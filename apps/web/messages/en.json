@@ -1,4 +1,24 @@
 {
+  "live": {
+    "chip": {
+      "text": "DEMO · Simulated activity · Real launch coming soon"
+    },
+    "clock": {
+      "badge": "EU-N MARKET · LIVE"
+    },
+    "ticker": {
+      "label": "Live market activity ticker"
+    },
+    "counters": {
+      "activeWorkers": "Active workers",
+      "liveDemand": "Open demand",
+      "matchesToday": "Matches today",
+      "avgOvr": "Avg profile strength"
+    },
+    "activity": {
+      "label": "Live activity feed"
+    }
+  },
   "nav": {
     "platform": "Platform",
     "solutions": "Solutions",

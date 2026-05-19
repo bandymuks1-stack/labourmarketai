@@ -120,9 +120,25 @@ a {
   }
 }
 
+/* 5b.1 live ticker — GPU-only translateX marquee, 30s linear infinite.
+   The track holds the events twice; -50% lands seamlessly at the loop. */
+@keyframes ticker-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.ticker-track {
+  animation: ticker-scroll 30s linear infinite;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
-  [data-decor] {
+  [data-decor],
+  .ticker-track {
     animation: none !important;
   }
 }

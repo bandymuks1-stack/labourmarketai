@@ -25,6 +25,9 @@ export type PlaceholderStatus = "placeholder" | "pending-real" | "replaced";
 
 export type Milestone = "M0" | "M1" | "M2" | "M3" | "M4" | "M5" | string;
 
+/** Feed item glyph (5b.1 live skin). */
+export type PlaceholderIcon = "join" | "demand" | "match" | "checkin";
+
 export type Placeholder = {
   id: string;
   type: PlaceholderType;
@@ -38,6 +41,13 @@ export type Placeholder = {
   /** true for persons, logos, testimonials. */
   consentRequired: boolean;
   notes?: string;
+  /**
+   * Animated counters/tickers rotate through this set so the UI "moves"
+   * without any real data. Still fake — `value` is the representative entry.
+   */
+  cycle?: readonly PlaceholderValue[];
+  /** Feed-row glyph type (5b.1). */
+  icon?: PlaceholderIcon;
 };
 
 const SQL = (q: string) => `SQL: ${q}`;
@@ -76,6 +86,7 @@ export const placeholders: readonly Placeholder[] = [
     id: "stats.active_workers",
     type: "stat",
     value: "320K+",
+    cycle: ["318K+", "320K+", "321K+", "323K+"],
     description: "Hero stat row — active workers count.",
     replacementSource: SQL(
       "SELECT count(*) FROM workers WHERE status='available'",
@@ -88,6 +99,7 @@ export const placeholders: readonly Placeholder[] = [
     id: "stats.live_projects",
     type: "stat",
     value: "18K+",
+    cycle: ["17K+", "18K+", "18K+", "19K+"],
     description: "Hero stat row — live projects count.",
     replacementSource: SQL(
       "SELECT count(*) FROM projects WHERE status='live'",
@@ -100,6 +112,7 @@ export const placeholders: readonly Placeholder[] = [
     id: "stats.companies",
     type: "stat",
     value: "4.2K",
+    cycle: ["4.1K", "4.2K", "4.2K", "4.3K"],
     description: "Hero stat row — companies count.",
     replacementSource: SQL("SELECT count(*) FROM companies"),
     status: "placeholder",
@@ -110,6 +123,7 @@ export const placeholders: readonly Placeholder[] = [
     id: "stats.success_rate",
     type: "stat",
     value: "92%",
+    cycle: ["91%", "92%", "92%", "93%"],
     description: "Hero stat row — success rate.",
     replacementSource:
       "Derived from `match_actions` accept rate over the last 90 days.",
@@ -173,35 +187,103 @@ export const placeholders: readonly Placeholder[] = [
       notes: "Plan tier row is real config; only the price is unset.",
     }),
   ),
-  ...Array.from({ length: 3 }, (_, i): Placeholder => {
+  ...(
+    [
+      ["join", "Naujas darbuotojas prisijungė – Vilnius", "New worker joined — Vilnius"],
+      ["demand", "Naujas darbo poreikis – Roterdamas", "New job demand — Rotterdam"],
+      ["match", "Atitikimas: suvirintojas → projektas", "Match: welder → project"],
+      ["checkin", "Darbuotojas pažymėjo atvykimą – Amsterdamas", "Worker checked in — Amsterdam"],
+      ["join", "Agentūra įtraukė 4 montuotojus", "Agency added 4 fitters"],
+      ["demand", "Naujas darbo poreikis – Kopenhaga", "New job demand — Copenhagen"],
+      ["match", "Atitikimas: betonuotojas → projektas", "Match: concreter → project"],
+      ["checkin", "Pamaina pradėta – Hamburgas", "Shift started — Hamburg"],
+      ["join", "Darbuotojas patvirtino prieinamumą", "Worker confirmed availability"],
+      ["demand", "Komanda suformuota projektui – Oslas", "Team formed for a project — Oslo"],
+    ] as const
+  ).map(
+    ([icon, lt, en], i): Placeholder => ({
+      id: `activity.feed.${i + 1}`,
+      type: "metric",
+      value: { lt, en },
+      icon,
+      description: `Live activity feed — streaming item ${i + 1} (${icon}).`,
+      replacementSource: SQL(
+        "SELECT action, entity, occurred_at FROM audit_logs ORDER BY occurred_at DESC LIMIT 10",
+      ),
+      status: "placeholder",
+      addedIn: "M0",
+      consentRequired: false,
+    }),
+  ),
+  ...Array.from({ length: 12 }, (_, i): Placeholder => {
     const n = i + 1;
     const samples: Record<number, { lt: string; en: string }> = {
-      1: {
-        lt: "Naujas darbo poreikis – Rotterdamas",
-        en: "New job demand posted — Rotterdam",
-      },
-      2: {
-        lt: "Darbuotojas patvirtino prieinamumą",
-        en: "Worker confirmed availability",
-      },
-      3: {
-        lt: "Komanda suformuota projektui",
-        en: "Team formed for a project",
-      },
+      1: { lt: "Naujas poreikis · Roterdamas · 6 montuotojų", en: "New demand · Rotterdam · 6 fitters" },
+      2: { lt: "Atitikimas patvirtintas · Amsterdamas", en: "Match confirmed · Amsterdam" },
+      3: { lt: "Agentūra prisijungė · Vilnius", en: "Agency joined · Vilnius" },
+      4: { lt: "Pamaina pradėta · Hamburgas", en: "Shift started · Hamburg" },
+      5: { lt: "12 darbuotojų laisvi · Kopenhaga", en: "12 workers available · Copenhagen" },
+      6: { lt: "Naujas projektas · Oslas", en: "New project · Oslo" },
+      7: { lt: "Suvirintojų paklausa +18% · Šiaurės Europa", en: "Welder demand +18% · Northern Europe" },
+      8: { lt: "Komanda suformuota · Roterdamas", en: "Team formed · Rotterdam" },
+      9: { lt: "Atvykimas pažymėtas · Amsterdamas", en: "Check-in logged · Amsterdam" },
+      10: { lt: "Naujas poreikis · Berlynas · 4 elektrikai", en: "New demand · Berlin · 4 electricians" },
+      11: { lt: "Profilis patvirtintas · Klaipėda", en: "Profile verified · Klaipėda" },
+      12: { lt: "Sutartis pasirašyta · Stokholmas", en: "Contract signed · Stockholm" },
     };
     return {
-      id: `activity.feed.${n}`,
+      id: `ticker.event.${n}`,
       type: "metric",
       value: samples[n],
-      description: `Live activity feed — recent item ${n}.`,
+      description: `Hero live ticker — scrolling event ${n}.`,
       replacementSource: SQL(
-        "SELECT ... FROM audit_logs ORDER BY occurred_at DESC LIMIT 5",
+        "SELECT ... FROM audit_logs ORDER BY occurred_at DESC LIMIT 12",
       ),
       status: "placeholder",
       addedIn: "M0",
       consentRequired: false,
     };
   }),
+  ...(
+    [
+      [
+        "active_workers",
+        "Active workers count",
+        ["318K", "320K", "321K", "323K"],
+        SQL("SELECT count(*) FROM workers WHERE availability_status='available'"),
+      ],
+      [
+        "live_demand",
+        "Open job demands count",
+        ["1,180", "1,205", "1,240", "1,262"],
+        SQL("SELECT count(*) FROM job_demands WHERE status='open'"),
+      ],
+      [
+        "matches_today",
+        "Matches produced today",
+        ["84", "97", "112", "129"],
+        SQL("SELECT count(*) FROM matches WHERE computed_at::date = now()::date"),
+      ],
+      [
+        "avg_ovr",
+        "Average worker profile strength",
+        ["71", "72", "72", "73"],
+        SQL("SELECT round(avg(profile_completeness)) FROM workers"),
+      ],
+    ] as const
+  ).map(
+    ([key, label, cycle, replacementSource]): Placeholder => ({
+      id: `counters.${key}`,
+      type: "stat",
+      value: cycle[0],
+      cycle: [...cycle],
+      description: `Hero market counter — ${label} (animated cycle, fake motion).`,
+      replacementSource,
+      status: "placeholder",
+      addedIn: "M0",
+      consentRequired: false,
+    }),
+  ),
   {
     id: "system.status",
     type: "metric",
@@ -433,4 +515,29 @@ export function placeholdersByStatus(
   status: PlaceholderStatus,
 ): Placeholder[] {
   return placeholders.filter((p) => p.status === status);
+}
+
+/** Resolve a placeholder value to a display string for a locale.
+ *  Client-safe (this module has no server-only deps). */
+export function localizeValue(
+  v: PlaceholderValue,
+  locale: string,
+): string {
+  if (typeof v === "object") {
+    if ("src" in v) return v.src;
+    if ("lt" in v) return locale === "lt" ? v.lt : v.en;
+  }
+  return String(v);
+}
+
+export function placeholderText(id: string, locale: string): string {
+  return localizeValue(getPlaceholder(id).value, locale);
+}
+
+/** The animated cycle for a counter/ticker placeholder, localized. Falls
+ *  back to the single representative value when no cycle is registered. */
+export function placeholderCycle(id: string, locale: string): string[] {
+  const p = getPlaceholder(id);
+  const set = p.cycle ?? [p.value];
+  return set.map((v) => localizeValue(v, locale));
 }

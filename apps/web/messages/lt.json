@@ -1,4 +1,24 @@
 {
+  "live": {
+    "chip": {
+      "text": "DEMO · Imituojamas aktyvumas · Tikras startas netrukus"
+    },
+    "clock": {
+      "badge": "EU-Š RINKA · GYVA"
+    },
+    "ticker": {
+      "label": "Gyvo rinkos aktyvumo juosta"
+    },
+    "counters": {
+      "activeWorkers": "Aktyvūs darbuotojai",
+      "liveDemand": "Atvira paklausa",
+      "matchesToday": "Atitikimai šiandien",
+      "avgOvr": "Vid. profilio stiprumas"
+    },
+    "activity": {
+      "label": "Gyvo aktyvumo srautas"
+    }
+  },
   "nav": {
     "platform": "Platforma",
     "solutions": "Sprendimai",
