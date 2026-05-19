@@ -1,0 +1,34 @@
+OWNER VISUAL REVIEW — PROOF
+labourmarket.ai · PR #1 · premium landing v1 · generated 2026-05-19
+
+BRANCH / HEAD
+  repo            C:\Users\Mano\Documents\labourmarketai
+  remote          github.com/bandymuks1-stack/labourmarketai
+  branch          feat/labourmarketai-foundation-v1
+  reviewed HEAD   2864b206ce2a4025045ccba36ca4cfe908697fca
+  working tree    clean at capture time
+
+PRODUCTION / MAIN — NOT CONTACTED, NOT CHANGED
+  origin/main     5e5998906da9184e892eabd6889488d7d119f831  (neutral scaffold, unchanged)
+  no merge, no push to main, no production deploy, no Vercel settings change
+  Vercel branch preview is SSO-gated (HTTP 401 public) — not used as source
+
+LOCALHOST CAPTURE
+  build           next build  (commit 2864b20, clean tree)
+  serve           next start -p 3120
+  url             http://localhost:3120/   ->  HTTP 200
+  served title    labourmarket.ai — Find work. Find workers. Faster.
+  screenshot tool Playwright CLI, --channel=chrome (installed Chrome), --full-page
+  server stopped  after capture (local only; nothing left running)
+
+ARTIFACTS (this folder: review/artifacts/)
+  desktop.png      1440 x 900  full page
+  tablet.png        834 x 1112 full page
+  mobile.png        390 x 844  full page
+  OWNER-REVIEW.html contact sheet (clickable screenshots + notes)
+  PROOF.txt         this file
+
+INTEGRITY
+  No product logic, routes, copy strategy, or guards were changed to produce
+  this artifact. Guards pass at the reviewed commit:
+  typecheck OK · lint OK · check OK · build OK.
