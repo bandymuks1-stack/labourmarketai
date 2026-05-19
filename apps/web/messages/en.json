@@ -29,8 +29,18 @@
       "expansion_candidate": "Expansion candidate"
     },
     "legend": {
-      "active_markets": "Active markets",
+      "active_markets": "Active markets (9)",
       "expansion_candidates": "Expansion candidates"
+    },
+    "caption": "9 active markets · fast expansion to follow"
+  },
+  "company": {
+    "score": {
+      "label": "Company score",
+      "payment": "Payment history",
+      "completion": "Project completion",
+      "reviews": "Worker reviews",
+      "response": "Response time"
     }
   },
   "playercards": {
@@ -111,7 +121,7 @@
       "headline": "Straight answers",
       "items": [
         { "q": "How are skills verified?", "a": "Through employer confirmations on completed work and uploaded certificates — never self-claim alone." },
-        { "q": "How much does it cost workers?", "a": "Nothing. Workers never pay to have a profile, get matched or be contacted." },
+        { "q": "How much does it cost workers?", "a": "The core is free — your profile, matches, search and messaging never cost workers anything. Premium extras (photo + video galleries, the AI profile assistant, VIP visibility) carry a small fee. Final pricing is published before full launch." },
         { "q": "Who sees my profile?", "a": "Only verified employers and agencies you're visible to — you control your availability and exposure." },
         { "q": "Can I work for multiple companies?", "a": "Yes. Your profile is yours; you can take roles from any company on the platform." }
       ]

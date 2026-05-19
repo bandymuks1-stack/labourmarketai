@@ -211,3 +211,84 @@ confirm: a worker cannot `select` another worker's `worker_skills`; an
 anonymous request gets rows only from `skills`/`countries`/`plans`; a company
 cannot `update` a project it doesn't own. (Automated RLS tests land with the
 auth feature slice in M1.)
+
+---
+
+## Architectural sketches (NOT implemented in M0)
+
+These are **design sketches only** — no migration is applied in M0. Each is
+applied at its tagged milestone (`docs/ROADMAP.md`,
+`docs/PROJECT_VISION.md` §12). Shapes are indicative, not final DDL.
+
+### `skill_verifications` — schema **M1**, UI **M2**
+Implements `PROJECT_VISION.md` §6 (the five levels) — see ADR 0009.
+```
+skill_verifications (
+  id uuid pk,
+  skill_id uuid references skills,
+  profile_id uuid references profiles,
+  level text check (level in ('self','work_journal','manager','client','document')),
+  evidence_id uuid,            -- journal entry / document / review ref
+  verified_by uuid references profiles,
+  verified_at timestamptz,
+  created_at, updated_at
+)
+```
+Replaces the boolean-ish `worker_skills.verified` with an explicit,
+auditable level. Colour/labels in UI derive from `level` — never "verified"
+unless `level >= 'manager'` or `document`.
+
+### `professions` + `journal_templates` + `work_journals` + `journal_entries` — **M2**
+Profession-specific journals (ADR 0006, `docs/PROFESSION_TEMPLATES.md`).
+```
+professions (id, key, name_lt, name_en, family)
+journal_templates (id, profession_id references professions, field_schema jsonb)
+work_journals (id, profile_id references profiles, profession_id, project_id references projects)
+journal_entries (id, work_journal_id references work_journals, payload jsonb, occurred_on date, skill_refs uuid[], evidence_ids uuid[])
+```
+`field_schema` is data, not code — new profession = new row, no migration
+(extensibility rule).
+
+### `service_requests` + `service_bookings` — **M3**
+B2C `customer` marketplace as a parallel layer over the same worker data
+(ADR 0007).
+```
+service_requests (id, customer_id references profiles, category, location, details jsonb, status)
+service_bookings (id, service_request_id references service_requests, provider_profile_id references profiles, status, scheduled_for)
+```
+
+### `decision_queue` — **M2** (computed view)
+A first-class, ranked view (not a table) of everything awaiting a human
+decision (`PROJECT_VISION.md` §8 module 10): pending matches, skill
+confirmations, document approvals, agency offers — ordered by urgency,
+scoped by RLS to the actor who must act.
+
+### `market_intelligence_signals` — **M4**
+Captured external demand signals / external listings feeding the market
+intelligence module (`PROJECT_VISION.md` §8 module 11).
+```
+market_intelligence_signals (id, source, region, signal_type, payload jsonb, captured_at)
+```
+
+### `team_entities` — **M2**
+Team as a first-class object with its own identity (brigades, installer
+teams, shifts) — `PROJECT_VISION.md` §5 object 6.
+```
+team_entities (id, name, owner_profile_id references profiles, company_id references companies, kind, member_profile_ids uuid[])
+```
+
+### `profiles.role` extension — schema **M1**
+Extend the check constraint to the full seven (`docs/ROLES.md`):
+`role in ('worker','team_leader','company_manager','hr_personnel','agency','admin','customer')`.
+M0 ships the subset `('worker','company','agency','admin')`; the four new
+values (incl. **`customer`**, ADR 0007) are added in M1.
+
+### `companies.trust_score` (already in schema)
+The `companies.trust_score int default 0` column from
+`supabase/migrations/0001_initial_schema.sql` (slice 4) **powers the
+`CompanyScoreRing` UI** added in 5b.3.6 (`/for-companies` demand preview).
+In M0 the displayed score + breakdown are a governed placeholder
+(`companies.featured.1`); post-launch the ring reads real
+`companies.trust_score` with the breakdown (payment / completion / reviews
+/ response) derived from real signals. Symmetric to the worker OVR.
+

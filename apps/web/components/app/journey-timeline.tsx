@@ -2,9 +2,11 @@
 
 import { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
+import { useMounted } from "@/lib/use-mounted";
 
 /** 4-step horizontal timeline (vertical < md). Steps fade in sequentially
- *  on scroll-into-view with a 100ms stagger; reduced-motion → instant. */
+ *  on scroll-into-view with a 100ms stagger; reduced-motion → instant.
+ *  Renders the final state until mounted so SSR/client markup agree. */
 export function JourneyTimeline({
   steps,
 }: {
@@ -13,6 +15,8 @@ export function JourneyTimeline({
   const ref = useRef<HTMLOListElement>(null);
   const inView = useInView(ref, { amount: 0.3, once: false });
   const reduce = useReducedMotion();
+  const mounted = useMounted();
+  const animateIn = mounted && !reduce;
 
   return (
     <ol
@@ -30,18 +34,14 @@ export function JourneyTimeline({
           key={s.title}
           role="listitem"
           className="relative"
-          initial={reduce ? false : { opacity: 0, y: 12 }}
+          initial={false}
           animate={
-            inView
-              ? { opacity: 1, y: 0 }
-              : reduce
-                ? { opacity: 1, y: 0 }
-                : { opacity: 0, y: 12 }
+            !animateIn || inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }
           }
           transition={{
-            duration: reduce ? 0 : 0.45,
+            duration: animateIn && inView ? 0.45 : 0,
             ease: "easeOut",
-            delay: reduce ? 0 : i * 0.1,
+            delay: animateIn && inView ? i * 0.1 : 0,
           }}
         >
           <span

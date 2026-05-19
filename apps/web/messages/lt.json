@@ -29,8 +29,18 @@
       "expansion_candidate": "Plėtros kandidatė"
     },
     "legend": {
-      "active_markets": "Aktyvios rinkos",
+      "active_markets": "Aktyvios rinkos (9)",
       "expansion_candidates": "Plėtros kandidatės"
+    },
+    "caption": "9 aktyvios rinkos · greita plėtra toliau"
+  },
+  "company": {
+    "score": {
+      "label": "Įmonės įvertinimas",
+      "payment": "Mokėjimų istorija",
+      "completion": "Projektų užbaigimas",
+      "reviews": "Darbuotojų atsiliepimai",
+      "response": "Atsako laikas"
     }
   },
   "playercards": {
@@ -114,7 +124,7 @@
       "headline": "Aiškūs atsakymai",
       "items": [
         { "q": "Kaip patvirtinami įgūdžiai?", "a": "Darbdavių patvirtinimais už atliktą darbą ir įkeltais pažymėjimais — niekada vien savadarbiai." },
-        { "q": "Kiek kainuoja darbuotojui?", "a": "Nieko. Darbuotojai niekada nemoka už profilį, atitikimus ar kontaktą." },
+        { "q": "Kiek kainuoja darbuotojui?", "a": "Pagrindas nemokamas — profilis, atitikimai, paieška ir žinutės darbuotojui niekada nieko nekainuoja. Papildomos premium funkcijos (nuotraukų ir vaizdo galerijos, AI profilio asistentas, VIP matomumas) turi nedidelį mokestį. Galutinės kainos skelbiamos prieš pilną startą." },
         { "q": "Kas mato mano profilį?", "a": "Tik patvirtinti darbdaviai ir agentūros, kuriems esate matomas — jūs valdote prieinamumą ir matomumą." },
         { "q": "Ar galiu dirbti kelioms įmonėms?", "a": "Taip. Profilis priklauso jums; galite priimti darbus iš bet kurios įmonės platformoje." }
       ]

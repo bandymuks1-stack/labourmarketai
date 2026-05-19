@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import type { PlayerTier } from "@/content/placeholders";
+import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 
 const SIZES = { sm: 56, md: 80, lg: 120 } as const;
@@ -37,6 +38,8 @@ export function OVRRing({
   const ref = useRef<SVGSVGElement>(null);
   const inView = useInView(ref, { amount: 0.6 });
   const reduce = useReducedMotion();
+  const mounted = useMounted();
+  const animateIn = mounted && !reduce;
   const t = tier ?? tierOf(value);
 
   const px = SIZES[size];
@@ -77,9 +80,14 @@ export function OVRRing({
           className={TIER_STROKE[t]}
           transform={`rotate(-90 ${cx} ${cx})`}
           strokeDasharray={C}
-          initial={{ strokeDashoffset: C }}
-          animate={{ strokeDashoffset: inView ? filled : C }}
-          transition={{ duration: reduce ? 0 : 0.8, ease: "easeOut" }}
+          initial={false}
+          animate={{
+            strokeDashoffset: !animateIn || inView ? filled : C,
+          }}
+          transition={{
+            duration: animateIn && inView ? 0.8 : 0,
+            ease: "easeOut",
+          }}
         />
         <text
           x={cx}

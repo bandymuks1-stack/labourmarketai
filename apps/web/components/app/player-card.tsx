@@ -11,6 +11,7 @@ import {
   type PlayerTier,
 } from "@/content/placeholders";
 import { env } from "@/lib/env";
+import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { OVRRing } from "@/components/app/ovr-ring";
 
@@ -44,6 +45,8 @@ export function PlayerCard({ id }: { id: string }) {
   const locale = useLocale();
   const t = useTranslations("playercards");
   const reduce = useReducedMotion();
+  const mounted = useMounted();
+  const animateIn = mounted && !reduce;
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { amount: 0.35 });
 
@@ -165,12 +168,14 @@ export function PlayerCard({ id }: { id: string }) {
               >
                 <motion.div
                   className={cn("h-full origin-left rounded-full", TIER_BAR[card.tier])}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: inView ? v / 100 : 0 }}
+                  initial={false}
+                  animate={{
+                    scaleX: !animateIn || inView ? v / 100 : 0,
+                  }}
                   transition={{
-                    duration: reduce ? 0 : 0.6,
+                    duration: animateIn && inView ? 0.6 : 0,
                     ease: "easeOut",
-                    delay: reduce ? 0 : i * 0.08,
+                    delay: animateIn && inView ? i * 0.08 : 0,
                   }}
                 />
               </div>

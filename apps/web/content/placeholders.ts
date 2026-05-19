@@ -86,6 +86,22 @@ export type DemandData = {
   rankedMatches: number;
 };
 
+/** Company score ring payload (5b.3.6) — symmetric to the worker OVR. */
+export type CompanyTier = "diamond" | "gold" | "silver" | "bronze";
+export type CompanyScoreData = {
+  legal_name: string;
+  country: string;
+  score: number;
+  tier: CompanyTier;
+  score_breakdown: {
+    payment: number;
+    completion: number;
+    reviews: number;
+    response: number;
+  };
+  main_industry: { lt: string; en: string };
+};
+
 /** Agencies-page pool preview payload (5b.3.5). */
 export type AgencyPoolData = {
   poolSize: number;
@@ -123,6 +139,8 @@ export type Placeholder = {
   demand?: DemandData;
   /** Agencies-page pool preview (5b.3.5). */
   pool?: AgencyPoolData;
+  /** Company score ring (5b.3.6). */
+  company?: CompanyScoreData;
 };
 
 const SQL = (q: string) => `SQL: ${q}`;
@@ -923,6 +941,52 @@ export const placeholders: readonly Placeholder[] = [
       extraCount: 12,
     },
   },
+  {
+    id: "companies.featured.1",
+    type: "company",
+    value: {
+      lt: "Rangos įmonė (pavyzdys) · įvertinimas 88 · NL",
+      en: "Contractor (sample) · score 88 · NL",
+    },
+    description:
+      "Company score ring on the /for-companies demand preview (5b.3.6).",
+    replacementSource:
+      "Real `companies` row: companies.trust_score powers the ring; breakdown from payment history, project completion, worker reviews and response time once those signals exist.",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: true,
+    notes: "consented:false — sample company; real names need consent.",
+    company: {
+      legal_name: "Contractor (sample)",
+      country: "NL",
+      score: 88,
+      tier: "gold",
+      score_breakdown: {
+        payment: 92,
+        completion: 86,
+        reviews: 84,
+        response: 90,
+      },
+      main_industry: { lt: "Statyba", en: "Construction" },
+    },
+  },
+  {
+    id: "pricing.workers.tiers",
+    type: "metric",
+    value: {
+      lt: "Pagrindas nemokamas; premium (galerijos, AI asistentas, VIP matomumas) — nedidelis mokestis",
+      en: "Core free; premium (galleries, AI assistant, VIP visibility) — small fee",
+    },
+    description:
+      "Worker pricing model — two-tier honest statement used in the worker FAQ.",
+    replacementSource:
+      "Final worker pricing set by the founder and published before full launch; core stays free.",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: false,
+    notes:
+      "Core (profile/matches/search/messaging) free; premium add-ons carry a small fee.",
+  },
   ...mapPlaceholderSet(),
 ] as const;
 
@@ -992,6 +1056,13 @@ export function getPool(id: string): AgencyPoolData {
   const p = getPlaceholder(id).pool;
   if (!p) throw new Error(`Placeholder "${id}" has no pool payload.`);
   return p;
+}
+
+/** Company-score payload (5b.3.6). */
+export function getCompany(id: string): CompanyScoreData {
+  const c = getPlaceholder(id).company;
+  if (!c) throw new Error(`Placeholder "${id}" has no company payload.`);
+  return c;
 }
 
 /** Narrowed geo payloads of a given kind, in registry order. */

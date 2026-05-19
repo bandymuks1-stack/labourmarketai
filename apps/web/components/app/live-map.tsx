@@ -116,6 +116,11 @@ export function LiveMap() {
         </span>
       </div>
 
+      {/* market-count caption bottom-left */}
+      <div className="pointer-events-none absolute bottom-3 left-3 z-10 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("caption")}
+      </div>
+
       <svg
         viewBox={`0 0 ${MAP_W} ${MAP_H}`}
         className="block h-auto w-full text-brand-blue"
@@ -188,7 +193,7 @@ export function LiveMap() {
                 setHover({ code: g.code, name: g.name, tier: "target" })
               }
               onMouseLeave={() => setHover(null)}
-              className="fill-ink-700 stroke-brand-blue/35 transition-colors hover:stroke-brand-blue"
+              className="fill-ink-700 stroke-brand-blue transition-colors hover:stroke-brand-cyan"
               strokeWidth={1}
               vectorEffect="non-scaling-stroke"
             />
