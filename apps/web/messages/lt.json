@@ -1,17 +1,256 @@
 {
-  "marketing": {
-    "hero": {
-      "eyebrow": "Darbo rinkos sistema",
-      "headline": "Gyva darbo rinkos",
-      "headlineAccent": "valdymo sistema.",
-      "subcopy": "Vienas profilis. Darbuotojai, įmonės ir agentūros — gyva paklausa, atitikimas realiu laiku, viena sujungta rinka.",
-      "ctaPrimary": "Išbandyti platformą",
-      "ctaSecondary": "Kaip tai veikia",
-      "m0Notice": "M0 pagrindas — tik karkasas. Prisijungimas, atitikimas ir realūs duomenys — vėlesniuose etapuose."
+  "nav": {
+    "platform": "Platforma",
+    "solutions": "Sprendimai",
+    "resources": "Ištekliai",
+    "pricing": "Kainos",
+    "company": "Apie mus"
+  },
+  "hero": {
+    "chip": "Darbo rinkos sistema",
+    "headline": "Gyva darbo rinkos",
+    "headlineAccent": "valdymo sistema.",
+    "subcopy": "Vienas profilis. Darbuotojai, įmonės ir agentūros vienoje sujungtoje rinkoje — gyva paklausa, atitikimas realiu laiku, sąžiningi signalai. Platforma kuriama; tai M0 pagrindas.",
+    "ctaPrimary": "Išbandyti platformą",
+    "ctaSecondary": "Kaip tai veikia"
+  },
+  "stats": {
+    "activeWorkers": "Aktyvūs darbuotojai",
+    "liveProjects": "Aktyvūs projektai",
+    "companies": "Įmonės",
+    "successRate": "Sėkmingų atitikimų dalis"
+  },
+  "trusted": {
+    "title": "Kuriama rinkos lyderiams Baltijos ir Šiaurės Europoje"
+  },
+  "heroCards": {
+    "worker": {
+      "label": "Darbuotojo profilis",
+      "strength": "Profilio išbaigtumas",
+      "skills": "Pagrindiniai įgūdžiai",
+      "cta": "Žiūrėti profilį"
+    },
+    "project": {
+      "label": "Aktyvus projektas",
+      "progress": "Eiga",
+      "sites": "Objektai",
+      "workers": "Darbuotojai",
+      "safety": "Sauga",
+      "target": "Terminas",
+      "cta": "Atverti projektą"
+    },
+    "action": {
+      "label": "Veiksmų centras"
     }
+  },
+  "secondary": {
+    "team": {
+      "label": "Komanda objekte",
+      "onSite": "Objekte",
+      "roles": "Pareigybių pasiskirstymas"
+    },
+    "comm": {
+      "label": "Komunikacija"
+    },
+    "companies": {
+      "label": "Įmonės ir personalas",
+      "main": "Pagrindinis rangovas",
+      "subs": "Subrangovai"
+    },
+    "shortcuts": {
+      "label": "Mano nuorodos",
+      "findWork": "Ieškoti darbo",
+      "myProjects": "Mano projektai",
+      "timesheets": "Darbo laikas",
+      "documents": "Dokumentai",
+      "certificates": "Pažymėjimai",
+      "payslips": "Atlyginimo lapeliai"
+    }
+  },
+  "market": {
+    "label": "Rinkos analitika",
+    "demand": "Darbo paklausa",
+    "workers": "Laisvi darbuotojai",
+    "competition": "Konkurencija",
+    "topSkills": "Paklausiausi įgūdžiai",
+    "cta": "Visa analitika"
+  },
+  "footer": {
+    "tagline": "Gyva statybų darbo rinka — Baltijos ir Šiaurės Europa.",
+    "activity": "Gyvas rinkos aktyvumas",
+    "product": "Produktas",
+    "company": "Apie mus",
+    "legalGroup": "Teisinė informacija",
+    "about": "Apie",
+    "contact": "Kontaktai",
+    "rights": "Visos teisės saugomos.",
+    "preview": "M0 peržiūros versija — tai nėra viešas startas."
+  },
+  "leadForm": {
+    "open": "Užsisakyti demo",
+    "openAlt": "Gauti ankstyvą prieigą",
+    "title": "Užsisakyti demo",
+    "subtitle": "Pasakykite, kas esate, ir susisieksime atsivėrus prieigai.",
+    "name": "Vardas ir pavardė",
+    "email": "Darbo el. paštas",
+    "intentLabel": "Noriu",
+    "intents": {
+      "hire_workers": "Samdyti darbuotojus",
+      "find_job": "Rasti darbą",
+      "partner": "Partnerystė / agentūra"
+    },
+    "submit": "Prašyti prieigos",
+    "sending": "Siunčiama…",
+    "success": "Ačiū — užfiksavome jūsų susidomėjimą ir susisieksime.",
+    "error": "Įvyko klaida. Pabandykite dar kartą vėliau.",
+    "close": "Uždaryti"
+  },
+  "pages": {
+    "workers": {
+      "eyebrow": "Darbuotojams",
+      "title": "Jūsų įgūdžiai —",
+      "titleAccent": "matomi.",
+      "subcopy": "Sukurkite vieną profilį, nustatykite prieinamumą ir leiskite realiai paklausai jus surasti — be tarpininkų.",
+      "benefits": [
+        {
+          "title": "Vienas profilis visoms rinkoms",
+          "body": "Vienas avataras su patvirtintais įgūdžiais ir prieinamumu — matomas patikrintiems darbdaviams devyniose šalyse."
+        },
+        {
+          "title": "Reali paklausa realiu laiku",
+          "body": "Matykite gyvą darbo paklausą ir gaukite atitikimus pagal profesiją, įkainį ir vietą."
+        },
+        {
+          "title": "Sąžiningi signalai",
+          "body": "Skaidrus pasitikėjimo signalas ir profilio išbaigtumas — be išpūstų pažadų ir mokamų reitingų."
+        }
+      ],
+      "screenshot": "Darbuotojo profilio srautas",
+      "cta": "Gauti ankstyvą prieigą"
+    },
+    "companies": {
+      "eyebrow": "Įmonėms",
+      "title": "Gyva paklausa —",
+      "titleAccent": "surikiuota.",
+      "subcopy": "Nurodykite, ko reikia kiekviename projekte, ir gaukite surikiuotus, paaiškinamus atitikimus iš laisvų darbuotojų ir agentūrų.",
+      "benefits": [
+        {
+          "title": "Paklausa pagal projektą",
+          "body": "Apibrėžkite pareigybes, žmonių skaičių ir įgūdžius kiekvienam projektui — ne miglotus skelbimus."
+        },
+        {
+          "title": "Surikiuoti, paaiškinami atitikimai",
+          "body": "Kiekvienas atitikimas pateikiamas su priežastimis, todėl sprendimai lieka atsekami."
+        },
+        {
+          "title": "Agentūros, kai reikia",
+          "body": "Pasinaudokite patikrintų agentūrų rezervu papildomam pajėgumui neprarasdami matomumo."
+        }
+      ],
+      "screenshot": "Įmonės paklausos srautas",
+      "cta": "Užsisakyti demo"
+    },
+    "agencies": {
+      "eyebrow": "Agentūroms",
+      "title": "Jūsų rezervas —",
+      "titleAccent": "judantis.",
+      "subcopy": "Valdykite kuruojamus darbuotojus, skelbkite paklausą klientų vardu ir tarpininkaukite — viskas vienoje vietoje.",
+      "benefits": [
+        {
+          "title": "Valdykite rezervą",
+          "body": "Kuruojami darbuotojai, prieinamumas ir būsenos — viskas vienoje darbo erdvėje."
+        },
+        {
+          "title": "Tarpininkavimas su pranašumu",
+          "body": "Skelbkite paklausą klientams ir greičiau įdarbinkite tinkamus žmones su surikiuotu atitikimu."
+        },
+        {
+          "title": "Matomumo valdymas",
+          "body": "Pasirinkite, kas vieša, tik agentūroms ar tiesioginė — matomumą valdote jūs."
+        }
+      ],
+      "screenshot": "Agentūros režimo srautas",
+      "cta": "Užsisakyti demo"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Kainos",
+    "title": "Aiškūs planai —",
+    "titleAccent": "sąžininga kaina.",
+    "subcopy": "Kainos dar nėra galutinės — jos bus nustatytos prieš startą. Užsirašykite į laukiančiųjų sąrašą tinkamam planui ir patikslinsime detales.",
+    "planCta": "Užsirašyti į šio plano sąrašą",
+    "featuresLabel": "Apima",
+    "plans": {
+      "free": {
+        "name": "Nemokamas",
+        "tagline": "Pradėkite rinkoje.",
+        "features": [
+          "1 projektas",
+          "1 darbo poreikis",
+          "Bendruomenės pagalba"
+        ]
+      },
+      "business": {
+        "name": "Verslo",
+        "tagline": "Aktyviems darbdaviams.",
+        "features": [
+          "10 projektų",
+          "25 darbo poreikiai",
+          "Darbuotojų paieška",
+          "Pagalba el. paštu"
+        ]
+      },
+      "agency": {
+        "name": "Agentūros",
+        "tagline": "Personalo partneriams.",
+        "features": [
+          "Neriboti kuruojami darbuotojai",
+          "Tarpininkavimo įrankiai",
+          "Darbuotojų paieška",
+          "Prioritetinė pagalba"
+        ]
+      },
+      "enterprise": {
+        "name": "Įmonių",
+        "tagline": "Mastui ir kontrolei.",
+        "features": [
+          "Neriboti projektai",
+          "SSO",
+          "SLA",
+          "Skirta pagalba"
+        ]
+      }
+    },
+    "faqTitle": "Kainų DUK",
+    "faq": [
+      {
+        "q": "Kodėl kaina dar nerodoma?",
+        "a": "Dar nepradėjome veiklos. Skelbti kainą, kurios kol kas negalime garantuoti, būtų nesąžininga — todėl rodoma plano apimtis, o kaina patvirtinama prieš startą."
+      },
+      {
+        "q": "Ar nemokamas planas liks nemokamas?",
+        "a": "Taip. Nemokamas planas skirtas darbuotojams ir mažoms įmonėms patekti į rinką be jokių išlaidų."
+      },
+      {
+        "q": "Kaip vyks atsiskaitymai?",
+        "a": "Atsiskaitymų integracija planuojama vėlesniame etape. M0 galite tik užsirašyti į sąrašą — kortelės duomenys nerenkami."
+      },
+      {
+        "q": "Ar galėsiu keisti planą vėliau?",
+        "a": "Taip. Planai pritaikomi pagal poreikius — galėsite pereiti į aukštesnį ar žemesnį."
+      }
+    ]
+  },
+  "legal": {
+    "draftNote": "Šis dokumentas yra juodraštis. Galutinį, įpareigojantį tekstą prieš viešą startą peržiūrės teisininkai (M5).",
+    "terms": { "title": "Naudojimo sąlygos" },
+    "privacy": { "title": "Privatumo politika" },
+    "cookies": { "title": "Slapukų politika" }
   },
   "common": {
     "localeSwitch": "Kalba",
+    "lt": "Lietuvių",
+    "en": "English",
     "notFound": "Tokio puslapio nėra",
     "backHome": "Grįžti į pradžią"
   }

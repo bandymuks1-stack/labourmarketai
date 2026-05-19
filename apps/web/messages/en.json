@@ -1,17 +1,256 @@
 {
-  "marketing": {
-    "hero": {
-      "eyebrow": "The labour market OS",
-      "headline": "The labour market,",
-      "headlineAccent": "alive.",
-      "subcopy": "One profile. Workers, companies and agencies — live demand, real-time matching, one connected market.",
-      "ctaPrimary": "Explore the platform",
-      "ctaSecondary": "Watch how it works",
-      "m0Notice": "M0 foundation — scaffold only. Auth, matching and live data arrive in later milestones."
+  "nav": {
+    "platform": "Platform",
+    "solutions": "Solutions",
+    "resources": "Resources",
+    "pricing": "Pricing",
+    "company": "Company"
+  },
+  "hero": {
+    "chip": "The labour market OS",
+    "headline": "The labour market,",
+    "headlineAccent": "alive.",
+    "subcopy": "One profile. Workers, companies and agencies on a single connected market — live demand, real-time matching, honest signals. The platform is being built; this is the M0 foundation.",
+    "ctaPrimary": "Explore the platform",
+    "ctaSecondary": "Watch how it works"
+  },
+  "stats": {
+    "activeWorkers": "Active workers",
+    "liveProjects": "Live projects",
+    "companies": "Companies",
+    "successRate": "Match success rate"
+  },
+  "trusted": {
+    "title": "Built for industry leaders across the Baltic & Northern Europe"
+  },
+  "heroCards": {
+    "worker": {
+      "label": "Worker profile",
+      "strength": "Profile strength",
+      "skills": "Top skills",
+      "cta": "View profile"
+    },
+    "project": {
+      "label": "Active project",
+      "progress": "Progress",
+      "sites": "Sites",
+      "workers": "Workers",
+      "safety": "Safety",
+      "target": "Target date",
+      "cta": "Open project hub"
+    },
+    "action": {
+      "label": "Action center"
     }
+  },
+  "secondary": {
+    "team": {
+      "label": "Team on site",
+      "onSite": "On site",
+      "roles": "Role breakdown"
+    },
+    "comm": {
+      "label": "Communication"
+    },
+    "companies": {
+      "label": "Companies & HR",
+      "main": "Main contractor",
+      "subs": "Subcontractors"
+    },
+    "shortcuts": {
+      "label": "My shortcuts",
+      "findWork": "Find work",
+      "myProjects": "My projects",
+      "timesheets": "Timesheets",
+      "documents": "Documents",
+      "certificates": "Certificates",
+      "payslips": "Payslips"
+    }
+  },
+  "market": {
+    "label": "Market intelligence",
+    "demand": "Labour demand",
+    "workers": "Available workers",
+    "competition": "Competition",
+    "topSkills": "Top in-demand skills",
+    "cta": "View full insights"
+  },
+  "footer": {
+    "tagline": "The living labour market for construction — Baltic & Northern Europe.",
+    "activity": "Live market activity",
+    "product": "Product",
+    "company": "Company",
+    "legalGroup": "Legal",
+    "about": "About",
+    "contact": "Contact",
+    "rights": "All rights reserved.",
+    "preview": "M0 preview build — not a public launch."
+  },
+  "leadForm": {
+    "open": "Book a demo",
+    "openAlt": "Get early access",
+    "title": "Book a demo",
+    "subtitle": "Tell us who you are and we'll reach out as access opens.",
+    "name": "Full name",
+    "email": "Work email",
+    "intentLabel": "I want to",
+    "intents": {
+      "hire_workers": "Hire workers",
+      "find_job": "Find work",
+      "partner": "Partner / agency"
+    },
+    "submit": "Request access",
+    "sending": "Sending…",
+    "success": "Thanks — we've recorded your interest and will be in touch.",
+    "error": "Something went wrong. Please try again shortly.",
+    "close": "Close"
+  },
+  "pages": {
+    "workers": {
+      "eyebrow": "For workers",
+      "title": "Your skills,",
+      "titleAccent": "discoverable.",
+      "subcopy": "Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
+      "benefits": [
+        {
+          "title": "One profile, every market",
+          "body": "Maintain a single avatar with verified skills and availability — visible to vetted employers across nine countries."
+        },
+        {
+          "title": "Real demand, real-time",
+          "body": "See live job demand and get matched to roles that fit your trade, rate and location."
+        },
+        {
+          "title": "Honest signals",
+          "body": "A transparent trust signal and profile strength — no inflated claims, no pay-to-rank."
+        }
+      ],
+      "screenshot": "Worker avatar flow",
+      "cta": "Get early access"
+    },
+    "companies": {
+      "eyebrow": "For companies",
+      "title": "Live demand,",
+      "titleAccent": "ranked.",
+      "subcopy": "Post what you need on each project and receive ranked, explainable matches from available workers and agencies.",
+      "benefits": [
+        {
+          "title": "Post demand per project",
+          "body": "Define roles, headcount and skills per project — not vague job ads."
+        },
+        {
+          "title": "Ranked, explainable matches",
+          "body": "Every match comes with the reasons behind it, so hiring decisions stay accountable."
+        },
+        {
+          "title": "Agencies, when you need them",
+          "body": "Tap vetted agency pools for surge capacity without losing visibility."
+        }
+      ],
+      "screenshot": "Company demand flow",
+      "cta": "Book a demo"
+    },
+    "agencies": {
+      "eyebrow": "For agencies",
+      "title": "Your pool,",
+      "titleAccent": "in motion.",
+      "subcopy": "Manage your managed workers, post demand on behalf of clients, and broker introductions — all in one place.",
+      "benefits": [
+        {
+          "title": "Manage your pool",
+          "body": "Keep your managed workers, availability and statuses organised in one workspace."
+        },
+        {
+          "title": "Broker with leverage",
+          "body": "Post demand for clients and place the right people faster with ranked matching."
+        },
+        {
+          "title": "Visibility controls",
+          "body": "Choose what is public, agencies-only, or direct — you control exposure."
+        }
+      ],
+      "screenshot": "Agency mode flow",
+      "cta": "Book a demo"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Pricing",
+    "title": "Simple tiers,",
+    "titleAccent": "set fairly.",
+    "subcopy": "Prices are not finalised yet — they will be set before launch. Join the waitlist for the tier that fits and we'll confirm details with you.",
+    "planCta": "Join the waitlist for this plan",
+    "featuresLabel": "Includes",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "tagline": "Get on the market.",
+        "features": [
+          "1 project",
+          "1 job demand",
+          "Community support"
+        ]
+      },
+      "business": {
+        "name": "Business",
+        "tagline": "For active employers.",
+        "features": [
+          "10 projects",
+          "25 job demands",
+          "Worker search",
+          "Email support"
+        ]
+      },
+      "agency": {
+        "name": "Agency",
+        "tagline": "For staffing partners.",
+        "features": [
+          "Unlimited managed workers",
+          "Broker tools",
+          "Worker search",
+          "Priority support"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "tagline": "For scale and control.",
+        "features": [
+          "Unlimited projects",
+          "SSO",
+          "SLA",
+          "Dedicated support"
+        ]
+      }
+    },
+    "faqTitle": "Pricing FAQ",
+    "faq": [
+      {
+        "q": "Why is there no price shown yet?",
+        "a": "We're pre-launch. Setting a price we can't yet stand behind would be dishonest, so tiers show their scope and the price is confirmed before launch."
+      },
+      {
+        "q": "Will the Free tier stay free?",
+        "a": "Yes. The Free tier is meant to get workers and small employers onto the market with no cost."
+      },
+      {
+        "q": "How is billing handled?",
+        "a": "Billing integration is planned for a later milestone. In M0 you can only join a waitlist — no card is collected."
+      },
+      {
+        "q": "Can I change tiers later?",
+        "a": "Yes. Tiers are meant to follow your needs; you'll be able to move up or down."
+      }
+    ]
+  },
+  "legal": {
+    "draftNote": "This document is a draft. The final, binding text will be reviewed by legal counsel before public launch (M5).",
+    "terms": { "title": "Terms of Service" },
+    "privacy": { "title": "Privacy Policy" },
+    "cookies": { "title": "Cookie Policy" }
   },
   "common": {
     "localeSwitch": "Language",
+    "lt": "Lietuvių",
+    "en": "English",
     "notFound": "This page does not exist",
     "backHome": "Back to home"
   }
