@@ -4,9 +4,9 @@ export const site = {
   name: "labourmarket.ai",
   wordmark: "labourmarket",
   domainTld: ".ai",
-  tagline: "The labour market as a living system",
+  tagline: "Find work. Find workers. Faster.",
   description:
-    "labourmarket.ai turns people, companies, roles and matching into one connected, visual system — every participant represented by a single reusable player card.",
+    "Create your work profile, show your skills, and get discovered by companies hiring now. Hiring? Find suitable workers, compare who fits, and contact the right people faster.",
 } as const;
 
 export interface NavItem {
@@ -33,7 +33,15 @@ export const adminNav: NavItem[] = [
 
 /** Landing-page primary calls to action. */
 export const landingCtas = [
-  { href: "/register", label: "Create profile", kind: "primary" as const },
-  { href: "/app/discover", label: "Find workers", kind: "ghost" as const },
-  { href: "/app/matches", label: "Explore matches", kind: "ghost" as const },
+  {
+    href: "/register",
+    label: "Create your work profile",
+    kind: "primary" as const,
+  },
+  {
+    href: "/app/discover",
+    label: "Find suitable workers",
+    kind: "ghost" as const,
+  },
+  { href: "/app/matches", label: "Compare matches", kind: "ghost" as const },
 ];
