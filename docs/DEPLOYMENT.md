@@ -48,12 +48,12 @@ pnpm db:types
 `supabase/migrations/` in order:
 
 - `0001_initial_schema.sql` — all tables, triggers, RLS helpers, RLS policies.
-- `0002_reference_data.sql` — countries, ~37 construction skills, 4 plan
+- `0002_reference_data.sql` — countries, 38 construction skills, 4 plan
   tiers. Idempotent (`ON CONFLICT`), so it is safe on every subsequent
   deploy. (`supabase/reference-data.sql` is the canonical editable copy of
   the same inserts; keep the two in sync.)
 
-After this, verify in the SQL editor: `select count(*) from skills;` (~37),
+After this, verify in the SQL editor: `select count(*) from skills;` (38),
 `select count(*) from countries;` (9), `select count(*) from plans;` (4), and
 that `select * from pg_policies where schemaname='public';` lists policies for
 every table. See `docs/DATA_MODEL.md` → "Testing the policies".
