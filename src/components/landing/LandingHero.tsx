@@ -1,119 +1,81 @@
 /**
- * LandingHero — the opening scene of the work-market arena.
+ * LandingHero — the opening of the labour-market operating layer.
  *
- * Premium scouting / draft framing: a real work profile staged like a scouted
- * candidate card. It reuses the shared ProfilePlayerCard and StatusChip
- * components — no bespoke card art, no duplicate logic. All signals shown are
- * real attributes of the example profile, never invented market numbers.
+ * Restores the completeness idea: one profile that carries CV, work evidence,
+ * skills, proof, availability, team, projects and conversations into one
+ * connected market. It reuses the shared SystemScene (which itself reuses the
+ * shared ProfilePlayerCard / StatusChip) — no second profile or card concept,
+ * no job-board reduction, no invented numbers.
  */
-import { ProfilePlayerCard } from "@/components/profile/ProfilePlayerCard";
-import { CtaButton } from "@/components/ui/CtaButton";
+import Link from "next/link";
+import { SystemScene } from "@/components/landing/SystemScene";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { StatusChip } from "@/components/ui/StatusChip";
-import { landingCtas } from "@/config/site";
-import { profileToPlayerCard } from "@/lib/player-card";
-import { sampleProfiles } from "@/lib/sample-data";
 
-const VALUE_POINTS = [
-  "Build one work profile",
-  "Get scouted by companies",
-  "See the fit, act fast",
+const FACETS = [
+  "CV",
+  "Work journal",
+  "Skills",
+  "Proof",
+  "Availability",
+  "Team",
+  "Projects",
+  "Communication",
+  "Opportunities",
 ];
 
 export function LandingHero() {
-  const candidate = sampleProfiles[0];
-  const card = profileToPlayerCard(candidate);
-  const tierLabel = card.tier[0].toUpperCase() + card.tier.slice(1);
-
   return (
-    <section className="relative px-6 pb-16 pt-10">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-        {/* Left — what it is, why it matters */}
-        <div className="rise">
-          <Eyebrow>The work-market arena</Eyebrow>
+    <section className="relative px-5 pb-14 pt-6 sm:px-6 sm:pt-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="max-w-3xl rise">
+          <Eyebrow>One profile · one connected market</Eyebrow>
 
-          <h1 className="display mt-5 text-5xl sm:text-6xl xl:text-[4.25rem]">
-            Real skills.
+          <h1 className="display mt-5 text-[2.6rem] leading-[1.02] sm:text-5xl lg:text-6xl">
+            The labour market,
             <br />
-            <span className="grad-text">Scouted</span> like talent.
+            <span className="grad-text">finally visible.</span>
           </h1>
 
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-fg-dim">
-            labourmarket.ai turns your work profile into a card scouts read at
-            a glance — your skills, your availability, your fit. Companies and
-            agencies scout, compare and reach the right people. Workers get
-            found for what they can actually do.
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-fg-dim sm:text-lg">
+            Your CV, work journal, skills, proof, availability, team, projects
+            and conversations — held in one profile and connected into one
+            living market. Not a job board. Not generic HR software. The layer
+            where work, people and companies actually meet.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            {landingCtas.map((cta) => (
-              <CtaButton key={cta.href} href={cta.href} kind={cta.kind}>
-                {cta.label}
-              </CtaButton>
-            ))}
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/register"
+              className="cta cta-primary w-full sm:w-auto"
+            >
+              Create your profile
+              <span aria-hidden>→</span>
+            </Link>
+            <Link
+              href="/app/discover"
+              className="cta cta-ghost w-full sm:w-auto"
+            >
+              Explore the market
+            </Link>
           </div>
 
-          <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2">
-            {VALUE_POINTS.map((point) => (
+          <ul className="mt-7 flex flex-wrap gap-x-3 gap-y-2">
+            {FACETS.map((f) => (
               <li
-                key={point}
-                className="flex items-center gap-2 text-sm text-fg-dim"
+                key={f}
+                className="rounded-full border border-line/60 bg-fg/[0.03] px-2.5 py-1 text-[0.72rem] text-fg-mute"
               >
-                <span className="grid h-4 w-4 place-items-center rounded-full bg-cyan/15 text-[0.6rem] text-cyan">
-                  ✓
-                </span>
-                {point}
+                {f}
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Right — the scout board */}
-        <div className="relative">
-          <div aria-hidden className="spotlight" />
-
-          {/* an example scout search, in a company's words */}
-          <div
-            aria-hidden
-            className="mb-5 flex items-center gap-3 rounded-full border border-line/60 bg-fg/[0.03] px-4 py-2.5 text-sm"
-          >
-            <span className="text-fg-mute">⌕</span>
-            <span className="text-fg-dim">
-              welders · Rotterdam · available
-            </span>
-            <span className="ml-auto text-[0.7rem] uppercase tracking-wider text-fg-mute">
-              scout search
-            </span>
-          </div>
-
-          <div className="scout-frame mx-auto w-full max-w-sm p-4 sm:p-5">
-            <div className="tier-bar mb-4" />
-            <div
-              className="rise rotate-[-2deg]"
-              style={{ animationDelay: "0.08s" }}
-            >
-              <ProfilePlayerCard profile={candidate} />
-            </div>
-
-            <div className="signal-rail mt-5">
-              <StatusChip tone="gold" dot>
-                {tierLabel} tier
-              </StatusChip>
-              <StatusChip tone="positive" dot>
-                Open to work
-              </StatusChip>
-              <StatusChip tone="info" dot>
-                {candidate.experienceYears} yrs experience
-              </StatusChip>
-              <StatusChip tone="silver" dot>
-                {candidate.verified ? "Verified" : "Unverified"}
-              </StatusChip>
-            </div>
-
-            <p className="mt-4 text-center text-xs text-fg-mute">
-              One work profile, read like a scouted card.
-            </p>
-          </div>
+        <div
+          className="mt-10 rise sm:mt-12"
+          style={{ animationDelay: "0.1s" }}
+        >
+          <SystemScene />
         </div>
       </div>
     </section>
