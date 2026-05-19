@@ -277,11 +277,62 @@ async function checkCommunicationArea() {
   }
 }
 
+/**
+ * Public UI copy must not contradict the locked premium sports / draft /
+ * scouting visual direction (constitution §2). Scoped to the public surface
+ * only (landing route + landing components), like checkPublicLexicon — docs
+ * legitimately say "not a SaaS template" and must not be scanned here.
+ */
+async function checkPremiumVisualTerms() {
+  const targets = [join(SRC_APP, "page.tsx")];
+  targets.push(
+    ...(await walk(join(SRC_COMPONENTS, "landing"), (f) =>
+      /\.tsx?$/.test(f),
+    )),
+  );
+
+  const contradictory: { rule: string; re: RegExp }[] = [
+    { rule: "saas-template", re: /\bsaas\s+template\b/i },
+    {
+      rule: "generic-template",
+      re: /\bgeneric\s+(?:dashboard|saas|template|theme)\b/i,
+    },
+    { rule: "boilerplate", re: /\bboilerplate\b/i },
+    { rule: "lorem-ipsum", re: /\blorem\s+ipsum\b/i },
+    { rule: "wireframe", re: /\bwireframe\b/i },
+    {
+      rule: "placeholder-design",
+      re: /\bplaceholder\s+(?:design|text|copy|content)\b/i,
+    },
+    {
+      rule: "off-the-shelf-template",
+      re: /\b(?:bootstrap|admin|starter)\s+template\b/i,
+    },
+    { rule: "default-theme", re: /\bdefault\s+theme\b/i },
+    { rule: "template-look", re: /\btemplate[-\s]?look\b/i },
+  ];
+
+  for (const file of targets) {
+    if (!existsSync(file)) continue;
+    const text = await readFile(file, "utf8");
+    const rel = relative(ROOT, file).replace(/\\/g, "/");
+    for (const c of contradictory) {
+      if (c.re.test(text)) {
+        fail(
+          "premium-visual-direction",
+          `term contradicting the locked premium visual direction "${c.rule}": ${rel}`,
+        );
+      }
+    }
+  }
+}
+
 async function main() {
   await checkRoutes();
   await checkWording();
   await checkPlayerCards();
   await checkPublicLexicon();
+  await checkPremiumVisualTerms();
   await checkProfileSource();
   await checkCommunicationArea();
 
@@ -292,7 +343,7 @@ async function main() {
     process.exit(1);
   }
   console.log(
-    "✓ Foundation guards passed (routes, wording, player cards, public copy, single sources).",
+    "✓ Foundation guards passed (routes, wording, player cards, public copy, premium visual, single sources).",
   );
 }
 

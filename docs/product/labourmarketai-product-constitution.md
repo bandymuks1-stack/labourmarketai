@@ -237,9 +237,9 @@ A PR may be accepted only if all hold:
 single profile route, no separate avatar route, single communication route,
 no duplicate player-card components, no duplicate profile source file, no
 duplicate communication area, honest wording (no approval/screening/owner
-acceptance phrasing, no fabricated-intelligence claims), and no banned
-technical terms in public UI copy. CI must also pass typecheck, lint and
-build.
+acceptance phrasing, no fabricated-intelligence claims), no banned technical
+terms in public UI copy, and no terms contradicting the §2 premium visual
+direction in public UI copy. CI must also pass typecheck, lint and build.
 
 This constitution is amended only by editing **this document together with its
 guard in the same pull request**, with explicit owner authorization. A guard
