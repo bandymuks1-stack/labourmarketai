@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 /*
- * Slice 1 base only. The full "Industrial Intelligence" system
- * (.card-border, .live-dot, keyframes, token-driven colors) lands in
- * slice 2 (design system). Near-black ink base, never pure #000.
+ * Industrial Intelligence — token→CSS bridge (brief §8). The literal values
+ * here mirror tokens/*; components never use raw hex (they use preset classes).
  */
 :root {
-  --background: #06070d;
-  --foreground: #f4f6fb;
+  --ink-900: #06070d;
+  --ink-800: #0b0d17;
+  --fg: #f4f6fb;
   color-scheme: dark;
 }
 
@@ -20,8 +20,8 @@ body {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--ink-900);
+  color: var(--fg);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -38,11 +38,91 @@ a {
   text-decoration: none;
 }
 
-@layer utilities {
+@layer components {
+  /* gradient on ONE accent word only */
   .text-gradient-accent {
     background: linear-gradient(90deg, #3e8bff 0%, #7b5cff 55%, #b57bff 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  /* rounded-lg gradient border + radial inner glow */
+  .card-border {
+    position: relative;
+    border-radius: 18px;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--ink-800), var(--ink-800)) padding-box,
+      linear-gradient(
+          135deg,
+          rgba(62, 139, 255, 0.4),
+          rgba(123, 92, 255, 0.15) 50%,
+          rgba(62, 139, 255, 0.05)
+        )
+        border-box;
+  }
+  .card-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      120% 80% at 50% 0%,
+      rgba(62, 139, 255, 0.08) 0%,
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+
+  /* pulsing green LIVE dot (never a solid status badge) */
+  .live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #00e676;
+    box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.6);
+    animation: live-pulse 2s ease-out infinite;
+  }
+}
+
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(0, 230, 118, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 230, 118, 0);
+  }
+}
+
+@keyframes ambient-drift {
+  0% {
+    opacity: 0.5;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(2%, -1%, 0);
+  }
+}
+
+@keyframes constellation-fade {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot,
+  [data-decor] {
+    animation: none !important;
   }
 }
