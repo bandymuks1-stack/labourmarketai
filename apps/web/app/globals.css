@@ -131,14 +131,48 @@ a {
   }
 }
 .ticker-track {
-  animation: ticker-scroll 30s linear infinite;
+  /* 5b.2: tightened 30s → 18s so the motion reads as "live". */
+  animation: ticker-scroll 18s linear infinite;
+  will-change: transform;
+}
+
+/* 5b.2 LiveMap — GPU-only marker pulse + slow worker drift. Scale is
+   applied to SVG shapes via fill-box so it pivots on the marker centre. */
+@keyframes marker-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+.map-marker {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: marker-pulse 2s ease-in-out infinite;
+}
+@keyframes worker-drift {
+  from {
+    transform: translate3d(-3px, 0, 0);
+  }
+  to {
+    transform: translate3d(3px, 0, 0);
+  }
+}
+.map-drift {
+  animation: worker-drift 8s ease-in-out infinite alternate;
   will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   [data-decor],
-  .ticker-track {
+  .ticker-track,
+  .map-marker,
+  .map-drift {
     animation: none !important;
   }
 }

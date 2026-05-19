@@ -19,6 +19,20 @@
       "label": "Live activity feed"
     }
   },
+  "map": {
+    "label": { "live": "EU LIVE", "utc": "UTC" },
+    "tooltip": {
+      "workers": "workers",
+      "projects": "projects",
+      "companies": "companies",
+      "matchesToday": "matches today",
+      "expansion_candidate": "Expansion candidate"
+    },
+    "legend": {
+      "active_markets": "Active markets",
+      "expansion_candidates": "Expansion candidates"
+    }
+  },
   "nav": {
     "platform": "Platform",
     "solutions": "Solutions",

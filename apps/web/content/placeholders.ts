@@ -28,6 +28,36 @@ export type Milestone = "M0" | "M1" | "M2" | "M3" | "M4" | "M5" | string;
 /** Feed item glyph (5b.1 live skin). */
 export type PlaceholderIcon = "join" | "demand" | "match" | "checkin";
 
+/** Structured map payloads (5b.2 LiveMap). `value` still carries a human
+ *  summary; this is the typed data the map actually renders. */
+export type LngLat = readonly [number, number];
+export type GeoPayload =
+  | { kind: "intensity"; code: string; intensity: number }
+  | {
+      kind: "counts";
+      code: string;
+      workers: number;
+      projects: number;
+      companies: number;
+      matchesToday: number;
+    }
+  | { kind: "worker"; country: string; coord: LngLat; role: string }
+  | {
+      kind: "project";
+      country: string;
+      coord: LngLat;
+      name: { lt: string; en: string };
+      headcount: number;
+    }
+  | {
+      kind: "match";
+      country: string;
+      workerCoord: LngLat;
+      projectCoord: LngLat;
+      score: number;
+    }
+  | { kind: "company"; country: string; coord: LngLat; name: string };
+
 export type Placeholder = {
   id: string;
   type: PlaceholderType;
@@ -48,9 +78,177 @@ export type Placeholder = {
   cycle?: readonly PlaceholderValue[];
   /** Feed-row glyph type (5b.1). */
   icon?: PlaceholderIcon;
+  /** Structured map payload (5b.2). */
+  geo?: GeoPayload;
 };
 
 const SQL = (q: string) => `SQL: ${q}`;
+
+// ── 5b.2 LiveMap data — deterministic (seeded LCG, no Date/Math.random) so
+// SSR and client agree. Coordinates are [lng, lat]; LiveMap projects them
+// with the same equirectangular transform as the country paths.
+type TargetDef = {
+  code: string;
+  anchors: readonly LngLat[];
+  intensity: number;
+  counts: { workers: number; projects: number; companies: number; matchesToday: number };
+};
+const MAP_TARGETS: readonly TargetDef[] = [
+  { code: "NL", anchors: [[4.9, 52.37], [4.48, 51.92], [5.29, 52.13]], intensity: 84, counts: { workers: 47, projects: 12, companies: 9, matchesToday: 5 } },
+  { code: "DE", anchors: [[13.4, 52.52], [9.99, 53.55], [11.58, 48.14], [6.96, 50.94], [8.68, 50.11]], intensity: 91, counts: { workers: 63, projects: 18, companies: 14, matchesToday: 8 } },
+  { code: "DK", anchors: [[12.57, 55.68], [10.2, 56.16]], intensity: 72, counts: { workers: 28, projects: 7, companies: 5, matchesToday: 3 } },
+  { code: "SE", anchors: [[18.07, 59.33], [11.97, 57.71], [13.0, 55.6]], intensity: 69, counts: { workers: 31, projects: 8, companies: 6, matchesToday: 3 } },
+  { code: "NO", anchors: [[10.75, 59.91], [5.32, 60.39]], intensity: 58, counts: { workers: 19, projects: 5, companies: 4, matchesToday: 2 } },
+  { code: "PL", anchors: [[21.01, 52.23], [17.04, 51.11], [19.94, 50.06]], intensity: 64, counts: { workers: 34, projects: 9, companies: 7, matchesToday: 4 } },
+  { code: "LT", anchors: [[25.28, 54.69], [23.9, 54.9]], intensity: 77, counts: { workers: 22, projects: 6, companies: 5, matchesToday: 3 } },
+  { code: "LV", anchors: [[24.11, 56.95]], intensity: 53, counts: { workers: 13, projects: 3, companies: 3, matchesToday: 1 } },
+  { code: "EE", anchors: [[24.75, 59.44]], intensity: 55, counts: { workers: 14, projects: 4, companies: 3, matchesToday: 2 } },
+];
+const TARGET_BY_CODE = Object.fromEntries(
+  MAP_TARGETS.map((t) => [t.code, t]),
+) as Record<string, TargetDef>;
+
+function lcg(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+const rnd = lcg(20260519);
+function near(anchor: LngLat): LngLat {
+  return [
+    +(anchor[0] + (rnd() * 2 - 1) * 0.55).toFixed(3),
+    +(anchor[1] + (rnd() * 2 - 1) * 0.32).toFixed(3),
+  ];
+}
+function pickAnchor(code: string): LngLat {
+  const a = TARGET_BY_CODE[code].anchors;
+  return a[Math.floor(rnd() * a.length)];
+}
+function expand(plan: Record<string, number>): string[] {
+  const out: string[] = [];
+  for (const t of MAP_TARGETS)
+    for (let i = 0; i < (plan[t.code] ?? 0); i++) out.push(t.code);
+  return out;
+}
+
+const ROLES = [
+  "Steel fixer", "Welder", "Formwork carpenter", "Concreter",
+  "Scaffolder", "Electrician", "Plumber", "HVAC fitter",
+  "Site supervisor", "General labour", "Crane operator", "Excavator operator",
+] as const;
+const PROJ = [
+  { lt: "Renovacijos darbai", en: "Renovation works" },
+  { lt: "Gyvenamasis kvartalas", en: "Residential quarter" },
+  { lt: "Logistikos centras", en: "Logistics centre" },
+  { lt: "Tilto rekonstrukcija", en: "Bridge reconstruction" },
+  { lt: "Pramonės pastatas", en: "Industrial facility" },
+  { lt: "Mokyklos statyba", en: "School build" },
+] as const;
+
+function mapPlaceholderSet(): Placeholder[] {
+  const base = {
+    status: "placeholder" as const,
+    addedIn: "M0" as const,
+    consentRequired: false,
+  };
+  const out: Placeholder[] = [];
+
+  for (const t of MAP_TARGETS) {
+    out.push({
+      ...base,
+      id: `map.country.intensity.${t.code}`,
+      type: "metric",
+      value: `${t.code} · intensity ${t.intensity}/100`,
+      geo: { kind: "intensity", code: t.code, intensity: t.intensity },
+      description: `LiveMap glow intensity for target market ${t.code}.`,
+      replacementSource:
+        "Activity index per country derived from `workers` + `job_demands` density (post-launch analytics).",
+    });
+    out.push({
+      ...base,
+      id: `map.country.counts.${t.code}`,
+      type: "metric",
+      value: `${t.code} · ${t.counts.workers}w · ${t.counts.projects}p`,
+      geo: { kind: "counts", code: t.code, ...t.counts },
+      description: `LiveMap hover counts for target market ${t.code}.`,
+      replacementSource: SQL(
+        `SELECT count(*) FROM workers/projects/companies/matches WHERE country='${t.code}'`,
+      ),
+    });
+  }
+
+  expand({ NL: 5, DE: 7, DK: 4, SE: 4, NO: 2, PL: 3, LT: 2, LV: 2, EE: 1 }).forEach(
+    (code, i) => {
+      const role = ROLES[i % ROLES.length];
+      out.push({
+        ...base,
+        id: `map.marker.worker.${i + 1}`,
+        type: "person",
+        value: { lt: `Darbuotojas · ${role} · ${code}`, en: `Worker · ${role} · ${code}` },
+        geo: { kind: "worker", country: code, coord: near(pickAnchor(code)), role },
+        description: `LiveMap worker marker ${i + 1} (${code}).`,
+        replacementSource:
+          "Coarse worker location from `workers.current_location_country` + consented geo.",
+      });
+    },
+  );
+
+  expand({ NL: 2, DE: 3, DK: 1, SE: 2, NO: 1, PL: 1, LT: 1, EE: 1 }).forEach(
+    (code, i) => {
+      const p = PROJ[i % PROJ.length];
+      const headcount = 4 + ((i * 3) % 9);
+      out.push({
+        ...base,
+        id: `map.marker.project.${i + 1}`,
+        type: "project",
+        value: { lt: `${p.lt} · ${code}`, en: `${p.en} · ${code}` },
+        geo: {
+          kind: "project",
+          country: code,
+          coord: near(pickAnchor(code)),
+          name: { lt: `${p.lt} · ${code}`, en: `${p.en} · ${code}` },
+          headcount,
+        },
+        description: `LiveMap project marker ${i + 1} (${code}).`,
+        replacementSource: "Real project from `projects` WHERE status='live' (city geocoded).",
+      });
+    },
+  );
+
+  expand({ DE: 2, NL: 2, DK: 1, SE: 1 }).forEach((code, i) => {
+    const wc = near(pickAnchor(code));
+    const pc = near(pickAnchor(code));
+    const score = 62 + ((i * 7) % 36);
+    out.push({
+      ...base,
+      id: `map.marker.match.${i + 1}`,
+      type: "metric",
+      value: { lt: `Atitikimas · ${code} · ${score}`, en: `Match · ${code} · ${score}` },
+      geo: { kind: "match", country: code, workerCoord: wc, projectCoord: pc, score },
+      description: `LiveMap match connector ${i + 1} (${code}).`,
+      replacementSource: "Real match from `matches` linking a worker to a job_demand.",
+    });
+  });
+
+  expand({ NL: 3, DE: 4, DK: 2, SE: 3, NO: 1, PL: 2, LT: 1, LV: 1, EE: 1 }).forEach(
+    (code, i) => {
+      const name = `Contractor ${code}-${i + 1} (sample)`;
+      out.push({
+        ...base,
+        id: `map.marker.company.${i + 1}`,
+        type: "company",
+        value: { lt: `Įmonė · ${code}`, en: `Company · ${code}` },
+        geo: { kind: "company", country: code, coord: near(pickAnchor(code)), name },
+        description: `LiveMap company marker ${i + 1} (${code}).`,
+        replacementSource: "Real company from `companies` (HQ city geocoded; consent for name).",
+      });
+    },
+  );
+
+  return out;
+}
 
 export const placeholders: readonly Placeholder[] = [
   {
@@ -499,6 +697,7 @@ export const placeholders: readonly Placeholder[] = [
       consentRequired: false,
     }),
   ),
+  ...mapPlaceholderSet(),
 ] as const;
 
 export function getPlaceholder(id: string): Placeholder {
@@ -540,4 +739,24 @@ export function placeholderCycle(id: string, locale: string): string[] {
   const p = getPlaceholder(id);
   const set = p.cycle ?? [p.value];
   return set.map((v) => localizeValue(v, locale));
+}
+
+/** All placeholders whose id starts with `prefix` (e.g. "map.marker.worker.").
+ *  Used by LiveMap to pull its marker sets. */
+export function placeholdersByPrefix(prefix: string): Placeholder[] {
+  return placeholders.filter((p) => p.id.startsWith(prefix));
+}
+
+/** Narrowed geo payloads of a given kind, in registry order. */
+export function geoPayloads<K extends GeoPayload["kind"]>(
+  prefix: string,
+  kind: K,
+): Extract<GeoPayload, { kind: K }>[] {
+  const out: Extract<GeoPayload, { kind: K }>[] = [];
+  for (const p of placeholders) {
+    if (p.id.startsWith(prefix) && p.geo && p.geo.kind === kind) {
+      out.push(p.geo as Extract<GeoPayload, { kind: K }>);
+    }
+  }
+  return out;
 }

@@ -1,14 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { Sparkline } from "@/components/ui/Sparkline";
-import { ConstellationBg } from "@/components/decor/constellation-bg";
 import { LeadCapture } from "@/components/marketing/lead-capture";
 import { DemoChip } from "@/components/app/demo-chip";
 import { LiveClock } from "@/components/app/live-clock";
+import { LiveMap } from "@/components/app/live-map";
 import { LiveTicker } from "@/components/app/live-ticker";
 import { MarketCounters } from "@/components/app/market-counters";
 import { MicroActivityFeed } from "@/components/app/micro-activity-feed";
@@ -30,7 +28,6 @@ export default async function LandingPage({
   setRequestLocale(locale);
   const t = await getTranslations("hero");
   const tr = await getTranslations("trusted");
-  const hc = await getTranslations("heroCards");
   const sec = await getTranslations("secondary");
   const mk = await getTranslations("market");
 
@@ -46,7 +43,7 @@ export default async function LandingPage({
   return (
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="grid items-start gap-12 lg:grid-cols-2">
+      <section className="grid items-start gap-12 lg:grid-cols-[1fr_1.35fr]">
         <div>
           <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-[11px] uppercase tracking-label text-text-secondary">
             <span className="live-dot" aria-hidden />
@@ -86,75 +83,13 @@ export default async function LandingPage({
           </div>
         </div>
 
-        {/* Hero card cluster + constellation overlay */}
+        {/* Hero right — live mission-control map (5b.2) */}
         <div className="relative">
-          <ConstellationBg />
           <div className="relative mb-5 flex items-start justify-between gap-4">
             <DemoChip />
             <LiveClock />
           </div>
-          <div className="relative flex flex-col gap-5">
-            <Card label={hc("worker.label")} live>
-              <div className="flex items-center gap-4">
-                <Avatar alt="Worker" initials="TJ" size={56} glow />
-                <div className="min-w-0">
-                  <p className="truncate font-display font-semibold text-text-primary">
-                    <Placeholder id="hero.worker.featured" />
-                  </p>
-                  <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
-                    {hc("worker.strength")}
-                  </p>
-                  <div className="mt-1 h-1.5 w-40 max-w-full overflow-hidden rounded-full bg-ink-600">
-                    <div className="h-full w-3/4 bg-gradient-cta" />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Badge tone="brand">{mk("topSkills")}</Badge>
-                <Badge tone="live">{hc("worker.cta")} →</Badge>
-              </div>
-            </Card>
-
-            <Card label={hc("project.label")}>
-              <p className="font-display font-semibold text-text-primary">
-                <Placeholder id="hero.project.featured" />
-              </p>
-              <p className="mt-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
-                {hc("project.progress")}
-              </p>
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-ink-600">
-                <div className="h-full w-2/3 bg-gradient-cta" />
-              </div>
-              <div className="mt-4 grid grid-cols-4 gap-3 text-center">
-                {(["sites", "workers", "safety", "target"] as const).map(
-                  (k) => (
-                    <div key={k}>
-                      <p className="font-display text-lg font-bold text-text-primary">
-                        —
-                      </p>
-                      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                        {hc(`project.${k}`)}
-                      </p>
-                    </div>
-                  ),
-                )}
-              </div>
-            </Card>
-
-            <Card label={hc("action.label")}>
-              <ul className="flex flex-col gap-3 text-sm text-text-secondary">
-                {[1, 2, 3, 4].map((n) => (
-                  <li key={n} className="flex items-center gap-3">
-                    <span
-                      aria-hidden
-                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-blue"
-                    />
-                    <Placeholder id={`hero.action.${n}`} />
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
+          <LiveMap />
         </div>
       </section>
 

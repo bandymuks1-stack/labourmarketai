@@ -19,6 +19,20 @@
       "label": "Gyvo aktyvumo srautas"
     }
   },
+  "map": {
+    "label": { "live": "EU GYVA", "utc": "UTC" },
+    "tooltip": {
+      "workers": "darbuotojai",
+      "projects": "projektai",
+      "companies": "įmonės",
+      "matchesToday": "atitikimai šiandien",
+      "expansion_candidate": "Plėtros kandidatė"
+    },
+    "legend": {
+      "active_markets": "Aktyvios rinkos",
+      "expansion_candidates": "Plėtros kandidatės"
+    }
+  },
   "nav": {
     "platform": "Platforma",
     "solutions": "Sprendimai",
