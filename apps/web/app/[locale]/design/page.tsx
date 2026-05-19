@@ -12,6 +12,8 @@ import { LiveDot } from "@/components/ui/LiveDot";
 import { Select } from "@/components/ui/Select";
 import { Sparkline } from "@/components/ui/Sparkline";
 import { Stat } from "@/components/ui/Stat";
+import { Placeholder } from "@/components/ui/Placeholder";
+import { placeholders } from "@/content/placeholders";
 import { env } from "@/lib/env";
 
 // Dev-gated (brief §10.3). Hidden in production (marker flag = false there).
@@ -114,6 +116,40 @@ export default async function DesignPreview({
               Mono small-caps label
             </p>
           </Card>
+        </section>
+
+        <section className="mt-12">
+          <Label>Placeholder registry — {placeholders.length} entries</Label>
+          <h2 className="mt-2 font-display text-2xl font-bold tracking-tightest">
+            Governed placeholders
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-text-secondary">
+            Every fake value below is registered in{" "}
+            <code className="font-mono text-xs text-text-muted">
+              content/placeholders.ts
+            </code>{" "}
+            and rendered via{" "}
+            <code className="font-mono text-xs text-text-muted">
+              &lt;Placeholder /&gt;
+            </code>
+            . The dotted outline + corner chip is the dev/preview marker; it is
+            hidden in production. Nothing here is real data.
+          </p>
+          <div className="mt-8 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            {placeholders.map((p) => (
+              <div key={p.id} className="flex flex-col gap-3">
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {p.id} · {p.type}
+                </span>
+                <div className="text-sm text-text-secondary">
+                  <Placeholder id={p.id} />
+                </div>
+                <span className="text-xs text-text-muted">
+                  {p.description}
+                </span>
+              </div>
+            ))}
+          </div>
         </section>
       </main>
     </div>
