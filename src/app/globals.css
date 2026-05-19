@@ -21,12 +21,27 @@
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* radius — single source */
+  --radius-sm: 0.55rem;
+  --radius-md: 0.85rem;
+  --radius-lg: 1.1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 999px;
+
+  /* elevation — single source */
+  --shadow-card: 0 18px 50px -30px rgba(5, 6, 12, 0.85);
+  --shadow-cta: 0 18px 50px -22px rgba(75, 227, 255, 0.7);
+  --shadow-glow: 0 0 0 1px rgba(123, 132, 196, 0.14),
+    0 30px 80px -40px rgba(75, 227, 255, 0.35);
 }
 
 :root {
   color-scheme: dark;
-  --shadow-glow: 0 0 0 1px rgba(123, 132, 196, 0.14),
-    0 30px 80px -40px rgba(75, 227, 255, 0.35);
+  /* layout rhythm — single source for spacing cadence */
+  --space-gutter: 1.5rem;
+  --space-section: 3.5rem;
+  --space-block: 1.25rem;
 }
 
 * {

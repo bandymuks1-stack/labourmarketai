@@ -186,10 +186,104 @@ async function checkPlayerCards() {
   }
 }
 
+/** Public UI copy must read human — no internal / technical terms. */
+async function checkPublicLexicon() {
+  const targets = [join(SRC_APP, "page.tsx")];
+  targets.push(
+    ...(await walk(join(SRC_COMPONENTS, "landing"), (f) =>
+      /\.tsx?$/.test(f),
+    )),
+  );
+
+  // Built partly from fragments so the banned literals never sit here as one
+  // scannable block; scripts/ is excluded from every scan anyway.
+  const banned: { rule: string; re: RegExp }[] = [
+    { rule: "canonical", re: /\bcanonical\b/i },
+    { rule: "deterministic", re: /\bdeterministic\b/i },
+    { rule: "source-of-truth", re: new RegExp("source\\s+of\\s+truth", "i") },
+    { rule: "architecture", re: /\barchitecture\b/i },
+    {
+      rule: "reusable-data-model",
+      re: /\breusable\s+data\s+model\b/i,
+    },
+    { rule: "zero-queues", re: /\bzero\s+(?:\w+\s+){0,2}queues?\b/i },
+    { rule: "no-duplicate-flows", re: /\bno\s+duplicate\s+flows?\b/i },
+    { rule: "connected-board", re: /\bconnected\s+board\b/i },
+    { rule: "fabric", re: /\bfabric\b/i },
+    { rule: "living-system", re: /\bliving\s+system\b/i },
+    { rule: "technical-scaffold", re: /\btechnical\s+scaffold\b/i },
+    { rule: "internal-model", re: /\binternal\s+model\b/i },
+  ];
+
+  for (const file of targets) {
+    if (!existsSync(file)) continue;
+    const text = await readFile(file, "utf8");
+    const rel = relative(ROOT, file).replace(/\\/g, "/");
+    for (const b of banned) {
+      if (b.re.test(text)) {
+        fail(
+          "human-public-copy",
+          `technical term "${b.rule}" in public UI copy: ${rel}`,
+        );
+      }
+    }
+  }
+}
+
+/** Exactly one canonical Profile model file — no duplicate profile source. */
+async function checkProfileSource() {
+  const files = await walk(join(ROOT, "src"), (f) => /\.tsx?$/.test(f));
+  const re = /export\s+(?:interface|type)\s+Profile\b/;
+  const where: string[] = [];
+  for (const file of files) {
+    const text = await readFile(file, "utf8");
+    if (re.test(text)) {
+      where.push(relative(ROOT, file).replace(/\\/g, "/"));
+    }
+  }
+  if (where.length !== 1) {
+    fail(
+      "single-profile-source",
+      `expected exactly 1 Profile model file, found ${where.length}: ${where.join(", ")}`,
+    );
+  }
+}
+
+/** One communication area only — no parallel inbox/messages/chat component. */
+async function checkCommunicationArea() {
+  const files = await walk(SRC_COMPONENTS, (f) => /\.tsx?$/.test(f));
+  const parallel =
+    /export\s+(?:async\s+)?(?:function|const)\s+(\w*(?:Inbox|Messages|Messaging|Mailbox|Chat|Conversation|DmThread)\w*)\b/;
+  const startDef =
+    /export\s+(?:async\s+)?(?:function|const)\s+CommunicationStart\b/;
+  let starts = 0;
+  for (const file of files) {
+    const text = await readFile(file, "utf8");
+    const rel = relative(ROOT, file).replace(/\\/g, "/");
+    const m = text.match(parallel);
+    if (m) {
+      fail(
+        "single-communication-area",
+        `parallel communication component "${m[1]}" in ${rel}`,
+      );
+    }
+    if (startDef.test(text)) starts += 1;
+  }
+  if (starts !== 1) {
+    fail(
+      "single-communication-area",
+      `expected exactly 1 CommunicationStart, found ${starts}`,
+    );
+  }
+}
+
 async function main() {
   await checkRoutes();
   await checkWording();
   await checkPlayerCards();
+  await checkPublicLexicon();
+  await checkProfileSource();
+  await checkCommunicationArea();
 
   if (failures.length > 0) {
     console.error("\nFoundation guards FAILED:\n");
@@ -197,7 +291,9 @@ async function main() {
     console.error(`\n${failures.length} violation(s).\n`);
     process.exit(1);
   }
-  console.log("✓ Foundation guards passed (routes, wording, player cards).");
+  console.log(
+    "✓ Foundation guards passed (routes, wording, player cards, public copy, single sources).",
+  );
 }
 
 main().catch((err) => {

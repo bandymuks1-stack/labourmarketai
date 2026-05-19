@@ -66,15 +66,28 @@ npm run check      # foundation guards
 npm run build      # production build
 ```
 
+## Governing docs
+
+The product is locked by a constitution and two maps — read these before any
+change:
+
+- `docs/product/labourmarketai-product-constitution.md` — direction, quality
+  bar, one-canonical-place principle, reuse rules, human-copy rules,
+  re-orderable foundation, prohibitions, per-PR acceptance criteria.
+- `docs/product/labourmarketai-route-map.md` — the locked routes.
+- `docs/product/labourmarketai-component-map.md` — the locked components.
+
 ## Guards (`npm run check`)
 
-Fails if: more than one profile route exists · a separate avatar route
-exists · more than one communication route exists · gatekeeping wording
-appears · fake AI capability claims appear · duplicate canonical player-card
-components appear. See `scripts/check.ts`.
+Fails if: more than one profile route · a separate avatar route · more than
+one communication route · a duplicate Profile model file · a parallel
+communication component · duplicate player-card components · gatekeeping or
+fabricated-capability wording · technical terms in public UI copy. See
+`scripts/check.ts`.
 
 ## Scope
 
-Structure + visual system only. No production deploy, no payments, no fake AI,
-no demo data treated as real, no duplicate flows. Onboarding and matching are
-automated and self-serve by design. See `docs/`.
+Structure + visual system only. No production deploy, no payments, no
+fabricated capability claims, no demo data treated as real, no duplicate
+flows. Onboarding and matching are automated and self-serve by design. See
+`docs/` and the governing docs above.
