@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { CompanyPlayerCard } from "@/components/company/CompanyPlayerCard";
 import { LandingHero } from "@/components/landing/LandingHero";
-import { ModuleTile } from "@/components/landing/ModuleTile";
 import { MatchResult } from "@/components/matches/MatchResult";
 import { ProfilePlayerCard } from "@/components/profile/ProfilePlayerCard";
 import { CtaButton } from "@/components/ui/CtaButton";
@@ -14,51 +13,11 @@ import {
   sampleProfiles,
 } from "@/lib/sample-data";
 
-const DISCONNECT = [
-  "Your CV sits apart from the real work you have done",
-  "Your work journal lives nowhere a company can see",
-  "Conversations happen far from the decisions",
-  "Skills are claimed, rarely proven",
-  "Teams are invisible until it is too late",
-  "Companies guess instead of seeing",
-  "Projects float, disconnected from people",
-];
-
-const LAYERS = [
-  { glyph: "◆", label: "One profile", hint: "Who you are, in one place" },
-  { glyph: "▤", label: "One work-evidence layer", hint: "Proof, not claims" },
-  { glyph: "⬡", label: "One team & project context", hint: "Where work happens" },
-  { glyph: "◈", label: "One communication layer", hint: "Talk, close to the call" },
-  { glyph: "▣", label: "One company & HR layer", hint: "Needs in context" },
-  { glyph: "✦", label: "One opportunity layer", hint: "Fit, surfaced" },
-];
-
 const USES = [
-  { glyph: "▤", label: "CV", hint: "Always current" },
-  { glyph: "◆", label: "Public work identity", hint: "How the market sees you" },
-  { glyph: "⬢", label: "Skill signal", hint: "Strength at a glance" },
-  { glyph: "▰", label: "Work journal evidence", hint: "Real, journaled work" },
-  { glyph: "✦", label: "Readiness", hint: "How prepared you are" },
-  { glyph: "◈", label: "Availability", hint: "Open, engaged or not" },
-  { glyph: "⬡", label: "Trust layer", hint: "Verified and earned" },
-  { glyph: "◇", label: "Opportunity surface", hint: "Roles that fit you" },
-  { glyph: "▣", label: "Team & company input", hint: "A decision companies can trust" },
-];
-
-const WORKER_SIDE = [
-  "Show your value, not just a CV",
-  "Prove skills with real work",
-  "Keep your work history with you",
-  "Signal readiness and availability",
-  "Reach opportunities that fit",
-];
-
-const COMPANY_SIDE = [
-  "See people, not paperwork",
-  "Form teams and frame projects",
-  "Communicate close to the decision",
-  "Hold HR and customer needs in context",
-  "Decide faster, with trust",
+  "A CV that stays current",
+  "A skill signal companies can read",
+  "Proof from real work",
+  "A fit surface for the right roles",
 ];
 
 export default function Home() {
@@ -68,221 +27,168 @@ export default function Home() {
 
   return (
     <div className="arena flex flex-1 flex-col">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-4 sm:px-6">
-        <Wordmark />
-        <nav className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="text-sm text-fg-dim transition hover:text-fg"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/register"
-            className="cta cta-primary cta-sm"
-          >
-            Create profile
-          </Link>
-        </nav>
+      <header className="sticky top-0 z-40 border-b border-line/40 bg-ink/70 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3.5 sm:px-6">
+          <Wordmark />
+          <nav className="flex items-center gap-4">
+            <Link
+              href="/login"
+              className="text-sm text-fg-dim transition hover:text-fg"
+            >
+              Sign in
+            </Link>
+            <Link href="/register" className="cta cta-primary cta-sm">
+              Create profile
+            </Link>
+          </nav>
+        </div>
       </header>
 
       <LandingHero />
 
-      {/* WHY THIS EXISTS — the disconnect, then the connected layer */}
-      <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
-        <div className="max-w-2xl">
-          <p className="eyebrow">Why this exists</p>
+      {/* WORK IN PIECES → CONNECTED */}
+      <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="eyebrow">Why this matters</p>
           <h2 className="display mt-3 text-3xl sm:text-4xl">
-            Today the market is{" "}
-            <span className="grad-text">disconnected.</span>
+            Work lives in pieces.{" "}
+            <span className="grad-text">We connect it.</span>
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-fg-dim">
-            Work, proof, people and decisions live in separate places.
-            labourmarket.ai puts them on one connected layer.
-          </p>
         </div>
 
-        <div className="scout-frame relative mt-8 overflow-hidden">
+        <div className="stage scout-frame relative mt-10 grid items-center gap-8 p-7 sm:p-10 lg:grid-cols-[1fr_auto_1fr]">
           <div aria-hidden className="netglow" />
-          <div className="grid lg:grid-cols-2">
-            <div className="p-6 sm:p-8">
-              <p className="text-xs font-semibold uppercase tracking-wider text-fg-mute">
-                The disconnect
-              </p>
-              <ul className="mt-4 space-y-3">
-                {DISCONNECT.map((d) => (
-                  <li
-                    key={d}
-                    className="flex items-start gap-3 text-sm text-fg-dim"
-                  >
-                    <span
-                      aria-hidden
-                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-fg-mute"
-                    />
-                    {d}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="flex flex-wrap justify-center gap-2 opacity-50 lg:justify-end">
+            {["CV", "Work history", "Proof", "Skills", "Availability"].map(
+              (frag) => (
+                <span
+                  key={frag}
+                  className="rounded-full border border-line/60 px-3 py-1.5 text-xs text-fg-mute"
+                >
+                  {frag}
+                </span>
+              ),
+            )}
+          </div>
 
-            <div className="border-t border-line/60 p-6 sm:p-8 lg:border-l lg:border-t-0">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-fg-mute">
-                  The labourmarket.ai layer
-                </p>
-                <span aria-hidden className="live-dot" />
-              </div>
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {LAYERS.map((l) => (
-                  <ModuleTile
-                    key={l.label}
-                    glyph={l.glyph}
-                    label={l.label}
-                    hint={l.hint}
-                    tone="info"
-                  />
-                ))}
-              </div>
-            </div>
+          <div
+            aria-hidden
+            className="netline mx-auto h-px w-24 lg:h-16 lg:w-px lg:rotate-0"
+          />
+
+          <div className="mx-auto flex items-center gap-3 rounded-full border border-cyan/40 bg-ink-2/80 px-5 py-3 lg:mx-0">
+            <span aria-hidden className="live-dot blue" />
+            <span className="text-sm font-semibold">
+              One connected market
+            </span>
           </div>
         </div>
       </section>
 
       {/* ONE PROFILE, MANY USES */}
-      <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
-        <div className="max-w-2xl">
-          <p className="eyebrow">Profile integrity</p>
-          <h2 className="display mt-3 text-3xl sm:text-4xl">
-            One profile.{" "}
-            <span className="grad-text">Many uses.</span>
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-fg-dim">
-            The same profile becomes everything the market needs to trust you
-            — without you maintaining ten disconnected copies.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-5 lg:grid-cols-[360px_1fr]">
-          <div>
+      <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
+        <div className="grid items-center gap-10 lg:grid-cols-[360px_1fr]">
+          <div className="mx-auto w-full max-w-sm">
             <div className="mb-3 flex items-center justify-between">
-              <span className="eyebrow">The one profile</span>
+              <span className="eyebrow">One profile</span>
               <StatusChip tone="muted">Example</StatusChip>
             </div>
             <ProfilePlayerCard profile={candidate} />
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {USES.map((u) => (
-              <ModuleTile
-                key={u.label}
-                glyph={u.glyph}
-                label={u.label}
-                hint={u.hint}
-                tone="neutral"
-              />
-            ))}
+          <div>
+            <h2 className="display text-3xl sm:text-4xl">
+              Build it once.{" "}
+              <span className="grad-text">Useful everywhere.</span>
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-fg-dim">
+              The same profile becomes what the market needs to trust you — no
+              ten disconnected copies.
+            </p>
+            <ul className="mt-7 space-y-3">
+              {USES.map((u) => (
+                <li
+                  key={u}
+                  className="flex items-center gap-3 text-base text-fg"
+                >
+                  <span
+                    aria-hidden
+                    className="h-2 w-2 rounded-full bg-accent-draft"
+                  />
+                  {u}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* BOTH SIDES + MARKET LAYER, CONNECTED */}
-      <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
-        <div className="text-center">
+      {/* WORKER · MARKET · COMPANY — ONE LAYER */}
+      <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">One connected market</p>
-          <h2 className="display mx-auto mt-3 max-w-2xl text-3xl sm:text-4xl">
+          <h2 className="display mt-3 text-3xl sm:text-4xl">
             Workers, companies and the market —{" "}
-            <span className="grad-text">on one layer.</span>
+            <span className="grad-text">one layer.</span>
           </h2>
         </div>
 
-        <div className="scout-frame relative mt-10 overflow-hidden p-5 sm:p-7">
+        <div className="stage scout-frame relative mt-10 overflow-hidden p-5 sm:p-8">
           <div aria-hidden className="netglow" />
-          <div className="grid items-stretch gap-5 lg:grid-cols-3">
-            <div className="flex flex-col">
+          <div className="grid gap-5 lg:grid-cols-3">
+            <div>
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-[0.7rem] uppercase tracking-[0.18em] text-fg-mute">
-                  The worker
+                  Worker
                 </span>
-                <StatusChip tone="muted">Example</StatusChip>
+                <StatusChip tone="positive" dot>
+                  Open
+                </StatusChip>
               </div>
               <ProfilePlayerCard profile={candidate} />
-              <ul className="mt-4 space-y-2">
-                {WORKER_SIDE.map((w) => (
-                  <li
-                    key={w}
-                    className="flex items-center gap-2.5 text-sm text-fg"
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-signal-green" />
-                    {w}
-                  </li>
-                ))}
-              </ul>
             </div>
-
-            <div className="flex flex-col">
+            <div>
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-[0.7rem] uppercase tracking-[0.18em] text-fg-mute">
-                  The market
+                  Market
                 </span>
                 <StatusChip tone="info" dot>
                   Fit in plain words
                 </StatusChip>
               </div>
               <MatchResult profile={candidate} match={match} />
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                <StatusChip tone="gold" dot>
-                  Trust
-                </StatusChip>
-                <StatusChip tone="positive" dot>
-                  Demand
-                </StatusChip>
-                <StatusChip tone="info" dot>
-                  Signals
-                </StatusChip>
-                <StatusChip tone="muted">Status</StatusChip>
-              </div>
             </div>
-
-            <div className="flex flex-col">
+            <div>
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-[0.7rem] uppercase tracking-[0.18em] text-fg-mute">
-                  The company
+                  Company
                 </span>
                 <StatusChip tone="muted">Example</StatusChip>
               </div>
               <CompanyPlayerCard company={company} />
-              <ul className="mt-4 space-y-2">
-                {COMPANY_SIDE.map((c) => (
-                  <li
-                    key={c}
-                    className="flex items-center gap-2.5 text-sm text-fg"
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-signal-blue" />
-                    {c}
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* WHAT TO DO NEXT */}
-      <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
-        <div className="scout-frame relative overflow-hidden p-8 text-center sm:p-14">
-          <div aria-hidden className="spotlight" />
-          <h2 className="display mx-auto max-w-3xl text-3xl sm:text-5xl">
+      {/* CLOSE */}
+      <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 sm:py-24">
+        <div className="stage sweep scout-frame relative overflow-hidden p-10 text-center sm:p-16">
+          <div aria-hidden className="halo" />
+          <h2 className="display mx-auto max-w-3xl text-4xl sm:text-6xl">
             Put your work on the{" "}
             <span className="grad-text">map.</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-fg-dim sm:text-base">
-            One profile, one connected market. Build it once and let the market
-            see what you can really do.
+          <p className="mx-auto mt-5 max-w-lg text-sm text-fg-dim sm:text-base">
+            One profile. One connected market. Built once, seen everywhere.
           </p>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <CtaButton href="/register">Create your profile</CtaButton>
-            <CtaButton href="/app/discover" kind="ghost">
-              Explore the market
-            </CtaButton>
+            <Link
+              href="/app/discover"
+              className="text-sm font-medium text-fg-dim transition hover:text-fg"
+            >
+              Explore the market <span aria-hidden>→</span>
+            </Link>
           </div>
         </div>
       </section>
