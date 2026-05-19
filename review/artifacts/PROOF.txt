@@ -1,45 +1,45 @@
 OWNER VISUAL REVIEW — PROOF
-labourmarket.ai · PR #1 · living labour-market landing v3 · generated 2026-05-19
+labourmarket.ai · PR #1 · landing wow-correction v4 · generated 2026-05-19
 
 BRANCH / HEAD
   repo            C:\Users\Mano\Documents\labourmarketai   (correct no-dot repo)
   remote          github.com/bandymuks1-stack/labourmarketai
   branch          feat/labourmarketai-foundation-v1   (PR #1 feature branch only)
-  rebuild commit  dffe9b635bd204e440d3c8257a672f216160fe20
-  baseline parent 8ae62890cb5d51ddd5ed4bed1a894edfecb73f58
+  rebuild commit  a2b5747bbc4a9c4769955a5ac5652991573b92de
+  prev baseline   df9806bfb64809a167f97bc3ea949780932391eb (v3)
   contaminated dot-path repo C:\Users\Mano\Documents\labourmarket.ai — NOT touched
 
 PRODUCTION / MAIN — NOT CONTACTED, NOT CHANGED
   origin/main     5e5998906da9184e892eabd6889488d7d119f831  (neutral scaffold, unchanged)
-  no merge, no push to main, no production deploy, no Vercel settings change
-  Vercel branch preview is SSO-gated (HTTP 401 public) — local server used instead
+  no merge · no push to main · no production deploy · no Vercel settings change
+  Vercel branch preview is SSO-gated (HTTP 401 public) — local server used
 
-LOCALHOST CAPTURE (rebuilt v3)
-  build           next build  (commit dffe9b6, clean tree)
-  serve           next start -p 3130
-  url             http://localhost:3130/   ->  HTTP 200
-  served markers  hero "finally visible" + "operating layer" present (v3 rebuild)
-  note            document <title> still carries the prior site.ts tagline
-                  ("Find work. Find workers. Faster."); intentionally not
-                  changed to keep scope to the landing only (owner-review note)
+LOCALHOST CAPTURE (v4)
+  build           next build  (commit a2b5747, clean tree)
+  serve           next start -p 3140
+  url             http://localhost:3140/   ->  HTTP 200
+  served markers  "finally visible" + "One connected labour market" +
+                  "Work lives in pieces"  (v4 reveal)
+  note            document <title> still carries prior site.ts tagline;
+                  left unchanged to keep scope to the landing only
   screenshot tool Playwright CLI, --channel=chrome (installed Chrome), --full-page
   server stopped  after capture (local only)
 
 ARTIFACTS (review/artifacts/)
-  desktop.png      1440 x 900  full page   (v3)
-  tablet.png        834 x 1112 full page   (v3)
-  mobile.png        390 x 844  full page   (v3)
-  OWNER-REVIEW.html contact sheet (clickable screenshots + notes)
-  PROOF.txt         this file
+  desktop.png  1440x900 full page · tablet.png 834x1112 · mobile.png 390x844
+  OWNER-REVIEW.html  contact sheet (clickable, v3->v4 notes)
+  PROOF.txt          this file
 
-VALIDATION AT REBUILD COMMIT
+VALIDATION AT a2b5747
   npm run typecheck  OK
   npm run lint       OK (exit 0)
   npm run check      OK (routes, wording, player cards, public copy,
                          premium visual, single sources)
   npm run build      OK (14 routes, all static, route set unchanged)
+  mobile             no horizontal overflow
 
 INTEGRITY
   Landing + landing components + token/CSS only. No new routes, no auth/admin/
-  app-flow change, no backend/API/schema, no payment, no fake AI / fake market
-  numbers, no duplicate profile/avatar/player-card/communication concept.
+  app-flow change, no backend/API/schema, no payment, no fake AI / fake counts
+  / fake customers, no duplicate profile/avatar/player-card/communication
+  concept. Removed now-unused ModuleTile.

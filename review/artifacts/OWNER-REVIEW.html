@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Owner Visual Review — labourmarket.ai PR #1 (living-market landing v3)</title>
+<title>Owner Visual Review — labourmarket.ai PR #1 (landing wow-correction v4)</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -13,8 +13,7 @@
   h1 { font-size: 1.7rem; letter-spacing: -0.02em; margin: 0 0 .35rem; }
   h2 { font-size: 1.02rem; margin: 2.4rem 0 .9rem; color: #4be3ff;
        text-transform: uppercase; letter-spacing: .16em; }
-  p { color: #aab0d6; }
-  a { color: #4be3ff; }
+  p { color: #aab0d6; } a { color: #4be3ff; }
   code { background: #0e1120; padding: .12rem .4rem; border-radius: 5px;
     font-family: ui-monospace, monospace; font-size: .86em; color: #f3f5ff; }
   .meta { color: #6f76a3; font-size: .9rem; }
@@ -39,102 +38,87 @@
 <body>
 <div class="wrap">
 
-  <h1>Owner Visual Review — living labour-market landing v3</h1>
-  <p class="meta">labourmarket.ai · PR #1 · generated 2026-05-19 · review-only evidence</p>
+  <h1>Owner Visual Review — landing wow-correction v4</h1>
+  <p class="meta">labourmarket.ai · PR #1 · 2026-05-19 · review-only evidence</p>
 
   <h2>Branch / head proof</h2>
   <div class="panel">
     <p style="margin:0">
-      Repo: <code>C:\Users\Mano\Documents\labourmarketai</code> (correct no-dot repo)
+      Repo <code>C:\Users\Mano\Documents\labourmarketai</code> (correct no-dot)
       → <code>github.com/bandymuks1-stack/labourmarketai</code><br/>
-      Branch: <code>feat/labourmarketai-foundation-v1</code> (PR #1 feature branch only)<br/>
-      Rebuild commit: <code>dffe9b635bd204e440d3c8257a672f216160fe20</code><br/>
-      Baseline parent: <code>8ae62890cb5d51ddd5ed4bed1a894edfecb73f58</code><br/>
-      <code>origin/main</code>: <code>5e5998906da9184e892eabd6889488d7d119f831</code>
-      — <b class="ok">unchanged neutral scaffold</b> (not contacted, not changed)<br/>
-      Contaminated dot-path repo <code>...\labourmarket.ai</code> —
-      <b class="ok">not touched</b>
+      Branch <code>feat/labourmarketai-foundation-v1</code> (PR #1 only)<br/>
+      v4 commit <code>a2b5747bbc4a9c4769955a5ac5652991573b92de</code>
+      · prev v3 <code>df9806b</code><br/>
+      <code>origin/main</code> <code>5e5998906da9184e892eabd6889488d7d119f831</code>
+      — <b class="ok">unchanged</b>; dot-path repo <b class="ok">not touched</b>
     </p>
   </div>
 
   <h2>Localhost capture proof</h2>
   <div class="panel">
     <p style="margin:0">
-      Vercel branch preview is SSO-protected (HTTP 401 public), so screenshots
-      were taken from a local production server of the rebuilt commit:<br/><br/>
-      <code>next build</code> → <code>next start -p 3130</code> →
-      <code>http://localhost:3130/</code> → <b class="ok">HTTP 200</b><br/>
-      Rebuilt v3 markers present: hero <i>"finally visible"</i> + <i>"operating
-      layer"</i>.<br/>
-      Engine: Playwright <code>--channel=chrome</code> (installed Chrome),
-      full-page. Server stopped after capture.<br/>
-      <span class="warn">Owner-review note:</span> the browser tab
-      <code>&lt;title&gt;</code> still carries the prior site tagline
-      (metadata in <code>site.ts</code>); intentionally left unchanged to keep
-      this update scoped to the landing only.<br/>
-      No production, deploy, Vercel setting, or <code>main</code> was contacted
-      or changed.
+      Vercel preview is SSO-gated (HTTP 401 public). Captured from local
+      production server of the v4 commit:
+      <code>next build</code> → <code>next start -p 3140</code> →
+      <code>http://localhost:3140/</code> → <b class="ok">HTTP 200</b>
+      (markers: "finally visible", "One connected labour market", "Work lives
+      in pieces"). Playwright <code>--channel=chrome</code>, full-page.
+      <span class="warn">Note:</span> browser tab <code>&lt;title&gt;</code>
+      still carries the prior <code>site.ts</code> tagline — intentionally
+      left to keep scope to the landing only.
     </p>
   </div>
 
-  <h2>Contact sheet — click any image for full resolution</h2>
+  <h2>Contact sheet — click for full resolution</h2>
   <div class="grid">
     <figure>
       <a class="shot" href="desktop.png" target="_blank" rel="noopener">
-        <img src="desktop.png" alt="Living-market landing — desktop 1440px" />
-      </a>
-      <figcaption><b>Desktop</b> — 1440 × 900, full page</figcaption>
+        <img src="desktop.png" alt="v4 landing — desktop 1440px" /></a>
+      <figcaption><b>Desktop</b> — 1440 × 900</figcaption>
     </figure>
     <figure>
       <a class="shot" href="tablet.png" target="_blank" rel="noopener">
-        <img src="tablet.png" alt="Living-market landing — tablet 834px" />
-      </a>
-      <figcaption><b>Tablet</b> — 834 × 1112, full page</figcaption>
+        <img src="tablet.png" alt="v4 landing — tablet 834px" /></a>
+      <figcaption><b>Tablet</b> — 834 × 1112</figcaption>
     </figure>
     <figure>
       <a class="shot" href="mobile.png" target="_blank" rel="noopener">
-        <img src="mobile.png" alt="Living-market landing — mobile 390px" />
-      </a>
-      <figcaption><b>Mobile</b> — 390 × 844, full page</figcaption>
+        <img src="mobile.png" alt="v4 landing — mobile 390px" /></a>
+      <figcaption><b>Mobile</b> — 390 × 844</figcaption>
     </figure>
   </div>
 
-  <h2>What changed (v1 → v3) — what the owner should inspect</h2>
+  <h2>v3 → v4: what to inspect</h2>
   <div class="panel">
     <ul>
-      <li><b>Message restored:</b> from "find work / find workers" back to the
-        completeness idea — one profile carrying CV, work evidence, skills,
-        proof, availability, team, projects and conversations into one
-        connected market. Hero: <i>"The labour market, finally visible."</i></li>
-      <li><b>Living system feel:</b> the static text+card hero is replaced by a
-        connected system scene — the one profile card at the centre with the
-        connected layers (work evidence, team, project, communication, company,
-        HR &amp; customers, action centre, opportunities) and the
-        worker → profile → … → market path; restrained pulse / glow /
-        shimmer / progress motion (reduced-motion safe).</li>
-      <li><b>Completeness/integrity sections:</b> "the market is disconnected →
-        the connected layer" and "one profile, many uses" make the labour-
-        market integrity idea explicit; "workers, companies and the market on
-        one layer" shows both sides as one connected layer, not a card grid.</li>
-      <li><b>Mobile:</b> compact header, small top CTA, stacked full-width but
-        not bulky buttons, staged scene with fewer modules, no horizontal
-        overflow, controlled vertical rhythm — intentionally designed, not a
-        squeezed desktop.</li>
-      <li><b>Buttons:</b> refined proportions (less chunky), new compact
-        variant for the header, focus ring, clear primary vs lighter secondary.</li>
-      <li><b>Honesty:</b> example surfaces tagged <b>"Example" / "Product
-        preview"</b>; the only number is the example profile's own readiness
-        signal; no fake counts, customers, AI or matching claims.</li>
+      <li><b>Density slashed:</b> removed the 7-item disconnect list, 6+9 tile
+        grids, 5+5 bullet lists, 9 facet chips and the 8-node path. Each
+        section is now a short headline + one line. Sells the feeling first.</li>
+      <li><b>Dominant cinematic hero:</b> centered reveal with a glowing focal
+        profile core (slow conic halo, breathing orbit, elegant light sweep)
+        and four minimal connected signals — a scene, not headline+text+UI.</li>
+      <li><b>Living-market feel:</b> ambient network glow, pulsing signals,
+        shimmer and easing motion (restrained, reduced-motion safe) make it
+        feel alive and operational, not a static SaaS page.</li>
+      <li><b>Five lean sections:</b> hero · work-in-pieces → connected ·
+        one profile/many uses · worker·market·company one layer · CTA close.</li>
+      <li><b>Header/buttons:</b> slim sticky blurred header, compact primary,
+        secondary actions are now light text links — no bulky top CTA block.</li>
+      <li><b>Mobile:</b> compact header, one strong full-width primary, the
+        focal scene with a single 3-signal row (no module grid), no horizontal
+        overflow — premium, intentional, not a squeezed desktop.</li>
+      <li><b>Honesty:</b> example surfaces tagged "Example/Product preview";
+        the only number is the example profile's own readiness; no fake
+        counts, customers, AI or matching claims.</li>
     </ul>
   </div>
 
   <p class="foot">
     Review-only. Landing + landing components + token/CSS only. No new routes,
     no auth/admin/app-flow change, no backend, no payment, no fake claims, no
-    duplicate profile/avatar/player-card/communication concept. No merge, no
-    deploy, no main push, no Vercel settings change. Guards green
-    (typecheck / lint / check / build) at commit
-    <code>dffe9b6</code>.
+    duplicate concepts. No merge · no deploy · no main push · no Vercel
+    settings change. Guards green (typecheck / lint / check / build) at
+    commit <code>a2b5747</code>.
   </p>
 
 </div>
