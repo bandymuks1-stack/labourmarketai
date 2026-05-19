@@ -1,0 +1,18 @@
+{
+  "marketing": {
+    "hero": {
+      "eyebrow": "Darbo rinkos sistema",
+      "headline": "Gyva darbo rinkos",
+      "headlineAccent": "valdymo sistema.",
+      "subcopy": "Vienas profilis. Darbuotojai, įmonės ir agentūros — gyva paklausa, atitikimas realiu laiku, viena sujungta rinka.",
+      "ctaPrimary": "Išbandyti platformą",
+      "ctaSecondary": "Kaip tai veikia",
+      "m0Notice": "M0 pagrindas — tik karkasas. Prisijungimas, atitikimas ir realūs duomenys — vėlesniuose etapuose."
+    }
+  },
+  "common": {
+    "localeSwitch": "Kalba",
+    "notFound": "Tokio puslapio nėra",
+    "backHome": "Grįžti į pradžią"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "marketing": {
+    "hero": {
+      "eyebrow": "The labour market OS",
+      "headline": "The labour market,",
+      "headlineAccent": "alive.",
+      "subcopy": "One profile. Workers, companies and agencies — live demand, real-time matching, one connected market.",
+      "ctaPrimary": "Explore the platform",
+      "ctaSecondary": "Watch how it works",
+      "m0Notice": "M0 foundation — scaffold only. Auth, matching and live data arrive in later milestones."
+    }
+  },
+  "common": {
+    "localeSwitch": "Language",
+    "notFound": "This page does not exist",
+    "backHome": "Back to home"
+  }
+}
