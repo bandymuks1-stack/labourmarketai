@@ -16,6 +16,16 @@
     "placeholders:list": "pnpm -C apps/web placeholders:list",
     "placeholders:pending": "pnpm -C apps/web placeholders:pending",
     "placeholders:check": "pnpm -C apps/web placeholders:check",
-    "placeholders:promote": "pnpm -C apps/web placeholders:promote"
+    "placeholders:promote": "pnpm -C apps/web placeholders:promote",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --project-id gorgitwvdzxbnaxhrsrw --schema public > apps/web/lib/supabase/types.ts",
+    "db:fixtures:local": "pnpm -C apps/web db:fixtures:local",
+    "admin:promote": "pnpm -C apps/web admin:promote"
+  },
+  "devDependencies": {
+    "supabase": "^2.100.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["supabase"]
   }
 }

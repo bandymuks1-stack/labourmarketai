@@ -149,6 +149,30 @@ export const placeholders: readonly Placeholder[] = [
     consentRequired: true,
     notes: "consented:false",
   },
+  ...(
+    [
+      ["free", "Nemokamas", "Free"],
+      ["business", "Verslo", "Business"],
+      ["agency", "Agentūros", "Agency"],
+      ["enterprise", "Įmonių", "Enterprise"],
+    ] as const
+  ).map(
+    ([slug, lt, en]): Placeholder => ({
+      id: `pricing.plan.${slug}`,
+      type: "stat",
+      value: { lt: `${lt}: kaina nustatoma`, en: `${en}: pricing TBD` },
+      description: `Pricing card — ${en} plan monthly price.`,
+      replacementSource:
+        "Founder-set monthly price in `plans.price_eur_monthly` " +
+        "(slug='" +
+        slug +
+        "'); promote here once pricing is finalized.",
+      status: "placeholder",
+      addedIn: "M0",
+      consentRequired: false,
+      notes: "Plan tier row is real config; only the price is unset.",
+    }),
+  ),
   ...Array.from({ length: 3 }, (_, i): Placeholder => {
     const n = i + 1;
     const samples: Record<number, { lt: string; en: string }> = {

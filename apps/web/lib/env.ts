@@ -47,3 +47,41 @@ export function requireServerSecrets() {
     );
   }
 }
+
+/**
+ * Public (URL + anon key) Supabase config for the browser/RSC clients.
+ * Validated lazily at client-construction time (not module load) so build
+ * and SSG succeed without secrets — Vercel injects them at deploy.
+ */
+export function requireSupabaseClientEnv(): {
+  url: string;
+  anonKey: string;
+} {
+  if (!env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_ANON_KEY. Set it in Vercel env / " +
+        ".env.local (Supabase Dashboard → Settings → API). See .env.example.",
+    );
+  }
+  return {
+    url: env.NEXT_PUBLIC_SUPABASE_URL,
+    anonKey: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  };
+}
+
+/** Server-only: validated service-role config for the admin client. */
+export function requireSupabaseServiceEnv(): {
+  url: string;
+  serviceRoleKey: string;
+} {
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      "Missing SUPABASE_SERVICE_ROLE_KEY. Set it in Vercel env / " +
+        ".env.local (Supabase Dashboard → Settings → API). NEVER commit it.",
+    );
+  }
+  return {
+    url: env.NEXT_PUBLIC_SUPABASE_URL,
+    serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY,
+  };
+}

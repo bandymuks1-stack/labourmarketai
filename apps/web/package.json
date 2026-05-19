@@ -12,13 +12,18 @@
     "placeholders:list": "tsx scripts/placeholders.ts list",
     "placeholders:pending": "tsx scripts/placeholders.ts pending",
     "placeholders:check": "tsx scripts/placeholders.ts check",
-    "placeholders:promote": "tsx scripts/placeholders.ts promote"
+    "placeholders:promote": "tsx scripts/placeholders.ts promote",
+    "db:fixtures:local": "tsx scripts/db-fixtures-local.ts",
+    "admin:promote": "tsx scripts/admin-promote.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.106.0",
     "next": "15.5.18",
     "next-intl": "^4.12.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "server-only": "^0.0.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
