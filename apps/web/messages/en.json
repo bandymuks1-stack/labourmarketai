@@ -33,6 +33,26 @@
       "expansion_candidates": "Expansion candidates"
     }
   },
+  "playercards": {
+    "eyebrow": "Workers as living profiles",
+    "headline": { "line1": "Every worker, ranked", "line2": "and ready." },
+    "subcopy": "Profile strength comes from real completed work, verified skills, and on-site behavior. Today's preview shows sample profiles.",
+    "stat": {
+      "SKL": "Skill",
+      "REL": "Reliability",
+      "SPD": "Speed",
+      "SAF": "Safety",
+      "ADP": "Adaptability",
+      "TRS": "Trust"
+    },
+    "tier": { "gold": "Gold", "silver": "Silver", "bronze": "Bronze" },
+    "status": {
+      "live": "Live",
+      "available": "Available",
+      "drafted": "Drafted",
+      "busy": "Busy"
+    }
+  },
   "nav": {
     "platform": "Platform",
     "solutions": "Solutions",

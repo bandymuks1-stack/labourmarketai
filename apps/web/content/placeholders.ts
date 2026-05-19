@@ -58,6 +58,23 @@ export type GeoPayload =
     }
   | { kind: "company"; country: string; coord: LngLat; name: string };
 
+/** Player-card (FUT-style worker profile) payload (5b.3). */
+export type PlayerStatKey = "SKL" | "REL" | "SPD" | "SAF" | "ADP" | "TRS";
+export type PlayerTier = "gold" | "silver" | "bronze";
+export type PlayerStatus = "LIVE" | "AVAILABLE" | "DRAFTED" | "BUSY";
+export type PlayerCardData = {
+  name: { lt: string; en: string };
+  role: { lt: string; en: string };
+  country: string;
+  flag: string;
+  ovr: number;
+  tier: PlayerTier;
+  status: PlayerStatus;
+  photo: { src: string; alt: { lt: string; en: string } };
+  stats: Record<PlayerStatKey, number>;
+  skills: string[];
+};
+
 export type Placeholder = {
   id: string;
   type: PlaceholderType;
@@ -80,6 +97,8 @@ export type Placeholder = {
   icon?: PlaceholderIcon;
   /** Structured map payload (5b.2). */
   geo?: GeoPayload;
+  /** Player-card payload (5b.3). */
+  card?: PlayerCardData;
 };
 
 const SQL = (q: string) => `SQL: ${q}`;
@@ -260,11 +279,140 @@ export const placeholders: readonly Placeholder[] = [
     },
     description: "Featured worker on the landing hero profile card.",
     replacementSource:
-      "Real consented worker profile from the `workers` table (featured-profile consent on file).",
+      "Real consented worker profile from the `workers` table joined with `worker_skills`, plus the published OVR formula.",
     status: "placeholder",
     addedIn: "M0",
     consentRequired: true,
     notes: "consented:false — same persona as reference imagery.",
+    card: {
+      name: { lt: "Tomas Jankauskas", en: "Tomas Jankauskas" },
+      role: { lt: "Statybos vadovas", en: "Site Supervisor" },
+      country: "NL",
+      flag: "🇳🇱",
+      ovr: 90,
+      tier: "gold",
+      status: "LIVE",
+      photo: {
+        src: "/placeholders/worker-portrait.svg",
+        alt: {
+          lt: "Darbuotojo portretas (vietos rezervas)",
+          en: "Worker portrait (placeholder)",
+        },
+      },
+      stats: { SKL: 92, REL: 93, SPD: 86, SAF: 95, ADP: 85, TRS: 91 },
+      skills: ["Site supervision", "Steel fixing", "Safety+"],
+    },
+  },
+  {
+    id: "workers.featured.1",
+    type: "person",
+    value: {
+      lt: "Lukas van der Berg — Armatūrininkų brigadininkas",
+      en: "Lukas van der Berg — Steel-fixing Foreman",
+    },
+    description: "PlayerCard showcase — gold-tier worker profile (NL).",
+    replacementSource:
+      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published OVR formula.",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: true,
+    notes: "consented:false — sample persona; photo is a placeholder.",
+    card: {
+      name: { lt: "Lukas van der Berg", en: "Lukas van der Berg" },
+      role: { lt: "Armatūrininkų brigadininkas", en: "Steel-fixing Foreman" },
+      country: "NL",
+      flag: "🇳🇱",
+      ovr: 92,
+      tier: "gold",
+      status: "AVAILABLE",
+      photo: {
+        src: "/placeholders/worker-portrait.svg",
+        alt: {
+          lt: "Darbuotojo portretas (vietos rezervas)",
+          en: "Worker portrait (placeholder)",
+        },
+      },
+      stats: { SKL: 95, REL: 94, SPD: 88, SAF: 96, ADP: 87, TRS: 93 },
+      skills: ["Steel fixing", "Formwork", "Safety+"],
+    },
+  },
+  {
+    id: "workers.featured.2",
+    type: "person",
+    value: {
+      lt: "Stefan Bauer — Statybvietės vadovas",
+      en: "Stefan Bauer — Site Manager",
+    },
+    description: "PlayerCard showcase — silver-tier worker profile (DE).",
+    replacementSource:
+      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published OVR formula.",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: true,
+    notes: "consented:false — sample persona; photo is a placeholder.",
+    card: {
+      name: { lt: "Stefan Bauer", en: "Stefan Bauer" },
+      role: { lt: "Statybvietės vadovas", en: "Site Manager" },
+      country: "DE",
+      flag: "🇩🇪",
+      ovr: 87,
+      tier: "silver",
+      status: "LIVE",
+      photo: {
+        src: "/placeholders/worker-portrait.svg",
+        alt: {
+          lt: "Darbuotojo portretas (vietos rezervas)",
+          en: "Worker portrait (placeholder)",
+        },
+      },
+      stats: { SKL: 84, REL: 95, SPD: 80, SAF: 90, ADP: 83, TRS: 94 },
+      skills: ["Site management", "Planning", "Safety+"],
+    },
+  },
+  {
+    id: "workers.featured.3",
+    type: "person",
+    value: {
+      lt: "Mantas Petrauskas — Elektrikas",
+      en: "Mantas Petrauskas — Electrician",
+    },
+    description: "PlayerCard showcase — bronze-tier worker profile (LT).",
+    replacementSource:
+      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published OVR formula.",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: true,
+    notes: "consented:false — sample persona; photo is a placeholder.",
+    card: {
+      name: { lt: "Mantas Petrauskas", en: "Mantas Petrauskas" },
+      role: { lt: "Elektrikas", en: "Electrician" },
+      country: "LT",
+      flag: "🇱🇹",
+      ovr: 79,
+      tier: "bronze",
+      status: "AVAILABLE",
+      photo: {
+        src: "/placeholders/worker-portrait.svg",
+        alt: {
+          lt: "Darbuotojo portretas (vietos rezervas)",
+          en: "Worker portrait (placeholder)",
+        },
+      },
+      stats: { SKL: 80, REL: 78, SPD: 79, SAF: 81, ADP: 77, TRS: 80 },
+      skills: ["Electrical install", "Industrial electric", "Safety"],
+    },
+  },
+  {
+    id: "playercards.caption.dragToCompare",
+    type: "metric",
+    value: { lt: "← Tempk palyginimui", en: "← Drag to compare" },
+    description:
+      "PlayerCard showcase — decorative caption hinting at M2 comparison.",
+    replacementSource:
+      "Real side-by-side worker comparison UX (drag/select) ships in M2.",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: false,
   },
   {
     id: "hero.project.featured",
@@ -745,6 +893,13 @@ export function placeholderCycle(id: string, locale: string): string[] {
  *  Used by LiveMap to pull its marker sets. */
 export function placeholdersByPrefix(prefix: string): Placeholder[] {
   return placeholders.filter((p) => p.id.startsWith(prefix));
+}
+
+/** Player-card payload for a registered worker profile (5b.3). */
+export function getCard(id: string): PlayerCardData {
+  const c = getPlaceholder(id).card;
+  if (!c) throw new Error(`Placeholder "${id}" has no card payload.`);
+  return c;
 }
 
 /** Narrowed geo payloads of a given kind, in registry order. */

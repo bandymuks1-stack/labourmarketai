@@ -13,6 +13,7 @@ const preset = {
         brand: colors.brand,
         state: colors.state,
         text: colors.text,
+        tier: colors.tier,
       },
       borderRadius: { ...radii },
       boxShadow: {

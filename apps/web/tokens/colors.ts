@@ -26,4 +26,11 @@ export const colors = {
     secondary: "#9BA3B8",
     muted: "#5C6480",
   },
+  // Player-card rating tiers (5b.3). Brief-mandated values, tokenised so
+  // components use classes (fill-tier-gold …) — never raw hex.
+  tier: {
+    gold: "#FFC857",
+    silver: "#C6CDD8",
+    bronze: "#C7895A",
+  },
 } as const;

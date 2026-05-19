@@ -10,6 +10,7 @@ import { LiveMap } from "@/components/app/live-map";
 import { LiveTicker } from "@/components/app/live-ticker";
 import { MarketCounters } from "@/components/app/market-counters";
 import { MicroActivityFeed } from "@/components/app/micro-activity-feed";
+import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 
 // Deterministic sample series — governed as market.*.series placeholders
 // (the caption under each carries the visible PLACEHOLDER marker).
@@ -97,6 +98,9 @@ export default async function LandingPage({
       <div className="mt-10">
         <LiveTicker />
       </div>
+
+      {/* ── Player card showcase (5b.3) ──────────────────────────────── */}
+      <PlayerCardShowcase />
 
       {/* ── Second row ───────────────────────────────────────────────── */}
       <section className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">

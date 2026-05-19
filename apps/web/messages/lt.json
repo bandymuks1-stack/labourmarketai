@@ -33,6 +33,29 @@
       "expansion_candidates": "Plėtros kandidatės"
     }
   },
+  "playercards": {
+    "eyebrow": "Darbuotojai kaip gyvi profiliai",
+    "headline": {
+      "line1": "Kiekvienas darbuotojas, įvertintas",
+      "line2": "ir paruoštas."
+    },
+    "subcopy": "Profilio stiprumas kyla iš realiai atlikto darbo, patvirtintų įgūdžių ir elgesio objekte. Ši peržiūra rodo pavyzdinius profilius.",
+    "stat": {
+      "SKL": "Įgūdis",
+      "REL": "Patikimumas",
+      "SPD": "Greitis",
+      "SAF": "Sauga",
+      "ADP": "Prisitaikymas",
+      "TRS": "Pasitikėjimas"
+    },
+    "tier": { "gold": "Auksas", "silver": "Sidabras", "bronze": "Bronza" },
+    "status": {
+      "live": "Gyva",
+      "available": "Laisvas",
+      "drafted": "Atrinktas",
+      "busy": "Užimtas"
+    }
+  },
   "nav": {
     "platform": "Platforma",
     "solutions": "Sprendimai",
