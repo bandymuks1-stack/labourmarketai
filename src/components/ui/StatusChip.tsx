@@ -6,7 +6,14 @@
  * reintroduced and there is no second chip system. Colour comes from the
  * token layer (`globals.css`), never hardcoded here.
  */
-export type ChipTone = "neutral" | "positive" | "info" | "warn" | "muted";
+export type ChipTone =
+  | "neutral"
+  | "positive"
+  | "info"
+  | "warn"
+  | "muted"
+  | "gold"
+  | "silver";
 
 const TONE: Record<ChipTone, string> = {
   neutral: "text-fg-dim",
@@ -14,6 +21,8 @@ const TONE: Record<ChipTone, string> = {
   info: "text-cyan",
   warn: "text-amber",
   muted: "text-fg-mute",
+  gold: "text-signal-gold",
+  silver: "text-signal-silver",
 };
 
 const DOT: Record<ChipTone, string> = {
@@ -22,6 +31,8 @@ const DOT: Record<ChipTone, string> = {
   info: "bg-cyan",
   warn: "bg-amber",
   muted: "bg-fg-mute",
+  gold: "bg-signal-gold",
+  silver: "bg-signal-silver",
 };
 
 export function StatusChip({

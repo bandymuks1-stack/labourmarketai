@@ -1,45 +1,48 @@
 /**
- * LandingHero — the opening scene.
+ * LandingHero — the opening scene of the work-market arena.
  *
- * Human, work-market framing: a worker getting discovered by companies that
- * are searching right now. It reuses the real worker card (no bespoke card
- * art, no duplicate logic) but wraps it in a scouting scene so it reads as a
- * person and an opportunity, not a UI object.
+ * Premium scouting / draft framing: a real work profile staged like a scouted
+ * candidate card. It reuses the shared ProfilePlayerCard and StatusChip
+ * components — no bespoke card art, no duplicate logic. All signals shown are
+ * real attributes of the example profile, never invented market numbers.
  */
 import { ProfilePlayerCard } from "@/components/profile/ProfilePlayerCard";
 import { CtaButton } from "@/components/ui/CtaButton";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { StatusChip } from "@/components/ui/StatusChip";
 import { landingCtas } from "@/config/site";
+import { profileToPlayerCard } from "@/lib/player-card";
 import { sampleProfiles } from "@/lib/sample-data";
 
-const SCOUTS = ["NF", "PL", "AX", "RV"];
-
 const VALUE_POINTS = [
-  "Show your real skills",
-  "Get discovered by companies",
-  "Find work that actually fits",
+  "Build one work profile",
+  "Get scouted by companies",
+  "See the fit, act fast",
 ];
 
 export function LandingHero() {
+  const candidate = sampleProfiles[0];
+  const card = profileToPlayerCard(candidate);
+  const tierLabel = card.tier[0].toUpperCase() + card.tier.slice(1);
+
   return (
     <section className="relative px-6 pb-16 pt-10">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-        {/* Left — the human promise */}
+      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+        {/* Left — what it is, why it matters */}
         <div className="rise">
-          <Eyebrow>For workers and companies</Eyebrow>
+          <Eyebrow>The work-market arena</Eyebrow>
 
           <h1 className="display mt-5 text-5xl sm:text-6xl xl:text-[4.25rem]">
-            Show what you can do.
+            Real skills.
             <br />
-            <span className="grad-text">Get found by companies</span> hiring
-            now.
+            <span className="grad-text">Scouted</span> like talent.
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-fg-dim">
-            Create your work profile in minutes, put your real skills front and
-            center, and become visible to companies actively searching. Hiring?
-            Find suitable workers, see who fits, and contact the right people
-            faster.
+            labourmarket.ai turns your work profile into a card scouts read at
+            a glance — your skills, your availability, your fit. Companies and
+            agencies scout, compare and reach the right people. Workers get
+            found for what they can actually do.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -50,7 +53,7 @@ export function LandingHero() {
             ))}
           </div>
 
-          <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+          <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2">
             {VALUE_POINTS.map((point) => (
               <li
                 key={point}
@@ -65,65 +68,51 @@ export function LandingHero() {
           </ul>
         </div>
 
-        {/* Right — the scouting scene */}
+        {/* Right — the scout board */}
         <div className="relative">
-          <div
-            aria-hidden
-            className="absolute -inset-12 -z-10 rounded-full bg-cyan/10 blur-3xl"
-          />
+          <div aria-hidden className="spotlight" />
 
-          {/* live search, in the companies' words */}
+          {/* an example scout search, in a company's words */}
           <div
             aria-hidden
             className="mb-5 flex items-center gap-3 rounded-full border border-line/60 bg-fg/[0.03] px-4 py-2.5 text-sm"
           >
             <span className="text-fg-mute">⌕</span>
             <span className="text-fg-dim">
-              welders · Rotterdam · available now
+              welders · Rotterdam · available
             </span>
-            <span className="ml-auto flex items-center gap-1.5 text-[0.7rem] uppercase tracking-wider text-cyan">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald" />
-              searching
+            <span className="ml-auto text-[0.7rem] uppercase tracking-wider text-fg-mute">
+              scout search
             </span>
           </div>
 
-          <div className="relative mx-auto w-full max-w-sm rise" style={{ animationDelay: "0.08s" }}>
-            {/* floating, human signals around the person */}
+          <div className="scout-frame mx-auto w-full max-w-sm p-4 sm:p-5">
+            <div className="tier-bar mb-4" />
             <div
-              aria-hidden
-              className="absolute -right-3 -top-3 z-30 rounded-full border border-cyan/40 bg-ink-2/90 px-3 py-1.5 text-xs font-medium text-fg shadow-[0_10px_30px_-12px_rgba(75,227,255,0.6)]"
+              className="rise rotate-[-2deg]"
+              style={{ animationDelay: "0.08s" }}
             >
-              👁 Viewed by 4 companies
-            </div>
-            <div
-              aria-hidden
-              className="absolute -bottom-3 -left-3 z-30 rounded-full border border-emerald/30 bg-ink-2/90 px-3 py-1.5 text-xs font-medium text-fg"
-            >
-              Open to work · replies fast
+              <ProfilePlayerCard profile={candidate} />
             </div>
 
-            <div className="rotate-[-2deg]">
-              <ProfilePlayerCard profile={sampleProfiles[0]} />
+            <div className="signal-rail mt-5">
+              <StatusChip tone="gold" dot>
+                {tierLabel} tier
+              </StatusChip>
+              <StatusChip tone="positive" dot>
+                Open to work
+              </StatusChip>
+              <StatusChip tone="info" dot>
+                {candidate.experienceYears} yrs experience
+              </StatusChip>
+              <StatusChip tone="silver" dot>
+                {candidate.verified ? "Verified" : "Unverified"}
+              </StatusChip>
             </div>
-          </div>
 
-          {/* who is looking, right now */}
-          <div className="mt-7 flex items-center justify-center gap-3">
-            <div className="flex -space-x-2">
-              {SCOUTS.map((s, i) => (
-                <span
-                  key={s}
-                  aria-hidden
-                  className="grid h-8 w-8 place-items-center rounded-full border border-line bg-ink-2 text-[0.65rem] font-semibold text-fg-dim"
-                  style={{ zIndex: SCOUTS.length - i }}
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
-            <span className="text-xs text-fg-mute">
-              Companies scouting talent right now
-            </span>
+            <p className="mt-4 text-center text-xs text-fg-mute">
+              One work profile, read like a scouted card.
+            </p>
           </div>
         </div>
       </div>

@@ -1,50 +1,61 @@
 import Link from "next/link";
+import { CompanyPlayerCard } from "@/components/company/CompanyPlayerCard";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { MatchResult } from "@/components/matches/MatchResult";
 import { ProfilePlayerCard } from "@/components/profile/ProfilePlayerCard";
 import { CtaButton } from "@/components/ui/CtaButton";
+import { StatusChip } from "@/components/ui/StatusChip";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { scoreMatch } from "@/lib/matching";
-import { sampleHiringNeeds, sampleProfiles } from "@/lib/sample-data";
+import {
+  sampleCompanies,
+  sampleHiringNeeds,
+  sampleProfiles,
+} from "@/lib/sample-data";
 
-const JOURNEY = [
+const WHAT = [
   {
     n: "01",
-    t: "Create your work profile",
-    d: "Your skills, experience and availability — honest and quick to set up.",
+    t: "One work profile",
+    d: "Your skills, experience and availability become a card a scout can read in seconds.",
   },
   {
     n: "02",
-    t: "Become visible to companies",
-    d: "Companies find you while they search for the people they need.",
+    t: "Real scouting",
+    d: "Companies and agencies search the market, shortlist and draft — like a club building a squad.",
   },
   {
     n: "03",
-    t: "Compare fit clearly",
-    d: "See how strongly you match each role, side by side, at a glance.",
+    t: "Clear fit",
+    d: "See how strongly a person matches a role, in plain words. No guessing, no buzzwords.",
   },
-  {
-    n: "04",
-    t: "Contact the right people faster",
-    d: "Start the conversation that actually leads to work.",
-  },
+];
+
+const SIGNALS = [
+  { tone: "gold" as const, label: "Tier", meaning: "Profile strength at a glance" },
+  { tone: "positive" as const, label: "Open", meaning: "Available and looking" },
+  { tone: "info" as const, label: "Strong fit", meaning: "High match on a role" },
+  { tone: "silver" as const, label: "Verified", meaning: "Identity confirmed" },
+  { tone: "warn" as const, label: "Partial fit", meaning: "Some gaps to close" },
 ];
 
 const WORKER_POINTS = [
-  "Create your work profile",
-  "Show your skills",
-  "Become visible to companies",
-  "Find work opportunities that fit",
+  "Build one work profile",
+  "Show your real skills",
+  "Get scouted by companies",
+  "Find work that actually fits",
 ];
 
 const COMPANY_POINTS = [
-  "Find suitable workers",
+  "Search the market like a scout",
   "Compare fit clearly",
-  "Contact the right people faster",
+  "Reach the right people first",
 ];
 
 export default function Home() {
-  const match = scoreMatch(sampleHiringNeeds[0], sampleProfiles[0]);
+  const candidate = sampleProfiles[0];
+  const company = sampleCompanies[0];
+  const match = scoreMatch(sampleHiringNeeds[0], candidate);
 
   return (
     <div className="arena flex flex-1 flex-col">
@@ -65,72 +76,122 @@ export default function Home() {
 
       <LandingHero />
 
-      {/* Journey — profile → visibility → match → contact */}
-      <section className="mx-auto w-full max-w-6xl px-6 py-14">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="eyebrow">How it works</p>
+      {/* WHAT IT IS */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-16">
+        <div className="flex flex-wrap items-end justify-between gap-5">
+          <div className="max-w-xl">
+            <p className="eyebrow">What this is</p>
             <h2 className="display mt-3 text-3xl sm:text-4xl">
-              From your profile to the{" "}
-              <span className="grad-text">right conversation</span>
+              Not generic HR software. A{" "}
+              <span className="grad-text">scouting floor</span> for real work.
             </h2>
           </div>
-          <p className="max-w-sm text-sm text-fg-dim">
-            Four clear steps. No noise, no guessing — just the path from
-            showing your skills to getting hired.
+          <p className="max-w-sm text-sm leading-relaxed text-fg-dim">
+            labourmarket.ai works like a draft room: people are scouted for
+            what they can do, and companies build the team they need.
           </p>
         </div>
 
-        <div className="mt-9 h-px w-full bg-line/70" />
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {JOURNEY.map((step, i) => (
-            <div
-              key={step.n}
-              className="glass glass-hover relative p-6"
-              style={{ animationDelay: `${i * 0.05}s` }}
-            >
-              <span className="text-3xl font-bold grad-text">{step.n}</span>
-              {i < JOURNEY.length - 1 ? (
-                <span
-                  aria-hidden
-                  className="absolute right-5 top-7 hidden text-fg-mute lg:block"
-                >
-                  →
+        <div className="scout-frame mt-9 overflow-hidden">
+          <div className="tier-bar" />
+          <div className="grid gap-px sm:grid-cols-3">
+            {WHAT.map((item) => (
+              <div key={item.n} className="bg-arena/40 p-7">
+                <span className="text-3xl font-bold grad-text">
+                  {item.n}
                 </span>
-              ) : null}
-              <h3 className="mt-4 text-lg font-semibold">{step.t}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-fg-dim">
-                {step.d}
-              </p>
-            </div>
-          ))}
+                <h3 className="mt-4 text-lg font-semibold">{item.t}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-fg-dim">
+                  {item.d}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Built for both sides */}
-      <section className="mx-auto w-full max-w-6xl px-6 py-14">
+      {/* WHY IT MATTERS / DOES IT FIT */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-16">
+        <div className="max-w-2xl">
+          <p className="eyebrow">How a match happens</p>
+          <h2 className="display mt-3 text-3xl sm:text-4xl">
+            From a profile to the{" "}
+            <span className="grad-text">right call.</span>
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-fg-dim">
+            See who someone is, why they stand out, whether they fit — then
+            make the call. The same card carries the whole decision.
+          </p>
+        </div>
+
+        <div className="mt-10 grid items-center gap-5 lg:grid-cols-[1fr_auto_1fr]">
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="eyebrow">Who they are</span>
+              <StatusChip tone="muted">Example profile</StatusChip>
+            </div>
+            <ProfilePlayerCard profile={candidate} />
+          </div>
+
+          <span
+            aria-hidden
+            className="mx-auto hidden text-2xl text-fg-mute lg:block"
+          >
+            →
+          </span>
+
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="eyebrow">Does it fit</span>
+              <StatusChip tone="info" dot>
+                Plain-language fit
+              </StatusChip>
+            </div>
+            <MatchResult profile={candidate} match={match} />
+          </div>
+        </div>
+
+        <div className="scout-frame mt-8 p-6">
+          <p className="text-sm font-semibold">What the signals mean</p>
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
+            {SIGNALS.map((s) => (
+              <div key={s.label} className="flex items-center gap-2.5">
+                <StatusChip tone={s.tone} dot>
+                  {s.label}
+                </StatusChip>
+                <span className="text-xs text-fg-mute">{s.meaning}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TWO SIDES */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-16">
         <div className="text-center">
-          <p className="eyebrow">For workers and companies</p>
+          <p className="eyebrow">Both sides of the arena</p>
           <h2 className="display mx-auto mt-3 max-w-2xl text-3xl sm:text-4xl">
-            Built for both sides of the{" "}
-            <span className="grad-text">work market</span>
+            Workers get <span className="grad-text">scouted.</span> Companies
+            build squads.
           </h2>
         </div>
 
         <div className="mt-12 grid items-stretch gap-6 lg:grid-cols-2">
-          {/* Workers */}
           <div className="glass flex flex-col gap-7 p-7 sm:flex-row">
             <div className="w-full max-w-[18rem] shrink-0">
-              <p className="mb-3 text-[0.7rem] uppercase tracking-[0.18em] text-fg-mute">
-                How a worker shows up to companies
-              </p>
-              <ProfilePlayerCard profile={sampleProfiles[0]} />
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-[0.7rem] uppercase tracking-[0.18em] text-fg-mute">
+                  The worker
+                </span>
+                <StatusChip tone="muted">Example</StatusChip>
+              </div>
+              <ProfilePlayerCard profile={candidate} />
             </div>
             <div className="flex flex-col">
               <h3 className="text-xl font-semibold">If you do the work</h3>
               <p className="mt-2 text-sm leading-relaxed text-fg-dim">
-                Put your real skills in front of companies that are hiring —
-                and let them come to you.
+                One profile that works for you while you work — read like a
+                scouted card, not a CV lost in a pile.
               </p>
               <ul className="mt-5 space-y-2.5">
                 {WORKER_POINTS.map((p) => (
@@ -138,7 +199,7 @@ export default function Home() {
                     key={p}
                     className="flex items-center gap-2.5 text-sm text-fg"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-cyan" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-signal-green" />
                     {p}
                   </li>
                 ))}
@@ -151,19 +212,21 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Companies */}
           <div className="glass flex flex-col gap-7 p-7 sm:flex-row">
             <div className="w-full max-w-[18rem] shrink-0">
-              <p className="mb-3 text-[0.7rem] uppercase tracking-[0.18em] text-fg-mute">
-                How you compare who fits
-              </p>
-              <MatchResult profile={sampleProfiles[0]} match={match} />
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-[0.7rem] uppercase tracking-[0.18em] text-fg-mute">
+                  The scout
+                </span>
+                <StatusChip tone="muted">Example</StatusChip>
+              </div>
+              <CompanyPlayerCard company={company} />
             </div>
             <div className="flex flex-col">
-              <h3 className="text-xl font-semibold">If you are hiring</h3>
+              <h3 className="text-xl font-semibold">If you scout and hire</h3>
               <p className="mt-2 text-sm leading-relaxed text-fg-dim">
-                Search for the people you need, see how well each one fits, and
-                reach the right ones first.
+                Work like a club building a squad: search the market, read the
+                fit, and reach the right people first.
               </p>
               <ul className="mt-5 space-y-2.5">
                 {COMPANY_POINTS.map((p) => (
@@ -171,7 +234,7 @@ export default function Home() {
                     key={p}
                     className="flex items-center gap-2.5 text-sm text-fg"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-violet" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-signal-blue" />
                     {p}
                   </li>
                 ))}
@@ -186,16 +249,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Emotional close */}
-      <section className="mx-auto w-full max-w-6xl px-6 py-14">
-        <div className="glass relative overflow-hidden p-10 text-center sm:p-14">
-          <div aria-hidden className="grad-soft absolute inset-0 -z-10" />
+      {/* WHAT TO DO NEXT */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-16">
+        <div className="scout-frame relative overflow-hidden p-10 text-center sm:p-14">
+          <div aria-hidden className="spotlight" />
           <h2 className="display mx-auto max-w-3xl text-4xl sm:text-5xl">
-            Your next job — or your next{" "}
-            <span className="grad-text">great hire</span> — starts now.
+            Step into the <span className="grad-text">arena.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-fg-dim">
-            Show your skills, get discovered, and reach the right people
+            Build your work profile, get scouted, and reach the right people
             faster. It takes minutes to start.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
