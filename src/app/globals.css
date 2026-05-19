@@ -596,6 +596,48 @@ body {
   100% { background-position: -30% 0; }
 }
 
+/* command-center scene depth + connection joints */
+.scene-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    radial-gradient(
+      circle at center,
+      color-mix(in oklab, var(--color-fg) 7%, transparent) 1px,
+      transparent 1.6px
+    );
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(70% 70% at 60% 40%, #000, transparent 75%);
+  mask-image: radial-gradient(70% 70% at 60% 40%, #000, transparent 75%);
+  pointer-events: none;
+}
+
+.node {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--color-accent-draft) 55%, transparent);
+  background: color-mix(in oklab, var(--color-accent-draft) 16%, var(--color-ink-2));
+  box-shadow: 0 0 18px -4px color-mix(in oklab, var(--color-accent-draft) 70%, transparent);
+  color: var(--color-fg);
+  font-size: 0.7rem;
+}
+
+.connect {
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-accent-draft) 50%, transparent) 50%,
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 7s linear infinite;
+}
+
 .rise {
   animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -609,6 +651,7 @@ body {
   .arena::before,
   .netglow,
   .netline,
+  .connect,
   .live-dot,
   .halo,
   .orbit,

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CompanyPlayerCard } from "@/components/company/CompanyPlayerCard";
 import { LandingHero } from "@/components/landing/LandingHero";
+import { ModuleTile } from "@/components/landing/ModuleTile";
 import { MatchResult } from "@/components/matches/MatchResult";
 import { ProfilePlayerCard } from "@/components/profile/ProfilePlayerCard";
 import { CtaButton } from "@/components/ui/CtaButton";
@@ -13,11 +14,13 @@ import {
   sampleProfiles,
 } from "@/lib/sample-data";
 
+const FRAGMENTS = ["CV", "Work history", "Proof", "Skills", "Availability"];
+
 const USES = [
-  "A CV that stays current",
-  "A skill signal companies can read",
-  "Proof from real work",
-  "A fit surface for the right roles",
+  { glyph: "▤", label: "A current CV", sub: "Always up to date" },
+  { glyph: "⬢", label: "A skill signal", sub: "Strength companies can read" },
+  { glyph: "▰", label: "Real work proof", sub: "Journaled, not claimed" },
+  { glyph: "◆", label: "An opportunity surface", sub: "Roles that fit you" },
 ];
 
 export default function Home() {
@@ -46,7 +49,7 @@ export default function Home() {
 
       <LandingHero />
 
-      {/* WORK IN PIECES → CONNECTED */}
+      {/* BROKEN → CONNECTED */}
       <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">Why this matters</p>
@@ -56,31 +59,25 @@ export default function Home() {
           </h2>
         </div>
 
-        <div className="stage scout-frame relative mt-10 grid items-center gap-8 p-7 sm:p-10 lg:grid-cols-[1fr_auto_1fr]">
+        <div className="stage scene-grid scout-frame relative mt-10 grid items-center gap-8 p-7 sm:p-10 lg:grid-cols-[1fr_auto_1fr]">
           <div aria-hidden className="netglow" />
           <div className="flex flex-wrap justify-center gap-2 opacity-50 lg:justify-end">
-            {["CV", "Work history", "Proof", "Skills", "Availability"].map(
-              (frag) => (
-                <span
-                  key={frag}
-                  className="rounded-full border border-line/60 px-3 py-1.5 text-xs text-fg-mute"
-                >
-                  {frag}
-                </span>
-              ),
-            )}
+            {FRAGMENTS.map((f) => (
+              <span
+                key={f}
+                className="rounded-full border border-line/60 px-3 py-1.5 text-xs text-fg-mute"
+              >
+                {f}
+              </span>
+            ))}
           </div>
-
           <div
             aria-hidden
-            className="netline mx-auto h-px w-24 lg:h-16 lg:w-px lg:rotate-0"
+            className="connect mx-auto h-px w-24 lg:h-16 lg:w-px"
           />
-
           <div className="mx-auto flex items-center gap-3 rounded-full border border-cyan/40 bg-ink-2/80 px-5 py-3 lg:mx-0">
             <span aria-hidden className="live-dot blue" />
-            <span className="text-sm font-semibold">
-              One connected market
-            </span>
+            <span className="text-sm font-semibold">One connected market</span>
           </div>
         </div>
       </section>
@@ -93,7 +90,9 @@ export default function Home() {
               <span className="eyebrow">One profile</span>
               <StatusChip tone="muted">Example</StatusChip>
             </div>
-            <ProfilePlayerCard profile={candidate} />
+            <div className="core overflow-hidden rounded-[var(--radius-xl)]">
+              <ProfilePlayerCard profile={candidate} />
+            </div>
           </div>
           <div>
             <h2 className="display text-3xl sm:text-4xl">
@@ -104,25 +103,23 @@ export default function Home() {
               The same profile becomes what the market needs to trust you — no
               ten disconnected copies.
             </p>
-            <ul className="mt-7 space-y-3">
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
               {USES.map((u) => (
-                <li
-                  key={u}
-                  className="flex items-center gap-3 text-base text-fg"
-                >
-                  <span
-                    aria-hidden
-                    className="h-2 w-2 rounded-full bg-accent-draft"
-                  />
-                  {u}
-                </li>
+                <ModuleTile
+                  key={u.label}
+                  glyph={u.glyph}
+                  label={u.label}
+                  sub={u.sub}
+                  tone="info"
+                  live
+                />
               ))}
-            </ul>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* WORKER · MARKET · COMPANY — ONE LAYER */}
+      {/* WORKERS · COMPANIES · MARKET — ONE LAYER */}
       <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">One connected market</p>
@@ -132,7 +129,7 @@ export default function Home() {
           </h2>
         </div>
 
-        <div className="stage scout-frame relative mt-10 overflow-hidden p-5 sm:p-8">
+        <div className="stage scene-grid scout-frame relative mt-10 overflow-hidden p-5 sm:p-8">
           <div aria-hidden className="netglow" />
           <div className="grid gap-5 lg:grid-cols-3">
             <div>
