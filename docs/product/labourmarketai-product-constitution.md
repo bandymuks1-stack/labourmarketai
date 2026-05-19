@@ -30,16 +30,56 @@ labourmarketai is a work market where workers and companies meet directly.
 It is a product for people looking for work and people looking for workers.
 It is not a dashboard demo, not a template, and not an internal tool.
 
-## 2. Visual direction (locked)
+## 2. Visual direction (locked) — premium sports / draft / scouting
 
-- Premium, cinematic, dark. High contrast, strong type hierarchy, controlled
-  depth and glow. Draft / scouting energy — people and opportunities, not
-  technical UI objects.
-- It must feel human and emotional, closer to a high-end sports-draft or
-  scouting interface than a SaaS template.
+The visual language is built on top-tier sports, draft, scouting and premium-
+arena aesthetics. Every landing and in-app screen must read like a high-end
+scouting dashboard or draft board — never a generic SaaS template.
+
+**Aesthetic basis**
+
+- Dark premium foundation: deep navy / graphite / black tones.
+- Strong contrast and a confident type hierarchy.
+- Sport-energy accents used with restraint; electric / neon only as
+  highlights, never as the whole surface.
+- High-value player-card / candidate-card feel — each entity looks scouted,
+  rated and worth a decision.
 - Controlled density: no dead space, no empty hero, no filler blocks.
-- Motion-ready layout (entrance and hover states), reduced-motion respected.
-- A generic SaaS card-wall is not acceptable and is grounds to reject a PR.
+- Motion-ready (entrance and hover), reduced-motion respected.
+- Emotional and human, closer to a sports draft than a dashboard demo.
+- A generic SaaS card-wall is grounds to reject a PR.
+
+**Colour & signal direction**
+
+- Base: arena background and premium surfaces (dark navy / graphite / black).
+- Decision accents: a draft accent and a match accent, used sparingly to
+  signal energy and fit — not decoration.
+- Fit & status signals use a gold / silver / blue / green family: gold/silver
+  for tier and standout signal, green for strong/open/confirmed, blue for
+  active/available, amber for partial/caution, neutral for unrated.
+- All of the above resolve from the named token vocabulary in §7.1 — screens
+  never invent their own palette.
+
+**Information hierarchy (locked order)**
+
+Every entity-centric surface presents information in this order:
+
+1. **What it is** — the person, company or need, as the clear visual centre.
+2. **Why it matters** — headline signal: tier, rating, key strengths.
+3. **Does it fit** — fit / match read in plain language.
+4. **What to do next** — the primary action, unmistakable.
+
+Less important context (secondary metadata, history, fine print) lives in a
+second visual layer and never competes with the centre.
+
+**Interior screens as a scouting / draft board**
+
+- The person, company or need has one clear visual centre (the player /
+  candidate card).
+- Skills, statuses, fit, actions and context are arranged around that centre.
+- Secondary information is de-emphasised into the second layer.
+- The same standard as the landing applies inside the app — no bare,
+  "technical", dashboard-grid screens.
 
 ## 3. App-interior quality rules
 
@@ -111,6 +151,31 @@ Visual change must be cheap and safe:
   rewriting components.
 - Copy lives close to the surface and in plain strings so wording changes do
   not require structural changes.
+
+### 7.1 Named token vocabulary (single source)
+
+Defined once in `src/app/globals.css` (`@theme`). These names are the locked
+vocabulary for the §2 visual language; future work uses these, never raw hex
+and never a parallel token. They are aliases of the primitives — change a
+primitive once and the language follows.
+
+| Concept | Token | Use |
+| --- | --- | --- |
+| Arena background | `--color-arena` | App / page base |
+| Premium surface | `--color-surface-premium` | Panels, sections |
+| Player-card surface | `--color-surface-card` | Player / candidate card body |
+| Premium border | `--color-border-premium` | Hairline edges |
+| Draft accent | `--color-accent-draft` | Draft / discover energy |
+| Match accent | `--color-accent-match` | Match / fit energy |
+| Success fit | `--color-fit-success` | Strong / good fit |
+| Warning fit | `--color-fit-warning` | Partial / caution fit |
+| Neutral fit | `--color-fit-neutral` | Unrated / neutral fit |
+| Tier signals | `--color-signal-gold` / `-silver` / `-blue` / `-green` | Tier & status signals |
+| Glow | `--shadow-glow` | Focus / highlight glow |
+| Depth shadow | `--shadow-depth` | Deep premium-arena elevation |
+
+No duplicate token may be introduced. If a new concept appears, extend this
+vocabulary here and in `globals.css` in the same PR.
 
 ## 8. Re-orderable UI foundation
 

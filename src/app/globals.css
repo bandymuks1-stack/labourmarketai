@@ -34,6 +34,34 @@
   --shadow-cta: 0 18px 50px -22px rgba(75, 227, 255, 0.7);
   --shadow-glow: 0 0 0 1px rgba(123, 132, 196, 0.14),
     0 30px 80px -40px rgba(75, 227, 255, 0.35);
+  /* depth shadow — deep premium-arena elevation for raised surfaces */
+  --shadow-depth: 0 44px 100px -52px rgba(2, 3, 8, 0.92);
+
+  /* ---------------------------------------------------------------- *
+   *  Semantic visual language — premium sports / draft / scouting.
+   *  These are the named tokens future work must use. They are
+   *  aliases of the primitives above (no duplicate values): change a
+   *  primitive once and the whole visual language follows.
+   * ---------------------------------------------------------------- */
+
+  /* surfaces */
+  --color-arena: var(--color-ink); /* arena background base */
+  --color-surface-premium: var(--color-surface); /* premium surface */
+  --color-surface-card: var(--color-ink-2); /* player / candidate card */
+  --color-border-premium: rgba(123, 132, 196, 0.16); /* premium hairline */
+
+  /* decision accents */
+  --color-accent-draft: var(--color-cyan); /* draft / discover energy */
+  --color-accent-match: var(--color-violet); /* match / fit energy */
+
+  /* fit + status signals (gold / silver / blue / green family) */
+  --color-fit-success: var(--color-emerald); /* strong / good fit */
+  --color-fit-warning: var(--color-amber); /* partial / caution fit */
+  --color-fit-neutral: var(--color-fg-mute); /* unrated / neutral fit */
+  --color-signal-gold: var(--color-amber); /* elite / top signal */
+  --color-signal-silver: #c7cee0; /* high signal */
+  --color-signal-blue: var(--color-cyan); /* active / available */
+  --color-signal-green: var(--color-emerald); /* open / confirmed */
 }
 
 :root {

@@ -9,6 +9,18 @@ The single token source for all visual values is `src/app/globals.css`
 (`@theme` + root tokens). No component hardcodes its own palette, radius,
 shadow or spacing.
 
+**Visual standard (locked).** Every component follows the premium sports /
+draft / scouting visual language in the constitution §2 and uses only the
+named token vocabulary in §7.1 (`--color-arena`, `--color-surface-premium`,
+`--color-surface-card`, `--color-border-premium`, `--color-accent-draft`,
+`--color-accent-match`, `--color-fit-success` / `-warning` / `-neutral`,
+`--color-signal-gold` / `-silver` / `-blue` / `-green`, `--shadow-glow`,
+`--shadow-depth`). Entity-centric components (player/candidate/company/need
+cards and the surfaces that frame them) present information in the locked
+order — what it is → why it matters → does it fit → what to do next — with one
+clear visual centre and secondary context in a second layer. Bare,
+dashboard-grid "technical" screens are not acceptable.
+
 ---
 
 ## Feature components
