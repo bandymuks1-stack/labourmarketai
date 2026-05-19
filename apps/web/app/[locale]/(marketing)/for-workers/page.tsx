@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Placeholder } from "@/components/ui/Placeholder";
 import { BenefitCards } from "@/components/marketing/benefit-cards";
-import { CtaBand } from "@/components/marketing/cta-band";
 import { PageHero } from "@/components/marketing/page-hero";
+import { RoleEnrichment } from "@/components/marketing/role-enrichment";
+import { PlayerCard } from "@/components/app/player-card";
 
 export default async function ForWorkersPage({
   params,
@@ -25,16 +25,12 @@ export default async function ForWorkersPage({
         ctaLabelKey="openAlt"
       />
       <BenefitCards items={benefits} />
-      <section className="mx-auto max-w-container px-6 pb-12 sm:px-12">
-        <div className="grid aspect-[16/7] place-items-center card-border p-8 text-center">
-          <Placeholder id="screenshot.flow.worker" />
-        </div>
-      </section>
-      <CtaBand
-        title={`${t("title")} ${t("titleAccent")}`}
-        subtitle={t("subcopy")}
+      <RoleEnrichment
+        root="workers"
+        previewKey="profile"
+        preview={<PlayerCard id="workers.featured.1" />}
         ctaSource="workers_cta"
-        ctaLabelKey="openAlt"
+        ctaIntent="find_job"
       />
     </>
   );

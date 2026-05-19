@@ -56,6 +56,178 @@
       "busy": "Užimtas"
     }
   },
+  "shared": {
+    "faq": { "expand_aria": "Išskleisti atsakymą" },
+    "preview": {
+      "rankedMatches": "surikiuoti atitikimai",
+      "headcount": "Žmonių skaičius",
+      "intensity": { "HOT": "Karšta", "FILLING": "Pildosi", "OPEN": "Atvira" },
+      "poolSize": "Rezervo dydis",
+      "trades": "Pagal profesiją",
+      "status": {
+        "active": "Aktyvūs",
+        "pending": "Laukiantys",
+        "available": "Laisvi"
+      },
+      "more": "+{n} daugiau"
+    }
+  },
+  "workers": {
+    "profile": {
+      "eyebrow": "Jūsų profilis",
+      "headline": {
+        "line1": "Štai kaip atrodysite —",
+        "line2": "kortelėje, kuri kalba už jus."
+      },
+      "subcopy": "Jūsų kortelė kuriama iš realiai atlikto darbo ir patvirtintų įgūdžių, o ne pačių rašyto CV. OVR — vienas sąžiningas signalas, kuriuo darbdaviai gali pasitikėti.",
+      "bullets": [
+        "OVR — vienas 0–99 įvertinimas iš patvirtintų įgūdžių, patikimumo ir saugos.",
+        "Statų juostos — Įgūdis, Patikimumas, Greitis, Sauga, Prisitaikymas, Pasitikėjimas.",
+        "Patvirtinti įgūdžiai — patvirtinti darbdavių ir pažymėjimų, ne savadarbiai.",
+        "Būsenos ženklas — Laisvas, Gyva, Atrinktas ar Užimtas, visada aktualus."
+      ]
+    },
+    "journey": {
+      "eyebrow": "Jūsų kelionė",
+      "headline": "Kelionė: nuo registracijos iki samdymo",
+      "steps": [
+        { "title": "Užpildykit profilį (5 min)", "desc": "Nurodykite profesiją, patirtį ir prieinamumą." },
+        { "title": "Patvirtinkit įgūdžius", "desc": "Darbdaviai ir pažymėjimai patvirtina, ką mokate." },
+        { "title": "Gaukite tinkamus pasiūlymus", "desc": "Jus suranda darbai pagal profesiją, įkainį ir vietą." },
+        { "title": "Dirbkite ir gaukite vertinimą", "desc": "Atliktas darbas kelia jūsų OVR ir istoriją." }
+      ]
+    },
+    "features": {
+      "eyebrow": "Ką gaunate",
+      "headline": "Sukurta darbuotojui, ne tarpininkui",
+      "items": [
+        { "title": "OVR pagal realų darbą", "desc": "Įvertinimas atspindi atliktą darbą, ne pažadus." },
+        { "title": "Patvirtinti įgūdžiai", "desc": "Patvirtinti darbdavių ir pažymėjimų." },
+        { "title": "Tarpvalstybinės galimybės", "desc": "NL, DK, DE, SE, NO ir kitos." },
+        { "title": "Tiesioginis kontaktas su darbdaviu", "desc": "Be neskaidrių tarpininkų." },
+        { "title": "Paaiškinama atranka", "desc": "Matykite, kodėl darbas jums pasiūlytas." },
+        { "title": "Auganti istorija", "desc": "Kiekvienas darbas kuria perkeliamą istoriją." }
+      ]
+    },
+    "faq": {
+      "eyebrow": "DUK darbuotojams",
+      "headline": "Aiškūs atsakymai",
+      "items": [
+        { "q": "Kaip patvirtinami įgūdžiai?", "a": "Darbdavių patvirtinimais už atliktą darbą ir įkeltais pažymėjimais — niekada vien savadarbiai." },
+        { "q": "Kiek kainuoja darbuotojui?", "a": "Nieko. Darbuotojai niekada nemoka už profilį, atitikimus ar kontaktą." },
+        { "q": "Kas mato mano profilį?", "a": "Tik patvirtinti darbdaviai ir agentūros, kuriems esate matomas — jūs valdote prieinamumą ir matomumą." },
+        { "q": "Ar galiu dirbti kelioms įmonėms?", "a": "Taip. Profilis priklauso jums; galite priimti darbus iš bet kurios įmonės platformoje." }
+      ]
+    },
+    "cta": {
+      "headline": { "line1": "Jūsų įgūdžiai verti", "line2": "sąžiningos rinkos." },
+      "subcopy": "Užsirašykite į darbuotojų beta sąrašą ir pakviesime atsivėrus prieigai.",
+      "button": "Užsirašyti į beta laukiančiųjų sąrašą"
+    }
+  },
+  "companies": {
+    "demand": {
+      "eyebrow": "Gyva paklausa",
+      "headline": {
+        "line1": "Štai kaip atrodo",
+        "line2": "gyva paklausa."
+      },
+      "subcopy": "Nurodykite, ko reikia kiekvienam projektui, ir gaukite surikiuotus, paaiškinamus atitikimus iš laisvų darbuotojų ir agentūrų — per valandas, ne savaites.",
+      "bullets": [
+        "Projektas + vieta — tiksliai apibrėžkite poreikį.",
+        "Žmonių skaičius — kiek kiekvienos pareigybės reikia.",
+        "Reikalingi įgūdžiai — lyginami su patvirtintais darbuotojų įgūdžiais.",
+        "Surikiuoti atitikimai: 47 — darbuotojai, jau tinkantys šiam poreikiui."
+      ]
+    },
+    "journey": {
+      "eyebrow": "Kaip veikia atranka jums",
+      "headline": "Nuo poreikio iki samdymo",
+      "steps": [
+        { "title": "Sukurkite projektą ir poreikį", "desc": "Apibrėžkite pareigybes, skaičių ir įgūdžius." },
+        { "title": "Sistema parodo geriausius", "desc": "Darbuotojai ir agentūros įvertinami pagal jūsų poreikį." },
+        { "title": "Susisiekite tiesiogiai", "desc": "Susisiekite su norimais žmonėmis — be tarpininko." },
+        { "title": "Samdykite greičiau", "desc": "Užpildykite pareigybes per dienas, atsekamai." }
+      ]
+    },
+    "features": {
+      "eyebrow": "Kodėl įmonės",
+      "headline": "Pasiūla, su kuria galima veikti",
+      "items": [
+        { "title": "Surikiuoti, paaiškinami atitikimai", "desc": "Kiekvienas atitikimas pateikia priežastis." },
+        { "title": "Tarpvalstybinis darbuotojų rezervas", "desc": "Baltijos ir Šiaurės pasiūla vienoje vietoje." },
+        { "title": "Be neskaidrių tarpininkų", "desc": "Jūs matote ir valdote santykį." },
+        { "title": "Patvirtinti įgūdžiai + OVR", "desc": "Samdykite pagal įrodymus, ne pažadus." },
+        { "title": "Realaus laiko pasiūlos signalai", "desc": "Matykite prieinamumo pokyčius iškart." },
+        { "title": "Tiesioginis kontaktas", "desc": "Santykis su darbuotoju priklauso jums." }
+      ]
+    },
+    "faq": {
+      "eyebrow": "DUK įmonėms",
+      "headline": "Aiškūs atsakymai",
+      "items": [
+        { "q": "Kas yra OVR rating?", "a": "Vienas 0–99 signalas iš patvirtintų įgūdžių, patikimumo ir saugos — palyginamas tarp darbuotojų." },
+        { "q": "Kiek kainuoja įmonei?", "a": "Kaina skelbiama prieš startą. Užsirašiusiems — ankstyvos prieigos kaina." },
+        { "q": "Ar galima atrinkti pagal lokaciją?", "a": "Taip — pagal šalį ir regioną, atsižvelgiant į darbuotojo vietą ir pasirengimą keltis." },
+        { "q": "Kas garantuoja darbuotojo patirtį?", "a": "Patvirtinti įgūdžiai, darbdavių patvirtinta istorija ir OVR — ne savadarbiai CV." }
+      ]
+    },
+    "cta": {
+      "headline": { "line1": "Nustokite laukti savaites", "line2": "kol užpildysite pareigybę." },
+      "subcopy": "Užsirašykite ir gaukite ankstyvos prieigos kainą savo projektams.",
+      "button": "Užsirašyti įmonės sąraše"
+    }
+  },
+  "agencies": {
+    "pool": {
+      "eyebrow": "Jūsų valdymo centras",
+      "headline": { "line1": "Visas jūsų rezervas —", "line2": "vienoje vietoje." },
+      "subcopy": "Valdykite darbuotojus, susiekite juos su klientų poreikiu ir tarpininkaukite — neprarasdami matomumo ir kontrolės.",
+      "bullets": [
+        "Rezervo dydis — visi kuruojami darbuotojai iškart.",
+        "Pasiskirstymas pagal profesiją — pajėgumas pagal įgūdį, gyvai.",
+        "Paskyrimų būsena — Aktyvūs, Laukiantys, Laisvi.",
+        "Keli klientai — tinkami žmonės skirtingiems klientams."
+      ]
+    },
+    "journey": {
+      "eyebrow": "Agentūros eiga",
+      "headline": "Valdykite rezervą kaip biuras",
+      "steps": [
+        { "title": "Onboard'inkit savo darbuotojus", "desc": "Suveskite kuruojamą rezervą į vieną erdvę." },
+        { "title": "Susiekite su klientų poreikiu", "desc": "Priderinkite žmones prie klientų poreikių." },
+        { "title": "Valdykite paskyrimus", "desc": "Sekite aktyvius, laukiančius ir laisvus." },
+        { "title": "Auginkite savo rezervą", "desc": "Pridėkite pajėgumo, kur auga paklausa." }
+      ]
+    },
+    "features": {
+      "eyebrow": "Kodėl agentūros",
+      "headline": "Svertas, ne kontrolės praradimas",
+      "items": [
+        { "title": "Valdykite rezervą", "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje." },
+        { "title": "Skelbkite klientų vardu", "desc": "Tarpininkaukite neprarasdami santykio." },
+        { "title": "Surikiuota atranka", "desc": "Greičiau įdarbinkite tinkamus." },
+        { "title": "Matomumo valdymas", "desc": "Vieša, tik agentūroms ar tiesioginė — jūsų sprendimas." },
+        { "title": "Tarpvalstybinis pasiekiamumas", "desc": "Baltijos ir Šiaurės klientai ir darbuotojai." },
+        { "title": "Auginkite biurą", "desc": "Pajėgumo įžvalgos keičiantis paklausai." }
+      ]
+    },
+    "faq": {
+      "eyebrow": "DUK agentūroms",
+      "headline": "Aiškūs atsakymai",
+      "items": [
+        { "q": "Ar išlaikome santykius su klientais?", "a": "Taip. Jūs tarpininkaujate ir valdote — platforma jūsų neaplenkia." },
+        { "q": "Kiek kainuoja agentūroms?", "a": "Kaina skelbiama prieš startą; partneriams sąraše — ankstyvos prieigos sąlygos." },
+        { "q": "Ar galime valdyti darbuotojų matomumą?", "a": "Taip — vieša, tik agentūroms ar tiesioginė, kiekvienam darbuotojui ir poreikiui." },
+        { "q": "Ar darbuotojas gali aptarnauti kelis klientus?", "a": "Taip, su paskyrimų būsenos sekimu, kad nebūtų dvigubų rezervacijų." }
+      ]
+    },
+    "cta": {
+      "headline": { "line1": "Paverskite rezervą", "line2": "gyvu biuru." },
+      "subcopy": "Užsirašykite į partnerių sąrašą ir gaukite ankstyvos prieigos sąlygas.",
+      "button": "Užsirašyti partnerių sąraše"
+    }
+  },
   "nav": {
     "platform": "Platforma",
     "solutions": "Sprendimai",

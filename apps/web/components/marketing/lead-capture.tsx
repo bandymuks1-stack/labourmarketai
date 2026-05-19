@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-type Intent = "hire_workers" | "find_job" | "partner";
+export type LeadIntent = "hire_workers" | "find_job" | "partner";
+type Intent = LeadIntent;
 type Status = "idle" | "sending" | "success" | "error";
 
 /**
@@ -19,18 +20,22 @@ export function LeadCapture({
   source = "landing_cta",
   tone = "primary",
   labelKey = "open",
+  label,
+  defaultIntent = "hire_workers",
   className,
 }: {
   source?: string;
   tone?: "primary" | "secondary";
   labelKey?: "open" | "openAlt";
+  label?: string;
+  defaultIntent?: LeadIntent;
   className?: string;
 }) {
   const t = useTranslations("leadForm");
   const fieldId = useId();
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
-  const [intent, setIntent] = useState<Intent>("hire_workers");
+  const [intent, setIntent] = useState<Intent>(defaultIntent);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -68,7 +73,7 @@ export function LeadCapture({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
-        {t(labelKey)}
+        {label ?? t(labelKey)}
       </Button>
 
       {open && (

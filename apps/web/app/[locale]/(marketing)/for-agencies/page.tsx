@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Placeholder } from "@/components/ui/Placeholder";
 import { BenefitCards } from "@/components/marketing/benefit-cards";
-import { CtaBand } from "@/components/marketing/cta-band";
 import { PageHero } from "@/components/marketing/page-hero";
+import { RoleEnrichment } from "@/components/marketing/role-enrichment";
+import { AgencyPoolPreview } from "@/components/app/agency-pool-preview";
 
 export default async function ForAgenciesPage({
   params,
@@ -24,15 +24,12 @@ export default async function ForAgenciesPage({
         ctaSource="agencies_hero"
       />
       <BenefitCards items={benefits} />
-      <section className="mx-auto max-w-container px-6 pb-12 sm:px-12">
-        <div className="grid aspect-[16/7] place-items-center card-border p-8 text-center">
-          <Placeholder id="screenshot.flow.agency" />
-        </div>
-      </section>
-      <CtaBand
-        title={`${t("title")} ${t("titleAccent")}`}
-        subtitle={t("subcopy")}
+      <RoleEnrichment
+        root="agencies"
+        previewKey="pool"
+        preview={<AgencyPoolPreview id="agency.pool.preview" />}
         ctaSource="agencies_cta"
+        ctaIntent="partner"
       />
     </>
   );

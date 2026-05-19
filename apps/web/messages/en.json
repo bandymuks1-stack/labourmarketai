@@ -53,6 +53,178 @@
       "busy": "Busy"
     }
   },
+  "shared": {
+    "faq": { "expand_aria": "Expand answer" },
+    "preview": {
+      "rankedMatches": "ranked matches",
+      "headcount": "Headcount",
+      "intensity": { "HOT": "Hot", "FILLING": "Filling", "OPEN": "Open" },
+      "poolSize": "Pool size",
+      "trades": "By trade",
+      "status": {
+        "active": "Active",
+        "pending": "Pending",
+        "available": "Available"
+      },
+      "more": "+{n} more"
+    }
+  },
+  "workers": {
+    "profile": {
+      "eyebrow": "Your profile",
+      "headline": {
+        "line1": "Here's what you'll look like —",
+        "line2": "a card that speaks for you."
+      },
+      "subcopy": "Your card is built from real completed work and verified skills, not a self-written CV. The OVR is one honest signal employers can trust.",
+      "bullets": [
+        "OVR — one 0–99 rating from verified skills, reliability and on-site safety.",
+        "Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
+        "Verified skills — confirmed by employers and certificates, not self-claimed.",
+        "Status badge — Available, Live, Drafted or Busy, always current."
+      ]
+    },
+    "journey": {
+      "eyebrow": "Your journey",
+      "headline": "Your journey: from signup to hire",
+      "steps": [
+        { "title": "Build your profile (5 min)", "desc": "Add your trade, experience and availability." },
+        { "title": "Verify your skills", "desc": "Employers and certificates confirm what you can do." },
+        { "title": "Receive ranked matches", "desc": "Roles that fit your trade, rate and location find you." },
+        { "title": "Work, earn, level up", "desc": "Completed work raises your OVR and track record." }
+      ]
+    },
+    "features": {
+      "eyebrow": "What you get",
+      "headline": "Built around the worker, not the middleman",
+      "items": [
+        { "title": "OVR from real performance", "desc": "Your rating reflects completed work, not promises." },
+        { "title": "Verified skills", "desc": "Confirmed by employers and certificates." },
+        { "title": "Cross-border opportunities", "desc": "NL, DK, DE, SE, NO and more." },
+        { "title": "Direct employer contact", "desc": "No opaque agents in the middle." },
+        { "title": "Explainable matching", "desc": "See why a role was matched to you." },
+        { "title": "Growing track record", "desc": "Every job builds a portable history." }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Worker FAQ",
+      "headline": "Straight answers",
+      "items": [
+        { "q": "How are skills verified?", "a": "Through employer confirmations on completed work and uploaded certificates — never self-claim alone." },
+        { "q": "How much does it cost workers?", "a": "Nothing. Workers never pay to have a profile, get matched or be contacted." },
+        { "q": "Who sees my profile?", "a": "Only verified employers and agencies you're visible to — you control your availability and exposure." },
+        { "q": "Can I work for multiple companies?", "a": "Yes. Your profile is yours; you can take roles from any company on the platform." }
+      ]
+    },
+    "cta": {
+      "headline": { "line1": "Your skills deserve", "line2": "a fair market." },
+      "subcopy": "Join the worker beta waitlist and we'll bring you on as access opens.",
+      "button": "Join the worker beta waitlist"
+    }
+  },
+  "companies": {
+    "demand": {
+      "eyebrow": "Live demand",
+      "headline": {
+        "line1": "Here's what live demand",
+        "line2": "looks like."
+      },
+      "subcopy": "Post what each project needs and receive ranked, explainable matches from available workers and agencies — in hours, not weeks.",
+      "bullets": [
+        "Project + location — scope each demand precisely.",
+        "Headcount — how many of each role you need.",
+        "Required skills — matched against verified worker skills.",
+        "Ranked matches: 47 — workers already fitting this demand now."
+      ]
+    },
+    "journey": {
+      "eyebrow": "How matching works for you",
+      "headline": "From demand to hire",
+      "steps": [
+        { "title": "Create project + post demand", "desc": "Define roles, headcount and skills." },
+        { "title": "System ranks best matches", "desc": "Workers and agencies scored against your demand." },
+        { "title": "Reach out directly", "desc": "Contact the people you want — no gatekeeper." },
+        { "title": "Hire faster", "desc": "Close roles in days, with accountable decisions." }
+      ]
+    },
+    "features": {
+      "eyebrow": "Why companies",
+      "headline": "Supply you can act on",
+      "items": [
+        { "title": "Ranked, explainable matches", "desc": "Every match shows the reasons behind it." },
+        { "title": "Cross-border worker pool", "desc": "Baltic + Nordic supply in one place." },
+        { "title": "No opaque middlemen", "desc": "You see and own the relationship." },
+        { "title": "Verified skills + OVR", "desc": "Hire on evidence, not on claims." },
+        { "title": "Real-time supply signals", "desc": "See availability shift as it happens." },
+        { "title": "Direct contact", "desc": "You own the worker relationship." }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Company FAQ",
+      "headline": "Straight answers",
+      "items": [
+        { "q": "What is the OVR rating?", "a": "A single 0–99 signal from verified skills, reliability and on-site safety — comparable across workers." },
+        { "q": "How much does it cost?", "a": "Pricing is announced at launch. Waitlist signups get early-access pricing." },
+        { "q": "Can we filter by location?", "a": "Yes — by country and region, matched to worker location and willingness to relocate." },
+        { "q": "How is worker experience guaranteed?", "a": "Through verified skills, employer-confirmed history and the OVR — not self-reported CVs." }
+      ]
+    },
+    "cta": {
+      "headline": { "line1": "Stop waiting weeks", "line2": "to fill a role." },
+      "subcopy": "Join the waitlist and get early-access pricing for your projects.",
+      "button": "Join the company waitlist"
+    }
+  },
+  "agencies": {
+    "pool": {
+      "eyebrow": "Your control room",
+      "headline": { "line1": "Your whole pool,", "line2": "in one room." },
+      "subcopy": "Manage your workers, match them to client demand and broker introductions — without losing visibility or control.",
+      "bullets": [
+        "Pool size — every managed worker at a glance.",
+        "Trade breakdown — capacity by skill, live.",
+        "Assignment status — Active, Pending, Available.",
+        "Multi-client — place the right people across clients."
+      ]
+    },
+    "journey": {
+      "eyebrow": "Agency workflow",
+      "headline": "Run your pool like a desk",
+      "steps": [
+        { "title": "Onboard your workers", "desc": "Bring your managed pool into one workspace." },
+        { "title": "Connect to client demand", "desc": "Match your people to open client roles." },
+        { "title": "Manage assignments", "desc": "Track active, pending and available." },
+        { "title": "Grow your pool", "desc": "Add capacity where demand is rising." }
+      ]
+    },
+    "features": {
+      "eyebrow": "Why agencies",
+      "headline": "Leverage, not loss of control",
+      "items": [
+        { "title": "Manage your pool", "desc": "Workers, availability and status in one place." },
+        { "title": "Post on behalf of clients", "desc": "Broker demand without losing the relationship." },
+        { "title": "Ranked matching", "desc": "Place the right people faster." },
+        { "title": "Visibility controls", "desc": "Public, agencies-only or direct — your call." },
+        { "title": "Cross-border reach", "desc": "Baltic + Nordic clients and workers." },
+        { "title": "Grow your desk", "desc": "Capacity insights as demand shifts." }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Agency FAQ",
+      "headline": "Straight answers",
+      "items": [
+        { "q": "Do we keep our client relationships?", "a": "Yes. You broker and stay in control — the platform never disintermediates you." },
+        { "q": "How much does it cost agencies?", "a": "Pricing is announced at launch; waitlist partners get early-access terms." },
+        { "q": "Can we control worker visibility?", "a": "Yes — public, agencies-only or direct, per worker and per demand." },
+        { "q": "Can one worker serve multiple clients?", "a": "Yes, with assignment status tracking so nothing is double-booked." }
+      ]
+    },
+    "cta": {
+      "headline": { "line1": "Turn your pool", "line2": "into a live desk." },
+      "subcopy": "Join the partner waitlist and get early-access terms for your agency.",
+      "button": "Join the partner waitlist"
+    }
+  },
   "nav": {
     "platform": "Platform",
     "solutions": "Solutions",

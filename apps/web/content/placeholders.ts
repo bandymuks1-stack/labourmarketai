@@ -75,6 +75,26 @@ export type PlayerCardData = {
   skills: string[];
 };
 
+/** Companies-page demand preview payload (5b.3.5). */
+export type DemandIntensity = "HOT" | "FILLING" | "OPEN";
+export type DemandData = {
+  project: { lt: string; en: string };
+  location: { lt: string; en: string };
+  headcount: number;
+  skills: string[];
+  intensity: DemandIntensity;
+  rankedMatches: number;
+};
+
+/** Agencies-page pool preview payload (5b.3.5). */
+export type AgencyPoolData = {
+  poolSize: number;
+  breakdown: { trade: string; count: number }[];
+  status: { active: number; pending: number; available: number };
+  avatars: number;
+  extraCount: number;
+};
+
 export type Placeholder = {
   id: string;
   type: PlaceholderType;
@@ -99,6 +119,10 @@ export type Placeholder = {
   geo?: GeoPayload;
   /** Player-card payload (5b.3). */
   card?: PlayerCardData;
+  /** Companies-page demand preview (5b.3.5). */
+  demand?: DemandData;
+  /** Agencies-page pool preview (5b.3.5). */
+  pool?: AgencyPoolData;
 };
 
 const SQL = (q: string) => `SQL: ${q}`;
@@ -845,6 +869,60 @@ export const placeholders: readonly Placeholder[] = [
       consentRequired: false,
     }),
   ),
+  {
+    id: "demand.featured.1",
+    type: "project",
+    value: {
+      lt: "Renovacijos darbai – Roterdamas · 8 vietos · 47 atitikimai",
+      en: "Renovation works – Rotterdam · 8 roles · 47 matches",
+    },
+    description: "Companies-page demand preview card (5b.3.5).",
+    replacementSource: SQL(
+      "SELECT jd.*, count(m.*) FROM job_demands jd LEFT JOIN matches m ON m.job_demand_id=jd.id WHERE jd.status='open' GROUP BY jd.id",
+    ),
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: false,
+    demand: {
+      project: {
+        lt: "Renovacijos darbai – Roterdamas",
+        en: "Renovation works – Rotterdam",
+      },
+      location: { lt: "Roterdamas, NL", en: "Rotterdam, NL" },
+      headcount: 8,
+      skills: ["Steel fixing", "Formwork", "Welding", "Safety+"],
+      intensity: "HOT",
+      rankedMatches: 47,
+    },
+  },
+  {
+    id: "agency.pool.preview",
+    type: "metric",
+    value: {
+      lt: "Agentūros rezervas · 86 darbuotojai · 31 aktyvūs",
+      en: "Agency pool · 86 workers · 31 active",
+    },
+    description: "Agencies-page pool control-room preview panel (5b.3.5).",
+    replacementSource: SQL(
+      "SELECT trade, count(*) FROM agency_workers JOIN workers ... GROUP BY trade; status counts from agency_workers.status",
+    ),
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: false,
+    pool: {
+      poolSize: 86,
+      breakdown: [
+        { trade: "Steel", count: 22 },
+        { trade: "Concrete", count: 18 },
+        { trade: "Welding", count: 15 },
+        { trade: "Electrical", count: 17 },
+        { trade: "General", count: 14 },
+      ],
+      status: { active: 31, pending: 9, available: 46 },
+      avatars: 4,
+      extraCount: 12,
+    },
+  },
   ...mapPlaceholderSet(),
 ] as const;
 
@@ -900,6 +978,20 @@ export function getCard(id: string): PlayerCardData {
   const c = getPlaceholder(id).card;
   if (!c) throw new Error(`Placeholder "${id}" has no card payload.`);
   return c;
+}
+
+/** Demand-preview payload (5b.3.5). */
+export function getDemand(id: string): DemandData {
+  const d = getPlaceholder(id).demand;
+  if (!d) throw new Error(`Placeholder "${id}" has no demand payload.`);
+  return d;
+}
+
+/** Agency-pool payload (5b.3.5). */
+export function getPool(id: string): AgencyPoolData {
+  const p = getPlaceholder(id).pool;
+  if (!p) throw new Error(`Placeholder "${id}" has no pool payload.`);
+  return p;
 }
 
 /** Narrowed geo payloads of a given kind, in registry order. */
