@@ -939,6 +939,15 @@ export type Database = {
     Functions: {
       can_access_match: { Args: { m: string }; Returns: boolean }
       can_access_thread: { Args: { t: string }; Returns: boolean }
+      complete_onboarding: {
+        Args: {
+          p_role: string
+          p_display_name: string | null
+          p_country: string | null
+          p_role_data: Json
+        }
+        Returns: void
+      }
       is_admin: { Args: never; Returns: boolean }
       is_employer: { Args: never; Returns: boolean }
       owns_agency: { Args: { a: string }; Returns: boolean }

@@ -53,7 +53,22 @@ test.describe("Existing user login", () => {
   });
 });
 
-test.describe("Multi-role flow", () => {
+test.describe("Onboarding entity creation (migration 0006)", () => {
+  // No SUPABASE_TEST_URL needed: anonymous visit to /onboarding must
+  // bounce to /auth/login because the page itself checks auth.getUser().
+  test("anonymous /onboarding redirects to /auth/login", async ({ page }) => {
+    await page.goto("/lt/onboarding");
+    await expect(page).toHaveURL(/\/lt\/auth\/login/);
+  });
+
+  test("worker onboarding creates a workers row + profile_roles entry", async () => {
+    requiresTestEnv();
+    test.skip(
+      true,
+      "Requires authenticated test session + DB introspection. Wire when SUPABASE_TEST_URL is provisioned (M1.x). Asserts: profiles.active_role='worker', profiles.onboarded_at IS NOT NULL, workers.profile_id = user.id (exactly one row), profile_roles entry with role='worker' and role_data containing profession/language/city.",
+    );
+  });
+
   test("worker adds the customer role from the switcher", async () => {
     requiresTestEnv();
     test.skip(true, "Requires authenticated session — wire after test project is configured (M1.x).");

@@ -7,8 +7,18 @@ import { createClient } from "@/lib/supabase/server";
 
 export type Role = "worker" | "company" | "agency" | "customer";
 
-/** Finish the first onboarding — write role-specific data into the user's
- *  matching `profile_roles.role_data` and stamp `profiles.onboarded_at`. */
+const ONBOARDING_ROLES = new Set<Role>([
+  "worker",
+  "company",
+  "agency",
+  "customer",
+]);
+
+/** Finish the first onboarding — atomic write of `profiles`,
+ *  `profile_roles`, and the role-specific entity row
+ *  (`workers` | `companies` | `agencies`) via the
+ *  `public.complete_onboarding` RPC. One transaction; idempotent on
+ *  re-submit (see migration 0006). */
 export async function completeOnboarding(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const {
@@ -17,6 +27,9 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   if (!user) throw new Error("Not authenticated");
 
   const role = String(formData.get("role") ?? "") as Role;
+  if (!ONBOARDING_ROLES.has(role)) {
+    throw new Error(`Invalid onboarding role: ${role}`);
+  }
   const display_name = String(formData.get("display_name") ?? "").trim();
   const country = String(formData.get("country") ?? "").trim();
   const locale = String(formData.get("locale") ?? "lt");
@@ -34,33 +47,20 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
     if (typeof v === "string") role_data[k] = v.trim();
   }
 
-  // profile core fields
-  const { error: profErr } = await supabase
-    .from("profiles")
-    .update({
-      full_name: display_name || null,
-      country: country || null,
-      active_role: role,
-      onboarded_at: new Date().toISOString(),
-      onboarded: true,
-    })
-    .eq("id", user.id);
-  if (profErr) {
-    throw new Error(`profiles update failed: ${profErr.message}`);
-  }
-
-  // upsert the role row (catalogue + role-specific blob)
-  const { error: roleErr } = await supabase.from("profile_roles").upsert(
-    {
-      profile_id: user.id,
-      role,
-      is_active: true,
-      role_data,
-    },
-    { onConflict: "profile_id,role" },
-  );
-  if (roleErr) {
-    throw new Error(`profile_roles upsert failed: ${roleErr.message}`);
+  const { error } = await supabase.rpc("complete_onboarding", {
+    p_role: role,
+    p_display_name: display_name || null,
+    p_country: country || null,
+    p_role_data: role_data,
+  });
+  if (error) {
+    console.error("[completeOnboarding] RPC failed", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+    throw new Error(`complete_onboarding RPC failed: ${error.message}`);
   }
 
   revalidatePath(`/${locale}/dashboard`);
