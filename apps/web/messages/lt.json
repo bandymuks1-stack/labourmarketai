@@ -108,6 +108,153 @@
       "busy": "Užimtas"
     }
   },
+  "auth": {
+    "signup": {
+      "headline": "Sukurkite paskyrą",
+      "subcopy": "Įveskite el. paštą ir pasirinkite savo vaidmenį. Atsiųsime prisijungimo nuorodą — slaptažodžio nereikia.",
+      "email_label": "Darbo el. paštas",
+      "email_placeholder": "vardas@imone.lt",
+      "rolePickerLabel": "Pasirinkite vaidmenį",
+      "role": {
+        "worker": "Darbuotojas",
+        "company": "Įmonė",
+        "agency": "Agentūra",
+        "customer": "Užsakovas"
+      },
+      "roleDescription": {
+        "worker": "Ieškau darbo ar profesinio augimo.",
+        "company": "Ieškau darbuotojų ar valdau projektus.",
+        "agency": "Atstovauju kandidatus klientams.",
+        "customer": "Užsisakau paslaugą."
+      },
+      "submit_label": "Siųsti prisijungimo nuorodą",
+      "sending": "Siunčiama...",
+      "disclaimer": "Šiuo metu platforma yra ankstyvame etape — daugiau funkcijų bus pridėta artimiausiomis savaitėmis. Jūsų atsiliepimai padės kurti.",
+      "success_title": "Patikrinkite el. paštą",
+      "success_body": "Atsiuntėme prisijungimo nuorodą {email}. Paspauskite ją el. laiške, kad pradėtumėte.",
+      "has_account": "Jau turite paskyrą?",
+      "login_link": "Prisijungti",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
+      "error_email": "Įveskite teisingą el. pašto adresą.",
+      "error_role": "Pasirinkite vaidmenį."
+    },
+    "login": {
+      "headline": "Prisijungti",
+      "subcopy": "Įveskite el. paštą — atsiųsime prisijungimo nuorodą.",
+      "email_label": "El. paštas",
+      "submit_label": "Siųsti prisijungimo nuorodą",
+      "sending": "Siunčiama...",
+      "success_title": "Patikrinkite el. paštą",
+      "success_body": "Atsiuntėme prisijungimo nuorodą {email}.",
+      "no_account": "Neturite paskyros?",
+      "signup_link": "Registruotis",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
+      "error_email": "Įveskite teisingą el. pašto adresą."
+    },
+    "callback": {
+      "verifying": "Tikrinama jūsų prisijungimo nuoroda...",
+      "error_title": "Nepavyko prisijungti",
+      "error_body": "Nuoroda nebegalioja arba sugadinta. Prašome bandyti dar kartą.",
+      "retry": "Bandyti dar kartą"
+    },
+    "onboarding": {
+      "greeting": "Sveiki, {name}!",
+      "subcopy": "Užpildykite kelis laukus, kad sukurtume jūsų profilį.",
+      "display_name_label": "Rodomas vardas",
+      "country_label": "Šalis",
+      "fields": {
+        "worker": {
+          "profession": "Profesija",
+          "language": "Pagrindinė kalba",
+          "city": "Dabartinis miestas"
+        },
+        "company": {
+          "name": "Įmonės pavadinimas",
+          "industry": "Veiklos sritis",
+          "headcount": "Darbuotojų skaičius"
+        },
+        "agency": {
+          "name": "Agentūros pavadinimas",
+          "regions": "Veikimo regionai",
+          "focus": "Pagrindinės sritys"
+        },
+        "customer": {
+          "city": "Dabartinis miestas"
+        }
+      },
+      "submit_label": "Tęsti",
+      "saving": "Saugoma...",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą."
+    },
+    "roleSwitcher": {
+      "label": "Vaidmuo",
+      "active_label": "Aktyvus",
+      "add_role": "Pridėti vaidmenį",
+      "switching": "Perjungiama...",
+      "addRoleTitle": "Pridėti naują vaidmenį",
+      "addRoleDescription": "Pasirinkite vaidmenį, kurį norite pridėti prie paskyros.",
+      "cancel": "Atšaukti",
+      "confirm": "Pridėti"
+    },
+    "dashboard": {
+      "greeting": "Sveiki, {name}",
+      "tabs": {
+        "overview": "Apžvalga",
+        "discover": "Naršyti",
+        "search": "Ieškoti",
+        "account": "Mano paskyra"
+      },
+      "section": {
+        "offer": { "title": "Ką siūlau" },
+        "seek": { "title": "Ko ieškau" },
+        "proofs": { "title": "Mano įrodymai" }
+      },
+      "empty": {
+        "worker": {
+          "offer": "Tuščia. Įgūdžių, darbo istorijos ir įrodymų valdymas ateina su M2.",
+          "seek": "Tuščia. Pageidaujamo darbo nustatymas ir prieinamumas ateina su M2.",
+          "proofs": "Tuščia. Patvirtinti įgūdžiai ir darbo žurnalas ateina su M2."
+        },
+        "company": {
+          "offer": "Tuščia. Atvirų pozicijų ir projektų valdymas ateina su M2.",
+          "seek": "Tuščia. Darbo poreikių paskelbimas ateina su M2.",
+          "proofs": "Tuščia. Įmonės įvertinimas ir projektų istorija ateina su M2."
+        },
+        "agency": {
+          "offer": "Tuščia. Kandidatų rezervas ir paslaugų pasiūla ateina su M2.",
+          "seek": "Tuščia. Klientų poreikiai ir paklausos signalai ateina su M2.",
+          "proofs": "Tuščia. Veiklos istorija ir klientų atsiliepimai ateina su M2/M3."
+        },
+        "customer": {
+          "seek": "Tuščia. Paslaugų užsakymo paieška ateina su M3.",
+          "proofs": "Tuščia. Užsakymų istorija ir atsiliepimai ateina su M3."
+        },
+        "discover": "Atrasimo srautas — numatomas M3.",
+        "search": "Detali paieška — numatoma M2.",
+        "account_intro": "Tvarkykite savo el. paštą ir vaidmenis."
+      },
+      "customer": {
+        "offerHint": "Norite siūlyti paslaugas? Pridėkite Worker vaidmenį.",
+        "offerHintCta": "Pridėti Worker vaidmenį"
+      },
+      "account": {
+        "email_label": "El. paštas",
+        "roles_label": "Mano vaidmenys",
+        "logout": "Atsijungti"
+      }
+    },
+    "middleware": {
+      "session_expired": "Jūsų sesija pasibaigė. Prisijunkite iš naujo.",
+      "onboarding_required": "Pirmiausia užpildykite profilį."
+    },
+    "notifications": {
+      "label": "Pranešimai",
+      "emptyTitle": "Pranešimų dar nėra",
+      "emptyBody": "Pranešimai pasirodys čia, kai sistema augs.",
+      "switchRoleCta": "Persijungti į {role} norėdami pamatyti",
+      "markAllRead": "Pažymėti visus skaitytais"
+    }
+  },
   "shared": {
     "faq": { "expand_aria": "Išskleisti atsakymą" },
     "preview": {

@@ -1,0 +1,127 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useAuth } from "@/lib/auth/context";
+import { type Role } from "@/lib/auth/actions";
+import { cn } from "@/lib/utils";
+
+const ALL_ROLES: Role[] = ["worker", "company", "agency", "customer"];
+const ROLE_ICON: Record<Role, string> = {
+  worker: "🔨",
+  company: "🏗️",
+  agency: "🤝",
+  customer: "🛒",
+};
+
+/** Authenticated-header role switcher. Always visible (even for users with
+ *  one role) so adding a second role stays discoverable (PV §15). */
+export function RoleSwitcher() {
+  const t = useTranslations("auth");
+  const tSwitcher = useTranslations("auth.roleSwitcher");
+  const { roles, activeRole, switchRole, addRole } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState<Role | null>(null);
+
+  const missing = ALL_ROLES.filter((r) => !roles.includes(r));
+
+  async function pick(r: Role) {
+    if (r === activeRole) {
+      setOpen(false);
+      return;
+    }
+    setPending(r);
+    try {
+      if (roles.includes(r)) await switchRole(r);
+      else await addRole(r);
+    } finally {
+      setPending(null);
+      setOpen(false);
+    }
+  }
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-label={tSwitcher("label")}
+        className="inline-flex items-center gap-2 rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-sm text-text-primary hover:border-brand-blue"
+      >
+        <span aria-hidden>{activeRole ? ROLE_ICON[activeRole] : "•"}</span>
+        <span className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          {activeRole ? t(`signup.role.${activeRole}`) : tSwitcher("label")}
+        </span>
+        <span aria-hidden className="text-text-muted">
+          ▾
+        </span>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 z-30 mt-2 w-64 rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
+        >
+          <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {tSwitcher("label")}
+          </p>
+          <ul className="flex flex-col gap-0.5">
+            {roles.map((r) => (
+              <li key={r}>
+                <button
+                  type="button"
+                  onClick={() => pick(r)}
+                  disabled={pending !== null}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-sm hover:bg-ink-700",
+                    r === activeRole && "text-brand-blue",
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <span aria-hidden>{ROLE_ICON[r]}</span>
+                    {t(`signup.role.${r}`)}
+                  </span>
+                  {r === activeRole && (
+                    <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
+                      {tSwitcher("active_label")}
+                    </span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {missing.length > 0 && (
+            <>
+              <hr className="my-2 border-ink-600" />
+              <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                {tSwitcher("add_role")}
+              </p>
+              <ul className="flex flex-col gap-0.5">
+                {missing.map((r) => (
+                  <li key={r}>
+                    <button
+                      type="button"
+                      onClick={() => pick(r)}
+                      disabled={pending !== null}
+                      className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
+                    >
+                      <span aria-hidden>{ROLE_ICON[r]}</span>
+                      {t(`signup.role.${r}`)}
+                      {pending === r && (
+                        <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          {tSwitcher("switching")}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

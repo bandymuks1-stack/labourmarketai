@@ -21,6 +21,8 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       "scripts/**",
+      "tests/e2e/**",
+      "playwright.config.ts",
     ],
   },
 ];

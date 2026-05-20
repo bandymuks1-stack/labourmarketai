@@ -27,17 +27,30 @@ type Tbl<R> = { Row: R; Insert: Partial<R>; Update: Partial<R>; Relationships: [
 
 type Profiles = {
   id: string;
-  role: string | null;
+  /** Which role's workspace the user currently sees. Multi-role catalogue
+   *  lives in `profile_roles` (slice 6 / migration 0003). */
+  active_role: string | null;
   locale: string;
   full_name: string | null;
   email: string | null;
   phone: string | null;
   country: string | null;
   onboarded: boolean;
+  /** Timestamp of first onboarding completion; null = needs onboarding. */
+  onboarded_at: string | null;
   consent_marketing: boolean;
   consent_data_processing: boolean;
   created_at: string;
   updated_at: string;
+};
+
+type ProfileRoles = {
+  id: string;
+  profile_id: string;
+  role: string;
+  added_at: string;
+  is_active: boolean;
+  role_data: Json;
 };
 
 type Workers = {
@@ -258,6 +271,7 @@ export type Database = {
   public: {
     Tables: {
       profiles: Tbl<Profiles>;
+      profile_roles: Tbl<ProfileRoles>;
       workers: Tbl<Workers>;
       skills: Tbl<Skills>;
       countries: Tbl<Countries>;

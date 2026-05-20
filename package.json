@@ -20,7 +20,8 @@
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --project-id gorgitwvdzxbnaxhrsrw --schema public > apps/web/lib/supabase/types.ts",
     "db:fixtures:local": "pnpm -C apps/web db:fixtures:local",
-    "admin:promote": "pnpm -C apps/web admin:promote"
+    "admin:promote": "pnpm -C apps/web admin:promote",
+    "e2e": "pnpm -C apps/web e2e"
   },
   "devDependencies": {
     "supabase": "^2.100.1"

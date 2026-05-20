@@ -94,9 +94,9 @@ async function main(): Promise<void> {
 
   const { data, error } = await admin
     .from("profiles")
-    .update({ role: "admin" })
+    .update({ active_role: "admin" })
     .eq("email", email)
-    .select("id, email, role");
+    .select("id, email, active_role");
 
   if (error) {
     console.error(`Update failed: ${error.message}`);

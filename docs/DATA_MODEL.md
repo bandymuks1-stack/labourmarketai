@@ -40,9 +40,13 @@ requirement that target-market country rows are loaded as reference data
 is a non-conflicting reference lookup; the decision is recorded as an ADR in
 slice 7.
 
-Roles (`profiles.role`, brief §6): `worker`, `company`, `agency`, `admin`.
-A `NULL` role is permitted transiently (the CHECK constraint allows it) for a
-freshly-created profile before onboarding picks a role.
+Roles (slice 6+, see "Slice 6 — Multi-role" below): held in
+`profile_roles`; the currently-active workspace is `profiles.active_role`
+∈ `worker | company | agency | customer | admin`. A `NULL` active role
+is permitted transiently for a freshly-created profile before onboarding
+picks one. (The pre-slice-6 single-`profiles.role` model is **superseded**
+by ADR 0012; older references in this file may still mention it
+historically.)
 
 ## RLS — the authoritative policy reference
 
@@ -214,6 +218,32 @@ auth feature slice in M1.)
 
 ---
 
+## Slice 6 — Multi-role + customer (migration `0003_multi_role.sql`)
+
+Status: **applied in M1** (founder runs `pnpm db:push`, see
+`docs/AUTH_SETUP.md`). ADR 0012.
+
+- `profiles.role` (M0) is **dropped**; replaced by
+  `profiles.active_role text check (active_role is null or in
+  ('worker','company','agency','customer','admin'))` — which workspace
+  the user currently sees.
+- `profiles.onboarded_at timestamptz` — null until the first onboarding
+  flow completes; used by middleware to gate `/dashboard`.
+- `profile_roles (id, profile_id → profiles, role, added_at, is_active,
+  role_data jsonb)` — many-to-many catalogue of every role the user
+  holds, with per-role onboarding answers in `role_data`. Unique
+  `(profile_id, role)`.
+- RLS helpers (`profile_role()`, `is_admin()`, `is_employer()`) updated
+  to read `profiles.active_role` — existing per-table policies on
+  workers/companies/agencies/etc. keep working unchanged. Adding a role
+  via `profile_roles` does **not** grant table access until the user
+  switches into it. RBAC by `active_role`; multi-role is catalogue.
+- `handle_new_user()` trigger now also inserts the matching
+  `profile_roles` row from `raw_user_meta_data.role` on signup.
+- RLS on `profile_roles`: self + admin for all CRUD.
+
+The `customer` value is now legal across the schema (ADR 0007).
+
 ## Architectural sketches (NOT implemented in M0)
 
 These are **design sketches only** — no migration is applied in M0. Each is
@@ -277,11 +307,37 @@ teams, shifts) — `PROJECT_VISION.md` §5 object 6.
 team_entities (id, name, owner_profile_id references profiles, company_id references companies, kind, member_profile_ids uuid[])
 ```
 
-### `profiles.role` extension — schema **M1**
-Extend the check constraint to the full seven (`docs/ROLES.md`):
-`role in ('worker','team_leader','company_manager','hr_personnel','agency','admin','customer')`.
-M0 ships the subset `('worker','company','agency','admin')`; the four new
-values (incl. **`customer`**, ADR 0007) are added in M1.
+### `notifications` — schema **M2**, UI shell **M1** (slice 6)
+
+The header `NotificationPanel` ships as an empty shell in slice 6
+(typed `notifications: []` on the auth context, honest "no
+notifications yet" placeholder). The table that backs it lands in M2:
+
+```
+notifications (
+  id           uuid pk default gen_random_uuid(),
+  profile_id   uuid references profiles(id) on delete cascade,
+  role         text check (role in ('worker','company','agency','customer')),
+  type         text,
+  payload      jsonb,
+  read_at      timestamptz,
+  created_at   timestamptz not null default now()
+)
+```
+
+A notification carries the `role` it belongs to. The UI is already
+multi-role-aware: a notification for role Y received while the user is
+in role X renders a "Switch to {Y} to view" CTA wired to the same
+switch action as the `RoleSwitcher`.
+
+### `profiles.role` extension — superseded by slice 6 (migration 0003)
+The original M1 sketch (extend the check constraint to the full seven
+roles) is **superseded by ADR 0012**. Slice 6 took a different shape:
+`profiles.role` is dropped; `profiles.active_role` carries the current
+workspace (`worker | company | agency | customer | admin`); the wider
+`team_leader` / `company_manager` / `hr_personnel` roles from
+`docs/ROLES.md` land when their UX is built (M2+). See "Slice 6 —
+Multi-role" above.
 
 ### `companies.trust_score` (already in schema)
 The `companies.trust_score int default 0` column from

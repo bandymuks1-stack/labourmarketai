@@ -18,14 +18,33 @@ vision set. No auth, no CRUD, no AI.
 **Implements PV:** §10 (honesty), §11 (map seed), §2/§4 (positioning,
 9 markets), §1/§15 (messaging).
 
-## M1 — Etapas 1: Product core
+## M1 — Etapas 1: Product core (in progress)
 
-Auth flow (signup/login/reset), `profiles` with the **7 roles** incl.
-`customer`, profile module foundation, skills list, document statuses.
-**Implements PV:** §5 (Person, Skill, Document), §6 (5 verification
-levels — schema), §7 (roles), §8 modules 1/2/4.
-**Schema:** `skill_verifications`, `profiles.role` += `customer`
-(documented in `docs/DATA_MODEL.md`, applied this milestone).
+### Slice 6 ✅ — Magic-link auth + multi-role + marketplace shell
+
+Delivered: passwordless signup/login via Supabase magic link; route
+group `/[locale]/auth/{signup,login,callback,logout}`; middleware that
+gates `/dashboard` behind a session and `/onboarding` until the user
+completes the first form; `customer` role added to the enum; multi-role
+catalogue table `profile_roles` with per-role JSONB onboarding payload;
+`RoleSwitcher` in the authenticated header; empty `NotificationPanel`
+with cross-role-CTA architecture wired; dashboard shell with three
+sections per active role (What I offer / What I seek / My proofs), four
+tabs (Overview, Discover, Search, My account), all empty states honest
+and pointed at M2/M3 ETAs (PV §10); full bilingual `auth.*` i18n;
+Playwright harness with conditional-skip auth specs.
+**Schema (applied via `0003_multi_role.sql`):** `profile_roles`,
+`profiles.active_role`, `profiles.onboarded_at`; RLS helpers retargeted
+to `active_role`. ADRs **0012** (multi-role) and **0013** (hybrid
+marketplace pattern).
+
+### Remaining in M1
+
+Skill verifications schema + UI (5 levels — ADR 0009), document
+statuses module, profile module deeper editing (worker
+profession/skills, company industry/headcount/projects, agency
+regions). **Implements PV:** §5 (Person, Skill, Document), §6
+(5 verification levels — schema), §7 (roles), §8 modules 1/2/4.
 
 ## M2 — Etapas 2: First sellable company product
 

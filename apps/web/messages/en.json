@@ -105,6 +105,153 @@
       "busy": "Busy"
     }
   },
+  "auth": {
+    "signup": {
+      "headline": "Create your account",
+      "subcopy": "Enter your email and pick a role. We'll send a sign-in link — no password needed.",
+      "email_label": "Work email",
+      "email_placeholder": "name@company.com",
+      "rolePickerLabel": "Pick a role",
+      "role": {
+        "worker": "Worker",
+        "company": "Company",
+        "agency": "Agency",
+        "customer": "Customer"
+      },
+      "roleDescription": {
+        "worker": "I'm looking for work or growth.",
+        "company": "I hire workers or run projects.",
+        "agency": "I represent candidates to clients.",
+        "customer": "I order a service."
+      },
+      "submit_label": "Send login link",
+      "sending": "Sending...",
+      "disclaimer": "The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
+      "success_title": "Check your email",
+      "success_body": "We've sent a sign-in link to {email}. Click it to get started.",
+      "has_account": "Already have an account?",
+      "login_link": "Sign in",
+      "error_generic": "Something went wrong. Please try again shortly.",
+      "error_email": "Please enter a valid email address.",
+      "error_role": "Please pick a role."
+    },
+    "login": {
+      "headline": "Sign in",
+      "subcopy": "Enter your email — we'll send a sign-in link.",
+      "email_label": "Email",
+      "submit_label": "Send login link",
+      "sending": "Sending...",
+      "success_title": "Check your email",
+      "success_body": "We've sent a sign-in link to {email}.",
+      "no_account": "No account yet?",
+      "signup_link": "Sign up",
+      "error_generic": "Something went wrong. Please try again shortly.",
+      "error_email": "Please enter a valid email address."
+    },
+    "callback": {
+      "verifying": "Verifying your sign-in link...",
+      "error_title": "Sign-in failed",
+      "error_body": "This link is invalid or expired. Please try again.",
+      "retry": "Try again"
+    },
+    "onboarding": {
+      "greeting": "Welcome, {name}!",
+      "subcopy": "A few quick fields to set up your profile.",
+      "display_name_label": "Display name",
+      "country_label": "Country",
+      "fields": {
+        "worker": {
+          "profession": "Profession",
+          "language": "Primary language",
+          "city": "Current city"
+        },
+        "company": {
+          "name": "Company name",
+          "industry": "Industry",
+          "headcount": "Headcount range"
+        },
+        "agency": {
+          "name": "Agency name",
+          "regions": "Regions of operation",
+          "focus": "Focus industries"
+        },
+        "customer": {
+          "city": "Current city"
+        }
+      },
+      "submit_label": "Continue",
+      "saving": "Saving...",
+      "error_generic": "Something went wrong. Please try again."
+    },
+    "roleSwitcher": {
+      "label": "Role",
+      "active_label": "Active",
+      "add_role": "Add role",
+      "switching": "Switching...",
+      "addRoleTitle": "Add a new role",
+      "addRoleDescription": "Pick a role to add to your account.",
+      "cancel": "Cancel",
+      "confirm": "Add"
+    },
+    "dashboard": {
+      "greeting": "Welcome back, {name}",
+      "tabs": {
+        "overview": "Overview",
+        "discover": "Discover",
+        "search": "Search",
+        "account": "My account"
+      },
+      "section": {
+        "offer": { "title": "What I offer" },
+        "seek": { "title": "What I seek" },
+        "proofs": { "title": "My proofs" }
+      },
+      "empty": {
+        "worker": {
+          "offer": "Empty. Skills, work history and proofs management ships in M2.",
+          "seek": "Empty. Job preferences and availability settings ship in M2.",
+          "proofs": "Empty. Verified skills and the work journal ship in M2."
+        },
+        "company": {
+          "offer": "Empty. Open positions and projects management ships in M2.",
+          "seek": "Empty. Posting workforce needs ships in M2.",
+          "proofs": "Empty. Company score and project history ship in M2."
+        },
+        "agency": {
+          "offer": "Empty. Candidate pool and service offerings ship in M2.",
+          "seek": "Empty. Client needs and demand signals ship in M2.",
+          "proofs": "Empty. Track record and client testimonials ship in M2/M3."
+        },
+        "customer": {
+          "seek": "Empty. Service ordering and search ships in M3.",
+          "proofs": "Empty. Order history and reviews given ship in M3."
+        },
+        "discover": "Discover feed — expected in M3.",
+        "search": "Detailed search — expected in M2.",
+        "account_intro": "Manage your email and roles."
+      },
+      "customer": {
+        "offerHint": "Want to offer services? Add the Worker role.",
+        "offerHintCta": "Add Worker role"
+      },
+      "account": {
+        "email_label": "Email",
+        "roles_label": "My roles",
+        "logout": "Sign out"
+      }
+    },
+    "middleware": {
+      "session_expired": "Your session has expired. Please sign in again.",
+      "onboarding_required": "Please finish setting up your profile first."
+    },
+    "notifications": {
+      "label": "Notifications",
+      "emptyTitle": "No notifications yet",
+      "emptyBody": "Notifications will appear here as the system grows.",
+      "switchRoleCta": "Switch to {role} to view",
+      "markAllRead": "Mark all as read"
+    }
+  },
   "shared": {
     "faq": { "expand_aria": "Expand answer" },
     "preview": {
