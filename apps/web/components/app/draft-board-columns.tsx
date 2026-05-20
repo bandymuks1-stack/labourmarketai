@@ -126,7 +126,7 @@ function Column({
       className={cn(
         "flex flex-col gap-3 rounded-lg p-3",
         glow === "amber" &&
-          "ring-1 ring-state-amber/20 shadow-[inset_0_0_30px_-15px_rgba(255,165,82,0.35)] motion-safe:animate-pulse",
+          "ring-1 ring-state-amber/20 shadow-[inset_0_0_30px_-15px_rgba(255,165,82,0.35)]",
         glow === "live" &&
           "ring-1 ring-state-live/20 shadow-[inset_0_0_30px_-15px_rgba(0,230,118,0.30)]",
       )}

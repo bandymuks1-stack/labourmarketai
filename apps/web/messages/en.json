@@ -530,6 +530,7 @@
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "This page does not exist",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "skipToContent": "Skip to content"
   }
 }

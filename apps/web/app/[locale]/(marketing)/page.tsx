@@ -111,7 +111,7 @@ export default async function LandingPage({
       <MarketPulse />
 
       {/* ── Second row ───────────────────────────────────────────────── */}
-      <section className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <Card label={sec("team.label")}>
           <p className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             <Placeholder id="team.onsite.count" />
@@ -168,7 +168,7 @@ export default async function LandingPage({
       </section>
 
       {/* ── Market intelligence ──────────────────────────────────────── */}
-      <section className="mt-8">
+      <section className="mt-16">
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
           {mk("label")}
         </p>
@@ -200,7 +200,7 @@ export default async function LandingPage({
       </section>
 
       {/* ── Testimonial ──────────────────────────────────────────────── */}
-      <section className="mt-12">
+      <section className="mt-16">
         <blockquote className="mx-auto max-w-3xl text-center font-display text-xl font-medium leading-relaxed text-text-secondary">
           “<Placeholder id="testimonial.featured" />”
         </blockquote>

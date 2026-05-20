@@ -717,18 +717,6 @@ export const placeholders: readonly Placeholder[] = [
       consentRequired: false,
     }),
   ),
-  {
-    id: "system.status",
-    type: "metric",
-    value: { lt: "GYVA SISTEMA", en: "LIVE SYSTEM" },
-    description: "Top-nav status pill (green pulse) — pre-launch placeholder.",
-    replacementSource:
-      "Real platform health signal from the status/uptime service once the platform is live.",
-    status: "placeholder",
-    addedIn: "M0",
-    consentRequired: false,
-    notes: "Platform is pre-launch; the pill is aspirational until then.",
-  },
   ...Array.from({ length: 4 }, (_, i): Placeholder => {
     const n = i + 1;
     const samples: Record<number, { lt: string; en: string }> = {

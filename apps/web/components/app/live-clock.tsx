@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 
 /** Real local time, top-right of the hero card region. Ticks every second
  *  (state-only update — no motion, so reduced-motion is a no-op here).
  *  Mounted-guarded so SSR and first client render agree. */
 export function LiveClock() {
-  const t = useTranslations("live.clock");
   const locale = useLocale();
   const tag = locale === "lt" ? "lt-LT" : "en-GB";
   const [now, setNow] = useState<Date | null>(null);
@@ -43,10 +42,8 @@ export function LiveClock() {
       >
         {date}
       </div>
-      <div className="mt-1 inline-flex items-center gap-1.5 rounded-sm border border-state-live/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-live">
-        <span className="live-dot" aria-hidden />
-        {t("badge")}
-      </div>
+      {/* 5b.5: 'EU-N MARKET · LIVE' badge consolidated into the map's
+          single UTC chip — see live-map.tsx. */}
     </div>
   );
 }

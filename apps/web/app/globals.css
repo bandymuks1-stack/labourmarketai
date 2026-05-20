@@ -38,6 +38,15 @@ a {
   text-decoration: none;
 }
 
+/* 5b.5: keyboard-visible focus everywhere unless a component overrides it.
+   Components that already provide their own focus styles (e.g. Button) keep
+   theirs because more-specific selectors win. */
+:focus-visible {
+  outline: 2px solid #3e8bff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 @layer components {
   /* gradient on ONE accent word only */
   .text-gradient-accent {

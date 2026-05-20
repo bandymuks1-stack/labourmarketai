@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { Placeholder } from "@/components/ui/Placeholder";
 import { LeadCapture } from "@/components/marketing/lead-capture";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 
@@ -38,12 +37,8 @@ export async function SiteNav() {
         </nav>
 
         <div className="ml-auto flex items-center gap-4">
-          <span className="hidden items-center gap-2 rounded-sm border border-ink-500 px-2.5 py-1 sm:inline-flex">
-            <span className="live-dot" aria-hidden />
-            <span className="font-mono text-[11px] uppercase tracking-label text-state-live">
-              <Placeholder id="system.status" />
-            </span>
-          </span>
+          {/* 5b.5: the live-system pill was removed here — DemoChip on the
+              hero is now the single honesty indicator (per PV §10). */}
           <LocaleSwitcher className="hidden sm:flex" />
           <LeadCapture source="nav_demo" />
         </div>

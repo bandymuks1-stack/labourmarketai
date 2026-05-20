@@ -44,7 +44,10 @@ export function MarketCounters() {
 
         return (
           <div key={c.id} className="flex flex-col gap-1">
-            <span className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            {/* 5b.5: 2-line min-height + items-end so the number baselines
+                stay aligned even when one label wraps to a single line
+                (notably LT "Atvira paklausa" vs the 2-line others). */}
+            <span className="flex min-h-9 items-end font-mono text-[11px] uppercase tracking-label text-text-muted">
               {t(c.label)}
             </span>
             <span className="relative inline-flex h-9 items-center overflow-hidden font-display text-3xl font-bold tabular-nums tracking-tightest text-text-primary">
