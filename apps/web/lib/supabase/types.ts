@@ -937,6 +937,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_role: {
+        Args: {
+          p_role: string
+          p_role_data: Json
+        }
+        Returns: void
+      }
       can_access_match: { Args: { m: string }; Returns: boolean }
       can_access_thread: { Args: { t: string }; Returns: boolean }
       complete_onboarding: {

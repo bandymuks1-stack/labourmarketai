@@ -69,9 +69,12 @@ test.describe("Onboarding entity creation (migration 0006)", () => {
     );
   });
 
-  test("worker adds the customer role from the switcher", async () => {
+  test("worker adds the company role from the switcher (creates companies row)", async () => {
     requiresTestEnv();
-    test.skip(true, "Requires authenticated session — wire after test project is configured (M1.x).");
+    test.skip(
+      true,
+      "Requires authenticated test session + DB introspection. Wire when SUPABASE_TEST_URL is provisioned (M1.x). Asserts: addRole('company') leaves exactly one row in companies WHERE profile_id = user.id, profile_roles entry with role='company' and is_active=true, profiles.active_role='company'. Re-invoking is a no-op (still exactly one companies row).",
+    );
   });
 });
 

@@ -92,13 +92,20 @@ export async function switchActiveRole(role: Role): Promise<void> {
   revalidatePath("/", "layout");
 }
 
-/** Add an additional role to the user's catalogue and switch into it. */
+/** Add an additional role to the user's catalogue and switch into it.
+ *  Atomic: catalogue upsert + role-specific entity row creation
+ *  (`workers` | `companies` | `agencies`) happen in one transaction via
+ *  the `public.add_role` RPC (migration 0007). Idempotent on retry. */
 export async function addRole(role: Role, formData?: FormData): Promise<void> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
+
+  if (!ONBOARDING_ROLES.has(role)) {
+    throw new Error(`Invalid role: ${role}`);
+  }
 
   const role_data: Record<string, string> = {};
   if (formData) {
@@ -107,20 +114,19 @@ export async function addRole(role: Role, formData?: FormData): Promise<void> {
     }
   }
 
-  await supabase.from("profile_roles").upsert(
-    {
-      profile_id: user.id,
-      role,
-      is_active: true,
-      role_data,
-    },
-    { onConflict: "profile_id,role" },
-  );
-
-  await supabase
-    .from("profiles")
-    .update({ active_role: role })
-    .eq("id", user.id);
+  const { error } = await supabase.rpc("add_role", {
+    p_role: role,
+    p_role_data: role_data,
+  });
+  if (error) {
+    console.error("[addRole] RPC failed", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+    throw new Error(`add_role RPC failed: ${error.message}`);
+  }
 
   revalidatePath("/", "layout");
 }
