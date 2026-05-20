@@ -33,6 +33,10 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   const display_name = String(formData.get("display_name") ?? "").trim();
   const country = String(formData.get("country") ?? "").trim();
   const locale = String(formData.get("locale") ?? "lt");
+  const profession_id = String(formData.get("profession_id") ?? "").trim();
+  if (role === "worker" && !profession_id) {
+    throw new Error("Worker onboarding requires a profession_id");
+  }
 
   // Per-role payload from the form
   const role_data: Record<string, string> = {};
@@ -41,7 +45,8 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       k === "role" ||
       k === "display_name" ||
       k === "country" ||
-      k === "locale"
+      k === "locale" ||
+      k === "profession_id"
     )
       continue;
     if (typeof v === "string") role_data[k] = v.trim();
@@ -52,6 +57,7 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
     p_display_name: display_name || null,
     p_country: country || null,
     p_role_data: role_data,
+    p_profession_id: profession_id || null,
   });
   if (error) {
     console.error("[completeOnboarding] RPC failed", {

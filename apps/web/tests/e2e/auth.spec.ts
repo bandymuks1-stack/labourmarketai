@@ -69,6 +69,14 @@ test.describe("Onboarding entity creation (migration 0006)", () => {
     );
   });
 
+  test("worker onboarding with profession creates worker_professions primary row", async () => {
+    requiresTestEnv();
+    test.skip(
+      true,
+      "Requires authenticated test session + DB introspection (migration 0008). Wire when SUPABASE_TEST_URL is provisioned. Asserts: worker_professions row exists with worker_id matching workers.id (via profile_id), profession_id matching the chosen seed slug (e.g. 'carpenter'), is_primary=true. Re-running with the same profession_id is a no-op; re-running with a different profession_id inserts is_primary=false (partial unique index 'worker_professions_one_primary' protects the primary).",
+    );
+  });
+
   test("worker adds the company role from the switcher (creates companies row)", async () => {
     requiresTestEnv();
     test.skip(
