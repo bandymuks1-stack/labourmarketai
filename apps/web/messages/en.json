@@ -43,6 +43,48 @@
       "response": "Response time"
     }
   },
+  "draft": {
+    "eyebrow": "Live matching",
+    "headline": {
+      "line1": "Here's how workers",
+      "line2": "find work in real time."
+    },
+    "subcopy": "Real-time matching, with reasons. Every match shows the why — no opaque algorithm, no black-box score.",
+    "column": {
+      "onDeck": "On deck",
+      "live": "Live now",
+      "drafted": "Drafted"
+    },
+    "status": {
+      "reviewing": "Reviewing",
+      "deciding": "Deciding",
+      "hired": "Hired"
+    },
+    "liveCounter": "Live draft · 12 matches in progress"
+  },
+  "marketPulse": {
+    "eyebrow": "Market pulse",
+    "headline": {
+      "line1": "The labour market,",
+      "line2": "seen in real time."
+    },
+    "subcopy": "Market intelligence is part of the platform — supply, demand and signals visible to everyone who needs them.",
+    "panel": {
+      "demandByCountry": "Demand by country",
+      "topSkills": "Top in-demand skills",
+      "supplyDemand": "Supply vs demand (30d)",
+      "recentMatches": "Recent matches"
+    },
+    "hot": "Hot",
+    "gap": "Gap",
+    "legend": { "supply": "Supply", "demand": "Demand" },
+    "autoUpdate": "Auto-update",
+    "timeAgo": {
+      "justNow": "just now",
+      "minutes": "{n}min ago",
+      "hours": "{n}h ago"
+    }
+  },
   "playercards": {
     "eyebrow": "Workers as living profiles",
     "headline": { "line1": "Every worker, ranked", "line2": "and ready." },

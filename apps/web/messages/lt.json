@@ -43,6 +43,48 @@
       "response": "Atsako laikas"
     }
   },
+  "draft": {
+    "eyebrow": "Gyvas matching",
+    "headline": {
+      "line1": "Štai kaip darbuotojai",
+      "line2": "atranda darbą realiu laiku."
+    },
+    "subcopy": "Atitikimas realiu laiku, su priežastimis. Kiekvienas atitikimas parodo \"kodėl\" — be neskaidraus algoritmo ar užmaskuoto įvertinimo.",
+    "column": {
+      "onDeck": "Eilėje",
+      "live": "Vyksta dabar",
+      "drafted": "Atrinkti"
+    },
+    "status": {
+      "reviewing": "Svarstoma",
+      "deciding": "Sprendimas",
+      "hired": "Atrinkta"
+    },
+    "liveCounter": "Aktyvus draftas · 12 matching procesų"
+  },
+  "marketPulse": {
+    "eyebrow": "Rinkos pulsas",
+    "headline": {
+      "line1": "Darbo rinka,",
+      "line2": "matoma realiu laiku."
+    },
+    "subcopy": "Rinkos analitika — sistemos dalis: pasiūla, paklausa ir signalai matomi visiems, kam jų reikia.",
+    "panel": {
+      "demandByCountry": "Paklausa pagal šalį",
+      "topSkills": "Paklausiausi įgūdžiai",
+      "supplyDemand": "Pasiūla vs paklausa (30d)",
+      "recentMatches": "Paskutiniai atitikimai"
+    },
+    "hot": "Karšta",
+    "gap": "Trūkumas",
+    "legend": { "supply": "Pasiūla", "demand": "Paklausa" },
+    "autoUpdate": "Auto-atnaujinimas",
+    "timeAgo": {
+      "justNow": "ką tik",
+      "minutes": "prieš {n}min",
+      "hours": "prieš {n}val"
+    }
+  },
   "playercards": {
     "eyebrow": "Darbuotojai kaip gyvi profiliai",
     "headline": {

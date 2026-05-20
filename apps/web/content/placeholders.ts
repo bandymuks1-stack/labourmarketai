@@ -86,6 +86,47 @@ export type DemandData = {
   rankedMatches: number;
 };
 
+/** DraftBoard mini-card payload (5b.4). */
+export type DraftStatus = "reviewing" | "deciding" | "hired";
+export type DraftCardData = {
+  name: string;
+  country: string;
+  flag: string;
+  role: { lt: string; en: string };
+  ovr: number;
+  tier: PlayerTier;
+  status: DraftStatus;
+};
+
+/** MarketPulse panel payloads (5b.4). */
+export type SkillTrend = "up" | "down" | "flat";
+export type RegionDemand = {
+  code: string;
+  flag: string;
+  name: { lt: string; en: string };
+  intensity: number;
+};
+export type SkillDemandRow = {
+  name: { lt: string; en: string };
+  trend: SkillTrend;
+  score: number;
+};
+export type RecentMatchEvent = {
+  initials: string;
+  project: { lt: string; en: string };
+  minutesAgo: number;
+};
+export type MarketPanel =
+  | { kind: "demand_by_country"; rows: RegionDemand[] }
+  | { kind: "skills_top"; rows: SkillDemandRow[] }
+  | {
+      kind: "supply_demand";
+      supply: number[];
+      demand: number[];
+      gapPct: number;
+    }
+  | { kind: "recent_matches"; rows: RecentMatchEvent[] };
+
 /** Company score ring payload (5b.3.6) — symmetric to the worker OVR. */
 export type CompanyTier = "diamond" | "gold" | "silver" | "bronze";
 export type CompanyScoreData = {
@@ -141,6 +182,10 @@ export type Placeholder = {
   pool?: AgencyPoolData;
   /** Company score ring (5b.3.6). */
   company?: CompanyScoreData;
+  /** DraftBoard mini-card (5b.4). */
+  draft?: DraftCardData;
+  /** MarketPulse panel payload (5b.4). */
+  marketPanel?: MarketPanel;
 };
 
 const SQL = (q: string) => `SQL: ${q}`;
@@ -970,6 +1015,152 @@ export const placeholders: readonly Placeholder[] = [
       main_industry: { lt: "Statyba", en: "Construction" },
     },
   },
+  ...(
+    [
+      { id: "draft.onDeck.1", name: "Andrius K.", country: "LT", flag: "🇱🇹", role: { lt: "Armatūrininkas", en: "Steel fixer" }, ovr: 88, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.2", name: "Lukas H.",  country: "DE", flag: "🇩🇪", role: { lt: "Suvirintojas",  en: "Welder" },      ovr: 92, tier: "gold" as PlayerTier,   status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.3", name: "Emil J.",   country: "DK", flag: "🇩🇰", role: { lt: "Betonuotojas",  en: "Concreter" },   ovr: 79, tier: "bronze" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.4", name: "Jonas P.",  country: "LV", flag: "🇱🇻", role: { lt: "Elektrikas",    en: "Electrician" }, ovr: 84, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.live.1",   name: "Pieter V.", country: "NL", flag: "🇳🇱", role: { lt: "Statybvietės vadovas", en: "Site Supervisor" }, ovr: 91, tier: "gold" as PlayerTier,   status: "deciding" as DraftStatus },
+      { id: "draft.live.2",   name: "Mateusz S.",country: "PL", flag: "🇵🇱", role: { lt: "Santechnikas",  en: "Plumber" },     ovr: 82, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
+      { id: "draft.live.3",   name: "Erik N.",   country: "SE", flag: "🇸🇪", role: { lt: "Klojinių dailidė", en: "Formwork carpenter" }, ovr: 86, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
+      { id: "draft.drafted.1",name: "Henrik O.", country: "NO", flag: "🇳🇴", role: { lt: "Krano operatorius", en: "Crane operator" }, ovr: 90, tier: "gold" as PlayerTier,   status: "hired" as DraftStatus },
+      { id: "draft.drafted.2",name: "Jaak R.",   country: "EE", flag: "🇪🇪", role: { lt: "ŠVOK montuotojas", en: "HVAC fitter" }, ovr: 81, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
+      { id: "draft.drafted.3",name: "Marek W.",  country: "PL", flag: "🇵🇱", role: { lt: "Pastolininkas",  en: "Scaffolder" }, ovr: 77, tier: "bronze" as PlayerTier, status: "hired" as DraftStatus },
+      { id: "draft.drafted.4",name: "Tomas K.",  country: "LT", flag: "🇱🇹", role: { lt: "Saugos specialistas", en: "Safety officer" }, ovr: 89, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
+    ] as const
+  ).map(
+    (c): Placeholder => ({
+      id: c.id,
+      type: "person",
+      value: {
+        lt: `${c.name} · ${c.role.lt} · ${c.country} · OVR ${c.ovr}`,
+        en: `${c.name} · ${c.role.en} · ${c.country} · OVR ${c.ovr}`,
+      },
+      description: `DraftBoard mini-card (${c.status}, ${c.country}).`,
+      replacementSource:
+        "Real matching events from `match_events` joined with `workers` and `projects`, computed by the M2 matching module.",
+      status: "placeholder",
+      addedIn: "M0",
+      consentRequired: true,
+      notes: "consented:false — sample persona for the live-draft visual.",
+      draft: {
+        name: c.name,
+        country: c.country,
+        flag: c.flag,
+        role: { lt: c.role.lt, en: c.role.en },
+        ovr: c.ovr,
+        tier: c.tier,
+        status: c.status,
+      },
+    }),
+  ),
+  {
+    id: "market.demand.byCountry",
+    type: "metric",
+    value: {
+      lt: "Paklausa pagal šalį · 9 rinkos (pavyzdys)",
+      en: "Demand by country · 9 markets (sample)",
+    },
+    description: "MarketPulse panel — demand intensity per launch country.",
+    replacementSource:
+      "Real market intelligence aggregated from `job_demands` + `workers` per country, computed in M4 (PROJECT_VISION.md §8 module 11).",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: false,
+    marketPanel: {
+      kind: "demand_by_country",
+      rows: [
+        { code: "DE", flag: "🇩🇪", name: { lt: "Vokietija",   en: "Germany" },     intensity: 92 },
+        { code: "NL", flag: "🇳🇱", name: { lt: "Nyderlandai", en: "Netherlands" }, intensity: 84 },
+        { code: "PL", flag: "🇵🇱", name: { lt: "Lenkija",     en: "Poland" },      intensity: 78 },
+        { code: "DK", flag: "🇩🇰", name: { lt: "Danija",      en: "Denmark" },     intensity: 71 },
+        { code: "SE", flag: "🇸🇪", name: { lt: "Švedija",     en: "Sweden" },      intensity: 67 },
+        { code: "LT", flag: "🇱🇹", name: { lt: "Lietuva",     en: "Lithuania" },   intensity: 64 },
+        { code: "NO", flag: "🇳🇴", name: { lt: "Norvegija",   en: "Norway" },      intensity: 58 },
+        { code: "EE", flag: "🇪🇪", name: { lt: "Estija",      en: "Estonia" },     intensity: 55 },
+        { code: "LV", flag: "🇱🇻", name: { lt: "Latvija",     en: "Latvia" },      intensity: 53 },
+      ],
+    },
+  },
+  {
+    id: "market.skills.topDemand",
+    type: "metric",
+    value: {
+      lt: "Paklausiausi įgūdžiai · 8 pozicijos (pavyzdys)",
+      en: "Top in-demand skills · 8 entries (sample)",
+    },
+    description: "MarketPulse panel — ranked top in-demand skills.",
+    replacementSource:
+      "Aggregated from `job_demands.required_skills` over the last 30 days, computed in M4 (PROJECT_VISION.md §8 module 11).",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: false,
+    marketPanel: {
+      kind: "skills_top",
+      rows: [
+        { name: { lt: "Armatūros rišimas",     en: "Steel fixing" },           trend: "up",   score: 94 },
+        { name: { lt: "Klojinių dailidė",      en: "Concrete formwork" },      trend: "up",   score: 89 },
+        { name: { lt: "Elektros instaliacija", en: "Electrical installation" },trend: "up",   score: 86 },
+        { name: { lt: "Suvirinimas",           en: "Welding" },                trend: "flat", score: 83 },
+        { name: { lt: "Pastoliai",             en: "Scaffolding" },            trend: "up",   score: 79 },
+        { name: { lt: "ŠVOK",                  en: "HVAC" },                   trend: "down", score: 76 },
+        { name: { lt: "Santechnika",           en: "Plumbing" },               trend: "flat", score: 72 },
+        { name: { lt: "Statybos priežiūra",    en: "Site supervision" },       trend: "up",   score: 70 },
+      ],
+    },
+  },
+  ((): Placeholder => {
+    const r = lcg(20260520);
+    const supply = Array.from({ length: 30 }, (_, i) =>
+      Math.round(50 + i * 0.4 + (r() * 8 - 4)),
+    );
+    const demand = Array.from({ length: 30 }, (_, i) =>
+      Math.round(55 + i * 0.9 + (r() * 8 - 4)),
+    );
+    return {
+      id: "market.supplyDemand.series",
+      type: "metric",
+      value: {
+        lt: "Pasiūla vs paklausa · 30d (pavyzdys)",
+        en: "Supply vs demand · 30d (sample)",
+      },
+      description: "MarketPulse panel — supply vs demand 30-day series.",
+      replacementSource:
+        "Daily supply (`workers.availability_status='available'`) and demand (`job_demands.status='open'`) counts over a 30-day window, computed in M4 (PROJECT_VISION.md §8 module 11).",
+      status: "placeholder",
+      addedIn: "M0",
+      consentRequired: false,
+      marketPanel: { kind: "supply_demand", supply, demand, gapPct: -12 },
+    };
+  })(),
+  {
+    id: "market.recentMatches.feed",
+    type: "metric",
+    value: {
+      lt: "Paskutiniai atitikimai · 8 įvykiai (pavyzdys)",
+      en: "Recent matches · 8 events (sample)",
+    },
+    description: "MarketPulse panel — streaming recent-matches feed pool.",
+    replacementSource:
+      "Recent rows from `match_events` joined with `workers`/`projects`, streamed live in M4 (PROJECT_VISION.md §8 module 11).",
+    status: "placeholder",
+    addedIn: "M0",
+    consentRequired: false,
+    marketPanel: {
+      kind: "recent_matches",
+      rows: [
+        { initials: "AK", project: { lt: "Roterdamas · Armatūrininkas", en: "Rotterdam · Steel fixer" },     minutesAgo: 2 },
+        { initials: "LH", project: { lt: "Berlynas · Suvirintojas",     en: "Berlin · Welder" },             minutesAgo: 5 },
+        { initials: "EJ", project: { lt: "Kopenhaga · Betonuotojas",    en: "Copenhagen · Concreter" },      minutesAgo: 9 },
+        { initials: "PV", project: { lt: "Amsterdamas · Vadovas",       en: "Amsterdam · Supervisor" },      minutesAgo: 14 },
+        { initials: "MS", project: { lt: "Varšuva · Santechnikas",      en: "Warsaw · Plumber" },            minutesAgo: 21 },
+        { initials: "EN", project: { lt: "Stokholmas · Dailidė",        en: "Stockholm · Carpenter" },       minutesAgo: 33 },
+        { initials: "HO", project: { lt: "Oslas · Krano operatorius",   en: "Oslo · Crane operator" },       minutesAgo: 48 },
+        { initials: "JR", project: { lt: "Talinas · ŠVOK",              en: "Tallinn · HVAC" },              minutesAgo: 72 },
+      ],
+    },
+  },
   {
     id: "pricing.workers.tiers",
     type: "metric",
@@ -1063,6 +1254,24 @@ export function getCompany(id: string): CompanyScoreData {
   const c = getPlaceholder(id).company;
   if (!c) throw new Error(`Placeholder "${id}" has no company payload.`);
   return c;
+}
+
+/** Draft mini-card payload (5b.4). */
+export function getDraft(id: string): DraftCardData {
+  const d = getPlaceholder(id).draft;
+  if (!d) throw new Error(`Placeholder "${id}" has no draft payload.`);
+  return d;
+}
+
+/** Typed market-panel payload (5b.4). Narrows by the `kind` discriminator. */
+export function getMarketPanel<K extends MarketPanel["kind"]>(
+  id: string,
+  kind: K,
+): Extract<MarketPanel, { kind: K }> {
+  const p = getPlaceholder(id).marketPanel;
+  if (!p || p.kind !== kind)
+    throw new Error(`Placeholder "${id}" has no ${kind} marketPanel.`);
+  return p as Extract<MarketPanel, { kind: K }>;
 }
 
 /** Narrowed geo payloads of a given kind, in registry order. */
