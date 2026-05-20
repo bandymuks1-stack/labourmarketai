@@ -57,7 +57,8 @@ export function SignupForm() {
       });
       if (err) throw err;
       setStatus("sent");
-    } catch {
+    } catch (e) {
+      console.error("[signup] signInWithOtp failed:", e);
       setStatus("error");
       setError(t("error_generic"));
     }

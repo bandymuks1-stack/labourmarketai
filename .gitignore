@@ -21,3 +21,5 @@ next-env.d.ts
 Thumbs.db
 .DS_Store
 *.log
+
+supabase/.temp/

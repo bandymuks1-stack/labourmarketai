@@ -39,7 +39,8 @@ export function LoginForm() {
       });
       if (err) throw err;
       setStatus("sent");
-    } catch {
+    } catch (e) {
+      console.error("[login] signInWithOtp failed:", e);
       setStatus("error");
       setError(t("error_generic"));
     }

@@ -37,7 +37,12 @@ export function OnboardingForm({
     start(async () => {
       try {
         await completeOnboarding(form);
-      } catch {
+      } catch (e) {
+        // Re-throw Next.js redirect signal (server action navigation)
+        if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) {
+          throw e;
+        }
+        console.error("[onboarding] completeOnboarding failed:", e);
         setError(t("error_generic"));
       }
     });

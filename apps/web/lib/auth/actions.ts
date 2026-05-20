@@ -35,7 +35,7 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   }
 
   // profile core fields
-  await supabase
+  const { error: profErr } = await supabase
     .from("profiles")
     .update({
       full_name: display_name || null,
@@ -45,9 +45,12 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       onboarded: true,
     })
     .eq("id", user.id);
+  if (profErr) {
+    throw new Error(`profiles update failed: ${profErr.message}`);
+  }
 
   // upsert the role row (catalogue + role-specific blob)
-  await supabase.from("profile_roles").upsert(
+  const { error: roleErr } = await supabase.from("profile_roles").upsert(
     {
       profile_id: user.id,
       role,
@@ -56,6 +59,9 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
     },
     { onConflict: "profile_id,role" },
   );
+  if (roleErr) {
+    throw new Error(`profile_roles upsert failed: ${roleErr.message}`);
+  }
 
   revalidatePath(`/${locale}/dashboard`);
   redirect(`/${locale}/dashboard`);

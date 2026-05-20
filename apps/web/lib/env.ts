@@ -21,7 +21,14 @@ const schema = z.object({
     .default("true"),
 });
 
-const parsed = schema.safeParse(process.env);
+const parsed = schema.safeParse({
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
+  NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
+    process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,
+});
 
 if (!parsed.success) {
   console.error(
