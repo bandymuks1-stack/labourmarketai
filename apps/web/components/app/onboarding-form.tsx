@@ -11,21 +11,26 @@ import {
 const COUNTRIES = ["LT", "LV", "EE", "PL", "NL", "DE", "DK", "SE", "NO"] as const;
 
 const FIELDS: Record<Role, string[]> = {
-  worker: ["profession", "language", "city"],
+  worker: ["language", "city"],
   company: ["name", "industry", "headcount"],
   agency: ["name", "regions", "focus"],
   customer: ["city"],
 };
 
+type ProfessionOption = { id: string; name: string };
+
 /** First-onboarding form. Common (display_name + country) plus a small
- *  role-specific set; everything posts to the `completeOnboarding` server
- *  action which writes profile_roles.role_data + profiles.onboarded_at. */
+ *  role-specific set; worker also picks a primary profession from the
+ *  `professions` table (migration 0008). Everything posts to the
+ *  `completeOnboarding` server action. */
 export function OnboardingForm({
   role,
   defaultName,
+  professions,
 }: {
   role: Role;
   defaultName: string;
+  professions: ProfessionOption[];
 }) {
   const t = useTranslations("auth.onboarding");
   const locale = useLocale();
@@ -86,6 +91,27 @@ export function OnboardingForm({
           ))}
         </select>
       </label>
+
+      {role === "worker" && (
+        <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+          {t("profession.label")}
+          <select
+            name="profession_id"
+            required
+            defaultValue=""
+            className={inputCls}
+          >
+            <option value="" disabled>
+              {t("profession.placeholder")}
+            </option>
+            {professions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       {FIELDS[role].map((f) => (
         <label

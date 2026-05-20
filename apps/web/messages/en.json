@@ -159,9 +159,13 @@
       "subcopy": "A few quick fields to set up your profile.",
       "display_name_label": "Display name",
       "country_label": "Country",
+      "profession": {
+        "label": "Profession",
+        "placeholder": "Select a profession",
+        "required": "Please pick a profession."
+      },
       "fields": {
         "worker": {
-          "profession": "Profession",
           "language": "Primary language",
           "city": "Current city"
         },

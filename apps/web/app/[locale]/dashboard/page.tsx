@@ -67,11 +67,45 @@ export default async function DashboardOverviewPage({
     );
   }
 
+  // Primary profession lookup for the worker badge (migration 0008).
+  // Two-step query keeps types simple; if either row is missing the
+  // badge silently drops the profession suffix.
+  type ProfRow = {
+    name_lt: string;
+    name_en: string;
+    name_nl: string | null;
+    name_de: string | null;
+    name_pl: string | null;
+    name_ru: string | null;
+  };
+  let primaryProfession: string | null = null;
+  const { data: workerRow } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (workerRow?.id) {
+    const { data: wp } = await supabase
+      .from("worker_professions")
+      .select(
+        "professions(name_lt, name_en, name_nl, name_de, name_pl, name_ru)",
+      )
+      .eq("worker_id", workerRow.id)
+      .eq("is_primary", true)
+      .maybeSingle();
+    const prof = (wp?.professions as ProfRow | null) ?? null;
+    if (prof) {
+      const key = `name_${locale}` as keyof ProfRow;
+      primaryProfession = (prof[key] as string | null) ?? prof.name_en;
+    }
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <header>
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
           {tRole(role)}
+          {primaryProfession ? ` · ${primaryProfession}` : ""}
         </p>
         <h1 className="mt-2 font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("greeting", { name })}

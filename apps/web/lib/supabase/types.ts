@@ -539,6 +539,93 @@ export type Database = {
         }
         Relationships: []
       }
+      professions: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name_de: string | null
+          name_en: string
+          name_lt: string
+          name_nl: string | null
+          name_pl: string | null
+          name_ru: string | null
+          sector: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_de?: string | null
+          name_en: string
+          name_lt: string
+          name_nl?: string | null
+          name_pl?: string | null
+          name_ru?: string | null
+          sector: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_de?: string | null
+          name_en?: string
+          name_lt?: string
+          name_nl?: string | null
+          name_pl?: string | null
+          name_ru?: string | null
+          sector?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      worker_professions: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          profession_id: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          profession_id: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          profession_id?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_professions_profession_id_fkey"
+            columns: ["profession_id"]
+            isOneToOne: false
+            referencedRelation: "professions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_professions_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_roles: {
         Row: {
           added_at: string
@@ -952,6 +1039,7 @@ export type Database = {
           p_display_name: string | null
           p_country: string | null
           p_role_data: Json
+          p_profession_id?: string | null
         }
         Returns: void
       }

@@ -162,9 +162,13 @@
       "subcopy": "Užpildykite kelis laukus, kad sukurtume jūsų profilį.",
       "display_name_label": "Rodomas vardas",
       "country_label": "Šalis",
+      "profession": {
+        "label": "Profesija",
+        "placeholder": "Pasirink profesiją",
+        "required": "Pasirinkite profesiją."
+      },
       "fields": {
         "worker": {
-          "profession": "Profesija",
           "language": "Pagrindinė kalba",
           "city": "Dabartinis miestas"
         },

@@ -50,6 +50,34 @@ export default async function OnboardingPage({
   const defaultName =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
 
+  // Worker onboarding needs the profession dropdown options. Fetch all
+  // active professions and pick the locale-appropriate display name in
+  // memory (avoids a dynamic column-name select that TypeScript can't
+  // narrow). Empty list is OK — the form will render an empty dropdown.
+  type ProfessionRow = {
+    id: string;
+    name_lt: string;
+    name_en: string;
+    name_nl: string | null;
+    name_de: string | null;
+    name_pl: string | null;
+    name_ru: string | null;
+  };
+  let professions: { id: string; name: string }[] = [];
+  if (role === "worker") {
+    const { data } = await supabase
+      .from("professions")
+      .select("id, name_lt, name_en, name_nl, name_de, name_pl, name_ru")
+      .eq("is_active", true);
+    const key = (`name_${locale}` as keyof ProfessionRow);
+    professions = ((data as ProfessionRow[] | null) ?? [])
+      .map((p) => ({
+        id: p.id,
+        name: (p[key] as string | null) ?? p.name_en,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   return (
     <div className="relative min-h-screen">
       <AmbientGlow />
@@ -62,7 +90,11 @@ export default async function OnboardingPage({
         </Link>
       </header>
       <main className="relative z-10 mx-auto flex max-w-md flex-col px-6 pb-20">
-        <OnboardingForm role={role} defaultName={defaultName} />
+        <OnboardingForm
+          role={role}
+          defaultName={defaultName}
+          professions={professions}
+        />
       </main>
     </div>
   );
