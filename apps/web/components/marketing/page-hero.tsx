@@ -1,21 +1,27 @@
-import { LeadCapture } from "@/components/marketing/lead-capture";
+import { Link } from "@/lib/i18n/navigation";
+import { Button } from "@/components/ui/Button";
+import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 
 /** Shared sub-page hero: small-caps chip → two-line headline with the accent
- *  word in the brand gradient → honest sub-copy → one lead-capture CTA. */
+ *  word in the brand gradient → honest sub-copy → one CTA. CTA is either a
+ *  real signup (workers) or the company/agency waitlist modal (everyone else)
+ *  per the M1 honest-positioning brief. */
 export function PageHero({
   eyebrow,
   title,
   accent,
   subcopy,
+  ctaKind,
+  ctaLabel,
   ctaSource,
-  ctaLabelKey = "open",
 }: {
   eyebrow: string;
   title: string;
   accent: string;
   subcopy: string;
+  ctaKind: "signup" | "waitlist";
+  ctaLabel: string;
   ctaSource: string;
-  ctaLabelKey?: "open" | "openAlt";
 }) {
   return (
     <section className="relative mx-auto max-w-container px-6 pb-12 pt-16 sm:px-12">
@@ -30,7 +36,17 @@ export function PageHero({
         {subcopy}
       </p>
       <div className="mt-8">
-        <LeadCapture source={ctaSource} labelKey={ctaLabelKey} />
+        {ctaKind === "signup" ? (
+          <Link href="/auth/signup">
+            <Button>{ctaLabel} →</Button>
+          </Link>
+        ) : (
+          <WaitlistModal
+            trigger={ctaLabel}
+            source={ctaSource}
+            triggerClassName="font-semibold text-text-primary"
+          />
+        )}
       </div>
     </section>
   );

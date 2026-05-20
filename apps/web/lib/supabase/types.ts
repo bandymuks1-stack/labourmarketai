@@ -843,6 +843,30 @@ export type Database = {
           },
         ]
       }
+      waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          locale: string | null
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          locale?: string | null
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          locale?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       workers: {
         Row: {
           availability_status: string | null

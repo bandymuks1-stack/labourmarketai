@@ -1,7 +1,7 @@
 {
   "live": {
     "chip": {
-      "text": "DEMO · Simulated activity · Real launch coming soon"
+      "text": "PRE-ALPHA · Activity preview · Live market growing"
     },
     "clock": {
       "badge": "EU-N MARKET · LIVE"
@@ -238,6 +238,12 @@
         "email_label": "Email",
         "roles_label": "My roles",
         "logout": "Sign out"
+      },
+      "comingSoon": {
+        "greeting": "👋 Welcome, {name}",
+        "body_main": "We're finishing the company / agency functionality right now.",
+        "body_notify": "We'll let you know the moment it's ready.",
+        "body_meanwhile": "In the meantime — you can browse the platform via the \"Discover\" tab (read-only)."
       }
     },
     "middleware": {
@@ -429,15 +435,34 @@
     "solutions": "Solutions",
     "resources": "Resources",
     "pricing": "Pricing",
-    "company": "Company"
+    "company": "Company",
+    "login": "Sign in",
+    "startNow": "Start now"
   },
   "hero": {
     "chip": "The labour market OS",
     "headline": "The labour market,",
     "headlineAccent": "alive.",
     "subcopy": "One profile. Workers, companies and agencies on a single connected market — live demand, real-time matching, honest signals. The platform is being built; this is the M0 foundation.",
-    "ctaPrimary": "Explore the platform",
-    "ctaSecondary": "Watch how it works"
+    "ctaPrimary": "Start now",
+    "businessNote": "For companies & agencies ·",
+    "businessLink": "Learn more"
+  },
+  "waitlist": {
+    "title": "For companies & agencies — coming soon",
+    "body_intro": "LabourMarket.ai is currently open to workers.",
+    "body_detail": "Company functionality (hiring, workforce management) and agency functionality (placement) will ship in the coming months.",
+    "body_cta": "Leave your email — we'll notify the first batch.",
+    "email_label": "Email",
+    "email_placeholder": "name@company.com",
+    "submit": "Notify me",
+    "sending": "Sending…",
+    "success_title": "Thanks!",
+    "success_body": "We'll let you know as soon as it's ready.",
+    "duplicate_title": "You're already on the list ✓",
+    "duplicate_body": "This email is already recorded — we'll notify you when access opens.",
+    "error": "Something went wrong. Please try again shortly.",
+    "close": "Close"
   },
   "stats": {
     "activeWorkers": "Active workers",
@@ -511,25 +536,6 @@
     "rights": "All rights reserved.",
     "preview": "M0 preview build — not a public launch."
   },
-  "leadForm": {
-    "open": "Book a demo",
-    "openAlt": "Get early access",
-    "title": "Book a demo",
-    "subtitle": "Tell us who you are and we'll reach out as access opens.",
-    "name": "Full name",
-    "email": "Work email",
-    "intentLabel": "I want to",
-    "intents": {
-      "hire_workers": "Hire workers",
-      "find_job": "Find work",
-      "partner": "Partner / agency"
-    },
-    "submit": "Request access",
-    "sending": "Sending…",
-    "success": "Thanks — we've recorded your interest and will be in touch.",
-    "error": "Something went wrong. Please try again shortly.",
-    "close": "Close"
-  },
   "pages": {
     "workers": {
       "eyebrow": "For workers",
@@ -551,7 +557,7 @@
         }
       ],
       "screenshot": "Worker avatar flow",
-      "cta": "Get early access"
+      "cta": "Start now"
     },
     "companies": {
       "eyebrow": "For companies",
@@ -573,7 +579,7 @@
         }
       ],
       "screenshot": "Company demand flow",
-      "cta": "Book a demo"
+      "cta": "Join the company waitlist"
     },
     "agencies": {
       "eyebrow": "For agencies",
@@ -595,7 +601,7 @@
         }
       ],
       "screenshot": "Agency mode flow",
-      "cta": "Book a demo"
+      "cta": "Join the partner waitlist"
     }
   },
   "pricing": {

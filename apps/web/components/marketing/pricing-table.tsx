@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { Placeholder } from "@/components/ui/Placeholder";
-import { LeadCapture } from "@/components/marketing/lead-capture";
+import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { getPlans, PLAN_SLUGS } from "@/lib/marketing/plans";
 
 export async function PricingTable() {
@@ -44,12 +44,11 @@ export async function PricingTable() {
             </ul>
 
             <div className="mt-6">
-              <LeadCapture
+              <WaitlistModal
+                trigger={t("planCta")}
                 source={`pricing_${slug}`}
-                tone="secondary"
-                labelKey="open"
+                triggerClassName="text-sm font-semibold text-text-primary"
               />
-              <p className="mt-2 text-xs text-text-muted">{t("planCta")}</p>
             </div>
           </div>
         );

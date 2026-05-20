@@ -1,21 +1,24 @@
-import { LeadCapture, type LeadIntent } from "@/components/marketing/lead-capture";
+import { Link } from "@/lib/i18n/navigation";
+import { Button } from "@/components/ui/Button";
+import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 
-/** Bottom call-to-action band. `accent` renders as a gradient second
- *  headline line; `ctaIntent` pre-selects the lead intent for the role. */
+/** Bottom call-to-action band. CTA kind chooses between the real worker
+ *  signup and the company / agency waitlist modal — see M1 honest-
+ *  positioning brief and PV §10. */
 export function CtaBand({
   title,
   accent,
   subtitle,
-  ctaSource,
+  ctaKind,
   ctaLabel,
-  ctaIntent = "hire_workers",
+  ctaSource,
 }: {
   title: string;
   accent?: string;
   subtitle: string;
+  ctaKind: "signup" | "waitlist";
+  ctaLabel: string;
   ctaSource: string;
-  ctaLabel?: string;
-  ctaIntent?: LeadIntent;
 }) {
   return (
     <section className="mx-auto max-w-container px-6 pb-20 sm:px-12">
@@ -33,11 +36,17 @@ export function CtaBand({
           {subtitle}
         </p>
         <div className="mt-8 flex justify-center">
-          <LeadCapture
-            source={ctaSource}
-            label={ctaLabel}
-            defaultIntent={ctaIntent}
-          />
+          {ctaKind === "signup" ? (
+            <Link href="/auth/signup">
+              <Button>{ctaLabel} →</Button>
+            </Link>
+          ) : (
+            <WaitlistModal
+              trigger={ctaLabel}
+              source={ctaSource}
+              triggerClassName="font-semibold text-text-primary"
+            />
+          )}
         </div>
       </div>
     </section>

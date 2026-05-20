@@ -1,9 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { Sparkline } from "@/components/ui/Sparkline";
-import { LeadCapture } from "@/components/marketing/lead-capture";
+import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { DemoChip } from "@/components/app/demo-chip";
 import { LiveClock } from "@/components/app/live-clock";
 import { LiveMap } from "@/components/app/live-map";
@@ -60,11 +61,17 @@ export default async function LandingPage({
           <p className="mt-6 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">
             {t("subcopy")}
           </p>
-          <div className="mt-8 flex flex-wrap items-start gap-4">
-            <LeadCapture source="hero_primary" />
-            <Button variant="secondary" disabled aria-disabled>
-              {t("ctaSecondary")}
-            </Button>
+          <div className="mt-8 flex flex-col items-start gap-3">
+            <Link href="/auth/signup">
+              <Button>{t("ctaPrimary")} →</Button>
+            </Link>
+            <p className="text-xs text-text-muted">
+              {t("businessNote")}{" "}
+              <WaitlistModal
+                trigger={t("businessLink")}
+                source="hero_business_link"
+              />
+            </p>
           </div>
 
           <div className="mt-12">

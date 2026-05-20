@@ -1,7 +1,7 @@
 {
   "live": {
     "chip": {
-      "text": "DEMO · Imituojamas aktyvumas · Tikras startas netrukus"
+      "text": "PRE-ALPHA · Aktyvumo preview · Gyva rinka auga"
     },
     "clock": {
       "badge": "EU-Š RINKA · GYVA"
@@ -241,6 +241,12 @@
         "email_label": "El. paštas",
         "roles_label": "Mano vaidmenys",
         "logout": "Atsijungti"
+      },
+      "comingSoon": {
+        "greeting": "👋 Sveiki, {name}",
+        "body_main": "Šiuo metu mes baigiame ruošti įmonių/agentūrų funkcionalumą.",
+        "body_notify": "Pranešime iškart, kai bus paruošta.",
+        "body_meanwhile": "Tuo tarpu — gali apžiūrėti platformą per „Naršyti\" skiltį (read-only)."
       }
     },
     "middleware": {
@@ -432,15 +438,34 @@
     "solutions": "Sprendimai",
     "resources": "Ištekliai",
     "pricing": "Kainos",
-    "company": "Apie mus"
+    "company": "Apie mus",
+    "login": "Prisijungti",
+    "startNow": "Pradėti dabar"
   },
   "hero": {
     "chip": "Darbo rinkos sistema",
     "headline": "Gyva darbo rinkos",
     "headlineAccent": "valdymo sistema.",
     "subcopy": "Vienas profilis. Darbuotojai, įmonės ir agentūros vienoje sujungtoje rinkoje — gyva paklausa, atitikimas realiu laiku, sąžiningi signalai. Platforma kuriama; tai M0 pagrindas.",
-    "ctaPrimary": "Išbandyti platformą",
-    "ctaSecondary": "Kaip tai veikia"
+    "ctaPrimary": "Pradėti dabar",
+    "businessNote": "Įmonėms ir agentūroms ·",
+    "businessLink": "Sužinoti daugiau"
+  },
+  "waitlist": {
+    "title": "Įmonėms ir agentūroms — netrukus",
+    "body_intro": "LabourMarket.ai platforma šiuo metu atvira darbuotojams.",
+    "body_detail": "Įmonių (samdymas, darbuotojų valdymas) ir agentūrų (tarpininkavimas) funkcionalumą paleisime artimiausiais mėnesiais.",
+    "body_cta": "Palik el. paštą — pranešime pirmiems.",
+    "email_label": "El. paštas",
+    "email_placeholder": "vardas@imone.lt",
+    "submit": "Pranešti man",
+    "sending": "Siunčiama…",
+    "success_title": "Ačiū!",
+    "success_body": "Informuosime, kai paleisime.",
+    "duplicate_title": "Jau esi sąraše ✓",
+    "duplicate_body": "Šis el. paštas jau įrašytas — pranešime, kai atvers prieigą.",
+    "error": "Įvyko klaida. Pabandykite dar kartą vėliau.",
+    "close": "Uždaryti"
   },
   "stats": {
     "activeWorkers": "Aktyvūs darbuotojai",
@@ -514,25 +539,6 @@
     "rights": "Visos teisės saugomos.",
     "preview": "M0 peržiūros versija — tai nėra viešas startas."
   },
-  "leadForm": {
-    "open": "Užsisakyti demo",
-    "openAlt": "Gauti ankstyvą prieigą",
-    "title": "Užsisakyti demo",
-    "subtitle": "Pasakykite, kas esate, ir susisieksime atsivėrus prieigai.",
-    "name": "Vardas ir pavardė",
-    "email": "Darbo el. paštas",
-    "intentLabel": "Noriu",
-    "intents": {
-      "hire_workers": "Samdyti darbuotojus",
-      "find_job": "Rasti darbą",
-      "partner": "Partnerystė / agentūra"
-    },
-    "submit": "Prašyti prieigos",
-    "sending": "Siunčiama…",
-    "success": "Ačiū — užfiksavome jūsų susidomėjimą ir susisieksime.",
-    "error": "Įvyko klaida. Pabandykite dar kartą vėliau.",
-    "close": "Uždaryti"
-  },
   "pages": {
     "workers": {
       "eyebrow": "Darbuotojams",
@@ -554,7 +560,7 @@
         }
       ],
       "screenshot": "Darbuotojo profilio srautas",
-      "cta": "Gauti ankstyvą prieigą"
+      "cta": "Pradėti dabar"
     },
     "companies": {
       "eyebrow": "Įmonėms",
@@ -576,7 +582,7 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Užsisakyti demo"
+      "cta": "Užsirašyti į įmonių sąrašą"
     },
     "agencies": {
       "eyebrow": "Agentūroms",
@@ -598,7 +604,7 @@
         }
       ],
       "screenshot": "Agentūros režimo srautas",
-      "cta": "Užsisakyti demo"
+      "cta": "Užsirašyti į partnerių sąrašą"
     }
   },
   "pricing": {

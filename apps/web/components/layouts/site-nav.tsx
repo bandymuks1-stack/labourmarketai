@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { LeadCapture } from "@/components/marketing/lead-capture";
+import { Button } from "@/components/ui/Button";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 
 const LINKS = [
@@ -36,11 +36,17 @@ export async function SiteNav() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-4">
-          {/* 5b.5: the live-system pill was removed here — DemoChip on the
-              hero is now the single honesty indicator (per PV §10). */}
+        <div className="ml-auto flex items-center gap-3 sm:gap-4">
+          <Link
+            href="/auth/login"
+            className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+          >
+            {t("login")}
+          </Link>
+          <Link href="/auth/signup">
+            <Button size="sm">{t("startNow")}</Button>
+          </Link>
           <LocaleSwitcher className="hidden sm:flex" />
-          <LeadCapture source="nav_demo" />
         </div>
       </div>
     </header>

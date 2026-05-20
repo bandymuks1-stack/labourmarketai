@@ -23,6 +23,8 @@ export default async function PricingPage({
         title={t("title")}
         accent={t("titleAccent")}
         subcopy={t("subcopy")}
+        ctaKind="waitlist"
+        ctaLabel={t("planCta")}
         ctaSource="pricing_hero"
       />
       <PricingTable />

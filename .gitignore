@@ -23,3 +23,5 @@ Thumbs.db
 *.log
 
 supabase/.temp/
+
+BRIEF_MO.md

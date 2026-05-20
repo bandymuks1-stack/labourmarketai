@@ -21,6 +21,8 @@ export default async function ForAgenciesPage({
         title={t("title")}
         accent={t("titleAccent")}
         subcopy={t("subcopy")}
+        ctaKind="waitlist"
+        ctaLabel={t("cta")}
         ctaSource="agencies_hero"
       />
       <BenefitCards items={benefits} />
@@ -29,7 +31,7 @@ export default async function ForAgenciesPage({
         previewKey="pool"
         preview={<AgencyPoolPreview id="agency.pool.preview" />}
         ctaSource="agencies_cta"
-        ctaIntent="partner"
+        ctaKind="waitlist"
       />
     </>
   );

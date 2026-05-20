@@ -21,8 +21,9 @@ export default async function ForWorkersPage({
         title={t("title")}
         accent={t("titleAccent")}
         subcopy={t("subcopy")}
+        ctaKind="signup"
+        ctaLabel={t("cta")}
         ctaSource="workers_hero"
-        ctaLabelKey="openAlt"
       />
       <BenefitCards items={benefits} />
       <RoleEnrichment
@@ -30,7 +31,7 @@ export default async function ForWorkersPage({
         previewKey="profile"
         preview={<PlayerCard id="workers.featured.1" />}
         ctaSource="workers_cta"
-        ctaIntent="find_job"
+        ctaKind="signup"
       />
     </>
   );

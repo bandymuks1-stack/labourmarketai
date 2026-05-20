@@ -4,7 +4,6 @@ import { BenefitCards } from "@/components/marketing/benefit-cards";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { FAQAccordion } from "@/components/app/faq-accordion";
 import { JourneyTimeline } from "@/components/app/journey-timeline";
-import type { LeadIntent } from "@/components/marketing/lead-capture";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -26,13 +25,13 @@ export async function RoleEnrichment({
   previewKey,
   preview,
   ctaSource,
-  ctaIntent,
+  ctaKind,
 }: {
   root: "workers" | "companies" | "agencies";
   previewKey: "profile" | "demand" | "pool";
   preview: React.ReactNode;
   ctaSource: string;
-  ctaIntent: LeadIntent;
+  ctaKind: "signup" | "waitlist";
 }) {
   const t = await getTranslations(root);
   const sh = await getTranslations("shared");
@@ -118,9 +117,9 @@ export async function RoleEnrichment({
           title={t("cta.headline.line1")}
           accent={t("cta.headline.line2")}
           subtitle={t("cta.subcopy")}
-          ctaSource={ctaSource}
+          ctaKind={ctaKind}
           ctaLabel={t("cta.button")}
-          ctaIntent={ctaIntent}
+          ctaSource={ctaSource}
         />
       </div>
     </div>

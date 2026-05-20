@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { AddRoleHint } from "@/components/app/add-role-hint";
 import { DashboardSection } from "@/components/app/dashboard-section";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
@@ -39,6 +38,35 @@ export default async function DashboardOverviewPage({
   const name =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
 
+  // M1 only ships worker functionality. Company / agency / customer users
+  // see an honest "coming soon" panel instead of the placeholder skeleton
+  // (PV §10). Worker keeps the existing 3-section overview stub.
+  if (role !== "worker") {
+    return (
+      <div className="flex flex-col gap-8">
+        <header>
+          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            {tRole(role)}
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-bold tracking-tightest text-text-primary">
+            {t("comingSoon.greeting", { name })}
+          </h1>
+        </header>
+        <div className="card-border max-w-2xl p-6 sm:p-8">
+          <p className="text-base leading-relaxed text-text-secondary">
+            {t("comingSoon.body_main")}
+          </p>
+          <p className="mt-4 text-base leading-relaxed text-text-secondary">
+            {t("comingSoon.body_notify")}
+          </p>
+          <p className="mt-4 text-base leading-relaxed text-text-secondary">
+            {t("comingSoon.body_meanwhile")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <header>
@@ -51,22 +79,10 @@ export default async function DashboardOverviewPage({
       </header>
 
       <div className="grid gap-5 md:grid-cols-3">
-        {role === "customer" ? (
-          <DashboardSection title={t("section.offer.title")}>
-            <p className="text-sm leading-relaxed text-text-secondary">
-              {t("customer.offerHint")}
-            </p>
-            <div className="mt-4">
-              <AddRoleHint label={t("customer.offerHintCta")} role="worker" />
-            </div>
-          </DashboardSection>
-        ) : (
-          <DashboardSection
-            title={t("section.offer.title")}
-            emptyBody={t(`empty.${role}.offer`)}
-          />
-        )}
-
+        <DashboardSection
+          title={t("section.offer.title")}
+          emptyBody={t(`empty.${role}.offer`)}
+        />
         <DashboardSection
           title={t("section.seek.title")}
           emptyBody={t(`empty.${role}.seek`)}

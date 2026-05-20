@@ -21,6 +21,8 @@ export default async function ForCompaniesPage({
         title={t("title")}
         accent={t("titleAccent")}
         subcopy={t("subcopy")}
+        ctaKind="waitlist"
+        ctaLabel={t("cta")}
         ctaSource="companies_hero"
       />
       <BenefitCards items={benefits} />
@@ -29,7 +31,7 @@ export default async function ForCompaniesPage({
         previewKey="demand"
         preview={<DemandPreviewCard id="demand.featured.1" />}
         ctaSource="companies_cta"
-        ctaIntent="hire_workers"
+        ctaKind="waitlist"
       />
     </>
   );
