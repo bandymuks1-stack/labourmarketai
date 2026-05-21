@@ -759,11 +759,52 @@ export type Database = {
           },
         ]
       }
+      profession_skills: {
+        // Added ahead of migration 0010 (DI to apply). Regenerate types after.
+        Row: {
+          created_at: string
+          display_order: number
+          is_core: boolean
+          profession_id: string
+          skill_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          is_core?: boolean
+          profession_id: string
+          skill_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          is_core?: boolean
+          profession_id?: string
+          skill_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profession_skills_profession_id_fkey"
+            columns: ["profession_id"]
+            isOneToOne: false
+            referencedRelation: "professions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profession_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skills: {
         Row: {
           category: string | null
           created_at: string
           id: string
+          is_active: boolean
           name_en: string | null
           name_lt: string | null
           slug: string | null
@@ -773,6 +814,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean
           name_en?: string | null
           name_lt?: string | null
           slug?: string | null
@@ -782,6 +824,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean
           name_en?: string | null
           name_lt?: string | null
           slug?: string | null
@@ -878,6 +921,7 @@ export type Database = {
           id: string
           self_rated_level: number | null
           skill_id: string | null
+          source: string
           updated_at: string
           verified: boolean
           verified_at: string | null
@@ -889,6 +933,7 @@ export type Database = {
           id?: string
           self_rated_level?: number | null
           skill_id?: string | null
+          source?: string
           updated_at?: string
           verified?: boolean
           verified_at?: string | null
@@ -900,6 +945,7 @@ export type Database = {
           id?: string
           self_rated_level?: number | null
           skill_id?: string | null
+          source?: string
           updated_at?: string
           verified?: boolean
           verified_at?: string | null

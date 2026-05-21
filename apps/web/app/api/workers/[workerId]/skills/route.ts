@@ -1,0 +1,153 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import {
+  ownsWorker,
+  primaryProfessionId,
+  professionSkillIds,
+  saveSkillsSchema,
+  uuidSchema,
+} from "@/lib/skills";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+/** GET /api/workers/:workerId/skills — the worker's declared skills. */
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ workerId: string }> },
+) {
+  const { workerId } = await params;
+  if (!uuidSchema.safeParse(workerId).success) {
+    return NextResponse.json({ ok: false, message: "Invalid worker id" }, { status: 400 });
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+  }
+  if (!(await ownsWorker(supabase, workerId, user.id))) {
+    return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
+  }
+
+  const { data, error } = await supabase
+    .from("worker_skills")
+    .select("skill_id, verified, source, verified_at")
+    .eq("worker_id", workerId);
+
+  if (error) {
+    console.error("[api/workers/skills GET] failed:", error.message);
+    return NextResponse.json({ ok: false, message: "Failed to load" }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    skills: (data ?? []).map((r) => ({
+      skillId: r.skill_id,
+      verified: r.verified,
+      source: r.source,
+      verifiedAt: r.verified_at,
+    })),
+  });
+}
+
+/**
+ * POST /api/workers/:workerId/skills  body: { skillIds: string[] }
+ * Replaces the worker's full skill set (idempotent). Rejects ids not linked to
+ * the worker's PRIMARY profession (can't pick welder skills as a plasterer).
+ * Owner-only in M1 (manager flow = M2; see lib/skills ownsWorker).
+ */
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ workerId: string }> },
+) {
+  const { workerId } = await params;
+  if (!uuidSchema.safeParse(workerId).success) {
+    return NextResponse.json({ ok: false, message: "Invalid worker id" }, { status: 400 });
+  }
+
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return NextResponse.json({ ok: false, message: "Invalid body" }, { status: 400 });
+  }
+  const parsed = saveSkillsSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { ok: false, message: "skillIds must be an array of uuids" },
+      { status: 400 },
+    );
+  }
+  const requested = [...new Set(parsed.data.skillIds)];
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+  }
+  if (!(await ownsWorker(supabase, workerId, user.id))) {
+    return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
+  }
+
+  // Scope guard: every requested skill must belong to the worker's profession.
+  const professionId = await primaryProfessionId(supabase, workerId);
+  if (!professionId) {
+    return NextResponse.json(
+      { ok: false, message: "Set a primary profession before adding skills" },
+      { status: 400 },
+    );
+  }
+  const allowed = await professionSkillIds(supabase, professionId);
+  const offending = requested.filter((id) => !allowed.has(id));
+  if (offending.length > 0) {
+    return NextResponse.json(
+      { ok: false, message: "Some skills are not valid for your profession", offending },
+      { status: 400 },
+    );
+  }
+
+  // Diff against the current set, then apply the minimal delete + insert.
+  const { data: existingRows, error: exErr } = await supabase
+    .from("worker_skills")
+    .select("skill_id")
+    .eq("worker_id", workerId);
+  if (exErr) {
+    console.error("[api/workers/skills POST] read failed:", exErr.message);
+    return NextResponse.json({ ok: false, message: "Failed to save" }, { status: 500 });
+  }
+  const existing = new Set((existingRows ?? []).map((r) => r.skill_id));
+  const requestedSet = new Set(requested);
+  const toInsert = requested.filter((id) => !existing.has(id));
+  const toDelete = [...existing].filter(
+    (id): id is string => id !== null && !requestedSet.has(id),
+  );
+
+  if (toDelete.length > 0) {
+    const { error } = await supabase
+      .from("worker_skills")
+      .delete()
+      .eq("worker_id", workerId)
+      .in("skill_id", toDelete);
+    if (error) {
+      console.error("[api/workers/skills POST] delete failed:", error.message);
+      return NextResponse.json({ ok: false, message: "Failed to save" }, { status: 500 });
+    }
+  }
+  if (toInsert.length > 0) {
+    // source/verified take their column defaults (self_declared / false).
+    const { error } = await supabase
+      .from("worker_skills")
+      .insert(toInsert.map((skill_id) => ({ worker_id: workerId, skill_id })));
+    if (error) {
+      console.error("[api/workers/skills POST] insert failed:", error.message);
+      return NextResponse.json({ ok: false, message: "Failed to save" }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ ok: true, count: requested.length });
+}
