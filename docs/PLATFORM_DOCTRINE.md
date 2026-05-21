@@ -153,16 +153,19 @@ Revocation = setting `revoked_at`, not deleting the row. The history of who coul
 
 ---
 
-## Section 5 — Positions vs. roles
+## Section 5 — Positions, roles, and engagements (amended)
 
-These are different concepts. Do not conflate them.
-
-- **Platform role** (`worker`, `manager`, `organization_owner`, `client`, etc.) — what the user can do in the SaaS. Fixed list, RBAC-controlled.
-- **Position** (`brigadininkas`, `darbų vadovas`, `vyr. specialistas`, custom names) — what the user does inside their own organization on the ground. Mixed model: platform-seeded defaults + custom names per organization.
-
-Positions carry assignable **responsibilities** from an extensible registry: `approve_work_scope`, `distribute_tasks`, `give_instructions`, `confirm_hours`, `schedule_changes`, etc. Workers see their position + chain of command + who distributes tasks to them.
-
-A position is not a role. A role is not a position. Schema reflects both as separate concerns.
+> **§5 Positions, roles, and engagements (amended).** The platform separates four orthogonal layers of how a person relates to the world. Mixing them causes the recurring "what role am I?" confusion.
+>
+> **§5.1 Personhood — singular and root.** One human ↔ exactly one `profiles` row, always. There is no scenario in which a single person is split across multiple profile records, regardless of how many organizations, projects, or contexts they participate in.
+>
+> **§5.2 Platform authority (RBAC) — small, fixed, technical.** A short closed set of technical capability levels: `admin` (platform operations) and operational sub-roles assigned to platform staff. NOT for describing what someone does in the world. This is the only layer where a CHECK enum is appropriate; the enum reflects platform code paths, not market reality.
+>
+> **§5.3 Profession + skill identity — extensible.** What a person *does* professionally — the `professions` + `skills` registries — slug + JSON, freely extensible per §10. A person may carry several professions; skills accumulate across the lifetime.
+>
+> **§5.4 Organizational positions — assigned within an organization.** When a person is engaged within an organization, that organization may assign them a position (brigadininkas, prižiūrėtojas, vyr. specialistas, …) with responsibilities from an extensible registry. Mixed model: platform defaults + custom org-defined positions. Positions ≠ §5.2 authority.
+>
+> **§5.5 Engagement contexts — plural, open, first-class.** Each person-organization or person-project relationship is its own row in `engagement_contexts`, classified by a `relationship_types` slug (`owner`, `employee`, `consultant`, `collaborator`, `freelancer`, `unemployed`, `student`, …). The relationship registry is extensible per §10. A single profile may hold arbitrarily many engagements simultaneously across countries, with no constraint on combinations. Work Journal entries pin to an engagement context, never directly to an organization. This is the architectural expression of "level playing field" (§1): no person fits in a category; each person carries a portfolio of relationships, and the platform represents them honestly.
 
 ---
 
@@ -198,6 +201,10 @@ Failing any check → revise before merging.
 3. **Verification decisions are human.** Skill verification, manager confirmations, work proof acceptance — AI can suggest, humans decide.
 4. **Platform translations are curated, not AI-generated, in shipped builds.** AI may help during seeding; DI/admin reviews before merge.
 
+### 7.1 AI as translator, not author
+
+> **§7.1 AI as translator, not author.** AI MAY read user-authored content (freeform journal entries, voice transcripts, document uploads) and SUGGEST structure (candidate skills, candidate productivity values, candidate metadata). AI MUST NEVER persist these suggestions to verified records autonomously. The workflow is always: free text → AI suggests → human (worker for self-declared layer, manager for verified layer) confirms → entry persists at the appropriate trust level. All AI extraction runs are logged append-only with provider + model + raw response + worker's accepted subset, so the trust chain remains auditable indefinitely. This rule extends §7; it does not relax it.
+
 ---
 
 ## Section 8 — How agents apply this doctrine
@@ -220,12 +227,19 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 
 ---
 
+## Section 15 — Skill trust signals & productivity
+
+> **§15 Skill trust signals & productivity.** Every `worker_skill` carries a derived `confidence_score` (numeric) and `confidence_bin` (red / green / yellow), and may carry a `current_pace_value + unit_slug`. These signals are computed from append-only journal entries + manager confirmations — never user-editable. Platform-wide aggregates per skill are fed only by manager-confirmed entries, refreshed on a fixed cadence, and gated by a minimum sample size below which a curated industry-seed benchmark is shown with explicit "industry-typical, not platform-measured" framing. Productivity units live in a slug registry per §10 and may be created at platform, org, worker, or client scope; cross-unit aggregation normalizes to a declared base unit via `parent_unit_slug + conversion_factor` metadata. UI surfaces are gated by §4 visibility and §7 / §7.1 (AI may surface but never edit them). The numeric confidence score is hidden from external viewers by default; schema supports per-jurisdiction transparency exposure via config flag. Workers MAY see numeric counts of their own skills broken down by confidence bin as a self-progress motivator — private self-view, never used for peer comparison.
+
+---
+
 ## Section 9 — Changelog (doctrine evolution)
 
 | Date | Section(s) | Change | Author |
 |---|---|---|---|
 | 2026-05-21 | All | Initial doctrine established from DI architecture conversation (translation tokens, legal proof, append-only, default-closed, storage minimalism, AI-never-lies). | DI + Chat Claude |
 | 2026-05-21 | §2.4, §2.5, §10 | Add §2.4 Locale set (binding, 10-locale canonical set; existing "Why this matters" renumbered §2.5). Promote §10 Lego architecture (slug→JSON for all extensible taxonomy) from v1.1 pending to active. (PR #8 architect review B4/B6.) | DI + Architect (Chat Claude) |
+| 2026-05-21 | §5, §7.1, §15 | Amend §5 to the four-layer person→world model (personhood / RBAC / profession+skill / positions / engagement contexts). Insert §7.1 (AI as translator, not author). Add §15 (skill trust signals & productivity). Bundled with the M1 Work Journal implementation (TASK-M1-WORK-JOURNAL). | DI + Architect (Chat Claude) |
 
 ---
 
