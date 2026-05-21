@@ -760,7 +760,6 @@ export type Database = {
         ]
       }
       profession_skills: {
-        // Added ahead of migration 0010 (DI to apply). Regenerate types after.
         Row: {
           created_at: string
           display_order: number
