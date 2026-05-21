@@ -51,10 +51,12 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
 
   const { error } = await supabase.rpc("complete_onboarding", {
     p_role: primary,
-    p_display_name: display_name || null,
-    p_country: country || null,
+    // RPC nullif()s empty strings; pass the (possibly empty) string rather
+    // than null to match the generated arg types. p_profession_id is optional
+    // (SQL default null) so it's omitted.
+    p_display_name: display_name,
+    p_country: country,
     p_role_data: roleData(primary),
-    p_profession_id: null,
   });
   if (error) {
     console.error("[completeOnboarding] RPC failed", {
