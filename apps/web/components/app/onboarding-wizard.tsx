@@ -6,57 +6,61 @@ import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
-/** Role cards. Internal identifiers stay worker/company/agency/customer
- *  (the DB + dashboard contract); the LT/EN labels render Įmonė/Užsakovas
- *  etc. via i18n. Emoji per the onboarding card spec. */
+/** Role cards. Internal identifiers stay worker/company/agency/customer (the
+ *  DB + dashboard contract); LT/EN labels render via i18n (incl. Pirkėjas). */
 const ROLE_CARDS: { key: Role; icon: string }[] = [
   { key: "worker", icon: "🔨" },
   { key: "company", icon: "🏢" },
-  { key: "agency", icon: "🤝" },
-  { key: "customer", icon: "🛒" },
+  { key: "agency", icon: "🎯" },
+  { key: "customer", icon: "👤" },
 ];
 
 // The 9 launch markets, LT first (default).
 const COUNTRIES = ["LT", "LV", "EE", "NL", "DE", "DK", "NO", "SE", "PL"] as const;
 
-/** Unified onboarding for ALL auth methods. Two steps:
- *  1) role picker, 2) basic profile (display name + country). On submit it
- *  calls the existing `completeOnboarding` RPC action (sets active_role,
- *  upserts profile_roles, creates the role's entity row) and redirects to
- *  /dashboard. The auto-Worker trigger (migration 0009) guarantees a workers
- *  row regardless of role. */
+/** Person-first onboarding. Two steps: (1) pick one OR MORE roles (the same
+ *  person can be a worker, run an agency, and buy services), (2) basic profile
+ *  (display name + country). Submits the full role set via completeOnboarding;
+ *  the first selected (canonical order) becomes the active workspace. */
 export function OnboardingWizard({ defaultName }: { defaultName: string }) {
   const t = useTranslations("auth.onboarding");
   const locale = useLocale();
   const [step, setStep] = useState<1 | 2>(1);
-  const [role, setRole] = useState<Role | null>(null);
+  const [roles, setRoles] = useState<Set<Role>>(() => new Set());
   const [displayName, setDisplayName] = useState(defaultName);
   const [country, setCountry] = useState<string>("LT");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  function toggleRole(r: Role) {
+    setRoles((prev) => {
+      const next = new Set(prev);
+      if (next.has(r)) next.delete(r);
+      else next.add(r);
+      return next;
+    });
+  }
+
   function submit() {
-    if (!role) return;
+    if (roles.size === 0) return;
     setError(null);
     if (!displayName.trim()) {
       setError(t("error_name_required"));
       return;
     }
     const form = new FormData();
-    form.set("role", role);
+    // canonical order keeps the chosen primary deterministic server-side
+    form.set(
+      "roles",
+      ROLE_CARDS.map((c) => c.key).filter((k) => roles.has(k)).join(","),
+    );
     form.set("locale", locale);
     form.set("display_name", displayName.trim());
     form.set("country", country);
-    // company/agency entity rows take their name from role_data.name; seed a
-    // draft name from the display name (DI can rename later in dashboard).
-    if (role === "company" || role === "agency") {
-      form.set("name", `${displayName.trim()} UAB`);
-    }
     start(async () => {
       try {
         await completeOnboarding(form);
       } catch (e) {
-        // Re-throw Next.js redirect signal (server action navigation).
         if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) throw e;
         console.error("[onboarding] completeOnboarding failed:", e);
         setError(t("error_generic"));
@@ -74,34 +78,56 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.heading")}
           </h1>
+          <p className="mt-2 text-sm text-text-secondary">
+            {t("rolePicker.multiNote")}
+          </p>
         </header>
 
-        <div className="grid grid-cols-2 gap-3">
-          {ROLE_CARDS.map((r) => (
-            <button
-              key={r.key}
-              type="button"
-              onClick={() => setRole(r.key)}
-              aria-pressed={role === r.key}
-              className={cn(
-                "flex flex-col items-start gap-1.5 rounded-md border bg-ink-800 p-4 text-left transition-colors",
-                role === r.key
-                  ? "border-brand-orange ring-1 ring-brand-orange"
-                  : "border-ink-500 hover:border-text-muted",
-              )}
-            >
-              <span aria-hidden className="text-2xl">
-                {r.icon}
-              </span>
-              <span className="font-display text-sm font-semibold text-text-primary">
-                {t(`rolePicker.${r.key}.title`)}
-              </span>
-              <span className="text-xs leading-relaxed text-text-muted">
-                {t(`rolePicker.${r.key}.desc`)}
-              </span>
-            </button>
-          ))}
-        </div>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {ROLE_CARDS.map((r) => {
+            const selected = roles.has(r.key);
+            return (
+              <li key={r.key}>
+                <button
+                  type="button"
+                  onClick={() => toggleRole(r.key)}
+                  aria-pressed={selected}
+                  className={cn(
+                    "flex w-full items-start gap-3 rounded-md border bg-ink-800 p-4 text-left transition-colors",
+                    selected
+                      ? "border-brand-orange ring-1 ring-brand-orange"
+                      : "border-ink-500 hover:border-text-muted",
+                  )}
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded border text-[11px]",
+                      selected
+                        ? "border-brand-orange bg-brand-orange text-ink-900"
+                        : "border-ink-500 text-transparent",
+                    )}
+                  >
+                    ✓
+                  </span>
+                  <span className="flex flex-col gap-1">
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden className="text-xl">
+                        {r.icon}
+                      </span>
+                      <span className="font-display text-sm font-semibold text-text-primary">
+                        {t(`rolePicker.${r.key}.title`)}
+                      </span>
+                    </span>
+                    <span className="text-xs leading-relaxed text-text-muted">
+                      {t(`rolePicker.${r.key}.desc`)}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
 
         <p className="rounded-md border border-ink-500 bg-ink-700/50 px-4 py-3 text-xs leading-relaxed text-text-secondary">
           {t("rolePicker.infoBox")}
@@ -109,7 +135,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
 
         <Button
           type="button"
-          disabled={!role}
+          disabled={roles.size === 0}
           onClick={() => setStep(2)}
           className="self-start"
         >

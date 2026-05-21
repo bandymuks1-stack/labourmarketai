@@ -1,4 +1,16 @@
 {
+  "cv": {
+    "title": "JŪSŲ CV (REALAUS LAIKO PERŽIŪRA)",
+    "name": "Vardas",
+    "profession": "Profesija",
+    "roles": "Rolės",
+    "skills": "Įgūdžiai",
+    "skillsEmpty": "Dar nepasirinkote įgūdžių.",
+    "tagCore": "Pagrindinis",
+    "tagSystem": "Sistema",
+    "transparency": "✓ Jūsų CV kuriamas čia, dabar. Visi duomenys saugomi jūsų profilyje.",
+    "disclaimer": "Visi čia matomi duomenys yra jūsų. Jie niekur kitur nekeliauja."
+  },
   "skills": {
     "pageTitle": "Profesija ir įgūdžiai",
     "professionLabel": "Tavo profesija",
@@ -12,10 +24,16 @@
     "verified": "Patvirtinta",
     "saveButton": "Išsaugoti įgūdžius",
     "saving": "Saugoma...",
-    "savedToast": "Įgūdžiai išsaugoti",
+    "savedToast": "CV išsaugota. Jūsų profilis paruoštas.",
     "saveError": "Nepavyko išsaugoti. Bandyk dar kartą.",
     "empty": "Šiai profesijai dar nėra įgūdžių sąrašo",
-    "loading": "Kraunama..."
+    "loading": "Kraunama...",
+    "viewProfile": "Peržiūrėti profilį",
+    "importPrompt": "Turite seną CV? Įkelkite PDF arba DOCX",
+    "importComingSoon": "CV įkėlimas bus įjungtas M2 etape.",
+    "importNotSaved": "Pasirinkta: {file}. Failas dar neįkeltas ir neišsaugotas.",
+    "customPrompt": "Nerandate savo įgūdžio?",
+    "customComingSoon": "netrukus"
   },
   "live": {
     "chip": {
@@ -137,6 +155,12 @@
     },
     "signup": {
       "headline": "Sukurkite paskyrą",
+      "role": {
+        "worker": "Darbuotojas",
+        "company": "Įmonė",
+        "agency": "Agentūra",
+        "customer": "Pirkėjas"
+      },
       "subcopy": "Prisiregistruok su Google arba el. paštu ir slaptažodžiu. Vaidmenį pasirinksi kitame žingsnyje.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
@@ -144,7 +168,7 @@
       "email_label": "Darbo el. paštas",
       "email_placeholder": "vardas@imone.lt",
       "password_label": "Slaptažodis",
-      "password_help": "Bent 8 simboliai. Įtrauk skaičių ar specialųjį simbolį.",
+      "password_help": "Bent 8 simboliai, 1 didžioji raidė, 1 skaičius, 1 specialusis (!@#$%).",
       "confirm_password_label": "Pakartok slaptažodį",
       "submit_label": "Registruotis",
       "signing": "Kuriama...",
@@ -154,7 +178,10 @@
       "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
       "error_email": "Įveskite teisingą el. pašto adresą.",
       "error_password_short": "Slaptažodį turi sudaryti bent {min} simboliai.",
-      "error_password_mismatch": "Slaptažodžiai nesutampa."
+      "error_password_mismatch": "Slaptažodžiai nesutampa.",
+      "error_password_uppercase": "Slaptažodyje turi būti bent viena didžioji raidė.",
+      "error_password_number": "Slaptažodyje turi būti bent vienas skaičius.",
+      "error_password_special": "Slaptažodyje turi būti bent vienas specialusis simbolis."
     },
     "login": {
       "headline": "Prisijungti",
@@ -209,25 +236,26 @@
     },
     "onboarding": {
       "rolePicker": {
-        "heading": "Su kuo ateini į LabourMarket?",
+        "heading": "Pasirinkite, kaip norite naudoti platformą",
         "worker": {
           "title": "Darbuotojas",
-          "desc": "Ieškau darbo ar profesinio augimo."
+          "desc": "Ieškoti darbo, kurti CV, gauti patvirtinimus."
         },
         "company": {
           "title": "Įmonė",
-          "desc": "Ieškau darbuotojų ar valdau projektus."
+          "desc": "Samdyti, valdyti komandas, skelbti darbus."
         },
         "agency": {
           "title": "Agentūra",
-          "desc": "Atstovauju kandidatus klientams."
+          "desc": "Įdarbinti darbuotojus, valdyti sutartis."
         },
         "customer": {
-          "title": "Užsakovas",
-          "desc": "Užsisakau paslaugą."
+          "title": "Pirkėjas",
+          "desc": "Užsisakyti paslaugas, gauti ataskaitas."
         },
         "infoBox": "💡 Žinoma, kad ir kokią rolę pasirinkai — tavo darbo patirtis bus tyliai kaupiama Darbo Dienoraštyje. Vieną dieną tai gali būti vertingiausia tavo CV dalis.",
-        "continue": "Tęsti"
+        "continue": "Tęsti",
+        "multiNote": "Galite rinktis kelis. Vėliau pakeisite nustatymuose."
       },
       "step2": {
         "heading": "Šiek tiek apie tave",
@@ -259,9 +287,15 @@
         "account": "Mano paskyra"
       },
       "section": {
-        "offer": { "title": "Ką siūlau" },
-        "seek": { "title": "Ko ieškau" },
-        "proofs": { "title": "Mano įrodymai" }
+        "offer": {
+          "title": "Ką siūlau"
+        },
+        "seek": {
+          "title": "Ko ieškau"
+        },
+        "proofs": {
+          "title": "Mano įrodymai"
+        }
       },
       "empty": {
         "worker": {

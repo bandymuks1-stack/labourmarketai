@@ -41,6 +41,18 @@ export function SignupForm() {
       setError(t("error_password_short", { min: MIN_PASSWORD }));
       return;
     }
+    if (!/[A-Z]/.test(password)) {
+      setError(t("error_password_uppercase"));
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      setError(t("error_password_number"));
+      return;
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      setError(t("error_password_special"));
+      return;
+    }
     if (password !== confirm) {
       setError(t("error_password_mismatch"));
       return;
@@ -72,7 +84,11 @@ export function SignupForm() {
   }
 
   const disabled = status === "signing";
-  const passwordOk = password.length >= MIN_PASSWORD && /[0-9\W]/.test(password);
+  const passwordOk =
+    password.length >= MIN_PASSWORD &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password);
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 

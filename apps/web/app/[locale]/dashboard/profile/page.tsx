@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
+import { type Role } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
 
-/** Worker "Profession & skills" page. Primary home for the skills picker. */
+const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
+
+/** Worker "Profession & skills" page — profession + skills + live CV preview. */
 export default async function ProfilePage({
   params,
 }: {
@@ -20,13 +23,28 @@ export default async function ProfilePage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, email")
+    .eq("id", user.id)
+    .single();
+  const personName =
+    profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
+
+  const { data: roleRows } = await supabase
+    .from("profile_roles")
+    .select("role")
+    .eq("profile_id", user.id)
+    .eq("is_active", true);
+  const roles = (roleRows ?? [])
+    .map((r) => r.role)
+    .filter((r): r is Role => ROLES.has(r as Role));
+
   const { data: worker } = await supabase
     .from("workers")
     .select("id")
     .eq("profile_id", user.id)
     .maybeSingle();
-
-  // Worker row is guaranteed by the migration-0009 trigger; guard anyway.
   const workerId = worker?.id ?? null;
 
   // Names live in JSON keyed by slug (PLATFORM_DOCTRINE §2); fetch id+slug,
@@ -61,7 +79,7 @@ export default async function ProfilePage({
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
+    <div className="flex flex-col gap-8">
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("pageTitle")}
@@ -74,6 +92,8 @@ export default async function ProfilePage({
           professions={professions}
           currentProfessionId={currentProfessionId}
           initialSkillIds={initialSkillIds}
+          personName={personName}
+          roles={roles}
         />
       ) : (
         <p className="text-sm text-text-secondary">{t("noProfession")}</p>
