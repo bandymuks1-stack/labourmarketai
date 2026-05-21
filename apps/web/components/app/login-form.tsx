@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { GoogleButton } from "@/components/app/google-button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { mapAuthError } from "@/lib/auth-errors";
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -17,6 +18,7 @@ function isValidEmail(v: string): boolean {
  *  bounces not-yet-onboarded users on to /onboarding. */
 export function LoginForm() {
   const t = useTranslations("auth.login");
+  const tErr = useTranslations("auth.errors");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,7 +48,8 @@ export function LoginForm() {
     } catch (e) {
       console.error("[login] signInWithPassword failed:", e);
       setStatus("error");
-      setError(t("error_invalid_credentials"));
+      const info = mapAuthError(e);
+      setError(tErr(info.key, info.params));
     }
   }
 

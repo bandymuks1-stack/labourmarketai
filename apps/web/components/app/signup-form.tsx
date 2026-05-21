@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { GoogleButton } from "@/components/app/google-button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { mapAuthError } from "@/lib/auth-errors";
+import { cn } from "@/lib/utils";
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -19,6 +21,7 @@ const MIN_PASSWORD = 8;
  *  we route straight to /onboarding. Magic link was removed in M1. */
 export function SignupForm() {
   const t = useTranslations("auth.signup");
+  const tErr = useTranslations("auth.errors");
   const locale = useLocale();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -63,11 +66,13 @@ export function SignupForm() {
     } catch (e) {
       console.error("[signup] signUp failed:", e);
       setStatus("error");
-      setError(t("error_generic"));
+      const info = mapAuthError(e);
+      setError(tErr(info.key, info.params));
     }
   }
 
   const disabled = status === "signing";
+  const passwordOk = password.length >= MIN_PASSWORD && /[0-9\W]/.test(password);
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
@@ -122,7 +127,18 @@ export function SignupForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className={inputCls}
+          aria-describedby="password-help"
         />
+        <span
+          id="password-help"
+          className={cn(
+            "flex items-center gap-1 text-text-muted",
+            passwordOk && "text-state-live",
+          )}
+        >
+          {passwordOk && <span aria-hidden>✓</span>}
+          {t("password_help")}
+        </span>
       </label>
 
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
