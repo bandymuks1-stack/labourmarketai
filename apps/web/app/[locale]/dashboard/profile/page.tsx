@@ -3,16 +3,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { createClient } from "@/lib/supabase/server";
 
-type ProfRow = {
-  id: string;
-  name_lt: string | null;
-  name_en: string | null;
-  name_nl: string | null;
-  name_de: string | null;
-  name_pl: string | null;
-  name_ru: string | null;
-};
-
 /** Worker "Profession & skills" page. Primary home for the skills picker. */
 export default async function ProfilePage({
   params,
@@ -22,6 +12,7 @@ export default async function ProfilePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("skills");
+  const tProf = await getTranslations("professions");
 
   const supabase = await createClient();
   const {
@@ -38,14 +29,16 @@ export default async function ProfilePage({
   // Worker row is guaranteed by the migration-0009 trigger; guard anyway.
   const workerId = worker?.id ?? null;
 
+  // Names live in JSON keyed by slug (PLATFORM_DOCTRINE §2); fetch id+slug,
+  // translate + sort by the localized name here.
   const { data: profRows } = await supabase
     .from("professions")
-    .select("id, name_lt, name_en, name_nl, name_de, name_pl, name_ru")
+    .select("id, slug")
     .eq("is_active", true);
-  const key = `name_${locale}` as keyof ProfRow;
-  const professions = ((profRows as ProfRow[] | null) ?? [])
-    .map((p) => ({ id: p.id, name: (p[key] as string | null) ?? p.name_en ?? "" }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const professions = (profRows ?? [])
+    .map((p) => ({ id: p.id, slug: p.slug, name: tProf(p.slug) }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(({ id, slug }) => ({ id, slug }));
 
   let currentProfessionId: string | null = null;
   let initialSkillIds: string[] = [];

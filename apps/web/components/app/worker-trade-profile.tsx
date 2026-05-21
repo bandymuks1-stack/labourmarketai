@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { ProfessionSkillsPicker } from "@/components/app/profession-skills-picker";
 import { setPrimaryProfession } from "@/lib/worker/actions";
 
-type ProfessionOption = { id: string; name: string };
+type ProfessionOption = { id: string; slug: string };
 
 /**
  * Worker "Profession & skills" panel. Picks a primary profession (saved via
@@ -26,6 +26,7 @@ export function WorkerTradeProfile({
   initialSkillIds: string[];
 }) {
   const t = useTranslations("skills");
+  const tProf = useTranslations("professions");
   const router = useRouter();
   const [professionId, setProfessionId] = useState<string>(
     currentProfessionId ?? "",
@@ -74,7 +75,7 @@ export function WorkerTradeProfile({
           </option>
           {professions.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.name}
+              {tProf(p.slug)}
             </option>
           ))}
         </select>

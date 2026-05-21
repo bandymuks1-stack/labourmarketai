@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 type ApiSkill = {
   id: string;
-  slug: string | null;
-  name_lt: string | null;
-  name_en: string | null;
+  slug: string;
   category: string | null;
   isCore: boolean;
   displayOrder: number;
@@ -31,7 +29,7 @@ export function ProfessionSkillsPicker({
   initialSelectedIds: string[];
 }) {
   const t = useTranslations("skills");
-  const locale = useLocale();
+  const tName = useTranslations("skillNames");
   const [skills, setSkills] = useState<ApiSkill[] | null>(null);
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(initialSelectedIds),
@@ -58,7 +56,7 @@ export function ProfessionSkillsPicker({
   }, [professionId]);
 
   function label(s: ApiSkill): string {
-    return (locale === "lt" ? s.name_lt : s.name_en) ?? s.name_en ?? s.slug ?? "";
+    return tName(s.slug);
   }
 
   function toggle(id: string) {

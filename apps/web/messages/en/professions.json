@@ -1,0 +1,20 @@
+{
+  "builder": "Builder",
+  "carpenter": "Carpenter",
+  "concrete_worker": "Concrete worker",
+  "crane_operator": "Crane operator",
+  "drywaller": "Drywaller",
+  "electrician": "Electrician",
+  "foreman": "Foreman",
+  "general_laborer": "General laborer",
+  "heavy_equipment_operator": "Heavy equipment operator",
+  "mason": "Mason",
+  "painter": "Painter",
+  "plumber": "Plumber",
+  "rebar_worker": "Rebar Worker",
+  "roofer": "Roofer",
+  "site_engineer": "Site engineer",
+  "site_manager": "Site Manager",
+  "tiler": "Tiler",
+  "welder": "Welder"
+}

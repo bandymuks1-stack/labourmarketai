@@ -34,11 +34,11 @@ export async function GET(
     );
   }
 
+  // Names are NOT returned — they live in JSON keyed by slug
+  // (PLATFORM_DOCTRINE §2). The client renders t(`skillNames.${slug}`).
   const { data, error } = await supabase
     .from("profession_skills")
-    .select(
-      "is_core, display_order, skills(id, slug, name_lt, name_en, category, is_active)",
-    )
+    .select("is_core, display_order, skills(id, slug, category, is_active)")
     .eq("profession_id", professionId)
     .order("display_order", { ascending: true });
 
@@ -53,12 +53,10 @@ export async function GET(
   const skills = (data ?? [])
     .map((row) => {
       const s = row.skills;
-      if (!s || s.is_active === false) return null;
+      if (!s || s.is_active === false || !s.slug) return null;
       return {
         id: s.id,
         slug: s.slug,
-        name_lt: s.name_lt,
-        name_en: s.name_en,
         category: s.category,
         isCore: row.is_core,
         displayOrder: row.display_order,

@@ -30,6 +30,7 @@ export default async function DashboardOverviewPage({
 
   const t = await getTranslations("auth.dashboard");
   const tRole = await getTranslations("auth.signup.role");
+  const tProf = await getTranslations("professions");
 
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
@@ -67,17 +68,9 @@ export default async function DashboardOverviewPage({
     );
   }
 
-  // Primary profession lookup for the worker badge (migration 0008).
-  // Two-step query keeps types simple; if either row is missing the
-  // badge silently drops the profession suffix.
-  type ProfRow = {
-    name_lt: string;
-    name_en: string;
-    name_nl: string | null;
-    name_de: string | null;
-    name_pl: string | null;
-    name_ru: string | null;
-  };
+  // Primary profession lookup for the worker badge (migration 0008). Names
+  // live in JSON keyed by slug (PLATFORM_DOCTRINE §2), so we fetch the slug
+  // and translate it. If either row is missing the suffix silently drops.
   let primaryProfession: string | null = null;
   const { data: workerRow } = await supabase
     .from("workers")
@@ -87,17 +80,12 @@ export default async function DashboardOverviewPage({
   if (workerRow?.id) {
     const { data: wp } = await supabase
       .from("worker_professions")
-      .select(
-        "professions(name_lt, name_en, name_nl, name_de, name_pl, name_ru)",
-      )
+      .select("professions(slug)")
       .eq("worker_id", workerRow.id)
       .eq("is_primary", true)
       .maybeSingle();
-    const prof = (wp?.professions as ProfRow | null) ?? null;
-    if (prof) {
-      const key = `name_${locale}` as keyof ProfRow;
-      primaryProfession = (prof[key] as string | null) ?? prof.name_en;
-    }
+    const slug = (wp?.professions as { slug: string } | null)?.slug ?? null;
+    if (slug) primaryProfession = tProf(slug);
   }
 
   return (
