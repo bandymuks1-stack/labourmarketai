@@ -13,6 +13,8 @@ export const colors = {
     cyan: "#00C2FF",
     violet: "#7B5CFF",
     purple: "#B57BFF",
+    // Safety orange — active-state accent for the mobile bottom tab bar.
+    orange: "#FF6B1A",
   },
   state: {
     live: "#00E676",
