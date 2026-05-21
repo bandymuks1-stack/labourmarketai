@@ -15,7 +15,6 @@ export function RegionalHeatmap() {
   const data = getMarketPanel("market.demand.byCountry", "demand_by_country");
   const locale = useLocale();
   const t = useTranslations("marketPulse");
-  const topCode = data.rows.reduce((a, b) => (b.intensity > a.intensity ? b : a)).code;
 
   return (
     <section
@@ -42,13 +41,13 @@ export function RegionalHeatmap() {
                 style={{ width: `${r.intensity}%` }}
               />
             </div>
-            <span className="text-right font-mono tabular-nums text-text-primary">
-              {r.intensity}%
-              {r.code === topCode && (
-                <span className="ml-1 rounded-sm border border-state-danger/50 px-1 font-mono text-[9px] uppercase tracking-label text-state-danger">
-                  {t("hot")}
-                </span>
+            <span
+              className={cn(
+                "text-right font-mono tabular-nums",
+                r.intensity >= 80 ? "text-state-danger" : "text-text-primary",
               )}
+            >
+              {r.intensity}%
             </span>
           </li>
         ))}
