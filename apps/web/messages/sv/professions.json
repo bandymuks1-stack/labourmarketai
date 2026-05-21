@@ -1,0 +1,20 @@
+{
+  "builder": "[EN] Builder",
+  "carpenter": "[EN] Carpenter",
+  "concrete_worker": "[EN] Concrete worker",
+  "crane_operator": "[EN] Crane operator",
+  "drywaller": "[EN] Drywaller",
+  "electrician": "[EN] Electrician",
+  "foreman": "[EN] Foreman",
+  "general_laborer": "[EN] General laborer",
+  "heavy_equipment_operator": "[EN] Heavy equipment operator",
+  "mason": "[EN] Mason",
+  "painter": "[EN] Painter",
+  "plumber": "[EN] Plumber",
+  "rebar_worker": "[EN] Rebar Worker",
+  "roofer": "[EN] Roofer",
+  "site_engineer": "[EN] Site engineer",
+  "site_manager": "[EN] Site Manager",
+  "tiler": "[EN] Tiler",
+  "welder": "[EN] Welder"
+}

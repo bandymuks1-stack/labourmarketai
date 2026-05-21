@@ -10,11 +10,18 @@
  * row. This file only declares the contracts; M1 ships no extraction/storage.
  */
 
-export type CvImportSource = "pdf" | "docx" | "linkedin" | "manual";
+/**
+ * Import-source SLUG — resolved from the M2 `cv_import_source` registry (DB
+ * rows + per-locale JSON labels), NOT a TypeScript enum (PLATFORM_DOCTRINE
+ * §10: extensible taxonomy must be slug + JSON, never a hardcoded union).
+ * Seed slugs at M2: `pdf`, `docx`, `linkedin`, `manual` — but the source of
+ * truth is the registry, so new sources can be added without a code deploy.
+ */
+export type CvImportSourceSlug = string;
 
 /** Raw, unverified data lifted from an uploaded document (Level 0). */
 export interface CvImportData {
-  source: CvImportSource;
+  source: CvImportSourceSlug;
   originalLanguage: string; // ISO 639-1
   fullName?: string;
   contact?: { email?: string; phone?: string };

@@ -1,5 +1,5 @@
 import "server-only";
-import type { CvImportData, CvImportSource } from "./types";
+import type { CvImportData, CvImportSourceSlug } from "./types";
 
 /**
  * OUTLINE (M2). Extract structured data from an uploaded CV.
@@ -14,7 +14,7 @@ import type { CvImportData, CvImportSource } from "./types";
  */
 export async function extractCv(
   file: ArrayBuffer,
-  source: CvImportSource,
+  source: CvImportSourceSlug,
 ): Promise<CvImportData> {
   void file;
   void source;
