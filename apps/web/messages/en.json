@@ -138,6 +138,9 @@
     "login": {
       "headline": "Sign in",
       "subcopy": "Enter your email — we'll send a sign-in link.",
+      "google_label": "Continue with Google",
+      "google_redirecting": "Redirecting...",
+      "divider": "or",
       "email_label": "Email",
       "submit_label": "Send login link",
       "sending": "Sending...",

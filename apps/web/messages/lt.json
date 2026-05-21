@@ -141,6 +141,9 @@
     "login": {
       "headline": "Prisijungti",
       "subcopy": "Įveskite el. paštą — atsiųsime prisijungimo nuorodą.",
+      "google_label": "Tęsti su Google",
+      "google_redirecting": "Nukreipiama...",
+      "divider": "arba",
       "email_label": "El. paštas",
       "submit_label": "Siųsti prisijungimo nuorodą",
       "sending": "Siunčiama...",

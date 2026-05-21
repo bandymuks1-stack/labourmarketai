@@ -10,6 +10,31 @@ function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 }
 
+/** Official Google "G" mark (multicolour). Inline so the white OAuth button
+ *  needs no asset pipeline. */
+function GoogleLogo() {
+  return (
+    <svg aria-hidden width="18" height="18" viewBox="0 0 18 18">
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.89 2.68-6.62Z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.47.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"
+      />
+    </svg>
+  );
+}
+
 /** Login form (magic link). Only email — the role + onboarding already
  *  exist for returning users; the callback decides where to land them. */
 export function LoginForm() {
@@ -19,7 +44,33 @@ export function LoginForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
     "idle",
   );
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /** OAuth (Google). Reuses the existing PKCE callback at /auth/callback,
+   *  which exchanges the `?code=` and routes to dashboard (or onboarding for
+   *  brand-new users). The SDK redirects the browser to Google on success, so
+   *  we only need to surface failures. Independent of the magic-link flow. */
+  async function onGoogle() {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const { error: err } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${origin}/${locale}/auth/callback` },
+      });
+      if (err) throw err;
+      // Success: browser navigates to Google; keep the button in its loading
+      // state until the redirect happens.
+    } catch (e) {
+      console.error("[login] signInWithOAuth(google) failed:", e);
+      setGoogleLoading(false);
+      setError(t("error_generic"));
+    }
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -62,7 +113,7 @@ export function LoginForm() {
     );
   }
 
-  const disabled = status === "sending";
+  const disabled = status === "sending" || googleLoading;
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
@@ -76,6 +127,24 @@ export function LoginForm() {
           {t("subcopy")}
         </p>
       </header>
+
+      <button
+        type="button"
+        onClick={onGoogle}
+        disabled={disabled}
+        className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition-opacity hover:bg-white/90 disabled:opacity-60"
+      >
+        <GoogleLogo />
+        {googleLoading ? t("google_redirecting") : t("google_label")}
+      </button>
+
+      <div className="flex items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-ink-500" />
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("divider")}
+        </span>
+        <span className="h-px flex-1 bg-ink-500" />
+      </div>
 
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("email_label")}
