@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { CvPreview, type CvSkill } from "@/components/app/cv-preview";
 import { ProfessionSkillsPicker } from "@/components/app/profession-skills-picker";
 import { setPrimaryProfession } from "@/lib/worker/actions";
 import { type Role } from "@/lib/auth/actions";
@@ -11,9 +12,10 @@ type ProfessionOption = { id: string; slug: string };
 
 /**
  * Worker "Profession & skills" panel. Picks a primary profession (saved via
- * server action — PR #5 dropped this from onboarding) and, once one is set,
- * shows the profession-scoped skills picker + live CV preview. Skills already
- * saved for the CURRENT profession are pre-selected so a reload shows them.
+ * server action — PR #5 dropped this from onboarding) and shows the
+ * profession-scoped skills picker (left) beside the live CV preview (right).
+ * The preview is a read model of SAVED data passed from the server; the picker
+ * refreshes it on save so its counts always match what's persisted.
  */
 export function WorkerTradeProfile({
   workerId,
@@ -22,6 +24,8 @@ export function WorkerTradeProfile({
   initialSkillIds,
   personName,
   roles,
+  activeRole,
+  savedSkills,
 }: {
   workerId: string;
   professions: ProfessionOption[];
@@ -29,6 +33,8 @@ export function WorkerTradeProfile({
   initialSkillIds: string[];
   personName: string;
   roles: Role[];
+  activeRole: Role | null;
+  savedSkills: CvSkill[];
 }) {
   const t = useTranslations("skills");
   const tProf = useTranslations("professions");
@@ -100,15 +106,22 @@ export function WorkerTradeProfile({
       </label>
 
       {professionId && professionSlug ? (
-        <ProfessionSkillsPicker
-          key={professionId}
-          workerId={workerId}
-          professionId={professionId}
-          professionSlug={professionSlug}
-          personName={personName}
-          roles={roles}
-          initialSelectedIds={initialForPicker}
-        />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <ProfessionSkillsPicker
+            key={professionId}
+            workerId={workerId}
+            professionId={professionId}
+            initialSelectedIds={initialForPicker}
+            onSaved={() => router.refresh()}
+          />
+          <CvPreview
+            personName={personName}
+            roles={roles}
+            activeRole={activeRole}
+            professionSlug={professionSlug}
+            skills={savedSkills}
+          />
+        </div>
       ) : (
         <p className="text-sm text-text-secondary">{t("noProfession")}</p>
       )}

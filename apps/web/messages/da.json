@@ -427,7 +427,9 @@
     "tagCore": "[EN] Core",
     "tagSystem": "[EN] System",
     "title": "[EN] YOUR CV (REAL-TIME PREVIEW)",
-    "transparency": "[EN] ✓ Your CV is building here, now. All data is stored in your profile."
+    "transparency": "[EN] ✓ Your CV is building here, now. All data is stored in your profile.",
+    "savedCount": "[EN] Saved: {n} skills",
+    "activeTag": "[EN] active"
   },
   "draft": {
     "column": {

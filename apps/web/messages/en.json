@@ -9,7 +9,9 @@
     "tagCore": "Core",
     "tagSystem": "System",
     "transparency": "✓ Your CV is building here, now. All data is stored in your profile.",
-    "disclaimer": "All the data you see here is yours. It doesn't go anywhere else."
+    "disclaimer": "All the data you see here is yours. It doesn't go anywhere else.",
+    "savedCount": "Saved: {n} skills",
+    "activeTag": "active"
   },
   "skills": {
     "pageTitle": "Profession & skills",

@@ -9,7 +9,9 @@
     "tagCore": "Pagrindinis",
     "tagSystem": "Sistema",
     "transparency": "✓ Jūsų CV kuriamas čia, dabar. Visi duomenys saugomi jūsų profilyje.",
-    "disclaimer": "Visi čia matomi duomenys yra jūsų. Jie niekur kitur nekeliauja."
+    "disclaimer": "Visi čia matomi duomenys yra jūsų. Jie niekur kitur nekeliauja.",
+    "savedCount": "Išsaugota: {n} įgūdžių",
+    "activeTag": "aktyvi"
   },
   "skills": {
     "pageTitle": "Profesija ir įgūdžiai",

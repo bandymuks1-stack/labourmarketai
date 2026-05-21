@@ -7,19 +7,22 @@ import { cn } from "@/lib/utils";
 export type CvSkill = { slug: string; isCore: boolean };
 
 /**
- * Real-time CV preview shown beside the skills picker. Pure render of what the
- * person has selected — name, role(s), profession, skills — so they SEE their
- * CV building live. No data is fetched or stored here (transparency: "all this
- * data is yours"); names render from JSON by slug (PLATFORM_DOCTRINE §2).
+ * CV preview — a READ MODEL of the worker's SAVED data (§7: mirrors confirmed
+ * data, never editorializes or hides). It renders every saved skill and every
+ * role the person holds; names resolve from JSON by slug (§2). The parent feeds
+ * server-fetched saved state and refreshes it after a save, so the shown counts
+ * always equal what is persisted.
  */
 export function CvPreview({
   personName,
   roles,
+  activeRole,
   professionSlug,
   skills,
 }: {
   personName: string;
   roles: Role[];
+  activeRole: Role | null;
   professionSlug: string | null;
   skills: CvSkill[];
 }) {
@@ -27,6 +30,12 @@ export function CvPreview({
   const tRole = useTranslations("auth.signup.role");
   const tProf = useTranslations("professions");
   const tSkill = useTranslations("skillNames");
+
+  // Active role first, then the rest in the order given.
+  const orderedRoles =
+    activeRole && roles.includes(activeRole)
+      ? [activeRole, ...roles.filter((r) => r !== activeRole)]
+      : roles;
 
   return (
     <aside className="card-border bg-card-glow p-5 md:sticky md:top-20">
@@ -47,17 +56,39 @@ export function CvPreview({
         </div>
         <div className="flex gap-2">
           <dt className="w-24 flex-none text-text-muted">{t("roles")}</dt>
-          <dd className="text-text-primary">
-            {roles.length > 0 ? roles.map((r) => tRole(r)).join(" · ") : "—"}
+          <dd className="flex flex-wrap gap-x-2 gap-y-0.5 text-text-primary">
+            {orderedRoles.length === 0
+              ? "—"
+              : orderedRoles.map((r) => (
+                  <span key={r}>
+                    <span
+                      className={cn(
+                        r === activeRole && "font-semibold text-brand-orange",
+                      )}
+                    >
+                      {tRole(r)}
+                    </span>
+                    {r === activeRole && (
+                      <span className="ml-1 font-mono text-[9px] uppercase tracking-label text-text-muted">
+                        ({t("activeTag")})
+                      </span>
+                    )}
+                  </span>
+                ))}
           </dd>
         </div>
       </dl>
 
       <hr className="my-4 border-ink-600" />
 
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-        {t("skills")}
-      </p>
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("skills")}
+        </p>
+        <p className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+          {t("savedCount", { n: skills.length })}
+        </p>
+      </div>
       {skills.length === 0 ? (
         <p className="mt-2 text-sm text-text-muted">{t("skillsEmpty")}</p>
       ) : (
@@ -68,14 +99,13 @@ export function CvPreview({
               className="flex items-center justify-between gap-2 text-sm text-text-primary"
             >
               <span>{tSkill(s.slug)}</span>
-              <span
-                className={cn(
-                  "flex-none rounded-sm px-1 font-mono text-[9px] uppercase tracking-label",
-                  s.isCore ? "text-brand-orange" : "text-text-muted",
-                )}
-              >
-                {s.isCore ? t("tagCore") : t("tagSystem")}
-              </span>
+              {/* Only the meaningful "core skill of your trade" badge is shown;
+                  the internal system/seed distinction is not surfaced. */}
+              {s.isCore && (
+                <span className="flex-none rounded-sm px-1 font-mono text-[9px] uppercase tracking-label text-brand-orange">
+                  {t("tagCore")}
+                </span>
+              )}
             </li>
           ))}
         </ul>
