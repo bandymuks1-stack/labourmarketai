@@ -544,12 +544,6 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
-          name_de: string | null
-          name_en: string
-          name_lt: string
-          name_nl: string | null
-          name_pl: string | null
-          name_ru: string | null
           sector: string
           slug: string
           updated_at: string
@@ -558,12 +552,6 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
-          name_de?: string | null
-          name_en: string
-          name_lt: string
-          name_nl?: string | null
-          name_pl?: string | null
-          name_ru?: string | null
           sector: string
           slug: string
           updated_at?: string
@@ -572,12 +560,6 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
-          name_de?: string | null
-          name_en?: string
-          name_lt?: string
-          name_nl?: string | null
-          name_pl?: string | null
-          name_ru?: string | null
           sector?: string
           slug?: string
           updated_at?: string
@@ -804,8 +786,6 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
-          name_en: string | null
-          name_lt: string | null
           slug: string | null
           updated_at: string
         }
@@ -814,8 +794,6 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
-          name_en?: string | null
-          name_lt?: string | null
           slug?: string | null
           updated_at?: string
         }
@@ -824,8 +802,6 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
-          name_en?: string | null
-          name_lt?: string | null
           slug?: string | null
           updated_at?: string
         }
