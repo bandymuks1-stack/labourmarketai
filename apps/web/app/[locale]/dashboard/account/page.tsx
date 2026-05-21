@@ -28,6 +28,7 @@ export default async function AccountPage({
   const tSwitcher = await getTranslations("auth.roleSwitcher");
   const tCommon = await getTranslations("common");
   const tSkills = await getTranslations("skills");
+  const tJournal = await getTranslations("journal");
 
   const supabase = await createClient();
   const {
@@ -45,6 +46,16 @@ export default async function AccountPage({
     .select("role, added_at, is_active")
     .eq("profile_id", user.id)
     .order("added_at", { ascending: true });
+
+  // Show the manager confirm inbox link only to people who manage an org (§13.2).
+  const { data: mgrEc } = await supabase
+    .from("engagement_contexts")
+    .select("id")
+    .eq("profile_id", user.id)
+    .eq("status", "active")
+    .in("relationship_slug", ["manager", "owner", "external_manager"])
+    .limit(1);
+  const managesOrg = (mgrEc ?? []).length > 0;
 
   return (
     <div className="flex flex-col gap-8">
@@ -107,6 +118,40 @@ export default async function AccountPage({
           </span>
         </Link>
       </section>
+
+      {profile?.active_role === "worker" && (
+        <section className="card-border p-6">
+          <Link
+            href="/dashboard/journal"
+            className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+          >
+            <span className="flex items-center gap-2">
+              <span aria-hidden>📓</span>
+              {tJournal("navTitle")}
+            </span>
+            <span aria-hidden className="text-text-muted">
+              →
+            </span>
+          </Link>
+        </section>
+      )}
+
+      {managesOrg && (
+        <section className="card-border p-6">
+          <Link
+            href="/dashboard/inbox"
+            className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+          >
+            <span className="flex items-center gap-2">
+              <span aria-hidden>✅</span>
+              {tJournal("inbox.title")}
+            </span>
+            <span aria-hidden className="text-text-muted">
+              →
+            </span>
+          </Link>
+        </section>
+      )}
 
       {/* Language lives in the header on tablet/desktop; on mobile the top bar
           is simplified, so the switcher is relocated here (md:hidden). */}

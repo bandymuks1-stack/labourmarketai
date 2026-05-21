@@ -1,0 +1,56 @@
+{
+  "composeTiler": "Padariau {area} {unit} plytelių objektui {site}.",
+  "cv": {
+    "present": "dabar",
+    "primary": "Pagrindinis",
+    "skills": "Įgūdžiai",
+    "title": "Tavo darbo istorija"
+  },
+  "date": "Data",
+  "engagement": "Kontekstas",
+  "entry": {
+    "status": {
+      "confirmed": "Patvirtinta",
+      "rejected": "Atmesta",
+      "submitted": "Pateikta"
+    }
+  },
+  "field": {
+    "area_done": "Atlikta plotas",
+    "site_name": "Objektas",
+    "tile_type": "Plytelių tipas"
+  },
+  "inbox": {
+    "cancel": "Atšaukti",
+    "confirm": "Patvirtinti",
+    "confirm_with_correction": "Patvirtinti su pataisymu",
+    "empty": "Nėra laukiančių įrašų.",
+    "hideOriginal": "Slėpti originalą",
+    "metrics": "Rodikliai",
+    "reject": "Atmesti",
+    "rejectReason": "Atmetimo priežastis",
+    "showOriginal": "Rodyti originalą",
+    "skills": "Įgūdžiai",
+    "title": "Patvirtinti įrašai"
+  },
+  "listEmpty": "Dar nėra įrašų.",
+  "listTitle": "Įrašai",
+  "navTitle": "Mano dienoraštis",
+  "newEntry": "Naujas įrašas",
+  "noEngagement": "Kol kas neturi aktyvaus darbo konteksto, todėl nėra prie ko fiksuoti įrašų. Kai vadovas ar klientas pridės tave prie organizacijos ar projekto, dienoraštis atsidarys čia.",
+  "notes": "Pastabos",
+  "prompt": {
+    "tiler": "Aprašyk, ką nuveikei šiandien (nebūtina)"
+  },
+  "save": "Išsaugoti įrašą",
+  "saveError": "Nepavyko išsaugoti. Bandyk dar kartą.",
+  "saved": "Įrašas išsaugotas",
+  "saving": "Saugoma...",
+  "self_progress": {
+    "awaiting": "Dar laukia įrašų: {n}",
+    "confirmed": "Patvirtinti: {n}",
+    "strongly_confirmed": "Stipriai patvirtinti: {n}",
+    "title": "Tu turi {n} įgūdžių"
+  },
+  "unit": "Vienetas"
+}
