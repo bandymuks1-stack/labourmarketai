@@ -1,0 +1,56 @@
+{
+  "composeTiler": "[EN] Laid {area} {unit} of tiling at {site}.",
+  "cv": {
+    "present": "[EN] present",
+    "primary": "[EN] Primary",
+    "skills": "[EN] Skills",
+    "title": "[EN] Your work history"
+  },
+  "date": "[EN] Date",
+  "engagement": "[EN] Context",
+  "entry": {
+    "status": {
+      "confirmed": "[EN] Confirmed",
+      "rejected": "[EN] Rejected",
+      "submitted": "[EN] Submitted"
+    }
+  },
+  "field": {
+    "area_done": "[EN] Area done",
+    "site_name": "[EN] Site",
+    "tile_type": "[EN] Tile type"
+  },
+  "inbox": {
+    "cancel": "[EN] Cancel",
+    "confirm": "[EN] Confirm",
+    "confirm_with_correction": "[EN] Confirm with correction",
+    "empty": "[EN] No entries waiting.",
+    "hideOriginal": "[EN] Hide original",
+    "metrics": "[EN] Metrics",
+    "reject": "[EN] Reject",
+    "rejectReason": "[EN] Reason for rejection",
+    "showOriginal": "[EN] Show original",
+    "skills": "[EN] Skills",
+    "title": "[EN] Entries to confirm"
+  },
+  "listEmpty": "[EN] No entries yet.",
+  "listTitle": "[EN] Entries",
+  "navTitle": "[EN] My journal",
+  "newEntry": "[EN] New entry",
+  "noEngagement": "[EN] You don't have an active work engagement yet, so there is nothing to log against. Once a manager or client adds you to an organization or project, your journal opens here.",
+  "notes": "[EN] Notes",
+  "prompt": {
+    "tiler": "[EN] Describe what you did today (optional)"
+  },
+  "save": "[EN] Save entry",
+  "saveError": "[EN] Could not save. Please try again.",
+  "saved": "[EN] Entry saved",
+  "saving": "[EN] Saving...",
+  "self_progress": {
+    "awaiting": "[EN] Awaiting entries: {n}",
+    "confirmed": "[EN] Confirmed: {n}",
+    "strongly_confirmed": "[EN] Strongly confirmed: {n}",
+    "title": "[EN] You have {n} skills"
+  },
+  "unit": "[EN] Unit"
+}

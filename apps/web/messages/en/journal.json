@@ -1,0 +1,56 @@
+{
+  "composeTiler": "Laid {area} {unit} of tiling at {site}.",
+  "cv": {
+    "present": "present",
+    "primary": "Primary",
+    "skills": "Skills",
+    "title": "Your work history"
+  },
+  "date": "Date",
+  "engagement": "Context",
+  "entry": {
+    "status": {
+      "confirmed": "Confirmed",
+      "rejected": "Rejected",
+      "submitted": "Submitted"
+    }
+  },
+  "field": {
+    "area_done": "Area done",
+    "site_name": "Site",
+    "tile_type": "Tile type"
+  },
+  "inbox": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "confirm_with_correction": "Confirm with correction",
+    "empty": "No entries waiting.",
+    "hideOriginal": "Hide original",
+    "metrics": "Metrics",
+    "reject": "Reject",
+    "rejectReason": "Reason for rejection",
+    "showOriginal": "Show original",
+    "skills": "Skills",
+    "title": "Entries to confirm"
+  },
+  "listEmpty": "No entries yet.",
+  "listTitle": "Entries",
+  "navTitle": "My journal",
+  "newEntry": "New entry",
+  "noEngagement": "You don't have an active work engagement yet, so there is nothing to log against. Once a manager or client adds you to an organization or project, your journal opens here.",
+  "notes": "Notes",
+  "prompt": {
+    "tiler": "Describe what you did today (optional)"
+  },
+  "save": "Save entry",
+  "saveError": "Could not save. Please try again.",
+  "saved": "Entry saved",
+  "saving": "Saving...",
+  "self_progress": {
+    "awaiting": "Awaiting entries: {n}",
+    "confirmed": "Confirmed: {n}",
+    "strongly_confirmed": "Strongly confirmed: {n}",
+    "title": "You have {n} skills"
+  },
+  "unit": "Unit"
+}

@@ -12,11 +12,15 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   // Base UI strings + platform taxonomy name files (slug → name), kept in
   // JSON per PLATFORM_DOCTRINE §2 (taxonomy names live in JSON, never in DB).
-  const [base, professions, skillNames] = await Promise.all([
-    import(`../../messages/${locale}.json`),
-    import(`../../messages/${locale}/professions.json`),
-    import(`../../messages/${locale}/skill-names.json`),
-  ]);
+  const [base, professions, skillNames, journal, relationshipTypes, productivityUnits] =
+    await Promise.all([
+      import(`../../messages/${locale}.json`),
+      import(`../../messages/${locale}/professions.json`),
+      import(`../../messages/${locale}/skill-names.json`),
+      import(`../../messages/${locale}/journal.json`),
+      import(`../../messages/${locale}/relationship-types.json`),
+      import(`../../messages/${locale}/productivity-units.json`),
+    ]);
 
   return {
     locale,
@@ -24,6 +28,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
       ...base.default,
       professions: professions.default,
       skillNames: skillNames.default,
+      journal: journal.default,
+      relationshipTypes: relationshipTypes.default,
+      productivityUnits: productivityUnits.default,
     },
   };
 });
