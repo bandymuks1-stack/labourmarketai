@@ -61,7 +61,13 @@ original_language   CHAR(2)     NOT NULL,  -- ISO 639-1: 'lt','en','pl','de','nl
 
 **FORBIDDEN:** any column holding a translated copy (`text_en`, `body_translations`, etc.).
 
-### 2.4 Why this matters
+### 2.4 Locale set (binding)
+
+> **§2.4 Locale set (binding).** The canonical locale set is 10: EN (source) + 9 launch markets (LT, LV, EE, NL, DE, DK, NO, SE, PL). All 10 JSON files must exist in the repo at all times. No PR may remove a locale. New i18n keys must be added to all 10 files in the same PR — placeholder values `[EN] <english>` are acceptable for non-Tier-1 locales until human or community translation lands. Translation completeness is tracked per-locale: Tier 1 = human-verified (EN, LT for M1); Tier 2 = baseline + moderation (the other 8). Tier promotion is independent of the locale set — the locale set never shrinks.
+
+Implementation note (ISO 639-1 locale codes): `en, lt, lv, et, nl, de, da, no, sv, pl` (market → code: EE→et, DK→da, NO→no, SE→sv). The set lives in `apps/web/lib/i18n/config.ts`; routing + middleware derive from it; per-locale files are `messages/{locale}.json` plus the taxonomy layers `messages/{locale}/professions.json` and `messages/{locale}/skill-names.json`.
+
+### 2.5 Why this matters
 
 - Translations stored in DB = N× storage cost per record (1 message → 6 language copies).
 - Translations in DB = stale when translation engine improves.
@@ -206,11 +212,20 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 
 ---
 
+## Section 10 — Lego architecture
+
+> **§10 Lego architecture (binding).** Any platform taxonomy (roles, professions, skills, positions, responsibilities, document types, notification types, work proof types, journal entry types, rating criteria, and any future taxonomy that may extend or be modified without a code deploy) must be stored as slugs in the database with a separate JSON label layer per locale. Hardcoded TypeScript enums or string constants in UI components are forbidden for any extensible taxonomy. A PR introducing a fixed list without a slug registry cannot be merged. Existing enums identified post-hoc must be migrated to slug registries before any feature using them ships.
+
+**Boundary note.** §5 platform roles are a *fixed, RBAC-controlled* set (not extensible without a code deploy), so the `Role` union type is permitted — but role *labels* still follow the slug→JSON rule (`profile_roles.role` / `active_role` store slugs; labels resolve via `auth.signup.role.*` JSON). Genuinely extensible taxonomies (professions, skills, document types, …) must use the slug-registry shape.
+
+---
+
 ## Section 9 — Changelog (doctrine evolution)
 
 | Date | Section(s) | Change | Author |
 |---|---|---|---|
 | 2026-05-21 | All | Initial doctrine established from DI architecture conversation (translation tokens, legal proof, append-only, default-closed, storage minimalism, AI-never-lies). | DI + Chat Claude |
+| 2026-05-21 | §2.4, §2.5, §10 | Add §2.4 Locale set (binding, 10-locale canonical set; existing "Why this matters" renumbered §2.5). Promote §10 Lego architecture (slug→JSON for all extensible taxonomy) from v1.1 pending to active. (PR #8 architect review B4/B6.) | DI + Architect (Chat Claude) |
 
 ---
 

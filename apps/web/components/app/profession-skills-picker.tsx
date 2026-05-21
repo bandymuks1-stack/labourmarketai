@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { CvImportUpload } from "@/components/app/cv-import-upload";
+import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 type ApiSkill = {
@@ -14,19 +16,23 @@ type ApiSkill = {
 };
 
 /**
- * Multi-select skill chips scoped to one profession. Fetches the profession's
- * curated skills from the API, lets the worker toggle them, and saves the full
- * set. Selected = safety-orange fill; core skills get a subtle badge; persisted
- * (saved) skills show a "self-declared" label (M1 — nothing is verified yet).
+ * Profession-scoped skill chips (left column). Fetches the profession's curated
+ * skills by id, toggles selection, and saves the full set. On save it calls
+ * `onSaved` so the parent can refresh the server-fed CV preview (which is the
+ * read model of what's actually persisted). Also surfaces the M2 scaffolds (CV
+ * import + custom skill) as clearly-disabled affordances (doctrine: M1 curated
+ * only).
  */
 export function ProfessionSkillsPicker({
   workerId,
   professionId,
   initialSelectedIds,
+  onSaved,
 }: {
   workerId: string;
   professionId: string;
   initialSelectedIds: string[];
+  onSaved?: () => void;
 }) {
   const t = useTranslations("skills");
   const tName = useTranslations("skillNames");
@@ -34,11 +40,8 @@ export function ProfessionSkillsPicker({
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(initialSelectedIds),
   );
-  const [persisted, setPersisted] = useState<Set<string>>(
-    () => new Set(initialSelectedIds),
-  );
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,11 +58,8 @@ export function ProfessionSkillsPicker({
     };
   }, [professionId]);
 
-  function label(s: ApiSkill): string {
-    return tName(s.slug);
-  }
-
   function toggle(id: string) {
+    setSaved(false);
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -70,7 +70,7 @@ export function ProfessionSkillsPicker({
 
   async function save() {
     setError(null);
-    setToast(null);
+    setSaved(false);
     setSaving(true);
     try {
       const res = await fetch(`/api/workers/${workerId}/skills`, {
@@ -79,21 +79,14 @@ export function ProfessionSkillsPicker({
         body: JSON.stringify({ skillIds: [...selected] }),
       });
       if (!res.ok) throw new Error(`save failed: ${res.status}`);
-      setPersisted(new Set(selected));
-      setToast(t("savedToast"));
+      setSaved(true);
+      onSaved?.(); // refresh the server-fed CV preview to the saved truth
     } catch (e) {
       console.error("[skills-picker] save failed:", e);
       setError(t("saveError"));
     } finally {
       setSaving(false);
     }
-  }
-
-  if (skills === null) {
-    return <p className="text-sm text-text-secondary">{t("loading")}</p>;
-  }
-  if (skills.length === 0) {
-    return <p className="text-sm text-text-secondary">{t("empty")}</p>;
   }
 
   return (
@@ -105,46 +98,46 @@ export function ProfessionSkillsPicker({
         <p className="mt-1 text-xs text-text-secondary">{t("pickerHelp")}</p>
       </div>
 
-      <ul className="flex flex-wrap gap-2">
-        {skills.map((s) => {
-          const isSelected = selected.has(s.id);
-          const isPersisted = persisted.has(s.id) && isSelected;
-          return (
-            <li key={s.id} className="flex flex-col items-start gap-0.5">
-              <button
-                type="button"
-                onClick={() => toggle(s.id)}
-                aria-pressed={isSelected}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
-                  isSelected
-                    ? "border-brand-orange bg-brand-orange text-ink-900"
-                    : "border-ink-500 text-text-secondary hover:border-text-muted",
-                )}
-              >
-                {label(s)}
-                {s.isCore && (
-                  <span
-                    className={cn(
-                      "rounded-sm px-1 font-mono text-[9px] uppercase tracking-label",
-                      isSelected
-                        ? "bg-ink-900/20 text-ink-900"
-                        : "text-text-muted",
-                    )}
-                  >
-                    {t("coreBadge")}
-                  </span>
-                )}
-              </button>
-              {isPersisted && (
-                <span className="pl-2 font-mono text-[9px] uppercase tracking-label text-text-muted">
-                  {t("selfDeclared")}
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+      {skills === null ? (
+        <p className="text-sm text-text-secondary">{t("loading")}</p>
+      ) : skills.length === 0 ? (
+        <p className="text-sm text-text-secondary">{t("empty")}</p>
+      ) : (
+        <ul className="flex flex-wrap gap-2">
+          {skills.map((s) => {
+            const isSelected = selected.has(s.id);
+            return (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => toggle(s.id)}
+                  aria-pressed={isSelected}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                    isSelected
+                      ? "border-brand-orange bg-brand-orange text-ink-900"
+                      : "border-ink-500 text-text-secondary hover:border-text-muted",
+                  )}
+                >
+                  {tName(s.slug)}
+                  {s.isCore && (
+                    <span
+                      className={cn(
+                        "rounded-sm px-1 font-mono text-[9px] uppercase tracking-label",
+                        isSelected
+                          ? "bg-ink-900/20 text-ink-900"
+                          : "text-text-muted",
+                      )}
+                    >
+                      {t("coreBadge")}
+                    </span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       {error && (
         <p className="text-xs text-state-danger" role="alert">
@@ -152,16 +145,34 @@ export function ProfessionSkillsPicker({
         </p>
       )}
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={save} disabled={saving}>
           {saving ? t("saving") : t("saveButton")}
         </Button>
-        {toast && (
-          <span className="text-xs text-state-live" role="status">
-            ✓ {toast}
+        {saved && (
+          <span
+            className="flex items-center gap-2 text-xs text-state-live"
+            role="status"
+          >
+            ✓ {t("savedToast")}
+            <Link
+              href="/dashboard"
+              className="text-brand-blue hover:text-brand-cyan"
+            >
+              {t("viewProfile")}
+            </Link>
           </span>
         )}
       </div>
+
+      {/* M2 scaffolds — clearly not active yet (doctrine: M1 curated only) */}
+      <CvImportUpload />
+      <p className="text-xs text-text-muted">
+        {t("customPrompt")}{" "}
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          ({t("customComingSoon")})
+        </span>
+      </p>
     </div>
   );
 }

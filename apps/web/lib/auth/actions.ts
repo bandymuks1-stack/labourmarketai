@@ -14,11 +14,14 @@ const ONBOARDING_ROLES = new Set<Role>([
   "customer",
 ]);
 
-/** Finish the first onboarding — atomic write of `profiles`,
- *  `profile_roles`, and the role-specific entity row
- *  (`workers` | `companies` | `agencies`) via the
- *  `public.complete_onboarding` RPC. One transaction; idempotent on
- *  re-submit (see migration 0006). */
+const ROLE_ORDER: Role[] = ["worker", "company", "agency", "customer"];
+
+/** Finish the first onboarding — person-first, multi-role. `roles` is a
+ *  comma-separated list (1–4); the first in canonical order becomes the
+ *  primary (active workspace) via `complete_onboarding`, and each extra is
+ *  added via `add_role`. Both RPCs upsert `profile_roles` + the role's entity
+ *  row (`workers` | `companies` | `agencies`) idempotently (0006/0007).
+ *  Falls back to a single `role` field for backward compatibility. */
 export async function completeOnboarding(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const {
@@ -26,37 +29,32 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const role = String(formData.get("role") ?? "") as Role;
-  if (!ONBOARDING_ROLES.has(role)) {
-    throw new Error(`Invalid onboarding role: ${role}`);
+  const rawRoles = String(formData.get("roles") ?? formData.get("role") ?? "");
+  const roles = [
+    ...new Set(rawRoles.split(",").map((r) => r.trim()).filter(Boolean)),
+  ] as Role[];
+  if (roles.length === 0 || roles.some((r) => !ONBOARDING_ROLES.has(r))) {
+    throw new Error(`Invalid onboarding roles: ${rawRoles}`);
   }
+  const primary = ROLE_ORDER.find((r) => roles.includes(r)) as Role;
+  const extras = roles.filter((r) => r !== primary);
+
   const display_name = String(formData.get("display_name") ?? "").trim();
   const country = String(formData.get("country") ?? "").trim();
   const locale = String(formData.get("locale") ?? "lt");
-  // Profession is no longer collected during onboarding (M1 unified flow);
-  // it moves to the worker dashboard. Optional here for backward compat.
-  const profession_id = String(formData.get("profession_id") ?? "").trim();
 
-  // Per-role payload from the form
-  const role_data: Record<string, string> = {};
-  for (const [k, v] of formData.entries()) {
-    if (
-      k === "role" ||
-      k === "display_name" ||
-      k === "country" ||
-      k === "locale" ||
-      k === "profession_id"
-    )
-      continue;
-    if (typeof v === "string") role_data[k] = v.trim();
-  }
+  // company/agency entity rows seed a draft name from role_data.name.
+  const roleData = (r: Role): Record<string, string> =>
+    (r === "company" || r === "agency") && display_name
+      ? { name: `${display_name} UAB` }
+      : {};
 
   const { error } = await supabase.rpc("complete_onboarding", {
-    p_role: role,
+    p_role: primary,
     p_display_name: display_name || null,
     p_country: country || null,
-    p_role_data: role_data,
-    p_profession_id: profession_id || null,
+    p_role_data: roleData(primary),
+    p_profession_id: null,
   });
   if (error) {
     console.error("[completeOnboarding] RPC failed", {
@@ -66,6 +64,28 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       hint: error.hint,
     });
     throw new Error(`complete_onboarding RPC failed: ${error.message}`);
+  }
+
+  // Additional roles. add_role flips active_role to the role it adds, so we
+  // reset active_role back to the chosen primary afterwards.
+  for (const r of extras) {
+    const { error: e } = await supabase.rpc("add_role", {
+      p_role: r,
+      p_role_data: roleData(r),
+    });
+    if (e) {
+      console.error("[completeOnboarding] add_role failed", {
+        role: r,
+        message: e.message,
+      });
+      throw new Error(`add_role RPC failed: ${e.message}`);
+    }
+  }
+  if (extras.length > 0) {
+    await supabase
+      .from("profiles")
+      .update({ active_role: primary })
+      .eq("id", user.id);
   }
 
   revalidatePath(`/${locale}/dashboard`);

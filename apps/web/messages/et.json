@@ -1,0 +1,942 @@
+{
+  "agencies": {
+    "cta": {
+      "button": "[EN] Join the partner waitlist",
+      "headline": {
+        "line1": "[EN] Turn your pool",
+        "line2": "[EN] into a live desk."
+      },
+      "subcopy": "[EN] Join the partner waitlist and get early-access terms for your agency."
+    },
+    "faq": {
+      "eyebrow": "[EN] Agency FAQ",
+      "headline": "[EN] Straight answers",
+      "items": [
+        {
+          "a": "[EN] Yes. You broker and stay in control — the platform never disintermediates you.",
+          "q": "[EN] Do we keep our client relationships?"
+        },
+        {
+          "a": "[EN] Pricing is announced at launch; waitlist partners get early-access terms.",
+          "q": "[EN] How much does it cost agencies?"
+        },
+        {
+          "a": "[EN] Yes — public, agencies-only or direct, per worker and per demand.",
+          "q": "[EN] Can we control worker visibility?"
+        },
+        {
+          "a": "[EN] Yes, with assignment status tracking so nothing is double-booked.",
+          "q": "[EN] Can one worker serve multiple clients?"
+        }
+      ]
+    },
+    "features": {
+      "eyebrow": "[EN] Why agencies",
+      "headline": "[EN] Leverage, not loss of control",
+      "items": [
+        {
+          "desc": "[EN] Workers, availability and status in one place.",
+          "title": "[EN] Manage your pool"
+        },
+        {
+          "desc": "[EN] Broker demand without losing the relationship.",
+          "title": "[EN] Post on behalf of clients"
+        },
+        {
+          "desc": "[EN] Place the right people faster.",
+          "title": "[EN] Ranked matching"
+        },
+        {
+          "desc": "[EN] Public, agencies-only or direct — your call.",
+          "title": "[EN] Visibility controls"
+        },
+        {
+          "desc": "[EN] Baltic + Nordic clients and workers.",
+          "title": "[EN] Cross-border reach"
+        },
+        {
+          "desc": "[EN] Capacity insights as demand shifts.",
+          "title": "[EN] Grow your desk"
+        }
+      ]
+    },
+    "journey": {
+      "eyebrow": "[EN] Agency workflow",
+      "headline": "[EN] Run your pool like a desk",
+      "steps": [
+        {
+          "desc": "[EN] Bring your managed pool into one workspace.",
+          "title": "[EN] Onboard your workers"
+        },
+        {
+          "desc": "[EN] Match your people to open client roles.",
+          "title": "[EN] Connect to client demand"
+        },
+        {
+          "desc": "[EN] Track active, pending and available.",
+          "title": "[EN] Manage assignments"
+        },
+        {
+          "desc": "[EN] Add capacity where demand is rising.",
+          "title": "[EN] Grow your pool"
+        }
+      ]
+    },
+    "pool": {
+      "bullets": [
+        "[EN] Pool size — every managed worker at a glance.",
+        "[EN] Trade breakdown — capacity by skill, live.",
+        "[EN] Assignment status — Active, Pending, Available.",
+        "[EN] Multi-client — place the right people across clients."
+      ],
+      "eyebrow": "[EN] Your control room",
+      "headline": {
+        "line1": "[EN] Your whole pool,",
+        "line2": "[EN] in one room."
+      },
+      "subcopy": "[EN] Manage your workers, match them to client demand and broker introductions — without losing visibility or control."
+    }
+  },
+  "auth": {
+    "callback": {
+      "error_body": "[EN] This link is invalid or expired. Please try again.",
+      "error_title": "[EN] Sign-in failed",
+      "retry": "[EN] Try again",
+      "verifying": "[EN] Verifying your sign-in link..."
+    },
+    "dashboard": {
+      "account": {
+        "email_label": "[EN] Email",
+        "logout": "[EN] Sign out",
+        "roles_label": "[EN] My roles"
+      },
+      "comingSoon": {
+        "body_main": "[EN] We're finishing the company / agency functionality right now.",
+        "body_meanwhile": "[EN] In the meantime — you can browse the platform via the \"Discover\" tab (read-only).",
+        "body_notify": "[EN] We'll let you know the moment it's ready.",
+        "greeting": "[EN] 👋 Welcome, {name}"
+      },
+      "customer": {
+        "offerHint": "[EN] Want to offer services? Add the Worker role.",
+        "offerHintCta": "[EN] Add Worker role"
+      },
+      "empty": {
+        "account_intro": "[EN] Manage your email and roles.",
+        "agency": {
+          "offer": "[EN] Empty. Candidate pool and service offerings ship in M2.",
+          "proofs": "[EN] Empty. Track record and client testimonials ship in M2/M3.",
+          "seek": "[EN] Empty. Client needs and demand signals ship in M2."
+        },
+        "company": {
+          "offer": "[EN] Empty. Open positions and projects management ships in M2.",
+          "proofs": "[EN] Empty. Company score and project history ship in M2.",
+          "seek": "[EN] Empty. Posting workforce needs ships in M2."
+        },
+        "customer": {
+          "proofs": "[EN] Empty. Order history and reviews given ship in M3.",
+          "seek": "[EN] Empty. Service ordering and search ships in M3."
+        },
+        "discover": "[EN] Discover feed — expected in M3.",
+        "search": "[EN] Detailed search — expected in M2.",
+        "worker": {
+          "offer": "[EN] Empty. Skills, work history and proofs management ships in M2.",
+          "proofs": "[EN] Empty. Verified skills and the work journal ship in M2.",
+          "seek": "[EN] Empty. Job preferences and availability settings ship in M2."
+        }
+      },
+      "greeting": "[EN] Welcome back, {name}",
+      "section": {
+        "offer": {
+          "title": "[EN] What I offer"
+        },
+        "proofs": {
+          "title": "[EN] My proofs"
+        },
+        "seek": {
+          "title": "[EN] What I seek"
+        }
+      },
+      "tabs": {
+        "account": "[EN] My account",
+        "discover": "[EN] Discover",
+        "overview": "[EN] Overview",
+        "search": "[EN] Search"
+      }
+    },
+    "errors": {
+      "generic": "[EN] Something went wrong. Please try again.",
+      "invalidCredentials": "[EN] Incorrect email or password.",
+      "invalidEmail": "[EN] Invalid email format.",
+      "passwordTooShort": "[EN] Password too short (at least {min} characters).",
+      "rateLimited": "[EN] Too many attempts. Please try again later.",
+      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead."
+    },
+    "forgotPassword": {
+      "back_to_login": "[EN] Back to sign in",
+      "email_label": "[EN] Email",
+      "error_email": "[EN] Please enter a valid email address.",
+      "error_generic": "[EN] Something went wrong. Please try again shortly.",
+      "headline": "[EN] Forgot password?",
+      "sending": "[EN] Sending...",
+      "subcopy": "[EN] Enter your email and we'll send you a link to reset your password.",
+      "submit_label": "[EN] Send reset link",
+      "success_body": "[EN] If an account exists for {email}, we've sent a password reset link.",
+      "success_title": "[EN] Check your email"
+    },
+    "login": {
+      "divider": "[EN] or",
+      "email_label": "[EN] Email",
+      "error_email": "[EN] Please enter a valid email address.",
+      "error_generic": "[EN] Something went wrong. Please try again shortly.",
+      "error_invalid_credentials": "[EN] Invalid email or password.",
+      "error_password_required": "[EN] Please enter your password.",
+      "forgot_password": "[EN] Forgot password?",
+      "google_label": "[EN] Continue with Google",
+      "google_redirecting": "[EN] Redirecting...",
+      "headline": "[EN] Sign in",
+      "no_account": "[EN] No account yet?",
+      "password_label": "[EN] Password",
+      "signing": "[EN] Signing in...",
+      "signup_link": "[EN] Sign up",
+      "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
+      "submit_label": "[EN] Sign in"
+    },
+    "middleware": {
+      "onboarding_required": "[EN] Please finish setting up your profile first.",
+      "session_expired": "[EN] Your session has expired. Please sign in again."
+    },
+    "notifications": {
+      "emptyBody": "[EN] Notifications will appear here as the system grows.",
+      "emptyTitle": "[EN] No notifications yet",
+      "label": "[EN] Notifications",
+      "markAllRead": "[EN] Mark all as read",
+      "switchRoleCta": "[EN] Switch to {role} to view"
+    },
+    "onboarding": {
+      "back": "[EN] Back",
+      "country_label": "[EN] Country",
+      "display_name_label": "[EN] Display name",
+      "error_generic": "[EN] Something went wrong. Please try again.",
+      "error_name_required": "[EN] Please enter a display name.",
+      "rolePicker": {
+        "agency": {
+          "desc": "[EN] Staff workers, manage contracts.",
+          "title": "[EN] Agency"
+        },
+        "company": {
+          "desc": "[EN] Recruit, manage teams, post jobs.",
+          "title": "[EN] Company"
+        },
+        "continue": "[EN] Continue",
+        "customer": {
+          "desc": "[EN] Order services, get work reports.",
+          "title": "[EN] Customer"
+        },
+        "heading": "[EN] Choose how you'll use the platform",
+        "infoBox": "[EN] 💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
+        "multiNote": "[EN] You can choose several. Change later in settings.",
+        "worker": {
+          "desc": "[EN] Seek work, build your CV, get verified.",
+          "title": "[EN] Worker"
+        }
+      },
+      "saving": "[EN] Saving...",
+      "step2": {
+        "continue": "[EN] Finish",
+        "heading": "[EN] A bit about you"
+      }
+    },
+    "resetPassword": {
+      "checking": "[EN] Checking link...",
+      "confirm_password_label": "[EN] Confirm password",
+      "error_generic": "[EN] Something went wrong. Please try again shortly.",
+      "error_password_mismatch": "[EN] Passwords don't match.",
+      "error_password_short": "[EN] Password must be at least {min} characters.",
+      "headline": "[EN] New password",
+      "invalid_body": "[EN] This password reset link is invalid or has expired.",
+      "invalid_title": "[EN] Link not valid",
+      "password_label": "[EN] New password",
+      "request_new": "[EN] Request a new link",
+      "saving": "[EN] Saving...",
+      "subcopy": "[EN] Choose a new password for your account.",
+      "submit_label": "[EN] Save password"
+    },
+    "roleSwitcher": {
+      "active_label": "[EN] Active",
+      "addRoleDescription": "[EN] Pick a role to add to your account.",
+      "addRoleTitle": "[EN] Add a new role",
+      "add_role": "[EN] Add role",
+      "cancel": "[EN] Cancel",
+      "confirm": "[EN] Add",
+      "label": "[EN] Role",
+      "switching": "[EN] Switching..."
+    },
+    "signup": {
+      "confirm_password_label": "[EN] Confirm password",
+      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
+      "divider": "[EN] or",
+      "email_label": "[EN] Work email",
+      "email_placeholder": "[EN] name@company.com",
+      "error_email": "[EN] Please enter a valid email address.",
+      "error_generic": "[EN] Something went wrong. Please try again shortly.",
+      "error_password_mismatch": "[EN] Passwords don't match.",
+      "error_password_number": "[EN] Password must include a number.",
+      "error_password_short": "[EN] Password must be at least {min} characters.",
+      "error_password_special": "[EN] Password must include a special character.",
+      "error_password_uppercase": "[EN] Password must include an uppercase letter.",
+      "google_label": "[EN] Continue with Google",
+      "google_redirecting": "[EN] Redirecting...",
+      "has_account": "[EN] Already have an account?",
+      "headline": "[EN] Create your account",
+      "login_link": "[EN] Sign in",
+      "password_help": "[EN] Min. 8 characters, 1 uppercase, 1 number, 1 special (!@#$%).",
+      "password_label": "[EN] Password",
+      "role": {
+        "agency": "[EN] Agency",
+        "company": "[EN] Company",
+        "customer": "[EN] Customer",
+        "worker": "[EN] Worker"
+      },
+      "signing": "[EN] Creating...",
+      "subcopy": "[EN] Sign up with Google, or with your email and password. You'll pick your role next.",
+      "submit_label": "[EN] Sign up"
+    }
+  },
+  "common": {
+    "backHome": "[EN] Back to home",
+    "en": "[EN] English",
+    "localeSwitch": "[EN] Language",
+    "lt": "[EN] Lietuvių",
+    "notFound": "[EN] This page does not exist",
+    "skipToContent": "[EN] Skip to content"
+  },
+  "companies": {
+    "cta": {
+      "button": "[EN] Join the company waitlist",
+      "headline": {
+        "line1": "[EN] Stop waiting weeks",
+        "line2": "[EN] to fill a role."
+      },
+      "subcopy": "[EN] Join the waitlist and get early-access pricing for your projects."
+    },
+    "demand": {
+      "bullets": [
+        "[EN] Project + location — scope each demand precisely.",
+        "[EN] Headcount — how many of each role you need.",
+        "[EN] Required skills — matched against verified worker skills.",
+        "[EN] Ranked matches: 47 — workers already fitting this demand now."
+      ],
+      "eyebrow": "[EN] Live demand",
+      "headline": {
+        "line1": "[EN] Here's what live demand",
+        "line2": "[EN] looks like."
+      },
+      "subcopy": "[EN] Post what each project needs and receive ranked, explainable matches from available workers and agencies — in hours, not weeks."
+    },
+    "faq": {
+      "eyebrow": "[EN] Company FAQ",
+      "headline": "[EN] Straight answers",
+      "items": [
+        {
+          "a": "[EN] A single 0–99 signal from verified skills, reliability and on-site safety — comparable across workers.",
+          "q": "[EN] What is the OVR rating?"
+        },
+        {
+          "a": "[EN] Pricing is announced at launch. Waitlist signups get early-access pricing.",
+          "q": "[EN] How much does it cost?"
+        },
+        {
+          "a": "[EN] Yes — by country and region, matched to worker location and willingness to relocate.",
+          "q": "[EN] Can we filter by location?"
+        },
+        {
+          "a": "[EN] Through verified skills, employer-confirmed history and the OVR — not self-reported CVs.",
+          "q": "[EN] How is worker experience guaranteed?"
+        }
+      ]
+    },
+    "features": {
+      "eyebrow": "[EN] Why companies",
+      "headline": "[EN] Supply you can act on",
+      "items": [
+        {
+          "desc": "[EN] Every match shows the reasons behind it.",
+          "title": "[EN] Ranked, explainable matches"
+        },
+        {
+          "desc": "[EN] Baltic + Nordic supply in one place.",
+          "title": "[EN] Cross-border worker pool"
+        },
+        {
+          "desc": "[EN] You see and own the relationship.",
+          "title": "[EN] No opaque middlemen"
+        },
+        {
+          "desc": "[EN] Hire on evidence, not on claims.",
+          "title": "[EN] Verified skills + OVR"
+        },
+        {
+          "desc": "[EN] See availability shift as it happens.",
+          "title": "[EN] Real-time supply signals"
+        },
+        {
+          "desc": "[EN] You own the worker relationship.",
+          "title": "[EN] Direct contact"
+        }
+      ]
+    },
+    "journey": {
+      "eyebrow": "[EN] How matching works for you",
+      "headline": "[EN] From demand to hire",
+      "steps": [
+        {
+          "desc": "[EN] Define roles, headcount and skills.",
+          "title": "[EN] Create project + post demand"
+        },
+        {
+          "desc": "[EN] Workers and agencies scored against your demand.",
+          "title": "[EN] System ranks best matches"
+        },
+        {
+          "desc": "[EN] Contact the people you want — no gatekeeper.",
+          "title": "[EN] Reach out directly"
+        },
+        {
+          "desc": "[EN] Close roles in days, with accountable decisions.",
+          "title": "[EN] Hire faster"
+        }
+      ]
+    }
+  },
+  "company": {
+    "score": {
+      "completion": "[EN] Project completion",
+      "label": "[EN] Company score",
+      "payment": "[EN] Payment history",
+      "response": "[EN] Response time",
+      "reviews": "[EN] Worker reviews"
+    }
+  },
+  "cv": {
+    "disclaimer": "[EN] All the data you see here is yours. It doesn't go anywhere else.",
+    "name": "[EN] Name",
+    "profession": "[EN] Profession",
+    "roles": "[EN] Roles",
+    "skills": "[EN] Skills",
+    "skillsEmpty": "[EN] No skills selected yet.",
+    "tagCore": "[EN] Core",
+    "tagSystem": "[EN] System",
+    "title": "[EN] YOUR CV (REAL-TIME PREVIEW)",
+    "transparency": "[EN] ✓ Your CV is building here, now. All data is stored in your profile.",
+    "savedCount": "[EN] Saved: {n} skills",
+    "activeTag": "[EN] active"
+  },
+  "draft": {
+    "column": {
+      "drafted": "[EN] Drafted",
+      "live": "[EN] Live now",
+      "onDeck": "[EN] On deck"
+    },
+    "eyebrow": "[EN] Live matching",
+    "headline": {
+      "line1": "[EN] Here's how workers",
+      "line2": "[EN] find work in real time."
+    },
+    "liveCounter": "[EN] Live draft · 12 matches in progress",
+    "status": {
+      "deciding": "[EN] Deciding",
+      "hired": "[EN] Hired",
+      "reviewing": "[EN] Reviewing"
+    },
+    "subcopy": "[EN] Real-time matching, with reasons. Every match shows the why — no opaque algorithm, no black-box score."
+  },
+  "footer": {
+    "about": "[EN] About",
+    "activity": "[EN] Live market activity",
+    "company": "[EN] Company",
+    "contact": "[EN] Contact",
+    "legalGroup": "[EN] Legal",
+    "preview": "[EN] M0 preview build — not a public launch.",
+    "product": "[EN] Product",
+    "rights": "[EN] All rights reserved.",
+    "tagline": "[EN] The living labour market for construction — Baltic & Northern Europe."
+  },
+  "hero": {
+    "businessLink": "[EN] Learn more",
+    "businessNote": "[EN] For companies & agencies ·",
+    "chip": "[EN] The labour market OS",
+    "ctaPrimary": "[EN] Start now",
+    "headline": "[EN] The labour market,",
+    "headlineAccent": "[EN] alive.",
+    "subcopy": "[EN] One profile. Workers, companies and agencies on a single connected market — live demand, real-time matching, honest signals. The platform is being built; this is the M0 foundation."
+  },
+  "heroCards": {
+    "action": {
+      "label": "[EN] Action center"
+    },
+    "project": {
+      "cta": "[EN] Open project hub",
+      "label": "[EN] Active project",
+      "progress": "[EN] Progress",
+      "safety": "[EN] Safety",
+      "sites": "[EN] Sites",
+      "target": "[EN] Target date",
+      "workers": "[EN] Workers"
+    },
+    "worker": {
+      "cta": "[EN] View profile",
+      "label": "[EN] Worker profile",
+      "skills": "[EN] Top skills",
+      "strength": "[EN] Profile strength"
+    }
+  },
+  "legal": {
+    "cookies": {
+      "title": "[EN] Cookie Policy"
+    },
+    "draftNote": "[EN] This document is a draft. The final, binding text will be reviewed by legal counsel before public launch (M5).",
+    "privacy": {
+      "title": "[EN] Privacy Policy"
+    },
+    "terms": {
+      "title": "[EN] Terms of Service"
+    }
+  },
+  "live": {
+    "activity": {
+      "label": "[EN] Live activity feed"
+    },
+    "chip": {
+      "text": "[EN] PRE-ALPHA · Activity preview · Live market growing"
+    },
+    "clock": {
+      "badge": "[EN] EU-N MARKET · LIVE"
+    },
+    "counters": {
+      "activeWorkers": "[EN] Active workers",
+      "avgOvr": "[EN] Avg profile strength",
+      "liveDemand": "[EN] Open demand",
+      "matchesToday": "[EN] Matches today"
+    },
+    "ticker": {
+      "label": "[EN] Live market activity ticker"
+    }
+  },
+  "map": {
+    "caption": "[EN] 9 active markets · fast expansion to follow",
+    "label": {
+      "live": "[EN] EU LIVE",
+      "utc": "[EN] UTC"
+    },
+    "legend": {
+      "active_markets": "[EN] Active markets (9)",
+      "expansion_candidates": "[EN] Expansion candidates"
+    },
+    "tooltip": {
+      "companies": "[EN] companies",
+      "expansion_candidate": "[EN] Expansion candidate",
+      "matchesToday": "[EN] matches today",
+      "projects": "[EN] projects",
+      "workers": "[EN] workers"
+    }
+  },
+  "market": {
+    "competition": "[EN] Competition",
+    "cta": "[EN] View full insights",
+    "demand": "[EN] Labour demand",
+    "label": "[EN] Market intelligence",
+    "topSkills": "[EN] Top in-demand skills",
+    "workers": "[EN] Available workers"
+  },
+  "marketPulse": {
+    "autoUpdate": "[EN] Auto-update",
+    "eyebrow": "[EN] Market pulse",
+    "gap": "[EN] Gap",
+    "headline": {
+      "line1": "[EN] The labour market,",
+      "line2": "[EN] seen in real time."
+    },
+    "hot": "[EN] Hot",
+    "legend": {
+      "demand": "[EN] Demand",
+      "supply": "[EN] Supply"
+    },
+    "panel": {
+      "demandByCountry": "[EN] Demand by country",
+      "recentMatches": "[EN] Recent matches",
+      "supplyDemand": "[EN] Supply vs demand (30d)",
+      "topSkills": "[EN] Top in-demand skills"
+    },
+    "subcopy": "[EN] Market intelligence is part of the platform — supply, demand and signals visible to everyone who needs them.",
+    "timeAgo": {
+      "hours": "[EN] {n}h ago",
+      "justNow": "[EN] just now",
+      "minutes": "[EN] {n}min ago"
+    }
+  },
+  "nav": {
+    "company": "[EN] Company",
+    "login": "[EN] Sign in",
+    "platform": "[EN] Platform",
+    "pricing": "[EN] Pricing",
+    "resources": "[EN] Resources",
+    "solutions": "[EN] Solutions",
+    "startNow": "[EN] Start now"
+  },
+  "pages": {
+    "agencies": {
+      "benefits": [
+        {
+          "body": "[EN] Keep your managed workers, availability and statuses organised in one workspace.",
+          "title": "[EN] Manage your pool"
+        },
+        {
+          "body": "[EN] Post demand for clients and place the right people faster with ranked matching.",
+          "title": "[EN] Broker with leverage"
+        },
+        {
+          "body": "[EN] Choose what is public, agencies-only, or direct — you control exposure.",
+          "title": "[EN] Visibility controls"
+        }
+      ],
+      "cta": "[EN] Join the partner waitlist",
+      "eyebrow": "[EN] For agencies",
+      "screenshot": "[EN] Agency mode flow",
+      "subcopy": "[EN] Manage your managed workers, post demand on behalf of clients, and broker introductions — all in one place.",
+      "title": "[EN] Your pool,",
+      "titleAccent": "[EN] in motion."
+    },
+    "companies": {
+      "benefits": [
+        {
+          "body": "[EN] Define roles, headcount and skills per project — not vague job ads.",
+          "title": "[EN] Post demand per project"
+        },
+        {
+          "body": "[EN] Every match comes with the reasons behind it, so hiring decisions stay accountable.",
+          "title": "[EN] Ranked, explainable matches"
+        },
+        {
+          "body": "[EN] Tap vetted agency pools for surge capacity without losing visibility.",
+          "title": "[EN] Agencies, when you need them"
+        }
+      ],
+      "cta": "[EN] Join the company waitlist",
+      "eyebrow": "[EN] For companies",
+      "screenshot": "[EN] Company demand flow",
+      "subcopy": "[EN] Post what you need on each project and receive ranked, explainable matches from available workers and agencies.",
+      "title": "[EN] Live demand,",
+      "titleAccent": "[EN] ranked."
+    },
+    "workers": {
+      "benefits": [
+        {
+          "body": "[EN] Maintain a single avatar with verified skills and availability — visible to vetted employers across nine countries.",
+          "title": "[EN] One profile, every market"
+        },
+        {
+          "body": "[EN] See live job demand and get matched to roles that fit your trade, rate and location.",
+          "title": "[EN] Real demand, real-time"
+        },
+        {
+          "body": "[EN] A transparent trust signal and profile strength — no inflated claims, no pay-to-rank.",
+          "title": "[EN] Honest signals"
+        }
+      ],
+      "cta": "[EN] Start now",
+      "eyebrow": "[EN] For workers",
+      "screenshot": "[EN] Worker avatar flow",
+      "subcopy": "[EN] Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
+      "title": "[EN] Your skills,",
+      "titleAccent": "[EN] discoverable."
+    }
+  },
+  "playercards": {
+    "eyebrow": "[EN] Workers as living profiles",
+    "headline": {
+      "line1": "[EN] Every worker, ranked",
+      "line2": "[EN] and ready."
+    },
+    "stat": {
+      "ADP": "[EN] Adaptability",
+      "REL": "[EN] Reliability",
+      "SAF": "[EN] Safety",
+      "SKL": "[EN] Skill",
+      "SPD": "[EN] Speed",
+      "TRS": "[EN] Trust"
+    },
+    "status": {
+      "available": "[EN] Available",
+      "busy": "[EN] Busy",
+      "drafted": "[EN] Drafted",
+      "live": "[EN] Live"
+    },
+    "subcopy": "[EN] Profile strength comes from real completed work, verified skills, and on-site behavior. Today's preview shows sample profiles.",
+    "tier": {
+      "bronze": "[EN] Bronze",
+      "gold": "[EN] Gold",
+      "silver": "[EN] Silver"
+    }
+  },
+  "pricing": {
+    "eyebrow": "[EN] Pricing",
+    "faq": [
+      {
+        "a": "[EN] We're pre-launch. Setting a price we can't yet stand behind would be dishonest, so tiers show their scope and the price is confirmed before launch.",
+        "q": "[EN] Why is there no price shown yet?"
+      },
+      {
+        "a": "[EN] Yes. The Free tier is meant to get workers and small employers onto the market with no cost.",
+        "q": "[EN] Will the Free tier stay free?"
+      },
+      {
+        "a": "[EN] Billing integration is planned for a later milestone. In M0 you can only join a waitlist — no card is collected.",
+        "q": "[EN] How is billing handled?"
+      },
+      {
+        "a": "[EN] Yes. Tiers are meant to follow your needs; you'll be able to move up or down.",
+        "q": "[EN] Can I change tiers later?"
+      }
+    ],
+    "faqTitle": "[EN] Pricing FAQ",
+    "featuresLabel": "[EN] Includes",
+    "planCta": "[EN] Join the waitlist for this plan",
+    "plans": {
+      "agency": {
+        "features": [
+          "[EN] Unlimited managed workers",
+          "[EN] Broker tools",
+          "[EN] Worker search",
+          "[EN] Priority support"
+        ],
+        "name": "[EN] Agency",
+        "tagline": "[EN] For staffing partners."
+      },
+      "business": {
+        "features": [
+          "[EN] 10 projects",
+          "[EN] 25 job demands",
+          "[EN] Worker search",
+          "[EN] Email support"
+        ],
+        "name": "[EN] Business",
+        "tagline": "[EN] For active employers."
+      },
+      "enterprise": {
+        "features": [
+          "[EN] Unlimited projects",
+          "[EN] SSO",
+          "[EN] SLA",
+          "[EN] Dedicated support"
+        ],
+        "name": "[EN] Enterprise",
+        "tagline": "[EN] For scale and control."
+      },
+      "free": {
+        "features": [
+          "[EN] 1 project",
+          "[EN] 1 job demand",
+          "[EN] Community support"
+        ],
+        "name": "[EN] Free",
+        "tagline": "[EN] Get on the market."
+      }
+    },
+    "subcopy": "[EN] Prices are not finalised yet — they will be set before launch. Join the waitlist for the tier that fits and we'll confirm details with you.",
+    "title": "[EN] Simple tiers,",
+    "titleAccent": "[EN] set fairly."
+  },
+  "secondary": {
+    "comm": {
+      "label": "[EN] Communication"
+    },
+    "companies": {
+      "label": "[EN] Companies & HR",
+      "main": "[EN] Main contractor",
+      "subs": "[EN] Subcontractors"
+    },
+    "shortcuts": {
+      "certificates": "[EN] Certificates",
+      "documents": "[EN] Documents",
+      "findWork": "[EN] Find work",
+      "label": "[EN] My shortcuts",
+      "myProjects": "[EN] My projects",
+      "payslips": "[EN] Payslips",
+      "timesheets": "[EN] Timesheets"
+    },
+    "team": {
+      "label": "[EN] Team on site",
+      "onSite": "[EN] On site",
+      "roles": "[EN] Role breakdown"
+    }
+  },
+  "shared": {
+    "faq": {
+      "expand_aria": "[EN] Expand answer"
+    },
+    "preview": {
+      "headcount": "[EN] Headcount",
+      "intensity": {
+        "FILLING": "[EN] Filling",
+        "HOT": "[EN] Hot",
+        "OPEN": "[EN] Open"
+      },
+      "more": "[EN] +{n} more",
+      "poolSize": "[EN] Pool size",
+      "rankedMatches": "[EN] ranked matches",
+      "status": {
+        "active": "[EN] Active",
+        "available": "[EN] Available",
+        "pending": "[EN] Pending"
+      },
+      "trades": "[EN] By trade"
+    }
+  },
+  "skills": {
+    "coreBadge": "[EN] Core",
+    "customComingSoon": "[EN] coming soon",
+    "customPrompt": "[EN] Can't find your skill?",
+    "empty": "[EN] No skills yet for this profession",
+    "importComingSoon": "[EN] CV import will be enabled in M2.",
+    "importNotSaved": "[EN] Selected: {file}. The file isn't uploaded or stored yet.",
+    "importPrompt": "[EN] Have an old CV? Upload PDF or DOCX",
+    "loading": "[EN] Loading...",
+    "noProfession": "[EN] Pick a profession to see the skills linked to it.",
+    "pageTitle": "[EN] Profession & skills",
+    "pickerHelp": "[EN] Select skills you have. They will be confirmed later by a site manager.",
+    "pickerTitle": "[EN] Your skills",
+    "professionLabel": "[EN] Your profession",
+    "professionPlaceholder": "[EN] Select a profession",
+    "professionSaved": "[EN] Profession saved",
+    "saveButton": "[EN] Save skills",
+    "saveError": "[EN] Could not save. Please try again.",
+    "savedToast": "[EN] Saved. Your profile is ready.",
+    "saving": "[EN] Saving...",
+    "selfDeclared": "[EN] Self-declared",
+    "verified": "[EN] Verified",
+    "viewProfile": "[EN] View profile"
+  },
+  "stats": {
+    "activeWorkers": "[EN] Active workers",
+    "companies": "[EN] Companies",
+    "liveProjects": "[EN] Live projects",
+    "successRate": "[EN] Match success rate"
+  },
+  "trusted": {
+    "title": "[EN] Built for industry leaders across the Baltic & Northern Europe"
+  },
+  "waitlist": {
+    "body_cta": "[EN] Leave your email — we'll notify the first batch.",
+    "body_detail": "[EN] Company functionality (hiring, workforce management) and agency functionality (placement) will ship in the coming months.",
+    "body_intro": "[EN] LabourMarket.ai is currently open to workers.",
+    "close": "[EN] Close",
+    "duplicate_body": "[EN] This email is already recorded — we'll notify you when access opens.",
+    "duplicate_title": "[EN] You're already on the list ✓",
+    "email_label": "[EN] Email",
+    "email_placeholder": "[EN] name@company.com",
+    "error": "[EN] Something went wrong. Please try again shortly.",
+    "sending": "[EN] Sending…",
+    "submit": "[EN] Notify me",
+    "success_body": "[EN] We'll let you know as soon as it's ready.",
+    "success_title": "[EN] Thanks!",
+    "title": "[EN] For companies & agencies — coming soon"
+  },
+  "workers": {
+    "cta": {
+      "button": "[EN] Join the worker beta waitlist",
+      "headline": {
+        "line1": "[EN] Your skills deserve",
+        "line2": "[EN] a fair market."
+      },
+      "subcopy": "[EN] Join the worker beta waitlist and we'll bring you on as access opens."
+    },
+    "faq": {
+      "eyebrow": "[EN] Worker FAQ",
+      "headline": "[EN] Straight answers",
+      "items": [
+        {
+          "a": "[EN] Through employer confirmations on completed work and uploaded certificates — never self-claim alone.",
+          "q": "[EN] How are skills verified?"
+        },
+        {
+          "a": "[EN] The core is free — your profile, matches, search and messaging never cost workers anything. Premium extras (photo + video galleries, the AI profile assistant, VIP visibility) carry a small fee. Final pricing is published before full launch.",
+          "q": "[EN] How much does it cost workers?"
+        },
+        {
+          "a": "[EN] Only verified employers and agencies you're visible to — you control your availability and exposure.",
+          "q": "[EN] Who sees my profile?"
+        },
+        {
+          "a": "[EN] Yes. Your profile is yours; you can take roles from any company on the platform.",
+          "q": "[EN] Can I work for multiple companies?"
+        }
+      ]
+    },
+    "features": {
+      "eyebrow": "[EN] What you get",
+      "headline": "[EN] Built around the worker, not the middleman",
+      "items": [
+        {
+          "desc": "[EN] Your rating reflects completed work, not promises.",
+          "title": "[EN] OVR from real performance"
+        },
+        {
+          "desc": "[EN] Confirmed by employers and certificates.",
+          "title": "[EN] Verified skills"
+        },
+        {
+          "desc": "[EN] NL, DK, DE, SE, NO and more.",
+          "title": "[EN] Cross-border opportunities"
+        },
+        {
+          "desc": "[EN] No opaque agents in the middle.",
+          "title": "[EN] Direct employer contact"
+        },
+        {
+          "desc": "[EN] See why a role was matched to you.",
+          "title": "[EN] Explainable matching"
+        },
+        {
+          "desc": "[EN] Every job builds a portable history.",
+          "title": "[EN] Growing track record"
+        }
+      ]
+    },
+    "journey": {
+      "eyebrow": "[EN] Your journey",
+      "headline": "[EN] Your journey: from signup to hire",
+      "steps": [
+        {
+          "desc": "[EN] Add your trade, experience and availability.",
+          "title": "[EN] Build your profile (5 min)"
+        },
+        {
+          "desc": "[EN] Employers and certificates confirm what you can do.",
+          "title": "[EN] Verify your skills"
+        },
+        {
+          "desc": "[EN] Roles that fit your trade, rate and location find you.",
+          "title": "[EN] Receive ranked matches"
+        },
+        {
+          "desc": "[EN] Completed work raises your OVR and track record.",
+          "title": "[EN] Work, earn, level up"
+        }
+      ]
+    },
+    "profile": {
+      "bullets": [
+        "[EN] OVR — one 0–99 rating from verified skills, reliability and on-site safety.",
+        "[EN] Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
+        "[EN] Verified skills — confirmed by employers and certificates, not self-claimed.",
+        "[EN] Status badge — Available, Live, Drafted or Busy, always current."
+      ],
+      "eyebrow": "[EN] Your profile",
+      "headline": {
+        "line1": "[EN] Here's what you'll look like —",
+        "line2": "[EN] a card that speaks for you."
+      },
+      "subcopy": "[EN] Your card is built from real completed work and verified skills, not a self-written CV. The OVR is one honest signal employers can trust."
+    }
+  }
+}

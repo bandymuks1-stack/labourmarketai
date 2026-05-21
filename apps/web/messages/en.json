@@ -1,4 +1,18 @@
 {
+  "cv": {
+    "title": "YOUR CV (REAL-TIME PREVIEW)",
+    "name": "Name",
+    "profession": "Profession",
+    "roles": "Roles",
+    "skills": "Skills",
+    "skillsEmpty": "No skills selected yet.",
+    "tagCore": "Core",
+    "tagSystem": "System",
+    "transparency": "✓ Your CV is building here, now. All data is stored in your profile.",
+    "disclaimer": "All the data you see here is yours. It doesn't go anywhere else.",
+    "savedCount": "Saved: {n} skills",
+    "activeTag": "active"
+  },
   "skills": {
     "pageTitle": "Profession & skills",
     "professionLabel": "Your profession",
@@ -12,10 +26,16 @@
     "verified": "Verified",
     "saveButton": "Save skills",
     "saving": "Saving...",
-    "savedToast": "Skills saved",
+    "savedToast": "Saved. Your profile is ready.",
     "saveError": "Could not save. Please try again.",
     "empty": "No skills yet for this profession",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "viewProfile": "View profile",
+    "importPrompt": "Have an old CV? Upload PDF or DOCX",
+    "importComingSoon": "CV import will be enabled in M2.",
+    "importNotSaved": "Selected: {file}. The file isn't uploaded or stored yet.",
+    "customPrompt": "Can't find your skill?",
+    "customComingSoon": "coming soon"
   },
   "live": {
     "chip": {
@@ -134,6 +154,12 @@
     },
     "signup": {
       "headline": "Create your account",
+      "role": {
+        "worker": "Worker",
+        "company": "Company",
+        "agency": "Agency",
+        "customer": "Customer"
+      },
       "subcopy": "Sign up with Google, or with your email and password. You'll pick your role next.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
@@ -141,7 +167,7 @@
       "email_label": "Work email",
       "email_placeholder": "name@company.com",
       "password_label": "Password",
-      "password_help": "At least 8 characters. Include a number or special character.",
+      "password_help": "Min. 8 characters, 1 uppercase, 1 number, 1 special (!@#$%).",
       "confirm_password_label": "Confirm password",
       "submit_label": "Sign up",
       "signing": "Creating...",
@@ -151,7 +177,10 @@
       "error_generic": "Something went wrong. Please try again shortly.",
       "error_email": "Please enter a valid email address.",
       "error_password_short": "Password must be at least {min} characters.",
-      "error_password_mismatch": "Passwords don't match."
+      "error_password_mismatch": "Passwords don't match.",
+      "error_password_uppercase": "Password must include an uppercase letter.",
+      "error_password_number": "Password must include a number.",
+      "error_password_special": "Password must include a special character."
     },
     "login": {
       "headline": "Sign in",
@@ -206,25 +235,26 @@
     },
     "onboarding": {
       "rolePicker": {
-        "heading": "Who are you joining LabourMarket as?",
+        "heading": "Choose how you'll use the platform",
         "worker": {
           "title": "Worker",
-          "desc": "I'm looking for work or growth."
+          "desc": "Seek work, build your CV, get verified."
         },
         "company": {
           "title": "Company",
-          "desc": "I hire workers or run projects."
+          "desc": "Recruit, manage teams, post jobs."
         },
         "agency": {
           "title": "Agency",
-          "desc": "I represent candidates to clients."
+          "desc": "Staff workers, manage contracts."
         },
         "customer": {
           "title": "Customer",
-          "desc": "I order a service."
+          "desc": "Order services, get work reports."
         },
         "infoBox": "💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
-        "continue": "Continue"
+        "continue": "Continue",
+        "multiNote": "You can choose several. Change later in settings."
       },
       "step2": {
         "heading": "A bit about you",
@@ -256,9 +286,15 @@
         "account": "My account"
       },
       "section": {
-        "offer": { "title": "What I offer" },
-        "seek": { "title": "What I seek" },
-        "proofs": { "title": "My proofs" }
+        "offer": {
+          "title": "What I offer"
+        },
+        "seek": {
+          "title": "What I seek"
+        },
+        "proofs": {
+          "title": "My proofs"
+        }
       },
       "empty": {
         "worker": {
