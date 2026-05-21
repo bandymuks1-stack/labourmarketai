@@ -27,18 +27,6 @@
 
 create extension if not exists pgcrypto with schema extensions;
 
--- ── helper: does the current user manage this organization? ─────────────────
-create or replace function public.manages_organization(org uuid)
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists (
-    select 1 from public.engagement_contexts ec
-     where ec.profile_id = auth.uid()
-       and ec.organization_id = org
-       and ec.status = 'active'
-       and ec.relationship_slug in ('manager','owner','external_manager')
-  )
-$$;
-
 -- ════════════════════════════════════════════════════════════════════════
 -- 1. organizations (scaffolded root; mirrors companies/agencies in M1)
 -- ════════════════════════════════════════════════════════════════════════
@@ -114,6 +102,20 @@ create table if not exists public.engagement_contexts (
 create index if not exists idx_engagement_contexts_profile on public.engagement_contexts(profile_id, status, is_primary desc);
 create index if not exists idx_engagement_contexts_org on public.engagement_contexts(organization_id) where organization_id is not null;
 create index if not exists idx_engagement_contexts_project on public.engagement_contexts(project_id) where project_id is not null;
+
+-- helper: does the current user manage this organization? Defined AFTER
+-- engagement_contexts — a `language sql` body is validated against existing
+-- relations at creation time.
+create or replace function public.manages_organization(org uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.engagement_contexts ec
+     where ec.profile_id = auth.uid()
+       and ec.organization_id = org
+       and ec.status = 'active'
+       and ec.relationship_slug in ('manager','owner','external_manager')
+  )
+$$;
 
 -- ════════════════════════════════════════════════════════════════════════
 -- 5. journal_entries (append-only; §3)
