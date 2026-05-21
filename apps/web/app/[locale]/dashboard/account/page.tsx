@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
-import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
 
@@ -25,7 +24,6 @@ export default async function AccountPage({
   const t = await getTranslations("auth.dashboard");
   const tRole = await getTranslations("auth.signup.role");
   const tSwitcher = await getTranslations("auth.roleSwitcher");
-  const tCommon = await getTranslations("common");
 
   const supabase = await createClient();
   const {
@@ -89,17 +87,6 @@ export default async function AccountPage({
             );
           })}
         </ul>
-      </section>
-
-      {/* Language lives in the header on tablet/desktop; on mobile the top bar
-          is simplified, so the switcher is relocated here (md:hidden). */}
-      <section className="card-border p-6 md:hidden">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
-          {tCommon("localeSwitch")}
-        </p>
-        <div className="mt-3">
-          <LocaleSwitcher />
-        </div>
       </section>
 
       <section className="card-border p-6">

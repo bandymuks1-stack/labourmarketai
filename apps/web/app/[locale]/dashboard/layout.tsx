@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
-import { BottomNav } from "@/components/app/bottom-nav";
 import { DashboardTabs } from "@/components/app/dashboard-tabs";
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { RoleSwitcher } from "@/components/app/role-switcher";
@@ -68,26 +67,25 @@ export default async function DashboardLayout({
     >
       <div className="relative min-h-screen">
         <AmbientGlow />
-        <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
-          <div className="mx-auto flex h-14 max-w-container items-center gap-6 px-6 md:h-auto md:py-3 sm:px-12">
+        <header className="relative z-20 border-b border-ink-600/60">
+          <div className="mx-auto flex max-w-container items-center gap-6 px-6 py-3 sm:px-12">
             <Link
               href="/"
               className="font-display text-lg font-bold tracking-tightest text-text-primary"
             >
               labourmarket<span className="text-gradient-accent">.ai</span>
             </Link>
-            <DashboardTabs className="hidden md:flex" />
+            <DashboardTabs />
             <div className="ml-auto flex items-center gap-3">
-              <LocaleSwitcher className="hidden md:flex" />
+              <LocaleSwitcher className="hidden sm:flex" />
               <NotificationPanel />
               <RoleSwitcher />
             </div>
           </div>
         </header>
-        <main className="relative z-10 mx-auto max-w-container px-6 py-10 pb-[calc(4rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-10">
+        <main className="relative z-10 mx-auto max-w-container px-6 py-10 sm:px-12">
           {children}
         </main>
-        <BottomNav />
       </div>
     </AuthProvider>
   );

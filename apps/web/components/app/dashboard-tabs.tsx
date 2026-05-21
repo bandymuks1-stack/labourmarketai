@@ -11,14 +11,11 @@ const TABS = [
   { key: "account", href: "/dashboard/account" },
 ] as const;
 
-export function DashboardTabs({ className }: { className?: string }) {
+export function DashboardTabs() {
   const t = useTranslations("auth.dashboard.tabs");
   const pathname = usePathname();
   return (
-    <nav
-      aria-label="Dashboard sections"
-      className={cn("flex items-center gap-1", className)}
-    >
+    <nav aria-label="Dashboard sections" className="flex items-center gap-1">
       {TABS.map((tab) => {
         const active =
           tab.href === "/dashboard"
