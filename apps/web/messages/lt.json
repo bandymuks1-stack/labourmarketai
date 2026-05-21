@@ -111,48 +111,68 @@
   "auth": {
     "signup": {
       "headline": "Sukurkite paskyrą",
-      "subcopy": "Įveskite el. paštą ir pasirinkite savo vaidmenį. Atsiųsime prisijungimo nuorodą — slaptažodžio nereikia.",
+      "subcopy": "Prisiregistruok su Google arba el. paštu ir slaptažodžiu. Vaidmenį pasirinksi kitame žingsnyje.",
+      "google_label": "Tęsti su Google",
+      "google_redirecting": "Nukreipiama...",
+      "divider": "arba",
       "email_label": "Darbo el. paštas",
       "email_placeholder": "vardas@imone.lt",
-      "rolePickerLabel": "Pasirinkite vaidmenį",
-      "role": {
-        "worker": "Darbuotojas",
-        "company": "Įmonė",
-        "agency": "Agentūra",
-        "customer": "Užsakovas"
-      },
-      "roleDescription": {
-        "worker": "Ieškau darbo ar profesinio augimo.",
-        "company": "Ieškau darbuotojų ar valdau projektus.",
-        "agency": "Atstovauju kandidatus klientams.",
-        "customer": "Užsisakau paslaugą."
-      },
-      "submit_label": "Siųsti prisijungimo nuorodą",
-      "sending": "Siunčiama...",
+      "password_label": "Slaptažodis",
+      "confirm_password_label": "Pakartok slaptažodį",
+      "submit_label": "Registruotis",
+      "signing": "Kuriama...",
       "disclaimer": "Šiuo metu platforma yra ankstyvame etape — daugiau funkcijų bus pridėta artimiausiomis savaitėmis. Jūsų atsiliepimai padės kurti.",
-      "success_title": "Patikrinkite el. paštą",
-      "success_body": "Atsiuntėme prisijungimo nuorodą {email}. Paspauskite ją el. laiške, kad pradėtumėte.",
-      "has_account": "Jau turite paskyrą?",
+      "has_account": "Jau turi paskyrą?",
       "login_link": "Prisijungti",
       "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
       "error_email": "Įveskite teisingą el. pašto adresą.",
-      "error_role": "Pasirinkite vaidmenį."
+      "error_password_short": "Slaptažodį turi sudaryti bent {min} simboliai.",
+      "error_password_mismatch": "Slaptažodžiai nesutampa."
     },
     "login": {
       "headline": "Prisijungti",
-      "subcopy": "Įveskite el. paštą — atsiųsime prisijungimo nuorodą.",
+      "subcopy": "Prisijunk su Google arba el. paštu ir slaptažodžiu.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
       "email_label": "El. paštas",
-      "submit_label": "Siųsti prisijungimo nuorodą",
-      "sending": "Siunčiama...",
-      "success_title": "Patikrinkite el. paštą",
-      "success_body": "Atsiuntėme prisijungimo nuorodą {email}.",
-      "no_account": "Neturite paskyros?",
+      "password_label": "Slaptažodis",
+      "forgot_password": "Pamiršai slaptažodį?",
+      "submit_label": "Prisijungti",
+      "signing": "Jungiamasi...",
+      "no_account": "Neturi paskyros?",
       "signup_link": "Registruotis",
       "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
-      "error_email": "Įveskite teisingą el. pašto adresą."
+      "error_email": "Įveskite teisingą el. pašto adresą.",
+      "error_password_required": "Įveskite slaptažodį.",
+      "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis."
+    },
+    "forgotPassword": {
+      "headline": "Pamiršai slaptažodį?",
+      "subcopy": "Įvesk savo el. paštą ir atsiųsime nuorodą slaptažodžiui atkurti.",
+      "email_label": "El. paštas",
+      "submit_label": "Siųsti nuorodą",
+      "sending": "Siunčiama...",
+      "success_title": "Patikrink savo el. paštą",
+      "success_body": "Jei {email} turi paskyrą, išsiuntėme slaptažodžio atkūrimo nuorodą.",
+      "back_to_login": "Grįžti į prisijungimą",
+      "error_email": "Įveskite teisingą el. pašto adresą.",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau."
+    },
+    "resetPassword": {
+      "headline": "Naujas slaptažodis",
+      "subcopy": "Įvesk naują slaptažodį savo paskyrai.",
+      "checking": "Tikrinama nuoroda...",
+      "password_label": "Naujas slaptažodis",
+      "confirm_password_label": "Pakartok slaptažodį",
+      "submit_label": "Išsaugoti slaptažodį",
+      "saving": "Saugoma...",
+      "invalid_title": "Nuoroda negalioja",
+      "invalid_body": "Ši slaptažodžio atkūrimo nuoroda negalioja arba baigėsi jos galiojimas.",
+      "request_new": "Prašyti naujos nuorodos",
+      "error_password_short": "Slaptažodį turi sudaryti bent {min} simboliai.",
+      "error_password_mismatch": "Slaptažodžiai nesutampa.",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau."
     },
     "callback": {
       "verifying": "Tikrinama jūsų prisijungimo nuoroda...",
@@ -161,36 +181,36 @@
       "retry": "Bandyti dar kartą"
     },
     "onboarding": {
-      "greeting": "Sveiki, {name}!",
-      "subcopy": "Užpildykite kelis laukus, kad sukurtume jūsų profilį.",
-      "display_name_label": "Rodomas vardas",
-      "country_label": "Šalis",
-      "profession": {
-        "label": "Profesija",
-        "placeholder": "Pasirink profesiją",
-        "required": "Pasirinkite profesiją."
-      },
-      "fields": {
+      "rolePicker": {
+        "heading": "Su kuo ateini į LabourMarket?",
         "worker": {
-          "language": "Pagrindinė kalba",
-          "city": "Dabartinis miestas"
+          "title": "Darbuotojas",
+          "desc": "Ieškau darbo ar profesinio augimo."
         },
         "company": {
-          "name": "Įmonės pavadinimas",
-          "industry": "Veiklos sritis",
-          "headcount": "Darbuotojų skaičius"
+          "title": "Įmonė",
+          "desc": "Ieškau darbuotojų ar valdau projektus."
         },
         "agency": {
-          "name": "Agentūros pavadinimas",
-          "regions": "Veikimo regionai",
-          "focus": "Pagrindinės sritys"
+          "title": "Agentūra",
+          "desc": "Atstovauju kandidatus klientams."
         },
         "customer": {
-          "city": "Dabartinis miestas"
-        }
+          "title": "Užsakovas",
+          "desc": "Užsisakau paslaugą."
+        },
+        "infoBox": "💡 Žinoma, kad ir kokią rolę pasirinkai — tavo darbo patirtis bus tyliai kaupiama Darbo Dienoraštyje. Vieną dieną tai gali būti vertingiausia tavo CV dalis.",
+        "continue": "Tęsti"
       },
-      "submit_label": "Tęsti",
+      "step2": {
+        "heading": "Šiek tiek apie tave",
+        "continue": "Baigti"
+      },
+      "display_name_label": "Rodomas vardas",
+      "country_label": "Šalis",
+      "back": "Atgal",
       "saving": "Saugoma...",
+      "error_name_required": "Įvesk rodomą vardą.",
       "error_generic": "Įvyko klaida. Pabandykite dar kartą."
     },
     "roleSwitcher": {
