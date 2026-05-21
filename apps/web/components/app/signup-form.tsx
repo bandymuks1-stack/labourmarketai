@@ -3,33 +3,28 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { Link } from "@/lib/i18n/navigation";
+import { GoogleButton } from "@/components/app/google-button";
+import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
-
-type Role = "worker" | "company" | "agency" | "customer";
-const ROLES: { key: Role; icon: string }[] = [
-  { key: "worker", icon: "🔨" },
-  { key: "company", icon: "🏗️" },
-  { key: "agency", icon: "🤝" },
-  { key: "customer", icon: "🛒" },
-];
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 }
 
-/** Signup form (magic link). Posts via supabase.auth.signInWithOtp; the
- *  selected role + locale ride along in user_metadata so the
- *  handle_new_user() trigger creates the matching profile_roles row. */
+const MIN_PASSWORD = 8;
+
+/** Signup form. Google OAuth (shared button) + email/password/confirm
+ *  (`signUp`). Role is no longer picked here — it moves to /onboarding.
+ *  Email confirmation is OFF (DI prereq), so signUp returns a live session;
+ *  we route straight to /onboarding. Magic link was removed in M1. */
 export function SignupForm() {
   const t = useTranslations("auth.signup");
   const locale = useLocale();
+  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<Role | null>(null);
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [status, setStatus] = useState<"idle" | "signing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -39,48 +34,40 @@ export function SignupForm() {
       setError(t("error_email"));
       return;
     }
-    if (!role) {
-      setError(t("error_role"));
+    if (password.length < MIN_PASSWORD) {
+      setError(t("error_password_short", { min: MIN_PASSWORD }));
       return;
     }
-    setStatus("sending");
+    if (password !== confirm) {
+      setError(t("error_password_mismatch"));
+      return;
+    }
+    setStatus("signing");
     try {
       const supabase = createClient();
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const { error: err } = await supabase.auth.signInWithOtp({
+      const { error: err } = await supabase.auth.signUp({
         email: email.trim(),
+        password,
         options: {
+          // Harmless when "Confirm email" is OFF; correct target if DI
+          // re-enables verification later.
           emailRedirectTo: `${origin}/${locale}/auth/callback`,
-          data: { role, locale },
+          data: { locale },
         },
       });
       if (err) throw err;
-      setStatus("sent");
+      // Confirm email OFF → session is live. Land on the unified onboarding.
+      router.replace("/onboarding");
     } catch (e) {
-      console.error("[signup] signInWithOtp failed:", e);
+      console.error("[signup] signUp failed:", e);
       setStatus("error");
       setError(t("error_generic"));
     }
   }
 
-  if (status === "sent") {
-    return (
-      <div className="card-border bg-card-glow p-8">
-        <p className="font-mono text-[11px] uppercase tracking-label text-state-live">
-          ✓
-        </p>
-        <h2 className="mt-3 font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("success_title")}
-        </h2>
-        <p className="mt-3 text-sm text-text-secondary">
-          {t("success_body", { email: email.trim() })}
-        </p>
-      </div>
-    );
-  }
-
-  const disabled = status === "sending";
+  const disabled = status === "signing";
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
@@ -94,6 +81,21 @@ export function SignupForm() {
           {t("subcopy")}
         </p>
       </header>
+
+      <GoogleButton
+        label={t("google_label")}
+        redirectingLabel={t("google_redirecting")}
+        errorLabel={t("error_generic")}
+        disabled={disabled}
+      />
+
+      <div className="flex items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-ink-500" />
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("divider")}
+        </span>
+        <span className="h-px flex-1 bg-ink-500" />
+      </div>
 
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("email_label")}
@@ -109,39 +111,32 @@ export function SignupForm() {
         />
       </label>
 
-      <fieldset className="flex flex-col gap-2.5">
-        <legend className="mb-1 text-xs text-text-secondary">
-          {t("rolePickerLabel")}
-        </legend>
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          {ROLES.map((r) => (
-            <button
-              key={r.key}
-              type="button"
-              onClick={() => setRole(r.key)}
-              aria-pressed={role === r.key}
-              className={cn(
-                "flex flex-col items-start gap-1.5 rounded-md border bg-ink-800 p-3 text-left transition-colors",
-                role === r.key
-                  ? "border-brand-blue ring-1 ring-brand-blue"
-                  : "border-ink-500 hover:border-text-muted",
-              )}
-            >
-              <span className="flex items-center gap-2">
-                <span aria-hidden className="text-lg">
-                  {r.icon}
-                </span>
-                <span className="font-display text-sm font-semibold text-text-primary">
-                  {t(`role.${r.key}`)}
-                </span>
-              </span>
-              <span className="text-xs leading-relaxed text-text-muted">
-                {t(`roleDescription.${r.key}`)}
-              </span>
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+        {t("password_label")}
+        <input
+          type="password"
+          name="password"
+          autoComplete="new-password"
+          required
+          minLength={MIN_PASSWORD}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className={inputCls}
+        />
+      </label>
+
+      <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+        {t("confirm_password_label")}
+        <input
+          type="password"
+          name="confirm_password"
+          autoComplete="new-password"
+          required
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          className={inputCls}
+        />
+      </label>
 
       <p className="rounded-md border border-state-warning/40 px-3 py-2 text-xs leading-relaxed text-state-warning">
         {t("disclaimer")}
@@ -155,7 +150,7 @@ export function SignupForm() {
 
       <div className="flex items-center justify-between">
         <Button type="submit" disabled={disabled}>
-          {disabled ? t("sending") : t("submit_label")}
+          {disabled ? t("signing") : t("submit_label")}
         </Button>
         <span className="text-xs text-text-muted">
           {t("has_account")}{" "}

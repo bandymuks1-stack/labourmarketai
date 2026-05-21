@@ -108,48 +108,68 @@
   "auth": {
     "signup": {
       "headline": "Create your account",
-      "subcopy": "Enter your email and pick a role. We'll send a sign-in link — no password needed.",
+      "subcopy": "Sign up with Google, or with your email and password. You'll pick your role next.",
+      "google_label": "Continue with Google",
+      "google_redirecting": "Redirecting...",
+      "divider": "or",
       "email_label": "Work email",
       "email_placeholder": "name@company.com",
-      "rolePickerLabel": "Pick a role",
-      "role": {
-        "worker": "Worker",
-        "company": "Company",
-        "agency": "Agency",
-        "customer": "Customer"
-      },
-      "roleDescription": {
-        "worker": "I'm looking for work or growth.",
-        "company": "I hire workers or run projects.",
-        "agency": "I represent candidates to clients.",
-        "customer": "I order a service."
-      },
-      "submit_label": "Send login link",
-      "sending": "Sending...",
+      "password_label": "Password",
+      "confirm_password_label": "Confirm password",
+      "submit_label": "Sign up",
+      "signing": "Creating...",
       "disclaimer": "The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
-      "success_title": "Check your email",
-      "success_body": "We've sent a sign-in link to {email}. Click it to get started.",
       "has_account": "Already have an account?",
       "login_link": "Sign in",
       "error_generic": "Something went wrong. Please try again shortly.",
       "error_email": "Please enter a valid email address.",
-      "error_role": "Please pick a role."
+      "error_password_short": "Password must be at least {min} characters.",
+      "error_password_mismatch": "Passwords don't match."
     },
     "login": {
       "headline": "Sign in",
-      "subcopy": "Enter your email — we'll send a sign-in link.",
+      "subcopy": "Continue with Google, or sign in with your email and password.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",
       "email_label": "Email",
-      "submit_label": "Send login link",
-      "sending": "Sending...",
-      "success_title": "Check your email",
-      "success_body": "We've sent a sign-in link to {email}.",
+      "password_label": "Password",
+      "forgot_password": "Forgot password?",
+      "submit_label": "Sign in",
+      "signing": "Signing in...",
       "no_account": "No account yet?",
       "signup_link": "Sign up",
       "error_generic": "Something went wrong. Please try again shortly.",
-      "error_email": "Please enter a valid email address."
+      "error_email": "Please enter a valid email address.",
+      "error_password_required": "Please enter your password.",
+      "error_invalid_credentials": "Invalid email or password."
+    },
+    "forgotPassword": {
+      "headline": "Forgot password?",
+      "subcopy": "Enter your email and we'll send you a link to reset your password.",
+      "email_label": "Email",
+      "submit_label": "Send reset link",
+      "sending": "Sending...",
+      "success_title": "Check your email",
+      "success_body": "If an account exists for {email}, we've sent a password reset link.",
+      "back_to_login": "Back to sign in",
+      "error_email": "Please enter a valid email address.",
+      "error_generic": "Something went wrong. Please try again shortly."
+    },
+    "resetPassword": {
+      "headline": "New password",
+      "subcopy": "Choose a new password for your account.",
+      "checking": "Checking link...",
+      "password_label": "New password",
+      "confirm_password_label": "Confirm password",
+      "submit_label": "Save password",
+      "saving": "Saving...",
+      "invalid_title": "Link not valid",
+      "invalid_body": "This password reset link is invalid or has expired.",
+      "request_new": "Request a new link",
+      "error_password_short": "Password must be at least {min} characters.",
+      "error_password_mismatch": "Passwords don't match.",
+      "error_generic": "Something went wrong. Please try again shortly."
     },
     "callback": {
       "verifying": "Verifying your sign-in link...",
@@ -158,36 +178,36 @@
       "retry": "Try again"
     },
     "onboarding": {
-      "greeting": "Welcome, {name}!",
-      "subcopy": "A few quick fields to set up your profile.",
-      "display_name_label": "Display name",
-      "country_label": "Country",
-      "profession": {
-        "label": "Profession",
-        "placeholder": "Select a profession",
-        "required": "Please pick a profession."
-      },
-      "fields": {
+      "rolePicker": {
+        "heading": "Who are you joining LabourMarket as?",
         "worker": {
-          "language": "Primary language",
-          "city": "Current city"
+          "title": "Worker",
+          "desc": "I'm looking for work or growth."
         },
         "company": {
-          "name": "Company name",
-          "industry": "Industry",
-          "headcount": "Headcount range"
+          "title": "Company",
+          "desc": "I hire workers or run projects."
         },
         "agency": {
-          "name": "Agency name",
-          "regions": "Regions of operation",
-          "focus": "Focus industries"
+          "title": "Agency",
+          "desc": "I represent candidates to clients."
         },
         "customer": {
-          "city": "Current city"
-        }
+          "title": "Customer",
+          "desc": "I order a service."
+        },
+        "infoBox": "💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
+        "continue": "Continue"
       },
-      "submit_label": "Continue",
+      "step2": {
+        "heading": "A bit about you",
+        "continue": "Finish"
+      },
+      "display_name_label": "Display name",
+      "country_label": "Country",
+      "back": "Back",
       "saving": "Saving...",
+      "error_name_required": "Please enter a display name.",
       "error_generic": "Something went wrong. Please try again."
     },
     "roleSwitcher": {
