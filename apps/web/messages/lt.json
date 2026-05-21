@@ -1,4 +1,22 @@
 {
+  "skills": {
+    "pageTitle": "Profesija ir įgūdžiai",
+    "professionLabel": "Tavo profesija",
+    "professionPlaceholder": "Pasirink profesiją",
+    "professionSaved": "Profesija išsaugota",
+    "noProfession": "Pasirink profesiją, kad pamatytum su ja susijusius įgūdžius.",
+    "pickerTitle": "Tavo įgūdžiai",
+    "pickerHelp": "Pasirink įgūdžius, kuriuos turi. Vėliau juos patvirtins darbų vadovas.",
+    "coreBadge": "Pagrindinis",
+    "selfDeclared": "Tavo paties nurodyta",
+    "verified": "Patvirtinta",
+    "saveButton": "Išsaugoti įgūdžius",
+    "saving": "Saugoma...",
+    "savedToast": "Įgūdžiai išsaugoti",
+    "saveError": "Nepavyko išsaugoti. Bandyk dar kartą.",
+    "empty": "Šiai profesijai dar nėra įgūdžių sąrašo",
+    "loading": "Kraunama..."
+  },
   "live": {
     "chip": {
       "text": "PRE-ALPHA · Aktyvumo preview · Gyva rinka auga"
@@ -109,6 +127,14 @@
     }
   },
   "auth": {
+    "errors": {
+      "userAlreadyRegistered": "Šis el. paštas jau registruotas. Prisijunk vietoj registracijos.",
+      "passwordTooShort": "Slaptažodis per trumpas (bent {min} simbolių).",
+      "invalidCredentials": "Neteisingas el. paštas arba slaptažodis.",
+      "invalidEmail": "Netaisyklingas el. pašto formatas.",
+      "rateLimited": "Per daug bandymų. Pabandyk vėliau.",
+      "generic": "Įvyko klaida. Bandyk dar kartą."
+    },
     "signup": {
       "headline": "Sukurkite paskyrą",
       "subcopy": "Prisiregistruok su Google arba el. paštu ir slaptažodžiu. Vaidmenį pasirinksi kitame žingsnyje.",
@@ -118,6 +144,7 @@
       "email_label": "Darbo el. paštas",
       "email_placeholder": "vardas@imone.lt",
       "password_label": "Slaptažodis",
+      "password_help": "Bent 8 simboliai. Įtrauk skaičių ar specialųjį simbolį.",
       "confirm_password_label": "Pakartok slaptažodį",
       "submit_label": "Registruotis",
       "signing": "Kuriama...",

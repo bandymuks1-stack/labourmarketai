@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
 
@@ -26,6 +27,7 @@ export default async function AccountPage({
   const tRole = await getTranslations("auth.signup.role");
   const tSwitcher = await getTranslations("auth.roleSwitcher");
   const tCommon = await getTranslations("common");
+  const tSkills = await getTranslations("skills");
 
   const supabase = await createClient();
   const {
@@ -89,6 +91,21 @@ export default async function AccountPage({
             );
           })}
         </ul>
+      </section>
+
+      <section className="card-border p-6">
+        <Link
+          href="/dashboard/profile"
+          className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+        >
+          <span className="flex items-center gap-2">
+            <span aria-hidden>🔧</span>
+            {tSkills("pageTitle")}
+          </span>
+          <span aria-hidden className="text-text-muted">
+            →
+          </span>
+        </Link>
       </section>
 
       {/* Language lives in the header on tablet/desktop; on mobile the top bar

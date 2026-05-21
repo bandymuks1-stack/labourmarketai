@@ -62,7 +62,11 @@ export function NotificationPanel() {
         <div
           role="dialog"
           aria-label={t("label")}
-          className="absolute right-0 z-30 mt-2 max-h-[28rem] w-80 overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card"
+          // max-w keeps the w-80 panel inside the viewport on narrow phones
+          // (≤360px) where right-anchored absolute content would otherwise spill
+          // past the screen edge and trigger horizontal scroll. right-2 on
+          // mobile leaves a small gutter; flush right-0 from md up.
+          className="absolute right-2 z-30 mt-2 max-h-[28rem] w-80 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card md:right-0 md:max-w-[calc(100vw-2rem)]"
         >
           <header className="flex items-center justify-between border-b border-ink-600 px-3 py-2">
             <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">

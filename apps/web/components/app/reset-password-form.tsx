@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { mapAuthError } from "@/lib/auth-errors";
 
 const MIN_PASSWORD = 8;
 
@@ -17,6 +18,7 @@ const MIN_PASSWORD = 8;
  *  established we show an "invalid/expired link" state. */
 export function ResetPasswordForm() {
   const t = useTranslations("auth.resetPassword");
+  const tErr = useTranslations("auth.errors");
   const router = useRouter();
   const [ready, setReady] = useState<"checking" | "ok" | "invalid">(
     "checking",
@@ -67,7 +69,8 @@ export function ResetPasswordForm() {
     } catch (e) {
       console.error("[reset-password] updateUser failed:", e);
       setStatus("idle");
-      setError(t("error_generic"));
+      const info = mapAuthError(e);
+      setError(info.key === "generic" ? t("error_generic") : tErr(info.key, info.params));
     }
   }
 

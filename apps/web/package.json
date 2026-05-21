@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "format": "prettier --write .",
     "placeholders:list": "tsx scripts/placeholders.ts list",
     "placeholders:pending": "tsx scripts/placeholders.ts pending",
@@ -47,6 +48,7 @@
     "topojson-client": "^3.1.0",
     "tsx": "^4.22.3",
     "typescript": "^5",
+    "vitest": "^4.1.7",
     "world-atlas": "^2.0.2"
   }
 }

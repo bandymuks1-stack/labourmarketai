@@ -1,4 +1,22 @@
 {
+  "skills": {
+    "pageTitle": "Profession & skills",
+    "professionLabel": "Your profession",
+    "professionPlaceholder": "Select a profession",
+    "professionSaved": "Profession saved",
+    "noProfession": "Pick a profession to see the skills linked to it.",
+    "pickerTitle": "Your skills",
+    "pickerHelp": "Select skills you have. They will be confirmed later by a site manager.",
+    "coreBadge": "Core",
+    "selfDeclared": "Self-declared",
+    "verified": "Verified",
+    "saveButton": "Save skills",
+    "saving": "Saving...",
+    "savedToast": "Skills saved",
+    "saveError": "Could not save. Please try again.",
+    "empty": "No skills yet for this profession",
+    "loading": "Loading..."
+  },
   "live": {
     "chip": {
       "text": "PRE-ALPHA · Activity preview · Live market growing"
@@ -106,6 +124,14 @@
     }
   },
   "auth": {
+    "errors": {
+      "userAlreadyRegistered": "This email is already registered. Sign in instead.",
+      "passwordTooShort": "Password too short (at least {min} characters).",
+      "invalidCredentials": "Incorrect email or password.",
+      "invalidEmail": "Invalid email format.",
+      "rateLimited": "Too many attempts. Please try again later.",
+      "generic": "Something went wrong. Please try again."
+    },
     "signup": {
       "headline": "Create your account",
       "subcopy": "Sign up with Google, or with your email and password. You'll pick your role next.",
@@ -115,6 +141,7 @@
       "email_label": "Work email",
       "email_placeholder": "name@company.com",
       "password_label": "Password",
+      "password_help": "At least 8 characters. Include a number or special character.",
       "confirm_password_label": "Confirm password",
       "submit_label": "Sign up",
       "signing": "Creating...",

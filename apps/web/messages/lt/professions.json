@@ -1,0 +1,20 @@
+{
+  "builder": "Statybininkas",
+  "carpenter": "Stalius",
+  "concrete_worker": "Betonuotojas",
+  "crane_operator": "Kranininkas",
+  "drywaller": "Gipso kartono montuotojas",
+  "electrician": "Elektrikas",
+  "foreman": "Brigadininkas",
+  "general_laborer": "Bendrasis darbininkas",
+  "heavy_equipment_operator": "Sunkios technikos operatorius",
+  "mason": "Mūrininkas",
+  "painter": "Dažytojas",
+  "plumber": "Santechnikas",
+  "rebar_worker": "Armatūrininkas",
+  "roofer": "Stogdengys",
+  "site_engineer": "Aikštelės inžinierius",
+  "site_manager": "Statybų vadovas",
+  "tiler": "Plytelių klojėjas",
+  "welder": "Suvirintojas"
+}
