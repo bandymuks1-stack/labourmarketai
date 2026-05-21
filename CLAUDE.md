@@ -1,5 +1,7 @@
 # Agent Operating Contract — LabourMarket.ai / LABMA OS
 
+> 📜 **Read [`docs/PLATFORM_DOCTRINE.md`](docs/PLATFORM_DOCTRINE.md) first** — canonical, permanent, binding platform doctrine. If a task spec contradicts it, the doctrine wins (flag the conflict in the PR).
+
 ## Auto-commit policy
 
 After completing any work session, agents MUST automatically commit and push 
