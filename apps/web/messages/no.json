@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "eyebrow": "Slik fungerer det",
+    "title": "Én profil. En veiledet vei til muligheter.",
+    "subcopy": "Ærlige profiler og ekte bevis, gjort om til muligheter — for arbeidstakere, bedrifter og byråer.",
+    "s1": "Start ditt rom",
+    "s2": "Bygg identitet",
+    "s3": "Legg til bevis",
+    "s4": "Åpne muligheter"
+  },
   "agencies": {
     "cta": {
       "button": "[EN] Join the partner waitlist",

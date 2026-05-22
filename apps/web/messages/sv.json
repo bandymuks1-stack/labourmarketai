@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "eyebrow": "Så fungerar det",
+    "title": "En profil. En guidad väg till möjligheter.",
+    "subcopy": "Ärliga profiler och riktiga bevis, omvandlade till möjligheter — för arbetstagare, företag och byråer.",
+    "s1": "Starta ditt utrymme",
+    "s2": "Bygg identitet",
+    "s3": "Lägg till bevis",
+    "s4": "Öppna möjligheter"
+  },
   "agencies": {
     "cta": {
       "button": "[EN] Join the partner waitlist",

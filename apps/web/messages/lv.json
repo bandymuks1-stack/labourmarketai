@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "eyebrow": "Kā tas darbojas",
+    "title": "Viens profils. Vadīts ceļš uz iespējām.",
+    "subcopy": "Godīgi profili un reāli pierādījumi, pārvērsti iespējās — darbiniekiem, uzņēmumiem un aģentūrām.",
+    "s1": "Sāciet savu telpu",
+    "s2": "Veidojiet identitāti",
+    "s3": "Pievienojiet pierādījumus",
+    "s4": "Atveriet iespējas"
+  },
   "agencies": {
     "cta": {
       "button": "[EN] Join the partner waitlist",

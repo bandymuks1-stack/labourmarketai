@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "eyebrow": "So funktioniert es",
+    "title": "Ein Profil. Ein geführter Weg zu Chancen.",
+    "subcopy": "Ehrliche Profile und echte Nachweise, verwandelt in Chancen — für Arbeitskräfte, Unternehmen und Agenturen.",
+    "s1": "Starte deinen Raum",
+    "s2": "Identität aufbauen",
+    "s3": "Nachweise hinzufügen",
+    "s4": "Chancen öffnen"
+  },
   "agencies": {
     "cta": {
       "button": "[EN] Join the partner waitlist",

@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "eyebrow": "Jak to działa",
+    "title": "Jeden profil. Prowadzona ścieżka do możliwości.",
+    "subcopy": "Uczciwe profile i realne dowody zamienione w możliwości — dla pracowników, firm i agencji.",
+    "s1": "Rozpocznij przestrzeń",
+    "s2": "Zbuduj tożsamość",
+    "s3": "Dodaj dowody",
+    "s4": "Otwórz możliwości"
+  },
   "agencies": {
     "cta": {
       "button": "[EN] Join the partner waitlist",

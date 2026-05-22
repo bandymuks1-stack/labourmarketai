@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "eyebrow": "Kaip tai veikia",
+    "title": "Vienas profilis. Vedamas kelias į galimybes.",
+    "subcopy": "Sąžiningi profiliai ir realūs įrodymai, paversti galimybėmis — darbuotojams, įmonėms ir agentūroms.",
+    "s1": "Pradėkite erdvę",
+    "s2": "Kurkite tapatybę",
+    "s3": "Pridėkite įrodymų",
+    "s4": "Atverkite galimybes"
+  },
   "cv": {
     "title": "JŪSŲ CV (REALAUS LAIKO PERŽIŪRA)",
     "name": "Vardas",
