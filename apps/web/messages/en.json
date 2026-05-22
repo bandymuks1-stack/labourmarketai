@@ -278,6 +278,61 @@
       "confirm": "Add"
     },
     "dashboard": {
+      "wow": {
+        "startingPoint": "This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
+        "nextSteps": {
+          "title": "Your next steps",
+          "done": "Done",
+          "todo": "To do",
+          "open": "Open",
+          "profession": {
+            "title": "Set your profession",
+            "body": "Pick the trade or field you work in.",
+            "bodyDone": "{profession}"
+          },
+          "skills": {
+            "title": "Add your skills",
+            "body": "Tell us what you can do - a manager confirms them later.",
+            "bodyDone": "{n} skills added"
+          },
+          "journal": {
+            "title": "Log your first work entry",
+            "body": "Record what you did. Your work journal becomes your proof.",
+            "bodyDone": "{n} entries logged"
+          }
+        },
+        "identity": {
+          "title": "Your work identity",
+          "body": "Skills, experience, languages, mobility and documents - a living profile, not a static CV.",
+          "cta": "Open your profile"
+        },
+        "journal": {
+          "title": "Work journal",
+          "body": "Log work against an engagement. Confirmed entries build verified skills over time.",
+          "cta": "Open journal"
+        },
+        "addMore": {
+          "title": "Add another way to use labourmarket.ai",
+          "body": "You're not locked in. Add a worker, company, agency or customer role whenever you're ready.",
+          "cta": "Manage roles"
+        },
+        "activity": {
+          "earlyAccess": "Early access",
+          "title": "Start your activity space",
+          "body": "labourmarket.ai is opening for companies, teams and agencies. Tell us what you need and we'll set up your space with you.",
+          "p1": "Show what you do and where you work.",
+          "p2": "Say what people, teams or partners you need.",
+          "p3": "Offer your services to the market."
+        },
+        "pilot": {
+          "title": "Request a pilot",
+          "body": "Get early, hands-on onboarding from our team. We review every request personally.",
+          "cta": "Request pilot access",
+          "sending": "Sending...",
+          "done": "Thanks - we've got your request and will be in touch.",
+          "error": "Couldn't send. Please try again."
+        }
+      },
       "greeting": "Welcome back, {name}",
       "tabs": {
         "overview": "Overview",

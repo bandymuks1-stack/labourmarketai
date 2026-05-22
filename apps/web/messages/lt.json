@@ -281,6 +281,61 @@
       "confirm": "Pridėti"
     },
     "dashboard": {
+      "wow": {
+        "startingPoint": "Tai tik jusu pradzios taskas. Veliau galesite prideti daugiau veiklu, roliu, imoniu, komandu, projektu ar galimybiu.",
+        "nextSteps": {
+          "title": "Tolimesni zingsniai",
+          "done": "Atlikta",
+          "todo": "Reikia atlikti",
+          "open": "Atidaryti",
+          "profession": {
+            "title": "Nurodykite profesija",
+            "body": "Pasirinkite sriti, kurioje dirbate.",
+            "bodyDone": "{profession}"
+          },
+          "skills": {
+            "title": "Pridekite igudzius",
+            "body": "Nurodykite, ka mokate - veliau patvirtins vadovas.",
+            "bodyDone": "Prideta igudziu: {n}"
+          },
+          "journal": {
+            "title": "Irasykite pirma darbo irasa",
+            "body": "Uzfiksuokite, ka nuveikete. Darbo dienorastis tampa jusu irodymu.",
+            "bodyDone": "Irasu: {n}"
+          }
+        },
+        "identity": {
+          "title": "Jusu darbo tapatybe",
+          "body": "Igudziai, patirtis, kalbos, mobilumas ir dokumentai - gyvas profilis, o ne statiskas CV.",
+          "cta": "Atidaryti profili"
+        },
+        "journal": {
+          "title": "Darbo dienorastis",
+          "body": "Fiksuokite darba pagal veikla. Patvirtinti irasai ilgainiui sukuria patvirtintus igudzius.",
+          "cta": "Atidaryti dienorasti"
+        },
+        "addMore": {
+          "title": "Pridekite dar viena buda naudotis labourmarket.ai",
+          "body": "Jus nesate uzrakinti. Pridekite darbuotojo, imones, agenturos ar pirkejo role, kai busite pasiruose.",
+          "cta": "Tvarkyti roles"
+        },
+        "activity": {
+          "earlyAccess": "Ankstyva prieiga",
+          "title": "Pradekite savo veiklos erdve",
+          "body": "labourmarket.ai atsiveria imonems, komandoms ir agenturoms. Pasakykite, ko jums reikia, ir kartu paruosime jusu erdve.",
+          "p1": "Parodykite, ka darote ir kur dirbate.",
+          "p2": "Nurodykite, kokiu zmoniu, komandu ar partneriu ieskote.",
+          "p3": "Pasiulykite savo paslaugas rinkai."
+        },
+        "pilot": {
+          "title": "Uzsisakykite bandomaja prieiga",
+          "body": "Gaukite ankstyva, asmenini komandos ivedima. Kiekviena uzklausa perziurime asmeniskai.",
+          "cta": "Prasyti bandomosios prieigos",
+          "sending": "Siunciama...",
+          "done": "Aciu - gavome jusu uzklausa ir susisieksime.",
+          "error": "Nepavyko issiusti. Bandykite dar karta."
+        }
+      },
       "greeting": "Sveiki, {name}",
       "tabs": {
         "overview": "Apžvalga",
