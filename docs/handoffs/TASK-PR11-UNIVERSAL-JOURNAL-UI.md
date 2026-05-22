@@ -50,4 +50,29 @@
 - Custom skill creation (scaffold; locked to M2)
 - Any RLS policy authoring (owned by PR #10)
 
+## Acceptance criteria — skill aggregation (absorbs M1 mobile bug #3)
+
+Bug #3 (skill counter overwrite) is **deferred here** rather than hotfixed in M1 —
+it is a single-context / aggregation-logic symptom whose full fix belongs in the
+universal Journal/CV flow.
+
+- [ ] Worker has 7 existing skills in one profession/context; adds 3 new → CV Hub shows **10 total**.
+- [ ] **No previously saved skill is silently overwritten** on add.
+- [ ] Skill count **aggregates across ALL profession contexts**, not a single context.
+- [ ] Breakdown stays explicit: self-declared / journal-supported / evidence-supported / manager-or-client confirmed.
+- [ ] **Regression test MUST FAIL if the UI shows only the newly added 3.**
+- [ ] Full fix belongs in PR #11 (universal Journal/CV flow), **not an M1 temporary hack**.
+
+## Owns: entry↔skill-link table + compensating controls #3 / #4 (from PR #10b §5.8)
+
+PR #11 introduces the entry↔skill-link table (the "universal" `work_journal_entry_skill_link`
+equivalent). It **does not exist in the current schema**, so it must **not** be
+created inside PR #10b / migration `0014`. When PR #11 introduces it, that PR
+also owns the two compensating controls deferred from
+`docs/handoffs/TASK-PR10B-0014-HARDENING-SPEC.md` §5.8:
+
+- [ ] **Control #3 — BEFORE INSERT** on the entry↔skill-link table: validate `skill_id` belongs to the entry's profession taxonomy (`profession_skills`); reject `skill_not_in_profession`; links are **entry-specific, never profession-wide**.
+- [ ] **Control #4 — AFTER INSERT** on the entry↔skill-link table: append a `journal_entry_confirmations` row (`kind = 'confirm'`, `self_declared` semantics) linking entry/worker/profession/skill/actor + server timestamp; append-only.
+- [ ] These are the only two of PR #10b's seven compensating controls that are **PR #11 scope** (#1, #2, #5, #6, #7 ship in `0014`).
+
 > **Architect will replace this skeleton with the full PR #11 spec before execution.**
