@@ -238,7 +238,7 @@
     },
     "onboarding": {
       "rolePicker": {
-        "heading": "Pasirinkite, kaip norite naudoti platformą",
+        "heading": "Nuo ko norite pradėti šiandien?",
         "worker": {
           "title": "Darbuotojas",
           "desc": "Ieškoti darbo, kurti CV, gauti patvirtinimus."
@@ -257,7 +257,7 @@
         },
         "infoBox": "💡 Žinoma, kad ir kokią rolę pasirinkai — tavo darbo patirtis bus tyliai kaupiama Darbo Dienoraštyje. Vieną dieną tai gali būti vertingiausia tavo CV dalis.",
         "continue": "Tęsti",
-        "multiNote": "Galite rinktis kelis. Vėliau pakeisite nustatymuose."
+        "multiNote": "Pasirinkite vieną ar kelis — tai tik jūsų pradžios taškas. Vėliau galėsite pridėti daugiau veiklų, rolių, įmonių, komandų, projektų ar galimybių."
       },
       "step2": {
         "heading": "Šiek tiek apie tave",
