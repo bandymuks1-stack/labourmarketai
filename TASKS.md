@@ -7,7 +7,7 @@ live in `docs/handoffs/`.
 
 - [x] **PR #10 (old greenfield spec)** — **SUPERSEDED** by the PR #14 gap analysis (`docs/handoffs/TASK-PR10-GAP-ANALYSIS.md`). The universal data model already shipped in PR #12 (`0013_work_journal_m1.sql`: 12 tables, RLS on all); the old spec targeted a non-existent Prisma schema and is not executed.
 - [ ] **PR #10b** — Journal security-hardening delta (`0014`) — **spec-only authored** (`docs/handoffs/TASK-PR10B-0014-HARDENING-SPEC.md`); write-path decision encoded (worker self-INSERT direct under strict RLS; trust/exposure changes via SECURITY DEFINER RPC writing `audit_logs`). *Pending implementation review.* **Implementation automerge = NO until the SQL/RLS/RPC/audit diff is reviewed.*
-- [ ] **PR #11** — Universal Work Journal UI + API — *blocked by: PR #10b*
+- [ ] **PR #11** — Universal Work Journal UI + API — *blocked by: PR #10b*. Owns the entry↔skill-link table (does **not** exist yet → not created in `0014`) + PR #10b §5.8 compensating controls **#3/#4**. Controls **#1,#2,#5,#6,#7** stay in PR #10b/`0014`.
 - [ ] **PR #12** — Living CV Hub + entry-level confirmation — *blocked by: PR #11*
 - [ ] **PR #13** — Dashboard redesign (living OS feel) — *blocked by: PR #12*
 
