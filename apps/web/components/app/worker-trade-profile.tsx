@@ -110,31 +110,48 @@ export function WorkerTradeProfile({
           <h3 className="font-display text-sm font-semibold text-text-primary">
             {t("workDirectionsTitle")}
           </h3>
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Capability groups — each direction is a calm card; the active one
+              (being edited) has a clear ring + pulse. */}
+          <div className="grid gap-2 sm:grid-cols-2">
             {directions.map((d) => {
               const isActive = d.id === editId;
               return (
-                <span
+                <div
                   key={d.id}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                    "flex items-center justify-between gap-2 rounded-xl border p-3 transition-colors",
                     isActive
-                      ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                      : "border-ink-500 bg-ink-800 text-text-secondary hover:border-text-muted",
+                      ? "border-brand-blue bg-brand-blue/5"
+                      : "border-ink-600 bg-ink-800/50 hover:border-text-muted",
                   )}
                 >
                   <button
                     type="button"
                     onClick={() => setEditId(d.id)}
                     aria-pressed={isActive}
-                    className="inline-flex items-center gap-1.5"
+                    className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                   >
-                    {d.name}
-                    {d.isPrimary && (
-                      <span className="font-mono text-[9px] uppercase tracking-label text-brand-orange">
-                        {t("primaryBadge")}
+                    <span
+                      className={cn(
+                        "h-2 w-2 flex-none rounded-full",
+                        isActive
+                          ? "stage-current bg-brand-orange"
+                          : "bg-ink-500",
+                      )}
+                      aria-hidden
+                    />
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-text-primary">
+                        {d.name}
                       </span>
-                    )}
+                      <span className="block font-mono text-[9px] uppercase tracking-label text-text-muted">
+                        {d.isPrimary
+                          ? t("primaryBadge")
+                          : isActive
+                            ? t("editingDirection")
+                            : t("skillsForDirection")}
+                      </span>
+                    </span>
                   </button>
                   {!d.isPrimary && (
                     <button
@@ -147,12 +164,12 @@ export function WorkerTradeProfile({
                       }}
                       disabled={pending}
                       aria-label={`${t("removeDirection")} ${d.name}`}
-                      className="text-text-muted transition-colors hover:text-state-danger"
+                      className="flex-none rounded-md px-1.5 py-0.5 text-text-muted transition-colors hover:bg-state-danger/10 hover:text-state-danger"
                     >
                       ✕
                     </button>
                   )}
-                </span>
+                </div>
               );
             })}
           </div>
