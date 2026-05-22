@@ -50,4 +50,17 @@
 - Custom skill creation (scaffold; locked to M2)
 - Any RLS policy authoring (owned by PR #10)
 
+## Acceptance criteria — skill aggregation (absorbs M1 mobile bug #3)
+
+Bug #3 (skill counter overwrite) is **deferred here** rather than hotfixed in M1 —
+it is a single-context / aggregation-logic symptom whose full fix belongs in the
+universal Journal/CV flow.
+
+- [ ] Worker has 7 existing skills in one profession/context; adds 3 new → CV Hub shows **10 total**.
+- [ ] **No previously saved skill is silently overwritten** on add.
+- [ ] Skill count **aggregates across ALL profession contexts**, not a single context.
+- [ ] Breakdown stays explicit: self-declared / journal-supported / evidence-supported / manager-or-client confirmed.
+- [ ] **Regression test MUST FAIL if the UI shows only the newly added 3.**
+- [ ] Full fix belongs in PR #11 (universal Journal/CV flow), **not an M1 temporary hack**.
+
 > **Architect will replace this skeleton with the full PR #11 spec before execution.**
