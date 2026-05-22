@@ -46,6 +46,7 @@ export default async function JournalPage({
   setRequestLocale(locale);
   const t = await getTranslations("journal");
   const tRel = await getTranslations("relationshipTypes");
+  const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
 
   const supabase = await createClient();
@@ -64,7 +65,7 @@ export default async function JournalPage({
   const { data: ecRows } = await supabase
     .from("engagement_contexts")
     .select(
-      "id, relationship_slug, title, is_primary, organizations(display_name, legal_name)",
+      "id, relationship_slug, title, is_primary, organizations(display_name, legal_name, organization_type)",
     )
     .eq("profile_id", user.id)
     .eq("status", "active")
@@ -73,9 +74,24 @@ export default async function JournalPage({
 
   const engagements: JournalEngagement[] = (ecRows ?? []).map((e) => {
     const org = e.organizations as
-      | { display_name: string | null; legal_name: string | null }
+      | {
+          display_name: string | null;
+          legal_name: string | null;
+          organization_type: string | null;
+        }
       | null;
-    const orgName = org?.display_name ?? org?.legal_name ?? e.title ?? "—";
+    // Disambiguate same-relationship engagements (e.g. owning a company AND an
+    // agency both show "Owner") by falling back to the org TYPE label when the
+    // org has no display/legal name — never a bare "—". Reuses existing role
+    // labels (company/agency), so no new i18n keys.
+    const typeLabel =
+      org?.organization_type === "company"
+        ? tRole("company")
+        : org?.organization_type === "agency"
+          ? tRole("agency")
+          : null;
+    const orgName =
+      org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—";
     return {
       id: e.id,
       label: `${orgName} · ${tRel(e.relationship_slug)}`,
