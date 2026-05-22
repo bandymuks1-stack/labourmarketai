@@ -96,6 +96,44 @@ Full taxonomy, transition conditions, copy rules, and the live inventory:
 `docs/DEMO_TO_REAL_DATA_POLICY.md`. Promotion stays owner-authorised via the
 Placeholder Governance flow (`docs/PLACEHOLDERS.md`).
 
+## 10. No universal value — contextual fit signals only (architectural law)
+
+labourmarket.ai **must never** score a person, worker, company, team, or agency
+as having **one universal human or business value** — no single "overall rating"
+(e.g. a lone 0–99 OVR), no global rank of a human being, no league table of
+worth. A number that claims to summarise a person's or organisation's total
+value is forbidden, even as a concept visual presented as real.
+
+Every score, percentage, or signal the product shows **must be contextual and
+explainable** — tied to a specific question and traceable to evidence:
+
+1. **Capability coverage** — how a defined skill set is covered (e.g. "8 of 10
+   required skills"), against a *named* skill set.
+2. **Fit signal** — a percentage/indicator of fit against a **specific** search,
+   project, role, need, or opportunity — never a standalone label on the person.
+3. **Extra strengths** — capabilities held *beyond* the required criteria of that
+   specific context, shown as additive, not as a global bonus score.
+4. **Readiness / proof status** — based on **traceable evidence** (confirmed
+   journal entries, documents, employer confirmations), never self-asserted.
+5. **Future comparison types** — permitted **only if** every one is contextual,
+   traceable, explainable, and human-dignity safe (a person can always see what a
+   signal is measured against and why).
+
+Every signal must answer: *measured against what, and from which evidence?* If it
+cannot, it must not ship — not even as concept/preview. This **extends §5** (no
+fake) and §9 (demo-to-real): a fit/coverage signal becomes real only when the
+context is defined and the evidence is traceable; until then it stays governed
+concept/preview and is never framed as a real, universal rating.
+
+> **Standing conflict to resolve:** existing concept marketing copy describes a
+> single "OVR — one 0–99 rating" / "profile strength" for a worker. That is a
+> universal-value score and conflicts with this section. It must be reframed to
+> contextual coverage/fit signals (or retired) **before** any scoring is built or
+> promoted to real. Flagged here per Change control; tracked in `TASKS.md`.
+
+Full doctrine — definitions, allowed/forbidden patterns, copy rules, and the
+reframe path: `docs/CONTEXTUAL_FIT_SIGNALS.md`.
+
 ---
 
 ## Hard "do not" list (product)
@@ -107,4 +145,4 @@ or fake jobs/candidates/companies — introduced as part of product/UX work.
 ## Change control
 
 This constitution is amended only by explicit owner/DI decision, recorded here or
-in `docs/DECISIONS/`. Implementation sprints must check their work against §1–§9.
+in `docs/DECISIONS/`. Implementation sprints must check their work against §1–§10.

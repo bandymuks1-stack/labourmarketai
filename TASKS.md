@@ -44,3 +44,22 @@ underlying requirements are already enforced via existing doctrine (§3.1, §3.4
 - **Status:** pre-existing technical debt — **not introduced by PR #8**.
 - **Doctrine:** §2 (no translations stored in DB) + §10 (extensible taxonomy as slug + JSON).
 - **Back-reference:** `docs/handoffs/TASK-PR8-CONFLICT-TABLE.md` (B5 — pre-existing follow-up).
+
+## Scoring / fit signals doctrine
+
+Doctrine locked (docs-only): **PRODUCT_CONSTITUTION §10** + `docs/CONTEXTUAL_FIT_SIGNALS.md`.
+labourmarket.ai never assigns a universal human/business value; every signal is
+contextual, traceable, explainable, and dignity-safe. No scoring UI / DB fields /
+matching / scoring / verification logic exists yet — these are design gates only.
+
+- [ ] **OVR → contextual-signals reframe** *(blocker before any scoring ships)* —
+  existing concept marketing copy ("OVR — one 0–99 rating", "profile strength",
+  "Verified skills + OVR") is a **universal-value score** and conflicts with
+  PRODUCT_CONSTITUTION §10. Reframe to per-context **coverage + fit** (Types 1–2)
+  plus **readiness/proof** (Type 4), each shown with its context — or retire it.
+  Stays governed as PRE-ALPHA **concept** until reframed; never a real rating.
+  Ref: `docs/CONTEXTUAL_FIT_SIGNALS.md` §6.
+- [ ] **Fit/coverage signal design** *(future, not started)* — when designed, must
+  pass the Type-5 admission test (contextual · traceable · explainable ·
+  human-dignity safe) and record context + evidence source per signal.
+  Supersedes any single-number profile-strength idea (`TASK-SKILL-CONFIDENCE-DESIGN`).
