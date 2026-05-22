@@ -49,7 +49,7 @@
     },
     "counters": {
       "activeWorkers": "Aktyvūs darbuotojai",
-      "liveDemand": "Atvira paklausa",
+      "liveDemand": "Atviros galimybės",
       "matchesToday": "Atitikimai šiandien",
       "avgOvr": "Vid. profilio stiprumas"
     },
@@ -281,6 +281,79 @@
       "confirm": "Pridėti"
     },
     "dashboard": {
+      "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Jūsų darbo pultas",
+            "nextMove": "Kitas žingsnis",
+            "ready": "Esate pasiruošę atverti galimybes",
+            "readiness": "Pasirengimo kelias",
+            "s1": "Tapatybė",
+            "s2": "Įrodymai",
+            "s3": "Galimybės"
+          },
+          "company": {
+            "eyebrow": "Veiklos pultas",
+            "c1": "Apibrėžkite poreikį",
+            "c2": "Paruoškite kriterijus",
+            "c3": "Peržiūrėkite tinkamumą",
+            "c4": "Užsakyti pilotą"
+          }
+        },
+        "startingPoint": "Tai tik jusu pradzios taskas. Veliau galesite prideti daugiau veiklu, roliu, imoniu, komandu, projektu ar galimybiu.",
+        "nextSteps": {
+          "title": "Tolimesni zingsniai",
+          "done": "Atlikta",
+          "todo": "Reikia atlikti",
+          "open": "Atidaryti",
+          "profession": {
+            "title": "Nurodykite profesija",
+            "body": "Pasirinkite sriti, kurioje dirbate.",
+            "bodyDone": "{profession}"
+          },
+          "skills": {
+            "title": "Pridekite igudzius",
+            "body": "Nurodykite, ka mokate - veliau patvirtins vadovas.",
+            "bodyDone": "Prideta igudziu: {n}"
+          },
+          "journal": {
+            "title": "Irasykite pirma darbo irasa",
+            "body": "Uzfiksuokite, ka nuveikete. Darbo dienorastis tampa jusu irodymu.",
+            "bodyDone": "Irasu: {n}"
+          }
+        },
+        "identity": {
+          "title": "Jusu darbo tapatybe",
+          "body": "Igudziai, patirtis, kalbos, mobilumas ir dokumentai - gyvas profilis, o ne statiskas CV.",
+          "cta": "Atidaryti profili"
+        },
+        "journal": {
+          "title": "Darbo dienorastis",
+          "body": "Fiksuokite darba pagal veikla. Patvirtinti irasai ilgainiui sukuria patvirtintus igudzius.",
+          "cta": "Atidaryti dienorasti"
+        },
+        "addMore": {
+          "title": "Pridekite dar viena buda naudotis labourmarket.ai",
+          "body": "Jus nesate uzrakinti. Pridekite darbuotojo, imones, agenturos ar pirkejo role, kai busite pasiruose.",
+          "cta": "Tvarkyti roles"
+        },
+        "activity": {
+          "earlyAccess": "Ankstyva prieiga",
+          "title": "Pradekite savo veiklos erdve",
+          "body": "labourmarket.ai atsiveria imonems, komandoms ir agenturoms. Pasakykite, ko jums reikia, ir kartu paruosime jusu erdve.",
+          "p1": "Parodykite, ka darote ir kur dirbate.",
+          "p2": "Nurodykite, kokiu zmoniu, komandu ar partneriu ieskote.",
+          "p3": "Pasiulykite savo paslaugas rinkai."
+        },
+        "pilot": {
+          "title": "Uzsisakykite bandomaja prieiga",
+          "body": "Gaukite ankstyva, asmenini komandos ivedima. Kiekviena uzklausa perziurime asmeniskai.",
+          "cta": "Prasyti bandomosios prieigos",
+          "sending": "Siunciama...",
+          "done": "Aciu - gavome jusu uzklausa ir susisieksime.",
+          "error": "Nepavyko issiusti. Bandykite dar karta."
+        }
+      },
       "greeting": "Sveiki, {name}",
       "tabs": {
         "overview": "Apžvalga",
@@ -422,10 +495,10 @@
   },
   "companies": {
     "demand": {
-      "eyebrow": "Gyva paklausa",
+      "eyebrow": "Galimybių radaras",
       "headline": {
         "line1": "Štai kaip atrodo",
-        "line2": "gyva paklausa."
+        "line2": "galimybių srautas."
       },
       "subcopy": "Nurodykite, ko reikia kiekvienam projektui, ir gaukite surikiuotus, paaiškinamus atitikimus iš laisvų darbuotojų ir agentūrų — per valandas, ne savaites.",
       "bullets": [
@@ -536,7 +609,7 @@
     "chip": "Darbo rinkos sistema",
     "headline": "Gyva darbo rinkos",
     "headlineAccent": "valdymo sistema.",
-    "subcopy": "Vienas profilis. Darbuotojai, įmonės ir agentūros vienoje sujungtoje rinkoje — gyva paklausa, atitikimas realiu laiku, sąžiningi signalai. Platforma kuriama; tai M0 pagrindas.",
+    "subcopy": "Vienas profilis. Darbuotojai, įmonės ir agentūros vienoje sujungtoje rinkoje — gyvas galimybių srautas, atitikimas realiu laiku, sąžiningi signalai. Platforma kuriama; tai M0 pagrindas.",
     "ctaPrimary": "Pradėti dabar",
     "businessNote": "Įmonėms ir agentūroms ·",
     "businessLink": "Sužinoti daugiau"
@@ -654,7 +727,7 @@
     },
     "companies": {
       "eyebrow": "Įmonėms",
-      "title": "Gyva paklausa —",
+      "title": "Galimybių srautas —",
       "titleAccent": "surikiuota.",
       "subcopy": "Nurodykite, ko reikia kiekviename projekte, ir gaukite surikiuotus, paaiškinamus atitikimus iš laisvų darbuotojų ir agentūrų.",
       "benefits": [

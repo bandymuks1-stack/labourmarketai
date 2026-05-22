@@ -176,12 +176,86 @@ a {
   will-change: transform;
 }
 
+/* ── WOW action surfaces (PR #20 redesign) ──────────────────────────────
+   Cinematic, GPU-only motion for the post-onboarding cockpit. Decorative
+   only — never a claim of real live activity. All disabled under
+   prefers-reduced-motion. */
+@keyframes wow-sweep {
+  0% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(160%);
+  }
+}
+@keyframes rail-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+@keyframes stage-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 138, 51, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(255, 138, 51, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 138, 51, 0);
+  }
+}
+
+/* "Next move" card — a slow sheen sweeping across the panel. */
+.wow-card {
+  position: relative;
+  overflow: hidden;
+}
+.wow-card::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 45%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(123, 92, 255, 0.16) 50%,
+    transparent
+  );
+  transform: translateX(-130%);
+  animation: wow-sweep 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Animated gradient rail connecting the journey stages. */
+.stage-line {
+  background-image: linear-gradient(90deg, #3e8bff, #7b5cff 50%, #3e8bff);
+  background-size: 200% 100%;
+  animation: rail-flow 6s linear infinite;
+}
+
+/* Current-stage node — a calm orange pulse signalling "you are here / next". */
+.stage-current {
+  animation: stage-pulse 2.4s ease-out infinite;
+}
+
+/* Small activity-signal dot (decorative ambiance, not a live-data claim). */
+.signal-dot {
+  animation: live-pulse 2.8s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   [data-decor],
   .ticker-track,
   .map-marker,
-  .map-drift {
+  .map-drift,
+  .wow-card::after,
+  .stage-line,
+  .stage-current,
+  .signal-dot {
     animation: none !important;
   }
 }

@@ -105,6 +105,79 @@
       "verifying": "[EN] Verifying your sign-in link..."
     },
     "dashboard": {
+      "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Jūsu darba pults",
+            "nextMove": "Nākamais solis",
+            "ready": "Esat gatavs atvērt iespējas",
+            "readiness": "Gatavības ceļš",
+            "s1": "Identitāte",
+            "s2": "Pierādījumi",
+            "s3": "Iespējas"
+          },
+          "company": {
+            "eyebrow": "Darbības pults",
+            "c1": "Definējiet vajadzību",
+            "c2": "Sagatavojiet kritērijus",
+            "c3": "Pārskatiet atbilstību",
+            "c4": "Pieprasīt pilotu"
+          }
+        },
+        "startingPoint": "[EN] This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
+        "nextSteps": {
+          "title": "[EN] Your next steps",
+          "done": "[EN] Done",
+          "todo": "[EN] To do",
+          "open": "[EN] Open",
+          "profession": {
+            "title": "[EN] Set your profession",
+            "body": "[EN] Pick the trade or field you work in.",
+            "bodyDone": "[EN] {profession}"
+          },
+          "skills": {
+            "title": "[EN] Add your skills",
+            "body": "[EN] Tell us what you can do - a manager confirms them later.",
+            "bodyDone": "[EN] {n} skills added"
+          },
+          "journal": {
+            "title": "[EN] Log your first work entry",
+            "body": "[EN] Record what you did. Your work journal becomes your proof.",
+            "bodyDone": "[EN] {n} entries logged"
+          }
+        },
+        "identity": {
+          "title": "[EN] Your work identity",
+          "body": "[EN] Skills, experience, languages, mobility and documents - a living profile, not a static CV.",
+          "cta": "[EN] Open your profile"
+        },
+        "journal": {
+          "title": "[EN] Work journal",
+          "body": "[EN] Log work against an engagement. Confirmed entries build verified skills over time.",
+          "cta": "[EN] Open journal"
+        },
+        "addMore": {
+          "title": "[EN] Add another way to use labourmarket.ai",
+          "body": "[EN] You're not locked in. Add a worker, company, agency or customer role whenever you're ready.",
+          "cta": "[EN] Manage roles"
+        },
+        "activity": {
+          "earlyAccess": "[EN] Early access",
+          "title": "[EN] Start your activity space",
+          "body": "[EN] labourmarket.ai is opening for companies, teams and agencies. Tell us what you need and we'll set up your space with you.",
+          "p1": "[EN] Show what you do and where you work.",
+          "p2": "[EN] Say what people, teams or partners you need.",
+          "p3": "[EN] Offer your services to the market."
+        },
+        "pilot": {
+          "title": "[EN] Request a pilot",
+          "body": "[EN] Get early, hands-on onboarding from our team. We review every request personally.",
+          "cta": "[EN] Request pilot access",
+          "sending": "[EN] Sending...",
+          "done": "[EN] Thanks - we've got your request and will be in touch.",
+          "error": "[EN] Couldn't send. Please try again."
+        }
+      },
       "account": {
         "email_label": "[EN] Email",
         "logout": "[EN] Sign out",

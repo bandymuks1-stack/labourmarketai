@@ -49,7 +49,7 @@
     },
     "counters": {
       "activeWorkers": "Active workers",
-      "liveDemand": "Open demand",
+      "liveDemand": "Open opportunities",
       "matchesToday": "Matches today",
       "avgOvr": "Avg profile strength"
     },
@@ -278,6 +278,79 @@
       "confirm": "Add"
     },
     "dashboard": {
+      "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Your work cockpit",
+            "nextMove": "Next move",
+            "ready": "You're ready to open opportunities",
+            "readiness": "Readiness path",
+            "s1": "Identity",
+            "s2": "Proof",
+            "s3": "Opportunities"
+          },
+          "company": {
+            "eyebrow": "Activity cockpit",
+            "c1": "Define need",
+            "c2": "Prepare criteria",
+            "c3": "Review fit",
+            "c4": "Request pilot"
+          }
+        },
+        "startingPoint": "This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
+        "nextSteps": {
+          "title": "Your next steps",
+          "done": "Done",
+          "todo": "To do",
+          "open": "Open",
+          "profession": {
+            "title": "Set your profession",
+            "body": "Pick the trade or field you work in.",
+            "bodyDone": "{profession}"
+          },
+          "skills": {
+            "title": "Add your skills",
+            "body": "Tell us what you can do - a manager confirms them later.",
+            "bodyDone": "{n} skills added"
+          },
+          "journal": {
+            "title": "Log your first work entry",
+            "body": "Record what you did. Your work journal becomes your proof.",
+            "bodyDone": "{n} entries logged"
+          }
+        },
+        "identity": {
+          "title": "Your work identity",
+          "body": "Skills, experience, languages, mobility and documents - a living profile, not a static CV.",
+          "cta": "Open your profile"
+        },
+        "journal": {
+          "title": "Work journal",
+          "body": "Log work against an engagement. Confirmed entries build verified skills over time.",
+          "cta": "Open journal"
+        },
+        "addMore": {
+          "title": "Add another way to use labourmarket.ai",
+          "body": "You're not locked in. Add a worker, company, agency or customer role whenever you're ready.",
+          "cta": "Manage roles"
+        },
+        "activity": {
+          "earlyAccess": "Early access",
+          "title": "Start your activity space",
+          "body": "labourmarket.ai is opening for companies, teams and agencies. Tell us what you need and we'll set up your space with you.",
+          "p1": "Show what you do and where you work.",
+          "p2": "Say what people, teams or partners you need.",
+          "p3": "Offer your services to the market."
+        },
+        "pilot": {
+          "title": "Request a pilot",
+          "body": "Get early, hands-on onboarding from our team. We review every request personally.",
+          "cta": "Request pilot access",
+          "sending": "Sending...",
+          "done": "Thanks - we've got your request and will be in touch.",
+          "error": "Couldn't send. Please try again."
+        }
+      },
       "greeting": "Welcome back, {name}",
       "tabs": {
         "overview": "Overview",
@@ -419,17 +492,17 @@
   },
   "companies": {
     "demand": {
-      "eyebrow": "Live demand",
+      "eyebrow": "Opportunity radar",
       "headline": {
-        "line1": "Here's what live demand",
+        "line1": "Here's what the opportunity flow",
         "line2": "looks like."
       },
       "subcopy": "Post what each project needs and receive ranked, explainable matches from available workers and agencies — in hours, not weeks.",
       "bullets": [
-        "Project + location — scope each demand precisely.",
+        "Project + location — scope each need precisely.",
         "Headcount — how many of each role you need.",
         "Required skills — matched against verified worker skills.",
-        "Ranked matches: 47 — workers already fitting this demand now."
+        "Ranked matches: 47 — workers whose abilities fit this need now."
       ]
     },
     "journey": {
@@ -533,7 +606,7 @@
     "chip": "The labour market OS",
     "headline": "The labour market,",
     "headlineAccent": "alive.",
-    "subcopy": "One profile. Workers, companies and agencies on a single connected market — live demand, real-time matching, honest signals. The platform is being built; this is the M0 foundation.",
+    "subcopy": "One profile. Workers, companies and agencies on a single connected market — a live opportunity flow, real-time matching, honest signals. The platform is being built; this is the M0 foundation.",
     "ctaPrimary": "Start now",
     "businessNote": "For companies & agencies ·",
     "businessLink": "Learn more"
@@ -651,7 +724,7 @@
     },
     "companies": {
       "eyebrow": "For companies",
-      "title": "Live demand,",
+      "title": "Opportunity flow,",
       "titleAccent": "ranked.",
       "subcopy": "Post what you need on each project and receive ranked, explainable matches from available workers and agencies.",
       "benefits": [
