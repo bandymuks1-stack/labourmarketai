@@ -79,7 +79,7 @@ export function CompanyScoreRing({
         height={px}
         viewBox={`0 0 ${px} ${px}`}
         role="img"
-        aria-label={`${t("label")} ${value} / 99, ${tier}`}
+        aria-label={`${t("label")} ${value} / 99, ${tier} — concept preview, not a universal score`}
       >
         <circle
           cx={cx}

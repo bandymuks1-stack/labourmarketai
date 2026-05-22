@@ -59,8 +59,8 @@
     "counters": {
       "activeWorkers": "Aktyvūs darbuotojai",
       "liveDemand": "Atviros galimybės",
-      "matchesToday": "Atitikimai šiandien",
-      "avgOvr": "Vid. profilio stiprumas"
+      "matchesToday": "Veikla šiandien",
+      "avgOvr": "Vid. pasirengimas · peržiūra"
     },
     "activity": {
       "label": "Gyvo aktyvumo srautas"
@@ -83,7 +83,7 @@
   },
   "company": {
     "score": {
-      "label": "Įmonės įvertinimas",
+      "label": "Įmonės atitikimo signalai",
       "payment": "Mokėjimų istorija",
       "completion": "Projektų užbaigimas",
       "reviews": "Darbuotojų atsiliepimai",
@@ -91,12 +91,12 @@
     }
   },
   "draft": {
-    "eyebrow": "Gyvas matching",
+    "eyebrow": "Atitikimo kryptis",
     "headline": {
       "line1": "Štai kaip darbuotojai",
-      "line2": "atranda darbą realiu laiku."
+      "line2": "atranda jiems tinkantį darbą."
     },
-    "subcopy": "Atitikimas realiu laiku, su priežastimis. Kiekvienas atitikimas parodo \"kodėl\" — be neskaidraus algoritmo ar užmaskuoto įvertinimo.",
+    "subcopy": "Atitikimo kryptis su priežastimis. Kiekvienas atitikimas parodo \"kodėl\" — be neskaidraus algoritmo ar užmaskuoto įvertinimo. Koncepcijos peržiūra, kaip veiks galimybių atitikimas.",
     "column": {
       "onDeck": "Eilėje",
       "live": "Vyksta dabar",
@@ -107,7 +107,7 @@
       "deciding": "Sprendimas",
       "hired": "Atrinkta"
     },
-    "liveCounter": "Aktyvus draftas · 12 matching procesų"
+    "liveCounter": "Koncepcijos peržiūra · pavyzdinė atranka"
   },
   "marketPulse": {
     "eyebrow": "Rinkos pulsas",
@@ -135,10 +135,10 @@
   "playercards": {
     "eyebrow": "Darbuotojai kaip gyvi profiliai",
     "headline": {
-      "line1": "Kiekvienas darbuotojas, įvertintas",
+      "line1": "Kiekvienas darbuotojas — kontekste",
       "line2": "ir paruoštas."
     },
-    "subcopy": "Profilio stiprumas kyla iš realiai atlikto darbo, patvirtintų įgūdžių ir elgesio objekte. Ši peržiūra rodo pavyzdinius profilius.",
+    "subcopy": "Atitikimas ir pasirengimas kyla iš realiai atlikto darbo, patvirtintų įgūdžių ir įrodymų objekte — visada rodomi kontekste, niekada kaip vienas universalus įvertinimas. Koncepcijos peržiūra su pavyzdiniais profiliais.",
     "stat": {
       "SKL": "Įgūdis",
       "REL": "Patikimumas",
@@ -390,7 +390,7 @@
         "company": {
           "offer": "Tuščia. Atvirų pozicijų ir projektų valdymas ateina su M2.",
           "seek": "Tuščia. Darbo poreikių paskelbimas ateina su M2.",
-          "proofs": "Tuščia. Įmonės įvertinimas ir projektų istorija ateina su M2."
+          "proofs": "Tuščia. Įmonės atitikimo signalai ir projektų istorija ateina su M2."
         },
         "agency": {
           "offer": "Tuščia. Kandidatų rezervas ir paslaugų pasiūla ateina su M2.",
@@ -436,7 +436,8 @@
   "shared": {
     "faq": { "expand_aria": "Išskleisti atsakymą" },
     "preview": {
-      "rankedMatches": "surikiuoti atitikimai",
+      "conceptChip": "Koncepcijos peržiūra · pre-alpha",
+      "rankedMatches": "atitikimo kryptis",
       "headcount": "Žmonių skaičius",
       "intensity": { "HOT": "Karšta", "FILLING": "Pildosi", "OPEN": "Atvira" },
       "poolSize": "Rezervo dydis",
@@ -456,9 +457,9 @@
         "line1": "Štai kaip atrodysite —",
         "line2": "kortelėje, kuri kalba už jus."
       },
-      "subcopy": "Jūsų kortelė kuriama iš realiai atlikto darbo ir patvirtintų įgūdžių, o ne pačių rašyto CV. OVR — vienas sąžiningas signalas, kuriuo darbdaviai gali pasitikėti.",
+      "subcopy": "Jūsų kortelė kuriama iš realiai atlikto darbo ir patvirtintų įgūdžių, o ne pačių rašyto CV. Atitikimo signalai rodomi kontekste — aprėptis ir pasirengimas konkrečiam poreikiui, niekada kaip vienas universalus įvertinimas.",
       "bullets": [
-        "OVR — vienas 0–99 įvertinimas iš patvirtintų įgūdžių, patikimumo ir saugos.",
+        "Atitikimo ir pasirengimo signalai — aprėptis konkrečiam poreikiui pagal patvirtintus įgūdžius, patikimumą ir saugą. Niekada vienas universalus įvertinimas.",
         "Statų juostos — Įgūdis, Patikimumas, Greitis, Sauga, Prisitaikymas, Pasitikėjimas.",
         "Patvirtinti įgūdžiai — patvirtinti darbdavių ir pažymėjimų, ne savadarbiai.",
         "Būsenos ženklas — Laisvas, Gyva, Atrinktas ar Užimtas, visada aktualus."
@@ -470,19 +471,19 @@
       "steps": [
         { "title": "Užpildykit profilį (5 min)", "desc": "Nurodykite profesiją, patirtį ir prieinamumą." },
         { "title": "Patvirtinkit įgūdžius", "desc": "Darbdaviai ir pažymėjimai patvirtina, ką mokate." },
-        { "title": "Gaukite tinkamus pasiūlymus", "desc": "Jus suranda darbai pagal profesiją, įkainį ir vietą." },
-        { "title": "Dirbkite ir gaukite vertinimą", "desc": "Atliktas darbas kelia jūsų OVR ir istoriją." }
+        { "title": "Matykite galimybių atitikimo kryptį", "desc": "Jus suranda darbai pagal profesiją, įkainį ir vietą." },
+        { "title": "Dirbkite ir gaukite vertinimą", "desc": "Atliktas darbas stiprina jūsų įrodymus ir pasirengimą." }
       ]
     },
     "features": {
       "eyebrow": "Ką gaunate",
       "headline": "Sukurta darbuotojui, ne tarpininkui",
       "items": [
-        { "title": "OVR pagal realų darbą", "desc": "Įvertinimas atspindi atliktą darbą, ne pažadus." },
+        { "title": "Pasirengimas pagal realų darbą", "desc": "Pasirengimas atspindi atliktą darbą ir įrodymus, rodomas kontekste — ne pažadus." },
         { "title": "Patvirtinti įgūdžiai", "desc": "Patvirtinti darbdavių ir pažymėjimų." },
         { "title": "Tarpvalstybinės galimybės", "desc": "NL, DK, DE, SE, NO ir kitos." },
         { "title": "Tiesioginis kontaktas su darbdaviu", "desc": "Be neskaidrių tarpininkų." },
-        { "title": "Paaiškinama atranka", "desc": "Matykite, kodėl darbas jums pasiūlytas." },
+        { "title": "Paaiškinamas atitikimas", "desc": "Matykite, kodėl darbas jums gali tikti." },
         { "title": "Auganti istorija", "desc": "Kiekvienas darbas kuria perkeliamą istoriją." }
       ]
     },
@@ -509,16 +510,16 @@
         "line1": "Štai kaip atrodo",
         "line2": "galimybių srautas."
       },
-      "subcopy": "Nurodykite, ko reikia kiekvienam projektui, ir gaukite surikiuotus, paaiškinamus atitikimus iš laisvų darbuotojų ir agentūrų — per valandas, ne savaites.",
+      "subcopy": "Nurodykite, ko reikia kiekvienam projektui, ir matykite paaiškinamą atitikimo kryptį iš laisvų darbuotojų ir agentūrų — per valandas, ne savaites.",
       "bullets": [
         "Projektas + vieta — tiksliai apibrėžkite poreikį.",
         "Žmonių skaičius — kiek kiekvienos pareigybės reikia.",
         "Reikalingi įgūdžiai — lyginami su patvirtintais darbuotojų įgūdžiais.",
-        "Surikiuoti atitikimai: 47 — darbuotojai, jau tinkantys šiam poreikiui."
+        "Atitikimo kryptis — darbuotojai, kurių gebėjimai gali tikti šiam poreikiui."
       ]
     },
     "journey": {
-      "eyebrow": "Kaip veikia atranka jums",
+      "eyebrow": "Kaip veikia atitikimo kryptis jums",
       "headline": "Nuo poreikio iki samdymo",
       "steps": [
         { "title": "Sukurkite projektą ir poreikį", "desc": "Apibrėžkite pareigybes, skaičių ir įgūdžius." },
@@ -531,10 +532,10 @@
       "eyebrow": "Kodėl įmonės",
       "headline": "Pasiūla, su kuria galima veikti",
       "items": [
-        { "title": "Surikiuoti, paaiškinami atitikimai", "desc": "Kiekvienas atitikimas pateikia priežastis." },
+        { "title": "Paaiškinama atitikimo kryptis", "desc": "Kiekvienas atitikimo signalas pateikia priežastis." },
         { "title": "Tarpvalstybinis darbuotojų rezervas", "desc": "Baltijos ir Šiaurės pasiūla vienoje vietoje." },
         { "title": "Be neskaidrių tarpininkų", "desc": "Jūs matote ir valdote santykį." },
-        { "title": "Patvirtinti įgūdžiai + OVR", "desc": "Samdykite pagal įrodymus, ne pažadus." },
+        { "title": "Patvirtinti įgūdžiai + atitikimo signalai", "desc": "Samdykite pagal įrodymus, ne pažadus." },
         { "title": "Realaus laiko pasiūlos signalai", "desc": "Matykite prieinamumo pokyčius iškart." },
         { "title": "Tiesioginis kontaktas", "desc": "Santykis su darbuotoju priklauso jums." }
       ]
@@ -543,10 +544,10 @@
       "eyebrow": "DUK įmonėms",
       "headline": "Aiškūs atsakymai",
       "items": [
-        { "q": "Kas yra OVR rating?", "a": "Vienas 0–99 signalas iš patvirtintų įgūdžių, patikimumo ir saugos — palyginamas tarp darbuotojų." },
+        { "q": "Kaip rodomi atitikimo signalai?", "a": "Visada konkrečiam poreikiui: aprėptis ir atitikimas pagal patvirtintus įgūdžius, patikimumą ir saugą, su priežastimis. Niekada vienas universalus įvertinimas, palyginamas tarp žmonių." },
         { "q": "Kiek kainuoja įmonei?", "a": "Kaina skelbiama prieš startą. Užsirašiusiems — ankstyvos prieigos kaina." },
         { "q": "Ar galima atrinkti pagal lokaciją?", "a": "Taip — pagal šalį ir regioną, atsižvelgiant į darbuotojo vietą ir pasirengimą keltis." },
-        { "q": "Kas garantuoja darbuotojo patirtį?", "a": "Patvirtinti įgūdžiai, darbdavių patvirtinta istorija ir OVR — ne savadarbiai CV." }
+        { "q": "Kas garantuoja darbuotojo patirtį?", "a": "Patvirtinti įgūdžiai, darbdavių patvirtinta istorija ir kontekstiniai atitikimo signalai — ne savadarbiai CV." }
       ]
     },
     "cta": {
@@ -583,7 +584,7 @@
       "items": [
         { "title": "Valdykite rezervą", "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje." },
         { "title": "Skelbkite klientų vardu", "desc": "Tarpininkaukite neprarasdami santykio." },
-        { "title": "Surikiuota atranka", "desc": "Greičiau įdarbinkite tinkamus." },
+        { "title": "Atitikimo kryptis", "desc": "Greičiau įdarbinkite tinkamus." },
         { "title": "Matomumo valdymas", "desc": "Vieša, tik agentūroms ar tiesioginė — jūsų sprendimas." },
         { "title": "Tarpvalstybinis pasiekiamumas", "desc": "Baltijos ir Šiaurės klientai ir darbuotojai." },
         { "title": "Auginkite biurą", "desc": "Pajėgumo įžvalgos keičiantis paklausai." }
@@ -643,7 +644,7 @@
     "activeWorkers": "Aktyvūs darbuotojai",
     "liveProjects": "Aktyvūs projektai",
     "companies": "Įmonės",
-    "successRate": "Sėkmingų atitikimų dalis"
+    "successRate": "Atitikimo sėkmė"
   },
   "trusted": {
     "title": "Kuriama rinkos lyderiams Baltijos ir Šiaurės Europoje"
@@ -651,7 +652,7 @@
   "heroCards": {
     "worker": {
       "label": "Darbuotojo profilis",
-      "strength": "Profilio išbaigtumas",
+      "strength": "Pasirengimas",
       "skills": "Pagrindiniai įgūdžiai",
       "cta": "Žiūrėti profilį"
     },
@@ -724,11 +725,11 @@
         },
         {
           "title": "Reali paklausa realiu laiku",
-          "body": "Matykite gyvą darbo paklausą ir gaukite atitikimus pagal profesiją, įkainį ir vietą."
+          "body": "Matykite gyvas galimybes ir raskite jums tinkančias pozicijas pagal profesiją, įkainį ir vietą."
         },
         {
           "title": "Sąžiningi signalai",
-          "body": "Skaidrus pasitikėjimo signalas ir profilio išbaigtumas — be išpūstų pažadų ir mokamų reitingų."
+          "body": "Skaidrūs, kontekstiniai atitikimo signalai — be išpūstų pažadų, be universalaus įvertinimo, be mokamų reitingų."
         }
       ],
       "screenshot": "Darbuotojo profilio srautas",
@@ -737,16 +738,16 @@
     "companies": {
       "eyebrow": "Įmonėms",
       "title": "Galimybių srautas —",
-      "titleAccent": "surikiuota.",
-      "subcopy": "Nurodykite, ko reikia kiekviename projekte, ir gaukite surikiuotus, paaiškinamus atitikimus iš laisvų darbuotojų ir agentūrų.",
+      "titleAccent": "kontekste.",
+      "subcopy": "Nurodykite, ko reikia kiekviename projekte, ir matykite paaiškinamą atitikimo kryptį iš laisvų darbuotojų ir agentūrų.",
       "benefits": [
         {
           "title": "Paklausa pagal projektą",
           "body": "Apibrėžkite pareigybes, žmonių skaičių ir įgūdžius kiekvienam projektui — ne miglotus skelbimus."
         },
         {
-          "title": "Surikiuoti, paaiškinami atitikimai",
-          "body": "Kiekvienas atitikimas pateikiamas su priežastimis, todėl sprendimai lieka atsekami."
+          "title": "Paaiškinama atitikimo kryptis",
+          "body": "Kiekvienas atitikimo signalas pateikiamas su priežastimis, todėl sprendimai lieka atsekami."
         },
         {
           "title": "Agentūros, kai reikia",
@@ -768,7 +769,7 @@
         },
         {
           "title": "Tarpininkavimas su pranašumu",
-          "body": "Skelbkite paklausą klientams ir greičiau įdarbinkite tinkamus žmones su surikiuotu atitikimu."
+          "body": "Dalinkitės klientų poreikiais ir greičiau įdarbinkite tinkamus žmones su paaiškinama atitikimo kryptimi."
         },
         {
           "title": "Matomumo valdymas",

@@ -62,7 +62,7 @@ export function PlayerCard({ id }: { id: string }) {
     <motion.article
       ref={ref}
       role="article"
-      aria-label={`${name} — ${role}, OVR ${card.ovr}`}
+      aria-label={`${name} — ${role}, concept fit signal ${card.ovr} of 99 (preview)`}
       whileHover={reduce ? undefined : { y: -8 }}
       transition={{ duration: reduce ? 0 : 0.25, ease: "easeOut" }}
       className={cn(
