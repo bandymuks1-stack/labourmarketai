@@ -1,6 +1,9 @@
 {
   "chooseWorkType": "[EN] Choose work type",
   "whatDidYouDo": "[EN] What did you do today?",
+  "freeTextLead": "[EN] Start by describing what you actually did. You can choose a work direction if it fits, or leave it for later classification.",
+  "workDirectionOptional": "[EN] Work direction (optional)",
+  "classifyLater": "[EN] Later, the system can suggest work direction, skills, quantities, and units from your entry. Suggestions must be reviewed before becoming facts.",
   "quantityLabel": "[EN] Quantity",
   "additionalDetails": "[EN] Additional details",
   "connectsLater": "[EN] This entry can later connect to skills and confirmations",

@@ -72,6 +72,22 @@ export function JournalEntryForm({
         </Select>
       </label>
 
+      {/* Free-text FIRST — the worker records reality before any taxonomy.
+          This is the one required field; everything below is optional. */}
+      <p className="text-xs leading-relaxed text-text-secondary">
+        {t("freeTextLead")}
+      </p>
+      <label className="flex flex-col gap-1.5">
+        <Label>{t("whatDidYouDo")}</Label>
+        <textarea
+          name="notes"
+          rows={4}
+          required
+          placeholder={t("additionalDetails")}
+          className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
+        />
+      </label>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <Label>{t("date")}</Label>
@@ -82,20 +98,6 @@ export function JournalEntryForm({
           <Input name="site_name" />
         </label>
       </div>
-
-      {/* Work direction — any of the worker's directions, or general work.
-          No longer locked to one tiler template (broader proof capture). */}
-      <label className="flex flex-col gap-1.5">
-        <Label>{t("field.work_direction")}</Label>
-        <Select name="work_direction" defaultValue="">
-          <option value="">{t("otherWorkType")}</option>
-          {directions.map((d) => (
-            <option key={d.slug} value={d.slug}>
-              {d.name}
-            </option>
-          ))}
-        </Select>
-      </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
@@ -120,21 +122,22 @@ export function JournalEntryForm({
         </label>
       </div>
 
-      {/* The central field — free text is always the proof of record. */}
+      {/* Work direction — OPTIONAL and LAST. Never blocks honest logging; the
+          empty option leaves it unspecified for later classification. */}
       <label className="flex flex-col gap-1.5">
-        <Label>{t("whatDidYouDo")}</Label>
-        <textarea
-          name="notes"
-          rows={3}
-          required
-          placeholder={t("additionalDetails")}
-          className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
-        />
+        <Label>{t("workDirectionOptional")}</Label>
+        <Select name="work_direction" defaultValue="">
+          <option value="">{t("otherWorkType")}</option>
+          {directions.map((d) => (
+            <option key={d.slug} value={d.slug}>
+              {d.name}
+            </option>
+          ))}
+        </Select>
+        <span className="text-[11px] leading-relaxed text-text-muted">
+          {t("classifyLater")}
+        </span>
       </label>
-
-      <p className="text-[11px] leading-relaxed text-text-muted">
-        {t("connectsLater")}
-      </p>
 
       <div className="flex justify-end">
         <SubmitButton />

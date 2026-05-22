@@ -1,6 +1,9 @@
 {
   "chooseWorkType": "Choose work type",
   "whatDidYouDo": "What did you do today?",
+  "freeTextLead": "Start by describing what you actually did. You can choose a work direction if it fits, or leave it for later classification.",
+  "workDirectionOptional": "Work direction (optional)",
+  "classifyLater": "Later, the system can suggest work direction, skills, quantities, and units from your entry. Suggestions must be reviewed before becoming facts.",
   "quantityLabel": "Quantity",
   "additionalDetails": "Additional details",
   "connectsLater": "This entry can later connect to skills and confirmations",

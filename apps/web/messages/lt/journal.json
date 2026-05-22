@@ -1,6 +1,9 @@
 {
   "chooseWorkType": "Pasirinkite darbo tipą",
   "whatDidYouDo": "Ką šiandien atlikote?",
+  "freeTextLead": "Pirmiausia aprašykite, ką realiai atlikote. Darbo kryptį galite pasirinkti, jei tinka, arba palikti vėlesniam susiejimui.",
+  "workDirectionOptional": "Darbo kryptis (neprivaloma)",
+  "classifyLater": "Ateityje sistema galės pasiūlyti darbo kryptį, įgūdžius, kiekius ir vienetus pagal jūsų įrašą. Pasiūlymai turės būti peržiūrimi prieš išsaugant kaip faktą.",
   "quantityLabel": "Kiekis",
   "additionalDetails": "Papildoma informacija",
   "connectsLater": "Įrašas vėliau galės būti susietas su įgūdžiais ir patvirtinimais",
