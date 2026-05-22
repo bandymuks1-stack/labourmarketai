@@ -1,14 +1,17 @@
 "use client";
 
-import { Filter, Home, Search, User } from "lucide-react";
+import { FileText, Home, IdCard, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+// P1.2 (beta hardening): Discover/Search were empty "coming in Mx" dead-ends.
+// Replaced with the real, useful surfaces (Profile = work identity, Journal =
+// proof) the cockpit already links to — no dead-end nav before beta.
 const TABS = [
   { key: "overview", href: "/dashboard", Icon: Home },
-  { key: "discover", href: "/dashboard/discover", Icon: Search },
-  { key: "search", href: "/dashboard/search", Icon: Filter },
+  { key: "profile", href: "/dashboard/profile", Icon: IdCard },
+  { key: "journal", href: "/dashboard/journal", Icon: FileText },
   { key: "account", href: "/dashboard/account", Icon: User },
 ] as const;
 
