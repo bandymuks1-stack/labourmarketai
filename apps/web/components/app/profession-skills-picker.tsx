@@ -94,6 +94,13 @@ export function ProfessionSkillsPicker({
       <div>
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {t("pickerTitle")}
+          {skills !== null && skills.length > 0 && (
+            <span className="ml-2 font-mono text-[11px] font-normal uppercase tracking-label text-text-muted">
+              {t("selectedCount", {
+                n: skills.filter((s) => selected.has(s.id)).length,
+              })}
+            </span>
+          )}
         </h2>
         <p className="mt-1 text-xs text-text-secondary">{t("pickerHelp")}</p>
       </div>

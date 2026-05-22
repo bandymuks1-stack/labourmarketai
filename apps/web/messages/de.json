@@ -115,6 +115,19 @@
     },
     "dashboard": {
       "wow": {
+        "canonical": {
+          "identity": {
+            "title": "[EN] Work identity",
+            "body": "[EN] Profile, directions, skills, and CV in one place.",
+            "cta": "[EN] Manage work identity"
+          },
+          "proof": {
+            "title": "[EN] Work proof",
+            "body": "[EN] Log completed work. Entries later become proof for skills.",
+            "cta": "[EN] Open journal"
+          },
+          "notLimit": "[EN] Your first choice is not a limit — you can add more directions later."
+        },
         "flow": {
           "worker": {
             "eyebrow": "Dein Arbeits-Cockpit",
@@ -879,6 +892,24 @@
     }
   },
   "skills": {
+    "workDirectionsTitle": "[EN] Work directions",
+    "editingDirection": "[EN] Editing direction",
+    "skillsForDirection": "[EN] Skills for this direction",
+    "othersRemainSaved": "[EN] Other directions remain saved",
+    "canChangeLater": "[EN] You can return and change this later",
+    "notConfirmedYet": "[EN] This is not a confirmed skill yet. You can adjust your directions and skills until they are backed by work proof.",
+    "removeConfirm": "[EN] Remove {name} from your directions? Your saved skills are kept.",
+    "selectedCount": "[EN] {n} selected",
+    "primaryDirection": "[EN] Primary work direction",
+    "additionalDirections": "[EN] Additional directions",
+    "directionsAndSkills": "[EN] Work directions and skills",
+    "addDirection": "[EN] Add more fields you can work in",
+    "addDirectionCta": "[EN] Add direction",
+    "editingSkillsFor": "[EN] Editing skills for",
+    "setPrimary": "[EN] Set as primary",
+    "removeDirection": "[EN] Remove",
+    "primaryBadge": "[EN] Primary",
+    "directionAdded": "[EN] Direction added",
     "coreBadge": "[EN] Core",
     "customComingSoon": "[EN] coming soon",
     "customPrompt": "[EN] Can't find your skill?",

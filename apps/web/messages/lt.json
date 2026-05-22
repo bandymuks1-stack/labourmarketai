@@ -23,6 +23,24 @@
     "activeTag": "aktyvi"
   },
   "skills": {
+    "workDirectionsTitle": "Darbo kryptys",
+    "editingDirection": "Redaguojate kryptį",
+    "skillsForDirection": "Šios krypties įgūdžiai",
+    "othersRemainSaved": "Kitos kryptys išlieka išsaugotos",
+    "canChangeLater": "Galite grįžti ir pakeisti vėliau",
+    "notConfirmedYet": "Tai dar nėra patvirtintas įgūdis. Jūs galite koreguoti savo kryptis ir įgūdžius, kol jie nėra patvirtinti darbų įrodymais.",
+    "removeConfirm": "Pašalinti {name} iš jūsų krypčių? Išsaugoti įgūdžiai lieka.",
+    "selectedCount": "pasirinkta: {n}",
+    "primaryDirection": "Pagrindinė darbo kryptis",
+    "additionalDirections": "Papildomos kryptys",
+    "directionsAndSkills": "Darbo kryptys ir įgūdžiai",
+    "addDirection": "Pridėkite daugiau sričių, kuriose galite dirbti",
+    "addDirectionCta": "Pridėti kryptį",
+    "editingSkillsFor": "Redaguojami įgūdžiai:",
+    "setPrimary": "Padaryti pagrindine",
+    "removeDirection": "Pašalinti",
+    "primaryBadge": "Pagrindinė",
+    "directionAdded": "Kryptis pridėta",
     "pageTitle": "Profesija ir įgūdžiai",
     "professionLabel": "Tavo profesija",
     "professionPlaceholder": "Pasirink profesiją",
@@ -292,6 +310,19 @@
     },
     "dashboard": {
       "wow": {
+        "canonical": {
+          "identity": {
+            "title": "Darbo tapatybė",
+            "body": "Profilis, kryptys, įgūdžiai ir CV vienoje vietoje.",
+            "cta": "Tvarkyti darbo tapatybę"
+          },
+          "proof": {
+            "title": "Darbo įrodymai",
+            "body": "Žurnale fiksuokite atliktą darbą. Vėliau įrašai taps įgūdžių įrodymais.",
+            "cta": "Atidaryti žurnalą"
+          },
+          "notLimit": "Jūsų pirmas pasirinkimas nėra riba — vėliau galėsite pridėti daugiau krypčių."
+        },
         "flow": {
           "worker": {
             "eyebrow": "Jūsų darbo pultas",

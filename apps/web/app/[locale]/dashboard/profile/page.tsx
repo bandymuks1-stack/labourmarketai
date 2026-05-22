@@ -10,6 +10,8 @@ import {
 import { type Role } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
 
+type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
+
 const WORKER_RELATIONSHIPS = [
   "employee",
   "freelancer",
@@ -80,19 +82,30 @@ export default async function ProfilePage({
     .map(({ id, slug }) => ({ id, slug }));
 
   let currentProfessionId: string | null = null;
+  let workerDirections: WorkerDirection[] = [];
   let initialSkillIds: string[] = [];
   let savedSkills: CvSkill[] = [];
   let skillDots: SkillDot[] = [];
   let engagementCards: EngagementCard[] = [];
   let professionIconSlug: string | null = null;
   if (workerId) {
-    const { data: wp } = await supabase
+    const { data: wpAll } = await supabase
       .from("worker_professions")
-      .select("profession_id")
+      .select("profession_id, is_primary")
       .eq("worker_id", workerId)
-      .eq("is_primary", true)
-      .maybeSingle();
+      .order("is_primary", { ascending: false });
+    const wp = (wpAll ?? []).find((r) => r.is_primary) ?? null;
     currentProfessionId = wp?.profession_id ?? null;
+    // All of the worker's directions (primary + additional) — non-locking (§1).
+    workerDirections = (wpAll ?? [])
+      .map((r) => {
+        const p = professions.find((x) => x.id === r.profession_id);
+        return p
+          ? { id: p.id, slug: p.slug, name: tProf(p.slug), isPrimary: r.is_primary }
+          : null;
+      })
+      .filter((d): d is WorkerDirection => d !== null)
+      .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
 
     // is_core per skill for the current profession (for the [PAGRINDINIS] tag).
     const coreMap = new Map<string, boolean>();
@@ -210,6 +223,7 @@ export default async function ProfilePage({
             workerId={workerId}
             professions={professions}
             currentProfessionId={currentProfessionId}
+            directions={workerDirections}
             initialSkillIds={initialSkillIds}
             personName={personName}
             roles={roles}

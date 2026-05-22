@@ -23,6 +23,24 @@
     "activeTag": "active"
   },
   "skills": {
+    "workDirectionsTitle": "Work directions",
+    "editingDirection": "Editing direction",
+    "skillsForDirection": "Skills for this direction",
+    "othersRemainSaved": "Other directions remain saved",
+    "canChangeLater": "You can return and change this later",
+    "notConfirmedYet": "This is not a confirmed skill yet. You can adjust your directions and skills until they are backed by work proof.",
+    "removeConfirm": "Remove {name} from your directions? Your saved skills are kept.",
+    "selectedCount": "{n} selected",
+    "primaryDirection": "Primary work direction",
+    "additionalDirections": "Additional directions",
+    "directionsAndSkills": "Work directions and skills",
+    "addDirection": "Add more fields you can work in",
+    "addDirectionCta": "Add direction",
+    "editingSkillsFor": "Editing skills for",
+    "setPrimary": "Set as primary",
+    "removeDirection": "Remove",
+    "primaryBadge": "Primary",
+    "directionAdded": "Direction added",
     "pageTitle": "Profession & skills",
     "professionLabel": "Your profession",
     "professionPlaceholder": "Select a profession",
@@ -289,6 +307,19 @@
     },
     "dashboard": {
       "wow": {
+        "canonical": {
+          "identity": {
+            "title": "Work identity",
+            "body": "Profile, directions, skills, and CV in one place.",
+            "cta": "Manage work identity"
+          },
+          "proof": {
+            "title": "Work proof",
+            "body": "Log completed work. Entries later become proof for skills.",
+            "cta": "Open journal"
+          },
+          "notLimit": "Your first choice is not a limit — you can add more directions later."
+        },
         "flow": {
           "worker": {
             "eyebrow": "Your work cockpit",

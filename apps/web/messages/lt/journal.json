@@ -1,4 +1,14 @@
 {
+  "chooseWorkType": "Pasirinkite darbo tipą",
+  "whatDidYouDo": "Ką šiandien atlikote?",
+  "freeTextLead": "Aprašykite viską laisvai: darbus, kiekius, vienetus, laiką, vietą ir pastabas. Vėliau sistema galės padėti tai išskaidyti į darbo eilutes.",
+  "quantitySummaryHint": "Neprivaloma greita santrauka — visus kiekius ir vienetus taip pat galite surašyti aprašyme aukščiau.",
+  "workDirectionOptional": "Darbo kryptis (neprivaloma)",
+  "classifyLater": "Ateityje sistema galės pasiūlyti darbo kryptį, įgūdžius, kiekius ir vienetus pagal jūsų įrašą. Pasiūlymai turės būti peržiūrimi prieš išsaugant kaip faktą.",
+  "quantityLabel": "Kiekis",
+  "additionalDetails": "Papildoma informacija",
+  "connectsLater": "Įrašas vėliau galės būti susietas su įgūdžiais ir patvirtinimais",
+  "otherWorkType": "Kita / bendri darbai",
   "composeTiler": "Padariau {area} {unit} plytelių objektui {site}.",
   "cv": {
     "present": "dabar",
@@ -16,6 +26,7 @@
     }
   },
   "field": {
+    "work_direction": "Darbo kryptis",
     "area_done": "Atlikta plotas",
     "site_name": "Objektas",
     "tile_type": "Plytelių tipas"

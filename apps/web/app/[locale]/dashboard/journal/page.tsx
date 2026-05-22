@@ -48,6 +48,7 @@ export default async function JournalPage({
   const tRel = await getTranslations("relationshipTypes");
   const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
+  const tProf = await getTranslations("professions");
 
   const supabase = await createClient();
   const {
@@ -128,6 +129,18 @@ export default async function JournalPage({
   }
   const totalSkills = skills?.length ?? 0;
 
+  // The worker's work directions (primary + additional) for the entry form —
+  // so the journal is no longer locked to one tiler template.
+  const { data: dirRows } = await supabase
+    .from("worker_professions")
+    .select("is_primary, professions(slug)")
+    .eq("worker_id", worker.id)
+    .order("is_primary", { ascending: false });
+  const directions = (dirRows ?? [])
+    .map((r) => (r.professions as { slug: string } | null)?.slug ?? null)
+    .filter((s): s is string => s !== null)
+    .map((slug) => ({ slug, name: tProf(slug) }));
+
   // Entries with their metrics + confirmation status.
   const { data: entries } = await supabase
     .from("journal_entries")
@@ -161,7 +174,7 @@ export default async function JournalPage({
         </span>
       </div>
 
-      <JournalEntryForm engagements={engagements} />
+      <JournalEntryForm engagements={engagements} directions={directions} />
 
       {/* Entry list */}
       <section className="flex flex-col gap-3">
@@ -175,8 +188,12 @@ export default async function JournalPage({
             {(entries ?? []).map((e) => {
               const status = statusOf(e.journal_entry_confirmations);
               const metrics = e.journal_entry_metrics ?? [];
-              const area = metrics.find((m) => m.metric_slug === "area_done");
+              // Generalised: quantity (any work) + legacy area_done fallback.
+              const area =
+                metrics.find((m) => m.metric_slug === "quantity") ??
+                metrics.find((m) => m.metric_slug === "area_done");
               const site = metrics.find((m) => m.metric_slug === "site_name");
+              const dir = metrics.find((m) => m.metric_slug === "work_direction");
               return (
                 <li key={e.id} className="card-border p-4">
                   <div className="flex items-start justify-between gap-3">
@@ -188,6 +205,7 @@ export default async function JournalPage({
                     </span>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
+                    {dir?.value_text && <span>{tProf(dir.value_text)}</span>}
                     {site?.value_text && <span>{site.value_text}</span>}
                     {area?.value_numeric != null && (
                       <span>

@@ -15,6 +15,8 @@ export type JournalEngagement = {
   isPrimary: boolean;
 };
 
+export type JournalDirection = { slug: string; name: string };
+
 const UNIT_SLUGS = ["square_meters", "box_per_day"] as const;
 
 function SubmitButton() {
@@ -32,8 +34,10 @@ function SubmitButton() {
  *  and writes the hash chain). The form auto-selects the primary engagement. */
 export function JournalEntryForm({
   engagements,
+  directions,
 }: {
   engagements: JournalEngagement[];
+  directions: JournalDirection[];
 }) {
   const t = useTranslations("journal");
   const tUnit = useTranslations("productivityUnits");
@@ -68,6 +72,22 @@ export function JournalEntryForm({
         </Select>
       </label>
 
+      {/* Free-text FIRST — the worker records reality before any taxonomy.
+          This is the one required field; everything below is optional. */}
+      <p className="text-xs leading-relaxed text-text-secondary">
+        {t("freeTextLead")}
+      </p>
+      <label className="flex flex-col gap-1.5">
+        <Label>{t("whatDidYouDo")}</Label>
+        <textarea
+          name="notes"
+          rows={4}
+          required
+          placeholder={t("additionalDetails")}
+          className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
+        />
+      </label>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <Label>{t("date")}</Label>
@@ -75,48 +95,53 @@ export function JournalEntryForm({
         </label>
         <label className="flex flex-col gap-1.5">
           <Label>{t("field.site_name")}</Label>
-          <Input name="site_name" required />
+          <Input name="site_name" />
         </label>
       </div>
 
+      {/* Optional quick-summary fields — NOT the only place to record numbers;
+          the free-text above can hold all quantities/units/times/locations. */}
+      <p className="text-[11px] leading-relaxed text-text-muted">
+        {t("quantitySummaryHint")}
+      </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
-          <Label>{t("field.tile_type")}</Label>
-          <Input name="tile_type" />
+          <Label>{t("quantityLabel")}</Label>
+          <Input
+            type="number"
+            name="quantity"
+            min="0"
+            step="0.1"
+            inputMode="decimal"
+          />
         </label>
-        <div className="grid grid-cols-2 gap-2">
-          <label className="flex flex-col gap-1.5">
-            <Label>{t("field.area_done")}</Label>
-            <Input
-              type="number"
-              name="area_done"
-              min="0"
-              step="0.1"
-              inputMode="decimal"
-              required
-            />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <Label>{t("unit")}</Label>
-            <Select name="unit_slug" defaultValue="square_meters">
-              {UNIT_SLUGS.map((u) => (
-                <option key={u} value={u}>
-                  {tUnit(u)}
-                </option>
-              ))}
-            </Select>
-          </label>
-        </div>
+        <label className="flex flex-col gap-1.5">
+          <Label>{t("unit")}</Label>
+          <Select name="unit_slug" defaultValue="square_meters">
+            {UNIT_SLUGS.map((u) => (
+              <option key={u} value={u}>
+                {tUnit(u)}
+              </option>
+            ))}
+          </Select>
+        </label>
       </div>
 
+      {/* Work direction — OPTIONAL and LAST. Never blocks honest logging; the
+          empty option leaves it unspecified for later classification. */}
       <label className="flex flex-col gap-1.5">
-        <Label>{t("notes")}</Label>
-        <textarea
-          name="notes"
-          rows={3}
-          placeholder={t("prompt.tiler")}
-          className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
-        />
+        <Label>{t("workDirectionOptional")}</Label>
+        <Select name="work_direction" defaultValue="">
+          <option value="">{t("otherWorkType")}</option>
+          {directions.map((d) => (
+            <option key={d.slug} value={d.slug}>
+              {d.name}
+            </option>
+          ))}
+        </Select>
+        <span className="text-[11px] leading-relaxed text-text-muted">
+          {t("classifyLater")}
+        </span>
       </label>
 
       <div className="flex justify-end">

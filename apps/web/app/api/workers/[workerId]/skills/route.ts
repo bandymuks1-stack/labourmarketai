@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   ownsWorker,
-  primaryProfessionId,
-  professionSkillIds,
+  workerProfessionSkillIds,
   saveSkillsSchema,
   uuidSchema,
 } from "@/lib/skills";
@@ -94,24 +93,7 @@ export async function POST(
     return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
   }
 
-  // Scope guard: every requested skill must belong to the worker's profession.
-  const professionId = await primaryProfessionId(supabase, workerId);
-  if (!professionId) {
-    return NextResponse.json(
-      { ok: false, message: "Set a primary profession before adding skills" },
-      { status: 400 },
-    );
-  }
-  const allowed = await professionSkillIds(supabase, professionId);
-  const offending = requested.filter((id) => !allowed.has(id));
-  if (offending.length > 0) {
-    return NextResponse.json(
-      { ok: false, message: "Some skills are not valid for your profession", offending },
-      { status: 400 },
-    );
-  }
-
-  // Diff against the current set, then apply the minimal delete + insert.
+  // Current saved set (also the diff baseline below).
   const { data: existingRows, error: exErr } = await supabase
     .from("worker_skills")
     .select("skill_id")
@@ -121,6 +103,27 @@ export async function POST(
     return NextResponse.json({ ok: false, message: "Failed to save" }, { status: 500 });
   }
   const existing = new Set((existingRows ?? []).map((r) => r.skill_id));
+
+  // Scope guard: a NEW skill must belong to ANY of the worker's directions
+  // (primary + additional) — non-locking (§1). Already-saved skills are always
+  // allowed (so removing a direction never blocks a save or silently drops
+  // unrelated skills — the worker keeps or deselects them deliberately).
+  const allowed = await workerProfessionSkillIds(supabase, workerId);
+  if (allowed.size === 0 && existing.size === 0) {
+    return NextResponse.json(
+      { ok: false, message: "Add a work direction before adding skills" },
+      { status: 400 },
+    );
+  }
+  const offending = requested.filter(
+    (id) => !allowed.has(id) && !existing.has(id),
+  );
+  if (offending.length > 0) {
+    return NextResponse.json(
+      { ok: false, message: "Some skills are not valid for your directions", offending },
+      { status: 400 },
+    );
+  }
   const requestedSet = new Set(requested);
   const toInsert = requested.filter((id) => !existing.has(id));
   const toDelete = [...existing].filter(

@@ -100,6 +100,7 @@ export default async function DashboardOverviewPage({
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.wow");
   const tf = await getTranslations("auth.dashboard.wow.flow");
+  const tc = await getTranslations("auth.dashboard.wow.canonical");
   const tRole = await getTranslations("auth.signup.role");
   const tProf = await getTranslations("professions");
 
@@ -316,99 +317,51 @@ export default async function DashboardOverviewPage({
         </Link>
       </section>
 
-      {/* ── Readiness path — the steps as a progress path, not a flat list ── */}
-      <section className="flex flex-col gap-3">
-        <h2 className="font-display text-lg font-semibold text-text-primary">
-          {tf("worker.readiness")}
-        </h2>
-        <ol className="grid gap-3 sm:grid-cols-3">
-          {steps.map((s, i) => (
-            <li key={s.title}>
-              <Link
-                href={s.href}
-                className={cn(
-                  "group flex h-full flex-col gap-2 rounded-md border bg-ink-800/60 p-4 transition-colors",
-                  s.done
-                    ? "border-state-success/30 hover:border-state-success/60"
-                    : !steps[i].done &&
-                        steps.findIndex((x) => !x.done) === i
-                      ? "border-brand-orange/40 hover:border-brand-orange"
-                      : "border-ink-500 hover:border-brand-blue",
-                )}
-              >
-                <span className="flex items-center justify-between">
-                  <span
-                    className={cn(
-                      "flex h-6 w-6 items-center justify-center rounded-full border font-mono text-[10px] font-semibold",
-                      s.done
-                        ? "border-state-success/50 bg-state-success/15 text-state-success"
-                        : "border-ink-500 bg-ink-800 text-text-muted",
-                    )}
-                  >
-                    {s.done ? "✓" : i + 1}
-                  </span>
-                  <span
-                    className={cn(
-                      "rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-label",
-                      s.done
-                        ? "bg-state-success/15 text-state-success"
-                        : "bg-brand-orange/15 text-brand-orange",
-                    )}
-                  >
-                    {s.done ? tw("nextSteps.done") : tw("nextSteps.todo")}
-                  </span>
-                </span>
-                <span className="font-display text-sm font-semibold text-text-primary">
-                  {s.title}
-                </span>
-                <span className="text-xs leading-relaxed text-text-muted">
-                  {s.body}
-                </span>
-                <span className="mt-auto pt-1 text-xs font-semibold text-brand-blue group-hover:text-brand-cyan">
-                  {tw("nextSteps.open")} →
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* ── Proof surfaces — identity coming online + work journal ── */}
+      {/* ── Two canonical surfaces — ONE entry per workflow (no duplicates) ── */}
       <div className="grid gap-4 sm:grid-cols-2">
+        {/* A. Work Identity — the single home for profession, directions, skills, CV */}
         <section className="card-border flex flex-col gap-2 p-6">
           <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-state-success">
             <span className="live-dot signal-dot" aria-hidden />
             {tf("worker.s1")}
           </span>
           <h2 className="font-display text-base font-semibold text-text-primary">
-            {tw("identity.title")}
+            {tc("identity.title")}
           </h2>
           <p className="text-sm leading-relaxed text-text-secondary">
-            {tw("identity.body")}
+            {tc("identity.body")}
+          </p>
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
+            {professionName ?? "—"} ·{" "}
+            {tw("nextSteps.skills.bodyDone", { n: skillsCount })}
           </p>
           <Link
             href="/dashboard/profile"
             className={cn(linkCls, "mt-2 self-start")}
           >
-            {tw("identity.cta")} →
+            {tc("identity.cta")} →
           </Link>
         </section>
+        {/* B. Work Proof / Journal — the single home for proof entries */}
         <section className="card-border flex flex-col gap-2 p-6">
           <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
             <span className="live-dot signal-dot" aria-hidden />
             {tf("worker.s2")}
           </span>
           <h2 className="font-display text-base font-semibold text-text-primary">
-            {tw("journal.title")}
+            {tc("proof.title")}
           </h2>
           <p className="text-sm leading-relaxed text-text-secondary">
-            {tw("journal.body")}
+            {tc("proof.body")}
+          </p>
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
+            {tw("nextSteps.journal.bodyDone", { n: entriesCount })}
           </p>
           <Link
             href="/dashboard/journal"
             className={cn(linkCls, "mt-2 self-start")}
           >
-            {tw("journal.cta")} →
+            {tc("proof.cta")} →
           </Link>
         </section>
       </div>
