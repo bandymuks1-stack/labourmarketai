@@ -5,8 +5,9 @@ live in `docs/handoffs/`.
 
 ## Universal Architecture Sequence (PR #9 → #13)
 
-- [ ] **PR #10** — Universal data model (non-destructive schema) — *blocked by: PR #9*
-- [ ] **PR #11** — Universal Work Journal UI + API — *blocked by: PR #10*
+- [x] **PR #10** — Universal data model — **already shipped in PR #12** (`0013_work_journal_m1.sql`: 12 tables, RLS on all). Spec was written against a non-existent Prisma schema. See `docs/handoffs/TASK-PR10-GAP-ANALYSIS.md` for the security-hardening delta (gaps: feature-flag lock, audit-on-confirm, reject flow, 10-locale CHECK, proof_of_work scaffold) — pending DI decision on RLS-direct vs RPC write path.
+- [ ] **PR #10b** — Journal security-hardening delta (`0014`) — *blocked by: DI decision in gap analysis §3*
+- [ ] **PR #11** — Universal Work Journal UI + API — *blocked by: PR #10b*
 - [ ] **PR #12** — Living CV Hub + entry-level confirmation — *blocked by: PR #11*
 - [ ] **PR #13** — Dashboard redesign (living OS feel) — *blocked by: PR #12*
 
