@@ -235,7 +235,7 @@
     },
     "onboarding": {
       "rolePicker": {
-        "heading": "Choose how you'll use the platform",
+        "heading": "What do you want to start with today?",
         "worker": {
           "title": "Worker",
           "desc": "Seek work, build your CV, get verified."
@@ -254,7 +254,7 @@
         },
         "infoBox": "💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "continue": "Continue",
-        "multiNote": "You can choose several. Change later in settings."
+        "multiNote": "Pick one or more — this is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later."
       },
       "step2": {
         "heading": "A bit about you",
