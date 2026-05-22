@@ -106,6 +106,24 @@
     },
     "dashboard": {
       "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Sinu töölaud",
+            "nextMove": "Järgmine samm",
+            "ready": "Oled valmis võimalusi avama",
+            "readiness": "Valmiduse teekond",
+            "s1": "Identiteet",
+            "s2": "Tõendid",
+            "s3": "Võimalused"
+          },
+          "company": {
+            "eyebrow": "Tegevuse juhtpaneel",
+            "c1": "Määratle vajadus",
+            "c2": "Valmista kriteeriumid",
+            "c3": "Vaata sobivust",
+            "c4": "Telli piloot"
+          }
+        },
         "startingPoint": "[EN] This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
         "nextSteps": {
           "title": "[EN] Your next steps",

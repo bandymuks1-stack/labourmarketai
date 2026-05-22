@@ -106,6 +106,24 @@
     },
     "dashboard": {
       "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Jūsu darba pults",
+            "nextMove": "Nākamais solis",
+            "ready": "Esat gatavs atvērt iespējas",
+            "readiness": "Gatavības ceļš",
+            "s1": "Identitāte",
+            "s2": "Pierādījumi",
+            "s3": "Iespējas"
+          },
+          "company": {
+            "eyebrow": "Darbības pults",
+            "c1": "Definējiet vajadzību",
+            "c2": "Sagatavojiet kritērijus",
+            "c3": "Pārskatiet atbilstību",
+            "c4": "Pieprasīt pilotu"
+          }
+        },
         "startingPoint": "[EN] This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
         "nextSteps": {
           "title": "[EN] Your next steps",

@@ -106,6 +106,24 @@
     },
     "dashboard": {
       "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Twój pulpit pracy",
+            "nextMove": "Następny krok",
+            "ready": "Jesteś gotów otworzyć możliwości",
+            "readiness": "Ścieżka gotowości",
+            "s1": "Tożsamość",
+            "s2": "Dowody",
+            "s3": "Możliwości"
+          },
+          "company": {
+            "eyebrow": "Pulpit działania",
+            "c1": "Określ potrzebę",
+            "c2": "Przygotuj kryteria",
+            "c3": "Przejrzyj dopasowanie",
+            "c4": "Poproś o pilotaż"
+          }
+        },
         "startingPoint": "[EN] This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
         "nextSteps": {
           "title": "[EN] Your next steps",

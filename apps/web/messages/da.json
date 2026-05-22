@@ -106,6 +106,24 @@
     },
     "dashboard": {
       "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Dit arbejdscockpit",
+            "nextMove": "Næste skridt",
+            "ready": "Du er klar til at åbne muligheder",
+            "readiness": "Parathedssti",
+            "s1": "Identitet",
+            "s2": "Bevis",
+            "s3": "Muligheder"
+          },
+          "company": {
+            "eyebrow": "Aktivitetscockpit",
+            "c1": "Definér behov",
+            "c2": "Forbered kriterier",
+            "c3": "Gennemse match",
+            "c4": "Anmod om pilot"
+          }
+        },
         "startingPoint": "[EN] This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
         "nextSteps": {
           "title": "[EN] Your next steps",

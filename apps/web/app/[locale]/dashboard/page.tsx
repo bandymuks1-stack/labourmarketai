@@ -8,10 +8,75 @@ import { cn } from "@/lib/utils";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
-/** Overview tab — the WOW Public Beta "start here" surface. Honest signals only
+type StageState = "done" | "current" | "todo";
+type Stage = { label: string; state: StageState };
+
+/** Cinematic journey rail — connected, animated stage map (not a flat list).
+ *  Reflects the user's REAL progress; the moving gradient is decorative only,
+ *  never a claim of live activity (DEMO_TO_REAL_DATA_POLICY). */
+function JourneyRail({ stages, label }: { stages: Stage[]; label: string }) {
+  const last = stages.length - 1;
+  return (
+    <nav aria-label={label} className="flex items-start">
+      {stages.map((s, i) => {
+        const leftActive = i > 0 && stages[i - 1].state === "done";
+        const rightActive = s.state === "done";
+        return (
+          <div key={s.label} className="flex flex-1 flex-col items-center">
+            <div className="flex w-full items-center">
+              <span
+                className={cn(
+                  "h-0.5 flex-1 rounded-full",
+                  i === 0
+                    ? "bg-transparent"
+                    : leftActive
+                      ? "stage-line"
+                      : "bg-ink-600",
+                )}
+              />
+              <span
+                className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] font-semibold",
+                  s.state === "done"
+                    ? "border-state-success/50 bg-state-success/15 text-state-success"
+                    : s.state === "current"
+                      ? "stage-current border-brand-orange bg-brand-orange/15 text-brand-orange"
+                      : "border-ink-500 bg-ink-800 text-text-muted",
+                )}
+              >
+                {s.state === "done" ? "✓" : i + 1}
+              </span>
+              <span
+                className={cn(
+                  "h-0.5 flex-1 rounded-full",
+                  i === last
+                    ? "bg-transparent"
+                    : rightActive
+                      ? "stage-line"
+                      : "bg-ink-600",
+                )}
+              />
+            </div>
+            <span
+              className={cn(
+                "mt-2 px-1 text-center font-mono text-[10px] uppercase leading-tight tracking-label",
+                s.state === "todo" ? "text-text-muted" : "text-text-secondary",
+              )}
+            >
+              {s.label}
+            </span>
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
+/** Overview tab — the WOW Public Beta "operating cockpit". Honest signals only
  *  (real profession/skills/journal counts); no fake matching/metrics (PV §10,
- *  PRODUCT_CONSTITUTION §5). Non-locking by design: the active role is the
- *  current workspace, not a permanent category (§1). */
+ *  PRODUCT_CONSTITUTION §5/§9). Non-locking by design: the active role is the
+ *  current workspace, not a permanent category (§1). The redesign turns the old
+ *  static card list into an action path: journey rail → next move → readiness. */
 export default async function DashboardOverviewPage({
   params,
 }: {
@@ -34,6 +99,7 @@ export default async function DashboardOverviewPage({
 
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.wow");
+  const tf = await getTranslations("auth.dashboard.wow.flow");
   const tRole = await getTranslations("auth.signup.role");
   const tProf = await getTranslations("professions");
 
@@ -48,7 +114,7 @@ export default async function DashboardOverviewPage({
   const Header = (
     <header className="flex flex-col gap-2">
       <span className="inline-flex w-fit items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
-        <span className="h-1.5 w-1.5 rounded-full bg-brand-orange" aria-hidden />
+        <span className="live-dot" aria-hidden />
         {tRole(role)}
       </span>
       <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -64,38 +130,71 @@ export default async function DashboardOverviewPage({
     </p>
   );
 
-  // ── Company / agency / customer: honest activity-start surface ──
+  const linkCls =
+    "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
+
+  // ── Company / agency / customer: operating cockpit (define → pilot) ──
   if (role !== "worker") {
     const intent = role === "agency" ? "partner" : "hire_workers";
-    const points = [tw("activity.p1"), tw("activity.p2"), tw("activity.p3")];
+    const lanes = [
+      { step: tf("company.c1"), body: tw("activity.p1") },
+      { step: tf("company.c2"), body: tw("activity.p2") },
+      { step: tf("company.c3"), body: tw("activity.p3") },
+    ];
+    const stages: Stage[] = [
+      { label: tf("company.c1"), state: "current" },
+      { label: tf("company.c2"), state: "todo" },
+      { label: tf("company.c3"), state: "todo" },
+      { label: tf("company.c4"), state: "todo" },
+    ];
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-7">
         {Header}
         {StartingPoint}
-        <section className="card-border flex flex-col gap-5 p-6 sm:p-8">
+
+        <JourneyRail stages={stages} label={tf("company.eyebrow")} />
+
+        {/* Cinematic cockpit panel */}
+        <section className="card-border wow-card flex flex-col gap-5 p-6 sm:p-8">
           <div className="flex flex-col gap-1">
-            <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
-              {tw("activity.earlyAccess")}
+            <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+              <span className="live-dot signal-dot" aria-hidden />
+              {tf("company.eyebrow")} · {tw("activity.earlyAccess")}
             </span>
-            <h2 className="font-display text-xl font-semibold text-text-primary">
+            <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
               {tw("activity.title")}
             </h2>
-            <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+            <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
               {tw("activity.body")}
             </p>
           </div>
-          <ul className="flex flex-col gap-2">
-            {points.map((p) => (
-              <li key={p} className="flex items-start gap-2 text-sm text-text-secondary">
-                <span className="mt-1 text-brand-orange" aria-hidden>
-                  →
+
+          {/* Action lanes — each stage is a move, not a passive bullet */}
+          <ol className="grid gap-3 sm:grid-cols-3">
+            {lanes.map((l, i) => (
+              <li
+                key={l.step}
+                className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/60 p-4"
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-blue/40 bg-brand-blue/10 font-mono text-[11px] font-semibold text-brand-blue">
+                  {i + 1}
                 </span>
-                {p}
+                <span className="font-display text-sm font-semibold text-text-primary">
+                  {l.step}
+                </span>
+                <span className="text-xs leading-relaxed text-text-muted">
+                  {l.body}
+                </span>
               </li>
             ))}
-          </ul>
-          <div className="border-t border-ink-600 pt-5">
-            <h3 className="font-display text-sm font-semibold text-text-primary">
+          </ol>
+
+          {/* Terminal action — the live, real path (posts to /api/leads) */}
+          <div className="flex flex-col gap-1 border-t border-ink-600 pt-5">
+            <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+              {tf("company.c4")}
+            </span>
+            <h3 className="font-display text-base font-semibold text-text-primary">
               {tw("pilot.title")}
             </h3>
             <p className="mb-3 mt-1 text-sm leading-relaxed text-text-secondary">
@@ -108,7 +207,7 @@ export default async function DashboardOverviewPage({
     );
   }
 
-  // ── Worker: "start here" work-identity hub with honest next-step signals ──
+  // ── Worker: "work cockpit" — identity → proof → opportunities ──
   let professionName: string | null = null;
   let skillsCount = 0;
   let entriesCount = 0;
@@ -152,26 +251,41 @@ export default async function DashboardOverviewPage({
     {
       done: skillsCount > 0,
       title: tw("nextSteps.skills.title"),
-      body: skillsCount > 0
-        ? tw("nextSteps.skills.bodyDone", { n: skillsCount })
-        : tw("nextSteps.skills.body"),
+      body:
+        skillsCount > 0
+          ? tw("nextSteps.skills.bodyDone", { n: skillsCount })
+          : tw("nextSteps.skills.body"),
       href: "/dashboard/profile" as const,
     },
     {
       done: entriesCount > 0,
       title: tw("nextSteps.journal.title"),
-      body: entriesCount > 0
-        ? tw("nextSteps.journal.bodyDone", { n: entriesCount })
-        : tw("nextSteps.journal.body"),
+      body:
+        entriesCount > 0
+          ? tw("nextSteps.journal.bodyDone", { n: entriesCount })
+          : tw("nextSteps.journal.body"),
       href: "/dashboard/journal" as const,
     },
   ];
 
-  const linkCls =
-    "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
+  // Higher-level journey stages (identity → proof → opportunities).
+  const idDone = !!professionName && skillsCount > 0;
+  const proofDone = entriesCount > 0;
+  const stageDone = [idDone, proofDone, false];
+  const currentStage = stageDone.findIndex((d) => !d);
+  const stageState = (i: number): StageState =>
+    stageDone[i] ? "done" : i === currentStage ? "current" : "todo";
+  const wstages: Stage[] = [
+    { label: tf("worker.s1"), state: stageState(0) },
+    { label: tf("worker.s2"), state: stageState(1) },
+    { label: tf("worker.s3"), state: stageState(2) },
+  ];
+
+  // The single next best action.
+  const nextStep = steps.find((s) => !s.done) ?? null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-7">
       {Header}
       {professionName && (
         <p className="-mt-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
@@ -180,27 +294,69 @@ export default async function DashboardOverviewPage({
       )}
       {StartingPoint}
 
-      {/* Next steps — honest, computed from saved data */}
+      <JourneyRail stages={wstages} label={tf("worker.eyebrow")} />
+
+      {/* ── Next move — one cinematic, guided action ── */}
+      <section className="card-border wow-card flex flex-col gap-3 p-6 sm:p-7">
+        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-orange">
+          <span className="live-dot signal-dot" aria-hidden />
+          {tf("worker.eyebrow")} · {tf("worker.nextMove")}
+        </span>
+        <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+          {nextStep ? nextStep.title : tf("worker.ready")}
+        </h2>
+        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
+          {nextStep ? nextStep.body : tw("journal.body")}
+        </p>
+        <Link
+          href={nextStep ? nextStep.href : "/dashboard/journal"}
+          className="mt-1 inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5"
+        >
+          {nextStep ? tw("nextSteps.open") : tw("journal.cta")} →
+        </Link>
+      </section>
+
+      {/* ── Readiness path — the steps as a progress path, not a flat list ── */}
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-lg font-semibold text-text-primary">
-          {tw("nextSteps.title")}
+          {tf("worker.readiness")}
         </h2>
-        <ul className="grid gap-3 sm:grid-cols-3">
-          {steps.map((s) => (
+        <ol className="grid gap-3 sm:grid-cols-3">
+          {steps.map((s, i) => (
             <li key={s.title}>
               <Link
                 href={s.href}
-                className="group flex h-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-4 transition-colors hover:border-brand-blue"
+                className={cn(
+                  "group flex h-full flex-col gap-2 rounded-md border bg-ink-800/60 p-4 transition-colors",
+                  s.done
+                    ? "border-state-success/30 hover:border-state-success/60"
+                    : !steps[i].done &&
+                        steps.findIndex((x) => !x.done) === i
+                      ? "border-brand-orange/40 hover:border-brand-orange"
+                      : "border-ink-500 hover:border-brand-blue",
+                )}
               >
-                <span
-                  className={cn(
-                    "inline-flex w-fit items-center gap-1.5 rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-label",
-                    s.done
-                      ? "bg-state-success/15 text-state-success"
-                      : "bg-brand-orange/15 text-brand-orange",
-                  )}
-                >
-                  {s.done ? `✓ ${tw("nextSteps.done")}` : tw("nextSteps.todo")}
+                <span className="flex items-center justify-between">
+                  <span
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center rounded-full border font-mono text-[10px] font-semibold",
+                      s.done
+                        ? "border-state-success/50 bg-state-success/15 text-state-success"
+                        : "border-ink-500 bg-ink-800 text-text-muted",
+                    )}
+                  >
+                    {s.done ? "✓" : i + 1}
+                  </span>
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                      s.done
+                        ? "bg-state-success/15 text-state-success"
+                        : "bg-brand-orange/15 text-brand-orange",
+                    )}
+                  >
+                    {s.done ? tw("nextSteps.done") : tw("nextSteps.todo")}
+                  </span>
                 </span>
                 <span className="font-display text-sm font-semibold text-text-primary">
                   {s.title}
@@ -214,44 +370,66 @@ export default async function DashboardOverviewPage({
               </Link>
             </li>
           ))}
-        </ul>
+        </ol>
       </section>
 
-      {/* Two strong surfaces */}
+      {/* ── Proof surfaces — identity coming online + work journal ── */}
       <div className="grid gap-4 sm:grid-cols-2">
         <section className="card-border flex flex-col gap-2 p-6">
+          <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-state-success">
+            <span className="live-dot signal-dot" aria-hidden />
+            {tf("worker.s1")}
+          </span>
           <h2 className="font-display text-base font-semibold text-text-primary">
             {tw("identity.title")}
           </h2>
           <p className="text-sm leading-relaxed text-text-secondary">
             {tw("identity.body")}
           </p>
-          <Link href="/dashboard/profile" className={cn(linkCls, "mt-2 self-start")}>
+          <Link
+            href="/dashboard/profile"
+            className={cn(linkCls, "mt-2 self-start")}
+          >
             {tw("identity.cta")} →
           </Link>
         </section>
         <section className="card-border flex flex-col gap-2 p-6">
+          <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+            <span className="live-dot signal-dot" aria-hidden />
+            {tf("worker.s2")}
+          </span>
           <h2 className="font-display text-base font-semibold text-text-primary">
             {tw("journal.title")}
           </h2>
           <p className="text-sm leading-relaxed text-text-secondary">
             {tw("journal.body")}
           </p>
-          <Link href="/dashboard/journal" className={cn(linkCls, "mt-2 self-start")}>
+          <Link
+            href="/dashboard/journal"
+            className={cn(linkCls, "mt-2 self-start")}
+          >
             {tw("journal.cta")} →
           </Link>
         </section>
       </div>
 
-      {/* Add another way to use the platform (non-locking, §1/§2) */}
-      <section className="rounded-md border border-dashed border-ink-500 px-4 py-4">
-        <h3 className="font-display text-sm font-semibold text-text-primary">
-          {tw("addMore.title")}
-        </h3>
-        <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-          {tw("addMore.body")}
-        </p>
-        <Link href="/dashboard/account" className={cn(linkCls, "mt-3 self-start")}>
+      {/* ── Open another direction (non-locking, §1/§2) ── */}
+      <section className="group flex items-start justify-between gap-4 rounded-md border border-dashed border-ink-500 px-4 py-4 transition-colors hover:border-brand-blue">
+        <div>
+          <h3 className="flex items-center gap-2 font-display text-sm font-semibold text-text-primary">
+            <span className="font-mono text-brand-orange" aria-hidden>
+              →
+            </span>
+            {tw("addMore.title")}
+          </h3>
+          <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+            {tw("addMore.body")}
+          </p>
+        </div>
+        <Link
+          href="/dashboard/account"
+          className={cn(linkCls, "shrink-0")}
+        >
           {tw("addMore.cta")} →
         </Link>
       </section>

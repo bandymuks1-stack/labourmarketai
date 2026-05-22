@@ -106,6 +106,24 @@
     },
     "dashboard": {
       "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Jouw werkcockpit",
+            "nextMove": "Volgende stap",
+            "ready": "Je bent klaar om kansen te openen",
+            "readiness": "Gereedheidspad",
+            "s1": "Identiteit",
+            "s2": "Bewijs",
+            "s3": "Kansen"
+          },
+          "company": {
+            "eyebrow": "Activiteitencockpit",
+            "c1": "Behoefte bepalen",
+            "c2": "Criteria voorbereiden",
+            "c3": "Geschiktheid bekijken",
+            "c4": "Pilot aanvragen"
+          }
+        },
         "startingPoint": "[EN] This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
         "nextSteps": {
           "title": "[EN] Your next steps",

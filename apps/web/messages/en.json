@@ -49,7 +49,7 @@
     },
     "counters": {
       "activeWorkers": "Active workers",
-      "liveDemand": "Open demand",
+      "liveDemand": "Open opportunities",
       "matchesToday": "Matches today",
       "avgOvr": "Avg profile strength"
     },
@@ -279,6 +279,24 @@
     },
     "dashboard": {
       "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Your work cockpit",
+            "nextMove": "Next move",
+            "ready": "You're ready to open opportunities",
+            "readiness": "Readiness path",
+            "s1": "Identity",
+            "s2": "Proof",
+            "s3": "Opportunities"
+          },
+          "company": {
+            "eyebrow": "Activity cockpit",
+            "c1": "Define need",
+            "c2": "Prepare criteria",
+            "c3": "Review fit",
+            "c4": "Request pilot"
+          }
+        },
         "startingPoint": "This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
         "nextSteps": {
           "title": "Your next steps",
@@ -474,17 +492,17 @@
   },
   "companies": {
     "demand": {
-      "eyebrow": "Live demand",
+      "eyebrow": "Opportunity radar",
       "headline": {
-        "line1": "Here's what live demand",
+        "line1": "Here's what the opportunity flow",
         "line2": "looks like."
       },
       "subcopy": "Post what each project needs and receive ranked, explainable matches from available workers and agencies — in hours, not weeks.",
       "bullets": [
-        "Project + location — scope each demand precisely.",
+        "Project + location — scope each need precisely.",
         "Headcount — how many of each role you need.",
         "Required skills — matched against verified worker skills.",
-        "Ranked matches: 47 — workers already fitting this demand now."
+        "Ranked matches: 47 — workers whose abilities fit this need now."
       ]
     },
     "journey": {
@@ -588,7 +606,7 @@
     "chip": "The labour market OS",
     "headline": "The labour market,",
     "headlineAccent": "alive.",
-    "subcopy": "One profile. Workers, companies and agencies on a single connected market — live demand, real-time matching, honest signals. The platform is being built; this is the M0 foundation.",
+    "subcopy": "One profile. Workers, companies and agencies on a single connected market — a live opportunity flow, real-time matching, honest signals. The platform is being built; this is the M0 foundation.",
     "ctaPrimary": "Start now",
     "businessNote": "For companies & agencies ·",
     "businessLink": "Learn more"
@@ -706,7 +724,7 @@
     },
     "companies": {
       "eyebrow": "For companies",
-      "title": "Live demand,",
+      "title": "Opportunity flow,",
       "titleAccent": "ranked.",
       "subcopy": "Post what you need on each project and receive ranked, explainable matches from available workers and agencies.",
       "benefits": [

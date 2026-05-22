@@ -106,6 +106,24 @@
     },
     "dashboard": {
       "wow": {
+        "flow": {
+          "worker": {
+            "eyebrow": "Dein Arbeits-Cockpit",
+            "nextMove": "Nächster Schritt",
+            "ready": "Du bist bereit, Chancen zu öffnen",
+            "readiness": "Bereitschaftspfad",
+            "s1": "Identität",
+            "s2": "Nachweise",
+            "s3": "Chancen"
+          },
+          "company": {
+            "eyebrow": "Aktivitäts-Cockpit",
+            "c1": "Bedarf definieren",
+            "c2": "Kriterien vorbereiten",
+            "c3": "Eignung prüfen",
+            "c4": "Pilot anfragen"
+          }
+        },
         "startingPoint": "[EN] This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
         "nextSteps": {
           "title": "[EN] Your next steps",
