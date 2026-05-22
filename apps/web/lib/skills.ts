@@ -43,6 +43,30 @@ export async function professionSkillIds(
   return new Set((data ?? []).map((r) => r.skill_id));
 }
 
+/**
+ * Skill ids linked to ANY of the worker's professions (primary + additional) —
+ * the allowlist once a worker can hold multiple work directions. A worker who
+ * does tiling AND concreting may declare skills from both (non-locking, §1).
+ */
+export async function workerProfessionSkillIds(
+  supabase: ServerSupabase,
+  workerId: string,
+): Promise<Set<string>> {
+  const { data: wp } = await supabase
+    .from("worker_professions")
+    .select("profession_id")
+    .eq("worker_id", workerId);
+  const profIds = (wp ?? [])
+    .map((r) => r.profession_id)
+    .filter((id): id is string => id !== null);
+  if (profIds.length === 0) return new Set();
+  const { data } = await supabase
+    .from("profession_skills")
+    .select("skill_id")
+    .in("profession_id", profIds);
+  return new Set((data ?? []).map((r) => r.skill_id));
+}
+
 /** The worker's primary profession id, or null if none set yet. */
 export async function primaryProfessionId(
   supabase: ServerSupabase,

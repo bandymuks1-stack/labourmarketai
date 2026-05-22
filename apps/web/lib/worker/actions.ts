@@ -53,3 +53,62 @@ export async function setPrimaryProfession(professionId: string): Promise<void> 
 
   revalidatePath("/", "layout");
 }
+
+async function currentWorkerId() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (!worker) throw new Error("No worker profile");
+  return { supabase, workerId: worker.id };
+}
+
+/**
+ * Add an ADDITIONAL work direction (is_primary = false). The first choice is
+ * never a lock (§1): a worker can hold several directions and declare skills
+ * from each. Idempotent — does nothing if the row already exists. Does NOT
+ * touch the primary.
+ */
+export async function addWorkerDirection(professionId: string): Promise<void> {
+  const { supabase, workerId } = await currentWorkerId();
+  const { data: existing } = await supabase
+    .from("worker_professions")
+    .select("id")
+    .eq("worker_id", workerId)
+    .eq("profession_id", professionId)
+    .maybeSingle();
+  if (existing) return;
+  const { error } = await supabase
+    .from("worker_professions")
+    .insert({ worker_id: workerId, profession_id: professionId, is_primary: false });
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}
+
+/**
+ * Remove a work direction. Refuses to remove the PRIMARY (switch primary
+ * first). The worker's saved skills are NOT deleted — they persist independently.
+ */
+export async function removeWorkerDirection(professionId: string): Promise<void> {
+  const { supabase, workerId } = await currentWorkerId();
+  const { data: row } = await supabase
+    .from("worker_professions")
+    .select("id, is_primary")
+    .eq("worker_id", workerId)
+    .eq("profession_id", professionId)
+    .maybeSingle();
+  if (!row) return;
+  if (row.is_primary) throw new Error("Cannot remove the primary direction");
+  const { error } = await supabase
+    .from("worker_professions")
+    .delete()
+    .eq("id", row.id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}

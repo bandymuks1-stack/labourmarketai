@@ -1,4 +1,10 @@
 {
+  "chooseWorkType": "Pasirinkite darbo tipą",
+  "whatDidYouDo": "Ką šiandien atlikote?",
+  "quantityLabel": "Kiekis",
+  "additionalDetails": "Papildoma informacija",
+  "connectsLater": "Įrašas vėliau galės būti susietas su įgūdžiais ir patvirtinimais",
+  "otherWorkType": "Kita / bendri darbai",
   "composeTiler": "Padariau {area} {unit} plytelių objektui {site}.",
   "cv": {
     "present": "dabar",
@@ -16,6 +22,7 @@
     }
   },
   "field": {
+    "work_direction": "Darbo kryptis",
     "area_done": "Atlikta plotas",
     "site_name": "Objektas",
     "tile_type": "Plytelių tipas"

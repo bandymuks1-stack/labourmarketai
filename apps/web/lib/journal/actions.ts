@@ -2,7 +2,6 @@
 
 import "server-only";
 import { createHash } from "node:crypto";
-import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,36 +28,35 @@ export async function createJournalEntry(formData: FormData): Promise<void> {
   const locale = String(formData.get("locale") ?? "lt");
   const engagementId = String(formData.get("engagement_context_id") ?? "").trim();
   const siteName = String(formData.get("site_name") ?? "").trim();
-  const tileType = String(formData.get("tile_type") ?? "").trim();
-  const areaRaw = String(formData.get("area_done") ?? "").trim();
+  const workDirection = String(formData.get("work_direction") ?? "").trim();
+  const quantityRaw = String(formData.get("quantity") ?? "").trim();
   const unitSlug = String(formData.get("unit_slug") ?? "square_meters").trim();
   const notes = String(formData.get("notes") ?? "").trim();
   const workDate = String(formData.get("work_date") ?? "").trim();
-  const area = Number(areaRaw);
+  const quantity = quantityRaw === "" ? null : Number(quantityRaw);
 
   if (!engagementId) throw new Error("Engagement context required");
-  if (!siteName) throw new Error("Site name required");
-  if (!Number.isFinite(area) || area <= 0) throw new Error("Area must be a positive number");
-
-  // tiler profession (M1 form is tiler-specific)
-  const { data: prof } = await supabase
-    .from("professions")
-    .select("id")
-    .eq("slug", "tiler")
-    .maybeSingle();
-
-  // original_text: worker's notes, else an auto-composed summary (§2 — the
-  // structured fields still produce author content for uniform translation).
-  let originalText = notes;
-  if (!originalText) {
-    const tJournal = await getTranslations({ locale, namespace: "journal" });
-    const tUnit = await getTranslations({ locale, namespace: "productivityUnits" });
-    originalText = tJournal("composeTiler", {
-      area,
-      unit: tUnit(unitSlug),
-      site: siteName,
-    });
+  // Free text is the proof of record — it is the one required field now (no
+  // longer locked to a tiler template needing site + area). Quantity optional.
+  if (!notes) throw new Error("Please describe what you did");
+  if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) {
+    throw new Error("Quantity must be a non-negative number");
   }
+
+  // Resolve the chosen work direction to a profession id (null = general work).
+  // Any of the worker's directions — never forced to one template.
+  let professionId: string | null = null;
+  if (workDirection) {
+    const { data: prof } = await supabase
+      .from("professions")
+      .select("id")
+      .eq("slug", workDirection)
+      .maybeSingle();
+    professionId = prof?.id ?? null;
+  }
+
+  // The worker's own words are the original_text (required, §2).
+  const originalText = notes;
 
   // hash chain: link to this worker's previous entry
   const { data: prev } = await supabase
@@ -80,8 +78,9 @@ export async function createJournalEntry(formData: FormData): Promise<void> {
     .insert({
       worker_id: worker.id,
       engagement_context_id: engagementId,
-      entry_type_slug: "structured",
-      profession_id: prof?.id ?? null,
+      // freeform when only the narrative was given; hybrid when a metric is too.
+      entry_type_slug: quantity !== null ? "hybrid" : "freeform",
+      profession_id: professionId,
       original_text: originalText,
       original_language: locale.slice(0, 2),
       hash_prev: hashPrev,
@@ -95,28 +94,28 @@ export async function createJournalEntry(formData: FormData): Promise<void> {
     throw new Error(`journal entry insert failed: ${error?.message}`);
   }
 
+  // Generic, optional metrics — nothing tiler-specific. metric_slug is free
+  // text, so any work type composes the same way (no schema change).
   const metrics = [
-    { entry_id: entry.id, metric_slug: "site_name", value_text: siteName, source: "worker_input" },
-    ...(tileType
-      ? [{ entry_id: entry.id, metric_slug: "tile_type", value_text: tileType, source: "worker_input" }]
+    ...(workDirection
+      ? [{ entry_id: entry.id, metric_slug: "work_direction", value_text: workDirection, source: "worker_input" }]
       : []),
-    {
-      entry_id: entry.id,
-      metric_slug: "area_done",
-      value_numeric: area,
-      unit_slug: unitSlug,
-      source: "worker_input",
-    },
-    // journal_entries has no work_date column — the date the work happened is
-    // a metric (created_at remains the immutable log timestamp, §3).
+    ...(siteName
+      ? [{ entry_id: entry.id, metric_slug: "site_name", value_text: siteName, source: "worker_input" }]
+      : []),
+    ...(quantity !== null
+      ? [{ entry_id: entry.id, metric_slug: "quantity", value_numeric: quantity, unit_slug: unitSlug, source: "worker_input" }]
+      : []),
     ...(workDate
       ? [{ entry_id: entry.id, metric_slug: "work_date", value_text: workDate, source: "worker_input" }]
       : []),
   ];
-  const { error: mErr } = await supabase.from("journal_entry_metrics").insert(metrics);
-  if (mErr) {
-    console.error("[journal] insert metrics failed:", mErr.message);
-    throw new Error(`journal metrics insert failed: ${mErr.message}`);
+  if (metrics.length > 0) {
+    const { error: mErr } = await supabase.from("journal_entry_metrics").insert(metrics);
+    if (mErr) {
+      console.error("[journal] insert metrics failed:", mErr.message);
+      throw new Error(`journal metrics insert failed: ${mErr.message}`);
+    }
   }
 
   revalidatePath(`/${locale}/dashboard/journal`);

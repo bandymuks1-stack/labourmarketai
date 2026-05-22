@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   ownsWorker,
-  primaryProfessionId,
-  professionSkillIds,
+  workerProfessionSkillIds,
   saveSkillsSchema,
   uuidSchema,
 } from "@/lib/skills";
@@ -94,15 +93,15 @@ export async function POST(
     return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
   }
 
-  // Scope guard: every requested skill must belong to the worker's profession.
-  const professionId = await primaryProfessionId(supabase, workerId);
-  if (!professionId) {
+  // Scope guard: every requested skill must belong to ANY of the worker's work
+  // directions (primary + additional) — non-locking (§1), no longer primary-only.
+  const allowed = await workerProfessionSkillIds(supabase, workerId);
+  if (allowed.size === 0) {
     return NextResponse.json(
-      { ok: false, message: "Set a primary profession before adding skills" },
+      { ok: false, message: "Add a work direction before adding skills" },
       { status: 400 },
     );
   }
-  const allowed = await professionSkillIds(supabase, professionId);
   const offending = requested.filter((id) => !allowed.has(id));
   if (offending.length > 0) {
     return NextResponse.json(
