@@ -890,6 +890,7 @@
   },
   "common": {
     "localeSwitch": "Kalba",
+    "localePreview": "peržiūra",
     "lt": "Lietuvių",
     "en": "English",
     "notFound": "Tokio puslapio nėra",
