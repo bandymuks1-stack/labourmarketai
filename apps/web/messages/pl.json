@@ -53,7 +53,7 @@
         },
         {
           "desc": "[EN] Place the right people faster.",
-          "title": "[EN] Ranked matching"
+          "title": "[EN] Fit direction"
         },
         {
           "desc": "[EN] Public, agencies-only or direct — your call.",
@@ -78,7 +78,7 @@
           "title": "[EN] Onboard your workers"
         },
         {
-          "desc": "[EN] Match your people to open client roles.",
+          "desc": "[EN] Direct your people toward open client roles.",
           "title": "[EN] Connect to client demand"
         },
         {
@@ -211,7 +211,7 @@
         },
         "company": {
           "offer": "[EN] Empty. Open positions and projects management ships in M2.",
-          "proofs": "[EN] Empty. Company score and project history ship in M2.",
+          "proofs": "[EN] Empty. Company fit signals and project history ship in M2.",
           "seek": "[EN] Empty. Posting workforce needs ships in M2."
         },
         "customer": {
@@ -242,6 +242,8 @@
         "account": "[EN] My account",
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
+        "profile": "Profil",
+        "journal": "Dziennik",
         "search": "[EN] Search"
       }
     },
@@ -405,7 +407,7 @@
       "bullets": [
         "[EN] Project + location — scope each demand precisely.",
         "[EN] Headcount — how many of each role you need.",
-        "[EN] Required skills — matched against verified worker skills.",
+        "[EN] Required skills — compared with confirmed worker skills.",
         "[EN] Ranked matches: 47 — workers already fitting this demand now."
       ],
       "eyebrow": "[EN] Live demand",
@@ -420,8 +422,8 @@
       "headline": "[EN] Straight answers",
       "items": [
         {
-          "a": "[EN] A single 0–99 signal from verified skills, reliability and on-site safety — comparable across workers.",
-          "q": "[EN] What is the OVR rating?"
+          "a": "[EN] Always against a specific need: coverage and fit from confirmed skills, reliability and on-site proof, with the reasons. Never one universal rating comparable across people.",
+          "q": "[EN] How are fit signals shown?"
         },
         {
           "a": "[EN] Pricing is announced at launch. Waitlist signups get early-access pricing.",
@@ -432,7 +434,7 @@
           "q": "[EN] Can we filter by location?"
         },
         {
-          "a": "[EN] Through verified skills, employer-confirmed history and the OVR — not self-reported CVs.",
+          "a": "[EN] Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs.",
           "q": "[EN] How is worker experience guaranteed?"
         }
       ]
@@ -442,8 +444,8 @@
       "headline": "[EN] Supply you can act on",
       "items": [
         {
-          "desc": "[EN] Every match shows the reasons behind it.",
-          "title": "[EN] Ranked, explainable matches"
+          "desc": "[EN] Every fit signal shows the reasons behind it.",
+          "title": "[EN] Explainable fit direction"
         },
         {
           "desc": "[EN] Baltic + Nordic supply in one place.",
@@ -455,7 +457,7 @@
         },
         {
           "desc": "[EN] Hire on evidence, not on claims.",
-          "title": "[EN] Verified skills + OVR"
+          "title": "[EN] Confirmed skills + fit signals"
         },
         {
           "desc": "[EN] See availability shift as it happens.",
@@ -468,7 +470,7 @@
       ]
     },
     "journey": {
-      "eyebrow": "[EN] How matching works for you",
+      "eyebrow": "[EN] How fit direction works for you",
       "headline": "[EN] From demand to hire",
       "steps": [
         {
@@ -493,7 +495,7 @@
   "company": {
     "score": {
       "completion": "[EN] Project completion",
-      "label": "[EN] Company score",
+      "label": "[EN] Company fit signals",
       "payment": "[EN] Payment history",
       "response": "[EN] Response time",
       "reviews": "[EN] Worker reviews"
@@ -519,18 +521,18 @@
       "live": "[EN] Live now",
       "onDeck": "[EN] On deck"
     },
-    "eyebrow": "[EN] Live matching",
+    "eyebrow": "[EN] Fit direction",
     "headline": {
       "line1": "[EN] Here's how workers",
-      "line2": "[EN] find work in real time."
+      "line2": "[EN] find work that fits."
     },
-    "liveCounter": "[EN] Live draft · 12 matches in progress",
+    "liveCounter": "[EN] Concept preview · sample draft board",
     "status": {
       "deciding": "[EN] Deciding",
       "hired": "[EN] Hired",
       "reviewing": "[EN] Reviewing"
     },
-    "subcopy": "[EN] Real-time matching, with reasons. Every match shows the why — no opaque algorithm, no black-box score."
+    "subcopy": "[EN] Fit direction, with reasons. You always see the why — no opaque algorithm, no black-box score. A concept preview of how opportunity-fit will work."
   },
   "footer": {
     "about": "[EN] About",
@@ -569,7 +571,7 @@
       "cta": "[EN] View profile",
       "label": "[EN] Worker profile",
       "skills": "[EN] Top skills",
-      "strength": "[EN] Profile strength"
+      "strength": "[EN] Readiness"
     }
   },
   "legal": {
@@ -596,9 +598,10 @@
     },
     "counters": {
       "activeWorkers": "[EN] Active workers",
-      "avgOvr": "[EN] Avg profile strength",
+      "previewNote": "Podgląd pre-alpha — przykładowe sygnały, nie realne dane platformy.",
+      "avgOvr": "[EN] Avg readiness · preview",
       "liveDemand": "[EN] Open demand",
-      "matchesToday": "[EN] Matches today"
+      "matchesToday": "[EN] Activity today"
     },
     "ticker": {
       "label": "[EN] Live market activity ticker"
@@ -673,7 +676,7 @@
           "title": "[EN] Manage your pool"
         },
         {
-          "body": "[EN] Post demand for clients and place the right people faster with ranked matching.",
+          "body": "[EN] Share client needs and place the right people faster with explainable fit direction.",
           "title": "[EN] Broker with leverage"
         },
         {
@@ -695,8 +698,8 @@
           "title": "[EN] Post demand per project"
         },
         {
-          "body": "[EN] Every match comes with the reasons behind it, so hiring decisions stay accountable.",
-          "title": "[EN] Ranked, explainable matches"
+          "body": "[EN] Every fit signal comes with the reasons behind it, so hiring decisions stay accountable.",
+          "title": "[EN] Explainable fit direction"
         },
         {
           "body": "[EN] Tap vetted agency pools for surge capacity without losing visibility.",
@@ -706,9 +709,9 @@
       "cta": "[EN] Join the company waitlist",
       "eyebrow": "[EN] For companies",
       "screenshot": "[EN] Company demand flow",
-      "subcopy": "[EN] Post what you need on each project and receive ranked, explainable matches from available workers and agencies.",
+      "subcopy": "[EN] Post what you need on each project and see explainable fit direction from available workers and agencies.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] ranked."
+      "titleAccent": "[EN] in context."
     },
     "workers": {
       "benefits": [
@@ -717,11 +720,11 @@
           "title": "[EN] One profile, every market"
         },
         {
-          "body": "[EN] See live job demand and get matched to roles that fit your trade, rate and location.",
+          "body": "[EN] See live opportunities and find roles that fit your trade, rate and location.",
           "title": "[EN] Real demand, real-time"
         },
         {
-          "body": "[EN] A transparent trust signal and profile strength — no inflated claims, no pay-to-rank.",
+          "body": "[EN] Transparent, contextual fit signals — no inflated claims, no universal rating, no pay-to-rank.",
           "title": "[EN] Honest signals"
         }
       ],
@@ -736,7 +739,7 @@
   "playercards": {
     "eyebrow": "[EN] Workers as living profiles",
     "headline": {
-      "line1": "[EN] Every worker, ranked",
+      "line1": "[EN] Every worker, in context",
       "line2": "[EN] and ready."
     },
     "stat": {
@@ -753,7 +756,7 @@
       "drafted": "[EN] Drafted",
       "live": "[EN] Live"
     },
-    "subcopy": "[EN] Profile strength comes from real completed work, verified skills, and on-site behavior. Today's preview shows sample profiles.",
+    "subcopy": "[EN] Fit and readiness come from real completed work, confirmed skills and on-site proof — always shown in context, never one universal rating. Concept preview with sample profiles.",
     "tier": {
       "bronze": "[EN] Bronze",
       "gold": "[EN] Gold",
@@ -866,7 +869,7 @@
       "more": "[EN] +{n} more",
       "poolSize": "[EN] Pool size",
       "conceptChip": "Podgląd koncepcji · pre-alpha",
-      "rankedMatches": "[EN] ranked matches",
+      "rankedMatches": "[EN] fit direction",
       "status": {
         "active": "[EN] Active",
         "available": "[EN] Available",
@@ -903,7 +906,7 @@
     "activeWorkers": "[EN] Active workers",
     "companies": "[EN] Companies",
     "liveProjects": "[EN] Live projects",
-    "successRate": "[EN] Match success rate"
+    "successRate": "[EN] Fit success rate"
   },
   "trusted": {
     "title": "[EN] Built for industry leaders across the Baltic & Northern Europe"
@@ -961,7 +964,7 @@
       "items": [
         {
           "desc": "[EN] Your rating reflects completed work, not promises.",
-          "title": "[EN] OVR from real performance"
+          "title": "[EN] Readiness from real work"
         },
         {
           "desc": "[EN] Confirmed by employers and certificates.",
@@ -976,8 +979,8 @@
           "title": "[EN] Direct employer contact"
         },
         {
-          "desc": "[EN] See why a role was matched to you.",
-          "title": "[EN] Explainable matching"
+          "desc": "[EN] See why a role may fit you.",
+          "title": "[EN] Explainable fit"
         },
         {
           "desc": "[EN] Every job builds a portable history.",
@@ -999,17 +1002,17 @@
         },
         {
           "desc": "[EN] Roles that fit your trade, rate and location find you.",
-          "title": "[EN] Receive ranked matches"
+          "title": "[EN] See opportunity-fit direction"
         },
         {
-          "desc": "[EN] Completed work raises your OVR and track record.",
+          "desc": "[EN] Completed work strengthens your proof and readiness.",
           "title": "[EN] Work, earn, level up"
         }
       ]
     },
     "profile": {
       "bullets": [
-        "[EN] OVR — one 0–99 rating from verified skills, reliability and on-site safety.",
+        "[EN] Fit & readiness signals — coverage against a specific need from confirmed skills, reliability and on-site proof. Never one universal rating.",
         "[EN] Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
         "[EN] Verified skills — confirmed by employers and certificates, not self-claimed.",
         "[EN] Status badge — Available, Live, Drafted or Busy, always current."
@@ -1019,7 +1022,7 @@
         "line1": "[EN] Here's what you'll look like —",
         "line2": "[EN] a card that speaks for you."
       },
-      "subcopy": "[EN] Your card is built from real completed work and verified skills, not a self-written CV. The OVR is one honest signal employers can trust."
+      "subcopy": "[EN] Your card is built from real completed work and confirmed skills, not a self-written CV. Fit signals are shown in context — coverage and readiness for a specific need, never one universal rating."
     }
   }
 }

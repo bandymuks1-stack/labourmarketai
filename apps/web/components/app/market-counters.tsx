@@ -32,7 +32,8 @@ export function MarketCounters() {
   }, []);
 
   return (
-    <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
       {COUNTERS.map((c) => {
         const cycle = placeholderCycle(c.id, locale);
         const i = idx % cycle.length;
@@ -81,6 +82,13 @@ export function MarketCounters() {
           </div>
         );
       })}
+      </div>
+      {/* P0.2: explicit preview governance so the figures don't read as real
+          platform scale. Decorative/sample only — never a real metric. */}
+      <p className="inline-flex w-fit items-center gap-2 rounded-sm border border-state-warning/40 bg-ink-800/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning">
+        <span className="live-dot" aria-hidden />
+        {t("previewNote")}
+      </p>
     </div>
   );
 }

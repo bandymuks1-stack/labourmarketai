@@ -4,10 +4,12 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+// P1.2 (beta hardening): Discover/Search were empty dead-ends → replaced with
+// the real Profile (work identity) and Journal (proof) surfaces.
 const TABS = [
   { key: "overview", href: "/dashboard" },
-  { key: "discover", href: "/dashboard/discover" },
-  { key: "search", href: "/dashboard/search" },
+  { key: "profile", href: "/dashboard/profile" },
+  { key: "journal", href: "/dashboard/journal" },
   { key: "account", href: "/dashboard/account" },
 ] as const;
 

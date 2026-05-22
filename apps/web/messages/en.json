@@ -60,6 +60,7 @@
       "activeWorkers": "Active workers",
       "liveDemand": "Open opportunities",
       "matchesToday": "Activity today",
+      "previewNote": "Pre-alpha preview — sample signals, not real platform figures.",
       "avgOvr": "Avg readiness · preview"
     },
     "activity": {
@@ -363,6 +364,8 @@
       "greeting": "Welcome back, {name}",
       "tabs": {
         "overview": "Overview",
+        "profile": "Profile",
+        "journal": "Journal",
         "discover": "Discover",
         "search": "Search",
         "account": "My account"

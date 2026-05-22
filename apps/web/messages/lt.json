@@ -60,6 +60,7 @@
       "activeWorkers": "Aktyvūs darbuotojai",
       "liveDemand": "Atviros galimybės",
       "matchesToday": "Veikla šiandien",
+      "previewNote": "Pre-alpha peržiūra — pavyzdiniai signalai, ne realūs platformos skaičiai.",
       "avgOvr": "Vid. pasirengimas · peržiūra"
     },
     "activity": {
@@ -366,6 +367,8 @@
       "greeting": "Sveiki, {name}",
       "tabs": {
         "overview": "Apžvalga",
+        "profile": "Profilis",
+        "journal": "Žurnalas",
         "discover": "Naršyti",
         "search": "Ieškoti",
         "account": "Mano paskyra"
