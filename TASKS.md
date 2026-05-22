@@ -12,6 +12,23 @@ live in `docs/handoffs/`.
 
 Strategic compass: `docs/handoffs/TASK-ARCH-LABOURMARKETAI-UNIVERSAL-DIRECTION.md`
 
+### Proposed future doctrine work (NOT formalized in PR #9)
+
+These emerged from the PR #9 security/architecture review. They are recorded as
+proposed doctrine candidates only — **not** formalized as new doctrine sections
+(§15/§16) in PR #9, which stays strictly docs-only architecture alignment. The
+underlying requirements are already enforced via existing doctrine (§3.1, §3.4,
+§4, §7) and are baked into the PR #10–#12 skeletons.
+
+- [ ] **Proposed: "DB-First Security" doctrine** — RLS default-deny on every
+  author-content table; all confirmation/evidence/history writes via
+  `SECURITY DEFINER` RPCs with server-side authorization; no direct client
+  writes. (Currently grounded in §3.1 + §4.)
+- [ ] **Proposed: "Audit-on-Trust-Event" doctrine** — every confirmation /
+  rejection / verification transactionally writes link-state + append-only
+  history + immutable `audit_log` (actor, target, payload, server timestamp).
+  (Currently grounded in §3.4.)
+
 ## Backlog (post-PR-#8)
 
 ### Item A — `worker_skills.source` → slug + JSON label layer

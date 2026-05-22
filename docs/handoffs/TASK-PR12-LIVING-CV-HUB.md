@@ -9,27 +9,46 @@
 - `<CVHub>` component — replaces static profile page
 - `<ProfessionCard>`, `<SkillBadge>`, `<ReadinessSignal>` — reusable building blocks
 - `<ManagerConfirmationView>` — entry-level confirmation UI (not profession-wide)
-- New endpoints: CV aggregate, pending confirmations, confirmation submit
-- `skill_confirmation_history` written on every confirmation event (§3)
+- Read endpoints: CV aggregate, pending confirmations
+- Confirmation / rejection via the PR #10 `SECURITY DEFINER` RPCs
+  (`confirm_entry_skills`, `reject_entry`)
 
 ## Hard Guardrails
 
+- **Confirmation / rejection goes through a `SECURITY DEFINER` RPC (or
+  server-only action) with DB-side authorization.** No direct client `INSERT`
+  into confirmation tables (§3.1, §7).
+- **Each confirmation / rejection writes transactionally, in one RPC call:**
+  1. `work_journal_entry_skill_link` — update/confirmation state
+  2. `skill_confirmation_history` — append-only row (§3.1)
+  3. `audit_log` — immutable row (§3.4)
+
+  Every record carries: actor id, target entry id, event payload, and a
+  **server-side timestamp** (§3.2). All-or-nothing: partial writes are not
+  allowed.
+- The RPC checks actor role, org / engagement membership, worker relationship,
+  and target-entry ownership server-side before writing.
 - CV is the central surface. Old `/dashboard/profile` redirects here.
-- Confirmation is per-entry-per-skill. Never profession-wide.
+- **Confirmation is per-entry-per-skill. Never profession-wide.**
 - Confirmation attribution is visible (who, when, which entry).
 - Readiness Signal % is transparently computable; tooltip explains the formula.
-- No fake numbers presented as real. Labeled placeholders (`Sample`, `Demo`) are allowed only where real data does not yet exist for the user.
-- No invented endorsements. No auto-confirmation.
+- No fake numbers presented as real. Labeled placeholders (`Sample`, `Demo`) are
+  allowed only where real data does not yet exist for the user.
+- No invented endorsements. No auto-confirmation. AI may suggest, never persists (§7.1).
+- **UI shows success only after the RPC returns success.** No optimistic
+  "confirmed" state before the server transaction commits.
 
 ## Definition of Done
 
 - [ ] CV Hub displays multiple professions with per-profession readiness
-- [ ] Manager can confirm individual skills per entry
+- [ ] Manager can confirm individual skills per entry (never profession-wide)
+- [ ] Confirmation/rejection executes via RPC; client never writes confirmation tables directly
+- [ ] One transactional write produces all three records (link state + history + audit) with actor/entry/payload/server-timestamp
 - [ ] Confirmation history visible to worker + confirmer
-- [ ] Worker CV reflects confirmation within UI refresh cycle
+- [ ] Worker CV reflects confirmation only after RPC success
 - [ ] Skill badges visually distinguish: ✓ verified, • declared, ? in-progress
-- [ ] i18n: all new strings in 10 locales
-- [ ] RLS: manager can't confirm outside their org
+- [ ] i18n: all new strings in 10 locales (§2.4)
+- [ ] RLS: manager can't confirm outside their org (deny-path test)
 
 ## Out of Scope
 

@@ -76,3 +76,23 @@ that task.
 
 This policy supersedes any prior "review-only / no merge / no deploy / no send" 
 slice rules. Auto-commit is now the default; manual review is the exception.
+
+## Universal Architecture Migration (May 2026)
+
+Active sequence:
+1. **PR #9** — Docs-only architecture & handoff suite (this commit)
+2. **PR #10** — Non-destructive universal schema migration
+3. **PR #11** — Universal Work Journal UI + API
+4. **PR #12** — Living CV Hub + entry-level manager confirmation
+5. **PR #13** — Dashboard redesign (Industrial Intelligence aesthetic)
+
+Strategic compass: `docs/handoffs/TASK-ARCH-LABOURMARKETAI-UNIVERSAL-DIRECTION.md`  
+Architecture summary: `docs/ARCHITECTURE_UNIVERSAL_LABOURMARKETAI.md`
+
+Non-negotiable principles for the sequence:
+- No tiler hardcode
+- New worker must start without company / project
+- CV is the central living trust object
+- No unlabeled fake data (placeholders allowed only when visually marked `Sample` / `Demo`); no fake verification; no fake AI (§7)
+
+See the strategic doc for full rationale.
