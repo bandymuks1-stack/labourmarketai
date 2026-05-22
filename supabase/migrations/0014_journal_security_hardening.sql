@@ -29,6 +29,14 @@
 --   • original_language values are constrained to the doctrine §2.4 set
 --     (en,lt,lv,et,nl,de,da,no,sv,pl) — note da/sv, NOT dk/se.
 --
+-- Review-gate patches (PR #18 review):
+--   • Concern A — audit actor never null: journal_entries audit coalesces
+--     auth.uid() → owning worker's profile (no created_by column exists);
+--     journal_entry_confirmations audit coalesces auth.uid() → confirmer_id.
+--   • Concern B — generic helper names: the append-only guards are named
+--     journal_reject_update() / journal_reject_delete() (verified absent in
+--     0001–0013) to avoid cross-feature coupling.
+--
 -- Verification: supabase CLI was NOT available in the authoring environment, so
 -- `supabase db reset` and the RLS/RPC test matrix were NOT run. DI must run them
 -- locally / on a staging-copy DB before the production db push (see PR body).
@@ -41,11 +49,11 @@ begin;
 -- ────────────────────────────────────────────────────────────────────────
 -- Shared append-only guard helpers (defense-in-depth; §3.1)
 -- ────────────────────────────────────────────────────────────────────────
-create or replace function public.reject_update()
+create or replace function public.journal_reject_update()
 returns trigger language plpgsql as $$
 begin raise exception 'append_only_no_update'; end $$;
 
-create or replace function public.reject_delete()
+create or replace function public.journal_reject_delete()
 returns trigger language plpgsql as $$
 begin raise exception 'append_only_no_delete'; end $$;
 
@@ -112,7 +120,7 @@ returns trigger language plpgsql security definer set search_path = public as $$
 begin
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
   values (
-    auth.uid(),
+    coalesce(auth.uid(), new.confirmer_id),  -- Concern A: fall back to confirmer if no JWT actor
     case new.kind when 'reject' then 'entry_rejected'
                   when 'revoke' then 'confirmation_revoked'
                   else 'entry_confirmed' end,
@@ -135,20 +143,20 @@ create trigger trg_jec_audit after insert on public.journal_entry_confirmations
 -- Append-only (spec §5.7): block UPDATE/DELETE for all roles.
 drop trigger if exists trg_jec_no_update on public.journal_entry_confirmations;
 create trigger trg_jec_no_update before update on public.journal_entry_confirmations
-  for each row execute function public.reject_update();
+  for each row execute function public.journal_reject_update();
 drop trigger if exists trg_jec_no_delete on public.journal_entry_confirmations;
 create trigger trg_jec_no_delete before delete on public.journal_entry_confirmations
-  for each row execute function public.reject_delete();
+  for each row execute function public.journal_reject_delete();
 
 -- ════════════════════════════════════════════════════════════════════════
 -- 4. audit_logs — append-only hardening (spec §5.7)
 -- ════════════════════════════════════════════════════════════════════════
 drop trigger if exists trg_audit_no_update on public.audit_logs;
 create trigger trg_audit_no_update before update on public.audit_logs
-  for each row execute function public.reject_update();
+  for each row execute function public.journal_reject_update();
 drop trigger if exists trg_audit_no_delete on public.audit_logs;
 create trigger trg_audit_no_delete before delete on public.audit_logs
-  for each row execute function public.reject_delete();
+  for each row execute function public.journal_reject_delete();
 
 -- ════════════════════════════════════════════════════════════════════════
 -- 5. proof_of_work — scaffold (spec §5.6); RLS default-deny, no client write
@@ -219,7 +227,10 @@ create or replace function public.je_audit_insert()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
-  values (auth.uid(), 'entry_created', 'journal_entries', new.id,
+  -- Concern A: journal_entries has no created_by column → fall back to the
+  -- owning worker's profile if there is no JWT actor (future service paths).
+  values (coalesce(auth.uid(), (select w.profile_id from public.workers w where w.id = new.worker_id)),
+    'entry_created', 'journal_entries', new.id,
     jsonb_build_object(
       'worker_id', new.worker_id, 'profession_id', new.profession_id,
       'engagement_context_id', new.engagement_context_id,
@@ -253,7 +264,7 @@ create trigger trg_je_guard_visibility before update on public.journal_entries
 
 drop trigger if exists trg_je_no_delete on public.journal_entries;
 create trigger trg_je_no_delete before delete on public.journal_entries
-  for each row execute function public.reject_delete();
+  for each row execute function public.journal_reject_delete();
 
 -- #6 RLS: narrow direct INSERT to own-worker + closed only (no loosening).
 drop policy if exists journal_entries_insert on public.journal_entries;
@@ -443,8 +454,8 @@ commit;
 --   alter table public.journal_entries drop constraint if exists journal_entries_original_language_chk;
 --   drop table if exists public.proof_of_work cascade;
 --   drop table if exists public.feature_flags cascade;
---   -- reject_update/reject_delete are shared helpers; drop only if unused elsewhere:
---   -- drop function if exists public.reject_update();
---   -- drop function if exists public.reject_delete();
+--   -- journal_reject_update/journal_reject_delete are shared helpers; drop only if unused elsewhere:
+--   -- drop function if exists public.journal_reject_update();
+--   -- drop function if exists public.journal_reject_delete();
 --   commit;
 -- ════════════════════════════════════════════════════════════════════════
