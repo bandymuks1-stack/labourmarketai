@@ -16,6 +16,47 @@ Worker writes a natural-language entry
   → confirmed proof strengthens contextual fit signals (never a universal score — see §10)
 ```
 
+## Journal text → structured work lines
+
+A single free-text entry can describe **several** work items, each with its own
+quantity, unit, time, and location (e.g. "laid 40 m² of tiles in the kitchen in
+the morning, then helped carry materials for 2 h, then cleaned the site"). The
+worker is told (in the form copy) to **write everything freely** in the
+description; the structured Quantity/Unit fields are an *optional quick summary*,
+not the only place for numbers.
+
+The future, non-faked flow turns that one narrative into reviewable **work
+lines**:
+
+```text
+One free-text entry
+  → system PROPOSES N structured work lines, each: { work direction?, quantity?, unit?, time?, location?, note }
+  → worker REVIEWS, edits, and CONFIRMS each line (or rejects it)
+  → only confirmed lines become stored structured data (journal_entry_metrics / a future work-lines table)
+  → nothing is written as fact before the worker confirms it
+```
+
+Each proposed line is a **suggestion**, shown next to the original text, with a
+clear "you wrote this — is this right?" review step. The worker can merge, split,
+edit, or discard lines. The original free text always remains the source of
+record (it is never overwritten by the structured interpretation).
+
+## Future exports (built only on confirmed data)
+
+Once work lines are confirmed, the same structured data can power **exports** —
+all derived from real, worker-confirmed entries, never fabricated:
+
+- **Personal CV / work history** — a chronological, human-readable record of
+  what the worker actually did, per direction.
+- **Excel / CSV-style work log** — confirmed work lines (date, direction,
+  quantity, unit, location, note) the worker (or, with permission, an employer)
+  can download.
+- **Skill proof signals** — confirmed work lines feed *contextual* coverage /
+  readiness signals (§10), never a universal score, and only where the evidence
+  is traceable to confirmed entries.
+
+Exports must reflect only confirmed data; unconfirmed suggestions are excluded.
+
 ## Non-negotiable rules for that future flow
 
 1. **Suggestions are never silently persisted as confirmed facts.** Any

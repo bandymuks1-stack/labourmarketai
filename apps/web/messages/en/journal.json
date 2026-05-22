@@ -1,7 +1,8 @@
 {
   "chooseWorkType": "Choose work type",
   "whatDidYouDo": "What did you do today?",
-  "freeTextLead": "Start by describing what you actually did. You can choose a work direction if it fits, or leave it for later classification.",
+  "freeTextLead": "Describe everything freely: work done, quantities, units, time, location, and notes. Later the system can help turn this into structured work lines.",
+  "quantitySummaryHint": "Optional quick summary — you can also write all quantities and units in the description above.",
   "workDirectionOptional": "Work direction (optional)",
   "classifyLater": "Later, the system can suggest work direction, skills, quantities, and units from your entry. Suggestions must be reviewed before becoming facts.",
   "quantityLabel": "Quantity",

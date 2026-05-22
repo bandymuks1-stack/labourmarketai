@@ -99,6 +99,11 @@ export function JournalEntryForm({
         </label>
       </div>
 
+      {/* Optional quick-summary fields — NOT the only place to record numbers;
+          the free-text above can hold all quantities/units/times/locations. */}
+      <p className="text-[11px] leading-relaxed text-text-muted">
+        {t("quantitySummaryHint")}
+      </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <Label>{t("quantityLabel")}</Label>
