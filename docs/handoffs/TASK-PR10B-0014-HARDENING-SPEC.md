@@ -49,20 +49,23 @@
 
 ## 3. DI write-path decision (encoded)
 
-**Worker self-created entries — may remain direct INSERT**, *if and only if* RLS `WITH CHECK` constrains them to: actor's own worker row, valid content, and **non-exposed visibility** (`visibility_scope` limited to `'closed'`/`'team'` on direct insert). Exposure beyond the org is never set by direct client write.
+> **DI-resolved (2026-05-22).** The decisions below are final for the `0014` implementation.
 
-**Trust-changing and exposure-changing operations MUST go through a `SECURITY DEFINER` RPC / server-side transaction:**
-- manager confirm, client confirm
+**Worker self-created entries — may remain direct INSERT**, *if and only if* RLS `WITH CHECK` constrains them to: actor's own worker row, valid content, and **closed/private visibility only** (`visibility_scope = 'closed'`). Direct worker INSERT with `'team'`, `'client_report'`, or `'public_proof_link'` is **not allowed** — any exposure change goes through the `set_entry_visibility` RPC.
+
+**Trust-changing and exposure-changing operations MUST go through a `SECURITY DEFINER` RPC / server-side transaction (with authorization + audit):**
+- manager confirm (client confirm scaffolded but **locked** in M1 — see §4)
 - reject
 - revoke
-- visibility change to `'public_proof_link'`
-- visibility change to `'client_report'`
+- visibility change to `'team'`, `'client_report'`, or `'public_proof_link'`
+- **de-exposure** back to `'closed'`/private (required for safety/recovery)
 - any confirmation / audit state change
 
 **Hard rules:**
 - **No direct client `INSERT`/`UPDATE`/`DELETE`** into confirmation history, audit log, or public/client exposure state.
 - Each trust/exposure RPC **writes an `audit_logs` row in the same transaction**.
 - `journal_entries` / `journal_entry_confirmations` / `audit_logs` stay append-only.
+- Confirmation is **entry-specific AND skill-specific — never profession-wide** (DI non-negotiable).
 
 ---
 
@@ -70,12 +73,17 @@
 
 All `SECURITY DEFINER`, `SET search_path = public`, `REVOKE ALL … FROM PUBLIC, anon`, `GRANT EXECUTE … TO authenticated`, internal authz checks, and an `audit_logs` insert per call.
 
-| Proposed RPC | Purpose | Authz check (server-side) | Writes |
+**Names DI-approved.** Confirmation is **entry-specific AND skill-specific** —
+`confirm_journal_entry` takes a `p_skill_ids uuid[]` so it confirms named skills
+on a named entry, never a whole profession. (If clearer at implementation,
+`confirm_journal_entry_skills` is an acceptable alias for the same contract.)
+
+| Approved RPC | Purpose | Authz check (server-side) | Writes |
 |---|---|---|---|
-| `confirm_journal_entry(p_entry_id uuid, p_scope jsonb, p_source text)` | manager/client confirm | `manages_organization(ec.organization_id)` for the entry's engagement; `'client'` source locked in M1 | `journal_entry_confirmations` + `audit_logs` |
-| `reject_journal_entry(p_entry_id uuid, p_reason text)` | reject (non-destructive) | same manager authz; `p_reason` required | append rejection record (see §5.3) + `audit_logs` |
-| `revoke_entry_confirmation(p_confirmation_id uuid, p_reason text)` | revoke a prior confirmation | manager authz + confirmation belongs to actor's managed org | append revocation record + `audit_logs` |
-| `set_entry_visibility(p_entry_id uuid, p_scope text)` | exposure change to `client_report`/`public_proof_link` | `owns_worker(entry.worker_id)` **AND** matching `feature_flags` enabled | UPDATE `journal_entries.visibility_scope` (via definer) + `audit_logs` |
+| `confirm_journal_entry(p_entry_id uuid, p_skill_ids uuid[], p_source text default 'manager', p_note text default null)` | manager confirm of specific skills on a specific entry | `manages_organization(ec.organization_id)` for the entry's engagement. `p_source='client'` is **scaffolded but raises `client_confirmation_locked`** in M1 | `journal_entry_confirmations` (`kind='confirm'`) + `audit_logs` |
+| `reject_journal_entry(p_entry_id uuid, p_reason text)` | reject (non-destructive) | same manager authz; **`p_reason` required** (raise if null/blank) | `journal_entry_confirmations` (`kind='reject'`, `reason`) + `audit_logs` |
+| `revoke_entry_confirmation(p_confirmation_id uuid, p_reason text)` | revoke a prior confirmation | manager authz + confirmation belongs to actor's managed org; **`p_reason` required** | `journal_entry_confirmations` (`kind='revoke'`, `reason`) + `audit_logs` |
+| `set_entry_visibility(p_entry_id uuid, p_scope text)` | exposure change **and de-exposure** — `'team'` / `'client_report'` / `'public_proof_link'` / back to `'closed'` | `owns_worker(entry.worker_id)`; exposure scopes additionally require the matching `feature_flags` enabled; **de-exposure to `'closed'` is always allowed** (safety/recovery) | UPDATE `journal_entries.visibility_scope` (via definer) + `audit_logs` |
 
 > Naming aligns with the existing `manages_organization` style. Final names/params confirmed by architect at implementation time.
 
@@ -97,11 +105,18 @@ All `CREATE` / `ADD` / `CREATE POLICY` / `CREATE FUNCTION` only. **No `DROP TABL
 - **Doctrine §2.4 codes** — note `da`/`sv` (NOT `dk`/`se`; the old greenfield spec had these wrong).
 - Pre-flight: confirm existing rows already satisfy the set (M1 data is `lt`/`en`); if any violate, the constraint add must be `NOT VALID` then validated, or data corrected first. Document in migration header.
 
-### 5.3 Reject / revoke records (gap #3)
-- Keep append-only. Two options for architect:
-  - (a) extend `journal_entry_confirmations` with a `kind text check (kind in ('confirm','reject','revoke')) default 'confirm'` column + `reason text` (additive `ADD COLUMN`), or
-  - (b) a sibling `journal_entry_decisions` table.
-- **Recommendation:** (a) — minimal, keeps one append-only audit surface. The confirm/reject/revoke RPCs insert rows with the appropriate `kind`.
+### 5.3 Reject / revoke records (gap #3) — **DI-decided**
+- **Use the existing `journal_entry_confirmations` as the decision ledger.** Do
+  **NOT** create a new `journal_entry_decisions` table in PR #10b unless the
+  implementation proves it unavoidable (document the proof if so).
+- Additive `ADD COLUMN` only:
+  - `kind text not null default 'confirm' check (kind in ('confirm','reject','revoke'))`
+  - `reason text` (a.k.a. note)
+- **`reason` is required for `reject` and `revoke`** — enforced in the RPC (raise
+  on null/blank) and reinforced by a CHECK: `kind = 'confirm' OR (reason is not
+  null and length(trim(reason)) > 0)`.
+- **Append-only preserved:** confirm/reject/revoke are all INSERTs of new rows
+  (never UPDATE/DELETE of prior rows). The ledger is the full decision history.
 
 ### 5.4 `audit_logs` wiring (gap #2)
 - No schema change to `audit_logs` (columns sufficient: `actor_id, action, entity, entity_id, payload`).
@@ -109,7 +124,7 @@ All `CREATE` / `ADD` / `CREATE POLICY` / `CREATE FUNCTION` only. **No `DROP TABL
 
 ### 5.5 RLS / grant tightening (gap #6 + exposure lock)
 - `journal_entry_confirmations`: **REVOKE INSERT** from `authenticated`; drop the direct `journal_entry_confirmations_insert` policy. Inserts happen only via SECURITY DEFINER RPC (which bypasses RLS). SELECT policy unchanged.
-- `journal_entries`: tighten the `journal_entries_insert` `WITH CHECK` so direct insert requires `owns_worker(worker_id)` **AND** `visibility_scope IN ('closed','team')`. Exposure scopes set only via `set_entry_visibility` RPC.
+- `journal_entries`: tighten the `journal_entries_insert` `WITH CHECK` so direct insert requires `owns_worker(worker_id)` **AND** `visibility_scope = 'closed'` (closed/private only — DI-decided). `'team'`, `'client_report'`, and `'public_proof_link'` are set **only** via the `set_entry_visibility` RPC (authz + feature-flag + audit).
 - New RPCs: `REVOKE ALL FROM PUBLIC, anon; GRANT EXECUTE TO authenticated`.
 - Net default-deny posture preserved; this **narrows** the authenticated surface (no loosening).
 
@@ -162,17 +177,21 @@ Forward-only migrations (`db push`); rollback is a documented manual DOWN script
 
 ## 10. Automerge status
 
-- **This spec PR:** docs-only; eligible for review, but open as **draft / do not merge** pending DI sign-off on the §3 decision encoding and §4 RPC names.
+- **This spec PR:** docs-only; DI's write-path / RPC / ledger decisions are now encoded (§11). Stays **draft / do not merge** until DI confirms the updated spec.
 - **Implementation PR (`0014`):** **automerge = NO** until SQL/RLS/RPC diff is reviewed and DI explicitly says "implement 0014 now."
 
 ---
 
-## 11. Remaining questions for DI / architect (before implementation)
+## 11. DI decisions (resolved 2026-05-22)
 
-1. §5.3: extend `journal_entry_confirmations` with `kind`+`reason` (recommended) vs a new `journal_entry_decisions` table?
-2. Final RPC names/params (§4) — confirm or adjust.
-3. Is `'team'` visibility acceptable via direct worker insert, or restrict direct insert to `'closed'` only?
-4. Client-confirmation flow stays locked in M1 (no `'client'` source enabled yet) — confirm.
-5. Should `set_entry_visibility` also handle de-exposure (back to `'closed'`)? Likely yes, same RPC.
+All prior open questions are now resolved and folded into §3–§5 above:
 
-> Do NOT implement `0014` until DI explicitly approves and answers §11. This document is the spec only.
+1. **Decision ledger:** reuse `journal_entry_confirmations` with `kind` (`confirm`/`reject`/`revoke`) + required `reason` for reject/revoke; append-only. **No** new `journal_entry_decisions` table unless implementation proves it unavoidable. (§5.3)
+2. **RPC names approved:** `confirm_journal_entry` (takes `p_skill_ids uuid[]`; alias `confirm_journal_entry_skills` acceptable), `reject_journal_entry`, `revoke_entry_confirmation`, `set_entry_visibility`. Confirmation is **entry-specific AND skill-specific, never profession-wide**. (§4)
+3. **Direct worker INSERT:** closed/private only (`visibility_scope = 'closed'`). No `'team'`/`'client_report'`/`'public_proof_link'` via direct insert. (§3, §5.5)
+4. **Client confirmation:** locked in M1 — manager confirm supported; `'client'` source scaffolded but raises `client_confirmation_locked`. (§4)
+5. **De-exposure:** `set_entry_visibility` must support returning to `'closed'`/private (safety/recovery), always allowed without a flag. (§3, §4)
+
+> `0014` implementation remains a **separate, reviewed PR**. Do NOT implement the
+> migration until DI explicitly says "implement 0014 now." This document is the
+> spec only.
