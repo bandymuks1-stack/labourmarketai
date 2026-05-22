@@ -892,6 +892,14 @@
     }
   },
   "skills": {
+    "workDirectionsTitle": "[EN] Work directions",
+    "editingDirection": "[EN] Editing direction",
+    "skillsForDirection": "[EN] Skills for this direction",
+    "othersRemainSaved": "[EN] Other directions remain saved",
+    "canChangeLater": "[EN] You can return and change this later",
+    "notConfirmedYet": "[EN] This is not a confirmed skill yet. You can adjust your directions and skills until they are backed by work proof.",
+    "removeConfirm": "[EN] Remove {name} from your directions? Your saved skills are kept.",
+    "selectedCount": "[EN] {n} selected",
     "primaryDirection": "[EN] Primary work direction",
     "additionalDirections": "[EN] Additional directions",
     "directionsAndSkills": "[EN] Work directions and skills",

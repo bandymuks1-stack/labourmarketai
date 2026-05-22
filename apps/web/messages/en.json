@@ -23,6 +23,14 @@
     "activeTag": "active"
   },
   "skills": {
+    "workDirectionsTitle": "Work directions",
+    "editingDirection": "Editing direction",
+    "skillsForDirection": "Skills for this direction",
+    "othersRemainSaved": "Other directions remain saved",
+    "canChangeLater": "You can return and change this later",
+    "notConfirmedYet": "This is not a confirmed skill yet. You can adjust your directions and skills until they are backed by work proof.",
+    "removeConfirm": "Remove {name} from your directions? Your saved skills are kept.",
+    "selectedCount": "{n} selected",
     "primaryDirection": "Primary work direction",
     "additionalDirections": "Additional directions",
     "directionsAndSkills": "Work directions and skills",

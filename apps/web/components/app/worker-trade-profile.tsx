@@ -11,6 +11,7 @@ import {
   setPrimaryProfession,
 } from "@/lib/worker/actions";
 import { type Role } from "@/lib/auth/actions";
+import { cn } from "@/lib/utils";
 
 type ProfessionOption = { id: string; slug: string };
 type Direction = { id: string; slug: string; name: string; isPrimary: boolean };
@@ -76,6 +77,7 @@ export function WorkerTradeProfile({
   const directionIds = new Set(directions.map((d) => d.id));
   const available = professions.filter((p) => !directionIds.has(p.id));
   const editSlug = directions.find((d) => d.id === editId)?.slug ?? "";
+  const editName = directions.find((d) => d.id === editId)?.name ?? "";
   const primarySlug = directions.find((d) => d.isPrimary)?.slug ?? "";
 
   return (
@@ -100,45 +102,67 @@ export function WorkerTradeProfile({
         </select>
       </label>
 
-      {/* Additional directions — the first choice is not a limit (§1) */}
+      {/* Work directions — calmer capability-group chips. Click a chip to edit
+          its skills (does NOT change primary). The first choice is not a
+          limit (§1); non-primary directions are removable. */}
       {currentProfessionId && (
-        <div className="flex flex-col gap-2">
-          <span className="text-xs text-text-secondary">
-            {t("additionalDirections")}
-          </span>
+        <section className="card-border flex flex-col gap-3 p-5">
+          <h3 className="font-display text-sm font-semibold text-text-primary">
+            {t("workDirectionsTitle")}
+          </h3>
           <div className="flex flex-wrap items-center gap-2">
-            {directions.map((d) => (
-              <span
-                key={d.id}
-                className="inline-flex items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-sm text-text-primary"
-              >
-                {d.name}
-                {d.isPrimary ? (
-                  <span className="font-mono text-[9px] uppercase tracking-label text-brand-orange">
-                    {t("primaryBadge")}
-                  </span>
-                ) : (
+            {directions.map((d) => {
+              const isActive = d.id === editId;
+              return (
+                <span
+                  key={d.id}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                    isActive
+                      ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                      : "border-ink-500 bg-ink-800 text-text-secondary hover:border-text-muted",
+                  )}
+                >
                   <button
                     type="button"
-                    onClick={() => run(() => removeWorkerDirection(d.id))}
-                    disabled={pending}
-                    aria-label={`${t("removeDirection")} ${d.name}`}
-                    className="text-text-muted transition-colors hover:text-state-danger"
+                    onClick={() => setEditId(d.id)}
+                    aria-pressed={isActive}
+                    className="inline-flex items-center gap-1.5"
                   >
-                    ✕
+                    {d.name}
+                    {d.isPrimary && (
+                      <span className="font-mono text-[9px] uppercase tracking-label text-brand-orange">
+                        {t("primaryBadge")}
+                      </span>
+                    )}
                   </button>
-                )}
-              </span>
-            ))}
+                  {!d.isPrimary && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(t("removeConfirm", { name: d.name }))) {
+                          if (editId === d.id) setEditId(currentProfessionId);
+                          run(() => removeWorkerDirection(d.id));
+                        }
+                      }}
+                      disabled={pending}
+                      aria-label={`${t("removeDirection")} ${d.name}`}
+                      className="text-text-muted transition-colors hover:text-state-danger"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </span>
+              );
+            })}
           </div>
           {available.length > 0 && (
-            <label className="flex max-w-md flex-col gap-1.5 text-xs text-text-secondary">
+            <label className="flex max-w-xs flex-col gap-1.5 text-xs text-text-secondary">
               {t("addDirection")}
               <select
                 value=""
                 onChange={(e) =>
-                  e.target.value &&
-                  run(() => addWorkerDirection(e.target.value))
+                  e.target.value && run(() => addWorkerDirection(e.target.value))
                 }
                 disabled={pending}
                 className={inputCls}
@@ -152,7 +176,7 @@ export function WorkerTradeProfile({
               </select>
             </label>
           )}
-        </div>
+        </section>
       )}
 
       {error && (
@@ -162,24 +186,23 @@ export function WorkerTradeProfile({
       )}
 
       {currentProfessionId && editSlug ? (
-        <div className="flex flex-col gap-4">
-          {/* Choose which direction's skills to edit (does not change primary) */}
-          {directions.length > 1 && (
-            <label className="flex max-w-md flex-col gap-1.5 text-xs text-text-secondary">
-              {t("editingSkillsFor")}
-              <select
-                value={editId}
-                onChange={(e) => setEditId(e.target.value)}
-                className={inputCls}
-              >
-                {directions.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+        <section className="flex flex-col gap-3">
+          {/* Clear editing context — which direction, and that others are safe */}
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-brand-blue/10 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+              {t("editingDirection")}: {editName}
+            </span>
+            <p className="text-sm font-semibold text-text-primary">
+              {t("skillsForDirection")}
+            </p>
+            <p className="text-xs leading-relaxed text-text-muted">
+              {t("othersRemainSaved")} · {t("canChangeLater")}
+            </p>
+          </div>
+          {/* Honest self-declared framing — never imply confirmed/proof-backed */}
+          <p className="rounded-md border border-ink-600 bg-ink-800/50 px-4 py-3 text-xs leading-relaxed text-text-secondary">
+            {t("notConfirmedYet")}
+          </p>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <ProfessionSkillsPicker
               key={editId}
@@ -196,7 +219,7 @@ export function WorkerTradeProfile({
               skills={savedSkills}
             />
           </div>
-        </div>
+        </section>
       ) : (
         <p className="text-sm text-text-secondary">{t("noProfession")}</p>
       )}
