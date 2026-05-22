@@ -3,6 +3,15 @@
 Persistent backlog for work that outlives a single PR. PR-specific handoffs
 live in `docs/handoffs/`.
 
+## Universal Architecture Sequence (PR #9 → #13)
+
+- [ ] **PR #10** — Universal data model (non-destructive schema) — *blocked by: PR #9*
+- [ ] **PR #11** — Universal Work Journal UI + API — *blocked by: PR #10*
+- [ ] **PR #12** — Living CV Hub + entry-level confirmation — *blocked by: PR #11*
+- [ ] **PR #13** — Dashboard redesign (living OS feel) — *blocked by: PR #12*
+
+Strategic compass: `docs/handoffs/TASK-ARCH-LABOURMARKETAI-UNIVERSAL-DIRECTION.md`
+
 ## Backlog (post-PR-#8)
 
 ### Item A — `worker_skills.source` → slug + JSON label layer
