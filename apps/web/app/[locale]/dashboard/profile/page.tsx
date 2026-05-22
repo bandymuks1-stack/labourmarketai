@@ -33,6 +33,7 @@ export default async function ProfilePage({
   const t = await getTranslations("skills");
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
+  const tRole = await getTranslations("auth.signup.role");
 
   const supabase = await createClient();
   const {
@@ -144,7 +145,7 @@ export default async function ProfilePage({
     const { data: ecRows } = await supabase
       .from("engagement_contexts")
       .select(
-        "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name)",
+        "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
       )
       .eq("profile_id", user.id)
       .in("relationship_slug", WORKER_RELATIONSHIPS)
@@ -152,11 +153,25 @@ export default async function ProfilePage({
       .order("started_at", { ascending: false, nullsFirst: false });
     engagementCards = (ecRows ?? []).map((e) => {
       const org = e.organizations as
-        | { display_name: string | null; legal_name: string | null }
+        | {
+            display_name: string | null;
+            legal_name: string | null;
+            organization_type: string | null;
+          }
         | null;
+      // Disambiguate same-relationship engagements (own a company AND an agency
+      // both show "Owner") via the org TYPE label when no name exists — never a
+      // bare "—". Reuses existing role labels, so no new i18n keys.
+      const typeLabel =
+        org?.organization_type === "company"
+          ? tRole("company")
+          : org?.organization_type === "agency"
+            ? tRole("agency")
+            : null;
       return {
         id: e.id,
-        orgName: org?.display_name ?? org?.legal_name ?? e.title ?? "—",
+        orgName:
+          org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—",
         relationship: e.relationship_slug,
         startedAt: e.started_at,
         endedAt: e.ended_at,
