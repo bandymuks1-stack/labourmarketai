@@ -1,5 +1,12 @@
 # Work Journal — Architecture Design
 
+> ⚠️ SUPERSEDED WHERE CONFLICTING WITH UNIVERSAL ARCHITECTURE.
+> The PR #9 universal architecture direction is now the execution compass.
+> Tiler-specific M1 patterns in this document must not be implemented after PR #9.
+> Keep this document for historical/architectural context only.
+>
+> Compass: `docs/handoffs/TASK-ARCH-LABOURMARKETAI-UNIVERSAL-DIRECTION.md`
+
 **Version:** v1.0 (commit-ready baseline)
 **Status:** Architect-approved. Ready for commit to `docs/architecture/`. Companion doctrine PR adds §5 four-layer amendment, §7.1, §15.
 **Author:** Architect (Chat Claude)
