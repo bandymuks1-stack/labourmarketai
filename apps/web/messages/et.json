@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "eyebrow": "Kuidas see töötab",
+    "title": "Üks profiil. Juhitud tee võimalusteni.",
+    "subcopy": "Ausad profiilid ja reaalsed tõendid, muudetud võimalusteks — töötajatele, ettevõtetele ja agentuuridele.",
+    "s1": "Alusta oma ruumi",
+    "s2": "Ehita identiteet",
+    "s3": "Lisa tõendid",
+    "s4": "Ava võimalused"
+  },
   "agencies": {
     "cta": {
       "button": "[EN] Join the partner waitlist",

@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "eyebrow": "How it works",
+    "title": "One profile. A guided path to opportunities.",
+    "subcopy": "Honest profiles and real proof, turned into opportunities — for workers, companies and agencies alike.",
+    "s1": "Start your space",
+    "s2": "Build identity",
+    "s3": "Add proof",
+    "s4": "Open opportunities"
+  },
   "cv": {
     "title": "YOUR CV (REAL-TIME PREVIEW)",
     "name": "Name",

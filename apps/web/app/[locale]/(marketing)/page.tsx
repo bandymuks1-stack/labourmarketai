@@ -34,6 +34,12 @@ export default async function LandingPage({
   const tr = await getTranslations("trusted");
   const sec = await getTranslations("secondary");
   const mk = await getTranslations("market");
+  const tj = await getTranslations("journey");
+
+  // Landing↔app journey band — the same stage rail the user meets inside the
+  // cockpit after signup (visual continuity). Honest product explanation of the
+  // real flow; no fake metrics, no fake matching (DEMO_TO_REAL_DATA_POLICY).
+  const journeyStages = [tj("s1"), tj("s2"), tj("s3"), tj("s4")];
 
   const shortcuts = [
     "findWork",
@@ -107,6 +113,56 @@ export default async function LandingPage({
       <div className="mt-10">
         <LiveTicker />
       </div>
+
+      {/* ── Journey band — same action rail as the in-app cockpit ─────── */}
+      <section className="mt-16">
+        <div className="card-border wow-card p-6 sm:p-10">
+          <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+            <span className="live-dot" aria-hidden />
+            {tj("eyebrow")}
+          </p>
+          <h2 className="mt-3 max-w-2xl font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
+            {tj("title")}
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">
+            {tj("subcopy")}
+          </p>
+
+          <ol className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-0">
+            {journeyStages.map((label, i) => (
+              <li
+                key={label}
+                className="flex flex-1 items-center gap-3 sm:flex-col sm:items-center sm:gap-0"
+              >
+                <div className="flex items-center gap-3 sm:w-full sm:gap-0">
+                  <span
+                    className={`hidden h-0.5 flex-1 rounded-full sm:block ${i === 0 ? "bg-transparent" : "stage-line"}`}
+                  />
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-mono text-xs font-semibold ${
+                      i === 0
+                        ? "stage-current border-brand-orange bg-brand-orange/15 text-brand-orange"
+                        : "border-brand-blue/40 bg-brand-blue/10 text-brand-blue"
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                  <span
+                    className={`hidden h-0.5 flex-1 rounded-full sm:block ${i === journeyStages.length - 1 ? "bg-transparent" : "stage-line"}`}
+                  />
+                </div>
+                <span className="font-display text-sm font-semibold text-text-primary sm:mt-2 sm:text-center">
+                  {label}
+                </span>
+              </li>
+            ))}
+          </ol>
+
+          <Link href="/auth/signup" className="mt-8 inline-block">
+            <Button>{t("ctaPrimary")} →</Button>
+          </Link>
+        </div>
+      </section>
 
       {/* ── Player card showcase (5b.3) ──────────────────────────────── */}
       <PlayerCardShowcase />
