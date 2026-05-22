@@ -51,7 +51,7 @@
 
 > **DI-resolved (2026-05-22).** The decisions below are final for the `0014` implementation.
 
-**Worker self-created entries — may remain direct INSERT**, *if and only if* RLS `WITH CHECK` constrains them to: actor's own worker row, valid content, and **closed/private visibility only** (`visibility_scope = 'closed'`). Direct worker INSERT with `'team'`, `'client_report'`, or `'public_proof_link'` is **not allowed** — any exposure change goes through the `set_entry_visibility` RPC.
+**Worker self-created entries — may remain direct INSERT**, *if and only if* RLS `WITH CHECK` constrains them to: actor's own worker row, valid content, and **closed/private visibility only** (`visibility_scope = 'closed'`), **AND** the DB-layer compensating controls of **§5.8** ship in the same `0014` migration (validation + audit + history seeding equivalent to the RPC path). Direct worker INSERT with `'team'`, `'client_report'`, or `'public_proof_link'` is **not allowed** — any exposure change goes through the `set_entry_visibility` RPC. Without §5.8, direct INSERT is a security regression and `0014` is blocked.
 
 **Trust-changing and exposure-changing operations MUST go through a `SECURITY DEFINER` RPC / server-side transaction (with authorization + audit):**
 - manager confirm (client confirm scaffolded but **locked** in M1 — see §4)
@@ -124,7 +124,7 @@ All `CREATE` / `ADD` / `CREATE POLICY` / `CREATE FUNCTION` only. **No `DROP TABL
 
 ### 5.5 RLS / grant tightening (gap #6 + exposure lock)
 - `journal_entry_confirmations`: **REVOKE INSERT** from `authenticated`; drop the direct `journal_entry_confirmations_insert` policy. Inserts happen only via SECURITY DEFINER RPC (which bypasses RLS). SELECT policy unchanged.
-- `journal_entries`: tighten the `journal_entries_insert` `WITH CHECK` so direct insert requires `owns_worker(worker_id)` **AND** `visibility_scope = 'closed'` (closed/private only — DI-decided). `'team'`, `'client_report'`, and `'public_proof_link'` are set **only** via the `set_entry_visibility` RPC (authz + feature-flag + audit).
+- `journal_entries`: tighten the `journal_entries_insert` `WITH CHECK` so direct insert requires `owns_worker(worker_id)` **AND** `visibility_scope = 'closed'` (closed/private only — DI-decided). `'team'`/`'org'`, `'client_report'`, and `'public_proof_link'` are set **only** via the `set_entry_visibility` RPC (authz + feature-flag + audit). **The direct-INSERT path is only acceptable with the non-negotiable compensating controls in §5.8** (BEFORE/AFTER INSERT triggers for validation + audit + history seeding, equivalent to the RPC path).
 - New RPCs: `REVOKE ALL FROM PUBLIC, anon; GRANT EXECUTE TO authenticated`.
 - Net default-deny posture preserved; this **narrows** the authenticated surface (no loosening).
 
@@ -136,6 +136,79 @@ All `CREATE` / `ADD` / `CREATE POLICY` / `CREATE FUNCTION` only. **No `DROP TABL
 - BEFORE UPDATE/DELETE triggers `RAISE EXCEPTION` on `journal_entries`, `journal_entry_confirmations`, `audit_logs`, `proof_of_work` — belt-and-suspenders for §3.1 "all roles", since SECURITY DEFINER RPCs and admin otherwise bypass RLS.
 
 ---
+
+## 5.8 Compensating Controls for Direct INSERT path (NON-NEGOTIABLE)
+
+If direct `INSERT` into the journal entry table is permitted for worker
+self-created entries, it is allowed **ONLY** for closed/private entries **AND
+ONLY IF** the DB-layer compensating controls below are created in the **same
+`0014` hardening migration**. The direct-INSERT path must be **functionally
+equivalent to the RPC path** for validation, audit, and history seeding.
+
+> **Without these controls, direct INSERT is a security regression and `0014`
+> implementation is BLOCKED. With them, direct worker INSERT is accepted as
+> equivalent to the RPC path for self-created closed entries.**
+
+### Name mapping (DI control language → actual repo schema)
+
+DI's control text uses the old greenfield names. Mapped to the **real** schema
+verified in migrations `0001`–`0013` and `apps/web/lib/journal/actions.ts`:
+
+| DI control language | Actual repo object | Note |
+|---|---|---|
+| `work_journal_entry` | `public.journal_entries` | direct INSERT path lives in `actions.ts:createJournalEntry` (visibility hardcoded `'closed'`) |
+| `work_journal_entry_skill_link` | **does not exist** | M1 does **not** link skills at entry creation; controls #3/#4 are **deferred to PR #11**, when/if an entry↔skill-link table is introduced |
+| `skill_confirmation_history` | `public.journal_entry_confirmations` | the append-only decision ledger (no separate history table) |
+| `audit_logs.event_type` | `audit_logs.action` | real columns: `actor_id, action, entity, entity_id, payload, occurred_at` |
+| `context_id` | `journal_entries.engagement_context_id` | §5.5 engagement context |
+
+### Required DB-layer controls (for `0014`, on `journal_entries`)
+
+1. **BEFORE INSERT trigger on `journal_entries`:**
+   - validate `profession_id` exists and is active (when non-null);
+   - validate `worker_id` resolves to a `workers` row owned by `auth.uid()`, and `created_by`/actor = `auth.uid()`;
+   - if `engagement_context_id` is provided, validate it belongs to the actor (or is otherwise authorized);
+   - validate `original_language` against the §2.4 set (`en,lt,lv,et,nl,de,da,no,sv,pl`);
+   - enforce direct-INSERT `visibility_scope = 'closed'` only;
+   - reject `'team'` / `'org'` / `'client_report'` / `'public_proof_link'` on direct insert.
+
+2. **AFTER INSERT trigger on `journal_entries`:**
+   - write an `audit_logs` row with `action = 'entry_created'`, `entity = 'journal_entries'`, `entity_id = entry id`;
+   - `actor_id = auth.uid()` where available;
+   - `payload` includes worker id, profession id, engagement context id, visibility, and server timestamp;
+   - implemented in the DB layer so audit **cannot be forgotten** by future write paths.
+
+3. **(PR #11 scope — no target table in M1) BEFORE INSERT trigger on the entry↔skill-link table:**
+   - validate `skill_id` belongs to the entry's profession taxonomy (`profession_skills`);
+   - reject invalid combinations (`skill_not_in_profession`);
+   - ensure links are **entry-specific**, never profession-wide.
+   - *Applies only once PR #11 introduces the entry↔skill-link table; not creatable in `0014`.*
+
+4. **(PR #11 scope) AFTER INSERT trigger on the entry↔skill-link table:**
+   - append a `journal_entry_confirmations` row with `kind = 'confirm'`, `confirmer_role`/source = `'self_declared'` semantics, linking entry id, worker id, profession id, skill id, actor, server timestamp; append-only.
+   - *Deferred to PR #11 with control #3.*
+
+5. **Hard guard on `journal_entries` visibility changes:**
+   - block direct `visibility_scope` changes — a BEFORE UPDATE trigger raises `use_set_entry_visibility_rpc` when `OLD.visibility_scope <> NEW.visibility_scope`;
+   - **all** exposure and de-exposure go through `set_entry_visibility` (§4), which writes `audit_logs` in the same transaction.
+
+6. **RLS / policy requirements:**
+   - the direct INSERT policy (if any) is limited to **own worker / private (`'closed'`) entries only**;
+   - **no** direct UPDATE/DELETE policy for trust or exposure state;
+   - **no** direct client `INSERT`/`UPDATE`/`DELETE` into `journal_entry_confirmations`, `audit_logs`, exposure state (or any future skill-confirmation/history table).
+
+7. **Trigger-function security:**
+   - trigger functions that write audit/history must be safe under RLS — use `SECURITY DEFINER` with a fixed `search_path` where the schema/RLS posture requires it;
+   - **do not rely on frontend/backend code to remember audit/history writes** — the DB enforces them.
+
+### Bypass-scope wording (accurate, not overstated)
+
+These triggers are **not** claimed to be impossible to bypass at the database
+superuser / replication level. The accurate guarantee is:
+
+> **Application / `authenticated` roles must not be able to bypass these
+> triggers. Production operational processes must not use
+> `session_replication_role = replica` for application writes.**
 
 ## 6. RLS / default-deny impact summary
 
