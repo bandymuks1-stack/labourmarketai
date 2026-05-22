@@ -60,7 +60,7 @@ export function OVRRing({
         height={px}
         viewBox={`0 0 ${px} ${px}`}
         role="img"
-        aria-label={`Overall rating ${value} out of 99, ${t} tier`}
+        aria-label={`Concept fit signal ${value} of 99, ${t} tier — preview, not a universal rating`}
       >
         <circle
           cx={cx}
