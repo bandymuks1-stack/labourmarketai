@@ -17,6 +17,9 @@ next-env.d.ts
 # vercel
 .vercel/
 
+# local owner-review artifacts (screenshots, static review HTML) — never committed
+/runtime/
+
 # os / editor
 Thumbs.db
 .DS_Store

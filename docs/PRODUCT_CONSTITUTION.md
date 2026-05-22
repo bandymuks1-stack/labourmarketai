@@ -76,6 +76,26 @@ Fewer strong, coherent, honest screens beat many weak ones. Every visible beta
 claim must be honest; no empty buttons, dead-end CTAs, misleading copy, or
 unfinished-looking core screens. Mobile must be clean (no header/bell/nav overflow).
 
+## 9. Demo-to-Real Data Transition (extends §5)
+
+Premium **concept / sample / preview** visualizations are allowed in landing and
+product-vision UI when real data does not exist yet — an empty surface would
+damage first impression and fail to communicate the product direction. They are
+allowed **only** to support first impression, product explanation, or visual
+direction, and **never** as real production achievements, real active users,
+real verified matching, real customer metrics, or real platform statistics.
+
+Every demo-like signal is classified as one of **concept · sample · preview ·
+real**. A signal becomes **real** only when backed by real records / real
+user-company-pilot activity / a traceable source — and for matching, scoring, or
+verification, only when the actual logic exists and its output is traceable. A
+visual is never promoted to real by relabeling alone. Until then it may remain
+product-vision UI, but the surrounding copy must avoid false real-world claims.
+
+Full taxonomy, transition conditions, copy rules, and the live inventory:
+`docs/DEMO_TO_REAL_DATA_POLICY.md`. Promotion stays owner-authorised via the
+Placeholder Governance flow (`docs/PLACEHOLDERS.md`).
+
 ---
 
 ## Hard "do not" list (product)
@@ -87,4 +107,4 @@ or fake jobs/candidates/companies — introduced as part of product/UX work.
 ## Change control
 
 This constitution is amended only by explicit owner/DI decision, recorded here or
-in `docs/DECISIONS/`. Implementation sprints must check their work against §1–§8.
+in `docs/DECISIONS/`. Implementation sprints must check their work against §1–§9.
