@@ -264,6 +264,21 @@ export function JournalEntryComposer({
           />
         </label>
 
+        {/* Phase 5 (adaptive): cross-domain examples so the journal does
+            not feel like a construction-only form. Worker doesn't have to
+            click anything — they can copy the wording style. */}
+        <details className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-xs text-text-secondary">
+          <summary className="cursor-pointer select-none font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("examplesTitle")}
+          </summary>
+          <ul className="mt-2 flex flex-col gap-1.5 leading-relaxed">
+            <li>· {t("example1")}</li>
+            <li>· {t("example2")}</li>
+            <li>· {t("example3")}</li>
+            <li>· {t("example4")}</li>
+          </ul>
+        </details>
+
         <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
           {tS("ruleBasedNotice")}
         </p>

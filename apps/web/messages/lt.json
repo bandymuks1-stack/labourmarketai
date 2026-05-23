@@ -80,6 +80,14 @@
       "needsExternalConfirmation": "Vėliau reikės išorinio patvirtinimo"
     }
   },
+  "suggestionStatuses": {
+    "detected": "Pasiūlyta",
+    "confirmed_by_user": "Patvirtinta jūsų",
+    "discarded_by_user": "Neįtraukta",
+    "needs_more_detail": "Reikia daugiau informacijos",
+    "needs_external_confirmation": "Laukia išorinio patvirtinimo",
+    "externally_confirmed": "Patvirtinta iš išorės"
+  },
   "structuring": {
     "groupEyebrow": "Sistema rado",
     "ruleBasedNotice": "Pastaba: kol kas naudojame paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai netampa faktais, kol jūs jų nepatvirtinate — niekas neišsaugoma automatiškai.",
@@ -367,14 +375,15 @@
     "dashboard": {
       "firstUse": {
         "eyebrow": "Pradžia",
-        "title": "Pradėkite nuo paprasto aprašymo",
-        "body": "Parašykite, ką mokate arba ką šiandien dirbote. labourmarket.ai padės tai paversti tvarkingu profiliu ir darbo įrašais, bet nieko neišsaugos kaip fakto be jūsų patvirtinimo.",
-        "step1": "Papasakokite, ką mokate",
-        "step2": "Patvirtinkite rastus pasiūlymus",
-        "step3": "Pridėkite šiandienos darbą",
-        "step4": "Po truputį susikurkite naudingą darbo profilį",
-        "completeProfileCta": "Tvarkyti profilį",
-        "addJournalCta": "Pridėti dienoraščio įrašą",
+        "title": "Pradėkite nuo savęs",
+        "body": "Parašykite, ką mokate, ką darėte arba ką norite pasiūlyti. Sistema padės sutvarkyti informaciją, bet tik jūs patvirtinate, kas tampa jūsų faktais.",
+        "step1": "Pradėkite nuo savęs",
+        "step2": "Apibūdinkite įgūdžius arba patirtį",
+        "step3": "Užfiksuokite darbą arba veiklą",
+        "step4": "Patvirtinkite, kas yra tiesa",
+        "step5": "Vėliau pridėkite daugiau vaidmenų",
+        "completeProfileCta": "Tęsti profilį",
+        "addJournalCta": "Pridėti darbo / veiklos įrašą",
         "reviewRolesCta": "Peržiūrėti vaidmenis"
       },
       "wow": {
