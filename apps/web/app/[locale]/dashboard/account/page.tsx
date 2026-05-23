@@ -81,23 +81,40 @@ export default async function AccountPage({
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
           {t("account.roles_label")}
         </p>
+        {/* Honest framing: only the worker space is live today. The other
+            roles route to a pilot cockpit (not a full management surface), so
+            we tag them clearly instead of suggesting full parity. */}
+        <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+          {t("account.rolesIntro")}
+        </p>
         <ul className="mt-3 flex flex-col gap-2">
           {(rolesRows ?? []).map((r) => {
             const isActive = r.role === profile?.active_role;
+            const role = r.role as Role;
+            // worker is the only role with a fully active worker space today;
+            // the others land on the pilot cockpit ("preview") — say so.
+            const isLiveRole = role === "worker";
             return (
               <li
                 key={r.role}
                 className="flex items-center justify-between gap-3 rounded-md border border-ink-500 px-3 py-2"
               >
                 <span className="flex items-center gap-2 text-sm text-text-primary">
-                  <span aria-hidden>{ROLE_ICON[r.role as Role] ?? "•"}</span>
-                  {tRole(r.role as Role)}
+                  <span aria-hidden>{ROLE_ICON[role] ?? "•"}</span>
+                  {tRole(role)}
                 </span>
-                {isActive && (
-                  <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
-                    ● {tSwitcher("active_label")}
-                  </span>
-                )}
+                <span className="flex items-center gap-2">
+                  {!isLiveRole && (
+                    <span className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">
+                      {t("account.preview_workspace")}
+                    </span>
+                  )}
+                  {isActive && (
+                    <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
+                      ● {tSwitcher("active_label")}
+                    </span>
+                  )}
+                </span>
               </li>
             );
           })}

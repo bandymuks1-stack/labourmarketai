@@ -1,5 +1,12 @@
 {
+  "minutes": "[EN] minutes",
+  "hours": "[EN] hours",
+  "days": "[EN] days",
+  "square_meters": "m²",
+  "meters": "m",
+  "pieces": "[EN] pcs",
+  "kilograms": "kg",
+  "packages": "[EN] packages",
   "box_per_day": "[EN] boxes/day",
-  "square_meters": "[EN] m²",
   "square_meters_per_day": "[EN] m²/day"
 }

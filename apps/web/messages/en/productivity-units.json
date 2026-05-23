@@ -1,5 +1,12 @@
 {
-  "box_per_day": "boxes/day",
+  "minutes": "minutes",
+  "hours": "hours",
+  "days": "days",
   "square_meters": "m²",
+  "meters": "m",
+  "pieces": "pcs",
+  "kilograms": "kg",
+  "packages": "packages",
+  "box_per_day": "boxes/day",
   "square_meters_per_day": "m²/day"
 }

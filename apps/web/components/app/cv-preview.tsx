@@ -112,6 +112,11 @@ export function CvPreview({
         <p className="mt-2 text-sm text-text-muted">{t("skillsEmpty")}</p>
       ) : (
         <ul className="mt-2 flex flex-wrap gap-1.5">
+          {/* Core chips carry the orange border + dot — the per-chip text tag
+              is intentionally dropped here. The skills picker is the editing
+              surface that surfaces the badge; on the read-only CV preview a
+              row of "Pagrindinis · Pagrindinis · …" duplicates that signal
+              and adds noise (Mobile UX §6: drop duplicate statuses). */}
           {skills.map((s) => (
             <li
               key={s.slug}
@@ -122,12 +127,13 @@ export function CvPreview({
                   : "border-ink-500 bg-ink-800 text-text-secondary",
               )}
             >
-              {tSkill(s.slug)}
               {s.isCore && (
-                <span className="font-mono text-[8px] uppercase tracking-label text-brand-orange">
-                  {t("tagCore")}
-                </span>
+                <span
+                  aria-hidden
+                  className="h-1.5 w-1.5 rounded-full bg-brand-orange"
+                />
               )}
+              {tSkill(s.slug)}
             </li>
           ))}
         </ul>

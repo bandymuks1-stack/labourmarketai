@@ -1,6 +1,12 @@
 {
   "chooseWorkType": "Choose work type",
-  "whatDidYouDo": "What did you do today?",
+  "whatDidYouDo": "What did you work on today?",
+  "textPlaceholder": "e.g. Worked 8 hours. Installed drywall ceilings, did ~35 m², mounted profiles and finished the reveals.",
+  "analyseSubmit": "Suggest a structure",
+  "confirmEntry": "Confirm entry",
+  "confirmAllSuggestions": "Confirm all suggestions",
+  "editText": "Back to text",
+  "strengthensHint": "This entry can strengthen this skill",
   "freeTextLead": "Describe everything freely: work done, quantities, units, time, location, and notes. Later the system can help turn this into structured work lines.",
   "quantitySummaryHint": "Optional quick summary — you can also write all quantities and units in the description above.",
   "workDirectionOptional": "Work direction (optional)",

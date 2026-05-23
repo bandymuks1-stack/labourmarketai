@@ -62,7 +62,59 @@
     "importComingSoon": "CV įkėlimas bus įjungtas M2 etape.",
     "importNotSaved": "Pasirinkta: {file}. Failas dar neįkeltas ir neišsaugotas.",
     "customPrompt": "Nerandate savo įgūdžio?",
-    "customComingSoon": "netrukus"
+    "customComingSoon": "netrukus",
+    "textFirst": {
+      "title": "Papasakokite, ką mokate",
+      "helper": "Parašykite savais žodžiais arba įkelkite CV. Sistema pasiūlys įgūdžius, darbo kryptis, vaidmenis ir CV įrašus — bet patvirtinsite tik jūs.",
+      "placeholder": "Pvz.: 8 metus dirbau vidaus apdailoje, montavau gipso lubas, dėjau grindis, tvarkiau santechniką, vadovavau 4 žmonių komandai.",
+      "submit": "Pasiūlykite struktūrą",
+      "manualCta": "Pridėti rankiniu būdu",
+      "manualHelper": "Rankinis pasirinkimas lieka kaip antrinis kelias. Pradėkite nuo teksto arba CV — taip greičiau.",
+      "rescan": "Iš naujo pasiūlyti pagal tekstą",
+      "backToText": "Grįžti prie teksto",
+      "applyAll": "Įtraukti patvirtintus pasiūlymus",
+      "appliedToast": "Patvirtintus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti rankiniu būdu."
+    }
+  },
+  "structuring": {
+    "groupEyebrow": "Sistema rado",
+    "ruleBasedNotice": "Pastaba: sistema dar naudoja paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai nėra faktai, kol jų nepatvirtinote.",
+    "emptyBucket": "Šiame teksto fragmente nieko aiškaus neradome. Galite parašyti daugiau arba praleisti.",
+    "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau arba pridėkite rankiniu būdu.",
+    "buckets": {
+      "skills": "Rasti įgūdžiai",
+      "directions": "Galimos darbo kryptys",
+      "roles": "Galimi vaidmenys",
+      "experience": "Patirtis",
+      "cvEntries": "Galimi CV įrašai",
+      "time": "Laikas",
+      "quantity": "Kiekis",
+      "site": "Objektas / vieta"
+    },
+    "experience": {
+      "years": "Patirtis: {n} metai",
+      "team": "Vadovauta žmonių: {n}"
+    },
+    "actions": {
+      "confirm": "Patvirtinti",
+      "edit": "Pataisyti",
+      "discard": "Neįtraukti"
+    },
+    "status": {
+      "confirmed": "Patvirtinta",
+      "edited": "Pataisyta",
+      "discarded": "Neįtraukta",
+      "pending": "Pasiūlymas"
+    },
+    "cv": {
+      "title": "Įkelti arba įklijuoti CV",
+      "helper": "Įkelkite PDF / DOCX arba įklijuokite CV tekstą. CV įkėlimas dar nesaugomas — kol kas naudokite teksto įklijavimą.",
+      "uploadLabel": "Įkelti CV failą",
+      "uploadComingSoon": "Failo įkėlimas bus aktyvuotas M2 etape — kol kas naudokite teksto įklijavimą.",
+      "pasteLabel": "Įklijuoti CV tekstą",
+      "pastePlaceholder": "Įklijuokite savo CV tekstą čia.",
+      "pasteSubmit": "Pasiūlyti pagal CV tekstą"
+    }
   },
   "live": {
     "chip": {
@@ -446,7 +498,11 @@
       "account": {
         "email_label": "El. paštas",
         "roles_label": "Mano vaidmenys",
-        "logout": "Atsijungti"
+        "logout": "Atsijungti",
+        "rolesIntro": "Šiuo metu aktyvi jūsų darbuotojo erdvė. Kitos rolės bus įjungtos palaipsniui. Jūs nesate užrakinti viename būde naudotis labourmarket.ai.",
+        "active_workspace": "Aktyvi erdvė",
+        "preview_workspace": "Ruošiama",
+        "comingLater": "Bus galima vėliau"
       },
       "comingSoon": {
         "greeting": "👋 Sveiki, {name}",

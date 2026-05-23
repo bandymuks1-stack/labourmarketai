@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { env } from "@/lib/env";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
+import { MobileSheet } from "@/components/ui/MobileSheet";
 import { cn } from "@/lib/utils";
 
 const ROLE_ICON: Record<Role, string> = {
@@ -58,86 +59,155 @@ export function NotificationPanel() {
         />
       </button>
 
+      {/* Desktop: keep a right-anchored popover; on phones it would cover the
+          hero, so we render the same content inside a MobileSheet instead. */}
       {open && (
         <div
           role="dialog"
           aria-label={t("label")}
-          // max-w keeps the w-80 panel inside the viewport on narrow phones
-          // (≤360px) where right-anchored absolute content would otherwise spill
-          // past the screen edge and trigger horizontal scroll. right-2 on
-          // mobile leaves a small gutter; flush right-0 from md up.
-          className="absolute right-2 z-30 mt-2 max-h-[28rem] w-80 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card md:right-0 md:max-w-[calc(100vw-2rem)]"
+          className="absolute right-0 z-30 mt-2 hidden max-h-[28rem] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card md:block"
         >
-          <header className="flex items-center justify-between border-b border-ink-600 px-3 py-2">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("label")}
-            </p>
-            {notifications.length > 0 && (
-              <button
-                type="button"
-                onClick={markAllRead}
-                className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan"
-              >
-                {t("markAllRead")}
-              </button>
-            )}
-          </header>
-
-          {notifications.length === 0 ? (
-            <div className="p-5 text-sm">
-              <p className="font-display font-semibold text-text-primary">
-                {t("emptyTitle")}
-              </p>
-              <p
-                className={cn(
-                  "relative mt-1.5 text-text-secondary",
-                  env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true" &&
-                    "rounded-sm outline-dashed outline-1 outline-offset-2 outline-brand-blue/40 p-1.5",
-                )}
-              >
-                {env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true" && (
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute -right-1 -top-3 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-[9px] uppercase tracking-label text-brand-blue"
-                  >
-                    Placeholder
-                  </span>
-                )}
-                {t("emptyBody")}
-              </p>
-            </div>
-          ) : (
-            <ul className="flex flex-col">
-              {notifications.map((n) => {
-                const crossRole = activeRole !== n.role;
-                return (
-                  <li
-                    key={n.id}
-                    className={cn(
-                      "border-b border-ink-600 px-3 py-3 last:border-b-0",
-                      !n.read_at && "bg-ink-800/40",
-                    )}
-                  >
-                    <p className="flex items-center gap-2 text-xs text-text-secondary">
-                      <span aria-hidden>{ROLE_ICON[n.role]}</span>
-                      <span className="text-text-primary">{n.type}</span>
-                    </p>
-                    {crossRole && (
-                      <button
-                        type="button"
-                        onClick={() => switchRole(n.role)}
-                        className="mt-2 inline-flex items-center rounded-sm border border-brand-blue/40 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-brand-blue hover:border-brand-blue"
-                      >
-                        {t("switchRoleCta", { role: tRole(n.role) })}
-                      </button>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <NotificationsBody
+            label={t("label")}
+            emptyTitle={t("emptyTitle")}
+            emptyBody={t("emptyBody")}
+            markAllReadLabel={t("markAllRead")}
+            switchRoleLabel={(role) => t("switchRoleCta", { role: tRole(role) })}
+            notifications={notifications}
+            activeRole={activeRole}
+            switchRole={switchRole}
+            markAllRead={markAllRead}
+            placeholderMarker={env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true"}
+          />
         </div>
       )}
+
+      <MobileSheet open={open} onClose={() => setOpen(false)} title={t("label")}>
+        <NotificationsBody
+          label={t("label")}
+          emptyTitle={t("emptyTitle")}
+          emptyBody={t("emptyBody")}
+          markAllReadLabel={t("markAllRead")}
+          switchRoleLabel={(role) => t("switchRoleCta", { role: tRole(role) })}
+          notifications={notifications}
+          activeRole={activeRole}
+          switchRole={switchRole}
+          markAllRead={markAllRead}
+          placeholderMarker={env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true"}
+          chromeless
+        />
+      </MobileSheet>
     </div>
+  );
+}
+
+type Notif = {
+  id: string;
+  role: Role;
+  type: string;
+  read_at: string | null;
+};
+
+/** Body shared between the desktop popover and the mobile sheet. `chromeless`
+ *  hides the redundant header bar when wrapped inside MobileSheet (which has
+ *  its own title row already). */
+function NotificationsBody({
+  label,
+  emptyTitle,
+  emptyBody,
+  markAllReadLabel,
+  switchRoleLabel,
+  notifications,
+  activeRole,
+  switchRole,
+  markAllRead,
+  placeholderMarker,
+  chromeless = false,
+}: {
+  label: string;
+  emptyTitle: string;
+  emptyBody: string;
+  markAllReadLabel: string;
+  switchRoleLabel: (role: Role) => string;
+  notifications: Notif[];
+  activeRole: Role | null;
+  switchRole: (r: Role) => void;
+  markAllRead: () => void;
+  placeholderMarker: boolean;
+  chromeless?: boolean;
+}) {
+  return (
+    <>
+      {!chromeless && (
+        <header className="flex items-center justify-between border-b border-ink-600 px-3 py-2">
+          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {label}
+          </p>
+          {notifications.length > 0 && (
+            <button
+              type="button"
+              onClick={markAllRead}
+              className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+            >
+              {markAllReadLabel}
+            </button>
+          )}
+        </header>
+      )}
+
+      {notifications.length === 0 ? (
+        <div className="p-5 text-sm">
+          <p className="font-display font-semibold text-text-primary">
+            {emptyTitle}
+          </p>
+          <p
+            className={cn(
+              "relative mt-1.5 text-text-secondary",
+              placeholderMarker &&
+                "rounded-sm outline-dashed outline-1 outline-offset-2 outline-brand-blue/40 p-1.5",
+            )}
+          >
+            {placeholderMarker && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -right-1 -top-3 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-[9px] uppercase tracking-label text-brand-blue"
+              >
+                Placeholder
+              </span>
+            )}
+            {emptyBody}
+          </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col">
+          {notifications.map((n) => {
+            const crossRole = activeRole !== n.role;
+            return (
+              <li
+                key={n.id}
+                className={cn(
+                  "border-b border-ink-600 px-3 py-3 last:border-b-0",
+                  !n.read_at && "bg-ink-800/40",
+                )}
+              >
+                <p className="flex items-center gap-2 text-xs text-text-secondary">
+                  <span aria-hidden>{ROLE_ICON[n.role]}</span>
+                  <span className="text-text-primary">{n.type}</span>
+                </p>
+                {crossRole && (
+                  <button
+                    type="button"
+                    onClick={() => switchRole(n.role)}
+                    className="mt-2 inline-flex items-center rounded-sm border border-brand-blue/40 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-brand-blue hover:border-brand-blue"
+                  >
+                    {switchRoleLabel(n.role)}
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </>
   );
 }

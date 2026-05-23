@@ -84,7 +84,10 @@ export default async function DashboardLayout({
             </div>
           </div>
         </header>
-        <main className="relative z-10 mx-auto max-w-container px-6 py-10 pb-[calc(4rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-10">
+        {/* Mobile safe bottom — clears the fixed bottom nav (h-16) PLUS an
+            extra rem for breathing room so form CTAs (Patvirtinti įrašą /
+            Pridėti) never sit flush against the nav (Mobile UX §3-§4). */}
+        <main className="relative z-10 mx-auto max-w-container px-6 py-10 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-10">
           {children}
         </main>
         <BottomNav />

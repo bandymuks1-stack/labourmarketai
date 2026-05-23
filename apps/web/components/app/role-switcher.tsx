@@ -15,10 +15,14 @@ const ROLE_ICON: Record<Role, string> = {
 };
 
 /** Authenticated-header role switcher. Always visible (even for users with
- *  one role) so adding a second role stays discoverable (PV §15). */
+ *  one role) so adding a second role stays discoverable (PV §15).
+ *  Non-worker roles route to the pilot cockpit today (not a full management
+ *  surface) — we tag them honestly with "Ruošiama" so the user is not
+ *  misled into expecting full feature parity. */
 export function RoleSwitcher() {
   const t = useTranslations("auth");
   const tSwitcher = useTranslations("auth.roleSwitcher");
+  const tAccount = useTranslations("auth.dashboard.account");
   const { roles, activeRole, switchRole, addRole } = useAuth();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
@@ -67,29 +71,39 @@ export function RoleSwitcher() {
             {tSwitcher("label")}
           </p>
           <ul className="flex flex-col gap-0.5">
-            {roles.map((r) => (
-              <li key={r}>
-                <button
-                  type="button"
-                  onClick={() => pick(r)}
-                  disabled={pending !== null}
-                  className={cn(
-                    "flex w-full items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-sm hover:bg-ink-700",
-                    r === activeRole && "text-brand-blue",
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    <span aria-hidden>{ROLE_ICON[r]}</span>
-                    {t(`signup.role.${r}`)}
-                  </span>
-                  {r === activeRole && (
-                    <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
-                      {tSwitcher("active_label")}
+            {roles.map((r) => {
+              const isPreview = r !== "worker";
+              return (
+                <li key={r}>
+                  <button
+                    type="button"
+                    onClick={() => pick(r)}
+                    disabled={pending !== null}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-sm hover:bg-ink-700",
+                      r === activeRole && "text-brand-blue",
+                    )}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden>{ROLE_ICON[r]}</span>
+                      {t(`signup.role.${r}`)}
                     </span>
-                  )}
-                </button>
-              </li>
-            ))}
+                    <span className="ml-auto flex items-center gap-2">
+                      {isPreview && (
+                        <span className="rounded-sm border border-state-warning/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-state-warning">
+                          {tAccount("preview_workspace")}
+                        </span>
+                      )}
+                      {r === activeRole && (
+                        <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
+                          {tSwitcher("active_label")}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
 
           {missing.length > 0 && (
@@ -99,24 +113,32 @@ export function RoleSwitcher() {
                 {tSwitcher("add_role")}
               </p>
               <ul className="flex flex-col gap-0.5">
-                {missing.map((r) => (
-                  <li key={r}>
-                    <button
-                      type="button"
-                      onClick={() => pick(r)}
-                      disabled={pending !== null}
-                      className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
-                    >
-                      <span aria-hidden>{ROLE_ICON[r]}</span>
-                      {t(`signup.role.${r}`)}
-                      {pending === r && (
-                        <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
-                          {tSwitcher("switching")}
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                ))}
+                {missing.map((r) => {
+                  const isPreview = r !== "worker";
+                  return (
+                    <li key={r}>
+                      <button
+                        type="button"
+                        onClick={() => pick(r)}
+                        disabled={pending !== null}
+                        className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
+                      >
+                        <span aria-hidden>{ROLE_ICON[r]}</span>
+                        {t(`signup.role.${r}`)}
+                        {isPreview && (
+                          <span className="ml-auto rounded-sm border border-state-warning/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-state-warning">
+                            {tAccount("preview_workspace")}
+                          </span>
+                        )}
+                        {pending === r && (
+                          <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            {tSwitcher("switching")}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </>
           )}
