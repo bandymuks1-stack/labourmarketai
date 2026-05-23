@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 /**
@@ -9,8 +10,10 @@ import { cn } from "@/lib/utils";
  * header's notification + role surfaces so popovers don't cover the hero on
  * narrow viewports (Mobile UX §1).
  *
- * Pure CSS, no portal — keeps server-rendered headers stable. The caller
- * controls `open` and the title for the accessible label.
+ * Portal'd to document.body so `position: fixed` is anchored to the viewport
+ * and not to a transformed / filtered / backdrop-blurred ancestor (the auth
+ * header uses backdrop-blur, which would otherwise re-anchor `fixed` and
+ * push the sheet into the header band).
  */
 export function MobileSheet({
   open,
@@ -25,6 +28,13 @@ export function MobileSheet({
   children: React.ReactNode;
   className?: string;
 }) {
+  // SSR-safe portal: only render once the DOM is available, otherwise
+  // `document.body` blows up during the server render.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
@@ -39,9 +49,9 @@ export function MobileSheet({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!mounted || !open) return null;
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-label={title}
@@ -75,6 +85,7 @@ export function MobileSheet({
         </div>
         <div className="px-4 py-3">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
