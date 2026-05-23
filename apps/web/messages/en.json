@@ -88,6 +88,74 @@
     "needs_external_confirmation": "Needs external confirmation",
     "externally_confirmed": "Externally confirmed"
   },
+  "dashboard": {
+    "featuresHeading": {
+      "eyebrow": "What's here and what's coming",
+      "title": "What you can do today and what comes later",
+      "body": "Start from what is true today: what you can do, what you did, or what you want to offer. Later you can expand roles and activities when they are ready.",
+      "open": "Open"
+    }
+  },
+  "features": {
+    "preparing_generic_reason": "This option will be enabled later.",
+    "preparing_badge": "Preparing",
+    "profile_text_first": {
+      "label": "Profile",
+      "description": "Describe yourself in your own words or paste a CV. The system suggests skills, but you confirm them."
+    },
+    "journal_text_first": {
+      "label": "Work or activity record",
+      "description": "Record today's work or activity. The system helps you structure it, but you confirm the facts."
+    },
+    "account_roles": {
+      "label": "Roles",
+      "description": "Review your roles. The worker space is active today; other roles are added step by step."
+    },
+    "role_expansion": {
+      "label": "More roles",
+      "description": "Later you'll be able to add company, agency, customer and other spaces when they are ready."
+    },
+    "external_confirmation": {
+      "label": "External confirmation",
+      "description": "A manager, client or partner will later be able to confirm your work records."
+    },
+    "company_workspace": {
+      "label": "Company space",
+      "description": "Team, project and need management for companies."
+    },
+    "agency_workspace": {
+      "label": "Agency space",
+      "description": "Candidate pool and service offer management for agencies."
+    },
+    "customer_workspace": {
+      "label": "Customer space",
+      "description": "Service ordering and reports for customers."
+    },
+    "document_records": {
+      "label": "Document records",
+      "description": "A place for certificates and documents."
+    },
+    "team_offers": {
+      "label": "Team offers",
+      "description": "A place to form teams and post joint offers."
+    },
+    "work_needs": {
+      "label": "Work needs",
+      "description": "A place to record what work or help you need."
+    },
+    "service_offers": {
+      "label": "Service offers",
+      "description": "A place to publish the services you provide."
+    },
+    "matching": {
+      "label": "Matching",
+      "description": "This product has no matching / ranking engine and will not until one can ship honestly."
+    },
+    "marketplace": {
+      "label": "Marketplace",
+      "description": "There is no marketplace layer yet."
+    }
+  },
   "structuring": {
     "groupEyebrow": "What we found",
     "ruleBasedNotice": "Note: this still uses a small dictionary and rules — no AI. Suggestions only become facts when you confirm them. Nothing is saved automatically.",

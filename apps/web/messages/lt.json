@@ -88,6 +88,74 @@
     "needs_external_confirmation": "Laukia išorinio patvirtinimo",
     "externally_confirmed": "Patvirtinta iš išorės"
   },
+  "dashboard": {
+    "featuresHeading": {
+      "eyebrow": "Galimybės ir ruošiama",
+      "title": "Ką galima daryti šiandien ir kas ateis vėliau",
+      "body": "Pradėkite nuo to, kas šiandien tikra: ką mokate, ką darėte arba ką norite pasiūlyti. Vėliau galėsite plėsti vaidmenis ir veiklas, kai jos bus paruoštos.",
+      "open": "Atidaryti"
+    }
+  },
+  "features": {
+    "preparing_generic_reason": "Ši galimybė bus įjungta vėliau.",
+    "preparing_badge": "Ruošiama",
+    "profile_text_first": {
+      "label": "Profilis",
+      "description": "Apibūdinkite save savais žodžiais arba įklijuokite CV. Sistema pasiūlys įgūdžius, kuriuos patvirtinsite jūs."
+    },
+    "journal_text_first": {
+      "label": "Darbo ar veiklos įrašas",
+      "description": "Užfiksuokite šiandienos darbą arba veiklą. Sistema padės struktūruoti, bet tik jūs patvirtinate faktus."
+    },
+    "account_roles": {
+      "label": "Vaidmenys",
+      "description": "Peržiūrėkite savo vaidmenis. Šiandien aktyvi darbuotojo erdvė; kiti vaidmenys bus pridėti palaipsniui."
+    },
+    "role_expansion": {
+      "label": "Daugiau vaidmenų",
+      "description": "Vėliau galėsite pridėti įmonės, agentūros, kliento ir kitas erdves, kai jos bus paruoštos."
+    },
+    "external_confirmation": {
+      "label": "Išorinis patvirtinimas",
+      "description": "Vadovas, klientas ar partneris vėliau galės patvirtinti jūsų darbo įrašus."
+    },
+    "company_workspace": {
+      "label": "Įmonės erdvė",
+      "description": "Komandų, projektų ir poreikių valdymo erdvė įmonėms."
+    },
+    "agency_workspace": {
+      "label": "Agentūros erdvė",
+      "description": "Kandidatų ir paslaugų pasiūlos valdymo erdvė agentūroms."
+    },
+    "customer_workspace": {
+      "label": "Pirkėjo erdvė",
+      "description": "Paslaugų užsakymo ir ataskaitų erdvė klientams."
+    },
+    "document_records": {
+      "label": "Dokumentų įrašai",
+      "description": "Pažymėjimų ir dokumentų saugojimo erdvė."
+    },
+    "team_offers": {
+      "label": "Komandos pasiūlymai",
+      "description": "Komandų suformavimo ir bendrų pasiūlymų erdvė."
+    },
+    "work_needs": {
+      "label": "Darbo poreikiai",
+      "description": "Vieta užfiksuoti, kokio darbo ar pagalbos jums reikia."
+    },
+    "service_offers": {
+      "label": "Paslaugų pasiūla",
+      "description": "Vieta paskelbti jūsų teikiamas paslaugas."
+    },
+    "matching": {
+      "label": "Atitikimas",
+      "description": "Šiame produkte nėra atitikimo / reitingavimo variklio ir nebus, kol jis nebus padarytas sąžiningai."
+    },
+    "marketplace": {
+      "label": "Prekyvietė",
+      "description": "Prekyvietės sluoksnio kol kas nėra."
+    }
+  },
   "structuring": {
     "groupEyebrow": "Sistema rado",
     "ruleBasedNotice": "Pastaba: kol kas naudojame paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai netampa faktais, kol jūs jų nepatvirtinate — niekas neišsaugoma automatiškai.",
