@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { GoogleButton } from "@/components/app/google-button";
-import { Link, useRouter } from "@/lib/i18n/navigation";
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
+import { getSafeReturnPath } from "@/lib/auth/redirect";
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -19,7 +21,13 @@ function isValidEmail(v: string): boolean {
 export function LoginForm() {
   const t = useTranslations("auth.login");
   const tErr = useTranslations("auth.errors");
-  const router = useRouter();
+  const locale = useLocale();
+  // Honour the `?next=…` the middleware sets when it bounces an
+  // unauthenticated user from a protected route to login. Sanitised via
+  // `getSafeReturnPath` so an open-redirect query can't survive.
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get("next");
+  const nextPath = getSafeReturnPath(nextParam, locale);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "signing" | "error">("idle");
@@ -44,7 +52,10 @@ export function LoginForm() {
         password,
       });
       if (err) throw err;
-      router.replace("/dashboard");
+      // `next` already includes the locale prefix (or got one from
+      // `getSafeReturnPath`), so use the raw `window.location` navigation
+      // route instead of the locale-aware Link.
+      window.location.assign(nextPath);
     } catch (e) {
       console.error("[login] signInWithPassword failed:", e);
       setStatus("error");
@@ -73,6 +84,7 @@ export function LoginForm() {
         redirectingLabel={t("google_redirecting")}
         errorLabel={t("error_generic")}
         disabled={disabled}
+        nextPath={nextPath}
       />
 
       <div className="flex items-center gap-3" aria-hidden>
@@ -130,7 +142,14 @@ export function LoginForm() {
         <span className="text-xs text-text-muted">
           {t("no_account")}{" "}
           <Link
-            href="/auth/signup"
+            // Preserve the `?next=…` the middleware attached, so a user
+            // bounced from /dashboard/journal → login → signup still
+            // returns to /dashboard/journal after onboarding.
+            href={
+              nextParam
+                ? `/auth/signup?next=${encodeURIComponent(nextPath)}`
+                : "/auth/signup"
+            }
             className="text-brand-blue hover:text-brand-cyan"
           >
             {t("signup_link")}

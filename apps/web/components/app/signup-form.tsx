@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { GoogleButton } from "@/components/app/google-button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
+import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { cn } from "@/lib/utils";
 
 function isValidEmail(v: string): boolean {
@@ -24,11 +26,22 @@ export function SignupForm() {
   const tErr = useTranslations("auth.errors");
   const locale = useLocale();
   const router = useRouter();
+  // Honour the `?next=…` the middleware sets when it bounces an
+  // unauthenticated user from a protected route to login → signup.
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get("next");
+  const nextPath = getSafeReturnPath(nextParam, locale);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [status, setStatus] = useState<"idle" | "signing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  // When a returning user lands on /signup by mistake, Supabase returns
+  // `user_already_exists`. We surface a one-click "Login instead" CTA
+  // next to the error so they aren't stuck reading body text.
+  const [errorKind, setErrorKind] = useState<"generic" | "alreadyRegistered">(
+    "generic",
+  );
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -73,13 +86,21 @@ export function SignupForm() {
         },
       });
       if (err) throw err;
-      // Confirm email OFF → session is live. Land on the unified onboarding.
-      router.replace("/onboarding");
+      // Confirm email OFF → session is live. Land on the unified
+      // onboarding, propagating `next` so onboarding completion can fall
+      // back to the user's original destination.
+      const onboardingPath = nextParam
+        ? `/onboarding?next=${encodeURIComponent(nextPath)}`
+        : "/onboarding";
+      router.replace(onboardingPath);
     } catch (e) {
       console.error("[signup] signUp failed:", e);
       setStatus("error");
       const info = mapAuthError(e);
       setError(tErr(info.key, info.params));
+      setErrorKind(
+        info.key === "userAlreadyRegistered" ? "alreadyRegistered" : "generic",
+      );
     }
   }
 
@@ -108,6 +129,7 @@ export function SignupForm() {
         redirectingLabel={t("google_redirecting")}
         errorLabel={t("error_generic")}
         disabled={disabled}
+        nextPath={nextPath}
       />
 
       <div className="flex items-center gap-3" aria-hidden>
@@ -175,9 +197,26 @@ export function SignupForm() {
       </p>
 
       {error && (
-        <p className="text-xs text-state-danger" role="alert">
-          {error}
-        </p>
+        // The already-registered case is the most common reason an owner
+        // bounces back here ("I registered yesterday — why am I not in?").
+        // Surface a one-tap "Login instead" CTA right next to the error
+        // text so the user isn't stuck searching for the footer link.
+        <div className="flex flex-col gap-2" role="alert">
+          <p className="text-xs text-state-danger">{error}</p>
+          {errorKind === "alreadyRegistered" && (
+            <Link
+              data-testid="signup-login-instead"
+              href={
+                nextParam
+                  ? `/auth/login?next=${encodeURIComponent(nextPath)}`
+                  : "/auth/login"
+              }
+              className="inline-flex w-fit items-center rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:border-brand-blue"
+            >
+              {t("login_link")} →
+            </Link>
+          )}
+        </div>
       )}
 
       <div className="flex items-center justify-between">
@@ -187,7 +226,11 @@ export function SignupForm() {
         <span className="text-xs text-text-muted">
           {t("has_account")}{" "}
           <Link
-            href="/auth/login"
+            href={
+              nextParam
+                ? `/auth/login?next=${encodeURIComponent(nextPath)}`
+                : "/auth/login"
+            }
             className="text-brand-blue hover:text-brand-cyan"
           >
             {t("login_link")}
