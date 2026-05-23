@@ -65,22 +65,22 @@
     "customComingSoon": "netrukus",
     "textFirst": {
       "title": "Papasakokite, ką mokate",
-      "helper": "Parašykite savais žodžiais arba įkelkite CV. Sistema pasiūlys įgūdžius, darbo kryptis, vaidmenis ir CV įrašus — bet patvirtinsite tik jūs.",
-      "placeholder": "Pvz.: 8 metus dirbau vidaus apdailoje, montavau gipso lubas, dėjau grindis, tvarkiau santechniką, vadovavau 4 žmonių komandai.",
+      "helper": "Parašykite savais žodžiais arba įkelkite CV. Sistema pasiūlys įgūdžius, darbo kryptis, vaidmenis ir CV įrašus — bet kiekvieną pasiūlymą patvirtinate jūs. Be jūsų patvirtinimo nieko neišsaugome.",
+      "placeholder": "Pvz.: kelerius metus dirbau vidaus apdailoje ir mažuose remonto darbuose, vadovavau nedidelei komandai. Galite rašyti laisvai — apie patirtį, darbus, įrankius, klientus arba mokymąsi.",
       "submit": "Pasiūlykite struktūrą",
       "manualCta": "Pridėti rankiniu būdu",
-      "manualHelper": "Rankinis pasirinkimas lieka kaip antrinis kelias. Pradėkite nuo teksto arba CV — taip greičiau.",
+      "manualHelper": "Rankinis pasirinkimas lieka kaip antrinis kelias. Pradėkite nuo teksto arba CV — taip greičiau, ir nereikės iškart rinktis sudėtingo įgūdžių sąrašo.",
       "rescan": "Iš naujo pasiūlyti pagal tekstą",
       "backToText": "Grįžti prie teksto",
       "applyAll": "Įtraukti patvirtintus pasiūlymus",
-      "appliedToast": "Patvirtintus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti rankiniu būdu."
+      "appliedToast": "Patvirtintus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti arba papildyti rankiniu būdu."
     }
   },
   "structuring": {
     "groupEyebrow": "Sistema rado",
-    "ruleBasedNotice": "Pastaba: sistema dar naudoja paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai nėra faktai, kol jų nepatvirtinote.",
+    "ruleBasedNotice": "Pastaba: kol kas naudojame paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai netampa faktais, kol jūs jų nepatvirtinate — niekas neišsaugoma automatiškai.",
     "emptyBucket": "Šiame teksto fragmente nieko aiškaus neradome. Galite parašyti daugiau arba praleisti.",
-    "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau arba pridėkite rankiniu būdu.",
+    "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau, arba pridėkite reikšmingus įrašus rankiniu būdu.",
     "buckets": {
       "skills": "Rasti įgūdžiai",
       "directions": "Galimos darbo kryptys",
@@ -499,7 +499,7 @@
         "email_label": "El. paštas",
         "roles_label": "Mano vaidmenys",
         "logout": "Atsijungti",
-        "rolesIntro": "Šiuo metu aktyvi jūsų darbuotojo erdvė. Kitos rolės bus įjungtos palaipsniui. Jūs nesate užrakinti viename būde naudotis labourmarket.ai.",
+        "rolesIntro": "Šiuo metu aktyvi jūsų darbuotojo erdvė. Įmonės, agentūros ir pirkėjo erdvės dar ruošiamos — įjungsime palaipsniui. Jūs nesate užrakinti viename būde naudotis labourmarket.ai: pasirinkimas šiandien neuždaro kelio kitoms rolėms vėliau.",
         "active_workspace": "Aktyvi erdvė",
         "preview_workspace": "Ruošiama",
         "comingLater": "Bus galima vėliau"
