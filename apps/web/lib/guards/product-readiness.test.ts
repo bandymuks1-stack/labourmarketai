@@ -837,13 +837,53 @@ describe("supergrand vision surface", () => {
     }
   });
 
-  it("nav exposes vision and SiteNav links to /vision", () => {
+  it("nav.vision i18n key exists in LT + EN (ready for the flip)", () => {
     const lt = JSON.parse(readWeb("messages/lt.json"));
     const en = JSON.parse(readWeb("messages/en.json"));
     expect(lt.nav.vision).toBeTruthy();
     expect(en.nav.vision).toBeTruthy();
+    // SiteNav still declares the /vision link in its source — but the
+    // visibility is gated through `isVisionPublic()` at render time
+    // (see the "vision is gated behind the publication flag" assertion
+    // below). Keeping the entry in the source means flipping
+    // VISION_PUBLIC to `true` is a one-line owner edit.
     const nav = readWeb("components/layouts/site-nav.tsx");
     expect(nav).toMatch(/href:\s*"\/vision"/);
+  });
+
+  it("vision is gated behind the publication flag (PR #41)", () => {
+    const cfg = readWeb("lib/config/vision-publication.ts");
+    // Default must be `false` until the owner flips it after smoke
+    // PASSES — the literal here is what reviewers see in PRs.
+    expect(cfg).toMatch(/VISION_PUBLIC:\s*boolean\s*=\s*false/);
+    expect(cfg).toMatch(/export function isVisionPublic\(\)/);
+
+    // SiteNav consults the gate before rendering the /vision link.
+    const nav = readWeb("components/layouts/site-nav.tsx");
+    expect(nav).toMatch(/isVisionPublic/);
+    expect(nav).toMatch(/visibility:\s*"vision-gate"/);
+
+    // Vision page reads the flag, emits robots:noindex when private,
+    // and renders the internal-preview banner.
+    const page = readWeb("app/[locale]/(marketing)/vision/page.tsx");
+    expect(page).toMatch(/isVisionPublic/);
+    expect(page).toMatch(/index:\s*false/);
+    expect(page).toMatch(/follow:\s*false/);
+    expect(page).toMatch(/data-testid="vision-internal-preview"/);
+    expect(page).toMatch(/internalPreviewBanner/);
+  });
+
+  it("internal-preview copy exists in LT + EN", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    expect(lt.vision.internalPreviewBadge).toBeTruthy();
+    expect(lt.vision.internalPreviewBanner).toBeTruthy();
+    expect(en.vision.internalPreviewBadge).toBeTruthy();
+    expect(en.vision.internalPreviewBanner).toBeTruthy();
+    // Honesty signals — keep the "do not publish publicly until smoke"
+    // wording in both locales.
+    expect(lt.vision.internalPreviewBanner).toMatch(/smoke/i);
+    expect(en.vision.internalPreviewBanner).toMatch(/smoke/i);
   });
 
   it("Super Max Cosmo + Supergrand Vision smoke checklists stay PENDING", () => {

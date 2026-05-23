@@ -168,7 +168,9 @@
       "agent": "AI / agent orchestrator (only when it can ship safely)",
       "trust": "Reputation / trust layer"
     },
-    "footer": "Publishing the vision map here does not mean every area is live. What is usable today is tagged \"Live today\". Everything else is either \"Preparing\" or a future layer."
+    "footer": "Publishing the vision map here does not mean every area is live. What is usable today is tagged \"Live today\". Everything else is either \"Preparing\" or a future layer.",
+    "internalPreviewBadge": "Internal preview",
+    "internalPreviewBanner": "This page is not publicly published yet. It is an internal preview for the owner and invited pilot participants. Do not share the URL publicly until the owner production smoke is PASSED."
   },
   "suggestionStatuses": {
     "detected": "Suggested",

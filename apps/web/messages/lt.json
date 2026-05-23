@@ -168,7 +168,9 @@
       "agent": "AI / agentų orkestras (kai bus paruoštas saugiai)",
       "trust": "Reputacijos / pasitikėjimo sluoksnis"
     },
-    "footer": "Sistemoje paskelbtas vizijos žemėlapis nereiškia, kad visos sritys jau veikia. Ką galima naudoti šiandien — pažymėta „Šiandien veikia“. Visa kita yra arba „Ruošiama“, arba ateities sluoksnis."
+    "footer": "Sistemoje paskelbtas vizijos žemėlapis nereiškia, kad visos sritys jau veikia. Ką galima naudoti šiandien — pažymėta „Šiandien veikia“. Visa kita yra arba „Ruošiama“, arba ateities sluoksnis.",
+    "internalPreviewBadge": "Vidinė peržiūra",
+    "internalPreviewBanner": "Puslapis dar nepaviešintas. Tai vidinė peržiūra savininkui ir pakviestiems pilotiniams dalyviams. Nepublikuokite nuorodos viešai, kol owner production smoke nebus PASSED."
   },
   "suggestionStatuses": {
     "detected": "Pasiūlyta",

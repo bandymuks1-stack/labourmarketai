@@ -115,3 +115,24 @@ Result:              —
 
 All three checklists must be PASSED before the founder publishes the
 `/vision` URL externally as a pilot-onboarding link.
+
+## After smoke PASSES — flip the publication flag
+
+PR #41 temporarily hid `/vision` from the public site nav and added
+`robots: noindex,nofollow` + an "internal preview" banner on the page
+itself. The URL stays reachable so this checklist can be walked
+against it; search engines and casual visitors do not see it.
+
+When all three smoke / review checklists above are PASSED, open a
+small follow-up PR that:
+
+1. Edits `apps/web/lib/config/vision-publication.ts` — change the line
+   `export const VISION_PUBLIC: boolean = false;` to `= true;`.
+2. Validates (`pnpm -F web typecheck && pnpm -F web lint && pnpm -F web
+   test && pnpm -F web build && pnpm -F web placeholders:check`).
+3. Merges via GitHub UI.
+
+The page automatically becomes publicly indexable, the nav link
+re-appears, and the internal-preview banner disappears. **Do not flip
+the flag in the same PR that ships another feature** — keep the
+publish decision visible on its own.
