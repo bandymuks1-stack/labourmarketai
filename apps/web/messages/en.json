@@ -112,6 +112,64 @@
       "description": "Service provider: public service catalogue with confirmed evidence. Preparing."
     }
   },
+  "activityTypes": {
+    "work_done": "Work done",
+    "skill_claim": "Skill claim",
+    "service_offer": "Service offer",
+    "worker_need": "Work need (worker)",
+    "project_need": "Project need",
+    "team_offer": "Team offer",
+    "company_activity": "Company activity",
+    "learning_goal": "Learning goal",
+    "business_idea": "Business idea",
+    "document_record": "Document record"
+  },
+  "vision": {
+    "navLabel": "Vision",
+    "metaTitle": "labourmarket.ai — labour-market OS vision",
+    "metaDescription": "A labour-market operating system where one person can grow across many roles, activities, and opportunities.",
+    "eyebrow": "Labour-market OS",
+    "headline": "Not a job board. A labour-market operating system.",
+    "lede": "One person. Many roles over time. A CV born from real work and real confirmations, not self-written claims. The first choice is an entry point, not a cage.",
+    "honesty": "Note: below is the whole system map. Some surfaces are live today; the rest are openly labelled \"Preparing\". We never say something works when it doesn't.",
+    "sections": {
+      "today": "Live today",
+      "preparing": "Preparing",
+      "workflow": "How a person's path moves through the system",
+      "roles": "Role evolution (without lock-in)",
+      "activities": "Activity landscape",
+      "controlRoom": "System status snapshot",
+      "future_layers": "Future layers"
+    },
+    "workflowSteps": {
+      "s1": "Write what you can do, or paste a CV",
+      "s2": "The system structures skills — you confirm",
+      "s3": "Record today's work in the work journal",
+      "s4": "Entries become evidence",
+      "s5": "Evidence is later confirmed by a manager or client",
+      "s6": "Grow roles and opportunities at your own pace"
+    },
+    "controlRoom": {
+      "todayLabel": "Active today",
+      "preparingLabel": "Preparing",
+      "blockedLabel": "Blocked",
+      "ownerSmokeLabel": "Owner production smoke",
+      "ownerSmokeStatus": "PENDING",
+      "pr18Label": "PR #18 — journal security layer",
+      "pr18Status": "BLOCKED (issue #32)",
+      "nonWorkerLabel": "Company / agency / customer spaces",
+      "nonWorkerStatus": "Preparing",
+      "fakeClaimsLabel": "Fake AI / matching / verified",
+      "fakeClaimsStatus": "Never used"
+    },
+    "futureLayers": {
+      "draft": "Scouting / draft / team formation",
+      "monitor": "Live work monitor",
+      "agent": "AI / agent orchestrator (only when it can ship safely)",
+      "trust": "Reputation / trust layer"
+    },
+    "footer": "Publishing the vision map here does not mean every area is live. What is usable today is tagged \"Live today\". Everything else is either \"Preparing\" or a future layer."
+  },
   "suggestionStatuses": {
     "detected": "Suggested",
     "confirmed_by_user": "Confirmed by you",
@@ -831,6 +889,7 @@
     "resources": "Resources",
     "pricing": "Pricing",
     "company": "Company",
+    "vision": "Vision",
     "login": "Sign in",
     "startNow": "Start now"
   },

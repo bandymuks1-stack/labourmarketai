@@ -112,6 +112,64 @@
       "description": "Paslaugų teikėjas: viešas paslaugų katalogas su patvirtintais įrodymais. Ruošiama."
     }
   },
+  "activityTypes": {
+    "work_done": "Atliktas darbas",
+    "skill_claim": "Įgūdžio pareiškimas",
+    "service_offer": "Paslaugos pasiūlymas",
+    "worker_need": "Darbo poreikis (darbuotojui)",
+    "project_need": "Projekto poreikis",
+    "team_offer": "Komandos pasiūlymas",
+    "company_activity": "Įmonės veikla",
+    "learning_goal": "Mokymosi tikslas",
+    "business_idea": "Verslo idėja",
+    "document_record": "Dokumento įrašas"
+  },
+  "vision": {
+    "navLabel": "Vizija",
+    "metaTitle": "labourmarket.ai — darbo rinkos OS vizija",
+    "metaDescription": "Darbo rinkos operacinė sistema, kurioje vienas žmogus gali augti per daug vaidmenų, veiklų ir galimybių.",
+    "eyebrow": "Darbo rinkos OS",
+    "headline": "Ne darbo skelbimų lenta. Darbo rinkos operacinė sistema.",
+    "lede": "Vienas asmuo. Daug vaidmenų laikui bėgant. CV gimsta iš realių darbų ir patvirtinimų, ne iš savadarbio teksto. Pirmas pasirinkimas yra įėjimo taškas, ne narvas.",
+    "honesty": "Pastaba: žemiau matote visą sistemos žemėlapį. Vieni paviršiai šiandien jau veikia, kiti aiškiai pažymėti kaip „Ruošiama“. Niekada nesakome, kad veikia tai, ko dar nėra.",
+    "sections": {
+      "today": "Šiandien veikia",
+      "preparing": "Ruošiama",
+      "workflow": "Kaip žmogaus kelias eina per sistemą",
+      "roles": "Vaidmenų vystymasis (be užrakto)",
+      "activities": "Veiklų landšaftas",
+      "controlRoom": "Sistemos būsenos suvestinė",
+      "future_layers": "Ateities sluoksniai"
+    },
+    "workflowSteps": {
+      "s1": "Aprašykite, ką mokate, arba įkelkite CV tekstą",
+      "s2": "Sistema struktūruoja įgūdžius — jūs patvirtinate",
+      "s3": "Užfiksuokite šiandienos darbą darbo dienoraštyje",
+      "s4": "Įrašai virsta įrodymais",
+      "s5": "Įrodymus vėliau patvirtins vadovas ar klientas",
+      "s6": "Vystykite vaidmenis ir galimybes savo tempu"
+    },
+    "controlRoom": {
+      "todayLabel": "Šiandien aktyvu",
+      "preparingLabel": "Ruošiama",
+      "blockedLabel": "Užblokuota",
+      "ownerSmokeLabel": "Owner production smoke",
+      "ownerSmokeStatus": "PENDING",
+      "pr18Label": "PR #18 — žurnalo saugumo sluoksnis",
+      "pr18Status": "BLOCKED (issue #32)",
+      "nonWorkerLabel": "Įmonės / agentūros / pirkėjo erdvės",
+      "nonWorkerStatus": "Ruošiama",
+      "fakeClaimsLabel": "Fake AI / matching / verified",
+      "fakeClaimsStatus": "Niekada nenaudojama"
+    },
+    "futureLayers": {
+      "draft": "Scouting / draft / komandos sudarymas",
+      "monitor": "Gyvas darbo monitorius",
+      "agent": "AI / agentų orkestras (kai bus paruoštas saugiai)",
+      "trust": "Reputacijos / pasitikėjimo sluoksnis"
+    },
+    "footer": "Sistemoje paskelbtas vizijos žemėlapis nereiškia, kad visos sritys jau veikia. Ką galima naudoti šiandien — pažymėta „Šiandien veikia“. Visa kita yra arba „Ruošiama“, arba ateities sluoksnis."
+  },
   "suggestionStatuses": {
     "detected": "Pasiūlyta",
     "confirmed_by_user": "Patvirtinta jūsų",
@@ -834,6 +892,7 @@
     "resources": "Ištekliai",
     "pricing": "Kainos",
     "company": "Apie mus",
+    "vision": "Vizija",
     "login": "Prisijungti",
     "startNow": "Pradėti dabar"
   },
