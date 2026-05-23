@@ -65,10 +65,15 @@ export function RoleSwitcher() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-64 rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
+          className="absolute right-0 z-30 mt-2 w-72 rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
             {tSwitcher("label")}
+          </p>
+          {/* Phase 6: honest non-locking framing right inside the menu so the
+              user never wonders what RUOŠIAMA means. */}
+          <p className="px-2 pb-2 text-[11px] leading-snug text-text-secondary">
+            {tAccount("rolesIntro")}
           </p>
           <ul className="flex flex-col gap-0.5">
             {roles.map((r) => {

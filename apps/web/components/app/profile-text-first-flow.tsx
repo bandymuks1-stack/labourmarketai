@@ -269,9 +269,30 @@ export function ProfileTextFirstFlow({
       </p>
 
       {totalDetected === 0 ? (
-        <p className="card-border p-4 text-sm text-text-secondary">
-          {tS("noMatches")}
-        </p>
+        // Universal fallback (Phase 4): the parser is rule-based and will miss
+        // anything outside its small dictionary. Tell the user that's OK, and
+        // point them at the manual path — never a dead end.
+        <div className="card-border flex flex-col gap-3 p-4">
+          <p className="text-sm text-text-secondary">
+            {t("noSuggestionsFallback")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setStage("compose")}
+              className="rounded-md border border-ink-500 px-2.5 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            >
+              {t("backToText")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setStage("manual")}
+              className="rounded-md border border-ink-500 px-2.5 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            >
+              {t("manualCta")}
+            </button>
+          </div>
+        </div>
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
           <DetectedSuggestionList title={tBucket("skills")} count={skills.length}>
@@ -374,9 +395,21 @@ export function ProfileTextFirstFlow({
         </p>
       )}
       {applied && (
-        <p className="text-xs text-state-success" role="status">
-          ✓ {t("appliedToast")}
-        </p>
+        // Phase 4: make the confirmed-state trail explicit — the user sees
+        // exactly which state the saved facts live in: "Confirmed by you"
+        // (added to profile), still waiting for external confirmation later.
+        <div
+          role="status"
+          className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2 text-xs text-state-success"
+        >
+          <p className="font-semibold">✓ {t("appliedToast")}</p>
+          <p className="mt-1 text-text-secondary">
+            <span className="font-mono text-[10px] uppercase tracking-label text-state-success">
+              {t("confirmedByYou")}
+            </span>{" "}
+            · {t("addedToProfile")} · {t("needsExternalConfirmation")}
+          </p>
+        </div>
       )}
 
       <div className={cn("flex flex-wrap items-center gap-3")}>

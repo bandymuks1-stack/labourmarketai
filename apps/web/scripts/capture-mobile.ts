@@ -14,7 +14,17 @@ import type { Page } from "@playwright/test";
 
 const BASE = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000";
 // docs/ lives at the repo root (apps/web is the cwd when launched via pnpm).
-const OUT = resolve(__dirname, "..", "..", "..", "docs", "evidence", "text-first-mobile");
+// `CAPTURE_OUT` lets a sprint redirect output to its own evidence folder
+// without forking the script.
+const OUT = resolve(
+  __dirname,
+  "..",
+  "..",
+  "..",
+  "docs",
+  "evidence",
+  process.env.CAPTURE_OUT ?? "text-first-mobile",
+);
 
 type Shot = {
   name: string;

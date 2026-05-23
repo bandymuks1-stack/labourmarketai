@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PilotRequestButton } from "@/components/app/pilot-request-button";
+import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
@@ -285,6 +286,12 @@ export default async function DashboardOverviewPage({
   // The single next best action.
   const nextStep = steps.find((s) => !s.done) ?? null;
 
+  // Phase 3: a worker is in "first-use" until they have BOTH a profession set
+  // AND at least one journal entry. We show the full first-use panel during
+  // that window, and switch to a compact greeting card after — never both,
+  // never blank.
+  const isFirstUse = !professionName || entriesCount === 0;
+
   return (
     <div className="flex flex-col gap-7">
       {Header}
@@ -294,6 +301,8 @@ export default async function DashboardOverviewPage({
         </p>
       )}
       {StartingPoint}
+
+      <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
 
       <JourneyRail stages={wstages} label={tf("worker.eyebrow")} />
 
