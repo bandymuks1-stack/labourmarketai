@@ -5,6 +5,7 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
+import { ROLE_BY_ID, type LabourMarketRoleId } from "@/lib/config/roles";
 
 const ROLE_ICON: Record<Role, string> = {
   worker: "🔨",
@@ -91,9 +92,11 @@ export default async function AccountPage({
           {(rolesRows ?? []).map((r) => {
             const isActive = r.role === profile?.active_role;
             const role = r.role as Role;
-            // worker is the only role with a fully active worker space today;
-            // the others land on the pilot cockpit ("preview") — say so.
-            const isLiveRole = role === "worker";
+            // Single source for "is this role preparing?" — the catalogue at
+            // `lib/config/roles.ts`. Future roles (freelancer, team_lead, …)
+            // and any preparing role automatically render the RUOŠIAMA tag.
+            const cfg = ROLE_BY_ID[role as LabourMarketRoleId];
+            const isLiveRole = cfg?.availability === "active";
             return (
               <li
                 key={r.role}

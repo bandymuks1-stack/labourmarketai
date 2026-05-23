@@ -52,7 +52,10 @@ export async function DashboardFirstUsePanel({
     );
   }
 
-  const steps = [t("step1"), t("step2"), t("step3"), t("step4")];
+  // 5-step universal path (Phase 4 — adaptive sprint): the system helps any
+  // person, not only a worker. Steps come from i18n so future phases can
+  // reword without touching this component.
+  const steps = [t("step1"), t("step2"), t("step3"), t("step4"), t("step5")];
 
   return (
     <section

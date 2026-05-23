@@ -264,3 +264,175 @@ describe("role switcher honest framing", () => {
     expect(txt).toMatch(/tAccount\("rolesIntro"\)/);
   });
 });
+
+// ── 12. Central role / activity / status config is the source of truth ──
+
+describe("central config drives role + suggestion + activity surfaces", () => {
+  it("role config exists and only `worker` is active today", () => {
+    const txt = readWeb("lib/config/roles.ts");
+    expect(txt).toMatch(/LABOUR_MARKET_ROLES/);
+    // Enumerate active role rows by id; only `worker` is allowed today.
+    const rows = txt.split(/\bid:\s*"/).slice(1);
+    const active = rows
+      .map((chunk) => {
+        const id = chunk.match(/^([^"]+)"/)?.[1];
+        const avail = chunk.match(/availability:\s*"([^"]+)"/)?.[1];
+        return id && avail === "active" ? id : null;
+      })
+      .filter((id): id is string => !!id);
+    expect(new Set(active)).toEqual(new Set(["worker"]));
+  });
+  it("RoleSwitcher + account page read availability from the catalogue", () => {
+    const rs = readWeb("components/app/role-switcher.tsx");
+    const acct = readWeb("app/[locale]/dashboard/account/page.tsx");
+    expect(rs).toMatch(/ROLE_BY_ID|LABOUR_MARKET_ROLES/);
+    expect(acct).toMatch(/ROLE_BY_ID/);
+  });
+  it("suggestion-statuses config exists and externally_confirmed is preparing", () => {
+    const txt = readWeb("lib/config/suggestion-statuses.ts");
+    expect(txt).toMatch(/SUGGESTION_STATUSES/);
+    // The externally_confirmed row must NOT be marked active anywhere.
+    // We grep for the row and assert it carries availability: "preparing".
+    expect(txt).toMatch(
+      /id:\s*"externally_confirmed",[\s\S]{0,300}availability:\s*"preparing"/,
+    );
+  });
+  it("activity-type config exists, only work_done + skill_claim are active", () => {
+    const txt = readWeb("lib/config/activity-types.ts");
+    expect(txt).toMatch(/ACTIVITY_TYPES/);
+    // Split by `id:` and read each row's availability independently — a
+    // forgiving way to enumerate active rows without depending on the
+    // exact line ordering.
+    const rows = txt.split(/\bid:\s*"/).slice(1);
+    const active = rows
+      .map((chunk) => {
+        const id = chunk.match(/^([^"]+)"/)?.[1];
+        const avail = chunk.match(/availability:\s*"([^"]+)"/)?.[1];
+        return id && avail === "active" ? id : null;
+      })
+      .filter((id): id is string => !!id);
+    expect(new Set(active)).toEqual(new Set(["work_done", "skill_claim"]));
+  });
+  it("feature-availability blocks matching / score / AI by config", () => {
+    const txt = readWeb("lib/config/feature-availability.ts");
+    expect(txt).toMatch(
+      /id:\s*"matching\.engine",\s*availability:\s*"hidden"/,
+    );
+    expect(txt).toMatch(
+      /id:\s*"score\.universal",\s*availability:\s*"hidden"/,
+    );
+    expect(txt).toMatch(
+      /id:\s*"ai\.extraction",\s*availability:\s*"hidden"/,
+    );
+    expect(txt).toMatch(
+      /id:\s*"ai\.verification",\s*availability:\s*"hidden"/,
+    );
+  });
+});
+
+// ── 13. Universal first-use copy + non-locking framing ──────────────────
+
+describe("adaptive non-locking copy", () => {
+  it("LT + EN firstUse copy says 'start from yourself' (5 steps)", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    // 5-step path (adaptive sprint expands from 4 → 5).
+    expect(lt.auth.dashboard.firstUse.step5).toBeTruthy();
+    expect(en.auth.dashboard.firstUse.step5).toBeTruthy();
+    expect(lt.auth.dashboard.firstUse.title).toMatch(/savęs/i);
+    expect(en.auth.dashboard.firstUse.title).toMatch(/yourself/i);
+  });
+  it("LT + EN account.rolesIntro carries the non-locking promise", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    const ltIntro = lt.auth.dashboard.account.rolesIntro as string;
+    const enIntro = en.auth.dashboard.account.rolesIntro as string;
+    expect(ltIntro).toMatch(/neužrakina/i);
+    expect(enIntro).toMatch(/not lock|does not lock/i);
+  });
+});
+
+// ── 14. Journal exposes universal examples (cross-domain) ───────────────
+
+describe("journal universal examples", () => {
+  it("LT + EN expose 4 cross-domain examples", () => {
+    const lt = JSON.parse(readWeb("messages/lt/journal.json"));
+    const en = JSON.parse(readWeb("messages/en/journal.json"));
+    for (const m of [lt, en]) {
+      expect(m.example1).toBeTruthy();
+      expect(m.example2).toBeTruthy();
+      expect(m.example3).toBeTruthy();
+      expect(m.example4).toBeTruthy();
+    }
+    // The 4 examples must collectively reference at least three different
+    // domains — customer support, project / proposal, team leadership,
+    // and assembly / furniture work. We check via cumulative keywords so
+    // future copy rewording doesn't blow up the test.
+    const allLt = [lt.example1, lt.example2, lt.example3, lt.example4].join(
+      " ",
+    );
+    expect(allLt).toMatch(/klient/i);
+    expect(allLt).toMatch(/projekt|pasiūlym/i);
+    expect(allLt).toMatch(/komand|vedž|paskirst/i);
+    const allEn = [en.example1, en.example2, en.example3, en.example4].join(
+      " ",
+    );
+    expect(allEn).toMatch(/customer/i);
+    expect(allEn).toMatch(/project|proposal/i);
+    expect(allEn).toMatch(/team/i);
+  });
+});
+
+// ── 15. Suggestion-status copy is honest + externally_confirmed blocked ─
+
+describe("suggestion status copy", () => {
+  it("LT + EN expose every status label", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    const required = [
+      "detected",
+      "confirmed_by_user",
+      "discarded_by_user",
+      "needs_more_detail",
+      "needs_external_confirmation",
+      "externally_confirmed",
+    ];
+    for (const id of required) {
+      expect(lt.suggestionStatuses[id]).toBeTruthy();
+      expect(en.suggestionStatuses[id]).toBeTruthy();
+    }
+  });
+  it("UI components do not currently render externally_confirmed status", () => {
+    // Until real external confirmation ships (PR #18 / issue #32) no
+    // surfaced UI may treat the parser path as externally confirmed.
+    const grep = (path: string) => readWeb(path);
+    const filesToCheck = [
+      "components/app/profile-text-first-flow.tsx",
+      "components/app/journal-entry-composer.tsx",
+      "components/app/detected-suggestion-card.tsx",
+      "components/app/detected-suggestion-list.tsx",
+    ];
+    for (const f of filesToCheck) {
+      expect(grep(f)).not.toMatch(/externally_confirmed/);
+    }
+  });
+});
+
+// ── 16. This sprint adds no Supabase migration files ────────────────────
+
+describe("no migration files added by this sprint", () => {
+  it("supabase/migrations contains no new files vs main baseline", () => {
+    // The audit / smoke documents reflect the migrations that exist at
+    // main; if a new migration file appears in this branch it must be
+    // intentional + go through a separate review (issue #32). We snapshot
+    // the count using readdir at test time — adding new migrations bumps
+    // this number and fails the test with a clear message.
+    const dir = resolve(REPO, "supabase", "migrations");
+    const files = readdirSync(dir).filter((f) => f.endsWith(".sql"));
+    // Whatever the baseline count is at the start of the sprint, the
+    // count must not grow during it. We capture the baseline here from
+    // the merged state at sprint start (main @ 5d9ceeb).
+    const SPRINT_BASELINE = 13;
+    expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
+  });
+});

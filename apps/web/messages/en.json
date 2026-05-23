@@ -80,6 +80,14 @@
       "needsExternalConfirmation": "Needs external confirmation later"
     }
   },
+  "suggestionStatuses": {
+    "detected": "Suggested",
+    "confirmed_by_user": "Confirmed by you",
+    "discarded_by_user": "Not included",
+    "needs_more_detail": "Needs more detail",
+    "needs_external_confirmation": "Needs external confirmation",
+    "externally_confirmed": "Externally confirmed"
+  },
   "structuring": {
     "groupEyebrow": "What we found",
     "ruleBasedNotice": "Note: this still uses a small dictionary and rules — no AI. Suggestions only become facts when you confirm them. Nothing is saved automatically.",
@@ -364,15 +372,16 @@
     "dashboard": {
       "firstUse": {
         "eyebrow": "Start here",
-        "title": "Start with a simple description",
-        "body": "Write what you can do or what you worked on today. labourmarket.ai helps structure it into a profile and work records, but nothing becomes a fact without your confirmation.",
-        "step1": "Tell us what you can do",
-        "step2": "Confirm detected suggestions",
-        "step3": "Add today's work",
-        "step4": "Build a useful work profile over time",
-        "completeProfileCta": "Complete profile",
-        "addJournalCta": "Add journal entry",
-        "reviewRolesCta": "Review account roles"
+        "title": "Start from yourself",
+        "body": "Write what you can do, what you did, or what you want to offer. The system helps structure the information, but only you confirm what becomes your facts.",
+        "step1": "Start from yourself",
+        "step2": "Describe skills or experience",
+        "step3": "Record work or activity",
+        "step4": "Confirm what is true",
+        "step5": "Expand roles later",
+        "completeProfileCta": "Continue profile",
+        "addJournalCta": "Add work / activity entry",
+        "reviewRolesCta": "Review roles"
       },
       "wow": {
         "canonical": {

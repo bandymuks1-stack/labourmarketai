@@ -4,9 +4,17 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
+import {
+  LABOUR_MARKET_ROLES,
+  ROLE_BY_ID,
+  isLiveRoleId,
+  type LabourMarketRoleId,
+} from "@/lib/config/roles";
 import { cn } from "@/lib/utils";
 
-const ALL_ROLES: Role[] = ["worker", "company", "agency", "customer"];
+// Role catalogue + icons read from the central role config so adding a
+// future role is a one-file change. Icons stay in this client component
+// because they are pure presentation.
 const ROLE_ICON: Record<Role, string> = {
   worker: "🔨",
   company: "🏗️",
@@ -27,7 +35,15 @@ export function RoleSwitcher() {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
 
-  const missing = ALL_ROLES.filter((r) => !roles.includes(r));
+  // Renderable roles come from the central config. We still constrain the
+  // pick / addRole branches to the LIVE role ids (`worker`/`company`/
+  // `agency`/`customer`) because those are the values the auth backend
+  // accepts today; preparing FUTURE roles (freelancer, team_lead, …) are
+  // intentionally `availability: "hidden"` and never reach this list.
+  const liveRoleIds = LABOUR_MARKET_ROLES.filter(
+    (r) => r.availability !== "hidden" && isLiveRoleId(r.id),
+  ).map((r) => r.id as Role);
+  const missing = liveRoleIds.filter((r) => !roles.includes(r));
 
   async function pick(r: Role) {
     if (r === activeRole) {
@@ -77,7 +93,9 @@ export function RoleSwitcher() {
           </p>
           <ul className="flex flex-col gap-0.5">
             {roles.map((r) => {
-              const isPreview = r !== "worker";
+              // Single source for "is this role preparing?" — the catalogue.
+              const cfg = ROLE_BY_ID[r as LabourMarketRoleId];
+              const isPreview = cfg?.availability !== "active";
               return (
                 <li key={r}>
                   <button
@@ -119,7 +137,8 @@ export function RoleSwitcher() {
               </p>
               <ul className="flex flex-col gap-0.5">
                 {missing.map((r) => {
-                  const isPreview = r !== "worker";
+                  const cfg = ROLE_BY_ID[r as LabourMarketRoleId];
+                  const isPreview = cfg?.availability !== "active";
                   return (
                     <li key={r}>
                       <button
