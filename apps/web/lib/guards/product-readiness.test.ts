@@ -422,6 +422,7 @@ describe("feature-availability + config-driven dashboard", () => {
   it("catalogue contains every required FeatureKey", () => {
     const txt = readWeb("lib/config/feature-availability.ts");
     const required = [
+      "overview",
       "profile_text_first",
       "journal_text_first",
       "account_roles",
@@ -444,7 +445,7 @@ describe("feature-availability + config-driven dashboard", () => {
     }
   });
 
-  it("only the three beta features are active today", () => {
+  it("only the allowed beta surfaces are active today", () => {
     const txt = readWeb("lib/config/feature-availability.ts");
     const rows = txt.split(/\bkey:\s*"/).slice(1);
     const active = rows
@@ -455,7 +456,15 @@ describe("feature-availability + config-driven dashboard", () => {
       })
       .filter((k): k is string => !!k);
     expect(new Set(active)).toEqual(
-      new Set(["profile_text_first", "journal_text_first", "account_roles"]),
+      new Set([
+        // PR #37 adds `overview` so the dashboard home can drive primary
+        // nav from the catalogue. The three text-first surfaces remain
+        // the only feature workflows that ship today.
+        "overview",
+        "profile_text_first",
+        "journal_text_first",
+        "account_roles",
+      ]),
     );
   });
 
@@ -496,6 +505,7 @@ describe("feature-availability + config-driven dashboard", () => {
       expect(m.features.preparing_badge).toBeTruthy();
       expect(m.features.preparing_generic_reason).toBeTruthy();
       for (const key of [
+        "overview",
         "profile_text_first",
         "journal_text_first",
         "account_roles",
@@ -532,7 +542,87 @@ describe("feature-availability + config-driven dashboard", () => {
   });
 });
 
-// ── 17. This sprint adds no Supabase migration files ────────────────────
+// ── 17. Primary nav is catalogue-driven ─────────────────────────────────
+
+describe("catalogue-driven primary nav", () => {
+  it("navigation.ts derives tabs from getVisiblePrimaryFeatures()", () => {
+    const txt = readWeb("lib/config/navigation.ts");
+    expect(txt).toMatch(/getVisiblePrimaryFeatures/);
+    expect(txt).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
+    expect(txt).toMatch(/TAB_META/);
+  });
+
+  it("BottomNav + DashboardTabs read VISIBLE_PRIMARY_NAV_ITEMS", () => {
+    const bn = readWeb("components/app/bottom-nav.tsx");
+    const dt = readWeb("components/app/dashboard-tabs.tsx");
+    expect(bn).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
+    expect(dt).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
+    // No hardcoded TABS arrays left behind.
+    expect(bn).not.toMatch(/^const TABS\s*=/m);
+    expect(dt).not.toMatch(/^const TABS\s*=/m);
+  });
+
+  it("only the four active beta surfaces become primary nav tabs", () => {
+    // Mirrors the static set callers expect. If a future PR adds a tab,
+    // both this assertion and the TAB_META map have to change — keeps
+    // visual changes obvious in code review.
+    const navTxt = readWeb("lib/config/navigation.ts");
+    const tabFeatures = [...navTxt.matchAll(/\b(overview|profile_text_first|journal_text_first|account_roles):\s*\{\s*tabLabelKey/g)].map(
+      (m) => m[1],
+    );
+    expect(new Set(tabFeatures)).toEqual(
+      new Set([
+        "overview",
+        "profile_text_first",
+        "journal_text_first",
+        "account_roles",
+      ]),
+    );
+  });
+
+  it("the `overview` feature is active and safeToShowInPrimaryNav", () => {
+    const txt = readWeb("lib/config/feature-availability.ts");
+    expect(txt).toMatch(
+      /key:\s*"overview",[\s\S]{0,250}availability:\s*"active",[\s\S]{0,250}safeToShowInPrimaryNav:\s*true/,
+    );
+  });
+
+  it("preparing features cannot appear in TAB_META", () => {
+    // Static guard: any TAB_META key must also be an `active` row in
+    // the feature catalogue. Defends against accidentally pinning a
+    // preparing feature to a tab.
+    const featTxt = readWeb("lib/config/feature-availability.ts");
+    const navTxt = readWeb("lib/config/navigation.ts");
+    const activeRows = featTxt.split(/\bkey:\s*"/).slice(1);
+    const activeKeys = new Set(
+      activeRows
+        .map((chunk) => {
+          const key = chunk.match(/^([^"]+)"/)?.[1];
+          const avail = chunk.match(/availability:\s*"([^"]+)"/)?.[1];
+          return key && avail === "active" ? key : null;
+        })
+        .filter((k): k is string => !!k),
+    );
+    const tabKeys = [
+      ...navTxt.matchAll(/\b(\w+):\s*\{\s*tabLabelKey/g),
+    ].map((m) => m[1]);
+    for (const k of tabKeys) {
+      expect(
+        activeKeys.has(k),
+        `tab feature ${k} must be availability:"active"`,
+      ).toBe(true);
+    }
+  });
+
+  it("LT + EN expose the new overview feature label", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    expect(lt.features.overview?.label).toBeTruthy();
+    expect(en.features.overview?.label).toBeTruthy();
+  });
+});
+
+// ── 18. This sprint adds no Supabase migration files ────────────────────
 
 describe("no migration files added by this sprint", () => {
   it("supabase/migrations contains no new files vs main baseline", () => {

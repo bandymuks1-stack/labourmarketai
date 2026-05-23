@@ -1,57 +1,98 @@
 /**
- * Single source of truth for the dashboard's primary navigation. Bottom
- * nav + the desktop dashboard tabs read from this file so adding / hiding
- * a tab is one change instead of two.
+ * Single source of truth for the dashboard's primary navigation.
  *
- * Only "active" entries are rendered in the visible nav. Preparing /
- * hidden entries can still exist as routes (and have their own
- * preparing-state pages), but they never appear as primary nav targets.
+ * The list of tabs is DERIVED from the feature-availability catalogue
+ * (`getVisiblePrimaryFeatures()`), not maintained separately. This file
+ * adds the bits the catalogue doesn't carry — the short tab label
+ * (catalogue label = full feature name; tab label is shorter) and the
+ * icon. Adding a new tab is a two-line change: flip
+ * `safeToShowInPrimaryNav: true` in feature-availability, then add a
+ * matching row to `TAB_META` below.
+ *
+ * Preparing or hidden features cannot reach the primary nav: the
+ * `getVisiblePrimaryFeatures()` filter requires `availability: "active"`
+ * AND `safeToShowInPrimaryNav: true`. The guard test enforces it.
  */
 
-import type { FeatureAvailability as Availability } from "./feature-availability";
+import {
+  getVisiblePrimaryFeatures,
+  type FeatureConfig,
+  type FeatureKey,
+} from "./feature-availability";
 
-export type NavItemId = "overview" | "profile" | "journal" | "account";
+/** Icon ids — concrete icon imports live in the nav components
+ *  (`BottomNav`, `DashboardTabs`), so this config stays
+ *  framework-agnostic. */
+export type NavIconKey = "home" | "idCard" | "fileText" | "user";
 
-export type NavItem = {
-  id: NavItemId;
-  /** i18n key, looked up under `auth.dashboard.tabs.*`. */
-  labelKey: string;
-  /** Locale-prefixed app route. */
-  href:
-    | "/dashboard"
-    | "/dashboard/profile"
-    | "/dashboard/journal"
-    | "/dashboard/account";
-  availability: Availability;
+type TabMeta = {
+  /** i18n key for the SHORT tab label (e.g. "Apžvalga" vs the feature's
+   *  full label "Apžvalga"). Lives under `auth.dashboard.tabs.*`. */
+  tabLabelKey: string;
+  iconKey: NavIconKey;
 };
 
-export const PRIMARY_NAV_ITEMS: readonly NavItem[] = [
-  {
-    id: "overview",
-    labelKey: "auth.dashboard.tabs.overview",
-    href: "/dashboard",
-    availability: "active",
+/**
+ * Per-feature tab presentation. Only feature keys that appear here can
+ * become a primary-nav tab — even if a feature flips
+ * `safeToShowInPrimaryNav: true`, it must also opt-in with an icon and
+ * a short label here. This keeps tab visuals tightly controlled.
+ */
+const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
+  overview: {
+    tabLabelKey: "auth.dashboard.tabs.overview",
+    iconKey: "home",
   },
-  {
-    id: "profile",
-    labelKey: "auth.dashboard.tabs.profile",
-    href: "/dashboard/profile",
-    availability: "active",
+  profile_text_first: {
+    tabLabelKey: "auth.dashboard.tabs.profile",
+    iconKey: "idCard",
   },
-  {
-    id: "journal",
-    labelKey: "auth.dashboard.tabs.journal",
-    href: "/dashboard/journal",
-    availability: "active",
+  journal_text_first: {
+    tabLabelKey: "auth.dashboard.tabs.journal",
+    iconKey: "fileText",
   },
-  {
-    id: "account",
-    labelKey: "auth.dashboard.tabs.account",
-    href: "/dashboard/account",
-    availability: "active",
+  account_roles: {
+    tabLabelKey: "auth.dashboard.tabs.account",
+    iconKey: "user",
   },
-] as const;
+};
 
-/** Items rendered in the visible bottom nav / tabs row. */
+export type NavItem = {
+  /** The feature key the tab is sourced from. Useful for tests + telemetry. */
+  id: FeatureKey;
+  /** Locale-prefixed app route. */
+  href: string;
+  tabLabelKey: string;
+  iconKey: NavIconKey;
+};
+
+/**
+ * The tabs the user sees. Derived live from the catalogue so future
+ * promotions / demotions of features automatically reflect here.
+ */
+export function getVisiblePrimaryNavItems(): readonly NavItem[] {
+  const items: NavItem[] = [];
+  for (const f of getVisiblePrimaryFeatures()) {
+    const meta = TAB_META[f.key];
+    if (!meta) continue;
+    if (!f.primaryRoute) continue;
+    items.push({
+      id: f.key,
+      href: f.primaryRoute,
+      tabLabelKey: meta.tabLabelKey,
+      iconKey: meta.iconKey,
+    });
+  }
+  return items;
+}
+
+/**
+ * Frozen snapshot for callers that need a stable, plain array. Recomputed
+ * once on module load. Tests / guards read from here.
+ */
 export const VISIBLE_PRIMARY_NAV_ITEMS: readonly NavItem[] =
-  PRIMARY_NAV_ITEMS.filter((n) => n.availability === "active");
+  getVisiblePrimaryNavItems();
+
+/** Plain feature list backing the nav — used by audit / route-check docs. */
+export const PRIMARY_NAV_SOURCE_FEATURES: readonly FeatureConfig[] =
+  getVisiblePrimaryFeatures().filter((f) => TAB_META[f.key] !== undefined);

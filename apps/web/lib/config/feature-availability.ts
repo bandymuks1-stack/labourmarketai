@@ -22,6 +22,7 @@ export type FeatureAvailability = "active" | "preparing" | "hidden";
 
 export type FeatureKey =
   // Active surfaces backing the first working beta.
+  | "overview"
   | "profile_text_first"
   | "journal_text_first"
   | "account_roles"
@@ -63,6 +64,16 @@ export type FeatureConfig = {
  */
 export const FEATURES: readonly FeatureConfig[] = [
   // ── Active first-beta surfaces ─────────────────────────────────────
+  // The dashboard home itself is a "feature" so primary nav can be
+  // derived from this catalogue without a separate source of truth.
+  {
+    key: "overview",
+    availability: "active",
+    labelKey: "features.overview.label",
+    descriptionKey: "features.overview.description",
+    primaryRoute: "/dashboard",
+    safeToShowInPrimaryNav: true,
+  },
   {
     key: "profile_text_first",
     availability: "active",
