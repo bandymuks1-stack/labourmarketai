@@ -65,22 +65,22 @@
     "customComingSoon": "coming soon",
     "textFirst": {
       "title": "Tell us what you do",
-      "helper": "Write a few sentences or upload a CV. We'll suggest skills, work directions, roles and CV entries — but you confirm what counts.",
-      "placeholder": "e.g. I spent 8 years in interior finishing — drywall ceilings, flooring, plumbing — and led a team of 4.",
+      "helper": "Write in your own words or upload a CV. We'll suggest skills, work directions, roles and CV entries — but you confirm every suggestion. Nothing is saved without your confirmation.",
+      "placeholder": "e.g. I spent a few years in interior finishing and small renovation work and led a small team. Write freely — about experience, work done, tools, clients or training.",
       "submit": "Suggest a structure",
       "manualCta": "Add manually",
-      "manualHelper": "Manual selection stays as a secondary path. Start from text or CV — it's faster.",
+      "manualHelper": "Manual selection stays as a secondary path. Start from text or CV — it's faster, and you don't have to commit to a heavy skill list up front.",
       "rescan": "Re-suggest from text",
       "backToText": "Back to text",
       "applyAll": "Add confirmed suggestions",
-      "appliedToast": "Confirmed suggestions added to your profile. You can still edit them manually."
+      "appliedToast": "Confirmed suggestions added to your profile. You can still edit or extend them manually."
     }
   },
   "structuring": {
     "groupEyebrow": "What we found",
-    "ruleBasedNotice": "Note: this still uses a small dictionary and regex, not AI. Suggestions are not facts until you confirm them.",
+    "ruleBasedNotice": "Note: this still uses a small dictionary and rules — no AI. Suggestions only become facts when you confirm them. Nothing is saved automatically.",
     "emptyBucket": "Nothing clear in this part. You can write more or skip it.",
-    "noMatches": "Nothing clear in this text yet. Try adding more detail or add items manually.",
+    "noMatches": "Nothing clear in this text yet. Try adding more detail, or add meaningful entries manually.",
     "buckets": {
       "skills": "Detected skills",
       "directions": "Possible work directions",
@@ -496,7 +496,7 @@
         "email_label": "Email",
         "roles_label": "My roles",
         "logout": "Sign out",
-        "rolesIntro": "Your worker space is active right now. Other roles will roll out step by step — you're not locked into one way of using labourmarket.ai.",
+        "rolesIntro": "Your worker space is active right now. The company, agency and customer spaces are still being prepared — we'll roll them out step by step. Picking one role today does not lock you out of the others later.",
         "active_workspace": "Active space",
         "preview_workspace": "Preview",
         "comingLater": "Available later"
