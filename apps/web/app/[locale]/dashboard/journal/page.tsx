@@ -170,6 +170,15 @@ export default async function JournalPage({
         </h1>
       </header>
 
+      {/* Honest pilot framing — the manager / client confirmation + audit
+          layer ships with PR #18 (issue #32). Until then, journal entries
+          live with `visibility_scope: "closed"` and there is no external
+          attestation yet. Surface that clearly so workers can't be misled
+          into thinking the legal backbone is fully live. */}
+      <p className="card-border bg-state-warning/5 text-text-secondary p-3 text-xs leading-relaxed">
+        {t("pilotBackboneNote")}
+      </p>
+
       {/* Self-progress counter (§15) */}
       <div className="card-border flex flex-wrap items-center gap-x-6 gap-y-2 p-4">
         <span className="font-display text-sm font-semibold text-text-primary">
