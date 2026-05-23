@@ -66,14 +66,18 @@
     "textFirst": {
       "title": "Papasakokite, ką mokate",
       "helper": "Parašykite savais žodžiais arba įkelkite CV. Sistema pasiūlys įgūdžius, darbo kryptis, vaidmenis ir CV įrašus — bet kiekvieną pasiūlymą patvirtinate jūs. Be jūsų patvirtinimo nieko neišsaugome.",
-      "placeholder": "Pvz.: kelerius metus dirbau vidaus apdailoje ir mažuose remonto darbuose, vadovavau nedidelei komandai. Galite rašyti laisvai — apie patirtį, darbus, įrankius, klientus arba mokymąsi.",
+      "placeholder": "Pvz.: dirbau klientų aptarnavime, taisiau dviračius, vedžiau nedidelę komandą, kūriau svetaines, montavau baldus, tvarkiau dokumentus.",
       "submit": "Pasiūlykite struktūrą",
       "manualCta": "Pridėti rankiniu būdu",
       "manualHelper": "Rankinis pasirinkimas lieka kaip antrinis kelias. Pradėkite nuo teksto arba CV — taip greičiau, ir nereikės iškart rinktis sudėtingo įgūdžių sąrašo.",
       "rescan": "Iš naujo pasiūlyti pagal tekstą",
       "backToText": "Grįžti prie teksto",
       "applyAll": "Įtraukti patvirtintus pasiūlymus",
-      "appliedToast": "Patvirtintus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti arba papildyti rankiniu būdu."
+      "appliedToast": "Patvirtintus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti arba papildyti rankiniu būdu.",
+      "noSuggestionsFallback": "Kol kas neradome aiškių pasiūlymų. Galite parašyti plačiau arba pridėti informaciją rankiniu būdu.",
+      "confirmedByYou": "Patvirtinta jūsų",
+      "addedToProfile": "Pridėta į jūsų profilį",
+      "needsExternalConfirmation": "Vėliau reikės išorinio patvirtinimo"
     }
   },
   "structuring": {
@@ -361,6 +365,18 @@
       "confirm": "Pridėti"
     },
     "dashboard": {
+      "firstUse": {
+        "eyebrow": "Pradžia",
+        "title": "Pradėkite nuo paprasto aprašymo",
+        "body": "Parašykite, ką mokate arba ką šiandien dirbote. labourmarket.ai padės tai paversti tvarkingu profiliu ir darbo įrašais, bet nieko neišsaugos kaip fakto be jūsų patvirtinimo.",
+        "step1": "Papasakokite, ką mokate",
+        "step2": "Patvirtinkite rastus pasiūlymus",
+        "step3": "Pridėkite šiandienos darbą",
+        "step4": "Po truputį susikurkite naudingą darbo profilį",
+        "completeProfileCta": "Tvarkyti profilį",
+        "addJournalCta": "Pridėti dienoraščio įrašą",
+        "reviewRolesCta": "Peržiūrėti vaidmenis"
+      },
       "wow": {
         "canonical": {
           "identity": {
@@ -427,8 +443,8 @@
         },
         "addMore": {
           "title": "Pridekite dar viena buda naudotis labourmarket.ai",
-          "body": "Jus nesate uzrakinti. Pridekite darbuotojo, imones, agenturos ar pirkejo role, kai busite pasiruose.",
-          "cta": "Tvarkyti roles"
+          "body": "Jus nesate uzrakinti viename vaidmenyje. Imones, agenturos ir pirkejo erdves dar ruosiamos — pridesime palaipsniui.",
+          "cta": "Perziureti vaidmenis"
         },
         "activity": {
           "earlyAccess": "Ankstyva prieiga",
@@ -499,7 +515,7 @@
         "email_label": "El. paštas",
         "roles_label": "Mano vaidmenys",
         "logout": "Atsijungti",
-        "rolesIntro": "Šiuo metu aktyvi jūsų darbuotojo erdvė. Įmonės, agentūros ir pirkėjo erdvės dar ruošiamos — įjungsime palaipsniui. Jūs nesate užrakinti viename būde naudotis labourmarket.ai: pasirinkimas šiandien neuždaro kelio kitoms rolėms vėliau.",
+        "rolesIntro": "Šiandien galite pradėti kaip darbuotojas, bet tai neužrakina jūsų viename vaidmenyje. Vėliau galėsite pridėti įmonės, agentūros, kliento ar kitus darbo rinkos vaidmenis, kai jie bus paruošti.",
         "active_workspace": "Aktyvi erdvė",
         "preview_workspace": "Ruošiama",
         "comingLater": "Bus galima vėliau"

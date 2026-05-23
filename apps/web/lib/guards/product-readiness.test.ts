@@ -181,3 +181,86 @@ describe("PR #30 production smoke checklist", () => {
     expect(txt).toMatch(/Smoke status:\s*PENDING/);
   });
 });
+
+// ── 8. Dashboard first-use panel + non-locking role copy (Phase 3 / 6) ───
+
+describe("dashboard first-use panel", () => {
+  it("worker dashboard mounts <DashboardFirstUsePanel>", () => {
+    const txt = readWeb("app/[locale]/dashboard/page.tsx");
+    expect(txt).toMatch(/<DashboardFirstUsePanel/);
+  });
+  it("LT + EN expose firstUse.title via auth.dashboard.firstUse", () => {
+    const lt = readWeb("messages/lt.json");
+    const en = readWeb("messages/en.json");
+    for (const txt of [lt, en]) {
+      expect(txt).toMatch(/"firstUse":\s*\{/);
+      expect(txt).toMatch(/"step1":/);
+      expect(txt).toMatch(/"step4":/);
+      expect(txt).toMatch(/"completeProfileCta":/);
+      expect(txt).toMatch(/"addJournalCta":/);
+      expect(txt).toMatch(/"reviewRolesCta":/);
+    }
+  });
+});
+
+// ── 9. Universal placeholders — examples must not be construction-only ──
+
+describe("universal placeholders", () => {
+  it("profile textFirst placeholder mentions at least one non-construction example", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    const ltPlaceholder = lt.skills.textFirst.placeholder as string;
+    const enPlaceholder = en.skills.textFirst.placeholder as string;
+    // Must reference at least one non-construction example domain. Failing
+    // here means the placeholder regressed to a single-vertical narrative.
+    expect(ltPlaceholder).toMatch(/klient|svetai|baldu|baldų|dokument|dvirat/i);
+    expect(enPlaceholder).toMatch(/customer|website|furniture|document|bike/i);
+  });
+  it("journal textPlaceholder is not a tiling-only example", () => {
+    const lt = JSON.parse(readWeb("messages/lt/journal.json"));
+    const en = JSON.parse(readWeb("messages/en/journal.json"));
+    const ltP = lt.textPlaceholder as string;
+    const enP = en.textPlaceholder as string;
+    // The placeholder may still mention construction work as ONE option, but
+    // it must not be the entire example. Look for a customer / report /
+    // request signal that gives it universal flavour.
+    expect(ltP).toMatch(/klient|užklaus|ataskait|sutvark|paruoš/i);
+    expect(enP).toMatch(/customer|report|request|handled|resolved|prepared/i);
+  });
+});
+
+// ── 10. Confirmation framing copy exists ─────────────────────────────────
+
+describe("confirmation-required copy is present", () => {
+  it("profile textFirst + structuring keys carry the confirm rule", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    expect(lt.skills.textFirst.confirmedByYou).toBe("Patvirtinta jūsų");
+    expect(en.skills.textFirst.confirmedByYou).toBe("Confirmed by you");
+    expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/išorinio/i);
+    expect(en.skills.textFirst.needsExternalConfirmation).toMatch(
+      /external/i,
+    );
+    expect(lt.structuring.ruleBasedNotice).toMatch(/nepatvirtin/i);
+    expect(en.structuring.ruleBasedNotice).toMatch(/confirm/i);
+  });
+  it("journal exposes a suggestionReviewIntro + saved-state strings", () => {
+    const lt = JSON.parse(readWeb("messages/lt/journal.json"));
+    const en = JSON.parse(readWeb("messages/en/journal.json"));
+    expect(lt.suggestionReviewIntro).toMatch(/pasiūlym/i);
+    expect(en.suggestionReviewIntro).toMatch(/suggestions/i);
+    expect(lt.savedTitle).toBeTruthy();
+    expect(en.savedTitle).toBeTruthy();
+    expect(lt.savedBody).toMatch(/patvirtint/i);
+    expect(en.savedBody).toMatch(/confirmed/i);
+  });
+});
+
+// ── 11. Role switcher exposes the non-locking intro inside the menu ─────
+
+describe("role switcher honest framing", () => {
+  it("RoleSwitcher renders the rolesIntro copy in its menu", () => {
+    const txt = readWeb("components/app/role-switcher.tsx");
+    expect(txt).toMatch(/tAccount\("rolesIntro"\)/);
+  });
+});

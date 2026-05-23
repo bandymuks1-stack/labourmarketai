@@ -70,6 +70,9 @@ export function JournalEntryComposer({
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Phase 5: a saved-state feedback flag — set immediately after a successful
+  // server save so the worker SEES the confirmation, not a silent reset.
+  const [savedAt, setSavedAt] = useState<number | null>(null);
 
   // Suggestion view state. We don't keep the raw parser result in state —
   // each bucket (time / quantity / direction / site / skills) has its own
@@ -169,7 +172,9 @@ export function JournalEntryComposer({
       }
       await createJournalEntry(fd);
       formRef.current?.reset();
-      // Reset to compose stage with a fresh slate.
+      // Reset to compose stage with a fresh slate, but mark "just saved" so
+      // the compose stage can render a visible success card (Phase 5 —
+      // mobile-safe saved-state feedback).
       setStage("compose");
       setText("");
       setTimeValue("");
@@ -178,6 +183,7 @@ export function JournalEntryComposer({
       setSiteName("");
       setSkillSuggestions([]);
       setSkillStatuses({});
+      setSavedAt(Date.now());
     } catch (e) {
       console.error("[journal-composer] submit failed:", e);
       setError(t("saveError"));
@@ -207,10 +213,26 @@ export function JournalEntryComposer({
         ref={formRef}
         onSubmit={(e) => {
           e.preventDefault();
+          setSavedAt(null);
           analyse(text);
         }}
         className="card-border flex flex-col gap-4 p-4 sm:p-6"
       >
+        {savedAt !== null && (
+          // Phase 5: clear success card after a journal save. Stays until the
+          // worker submits the next entry so it's not missed on mobile.
+          <div
+            role="status"
+            className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2"
+          >
+            <p className="text-sm font-semibold text-state-success">
+              ✓ {t("savedTitle")}
+            </p>
+            <p className="mt-0.5 text-xs text-text-secondary">
+              {t("savedBody")}
+            </p>
+          </div>
+        )}
         <h3 className="font-display text-lg font-semibold text-text-primary">
           {t("newEntry")}
         </h3>
@@ -283,6 +305,11 @@ export function JournalEntryComposer({
 
       <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
         {tS("ruleBasedNotice")}
+      </p>
+      {/* Phase 5: explicit "these are suggestions" framing — the worker sees
+          this every time they hit review, before any confirm tap. */}
+      <p className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary">
+        {t("suggestionReviewIntro")}
       </p>
 
       {totalDetected === 0 ? (
