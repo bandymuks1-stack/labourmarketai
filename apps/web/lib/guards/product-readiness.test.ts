@@ -1044,11 +1044,56 @@ describe("no migration files added by this sprint", () => {
     // Whatever the baseline count is at the start of the sprint, the
     // count must not grow during it. We capture the baseline here from
     // the merged state at sprint start. Bumped from 13 → 14 on the
-    // registered-user-core-loop-v1 sprint: migration 0014 adds the
-    // missing GRANT INSERT, UPDATE on public.workers to authenticated
-    // (RLS already restricts rows; this only fixes a SQL-level gap that
-    // silently blocked workers.bio writes from the app session).
+    // registered-user-core-loop-v1 sprint: migration 0014 adds an
+    // owner-only `profile_text` column to public.profiles so the
+    // text-first composer's raw narrative is NOT stored on employer-
+    // readable workers.bio. profiles_select RLS (0001) + GRANTs (0004)
+    // already scope reads/writes to the owner; no new policy needed.
     const SPRINT_BASELINE = 14;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
+  });
+});
+
+// ── 23. Privacy guards for the text-first composer (PR #44) ─────────────
+//
+// The composer's narrative is supposed to live on the owner-only
+// profiles.profile_text column, NOT on workers.bio / workers.headline (both
+// readable by every employer via workers_select / is_employer(), 0001+0003).
+// These guards fail loudly if a future patch silently moves the destination
+// back into the employer-readable surface.
+
+describe("text-first composer privacy", () => {
+  it("server action writes to profiles.profile_text, not workers.bio/headline", () => {
+    const src = readWeb("lib/worker/profile-text-actions.ts");
+    // Must write profile_text on profiles
+    expect(src).toMatch(/\.from\(["']profiles["']\)/);
+    expect(src).toMatch(/profile_text/);
+    // Must NOT update workers from this action — that would route the
+    // narrative through workers.bio (employer-readable).
+    expect(src).not.toMatch(/\.from\(["']workers["']\)/);
+    expect(src).not.toMatch(/\bbio\s*[:,}]/);
+    expect(src).not.toMatch(/\bheadline\s*[:,}]/);
+  });
+
+  it("sprint migration 0014 does not widen workers write surface", () => {
+    const dir = resolve(REPO, "supabase", "migrations");
+    const sprintFiles = readdirSync(dir).filter(
+      (f) => f.startsWith("0014_") && f.endsWith(".sql"),
+    );
+    expect(sprintFiles.length).toBe(1);
+    // Strip SQL line comments first — the migration's header deliberately
+    // explains *why* the earlier draft was rewritten, and that prose
+    // contains the exact phrase we're guarding against. The guard cares
+    // about executable SQL only.
+    const sqlOnly = readFileSync(join(dir, sprintFiles[0]), "utf8")
+      .split(/\r?\n/)
+      .map((line) => line.replace(/--.*$/, ""))
+      .join("\n")
+      .toLowerCase();
+    // An earlier draft tried to `grant insert, update on public.workers to
+    // authenticated` — disallowed: it would let any registered employer
+    // bypass column-level intent. Storing the narrative on profiles
+    // (owner-only RLS + grants from 0004) is the right home.
+    expect(sqlOnly).not.toMatch(/grant[^;]*\b(insert|update)\b[^;]*\bpublic\.workers\b/);
   });
 });

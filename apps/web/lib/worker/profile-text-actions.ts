@@ -4,18 +4,24 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-/** Soft caps — keep the column from accidentally absorbing a whole novel. */
-const MAX_BIO_LEN = 4000;
-const MAX_HEADLINE_LEN = 200;
+/** Soft cap — keeps the column from accidentally absorbing a whole novel. */
+const MAX_PROFILE_TEXT_LEN = 4000;
 
 /**
- * Persist the worker's free-text self-description into `workers.bio` (and the
- * first non-empty line as `headline`). This is the text the user wrote in the
- * text-first composer — the *claim*, not a verified fact (§3 of the core-loop
- * spec). Suggestions extracted from it remain separate (`worker_skills`).
+ * Persist the registered user's free-text self-description into the
+ * owner-only `profiles.profile_text` column (migration 0014). This is the
+ * text the user wrote in the text-first composer — the *claim* (§3 of the
+ * core-loop spec), not a verified fact. Suggestions extracted from it remain
+ * separate (`worker_skills`) and require per-card confirm.
  *
- * Owner-only at the DB level: workers_update RLS already restricts rows to
- * `profile_id = auth.uid()`; migration 0014 supplies the missing GRANT.
+ * IMPORTANT — privacy posture:
+ *   - profiles RLS is owner-only (id = auth.uid()), so this narrative is
+ *     never visible to employers/agencies/companies/managers/teams.
+ *   - We deliberately do NOT mirror the text into `workers.bio` or
+ *     `workers.headline` — those columns are readable by every employer via
+ *     `workers_select` (0001), so they remain reserved for explicit
+ *     professional summaries the user authors with full knowledge of who
+ *     can see them. That UI is a separate slice.
  */
 export async function saveWorkerProfileText(rawText: string): Promise<void> {
   const supabase = await createClient();
@@ -24,25 +30,16 @@ export async function saveWorkerProfileText(rawText: string): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const { data: worker } = await supabase
-    .from("workers")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (!worker) throw new Error("No worker profile");
-
   const trimmed = (rawText ?? "").trim();
   if (trimmed.length === 0) throw new Error("Empty text");
-  const bio = trimmed.slice(0, MAX_BIO_LEN);
-  const firstLine = bio.split(/\r?\n/, 1)[0]?.trim() ?? "";
-  const headline = firstLine.length > 0 ? firstLine.slice(0, MAX_HEADLINE_LEN) : null;
+  const profileText = trimmed.slice(0, MAX_PROFILE_TEXT_LEN);
 
   const { error } = await supabase
-    .from("workers")
-    .update({ bio, headline })
-    .eq("id", worker.id);
+    .from("profiles")
+    .update({ profile_text: profileText })
+    .eq("id", user.id);
   if (error) {
-    console.error("[worker] save profile text failed:", error.message);
+    console.error("[profile] save profile_text failed:", error.message);
     throw new Error(`save failed: ${error.message}`);
   }
 

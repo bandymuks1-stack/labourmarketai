@@ -90,7 +90,8 @@ export function ProfileTextFirstFlow({
   /** Localized professions, used to render direction / role suggestions. */
   professions: (ProfRow & { name: string })[];
   initialSelectedIds: string[];
-  /** Previously-saved self-description text (workers.bio), prefilled into the composer. */
+  /** Previously-saved self-description text (owner-only profiles.profile_text),
+   *  prefilled into the composer. */
   initialText?: string;
   /** Manual picker rendered after the user clicks "Add manually". */
   manualSlot: React.ReactNode;
@@ -134,9 +135,10 @@ export function ProfileTextFirstFlow({
     setText(raw);
     setSuggestions(s);
     // Persist the user's own words alongside the parser pass. The text is the
-    // *claim* (§3) — saved into workers.bio — and reload prefills the composer.
-    // Suggestions still need a per-card confirm; this save does NOT mark any
-    // skill as verified.
+    // *claim* (§3) — saved into the owner-only profiles.profile_text column
+    // (migration 0014) — and reload prefills the composer. Suggestions still
+    // need a per-card confirm; this save does NOT mark any skill as verified.
+    // Employers cannot read this column (profiles_select RLS is owner-only).
     if (raw.trim().length > 0) {
       setTextSaveState("saving");
       void saveWorkerProfileText(raw)
