@@ -41,11 +41,15 @@ export function GoogleButton({
   redirectingLabel,
   errorLabel,
   disabled,
+  nextPath,
 }: {
   label: string;
   redirectingLabel: string;
   errorLabel: string;
   disabled?: boolean;
+  /** Already-sanitised internal path (see `getSafeReturnPath`). When set,
+   *  the OAuth callback is told to route the user here on success. */
+  nextPath?: string;
 }) {
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
@@ -58,9 +62,14 @@ export function GoogleButton({
       const supabase = createClient();
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
+      // Forward the sanitised return path through Supabase → callback as
+      // a query param. The callback at `/[locale]/auth/callback`
+      // re-validates before honouring it.
+      const callback = new URL(`${origin}/${locale}/auth/callback`);
+      if (nextPath) callback.searchParams.set("next", nextPath);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${origin}/${locale}/auth/callback` },
+        options: { redirectTo: callback.toString() },
       });
       if (error) throw error;
       // Success: browser navigates to Google; keep the loading state.

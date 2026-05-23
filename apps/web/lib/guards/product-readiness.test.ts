@@ -939,7 +939,98 @@ describe("supergrand vision surface", () => {
   });
 });
 
-// ── 21. This sprint adds no Supabase migration files ────────────────────
+// ── 21. Auth re-entry: `next` is preserved across login / signup / OAuth
+
+describe("auth session re-entry honours `next` (PR #43)", () => {
+  it("login form reads `next` + routes the user there after success", () => {
+    const txt = readWeb("components/app/login-form.tsx");
+    expect(txt).toMatch(/useSearchParams/);
+    expect(txt).toMatch(/getSafeReturnPath/);
+    expect(txt).toMatch(/nextPath/);
+    // The hardcoded /dashboard redirect must be gone — replaced by an
+    // assign to the sanitised return path.
+    expect(txt).not.toMatch(/router\.replace\("\/dashboard"\)/);
+    expect(txt).toMatch(/window\.location\.assign\(nextPath\)/);
+  });
+
+  it("signup form reads `next` + carries it into onboarding", () => {
+    const txt = readWeb("components/app/signup-form.tsx");
+    expect(txt).toMatch(/useSearchParams/);
+    expect(txt).toMatch(/getSafeReturnPath/);
+    expect(txt).toMatch(/router\.replace\(onboardingPath\)/);
+    // Already-registered users see an inline "Login instead" CTA, not
+    // just the body text — the data-testid is the stable hook.
+    expect(txt).toMatch(/data-testid="signup-login-instead"/);
+    expect(txt).toMatch(/errorKind === "alreadyRegistered"/);
+  });
+
+  it("GoogleButton forwards a sanitised `next` into the OAuth redirect", () => {
+    const txt = readWeb("components/app/google-button.tsx");
+    expect(txt).toMatch(/nextPath\?:\s*string/);
+    expect(txt).toMatch(/callback\.searchParams\.set\("next", nextPath\)/);
+  });
+
+  it("OAuth callback honours `next` + preserves it on error rebounds", () => {
+    const txt = readWeb("app/[locale]/auth/callback/route.ts");
+    expect(txt).toMatch(/getSafeReturnPath/);
+    expect(txt).toMatch(/url\.searchParams\.get\("next"\)/);
+    // On error we rebound to /auth/login with the `next` preserved so
+    // the retry still routes the user correctly.
+    expect(txt).toMatch(
+      /loginUrl\.searchParams\.set\("next",\s*nextParam\)/,
+    );
+  });
+
+  it("no real owner email appears in repo changes", () => {
+    // Belt-and-braces: the primary email named in the bug report must
+    // never appear in any source / docs / test fixture under apps/web
+    // or docs/. This is a privacy hygiene guard — the literal itself
+    // is reconstructed at runtime from two halves so this very
+    // assertion does not embed it.
+    const localLeft = "sukys";
+    const localRight = "donatas";
+    const owned = `${localLeft}${localRight}@gmail.com`;
+    const scanDirs = [
+      resolve(WEB, "messages"),
+      resolve(WEB, "components"),
+      resolve(WEB, "app"),
+      resolve(WEB, "lib"),
+      resolve(WEB, "scripts"),
+      resolve(REPO, "docs"),
+    ];
+    function walkFiles(dir: string): string[] {
+      const out: string[] = [];
+      for (const entry of readdirSync(dir)) {
+        const p = join(dir, entry);
+        const s = statSync(p);
+        if (s.isDirectory()) {
+          if (
+            entry === "node_modules" ||
+            entry === ".next" ||
+            entry === ".turbo"
+          )
+            continue;
+          out.push(...walkFiles(p));
+        } else if (/\.(ts|tsx|js|jsx|json|md|sql)$/i.test(p)) {
+          out.push(p);
+        }
+      }
+      return out;
+    }
+    for (const dir of scanDirs) {
+      for (const f of walkFiles(dir)) {
+        const txt = readFileSync(f, "utf8");
+        if (txt.includes(owned)) {
+          throw new Error(
+            `Owner email leaked into ${f.replace(REPO, ".")}`,
+          );
+        }
+      }
+    }
+  });
+});
+
+// ── 22. This sprint adds no Supabase migration files ────────────────────
 
 describe("no migration files added by this sprint", () => {
   it("supabase/migrations contains no new files vs main baseline", () => {
