@@ -8,7 +8,7 @@
  * preparing-state pages), but they never appear as primary nav targets.
  */
 
-import type { Availability } from "./feature-availability";
+import type { FeatureAvailability as Availability } from "./feature-availability";
 
 export type NavItemId = "overview" | "profile" | "journal" | "account";
 

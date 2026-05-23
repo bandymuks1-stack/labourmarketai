@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PilotRequestButton } from "@/components/app/pilot-request-button";
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
+import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
@@ -205,6 +206,12 @@ export default async function DashboardOverviewPage({
             <PilotRequestButton intent={intent} />
           </div>
         </section>
+
+        {/* Same config-driven landscape as the worker dashboard (PR #36).
+            Non-worker users see honest preparing cards for the spaces
+            they would expect (company / agency / customer), so they
+            understand what's coming without misleading CTAs. */}
+        <FeatureAvailabilityGrid />
       </div>
     );
   }
@@ -395,6 +402,17 @@ export default async function DashboardOverviewPage({
           {tw("addMore.cta")} →
         </Link>
       </section>
+
+      {/*  Config-driven what's-here-and-what's-coming surface (PR #36):
+          the central feature catalogue renders preparing features as
+          honest cards with no broken CTAs. Adding a future feature is a
+          one-row change in lib/config/feature-availability.ts — no
+          edits here. profile_text_first + journal_text_first are
+          excluded because they already appear as the two canonical
+          cards above. */}
+      <FeatureAvailabilityGrid
+        excludeKeys={["profile_text_first", "journal_text_first"]}
+      />
     </div>
   );
 }

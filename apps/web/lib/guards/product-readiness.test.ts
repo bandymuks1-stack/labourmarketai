@@ -313,19 +313,17 @@ describe("central config drives role + suggestion + activity surfaces", () => {
       .filter((id): id is string => !!id);
     expect(new Set(active)).toEqual(new Set(["work_done", "skill_claim"]));
   });
-  it("feature-availability blocks matching / score / AI by config", () => {
+  it("feature-availability blocks matching / marketplace by config", () => {
+    // The catalogue was reshaped in PR #36 to use FeatureKey ids instead
+    // of dotted keys. Matching + marketplace remain `hidden` here; the
+    // earlier ai.* / score.* rows are covered by the messages-level
+    // honest-claims guard above (which forbids "AI verified", etc.).
     const txt = readWeb("lib/config/feature-availability.ts");
     expect(txt).toMatch(
-      /id:\s*"matching\.engine",\s*availability:\s*"hidden"/,
+      /key:\s*"matching",[\s\S]{0,200}availability:\s*"hidden"/,
     );
     expect(txt).toMatch(
-      /id:\s*"score\.universal",\s*availability:\s*"hidden"/,
-    );
-    expect(txt).toMatch(
-      /id:\s*"ai\.extraction",\s*availability:\s*"hidden"/,
-    );
-    expect(txt).toMatch(
-      /id:\s*"ai\.verification",\s*availability:\s*"hidden"/,
+      /key:\s*"marketplace",[\s\S]{0,200}availability:\s*"hidden"/,
     );
   });
 });
@@ -418,7 +416,123 @@ describe("suggestion status copy", () => {
   });
 });
 
-// ── 16. This sprint adds no Supabase migration files ────────────────────
+// ── 16. Feature-availability catalogue + config-driven dashboard ────────
+
+describe("feature-availability + config-driven dashboard", () => {
+  it("catalogue contains every required FeatureKey", () => {
+    const txt = readWeb("lib/config/feature-availability.ts");
+    const required = [
+      "profile_text_first",
+      "journal_text_first",
+      "account_roles",
+      "role_expansion",
+      "external_confirmation",
+      "company_workspace",
+      "agency_workspace",
+      "customer_workspace",
+      "document_records",
+      "team_offers",
+      "work_needs",
+      "service_offers",
+      "matching",
+      "marketplace",
+    ];
+    for (const key of required) {
+      expect(txt, `feature ${key} missing`).toMatch(
+        new RegExp(`key:\\s*"${key}"`),
+      );
+    }
+  });
+
+  it("only the three beta features are active today", () => {
+    const txt = readWeb("lib/config/feature-availability.ts");
+    const rows = txt.split(/\bkey:\s*"/).slice(1);
+    const active = rows
+      .map((chunk) => {
+        const key = chunk.match(/^([^"]+)"/)?.[1];
+        const avail = chunk.match(/availability:\s*"([^"]+)"/)?.[1];
+        return key && avail === "active" ? key : null;
+      })
+      .filter((k): k is string => !!k);
+    expect(new Set(active)).toEqual(
+      new Set(["profile_text_first", "journal_text_first", "account_roles"]),
+    );
+  });
+
+  it("matching + marketplace are hidden by config", () => {
+    const txt = readWeb("lib/config/feature-availability.ts");
+    expect(txt).toMatch(
+      /key:\s*"matching",[\s\S]{0,200}availability:\s*"hidden"/,
+    );
+    expect(txt).toMatch(
+      /key:\s*"marketplace",[\s\S]{0,200}availability:\s*"hidden"/,
+    );
+  });
+
+  it("dashboard page reads features from the central catalogue", () => {
+    const txt = readWeb("app/[locale]/dashboard/page.tsx");
+    expect(txt).toMatch(/FeatureAvailabilityGrid/);
+  });
+
+  it("FeatureAvailabilityGrid gates CTAs on isFeatureActive", () => {
+    const txt = readWeb("components/app/feature-availability-grid.tsx");
+    expect(txt).toMatch(/isFeatureActive/);
+    // Preparing cards must NOT render a navigating link without an
+    // active gate. Assert the only `<Link>` render is inside the
+    // `active && f.primaryRoute ? (...) : (...)` ternary.
+    expect(txt).toMatch(/active\s*&&\s*f\.primaryRoute\s*\?\s*\(\s*<Link/);
+    // And assert there is exactly one Link tag in the component (the
+    // gated one) — guards against an accidental extra ungated render.
+    const linkOpens = txt.match(/<Link\b/g) ?? [];
+    expect(linkOpens.length).toBe(1);
+  });
+
+  it("LT + EN expose the dashboard features heading + every feature label", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    for (const m of [lt, en]) {
+      expect(m.dashboard.featuresHeading.title).toBeTruthy();
+      expect(m.dashboard.featuresHeading.body).toBeTruthy();
+      expect(m.features.preparing_badge).toBeTruthy();
+      expect(m.features.preparing_generic_reason).toBeTruthy();
+      for (const key of [
+        "profile_text_first",
+        "journal_text_first",
+        "account_roles",
+        "role_expansion",
+        "external_confirmation",
+        "company_workspace",
+        "agency_workspace",
+        "customer_workspace",
+        "document_records",
+        "team_offers",
+        "work_needs",
+        "service_offers",
+        "matching",
+        "marketplace",
+      ]) {
+        expect(m.features[key]?.label, `${key} label`).toBeTruthy();
+        expect(
+          m.features[key]?.description,
+          `${key} description`,
+        ).toBeTruthy();
+      }
+    }
+  });
+
+  it("shared dashboard heading body carries the non-locking promise", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    expect(lt.dashboard.featuresHeading.body).toMatch(
+      /paruoštos|paruoštus|kai jos|vėliau/i,
+    );
+    expect(en.dashboard.featuresHeading.body).toMatch(
+      /later|when they are ready/i,
+    );
+  });
+});
+
+// ── 17. This sprint adds no Supabase migration files ────────────────────
 
 describe("no migration files added by this sprint", () => {
   it("supabase/migrations contains no new files vs main baseline", () => {

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { TextFirstPreview } from "./preview";
+import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { env } from "@/lib/env";
 
 /**
@@ -19,5 +20,21 @@ export default async function TextFirstDesignPreview({
   if (env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS !== "true") {
     notFound();
   }
-  return <TextFirstPreview />;
+  // The capture script targets this page; render the FeatureAvailabilityGrid
+  // here (server component) below the client preview so mobile evidence
+  // shows the new config-driven dashboard surface alongside the existing
+  // text-first composers.
+  return (
+    <>
+      <TextFirstPreview />
+      <div
+        data-testid="preview-feature-grid"
+        className="mx-auto max-w-container px-4 pb-10"
+      >
+        <FeatureAvailabilityGrid
+          excludeKeys={["profile_text_first", "journal_text_first"]}
+        />
+      </div>
+    </>
+  );
 }
