@@ -62,7 +62,59 @@
     "importComingSoon": "CV import will be enabled in M2.",
     "importNotSaved": "Selected: {file}. The file isn't uploaded or stored yet.",
     "customPrompt": "Can't find your skill?",
-    "customComingSoon": "coming soon"
+    "customComingSoon": "coming soon",
+    "textFirst": {
+      "title": "Tell us what you do",
+      "helper": "Write a few sentences or upload a CV. We'll suggest skills, work directions, roles and CV entries — but you confirm what counts.",
+      "placeholder": "e.g. I spent 8 years in interior finishing — drywall ceilings, flooring, plumbing — and led a team of 4.",
+      "submit": "Suggest a structure",
+      "manualCta": "Add manually",
+      "manualHelper": "Manual selection stays as a secondary path. Start from text or CV — it's faster.",
+      "rescan": "Re-suggest from text",
+      "backToText": "Back to text",
+      "applyAll": "Add confirmed suggestions",
+      "appliedToast": "Confirmed suggestions added to your profile. You can still edit them manually."
+    }
+  },
+  "structuring": {
+    "groupEyebrow": "What we found",
+    "ruleBasedNotice": "Note: this still uses a small dictionary and regex, not AI. Suggestions are not facts until you confirm them.",
+    "emptyBucket": "Nothing clear in this part. You can write more or skip it.",
+    "noMatches": "Nothing clear in this text yet. Try adding more detail or add items manually.",
+    "buckets": {
+      "skills": "Detected skills",
+      "directions": "Possible work directions",
+      "roles": "Possible roles",
+      "experience": "Experience",
+      "cvEntries": "Possible CV entries",
+      "time": "Time",
+      "quantity": "Quantity",
+      "site": "Site / location"
+    },
+    "experience": {
+      "years": "Experience: {n} year(s)",
+      "team": "Team led: {n}"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "edit": "Edit",
+      "discard": "Discard"
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "edited": "Edited",
+      "discarded": "Discarded",
+      "pending": "Suggestion"
+    },
+    "cv": {
+      "title": "Upload or paste a CV",
+      "helper": "Upload a PDF / DOCX or paste your CV text. File upload is not stored yet — for now, use paste.",
+      "uploadLabel": "Upload CV file",
+      "uploadComingSoon": "File upload lands in M2 — for now paste the text.",
+      "pasteLabel": "Paste CV text",
+      "pastePlaceholder": "Paste your CV text here.",
+      "pasteSubmit": "Suggest from CV text"
+    }
   },
   "live": {
     "chip": {
@@ -443,7 +495,11 @@
       "account": {
         "email_label": "Email",
         "roles_label": "My roles",
-        "logout": "Sign out"
+        "logout": "Sign out",
+        "rolesIntro": "Your worker space is active right now. Other roles will roll out step by step — you're not locked into one way of using labourmarket.ai.",
+        "active_workspace": "Active space",
+        "preview_workspace": "Preview",
+        "comingLater": "Available later"
       },
       "comingSoon": {
         "greeting": "👋 Welcome, {name}",

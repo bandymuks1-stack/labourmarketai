@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
-  JournalEntryForm,
+  JournalEntryComposer,
   type JournalEngagement,
-} from "@/components/app/journal-entry-form";
+} from "@/components/app/journal-entry-composer";
 import { createClient } from "@/lib/supabase/server";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
@@ -141,6 +141,18 @@ export default async function JournalPage({
     .filter((s): s is string => s !== null)
     .map((slug) => ({ slug, name: tProf(slug) }));
 
+  // Worker's saved skills — used by the composer to surface
+  // "this entry could strengthen X" suggestions for the rule-based parser.
+  const tSkillName = await getTranslations("skillNames");
+  const { data: workerSkillRows } = await supabase
+    .from("worker_skills")
+    .select("skills(slug)")
+    .eq("worker_id", worker.id);
+  const workerSkills = (workerSkillRows ?? [])
+    .map((r) => (r.skills as { slug: string | null } | null)?.slug ?? null)
+    .filter((slug): slug is string => !!slug)
+    .map((slug) => ({ slug, name: tSkillName(slug) }));
+
   // Entries with their metrics + confirmation status.
   const { data: entries } = await supabase
     .from("journal_entries")
@@ -174,7 +186,11 @@ export default async function JournalPage({
         </span>
       </div>
 
-      <JournalEntryForm engagements={engagements} directions={directions} />
+      <JournalEntryComposer
+        engagements={engagements}
+        directions={directions}
+        workerSkills={workerSkills}
+      />
 
       {/* Entry list */}
       <section className="flex flex-col gap-3">

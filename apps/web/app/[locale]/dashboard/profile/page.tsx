@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
+import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { type CvSkill } from "@/components/app/cv-preview";
 import {
   CvEngagementCards,
@@ -88,6 +89,10 @@ export default async function ProfilePage({
   let skillDots: SkillDot[] = [];
   let engagementCards: EngagementCard[] = [];
   let professionIconSlug: string | null = null;
+  // Skills the worker is allowed to pick from across all their directions.
+  // The text-first flow needs this catalogue (id + slug + localized name) so
+  // confirmed parser matches can be mapped back to a real skill_id.
+  const allowedSkills: { id: string; slug: string; name: string }[] = [];
   if (workerId) {
     const { data: wpAll } = await supabase
       .from("worker_professions")
@@ -193,6 +198,27 @@ export default async function ProfilePage({
       };
     });
 
+    // Catalogue of skills allowed for this worker (all directions). Used by
+    // the text-first flow to resolve confirmed parser matches to skill_ids.
+    const workerProfIds = (wpAll ?? [])
+      .map((r) => r.profession_id)
+      .filter((id): id is string => !!id);
+    if (workerProfIds.length > 0) {
+      const { data: psRows } = await supabase
+        .from("profession_skills")
+        .select("skills(id, slug)")
+        .in("profession_id", workerProfIds);
+      const seen = new Set<string>();
+      for (const row of psRows ?? []) {
+        const s = row.skills as { id: string | null; slug: string | null } | null;
+        if (s?.id && s.slug && !seen.has(s.id)) {
+          seen.add(s.id);
+          allowedSkills.push({ id: s.id, slug: s.slug, name: tSkill(s.slug) });
+        }
+      }
+      allowedSkills.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
     // Profession-level icon — stored in profession_templates.template->>'icon_slug'
     // (spec referenced a flat icon_slug column; actual schema nests it in the
     // template jsonb). Platform default for the worker's primary profession.
@@ -219,16 +245,26 @@ export default async function ProfilePage({
 
       {workerId ? (
         <>
-          <WorkerTradeProfile
+          {/* PRIMARY path — text-first / CV-first. Manual selection is now a
+              secondary "Pridėti rankiniu būdu" link inside this flow. */}
+          <ProfileTextFirstFlow
             workerId={workerId}
-            professions={professions}
-            currentProfessionId={currentProfessionId}
-            directions={workerDirections}
-            initialSkillIds={initialSkillIds}
-            personName={personName}
-            roles={roles}
-            activeRole={activeRole}
-            savedSkills={savedSkills}
+            professionSkills={allowedSkills}
+            professions={professions.map((p) => ({ ...p, name: tProf(p.slug) }))}
+            initialSelectedIds={initialSkillIds}
+            manualSlot={
+              <WorkerTradeProfile
+                workerId={workerId}
+                professions={professions}
+                currentProfessionId={currentProfessionId}
+                directions={workerDirections}
+                initialSkillIds={initialSkillIds}
+                personName={personName}
+                roles={roles}
+                activeRole={activeRole}
+                savedSkills={savedSkills}
+              />
+            }
           />
           <CvEngagementCards
             cards={engagementCards}
