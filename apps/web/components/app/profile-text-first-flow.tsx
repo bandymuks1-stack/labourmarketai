@@ -10,11 +10,52 @@ import {
   extractProfileSuggestions,
   type ProfileSuggestions,
 } from "@/lib/structuring/extract-profile-suggestions";
+import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 type SkillRow = { id: string; slug: string };
 type ProfRow = { id: string; slug: string };
+
+/** Tiny inline pill — tells the user the *narrative* is persisted. Suggestions
+ *  still need per-card confirm; this is decoupled from "skills are verified". */
+function TextSaveIndicator({
+  state,
+  t,
+}: {
+  state: "idle" | "saving" | "saved" | "error";
+  t: (key: string) => string;
+}) {
+  if (state === "idle") return null;
+  if (state === "saving") {
+    return (
+      <p
+        role="status"
+        className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+      >
+        {t("textSavingLabel")}
+      </p>
+    );
+  }
+  if (state === "error") {
+    return (
+      <p
+        role="alert"
+        className="font-mono text-[10px] uppercase tracking-label text-state-danger"
+      >
+        {t("textSaveErrorLabel")}
+      </p>
+    );
+  }
+  return (
+    <p
+      role="status"
+      className="font-mono text-[10px] uppercase tracking-label text-state-success"
+    >
+      ✓ {t("textSavedLabel")} · {t("textClaimNotVerified")}
+    </p>
+  );
+}
 
 /** Per-suggestion view state — the parser proposes, the user disposes. */
 type Item<T> = {
@@ -40,6 +81,7 @@ export function ProfileTextFirstFlow({
   professionSkills,
   professions,
   initialSelectedIds,
+  initialText = "",
   manualSlot,
 }: {
   workerId: string;
@@ -48,6 +90,8 @@ export function ProfileTextFirstFlow({
   /** Localized professions, used to render direction / role suggestions. */
   professions: (ProfRow & { name: string })[];
   initialSelectedIds: string[];
+  /** Previously-saved self-description text (workers.bio), prefilled into the composer. */
+  initialText?: string;
   /** Manual picker rendered after the user clicks "Add manually". */
   manualSlot: React.ReactNode;
 }) {
@@ -56,8 +100,11 @@ export function ProfileTextFirstFlow({
   const tBucket = useTranslations("structuring.buckets");
 
   const [stage, setStage] = useState<"compose" | "review" | "manual">("compose");
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialText);
   const [pasted, setPasted] = useState("");
+  const [textSaveState, setTextSaveState] = useState<"idle" | "saving" | "saved" | "error">(
+    initialText.trim().length > 0 ? "saved" : "idle",
+  );
   const [suggestions, setSuggestions] = useState<ProfileSuggestions | null>(
     null,
   );
@@ -86,6 +133,19 @@ export function ProfileTextFirstFlow({
     const s = extractProfileSuggestions(raw);
     setText(raw);
     setSuggestions(s);
+    // Persist the user's own words alongside the parser pass. The text is the
+    // *claim* (§3) — saved into workers.bio — and reload prefills the composer.
+    // Suggestions still need a per-card confirm; this save does NOT mark any
+    // skill as verified.
+    if (raw.trim().length > 0) {
+      setTextSaveState("saving");
+      void saveWorkerProfileText(raw)
+        .then(() => setTextSaveState("saved"))
+        .catch((e) => {
+          console.error("[profile-text-first] save text failed:", e);
+          setTextSaveState("error");
+        });
+    }
     setSkills(
       s.skillSlugs
         .filter((slug) => skillBySlug.has(slug))
@@ -212,6 +272,7 @@ export function ProfileTextFirstFlow({
           onManual={() => setStage("manual")}
           initial={text}
         />
+        <TextSaveIndicator state={textSaveState} t={t} />
         <CvInputPanel
           onPasteSubmit={(v) => {
             setPasted(v);
@@ -267,6 +328,8 @@ export function ProfileTextFirstFlow({
       <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
         {tS("ruleBasedNotice")}
       </p>
+
+      <TextSaveIndicator state={textSaveState} t={t} />
 
       {totalDetected === 0 ? (
         // Universal fallback (Phase 4): the parser is rule-based and will miss

@@ -77,7 +77,11 @@
       "noSuggestionsFallback": "No clear suggestions yet. You can add more detail or add information manually.",
       "confirmedByYou": "Confirmed by you",
       "addedToProfile": "Added to your profile",
-      "needsExternalConfirmation": "Needs external confirmation later"
+      "needsExternalConfirmation": "Needs external confirmation later",
+      "textSavingLabel": "Saving…",
+      "textSavedLabel": "Your text is saved",
+      "textSaveErrorLabel": "Could not save your text. Please try again.",
+      "textClaimNotVerified": "This is your own claim — not externally verified yet"
     }
   },
   "roles": {

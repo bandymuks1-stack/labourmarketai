@@ -66,10 +66,11 @@ export default async function ProfilePage({
 
   const { data: worker } = await supabase
     .from("workers")
-    .select("id")
+    .select("id, bio")
     .eq("profile_id", user.id)
     .maybeSingle();
   const workerId = worker?.id ?? null;
+  const savedProfileText = worker?.bio ?? "";
 
   // Names live in JSON keyed by slug (PLATFORM_DOCTRINE §2); fetch id+slug,
   // translate + sort by the localized name here.
@@ -252,6 +253,7 @@ export default async function ProfilePage({
             professionSkills={allowedSkills}
             professions={professions.map((p) => ({ ...p, name: tProf(p.slug) }))}
             initialSelectedIds={initialSkillIds}
+            initialText={savedProfileText}
             manualSlot={
               <WorkerTradeProfile
                 workerId={workerId}
