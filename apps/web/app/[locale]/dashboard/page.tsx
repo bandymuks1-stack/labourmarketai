@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PilotRequestButton } from "@/components/app/pilot-request-button";
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
+import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
+import { getVisibleRoleOptions } from "@/lib/config/roles";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
@@ -382,26 +384,25 @@ export default async function DashboardOverviewPage({
         </section>
       </div>
 
-      {/* ── Open another direction (non-locking, §1/§2) ── */}
-      <section className="group flex items-start justify-between gap-4 rounded-md border border-dashed border-ink-500 px-4 py-4 transition-colors hover:border-brand-blue">
-        <div>
-          <h3 className="flex items-center gap-2 font-display text-sm font-semibold text-text-primary">
-            <span className="font-mono text-brand-orange" aria-hidden>
-              →
-            </span>
-            {tw("addMore.title")}
-          </h3>
-          <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-            {tw("addMore.body")}
-          </p>
-        </div>
+      {/* ── Role expansion (non-locking, catalogue-driven) ──
+          The card list is generated from `lib/config/roles.ts` via
+          `getVisibleRoleOptions()`. Active roles render a navigating
+          link; preparing roles render the `RUOŠIAMA` chip + reason
+          and never a broken CTA. Adding a future role is a one-row
+          change in the role catalogue. The small <Link> below stays
+          as the explicit "go manage roles" handle into account. */}
+      <RoleCatalogueGrid roles={getVisibleRoleOptions()} />
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dashed border-ink-500 px-4 py-3">
+        <p className="text-xs leading-relaxed text-text-muted">
+          {tw("addMore.body")}
+        </p>
         <Link
           href="/dashboard/account"
           className={cn(linkCls, "shrink-0")}
         >
           {tw("addMore.cta")} →
         </Link>
-      </section>
+      </div>
 
       {/*  Config-driven what's-here-and-what's-coming surface (PR #36):
           the central feature catalogue renders preparing features as

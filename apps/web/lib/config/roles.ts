@@ -1,26 +1,35 @@
 /**
- * Central labour-market role model.
+ * Central labour-market role catalogue.
  *
- * One source of truth for which roles exist, which are currently active in
- * the product, which are openly labelled as preparing, and where each lands
- * when chosen. UI surfaces (RoleSwitcher, account page, onboarding picker)
- * read from here instead of duplicating role lists / labels / availability
- * checks. Adding a new role later only requires touching this file +
- * the matching i18n keys — no scattered changes.
+ * One source of truth for: which roles exist, which are usable today,
+ * which are honestly preparing, which are forward-looking and not yet
+ * surfaced. UI surfaces (RoleSwitcher, account page, dashboard role
+ * expansion section, onboarding picker) read from here instead of
+ * duplicating role lists / labels / availability checks.
  *
- * Non-locking: every role flags `canBeAddedLater = true`. The system never
- * locks a person into one role; the first choice is only an entry point
- * (PLATFORM_DOCTRINE §1; product principle of this sprint).
+ * Non-locking by design: every role row carries `canBeAddedLater: true`.
+ * The platform never locks a person into one role — the first choice is
+ * only an entry point (PLATFORM_DOCTRINE §1; product doctrine for this
+ * sprint sequence).
+ *
+ * Adding / hiding / promoting a role is a one-row change here + the
+ * matching i18n keys + (optionally) a feature catalogue row. No
+ * component edits.
  */
 
-export type Availability = "active" | "preparing" | "hidden";
+import type { FeatureKey } from "./feature-availability";
 
-/** Roles that already exist as a `Role` union elsewhere in the codebase. */
+export type RoleAvailability = "active" | "preparing" | "hidden";
+
+/** Roles already used as the `Role` union elsewhere in the codebase
+ *  (matches `profile_roles.role` + DB enum today). */
 export type LiveRoleId = "worker" | "company" | "agency" | "customer";
 
-/** Forward-looking role ids — documented as preparing here so the system has
- *  a single canonical list. They do NOT yet exist as DB enum values; this is
- *  pure UI / config data. Future migration sprints would add them. */
+/** Forward-looking role ids — documented as `hidden` for now so the
+ *  catalogue is a single, searchable list of "every role we've ever
+ *  considered". They have no DB enum value yet; this is pure UI / config
+ *  data. A future migration sprint adds the enum values; UI flips them
+ *  from `hidden` → `preparing` → `active` one row at a time. */
 export type FutureRoleId =
   | "freelancer"
   | "team_lead"
@@ -31,95 +40,134 @@ export type LabourMarketRoleId = LiveRoleId | FutureRoleId;
 export type LabourMarketRole = {
   /** Stable identifier used in code, URLs, and i18n keys. */
   id: LabourMarketRoleId;
-  /** i18n key for the localized label (e.g. "auth.signup.role.worker"). */
+  /** i18n key for the localized SHORT label (e.g. "Darbuotojas"). */
   labelKey: string;
-  /** i18n key for a one-line description. Optional — undefined for live
-   *  roles whose existing copy already covers the label. */
-  descriptionKey?: string;
-  /** "active" = fully usable today; "preparing" = surfaced honestly as
-   *  RUOŠIAMA; "hidden" = never rendered in user UI. */
-  availability: Availability;
+  /** i18n key for a longer description shown on cards / surfaces. */
+  descriptionKey: string;
+  /** "active" = fully usable today; "preparing" = surfaced as RUOŠIAMA;
+   *  "hidden" = catalogue row only, never rendered in user UI. */
+  availability: RoleAvailability;
   /** Can the user START as this role at signup / onboarding? Today only
    *  worker is a real entry point because the others land on the pilot
    *  cockpit, not a full management surface. */
   entryPoint: boolean;
   /** Can the role be added later via the role switcher / account page? */
   canBeAddedLater: boolean;
-  /** Primary route the user goes to when they switch to this role. Omit
-   *  for roles that have no destination yet. */
+  /** Feature key the role maps to. Pulling availability from the feature
+   *  catalogue keeps role / feature honesty in lock-step (e.g. if
+   *  `company_workspace` flips to "active", any role row that points at
+   *  it should be re-considered for promotion too). */
+  primaryFeatureKey?: FeatureKey;
+  /** Primary route the user goes to when they switch to this role.
+   *  Omit for roles that have no destination yet (the renderer will
+   *  surface the preparing chip + reason instead of a navigating link). */
   primaryRoute?: string;
-  /** i18n key for the explanation shown next to a preparing chip. */
-  disabledReasonKey?: string;
+  /** i18n key explaining *why* a role is preparing. UI surfaces show
+   *  this verbatim as a chip / tooltip / reason line. */
+  preparingReasonKey?: string;
+  /** Whether the role is safe to surface in dashboard role-expansion
+   *  surfaces today. Hidden rows are never safe; preparing rows are
+   *  safe (rendered as preparing); active rows are always safe. */
+  safeToShowInRoleSurfaces: boolean;
+  /** Render order for catalogue-driven surfaces. Lower is earlier. */
+  sortOrder: number;
 };
 
 /**
- * The canonical role catalogue. Order matters — this is the order UI
- * surfaces render the rows in. `worker` first because it is the only
- * fully-active role today; the others follow grouped by closeness to
- * shipping.
+ * The canonical role catalogue. Order matters — surfaces iterate over
+ * this list (sorted by `sortOrder`) so the order users see is the order
+ * here.
  */
 export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
   {
     id: "worker",
     labelKey: "auth.signup.role.worker",
+    descriptionKey: "roles.worker.description",
     availability: "active",
     entryPoint: true,
     canBeAddedLater: true,
+    primaryFeatureKey: "profile_text_first",
     primaryRoute: "/dashboard",
+    safeToShowInRoleSurfaces: true,
+    sortOrder: 10,
   },
   {
     id: "company",
     labelKey: "auth.signup.role.company",
+    descriptionKey: "roles.company.description",
     availability: "preparing",
     entryPoint: false,
     canBeAddedLater: true,
+    primaryFeatureKey: "company_workspace",
     primaryRoute: "/dashboard",
-    disabledReasonKey: "auth.dashboard.account.preview_workspace",
+    preparingReasonKey: "roles.preparingReason.default",
+    safeToShowInRoleSurfaces: true,
+    sortOrder: 20,
   },
   {
     id: "agency",
     labelKey: "auth.signup.role.agency",
+    descriptionKey: "roles.agency.description",
     availability: "preparing",
     entryPoint: false,
     canBeAddedLater: true,
+    primaryFeatureKey: "agency_workspace",
     primaryRoute: "/dashboard",
-    disabledReasonKey: "auth.dashboard.account.preview_workspace",
+    preparingReasonKey: "roles.preparingReason.default",
+    safeToShowInRoleSurfaces: true,
+    sortOrder: 30,
   },
   {
     id: "customer",
     labelKey: "auth.signup.role.customer",
+    descriptionKey: "roles.customer.description",
     availability: "preparing",
     entryPoint: false,
     canBeAddedLater: true,
+    primaryFeatureKey: "customer_workspace",
     primaryRoute: "/dashboard",
-    disabledReasonKey: "auth.dashboard.account.preview_workspace",
+    preparingReasonKey: "roles.preparingReason.default",
+    safeToShowInRoleSurfaces: true,
+    sortOrder: 40,
   },
-  // Future roles — documented so the product never lies about scope. They
-  // are hidden from UI today; when their flows ship they flip to
-  // "preparing" then "active" without any other code changes.
+  // ── Forward-looking roles — hidden until UI surfaces ship ─────────
+  // The platform may surface them as `preparing` once the catalogue
+  // text exists in LT + EN; that's a one-row flip.
   {
     id: "freelancer",
     labelKey: "auth.signup.role.freelancer",
-    descriptionKey: "auth.signup.role.freelancer_desc",
+    descriptionKey: "roles.freelancer.description",
     availability: "hidden",
     entryPoint: false,
     canBeAddedLater: true,
+    primaryFeatureKey: "service_offers",
+    preparingReasonKey: "roles.preparingReason.default",
+    safeToShowInRoleSurfaces: false,
+    sortOrder: 50,
   },
   {
     id: "team_lead",
     labelKey: "auth.signup.role.team_lead",
-    descriptionKey: "auth.signup.role.team_lead_desc",
+    descriptionKey: "roles.team_lead.description",
     availability: "hidden",
     entryPoint: false,
     canBeAddedLater: true,
+    primaryFeatureKey: "team_offers",
+    preparingReasonKey: "roles.preparingReason.default",
+    safeToShowInRoleSurfaces: false,
+    sortOrder: 60,
   },
   {
     id: "service_provider",
     labelKey: "auth.signup.role.service_provider",
-    descriptionKey: "auth.signup.role.service_provider_desc",
+    descriptionKey: "roles.service_provider.description",
     availability: "hidden",
     entryPoint: false,
     canBeAddedLater: true,
+    primaryFeatureKey: "service_offers",
+    preparingReasonKey: "roles.preparingReason.default",
+    safeToShowInRoleSurfaces: false,
+    sortOrder: 70,
   },
 ] as const;
 
@@ -130,18 +178,53 @@ export const ROLE_BY_ID: Record<LabourMarketRoleId, LabourMarketRole> =
     LabourMarketRole
   >;
 
-/** Roles surfaced in UI (live + preparing, not hidden). */
+/** Backwards-compatible alias for callers (PR #35) that still iterate
+ *  by "is this visible at all?". Filters out hidden + sorts. */
 export const VISIBLE_LABOUR_MARKET_ROLES: readonly LabourMarketRole[] =
-  LABOUR_MARKET_ROLES.filter((r) => r.availability !== "hidden");
+  [...LABOUR_MARKET_ROLES]
+    .filter((r) => r.availability !== "hidden")
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+
+// ── Helpers (called by UI surfaces) ─────────────────────────────────
+
+export function getRoleConfig(
+  id: LabourMarketRoleId,
+): LabourMarketRole | undefined {
+  return ROLE_BY_ID[id];
+}
+
+/** Roles safe to render on dashboard role-expansion / account surfaces.
+ *  Returns active + preparing rows (hidden is excluded), sorted. */
+export function getVisibleRoleOptions(): readonly LabourMarketRole[] {
+  return [...LABOUR_MARKET_ROLES]
+    .filter((r) => r.safeToShowInRoleSurfaces && r.availability !== "hidden")
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export function getActiveRoles(): readonly LabourMarketRole[] {
+  return [...LABOUR_MARKET_ROLES]
+    .filter((r) => r.availability === "active")
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export function getPreparingRoles(): readonly LabourMarketRole[] {
+  return [...LABOUR_MARKET_ROLES]
+    .filter((r) => r.availability === "preparing")
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export function isRoleActive(id: LabourMarketRoleId): boolean {
+  return ROLE_BY_ID[id]?.availability === "active";
+}
+
+export function isRolePreparing(id: LabourMarketRoleId): boolean {
+  return ROLE_BY_ID[id]?.availability === "preparing";
+}
 
 export function isLiveRoleId(id: string): id is LiveRoleId {
   return id === "worker" || id === "company" || id === "agency" || id === "customer";
 }
 
-export function isLabourMarketRoleAvailable(id: LabourMarketRoleId): boolean {
-  return ROLE_BY_ID[id]?.availability === "active";
-}
-
 export function rolePreparingLabelKey(): string {
-  return "auth.dashboard.account.preview_workspace";
+  return "roles.status.preparing";
 }
