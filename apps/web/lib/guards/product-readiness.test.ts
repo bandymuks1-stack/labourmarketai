@@ -776,7 +776,130 @@ describe("pilot readiness clarity", () => {
   });
 });
 
-// ── 20. This sprint adds no Supabase migration files ────────────────────
+// ── 20. Supergrand vision public surface (PR #40) ───────────────────────
+
+describe("supergrand vision surface", () => {
+  it("public /vision page + LabourMarketOsMap component exist", () => {
+    const page = readWeb("app/[locale]/(marketing)/vision/page.tsx");
+    const map = readWeb("components/marketing/labour-market-os-map.tsx");
+    expect(page).toMatch(/LabourMarketOsMap/);
+    // Map must read from all three catalogues — that's what makes it
+    // tamper-proof against drift.
+    expect(map).toMatch(/from\s+["']@\/lib\/config\/feature-availability["']/);
+    expect(map).toMatch(/from\s+["']@\/lib\/config\/activity-types["']/);
+    expect(map).toMatch(/from\s+["']@\/lib\/config\/roles["']/);
+  });
+
+  it("vision page renders the today / preparing / control-room sections", () => {
+    const page = readWeb("app/[locale]/(marketing)/vision/page.tsx");
+    const map = readWeb("components/marketing/labour-market-os-map.tsx");
+    expect(map).toMatch(/vision\.sections\.today/);
+    expect(map).toMatch(/vision\.sections\.preparing/);
+    expect(map).toMatch(/vision\.sections\.controlRoom/);
+    expect(map).toMatch(/vision\.sections\.future_layers/);
+    // The vision page uses a scoped translator `getTranslations("vision")`,
+    // so the literal key is "honesty" (not "vision.honesty"). Assert the
+    // honesty paragraph is wired through, and that the scoped namespace
+    // is the vision one.
+    expect(page).toMatch(/getTranslations\("vision"\)/);
+    expect(page).toMatch(/t\("honesty"\)/);
+  });
+
+  it("vision control room declares PR #18 BLOCKED + owner smoke PENDING", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    expect(lt.vision.controlRoom.ownerSmokeStatus).toBe("PENDING");
+    expect(en.vision.controlRoom.ownerSmokeStatus).toBe("PENDING");
+    expect(lt.vision.controlRoom.pr18Status).toMatch(/BLOCKED/);
+    expect(en.vision.controlRoom.pr18Status).toMatch(/BLOCKED/);
+    // The fake-claims row must read "never used" in both locales.
+    expect(lt.vision.controlRoom.fakeClaimsStatus).toMatch(/Niekada/);
+    expect(en.vision.controlRoom.fakeClaimsStatus).toMatch(/Never/);
+  });
+
+  it("activityTypes labels resolve in LT + EN", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    for (const id of [
+      "work_done",
+      "skill_claim",
+      "service_offer",
+      "worker_need",
+      "project_need",
+      "team_offer",
+      "company_activity",
+      "learning_goal",
+      "business_idea",
+      "document_record",
+    ]) {
+      expect(lt.activityTypes[id], `LT activityTypes.${id}`).toBeTruthy();
+      expect(en.activityTypes[id], `EN activityTypes.${id}`).toBeTruthy();
+    }
+  });
+
+  it("nav exposes vision and SiteNav links to /vision", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    expect(lt.nav.vision).toBeTruthy();
+    expect(en.nav.vision).toBeTruthy();
+    const nav = readWeb("components/layouts/site-nav.tsx");
+    expect(nav).toMatch(/href:\s*"\/vision"/);
+  });
+
+  it("Super Max Cosmo + Supergrand Vision smoke checklists stay PENDING", () => {
+    // Belt-and-braces: both PR #30 and PR #39 checklists must still
+    // be PENDING; the new sprint may not silently flip them.
+    const pr30 = read("docs/evidence/post-merge-production-smoke-pr30.md");
+    const cosmo = read(
+      "docs/evidence/super-max-cosmo-pilot-readiness-v1/owner-production-smoke-checklist.md",
+    );
+    expect(pr30).toMatch(/Status:\s*PENDING/);
+    expect(cosmo).toMatch(/Status:\s*PENDING/);
+  });
+
+  it("vision-related docs all exist", () => {
+    for (const rel of [
+      "docs/product/labourmarketai-supergrand-vision-os-v1.md",
+      "docs/architecture/labourmarketai-operating-system-map-v1.md",
+      "docs/product/labourmarketai-pilot-to-grand-vision-roadmap-v1.md",
+      "docs/evidence/supergrand-vision-os-leap-v1/README.md",
+      "docs/evidence/supergrand-vision-os-leap-v1/owner-review-checklist.md",
+    ]) {
+      const txt = read(rel);
+      expect(txt.length, `${rel} should be non-empty`).toBeGreaterThan(200);
+    }
+  });
+
+  it("vision doctrine doc refuses patent / patent-pending language", () => {
+    // Task spec G: do NOT call any internal architecture a patent
+    // application or claim "patent pending". Owner review required
+    // before any such legal claim ever lands publicly.
+    const docs = [
+      read("docs/product/labourmarketai-supergrand-vision-os-v1.md"),
+      read("docs/architecture/labourmarketai-operating-system-map-v1.md"),
+      read("docs/product/labourmarketai-pilot-to-grand-vision-roadmap-v1.md"),
+    ];
+    for (const txt of docs) {
+      expect(txt).not.toMatch(/\bpatent\s+pending\b/i);
+      expect(txt).not.toMatch(/\bpatented\b/i);
+      expect(txt).not.toMatch(/\bpatent application\b/i);
+    }
+  });
+
+  it("LabourMarketOsMap does not embed any fake live metric", () => {
+    // Numbers shown on the control-room card must come from catalogue
+    // derived counts, NOT from a literal that pretends to be live data.
+    // We confirm the component sources its Stat values from
+    // `getVisibleFeatures()` and not from hardcoded strings like
+    // "318k" or "1,180" (those still live on the marketing landing
+    // and are governed by their own PRE-ALPHA chip).
+    const map = readWeb("components/marketing/labour-market-os-map.tsx");
+    expect(map).toMatch(/getVisibleFeatures/);
+    expect(map).not.toMatch(/318[Kk]|1,180|1,200/);
+  });
+});
+
+// ── 21. This sprint adds no Supabase migration files ────────────────────
 
 describe("no migration files added by this sprint", () => {
   it("supabase/migrations contains no new files vs main baseline", () => {

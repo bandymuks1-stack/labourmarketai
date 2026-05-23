@@ -5,6 +5,7 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 
 const LINKS = [
   { key: "platform", href: "/" },
+  { key: "vision", href: "/vision" },
   { key: "solutions", href: "/for-companies" },
   { key: "resources", href: "/for-workers" },
   { key: "pricing", href: "/pricing" },
