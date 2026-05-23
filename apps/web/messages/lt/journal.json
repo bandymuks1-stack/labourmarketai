@@ -16,6 +16,7 @@
   "suggestionReviewIntro": "Tai pasiūlymai. Patvirtinkite tik tai, kas teisinga. Nepatvirtinti pasiūlymai neišsaugomi kaip faktai.",
   "savedTitle": "Įrašas išsaugotas",
   "savedBody": "Jūsų patvirtinti duomenys pridėti prie darbo istorijos.",
+  "pilotBackboneNote": "Pilotinė versija: jūsų įrašai šiuo metu privatūs. Vadovo / kliento patvirtinimo bei audito sluoksnis dar ruošiamas — kai bus paruoštas, įjungsime jį tame pačiame įraše be jūsų papildomų veiksmų.",
   "quantitySummaryHint": "Neprivaloma greita santrauka — visus kiekius ir vienetus taip pat galite surašyti aprašyme aukščiau.",
   "workDirectionOptional": "Darbo kryptis (neprivaloma)",
   "classifyLater": "Ateityje sistema galės pasiūlyti darbo kryptį, įgūdžius, kiekius ir vienetus pagal jūsų įrašą. Pasiūlymai turės būti peržiūrimi prieš išsaugant kaip faktą.",

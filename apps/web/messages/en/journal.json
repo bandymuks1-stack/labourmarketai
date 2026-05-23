@@ -16,6 +16,7 @@
   "suggestionReviewIntro": "These are suggestions. Confirm only what is correct. Unconfirmed suggestions are not saved as facts.",
   "savedTitle": "Entry saved",
   "savedBody": "Your confirmed details were added to your work history.",
+  "pilotBackboneNote": "Pilot release: your entries are private right now. The manager / client confirmation + audit layer is still being prepared — when it ships, we'll enable it on the same entry with no extra action from you.",
   "quantitySummaryHint": "Optional quick summary — you can also write all quantities and units in the description above.",
   "workDirectionOptional": "Work direction (optional)",
   "classifyLater": "Later, the system can suggest work direction, skills, quantities, and units from your entry. Suggestions must be reviewed before becoming facts.",

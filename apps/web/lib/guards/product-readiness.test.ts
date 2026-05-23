@@ -740,7 +740,43 @@ describe("role catalogue + shared role-card model", () => {
   });
 });
 
-// ── 19. This sprint adds no Supabase migration files ────────────────────
+// ── 19. Pilot readiness clarity (Super Max Cosmo, PR #39) ───────────────
+
+describe("pilot readiness clarity", () => {
+  it("journal page renders the honest pilot-backbone note", () => {
+    const txt = readWeb("app/[locale]/dashboard/journal/page.tsx");
+    expect(txt).toMatch(/t\("pilotBackboneNote"\)/);
+  });
+
+  it("LT + EN expose the pilotBackboneNote with a clear preparing signal", () => {
+    const lt = JSON.parse(readWeb("messages/lt/journal.json"));
+    const en = JSON.parse(readWeb("messages/en/journal.json"));
+    expect(lt.pilotBackboneNote).toBeTruthy();
+    expect(en.pilotBackboneNote).toBeTruthy();
+    expect(lt.pilotBackboneNote).toMatch(/ruošiam|piloti/i);
+    expect(en.pilotBackboneNote).toMatch(/prepared|preparing|pilot/i);
+    // Honesty: must mention privacy / closed visibility today so the
+    // worker isn't misled into thinking the legal backbone is live.
+    expect(lt.pilotBackboneNote).toMatch(/privat/i);
+    expect(en.pilotBackboneNote).toMatch(/private/i);
+  });
+
+  it("Super Max Cosmo owner smoke checklist exists and is PENDING", () => {
+    const txt = read(
+      "docs/evidence/super-max-cosmo-pilot-readiness-v1/owner-production-smoke-checklist.md",
+    );
+    expect(txt).toMatch(/Status:\s*PENDING/);
+    expect(txt).toMatch(/Smoke status:\s*PENDING/);
+  });
+
+  it("PR #30 smoke checklist also remains PENDING", () => {
+    // Belt-and-braces: both checklists must stay PENDING in lock-step.
+    const pr30 = read("docs/evidence/post-merge-production-smoke-pr30.md");
+    expect(pr30).toMatch(/Status:\s*PENDING/);
+  });
+});
+
+// ── 20. This sprint adds no Supabase migration files ────────────────────
 
 describe("no migration files added by this sprint", () => {
   it("supabase/migrations contains no new files vs main baseline", () => {
