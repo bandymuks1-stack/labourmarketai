@@ -2,34 +2,33 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
+import { VISIBLE_PRIMARY_NAV_ITEMS } from "@/lib/config/navigation";
 import { cn } from "@/lib/utils";
 
-// P1.2 (beta hardening): Discover/Search were empty dead-ends → replaced with
-// the real Profile (work identity) and Journal (proof) surfaces.
-const TABS = [
-  { key: "overview", href: "/dashboard" },
-  { key: "profile", href: "/dashboard/profile" },
-  { key: "journal", href: "/dashboard/journal" },
-  { key: "account", href: "/dashboard/account" },
-] as const;
-
+/**
+ * Tablet / desktop horizontal tab bar. Tabs are sourced from
+ * `lib/config/navigation.ts` (which itself derives from the
+ * feature-availability catalogue). Adding / removing a tab is a
+ * catalogue + meta change — never a component edit. The component is a
+ * thin renderer.
+ */
 export function DashboardTabs({ className }: { className?: string }) {
-  const t = useTranslations("auth.dashboard.tabs");
+  const t = useTranslations();
   const pathname = usePathname();
   return (
     <nav
       aria-label="Dashboard sections"
       className={cn("flex items-center gap-1", className)}
     >
-      {TABS.map((tab) => {
+      {VISIBLE_PRIMARY_NAV_ITEMS.map(({ id, href, tabLabelKey }) => {
         const active =
-          tab.href === "/dashboard"
+          href === "/dashboard"
             ? pathname === "/dashboard"
-            : pathname === tab.href || pathname.startsWith(tab.href + "/");
+            : pathname === href || pathname.startsWith(href + "/");
         return (
           <Link
-            key={tab.key}
-            href={tab.href}
+            key={id}
+            href={href as "/dashboard"}
             aria-current={active ? "page" : undefined}
             className={cn(
               "rounded-md px-3 py-1.5 text-sm transition-colors",
@@ -38,7 +37,7 @@ export function DashboardTabs({ className }: { className?: string }) {
                 : "text-text-secondary hover:text-text-primary",
             )}
           >
-            {t(tab.key)}
+            {t(tabLabelKey)}
           </Link>
         );
       })}

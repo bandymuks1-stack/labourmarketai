@@ -99,6 +99,10 @@
   "features": {
     "preparing_generic_reason": "Ši galimybė bus įjungta vėliau.",
     "preparing_badge": "Ruošiama",
+    "overview": {
+      "label": "Apžvalga",
+      "description": "Pagrindinis langas su pradžia, pasiūlymais ir galimybėmis."
+    },
     "profile_text_first": {
       "label": "Profilis",
       "description": "Apibūdinkite save savais žodžiais arba įklijuokite CV. Sistema pasiūlys įgūdžius, kuriuos patvirtinsite jūs."

@@ -99,6 +99,10 @@
   "features": {
     "preparing_generic_reason": "This option will be enabled later.",
     "preparing_badge": "Preparing",
+    "overview": {
+      "label": "Overview",
+      "description": "Main view with the starting steps, suggestions and opportunities."
+    },
     "profile_text_first": {
       "label": "Profile",
       "description": "Describe yourself in your own words or paste a CV. The system suggests skills, but you confirm them."
