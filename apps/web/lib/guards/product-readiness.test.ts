@@ -622,7 +622,125 @@ describe("catalogue-driven primary nav", () => {
   });
 });
 
-// ── 18. This sprint adds no Supabase migration files ────────────────────
+// ── 18. Role catalogue drives dashboard role surfaces ───────────────────
+
+describe("role catalogue + shared role-card model", () => {
+  it("catalogue contains every required role id (live + future)", () => {
+    const txt = readWeb("lib/config/roles.ts");
+    const required = [
+      "worker",
+      "company",
+      "agency",
+      "customer",
+      "freelancer",
+      "team_lead",
+      "service_provider",
+    ];
+    for (const id of required) {
+      expect(txt, `role ${id} missing`).toMatch(new RegExp(`id:\\s*"${id}"`));
+    }
+  });
+
+  it("only `worker` is currently active", () => {
+    const txt = readWeb("lib/config/roles.ts");
+    const rows = txt.split(/\bid:\s*"/).slice(1);
+    const active = rows
+      .map((chunk) => {
+        const id = chunk.match(/^([^"]+)"/)?.[1];
+        const avail = chunk.match(/availability:\s*"([^"]+)"/)?.[1];
+        return id && avail === "active" ? id : null;
+      })
+      .filter((id): id is string => !!id);
+    expect(new Set(active)).toEqual(new Set(["worker"]));
+  });
+
+  it("role config exposes the new spec helpers", () => {
+    const txt = readWeb("lib/config/roles.ts");
+    for (const helper of [
+      "getRoleConfig",
+      "getVisibleRoleOptions",
+      "getActiveRoles",
+      "getPreparingRoles",
+      "isRoleActive",
+      "isRolePreparing",
+    ]) {
+      expect(txt, `helper ${helper} missing`).toMatch(
+        new RegExp(`export function ${helper}\\b`),
+      );
+    }
+  });
+
+  it("RoleCatalogueCard renders <Link> only inside the active branch", () => {
+    const txt = readWeb("components/app/role-catalogue-card.tsx");
+    expect(txt).toMatch(/isActive\s*&&\s*role\.primaryRoute\s*\?\s*\(\s*<Link/);
+    // Exactly one Link tag — guards against an ungated render.
+    const linkOpens = txt.match(/<Link\b/g) ?? [];
+    expect(linkOpens.length).toBe(1);
+  });
+
+  it("dashboard mounts RoleCatalogueGrid from the role catalogue", () => {
+    const txt = readWeb("app/[locale]/dashboard/page.tsx");
+    expect(txt).toMatch(/RoleCatalogueGrid/);
+    expect(txt).toMatch(/getVisibleRoleOptions/);
+  });
+
+  it("RoleSwitcher + account page still consume the role catalogue", () => {
+    const rs = readWeb("components/app/role-switcher.tsx");
+    const acct = readWeb("app/[locale]/dashboard/account/page.tsx");
+    // PR #35 wired both through ROLE_BY_ID — this guard prevents drift.
+    expect(rs).toMatch(/ROLE_BY_ID|LABOUR_MARKET_ROLES/);
+    expect(acct).toMatch(/ROLE_BY_ID/);
+  });
+
+  it("role labels + descriptions are i18n keys, never raw UI text", () => {
+    const txt = readWeb("lib/config/roles.ts");
+    const labelKeys = [...txt.matchAll(/labelKey:\s*"([^"]+)"/g)].map(
+      (m) => m[1],
+    );
+    const descKeys = [...txt.matchAll(/descriptionKey:\s*"([^"]+)"/g)].map(
+      (m) => m[1],
+    );
+    expect(labelKeys.length).toBeGreaterThanOrEqual(7);
+    expect(descKeys.length).toBeGreaterThanOrEqual(7);
+    for (const key of [...labelKeys, ...descKeys]) {
+      // Heuristic: i18n keys are dotted identifiers, never spaces /
+      // diacritics / sentence text.
+      expect(key).toMatch(/^[a-z][a-zA-Z0-9._]*$/);
+    }
+  });
+
+  it("LT + EN expose the new roles.* namespace + all role descriptions", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    for (const m of [lt, en]) {
+      expect(m.roles.nonLockingIntro).toBeTruthy();
+      expect(m.roles.addLaterHint).toBeTruthy();
+      expect(m.roles.status.active).toBeTruthy();
+      expect(m.roles.status.preparing).toBeTruthy();
+      expect(m.roles.preparingReason.default).toBeTruthy();
+      for (const id of [
+        "worker",
+        "company",
+        "agency",
+        "customer",
+        "freelancer",
+        "team_lead",
+        "service_provider",
+      ]) {
+        expect(m.roles[id]?.description, `${id} description`).toBeTruthy();
+      }
+    }
+  });
+
+  it("non-locking role copy carries the explicit promise", () => {
+    const lt = JSON.parse(readWeb("messages/lt.json"));
+    const en = JSON.parse(readWeb("messages/en.json"));
+    expect(lt.roles.nonLockingIntro).toMatch(/apribojim|nėra\s+lim/i);
+    expect(en.roles.nonLockingIntro).toMatch(/not a limit|not lock/i);
+  });
+});
+
+// ── 19. This sprint adds no Supabase migration files ────────────────────
 
 describe("no migration files added by this sprint", () => {
   it("supabase/migrations contains no new files vs main baseline", () => {

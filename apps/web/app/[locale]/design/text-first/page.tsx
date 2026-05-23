@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { TextFirstPreview } from "./preview";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
+import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
+import { getVisibleRoleOptions } from "@/lib/config/roles";
 import { env } from "@/lib/env";
 
 /**
@@ -29,11 +31,17 @@ export default async function TextFirstDesignPreview({
       <TextFirstPreview />
       <div
         data-testid="preview-feature-grid"
-        className="mx-auto max-w-container px-4 pb-10"
+        className="mx-auto max-w-container px-4 pb-6"
       >
         <FeatureAvailabilityGrid
           excludeKeys={["profile_text_first", "journal_text_first"]}
         />
+      </div>
+      <div
+        data-testid="preview-role-grid"
+        className="mx-auto max-w-container px-4 pb-10"
+      >
+        <RoleCatalogueGrid roles={getVisibleRoleOptions()} />
       </div>
     </>
   );

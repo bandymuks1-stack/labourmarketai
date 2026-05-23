@@ -80,6 +80,38 @@
       "needsExternalConfirmation": "Needs external confirmation later"
     }
   },
+  "roles": {
+    "nonLockingIntro": "Your first role is not a limit. You can start with what works today and add other roles when they are ready.",
+    "addLaterHint": "You'll be able to add more roles later — they appear in the catalogue once they're ready.",
+    "status": {
+      "active": "Active",
+      "preparing": "Preparing"
+    },
+    "preparingReason": {
+      "default": "This role is still being prepared. We'll enable it once it can ship honestly."
+    },
+    "worker": {
+      "description": "Worker: text-first profile, skills, and work journal. Active today."
+    },
+    "company": {
+      "description": "Company space: team, project and need management. Will be enabled later."
+    },
+    "agency": {
+      "description": "Agency space: candidate pool and service-offer management. Will be enabled later."
+    },
+    "customer": {
+      "description": "Customer space: service ordering and reports. Will be enabled later."
+    },
+    "freelancer": {
+      "description": "Freelancer: services and work history in one profile. Preparing."
+    },
+    "team_lead": {
+      "description": "Team lead: team composition and joint offers. Preparing."
+    },
+    "service_provider": {
+      "description": "Service provider: public service catalogue with confirmed evidence. Preparing."
+    }
+  },
   "suggestionStatuses": {
     "detected": "Suggested",
     "confirmed_by_user": "Confirmed by you",
@@ -322,7 +354,10 @@
         "worker": "Worker",
         "company": "Company",
         "agency": "Agency",
-        "customer": "Customer"
+        "customer": "Customer",
+        "freelancer": "Freelancer",
+        "team_lead": "Team lead",
+        "service_provider": "Service provider"
       },
       "subcopy": "Sign up with Google, or with your email and password. You'll pick your role next.",
       "google_label": "Continue with Google",

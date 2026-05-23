@@ -80,6 +80,38 @@
       "needsExternalConfirmation": "Vėliau reikės išorinio patvirtinimo"
     }
   },
+  "roles": {
+    "nonLockingIntro": "Jūsų pradinis vaidmuo nėra apribojimas. Galite pradėti nuo to, kas veikia šiandien, o kitus vaidmenis pridėti, kai jie bus paruošti.",
+    "addLaterHint": "Vėliau galėsite pridėti daugiau vaidmenų — kataloge jie pasirodys, kai bus paruošti.",
+    "status": {
+      "active": "Aktyvu",
+      "preparing": "Ruošiama"
+    },
+    "preparingReason": {
+      "default": "Šis vaidmuo dar ruošiamas. Įjungsime jį, kai bus paruoštas saugiai."
+    },
+    "worker": {
+      "description": "Darbuotojas: text-first profilis, įgūdžiai ir darbo dienoraštis. Aktyvu šiandien."
+    },
+    "company": {
+      "description": "Įmonės erdvė: komandų, projektų ir poreikių valdymas. Bus įjungta vėliau."
+    },
+    "agency": {
+      "description": "Agentūros erdvė: kandidatų rezervas ir paslaugų pasiūlos valdymas. Bus įjungta vėliau."
+    },
+    "customer": {
+      "description": "Pirkėjo erdvė: paslaugų užsakymas ir ataskaitos. Bus įjungta vėliau."
+    },
+    "freelancer": {
+      "description": "Laisvai samdomas: jūsų paslaugos ir darbo istorija viename profilyje. Ruošiama."
+    },
+    "team_lead": {
+      "description": "Komandos vadovas: komandos sudėtis ir bendri pasiūlymai. Ruošiama."
+    },
+    "service_provider": {
+      "description": "Paslaugų teikėjas: viešas paslaugų katalogas su patvirtintais įrodymais. Ruošiama."
+    }
+  },
   "suggestionStatuses": {
     "detected": "Pasiūlyta",
     "confirmed_by_user": "Patvirtinta jūsų",
@@ -325,7 +357,10 @@
         "worker": "Darbuotojas",
         "company": "Įmonė",
         "agency": "Agentūra",
-        "customer": "Pirkėjas"
+        "customer": "Pirkėjas",
+        "freelancer": "Laisvai samdomas",
+        "team_lead": "Komandos vadovas",
+        "service_provider": "Paslaugų teikėjas"
       },
       "subcopy": "Prisiregistruok su Google arba el. paštu ir slaptažodžiu. Vaidmenį pasirinksi kitame žingsnyje.",
       "google_label": "Tęsti su Google",
