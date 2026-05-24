@@ -33,21 +33,37 @@ export async function GET(
 
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) {
+    const { error: exchangeError } =
+      await supabase.auth.exchangeCodeForSession(code);
+    if (exchangeError) {
       // Surface the non-secret Supabase error identifiers so the owner can
       // tell expired/already-used codes (`invalid_grant`) apart from PKCE
       // verifier cookie issues, network blips, etc. We deliberately do NOT
       // log the auth code, tokens, cookies, or the full request URL.
       console.error("[auth/callback] exchangeCodeForSession failed", {
         locale,
-        code: error.code,
-        status: error.status,
-        name: error.name,
-        message: error.message,
+        code: exchangeError.code,
+        status: exchangeError.status,
+        name: exchangeError.name,
+        message: exchangeError.message,
       });
-      loginUrl.searchParams.set("error", "exchange_failed");
-      return NextResponse.redirect(loginUrl);
+
+      // PKCE cookie race fallback: a concurrent token_revoke / cookie
+      // overwrite can make exchangeCodeForSession abort locally before
+      // posting to /token even though the SDK has already established a
+      // valid session via other means (refresh, cached cookie). Check
+      // getSession before giving up — if a real session is present we
+      // proceed, exactly like a normal success. Verified safe: getSession
+      // only reads existing cookies, never trusts client input.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session) {
+        loginUrl.searchParams.set("error", "exchange_failed");
+        return NextResponse.redirect(loginUrl);
+      }
+      console.warn(
+        "[auth/callback] exchangeCodeForSession errored but getSession is valid — proceeding (PKCE race fallback)",
+        { locale },
+      );
     }
 
     const {

@@ -23,9 +23,20 @@ export async function createClient() {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options),
           );
-        } catch {
-          // Called from a Server Component where cookies are read-only.
-          // Safe to ignore — session refresh happens in middleware.
+        } catch (e) {
+          // Called from a Server Component where cookies are read-only —
+          // expected and safe; the same setAll is invoked again from
+          // the route handler / server action where it WILL succeed,
+          // and session refresh also happens in middleware. We log the
+          // non-secret error fields so a real cookie-write failure on
+          // the route-handler path (where setAll IS supposed to work)
+          // doesn't fail silently. NEVER log cookie names, values,
+          // tokens, or the cookiesToSet array itself.
+          const err =
+            e instanceof Error
+              ? { name: e.name, message: e.message }
+              : { name: "unknown", message: String(e) };
+          console.error("[supabase/server] cookies.setAll suppressed", err);
         }
       },
     },

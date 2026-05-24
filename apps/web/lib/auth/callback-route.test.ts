@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // returns to exercise each branch.
 const exchangeMock = vi.fn();
 const getUserMock = vi.fn();
+const getSessionMock = vi.fn();
 const fromMock = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -12,6 +13,7 @@ vi.mock("@/lib/supabase/server", () => ({
     auth: {
       exchangeCodeForSession: exchangeMock,
       getUser: getUserMock,
+      getSession: getSessionMock,
     },
     from: fromMock,
   })),
@@ -28,7 +30,12 @@ function buildRequest(qs: string): Request {
 beforeEach(() => {
   exchangeMock.mockReset();
   getUserMock.mockReset();
+  getSessionMock.mockReset();
   fromMock.mockReset();
+  // Default: no fallback session unless a specific test opts in. This
+  // keeps the existing error-path assertions valid after the PKCE-race
+  // fallback was added (failed exchange + no session → exchange_failed).
+  getSessionMock.mockResolvedValue({ data: { session: null } });
 });
 
 describe("auth/callback route", () => {
@@ -179,5 +186,90 @@ describe("auth/callback route", () => {
     expect(errorSpy).toHaveBeenCalled();
 
     errorSpy.mockRestore();
+  });
+
+  // PKCE-race fallback: a concurrent token_revoke / cookie overwrite
+  // can make `exchangeCodeForSession` abort locally before /token even
+  // though the SDK has already established a valid session. In that
+  // case we proceed as if exchange succeeded, never strand the user on
+  // ?error=exchange_failed.
+  describe("PKCE-race fallback (failed exchange + valid getSession)", () => {
+    it("proceeds to sanitized next when getSession returns a valid session", async () => {
+      exchangeMock.mockResolvedValue({
+        error: {
+          name: "AuthApiError",
+          code: "invalid_grant",
+          status: 400,
+          message: "race",
+        },
+      });
+      getSessionMock.mockResolvedValue({
+        data: {
+          session: {
+            access_token: "REDACTED_TEST_TOKEN",
+            user: { id: "u1" },
+          },
+        },
+      });
+      getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+      fromMock.mockReturnValue({
+        select: () => ({
+          eq: () => ({
+            single: async () => ({
+              data: { onboarded_at: "2025-01-01T00:00:00Z" },
+            }),
+          }),
+        }),
+      });
+      const errorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const warnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      const res = await GET(
+        buildRequest("code=AUTHCODE_RACE&next=%2Flt%2Fdashboard%2Fjournal"),
+        { params: Promise.resolve({ locale: "lt" }) },
+      );
+      const loc = res.headers.get("location") ?? "";
+
+      // Success path was honoured despite the exchange error.
+      expect(loc).toBe(`${ORIGIN}/lt/dashboard/journal`);
+      expect(loc).not.toContain("error=exchange_failed");
+
+      // Diagnostic logs fired without leaking the auth code or token.
+      expect(errorSpy).toHaveBeenCalled();
+      expect(warnSpy).toHaveBeenCalled();
+      const allLogged = JSON.stringify(
+        errorSpy.mock.calls.concat(warnSpy.mock.calls),
+      );
+      expect(allLogged).not.toContain("AUTHCODE_RACE");
+      expect(allLogged).not.toContain("REDACTED_TEST_TOKEN");
+
+      errorSpy.mockRestore();
+      warnSpy.mockRestore();
+    });
+
+    it("still redirects to exchange_failed when getSession also has no session", async () => {
+      exchangeMock.mockResolvedValue({
+        error: {
+          name: "AuthApiError",
+          code: "invalid_grant",
+          status: 400,
+          message: "no race recovery",
+        },
+      });
+      getSessionMock.mockResolvedValue({ data: { session: null } });
+      vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const res = await GET(
+        buildRequest("code=X&next=%2Flt%2Fdashboard"),
+        { params: Promise.resolve({ locale: "lt" }) },
+      );
+      const loc = res.headers.get("location") ?? "";
+      expect(loc).toContain("/lt/auth/login");
+      expect(loc).toContain("error=exchange_failed");
+    });
   });
 });

@@ -60,6 +60,20 @@ export function GoogleButton({
     setLoading(true);
     try {
       const supabase = createClient();
+      // Evict stale local auth state BEFORE writing a fresh PKCE
+      // code_verifier cookie. Production logs showed a token_revoked
+      // event on a prior refresh_token at the exact second a new
+      // /authorize started, with no follow-up /token POST — classic
+      // PKCE race where the new verifier collides with a half-revoked
+      // session cookie. `scope: 'local'` ONLY clears this browser's
+      // tokens/cookies — it does NOT call Supabase /logout and never
+      // revokes the user's other sessions. Safe to ignore failures.
+      try {
+        await supabase.auth.signOut({ scope: "local" });
+      } catch {
+        // signOut may throw if no local session — irrelevant for the
+        // fresh-OAuth-start path. Continue to signInWithOAuth.
+      }
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
       // Forward the sanitised return path through Supabase → callback as
