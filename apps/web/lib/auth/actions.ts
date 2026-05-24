@@ -111,6 +111,29 @@ export async function switchActiveRole(role: Role): Promise<void> {
     .maybeSingle();
   if (!held) throw new Error("Role not held by user");
 
+  // Preserve admin across workspace switches. Before overwriting
+  // active_role, if the user is currently admin via active_role
+  // (the legacy single-source signal) we MUST persist an admin row
+  // in profile_roles so the app-level admin gate (dashboard layout,
+  // requireSuperadmin) keeps recognising them after the switch.
+  // Idempotent: a conflict on (profile_id, role) is a no-op. We do
+  // NOT touch profiles.is_admin or any other column. The DB-level
+  // RLS helper `public.is_admin()` still reads only active_role and
+  // is documented as a follow-up migration.
+  const { data: currentProfile } = await supabase
+    .from("profiles")
+    .select("active_role")
+    .eq("id", user.id)
+    .single();
+  if (currentProfile?.active_role === "admin") {
+    await supabase
+      .from("profile_roles")
+      .upsert(
+        { profile_id: user.id, role: "admin" },
+        { onConflict: "profile_id,role" },
+      );
+  }
+
   await supabase
     .from("profiles")
     .update({ active_role: role })

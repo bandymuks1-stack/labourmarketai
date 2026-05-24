@@ -5,11 +5,24 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Server-side superadmin authorization.
  *
- * Source of truth: `public.profiles.active_role === 'admin'`. The SQL
- * helper `public.is_admin()` (migration 0003) reads the same column;
- * RLS policies on profiles + profile_skill_claims grant admin reads
- * via that helper, so admin queries can use the regular user-scoped
- * Supabase client — no service-role required for read-only inspection.
+ * Admin is recognised via a DUAL signal so a workspace switch
+ * (`switchActiveRole` overwriting `profiles.active_role`) never
+ * strips admin at the application layer:
+ *
+ *   (a) `public.profiles.active_role === 'admin'`  — legacy single
+ *       source, still honoured for admins whose active_role is admin.
+ *   (b) a row in `public.profile_roles` tagged `role = 'admin'` —
+ *       inserted by `switchActiveRole` BEFORE it overwrites
+ *       active_role, and by `admin:grant-superadmin --apply`. This
+ *       signal survives any subsequent workspace switch.
+ *
+ * The SQL RLS helper `public.is_admin()` (migration 0003) still
+ * reads only (a). That mismatch is intentional and explicit: a
+ * full schema decoupling (helper checking profile_roles, or a
+ * `profiles.is_admin boolean` column) is a follow-up migration.
+ * Until then, RLS bypass on admin-only tables requires the admin
+ * to have active_role='admin' in DB; the application-level gate
+ * via these helpers always grants by (a) OR (b).
  *
  * Security posture:
  *
@@ -23,9 +36,35 @@ import { createClient } from "@/lib/supabase/server";
  *     component fails the Next.js build.
  *
  * Grant path: `pnpm admin:grant-superadmin --email ... --apply
- * --i-understand-this-mutates-production` (scripts/admin-promote.ts).
- * The grant is auditable; the read side is RLS-enforced.
+ * --i-understand-this-mutates-production`. The grant is auditable;
+ * read side is RLS-enforced (DB-level) and application-gated (here).
  */
+
+async function readAdminSignals(userId: string): Promise<{
+  activeRoleAdmin: boolean;
+  profileRolesAdmin: boolean;
+}> {
+  const supabase = await createClient();
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("active_role")
+    .eq("id", userId)
+    .single();
+  if (error || !profile) {
+    return { activeRoleAdmin: false, profileRolesAdmin: false };
+  }
+  // RLS on profile_roles permits the user to read their own rows.
+  const { data: adminRow } = await supabase
+    .from("profile_roles")
+    .select("role")
+    .eq("profile_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  return {
+    activeRoleAdmin: profile.active_role === "admin",
+    profileRolesAdmin: !!adminRow,
+  };
+}
 
 export async function isSuperadmin(): Promise<boolean> {
   const supabase = await createClient();
@@ -33,17 +72,10 @@ export async function isSuperadmin(): Promise<boolean> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return false;
-
-  // RLS on profiles allows the user to read their own row; we read
-  // active_role and check it against the canonical 'admin' value.
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
-
-  if (error || !profile) return false;
-  return profile.active_role === "admin";
+  const { activeRoleAdmin, profileRolesAdmin } = await readAdminSignals(
+    user.id,
+  );
+  return activeRoleAdmin || profileRolesAdmin;
 }
 
 /**
@@ -54,7 +86,7 @@ export async function isSuperadmin(): Promise<boolean> {
  * Behavior:
  *   - unauthenticated user → redirect to /<locale>/auth/login;
  *   - authenticated non-admin → redirect to /<locale>/dashboard;
- *   - admin → returns the user.id so the caller can use it.
+ *   - admin (active_role='admin' OR profile_roles has 'admin') → returns user.id.
  */
 export async function requireSuperadmin(locale: string): Promise<string> {
   const supabase = await createClient();
@@ -63,13 +95,10 @@ export async function requireSuperadmin(locale: string): Promise<string> {
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.active_role !== "admin") {
+  const { activeRoleAdmin, profileRolesAdmin } = await readAdminSignals(
+    user.id,
+  );
+  if (!activeRoleAdmin && !profileRolesAdmin) {
     redirect(`/${locale}/dashboard`);
   }
   return user.id;
