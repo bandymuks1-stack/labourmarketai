@@ -95,8 +95,35 @@ const DICTIONARY: readonly DictionaryRow[] = [
     needles: ["santechnik", "vandentiek", "plumbing", "plumber"],
   },
   {
-    label: "Stogo darbai",
-    needles: ["stog", "roofing", "roofer"],
+    // Renamed from "Stogo darbai" → "Stogų dengimas" to mirror the
+    // active-verb form the owner's narrative used ("dengti stogus") and
+    // to match the owner-preferred wording in the PR #46 follow-up
+    // hotfix spec. "stog" stays as the broad needle so anything
+    // roof-related still surfaces.
+    label: "Stogų dengimas",
+    needles: ["dengti stog", "stogdeng", "stog", "roofing", "roofer"],
+  },
+  {
+    // New row — owner's narrative was "...gaminti lietuviškos virtuvės
+    // patiekalus" which previously produced 0 self-declared chips. Stems
+    // are picked to match the morphology of LT verbs ("gaminti" → "gamin",
+    // "virėjas" → "virėj") + the obvious EN equivalents.
+    label: "Maisto gamyba",
+    needles: [
+      "gaminti patiekal",
+      "gaminti maist",
+      "virtuvės patiek",
+      "virtuvės darb",
+      "lietuvišk virtuv",
+      "lietuviškos virtuv",
+      "maisto gamy",
+      "maisto ruoš",
+      "virėj",
+      "virim",
+      "cooking",
+      "chef",
+      "kitchen work",
+    ],
   },
   {
     label: "Vadovavimas komandai",

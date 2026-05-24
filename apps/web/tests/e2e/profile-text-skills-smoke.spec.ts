@@ -56,7 +56,11 @@ test.skip(
 
 test.use({ storageState: STORAGE_STATE });
 
-const GOAL_INPUT = "Moku gerai programuoti ir statyti namus";
+// PR #46 owner-follow-up sentence. The first 3 skills + roofing were the
+// PR #46 baseline; "gaminti lietuviškos virtuvės patiekalus" is the gap
+// fix/cc/profile-text-skills-unify-flow-v2 fills via the cooking row.
+const GOAL_INPUT =
+  "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti lietuviškos virtuvės patiekalus";
 
 mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
@@ -86,16 +90,32 @@ test("composer extracts goal example into self-declared chips with safe copy", a
     .first()
     .click();
 
-  // The NEW bucket the fix adds: "Paties nurodyti įgūdžiai" with the
-  // two goal-example chips. This is the exact owner-visible regression
-  // the slice fixes — before this PR the goal input produced 0 chips
-  // because the composer's button only ran the OLD extractor.
+  // The single canonical bucket renders all four chips for the extended
+  // owner sentence. Before this hotfix the cooking phrase produced 0
+  // chips and "Stogdengys" only surfaced in the legacy bucket grid.
   const selfDeclaredHeader = page.getByText("Paties nurodyti įgūdžiai", {
     exact: false,
   });
   await selfDeclaredHeader.waitFor({ state: "visible", timeout: 15_000 });
   await expect(page.getByText("Programavimas").first()).toBeVisible();
   await expect(page.getByText("Namų statyba").first()).toBeVisible();
+  await expect(page.getByText("Stogų dengimas").first()).toBeVisible();
+  await expect(page.getByText("Maisto gamyba").first()).toBeVisible();
+
+  // Duplicate-system guard at the rendered-page level: the legacy
+  // bucket titles must NOT appear anywhere on this surface.
+  expect(
+    await page.getByText("Rasti įgūdžiai", { exact: false }).count(),
+    "legacy 'Rasti įgūdžiai' bucket must not render on this surface",
+  ).toBe(0);
+  expect(
+    await page.getByText("Galimi vaidmenys", { exact: false }).count(),
+    "legacy 'Galimi vaidmenys' bucket must not render on this surface",
+  ).toBe(0);
+  expect(
+    await page.getByText("Galimi CV įrašai", { exact: false }).count(),
+    "legacy 'Galimi CV įrašai' bucket must not render on this surface",
+  ).toBe(0);
   await shot(page, "03-suggestions-rendered");
 
   // Click "Pasirinkti" on the first two visible buttons — those are the

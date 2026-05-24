@@ -37,10 +37,10 @@ function read(rel: string): string {
   return readFileSync(join(APP_ROOT, rel), "utf8");
 }
 
-describe("Guard: integrated profile-text composer wiring", () => {
+describe("Guard: profile-text composer is single-canonical (no dual-system UI)", () => {
   const flow = read("components/app/profile-text-first-flow.tsx");
 
-  it("imports the PR #45 deterministic skill-claim extractor", () => {
+  it("imports the deterministic skill-claim extractor", () => {
     expect(flow).toMatch(
       /from\s+["']@\/lib\/profile\/skill-claim-extractor["']/,
     );
@@ -54,26 +54,51 @@ describe("Guard: integrated profile-text composer wiring", () => {
     expect(flow).toMatch(/saveProfileSkillClaimsAction/);
   });
 
-  it("still uses the legacy structured-suggestion extractor (no regression)", () => {
-    expect(flow).toMatch(/extractProfileSuggestions/);
+  it("DOES NOT import the legacy `extractProfileSuggestions` (duplicate-system removal)", () => {
+    // Owner production smoke showed the OLD bucket grid surfaced
+    // "Stogdengys" via this legacy extractor while the new canonical
+    // upper bucket stayed empty — a confusing dual-system UI. Removing
+    // the import is the single hard guarantee that the legacy flow
+    // can't re-enter through ProfileTextFirstFlow. Comments are stripped
+    // first so the file's "Removed in …" header doesn't false-trigger.
+    const codeOnly = flow
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    expect(codeOnly).not.toMatch(/extractProfileSuggestions/);
+    expect(codeOnly).not.toMatch(
+      /from\s+["']@\/lib\/structuring\/extract-profile-suggestions["']/,
+    );
   });
 
-  it("renders a selfDeclared bucket above the catalogue skills bucket", () => {
-    // The `selfDeclared` bucket must come BEFORE the catalogue `skills`
-    // bucket in source order, because the catch on the goal example is
-    // exactly that the user's own words show up first.
-    const selfIdx = flow.indexOf('tBucket("selfDeclared")');
-    const skillsIdx = flow.indexOf('tBucket("skills")');
-    expect(selfIdx, "selfDeclared bucket missing").toBeGreaterThan(-1);
-    expect(skillsIdx, "skills bucket missing").toBeGreaterThan(-1);
-    expect(selfIdx).toBeLessThan(skillsIdx);
+  it("renders ONLY the selfDeclared bucket — no catalogued / directions / roles / experience / cvEntries renders", () => {
+    // The legacy bucket grid is gone. Each old bucket KEY must not
+    // appear as a tBucket(...) argument. Comments are stripped before
+    // the match so explanatory headers don't false-trigger.
+    const codeOnly = flow
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    expect(codeOnly).toMatch(/tBucket\(["']selfDeclared["']\)/);
+    for (const old of ["skills", "directions", "roles", "experience", "cvEntries"]) {
+      expect(
+        codeOnly,
+        `tBucket('${old}') must not render on the profile-text flow`,
+      ).not.toMatch(new RegExp(`tBucket\\(["']${old}["']\\)`));
+    }
   });
 
   it("apply path persists self-declared confirmations via saveProfileSkillClaimsAction", () => {
-    // The applyConfirmed body must filter `selfDeclared` for confirmed
-    // items AND call the server action with the resulting labels.
     expect(flow).toMatch(/selfDeclared[\s\S]{0,300}\.filter\([\s\S]{0,80}["']confirmed["']/);
     expect(flow).toMatch(/saveProfileSkillClaimsAction\s*\(/);
+  });
+
+  it("apply path no longer POSTs to /api/workers/:id/skills from this surface", () => {
+    // Catalogued worker_skills saves now live ONLY behind the manual
+    // picker (manualSlot → WorkerTradeProfile). Re-introducing a POST
+    // here would resurrect the dual-system save path that owner
+    // production smoke rejected.
+    expect(flow).not.toMatch(
+      /fetch\(\s*[`'"]\/api\/workers\//,
+    );
   });
 });
 

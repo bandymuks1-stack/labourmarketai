@@ -9,8 +9,8 @@
  * actually fixes.
  *
  * Usage:
- *   E2E_OWNER_EMAIL=sukysdonatas@gmail.com pnpm tsx scripts/e2e-seed-claims.ts seed
- *   E2E_OWNER_EMAIL=sukysdonatas@gmail.com pnpm tsx scripts/e2e-seed-claims.ts cleanup
+ *   E2E_OWNER_EMAIL=you@example.com pnpm tsx scripts/e2e-seed-claims.ts seed
+ *   E2E_OWNER_EMAIL=you@example.com pnpm tsx scripts/e2e-seed-claims.ts cleanup
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";

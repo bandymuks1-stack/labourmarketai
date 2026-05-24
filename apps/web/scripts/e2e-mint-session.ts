@@ -7,7 +7,7 @@
  *
  * NOT a production script. NOT a build step. Run on demand:
  *
- *   E2E_OWNER_EMAIL=sukysdonatas@gmail.com \
+ *   E2E_OWNER_EMAIL=you@example.com \
  *     pnpm tsx scripts/e2e-mint-session.ts
  *
  * Requires NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,

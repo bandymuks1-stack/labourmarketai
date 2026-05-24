@@ -267,13 +267,12 @@ export default async function ProfilePage({
 
       {workerId ? (
         <>
-          {/* PRIMARY path — text-first / CV-first. Manual selection is now a
-              secondary "Pridėti rankiniu būdu" link inside this flow. */}
+          {/* PRIMARY path — text-first / CV-first. Self-declared bucket is
+              the SINGLE canonical output for narrative-derived suggestions
+              (PR #46 hotfix removed the parallel OLD bucket grid).
+              `Pridėti rankiniu būdu` opens the catalogued worker_skills
+              picker via the manualSlot below. */}
           <ProfileTextFirstFlow
-            workerId={workerId}
-            professionSkills={allowedSkills}
-            professions={professions.map((p) => ({ ...p, name: tProf(p.slug) }))}
-            initialSelectedIds={initialSkillIds}
             initialText={savedProfileText}
             savedClaimNormalizedLabels={savedSkillClaims.map(
               (c) => c.normalized_label,

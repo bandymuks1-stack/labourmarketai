@@ -6,18 +6,11 @@ import { CvInputPanel } from "@/components/app/cv-input-panel";
 import { DetectedSuggestionCard, type SuggestionStatus } from "@/components/app/detected-suggestion-card";
 import { DetectedSuggestionList } from "@/components/app/detected-suggestion-list";
 import { TextFirstComposer } from "@/components/app/text-first-composer";
-import {
-  extractProfileSuggestions,
-  type ProfileSuggestions,
-} from "@/lib/structuring/extract-profile-suggestions";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-
-type SkillRow = { id: string; slug: string };
-type ProfRow = { id: string; slug: string };
 
 /** Tiny inline pill — tells the user the *narrative* is persisted. Suggestions
  *  still need per-card confirm; this is decoupled from "skills are verified". */
@@ -60,39 +53,38 @@ function TextSaveIndicator({
 }
 
 /** Per-suggestion view state — the parser proposes, the user disposes. */
-type Item<T> = {
+type Item = {
   key: string;
   status: SuggestionStatus;
-  value: T;
-  /** Editable label (skills/directions keep their slug; the label is shown). */
+  /** Normalized label — UNIQUE key column for `profile_skill_claims`. */
+  value: string;
+  /** Human form shown in the chip. */
   label: string;
 };
 
 /**
- * Text-first / CV-first onboarding for the worker profile. This is the
- * PRIMARY path now (PLATFORM_DOCTRINE §7, TASK spec). The legacy chip picker
- * stays available behind `Pridėti rankiniu būdu` for users who prefer manual.
+ * Text-first / CV-first onboarding for the worker profile.
  *
- * Parser source: lib/structuring/extract-profile-suggestions.ts — rule-based,
- * not AI. Nothing is persisted from this component directly. The user clicks
- * `Įtraukti patvirtintus pasiūlymus` to apply confirmed skills via the same
- * /api/workers/:id/skills endpoint the manual picker uses.
+ * Single canonical output: the `Paties nurodyti įgūdžiai` bucket, sourced
+ * exclusively from the PR #45 free-text extractor and persisted to
+ * `profile_skill_claims` (owner-only RLS, status='self_declared',
+ * source='profile_text', visibility='closed').
+ *
+ * Removed in fix/cc/profile-text-skills-unify-flow-v2: the legacy
+ * `extractProfileSuggestions` bucket grid (`Rasti įgūdžiai` / `Galimos
+ * darbo kryptys` / `Galimi vaidmenys` / `Patirtis` / `Galimi CV įrašai`)
+ * and the `/api/workers/:id/skills` POST that backed it. Owner production
+ * smoke proved the dual-system UX confused users (e.g. "Stogdengys"
+ * appearing ONLY in the lower bucket while the upper canonical one stayed
+ * empty, even though the new extractor matches `stog`). The catalogued
+ * worker_skills picker remains available via `Pridėti rankiniu būdu`
+ * (manualSlot) — the explicit, intentional path.
  */
 export function ProfileTextFirstFlow({
-  workerId,
-  professionSkills,
-  professions,
-  initialSelectedIds,
   initialText = "",
   savedClaimNormalizedLabels = [],
   manualSlot,
 }: {
-  workerId: string;
-  /** Localized skill rows ALLOWED for this worker (across all their directions). */
-  professionSkills: (SkillRow & { name: string })[];
-  /** Localized professions, used to render direction / role suggestions. */
-  professions: (ProfRow & { name: string })[];
-  initialSelectedIds: string[];
   /** Previously-saved self-description text (owner-only profiles.profile_text),
    *  prefilled into the composer. */
   initialText?: string;
@@ -109,54 +101,31 @@ export function ProfileTextFirstFlow({
   const [stage, setStage] = useState<"compose" | "review" | "manual">("compose");
   const [text, setText] = useState(initialText);
   const [pasted, setPasted] = useState("");
-  const [textSaveState, setTextSaveState] = useState<"idle" | "saving" | "saved" | "error">(
-    initialText.trim().length > 0 ? "saved" : "idle",
-  );
-  const [suggestions, setSuggestions] = useState<ProfileSuggestions | null>(
-    null,
-  );
-  const [skills, setSkills] = useState<Item<string>[]>([]);
-  const [dirs, setDirs] = useState<Item<string>[]>([]);
-  const [roles, setRoles] = useState<Item<string>[]>([]);
-  const [cvEntries, setCvEntries] = useState<Item<string>[]>([]);
-  const [yoe, setYoe] = useState<Item<number> | null>(null);
-  const [team, setTeam] = useState<Item<number> | null>(null);
-  /** Self-declared claim suggestions from the PR #45 extractor. Free-text
-   *  labels (NOT skill_ids) that persist to `profile_skill_claims` —
-   *  owner-only, never asserted as verified. The `value` is the
-   *  normalized_label (UNIQUE key column); the `label` is the human form. */
-  const [selfDeclared, setSelfDeclared] = useState<Item<string>[]>([]);
+  const [textSaveState, setTextSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >(initialText.trim().length > 0 ? "saved" : "idle");
+  const [hasExtracted, setHasExtracted] = useState(false);
+  const [selfDeclared, setSelfDeclared] = useState<Item[]>([]);
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Hoist already-saved claim normalized labels into a Set so re-extract
-  // doesn't propose duplicates. Stable across renders for a given session.
   const savedClaimSet = useMemo(
     () => new Set(savedClaimNormalizedLabels),
     [savedClaimNormalizedLabels],
   );
 
-  const skillBySlug = useMemo(
-    () => new Map(professionSkills.map((s) => [s.slug, s])),
-    [professionSkills],
-  );
-  const professionBySlug = useMemo(
-    () => new Map(professions.map((p) => [p.slug, p])),
-    [professions],
-  );
-
   function analyse(raw: string) {
     setError(null);
     setApplied(false);
-    const s = extractProfileSuggestions(raw);
     setText(raw);
-    setSuggestions(s);
-    // Persist the user's own words alongside the parser pass. The text is the
-    // *claim* (§3) — saved into the owner-only profiles.profile_text column
-    // (migration 0014) — and reload prefills the composer. Suggestions still
-    // need a per-card confirm; this save does NOT mark any skill as verified.
-    // Employers cannot read this column (profiles_select RLS is owner-only).
+    setHasExtracted(true);
+
+    // Persist the user's own words. The text is the *claim* — saved into
+    // the owner-only `profiles.profile_text` (migration 0014); reload
+    // prefills the composer. Suggestions still need per-card confirm;
+    // this save does NOT mark any skill as verified. profiles_select RLS
+    // (0001) keeps the text owner-only — employers cannot read it.
     if (raw.trim().length > 0) {
       setTextSaveState("saving");
       void saveWorkerProfileText(raw)
@@ -166,50 +135,9 @@ export function ProfileTextFirstFlow({
           setTextSaveState("error");
         });
     }
-    setSkills(
-      s.skillSlugs
-        .filter((slug) => skillBySlug.has(slug))
-        .map((slug, i) => ({
-          key: `skill-${i}-${slug}`,
-          status: "pending",
-          value: slug,
-          label: skillBySlug.get(slug)?.name ?? slug,
-        })),
-    );
-    setDirs(
-      s.workDirectionSlugs
-        .filter((slug) => professionBySlug.has(slug))
-        .map((slug, i) => ({
-          key: `dir-${i}-${slug}`,
-          status: "pending",
-          value: slug,
-          label: professionBySlug.get(slug)?.name ?? slug,
-        })),
-    );
-    setRoles(
-      s.professionSlugs
-        .filter((slug) => professionBySlug.has(slug))
-        .map((slug, i) => ({
-          key: `role-${i}-${slug}`,
-          status: "pending",
-          value: slug,
-          label: professionBySlug.get(slug)?.name ?? slug,
-        })),
-    );
-    setCvEntries(
-      s.cvEntries.map((entry, i) => ({
-        key: `cv-${i}`,
-        status: "pending",
-        value: entry,
-        label: entry,
-      })),
-    );
-    // PR #45 path — self-declared free-text claims (e.g. "Programavimas",
-    // "Namų statyba"). These come from a DIFFERENT extractor than the
-    // catalogue-bound skills above, so the user can ALWAYS surface their
-    // own narrative-derived claims even when none of their existing
-    // professions have a matching skill_id. Already-saved labels are
-    // filtered out so the user doesn't see redundant chips on re-extract.
+
+    // Single extractor → single bucket. Already-saved labels are
+    // filtered so the user doesn't see redundant chips on re-extract.
     setSelfDeclared(
       extractProfileSkillClaims(raw)
         .filter((c) => !savedClaimSet.has(c.normalizedLabel))
@@ -220,68 +148,25 @@ export function ProfileTextFirstFlow({
           label: c.label,
         })),
     );
-    setYoe(
-      s.yearsOfExperience !== null
-        ? {
-            key: "yoe",
-            status: "pending",
-            value: s.yearsOfExperience,
-            label: String(s.yearsOfExperience),
-          }
-        : null,
-    );
-    setTeam(
-      s.teamSize !== null
-        ? {
-            key: "team",
-            status: "pending",
-            value: s.teamSize,
-            label: String(s.teamSize),
-          }
-        : null,
-    );
     setStage("review");
   }
 
-  function toggle<T>(
-    list: Item<T>[],
-    setList: (next: Item<T>[]) => void,
-    key: string,
-    next: SuggestionStatus,
-  ) {
-    setList(list.map((it) => (it.key === key ? { ...it, status: next } : it)));
+  function toggle(key: string, next: SuggestionStatus) {
+    setSelfDeclared((prev) =>
+      prev.map((it) => (it.key === key ? { ...it, status: next } : it)),
+    );
   }
 
   async function applyConfirmed() {
     setApplying(true);
     setError(null);
     try {
-      // (1) Catalogued worker_skills — confirmed slugs that map to a real
-      // skill_id within the worker's allowed catalogue. Posted to the
-      // existing /api/workers/:id/skills endpoint. No-op if zero.
-      const confirmedSlugs = skills
-        .filter((it) => it.status === "confirmed")
-        .map((it) => it.value);
-      const confirmedIds = confirmedSlugs
-        .map((slug) => skillBySlug.get(slug)?.id)
-        .filter((id): id is string => !!id);
-      if (confirmedIds.length > 0 || initialSelectedIds.length > 0) {
-        const nextIds = Array.from(
-          new Set([...initialSelectedIds, ...confirmedIds]),
-        );
-        const res = await fetch(`/api/workers/${workerId}/skills`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ skillIds: nextIds }),
-        });
-        if (!res.ok) throw new Error(`save failed: ${res.status}`);
-      }
-
-      // (2) Self-declared profile_skill_claims — confirmed free-text labels
-      // from the PR #45 extractor. Owner-only RLS, status='self_declared',
-      // source='profile_text', visibility='closed'. The server action
+      // Self-declared profile_skill_claims — the ONLY persistence path
+      // from the text composer now. Owner-only RLS; the server action
       // upserts on (profile_id, normalized_label) so re-clicking Save
-      // never duplicates.
+      // never duplicates. Catalogued worker_skills writes were removed
+      // alongside the OLD bucket grid; the manual picker still has its
+      // own catalogued save path.
       const confirmedClaims = selfDeclared
         .filter((it) => it.status === "confirmed")
         .map((it) => it.label.trim())
@@ -289,7 +174,6 @@ export function ProfileTextFirstFlow({
       if (confirmedClaims.length > 0) {
         await saveProfileSkillClaimsAction(confirmedClaims);
       }
-
       setApplied(true);
     } catch (e) {
       console.error("[profile-text-first] apply failed:", e);
@@ -304,7 +188,7 @@ export function ProfileTextFirstFlow({
       <div className="flex flex-col gap-4">
         <button
           type="button"
-          onClick={() => setStage(suggestions ? "review" : "compose")}
+          onClick={() => setStage(hasExtracted ? "review" : "compose")}
           className="self-start text-xs text-text-secondary hover:text-text-primary"
         >
           ← {t("backToText")}
@@ -314,7 +198,7 @@ export function ProfileTextFirstFlow({
     );
   }
 
-  if (stage === "compose" || !suggestions) {
+  if (stage === "compose" || !hasExtracted) {
     return (
       <div className="flex flex-col gap-4">
         <TextFirstComposer
@@ -339,17 +223,8 @@ export function ProfileTextFirstFlow({
     );
   }
 
-  const anyConfirmed =
-    skills.some((s) => s.status === "confirmed") ||
-    selfDeclared.some((s) => s.status === "confirmed");
-  const totalDetected =
-    selfDeclared.length +
-    skills.length +
-    dirs.length +
-    roles.length +
-    cvEntries.length +
-    (yoe ? 1 : 0) +
-    (team ? 1 : 0);
+  const anyConfirmed = selfDeclared.some((s) => s.status === "confirmed");
+  const totalDetected = selfDeclared.length;
 
   return (
     <div className="flex flex-col gap-5">
@@ -388,8 +263,6 @@ export function ProfileTextFirstFlow({
       </p>
 
       {selfDeclared.length > 0 && (
-        // The self-declared bucket carries the strongest trust posture —
-        // surface the slice-spec disclaimer before the grid renders.
         <p
           className="text-xs text-text-secondary"
           data-testid="profile-text-flow-self-declared-disclaimer"
@@ -401,9 +274,9 @@ export function ProfileTextFirstFlow({
       <TextSaveIndicator state={textSaveState} t={t} />
 
       {totalDetected === 0 ? (
-        // Universal fallback (Phase 4): the parser is rule-based and will miss
-        // anything outside its small dictionary. Tell the user that's OK, and
-        // point them at the manual path — never a dead end.
+        // Universal fallback — the dictionary will miss anything outside
+        // its vocabulary. Tell the user that's OK, point them at the
+        // manual path — never a dead end.
         <div className="card-border flex flex-col gap-3 p-4">
           <p className="text-sm text-text-secondary">
             {t("noSuggestionsFallback")}
@@ -426,123 +299,20 @@ export function ProfileTextFirstFlow({
           </div>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2">
-          {/* PR #45 path — owner's own words as self-declared claims. Lives
-              above the catalogue-bound skills bucket because these are the
-              user's direct narrative and the primary slice goal. Saves into
-              `profile_skill_claims` (owner-only) on apply. */}
-          <DetectedSuggestionList
-            className="md:col-span-2"
-            title={tBucket("selfDeclared")}
-            count={selfDeclared.length}
-          >
-            {selfDeclared.map((it) => (
-              <DetectedSuggestionCard
-                key={it.key}
-                label={it.label}
-                status={it.status}
-                onConfirm={() =>
-                  toggle(selfDeclared, setSelfDeclared, it.key, "confirmed")
-                }
-                onDiscard={() =>
-                  toggle(selfDeclared, setSelfDeclared, it.key, "discarded")
-                }
-              />
-            ))}
-          </DetectedSuggestionList>
-
-          <DetectedSuggestionList title={tBucket("skills")} count={skills.length}>
-            {skills.map((it) => (
-              <DetectedSuggestionCard
-                key={it.key}
-                label={it.label}
-                status={it.status}
-                onConfirm={() => toggle(skills, setSkills, it.key, "confirmed")}
-                onDiscard={() => toggle(skills, setSkills, it.key, "discarded")}
-              />
-            ))}
-          </DetectedSuggestionList>
-
-          <DetectedSuggestionList
-            title={tBucket("directions")}
-            count={dirs.length}
-          >
-            {dirs.map((it) => (
-              <DetectedSuggestionCard
-                key={it.key}
-                label={it.label}
-                status={it.status}
-                onConfirm={() => toggle(dirs, setDirs, it.key, "confirmed")}
-                onDiscard={() => toggle(dirs, setDirs, it.key, "discarded")}
-              />
-            ))}
-          </DetectedSuggestionList>
-
-          <DetectedSuggestionList title={tBucket("roles")} count={roles.length}>
-            {roles.map((it) => (
-              <DetectedSuggestionCard
-                key={it.key}
-                label={it.label}
-                status={it.status}
-                onConfirm={() => toggle(roles, setRoles, it.key, "confirmed")}
-                onDiscard={() => toggle(roles, setRoles, it.key, "discarded")}
-              />
-            ))}
-          </DetectedSuggestionList>
-
-          <DetectedSuggestionList
-            title={tBucket("experience")}
-            count={(yoe ? 1 : 0) + (team ? 1 : 0)}
-          >
-            {yoe && (
-              <DetectedSuggestionCard
-                label={tS("experience.years", { n: yoe.value })}
-                status={yoe.status}
-                onConfirm={() => setYoe({ ...yoe, status: "confirmed" })}
-                onDiscard={() => setYoe({ ...yoe, status: "discarded" })}
-              />
-            )}
-            {team && (
-              <DetectedSuggestionCard
-                label={tS("experience.team", { n: team.value })}
-                status={team.status}
-                onConfirm={() => setTeam({ ...team, status: "confirmed" })}
-                onDiscard={() => setTeam({ ...team, status: "discarded" })}
-              />
-            )}
-          </DetectedSuggestionList>
-
-          <DetectedSuggestionList
-            className="md:col-span-2"
-            title={tBucket("cvEntries")}
-            count={cvEntries.length}
-          >
-            {cvEntries.map((it) => (
-              <DetectedSuggestionCard
-                key={it.key}
-                label={it.label}
-                status={it.status}
-                editable
-                editValue={it.label}
-                onEdit={(next) =>
-                  setCvEntries((prev) =>
-                    prev.map((row) =>
-                      row.key === it.key
-                        ? { ...row, label: next, status: "edited" }
-                        : row,
-                    ),
-                  )
-                }
-                onConfirm={() =>
-                  toggle(cvEntries, setCvEntries, it.key, "confirmed")
-                }
-                onDiscard={() =>
-                  toggle(cvEntries, setCvEntries, it.key, "discarded")
-                }
-              />
-            ))}
-          </DetectedSuggestionList>
-        </div>
+        <DetectedSuggestionList
+          title={tBucket("selfDeclared")}
+          count={selfDeclared.length}
+        >
+          {selfDeclared.map((it) => (
+            <DetectedSuggestionCard
+              key={it.key}
+              label={it.label}
+              status={it.status}
+              onConfirm={() => toggle(it.key, "confirmed")}
+              onDiscard={() => toggle(it.key, "discarded")}
+            />
+          ))}
+        </DetectedSuggestionList>
       )}
 
       {error && (
@@ -551,9 +321,6 @@ export function ProfileTextFirstFlow({
         </p>
       )}
       {applied && (
-        // Phase 4: make the confirmed-state trail explicit — the user sees
-        // exactly which state the saved facts live in: "Confirmed by you"
-        // (added to profile), still waiting for external confirmation later.
         <div
           role="status"
           className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2 text-xs text-state-success"
