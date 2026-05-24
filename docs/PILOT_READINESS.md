@@ -2,7 +2,7 @@
 
 The owner-driven manual smoke that gates inviting 2–5 trusted real users to `app.labourmarket.ai`. **Do not** treat green here as a public-launch signal — it's a controlled pilot only.
 
-Run this on **production** (`https://app.labourmarket.ai`) with the **superadmin Google account** (`sukysdonatas@gmail.com` once the grant is applied). Each item maps to a Work Package in the sprint goal.
+Run this on **production** (`https://app.labourmarket.ai`) with the **superadmin Google account** (`<owner-email>` once the grant is applied). Each item maps to a Work Package in the sprint goal.
 
 ## 0. Superadmin grant (run once before the pilot starts)
 
@@ -12,10 +12,10 @@ The server-side superadmin role is already wired (`lib/auth/superadmin.ts`, RLS 
 cd C:\Users\Mano\Documents\labourmarketai\apps\web
 
 # Step 1 — dry-run (zero writes, prints the audit line that WOULD result)
-pnpm admin:grant-superadmin --email sukysdonatas@gmail.com --dry-run
+pnpm admin:grant-superadmin --email <owner-email> --dry-run
 
 # Step 2 — apply (REQUIRES both flags; either alone is rejected)
-pnpm admin:grant-superadmin --email sukysdonatas@gmail.com --apply --i-understand-this-mutates-production
+pnpm admin:grant-superadmin --email <owner-email> --apply --i-understand-this-mutates-production
 ```
 
 **Heads-up:** this Supabase project uses an explicit-grants pattern (no Supabase defaults — see migration 0004 / 0010 headers). The dry-run on prod reports
@@ -41,7 +41,7 @@ Verify with a read-only SQL query:
 
 ```sql
 select email, active_role from public.profiles
-where email = 'sukysdonatas@gmail.com';
+where email = '<owner-email>';
 -- expected: active_role = 'admin'
 ```
 

@@ -29,6 +29,18 @@ type AuthState = {
   profile: { full_name: string | null; email: string | null } | null;
   activeRole: Role | null;
   roles: Role[];
+  /**
+   * Server-resolved admin flag. True iff `profiles.active_role === 'admin'`
+   * for the current user — orthogonal to the `roles` / `activeRole`
+   * workspace catalogue (worker/company/agency/customer). The header
+   * role switcher uses this to render an explicit Admin badge instead
+   * of falling back to a user-facing role chip (the prior bug — admin
+   * fell through `ROLES.has(...)` in `dashboard/layout.tsx` and showed
+   * up as DARBUOTOJAS). Server-side admin pages still enforce their
+   * own gate via `requireSuperadmin`; this flag is purely a display
+   * signal.
+   */
+  isAdmin: boolean;
   notifications: Notification[];
 };
 
@@ -88,6 +100,7 @@ export function AuthProvider({
       profile: initial.profile,
       activeRole: initial.activeRole,
       roles: initial.roles,
+      isAdmin: initial.isAdmin,
       notifications,
       switchRole,
       addRole,
@@ -99,6 +112,7 @@ export function AuthProvider({
       initial.profile,
       initial.activeRole,
       initial.roles,
+      initial.isAdmin,
       notifications,
       switchRole,
       addRole,
