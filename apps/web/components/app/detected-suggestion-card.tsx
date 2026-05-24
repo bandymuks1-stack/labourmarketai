@@ -3,7 +3,20 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-export type SuggestionStatus = "pending" | "confirmed" | "edited" | "discarded";
+export type SuggestionStatus =
+  | "pending"
+  | "confirmed"
+  | "edited"
+  | "discarded"
+  /** Successfully persisted in this session (just after the apply
+   *  action). Carries the "Išsaugota" badge and has NO per-card
+   *  buttons — the chip is now part of the user's saved profile. */
+  | "saved"
+  /** Re-extracted from the narrative but already present in the user's
+   *  saved profile_skill_claims. Carries the "Jau išsaugota" badge,
+   *  muted styling, NO per-card buttons. Prevents accidental duplicate
+   *  selection AND tells the user *why* the chip is not actionable. */
+  | "already_saved";
 
 /**
  * One detected suggestion (a skill, a duration, a work direction, a CV entry).
@@ -42,11 +55,15 @@ export function DetectedSuggestionCard({
   const stateClass =
     status === "confirmed"
       ? "border-state-success/40 bg-state-success/5"
-      : status === "discarded"
-        ? "border-ink-600 bg-ink-800/40 opacity-60"
-        : status === "edited"
-          ? "border-brand-blue/40 bg-brand-blue/5"
-          : "border-ink-600 bg-ink-800/40";
+      : status === "saved"
+        ? "border-state-success bg-state-success/10"
+        : status === "already_saved"
+          ? "border-ink-500 bg-ink-700/50 opacity-80"
+          : status === "discarded"
+            ? "border-ink-600 bg-ink-800/40 opacity-60"
+            : status === "edited"
+              ? "border-brand-blue/40 bg-brand-blue/5"
+              : "border-ink-600 bg-ink-800/40";
 
   return (
     <li
@@ -72,6 +89,8 @@ export function DetectedSuggestionCard({
             className={cn(
               "shrink-0 font-mono text-[10px] uppercase tracking-label",
               status === "confirmed" && "text-state-success",
+              status === "saved" && "text-state-success",
+              status === "already_saved" && "text-text-secondary",
               status === "edited" && "text-brand-blue",
               status === "discarded" && "text-text-muted",
             )}
@@ -81,17 +100,23 @@ export function DetectedSuggestionCard({
         )}
       </div>
 
-      {editable && status !== "discarded" && (
-        <input
-          type="text"
-          value={editValue ?? ""}
-          onChange={(e) => onEdit?.(e.target.value)}
-          className="w-full rounded-md border border-ink-500 bg-ink-700 px-2.5 py-1.5 text-xs text-text-primary outline-none focus:border-brand-blue"
-        />
-      )}
+      {editable &&
+        status !== "discarded" &&
+        status !== "saved" &&
+        status !== "already_saved" && (
+          <input
+            type="text"
+            value={editValue ?? ""}
+            onChange={(e) => onEdit?.(e.target.value)}
+            className="w-full rounded-md border border-ink-500 bg-ink-700 px-2.5 py-1.5 text-xs text-text-primary outline-none focus:border-brand-blue"
+          />
+        )}
       {children}
 
-      {status !== "confirmed" && status !== "discarded" && (
+      {status !== "confirmed" &&
+        status !== "discarded" &&
+        status !== "saved" &&
+        status !== "already_saved" && (
         <div className="mt-1 flex flex-wrap gap-2">
           <button
             type="button"

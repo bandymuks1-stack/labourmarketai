@@ -103,8 +103,12 @@
       "rescan": "Iš naujo pasiūlyti pagal tekstą",
       "backToText": "Grįžti prie teksto",
       "applyAll": "Įtraukti pasirinktus pasiūlymus",
+      "applyAllDisabledHint": "Pasirinkite bent vieną pasiūlymą",
+      "applying": "Saugoma…",
+      "savedToCapabilities": "Įgūdžiai išsaugoti į Mano gebėjimai",
       "appliedToast": "Pasirinktus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti arba papildyti rankiniu būdu.",
       "noSuggestionsFallback": "Kol kas neradome aiškių pasiūlymų. Galite parašyti plačiau arba pridėti informaciją rankiniu būdu.",
+      "noNewSuggestions": "Naujų pasiūlymų neradome. Jau išsaugoti gebėjimai rodomi žemiau.",
       "confirmedByYou": "Paties nurodyta",
       "addedToProfile": "Pridėta į jūsų profilį",
       "needsExternalConfirmation": "Vėliau reikės išorinio patvirtinimo",
@@ -314,6 +318,8 @@
     },
     "status": {
       "confirmed": "Pasirinkta",
+      "saved": "Išsaugota",
+      "already_saved": "Jau išsaugota",
       "edited": "Pataisyta",
       "discarded": "Neįtraukta",
       "pending": "Pasiūlymas"

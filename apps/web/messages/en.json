@@ -103,8 +103,12 @@
       "rescan": "Re-suggest from text",
       "backToText": "Back to text",
       "applyAll": "Add selected suggestions",
+      "applyAllDisabledHint": "Select at least one suggestion",
+      "applying": "Saving…",
+      "savedToCapabilities": "Skills saved to My capabilities",
       "appliedToast": "Selected suggestions added to your profile. You can still edit or extend them manually.",
       "noSuggestionsFallback": "No clear suggestions yet. You can add more detail or add information manually.",
+      "noNewSuggestions": "No new suggestions. Your already-saved skills are shown below.",
       "confirmedByYou": "Self-declared",
       "addedToProfile": "Added to your profile",
       "needsExternalConfirmation": "Needs external confirmation later",
@@ -314,6 +318,8 @@
     },
     "status": {
       "confirmed": "Selected",
+      "saved": "Saved",
+      "already_saved": "Already saved",
       "edited": "Edited",
       "discarded": "Discarded",
       "pending": "Suggestion"
