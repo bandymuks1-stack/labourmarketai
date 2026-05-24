@@ -74,11 +74,23 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
   if (step === 1) {
     return (
       <div className="flex flex-col gap-6">
-        <header>
+        <header className="flex flex-col gap-3">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.heading")}
           </h1>
-          <p className="mt-2 text-sm text-text-secondary">
+          {/*
+           * Premium-impression cleanup v1: the multi-role promise was
+           * previously a quiet `text-sm text-text-secondary` line under
+           * the heading. Doctrine §5.5 says no person fits in one
+           * category — each person carries a portfolio of engagements.
+           * The promise must be visible BEFORE the user picks, so it is
+           * now a bordered callout that the eye reads with the cards,
+           * not before them. Copy unchanged — same i18n key, same text.
+           */}
+          <p
+            className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm leading-relaxed text-text-secondary"
+            data-testid="onboarding-role-multi-note"
+          >
             {t("rolePicker.multiNote")}
           </p>
         </header>
