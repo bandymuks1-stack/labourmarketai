@@ -99,47 +99,39 @@ describe("Guard: each role dashboard calls the gate FIRST", () => {
         expect(src).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
       });
 
-      it("does not write to the DB", () => {
-        // The role dashboards are pure read/render. Mutations live in
-        // the deferred drafts-persistence PR.
+      it("does not write to the DB directly (mutations go through pilot-drafts-actions)", () => {
+        // The page itself is pure read + render. Mutations live in the
+        // server-action wrapper used by PilotDraftForm; the page never
+        // calls supabase.from(...).insert/update/delete inline.
         expect(src).not.toMatch(/\.insert\(/);
         expect(src).not.toMatch(/\.update\(/);
         expect(src).not.toMatch(/\.delete\(/);
         expect(src).not.toMatch(/\.upsert\(/);
+        // The narrative-skills surface stays out of role dashboards.
         expect(src).not.toMatch(/\bsaveProfileSkillClaimsAction\b/);
       });
 
-      it("passes the matching i18n namespace + testId to RoleDashboard", () => {
+      it("uses the matching i18n namespace + data-testid", () => {
         expect(src).toMatch(
           new RegExp(
             `getTranslations\\(["']${i18nKey.replace(/\./g, "\\.")}["']\\)`,
           ),
         );
         expect(src).toMatch(
-          new RegExp(`testId=["']${testid}["']`),
+          new RegExp(`data-testid=["']${testid}["']`),
         );
+      });
+
+      it("renders the pilot disclaimer + profile link inline", () => {
+        // PR B inlined the shell on each role page (the shared
+        // RoleDashboard component was removed once each page had its
+        // own draft form layout). Re-assert the per-page invariants
+        // that used to live on the shared component.
+        expect(src).toMatch(/pilotDisclaimer/);
+        expect(src).toMatch(/href=["']\/dashboard\/profile["']/);
       });
     });
   }
-});
-
-describe("Guard: shared RoleDashboard renders the pilot disclaimer + no fake matching", () => {
-  const src = read("components/app/role-dashboard.tsx");
-
-  it("renders the pilot disclaimer slot", () => {
-    expect(src).toMatch(/pilotDisclaimer/);
-    expect(src).toMatch(/pilot-disclaimer/);
-  });
-
-  it("renders the first-action slot with a status label", () => {
-    expect(src).toMatch(/firstActionTitle/);
-    expect(src).toMatch(/firstActionBody/);
-    expect(src).toMatch(/firstActionStatus/);
-  });
-
-  it("links back to /dashboard/profile (the universal capability surface)", () => {
-    expect(src).toMatch(/href=["']\/dashboard\/profile["']/);
-  });
 });
 
 describe("Guard: roleDashboards i18n is honest (LT + EN)", () => {
@@ -168,7 +160,10 @@ describe("Guard: roleDashboards i18n is honest (LT + EN)", () => {
           expect(r[key], `${locale}.roleDashboards.${role}.${key}`).toBeTruthy();
         }
         const firstAction = r.firstAction as Record<string, string>;
-        for (const key of ["title", "body", "status"]) {
+        for (const key of ["title", "body"]) {
+          // `status` (the "Ruošiama" placeholder) was removed in PR B
+          // (feat/cc/pilot-draft-flows) when the form replaced the
+          // placeholder; title/body remain as the form's section header.
           expect(
             firstAction[key],
             `${locale}.roleDashboards.${role}.firstAction.${key}`,

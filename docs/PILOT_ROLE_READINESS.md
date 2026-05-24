@@ -30,7 +30,9 @@ See `docs/PILOT_READINESS.md`. Worker capability flow is mature; this sprint doe
 - [ ] Sign in as a user who holds the `company` role (or add it from the role switcher).
 - [ ] Navigate to `/lt/dashboard/company` directly. The page renders with header `Įmonės pilotinis skydas` + subtitle that says role is an entry point.
 - [ ] A `PILOT` disclaimer card is visible explaining no fake matching, no auto-publication.
-- [ ] The "First useful action" card titled `Sukurti darbo / paslaugos / komandos paklausą` is visible with a `Ruošiama` status badge (honest — draft persistence ships in a follow-up slice).
+- [ ] The "First useful action" card renders a save form titled `Sukurti darbo / paslaugos / komandos paklausą` (PR B / feat/cc/pilot-draft-flows — draft persistence is shipped; one private row per user per draft_type).
+- [ ] Fill any field (e.g. `Pavadinimas` / `Pajėgumai`) and press `Išsaugoti`. The green `✓ Išsaugota privačiai` confirmation appears; reload shows the values pre-filled.
+- [ ] `Ištrinti juodraštį` is only visible when a draft already exists; pressing it removes the row and the form returns empty.
 - [ ] A link `Mano gebėjimai →` is visible and goes to `/lt/dashboard/profile`.
 - [ ] If you do NOT hold the `company` role, navigating to `/lt/dashboard/company` redirects to `/lt/dashboard` (the overview). Server-side; no flash of company content.
 
@@ -39,7 +41,7 @@ See `docs/PILOT_READINESS.md`. Worker capability flow is mature; this sprint doe
 - [ ] Sign in as a user who holds the `agency` role.
 - [ ] Navigate to `/lt/dashboard/agency`. Page renders `Agentūros pilotinis skydas`.
 - [ ] Pilot disclaimer mentions that candidates are not auto-verified.
-- [ ] First-action card: `Sukurti kandidatų / paslaugų pasiūlymo juodraštį` with `Ruošiama` status.
+- [ ] First-action card renders the agency draft form; save / reload / edit / delete loop works as for the company role.
 - [ ] `Mano gebėjimai →` link works.
 - [ ] Non-agency users are server-side redirected to `/lt/dashboard`.
 
@@ -48,7 +50,7 @@ See `docs/PILOT_READINESS.md`. Worker capability flow is mature; this sprint doe
 - [ ] Sign in as a user who holds the `customer` role (the DB slug; the user-facing label is "Pirkėjas").
 - [ ] Navigate to `/lt/dashboard/buyer`. Page renders `Pirkėjo pilotinis skydas`.
 - [ ] Pilot disclaimer mentions request stays private.
-- [ ] First-action card: `Sukurti paslaugos / komandos / rangovo užklausą` with `Ruošiama`.
+- [ ] First-action card renders the buyer draft form; save / reload / edit / delete loop works as for the company role.
 - [ ] `Mano gebėjimai →` link works.
 - [ ] Non-buyer users are server-side redirected to `/lt/dashboard`.
 
@@ -68,14 +70,13 @@ See `docs/PILOT_READINESS.md`. Admin role-switcher badge (PR #52) and pilot pane
 - [ ] No billing/payment UI visible.
 - [ ] LT copy understandable to a Lithuanian-speaking pilot tester.
 
-## What's deferred to a follow-up PR
+## What ships in PR B (feat/cc/pilot-draft-flows)
 
-This sprint ships **dashboards + onboarding + copy** for the three non-worker roles. The honest first-action card status is `Ruošiama` because:
+- **Draft persistence** — `public.pilot_drafts` (migration 0016) holds one private row per `(profile_id, draft_type)` with owner-scoped RLS, `closed`-only visibility CHECK, explicit GRANT to `authenticated` only (no service_role), and `is_admin()` read-only path.
+- **Admin pilot-observability metrics** — the admin pilot panel now shows total + per-type draft counts and the per-user inspect view lists each draft's payload.
+- **Honesty** — no public exposure, no fake matching / verified / confirmed copy, no billing, no service_role grant. Source-level invariants enforced by `lib/guards/pilot-drafts.test.ts`.
 
-- **Draft persistence** (company request / agency offer / buyer request rows in their own table, with owner-scoped RLS + `closed` visibility) is the next slice.
-- **Admin pilot-observability metrics** (per-role profile count, drafts count by type) will be added once the drafts table exists.
-
-These two are the explicit follow-ups documented in the sprint goal under "Required work package C" and "Required work package D".
+The migration file is committed; **owner applies on production** via Supabase SQL Editor / MCP (CLAUDE.md: "Running migrations on production — NEVER automatic.").
 
 ## Auto-verified invariants (existing test suite)
 
@@ -92,13 +93,11 @@ These don't need manual verification — `pnpm -F web test` enforces them:
 | Admin badge fix (PR #52) preserved | `lib/guards/admin-role-switcher.test.ts` |
 | Superadmin server-side gate (PR #51) preserved | `lib/guards/superadmin.test.ts` |
 
-## Out of scope (intentional, this sprint)
+## Out of scope (intentional, even with PR B)
 
-- DB migrations.
-- Production DB writes.
-- Service-role grant.
-- Drafts persistence — explicit follow-up.
-- Admin per-role / per-draft metrics — depends on drafts persistence.
+- Public exposure of drafts — explicitly forbidden; will require a separate consent-driven slice.
+- Service-role grant on `pilot_drafts` — explicitly forbidden.
+- Production DB writes by an agent — owner applies migrations manually.
 - Billing / payment / provider work.
 - External AI / API.
 - Broad visual redesign.

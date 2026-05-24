@@ -47,8 +47,29 @@
       "pilotDisclaimer": "Pilot mode. Matching is not yet offered. Nothing becomes public automatically. You can safely prepare a first request and wait for the next pilot stage.",
       "firstAction": {
         "title": "Create a worker / team / service request",
-        "body": "First useful action: describe the worker, team, or service you need. The draft stays private to you until you decide otherwise.",
-        "status": "Preparing"
+        "body": "First useful action: describe the worker, team, or service you need. The draft stays private to you until you decide otherwise."
+      },
+      "draftForm": {
+        "field": {
+          "title": { "label": "Role / job title needed", "placeholder": "e.g. painter, cook, driver" },
+          "capabilities": { "label": "Required skills", "placeholder": "e.g. painting, masonry, driving" },
+          "location": { "label": "Location / country", "placeholder": "e.g. Vilnius, Lithuania" },
+          "timing": { "label": "Start timing", "placeholder": "e.g. in March, this week" },
+          "accommodation": {
+            "label": "Accommodation",
+            "placeholder": "Choose",
+            "options": { "yes": "Provided", "no": "Not provided", "unknown": "Not sure yet" }
+          },
+          "languages": { "label": "Language needs", "placeholder": "e.g. Lithuanian, English" },
+          "notes": { "label": "Notes", "placeholder": "Any notes for the pilot" }
+        },
+        "saveButton": "Save draft",
+        "saving": "Saving…",
+        "deleteButton": "Remove draft",
+        "deleting": "Removing…",
+        "savedPrivate": "Saved privately — nobody else sees this",
+        "saveError": "Could not save. Please try again.",
+        "deleteError": "Could not remove. Please try again."
       },
       "profileLink": "My capabilities (if you're also a person, not only a company)"
     },
@@ -59,8 +80,25 @@
       "pilotDisclaimer": "Pilot mode. We don't auto-verify candidates. Nothing becomes public without your decision. You can safely prepare an offer and wait for the next pilot stage.",
       "firstAction": {
         "title": "Create a candidates / services offer draft",
-        "body": "First useful action: describe the workers you can supply or the assignments you're looking for. The draft stays private to you.",
-        "status": "Preparing"
+        "body": "First useful action: describe the workers you can supply or the assignments you're looking for. The draft stays private to you."
+      },
+      "draftForm": {
+        "field": {
+          "candidateRoles": { "label": "Candidate roles offered", "placeholder": "e.g. electricians, developers" },
+          "skillAreas": { "label": "Skill areas", "placeholder": "e.g. construction, IT, kitchen" },
+          "countries": { "label": "Countries", "placeholder": "e.g. LT, LV, EE" },
+          "languages": { "label": "Language coverage", "placeholder": "e.g. LT, EN, RU" },
+          "availability": { "label": "Availability", "placeholder": "e.g. 5 people immediately" },
+          "documentation": { "label": "Documentation readiness", "placeholder": "e.g. A1 ready, permits in process" },
+          "notes": { "label": "Notes", "placeholder": "Any notes for the pilot" }
+        },
+        "saveButton": "Save draft",
+        "saving": "Saving…",
+        "deleteButton": "Remove draft",
+        "deleting": "Removing…",
+        "savedPrivate": "Saved privately — nobody else sees this",
+        "saveError": "Could not save. Please try again.",
+        "deleteError": "Could not remove. Please try again."
       },
       "profileLink": "My capabilities"
     },
@@ -71,8 +109,23 @@
       "pilotDisclaimer": "Pilot mode. We don't present fake offers. Your request stays private to you until you decide otherwise.",
       "firstAction": {
         "title": "Create a service / team / contractor request",
-        "body": "First useful action: describe what you need (service, team, contractor). The draft stays private.",
-        "status": "Preparing"
+        "body": "First useful action: describe what you need (service, team, contractor). The draft stays private."
+      },
+      "draftForm": {
+        "field": {
+          "serviceType": { "label": "Service / work type", "placeholder": "e.g. roofing, translation" },
+          "location": { "label": "Location", "placeholder": "e.g. Vilnius" },
+          "timing": { "label": "Expected timing", "placeholder": "e.g. in April" },
+          "budget": { "label": "Budget (if known)", "placeholder": "Optional" },
+          "notes": { "label": "Notes", "placeholder": "Any notes for the pilot" }
+        },
+        "saveButton": "Save draft",
+        "saving": "Saving…",
+        "deleteButton": "Remove draft",
+        "deleting": "Removing…",
+        "savedPrivate": "Saved privately — nobody else sees this",
+        "saveError": "Could not save. Please try again.",
+        "deleteError": "Could not remove. Please try again."
       },
       "profileLink": "My capabilities"
     }
@@ -95,13 +148,31 @@
       "no": "no",
       "inspect": "Inspect →"
     },
+    "drafts": {
+      "title": "Pilot drafts",
+      "help": "Private drafts from company / agency / buyer pilot users. Visible only to the owner and admins.",
+      "total": "Total",
+      "byType": {
+        "company": "Company request",
+        "agency": "Agency offer",
+        "buyer": "Buyer request"
+      }
+    },
     "user": {
       "onboarded": "Onboarded",
       "notOnboarded": "Not onboarded",
       "profileTextTitle": "Profile text",
       "profileTextEmpty": "No profile text yet.",
       "claimsTitle": "Self-declared skills",
-      "claimsEmpty": "No self-declared skills yet."
+      "claimsEmpty": "No self-declared skills yet.",
+      "draftsTitle": "Pilot drafts",
+      "draftsEmpty": "No pilot drafts yet.",
+      "draftEmpty": "Draft is empty.",
+      "draftType": {
+        "company_request": "Company request",
+        "agency_offer": "Agency offer",
+        "buyer_request": "Buyer request"
+      }
     }
   },
   "profileSkillClaims": {

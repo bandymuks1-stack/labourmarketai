@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
+import { getPilotDraftCounts } from "@/lib/pilot/pilot-drafts";
 
 /**
  * Type-escape for the `profile_skill_claims` table — the generated
@@ -66,6 +67,14 @@ export default async function AdminDashboardPage({
     head: true,
   });
 
+  // Pilot-drafts metrics (added in feat/cc/pilot-draft-flows). Admin
+  // RLS allows the broad SELECT via is_admin() on pilot_drafts.
+  const draftCounts = await getPilotDraftCounts();
+  const draftsTotal =
+    draftCounts.company_request +
+    draftCounts.agency_offer +
+    draftCounts.buyer_request;
+
   // 10 most recent profile rows. Admin RLS allows SELECT on all rows.
   const { data: recent } = await supabase
     .from("profiles")
@@ -124,6 +133,50 @@ export default async function AdminDashboardPage({
           <p className="mt-1 font-display text-2xl font-bold text-text-primary">
             {claimsTotal ?? 0}
           </p>
+        </div>
+      </section>
+
+      <section
+        className="flex flex-col gap-3"
+        data-testid="admin-pilot-drafts"
+      >
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {t("drafts.title")}
+        </h2>
+        <p className="text-xs text-text-secondary">{t("drafts.help")}</p>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <div className="card-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("drafts.total")}
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-text-primary">
+              {draftsTotal}
+            </p>
+          </div>
+          <div className="card-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("drafts.byType.company")}
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-text-primary">
+              {draftCounts.company_request}
+            </p>
+          </div>
+          <div className="card-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("drafts.byType.agency")}
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-text-primary">
+              {draftCounts.agency_offer}
+            </p>
+          </div>
+          <div className="card-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("drafts.byType.buyer")}
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-text-primary">
+              {draftCounts.buyer_request}
+            </p>
+          </div>
         </div>
       </section>
 

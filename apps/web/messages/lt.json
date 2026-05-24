@@ -47,8 +47,29 @@
       "pilotDisclaimer": "Tai pilotinis režimas. Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite saugiai paruošti pirminę paklausą ir laukti, kol atsidarys tolesni etapai.",
       "firstAction": {
         "title": "Sukurti darbo / paslaugos / komandos paklausą",
-        "body": "Pirmas naudingas veiksmas: aprašykite kokio darbuotojo, komandos ar paslaugos jums reikia. Juodraštis bus privatus, prieinamas tik jums, kol nenuspręsite kitaip.",
-        "status": "Ruošiama"
+        "body": "Pirmas naudingas veiksmas: aprašykite kokio darbuotojo, komandos ar paslaugos jums reikia. Juodraštis bus privatus, prieinamas tik jums, kol nenuspręsite kitaip."
+      },
+      "draftForm": {
+        "field": {
+          "title": { "label": "Pareigybė / vaidmuo", "placeholder": "Pvz., dažytojas, virėjas, vairuotojas" },
+          "capabilities": { "label": "Reikiamos kompetencijos", "placeholder": "Pvz., dažymas, mūrijimas, vairavimas" },
+          "location": { "label": "Vieta / šalis", "placeholder": "Pvz., Vilnius, Lietuva" },
+          "timing": { "label": "Pradžios laikas", "placeholder": "Pvz., kovo mėnesį, šią savaitę" },
+          "accommodation": {
+            "label": "Apgyvendinimas",
+            "placeholder": "Pasirinkti",
+            "options": { "yes": "Suteikiamas", "no": "Nesuteikiamas", "unknown": "Dar nežinia" }
+          },
+          "languages": { "label": "Kalbų poreikis", "placeholder": "Pvz., lietuvių, anglų" },
+          "notes": { "label": "Papildoma informacija", "placeholder": "Bet kokios pastabos pilotui" }
+        },
+        "saveButton": "Išsaugoti juodraštį",
+        "saving": "Saugoma…",
+        "deleteButton": "Pašalinti juodraštį",
+        "deleting": "Šalinama…",
+        "savedPrivate": "Išsaugota privačiai — niekas nemato",
+        "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
+        "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
       "profileLink": "Mano gebėjimai (jei esate ir asmuo, ne tik įmonė)"
     },
@@ -59,8 +80,25 @@
       "pilotDisclaimer": "Tai pilotinis režimas. Kandidatų patvirtinimas nedaromas automatiškai. Niekas netampa viešu be jūsų sprendimo. Galite saugiai paruošti pasiūlymą ir laukti, kol atsidarys tolesni etapai.",
       "firstAction": {
         "title": "Sukurti kandidatų / paslaugų pasiūlymo juodraštį",
-        "body": "Pirmas naudingas veiksmas: aprašykite, kokius darbuotojus galite pasiūlyti arba kokių užsakymų ieškote. Juodraštis bus privatus, prieinamas tik jums.",
-        "status": "Ruošiama"
+        "body": "Pirmas naudingas veiksmas: aprašykite, kokius darbuotojus galite pasiūlyti arba kokių užsakymų ieškote. Juodraštis bus privatus, prieinamas tik jums."
+      },
+      "draftForm": {
+        "field": {
+          "candidateRoles": { "label": "Siūlomi kandidatų vaidmenys", "placeholder": "Pvz., elektrikai, programuotojai" },
+          "skillAreas": { "label": "Įgūdžių sritys", "placeholder": "Pvz., statyba, IT, virtuvė" },
+          "countries": { "label": "Šalys", "placeholder": "Pvz., LT, LV, EE" },
+          "languages": { "label": "Kalbų aprėptis", "placeholder": "Pvz., LT, EN, RU" },
+          "availability": { "label": "Galimumas", "placeholder": "Pvz., 5 žmonės iškart" },
+          "documentation": { "label": "Dokumentų pasirengimas", "placeholder": "Pvz., A1, leidimai tvarkomi" },
+          "notes": { "label": "Papildoma informacija", "placeholder": "Bet kokios pastabos pilotui" }
+        },
+        "saveButton": "Išsaugoti juodraštį",
+        "saving": "Saugoma…",
+        "deleteButton": "Pašalinti juodraštį",
+        "deleting": "Šalinama…",
+        "savedPrivate": "Išsaugota privačiai — niekas nemato",
+        "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
+        "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
       "profileLink": "Mano gebėjimai"
     },
@@ -71,8 +109,23 @@
       "pilotDisclaimer": "Tai pilotinis režimas. Nepateikiame netikrų pasiūlymų. Jūsų užklausa lieka privati, kol nenuspręsite kitaip.",
       "firstAction": {
         "title": "Sukurti paslaugos / komandos / rangovo užklausą",
-        "body": "Pirmas naudingas veiksmas: aprašykite, ko jums reikia (paslauga, komanda, rangovas). Juodraštis bus privatus.",
-        "status": "Ruošiama"
+        "body": "Pirmas naudingas veiksmas: aprašykite, ko jums reikia (paslauga, komanda, rangovas). Juodraštis bus privatus."
+      },
+      "draftForm": {
+        "field": {
+          "serviceType": { "label": "Paslaugos / darbo tipas", "placeholder": "Pvz., stogo dengimas, vertimas" },
+          "location": { "label": "Vieta", "placeholder": "Pvz., Vilnius" },
+          "timing": { "label": "Numatomas laikas", "placeholder": "Pvz., balandžio mėnesį" },
+          "budget": { "label": "Biudžetas (jei žinote)", "placeholder": "Neprivaloma" },
+          "notes": { "label": "Papildoma informacija", "placeholder": "Bet kokios pastabos pilotui" }
+        },
+        "saveButton": "Išsaugoti juodraštį",
+        "saving": "Saugoma…",
+        "deleteButton": "Pašalinti juodraštį",
+        "deleting": "Šalinama…",
+        "savedPrivate": "Išsaugota privačiai — niekas nemato",
+        "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
+        "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
       "profileLink": "Mano gebėjimai"
     }
@@ -95,13 +148,31 @@
       "no": "nėra",
       "inspect": "Tikrinti →"
     },
+    "drafts": {
+      "title": "Pilotiniai juodraščiai",
+      "help": "Įmonių / agentūrų / pirkėjų privatūs juodraščiai. Skaityti gali tik savininkas ir adminas.",
+      "total": "Iš viso",
+      "byType": {
+        "company": "Įmonės paklausa",
+        "agency": "Agentūros pasiūlymas",
+        "buyer": "Pirkėjo užklausa"
+      }
+    },
     "user": {
       "onboarded": "Užregistruotas",
       "notOnboarded": "Dar nepradėjęs",
       "profileTextTitle": "Profilio tekstas",
       "profileTextEmpty": "Profilio tekstas dar neįrašytas.",
       "claimsTitle": "Paties nurodyti įgūdžiai",
-      "claimsEmpty": "Šis vartotojas dar neturi paties nurodytų įgūdžių."
+      "claimsEmpty": "Šis vartotojas dar neturi paties nurodytų įgūdžių.",
+      "draftsTitle": "Pilotiniai juodraščiai",
+      "draftsEmpty": "Šis vartotojas dar neturi pilotinių juodraščių.",
+      "draftEmpty": "Juodraštis tuščias.",
+      "draftType": {
+        "company_request": "Įmonės paklausa",
+        "agency_offer": "Agentūros pasiūlymas",
+        "buyer_request": "Pirkėjo užklausa"
+      }
     }
   },
   "profileSkillClaims": {
