@@ -39,6 +39,44 @@
     "manualAdding": "Pridedama…",
     "addError": "Nepavyko pridėti. Pabandykite dar kartą."
   },
+  "roleDashboards": {
+    "company": {
+      "eyebrow": "ĮMONĖS ERDVĖ",
+      "title": "Įmonės pilotinis skydas",
+      "subtitle": "Įmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.",
+      "pilotDisclaimer": "Tai pilotinis režimas. Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite saugiai paruošti pirminę paklausą ir laukti, kol atsidarys tolesni etapai.",
+      "firstAction": {
+        "title": "Sukurti darbo / paslaugos / komandos paklausą",
+        "body": "Pirmas naudingas veiksmas: aprašykite kokio darbuotojo, komandos ar paslaugos jums reikia. Juodraštis bus privatus, prieinamas tik jums, kol nenuspręsite kitaip.",
+        "status": "Ruošiama"
+      },
+      "profileLink": "Mano gebėjimai (jei esate ir asmuo, ne tik įmonė)"
+    },
+    "agency": {
+      "eyebrow": "AGENTŪROS ERDVĖ",
+      "title": "Agentūros pilotinis skydas",
+      "subtitle": "Agentūros vaidmuo yra įėjimo taškas. Galite plėstis į kitas roles, kai pasiruošę.",
+      "pilotDisclaimer": "Tai pilotinis režimas. Kandidatų patvirtinimas nedaromas automatiškai. Niekas netampa viešu be jūsų sprendimo. Galite saugiai paruošti pasiūlymą ir laukti, kol atsidarys tolesni etapai.",
+      "firstAction": {
+        "title": "Sukurti kandidatų / paslaugų pasiūlymo juodraštį",
+        "body": "Pirmas naudingas veiksmas: aprašykite, kokius darbuotojus galite pasiūlyti arba kokių užsakymų ieškote. Juodraštis bus privatus, prieinamas tik jums.",
+        "status": "Ruošiama"
+      },
+      "profileLink": "Mano gebėjimai"
+    },
+    "buyer": {
+      "eyebrow": "PIRKĖJO ERDVĖ",
+      "title": "Pirkėjo pilotinis skydas",
+      "subtitle": "Pirkėjo vaidmuo yra įėjimo taškas. Galite vėliau pridėti ir kitus vaidmenis.",
+      "pilotDisclaimer": "Tai pilotinis režimas. Nepateikiame netikrų pasiūlymų. Jūsų užklausa lieka privati, kol nenuspręsite kitaip.",
+      "firstAction": {
+        "title": "Sukurti paslaugos / komandos / rangovo užklausą",
+        "body": "Pirmas naudingas veiksmas: aprašykite, ko jums reikia (paslauga, komanda, rangovas). Juodraštis bus privatus.",
+        "status": "Ruošiama"
+      },
+      "profileLink": "Mano gebėjimai"
+    }
+  },
   "admin": {
     "eyebrow": "PILOTO VALDYMAS",
     "title": "Pilotinis valdymo skydas",
