@@ -608,7 +608,9 @@
       "addRoleTitle": "Add a new role",
       "addRoleDescription": "Pick a role to add to your account.",
       "cancel": "Cancel",
-      "confirm": "Add"
+      "confirm": "Add",
+      "adminMode": "Admin mode",
+      "adminPanelLink": "Open pilot control panel"
     },
     "dashboard": {
       "firstUse": {

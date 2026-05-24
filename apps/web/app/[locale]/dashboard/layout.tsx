@@ -49,6 +49,13 @@ export default async function DashboardLayout({
   const roles = (rolesRows ?? [])
     .map((r) => r.role)
     .filter((r): r is Role => ROLES.has(r as Role));
+  // Admin is NOT a workspace role (the role catalogue only knows worker/
+  // company/agency/customer/preparing-roles). When the user is admin we
+  // surface that fact via a SEPARATE flag — see role-switcher.tsx for
+  // the rendering. activeRole continues to fall back to the user's first
+  // user-facing role so the dashboard's tab/nav surfaces still have a
+  // workspace context to render in.
+  const isAdmin = profile.active_role === "admin";
   const activeRole = ROLES.has(profile.active_role as Role)
     ? (profile.active_role as Role)
     : (roles[0] ?? null);
@@ -63,6 +70,7 @@ export default async function DashboardLayout({
         },
         activeRole,
         roles,
+        isAdmin,
         notifications: [],
       }}
     >

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import {
@@ -31,7 +32,7 @@ export function RoleSwitcher() {
   const t = useTranslations("auth");
   const tSwitcher = useTranslations("auth.roleSwitcher");
   const tAccount = useTranslations("auth.dashboard.account");
-  const { roles, activeRole, switchRole, addRole } = useAuth();
+  const { roles, activeRole, isAdmin, switchRole, addRole } = useAuth();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
 
@@ -61,7 +62,28 @@ export function RoleSwitcher() {
   }
 
   return (
-    <div className="relative">
+    <div className="flex items-center gap-2">
+      {/* Admin badge — rendered ONLY when the server resolved
+          profiles.active_role === 'admin'. Lives OUTSIDE the workspace
+          role switcher dropdown so the user never sees an admin chip
+          mixed in with worker/company/agency/customer chips, and so
+          the workspace switcher's user-facing UX is untouched.
+          Clicking the badge navigates to the pilot panel. */}
+      {isAdmin && (
+        <Link
+          href="/dashboard/admin"
+          aria-label={tSwitcher("adminPanelLink")}
+          data-testid="role-switcher-admin-badge"
+          className="inline-flex items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/10 px-3 py-1.5 text-sm font-semibold text-brand-orange hover:border-brand-orange"
+        >
+          <span aria-hidden>⚙</span>
+          <span className="font-mono text-[11px] uppercase tracking-label">
+            {tSwitcher("adminMode")}
+          </span>
+        </Link>
+      )}
+
+      <div className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -168,6 +190,7 @@ export function RoleSwitcher() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

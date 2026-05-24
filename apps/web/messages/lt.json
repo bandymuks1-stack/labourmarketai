@@ -611,7 +611,9 @@
       "addRoleTitle": "Pridėti naują vaidmenį",
       "addRoleDescription": "Pasirinkite vaidmenį, kurį norite pridėti prie paskyros.",
       "cancel": "Atšaukti",
-      "confirm": "Pridėti"
+      "confirm": "Pridėti",
+      "adminMode": "Admin režimas",
+      "adminPanelLink": "Atidaryti pilotinį valdymo skydą"
     },
     "dashboard": {
       "firstUse": {

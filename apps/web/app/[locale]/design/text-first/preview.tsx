@@ -34,6 +34,7 @@ export function TextFirstPreview() {
         profile: { full_name: "Preview", email: "preview@labourmarket.ai" },
         activeRole: "worker",
         roles: ["worker", "company", "agency", "customer"],
+        isAdmin: false,
         notifications: [],
       }}
     >
