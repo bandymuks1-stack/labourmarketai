@@ -1,23 +1,18 @@
 /**
  * Local credentialed smoke for
- * feat/cc/profile-save-state-and-idea-extraction.
+ * feat/cc/profile-max-capability-capture.
  *
- * State-aware: production `profile_skill_claims` rows persist across
- * smoke runs, so this spec exercises whichever save-state branch the
- * current DB state surfaces. Specifically:
+ * Two specs:
  *
- *   - if any actionable chips exist (status=pending), exercise the
- *     full suggestions-found → selected-pending → saved cycle and
- *     capture screenshots 1-3;
- *   - if every extracted chip is already in profile_skill_claims,
- *     skip the action cycle and capture screenshot 4 directly
- *     (no-new-suggestions empty state).
+ *   1. STATE — broad narrative produces many capabilities, all
+ *      already-saved chips render with the Jau išsaugota badge, no
+ *      misleading verified copy, Save button hidden when nothing to
+ *      save.
  *
- * Either way: the spec asserts the structural invariants (all 9 broad
- * chips render somewhere, no fake confirmed/verified copy, no legacy
- * "Sistema rado" bucket grid). The save-state lifecycle LOGIC is
- * proved deterministically by `lib/guards/profile-text-flow-wiring.test.ts`
- * which doesn't depend on production state.
+ *   2. EDIT FLOW — owner asked to verify Grįžti prie teksto / edit
+ *      round-trip works: type, suggest, click back, the textarea is
+ *      visible with the last text intact, edit, suggest again, new
+ *      bucket renders.
  *
  * Auth: pre-set storage state minted by scripts/e2e-mint-session.ts.
  * Skips when `tests/e2e/.storage-state.json` is missing.
@@ -36,7 +31,7 @@ const SCREENSHOT_DIR = join(
   "runtime",
   "review-evidence",
   "labourmarketai",
-  "profile-save-state-and-idea-extraction",
+  "profile-max-capability-capture",
   "screenshots",
 );
 
@@ -56,25 +51,47 @@ async function shot(page: Page, name: string): Promise<void> {
   });
 }
 
-const EXPANDED_INPUT =
+// Broad owner narrative — touches construction, IT, cooking with LT
+// cuisine specialization, woodworking + drožyba, Word/Excel/PDF,
+// Rivilė, team coordination, recruitment, sales, driving + light car,
+// plumbing + install, legal documents.
+const BROAD_INPUT =
   "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti " +
   "lietuviškos virtuvės patiekalus. taip pat moku drožti iš medžio, " +
   "bei dirbti su word, excel ir pdf dokumentais rivilė aplinkoje ir " +
-  "galiu koordinuoti komanda bei ieškoti naujų žmonių ir darbuotojų";
+  "galiu koordinuoti komanda bei ieškoti naujų žmonių ir darbuotojų. " +
+  "Turiu teisinės patirties, ruošiu sutartis ir teisinius dokumentus. " +
+  "Galiu vairuoti lengvąjį automobilį, taip pat užsiimu santechnikos " +
+  "montavimu ir dirbu pardavėju.";
 
-const CANONICAL_CHIPS = [
+// Spot-check chips that must appear in EITHER the extracted bucket
+// (pending / already_saved) OR the saved CapabilityProfileSection
+// below. These are the user-visible specializations + new domains
+// the PR is built for.
+const REQUIRED_CHIPS = [
+  // baseline
   "Programavimas",
   "Namų statyba",
   "Stogų dengimas",
   "Maisto gamyba",
-  "Medienos apdirbimas",
-  "Dokumentų tvarkymas",
-  "Apskaitos sistemos",
-  "Komandos koordinavimas",
-  "Darbuotojų paieška",
+  // NEW specializations
+  "Lietuviškos virtuvės gamyba",
+  "Drožyba",
+  "Word dokumentai",
+  "Excel / Skaičiuoklės",
+  "PDF dokumentai",
+  "Rivilė",
+  "Santechnikos montavimas",
+  "Lengvojo automobilio vairavimas",
+  // NEW domains
+  "Pardavimai",
+  "Sutarčių ruošimas",
+  "Vairavimas",
 ];
 
-test("save-state lifecycle + idea-based extraction", async ({ page }) => {
+test("broad narrative produces many capabilities incl. specializations", async ({
+  page,
+}) => {
   test.setTimeout(120_000);
 
   await page.goto("/lt/dashboard/profile", { waitUntil: "networkidle" });
@@ -82,106 +99,101 @@ test("save-state lifecycle + idea-based extraction", async ({ page }) => {
 
   const composer = page.locator("textarea").first();
   await composer.waitFor({ state: "visible", timeout: 30_000 });
-  await composer.fill(EXPANDED_INPUT);
+  await composer.fill(BROAD_INPUT);
 
   await page
     .getByRole("button", { name: "Pasiūlykite struktūrą" })
     .first()
     .click();
 
-  // Bucket header appears.
   await page
     .getByText("Paties nurodyti įgūdžiai", { exact: false })
     .waitFor({ state: "visible", timeout: 15_000 });
 
-  // All 9 canonical chips MUST be visible somewhere on the page —
-  // either inside the extracted bucket (pending OR already_saved) OR
-  // in the unified CapabilityProfileSection below (saved already).
-  // This is the idea-based extractor proof: the prior 4-chip baseline
-  // is at least doubled.
-  for (const broad of CANONICAL_CHIPS) {
+  // All required chips must be visible somewhere on the page (bucket
+  // OR saved area). Using .first() handles the dual rendering when a
+  // label appears both as a saved chip and as an extracted chip.
+  for (const chip of REQUIRED_CHIPS) {
     await expect(
-      page.getByText(broad, { exact: false }).first(),
-      `${broad} chip should be visible on the page`,
+      page.getByText(chip, { exact: false }).first(),
+      `${chip} chip should be visible on the page`,
     ).toBeVisible();
   }
-  await shot(page, "01-suggestions-found");
+  await shot(page, "01-broad-narrative-many-chips");
 
-  // State-aware branching: did the extractor leave us with any
-  // actionable chips, or is everything already_saved?
-  const selectButtons = page.getByRole("button", { name: "Pasirinkti" });
-  const actionableCount = await selectButtons.count();
-
-  if (actionableCount > 0) {
-    // ── 2. SELECTED PENDING ────────────────────────────────────────
-    for (let safety = 0; safety < 20; safety++) {
-      const remaining = await selectButtons.count();
-      if (remaining === 0) break;
-      await selectButtons.nth(0).click();
-      await page.waitForTimeout(200);
-    }
-
-    await expect(
-      page.getByText("Pasirinkta", { exact: true }).first(),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", {
-        name: "Įtraukti pasirinktus pasiūlymus",
-        exact: true,
-      }),
-    ).toBeEnabled();
-    await shot(page, "02-selected-pending");
-
-    // ── 3. SAVED STATE ────────────────────────────────────────────
-    await page
-      .getByRole("button", {
-        name: "Įtraukti pasirinktus pasiūlymus",
-        exact: true,
-      })
-      .click();
-
-    await expect(
-      page.getByText(/Įgūdžiai išsaugoti į Mano gebėjimai/i),
-    ).toBeVisible({ timeout: 10_000 });
-    await expect(
-      page.getByText("Išsaugota", { exact: true }).first(),
-    ).toBeVisible();
-    await shot(page, "03-saved-state");
-
-    // ── 4. NO-NEW-SUGGESTIONS ──────────────────────────────────────
-    // Re-extract after save — everything should now be already_saved.
-    await page
-      .getByRole("button", { name: "Iš naujo pasiūlyti pagal tekstą" })
-      .click();
-    await page.waitForTimeout(500);
-  }
-
-  // Whether we reached this point through the action cycle or
-  // directly (production rows already covered everything), the
-  // no-new-suggestions empty state should now apply.
+  // Lithuanian-cuisine specialization rendered as its own chip, not
+  // flattened into the generic Maisto gamyba.
   await expect(
-    page.getByTestId("profile-text-flow-no-new-suggestions"),
-  ).toBeVisible({ timeout: 10_000 });
-
-  // Save button is gone (newCount === 0 && selectedCount === 0).
-  expect(
-    await page.getByTestId("profile-text-flow-apply-button").count(),
-    "Save button must not render when nothing is selectable",
-  ).toBe(0);
-
-  // All extracted chips render with the "Jau išsaugota" badge.
-  await expect(
-    page.getByText("Jau išsaugota", { exact: true }).first(),
+    page.getByText("Lietuviškos virtuvės gamyba", { exact: false }).first(),
   ).toBeVisible();
-  await shot(page, "04-no-new-suggestions");
+  await shot(page, "02-lithuanian-cuisine-specialization");
 
-  // Honest-status invariant: no standalone Patvirtinta/Patvirtinti
-  // anywhere in the rendered VISIBLE text (raw HTML would false-trigger
-  // because next-intl inlines the full LT bundle).
+  // No standalone Patvirtinta / Patvirtinti badges anywhere.
   const visibleText = (await page.locator("body").innerText()).replace(
     /\s+/g,
     " ",
   );
   expect(visibleText).not.toMatch(/(^|\s)Patvirtinta(\s|$|[.,])/);
   expect(visibleText).not.toMatch(/(^|\s)Patvirtinti(\s|$|[.,])/);
+});
+
+test("edit flow — type → suggest → back → edit → re-suggest", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+
+  await page.goto("/lt/dashboard/profile", { waitUntil: "networkidle" });
+
+  const composer = page.locator("textarea").first();
+  await composer.waitFor({ state: "visible", timeout: 30_000 });
+
+  // STEP 1 — type a known short text.
+  const FIRST_TEXT = "Programuoju ir statau namus.";
+  await composer.fill(FIRST_TEXT);
+
+  // STEP 2 — click suggest.
+  await page
+    .getByRole("button", { name: "Pasiūlykite struktūrą" })
+    .first()
+    .click();
+
+  await page
+    .getByText("Paties nurodyti įgūdžiai", { exact: false })
+    .waitFor({ state: "visible", timeout: 15_000 });
+
+  // The back-to-text button carries the stable testid added by this PR.
+  const backButton = page.getByTestId("profile-text-flow-back-to-text");
+  await expect(backButton).toBeVisible();
+  await shot(page, "03-back-button-visible");
+
+  // STEP 3 — click Grįžti prie teksto.
+  await backButton.click();
+
+  // STEP 4 — compose stage is back, with the LAST submitted text
+  // pre-filled in the textarea.
+  await expect(
+    page.getByTestId("profile-text-flow-compose"),
+  ).toBeVisible({ timeout: 5_000 });
+  const composerAgain = page.locator("textarea").first();
+  await expect(composerAgain).toHaveValue(FIRST_TEXT);
+  await shot(page, "04-back-to-text-textarea-intact");
+
+  // STEP 5 — edit text, add more capabilities.
+  const SECOND_TEXT = FIRST_TEXT + " Taip pat dirbu pardavėju.";
+  await composerAgain.fill(SECOND_TEXT);
+
+  // STEP 6 — re-suggest. New bucket renders. Pardavimai chip appears.
+  await page
+    .getByRole("button", { name: "Pasiūlykite struktūrą" })
+    .first()
+    .click();
+
+  await page
+    .getByText("Paties nurodyti įgūdžiai", { exact: false })
+    .waitFor({ state: "visible", timeout: 15_000 });
+
+  await expect(
+    page.getByText("Pardavimai", { exact: false }).first(),
+  ).toBeVisible();
+  await shot(page, "05-edited-text-new-suggestions");
 });

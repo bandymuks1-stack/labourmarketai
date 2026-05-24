@@ -245,7 +245,10 @@ export function ProfileTextFirstFlow({
 
   if (stage === "compose" || !hasExtracted) {
     return (
-      <div className="flex flex-col gap-4">
+      <div
+        className="flex flex-col gap-4"
+        data-testid="profile-text-flow-compose"
+      >
         <TextFirstComposer
           title={t("title")}
           helper={t("helper")}
@@ -295,10 +298,22 @@ export function ProfileTextFirstFlow({
           </button>
           <button
             type="button"
-            onClick={() => setStage("compose")}
-            className="rounded-md border border-ink-500 px-2.5 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            onClick={() => {
+              // Defensive reset on back-navigation: the user may have
+              // saved earlier and we don't want a stale success toast
+              // re-appearing if they tap submit again with no
+              // changes. analyse() resets these too, but resetting
+              // them here makes the edit-then-resuggest contract
+              // explicit and matches the owner's mental model
+              // ("clicking Grįžti prie teksto is a fresh start").
+              setApplied(false);
+              setError(null);
+              setStage("compose");
+            }}
+            className="rounded-md border border-brand-blue/40 bg-brand-blue/5 px-2.5 py-1 text-xs font-semibold text-text-primary hover:border-brand-blue"
+            data-testid="profile-text-flow-back-to-text"
           >
-            {t("backToText")}
+            ← {t("backToText")}
           </button>
           {manualSlot && (
             <button

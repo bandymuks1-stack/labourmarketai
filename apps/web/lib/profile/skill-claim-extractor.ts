@@ -108,14 +108,18 @@ const DICTIONARY: readonly DictionaryRow[] = [
     // patiekalus" which previously produced 0 self-declared chips. Stems
     // are picked to match the morphology of LT verbs ("gaminti" → "gamin",
     // "virėjas" → "virėj") + the obvious EN equivalents.
+    // Parent — broad cooking/kitchen competence. "patiekal" added so
+    // phrases like "lietuviškos virtuvės patiekalus" surface this
+    // parent even when "gaminti patiekal" isn't adjacent (the
+    // specialization "Lietuviškos virtuvės gamyba" below ALSO matches
+    // on the same text — parent + specialization is the intent).
     label: "Maisto gamyba",
     needles: [
       "gaminti patiekal",
       "gaminti maist",
       "virtuvės patiek",
       "virtuvės darb",
-      "lietuvišk virtuv",
-      "lietuviškos virtuv",
+      "patiekal",
       "maisto gamy",
       "maisto ruoš",
       "virėj",
@@ -123,6 +127,21 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "cooking",
       "chef",
       "kitchen work",
+    ],
+  },
+  {
+    // SPECIALIZATION of Maisto gamyba. Triggers on the explicit LT
+    // cuisine domain; the parent chip continues to surface via the
+    // "patiekal" needle.
+    label: "Lietuviškos virtuvės gamyba",
+    needles: [
+      "lietuvišk virtuv",
+      "lietuviškos virtuv",
+      "lietuvišką virtuv",
+      "lietuviška virtuv",
+      "lietuvišk patiekal",
+      "lithuanian cuisine",
+      "lithuanian dishes",
     ],
   },
   {
@@ -155,43 +174,73 @@ const DICTIONARY: readonly DictionaryRow[] = [
   // "drožinėju") rather than a single fully inflected form.
 
   {
-    // Activity phrase. "drož" matches drožti / drožiu / drožyba /
-    // drožinėju; "medien"/"medžio darb"/"medžio drož" cover the
-    // material-centric phrasings; EN equivalents kept narrow so an
-    // unrelated "wood" reference (e.g. a company name) does not match.
+    // Parent: any material-based wood work. "medž" matches medžio /
+    // medžiagą; "medien" matches medieną; "medžio darb" / "carpentry"
+    // / "woodwork" are unambiguous.
     label: "Medienos apdirbimas",
     needles: [
-      "drož",
+      "medž",
       "medien",
       "medžio darb",
       "medzio darb",
-      "medžio drož",
       "carpentry",
       "woodwork",
     ],
   },
   {
-    // Tool mentions. Word/Excel/PDF/Rivilė are case-insensitive
-    // substrings — needle lowercased here. "dokument" is a broad stem
-    // (dokumentai / dokumentų / dokumentus). Whitespace padding on
-    // "word " avoids matching unrelated "wordpress", "word-of-mouth",
-    // etc. — at the cost of missing "Word." with a trailing period;
-    // we accept that as the trade-off for false-positive avoidance.
-    label: "Dokumentų tvarkymas",
+    // SPECIALIZATION of Medienos apdirbimas. "drož" matches drožti /
+    // drožy / drožinė / drožinėju. Owner's "drožti iš medžio" yields
+    // BOTH Drožyba (via "drož") AND Medienos apdirbimas (via "medž"),
+    // so the user sees both the general material competence and the
+    // specific specialization.
+    label: "Drožyba",
     needles: [
-      "dokument",
-      "word ",
-      "excel",
-      "pdf",
-      "office",
-      "biuro dokumen",
-      "spreadsheet",
+      "drož",
+      "wood carv",
+      "carving",
     ],
   },
   {
-    // Business / accounting tool. Rivilė is a specific LT ERP product;
-    // generic "apskait" stem covers any accounting / bookkeeping
-    // mention; "verslo administr" picks up business admin framings.
+    // Parent. Generic document-handling competence. "dokument" stem
+    // covers dokumentai / dokumentų / dokumentus / dokumentais.
+    label: "Dokumentų tvarkymas",
+    needles: [
+      "dokument",
+      "office",
+      "biuro dokumen",
+      "document management",
+    ],
+  },
+  {
+    // SPECIALIZATION — specific office tool. Padded with leading
+    // space so it doesn't match unrelated words. The user typing
+    // "Word" / "word" / " word " surfaces this AND the parent
+    // Dokumentų tvarkymas via the "dokument" stem when both phrases
+    // appear in the narrative.
+    label: "Word dokumentai",
+    needles: [
+      " word ",
+      " word,",
+      " word.",
+      "microsoft word",
+      "ms word",
+      "word, excel",
+      "word ir excel",
+      "word and excel",
+    ],
+  },
+  {
+    label: "Excel / Skaičiuoklės",
+    needles: ["excel", "spreadsheet", "skaičiuokl", "skaiciuokl"],
+  },
+  {
+    label: "PDF dokumentai",
+    needles: ["pdf"],
+  },
+  {
+    // Parent — any accounting / business-admin tool. Rivilė is broken
+    // out as its own specialization chip below so the user sees the
+    // system recognised the specific product.
     label: "Apskaitos sistemos",
     needles: [
       "rivilė",
@@ -203,6 +252,12 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "bookkeep",
       "accounting software",
     ],
+  },
+  {
+    // SPECIALIZATION. Triggered only by the explicit product name —
+    // the parent already covers any other ERP/accounting framing.
+    label: "Rivilė",
+    needles: ["rivilė", "rivile"],
   },
   {
     // Responsibility phrase — coordination is intentionally separate
@@ -248,9 +303,91 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "staffing",
     ],
   },
+
+  // ─── Specialization + new-domain rows (feat/cc/profile-max-capability-capture) ──
+
+  {
+    // SPECIALIZATION of Santechnika. When the text says "santechnikos
+    // montavimas" or "montuoju santechniką", both chips surface — the
+    // user sees that the system caught the specific install activity,
+    // not just the field.
+    label: "Santechnikos montavimas",
+    needles: [
+      "santechnik montav",
+      "santechnikos montav",
+      "santechnikos darb",
+      "santechnikos instal",
+      "montuoju santechnik",
+      "montuoti santechnik",
+      "plumbing instal",
+    ],
+  },
+  {
+    // Activity verb — broad driving competence. Specialization chip
+    // for the specific category sits below; both can match.
+    label: "Vairavimas",
+    needles: [
+      "vairuot",
+      "vairuoj",
+      "vairavim",
+      "vairuoja",
+      "driving",
+      "driver",
+    ],
+  },
+  {
+    // SPECIALIZATION — passenger-car driving. Owner's narrative
+    // mentioned "lengvąjį automobilį"; the specialization tells the
+    // employer it is specifically a B-category driver, not e.g. heavy
+    // truck.
+    label: "Lengvojo automobilio vairavimas",
+    needles: [
+      "lengvąjį automobil",
+      "lengvasis automobil",
+      "lengvojo automobil",
+      "lengvąja automobil",
+      "lengv. automobil",
+      "b kategorij",
+      "passenger car driv",
+    ],
+  },
+  {
+    // Activity / role. Catches sales verbs ("parduodu", "pardaviau")
+    // and the role noun ("pardavėjas", "pardavė").
+    label: "Pardavimai",
+    needles: [
+      "pardav",
+      "parduod",
+      "parduoda",
+      "selling",
+      "sales",
+      "salesperson",
+    ],
+  },
+  {
+    // Domain — legal / contract document work. Triggered by "sutart"
+    // (sutartis / sutartys / sutartys) OR "teisin dokument" (teisinius
+    // dokumentus) so it doesn't fire on every generic "dokument"
+    // mention.
+    label: "Sutarčių ruošimas",
+    needles: [
+      "sutarč",
+      "sutart",
+      "teisin dokument",
+      "teisin patir",
+      "teisin darb",
+      "legal document",
+      "contract draft",
+      "contract prep",
+    ],
+  },
 ];
 
-const MAX_SUGGESTIONS = 12;
+// Bumped from 12 → 24 for the max-capture upgrade: owner's expanded
+// narrative now reliably yields 15+ chips when it touches multiple
+// domains. Cap stays so an extreme adversarial CV-paste doesn't blow
+// up the bucket grid.
+const MAX_SUGGESTIONS = 24;
 const MAX_INPUT_CHARS = 4000;
 
 /**
