@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
+import { ProfileSkillClaimsSection } from "@/components/app/profile-skill-claims-section";
+import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
 import {
   CvEngagementCards,
@@ -58,6 +60,11 @@ export default async function ProfilePage({
   // workers.bio (employer-readable via is_employer() RLS); see profile-text-actions.ts.
   const savedProfileText =
     (profile as { profile_text?: string | null } | null)?.profile_text ?? "";
+
+  // Owner-only self-declared skill claims derived from profile_text
+  // (migration 0015). Safe to fetch unconditionally — listProfileSkillClaims
+  // returns [] if the user is missing or the table isn't reachable yet.
+  const savedSkillClaims = await listProfileSkillClaims();
 
   const { data: roleRows } = await supabase
     .from("profile_roles")
@@ -246,6 +253,17 @@ export default async function ProfilePage({
           {t("pageTitle")}
         </h1>
       </header>
+
+      {/* Self-declared profile skill claims (owner-only, migration 0015).
+          Always rendered when the user has a worker row; sits above the
+          existing detected-suggestions flow because the slice spec wants
+          the user to first see "claims from MY text" as the headline. */}
+      {workerId && (
+        <ProfileSkillClaimsSection
+          initialText={savedProfileText}
+          initialClaims={savedSkillClaims}
+        />
+      )}
 
       {workerId ? (
         <>

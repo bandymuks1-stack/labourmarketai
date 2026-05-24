@@ -22,6 +22,23 @@
     "savedCount": "Saved: {n} skills",
     "activeTag": "active"
   },
+  "profileSkillClaims": {
+    "title": "Your self-declared skills",
+    "intro": "From your profile text we propose skill chips. You decide which to save.",
+    "disclaimer": "These are self-declared skills. They are not yet confirmed by work journal evidence, documents, or another person.",
+    "suggestButton": "Suggest structure",
+    "needsTextHint": "Add some profile text below first.",
+    "pendingTitle": "Suggestions — confirm or edit",
+    "savedTitle": "Your saved self-declared skills",
+    "saveButton": "Save selected",
+    "savingButton": "Saving…",
+    "removeLabel": "Remove suggestion",
+    "removeSavedLabel": "Remove skill",
+    "editLabel": "Edit skill label",
+    "noNewSuggestions": "No new suggestions. You can edit the text and try again.",
+    "saveError": "Could not save. Please try again.",
+    "deleteError": "Could not remove. Please try again."
+  },
   "skills": {
     "workDirectionsTitle": "Work directions",
     "editingDirection": "Editing direction",
