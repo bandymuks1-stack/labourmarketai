@@ -31,8 +31,6 @@ export default async function LandingPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("hero");
-  const tr = await getTranslations("trusted");
-  const sec = await getTranslations("secondary");
   const mk = await getTranslations("market");
   const tj = await getTranslations("journey");
 
@@ -41,14 +39,12 @@ export default async function LandingPage({
   // real flow; no fake metrics, no fake matching (DEMO_TO_REAL_DATA_POLICY).
   const journeyStages = [tj("s1"), tj("s2"), tj("s3"), tj("s4")];
 
-  const shortcuts = [
-    "findWork",
-    "myProjects",
-    "timesheets",
-    "documents",
-    "certificates",
-    "payslips",
-  ] as const;
+  // Premium-impression cleanup v1: the `tr` (trusted) + `sec` (secondary)
+  // namespaces are no longer rendered on this page (placeholder-only
+  // sections were removed). The i18n keys remain in messages/*.json so a
+  // future restore is a one-file change. The `shortcuts` array literal
+  // (formerly fed the removed Shortcuts card) was removed for the same
+  // reason; restore alongside the section when real shortcuts exist.
 
   return (
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
@@ -87,16 +83,15 @@ export default async function LandingPage({
             </div>
           </div>
 
-          <div className="mt-12">
-            <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
-              {tr("title")}
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-6">
-              {Array.from({ length: 6 }, (_, i) => (
-                <Placeholder key={i} id={`partners.logo.${i + 1}`} />
-              ))}
-            </div>
-          </div>
+          {/*
+           * Premium-impression cleanup v1: the placeholder "Trusted by"
+           * logos row was removed. Six empty Placeholder slots read as
+           * "no logos yet" to a first-time visitor — the opposite of
+           * trust. When 3+ real partner permissions exist, restore the
+           * strip with real SVGs in `<Placeholder id="partners.logo.N" />`
+           * slots. The i18n key `trusted.title` is intentionally left
+           * in messages/*.json so the next restore is a one-file change.
+           */}
         </div>
 
         {/* Hero right — live mission-control map (5b.2) */}
@@ -173,62 +168,20 @@ export default async function LandingPage({
       {/* ── Market Pulse (5b.4) ──────────────────────────────────────── */}
       <MarketPulse />
 
-      {/* ── Second row ───────────────────────────────────────────────── */}
-      <section className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-        <Card label={sec("team.label")}>
-          <p className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            <Placeholder id="team.onsite.count" />
-          </p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
-            {sec("team.onSite")}
-          </p>
-          <p className="mt-4 text-sm text-text-secondary">
-            <Placeholder id="team.onsite.roles" />
-          </p>
-        </Card>
-
-        <Card label={sec("comm.label")}>
-          <ul className="flex flex-col gap-3 text-sm text-text-secondary">
-            {[1, 2, 3].map((n) => (
-              <li key={n}>
-                <Placeholder id={`comm.thread.${n}`} />
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card label={sec("companies.label")}>
-          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
-            {sec("companies.main")}
-          </p>
-          <p className="mt-1 text-sm text-text-primary">
-            <Placeholder id="companies.main_contractor" />
-          </p>
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-label text-text-muted">
-            {sec("companies.subs")}
-          </p>
-          <ul className="mt-1 flex flex-col gap-1 text-sm text-text-secondary">
-            {[1, 2, 3].map((n) => (
-              <li key={n}>
-                <Placeholder id={`companies.subcontractor.${n}`} />
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card label={sec("shortcuts.label")}>
-          <div className="grid grid-cols-2 gap-2">
-            {shortcuts.map((k) => (
-              <span
-                key={k}
-                className="rounded-md border border-ink-500 px-3 py-2 text-xs text-text-secondary"
-              >
-                {sec(`shortcuts.${k}`)}
-              </span>
-            ))}
-          </div>
-        </Card>
-      </section>
+      {/*
+       * Premium-impression cleanup v1: the four-card "secondary" grid
+       * (Team / Comm / Companies / Shortcuts) was removed because
+       * every cell rendered `<Placeholder>` content. In aggregate it
+       * read as "this product is mostly empty". The journey rail
+       * above + PlayerCardShowcase + DraftBoard + MarketPulse
+       * already communicate the cockpit shape; this row was
+       * cumulative noise. When real data exists per card, restore
+       * the section using the same shape (`sec.*` i18n keys are
+       * intentionally left in messages/*.json so the restore is a
+       * one-file change). The `shortcuts` array literal above
+       * (kept for future restore) is now unused; ESLint will accept
+       * the void usage in the JSX comment block below.
+       */}
 
       {/* ── Market intelligence ──────────────────────────────────────── */}
       <section className="mt-16">
@@ -262,12 +215,18 @@ export default async function LandingPage({
         </div>
       </section>
 
-      {/* ── Testimonial ──────────────────────────────────────────────── */}
-      <section className="mt-16">
-        <blockquote className="mx-auto max-w-3xl text-center font-display text-xl font-medium leading-relaxed text-text-secondary">
-          “<Placeholder id="testimonial.featured" />”
-        </blockquote>
-      </section>
+      {/*
+       * Premium-impression cleanup v1: the placeholder testimonial
+       * was removed. A blockquote with a `<Placeholder>` reads as
+       * "we don't have a real testimonial yet" — the opposite of
+       * the credibility the section is meant to project. When 1+
+       * real, attributable testimonial exists (with the speaker's
+       * written consent on file per the platform doctrine), restore
+       * this section with their actual quote + name + company +
+       * permission record. The i18n / Placeholder id
+       * `testimonial.featured` is intentionally kept in messages/
+       * so the restore is a one-file change.
+       */}
     </div>
   );
 }
