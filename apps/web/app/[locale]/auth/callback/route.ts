@@ -35,6 +35,17 @@ export async function GET(
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
+      // Surface the non-secret Supabase error identifiers so the owner can
+      // tell expired/already-used codes (`invalid_grant`) apart from PKCE
+      // verifier cookie issues, network blips, etc. We deliberately do NOT
+      // log the auth code, tokens, cookies, or the full request URL.
+      console.error("[auth/callback] exchangeCodeForSession failed", {
+        locale,
+        code: error.code,
+        status: error.status,
+        name: error.name,
+        message: error.message,
+      });
       loginUrl.searchParams.set("error", "exchange_failed");
       return NextResponse.redirect(loginUrl);
     }
@@ -43,6 +54,9 @@ export async function GET(
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
+      console.error("[auth/callback] getUser returned no user after exchange", {
+        locale,
+      });
       loginUrl.searchParams.set("error", "no_user");
       return NextResponse.redirect(loginUrl);
     }
@@ -65,7 +79,15 @@ export async function GET(
 
     const safeNext = getSafeReturnPath(nextParam, locale);
     return NextResponse.redirect(new URL(safeNext, url.origin));
-  } catch {
+  } catch (e) {
+    // Without this the bare catch silently swallowed every unexpected error
+    // (env throws, fetch failures, etc.) and the user saw `error=callback`
+    // with no signal in Vercel logs. Log the error message only — never the
+    // request URL (it carries the auth code).
+    console.error(
+      "[auth/callback] unexpected error during exchange",
+      e instanceof Error ? { name: e.name, message: e.message } : e,
+    );
     loginUrl.searchParams.set("error", "callback");
     return NextResponse.redirect(loginUrl);
   }
