@@ -62,19 +62,6 @@ export function TextFirstPreview() {
               Profile / Skills — text-first
             </h1>
             <ProfileTextFirstFlow
-              workerId="preview-worker"
-              professionSkills={[
-                { id: "ps-drywall", slug: "drywall", name: "Gipso kartono montavimas" },
-                { id: "ps-ceiling", slug: "ceiling-systems", name: "Pakabinamų lubų montavimas" },
-                { id: "ps-flooring", slug: "flooring", name: "Grindų dangos" },
-                { id: "ps-plumbing", slug: "plumbing", name: "Santechnikos darbai" },
-              ]}
-              professions={[
-                { id: "p-tiler", slug: "tiler", name: "Plytelių klojėjas" },
-                { id: "p-drywaller", slug: "drywaller", name: "Gipso kartono montuotojas" },
-                { id: "p-foreman", slug: "foreman", name: "Brigadininkas" },
-              ]}
-              initialSelectedIds={[]}
               manualSlot={
                 <div className="card-border p-4 text-sm text-text-secondary">
                   Manual skill picker would render here (kept as the secondary

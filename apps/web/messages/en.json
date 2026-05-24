@@ -82,17 +82,17 @@
     "customComingSoon": "coming soon",
     "textFirst": {
       "title": "Tell us what you do",
-      "helper": "Write in your own words or upload a CV. We'll suggest skills, work directions, roles and CV entries — but you confirm every suggestion. Nothing is saved without your confirmation.",
+      "helper": "Write in your own words or upload a CV. We'll suggest skills, work directions, roles and CV entries — but you select every suggestion. Nothing is saved without your selection.",
       "placeholder": "e.g. I worked in customer support, repaired bikes, led a small team, built websites, assembled furniture, handled documents.",
       "submit": "Suggest a structure",
       "manualCta": "Add manually",
       "manualHelper": "Manual selection stays as a secondary path. Start from text or CV — it's faster, and you don't have to commit to a heavy skill list up front.",
       "rescan": "Re-suggest from text",
       "backToText": "Back to text",
-      "applyAll": "Add confirmed suggestions",
-      "appliedToast": "Confirmed suggestions added to your profile. You can still edit or extend them manually.",
+      "applyAll": "Add selected suggestions",
+      "appliedToast": "Selected suggestions added to your profile. You can still edit or extend them manually.",
       "noSuggestionsFallback": "No clear suggestions yet. You can add more detail or add information manually.",
-      "confirmedByYou": "Confirmed by you",
+      "confirmedByYou": "Self-declared",
       "addedToProfile": "Added to your profile",
       "needsExternalConfirmation": "Needs external confirmation later",
       "textSavingLabel": "Saving…",
@@ -279,6 +279,8 @@
     "emptyBucket": "Nothing clear in this part. You can write more or skip it.",
     "noMatches": "Nothing clear in this text yet. Try adding more detail, or add meaningful entries manually.",
     "buckets": {
+      "selfDeclared": "Self-declared skills",
+      "selfDeclaredDisclaimer": "These are self-declared skills. They are not yet confirmed by work journal evidence, documents, or another person.",
       "skills": "Detected skills",
       "directions": "Possible work directions",
       "roles": "Possible roles",
@@ -293,12 +295,12 @@
       "team": "Team led: {n}"
     },
     "actions": {
-      "confirm": "Confirm",
+      "confirm": "Select",
       "edit": "Edit",
       "discard": "Discard"
     },
     "status": {
-      "confirmed": "Confirmed",
+      "confirmed": "Selected",
       "edited": "Edited",
       "discarded": "Discarded",
       "pending": "Suggestion"

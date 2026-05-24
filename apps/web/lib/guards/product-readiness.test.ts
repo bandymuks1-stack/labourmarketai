@@ -235,8 +235,15 @@ describe("confirmation-required copy is present", () => {
   it("profile textFirst + structuring keys carry the confirm rule", () => {
     const lt = JSON.parse(readWeb("messages/lt.json"));
     const en = JSON.parse(readWeb("messages/en.json"));
-    expect(lt.skills.textFirst.confirmedByYou).toBe("Patvirtinta jūsų");
-    expect(en.skills.textFirst.confirmedByYou).toBe("Confirmed by you");
+    // Updated in fix/cc/profile-text-skills-production-wiring: the
+    // self-applied saved-status label MUST NOT use "Patvirtinta" /
+    // "Confirmed" — those words imply external verification and were the
+    // visible misleading copy reported by the owner. The new wording
+    // ("Paties nurodyta" / "Self-declared") makes the trust posture
+    // explicit. The accompanying needsExternalConfirmation key remains
+    // unchanged — it describes the FUTURE confirmation flow honestly.
+    expect(lt.skills.textFirst.confirmedByYou).toBe("Paties nurodyta");
+    expect(en.skills.textFirst.confirmedByYou).toBe("Self-declared");
     expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/išorinio/i);
     expect(en.skills.textFirst.needsExternalConfirmation).toMatch(
       /external/i,

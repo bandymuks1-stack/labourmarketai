@@ -82,17 +82,17 @@
     "customComingSoon": "netrukus",
     "textFirst": {
       "title": "Papasakokite, ką mokate",
-      "helper": "Parašykite savais žodžiais arba įkelkite CV. Sistema pasiūlys įgūdžius, darbo kryptis, vaidmenis ir CV įrašus — bet kiekvieną pasiūlymą patvirtinate jūs. Be jūsų patvirtinimo nieko neišsaugome.",
+      "helper": "Parašykite savais žodžiais arba įkelkite CV. Sistema pasiūlys įgūdžius, darbo kryptis, vaidmenis ir CV įrašus — bet kiekvieną pasiūlymą pasirenkate jūs. Be jūsų pasirinkimo nieko neišsaugome.",
       "placeholder": "Pvz.: dirbau klientų aptarnavime, taisiau dviračius, vedžiau nedidelę komandą, kūriau svetaines, montavau baldus, tvarkiau dokumentus.",
       "submit": "Pasiūlykite struktūrą",
       "manualCta": "Pridėti rankiniu būdu",
       "manualHelper": "Rankinis pasirinkimas lieka kaip antrinis kelias. Pradėkite nuo teksto arba CV — taip greičiau, ir nereikės iškart rinktis sudėtingo įgūdžių sąrašo.",
       "rescan": "Iš naujo pasiūlyti pagal tekstą",
       "backToText": "Grįžti prie teksto",
-      "applyAll": "Įtraukti patvirtintus pasiūlymus",
-      "appliedToast": "Patvirtintus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti arba papildyti rankiniu būdu.",
+      "applyAll": "Įtraukti pasirinktus pasiūlymus",
+      "appliedToast": "Pasirinktus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti arba papildyti rankiniu būdu.",
       "noSuggestionsFallback": "Kol kas neradome aiškių pasiūlymų. Galite parašyti plačiau arba pridėti informaciją rankiniu būdu.",
-      "confirmedByYou": "Patvirtinta jūsų",
+      "confirmedByYou": "Paties nurodyta",
       "addedToProfile": "Pridėta į jūsų profilį",
       "needsExternalConfirmation": "Vėliau reikės išorinio patvirtinimo",
       "textSavingLabel": "Įrašoma…",
@@ -279,6 +279,8 @@
     "emptyBucket": "Šiame teksto fragmente nieko aiškaus neradome. Galite parašyti daugiau arba praleisti.",
     "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau, arba pridėkite reikšmingus įrašus rankiniu būdu.",
     "buckets": {
+      "selfDeclared": "Paties nurodyti įgūdžiai",
+      "selfDeclaredDisclaimer": "Tai jūsų pačių nurodyti įgūdžiai. Jie dar nėra patvirtinti darbų žurnalu, dokumentais ar kito žmogaus patvirtinimu.",
       "skills": "Rasti įgūdžiai",
       "directions": "Galimos darbo kryptys",
       "roles": "Galimi vaidmenys",
@@ -293,12 +295,12 @@
       "team": "Vadovauta žmonių: {n}"
     },
     "actions": {
-      "confirm": "Patvirtinti",
+      "confirm": "Pasirinkti",
       "edit": "Pataisyti",
       "discard": "Neįtraukti"
     },
     "status": {
-      "confirmed": "Patvirtinta",
+      "confirmed": "Pasirinkta",
       "edited": "Pataisyta",
       "discarded": "Neįtraukta",
       "pending": "Pasiūlymas"

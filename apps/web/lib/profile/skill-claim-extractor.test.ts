@@ -46,6 +46,51 @@ describe("extractProfileSkillClaims", () => {
     expect(result.map((r) => r.label)).toContain("Santechnika");
   });
 
+  // Anchor: the owner's PR #46 follow-up production sentence. The first
+  // three skills were already mapped by PR #46; the cooking phrase
+  // ("gaminti lietuviškos virtuvės patiekalus") was the dictionary gap
+  // the hotfix fills.
+  it("extracts all four canonical claims from the extended owner sentence", () => {
+    const result = extractProfileSkillClaims(
+      "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti lietuviškos virtuvės patiekalus",
+    );
+    const labels = result.map((r) => r.label);
+    expect(labels).toContain("Programavimas");
+    expect(labels).toContain("Namų statyba");
+    expect(labels).toContain("Stogų dengimas");
+    expect(labels).toContain("Maisto gamyba");
+  });
+
+  it("maps 'dengti stogus' → 'Stogų dengimas' (new label)", () => {
+    const result = extractProfileSkillClaims(
+      "Per 5 metus dengėme stogus visoje Lietuvoje.",
+    );
+    expect(result.map((r) => r.label)).toContain("Stogų dengimas");
+    // Old label gone — preventing accidental dual-label drift if a future
+    // PR re-introduces "Stogo darbai" alongside.
+    expect(result.map((r) => r.label)).not.toContain("Stogo darbai");
+  });
+
+  it("maps 'gaminti lietuviškos virtuvės patiekalus' → 'Maisto gamyba'", () => {
+    const result = extractProfileSkillClaims(
+      "Mėgstu gaminti lietuviškos virtuvės patiekalus.",
+    );
+    expect(result.map((r) => r.label)).toContain("Maisto gamyba");
+  });
+
+  it("maps English 'cooking' / 'chef' → 'Maisto gamyba'", () => {
+    expect(
+      extractProfileSkillClaims("Have a passion for cooking traditional dishes.").map(
+        (r) => r.label,
+      ),
+    ).toContain("Maisto gamyba");
+    expect(
+      extractProfileSkillClaims("Worked as a chef in two restaurants.").map(
+        (r) => r.label,
+      ),
+    ).toContain("Maisto gamyba");
+  });
+
   it("does not duplicate when multiple needles for the same label hit", () => {
     const result = extractProfileSkillClaims(
       "Programuoju, programavimas yra mano stiprybė, frontend ir backend.",
