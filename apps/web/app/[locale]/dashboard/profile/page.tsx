@@ -254,15 +254,15 @@ export default async function ProfilePage({
         </h1>
       </header>
 
-      {/* Self-declared profile skill claims (owner-only, migration 0015).
-          Always rendered when the user has a worker row; sits above the
-          existing detected-suggestions flow because the slice spec wants
-          the user to first see "claims from MY text" as the headline. */}
-      {workerId && (
-        <ProfileSkillClaimsSection
-          initialText={savedProfileText}
-          initialClaims={savedSkillClaims}
-        />
+      {/* Pure-display list of already-saved self-declared profile skill
+          claims (owner-only, migration 0015). The composer below — wired
+          into ProfileTextFirstFlow.applyConfirmed — is the SINGLE place
+          new claims are produced from profile text. This section only
+          renders when the user has saved claims (no extract CTA here, by
+          design — having two competing CTAs was the production bug fix/cc
+          /profile-text-skills-production-wiring resolves). */}
+      {workerId && savedSkillClaims.length > 0 && (
+        <ProfileSkillClaimsSection initialClaims={savedSkillClaims} />
       )}
 
       {workerId ? (
@@ -275,6 +275,9 @@ export default async function ProfilePage({
             professions={professions.map((p) => ({ ...p, name: tProf(p.slug) }))}
             initialSelectedIds={initialSkillIds}
             initialText={savedProfileText}
+            savedClaimNormalizedLabels={savedSkillClaims.map(
+              (c) => c.normalized_label,
+            )}
             manualSlot={
               <WorkerTradeProfile
                 workerId={workerId}

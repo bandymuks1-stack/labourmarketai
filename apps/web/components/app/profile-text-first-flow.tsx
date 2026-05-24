@@ -10,6 +10,8 @@ import {
   extractProfileSuggestions,
   type ProfileSuggestions,
 } from "@/lib/structuring/extract-profile-suggestions";
+import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
+import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -82,6 +84,7 @@ export function ProfileTextFirstFlow({
   professions,
   initialSelectedIds,
   initialText = "",
+  savedClaimNormalizedLabels = [],
   manualSlot,
 }: {
   workerId: string;
@@ -93,6 +96,9 @@ export function ProfileTextFirstFlow({
   /** Previously-saved self-description text (owner-only profiles.profile_text),
    *  prefilled into the composer. */
   initialText?: string;
+  /** Normalized labels of profile_skill_claims rows the user has already
+   *  saved. Used to suppress duplicate suggestions on re-extract. */
+  savedClaimNormalizedLabels?: string[];
   /** Manual picker rendered after the user clicks "Add manually". */
   manualSlot: React.ReactNode;
 }) {
@@ -115,9 +121,21 @@ export function ProfileTextFirstFlow({
   const [cvEntries, setCvEntries] = useState<Item<string>[]>([]);
   const [yoe, setYoe] = useState<Item<number> | null>(null);
   const [team, setTeam] = useState<Item<number> | null>(null);
+  /** Self-declared claim suggestions from the PR #45 extractor. Free-text
+   *  labels (NOT skill_ids) that persist to `profile_skill_claims` —
+   *  owner-only, never asserted as verified. The `value` is the
+   *  normalized_label (UNIQUE key column); the `label` is the human form. */
+  const [selfDeclared, setSelfDeclared] = useState<Item<string>[]>([]);
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Hoist already-saved claim normalized labels into a Set so re-extract
+  // doesn't propose duplicates. Stable across renders for a given session.
+  const savedClaimSet = useMemo(
+    () => new Set(savedClaimNormalizedLabels),
+    [savedClaimNormalizedLabels],
+  );
 
   const skillBySlug = useMemo(
     () => new Map(professionSkills.map((s) => [s.slug, s])),
@@ -186,6 +204,22 @@ export function ProfileTextFirstFlow({
         label: entry,
       })),
     );
+    // PR #45 path — self-declared free-text claims (e.g. "Programavimas",
+    // "Namų statyba"). These come from a DIFFERENT extractor than the
+    // catalogue-bound skills above, so the user can ALWAYS surface their
+    // own narrative-derived claims even when none of their existing
+    // professions have a matching skill_id. Already-saved labels are
+    // filtered out so the user doesn't see redundant chips on re-extract.
+    setSelfDeclared(
+      extractProfileSkillClaims(raw)
+        .filter((c) => !savedClaimSet.has(c.normalizedLabel))
+        .map((c, i) => ({
+          key: `claim-${i}-${c.normalizedLabel}`,
+          status: "pending",
+          value: c.normalizedLabel,
+          label: c.label,
+        })),
+    );
     setYoe(
       s.yearsOfExperience !== null
         ? {
@@ -222,21 +256,40 @@ export function ProfileTextFirstFlow({
     setApplying(true);
     setError(null);
     try {
-      // Merge: keep existing saved skills, add confirmed parser slugs that
-      // match a real skill row (skill_id from professionSkills).
+      // (1) Catalogued worker_skills — confirmed slugs that map to a real
+      // skill_id within the worker's allowed catalogue. Posted to the
+      // existing /api/workers/:id/skills endpoint. No-op if zero.
       const confirmedSlugs = skills
         .filter((it) => it.status === "confirmed")
         .map((it) => it.value);
       const confirmedIds = confirmedSlugs
         .map((slug) => skillBySlug.get(slug)?.id)
         .filter((id): id is string => !!id);
-      const nextIds = Array.from(new Set([...initialSelectedIds, ...confirmedIds]));
-      const res = await fetch(`/api/workers/${workerId}/skills`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ skillIds: nextIds }),
-      });
-      if (!res.ok) throw new Error(`save failed: ${res.status}`);
+      if (confirmedIds.length > 0 || initialSelectedIds.length > 0) {
+        const nextIds = Array.from(
+          new Set([...initialSelectedIds, ...confirmedIds]),
+        );
+        const res = await fetch(`/api/workers/${workerId}/skills`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ skillIds: nextIds }),
+        });
+        if (!res.ok) throw new Error(`save failed: ${res.status}`);
+      }
+
+      // (2) Self-declared profile_skill_claims — confirmed free-text labels
+      // from the PR #45 extractor. Owner-only RLS, status='self_declared',
+      // source='profile_text', visibility='closed'. The server action
+      // upserts on (profile_id, normalized_label) so re-clicking Save
+      // never duplicates.
+      const confirmedClaims = selfDeclared
+        .filter((it) => it.status === "confirmed")
+        .map((it) => it.label.trim())
+        .filter((l) => l.length > 0);
+      if (confirmedClaims.length > 0) {
+        await saveProfileSkillClaimsAction(confirmedClaims);
+      }
+
       setApplied(true);
     } catch (e) {
       console.error("[profile-text-first] apply failed:", e);
@@ -286,8 +339,11 @@ export function ProfileTextFirstFlow({
     );
   }
 
-  const anyConfirmed = skills.some((s) => s.status === "confirmed");
+  const anyConfirmed =
+    skills.some((s) => s.status === "confirmed") ||
+    selfDeclared.some((s) => s.status === "confirmed");
   const totalDetected =
+    selfDeclared.length +
     skills.length +
     dirs.length +
     roles.length +
@@ -331,6 +387,17 @@ export function ProfileTextFirstFlow({
         {tS("ruleBasedNotice")}
       </p>
 
+      {selfDeclared.length > 0 && (
+        // The self-declared bucket carries the strongest trust posture —
+        // surface the slice-spec disclaimer before the grid renders.
+        <p
+          className="text-xs text-text-secondary"
+          data-testid="profile-text-flow-self-declared-disclaimer"
+        >
+          {tBucket("selfDeclaredDisclaimer")}
+        </p>
+      )}
+
       <TextSaveIndicator state={textSaveState} t={t} />
 
       {totalDetected === 0 ? (
@@ -360,6 +427,30 @@ export function ProfileTextFirstFlow({
         </div>
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
+          {/* PR #45 path — owner's own words as self-declared claims. Lives
+              above the catalogue-bound skills bucket because these are the
+              user's direct narrative and the primary slice goal. Saves into
+              `profile_skill_claims` (owner-only) on apply. */}
+          <DetectedSuggestionList
+            className="md:col-span-2"
+            title={tBucket("selfDeclared")}
+            count={selfDeclared.length}
+          >
+            {selfDeclared.map((it) => (
+              <DetectedSuggestionCard
+                key={it.key}
+                label={it.label}
+                status={it.status}
+                onConfirm={() =>
+                  toggle(selfDeclared, setSelfDeclared, it.key, "confirmed")
+                }
+                onDiscard={() =>
+                  toggle(selfDeclared, setSelfDeclared, it.key, "discarded")
+                }
+              />
+            ))}
+          </DetectedSuggestionList>
+
           <DetectedSuggestionList title={tBucket("skills")} count={skills.length}>
             {skills.map((it) => (
               <DetectedSuggestionCard
