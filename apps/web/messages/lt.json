@@ -77,7 +77,11 @@
       "noSuggestionsFallback": "Kol kas neradome aiškių pasiūlymų. Galite parašyti plačiau arba pridėti informaciją rankiniu būdu.",
       "confirmedByYou": "Patvirtinta jūsų",
       "addedToProfile": "Pridėta į jūsų profilį",
-      "needsExternalConfirmation": "Vėliau reikės išorinio patvirtinimo"
+      "needsExternalConfirmation": "Vėliau reikės išorinio patvirtinimo",
+      "textSavingLabel": "Įrašoma…",
+      "textSavedLabel": "Jūsų tekstas išsaugotas",
+      "textSaveErrorLabel": "Nepavyko išsaugoti teksto. Bandykite dar kartą.",
+      "textClaimNotVerified": "Tai jūsų pačių teiginys — dar ne išorinis patvirtinimas"
     }
   },
   "roles": {

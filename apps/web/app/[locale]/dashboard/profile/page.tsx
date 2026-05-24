@@ -46,7 +46,7 @@ export default async function ProfilePage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email, active_role")
+    .select("full_name, email, active_role, profile_text")
     .eq("id", user.id)
     .single();
   const personName =
@@ -54,6 +54,10 @@ export default async function ProfilePage({
   const activeRole = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : null;
+  // Owner-only narrative from migration 0014. Deliberately NOT sourced from
+  // workers.bio (employer-readable via is_employer() RLS); see profile-text-actions.ts.
+  const savedProfileText =
+    (profile as { profile_text?: string | null } | null)?.profile_text ?? "";
 
   const { data: roleRows } = await supabase
     .from("profile_roles")
@@ -252,6 +256,7 @@ export default async function ProfilePage({
             professionSkills={allowedSkills}
             professions={professions.map((p) => ({ ...p, name: tProf(p.slug) }))}
             initialSelectedIds={initialSkillIds}
+            initialText={savedProfileText}
             manualSlot={
               <WorkerTradeProfile
                 workerId={workerId}

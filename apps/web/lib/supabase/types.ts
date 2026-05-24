@@ -1199,6 +1199,7 @@ export type Database = {
           onboarded: boolean
           onboarded_at: string | null
           phone: string | null
+          profile_text: string | null
           updated_at: string
         }
         Insert: {
@@ -1214,6 +1215,7 @@ export type Database = {
           onboarded?: boolean
           onboarded_at?: string | null
           phone?: string | null
+          profile_text?: string | null
           updated_at?: string
         }
         Update: {
@@ -1229,6 +1231,7 @@ export type Database = {
           onboarded?: boolean
           onboarded_at?: string | null
           phone?: string | null
+          profile_text?: string | null
           updated_at?: string
         }
         Relationships: []
