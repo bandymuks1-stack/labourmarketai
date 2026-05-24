@@ -16,6 +16,7 @@
     "placeholders:promote": "tsx scripts/placeholders.ts promote",
     "db:fixtures:local": "tsx scripts/db-fixtures-local.ts",
     "admin:promote": "tsx scripts/admin-promote.ts",
+    "admin:grant-superadmin": "tsx scripts/admin-grant-superadmin.ts",
     "e2e": "playwright test",
     "e2e:install": "playwright install chromium"
   },

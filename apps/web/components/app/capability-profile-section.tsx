@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { ProfileSkillClaimRow } from "@/lib/profile/profile-skill-claims";
-import { deleteProfileSkillClaimAction } from "@/lib/profile/profile-skill-claims-actions";
+import {
+  deleteProfileSkillClaimAction,
+  saveProfileSkillClaimsAction,
+} from "@/lib/profile/profile-skill-claims-actions";
 import type {
   EngagementCard,
   SkillDot,
@@ -57,10 +61,13 @@ export function CapabilityProfileSection({
   const tRel = useTranslations("relationshipTypes");
   const locale = useLocale();
 
+  const router = useRouter();
   const [savedClaims, setSavedClaims] =
     useState<ProfileSkillClaimRow[]>(claims);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, startDelete] = useTransition();
+  const [manualLabel, setManualLabel] = useState("");
+  const [isAdding, startAdd] = useTransition();
 
   function removeClaim(id: string) {
     setError(null);
@@ -76,9 +83,40 @@ export function CapabilityProfileSection({
     });
   }
 
+  // Manual-add path for pilot users (Work Package D1). The extractor
+  // remains the primary way to surface chips, but users must be able
+  // to add a capability that the dictionary missed without editing
+  // their profile text. Save path is identical (same
+  // saveProfileSkillClaimsAction → profile_skill_claims), so the
+  // honest status posture is preserved.
+  function addManual() {
+    const label = manualLabel.trim();
+    if (label.length === 0) return;
+    setError(null);
+    startAdd(() => {
+      saveProfileSkillClaimsAction([label])
+        .then(() => {
+          setManualLabel("");
+          // router.refresh() re-fetches the server-rendered claims
+          // list so the new chip appears in this section without a
+          // page reload. The UNIQUE (profile_id, normalized_label)
+          // constraint + `ignoreDuplicates: true` in the server
+          // action handle the no-duplicate guarantee for us.
+          router.refresh();
+        })
+        .catch((e: unknown) => {
+          console.error("[capability-profile] add failed", e);
+          setError(t("addError"));
+        });
+    });
+  }
+
   const hasClaims = savedClaims.length > 0;
   const hasEngagements = engagements.length > 0;
-  if (!hasClaims && !hasEngagements) return null;
+  // Always render — the manual-add form needs to be available even
+  // when the user has no claims yet. The original "return null when
+  // empty" preserved the slim-display invariant but blocked manual
+  // entry; the form's small footprint is acceptable to always show.
 
   const fmt = (d: string | null) =>
     d
@@ -106,6 +144,44 @@ export function CapabilityProfileSection({
         </h2>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
+
+      {/* Manual-add row — always rendered when the user has any saved
+          claims OR when they're going to use this surface as a manual
+          entry point. The form sits ABOVE the chip list for keyboard
+          flow: type label, press Enter or click Pridėti, the new chip
+          appears below. */}
+      <form
+        className="card-border flex flex-wrap items-end gap-2 p-3"
+        data-testid="capability-profile-manual-add"
+        onSubmit={(e) => {
+          e.preventDefault();
+          addManual();
+        }}
+      >
+        <label className="flex flex-1 min-w-[10rem] flex-col gap-1">
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("manualAddLabel")}
+          </span>
+          <input
+            type="text"
+            value={manualLabel}
+            onChange={(e) => setManualLabel(e.target.value)}
+            placeholder={t("manualAddPlaceholder")}
+            className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+            data-testid="capability-profile-manual-input"
+            disabled={isAdding}
+            maxLength={80}
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={isAdding || manualLabel.trim().length === 0}
+          className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2 text-sm font-semibold text-state-success hover:border-state-success disabled:cursor-not-allowed disabled:opacity-50"
+          data-testid="capability-profile-manual-add-button"
+        >
+          {isAdding ? t("manualAdding") : t("manualAddButton")}
+        </button>
+      </form>
 
       {hasClaims && (
         <div

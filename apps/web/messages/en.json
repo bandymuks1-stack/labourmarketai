@@ -32,7 +32,39 @@
     "disclaimer": "These skills are taken from your own description. They are not yet confirmed by work journal evidence, documents, or another person — but they are part of your overall capability profile.",
     "experienceTitle": "Work history",
     "removeLabel": "Remove skill",
-    "deleteError": "Could not remove. Please try again."
+    "deleteError": "Could not remove. Please try again.",
+    "manualAddLabel": "Add a skill manually",
+    "manualAddPlaceholder": "e.g. English language",
+    "manualAddButton": "Add",
+    "manualAdding": "Adding…",
+    "addError": "Could not add. Please try again."
+  },
+  "admin": {
+    "eyebrow": "PILOT CONTROL",
+    "title": "Pilot control panel",
+    "subtitle": "Superadmins only. Server-side RLS + profiles.active_role = 'admin'.",
+    "back": "Back to pilot panel",
+    "metric": {
+      "totalUsers": "Total profiles",
+      "totalClaims": "Total skill claims"
+    },
+    "recent": {
+      "title": "Recent profiles",
+      "help": "Last 10 profiles. Emails partially masked so screenshots don't leak the full address.",
+      "profileText": "Profile text",
+      "claims": "Claims",
+      "yes": "yes",
+      "no": "no",
+      "inspect": "Inspect →"
+    },
+    "user": {
+      "onboarded": "Onboarded",
+      "notOnboarded": "Not onboarded",
+      "profileTextTitle": "Profile text",
+      "profileTextEmpty": "No profile text yet.",
+      "claimsTitle": "Self-declared skills",
+      "claimsEmpty": "No self-declared skills yet."
+    }
   },
   "profileSkillClaims": {
     "title": "Your self-declared skills",

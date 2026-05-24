@@ -126,8 +126,16 @@ describe("Guard: unified capability surface (replaces the standalone section)", 
     );
   });
 
-  it("does NOT import the save server action (display-only)", () => {
-    expect(capability).not.toMatch(/saveProfileSkillClaimsAction/);
+  it("imports BOTH delete and save server actions (delete for chips, save for manual-add)", () => {
+    // Updated in feat/cc/pilot-readiness-superadmin: the unified
+    // capability surface added a manual-add input + button so pilot
+    // users can declare a capability the extractor missed. The save
+    // action used by manual-add is the SAME one the composer uses,
+    // so the no-parallel-write-path invariant from PR #48 is
+    // preserved (asserted further down in the manual-add guard
+    // block).
+    expect(capability).toMatch(/saveProfileSkillClaimsAction/);
+    expect(capability).toMatch(/deleteProfileSkillClaimAction/);
   });
 
   it("preserves owner-only chip delete via deleteProfileSkillClaimAction", () => {
@@ -150,13 +158,22 @@ describe("Guard: unified capability surface (replaces the standalone section)", 
     expect(claimsIdx).toBeLessThan(engagementsIdx);
   });
 
-  it("renders WITHOUT requiring engagements (works for non-worker users)", () => {
-    // `if (!hasClaims && !hasEngagements) return null` — when the user
-    // has chips but NO engagements (e.g. a pure company account that
-    // typed profile text), the section still renders.
-    expect(capability).toMatch(
+  it("renders WITHOUT requiring engagements OR claims (manual-add must always be reachable)", () => {
+    // PR #48 returned null when the user had neither claims nor
+    // engagements; pilot readiness needs the manual-add form to be
+    // visible even on a brand-new profile, so the early-return was
+    // removed. The component still gates the saved-chip + engagement
+    // sub-sections by their respective `hasClaims` / `hasEngagements`
+    // booleans, but the section itself always renders.
+    const codeOnly = capability
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    expect(codeOnly).not.toMatch(
       /if\s*\(\s*!hasClaims\s*&&\s*!hasEngagements\s*\)\s*return\s+null/,
     );
+    // Sub-sections remain conditional on their own data.
+    expect(codeOnly).toMatch(/\{hasClaims\s*&&/);
+    expect(codeOnly).toMatch(/\{hasEngagements\s*&&/);
   });
 });
 
