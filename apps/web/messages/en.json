@@ -39,6 +39,44 @@
     "manualAdding": "Adding…",
     "addError": "Could not add. Please try again."
   },
+  "roleDashboards": {
+    "company": {
+      "eyebrow": "COMPANY WORKSPACE",
+      "title": "Company pilot panel",
+      "subtitle": "Company context is an entry point, not a limit. You can hold other roles and add more later via the role switcher.",
+      "pilotDisclaimer": "Pilot mode. Matching is not yet offered. Nothing becomes public automatically. You can safely prepare a first request and wait for the next pilot stage.",
+      "firstAction": {
+        "title": "Create a worker / team / service request",
+        "body": "First useful action: describe the worker, team, or service you need. The draft stays private to you until you decide otherwise.",
+        "status": "Preparing"
+      },
+      "profileLink": "My capabilities (if you're also a person, not only a company)"
+    },
+    "agency": {
+      "eyebrow": "AGENCY WORKSPACE",
+      "title": "Agency pilot panel",
+      "subtitle": "Agency role is an entry point. You can grow into other roles when ready.",
+      "pilotDisclaimer": "Pilot mode. We don't auto-verify candidates. Nothing becomes public without your decision. You can safely prepare an offer and wait for the next pilot stage.",
+      "firstAction": {
+        "title": "Create a candidates / services offer draft",
+        "body": "First useful action: describe the workers you can supply or the assignments you're looking for. The draft stays private to you.",
+        "status": "Preparing"
+      },
+      "profileLink": "My capabilities"
+    },
+    "buyer": {
+      "eyebrow": "BUYER WORKSPACE",
+      "title": "Buyer pilot panel",
+      "subtitle": "Buyer role is an entry point. You can add other roles later.",
+      "pilotDisclaimer": "Pilot mode. We don't present fake offers. Your request stays private to you until you decide otherwise.",
+      "firstAction": {
+        "title": "Create a service / team / contractor request",
+        "body": "First useful action: describe what you need (service, team, contractor). The draft stays private.",
+        "status": "Preparing"
+      },
+      "profileLink": "My capabilities"
+    }
+  },
   "admin": {
     "eyebrow": "PILOT CONTROL",
     "title": "Pilot control panel",
