@@ -91,8 +91,11 @@ export function ProfileTextFirstFlow({
   /** Normalized labels of profile_skill_claims rows the user has already
    *  saved. Used to suppress duplicate suggestions on re-extract. */
   savedClaimNormalizedLabels?: string[];
-  /** Manual picker rendered after the user clicks "Add manually". */
-  manualSlot: React.ReactNode;
+  /** Manual picker rendered after the user clicks "Add manually".
+   *  Optional — non-worker users (e.g. pure company/agency accounts)
+   *  have no catalogued worker_skills picker yet, so the "Pridėti
+   *  rankiniu būdu" CTA is hidden for them entirely. */
+  manualSlot?: React.ReactNode;
 }) {
   const t = useTranslations("skills.textFirst");
   const tS = useTranslations("structuring");
@@ -183,7 +186,7 @@ export function ProfileTextFirstFlow({
     }
   }
 
-  if (stage === "manual") {
+  if (stage === "manual" && manualSlot) {
     return (
       <div className="flex flex-col gap-4">
         <button
@@ -206,9 +209,9 @@ export function ProfileTextFirstFlow({
           helper={t("helper")}
           placeholder={t("placeholder")}
           submitLabel={t("submit")}
-          manualLabel={t("manualCta")}
+          manualLabel={manualSlot ? t("manualCta") : undefined}
           onSubmit={analyse}
-          onManual={() => setStage("manual")}
+          onManual={manualSlot ? () => setStage("manual") : undefined}
           initial={text}
         />
         <TextSaveIndicator state={textSaveState} t={t} />
@@ -218,7 +221,9 @@ export function ProfileTextFirstFlow({
             analyse(v);
           }}
         />
-        <p className="text-xs text-text-secondary">{t("manualHelper")}</p>
+        {manualSlot && (
+          <p className="text-xs text-text-secondary">{t("manualHelper")}</p>
+        )}
       </div>
     );
   }
@@ -248,13 +253,15 @@ export function ProfileTextFirstFlow({
           >
             {t("backToText")}
           </button>
-          <button
-            type="button"
-            onClick={() => setStage("manual")}
-            className="rounded-md border border-ink-500 px-2.5 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-          >
-            {t("manualCta")}
-          </button>
+          {manualSlot && (
+            <button
+              type="button"
+              onClick={() => setStage("manual")}
+              className="rounded-md border border-ink-500 px-2.5 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            >
+              {t("manualCta")}
+            </button>
+          )}
         </div>
       </div>
 
@@ -289,13 +296,15 @@ export function ProfileTextFirstFlow({
             >
               {t("backToText")}
             </button>
-            <button
-              type="button"
-              onClick={() => setStage("manual")}
-              className="rounded-md border border-ink-500 px-2.5 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-            >
-              {t("manualCta")}
-            </button>
+            {manualSlot && (
+              <button
+                type="button"
+                onClick={() => setStage("manual")}
+                className="rounded-md border border-ink-500 px-2.5 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+              >
+                {t("manualCta")}
+              </button>
+            )}
           </div>
         </div>
       ) : (

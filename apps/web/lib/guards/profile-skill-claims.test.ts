@@ -41,8 +41,11 @@ describe("Guard: profile narrative never written to workers.bio", () => {
     expect(src).not.toMatch(/\bbio\b/);
   });
 
-  it("profile-skill-claims UI component does not write to workers/bio", () => {
-    const src = read("components/app/profile-skill-claims-section.tsx");
+  it("capability-profile-section (the canonical CV/skills surface) does not write to workers/bio", () => {
+    // Replaces the prior assertion on profile-skill-claims-section.tsx,
+    // which was deleted in fix/cc/cv-unify-self-declared after the
+    // self-declared chips moved into the unified CapabilityProfileSection.
+    const src = read("components/app/capability-profile-section.tsx");
     expect(src).not.toMatch(/\bfrom\(["']workers["']\)/);
     expect(src).not.toMatch(/\bworkers\.bio\b/);
   });

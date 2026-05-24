@@ -1,35 +1,28 @@
 /**
- * Local credentialed smoke for fix/cc/profile-text-skills-production-wiring.
+ * Local credentialed smoke for fix/cc/cv-unify-self-declared.
  *
- * Owner reported that PR #46's preview couldn't be smoked through Google
- * OAuth because the preview URL is not in Supabase's Site URL / Allowed
- * Redirect URLs list, so post-OAuth landed on production. This spec drives
- * a credentialed browser session against the LOCAL dev server (which builds
- * the SAME commit Vercel deployed for PR #46's preview) and screenshots
- * every owner-visible step.
+ * Asserts the unified CV/capability surface:
  *
- * Setup:
- *   1. E2E_OWNER_EMAIL=…  pnpm tsx scripts/e2e-mint-session.ts
- *      → writes tests/e2e/.storage-state.json with a real session cookie
- *   2. E2E_OWNER_EMAIL=…  pnpm tsx scripts/e2e-seed-claims.ts seed
- *      → upserts 2 test rows (Programavimas, Namų statyba) for the owner
- *   3. pnpm e2e -- profile-text-skills
- *   4. E2E_OWNER_EMAIL=…  pnpm tsx scripts/e2e-seed-claims.ts cleanup
+ *   1. Page renders for ANY authenticated user (no construction-only
+ *      worker gate). Header is the new "Mano gebėjimai" copy with the
+ *      "not locked into one category" subtitle.
+ *   2. The composer is rendered (unconditionally — no workerId gate).
+ *   3. The CapabilityProfileSection renders saved
+ *      `profile_skill_claims` chips with the explicit honest status
+ *      (`Paties nurodyta · Nepatvirtinta išoriškai · source = profile
+ *      text`) AND the disclaimer.
+ *   4. Broad non-construction skills (`Programavimas`, `Maisto gamyba`)
+ *      are visible on the same surface as construction skills
+ *      (`Namų statyba`, `Stogų dengimas`) — PLATFORM_DOCTRINE §1.
+ *   5. No `Patvirtinta` / `Verified` / `Confirmed` label appears next
+ *      to any self-declared chip (the disclaimer phrase "dar nėra
+ *      patvirtinti" is the only allowed mention and is stripped before
+ *      the negative check).
  *
- * The spec splits proof into two halves so neither depends on a Playwright-
- * fragile server-action round-trip:
- *
- *   PART A — extraction + select + copy
- *     Drives the composer with the goal text and asserts the new bucket,
- *     the chips, the "Pasirinkti / Pasirinkta" wording, and the absence of
- *     "Patvirtinta". Does NOT click the bottom Save (it would write rows
- *     and the test cleans up via SQL anyway).
- *
- *   PART B — saved-display + disclaimer + no-Patvirtinta
- *     Relies on pre-seeded rows to assert the read+render path shows the
- *     saved chips, the disclaimer copy, and no misleading labels.
- *
- * Skipped automatically when `tests/e2e/.storage-state.json` is missing.
+ * Auth: pre-set storage state minted by scripts/e2e-mint-session.ts.
+ * Skipped automatically when `tests/e2e/.storage-state.json` is
+ * missing (e.g. on a default `pnpm test` run in CI without the mint
+ * step).
  */
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync } from "node:fs";
@@ -45,7 +38,7 @@ const SCREENSHOT_DIR = join(
   "runtime",
   "review-evidence",
   "labourmarketai",
-  "profile-text-skills-production-wiring-fix",
+  "cv-unify-self-declared",
   "screenshots",
 );
 
@@ -56,12 +49,6 @@ test.skip(
 
 test.use({ storageState: STORAGE_STATE });
 
-// PR #46 owner-follow-up sentence. The first 3 skills + roofing were the
-// PR #46 baseline; "gaminti lietuviškos virtuvės patiekalus" is the gap
-// fix/cc/profile-text-skills-unify-flow-v2 fills via the cooking row.
-const GOAL_INPUT =
-  "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti lietuviškos virtuvės patiekalus";
-
 mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
 async function shot(page: Page, name: string): Promise<void> {
@@ -71,98 +58,85 @@ async function shot(page: Page, name: string): Promise<void> {
   });
 }
 
-test("composer extracts goal example into self-declared chips with safe copy", async ({
+test("unified capability surface renders self-declared chips with honest status, no construction-only lock", async ({
   page,
 }) => {
   test.setTimeout(90_000);
 
   await page.goto("/lt/dashboard/profile", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/lt\/dashboard\/profile/);
-  await shot(page, "01-profile-empty");
 
-  const composer = page.locator("textarea").first();
-  await composer.waitFor({ state: "visible", timeout: 30_000 });
-  await composer.fill(GOAL_INPUT);
-  await shot(page, "02-text-entered");
-
-  await page
-    .getByRole("button", { name: "Pasiūlykite struktūrą" })
-    .first()
-    .click();
-
-  // The single canonical bucket renders all four chips for the extended
-  // owner sentence. Before this hotfix the cooking phrase produced 0
-  // chips and "Stogdengys" only surfaced in the legacy bucket grid.
-  const selfDeclaredHeader = page.getByText("Paties nurodyti įgūdžiai", {
-    exact: false,
-  });
-  await selfDeclaredHeader.waitFor({ state: "visible", timeout: 15_000 });
-  await expect(page.getByText("Programavimas").first()).toBeVisible();
-  await expect(page.getByText("Namų statyba").first()).toBeVisible();
-  await expect(page.getByText("Stogų dengimas").first()).toBeVisible();
-  await expect(page.getByText("Maisto gamyba").first()).toBeVisible();
-
-  // Duplicate-system guard at the rendered-page level: the legacy
-  // bucket titles must NOT appear anywhere on this surface.
-  expect(
-    await page.getByText("Rasti įgūdžiai", { exact: false }).count(),
-    "legacy 'Rasti įgūdžiai' bucket must not render on this surface",
-  ).toBe(0);
-  expect(
-    await page.getByText("Galimi vaidmenys", { exact: false }).count(),
-    "legacy 'Galimi vaidmenys' bucket must not render on this surface",
-  ).toBe(0);
-  expect(
-    await page.getByText("Galimi CV įrašai", { exact: false }).count(),
-    "legacy 'Galimi CV įrašai' bucket must not render on this surface",
-  ).toBe(0);
-  await shot(page, "03-suggestions-rendered");
-
-  // Click "Pasirinkti" on the first two visible buttons — those are the
-  // self-declared bucket's chips because that bucket renders first.
-  const selectButtons = page.getByRole("button", { name: "Pasirinkti" });
-  await selectButtons.nth(0).click();
-  await page.waitForTimeout(300);
-  await selectButtons.nth(0).click();
-  await page.waitForTimeout(300);
-
-  // Per-card status badge text is "Pasirinkta" — not "Patvirtinta".
-  // We assert PRESENCE of the new badge AND ABSENCE of the old per-chip
-  // confirm action. The blanket "no Patvirtinta anywhere on the page"
-  // assertion is left to the source-level guards in
-  // lib/guards/profile-text-flow-wiring.test.ts because other dashboard
-  // surfaces (e.g. work journal) legitimately render confirmed states.
+  // Header carries the new "not locked into one category" framing.
   await expect(
-    page.getByText("Pasirinkta", { exact: true }).first(),
-  ).toBeVisible({ timeout: 5_000 });
-
-  // The old per-card confirm action button label is gone everywhere on
-  // this rendered surface (was "Patvirtinti", now "Pasirinkti").
-  expect(
-    await page.getByRole("button", { name: "Patvirtinti" }).count(),
-    "old 'Patvirtinti' per-card button must not exist on this surface",
-  ).toBe(0);
-
-  // Bottom CTA reads the new safer wording.
-  await expect(
-    page.getByRole("button", { name: "Įtraukti pasirinktus pasiūlymus" }),
+    page.getByRole("heading", { name: "Mano gebėjimai", level: 1 }),
   ).toBeVisible();
-  expect(
-    await page
-      .getByRole("button", { name: "Įtraukti patvirtintus pasiūlymus" })
-      .count(),
-    "old 'Įtraukti patvirtintus pasiūlymus' CTA must not exist",
-  ).toBe(0);
-  await shot(page, "04-chips-selected");
-});
+  await expect(
+    page.getByText(
+      /Pasirinkta darbo kategorija yra tik kontekstas, ne apribojimas/,
+    ),
+  ).toBeVisible();
+  await shot(page, "01-page-header");
 
-// The save → reload → "Išsaugoti…" display path requires writing rows
-// into production profile_skill_claims for the owner — a write the
-// auto-mode classifier reasonably blocks unless explicitly authorized
-// per-action. The path is covered by:
-//   - source-level guard: `lib/guards/profile-text-flow-wiring.test.ts`
-//     asserts ProfileTextFirstFlow's applyConfirmed() invokes
-//     saveProfileSkillClaimsAction with the confirmed labels;
-//   - PR #45's already-merged + production-running profile_skill_claims
-//     server actions (saved chips render the same way they did pre-fix).
-// Owner runs the reload smoke step themselves once the PR is on main.
+  // Composer is rendered unconditionally (no workerId gate). The "what
+  // I do for a living" placeholder text is part of it.
+  const composer = page.locator("textarea").first();
+  await expect(composer).toBeVisible();
+  await shot(page, "02-composer-visible");
+
+  // Unified CapabilityProfileSection renders. The section's title is
+  // the new "Įgūdžiai ir patirtis" canonical home for skills.
+  await expect(
+    page.getByRole("heading", {
+      name: /Įgūdžiai ir patirtis/i,
+      level: 2,
+    }),
+  ).toBeVisible();
+
+  // Self-declared sub-section carries the EXPLICIT honest status. Every
+  // saved chip lives under this header — no separate disconnected card.
+  const selfDeclared = page.getByTestId(
+    "capability-profile-self-declared",
+  );
+  await expect(selfDeclared).toBeVisible();
+  await expect(
+    selfDeclared.getByText("Paties nurodyta", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    selfDeclared.getByText("Nepatvirtinta išoriškai", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    selfDeclared.getByText(/Šaltinis: profilio tekstas/i),
+  ).toBeVisible();
+
+  // PLATFORM_DOCTRINE §1: a user is not locked into one category.
+  // All four saved chips render TOGETHER on the same canonical surface —
+  // broad (Programavimas, Maisto gamyba) live next to construction
+  // (Namų statyba, Stogų dengimas).
+  const chips = page.getByTestId("capability-profile-claims");
+  await expect(chips.getByText("Programavimas")).toBeVisible();
+  await expect(chips.getByText("Maisto gamyba")).toBeVisible();
+  await expect(chips.getByText("Namų statyba")).toBeVisible();
+  await expect(chips.getByText("Stogų dengimas")).toBeVisible();
+  await shot(page, "03-chips-unified");
+
+  // No misleading verified/confirmed BADGE on the canonical surface.
+  // We inspect VISIBLE text (innerText), not raw HTML — next-intl
+  // serializes the entire LT message bundle into the page for client
+  // hydration, which would otherwise false-trigger on marketing-page
+  // copy that contains "Patvirtinti". innerText only reports what the
+  // user actually sees rendered. Word-boundary scoped so the honest
+  // negating phrases ("Nepatvirtinta išoriškai", "dar nėra patvirtinti
+  // …") are not caught.
+  const visibleText = (await page.locator("body").innerText()).replace(
+    /\s+/g,
+    " ",
+  );
+  expect(
+    visibleText,
+    "no standalone 'Patvirtinta' badge in rendered text",
+  ).not.toMatch(/(^|\s)Patvirtinta(\s|$|[.,])/);
+  expect(
+    visibleText,
+    "no standalone 'Patvirtinti' button label in rendered text",
+  ).not.toMatch(/(^|\s)Patvirtinti(\s|$|[.,])/);
+});
