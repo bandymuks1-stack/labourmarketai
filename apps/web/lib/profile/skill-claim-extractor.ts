@@ -136,6 +136,118 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "brigad",
     ],
   },
+
+  // ─── Idea-based capability rows ─────────────────────────────────────
+  // Added in feat/cc/profile-save-state-and-idea-extraction. Each row
+  // is grouped by the kind of mention the dictionary recognises:
+  //
+  //   - Activity phrase → capability (e.g. "drožti iš medžio" → Medienos
+  //     apdirbimas)
+  //   - Tool mention → capability (Word / Excel / PDF → Dokumentų
+  //     tvarkymas)
+  //   - Business-tool mention → capability (Rivilė → Apskaitos sistemos)
+  //   - Responsibility phrase → capability (koordinuoti komandą → Komandos
+  //     koordinavimas; ieškoti darbuotojų → Darbuotojų paieška)
+  //
+  // Adding a needle should follow the morphological-stem convention used
+  // by the earlier rows: prefer a stem that catches the most LT case
+  // endings (e.g. "drož" matches "drožti", "drožiu", "drožyba",
+  // "drožinėju") rather than a single fully inflected form.
+
+  {
+    // Activity phrase. "drož" matches drožti / drožiu / drožyba /
+    // drožinėju; "medien"/"medžio darb"/"medžio drož" cover the
+    // material-centric phrasings; EN equivalents kept narrow so an
+    // unrelated "wood" reference (e.g. a company name) does not match.
+    label: "Medienos apdirbimas",
+    needles: [
+      "drož",
+      "medien",
+      "medžio darb",
+      "medzio darb",
+      "medžio drož",
+      "carpentry",
+      "woodwork",
+    ],
+  },
+  {
+    // Tool mentions. Word/Excel/PDF/Rivilė are case-insensitive
+    // substrings — needle lowercased here. "dokument" is a broad stem
+    // (dokumentai / dokumentų / dokumentus). Whitespace padding on
+    // "word " avoids matching unrelated "wordpress", "word-of-mouth",
+    // etc. — at the cost of missing "Word." with a trailing period;
+    // we accept that as the trade-off for false-positive avoidance.
+    label: "Dokumentų tvarkymas",
+    needles: [
+      "dokument",
+      "word ",
+      "excel",
+      "pdf",
+      "office",
+      "biuro dokumen",
+      "spreadsheet",
+    ],
+  },
+  {
+    // Business / accounting tool. Rivilė is a specific LT ERP product;
+    // generic "apskait" stem covers any accounting / bookkeeping
+    // mention; "verslo administr" picks up business admin framings.
+    label: "Apskaitos sistemos",
+    needles: [
+      "rivilė",
+      "rivile",
+      "apskait",
+      "buhalter",
+      "verslo administr",
+      "erp",
+      "bookkeep",
+      "accounting software",
+    ],
+  },
+  {
+    // Responsibility phrase — coordination is intentionally separate
+    // from `Vadovavimas komandai` (above). A coordinator routes work
+    // and unblocks; a lead/foreman commands. The two CAN coexist on
+    // the same chip (a foreman who also coordinates) so we let both
+    // chips surface when both phrasings are present.
+    label: "Komandos koordinavimas",
+    needles: [
+      "koordinuot",
+      "koordinuoj",
+      "koordinavim",
+      "koordinuoti komand",
+      "koordin komand",
+      "team coordination",
+      "team coordinator",
+    ],
+  },
+  {
+    // Recruitment phrase. Catches LT verbs (ieškoti / ieškau /
+    // ieškojau) when they appear in the context of finding workers,
+    // plus the formal "atrank" / "atranka" (selection) and EN
+    // "recruit"/"hiring" / "staffing".
+    label: "Darbuotojų paieška",
+    needles: [
+      "ieškoti darbuotoj",
+      "ieskoti darbuotoj",
+      "ieškoti žmoni",
+      "ieskoti zmoni",
+      "ieškoti naujų žmoni",
+      "ieskoti nauju zmoni",
+      "darbuotojų paiešk",
+      "darbuotoju paiesk",
+      "atrank", // atranka / atrankos
+      "atrenk", // atrenku / atrenka / atrenkti
+      "naujus darbuotoj",
+      "naujus žmoni",
+      "naujus zmoni",
+      "personalo paiešk",
+      "personalo paiesk",
+      "recruit",
+      "hiring",
+      "staffing",
+    ],
+  },
 ];
 
 const MAX_SUGGESTIONS = 12;

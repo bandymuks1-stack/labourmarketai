@@ -134,6 +134,131 @@ describe("extractProfileSkillClaims", () => {
     // should NOT find it — proves the cap is enforced.
     expect(result.map((r) => r.label)).not.toContain("Programavimas");
   });
+
+  // ── Idea-based extraction anchors (feat/cc/profile-save-state-and-idea-extraction) ──
+  // Goal upgrade: the dictionary now covers PHRASES + TOOLS + RESPONSIBILITIES,
+  // not just exact-string skill needles. Each describe-block below is one
+  // principle from the goal doc (activity / tool / responsibility / domain).
+
+  describe("Activity phrase → Medienos apdirbimas", () => {
+    it("drožti iš medžio (activity verb + material)", () => {
+      const labels = extractProfileSkillClaims(
+        "Mokam drožti iš medžio nuo vaikystės.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Medienos apdirbimas");
+    });
+    it("medžio darbai (material + work)", () => {
+      const labels = extractProfileSkillClaims(
+        "Dirbu medžio darbus daugiau nei 10 metų.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Medienos apdirbimas");
+    });
+    it("EN carpentry / woodwork", () => {
+      expect(
+        extractProfileSkillClaims("Hobby: carpentry on weekends.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Medienos apdirbimas");
+      expect(
+        extractProfileSkillClaims("20 years of woodwork experience.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Medienos apdirbimas");
+    });
+  });
+
+  describe("Tool mention → Dokumentų tvarkymas", () => {
+    it("dokumentai", () => {
+      expect(
+        extractProfileSkillClaims("Tvarkau dokumentus biure.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Dokumentų tvarkymas");
+    });
+    it("Word / Excel / PDF", () => {
+      const labels = extractProfileSkillClaims(
+        "Dirbu su Word, Excel ir PDF failais kasdien.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Dokumentų tvarkymas");
+    });
+  });
+
+  describe("Business-tool mention → Apskaitos sistemos", () => {
+    it("Rivilė ERP", () => {
+      expect(
+        extractProfileSkillClaims("Pildau dokumentus Rivilė aplinkoje.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Apskaitos sistemos");
+    });
+    it("generic apskaita stem", () => {
+      expect(
+        extractProfileSkillClaims("Dirbu su apskaitos programa.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Apskaitos sistemos");
+    });
+  });
+
+  describe("Responsibility phrase → Komandos koordinavimas / Darbuotojų paieška", () => {
+    it("koordinuoti komandą → Komandos koordinavimas", () => {
+      const labels = extractProfileSkillClaims(
+        "Galiu koordinuoti komandą nuo 5 iki 20 žmonių.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Komandos koordinavimas");
+    });
+    it("ieškoti darbuotojų → Darbuotojų paieška", () => {
+      const labels = extractProfileSkillClaims(
+        "Per kelias savaites surandu ir atrenku naujus darbuotojus.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Darbuotojų paieška");
+    });
+    it("EN recruit / hiring → Darbuotojų paieška", () => {
+      expect(
+        extractProfileSkillClaims("Have led recruit campaigns.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Darbuotojų paieška");
+      expect(
+        extractProfileSkillClaims("Hiring engineers for a startup.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Darbuotojų paieška");
+    });
+  });
+
+  describe("Full owner sentence — at least 8 capabilities from one paragraph", () => {
+    // Anchor: the owner's PR #48 follow-up production smoke text. The
+    // dictionary upgrade must produce at least the listed broad set so
+    // the test fails if a future PR narrows or breaks the phrase-stem
+    // matching that this slice introduced.
+    it("extends the four-chip baseline to ~10 broader capabilities", () => {
+      const text =
+        "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti " +
+        "lietuviškos virtuvės patiekalus. taip pat moku drožti iš medžio, " +
+        "bei dirbti su word, excel ir pdf dokumentais rivilė aplinkoje ir " +
+        "galiu koordinuoti komanda bei ieškoti naujų žmonių ir darbuotojų";
+      const labels = extractProfileSkillClaims(text).map((r) => r.label);
+
+      // Baseline chips from prior PRs — must continue to appear.
+      expect(labels).toContain("Programavimas");
+      expect(labels).toContain("Namų statyba");
+      expect(labels).toContain("Stogų dengimas");
+      expect(labels).toContain("Maisto gamyba");
+
+      // New idea-based chips — the actual upgrade this slice ships.
+      expect(labels).toContain("Medienos apdirbimas");
+      expect(labels).toContain("Dokumentų tvarkymas");
+      expect(labels).toContain("Apskaitos sistemos");
+      expect(labels).toContain("Komandos koordinavimas");
+      expect(labels).toContain("Darbuotojų paieška");
+
+      // Catches a regression that narrows the new dictionary by
+      // accident — the prior 4-chip baseline should be at least
+      // doubled.
+      expect(labels.length).toBeGreaterThanOrEqual(8);
+    });
+  });
 });
 
 describe("normalizeClaimLabel", () => {

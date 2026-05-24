@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { CvInputPanel } from "@/components/app/cv-input-panel";
 import { DetectedSuggestionCard, type SuggestionStatus } from "@/components/app/detected-suggestion-card";
@@ -100,6 +101,7 @@ export function ProfileTextFirstFlow({
   const t = useTranslations("skills.textFirst");
   const tS = useTranslations("structuring");
   const tBucket = useTranslations("structuring.buckets");
+  const router = useRouter();
 
   const [stage, setStage] = useState<"compose" | "review" | "manual">("compose");
   const [text, setText] = useState(initialText);
@@ -117,6 +119,25 @@ export function ProfileTextFirstFlow({
     () => new Set(savedClaimNormalizedLabels),
     [savedClaimNormalizedLabels],
   );
+
+  // Counts the user actually needs to reason about save-state. The
+  // visible UI uses these directly so the bottom save button cannot
+  // be wired without a non-zero selection, and the "no new
+  // suggestions" empty state shows when extraction returns nothing
+  // genuinely new.
+  const newSuggestions = selfDeclared.filter(
+    (s) => s.status !== "already_saved",
+  );
+  const newCount = newSuggestions.length;
+  const selectedCount = selfDeclared.filter(
+    (s) => s.status === "confirmed",
+  ).length;
+  const alreadySavedShown = selfDeclared.filter(
+    (s) => s.status === "already_saved",
+  ).length;
+  const savedThisSession = selfDeclared.filter(
+    (s) => s.status === "saved",
+  ).length;
 
   function analyse(raw: string) {
     setError(null);
@@ -139,17 +160,22 @@ export function ProfileTextFirstFlow({
         });
     }
 
-    // Single extractor → single bucket. Already-saved labels are
-    // filtered so the user doesn't see redundant chips on re-extract.
+    // Single extractor → single bucket. Chips the user has ALREADY
+    // saved (server-side `profile_skill_claims`) are kept in the list
+    // BUT marked with `already_saved` status so the user sees *why*
+    // they aren't actionable (rather than silently disappearing — the
+    // prior PR #48 behavior, which broke save-state clarity). New
+    // suggestions still carry `pending` status with the standard
+    // select / discard actions.
     setSelfDeclared(
-      extractProfileSkillClaims(raw)
-        .filter((c) => !savedClaimSet.has(c.normalizedLabel))
-        .map((c, i) => ({
-          key: `claim-${i}-${c.normalizedLabel}`,
-          status: "pending",
-          value: c.normalizedLabel,
-          label: c.label,
-        })),
+      extractProfileSkillClaims(raw).map((c, i) => ({
+        key: `claim-${i}-${c.normalizedLabel}`,
+        status: savedClaimSet.has(c.normalizedLabel)
+          ? "already_saved"
+          : "pending",
+        value: c.normalizedLabel,
+        label: c.label,
+      })),
     );
     setStage("review");
   }
@@ -164,20 +190,36 @@ export function ProfileTextFirstFlow({
     setApplying(true);
     setError(null);
     try {
-      // Self-declared profile_skill_claims — the ONLY persistence path
-      // from the text composer now. Owner-only RLS; the server action
-      // upserts on (profile_id, normalized_label) so re-clicking Save
-      // never duplicates. Catalogued worker_skills writes were removed
-      // alongside the OLD bucket grid; the manual picker still has its
-      // own catalogued save path.
       const confirmedClaims = selfDeclared
         .filter((it) => it.status === "confirmed")
         .map((it) => it.label.trim())
         .filter((l) => l.length > 0);
-      if (confirmedClaims.length > 0) {
-        await saveProfileSkillClaimsAction(confirmedClaims);
+      if (confirmedClaims.length === 0) {
+        // Defensive — the bottom save button is disabled in this case
+        // so the call should not happen. Bail rather than no-op.
+        return;
       }
+
+      // Self-declared profile_skill_claims — the ONLY persistence path
+      // from the text composer. Owner-only RLS; the server action
+      // upserts on (profile_id, normalized_label) so re-clicking Save
+      // never duplicates.
+      await saveProfileSkillClaimsAction(confirmedClaims);
+
+      // SAVE-STATE LIFECYCLE (feat/cc/profile-save-state-and-idea-extraction):
+      // The confirmed chips MOVE from `confirmed` → `saved` so the
+      // user immediately sees that those chips are part of their
+      // profile, not pending input. The success message below points
+      // to the unified `Mano gebėjimai` surface below. router.refresh()
+      // re-fetches the page so `CapabilityProfileSection` shows the new
+      // chips in the canonical area without a full reload.
+      setSelfDeclared((prev) =>
+        prev.map((it) =>
+          it.status === "confirmed" ? { ...it, status: "saved" } : it,
+        ),
+      );
       setApplied(true);
+      router.refresh();
     } catch (e) {
       console.error("[profile-text-first] apply failed:", e);
       setError(tS("actions.confirm"));
@@ -228,15 +270,20 @@ export function ProfileTextFirstFlow({
     );
   }
 
-  const anyConfirmed = selfDeclared.some((s) => s.status === "confirmed");
-  const totalDetected = selfDeclared.length;
+  const anyConfirmed = selectedCount > 0;
+  // Counter shown above the bucket is "Sistema pasiūlė · N" where N is
+  // NEW suggestions only — `already_saved` chips are visually present
+  // but don't count as "new findings", otherwise the user sees
+  // "Sistema pasiūlė · 4" with all 4 chips greyed out as already saved,
+  // which is confusing.
+  const headerCount = newCount;
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
           <span className="text-text-muted">{tS("groupEyebrow")}</span> ·{" "}
-          {totalDetected}
+          {headerCount}
         </p>
         <div className="flex flex-wrap gap-2">
           <button
@@ -280,10 +327,11 @@ export function ProfileTextFirstFlow({
 
       <TextSaveIndicator state={textSaveState} t={t} />
 
-      {totalDetected === 0 ? (
-        // Universal fallback — the dictionary will miss anything outside
-        // its vocabulary. Tell the user that's OK, point them at the
-        // manual path — never a dead end.
+      {selfDeclared.length === 0 ? (
+        // Universal fallback — the dictionary missed everything. The
+        // text is still saved (TextSaveIndicator above shows that),
+        // but no chips to confirm. Point at the manual path so the
+        // flow never dead-ends.
         <div className="card-border flex flex-col gap-3 p-4">
           <p className="text-sm text-text-secondary">
             {t("noSuggestionsFallback")}
@@ -307,6 +355,35 @@ export function ProfileTextFirstFlow({
             )}
           </div>
         </div>
+      ) : newCount === 0 && alreadySavedShown > 0 && savedThisSession === 0 ? (
+        // "Only already-saved" empty state. The dictionary did find
+        // chips, but all of them are already in the user's profile —
+        // a re-extract with no new finds. The user must SEE the
+        // already-saved chips (so they know nothing was missed) AND
+        // the friendly explanation, but the bottom Save button is
+        // disabled to keep the action surface honest.
+        <>
+          <p
+            className="text-xs text-text-secondary"
+            data-testid="profile-text-flow-no-new-suggestions"
+          >
+            {t("noNewSuggestions")}
+          </p>
+          <DetectedSuggestionList
+            title={tBucket("selfDeclared")}
+            count={selfDeclared.length}
+          >
+            {selfDeclared.map((it) => (
+              <DetectedSuggestionCard
+                key={it.key}
+                label={it.label}
+                status={it.status}
+                onConfirm={() => toggle(it.key, "confirmed")}
+                onDiscard={() => toggle(it.key, "discarded")}
+              />
+            ))}
+          </DetectedSuggestionList>
+        </>
       ) : (
         <DetectedSuggestionList
           title={tBucket("selfDeclared")}
@@ -333,8 +410,9 @@ export function ProfileTextFirstFlow({
         <div
           role="status"
           className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2 text-xs text-state-success"
+          data-testid="profile-text-flow-applied-toast"
         >
-          <p className="font-semibold">✓ {t("appliedToast")}</p>
+          <p className="font-semibold">✓ {t("savedToCapabilities")}</p>
           <p className="mt-1 text-text-secondary">
             <span className="font-mono text-[10px] uppercase tracking-label text-state-success">
               {t("confirmedByYou")}
@@ -345,13 +423,25 @@ export function ProfileTextFirstFlow({
       )}
 
       <div className={cn("flex flex-wrap items-center gap-3")}>
-        <Button
-          type="button"
-          onClick={applyConfirmed}
-          disabled={!anyConfirmed || applying}
-        >
-          {t("applyAll")}
-        </Button>
+        {/* Save button is honest about what it will do: hidden when
+            there's nothing to save (newCount === 0 and selectedCount
+            === 0), disabled when there are new suggestions but the
+            user hasn't selected any, and switches to a loading label
+            during the actual save round-trip. */}
+        {(newCount > 0 || selectedCount > 0) && (
+          <Button
+            type="button"
+            onClick={applyConfirmed}
+            disabled={!anyConfirmed || applying}
+            data-testid="profile-text-flow-apply-button"
+          >
+            {applying
+              ? t("applying")
+              : selectedCount === 0
+                ? t("applyAllDisabledHint")
+                : t("applyAll")}
+          </Button>
+        )}
         <span className="text-[11px] text-text-muted">
           {tS("ruleBasedNotice")}
         </span>

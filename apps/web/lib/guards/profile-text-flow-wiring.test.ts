@@ -329,6 +329,118 @@ describe("Guard: broad non-construction skills survive a construction-context na
   });
 });
 
+describe("Guard: save-state lifecycle is honest and dedupe-safe", () => {
+  // feat/cc/profile-save-state-and-idea-extraction owner-visible spec:
+  //   - the bottom Save button is only rendered when there's something
+  //     to save (newCount > 0 || selectedCount > 0);
+  //   - when the user selects 0, the Save button is DISABLED with a
+  //     hint label ("Pasirinkite bent vieną pasiūlymą" / "Select at
+  //     least one suggestion");
+  //   - successful save transitions confirmed chips → `saved` status
+  //     (not just an "applied" boolean flag) and calls router.refresh()
+  //     so the unified CapabilityProfileSection picks the chips up;
+  //   - re-extraction NEVER hides already-saved chips silently — they
+  //     surface with `already_saved` status so the user knows WHY they
+  //     are not actionable;
+  //   - the success message points at the unified surface
+  //     ("Įgūdžiai išsaugoti į Mano gebėjimai").
+  const flow = read("components/app/profile-text-first-flow.tsx");
+
+  it("imports useRouter so it can refresh the unified surface after save", () => {
+    expect(flow).toMatch(/from\s+["']next\/navigation["']/);
+    expect(flow).toMatch(/useRouter\(\)/);
+  });
+
+  it("applyConfirmed transitions confirmed chips → 'saved' status", () => {
+    expect(flow).toMatch(
+      /status\s*===\s*["']confirmed["'][\s\S]{0,80}status:\s*["']saved["']/,
+    );
+  });
+
+  it("applyConfirmed calls router.refresh() after a successful save", () => {
+    // Located AFTER the saveProfileSkillClaimsAction call so the
+    // server-rendered CapabilityProfileSection re-fetches the new
+    // claims. Comments stripped before match.
+    const codeOnly = flow
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    expect(codeOnly).toMatch(
+      /saveProfileSkillClaimsAction\s*\([\s\S]{0,500}router\.refresh\(\)/,
+    );
+  });
+
+  it("never silently filters out already-saved chips (no .filter on savedClaimSet)", () => {
+    // The PR #48 behavior filtered already-saved chips OUT of the
+    // selfDeclared array via `.filter((c) => !savedClaimSet.has(...))`.
+    // This save-state slice REPLACES that with status='already_saved'
+    // so the user can see why a chip isn't actionable.
+    const codeOnly = flow
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    expect(codeOnly).not.toMatch(/\.filter\(\(c\)[^)]*!savedClaimSet/);
+    // And the assignment to status must include the "already_saved"
+    // ternary branch.
+    expect(codeOnly).toMatch(
+      /savedClaimSet\.has\([^)]+\)[\s\S]{0,80}["']already_saved["']/,
+    );
+  });
+
+  it("renders the Save button only when there is something to save", () => {
+    // Guards against the prior production bug — Save was always
+    // rendered even when newCount === 0 AND selectedCount === 0,
+    // which made the flow look broken ("Sistema rado · 0" next to a
+    // useless button).
+    const codeOnly = flow
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    expect(codeOnly).toMatch(
+      /\(newCount\s*>\s*0\s*\|\|\s*selectedCount\s*>\s*0\)\s*&&\s*\(\s*<Button/,
+    );
+  });
+
+  it("Save button switches label between idle / disabled / applying", () => {
+    const codeOnly = flow
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    // Three i18n keys must appear inside the Button label: applying
+    // (loading state), applyAllDisabledHint (selectedCount === 0),
+    // applyAll (idle).
+    expect(codeOnly).toMatch(/t\(\s*["']applying["']\s*\)/);
+    expect(codeOnly).toMatch(/t\(\s*["']applyAllDisabledHint["']\s*\)/);
+    expect(codeOnly).toMatch(/t\(\s*["']applyAll["']\s*\)/);
+  });
+
+  it("success message points at the unified Mano gebėjimai surface (savedToCapabilities key)", () => {
+    expect(flow).toMatch(/t\(\s*["']savedToCapabilities["']\s*\)/);
+    const lt = JSON.parse(read("messages/lt.json")) as Record<
+      string,
+      unknown
+    >;
+    const skills = lt.skills as Record<string, unknown>;
+    const tf = skills.textFirst as Record<string, string>;
+    expect(tf.savedToCapabilities).toContain("Mano gebėjimai");
+  });
+
+  it("i18n carries the four save-state status labels (LT + EN)", () => {
+    for (const locale of ["lt", "en"] as const) {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as Record<
+        string,
+        unknown
+      >;
+      const structuring = json.structuring as Record<string, unknown>;
+      const status = structuring.status as Record<string, string>;
+      // The four user-visible save-state badges in this flow.
+      expect(status.confirmed, `${locale}.structuring.status.confirmed`).toBeTruthy();
+      expect(status.saved, `${locale}.structuring.status.saved`).toBeTruthy();
+      expect(
+        status.already_saved,
+        `${locale}.structuring.status.already_saved`,
+      ).toBeTruthy();
+      expect(status.pending, `${locale}.structuring.status.pending`).toBeTruthy();
+    }
+  });
+});
+
 describe("Guard: capability-profile copy avoids fake verification", () => {
   for (const locale of ["lt", "en"] as const) {
     it(`${locale}.capabilityProfile keeps the self-declared status honest`, () => {
