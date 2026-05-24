@@ -1049,7 +1049,12 @@ describe("no migration files added by this sprint", () => {
     // text-first composer's raw narrative is NOT stored on employer-
     // readable workers.bio. profiles_select RLS (0001) + GRANTs (0004)
     // already scope reads/writes to the owner; no new policy needed.
-    const SPRINT_BASELINE = 14;
+    // Bumped from 14 → 15 on the profile-text-to-skill-suggestions-v1
+    // sprint: migration 0015 adds the owner-only `profile_skill_claims`
+    // table so structured self-declared skill labels (derived from the
+    // narrative) persist in their own RLS-closed primitive instead of
+    // leaking through worker_skills (employer-readable).
+    const SPRINT_BASELINE = 15;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
