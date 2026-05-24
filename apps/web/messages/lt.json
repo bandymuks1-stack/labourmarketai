@@ -32,7 +32,39 @@
     "disclaimer": "Šie įgūdžiai paimti iš jūsų pačių aprašymo. Jie dar nėra patvirtinti darbų žurnalu, dokumentais ar kito žmogaus patvirtinimu — bet jie yra jūsų bendros gebėjimų savybės dalis.",
     "experienceTitle": "Darbo istorija",
     "removeLabel": "Pašalinti įgūdį",
-    "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
+    "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą.",
+    "manualAddLabel": "Pridėti įgūdį rankiniu būdu",
+    "manualAddPlaceholder": "Pvz., Anglų kalba",
+    "manualAddButton": "Pridėti",
+    "manualAdding": "Pridedama…",
+    "addError": "Nepavyko pridėti. Pabandykite dar kartą."
+  },
+  "admin": {
+    "eyebrow": "PILOTO VALDYMAS",
+    "title": "Pilotinis valdymo skydas",
+    "subtitle": "Tik superadminams. Saugomi serverio pusės RLS ir profiles.active_role = 'admin'.",
+    "back": "Grįžti į pilotinį skydą",
+    "metric": {
+      "totalUsers": "Profiliai iš viso",
+      "totalClaims": "Įgūdžių teiginiai iš viso"
+    },
+    "recent": {
+      "title": "Naujausi profiliai",
+      "help": "Paskutiniai 10 profilių. El. paštai dalinai užmaskuoti, kad nesimatytų ekrane.",
+      "profileText": "Profilio tekstas",
+      "claims": "Teiginių",
+      "yes": "yra",
+      "no": "nėra",
+      "inspect": "Tikrinti →"
+    },
+    "user": {
+      "onboarded": "Užregistruotas",
+      "notOnboarded": "Dar nepradėjęs",
+      "profileTextTitle": "Profilio tekstas",
+      "profileTextEmpty": "Profilio tekstas dar neįrašytas.",
+      "claimsTitle": "Paties nurodyti įgūdžiai",
+      "claimsEmpty": "Šis vartotojas dar neturi paties nurodytų įgūdžių."
+    }
   },
   "profileSkillClaims": {
     "title": "Jūsų pačių nurodyti įgūdžiai",
