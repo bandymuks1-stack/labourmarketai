@@ -13,10 +13,14 @@ async function handle(
     // Logout should never error to the user; cookies still cleared by signOut.
   }
   const url = new URL(request.url);
-  return NextResponse.redirect(new URL(`/${locale}`, url.origin));
+  // Localized login (not the locale home) so the next action after sign
+  // out is unambiguous: re-authenticate, switch account, or close the
+  // tab. Owner-requested in the account-menu-logout-admin-visibility
+  // hotfix doc.
+  return NextResponse.redirect(new URL(`/${locale}/auth/login`, url.origin));
 }
 
 /** Accept POST (form submit from the dashboard) and GET (direct link), both
- *  clear the session and return the visitor to the locale home. */
+ *  clear the session and route the visitor to the localized login page. */
 export const POST = handle;
 export const GET = handle;

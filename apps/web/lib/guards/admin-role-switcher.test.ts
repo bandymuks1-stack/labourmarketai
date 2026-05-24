@@ -40,12 +40,25 @@ describe("Guard: AuthProvider exposes isAdmin", () => {
   });
 });
 
-describe("Guard: dashboard layout computes isAdmin from profiles.active_role", () => {
+describe("Guard: dashboard layout derives isAdmin from a DUAL signal", () => {
   const layout = read("app/[locale]/dashboard/layout.tsx");
 
-  it("derives isAdmin from active_role === 'admin'", () => {
+  // Updated for fix/account-menu-logout-admin-visibility: permission
+  // and workspace are independent dimensions. The single-source check
+  // `profile.active_role === 'admin'` was a bug — `switchActiveRole`
+  // overwrites active_role and the admin badge vanished. The new
+  // helper `deriveIsAdmin` checks both `active_role === 'admin'` AND
+  // `profile_roles` for a row tagged `admin`, so admin persists
+  // across workspace switches.
+  it("imports the deriveIsAdmin helper from lib/auth/admin-signal", () => {
     expect(layout).toMatch(
-      /const\s+isAdmin\s*=\s*profile\.active_role\s*===\s*["']admin["']/,
+      /import\s*\{\s*deriveIsAdmin\s*\}\s*from\s*["']@\/lib\/auth\/admin-signal["']/,
+    );
+  });
+
+  it("calls deriveIsAdmin with both profile.active_role and rolesRows", () => {
+    expect(layout).toMatch(
+      /deriveIsAdmin\(\s*\{[\s\S]{0,200}activeRole:\s*profile\.active_role[\s\S]{0,200}profileRoles:\s*rolesRows\s*\?\?\s*\[\]/,
     );
   });
 

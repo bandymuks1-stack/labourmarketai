@@ -5,9 +5,11 @@ import { BottomNav } from "@/components/app/bottom-nav";
 import { DashboardTabs } from "@/components/app/dashboard-tabs";
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { RoleSwitcher } from "@/components/app/role-switcher";
+import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
+import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -50,12 +52,17 @@ export default async function DashboardLayout({
     .map((r) => r.role)
     .filter((r): r is Role => ROLES.has(r as Role));
   // Admin is NOT a workspace role (the role catalogue only knows worker/
-  // company/agency/customer/preparing-roles). When the user is admin we
-  // surface that fact via a SEPARATE flag — see role-switcher.tsx for
-  // the rendering. activeRole continues to fall back to the user's first
-  // user-facing role so the dashboard's tab/nav surfaces still have a
-  // workspace context to render in.
-  const isAdmin = profile.active_role === "admin";
+  // company/agency/customer/preparing-roles). Permission and workspace
+  // are independent dimensions: admin lives on a SEPARATE signal so
+  // that switching workspaces (worker -> company) never strips admin
+  // in the UI. See `deriveIsAdmin` for the dual signal — active_role
+  // OR a `profile_roles` row tagged 'admin'. The SQL helper
+  // `public.is_admin()` still reads only `active_role` for the RLS
+  // bypass; full schema decoupling is a follow-up migration.
+  const isAdmin = deriveIsAdmin({
+    activeRole: profile.active_role,
+    profileRoles: rolesRows ?? [],
+  });
   const activeRole = ROLES.has(profile.active_role as Role)
     ? (profile.active_role as Role)
     : (roles[0] ?? null);
@@ -89,6 +96,7 @@ export default async function DashboardLayout({
               <LocaleSwitcher className="hidden md:flex" />
               <NotificationPanel />
               <RoleSwitcher />
+              <AccountMenu />
             </div>
           </div>
         </header>

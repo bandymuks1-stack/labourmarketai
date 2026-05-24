@@ -208,6 +208,31 @@ async function main(): Promise<void> {
     process.exit(1);
     return;
   }
+
+  // Also persist the admin signal in profile_roles so the application
+  // continues to recognise the admin after any subsequent workspace
+  // switch (`switchActiveRole` overwrites profiles.active_role).
+  // Idempotent via unique(profile_id, role).
+  const { error: prErr } = await admin
+    .from("profile_roles")
+    .upsert(
+      { profile_id: profile.id, role: "admin" },
+      { onConflict: "profile_id,role" },
+    );
+  if (prErr) {
+    audit({
+      action: "apply.partial",
+      email: args.email,
+      profileId: profile.id,
+      previousRole: currentRole,
+      newRole: "admin",
+      profileRolesUpsertError: prErr.message,
+      mode: "apply",
+    });
+    process.exit(1);
+    return;
+  }
+
   audit({
     action: alreadyAdmin ? "apply.noop" : "apply.granted",
     email: args.email,
@@ -215,6 +240,7 @@ async function main(): Promise<void> {
     previousRole: currentRole,
     newRole: "admin",
     alreadyAdmin,
+    profileRolesAdminUpserted: true,
     mode: "apply",
     rowsAffected: updated?.length ?? 0,
   });
