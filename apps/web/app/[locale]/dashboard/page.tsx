@@ -228,26 +228,30 @@ export default async function DashboardOverviewPage({
     .eq("profile_id", user.id)
     .maybeSingle();
   if (workerRow?.id) {
-    const { data: wp } = await supabase
-      .from("worker_professions")
-      .select("professions(slug)")
-      .eq("worker_id", workerRow.id)
-      .eq("is_primary", true)
-      .maybeSingle();
-    const slug = (wp?.professions as { slug: string } | null)?.slug ?? null;
+    // The three reads (primary profession, skill count, journal count) are
+    // independent of each other; run them in parallel to cut the worker
+    // overview's tail latency.
+    const [wpRes, scRes, ecRes] = await Promise.all([
+      supabase
+        .from("worker_professions")
+        .select("professions(slug)")
+        .eq("worker_id", workerRow.id)
+        .eq("is_primary", true)
+        .maybeSingle(),
+      supabase
+        .from("worker_skills")
+        .select("*", { count: "exact", head: true })
+        .eq("worker_id", workerRow.id),
+      supabase
+        .from("journal_entries")
+        .select("*", { count: "exact", head: true })
+        .eq("worker_id", workerRow.id),
+    ]);
+    const slug =
+      (wpRes.data?.professions as { slug: string } | null)?.slug ?? null;
     if (slug) professionName = tProf(slug);
-
-    const { count: sc } = await supabase
-      .from("worker_skills")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerRow.id);
-    skillsCount = sc ?? 0;
-
-    const { count: ec } = await supabase
-      .from("journal_entries")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerRow.id);
-    entriesCount = ec ?? 0;
+    skillsCount = scRes.count ?? 0;
+    entriesCount = ecRes.count ?? 0;
   }
 
   const steps = [

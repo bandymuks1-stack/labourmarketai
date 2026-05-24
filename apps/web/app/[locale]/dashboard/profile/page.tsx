@@ -45,11 +45,35 @@ export default async function ProfilePage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, email, active_role, profile_text")
-    .eq("id", user.id)
-    .single();
+  // These five top-level reads are independent — run them in parallel to
+  // cut the slowest authenticated SSR page's tail latency. The worker
+  // branch's inner queries (further down) still depend on workerId /
+  // currentProfessionId / workerProfIds, so they stay sequential.
+  const [profileRes, savedSkillClaims, roleRowsRes, workerRes, profRowsRes] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("full_name, email, active_role, profile_text")
+        .eq("id", user.id)
+        .single(),
+      listProfileSkillClaims(),
+      supabase
+        .from("profile_roles")
+        .select("role")
+        .eq("profile_id", user.id)
+        .eq("is_active", true),
+      supabase
+        .from("workers")
+        .select("id")
+        .eq("profile_id", user.id)
+        .maybeSingle(),
+      supabase.from("professions").select("id, slug").eq("is_active", true),
+    ]);
+  const profile = profileRes.data;
+  const roleRows = roleRowsRes.data;
+  const worker = workerRes.data;
+  const profRows = profRowsRes.data;
+
   const personName =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
   const activeRole = ROLES.has(profile?.active_role as Role)
@@ -60,33 +84,14 @@ export default async function ProfilePage({
   const savedProfileText =
     (profile as { profile_text?: string | null } | null)?.profile_text ?? "";
 
-  // Owner-only self-declared skill claims derived from profile_text
-  // (migration 0015). Safe to fetch unconditionally — listProfileSkillClaims
-  // returns [] if the user is missing or the table isn't reachable yet.
-  const savedSkillClaims = await listProfileSkillClaims();
-
-  const { data: roleRows } = await supabase
-    .from("profile_roles")
-    .select("role")
-    .eq("profile_id", user.id)
-    .eq("is_active", true);
   const roles = (roleRows ?? [])
     .map((r) => r.role)
     .filter((r): r is Role => ROLES.has(r as Role));
 
-  const { data: worker } = await supabase
-    .from("workers")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
   const workerId = worker?.id ?? null;
 
   // Names live in JSON keyed by slug (PLATFORM_DOCTRINE §2); fetch id+slug,
   // translate + sort by the localized name here.
-  const { data: profRows } = await supabase
-    .from("professions")
-    .select("id, slug")
-    .eq("is_active", true);
   const professions = (profRows ?? [])
     .map((p) => ({ id: p.id, slug: p.slug, name: tProf(p.slug) }))
     .sort((a, b) => a.name.localeCompare(b.name))
