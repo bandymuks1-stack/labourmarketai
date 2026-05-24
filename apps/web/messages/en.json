@@ -22,6 +22,18 @@
     "savedCount": "Saved: {n} skills",
     "activeTag": "active"
   },
+  "capabilityProfile": {
+    "title": "Skills & experience",
+    "intro": "Your capabilities — from your own words and your work history. You're not locked into one role: skills from any field belong here.",
+    "skillsTitle": "Skills",
+    "selfDeclaredStatus": "Self-declared",
+    "notExternallyVerified": "Not externally verified",
+    "sourceProfileText": "Source: profile text",
+    "disclaimer": "These skills are taken from your own description. They are not yet confirmed by work journal evidence, documents, or another person — but they are part of your overall capability profile.",
+    "experienceTitle": "Work history",
+    "removeLabel": "Remove skill",
+    "deleteError": "Could not remove. Please try again."
+  },
   "profileSkillClaims": {
     "title": "Your self-declared skills",
     "intro": "From your profile text we propose skill chips. You decide which to save.",
@@ -58,7 +70,8 @@
     "removeDirection": "Remove",
     "primaryBadge": "Primary",
     "directionAdded": "Direction added",
-    "pageTitle": "Profession & skills",
+    "pageTitle": "My capabilities",
+    "pageSubtitle": "All your skills and experience in one place. The work category you picked is only context, not a limit — you can hold skills from any field.",
     "professionLabel": "Your profession",
     "professionPlaceholder": "Select a profession",
     "professionSaved": "Profession saved",

@@ -102,36 +102,93 @@ describe("Guard: profile-text composer is single-canonical (no dual-system UI)",
   });
 });
 
-describe("Guard: standalone section is display-only (no duplicate CTA)", () => {
-  const section = read("components/app/profile-skill-claims-section.tsx");
+describe("Guard: unified capability surface (replaces the standalone section)", () => {
+  // fix/cc/cv-unify-self-declared deleted components/app/profile-skill-
+  // claims-section.tsx and moved the saved-chip display into the
+  // unified CapabilityProfileSection. These assertions guarantee the
+  // new component preserves the same invariants the standalone section
+  // had (no duplicate CTA, no inline extract/save) AND the same
+  // delete-affordance for owner-only cleanup.
+  const capability = read(
+    "components/app/capability-profile-section.tsx",
+  );
 
-  it("does NOT reference the suggest CTA i18n key", () => {
-    // The old duplicate CTA called `t('suggestButton')`. A pure display-
-    // only section never does. Comments are stripped before matching so
-    // an explanatory header that mentions the old button by name doesn't
-    // false-trigger.
-    const codeOnly = section
+  it("does NOT reference the suggest CTA i18n key (CTA stays in ProfileTextFirstFlow)", () => {
+    const codeOnly = capability
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/\/\/[^\n]*\n/g, "");
     expect(codeOnly).not.toMatch(/t\(\s*["']suggestButton["']\s*\)/);
   });
 
-  it("does NOT import the deterministic extractor (no inline suggest path)", () => {
-    expect(section).not.toMatch(
+  it("does NOT import the deterministic extractor (display-only)", () => {
+    expect(capability).not.toMatch(
       /from\s+["']@\/lib\/profile\/skill-claim-extractor["']/,
     );
   });
 
-  it("does NOT import the save server action (no inline save path)", () => {
-    expect(section).not.toMatch(/saveProfileSkillClaimsAction/);
+  it("does NOT import the save server action (display-only)", () => {
+    expect(capability).not.toMatch(/saveProfileSkillClaimsAction/);
   });
 
-  it("still allows deleting saved chips (read+delete surface)", () => {
-    expect(section).toMatch(/deleteProfileSkillClaimAction/);
+  it("preserves owner-only chip delete via deleteProfileSkillClaimAction", () => {
+    expect(capability).toMatch(/deleteProfileSkillClaimAction/);
   });
 
-  it("renders nothing when there are no saved claims", () => {
-    expect(section).toMatch(/if\s*\(\s*savedClaims\.length\s*===\s*0\s*\)\s*return\s+null/);
+  it("renders the self-declared chips as the FIRST sub-section", () => {
+    // The product rule (PLATFORM_DOCTRINE §1) places the user's own
+    // self-declared capabilities ahead of any work-context history,
+    // because they belong to the person, not the context.
+    const codeOnly = capability
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    const claimsIdx = codeOnly.indexOf("hasClaims &&");
+    const engagementsIdx = codeOnly.indexOf("hasEngagements &&");
+    expect(claimsIdx, "self-declared block missing").toBeGreaterThan(-1);
+    expect(engagementsIdx, "engagements block missing").toBeGreaterThan(
+      -1,
+    );
+    expect(claimsIdx).toBeLessThan(engagementsIdx);
+  });
+
+  it("renders WITHOUT requiring engagements (works for non-worker users)", () => {
+    // `if (!hasClaims && !hasEngagements) return null` — when the user
+    // has chips but NO engagements (e.g. a pure company account that
+    // typed profile text), the section still renders.
+    expect(capability).toMatch(
+      /if\s*\(\s*!hasClaims\s*&&\s*!hasEngagements\s*\)\s*return\s+null/,
+    );
+  });
+});
+
+describe("Guard: profile page is no longer construction-only gated", () => {
+  const page = read("app/[locale]/dashboard/profile/page.tsx");
+
+  it("does NOT gate the text-first composer on workerId presence", () => {
+    // The old structure was `workerId ? <ProfileTextFirstFlow .../> :
+    // <p>noProfession</p>` — the composer hidden from non-workers.
+    // The fix renders the composer unconditionally; workerId only
+    // gates the catalogued worker-skills picker in manualSlot.
+    const codeOnly = page
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    // No `{workerId ? <ProfileTextFirstFlow` anywhere — the composer
+    // sits OUTSIDE any workerId ternary.
+    expect(codeOnly).not.toMatch(
+      /workerId\s*\?\s*\(\s*<\s*>[\s\S]*<ProfileTextFirstFlow/,
+    );
+    // The composer JSX is present at top level.
+    expect(codeOnly).toMatch(/<ProfileTextFirstFlow\b/);
+  });
+
+  it("does NOT render the construction-only 'noProfession' dead-end branch", () => {
+    // Previously: `: <p>{t("noProfession")}</p>` blocked non-workers.
+    // The fix removes the branch entirely — non-workers get the
+    // composer + their self-declared chips like everyone else.
+    expect(page).not.toMatch(/noProfession/);
+  });
+
+  it("renders the unified CapabilityProfileSection (single canonical area)", () => {
+    expect(page).toMatch(/<CapabilityProfileSection\b/);
   });
 });
 
@@ -242,4 +299,63 @@ describe("Goal example: extractor returns Programavimas + Namų statyba", () => 
     expect(labels).toContain("Programavimas");
     expect(labels).toContain("Namų statyba");
   });
+});
+
+describe("Guard: broad non-construction skills survive a construction-context narrative", () => {
+  // PLATFORM_DOCTRINE §1: a user is not locked into one category.
+  // The extended owner sentence mixes construction (statyti namus,
+  // dengti stogus) with non-construction (programuoti, gaminti
+  // patiekalus). All four canonical chips MUST be returned together —
+  // the construction context cannot suppress the broad skills.
+  it("extended owner sentence keeps Programavimas + Maisto gamyba alongside the construction skills", async () => {
+    const { extractProfileSkillClaims } = await import(
+      "../profile/skill-claim-extractor"
+    );
+    const labels = extractProfileSkillClaims(
+      "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti lietuviškos virtuvės patiekalus",
+    ).map((c) => c.label);
+    expect(labels).toContain("Programavimas");
+    expect(labels).toContain("Namų statyba");
+    expect(labels).toContain("Stogų dengimas");
+    expect(labels).toContain("Maisto gamyba");
+    // The two "broad" non-construction chips must NOT come last just
+    // because there are more construction matches — the dictionary
+    // order in skill-claim-extractor.ts puts Programavimas first so
+    // a refactor that re-orders by frequency or by category would be
+    // caught here.
+    expect(labels.indexOf("Programavimas")).toBeLessThan(
+      labels.indexOf("Namų statyba"),
+    );
+  });
+});
+
+describe("Guard: capability-profile copy avoids fake verification", () => {
+  for (const locale of ["lt", "en"] as const) {
+    it(`${locale}.capabilityProfile keeps the self-declared status honest`, () => {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as Record<
+        string,
+        unknown
+      >;
+      const ns = json.capabilityProfile as Record<string, string>;
+      expect(ns, "capabilityProfile namespace missing").toBeTruthy();
+      // Required honest-status keys must be present.
+      expect(ns.selfDeclaredStatus).toBeTruthy();
+      expect(ns.notExternallyVerified).toBeTruthy();
+      expect(ns.sourceProfileText).toBeTruthy();
+      // The disclaimer is the only key allowed to NEGATE the words.
+      const WHITELIST = new Set([
+        "disclaimer",
+        "notExternallyVerified",
+        "selfDeclaredStatus",
+      ]);
+      for (const [key, val] of Object.entries(ns)) {
+        if (WHITELIST.has(key)) continue;
+        const lower = val.toLowerCase();
+        expect(
+          lower,
+          `${locale}.capabilityProfile.${key} must not affirm verified/confirmed`,
+        ).not.toMatch(/\bverified\b|\bconfirmed\b|\bpatvirtin\w*/);
+      }
+    });
+  }
 });

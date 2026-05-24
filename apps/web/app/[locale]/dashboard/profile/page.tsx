@@ -2,13 +2,12 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
-import { ProfileSkillClaimsSection } from "@/components/app/profile-skill-claims-section";
+import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
-import {
-  CvEngagementCards,
-  type EngagementCard,
-  type SkillDot,
+import type {
+  EngagementCard,
+  SkillDot,
 } from "@/components/app/cv-engagement-cards";
 import { type Role } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
@@ -252,54 +251,54 @@ export default async function ProfilePage({
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("pageTitle")}
         </h1>
+        <p className="mt-2 text-sm text-text-secondary">
+          {t("pageSubtitle")}
+        </p>
       </header>
 
-      {/* Pure-display list of already-saved self-declared profile skill
-          claims (owner-only, migration 0015). The composer below — wired
-          into ProfileTextFirstFlow.applyConfirmed — is the SINGLE place
-          new claims are produced from profile text. This section only
-          renders when the user has saved claims (no extract CTA here, by
-          design — having two competing CTAs was the production bug fix/cc
-          /profile-text-skills-production-wiring resolves). */}
-      {workerId && savedSkillClaims.length > 0 && (
-        <ProfileSkillClaimsSection initialClaims={savedSkillClaims} />
-      )}
+      {/* Text-first composer — universal. Available to every authenticated
+          user regardless of role. The catalogued worker_skills picker
+          (manualSlot) only renders for users with a worker row; pure
+          company/agency/customer accounts see only the self-declared
+          composer + chips, which is the right canonical surface for
+          their narrative-derived skills. */}
+      <ProfileTextFirstFlow
+        initialText={savedProfileText}
+        savedClaimNormalizedLabels={savedSkillClaims.map(
+          (c) => c.normalized_label,
+        )}
+        manualSlot={
+          workerId ? (
+            <WorkerTradeProfile
+              workerId={workerId}
+              professions={professions}
+              currentProfessionId={currentProfessionId}
+              directions={workerDirections}
+              initialSkillIds={initialSkillIds}
+              personName={personName}
+              roles={roles}
+              activeRole={activeRole}
+              savedSkills={savedSkills}
+            />
+          ) : undefined
+        }
+      />
 
-      {workerId ? (
-        <>
-          {/* PRIMARY path — text-first / CV-first. Self-declared bucket is
-              the SINGLE canonical output for narrative-derived suggestions
-              (PR #46 hotfix removed the parallel OLD bucket grid).
-              `Pridėti rankiniu būdu` opens the catalogued worker_skills
-              picker via the manualSlot below. */}
-          <ProfileTextFirstFlow
-            initialText={savedProfileText}
-            savedClaimNormalizedLabels={savedSkillClaims.map(
-              (c) => c.normalized_label,
-            )}
-            manualSlot={
-              <WorkerTradeProfile
-                workerId={workerId}
-                professions={professions}
-                currentProfessionId={currentProfessionId}
-                directions={workerDirections}
-                initialSkillIds={initialSkillIds}
-                personName={personName}
-                roles={roles}
-                activeRole={activeRole}
-                savedSkills={savedSkills}
-              />
-            }
-          />
-          <CvEngagementCards
-            cards={engagementCards}
-            skills={skillDots}
-            professionIconSlug={professionIconSlug}
-          />
-        </>
-      ) : (
-        <p className="text-sm text-text-secondary">{t("noProfession")}</p>
-      )}
+      {/* Unified CAPABILITY surface — the canonical home for self-declared
+          skills (`profile_skill_claims`) and worker work history. Always
+          renders when the user has any saved chips OR any worker
+          engagements. Self-declared chips are clearly labelled
+          "Paties nurodyta · Nepatvirtinta išoriškai · source = profile_text"
+          so they cannot be mistaken for externally verified claims, and
+          they remain visible regardless of the user's currently-selected
+          work category (PLATFORM_DOCTRINE §1: a person is not locked into
+          one category). */}
+      <CapabilityProfileSection
+        claims={savedSkillClaims}
+        engagements={workerId ? engagementCards : []}
+        workerSkillDots={workerId ? skillDots : []}
+        professionIconSlug={workerId ? professionIconSlug : null}
+      />
     </div>
   );
 }

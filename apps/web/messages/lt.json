@@ -22,6 +22,18 @@
     "savedCount": "Išsaugota: {n} įgūdžių",
     "activeTag": "aktyvi"
   },
+  "capabilityProfile": {
+    "title": "Įgūdžiai ir patirtis",
+    "intro": "Jūsų gebėjimai — iš jūsų pačių žodžių ir darbo istorijos. Nesate užrakinti viename vaidmenyje: čia tilps įgūdžiai iš bet kurios srities.",
+    "skillsTitle": "Įgūdžiai",
+    "selfDeclaredStatus": "Paties nurodyta",
+    "notExternallyVerified": "Nepatvirtinta išoriškai",
+    "sourceProfileText": "Šaltinis: profilio tekstas",
+    "disclaimer": "Šie įgūdžiai paimti iš jūsų pačių aprašymo. Jie dar nėra patvirtinti darbų žurnalu, dokumentais ar kito žmogaus patvirtinimu — bet jie yra jūsų bendros gebėjimų savybės dalis.",
+    "experienceTitle": "Darbo istorija",
+    "removeLabel": "Pašalinti įgūdį",
+    "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
+  },
   "profileSkillClaims": {
     "title": "Jūsų pačių nurodyti įgūdžiai",
     "intro": "Iš jūsų profilio teksto siūlome įgūdžių chip'us. Jūs nuspręskite, kuriuos išsaugoti.",
@@ -58,7 +70,8 @@
     "removeDirection": "Pašalinti",
     "primaryBadge": "Pagrindinė",
     "directionAdded": "Kryptis pridėta",
-    "pageTitle": "Profesija ir įgūdžiai",
+    "pageTitle": "Mano gebėjimai",
+    "pageSubtitle": "Visi jūsų įgūdžiai ir patirtis vienoje vietoje. Pasirinkta darbo kategorija yra tik kontekstas, ne apribojimas — galite turėti įgūdžių iš bet kurios srities.",
     "professionLabel": "Tavo profesija",
     "professionPlaceholder": "Pasirink profesiją",
     "professionSaved": "Profesija išsaugota",
