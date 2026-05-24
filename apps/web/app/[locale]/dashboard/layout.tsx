@@ -34,19 +34,29 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, email, active_role, onboarded_at")
-    .eq("id", user.id)
-    .single();
+  // The profile row and the profile_roles catalogue are independent reads;
+  // running them in parallel halves the auth-shell SSR latency. Every
+  // route under the dashboard tree pays this layout cost, so the saving
+  // compounds. (Avoid writing the literal slash-star sequence in this
+  // comment: the project's source-level guards run a comment-stripping
+  // regex that treats it as a block comment opener and would consume
+  // past this Promise.all into the JSX below.)
+  const [profileRes, rolesRes] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, email, active_role, onboarded_at")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("profile_roles")
+      .select("role")
+      .eq("profile_id", user.id)
+      .eq("is_active", true),
+  ]);
+  const profile = profileRes.data;
+  const rolesRows = rolesRes.data;
 
   if (!profile?.onboarded_at) redirect(`/${locale}/onboarding`);
-
-  const { data: rolesRows } = await supabase
-    .from("profile_roles")
-    .select("role")
-    .eq("profile_id", user.id)
-    .eq("is_active", true);
 
   const roles = (rolesRows ?? [])
     .map((r) => r.role)

@@ -1,0 +1,68 @@
+/**
+ * Source-level guards for fix/pilot-ready-stability-trust-sprint Phase 3
+ * (small perf fixes only).
+ *
+ * The dashboard layout, dashboard overview, and dashboard/profile pages
+ * each previously issued the bulk of their independent SSR reads
+ * sequentially. The fix groups them under `Promise.all` so the round
+ * trips overlap — measurable win on the slowest authenticated paths,
+ * zero behaviour change.
+ *
+ * Lock the parallelization shape so a future edit can't accidentally
+ * de-parallelize back to a serial chain (the historic "feels slow"
+ * regression mode).
+ */
+
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const APP_ROOT = join(__dirname, "..", "..");
+
+function read(rel: string): string {
+  return readFileSync(join(APP_ROOT, rel), "utf8");
+}
+
+describe("Guard: dashboard layout parallelizes profile + profile_roles reads", () => {
+  const layout = read("app/[locale]/dashboard/layout.tsx");
+
+  it("uses Promise.all for the two independent reads", () => {
+    expect(layout).toMatch(
+      /Promise\.all\(\s*\[[\s\S]{0,800}from\(["']profiles["']\)[\s\S]{0,400}from\(["']profile_roles["']\)/,
+    );
+  });
+
+  it("does NOT await profiles before awaiting profile_roles", () => {
+    // Old serial shape: `const { data: profile } = await supabase.from('profiles')...; const { data: rolesRows } = await supabase.from('profile_roles')...`
+    expect(layout).not.toMatch(
+      /const\s*\{\s*data:\s*profile\s*\}\s*=\s*await\s+supabase[\s\S]{0,500}const\s*\{\s*data:\s*rolesRows\s*\}\s*=\s*await\s+supabase/,
+    );
+  });
+});
+
+describe("Guard: dashboard overview parallelizes worker reads", () => {
+  const page = read("app/[locale]/dashboard/page.tsx");
+
+  it("uses Promise.all for worker_professions + worker_skills + journal_entries", () => {
+    expect(page).toMatch(
+      /Promise\.all\(\s*\[[\s\S]{0,1500}from\(["']worker_professions["']\)[\s\S]{0,1500}from\(["']worker_skills["']\)[\s\S]{0,1500}from\(["']journal_entries["']\)/,
+    );
+  });
+});
+
+describe("Guard: dashboard/profile parallelizes top-level reads", () => {
+  const page = read("app/[locale]/dashboard/profile/page.tsx");
+
+  it("uses Promise.all for profile + claims + profile_roles + workers + professions", () => {
+    expect(page).toMatch(
+      /Promise\.all\(\s*\[[\s\S]{0,2500}from\(["']profiles["']\)[\s\S]{0,2500}listProfileSkillClaims\(\)[\s\S]{0,2500}from\(["']profile_roles["']\)[\s\S]{0,2500}from\(["']workers["']\)[\s\S]{0,2500}from\(["']professions["']\)/,
+    );
+  });
+
+  it("does NOT await profiles before awaiting profile_roles serially", () => {
+    // Catch the historic serial chain. The new code reads profileRes/rolesRowsRes.data after Promise.all resolves.
+    expect(page).not.toMatch(
+      /const\s*\{\s*data:\s*profile\s*\}\s*=\s*await\s+supabase\.from\(["']profiles["']\)[\s\S]{0,800}const\s*\{\s*data:\s*roleRows\s*\}\s*=\s*await\s+supabase\.from\(["']profile_roles["']\)/,
+    );
+  });
+});
