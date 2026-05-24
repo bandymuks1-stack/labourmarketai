@@ -175,9 +175,23 @@ describe("extractProfileSkillClaims", () => {
         ),
       ).toContain("Dokumentų tvarkymas");
     });
-    it("Word / Excel / PDF", () => {
+    it("Word / Excel / PDF → tool-specific chips", () => {
+      // feat/cc/profile-max-capability-capture: each office tool now
+      // gets its own specialization chip so the user sees that the
+      // system recognised the specific tool, not just generic
+      // document work. Dokumentų tvarkymas still surfaces when the
+      // text says "dokumentai" / "office" / etc.
       const labels = extractProfileSkillClaims(
         "Dirbu su Word, Excel ir PDF failais kasdien.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Word dokumentai");
+      expect(labels).toContain("Excel / Skaičiuoklės");
+      expect(labels).toContain("PDF dokumentai");
+    });
+    it("dokumentai stem AND parent chip", () => {
+      // Plain "dokumentai" / "dokumentus" still surfaces the parent.
+      const labels = extractProfileSkillClaims(
+        "Tvarkau dokumentus ir užsiimu administravimu.",
       ).map((r) => r.label);
       expect(labels).toContain("Dokumentų tvarkymas");
     });
@@ -227,12 +241,164 @@ describe("extractProfileSkillClaims", () => {
     });
   });
 
-  describe("Full owner sentence — at least 8 capabilities from one paragraph", () => {
-    // Anchor: the owner's PR #48 follow-up production smoke text. The
-    // dictionary upgrade must produce at least the listed broad set so
-    // the test fails if a future PR narrows or breaks the phrase-stem
-    // matching that this slice introduced.
-    it("extends the four-chip baseline to ~10 broader capabilities", () => {
+  // ── Specialization + new-domain anchors (feat/cc/profile-max-capability-capture) ──
+
+  describe("Specialization: Lietuviškos virtuvės gamyba alongside Maisto gamyba", () => {
+    it("parent + specialization both fire for 'lietuviškos virtuvės patiekalus'", () => {
+      const labels = extractProfileSkillClaims(
+        "Gaminu lietuviškos virtuvės patiekalus kasdien.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Maisto gamyba");
+      expect(labels).toContain("Lietuviškos virtuvės gamyba");
+    });
+    it("specialization-only when text only has the LT-cuisine phrase", () => {
+      const labels = extractProfileSkillClaims(
+        "Specializuojuosi lietuviška virtuve.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Lietuviškos virtuvės gamyba");
+    });
+  });
+
+  describe("Specialization: Drožyba alongside Medienos apdirbimas", () => {
+    it("parent + specialization both fire for 'drožti iš medžio'", () => {
+      const labels = extractProfileSkillClaims(
+        "Moku drožti iš medžio nuo mažumės.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Medienos apdirbimas");
+      expect(labels).toContain("Drožyba");
+    });
+  });
+
+  describe("Specialization: tool-specific chips inside the Dokumentų cluster", () => {
+    it("Word / Excel / PDF → tool chips + parent stays available via 'dokumentus'", () => {
+      const labels = extractProfileSkillClaims(
+        "Dirbu su Word, Excel ir PDF dokumentais.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Word dokumentai");
+      expect(labels).toContain("Excel / Skaičiuoklės");
+      expect(labels).toContain("PDF dokumentai");
+      expect(labels).toContain("Dokumentų tvarkymas");
+    });
+  });
+
+  describe("Specialization: Rivilė alongside Apskaitos sistemos", () => {
+    it("explicit product name surfaces both chips", () => {
+      const labels = extractProfileSkillClaims(
+        "Pildau dokumentus Rivilė aplinkoje.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Rivilė");
+      expect(labels).toContain("Apskaitos sistemos");
+    });
+  });
+
+  describe("Specialization: Santechnikos montavimas alongside Santechnika", () => {
+    it("'santechnikos montavimu' → both general + specialization", () => {
+      const labels = extractProfileSkillClaims(
+        "Užsiimu santechnikos montavimu.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Santechnika");
+      expect(labels).toContain("Santechnikos montavimas");
+    });
+  });
+
+  describe("Specialization: Lengvojo automobilio vairavimas alongside Vairavimas", () => {
+    it("'vairuoti lengvąjį automobilį' → both chips", () => {
+      const labels = extractProfileSkillClaims(
+        "Galiu vairuoti lengvąjį automobilį.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Vairavimas");
+      expect(labels).toContain("Lengvojo automobilio vairavimas");
+    });
+  });
+
+  describe("Pardavimai (new domain)", () => {
+    it("'pardavėju' → Pardavimai", () => {
+      const labels = extractProfileSkillClaims(
+        "Dirbu pardavėju penkis metus.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Pardavimai");
+    });
+    it("EN 'sales' / 'selling' → Pardavimai", () => {
+      expect(
+        extractProfileSkillClaims("Have run B2B sales teams.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Pardavimai");
+    });
+  });
+
+  describe("Sutarčių ruošimas (new domain)", () => {
+    it("'sutartis ir teisinius dokumentus' → Sutarčių ruošimas", () => {
+      const labels = extractProfileSkillClaims(
+        "Ruošiu sutartis ir teisinius dokumentus.",
+      ).map((r) => r.label);
+      expect(labels).toContain("Sutarčių ruošimas");
+    });
+    it("EN 'contract preparation' → Sutarčių ruošimas", () => {
+      expect(
+        extractProfileSkillClaims("Years of contract preparation work.").map(
+          (r) => r.label,
+        ),
+      ).toContain("Sutarčių ruošimas");
+    });
+  });
+
+  describe("Broad owner narrative — at least 15 capabilities from one paragraph", () => {
+    // Anchor: the PR #49 follow-up production smoke text — narrower
+    // than the goal's full sample, kept short enough to reason about
+    // line-by-line. The dictionary upgrade must produce at least the
+    // listed broad set so the test fails if a future PR narrows or
+    // breaks phrase-stem / specialization matching.
+    it("extended owner sentence with construction + IT + cooking + woodwork + office + ERP + team + recruitment + plumbing + sales + driving + legal docs → ≥15 chips", () => {
+      const text =
+        "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti " +
+        "lietuviškos virtuvės patiekalus. taip pat moku drožti iš medžio, " +
+        "bei dirbti su word, excel ir pdf dokumentais rivilė aplinkoje ir " +
+        "galiu koordinuoti komanda bei ieškoti naujų žmonių ir darbuotojų. " +
+        "Turiu teisinės patirties, ruošiu sutartis ir teisinius dokumentus. " +
+        "Galiu vairuoti lengvąjį automobilį, taip pat užsiimu santechnikos " +
+        "montavimu ir dirbu pardavėju.";
+      const labels = extractProfileSkillClaims(text).map((r) => r.label);
+
+      for (const expected of [
+        // baseline + specializations
+        "Programavimas",
+        "Namų statyba",
+        "Stogų dengimas",
+        "Maisto gamyba",
+        "Lietuviškos virtuvės gamyba",
+        "Medienos apdirbimas",
+        "Drožyba",
+        "Word dokumentai",
+        "Excel / Skaičiuoklės",
+        "PDF dokumentai",
+        "Dokumentų tvarkymas",
+        "Rivilė",
+        "Apskaitos sistemos",
+        "Komandos koordinavimas",
+        "Darbuotojų paieška",
+        // new domains
+        "Sutarčių ruošimas",
+        "Vairavimas",
+        "Lengvojo automobilio vairavimas",
+        "Santechnika",
+        "Santechnikos montavimas",
+        "Pardavimai",
+      ]) {
+        expect(
+          labels,
+          `missing ${expected} for full owner narrative`,
+        ).toContain(expected);
+      }
+      // Hard floor — guard against an accidental regression that
+      // narrows the dictionary or breaks parent+specialization
+      // double-matching.
+      expect(labels.length).toBeGreaterThanOrEqual(15);
+    });
+
+    // Keep the prior PR #49 anchor too — it covers the shorter sentence
+    // and prevents regressing the "doubled the 4-chip baseline" claim.
+    it("PR #49 baseline anchor (shorter sentence) still passes", () => {
       const text =
         "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti " +
         "lietuviškos virtuvės patiekalus. taip pat moku drožti iš medžio, " +

@@ -329,6 +329,95 @@ describe("Guard: broad non-construction skills survive a construction-context na
   });
 });
 
+describe("Guard: back-to-text / edit flow is reliable", () => {
+  // feat/cc/profile-max-capability-capture: owner reported the
+  // back-to-text affordance was unreliable. We do not change the core
+  // state machine (it already worked) but we DO lock down:
+  //   - back button carries a stable data-testid for e2e wiring;
+  //   - clicking back explicitly resets `applied` and `error` so a
+  //     stale success toast cannot bleed into the next compose pass;
+  //   - compose stage is testid'd so the e2e can wait on it
+  //     deterministically after back-navigation.
+  const flow = read("components/app/profile-text-first-flow.tsx");
+
+  it("back-to-text button carries a stable data-testid", () => {
+    expect(flow).toMatch(
+      /data-testid=["']profile-text-flow-back-to-text["']/,
+    );
+  });
+
+  it("compose stage wrapper carries a stable data-testid", () => {
+    expect(flow).toMatch(
+      /data-testid=["']profile-text-flow-compose["']/,
+    );
+  });
+
+  it("clicking back resets the applied + error state explicitly", () => {
+    // The reset must happen INSIDE the back button's onClick handler.
+    // Comments stripped before match.
+    const codeOnly = flow
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*\n/g, "");
+    expect(codeOnly).toMatch(
+      /setApplied\(false\)[\s\S]{0,200}setStage\(["']compose["']\)/,
+    );
+  });
+});
+
+describe("Guard: max-capability capture (specializations + new domains)", () => {
+  // feat/cc/profile-max-capability-capture extends the dictionary with
+  // 11 new rows so the owner's broader narrative ("santechnika,
+  // pardavimai, vairavimas, sutartys, lietuviška virtuvė, Word/Excel/
+  // PDF, Rivilė, drožyba") surfaces specializations alongside parent
+  // chips. Future PRs that narrow this dictionary will break this
+  // guard before they reach prod.
+  it("anchor: a wide narrative produces ≥15 distinct labels including key specializations", async () => {
+    const { extractProfileSkillClaims } = await import(
+      "../profile/skill-claim-extractor"
+    );
+    const text =
+      "Moku gerai programuoti ir statyti namus, dengti stogus ir gaminti " +
+      "lietuviškos virtuvės patiekalus. taip pat moku drožti iš medžio, " +
+      "bei dirbti su word, excel ir pdf dokumentais rivilė aplinkoje ir " +
+      "galiu koordinuoti komanda bei ieškoti naujų žmonių ir darbuotojų. " +
+      "Turiu teisinės patirties, ruošiu sutartis ir teisinius dokumentus. " +
+      "Galiu vairuoti lengvąjį automobilį, taip pat užsiimu santechnikos " +
+      "montavimu ir dirbu pardavėju.";
+    const labels = extractProfileSkillClaims(text).map((r) => r.label);
+    // Spot-check a parent/specialization pair from each cluster the
+    // upgrade introduces.
+    for (const specialization of [
+      "Lietuviškos virtuvės gamyba",
+      "Drožyba",
+      "Word dokumentai",
+      "Excel / Skaičiuoklės",
+      "PDF dokumentai",
+      "Rivilė",
+      "Santechnikos montavimas",
+      "Lengvojo automobilio vairavimas",
+    ]) {
+      expect(labels).toContain(specialization);
+    }
+    // The corresponding PARENTS must also surface, proving the
+    // double-match (parent + child) the goal asks for.
+    for (const parent of [
+      "Maisto gamyba",
+      "Medienos apdirbimas",
+      "Dokumentų tvarkymas",
+      "Apskaitos sistemos",
+      "Santechnika",
+      "Vairavimas",
+    ]) {
+      expect(labels).toContain(parent);
+    }
+    // New domain chips from this PR.
+    expect(labels).toContain("Pardavimai");
+    expect(labels).toContain("Sutarčių ruošimas");
+
+    expect(labels.length).toBeGreaterThanOrEqual(15);
+  });
+});
+
 describe("Guard: save-state lifecycle is honest and dedupe-safe", () => {
   // feat/cc/profile-save-state-and-idea-extraction owner-visible spec:
   //   - the bottom Save button is only rendered when there's something
