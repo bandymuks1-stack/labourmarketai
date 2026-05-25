@@ -35,6 +35,13 @@ type ParsedFragmentInput = {
   timeUnit?: "hours" | "minutes" | "days" | null;
   activitySlug?: string | null;
   activityLabel?: string | null;
+  /** v3 — true when the parser flagged the fragment as unrecognised
+   *  (time, no matched activity). */
+  isUnknown?: boolean;
+  /** v3 — worker-typed clarification label for an unknown fragment.
+   *  Persists as `unknown_phrase` metric (review-only, no fake
+   *  taxonomy claim). */
+  userLabel?: string | null;
 };
 
 function parseFragments(raw: string | null): ParsedFragmentInput[] {
@@ -66,6 +73,11 @@ function parseFragments(raw: string | null): ParsedFragmentInput[] {
           typeof r.activitySlug === "string" ? r.activitySlug : null,
         activityLabel:
           typeof r.activityLabel === "string" ? r.activityLabel : null,
+        isUnknown: r.isUnknown === true,
+        userLabel:
+          typeof r.userLabel === "string" && r.userLabel.trim().length > 0
+            ? r.userLabel.trim().slice(0, 200)
+            : null,
       });
     }
     return out;
@@ -119,6 +131,12 @@ export async function createJournalEntry(
   const unitSlug = String(formData.get("unit_slug") ?? "square_meters").trim();
   const notes = String(formData.get("notes") ?? "").trim();
   const workDate = String(formData.get("work_date") ?? "").trim();
+  // v3 — free-text review-only metadata. Capped lengths so a runaway paste
+  // can't blow up a single metric row.
+  const institutionName = String(formData.get("institution_name") ?? "")
+    .trim()
+    .slice(0, 200);
+  const topic = String(formData.get("topic") ?? "").trim().slice(0, 500);
   const fragments = parseFragments(String(formData.get("fragments_json") ?? "") || null);
   const quantity = quantityRaw === "" ? null : Number(quantityRaw);
 
@@ -247,6 +265,24 @@ export async function createJournalEntry(
           },
         ]
       : []),
+    ...(institutionName
+      ? [
+          {
+            metric_slug: "institution_name",
+            value_text: institutionName,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(topic
+      ? [
+          {
+            metric_slug: "topic",
+            value_text: topic,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
     ...fragments.flatMap((f, idx): RpcMetricRow[] => {
       const rows: RpcMetricRow[] = [
         {
@@ -269,6 +305,16 @@ export async function createJournalEntry(
         rows.push({
           metric_slug: "fragment_activity",
           value_text: `${idx + 1}|${activityLabel}`,
+          source: "worker_input" as const,
+        });
+      }
+      // v3 — when the parser flagged the fragment as unknown AND the worker
+      // typed a clarification, persist that as a review-only label. Stored
+      // for future admin / agent dictionary review (no auto-promotion).
+      if (f.isUnknown && f.userLabel) {
+        rows.push({
+          metric_slug: "unknown_phrase",
+          value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
           source: "worker_input" as const,
         });
       }
@@ -344,6 +390,121 @@ export async function createJournalEntry(
 
   revalidatePath(`/${locale}/dashboard/journal`);
   return { ok: true, entryId: rpcEntryId };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// v3 — correction / edit / delete lifecycle (migration 0018).
+// ─────────────────────────────────────────────────────────────────────────
+
+export type JournalLifecycleResult =
+  | { ok: true }
+  | { ok: false; code: JournalLifecycleErrorCode; message: string };
+
+export type JournalLifecycleErrorCode =
+  | "not_authenticated"
+  | "entry_not_found"
+  | "not_owner"
+  | "already_confirmed"
+  | "cannot_supersede_deleted"
+  | "rpc_unavailable"
+  | "unknown_error";
+
+/** Soft-delete a journal entry the caller owns AND that no external party
+ *  has confirmed yet. Calls the `journal_entry_soft_delete` RPC from 0018.
+ *  Returns a tagged result so the UI can render a precise reason. */
+export async function softDeleteJournalEntry(
+  entryId: string,
+  locale: string,
+): Promise<JournalLifecycleResult> {
+  if (!entryId) {
+    return {
+      ok: false,
+      code: "entry_not_found",
+      message: "Įrašas nerastas.",
+    };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      code: "not_authenticated",
+      message: "Sesija nutrūko. Prisijunkite iš naujo.",
+    };
+  }
+
+  const { error } = await (
+    supabase.rpc as unknown as (
+      fn: string,
+      params: { p_entry_id: string },
+    ) => Promise<{ data: unknown; error: { code?: string; message?: string } | null }>
+  )("journal_entry_soft_delete", { p_entry_id: entryId });
+
+  if (error) {
+    const mapped = mapJournalRpcError(error);
+    if (mapped) return mapped;
+    return {
+      ok: false,
+      code: "unknown_error",
+      message: `Įrašo pašalinti nepavyko: ${error.message ?? "nežinoma klaida"}`,
+    };
+  }
+
+  revalidatePath(`/${locale}/dashboard/journal`);
+  return { ok: true };
+}
+
+function mapJournalRpcError(err: {
+  code?: string;
+  message?: string;
+}): JournalLifecycleResult | null {
+  // Postgres RAISE EXCEPTION lands in `message`; PostgREST also surfaces
+  // SQLSTATE in `code` when available. We pattern-match the message body
+  // so we don't depend on PostgREST passing the SQLSTATE unchanged.
+  const text = `${err.message ?? ""} ${err.code ?? ""}`.toLowerCase();
+  if (/pgrst202|create_journal|create_journal_entry|function/.test(text) &&
+      /could not find|does not exist|undefined function/.test(text)) {
+    return {
+      ok: false,
+      code: "rpc_unavailable",
+      message:
+        "Pataisymų funkcija dar nepritaikyta šioje aplinkoje. " +
+        "Paprašykite administratoriaus pritaikyti migraciją 0018.",
+    };
+  }
+  if (text.includes("entry_not_found")) {
+    return {
+      ok: false,
+      code: "entry_not_found",
+      message: "Įrašas nerastas (gali būti, kad jau buvo pašalintas).",
+    };
+  }
+  if (text.includes("not_owner")) {
+    return {
+      ok: false,
+      code: "not_owner",
+      message: "Negalima keisti svetimo įrašo.",
+    };
+  }
+  if (text.includes("already_confirmed_use_correction_request")) {
+    return {
+      ok: false,
+      code: "already_confirmed",
+      message:
+        "Įrašas jau patvirtintas išorinio asmens — vietoje ištrynimo " +
+        "siųskite pataisymo prašymą.",
+    };
+  }
+  if (text.includes("cannot_supersede_deleted")) {
+    return {
+      ok: false,
+      code: "cannot_supersede_deleted",
+      message: "Negalima keisti pašalinto įrašo.",
+    };
+  }
+  return null;
 }
 
 type RpcMetricRow = {

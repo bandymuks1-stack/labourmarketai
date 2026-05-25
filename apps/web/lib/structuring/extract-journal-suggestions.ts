@@ -22,6 +22,13 @@ export type JournalSuggestions = {
   workDirectionSlug: string | null;
   /** Site / location mention if the worker named one (e.g. "objektas Vilniuje"). */
   siteName: string | null;
+  /** Institution / organization name when the worker mentioned one
+   *  (e.g. "Vytauto Didžiojo universitete"). Free-text, review-only —
+   *  there is no organisation taxonomy mounted to this yet. */
+  institutionName: string | null;
+  /** Topic / theme of the work when the worker prefixed it with `tema:` /
+   *  `theme:` (free text, review-only). */
+  topic: string | null;
   /** Per-fragment suggestions when the worker logged multiple work items in
    *  one entry ("1h driver, 3h cashier, 5h roofing"). Each fragment keeps the
    *  raw phrase so the UI can show evidence next to the interpretation. */
@@ -40,6 +47,12 @@ export type JournalFragmentSuggestion = {
   /** Human-readable activity label (LT). Always set when the fragment has any
    *  recognizable activity wording — even if no slug matched the taxonomy. */
   activityLabel: string | null;
+  /** True when the fragment carries a recognisable time but no matched
+   *  activity (slug + label both null) — surfaces as a "Nesuprasta /
+   *  patikslinkite" card in the composer so the worker can attach a free-text
+   *  label. Unknown-phrase rows are persisted as `unknown_phrase` metric
+   *  entries for future admin/agent review (no fake auto-classify). */
+  isUnknown: boolean;
 };
 
 const EMPTY: JournalSuggestions = {
@@ -48,6 +61,8 @@ const EMPTY: JournalSuggestions = {
   skillSlugs: [],
   workDirectionSlug: null,
   siteName: null,
+  institutionName: null,
+  topic: null,
   fragments: [],
   hasAny: false,
 };
@@ -75,16 +90,14 @@ function toNumber(raw: string): number | null {
 }
 
 /** Match every hours/minutes/days mention in the text, returning normalized
- *  values. Used to break the legacy "first match only" parser and let the
- *  caller see how many time fragments exist. */
+ *  values. */
 function findAllTimes(
   lower: string,
 ): { value: number; unitSlug: "hours" | "days" | "minutes" }[] {
   const out: { value: number; unitSlug: "hours" | "days" | "minutes" }[] = [];
-  const hoursRe =
-    /(\d+(?:[.,]\d+)?)\s*(?:valand[oųa][s]?|val\.?|h\b)/gi;
-  const daysRe = /(\d+(?:[.,]\d+)?)\s*(?:dien[ąa]?[s]?|d\.?)\b/gi;
-  const minutesRe = /(\d+(?:[.,]\d+)?)\s*(?:minut[ėeų][s]?|min\.?)/gi;
+  const hoursRe = /(\d+(?:[.,]\d+)?)\s*(?:valand[\p{L}]*|val\.?|h\b)/giu;
+  const daysRe = /(\d+(?:[.,]\d+)?)\s*(?:dien[\p{L}]*|d\.?)\b/giu;
+  const minutesRe = /(\d+(?:[.,]\d+)?)\s*(?:minu[čt][\p{L}]*|min\.?)/giu;
   for (const m of lower.matchAll(hoursRe)) {
     const v = toNumber(m[1]);
     if (v !== null) out.push({ value: v, unitSlug: "hours" });
@@ -101,21 +114,13 @@ function findAllTimes(
 }
 
 /** Lithuanian number-word lexicon (accusative case — the form used with
- *  durations: "dvi valandas", "penkiolika minučių"). Lowercase only.
- *
- *  Doesn't try to be a full LT numeral parser — keeps the cardinals that
- *  come up in day-shift journal language (1..12, then the standard
- *  "teen" decade words). Larger or compound numerals are rare in this
- *  context; falling back to the digit form ("13 valandų") is fine. */
+ *  durations: "dvi valandas", "penkiolika minučių"). Lowercase only. */
 const LT_NUMBER_WORDS: Record<string, number> = {
-  // 1 — accusative masculine/feminine forms used with valandas/minučių.
   vieną: 1,
   viena: 1,
   vienas: 1,
-  // 2..12 — accusative feminine ("dvi valandas").
   dvi: 2,
   trys: 3,
-  // The accusative of "trys" is "tris"; recognized too.
   tris: 3,
   keturias: 4,
   keturi: 4,
@@ -142,107 +147,140 @@ const LT_NUMBER_WORDS: Record<string, number> = {
   dvidešimt: 20,
 };
 
-/** Match an LT number-word followed by a duration noun. Returns the
- *  numeric value + canonical unit, or null. */
-function detectNumberWordTime(
-  fragment: string,
-): { value: number; unitSlug: "hours" | "minutes" | "days" } | null {
-  const f = fragment.toLowerCase();
-  // Build the alternation once per call (cheap; ~30 keys).
-  const keys = Object.keys(LT_NUMBER_WORDS)
-    .sort((a, b) => b.length - a.length) // greedy: prefer longer match first
+function numberWordKeysAlternation(): string {
+  return Object.keys(LT_NUMBER_WORDS)
+    .sort((a, b) => b.length - a.length)
     .join("|");
-  // Hours — `valand` + any LT letter suffix (valandą / valandas / valandos /
-  // valandų / valandoms / valandomis…).
-  const hoursMatch = new RegExp(
+}
+
+/** Recognise a hours-as-words mention. Returns hours (may be fractional from
+ *  "valandą su puse" = 1.5). */
+function detectHoursWord(f: string): number | null {
+  if (/(?:^|\s)pusvaland[įio]/.test(f)) return 0.5;
+  if (/(?:^|\s)pusę\s+valandos(?=\s|[.,!?]|$)/.test(f)) return 0.5;
+  const keys = numberWordKeysAlternation();
+  // Number-word + valand*
+  const m = new RegExp(
     `(?:^|[^\\p{L}])(${keys})\\s+valand[\\p{L}]*(?=\\s|[.,!?]|$)`,
     "u",
   ).exec(f);
-  if (hoursMatch) {
-    const v = LT_NUMBER_WORDS[hoursMatch[1]];
-    if (v !== undefined) return { value: v, unitSlug: "hours" };
+  if (m) {
+    const v = LT_NUMBER_WORDS[m[1]];
+    if (v !== undefined) return v;
   }
-  // Minutes — `minu` + `t` OR `č` (palatalization) + any LT letter suffix
-  // (minutės / minutes / minučių / minutėms…).
-  const minMatch = new RegExp(
-    `(?:^|[^\\p{L}])(${keys})\\s+minu[čt][\\p{L}]*(?=\\s|[.,!?]|$)`,
-    "u",
-  ).exec(f);
-  if (minMatch) {
-    const v = LT_NUMBER_WORDS[minMatch[1]];
-    if (v !== undefined) return { value: v, unitSlug: "minutes" };
-  }
-  // Days — `dien` + any LT letter suffix (dieną / dienas / dienų / dienomis…).
-  const daysMatch = new RegExp(
-    `(?:^|[^\\p{L}])(${keys})\\s+dien[\\p{L}]*(?=\\s|[.,!?]|$)`,
-    "u",
-  ).exec(f);
-  if (daysMatch) {
-    const v = LT_NUMBER_WORDS[daysMatch[1]];
-    if (v !== undefined) return { value: v, unitSlug: "days" };
-  }
-  return null;
-}
-
-/** Single-hour word forms — "valandą", "vieną valandą", "pusvalandį",
- *  "pusę valandos". Digitless, so the numeric regex misses them.
- *
- *  JS `\b` is ASCII-only and breaks on Lithuanian characters (`ą`, `ę`, etc.)
- *  — every boundary here uses explicit non-letter lookaround instead. */
-function detectWordHours(
-  fragment: string,
-): { value: number; unitSlug: "hours" | "minutes" | "days" } | null {
-  const f = fragment.toLowerCase();
-  // Compound number-word time wins before the bare-form heuristics: a
-  // sentence like "Keturias valandas dirbau" must read as 4h, not as
-  // "valandą" (1h) just because the bare-word matcher fires.
-  const numberWord = detectNumberWordTime(f);
-  if (numberWord) return numberWord;
-  if (/(?:^|\s)vieną\s+valand[ąoų]/.test(f)) {
-    return { value: 1, unitSlug: "hours" };
-  }
-  if (/(?:^|\s)pusvaland[įio]/.test(f)) {
-    return { value: 0.5, unitSlug: "hours" };
-  }
-  if (/(?:^|\s)pusę\s+valandos(?=\s|[.,!?]|$)/.test(f)) {
-    return { value: 0.5, unitSlug: "hours" };
-  }
-  // Bare "valandą" / "valando" / "valandų" with no preceding digit and
-  // no number-word in front (the number-word path above caught those).
+  // Bare valandą / valandos / valandų (= 1 hour) when no digit + no number-word.
   if (
     /(?:^|[^\d])valand[ąoų](?=\s|[.,!?]|$)/.test(f) &&
     !/\d\s*valand/.test(f)
   ) {
-    return { value: 1, unitSlug: "hours" };
+    return 1;
   }
   return null;
 }
 
-/** Split a free-text entry into discrete work fragments. Splitters:
- *  - sentence terminators (`.` `;` `!` `?`)
- *  - comma + `ir|bei` (e.g. "..., ir 5 valandas ...")
- *  - bare `ir`/`bei` between two time-bearing clauses
- *  - plain commas (lists like "1h driver, 3h cashier, 5h roofer")
+/** Recognise a minutes-as-words mention. */
+function detectMinutesWord(f: string): number | null {
+  const keys = numberWordKeysAlternation();
+  const m = new RegExp(
+    `(?:^|[^\\p{L}])(${keys})\\s+minu[čt][\\p{L}]*(?=\\s|[.,!?]|$)`,
+    "u",
+  ).exec(f);
+  if (m) {
+    const v = LT_NUMBER_WORDS[m[1]];
+    if (v !== undefined) return v;
+  }
+  return null;
+}
+
+/** Recognise a days-as-words mention. */
+function detectDaysWord(f: string): number | null {
+  const keys = numberWordKeysAlternation();
+  const m = new RegExp(
+    `(?:^|[^\\p{L}])(${keys})\\s+dien[\\p{L}]*(?=\\s|[.,!?]|$)`,
+    "u",
+  ).exec(f);
+  if (m) {
+    const v = LT_NUMBER_WORDS[m[1]];
+    if (v !== undefined) return v;
+  }
+  return null;
+}
+
+/** Single-fragment duration parser. Handles:
+ *    - bare digit forms ("3 valandas", "15 minučių"),
+ *    - word-only forms ("keturias valandas", "penkiolika minučių", "valandą"),
+ *    - compound hours+minutes ("valandą dvidešimt minučių" = 1h20min),
+ *    - half-hour idioms ("valandą su puse" = 1.5h, "pusvalandį" = 0.5h).
  *
- *  Plain-comma splits are safe because the downstream loop only KEEPS a
- *  fragment if it has a recognizable time / activity slug / activity label.
- *  Filler subclauses ("padariau 35 m², dėjau profilius") get dropped
- *  silently; they don't pollute the multi-fragment review. */
+ *  Returns the canonical unit:
+ *    - if any minutes contribution exists ⇒ result is normalized to minutes
+ *      (e.g. 1h20min ⇒ 80 minutes). The composer can re-cast for display.
+ *    - else hours / days as detected.
+ *
+ *  JS `\b` is ASCII-only and breaks on Lithuanian characters (`ą`, `ę`, etc.)
+ *  — every boundary here uses explicit non-letter lookaround instead. */
+function detectFragmentTime(
+  fragment: string,
+): { value: number; unitSlug: "hours" | "minutes" | "days" } | null {
+  const f = fragment.toLowerCase();
+
+  // Hours contribution (digit OR word OR special idiom).
+  let hours: number | null = null;
+  const digitHourMatch = f.match(/(\d+(?:[.,]\d+)?)\s*(?:valand[\p{L}]*|val\.?|h\b)/u);
+  if (digitHourMatch) hours = toNumber(digitHourMatch[1]);
+  if (hours === null) hours = detectHoursWord(f);
+
+  // "su puse" = "and a half" — adds 0.5h to the hours we already have.
+  if (hours !== null && /\s+su\s+puse/.test(f)) {
+    hours = hours + 0.5;
+  } else if (hours === null && /\s+su\s+puse/.test(f)) {
+    // "valandą su puse" already detected via detectHoursWord (= 1) plus +0.5;
+    // but if hours is still null, default to 1.5.
+    hours = 1.5;
+  }
+
+  // Minutes contribution.
+  let minutes: number | null = null;
+  const digitMinMatch = f.match(/(\d+(?:[.,]\d+)?)\s*(?:minu[čt][\p{L}]*|min\.?)/u);
+  if (digitMinMatch) minutes = toNumber(digitMinMatch[1]);
+  if (minutes === null) minutes = detectMinutesWord(f);
+
+  // Days contribution (only used when no hours/minutes present — days don't
+  // compound with sub-hour units in journal language).
+  if (hours === null && minutes === null) {
+    let days: number | null = null;
+    const digitDayMatch = f.match(/(\d+(?:[.,]\d+)?)\s*(?:dien[\p{L}]*|d\.?)/u);
+    if (digitDayMatch) days = toNumber(digitDayMatch[1]);
+    if (days === null) days = detectDaysWord(f);
+    if (days !== null) return { value: days, unitSlug: "days" };
+  }
+
+  if (hours !== null && minutes !== null) {
+    // Compound — normalise to minutes for precision.
+    return { value: hours * 60 + minutes, unitSlug: "minutes" };
+  }
+  if (hours !== null) return { value: hours, unitSlug: "hours" };
+  if (minutes !== null) return { value: minutes, unitSlug: "minutes" };
+  return null;
+}
+
+/** Split a free-text entry into discrete work fragments. */
 function splitFragments(text: string): string[] {
   const normalized = text
     .replace(/\r/g, "")
     .replace(/,\s*(ir|bei)\s+/gi, " | ")
     .replace(/\s+(ir|bei)\s+/gi, " | ");
-  return normalized
+  // Do not split on plain commas if the next chunk introduces a `tema:`
+  // (theme) qualifier — the theme is metadata for the previous fragment,
+  // not a new fragment. We protect it with a placeholder first.
+  const protectedText = normalized.replace(/,\s*(tema\s*:)/giu, " ##TEMA## $1");
+  return protectedText
     .split(/[.;!?\n|,]+/)
-    .map((s) => s.trim())
+    .map((s) => s.replace(/##TEMA##/g, ",").trim())
     .filter((s) => s.length > 0);
 }
 
-/** Pick the strongest activity hint for one fragment. Returns slug + LT label
- *  when matched. When wording is recognizably "work" but no slug is in the
- *  taxonomy (e.g. cashier), returns a label only — surfaced as a review-only
- *  free-text suggestion (no fake taxonomy entry). */
+/** Pick the strongest activity hint for one fragment. */
 function detectActivity(
   fragment: string,
 ): { slug: string | null; label: string | null } {
@@ -257,13 +295,32 @@ function detectActivity(
   return { slug: null, label: null };
 }
 
+/** Recognise an institution / organization mention. Returns the inflected form
+ *  the worker typed (no normalisation — review-only). */
+function detectInstitution(text: string): string | null {
+  // Pattern 1: explicit prefix ("...universitete", "...kolegijoje",
+  //   "...gimnazijoje", "...institute", "...mokykloje"). Capture the head
+  //   noun + up to two preceding capitalised words (genitive constructions
+  //   like "Vytauto Didžiojo universitete").
+  const inst = text.match(
+    /((?:[A-ZĄČĘĖĮŠŲŪŽ][\p{L}]+\s+){0,3}(?:universitet|kolegij|gimnazij|institut|mokykl|akademij)[\p{L}]*)/u,
+  );
+  if (inst) return inst[1].trim();
+  return null;
+}
+
+/** Recognise a topic / theme mention prefixed with `tema:` / `theme:`. */
+function detectTopic(text: string): string | null {
+  const m = text.match(/\btema\s*:\s*([^.;\n]+?)(?=[.;\n]|$)/i);
+  if (m) return m[1].trim();
+  const en = text.match(/\btheme\s*:\s*([^.;\n]+?)(?=[.;\n]|$)/i);
+  if (en) return en[1].trim();
+  return null;
+}
+
 /**
  * Inspect a worker's free-text journal entry and return a set of structured
- * suggestions. The caller is expected to render these as proposals next to
- * confirm / edit / discard actions.
- *
- * Supports LT input for M1; other locales fall back to numbers + skill hints
- * only and will be expanded as we add localized dictionaries.
+ * suggestions.
  */
 export function extractJournalSuggestions(text: string): JournalSuggestions {
   if (!text || text.trim().length === 0) return EMPTY;
@@ -271,13 +328,14 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
 
   const allTimes = findAllTimes(lower);
 
-  // 1) Legacy single-time field — first numeric hit, else first word-form hit.
+  // 1) Legacy single-time field — first hit, else word-form.
   let time: JournalSuggestions["time"] = allTimes[0] ?? null;
   if (!time) {
-    time = detectWordHours(lower);
+    const v = detectFragmentTime(lower);
+    if (v) time = v;
   }
 
-  // 2) Quantity + unit. m² / kv. m / m / vnt / kg / pakuotės.
+  // 2) Quantity + unit.
   let quantity: JournalSuggestions["quantity"] = null;
   const sqm = lower.match(
     /(\d+(?:[.,]\d+)?)\s*(?:m\s*2|m²|kv\.?\s*m|kvadrat)/i,
@@ -303,35 +361,36 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     if (v !== null) quantity = { value: v, unitSlug: "packages" };
   }
 
-  // 3) Skills (whole-text scan — multi-fragment text often shares context).
+  // 3) Skills + work direction.
   const skillSlugs = pickSlug(lower, SKILL_HINTS_LT);
-
-  // 4) Work direction (one — the first matching profession-ish bucket).
   const dirs = pickSlug(lower, WORK_DIRECTION_HINTS_LT);
   const workDirectionSlug = dirs[0] ?? null;
 
-  // 5) Site name — only when clearly marked (avoids hallucinated locations).
+  // 4) Site name (legacy explicit-marker form).
   let siteName: string | null = null;
   const siteMatch = text.match(
     /\b(?:objekt(?:as|e)?|aikštel(?:ė|ėje|eje)|vietoj(?:e)?|adres(?:as|u))[:\s]+([A-ZĄČĘĖĮŠŲŪŽ][^.,;\n]{1,60})/iu,
   );
   if (siteMatch) siteName = siteMatch[1].trim();
 
-  // 6) Multi-fragment pass — only when the worker logged more than one work
-  //    item in the same entry. Each fragment gets its own time + activity.
+  // 5) Institution and topic (v3).
+  const institutionName = detectInstitution(text);
+  const topic = detectTopic(text);
+
+  // 6) Multi-fragment pass.
   const fragments: JournalFragmentSuggestion[] = [];
   const rawParts = splitFragments(text);
   for (const raw of rawParts) {
-    const lowerRaw = raw.toLowerCase();
-    const localTimes = findAllTimes(lowerRaw);
-    const localTime = localTimes[0] ?? detectWordHours(raw);
+    const localTime = detectFragmentTime(raw);
     const { slug, label } = detectActivity(raw);
+    const isUnknown = localTime !== null && slug === null && label === null;
     if (localTime || slug || label) {
       fragments.push({
         rawPhrase: raw,
         time: localTime,
         activitySlug: slug,
         activityLabel: label,
+        isUnknown,
       });
     }
   }
@@ -342,6 +401,8 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     skillSlugs.length > 0 ||
     workDirectionSlug !== null ||
     siteName !== null ||
+    institutionName !== null ||
+    topic !== null ||
     fragments.length > 0;
 
   return {
@@ -350,6 +411,8 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     skillSlugs,
     workDirectionSlug,
     siteName,
+    institutionName,
+    topic,
     fragments,
     hasAny,
   };

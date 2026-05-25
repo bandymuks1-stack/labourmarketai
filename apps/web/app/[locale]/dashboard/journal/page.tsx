@@ -4,6 +4,7 @@ import {
   JournalEntryComposer,
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
+import { JournalEntryRow } from "@/components/app/journal-entry-row";
 import { createClient } from "@/lib/supabase/server";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
@@ -153,14 +154,54 @@ export default async function JournalPage({
     .filter((slug): slug is string => !!slug)
     .map((slug) => ({ slug, name: tSkillName(slug) }));
 
-  // Entries with their metrics + confirmation status.
-  const { data: entries } = await supabase
-    .from("journal_entries")
+  // Entries with their metrics + confirmation status. The select reads the
+  // v3 lifecycle columns (deleted_at, superseded_by) so the list filter
+  // hides soft-deleted rows and entries that the worker has superseded
+  // pre-confirmation. The columns themselves only exist after migration
+  // 0018 is applied; the leading try/catch keeps the page renderable on
+  // older DBs by falling back to the legacy projection.
+  type JournalEntryRow = {
+    id: string;
+    original_text: string;
+    created_at: string;
+    deleted_at?: string | null;
+    superseded_by?: string | null;
+    journal_entry_metrics:
+      | {
+          metric_slug: string;
+          value_text: string | null;
+          value_numeric: number | null;
+          unit_slug: string | null;
+        }[]
+      | null;
+    journal_entry_confirmations: { confirmation_scope: unknown }[] | null;
+  };
+  let entries: JournalEntryRow[] | null = null;
+  // Cast the supabase client through `any` for the v3 select — the
+  // `deleted_at` / `superseded_by` columns are present at runtime after
+  // migration 0018 but aren't in the generated Supabase types until those
+  // are regenerated. The runtime path falls back to the legacy projection
+  // when the v3 columns are still missing on the target DB.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const v3 = await (supabase.from("journal_entries") as any)
     .select(
-      "id, original_text, created_at, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope)",
+      "id, original_text, created_at, deleted_at, superseded_by, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope)",
     )
     .eq("worker_id", worker.id)
     .order("created_at", { ascending: false });
+  if (v3.error) {
+    const legacy = await supabase
+      .from("journal_entries")
+      .select(
+        "id, original_text, created_at, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope)",
+      )
+      .eq("worker_id", worker.id)
+      .order("created_at", { ascending: false });
+    entries = legacy.data as JournalEntryRow[] | null;
+  } else {
+    const rows = (v3.data ?? []) as JournalEntryRow[];
+    entries = rows.filter((e) => !e.deleted_at && !e.superseded_by);
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -223,14 +264,21 @@ export default async function JournalPage({
             {(entries ?? []).map((e) => {
               const status = statusOf(e.journal_entry_confirmations);
               const metrics = e.journal_entry_metrics ?? [];
-              // Generalised: quantity (any work) + legacy area_done fallback.
               const area =
                 metrics.find((m) => m.metric_slug === "quantity") ??
                 metrics.find((m) => m.metric_slug === "area_done");
               const site = metrics.find((m) => m.metric_slug === "site_name");
               const dir = metrics.find((m) => m.metric_slug === "work_direction");
+              // v3 — Delete control is offered only when the entry has no
+              // external confirmations yet. The RPC re-enforces the same
+              // rule server-side, so a stale client can't escalate.
+              const canDelete = (e.journal_entry_confirmations ?? []).length === 0;
               return (
-                <li key={e.id} className="card-border p-4">
+                <JournalEntryRow
+                  key={e.id}
+                  entryId={e.id}
+                  canDelete={canDelete}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm text-text-primary">{e.original_text}</p>
                     <span
@@ -252,7 +300,7 @@ export default async function JournalPage({
                       {new Date(e.created_at).toLocaleDateString(locale)}
                     </span>
                   </div>
-                </li>
+                </JournalEntryRow>
               );
             })}
           </ul>

@@ -41,6 +41,11 @@ type Stage = "compose" | "review";
 
 type FragmentReviewState = JournalFragmentSuggestion & {
   status: SuggestionStatus;
+  /** When the parser flagged this fragment as `isUnknown`, the worker can
+   *  type a short free-text label ("Nesuprasta / patikslinkite"). The label
+   *  is forwarded to the save action as a review-only `unknown_phrase`
+   *  metric — never auto-promoted to a verified taxonomy entry. */
+  userLabel: string;
 };
 
 export function JournalEntryComposer({
@@ -87,6 +92,11 @@ export function JournalEntryComposer({
   // Multi-fragment review state — populated when the parser splits the text
   // into more than one work fragment (the owner sentence yields 3).
   const [fragments, setFragments] = useState<FragmentReviewState[]>([]);
+  // v3 — institution / topic detection cards.
+  const [institutionStatus, setInstitutionStatus] = useState<SuggestionStatus>("pending");
+  const [institutionName, setInstitutionName] = useState<string>("");
+  const [topicStatus, setTopicStatus] = useState<SuggestionStatus>("pending");
+  const [topic, setTopic] = useState<string>("");
   const [engagementId, setEngagementId] = useState<string>(primaryId);
   const [workDate, setWorkDate] = useState<string>(today);
 
@@ -139,11 +149,20 @@ export function JournalEntryComposer({
     // the entry without visual duplication.
     if (s.fragments.length > 1) {
       setFragments(
-        s.fragments.map((f) => ({ ...f, status: "pending" as SuggestionStatus })),
+        s.fragments.map((f) => ({
+          ...f,
+          status: "pending" as SuggestionStatus,
+          userLabel: "",
+        })),
       );
     } else {
       setFragments([]);
     }
+    // v3: institution / topic.
+    setInstitutionStatus("pending");
+    setInstitutionName(s.institutionName ?? "");
+    setTopicStatus("pending");
+    setTopic(s.topic ?? "");
     setStage("review");
   }
 
@@ -154,6 +173,12 @@ export function JournalEntryComposer({
   function setFragmentStatus(idx: number, next: SuggestionStatus) {
     setFragments((prev) =>
       prev.map((f, i) => (i === idx ? { ...f, status: next } : f)),
+    );
+  }
+
+  function setFragmentUserLabel(idx: number, label: string) {
+    setFragments((prev) =>
+      prev.map((f, i) => (i === idx ? { ...f, userLabel: label } : f)),
     );
   }
 
@@ -181,7 +206,9 @@ export function JournalEntryComposer({
         fd.set("unit_slug", timeUnit);
       }
       // Forward confirmed fragments as reviewable metadata. Empty when the
-      // entry is single-fragment.
+      // entry is single-fragment. The optional `userLabel` ships only when
+      // the parser flagged the fragment as `isUnknown` and the worker typed
+      // a clarification — persisted server-side as `unknown_phrase` metric.
       const confirmedFragments = fragments
         .filter((f) => f.status === "confirmed")
         .map((f) => ({
@@ -190,7 +217,13 @@ export function JournalEntryComposer({
           timeUnit: f.time?.unitSlug ?? null,
           activitySlug: f.activitySlug,
           activityLabel: f.activityLabel,
+          isUnknown: f.isUnknown,
+          userLabel: f.userLabel.trim() || null,
         }));
+      if (institutionStatus === "confirmed" && institutionName.trim())
+        fd.set("institution_name", institutionName.trim());
+      if (topicStatus === "confirmed" && topic.trim())
+        fd.set("topic", topic.trim());
       if (confirmedFragments.length > 0) {
         fd.set("fragments_json", JSON.stringify(confirmedFragments));
       }
@@ -209,6 +242,8 @@ export function JournalEntryComposer({
       setSkillSuggestions([]);
       setSkillStatuses({});
       setFragments([]);
+      setInstitutionName("");
+      setTopic("");
       setSavedAt(Date.now());
     } catch (e) {
       // Network / unexpected — only the truly unexpected path falls through
@@ -226,6 +261,9 @@ export function JournalEntryComposer({
     if (qtyStatus === "pending" && qtyValue) setQtyStatus("confirmed");
     if (dirStatus === "pending" && dirSlug) setDirStatus("confirmed");
     if (siteStatus === "pending" && siteName) setSiteStatus("confirmed");
+    if (institutionStatus === "pending" && institutionName)
+      setInstitutionStatus("confirmed");
+    if (topicStatus === "pending" && topic) setTopicStatus("confirmed");
     setSkillStatuses((prev) => {
       const next = { ...prev };
       for (const slug of Object.keys(next)) {
@@ -331,6 +369,8 @@ export function JournalEntryComposer({
     (qtyValue ? 1 : 0) +
     (dirSlug ? 1 : 0) +
     (siteName ? 1 : 0) +
+    (institutionName ? 1 : 0) +
+    (topic ? 1 : 0) +
     skillSuggestions.length +
     fragments.length;
 
@@ -381,9 +421,11 @@ export function JournalEntryComposer({
                 const timeLabel = f.time
                   ? `${f.time.value} ${tUnit(f.time.unitSlug)}`
                   : t("fragment.noTime");
-                const activityName = f.activitySlug
-                  ? tProfSafe(tProf, f.activitySlug, f.activityLabel)
-                  : (f.activityLabel ?? t("fragment.noActivity"));
+                const activityName = f.isUnknown
+                  ? t("fragment.unknownTitle")
+                  : f.activitySlug
+                    ? tProfSafe(tProf, f.activitySlug, f.activityLabel)
+                    : (f.activityLabel ?? t("fragment.noActivity"));
                 return (
                   <DetectedSuggestionCard
                     key={`${idx}-${f.rawPhrase}`}
@@ -392,12 +434,75 @@ export function JournalEntryComposer({
                     status={f.status}
                     onConfirm={() => setFragmentStatus(idx, "confirmed")}
                     onDiscard={() => setFragmentStatus(idx, "discarded")}
-                  />
+                  >
+                    {f.isUnknown && (
+                      // v3 "Nesuprasta / patikslinkite": the parser found a
+                      // duration but no recognised activity. The worker can
+                      // type a short LT label that ships as `unknown_phrase`
+                      // metric — review-only, never auto-promoted to a
+                      // verified skill.
+                      <div className="flex flex-col gap-1.5">
+                        <p className="text-[11px] leading-relaxed text-text-secondary">
+                          {t("fragment.unknownHint")}
+                        </p>
+                        <Input
+                          type="text"
+                          value={f.userLabel}
+                          maxLength={120}
+                          placeholder={t("fragment.unknownPlaceholder")}
+                          onChange={(e) =>
+                            setFragmentUserLabel(idx, e.target.value)
+                          }
+                          data-testid={`fragment-unknown-label-${idx}`}
+                        />
+                      </div>
+                    )}
+                  </DetectedSuggestionCard>
                 );
               })}
             </DetectedSuggestionList>
           )}
 
+          {institutionName && (
+            <DetectedSuggestionList
+              title={tBucket("institution")}
+              count={1}
+            >
+              <DetectedSuggestionCard
+                label={institutionName}
+                hint={t("fragment.institutionHint")}
+                status={institutionStatus}
+                editable
+                editValue={institutionName}
+                onEdit={(next) => {
+                  setInstitutionName(next);
+                  setInstitutionStatus("edited");
+                }}
+                onConfirm={() => setInstitutionStatus("confirmed")}
+                onDiscard={() => setInstitutionStatus("discarded")}
+              />
+            </DetectedSuggestionList>
+          )}
+          {topic && (
+            <DetectedSuggestionList
+              title={tBucket("topic")}
+              count={1}
+            >
+              <DetectedSuggestionCard
+                label={topic}
+                hint={t("fragment.topicHint")}
+                status={topicStatus}
+                editable
+                editValue={topic}
+                onEdit={(next) => {
+                  setTopic(next);
+                  setTopicStatus("edited");
+                }}
+                onConfirm={() => setTopicStatus("confirmed")}
+                onDiscard={() => setTopicStatus("discarded")}
+              />
+            </DetectedSuggestionList>
+          )}
           <DetectedSuggestionList
             title={tBucket("time")}
             count={timeValue ? 1 : 0}

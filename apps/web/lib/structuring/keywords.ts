@@ -122,6 +122,96 @@ export const ACTIVITY_HINTS_LT: {
       "projekt parengim",
     ],
   },
+  // ── Non-construction day-work (v3) ────────────────────────────────────
+  // Each row uses explicit LT inflected forms — substring matches on short
+  // roots like `tikr` / `darb` would false-match dozens of unrelated words.
+  {
+    // App / software testing.
+    slug: null,
+    label: "Programėlės / programinės įrangos testavimas",
+    needles: [
+      "programėlės patikrinim",
+      "programėlės testav",
+      "programos patikrinim",
+      "programos testav",
+      "programinės įrangos patikrinim",
+      "programinės įrangos testav",
+      "atlikau patikrinim",
+      "qa testav",
+      "app testing",
+      "software testing",
+    ],
+  },
+  {
+    // Programming / software fixes — distinct from testing.
+    slug: null,
+    label: "Programavimas / kodo pataisymai",
+    needles: [
+      "programavau",
+      "programuoju",
+      "kodav",
+      "programavimo darb",
+      "kodo pataisym",
+      "pataisymus",
+      "pataisymai",
+      "bug fix",
+      "coding",
+      "programming",
+    ],
+  },
+  {
+    // Wall plastering / smoothing — distinct from generic plastering because
+    // the LT verb `glaistyti` (skim-coating) is the common worker form. We
+    // also surface a profession slug (`plasterer` is absent, so `skim-coating`
+    // skill or null) — null is the safe pick to avoid a fake profession.
+    slug: null,
+    label: "Sienų glaistymas / lyginimas",
+    needles: [
+      "glaiščiau sien",
+      "glaisčiau sien",
+      "glaistau sien",
+      "glaistyti sien",
+      "glaist sienas",
+      "lygin sien",
+      "wall plaster",
+      "wall smoothing",
+      "skim coat",
+    ],
+  },
+  {
+    // Horse / animal care.
+    slug: null,
+    label: "Žirgų / gyvulių priežiūra",
+    needles: [
+      "prižiūrėjau žirg",
+      "žirgų priežiūr",
+      "žirg priežiūr",
+      "šėriau žirg",
+      "valiau arklid",
+      "gyvulių priežiūr",
+      "horse care",
+      "stable",
+    ],
+  },
+  {
+    // Lecturing / teaching. Captures `dėsčiau paskaitą`, `vedžiau seminarą`.
+    slug: null,
+    label: "Paskaitos / mokymai",
+    needles: [
+      "dėsčiau paskait",
+      "skaiciau paskait",
+      "skaitė paskait",
+      "vedžiau paskait",
+      "vedžiau seminar",
+      "vedžiau mokymus",
+      "vedžiau mokymai",
+      "paskaitos",
+      "paskaitą",
+      "lectured",
+      "teaching session",
+      "workshop facilitation",
+    ],
+  },
   // ── Construction trades ────────────────────────────────────────────────
   {
     slug: "roofer",

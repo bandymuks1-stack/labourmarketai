@@ -38,7 +38,11 @@
       "confirmed": "Confirmed",
       "rejected": "Rejected",
       "submitted": "Submitted"
-    }
+    },
+    "delete": "Delete entry",
+    "deleting": "Deleting...",
+    "deleteConfirm": "Really delete this entry? It becomes soft-deleted — the row stays in history but won't show in the list.",
+    "deleteBlocked": "Entry already confirmed — send a correction request instead of deleting."
   },
   "field": {
     "work_direction": "Work direction",
@@ -75,7 +79,12 @@
   "reviewMetaNote": "Private entry · suggestions reviewed by you. Manager / client confirmation will be added later.",
   "fragment": {
     "noTime": "Time not detected",
-    "noActivity": "Work direction not detected"
+    "noActivity": "Work direction not detected",
+    "unknownTitle": "Not understood / please clarify",
+    "unknownHint": "The system recognised a duration but not the work itself. Add a short description — the label stays private until a human confirmation step is added.",
+    "unknownPlaceholder": "e.g. leisure, sports, volunteering…",
+    "institutionHint": "Institution / organization (free text, optional)",
+    "topicHint": "Topic / context (free text, optional)"
   },
   "saved": "Entry saved",
   "saving": "Saving...",

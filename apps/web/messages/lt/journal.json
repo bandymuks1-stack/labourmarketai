@@ -38,7 +38,11 @@
       "confirmed": "Patvirtinta",
       "rejected": "Atmesta",
       "submitted": "Pateikta"
-    }
+    },
+    "delete": "Pašalinti įrašą",
+    "deleting": "Šalinama...",
+    "deleteConfirm": "Tikrai pašalinti šį įrašą? Veiksmas grąžinamas — soft-delete (įrašas nedingsta iš istorijos, tik nebematomas sąraše).",
+    "deleteBlocked": "Įrašas patvirtintas — vietoje pašalinimo siųskite pataisymo prašymą."
   },
   "field": {
     "work_direction": "Darbo kryptis",
@@ -75,7 +79,12 @@
   "reviewMetaNote": "Privatus įrašas · Pasiūlymai peržiūrėti jūsų. Patvirtinimas vadovo / kliento bus pridedamas vėliau.",
   "fragment": {
     "noTime": "Laikas nenustatytas",
-    "noActivity": "Darbo kryptis nenustatyta"
+    "noActivity": "Darbo kryptis nenustatyta",
+    "unknownTitle": "Nesuprasta / patikslinkite",
+    "unknownHint": "Sistema užfiksavo laiką, bet nesuprato, kokia tai veikla. Trumpai apibūdinkite — etiketė liks asmeninė, kol jos nepatvirtinsime žmogus prieš žmogų.",
+    "unknownPlaceholder": "Pvz.: laisvalaikis, sportas, savanorystė…",
+    "institutionHint": "Įstaiga / organizacija (laisvas tekstas, neprivaloma)",
+    "topicHint": "Tema / kontekstas (laisvas tekstas, neprivaloma)"
   },
   "saved": "Įrašas išsaugotas",
   "saving": "Saugoma...",

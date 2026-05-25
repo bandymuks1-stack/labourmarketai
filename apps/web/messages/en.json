@@ -376,7 +376,9 @@
       "time": "Time",
       "quantity": "Quantity",
       "site": "Site / location",
-      "fragments": "Work fragments"
+      "fragments": "Work fragments",
+      "institution": "Institution / organization",
+      "topic": "Topic / context"
     },
     "experience": {
       "years": "Experience: {n} year(s)",
