@@ -1408,6 +1408,48 @@
     "eyebrow": "Bandomasis etapas",
     "body": "Ši rolė skirta realiai organizacijai ar atstovaujamam klientui. Bandomajame etape juodraščiai privatūs ir realių pasekmių nesukelia. Rimtam naudojimui reikės įmonės duomenų (šalies, pavadinimo, registracijos kodo, korespondencijos adreso, atstovo vaidmens)."
   },
+  "profileCvClarity": {
+    "title": "Iš ko susideda tavo profilis",
+    "scope": "Aiškumas",
+    "intro": "Profilis auga iš realaus darbo, o ne iš pažadų. Štai dalys, kurios jį formuoja, ir kas dar laukia patvirtinimo.",
+    "step": {
+      "about": {
+        "label": "Apie mane / patirtis",
+        "body": "Trumpas, paties parašytas pristatymas. Niekas jo automatiškai netikrina ir nepublikuoja viešai."
+      },
+      "skills": {
+        "label": "Įgūdžiai",
+        "body": "Įgūdžių etiketės, kurias pasirenki pats. Jos rodomos tik tau ir adminui — darbdaviams neatskleidžiamos, kol nenuspręsi kitaip."
+      },
+      "journal": {
+        "label": "Darbo žurnalas",
+        "body": "Realių pamainų ir užduočių įrašai. Pridedamas tik nauji įrašai — istorija nekeičiama. Tai pats stipriausias signalas apie tavo patirtį."
+      },
+      "selfDeclared": {
+        "label": "Kas paties nurodyta",
+        "body": "Viskas, ką įrašei pats (kalbos, dokumentai, ankstesnis darbas) yra paties pareikšti faktai. Sistema jų nepatvirtina automatiškai ir nesako, kad esi „verifikuotas“."
+      },
+      "awaitingProof": {
+        "label": "Kas laukia įrodymų / išorinio patvirtinimo",
+        "body": "Įgūdžiai ar darbo pasiekimai, kuriems reikia darbdavio ar institucijos patvirtinimo, lieka pažymėti kaip „laukia įrodymo“. Jokio netikro dirbtinio intelekto sugeneruoto patvirtinimo ar „Verified“ ženklelio nebus."
+      }
+    },
+    "footnote": "Jei sistema kažko nežino — ji apie tai pasako. Mes neslepiame neaiškumo už dirbtinio pasitikėjimo."
+  },
+  "teamRosterEmpty": {
+    "company": {
+      "title": "Komandos branduolys",
+      "scope": "Tuščia būsena",
+      "intro": "Čia bus tavo komandos žmonės — realūs darbuotojai, dabartiniai vaidmenys ir kas šią savaitę dirba. Kol kas nėra nė vieno nario, todėl rodome tik tuščią būseną, o ne sugalvotus pavyzdžius.",
+      "footnote": "Kvietimai, vaidmenys ir prieinamumas atsiras vėlesniame etape. Realių žmonių išgalvoti neketiname."
+    },
+    "agency": {
+      "title": "Kandidatų rezervas",
+      "scope": "Tuščia būsena",
+      "intro": "Čia matysi savo aktyvius kandidatus — kas pasiruošęs, kas dabar užsiėmęs, kas laukia kito sezono. Kol kas nė vieno nėra, todėl rodome tuščią būseną be netikrų profilių.",
+      "footnote": "Rezervo valdymas, prieinamumo langai ir komandų rekomendacijos atsiras vėliau, palaipsniui."
+    }
+  },
   "agentOs": {
     "title": "Agentų OS (v1)",
     "subtitle": "Vidiniai agentų vaidmenys, padedantys vykdyti realių testuotojų piloto programą. Read-only versija — vykdymas dar nesujungtas.",
