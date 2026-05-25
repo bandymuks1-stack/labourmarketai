@@ -1061,7 +1061,15 @@ describe("no migration files added by this sprint", () => {
     // table so structured self-declared skill labels (derived from the
     // narrative) persist in their own RLS-closed primitive instead of
     // leaking through worker_skills (employer-readable).
-    const SPRINT_BASELINE = 15;
+    // Bumped from 15 → 16 on the journal-evidence-loop-v2 sprint:
+    // migration 0016 seeds the platform productivity_units rows that
+    // `apps/web/components/app/journal-entry-composer.tsx` UNIT_OPTIONS
+    // (hours/minutes/days/meters/pieces/kilograms/packages) has always
+    // referenced but were never registered — the FK was silently rejecting
+    // any non-area journal_entry_metrics insert. The same migration adds an
+    // atomic `create_journal_entry_full` RPC so the journal save can no
+    // longer leak a half-written entry if the metrics insert fails.
+    const SPRINT_BASELINE = 16;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

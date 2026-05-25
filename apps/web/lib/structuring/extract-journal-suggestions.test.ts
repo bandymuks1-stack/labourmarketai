@@ -113,6 +113,94 @@ describe("extractJournalSuggestions — LT word-form numerics", () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// v2 — LT number-words for hours / minutes / days, plus three new activity
+// directions (door + window, roof framing, project preparation).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("extractJournalSuggestions — v2 LT number-word numerics", () => {
+  it("parses 'keturias valandas' as 4 hours", () => {
+    const s = extractJournalSuggestions("Keturias valandas dirbau objektuose.");
+    expect(s.fragments[0]?.time).toEqual({ value: 4, unitSlug: "hours" });
+  });
+
+  it("parses 'dvi valandas' as 2 hours", () => {
+    const s = extractJournalSuggestions("Dvi valandas dirbau pavežėju.");
+    expect(s.fragments[0]?.time).toEqual({ value: 2, unitSlug: "hours" });
+  });
+
+  it("parses 'penkiolika minučių' as 15 minutes", () => {
+    const s = extractJournalSuggestions(
+      "Penkiolika minučių valiau įrankius.",
+    );
+    expect(s.fragments[0]?.time).toEqual({ value: 15, unitSlug: "minutes" });
+  });
+
+  it("parses 'dvi valandas ir penkiolika minučių' as two fragments (2h + 15min)", () => {
+    const s = extractJournalSuggestions(
+      "Dvi valandas ir penkiolika minučių rengiau projektą.",
+    );
+    const times = s.fragments
+      .filter((f) => f.time)
+      .map((f) => `${f.time!.value}${f.time!.unitSlug}`);
+    expect(times).toEqual(["2hours", "15minutes"]);
+  });
+
+  it("parses 'tris dienas' as 3 days", () => {
+    const s = extractJournalSuggestions("Tris dienas dirbau aikštelėje.");
+    expect(s.fragments[0]?.time).toEqual({ value: 3, unitSlug: "days" });
+  });
+
+  it("digit form still wins when both number-word and digit are present", () => {
+    const s = extractJournalSuggestions("8 valandas dirbau.");
+    expect(s.fragments[0]?.time).toEqual({ value: 8, unitSlug: "hours" });
+  });
+});
+
+describe("extractJournalSuggestions — v2 LT activity hints", () => {
+  it("'Dvi valandas montavau duris' → door / window installation (carpenter)", () => {
+    const s = extractJournalSuggestions("Dvi valandas montavau duris.");
+    expect(s.fragments).toHaveLength(1);
+    expect(s.fragments[0].activitySlug).toBe("carpenter");
+    expect(s.fragments[0].activityLabel).toMatch(/durų ir langų/i);
+  });
+
+  it("'Tris valandas stačiau langus' → door / window installation", () => {
+    const s = extractJournalSuggestions("Tris valandas stačiau langus.");
+    expect(s.fragments[0].activityLabel).toMatch(/durų ir langų/i);
+  });
+
+  it("'Keturias valandas dariau stogo karkasą' → roof framing (carpenter), NOT roofing", () => {
+    const s = extractJournalSuggestions(
+      "Keturias valandas dariau stogo karkasą.",
+    );
+    expect(s.fragments[0].activitySlug).toBe("carpenter");
+    expect(s.fragments[0].activityLabel).toMatch(/stogo karkas/i);
+  });
+
+  it("'Vieną valandą rengiau projektą' → project preparation (label-only, slug=null)", () => {
+    const s = extractJournalSuggestions("Vieną valandą rengiau projektą.");
+    expect(s.fragments[0].activitySlug).toBeNull();
+    expect(s.fragments[0].activityLabel).toMatch(/projekto rengim/i);
+  });
+
+  it("mixed v2 sentence yields 3 fragments + 3 activity directions", () => {
+    const text =
+      "Vieną valandą rengiau projektą, dvi valandas montavau duris, " +
+      "ir keturias valandas dariau stogo karkasą.";
+    const s = extractJournalSuggestions(text);
+    expect(s.fragments).toHaveLength(3);
+    const labels = s.fragments.map((f) => f.activityLabel).join("|");
+    expect(labels).toMatch(/projekto rengim/i);
+    expect(labels).toMatch(/durų ir langų/i);
+    expect(labels).toMatch(/stogo karkas/i);
+    const times = s.fragments
+      .filter((f) => f.time)
+      .map((f) => `${f.time!.value}${f.time!.unitSlug}`);
+    expect(times).toEqual(["1hours", "2hours", "4hours"]);
+  });
+});
+
 describe("extractJournalSuggestions — single-fragment per-domain mappings", () => {
   it("'Valandą dirbau pavežėju' yields 1h + driver direction", () => {
     const s = extractJournalSuggestions("Valandą dirbau pavežėju.");

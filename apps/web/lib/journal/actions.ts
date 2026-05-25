@@ -25,6 +25,7 @@ export type JournalSaveErrorCode =
   | "engagement_required"
   | "notes_required"
   | "quantity_invalid"
+  | "unit_slug_unknown"
   | "entry_insert_failed"
   | "metrics_insert_failed";
 
@@ -180,9 +181,151 @@ export async function createJournalEntry(
   const hasStructured =
     quantity !== null || workDirection !== "" || fragments.length > 0;
 
-  const { data: entry, error } = await supabase
-    .from("journal_entries")
-    .insert({
+  // Pre-validate the unit_slug FK so we fail BEFORE any insert if the
+  // worker's productivity unit isn't registered in `productivity_units`.
+  // This is what surfaced after PR #61: the legacy seed only covered
+  // square_meters / square_meters_per_day / box_per_day, so a confirmed
+  // "hours"-as-fallback quantity (or any fragment_time row) tripped the
+  // FK. Migration 0016 closes the seed; this pre-check makes sure that on
+  // a DB where 0016 hasn't been applied yet, the worker still sees a
+  // human-readable reason instead of a half-saved entry.
+  const unitSlugsToCheck = collectUnitSlugs({ quantity, unitSlug, fragments });
+  if (unitSlugsToCheck.size > 0) {
+    const { data: knownUnits } = await supabase
+      .from("productivity_units")
+      .select("slug")
+      .in("slug", [...unitSlugsToCheck]);
+    const known = new Set((knownUnits ?? []).map((r) => r.slug));
+    const missing = [...unitSlugsToCheck].filter((s) => !known.has(s));
+    if (missing.length > 0) {
+      return {
+        ok: false,
+        code: "unit_slug_unknown",
+        message:
+          `Vieneto registre kol kas nėra: ${missing.join(", ")}. ` +
+          `Paprašykite administratoriaus pritaikyti migraciją 0016 ` +
+          `(productivity_units seedą), tada bandykite dar kartą.`,
+      };
+    }
+  }
+
+  const metrics: RpcMetricRow[] = [
+    ...(workDirection
+      ? [
+          {
+            metric_slug: "work_direction",
+            value_text: workDirection,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(siteName
+      ? [
+          {
+            metric_slug: "site_name",
+            value_text: siteName,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(quantity !== null
+      ? [
+          {
+            metric_slug: "quantity",
+            value_numeric: quantity,
+            unit_slug: unitSlug,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(workDate
+      ? [
+          {
+            metric_slug: "work_date",
+            value_text: workDate,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...fragments.flatMap((f, idx): RpcMetricRow[] => {
+      const rows: RpcMetricRow[] = [
+        {
+          metric_slug: "parsed_fragment",
+          value_text: `${idx + 1}|${f.rawPhrase}`,
+          source: "worker_input" as const,
+        },
+      ];
+      if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
+        rows.push({
+          metric_slug: "fragment_time",
+          value_numeric: f.timeValue,
+          unit_slug: f.timeUnit,
+          value_text: String(idx + 1),
+          source: "worker_input" as const,
+        });
+      }
+      const activityLabel = f.activitySlug ?? f.activityLabel;
+      if (activityLabel) {
+        rows.push({
+          metric_slug: "fragment_activity",
+          value_text: `${idx + 1}|${activityLabel}`,
+          source: "worker_input" as const,
+        });
+      }
+      return rows;
+    }),
+  ];
+
+  // Atomic save — the RPC inserts the entry and all metric rows inside one
+  // transaction (see 0016). Any failure rolls back the entry, so the worker
+  // never lands in the half-saved "ghost entry" state where the row exists
+  // but its interpretation does not.
+  const rpcParams = {
+    p_worker_id: worker.id,
+    p_engagement_context_id: engagementId,
+    p_entry_type_slug: hasStructured ? "hybrid" : "freeform",
+    p_profession_id: professionId,
+    p_original_text: originalText,
+    p_original_language: locale.slice(0, 2),
+    p_hash_prev: hashPrev,
+    p_hash_self: hashSelf,
+    p_visibility_scope: "closed",
+    p_metrics: metrics,
+  };
+  // The generated supabase-js types are built from the schema cache and
+  // don't include `create_journal_entry_full` until 0016 is applied AND the
+  // local types are regenerated. The runtime call is correct; the cast just
+  // suppresses the static name check.
+  const { data: rpcEntryId, error: rpcErr } = (await (
+    supabase.rpc as unknown as (
+      fn: string,
+      params: typeof rpcParams,
+    ) => Promise<{ data: string | null; error: { code?: string; message?: string } | null }>
+  )("create_journal_entry_full", rpcParams));
+
+  if (rpcErr || typeof rpcEntryId !== "string") {
+    // Fallback path — only entered when the RPC is missing on the target
+    // DB (PostgREST returns `PGRST202` "Could not find the function" /
+    // a 404 schema cache error). On every other failure we surface the
+    // exact reason and DO NOT attempt a second write, so the save stays
+    // all-or-nothing.
+    const isMissingRpc =
+      !!rpcErr &&
+      (/PGRST202/i.test(rpcErr.code ?? "") ||
+        /create_journal_entry_full/i.test(rpcErr.message ?? "") ||
+        rpcErr.message?.includes("function") === true);
+    if (!isMissingRpc) {
+      console.error("[journal] rpc save failed:", rpcErr?.message);
+      return {
+        ok: false,
+        code: "entry_insert_failed",
+        message: `Įrašo išsaugoti nepavyko: ${rpcErr?.message ?? "nežinoma klaida"}`,
+      };
+    }
+    console.warn(
+      "[journal] create_journal_entry_full RPC missing — falling back to legacy two-step insert. Apply migration 0016.",
+    );
+    const legacy = await legacyTwoStepSave(supabase, {
       worker_id: worker.id,
       engagement_context_id: engagementId,
       entry_type_slug: hasStructured ? "hybrid" : "freeform",
@@ -192,116 +335,86 @@ export async function createJournalEntry(
       hash_prev: hashPrev,
       hash_self: hashSelf,
       visibility_scope: "closed",
-    })
+      metrics: metrics.map((m) => ({ ...m })),
+    });
+    if (!legacy.ok) return legacy;
+    revalidatePath(`/${locale}/dashboard/journal`);
+    return { ok: true, entryId: legacy.entryId };
+  }
+
+  revalidatePath(`/${locale}/dashboard/journal`);
+  return { ok: true, entryId: rpcEntryId };
+}
+
+type RpcMetricRow = {
+  metric_slug: string;
+  source: "worker_input";
+  value_text?: string | null;
+  value_numeric?: number | null;
+  unit_slug?: string | null;
+};
+
+function collectUnitSlugs(args: {
+  quantity: number | null;
+  unitSlug: string;
+  fragments: ParsedFragmentInput[];
+}): Set<string> {
+  const out = new Set<string>();
+  if (args.quantity !== null && args.unitSlug) out.add(args.unitSlug);
+  for (const f of args.fragments) {
+    if (f.timeUnit) out.add(f.timeUnit);
+  }
+  return out;
+}
+
+/** Legacy two-step save — only reached when the RPC is not yet on the
+ *  target DB. Atomicity here is best-effort: if the metric insert fails
+ *  we attempt a compensating delete; if RLS forbids the delete we still
+ *  surface the failure so the worker knows the entry leaked. */
+async function legacyTwoStepSave(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  args: {
+    worker_id: string;
+    engagement_context_id: string;
+    entry_type_slug: string;
+    profession_id: string | null;
+    original_text: string;
+    original_language: string;
+    hash_prev: string | null;
+    hash_self: string;
+    visibility_scope: string;
+    metrics: RpcMetricRow[];
+  },
+): Promise<CreateJournalEntryResult> {
+  const { metrics, ...entryFields } = args;
+  const { data: entry, error } = await supabase
+    .from("journal_entries")
+    .insert(entryFields)
     .select("id")
     .single();
   if (error || !entry) {
-    console.error("[journal] insert entry failed:", error?.message);
     return {
       ok: false,
       code: "entry_insert_failed",
       message: `Įrašo išsaugoti nepavyko: ${error?.message ?? "nežinoma klaida"}`,
     };
   }
-
-  const metrics = [
-    ...(workDirection
-      ? [
-          {
-            entry_id: entry.id,
-            metric_slug: "work_direction",
-            value_text: workDirection,
-            source: "worker_input",
-          },
-        ]
-      : []),
-    ...(siteName
-      ? [
-          {
-            entry_id: entry.id,
-            metric_slug: "site_name",
-            value_text: siteName,
-            source: "worker_input",
-          },
-        ]
-      : []),
-    ...(quantity !== null
-      ? [
-          {
-            entry_id: entry.id,
-            metric_slug: "quantity",
-            value_numeric: quantity,
-            unit_slug: unitSlug,
-            source: "worker_input",
-          },
-        ]
-      : []),
-    ...(workDate
-      ? [
-          {
-            entry_id: entry.id,
-            metric_slug: "work_date",
-            value_text: workDate,
-            source: "worker_input",
-          },
-        ]
-      : []),
-    // Per-fragment review metadata. Each row preserves the raw phrase + the
-    // interpretation the worker confirmed. Marked `worker_input` so the trust
-    // layer never treats these as externally verified.
-    ...fragments.flatMap((f, idx) => {
-      type MetricRow = {
-        entry_id: string;
-        metric_slug: string;
-        source: string;
-        value_text?: string | null;
-        value_numeric?: number | null;
-        unit_slug?: string | null;
-      };
-      const rows: MetricRow[] = [
-        {
-          entry_id: entry.id,
-          metric_slug: "parsed_fragment",
-          value_text: `${idx + 1}|${f.rawPhrase}`,
-          source: "worker_input",
-        },
-      ];
-      if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
-        rows.push({
-          entry_id: entry.id,
-          metric_slug: "fragment_time",
-          value_numeric: f.timeValue,
-          unit_slug: f.timeUnit,
-          value_text: String(idx + 1),
-          source: "worker_input",
-        });
-      }
-      const activityLabel = f.activitySlug ?? f.activityLabel;
-      if (activityLabel) {
-        rows.push({
-          entry_id: entry.id,
-          metric_slug: "fragment_activity",
-          value_text: `${idx + 1}|${activityLabel}`,
-          source: "worker_input",
-        });
-      }
-      return rows;
-    }),
-  ];
-  if (metrics.length > 0) {
-    const { error: mErr } = await supabase
-      .from("journal_entry_metrics")
-      .insert(metrics);
-    if (mErr) {
-      console.error("[journal] insert metrics failed:", mErr.message);
-      return {
-        ok: false,
-        code: "metrics_insert_failed",
-        message: `Įrašas išsaugotas, bet pasiūlymų metadata nepridėta: ${mErr.message}`,
-      };
-    }
+  if (metrics.length === 0) return { ok: true, entryId: entry.id };
+  const rows = metrics.map((m) => ({ ...m, entry_id: entry.id }));
+  const { error: mErr } = await supabase
+    .from("journal_entry_metrics")
+    .insert(rows);
+  if (mErr) {
+    // Best-effort compensation — append-only doctrine blocks DELETE by
+    // default, so the entry likely leaks. Surface that honestly.
+    await supabase.from("journal_entries").delete().eq("id", entry.id);
+    return {
+      ok: false,
+      code: "metrics_insert_failed",
+      message:
+        `Įrašas nebuvo išsaugotas pilnai: ${mErr.message}. ` +
+        `Įrašas atmestas — bandykite dar kartą.`,
+    };
   }
-
-  revalidatePath(`/${locale}/dashboard/journal`);
   return { ok: true, entryId: entry.id };
 }

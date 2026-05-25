@@ -100,6 +100,90 @@ function findAllTimes(
   return out;
 }
 
+/** Lithuanian number-word lexicon (accusative case — the form used with
+ *  durations: "dvi valandas", "penkiolika minučių"). Lowercase only.
+ *
+ *  Doesn't try to be a full LT numeral parser — keeps the cardinals that
+ *  come up in day-shift journal language (1..12, then the standard
+ *  "teen" decade words). Larger or compound numerals are rare in this
+ *  context; falling back to the digit form ("13 valandų") is fine. */
+const LT_NUMBER_WORDS: Record<string, number> = {
+  // 1 — accusative masculine/feminine forms used with valandas/minučių.
+  vieną: 1,
+  viena: 1,
+  vienas: 1,
+  // 2..12 — accusative feminine ("dvi valandas").
+  dvi: 2,
+  trys: 3,
+  // The accusative of "trys" is "tris"; recognized too.
+  tris: 3,
+  keturias: 4,
+  keturi: 4,
+  penkias: 5,
+  penkis: 5,
+  šešias: 6,
+  šešis: 6,
+  septynias: 7,
+  septynis: 7,
+  aštuonias: 8,
+  aštuonis: 8,
+  devynias: 9,
+  devynis: 9,
+  dešimt: 10,
+  vienuolika: 11,
+  dvylika: 12,
+  trylika: 13,
+  keturiolika: 14,
+  penkiolika: 15,
+  šešiolika: 16,
+  septyniolika: 17,
+  aštuoniolika: 18,
+  devyniolika: 19,
+  dvidešimt: 20,
+};
+
+/** Match an LT number-word followed by a duration noun. Returns the
+ *  numeric value + canonical unit, or null. */
+function detectNumberWordTime(
+  fragment: string,
+): { value: number; unitSlug: "hours" | "minutes" | "days" } | null {
+  const f = fragment.toLowerCase();
+  // Build the alternation once per call (cheap; ~30 keys).
+  const keys = Object.keys(LT_NUMBER_WORDS)
+    .sort((a, b) => b.length - a.length) // greedy: prefer longer match first
+    .join("|");
+  // Hours — `valand` + any LT letter suffix (valandą / valandas / valandos /
+  // valandų / valandoms / valandomis…).
+  const hoursMatch = new RegExp(
+    `(?:^|[^\\p{L}])(${keys})\\s+valand[\\p{L}]*(?=\\s|[.,!?]|$)`,
+    "u",
+  ).exec(f);
+  if (hoursMatch) {
+    const v = LT_NUMBER_WORDS[hoursMatch[1]];
+    if (v !== undefined) return { value: v, unitSlug: "hours" };
+  }
+  // Minutes — `minu` + `t` OR `č` (palatalization) + any LT letter suffix
+  // (minutės / minutes / minučių / minutėms…).
+  const minMatch = new RegExp(
+    `(?:^|[^\\p{L}])(${keys})\\s+minu[čt][\\p{L}]*(?=\\s|[.,!?]|$)`,
+    "u",
+  ).exec(f);
+  if (minMatch) {
+    const v = LT_NUMBER_WORDS[minMatch[1]];
+    if (v !== undefined) return { value: v, unitSlug: "minutes" };
+  }
+  // Days — `dien` + any LT letter suffix (dieną / dienas / dienų / dienomis…).
+  const daysMatch = new RegExp(
+    `(?:^|[^\\p{L}])(${keys})\\s+dien[\\p{L}]*(?=\\s|[.,!?]|$)`,
+    "u",
+  ).exec(f);
+  if (daysMatch) {
+    const v = LT_NUMBER_WORDS[daysMatch[1]];
+    if (v !== undefined) return { value: v, unitSlug: "days" };
+  }
+  return null;
+}
+
 /** Single-hour word forms — "valandą", "vieną valandą", "pusvalandį",
  *  "pusę valandos". Digitless, so the numeric regex misses them.
  *
@@ -107,8 +191,13 @@ function findAllTimes(
  *  — every boundary here uses explicit non-letter lookaround instead. */
 function detectWordHours(
   fragment: string,
-): { value: number; unitSlug: "hours" } | null {
+): { value: number; unitSlug: "hours" | "minutes" | "days" } | null {
   const f = fragment.toLowerCase();
+  // Compound number-word time wins before the bare-form heuristics: a
+  // sentence like "Keturias valandas dirbau" must read as 4h, not as
+  // "valandą" (1h) just because the bare-word matcher fires.
+  const numberWord = detectNumberWordTime(f);
+  if (numberWord) return numberWord;
   if (/(?:^|\s)vieną\s+valand[ąoų]/.test(f)) {
     return { value: 1, unitSlug: "hours" };
   }
@@ -118,7 +207,8 @@ function detectWordHours(
   if (/(?:^|\s)pusę\s+valandos(?=\s|[.,!?]|$)/.test(f)) {
     return { value: 0.5, unitSlug: "hours" };
   }
-  // Bare "valandą" / "valando" / "valandų" with no preceding digit.
+  // Bare "valandą" / "valando" / "valandų" with no preceding digit and
+  // no number-word in front (the number-word path above caught those).
   if (
     /(?:^|[^\d])valand[ąoų](?=\s|[.,!?]|$)/.test(f) &&
     !/\d\s*valand/.test(f)
@@ -131,14 +221,20 @@ function detectWordHours(
 /** Split a free-text entry into discrete work fragments. Splitters:
  *  - sentence terminators (`.` `;` `!` `?`)
  *  - comma + `ir|bei` (e.g. "..., ir 5 valandas ...")
- *  - bare `ir`/`bei` between two time-bearing clauses. */
+ *  - bare `ir`/`bei` between two time-bearing clauses
+ *  - plain commas (lists like "1h driver, 3h cashier, 5h roofer")
+ *
+ *  Plain-comma splits are safe because the downstream loop only KEEPS a
+ *  fragment if it has a recognizable time / activity slug / activity label.
+ *  Filler subclauses ("padariau 35 m², dėjau profilius") get dropped
+ *  silently; they don't pollute the multi-fragment review. */
 function splitFragments(text: string): string[] {
   const normalized = text
     .replace(/\r/g, "")
     .replace(/,\s*(ir|bei)\s+/gi, " | ")
     .replace(/\s+(ir|bei)\s+/gi, " | ");
   return normalized
-    .split(/[.;!?\n|]+/)
+    .split(/[.;!?\n|,]+/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
 }

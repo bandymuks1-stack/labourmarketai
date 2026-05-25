@@ -36,8 +36,6 @@ describe("journal save action returns structured results", () => {
   });
 
   it("never throws a string Error for known failure modes", () => {
-    // The action used to `throw new Error("...")` for every validation path;
-    // these strings now MUST be returned, not thrown.
     expect(src).not.toMatch(/throw new Error\("Engagement context required"\)/);
     expect(src).not.toMatch(/throw new Error\("No worker profile"\)/);
     expect(src).not.toMatch(/throw new Error\("Not authenticated"\)/);
@@ -48,6 +46,30 @@ describe("journal save action returns structured results", () => {
     expect(src).not.toMatch(/service[_-]?role/i);
     expect(src).not.toMatch(/SUPABASE_SERVICE_ROLE/);
     expect(src).not.toMatch(/createAdminClient/i);
+  });
+
+  it("pre-validates unit_slug against productivity_units before any insert", () => {
+    // The save must check the FK BEFORE touching journal_entries — otherwise
+    // a stale productivity_units seed produces a half-written entry. The
+    // pre-check is what closes the regression that surfaced in v1 prod.
+    expect(src).toMatch(/from\("productivity_units"\)/);
+    expect(src).toMatch(/unit_slug_unknown/);
+  });
+
+  it("calls the atomic create_journal_entry_full RPC as the primary save path", () => {
+    // Atomicity is enforced server-side — the RPC inserts the entry + all
+    // metric rows in one transaction (see 0016). The legacy two-step fallback
+    // is only reached when the RPC is missing on the target DB.
+    expect(src).toMatch(/supabase\.rpc\(\s*["']create_journal_entry_full["']/);
+  });
+
+  it("compensates with a delete when the legacy two-step save's metrics insert fails", () => {
+    // If the RPC isn't applied yet and the metrics insert fails after the
+    // entry insert succeeded, the fallback must try to clean up the orphan
+    // entry so we don't leak a half-written record.
+    expect(src).toMatch(
+      /journal_entries["']\s*\)\s*\.delete\(\s*\)\s*\.eq\(["']id["']/,
+    );
   });
 });
 
