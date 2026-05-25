@@ -1448,6 +1448,7 @@
     }
   },
   "agentOs": {
+    "missionEyebrow": "Mission control",
     "title": "Agent OS (v1)",
     "subtitle": "Internal agent roles helping run the real-tester pilot. Read-only — no live agent runtime yet.",
     "statusEyebrow": "Status",
