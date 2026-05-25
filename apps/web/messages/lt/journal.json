@@ -70,10 +70,18 @@
   },
   "save": "Išsaugoti įrašą",
   "saveError": "Nepavyko išsaugoti. Bandyk dar kartą.",
+  "notesRequiredCopy": "Aprašykite ką dirbote — laisvas tekstas yra įrašo įrodymas.",
+  "foundSummary": "Sistema rado {times} laiko įrašus ir {activities} galimas darbo kryptis. Žemiau patvirtinkite tik tai, kas tikra.",
+  "reviewMetaNote": "Privatus įrašas · Pasiūlymai peržiūrėti jūsų. Patvirtinimas vadovo / kliento bus pridedamas vėliau.",
+  "fragment": {
+    "noTime": "Laikas nenustatytas",
+    "noActivity": "Darbo kryptis nenustatyta"
+  },
   "saved": "Įrašas išsaugotas",
   "saving": "Saugoma...",
   "self_progress": {
     "awaiting": "Dar laukia įrašų: {n}",
+    "awaitingHint": "Šie įgūdžiai dar neturi nei vieno patvirtinto darbo įrašo. Pridėkite įrašą, kuriame paminėtumėte šį darbą — pasiūlymai pasirodys čia, o po jūsų patvirtinimo prisirinks įrodymų bazė.",
     "confirmed": "Patvirtinti: {n}",
     "strongly_confirmed": "Stipriai patvirtinti: {n}",
     "title": "Tu turi {n} įgūdžių"

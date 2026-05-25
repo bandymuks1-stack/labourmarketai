@@ -180,19 +180,29 @@ export default async function JournalPage({
       </p>
 
       {/* Self-progress counter (§15) */}
-      <div className="card-border flex flex-wrap items-center gap-x-6 gap-y-2 p-4">
-        <span className="font-display text-sm font-semibold text-text-primary">
-          {t("self_progress.title", { n: totalSkills })}
-        </span>
-        <span className="text-xs text-state-success">
-          {t("self_progress.strongly_confirmed", { n: bins.yellow })}
-        </span>
-        <span className="text-xs text-text-secondary">
-          {t("self_progress.confirmed", { n: bins.green })}
-        </span>
-        <span className="text-xs text-text-muted">
-          {t("self_progress.awaiting", { n: bins.red })}
-        </span>
+      <div className="card-border flex flex-col gap-2 p-4">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <span className="font-display text-sm font-semibold text-text-primary">
+            {t("self_progress.title", { n: totalSkills })}
+          </span>
+          <span className="text-xs text-state-success">
+            {t("self_progress.strongly_confirmed", { n: bins.yellow })}
+          </span>
+          <span className="text-xs text-text-secondary">
+            {t("self_progress.confirmed", { n: bins.green })}
+          </span>
+          <span className="text-xs text-text-muted">
+            {t("self_progress.awaiting", { n: bins.red })}
+          </span>
+        </div>
+        {bins.red > 0 && (
+          // Honest explanation of the awaiting count — without it the row
+          // reads as "you owe the system 8 entries" instead of "8 of your
+          // self-declared skills don't yet have journal evidence".
+          <p className="text-[11px] leading-relaxed text-text-muted">
+            {t("self_progress.awaitingHint")}
+          </p>
+        )}
       </div>
 
       <JournalEntryComposer

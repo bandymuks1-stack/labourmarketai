@@ -375,7 +375,8 @@
       "cvEntries": "Possible CV entries",
       "time": "Time",
       "quantity": "Quantity",
-      "site": "Site / location"
+      "site": "Site / location",
+      "fragments": "Work fragments"
     },
     "experience": {
       "years": "Experience: {n} year(s)",

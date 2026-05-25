@@ -70,10 +70,18 @@
   },
   "save": "Save entry",
   "saveError": "Could not save. Please try again.",
+  "notesRequiredCopy": "Describe what you worked on — the free text is the proof of record.",
+  "foundSummary": "The system found {times} time entries and {activities} possible work directions. Confirm only what is true below.",
+  "reviewMetaNote": "Private entry · suggestions reviewed by you. Manager / client confirmation will be added later.",
+  "fragment": {
+    "noTime": "Time not detected",
+    "noActivity": "Work direction not detected"
+  },
   "saved": "Entry saved",
   "saving": "Saving...",
   "self_progress": {
     "awaiting": "Awaiting entries: {n}",
+    "awaitingHint": "These skills have no confirmed journal entries yet. Add an entry that mentions the relevant work — suggestions will appear here, and your confirmations will build the evidence base.",
     "confirmed": "Confirmed: {n}",
     "strongly_confirmed": "Strongly confirmed: {n}",
     "title": "You have {n} skills"
