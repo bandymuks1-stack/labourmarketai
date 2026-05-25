@@ -151,7 +151,8 @@
     "hub": {
       "agentOs": "Agentų OS",
       "telemetry": "Piloto telemetrija",
-      "languageFeedback": "Kalbos pranešimai"
+      "languageFeedback": "Kalbos pranešimai",
+      "communication": "Pokalbiai"
     },
     "drafts": {
       "title": "Pilotiniai juodraščiai",
@@ -1338,6 +1339,42 @@
     "privacy": { "title": "Privatumo politika" },
     "cookies": { "title": "Slapukų politika" }
   },
+  "pilotReadiness": {
+    "title": "Bandomoji versija",
+    "badge": "Pilotas",
+    "body": "Tai bandomoji (pilot) labourmarket.ai versija realiems testuotojams. Įrašai privatūs. Be viešo „verified“ žymeklio. Be matchingo. Tikriname pamatą — patikimą darbo įrodymų grandinę.",
+    "links": {
+      "communication": "Pokalbiai ir pagalba →"
+    },
+    "feedbackHint": "Tekstas painus? Pažymėkite + spauskite „Pranešti apie tekstą“ apačioje.",
+    "telemetryNote": "Privatumas: renkame tik užduočių laikus + klaidų kodus + maršrutus. Be jūsų teksto. Be klavišų. Be paslėpto sekimo."
+  },
+  "communication": {
+    "title": "Pokalbiai",
+    "subtitle": "Vidinis bendravimas tarp testuotojų, įmonių, agentūrų ir administratoriaus.",
+    "v1Notice": "v1 versija: bendravimas atnaujinamas perkrovus puslapį (ne realiu laiku). Be failų prikabinimo. Be „delivered/read“ žymeklių — tik sąžiningas „atidaryta“ laiko žymeklis dalyviui.",
+    "empty": "Pokalbių dar nėra. Jei jus pakvietė į pokalbį, jis čia atsiras.",
+    "unnamedThread": "(be temos)",
+    "unread": "Naujas",
+    "kind": {
+      "direct": "Asmeninis",
+      "support": "Pagalba / pilotas",
+      "team": "Komanda"
+    },
+    "backToList": "← Visi pokalbiai",
+    "noMessages": "Šiame pokalbyje dar nėra žinučių. Pradėkite rašydami žemiau.",
+    "byYou": "Jūs",
+    "byOther": "Pašnekovas",
+    "footnote": "Pokalbiai matomi tik dalyviams ir administratoriui. Privatūs. Be viešos prieigos.",
+    "composer": {
+      "label": "Nauja žinutė",
+      "placeholder": "Parašykite žinutę…",
+      "send": "Siųsti",
+      "sending": "Siunčiama...",
+      "emptyError": "Žinutė tuščia.",
+      "charCount": "{n}/{max}"
+    }
+  },
   "agentOs": {
     "title": "Agentų OS (v1)",
     "subtitle": "Vidiniai agentų vaidmenys, padedantys vykdyti realių testuotojų piloto programą. Read-only versija — vykdymas dar nesujungtas.",
@@ -1395,6 +1432,17 @@
     "pilotSalesReadiness": {
       "title": "Piloto pardavimų pasiruošimas",
       "summary": "Company/agency/buyer drafts, užduočių trintis, piloto pasiruošimo įvertinimas."
+    },
+    "commandCenter": {
+      "title": "Piloto valdymo centras",
+      "window": "Paskutinės 24 val.",
+      "metric": {
+        "events24h": "Pilot įvykiai",
+        "errors24h": "Klaidos",
+        "languageOpen": "Kalbos pranešimai (open)",
+        "draftsTotal": "Pilot juodraščiai (viso)"
+      },
+      "footnote": "Skaičiai iš live DB per admin RLS. „—“ reiškia, kad atitinkama lentelė dar nepritaikyta šioje aplinkoje (peržiūrėkite migracijų ledger)."
     }
   },
   "pilotTelemetry": {

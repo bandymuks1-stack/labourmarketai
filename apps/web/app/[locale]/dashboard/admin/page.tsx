@@ -138,6 +138,12 @@ export default async function AdminDashboardPage({
         >
           {t("hub.languageFeedback")}
         </Link>
+        <Link
+          href="/dashboard/communication"
+          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        >
+          {t("hub.communication")}
+        </Link>
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2">

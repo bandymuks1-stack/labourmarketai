@@ -1102,7 +1102,15 @@ describe("no migration files added by this sprint", () => {
     // app_version) with RLS — SELECT admin-only via public.is_admin(),
     // INSERT profile_id=auth.uid() OR NULL. Append-only inbox (no UPDATE /
     // DELETE policy); grants restricted to authenticated.
-    const SPRINT_BASELINE = 20;
+    //
+    // Bumped from 20 → 21 on the pilot-launch-os-v2 sprint: migration
+    // 0021 adds the v1 communication surface — three tables
+    // (`conversations`, `conversation_participants`, `messages`) +
+    // `is_conversation_participant(uuid)` helper (security invoker).
+    // Participant-scoped SELECT; messages append-only (no UPDATE/DELETE
+    // policy); participants can flip only their own last_read_at.
+    // Grants only to authenticated.
+    const SPRINT_BASELINE = 21;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

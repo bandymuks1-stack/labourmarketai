@@ -151,7 +151,8 @@
     "hub": {
       "agentOs": "Agent OS",
       "telemetry": "Pilot telemetry",
-      "languageFeedback": "Language reports"
+      "languageFeedback": "Language reports",
+      "communication": "Conversations"
     },
     "drafts": {
       "title": "Pilot drafts",
@@ -1335,6 +1336,42 @@
     "privacy": { "title": "Privacy Policy" },
     "cookies": { "title": "Cookie Policy" }
   },
+  "pilotReadiness": {
+    "title": "Pilot version",
+    "badge": "Pilot",
+    "body": "This is a pilot release of labourmarket.ai for real testers. Your entries are private. No public 'verified' marker. No matching. We're proving the foundation — a reliable evidence chain from free text to confirmed work.",
+    "links": {
+      "communication": "Conversations & support →"
+    },
+    "feedbackHint": "Confusing copy? Highlight + click 'Report copy' bottom-right.",
+    "telemetryNote": "Privacy: we collect task durations + error codes + route paths only. No text from you. No keystrokes. No hidden tracking."
+  },
+  "communication": {
+    "title": "Conversations",
+    "subtitle": "Internal communication between testers, companies, agencies, and the admin.",
+    "v1Notice": "v1: messages update on page refresh (not real-time). No file attachments. No fake delivered/read indicators — just an honest per-participant 'opened' timestamp.",
+    "empty": "No conversations yet. Invitations land here.",
+    "unnamedThread": "(no subject)",
+    "unread": "New",
+    "kind": {
+      "direct": "Direct",
+      "support": "Support / pilot",
+      "team": "Team"
+    },
+    "backToList": "← All conversations",
+    "noMessages": "No messages in this conversation yet. Start typing below.",
+    "byYou": "You",
+    "byOther": "Other",
+    "footnote": "Conversations are visible only to participants + the admin. Private. No public access.",
+    "composer": {
+      "label": "New message",
+      "placeholder": "Write a message…",
+      "send": "Send",
+      "sending": "Sending...",
+      "emptyError": "Message is empty.",
+      "charCount": "{n}/{max}"
+    }
+  },
   "agentOs": {
     "title": "Agent OS (v1)",
     "subtitle": "Internal agent roles helping run the real-tester pilot. Read-only — no live agent runtime yet.",
@@ -1392,6 +1429,17 @@
     "pilotSalesReadiness": {
       "title": "Pilot Sales Readiness",
       "summary": "Company/agency/buyer drafts, task friction, pilot readiness score."
+    },
+    "commandCenter": {
+      "title": "Pilot command center",
+      "window": "Last 24h",
+      "metric": {
+        "events24h": "Pilot events",
+        "errors24h": "Errors",
+        "languageOpen": "Language reports (open)",
+        "draftsTotal": "Pilot drafts (total)"
+      },
+      "footnote": "Counts pulled from the live DB via admin RLS. '—' means the underlying table is not yet applied in this environment (check the migration ledger)."
     }
   },
   "pilotTelemetry": {
