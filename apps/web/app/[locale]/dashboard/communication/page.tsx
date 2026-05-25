@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { SupportConversationLauncher } from "@/components/app/support-conversation-launcher";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -80,6 +81,9 @@ export default async function CommunicationListPage({
       <p className="card-border bg-state-warning/5 p-3 text-xs leading-relaxed text-text-secondary">
         {t("v1Notice")}
       </p>
+
+      {/* v2 launcher — open a new support thread. */}
+      <SupportConversationLauncher locale={locale} />
 
       {conversations.length === 0 ? (
         <p className="card-border p-4 text-sm text-text-secondary">

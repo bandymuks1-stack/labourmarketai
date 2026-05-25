@@ -198,6 +198,58 @@ export async function sendMessage(input: {
   return { ok: true, data: { id: result.data.id as string } };
 }
 
+/** Admin joins an existing support / team conversation as a participant.
+ *  Uses the existing `conversation_participants_insert` policy
+ *  (admin OR conversation creator) — no new RPC needed. Idempotent
+ *  via primary-key collision: re-clicking Join is a silent no-op. */
+export async function joinConversationAsAdmin(input: {
+  conversationId: string;
+  locale: string;
+}): Promise<CommunicationResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      code: "not_authenticated",
+      message: "Sesija nutrūko.",
+    };
+  }
+  const result = await asAny(supabase)
+    .from("conversation_participants")
+    .insert({
+      conversation_id: input.conversationId,
+      profile_id: user.id,
+      added_by: user.id,
+    });
+  if (result.error) {
+    const msg = result.error?.message ?? "";
+    // Idempotent: collision on the (conversation_id, profile_id) PK
+    // means the admin is already a participant — treat as success.
+    if (/duplicate key|conversation_participants_pkey/i.test(msg)) {
+      return { ok: true };
+    }
+    console.error("[communication] admin join failed:", msg);
+    if (/row level security|policy/i.test(msg)) {
+      return {
+        ok: false,
+        code: "not_a_participant",
+        message: "Negalima prisijungti prie šio pokalbio (RLS atmetė).",
+      };
+    }
+    return {
+      ok: false,
+      code: "insert_failed",
+      message: `Prisijungti prie pokalbio nepavyko: ${msg || "nežinoma klaida"}`,
+    };
+  }
+  revalidatePath(`/${input.locale}/dashboard/admin/support`);
+  revalidatePath(`/${input.locale}/dashboard/communication/${input.conversationId}`);
+  return { ok: true };
+}
+
 export async function markConversationRead(input: {
   conversationId: string;
   locale: string;
