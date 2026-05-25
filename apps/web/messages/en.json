@@ -1251,6 +1251,40 @@
     "privacy": { "title": "Privacy Policy" },
     "cookies": { "title": "Cookie Policy" }
   },
+  "languageFeedback": {
+    "openLabel": "Report copy",
+    "openAria": "Open the language-feedback form",
+    "title": "Report confusing or wrong copy",
+    "intro": "Highlight the text on the page before opening this form, or just describe which word or section is confusing. Reports are visible only to the admin.",
+    "routeLabel": "Route",
+    "localeLabel": "Locale",
+    "selectedLabel": "Selected text",
+    "noSelectionHint": "No text was highlighted — that's fine, just tell us which part needs clarifying.",
+    "commentLabel": "Comment or suggested fix",
+    "commentPlaceholder": "e.g. \"Confirm\" is confusing here — \"Save\" would be clearer.",
+    "submit": "Send",
+    "submitting": "Sending...",
+    "cancel": "Cancel",
+    "savedTitle": "Thanks — your report was recorded.",
+    "privacyNote": "Stored: route, locale, selected text, your comment, and (if signed in) your user id. Nobody except the admin sees these reports.",
+    "admin": {
+      "title": "Language reports (testing)",
+      "subtitle": "Confusing or wrong LT/EN copy flagged by testers. Read-only for v1 — status flipping will be added later.",
+      "empty": "No reports yet.",
+      "loadError": "Could not load reports: {msg}",
+      "anonymous": "anonymous",
+      "footnote": "Sorted by submission time (newest first). Showing up to 200 most recent rows. Only admins can see this page.",
+      "col": {
+        "createdAt": "Submitted",
+        "status": "Status",
+        "locale": "Locale",
+        "route": "Route",
+        "selected": "Selected",
+        "comment": "Comment",
+        "user": "User"
+      }
+    }
+  },
   "common": {
     "localeSwitch": "Language",
     "localePreview": "preview",

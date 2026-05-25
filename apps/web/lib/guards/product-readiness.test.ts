@@ -1076,7 +1076,14 @@ describe("no migration files added by this sprint", () => {
     // security-definer RPCs (journal_entry_soft_delete,
     // journal_entry_supersede) that gate pre-vs-post external-confirmation
     // behaviour. Additive only; no schema removals.
-    const SPRINT_BASELINE = 17;
+    //
+    // Bumped from 17 → 18 on the language-feedback v1 sprint: migration
+    // 0019 ships `public.language_feedback` (route / locale / selected_text /
+    // comment / user_id / status='open' / created_at) with RLS — SELECT is
+    // admin-only via `public.is_admin()`, INSERT restricts user_id to
+    // auth.uid() or NULL. Append-only inbox (no UPDATE / DELETE policy);
+    // grants restricted to authenticated.
+    const SPRINT_BASELINE = 18;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -702,58 +702,58 @@
             "c4": "Užsakyti pilotą"
           }
         },
-        "startingPoint": "Tai tik jusu pradzios taskas. Veliau galesite prideti daugiau veiklu, roliu, imoniu, komandu, projektu ar galimybiu.",
+        "startingPoint": "Tai tik jūsų pradžios taškas. Vėliau galėsite pridėti daugiau veiklų, rolių, įmonių, komandų, projektų ar galimybių.",
         "nextSteps": {
-          "title": "Tolimesni zingsniai",
+          "title": "Tolimesni žingsniai",
           "done": "Atlikta",
           "todo": "Reikia atlikti",
           "open": "Atidaryti",
           "profession": {
-            "title": "Nurodykite profesija",
-            "body": "Pasirinkite sriti, kurioje dirbate.",
+            "title": "Nurodykite profesiją",
+            "body": "Pasirinkite sritį, kurioje dirbate.",
             "bodyDone": "{profession}"
           },
           "skills": {
-            "title": "Pridekite igudzius",
-            "body": "Nurodykite, ka mokate - veliau patvirtins vadovas.",
-            "bodyDone": "Prideta igudziu: {n}"
+            "title": "Pridėkite įgūdžius",
+            "body": "Nurodykite, ką mokate — vėliau patvirtins vadovas.",
+            "bodyDone": "Pridėta įgūdžių: {n}"
           },
           "journal": {
-            "title": "Irasykite pirma darbo irasa",
-            "body": "Uzfiksuokite, ka nuveikete. Darbo dienorastis tampa jusu irodymu.",
-            "bodyDone": "Irasu: {n}"
+            "title": "Įrašykite pirmą darbo įrašą",
+            "body": "Užfiksuokite, ką nuveikėte. Darbo dienoraštis tampa jūsų įrodymu.",
+            "bodyDone": "Įrašų: {n}"
           }
         },
         "identity": {
-          "title": "Jusu darbo tapatybe",
-          "body": "Igudziai, patirtis, kalbos, mobilumas ir dokumentai - gyvas profilis, o ne statiskas CV.",
-          "cta": "Atidaryti profili"
+          "title": "Jūsų darbo tapatybė",
+          "body": "Įgūdžiai, patirtis, kalbos, mobilumas ir dokumentai — gyvas profilis, o ne statiškas CV.",
+          "cta": "Atidaryti profilį"
         },
         "journal": {
-          "title": "Darbo dienorastis",
-          "body": "Fiksuokite darba pagal veikla. Patvirtinti irasai ilgainiui sukuria patvirtintus igudzius.",
-          "cta": "Atidaryti dienorasti"
+          "title": "Darbo dienoraštis",
+          "body": "Fiksuokite darbą pagal veiklą. Patvirtinti įrašai ilgainiui sukuria patvirtintus įgūdžius.",
+          "cta": "Atidaryti dienoraštį"
         },
         "addMore": {
-          "title": "Pridekite dar viena buda naudotis labourmarket.ai",
-          "body": "Jus nesate uzrakinti viename vaidmenyje. Imones, agenturos ir pirkejo erdves dar ruosiamos — pridesime palaipsniui.",
-          "cta": "Perziureti vaidmenis"
+          "title": "Pridėkite dar vieną būdą naudotis labourmarket.ai",
+          "body": "Jūs nesate užrakinti viename vaidmenyje. Įmonės, agentūros ir pirkėjo erdvės dar ruošiamos — pridėsime palaipsniui.",
+          "cta": "Peržiūrėti vaidmenis"
         },
         "activity": {
           "earlyAccess": "Ankstyva prieiga",
-          "title": "Pradekite savo veiklos erdve",
-          "body": "labourmarket.ai atsiveria imonems, komandoms ir agenturoms. Pasakykite, ko jums reikia, ir kartu paruosime jusu erdve.",
-          "p1": "Parodykite, ka darote ir kur dirbate.",
-          "p2": "Nurodykite, kokiu zmoniu, komandu ar partneriu ieskote.",
-          "p3": "Pasiulykite savo paslaugas rinkai."
+          "title": "Pradėkite savo veiklos erdvę",
+          "body": "labourmarket.ai atsiveria įmonėms, komandoms ir agentūroms. Pasakykite, ko jums reikia, ir kartu paruošime jūsų erdvę.",
+          "p1": "Parodykite, ką darote ir kur dirbate.",
+          "p2": "Nurodykite, kokių žmonių, komandų ar partnerių ieškote.",
+          "p3": "Pasiūlykite savo paslaugas rinkai."
         },
         "pilot": {
-          "title": "Uzsisakykite bandomaja prieiga",
-          "body": "Gaukite ankstyva, asmenini komandos ivedima. Kiekviena uzklausa perziurime asmeniskai.",
-          "cta": "Prasyti bandomosios prieigos",
-          "sending": "Siunciama...",
-          "done": "Aciu - gavome jusu uzklausa ir susisieksime.",
-          "error": "Nepavyko issiusti. Bandykite dar karta."
+          "title": "Užsisakykite bandomąją prieigą",
+          "body": "Gaukite ankstyvą, asmeninį komandos įvedimą. Kiekvieną užklausą peržiūrime asmeniškai.",
+          "cta": "Prašyti bandomosios prieigos",
+          "sending": "Siunčiama...",
+          "done": "Ačiū — gavome jūsų užklausą ir susisieksime.",
+          "error": "Nepavyko išsiųsti. Bandykite dar kartą."
         }
       },
       "greeting": "Sveiki, {name}",
@@ -1253,6 +1253,40 @@
     "terms": { "title": "Naudojimo sąlygos" },
     "privacy": { "title": "Privatumo politika" },
     "cookies": { "title": "Slapukų politika" }
+  },
+  "languageFeedback": {
+    "openLabel": "Pranešti apie tekstą",
+    "openAria": "Atverti kalbos pataisymo formą",
+    "title": "Pranešti apie nesuprantamą / klaidingą tekstą",
+    "intro": "Pažymėkite tekstą puslapyje prieš atidarydami šią formą, arba tiesiog parašykite, kuris žodis ar dalis painioja. Pranešimas matomas tik administratoriui.",
+    "routeLabel": "Maršrutas",
+    "localeLabel": "Kalba",
+    "selectedLabel": "Pažymėtas tekstas",
+    "noSelectionHint": "Teksto fragmento nepažymėjote — nieko tokio, parašykite, kurią vietą reikia paaiškinti.",
+    "commentLabel": "Pastaba arba siūlomas pataisymas",
+    "commentPlaceholder": "Pvz.: „Patvirtinti“ čia klaidina, geriau „Išsaugoti“.",
+    "submit": "Išsiųsti",
+    "submitting": "Siunčiama...",
+    "cancel": "Atšaukti",
+    "savedTitle": "Ačiū — pranešimas užfiksuotas.",
+    "privacyNote": "Saugoma: maršrutas, kalba, pažymėtas tekstas, jūsų pastaba ir (jei prisijungę) jūsų vartotojo ID. Be administratoriaus niekas šių pranešimų nemato.",
+    "admin": {
+      "title": "Kalbos pranešimai (testavimas)",
+      "subtitle": "Testuotojų pažymėti painūs / klaidingi LT/EN tekstai. Sąrašas read-only — statuso keitimas bus pridėtas vėliau.",
+      "empty": "Pranešimų dar nėra.",
+      "loadError": "Nepavyko užkrauti pranešimų: {msg}",
+      "anonymous": "neprisij.",
+      "footnote": "Eilutės rūšiuojamos pagal pateikimo laiką (naujausi viršuje). Rodomi paskutiniai 200 įrašų. Tik administratoriai mato šį puslapį.",
+      "col": {
+        "createdAt": "Pateikta",
+        "status": "Būsena",
+        "locale": "Kalba",
+        "route": "Maršrutas",
+        "selected": "Pažymėta",
+        "comment": "Pastaba",
+        "user": "Vartotojas"
+      }
+    }
   },
   "common": {
     "localeSwitch": "Kalba",
