@@ -117,6 +117,29 @@ export default async function AdminDashboardPage({
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
+      {/* Agent OS + telemetry + language-feedback hub (v1). The pages
+          themselves are gated by requireSuperadmin AND admin-only RLS. */}
+      <section className="flex flex-wrap gap-3" data-testid="admin-tools-hub">
+        <Link
+          href="/dashboard/admin/agent-os"
+          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        >
+          {t("hub.agentOs")}
+        </Link>
+        <Link
+          href="/dashboard/admin/pilot-telemetry"
+          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        >
+          {t("hub.telemetry")}
+        </Link>
+        <Link
+          href="/dashboard/admin/language-feedback"
+          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        >
+          {t("hub.languageFeedback")}
+        </Link>
+      </section>
+
       <section className="grid gap-3 sm:grid-cols-2">
         <div className="card-border p-4">
           <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">

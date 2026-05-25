@@ -1094,7 +1094,15 @@ describe("no migration files added by this sprint", () => {
     // (`create table if not exists`, RLS `drop policy if exists` + recreate)
     // keeps re-runs safe. See lib/guards/pilot-drafts.test.ts for the full
     // RLS / privacy / sanitisation guard suite.
-    const SPRINT_BASELINE = 19;
+    //
+    // Bumped from 19 → 20 on the agent-os-and-pilot-telemetry-v1 sprint:
+    // migration 0020 adds `public.pilot_events` (id / created_at /
+    // profile_id / session_id / route / locale / event_name / task_name /
+    // task_step / duration_ms / result / error_code / metadata /
+    // app_version) with RLS — SELECT admin-only via public.is_admin(),
+    // INSERT profile_id=auth.uid() OR NULL. Append-only inbox (no UPDATE /
+    // DELETE policy); grants restricted to authenticated.
+    const SPRINT_BASELINE = 20;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

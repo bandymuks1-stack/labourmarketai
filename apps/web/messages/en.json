@@ -148,6 +148,11 @@
       "no": "no",
       "inspect": "Inspect →"
     },
+    "hub": {
+      "agentOs": "Agent OS",
+      "telemetry": "Pilot telemetry",
+      "languageFeedback": "Language reports"
+    },
     "drafts": {
       "title": "Pilot drafts",
       "help": "Private drafts from company / agency / buyer pilot users. Visible only to the owner and admins.",
@@ -1329,6 +1334,108 @@
     "terms": { "title": "Terms of Service" },
     "privacy": { "title": "Privacy Policy" },
     "cookies": { "title": "Cookie Policy" }
+  },
+  "agentOs": {
+    "title": "Agent OS (v1)",
+    "subtitle": "Internal agent roles helping run the real-tester pilot. Read-only — no live agent runtime yet.",
+    "statusEyebrow": "Status",
+    "statusV1Body": "v1 ships role cards only + links to the specs under docs/agent-os/. No live agent execution yet — each role is a written contract for the owner to reason against.",
+    "scope": {
+      "owner_brief": "Owner brief",
+      "ops": "Operations",
+      "tester": "Testers",
+      "security": "Security",
+      "sales": "Sales"
+    },
+    "links": {
+      "telemetry": "→ Pilot telemetry",
+      "languageFeedback": "→ Language reports",
+      "adminHome": "→ Admin home"
+    },
+    "footnote": "Admins only. Agent descriptions are not auto-executed.",
+    "chiefOperator": {
+      "title": "Chief Operator",
+      "summary": "Daily owner brief: current system state, top blockers, next safest action."
+    },
+    "prReadiness": {
+      "title": "PR Readiness",
+      "summary": "Open PRs status: mergeability, CI, Vercel preview, Supabase preview, migration risk, owner action required."
+    },
+    "migrationAuditor": {
+      "title": "Migration Auditor",
+      "summary": "Diff between repo migration files and the production ledger: duplicate numbering, idempotency, RLS/grants, production apply status."
+    },
+    "deploySmoke": {
+      "title": "Deploy + Smoke",
+      "summary": "Latest main commit deploy status, route smoke checklist, post-merge owner tests."
+    },
+    "testerJourney": {
+      "title": "Tester Journey",
+      "summary": "Tracks task starts/completions/durations, identifies where testers abandon: login, CV/profile, Work Journal, language feedback, drafts."
+    },
+    "cvProfile": {
+      "title": "CV / Profile Agent",
+      "summary": "Watches profile/CV creation funnel: profile_text_saved, skill_suggestion_confirmed, skill_edit, feedback. No raw text in telemetry."
+    },
+    "workJournalEvidence": {
+      "title": "Work Journal Evidence",
+      "summary": "Unknown phrase counts, journal save errors, edit/delete usage, parser-review suggestions (no auto-promotion)."
+    },
+    "languageQa": {
+      "title": "Language QA",
+      "summary": "Reads the language_feedback admin inbox, groups by route/locale/selected_text, suggests LT/EN wording fixes."
+    },
+    "securityPrivacy": {
+      "title": "Security / Privacy",
+      "summary": "Checks admin-only access, RLS expectations, no service_role runtime, no raw text in telemetry, no public exposure."
+    },
+    "pilotSalesReadiness": {
+      "title": "Pilot Sales Readiness",
+      "summary": "Company/agency/buyer drafts, task friction, pilot readiness score."
+    }
+  },
+  "pilotTelemetry": {
+    "title": "Pilot telemetry (v1)",
+    "subtitle": "Safe tester QA events. Read-only. Admins only.",
+    "loadError": "Could not load events: {msg}",
+    "tasks": {
+      "title": "Task summary",
+      "help": "By task_name across the last 200 events. avgMs = average ms between task_start and task_complete (success).",
+      "empty": "No tasks yet.",
+      "col": {
+        "task": "Task",
+        "started": "Started",
+        "success": "Success",
+        "error": "Error",
+        "abandoned": "Abandoned",
+        "avgMs": "Avg duration"
+      }
+    },
+    "errors": {
+      "title": "Top error codes",
+      "help": "From the last 200 events with result=error.",
+      "empty": "No errors yet."
+    },
+    "recent": {
+      "title": "Recent events",
+      "count": "{n} rows",
+      "empty": "No events yet.",
+      "col": {
+        "when": "When",
+        "result": "Result",
+        "event": "Event",
+        "task": "Task",
+        "route": "Route",
+        "duration": "Duration",
+        "error": "Error",
+        "metadata": "Metadata"
+      }
+    },
+    "links": {
+      "agentOs": "→ Agent OS",
+      "languageFeedback": "→ Language reports"
+    },
+    "footnote": "Sorted by event time (newest first). Showing the last 200. RLS scopes SELECT to admins."
   },
   "languageFeedback": {
     "openLabel": "Report copy",

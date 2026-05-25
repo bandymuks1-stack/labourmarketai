@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { softDeleteJournalEntry } from "@/lib/journal/actions";
+import { recordEvent } from "@/lib/telemetry/task";
 
 /**
  * One row in the journal entries list. The Delete + Edit controls are only
@@ -29,6 +30,7 @@ export function JournalEntryRow({
   const [error, setError] = useState<string | null>(null);
 
   function onDelete() {
+    recordEvent("journal_delete_clicked");
     const confirmed = window.confirm(t("entry.deleteConfirm"));
     if (!confirmed) return;
     setError(null);
@@ -36,6 +38,9 @@ export function JournalEntryRow({
       const result = await softDeleteJournalEntry(entryId, locale);
       if (!result.ok) {
         setError(result.message);
+        recordEvent("journal_save_error_code", { result_kind: result.code });
+      } else {
+        recordEvent("journal_save_success", { result_kind: "soft_delete" });
       }
     });
   }
@@ -49,6 +54,7 @@ export function JournalEntryRow({
             <>
               <Link
                 href={`/${locale}/dashboard/journal?editing=${entryId}#journal-composer`}
+                onClick={() => recordEvent("journal_edit_clicked")}
                 className="font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue"
                 data-testid={`journal-entry-edit-${entryId}`}
               >

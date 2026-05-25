@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { usePathname } from "@/lib/i18n/navigation";
 import { submitLanguageFeedback } from "@/lib/language-feedback/actions";
+import { recordEvent } from "@/lib/telemetry/task";
 
 /**
  * Floating tester-feedback widget. Mounted inside the dashboard layout so
@@ -55,8 +56,16 @@ export function LanguageFeedbackWidget() {
       });
       if (!result.ok) {
         setError(result.message);
+        recordEvent("language_feedback_submitted", {
+          result_kind: result.code,
+        });
         return;
       }
+      recordEvent("language_feedback_submitted", {
+        result_kind: "success",
+        had_selection: selectedText.length > 0,
+        comment_length: comment.length,
+      });
       setSavedAt(Date.now());
       setComment("");
       setSelectedText("");
@@ -72,7 +81,10 @@ export function LanguageFeedbackWidget() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          recordEvent("language_feedback_opened");
+          setOpen(true);
+        }}
         className="fixed bottom-20 right-4 z-40 rounded-full border border-brand-blue/40 bg-ink-800/90 px-4 py-2 font-mono text-[10px] uppercase tracking-label text-text-secondary shadow-lg backdrop-blur hover:border-brand-blue hover:text-text-primary sm:bottom-6"
         data-testid="language-feedback-open"
         aria-label={t("openAria")}

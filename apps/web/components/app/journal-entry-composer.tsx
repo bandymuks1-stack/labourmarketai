@@ -20,6 +20,12 @@ import {
   supersedeJournalEntry,
 } from "@/lib/journal/actions";
 import { formatDuration } from "@/lib/journal/format-duration";
+import {
+  completeTask,
+  errorTask,
+  recordEvent,
+  startTask,
+} from "@/lib/telemetry/task";
 import { cn } from "@/lib/utils";
 
 export type JournalEngagement = {
@@ -128,6 +134,14 @@ export function JournalEntryComposer({
   function analyse(raw: string) {
     setError(null);
     const s = extractJournalSuggestions(raw);
+    // Pilot telemetry: a journal entry begins when the worker asks for
+    // structure suggestions. Edit mode lets us tell create vs supersede
+    // apart downstream.
+    const taskName = editingEntry ? "journal_entry_edit" : "journal_entry_create";
+    startTask(taskName);
+    recordEvent("journal_suggest_clicked", {
+      fragment_count: s.fragments.length,
+    });
     setText(raw);
     setTimeStatus("pending");
     if (s.time) {
@@ -260,10 +274,28 @@ export function JournalEntryComposer({
       const result = editingEntry
         ? await supersedeJournalEntry(editingEntry.id, fd)
         : await createJournalEntry(fd);
+      const taskName = editingEntry
+        ? "journal_entry_edit"
+        : "journal_entry_create";
       if (!result.ok) {
         setError(result.message);
+        recordEvent("journal_save_error_code", {
+          result_kind: result.code,
+        });
+        errorTask(taskName, result.code, {
+          fragment_count: confirmedFragments.length,
+          unresolved_unknown_count: fragments.filter(
+            (f) => f.isUnknown && f.userLabel.trim().length === 0,
+          ).length,
+        });
         return;
       }
+      recordEvent("journal_save_success", {
+        fragment_count: confirmedFragments.length,
+      });
+      completeTask(taskName, {
+        fragment_count: confirmedFragments.length,
+      });
       formRef.current?.reset();
       setStage("compose");
       setText("");

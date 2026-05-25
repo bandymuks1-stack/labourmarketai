@@ -5,9 +5,11 @@ import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import {
   generateOauthTraceId,
+  isVercelPreviewHost,
   rememberOauthTraceId,
   withOauthTraceId,
 } from "@/lib/auth/oauth-trace";
+import { recordEvent } from "@/lib/telemetry/task";
 
 /** Official Google "G" mark (multicolour). Inline so the white OAuth button
  *  needs no asset pipeline. */
@@ -101,6 +103,17 @@ export function GoogleButton({
         origin,
         locale,
       });
+      // Pilot telemetry (v1) — fire-and-forget. The trace id is safe to
+      // share with the server-side recorder; we send `preview_host` so
+      // the admin can tell which sessions started from a preview deploy.
+      recordEvent("google_oauth_start", {
+        provider: "google",
+        trace: traceId,
+        origin,
+        preview_host: isVercelPreviewHost(
+          typeof window !== "undefined" ? window.location.host : null,
+        ),
+      });
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: callbackWithTrace.toString() },
@@ -111,6 +124,10 @@ export function GoogleButton({
       console.error("[auth] signInWithOAuth(google) failed:", {
         name: e instanceof Error ? e.name : "unknown",
         message: e instanceof Error ? e.message : String(e),
+      });
+      recordEvent("google_oauth_error", {
+        provider: "google",
+        result_kind: e instanceof Error ? e.name : "unknown",
       });
       setLoading(false);
       setFailed(true);
