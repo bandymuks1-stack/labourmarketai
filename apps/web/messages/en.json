@@ -1440,6 +1440,19 @@
         "draftsTotal": "Pilot drafts (total)"
       },
       "footnote": "Counts pulled from the live DB via admin RLS. '—' means the underlying table is not yet applied in this environment (check the migration ledger)."
+    },
+    "checklist": {
+      "title": "Pilot start checklist",
+      "scope": "Health check",
+      "item": {
+        "login": "Google sign-in observed",
+        "journal": "Work Journal saves observed",
+        "language": "Language reports received",
+        "telemetry": "Pilot telemetry recording (last 24h)",
+        "drafts": "Company / agency / buyer drafts saved",
+        "communication": "Conversation messages relayed"
+      },
+      "footnote": "✓ = at least one signal observed live. · = nothing seen yet. '—' = the underlying table is not applied here. Count on the right is the lifetime total."
     }
   },
   "pilotTelemetry": {
