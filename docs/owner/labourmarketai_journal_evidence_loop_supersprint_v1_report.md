@@ -107,6 +107,43 @@ useful next step is a small client-side "Prisijungiame…" spinner+timer on
 `/auth/callback` so the wait is honest rather than silent — but that belongs
 in a dedicated UX slice, not this one.
 
+## Vercel Preview Google OAuth limitation (NOT a PR #61 regression)
+
+Owner reported that Google login does not complete on the **Vercel Preview**
+deployment for PR #61, while production login works (slightly heavy) and
+logout works.
+
+This is treated as an **environment / auth-preview limitation, not a journal
+regression**, because:
+
+- PR #61's diff (`git diff --name-only origin/main...HEAD`) is journal-only.
+  No file under `apps/web/app/[locale]/auth/`, no middleware, no Supabase
+  client config, no callback route, no cookie code, no env file, no
+  `messages/**/auth.json` is touched in this PR.
+- The single auth-adjacent line is inside `lib/journal/actions.ts`: the
+  journal save action used to call `throw new Error("Not authenticated")`
+  when `supabase.auth.getUser()` returned no user. It now returns the same
+  outcome as `{ ok: false, code: "not_authenticated", message: ... }` so
+  the composer can render a precise message. The `auth.getUser()` call
+  itself, the cookies, and the SSR client are unchanged.
+- The most likely cause of preview-only OAuth breakage is the Supabase
+  project's OAuth **redirect URL allowlist** + Google Cloud OAuth client
+  **Authorized redirect URIs** not including the per-deployment Vercel
+  preview origin — preview URLs change on every push and are not
+  automatically appended to either allowlist. This affects every preview
+  branch in the project, not PR #61 specifically.
+
+> Authenticated browser smoke could not be completed on Vercel Preview
+> because Google OAuth does not complete on preview. This is treated as
+> environment/auth-preview limitation, not as journal regression, unless
+> production reproduces it.
+
+If production *does* reproduce it, the fix belongs to a separate scoped PR:
+
+  `fix(auth): make production Google login/callback state observable and stable`
+
+Not to PR #61.
+
 ## Owner manual smoke checklist
 
 1. Open `/lt/dashboard/journal` while authenticated as a worker who has at
