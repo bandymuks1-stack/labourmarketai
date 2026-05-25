@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { DashboardTabs } from "@/components/app/dashboard-tabs";
+import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { RoleSwitcher } from "@/components/app/role-switcher";
 import { AccountMenu } from "@/components/app/account-menu";
@@ -117,6 +118,10 @@ export default async function DashboardLayout({
           {children}
         </main>
         <BottomNav />
+        {/* v1 tester language-feedback widget. Mounted INSIDE the auth
+            shell so it's only visible to authenticated sessions — the
+            inbox is also admin-only via RLS, so this is double-gated. */}
+        <LanguageFeedbackWidget />
       </div>
     </AuthProvider>
   );
