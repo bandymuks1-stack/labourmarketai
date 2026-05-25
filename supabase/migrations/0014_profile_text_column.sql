@@ -25,9 +25,16 @@
 alter table public.profiles
   add column if not exists profile_text text;
 
+-- Note: a previous revision of this file concatenated three literals with
+-- the `||` operator. `COMMENT ON ... IS` requires a string LITERAL, not an
+-- expression, and Supabase's preview migration replay rejects the `||`
+-- chain. Switched to SQL-standard adjacent-string-literal concatenation
+-- (two string constants separated by whitespace including at least one
+-- newline are parsed as one literal). Same final comment text; the
+-- production catalogue already holds the resolved text.
 comment on column public.profiles.profile_text is
-  'Owner-only raw self-description / CV paste from the text-first composer. ' ||
-  'NOT a verified claim. NOT readable by employers. RLS scopes reads/writes ' ||
+  'Owner-only raw self-description / CV paste from the text-first composer. '
+  'NOT a verified claim. NOT readable by employers. RLS scopes reads/writes '
   'to id = auth.uid().';
 
 -- ── DOWN (manual rollback) ───────────────────────────────────────────────

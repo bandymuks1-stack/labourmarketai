@@ -1083,7 +1083,18 @@ describe("no migration files added by this sprint", () => {
     // admin-only via `public.is_admin()`, INSERT restricts user_id to
     // auth.uid() or NULL. Append-only inbox (no UPDATE / DELETE policy);
     // grants restricted to authenticated.
-    const SPRINT_BASELINE = 18;
+    //
+    // Bumped from 18 → 19 on the pilot-draft-flows sprint
+    // (feat/cc/pilot-draft-flows = PR #54): migration 0016 adds the
+    // owner-only `pilot_drafts` table holding private company/agency/buyer
+    // drafts with explicit GRANT to authenticated only, closed-only
+    // visibility CHECK, and admin-read via is_admin(). 0016 sits
+    // numerically BEFORE 0017/0018/0019 only because this PR's branch
+    // forked off main before those numbers existed; SQL idempotency
+    // (`create table if not exists`, RLS `drop policy if exists` + recreate)
+    // keeps re-runs safe. See lib/guards/pilot-drafts.test.ts for the full
+    // RLS / privacy / sanitisation guard suite.
+    const SPRINT_BASELINE = 19;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

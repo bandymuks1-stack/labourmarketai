@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
+import {
+  listPilotDraftsForProfile,
+  type DraftType,
+} from "@/lib/pilot/pilot-drafts";
 
 type ClaimRow = {
   id: string;
@@ -58,6 +62,10 @@ export default async function AdminUserPage({
     .eq("profile_id", id)
     .order("created_at", { ascending: false });
   const userClaims = (claimsData ?? []) as unknown as ClaimRow[];
+
+  // Pilot drafts for this profile (feat/cc/pilot-draft-flows). Admin
+  // RLS allows broad SELECT via is_admin().
+  const userDrafts = await listPilotDraftsForProfile(id);
 
   return (
     <div
@@ -115,6 +123,62 @@ export default async function AdminUserPage({
                 </span>
               </li>
             ))}
+          </ul>
+        )}
+      </section>
+
+      <section
+        className="flex flex-col gap-3"
+        data-testid="admin-user-drafts"
+      >
+        <h2 className="font-display text-sm font-semibold text-text-primary">
+          {t("user.draftsTitle")} · {userDrafts.length}
+        </h2>
+        {userDrafts.length === 0 ? (
+          <p className="text-sm text-text-muted">{t("user.draftsEmpty")}</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {userDrafts.map((d) => {
+              const payload = (d.payload ?? {}) as Record<string, unknown>;
+              const entries = Object.entries(payload).filter(
+                ([, v]) => typeof v === "string" && v.length > 0,
+              );
+              return (
+                <li
+                  key={d.id}
+                  className="card-border flex flex-col gap-2 p-3"
+                >
+                  <header className="flex items-baseline justify-between gap-3">
+                    <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+                      {t(
+                        `user.draftType.${d.draft_type as DraftType}`,
+                      )}
+                    </span>
+                    <span className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                      {d.visibility}
+                    </span>
+                  </header>
+                  {entries.length === 0 ? (
+                    <p className="text-xs text-text-muted">
+                      {t("user.draftEmpty")}
+                    </p>
+                  ) : (
+                    <dl className="grid gap-1 sm:grid-cols-2 text-xs">
+                      {entries.map(([k, v]) => (
+                        <div key={k} className="flex flex-col gap-0.5">
+                          <dt className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                            {k}
+                          </dt>
+                          <dd className="text-text-secondary">
+                            {String(v)}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
