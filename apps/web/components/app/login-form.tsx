@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +9,18 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
+import { isVercelPreviewHost } from "@/lib/auth/oauth-trace";
+
+/** Map of callback-route `?error=…` codes to a translation key under
+ *  `auth.errors.oauth.*`. Any code not listed here falls through to the
+ *  generic copy. The codes themselves match what `/[locale]/auth/callback`
+ *  sets. */
+const OAUTH_ERROR_KEYS: Record<string, string> = {
+  missing_code: "oauth.missing_code",
+  exchange_failed: "oauth.exchange_failed",
+  no_user: "oauth.no_user",
+  callback: "oauth.callback",
+};
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -28,10 +40,30 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const nextPath = getSafeReturnPath(nextParam, locale);
+  const oauthErrorCode = searchParams.get("error");
+  const oauthTrace = searchParams.get("trace");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "signing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [isPreviewHost, setIsPreviewHost] = useState(false);
+
+  // Detect Vercel preview host (e.g. labourmarketai-<sha>.vercel.app)
+  // client-side only — the host is window-bound. Production
+  // (`app.labourmarket.ai`) and the Vercel-managed prod alias
+  // (`labourmarket-ai.vercel.app`) are NOT flagged.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsPreviewHost(isVercelPreviewHost(window.location.host));
+    }
+  }, []);
+
+  // Surface the callback-route's `?error=…` so the user sees a precise
+  // reason instead of a silent re-render. The trace id is exposed too —
+  // it's not a secret and lets the user quote it back in a bug report.
+  const oauthError = oauthErrorCode
+    ? tErr(OAUTH_ERROR_KEYS[oauthErrorCode] ?? "oauth.unknown")
+    : null;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -78,6 +110,40 @@ export function LoginForm() {
           {t("subcopy")}
         </p>
       </header>
+
+      {oauthError && (
+        // Surfaced when the callback redirected back here with `?error=…`.
+        // The trace id (also a URL param) is shown so the user can quote
+        // it in support. NEVER includes the auth code, tokens, or cookies.
+        <div
+          role="alert"
+          className="rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs leading-relaxed text-state-danger"
+          data-testid="login-oauth-error"
+        >
+          <p>{oauthError}</p>
+          {oauthTrace && (
+            <p className="mt-1 font-mono text-[10px] text-text-muted">
+              trace: {oauthTrace}
+            </p>
+          )}
+        </div>
+      )}
+      {isPreviewHost && (
+        // Honest framing for testers who land on a preview deployment.
+        // The Vercel preview is gated by SSO BEFORE the page reaches
+        // Supabase, and the Supabase project's Site URL + redirect
+        // allowlist target the production origin, not per-deployment
+        // preview URLs. So Google login WILL bounce back here from
+        // Supabase even after the SSO gate. Surfacing this up-front
+        // saves the tester from blaming the product.
+        <div
+          role="status"
+          className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="login-preview-notice"
+        >
+          {t("preview_host_notice")}
+        </div>
+      )}
 
       <GoogleButton
         label={t("google_label")}

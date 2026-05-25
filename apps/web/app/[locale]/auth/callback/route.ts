@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
+import { readOauthTraceId } from "@/lib/auth/oauth-trace";
 
 /**
  * Magic-link / OAuth callback. Supabase redirects here after the user
@@ -23,10 +24,18 @@ export async function GET(
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const nextParam = url.searchParams.get("next");
+  // v1 OAuth trace id (see lib/auth/oauth-trace.ts). NOT a secret; safe to
+  // log and to forward to /login on failure so the user can quote it back.
+  const traceId = readOauthTraceId(url);
   const loginUrl = new URL(`/${locale}/auth/login`, url.origin);
   if (nextParam) loginUrl.searchParams.set("next", nextParam);
+  if (traceId) loginUrl.searchParams.set("trace", traceId);
 
   if (!code) {
+    console.error("[auth/callback] missing code in callback URL", {
+      locale,
+      trace: traceId,
+    });
     loginUrl.searchParams.set("error", "missing_code");
     return NextResponse.redirect(loginUrl);
   }
@@ -42,6 +51,7 @@ export async function GET(
       // log the auth code, tokens, cookies, or the full request URL.
       console.error("[auth/callback] exchangeCodeForSession failed", {
         locale,
+        trace: traceId,
         code: exchangeError.code,
         status: exchangeError.status,
         name: exchangeError.name,
@@ -62,7 +72,7 @@ export async function GET(
       }
       console.warn(
         "[auth/callback] exchangeCodeForSession errored but getSession is valid — proceeding (PKCE race fallback)",
-        { locale },
+        { locale, trace: traceId },
       );
     }
 
@@ -72,6 +82,7 @@ export async function GET(
     if (!user) {
       console.error("[auth/callback] getUser returned no user after exchange", {
         locale,
+        trace: traceId,
       });
       loginUrl.searchParams.set("error", "no_user");
       return NextResponse.redirect(loginUrl);
@@ -94,16 +105,23 @@ export async function GET(
     }
 
     const safeNext = getSafeReturnPath(nextParam, locale);
+    console.info("[auth/callback] success", {
+      locale,
+      trace: traceId,
+      onboarded: !!profile?.onboarded_at,
+    });
     return NextResponse.redirect(new URL(safeNext, url.origin));
   } catch (e) {
     // Without this the bare catch silently swallowed every unexpected error
     // (env throws, fetch failures, etc.) and the user saw `error=callback`
     // with no signal in Vercel logs. Log the error message only — never the
     // request URL (it carries the auth code).
-    console.error(
-      "[auth/callback] unexpected error during exchange",
-      e instanceof Error ? { name: e.name, message: e.message } : e,
-    );
+    console.error("[auth/callback] unexpected error during exchange", {
+      trace: traceId,
+      ...(e instanceof Error
+        ? { name: e.name, message: e.message }
+        : { value: String(e) }),
+    });
     loginUrl.searchParams.set("error", "callback");
     return NextResponse.redirect(loginUrl);
   }
