@@ -74,10 +74,10 @@ export function RoleSwitcher() {
           href="/dashboard/admin"
           aria-label={tSwitcher("adminPanelLink")}
           data-testid="role-switcher-admin-badge"
-          className="inline-flex items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/10 px-3 py-1.5 text-sm font-semibold text-brand-orange hover:border-brand-orange"
+          className="inline-flex shrink-0 items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/10 px-2 py-1.5 text-sm font-semibold text-brand-orange hover:border-brand-orange sm:px-3"
         >
           <span aria-hidden>⚙</span>
-          <span className="font-mono text-[11px] uppercase tracking-label">
+          <span className="hidden font-mono text-[11px] uppercase tracking-label sm:inline">
             {tSwitcher("adminMode")}
           </span>
         </Link>
@@ -89,10 +89,10 @@ export function RoleSwitcher() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={tSwitcher("label")}
-        className="inline-flex items-center gap-2 rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-sm text-text-primary hover:border-brand-blue"
+        className="inline-flex shrink-0 items-center gap-2 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary hover:border-brand-blue sm:px-3"
       >
         <span aria-hidden>{activeRole ? ROLE_ICON[activeRole] : "•"}</span>
-        <span className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <span className="hidden font-mono text-[11px] uppercase tracking-label text-text-secondary sm:inline">
           {activeRole ? t(`signup.role.${activeRole}`) : tSwitcher("label")}
         </span>
         <span aria-hidden className="text-text-muted">
@@ -103,7 +103,7 @@ export function RoleSwitcher() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-72 rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
+          className="absolute right-0 z-30 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
             {tSwitcher("label")}

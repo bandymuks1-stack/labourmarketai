@@ -95,15 +95,15 @@ export default async function DashboardLayout({
       <div className="relative min-h-screen">
         <AmbientGlow />
         <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
-          <div className="mx-auto flex h-14 max-w-container items-center gap-6 px-6 md:h-auto md:py-3 sm:px-12">
+          <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
             <Link
               href="/"
-              className="font-display text-lg font-bold tracking-tightest text-text-primary"
+              className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
             >
               labourmarket<span className="text-gradient-accent">.ai</span>
             </Link>
             <DashboardTabs className="hidden md:flex" />
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
               <LocaleSwitcher className="hidden md:flex" />
               <NotificationPanel />
               <RoleSwitcher />
