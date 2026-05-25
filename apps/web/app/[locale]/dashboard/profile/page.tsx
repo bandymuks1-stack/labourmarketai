@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
+import { ProfileCvClarityCard } from "@/components/app/profile-cv-clarity-card";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
@@ -260,6 +261,8 @@ export default async function ProfilePage({
           {t("pageSubtitle")}
         </p>
       </header>
+
+      <ProfileCvClarityCard />
 
       {/* Text-first composer — universal. Available to every authenticated
           user regardless of role. The catalogued worker_skills picker

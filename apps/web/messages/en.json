@@ -1405,6 +1405,48 @@
     "eyebrow": "Pilot phase",
     "body": "This role is for a real organisation or a client you represent. In pilot mode, drafts are private and have no real consequence. Serious use will require company details (country, legal name, registration code, correspondence address, representative role)."
   },
+  "profileCvClarity": {
+    "title": "What your profile is built from",
+    "scope": "Clarity",
+    "intro": "Your profile grows from real work, not promises. Here are the pieces that shape it, and what is still waiting for evidence.",
+    "step": {
+      "about": {
+        "label": "About me / experience",
+        "body": "A short self-written intro. Nothing checks or publishes it automatically."
+      },
+      "skills": {
+        "label": "Skills",
+        "body": "Self-chosen skill labels. Visible only to you and the admin — never exposed to employers until you decide otherwise."
+      },
+      "journal": {
+        "label": "Work journal",
+        "body": "Real shifts and tasks you log. Entries are append-only — history is never rewritten. This is the strongest signal about your experience."
+      },
+      "selfDeclared": {
+        "label": "What you declared yourself",
+        "body": "Everything you typed yourself (languages, documents, prior employers) is a self-declared fact. The system does not auto-confirm it or call you 'verified'."
+      },
+      "awaitingProof": {
+        "label": "What is awaiting proof / external confirmation",
+        "body": "Skills or achievements that need an employer or institution to confirm them stay marked 'awaiting proof'. There will be no fake 'AI confirmed' or 'Verified' badge."
+      }
+    },
+    "footnote": "If the system does not know something — it says so. We do not hide uncertainty behind fake confidence."
+  },
+  "teamRosterEmpty": {
+    "company": {
+      "title": "Team core",
+      "scope": "Empty state",
+      "intro": "This will hold your team — real people, current roles and who is working this week. There are no members yet, so we show only the empty state instead of made-up examples.",
+      "footnote": "Invitations, roles and availability windows will land in a later stage. We will not invent people."
+    },
+    "agency": {
+      "title": "Candidate bench",
+      "scope": "Empty state",
+      "intro": "This will show your active candidates — who is ready, who is currently engaged, who is waiting for the next season. There are none yet, so we show an empty state instead of fake profiles.",
+      "footnote": "Bench management, availability windows and team recommendations will land later, step by step."
+    }
+  },
   "agentOs": {
     "title": "Agent OS (v1)",
     "subtitle": "Internal agent roles helping run the real-tester pilot. Read-only — no live agent runtime yet.",
