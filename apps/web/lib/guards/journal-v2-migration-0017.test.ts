@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Pinning tests for migration `supabase/migrations/0016_seed_platform_productivity_units.sql`.
+ * Pinning tests for migration `supabase/migrations/0017_seed_platform_productivity_units.sql`.
  *
  * The migration closes a long-latent gap: `productivity_units` only had
  * area-rate slugs (`square_meters`, `square_meters_per_day`, `box_per_day`),
@@ -20,11 +20,11 @@ import { join } from "node:path";
 
 const REPO_ROOT = join(process.cwd(), "..", "..");
 const migration = readFileSync(
-  join(REPO_ROOT, "supabase/migrations/0016_seed_platform_productivity_units.sql"),
+  join(REPO_ROOT, "supabase/migrations/0017_seed_platform_productivity_units.sql"),
   "utf-8",
 );
 
-describe("0016 — productivity_units seed", () => {
+describe("0017 — productivity_units seed", () => {
   it("seeds every unit slug that the composer / messages already exposed", () => {
     for (const slug of [
       "hours",
@@ -50,7 +50,7 @@ describe("0016 — productivity_units seed", () => {
   });
 });
 
-describe("0016 — create_journal_entry_full RPC", () => {
+describe("0017 — create_journal_entry_full RPC", () => {
   it("defines the RPC with the parameter list the action calls", () => {
     expect(migration).toMatch(/create or replace function public\.create_journal_entry_full/i);
     for (const param of [

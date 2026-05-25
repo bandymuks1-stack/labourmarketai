@@ -186,8 +186,8 @@ export async function createJournalEntry(
   // This is what surfaced after PR #61: the legacy seed only covered
   // square_meters / square_meters_per_day / box_per_day, so a confirmed
   // "hours"-as-fallback quantity (or any fragment_time row) tripped the
-  // FK. Migration 0016 closes the seed; this pre-check makes sure that on
-  // a DB where 0016 hasn't been applied yet, the worker still sees a
+  // FK. Migration 0017 closes the seed; this pre-check makes sure that on
+  // a DB where 0017 hasn't been applied yet, the worker still sees a
   // human-readable reason instead of a half-saved entry.
   const unitSlugsToCheck = collectUnitSlugs({ quantity, unitSlug, fragments });
   if (unitSlugsToCheck.size > 0) {
@@ -203,7 +203,7 @@ export async function createJournalEntry(
         code: "unit_slug_unknown",
         message:
           `Vieneto registre kol kas nėra: ${missing.join(", ")}. ` +
-          `Paprašykite administratoriaus pritaikyti migraciją 0016 ` +
+          `Paprašykite administratoriaus pritaikyti migraciją 0017 ` +
           `(productivity_units seedą), tada bandykite dar kartą.`,
       };
     }
@@ -277,7 +277,7 @@ export async function createJournalEntry(
   ];
 
   // Atomic save — the RPC inserts the entry and all metric rows inside one
-  // transaction (see 0016). Any failure rolls back the entry, so the worker
+  // transaction (see 0017). Any failure rolls back the entry, so the worker
   // never lands in the half-saved "ghost entry" state where the row exists
   // but its interpretation does not.
   const rpcParams = {
@@ -293,7 +293,7 @@ export async function createJournalEntry(
     p_metrics: metrics,
   };
   // The generated supabase-js types are built from the schema cache and
-  // don't include `create_journal_entry_full` until 0016 is applied AND the
+  // don't include `create_journal_entry_full` until 0017 is applied AND the
   // local types are regenerated. The runtime call is correct; the cast just
   // suppresses the static name check.
   const { data: rpcEntryId, error: rpcErr } = (await (
@@ -323,7 +323,7 @@ export async function createJournalEntry(
       };
     }
     console.warn(
-      "[journal] create_journal_entry_full RPC missing — falling back to legacy two-step insert. Apply migration 0016.",
+      "[journal] create_journal_entry_full RPC missing — falling back to legacy two-step insert. Apply migration 0017.",
     );
     const legacy = await legacyTwoStepSave(supabase, {
       worker_id: worker.id,

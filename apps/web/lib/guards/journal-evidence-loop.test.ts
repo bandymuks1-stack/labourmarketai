@@ -58,9 +58,15 @@ describe("journal save action returns structured results", () => {
 
   it("calls the atomic create_journal_entry_full RPC as the primary save path", () => {
     // Atomicity is enforced server-side — the RPC inserts the entry + all
-    // metric rows in one transaction (see 0016). The legacy two-step fallback
+    // metric rows in one transaction (see 0017). The legacy two-step fallback
     // is only reached when the RPC is missing on the target DB.
-    expect(src).toMatch(/supabase\.rpc\(\s*["']create_journal_entry_full["']/);
+    //
+    // The current call site goes through a typed-cast wrapper so the
+    // PostgREST-generated function name doesn't fail static type-checking
+    // before 0017 is applied + types are regenerated. The guard tolerates
+    // both forms: a direct `supabase.rpc("create_journal_entry_full", …)` or
+    // the cast wrapper `(supabase.rpc as …)("create_journal_entry_full", …)`.
+    expect(src).toMatch(/supabase\.rpc[\s\S]{0,200}["']create_journal_entry_full["']/);
   });
 
   it("compensates with a delete when the legacy two-step save's metrics insert fails", () => {

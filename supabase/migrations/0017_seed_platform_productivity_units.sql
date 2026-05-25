@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════════════
--- 0016 — Seed missing platform productivity_units + add an atomic
+-- 0017 — Seed missing platform productivity_units + add an atomic
 --        create_journal_entry_full RPC so the save loop can never leave
 --        a half-written entry behind.
 --

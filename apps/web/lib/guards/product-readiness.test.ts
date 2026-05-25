@@ -1062,7 +1062,7 @@ describe("no migration files added by this sprint", () => {
     // narrative) persist in their own RLS-closed primitive instead of
     // leaking through worker_skills (employer-readable).
     // Bumped from 15 → 16 on the journal-evidence-loop-v2 sprint:
-    // migration 0016 seeds the platform productivity_units rows that
+    // migration 0017 seeds the platform productivity_units rows that
     // `apps/web/components/app/journal-entry-composer.tsx` UNIT_OPTIONS
     // (hours/minutes/days/meters/pieces/kilograms/packages) has always
     // referenced but were never registered — the FK was silently rejecting

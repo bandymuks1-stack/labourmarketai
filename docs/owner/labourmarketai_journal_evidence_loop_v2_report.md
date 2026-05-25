@@ -70,13 +70,13 @@ the construction set.
 
 | Path | Change |
 |------|--------|
-| `supabase/migrations/0016_seed_platform_productivity_units.sql` | **NEW.** Seeds the 7 missing platform productivity_units (`hours`, `minutes`, `days`, `meters`, `pieces`, `kilograms`, `packages`) with `on conflict do nothing` (idempotent). Defines `create_journal_entry_full(...)` RPC which inserts the entry + every metric row inside one transaction. RPC is `security invoker`, so RLS still applies. `grant execute … to authenticated`, revoked from `public`. |
+| `supabase/migrations/0017_seed_platform_productivity_units.sql` | **NEW.** Seeds the 7 missing platform productivity_units (`hours`, `minutes`, `days`, `meters`, `pieces`, `kilograms`, `packages`) with `on conflict do nothing` (idempotent). Defines `create_journal_entry_full(...)` RPC which inserts the entry + every metric row inside one transaction. RPC is `security invoker`, so RLS still applies. `grant execute … to authenticated`, revoked from `public`. |
 | `apps/web/lib/journal/actions.ts` | Calls `create_journal_entry_full` RPC as primary save path. Pre-validates every `unit_slug` against `productivity_units` BEFORE any insert (new `unit_slug_unknown` error code). Falls back to the legacy two-step insert only when the RPC isn't applied yet on the target DB (detected via `PGRST202` / missing-function error). Legacy fallback issues a compensating `delete` on metrics failure and returns a precise error. |
 | `apps/web/lib/structuring/extract-journal-suggestions.ts` | New `detectNumberWordTime()` recognizing LT number-words 1–20 paired with `valand*` / `minu[čt]*` / `dien*`. Unicode-aware regex (`\p{L}` with `u` flag) so LT suffix declensions (`valandų`, `minučių`, `minutėms`, `dienomis`) all match. `splitFragments` now also splits on plain commas (downstream filter drops fragments that have no time / no activity, so this can't add noise). |
 | `apps/web/lib/structuring/keywords.ts` | Three new `ACTIVITY_HINTS_LT` rows, placed BEFORE the generic `stog…` row so they win: **Stogo karkaso darbai** (`carpenter`), **Durų ir langų montavimas** (`carpenter`, explicit LT case forms only — `dur`/`lang` would false-match), **Projekto rengimas** (slug=null, label-only — no fake taxonomy entry). |
 | `apps/web/lib/structuring/extract-journal-suggestions.test.ts` | 11 new tests covering the v2 number-words, the three new activity directions, the digit-vs-word precedence, and a mixed 3-fragment sentence. |
 | `apps/web/lib/guards/journal-evidence-loop.test.ts` | New assertions: pre-validation against `productivity_units` exists; RPC is the primary save path; legacy fallback issues a compensating delete. |
-| `apps/web/lib/guards/journal-v2-migration-0016.test.ts` | **NEW.** Pins the 0016 migration: every expected unit slug appears; uses `on conflict (slug) do nothing`; no DROP/ALTER/DELETE; RPC is `security invoker`, granted to `authenticated`, revoked from `public`. |
+| `apps/web/lib/guards/journal-v2-migration-0017.test.ts` | **NEW.** Pins the 0017 migration: every expected unit slug appears; uses `on conflict (slug) do nothing`; no DROP/ALTER/DELETE; RPC is `security invoker`, granted to `authenticated`, revoked from `public`. |
 | `apps/web/lib/guards/product-readiness.test.ts` | `SPRINT_BASELINE` bumped 15 → 16 with the rationale captured in a comment. |
 
 ## Owner's new LT phrases — before vs after
@@ -101,7 +101,7 @@ either every row commits or none does. A missing FK (e.g. an unseeded
 `unit_slug`) raises inside the loop, the function aborts, and no row
 lands in `journal_entries`. The save is structurally all-or-nothing.
 
-Fallback path (legacy DBs without 0016 applied): two inserts. If metrics
+Fallback path (legacy DBs without 0017 applied): two inserts. If metrics
 fail, the action attempts a compensating `delete` on the orphan entry
 and returns `metrics_insert_failed` with a clear LT message ("Įrašas
 nebuvo išsaugotas pilnai: … Įrašas atmestas — bandykite dar kartą.").
@@ -121,7 +121,7 @@ no longer told the save succeeded.
 
 - [x] No billing / payments / Stripe / Montonio / pricing edits.
 - [x] No env / secrets / Vercel changes.
-- [x] **Migration 0016 is shipped but NOT auto-applied to production** — per
+- [x] **Migration 0017 is shipped but NOT auto-applied to production** — per
       the project's "running migrations on production is NEVER automatic"
       policy in CLAUDE.md. Owner runs it manually via Supabase SQL editor or
       CLI. The app degrades gracefully on un-migrated DBs via the legacy
@@ -138,8 +138,8 @@ no longer told the save succeeded.
 
 ## Owner manual smoke checklist
 
-1. **Apply migration 0016 on production** (Supabase SQL editor, paste the
-   contents of `supabase/migrations/0016_seed_platform_productivity_units.sql`).
+1. **Apply migration 0017 on production** (Supabase SQL editor, paste the
+   contents of `supabase/migrations/0017_seed_platform_productivity_units.sql`).
 2. Open `/lt/dashboard/journal` as the worker.
 3. Try each of:
    - `Valandą dirbau pavežėju. 3 valandas parduotuvėje kasininku, ir 5 valandas padėjau dengti stogą.` (v1 sentence)
@@ -148,8 +148,8 @@ no longer told the save succeeded.
 4. Press **Patvirtinti visus pasiūlymus** → **Patvirtinti įrašą**.
 5. Expected: each save returns the green "✓ Įrašas išsaugotas" card. Entry
    appears in **Įrašai**. Survives hard reload.
-6. If 0016 was not yet applied: red banner reads "Vieneto registre kol kas
-   nėra: hours, … Paprašykite administratoriaus pritaikyti migraciją 0016."
+6. If 0017 was not yet applied: red banner reads "Vieneto registre kol kas
+   nėra: hours, … Paprašykite administratoriaus pritaikyti migraciją 0017."
    No entry leaks.
 
 ## Out of scope (intentionally)
