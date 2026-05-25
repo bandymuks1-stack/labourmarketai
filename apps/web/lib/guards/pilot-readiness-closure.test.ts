@@ -60,14 +60,16 @@ describe("Pilot Start Checklist — rendered on admin/agent-os", () => {
     // signals are wired so a quiet regression doesn't strip one without
     // anyone noticing.
     for (const key of [
-      "loginSignal",
-      "journalSignal",
-      "languageSignal",
-      "telemetrySignal",
-      "draftsSignal",
-      "communicationSignal",
+      "login",
+      "journal",
+      "language",
+      "telemetry",
+      "drafts",
+      "communication",
     ]) {
-      expect(page).toContain(key);
+      expect(page).toMatch(
+        new RegExp(`key:\\s*["']${key}["']\\s*,\\s*observed:`),
+      );
     }
   });
 
