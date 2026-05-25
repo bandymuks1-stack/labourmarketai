@@ -77,6 +77,22 @@ describe("journal save action returns structured results", () => {
       /journal_entries["']\s*\)\s*\.delete\(\s*\)\s*\.eq\(["']id["']/,
     );
   });
+
+  it("exports softDeleteJournalEntry that calls the journal_entry_soft_delete RPC", () => {
+    // v3 lifecycle: the soft-delete server action must route through the
+    // 0018 RPC. Direct table mutations would be RLS-denied and would also
+    // skip the post-confirmation gate.
+    expect(src).toMatch(/export async function softDeleteJournalEntry/);
+    expect(src).toMatch(/["']journal_entry_soft_delete["']/);
+  });
+
+  it("returns a tagged JournalLifecycleResult — not a plain boolean", () => {
+    // The UI relies on the result's `code` to show different copy for
+    // not_owner / already_confirmed / rpc_unavailable.
+    expect(src).toMatch(/export type JournalLifecycleResult\s*=/);
+    expect(src).toMatch(/already_confirmed/);
+    expect(src).toMatch(/rpc_unavailable/);
+  });
 });
 
 describe("journal parser stays deterministic + rule-based", () => {

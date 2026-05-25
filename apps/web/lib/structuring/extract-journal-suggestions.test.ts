@@ -157,6 +157,178 @@ describe("extractJournalSuggestions — v2 LT number-word numerics", () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// v3 — compound durations (1h20, 1.5h), institution + topic extractors,
+// new activity verticals (app testing, programming, plastering, horse care,
+// lectures), and unknown-phrase flagging.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("extractJournalSuggestions — v3 compound LT durations", () => {
+  it("'valandą dvidešimt minučių' yields 80 minutes (1h20)", () => {
+    const s = extractJournalSuggestions(
+      "Valandą dvidešimt minučių programavau pataisymus.",
+    );
+    expect(s.fragments[0]?.time).toEqual({ value: 80, unitSlug: "minutes" });
+  });
+
+  it("'valandą su puse' yields 1.5 hours", () => {
+    const s = extractJournalSuggestions(
+      "Valandą su puse dėsčiau paskaitą.",
+    );
+    expect(s.fragments[0]?.time).toEqual({ value: 1.5, unitSlug: "hours" });
+  });
+
+  it("'2 valandas 30 minučių' yields 150 minutes", () => {
+    const s = extractJournalSuggestions("2 valandas 30 minučių dirbau.");
+    expect(s.fragments[0]?.time).toEqual({ value: 150, unitSlug: "minutes" });
+  });
+
+  it("'15 minučių' alone yields 15 minutes (no hour contribution)", () => {
+    const s = extractJournalSuggestions(
+      "15 minučių atlikau programėlės patikrinimą.",
+    );
+    expect(s.fragments[0]?.time).toEqual({ value: 15, unitSlug: "minutes" });
+  });
+});
+
+describe("extractJournalSuggestions — v3 institution + topic", () => {
+  it("captures 'Vytauto Didžiojo universitete' as the institution", () => {
+    const s = extractJournalSuggestions(
+      "Valandą su puse dėsčiau paskaitą Vytauto Didžiojo universitete.",
+    );
+    expect(s.institutionName).toMatch(/Vytauto\s+Didžiojo\s+universitete/i);
+  });
+
+  it("captures a single-word institution 'Vilniaus kolegijoje'", () => {
+    const s = extractJournalSuggestions(
+      "Dvi valandas dėsčiau Vilniaus kolegijoje.",
+    );
+    expect(s.institutionName).toMatch(/Vilniaus\s+kolegijoje/i);
+  });
+
+  it("captures topic prefixed with 'tema:'", () => {
+    const s = extractJournalSuggestions(
+      "Dėsčiau paskaitą, tema: oratorystės meno taikymas dirbtinio intelekto rinkos pritaikymui verslo pasaulyje.",
+    );
+    expect(s.topic).toMatch(/oratorystės meno taikymas/i);
+  });
+
+  it("returns null for institution/topic when not present", () => {
+    const s = extractJournalSuggestions("Dvi valandas dirbau.");
+    expect(s.institutionName).toBeNull();
+    expect(s.topic).toBeNull();
+  });
+});
+
+describe("extractJournalSuggestions — v3 activity verticals", () => {
+  it("'atlikau programėlės patikrinimą' → app testing", () => {
+    const s = extractJournalSuggestions(
+      "15 minučių atlikau programėlės patikrinimą.",
+    );
+    expect(s.fragments[0]?.activityLabel).toMatch(/programėlės/i);
+    expect(s.fragments[0]?.activityLabel).toMatch(/testavim/i);
+    expect(s.fragments[0]?.isUnknown).toBe(false);
+  });
+
+  it("'programavau pataisymus' → programming/fixes", () => {
+    const s = extractJournalSuggestions(
+      "Valandą dvidešimt minučių programavau pataisymus.",
+    );
+    expect(s.fragments[0]?.activityLabel).toMatch(/programavim/i);
+  });
+
+  it("'glaiščiau sienas' → wall plastering", () => {
+    const s = extractJournalSuggestions("4 valandas glaiščiau sienas.");
+    expect(s.fragments[0]?.activityLabel).toMatch(/sien/i);
+    expect(s.fragments[0]?.activityLabel).toMatch(/glaistym|lygin/i);
+  });
+
+  it("'prižiūrėjau žirgus' → horse care", () => {
+    const s = extractJournalSuggestions("Dvi valandas prižiūrėjau žirgus.");
+    expect(s.fragments[0]?.activityLabel).toMatch(/žirg/i);
+  });
+
+  it("'dėsčiau paskaitą' → lecture/teaching", () => {
+    const s = extractJournalSuggestions(
+      "Valandą su puse dėsčiau paskaitą Vytauto Didžiojo universitete.",
+    );
+    expect(s.fragments[0]?.activityLabel).toMatch(/paskait/i);
+  });
+});
+
+describe("extractJournalSuggestions — v3 unknown-phrase flag", () => {
+  it("fragment with time + unrecognised activity is marked isUnknown", () => {
+    const s = extractJournalSuggestions(
+      "Dvi valandas svorį kilnojau pajūryje.",
+    );
+    expect(s.fragments[0]?.isUnknown).toBe(true);
+    expect(s.fragments[0]?.activitySlug).toBeNull();
+    expect(s.fragments[0]?.activityLabel).toBeNull();
+    expect(s.fragments[0]?.time).toEqual({ value: 2, unitSlug: "hours" });
+  });
+
+  it("fragment with recognised activity is NOT marked isUnknown", () => {
+    const s = extractJournalSuggestions("Dvi valandas montavau duris.");
+    expect(s.fragments[0]?.isUnknown).toBe(false);
+  });
+});
+
+describe("extractJournalSuggestions — owner v3 long sentence", () => {
+  const ownerV3 =
+    "15 minučių atlikau programėlės patikrinimą, " +
+    "valandą dvidešimt minučių programavau pataisymus. " +
+    "4 valandas glaiščiau sienas ir " +
+    "dvi valandas prižiūrėjau žirgus ir " +
+    "valandą su puse dėsčiau paskaitą Vytauto Didžiojo universitete, " +
+    "tema: oratorystės meno taikymas dirbtinio intelekto rinkos pritaikymui verslo pasaulyje";
+
+  it("yields five work fragments", () => {
+    const s = extractJournalSuggestions(ownerV3);
+    expect(s.fragments).toHaveLength(5);
+  });
+
+  it("detects all five durations (15min, 80min, 4h, 2h, 1.5h)", () => {
+    const s = extractJournalSuggestions(ownerV3);
+    const times = s.fragments
+      .filter((f) => f.time)
+      .map((f) => `${f.time!.value}${f.time!.unitSlug}`);
+    expect(times).toEqual([
+      "15minutes",
+      "80minutes",
+      "4hours",
+      "2hours",
+      "1.5hours",
+    ]);
+  });
+
+  it("detects all five activity directions", () => {
+    const s = extractJournalSuggestions(ownerV3);
+    const labels = s.fragments.map((f) => f.activityLabel).join("|");
+    expect(labels).toMatch(/programėlės/i); // app testing
+    expect(labels).toMatch(/programavim/i); // programming
+    expect(labels).toMatch(/glaistym|lygin/i); // wall plastering
+    expect(labels).toMatch(/žirg/i); // horse care
+    expect(labels).toMatch(/paskait/i); // lecture
+  });
+
+  it("extracts institution = 'Vytauto Didžiojo universitete'", () => {
+    const s = extractJournalSuggestions(ownerV3);
+    expect(s.institutionName).toMatch(/Vytauto\s+Didžiojo\s+universitete/i);
+  });
+
+  it("extracts topic = the oratory/AI string", () => {
+    const s = extractJournalSuggestions(ownerV3);
+    expect(s.topic).toMatch(/oratorystės meno taikymas/i);
+    expect(s.topic).toMatch(/dirbtinio intelekto/i);
+  });
+
+  it("flags zero unknown-phrase fragments for this sentence (all five are recognised)", () => {
+    const s = extractJournalSuggestions(ownerV3);
+    const unknown = s.fragments.filter((f) => f.isUnknown);
+    expect(unknown).toHaveLength(0);
+  });
+});
+
 describe("extractJournalSuggestions — v2 LT activity hints", () => {
   it("'Dvi valandas montavau duris' → door / window installation (carpenter)", () => {
     const s = extractJournalSuggestions("Dvi valandas montavau duris.");

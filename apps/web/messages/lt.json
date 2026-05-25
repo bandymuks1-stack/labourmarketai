@@ -376,7 +376,9 @@
       "time": "Laikas",
       "quantity": "Kiekis",
       "site": "Objektas / vieta",
-      "fragments": "Darbo fragmentai"
+      "fragments": "Darbo fragmentai",
+      "institution": "Įstaiga / organizacija",
+      "topic": "Tema / kontekstas"
     },
     "experience": {
       "years": "Patirtis: {n} metai",

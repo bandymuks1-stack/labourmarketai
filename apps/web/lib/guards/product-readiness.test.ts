@@ -1069,7 +1069,14 @@ describe("no migration files added by this sprint", () => {
     // any non-area journal_entry_metrics insert. The same migration adds an
     // atomic `create_journal_entry_full` RPC so the journal save can no
     // longer leak a half-written entry if the metrics insert fails.
-    const SPRINT_BASELINE = 16;
+    //
+    // Bumped from 16 → 17 on the journal-evidence-loop-v3 sprint: migration
+    // 0018 ships the correction / edit / delete lifecycle. Adds the
+    // `deleted_at` + `correction_of` columns to journal_entries, plus two
+    // security-definer RPCs (journal_entry_soft_delete,
+    // journal_entry_supersede) that gate pre-vs-post external-confirmation
+    // behaviour. Additive only; no schema removals.
+    const SPRINT_BASELINE = 17;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
