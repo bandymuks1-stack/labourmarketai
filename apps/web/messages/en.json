@@ -152,7 +152,8 @@
       "agentOs": "Agent OS",
       "telemetry": "Pilot telemetry",
       "languageFeedback": "Language reports",
-      "communication": "Conversations"
+      "communication": "Conversations",
+      "support": "Support conversations"
     },
     "drafts": {
       "title": "Pilot drafts",
@@ -1370,7 +1371,39 @@
       "sending": "Sending...",
       "emptyError": "Message is empty.",
       "charCount": "{n}/{max}"
+    },
+    "launcher": {
+      "openLabel": "Contact support",
+      "title": "New support conversation",
+      "intro": "Briefly describe what we can help with. Visible only to you + the admin. No email / no SMS.",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "e.g. cannot save journal entry",
+      "bodyLabel": "First message",
+      "bodyPlaceholder": "Describe the question or issue briefly.",
+      "send": "Start conversation",
+      "sending": "Starting...",
+      "cancel": "Cancel",
+      "error": {
+        "subjectRequired": "Add a short subject.",
+        "bodyRequired": "Type the first message."
+      }
+    },
+    "adminSupport": {
+      "title": "Support conversations",
+      "subtitle": "Support threads started by testers. Read-only list — admin joins from the thread detail page.",
+      "empty": "No support conversations yet.",
+      "loadError": "Could not load conversations: {msg}",
+      "unnamed": "(no subject)",
+      "createdBy": "Created by: {id}…",
+      "footnote": "Admins only. RLS scopes SELECT to participants OR is_admin().",
+      "joinHint": "You're an admin but not yet a participant of this thread. Join to reply.",
+      "joinLabel": "Join conversation",
+      "joinPending": "Joining..."
     }
+  },
+  "orgTier1Warning": {
+    "eyebrow": "Pilot phase",
+    "body": "This role is for a real organisation or a client you represent. In pilot mode, drafts are private and have no real consequence. Serious use will require company details (country, legal name, registration code, correspondence address, representative role)."
   },
   "agentOs": {
     "title": "Agent OS (v1)",

@@ -1,5 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
+import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { PilotDraftForm } from "@/components/app/pilot-draft-form";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
@@ -53,6 +54,8 @@ export default async function CompanyDashboardPage({
         </p>
         <p className="text-sm text-text-secondary">{t("pilotDisclaimer")}</p>
       </section>
+
+      <OrgTier1Warning />
 
       <section
         className="card-border flex flex-col gap-4 p-5"
