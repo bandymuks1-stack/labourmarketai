@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
+import {
+  generateOauthTraceId,
+  rememberOauthTraceId,
+  withOauthTraceId,
+} from "@/lib/auth/oauth-trace";
 
 /** Official Google "G" mark (multicolour). Inline so the white OAuth button
  *  needs no asset pipeline. */
@@ -81,14 +86,32 @@ export function GoogleButton({
       // re-validates before honouring it.
       const callback = new URL(`${origin}/${locale}/auth/callback`);
       if (nextPath) callback.searchParams.set("next", nextPath);
+      // v1 observability — generate a short trace id, attach it as a
+      // query param so it survives the Google round-trip + lands in the
+      // Supabase auth log's `referer` field, and stash it in
+      // sessionStorage so the callback can still correlate if a
+      // provider/ad-blocker combo strips query params. NOT a secret;
+      // never derived from the auth code.
+      const traceId = generateOauthTraceId();
+      rememberOauthTraceId(traceId);
+      const callbackWithTrace = withOauthTraceId(callback, traceId);
+      console.info("[auth] oauth start", {
+        provider: "google",
+        trace: traceId,
+        origin,
+        locale,
+      });
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: callback.toString() },
+        options: { redirectTo: callbackWithTrace.toString() },
       });
       if (error) throw error;
       // Success: browser navigates to Google; keep the loading state.
     } catch (e) {
-      console.error("[auth] signInWithOAuth(google) failed:", e);
+      console.error("[auth] signInWithOAuth(google) failed:", {
+        name: e instanceof Error ? e.name : "unknown",
+        message: e instanceof Error ? e.message : String(e),
+      });
       setLoading(false);
       setFailed(true);
     }

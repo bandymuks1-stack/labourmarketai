@@ -592,7 +592,14 @@
       "invalidCredentials": "Incorrect email or password.",
       "invalidEmail": "Invalid email format.",
       "rateLimited": "Too many attempts. Please try again later.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "oauth": {
+        "missing_code": "Google bounced back without a sign-in code. Try again — if it repeats, reload the page.",
+        "exchange_failed": "The sign-in code couldn't be exchanged for a session. Usually a retry works — codes are one-time and short-lived.",
+        "no_user": "Session was created but the user record isn't reachable. Sign out and back in.",
+        "callback": "Unexpected error during sign-in. Try again — if it persists, share the trace ID below.",
+        "unknown": "Couldn't sign in. Please try again."
+      }
     },
     "signup": {
       "headline": "Create your account",
@@ -643,7 +650,8 @@
       "error_generic": "Something went wrong. Please try again shortly.",
       "error_email": "Please enter a valid email address.",
       "error_password_required": "Please enter your password.",
-      "error_invalid_credentials": "Invalid email or password."
+      "error_invalid_credentials": "Invalid email or password.",
+      "preview_host_notice": "You're on a Vercel preview deployment. Google sign-in is not configured for this URL — Supabase Site URL only allows the production origin. Sign in at https://app.labourmarket.ai. Email + password sign-in still works here."
     },
     "forgotPassword": {
       "headline": "Forgot password?",
