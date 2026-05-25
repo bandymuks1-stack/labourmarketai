@@ -83,7 +83,46 @@ export const ACTIVITY_HINTS_LT: {
   label: string;
   needles: string[];
 }[] = [
-  // Construction
+  // ── Specific-before-generic ────────────────────────────────────────────
+  // Order matters: the activity matcher picks the FIRST row whose needle
+  // appears in the fragment, so narrower carpentry/structural variants of
+  // a "stog…" / generic phrase must sit ABOVE the wider entries below.
+  {
+    // "Stogo karkasas" — roof framing (carpentry-side, not the membrane).
+    // Kept distinct from generic "Stogo dengimas" because the worker is
+    // building the timber structure, not laying the cover.
+    slug: "carpenter",
+    label: "Stogo karkaso darbai",
+    needles: ["stogo karkas", "stog karkas", "karkas stog"],
+  },
+  {
+    // Door + window installation. Each LT form is listed explicitly to keep
+    // the needles long enough that they don't false-match unrelated words.
+    slug: "carpenter",
+    label: "Durų ir langų montavimas",
+    needles: [
+      "duris", "durų", "durims", "durimis", "duryse",
+      "langus", "langų", "langams", "langais", "languose",
+      "stačiau duris", "stačiau langus",
+      "dėjau duris", "dėjau langus",
+      "montav duris", "montav langus",
+    ],
+  },
+  {
+    // Project preparation / design — not a trade slug; surface as label-only
+    // so the worker can confirm it without the platform pretending there's
+    // a verified "project_manager" skill behind it.
+    slug: null,
+    label: "Projekto rengimas",
+    needles: [
+      "projekt reng",
+      "rengiau projekt",
+      "projekto rengim",
+      "rengiu projekt",
+      "projekt parengim",
+    ],
+  },
+  // ── Construction trades ────────────────────────────────────────────────
   {
     slug: "roofer",
     label: "Stogo dengimas",
