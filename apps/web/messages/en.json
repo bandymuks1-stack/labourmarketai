@@ -1470,7 +1470,10 @@
         "events24h": "Pilot events",
         "errors24h": "Errors",
         "languageOpen": "Language reports (open)",
-        "draftsTotal": "Pilot drafts (total)"
+        "draftsTotal": "Pilot drafts (total)",
+        "draftsBreakdown": "Company: {company} · Agency: {agency} · Buyer: {buyer}",
+        "supportThreads": "Support threads (total)",
+        "communicationMessages": "Conversation messages (total)"
       },
       "footnote": "Counts pulled from the live DB via admin RLS. '—' means the underlying table is not yet applied in this environment (check the migration ledger)."
     },

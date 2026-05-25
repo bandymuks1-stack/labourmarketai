@@ -1473,7 +1473,10 @@
         "events24h": "Pilot įvykiai",
         "errors24h": "Klaidos",
         "languageOpen": "Kalbos pranešimai (open)",
-        "draftsTotal": "Pilot juodraščiai (viso)"
+        "draftsTotal": "Pilot juodraščiai (viso)",
+        "draftsBreakdown": "Įmonės: {company} · Agentūros: {agency} · Pirkėjo: {buyer}",
+        "supportThreads": "Pagalbos pokalbiai (viso)",
+        "communicationMessages": "Pokalbių žinutės (viso)"
       },
       "footnote": "Skaičiai iš live DB per admin RLS. „—“ reiškia, kad atitinkama lentelė dar nepritaikyta šioje aplinkoje (peržiūrėkite migracijų ledger)."
     },

@@ -59,88 +59,91 @@ export default async function AdminAgentOsPage({
   const supabase = await createClient();
   const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  const [eventsRecent, eventsErrors, feedbackOpen, draftsTotal] =
-    await Promise.all([
-      asAny(supabase)
-        .from("pilot_events")
-        .select("id", { count: "exact", head: true })
-        .gte("created_at", since24h)
-        .then((r: { count?: number; error: unknown }) =>
-          r.error ? null : (r.count ?? 0),
-        ),
-      asAny(supabase)
-        .from("pilot_events")
-        .select("id", { count: "exact", head: true })
-        .eq("result", "error")
-        .gte("created_at", since24h)
-        .then((r: { count?: number; error: unknown }) =>
-          r.error ? null : (r.count ?? 0),
-        ),
-      asAny(supabase)
-        .from("language_feedback")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "open")
-        .then((r: { count?: number; error: unknown }) =>
-          r.error ? null : (r.count ?? 0),
-        ),
-      asAny(supabase)
-        .from("pilot_drafts")
-        .select("id", { count: "exact", head: true })
-        .then((r: { count?: number; error: unknown }) =>
-          r.error ? null : (r.count ?? 0),
-        ),
-    ]);
+  // Helper — count or null on RLS / missing-table error.
+  const toCount = (r: { count?: number; error: unknown }) =>
+    r.error ? null : (r.count ?? 0);
 
-  // Pilot Start Checklist — Workstream A. One "has been observed" signal
-  // per critical flow. Each signal is a count from a tracked event; null
-  // = the underlying table is missing on this DB (migration not yet
-  // applied) so the row reads "—" instead of misleading green/red.
   const [
-    loginSignal,
-    journalSignal,
-    languageSignal,
-    telemetrySignal,
-    draftsSignal,
-    communicationSignal,
+    eventsRecent,
+    eventsErrors,
+    feedbackOpen,
+    draftsTotal,
+    supportThreads,
+    conversationMessages,
+    companyDrafts,
+    agencyDrafts,
+    buyerDrafts,
   ] = await Promise.all([
     asAny(supabase)
       .from("pilot_events")
       .select("id", { count: "exact", head: true })
+      .gte("created_at", since24h)
+      .then(toCount),
+    asAny(supabase)
+      .from("pilot_events")
+      .select("id", { count: "exact", head: true })
+      .eq("result", "error")
+      .gte("created_at", since24h)
+      .then(toCount),
+    asAny(supabase)
+      .from("language_feedback")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open")
+      .then(toCount),
+    asAny(supabase)
+      .from("pilot_drafts")
+      .select("id", { count: "exact", head: true })
+      .then(toCount),
+    asAny(supabase)
+      .from("conversations")
+      .select("id", { count: "exact", head: true })
+      .eq("kind", "support")
+      .then(toCount),
+    asAny(supabase)
+      .from("conversation_messages")
+      .select("id", { count: "exact", head: true })
+      .then(toCount),
+    asAny(supabase)
+      .from("pilot_drafts")
+      .select("id", { count: "exact", head: true })
+      .eq("draft_type", "company_request")
+      .then(toCount),
+    asAny(supabase)
+      .from("pilot_drafts")
+      .select("id", { count: "exact", head: true })
+      .eq("draft_type", "agency_offer")
+      .then(toCount),
+    asAny(supabase)
+      .from("pilot_drafts")
+      .select("id", { count: "exact", head: true })
+      .eq("draft_type", "buyer_request")
+      .then(toCount),
+  ]);
+
+  // Pilot Start Checklist — Workstream A. One "has been observed" signal
+  // per critical flow. v2 reuses the counts from the command-center
+  // Promise.all above to avoid duplicate round-trips. Login + journal
+  // signals are the only extra queries.
+  const [loginSignal, journalSignal] = await Promise.all([
+    asAny(supabase)
+      .from("pilot_events")
+      .select("id", { count: "exact", head: true })
       .in("event_name", ["google_oauth_start"])
-      .then((r: { count?: number; error: unknown }) =>
-        r.error ? null : (r.count ?? 0),
-      ),
+      .then(toCount),
     asAny(supabase)
       .from("pilot_events")
       .select("id", { count: "exact", head: true })
       .eq("event_name", "journal_save_success")
-      .then((r: { count?: number; error: unknown }) =>
-        r.error ? null : (r.count ?? 0),
-      ),
-    asAny(supabase)
-      .from("language_feedback")
-      .select("id", { count: "exact", head: true })
-      .then((r: { count?: number; error: unknown }) =>
-        r.error ? null : (r.count ?? 0),
-      ),
-    // "telemetry recording" — any pilot_event row at all in the last 24h.
-    Promise.resolve(eventsRecent),
-    Promise.resolve(draftsTotal),
-    asAny(supabase)
-      .from("conversation_messages")
-      .select("id", { count: "exact", head: true })
-      .then((r: { count?: number; error: unknown }) =>
-        r.error ? null : (r.count ?? 0),
-      ),
+      .then(toCount),
   ]);
 
   const checklist: { key: string; observed: number | null }[] = [
     { key: "login", observed: loginSignal },
     { key: "journal", observed: journalSignal },
-    { key: "language", observed: languageSignal },
-    { key: "telemetry", observed: telemetrySignal },
-    { key: "drafts", observed: draftsSignal },
-    { key: "communication", observed: communicationSignal },
+    { key: "language", observed: feedbackOpen },
+    { key: "telemetry", observed: eventsRecent },
+    { key: "drafts", observed: draftsTotal },
+    { key: "communication", observed: conversationMessages },
   ];
 
   return (
@@ -210,6 +213,29 @@ export default async function AdminAgentOsPage({
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
               {draftsTotal ?? "—"}
+            </p>
+            <p className="mt-1 font-mono text-[10px] text-text-muted">
+              {t("commandCenter.metric.draftsBreakdown", {
+                company: companyDrafts ?? 0,
+                agency: agencyDrafts ?? 0,
+                buyer: buyerDrafts ?? 0,
+              })}
+            </p>
+          </div>
+          <div className="rounded-md border border-ink-600/60 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("commandCenter.metric.supportThreads")}
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {supportThreads ?? "—"}
+            </p>
+          </div>
+          <div className="rounded-md border border-ink-600/60 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("commandCenter.metric.communicationMessages")}
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {conversationMessages ?? "—"}
             </p>
           </div>
         </div>
