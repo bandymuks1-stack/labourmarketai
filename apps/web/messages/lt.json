@@ -1451,6 +1451,7 @@
     }
   },
   "agentOs": {
+    "missionEyebrow": "Misijos valdymas",
     "title": "Agentų OS (v1)",
     "subtitle": "Vidiniai agentų vaidmenys, padedantys vykdyti realių testuotojų piloto programą. Read-only versija — vykdymas dar nesujungtas.",
     "statusEyebrow": "Būsena",
