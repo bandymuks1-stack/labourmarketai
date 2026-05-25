@@ -2,8 +2,10 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
+import { AdminJoinConversation } from "@/components/app/admin-join-conversation";
 import { CommunicationComposer } from "@/components/app/communication-composer";
 import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
+import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 
 type MessageRow = {
@@ -56,6 +58,34 @@ export default async function ConversationDetailPage({
     .limit(500);
   const messages: MessageRow[] = (messagesRes.data ?? []) as MessageRow[];
 
+  // v2 — surface the admin-only "Join thread" affordance when the
+  // viewer is admin but not yet a participant. Admins arriving from
+  // /admin/support need a one-click way to become a participant so
+  // sendMessage stops being RLS-blocked.
+  const [{ data: profile }, { data: rolesRows }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("active_role")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("profile_roles")
+      .select("role")
+      .eq("profile_id", user.id)
+      .eq("is_active", true),
+  ]);
+  const viewerIsAdmin = deriveIsAdmin({
+    activeRole: profile?.active_role ?? null,
+    profileRoles: rolesRows ?? [],
+  });
+  const { data: viewerParticipantRow } = await asAny(supabase)
+    .from("conversation_participants")
+    .select("profile_id")
+    .eq("conversation_id", conversationId)
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  const viewerIsParticipant = !!viewerParticipantRow;
+
   return (
     <div className="flex flex-col gap-5">
       <header className="flex items-center justify-between gap-3">
@@ -79,6 +109,13 @@ export default async function ConversationDetailPage({
           page first mounts — honest "I opened this thread" signal, not a
           fake "delivered" indicator. */}
       <MarkReadOnMount conversationId={conversationId} locale={locale} />
+
+      <AdminJoinConversation
+        conversationId={conversationId}
+        locale={locale}
+        isAdmin={viewerIsAdmin}
+        isParticipant={viewerIsParticipant}
+      />
 
       {messages.length === 0 ? (
         <p className="card-border p-4 text-sm text-text-secondary">

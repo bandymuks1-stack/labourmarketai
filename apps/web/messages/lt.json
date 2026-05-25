@@ -152,7 +152,8 @@
       "agentOs": "Agentų OS",
       "telemetry": "Piloto telemetrija",
       "languageFeedback": "Kalbos pranešimai",
-      "communication": "Pokalbiai"
+      "communication": "Pokalbiai",
+      "support": "Pagalbos pokalbiai"
     },
     "drafts": {
       "title": "Pilotiniai juodraščiai",
@@ -1373,7 +1374,39 @@
       "sending": "Siunčiama...",
       "emptyError": "Žinutė tuščia.",
       "charCount": "{n}/{max}"
+    },
+    "launcher": {
+      "openLabel": "Susisiekti su pagalba",
+      "title": "Naujas pagalbos pokalbis",
+      "intro": "Aprašykite trumpai, kuo galime padėti. Pokalbis matomas tik jums ir administratoriui. Be el. pašto ar SMS.",
+      "subjectLabel": "Tema",
+      "subjectPlaceholder": "Pvz.: nepavyksta išsaugoti darbo įrašo",
+      "bodyLabel": "Pirmoji žinutė",
+      "bodyPlaceholder": "Trumpai aprašykite klausimą arba problemą.",
+      "send": "Pradėti pokalbį",
+      "sending": "Pradedama...",
+      "cancel": "Atšaukti",
+      "error": {
+        "subjectRequired": "Įveskite trumpą temą.",
+        "bodyRequired": "Įveskite pirmąją žinutę."
+      }
+    },
+    "adminSupport": {
+      "title": "Pagalbos pokalbiai",
+      "subtitle": "Testuotojų pradėti pagalbos pokalbiai. Read-only sąrašas — administratorius gali prisijungti prie pokalbio detalės puslapyje.",
+      "empty": "Pagalbos pokalbių dar nėra.",
+      "loadError": "Nepavyko užkrauti pokalbių: {msg}",
+      "unnamed": "(be temos)",
+      "createdBy": "Sukūrė: {id}…",
+      "footnote": "Tik administratoriai mato šį sąrašą. RLS riboja SELECT iki participants OR is_admin().",
+      "joinHint": "Esate administratorius, bet dar ne šio pokalbio dalyvis. Prisijunkite, kad galėtumėte atsakyti.",
+      "joinLabel": "Prisijungti prie pokalbio",
+      "joinPending": "Jungiamasi..."
     }
+  },
+  "orgTier1Warning": {
+    "eyebrow": "Bandomasis etapas",
+    "body": "Ši rolė skirta realiai organizacijai ar atstovaujamam klientui. Bandomajame etape juodraščiai privatūs ir realių pasekmių nesukelia. Rimtam naudojimui reikės įmonės duomenų (šalies, pavadinimo, registracijos kodo, korespondencijos adreso, atstovo vaidmens)."
   },
   "agentOs": {
     "title": "Agentų OS (v1)",
