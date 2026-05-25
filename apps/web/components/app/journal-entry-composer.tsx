@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
-import { DetectedSuggestionCard, type SuggestionStatus } from "@/components/app/detected-suggestion-card";
+import {
+  DetectedSuggestionCard,
+  type SuggestionStatus,
+} from "@/components/app/detected-suggestion-card";
 import { DetectedSuggestionList } from "@/components/app/detected-suggestion-list";
-import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
+import {
+  extractJournalSuggestions,
+  type JournalFragmentSuggestion,
+} from "@/lib/structuring/extract-journal-suggestions";
 import { createJournalEntry } from "@/lib/journal/actions";
 import { cn } from "@/lib/utils";
 
@@ -20,8 +26,6 @@ export type JournalEngagement = {
 export type JournalDirection = { slug: string; name: string };
 export type JournalSkill = { slug: string; name: string };
 
-/** All units exposed by `messages/{locale}/productivity-units.json`. Hours is
- *  surfaced FIRST because the spec wants time as the universal default (§Units). */
 const UNIT_OPTIONS = [
   "hours",
   "minutes",
@@ -35,16 +39,10 @@ const UNIT_OPTIONS = [
 
 type Stage = "compose" | "review";
 
-/**
- * Journal entry composer — text-first (§Work Journal). The worker writes one
- * paragraph ("Ką šiandien dirbote?"), then the rule-based parser proposes
- * structured data. Each proposal needs a confirm before it lands in the form;
- * nothing is persisted until the worker clicks "Patvirtinti įrašą".
- *
- * The submit goes through the existing server action `createJournalEntry`,
- * so the journal_entries / journal_entry_metrics tables behave exactly as
- * before — no DB migration required.
- */
+type FragmentReviewState = JournalFragmentSuggestion & {
+  status: SuggestionStatus;
+};
+
 export function JournalEntryComposer({
   engagements,
   directions,
@@ -52,13 +50,13 @@ export function JournalEntryComposer({
 }: {
   engagements: JournalEngagement[];
   directions: JournalDirection[];
-  /** The worker's saved skills — used to suggest "this entry could strengthen X". */
   workerSkills: JournalSkill[];
 }) {
   const t = useTranslations("journal");
   const tS = useTranslations("structuring");
   const tBucket = useTranslations("structuring.buckets");
   const tUnit = useTranslations("productivityUnits");
+  const tProf = useTranslations("professions");
   const locale = useLocale();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -70,13 +68,8 @@ export function JournalEntryComposer({
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Phase 5: a saved-state feedback flag — set immediately after a successful
-  // server save so the worker SEES the confirmation, not a silent reset.
   const [savedAt, setSavedAt] = useState<number | null>(null);
 
-  // Suggestion view state. We don't keep the raw parser result in state —
-  // each bucket (time / quantity / direction / site / skills) has its own
-  // user-editable mirror below, and re-running the parser updates them.
   const [timeStatus, setTimeStatus] = useState<SuggestionStatus>("pending");
   const [timeValue, setTimeValue] = useState<string>("");
   const [timeUnit, setTimeUnit] = useState<string>("hours");
@@ -91,6 +84,9 @@ export function JournalEntryComposer({
     Record<string, SuggestionStatus>
   >({});
   const [skillSuggestions, setSkillSuggestions] = useState<JournalSkill[]>([]);
+  // Multi-fragment review state — populated when the parser splits the text
+  // into more than one work fragment (the owner sentence yields 3).
+  const [fragments, setFragments] = useState<FragmentReviewState[]>([]);
   const [engagementId, setEngagementId] = useState<string>(primaryId);
   const [workDate, setWorkDate] = useState<string>(today);
 
@@ -138,6 +134,16 @@ export function JournalEntryComposer({
     setSkillStatuses(
       Object.fromEntries(matchedSkills.map((row) => [row.slug, "pending"])),
     );
+    // Multi-fragment view is only meaningful when the worker logged more
+    // than one work item — otherwise the single-bucket cards already cover
+    // the entry without visual duplication.
+    if (s.fragments.length > 1) {
+      setFragments(
+        s.fragments.map((f) => ({ ...f, status: "pending" as SuggestionStatus })),
+      );
+    } else {
+      setFragments([]);
+    }
     setStage("review");
   }
 
@@ -145,9 +151,15 @@ export function JournalEntryComposer({
     setSkillStatuses((prev) => ({ ...prev, [slug]: next }));
   }
 
+  function setFragmentStatus(idx: number, next: SuggestionStatus) {
+    setFragments((prev) =>
+      prev.map((f, i) => (i === idx ? { ...f, status: next } : f)),
+    );
+  }
+
   async function submit() {
     if (!text.trim()) {
-      setError(t("saveError"));
+      setError(t("notesRequiredCopy"));
       return;
     }
     setError(null);
@@ -158,7 +170,6 @@ export function JournalEntryComposer({
       fd.set("engagement_context_id", engagementId);
       fd.set("notes", text);
       fd.set("work_date", workDate);
-      // Only forward fields the worker actually confirmed.
       if (siteStatus === "confirmed" && siteName.trim())
         fd.set("site_name", siteName.trim());
       if (dirStatus === "confirmed" && dirSlug) fd.set("work_direction", dirSlug);
@@ -166,15 +177,29 @@ export function JournalEntryComposer({
         fd.set("quantity", qtyValue);
         fd.set("unit_slug", qtyUnit);
       } else if (timeStatus === "confirmed" && timeValue) {
-        // Time is the universal fallback unit when no other quantity was given.
         fd.set("quantity", timeValue);
         fd.set("unit_slug", timeUnit);
       }
-      await createJournalEntry(fd);
+      // Forward confirmed fragments as reviewable metadata. Empty when the
+      // entry is single-fragment.
+      const confirmedFragments = fragments
+        .filter((f) => f.status === "confirmed")
+        .map((f) => ({
+          rawPhrase: f.rawPhrase,
+          timeValue: f.time?.value ?? null,
+          timeUnit: f.time?.unitSlug ?? null,
+          activitySlug: f.activitySlug,
+          activityLabel: f.activityLabel,
+        }));
+      if (confirmedFragments.length > 0) {
+        fd.set("fragments_json", JSON.stringify(confirmedFragments));
+      }
+      const result = await createJournalEntry(fd);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
       formRef.current?.reset();
-      // Reset to compose stage with a fresh slate, but mark "just saved" so
-      // the compose stage can render a visible success card (Phase 5 —
-      // mobile-safe saved-state feedback).
       setStage("compose");
       setText("");
       setTimeValue("");
@@ -183,8 +208,12 @@ export function JournalEntryComposer({
       setSiteName("");
       setSkillSuggestions([]);
       setSkillStatuses({});
+      setFragments([]);
       setSavedAt(Date.now());
     } catch (e) {
+      // Network / unexpected — only the truly unexpected path falls through
+      // to the generic copy now, since the server action returns structured
+      // failures for known reasons.
       console.error("[journal-composer] submit failed:", e);
       setError(t("saveError"));
     } finally {
@@ -192,7 +221,6 @@ export function JournalEntryComposer({
     }
   }
 
-  // Quick action: confirm everything still pending (a typical "all good" tap).
   function confirmAllPending() {
     if (timeStatus === "pending" && timeValue) setTimeStatus("confirmed");
     if (qtyStatus === "pending" && qtyValue) setQtyStatus("confirmed");
@@ -205,6 +233,9 @@ export function JournalEntryComposer({
       }
       return next;
     });
+    setFragments((prev) =>
+      prev.map((f) => (f.status === "pending" ? { ...f, status: "confirmed" } : f)),
+    );
   }
 
   if (stage === "compose") {
@@ -219,8 +250,6 @@ export function JournalEntryComposer({
         className="card-border flex flex-col gap-4 p-4 sm:p-6"
       >
         {savedAt !== null && (
-          // Phase 5: clear success card after a journal save. Stays until the
-          // worker submits the next entry so it's not missed on mobile.
           <div
             role="status"
             className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2"
@@ -264,9 +293,6 @@ export function JournalEntryComposer({
           />
         </label>
 
-        {/* Phase 5 (adaptive): cross-domain examples so the journal does
-            not feel like a construction-only form. Worker doesn't have to
-            click anything — they can copy the wording style. */}
         <details className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-xs text-text-secondary">
           <summary className="cursor-pointer select-none font-mono text-[10px] uppercase tracking-label text-text-muted">
             {t("examplesTitle")}
@@ -296,12 +322,17 @@ export function JournalEntryComposer({
   }
 
   // Review stage — show structured suggestions and a final confirm CTA.
+  const fragmentTimes = fragments.filter((f) => f.time !== null).length;
+  const fragmentActivities = fragments.filter(
+    (f) => f.activitySlug !== null || f.activityLabel !== null,
+  ).length;
   const totalDetected =
     (timeValue ? 1 : 0) +
     (qtyValue ? 1 : 0) +
     (dirSlug ? 1 : 0) +
     (siteName ? 1 : 0) +
-    skillSuggestions.length;
+    skillSuggestions.length +
+    fragments.length;
 
   return (
     <div className="card-border flex flex-col gap-5 p-4 sm:p-6">
@@ -321,16 +352,52 @@ export function JournalEntryComposer({
       <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
         {tS("ruleBasedNotice")}
       </p>
-      {/* Phase 5: explicit "these are suggestions" framing — the worker sees
-          this every time they hit review, before any confirm tap. */}
       <p className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary">
         {t("suggestionReviewIntro")}
       </p>
+
+      {fragments.length > 0 && (
+        // Multi-fragment summary — required by the supersprint goal so the
+        // worker sees how many work items the parser found before reviewing.
+        <p
+          data-testid="journal-fragment-summary"
+          className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+        >
+          {t("foundSummary", { times: fragmentTimes, activities: fragmentActivities })}
+        </p>
+      )}
 
       {totalDetected === 0 ? (
         <p className="text-sm text-text-secondary">{tS("noMatches")}</p>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
+          {fragments.length > 0 && (
+            <DetectedSuggestionList
+              className="md:col-span-2"
+              title={tBucket("fragments")}
+              count={fragments.length}
+            >
+              {fragments.map((f, idx) => {
+                const timeLabel = f.time
+                  ? `${f.time.value} ${tUnit(f.time.unitSlug)}`
+                  : t("fragment.noTime");
+                const activityName = f.activitySlug
+                  ? tProfSafe(tProf, f.activitySlug, f.activityLabel)
+                  : (f.activityLabel ?? t("fragment.noActivity"));
+                return (
+                  <DetectedSuggestionCard
+                    key={`${idx}-${f.rawPhrase}`}
+                    label={`${timeLabel} · ${activityName}`}
+                    hint={`„${f.rawPhrase}"`}
+                    status={f.status}
+                    onConfirm={() => setFragmentStatus(idx, "confirmed")}
+                    onDiscard={() => setFragmentStatus(idx, "discarded")}
+                  />
+                );
+              })}
+            </DetectedSuggestionList>
+          )}
+
           <DetectedSuggestionList
             title={tBucket("time")}
             count={timeValue ? 1 : 0}
@@ -505,7 +572,11 @@ export function JournalEntryComposer({
       </div>
 
       {error && (
-        <p className="text-xs text-state-danger" role="alert">
+        <p
+          className="rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs text-state-danger"
+          role="alert"
+          data-testid="journal-save-error"
+        >
           {error}
         </p>
       )}
@@ -531,6 +602,25 @@ export function JournalEntryComposer({
           {t("editText")}
         </button>
       </div>
+      <p className="text-[11px] text-text-muted">{t("reviewMetaNote")}</p>
     </div>
   );
+}
+
+/** Resolve a profession slug to its localized label, falling back to the
+ *  raw LT label when the taxonomy doesn't have an entry yet (rule-based
+ *  matches outside the construction set, e.g. cashier — surfaced via the
+ *  free-text label rather than a fake taxonomy entry). */
+function tProfSafe(
+  tProf: (key: string) => string,
+  slug: string,
+  fallback: string | null,
+): string {
+  try {
+    const v = tProf(slug);
+    if (v && v !== slug) return v;
+  } catch {
+    /* fall through */
+  }
+  return fallback ?? slug;
 }

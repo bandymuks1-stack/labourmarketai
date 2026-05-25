@@ -65,3 +65,111 @@ export const WORK_DIRECTION_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "plumber", needles: ["santechnik darb"] },
   { slug: "carpenter", needles: ["medienos darb", "stalystės"] },
 ];
+
+/** Cross-domain per-fragment activity lexicon (not just construction).
+ *
+ *  Each row carries:
+ *  - `slug`: maps to professions.json when the activity has a canonical entry
+ *    (e.g. roofer). May be `null` when the activity is honest day-work that
+ *    the taxonomy doesn't model yet (e.g. cashier, driver) — the UI shows the
+ *    LT `label` directly as a review-only free-text suggestion (no fake
+ *    taxonomy invention, no auto-verified skill — see §7 of the doctrine).
+ *  - `label`: short LT human-readable name for the work direction.
+ *  - `needles`: lowercase substrings that trigger the match per fragment.
+ *
+ *  Ordering matters — earlier entries win for ambiguous fragments. */
+export const ACTIVITY_HINTS_LT: {
+  slug: string | null;
+  label: string;
+  needles: string[];
+}[] = [
+  // Construction
+  {
+    slug: "roofer",
+    label: "Stogo dengimas",
+    needles: ["stog", "dengiau stog", "dengti stog"],
+  },
+  { slug: "tiler", label: "Plytelių klojimas", needles: ["plytel", "klijav"] },
+  {
+    slug: "drywaller",
+    label: "Gipso kartono montavimas",
+    needles: ["gipso", "gipskart"],
+  },
+  { slug: "painter", label: "Dažymas", needles: ["daž", "dazym"] },
+  { slug: "plumber", label: "Santechnika", needles: ["santechn"] },
+  { slug: "electrician", label: "Elektra", needles: ["elektr"] },
+  {
+    slug: "carpenter",
+    label: "Staliaus darbai",
+    needles: ["stali", "medien"],
+  },
+  { slug: "mason", label: "Mūrijimas", needles: ["mūr", "mur "] },
+  {
+    slug: "concrete_worker",
+    label: "Betonavimas",
+    needles: ["beton liej", "betonav"],
+  },
+  { slug: "welder", label: "Suvirinimas", needles: ["suvirin"] },
+  {
+    slug: "rebar_worker",
+    label: "Armatūros darbai",
+    needles: ["armatūr", "armatur"],
+  },
+  // Adjacent day-work that the construction taxonomy doesn't model — label
+  // only, no fake slug so it stays a review-only suggestion.
+  {
+    slug: null,
+    label: "Pavežėjimas / vairavimas",
+    needles: [
+      "pavežėj",
+      "pavezej",
+      "pavežti",
+      "pavezti",
+      "vežiau",
+      "veziau",
+      "vairav",
+      "ride-hail",
+      "driver",
+      "driving",
+    ],
+  },
+  {
+    slug: null,
+    label: "Kasininko / parduotuvės darbas",
+    needles: [
+      "kasinink",
+      "kasoje",
+      "kasa ",
+      "parduotuv",
+      "cashier",
+      "retail",
+      "store ",
+    ],
+  },
+  {
+    slug: null,
+    label: "Klientų aptarnavimas",
+    needles: ["klient aptarn", "aptarnav"],
+  },
+];
+
+/** English aliases for the activity lexicon. The matcher in the extractor
+ *  lowercases the haystack so adding EN substrings to `needles` is enough
+ *  for bilingual entries — kept here for clarity. */
+export const ACTIVITY_HINTS_EN: typeof ACTIVITY_HINTS_LT = [
+  {
+    slug: "roofer",
+    label: "Roofing",
+    needles: ["roof", "roofing", "covering roof"],
+  },
+  {
+    slug: null,
+    label: "Driver / ride-hailing",
+    needles: ["driver", "driving", "ride-hail", "transport"],
+  },
+  {
+    slug: null,
+    label: "Cashier / retail",
+    needles: ["cashier", "store", "retail", "shop"],
+  },
+];

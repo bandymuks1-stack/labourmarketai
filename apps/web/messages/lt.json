@@ -375,7 +375,8 @@
       "cvEntries": "Galimi CV įrašai",
       "time": "Laikas",
       "quantity": "Kiekis",
-      "site": "Objektas / vieta"
+      "site": "Objektas / vieta",
+      "fragments": "Darbo fragmentai"
     },
     "experience": {
       "years": "Patirtis: {n} metai",
