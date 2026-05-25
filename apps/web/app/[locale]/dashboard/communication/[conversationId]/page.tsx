@@ -1,0 +1,122 @@
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { notFound, redirect } from "next/navigation";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { Link } from "@/lib/i18n/navigation";
+import { CommunicationComposer } from "@/components/app/communication-composer";
+import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
+import { createClient } from "@/lib/supabase/server";
+
+type MessageRow = {
+  id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(supabase: SupabaseClient): any {
+  return supabase as unknown;
+}
+
+export default async function ConversationDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; conversationId: string }>;
+}) {
+  const { locale, conversationId } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("communication");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    redirect(
+      `/${locale}/auth/login?next=/${locale}/dashboard/communication/${conversationId}`,
+    );
+
+  // RLS scopes both reads — a non-participant sees zero rows / zero
+  // messages, which we treat as 404.
+  const convRes = await asAny(supabase)
+    .from("conversations")
+    .select("id, subject, kind, created_by, updated_at")
+    .eq("id", conversationId)
+    .maybeSingle();
+  if (!convRes.data) notFound();
+  const conversation = convRes.data;
+
+  // Table is `conversation_messages`, NOT `messages` — see 0021's header
+  // for why (legacy public.messages chain pre-exists in prod).
+  const messagesRes = await asAny(supabase)
+    .from("conversation_messages")
+    .select("id, author_id, body, created_at")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true })
+    .limit(500);
+  const messages: MessageRow[] = (messagesRes.data ?? []) as MessageRow[];
+
+  return (
+    <div className="flex flex-col gap-5">
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <Link
+            href="/dashboard/communication"
+            className="font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue"
+          >
+            ← {t("backToList")}
+          </Link>
+          <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+            {conversation.subject ?? t("unnamedThread")}
+          </h1>
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t(`kind.${conversation.kind}`)}
+          </span>
+        </div>
+      </header>
+
+      {/* MarkReadOnMount stamps the participant's last_read_at when the
+          page first mounts — honest "I opened this thread" signal, not a
+          fake "delivered" indicator. */}
+      <MarkReadOnMount conversationId={conversationId} locale={locale} />
+
+      {messages.length === 0 ? (
+        <p className="card-border p-4 text-sm text-text-secondary">
+          {t("noMessages")}
+        </p>
+      ) : (
+        <ol className="flex flex-col gap-3">
+          {messages.map((m) => {
+            const isMine = m.author_id === user.id;
+            return (
+              <li
+                key={m.id}
+                data-testid={`message-${m.id}`}
+                className={`card-border flex flex-col gap-1 p-3 ${
+                  isMine ? "border-brand-blue/40 bg-brand-blue/5" : ""
+                }`}
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    {isMine ? t("byYou") : t("byOther")}
+                  </span>
+                  <span className="font-mono text-[10px] text-text-muted">
+                    {new Date(m.created_at).toLocaleString(locale)}
+                  </span>
+                </div>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">
+                  {m.body}
+                </p>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      <CommunicationComposer
+        conversationId={conversationId}
+        locale={locale}
+      />
+    </div>
+  );
+}

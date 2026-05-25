@@ -1,6 +1,8 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Agent OS admin index (v1, read-only).
@@ -34,6 +36,11 @@ const AGENTS: AgentCard[] = [
   { key: "pilot-sales-readiness", titleKey: "pilotSalesReadiness.title", summaryKey: "pilotSalesReadiness.summary", docPath: "docs/agent-os/agents/pilot-sales-readiness.md", scope: "sales" },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(supabase: SupabaseClient): any {
+  return supabase as unknown;
+}
+
 export default async function AdminAgentOsPage({
   params,
 }: {
@@ -43,6 +50,46 @@ export default async function AdminAgentOsPage({
   await requireSuperadmin(locale);
   setRequestLocale(locale);
   const t = await getTranslations("agentOs");
+
+  // Live counts for the "Pilot command center" panel (Phase 8 of the
+  // pilot-launch sprint). Pulls from tables the admin can read via RLS:
+  // pilot_events, language_feedback, pilot_drafts. Honest about zero
+  // state — if a table is missing on the target DB (migration not yet
+  // applied), the count surfaces as null and the panel shows "—".
+  const supabase = await createClient();
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  const [eventsRecent, eventsErrors, feedbackOpen, draftsTotal] =
+    await Promise.all([
+      asAny(supabase)
+        .from("pilot_events")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since24h)
+        .then((r: { count?: number; error: unknown }) =>
+          r.error ? null : (r.count ?? 0),
+        ),
+      asAny(supabase)
+        .from("pilot_events")
+        .select("id", { count: "exact", head: true })
+        .eq("result", "error")
+        .gte("created_at", since24h)
+        .then((r: { count?: number; error: unknown }) =>
+          r.error ? null : (r.count ?? 0),
+        ),
+      asAny(supabase)
+        .from("language_feedback")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open")
+        .then((r: { count?: number; error: unknown }) =>
+          r.error ? null : (r.count ?? 0),
+        ),
+      asAny(supabase)
+        .from("pilot_drafts")
+        .select("id", { count: "exact", head: true })
+        .then((r: { count?: number; error: unknown }) =>
+          r.error ? null : (r.count ?? 0),
+        ),
+    ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -58,6 +105,65 @@ export default async function AdminAgentOsPage({
           {t("statusEyebrow")}
         </p>
         <p className="mt-1">{t("statusV1Body")}</p>
+      </section>
+
+      {/* Pilot command center — Phase 8 of the pilot-launch sprint.
+          Live counts pulled from pilot_events / language_feedback /
+          pilot_drafts via admin RLS. Honest "—" when a table is missing
+          (e.g. 0020 not applied yet). */}
+      <section
+        className="card-border flex flex-col gap-3 p-4"
+        data-testid="agent-os-command-center"
+      >
+        <header className="flex items-baseline justify-between gap-2">
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            {t("commandCenter.title")}
+          </h2>
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("commandCenter.window")}
+          </span>
+        </header>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-md border border-ink-600/60 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("commandCenter.metric.events24h")}
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {eventsRecent ?? "—"}
+            </p>
+          </div>
+          <div className="rounded-md border border-ink-600/60 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("commandCenter.metric.errors24h")}
+            </p>
+            <p
+              className={`mt-1 font-display text-2xl font-bold ${
+                (eventsErrors ?? 0) > 0 ? "text-state-danger" : "text-text-primary"
+              }`}
+            >
+              {eventsErrors ?? "—"}
+            </p>
+          </div>
+          <div className="rounded-md border border-ink-600/60 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("commandCenter.metric.languageOpen")}
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {feedbackOpen ?? "—"}
+            </p>
+          </div>
+          <div className="rounded-md border border-ink-600/60 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("commandCenter.metric.draftsTotal")}
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {draftsTotal ?? "—"}
+            </p>
+          </div>
+        </div>
+        <p className="text-[11px] text-text-muted">
+          {t("commandCenter.footnote")}
+        </p>
       </section>
 
       <div className="grid gap-3 md:grid-cols-2">

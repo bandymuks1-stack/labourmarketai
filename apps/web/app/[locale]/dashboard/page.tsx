@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PilotRequestButton } from "@/components/app/pilot-request-button";
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
+import { PilotReadinessCard } from "@/components/app/pilot-readiness-card";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { getVisibleRoleOptions } from "@/lib/config/roles";
@@ -316,6 +317,11 @@ export default async function DashboardOverviewPage({
       {StartingPoint}
 
       <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
+
+      {/* Pilot readiness — sits above the journey rail so testers see the
+          honest pilot framing + the link to communication + the privacy
+          note BEFORE diving into the regular dashboard surfaces. */}
+      <PilotReadinessCard locale={locale} />
 
       <JourneyRail stages={wstages} label={tf("worker.eyebrow")} />
 
