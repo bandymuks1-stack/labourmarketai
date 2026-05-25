@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { DraftType, PilotDraftRow } from "@/lib/pilot/pilot-drafts";
+import { recordEvent } from "@/lib/telemetry/task";
 import {
   savePilotDraftAction,
   deletePilotDraftAction,
@@ -88,11 +89,20 @@ export function PilotDraftForm({
       savePilotDraftAction(draftType, payload)
         .then(() => {
           setSavedAt(new Date().toISOString());
+          // Pilot telemetry — event name per draft type so the admin
+          // dashboard can split funnels.
+          recordEvent(`${draftType.replace("_request", "_draft").replace("_offer", "_draft")}_saved`, {
+            draft_type: draftType,
+          });
           router.refresh();
         })
         .catch((e: unknown) => {
           console.error("[pilot-draft-form] save failed", e);
           setError(t("saveError"));
+          recordEvent("task_error", {
+            draft_type: draftType,
+            result_kind: e instanceof Error ? e.name : "unknown",
+          });
         });
     });
   }

@@ -21,7 +21,7 @@ the last ~3.5h of Supabase auth logs via `mcp__claude_ai_Supabase__get_logs`
 | Preview-host (`*.vercel.app`) traffic hitting auth | 0 |
 | 4xx / 5xx besides a single benign `session_not_found` (duplicate logout) | 0 |
 
-Recent successful Google PKCE login: user `dc3284ea-…` (sukysdonatas@gmail.com)
+Recent successful Google PKCE login: user `dc3284ea-…` (owner test account)
 from `referer: https://app.labourmarket.ai` at 2026-05-25 06:27:14 UTC.
 
 **What this means for the sprint:** the symptom owner reported earlier

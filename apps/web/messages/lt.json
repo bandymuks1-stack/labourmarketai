@@ -148,6 +148,11 @@
       "no": "nėra",
       "inspect": "Tikrinti →"
     },
+    "hub": {
+      "agentOs": "Agentų OS",
+      "telemetry": "Piloto telemetrija",
+      "languageFeedback": "Kalbos pranešimai"
+    },
     "drafts": {
       "title": "Pilotiniai juodraščiai",
       "help": "Įmonių / agentūrų / pirkėjų privatūs juodraščiai. Skaityti gali tik savininkas ir adminas.",
@@ -1332,6 +1337,108 @@
     "terms": { "title": "Naudojimo sąlygos" },
     "privacy": { "title": "Privatumo politika" },
     "cookies": { "title": "Slapukų politika" }
+  },
+  "agentOs": {
+    "title": "Agentų OS (v1)",
+    "subtitle": "Vidiniai agentų vaidmenys, padedantys vykdyti realių testuotojų piloto programą. Read-only versija — vykdymas dar nesujungtas.",
+    "statusEyebrow": "Būsena",
+    "statusV1Body": "v1 pateikia tik agentų vaidmenų korteles + nuorodas į specifikacijas docs/agent-os/. Realių agentų vykdymo dar nėra — kiekvienas vaidmuo aprašytas kaip atskaitos taškas savininkui.",
+    "scope": {
+      "owner_brief": "Savininko apžvalga",
+      "ops": "Operacijos",
+      "tester": "Testuotojai",
+      "security": "Saugumas",
+      "sales": "Pardavimai"
+    },
+    "links": {
+      "telemetry": "→ Piloto telemetrija",
+      "languageFeedback": "→ Kalbos pranešimai",
+      "adminHome": "→ Admin pradžia"
+    },
+    "footnote": "Tik administratoriai mato šį puslapį. Agentų aprašymai neauto-vykdomi.",
+    "chiefOperator": {
+      "title": "Vyriausiasis operatorius",
+      "summary": "Kasdienis savininko brief'as: dabartinė sistemos būsena, top blokeriai, saugiausias kitas veiksmas."
+    },
+    "prReadiness": {
+      "title": "PR pasiruošimas",
+      "summary": "Atvirų PR būsena: mergeability, CI, Vercel preview, Supabase preview, migracijų rizika, savininko veiksmai."
+    },
+    "migrationAuditor": {
+      "title": "Migracijų auditas",
+      "summary": "Lyginimas tarp repo migracijų ir produkcijos ledger: numeracijos dublikatai, idempotentumas, RLS/grants, ar pritaikyta produkcijoje."
+    },
+    "deploySmoke": {
+      "title": "Deploy + Smoke",
+      "summary": "Naujausio main commit deploy būsena, route smoke patikra, po-merge savininko testai."
+    },
+    "testerJourney": {
+      "title": "Testuotojų kelionė",
+      "summary": "Sekama užduočių pradžia/užbaigimas/trukmė, kur testuotojai pasitraukia: login, CV/profile, Work Journal, language feedback, drafts."
+    },
+    "cvProfile": {
+      "title": "CV / profilio agentas",
+      "summary": "Stebi profilio/CV kūrimo piltuvėlį: profile_text_saved, skill_suggestion_confirmed, skill_edit, feedback. Be neapdoroto teksto telemetrijoje."
+    },
+    "workJournalEvidence": {
+      "title": "Work Journal įrodymai",
+      "summary": "Nesuprastų frazių skaičiai, journal save klaidos, edit/delete naudojimas, parserio peržiūros pasiūlymai (be auto-promocijos)."
+    },
+    "languageQa": {
+      "title": "Kalbos QA",
+      "summary": "Skaito language_feedback admin inbox, grupuoja pagal route/locale/pažymėtą tekstą, siūlo LT/EN formuluočių pataisymus."
+    },
+    "securityPrivacy": {
+      "title": "Saugumas / privatumas",
+      "summary": "Tikrina admin-only prieigą, RLS lūkesčius, jokio service_role runtime, jokio neapdoroto teksto telemetrijoje, jokio viešo atvėrimo."
+    },
+    "pilotSalesReadiness": {
+      "title": "Piloto pardavimų pasiruošimas",
+      "summary": "Company/agency/buyer drafts, užduočių trintis, piloto pasiruošimo įvertinimas."
+    }
+  },
+  "pilotTelemetry": {
+    "title": "Piloto telemetrija (v1)",
+    "subtitle": "Saugūs testuotojų QA įvykiai. Read-only sąrašas. Tik administratoriai mato.",
+    "loadError": "Nepavyko užkrauti įvykių: {msg}",
+    "tasks": {
+      "title": "Užduočių santrauka",
+      "help": "Pagal task_name iš 200 paskutinių įvykių. avgMs — vidutinė trukmė tarp task_start ir task_complete (success).",
+      "empty": "Užduočių dar nėra.",
+      "col": {
+        "task": "Užduotis",
+        "started": "Pradėta",
+        "success": "Pavyko",
+        "error": "Klaida",
+        "abandoned": "Palikta",
+        "avgMs": "Vid. trukmė"
+      }
+    },
+    "errors": {
+      "title": "Top klaidų kodai",
+      "help": "Iš 200 paskutinių įvykių su result=error.",
+      "empty": "Klaidų dar nėra."
+    },
+    "recent": {
+      "title": "Paskutiniai įvykiai",
+      "count": "{n} įrašai",
+      "empty": "Įvykių dar nėra.",
+      "col": {
+        "when": "Laikas",
+        "result": "Rezultatas",
+        "event": "Įvykis",
+        "task": "Užduotis",
+        "route": "Maršrutas",
+        "duration": "Trukmė",
+        "error": "Klaida",
+        "metadata": "Metadata"
+      }
+    },
+    "links": {
+      "agentOs": "→ Agentų OS",
+      "languageFeedback": "→ Kalbos pranešimai"
+    },
+    "footnote": "Rūšiuojama pagal įvykio laiką (naujausi viršuje). Rodomi paskutiniai 200. RLS leidžia matyti tik administratoriams."
   },
   "languageFeedback": {
     "openLabel": "Pranešti apie tekstą",

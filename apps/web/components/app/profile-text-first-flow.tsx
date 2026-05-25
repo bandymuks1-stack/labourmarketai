@@ -10,6 +10,7 @@ import { TextFirstComposer } from "@/components/app/text-first-composer";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
+import { recordEvent } from "@/lib/telemetry/task";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -205,6 +206,14 @@ export function ProfileTextFirstFlow({
       // upserts on (profile_id, normalized_label) so re-clicking Save
       // never duplicates.
       await saveProfileSkillClaimsAction(confirmedClaims);
+
+      // Pilot telemetry — fire-and-forget. We send a count of confirmed
+      // skill claims (number, not labels) so the admin can see funnel
+      // throughput without the labels themselves leaking into telemetry.
+      recordEvent("profile_text_saved");
+      recordEvent("profile_skill_suggestion_confirmed", {
+        skill_count: confirmedClaims.length,
+      });
 
       // SAVE-STATE LIFECYCLE (feat/cc/profile-save-state-and-idea-extraction):
       // The confirmed chips MOVE from `confirmed` → `saved` so the
