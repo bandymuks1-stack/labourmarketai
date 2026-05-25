@@ -1,13 +1,28 @@
 -- ════════════════════════════════════════════════════════════════════════
 -- 0021 — Communication v1: conversations, participants, messages.
 --
--- Pilot tester ↔ admin / worker ↔ company / worker ↔ agency channel.
--- NOT a marketing chat. NOT a public chat. NOT a fake-realtime channel.
+-- NAMING NOTE — Why the messages table is `conversation_messages`:
+--
+--   Production already contains a legacy `public.messages` table (with
+--   `thread_id` / `sender_id` / `sent_at` columns) belonging to an
+--   earlier `messages → threads → matches` chain that predates this
+--   repo's migration ledger (it isn't in any tracked migration file).
+--   It is currently empty (0 rows) and not referenced by the v1 app
+--   code shipped in PR #68.
+--
+--   To avoid a collision we name THIS sprint's table
+--   `public.conversation_messages`. The legacy `messages` chain is
+--   left untouched (no DROP, no policy change). It can be retired in
+--   a separate, carefully-reviewed slice once the owner decides.
+--
+--   The pattern stays: one row per thread, m:n participants, append-only
+--   message rows. Only the table name changes from the original PR #68
+--   draft.
 --
 -- Three tables:
 --   - public.conversations         — one row per thread.
 --   - public.conversation_participants — m:n (conversation × profile).
---   - public.messages              — append-only message rows.
+--   - public.conversation_messages — append-only message rows.
 --
 -- Access (RLS, enforced at the DB):
 --   - SELECT: only profiles that participate in the conversation (or admin).
@@ -54,8 +69,8 @@ create table if not exists public.conversation_participants (
 create index if not exists idx_conversation_participants_profile
   on public.conversation_participants(profile_id, conversation_id);
 
--- ── 3. messages ────────────────────────────────────────────────────────
-create table if not exists public.messages (
+-- ── 3. conversation_messages (NOT `messages` — see header) ─────────────
+create table if not exists public.conversation_messages (
   id              uuid primary key default gen_random_uuid(),
   conversation_id uuid not null references public.conversations(id) on delete cascade,
   author_id       uuid not null references public.profiles(id),
@@ -65,10 +80,10 @@ create table if not exists public.messages (
   body            text not null check (char_length(body) between 1 and 10000),
   created_at      timestamptz not null default now()
 );
-create index if not exists idx_messages_conversation_created
-  on public.messages(conversation_id, created_at);
-create index if not exists idx_messages_author_created
-  on public.messages(author_id, created_at desc);
+create index if not exists idx_conversation_messages_conversation_created
+  on public.conversation_messages(conversation_id, created_at);
+create index if not exists idx_conversation_messages_author_created
+  on public.conversation_messages(author_id, created_at desc);
 
 -- ── 4. RLS helper — is the caller a participant in this conversation? ─
 create or replace function public.is_conversation_participant(p_conversation_id uuid)
@@ -124,27 +139,27 @@ create policy conversation_participants_update on public.conversation_participan
   using (profile_id = auth.uid())
   with check (profile_id = auth.uid());
 
--- ── 7. RLS — messages ─────────────────────────────────────────────────
-alter table public.messages enable row level security;
+-- ── 7. RLS — conversation_messages ────────────────────────────────────
+alter table public.conversation_messages enable row level security;
 
-create policy messages_select on public.messages for select
+create policy conversation_messages_select on public.conversation_messages for select
   using (
     public.is_conversation_participant(conversation_id)
     or public.is_admin()
   );
 
-create policy messages_insert on public.messages for insert
+create policy conversation_messages_insert on public.conversation_messages for insert
   with check (
     author_id = auth.uid()
     and public.is_conversation_participant(conversation_id)
   );
 
--- No UPDATE / DELETE policy — messages are append-only.
+-- No UPDATE / DELETE policy on conversation_messages — append-only.
 
 -- ── 8. Grants ──────────────────────────────────────────────────────────
 grant select, insert            on public.conversations              to authenticated;
 grant select, insert, update    on public.conversation_participants  to authenticated;
-grant select, insert            on public.messages                   to authenticated;
+grant select, insert            on public.conversation_messages      to authenticated;
 
 revoke all on function public.is_conversation_participant(uuid) from public;
 grant execute on function public.is_conversation_participant(uuid) to authenticated;

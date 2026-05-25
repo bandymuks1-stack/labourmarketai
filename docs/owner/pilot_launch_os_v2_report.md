@@ -25,7 +25,20 @@ A single sprint covering operations, policies, communication, sports-team vocabu
 - `journal-evidence-and-correction-policy-v1.md` — supersede semantics + correction-request flow + hash chain.
 
 ### Phase 3 — Communication v1 (migration + UI)
-- **Migration `0021_communication.sql`** — adds `conversations`, `conversation_participants`, `messages` + `is_conversation_participant(uuid)` helper (security invoker). RLS: SELECT participants-or-admin; INSERT messages requires `author_id = auth.uid()` AND participation; participants update only their own `last_read_at`; messages append-only. Grants to authenticated only.
+
+> **Naming note (revised in-PR after the pre-apply production diagnostic):**
+> The v1 message table is **`conversation_messages`**, not `messages`.
+> Production already contained a legacy `public.messages` chain
+> (`messages` → `threads` → `matches` with `thread_id` / `sender_id` /
+> `sent_at` columns, RLS via a `can_access_thread` `security definer`
+> helper) that predates this repo's migration ledger. It is empty
+> (0 rows) and not referenced by current app code. To avoid an
+> impossible-to-cleanly-apply collision, the v1 message table was
+> renamed to `conversation_messages`. The legacy chain is left
+> untouched and will be reviewed in a separate, careful retirement
+> slice.
+
+- **Migration `0021_communication.sql`** — adds `conversations`, `conversation_participants`, `conversation_messages` + `is_conversation_participant(uuid)` helper (security invoker). RLS: SELECT participants-or-admin; INSERT conversation_messages requires `author_id = auth.uid()` AND participation; participants update only their own `last_read_at`; conversation_messages append-only. Grants to authenticated only.
 - **Server action `lib/communication/actions.ts`** — `createConversation` / `sendMessage` / `markConversationRead`, tagged-result, no service_role, precise LT/EN error mapping (including RLS denial → "Negalima rašyti šiame pokalbyje").
 - **Pages** —
   - `/[locale]/dashboard/communication` (thread list, RLS-scoped).
@@ -111,7 +124,7 @@ Use the standing `/goal Supabase production migration check` flow on `0021_commu
 
 ```
 /goal Supabase production migration check for PR #<NN> migration 0021_communication.
-First read-only verify whether conversations + conversation_participants + messages
+First read-only verify whether conversations + conversation_participants + conversation_messages
 tables exist, RLS enabled, participant-scoped SELECT, append-only messages, no public
 exposure. If missing and safe production access is available, ask for --apply before
 mutating. After apply, re-run verifier and report live state.

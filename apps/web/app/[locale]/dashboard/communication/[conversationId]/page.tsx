@@ -46,8 +46,10 @@ export default async function ConversationDetailPage({
   if (!convRes.data) notFound();
   const conversation = convRes.data;
 
+  // Table is `conversation_messages`, NOT `messages` — see 0021's header
+  // for why (legacy public.messages chain pre-exists in prod).
   const messagesRes = await asAny(supabase)
-    .from("messages")
+    .from("conversation_messages")
     .select("id, author_id, body, created_at")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })

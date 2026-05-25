@@ -154,8 +154,11 @@ export async function sendMessage(input: {
     };
   }
 
+  // Table is `conversation_messages`, NOT `messages` — see migration
+  // 0021's header for the naming rationale (legacy `public.messages`
+  // chain pre-existed in prod and is left untouched).
   const result = await asAny(supabase)
-    .from("messages")
+    .from("conversation_messages")
     .insert({
       conversation_id: input.conversationId,
       author_id: user.id,

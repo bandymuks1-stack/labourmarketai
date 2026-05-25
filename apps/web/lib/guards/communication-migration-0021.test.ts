@@ -40,11 +40,11 @@ const detailPage = readApp(
 const markRead = readApp("components/app/mark-read-on-mount.tsx");
 
 describe("0021 — three tables exist with RLS enabled", () => {
-  it("creates conversations / conversation_participants / messages", () => {
+  it("creates conversations / conversation_participants / conversation_messages", () => {
     for (const t of [
       "conversations",
       "conversation_participants",
-      "messages",
+      "conversation_messages",
     ]) {
       expect(migration).toMatch(
         new RegExp(`create table if not exists public\\.${t}`, "i"),
@@ -55,7 +55,16 @@ describe("0021 — three tables exist with RLS enabled", () => {
     }
   });
 
-  it("bounds the message body to 10000 chars", () => {
+  it("does NOT shadow the pre-existing legacy public.messages table", () => {
+    // The legacy chain (messages/threads/matches with thread_id/sender_id)
+    // pre-existed in production untracked by this repo. We must not
+    // collide with it. 0021's message table is `conversation_messages`.
+    expect(migration).not.toMatch(/create table if not exists public\.messages/i);
+    expect(migration).not.toMatch(/alter table public\.messages\b/i);
+    expect(migration).not.toMatch(/create policy[\s\S]{0,200}on public\.messages\b/i);
+  });
+
+  it("bounds the message body to 10000 chars on conversation_messages", () => {
     expect(migration).toMatch(
       /body\s+text not null check \(char_length\(body\) between 1 and 10000\)/i,
     );
@@ -75,15 +84,15 @@ describe("0021 — RLS policies are participant-scoped", () => {
     );
   });
 
-  it("messages INSERT requires author_id = auth.uid() AND participation", () => {
+  it("conversation_messages INSERT requires author_id = auth.uid() AND participation", () => {
     expect(migration).toMatch(
-      /create policy messages_insert on public\.messages for insert[\s\S]*author_id = auth\.uid\(\)[\s\S]*is_conversation_participant/i,
+      /create policy conversation_messages_insert on public\.conversation_messages for insert[\s\S]*author_id = auth\.uid\(\)[\s\S]*is_conversation_participant/i,
     );
   });
 
-  it("messages has NO update / delete policy (append-only)", () => {
+  it("conversation_messages has NO update / delete policy (append-only)", () => {
     expect(migration).not.toMatch(
-      /create policy[\s\S]*on public\.messages for (update|delete)/i,
+      /create policy[\s\S]*on public\.conversation_messages for (update|delete)/i,
     );
   });
 
@@ -110,13 +119,13 @@ describe("0021 — grants restricted to authenticated", () => {
     for (const t of [
       "conversations",
       "conversation_participants",
-      "messages",
+      "conversation_messages",
     ]) {
       expect(migration).toMatch(
         new RegExp(`grant[^;]*on public\\.${t}[\\s\\S]*to authenticated`, "i"),
       );
     }
-    expect(migration).not.toMatch(/grant[^;]*on public\.(conversations|conversation_participants|messages)[^;]*to\s+(anon|public)/i);
+    expect(migration).not.toMatch(/grant[^;]*on public\.(conversations|conversation_participants|conversation_messages)[^;]*to\s+(anon|public)/i);
   });
 });
 
