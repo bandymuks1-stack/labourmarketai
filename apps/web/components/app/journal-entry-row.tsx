@@ -1,18 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { softDeleteJournalEntry } from "@/lib/journal/actions";
 
 /**
- * One row in the journal entries list. The Delete button is only visible
- * when the entry has no external confirmations — `canDelete=false` keeps
- * the surface honest about the §3 append-only doctrine, and the RPC
- * back-end re-enforces the same rule (so a stale client can't bypass it).
+ * One row in the journal entries list. The Delete + Edit controls are only
+ * visible when the entry has no external confirmations (`canEdit=false`
+ * mirrors `canDelete=false`) — keeps the surface honest about the §3
+ * append-only doctrine, and the RPC back-end re-enforces the same rule.
  *
- * "Edit" is intentionally out of scope for this row: pre-confirmation
- * edits land via the composer in a follow-up slice, using the
- * `journal_entry_supersede` RPC the same migration ships.
+ * Edit hands off to the composer in "edit mode" via the `?editing=<id>`
+ * query parameter (URL-based so the back button + tab restore work).
  */
 export function JournalEntryRow({
   entryId,
@@ -44,21 +44,32 @@ export function JournalEntryRow({
     <li className="card-border p-4">
       {children}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        {canDelete ? (
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={pending}
-            className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-state-danger disabled:opacity-50"
-            data-testid={`journal-entry-delete-${entryId}`}
-          >
-            {pending ? t("entry.deleting") : t("entry.delete")}
-          </button>
-        ) : (
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("entry.deleteBlocked")}
-          </span>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          {canDelete ? (
+            <>
+              <Link
+                href={`/${locale}/dashboard/journal?editing=${entryId}#journal-composer`}
+                className="font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue"
+                data-testid={`journal-entry-edit-${entryId}`}
+              >
+                {t("entry.edit")}
+              </Link>
+              <button
+                type="button"
+                onClick={onDelete}
+                disabled={pending}
+                className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-state-danger disabled:opacity-50"
+                data-testid={`journal-entry-delete-${entryId}`}
+              >
+                {pending ? t("entry.deleting") : t("entry.delete")}
+              </button>
+            </>
+          ) : (
+            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("entry.deleteBlocked")}
+            </span>
+          )}
+        </div>
         {error && (
           <span
             role="alert"

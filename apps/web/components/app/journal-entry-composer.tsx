@@ -15,7 +15,11 @@ import {
   extractJournalSuggestions,
   type JournalFragmentSuggestion,
 } from "@/lib/structuring/extract-journal-suggestions";
-import { createJournalEntry } from "@/lib/journal/actions";
+import {
+  createJournalEntry,
+  supersedeJournalEntry,
+} from "@/lib/journal/actions";
+import { formatDuration } from "@/lib/journal/format-duration";
 import { cn } from "@/lib/utils";
 
 export type JournalEngagement = {
@@ -48,14 +52,26 @@ type FragmentReviewState = JournalFragmentSuggestion & {
   userLabel: string;
 };
 
+export type JournalEditingEntry = {
+  id: string;
+  originalText: string;
+};
+
 export function JournalEntryComposer({
   engagements,
   directions,
   workerSkills,
+  editingEntry,
 }: {
   engagements: JournalEngagement[];
   directions: JournalDirection[];
   workerSkills: JournalSkill[];
+  /** When set, the composer opens in EDIT mode: textarea is prefilled
+   *  with `editingEntry.originalText`, the submit CTA reads
+   *  "Atnaujinti įrašą", and on save the action calls
+   *  `supersedeJournalEntry(editingEntry.id, …)` (RPC from migration 0018)
+   *  instead of the create path. */
+  editingEntry?: JournalEditingEntry | null;
 }) {
   const t = useTranslations("journal");
   const tS = useTranslations("structuring");
@@ -70,7 +86,7 @@ export function JournalEntryComposer({
   const today = new Date().toISOString().slice(0, 10);
 
   const [stage, setStage] = useState<Stage>("compose");
-  const [text, setText] = useState("");
+  const [text, setText] = useState(editingEntry?.originalText ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -172,7 +188,21 @@ export function JournalEntryComposer({
 
   function setFragmentStatus(idx: number, next: SuggestionStatus) {
     setFragments((prev) =>
-      prev.map((f, i) => (i === idx ? { ...f, status: next } : f)),
+      prev.map((f, i) => {
+        if (i !== idx) return f;
+        // v4 clarify prompt: an unknown fragment cannot be confirmed
+        // without a user label. The Confirm tap is treated as a request
+        // for clarification rather than a hard error — we keep the
+        // status `pending` so the worker sees the inline hint + input.
+        if (
+          next === "confirmed" &&
+          f.isUnknown &&
+          f.userLabel.trim().length === 0
+        ) {
+          return { ...f, status: "pending" };
+        }
+        return { ...f, status: next };
+      }),
     );
   }
 
@@ -227,7 +257,9 @@ export function JournalEntryComposer({
       if (confirmedFragments.length > 0) {
         fd.set("fragments_json", JSON.stringify(confirmedFragments));
       }
-      const result = await createJournalEntry(fd);
+      const result = editingEntry
+        ? await supersedeJournalEntry(editingEntry.id, fd)
+        : await createJournalEntry(fd);
       if (!result.ok) {
         setError(result.message);
         return;
@@ -301,8 +333,24 @@ export function JournalEntryComposer({
           </div>
         )}
         <h3 className="font-display text-lg font-semibold text-text-primary">
-          {t("newEntry")}
+          {editingEntry ? t("editEntryTitle") : t("newEntry")}
         </h3>
+        {editingEntry && (
+          // v4 — explicit edit-mode banner so the worker knows their save
+          // will REPLACE an earlier entry rather than create a new one.
+          <p
+            className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+            data-testid="journal-edit-mode-banner"
+          >
+            {t("editEntryBanner")}{" "}
+            <a
+              href={`/${locale}/dashboard/journal`}
+              className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+            >
+              {t("editEntryCancel")}
+            </a>
+          </p>
+        )}
 
         <label className="flex flex-col gap-1.5">
           <Label>{t("engagement")}</Label>
@@ -419,7 +467,11 @@ export function JournalEntryComposer({
             >
               {fragments.map((f, idx) => {
                 const timeLabel = f.time
-                  ? `${f.time.value} ${tUnit(f.time.unitSlug)}`
+                  ? formatDuration(
+                      f.time.value,
+                      f.time.unitSlug,
+                      locale === "en" ? "en" : "lt",
+                    )
                   : t("fragment.noTime");
                 const activityName = f.isUnknown
                   ? t("fragment.unknownTitle")
@@ -436,11 +488,6 @@ export function JournalEntryComposer({
                     onDiscard={() => setFragmentStatus(idx, "discarded")}
                   >
                     {f.isUnknown && (
-                      // v3 "Nesuprasta / patikslinkite": the parser found a
-                      // duration but no recognised activity. The worker can
-                      // type a short LT label that ships as `unknown_phrase`
-                      // metric — review-only, never auto-promoted to a
-                      // verified skill.
                       <div className="flex flex-col gap-1.5">
                         <p className="text-[11px] leading-relaxed text-text-secondary">
                           {t("fragment.unknownHint")}
@@ -455,6 +502,19 @@ export function JournalEntryComposer({
                           }
                           data-testid={`fragment-unknown-label-${idx}`}
                         />
+                        {f.status === "pending" && f.userLabel.trim().length === 0 && (
+                          // v4 — the Confirm button on the card calls
+                          // setFragmentStatus(confirmed). The setter
+                          // refuses to flip an empty-label unknown to
+                          // confirmed, so we render a precise inline
+                          // hint so the worker knows what's blocking them.
+                          <p
+                            className="text-[11px] leading-relaxed text-state-warning"
+                            data-testid={`fragment-unknown-clarify-${idx}`}
+                          >
+                            {t("fragment.unknownClarifyPrompt")}
+                          </p>
+                        )}
                       </div>
                     )}
                   </DetectedSuggestionCard>
@@ -676,6 +736,27 @@ export function JournalEntryComposer({
         </label>
       </div>
 
+      {(() => {
+        // v4 — surface a banner when any unknown fragment is still
+        // unresolved (pending OR confirmed-but-empty-label). The Save
+        // button stays enabled (worker can still save without resolving),
+        // but the banner makes it visible so they don't ship with
+        // unanswered "patikslinkite" cards in the saved metadata.
+        const unresolvedUnknownCount = fragments.filter(
+          (f) => f.isUnknown && f.userLabel.trim().length === 0,
+        ).length;
+        if (unresolvedUnknownCount === 0) return null;
+        return (
+          <p
+            data-testid="journal-unresolved-unknowns"
+            className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          >
+            {t("fragment.unresolvedUnknownsBanner", {
+              count: unresolvedUnknownCount,
+            })}
+          </p>
+        );
+      })()}
       {error && (
         <p
           className="rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs text-state-danger"
@@ -688,7 +769,11 @@ export function JournalEntryComposer({
 
       <div className={cn("flex flex-wrap items-center gap-3")}>
         <Button type="button" onClick={submit} disabled={submitting}>
-          {submitting ? t("saving") : t("confirmEntry")}
+          {submitting
+            ? t("saving")
+            : editingEntry
+              ? t("updateEntry")
+              : t("confirmEntry")}
         </Button>
         {totalDetected > 0 && (
           <button

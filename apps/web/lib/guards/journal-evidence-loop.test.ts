@@ -93,6 +93,35 @@ describe("journal save action returns structured results", () => {
     expect(src).toMatch(/already_confirmed/);
     expect(src).toMatch(/rpc_unavailable/);
   });
+
+  it("exports supersedeJournalEntry that calls the journal_entry_supersede RPC (v4 edit)", () => {
+    // v4 edit flow: clicking Redaguoti įrašą on an entry routes the save
+    // through the supersede RPC instead of the create path. The action
+    // shares the FormData contract so the composer can re-use submit code.
+    expect(src).toMatch(/export async function supersedeJournalEntry/);
+    expect(src).toMatch(/["']journal_entry_supersede["']/);
+  });
+});
+
+describe("journal composer wires the v4 edit + clarify flow", () => {
+  const composer = read("components/app/journal-entry-composer.tsx");
+
+  it("accepts an editingEntry prop and switches submit to supersede when set", () => {
+    expect(composer).toMatch(/editingEntry\s*\?\:/);
+    expect(composer).toMatch(/supersedeJournalEntry\(editingEntry\.id/);
+  });
+
+  it("refuses to flip an unknown fragment to confirmed without a user label", () => {
+    // The Confirm button on an unknown fragment is a request for
+    // clarification, not a hard error. The setter forces status back to
+    // pending when the worker tries to confirm without a label.
+    expect(composer).toMatch(/f\.isUnknown[\s\S]{0,200}userLabel\.trim\(\)\.length === 0/);
+  });
+
+  it("surfaces an unresolved-unknowns banner above the Save CTA", () => {
+    expect(composer).toMatch(/unresolvedUnknownCount/);
+    expect(composer).toMatch(/unresolvedUnknownsBanner/);
+  });
 });
 
 describe("journal parser stays deterministic + rule-based", () => {

@@ -42,8 +42,13 @@
     "delete": "Delete entry",
     "deleting": "Deleting...",
     "deleteConfirm": "Really delete this entry? It becomes soft-deleted — the row stays in history but won't show in the list.",
-    "deleteBlocked": "Entry already confirmed — send a correction request instead of deleting."
+    "deleteBlocked": "Entry already confirmed — send a correction request instead of deleting.",
+    "edit": "Edit entry"
   },
+  "editEntryTitle": "Edit entry",
+  "editEntryBanner": "You're editing a saved entry. Suggest the structure again, confirm what you're changing, then \"Update entry\" replaces the old version. To back out —",
+  "editEntryCancel": "cancel editing",
+  "updateEntry": "Update entry",
   "field": {
     "work_direction": "Work direction",
     "area_done": "Area done",
@@ -83,6 +88,8 @@
     "unknownTitle": "Not understood / please clarify",
     "unknownHint": "The system recognised a duration but not the work itself. Add a short description — the label stays private until a human confirmation step is added.",
     "unknownPlaceholder": "e.g. leisure, sports, volunteering…",
+    "unknownClarifyPrompt": "Enter a short label so this fragment can be confirmed. Without a clarification it will stay unexplained in the list.",
+    "unresolvedUnknownsBanner": "{count} fragment(s) still need a clarification. You can save the entry without them, but adding a label helps anyone reviewing this entry later understand the context.",
     "institutionHint": "Institution / organization (free text, optional)",
     "topicHint": "Topic / context (free text, optional)"
   },

@@ -42,8 +42,13 @@
     "delete": "Pašalinti įrašą",
     "deleting": "Šalinama...",
     "deleteConfirm": "Tikrai pašalinti šį įrašą? Veiksmas grąžinamas — soft-delete (įrašas nedingsta iš istorijos, tik nebematomas sąraše).",
-    "deleteBlocked": "Įrašas patvirtintas — vietoje pašalinimo siųskite pataisymo prašymą."
+    "deleteBlocked": "Įrašas patvirtintas — vietoje pašalinimo siųskite pataisymo prašymą.",
+    "edit": "Redaguoti įrašą"
   },
+  "editEntryTitle": "Redaguoti įrašą",
+  "editEntryBanner": "Redaguojate jau išsaugotą įrašą. Pasiūlykite struktūrą iš naujo, patvirtinkite ką taisote, ir paspaudus „Atnaujinti įrašą“ senas variantas bus pakeistas. Jei keisitės nuomonę —",
+  "editEntryCancel": "atšaukti redagavimą",
+  "updateEntry": "Atnaujinti įrašą",
   "field": {
     "work_direction": "Darbo kryptis",
     "area_done": "Atlikta plotas",
@@ -83,6 +88,8 @@
     "unknownTitle": "Nesuprasta / patikslinkite",
     "unknownHint": "Sistema užfiksavo laiką, bet nesuprato, kokia tai veikla. Trumpai apibūdinkite — etiketė liks asmeninė, kol jos nepatvirtinsime žmogus prieš žmogų.",
     "unknownPlaceholder": "Pvz.: laisvalaikis, sportas, savanorystė…",
+    "unknownClarifyPrompt": "Įveskite trumpą etiketę, kad galėtumėte šį fragmentą patvirtinti. Be paaiškinimo jis liks be paaiškinimo ir pasąraše.",
+    "unresolvedUnknownsBanner": "{count} fragmentas (-ai) dar be paaiškinimo. Galite išsaugoti įrašą ir taip, bet etiketę pridėjus žmogus, žiūrėdamas šį įrašą vėliau, supras kontekstą.",
     "institutionHint": "Įstaiga / organizacija (laisvas tekstas, neprivaloma)",
     "topicHint": "Tema / kontekstas (laisvas tekstas, neprivaloma)"
   },
