@@ -5,6 +5,7 @@ import {
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
+import { formatDuration } from "@/lib/journal/format-duration";
 import { createClient } from "@/lib/supabase/server";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
@@ -40,10 +41,17 @@ const STATUS_CLASS: Record<EntryStatus, string> = {
  *  until a manager confirms them (§13). */
 export default async function JournalPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ editing?: string | string[] }>;
 }) {
   const { locale } = await params;
+  const sp = (await searchParams) ?? {};
+  const editingId =
+    typeof sp.editing === "string" && sp.editing.trim().length > 0
+      ? sp.editing.trim()
+      : null;
   setRequestLocale(locale);
   const t = await getTranslations("journal");
   const tRel = await getTranslations("relationshipTypes");
@@ -246,11 +254,36 @@ export default async function JournalPage({
         )}
       </div>
 
-      <JournalEntryComposer
-        engagements={engagements}
-        directions={directions}
-        workerSkills={workerSkills}
-      />
+      {/* v4 — when the worker arrived via ?editing=<id> from the entries
+          list, prefill the composer with that entry's original_text and
+          flip its save path to the supersede RPC. Only unconfirmed
+          entries are eligible (the lookup filters by zero confirmations);
+          a confirmed-id is silently ignored so the worker can't be tricked
+          into "editing" a confirmed entry — they would need the explicit
+          correction-request UI for that. */}
+      <div id="journal-composer">
+        <JournalEntryComposer
+          engagements={engagements}
+          directions={directions}
+          workerSkills={workerSkills}
+          editingEntry={
+            editingId
+              ? ((entries ?? []).find(
+                  (e) =>
+                    e.id === editingId &&
+                    (e.journal_entry_confirmations ?? []).length === 0,
+                )
+                  ? {
+                      id: editingId,
+                      originalText:
+                        (entries ?? []).find((e) => e.id === editingId)
+                          ?.original_text ?? "",
+                    }
+                  : null)
+              : null
+          }
+        />
+      </div>
 
       {/* Entry list */}
       <section className="flex flex-col gap-3">
@@ -292,8 +325,23 @@ export default async function JournalPage({
                     {site?.value_text && <span>{site.value_text}</span>}
                     {area?.value_numeric != null && (
                       <span>
-                        {area.value_numeric}{" "}
-                        {area.unit_slug ? tUnit(area.unit_slug) : ""}
+                        {/* Time-class units (hours / minutes / days) get the
+                            human-readable formatter so a saved "195 min" row
+                            reads "3 val. 15 min." in the entries list, not
+                            an opaque minute count. Other quantity units
+                            (square_meters, pieces, kg, …) fall through to
+                            the legacy locale-aware unit label. */}
+                        {area.unit_slug === "hours" ||
+                        area.unit_slug === "minutes" ||
+                        area.unit_slug === "days"
+                          ? formatDuration(
+                              area.value_numeric,
+                              area.unit_slug,
+                              locale === "en" ? "en" : "lt",
+                            )
+                          : `${area.value_numeric} ${
+                              area.unit_slug ? tUnit(area.unit_slug) : ""
+                            }`}
                       </span>
                     )}
                     <span>

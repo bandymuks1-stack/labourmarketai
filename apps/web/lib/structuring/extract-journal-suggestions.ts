@@ -280,6 +280,92 @@ function splitFragments(text: string): string[] {
     .filter((s) => s.length > 0);
 }
 
+/** True when every word in the fragment is part of a time/numeric idiom
+ *  (cardinal numeral, duration noun, "su"/"puse"/"ir"/"bei", or a digit). */
+function isTimeOnlyFragment(fragment: string): boolean {
+  const TIME_TOKENS = new Set([
+    "su",
+    "puse",
+    "ir",
+    "bei",
+    "pusvaland",
+    "pusvalandį",
+    "pusvalandi",
+    ...Object.keys(LT_NUMBER_WORDS),
+  ]);
+  const words = fragment
+    .toLowerCase()
+    .replace(/[.,;!?]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) return false;
+  for (const w of words) {
+    if (/^\d+(?:[.,]\d+)?$/.test(w)) continue;
+    if (/^valand[\p{L}]*$/u.test(w)) continue;
+    if (/^minu[čt][\p{L}]*$/u.test(w)) continue;
+    if (/^dien[\p{L}]*$/u.test(w)) continue;
+    if (TIME_TOKENS.has(w)) continue;
+    return false;
+  }
+  return true;
+}
+
+/** Sum two duration values, normalising to minutes when one of them is in
+ *  minutes (so 2h + 15min becomes 135 minutes). */
+function addTimes(
+  a: { value: number; unitSlug: "hours" | "minutes" | "days" },
+  b: { value: number; unitSlug: "hours" | "minutes" | "days" },
+): { value: number; unitSlug: "hours" | "minutes" | "days" } {
+  // Days never combine with hours/minutes in journal language.
+  if (a.unitSlug === "days" || b.unitSlug === "days") return a;
+  const aMin = a.unitSlug === "hours" ? a.value * 60 : a.value;
+  const bMin = b.unitSlug === "hours" ? b.value * 60 : b.value;
+  const total = aMin + bMin;
+  // Result stays in minutes whenever a fractional or sub-hour part exists.
+  if (total % 60 !== 0) return { value: total, unitSlug: "minutes" };
+  return { value: total / 60, unitSlug: "hours" };
+}
+
+/** Post-split fragment merge: when fragment N is purely a duration
+ *  descriptor ("Dvi valandas") and fragment N+1 carries the activity
+ *  ("penkiolika minučių glaiščiau sienas"), join them so the worker
+ *  sees ONE card with the combined time + the right activity. Otherwise
+ *  the worker would have to attach an activity to the orphan time card
+ *  by hand (the v3 unknown-phrase flow). */
+function mergeContinuationFragments(
+  fragments: JournalFragmentSuggestion[],
+): JournalFragmentSuggestion[] {
+  const out: JournalFragmentSuggestion[] = [];
+  let i = 0;
+  while (i < fragments.length) {
+    const cur = fragments[i];
+    const next = fragments[i + 1];
+    const curHasNoActivity =
+      cur.activitySlug === null && cur.activityLabel === null;
+    const curIsTimeOnly =
+      cur.time !== null && curHasNoActivity && isTimeOnlyFragment(cur.rawPhrase);
+    if (curIsTimeOnly && next && next.time !== null) {
+      const mergedTime = addTimes(cur.time!, next.time);
+      const mergedRaw = `${cur.rawPhrase} ir ${next.rawPhrase}`.trim();
+      out.push({
+        rawPhrase: mergedRaw,
+        time: mergedTime,
+        activitySlug: next.activitySlug,
+        activityLabel: next.activityLabel,
+        isUnknown:
+          mergedTime !== null &&
+          next.activitySlug === null &&
+          next.activityLabel === null,
+      });
+      i += 2;
+      continue;
+    }
+    out.push(cur);
+    i += 1;
+  }
+  return out;
+}
+
 /** Pick the strongest activity hint for one fragment. */
 function detectActivity(
   fragment: string,
@@ -378,14 +464,14 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   const topic = detectTopic(text);
 
   // 6) Multi-fragment pass.
-  const fragments: JournalFragmentSuggestion[] = [];
+  const initialFragments: JournalFragmentSuggestion[] = [];
   const rawParts = splitFragments(text);
   for (const raw of rawParts) {
     const localTime = detectFragmentTime(raw);
     const { slug, label } = detectActivity(raw);
     const isUnknown = localTime !== null && slug === null && label === null;
     if (localTime || slug || label) {
-      fragments.push({
+      initialFragments.push({
         rawPhrase: raw,
         time: localTime,
         activitySlug: slug,
@@ -394,6 +480,9 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
       });
     }
   }
+  // Collapse "Dvi valandas | penkiolika minučių glaiščiau sienas" into one
+  // card — fragment-to-time pairing was wrong before this pass.
+  const fragments = mergeContinuationFragments(initialFragments);
 
   const hasAny =
     time !== null ||

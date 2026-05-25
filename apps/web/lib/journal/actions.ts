@@ -409,6 +409,301 @@ export type JournalLifecycleErrorCode =
   | "rpc_unavailable"
   | "unknown_error";
 
+/** Create a new entry that supersedes an existing one (v4 edit flow).
+ *
+ *  Routes through the `journal_entry_supersede` RPC from migration 0018.
+ *  Pre-confirmation: the OLD row's `superseded_by` is set to the new id and
+ *  the entries-list filter hides it. Post-confirmation: the new row's
+ *  `correction_of` is set instead; the OLD row stays untouched and visible.
+ *
+ *  Shares the FormData contract with `createJournalEntry` — the composer can
+ *  re-use the same submit code path with just `mode=supersede` + `old_id`.
+ */
+export async function supersedeJournalEntry(
+  oldEntryId: string,
+  formData: FormData,
+): Promise<CreateJournalEntryResult> {
+  if (!oldEntryId) {
+    return {
+      ok: false,
+      code: "entry_insert_failed",
+      message: "Trūksta keičiamo įrašo identifikatoriaus.",
+    };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      code: "not_authenticated",
+      message: "Sesija nutrūko. Prisijunkite iš naujo.",
+    };
+  }
+
+  const locale = String(formData.get("locale") ?? "lt");
+  const engagementId = String(formData.get("engagement_context_id") ?? "").trim();
+  const siteName = String(formData.get("site_name") ?? "").trim();
+  const workDirection = String(formData.get("work_direction") ?? "").trim();
+  const quantityRaw = String(formData.get("quantity") ?? "").trim();
+  const unitSlug = String(formData.get("unit_slug") ?? "square_meters").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  const workDate = String(formData.get("work_date") ?? "").trim();
+  const institutionName = String(formData.get("institution_name") ?? "")
+    .trim()
+    .slice(0, 200);
+  const topic = String(formData.get("topic") ?? "").trim().slice(0, 500);
+  const fragments = parseFragments(
+    String(formData.get("fragments_json") ?? "") || null,
+  );
+  const quantity = quantityRaw === "" ? null : Number(quantityRaw);
+
+  if (!engagementId) {
+    return {
+      ok: false,
+      code: "engagement_required",
+      message:
+        "Pasirinkite darbo kontekstą (organizaciją ar projektą), prie kurio priklauso šis įrašas.",
+    };
+  }
+  if (!notes) {
+    return {
+      ok: false,
+      code: "notes_required",
+      message: "Aprašykite ką dirbote — laisvas tekstas yra įrašo įrodymas.",
+    };
+  }
+  if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) {
+    return {
+      ok: false,
+      code: "quantity_invalid",
+      message: "Kiekis turi būti neneigiamas skaičius.",
+    };
+  }
+
+  // Pre-validate unit_slug just like the create path so the worker sees
+  // a precise reason on un-migrated DBs.
+  const unitSlugsToCheck = collectUnitSlugs({ quantity, unitSlug, fragments });
+  if (unitSlugsToCheck.size > 0) {
+    const { data: knownUnits } = await supabase
+      .from("productivity_units")
+      .select("slug")
+      .in("slug", [...unitSlugsToCheck]);
+    const known = new Set((knownUnits ?? []).map((r) => r.slug));
+    const missing = [...unitSlugsToCheck].filter((s) => !known.has(s));
+    if (missing.length > 0) {
+      return {
+        ok: false,
+        code: "unit_slug_unknown",
+        message:
+          `Vieneto registre kol kas nėra: ${missing.join(", ")}. ` +
+          `Paprašykite administratoriaus pritaikyti migraciją 0017 ` +
+          `(productivity_units seedą), tada bandykite dar kartą.`,
+      };
+    }
+  }
+
+  let professionId: string | null = null;
+  if (workDirection) {
+    const { data: prof } = await supabase
+      .from("professions")
+      .select("id")
+      .eq("slug", workDirection)
+      .maybeSingle();
+    professionId = prof?.id ?? null;
+  }
+
+  const originalText = notes;
+  const hashSelf = createHash("sha256")
+    .update(
+      [
+        user.id,
+        engagementId,
+        originalText,
+        locale,
+        "supersede:" + oldEntryId,
+        new Date().toISOString(),
+      ].join("|"),
+    )
+    .digest("hex");
+
+  const hasStructured =
+    quantity !== null || workDirection !== "" || fragments.length > 0;
+
+  const metrics = buildMetricsForSave({
+    workDirection,
+    siteName,
+    quantity,
+    unitSlug,
+    workDate,
+    institutionName,
+    topic,
+    fragments,
+  });
+
+  const rpcParams = {
+    p_old_entry_id: oldEntryId,
+    p_engagement_context_id: engagementId,
+    p_entry_type_slug: hasStructured ? "hybrid" : "freeform",
+    p_profession_id: professionId,
+    p_original_text: originalText,
+    p_original_language: locale.slice(0, 2),
+    p_hash_self: hashSelf,
+    p_visibility_scope: "closed",
+    p_metrics: metrics,
+  };
+  const { data: newEntryId, error } = await (
+    supabase.rpc as unknown as (
+      fn: string,
+      params: typeof rpcParams,
+    ) => Promise<{
+      data: string | null;
+      error: { code?: string; message?: string } | null;
+    }>
+  )("journal_entry_supersede", rpcParams);
+
+  if (error || typeof newEntryId !== "string") {
+    const mapped = mapJournalRpcError(
+      error ?? { code: undefined, message: undefined },
+    );
+    if (mapped) {
+      // mapped is JournalLifecycleResult; convert to CreateJournalEntryResult.
+      if (mapped.ok) return { ok: true, entryId: oldEntryId };
+      return {
+        ok: false,
+        code: mapped.code === "rpc_unavailable" ? "entry_insert_failed" : "entry_insert_failed",
+        message: mapped.message,
+      };
+    }
+    return {
+      ok: false,
+      code: "entry_insert_failed",
+      message: `Įrašo atnaujinti nepavyko: ${error?.message ?? "nežinoma klaida"}`,
+    };
+  }
+
+  revalidatePath(`/${locale}/dashboard/journal`);
+  return { ok: true, entryId: newEntryId };
+}
+
+/** Shared metric-row builder used by both `createJournalEntry` and
+ *  `supersedeJournalEntry`. Keeps the field semantics identical across
+ *  both code paths so an edit can't silently drop institution/topic/
+ *  fragment metadata that a create would have persisted. */
+function buildMetricsForSave(args: {
+  workDirection: string;
+  siteName: string;
+  quantity: number | null;
+  unitSlug: string;
+  workDate: string;
+  institutionName: string;
+  topic: string;
+  fragments: ParsedFragmentInput[];
+}): RpcMetricRow[] {
+  const {
+    workDirection,
+    siteName,
+    quantity,
+    unitSlug,
+    workDate,
+    institutionName,
+    topic,
+    fragments,
+  } = args;
+  return [
+    ...(workDirection
+      ? [
+          {
+            metric_slug: "work_direction",
+            value_text: workDirection,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(siteName
+      ? [
+          {
+            metric_slug: "site_name",
+            value_text: siteName,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(quantity !== null
+      ? [
+          {
+            metric_slug: "quantity",
+            value_numeric: quantity,
+            unit_slug: unitSlug,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(workDate
+      ? [
+          {
+            metric_slug: "work_date",
+            value_text: workDate,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(institutionName
+      ? [
+          {
+            metric_slug: "institution_name",
+            value_text: institutionName,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(topic
+      ? [
+          {
+            metric_slug: "topic",
+            value_text: topic,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...fragments.flatMap((f, idx): RpcMetricRow[] => {
+      const rows: RpcMetricRow[] = [
+        {
+          metric_slug: "parsed_fragment",
+          value_text: `${idx + 1}|${f.rawPhrase}`,
+          source: "worker_input" as const,
+        },
+      ];
+      if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
+        rows.push({
+          metric_slug: "fragment_time",
+          value_numeric: f.timeValue,
+          unit_slug: f.timeUnit,
+          value_text: String(idx + 1),
+          source: "worker_input" as const,
+        });
+      }
+      const activityLabel = f.activitySlug ?? f.activityLabel;
+      if (activityLabel) {
+        rows.push({
+          metric_slug: "fragment_activity",
+          value_text: `${idx + 1}|${activityLabel}`,
+          source: "worker_input" as const,
+        });
+      }
+      if (f.isUnknown && f.userLabel) {
+        rows.push({
+          metric_slug: "unknown_phrase",
+          value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
+          source: "worker_input" as const,
+        });
+      }
+      return rows;
+    }),
+  ];
+}
+
 /** Soft-delete a journal entry the caller owns AND that no external party
  *  has confirmed yet. Calls the `journal_entry_soft_delete` RPC from 0018.
  *  Returns a tagged result so the UI can render a precise reason. */

@@ -136,14 +136,17 @@ describe("extractJournalSuggestions — v2 LT number-word numerics", () => {
     expect(s.fragments[0]?.time).toEqual({ value: 15, unitSlug: "minutes" });
   });
 
-  it("parses 'dvi valandas ir penkiolika minučių' as two fragments (2h + 15min)", () => {
+  it("merges 'Dvi valandas ir penkiolika minučių rengiau projektą' into ONE fragment (135 min + projekto rengimas) — v4 pairing fix", () => {
+    // Pre-v4 the parser split into two fragments here; the time-only
+    // leading clause is now merged into the activity-bearing clause
+    // because that's what a worker means by "Dvi valandas ir penkiolika
+    // minučių rengiau projektą".
     const s = extractJournalSuggestions(
       "Dvi valandas ir penkiolika minučių rengiau projektą.",
     );
-    const times = s.fragments
-      .filter((f) => f.time)
-      .map((f) => `${f.time!.value}${f.time!.unitSlug}`);
-    expect(times).toEqual(["2hours", "15minutes"]);
+    expect(s.fragments).toHaveLength(1);
+    expect(s.fragments[0].time).toEqual({ value: 135, unitSlug: "minutes" });
+    expect(s.fragments[0].activityLabel).toMatch(/projekto rengim/i);
   });
 
   it("parses 'tris dienas' as 3 days", () => {
@@ -253,6 +256,40 @@ describe("extractJournalSuggestions — v3 activity verticals", () => {
       "Valandą su puse dėsčiau paskaitą Vytauto Didžiojo universitete.",
     );
     expect(s.fragments[0]?.activityLabel).toMatch(/paskait/i);
+  });
+});
+
+describe("extractJournalSuggestions — v4 fragment-to-time pairing (merge)", () => {
+  it("merges 'Dvi valandas ir penkiolika minučių glaiščiau sienas' into ONE fragment (2h15min = 135 min, glaistymas)", () => {
+    const s = extractJournalSuggestions(
+      "Dvi valandas ir penkiolika minučių glaiščiau sienas.",
+    );
+    expect(s.fragments).toHaveLength(1);
+    expect(s.fragments[0].time).toEqual({ value: 135, unitSlug: "minutes" });
+    expect(s.fragments[0].activityLabel).toMatch(/glaistym|lygin/i);
+  });
+
+  it("merges 'Valandą su puse ir penkiolika minučių prižiūrėjau žirgus' into ONE (1.5h + 15min = 105 min, žirgų priežiūra)", () => {
+    const s = extractJournalSuggestions(
+      "Valandą su puse ir penkiolika minučių prižiūrėjau žirgus.",
+    );
+    expect(s.fragments).toHaveLength(1);
+    expect(s.fragments[0].time).toEqual({ value: 105, unitSlug: "minutes" });
+    expect(s.fragments[0].activityLabel).toMatch(/žirg/i);
+  });
+
+  it("does NOT merge when the leading fragment already has an activity", () => {
+    const s = extractJournalSuggestions(
+      "3 valandas dirbau objektuose ir 5 valandas prižiūrėjau žirgus.",
+    );
+    expect(s.fragments).toHaveLength(2);
+    expect(s.fragments[1].activityLabel).toMatch(/žirg/i);
+  });
+
+  it("leaves a stand-alone time-only fragment as unknown when no next fragment to merge with", () => {
+    const s = extractJournalSuggestions("Dvi valandas.");
+    expect(s.fragments).toHaveLength(1);
+    expect(s.fragments[0].isUnknown).toBe(true);
   });
 });
 
