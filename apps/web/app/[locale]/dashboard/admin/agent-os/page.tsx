@@ -91,6 +91,58 @@ export default async function AdminAgentOsPage({
         ),
     ]);
 
+  // Pilot Start Checklist — Workstream A. One "has been observed" signal
+  // per critical flow. Each signal is a count from a tracked event; null
+  // = the underlying table is missing on this DB (migration not yet
+  // applied) so the row reads "—" instead of misleading green/red.
+  const [
+    loginSignal,
+    journalSignal,
+    languageSignal,
+    telemetrySignal,
+    draftsSignal,
+    communicationSignal,
+  ] = await Promise.all([
+    asAny(supabase)
+      .from("pilot_events")
+      .select("id", { count: "exact", head: true })
+      .in("event_name", ["google_oauth_start"])
+      .then((r: { count?: number; error: unknown }) =>
+        r.error ? null : (r.count ?? 0),
+      ),
+    asAny(supabase)
+      .from("pilot_events")
+      .select("id", { count: "exact", head: true })
+      .eq("event_name", "journal_save_success")
+      .then((r: { count?: number; error: unknown }) =>
+        r.error ? null : (r.count ?? 0),
+      ),
+    asAny(supabase)
+      .from("language_feedback")
+      .select("id", { count: "exact", head: true })
+      .then((r: { count?: number; error: unknown }) =>
+        r.error ? null : (r.count ?? 0),
+      ),
+    // "telemetry recording" — any pilot_event row at all in the last 24h.
+    Promise.resolve(eventsRecent),
+    Promise.resolve(draftsTotal),
+    asAny(supabase)
+      .from("conversation_messages")
+      .select("id", { count: "exact", head: true })
+      .then((r: { count?: number; error: unknown }) =>
+        r.error ? null : (r.count ?? 0),
+      ),
+  ]);
+
+  const checklist: { key: string; observed: number | null }[] = [
+    { key: "login", observed: loginSignal },
+    { key: "journal", observed: journalSignal },
+    { key: "language", observed: languageSignal },
+    { key: "telemetry", observed: telemetrySignal },
+    { key: "drafts", observed: draftsSignal },
+    { key: "communication", observed: communicationSignal },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -163,6 +215,60 @@ export default async function AdminAgentOsPage({
         </div>
         <p className="text-[11px] text-text-muted">
           {t("commandCenter.footnote")}
+        </p>
+      </section>
+
+      {/* Pilot Start Checklist (Workstream A). Each row = one critical
+          flow. "✓" when at least one signal observed; "—" when the table
+          is missing on this DB. Read-only; admin only via the page gate. */}
+      <section
+        className="card-border flex flex-col gap-3 p-4"
+        data-testid="pilot-start-checklist"
+      >
+        <header className="flex items-baseline justify-between gap-2">
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            {t("checklist.title")}
+          </h2>
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("checklist.scope")}
+          </span>
+        </header>
+        <ul className="flex flex-col gap-1.5 text-xs">
+          {checklist.map((row) => {
+            const status =
+              row.observed === null
+                ? "unknown"
+                : row.observed > 0
+                  ? "ok"
+                  : "pending";
+            const symbol = status === "ok" ? "✓" : status === "pending" ? "·" : "—";
+            const colour =
+              status === "ok"
+                ? "text-state-success"
+                : status === "pending"
+                  ? "text-text-muted"
+                  : "text-state-warning";
+            return (
+              <li
+                key={row.key}
+                className="flex items-center justify-between gap-3"
+                data-testid={`pilot-checklist-${row.key}`}
+              >
+                <span className={`font-mono text-sm font-bold ${colour}`}>
+                  {symbol}
+                </span>
+                <span className="flex-1 text-text-secondary">
+                  {t(`checklist.item.${row.key}`)}
+                </span>
+                <span className="font-mono text-[10px] text-text-muted">
+                  {row.observed === null ? "—" : row.observed}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {t("checklist.footnote")}
         </p>
       </section>
 

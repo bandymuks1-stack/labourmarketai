@@ -1443,6 +1443,19 @@
         "draftsTotal": "Pilot juodraščiai (viso)"
       },
       "footnote": "Skaičiai iš live DB per admin RLS. „—“ reiškia, kad atitinkama lentelė dar nepritaikyta šioje aplinkoje (peržiūrėkite migracijų ledger)."
+    },
+    "checklist": {
+      "title": "Piloto pradžios būsena",
+      "scope": "Sveikatos patikra",
+      "item": {
+        "login": "Prisijungimas su Google veikia",
+        "journal": "Darbo dienoraščio įrašai išsaugomi",
+        "language": "Kalbos pranešimai gaunami",
+        "telemetry": "Pilot telemetrija fiksuojama (paskutinės 24 val.)",
+        "drafts": "Įmonės / agentūros / pirkėjo juodraščiai išsaugomi",
+        "communication": "Pokalbių žinutės persiunčiamos"
+      },
+      "footnote": "✓ = bent vienas signalas užfiksuotas live DB. · = dar nieko nematyta. „—“ = atitinkama lentelė nėra pritaikyta šioje aplinkoje. Skaičius dešinėje rodo bendrą įvykių kiekį."
     }
   },
   "pilotTelemetry": {
