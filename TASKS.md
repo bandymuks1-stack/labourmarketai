@@ -13,6 +13,19 @@ live in `docs/handoffs/`.
 
 Strategic compass: `docs/handoffs/TASK-ARCH-LABOURMARKETAI-UNIVERSAL-DIRECTION.md`
 
+## Sales-readiness sequence (SR-1 → SR-6)
+
+Parallel track to the Universal Architecture sequence above. Defines the doctrine-aligned path from controlled pilot to a state where the platform can honestly invite the first paying organisations. Audit + per-PR scope in `docs/handoffs/TASK-SALES-READINESS-AUDIT-V1.md`.
+
+- [ ] **SR-1** — Org Tier-2 schema (migration `0022_organization_tier2.sql`): `registration_code`, `correspondence_address`, `tier`, `organization_representatives`, `organization_countries`, `promote_organization_to_tier2` SECURITY DEFINER RPC + audit_log entries. *Non-destructive, additive only.*
+- [ ] **SR-2** — Pre-role-switch copy + pilot draft banner (LT/EN, 10 locales). *Independent of SR-1.*
+- [ ] **SR-3** — Tier-2 onboarding UI (`/dashboard/<role>/tier2`). *Blocked by SR-1.*
+- [ ] **SR-4** — Admin Tier-2 review surface + `verify_organization_tier2` RPC. *Blocked by SR-3.*
+- [ ] **SR-5** — Honest `/pricing` page (LT/EN + 8 placeholder locales). *Independent.*
+- [ ] **SR-6** — OVR / scoring copy reframe → contextual fit signals. *Independent — recommended first as quick win.*
+
+Sequence prerequisites NOT owned by this track: PR #18 (manager confirmation backbone, standing block), payments provider decision, public posting surface, matchmaking. The sales-readiness track delivers the **honest preconditions** to a paid tier, not the paid tier itself.
+
 ### Proposed future doctrine work (NOT formalized in PR #9)
 
 These emerged from the PR #9 security/architecture review. They are recorded as
