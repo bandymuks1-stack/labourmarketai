@@ -175,7 +175,7 @@
         },
         "journal": {
           "title": "[EN] Work journal",
-          "body": "[EN] Log work against an engagement. Confirmed entries build verified skills over time.",
+          "body": "[EN] Log work against an engagement. Confirmed entries accumulate skill evidence over time.",
           "cta": "[EN] Open journal"
         },
         "addMore": {
@@ -235,7 +235,7 @@
         "search": "[EN] Detailed search — expected in M2.",
         "worker": {
           "offer": "[EN] Empty. Skills, work history and proofs management ships in M2.",
-          "proofs": "[EN] Empty. Verified skills and the work journal ship in M2.",
+          "proofs": "[EN] Empty. Evidence-backed skills and the work journal ship in M2.",
           "seek": "[EN] Empty. Job preferences and availability settings ship in M2."
         }
       },
@@ -730,7 +730,7 @@
     "workers": {
       "benefits": [
         {
-          "body": "[EN] Maintain a single avatar with verified skills and availability — visible to vetted employers across nine countries.",
+          "body": "[EN] Maintain a single avatar with evidence-backed skills and availability — visible to vetted employers across nine countries.",
           "title": "[EN] One profile, every market"
         },
         {
@@ -999,8 +999,8 @@
           "title": "[EN] Readiness from real work"
         },
         {
-          "desc": "[EN] Confirmed by employers and certificates.",
-          "title": "[EN] Verified skills"
+          "desc": "[EN] Built from confirmed work and certificates.",
+          "title": "[EN] Evidence-backed skills"
         },
         {
           "desc": "[EN] NL, DK, DE, SE, NO and more.",
@@ -1046,7 +1046,7 @@
       "bullets": [
         "[EN] Fit & readiness signals — coverage against a specific need from confirmed skills, reliability and on-site proof. Never one universal rating.",
         "[EN] Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
-        "[EN] Verified skills — confirmed by employers and certificates, not self-claimed.",
+        "[EN] Skill evidence — built from confirmed work and certificates, not self-claimed.",
         "[EN] Status badge — Available, Live, Drafted or Busy, always current."
       ],
       "eyebrow": "[EN] Your profile",

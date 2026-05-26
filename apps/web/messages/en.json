@@ -814,7 +814,7 @@
         },
         "journal": {
           "title": "Work journal",
-          "body": "Log work against an engagement. Confirmed entries build verified skills over time.",
+          "body": "Log work against an engagement. Confirmed entries accumulate skill evidence over time.",
           "cta": "Open journal"
         },
         "addMore": {
@@ -863,7 +863,7 @@
         "worker": {
           "offer": "Empty. Skills, work history and proofs management ships in M2.",
           "seek": "Empty. Job preferences and availability settings ship in M2.",
-          "proofs": "Empty. Verified skills and the work journal ship in M2."
+          "proofs": "Empty. Evidence-backed skills and the work journal ship in M2."
         },
         "company": {
           "offer": "Empty. Open positions and projects management ships in M2.",
@@ -943,7 +943,7 @@
       "bullets": [
         "Fit & readiness signals — coverage against a specific need from confirmed skills, reliability and on-site proof. Never one universal rating.",
         "Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
-        "Verified skills — confirmed by employers and certificates, not self-claimed.",
+        "Skill evidence — built from confirmed work and certificates, not self-claimed.",
         "Status badge — Available, Live, Drafted or Busy, always current."
       ]
     },
@@ -962,7 +962,7 @@
       "headline": "Built around the worker, not the middleman",
       "items": [
         { "title": "Readiness from real work", "desc": "Your readiness reflects completed work and proof, shown in context — not promises." },
-        { "title": "Verified skills", "desc": "Confirmed by employers and certificates." },
+        { "title": "Evidence-backed skills", "desc": "Built from confirmed work and certificates." },
         { "title": "Cross-border opportunities", "desc": "NL, DK, DE, SE, NO and more." },
         { "title": "Direct employer contact", "desc": "No opaque agents in the middle." },
         { "title": "Explainable fit", "desc": "See why a role may fit you." },
@@ -1204,7 +1204,7 @@
       "benefits": [
         {
           "title": "One profile, every market",
-          "body": "Maintain a single avatar with verified skills and availability — visible to vetted employers across nine countries."
+          "body": "Maintain a single avatar with evidence-backed skills and availability — visible to vetted employers across nine countries."
         },
         {
           "title": "Real demand, real-time",
