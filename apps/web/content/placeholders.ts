@@ -127,7 +127,7 @@ export type MarketPanel =
     }
   | { kind: "recent_matches"; rows: RecentMatchEvent[] };
 
-/** Company score ring payload (5b.3.6) — symmetric to the worker OVR. */
+/** Company score ring payload (5b.3.6) — symmetric to the worker fit-ring (concept). */
 export type CompanyTier = "diamond" | "gold" | "silver" | "bronze";
 export type CompanyScoreData = {
   legal_name: string;
@@ -366,7 +366,7 @@ export const placeholders: readonly Placeholder[] = [
     },
     description: "Featured worker on the landing hero profile card.",
     replacementSource:
-      "Real consented worker profile from the `workers` table joined with `worker_skills`, plus the published OVR formula.",
+      "Real consented worker profile from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
     status: "placeholder",
     addedIn: "M0",
     consentRequired: true,
@@ -399,7 +399,7 @@ export const placeholders: readonly Placeholder[] = [
     },
     description: "PlayerCard showcase — gold-tier worker profile (NL).",
     replacementSource:
-      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published OVR formula.",
+      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
     status: "placeholder",
     addedIn: "M0",
     consentRequired: true,
@@ -432,7 +432,7 @@ export const placeholders: readonly Placeholder[] = [
     },
     description: "PlayerCard showcase — silver-tier worker profile (DE).",
     replacementSource:
-      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published OVR formula.",
+      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
     status: "placeholder",
     addedIn: "M0",
     consentRequired: true,
@@ -465,7 +465,7 @@ export const placeholders: readonly Placeholder[] = [
     },
     description: "PlayerCard showcase — bronze-tier worker profile (LT).",
     replacementSource:
-      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published OVR formula.",
+      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
     status: "placeholder",
     addedIn: "M0",
     consentRequired: true,
@@ -699,7 +699,7 @@ export const placeholders: readonly Placeholder[] = [
       ],
       [
         "avg_ovr",
-        "Average worker profile strength",
+        "Average profile-evidence coverage (sample)",
         ["71", "72", "72", "73"],
         SQL("SELECT round(avg(profile_completeness)) FROM workers"),
       ],
@@ -1022,8 +1022,8 @@ export const placeholders: readonly Placeholder[] = [
       id: c.id,
       type: "person",
       value: {
-        lt: `${c.name} · ${c.role.lt} · ${c.country} · OVR ${c.ovr}`,
-        en: `${c.name} · ${c.role.en} · ${c.country} · OVR ${c.ovr}`,
+        lt: `${c.name} · ${c.role.lt} · ${c.country} · fit ${c.ovr}/99 (concept)`,
+        en: `${c.name} · ${c.role.en} · ${c.country} · fit ${c.ovr}/99 (concept)`,
       },
       description: `DraftBoard mini-card (${c.status}, ${c.country}).`,
       replacementSource:

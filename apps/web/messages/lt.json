@@ -817,7 +817,7 @@
         },
         "journal": {
           "title": "Darbo dienoraštis",
-          "body": "Fiksuokite darbą pagal veiklą. Patvirtinti įrašai ilgainiui sukuria patvirtintus įgūdžius.",
+          "body": "Fiksuokite darbą pagal veiklą. Patvirtinti įrašai ilgainiui kaupia įgūdžių įrodymus.",
           "cta": "Atidaryti dienoraštį"
         },
         "addMore": {
@@ -1207,7 +1207,7 @@
       "benefits": [
         {
           "title": "Vienas profilis visoms rinkoms",
-          "body": "Vienas avataras su patvirtintais įgūdžiais ir prieinamumu — matomas patikrintiems darbdaviams devyniose šalyse."
+          "body": "Vienas avataras su įrodymais paremtais įgūdžiais ir prieinamumu — matomas patikrintiems darbdaviams devyniose šalyse."
         },
         {
           "title": "Reali paklausa realiu laiku",

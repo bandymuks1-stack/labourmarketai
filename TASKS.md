@@ -22,7 +22,7 @@ Parallel track to the Universal Architecture sequence above. Defines the doctrin
 - [ ] **SR-3** — Tier-2 onboarding UI (`/dashboard/<role>/tier2`). *Blocked by SR-1.*
 - [ ] **SR-4** — Admin Tier-2 review surface + `verify_organization_tier2` RPC. *Blocked by SR-3.*
 - [ ] **SR-5** — Honest `/pricing` page (LT/EN + 8 placeholder locales). *Independent.*
-- [ ] **SR-6** — OVR / scoring copy reframe → contextual fit signals. *Independent — recommended first as quick win.*
+- [x] **SR-6** — OVR / scoring copy reframe → contextual fit signals. *User-facing OVR / "verified skills" / "profile strength" / 0–99 marketing language removed from `apps/web/messages/*.json` (10 locales) and `apps/web/content/placeholders.ts`; `pnpm -F web check:fit-signal-copy` guard enforces no reintroduction. Doctrine: `docs/CONTEXTUAL_FIT_SIGNALS.md` §6.*
 
 Sequence prerequisites NOT owned by this track: PR #18 (manager confirmation backbone, standing block), payments provider decision, public posting surface, matchmaking. The sales-readiness track delivers the **honest preconditions** to a paid tier, not the paid tier itself.
 
