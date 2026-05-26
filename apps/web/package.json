@@ -17,6 +17,7 @@
     "check:fit-signal-copy": "tsx scripts/check-fit-signal-copy.ts",
     "check:pilot-honesty-copy": "tsx scripts/check-pilot-honesty-copy.ts",
     "check:pricing-honesty-copy": "tsx scripts/check-pricing-honesty-copy.ts",
+    "check:db-validation-readiness": "tsx scripts/check-local-db-validation-readiness.ts",
     "db:fixtures:local": "tsx scripts/db-fixtures-local.ts",
     "admin:promote": "tsx scripts/admin-promote.ts",
     "admin:grant-superadmin": "tsx scripts/admin-grant-superadmin.ts",
