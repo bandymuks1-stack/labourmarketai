@@ -1363,6 +1363,22 @@
     "title": "Pilot mode",
     "body": "No payment, hiring decision, or verification happens automatically here. Real activation requires owner or admin review."
   },
+  "tier2Readiness": {
+    "badge": "Manual review only",
+    "title": "What Tier-2 (manual activation) will eventually require",
+    "body": "Tier-2 is the manual-activation tier for organisations that want a serious pilot. This card is a preview of what an owner or admin will ask for when you request a pilot review. Nothing on this page is submitted to the Tier-2 schema today, and Tier-2 status stays 'pilot' until owner / admin review completes.",
+    "requirementsTitle": "Information the manual review will ask for",
+    "requirements": [
+      "Organisation legal name and country of registration.",
+      "Country-specific registration code (e.g., 9-digit LT, 11-digit LV).",
+      "Correspondence address: country, city, street line, postcode.",
+      "One named human representative with their role (director, authorised representative, employee, or contractor).",
+      "Multi-country presence, when the organisation operates in more than one country."
+    ],
+    "reviewNote": "An owner or admin reviews each submission manually. Tier-2 status stays 'pilot' until that review completes; activation happens only after the human review records a decision.",
+    "notWritingNote": "This page is a preview. It does not submit anything to the Tier-2 schema. It does not collect a card. It does not start billing.",
+    "ctaLabel": "Request pilot review"
+  },
   "communication": {
     "title": "Conversations",
     "subtitle": "Internal communication between testers, companies, agencies, and the admin.",

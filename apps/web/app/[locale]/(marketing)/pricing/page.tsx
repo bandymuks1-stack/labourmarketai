@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHero } from "@/components/marketing/page-hero";
 import { PilotActivationCallout } from "@/components/marketing/pilot-activation-callout";
 import { PricingTable } from "@/components/marketing/pricing-table";
+import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
 
 // getPlans() reads the live `plans` table; keep this page request-time so
 // the build never needs Supabase. It degrades gracefully if unreachable.
@@ -29,6 +30,12 @@ export default async function PricingPage({
         ctaSource="pricing_hero"
       />
       <PilotActivationCallout />
+      <section className="mx-auto mb-10 max-w-container px-6 sm:px-12">
+        <Tier2ReadinessExplainer
+          source="pricing_tier2_readiness"
+          testId="pricing-tier2-readiness"
+        />
+      </section>
       <PricingTable />
 
       <section className="mx-auto max-w-container px-6 pb-20 sm:px-12">

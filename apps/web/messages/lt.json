@@ -1362,6 +1362,22 @@
     "feedbackHint": "Tekstas painus? Pažymėkite + spauskite „Pranešti apie tekstą“ apačioje.",
     "telemetryNote": "Privatumas: renkame tik užduočių laikus + klaidų kodus + maršrutus. Be jūsų teksto. Be klavišų. Be paslėpto sekimo."
   },
+  "tier2Readiness": {
+    "badge": "Tik rankinė peržiūra",
+    "title": "Ko reikės rankiniam Tier-2 aktyvavimui",
+    "body": "Tier-2 yra rankiniu būdu aktyvuojamas lygmuo organizacijoms, norinčioms rimto piloto. Ši kortelė rodo, ko savininkas arba administratorius klaus, kai paprašysite pilotinės peržiūros. Šiame puslapyje niekas neperduodama į Tier-2 schemą, o Tier-2 būsena išlieka 'pilot' tol, kol savininko ar administratoriaus peržiūra užbaigiama.",
+    "requirementsTitle": "Informacija, kurios paprašys rankinė peržiūra",
+    "requirements": [
+      "Organizacijos juridinis pavadinimas ir registracijos šalis.",
+      "Šaliai būdingas registracijos kodas (pvz., 9 skaitmenų LT, 11 skaitmenų LV).",
+      "Korespondencinis adresas: šalis, miestas, gatvės eilutė, pašto kodas.",
+      "Vienas įvardytas žmogus atstovas ir jo vaidmuo (direktorius, įgaliotas atstovas, darbuotojas arba rangovas).",
+      "Veikla keliose šalyse, kai organizacija dirba daugiau nei vienoje šalyje."
+    ],
+    "reviewNote": "Savininkas arba administratorius rankiniu būdu peržiūri kiekvieną pateikimą. Tier-2 būsena išlieka 'pilot' tol, kol ši peržiūra užbaigiama; aktyvavimas įvyksta tik po to, kai žmogaus peržiūra užfiksuoja sprendimą.",
+    "notWritingNote": "Šis puslapis yra peržiūra. Jis nieko neperduoda į Tier-2 schemą. Jis nesurenka kortelės. Jis nepradeda sąskaitų pateikimo.",
+    "ctaLabel": "Užsakyti pilotinę peržiūrą"
+  },
   "pilotMode": {
     "title": "Pilotinis režimas",
     "body": "Mokėjimas, samdymo sprendimas ar patvirtinimas čia automatiškai nevykdomas. Realus aktyvavimas reikalauja savininko ar administratoriaus peržiūros."
