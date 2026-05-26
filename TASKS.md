@@ -18,7 +18,7 @@ Strategic compass: `docs/handoffs/TASK-ARCH-LABOURMARKETAI-UNIVERSAL-DIRECTION.m
 Parallel track to the Universal Architecture sequence above. Defines the doctrine-aligned path from controlled pilot to a state where the platform can honestly invite the first paying organisations. Audit + per-PR scope in `docs/handoffs/TASK-SALES-READINESS-AUDIT-V1.md`.
 
 - [ ] **SR-1** — Org Tier-2 schema (migration `0022_organization_tier2.sql`): `registration_code`, `correspondence_address`, `tier`, `organization_representatives`, `organization_countries`, `promote_organization_to_tier2` SECURITY DEFINER RPC + audit_log entries. *Non-destructive, additive only.*
-- [ ] **SR-2** — Pre-role-switch copy + pilot draft banner (LT/EN, 10 locales). *Independent of SR-1.*
+- [x] **SR-2** — Pre-role-switch copy + pilot draft banner (LT/EN, 10 locales). *Role-switcher dropdown gains `clarityNote` (workspace-view vs account-identity, org-context expectation); dashboard layout mounts `PilotModeBanner` on every authenticated route. `pnpm -F web check:pilot-honesty-copy` guards against fake AI-matching / instant-hiring / automatic-verification / demo-is-live claims.*
 - [ ] **SR-3** — Tier-2 onboarding UI (`/dashboard/<role>/tier2`). *Blocked by SR-1.*
 - [ ] **SR-4** — Admin Tier-2 review surface + `verify_organization_tier2` RPC. *Blocked by SR-3.*
 - [ ] **SR-5** — Honest `/pricing` page (LT/EN + 8 placeholder locales). *Independent.*

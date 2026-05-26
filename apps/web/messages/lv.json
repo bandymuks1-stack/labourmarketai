@@ -366,7 +366,8 @@
       "cancel": "[EN] Cancel",
       "confirm": "[EN] Add",
       "label": "[EN] Role",
-      "switching": "[EN] Switching..."
+      "switching": "[EN] Switching...",
+      "clarityNote": "[EN] Switching role changes the workspace view, not your account. Company, agency and buyer workspaces may need an organization profile later."
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
@@ -1056,5 +1057,9 @@
       },
       "subcopy": "[EN] Your card is built from real completed work and confirmed skills, not a self-written CV. Fit signals are shown in context — coverage and readiness for a specific need, never one universal rating."
     }
+  },
+  "pilotMode": {
+    "title": "[EN] Pilot mode",
+    "body": "[EN] No payment, hiring decision, or verification happens automatically here. Real activation requires owner or admin review."
   }
 }

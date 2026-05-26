@@ -740,7 +740,8 @@
       "cancel": "Atšaukti",
       "confirm": "Pridėti",
       "adminMode": "Admin režimas",
-      "adminPanelLink": "Atidaryti pilotinį valdymo skydą"
+      "adminPanelLink": "Atidaryti pilotinį valdymo skydą",
+      "clarityNote": "Vaidmens keitimas keičia darbo erdvės vaizdą, ne jūsų paskyrą. Įmonės, agentūros ir pirkėjo erdvės vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
       "firstUse": {
@@ -1349,6 +1350,10 @@
     },
     "feedbackHint": "Tekstas painus? Pažymėkite + spauskite „Pranešti apie tekstą“ apačioje.",
     "telemetryNote": "Privatumas: renkame tik užduočių laikus + klaidų kodus + maršrutus. Be jūsų teksto. Be klavišų. Be paslėpto sekimo."
+  },
+  "pilotMode": {
+    "title": "Pilotinis režimas",
+    "body": "Mokėjimas, samdymo sprendimas ar patvirtinimas čia automatiškai nevykdomas. Realus aktyvavimas reikalauja savininko ar administratoriaus peržiūros."
   },
   "communication": {
     "title": "Pokalbiai",

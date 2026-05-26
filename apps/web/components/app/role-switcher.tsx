@@ -113,6 +113,11 @@ export function RoleSwitcher() {
           <p className="px-2 pb-2 text-[11px] leading-snug text-text-secondary">
             {tAccount("rolesIntro")}
           </p>
+          {/* SR-2: pre-role-switch clarity — workspace view vs account
+              identity; org-context expectation. */}
+          <p className="px-2 pb-2 text-[11px] leading-snug text-text-muted">
+            {tSwitcher("clarityNote")}
+          </p>
           <ul className="flex flex-col gap-0.5">
             {roles.map((r) => {
               // Single source for "is this role preparing?" — the catalogue.

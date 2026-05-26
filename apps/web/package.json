@@ -15,6 +15,7 @@
     "placeholders:check": "tsx scripts/placeholders.ts check",
     "placeholders:promote": "tsx scripts/placeholders.ts promote",
     "check:fit-signal-copy": "tsx scripts/check-fit-signal-copy.ts",
+    "check:pilot-honesty-copy": "tsx scripts/check-pilot-honesty-copy.ts",
     "db:fixtures:local": "tsx scripts/db-fixtures-local.ts",
     "admin:promote": "tsx scripts/admin-promote.ts",
     "admin:grant-superadmin": "tsx scripts/admin-grant-superadmin.ts",
