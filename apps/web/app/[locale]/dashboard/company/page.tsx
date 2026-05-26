@@ -3,6 +3,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { PilotDraftForm } from "@/components/app/pilot-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
+import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
 
@@ -57,6 +58,11 @@ export default async function CompanyDashboardPage({
       </section>
 
       <OrgTier1Warning />
+
+      <Tier2ReadinessExplainer
+        source="dashboard_company_tier2_readiness"
+        testId="company-dashboard-tier2-readiness"
+      />
 
       <TeamRosterEmptyState variant="company" />
 

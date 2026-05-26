@@ -25,6 +25,13 @@ const PATTERNS: { name: string; rx: RegExp }[] = [
   { name: "guaranteed match", rx: /\bguaranteed\s+match(?:ing)?\b/gi },
   { name: "verified automatically", rx: /\bverified\s+automatically\b/gi },
   { name: "AI match score", rx: /\bAI[\s-]+match\s+score\b/gi },
+  // Tier-2 readiness slice additions — never claim that a paid/active
+  // state already exists in product. The Tier-2 readiness explainer
+  // says "Tier-2 status stays 'pilot' until review completes" rather
+  // than asserting Tier-2 / payment / checkout is active.
+  { name: "Tier-2 active", rx: /\btier[-\s]?2\s+active\b/gi },
+  { name: "payment active", rx: /\bpayment\s+active\b/gi },
+  { name: "checkout active", rx: /\bcheckout\s+active\b/gi },
 ];
 
 const TARGETS: string[] = [join(webRoot, "messages")];
