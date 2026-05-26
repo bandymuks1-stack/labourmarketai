@@ -737,7 +737,8 @@
       "cancel": "Cancel",
       "confirm": "Add",
       "adminMode": "Admin mode",
-      "adminPanelLink": "Open pilot control panel"
+      "adminPanelLink": "Open pilot control panel",
+      "clarityNote": "Switching role changes the workspace view, not your account. Company, agency and buyer workspaces may need an organization profile later."
     },
     "dashboard": {
       "firstUse": {
@@ -1346,6 +1347,10 @@
     },
     "feedbackHint": "Confusing copy? Highlight + click 'Report copy' bottom-right.",
     "telemetryNote": "Privacy: we collect task durations + error codes + route paths only. No text from you. No keystrokes. No hidden tracking."
+  },
+  "pilotMode": {
+    "title": "Pilot mode",
+    "body": "No payment, hiring decision, or verification happens automatically here. Real activation requires owner or admin review."
   },
   "communication": {
     "title": "Conversations",
