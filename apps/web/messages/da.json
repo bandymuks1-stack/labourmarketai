@@ -842,9 +842,20 @@
         "tagline": "[EN] Get on the market."
       }
     },
-    "subcopy": "[EN] Prices are not finalised yet — they will be set before launch. Join the waitlist for the tier that fits and we'll confirm details with you.",
+    "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; pilot activation is manual — request a pilot review and we'll confirm pricing and scope with you before anything starts.",
     "title": "[EN] Simple tiers,",
-    "titleAccent": "[EN] set fairly."
+    "titleAccent": "[EN] set fairly.",
+    "pilotActivation": {
+      "badge": "[EN] Manual activation",
+      "title": "[EN] Pilot pricing — manual activation only",
+      "body": "[EN] There is no checkout button on this page. The product is in a pilot stage. No card is collected, no plan activates by itself, and no payment is taken without your explicit decision.",
+      "items": [
+        "[EN] Billing is never started for you — when paid plans launch, pricing will be announced at least two weeks in advance.",
+        "[EN] Organisation status is never set for you — every status comes from owner or admin review.",
+        "[EN] No silent trial — we won't quietly start charging after a trial window."
+      ],
+      "manualCta": "[EN] Request pilot review"
+    }
   },
   "secondary": {
     "comm": {

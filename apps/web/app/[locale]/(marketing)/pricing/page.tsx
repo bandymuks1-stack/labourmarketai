@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHero } from "@/components/marketing/page-hero";
+import { PilotActivationCallout } from "@/components/marketing/pilot-activation-callout";
 import { PricingTable } from "@/components/marketing/pricing-table";
 
 // getPlans() reads the live `plans` table; keep this page request-time so
@@ -27,6 +28,7 @@ export default async function PricingPage({
         ctaLabel={t("planCta")}
         ctaSource="pricing_hero"
       />
+      <PilotActivationCallout />
       <PricingTable />
 
       <section className="mx-auto max-w-container px-6 pb-20 sm:px-12">

@@ -1268,7 +1268,18 @@
     "eyebrow": "Pricing",
     "title": "Simple tiers,",
     "titleAccent": "set fairly.",
-    "subcopy": "Prices are not finalised yet — they will be set before launch. Join the waitlist for the tier that fits and we'll confirm details with you.",
+    "subcopy": "Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; pilot activation is manual — request a pilot review and we'll confirm pricing and scope with you before anything starts.",
+    "pilotActivation": {
+      "badge": "Manual activation",
+      "title": "Pilot pricing — manual activation only",
+      "body": "There is no checkout button on this page. The product is in a pilot stage. No card is collected, no plan activates by itself, and no payment is taken without your explicit decision.",
+      "items": [
+        "Billing is never started for you — when paid plans launch, pricing will be announced at least two weeks in advance.",
+        "Organisation status is never set for you — every status comes from owner or admin review.",
+        "No silent trial — we won't quietly start charging after a trial window."
+      ],
+      "manualCta": "Request pilot review"
+    },
     "planCta": "Join the waitlist for this plan",
     "featuresLabel": "Includes",
     "plans": {
