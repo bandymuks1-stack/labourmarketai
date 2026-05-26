@@ -91,7 +91,18 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   }
 
   revalidatePath(`/${locale}/dashboard`);
-  redirect(`/${locale}/dashboard`);
+  // Role-aware first-login destination. A company/agency/customer who
+  // just picked their primary role should land on THEIR workspace, not
+  // the generic /dashboard cockpit (which surfaces worker-shaped
+  // prompts like "Profession / Skills / Journal"). Workers stay on
+  // the generic /dashboard which already is the worker cockpit.
+  const ROLE_DASHBOARD: Record<Role, string> = {
+    worker: `/${locale}/dashboard`,
+    company: `/${locale}/dashboard/company`,
+    agency: `/${locale}/dashboard/agency`,
+    customer: `/${locale}/dashboard/buyer`,
+  };
+  redirect(ROLE_DASHBOARD[primary]);
 }
 
 /** Switch the workspace the user is currently looking at. */
