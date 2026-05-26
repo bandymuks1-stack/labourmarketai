@@ -1271,7 +1271,18 @@
     "eyebrow": "Kainos",
     "title": "Aiškūs planai —",
     "titleAccent": "sąžininga kaina.",
-    "subcopy": "Kainos dar nėra galutinės — jos bus nustatytos prieš startą. Užsirašykite į laukiančiųjų sąrašą tinkamam planui ir patikslinsime detales.",
+    "subcopy": "Kainos dar nėra galutinės ir sąskaitos už jus šiame puslapyje niekada nepradedamos. Žemiau pateikti planai apibūdina apimtį; pilotinis aktyvavimas vyksta rankiniu būdu — paprašykite pilotinės peržiūros ir prieš pradedant suderinsime kainą bei apimtį.",
+    "pilotActivation": {
+      "badge": "Aktyvavimas rankiniu būdu",
+      "title": "Pilotinė kaina — aktyvuojama tik rankiniu būdu",
+      "body": "Šiame puslapyje nėra atsiskaitymo mygtuko. Produktas yra pilotinėje stadijoje. Kortelė nesurinkama, planas savaime nepradeda veikti ir jokio mokėjimo neimame be aiškaus jūsų sprendimo.",
+      "items": [
+        "Sąskaitos už jus niekada nepradedamos — kai pradės veikti mokami planai, kainą paskelbsime mažiausiai dvi savaites iš anksto.",
+        "Organizacijos statusas už jus niekada nenustatomas — kiekvienas statusas atsiranda iš savininko ar administratoriaus peržiūros.",
+        "Jokio tylaus bandymo — pasibaigus bandymo laikotarpiui tyliai netaikysime mokėjimo."
+      ],
+      "manualCta": "Užsakyti pilotinę peržiūrą"
+    },
     "planCta": "Užsirašyti į šio plano sąrašą",
     "featuresLabel": "Apima",
     "plans": {
