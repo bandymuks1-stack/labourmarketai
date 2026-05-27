@@ -130,6 +130,88 @@
       "profileLink": "My capabilities"
     }
   },
+  "jobPostings": {
+    "list": {
+      "title": "My job postings",
+      "body": "Real job postings you have published. Private pilot drafts stay separate below.",
+      "empty": "You have not published any jobs yet. Open the form below to create your first.",
+      "untitledRole": "(untitled)",
+      "project": "Project",
+      "headcount": "Headcount needed",
+      "salary": "Salary",
+      "startDate": "Start date",
+      "countries": "Preferred countries",
+      "visibility": "Visibility",
+      "status": {
+        "open": "Open",
+        "paused": "Paused",
+        "filled": "Filled",
+        "closed": "Closed"
+      },
+      "visibility": {
+        "public": "Public",
+        "agencies_only": "Agencies only",
+        "direct_only": "Direct contacts only"
+      }
+    },
+    "form": {
+      "openCreate": "Create a new job posting",
+      "submitButton": "Publish job",
+      "submitting": "Publishing…",
+      "submitError": "Could not publish. Try again.",
+      "createdNotice": "Posting published. It is visible per your chosen visibility; no automatic sharing.",
+      "field": {
+        "roleTitle": {
+          "label": "Role title *",
+          "placeholder": "E.g., Construction site foreman"
+        },
+        "projectTitle": {
+          "label": "Project title (optional)",
+          "placeholder": "If empty, we use the role title"
+        },
+        "headcount": {
+          "label": "How many workers needed"
+        },
+        "salary": {
+          "label": "Salary (€)",
+          "placeholder": "E.g., 2200"
+        },
+        "countries": {
+          "label": "Preferred countries (ISO codes)",
+          "placeholder": "LT, DE, NL",
+          "help": "Up to 10 countries, ISO-3166-1 two-letter codes, separated by commas or spaces."
+        },
+        "startDate": {
+          "label": "Start date"
+        },
+        "housing": {
+          "label": "Housing",
+          "options": {
+            "unknown": "Not specified",
+            "yes": "Provided",
+            "no": "Not provided"
+          }
+        },
+        "visibility": {
+          "label": "Who can see this posting",
+          "options": {
+            "public": {
+              "label": "Public",
+              "help": "Any authenticated user can see this posting in search."
+            },
+            "agencies_only": {
+              "label": "Agencies only",
+              "help": "Only users with the agency role can see this posting."
+            },
+            "direct_only": {
+              "label": "Direct contacts only",
+              "help": "Posting is hidden from search; share the link manually."
+            }
+          }
+        }
+      }
+    }
+  },
   "admin": {
     "eyebrow": "PILOT CONTROL",
     "title": "Pilot control panel",

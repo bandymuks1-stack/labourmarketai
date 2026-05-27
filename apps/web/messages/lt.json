@@ -130,6 +130,88 @@
       "profileLink": "Mano gebėjimai"
     }
   },
+  "jobPostings": {
+    "list": {
+      "title": "Mano darbo skelbimai",
+      "body": "Realūs darbo skelbimai, kuriuos paskelbėte. Privatūs pilotiniai juodraščiai lieka atskirai žemiau.",
+      "empty": "Jūs dar neesate paskelbę nė vieno darbo. Atidarykite formą žemiau, kad sukurtumėte pirmą.",
+      "untitledRole": "(be pavadinimo)",
+      "project": "Projektas",
+      "headcount": "Reikia darbuotojų",
+      "salary": "Atlyginimas",
+      "startDate": "Pradžios data",
+      "countries": "Pageidaujamos šalys",
+      "visibility": "Matomumas",
+      "status": {
+        "open": "Aktyvus",
+        "paused": "Sustabdytas",
+        "filled": "Užpildytas",
+        "closed": "Uždarytas"
+      },
+      "visibility": {
+        "public": "Viešas",
+        "agencies_only": "Tik agentūroms",
+        "direct_only": "Tik tiesioginiams kontaktams"
+      }
+    },
+    "form": {
+      "openCreate": "Sukurti naują darbo skelbimą",
+      "submitButton": "Paskelbti darbą",
+      "submitting": "Skelbiama…",
+      "submitError": "Nepavyko paskelbti. Pabandykite dar kartą.",
+      "createdNotice": "Skelbimas paskelbtas. Jis matomas pagal pasirinktą matomumą; jokio automatinio dalinimosi.",
+      "field": {
+        "roleTitle": {
+          "label": "Pareigybė *",
+          "placeholder": "Pvz., Statybos brigadininkas"
+        },
+        "projectTitle": {
+          "label": "Projekto pavadinimas (neprivaloma)",
+          "placeholder": "Jei nenurodysite, naudosime pareigybę"
+        },
+        "headcount": {
+          "label": "Kiek darbuotojų reikia"
+        },
+        "salary": {
+          "label": "Atlyginimas (€)",
+          "placeholder": "Pvz., 2200"
+        },
+        "countries": {
+          "label": "Pageidaujamos šalys (ISO kodai)",
+          "placeholder": "LT, DE, NL",
+          "help": "Iki 10 šalių, ISO-3166-1 dviraidžių kodų, atskirtų kableliais arba tarpais."
+        },
+        "startDate": {
+          "label": "Pradžios data"
+        },
+        "housing": {
+          "label": "Apgyvendinimas",
+          "options": {
+            "unknown": "Nenurodyta",
+            "yes": "Suteikiamas",
+            "no": "Nesuteikiamas"
+          }
+        },
+        "visibility": {
+          "label": "Kas mato šį skelbimą",
+          "options": {
+            "public": {
+              "label": "Viešas",
+              "help": "Bet kuris prisijungęs vartotojas pamatys skelbimą paieškos sąraše."
+            },
+            "agencies_only": {
+              "label": "Tik agentūros",
+              "help": "Skelbimas matomas tik agentūros rolę turintiems vartotojams."
+            },
+            "direct_only": {
+              "label": "Tik tiesioginiams kontaktams",
+              "help": "Skelbimas nematomas paieškoje; dalinkitės nuoroda rankiniu būdu."
+            }
+          }
+        }
+      }
+    }
+  },
   "admin": {
     "eyebrow": "PILOTO VALDYMAS",
     "title": "Pilotinis valdymo skydas",
