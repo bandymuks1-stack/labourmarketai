@@ -212,6 +212,24 @@
       }
     }
   },
+  "jobDiscovery": {
+    "page": {
+      "subtitle": "Naujausi viešai paskelbti darbo skelbimai. Be netikrų \"tau pritaikyta\" reitingavimo — paprastas chronologinis sąrašas."
+    },
+    "list": {
+      "title": "Atviri darbo skelbimai",
+      "body": "Rodomi tik tie skelbimai, kuriuos įmonės pažymėjo kaip viešai matomus ir kurių statusas yra atviras.",
+      "empty": "Atvirų skelbimų kol kas nėra. Grįžkite vėliau arba paklauskite ChiefOperator, ar yra naujų projektų.",
+      "untitledRole": "(be pavadinimo)",
+      "project": "Projektas",
+      "headcount": "Reikia darbuotojų",
+      "salary": "Atlyginimas",
+      "startDate": "Pradžios data",
+      "countries": "Pageidaujamos šalys",
+      "postedAt": "Paskelbta {date}",
+      "honestNote": "Skelbimas matomas tiksliai taip, kaip jį pateikė įmonė. Nėra netikro suderinimo, nėra automatinio pasiūlymo."
+    }
+  },
   "admin": {
     "eyebrow": "PILOTO VALDYMAS",
     "title": "Pilotinis valdymo skydas",
