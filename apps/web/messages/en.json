@@ -212,6 +212,24 @@
       }
     }
   },
+  "jobDiscovery": {
+    "page": {
+      "subtitle": "The most recent publicly-posted job openings. No fake \"matched for you\" ranking — a plain chronological list."
+    },
+    "list": {
+      "title": "Open job postings",
+      "body": "Only postings companies marked as publicly visible and whose status is open are shown here.",
+      "empty": "No open postings yet. Check back later or ask ChiefOperator whether new projects exist.",
+      "untitledRole": "(untitled)",
+      "project": "Project",
+      "headcount": "Headcount needed",
+      "salary": "Salary",
+      "startDate": "Start date",
+      "countries": "Preferred countries",
+      "postedAt": "Posted {date}",
+      "honestNote": "The posting is shown exactly as the company submitted it. No fake matching, no automatic suggestion."
+    }
+  },
   "admin": {
     "eyebrow": "PILOT CONTROL",
     "title": "Pilot control panel",
