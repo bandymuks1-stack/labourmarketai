@@ -119,6 +119,7 @@ export default async function ProjectTruthPage({
     profilesCount,
     profileRolesCount,
     pilotDraftsCount,
+    customersCount,
   ] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase
@@ -126,7 +127,13 @@ export default async function ProjectTruthPage({
       .select("profile_id", { count: "exact", head: true }),
     untyped(supabase, "pilot_drafts")
       .select("id", { count: "exact", head: true }),
+    untyped(supabase, "customers")
+      .select("id", { count: "exact", head: true }),
   ]);
+  // Stage 2 PR 1: customers count returns 42P01 when migration 0026 is not
+  // yet applied to prod. Surface a literal "needs migration" instead of an
+  // exception so the admin can see the blocker without breaking the page.
+  const customersBlocked = customersCount.error?.code === "42P01";
 
   // ── Safe environment identifiers (NO secret values) ──────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? null;
@@ -257,7 +264,7 @@ export default async function ProjectTruthPage({
           every admin surface uses. If they look small, that&apos;s the visible
           symptom of the root cause above — not a fake row count.
         </p>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-4">
           <div className="card-border p-3">
             <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
               profiles
@@ -281,6 +288,22 @@ export default async function ProjectTruthPage({
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
               {pilotDraftsCount.count ?? "—"}
             </p>
+          </div>
+          <div
+            className="card-border p-3"
+            data-testid="project-truth-customers-count"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              customers
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {customersBlocked ? "—" : (customersCount.count ?? "—")}
+            </p>
+            {customersBlocked ? (
+              <p className="mt-1 text-[10px] text-state-warning">
+                migration 0026 not applied
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -619,7 +642,7 @@ const FEATURE_STATUS: readonly FeatureStatusRow[] = [
     route: "/[locale]/dashboard/start/buyer",
     status: "partial",
     note:
-      "PR #95. Honest partial — customer role can be added to profile_roles, but public.customers entity table is missing (M3 scope). Pilot draft persistence works.",
+      "PR #95 → PR #100. Form is wired to public.customers + save_customer_setup RPC. Status flips from partial to real ONCE migration 0026_customer_entity is applied to prod. Until then form shows the migration blocker. Pilot draft persistence continues to work alongside.",
   },
   {
     id: "admin",

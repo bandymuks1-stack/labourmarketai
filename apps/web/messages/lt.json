@@ -164,7 +164,43 @@
         "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
         "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
-      "profileLink": "Mano gebėjimai"
+      "profileLink": "Mano gebėjimai",
+      "setup": {
+        "formTitle": "Pirkėjo profilis",
+        "formSubtitle": "Šie laukai išsaugomi į public.customers per save_customer_setup RPC. Idempotentinis: pakartotinai pateikus, atnaujinami tik tie laukai, kuriuos pakeitėte.",
+        "existingHeading": "Pirkėjo profilis pradėtas",
+        "contactName": "Kontaktinio asmens vardas / įmonės etiketė",
+        "contactNameHelp": "Privaloma. 2-200 simbolių. Tampa public.customers.contact_name reikšme.",
+        "customerType": "Tipas",
+        "customerTypeOptions": {
+          "individual": "Asmuo",
+          "small_business": "Maža įmonė",
+          "nonprofit": "Nepelno organizacija",
+          "other": "Kita"
+        },
+        "country": "Šalis",
+        "countryPlaceholder": "Pvz., LT",
+        "market": "Rinka / regionas",
+        "marketPlaceholder": "Pvz., Baltijos / EU",
+        "needSummary": "Poreikio aprašymas",
+        "needSummaryHelp": "Trumpas paaiškinimas, ką ieškote. Neprivaloma. Saugoma kartu su profiliu.",
+        "contactPreference": "Susisiekimo būdas",
+        "contactPreferenceOptions": {
+          "email": "El. paštas",
+          "phone": "Telefonas",
+          "platform_message": "Žinutė platformoje"
+        },
+        "manualReviewNote": "Pastaba rankinei peržiūrai",
+        "manualReviewNoteHelp": "Neprivaloma. Operatoriaus / administratoriaus akimis matoma pastaba.",
+        "submit": "Išsaugoti pirkėjo profilį",
+        "statusSaved": "Pirkėjo profilis išsaugotas tikrai. Atidarykite puslapį iš naujo — duomenys lieka.",
+        "statusNeedsMigration": "Reikia migracijos 0026_customer_entity — public.customers lentelė ir save_customer_setup RPC dar nepritaikyti production DB. Savininkas turi pritaikyti supabase/migrations/0026_customer_entity.sql per Supabase SQL Editor arba MCP apply_migration.",
+        "statusInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
+        "statusError": "Įvyko klaida. Pabandykite dar kartą.",
+        "migrationBlockerHeading": "Reikia migracijos 0026_customer_entity",
+        "migrationBlockerBody": "Pirkėjo lentelė + save_customer_setup RPC dar nepritaikyti production DB. Forma matoma, bet nepateikiama. Po migracijos pritaikymo forma veikia be jokių kodo pakeitimų.",
+        "reviewStatus": "Peržiūros būsena"
+      }
     }
   },
   "jobPostings": {

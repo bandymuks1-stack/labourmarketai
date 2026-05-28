@@ -164,7 +164,43 @@
         "saveError": "Could not save. Please try again.",
         "deleteError": "Could not remove. Please try again."
       },
-      "profileLink": "My capabilities"
+      "profileLink": "My capabilities",
+      "setup": {
+        "formTitle": "Buyer profile",
+        "formSubtitle": "These fields persist to public.customers via the save_customer_setup RPC. Idempotent: resubmitting only updates the fields you changed.",
+        "existingHeading": "Buyer profile started",
+        "contactName": "Contact name / company label",
+        "contactNameHelp": "Required. 2-200 chars. Becomes public.customers.contact_name.",
+        "customerType": "Type",
+        "customerTypeOptions": {
+          "individual": "Individual",
+          "small_business": "Small business",
+          "nonprofit": "Nonprofit",
+          "other": "Other"
+        },
+        "country": "Country",
+        "countryPlaceholder": "e.g. LT",
+        "market": "Market / region",
+        "marketPlaceholder": "e.g. Baltic / EU",
+        "needSummary": "Need summary",
+        "needSummaryHelp": "Brief description of what you're looking for. Optional. Saved with the profile.",
+        "contactPreference": "Contact preference",
+        "contactPreferenceOptions": {
+          "email": "Email",
+          "phone": "Phone",
+          "platform_message": "Platform message"
+        },
+        "manualReviewNote": "Note for manual review",
+        "manualReviewNoteHelp": "Optional. Visible to the operator / admin.",
+        "submit": "Save buyer profile",
+        "statusSaved": "Buyer profile saved for real. Reload the page — the data remains.",
+        "statusNeedsMigration": "Migration 0026_customer_entity required — public.customers table and save_customer_setup RPC are not yet applied to production DB. The owner must apply supabase/migrations/0026_customer_entity.sql via Supabase SQL Editor or MCP apply_migration.",
+        "statusInvalid": "Form incomplete. Check required fields.",
+        "statusError": "Something went wrong. Please try again.",
+        "migrationBlockerHeading": "Migration 0026_customer_entity required",
+        "migrationBlockerBody": "The buyer table + save_customer_setup RPC are not yet applied to production DB. Form is visible but submit returns the migration blocker. After applying the migration the form works end-to-end with no code change.",
+        "reviewStatus": "Review status"
+      }
     }
   },
   "jobPostings": {
