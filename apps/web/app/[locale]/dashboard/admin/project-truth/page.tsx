@@ -120,6 +120,10 @@ export default async function ProjectTruthPage({
     profileRolesCount,
     pilotDraftsCount,
     customersCount,
+    agencyWorkersCount,
+    agencyWorkerInvitationsCount,
+    companyWorkersCount,
+    companyWorkerInvitationsCount,
   ] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase
@@ -129,11 +133,24 @@ export default async function ProjectTruthPage({
       .select("id", { count: "exact", head: true }),
     untyped(supabase, "customers")
       .select("id", { count: "exact", head: true }),
+    untyped(supabase, "agency_workers")
+      .select("worker_id", { count: "exact", head: true }),
+    untyped(supabase, "agency_worker_invitations")
+      .select("id", { count: "exact", head: true }),
+    untyped(supabase, "company_workers")
+      .select("worker_id", { count: "exact", head: true }),
+    untyped(supabase, "company_worker_invitations")
+      .select("id", { count: "exact", head: true }),
   ]);
   // Stage 2 PR 1: customers count returns 42P01 when migration 0026 is not
   // yet applied to prod. Surface a literal "needs migration" instead of an
   // exception so the admin can see the blocker without breaking the page.
   const customersBlocked = customersCount.error?.code === "42P01";
+  const agencyWorkerInvitationsBlocked =
+    agencyWorkerInvitationsCount.error?.code === "42P01";
+  const companyWorkersBlocked = companyWorkersCount.error?.code === "42P01";
+  const companyWorkerInvitationsBlocked =
+    companyWorkerInvitationsCount.error?.code === "42P01";
 
   // ── Safe environment identifiers (NO secret values) ──────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? null;
@@ -264,7 +281,7 @@ export default async function ProjectTruthPage({
           every admin surface uses. If they look small, that&apos;s the visible
           symptom of the root cause above — not a fake row count.
         </p>
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="card-border p-3">
             <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
               profiles
@@ -302,6 +319,69 @@ export default async function ProjectTruthPage({
             {customersBlocked ? (
               <p className="mt-1 text-[10px] text-state-warning">
                 migration 0026 not applied
+              </p>
+            ) : null}
+          </div>
+          <div
+            className="card-border p-3"
+            data-testid="project-truth-agency-workers-count"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              agency_workers
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {agencyWorkersCount.count ?? "—"}
+            </p>
+          </div>
+          <div
+            className="card-border p-3"
+            data-testid="project-truth-agency-worker-invitations-count"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              agency_worker_invitations
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {agencyWorkerInvitationsBlocked
+                ? "—"
+                : (agencyWorkerInvitationsCount.count ?? "—")}
+            </p>
+            {agencyWorkerInvitationsBlocked ? (
+              <p className="mt-1 text-[10px] text-state-warning">
+                migration 0025 not applied
+              </p>
+            ) : null}
+          </div>
+          <div
+            className="card-border p-3"
+            data-testid="project-truth-company-workers-count"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              company_workers
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {companyWorkersBlocked ? "—" : (companyWorkersCount.count ?? "—")}
+            </p>
+            {companyWorkersBlocked ? (
+              <p className="mt-1 text-[10px] text-state-warning">
+                migration 0027 not applied
+              </p>
+            ) : null}
+          </div>
+          <div
+            className="card-border p-3"
+            data-testid="project-truth-company-worker-invitations-count"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              company_worker_invitations
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {companyWorkerInvitationsBlocked
+                ? "—"
+                : (companyWorkerInvitationsCount.count ?? "—")}
+            </p>
+            {companyWorkerInvitationsBlocked ? (
+              <p className="mt-1 text-[10px] text-state-warning">
+                migration 0027 not applied
               </p>
             ) : null}
           </div>
@@ -645,6 +725,22 @@ const FEATURE_STATUS: readonly FeatureStatusRow[] = [
       "PR #95 → PR #100 → PR #101. Migration 0026_customer_entity applied to prod 2026-05-29 (table + RPC + RLS + grants). Form posts to save_customer_setup RPC → public.customers row + profile_roles[customer]. Idempotent upsert; persists across reload; RLS limits SELECT/UPDATE to own profile or admin.",
   },
   {
+    id: "agency-worker-link",
+    label: "Agency worker linking + invitations",
+    route: "/[locale]/dashboard/agency",
+    status: "real",
+    note:
+      "PR #99 + migration 0025 applied. agency_workers (composite PK, owns_agency RLS) for active links + agency_worker_invitations for pending invites + invite_agency_worker RPC (5 honest outcomes). NO external email send — invitee signs up/in themselves on receiving notification via owner's own channel.",
+  },
+  {
+    id: "company-worker-link",
+    label: "Company worker linking + invitations",
+    route: "/[locale]/dashboard/company",
+    status: "partial",
+    note:
+      "PR #102. Migration 0027_company_workers ships as file ONLY; apply is owner-gated. Mirrors agency shape exactly (company_workers + company_worker_invitations + invite_company_worker RPC). UI degrades to migration-blocker banner until applied. Once applied, status flips to real with no code change.",
+  },
+  {
     id: "admin",
     label: "Admin dashboard",
     route: "/[locale]/dashboard/admin",
@@ -679,6 +775,12 @@ const DUPLICATE_AUDIT: readonly DuplicateAuditRow[] = [
     label: "⚠ Duplicate-route warning — visual plan vs real path",
     detail:
       "/[locale]/dashboard/visual-os/agency is preview ONLY (sample data, no DB write). If owner copy ever drops the 'Vizualinis planas / ne funkcijos kelias' header, the surface starts competing with /dashboard/start/agency. PR #97 pins the header; check:constitution carries the literal phrase as a regression guard for the role catalogue.",
+  },
+  {
+    id: "worker-link-safety",
+    label: "Worker-link dedupe safety — agency + company",
+    detail:
+      "agency_workers + company_workers use composite (org_id, worker_id) PK — physically cannot duplicate within an org. agency_worker_invitations + company_worker_invitations carry UNIQUE (org_id, invited_email) — physically cannot duplicate pending invitations. RPCs invite_agency_worker / invite_company_worker check both tables BEFORE inserting and return already_linked / already_pending; no row written in those branches.",
   },
   {
     id: "company-routes",
