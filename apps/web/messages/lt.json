@@ -842,6 +842,8 @@
       "active_label": "Aktyvus",
       "add_role": "Pridėti vaidmenį",
       "switching": "Perjungiama...",
+      "chip_start": "Pradėti",
+      "chip_partial": "Dalinis",
       "addRoleTitle": "Pridėti naują vaidmenį",
       "addRoleDescription": "Pasirinkite vaidmenį, kurį norite pridėti prie paskyros.",
       "cancel": "Atšaukti",

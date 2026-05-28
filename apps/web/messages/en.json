@@ -839,6 +839,8 @@
       "active_label": "Active",
       "add_role": "Add role",
       "switching": "Switching...",
+      "chip_start": "Start",
+      "chip_partial": "Partial",
       "addRoleTitle": "Add a new role",
       "addRoleDescription": "Pick a role to add to your account.",
       "cancel": "Cancel",
