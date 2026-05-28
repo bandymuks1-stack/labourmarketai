@@ -447,10 +447,10 @@ $$;
 -- RLS policy that calls is_admin() picks up the new definition
 -- on the next evaluation.`}
         </pre>
-        <p className="text-xs text-state-warning">
-          This PR does NOT apply the SQL above. The change is a one-line helper
-          rewrite, but per the P0 spec no production DB mutation runs without
-          explicit owner approval.
+        <p className="text-xs text-state-success">
+          ✓ Applied to prod 2026-05-28 (migration 0024_is_admin_dual_signal,
+          Supabase project gorgitwvdzxbnaxhrsrw). The SQL above is the exact
+          body now live. Section 2 reflects the new dual-signal behaviour.
         </p>
       </section>
 
