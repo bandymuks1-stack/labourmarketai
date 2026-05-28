@@ -134,6 +134,33 @@ concept/preview and is never framed as a real, universal rating.
 Full doctrine — definitions, allowed/forbidden patterns, copy rules, and the
 reframe path: `docs/CONTEXTUAL_FIT_SIGNALS.md`.
 
+## 11. Onboarding channels and Definition of Done (codified 2026-05-28)
+
+The product is **not invite-only**. Self-entry at `/auth/signup` is the
+default channel: any person may sign up and start using the system
+personally without an invitation. Invitations are an **additional**
+channel for joining companies / agencies / teams / buyer organisations
+and never replace the self-start path. Both channels write to the same
+`profiles` + `profile_roles` + entity rows; no parallel invite-only
+data model is allowed. Full rules:
+`docs/policies/onboarding-channels-policy-v1.md`.
+
+Every feature, slice, or sprint claiming "shipped" must satisfy the
+seven-line Definition of Done — **BEFORE / AFTER / URL / ACTION /
+RESULT / RELOAD / BLOCKER** — and declare a progression state of
+**real / partial / blocked / preview**. A preview is never a completed
+feature. The Agentai visible-product-progress state must not advance
+for a stage whose DoD fails. Full rules:
+`docs/policies/feature-definition-of-done-v1.md`.
+
+Every PR that touches user-facing surfaces, schema, RLS, auth, roles,
+onboarding, or signal-classified visuals must paste the constitution
+compliance checklist into its PR description and into the matching
+sprint artefact:
+`docs/policies/constitution-compliance-checklist-v1.md`. A guard
+(`pnpm -F web check:constitution`) verifies the three codified
+policies above carry their required pinned phrases.
+
 ---
 
 ## Hard "do not" list (product)
@@ -145,4 +172,4 @@ or fake jobs/candidates/companies — introduced as part of product/UX work.
 ## Change control
 
 This constitution is amended only by explicit owner/DI decision, recorded here or
-in `docs/DECISIONS/`. Implementation sprints must check their work against §1–§10.
+in `docs/DECISIONS/`. Implementation sprints must check their work against §1–§11.

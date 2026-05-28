@@ -14,6 +14,7 @@
     "placeholders:pending": "tsx scripts/placeholders.ts pending",
     "placeholders:check": "tsx scripts/placeholders.ts check",
     "placeholders:promote": "tsx scripts/placeholders.ts promote",
+    "check:constitution": "tsx scripts/check-constitution.ts",
     "check:fit-signal-copy": "tsx scripts/check-fit-signal-copy.ts",
     "check:pilot-honesty-copy": "tsx scripts/check-pilot-honesty-copy.ts",
     "check:pricing-honesty-copy": "tsx scripts/check-pricing-honesty-copy.ts",
