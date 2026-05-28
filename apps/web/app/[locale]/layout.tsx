@@ -4,6 +4,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
+import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
 import "../globals.css";
 
 const display = Geist({ subsets: ["latin"], variable: "--font-display" });
@@ -11,9 +12,13 @@ const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(CANONICAL_ORIGIN),
   title: "labourmarket.ai — the living labour market",
   description:
     "A real-time, two-sided labour-market platform connecting workers, companies and agencies.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export function generateStaticParams() {

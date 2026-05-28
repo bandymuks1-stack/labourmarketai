@@ -3,8 +3,29 @@ import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "@/lib/i18n/routing";
 import { env } from "@/lib/env";
+import {
+  CANONICAL_ORIGIN,
+  isLegacyRedirectHost,
+} from "@/lib/domain/canonical";
 
 const intl = createIntlMiddleware(routing);
+
+/** Pure host-normalization: if request lands on labourmarket.ai
+ *  or www.labourmarket.ai, 308-redirect to the canonical
+ *  app.labourmarket.ai origin preserving path + query. Returns
+ *  undefined when no redirect is needed. */
+function maybeRedirectToCanonicalHost(request: NextRequest): NextResponse | undefined {
+  const host = request.headers.get("host");
+  if (!isLegacyRedirectHost(host)) return undefined;
+  const target = new URL(
+    `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    CANONICAL_ORIGIN,
+  );
+  // 308 = permanent + method-preserving. Owner wants the apex/www
+  // surface to stop showing old LABMA content; the redirect makes
+  // every request land on the new labourmarket.ai product.
+  return NextResponse.redirect(target, 308);
+}
 
 /** Locale-stripped pathname, e.g. "/lt/dashboard" → "/dashboard". */
 function stripLocale(pathname: string): { locale: string; rest: string } {
@@ -19,7 +40,13 @@ function stripLocale(pathname: string): { locale: string; rest: string } {
 const REQUIRES_AUTH = ["/dashboard", "/onboarding"];
 
 export async function middleware(request: NextRequest) {
-  // 1. Locale routing first — may redirect (`/` → `/lt`) or rewrite.
+  // 0. Canonical host normalization runs BEFORE locale/intl + auth
+  //    so labourmarket.ai + www.labourmarket.ai never even reach
+  //    the app shell — they 308 straight to app.labourmarket.ai.
+  const hostRedirect = maybeRedirectToCanonicalHost(request);
+  if (hostRedirect) return hostRedirect;
+
+  // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite.
   const intlResponse = intl(request);
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
