@@ -199,6 +199,47 @@ export const ROLE_BY_ID: Record<LabourMarketRoleId, LabourMarketRole> =
     LabourMarketRole
   >;
 
+/** Single source of truth for the availability → status chip mapping.
+ *  Both `RoleCatalogueCard` (dashboard) and `RoleSwitcher` (header
+ *  dropdown) MUST consume this so the header and the dashboard cannot
+ *  disagree. Returning `null` means "no chip" (the role is fully
+ *  active or hidden — caller decides what to do). */
+export function roleStatusChipKey(
+  availability: RoleAvailability,
+): "roles.status.active" | "roles.status.start" | "roles.status.partial" | "roles.status.preparing" | null {
+  switch (availability) {
+    case "active":
+      return "roles.status.active";
+    case "start-available":
+      return "roles.status.start";
+    case "partial":
+      return "roles.status.partial";
+    case "preparing":
+      return "roles.status.preparing";
+    case "hidden":
+      return null;
+  }
+}
+
+/** Single source for the "where does clicking this role go?" decision.
+ *  `held` = true → user already holds the role (workspace switch).
+ *  `held` = false → user does NOT hold the role yet (route to setup).
+ *  Returns `{ kind: 'switch' }` (caller invokes switchRole) or
+ *  `{ kind: 'navigate', route }` (caller renders a Link).
+ *  Used by RoleSwitcher to avoid the "blank-name addRole" dead-label
+ *  bug where clicking Įmonė / Agentūra / Pirkėjas in the dropdown
+ *  previously triggered an entity insert with `legal_name = null`
+ *  instead of routing to the setup form. */
+export function roleSwitcherTargetForRole(
+  role: LabourMarketRole,
+  held: boolean,
+): { kind: "switch" } | { kind: "navigate"; route: string } {
+  if (held) return { kind: "switch" };
+  if (role.setupRoute) return { kind: "navigate", route: role.setupRoute };
+  if (role.primaryRoute) return { kind: "navigate", route: role.primaryRoute };
+  return { kind: "switch" };
+}
+
 /** Backwards-compatible alias for callers (PR #35) that still iterate
  *  by "is this visible at all?". Filters out hidden + sorts. */
 export const VISIBLE_LABOUR_MARKET_ROLES: readonly LabourMarketRole[] =

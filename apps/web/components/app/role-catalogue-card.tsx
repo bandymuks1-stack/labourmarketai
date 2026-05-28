@@ -4,7 +4,7 @@ import {
   isFeatureActive,
   type FeatureKey,
 } from "@/lib/config/feature-availability";
-import type { LabourMarketRole } from "@/lib/config/roles";
+import { roleStatusChipKey, type LabourMarketRole } from "@/lib/config/roles";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,13 +44,8 @@ export async function RoleCatalogueCard({
   const isPartial = effectiveAvailability === "partial";
   const hasHonestStartPath = isActive || isStartAvailable || isPartial;
 
-  const chipKey = isActive
-    ? "roles.status.active"
-    : isStartAvailable
-      ? "roles.status.start"
-      : isPartial
-        ? "roles.status.partial"
-        : "roles.status.preparing";
+  const chipKey =
+    roleStatusChipKey(effectiveAvailability) ?? "roles.status.preparing";
 
   const chipTone = isActive
     ? "border-state-success/40 bg-state-success/5 text-state-success"

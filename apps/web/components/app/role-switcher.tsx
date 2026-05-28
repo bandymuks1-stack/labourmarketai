@@ -9,6 +9,8 @@ import {
   LABOUR_MARKET_ROLES,
   ROLE_BY_ID,
   isLiveRoleId,
+  roleStatusChipKey,
+  roleSwitcherTargetForRole,
   type LabourMarketRoleId,
 } from "@/lib/config/roles";
 import { cn } from "@/lib/utils";
@@ -120,9 +122,18 @@ export function RoleSwitcher() {
           </p>
           <ul className="flex flex-col gap-0.5">
             {roles.map((r) => {
-              // Single source for "is this role preparing?" — the catalogue.
+              // Single source for "what chip belongs on this role?" — the
+              // catalogue + the shared roleStatusChipKey helper. Keeps the
+              // header dropdown and the dashboard catalogue card in
+              // lock-step so they cannot disagree (PR #98 parity fix).
               const cfg = ROLE_BY_ID[r as LabourMarketRoleId];
-              const isPreview = cfg?.availability !== "active";
+              const chipKey = cfg ? roleStatusChipKey(cfg.availability) : null;
+              const isHonestlyActive = chipKey === "roles.status.active";
+              const chipTone = isHonestlyActive
+                ? "border-state-success/40 text-state-success"
+                : chipKey === "roles.status.start"
+                  ? "border-brand-blue/40 text-brand-blue"
+                  : "border-state-warning/40 text-state-warning";
               return (
                 <li key={r}>
                   <button
@@ -139,9 +150,19 @@ export function RoleSwitcher() {
                       {t(`signup.role.${r}`)}
                     </span>
                     <span className="ml-auto flex items-center gap-2">
-                      {isPreview && (
-                        <span className="rounded-sm border border-state-warning/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-state-warning">
-                          {tAccount("preview_workspace")}
+                      {chipKey && !isHonestlyActive && (
+                        <span
+                          className={cn(
+                            "rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                            chipTone,
+                          )}
+                          data-testid={`role-switcher-chip-${r}`}
+                        >
+                          {chipKey === "roles.status.start"
+                            ? tSwitcher("chip_start")
+                            : chipKey === "roles.status.partial"
+                              ? tSwitcher("chip_partial")
+                              : tAccount("preview_workspace")}
                         </span>
                       )}
                       {r === activeRole && (
@@ -165,28 +186,81 @@ export function RoleSwitcher() {
               <ul className="flex flex-col gap-0.5">
                 {missing.map((r) => {
                   const cfg = ROLE_BY_ID[r as LabourMarketRoleId];
-                  const isPreview = cfg?.availability !== "active";
+                  const chipKey = cfg
+                    ? roleStatusChipKey(cfg.availability)
+                    : null;
+                  const isHonestlyActive = chipKey === "roles.status.active";
+                  const chipTone = isHonestlyActive
+                    ? "border-state-success/40 text-state-success"
+                    : chipKey === "roles.status.start"
+                      ? "border-brand-blue/40 text-brand-blue"
+                      : "border-state-warning/40 text-state-warning";
+                  const target = cfg
+                    ? roleSwitcherTargetForRole(cfg, false)
+                    : { kind: "switch" as const };
+                  // PR #98 fix: clicking Įmonė / Agentūra / Pirkėjas no
+                  // longer triggers addRole(r) with empty FormData (which
+                  // previously inserted a row with legal_name=null — a
+                  // half-baked entity). Instead we render a Link to the
+                  // role's setupRoute so the user lands on the form and
+                  // types the legal name there.
                   return (
                     <li key={r}>
-                      <button
-                        type="button"
-                        onClick={() => pick(r)}
-                        disabled={pending !== null}
-                        className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
-                      >
-                        <span aria-hidden>{ROLE_ICON[r]}</span>
-                        {t(`signup.role.${r}`)}
-                        {isPreview && (
-                          <span className="ml-auto rounded-sm border border-state-warning/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-state-warning">
-                            {tAccount("preview_workspace")}
-                          </span>
-                        )}
-                        {pending === r && (
-                          <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
-                            {tSwitcher("switching")}
-                          </span>
-                        )}
-                      </button>
+                      {target.kind === "navigate" ? (
+                        <Link
+                          href={target.route as "/dashboard"}
+                          onClick={() => setOpen(false)}
+                          className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
+                          data-testid={`role-switcher-missing-${r}-link`}
+                        >
+                          <span aria-hidden>{ROLE_ICON[r]}</span>
+                          {t(`signup.role.${r}`)}
+                          {chipKey && !isHonestlyActive && (
+                            <span
+                              className={cn(
+                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                                chipTone,
+                              )}
+                              data-testid={`role-switcher-chip-missing-${r}`}
+                            >
+                              {chipKey === "roles.status.start"
+                                ? tSwitcher("chip_start")
+                                : chipKey === "roles.status.partial"
+                                  ? tSwitcher("chip_partial")
+                                  : tAccount("preview_workspace")}
+                            </span>
+                          )}
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => pick(r)}
+                          disabled={pending !== null}
+                          className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
+                        >
+                          <span aria-hidden>{ROLE_ICON[r]}</span>
+                          {t(`signup.role.${r}`)}
+                          {chipKey && !isHonestlyActive && (
+                            <span
+                              className={cn(
+                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                                chipTone,
+                              )}
+                            >
+                              {chipKey === "roles.status.start"
+                                ? tSwitcher("chip_start")
+                                : chipKey === "roles.status.partial"
+                                  ? tSwitcher("chip_partial")
+                                  : tAccount("preview_workspace")}
+                            </span>
+                          )}
+                          {pending === r && (
+                            <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
+                              {tSwitcher("switching")}
+                            </span>
+                          )}
+                        </button>
+                      )}
                     </li>
                   );
                 })}

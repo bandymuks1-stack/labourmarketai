@@ -248,8 +248,12 @@ describe("confirmation-required copy is present", () => {
     expect(en.skills.textFirst.needsExternalConfirmation).toMatch(
       /external/i,
     );
-    expect(lt.structuring.ruleBasedNotice).toMatch(/nepatvirtin/i);
-    expect(en.structuring.ruleBasedNotice).toMatch(/confirm/i);
+    // PR #97 softened self-declared-flow wording: "nepatvirtinate" →
+    // "nepasirenkate" (LT) and "confirm" → "select" (EN). The rule still
+    // states "Suggestions only become saved when you select them.
+    // Nothing is saved automatically." — pinned via the new keywords.
+    expect(lt.structuring.ruleBasedNotice).toMatch(/nepasirenkate|nepatvirtin/i);
+    expect(en.structuring.ruleBasedNotice).toMatch(/select|confirm/i);
   });
   it("journal exposes a suggestionReviewIntro + saved-state strings", () => {
     const lt = JSON.parse(readWeb("messages/lt/journal.json"));
@@ -677,9 +681,17 @@ describe("role catalogue + shared role-card model", () => {
     }
   });
 
-  it("RoleCatalogueCard renders <Link> only inside the active branch", () => {
+  it("RoleCatalogueCard renders <Link> only inside the honest-start-path branch", () => {
     const txt = readWeb("components/app/role-catalogue-card.tsx");
-    expect(txt).toMatch(/isActive\s*&&\s*role\.primaryRoute\s*\?\s*\(\s*<Link/);
+    // PR #97 extended the catalogue card to render the navigating
+    // <Link> not only for `active` roles but also for `start-available`
+    // and `partial` roles (using their `setupRoute`). The shape is now
+    //   {hasHonestStartPath && ctaRoute ? <Link …/> : null}
+    // Both helpers are pinned so a regression to `availability !==
+    // "active"` collapse is caught.
+    expect(txt).toMatch(
+      /hasHonestStartPath\s*&&\s*ctaRoute\s*\?\s*\(\s*<Link/,
+    );
     // Exactly one Link tag — guards against an ungated render.
     const linkOpens = txt.match(/<Link\b/g) ?? [];
     expect(linkOpens.length).toBe(1);
@@ -1110,7 +1122,17 @@ describe("no migration files added by this sprint", () => {
     // Participant-scoped SELECT; messages append-only (no UPDATE/DELETE
     // policy); participants can flip only their own last_read_at.
     // Grants only to authenticated.
-    const SPRINT_BASELINE = 21;
+    //
+    // Bumped from 21 → 23 on:
+    //  - PR #51 (`feat/cc/job-postings`) migration 0023 — `job_postings`
+    //    (with admin / company-owner / authenticated-read RLS + GRANTs).
+    //  - PR #94 (`fix(admin,i18n): is_admin() dual signal …`) migration
+    //    0024 — rewrites `public.is_admin()` to honour BOTH
+    //    `profiles.active_role='admin'` AND a `profile_roles[admin]`
+    //    row. Applied to prod via MCP `apply_migration`; source-of-truth
+    //    copy committed for repo parity. No schema change, no new table,
+    //    no RLS broadening — just the function body.
+    const SPRINT_BASELINE = 23;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
