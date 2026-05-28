@@ -5,6 +5,7 @@ import { JobDemandCard, type JobDemandCardEntity } from "@/components/visual/job
 import { VisualOsShell, type VisualOsCounts } from "@/components/visual/visual-os-shell";
 import { WorkerCard, type WorkerCardEntity } from "@/components/visual/worker-card";
 import { VISUAL_TOKENS } from "@/lib/visual/tokens";
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -230,6 +231,36 @@ export default async function VisualOsPage({
               <JobDemandCard key={j.id} job={j} />
             ))}
           </div>
+        </section>
+
+        <section
+          className={`flex flex-col gap-4 ${VISUAL_TOKENS.cardRadius} border ${VISUAL_TOKENS.cardBorder} ${VISUAL_TOKENS.cardSurface} p-6`}
+          data-testid="visual-os-agency-link-section"
+        >
+          <header className="flex flex-col gap-1">
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              {label(
+                "Agentūros / įmonės korta (slice 4)",
+                "Agency / company card (slice 4)",
+              )}
+            </h2>
+            <p className="text-sm text-text-secondary">
+              {label(
+                "Atskiras paviršius paaiškina agentūros dalyvavimo taisykles: matomi tik savi darbuotojai, kandidatų paieška kaip paslauga, ankstyvo dalyvio prioriteto peržiūra.",
+                "A dedicated surface explains how an agency participates: own workers only by default, candidate search as a service, early contributor priority review.",
+              )}
+            </p>
+          </header>
+          <Link
+            href={"/dashboard/visual-os/agency" as "/dashboard"}
+            className={`inline-flex w-fit items-center gap-2 rounded-full ${VISUAL_TOKENS.chipSurface} px-3 py-1 text-xs font-medium ${VISUAL_TOKENS.chipText} hover:underline`}
+            data-testid="visual-os-agency-card-link"
+          >
+            {label(
+              "Atidaryti agentūros / įmonės kortą →",
+              "Open agency / company card →",
+            )}
+          </Link>
         </section>
 
         <section
