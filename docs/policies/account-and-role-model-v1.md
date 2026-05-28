@@ -2,6 +2,26 @@
 
 This is a **product** policy, not a legal contract. It describes how labourmarket.ai treats accounts and roles so testers and the team have a shared mental model.
 
+## Onboarding channels — self-entry is the default
+
+**Self-entry is the default channel.** Any human can sign up at
+`/auth/signup` and start using labourmarket.ai personally without an
+invitation. No invitation token is required to register, complete
+onboarding, or reach `/dashboard`.
+
+Invitations are an **additional** channel — for joining a company,
+agency, team, or buyer organisation. They never replace or block the
+self-entry path; they sit beside it. When an invitation flow is
+offered, the same screen must also offer the self-start path with
+equal prominence.
+
+Both channels write to the same `profiles` + `profile_roles` + entity
+tables. There is no parallel "invitation-only" data model. Designing
+one is forbidden.
+
+The full policy lives in
+`docs/policies/onboarding-channels-policy-v1.md`.
+
 ## Three layers
 
 1. **Personal account** — your base identity. One Google login = one personal account. Email is the canonical id.
@@ -66,9 +86,40 @@ The pilot exists to prove the foundation: the trust loop from free-text input to
 | Journal entries after external confirmation | self-declared content stays; the confirmation is a separate row added by a manager. Original entry never overwritten. |
 | Anything labelled "AI-verified", "auto-matched", "guaranteed match" | **does not exist.** Pinned by `lib/guards/product-readiness.test.ts`. |
 
+## Each role has responsibilities, permissions, visibility, and limits
+
+Every role on this platform — worker / company / agency / customer /
+admin (and future manager / early-contributor / team-leader / hr) —
+must come with a clear answer to the four-question matrix:
+
+| Question | Answer source |
+|---|---|
+| **Responsibilities** — what does someone in this role do? | `docs/ROLES.md` row + the role-specific dashboard's purpose statement |
+| **Permissions** — what tables / RLS branches does this role read or write? | `docs/DATA_MODEL.md` → RLS section + the migration that creates the role's CHECK / RLS policy |
+| **Visibility** — what does this role see in the UI, and what is hidden? | The role's dashboard surface (e.g. `apps/web/app/[locale]/dashboard/{agency,company,buyer}/page.tsx`) + the dual-signal admin pattern (`apps/web/lib/auth/admin-signal.ts`) |
+| **Limits** — what is this role NOT allowed to do, and what blocks the broader marketplace? | This policy + `docs/policies/organization-profile-creation-policy-v1.md` (Tier 1 vs Tier 2) + the per-feature blocker statements in the active sprint artefact |
+
+Adding a new role is a one-row edit in `lib/config/roles.ts` PLUS:
+
+- a migration extending the `profile_roles.role` / `profiles.active_role`
+  allowlist;
+- an `add_role` RPC branch creating the role-specific entity row
+  (if any);
+- i18n labels in `messages/lt.json` + `messages/en.json` (and the
+  other 8 locale files per PLATFORM_DOCTRINE §2.4 file-presence);
+- a row in `docs/ROLES.md`.
+
+Any role added without all five answers cannot be marked `real` in
+the feature status matrix; it stays `partial` or `blocked` until the
+matrix is complete (see
+`docs/policies/feature-definition-of-done-v1.md`).
+
 ## See also
 
+- `docs/policies/onboarding-channels-policy-v1.md` — self-entry default + invitation channel.
 - `docs/policies/organization-profile-creation-policy-v1.md` — when can an org profile actually be used for real ops.
 - `docs/policies/pilot-terms-and-responsibility-v1.md` — what pilot testers are agreeing to.
 - `docs/policies/journal-evidence-and-correction-policy-v1.md` — how journal entries can be corrected.
+- `docs/policies/feature-definition-of-done-v1.md` — the seven-line DoD every feature must answer.
+- `docs/policies/constitution-compliance-checklist-v1.md` — the per-PR compliance checklist.
 - `apps/web/lib/auth/admin-signal.ts` — the dual `isAdmin` derivation.
