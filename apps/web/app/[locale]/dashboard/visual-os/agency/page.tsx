@@ -69,23 +69,59 @@ export default async function VisualOsAgencyPage({
   return (
     <div className="flex flex-col gap-6" data-testid="visual-os-agency-page">
       <header className="flex flex-col gap-2">
+        <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+          {label(
+            "VIZUALINIS PLANAS · NE FUNKCIJOS KELIAS",
+            "VISUAL PLAN · NOT A FEATURE PATH",
+          )}
+        </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {label("Agentūros / įmonės korta · Preview", "Agency / company card · Preview")}
+          {label("Agentūros / įmonės korta · vizualinis planas", "Agency / company card · visual plan")}
         </h1>
         <p className="text-sm text-text-secondary">
           {label(
-            "Kaip agentūra ar įmonė dalyvauja, kol pilna rinka dar ne paleista. Be apgaulingų skaičių, be automatinio matching, be mokėjimo.",
-            "How an agency or company participates while the full marketplace is not yet live. No misleading counts, no automatic matching, no payment.",
+            "Šis puslapis yra dizaino / navigacijos sluoksnis. Tai NĖRA užbaigta agentūros funkcija. Realus agentūros nustatymas vyksta kitur — žiūrėk nuorodas žemiau.",
+            "This page is a design / navigation layer. It is NOT a completed agency function. The real agency setup happens elsewhere — see the links below.",
           )}
         </p>
+        <div
+          className="card-border flex flex-col gap-2 p-3"
+          data-testid="visual-os-agency-real-paths"
+        >
+          <p className="text-xs font-semibold text-text-primary">
+            {label("Realūs agentūros keliai:", "Real agency paths:")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={"/dashboard/start/agency" as "/dashboard"}
+              className="rounded-md border border-brand-blue px-3 py-1 text-xs text-brand-blue hover:bg-brand-blue/10"
+              data-testid="visual-os-agency-cta-start"
+            >
+              {label(
+                "→ Pradėti agentūros nustatymą (/dashboard/start/agency)",
+                "→ Start agency setup (/dashboard/start/agency)",
+              )}
+            </Link>
+            <Link
+              href={"/dashboard/agency" as "/dashboard"}
+              className="rounded-md border border-ink-500 px-3 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+              data-testid="visual-os-agency-cta-workspace"
+            >
+              {label(
+                "→ Agentūros darbo erdvė (/dashboard/agency, jei vaidmuo turimas)",
+                "→ Agency workspace (/dashboard/agency, if role held)",
+              )}
+            </Link>
+          </div>
+        </div>
         <div
           className="card-border inline-flex w-fit items-center gap-2 px-3 py-1 text-xs"
           data-testid="visual-os-agency-preview-banner"
         >
           <span>
             {label(
-              "Owner-review preview · pavyzdiniai duomenys",
-              "Owner-review preview · sample data only",
+              "Šio puslapio kortelės naudoja Sample · pavyzdinius duomenis. Tai dizaino direkcija, ne tikras katalogas.",
+              "Cards on this page use Sample · placeholder data. This is direction, not a real catalogue.",
             )}
           </span>
         </div>

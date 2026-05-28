@@ -589,7 +589,37 @@ const FEATURE_STATUS: readonly FeatureStatusRow[] = [
     label: "Agency operating card preview",
     route: "/[locale]/dashboard/visual-os/agency",
     status: "preview",
-    note: "PR #92. Sample · data; no real agency wiring.",
+    note:
+      "PR #92 + PR #97. Sample · data; explicitly labelled 'Vizualinis planas / ne funkcijos kelias'. Real agency paths live at /dashboard/start/agency (setup) and /dashboard/agency (workspace). NOT a competing agency function.",
+  },
+  {
+    id: "activity-setup-hub",
+    label: "Activity setup hub",
+    route: "/[locale]/dashboard/start",
+    status: "real",
+    note: "PR #95. Hub linking to start/agency, start/company, start/buyer.",
+  },
+  {
+    id: "agency-setup",
+    label: "Agency setup",
+    route: "/[locale]/dashboard/start/agency",
+    status: "real",
+    note: "PR #95. Form posts addRole('agency', {name}) → public.agencies row via migration 0007 RPC. Idempotent.",
+  },
+  {
+    id: "company-setup",
+    label: "Company setup",
+    route: "/[locale]/dashboard/start/company",
+    status: "real",
+    note: "PR #95. Form posts addRole('company', {name}) → public.companies row via migration 0007 RPC. Idempotent.",
+  },
+  {
+    id: "buyer-setup",
+    label: "Buyer setup",
+    route: "/[locale]/dashboard/start/buyer",
+    status: "partial",
+    note:
+      "PR #95. Honest partial — customer role can be added to profile_roles, but public.customers entity table is missing (M3 scope). Pilot draft persistence works.",
   },
   {
     id: "admin",
@@ -617,9 +647,15 @@ interface DuplicateAuditRow {
 const DUPLICATE_AUDIT: readonly DuplicateAuditRow[] = [
   {
     id: "agency-routes",
-    label: "Agency route — 2 surfaces, one role-dashboard + one visual preview",
+    label: "Agency route — 3 surfaces (setup / workspace / visual plan)",
     detail:
-      "/[locale]/dashboard/agency (pilot dashboard, requireRoleOrRedirect 'agency') and /[locale]/dashboard/visual-os/agency (sample preview). NOT a duplicate model — one is the role dashboard, the other is the slice-4 visual primitive sandbox. Both legitimately exist.",
+      "/[locale]/dashboard/start/agency (CANONICAL setup, PR #95) + /[locale]/dashboard/agency (role workspace, requireRoleOrRedirect 'agency') + /[locale]/dashboard/visual-os/agency (visual plan, NOT a feature path — explicit banner since PR #97). Owner CTAs route to the setup or workspace path; the visual plan never competes with the real agency function.",
+  },
+  {
+    id: "duplicate-warning",
+    label: "⚠ Duplicate-route warning — visual plan vs real path",
+    detail:
+      "/[locale]/dashboard/visual-os/agency is preview ONLY (sample data, no DB write). If owner copy ever drops the 'Vizualinis planas / ne funkcijos kelias' header, the surface starts competing with /dashboard/start/agency. PR #97 pins the header; check:constitution carries the literal phrase as a regression guard for the role catalogue.",
   },
   {
     id: "company-routes",

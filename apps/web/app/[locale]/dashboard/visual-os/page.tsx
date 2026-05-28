@@ -163,20 +163,59 @@ export default async function VisualOsPage({
   return (
     <div className="flex flex-col gap-6" data-testid="visual-os-page">
       <header className="flex flex-col gap-2">
+        <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+          {label(
+            "VIZUALINIS PLANAS · NE FUNKCIJOS KELIAS",
+            "VISUAL PLAN · NOT A FEATURE PATH",
+          )}
+        </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {label("Vizualinė OS · Preview", "Visual OS · Preview")}
+          {label("Vizualinė OS · vizualinis planas", "Visual OS · visual plan")}
         </h1>
         <p className="text-sm text-text-secondary">
           {label(
-            "Pirmas tikras dashboard OS sluoksnis. Worker + Job demand kortelės, šoninis meniu, status juosta — viskas viename produkte.",
-            "First real dashboard OS layer. Worker + Job demand cards, sidebar, status strip — one product across the surface.",
+            "Šis puslapis yra dizaino / navigacijos sluoksnis, ne užbaigta funkcija. Realūs darbo, agentūros ir įmonės keliai gyvena kitur — žiūrėk realių kelių juostą žemiau.",
+            "This page is a design / navigation layer, not a completed function. The real worker, agency, and company paths live elsewhere — see the real-paths strip below.",
           )}
         </p>
+        <div
+          className="card-border flex flex-col gap-2 p-3"
+          data-testid="visual-os-real-paths"
+        >
+          <p className="text-xs font-semibold text-text-primary">
+            {label("Realūs keliai:", "Real paths:")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={"/dashboard/start" as "/dashboard"}
+              className="rounded-md border border-brand-blue px-3 py-1 text-xs text-brand-blue hover:bg-brand-blue/10"
+              data-testid="visual-os-cta-start"
+            >
+              {label(
+                "→ Veiklos pradžia (/dashboard/start)",
+                "→ Activity start (/dashboard/start)",
+              )}
+            </Link>
+            <Link
+              href={"/dashboard/admin/project-truth" as "/dashboard"}
+              className="rounded-md border border-ink-500 px-3 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+              data-testid="visual-os-cta-project-truth"
+            >
+              {label(
+                "→ Admin / projekto tiesa",
+                "→ Admin / project truth",
+              )}
+            </Link>
+          </div>
+        </div>
         <div
           className="card-border inline-flex w-fit items-center gap-2 px-3 py-1 text-xs"
           data-testid="visual-os-preview-banner"
         >
-          <span>{label("Owner-review preview · pavyzdiniai duomenys", "Owner-review preview · sample data only")}</span>
+          <span>{label(
+            "Žemiau matomos kortelės naudoja Sample · pavyzdinius duomenis — tai dizaino kryptis, ne tikri įrašai.",
+            "Cards below use Sample · placeholder data — direction, not real records.",
+          )}</span>
         </div>
       </header>
 

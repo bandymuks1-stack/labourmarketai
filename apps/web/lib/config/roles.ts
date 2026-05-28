@@ -19,7 +19,21 @@
 
 import type { FeatureKey } from "./feature-availability";
 
-export type RoleAvailability = "active" | "preparing" | "hidden";
+export type RoleAvailability =
+  | "active"
+  | "preparing"
+  | "hidden"
+  /** Role has a real setup path (`/dashboard/start/<role>`) and writes
+   *  a real entity row via the `add_role` RPC. Renders the `Pradėti`
+   *  chip + a navigating CTA to the setup route. Used when the
+   *  workspace is not "active" but the start path IS real and
+   *  persists. Codified by `docs/policies/feature-definition-of-done-v1.md`. */
+  | "start-available"
+  /** Role has limited functionality today — some real surfaces exist
+   *  but the first-class entity / full workspace is missing. Renders
+   *  the `Dalinis` chip + the reason key + the setup-route CTA. Used
+   *  for buyer / customer until `public.customers` migration ships. */
+  | "partial";
 
 /** Roles already used as the `Role` union elsewhere in the codebase
  *  (matches `profile_roles.role` + DB enum today). */
@@ -71,6 +85,10 @@ export type LabourMarketRole = {
   safeToShowInRoleSurfaces: boolean;
   /** Render order for catalogue-driven surfaces. Lower is earlier. */
   sortOrder: number;
+  /** Optional explicit setup route used by `start-available` / `partial`
+   *  availability rows. When set, the catalogue card surfaces a CTA to
+   *  this route instead of the navigating link to `primaryRoute`. */
+  setupRoute?: string;
 };
 
 /**
@@ -95,12 +113,13 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     id: "company",
     labelKey: "auth.signup.role.company",
     descriptionKey: "roles.company.description",
-    availability: "preparing",
+    availability: "start-available",
     entryPoint: false,
     canBeAddedLater: true,
     primaryFeatureKey: "company_workspace",
     primaryRoute: "/dashboard",
-    preparingReasonKey: "roles.preparingReason.default",
+    setupRoute: "/dashboard/start/company",
+    preparingReasonKey: "roles.preparingReason.startAvailable",
     safeToShowInRoleSurfaces: true,
     sortOrder: 20,
   },
@@ -108,12 +127,13 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     id: "agency",
     labelKey: "auth.signup.role.agency",
     descriptionKey: "roles.agency.description",
-    availability: "preparing",
+    availability: "start-available",
     entryPoint: false,
     canBeAddedLater: true,
     primaryFeatureKey: "agency_workspace",
     primaryRoute: "/dashboard",
-    preparingReasonKey: "roles.preparingReason.default",
+    setupRoute: "/dashboard/start/agency",
+    preparingReasonKey: "roles.preparingReason.startAvailable",
     safeToShowInRoleSurfaces: true,
     sortOrder: 30,
   },
@@ -121,12 +141,13 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     id: "customer",
     labelKey: "auth.signup.role.customer",
     descriptionKey: "roles.customer.description",
-    availability: "preparing",
+    availability: "partial",
     entryPoint: false,
     canBeAddedLater: true,
     primaryFeatureKey: "customer_workspace",
     primaryRoute: "/dashboard",
-    preparingReasonKey: "roles.preparingReason.default",
+    setupRoute: "/dashboard/start/buyer",
+    preparingReasonKey: "roles.preparingReason.customerPartial",
     safeToShowInRoleSurfaces: true,
     sortOrder: 40,
   },

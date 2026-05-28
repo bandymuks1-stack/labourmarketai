@@ -288,7 +288,7 @@
     "disclaimer": "These are self-declared skills. They are not yet confirmed by work journal evidence, documents, or another person.",
     "suggestButton": "Suggest structure",
     "needsTextHint": "Add some profile text below first.",
-    "pendingTitle": "Suggestions — confirm or edit",
+    "pendingTitle": "Suggestions — select or edit",
     "savedTitle": "Your saved self-declared skills",
     "saveButton": "Save selected",
     "savingButton": "Saving…",
@@ -371,10 +371,17 @@
     "addLaterHint": "You'll be able to add more roles later — they appear in the catalogue once they're ready.",
     "status": {
       "active": "Active",
-      "preparing": "Preparing"
+      "preparing": "Preparing",
+      "start": "Start",
+      "partial": "Partial"
+    },
+    "actions": {
+      "openSetup": "Open setup"
     },
     "preparingReason": {
-      "default": "This role is still being prepared. We'll enable it once it can ship honestly."
+      "default": "This role is still being prepared. We'll enable it once it can ship honestly.",
+      "startAvailable": "The setup path already works: one field, the legal name, and your row is saved in the DB for real. The full workspace surface is still being filled out.",
+      "customerPartial": "The first-class public.customers table is missing — the buyer entity is not yet at the DB level (M3 scope). You can add the customer role and fill the pilot request."
     },
     "worker": {
       "description": "Worker: text-first profile, skills, and work journal. Active today."
@@ -460,7 +467,7 @@
   },
   "suggestionStatuses": {
     "detected": "Suggested",
-    "confirmed_by_user": "Confirmed by you",
+    "confirmed_by_user": "Selected by you",
     "discarded_by_user": "Not included",
     "needs_more_detail": "Needs more detail",
     "needs_external_confirmation": "Needs external confirmation",
@@ -539,8 +546,8 @@
     }
   },
   "structuring": {
-    "groupEyebrow": "What we found",
-    "ruleBasedNotice": "Note: this still uses a small dictionary and rules — no AI. Suggestions only become facts when you confirm them. Nothing is saved automatically.",
+    "groupEyebrow": "Self-declared suggestions",
+    "ruleBasedNotice": "Note: this still uses a small dictionary and rules — no AI. Suggestions only become saved when you select them. Nothing is saved automatically.",
     "emptyBucket": "Nothing clear in this part. You can write more or skip it.",
     "noMatches": "Nothing clear in this text yet. Try adding more detail, or add meaningful entries manually.",
     "buckets": {
