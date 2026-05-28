@@ -4,8 +4,14 @@ import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { PilotDraftForm } from "@/components/app/pilot-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
+import { AgencyWorkersSection } from "@/components/app/agency-workers-section";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
+import {
+  getOwnAgency,
+  listActiveAgencyWorkers,
+  listAgencyWorkerInvitations,
+} from "@/lib/agency/agency-workers";
 
 const AGENCY_FIELDS = [
   { key: "candidateRoles" as const, labelKey: "field.candidateRoles.label", placeholderKey: "field.candidateRoles.placeholder", variant: "text" as const },
@@ -27,7 +33,47 @@ export default async function AgencyDashboardPage({
   await requireRoleOrRedirect(locale, "agency");
 
   const t = await getTranslations("roleDashboards.agency");
+  const tWorkers = await getTranslations("roleDashboards.agency.workers");
   const existingDraft = await getPilotDraft("agency_offer");
+
+  const ownAgency = await getOwnAgency();
+  const workersResult = ownAgency
+    ? await listActiveAgencyWorkers(ownAgency.id)
+    : ({ kind: "ok", rows: [] } as const);
+  const invitationsResult = ownAgency
+    ? await listAgencyWorkerInvitations(ownAgency.id)
+    : ({ kind: "ok", rows: [] } as const);
+
+  const workersLabels = {
+    title: tWorkers("title"),
+    subtitle: tWorkers("subtitle"),
+    emptyState: tWorkers("emptyState"),
+    emptyCta: tWorkers("emptyCta"),
+    inviteHeading: tWorkers("inviteHeading"),
+    inviteDescription: tWorkers("inviteDescription"),
+    inviteEmailLabel: tWorkers("inviteEmailLabel"),
+    inviteEmailPlaceholder: tWorkers("inviteEmailPlaceholder"),
+    inviteNoteLabel: tWorkers("inviteNoteLabel"),
+    inviteNoteHint: tWorkers("inviteNoteHint"),
+    inviteSubmit: tWorkers("inviteSubmit"),
+    invitationsHeading: tWorkers("invitationsHeading"),
+    invitationsEmpty: tWorkers("invitationsEmpty"),
+    statusInvited: tWorkers("statusInvited"),
+    statusAlreadyPending: tWorkers("statusAlreadyPending"),
+    statusAlreadyLinked: tWorkers("statusAlreadyLinked"),
+    statusNotOwner: tWorkers("statusNotOwner"),
+    statusInvalidEmail: tWorkers("statusInvalidEmail"),
+    statusError: tWorkers("statusError"),
+    statusNoAgency: tWorkers("statusNoAgency"),
+    migrationBlockerHeading: tWorkers("migrationBlockerHeading"),
+    migrationBlockerBody: tWorkers("migrationBlockerBody"),
+    activeWorkersHeading: tWorkers("activeWorkersHeading"),
+    columnEmail: tWorkers("columnEmail"),
+    columnStatus: tWorkers("columnStatus"),
+    columnInvitedAt: tWorkers("columnInvitedAt"),
+    noWorkersHeading: tWorkers("noWorkersHeading"),
+    noWorkersBody: tWorkers("noWorkersBody"),
+  };
 
   return (
     <div className="flex flex-col gap-6" data-testid="agency-dashboard">
@@ -59,6 +105,12 @@ export default async function AgencyDashboardPage({
       />
 
       <TeamRosterEmptyState variant="agency" />
+
+      <AgencyWorkersSection
+        workersResult={workersResult}
+        invitationsResult={invitationsResult}
+        labels={workersLabels}
+      />
 
       <section
         className="card-border flex flex-col gap-4 p-5"
