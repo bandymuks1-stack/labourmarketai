@@ -30,23 +30,48 @@ export async function RoleCatalogueCard({
 }) {
   const t = await getTranslations();
 
-  // Effective availability — honours the feature gate.
+  // Effective availability — honours the feature gate. `start-available`
+  // and `partial` already reflect honest "real start path exists" state,
+  // so the feature gate only downgrades `active` (which would otherwise
+  // promise a built workspace we have not shipped).
   const featureActive = role.primaryFeatureKey
     ? isFeatureActive(role.primaryFeatureKey as FeatureKey)
     : true;
   const effectiveAvailability =
     role.availability === "active" && featureActive ? "active" : role.availability;
   const isActive = effectiveAvailability === "active";
+  const isStartAvailable = effectiveAvailability === "start-available";
+  const isPartial = effectiveAvailability === "partial";
+  const hasHonestStartPath = isActive || isStartAvailable || isPartial;
+
+  const chipKey = isActive
+    ? "roles.status.active"
+    : isStartAvailable
+      ? "roles.status.start"
+      : isPartial
+        ? "roles.status.partial"
+        : "roles.status.preparing";
+
+  const chipTone = isActive
+    ? "border-state-success/40 bg-state-success/5 text-state-success"
+    : isStartAvailable
+      ? "border-brand-blue/40 bg-brand-blue/5 text-brand-blue"
+      : "border-state-warning/40 bg-state-warning/5 text-state-warning";
+
+  const ctaRoute = isActive
+    ? role.primaryRoute
+    : role.setupRoute ?? role.primaryRoute;
 
   return (
     <li
       className={cn(
         "flex flex-col gap-2 rounded-md border p-4 transition-colors",
-        isActive
+        hasHonestStartPath
           ? "border-ink-500 bg-ink-800/50 hover:border-brand-blue"
           : "border-ink-600 bg-ink-800/30",
         className,
       )}
+      data-testid={`role-catalogue-card-${role.id}`}
     >
       <div className="flex items-center justify-between gap-2">
         <h3 className="font-display text-sm font-semibold text-text-primary">
@@ -55,29 +80,32 @@ export async function RoleCatalogueCard({
         <span
           className={cn(
             "shrink-0 rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label",
-            isActive
-              ? "border-state-success/40 bg-state-success/5 text-state-success"
-              : "border-state-warning/40 bg-state-warning/5 text-state-warning",
+            chipTone,
           )}
         >
-          {isActive ? t("roles.status.active") : t("roles.status.preparing")}
+          {t(chipKey)}
         </span>
       </div>
       <p className="text-xs leading-relaxed text-text-secondary">
         {t(role.descriptionKey)}
       </p>
-      {isActive && role.primaryRoute ? (
-        <Link
-          href={role.primaryRoute as "/dashboard"}
-          className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
-        >
-          {t("dashboard.featuresHeading.open")} →
-        </Link>
-      ) : (
-        <p className="mt-auto text-[11px] leading-relaxed text-text-muted">
-          {t(role.preparingReasonKey ?? "roles.preparingReason.default")}
+      {!isActive && role.preparingReasonKey ? (
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {t(role.preparingReasonKey)}
         </p>
-      )}
+      ) : null}
+      {hasHonestStartPath && ctaRoute ? (
+        <Link
+          href={ctaRoute as "/dashboard"}
+          className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
+          data-testid={`role-catalogue-card-${role.id}-cta`}
+        >
+          {isActive
+            ? t("dashboard.featuresHeading.open")
+            : t("roles.actions.openSetup")}{" "}
+          →
+        </Link>
+      ) : null}
     </li>
   );
 }

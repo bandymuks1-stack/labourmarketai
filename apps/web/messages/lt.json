@@ -288,7 +288,7 @@
     "disclaimer": "Tai jūsų pačių nurodyti įgūdžiai. Jie dar nėra patvirtinti darbų žurnalu, dokumentais ar kito žmogaus patvirtinimu.",
     "suggestButton": "Pasiūlykite struktūrą",
     "needsTextHint": "Iš pradžių įrašykite profilio tekstą žemiau.",
-    "pendingTitle": "Pasiūlymai — patvirtinkite arba pakeiskite",
+    "pendingTitle": "Pasiūlymai — pasirinkite arba pakeiskite",
     "savedTitle": "Išsaugoti jūsų pačių nurodyti įgūdžiai",
     "saveButton": "Išsaugoti pasirinktus",
     "savingButton": "Saugoma…",
@@ -371,10 +371,17 @@
     "addLaterHint": "Vėliau galėsite pridėti daugiau vaidmenų — kataloge jie pasirodys, kai bus paruošti.",
     "status": {
       "active": "Aktyvu",
-      "preparing": "Ruošiama"
+      "preparing": "Ruošiama",
+      "start": "Pradėti",
+      "partial": "Dalinis"
+    },
+    "actions": {
+      "openSetup": "Atidaryti nustatymą"
     },
     "preparingReason": {
-      "default": "Šis vaidmuo dar ruošiamas. Įjungsime jį, kai bus paruoštas saugiai."
+      "default": "Šis vaidmuo dar ruošiamas. Įjungsime jį, kai bus paruoštas saugiai.",
+      "startAvailable": "Nustatymo kelias jau veikia: vienu lauku įrašai pavadinimą, ir paskyra realiai išsaugoma DB. Pilnas darbo erdvės sluoksnis vis dar pildomas.",
+      "customerPartial": "Trūksta pirmaeilės public.customers lentelės — pirkėjo entitetas dar nesukurtas DB lygmenyje (M3 etapas). Galite pridėti customer vaidmenį ir pildyti pilot užklausą."
     },
     "worker": {
       "description": "Darbuotojas: text-first profilis, įgūdžiai ir darbo dienoraštis. Aktyvu šiandien."
@@ -460,7 +467,7 @@
   },
   "suggestionStatuses": {
     "detected": "Pasiūlyta",
-    "confirmed_by_user": "Patvirtinta jūsų",
+    "confirmed_by_user": "Paties pasirinkta",
     "discarded_by_user": "Neįtraukta",
     "needs_more_detail": "Reikia daugiau informacijos",
     "needs_external_confirmation": "Laukia išorinio patvirtinimo",
@@ -539,8 +546,8 @@
     }
   },
   "structuring": {
-    "groupEyebrow": "Sistema rado",
-    "ruleBasedNotice": "Pastaba: kol kas naudojame paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai netampa faktais, kol jūs jų nepatvirtinate — niekas neišsaugoma automatiškai.",
+    "groupEyebrow": "Paties nurodyti pasiūlymai",
+    "ruleBasedNotice": "Pastaba: kol kas naudojame paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai netampa faktais, kol jūs jų nepasirenkate — niekas neišsaugoma automatiškai.",
     "emptyBucket": "Šiame teksto fragmente nieko aiškaus neradome. Galite parašyti daugiau arba praleisti.",
     "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau, arba pridėkite reikšmingus įrašus rankiniu būdu.",
     "buckets": {
