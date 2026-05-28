@@ -121,6 +121,13 @@ export default async function AdminDashboardPage({
           themselves are gated by requireSuperadmin AND admin-only RLS. */}
       <section className="flex flex-wrap gap-3" data-testid="admin-tools-hub">
         <Link
+          href="/dashboard/admin/project-truth"
+          className="rounded-md border border-brand-orange/60 px-4 py-2 text-xs font-medium text-brand-orange hover:border-brand-orange hover:text-text-primary"
+          data-testid="admin-tools-hub-project-truth"
+        >
+          Project truth · P0
+        </Link>
+        <Link
           href="/dashboard/admin/agent-os"
           className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
         >
