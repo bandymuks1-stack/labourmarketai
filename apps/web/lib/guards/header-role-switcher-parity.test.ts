@@ -124,8 +124,8 @@ describe("Guard: header chip parity with the dashboard catalogue per role", () =
     expect(ROLE_BY_ID.agency.setupRoute).toBe("/dashboard/start/agency");
   });
 
-  it("customer is partial with setupRoute /dashboard/start/buyer", () => {
-    expect(ROLE_BY_ID.customer.availability).toBe("partial");
+  it("customer is start-available with setupRoute /dashboard/start/buyer (PR #101: migration 0026 applied → partial flipped to start-available)", () => {
+    expect(ROLE_BY_ID.customer.availability).toBe("start-available");
     expect(ROLE_BY_ID.customer.setupRoute).toBe("/dashboard/start/buyer");
   });
 

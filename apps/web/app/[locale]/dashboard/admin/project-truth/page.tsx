@@ -640,9 +640,9 @@ const FEATURE_STATUS: readonly FeatureStatusRow[] = [
     id: "buyer-setup",
     label: "Buyer setup",
     route: "/[locale]/dashboard/start/buyer",
-    status: "partial",
+    status: "real",
     note:
-      "PR #95 → PR #100. Form is wired to public.customers + save_customer_setup RPC. Status flips from partial to real ONCE migration 0026_customer_entity is applied to prod. Until then form shows the migration blocker. Pilot draft persistence continues to work alongside.",
+      "PR #95 → PR #100 → PR #101. Migration 0026_customer_entity applied to prod 2026-05-29 (table + RPC + RLS + grants). Form posts to save_customer_setup RPC → public.customers row + profile_roles[customer]. Idempotent upsert; persists across reload; RLS limits SELECT/UPDATE to own profile or admin.",
   },
   {
     id: "admin",
