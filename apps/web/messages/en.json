@@ -71,7 +71,14 @@
         "saveError": "Could not save. Please try again.",
         "deleteError": "Could not remove. Please try again."
       },
-      "profileLink": "My capabilities (if you're also a person, not only a company)"
+      "profileLink": "My capabilities (if you're also a person, not only a company)",
+      "workersBlocker": {
+        "title": "Company workers link — waiting on a migration",
+        "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",
+        "statusLabel": "Missing table public.company_workers + invitations RPC",
+        "statusBody": "The schema today carries only public.agency_workers + the 0025 migration public.agency_worker_invitations. The company equivalent is not yet created. Next planned migration 0026: public.company_workers (company_id, worker_id, status, …) + RLS via owns_company() + RPC invite_company_worker().",
+        "nextStep": "Until then use the agency surface, or wait for the 0026 migration. Self-entry for workers stays open at all times."
+      }
     },
     "agency": {
       "eyebrow": "AGENCY WORKSPACE",
@@ -100,7 +107,37 @@
         "saveError": "Could not save. Please try again.",
         "deleteError": "Could not remove. Please try again."
       },
-      "profileLink": "My capabilities"
+      "profileLink": "My capabilities",
+      "workers": {
+        "title": "Agency workers",
+        "subtitle": "Link your agency with real workers. Self-entry stays open: a person can sign up on their own and be linked later. Invitations by email are an additional channel, not the only one.",
+        "emptyState": "No linked workers yet.",
+        "emptyCta": "Invite a worker",
+        "activeWorkersHeading": "Linked workers",
+        "noWorkersHeading": "No linked workers yet",
+        "noWorkersBody": "Invite by email, or wait for a worker to sign up on their own and be linked.",
+        "inviteHeading": "Invite a worker by email",
+        "inviteDescription": "The invitation is saved as its own DB row. No account is created automatically — the invited person signs up or signs in themselves.",
+        "inviteEmailLabel": "Email address",
+        "inviteEmailPlaceholder": "e.g. john@example.com",
+        "inviteNoteLabel": "Note to the invitee (optional)",
+        "inviteNoteHint": "Up to 500 characters. Saved with the invitation.",
+        "inviteSubmit": "Send invitation",
+        "invitationsHeading": "Pending invitations",
+        "invitationsEmpty": "No pending invitations.",
+        "statusInvited": "Invitation saved. The invitee must sign in or sign up.",
+        "statusAlreadyPending": "A pending invitation already exists for this email from your agency.",
+        "statusAlreadyLinked": "This worker is already linked to your agency.",
+        "statusNotOwner": "Action rejected: you are not the agency owner.",
+        "statusInvalidEmail": "Invalid email address.",
+        "statusError": "Something went wrong. Please try again.",
+        "statusNoAgency": "Finish agency setup first at /dashboard/start/agency.",
+        "migrationBlockerHeading": "Migration 0025_agency_worker_invitations required",
+        "migrationBlockerBody": "The invitations table and RPC are not applied to production yet. The owner must apply supabase/migrations/0025_agency_worker_invitations.sql via Supabase SQL Editor or MCP apply_migration. After it lands the form works end-to-end with no code change.",
+        "columnEmail": "Email",
+        "columnStatus": "Status",
+        "columnInvitedAt": "Date"
+      }
     },
     "buyer": {
       "eyebrow": "BUYER WORKSPACE",

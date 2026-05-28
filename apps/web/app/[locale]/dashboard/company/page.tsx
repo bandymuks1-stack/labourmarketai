@@ -75,6 +75,31 @@ export default async function CompanyDashboardPage({
       <TeamRosterEmptyState variant="company" />
 
       <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="company-workers-blocker"
+      >
+        <header className="flex flex-col gap-1">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("workersBlocker.title")}
+          </h2>
+          <p className="text-sm text-text-secondary">
+            {t("workersBlocker.subtitle")}
+          </p>
+        </header>
+        <div className="rounded-md border border-state-warning bg-state-warning/10 p-3">
+          <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+            {t("workersBlocker.statusLabel")}
+          </p>
+          <p className="mt-1 text-xs text-text-secondary">
+            {t("workersBlocker.statusBody")}
+          </p>
+        </div>
+        <p className="text-xs text-text-secondary">
+          {t("workersBlocker.nextStep")}
+        </p>
+      </section>
+
+      <section
         className="card-border flex flex-col gap-4 p-5"
         data-testid="company-dashboard-job-postings"
       >
