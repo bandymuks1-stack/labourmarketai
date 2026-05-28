@@ -394,6 +394,32 @@ export default async function DashboardOverviewPage({
         </section>
       </div>
 
+      {/* ── Activity Setup Hub link (Stage 2) ──
+          Direct path into /dashboard/start where the owner can see
+          real Agency / Company / Buyer state and start the first
+          two end-to-end. Surfaced above the role-catalogue grid so
+          it does not get buried under the "preparing" chips. */}
+      <Link
+        href="/dashboard/start"
+        className="card-border flex items-center justify-between gap-3 px-4 py-3 hover:border-brand-blue"
+        data-testid="dashboard-activity-setup-link"
+      >
+        <div className="flex flex-col gap-0.5">
+          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+            VEIKLOS PRADŽIA
+          </p>
+          <p className="text-sm font-semibold text-text-primary">
+            {tw("activitySetup.title")}
+          </p>
+          <p className="text-xs text-text-secondary">
+            {tw("activitySetup.body")}
+          </p>
+        </div>
+        <span className="shrink-0 text-sm text-brand-blue">
+          {tw("activitySetup.cta")} →
+        </span>
+      </Link>
+
       {/* ── Role expansion (non-locking, catalogue-driven) ──
           The card list is generated from `lib/config/roles.ts` via
           `getVisibleRoleOptions()`. Active roles render a navigating

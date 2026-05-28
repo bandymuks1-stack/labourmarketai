@@ -923,6 +923,11 @@
           "body": "You're not locked into one role. Company, agency and customer spaces are still being prepared — we'll add them step by step.",
           "cta": "Review roles"
         },
+        "activitySetup": {
+          "title": "Start agency, company or buyer activity",
+          "body": "Real DB writes — agency and company setup persists after submit and survives reload. Buyer — honest partial state.",
+          "cta": "Open activity start"
+        },
         "activity": {
           "earlyAccess": "Early access",
           "title": "Start your activity space",
