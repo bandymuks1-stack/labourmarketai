@@ -926,6 +926,11 @@
           "body": "Jūs nesate užrakinti viename vaidmenyje. Įmonės, agentūros ir pirkėjo erdvės dar ruošiamos — pridėsime palaipsniui.",
           "cta": "Peržiūrėti vaidmenis"
         },
+        "activitySetup": {
+          "title": "Pradėti agentūros, įmonės arba pirkėjo veiklą",
+          "body": "Tikra DB rašymas — agentūros ir įmonės nustatymas išsaugomas po pateikimo ir išlieka po perkrovimo. Pirkėjas — sąžinga dalinė būsena.",
+          "cta": "Atidaryti veiklos pradžią"
+        },
         "activity": {
           "earlyAccess": "Ankstyva prieiga",
           "title": "Pradėkite savo veiklos erdvę",
