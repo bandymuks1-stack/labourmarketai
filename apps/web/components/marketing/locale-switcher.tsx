@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import { locales, tier1Locales } from "@/lib/i18n/config";
+import { activeLocales, tier1Locales } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
 
 const TIER1 = new Set<string>(tier1Locales);
@@ -80,7 +80,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
           role="menu"
           className="absolute right-0 z-50 mt-2 max-h-[60vh] w-48 overflow-auto rounded-xl border border-ink-600 bg-ink-900/95 p-1.5 shadow-xl backdrop-blur-md"
         >
-          {locales.map((l) => {
+          {activeLocales.map((l) => {
             const preview = !TIER1.has(l);
             const isActive = l === active;
             return (
