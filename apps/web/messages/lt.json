@@ -328,6 +328,17 @@
             "future_pdf_reader_needed": "PDF nuskaitymas dar neįjungtas. Administratorius peržiūrės failą rankiniu būdu.",
             "future_ocr_needed": "Vaizdo/OCR nuskaitymas dar neįjungtas. Administratorius peržiūrės failą rankiniu būdu.",
             "manual_review_only": "Šis failo tipas vertinamas rankiniu būdu."
+          },
+          "completion": {
+            "heading": "Užklausos pilnumas",
+            "doneLabel": "Pridėta",
+            "missingLabel": "Trūksta",
+            "items": {
+              "description": "Aiškus poreikio aprašymas",
+              "files": "Bent vienas failas ar nuotrauka",
+              "location": "Vieta arba šalis",
+              "timing": "Pradžia arba trukmė"
+            }
           }
         }
       }

@@ -187,6 +187,17 @@ export default async function BuyerDashboardPage({
           "extractionReadiness.manual_review_only",
         ),
       },
+      completion: {
+        heading: tUnderstanding("completion.heading"),
+        doneLabel: tUnderstanding("completion.doneLabel"),
+        missingLabel: tUnderstanding("completion.missingLabel"),
+        items: {
+          description: tUnderstanding("completion.items.description"),
+          files: tUnderstanding("completion.items.files"),
+          location: tUnderstanding("completion.items.location"),
+          timing: tUnderstanding("completion.items.timing"),
+        },
+      },
     },
   };
 

@@ -328,6 +328,17 @@
             "future_pdf_reader_needed": "PDF reading is not enabled yet. An administrator will review the file manually.",
             "future_ocr_needed": "Image / OCR reading is not enabled yet. An administrator will review the file manually.",
             "manual_review_only": "This file type is reviewed manually."
+          },
+          "completion": {
+            "heading": "Request completeness",
+            "doneLabel": "Added",
+            "missingLabel": "Missing",
+            "items": {
+              "description": "A clear request description",
+              "files": "At least one file or photo",
+              "location": "Location or country",
+              "timing": "Start or duration"
+            }
           }
         }
       }

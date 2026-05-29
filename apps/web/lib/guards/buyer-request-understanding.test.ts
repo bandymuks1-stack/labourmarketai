@@ -211,3 +211,45 @@ describe("Guard: admin project-truth declares the workflow honestly", () => {
     expect(src).toMatch(/request-readiness/);
   });
 });
+
+describe("Guard: buyer request completion checklist (PR E)", () => {
+  it("section computes + renders the deterministic checklist", () => {
+    const src = read("components/app/buyer-requests-section.tsx");
+    expect(src).toMatch(
+      /from\s+["']@\/lib\/buyer\/request-completion["']/,
+    );
+    expect(src).toMatch(/computeRequestCompletion\(/);
+    expect(src).toMatch(/data-testid=\{`buyer-request-completion-\$\{r\.id\}`\}/);
+  });
+
+  it("completion helper is pure (no server-only / IO / clock)", () => {
+    const src = read("lib/buyer/request-completion.ts");
+    expect(src).not.toMatch(/import\s+["']server-only["']/);
+    expect(src).not.toMatch(/Date\.now|new Date\(|Math\.random|fetch\(|supabase/);
+  });
+
+  for (const locale of ["lt", "en"] as const) {
+    it(`${locale}.json completion keys present`, () => {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as Record<
+        string,
+        unknown
+      >;
+      const completion = (
+        (
+          (
+            (json.roleDashboards as Record<string, unknown>).buyer as Record<
+              string,
+              unknown
+            >
+          ).requests as Record<string, unknown>
+        ).understanding as Record<string, unknown>
+      ).completion as Record<string, unknown>;
+      expect(completion, `${locale} completion missing`).toBeTruthy();
+      expect(completion.heading).toBeTruthy();
+      const items = completion.items as Record<string, string>;
+      for (const k of ["description", "files", "location", "timing"]) {
+        expect(items[k], `${locale} completion.items.${k}`).toBeTruthy();
+      }
+    });
+  }
+});
