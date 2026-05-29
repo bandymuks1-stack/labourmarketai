@@ -47,6 +47,10 @@ const ADMIN_GATED_FILES = new Set<string>([
   // RoleSwitcher renders the /dashboard/admin admin-mode badge ONLY
   // when `isAdmin` from the auth context is true.
   join(APP_ROOT, "components", "app", "role-switcher.tsx"),
+  // Visual OS preview page renders the /dashboard/admin/project-truth
+  // shortcut ONLY when `isAdmin` (dual signal via deriveIsAdmin) is
+  // true; non-admins never see the admin link.
+  join(APP_ROOT, "app", "[locale]", "dashboard", "visual-os", "page.tsx"),
 ]);
 
 describe("admin visibility — non-admin UI never renders /dashboard/admin links", () => {

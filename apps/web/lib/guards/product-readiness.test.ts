@@ -1132,7 +1132,19 @@ describe("no migration files added by this sprint", () => {
     //    row. Applied to prod via MCP `apply_migration`; source-of-truth
     //    copy committed for repo parity. No schema change, no new table,
     //    no RLS broadening — just the function body.
-    const SPRINT_BASELINE = 23;
+    //
+    // Bumped from 23 → 28 to track the migrations already MERGED to main
+    // since the baseline was last set (this guard had drifted — it was
+    // never bumped when these shipped, so the suite was red on main):
+    //  - 0025_agency_worker_invitations (PR #99)
+    //  - 0026_customer_entity (PR #100/#101)
+    //  - 0027_company_workers (PR #102)
+    //  - 0028_customer_requests (PR #103)
+    //  - 0029_customer_request_attachments (PR #104)
+    // (0024_is_admin_dual_signal was already counted in the 21 → 23 bump
+    // above.) The intent is unchanged: a NEW migration added by a future
+    // sprint must bump this number deliberately, in its own review.
+    const SPRINT_BASELINE = 28;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
