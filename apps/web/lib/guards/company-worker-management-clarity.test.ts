@@ -116,6 +116,25 @@ describe("worker operations role/title is bridge-driven (PR C)", () => {
     });
   }
 
+  const setupSections = [
+    {
+      section: "components/app/company-workers-section.tsx",
+      note: "company-workers-ops-setup-note",
+    },
+    {
+      section: "components/app/agency-workers-section.tsx",
+      note: "agency-workers-ops-setup-note",
+    },
+  ];
+  for (const c of setupSections) {
+    it(`${c.section} shows a plain-language ops setup note when no roles assigned`, () => {
+      const src = read(c.section);
+      expect(src).toMatch(new RegExp(`data-testid="${c.note}"`));
+      expect(src).toMatch(/labels\.operations\.setupNote/);
+      expect(src).toMatch(/operationsRole\?\.trim\(\)/);
+    });
+  }
+
   const libs = [
     "lib/company/company-workers.ts",
     "lib/agency/agency-workers.ts",

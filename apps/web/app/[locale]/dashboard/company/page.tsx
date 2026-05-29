@@ -91,6 +91,7 @@ export default async function CompanyDashboardPage({
     coordinationNextAction: tWorkers("coordinationNextAction"),
     operations: {
       columnHeading: tWorkers("operations.columnHeading"),
+      setupNote: tWorkers("operations.setupNote"),
       notAssigned: tWorkers("operations.notAssigned"),
       reviewEnabled: tWorkers("operations.reviewEnabled"),
       reviewNotEnabled: tWorkers("operations.reviewNotEnabled"),
