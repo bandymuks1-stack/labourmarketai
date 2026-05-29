@@ -59,16 +59,22 @@ export interface AgencyWorkersSectionLabels {
   readonly columnInvitedAt: string;
   readonly noWorkersHeading: string;
   readonly noWorkersBody: string;
+  readonly coordinationHeading: string;
+  readonly coordinationBody: string;
+  readonly coordinationNextAction: string;
 }
 
 export function AgencyWorkersSection({
   workersResult,
   invitationsResult,
   labels,
+  roleCoordinationEnabled,
 }: {
   readonly workersResult: ListState<LinkedAgencyWorker>;
   readonly invitationsResult: ListState<AgencyWorkerInvitation>;
   readonly labels: AgencyWorkersSectionLabels;
+  /** From the operations role-capability map — false today. */
+  readonly roleCoordinationEnabled: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<
     InviteFormState | null,
@@ -177,6 +183,23 @@ export function AgencyWorkersSection({
           </table>
         )}
       </section>
+
+      {!roleCoordinationEnabled ? (
+        <div
+          className="rounded-md border border-ink-700 bg-surface-1 p-3"
+          data-testid="agency-workers-coordination-note"
+        >
+          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {labels.coordinationHeading}
+          </p>
+          <p className="mt-1 text-xs text-text-secondary">
+            {labels.coordinationBody}
+          </p>
+          <p className="mt-1 text-[11px] text-text-muted">
+            {labels.coordinationNextAction}
+          </p>
+        </div>
+      ) : null}
 
       {/* Invite worker form */}
       <form
