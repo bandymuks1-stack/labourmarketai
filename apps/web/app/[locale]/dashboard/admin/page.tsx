@@ -4,6 +4,20 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import { getPilotDraftCounts } from "@/lib/pilot/pilot-drafts";
+import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
+import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
+
+/** Priority-chip tone for the admin manual-review list (PR B). */
+const REVIEW_PRIORITY_CHIP: Record<AdminReviewPriorityStatus, string> = {
+  review_ready:
+    "rounded-full bg-state-success/15 px-2 py-0.5 text-[11px] text-state-success",
+  manual_review_needed:
+    "rounded-full bg-brand-blue/15 px-2 py-0.5 text-[11px] text-brand-blue",
+  missing_description:
+    "rounded-full bg-state-warning/15 px-2 py-0.5 text-[11px] text-state-warning",
+  missing_files:
+    "rounded-full bg-ink-700/40 px-2 py-0.5 text-[11px] text-text-muted",
+};
 
 /**
  * Type-escape for the `profile_skill_claims` table — the generated
@@ -74,6 +88,12 @@ export default async function AdminDashboardPage({
     draftCounts.company_request +
     draftCounts.agency_offer +
     draftCounts.buyer_request;
+
+  // Buyer requests needing manual review (deterministic priority, PR B).
+  const tReview = await getTranslations("admin.requestReview");
+  const adminReview = await listRequestsForAdminReview();
+  const reviewRows = adminReview.kind === "ok" ? adminReview.rows : [];
+  const reviewMigrationNeeded = adminReview.kind === "needs-migration";
 
   // 10 most recent profile rows. Admin RLS allows SELECT on all rows.
   const { data: recent } = await supabase
@@ -220,6 +240,69 @@ export default async function AdminDashboardPage({
             </p>
           </div>
         </div>
+      </section>
+
+      <section
+        className="flex flex-col gap-3"
+        data-testid="admin-request-review"
+      >
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {tReview("title")}
+        </h2>
+        <p className="text-xs text-text-secondary">{tReview("help")}</p>
+        {reviewMigrationNeeded ? (
+          <p
+            className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
+            data-testid="admin-request-review-migration-blocker"
+          >
+            {tReview("migrationBlocker")}
+          </p>
+        ) : reviewRows.length === 0 ? (
+          <p className="rounded-md border border-dashed border-ink-500 p-3 text-xs text-text-muted">
+            {tReview("empty")}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2" data-testid="admin-request-review-list">
+            {reviewRows.map((r) => {
+              const hasDescription = Boolean(r.needSummary?.trim());
+              return (
+                <li
+                  key={r.id}
+                  className="card-border flex flex-col gap-2 p-3"
+                  data-testid={`admin-request-review-row-${r.id}`}
+                  data-priority={r.priority}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-sm font-semibold text-text-primary">
+                        {r.title}
+                      </span>
+                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {tReview("created")}: {r.createdAt.slice(0, 10)} ·{" "}
+                        {tReview("filesLabel")}: {r.attachmentCount}
+                      </span>
+                    </div>
+                    <span className={REVIEW_PRIORITY_CHIP[r.priority]}>
+                      {tReview(`priority.${r.priority}`)}
+                    </span>
+                  </div>
+                  <p
+                    className={
+                      hasDescription
+                        ? "line-clamp-2 text-xs text-text-secondary"
+                        : "text-xs italic text-text-muted"
+                    }
+                  >
+                    {hasDescription ? r.needSummary : tReview("noDescription")}
+                  </p>
+                  <p className="text-[11px] text-text-secondary">
+                    {tReview(`action.${r.priority}`)}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <section className="flex flex-col gap-3">

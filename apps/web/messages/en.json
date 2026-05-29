@@ -462,6 +462,28 @@
         "buyer": "Buyer request"
       }
     },
+    "requestReview": {
+      "title": "Buyer requests — manual review",
+      "help": "Priority is computed deterministically from real fields (description, file count, status). No AI, no automatic reading.",
+      "empty": "No buyer requests yet.",
+      "migrationBlocker": "Migrations 0028_customer_requests / 0029_customer_request_attachments required.",
+      "filesLabel": "Files",
+      "created": "Created",
+      "noDescription": "No description provided",
+      "priorityHeading": "Priority",
+      "priority": {
+        "review_ready": "Ready for review",
+        "manual_review_needed": "Manual review needed",
+        "missing_description": "Missing description",
+        "missing_files": "Missing files"
+      },
+      "action": {
+        "review_ready": "Review the request and files manually.",
+        "manual_review_needed": "Review and decide the next step.",
+        "missing_description": "Waiting for the buyer to add a description.",
+        "missing_files": "Waiting for the buyer to add a file."
+      }
+    },
     "user": {
       "onboarded": "Onboarded",
       "notOnboarded": "Not onboarded",
