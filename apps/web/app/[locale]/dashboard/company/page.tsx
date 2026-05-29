@@ -133,6 +133,24 @@ export default async function CompanyDashboardPage({
         outcomeNeedsMigration: tWorkers(
           "operations.assign.outcomeNeedsMigration",
         ),
+        readyForSetup: tWorkers("operations.assign.readyForSetup"),
+        bridgeReasons: {
+          connected: tWorkers("operations.assign.bridgeReasons.connected"),
+          review_not_enabled: tWorkers(
+            "operations.assign.bridgeReasons.review_not_enabled",
+          ),
+          missing_engagement_context: tWorkers(
+            "operations.assign.bridgeReasons.missing_engagement_context",
+          ),
+          role_not_assigned: tWorkers(
+            "operations.assign.bridgeReasons.role_not_assigned",
+          ),
+          relationship_not_found: tWorkers(
+            "operations.assign.bridgeReasons.relationship_not_found",
+          ),
+          not_allowed: tWorkers("operations.assign.bridgeReasons.not_allowed"),
+          not_enabled: tWorkers("operations.assign.bridgeReasons.not_enabled"),
+        },
         // roleOptionLabels are injected at render from operations.roleLabels.
         roleOptionLabels: {},
       },

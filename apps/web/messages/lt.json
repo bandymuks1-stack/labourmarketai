@@ -124,7 +124,17 @@
             "outcomeInvalidRole": "Netinkama rolė.",
             "outcomeReviewNotAllowed": "Peržiūros kol kas negalima įjungti.",
             "outcomeError": "Nepavyko išsaugoti.",
-            "outcomeNeedsMigration": "Funkcija dar neparuošta."
+            "outcomeNeedsMigration": "Funkcija dar neparuošta.",
+            "bridgeReasons": {
+              "connected": "Peržiūra įjungta ir sujungta su darbo žurnalo kontekstu.",
+              "review_not_enabled": "Paruošta peržiūros nustatymui.",
+              "missing_engagement_context": "Darbo žurnalo kontekstas dar nesujungtas. Pirmiausia reikia sujungti darbuotojo ryšį su darbo žurnalo kontekstu.",
+              "role_not_assigned": "Pirma priskirkite operacinę rolę.",
+              "relationship_not_found": "Ryšys nerastas.",
+              "not_allowed": "Šiam darbuotojo ryšiui dar negalima įjungti peržiūros.",
+              "not_enabled": "Ši rolė dar neįjungta peržiūrai."
+            },
+            "readyForSetup": "Paruošta peržiūros nustatymui."
           }
         },
         "coordinationHeading": "Rolių koordinavimas",
@@ -226,7 +236,17 @@
             "outcomeInvalidRole": "Netinkama rolė.",
             "outcomeReviewNotAllowed": "Peržiūros kol kas negalima įjungti.",
             "outcomeError": "Nepavyko išsaugoti.",
-            "outcomeNeedsMigration": "Funkcija dar neparuošta."
+            "outcomeNeedsMigration": "Funkcija dar neparuošta.",
+            "bridgeReasons": {
+              "connected": "Peržiūra įjungta ir sujungta su darbo žurnalo kontekstu.",
+              "review_not_enabled": "Paruošta peržiūros nustatymui.",
+              "missing_engagement_context": "Darbo žurnalo kontekstas dar nesujungtas. Pirmiausia reikia sujungti darbuotojo ryšį su darbo žurnalo kontekstu.",
+              "role_not_assigned": "Pirma priskirkite operacinę rolę.",
+              "relationship_not_found": "Ryšys nerastas.",
+              "not_allowed": "Šiam darbuotojo ryšiui dar negalima įjungti peržiūros.",
+              "not_enabled": "Ši rolė dar neįjungta peržiūrai."
+            },
+            "readyForSetup": "Paruošta peržiūros nustatymui."
           }
         },
         "coordinationHeading": "Rolių koordinavimas",

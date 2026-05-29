@@ -229,6 +229,7 @@ export function AgencyWorkersSection({
                             workerId={w.workerId}
                             currentRole={w.operationsRole}
                             currentTitle={w.operationsTitle}
+                            journalReviewEnabled={w.journalReviewEnabled}
                             action={assignAgencyWorkerRoleAction}
                             labels={{
                               ...labels.operations.assign,

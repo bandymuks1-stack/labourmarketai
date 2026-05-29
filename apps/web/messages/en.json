@@ -124,7 +124,17 @@
             "outcomeInvalidRole": "Invalid role.",
             "outcomeReviewNotAllowed": "Review cannot be enabled yet.",
             "outcomeError": "Could not save.",
-            "outcomeNeedsMigration": "Not ready yet."
+            "outcomeNeedsMigration": "Not ready yet.",
+            "bridgeReasons": {
+              "connected": "Review is connected and enabled.",
+              "review_not_enabled": "Ready for review setup.",
+              "missing_engagement_context": "Work journal context is not connected yet. Connect the worker relationship to a work journal context first.",
+              "role_not_assigned": "Assign an operations role first.",
+              "relationship_not_found": "Relationship not found.",
+              "not_allowed": "Review cannot be enabled for this worker relationship yet.",
+              "not_enabled": "This role is not enabled for review yet."
+            },
+            "readyForSetup": "Ready for review setup."
           }
         },
         "coordinationHeading": "Role coordination",
@@ -226,7 +236,17 @@
             "outcomeInvalidRole": "Invalid role.",
             "outcomeReviewNotAllowed": "Review cannot be enabled yet.",
             "outcomeError": "Could not save.",
-            "outcomeNeedsMigration": "Not ready yet."
+            "outcomeNeedsMigration": "Not ready yet.",
+            "bridgeReasons": {
+              "connected": "Review is connected and enabled.",
+              "review_not_enabled": "Ready for review setup.",
+              "missing_engagement_context": "Work journal context is not connected yet. Connect the worker relationship to a work journal context first.",
+              "role_not_assigned": "Assign an operations role first.",
+              "relationship_not_found": "Relationship not found.",
+              "not_allowed": "Review cannot be enabled for this worker relationship yet.",
+              "not_enabled": "This role is not enabled for review yet."
+            },
+            "readyForSetup": "Ready for review setup."
           }
         },
         "coordinationHeading": "Role coordination",

@@ -6,6 +6,11 @@ import {
   ASSIGNABLE_OPERATIONS_ROLES,
   type AssignRoleActionState,
 } from "@/lib/operations/assign-operations-role";
+import {
+  computeEngagementBridgeReadiness,
+  EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE,
+  type EngagementBridgeState,
+} from "@/lib/operations/engagement-bridge";
 
 /**
  * Owner/admin-only operations role-select control for a single worker row.
@@ -31,6 +36,10 @@ export interface OperationsRoleControlLabels {
   readonly saving: string;
   readonly reviewToggleLabel: string;
   readonly reviewDisabledNote: string;
+  /** Per-bridge-state reason copy (engagement-context bridge readiness). */
+  readonly bridgeReasons: Record<EngagementBridgeState, string>;
+  /** Affirmative line shown when the bridge is ready but review is off. */
+  readonly readyForSetup: string;
   readonly outcomeAssigned: string;
   readonly outcomeCleared: string;
   readonly outcomeNotOwner: string;
@@ -52,12 +61,15 @@ export function WorkerOperationsRoleForm({
   workerId,
   currentRole,
   currentTitle,
+  journalReviewEnabled = false,
   action,
   labels,
 }: {
   readonly workerId: string;
   readonly currentRole: string | null;
   readonly currentTitle: string | null;
+  /** Current journal_review_enabled for this relationship (default false). */
+  readonly journalReviewEnabled?: boolean;
   readonly action: AssignAction;
   readonly labels: OperationsRoleControlLabels;
 }) {
@@ -65,6 +77,21 @@ export function WorkerOperationsRoleForm({
     AssignRoleActionState | null,
     FormData
   >(action, null);
+
+  // Engagement-context bridge readiness for THIS relationship. The bridge is
+  // not live yet (no provisioning RPC), so engagementContextLinked is false;
+  // the helper reports the exact blocker (e.g. missing_engagement_context).
+  // Review is NEVER shown as active unless the helper says reviewActive.
+  const bridge = computeEngagementBridgeReadiness({
+    relationshipExists: true,
+    operationsRole: currentRole,
+    journalReviewEnabled,
+    engagementContextLinked: EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE,
+  });
+  const bridgeReasonText =
+    bridge.bridgeReady && !bridge.reviewActive
+      ? labels.readyForSetup
+      : labels.bridgeReasons[bridge.state];
 
   const outcomeMessage: { text: string; ok: boolean } | null = (() => {
     if (!state) return null;
@@ -164,6 +191,22 @@ export function WorkerOperationsRoleForm({
           data-testid={`worker-ops-review-disabled-note-${workerId}`}
         >
           {labels.reviewDisabledNote}
+        </p>
+        {/* Specific engagement-context bridge reason for this relationship.
+            Affirmative styling ONLY when the bridge is ready (review can be
+            set up) — never claims review is active unless reviewActive. */}
+        <p
+          className={
+            bridge.bridgeReady
+              ? "text-[10px] leading-relaxed text-brand-blue"
+              : "text-[10px] leading-relaxed text-text-muted"
+          }
+          data-testid={`worker-ops-bridge-reason-${workerId}`}
+          data-bridge-state={bridge.state}
+          data-bridge-ready={bridge.bridgeReady ? "true" : "false"}
+          data-review-active={bridge.reviewActive ? "true" : "false"}
+        >
+          {bridgeReasonText}
         </p>
       </div>
 
