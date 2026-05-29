@@ -462,6 +462,28 @@
         "buyer": "Pirkėjo užklausa"
       }
     },
+    "requestReview": {
+      "title": "Pirkėjų užklausos — rankinė peržiūra",
+      "help": "Pirmenybė nustatoma deterministiškai pagal realius laukus (aprašymą, failų skaičių, būseną). Be dirbtinio intelekto, be automatinio nuskaitymo.",
+      "empty": "Pirkėjų užklausų dar nėra.",
+      "migrationBlocker": "Reikia migracijų 0028_customer_requests / 0029_customer_request_attachments.",
+      "filesLabel": "Failai",
+      "created": "Sukurta",
+      "noDescription": "Aprašymas nenurodytas",
+      "priorityHeading": "Pirmenybė",
+      "priority": {
+        "review_ready": "Paruošta peržiūrai",
+        "manual_review_needed": "Reikia rankinės peržiūros",
+        "missing_description": "Trūksta aprašymo",
+        "missing_files": "Trūksta failų"
+      },
+      "action": {
+        "review_ready": "Peržiūrėkite užklausą ir failus rankiniu būdu.",
+        "manual_review_needed": "Peržiūrėkite ir nuspręskite tolesnį žingsnį.",
+        "missing_description": "Laukiama, kol pirkėjas papildys aprašymą.",
+        "missing_files": "Laukiama, kol pirkėjas pridės failą."
+      }
+    },
     "user": {
       "onboarded": "Užregistruotas",
       "notOnboarded": "Dar nepradėjęs",
