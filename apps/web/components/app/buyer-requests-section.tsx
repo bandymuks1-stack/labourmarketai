@@ -119,6 +119,17 @@ export interface BuyerRequestUnderstandingLabels {
     readonly heading: string;
     readonly events: Record<RequestTimelineEventKey, string>;
   };
+  readonly workflow: {
+    readonly heading: string;
+    readonly futureLabel: string;
+    readonly steps: {
+      readonly request: string;
+      readonly files: string;
+      readonly readiness: string;
+      readonly adminReview: string;
+      readonly futureHelper: string;
+    };
+  };
 }
 
 /** Status-chip tone for each deterministic readiness state. */
@@ -216,6 +227,47 @@ export function BuyerRequestsSection({
       >
         {labels.manualReviewBanner}
       </p>
+
+      {/* Lightweight workflow stepper — explains the flow; the future
+          structured helper is visibly marked as not enabled. */}
+      <div className="flex flex-col gap-1" data-testid="buyer-requests-workflow">
+        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {labels.understanding.workflow.heading}
+        </p>
+        <ol className="flex flex-wrap items-center gap-x-1 gap-y-2 text-[11px]">
+          {[
+            { label: labels.understanding.workflow.steps.request, future: false },
+            { label: labels.understanding.workflow.steps.files, future: false },
+            { label: labels.understanding.workflow.steps.readiness, future: false },
+            {
+              label: labels.understanding.workflow.steps.adminReview,
+              future: false,
+            },
+            {
+              label: labels.understanding.workflow.steps.futureHelper,
+              future: true,
+            },
+          ].map((s, i, arr) => (
+            <li key={s.label} className="flex items-center gap-1">
+              <span
+                className={
+                  s.future
+                    ? "rounded-full border border-dashed border-ink-500 px-2 py-0.5 text-text-muted"
+                    : "rounded-full bg-ink-700/40 px-2 py-0.5 text-text-secondary"
+                }
+              >
+                {s.label}
+                {s.future ? ` · ${labels.understanding.workflow.futureLabel}` : ""}
+              </span>
+              {i < arr.length - 1 ? (
+                <span aria-hidden className="text-text-muted">
+                  →
+                </span>
+              ) : null}
+            </li>
+          ))}
+        </ol>
+      </div>
 
       {migrationNeeded ? (
         <div

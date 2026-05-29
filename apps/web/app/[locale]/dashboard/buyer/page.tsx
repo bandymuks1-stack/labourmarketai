@@ -211,6 +211,17 @@ export default async function BuyerDashboardPage({
           ),
         },
       },
+      workflow: {
+        heading: tUnderstanding("workflow.heading"),
+        futureLabel: tUnderstanding("workflow.futureLabel"),
+        steps: {
+          request: tUnderstanding("workflow.steps.request"),
+          files: tUnderstanding("workflow.steps.files"),
+          readiness: tUnderstanding("workflow.steps.readiness"),
+          adminReview: tUnderstanding("workflow.steps.adminReview"),
+          futureHelper: tUnderstanding("workflow.steps.futureHelper"),
+        },
+      },
     },
   };
 

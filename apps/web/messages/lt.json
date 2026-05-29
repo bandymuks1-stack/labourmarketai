@@ -348,6 +348,17 @@
               "automatic_reading_not_enabled": "Automatinis nuskaitymas neįjungtas",
               "manual_review_pending": "Laukiama rankinės peržiūros"
             }
+          },
+          "workflow": {
+            "heading": "Kaip tai veikia",
+            "futureLabel": "ateityje — neįjungta",
+            "steps": {
+              "request": "Užklausa",
+              "files": "Failai",
+              "readiness": "Rankinė parengtis",
+              "adminReview": "Administratoriaus peržiūra",
+              "futureHelper": "Struktūrinis pagalbininkas"
+            }
           }
         }
       }
