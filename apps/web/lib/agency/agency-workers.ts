@@ -263,3 +263,51 @@ export async function assignAgencyWorkerRole(
       : never;
   return { kind: "ok", outcome };
 }
+
+export type ProvisionAgencyEngagementContextResult =
+  | {
+      kind: "ok";
+      outcome:
+        | "connected"
+        | "already_connected"
+        | "not_owner"
+        | "not_linked"
+        | "profile_missing"
+        | "role_not_assigned"
+        | "role_not_allowed"
+        | "organization_missing";
+    }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * Owner/admin-only: provision (idempotently) an active `employee`
+ * engagement_context linking an agency↔worker relationship to the agency's
+ * mirrored organization, via the SECURITY DEFINER RPC
+ * `provision_agency_worker_engagement_context` (migration 0032). Mirrors the
+ * company wrapper: makes the relationship bridge-ready, never enables review,
+ * ownership re-validated server-side, degrades to `needs-migration` until 0032
+ * is applied.
+ */
+export async function provisionAgencyWorkerEngagementContext(
+  agencyId: string,
+  workerId: string,
+): Promise<ProvisionAgencyEngagementContextResult> {
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc(
+    "provision_agency_worker_engagement_context",
+    { p_agency_id: agencyId, p_worker_id: workerId },
+  );
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    if (error.code === PERMISSION_DENIED_CODE) {
+      return { kind: "ok", outcome: "not_owner" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  const outcome =
+    data as ProvisionAgencyEngagementContextResult extends { outcome: infer O }
+      ? O
+      : never;
+  return { kind: "ok", outcome };
+}

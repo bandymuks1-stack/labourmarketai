@@ -89,8 +89,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
       resolve(APP, "lib", "guards", "product-readiness.test.ts"),
       "utf8",
     );
-    // Bumped to 30 on the ops-role-assign-rpc-v1 slice (migration 0031
-    // adds the assignment RPCs). The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 30/);
+    // Bumped to 31 on the engagement-context-provisioning-rpc-v1 slice
+    // (migration 0032 adds the provisioning RPCs). The baseline only ever
+    // grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 31/);
   });
 });

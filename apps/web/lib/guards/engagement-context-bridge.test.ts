@@ -139,11 +139,14 @@ describe("bridge reason copy is present and carries no fake claims", () => {
 // ── 5. No migration added by this slice ─────────────────────────────────
 
 describe("engagement-bridge v1 is app-only (no DB change)", () => {
-  it("supabase/migrations has no 0032+ file from this slice", () => {
+  it("the readiness-classifier slice itself added no migration (0032 is the later provisioning slice)", () => {
     const dir = resolve(REPO, "supabase", "migrations");
     const files = readdirSync(dir).filter((f) => f.endsWith(".sql"));
-    // 0031 is the latest applied migration; this slice adds none.
-    expect(files.some((f) => /^003[2-9]/.test(f))).toBe(false);
+    // PR #141 (the read-only readiness classifier) added NO migration. The
+    // provisioning RPCs live in 0032 (engagement-context-provisioning-rpc-v1),
+    // a deliberately separate slice with its own SQL guard. Anything ≥ 0033
+    // would be unexpected here.
+    expect(files.some((f) => /^003[3-9]/.test(f))).toBe(false);
   });
 
   it("the engagement-bridge helper is pure (no server-only / external imports)", () => {
