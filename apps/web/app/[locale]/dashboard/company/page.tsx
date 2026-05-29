@@ -15,6 +15,7 @@ import {
   listCompanyWorkerInvitations,
 } from "@/lib/company/company-workers";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
+import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 
 const COMPANY_FIELDS = [
   { key: "title" as const, labelKey: "field.title.label", placeholderKey: "field.title.placeholder", variant: "text" as const },
@@ -85,6 +86,9 @@ export default async function CompanyDashboardPage({
     columnEmail: tWorkers("columnEmail"),
     columnStatus: tWorkers("columnStatus"),
     columnInvitedAt: tWorkers("columnInvitedAt"),
+    coordinationHeading: tWorkers("coordinationHeading"),
+    coordinationBody: tWorkers("coordinationBody"),
+    coordinationNextAction: tWorkers("coordinationNextAction"),
   };
 
   return (
@@ -122,6 +126,7 @@ export default async function CompanyDashboardPage({
         workersResult={workersResult}
         invitationsResult={invitationsResult}
         labels={workersLabels}
+        roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
       />
 
       <section

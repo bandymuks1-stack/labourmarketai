@@ -7,6 +7,7 @@ import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explai
 import { AgencyWorkersSection } from "@/components/app/agency-workers-section";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
+import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import {
   getOwnAgency,
   listActiveAgencyWorkers,
@@ -73,6 +74,9 @@ export default async function AgencyDashboardPage({
     columnInvitedAt: tWorkers("columnInvitedAt"),
     noWorkersHeading: tWorkers("noWorkersHeading"),
     noWorkersBody: tWorkers("noWorkersBody"),
+    coordinationHeading: tWorkers("coordinationHeading"),
+    coordinationBody: tWorkers("coordinationBody"),
+    coordinationNextAction: tWorkers("coordinationNextAction"),
   };
 
   return (
@@ -110,6 +114,7 @@ export default async function AgencyDashboardPage({
         workersResult={workersResult}
         invitationsResult={invitationsResult}
         labels={workersLabels}
+        roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
       />
 
       <section
