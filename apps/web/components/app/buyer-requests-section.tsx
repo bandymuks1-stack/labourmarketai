@@ -8,6 +8,11 @@ import {
 } from "@/lib/buyer/request-actions";
 import type { CustomerRequestRow } from "@/lib/buyer/customer-requests";
 import {
+  computeRequestReadiness,
+  type RequestNextAction,
+  type RequestReadinessStatus,
+} from "@/lib/buyer/request-readiness";
+import {
   BuyerRequestAttachmentUploader,
   type AttachmentListItem,
   type BuyerRequestAttachmentUploaderLabels,
@@ -71,7 +76,37 @@ export interface BuyerRequestsSectionLabels {
   readonly attachmentsMigrationBlocker: string;
   readonly attachmentsAnalysisFallback: string;
   readonly attachmentsUploader: BuyerRequestAttachmentUploaderLabels;
+  readonly understanding: BuyerRequestUnderstandingLabels;
 }
+
+export interface BuyerRequestUnderstandingLabels {
+  readonly panelHeading: string;
+  readonly basicsHeading: string;
+  readonly labelStatus: string;
+  readonly labelCreated: string;
+  readonly labelDescription: string;
+  readonly noDescription: string;
+  readonly readinessHeading: string;
+  readonly readinessStatus: Record<RequestReadinessStatus, string>;
+  readonly honestMessage: string;
+  readonly nextActionHeading: string;
+  readonly nextAction: Record<RequestNextAction, string>;
+  readonly filesHeading: string;
+  readonly analysisStatusLabel: string;
+  readonly analysisNotStarted: string;
+}
+
+/** Status-chip tone for each deterministic readiness state. */
+const READINESS_CHIP_CLASS: Record<RequestReadinessStatus, string> = {
+  no_files:
+    "rounded-full bg-ink-700/40 px-2 py-0.5 text-[11px] text-text-muted",
+  needs_more_info:
+    "rounded-full bg-state-warning/15 px-2 py-0.5 text-[11px] text-state-warning",
+  files_added:
+    "rounded-full bg-brand-blue/15 px-2 py-0.5 text-[11px] text-brand-blue",
+  enough_for_manual_review:
+    "rounded-full bg-state-success/15 px-2 py-0.5 text-[11px] text-state-success",
+};
 
 type ListState =
   | { kind: "ok"; rows: readonly CustomerRequestRow[] }
@@ -180,22 +215,67 @@ export function BuyerRequestsSection({
           <ul className="flex flex-col gap-2">
             {rows.map((r) => {
               const requestAttachments = attachmentsByRequest.get(r.id) ?? [];
+              const u = labels.understanding;
+              // Deterministic, transparent product logic — no AI / OCR /
+              // verification. Computed only from real request + attachment
+              // metadata the buyer already provided.
+              const readiness = computeRequestReadiness({
+                description: r.needSummary,
+                attachmentCount: requestAttachments.length,
+              });
+              const hasDescription = Boolean(r.needSummary?.trim());
               return (
                 <li
                   key={r.id}
-                  className="card-border flex flex-col gap-2 p-3"
+                  className="card-border flex flex-col gap-3 p-3 sm:p-4"
                   data-testid={`buyer-request-row-${r.id}`}
+                  data-readiness={readiness.status}
                 >
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <span className="text-text-primary">{r.title}</span>
-                    <span className="text-text-secondary">{r.status}</span>
-                    <span className="text-text-muted">
-                      {r.updatedAt.slice(0, 10)}
+                  {/* 1. Request basics + readiness chip */}
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <span className="font-display text-sm font-semibold text-text-primary">
+                        {r.title}
+                      </span>
+                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {u.labelCreated}: {r.createdAt.slice(0, 10)}
+                      </span>
+                    </div>
+                    <span
+                      className={READINESS_CHIP_CLASS[readiness.status]}
+                      data-testid={`buyer-request-readiness-${r.id}`}
+                    >
+                      {u.readinessStatus[readiness.status]}
                     </span>
                   </div>
+
+                  <div className="flex flex-col gap-1 text-xs">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-text-muted">{u.labelStatus}:</span>
+                      <span className="rounded bg-ink-700/40 px-2 py-0.5 text-text-secondary">
+                        {r.status}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-text-muted">
+                        {u.labelDescription}:
+                      </span>
+                      <span
+                        className={
+                          hasDescription
+                            ? "text-text-secondary"
+                            : "italic text-text-muted"
+                        }
+                      >
+                        {hasDescription ? r.needSummary : u.noDescription}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 2. Attached files */}
                   <div className="border-t border-ink-700 pt-2">
                     <p className="mb-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
-                      {labels.attachmentsHeading}
+                      {u.filesHeading}
                     </p>
                     {attachmentsMigrationNeeded ? (
                       <p
@@ -210,7 +290,11 @@ export function BuyerRequestsSection({
                           <p className="text-[11px] text-text-muted">
                             {labels.attachmentsEmpty}
                           </p>
-                        ) : null}
+                        ) : (
+                          <p className="mb-1 text-[10px] text-text-muted">
+                            {u.analysisStatusLabel}: {u.analysisNotStarted}
+                          </p>
+                        )}
                         <BuyerRequestAttachmentUploader
                           requestId={r.id}
                           attachments={requestAttachments}
@@ -219,6 +303,27 @@ export function BuyerRequestsSection({
                         />
                       </>
                     )}
+                  </div>
+
+                  {/* 3. Honest understanding message */}
+                  <p
+                    className="rounded-md border border-ink-700 bg-surface-1 px-3 py-2 text-[11px] text-text-secondary"
+                    data-testid={`buyer-request-honest-${r.id}`}
+                  >
+                    {u.honestMessage}
+                  </p>
+
+                  {/* 4 + 5. Readiness + single next action */}
+                  <div
+                    className="rounded-md border border-brand-blue/40 bg-brand-blue/10 px-3 py-2"
+                    data-testid={`buyer-request-next-action-${r.id}`}
+                  >
+                    <p className="font-mono text-[10px] uppercase tracking-label text-brand-blue">
+                      {u.nextActionHeading}
+                    </p>
+                    <p className="text-xs font-semibold text-text-primary">
+                      {u.nextAction[readiness.nextAction]}
+                    </p>
                   </div>
                 </li>
               );

@@ -801,6 +801,14 @@ const FEATURE_STATUS: readonly FeatureStatusRow[] = [
       "Buyer Request Attachments + Understanding Pipeline sprint, PR 1. Migration 0029_customer_request_attachments creates public.customer_request_attachments + private storage bucket 'customer-request-attachments' + RLS (owner+admin) + register_customer_request_attachment RPC. Level 1 — metadata only. Allowed types: PDF/JPG/PNG/WebP/TXT, max 10 MB. Honest fallback wording in UI: 'Failas pridėtas. Automatinis nuskaitymas dar neįjungtas — administratorius peržiūrės rankiniu būdu.' No fake AI / OCR / verification. Level 2 (text extraction) and Level 3 (structured helper) intentionally deferred to follow-up PRs.",
   },
   {
+    id: "buyer-request-understanding",
+    label: "Buyer Request Understanding Center (manual-review)",
+    route: "/[locale]/dashboard/buyer",
+    status: "real",
+    note:
+      "Buyer Request Understanding Center v1. Level 1 attachments are real (private bucket + signed read, migration 0029 — see row above). Each buyer request card shows a deterministic, manual-review-only understanding panel: request basics → attached files → readiness status (no_files / files_added / enough_for_manual_review / needs_more_info, computed by the pure helper lib/buyer/request-readiness.ts from real request + attachment metadata only) → one buyer next action. NOT AI — transparent product logic. No OCR yet. No AI text extraction yet. No automatic verification, no matching, no candidates, no offers. UI states honestly that automatic reading is not enabled and an administrator reviews manually. Future levels may add real text extraction and a structured helper.",
+  },
+  {
     id: "admin",
     label: "Admin dashboard",
     route: "/[locale]/dashboard/admin",
