@@ -89,6 +89,17 @@ describe("Guard: buyer surface wires the helper through the existing flow", () =
     const mounts = src.match(/<BuyerRequestsSection\b/g) ?? [];
     expect(mounts.length).toBe(1);
   });
+
+  it("request status is shown via a localized label, not the raw DB value", () => {
+    // Clarity guard (PR A): a buyer must not see raw technical wording like
+    // `draft` / `in_review`. The section maps the status through the
+    // localized requestStatus dictionary.
+    const src = read("components/app/buyer-requests-section.tsx");
+    expect(src).toMatch(/u\.requestStatus\[r\.status\]/);
+    // The long description must be clamped so a request cannot render a
+    // giant dense text block.
+    expect(src).toMatch(/line-clamp-3/);
+  });
 });
 
 describe("Guard: understanding copy is honest (LT + EN)", () => {
@@ -131,6 +142,17 @@ describe("Guard: understanding copy is honest (LT + EN)", () => {
       ]) {
         expect(nextAction[a], `${locale} nextAction.${a}`).toBeTruthy();
       }
+      const requestStatus = u.requestStatus as Record<string, string>;
+      for (const s of [
+        "draft",
+        "submitted",
+        "in_review",
+        "needs_followup",
+        "approved",
+        "closed",
+      ]) {
+        expect(requestStatus[s], `${locale} requestStatus.${s}`).toBeTruthy();
+      }
       for (const key of [
         "panelHeading",
         "labelStatus",
@@ -143,6 +165,7 @@ describe("Guard: understanding copy is honest (LT + EN)", () => {
         "filesHeading",
         "analysisStatusLabel",
         "analysisNotStarted",
+        "fileReviewChip",
       ]) {
         expect(u[key], `${locale} understanding.${key}`).toBeTruthy();
       }

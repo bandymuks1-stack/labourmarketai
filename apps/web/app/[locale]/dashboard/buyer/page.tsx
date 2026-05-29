@@ -164,6 +164,15 @@ export default async function BuyerDashboardPage({
       filesHeading: tUnderstanding("filesHeading"),
       analysisStatusLabel: tUnderstanding("analysisStatusLabel"),
       analysisNotStarted: tUnderstanding("analysisNotStarted"),
+      fileReviewChip: tUnderstanding("fileReviewChip"),
+      requestStatus: {
+        draft: tUnderstanding("requestStatus.draft"),
+        submitted: tUnderstanding("requestStatus.submitted"),
+        in_review: tUnderstanding("requestStatus.in_review"),
+        needs_followup: tUnderstanding("requestStatus.needs_followup"),
+        approved: tUnderstanding("requestStatus.approved"),
+        closed: tUnderstanding("requestStatus.closed"),
+      },
     },
   };
 
