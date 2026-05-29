@@ -10,6 +10,7 @@ import type {
   CompanyWorkerInvitation,
   LinkedCompanyWorker,
 } from "@/lib/company/company-workers";
+import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
 
 /**
  * Company workers + invitations panel.
@@ -55,6 +56,15 @@ export interface CompanyWorkersSectionLabels {
   readonly coordinationHeading: string;
   readonly coordinationBody: string;
   readonly coordinationNextAction: string;
+  readonly operations: OpsCellLabels;
+}
+
+export interface OpsCellLabels {
+  readonly columnHeading: string;
+  readonly notAssigned: string;
+  readonly reviewEnabled: string;
+  readonly reviewNotEnabled: string;
+  readonly roleLabels: Record<string, string>;
 }
 
 export function CompanyWorkersSection({
@@ -160,21 +170,46 @@ export function CompanyWorkersSection({
               <tr>
                 <th className="py-1 text-left">{labels.columnEmail}</th>
                 <th className="py-1 text-left">{labels.columnStatus}</th>
+                <th className="py-1 text-left">{labels.operations.columnHeading}</th>
                 <th className="py-1 text-left">{labels.columnInvitedAt}</th>
               </tr>
             </thead>
             <tbody>
-              {activeWorkers.map((w) => (
-                <tr
-                  key={w.workerId}
-                  className="border-t border-ink-700"
-                  data-testid={`company-worker-row-${w.workerId}`}
-                >
-                  <td className="py-1 text-text-primary">{w.email ?? "—"}</td>
-                  <td className="py-1 text-text-secondary">{w.status ?? "active"}</td>
-                  <td className="py-1 text-text-muted">{w.createdAt.slice(0, 10)}</td>
-                </tr>
-              ))}
+              {activeWorkers.map((w) => {
+                const ctx = computeEmploymentJournalContext({
+                  relationship: "company",
+                  operationsRole: w.operationsRole,
+                  journalReviewEnabled: w.journalReviewEnabled,
+                });
+                const roleLabel =
+                  ctx.operationsRole === "not_enabled"
+                    ? labels.operations.notAssigned
+                    : (labels.operations.roleLabels[ctx.operationsRole] ??
+                      labels.operations.notAssigned);
+                return (
+                  <tr
+                    key={w.workerId}
+                    className="border-t border-ink-700"
+                    data-testid={`company-worker-row-${w.workerId}`}
+                    data-review-capability={ctx.reviewCapability}
+                  >
+                    <td className="py-1 text-text-primary">{w.email ?? "—"}</td>
+                    <td className="py-1 text-text-secondary">{w.status ?? "active"}</td>
+                    <td className="py-1 text-text-secondary">
+                      <span>
+                        {w.operationsTitle?.trim() ? w.operationsTitle : roleLabel}
+                      </span>
+                      <span className="ml-1 text-[10px] text-text-muted">
+                        ·{" "}
+                        {ctx.reviewCapability === "can_review"
+                          ? labels.operations.reviewEnabled
+                          : labels.operations.reviewNotEnabled}
+                      </span>
+                    </td>
+                    <td className="py-1 text-text-muted">{w.createdAt.slice(0, 10)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

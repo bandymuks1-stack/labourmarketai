@@ -87,6 +87,19 @@
         "noWorkersBody": "Invite by email, or wait for a worker to sign up on their own and be linked.",
         "inviteHeading": "Invite a worker by email",
         "inviteDescription": "The invitation is saved as its own DB row. No account is created automatically — the invited person signs up or signs in themselves. Real email sending is not yet activated — that is deliberately deferred until the owner agrees with real people.",
+        "operations": {
+          "columnHeading": "Operations role / review",
+          "notAssigned": "Role not assigned",
+          "reviewEnabled": "review enabled",
+          "reviewNotEnabled": "review not enabled",
+          "roleLabels": {
+            "worker": "Worker",
+            "foreman": "Foreman",
+            "project_manager": "Project manager",
+            "company_admin": "Company admin",
+            "agency_admin": "Agency admin"
+          }
+        },
         "coordinationHeading": "Role coordination",
         "coordinationBody": "Right now every linked person is a worker. Assigning foreman, brigadier or manager roles and coordinating teams is not enabled yet.",
         "coordinationNextAction": "You can invite workers below. Role assignment will be added later.",
@@ -149,6 +162,19 @@
         "noWorkersBody": "Invite by email, or wait for a worker to sign up on their own and be linked.",
         "inviteHeading": "Invite a worker by email",
         "inviteDescription": "The invitation is saved as its own DB row. No account is created automatically — the invited person signs up or signs in themselves.",
+        "operations": {
+          "columnHeading": "Operations role / review",
+          "notAssigned": "Role not assigned",
+          "reviewEnabled": "review enabled",
+          "reviewNotEnabled": "review not enabled",
+          "roleLabels": {
+            "worker": "Worker",
+            "foreman": "Foreman",
+            "project_manager": "Project manager",
+            "company_admin": "Company admin",
+            "agency_admin": "Agency admin"
+          }
+        },
         "coordinationHeading": "Role coordination",
         "coordinationBody": "Right now every linked person is a worker. Assigning foreman, brigadier or manager roles and coordinating teams is not enabled yet.",
         "coordinationNextAction": "You can invite workers below. Role assignment will be added later.",

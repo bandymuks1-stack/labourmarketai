@@ -16,6 +16,9 @@ import { createClient } from "@/lib/supabase/server";
 const RPC_NOT_FOUND_CODE = "42883";
 const RELATION_NOT_FOUND_CODE = "42P01";
 const PERMISSION_DENIED_CODE = "42501";
+/** Postgres "undefined_column" — the ops-bridge columns (migration 0030)
+ *  are owner-gated and may not be applied yet; we degrade gracefully. */
+const UNDEFINED_COLUMN_CODE = "42703";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(supabase: SupabaseClient): any {
@@ -36,6 +39,10 @@ export interface LinkedCompanyWorker {
   readonly displayName: string | null;
   readonly email: string | null;
   readonly createdAt: string;
+  /** Ops-bridge fields (migration 0030); null/false until applied + set. */
+  readonly operationsRole: string | null;
+  readonly operationsTitle: string | null;
+  readonly journalReviewEnabled: boolean;
 }
 
 export interface CompanyWorkerInvitation {
@@ -93,14 +100,22 @@ export async function listActiveCompanyWorkers(
   companyId: string,
 ): Promise<CompanyWorkersListResult> {
   const supabase = await createClient();
-  const { data, error } = await asAny(supabase)
-    .from("company_workers")
-    .select(
-      "worker_id, status, created_at, workers(profile_id, display_name, profiles(email))",
-    )
-    .eq("company_id", companyId)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const WORKER_JOIN = "workers(profile_id, display_name, profiles(email))";
+  const BASE_COLS = `worker_id, status, created_at, ${WORKER_JOIN}`;
+  const BRIDGE_COLS = `worker_id, status, created_at, operations_role, operations_title, journal_review_enabled, ${WORKER_JOIN}`;
+  const run = (cols: string) =>
+    asAny(supabase)
+      .from("company_workers")
+      .select(cols)
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+  let { data, error } = await run(BRIDGE_COLS);
+  // Ops-bridge columns not applied yet → retry without them (fields null).
+  if (error && error.code === UNDEFINED_COLUMN_CODE) {
+    ({ data, error } = await run(BASE_COLS));
+  }
   if (error) {
     if (error.code === RELATION_NOT_FOUND_CODE) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
@@ -114,6 +129,9 @@ export async function listActiveCompanyWorkers(
       displayName: (r.workers?.display_name as string | null) ?? null,
       email: (r.workers?.profiles?.email as string | null) ?? null,
       createdAt: r.created_at as string,
+      operationsRole: (r.operations_role as string | null) ?? null,
+      operationsTitle: (r.operations_title as string | null) ?? null,
+      journalReviewEnabled: r.journal_review_enabled === true,
     }),
   );
   return { kind: "ok", rows };
