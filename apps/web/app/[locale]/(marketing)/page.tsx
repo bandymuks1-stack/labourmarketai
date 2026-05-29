@@ -33,6 +33,9 @@ export default async function LandingPage({
   const t = await getTranslations("hero");
   const mk = await getTranslations("market");
   const tj = await getTranslations("journey");
+  // Honest sample-data label, reused from the market counters (exists in every
+  // locale): "Pre-alpha preview — sample signals, not real platform figures."
+  const lv = await getTranslations("live.counters");
 
   // Landing↔app journey band — the same stage rail the user meets inside the
   // cockpit after signup (visual continuity). Honest product explanation of the
@@ -188,6 +191,9 @@ export default async function LandingPage({
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
           {mk("label")}
         </p>
+        {/* Honesty: this section shows sample signals, not real platform
+            figures. Label it in production too (markers are env-gated). */}
+        <p className="mt-1 text-xs text-text-muted">{lv("previewNote")}</p>
         <div className="mt-4 grid gap-5 lg:grid-cols-4">
           {(["demand", "workers", "competition"] as const).map((k) => (
             <Card key={k}>
@@ -205,12 +211,10 @@ export default async function LandingPage({
             <p className="mt-3 text-sm leading-relaxed text-text-primary">
               <Placeholder id="market.top_skills" />
             </p>
-            <a
-              href="#"
-              className="mt-4 inline-block font-mono text-[11px] uppercase tracking-label text-brand-blue"
-            >
-              {mk("cta")} →
-            </a>
+            {/* Dead CTA removed: "View full insights" linked to "#" (no
+                destination). No fake CTA on the primary flow. The `market.cta`
+                i18n key is kept for a future restore when a real insights page
+                exists. */}
           </Card>
         </div>
       </section>
