@@ -20,6 +20,7 @@
     "check:pricing-honesty-copy": "tsx scripts/check-pricing-honesty-copy.ts",
     "check:db-validation-readiness": "tsx scripts/check-local-db-validation-readiness.ts",
     "check:migration-0022-static-preview": "tsx scripts/check-migration-0022-static-preview.ts",
+    "check:primary-route-smoke": "tsx scripts/check-primary-route-smoke.ts",
     "db:fixtures:local": "tsx scripts/db-fixtures-local.ts",
     "admin:promote": "tsx scripts/admin-promote.ts",
     "admin:grant-superadmin": "tsx scripts/admin-grant-superadmin.ts",
