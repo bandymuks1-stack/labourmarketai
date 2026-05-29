@@ -1144,7 +1144,15 @@ describe("no migration files added by this sprint", () => {
     // (0024_is_admin_dual_signal was already counted in the 21 → 23 bump
     // above.) The intent is unchanged: a NEW migration added by a future
     // sprint must bump this number deliberately, in its own review.
-    const SPRINT_BASELINE = 28;
+    //
+    // Bumped from 28 → 29 on the employment↔journal ops-bridge sprint:
+    // migration 0030 adds additive nullable columns (operations_role /
+    // operations_title / journal_review_enabled default false /
+    // journal_review_scope) to public.company_workers + public.agency_workers
+    // so a per-relationship operations role + journal-review flag can exist.
+    // Non-destructive: no drops/renames/backfill, no RLS change, safe
+    // default = not assigned / review off. Owner-gated apply to prod.
+    const SPRINT_BASELINE = 29;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
