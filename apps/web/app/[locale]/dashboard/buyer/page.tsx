@@ -173,6 +173,20 @@ export default async function BuyerDashboardPage({
         approved: tUnderstanding("requestStatus.approved"),
         closed: tUnderstanding("requestStatus.closed"),
       },
+      extractionReadiness: {
+        future_readable_text_file: tUnderstanding(
+          "extractionReadiness.future_readable_text_file",
+        ),
+        future_pdf_reader_needed: tUnderstanding(
+          "extractionReadiness.future_pdf_reader_needed",
+        ),
+        future_ocr_needed: tUnderstanding(
+          "extractionReadiness.future_ocr_needed",
+        ),
+        manual_review_only: tUnderstanding(
+          "extractionReadiness.manual_review_only",
+        ),
+      },
     },
   };
 

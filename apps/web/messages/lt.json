@@ -322,6 +322,12 @@
             "needs_followup": "Reikia papildymo",
             "approved": "Priimta",
             "closed": "Uždaryta"
+          },
+          "extractionReadiness": {
+            "future_readable_text_file": "Tekstinis failas ateityje galės būti nuskaitomas automatiškai. Šiuo metu peržiūra atliekama rankiniu būdu.",
+            "future_pdf_reader_needed": "PDF nuskaitymas dar neįjungtas. Administratorius peržiūrės failą rankiniu būdu.",
+            "future_ocr_needed": "Vaizdo/OCR nuskaitymas dar neįjungtas. Administratorius peržiūrės failą rankiniu būdu.",
+            "manual_review_only": "Šis failo tipas vertinamas rankiniu būdu."
           }
         }
       }

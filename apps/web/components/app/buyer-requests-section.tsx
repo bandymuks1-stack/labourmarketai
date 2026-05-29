@@ -15,6 +15,7 @@ import {
   type RequestNextAction,
   type RequestReadinessStatus,
 } from "@/lib/buyer/request-readiness";
+import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
 import {
   BuyerRequestAttachmentUploader,
   type AttachmentListItem,
@@ -99,6 +100,7 @@ export interface BuyerRequestUnderstandingLabels {
   readonly analysisNotStarted: string;
   readonly fileReviewChip: string;
   readonly requestStatus: Record<CustomerRequestStatus, string>;
+  readonly extractionReadiness: Record<ExtractionReadiness, string>;
 }
 
 /** Status-chip tone for each deterministic readiness state. */
@@ -301,6 +303,7 @@ export function BuyerRequestsSection({
                           attachments={requestAttachments}
                           analysisFallbackLine={u.fileReviewChip}
                           labels={labels.attachmentsUploader}
+                          extractionReadinessLabels={u.extractionReadiness}
                         />
                       </>
                     )}
