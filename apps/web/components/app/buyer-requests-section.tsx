@@ -21,6 +21,10 @@ import {
   type RequestCompletionItemKey,
 } from "@/lib/buyer/request-completion";
 import {
+  computeRequestTimeline,
+  type RequestTimelineEventKey,
+} from "@/lib/buyer/request-timeline";
+import {
   BuyerRequestAttachmentUploader,
   type AttachmentListItem,
   type BuyerRequestAttachmentUploaderLabels,
@@ -110,6 +114,10 @@ export interface BuyerRequestUnderstandingLabels {
     readonly doneLabel: string;
     readonly missingLabel: string;
     readonly items: Record<RequestCompletionItemKey, string>;
+  };
+  readonly timeline: {
+    readonly heading: string;
+    readonly events: Record<RequestTimelineEventKey, string>;
   };
 }
 
@@ -260,6 +268,11 @@ export function BuyerRequestsSection({
                 startPeriod: r.startPeriod,
                 duration: r.duration,
               });
+              const timeline = computeRequestTimeline({
+                createdAt: r.createdAt,
+                status: r.status,
+                attachments: requestAttachments,
+              });
               const hasDescription = Boolean(r.needSummary?.trim());
               return (
                 <li
@@ -381,6 +394,40 @@ export function BuyerRequestsSection({
                         />
                       </>
                     )}
+                  </div>
+
+                  {/* Derived activity timeline — real timestamps + status only. */}
+                  <div
+                    className="flex flex-col gap-1 border-t border-ink-700 pt-2"
+                    data-testid={`buyer-request-timeline-${r.id}`}
+                  >
+                    <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {u.timeline.heading}
+                    </p>
+                    <ul className="flex flex-col gap-1">
+                      {timeline.map((event, idx) => (
+                        <li
+                          key={`${event.key}-${idx}`}
+                          className="flex items-center gap-2 text-[11px]"
+                        >
+                          <span
+                            aria-hidden
+                            className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brand-blue/70"
+                          />
+                          <span className="text-text-secondary">
+                            {u.timeline.events[event.key]}
+                            {event.key === "file_attached" && event.count
+                              ? ` (${event.count})`
+                              : ""}
+                          </span>
+                          {event.at ? (
+                            <span className="font-mono text-[10px] text-text-muted">
+                              {event.at.slice(0, 10)}
+                            </span>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
                   {/* 3. Honest understanding message */}

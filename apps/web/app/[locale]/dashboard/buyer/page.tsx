@@ -198,6 +198,19 @@ export default async function BuyerDashboardPage({
           timing: tUnderstanding("completion.items.timing"),
         },
       },
+      timeline: {
+        heading: tUnderstanding("timeline.heading"),
+        events: {
+          request_created: tUnderstanding("timeline.events.request_created"),
+          file_attached: tUnderstanding("timeline.events.file_attached"),
+          automatic_reading_not_enabled: tUnderstanding(
+            "timeline.events.automatic_reading_not_enabled",
+          ),
+          manual_review_pending: tUnderstanding(
+            "timeline.events.manual_review_pending",
+          ),
+        },
+      },
     },
   };
 
