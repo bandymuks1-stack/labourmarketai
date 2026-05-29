@@ -99,6 +99,9 @@ describe("Guard: buyer surface wires the helper through the existing flow", () =
     // The long description must be clamped so a request cannot render a
     // giant dense text block.
     expect(src).toMatch(/line-clamp-3/);
+    // Visual status rail (PR D) is keyed to the same readiness state as
+    // the chip — a scannable colour anchor, behaviour unchanged.
+    expect(src).toMatch(/READINESS_RAIL_CLASS\[readiness\.status\]/);
   });
 });
 

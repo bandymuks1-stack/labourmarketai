@@ -115,6 +115,18 @@ const READINESS_CHIP_CLASS: Record<RequestReadinessStatus, string> = {
     "rounded-full bg-state-success/15 px-2 py-0.5 text-[11px] text-state-success",
 };
 
+/**
+ * Subtle left status rail per readiness state (PR D — visual clarity
+ * only, no behaviour change). Gives the card a scannable colour anchor
+ * that matches the readiness chip.
+ */
+const READINESS_RAIL_CLASS: Record<RequestReadinessStatus, string> = {
+  no_files: "border-l-4 border-l-ink-500",
+  needs_more_info: "border-l-4 border-l-state-warning/60",
+  files_added: "border-l-4 border-l-brand-blue/60",
+  enough_for_manual_review: "border-l-4 border-l-state-success/70",
+};
+
 type ListState =
   | { kind: "ok"; rows: readonly CustomerRequestRow[] }
   | { kind: "needs-migration" }
@@ -234,7 +246,7 @@ export function BuyerRequestsSection({
               return (
                 <li
                   key={r.id}
-                  className="card-border flex flex-col gap-3 p-3 sm:p-4"
+                  className={`card-border flex flex-col gap-3 p-3 sm:p-4 ${READINESS_RAIL_CLASS[readiness.status]}`}
                   data-testid={`buyer-request-row-${r.id}`}
                   data-readiness={readiness.status}
                 >
