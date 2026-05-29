@@ -73,6 +73,15 @@ describe("Guard: admin request-review listing is read-only", () => {
   it("derives priority from the deterministic helper", () => {
     expect(src).toMatch(/computeAdminReviewPriority\(/);
   });
+
+  it("classifies file readiness from MIME metadata only (PR F)", () => {
+    // Reads mime_type (metadata) and the deterministic readiness helper —
+    // never file bytes. (The read-only assertion above already forbids
+    // .download / extracted_text / createSignedUrl.)
+    expect(src).toMatch(/mime_type/);
+    expect(src).toMatch(/computeExtractionReadiness\(/);
+    expect(src).toMatch(/hasUsefulDescription/);
+  });
 });
 
 describe("Guard: admin dashboard mounts the review section", () => {
@@ -112,6 +121,21 @@ describe("Guard: admin requestReview copy is present + honest (LT + EN)", () => 
       ]) {
         expect(priority[s], `${locale} priority.${s}`).toBeTruthy();
         expect(action[s], `${locale} action.${s}`).toBeTruthy();
+      }
+      // PR F decision-support signals.
+      const descriptionSignal = rr.descriptionSignal as Record<string, string>;
+      expect(descriptionSignal?.present, `${locale} descriptionSignal.present`)
+        .toBeTruthy();
+      expect(descriptionSignal?.thin, `${locale} descriptionSignal.thin`)
+        .toBeTruthy();
+      const fileKinds = rr.fileKinds as Record<string, string>;
+      for (const k of [
+        "future_readable_text_file",
+        "future_pdf_reader_needed",
+        "future_ocr_needed",
+        "manual_review_only",
+      ]) {
+        expect(fileKinds?.[k], `${locale} fileKinds.${k}`).toBeTruthy();
       }
       const flat = JSON.stringify(rr).toLowerCase();
       for (const phrase of FORBIDDEN) {

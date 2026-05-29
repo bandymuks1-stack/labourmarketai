@@ -6,6 +6,15 @@ import { createClient } from "@/lib/supabase/server";
 import { getPilotDraftCounts } from "@/lib/pilot/pilot-drafts";
 import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
+import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
+
+/** Stable display order for the file-readiness summary (PR F). */
+const READINESS_KINDS: readonly ExtractionReadiness[] = [
+  "future_readable_text_file",
+  "future_pdf_reader_needed",
+  "future_ocr_needed",
+  "manual_review_only",
+];
 
 /** Priority-chip tone for the admin manual-review list (PR B). */
 const REVIEW_PRIORITY_CHIP: Record<AdminReviewPriorityStatus, string> = {
@@ -265,6 +274,15 @@ export default async function AdminDashboardPage({
           <ul className="flex flex-col gap-2" data-testid="admin-request-review-list">
             {reviewRows.map((r) => {
               const hasDescription = Boolean(r.needSummary?.trim());
+              const fileSummary =
+                r.attachmentCount === 0
+                  ? tReview("noFiles")
+                  : READINESS_KINDS.filter((k) => r.fileReadiness[k] > 0)
+                      .map(
+                        (k) =>
+                          `${tReview(`fileKinds.${k}`)}: ${r.fileReadiness[k]}`,
+                      )
+                      .join(" · ");
               return (
                 <li
                   key={r.id}
@@ -295,7 +313,27 @@ export default async function AdminDashboardPage({
                   >
                     {hasDescription ? r.needSummary : tReview("noDescription")}
                   </p>
-                  <p className="text-[11px] text-text-secondary">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+                    <span className="text-text-muted">
+                      {tReview("descriptionSignalHeading")}:
+                    </span>
+                    <span
+                      className={
+                        r.hasUsefulDescription
+                          ? "text-state-success"
+                          : "text-state-warning"
+                      }
+                    >
+                      {r.hasUsefulDescription
+                        ? tReview("descriptionSignal.present")
+                        : tReview("descriptionSignal.thin")}
+                    </span>
+                    <span className="text-text-muted">
+                      · {tReview("fileReadinessHeading")}:
+                    </span>
+                    <span className="text-text-secondary">{fileSummary}</span>
+                  </div>
+                  <p className="text-[11px] font-medium text-text-primary">
                     {tReview(`action.${r.priority}`)}
                   </p>
                 </li>
