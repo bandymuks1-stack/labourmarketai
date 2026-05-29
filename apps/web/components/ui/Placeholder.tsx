@@ -7,9 +7,13 @@ import { cn } from "@/lib/utils";
 /**
  * Renders a registered placeholder. Components must use this — never inline a
  * fake value. When NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === 'true' (dev +
- * preview) a subtle dotted outline + corner chip marks it; in production the
- * flag is 'false' so it renders cleanly (the value is still a placeholder
- * until promoted via `pnpm placeholders:promote`).
+ * preview) a louder dotted outline + corner chip marks it.
+ *
+ * Always-on Sample affordance (platform doctrine §7 — "no unlabeled fake
+ * data"): in production, a fabricated value (status !== 'replaced') still
+ * carries a subtle visible `sample` marker so a real user never mistakes it
+ * for a real platform figure. Once a value is promoted to real data
+ * (`pnpm placeholders:promote` → status 'replaced'), it renders cleanly.
  */
 export async function Placeholder({
   id,
@@ -42,8 +46,26 @@ export async function Placeholder({
     content = String(value);
   }
 
+  // Real (promoted) data renders clean; fabricated values keep a visible
+  // affordance even in production so nothing fake is shown unlabeled.
+  const isReplaced = entry.status === "replaced";
+
   if (!showMarker) {
-    return <span className={className}>{content}</span>;
+    if (isReplaced) {
+      return <span className={className}>{content}</span>;
+    }
+    return (
+      <span
+        data-sample={entry.id}
+        title={`Sample data · ${entry.id} — not a real platform figure yet`}
+        className={className}
+      >
+        {content}
+        <sup className="ml-0.5 select-none font-mono text-[9px] uppercase tracking-label text-text-muted">
+          sample
+        </sup>
+      </span>
+    );
   }
 
   return (
