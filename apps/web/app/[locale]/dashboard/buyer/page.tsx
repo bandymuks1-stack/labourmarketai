@@ -3,9 +3,11 @@ import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { PilotDraftForm } from "@/components/app/pilot-draft-form";
 import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
+import { BuyerRequestsSection } from "@/components/app/buyer-requests-section";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
 import { getOwnCustomer } from "@/lib/buyer/customers";
+import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 
 const BUYER_FIELDS = [
   { key: "serviceType" as const, labelKey: "field.serviceType.label", placeholderKey: "field.serviceType.placeholder", variant: "text" as const },
@@ -26,10 +28,58 @@ export default async function BuyerDashboardPage({
 
   const t = await getTranslations("roleDashboards.buyer");
   const tSetup = await getTranslations("roleDashboards.buyer.setup");
+  const tRequests = await getTranslations("roleDashboards.buyer.requests");
   const existingDraft = await getPilotDraft("buyer_request");
   const customerRead = await getOwnCustomer();
   const customer = customerRead.kind === "ok" ? customerRead.row : null;
   const migrationNeeded = customerRead.kind === "needs-migration";
+  const requestsResult = await listOwnCustomerRequests();
+
+  const requestsLabels = {
+    heading: tRequests("heading"),
+    subheading: tRequests("subheading"),
+    newRequestHeading: tRequests("newRequestHeading"),
+    newRequestSubtitle: tRequests("newRequestSubtitle"),
+    fieldTitle: tRequests("fieldTitle"),
+    fieldTitlePlaceholder: tRequests("fieldTitlePlaceholder"),
+    fieldTitleHelp: tRequests("fieldTitleHelp"),
+    fieldNeedSummary: tRequests("fieldNeedSummary"),
+    fieldNeedSummaryPlaceholder: tRequests("fieldNeedSummaryPlaceholder"),
+    fieldCountry: tRequests("fieldCountry"),
+    fieldCountryPlaceholder: tRequests("fieldCountryPlaceholder"),
+    fieldLocation: tRequests("fieldLocation"),
+    fieldLocationPlaceholder: tRequests("fieldLocationPlaceholder"),
+    fieldRole: tRequests("fieldRole"),
+    fieldRolePlaceholder: tRequests("fieldRolePlaceholder"),
+    fieldTeamSize: tRequests("fieldTeamSize"),
+    fieldTeamSizePlaceholder: tRequests("fieldTeamSizePlaceholder"),
+    fieldStartPeriod: tRequests("fieldStartPeriod"),
+    fieldStartPeriodPlaceholder: tRequests("fieldStartPeriodPlaceholder"),
+    fieldDuration: tRequests("fieldDuration"),
+    fieldDurationPlaceholder: tRequests("fieldDurationPlaceholder"),
+    fieldLanguage: tRequests("fieldLanguage"),
+    fieldLanguagePlaceholder: tRequests("fieldLanguagePlaceholder"),
+    fieldNotes: tRequests("fieldNotes"),
+    fieldNotesPlaceholder: tRequests("fieldNotesPlaceholder"),
+    statusLabel: tRequests("statusLabel"),
+    statusDraft: tRequests("statusDraft"),
+    statusSubmitted: tRequests("statusSubmitted"),
+    statusHelp: tRequests("statusHelp"),
+    submit: tRequests("submit"),
+    resultSaved: tRequests("resultSaved"),
+    resultNeedsMigration: tRequests("resultNeedsMigration"),
+    resultInvalid: tRequests("resultInvalid"),
+    resultError: tRequests("resultError"),
+    listHeading: tRequests("listHeading"),
+    emptyStateHeading: tRequests("emptyStateHeading"),
+    emptyStateBody: tRequests("emptyStateBody"),
+    columnTitle: tRequests("columnTitle"),
+    columnStatus: tRequests("columnStatus"),
+    columnUpdated: tRequests("columnUpdated"),
+    manualReviewBanner: tRequests("manualReviewBanner"),
+    migrationBlockerHeading: tRequests("migrationBlockerHeading"),
+    migrationBlockerBody: tRequests("migrationBlockerBody"),
+  };
 
   return (
     <div className="flex flex-col gap-6" data-testid="buyer-dashboard">
@@ -144,6 +194,11 @@ export default async function BuyerDashboardPage({
       <Tier2ReadinessExplainer
         source="dashboard_buyer_tier2_readiness"
         testId="buyer-dashboard-tier2-readiness"
+      />
+
+      <BuyerRequestsSection
+        listResult={requestsResult}
+        labels={requestsLabels}
       />
 
       <section
