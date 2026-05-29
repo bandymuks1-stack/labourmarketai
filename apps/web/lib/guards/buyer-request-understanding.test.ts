@@ -268,6 +268,43 @@ describe("Guard: buyer request derived timeline (PR G)", () => {
     expect(src).not.toMatch(/Date\.now|new Date\(|Math\.random|fetch\(|supabase/);
   });
 
+  it("workflow stepper renders + marks the future helper as not enabled (PR H)", () => {
+    const src = read("components/app/buyer-requests-section.tsx");
+    expect(src).toMatch(/data-testid="buyer-requests-workflow"/);
+    expect(src).toMatch(/workflow\.futureLabel/);
+    for (const locale of ["lt", "en"] as const) {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as Record<
+        string,
+        unknown
+      >;
+      const workflow = (
+        (
+          (
+            (json.roleDashboards as Record<string, unknown>).buyer as Record<
+              string,
+              unknown
+            >
+          ).requests as Record<string, unknown>
+        ).understanding as Record<string, unknown>
+      ).workflow as Record<string, unknown>;
+      expect(workflow?.heading, `${locale} workflow.heading`).toBeTruthy();
+      // The future-helper label must read as future / not enabled.
+      expect(String(workflow?.futureLabel).toLowerCase()).toMatch(
+        locale === "lt" ? /ateityje|neįjungta/ : /future|not enabled/,
+      );
+      const steps = workflow?.steps as Record<string, string>;
+      for (const k of [
+        "request",
+        "files",
+        "readiness",
+        "adminReview",
+        "futureHelper",
+      ]) {
+        expect(steps?.[k], `${locale} workflow.steps.${k}`).toBeTruthy();
+      }
+    }
+  });
+
   for (const locale of ["lt", "en"] as const) {
     it(`${locale}.json timeline event keys present`, () => {
       const json = JSON.parse(read(`messages/${locale}.json`)) as Record<

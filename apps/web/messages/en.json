@@ -348,6 +348,17 @@
               "automatic_reading_not_enabled": "Automatic reading not enabled",
               "manual_review_pending": "Waiting for manual review"
             }
+          },
+          "workflow": {
+            "heading": "How this works",
+            "futureLabel": "future — not enabled",
+            "steps": {
+              "request": "Request",
+              "files": "Files",
+              "readiness": "Manual readiness",
+              "adminReview": "Admin review",
+              "futureHelper": "Structured helper"
+            }
           }
         }
       }
