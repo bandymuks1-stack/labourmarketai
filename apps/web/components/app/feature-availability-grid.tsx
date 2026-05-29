@@ -25,37 +25,57 @@ import { cn } from "@/lib/utils";
 export async function FeatureAvailabilityGrid({
   excludeKeys = [],
   showHeading = true,
+  only,
+  comingLater = false,
 }: {
   excludeKeys?: readonly FeatureConfig["key"][];
   showHeading?: boolean;
+  /** Render only active OR only preparing features. Omit to show both. */
+  only?: "active" | "preparing";
+  /** Use the compact "Coming later" framing (for the demoted preparing
+   *  section). Implies `only = "preparing"` when `only` is unset. */
+  comingLater?: boolean;
 }) {
   const t = await getTranslations();
-  const features = getVisibleFeatures().filter(
-    (f) => !excludeKeys.includes(f.key),
-  );
+  const filterMode = only ?? (comingLater ? "preparing" : undefined);
+  const features = getVisibleFeatures().filter((f) => {
+    if (excludeKeys.includes(f.key)) return false;
+    if (filterMode === "active") return isFeatureActive(f.key);
+    if (filterMode === "preparing") return !isFeatureActive(f.key);
+    return true;
+  });
 
   if (features.length === 0) return null;
 
+  const headingId = comingLater
+    ? "feature-coming-later-title"
+    : "feature-availability-title";
+
   return (
     <section
-      aria-labelledby={
-        showHeading ? "feature-availability-title" : undefined
-      }
+      aria-labelledby={showHeading ? headingId : undefined}
       className="flex flex-col gap-3"
+      data-testid={comingLater ? "dashboard-coming-later" : undefined}
     >
       {showHeading && (
         <div className="flex flex-col gap-1">
           <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("dashboard.featuresHeading.eyebrow")}
+            {comingLater
+              ? t("dashboard.comingLater.eyebrow")
+              : t("dashboard.featuresHeading.eyebrow")}
           </span>
           <h2
-            id="feature-availability-title"
+            id={headingId}
             className="font-display text-lg font-semibold text-text-primary"
           >
-            {t("dashboard.featuresHeading.title")}
+            {comingLater
+              ? t("dashboard.comingLater.title")
+              : t("dashboard.featuresHeading.title")}
           </h2>
           <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
-            {t("dashboard.featuresHeading.body")}
+            {comingLater
+              ? t("dashboard.comingLater.body")
+              : t("dashboard.featuresHeading.body")}
           </p>
         </div>
       )}

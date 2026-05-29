@@ -210,11 +210,11 @@ export default async function DashboardOverviewPage({
           </div>
         </section>
 
-        {/* Same config-driven landscape as the worker dashboard (PR #36).
-            Non-worker users see honest preparing cards for the spaces
-            they would expect (company / agency / customer), so they
-            understand what's coming without misleading CTAs. */}
-        <FeatureAvailabilityGrid />
+        {/* Same config-driven landscape as the worker dashboard (PR #36),
+            now DEMOTED into a compact "Coming later" section so the live
+            cockpit above stays dominant. Preparing cards carry no primary
+            open buttons (the grid gates CTAs on isFeatureActive). */}
+        <FeatureAvailabilityGrid comingLater />
       </div>
     );
   }
@@ -440,14 +440,16 @@ export default async function DashboardOverviewPage({
         </Link>
       </div>
 
-      {/*  Config-driven what's-here-and-what's-coming surface (PR #36):
-          the central feature catalogue renders preparing features as
-          honest cards with no broken CTAs. Adding a future feature is a
-          one-row change in lib/config/feature-availability.ts — no
-          edits here. profile_text_first + journal_text_first are
-          excluded because they already appear as the two canonical
-          cards above. */}
+      {/*  Config-driven "Coming later" surface (PR #36, demoted in the
+          ready-today cleanup): the central feature catalogue renders the
+          PREPARING features as a compact lower section with no primary
+          open buttons (the grid gates CTAs on isFeatureActive). Adding a
+          future feature is a one-row change in
+          lib/config/feature-availability.ts — no edits here. The active
+          surfaces (profile / journal / roles) already lead the page as
+          their own cards above, so they are not repeated here. */}
       <FeatureAvailabilityGrid
+        comingLater
         excludeKeys={["profile_text_first", "journal_text_first"]}
       />
     </div>
