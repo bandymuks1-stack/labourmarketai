@@ -272,7 +272,24 @@
         "columnStatus": "Status",
         "columnUpdated": "Updated",
         "migrationBlockerHeading": "Migration 0028_customer_requests required",
-        "migrationBlockerBody": "public.customer_requests + save_customer_request RPC are not applied to production DB yet. Form is visible but submit returns the migration blocker. After applying it works end-to-end with no code change."
+        "migrationBlockerBody": "public.customer_requests + save_customer_request RPC are not applied to production DB yet. Form is visible but submit returns the migration blocker. After applying it works end-to-end with no code change.",
+        "attachments": {
+          "heading": "Attached files",
+          "empty": "No files attached yet. You can attach a plan, recipe, engraving text, photo or specification.",
+          "migrationBlocker": "Migration 0029_customer_request_attachments required. After applying it, attachments work end-to-end with no code change.",
+          "analysisFallback": "File attached. Automatic reading is not enabled yet — an administrator will review manually.",
+          "addButton": "Attach file",
+          "uploadingLabel": "Uploading…",
+          "successLabel": "File attached.",
+          "errorTooLarge": "File is too large. Maximum size is 10 MB.",
+          "errorBadType": "File type not allowed. Allowed: PDF, JPG, PNG, WebP, TXT.",
+          "errorNeedsMigration": "File storage is not ready yet. Migration 0029_customer_request_attachments and the private storage bucket need to be applied.",
+          "errorGeneric": "Upload failed. Please try again.",
+          "removeLabel": "Remove",
+          "removingLabel": "Removing…",
+          "sizeHelp": "Maximum file size is 10 MB.",
+          "allowedHelp": "Allowed types: PDF, JPG, PNG, WebP, TXT."
+        }
       }
     }
   },

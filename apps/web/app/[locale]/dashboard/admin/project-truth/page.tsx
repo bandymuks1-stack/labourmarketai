@@ -125,6 +125,7 @@ export default async function ProjectTruthPage({
     companyWorkersCount,
     companyWorkerInvitationsCount,
     customerRequestsCount,
+    customerRequestAttachmentsCount,
   ] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase
@@ -144,6 +145,8 @@ export default async function ProjectTruthPage({
       .select("id", { count: "exact", head: true }),
     untyped(supabase, "customer_requests")
       .select("id", { count: "exact", head: true }),
+    untyped(supabase, "customer_request_attachments")
+      .select("id", { count: "exact", head: true }),
   ]);
   // Stage 2 PR 1: customers count returns 42P01 when migration 0026 is not
   // yet applied to prod. Surface a literal "needs migration" instead of an
@@ -156,6 +159,8 @@ export default async function ProjectTruthPage({
     companyWorkerInvitationsCount.error?.code === "42P01";
   const customerRequestsBlocked =
     customerRequestsCount.error?.code === "42P01";
+  const customerRequestAttachmentsBlocked =
+    customerRequestAttachmentsCount.error?.code === "42P01";
 
   // ── Safe environment identifiers (NO secret values) ──────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? null;
@@ -403,6 +408,24 @@ export default async function ProjectTruthPage({
             {customerRequestsBlocked ? (
               <p className="mt-1 text-[10px] text-state-warning">
                 migration 0028 not applied
+              </p>
+            ) : null}
+          </div>
+          <div
+            className="card-border p-3"
+            data-testid="project-truth-customer-request-attachments-count"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              customer_request_attachments
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-text-primary">
+              {customerRequestAttachmentsBlocked
+                ? "—"
+                : (customerRequestAttachmentsCount.count ?? "—")}
+            </p>
+            {customerRequestAttachmentsBlocked ? (
+              <p className="mt-1 text-[10px] text-state-warning">
+                migration 0029 not applied
               </p>
             ) : null}
           </div>
@@ -768,6 +791,14 @@ const FEATURE_STATUS: readonly FeatureStatusRow[] = [
     status: "real",
     note:
       "PR #103. Migration 0028_customer_requests applied to prod 2026-05-29. Structured 9-field form (title/need/country/location/role/team_size/start/duration/language/notes) posts save_customer_request RPC → public.customer_requests row + status (draft/submitted). Manual-review only: no auto-matching, no fake candidates, no marketplace. Admin promotes status to in_review/needs_followup/approved/closed.",
+  },
+  {
+    id: "buyer-attachments",
+    label: "Buyer request attachments (metadata + storage)",
+    route: "/[locale]/dashboard/buyer",
+    status: "real",
+    note:
+      "Buyer Request Attachments + Understanding Pipeline sprint, PR 1. Migration 0029_customer_request_attachments creates public.customer_request_attachments + private storage bucket 'customer-request-attachments' + RLS (owner+admin) + register_customer_request_attachment RPC. Level 1 — metadata only. Allowed types: PDF/JPG/PNG/WebP/TXT, max 10 MB. Honest fallback wording in UI: 'Failas pridėtas. Automatinis nuskaitymas dar neįjungtas — administratorius peržiūrės rankiniu būdu.' No fake AI / OCR / verification. Level 2 (text extraction) and Level 3 (structured helper) intentionally deferred to follow-up PRs.",
   },
   {
     id: "admin",

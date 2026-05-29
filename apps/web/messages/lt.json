@@ -272,7 +272,24 @@
         "columnStatus": "Būsena",
         "columnUpdated": "Atnaujinta",
         "migrationBlockerHeading": "Reikia migracijos 0028_customer_requests",
-        "migrationBlockerBody": "public.customer_requests lentelė ir save_customer_request RPC dar nepritaikyti production DB. Forma matoma, bet nepateikiama. Po migracijos pritaikymo veikia be jokių kodo pakeitimų."
+        "migrationBlockerBody": "public.customer_requests lentelė ir save_customer_request RPC dar nepritaikyti production DB. Forma matoma, bet nepateikiama. Po migracijos pritaikymo veikia be jokių kodo pakeitimų.",
+        "attachments": {
+          "heading": "Pridėti failai",
+          "empty": "Dar nėra pridėtų failų. Galite pridėti planą, receptą, graviravimo tekstą, nuotrauką ar specifikaciją.",
+          "migrationBlocker": "Reikia migracijos 0029_customer_request_attachments. Po pritaikymo failų pridėjimas veiks be kodo pakeitimų.",
+          "analysisFallback": "Failas pridėtas. Automatinis nuskaitymas dar neįjungtas — administratorius peržiūrės rankiniu būdu.",
+          "addButton": "Pridėti failą",
+          "uploadingLabel": "Įkeliama…",
+          "successLabel": "Failas pridėtas.",
+          "errorTooLarge": "Failas per didelis. Maksimalus dydis — 10 MB.",
+          "errorBadType": "Neleistinas failo tipas. Leidžiami: PDF, JPG, PNG, WebP, TXT.",
+          "errorNeedsMigration": "Failo saugykla dar neparuošta. Reikia migracijos 0029_customer_request_attachments ir privačios saugyklos bucket.",
+          "errorGeneric": "Nepavyko įkelti failo. Pabandykite dar kartą.",
+          "removeLabel": "Pašalinti",
+          "removingLabel": "Šalinama…",
+          "sizeHelp": "Maksimalus failo dydis — 10 MB.",
+          "allowedHelp": "Leidžiami tipai: PDF, JPG, PNG, WebP, TXT."
+        }
       }
     }
   },

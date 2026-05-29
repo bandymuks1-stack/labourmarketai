@@ -8,6 +8,7 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
 import { getOwnCustomer } from "@/lib/buyer/customers";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import { listOwnAttachments } from "@/lib/buyer/customer-request-attachments";
 
 const BUYER_FIELDS = [
   { key: "serviceType" as const, labelKey: "field.serviceType.label", placeholderKey: "field.serviceType.placeholder", variant: "text" as const },
@@ -34,6 +35,40 @@ export default async function BuyerDashboardPage({
   const customer = customerRead.kind === "ok" ? customerRead.row : null;
   const migrationNeeded = customerRead.kind === "needs-migration";
   const requestsResult = await listOwnCustomerRequests();
+  const attachmentsResultRaw = await listOwnAttachments();
+  type AttachmentItemDto = {
+    id: string;
+    requestId: string;
+    fileName: string;
+    mimeType: string;
+    fileSizeBytes: number;
+    analysisStatus: string;
+    createdAt: string;
+  };
+  type AttachmentsState =
+    | { kind: "ok"; rows: readonly AttachmentItemDto[] }
+    | { kind: "needs-migration"; rows: readonly AttachmentItemDto[] }
+    | { kind: "error"; rows: readonly AttachmentItemDto[]; message: string };
+  const attachmentsResult: AttachmentsState =
+    attachmentsResultRaw.kind === "ok"
+      ? {
+          kind: "ok",
+          rows: attachmentsResultRaw.rows.map((a) => ({
+            id: a.id,
+            requestId: a.requestId,
+            fileName: a.fileName,
+            mimeType: a.mimeType,
+            fileSizeBytes: a.fileSizeBytes,
+            analysisStatus: a.analysisStatus,
+            createdAt: a.createdAt,
+          })),
+        }
+      : attachmentsResultRaw.kind === "needs-migration"
+        ? { kind: "needs-migration", rows: [] }
+        : { kind: "error", rows: [], message: attachmentsResultRaw.message };
+  const tAttachments = await getTranslations(
+    "roleDashboards.buyer.requests.attachments",
+  );
 
   const requestsLabels = {
     heading: tRequests("heading"),
@@ -79,6 +114,23 @@ export default async function BuyerDashboardPage({
     manualReviewBanner: tRequests("manualReviewBanner"),
     migrationBlockerHeading: tRequests("migrationBlockerHeading"),
     migrationBlockerBody: tRequests("migrationBlockerBody"),
+    attachmentsHeading: tAttachments("heading"),
+    attachmentsEmpty: tAttachments("empty"),
+    attachmentsMigrationBlocker: tAttachments("migrationBlocker"),
+    attachmentsAnalysisFallback: tAttachments("analysisFallback"),
+    attachmentsUploader: {
+      addButton: tAttachments("addButton"),
+      uploadingLabel: tAttachments("uploadingLabel"),
+      successLabel: tAttachments("successLabel"),
+      errorTooLarge: tAttachments("errorTooLarge"),
+      errorBadType: tAttachments("errorBadType"),
+      errorNeedsMigration: tAttachments("errorNeedsMigration"),
+      errorGeneric: tAttachments("errorGeneric"),
+      removeLabel: tAttachments("removeLabel"),
+      removingLabel: tAttachments("removingLabel"),
+      sizeHelp: tAttachments("sizeHelp"),
+      allowedHelp: tAttachments("allowedHelp"),
+    },
   };
 
   return (
@@ -198,6 +250,7 @@ export default async function BuyerDashboardPage({
 
       <BuyerRequestsSection
         listResult={requestsResult}
+        attachmentsResult={attachmentsResult}
         labels={requestsLabels}
       />
 
