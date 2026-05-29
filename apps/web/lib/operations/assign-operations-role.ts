@@ -67,6 +67,25 @@ export function isAssignableOperationsRole(
   return (ASSIGNABLE_OPERATIONS_ROLES as readonly string[]).includes(value);
 }
 
+/** The text outcomes the assignment RPC / server actions can return. */
+export type AssignRoleOutcome =
+  | "assigned"
+  | "cleared"
+  | "not_owner"
+  | "not_linked"
+  | "invalid_role"
+  | "review_not_allowed";
+
+/** Shared server-action state for the owner role-select form (company OR
+ *  agency). `no_org` = the caller has no owned company/agency. */
+export type AssignRoleActionState =
+  | { ok: true; outcome: AssignRoleOutcome }
+  | {
+      ok: false;
+      code: "no_org" | "needs_migration" | "error";
+      message?: string;
+    };
+
 /**
  * Validate a desired operations-role assignment. Returns a discriminated
  * result the caller maps to an RPC argument set (or an early rejection). The

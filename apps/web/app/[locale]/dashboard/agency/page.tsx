@@ -99,6 +99,30 @@ export default async function AgencyDashboardPage({
         review_entries: tWorkers("operations.nextActionLabels.review_entries"),
         link_worker: tWorkers("operations.nextActionLabels.link_worker"),
       },
+      assign: {
+        heading: tWorkers("operations.assign.heading"),
+        roleLabel: tWorkers("operations.assign.roleLabel"),
+        none: tWorkers("operations.assign.none"),
+        titleLabel: tWorkers("operations.assign.titleLabel"),
+        titlePlaceholder: tWorkers("operations.assign.titlePlaceholder"),
+        save: tWorkers("operations.assign.save"),
+        saving: tWorkers("operations.assign.saving"),
+        reviewToggleLabel: tWorkers("operations.assign.reviewToggleLabel"),
+        reviewDisabledNote: tWorkers("operations.assign.reviewDisabledNote"),
+        outcomeAssigned: tWorkers("operations.assign.outcomeAssigned"),
+        outcomeCleared: tWorkers("operations.assign.outcomeCleared"),
+        outcomeNotOwner: tWorkers("operations.assign.outcomeNotOwner"),
+        outcomeNotLinked: tWorkers("operations.assign.outcomeNotLinked"),
+        outcomeInvalidRole: tWorkers("operations.assign.outcomeInvalidRole"),
+        outcomeReviewNotAllowed: tWorkers(
+          "operations.assign.outcomeReviewNotAllowed",
+        ),
+        outcomeError: tWorkers("operations.assign.outcomeError"),
+        outcomeNeedsMigration: tWorkers(
+          "operations.assign.outcomeNeedsMigration",
+        ),
+        roleOptionLabels: {},
+      },
     },
   };
 
@@ -138,6 +162,7 @@ export default async function AgencyDashboardPage({
         invitationsResult={invitationsResult}
         labels={workersLabels}
         roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
+        canAssignRoles
       />
 
       <section

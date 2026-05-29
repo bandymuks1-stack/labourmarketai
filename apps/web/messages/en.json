@@ -106,6 +106,25 @@
             "project_manager": "Project manager",
             "company_admin": "Company admin",
             "agency_admin": "Agency admin"
+          },
+          "assign": {
+            "heading": "Assign operations role",
+            "roleLabel": "Role",
+            "none": "— Not assigned —",
+            "titleLabel": "Title (optional)",
+            "titlePlaceholder": "e.g. Site lead",
+            "save": "Save role",
+            "saving": "Saving…",
+            "reviewToggleLabel": "Work journal review",
+            "reviewDisabledNote": "Work journal review is not enabled yet. The journal context must be connected first.",
+            "outcomeAssigned": "Role saved.",
+            "outcomeCleared": "Role cleared.",
+            "outcomeNotOwner": "You are not allowed to change this role.",
+            "outcomeNotLinked": "Worker is not linked.",
+            "outcomeInvalidRole": "Invalid role.",
+            "outcomeReviewNotAllowed": "Review cannot be enabled yet.",
+            "outcomeError": "Could not save.",
+            "outcomeNeedsMigration": "Not ready yet."
           }
         },
         "coordinationHeading": "Role coordination",
@@ -189,6 +208,25 @@
             "project_manager": "Project manager",
             "company_admin": "Company admin",
             "agency_admin": "Agency admin"
+          },
+          "assign": {
+            "heading": "Assign operations role",
+            "roleLabel": "Role",
+            "none": "— Not assigned —",
+            "titleLabel": "Title (optional)",
+            "titlePlaceholder": "e.g. Site lead",
+            "save": "Save role",
+            "saving": "Saving…",
+            "reviewToggleLabel": "Work journal review",
+            "reviewDisabledNote": "Work journal review is not enabled yet. The journal context must be connected first.",
+            "outcomeAssigned": "Role saved.",
+            "outcomeCleared": "Role cleared.",
+            "outcomeNotOwner": "You are not allowed to change this role.",
+            "outcomeNotLinked": "Worker is not linked.",
+            "outcomeInvalidRole": "Invalid role.",
+            "outcomeReviewNotAllowed": "Review cannot be enabled yet.",
+            "outcomeError": "Could not save.",
+            "outcomeNeedsMigration": "Not ready yet."
           }
         },
         "coordinationHeading": "Role coordination",
@@ -791,6 +829,11 @@
     "externally_confirmed": "Externally confirmed"
   },
   "dashboard": {
+    "comingLater": {
+      "eyebrow": "Later",
+      "title": "Coming later",
+      "body": "These areas are being prepared and will be enabled later. For now they have no working buttons."
+    },
     "featuresHeading": {
       "eyebrow": "What's here and what's coming",
       "title": "What you can do today and what comes later",

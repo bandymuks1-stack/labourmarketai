@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 
 import {
   inviteCompanyWorkerAction,
+  assignCompanyWorkerRoleAction,
   type InviteCompanyFormState,
 } from "@/lib/company/actions";
 import type {
@@ -11,6 +12,10 @@ import type {
   LinkedCompanyWorker,
 } from "@/lib/company/company-workers";
 import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
+import {
+  WorkerOperationsRoleForm,
+  type OperationsRoleControlLabels,
+} from "@/components/app/worker-operations-role-form";
 
 /**
  * Company workers + invitations panel.
@@ -69,6 +74,8 @@ export interface OpsCellLabels {
   readonly setupNote: string;
   /** One next action per relationship, keyed by context nextAction. */
   readonly nextActionLabels: Record<string, string>;
+  /** Owner-only role-select control copy (assign / clear + disabled review). */
+  readonly assign: OperationsRoleControlLabels;
 }
 
 /** Subtle left status rail per review capability (Step 9, visual only). */
@@ -83,6 +90,7 @@ export function CompanyWorkersSection({
   invitationsResult,
   labels,
   roleCoordinationEnabled,
+  canAssignRoles = false,
 }: {
   readonly workersResult: ListState<LinkedCompanyWorker>;
   readonly invitationsResult: ListState<CompanyWorkerInvitation>;
@@ -91,6 +99,9 @@ export function CompanyWorkersSection({
    *  manager coordination is not enabled). When false, show the honest
    *  not-enabled note instead of pretending coordination works. */
   readonly roleCoordinationEnabled: boolean;
+  /** Owner/admin viewing their own company → show the role-select control.
+   *  The RPC re-validates ownership regardless. */
+  readonly canAssignRoles?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<
     InviteCompanyFormState | null,
@@ -226,6 +237,18 @@ export function CompanyWorkersSection({
                           {labels.operations.nextActionLabels[ctx.nextAction] ??
                             ""}
                         </span>
+                        {canAssignRoles ? (
+                          <WorkerOperationsRoleForm
+                            workerId={w.workerId}
+                            currentRole={w.operationsRole}
+                            currentTitle={w.operationsTitle}
+                            action={assignCompanyWorkerRoleAction}
+                            labels={{
+                              ...labels.operations.assign,
+                              roleOptionLabels: labels.operations.roleLabels,
+                            }}
+                          />
+                        ) : null}
                       </div>
                     </td>
                     <td className="py-1 text-text-muted">{w.createdAt.slice(0, 10)}</td>

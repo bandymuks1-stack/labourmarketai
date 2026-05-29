@@ -106,6 +106,25 @@
             "project_manager": "Projekto vadovas",
             "company_admin": "Įmonės administratorius",
             "agency_admin": "Agentūros administratorius"
+          },
+          "assign": {
+            "heading": "Priskirti operacinę rolę",
+            "roleLabel": "Rolė",
+            "none": "— Nepriskirta —",
+            "titleLabel": "Pareigų pavadinimas (nebūtina)",
+            "titlePlaceholder": "pvz., Objekto vadovas",
+            "save": "Išsaugoti rolę",
+            "saving": "Saugoma…",
+            "reviewToggleLabel": "Darbo žurnalo peržiūra",
+            "reviewDisabledNote": "Darbo žurnalo peržiūra dar neįjungta. Pirma reikia sujungti žurnalo kontekstą.",
+            "outcomeAssigned": "Rolė išsaugota.",
+            "outcomeCleared": "Rolė pašalinta.",
+            "outcomeNotOwner": "Neturite teisės keisti šios rolės.",
+            "outcomeNotLinked": "Darbuotojas nesusietas.",
+            "outcomeInvalidRole": "Netinkama rolė.",
+            "outcomeReviewNotAllowed": "Peržiūros kol kas negalima įjungti.",
+            "outcomeError": "Nepavyko išsaugoti.",
+            "outcomeNeedsMigration": "Funkcija dar neparuošta."
           }
         },
         "coordinationHeading": "Rolių koordinavimas",
@@ -189,6 +208,25 @@
             "project_manager": "Projekto vadovas",
             "company_admin": "Įmonės administratorius",
             "agency_admin": "Agentūros administratorius"
+          },
+          "assign": {
+            "heading": "Priskirti operacinę rolę",
+            "roleLabel": "Rolė",
+            "none": "— Nepriskirta —",
+            "titleLabel": "Pareigų pavadinimas (nebūtina)",
+            "titlePlaceholder": "pvz., Objekto vadovas",
+            "save": "Išsaugoti rolę",
+            "saving": "Saugoma…",
+            "reviewToggleLabel": "Darbo žurnalo peržiūra",
+            "reviewDisabledNote": "Darbo žurnalo peržiūra dar neįjungta. Pirma reikia sujungti žurnalo kontekstą.",
+            "outcomeAssigned": "Rolė išsaugota.",
+            "outcomeCleared": "Rolė pašalinta.",
+            "outcomeNotOwner": "Neturite teisės keisti šios rolės.",
+            "outcomeNotLinked": "Darbuotojas nesusietas.",
+            "outcomeInvalidRole": "Netinkama rolė.",
+            "outcomeReviewNotAllowed": "Peržiūros kol kas negalima įjungti.",
+            "outcomeError": "Nepavyko išsaugoti.",
+            "outcomeNeedsMigration": "Funkcija dar neparuošta."
           }
         },
         "coordinationHeading": "Rolių koordinavimas",
@@ -791,6 +829,11 @@
     "externally_confirmed": "Patvirtinta iš išorės"
   },
   "dashboard": {
+    "comingLater": {
+      "eyebrow": "Vėliau",
+      "title": "Vėliau įjungiamos galimybės",
+      "body": "Šios sritys ruošiamos ir bus įjungtos vėliau. Kol kas jos be veikiančių mygtukų."
+    },
     "featuresHeading": {
       "eyebrow": "Galimybės ir ruošiama",
       "title": "Ką galima daryti šiandien ir kas ateis vėliau",

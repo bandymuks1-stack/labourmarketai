@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 
 import {
   inviteAgencyWorkerAction,
+  assignAgencyWorkerRoleAction,
   type InviteFormState,
 } from "@/lib/agency/actions";
 import type {
@@ -12,6 +13,7 @@ import type {
 } from "@/lib/agency/agency-workers";
 import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
 import type { OpsCellLabels } from "@/components/app/company-workers-section";
+import { WorkerOperationsRoleForm } from "@/components/app/worker-operations-role-form";
 
 /**
  * Stage 2 PR 2 — Agency workers + invitations panel.
@@ -79,12 +81,15 @@ export function AgencyWorkersSection({
   invitationsResult,
   labels,
   roleCoordinationEnabled,
+  canAssignRoles = false,
 }: {
   readonly workersResult: ListState<LinkedAgencyWorker>;
   readonly invitationsResult: ListState<AgencyWorkerInvitation>;
   readonly labels: AgencyWorkersSectionLabels;
   /** From the operations role-capability map — false today. */
   readonly roleCoordinationEnabled: boolean;
+  /** Owner/admin viewing their own agency → show the role-select control. */
+  readonly canAssignRoles?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<
     InviteFormState | null,
@@ -219,6 +224,18 @@ export function AgencyWorkersSection({
                           {labels.operations.nextActionLabels[ctx.nextAction] ??
                             ""}
                         </span>
+                        {canAssignRoles ? (
+                          <WorkerOperationsRoleForm
+                            workerId={w.workerId}
+                            currentRole={w.operationsRole}
+                            currentTitle={w.operationsTitle}
+                            action={assignAgencyWorkerRoleAction}
+                            labels={{
+                              ...labels.operations.assign,
+                              roleOptionLabels: labels.operations.roleLabels,
+                            }}
+                          />
+                        ) : null}
                       </div>
                     </td>
                     <td className="py-1 text-text-muted">{w.createdAt.slice(0, 10)}</td>
