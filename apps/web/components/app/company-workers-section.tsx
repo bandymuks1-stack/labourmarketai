@@ -71,6 +71,13 @@ export interface OpsCellLabels {
   readonly nextActionLabels: Record<string, string>;
 }
 
+/** Subtle left status rail per review capability (Step 9, visual only). */
+const REVIEW_RAIL: Record<string, string> = {
+  can_review: "border-l-2 border-l-state-success/60",
+  can_view: "border-l-2 border-l-brand-blue/50",
+  not_enabled: "border-l-2 border-l-ink-500",
+};
+
 export function CompanyWorkersSection({
   workersResult,
   invitationsResult,
@@ -193,7 +200,7 @@ export function CompanyWorkersSection({
                 return (
                   <tr
                     key={w.workerId}
-                    className="border-t border-ink-700"
+                    className={`border-t border-ink-700 ${REVIEW_RAIL[ctx.reviewCapability] ?? ""}`}
                     data-testid={`company-worker-row-${w.workerId}`}
                     data-review-capability={ctx.reviewCapability}
                   >
