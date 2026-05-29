@@ -18,6 +18,7 @@
     "placeholders:check": "pnpm -C apps/web placeholders:check",
     "placeholders:promote": "pnpm -C apps/web placeholders:promote",
     "check:primary-route-smoke": "pnpm -C apps/web check:primary-route-smoke",
+    "check:i18n-debt": "pnpm -C apps/web check:i18n-debt",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --project-id gorgitwvdzxbnaxhrsrw --schema public > apps/web/lib/supabase/types.ts",
     "db:fixtures:local": "pnpm -C apps/web db:fixtures:local",
