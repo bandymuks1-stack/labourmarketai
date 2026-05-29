@@ -499,7 +499,20 @@
         "manual_review_needed": "Peržiūrėkite ir nuspręskite tolesnį žingsnį.",
         "missing_description": "Laukiama, kol pirkėjas papildys aprašymą.",
         "missing_files": "Laukiama, kol pirkėjas pridės failą."
-      }
+      },
+      "descriptionSignalHeading": "Aprašymas",
+      "descriptionSignal": {
+        "present": "Pakankamas",
+        "thin": "Per trumpas"
+      },
+      "fileReadinessHeading": "Failų tipai",
+      "fileKinds": {
+        "future_readable_text_file": "Tekstas",
+        "future_pdf_reader_needed": "PDF",
+        "future_ocr_needed": "Vaizdas/OCR",
+        "manual_review_only": "Kita"
+      },
+      "noFiles": "Failų nėra"
     },
     "user": {
       "onboarded": "Užregistruotas",

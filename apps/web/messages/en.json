@@ -499,7 +499,20 @@
         "manual_review_needed": "Review and decide the next step.",
         "missing_description": "Waiting for the buyer to add a description.",
         "missing_files": "Waiting for the buyer to add a file."
-      }
+      },
+      "descriptionSignalHeading": "Description",
+      "descriptionSignal": {
+        "present": "Sufficient",
+        "thin": "Too short"
+      },
+      "fileReadinessHeading": "File types",
+      "fileKinds": {
+        "future_readable_text_file": "Text",
+        "future_pdf_reader_needed": "PDF",
+        "future_ocr_needed": "Image/OCR",
+        "manual_review_only": "Other"
+      },
+      "noFiles": "No files"
     },
     "user": {
       "onboarded": "Onboarded",

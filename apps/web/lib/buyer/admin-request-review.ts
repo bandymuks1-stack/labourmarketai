@@ -7,6 +7,20 @@ import {
   computeAdminReviewPriority,
   type AdminReviewPriorityStatus,
 } from "@/lib/buyer/admin-review-priority";
+import {
+  computeExtractionReadiness,
+  type ExtractionReadiness,
+} from "@/lib/buyer/attachment-readiness";
+
+/** Zeroed file-readiness tally (kinds of future reader a request needs). */
+function emptyReadinessTally(): Record<ExtractionReadiness, number> {
+  return {
+    future_readable_text_file: 0,
+    future_pdf_reader_needed: 0,
+    future_ocr_needed: 0,
+    manual_review_only: 0,
+  };
+}
 
 /**
  * Admin manual-review listing (long-cycle plan PR B, option B2).
@@ -44,6 +58,10 @@ export interface AdminReviewRequestRow {
   readonly attachmentCount: number;
   readonly priority: AdminReviewPriorityStatus;
   readonly order: number;
+  /** Whether the free-text need summary is useful enough to act on. */
+  readonly hasUsefulDescription: boolean;
+  /** Count of attachments by the kind of FUTURE reader they would need. */
+  readonly fileReadiness: Record<ExtractionReadiness, number>;
 }
 
 export type AdminReviewListResult =
@@ -75,20 +93,30 @@ export async function listRequestsForAdminReview(
   const reqRows = (requests ?? []) as any[];
   const ids = reqRows.map((r) => r.id as string);
 
-  // Attachment counts per request. A missing attachments table is
-  // non-fatal — every request simply counts as 0 files.
+  // Attachment counts + file-readiness tally per request. A missing
+  // attachments table is non-fatal — every request simply counts as 0
+  // files. We read only the MIME type (metadata) — never file bytes —
+  // to classify what KIND of future reader each file would need.
   const countByRequest = new Map<string, number>();
+  const readinessByRequest = new Map<string, Record<ExtractionReadiness, number>>();
   if (ids.length > 0) {
     const { data: attachments, error: attErr } = await asAny(supabase)
       .from("customer_request_attachments")
-      .select("request_id")
+      .select("request_id, mime_type")
       .in("request_id", ids);
     if (!attErr) {
-      for (const a of (attachments ?? []) as { request_id: string }[]) {
+      for (const a of (attachments ?? []) as {
+        request_id: string;
+        mime_type: string | null;
+      }[]) {
         countByRequest.set(
           a.request_id,
           (countByRequest.get(a.request_id) ?? 0) + 1,
         );
+        const tally =
+          readinessByRequest.get(a.request_id) ?? emptyReadinessTally();
+        tally[computeExtractionReadiness(a.mime_type)] += 1;
+        readinessByRequest.set(a.request_id, tally);
       }
     }
   }
@@ -109,6 +137,9 @@ export async function listRequestsForAdminReview(
       attachmentCount,
       priority: priority.status,
       order: priority.order,
+      hasUsefulDescription: priority.hasUsefulDescription,
+      fileReadiness:
+        readinessByRequest.get(r.id as string) ?? emptyReadinessTally(),
     };
   });
 
