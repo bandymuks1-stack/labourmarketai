@@ -304,16 +304,25 @@
             "enough_for_manual_review": "Enough for manual review",
             "needs_more_info": "Needs more info"
           },
-          "honestMessage": "This is transparent product logic based only on the information you provided. There is no automatic reading, no AI and no automatic checking — an administrator reviews the request manually.",
-          "nextActionHeading": "Next action",
+          "honestMessage": "Automatic file reading is not enabled yet. An administrator reviews your request and files manually.",
+          "nextActionHeading": "What to do next",
           "nextAction": {
             "add_first_file": "Add the first file",
             "add_more_project_details": "Add more project details",
-            "administrator_will_review": "An administrator will review manually"
+            "administrator_will_review": "Nothing to do — an administrator will review manually"
           },
           "filesHeading": "Attached files",
           "analysisStatusLabel": "Analysis status",
-          "analysisNotStarted": "Not enabled — manual review"
+          "analysisNotStarted": "Not enabled — manual review",
+          "fileReviewChip": "Manual review",
+          "requestStatus": {
+            "draft": "Draft",
+            "submitted": "Submitted",
+            "in_review": "In review",
+            "needs_followup": "Needs follow-up",
+            "approved": "Approved",
+            "closed": "Closed"
+          }
         }
       }
     }

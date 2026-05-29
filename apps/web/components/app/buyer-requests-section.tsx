@@ -6,7 +6,10 @@ import {
   saveBuyerRequestAction,
   type BuyerRequestFormState,
 } from "@/lib/buyer/request-actions";
-import type { CustomerRequestRow } from "@/lib/buyer/customer-requests";
+import type {
+  CustomerRequestRow,
+  CustomerRequestStatus,
+} from "@/lib/buyer/customer-requests";
 import {
   computeRequestReadiness,
   type RequestNextAction,
@@ -94,6 +97,8 @@ export interface BuyerRequestUnderstandingLabels {
   readonly filesHeading: string;
   readonly analysisStatusLabel: string;
   readonly analysisNotStarted: string;
+  readonly fileReviewChip: string;
+  readonly requestStatus: Record<CustomerRequestStatus, string>;
 }
 
 /** Status-chip tone for each deterministic readiness state. */
@@ -253,7 +258,7 @@ export function BuyerRequestsSection({
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-text-muted">{u.labelStatus}:</span>
                       <span className="rounded bg-ink-700/40 px-2 py-0.5 text-text-secondary">
-                        {r.status}
+                        {u.requestStatus[r.status] ?? r.status}
                       </span>
                     </div>
                     <div className="flex flex-col gap-0.5">
@@ -263,7 +268,7 @@ export function BuyerRequestsSection({
                       <span
                         className={
                           hasDescription
-                            ? "text-text-secondary"
+                            ? "line-clamp-3 text-text-secondary"
                             : "italic text-text-muted"
                         }
                       >
@@ -290,15 +295,11 @@ export function BuyerRequestsSection({
                           <p className="text-[11px] text-text-muted">
                             {labels.attachmentsEmpty}
                           </p>
-                        ) : (
-                          <p className="mb-1 text-[10px] text-text-muted">
-                            {u.analysisStatusLabel}: {u.analysisNotStarted}
-                          </p>
-                        )}
+                        ) : null}
                         <BuyerRequestAttachmentUploader
                           requestId={r.id}
                           attachments={requestAttachments}
-                          analysisFallbackLine={labels.attachmentsAnalysisFallback}
+                          analysisFallbackLine={u.fileReviewChip}
                           labels={labels.attachmentsUploader}
                         />
                       </>

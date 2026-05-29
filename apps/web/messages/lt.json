@@ -304,16 +304,25 @@
             "enough_for_manual_review": "Pakanka rankinei peržiūrai",
             "needs_more_info": "Trūksta informacijos"
           },
-          "honestMessage": "Tai skaidri produkto logika, paremta tik jūsų pateikta informacija. Nėra automatinio nuskaitymo, dirbtinio intelekto ar automatinio tikrinimo — užklausą peržiūri administratorius rankiniu būdu.",
-          "nextActionHeading": "Tolesnis veiksmas",
+          "honestMessage": "Automatinis failų nuskaitymas dar neįjungtas. Jūsų užklausą ir failus peržiūri administratorius rankiniu būdu.",
+          "nextActionHeading": "Ką daryti toliau",
           "nextAction": {
             "add_first_file": "Pridėkite pirmą failą",
             "add_more_project_details": "Pridėkite daugiau projekto detalių",
-            "administrator_will_review": "Administratorius peržiūrės rankiniu būdu"
+            "administrator_will_review": "Nieko nereikia — administratorius peržiūrės rankiniu būdu"
           },
           "filesHeading": "Pridėti failai",
           "analysisStatusLabel": "Analizės būsena",
-          "analysisNotStarted": "Neįjungta — rankinė peržiūra"
+          "analysisNotStarted": "Neįjungta — rankinė peržiūra",
+          "fileReviewChip": "Rankinė peržiūra",
+          "requestStatus": {
+            "draft": "Juodraštis",
+            "submitted": "Pateikta",
+            "in_review": "Peržiūrima",
+            "needs_followup": "Reikia papildymo",
+            "approved": "Priimta",
+            "closed": "Uždaryta"
+          }
         }
       }
     }
