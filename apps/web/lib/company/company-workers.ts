@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { validateOperationsRoleAssignment } from "@/lib/operations/assign-operations-role";
 
 /**
  * Company-worker linking service (Stage 2 follow-up to PR #99).
@@ -189,5 +190,65 @@ export async function inviteCompanyWorker(
   const outcome = data as InviteCompanyWorkerResult extends { outcome: infer O }
     ? O
     : never;
+  return { kind: "ok", outcome };
+}
+
+export type AssignCompanyWorkerRoleResult =
+  | {
+      kind: "ok";
+      outcome:
+        | "assigned"
+        | "cleared"
+        | "not_owner"
+        | "not_linked"
+        | "invalid_role"
+        | "review_not_allowed";
+    }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * Assign (or clear) an operations role/title on a company↔worker
+ * relationship via the owner/admin-scoped `assign_company_worker_role` RPC
+ * (migration 0031). Journal review is never enabled here — review rights
+ * cannot come from a stored label until the engagement-context bridge ships;
+ * the RPC and this wrapper reject any review-enable attempt.
+ *
+ * `operationsRole = null` (or blank) clears the assignment. Ownership is
+ * re-validated server-side inside the SECURITY DEFINER RPC.
+ */
+export async function assignCompanyWorkerRole(
+  companyId: string,
+  workerId: string,
+  operationsRole: string | null,
+  operationsTitle: string | null = null,
+): Promise<AssignCompanyWorkerRoleResult> {
+  // Fail fast with the same rules the RPC enforces (pure, no IO).
+  const check = validateOperationsRoleAssignment({
+    operationsRole,
+    operationsTitle,
+  });
+  if (!check.ok) {
+    return { kind: "ok", outcome: check.reason };
+  }
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc("assign_company_worker_role", {
+    p_company_id: companyId,
+    p_worker_id: workerId,
+    p_operations_role: check.action === "clear" ? null : check.role,
+    p_operations_title: check.action === "clear" ? null : check.title,
+    p_journal_review_enabled: false,
+  });
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    if (error.code === PERMISSION_DENIED_CODE) {
+      return { kind: "ok", outcome: "not_owner" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  const outcome =
+    data as AssignCompanyWorkerRoleResult extends { outcome: infer O }
+      ? O
+      : never;
   return { kind: "ok", outcome };
 }
