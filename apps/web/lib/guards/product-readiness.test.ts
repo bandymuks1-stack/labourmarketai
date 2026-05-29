@@ -1152,7 +1152,16 @@ describe("no migration files added by this sprint", () => {
     // so a per-relationship operations role + journal-review flag can exist.
     // Non-destructive: no drops/renames/backfill, no RLS change, safe
     // default = not assigned / review off. Owner-gated apply to prod.
-    const SPRINT_BASELINE = 29;
+    //
+    // Bumped from 29 → 30 on the ops-role-assign-rpc-v1 slice: migration
+    // 0031 adds two SECURITY DEFINER RPCs (assign_company_worker_role /
+    // assign_agency_worker_role) — the owner/admin-scoped write path for the
+    // 0030 bridge columns. Functions only: ownership re-validated, role
+    // validated against the conservative set, clearing supported, journal
+    // review NEVER enabled (label != permission), every write audit-logged
+    // to public.audit_logs. No table/RLS/grant change beyond EXECUTE on the
+    // two functions. Owner-gated apply to prod.
+    const SPRINT_BASELINE = 30;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

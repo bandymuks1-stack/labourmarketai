@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { validateOperationsRoleAssignment } from "@/lib/operations/assign-operations-role";
 
 /**
  * Agency-worker linking service (Stage 2 PR 2).
@@ -203,5 +204,62 @@ export async function inviteAgencyWorker(
   const outcome = data as InviteAgencyWorkerResult extends { outcome: infer O }
     ? O
     : never;
+  return { kind: "ok", outcome };
+}
+
+export type AssignAgencyWorkerRoleResult =
+  | {
+      kind: "ok";
+      outcome:
+        | "assigned"
+        | "cleared"
+        | "not_owner"
+        | "not_linked"
+        | "invalid_role"
+        | "review_not_allowed";
+    }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * Assign (or clear) an operations role/title on an agency↔worker
+ * relationship via the owner/admin-scoped `assign_agency_worker_role` RPC
+ * (migration 0031). Mirrors assignCompanyWorkerRole exactly: journal review
+ * is never enabled here (the RPC + this wrapper reject any review-enable
+ * attempt — review cannot come from a stored label). `operationsRole = null`
+ * (or blank) clears the assignment; ownership is re-validated server-side.
+ */
+export async function assignAgencyWorkerRole(
+  agencyId: string,
+  workerId: string,
+  operationsRole: string | null,
+  operationsTitle: string | null = null,
+): Promise<AssignAgencyWorkerRoleResult> {
+  const check = validateOperationsRoleAssignment({
+    operationsRole,
+    operationsTitle,
+  });
+  if (!check.ok) {
+    return { kind: "ok", outcome: check.reason };
+  }
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc("assign_agency_worker_role", {
+    p_agency_id: agencyId,
+    p_worker_id: workerId,
+    p_operations_role: check.action === "clear" ? null : check.role,
+    p_operations_title: check.action === "clear" ? null : check.title,
+    p_journal_review_enabled: false,
+  });
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    if (error.code === PERMISSION_DENIED_CODE) {
+      return { kind: "ok", outcome: "not_owner" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  const outcome =
+    data as AssignAgencyWorkerRoleResult extends { outcome: infer O }
+      ? O
+      : never;
   return { kind: "ok", outcome };
 }
