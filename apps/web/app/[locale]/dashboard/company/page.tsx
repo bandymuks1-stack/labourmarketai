@@ -102,6 +102,15 @@ export default async function CompanyDashboardPage({
         company_admin: tWorkers("operations.roleLabels.company_admin"),
         agency_admin: tWorkers("operations.roleLabels.agency_admin"),
       },
+      nextActionLabels: {
+        assign_role: tWorkers("operations.nextActionLabels.assign_role"),
+        await_role_enablement: tWorkers(
+          "operations.nextActionLabels.await_role_enablement",
+        ),
+        enable_review: tWorkers("operations.nextActionLabels.enable_review"),
+        review_entries: tWorkers("operations.nextActionLabels.review_entries"),
+        link_worker: tWorkers("operations.nextActionLabels.link_worker"),
+      },
     },
   };
 

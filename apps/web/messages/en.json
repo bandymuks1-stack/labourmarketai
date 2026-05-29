@@ -90,6 +90,13 @@
         "operations": {
           "columnHeading": "Operations role / review",
           "setupNote": "Operational roles are not assigned yet. Work journal review will be enabled only after safe setup.",
+          "nextActionLabels": {
+            "assign_role": "Next: assign an operations role (setup required)",
+            "await_role_enablement": "Next: role will be enabled later",
+            "enable_review": "Next: review will be enabled later (setup required)",
+            "review_entries": "Next: review work entries",
+            "link_worker": "Next: link a worker"
+          },
           "notAssigned": "Role not assigned",
           "reviewEnabled": "review enabled",
           "reviewNotEnabled": "review not enabled",
@@ -166,6 +173,13 @@
         "operations": {
           "columnHeading": "Operations role / review",
           "setupNote": "Operational roles are not assigned yet. Work journal review will be enabled only after safe setup.",
+          "nextActionLabels": {
+            "assign_role": "Next: assign an operations role (setup required)",
+            "await_role_enablement": "Next: role will be enabled later",
+            "enable_review": "Next: review will be enabled later (setup required)",
+            "review_entries": "Next: review work entries",
+            "link_worker": "Next: link a worker"
+          },
           "notAssigned": "Role not assigned",
           "reviewEnabled": "review enabled",
           "reviewNotEnabled": "review not enabled",

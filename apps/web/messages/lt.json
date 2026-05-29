@@ -90,6 +90,13 @@
         "operations": {
           "columnHeading": "Operacinė rolė / peržiūra",
           "setupNote": "Operacinės rolės dar nepriskirtos. Darbo žurnalo peržiūros ryšys bus įjungiamas tik po saugaus nustatymo.",
+          "nextActionLabels": {
+            "assign_role": "Tolesnis žingsnis: priskirti operacinę rolę (reikia nustatymo)",
+            "await_role_enablement": "Tolesnis žingsnis: rolė bus įjungta vėliau",
+            "enable_review": "Tolesnis žingsnis: peržiūra bus įjungta vėliau (reikia nustatymo)",
+            "review_entries": "Tolesnis žingsnis: peržiūrėti darbo įrašus",
+            "link_worker": "Tolesnis žingsnis: susieti darbuotoją"
+          },
           "notAssigned": "Rolė nepriskirta",
           "reviewEnabled": "peržiūra įjungta",
           "reviewNotEnabled": "peržiūra neįjungta",
@@ -166,6 +173,13 @@
         "operations": {
           "columnHeading": "Operacinė rolė / peržiūra",
           "setupNote": "Operacinės rolės dar nepriskirtos. Darbo žurnalo peržiūros ryšys bus įjungiamas tik po saugaus nustatymo.",
+          "nextActionLabels": {
+            "assign_role": "Tolesnis žingsnis: priskirti operacinę rolę (reikia nustatymo)",
+            "await_role_enablement": "Tolesnis žingsnis: rolė bus įjungta vėliau",
+            "enable_review": "Tolesnis žingsnis: peržiūra bus įjungta vėliau (reikia nustatymo)",
+            "review_entries": "Tolesnis žingsnis: peržiūrėti darbo įrašus",
+            "link_worker": "Tolesnis žingsnis: susieti darbuotoją"
+          },
           "notAssigned": "Rolė nepriskirta",
           "reviewEnabled": "peržiūra įjungta",
           "reviewNotEnabled": "peržiūra neįjungta",
