@@ -7,6 +7,10 @@ import {
   recordCustomerRequestAttachmentAction,
   removeCustomerRequestAttachmentAction,
 } from "@/lib/buyer/request-attachment-actions";
+import {
+  computeExtractionReadiness,
+  type ExtractionReadiness,
+} from "@/lib/buyer/attachment-readiness";
 
 /**
  * Buyer request attachment uploader (Stage 2 attachments PR 1).
@@ -84,6 +88,12 @@ interface UploaderProps {
   readonly attachments: readonly AttachmentListItem[];
   readonly analysisFallbackLine: string;
   readonly labels: BuyerRequestAttachmentUploaderLabels;
+  /**
+   * Per-MIME extraction-readiness copy (PR C). Deterministic foundation
+   * only — explains what future reader a file type would need; never
+   * claims extraction has run.
+   */
+  readonly extractionReadinessLabels: Record<ExtractionReadiness, string>;
 }
 
 export function BuyerRequestAttachmentUploader({
@@ -91,6 +101,7 @@ export function BuyerRequestAttachmentUploader({
   attachments,
   analysisFallbackLine,
   labels,
+  extractionReadinessLabels,
 }: UploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
@@ -209,6 +220,12 @@ export function BuyerRequestAttachmentUploader({
                 {analysisFallbackLine}
               </p>
             ) : null}
+            <p
+              className="text-[11px] text-text-muted"
+              data-testid="buyer-request-attachment-readiness"
+            >
+              {extractionReadinessLabels[computeExtractionReadiness(a.mimeType)]}
+            </p>
             <button
               type="button"
               onClick={() => handleRemove(a.id)}

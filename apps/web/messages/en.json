@@ -322,6 +322,12 @@
             "needs_followup": "Needs follow-up",
             "approved": "Approved",
             "closed": "Closed"
+          },
+          "extractionReadiness": {
+            "future_readable_text_file": "Text files may be read automatically in the future. For now an administrator reviews manually.",
+            "future_pdf_reader_needed": "PDF reading is not enabled yet. An administrator will review the file manually.",
+            "future_ocr_needed": "Image / OCR reading is not enabled yet. An administrator will review the file manually.",
+            "manual_review_only": "This file type is reviewed manually."
           }
         }
       }
