@@ -67,6 +67,8 @@ export interface OpsCellLabels {
   readonly roleLabels: Record<string, string>;
   /** Plain-language note shown when no worker has an ops role assigned yet. */
   readonly setupNote: string;
+  /** One next action per relationship, keyed by context nextAction. */
+  readonly nextActionLabels: Record<string, string>;
 }
 
 export function CompanyWorkersSection({
@@ -198,15 +200,26 @@ export function CompanyWorkersSection({
                     <td className="py-1 text-text-primary">{w.email ?? "—"}</td>
                     <td className="py-1 text-text-secondary">{w.status ?? "active"}</td>
                     <td className="py-1 text-text-secondary">
-                      <span>
-                        {w.operationsTitle?.trim() ? w.operationsTitle : roleLabel}
-                      </span>
-                      <span className="ml-1 text-[10px] text-text-muted">
-                        ·{" "}
-                        {ctx.reviewCapability === "can_review"
-                          ? labels.operations.reviewEnabled
-                          : labels.operations.reviewNotEnabled}
-                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <span>
+                          {w.operationsTitle?.trim()
+                            ? w.operationsTitle
+                            : roleLabel}
+                          <span className="ml-1 text-[10px] text-text-muted">
+                            ·{" "}
+                            {ctx.reviewCapability === "can_review"
+                              ? labels.operations.reviewEnabled
+                              : labels.operations.reviewNotEnabled}
+                          </span>
+                        </span>
+                        <span
+                          className="text-[10px] text-text-muted"
+                          data-testid={`company-worker-next-action-${w.workerId}`}
+                        >
+                          {labels.operations.nextActionLabels[ctx.nextAction] ??
+                            ""}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-1 text-text-muted">{w.createdAt.slice(0, 10)}</td>
                   </tr>

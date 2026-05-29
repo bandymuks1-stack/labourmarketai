@@ -133,6 +133,11 @@ describe("worker operations role/title is bridge-driven (PR C)", () => {
       expect(src).toMatch(/labels\.operations\.setupNote/);
       expect(src).toMatch(/operationsRole\?\.trim\(\)/);
     });
+    it(`${c.section} renders one next action per worker (guidance, no button)`, () => {
+      const src = read(c.section);
+      expect(src).toMatch(/labels\.operations\.nextActionLabels\[ctx\.nextAction\]/);
+      expect(src).toMatch(/-worker-next-action-/);
+    });
   }
 
   const libs = [
