@@ -289,6 +289,31 @@
           "removingLabel": "Removing…",
           "sizeHelp": "Maximum file size is 10 MB.",
           "allowedHelp": "Allowed types: PDF, JPG, PNG, WebP, TXT."
+        },
+        "understanding": {
+          "panelHeading": "Request understanding",
+          "basicsHeading": "Request details",
+          "labelStatus": "Status",
+          "labelCreated": "Created",
+          "labelDescription": "Description",
+          "noDescription": "No description provided",
+          "readinessHeading": "Manual-review readiness",
+          "readinessStatus": {
+            "no_files": "No files",
+            "files_added": "Files added — manual review needed",
+            "enough_for_manual_review": "Enough for manual review",
+            "needs_more_info": "Needs more info"
+          },
+          "honestMessage": "This is transparent product logic based only on the information you provided. There is no automatic reading, no AI and no automatic checking — an administrator reviews the request manually.",
+          "nextActionHeading": "Next action",
+          "nextAction": {
+            "add_first_file": "Add the first file",
+            "add_more_project_details": "Add more project details",
+            "administrator_will_review": "An administrator will review manually"
+          },
+          "filesHeading": "Attached files",
+          "analysisStatusLabel": "Analysis status",
+          "analysisNotStarted": "Not enabled — manual review"
         }
       }
     }

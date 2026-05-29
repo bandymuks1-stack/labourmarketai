@@ -289,6 +289,31 @@
           "removingLabel": "Šalinama…",
           "sizeHelp": "Maksimalus failo dydis — 10 MB.",
           "allowedHelp": "Leidžiami tipai: PDF, JPG, PNG, WebP, TXT."
+        },
+        "understanding": {
+          "panelHeading": "Užklausos supratimas",
+          "basicsHeading": "Užklausos informacija",
+          "labelStatus": "Būsena",
+          "labelCreated": "Sukurta",
+          "labelDescription": "Aprašymas",
+          "noDescription": "Aprašymas nenurodytas",
+          "readinessHeading": "Pasiruošimas rankinei peržiūrai",
+          "readinessStatus": {
+            "no_files": "Nėra failų",
+            "files_added": "Failai pridėti — reikalinga rankinė peržiūra",
+            "enough_for_manual_review": "Pakanka rankinei peržiūrai",
+            "needs_more_info": "Trūksta informacijos"
+          },
+          "honestMessage": "Tai skaidri produkto logika, paremta tik jūsų pateikta informacija. Nėra automatinio nuskaitymo, dirbtinio intelekto ar automatinio tikrinimo — užklausą peržiūri administratorius rankiniu būdu.",
+          "nextActionHeading": "Tolesnis veiksmas",
+          "nextAction": {
+            "add_first_file": "Pridėkite pirmą failą",
+            "add_more_project_details": "Pridėkite daugiau projekto detalių",
+            "administrator_will_review": "Administratorius peržiūrės rankiniu būdu"
+          },
+          "filesHeading": "Pridėti failai",
+          "analysisStatusLabel": "Analizės būsena",
+          "analysisNotStarted": "Neįjungta — rankinė peržiūra"
         }
       }
     }

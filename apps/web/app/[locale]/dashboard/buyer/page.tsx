@@ -69,6 +69,9 @@ export default async function BuyerDashboardPage({
   const tAttachments = await getTranslations(
     "roleDashboards.buyer.requests.attachments",
   );
+  const tUnderstanding = await getTranslations(
+    "roleDashboards.buyer.requests.understanding",
+  );
 
   const requestsLabels = {
     heading: tRequests("heading"),
@@ -130,6 +133,37 @@ export default async function BuyerDashboardPage({
       removingLabel: tAttachments("removingLabel"),
       sizeHelp: tAttachments("sizeHelp"),
       allowedHelp: tAttachments("allowedHelp"),
+    },
+    understanding: {
+      panelHeading: tUnderstanding("panelHeading"),
+      basicsHeading: tUnderstanding("basicsHeading"),
+      labelStatus: tUnderstanding("labelStatus"),
+      labelCreated: tUnderstanding("labelCreated"),
+      labelDescription: tUnderstanding("labelDescription"),
+      noDescription: tUnderstanding("noDescription"),
+      readinessHeading: tUnderstanding("readinessHeading"),
+      readinessStatus: {
+        no_files: tUnderstanding("readinessStatus.no_files"),
+        files_added: tUnderstanding("readinessStatus.files_added"),
+        enough_for_manual_review: tUnderstanding(
+          "readinessStatus.enough_for_manual_review",
+        ),
+        needs_more_info: tUnderstanding("readinessStatus.needs_more_info"),
+      },
+      honestMessage: tUnderstanding("honestMessage"),
+      nextActionHeading: tUnderstanding("nextActionHeading"),
+      nextAction: {
+        add_first_file: tUnderstanding("nextAction.add_first_file"),
+        add_more_project_details: tUnderstanding(
+          "nextAction.add_more_project_details",
+        ),
+        administrator_will_review: tUnderstanding(
+          "nextAction.administrator_will_review",
+        ),
+      },
+      filesHeading: tUnderstanding("filesHeading"),
+      analysisStatusLabel: tUnderstanding("analysisStatusLabel"),
+      analysisNotStarted: tUnderstanding("analysisNotStarted"),
     },
   };
 
