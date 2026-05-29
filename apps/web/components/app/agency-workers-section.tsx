@@ -10,6 +10,8 @@ import type {
   AgencyWorkerInvitation,
   LinkedAgencyWorker,
 } from "@/lib/agency/agency-workers";
+import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
+import type { OpsCellLabels } from "@/components/app/company-workers-section";
 
 /**
  * Stage 2 PR 2 — Agency workers + invitations panel.
@@ -62,6 +64,7 @@ export interface AgencyWorkersSectionLabels {
   readonly coordinationHeading: string;
   readonly coordinationBody: string;
   readonly coordinationNextAction: string;
+  readonly operations: OpsCellLabels;
 }
 
 export function AgencyWorkersSection({
@@ -164,21 +167,46 @@ export function AgencyWorkersSection({
               <tr>
                 <th className="py-1 text-left">{labels.columnEmail}</th>
                 <th className="py-1 text-left">{labels.columnStatus}</th>
+                <th className="py-1 text-left">{labels.operations.columnHeading}</th>
                 <th className="py-1 text-left">{labels.columnInvitedAt}</th>
               </tr>
             </thead>
             <tbody>
-              {activeWorkers.map((w) => (
-                <tr
-                  key={w.workerId}
-                  className="border-t border-ink-700"
-                  data-testid={`agency-worker-row-${w.workerId}`}
-                >
-                  <td className="py-1 text-text-primary">{w.email ?? "—"}</td>
-                  <td className="py-1 text-text-secondary">{w.status ?? "active"}</td>
-                  <td className="py-1 text-text-muted">{w.createdAt.slice(0, 10)}</td>
-                </tr>
-              ))}
+              {activeWorkers.map((w) => {
+                const ctx = computeEmploymentJournalContext({
+                  relationship: "agency",
+                  operationsRole: w.operationsRole,
+                  journalReviewEnabled: w.journalReviewEnabled,
+                });
+                const roleLabel =
+                  ctx.operationsRole === "not_enabled"
+                    ? labels.operations.notAssigned
+                    : (labels.operations.roleLabels[ctx.operationsRole] ??
+                      labels.operations.notAssigned);
+                return (
+                  <tr
+                    key={w.workerId}
+                    className="border-t border-ink-700"
+                    data-testid={`agency-worker-row-${w.workerId}`}
+                    data-review-capability={ctx.reviewCapability}
+                  >
+                    <td className="py-1 text-text-primary">{w.email ?? "—"}</td>
+                    <td className="py-1 text-text-secondary">{w.status ?? "active"}</td>
+                    <td className="py-1 text-text-secondary">
+                      <span>
+                        {w.operationsTitle?.trim() ? w.operationsTitle : roleLabel}
+                      </span>
+                      <span className="ml-1 text-[10px] text-text-muted">
+                        ·{" "}
+                        {ctx.reviewCapability === "can_review"
+                          ? labels.operations.reviewEnabled
+                          : labels.operations.reviewNotEnabled}
+                      </span>
+                    </td>
+                    <td className="py-1 text-text-muted">{w.createdAt.slice(0, 10)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

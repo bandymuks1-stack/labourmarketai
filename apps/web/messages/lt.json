@@ -87,6 +87,19 @@
         "noWorkersBody": "Pakvieskite el. paštu arba palaukite, kol darbuotojas užsiregistruos savaime ir bus susietas.",
         "inviteHeading": "Pakviesti darbuotoją el. paštu",
         "inviteDescription": "Pakvietimas išsaugomas DB kaip atskira eilutė. Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia. Realių laiškų siuntimas dar neaktyvuotas — tai sąmoningai laukia savininko patvirtinimo su realiais žmonėmis.",
+        "operations": {
+          "columnHeading": "Operacinė rolė / peržiūra",
+          "notAssigned": "Rolė nepriskirta",
+          "reviewEnabled": "peržiūra įjungta",
+          "reviewNotEnabled": "peržiūra neįjungta",
+          "roleLabels": {
+            "worker": "Darbuotojas",
+            "foreman": "Meistras",
+            "project_manager": "Projekto vadovas",
+            "company_admin": "Įmonės administratorius",
+            "agency_admin": "Agentūros administratorius"
+          }
+        },
         "coordinationHeading": "Rolių koordinavimas",
         "coordinationBody": "Šiuo metu visi susieti žmonės yra darbuotojai. Meistro, brigadininko ar vadovo rolių priskyrimas ir komandų koordinavimas dar neįjungtas.",
         "coordinationNextAction": "Galite pakviesti darbuotojus žemiau. Rolių priskyrimas bus pridėtas vėliau.",
@@ -149,6 +162,19 @@
         "noWorkersBody": "Pakvieskite el. paštu arba palaukite, kol darbuotojas užsiregistruos savaime ir bus susietas.",
         "inviteHeading": "Pakviesti darbuotoją el. paštu",
         "inviteDescription": "Pakvietimas išsaugomas DB kaip atskira eilutė. Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia.",
+        "operations": {
+          "columnHeading": "Operacinė rolė / peržiūra",
+          "notAssigned": "Rolė nepriskirta",
+          "reviewEnabled": "peržiūra įjungta",
+          "reviewNotEnabled": "peržiūra neįjungta",
+          "roleLabels": {
+            "worker": "Darbuotojas",
+            "foreman": "Meistras",
+            "project_manager": "Projekto vadovas",
+            "company_admin": "Įmonės administratorius",
+            "agency_admin": "Agentūros administratorius"
+          }
+        },
         "coordinationHeading": "Rolių koordinavimas",
         "coordinationBody": "Šiuo metu visi susieti žmonės yra darbuotojai. Meistro, brigadininko ar vadovo rolių priskyrimas ir komandų koordinavimas dar neįjungtas.",
         "coordinationNextAction": "Galite pakviesti darbuotojus žemiau. Rolių priskyrimas bus pridėtas vėliau.",

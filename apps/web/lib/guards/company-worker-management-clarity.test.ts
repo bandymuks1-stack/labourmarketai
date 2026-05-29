@@ -98,3 +98,66 @@ describe("coordination copy present + honest (LT + EN, company + agency)", () =>
     }
   }
 });
+
+describe("worker operations role/title is bridge-driven (PR C)", () => {
+  const sections = [
+    "components/app/company-workers-section.tsx",
+    "components/app/agency-workers-section.tsx",
+  ];
+  for (const s of sections) {
+    it(`${s} computes per-worker context via the helper`, () => {
+      const src = read(s);
+      expect(src).toMatch(
+        /from\s+["']@\/lib\/operations\/employment-journal-context["']/,
+      );
+      expect(src).toMatch(/computeEmploymentJournalContext\(/);
+      expect(src).toMatch(/labels\.operations\.columnHeading/);
+      expect(src).toMatch(/data-review-capability=/);
+    });
+  }
+
+  const libs = [
+    "lib/company/company-workers.ts",
+    "lib/agency/agency-workers.ts",
+  ];
+  for (const l of libs) {
+    it(`${l} reads bridge columns with a 42703 (column-absent) fallback`, () => {
+      const src = read(l);
+      expect(src).toMatch(/operations_role/);
+      expect(src).toMatch(/journal_review_enabled/);
+      // Graceful degrade when the owner-gated migration is not applied.
+      expect(src).toMatch(/42703|UNDEFINED_COLUMN_CODE/);
+    });
+  }
+
+  for (const locale of ["lt", "en"] as const) {
+    for (const role of ["company", "agency"] as const) {
+      it(`${locale} ${role} operations role labels present`, () => {
+        const json = JSON.parse(read(`messages/${locale}.json`)) as Record<
+          string,
+          unknown
+        >;
+        const ops = (
+          (
+            (json.roleDashboards as Record<string, unknown>)[role] as Record<
+              string,
+              unknown
+            >
+          ).workers as Record<string, unknown>
+        ).operations as Record<string, unknown>;
+        expect(ops?.columnHeading, `${locale}.${role}`).toBeTruthy();
+        expect(ops?.notAssigned).toBeTruthy();
+        const roleLabels = ops?.roleLabels as Record<string, string>;
+        for (const k of [
+          "worker",
+          "foreman",
+          "project_manager",
+          "company_admin",
+          "agency_admin",
+        ]) {
+          expect(roleLabels?.[k], `${locale}.${role}.${k}`).toBeTruthy();
+        }
+      });
+    }
+  }
+});

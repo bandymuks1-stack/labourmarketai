@@ -89,6 +89,19 @@ export default async function CompanyDashboardPage({
     coordinationHeading: tWorkers("coordinationHeading"),
     coordinationBody: tWorkers("coordinationBody"),
     coordinationNextAction: tWorkers("coordinationNextAction"),
+    operations: {
+      columnHeading: tWorkers("operations.columnHeading"),
+      notAssigned: tWorkers("operations.notAssigned"),
+      reviewEnabled: tWorkers("operations.reviewEnabled"),
+      reviewNotEnabled: tWorkers("operations.reviewNotEnabled"),
+      roleLabels: {
+        worker: tWorkers("operations.roleLabels.worker"),
+        foreman: tWorkers("operations.roleLabels.foreman"),
+        project_manager: tWorkers("operations.roleLabels.project_manager"),
+        company_admin: tWorkers("operations.roleLabels.company_admin"),
+        agency_admin: tWorkers("operations.roleLabels.agency_admin"),
+      },
+    },
   };
 
   return (
