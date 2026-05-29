@@ -7,6 +7,11 @@ import {
   type BuyerRequestFormState,
 } from "@/lib/buyer/request-actions";
 import type { CustomerRequestRow } from "@/lib/buyer/customer-requests";
+import {
+  BuyerRequestAttachmentUploader,
+  type AttachmentListItem,
+  type BuyerRequestAttachmentUploaderLabels,
+} from "@/components/app/buyer-request-attachment-uploader";
 
 /**
  * Stage 2 — Buyer demand/request section.
@@ -61,6 +66,11 @@ export interface BuyerRequestsSectionLabels {
   readonly manualReviewBanner: string;
   readonly migrationBlockerHeading: string;
   readonly migrationBlockerBody: string;
+  readonly attachmentsHeading: string;
+  readonly attachmentsEmpty: string;
+  readonly attachmentsMigrationBlocker: string;
+  readonly attachmentsAnalysisFallback: string;
+  readonly attachmentsUploader: BuyerRequestAttachmentUploaderLabels;
 }
 
 type ListState =
@@ -68,11 +78,18 @@ type ListState =
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
 
+type AttachmentsState =
+  | { kind: "ok"; rows: readonly AttachmentListItem[] }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
 export function BuyerRequestsSection({
   listResult,
+  attachmentsResult,
   labels,
 }: {
   readonly listResult: ListState;
+  readonly attachmentsResult: AttachmentsState;
   readonly labels: BuyerRequestsSectionLabels;
 }) {
   const [state, formAction, isPending] = useActionState<
@@ -82,6 +99,19 @@ export function BuyerRequestsSection({
 
   const rows = listResult.kind === "ok" ? listResult.rows : [];
   const migrationNeeded = listResult.kind === "needs-migration";
+  const attachmentsByRequest = (() => {
+    const m = new Map<string, AttachmentListItem[]>();
+    if (attachmentsResult.kind === "ok") {
+      for (const a of attachmentsResult.rows) {
+        const arr = m.get(a.requestId) ?? [];
+        arr.push(a);
+        m.set(a.requestId, arr);
+      }
+    }
+    return m;
+  })();
+  const attachmentsMigrationNeeded =
+    attachmentsResult.kind === "needs-migration";
 
   const banner: { tone: "success" | "warning"; text: string } | null = (() => {
     if (!state) return null;
@@ -147,30 +177,53 @@ export function BuyerRequestsSection({
             <p className="text-xs text-text-secondary">{labels.emptyStateBody}</p>
           </div>
         ) : (
-          <table className="w-full text-xs">
-            <thead className="text-text-muted">
-              <tr>
-                <th className="py-1 text-left">{labels.columnTitle}</th>
-                <th className="py-1 text-left">{labels.columnStatus}</th>
-                <th className="py-1 text-left">{labels.columnUpdated}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr
+          <ul className="flex flex-col gap-2">
+            {rows.map((r) => {
+              const requestAttachments = attachmentsByRequest.get(r.id) ?? [];
+              return (
+                <li
                   key={r.id}
-                  className="border-t border-ink-700"
+                  className="card-border flex flex-col gap-2 p-3"
                   data-testid={`buyer-request-row-${r.id}`}
                 >
-                  <td className="py-1 text-text-primary">{r.title}</td>
-                  <td className="py-1 text-text-secondary">{r.status}</td>
-                  <td className="py-1 text-text-muted">
-                    {r.updatedAt.slice(0, 10)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <span className="text-text-primary">{r.title}</span>
+                    <span className="text-text-secondary">{r.status}</span>
+                    <span className="text-text-muted">
+                      {r.updatedAt.slice(0, 10)}
+                    </span>
+                  </div>
+                  <div className="border-t border-ink-700 pt-2">
+                    <p className="mb-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {labels.attachmentsHeading}
+                    </p>
+                    {attachmentsMigrationNeeded ? (
+                      <p
+                        className="rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-[11px] text-state-warning"
+                        data-testid={`buyer-request-attachments-blocker-${r.id}`}
+                      >
+                        {labels.attachmentsMigrationBlocker}
+                      </p>
+                    ) : (
+                      <>
+                        {requestAttachments.length === 0 ? (
+                          <p className="text-[11px] text-text-muted">
+                            {labels.attachmentsEmpty}
+                          </p>
+                        ) : null}
+                        <BuyerRequestAttachmentUploader
+                          requestId={r.id}
+                          attachments={requestAttachments}
+                          analysisFallbackLine={labels.attachmentsAnalysisFallback}
+                          labels={labels.attachmentsUploader}
+                        />
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </section>
 
