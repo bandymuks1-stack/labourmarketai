@@ -17,6 +17,10 @@ import {
 } from "@/lib/buyer/request-readiness";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
 import {
+  computeRequestCompletion,
+  type RequestCompletionItemKey,
+} from "@/lib/buyer/request-completion";
+import {
   BuyerRequestAttachmentUploader,
   type AttachmentListItem,
   type BuyerRequestAttachmentUploaderLabels,
@@ -101,6 +105,12 @@ export interface BuyerRequestUnderstandingLabels {
   readonly fileReviewChip: string;
   readonly requestStatus: Record<CustomerRequestStatus, string>;
   readonly extractionReadiness: Record<ExtractionReadiness, string>;
+  readonly completion: {
+    readonly heading: string;
+    readonly doneLabel: string;
+    readonly missingLabel: string;
+    readonly items: Record<RequestCompletionItemKey, string>;
+  };
 }
 
 /** Status-chip tone for each deterministic readiness state. */
@@ -242,6 +252,14 @@ export function BuyerRequestsSection({
                 description: r.needSummary,
                 attachmentCount: requestAttachments.length,
               });
+              const completion = computeRequestCompletion({
+                description: r.needSummary,
+                attachmentCount: requestAttachments.length,
+                location: r.location,
+                country: r.country,
+                startPeriod: r.startPeriod,
+                duration: r.duration,
+              });
               const hasDescription = Boolean(r.needSummary?.trim());
               return (
                 <li
@@ -289,6 +307,50 @@ export function BuyerRequestsSection({
                         {hasDescription ? r.needSummary : u.noDescription}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Completeness checklist — deterministic, real fields only. */}
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`buyer-request-completion-${r.id}`}
+                  >
+                    <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {u.completion.heading} · {completion.doneCount}/
+                      {completion.totalCount}
+                    </p>
+                    <ul className="flex flex-col gap-0.5">
+                      {completion.items.map((item) => (
+                        <li
+                          key={item.key}
+                          className="flex items-center gap-2 text-[11px]"
+                        >
+                          <span
+                            aria-hidden
+                            className={
+                              item.done
+                                ? "text-state-success"
+                                : "text-text-muted"
+                            }
+                          >
+                            {item.done ? "✓" : "○"}
+                          </span>
+                          <span
+                            className={
+                              item.done
+                                ? "text-text-secondary"
+                                : "text-text-muted"
+                            }
+                          >
+                            {u.completion.items[item.key]}
+                          </span>
+                          <span className="sr-only">
+                            {item.done
+                              ? u.completion.doneLabel
+                              : u.completion.missingLabel}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
                   {/* 2. Attached files */}
