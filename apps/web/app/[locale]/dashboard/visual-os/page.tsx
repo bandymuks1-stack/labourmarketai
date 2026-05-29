@@ -7,6 +7,7 @@ import { WorkerCard, type WorkerCardEntity } from "@/components/visual/worker-ca
 import { VISUAL_TOKENS } from "@/lib/visual/tokens";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 
 /**
  * Visual Dashboard OS — real route, not just a primitive demo.
@@ -157,6 +158,24 @@ export default async function VisualOsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
+  // Admin links (e.g. the project-truth shortcut below) must be INVISIBLE
+  // to non-admins, not just blocked on direct navigation. Derive the
+  // dual admin signal (active_role OR a profile_roles 'admin' row) — the
+  // same gate the dashboard layout uses — and render the admin shortcut
+  // only when it is true.
+  const [profileRes, rolesRes] = await Promise.all([
+    supabase.from("profiles").select("active_role").eq("id", user.id).single(),
+    supabase
+      .from("profile_roles")
+      .select("role")
+      .eq("profile_id", user.id)
+      .eq("is_active", true),
+  ]);
+  const isAdmin = deriveIsAdmin({
+    activeRole: profileRes.data?.active_role ?? null,
+    profileRoles: rolesRes.data ?? [],
+  });
+
   const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
   const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
@@ -196,16 +215,18 @@ export default async function VisualOsPage({
                 "→ Activity start (/dashboard/start)",
               )}
             </Link>
-            <Link
-              href={"/dashboard/admin/project-truth" as "/dashboard"}
-              className="rounded-md border border-ink-500 px-3 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-              data-testid="visual-os-cta-project-truth"
-            >
-              {label(
-                "→ Admin / projekto tiesa",
-                "→ Admin / project truth",
-              )}
-            </Link>
+            {isAdmin ? (
+              <Link
+                href={"/dashboard/admin/project-truth" as "/dashboard"}
+                className="rounded-md border border-ink-500 px-3 py-1 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                data-testid="visual-os-cta-project-truth"
+              >
+                {label(
+                  "→ Admin / projekto tiesa",
+                  "→ Admin / project truth",
+                )}
+              </Link>
+            ) : null}
           </div>
         </div>
         <div
