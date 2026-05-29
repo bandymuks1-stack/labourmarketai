@@ -1161,7 +1161,16 @@ describe("no migration files added by this sprint", () => {
     // review NEVER enabled (label != permission), every write audit-logged
     // to public.audit_logs. No table/RLS/grant change beyond EXECUTE on the
     // two functions. Owner-gated apply to prod.
-    const SPRINT_BASELINE = 30;
+    //
+    // Bumped from 30 → 31 on the engagement-context-provisioning-rpc-v1
+    // slice: migration 0032 adds two SECURITY DEFINER RPCs
+    // (provision_company_worker_engagement_context /
+    // provision_agency_worker_engagement_context) that idempotently link an
+    // employment relationship to its mirrored organization via an active
+    // `employee` engagement_context. Functions only: ownership re-validated,
+    // role reviewer-eligibility checked, audit-logged, review NEVER enabled.
+    // No table/RLS/grant change beyond EXECUTE on the two functions.
+    const SPRINT_BASELINE = 31;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
