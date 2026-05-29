@@ -89,6 +89,7 @@
         "inviteDescription": "Pakvietimas išsaugomas DB kaip atskira eilutė. Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia. Realių laiškų siuntimas dar neaktyvuotas — tai sąmoningai laukia savininko patvirtinimo su realiais žmonėmis.",
         "operations": {
           "columnHeading": "Operacinė rolė / peržiūra",
+          "setupNote": "Operacinės rolės dar nepriskirtos. Darbo žurnalo peržiūros ryšys bus įjungiamas tik po saugaus nustatymo.",
           "notAssigned": "Rolė nepriskirta",
           "reviewEnabled": "peržiūra įjungta",
           "reviewNotEnabled": "peržiūra neįjungta",
@@ -164,6 +165,7 @@
         "inviteDescription": "Pakvietimas išsaugomas DB kaip atskira eilutė. Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia.",
         "operations": {
           "columnHeading": "Operacinė rolė / peržiūra",
+          "setupNote": "Operacinės rolės dar nepriskirtos. Darbo žurnalo peržiūros ryšys bus įjungiamas tik po saugaus nustatymo.",
           "notAssigned": "Rolė nepriskirta",
           "reviewEnabled": "peržiūra įjungta",
           "reviewNotEnabled": "peržiūra neįjungta",

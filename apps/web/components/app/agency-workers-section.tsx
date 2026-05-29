@@ -212,6 +212,16 @@ export function AgencyWorkersSection({
         )}
       </section>
 
+      {activeWorkers.length > 0 &&
+      activeWorkers.every((w) => !w.operationsRole?.trim()) ? (
+        <p
+          className="rounded-md border border-ink-700 bg-surface-1 px-3 py-2 text-[11px] text-text-secondary"
+          data-testid="agency-workers-ops-setup-note"
+        >
+          {labels.operations.setupNote}
+        </p>
+      ) : null}
+
       {!roleCoordinationEnabled ? (
         <div
           className="rounded-md border border-ink-700 bg-surface-1 p-3"

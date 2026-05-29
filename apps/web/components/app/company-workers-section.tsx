@@ -65,6 +65,8 @@ export interface OpsCellLabels {
   readonly reviewEnabled: string;
   readonly reviewNotEnabled: string;
   readonly roleLabels: Record<string, string>;
+  /** Plain-language note shown when no worker has an ops role assigned yet. */
+  readonly setupNote: string;
 }
 
 export function CompanyWorkersSection({
@@ -214,6 +216,16 @@ export function CompanyWorkersSection({
           </table>
         )}
       </section>
+
+      {activeWorkers.length > 0 &&
+      activeWorkers.every((w) => !w.operationsRole?.trim()) ? (
+        <p
+          className="rounded-md border border-ink-700 bg-surface-1 px-3 py-2 text-[11px] text-text-secondary"
+          data-testid="company-workers-ops-setup-note"
+        >
+          {labels.operations.setupNote}
+        </p>
+      ) : null}
 
       {!roleCoordinationEnabled ? (
         <div
