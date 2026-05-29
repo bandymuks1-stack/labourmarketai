@@ -1,0 +1,65 @@
+name: Quality Gates
+
+# First CI workflow for this repo. Until now CI was Vercel build/deploy +
+# Supabase preview only; there was no GitHub Actions quality pipeline.
+#
+# This runs the existing static quality gates — including the primary-route
+# smoke / dead-UI guard added in PR #136 — on every push to main and every PR,
+# so a dead link / placeholder leak / broken primary route is caught BEFORE it
+# reaches the Vercel production deploy.
+#
+# Deliberately secret-free: no env/secrets, no DB, no deploy. `next build` is
+# included because it is env-independent in this repo (it builds with no
+# secrets). Vercel remains the authoritative build + deploy.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -F web typecheck
+
+      - name: Lint
+        run: pnpm -F web lint
+
+      - name: Unit tests (vitest)
+        run: pnpm -F web test
+
+      - name: Placeholder governance check
+        run: pnpm placeholders:check
+
+      - name: Primary route smoke / dead-UI guard
+        run: pnpm check:primary-route-smoke
+
+      - name: Build (env-independent; Vercel remains deploy authority)
+        run: pnpm -F web build
