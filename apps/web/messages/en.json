@@ -339,6 +339,15 @@
               "location": "Location or country",
               "timing": "Start or duration"
             }
+          },
+          "timeline": {
+            "heading": "Activity",
+            "events": {
+              "request_created": "Request created",
+              "file_attached": "File added",
+              "automatic_reading_not_enabled": "Automatic reading not enabled",
+              "manual_review_pending": "Waiting for manual review"
+            }
           }
         }
       }

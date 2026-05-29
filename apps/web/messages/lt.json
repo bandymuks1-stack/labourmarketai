@@ -339,6 +339,15 @@
               "location": "Vieta arba šalis",
               "timing": "Pradžia arba trukmė"
             }
+          },
+          "timeline": {
+            "heading": "Eiga",
+            "events": {
+              "request_created": "Užklausa sukurta",
+              "file_attached": "Failas pridėtas",
+              "automatic_reading_not_enabled": "Automatinis nuskaitymas neįjungtas",
+              "manual_review_pending": "Laukiama rankinės peržiūros"
+            }
           }
         }
       }

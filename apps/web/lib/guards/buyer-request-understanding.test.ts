@@ -253,3 +253,48 @@ describe("Guard: buyer request completion checklist (PR E)", () => {
     });
   }
 });
+
+describe("Guard: buyer request derived timeline (PR G)", () => {
+  it("section computes + renders the derived timeline", () => {
+    const src = read("components/app/buyer-requests-section.tsx");
+    expect(src).toMatch(/from\s+["']@\/lib\/buyer\/request-timeline["']/);
+    expect(src).toMatch(/computeRequestTimeline\(/);
+    expect(src).toMatch(/data-testid=\{`buyer-request-timeline-\$\{r\.id\}`\}/);
+  });
+
+  it("timeline helper is pure (no server-only / IO / clock)", () => {
+    const src = read("lib/buyer/request-timeline.ts");
+    expect(src).not.toMatch(/import\s+["']server-only["']/);
+    expect(src).not.toMatch(/Date\.now|new Date\(|Math\.random|fetch\(|supabase/);
+  });
+
+  for (const locale of ["lt", "en"] as const) {
+    it(`${locale}.json timeline event keys present`, () => {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as Record<
+        string,
+        unknown
+      >;
+      const timeline = (
+        (
+          (
+            (json.roleDashboards as Record<string, unknown>).buyer as Record<
+              string,
+              unknown
+            >
+          ).requests as Record<string, unknown>
+        ).understanding as Record<string, unknown>
+      ).timeline as Record<string, unknown>;
+      expect(timeline, `${locale} timeline missing`).toBeTruthy();
+      expect(timeline.heading).toBeTruthy();
+      const events = timeline.events as Record<string, string>;
+      for (const k of [
+        "request_created",
+        "file_attached",
+        "automatic_reading_not_enabled",
+        "manual_review_pending",
+      ]) {
+        expect(events[k], `${locale} timeline.events.${k}`).toBeTruthy();
+      }
+    });
+  }
+});
