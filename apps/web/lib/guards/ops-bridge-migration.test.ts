@@ -96,7 +96,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // review_journal_entry + reviewable_journal_entry_ids RPCs), then to 34 on
     // the sales-core-nonstop-v1 unblock (migration 0035 backfills org-owner
     // engagements), then to 35 (migration 0036 adds the accept-worker-invitation
-    // link RPCs). The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 35/);
+    // link RPCs), then to 37 on the converge-single-product slice (two reversible
+    // owner-approved migrations: drop legacy threads/messages + projects
+    // organization_id FK move). The baseline only ever grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 37/);
   });
 });

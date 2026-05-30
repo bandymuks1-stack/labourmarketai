@@ -1207,7 +1207,16 @@ describe("no migration files added by this sprint", () => {
     // missing first step). Worker-scoped, idempotent, audit-logged; no fake
     // data, no destructive SQL, no RLS/grant change beyond EXECUTE on the two
     // functions. See accept-worker-invitation-rpc.test.ts.
-    const SPRINT_BASELINE = 35;
+    //
+    // Bumped from 35 → 37 on the converge-single-product slice: two reversible,
+    // owner-approved convergence migrations (timestamp-named per PLATFORM_DOCTRINE
+    // §16). 20260530120000_drop_legacy_threads_messages drops the unused legacy
+    // messaging tables (both asserted 0 rows; conversations* is canonical).
+    // 20260530120100_projects_company_to_organization adds projects.organization_id
+    // (FK organizations) + legacy-bridge backfill, KEEPING the nullable company_id
+    // column (non-destructive). See matching-ui-neutralized.test.ts and
+    // docs/CONVERGENCE_CHANGELOG.md.
+    const SPRINT_BASELINE = 37;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
