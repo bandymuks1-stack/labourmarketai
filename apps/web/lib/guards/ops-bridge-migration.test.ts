@@ -98,7 +98,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // engagements), then to 35 (migration 0036 adds the accept-worker-invitation
     // link RPCs), then to 37 on the converge-single-product slice (two reversible
     // owner-approved migrations: drop legacy threads/messages + projects
-    // organization_id FK move). The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 37/);
+    // organization_id FK move), then to 38 on the TASK 03 consolidation (one
+    // salvaged journal_integrity_guards migration). The baseline only ever grows
+    // deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 38/);
   });
 });
