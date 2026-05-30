@@ -13,6 +13,10 @@ import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
+// Authenticated cockpit — must never be served from a stale cache, or a logged-in
+// owner can see a pre-deploy render (e.g. missing the chain action CTAs).
+export const dynamic = "force-dynamic";
+
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
 type StageState = "done" | "current" | "todo";
@@ -158,14 +162,14 @@ export default async function DashboardOverviewPage({
     return (
       <div className="flex flex-col gap-7">
         {Header}
-        {StartingPoint}
 
-        {/* Reachable work-journal review chain entry points for the
-            company/agency workspace (invite worker / enable review / review
-            inbox) + pending invitation acceptance. Without these the chain was
-            unreachable from the company/agency dashboard. */}
+        {/* TOP priority — the real next actions for the chain
+            (invite worker / accept / enable review / review entries). Placed
+            first so a company/agency owner always lands on a visible CTA. */}
         <DashboardChainActions role={role} />
         <WorkerInvitationsCard />
+
+        {StartingPoint}
 
         <JourneyRail stages={stages} label={tf("company.eyebrow")} />
 
@@ -318,21 +322,18 @@ export default async function DashboardOverviewPage({
   return (
     <div className="flex flex-col gap-7">
       {Header}
+
+      {/* TOP priority — real chain next actions + pending invitation accept,
+          placed first so the next action is always visible. */}
+      <DashboardChainActions role={role} />
+      <WorkerInvitationsCard />
+
       {professionName && (
         <p className="-mt-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
           {professionName}
         </p>
       )}
       {StartingPoint}
-
-      {/* Reachable entry points for the work-journal review chain (role-aware).
-          Makes /dashboard/company|agency + /dashboard/inbox navigable from the
-          dashboard — they were not in the primary nav. */}
-      <DashboardChainActions role={role} />
-
-      {/* Pending worker invitations — the real Company/Agency → Worker link
-          step ("Priimti kvietimą"). Renders nothing when there are none. */}
-      <WorkerInvitationsCard />
 
       <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
 
