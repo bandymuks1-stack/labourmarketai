@@ -1244,7 +1244,8 @@
         "customer": "Pirkėjas",
         "freelancer": "Laisvai samdomas",
         "team_lead": "Komandos vadovas",
-        "service_provider": "Paslaugų teikėjas"
+        "service_provider": "Paslaugų teikėjas",
+        "admin": "Administratorius"
       },
       "subcopy": "Prisiregistruok su Google arba el. paštu ir slaptažodžiu. Vaidmenį pasirinksi kitame žingsnyje.",
       "google_label": "Tęsti su Google",
@@ -1541,7 +1542,13 @@
         "rolesIntro": "Šiandien galite pradėti kaip darbuotojas, bet tai neužrakina jūsų viename vaidmenyje. Vėliau galėsite pridėti įmonės, agentūros, kliento ar kitus darbo rinkos vaidmenis, kai jie bus paruošti.",
         "active_workspace": "Aktyvi erdvė",
         "preview_workspace": "Ruošiama",
-        "comingLater": "Bus galima vėliau"
+        "comingLater": "Bus galima vėliau",
+        "theme": {
+          "appearance": "Išvaizda",
+          "help": "Tema",
+          "toDark": "Tamsi",
+          "toLight": "Šviesi"
+        }
       },
       "comingSoon": {
         "greeting": "👋 Sveiki, {name}",

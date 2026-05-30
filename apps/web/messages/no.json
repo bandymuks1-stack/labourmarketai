@@ -203,7 +203,13 @@
       "account": {
         "email_label": "[EN] Email",
         "logout": "[EN] Sign out",
-        "roles_label": "[EN] My roles"
+        "roles_label": "[EN] My roles",
+        "theme": {
+          "appearance": "Appearance",
+          "help": "Theme",
+          "toDark": "Dark",
+          "toLight": "Light"
+        }
       },
       "comingSoon": {
         "body_main": "[EN] We're finishing the company / agency functionality right now.",
@@ -393,7 +399,8 @@
         "agency": "[EN] Agency",
         "company": "[EN] Company",
         "customer": "[EN] Customer",
-        "worker": "[EN] Worker"
+        "worker": "[EN] Worker",
+        "admin": "Administrator"
       },
       "signing": "[EN] Creating...",
       "subcopy": "[EN] Sign up with Google, or with your email and password. You'll pick your role next.",

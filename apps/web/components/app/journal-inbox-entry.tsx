@@ -241,7 +241,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         <p
           className={
             resultMessage.ok
-              ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-xs text-state-success"
+              ? "verified-pop rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-xs text-state-success"
               : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-xs text-state-warning"
           }
           role="status"

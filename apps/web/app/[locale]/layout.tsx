@@ -42,7 +42,18 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* No-flash theme bootstrap: apply the saved theme before paint so the
+            dark↔light token swap never flickers. Default is dark (:root). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;}}catch(e){}})();",
+          }}
+        />
+      </head>
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>

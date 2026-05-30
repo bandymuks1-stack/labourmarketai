@@ -2,12 +2,14 @@
 // color / radius / shadow / gradient that is not defined here.
 import { colors } from "./colors";
 import { gradients } from "./gradients";
+import { motion } from "./motion";
 import { radii } from "./radii";
 import { shadows } from "./shadows";
 import { typography } from "./typography";
 
 export { colors } from "./colors";
 export { gradients } from "./gradients";
+export { motion } from "./motion";
 export { typography } from "./typography";
 export { radii } from "./radii";
 export { shadows } from "./shadows";
@@ -15,6 +17,7 @@ export { shadows } from "./shadows";
 export const tokens = {
   colors,
   gradients,
+  motion,
   typography,
   radii,
   shadows,

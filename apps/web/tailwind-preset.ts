@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import { colors, gradients, radii, shadows, typography } from "./tokens";
+import { colors, gradients, motion, radii, shadows, typography } from "./tokens";
 
 /**
  * Brand token preset — the ONLY place tokens map into Tailwind.
@@ -38,6 +38,10 @@ const preset = {
         tightest: typography.letterSpacing.tightest,
         label: typography.letterSpacing.label,
       },
+      // Motion tokens → `duration-fast`, `ease-spring`, … (TASK 06). The single
+      // timing/easing source; resolves to the CSS vars in globals.css.
+      transitionDuration: { ...motion.duration },
+      transitionTimingFunction: { ...motion.easing },
       maxWidth: { container: "1440px" },
     },
   },

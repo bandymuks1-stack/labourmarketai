@@ -120,7 +120,7 @@ export function CvEngagementCards({
                           className={cn(
                             "rounded-full border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
                             s.verified
-                              ? "border-state-success/40 bg-state-success/10 text-state-success"
+                              ? "verified-pop border-state-success/40 bg-state-success/10 text-state-success"
                               : "border-ink-500 text-text-muted",
                           )}
                           data-testid={`skill-state-${s.slug}`}

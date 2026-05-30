@@ -3,14 +3,75 @@
 @tailwind utilities;
 
 /*
- * Industrial Intelligence — token→CSS bridge (brief §8). The literal values
- * here mirror tokens/*; components never use raw hex (they use preset classes).
+ * Industrial Intelligence — token→CSS bridge (brief §8 + TASK 06 theme layer).
+ * The semantic colours live here as RGB CHANNEL triplets ("R G B"); tokens/colors.ts
+ * resolves each to rgb(var(--c-*) / <alpha-value>). Swapping dark→light (or any
+ * rebrand) changes ONLY these variables — zero component edits. Dark = :root;
+ * light = [data-theme="light"]. The motion variables are the single source of
+ * timing/easing (tokens/motion.ts mirrors them for Tailwind).
  */
 :root {
-  --ink-900: #06070d;
-  --ink-800: #0b0d17;
-  --fg: #f4f6fb;
+  /* ink — surfaces (dark: near-black, cool tint) */
+  --c-ink-900: 6 7 13;
+  --c-ink-800: 11 13 23;
+  --c-ink-700: 16 19 31;
+  --c-ink-600: 26 30 46;
+  --c-ink-500: 37 42 61;
+  /* brand — signal accents */
+  --c-brand-blue: 62 139 255;
+  --c-brand-cyan: 0 194 255;
+  --c-brand-violet: 123 92 255;
+  --c-brand-purple: 181 123 255;
+  --c-brand-orange: 255 107 26;
+  /* state */
+  --c-state-live: 0 230 118;
+  --c-state-success: 52 211 153;
+  --c-state-warning: 255 184 69;
+  --c-state-amber: 255 165 82;
+  --c-state-danger: 255 92 92;
+  /* text */
+  --c-text-primary: 244 246 251;
+  --c-text-secondary: 155 163 184;
+  --c-text-muted: 110 120 146; /* lifted from #5C6480 for AA contrast on ink-900 */
+  /* tier — player-card ratings */
+  --c-tier-diamond: 91 224 255;
+  --c-tier-gold: 255 200 87;
+  --c-tier-silver: 198 205 216;
+  --c-tier-bronze: 199 137 90;
+
+  /* motion tokens (single source; mirrored in tokens/motion.ts) */
+  --motion-instant: 90ms;
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --motion-slow: 420ms;
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
   color-scheme: dark;
+}
+
+/* LIGHT THEME — slots ready; swap is a token change only (no component edits). */
+:root[data-theme="light"] {
+  --c-ink-900: 244 246 251; /* page bg → light */
+  --c-ink-800: 255 255 255; /* card bg → white */
+  --c-ink-700: 237 240 246;
+  --c-ink-600: 214 219 230; /* borders */
+  --c-ink-500: 188 196 212;
+  --c-brand-blue: 30 111 224;
+  --c-brand-cyan: 0 150 198;
+  --c-brand-violet: 106 69 240;
+  --c-brand-purple: 140 86 224;
+  --c-brand-orange: 224 84 8;
+  --c-state-live: 0 168 86;
+  --c-state-success: 17 132 90;
+  --c-state-warning: 168 104 0;
+  --c-state-amber: 190 100 16;
+  --c-state-danger: 200 44 44;
+  --c-text-primary: 11 13 23; /* near-black on light */
+  --c-text-secondary: 74 82 104;
+  --c-text-muted: 99 108 130;
+  --c-tier-gold: 176 122 0;
+  color-scheme: light;
 }
 
 html,
@@ -20,8 +81,8 @@ body {
 }
 
 body {
-  background: var(--ink-900);
-  color: var(--fg);
+  background: rgb(var(--c-ink-900));
+  color: rgb(var(--c-text-primary));
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -42,7 +103,7 @@ a {
    Components that already provide their own focus styles (e.g. Button) keep
    theirs because more-specific selectors win. */
 :focus-visible {
-  outline: 2px solid #3e8bff;
+  outline: 2px solid rgb(var(--c-brand-blue));
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -62,7 +123,7 @@ a {
     border-radius: 18px;
     border: 1px solid transparent;
     background:
-      linear-gradient(var(--ink-800), var(--ink-800)) padding-box,
+      linear-gradient(rgb(var(--c-ink-800)), rgb(var(--c-ink-800))) padding-box,
       linear-gradient(
           135deg,
           rgba(62, 139, 255, 0.4),
@@ -246,6 +307,55 @@ a {
   animation: live-pulse 2.8s ease-out infinite;
 }
 
+/* ── The verified "scored" moment ───────────────────────────────────────
+   A declared skill becoming a real verified Work Proof should feel earned —
+   a satisfying pop + glow, like a goal scored. Token-driven timing/easing;
+   colour from the state-success channel so it swaps with the theme. */
+@keyframes verified-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes verified-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--c-state-success) / 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgb(var(--c-state-success) / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--c-state-success) / 0);
+  }
+}
+.verified-pop {
+  animation:
+    verified-pop var(--motion-slow) var(--motion-ease-spring) both,
+    verified-glow 1.2s var(--motion-ease-out) var(--motion-instant);
+}
+
+/* Generic token-driven entrance for feed items / cards coming alive. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+.rise-in {
+  animation: rise-in var(--motion-base) var(--motion-ease-out) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   [data-decor],
@@ -255,7 +365,9 @@ a {
   .wow-card::after,
   .stage-line,
   .stage-current,
-  .signal-dot {
+  .signal-dot,
+  .verified-pop,
+  .rise-in {
     animation: none !important;
   }
 }
