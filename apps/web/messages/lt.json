@@ -1416,6 +1416,18 @@
         "search": "Ieškoti",
         "account": "Mano paskyra"
       },
+      "chainActions": {
+        "title": "Darbo žurnalo peržiūros grandinė",
+        "subtitle": "Pradėkite čia: pakvieskite darbuotoją, įjunkite peržiūrą ir peržiūrėkite jo įrašus.",
+        "inviteWorker": "Pakviesti darbuotoją",
+        "inviteWorkerDesc": "Susiekite darbuotoją su organizacija el. paštu.",
+        "enableReview": "Įjungti darbo žurnalo peržiūrą",
+        "enableReviewDesc": "Priskirkite rolę, sujunkite žurnalo kontekstą, įjunkite peržiūrą.",
+        "reviewEntries": "Peržiūrėti darbo įrašus",
+        "reviewEntriesDesc": "Patvirtinkite, atmeskite arba paprašykite pataisymų.",
+        "workJournal": "Darbo žurnalas",
+        "workJournalDesc": "Užregistruokite realų darbo žurnalo įrašą."
+      },
       "section": {
         "offer": {
           "title": "Ką siūlau"
