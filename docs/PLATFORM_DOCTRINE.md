@@ -267,26 +267,38 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 > **§17 Canonical demand intake (binding).** There is exactly ONE structured
 > demand model: **`customer_requests`** (+ `customers`, `customer_request_attachments`).
 > Any place a company / agency / buyer expresses a structured need or offer in
-> the product writes `customer_requests` — via the owner-scoped
-> `save_demand_draft` RPC for drafts (its INSERT RLS is admin-only by design) —
-> classified by `kind` (`company_request` / `agency_offer` / `buyer_request` /
+> the product writes `customer_requests` through an owner-scoped SECURITY DEFINER
+> RPC (its INSERT RLS is admin-only by design, so neither path loosens RLS nor
+> accepts a caller-supplied `profile_id`):
+> the **draft form** writes via `save_demand_draft` (`status='draft'`), and the
+> **pilot-request CTA** writes via `submit_demand_request` (`status='submitted'`).
+> Both stamp `kind` (`company_request` / `agency_offer` / `buyer_request` /
 > `customer_request`), with per-type extras in `payload` and the author's
 > `original_language` (§2). The lifecycle runs through `status`
-> (`draft → submitted → in_review → needs_followup → approved → closed`).
+> (`draft → submitted → in_review → needs_followup → approved → closed`). Any new
+> in-product demand surface routes to one of these RPCs — never a new table, never
+> `/api/leads`.
 >
 > **§17.1 No third demand path.** `pilot_drafts` was a parallel draft store; it
 > is **folded** into `customer_requests` (drafts = `status='draft'`) and no
 > longer written. Do not re-introduce a second structured-demand table or path.
 >
-> **§17.2 `leads` is a DISTINCT pre-auth funnel — intentionally kept, NOT a
-> demand path.** `leads` (`/api/leads`) captures top-of-funnel interest:
-> anonymous-style email + intent + source (e.g. the "request a pilot
-> conversation" CTA, waitlist), with **no `profile_id` and no structured need**.
-> It is a marketing/founder-review funnel that precedes a real authenticated
-> request — fundamentally different from `customer_requests`. It is kept on
-> purpose and must not be merged into, or treated as, the canonical demand
-> intake. Retire `/api/leads` only if a real CRM replaces the funnel — never as
-> "demand consolidation".
+> **§17.2 `leads` is a DISTINCT anonymous pre-auth funnel — intentionally kept,
+> NOT a demand path.** `leads` (`/api/leads`) captures top-of-funnel interest:
+> **anonymous** email + intent + source (a landing/waitlist "request a pilot
+> conversation" capture), with **no `profile_id` and no structured need**. It is a
+> marketing/founder-review funnel that precedes a real authenticated request —
+> fundamentally different in shape from `customer_requests`, and kept on purpose.
+> It must not be merged into, or treated as, the canonical demand intake.
+>
+> **The line that matters:** *anonymous email capture* belongs in `leads`; *an
+> authenticated structured need* belongs in `customer_requests`. The dashboard
+> pilot-request CTA was previously POSTing an **authenticated** company's need to
+> `/api/leads` — that was a second demand front door, now corrected: it submits a
+> `customer_request` via `submit_demand_request` (Slice 3.1). As a result
+> `/api/leads` currently has **no in-product caller** — it is retained, dormant,
+> as the funnel for a future genuinely-anonymous landing/waitlist CTA. Retire it
+> only if a real CRM replaces the funnel — never as "demand consolidation".
 
 ---
 
@@ -298,6 +310,7 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 | 2026-05-21 | §2.4, §2.5, §10 | Add §2.4 Locale set (binding, 10-locale canonical set; existing "Why this matters" renumbered §2.5). Promote §10 Lego architecture (slug→JSON for all extensible taxonomy) from v1.1 pending to active. (PR #8 architect review B4/B6.) | DI + Architect (Chat Claude) |
 | 2026-05-21 | §5, §7.1, §15 | Amend §5 to the four-layer person→world model (personhood / RBAC / profession+skill / positions / engagement contexts). Insert §7.1 (AI as translator, not author). Add §15 (skill trust signals & productivity). Bundled with the M1 Work Journal implementation (TASK-M1-WORK-JOURNAL). | DI + Architect (Chat Claude) |
 | 2026-05-30 | §16 | Add §16 Migration naming convention (forward-only `YYYYMMDDHHMMSS_snake_case.sql`; never rename applied `000N` migrations; ordering preserved; reversibility restated). Bundled with the single-product convergence PR (`feat/cc/converge-single-product`). | DI + Claude Code |
+| 2026-05-30 | §17 | Add §17 Canonical demand intake (one model: `customer_requests`; draft via `save_demand_draft`, submit via `submit_demand_request`; `pilot_drafts` folded §17.1; `leads` kept as a distinct anonymous pre-auth funnel §17.2). The authenticated dashboard pilot-request CTA was repointed off `/api/leads` onto the canonical intake. Phase 3 / Slice 3.1 — 🟡 migration queued for the gate. | DI + Claude Code |
 
 ---
 

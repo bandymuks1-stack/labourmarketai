@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// Inserts into `leads` via the service-role client (RLS-bypassing) — the
-// ONLY real DB write on public M0 pages (brief §10.4). Always returns JSON;
-// never throws to the client. Degrades gracefully when the service key is
-// not configured yet (preview before the founder sets Vercel env).
+// Anonymous pre-auth funnel — inserts into `leads` via the service-role client
+// (RLS-bypassing) for a landing/waitlist email capture (brief §10.4). This is
+// DELIBERATELY NOT the demand intake: an authenticated structured need goes to
+// `customer_requests` via submit_demand_request (PLATFORM_DOCTRINE §17.2). Since
+// the dashboard pilot-request CTA was repointed onto the canonical intake
+// (Slice 3.1), this endpoint is currently dormant — kept for a future genuinely
+// anonymous landing CTA. Always returns JSON; never throws to the client.
+// Degrades gracefully when the service key is not configured yet.
 export const runtime = "nodejs";
 
 const Schema = z.object({
