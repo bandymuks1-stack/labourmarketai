@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useActionState, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { confirmEntry, rejectEntry } from "@/lib/journal/confirm-actions";
+import {
+  reviewJournalEntry,
+  type ReviewActionState,
+} from "@/lib/journal/review-actions";
 
 export type InboxEntry = {
   id: string;
@@ -16,27 +18,51 @@ export type InboxEntry = {
   skills: string[];
 };
 
-function PendingButton({
-  children,
-  variant = "primary",
-}: {
-  children: React.ReactNode;
-  variant?: "primary" | "secondary";
-}) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" size="sm" variant={variant} disabled={pending}>
-      {children}
-    </Button>
-  );
-}
-
-/** One pending entry in the manager confirm inbox (§13.2). Confirm is a single
- *  click; reject reveals a reason field. */
+/**
+ * One reviewable entry in the manager inbox (slice
+ * manager-review-evidence-result-v1). The manager records a real evidence
+ * result — approve / reject / request changes — through the gated
+ * `reviewJournalEntry` action (→ migration 0034 RPC). Reject and request-changes
+ * reveal a note field. No fake approve/reject: the RPC re-checks manager scope +
+ * journal_review_enabled and persists the decision.
+ */
 export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
   const t = useTranslations("journal");
   const locale = useLocale();
-  const [rejecting, setRejecting] = useState(false);
+  const [mode, setMode] = useState<"idle" | "rejected" | "changes_requested">(
+    "idle",
+  );
+  const [state, formAction, isPending] = useActionState<
+    ReviewActionState | null,
+    FormData
+  >(reviewJournalEntry, null);
+
+  const resultMessage: { text: string; ok: boolean } | null = (() => {
+    if (!state) return null;
+    if (state.ok) {
+      const key =
+        state.decision === "approved"
+          ? "result.approved"
+          : state.decision === "rejected"
+            ? "result.rejected"
+            : "result.changesRequested";
+      return { text: t(`inbox.${key}`), ok: true };
+    }
+    switch (state.code) {
+      case "review_not_enabled":
+        return { text: t("inbox.result.reviewNotEnabled"), ok: false };
+      case "not_authorized":
+        return { text: t("inbox.result.notAuthorized"), ok: false };
+      case "no_reviewer_engagement":
+        return { text: t("inbox.result.notAuthorized"), ok: false };
+      case "needs_migration":
+        return { text: t("inbox.result.needsMigration"), ok: false };
+      default:
+        return { text: t("inbox.result.error"), ok: false };
+    }
+  })();
+
+  const reviewed = state?.ok === true;
 
   return (
     <li className="card-border flex flex-col gap-3 p-4">
@@ -79,40 +105,88 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         </div>
       )}
 
-      {!rejecting ? (
-        <div className="flex items-center gap-2">
-          <form action={confirmEntry}>
+      {!reviewed && mode === "idle" ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Approve — single click, no note. */}
+          <form action={formAction}>
             <input type="hidden" name="entry_id" value={entry.id} />
+            <input type="hidden" name="decision" value="approved" />
             <input type="hidden" name="locale" value={locale} />
-            <PendingButton>{t("inbox.confirm")}</PendingButton>
+            <Button
+              type="submit"
+              size="sm"
+              variant="primary"
+              disabled={isPending}
+              data-testid={`journal-review-approve-${entry.id}`}
+            >
+              {t("inbox.approve")}
+            </Button>
           </form>
           <Button
             type="button"
             size="sm"
+            variant="secondary"
+            onClick={() => setMode("changes_requested")}
+            data-testid={`journal-review-request-changes-${entry.id}`}
+          >
+            {t("inbox.requestChanges")}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
             variant="ghost"
-            onClick={() => setRejecting(true)}
+            onClick={() => setMode("rejected")}
+            data-testid={`journal-review-reject-${entry.id}`}
           >
             {t("inbox.reject")}
           </Button>
         </div>
-      ) : (
-        <form action={rejectEntry} className="flex flex-col gap-2">
+      ) : null}
+
+      {!reviewed && mode !== "idle" ? (
+        <form action={formAction} className="flex flex-col gap-2">
           <input type="hidden" name="entry_id" value={entry.id} />
+          <input type="hidden" name="decision" value={mode} />
           <input type="hidden" name="locale" value={locale} />
-          <Input name="reason" placeholder={t("inbox.rejectReason")} required />
+          <Input
+            name="note"
+            placeholder={
+              mode === "rejected"
+                ? t("inbox.rejectReason")
+                : t("inbox.changesNote")
+            }
+            required
+            data-testid={`journal-review-note-${entry.id}`}
+          />
           <div className="flex items-center gap-2">
-            <PendingButton variant="secondary">{t("inbox.reject")}</PendingButton>
+            <Button type="submit" size="sm" variant="secondary" disabled={isPending}>
+              {mode === "rejected" ? t("inbox.reject") : t("inbox.requestChanges")}
+            </Button>
             <Button
               type="button"
               size="sm"
               variant="ghost"
-              onClick={() => setRejecting(false)}
+              onClick={() => setMode("idle")}
             >
               {t("inbox.cancel")}
             </Button>
           </div>
         </form>
-      )}
+      ) : null}
+
+      {resultMessage ? (
+        <p
+          className={
+            resultMessage.ok
+              ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-xs text-state-success"
+              : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-xs text-state-warning"
+          }
+          role="status"
+          data-testid={`journal-review-result-${entry.id}`}
+        >
+          {resultMessage.text}
+        </p>
+      ) : null}
     </li>
   );
 }

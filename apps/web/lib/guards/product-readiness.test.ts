@@ -1182,7 +1182,16 @@ describe("no migration files added by this sprint", () => {
     // idempotent, audit-logged, no fake data, only the journal_review_enabled
     // flag on the link tables is mutated. No table/RLS/grant change beyond
     // EXECUTE on the four functions. See journal-review-enable-rpc.test.ts.
-    const SPRINT_BASELINE = 32;
+    //
+    // Bumped from 32 → 33 on the manager-review-evidence-result-v1 slice:
+    // migration 0034 adds TWO SECURITY DEFINER functions — review_journal_entry
+    // (the manager/admin + journal_review_enabled-gated evidence write, three
+    // decisions approved/rejected/changes_requested, append-only into
+    // journal_entry_confirmations + audit_logs) and reviewable_journal_entry_ids
+    // (the gated pending set). Functions only: reviewer scope re-validated,
+    // append-only, no fake data. No table/RLS/grant change beyond EXECUTE on the
+    // two functions. See manager-review-rpc.test.ts.
+    const SPRINT_BASELINE = 33;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

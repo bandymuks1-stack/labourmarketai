@@ -6,6 +6,10 @@ import {
 } from "@/components/app/journal-entry-composer";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
 import { formatDuration } from "@/lib/journal/format-duration";
+import {
+  deriveReviewResult,
+  type ReviewResult,
+} from "@/lib/journal/review-status";
 import { createClient } from "@/lib/supabase/server";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
@@ -18,22 +22,14 @@ const WORKER_RELATIONSHIPS = [
   "collaborator",
 ];
 
-type EntryStatus = "submitted" | "confirmed" | "rejected";
-
-function statusOf(
-  confirmations: { confirmation_scope: unknown }[] | null,
-): EntryStatus {
-  if (!confirmations || confirmations.length === 0) return "submitted";
-  const rejected = confirmations.some(
-    (c) => (c.confirmation_scope as { action?: string } | null)?.action === "reject",
-  );
-  return rejected ? "rejected" : "confirmed";
-}
-
-const STATUS_CLASS: Record<EntryStatus, string> = {
+// Worker-facing review/evidence result per entry (slice
+// manager-review-evidence-result-v1). Derived purely from the append-only
+// evidence rows; latest decision wins.
+const STATUS_CLASS: Record<ReviewResult, string> = {
   submitted: "text-state-warning",
-  confirmed: "text-state-success",
+  approved: "text-state-success",
   rejected: "text-state-error",
+  changes_requested: "text-brand-blue",
 };
 
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
@@ -182,7 +178,9 @@ export default async function JournalPage({
           unit_slug: string | null;
         }[]
       | null;
-    journal_entry_confirmations: { confirmation_scope: unknown }[] | null;
+    journal_entry_confirmations:
+      | { confirmation_scope: unknown; created_at?: string | null }[]
+      | null;
   };
   let entries: JournalEntryRow[] | null = null;
   // Cast the supabase client through `any` for the v3 select — the
@@ -193,7 +191,7 @@ export default async function JournalPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const v3 = await (supabase.from("journal_entries") as any)
     .select(
-      "id, original_text, created_at, deleted_at, superseded_by, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope)",
+      "id, original_text, created_at, deleted_at, superseded_by, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at)",
     )
     .eq("worker_id", worker.id)
     .order("created_at", { ascending: false });
@@ -201,7 +199,7 @@ export default async function JournalPage({
     const legacy = await supabase
       .from("journal_entries")
       .select(
-        "id, original_text, created_at, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope)",
+        "id, original_text, created_at, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at)",
       )
       .eq("worker_id", worker.id)
       .order("created_at", { ascending: false });
@@ -295,7 +293,7 @@ export default async function JournalPage({
         ) : (
           <ul className="flex flex-col gap-3">
             {(entries ?? []).map((e) => {
-              const status = statusOf(e.journal_entry_confirmations);
+              const status = deriveReviewResult(e.journal_entry_confirmations);
               const metrics = e.journal_entry_metrics ?? [];
               const area =
                 metrics.find((m) => m.metric_slug === "quantity") ??
