@@ -2215,5 +2215,20 @@
     "notFound": "This page does not exist",
     "backHome": "Back to home",
     "skipToContent": "Skip to content"
+  },
+  "workerInvitations": {
+    "title": "Pending invitations",
+    "body": "A company or agency invited you to link as a worker. Accept to connect — your work journal can then be reviewed by them.",
+    "companyLabel": "Company",
+    "agencyLabel": "Agency",
+    "accept": "Accept",
+    "accepting": "Accepting…",
+    "noteLabel": "Note",
+    "outcomeLinked": "Linked. You are now connected.",
+    "outcomeAlreadyLinked": "You are already linked.",
+    "outcomeNoInvitation": "Invitation not found.",
+    "outcomeNoWorker": "Your worker profile is not ready yet.",
+    "outcomeError": "Could not accept. Please try again.",
+    "outcomeNeedsMigration": "Not ready yet."
   }
 }

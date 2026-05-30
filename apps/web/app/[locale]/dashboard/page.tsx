@@ -5,6 +5,7 @@ import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-pan
 import { PilotReadinessCard } from "@/components/app/pilot-readiness-card";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
+import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
 import { getVisibleRoleOptions } from "@/lib/config/roles";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -315,6 +316,10 @@ export default async function DashboardOverviewPage({
         </p>
       )}
       {StartingPoint}
+
+      {/* Pending worker invitations — the real Company/Agency → Worker link
+          step. Renders nothing when there are none (no placeholder). */}
+      <WorkerInvitationsCard />
 
       <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
 

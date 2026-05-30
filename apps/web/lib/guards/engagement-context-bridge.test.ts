@@ -155,17 +155,17 @@ describe("bridge reason copy is present and carries no fake claims", () => {
 // ── 5. No migration added by this slice ─────────────────────────────────
 
 describe("engagement-bridge readiness helper stays pure + migration scope is bounded", () => {
-  it("the engagement/review slices add exactly 0033 + 0034 + 0035 (and nothing beyond yet)", () => {
+  it("the engagement/review slices add exactly 0033–0036 (and nothing beyond yet)", () => {
     const dir = resolve(REPO, "supabase", "migrations");
     const files = readdirSync(dir).filter((f) => f.endsWith(".sql"));
-    // Provisioning RPCs are 0032; journal-review-enable-toggle-v1 ships 0033;
-    // manager-review-evidence-result-v1 ships 0034; the sales-core unblock ships
-    // 0035 (org-owner engagement backfill + trigger, own SQL guard:
-    // owner-engagement-backfill-rpc.test.ts). Nothing ≥ 0036 is expected here.
+    // 0033 journal-review-enable; 0034 manager-review; 0035 org-owner backfill;
+    // 0036 accept-worker-invitation (the Company/Agency→Worker link path, own
+    // SQL guard: accept-worker-invitation-rpc.test.ts). Nothing ≥ 0037 yet.
     expect(files.some((f) => /^0033_/.test(f))).toBe(true);
     expect(files.some((f) => /^0034_/.test(f))).toBe(true);
     expect(files.some((f) => /^0035_/.test(f))).toBe(true);
-    expect(files.some((f) => /^003[6-9]/.test(f))).toBe(false);
+    expect(files.some((f) => /^0036_/.test(f))).toBe(true);
+    expect(files.some((f) => /^003[7-9]/.test(f))).toBe(false);
   });
 
   it("the engagement-bridge helper is pure (no server-only / external imports)", () => {

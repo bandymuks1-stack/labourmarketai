@@ -2218,5 +2218,20 @@
     "notFound": "Tokio puslapio nėra",
     "backHome": "Grįžti į pradžią",
     "skipToContent": "Pereiti į turinį"
+  },
+  "workerInvitations": {
+    "title": "Laukiantys pakvietimai",
+    "body": "Įmonė arba agentūra pakvietė jus prisijungti kaip darbuotoją. Priimkite, kad būtumėte sujungti — tada jūsų darbo žurnalą galės peržiūrėti.",
+    "companyLabel": "Įmonė",
+    "agencyLabel": "Agentūra",
+    "accept": "Priimti",
+    "accepting": "Priimama…",
+    "noteLabel": "Pastaba",
+    "outcomeLinked": "Sujungta. Dabar esate prijungti.",
+    "outcomeAlreadyLinked": "Jau esate sujungti.",
+    "outcomeNoInvitation": "Pakvietimas nerastas.",
+    "outcomeNoWorker": "Jūsų darbuotojo profilis dar neparuoštas.",
+    "outcomeError": "Nepavyko priimti. Bandykite dar kartą.",
+    "outcomeNeedsMigration": "Dar neparuošta."
   }
 }
