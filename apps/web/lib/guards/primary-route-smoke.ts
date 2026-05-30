@@ -75,6 +75,7 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   { id: "buyer-dashboard", urlPattern: "/dashboard/buyer", sourceFile: "app/[locale]/dashboard/buyer/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "profile", urlPattern: "/dashboard/profile", sourceFile: "app/[locale]/dashboard/profile/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "journal", urlPattern: "/dashboard/journal", sourceFile: "app/[locale]/dashboard/journal/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "inbox", urlPattern: "/dashboard/inbox", sourceFile: "app/[locale]/dashboard/inbox/page.tsx", requiresAuth: true, kind: "role-flow" },
 ];
 
 /** A single guard finding. `severity: "block"` fails the test + CI gate. */

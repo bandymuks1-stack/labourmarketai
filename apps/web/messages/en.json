@@ -1413,6 +1413,18 @@
         "search": "Search",
         "account": "My account"
       },
+      "chainActions": {
+        "title": "Work-journal review chain",
+        "subtitle": "Start here: invite a worker, enable review, and review their entries.",
+        "inviteWorker": "Invite a worker",
+        "inviteWorkerDesc": "Link a worker to your organisation by email.",
+        "enableReview": "Enable work-journal review",
+        "enableReviewDesc": "Assign a role, connect the journal context, turn review on.",
+        "reviewEntries": "Review work entries",
+        "reviewEntriesDesc": "Approve, reject, or request changes on submitted entries.",
+        "workJournal": "Work journal",
+        "workJournalDesc": "Log a real work-journal entry."
+      },
       "section": {
         "offer": {
           "title": "What I offer"

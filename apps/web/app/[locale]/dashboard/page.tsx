@@ -6,6 +6,7 @@ import { PilotReadinessCard } from "@/components/app/pilot-readiness-card";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
+import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { getVisibleRoleOptions } from "@/lib/config/roles";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -317,8 +318,13 @@ export default async function DashboardOverviewPage({
       )}
       {StartingPoint}
 
+      {/* Reachable entry points for the work-journal review chain (role-aware).
+          Makes /dashboard/company|agency + /dashboard/inbox navigable from the
+          dashboard — they were not in the primary nav. */}
+      <DashboardChainActions role={role} />
+
       {/* Pending worker invitations — the real Company/Agency → Worker link
-          step. Renders nothing when there are none (no placeholder). */}
+          step ("Priimti kvietimą"). Renders nothing when there are none. */}
       <WorkerInvitationsCard />
 
       <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
