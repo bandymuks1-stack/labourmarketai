@@ -160,6 +160,13 @@ export default async function DashboardOverviewPage({
         {Header}
         {StartingPoint}
 
+        {/* Reachable work-journal review chain entry points for the
+            company/agency workspace (invite worker / enable review / review
+            inbox) + pending invitation acceptance. Without these the chain was
+            unreachable from the company/agency dashboard. */}
+        <DashboardChainActions role={role} />
+        <WorkerInvitationsCard />
+
         <JourneyRail stages={stages} label={tf("company.eyebrow")} />
 
         {/* Cinematic cockpit panel */}

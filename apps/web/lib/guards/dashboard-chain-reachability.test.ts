@@ -16,12 +16,16 @@ function read(rel: string): string {
 }
 
 describe("dashboard surfaces the chain entry points", () => {
-  it("the dashboard page mounts <DashboardChainActions />", () => {
+  it("the dashboard page mounts <DashboardChainActions /> in BOTH render branches", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    expect(page).toMatch(/<DashboardChainActions\b/);
     expect(page).toMatch(
       /from\s+["']@\/components\/app\/dashboard-chain-actions["']/,
     );
+    // The dashboard has TWO return branches: company/agency (role !== "worker")
+    // and worker. The chain actions + accept card must render in BOTH, or the
+    // company/agency user (who hits the first branch) sees no invite/accept.
+    expect((page.match(/<DashboardChainActions\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    expect((page.match(/<WorkerInvitationsCard\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 
   it("the chain-actions card links to all real chain surfaces (real Links, no placeholder)", () => {
