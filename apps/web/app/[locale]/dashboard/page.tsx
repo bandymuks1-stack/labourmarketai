@@ -208,7 +208,9 @@ export default async function DashboardOverviewPage({
             ))}
           </ol>
 
-          {/* Terminal action — the live, real path (posts to /api/leads) */}
+          {/* Terminal action — the live, real path: submits a canonical
+              customer_request (status='submitted') via submit_demand_request.
+              The single demand front door (§17), not the leads pre-auth funnel. */}
           <div className="flex flex-col gap-1 border-t border-ink-600 pt-5">
             <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
               {tf("company.c4")}

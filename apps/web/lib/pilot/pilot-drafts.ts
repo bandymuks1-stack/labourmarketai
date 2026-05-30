@@ -1,18 +1,18 @@
 /**
- * Owner-only pilot draft persistence (migration 0016).
+ * Structured-demand draft persistence — now on the CANONICAL intake
+ * `customer_requests` (Phase 3 / Slice 3.1 fold). The "express your need/offer"
+ * form is the single demand front door; this module keeps its old
+ * getPilotDraft / savePilotDraft API but writes/reads `customer_requests`
+ * (status='draft', kind=<draft_type>, payload=<per-type fields>) instead of the
+ * retired `pilot_drafts` path. `leads` is a separate pre-auth funnel, not this.
  *
- * One row per (profile_id, draft_type). The UI surfaces one form per
- * draft type and upserts the row on save. Reads use the user-scoped
- * supabase client; RLS scopes rows to `profile_id = auth.uid()` (or
- * `is_admin()` for the admin panel's read-only metrics).
+ * Writes go through the `save_demand_draft` SECURITY DEFINER RPC because
+ * customer_requests INSERT RLS is admin-only; reads are owner-scoped by RLS
+ * (profile_id = auth.uid(), or is_admin() for the admin metrics).
  *
- * Payload is a per-type discriminated union, validated at the action
- * boundary BEFORE write so the DB never holds keys the UI doesn't
- * understand. Unknown keys are dropped silently — defence in depth.
- *
- * Type note: the table is added in 0016; the generated `Database`
- * type does not yet know about it (we'd need `pnpm db:types` after
- * apply). Same boundary-cast pattern as `lib/profile/profile-skill-claims.ts`.
+ * Type note: the new columns (kind/payload/original_language) + the RPC are not
+ * in the generated `Database` type until `pnpm db:types` runs post-apply — same
+ * boundary-cast pattern this file already used for the (now folded) table.
  */
 import "server-only";
 import { revalidatePath } from "next/cache";
@@ -104,15 +104,32 @@ const ALLOWED_KEYS: Record<DraftType, ReadonlySet<string>> = {
   ]),
 };
 
-function table(supabase: SupabaseClient) {
-  // The generated Database type does not yet know about pilot_drafts
-  // (migration 0016 — owner applies post-merge). Cast at the boundary;
-  // this file is the only place that needs the escape hatch.
-  return (
-    supabase as unknown as {
-      from: (name: string) => ReturnType<SupabaseClient["from"]>;
-    }
-  ).from("pilot_drafts");
+// customer_requests is in the generated types, but the new demand columns
+// (kind / payload / original_language) + the save_demand_draft RPC are not until
+// `pnpm db:types` runs post-apply. Cast at the boundary; this file is the only
+// place that needs the escape hatch.
+type DemandClient = {
+  from: (name: string) => ReturnType<SupabaseClient["from"]>;
+  rpc: (
+    name: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+};
+function cr(supabase: SupabaseClient) {
+  return (supabase as unknown as DemandClient).from("customer_requests");
+}
+function rowToDraft(r: unknown): PilotDraftRow | null {
+  if (r === null || typeof r !== "object") return null;
+  const row = r as Record<string, unknown>;
+  return {
+    id: row.id as string,
+    profile_id: row.profile_id as string,
+    draft_type: row.kind as DraftType,
+    payload: (row.payload ?? {}) as PilotDraftPayload,
+    visibility: "closed",
+    created_at: row.created_at as string,
+    updated_at: row.updated_at as string,
+  };
 }
 
 function sanitize<T extends PilotDraftPayload>(
@@ -133,7 +150,8 @@ function sanitize<T extends PilotDraftPayload>(
   return out as T;
 }
 
-/** Read the signed-in user's pilot draft of the given type, or null. */
+/** Read the signed-in user's structured-demand draft of the given type, or
+ *  null. Backed by customer_requests (status='draft', kind=type). */
 export async function getPilotDraft(
   type: DraftType,
 ): Promise<PilotDraftRow | null> {
@@ -143,23 +161,23 @@ export async function getPilotDraft(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data, error } = await table(supabase)
-    .select(
-      "id, profile_id, draft_type, payload, visibility, created_at, updated_at",
-    )
+  const { data, error } = await cr(supabase)
+    .select("id, profile_id, kind, payload, created_at, updated_at")
     .eq("profile_id", user.id)
-    .eq("draft_type", type)
+    .eq("kind", type)
+    .eq("status", "draft")
     .maybeSingle();
 
   if (error) {
-    console.error("[pilot-drafts] get failed:", error.message);
+    console.error("[demand-draft] get failed:", error.message);
     return null;
   }
-  return (data ?? null) as unknown as PilotDraftRow | null;
+  return rowToDraft(data);
 }
 
-/** Upsert the user's pilot draft of the given type. The UNIQUE
- *  constraint on (profile_id, draft_type) makes the upsert idempotent. */
+/** Upsert the user's structured-demand draft of the given type onto the
+ *  canonical intake via the owner-scoped save_demand_draft RPC (one draft per
+ *  profile+kind enforced by a partial unique index). */
 export async function savePilotDraft(
   type: DraftType,
   rawPayload: unknown,
@@ -171,18 +189,23 @@ export async function savePilotDraft(
   if (!user) throw new Error("Not authenticated");
 
   const payload = sanitize(type, rawPayload);
-  const { error } = await table(supabase).upsert(
+  const title =
+    typeof (payload as { title?: unknown }).title === "string"
+      ? ((payload as { title?: string }).title ?? null)
+      : null;
+
+  const { error } = await (supabase as unknown as DemandClient).rpc(
+    "save_demand_draft",
     {
-      profile_id: user.id,
-      draft_type: type,
-      payload,
-      // visibility / created_at / updated_at take their defaults.
+      p_kind: type,
+      p_title: title,
+      p_payload: payload,
+      p_original_language: "lt",
     },
-    { onConflict: "profile_id,draft_type", ignoreDuplicates: false },
   );
 
   if (error) {
-    console.error("[pilot-drafts] save failed:", error.message);
+    console.error("[demand-draft] save failed:", error.message);
     throw new Error(`save failed: ${error.message}`);
   }
 
@@ -190,7 +213,9 @@ export async function savePilotDraft(
   return getPilotDraft(type);
 }
 
-/** Delete the user's pilot draft of the given type. Owner-only via RLS. */
+/** "Remove" the user's draft of the given type. customer_requests DELETE is
+ *  admin-only RLS; an owner closes their own draft (owner UPDATE is allowed),
+ *  which honestly takes it out of the draft form. */
 export async function deletePilotDraft(type: DraftType): Promise<void> {
   const supabase = await createClient();
   const {
@@ -198,52 +223,50 @@ export async function deletePilotDraft(type: DraftType): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const { error } = await table(supabase)
-    .delete()
+  const { error } = await cr(supabase)
+    .update({ status: "closed" })
     .eq("profile_id", user.id)
-    .eq("draft_type", type);
+    .eq("kind", type)
+    .eq("status", "draft");
 
   if (error) {
-    console.error("[pilot-drafts] delete failed:", error.message);
+    console.error("[demand-draft] delete failed:", error.message);
     throw new Error(`delete failed: ${error.message}`);
   }
   revalidatePath("/", "layout");
 }
 
-/** Admin-only: aggregate counts per draft_type. Falls back to {} for
- *  non-admins (RLS prevents the broad read). The admin panel calls
- *  this AFTER its own requireSuperadmin check, but the function is
- *  defence-in-depth: a non-admin call simply returns empty counts. */
+/** Admin-only: aggregate draft counts per kind (read-only metrics). Non-admins
+ *  get empty counts (RLS scopes the read). */
 export async function getPilotDraftCounts(): Promise<
   Record<DraftType, number>
 > {
   const supabase = await createClient();
-  const { data, error } = await table(supabase).select("draft_type");
+  const { data, error } = await cr(supabase).select("kind").eq("status", "draft");
   const counts: Record<DraftType, number> = {
     company_request: 0,
     agency_offer: 0,
     buyer_request: 0,
   };
   if (error || !data) return counts;
-  for (const row of data as { draft_type: DraftType }[]) {
-    if (row.draft_type in counts) counts[row.draft_type]++;
+  for (const row of data as { kind: DraftType }[]) {
+    if (row.kind in counts) counts[row.kind]++;
   }
   return counts;
 }
 
-/** Admin-only: list pilot drafts for a single profile (used by the
- *  per-user inspect view). Uses the user-scoped client; admin RLS
- *  allows the broader read via is_admin(). */
+/** Admin-only: list a profile's structured-demand drafts (per-user inspect). */
 export async function listPilotDraftsForProfile(
   profileId: string,
 ): Promise<PilotDraftRow[]> {
   const supabase = await createClient();
-  const { data, error } = await table(supabase)
-    .select(
-      "id, profile_id, draft_type, payload, visibility, created_at, updated_at",
-    )
+  const { data, error } = await cr(supabase)
+    .select("id, profile_id, kind, payload, created_at, updated_at")
     .eq("profile_id", profileId)
-    .order("draft_type");
+    .eq("status", "draft")
+    .order("kind");
   if (error) return [];
-  return (data ?? []) as unknown as PilotDraftRow[];
+  return (data ?? [])
+    .map(rowToDraft)
+    .filter((x): x is PilotDraftRow => x !== null);
 }

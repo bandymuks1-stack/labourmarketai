@@ -23,6 +23,31 @@ PR #152). Full record: `docs/CONVERGENCE_CHANGELOG.md`.
     UI must reassign/remove projects first and surface an honest error — never a
     silent failure.
 
+## Demand intake — canonical (Phase 3 / Slice 3.1)
+
+Decision recorded in **PLATFORM_DOCTRINE §17**. The one structured-demand intake
+is `customer_requests`. Both in-product demand surfaces write it through
+owner-scoped RPCs: the "express your need/offer" **draft form** via
+`save_demand_draft` (`status='draft'`), and the dashboard **pilot-request CTA**
+via `submit_demand_request` (`status='submitted'`) — the latter **repointed off
+`/api/leads`**, which was a second demand front door. Migration
+`20260530150000_demand_intake_consolidation` (additive: `kind`/`payload`/
+`original_language` + draft index + `save_demand_draft` + `submit_demand_request`)
+— **queued for the gate, not applied** (TASK 05 / PR #161).
+
+- [x] **`leads` — DECIDED: KEEP as a distinct anonymous pre-auth funnel** (landing/
+  waitlist email + intent, no `profile_id`; `/api/leads`). NOT a demand path; not
+  merged into `customer_requests`. The authenticated pilot-request CTA no longer
+  feeds it, so it is now **dormant** (no in-product caller) — retained for a future
+  genuinely-anonymous landing CTA, retired only if a real CRM replaces it. See §17.2.
+- [ ] **Retire `pilot_drafts` table** — now folded (no code reads/writes it; 0
+  rows). Drop it in a later slice once the demand migration is applied and a
+  cycle confirms nothing references it. Destructive → RED, gated. (Same pattern
+  as the legacy `threads`/`messages` retire.)
+- [ ] **Translate-on-read for demand author content** — `original_language` is
+  now stored (§2); the viewer-language translation layer is a later cross-cutting
+  slice (infra is day-1; not built here).
+
 ## Captured from retired branches (TASK 03 consolidation cleanup)
 
 The branch consolidation (`docs/BRANCH_CONSOLIDATION_AUDIT.md`, PR #155) retired

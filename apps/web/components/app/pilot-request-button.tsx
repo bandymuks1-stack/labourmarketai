@@ -3,37 +3,30 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { useAuth } from "@/lib/auth/context";
+import { submitPilotRequestAction } from "@/lib/pilot/pilot-request-actions";
 
-/** Honest pilot-request CTA. Posts the signed-in user's email to the EXISTING
- *  /api/leads endpoint (real lead row — no new schema, no fake state). Used on
- *  the company/agency/customer activity-start surface so the founder can review
- *  early companies and start pilot conversations manually. */
-export function PilotRequestButton({ intent }: { intent: "hire_workers" | "partner" }) {
+/** Pilot-request CTA → the CANONICAL demand intake (§17). Submits a real
+ *  `customer_request` (status='submitted', kind by intent) through the
+ *  owner-scoped `submit_demand_request` RPC — the single structured-demand front
+ *  door. It no longer posts to `/api/leads`: that endpoint stays a DISTINCT
+ *  anonymous pre-auth funnel (§17.2), not a path for an authenticated need. The
+ *  server action resolves the owner from the session (auth.uid()), so no client
+ *  email is read or sent. */
+export function PilotRequestButton({
+  intent,
+}: {
+  intent: "hire_workers" | "partner";
+}) {
   const t = useTranslations("auth.dashboard.wow.pilot");
-  const { profile, user } = useAuth();
-  const email = profile?.email ?? user?.email ?? null;
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error">(
+    "idle",
+  );
 
   async function request() {
-    if (!email) {
-      setState("error");
-      return;
-    }
     setState("sending");
     try {
-      const res = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          full_name: profile?.full_name ?? null,
-          intent,
-          source: "dashboard_pilot",
-        }),
-      });
-      const data = (await res.json().catch(() => ({}))) as { ok?: boolean };
-      setState(res.ok && data.ok !== false ? "done" : "error");
+      const res = await submitPilotRequestAction(intent);
+      setState(res.ok ? "done" : "error");
     } catch {
       setState("error");
     }
