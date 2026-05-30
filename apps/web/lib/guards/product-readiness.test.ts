@@ -1216,7 +1216,13 @@ describe("no migration files added by this sprint", () => {
     // (FK organizations) + legacy-bridge backfill, KEEPING the nullable company_id
     // column (non-destructive). See matching-ui-neutralized.test.ts and
     // docs/CONVERGENCE_CHANGELOG.md.
-    const SPRINT_BASELINE = 37;
+    //
+    // Bumped from 37 → 38 on the TASK 03 consolidation: one salvaged additive
+    // migration 20260530130000_journal_integrity_guards (original_language CHECK
+    // from the canonical i18n locale set + closed-only insert narrowing).
+    // Committed + queued for review, NOT applied. See
+    // journal-integrity-guards-migration.test.ts.
+    const SPRINT_BASELINE = 38;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
