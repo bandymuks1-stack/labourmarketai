@@ -6,13 +6,15 @@ import {
 } from "@/components/app/journal-inbox-entry";
 import { createClient } from "@/lib/supabase/server";
 
-const MANAGER_RELATIONSHIPS = ["manager", "owner", "external_manager"];
-
 // Structured-field slugs that have a localized label; others fall back to slug.
 const FIELD_LABEL_SLUGS = new Set(["site_name", "tile_type", "area_done"]);
 
-/** Manager "Patvirtinti įrašai" inbox (§13.2). Lists pending journal entries
- *  from workers in organizations the viewer manages, with confirm / reject. */
+/** Manager review inbox (§13.2 + slice manager-review-evidence-result-v1).
+ *  Lists ONLY the real reviewable entries: the gated set from the SECURITY
+ *  DEFINER `reviewable_journal_entry_ids` RPC (migration 0034) — entries the
+ *  caller manages (or any, if admin) where the worker's employment relationship
+ *  has journal_review_enabled = true and there is no evidence row yet. The
+ *  manager records approve / reject / request-changes evidence per entry. */
 export default async function InboxPage({
   params,
 }: {
@@ -31,34 +33,35 @@ export default async function InboxPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  // Organizations this person manages.
-  const { data: mgrEc } = await supabase
-    .from("engagement_contexts")
-    .select("organization_id")
-    .eq("profile_id", user.id)
-    .eq("status", "active")
-    .in("relationship_slug", MANAGER_RELATIONSHIPS);
-  const orgIds = [
-    ...new Set(
-      (mgrEc ?? [])
-        .map((r) => r.organization_id)
-        .filter((id): id is string => id !== null),
-    ),
-  ];
+  // Gated reviewable set (migration 0034). Degrades to an empty inbox until the
+  // RPC is applied (42883) — honest, no mock data.
+  let reviewableIds: string[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: idRows } = await (supabase as any).rpc(
+    "reviewable_journal_entry_ids",
+  );
+  if (Array.isArray(idRows)) {
+    reviewableIds = idRows
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((r: any) =>
+        typeof r === "string"
+          ? r
+          : (r?.reviewable_journal_entry_ids ?? r?.id ?? null),
+      )
+      .filter((v: unknown): v is string => typeof v === "string");
+  }
 
   let pending: InboxEntry[] = [];
-  if (orgIds.length > 0) {
+  if (reviewableIds.length > 0) {
     const { data: rows } = await supabase
       .from("journal_entries")
       .select(
-        "id, original_text, created_at, worker_id, engagement_contexts!inner(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(id), workers!inner(profiles(full_name, email))",
+        "id, original_text, created_at, worker_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(profiles(full_name, email))",
       )
-      .in("engagement_contexts.organization_id", orgIds)
+      .in("id", reviewableIds)
       .order("created_at", { ascending: true });
 
-    const unconfirmed = (rows ?? []).filter(
-      (r) => (r.journal_entry_confirmations ?? []).length === 0,
-    );
+    const unconfirmed = rows ?? [];
 
     // Batch the workers' declared skills for the "skills attached" line.
     const workerIds = [

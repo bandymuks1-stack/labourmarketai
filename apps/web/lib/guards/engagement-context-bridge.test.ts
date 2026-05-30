@@ -155,15 +155,16 @@ describe("bridge reason copy is present and carries no fake claims", () => {
 // ── 5. No migration added by this slice ─────────────────────────────────
 
 describe("engagement-bridge readiness helper stays pure + migration scope is bounded", () => {
-  it("the enable-review slice adds exactly migration 0033 (and nothing beyond yet)", () => {
+  it("the engagement/review slices add exactly 0033 + 0034 (and nothing beyond yet)", () => {
     const dir = resolve(REPO, "supabase", "migrations");
     const files = readdirSync(dir).filter((f) => f.endsWith(".sql"));
-    // The readiness classifier (PR #141) added no migration; provisioning RPCs
-    // are 0032; THIS slice (journal-review-enable-toggle-v1) ships 0033 with the
-    // context-gated set_*_journal_review + per-row read RPCs (own SQL guard:
-    // journal-review-enable-rpc.test.ts). Nothing ≥ 0034 is expected here.
+    // Provisioning RPCs are 0032; journal-review-enable-toggle-v1 ships 0033;
+    // manager-review-evidence-result-v1 ships 0034 (review_journal_entry +
+    // reviewable_journal_entry_ids, own SQL guard: manager-review-rpc.test.ts).
+    // Nothing ≥ 0035 is expected here.
     expect(files.some((f) => /^0033_/.test(f))).toBe(true);
-    expect(files.some((f) => /^003[4-9]/.test(f))).toBe(false);
+    expect(files.some((f) => /^0034_/.test(f))).toBe(true);
+    expect(files.some((f) => /^003[5-9]/.test(f))).toBe(false);
   });
 
   it("the engagement-bridge helper is pure (no server-only / external imports)", () => {

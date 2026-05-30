@@ -35,6 +35,8 @@
   "engagement": "Kontekstas",
   "entry": {
     "status": {
+      "approved": "Patvirtinta",
+      "changes_requested": "Paprašyta pataisymų",
       "confirmed": "Patvirtinta",
       "rejected": "Atmesta",
       "submitted": "Pateikta"
@@ -56,7 +58,9 @@
     "tile_type": "Plytelių tipas"
   },
   "inbox": {
+    "approve": "Patvirtinti",
     "cancel": "Atšaukti",
+    "changesNote": "Ką reikia pataisyti?",
     "confirm": "Patvirtinti",
     "confirm_with_correction": "Patvirtinti su pataisymu",
     "empty": "Nėra laukiančių įrašų.",
@@ -64,6 +68,16 @@
     "metrics": "Rodikliai",
     "reject": "Atmesti",
     "rejectReason": "Atmetimo priežastis",
+    "requestChanges": "Prašyti pataisymų",
+    "result": {
+      "approved": "Patvirtinta.",
+      "changesRequested": "Paprašyta pataisymų.",
+      "error": "Nepavyko išsaugoti peržiūros.",
+      "needsMigration": "Peržiūra dar neparuošta.",
+      "notAuthorized": "Neturite teisės peržiūrėti šio įrašo.",
+      "rejected": "Atmesta.",
+      "reviewNotEnabled": "Šiam darbuotojui peržiūra dar neįjungta."
+    },
     "showOriginal": "Rodyti originalą",
     "skills": "Įgūdžiai",
     "title": "Patvirtinti įrašai"

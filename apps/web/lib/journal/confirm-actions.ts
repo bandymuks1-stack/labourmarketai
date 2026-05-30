@@ -77,7 +77,9 @@ async function recomputeProfessionSkills(
     const confirmers = new Set<string>();
     for (const c of confs ?? []) {
       const action = (c.confirmation_scope as { action?: string } | null)?.action;
-      if (action === "reject") continue;
+      // Only an explicit approval ('confirm') counts toward confidence — a
+      // 'reject' or 'request_changes' evidence row never verifies skills.
+      if (action !== "confirm") continue;
       confirmedEntryIds.add(c.entry_id);
       confirmers.add(c.confirmer_id);
       const ts = new Date(c.created_at);
@@ -103,6 +105,40 @@ async function recomputeProfessionSkills(
     })
     .eq("worker_id", workerId)
     .in("skill_id", skillIds);
+}
+
+/** Side effects of an APPROVED review (the verified-skill loop, §13.2): mark
+ *  the worker's self-declared skills under the entry's profession as verified,
+ *  then recompute confidence. Shared by the legacy confirmEntry and the gated
+ *  reviewJournalEntry action so approval behaves identically on both paths. */
+export async function applyApprovalSkillEffects(
+  supabase: DB,
+  {
+    workerId,
+    professionId,
+    confirmerId,
+  }: { workerId: string; professionId: string | null; confirmerId: string },
+): Promise<void> {
+  if (professionId) {
+    const { data: psRows } = await supabase
+      .from("profession_skills")
+      .select("skill_id")
+      .eq("profession_id", professionId);
+    const skillIds = (psRows ?? []).map((r) => r.skill_id);
+    if (skillIds.length > 0) {
+      await supabase
+        .from("worker_skills")
+        .update({
+          verified: true,
+          verified_by: confirmerId,
+          verified_at: new Date().toISOString(),
+        })
+        .eq("worker_id", workerId)
+        .eq("source", "self_declared")
+        .in("skill_id", skillIds);
+    }
+  }
+  await recomputeProfessionSkills(supabase, workerId, professionId);
 }
 
 /** Manager confirms a journal entry → verified-skill loop closes (§13.2).
@@ -138,29 +174,14 @@ export async function confirmEntry(formData: FormData): Promise<void> {
   });
   if (cErr) throw new Error(`confirmation insert failed: ${cErr.message}`);
 
-  // M1: confirm verifies all the worker's self-declared skills under this
-  // entry's profession (selective scoping arrives in M2).
-  if (entry.profession_id) {
-    const { data: psRows } = await supabase
-      .from("profession_skills")
-      .select("skill_id")
-      .eq("profession_id", entry.profession_id);
-    const skillIds = (psRows ?? []).map((r) => r.skill_id);
-    if (skillIds.length > 0) {
-      await supabase
-        .from("worker_skills")
-        .update({
-          verified: true,
-          verified_by: user.id,
-          verified_at: new Date().toISOString(),
-        })
-        .eq("worker_id", entry.worker_id)
-        .eq("source", "self_declared")
-        .in("skill_id", skillIds);
-    }
-  }
-
-  await recomputeProfessionSkills(supabase, entry.worker_id, entry.profession_id);
+  // M1: approval verifies all the worker's self-declared skills under this
+  // entry's profession (selective scoping arrives in M2) + recomputes
+  // confidence. Shared with the gated reviewJournalEntry approval path.
+  await applyApprovalSkillEffects(supabase, {
+    workerId: entry.worker_id,
+    professionId: entry.profession_id,
+    confirmerId: user.id,
+  });
   revalidatePath(`/${locale}/dashboard/inbox`);
   revalidatePath(`/${locale}/dashboard/journal`);
 }

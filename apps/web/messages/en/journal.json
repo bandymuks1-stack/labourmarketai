@@ -35,6 +35,8 @@
   "engagement": "Context",
   "entry": {
     "status": {
+      "approved": "Approved",
+      "changes_requested": "Changes requested",
       "confirmed": "Confirmed",
       "rejected": "Rejected",
       "submitted": "Submitted"
@@ -56,7 +58,9 @@
     "tile_type": "Tile type"
   },
   "inbox": {
+    "approve": "Approve",
     "cancel": "Cancel",
+    "changesNote": "What needs changing?",
     "confirm": "Confirm",
     "confirm_with_correction": "Confirm with correction",
     "empty": "No entries waiting.",
@@ -64,6 +68,16 @@
     "metrics": "Metrics",
     "reject": "Reject",
     "rejectReason": "Reason for rejection",
+    "requestChanges": "Request changes",
+    "result": {
+      "approved": "Approved.",
+      "changesRequested": "Changes requested.",
+      "error": "Could not save the review.",
+      "needsMigration": "Review is not ready yet.",
+      "notAuthorized": "You are not allowed to review this entry.",
+      "rejected": "Rejected.",
+      "reviewNotEnabled": "Review is not enabled for this worker yet."
+    },
     "showOriginal": "Show original",
     "skills": "Skills",
     "title": "Entries to confirm"
