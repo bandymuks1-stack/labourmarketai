@@ -21,9 +21,12 @@ begin
   end if;
 end $$;
 
-drop function if exists public.can_access_thread(uuid);   -- used only by legacy message RLS
+-- Order matters: drop the tables first (CASCADE removes their RLS policies,
+-- including the messages_* policies that depend on can_access_thread), THEN the
+-- function — otherwise DROP FUNCTION errors with "other objects depend on it".
 drop table    if exists public.messages cascade;          -- 0 rows; drops its 4 RLS policies
 drop table    if exists public.threads  cascade;          -- 0 rows; drops its 4 RLS policies + FK to matches
+drop function if exists public.can_access_thread(uuid);   -- now dependency-free (was used only by messages RLS)
 
 -- ─────────────────────────────────────────────────────────────────────────
 -- ROLLBACK (manual — copy-paste to restore the exact pre-drop state).
