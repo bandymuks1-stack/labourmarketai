@@ -23,6 +23,26 @@ PR #152). Full record: `docs/CONVERGENCE_CHANGELOG.md`.
     UI must reassign/remove projects first and surface an honest error — never a
     silent failure.
 
+## Demand intake — canonical (Phase 3 / Slice 3.1)
+
+Decision recorded in **PLATFORM_DOCTRINE §17**. The one structured-demand intake
+is `customer_requests`; the "express your need/offer" form now writes it (via the
+`save_demand_draft` RPC, `status='draft'`). Migration
+`20260530150000_demand_intake_consolidation` (additive: `kind`/`payload`/
+`original_language` + draft index + RPC) — **queued for the gate, not applied**
+(TASK 05 / PR pending).
+
+- [x] **`leads` — DECIDED: KEEP as a distinct pre-auth funnel** (anonymous email
+  + intent, no `profile_id`; `/api/leads`). NOT a demand path; not merged into
+  `customer_requests`. See §17.2.
+- [ ] **Retire `pilot_drafts` table** — now folded (no code reads/writes it; 0
+  rows). Drop it in a later slice once the demand migration is applied and a
+  cycle confirms nothing references it. Destructive → RED, gated. (Same pattern
+  as the legacy `threads`/`messages` retire.)
+- [ ] **Translate-on-read for demand author content** — `original_language` is
+  now stored (§2); the viewer-language translation layer is a later cross-cutting
+  slice (infra is day-1; not built here).
+
 ## Captured from retired branches (TASK 03 consolidation cleanup)
 
 The branch consolidation (`docs/BRANCH_CONSOLIDATION_AUDIT.md`, PR #155) retired

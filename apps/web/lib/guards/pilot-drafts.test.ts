@@ -115,16 +115,26 @@ describe("Guard: pilot-drafts server module sanitises + stays owner-scoped", () 
     expect(src).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
   });
 
-  it("scopes every write to the authenticated user's profile_id", () => {
-    // savePilotDraft must set profile_id from auth.getUser().id, not
-    // accept it from the caller.
+  it("scopes every write to the authenticated user (RPC, no caller profile_id)", () => {
+    // savePilotDraft resolves the user then writes through the owner-scoped
+    // save_demand_draft RPC, which sets profile_id = auth.uid() server-side; it
+    // never accepts a caller-supplied profile_id.
     expect(src).toMatch(
-      /savePilotDraft[\s\S]*?auth\.getUser\(\)[\s\S]*?profile_id:\s*user\.id/,
+      /savePilotDraft[\s\S]*?auth\.getUser\(\)[\s\S]*?save_demand_draft/,
     );
-    // deletePilotDraft must filter by the authenticated user.
+    // deletePilotDraft still filters by the authenticated user.
     expect(src).toMatch(
       /deletePilotDraft[\s\S]*?auth\.getUser\(\)[\s\S]*?\.eq\(\s*["']profile_id["']\s*,\s*user\.id\s*\)/,
     );
+  });
+
+  it("folds onto the canonical intake — customer_requests, not pilot_drafts", () => {
+    // Structured demand is consolidated to customer_requests (status='draft');
+    // the retired pilot_drafts table is no longer read or written here.
+    expect(src).toMatch(/from\(["']customer_requests["']\)/);
+    expect(src).toMatch(/save_demand_draft/);
+    expect(src).toMatch(/["']status["']\s*,\s*["']draft["']/);
+    expect(src).not.toMatch(/from\(["']pilot_drafts["']\)/);
   });
 
   it("sanitise() enforces a per-type key allowlist", () => {
@@ -133,12 +143,6 @@ describe("Guard: pilot-drafts server module sanitises + stays owner-scoped", () 
     // Length cap defence in depth.
     expect(src).toMatch(/MAX_FIELD_LEN/);
     expect(src).toMatch(/MAX_NOTES_LEN/);
-  });
-
-  it("upsert uses the owner-scoped UNIQUE constraint", () => {
-    expect(src).toMatch(
-      /onConflict\s*:\s*["']profile_id\s*,\s*draft_type["']/,
-    );
   });
 
   it("does not affirm matching / verified / shared / public", () => {

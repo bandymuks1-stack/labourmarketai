@@ -262,6 +262,34 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 
 ---
 
+## Section 17 — Canonical demand intake
+
+> **§17 Canonical demand intake (binding).** There is exactly ONE structured
+> demand model: **`customer_requests`** (+ `customers`, `customer_request_attachments`).
+> Any place a company / agency / buyer expresses a structured need or offer in
+> the product writes `customer_requests` — via the owner-scoped
+> `save_demand_draft` RPC for drafts (its INSERT RLS is admin-only by design) —
+> classified by `kind` (`company_request` / `agency_offer` / `buyer_request` /
+> `customer_request`), with per-type extras in `payload` and the author's
+> `original_language` (§2). The lifecycle runs through `status`
+> (`draft → submitted → in_review → needs_followup → approved → closed`).
+>
+> **§17.1 No third demand path.** `pilot_drafts` was a parallel draft store; it
+> is **folded** into `customer_requests` (drafts = `status='draft'`) and no
+> longer written. Do not re-introduce a second structured-demand table or path.
+>
+> **§17.2 `leads` is a DISTINCT pre-auth funnel — intentionally kept, NOT a
+> demand path.** `leads` (`/api/leads`) captures top-of-funnel interest:
+> anonymous-style email + intent + source (e.g. the "request a pilot
+> conversation" CTA, waitlist), with **no `profile_id` and no structured need**.
+> It is a marketing/founder-review funnel that precedes a real authenticated
+> request — fundamentally different from `customer_requests`. It is kept on
+> purpose and must not be merged into, or treated as, the canonical demand
+> intake. Retire `/api/leads` only if a real CRM replaces the funnel — never as
+> "demand consolidation".
+
+---
+
 ## Section 9 — Changelog (doctrine evolution)
 
 | Date | Section(s) | Change | Author |

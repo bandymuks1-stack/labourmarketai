@@ -1228,7 +1228,11 @@ describe("no migration files added by this sprint", () => {
     // membership + review-enable, hash-chained RPCs, legacy→canonical review
     // reroute, confirm_entry_and_verify_skills). Committed + queued for the gate,
     // NOT applied. See membership-engagement-reroute-migration.test.ts.
-    const SPRINT_BASELINE = 39;
+    // Bumped 39 → 40 on TASK 05 (demand-intake consolidation): additive
+    // 20260530150000_demand_intake_consolidation (customer_requests +=
+    // kind/payload/original_language + draft index + save_demand_draft RPC;
+    // folds pilot_drafts). Committed + queued for the gate, NOT applied.
+    const SPRINT_BASELINE = 40;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
