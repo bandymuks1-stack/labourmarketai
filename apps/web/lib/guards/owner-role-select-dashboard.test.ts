@@ -39,15 +39,21 @@ describe("WorkerOperationsRoleForm is an honest owner control", () => {
     expect(src).toMatch(/name="workerId"/);
   });
 
-  it("renders the review toggle VISIBLY DISABLED, never checked", () => {
-    // The checkbox must be disabled + checked={false}.
+  it("renders an honest review toggle: reflects real state, disabled until bridge-ready", () => {
+    // The checkbox mirrors the REAL reviewActive verdict (never a fake active
+    // state) and is disabled unless the relationship is genuinely bridge-ready.
     expect(src).toMatch(/type="checkbox"/);
-    expect(src).toMatch(/checked=\{false\}/);
-    expect(src).toMatch(/\bdisabled\b/);
+    expect(src).toMatch(/checked=\{bridge\.reviewActive\}/);
+    expect(src).toMatch(/disabled=\{!bridge\.bridgeReady\}/);
+    // When not bridge-ready, an explicit disabled-state blocker note is shown.
     expect(src).toMatch(/worker-ops-review-disabled-note-/);
   });
 
-  it("never submits journal review enable (no enabling field/value)", () => {
+  it("enables review only through the bridge-ready-gated toggle, never from a label", () => {
+    // The enable/disable submit is gated on bridge.bridgeReady and carries the
+    // desired state via the `enabled` field — there is no hardcoded enable.
+    expect(src).toMatch(/bridge\.bridgeReady\s*\?/);
+    expect(src).toMatch(/name="enabled"/);
     expect(src).not.toMatch(/name="journalReviewEnabled"/);
     expect(src).not.toMatch(/journal_review_enabled\s*[:=]\s*true/i);
     expect(src).not.toMatch(/journalReviewEnabled:\s*true/);

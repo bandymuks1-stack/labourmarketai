@@ -151,6 +151,69 @@ export default async function CompanyDashboardPage({
           not_allowed: tWorkers("operations.assign.bridgeReasons.not_allowed"),
           not_enabled: tWorkers("operations.assign.bridgeReasons.not_enabled"),
         },
+        provision: {
+          button: tWorkers("operations.assign.provision.button"),
+          provisioning: tWorkers("operations.assign.provision.provisioning"),
+          outcomeConnected: tWorkers("operations.assign.provision.outcomeConnected"),
+          outcomeAlreadyConnected: tWorkers(
+            "operations.assign.provision.outcomeAlreadyConnected",
+          ),
+          outcomeNotOwner: tWorkers("operations.assign.provision.outcomeNotOwner"),
+          outcomeNotLinked: tWorkers("operations.assign.provision.outcomeNotLinked"),
+          outcomeProfileMissing: tWorkers(
+            "operations.assign.provision.outcomeProfileMissing",
+          ),
+          outcomeRoleNotAssigned: tWorkers(
+            "operations.assign.provision.outcomeRoleNotAssigned",
+          ),
+          outcomeRoleNotAllowed: tWorkers(
+            "operations.assign.provision.outcomeRoleNotAllowed",
+          ),
+          outcomeOrganizationMissing: tWorkers(
+            "operations.assign.provision.outcomeOrganizationMissing",
+          ),
+          outcomeError: tWorkers("operations.assign.provision.outcomeError"),
+          outcomeNeedsMigration: tWorkers(
+            "operations.assign.provision.outcomeNeedsMigration",
+          ),
+        },
+        review: {
+          toggleLabel: tWorkers("operations.assign.review.toggleLabel"),
+          enableButton: tWorkers("operations.assign.review.enableButton"),
+          enabling: tWorkers("operations.assign.review.enabling"),
+          disableButton: tWorkers("operations.assign.review.disableButton"),
+          disabling: tWorkers("operations.assign.review.disabling"),
+          blockerNotReady: tWorkers("operations.assign.review.blockerNotReady"),
+          outcomeEnabled: tWorkers("operations.assign.review.outcomeEnabled"),
+          outcomeAlreadyEnabled: tWorkers(
+            "operations.assign.review.outcomeAlreadyEnabled",
+          ),
+          outcomeDisabled: tWorkers("operations.assign.review.outcomeDisabled"),
+          outcomeAlreadyDisabled: tWorkers(
+            "operations.assign.review.outcomeAlreadyDisabled",
+          ),
+          outcomeNotOwner: tWorkers("operations.assign.review.outcomeNotOwner"),
+          outcomeNotLinked: tWorkers("operations.assign.review.outcomeNotLinked"),
+          outcomeRoleNotAssigned: tWorkers(
+            "operations.assign.review.outcomeRoleNotAssigned",
+          ),
+          outcomeRoleNotAllowed: tWorkers(
+            "operations.assign.review.outcomeRoleNotAllowed",
+          ),
+          outcomeProfileMissing: tWorkers(
+            "operations.assign.review.outcomeProfileMissing",
+          ),
+          outcomeOrganizationMissing: tWorkers(
+            "operations.assign.review.outcomeOrganizationMissing",
+          ),
+          outcomeEngagementMissing: tWorkers(
+            "operations.assign.review.outcomeEngagementMissing",
+          ),
+          outcomeError: tWorkers("operations.assign.review.outcomeError"),
+          outcomeNeedsMigration: tWorkers(
+            "operations.assign.review.outcomeNeedsMigration",
+          ),
+        },
         // roleOptionLabels are injected at render from operations.roleLabels.
         roleOptionLabels: {},
       },

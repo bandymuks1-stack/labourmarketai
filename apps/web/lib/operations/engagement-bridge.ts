@@ -23,9 +23,11 @@ import {
  *     project_manager stay `not_enabled`; a plain `worker` is `not_allowed`);
  *   - review is only ever "ready"/"connected" when an engagement context
  *     actually links the worker to the org AND the role is a reviewer role;
- *   - until the provisioning RPC ships, `engagementContextLinked` is false for
- *     every employment relationship (see EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE),
- *     so the honest state is `missing_engagement_context`.
+ *   - the provisioning RPC (migration 0032) + the owner-scoped per-row read
+ *     (migration 0033) have shipped, so `engagementContextLinked` is now a REAL
+ *     per-relationship DB read — true only for relationships the owner has
+ *     actually connected. Unconnected relationships still report
+ *     `missing_engagement_context`, which is the honest pre-provisioning state.
  */
 
 export type EngagementBridgeState =
@@ -39,14 +41,16 @@ export type EngagementBridgeState =
 
 /**
  * Whether the employment→journal engagement-context bridge is LIVE in the
- * product. It is `false` until a dedicated, owner/migration-gated provisioning
- * RPC connects an employment relationship to a journal `engagement_context`.
- * Until then no relationship has a real org engagement link, so the UI passes
- * `engagementContextLinked: false` and the honest state stays
- * `missing_engagement_context`. Flipping this is NOT enough on its own — the
- * provisioning RPC + a real per-row read must land first.
+ * product. Now `true`: the owner/admin-gated provisioning RPC (migration 0032)
+ * connects an employment relationship to a journal `engagement_context`, and
+ * the owner-scoped per-row read (migration 0033) detects that link. The UI no
+ * longer passes a hardcoded flag — it passes the REAL per-relationship
+ * `engagementContextLinked` value read from the DB, so only relationships the
+ * owner has actually connected report a live bridge; the rest stay honestly at
+ * `missing_engagement_context`. This constant documents that the bridge path
+ * exists end-to-end; it is NOT used as a per-row substitute for the real read.
  */
-export const EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE = false;
+export const EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE = true;
 
 /** Reviewer-eligible roles — mirrors REVIEWER_ROLES in
  *  employment-journal-context.ts. Only these could ever review when both a
@@ -72,8 +76,8 @@ export interface EngagementBridgeInput {
   /** journal_review_enabled column (default false). */
   readonly journalReviewEnabled?: boolean | null;
   /** Whether an active engagement_context already links this relationship's
-   *  worker to the org. False for every relationship until the provisioning
-   *  RPC ships (see EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE). */
+   *  worker to the org. A REAL per-relationship DB read (migration 0033):
+   *  true only for relationships the owner has provisioned (migration 0032). */
   readonly engagementContextLinked?: boolean | null;
 }
 

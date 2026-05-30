@@ -136,17 +136,29 @@ describe("review can never be ready/active from a label alone", () => {
   });
 });
 
-describe("bridge is not live in production yet", () => {
-  it("EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE is false until the provisioning RPC ships", () => {
-    expect(EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE).toBe(false);
+describe("bridge is now live, but readiness is per-relationship", () => {
+  it("EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE is true (provisioning RPC + per-row read shipped)", () => {
+    expect(EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE).toBe(true);
   });
 
-  it("with the live flag, a reviewer relationship reports missing_engagement_context", () => {
+  it("a reviewer relationship WITHOUT a real context link still reports missing_engagement_context", () => {
+    // The live flag is NOT a per-row substitute: an unconnected relationship
+    // must still read engagementContextLinked=false and stay honest.
     expect(
       state({
         operationsRole: "company_admin",
-        engagementContextLinked: EMPLOYMENT_ENGAGEMENT_BRIDGE_LIVE,
+        engagementContextLinked: false,
       }),
     ).toBe("missing_engagement_context");
+  });
+
+  it("a reviewer relationship WITH a real context link advances to review_not_enabled", () => {
+    expect(
+      state({
+        operationsRole: "company_admin",
+        engagementContextLinked: true,
+        journalReviewEnabled: false,
+      }),
+    ).toBe("review_not_enabled");
   });
 });

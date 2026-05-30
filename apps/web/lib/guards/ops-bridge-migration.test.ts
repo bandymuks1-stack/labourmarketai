@@ -90,8 +90,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
       "utf8",
     );
     // Bumped to 31 on the engagement-context-provisioning-rpc-v1 slice
-    // (migration 0032 adds the provisioning RPCs). The baseline only ever
-    // grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 31/);
+    // (migration 0032 adds the provisioning RPCs), then to 32 on the
+    // journal-review-enable-toggle-v1 slice (migration 0033 adds the
+    // context-gated set_*_journal_review + per-row read RPCs). The baseline
+    // only ever grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 32/);
   });
 });

@@ -134,7 +134,42 @@
               "not_allowed": "Šiam darbuotojo ryšiui dar negalima įjungti peržiūros.",
               "not_enabled": "Ši rolė dar neįjungta peržiūrai."
             },
-            "readyForSetup": "Paruošta peržiūros nustatymui."
+            "readyForSetup": "Paruošta peržiūros nustatymui.",
+            "provision": {
+              "button": "Sujungti darbo žurnalo kontekstą",
+              "provisioning": "Jungiama…",
+              "outcomeConnected": "Darbo žurnalo kontekstas sujungtas. Dabar galite įjungti peržiūrą.",
+              "outcomeAlreadyConnected": "Darbo žurnalo kontekstas jau sujungtas.",
+              "outcomeNotOwner": "Neturite teisės sujungti šio konteksto.",
+              "outcomeNotLinked": "Darbuotojas nesusietas.",
+              "outcomeProfileMissing": "Šis darbuotojas dar neturi profilio.",
+              "outcomeRoleNotAssigned": "Pirma priskirkite peržiūros rolę.",
+              "outcomeRoleNotAllowed": "Peržiūros sujungimas galimas tik įmonės arba agentūros administratoriaus ryšiams.",
+              "outcomeOrganizationMissing": "Jūsų organizacijos įrašas dar neparuoštas.",
+              "outcomeError": "Nepavyko sujungti. Bandykite dar kartą.",
+              "outcomeNeedsMigration": "Funkcija dar neparuošta."
+            },
+            "review": {
+              "toggleLabel": "Darbo žurnalo peržiūra",
+              "enableButton": "Įjungti peržiūrą",
+              "enabling": "Įjungiama…",
+              "disableButton": "Išjungti peržiūrą",
+              "disabling": "Išjungiama…",
+              "blockerNotReady": "Darbo žurnalo peržiūrą galima įjungti tik sujungus žurnalo kontekstą. Pirma sujunkite kontekstą.",
+              "outcomeEnabled": "Darbo žurnalo peržiūra įjungta.",
+              "outcomeAlreadyEnabled": "Darbo žurnalo peržiūra jau įjungta.",
+              "outcomeDisabled": "Darbo žurnalo peržiūra išjungta.",
+              "outcomeAlreadyDisabled": "Darbo žurnalo peržiūra jau išjungta.",
+              "outcomeNotOwner": "Neturite teisės keisti šio darbuotojo peržiūros.",
+              "outcomeNotLinked": "Darbuotojas nesusietas.",
+              "outcomeRoleNotAssigned": "Pirma priskirkite peržiūros rolę.",
+              "outcomeRoleNotAllowed": "Ši rolė negali peržiūrėti darbo įrašų.",
+              "outcomeProfileMissing": "Šis darbuotojas dar neturi profilio.",
+              "outcomeOrganizationMissing": "Jūsų organizacijos įrašas dar neparuoštas.",
+              "outcomeEngagementMissing": "Prieš įjungdami peržiūrą sujunkite darbo žurnalo kontekstą.",
+              "outcomeError": "Nepavyko atnaujinti peržiūros. Bandykite dar kartą.",
+              "outcomeNeedsMigration": "Funkcija dar neparuošta."
+            }
           }
         },
         "coordinationHeading": "Rolių koordinavimas",
@@ -246,7 +281,42 @@
               "not_allowed": "Šiam darbuotojo ryšiui dar negalima įjungti peržiūros.",
               "not_enabled": "Ši rolė dar neįjungta peržiūrai."
             },
-            "readyForSetup": "Paruošta peržiūros nustatymui."
+            "readyForSetup": "Paruošta peržiūros nustatymui.",
+            "provision": {
+              "button": "Sujungti darbo žurnalo kontekstą",
+              "provisioning": "Jungiama…",
+              "outcomeConnected": "Darbo žurnalo kontekstas sujungtas. Dabar galite įjungti peržiūrą.",
+              "outcomeAlreadyConnected": "Darbo žurnalo kontekstas jau sujungtas.",
+              "outcomeNotOwner": "Neturite teisės sujungti šio konteksto.",
+              "outcomeNotLinked": "Darbuotojas nesusietas.",
+              "outcomeProfileMissing": "Šis darbuotojas dar neturi profilio.",
+              "outcomeRoleNotAssigned": "Pirma priskirkite peržiūros rolę.",
+              "outcomeRoleNotAllowed": "Peržiūros sujungimas galimas tik įmonės arba agentūros administratoriaus ryšiams.",
+              "outcomeOrganizationMissing": "Jūsų organizacijos įrašas dar neparuoštas.",
+              "outcomeError": "Nepavyko sujungti. Bandykite dar kartą.",
+              "outcomeNeedsMigration": "Funkcija dar neparuošta."
+            },
+            "review": {
+              "toggleLabel": "Darbo žurnalo peržiūra",
+              "enableButton": "Įjungti peržiūrą",
+              "enabling": "Įjungiama…",
+              "disableButton": "Išjungti peržiūrą",
+              "disabling": "Išjungiama…",
+              "blockerNotReady": "Darbo žurnalo peržiūrą galima įjungti tik sujungus žurnalo kontekstą. Pirma sujunkite kontekstą.",
+              "outcomeEnabled": "Darbo žurnalo peržiūra įjungta.",
+              "outcomeAlreadyEnabled": "Darbo žurnalo peržiūra jau įjungta.",
+              "outcomeDisabled": "Darbo žurnalo peržiūra išjungta.",
+              "outcomeAlreadyDisabled": "Darbo žurnalo peržiūra jau išjungta.",
+              "outcomeNotOwner": "Neturite teisės keisti šio darbuotojo peržiūros.",
+              "outcomeNotLinked": "Darbuotojas nesusietas.",
+              "outcomeRoleNotAssigned": "Pirma priskirkite peržiūros rolę.",
+              "outcomeRoleNotAllowed": "Ši rolė negali peržiūrėti darbo įrašų.",
+              "outcomeProfileMissing": "Šis darbuotojas dar neturi profilio.",
+              "outcomeOrganizationMissing": "Jūsų organizacijos įrašas dar neparuoštas.",
+              "outcomeEngagementMissing": "Prieš įjungdami peržiūrą sujunkite darbo žurnalo kontekstą.",
+              "outcomeError": "Nepavyko atnaujinti peržiūros. Bandykite dar kartą.",
+              "outcomeNeedsMigration": "Funkcija dar neparuošta."
+            }
           }
         },
         "coordinationHeading": "Rolių koordinavimas",
