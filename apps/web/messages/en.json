@@ -1844,6 +1844,20 @@
       ],
       "manualCta": "Request pilot review"
     },
+    "pilotWorkflow": {
+      "eyebrow": "First working pilot",
+      "title": "The first real pilot workflow",
+      "body": "This is the first end-to-end workflow we run with pilot organisations. Every step below is a real action in the product — nothing is decided for you and nothing is automated on your behalf; activation stays manual.",
+      "steps": [
+        "A company or agency links a real worker — they invite by email and the worker accepts.",
+        "The owner enables work-journal review for that worker relationship.",
+        "The worker logs a real work-journal entry against that organisation.",
+        "A manager reviews it — approve, reject, or request changes — and the decision is saved as evidence.",
+        "The worker, the company and the admin can all see the saved review result."
+      ],
+      "ctaNote": "Pilot activation is manual. No card is collected, no plan starts by itself, and pricing and scope are confirmed with you before anything begins.",
+      "cta": "Request a pilot"
+    },
     "planCta": "Join the waitlist for this plan",
     "featuresLabel": "Includes",
     "plans": {

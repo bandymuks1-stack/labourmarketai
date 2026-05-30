@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHero } from "@/components/marketing/page-hero";
 import { PilotActivationCallout } from "@/components/marketing/pilot-activation-callout";
+import { PilotWorkflowOffer } from "@/components/marketing/pilot-workflow-offer";
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
 
@@ -30,6 +31,7 @@ export default async function PricingPage({
         ctaSource="pricing_hero"
       />
       <PilotActivationCallout />
+      <PilotWorkflowOffer />
       <section className="mx-auto mb-10 max-w-container px-6 sm:px-12">
         <Tier2ReadinessExplainer
           source="pricing_tier2_readiness"
