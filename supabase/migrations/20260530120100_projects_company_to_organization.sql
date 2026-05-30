@@ -12,11 +12,17 @@
 -- RLS (keyed on company_id) is left as-is while the table is dormant;
 -- organization-based RLS lands with the staged org reroute follow-up.
 --
+-- ON DELETE RESTRICT (PLATFORM_DOCTRINE audit-trail / proof-chain): projects
+-- anchor journal proof via engagement_contexts. A cascade from organizations
+-- would let an org deletion silently wipe proof-anchoring projects, breaking the
+-- legal/audit record. RESTRICT forbids deleting an organization that still has
+-- projects, so the proof chain cannot be cascade-destroyed.
+--
 -- Application to prod is owner-gated (committed, not auto-run).
 
 alter table public.projects
   add column if not exists organization_id uuid
-  references public.organizations(id) on delete cascade;
+  references public.organizations(id) on delete restrict;
 
 -- Backfill through the legacy bridge. No-op at 0 rows; correct once rows exist.
 update public.projects p
@@ -30,8 +36,9 @@ create index if not exists projects_organization_id_idx
 
 -- ─────────────────────────────────────────────────────────────────────────
 -- ROLLBACK (manual — copy-paste). Fully reversible; company_id was never
--- touched, so no data is recoverable-from-loss here.
+-- touched, so no data is recoverable-from-loss here. Dropping organization_id
+-- also removes its ON DELETE RESTRICT FK, so the rollback needs no extra step.
 -- ─────────────────────────────────────────────────────────────────────────
 --
 -- drop index if exists public.projects_organization_id_idx;
--- alter table public.projects drop column if exists organization_id;
+-- alter table public.projects drop column if exists organization_id;  -- drops the RESTRICT FK with it
