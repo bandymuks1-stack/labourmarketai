@@ -1847,6 +1847,20 @@
       ],
       "manualCta": "Užsakyti pilotinę peržiūrą"
     },
+    "pilotWorkflow": {
+      "eyebrow": "Pirmas veikiantis pilotas",
+      "title": "Pirmasis realus pilotinis procesas",
+      "body": "Tai pirmasis nuo pradžios iki pabaigos veikiantis procesas, kurį vykdome su pilotinėmis organizacijomis. Kiekvienas žingsnis žemiau yra realus veiksmas produkte — niekas nenusprendžiama už jus ir niekas nevykdoma jūsų vardu automatiškai; aktyvavimas lieka rankinis.",
+      "steps": [
+        "Įmonė arba agentūra susieja realų darbuotoją — pakviečia el. paštu, o darbuotojas priima.",
+        "Savininkas įjungia darbo žurnalo peržiūrą tam darbuotojo ryšiui.",
+        "Darbuotojas užregistruoja realų darbo žurnalo įrašą toje organizacijoje.",
+        "Vadovas jį peržiūri — patvirtina, atmeta arba paprašo pataisymų — ir sprendimas išsaugomas kaip įrodymas.",
+        "Darbuotojas, įmonė ir administratorius mato išsaugotą peržiūros rezultatą."
+      ],
+      "ctaNote": "Pilotinis aktyvavimas yra rankinis. Kortelė nerenkama, joks planas neprasideda savaime, o kaina ir apimtis suderinamos su jumis prieš pradedant.",
+      "cta": "Užsakyti pilotą"
+    },
     "planCta": "Užsirašyti į šio plano sąrašą",
     "featuresLabel": "Apima",
     "plans": {
