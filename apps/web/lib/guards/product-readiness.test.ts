@@ -1191,7 +1191,15 @@ describe("no migration files added by this sprint", () => {
     // (the gated pending set). Functions only: reviewer scope re-validated,
     // append-only, no fake data. No table/RLS/grant change beyond EXECUTE on the
     // two functions. See manager-review-rpc.test.ts.
-    const SPRINT_BASELINE = 33;
+    //
+    // Bumped from 33 → 34 on the sales-core-nonstop-v1 unblock: migration 0035
+    // adds public.ensure_org_owner_engagement() + an AFTER INSERT trigger on
+    // public.organizations and an idempotent backfill, giving each org owner the
+    // 'owner' engagement_context the 0013 backfill missed for post-0013 orgs
+    // (so manages_organization() works and they can review). Additive +
+    // idempotent, no destructive SQL, no RLS/grant change. See
+    // owner-engagement-backfill-rpc.test.ts.
+    const SPRINT_BASELINE = 34;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
