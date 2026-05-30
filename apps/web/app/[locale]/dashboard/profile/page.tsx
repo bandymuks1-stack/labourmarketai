@@ -141,7 +141,7 @@ export default async function ProfilePage({
     // ALL of the worker's saved skills (read model — never filtered down).
     const { data: ws } = await supabase
       .from("worker_skills")
-      .select("skill_id, confidence_bin, skills(slug)")
+      .select("skill_id, confidence_bin, verified, source, skills(slug)")
       .eq("worker_id", workerId)
       .order("created_at", { ascending: true });
     const rows = ws ?? [];
@@ -169,10 +169,11 @@ export default async function ProfilePage({
               name: tSkill(slug),
               bin: (r.confidence_bin as string) ?? "red",
               isCore: coreMap.get(r.skill_id as string) ?? false,
+              verified: r.verified === true,
             }
           : null;
       })
-      .filter((x): x is SkillDot => x !== null)
+      .filter((x): x is NonNullable<typeof x> => x !== null)
       .sort((a, b) => Number(b.isCore) - Number(a.isCore));
 
     // Engagement-context cards (current first): primary first, then most-recent.

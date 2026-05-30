@@ -5,6 +5,8 @@ import { PilotDraftForm } from "@/components/app/pilot-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
+import { OrgMembersPanel } from "@/components/app/org-members-panel";
+import { getOrgMembersData } from "@/lib/operations/org-members";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import {
   getOwnCompany,
@@ -50,6 +52,24 @@ export default async function CompanyDashboardPage({
   const invitationsResult = ownCompany
     ? await listCompanyWorkerInvitations(ownCompany.id)
     : ({ kind: "ok", rows: [] } as const);
+  const orgMembers = ownCompany
+    ? await getOrgMembersData("company", ownCompany.id)
+    : null;
+  const tOrg = await getTranslations("orgMembers");
+  const orgMembersLabels = {
+    title: tOrg("title"),
+    intro: tOrg("intro"),
+    reviewOn: tOrg("reviewOn"),
+    reviewOff: tOrg("reviewOff"),
+    enable: tOrg("enable"),
+    disable: tOrg("disable"),
+    addTitle: tOrg("addTitle"),
+    addButton: tOrg("addButton"),
+    noMembers: tOrg("noMembers"),
+    noAddable: tOrg("noAddable"),
+    reviewEnabledBadge: tOrg("reviewEnabledBadge"),
+    reviewDisabledBadge: tOrg("reviewDisabledBadge"),
+  };
 
   const workersLabels = {
     title: tWorkers("title"),
@@ -250,6 +270,15 @@ export default async function CompanyDashboardPage({
         roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
         canAssignRoles
       />
+
+      {orgMembers && (
+        <OrgMembersPanel
+          orgId={orgMembers.orgId}
+          members={orgMembers.members}
+          addable={orgMembers.addable}
+          labels={orgMembersLabels}
+        />
+      )}
 
       <section
         className="card-border flex flex-col gap-4 p-5"

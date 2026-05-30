@@ -6,8 +6,12 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
   reviewJournalEntry,
+  confirmEntrySkills,
   type ReviewActionState,
+  type ConfirmSkillsState,
 } from "@/lib/journal/review-actions";
+
+export type InboxSkill = { id: string; name: string; verified: boolean };
 
 export type InboxEntry = {
   id: string;
@@ -15,57 +19,83 @@ export type InboxEntry = {
   workerName: string;
   createdAt: string;
   metrics: { label: string; value: string }[];
-  skills: string[];
+  skills: InboxSkill[];
 };
 
 /**
- * One reviewable entry in the manager inbox (slice
- * manager-review-evidence-result-v1). The manager records a real evidence
- * result — approve / reject / request changes — through the gated
- * `reviewJournalEntry` action (→ migration 0034 RPC). Reject and request-changes
- * reveal a note field. No fake approve/reject: the RPC re-checks manager scope +
- * journal_review_enabled and persists the decision.
+ * One reviewable entry in the manager inbox. The manager reviews a worker's
+ * journal entry and either:
+ *   - CONFIRMS the declared skills it proves → those skills become verified via
+ *     the SECURITY DEFINER `confirm_entry_and_verify_skills` RPC (the keystone
+ *     verified-proof path; the only path that can flip worker_skills), or
+ *   - rejects / requests changes (evidence-only, no verification) via
+ *     `review_journal_entry`.
+ * No fake state: every write is re-checked server-side (manager scope +
+ * journal_review_enabled).
  */
 export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
   const t = useTranslations("journal");
   const locale = useLocale();
-  const [mode, setMode] = useState<"idle" | "rejected" | "changes_requested">(
-    "idle",
-  );
-  const [state, formAction, isPending] = useActionState<
+  const [mode, setMode] = useState<
+    "idle" | "confirm" | "rejected" | "changes_requested"
+  >("idle");
+  const [reviewState, reviewAction, reviewPending] = useActionState<
     ReviewActionState | null,
     FormData
   >(reviewJournalEntry, null);
+  const [confirmState, confirmAction, confirmPending] = useActionState<
+    ConfirmSkillsState | null,
+    FormData
+  >(confirmEntrySkills, null);
+
+  const declaredUnverified = entry.skills.filter((s) => !s.verified);
+  const alreadyVerified = entry.skills.filter((s) => s.verified);
 
   const resultMessage: { text: string; ok: boolean } | null = (() => {
-    if (!state) return null;
-    if (state.ok) {
-      const key =
-        state.decision === "approved"
-          ? "result.approved"
-          : state.decision === "rejected"
-            ? "result.rejected"
-            : "result.changesRequested";
-      return { text: t(`inbox.${key}`), ok: true };
+    if (confirmState) {
+      if (confirmState.ok) {
+        return { text: t("inbox.result.skillsVerified", { count: confirmState.verified }), ok: true };
+      }
+      switch (confirmState.code) {
+        case "review_not_enabled":
+          return { text: t("inbox.result.reviewNotEnabled"), ok: false };
+        case "not_authorized":
+        case "no_reviewer_engagement":
+          return { text: t("inbox.result.notAuthorized"), ok: false };
+        case "skill_not_owned":
+          return { text: t("inbox.result.skillNotOwned"), ok: false };
+        case "no_skills":
+          return { text: t("inbox.result.noSkillsSelected"), ok: false };
+        default:
+          return { text: t("inbox.result.error"), ok: false };
+      }
     }
-    switch (state.code) {
-      case "review_not_enabled":
-        return { text: t("inbox.result.reviewNotEnabled"), ok: false };
-      case "not_authorized":
-        return { text: t("inbox.result.notAuthorized"), ok: false };
-      case "no_reviewer_engagement":
-        return { text: t("inbox.result.notAuthorized"), ok: false };
-      case "needs_migration":
-        return { text: t("inbox.result.needsMigration"), ok: false };
-      default:
-        return { text: t("inbox.result.error"), ok: false };
+    if (reviewState) {
+      if (reviewState.ok) {
+        const key =
+          reviewState.decision === "rejected" ? "result.rejected" : "result.changesRequested";
+        return { text: t(`inbox.${key}`), ok: true };
+      }
+      switch (reviewState.code) {
+        case "review_not_enabled":
+          return { text: t("inbox.result.reviewNotEnabled"), ok: false };
+        case "not_authorized":
+        case "no_reviewer_engagement":
+          return { text: t("inbox.result.notAuthorized"), ok: false };
+        case "needs_migration":
+          return { text: t("inbox.result.needsMigration"), ok: false };
+        default:
+          return { text: t("inbox.result.error"), ok: false };
+      }
     }
+    return null;
   })();
 
-  const reviewed = state?.ok === true;
+  const done = confirmState?.ok === true || reviewState?.ok === true;
+  const isPending = reviewPending || confirmPending;
 
   return (
-    <li className="card-border flex flex-col gap-3 p-4">
+    <li className="card-border flex flex-col gap-3 p-4" data-testid={`inbox-entry-${entry.id}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-display text-sm font-semibold text-text-primary">
@@ -89,39 +119,34 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         </div>
       )}
 
-      {entry.skills.length > 0 && (
+      {/* Skills already verified on this worker (context for the reviewer). */}
+      {alreadyVerified.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("inbox.skills")}
+            {t("inbox.alreadyVerified")}
           </span>
-          {entry.skills.map((s) => (
+          {alreadyVerified.map((s) => (
             <span
-              key={s}
-              className="rounded-full border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary"
+              key={s.id}
+              className="rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-[11px] text-state-success"
             >
-              {s}
+              ✓ {s.name}
             </span>
           ))}
         </div>
       )}
 
-      {!reviewed && mode === "idle" ? (
+      {!done && mode === "idle" ? (
         <div className="flex flex-wrap items-center gap-2">
-          {/* Approve — single click, no note. */}
-          <form action={formAction}>
-            <input type="hidden" name="entry_id" value={entry.id} />
-            <input type="hidden" name="decision" value="approved" />
-            <input type="hidden" name="locale" value={locale} />
-            <Button
-              type="submit"
-              size="sm"
-              variant="primary"
-              disabled={isPending}
-              data-testid={`journal-review-approve-${entry.id}`}
-            >
-              {t("inbox.approve")}
-            </Button>
-          </form>
+          <Button
+            type="button"
+            size="sm"
+            variant="primary"
+            onClick={() => setMode("confirm")}
+            data-testid={`journal-confirm-skills-${entry.id}`}
+          >
+            {t("inbox.confirmSkills")}
+          </Button>
           <Button
             type="button"
             size="sm"
@@ -143,18 +168,61 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         </div>
       ) : null}
 
-      {!reviewed && mode !== "idle" ? (
-        <form action={formAction} className="flex flex-col gap-2">
+      {/* Confirm-skills: pick which declared skills this entry proves → verify. */}
+      {!done && mode === "confirm" ? (
+        declaredUnverified.length === 0 ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-text-muted">{t("inbox.noSkillsToConfirm")}</p>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setMode("idle")}>
+              {t("inbox.cancel")}
+            </Button>
+          </div>
+        ) : (
+          <form action={confirmAction} className="flex flex-col gap-2">
+            <input type="hidden" name="entry_id" value={entry.id} />
+            <input type="hidden" name="locale" value={locale} />
+            <p className="text-xs text-text-secondary">{t("inbox.confirmSkillsHint")}</p>
+            <div className="flex flex-col gap-1">
+              {declaredUnverified.map((s) => (
+                <label key={s.id} className="flex items-center gap-2 text-sm text-text-primary">
+                  <input
+                    type="checkbox"
+                    name="skill_id"
+                    value={s.id}
+                    defaultChecked
+                    data-testid={`confirm-skill-${entry.id}-${s.id}`}
+                  />
+                  {s.name}
+                </label>
+              ))}
+            </div>
+            <Input name="note" placeholder={t("inbox.confirmNote")} />
+            <div className="flex items-center gap-2">
+              <Button
+                type="submit"
+                size="sm"
+                variant="primary"
+                disabled={isPending}
+                data-testid={`journal-confirm-submit-${entry.id}`}
+              >
+                {t("inbox.confirmSubmit")}
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setMode("idle")}>
+                {t("inbox.cancel")}
+              </Button>
+            </div>
+          </form>
+        )
+      ) : null}
+
+      {!done && (mode === "rejected" || mode === "changes_requested") ? (
+        <form action={reviewAction} className="flex flex-col gap-2">
           <input type="hidden" name="entry_id" value={entry.id} />
           <input type="hidden" name="decision" value={mode} />
           <input type="hidden" name="locale" value={locale} />
           <Input
             name="note"
-            placeholder={
-              mode === "rejected"
-                ? t("inbox.rejectReason")
-                : t("inbox.changesNote")
-            }
+            placeholder={mode === "rejected" ? t("inbox.rejectReason") : t("inbox.changesNote")}
             required
             data-testid={`journal-review-note-${entry.id}`}
           />
@@ -162,12 +230,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             <Button type="submit" size="sm" variant="secondary" disabled={isPending}>
               {mode === "rejected" ? t("inbox.reject") : t("inbox.requestChanges")}
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => setMode("idle")}
-            >
+            <Button type="button" size="sm" variant="ghost" onClick={() => setMode("idle")}>
               {t("inbox.cancel")}
             </Button>
           </div>

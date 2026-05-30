@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { applyApprovalSkillEffects } from "./confirm-actions";
+import { confirmEntryAndVerifySkills } from "@/lib/operations/org-membership";
 import { REVIEW_DECISIONS, type ReviewDecision } from "./review-status";
 
 /**
@@ -97,4 +98,39 @@ export async function reviewJournalEntry(
   revalidatePath(`/${locale}/dashboard/inbox`);
   revalidatePath(`/${locale}/dashboard/journal`);
   return { ok: true, decision };
+}
+
+/**
+ * Approve an entry AND verify the specific declared skills it proves — the
+ * canonical verified-proof path (keystone). Goes through the SECURITY DEFINER
+ * `confirm_entry_and_verify_skills` RPC (via lib/operations/org-membership.ts),
+ * which is the ONLY way a manager can flip a worker's skill to verified
+ * (worker_skills write RLS is owns_worker-only, so the old app-layer update was
+ * silently blocked). The manager picks which of the worker's declared skills
+ * this entry demonstrates; those become manager-confirmed/verified.
+ */
+export type ConfirmSkillsState =
+  | { ok: true; verified: number }
+  | { ok: false; code: string; message?: string };
+
+export async function confirmEntrySkills(
+  _prev: ConfirmSkillsState | null,
+  formData: FormData,
+): Promise<ConfirmSkillsState> {
+  const entryId = String(formData.get("entry_id") ?? "").trim();
+  const note = String(formData.get("note") ?? "").trim() || null;
+  const locale = String(formData.get("locale") ?? "lt");
+  const skillIds = formData
+    .getAll("skill_id")
+    .map((v) => String(v).trim())
+    .filter((v) => v !== "");
+
+  if (entryId === "") return { ok: false, code: "error", message: "entry_id required" };
+  if (skillIds.length === 0) return { ok: false, code: "no_skills" };
+
+  const res = await confirmEntryAndVerifySkills(entryId, skillIds, note, locale);
+  if (res.ok) return { ok: true, verified: res.verified ?? skillIds.length };
+  // Map the RPC block reasons through unchanged (review_not_enabled,
+  // not_authorized, skill_not_owned, no_reviewer_engagement, error, …).
+  return { ok: false, code: res.code, message: res.message };
 }
