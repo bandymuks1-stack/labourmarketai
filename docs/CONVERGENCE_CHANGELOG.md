@@ -51,17 +51,36 @@ It is now unreachable from the running app; the DB schema stays dormant.
 
 ---
 
-## 3. DB-touching migrations (committed in this PR, applied by owner on merge)
+## 3. DB-touching migrations (committed AND applied to prod)
 
-> Per AGENTS.md + PLATFORM_DOCTRINE §16: migrations are committed, **never run
-> automatically**; the owner applies them. Every migration is reversible and
-> uses the new `YYYYMMDDHHMMSS_snake_case.sql` convention (§16). Row counts
-> below were asserted against live prod before authoring.
+> **Apply mechanism (corrected).** There is **no automated migration step**:
+> `.github/workflows/quality.yml` is build-only ("no DB, no deploy"); Vercel
+> deploys the app, not the database. An earlier draft of this doc said the
+> "deploy pipeline auto-applies on merge" — that was **wrong**. Migrations are
+> applied **manually** via the Supabase MCP `apply_migration` path (the prod
+> ledger uses MCP-generated timestamp versions; `0014`+ all look like this).
+> `supabase db push` must **not** be used here — the repo's `0014`–`0036`
+> filenames carry versions absent from the ledger, so `db push` would try to
+> re-run 23 already-applied migrations. Every migration is reversible and uses
+> the `YYYYMMDDHHMMSS_snake_case.sql` convention (§16); row counts were asserted
+> against live prod before applying.
 
-1. **Drop legacy `threads` + `messages`** — both **0 rows** (asserted). Drops the two tables, their 16 RLS policies, and `can_access_thread()`. Reversible down-block recreates them. After apply, regenerate `lib/supabase/types.ts` via `pnpm db:types` (this removes the dead `threads` / `messages` / `can_access_thread` type definitions — they are deliberately **not** hand-edited now, so `types.ts` stays a faithful mirror of live prod until the drop applies).
-2. **`projects.company_id → organization_id`** — `projects` has **0 rows** (asserted). Adds `organization_id uuid REFERENCES organizations(id)`, backfills from `organizations.legacy_company_id` (no-op at 0 rows), keeps the nullable legacy `company_id` column (non-destructive, fully reversible). No app code reads `projects`, so there is no code-side change.
+Both migrations were **applied to prod `gorgitwvdzxbnaxhrsrw` on 2026-05-30**
+(owner-authorized) and recorded in the ledger with versions matching the
+filenames. Verified after apply: tables gone, column present, versions in
+history.
 
-**Exact SQL is presented for owner approval before the files are written (brief hard-stop).**
+1. **Drop legacy `threads` + `messages`** (`20260530120000`) — both **0 rows** (asserted by a pre-drop `DO` guard). Drops the two tables (CASCADE removes their RLS policies) then `can_access_thread()`. **Ordering note:** tables must drop *before* the function (the `messages_*` policies depend on it) — fixed after the first authoring. Faithful recreate in the commented ROLLBACK block.
+2. **`projects.company_id → organization_id`** (`20260530120100`) — `projects` has **0 rows** (asserted). Adds `organization_id uuid REFERENCES organizations(id) ON DELETE RESTRICT` (proof-chain protection, see §7), backfills from `organizations.legacy_company_id` (no-op at 0 rows), keeps the nullable legacy `company_id` column (non-destructive, fully reversible). No app code reads `projects`, so there is no code-side change.
+
+**Types resync.** `lib/supabase/types.ts` was regenerated from prod after apply
+(via the authenticated Supabase MCP generator — the `pnpm db:types` CLI lacked
+an access token locally). This removed the dead `threads`/`messages`/
+`can_access_thread` types, added `projects.organization_id`, and additionally
+resynced **significant pre-existing drift**: the committed types.ts had been
+stale since ~migration 0014, missing ~32 tables/RPCs that exist on prod
+(`conversations*`, `customer_requests*`, `company_workers*`, `pilot_drafts`,
+recent RPCs). `pnpm -F web typecheck` passes against the resynced types.
 
 ---
 
