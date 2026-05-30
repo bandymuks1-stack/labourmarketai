@@ -63,21 +63,25 @@ export default async function InboxPage({
 
     const unconfirmed = rows ?? [];
 
-    // Batch the workers' declared skills for the "skills attached" line.
+    // Batch the workers' declared skills WITH ids + verified state — the manager
+    // picks which of these the entry proves, to confirm/verify them.
     const workerIds = [
       ...new Set(unconfirmed.map((r) => r.worker_id).filter(Boolean)),
     ] as string[];
-    const skillsByWorker = new Map<string, string[]>();
+    const skillsByWorker = new Map<
+      string,
+      { id: string; name: string; verified: boolean }[]
+    >();
     if (workerIds.length > 0) {
       const { data: ws } = await supabase
         .from("worker_skills")
-        .select("worker_id, skills(slug)")
+        .select("worker_id, skill_id, verified, skills(slug)")
         .in("worker_id", workerIds);
       for (const r of ws ?? []) {
         const slug = (r.skills as { slug: string | null } | null)?.slug;
-        if (!r.worker_id || !slug) continue;
+        if (!r.worker_id || !r.skill_id || !slug) continue;
         const list = skillsByWorker.get(r.worker_id) ?? [];
-        list.push(tSkill(slug));
+        list.push({ id: r.skill_id, name: tSkill(slug), verified: r.verified === true });
         skillsByWorker.set(r.worker_id, list);
       }
     }

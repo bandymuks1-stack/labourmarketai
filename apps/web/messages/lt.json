@@ -51,17 +51,39 @@
       },
       "draftForm": {
         "field": {
-          "title": { "label": "Pareigybė / vaidmuo", "placeholder": "Pvz., dažytojas, virėjas, vairuotojas" },
-          "capabilities": { "label": "Reikiamos kompetencijos", "placeholder": "Pvz., dažymas, mūrijimas, vairavimas" },
-          "location": { "label": "Vieta / šalis", "placeholder": "Pvz., Vilnius, Lietuva" },
-          "timing": { "label": "Pradžios laikas", "placeholder": "Pvz., kovo mėnesį, šią savaitę" },
+          "title": {
+            "label": "Pareigybė / vaidmuo",
+            "placeholder": "Pvz., dažytojas, virėjas, vairuotojas"
+          },
+          "capabilities": {
+            "label": "Reikiamos kompetencijos",
+            "placeholder": "Pvz., dažymas, mūrijimas, vairavimas"
+          },
+          "location": {
+            "label": "Vieta / šalis",
+            "placeholder": "Pvz., Vilnius, Lietuva"
+          },
+          "timing": {
+            "label": "Pradžios laikas",
+            "placeholder": "Pvz., kovo mėnesį, šią savaitę"
+          },
           "accommodation": {
             "label": "Apgyvendinimas",
             "placeholder": "Pasirinkti",
-            "options": { "yes": "Suteikiamas", "no": "Nesuteikiamas", "unknown": "Dar nežinia" }
+            "options": {
+              "yes": "Suteikiamas",
+              "no": "Nesuteikiamas",
+              "unknown": "Dar nežinia"
+            }
           },
-          "languages": { "label": "Kalbų poreikis", "placeholder": "Pvz., lietuvių, anglų" },
-          "notes": { "label": "Papildoma informacija", "placeholder": "Bet kokios pastabos pilotui" }
+          "languages": {
+            "label": "Kalbų poreikis",
+            "placeholder": "Pvz., lietuvių, anglų"
+          },
+          "notes": {
+            "label": "Papildoma informacija",
+            "placeholder": "Bet kokios pastabos pilotui"
+          }
         },
         "saveButton": "Išsaugoti juodraštį",
         "saving": "Saugoma…",
@@ -207,13 +229,34 @@
       },
       "draftForm": {
         "field": {
-          "candidateRoles": { "label": "Siūlomi kandidatų vaidmenys", "placeholder": "Pvz., elektrikai, programuotojai" },
-          "skillAreas": { "label": "Įgūdžių sritys", "placeholder": "Pvz., statyba, IT, virtuvė" },
-          "countries": { "label": "Šalys", "placeholder": "Pvz., LT, LV, EE" },
-          "languages": { "label": "Kalbų aprėptis", "placeholder": "Pvz., LT, EN, RU" },
-          "availability": { "label": "Galimumas", "placeholder": "Pvz., 5 žmonės iškart" },
-          "documentation": { "label": "Dokumentų pasirengimas", "placeholder": "Pvz., A1, leidimai tvarkomi" },
-          "notes": { "label": "Papildoma informacija", "placeholder": "Bet kokios pastabos pilotui" }
+          "candidateRoles": {
+            "label": "Siūlomi kandidatų vaidmenys",
+            "placeholder": "Pvz., elektrikai, programuotojai"
+          },
+          "skillAreas": {
+            "label": "Įgūdžių sritys",
+            "placeholder": "Pvz., statyba, IT, virtuvė"
+          },
+          "countries": {
+            "label": "Šalys",
+            "placeholder": "Pvz., LT, LV, EE"
+          },
+          "languages": {
+            "label": "Kalbų aprėptis",
+            "placeholder": "Pvz., LT, EN, RU"
+          },
+          "availability": {
+            "label": "Galimumas",
+            "placeholder": "Pvz., 5 žmonės iškart"
+          },
+          "documentation": {
+            "label": "Dokumentų pasirengimas",
+            "placeholder": "Pvz., A1, leidimai tvarkomi"
+          },
+          "notes": {
+            "label": "Papildoma informacija",
+            "placeholder": "Bet kokios pastabos pilotui"
+          }
         },
         "saveButton": "Išsaugoti juodraštį",
         "saving": "Saugoma…",
@@ -354,11 +397,26 @@
       },
       "draftForm": {
         "field": {
-          "serviceType": { "label": "Paslaugos / darbo tipas", "placeholder": "Pvz., stogo dengimas, vertimas" },
-          "location": { "label": "Vieta", "placeholder": "Pvz., Vilnius" },
-          "timing": { "label": "Numatomas laikas", "placeholder": "Pvz., balandžio mėnesį" },
-          "budget": { "label": "Biudžetas (jei žinote)", "placeholder": "Neprivaloma" },
-          "notes": { "label": "Papildoma informacija", "placeholder": "Bet kokios pastabos pilotui" }
+          "serviceType": {
+            "label": "Paslaugos / darbo tipas",
+            "placeholder": "Pvz., stogo dengimas, vertimas"
+          },
+          "location": {
+            "label": "Vieta",
+            "placeholder": "Pvz., Vilnius"
+          },
+          "timing": {
+            "label": "Numatomas laikas",
+            "placeholder": "Pvz., balandžio mėnesį"
+          },
+          "budget": {
+            "label": "Biudžetas (jei žinote)",
+            "placeholder": "Neprivaloma"
+          },
+          "notes": {
+            "label": "Papildoma informacija",
+            "placeholder": "Bet kokios pastabos pilotui"
+          }
         },
         "saveButton": "Išsaugoti juodraštį",
         "saving": "Saugoma…",
@@ -551,17 +609,16 @@
       "salary": "Atlyginimas",
       "startDate": "Pradžios data",
       "countries": "Pageidaujamos šalys",
-      "visibility": "Matomumas",
+      "visibility": {
+        "public": "Viešas",
+        "agencies_only": "Tik agentūroms",
+        "direct_only": "Tik tiesioginiams kontaktams"
+      },
       "status": {
         "open": "Aktyvus",
         "paused": "Sustabdytas",
         "filled": "Užpildytas",
         "closed": "Uždarytas"
-      },
-      "visibility": {
-        "public": "Viešas",
-        "agencies_only": "Tik agentūroms",
-        "direct_only": "Tik tiesioginiams kontaktams"
       }
     },
     "form": {
@@ -1064,7 +1121,10 @@
     }
   },
   "map": {
-    "label": { "live": "EU GYVA", "utc": "UTC" },
+    "label": {
+      "live": "EU GYVA",
+      "utc": "UTC"
+    },
     "tooltip": {
       "workers": "darbuotojai",
       "projects": "projektai",
@@ -1121,7 +1181,10 @@
     },
     "hot": "Karšta",
     "gap": "Trūkumas",
-    "legend": { "supply": "Pasiūla", "demand": "Paklausa" },
+    "legend": {
+      "supply": "Pasiūla",
+      "demand": "Paklausa"
+    },
     "autoUpdate": "Auto-atnaujinimas",
     "timeAgo": {
       "justNow": "ką tik",
@@ -1144,7 +1207,11 @@
       "ADP": "Prisitaikymas",
       "TRS": "Pasitikėjimas"
     },
-    "tier": { "gold": "Auksas", "silver": "Sidabras", "bronze": "Bronza" },
+    "tier": {
+      "gold": "Auksas",
+      "silver": "Sidabras",
+      "bronze": "Bronza"
+    },
     "status": {
       "live": "Gyva",
       "available": "Laisvas",
@@ -1496,12 +1563,18 @@
     }
   },
   "shared": {
-    "faq": { "expand_aria": "Išskleisti atsakymą" },
+    "faq": {
+      "expand_aria": "Išskleisti atsakymą"
+    },
     "preview": {
       "conceptChip": "Koncepcijos peržiūra · pre-alpha",
       "rankedMatches": "atitikimo kryptis",
       "headcount": "Žmonių skaičius",
-      "intensity": { "HOT": "Karšta", "FILLING": "Pildosi", "OPEN": "Atvira" },
+      "intensity": {
+        "HOT": "Karšta",
+        "FILLING": "Pildosi",
+        "OPEN": "Atvira"
+      },
       "poolSize": "Rezervo dydis",
       "trades": "Pagal profesiją",
       "status": {
@@ -1531,36 +1604,81 @@
       "eyebrow": "Jūsų kelionė",
       "headline": "Kelionė: nuo registracijos iki samdymo",
       "steps": [
-        { "title": "Užpildykit profilį (5 min)", "desc": "Nurodykite profesiją, patirtį ir prieinamumą." },
-        { "title": "Patvirtinkit įgūdžius", "desc": "Darbdaviai ir pažymėjimai patvirtina, ką mokate." },
-        { "title": "Matykite galimybių atitikimo kryptį", "desc": "Jus suranda darbai pagal profesiją, įkainį ir vietą." },
-        { "title": "Dirbkite ir gaukite vertinimą", "desc": "Atliktas darbas stiprina jūsų įrodymus ir pasirengimą." }
+        {
+          "title": "Užpildykit profilį (5 min)",
+          "desc": "Nurodykite profesiją, patirtį ir prieinamumą."
+        },
+        {
+          "title": "Patvirtinkit įgūdžius",
+          "desc": "Darbdaviai ir pažymėjimai patvirtina, ką mokate."
+        },
+        {
+          "title": "Matykite galimybių atitikimo kryptį",
+          "desc": "Jus suranda darbai pagal profesiją, įkainį ir vietą."
+        },
+        {
+          "title": "Dirbkite ir gaukite vertinimą",
+          "desc": "Atliktas darbas stiprina jūsų įrodymus ir pasirengimą."
+        }
       ]
     },
     "features": {
       "eyebrow": "Ką gaunate",
       "headline": "Sukurta darbuotojui, ne tarpininkui",
       "items": [
-        { "title": "Pasirengimas pagal realų darbą", "desc": "Pasirengimas atspindi atliktą darbą ir įrodymus, rodomas kontekste — ne pažadus." },
-        { "title": "Patvirtinti įgūdžiai", "desc": "Patvirtinti darbdavių ir pažymėjimų." },
-        { "title": "Tarpvalstybinės galimybės", "desc": "NL, DK, DE, SE, NO ir kitos." },
-        { "title": "Tiesioginis kontaktas su darbdaviu", "desc": "Be neskaidrių tarpininkų." },
-        { "title": "Paaiškinamas atitikimas", "desc": "Matykite, kodėl darbas jums gali tikti." },
-        { "title": "Auganti istorija", "desc": "Kiekvienas darbas kuria perkeliamą istoriją." }
+        {
+          "title": "Pasirengimas pagal realų darbą",
+          "desc": "Pasirengimas atspindi atliktą darbą ir įrodymus, rodomas kontekste — ne pažadus."
+        },
+        {
+          "title": "Patvirtinti įgūdžiai",
+          "desc": "Patvirtinti darbdavių ir pažymėjimų."
+        },
+        {
+          "title": "Tarpvalstybinės galimybės",
+          "desc": "NL, DK, DE, SE, NO ir kitos."
+        },
+        {
+          "title": "Tiesioginis kontaktas su darbdaviu",
+          "desc": "Be neskaidrių tarpininkų."
+        },
+        {
+          "title": "Paaiškinamas atitikimas",
+          "desc": "Matykite, kodėl darbas jums gali tikti."
+        },
+        {
+          "title": "Auganti istorija",
+          "desc": "Kiekvienas darbas kuria perkeliamą istoriją."
+        }
       ]
     },
     "faq": {
       "eyebrow": "DUK darbuotojams",
       "headline": "Aiškūs atsakymai",
       "items": [
-        { "q": "Kaip patvirtinami įgūdžiai?", "a": "Darbdavių patvirtinimais už atliktą darbą ir įkeltais pažymėjimais — niekada vien savadarbiai." },
-        { "q": "Kiek kainuoja darbuotojui?", "a": "Pagrindas nemokamas — profilis, atitikimai, paieška ir žinutės darbuotojui niekada nieko nekainuoja. Papildomos premium funkcijos (nuotraukų ir vaizdo galerijos, AI profilio asistentas, VIP matomumas) turi nedidelį mokestį. Galutinės kainos skelbiamos prieš pilną startą." },
-        { "q": "Kas mato mano profilį?", "a": "Tik patvirtinti darbdaviai ir agentūros, kuriems esate matomas — jūs valdote prieinamumą ir matomumą." },
-        { "q": "Ar galiu dirbti kelioms įmonėms?", "a": "Taip. Profilis priklauso jums; galite priimti darbus iš bet kurios įmonės platformoje." }
+        {
+          "q": "Kaip patvirtinami įgūdžiai?",
+          "a": "Darbdavių patvirtinimais už atliktą darbą ir įkeltais pažymėjimais — niekada vien savadarbiai."
+        },
+        {
+          "q": "Kiek kainuoja darbuotojui?",
+          "a": "Pagrindas nemokamas — profilis, atitikimai, paieška ir žinutės darbuotojui niekada nieko nekainuoja. Papildomos premium funkcijos (nuotraukų ir vaizdo galerijos, AI profilio asistentas, VIP matomumas) turi nedidelį mokestį. Galutinės kainos skelbiamos prieš pilną startą."
+        },
+        {
+          "q": "Kas mato mano profilį?",
+          "a": "Tik patvirtinti darbdaviai ir agentūros, kuriems esate matomas — jūs valdote prieinamumą ir matomumą."
+        },
+        {
+          "q": "Ar galiu dirbti kelioms įmonėms?",
+          "a": "Taip. Profilis priklauso jums; galite priimti darbus iš bet kurios įmonės platformoje."
+        }
       ]
     },
     "cta": {
-      "headline": { "line1": "Jūsų įgūdžiai verti", "line2": "sąžiningos rinkos." },
+      "headline": {
+        "line1": "Jūsų įgūdžiai verti",
+        "line2": "sąžiningos rinkos."
+      },
       "subcopy": "Užsirašykite į darbuotojų beta sąrašą ir pakviesime atsivėrus prieigai.",
       "button": "Užsirašyti į beta laukiančiųjų sąrašą"
     }
@@ -1584,36 +1702,81 @@
       "eyebrow": "Kaip veikia atitikimo kryptis jums",
       "headline": "Nuo poreikio iki samdymo",
       "steps": [
-        { "title": "Sukurkite projektą ir poreikį", "desc": "Apibrėžkite pareigybes, skaičių ir įgūdžius." },
-        { "title": "Sistema parodo geriausius", "desc": "Darbuotojai ir agentūros įvertinami pagal jūsų poreikį." },
-        { "title": "Susisiekite tiesiogiai", "desc": "Susisiekite su norimais žmonėmis — be tarpininko." },
-        { "title": "Samdykite greičiau", "desc": "Užpildykite pareigybes per dienas, atsekamai." }
+        {
+          "title": "Sukurkite projektą ir poreikį",
+          "desc": "Apibrėžkite pareigybes, skaičių ir įgūdžius."
+        },
+        {
+          "title": "Sistema parodo geriausius",
+          "desc": "Darbuotojai ir agentūros įvertinami pagal jūsų poreikį."
+        },
+        {
+          "title": "Susisiekite tiesiogiai",
+          "desc": "Susisiekite su norimais žmonėmis — be tarpininko."
+        },
+        {
+          "title": "Samdykite greičiau",
+          "desc": "Užpildykite pareigybes per dienas, atsekamai."
+        }
       ]
     },
     "features": {
       "eyebrow": "Kodėl įmonės",
       "headline": "Pasiūla, su kuria galima veikti",
       "items": [
-        { "title": "Paaiškinama atitikimo kryptis", "desc": "Kiekvienas atitikimo signalas pateikia priežastis." },
-        { "title": "Tarpvalstybinis darbuotojų rezervas", "desc": "Baltijos ir Šiaurės pasiūla vienoje vietoje." },
-        { "title": "Be neskaidrių tarpininkų", "desc": "Jūs matote ir valdote santykį." },
-        { "title": "Patvirtinti įgūdžiai + atitikimo signalai", "desc": "Samdykite pagal įrodymus, ne pažadus." },
-        { "title": "Realaus laiko pasiūlos signalai", "desc": "Matykite prieinamumo pokyčius iškart." },
-        { "title": "Tiesioginis kontaktas", "desc": "Santykis su darbuotoju priklauso jums." }
+        {
+          "title": "Paaiškinama atitikimo kryptis",
+          "desc": "Kiekvienas atitikimo signalas pateikia priežastis."
+        },
+        {
+          "title": "Tarpvalstybinis darbuotojų rezervas",
+          "desc": "Baltijos ir Šiaurės pasiūla vienoje vietoje."
+        },
+        {
+          "title": "Be neskaidrių tarpininkų",
+          "desc": "Jūs matote ir valdote santykį."
+        },
+        {
+          "title": "Patvirtinti įgūdžiai + atitikimo signalai",
+          "desc": "Samdykite pagal įrodymus, ne pažadus."
+        },
+        {
+          "title": "Realaus laiko pasiūlos signalai",
+          "desc": "Matykite prieinamumo pokyčius iškart."
+        },
+        {
+          "title": "Tiesioginis kontaktas",
+          "desc": "Santykis su darbuotoju priklauso jums."
+        }
       ]
     },
     "faq": {
       "eyebrow": "DUK įmonėms",
       "headline": "Aiškūs atsakymai",
       "items": [
-        { "q": "Kaip rodomi atitikimo signalai?", "a": "Visada konkrečiam poreikiui: aprėptis ir atitikimas pagal patvirtintus įgūdžius, patikimumą ir saugą, su priežastimis. Niekada vienas universalus įvertinimas, palyginamas tarp žmonių." },
-        { "q": "Kiek kainuoja įmonei?", "a": "Kaina skelbiama prieš startą. Užsirašiusiems — ankstyvos prieigos kaina." },
-        { "q": "Ar galima atrinkti pagal lokaciją?", "a": "Taip — pagal šalį ir regioną, atsižvelgiant į darbuotojo vietą ir pasirengimą keltis." },
-        { "q": "Kas garantuoja darbuotojo patirtį?", "a": "Patvirtinti įgūdžiai, darbdavių patvirtinta istorija ir kontekstiniai atitikimo signalai — ne savadarbiai CV." }
+        {
+          "q": "Kaip rodomi atitikimo signalai?",
+          "a": "Visada konkrečiam poreikiui: aprėptis ir atitikimas pagal patvirtintus įgūdžius, patikimumą ir saugą, su priežastimis. Niekada vienas universalus įvertinimas, palyginamas tarp žmonių."
+        },
+        {
+          "q": "Kiek kainuoja įmonei?",
+          "a": "Kaina skelbiama prieš startą. Užsirašiusiems — ankstyvos prieigos kaina."
+        },
+        {
+          "q": "Ar galima atrinkti pagal lokaciją?",
+          "a": "Taip — pagal šalį ir regioną, atsižvelgiant į darbuotojo vietą ir pasirengimą keltis."
+        },
+        {
+          "q": "Kas garantuoja darbuotojo patirtį?",
+          "a": "Patvirtinti įgūdžiai, darbdavių patvirtinta istorija ir kontekstiniai atitikimo signalai — ne savadarbiai CV."
+        }
       ]
     },
     "cta": {
-      "headline": { "line1": "Nustokite laukti savaites", "line2": "kol užpildysite pareigybę." },
+      "headline": {
+        "line1": "Nustokite laukti savaites",
+        "line2": "kol užpildysite pareigybę."
+      },
       "subcopy": "Užsirašykite ir gaukite ankstyvos prieigos kainą savo projektams.",
       "button": "Užsirašyti įmonės sąraše"
     }
@@ -1621,7 +1784,10 @@
   "agencies": {
     "pool": {
       "eyebrow": "Jūsų valdymo centras",
-      "headline": { "line1": "Visas jūsų rezervas —", "line2": "vienoje vietoje." },
+      "headline": {
+        "line1": "Visas jūsų rezervas —",
+        "line2": "vienoje vietoje."
+      },
       "subcopy": "Valdykite darbuotojus, susiekite juos su klientų poreikiu ir tarpininkaukite — neprarasdami matomumo ir kontrolės.",
       "bullets": [
         "Rezervo dydis — visi kuruojami darbuotojai iškart.",
@@ -1634,36 +1800,81 @@
       "eyebrow": "Agentūros eiga",
       "headline": "Valdykite rezervą kaip biuras",
       "steps": [
-        { "title": "Onboard'inkit savo darbuotojus", "desc": "Suveskite kuruojamą rezervą į vieną erdvę." },
-        { "title": "Susiekite su klientų poreikiu", "desc": "Priderinkite žmones prie klientų poreikių." },
-        { "title": "Valdykite paskyrimus", "desc": "Sekite aktyvius, laukiančius ir laisvus." },
-        { "title": "Auginkite savo rezervą", "desc": "Pridėkite pajėgumo, kur auga paklausa." }
+        {
+          "title": "Onboard'inkit savo darbuotojus",
+          "desc": "Suveskite kuruojamą rezervą į vieną erdvę."
+        },
+        {
+          "title": "Susiekite su klientų poreikiu",
+          "desc": "Priderinkite žmones prie klientų poreikių."
+        },
+        {
+          "title": "Valdykite paskyrimus",
+          "desc": "Sekite aktyvius, laukiančius ir laisvus."
+        },
+        {
+          "title": "Auginkite savo rezervą",
+          "desc": "Pridėkite pajėgumo, kur auga paklausa."
+        }
       ]
     },
     "features": {
       "eyebrow": "Kodėl agentūros",
       "headline": "Svertas, ne kontrolės praradimas",
       "items": [
-        { "title": "Valdykite rezervą", "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje." },
-        { "title": "Skelbkite klientų vardu", "desc": "Tarpininkaukite neprarasdami santykio." },
-        { "title": "Atitikimo kryptis", "desc": "Greičiau įdarbinkite tinkamus." },
-        { "title": "Matomumo valdymas", "desc": "Vieša, tik agentūroms ar tiesioginė — jūsų sprendimas." },
-        { "title": "Tarpvalstybinis pasiekiamumas", "desc": "Baltijos ir Šiaurės klientai ir darbuotojai." },
-        { "title": "Auginkite biurą", "desc": "Pajėgumo įžvalgos keičiantis paklausai." }
+        {
+          "title": "Valdykite rezervą",
+          "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje."
+        },
+        {
+          "title": "Skelbkite klientų vardu",
+          "desc": "Tarpininkaukite neprarasdami santykio."
+        },
+        {
+          "title": "Atitikimo kryptis",
+          "desc": "Greičiau įdarbinkite tinkamus."
+        },
+        {
+          "title": "Matomumo valdymas",
+          "desc": "Vieša, tik agentūroms ar tiesioginė — jūsų sprendimas."
+        },
+        {
+          "title": "Tarpvalstybinis pasiekiamumas",
+          "desc": "Baltijos ir Šiaurės klientai ir darbuotojai."
+        },
+        {
+          "title": "Auginkite biurą",
+          "desc": "Pajėgumo įžvalgos keičiantis paklausai."
+        }
       ]
     },
     "faq": {
       "eyebrow": "DUK agentūroms",
       "headline": "Aiškūs atsakymai",
       "items": [
-        { "q": "Ar išlaikome santykius su klientais?", "a": "Taip. Jūs tarpininkaujate ir valdote — platforma jūsų neaplenkia." },
-        { "q": "Kiek kainuoja agentūroms?", "a": "Kaina skelbiama prieš startą; partneriams sąraše — ankstyvos prieigos sąlygos." },
-        { "q": "Ar galime valdyti darbuotojų matomumą?", "a": "Taip — vieša, tik agentūroms ar tiesioginė, kiekvienam darbuotojui ir poreikiui." },
-        { "q": "Ar darbuotojas gali aptarnauti kelis klientus?", "a": "Taip, su paskyrimų būsenos sekimu, kad nebūtų dvigubų rezervacijų." }
+        {
+          "q": "Ar išlaikome santykius su klientais?",
+          "a": "Taip. Jūs tarpininkaujate ir valdote — platforma jūsų neaplenkia."
+        },
+        {
+          "q": "Kiek kainuoja agentūroms?",
+          "a": "Kaina skelbiama prieš startą; partneriams sąraše — ankstyvos prieigos sąlygos."
+        },
+        {
+          "q": "Ar galime valdyti darbuotojų matomumą?",
+          "a": "Taip — vieša, tik agentūroms ar tiesioginė, kiekvienam darbuotojui ir poreikiui."
+        },
+        {
+          "q": "Ar darbuotojas gali aptarnauti kelis klientus?",
+          "a": "Taip, su paskyrimų būsenos sekimu, kad nebūtų dvigubų rezervacijų."
+        }
       ]
     },
     "cta": {
-      "headline": { "line1": "Paverskite rezervą", "line2": "gyvu biuru." },
+      "headline": {
+        "line1": "Paverskite rezervą",
+        "line2": "gyvu biuru."
+      },
       "subcopy": "Užsirašykite į partnerių sąrašą ir gaukite ankstyvos prieigos sąlygas.",
       "button": "Užsirašyti partnerių sąraše"
     }
@@ -1938,9 +2149,15 @@
   },
   "legal": {
     "draftNote": "Šis dokumentas yra juodraštis. Galutinį, įpareigojantį tekstą prieš viešą startą peržiūrės teisininkai (M5).",
-    "terms": { "title": "Naudojimo sąlygos" },
-    "privacy": { "title": "Privatumo politika" },
-    "cookies": { "title": "Slapukų politika" }
+    "terms": {
+      "title": "Naudojimo sąlygos"
+    },
+    "privacy": {
+      "title": "Privatumo politika"
+    },
+    "cookies": {
+      "title": "Slapukų politika"
+    }
   },
   "pilotReadiness": {
     "title": "Bandomoji versija",
@@ -2259,5 +2476,38 @@
     "outcomeNoWorker": "Jūsų darbuotojo profilis dar neparuoštas.",
     "outcomeError": "Nepavyko priimti. Bandykite dar kartą.",
     "outcomeNeedsMigration": "Dar neparuošta."
+  },
+  "journal": {
+    "inbox": {
+      "confirmSkills": "Patvirtinti įgūdžius",
+      "confirmSkillsHint": "Pažymėkite įgūdžius, kuriuos šis įrašas įrodo. Patvirtinimas juos patikrina.",
+      "confirmNote": "Pastaba (nebūtina)",
+      "confirmSubmit": "Patvirtinti ir patikrinti",
+      "alreadyVerified": "Jau patvirtinta",
+      "noSkillsToConfirm": "Šis darbuotojas neturi daugiau nurodytų įgūdžių patvirtinti.",
+      "result": {
+        "skillsVerified": "Patvirtinta įgūdžių: {count}.",
+        "skillNotOwned": "Darbuotojas šio įgūdžio nenurodė.",
+        "noSkillsSelected": "Pasirinkite bent vieną įgūdį."
+      }
+    },
+    "cv": {
+      "verified": "Patvirtinta",
+      "declared": "Nurodyta"
+    }
+  },
+  "orgMembers": {
+    "title": "Organizacijos nariai ir peržiūra",
+    "intro": "Įtraukite darbuotoją į savo organizaciją ir atverkite jo darbo žurnalą peržiūrai. Vadovas tada gali patvirtinti įgūdžius, kuriuos įrodo įrašai.",
+    "reviewOn": "Peržiūra įjungta",
+    "reviewOff": "Peržiūra išjungta",
+    "enable": "Įjungti peržiūrą",
+    "disable": "Išjungti peržiūrą",
+    "addTitle": "Pridėti darbuotoją į organizaciją",
+    "addButton": "Pridėti į organizaciją",
+    "noMembers": "Kol kas narių nėra. Pridėkite darbuotoją žemiau.",
+    "noAddable": "Nėra darbuotojų pridėti. Pirma pakvieskite darbuotoją, tada jis atsiras čia.",
+    "reviewEnabledBadge": "Peržiūra",
+    "reviewDisabledBadge": "Be peržiūros"
   }
 }

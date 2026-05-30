@@ -18,6 +18,8 @@ export type SkillDot = {
   name: string;
   bin: string;
   isCore: boolean;
+  /** Manager-confirmed: a real verified Work Proof (keystone). */
+  verified?: boolean;
 };
 
 // Confidence bin → dot colour (§15). Literal bin name maps to literal colour.
@@ -111,11 +113,26 @@ export function CvEngagementCards({
                         />
                         {s.name}
                       </span>
-                      {s.isCore && (
-                        <span className="flex-none rounded-sm px-1 font-mono text-[9px] uppercase tracking-label text-brand-orange">
-                          {t("primary")}
+                      <span className="flex flex-none items-center gap-1.5">
+                        {/* The moment of truth: a declared skill becomes a real
+                            verified Work Proof once a manager confirms it. */}
+                        <span
+                          className={cn(
+                            "rounded-full border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                            s.verified
+                              ? "border-state-success/40 bg-state-success/10 text-state-success"
+                              : "border-ink-500 text-text-muted",
+                          )}
+                          data-testid={`skill-state-${s.slug}`}
+                        >
+                          {s.verified ? `✓ ${t("verified")}` : t("declared")}
                         </span>
-                      )}
+                        {s.isCore && (
+                          <span className="rounded-sm px-1 font-mono text-[9px] uppercase tracking-label text-brand-orange">
+                            {t("primary")}
+                          </span>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>

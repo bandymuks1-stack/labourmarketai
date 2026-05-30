@@ -51,17 +51,39 @@
       },
       "draftForm": {
         "field": {
-          "title": { "label": "Role / job title needed", "placeholder": "e.g. painter, cook, driver" },
-          "capabilities": { "label": "Required skills", "placeholder": "e.g. painting, masonry, driving" },
-          "location": { "label": "Location / country", "placeholder": "e.g. Vilnius, Lithuania" },
-          "timing": { "label": "Start timing", "placeholder": "e.g. in March, this week" },
+          "title": {
+            "label": "Role / job title needed",
+            "placeholder": "e.g. painter, cook, driver"
+          },
+          "capabilities": {
+            "label": "Required skills",
+            "placeholder": "e.g. painting, masonry, driving"
+          },
+          "location": {
+            "label": "Location / country",
+            "placeholder": "e.g. Vilnius, Lithuania"
+          },
+          "timing": {
+            "label": "Start timing",
+            "placeholder": "e.g. in March, this week"
+          },
           "accommodation": {
             "label": "Accommodation",
             "placeholder": "Choose",
-            "options": { "yes": "Provided", "no": "Not provided", "unknown": "Not sure yet" }
+            "options": {
+              "yes": "Provided",
+              "no": "Not provided",
+              "unknown": "Not sure yet"
+            }
           },
-          "languages": { "label": "Language needs", "placeholder": "e.g. Lithuanian, English" },
-          "notes": { "label": "Notes", "placeholder": "Any notes for the pilot" }
+          "languages": {
+            "label": "Language needs",
+            "placeholder": "e.g. Lithuanian, English"
+          },
+          "notes": {
+            "label": "Notes",
+            "placeholder": "Any notes for the pilot"
+          }
         },
         "saveButton": "Save draft",
         "saving": "Saving…",
@@ -207,13 +229,34 @@
       },
       "draftForm": {
         "field": {
-          "candidateRoles": { "label": "Candidate roles offered", "placeholder": "e.g. electricians, developers" },
-          "skillAreas": { "label": "Skill areas", "placeholder": "e.g. construction, IT, kitchen" },
-          "countries": { "label": "Countries", "placeholder": "e.g. LT, LV, EE" },
-          "languages": { "label": "Language coverage", "placeholder": "e.g. LT, EN, RU" },
-          "availability": { "label": "Availability", "placeholder": "e.g. 5 people immediately" },
-          "documentation": { "label": "Documentation readiness", "placeholder": "e.g. A1 ready, permits in process" },
-          "notes": { "label": "Notes", "placeholder": "Any notes for the pilot" }
+          "candidateRoles": {
+            "label": "Candidate roles offered",
+            "placeholder": "e.g. electricians, developers"
+          },
+          "skillAreas": {
+            "label": "Skill areas",
+            "placeholder": "e.g. construction, IT, kitchen"
+          },
+          "countries": {
+            "label": "Countries",
+            "placeholder": "e.g. LT, LV, EE"
+          },
+          "languages": {
+            "label": "Language coverage",
+            "placeholder": "e.g. LT, EN, RU"
+          },
+          "availability": {
+            "label": "Availability",
+            "placeholder": "e.g. 5 people immediately"
+          },
+          "documentation": {
+            "label": "Documentation readiness",
+            "placeholder": "e.g. A1 ready, permits in process"
+          },
+          "notes": {
+            "label": "Notes",
+            "placeholder": "Any notes for the pilot"
+          }
         },
         "saveButton": "Save draft",
         "saving": "Saving…",
@@ -354,11 +397,26 @@
       },
       "draftForm": {
         "field": {
-          "serviceType": { "label": "Service / work type", "placeholder": "e.g. roofing, translation" },
-          "location": { "label": "Location", "placeholder": "e.g. Vilnius" },
-          "timing": { "label": "Expected timing", "placeholder": "e.g. in April" },
-          "budget": { "label": "Budget (if known)", "placeholder": "Optional" },
-          "notes": { "label": "Notes", "placeholder": "Any notes for the pilot" }
+          "serviceType": {
+            "label": "Service / work type",
+            "placeholder": "e.g. roofing, translation"
+          },
+          "location": {
+            "label": "Location",
+            "placeholder": "e.g. Vilnius"
+          },
+          "timing": {
+            "label": "Expected timing",
+            "placeholder": "e.g. in April"
+          },
+          "budget": {
+            "label": "Budget (if known)",
+            "placeholder": "Optional"
+          },
+          "notes": {
+            "label": "Notes",
+            "placeholder": "Any notes for the pilot"
+          }
         },
         "saveButton": "Save draft",
         "saving": "Saving…",
@@ -551,17 +609,16 @@
       "salary": "Salary",
       "startDate": "Start date",
       "countries": "Preferred countries",
-      "visibility": "Visibility",
+      "visibility": {
+        "public": "Public",
+        "agencies_only": "Agencies only",
+        "direct_only": "Direct contacts only"
+      },
       "status": {
         "open": "Open",
         "paused": "Paused",
         "filled": "Filled",
         "closed": "Closed"
-      },
-      "visibility": {
-        "public": "Public",
-        "agencies_only": "Agencies only",
-        "direct_only": "Direct contacts only"
       }
     },
     "form": {
@@ -1064,7 +1121,10 @@
     }
   },
   "map": {
-    "label": { "live": "EU LIVE", "utc": "UTC" },
+    "label": {
+      "live": "EU LIVE",
+      "utc": "UTC"
+    },
     "tooltip": {
       "workers": "workers",
       "projects": "projects",
@@ -1121,7 +1181,10 @@
     },
     "hot": "Hot",
     "gap": "Gap",
-    "legend": { "supply": "Supply", "demand": "Demand" },
+    "legend": {
+      "supply": "Supply",
+      "demand": "Demand"
+    },
     "autoUpdate": "Auto-update",
     "timeAgo": {
       "justNow": "just now",
@@ -1131,7 +1194,10 @@
   },
   "playercards": {
     "eyebrow": "Workers as living profiles",
-    "headline": { "line1": "Every worker, in context", "line2": "and ready." },
+    "headline": {
+      "line1": "Every worker, in context",
+      "line2": "and ready."
+    },
     "subcopy": "Fit and readiness come from real completed work, confirmed skills and on-site proof — always shown in context, never one universal rating. Concept preview with sample profiles.",
     "stat": {
       "SKL": "Skill",
@@ -1141,7 +1207,11 @@
       "ADP": "Adaptability",
       "TRS": "Trust"
     },
-    "tier": { "gold": "Gold", "silver": "Silver", "bronze": "Bronze" },
+    "tier": {
+      "gold": "Gold",
+      "silver": "Silver",
+      "bronze": "Bronze"
+    },
     "status": {
       "live": "Live",
       "available": "Available",
@@ -1493,12 +1563,18 @@
     }
   },
   "shared": {
-    "faq": { "expand_aria": "Expand answer" },
+    "faq": {
+      "expand_aria": "Expand answer"
+    },
     "preview": {
       "conceptChip": "Concept preview · pre-alpha",
       "rankedMatches": "fit direction",
       "headcount": "Headcount",
-      "intensity": { "HOT": "Hot", "FILLING": "Filling", "OPEN": "Open" },
+      "intensity": {
+        "HOT": "Hot",
+        "FILLING": "Filling",
+        "OPEN": "Open"
+      },
       "poolSize": "Pool size",
       "trades": "By trade",
       "status": {
@@ -1528,36 +1604,81 @@
       "eyebrow": "Your journey",
       "headline": "Your journey: from signup to hire",
       "steps": [
-        { "title": "Build your profile (5 min)", "desc": "Add your trade, experience and availability." },
-        { "title": "Verify your skills", "desc": "Employers and certificates confirm what you can do." },
-        { "title": "See opportunity-fit direction", "desc": "Roles that fit your trade, rate and location find you." },
-        { "title": "Work, earn, level up", "desc": "Completed work strengthens your proof and readiness." }
+        {
+          "title": "Build your profile (5 min)",
+          "desc": "Add your trade, experience and availability."
+        },
+        {
+          "title": "Verify your skills",
+          "desc": "Employers and certificates confirm what you can do."
+        },
+        {
+          "title": "See opportunity-fit direction",
+          "desc": "Roles that fit your trade, rate and location find you."
+        },
+        {
+          "title": "Work, earn, level up",
+          "desc": "Completed work strengthens your proof and readiness."
+        }
       ]
     },
     "features": {
       "eyebrow": "What you get",
       "headline": "Built around the worker, not the middleman",
       "items": [
-        { "title": "Readiness from real work", "desc": "Your readiness reflects completed work and proof, shown in context — not promises." },
-        { "title": "Evidence-backed skills", "desc": "Built from confirmed work and certificates." },
-        { "title": "Cross-border opportunities", "desc": "NL, DK, DE, SE, NO and more." },
-        { "title": "Direct employer contact", "desc": "No opaque agents in the middle." },
-        { "title": "Explainable fit", "desc": "See why a role may fit you." },
-        { "title": "Growing track record", "desc": "Every job builds a portable history." }
+        {
+          "title": "Readiness from real work",
+          "desc": "Your readiness reflects completed work and proof, shown in context — not promises."
+        },
+        {
+          "title": "Evidence-backed skills",
+          "desc": "Built from confirmed work and certificates."
+        },
+        {
+          "title": "Cross-border opportunities",
+          "desc": "NL, DK, DE, SE, NO and more."
+        },
+        {
+          "title": "Direct employer contact",
+          "desc": "No opaque agents in the middle."
+        },
+        {
+          "title": "Explainable fit",
+          "desc": "See why a role may fit you."
+        },
+        {
+          "title": "Growing track record",
+          "desc": "Every job builds a portable history."
+        }
       ]
     },
     "faq": {
       "eyebrow": "Worker FAQ",
       "headline": "Straight answers",
       "items": [
-        { "q": "How are skills verified?", "a": "Through employer confirmations on completed work and uploaded certificates — never self-claim alone." },
-        { "q": "How much does it cost workers?", "a": "The core is free — your profile, matches, search and messaging never cost workers anything. Premium extras (photo + video galleries, the AI profile assistant, VIP visibility) carry a small fee. Final pricing is published before full launch." },
-        { "q": "Who sees my profile?", "a": "Only verified employers and agencies you're visible to — you control your availability and exposure." },
-        { "q": "Can I work for multiple companies?", "a": "Yes. Your profile is yours; you can take roles from any company on the platform." }
+        {
+          "q": "How are skills verified?",
+          "a": "Through employer confirmations on completed work and uploaded certificates — never self-claim alone."
+        },
+        {
+          "q": "How much does it cost workers?",
+          "a": "The core is free — your profile, matches, search and messaging never cost workers anything. Premium extras (photo + video galleries, the AI profile assistant, VIP visibility) carry a small fee. Final pricing is published before full launch."
+        },
+        {
+          "q": "Who sees my profile?",
+          "a": "Only verified employers and agencies you're visible to — you control your availability and exposure."
+        },
+        {
+          "q": "Can I work for multiple companies?",
+          "a": "Yes. Your profile is yours; you can take roles from any company on the platform."
+        }
       ]
     },
     "cta": {
-      "headline": { "line1": "Your skills deserve", "line2": "a fair market." },
+      "headline": {
+        "line1": "Your skills deserve",
+        "line2": "a fair market."
+      },
       "subcopy": "Join the worker beta waitlist and we'll bring you on as access opens.",
       "button": "Join the worker beta waitlist"
     }
@@ -1581,36 +1702,81 @@
       "eyebrow": "How fit direction works for you",
       "headline": "From demand to hire",
       "steps": [
-        { "title": "Create project + post demand", "desc": "Define roles, headcount and skills." },
-        { "title": "System ranks best matches", "desc": "Workers and agencies scored against your demand." },
-        { "title": "Reach out directly", "desc": "Contact the people you want — no gatekeeper." },
-        { "title": "Hire faster", "desc": "Close roles in days, with accountable decisions." }
+        {
+          "title": "Create project + post demand",
+          "desc": "Define roles, headcount and skills."
+        },
+        {
+          "title": "System ranks best matches",
+          "desc": "Workers and agencies scored against your demand."
+        },
+        {
+          "title": "Reach out directly",
+          "desc": "Contact the people you want — no gatekeeper."
+        },
+        {
+          "title": "Hire faster",
+          "desc": "Close roles in days, with accountable decisions."
+        }
       ]
     },
     "features": {
       "eyebrow": "Why companies",
       "headline": "Supply you can act on",
       "items": [
-        { "title": "Explainable fit direction", "desc": "Every fit signal shows the reasons behind it." },
-        { "title": "Cross-border worker pool", "desc": "Baltic + Nordic supply in one place." },
-        { "title": "No opaque middlemen", "desc": "You see and own the relationship." },
-        { "title": "Confirmed skills + fit signals", "desc": "Hire on evidence, not on claims." },
-        { "title": "Real-time supply signals", "desc": "See availability shift as it happens." },
-        { "title": "Direct contact", "desc": "You own the worker relationship." }
+        {
+          "title": "Explainable fit direction",
+          "desc": "Every fit signal shows the reasons behind it."
+        },
+        {
+          "title": "Cross-border worker pool",
+          "desc": "Baltic + Nordic supply in one place."
+        },
+        {
+          "title": "No opaque middlemen",
+          "desc": "You see and own the relationship."
+        },
+        {
+          "title": "Confirmed skills + fit signals",
+          "desc": "Hire on evidence, not on claims."
+        },
+        {
+          "title": "Real-time supply signals",
+          "desc": "See availability shift as it happens."
+        },
+        {
+          "title": "Direct contact",
+          "desc": "You own the worker relationship."
+        }
       ]
     },
     "faq": {
       "eyebrow": "Company FAQ",
       "headline": "Straight answers",
       "items": [
-        { "q": "How are fit signals shown?", "a": "Always against a specific need: coverage and fit from confirmed skills, reliability and on-site proof, with the reasons. Never one universal rating comparable across people." },
-        { "q": "How much does it cost?", "a": "Pricing is announced at launch. Waitlist signups get early-access pricing." },
-        { "q": "Can we filter by location?", "a": "Yes — by country and region, matched to worker location and willingness to relocate." },
-        { "q": "How is worker experience guaranteed?", "a": "Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs." }
+        {
+          "q": "How are fit signals shown?",
+          "a": "Always against a specific need: coverage and fit from confirmed skills, reliability and on-site proof, with the reasons. Never one universal rating comparable across people."
+        },
+        {
+          "q": "How much does it cost?",
+          "a": "Pricing is announced at launch. Waitlist signups get early-access pricing."
+        },
+        {
+          "q": "Can we filter by location?",
+          "a": "Yes — by country and region, matched to worker location and willingness to relocate."
+        },
+        {
+          "q": "How is worker experience guaranteed?",
+          "a": "Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs."
+        }
       ]
     },
     "cta": {
-      "headline": { "line1": "Stop waiting weeks", "line2": "to fill a role." },
+      "headline": {
+        "line1": "Stop waiting weeks",
+        "line2": "to fill a role."
+      },
       "subcopy": "Join the waitlist and get early-access pricing for your projects.",
       "button": "Join the company waitlist"
     }
@@ -1618,7 +1784,10 @@
   "agencies": {
     "pool": {
       "eyebrow": "Your control room",
-      "headline": { "line1": "Your whole pool,", "line2": "in one room." },
+      "headline": {
+        "line1": "Your whole pool,",
+        "line2": "in one room."
+      },
       "subcopy": "Manage your workers, connect them to client needs and broker introductions — without losing visibility or control.",
       "bullets": [
         "Pool size — every managed worker at a glance.",
@@ -1631,36 +1800,81 @@
       "eyebrow": "Agency workflow",
       "headline": "Run your pool like a desk",
       "steps": [
-        { "title": "Onboard your workers", "desc": "Bring your managed pool into one workspace." },
-        { "title": "Connect to client demand", "desc": "Direct your people toward open client roles." },
-        { "title": "Manage assignments", "desc": "Track active, pending and available." },
-        { "title": "Grow your pool", "desc": "Add capacity where demand is rising." }
+        {
+          "title": "Onboard your workers",
+          "desc": "Bring your managed pool into one workspace."
+        },
+        {
+          "title": "Connect to client demand",
+          "desc": "Direct your people toward open client roles."
+        },
+        {
+          "title": "Manage assignments",
+          "desc": "Track active, pending and available."
+        },
+        {
+          "title": "Grow your pool",
+          "desc": "Add capacity where demand is rising."
+        }
       ]
     },
     "features": {
       "eyebrow": "Why agencies",
       "headline": "Leverage, not loss of control",
       "items": [
-        { "title": "Manage your pool", "desc": "Workers, availability and status in one place." },
-        { "title": "Post on behalf of clients", "desc": "Broker demand without losing the relationship." },
-        { "title": "Fit direction", "desc": "Place the right people faster." },
-        { "title": "Visibility controls", "desc": "Public, agencies-only or direct — your call." },
-        { "title": "Cross-border reach", "desc": "Baltic + Nordic clients and workers." },
-        { "title": "Grow your desk", "desc": "Capacity insights as demand shifts." }
+        {
+          "title": "Manage your pool",
+          "desc": "Workers, availability and status in one place."
+        },
+        {
+          "title": "Post on behalf of clients",
+          "desc": "Broker demand without losing the relationship."
+        },
+        {
+          "title": "Fit direction",
+          "desc": "Place the right people faster."
+        },
+        {
+          "title": "Visibility controls",
+          "desc": "Public, agencies-only or direct — your call."
+        },
+        {
+          "title": "Cross-border reach",
+          "desc": "Baltic + Nordic clients and workers."
+        },
+        {
+          "title": "Grow your desk",
+          "desc": "Capacity insights as demand shifts."
+        }
       ]
     },
     "faq": {
       "eyebrow": "Agency FAQ",
       "headline": "Straight answers",
       "items": [
-        { "q": "Do we keep our client relationships?", "a": "Yes. You broker and stay in control — the platform never disintermediates you." },
-        { "q": "How much does it cost agencies?", "a": "Pricing is announced at launch; waitlist partners get early-access terms." },
-        { "q": "Can we control worker visibility?", "a": "Yes — public, agencies-only or direct, per worker and per demand." },
-        { "q": "Can one worker serve multiple clients?", "a": "Yes, with assignment status tracking so nothing is double-booked." }
+        {
+          "q": "Do we keep our client relationships?",
+          "a": "Yes. You broker and stay in control — the platform never disintermediates you."
+        },
+        {
+          "q": "How much does it cost agencies?",
+          "a": "Pricing is announced at launch; waitlist partners get early-access terms."
+        },
+        {
+          "q": "Can we control worker visibility?",
+          "a": "Yes — public, agencies-only or direct, per worker and per demand."
+        },
+        {
+          "q": "Can one worker serve multiple clients?",
+          "a": "Yes, with assignment status tracking so nothing is double-booked."
+        }
       ]
     },
     "cta": {
-      "headline": { "line1": "Turn your pool", "line2": "into a live desk." },
+      "headline": {
+        "line1": "Turn your pool",
+        "line2": "into a live desk."
+      },
       "subcopy": "Join the partner waitlist and get early-access terms for your agency.",
       "button": "Join the partner waitlist"
     }
@@ -1935,9 +2149,15 @@
   },
   "legal": {
     "draftNote": "This document is a draft. The final, binding text will be reviewed by legal counsel before public launch (M5).",
-    "terms": { "title": "Terms of Service" },
-    "privacy": { "title": "Privacy Policy" },
-    "cookies": { "title": "Cookie Policy" }
+    "terms": {
+      "title": "Terms of Service"
+    },
+    "privacy": {
+      "title": "Privacy Policy"
+    },
+    "cookies": {
+      "title": "Cookie Policy"
+    }
   },
   "pilotReadiness": {
     "title": "Pilot version",
@@ -2256,5 +2476,38 @@
     "outcomeNoWorker": "Your worker profile is not ready yet.",
     "outcomeError": "Could not accept. Please try again.",
     "outcomeNeedsMigration": "Not ready yet."
+  },
+  "journal": {
+    "inbox": {
+      "confirmSkills": "Confirm skills",
+      "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
+      "confirmNote": "Optional note",
+      "confirmSubmit": "Confirm & verify",
+      "alreadyVerified": "Already verified",
+      "noSkillsToConfirm": "This worker has no declared skills left to confirm.",
+      "result": {
+        "skillsVerified": "Verified {count} skill(s).",
+        "skillNotOwned": "That skill is not declared by this worker.",
+        "noSkillsSelected": "Select at least one skill."
+      }
+    },
+    "cv": {
+      "verified": "Verified",
+      "declared": "Declared"
+    }
+  },
+  "orgMembers": {
+    "title": "Organization members & review",
+    "intro": "Bring a worker into your organization and open their work journal for review. A manager can then confirm the skills their entries prove.",
+    "reviewOn": "Review on",
+    "reviewOff": "Review off",
+    "enable": "Enable review",
+    "disable": "Disable review",
+    "addTitle": "Add a worker to the organization",
+    "addButton": "Add to organization",
+    "noMembers": "No organization members yet. Add a worker below.",
+    "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
+    "reviewEnabledBadge": "Review",
+    "reviewDisabledBadge": "No review"
   }
 }
