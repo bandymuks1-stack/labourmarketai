@@ -55,6 +55,14 @@ First line ≤72 chars, present tense, no period. Body (optional) explains WHY.
 - Running migrations on production — **NEVER automatic.** Agents never run 
   `pnpm supabase db push` or `prisma migrate deploy` against production. 
   DI runs migrations manually via Supabase SQL Editor or local CLI.
+- **Naming (binding, see PLATFORM_DOCTRINE §16):** NEW migrations are named
+  `YYYYMMDDHHMMSS_snake_case.sql` (14-digit UTC timestamp prefix). The legacy
+  sequential `000N_*.sql` files (`0001`–`0036`) are already applied and
+  **frozen** — never rename, renumber, or reformat them. The convention is
+  forward-only; timestamp prefixes sort after the `000N` set so order is kept.
+- **Reversibility (binding):** every DB-touching migration ships a rollback
+  path. `DROP TABLE` / `DROP COLUMN` only after asserting the target has zero
+  rows, and must still ship a reversible recreate.
 
 ## Branch strategy
 

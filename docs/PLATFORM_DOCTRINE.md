@@ -233,6 +233,35 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 
 ---
 
+## Section 16 — Migration naming convention
+
+> **§16 Migration naming convention (binding).** Going forward, every NEW
+> migration file in `supabase/migrations/` is named
+> **`YYYYMMDDHHMMSS_snake_case.sql`** (a 14-digit UTC timestamp prefix, an
+> underscore, then a short snake_case description — e.g.
+> `20260530141500_drop_legacy_threads_messages.sql`). The timestamp is the
+> moment the migration is authored, in UTC.
+>
+> **§16.1 Never rename an already-applied migration.** The existing
+> sequential `000N_*.sql` files (`0001`–`0036`) are historical and have been
+> applied to production. They are **frozen**: never renamed, renumbered, or
+> reformatted. Renaming an applied migration desynchronises the Supabase
+> migration ledger and can cause a re-run or a "missing migration" error on
+> deploy. The convention change is forward-only.
+>
+> **§16.2 Ordering is preserved.** A 14-digit timestamp prefix
+> (`2026…`) sorts lexicographically *after* every `000N` prefix (`0` < `2`),
+> so new timestamped migrations always run after the legacy sequential set —
+> no collision, no reordering of history.
+>
+> **§16.3 Reversibility (restating §3 / auto-commit policy for migrations).**
+> Every DB-touching migration must be reversible: include an explicit
+> rollback path (a `-- DOWN` block or a paired down migration). Destructive
+> operations (`DROP TABLE` / `DROP COLUMN`) are permitted ONLY after asserting
+> the target holds zero rows, and must still ship a reversible recreate.
+
+---
+
 ## Section 9 — Changelog (doctrine evolution)
 
 | Date | Section(s) | Change | Author |
@@ -240,6 +269,7 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 | 2026-05-21 | All | Initial doctrine established from DI architecture conversation (translation tokens, legal proof, append-only, default-closed, storage minimalism, AI-never-lies). | DI + Chat Claude |
 | 2026-05-21 | §2.4, §2.5, §10 | Add §2.4 Locale set (binding, 10-locale canonical set; existing "Why this matters" renumbered §2.5). Promote §10 Lego architecture (slug→JSON for all extensible taxonomy) from v1.1 pending to active. (PR #8 architect review B4/B6.) | DI + Architect (Chat Claude) |
 | 2026-05-21 | §5, §7.1, §15 | Amend §5 to the four-layer person→world model (personhood / RBAC / profession+skill / positions / engagement contexts). Insert §7.1 (AI as translator, not author). Add §15 (skill trust signals & productivity). Bundled with the M1 Work Journal implementation (TASK-M1-WORK-JOURNAL). | DI + Architect (Chat Claude) |
+| 2026-05-30 | §16 | Add §16 Migration naming convention (forward-only `YYYYMMDDHHMMSS_snake_case.sql`; never rename applied `000N` migrations; ordering preserved; reversibility restated). Bundled with the single-product convergence PR (`feat/cc/converge-single-product`). | DI + Claude Code |
 
 ---
 
