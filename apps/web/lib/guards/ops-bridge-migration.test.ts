@@ -99,8 +99,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // link RPCs), then to 37 on the converge-single-product slice (two reversible
     // owner-approved migrations: drop legacy threads/messages + projects
     // organization_id FK move), then to 38 on the TASK 03 consolidation (one
-    // salvaged journal_integrity_guards migration). The baseline only ever grows
+    // salvaged journal_integrity_guards migration), then to 39 on the keystone
+    // (TASK 01 membership_engagement_reroute). The baseline only ever grows
     // deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 38/);
+    expect(guard).toMatch(/SPRINT_BASELINE = 39/);
   });
 });

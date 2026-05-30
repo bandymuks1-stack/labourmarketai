@@ -1222,7 +1222,13 @@ describe("no migration files added by this sprint", () => {
     // from the canonical i18n locale set + closed-only insert narrowing).
     // Committed + queued for review, NOT applied. See
     // journal-integrity-guards-migration.test.ts.
-    const SPRINT_BASELINE = 38;
+    //
+    // Bumped from 38 → 39 on the keystone (TASK 01): one additive migration
+    // 20260530140000_membership_engagement_reroute (engagement_contexts
+    // membership + review-enable, hash-chained RPCs, legacy→canonical review
+    // reroute, confirm_entry_and_verify_skills). Committed + queued for the gate,
+    // NOT applied. See membership-engagement-reroute-migration.test.ts.
+    const SPRINT_BASELINE = 39;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
