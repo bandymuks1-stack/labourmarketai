@@ -1244,7 +1244,8 @@
         "customer": "Customer",
         "freelancer": "Freelancer",
         "team_lead": "Team lead",
-        "service_provider": "Service provider"
+        "service_provider": "Service provider",
+        "admin": "Admin"
       },
       "subcopy": "Sign up with Google, or with your email and password. You'll pick your role next.",
       "google_label": "Continue with Google",
@@ -1541,7 +1542,13 @@
         "rolesIntro": "You can start as a worker today, but this does not lock you into one role. Later you will be able to add company, agency, customer, or other labour-market roles when they are ready.",
         "active_workspace": "Active space",
         "preview_workspace": "Preview",
-        "comingLater": "Available later"
+        "comingLater": "Available later",
+        "theme": {
+          "appearance": "Appearance",
+          "help": "Theme",
+          "toDark": "Dark",
+          "toLight": "Light"
+        }
       },
       "comingSoon": {
         "greeting": "👋 Welcome, {name}",

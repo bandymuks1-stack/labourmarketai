@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -76,6 +77,19 @@ export default async function AccountPage({
         <p className="mt-2 text-sm text-text-primary">
           {profile?.email ?? user.email}
         </p>
+      </section>
+
+      <section className="card-border p-6">
+        <p className="mb-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
+          {t("account.theme.appearance")}
+        </p>
+        <ThemeToggle
+          labels={{
+            appearance: t("account.theme.help"),
+            toDark: t("account.theme.toDark"),
+            toLight: t("account.theme.toLight"),
+          }}
+        />
       </section>
 
       <section className="card-border p-6">
