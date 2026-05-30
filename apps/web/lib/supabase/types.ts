@@ -611,11 +611,14 @@ export type Database = {
           customer_id: string | null
           duration: string | null
           id: string
+          kind: string | null
           language_requirement: string | null
           location: string | null
           manual_review_note: string | null
           need_summary: string | null
           notes: string | null
+          original_language: string | null
+          payload: Json
           profile_id: string
           role_or_work_type: string | null
           start_period: string | null
@@ -630,11 +633,14 @@ export type Database = {
           customer_id?: string | null
           duration?: string | null
           id?: string
+          kind?: string | null
           language_requirement?: string | null
           location?: string | null
           manual_review_note?: string | null
           need_summary?: string | null
           notes?: string | null
+          original_language?: string | null
+          payload?: Json
           profile_id: string
           role_or_work_type?: string | null
           start_period?: string | null
@@ -649,11 +655,14 @@ export type Database = {
           customer_id?: string | null
           duration?: string | null
           id?: string
+          kind?: string | null
           language_requirement?: string | null
           location?: string | null
           manual_review_note?: string | null
           need_summary?: string | null
           notes?: string | null
+          original_language?: string | null
+          payload?: Json
           profile_id?: string
           role_or_work_type?: string | null
           start_period?: string | null
@@ -2484,6 +2493,15 @@ export type Database = {
         }
         Returns: string
       }
+      save_demand_draft: {
+        Args: {
+          p_kind: string
+          p_original_language?: string
+          p_payload?: Json
+          p_title: string
+        }
+        Returns: string
+      }
       set_agency_worker_journal_review: {
         Args: { p_agency_id: string; p_enabled: boolean; p_worker_id: string }
         Returns: string
@@ -2494,6 +2512,16 @@ export type Database = {
       }
       set_engagement_journal_review: {
         Args: { p_enabled: boolean; p_engagement_id: string }
+        Returns: string
+      }
+      submit_demand_request: {
+        Args: {
+          p_kind: string
+          p_need_summary?: string
+          p_original_language?: string
+          p_payload?: Json
+          p_title: string
+        }
         Returns: string
       }
     }
