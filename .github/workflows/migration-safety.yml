@@ -1,0 +1,47 @@
+name: Migration Safety
+
+# Static, secret-free, NO-DB safety gate for the Auto-merge Safety Envelope.
+# Fails (RED class) when a changed supabase/migrations/*.sql file carries a
+# risky pattern without an explicit `-- @human-gate-approved` annotation, or
+# breaks a structural rule (filename convention / version re-run hazard).
+# See .github/scripts/migration-safety.mjs and AGENTS.md "GREEN / RED merge tiers".
+#
+# Required by branch protection on `main` alongside Quality Gates. No secrets,
+# no database, no deploy — it only reads the PR's migration diff.
+
+# Runs on EVERY pull request (no `paths:` filter) on purpose: this is a REQUIRED
+# status check on `main`, and a required check with a path filter would leave
+# migration-free PRs stuck "waiting for a status that never reports". When no
+# migration files changed, the script exits GREEN in seconds.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migration-safety-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migration-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout (full history for base diff)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Self-test the checker
+        run: node .github/scripts/migration-safety.mjs --self-test
+
+      - name: Migration safety gate
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node .github/scripts/migration-safety.mjs

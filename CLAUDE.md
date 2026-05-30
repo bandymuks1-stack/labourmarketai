@@ -64,6 +64,47 @@ First line ≤72 chars, present tense, no period. Body (optional) explains WHY.
   path. `DROP TABLE` / `DROP COLUMN` only after asserting the target has zero
   rows, and must still ship a reversible recreate.
 
+## Merge model — Auto-merge Safety Envelope
+
+**Claude Code controls merge timing.** DI is removed from routine merges; a hard
+stop fires only for the irreversible RED class. Two CI checks gate `main`:
+`quality` (Quality Gates) and `migration-safety` (static, secret-free, no-DB —
+`.github/scripts/migration-safety.mjs`).
+
+**GREEN class → zero-human auto-merge.** Scope = code / docs / tests / additive
+or guarded migrations that **pass `migration-safety`** (no RED flags).
+- Claude Code opens the PR **only once the slice is fully pushed** (no more
+  commits coming). This kills the mid-slice merge race.
+- Claude Code then enables **GitHub native auto-merge (squash)**
+  (`gh pr merge --auto --squash`). It merges automatically the moment the
+  required checks pass. No DI action, no manual merge, no waiting human.
+
+**RED class → hard human gate (no auto-merge).** Any of:
+- a migration that trips `migration-safety` (unguarded `drop`, missing rollback,
+  RLS-loosening — `using (true)` / `to anon` / grant to anon|public, or an
+  auth-core change), **including** one marked `-- @human-gate-approved`;
+- any change to auth-core logic, destructive data ops, new secrets, billing, or
+  live outreach.
+
+For RED: do **not** enable auto-merge. Open the PR as **draft**, add the
+**`needs-human-gate`** label, and post the **exact migration SQL + RLS policy
+diff** in the description for explicit **DI / Chat-Claude approval**. Prod
+migration APPLY for RED stays **manual via Supabase MCP `apply_migration` after
+approval** — never `supabase db push` (the repo's filenames don't match the
+ledger versions; a push would re-run applied migrations).
+
+**The `-- @human-gate-approved` annotation** lets an intentional risky migration
+*pass CI*, but it **moves the PR to the RED class** (draft + label + human
+approval). It is an acknowledgement, not an auto-merge pass.
+
+**Structural rules always hold** (NOT bypassable by the annotation): §16
+filename convention; no reuse of an existing migration version (re-run hazard).
+
+**One-time prerequisites (DI, GitHub UI — see the envelope PR for exact steps):**
+repo setting *Allow auto-merge* must be ON, and branch protection on `main` must
+require both `quality` and `migration-safety` status checks. Until those are set,
+auto-merge is inert and Claude Code falls back to waiting for CI then merging.
+
 ## Branch strategy
 
 - `main` — production branch, auto-deployed by Vercel
@@ -72,7 +113,8 @@ First line ≤72 chars, present tense, no period. Body (optional) explains WHY.
   - Claude Code: `feat/cc/<short-name>` or `fix/cc/<short-name>`
   - Antigravity/Codex: `feat/ag/...`, `fix/ag/...`
   - Manual DI work: `feat/manual/...`
-- Feature branches: agent opens draft PR; DI reviews + merges via GitHub UI
+- Feature branches: GREEN-class PRs auto-merge once CI is green (see **Merge
+  model** above); RED-class PRs open as **draft** with `needs-human-gate` for DI.
 
 ## Policy overrides
 
