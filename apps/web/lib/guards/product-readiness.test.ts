@@ -1199,7 +1199,15 @@ describe("no migration files added by this sprint", () => {
     // (so manages_organization() works and they can review). Additive +
     // idempotent, no destructive SQL, no RLS/grant change. See
     // owner-engagement-backfill-rpc.test.ts.
-    const SPRINT_BASELINE = 34;
+    //
+    // Bumped from 34 → 35 on the sales-core-nonstop-v1 gap #1: migration 0036
+    // adds public.accept_{company,agency}_worker_invitation — the worker-
+    // initiated SECURITY DEFINER acceptance that finally turns a pending
+    // invitation into a real company_workers / agency_workers link (the chain's
+    // missing first step). Worker-scoped, idempotent, audit-logged; no fake
+    // data, no destructive SQL, no RLS/grant change beyond EXECUTE on the two
+    // functions. See accept-worker-invitation-rpc.test.ts.
+    const SPRINT_BASELINE = 35;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

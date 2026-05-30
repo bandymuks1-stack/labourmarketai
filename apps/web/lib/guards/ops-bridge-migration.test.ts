@@ -95,7 +95,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // manager-review-evidence-result-v1 slice (migration 0034 adds the gated
     // review_journal_entry + reviewable_journal_entry_ids RPCs), then to 34 on
     // the sales-core-nonstop-v1 unblock (migration 0035 backfills org-owner
-    // engagements). The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 34/);
+    // engagements), then to 35 (migration 0036 adds the accept-worker-invitation
+    // link RPCs). The baseline only ever grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 35/);
   });
 });
