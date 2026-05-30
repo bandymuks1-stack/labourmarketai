@@ -5,6 +5,8 @@ import { useActionState, useState } from "react";
 import {
   inviteCompanyWorkerAction,
   assignCompanyWorkerRoleAction,
+  provisionCompanyWorkerEngagementContextAction,
+  setCompanyWorkerJournalReviewAction,
   type InviteCompanyFormState,
 } from "@/lib/company/actions";
 import type {
@@ -243,7 +245,12 @@ export function CompanyWorkersSection({
                             currentRole={w.operationsRole}
                             currentTitle={w.operationsTitle}
                             journalReviewEnabled={w.journalReviewEnabled}
+                            engagementContextLinked={w.engagementContextLinked}
                             action={assignCompanyWorkerRoleAction}
+                            provisionAction={
+                              provisionCompanyWorkerEngagementContextAction
+                            }
+                            setReviewAction={setCompanyWorkerJournalReviewAction}
                             labels={{
                               ...labels.operations.assign,
                               roleOptionLabels: labels.operations.roleLabels,

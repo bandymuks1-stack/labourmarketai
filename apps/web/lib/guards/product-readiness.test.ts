@@ -1170,7 +1170,19 @@ describe("no migration files added by this sprint", () => {
     // `employee` engagement_context. Functions only: ownership re-validated,
     // role reviewer-eligibility checked, audit-logged, review NEVER enabled.
     // No table/RLS/grant change beyond EXECUTE on the two functions.
-    const SPRINT_BASELINE = 31;
+    //
+    // Bumped from 31 → 32 on the journal-review-enable-toggle-v1 slice:
+    // migration 0033 adds FOUR SECURITY DEFINER functions —
+    // set_{company,agency}_worker_journal_review (the owner/admin-scoped,
+    // engagement-context-gated write that finally enables/disables the
+    // per-relationship journal_review_enabled flag — enabling REQUIRES a real
+    // active `employee` engagement_context; disabling is always safe) and
+    // {company,agency}_worker_engagement_links (owner-scoped per-row read of
+    // which workers are bridged). Functions only: ownership re-validated,
+    // idempotent, audit-logged, no fake data, only the journal_review_enabled
+    // flag on the link tables is mutated. No table/RLS/grant change beyond
+    // EXECUTE on the four functions. See journal-review-enable-rpc.test.ts.
+    const SPRINT_BASELINE = 32;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -134,7 +134,42 @@
               "not_allowed": "Review cannot be enabled for this worker relationship yet.",
               "not_enabled": "This role is not enabled for review yet."
             },
-            "readyForSetup": "Ready for review setup."
+            "readyForSetup": "Ready for review setup.",
+            "provision": {
+              "button": "Connect work journal context",
+              "provisioning": "Connecting…",
+              "outcomeConnected": "Work journal context connected. You can now enable review.",
+              "outcomeAlreadyConnected": "Work journal context is already connected.",
+              "outcomeNotOwner": "You are not allowed to connect this context.",
+              "outcomeNotLinked": "Worker is not linked.",
+              "outcomeProfileMissing": "This worker has no profile yet.",
+              "outcomeRoleNotAssigned": "Assign a reviewer role first.",
+              "outcomeRoleNotAllowed": "Only company or agency admin relationships can be connected for review.",
+              "outcomeOrganizationMissing": "Your organization record is not ready yet.",
+              "outcomeError": "Could not connect. Please try again.",
+              "outcomeNeedsMigration": "Not ready yet."
+            },
+            "review": {
+              "toggleLabel": "Work journal review",
+              "enableButton": "Enable review",
+              "enabling": "Enabling…",
+              "disableButton": "Disable review",
+              "disabling": "Disabling…",
+              "blockerNotReady": "Work journal review can be enabled only after the journal context is connected. Connect the context first.",
+              "outcomeEnabled": "Work journal review enabled.",
+              "outcomeAlreadyEnabled": "Work journal review is already enabled.",
+              "outcomeDisabled": "Work journal review disabled.",
+              "outcomeAlreadyDisabled": "Work journal review is already disabled.",
+              "outcomeNotOwner": "You are not allowed to change review for this worker.",
+              "outcomeNotLinked": "Worker is not linked.",
+              "outcomeRoleNotAssigned": "Assign a reviewer role first.",
+              "outcomeRoleNotAllowed": "This role cannot review work entries.",
+              "outcomeProfileMissing": "This worker has no profile yet.",
+              "outcomeOrganizationMissing": "Your organization record is not ready yet.",
+              "outcomeEngagementMissing": "Connect the work journal context before enabling review.",
+              "outcomeError": "Could not update review. Please try again.",
+              "outcomeNeedsMigration": "Not ready yet."
+            }
           }
         },
         "coordinationHeading": "Role coordination",
@@ -246,7 +281,42 @@
               "not_allowed": "Review cannot be enabled for this worker relationship yet.",
               "not_enabled": "This role is not enabled for review yet."
             },
-            "readyForSetup": "Ready for review setup."
+            "readyForSetup": "Ready for review setup.",
+            "provision": {
+              "button": "Connect work journal context",
+              "provisioning": "Connecting…",
+              "outcomeConnected": "Work journal context connected. You can now enable review.",
+              "outcomeAlreadyConnected": "Work journal context is already connected.",
+              "outcomeNotOwner": "You are not allowed to connect this context.",
+              "outcomeNotLinked": "Worker is not linked.",
+              "outcomeProfileMissing": "This worker has no profile yet.",
+              "outcomeRoleNotAssigned": "Assign a reviewer role first.",
+              "outcomeRoleNotAllowed": "Only company or agency admin relationships can be connected for review.",
+              "outcomeOrganizationMissing": "Your organization record is not ready yet.",
+              "outcomeError": "Could not connect. Please try again.",
+              "outcomeNeedsMigration": "Not ready yet."
+            },
+            "review": {
+              "toggleLabel": "Work journal review",
+              "enableButton": "Enable review",
+              "enabling": "Enabling…",
+              "disableButton": "Disable review",
+              "disabling": "Disabling…",
+              "blockerNotReady": "Work journal review can be enabled only after the journal context is connected. Connect the context first.",
+              "outcomeEnabled": "Work journal review enabled.",
+              "outcomeAlreadyEnabled": "Work journal review is already enabled.",
+              "outcomeDisabled": "Work journal review disabled.",
+              "outcomeAlreadyDisabled": "Work journal review is already disabled.",
+              "outcomeNotOwner": "You are not allowed to change review for this worker.",
+              "outcomeNotLinked": "Worker is not linked.",
+              "outcomeRoleNotAssigned": "Assign a reviewer role first.",
+              "outcomeRoleNotAllowed": "This role cannot review work entries.",
+              "outcomeProfileMissing": "This worker has no profile yet.",
+              "outcomeOrganizationMissing": "Your organization record is not ready yet.",
+              "outcomeEngagementMissing": "Connect the work journal context before enabling review.",
+              "outcomeError": "Could not update review. Please try again.",
+              "outcomeNeedsMigration": "Not ready yet."
+            }
           }
         },
         "coordinationHeading": "Role coordination",
