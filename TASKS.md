@@ -23,10 +23,24 @@ PR #152). Full record: `docs/CONVERGENCE_CHANGELOG.md`.
     UI must reassign/remove projects first and surface an honest error — never a
     silent failure.
 
+## Captured from retired branches (TASK 03 consolidation cleanup)
+
+The branch consolidation (`docs/BRANCH_CONSOLIDATION_AUDIT.md`, PR #155) retired
+two genuinely-unmerged drafts. Their worthwhile ideas are captured here so
+nothing is lost; the branches themselves are gone.
+
+- [ ] **Org Tier-2 (org levels / verification / plans) — deferred idea.**
+  *(from retired `feat/sr1-tier2-schema-draft-v1`, draft migration `0022_organization_tier2.sql`, never applied.)* The draft added `organizations.registration_code` / `correspondence_address` / `tier`, plus `organization_representatives`, `organization_countries`, and a `promote_organization_to_tier2` SECURITY DEFINER RPC with audit. Additive extension of the canonical org model — not a duplicate. Revisit when org verification/levels actually ship. Supersedes/merges with the older **SR-1** line below (same idea).
+- [ ] **Journal append-only TRIGGER guards — deferred (defense-in-depth).**
+  *(from retired `feat/cc/pr10b-0014-hardening-implementation`.)* Prod already enforces append-only on `journal_entries` / `journal_entry_confirmations` / `audit_logs` via RLS (no UPDATE/DELETE policy → deny), and audits confirmations via the `review_journal_entry` RPC. Hard `BEFORE UPDATE/DELETE` triggers (`raise exception`) would add defense-in-depth so even a `SECURITY DEFINER`/owner path cannot rewrite history (§3.1). **Deferred deliberately** — the triggers must not break the existing correction / supersession (`0018`) / soft-delete lifecycle, so they need careful design, not a rushed port.
+- [ ] **Journal unshipped scaffolds — deferred until their features ship.**
+  *(also from `pr10b-0014`.)* `feature_flags` table + `set_entry_visibility` flag-gating (gates public-proof / client-report exposure) and a `proof_of_work` table (M2 proof-file uploads). Not live gaps — missing infrastructure for features that do not exist yet. Build alongside those features.
+- [x] **Journal integrity guards — the 2 REAL gaps prod lacks → being shipped.** The `original_language` CHECK (locale set from the canonical source `apps/web/lib/i18n/config.ts`) and the closed-only direct-insert narrowing (§4 default-closed) are drafted in `supabase/migrations/<ts>_journal_integrity_guards.sql` (committed, **queued for review — not applied**). This is the salvaged, current-schema subset of the retired `0014` hardening.
+
 ## Universal Architecture Sequence (PR #9 → #13)
 
 - [x] **PR #10 (old greenfield spec)** — **SUPERSEDED** by the PR #14 gap analysis (`docs/handoffs/TASK-PR10-GAP-ANALYSIS.md`). The universal data model already shipped in PR #12 (`0013_work_journal_m1.sql`: 12 tables, RLS on all); the old spec targeted a non-existent Prisma schema and is not executed.
-- [ ] **PR #10b** — Journal security-hardening delta (`0014`) — **spec-only authored** (`docs/handoffs/TASK-PR10B-0014-HARDENING-SPEC.md`); write-path decision encoded (worker self-INSERT direct under strict RLS; trust/exposure changes via SECURITY DEFINER RPC writing `audit_logs`). *Pending implementation review.* **Implementation automerge = NO until the SQL/RLS/RPC/audit diff is reviewed.*
+- [x] **PR #10b** — Journal security-hardening delta (`0014`) — **RESOLVED by the TASK 03 audit.** The implementation branch was compared against live prod: the core properties (append-only via RLS, audit-on-confirm via `review_journal_entry`, manager-gated confirmation) were already shipped the canonical way by `0033`–`0036`, and its confirm/reject/revoke RPCs would have **duplicated** the live review path. Branch retired; the 2 real additive gaps salvaged into `journal_integrity_guards` (queued), the triggers + scaffolds captured above. See "Captured from retired branches".
 - [ ] **PR #11** — Universal Work Journal UI + API — *blocked by: PR #10b*. Owns the entry↔skill-link table (does **not** exist yet → not created in `0014`) + PR #10b §5.8 compensating controls **#3/#4**. Controls **#1,#2,#5,#6,#7** stay in PR #10b/`0014`.
 - [ ] **PR #12** — Living CV Hub + entry-level confirmation — *blocked by: PR #11*
 - [ ] **PR #13** — Dashboard redesign (living OS feel) — *blocked by: PR #12*
