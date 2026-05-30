@@ -742,6 +742,8 @@ export type Database = {
           hash_self: string
           id: string
           is_primary: boolean
+          journal_review_enabled: boolean
+          operations_role: string | null
           organization_id: string | null
           profile_id: string
           project_id: string | null
@@ -760,6 +762,8 @@ export type Database = {
           hash_self: string
           id?: string
           is_primary?: boolean
+          journal_review_enabled?: boolean
+          operations_role?: string | null
           organization_id?: string | null
           profile_id: string
           project_id?: string | null
@@ -778,6 +782,8 @@ export type Database = {
           hash_self?: string
           id?: string
           is_primary?: boolean
+          journal_review_enabled?: boolean
+          operations_role?: string | null
           organization_id?: string | null
           profile_id?: string
           project_id?: string | null
@@ -2313,6 +2319,10 @@ export type Database = {
         Args: { p_company_id: string }
         Returns: string
       }
+      add_org_member: {
+        Args: { p_org_id: string; p_worker_id: string }
+        Returns: string
+      }
       add_role: {
         Args: { p_role: string; p_role_data: Json }
         Returns: undefined
@@ -2356,6 +2366,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      confirm_entry_and_verify_skills: {
+        Args: { p_entry_id: string; p_note?: string; p_skill_ids: string[] }
+        Returns: string
+      }
       create_journal_entry_full: {
         Args: {
           p_engagement_context_id: string
@@ -2368,6 +2382,14 @@ export type Database = {
           p_profession_id: string
           p_visibility_scope: string
           p_worker_id: string
+        }
+        Returns: string
+      }
+      grant_org_manager: {
+        Args: {
+          p_operations_role?: string
+          p_org_id: string
+          p_profile_id: string
         }
         Returns: string
       }
@@ -2468,6 +2490,10 @@ export type Database = {
       }
       set_company_worker_journal_review: {
         Args: { p_company_id: string; p_enabled: boolean; p_worker_id: string }
+        Returns: string
+      }
+      set_engagement_journal_review: {
+        Args: { p_enabled: boolean; p_engagement_id: string }
         Returns: string
       }
     }
