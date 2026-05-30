@@ -3,6 +3,26 @@
 Persistent backlog for work that outlives a single PR. PR-specific handoffs
 live in `docs/handoffs/`.
 
+## Convergence follow-ups (post-PR #152)
+
+Staged from the single-product convergence (`feat/cc/converge-single-product`,
+PR #152). Full record: `docs/CONVERGENCE_CHANGELOG.md`.
+
+- [ ] **`feat/cc/membership-engagement-reroute`** — full reroute of
+  `company_workers` / `agency_workers` → `engagement_contexts`. These legacy
+  link tables still back the live Manager-Confirm loop (the `0036`
+  `accept_*_worker_invitation` RPCs write them); `engagement_contexts` lacks
+  `operations_role` / `journal_review_enabled`. Migrate those fields + rewrite
+  the invite/accept/assign RPCs + worker-management UI, then make the legacy
+  link tables read-only. Also closes the live loop gap (entries currently pin to
+  org-less engagements → 0 manager confirmations on prod). *Migration-heavy;
+  staged so it does not break the working loop mid-flight.*
+  - **Constraint (carry into this work):** `projects.organization_id` is
+    `ON DELETE RESTRICT`. Deleting an organization that still has projects errors
+    at the DB level by design (proof-chain protection). The future org-deletion
+    UI must reassign/remove projects first and surface an honest error — never a
+    silent failure.
+
 ## Universal Architecture Sequence (PR #9 → #13)
 
 - [x] **PR #10 (old greenfield spec)** — **SUPERSEDED** by the PR #14 gap analysis (`docs/handoffs/TASK-PR10-GAP-ANALYSIS.md`). The universal data model already shipped in PR #12 (`0013_work_journal_m1.sql`: 12 tables, RLS on all); the old spec targeted a non-existent Prisma schema and is not executed.

@@ -102,3 +102,13 @@ the link) → owner enables journal review → worker adds an entry against that
 org engagement → owner confirms → the entry becomes verified proof. This gap is
 **pre-existing** and untouched by this convergence; closing it is the first
 candidate for the staged org-reroute follow-up (§4).
+
+---
+
+## 7. Known constraints
+
+- **`projects.organization_id` is `ON DELETE RESTRICT`.** Deleting an
+  organization that still has projects errors at the DB level by design
+  (proof-chain protection — projects anchor journal proof via
+  `engagement_contexts`). The future org-deletion UI must reassign/remove
+  projects first and surface an honest error — never a silent failure.
