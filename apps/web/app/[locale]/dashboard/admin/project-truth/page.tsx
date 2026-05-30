@@ -711,13 +711,6 @@ const FEATURE_STATUS: readonly FeatureStatusRow[] = [
       "Self-claim model exists (profile_skill_claims); external verification not yet wired.",
   },
   {
-    id: "discover",
-    label: "Discover talent",
-    route: "/[locale]/dashboard/discover",
-    status: "real",
-    note: "Real query of workers; RLS-respected.",
-  },
-  {
     id: "talent-preview",
     label: "Talent visual preview",
     route: "/[locale]/dashboard/talent",

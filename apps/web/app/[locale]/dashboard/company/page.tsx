@@ -1,14 +1,11 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { JobPostingForm } from "@/components/app/job-posting-form";
-import { JobPostingsList } from "@/components/app/job-postings-list";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { PilotDraftForm } from "@/components/app/pilot-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
-import { listJobPostingsForOwnCompany } from "@/lib/job-postings/job-postings";
 import {
   getOwnCompany,
   listActiveCompanyWorkers,
@@ -43,13 +40,8 @@ export default async function CompanyDashboardPage({
   await requireRoleOrRedirect(locale, "company");
 
   const t = await getTranslations("roleDashboards.company");
-  const tJobs = await getTranslations("jobPostings");
   const tWorkers = await getTranslations("roleDashboards.company.workers");
   const existingDraft = await getPilotDraft("company_request");
-  const jobPostingsResult = await listJobPostingsForOwnCompany();
-  const jobPostings = jobPostingsResult.ok ? jobPostingsResult.data : [];
-  const jobPostingsError =
-    jobPostingsResult.ok ? null : jobPostingsResult.message;
 
   const ownCompany = await getOwnCompany();
   const workersResult = ownCompany
@@ -258,39 +250,6 @@ export default async function CompanyDashboardPage({
         roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
         canAssignRoles
       />
-
-      <section
-        className="card-border flex flex-col gap-4 p-5"
-        data-testid="company-dashboard-job-postings"
-      >
-        <header className="flex flex-col gap-1">
-          <h2 className="font-display text-lg font-semibold text-text-primary">
-            {tJobs("list.title")}
-          </h2>
-          <p className="text-sm text-text-secondary">{tJobs("list.body")}</p>
-        </header>
-        {jobPostingsError && (
-          <p
-            className="rounded border border-state-error bg-state-error/10 px-3 py-2 text-sm text-state-error"
-            role="alert"
-            data-testid="company-dashboard-job-postings-error"
-          >
-            {jobPostingsError}
-          </p>
-        )}
-        <JobPostingsList rows={jobPostings} />
-        <details
-          className="rounded border border-border-default bg-surface-1 p-3"
-          data-testid="company-dashboard-job-postings-create"
-        >
-          <summary className="cursor-pointer text-sm font-semibold text-text-primary">
-            {tJobs("form.openCreate")}
-          </summary>
-          <div className="mt-3">
-            <JobPostingForm locale={locale} />
-          </div>
-        </details>
-      </section>
 
       <section
         className="card-border flex flex-col gap-4 p-5"
