@@ -1,4 +1,14 @@
 {
+  "workerEvidence": {
+    "title": "My evidence",
+    "intro": "Here is what your profile is backed by. This is not an external verification — only what you entered yourself and what the system recorded.",
+    "confirmed": "Confirmed by manager",
+    "selfDeclared": "Self-declared",
+    "awaitingNote": "Awaiting manager confirmation.",
+    "systemEntries": "System-recorded work entries",
+    "empty": "No skills or work entries yet. Add skills or write a journal entry.",
+    "footnote": "Skills can be self-declared, evidenced by system activity, or confirmed by a manager. Nothing is confirmed automatically."
+  },
   "reviewReport": {
     "title": "Review report",
     "print": "Print",
