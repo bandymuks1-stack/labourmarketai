@@ -29,6 +29,9 @@ export function CvImportUpload() {
       <p className="mt-2 text-[11px] leading-relaxed text-text-muted">
         {t("importComingSoon")}
       </p>
+      <p className="mt-1 text-[11px] leading-relaxed text-text-secondary">
+        {t("importAddManually")}
+      </p>
       {picked && (
         <p className="mt-1 text-[11px] text-state-warning" role="status">
           {t("importNotSaved", { file: picked })}
