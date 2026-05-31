@@ -9,6 +9,8 @@ import { getOrgMembersData } from "@/lib/operations/org-members";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { getManagerEvidence } from "@/lib/operations/manager-evidence";
 import { ManagerEvidenceCard } from "@/components/app/manager-evidence-card";
+import { getWorkerReadiness } from "@/lib/company/worker-readiness";
+import { WorkerReadinessSummary } from "@/components/app/worker-readiness-summary";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import {
   getOwnCompany,
@@ -61,6 +63,22 @@ export default async function CompanyDashboardPage({
   const tOps = await getTranslations("companyOps");
   // Slice 1 — operational status counts from existing data (read-back only).
   const acceptedCount = workersResult.kind === "ok" ? workersResult.rows.length : 0;
+  // Slice 9 — per-worker work-readiness SIGNALS (not a rating), computed from
+  // existing RLS-readable data (worker_skills + journal_entries + reviewable set).
+  const activeWorkerRows = workersResult.kind === "ok" ? workersResult.rows : [];
+  const readinessMap = await getWorkerReadiness(
+    activeWorkerRows.map((w) => w.workerId),
+  );
+  const readinessRows = activeWorkerRows.map((w) => ({
+    workerName: w.displayName ?? (w.email ? w.email.split("@")[0] : "—"),
+    readiness: readinessMap.get(w.workerId) ?? {
+      journalEntries: 0,
+      declaredSkills: 0,
+      confirmedSkills: 0,
+      openReviewItems: 0,
+      lastActivity: null,
+    },
+  }));
   const pendingCount =
     invitationsResult.kind === "ok"
       ? invitationsResult.rows.filter((i) => i.status === "pending").length
@@ -362,6 +380,8 @@ export default async function CompanyDashboardPage({
         roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
         canAssignRoles
       />
+
+      <WorkerReadinessSummary rows={readinessRows} />
 
       {orgMembers && (
         <OrgMembersPanel

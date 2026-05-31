@@ -1,4 +1,13 @@
 {
+  "workerReadiness": {
+    "title": "Work-readiness signals",
+    "note": "These are signals from existing data, not a rating or score. Workers are not ranked by who is \"best\".",
+    "journalEntries": "Journal entries",
+    "declaredSkills": "Declared skills",
+    "confirmedSkills": "Confirmed skills",
+    "openReview": "Awaiting review",
+    "lastActivity": "Last activity"
+  },
   "workerEvidence": {
     "title": "My evidence",
     "intro": "Here is what your profile is backed by. This is not an external verification — only what you entered yourself and what the system recorded.",
