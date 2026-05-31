@@ -34,6 +34,12 @@
   "date": "Data",
   "engagement": "Kontekstas",
   "entry": {
+    "reviewedBy": "Peržiūrėjo",
+    "confirmerRole": {
+      "manager": "Vadovas",
+      "owner": "Savininkas",
+      "external_manager": "Išorinis vadovas"
+    },
     "status": {
       "approved": "Patvirtinta",
       "changes_requested": "Paprašyta pataisymų",
