@@ -20,8 +20,16 @@ export type InboxEntry = {
   createdAt: string;
   metrics: { label: string; value: string }[];
   skills: InboxSkill[];
-  /** Deterministic work tags recognized from the entry text (display only). */
-  recognized: { slug: string; name: string }[];
+  /** Deterministic work items recognized from the entry text (display only),
+   *  each with the evidence phrase it was matched on. */
+  recognized: { slug: string; name: string; evidence: string | null }[];
+  /** Single detected total time; `certain` is false when the entry mentions
+   *  more than one time fragment (hours shown but flagged for clarification). */
+  hours: { value: number; unit: string; certain: boolean } | null;
+  /** Coarse recognition confidence for the whole entry. */
+  certainty: "clear" | "partial" | "unclear";
+  /** True when the parser could not fully scope hours/works (partial/unclear). */
+  needsClarification: boolean;
 };
 
 /**
@@ -125,21 +133,63 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         </div>
       )}
 
-      {/* Recognized work tags from the text — deterministic suggestions,
-          not verified facts. Honest fallback when nothing is recognized. */}
+      {/* Recognized work items from the text — deterministic suggestions, not
+          verified facts. Shows the evidence phrase, the detected total time
+          (flagged when ambiguous), and an honest certainty band so the
+          reviewer can ask for clarification instead of trusting a guess. */}
       {entry.recognized.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2" data-testid={`inbox-recognized-${entry.id}`}>
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("inbox.suggestedFromEntry")}
-          </span>
-          {entry.recognized.map((s) => (
-            <span
-              key={s.slug}
-              className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-[11px] text-brand-blue"
-            >
-              {s.name}
+        <div
+          className="flex flex-col gap-2 rounded-lg border border-brand-blue/30 bg-brand-blue/[0.04] p-3"
+          data-testid={`inbox-recognized-${entry.id}`}
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("inbox.recognizedWorks")}
             </span>
-          ))}
+            <span className="text-[10px] text-text-muted">· {t("inbox.suggestedFromEntry")}</span>
+            <span
+              className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                entry.certainty === "clear"
+                  ? "bg-emerald-500/10 text-emerald-600"
+                  : "bg-amber-500/10 text-amber-600"
+              }`}
+            >
+              {entry.certainty === "clear"
+                ? t("inbox.clear")
+                : t("inbox.needsClarification")}
+            </span>
+          </div>
+          <ul className="flex flex-col gap-1.5">
+            {entry.recognized.map((s) => (
+              <li key={s.slug} className="flex flex-col gap-0.5">
+                <span className="w-fit rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-[11px] text-brand-blue">
+                  {s.name}
+                </span>
+                {s.evidence && (
+                  <span className="pl-1 text-[10px] text-text-muted">
+                    {t("inbox.evidenceLabel")}: “{s.evidence}”
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+          {entry.hours && (
+            <p className="text-[11px] text-text-secondary">
+              {t("inbox.hoursLabel")}: {entry.hours.value} {entry.hours.unit}{" "}
+              <span
+                className={
+                  entry.hours.certain ? "text-emerald-600" : "text-amber-600"
+                }
+              >
+                ({entry.hours.certain ? t("inbox.hoursClear") : t("inbox.hoursUnclear")})
+              </span>
+            </p>
+          )}
+          {entry.needsClarification && (
+            <p className="text-[10px] leading-relaxed text-amber-700">
+              {t("inbox.clarifyHint")}
+            </p>
+          )}
         </div>
       ) : declaredUnverified.length === 0 && alreadyVerified.length === 0 ? (
         <p

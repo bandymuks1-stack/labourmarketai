@@ -42,7 +42,7 @@ export const SKILL_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "timber-framing", needles: ["karkas", "sij", "gegn", "apkal"] },
   { slug: "formwork", needles: ["klojin"] },
   { slug: "concrete-pouring", needles: ["sąram", "saram"] },
-  { slug: "blueprint-reading", needles: ["brėžin", "brezin"] },
+  { slug: "blueprint-reading", needles: ["brėžin", "brezin", "pagal projekt", "projekto skaitym"] },
   { slug: "general-labour", needles: ["darbo paruoš", "darbo pasiruoš"] },
 ];
 
