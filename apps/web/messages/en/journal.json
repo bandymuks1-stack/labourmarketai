@@ -6,6 +6,7 @@
   },
   "noContextCta": "Go to dashboard",
   "personalEntry": "Personal worker entry",
+  "reviewNotEnabledNote": "Review is not enabled yet. You can log your work now — but for entries to be confirmed, the organization owner needs to enable journal review for you.",
   "chooseWorkType": "Choose work type",
   "whatDidYouDo": "What did you work on today?",
   "textPlaceholder": "e.g. Worked 6 hours. Handled customer support, resolved 12 requests and prepared a daily report.",
