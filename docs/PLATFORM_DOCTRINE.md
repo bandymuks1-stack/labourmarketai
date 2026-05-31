@@ -302,6 +302,41 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 
 ---
 
+## Section 18 — Realumo principas (jokio demo/piloto/tarpinio sluoksnio)
+
+> **§18 Realumo principas — jokio demo/piloto/tarpinio sluoksnio (binding).**
+> labourmarket.ai yra realus produktas, daromas iš esmės, čia ir dabar.
+> Produkte nėra demo, piloto, „bandomosios prieigos“, „Tier-2 rankinio
+> aktyvavimo“ ar tarpinio / reprezentacinio modelio — nei kaip teksto, nei kaip
+> koncepcijos architektūroje ar UX.
+>
+> Kiekvienas ekranas yra reali, išliekanti funkcija savo tikroje dabartinėje
+> būsenoje. Jei duomenų dar nėra, rodoma tikra tuščia būsena be išgalvotų
+> pavyzdžių, nes vartotojas yra pirmas — viskas, kas daroma dabar, yra realu ir
+> išlieka.
+>
+> Pirmo atėjimo ir tuščių būsenų tonas turi suponuoti, kad žmogus atėjo į
+> realios sėkmės istorijos pradžią ir yra jos dalyvis (steigėjo momentas), ne į
+> tuščią demo.
+>
+> Leidžiamas tik sąžiningas roadmap'as („RUOŠIAMA“ / vėliau įjungiamos
+> funkcijos) — jis nėra reprezentacinis modelis, o atviras pranešimas, kas
+> artimiausiai ateina.
+>
+> **§18.1 Kaip tai taikoma kartu su kitomis sekcijomis.** §18 sustiprina §7
+> („AI niekada nemeluoja“) ir „jokių nepaženklintų netikrų duomenų“ taisyklę:
+> netikri pavyzdžiai, netikrai veikiantys mygtukai ir pardavimo wrapper'iai
+> („ačiū — gavome jūsų užklausą ir susisieksime“) draudžiami. Sąžininga
+> produkto tiesa (pvz. „įrašai privatūs“, „nėra automatinio atitikimo variklio“)
+> NĖRA piloto framing'as ir lieka — pašalinamas tik „pilotas / bandomoji versija
+> / Tier-2 / rankinis aktyvavimas“ sluoksnis virš realių funkcijų. Paklausos
+> įvedimas yra viena tiesi reali funkcija per §17 kanoninį modelį
+> (`customer_requests`): sukuri → išsaugoma → matoma. Pardavimas / pilotas yra
+> offline, DI-vedamas procesas, o ne vartai produkte. §18 nekeičia §17
+> (kanoninis paklausos modelis), §4 (default-closed) ar autentifikacijos.
+
+---
+
 ## Section 9 — Changelog (doctrine evolution)
 
 | Date | Section(s) | Change | Author |
@@ -311,6 +346,7 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 | 2026-05-21 | §5, §7.1, §15 | Amend §5 to the four-layer person→world model (personhood / RBAC / profession+skill / positions / engagement contexts). Insert §7.1 (AI as translator, not author). Add §15 (skill trust signals & productivity). Bundled with the M1 Work Journal implementation (TASK-M1-WORK-JOURNAL). | DI + Architect (Chat Claude) |
 | 2026-05-30 | §16 | Add §16 Migration naming convention (forward-only `YYYYMMDDHHMMSS_snake_case.sql`; never rename applied `000N` migrations; ordering preserved; reversibility restated). Bundled with the single-product convergence PR (`feat/cc/converge-single-product`). | DI + Claude Code |
 | 2026-05-30 | §17 | Add §17 Canonical demand intake (one model: `customer_requests`; draft via `save_demand_draft`, submit via `submit_demand_request`; `pilot_drafts` folded §17.1; `leads` kept as a distinct anonymous pre-auth funnel §17.2). The authenticated dashboard pilot-request CTA was repointed off `/api/leads` onto the canonical intake. Phase 3 / Slice 3.1 — 🟡 migration queued for the gate. | DI + Claude Code |
+| 2026-05-31 | §18 | Add §18 Realumo principas (no demo/pilot/intermediate layer — neither as text nor as concept in architecture/UX; real persisting features + honest empty states framed as a founder moment; only an honest `RUOŠIAMA` roadmap is allowed; honest product truth like "records are private / no matching engine" is NOT pilot framing and stays). Reinforces §7 + "no unlabeled fake data". Applied in product: removed the "order a pilot / request trial access" CTA framing, the Tier-2 readiness card, the pilot-readiness / pilot-mode framing, and the "thank you — we'll contact you" wrapper; lifted empty / first-login states to the founder moment. GREEN / additive — no schema, RLS, or auth change. | DI + Claude Code |
 
 ---
 
