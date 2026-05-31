@@ -29,7 +29,7 @@
     "empty": "Kol kas nėra peržiūrai laukiančių įrašų.",
     "noWorks": "Darbų pagal įrašą neatpažinta.",
     "uncertaintyNote": "Dalis įrašo neaiški — reikia patikslinti.",
-    "projectNote": "Kol kas įrašai siejami su darbuotoju ir įmone. Projektų, objektų ir užsakovo sluoksnis ruošiamas atskiru duomenų modelio pjūviu.",
+    "projectNote": "Įrašai gali būti susieti su projektu — duomenų modelis paruoštas, bet kol kas nė vienas įrašas nesusietas ir niekas neužpildoma automatiškai. Projektų, objektų ir užsakovų sluoksnis pildomas atskirame pjūvyje.",
     "totals": {
       "pending": "Laukia peržiūros",
       "workers": "Darbuotojai",
@@ -64,8 +64,11 @@
     "reviewTitle": "Žurnalo peržiūra",
     "reviewSteps": "1) darbuotojas priima · 2) pridedate prie organizacijos · 3) įjungiate peržiūrą · 4) darbuotojas žymi darbą · 5) jūs patvirtinate.",
     "reviewCta": "Peržiūrėti įrašus",
-    "projectsTitle": "Projektai ir užduotys ruošiami",
-    "projectsBody": "Šiuo metu realiai veikia darbuotojų susiejimas, organizacijos narystė ir darbo žurnalo peržiūra. Užduočių priskyrimas bus kitas duomenų modelio pjūvis.",
+    "projectsTitle": "Projektai, objektai ir užsakovai",
+    "projectsReadyBadge": "Struktūra paruošta",
+    "projectsBody": "Šio sluoksnio duomenų modelis jau veikia: projektai, užsakovai, projekto darbuotojai, darbo elementai ir žurnalo įrašo susiejimas su projektu. Niekas neužpildoma automatiškai — projektus ir užsakovus galėsite sukurti kitame, rašymą įgalinančiame pjūvyje. Tada žurnalo įrašus bus galima susieti su projektu.",
+    "projectsCount": "Projektai",
+    "projectsEmpty": "dar nesukurta nė vieno projekto",
     "needsTitle": "Poreikiai",
     "needsBody": "Pateikite struktūruotą poreikį ir sekite jo būseną.",
     "needsCta": "Atidaryti poreikius"

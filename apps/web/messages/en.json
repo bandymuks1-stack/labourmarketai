@@ -29,7 +29,7 @@
     "empty": "No entries are awaiting review yet.",
     "noWorks": "No works recognized from this entry.",
     "uncertaintyNote": "Part of this entry is unclear — needs clarification.",
-    "projectNote": "For now, entries are tied to the worker and company. A project / object / client layer is being prepared as a separate data-model slice.",
+    "projectNote": "Entries can be linked to a project — the data model is ready, but no entry is linked yet and nothing is filled automatically. The project / object / client layer is filled in a separate slice.",
     "totals": {
       "pending": "Awaiting review",
       "workers": "Workers",
@@ -64,8 +64,11 @@
     "reviewTitle": "Journal review",
     "reviewSteps": "1) worker accepts · 2) add to organization · 3) enable review · 4) worker logs work · 5) you confirm.",
     "reviewCta": "Review entries",
-    "projectsTitle": "Projects and tasks are being prepared",
-    "projectsBody": "Worker linking, organization membership and work-journal review work for real today. Task assignment is the next data-model slice.",
+    "projectsTitle": "Projects, objects and clients",
+    "projectsReadyBadge": "Structure ready",
+    "projectsBody": "The data model for this layer is now live: projects, clients, project workers, work items, and linking a journal entry to a project. Nothing is filled automatically — you'll be able to create projects and clients in a later, write-enabled slice. Journal entries will then be linkable to a project.",
+    "projectsCount": "Projects",
+    "projectsEmpty": "no projects created yet",
     "needsTitle": "Needs",
     "needsBody": "Submit a structured demand and track its status.",
     "needsCta": "Open needs"
