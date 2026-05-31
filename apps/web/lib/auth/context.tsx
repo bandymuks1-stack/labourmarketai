@@ -41,6 +41,8 @@ type AuthState = {
    * signal.
    */
   isAdmin: boolean;
+  /** Display-only: admin chose to hide admin chrome on normal surfaces (Fix D). */
+  adminUiHidden?: boolean;
   notifications: Notification[];
 };
 
@@ -101,6 +103,7 @@ export function AuthProvider({
       activeRole: initial.activeRole,
       roles: initial.roles,
       isAdmin: initial.isAdmin,
+      adminUiHidden: initial.adminUiHidden ?? false,
       notifications,
       switchRole,
       addRole,
@@ -113,6 +116,7 @@ export function AuthProvider({
       initial.activeRole,
       initial.roles,
       initial.isAdmin,
+      initial.adminUiHidden,
       notifications,
       switchRole,
       addRole,

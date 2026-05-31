@@ -34,7 +34,8 @@ export function RoleSwitcher() {
   const t = useTranslations("auth");
   const tSwitcher = useTranslations("auth.roleSwitcher");
   const tAccount = useTranslations("auth.dashboard.account");
-  const { roles, activeRole, isAdmin, switchRole, addRole } = useAuth();
+  const { roles, activeRole, isAdmin, adminUiHidden, switchRole, addRole } =
+    useAuth();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
 
@@ -71,7 +72,7 @@ export function RoleSwitcher() {
           mixed in with worker/company/agency/customer chips, and so
           the workspace switcher's user-facing UX is untouched.
           Clicking the badge navigates to the pilot panel. */}
-      {isAdmin && (
+      {isAdmin && !adminUiHidden && (
         <Link
           href="/dashboard/admin"
           aria-label={tSwitcher("adminPanelLink")}

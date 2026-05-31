@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 
+import { sanitizeDemandTitle } from "@/lib/demand/sanitize-demand-title";
+
 import {
   saveBuyerRequestAction,
   type BuyerRequestFormState,
@@ -337,7 +339,7 @@ export function BuyerRequestsSection({
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-col gap-0.5">
                       <span className="font-display text-sm font-semibold text-text-primary">
-                        {r.title}
+                        {sanitizeDemandTitle(r.title)}
                       </span>
                       <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
                         {u.labelCreated}: {r.createdAt.slice(0, 10)}
