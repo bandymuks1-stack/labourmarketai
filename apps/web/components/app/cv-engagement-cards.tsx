@@ -20,6 +20,8 @@ export type SkillDot = {
   isCore: boolean;
   /** Manager-confirmed: a real verified Work Proof (keystone). */
   verified?: boolean;
+  /** Stored verification provenance: self_declared | work_journal | manager_confirmed. */
+  source?: string;
 };
 
 // Confidence bin → dot colour (§15). Literal bin name maps to literal colour.
@@ -116,17 +118,31 @@ export function CvEngagementCards({
                       <span className="flex flex-none items-center gap-1.5">
                         {/* The moment of truth: a declared skill becomes a real
                             verified Work Proof once a manager confirms it. */}
-                        <span
-                          className={cn(
-                            "rounded-full border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
-                            s.verified
-                              ? "verified-pop border-state-success/40 bg-state-success/10 text-state-success"
-                              : "border-ink-500 text-text-muted",
-                          )}
-                          data-testid={`skill-state-${s.slug}`}
-                        >
-                          {s.verified ? `✓ ${t("verified")}` : t("declared")}
-                        </span>
+                        {(() => {
+                          const confirmed =
+                            s.verified || s.source === "manager_confirmed";
+                          const journal =
+                            !confirmed && s.source === "work_journal";
+                          return (
+                            <span
+                              className={cn(
+                                "rounded-full border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                                confirmed
+                                  ? "verified-pop border-state-success/40 bg-state-success/10 text-state-success"
+                                  : journal
+                                    ? "border-brand-blue/40 text-brand-blue"
+                                    : "border-ink-500 text-text-muted",
+                              )}
+                              data-testid={`skill-state-${s.slug}`}
+                            >
+                              {confirmed
+                                ? `✓ ${t("verified")}`
+                                : journal
+                                  ? t("journalBacked")
+                                  : t("declared")}
+                            </span>
+                          );
+                        })()}
                         {s.isCore && (
                           <span className="rounded-sm px-1 font-mono text-[9px] uppercase tracking-label text-brand-orange">
                             {t("primary")}

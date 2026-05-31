@@ -178,6 +178,7 @@ export default async function ProfilePage({
               bin: (r.confidence_bin as string) ?? "red",
               isCore: coreMap.get(r.skill_id as string) ?? false,
               verified: r.verified === true,
+              source: (r.source as string | null) ?? "self_declared",
             }
           : null;
       })
