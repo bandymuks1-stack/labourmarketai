@@ -83,7 +83,7 @@ export default async function ReviewReportPage({
         <div className="flex flex-col gap-5">
           {report.workers.map((w) => (
             <section key={w.workerName} className="card-border flex flex-col gap-3 p-4">
-              <h2 className="font-display text-base font-semibold text-text-primary">
+              <h2 className="break-words font-display text-base font-semibold text-text-primary">
                 {w.workerName}
               </h2>
               <ul className="flex flex-col gap-2">

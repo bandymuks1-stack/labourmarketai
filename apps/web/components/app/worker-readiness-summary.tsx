@@ -32,7 +32,9 @@ export async function WorkerReadinessSummary({ rows }: { rows: ReadinessRow[] })
             className="flex flex-col gap-1 border-t border-border/60 pt-2 first:border-0 first:pt-0"
             data-testid="worker-readiness-row"
           >
-            <span className="text-sm font-medium text-text-primary">{r.workerName}</span>
+            <span className="break-words text-sm font-medium text-text-primary">
+              {r.workerName}
+            </span>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-secondary">
               <span>
                 {t("journalEntries")}:{" "}
