@@ -6,6 +6,7 @@ import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { getOrgMembersData } from "@/lib/operations/org-members";
+import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import {
   getOwnCompany,
@@ -65,6 +66,8 @@ export default async function CompanyDashboardPage({
   const memberCount = orgMembers?.members.length ?? 0;
   const reviewCount =
     orgMembers?.members.filter((m) => m.reviewEnabled).length ?? 0;
+  // Slice 3 — pending entries the owner can review now (gated RPC; 0 if none).
+  const reviewPendingCount = ownCompany ? await countReviewablePendingEntries() : 0;
   const orgMembersLabels = {
     title: tOrg("title"),
     intro: tOrg("intro"),
@@ -295,11 +298,19 @@ export default async function CompanyDashboardPage({
             </h3>
             <p className="text-xs leading-relaxed text-text-secondary">{tOps("teamBody")}</p>
           </div>
-          <div className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-4">
+          <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-4">
             <h3 className="font-display text-sm font-semibold text-text-primary">
               {tOps("reviewTitle")}
             </h3>
             <p className="text-xs leading-relaxed text-text-secondary">{tOps("reviewSteps")}</p>
+            <Link
+              href="/dashboard/inbox"
+              className="self-start text-xs font-semibold text-brand-blue hover:underline"
+              data-testid="company-ops-review-link"
+            >
+              {tOps("reviewCta")}
+              {reviewPendingCount > 0 ? ` (${reviewPendingCount})` : ""} →
+            </Link>
           </div>
           <div
             className="flex flex-col gap-1 rounded-md border border-state-warning/30 bg-state-warning/5 p-4"
