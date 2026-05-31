@@ -1237,7 +1237,12 @@ describe("no migration files added by this sprint", () => {
     // storage for journal recognition; new table + RLS + grants to
     // authenticated only). Owner-approved and APPLIED to prod via Supabase MCP
     // apply_migration (gorgitwvdzxbnaxhrsrw); this bump lets the gate pass.
-    const SPRINT_BASELINE = 41;
+    // Bumped 41 → 42 for the project/object/client RED gate (PR #197): additive
+    // 20260601091000_project_object_client_context (project_clients /
+    // project_members / project_worker_assignments tables + can_manage_project
+    // predicate + nullable journal_entries.project_id; RLS + grants to
+    // authenticated only). Owner-approved and APPLIED to prod via Supabase MCP.
+    const SPRINT_BASELINE = 42;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
