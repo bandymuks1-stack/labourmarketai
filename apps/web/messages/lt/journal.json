@@ -73,6 +73,17 @@
     "tile_type": "Plytelių tipas"
   },
   "inbox": {
+    "confirmSkills": "Patvirtinti įrašą",
+    "noSkillsToConfirm": "Nėra įgūdžių, kuriuos galima patvirtinti",
+    "confirmSkillsHint": "Pažymėkite įgūdžius, kuriuos šis įrašas įrodo — jie taps patvirtinti.",
+    "confirmNote": "Pastaba (nebūtina)",
+    "confirmSubmit": "Patvirtinti",
+    "alreadyVerified": "Jau patvirtinta",
+    "summary": {
+      "pending": "Laukia peržiūros",
+      "confirmed": "Patvirtinta"
+    },
+    "projectNote": "Kol kas įrašai siejami su darbuotoju ir įmone. Projektų, objektų ir užsakovo sluoksnis ruošiamas atskiru duomenų modelio pjūviu.",
     "approve": "Patvirtinti",
     "cancel": "Atšaukti",
     "changesNote": "Ką reikia pataisyti?",
@@ -85,6 +96,9 @@
     "rejectReason": "Atmetimo priežastis",
     "requestChanges": "Prašyti pataisymų",
     "result": {
+      "skillsVerified": "Patvirtinta. Patvirtinti įgūdžiai: {count}.",
+      "skillNotOwned": "Šis įgūdis nepriklauso šiam darbuotojui.",
+      "noSkillsSelected": "Pasirinkite bent vieną įgūdį.",
       "approved": "Patvirtinta.",
       "changesRequested": "Paprašyta pataisymų.",
       "error": "Nepavyko išsaugoti peržiūros.",

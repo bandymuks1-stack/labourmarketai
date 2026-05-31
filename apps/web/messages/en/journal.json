@@ -73,6 +73,17 @@
     "tile_type": "Tile type"
   },
   "inbox": {
+    "confirmSkills": "Confirm entry",
+    "noSkillsToConfirm": "No skills available to confirm",
+    "confirmSkillsHint": "Pick the declared skills this entry proves — they become verified.",
+    "confirmNote": "Note (optional)",
+    "confirmSubmit": "Confirm",
+    "alreadyVerified": "Already verified",
+    "summary": {
+      "pending": "Waiting for review",
+      "confirmed": "Confirmed"
+    },
+    "projectNote": "For now, entries are tied to the worker and the company. A projects / sites / client layer is being prepared as a separate data-model slice.",
     "approve": "Approve",
     "cancel": "Cancel",
     "changesNote": "What needs changing?",
@@ -85,6 +96,9 @@
     "rejectReason": "Reason for rejection",
     "requestChanges": "Request changes",
     "result": {
+      "skillsVerified": "Confirmed. {count} skill(s) verified.",
+      "skillNotOwned": "That skill isn't this worker's.",
+      "noSkillsSelected": "Select at least one skill.",
       "approved": "Approved.",
       "changesRequested": "Changes requested.",
       "error": "Could not save the review.",
