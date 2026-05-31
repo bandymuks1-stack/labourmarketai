@@ -1,4 +1,14 @@
 {
+  "workerEvidence": {
+    "title": "Mano įrodymai",
+    "intro": "Čia matote, kuo paremtas jūsų profilis. Tai nėra išorinis patvirtinimas — tik tai, ką pateikėte patys ir ką užfiksavo sistema.",
+    "confirmed": "Patvirtinta vadovo",
+    "selfDeclared": "Paties nurodyta",
+    "awaitingNote": "Laukia vadovo patvirtinimo.",
+    "systemEntries": "Sistemos užfiksuoti darbo įrašai",
+    "empty": "Kol kas nėra įgūdžių ar darbo įrašų. Pridėkite įgūdžių arba parašykite žurnalo įrašą.",
+    "footnote": "Įgūdžiai gali būti paties nurodyti, įrodyti sistemos veikla arba patvirtinti vadovo. Sistema nieko nepatvirtina automatiškai."
+  },
   "reviewReport": {
     "title": "Peržiūros ataskaita",
     "print": "Spausdinti",

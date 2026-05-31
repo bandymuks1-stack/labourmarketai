@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileCvClarityCard } from "@/components/app/profile-cv-clarity-card";
+import { WorkerEvidenceCard } from "@/components/app/worker-evidence-card";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
@@ -281,6 +282,14 @@ export default async function ProfilePage({
             : {}),
         }}
       />
+
+      {workerId && (
+        <WorkerEvidenceCard
+          confirmedSkills={skillDots.filter((s) => s.verified).map((s) => s.name)}
+          selfDeclaredSkills={skillDots.filter((s) => !s.verified).map((s) => s.name)}
+          journalEntries={journalCount}
+        />
+      )}
 
       {/* Text-first composer — universal. Available to every authenticated
           user regardless of role. The catalogued worker_skills picker
