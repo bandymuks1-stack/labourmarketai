@@ -1,4 +1,10 @@
 {
+  "demandReadback": {
+    "heading": "Jūsų pateikti poreikiai",
+    "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
+    "empty": "Dar nepateikėte nė vieno poreikio. Pateikite poreikį viršuje ir jis atsiras čia su savo būsena.",
+    "created": "Sukurta"
+  },
   "journey": {
     "eyebrow": "Kaip tai veikia",
     "title": "Vienas profilis. Vedamas kelias į galimybes.",
