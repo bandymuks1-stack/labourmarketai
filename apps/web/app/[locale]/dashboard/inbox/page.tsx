@@ -5,7 +5,7 @@ import {
   type InboxEntry,
 } from "@/components/app/journal-inbox-entry";
 import { createClient } from "@/lib/supabase/server";
-import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
+import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 
 // Structured-field slugs that have a localized label; others fall back to slug.
 const FIELD_LABEL_SLUGS = new Set(["site_name", "tile_type", "area_done"]);
@@ -104,8 +104,19 @@ export default async function InboxPage({
       });
       // Deterministic recognition from the free text — informational
       // suggestions (not verified facts), computed at read time, no storage.
-      const recognized = extractJournalSuggestions(r.original_text ?? "")
-        .skillSlugs.map((slug) => ({ slug, name: tSkill(slug) }));
+      const depth = recognizeEntryDepth(r.original_text ?? "");
+      const recognized = depth.works.map((w) => ({
+        slug: w.slug,
+        name: tSkill(w.slug),
+        evidence: w.evidence,
+      }));
+      const hours = depth.hours
+        ? {
+            value: depth.hours.value,
+            unit: tUnit(depth.hours.unit),
+            certain: depth.hours.certain,
+          }
+        : null;
       return {
         id: r.id,
         originalText: r.original_text,
@@ -114,6 +125,9 @@ export default async function InboxPage({
         metrics,
         skills: r.worker_id ? (skillsByWorker.get(r.worker_id) ?? []) : [],
         recognized,
+        hours,
+        certainty: depth.certainty,
+        needsClarification: depth.needsClarification,
       };
     });
   }
