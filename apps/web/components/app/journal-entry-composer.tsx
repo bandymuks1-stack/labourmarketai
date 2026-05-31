@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
-import { Select } from "@/components/ui/Select";
+import { DarkListbox } from "@/components/ui/DarkListbox";
 import { Input } from "@/components/ui/Input";
 import {
   DetectedSuggestionCard,
@@ -386,17 +386,13 @@ export function JournalEntryComposer({
 
         <label className="flex flex-col gap-1.5">
           <Label>{t("engagement")}</Label>
-          <Select
+          <DarkListbox
             value={engagementId}
-            onChange={(e) => setEngagementId(e.target.value)}
-            required
-          >
-            {engagements.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.label}
-              </option>
-            ))}
-          </Select>
+            onChange={setEngagementId}
+            options={engagements.map((e) => ({ value: e.id, label: e.label }))}
+            ariaLabel={t("engagement")}
+            testId="journal-engagement-switcher"
+          />
         </label>
 
         <label className="flex flex-col gap-1.5">
@@ -618,19 +614,17 @@ export function JournalEntryComposer({
                       setTimeStatus("edited");
                     }}
                   />
-                  <Select
+                  <DarkListbox
                     value={timeUnit}
-                    onChange={(e) => {
-                      setTimeUnit(e.target.value);
+                    onChange={(v) => {
+                      setTimeUnit(v);
                       setTimeStatus("edited");
                     }}
-                  >
-                    {(["hours", "minutes", "days"] as const).map((u) => (
-                      <option key={u} value={u}>
-                        {tUnit(u)}
-                      </option>
-                    ))}
-                  </Select>
+                    options={(["hours", "minutes", "days"] as const).map((u) => ({
+                      value: u,
+                      label: tUnit(u),
+                    }))}
+                  />
                 </div>
               </DetectedSuggestionCard>
             )}
@@ -659,19 +653,14 @@ export function JournalEntryComposer({
                       setQtyStatus("edited");
                     }}
                   />
-                  <Select
+                  <DarkListbox
                     value={qtyUnit}
-                    onChange={(e) => {
-                      setQtyUnit(e.target.value);
+                    onChange={(v) => {
+                      setQtyUnit(v);
                       setQtyStatus("edited");
                     }}
-                  >
-                    {UNIT_OPTIONS.map((u) => (
-                      <option key={u} value={u}>
-                        {tUnit(u)}
-                      </option>
-                    ))}
-                  </Select>
+                    options={UNIT_OPTIONS.map((u) => ({ value: u, label: tUnit(u) }))}
+                  />
                 </div>
               </DetectedSuggestionCard>
             )}
@@ -688,19 +677,14 @@ export function JournalEntryComposer({
                 onConfirm={() => setDirStatus("confirmed")}
                 onDiscard={() => setDirStatus("discarded")}
               >
-                <Select
+                <DarkListbox
                   value={dirSlug}
-                  onChange={(e) => {
-                    setDirSlug(e.target.value);
+                  onChange={(v) => {
+                    setDirSlug(v);
                     setDirStatus("edited");
                   }}
-                >
-                  {directions.map((d) => (
-                    <option key={d.slug} value={d.slug}>
-                      {d.name}
-                    </option>
-                  ))}
-                </Select>
+                  options={directions.map((d) => ({ value: d.slug, label: d.name }))}
+                />
               </DetectedSuggestionCard>
             )}
           </DetectedSuggestionList>
@@ -747,16 +731,13 @@ export function JournalEntryComposer({
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <Label>{t("engagement")}</Label>
-          <Select
+          <DarkListbox
             value={engagementId}
-            onChange={(e) => setEngagementId(e.target.value)}
-          >
-            {engagements.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.label}
-              </option>
-            ))}
-          </Select>
+            onChange={setEngagementId}
+            options={engagements.map((e) => ({ value: e.id, label: e.label }))}
+            ariaLabel={t("engagement")}
+            testId="journal-engagement-switcher"
+          />
         </label>
         <label className="flex flex-col gap-1.5">
           <Label>{t("date")}</Label>
