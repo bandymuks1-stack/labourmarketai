@@ -13,6 +13,7 @@ import type {
   CompanyWorkerInvitation,
   LinkedCompanyWorker,
 } from "@/lib/company/company-workers";
+import { MessageButton } from "@/components/app/message-button";
 import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
 import {
   WorkerOperationsRoleForm,
@@ -212,6 +213,7 @@ export function CompanyWorkersSection({
                       <span className="break-all text-sm font-medium text-text-primary">{w.email ?? "—"}</span>
                       <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
                     </div>
+                    <MessageButton profileId={w.profileId} labelKey="messageWorker" />
                     <div className="flex flex-col gap-1 text-xs text-text-secondary">
                       <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
                         <span>
