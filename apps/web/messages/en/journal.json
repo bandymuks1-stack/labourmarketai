@@ -73,7 +73,11 @@
     "tile_type": "Tile type"
   },
   "inbox": {
-    "confirmSkills": "Confirm entry",
+    "confirmSkills": "Confirm skills",
+    "confirmEntry": "Confirm entry",
+    "suggestedFromEntry": "Suggested from this entry",
+    "noSkillsRecognized": "The system hasn't recognized any skills in this entry yet. You can approve the entry itself, or ask the worker to clarify the work.",
+    "writeConcreteWorks": "Tip: write concrete work words — e.g. painted walls, fitted rafters, dug sand, assembled formwork.",
     "noSkillsToConfirm": "No skills available to confirm",
     "confirmSkillsHint": "Pick the declared skills this entry proves — they become verified.",
     "confirmNote": "Note (optional)",

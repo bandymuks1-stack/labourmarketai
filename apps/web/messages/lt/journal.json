@@ -73,7 +73,11 @@
     "tile_type": "Plytelių tipas"
   },
   "inbox": {
-    "confirmSkills": "Patvirtinti įrašą",
+    "confirmSkills": "Patvirtinti įgūdžius",
+    "confirmEntry": "Patvirtinti įrašą",
+    "suggestedFromEntry": "Pasiūlyta pagal įrašą",
+    "noSkillsRecognized": "Šiame įraše sistema dar neatpažino įgūdžių. Galite patvirtinti patį įrašą arba prašyti darbuotojo patikslinti darbą.",
+    "writeConcreteWorks": "Parašykite konkrečius darbus: dažiau sienas, montavau gegnes, kasiau smėlį, rinkau klojinius.",
     "noSkillsToConfirm": "Nėra įgūdžių, kuriuos galima patvirtinti",
     "confirmSkillsHint": "Pažymėkite įgūdžius, kuriuos šis įrašas įrodo — jie taps patvirtinti.",
     "confirmNote": "Pastaba (nebūtina)",
