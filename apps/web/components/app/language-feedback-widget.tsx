@@ -85,11 +85,12 @@ export function LanguageFeedbackWidget() {
           recordEvent("language_feedback_opened");
           setOpen(true);
         }}
-        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 max-w-[calc(100vw-1.5rem)] rounded-full border border-brand-blue/40 bg-ink-800/90 px-4 py-2 font-mono text-[10px] uppercase tracking-label text-text-secondary shadow-lg backdrop-blur hover:border-brand-blue hover:text-text-primary md:bottom-6"
+        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-2 max-w-[calc(100vw-1.5rem)] rounded-full border border-brand-blue/40 bg-ink-800/90 p-3 font-mono text-[10px] uppercase tracking-label text-text-secondary shadow-lg backdrop-blur hover:border-brand-blue hover:text-text-primary sm:px-4 sm:py-2 md:bottom-6"
         data-testid="language-feedback-open"
         aria-label={t("openAria")}
       >
-        {t("openLabel")}
+        <span aria-hidden>✎</span>
+        <span className="hidden sm:inline">{t("openLabel")}</span>
       </button>
       {open && (
         <div

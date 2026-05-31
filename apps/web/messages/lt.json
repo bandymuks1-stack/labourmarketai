@@ -2479,6 +2479,7 @@
     "addButton": "Pridėti į organizaciją",
     "noMembers": "Kol kas narių nėra. Pridėkite darbuotoją žemiau.",
     "noAddable": "Nėra darbuotojų pridėti. Pirma pakvieskite darbuotoją, tada jis atsiras čia.",
+    "allAdded": "Visi priimti darbuotojai jau pridėti į organizaciją.",
     "reviewEnabledBadge": "Peržiūra",
     "reviewDisabledBadge": "Be peržiūros"
   }

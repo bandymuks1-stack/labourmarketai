@@ -282,7 +282,7 @@ export function WorkerOperationsRoleForm({
           <select
             name="operationsRole"
             defaultValue={defaultRole}
-            className="rounded-md border border-border-default bg-surface-1 px-2 py-1 text-text-primary outline-none focus:border-brand-blue"
+            className="w-full rounded-md border border-border-default bg-ink-700 px-3 py-2.5 text-text-primary outline-none focus:border-brand-blue sm:w-auto sm:py-1.5"
             data-testid={`worker-ops-role-select-${workerId}`}
           >
             <option value="">{labels.none}</option>
@@ -302,7 +302,7 @@ export function WorkerOperationsRoleForm({
             maxLength={120}
             defaultValue={currentTitle ?? ""}
             placeholder={labels.titlePlaceholder}
-            className="rounded-md border border-border-default bg-surface-1 px-2 py-1 text-text-primary outline-none focus:border-brand-blue"
+            className="w-full rounded-md border border-border-default bg-ink-700 px-3 py-2.5 text-text-primary outline-none focus:border-brand-blue sm:w-auto sm:py-1.5"
             data-testid={`worker-ops-title-input-${workerId}`}
           />
         </label>

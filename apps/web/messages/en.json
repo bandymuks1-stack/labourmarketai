@@ -2479,6 +2479,7 @@
     "addButton": "Add to organization",
     "noMembers": "No organization members yet. Add a worker below.",
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
+    "allAdded": "All accepted workers are already added to the organization.",
     "reviewEnabledBadge": "Review",
     "reviewDisabledBadge": "No review"
   }

@@ -20,6 +20,7 @@ export type OrgMembersPanelLabels = {
   addButton: string;
   noMembers: string;
   noAddable: string;
+  allAdded: string;
   reviewEnabledBadge: string;
   reviewDisabledBadge: string;
 };
@@ -82,7 +83,7 @@ export function OrgMembersPanel({
           {members.map((m) => (
             <li
               key={m.engagementId}
-              className="flex items-center justify-between gap-3 rounded-md border border-ink-600 px-3 py-2"
+              className="flex flex-col gap-2 rounded-md border border-ink-600 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
               data-testid={`org-member-${m.engagementId}`}
             >
               <span className="flex items-center gap-2 text-sm text-text-primary">
@@ -117,13 +118,15 @@ export function OrgMembersPanel({
           {labels.addTitle}
         </p>
         {addable.length === 0 ? (
-          <p className="text-sm text-text-muted">{labels.noAddable}</p>
+          <p className="text-sm text-text-muted">
+            {members.length > 0 ? labels.allAdded : labels.noAddable}
+          </p>
         ) : (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <select
               value={selected}
               onChange={(e) => setSelected(e.target.value)}
-              className="rounded-md border border-ink-500 bg-surface-1 px-2 py-1.5 text-sm text-text-primary"
+              className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2.5 text-sm text-text-primary sm:w-auto"
               data-testid="org-add-member-select"
             >
               {addable.map((a) => (
