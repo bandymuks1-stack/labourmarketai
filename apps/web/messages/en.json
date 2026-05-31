@@ -1,4 +1,14 @@
 {
+  "managerEvidence": {
+    "title": "Management activity",
+    "systemEvidenced": "System-evidenced activity",
+    "description": "Management activity is evidenced by system records: reviewed entries, confirmations, and team-management actions.",
+    "entriesReviewed": "Entries reviewed",
+    "confirmations": "Confirmations",
+    "correctionsRequested": "Corrections requested",
+    "lastActivity": "Last activity",
+    "distinctionNote": "This is system-recorded activity, not an external verification. Skills can be self-declared, evidenced by system activity, or externally confirmed. This card shows system-evidenced activity."
+  },
   "companyOps": {
     "counts": {
       "pending": "Pending invites",
