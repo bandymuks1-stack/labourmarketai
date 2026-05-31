@@ -69,6 +69,7 @@
     "projectsBody": "Šio sluoksnio duomenų modelis jau veikia: projektai, užsakovai, projekto darbuotojai, darbo elementai ir žurnalo įrašo susiejimas su projektu. Niekas neužpildoma automatiškai — projektus ir užsakovus galėsite sukurti kitame, rašymą įgalinančiame pjūvyje. Tada žurnalo įrašus bus galima susieti su projektu.",
     "projectsCount": "Projektai",
     "projectsEmpty": "dar nesukurta nė vieno projekto",
+    "projectsLinkingNote": "Projektų kūrimas ir įrašų susiejimas su projektu dar neįjungti. Niekas neužpildoma automatiškai.",
     "needsTitle": "Poreikiai",
     "needsBody": "Pateikite struktūruotą poreikį ir sekite jo būseną.",
     "needsCta": "Atidaryti poreikius"

@@ -357,6 +357,9 @@ export default async function CompanyDashboardPage({
               <span className="font-semibold text-text-primary">{projectContext.projects}</span>
               {projectContext.projects === 0 ? ` · ${tOps("projectsEmpty")}` : ""}
             </p>
+            <p className="text-[11px] leading-relaxed text-text-muted" data-testid="company-ops-projects-linking">
+              {tOps("projectsLinkingNote")}
+            </p>
           </div>
           <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-4">
             <h3 className="font-display text-sm font-semibold text-text-primary">
