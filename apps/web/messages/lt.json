@@ -2210,6 +2210,8 @@
     "body": "Ši rolė skirta realiai organizacijai ar atstovaujamam klientui. Juodraščiai lieka privatūs, kol nuspręsite kitaip. Rimtam naudojimui reikės įmonės duomenų (šalies, pavadinimo, registracijos kodo, korespondencijos adreso, atstovo vaidmens)."
   },
   "profileCvClarity": {
+    "statusDone": "Pridėta",
+    "statusTodo": "Dar pridėti",
     "title": "Iš ko susideda tavo profilis",
     "scope": "Aiškumas",
     "intro": "Profilis auga iš realaus darbo, o ne iš pažadų. Štai dalys, kurios jį formuoja, ir kas dar laukia patvirtinimo.",
