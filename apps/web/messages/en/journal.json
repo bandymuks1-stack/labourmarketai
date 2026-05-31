@@ -26,6 +26,7 @@
   "otherWorkType": "Other / general work",
   "composeTiler": "Laid {area} {unit} of tiling at {site}.",
   "cv": {
+    "journalBacked": "Journal-backed",
     "present": "present",
     "primary": "Primary",
     "skills": "Skills",

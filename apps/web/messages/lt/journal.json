@@ -26,6 +26,7 @@
   "otherWorkType": "Kita / bendri darbai",
   "composeTiler": "Padariau {area} {unit} plytelių objektui {site}.",
   "cv": {
+    "journalBacked": "Iš žurnalo",
     "present": "dabar",
     "primary": "Pagrindinis",
     "skills": "Įgūdžiai",
