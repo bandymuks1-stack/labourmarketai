@@ -1491,6 +1491,10 @@
         "account": "My account"
       },
       "chainActions": {
+        "buyerTitle": "Your requests workspace",
+        "buyerSubtitle": "Open your requests workspace to create, complete and track your demand.",
+        "buyerRequests": "Manage your requests",
+        "buyerRequestsDesc": "Create or complete a request and track its status.",
         "title": "Work-journal review chain",
         "subtitle": "Start here: invite a worker, enable review, and review their entries.",
         "inviteWorker": "Invite a worker",

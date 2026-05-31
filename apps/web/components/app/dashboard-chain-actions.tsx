@@ -49,9 +49,22 @@ export async function DashboardChainActions({ role }: { role: Role }) {
         testId: "chain-action-journal",
       },
     ];
+  } else if (role === "customer") {
+    actions = [
+      {
+        href: "/dashboard/buyer",
+        label: t("buyerRequests"),
+        desc: t("buyerRequestsDesc"),
+        testId: "chain-action-buyer-requests",
+      },
+    ];
   }
 
   if (actions.length === 0) return null;
+
+  const headingTitle = role === "customer" ? t("buyerTitle") : t("title");
+  const headingSubtitle =
+    role === "customer" ? t("buyerSubtitle") : t("subtitle");
 
   return (
     <section
@@ -60,9 +73,9 @@ export async function DashboardChainActions({ role }: { role: Role }) {
     >
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-base font-semibold text-text-primary">
-          {t("title")}
+          {headingTitle}
         </h2>
-        <p className="text-xs text-text-secondary">{t("subtitle")}</p>
+        <p className="text-xs text-text-secondary">{headingSubtitle}</p>
       </header>
       <ul className="grid gap-2 sm:grid-cols-3">
         {actions.map((a) => (

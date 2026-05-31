@@ -1491,6 +1491,10 @@
         "account": "Mano paskyra"
       },
       "chainActions": {
+        "buyerTitle": "Jūsų poreikių erdvė",
+        "buyerSubtitle": "Atverkite poreikių erdvę, kad sukurtumėte, papildytumėte ir sektumėte savo poreikius.",
+        "buyerRequests": "Tvarkyti poreikius",
+        "buyerRequestsDesc": "Sukurkite ar papildykite poreikį ir sekite jo būseną.",
         "title": "Darbo žurnalo peržiūros grandinė",
         "subtitle": "Pradėkite čia: pakvieskite darbuotoją, įjunkite peržiūrą ir peržiūrėkite jo įrašus.",
         "inviteWorker": "Pakviesti darbuotoją",
