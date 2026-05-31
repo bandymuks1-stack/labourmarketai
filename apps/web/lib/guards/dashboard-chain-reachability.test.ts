@@ -35,6 +35,7 @@ describe("dashboard surfaces the chain entry points", () => {
       "/dashboard/agency",
       "/dashboard/inbox",
       "/dashboard/journal",
+      "/dashboard/buyer",
     ]) {
       expect(src.includes(`"${href}"`), `must link to ${href}`).toBe(true);
     }
@@ -47,6 +48,8 @@ describe("dashboard surfaces the chain entry points", () => {
     expect(codeOnly).not.toMatch(/disabled|aria-disabled|coming\s*soon|cursor-not-allowed/i);
     // Role-aware: company/agency get invite + enable-review + review-inbox.
     expect(src).toMatch(/role === "company" \|\| role === "agency"/);
+    // Role-aware: the customer/buyer overview reaches its requests workspace.
+    expect(src).toMatch(/role === "customer"/);
   });
 
   it("the accept-invitation surface is mounted on the dashboard too", () => {
