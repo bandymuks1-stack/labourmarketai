@@ -140,7 +140,9 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         </div>
       </div>
 
-      <p className="text-sm text-text-primary">{entry.originalText}</p>
+      <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
+        {entry.originalText}
+      </p>
 
       {entry.metrics.length > 0 && (
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
@@ -185,7 +187,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
                   {s.name}
                 </span>
                 {s.evidence && (
-                  <span className="pl-1 text-[10px] text-text-muted">
+                  <span className="pl-1 text-[10px] text-text-muted break-words">
                     {t("inbox.evidenceLabel")}: “{s.evidence}”
                   </span>
                 )}
