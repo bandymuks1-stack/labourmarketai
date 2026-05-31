@@ -5,6 +5,7 @@
     "roster": "Priėmėte kvietimą ir esate komandos sąraše. Organizacijos savininkas dar turi pridėti jus prie organizacijos, kad galėtumėte žymėti darbą."
   },
   "noContextCta": "Į skydelį",
+  "personalEntry": "Asmeninis darbuotojo įrašas",
   "chooseWorkType": "Pasirinkite darbo tipą",
   "whatDidYouDo": "Ką šiandien dirbote?",
   "textPlaceholder": "Pvz.: Dirbau 6 valandas. Aptarnavau klientus, sutvarkiau 12 užklausų ir paruošiau dienos ataskaitą.",
@@ -22,7 +23,7 @@
   "suggestionReviewIntro": "Tai pasiūlymai. Patvirtinkite tik tai, kas teisinga. Nepatvirtinti pasiūlymai neišsaugomi kaip faktai.",
   "savedTitle": "Įrašas išsaugotas",
   "savedBody": "Jūsų patvirtinti duomenys pridėti prie darbo istorijos.",
-  "pilotBackboneNote": "Pilotinė versija: jūsų įrašai šiuo metu privatūs. Vadovo / kliento patvirtinimo bei audito sluoksnis dar ruošiamas — kai bus paruoštas, įjungsime jį tame pačiame įraše be jūsų papildomų veiksmų.",
+  "pilotBackboneNote": "Įrašai privatūs, kol nepasirinksite kitaip. Patvirtinimo sluoksnis rodomas tik kai yra realus patvirtinimas.",
   "quantitySummaryHint": "Neprivaloma greita santrauka — visus kiekius ir vienetus taip pat galite surašyti aprašyme aukščiau.",
   "workDirectionOptional": "Darbo kryptis (neprivaloma)",
   "classifyLater": "Ateityje sistema galės pasiūlyti darbo kryptį, įgūdžius, kiekius ir vienetus pagal jūsų įrašą. Pasiūlymai turės būti peržiūrimi prieš išsaugant kaip faktą.",

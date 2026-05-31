@@ -57,7 +57,7 @@ test("admin pilot panel renders + per-user inspect works", async ({
 
   await expect(
     page.getByRole("heading", {
-      name: /Pilotinis valdymo skydas/i,
+      name: /Operacijų valdymo skydas/i,
       level: 1,
     }),
   ).toBeVisible();

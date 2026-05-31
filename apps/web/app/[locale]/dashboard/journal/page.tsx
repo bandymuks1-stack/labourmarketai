@@ -101,9 +101,14 @@ export default async function JournalPage({
           : null;
     const orgName =
       org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—";
+    // A personal worker engagement (no organization) reads clearer as a
+    // named personal entry than a bare "— · Darbuotojas". Role model unchanged.
+    const label = org
+      ? `${orgName} · ${tRel(e.relationship_slug)}`
+      : t("personalEntry");
     return {
       id: e.id,
-      label: `${orgName} · ${tRel(e.relationship_slug)}`,
+      label,
       isPrimary: e.is_primary,
     };
   });

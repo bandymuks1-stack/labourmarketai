@@ -767,13 +767,13 @@ describe("pilot readiness clarity", () => {
     expect(txt).toMatch(/t\("pilotBackboneNote"\)/);
   });
 
-  it("LT + EN expose the pilotBackboneNote with a clear preparing signal", () => {
+  it("LT + EN expose the pilotBackboneNote with an honest confirmation signal", () => {
     const lt = JSON.parse(readWeb("messages/lt/journal.json"));
     const en = JSON.parse(readWeb("messages/en/journal.json"));
     expect(lt.pilotBackboneNote).toBeTruthy();
     expect(en.pilotBackboneNote).toBeTruthy();
-    expect(lt.pilotBackboneNote).toMatch(/ruošiam|piloti/i);
-    expect(en.pilotBackboneNote).toMatch(/prepared|preparing|pilot/i);
+    expect(lt.pilotBackboneNote).toMatch(/patvirtinim/i);
+    expect(en.pilotBackboneNote).toMatch(/confirmation/i);
     // Honesty: must mention privacy / closed visibility today so the
     // worker isn't misled into thinking the legal backbone is live.
     expect(lt.pilotBackboneNote).toMatch(/privat/i);

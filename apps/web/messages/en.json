@@ -1,4 +1,17 @@
 {
+  "companyOps": {
+    "title": "Operations workspace",
+    "intro": "What you can run today on this page, and what's next.",
+    "teamTitle": "Workers / Team",
+    "teamBody": "Invite workers, see the accepted roster, add them to the organization and enable journal review — all below on this page.",
+    "reviewTitle": "Journal review",
+    "reviewSteps": "1) worker accepts · 2) add to organization · 3) enable review · 4) worker logs work · 5) you confirm.",
+    "projectsTitle": "Projects and tasks are being prepared",
+    "projectsBody": "Worker linking, organization membership and work-journal review work for real today. Task assignment is the next data-model slice.",
+    "needsTitle": "Needs",
+    "needsBody": "Submit a structured demand and track its status.",
+    "needsCta": "Open needs"
+  },
   "demandReadback": {
     "heading": "Your submitted requests",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -704,10 +717,10 @@
     }
   },
   "admin": {
-    "eyebrow": "PILOT CONTROL",
-    "title": "Pilot control panel",
+    "eyebrow": "OPERATIONS CONTROL",
+    "title": "Operations control panel",
     "subtitle": "Superadmins only. Server-side RLS + profiles.active_role = 'admin'.",
-    "back": "Back to pilot panel",
+    "back": "Back to operations panel",
     "metric": {
       "totalUsers": "Total profiles",
       "totalClaims": "Total skill claims"
@@ -723,14 +736,14 @@
     },
     "hub": {
       "agentOs": "Agent OS",
-      "telemetry": "Pilot telemetry",
+      "telemetry": "Operations telemetry",
       "languageFeedback": "Language reports",
       "communication": "Conversations",
       "support": "Support conversations"
     },
     "drafts": {
-      "title": "Pilot drafts",
-      "help": "Private drafts from company / agency / buyer pilot users. Visible only to the owner and admins.",
+      "title": "Operations drafts",
+      "help": "Private drafts from company / agency / buyer users. Visible only to the owner and admins.",
       "total": "Total",
       "byType": {
         "company": "Company request",
@@ -780,8 +793,8 @@
       "profileTextEmpty": "No profile text yet.",
       "claimsTitle": "Self-declared skills",
       "claimsEmpty": "No self-declared skills yet.",
-      "draftsTitle": "Pilot drafts",
-      "draftsEmpty": "No pilot drafts yet.",
+      "draftsTitle": "Operations drafts",
+      "draftsEmpty": "No operations drafts yet.",
       "draftEmpty": "Draft is empty.",
       "draftType": {
         "company_request": "Company request",
@@ -971,7 +984,7 @@
     },
     "footer": "Publishing the vision map here does not mean every area is live. What is usable today is tagged \"Live today\". Everything else is either \"Preparing\" or a future layer.",
     "internalPreviewBadge": "Internal preview",
-    "internalPreviewBanner": "This page is not publicly published yet. It is an internal preview for the owner and invited pilot participants. Do not share the URL publicly until the owner production smoke is PASSED."
+    "internalPreviewBanner": "This page is not publicly published yet. It is an internal preview for the owner and invited participants. Do not share the URL publicly until the owner production smoke is PASSED."
   },
   "suggestionStatuses": {
     "detected": "Suggested",
@@ -1373,7 +1386,7 @@
       "cancel": "Cancel",
       "confirm": "Add",
       "adminMode": "Admin mode",
-      "adminPanelLink": "Open pilot control panel",
+      "adminPanelLink": "Open operations control panel",
       "clarityNote": "Switching role changes the workspace view, not your account. Company, agency and buyer workspaces may need an organization profile later."
     },
     "dashboard": {
@@ -2275,7 +2288,7 @@
       "sales": "Sales"
     },
     "links": {
-      "telemetry": "→ Pilot telemetry",
+      "telemetry": "→ Operations telemetry",
       "languageFeedback": "→ Language reports",
       "adminHome": "→ Admin home"
     },
@@ -2327,7 +2340,7 @@
         "events24h": "Pilot events",
         "errors24h": "Errors",
         "languageOpen": "Language reports (open)",
-        "draftsTotal": "Pilot drafts (total)",
+        "draftsTotal": "Operations drafts (total)",
         "draftsBreakdown": "Company: {company} · Agency: {agency} · Buyer: {buyer}",
         "supportThreads": "Support threads (total)",
         "communicationMessages": "Conversation messages (total)"
@@ -2341,7 +2354,7 @@
         "login": "Google sign-in observed",
         "journal": "Work Journal saves observed",
         "language": "Language reports received",
-        "telemetry": "Pilot telemetry recording (last 24h)",
+        "telemetry": "Operations telemetry recording (last 24h)",
         "drafts": "Company / agency / buyer drafts saved",
         "communication": "Conversation messages relayed"
       },
@@ -2349,7 +2362,7 @@
     }
   },
   "pilotTelemetry": {
-    "title": "Pilot telemetry (v1)",
+    "title": "Operations telemetry (v1)",
     "subtitle": "Safe tester QA events. Read-only. Admins only.",
     "loadError": "Could not load events: {msg}",
     "tasks": {
