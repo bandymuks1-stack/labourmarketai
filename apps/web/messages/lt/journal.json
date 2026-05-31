@@ -102,6 +102,7 @@
       "confirmed": "Patvirtinta"
     },
     "projectNote": "Kol kas įrašai siejami su darbuotoju ir įmone. Projektų, objektų ir užsakovo sluoksnis ruošiamas atskiru duomenų modelio pjūviu.",
+    "openReport": "Peržiūros ataskaita →",
     "approve": "Patvirtinti",
     "cancel": "Atšaukti",
     "changesNote": "Ką reikia pataisyti?",

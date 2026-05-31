@@ -1,4 +1,22 @@
 {
+  "reviewReport": {
+    "title": "Review report",
+    "print": "Print",
+    "origin": "Reviewed by the company owner. This report is built from system records, without external verification.",
+    "empty": "No entries are awaiting review yet.",
+    "noWorks": "No works recognized from this entry.",
+    "uncertaintyNote": "Part of this entry is unclear — needs clarification.",
+    "projectNote": "For now, entries are tied to the worker and company. A project / object / client layer is being prepared as a separate data-model slice.",
+    "totals": {
+      "pending": "Awaiting review",
+      "workers": "Workers",
+      "confirmations": "Confirmations",
+      "corrections": "Corrections requested"
+    },
+    "status": {
+      "pending": "Awaiting review"
+    }
+  },
   "managerEvidence": {
     "title": "Management activity",
     "systemEvidenced": "System-evidenced activity",
