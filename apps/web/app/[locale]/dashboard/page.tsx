@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PilotRequestButton } from "@/components/app/pilot-request-button";
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
-import { PilotReadinessCard } from "@/components/app/pilot-readiness-card";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
@@ -145,7 +144,7 @@ export default async function DashboardOverviewPage({
   const linkCls =
     "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
 
-  // ── Company / agency / customer: operating cockpit (define → pilot) ──
+  // ── Company / agency / customer: operating cockpit (define → submit need) ──
   if (role !== "worker") {
     const intent = role === "agency" ? "partner" : "hire_workers";
     const lanes = [
@@ -338,11 +337,6 @@ export default async function DashboardOverviewPage({
       {StartingPoint}
 
       <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
-
-      {/* Pilot readiness — sits above the journey rail so testers see the
-          honest pilot framing + the link to communication + the privacy
-          note BEFORE diving into the regular dashboard surfaces. */}
-      <PilotReadinessCard locale={locale} />
 
       <JourneyRail stages={wstages} label={tf("worker.eyebrow")} />
 

@@ -2,7 +2,6 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { PilotDraftForm } from "@/components/app/pilot-draft-form";
-import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
 import { BuyerRequestsSection } from "@/components/app/buyer-requests-section";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
@@ -241,9 +240,6 @@ export default async function BuyerDashboardPage({
         className="card-border flex flex-col gap-2 p-4"
         data-testid="buyer-dashboard-pilot-disclaimer"
       >
-        <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
-          PILOT
-        </p>
         <p className="text-sm text-text-secondary">{t("pilotDisclaimer")}</p>
       </section>
 
@@ -334,11 +330,6 @@ export default async function BuyerDashboardPage({
           </Link>
         </section>
       )}
-
-      <Tier2ReadinessExplainer
-        source="dashboard_buyer_tier2_readiness"
-        testId="buyer-dashboard-tier2-readiness"
-      />
 
       <BuyerRequestsSection
         listResult={requestsResult}

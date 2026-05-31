@@ -3,7 +3,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { PilotDraftForm } from "@/components/app/pilot-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
-import { Tier2ReadinessExplainer } from "@/components/app/tier2-readiness-explainer";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { getOrgMembersData } from "@/lib/operations/org-members";
@@ -248,18 +247,10 @@ export default async function CompanyDashboardPage({
         className="card-border flex flex-col gap-2 p-4"
         data-testid="company-dashboard-pilot-disclaimer"
       >
-        <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
-          PILOT
-        </p>
         <p className="text-sm text-text-secondary">{t("pilotDisclaimer")}</p>
       </section>
 
       <OrgTier1Warning />
-
-      <Tier2ReadinessExplainer
-        source="dashboard_company_tier2_readiness"
-        testId="company-dashboard-tier2-readiness"
-      />
 
       <TeamRosterEmptyState variant="company" />
 

@@ -42,9 +42,9 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "ĮMONĖS ERDVĖ",
-      "title": "Įmonės pilotinis skydas",
+      "title": "Įmonės darbo erdvė",
       "subtitle": "Įmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.",
-      "pilotDisclaimer": "Tai pilotinis režimas. Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite saugiai paruošti pirminę paklausą ir laukti, kol atsidarys tolesni etapai.",
+      "pilotDisclaimer": "Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite ramiai paruošti pirmą poreikį — jis iškart išsaugomas ir lieka privatus.",
       "firstAction": {
         "title": "Sukurti darbo / paslaugos / komandos paklausą",
         "body": "Pirmas naudingas veiksmas: aprašykite kokio darbuotojo, komandos ar paslaugos jums reikia. Juodraštis bus privatus, prieinamas tik jums, kol nenuspręsite kitaip."
@@ -82,7 +82,7 @@
           },
           "notes": {
             "label": "Papildoma informacija",
-            "placeholder": "Bet kokios pastabos pilotui"
+            "placeholder": "Bet kokios pastabos"
           }
         },
         "saveButton": "Išsaugoti juodraštį",
@@ -220,9 +220,9 @@
     },
     "agency": {
       "eyebrow": "AGENTŪROS ERDVĖ",
-      "title": "Agentūros pilotinis skydas",
+      "title": "Agentūros darbo erdvė",
       "subtitle": "Agentūros vaidmuo yra įėjimo taškas. Galite plėstis į kitas roles, kai pasiruošę.",
-      "pilotDisclaimer": "Tai pilotinis režimas. Kandidatų patvirtinimas nedaromas automatiškai. Niekas netampa viešu be jūsų sprendimo. Galite saugiai paruošti pasiūlymą ir laukti, kol atsidarys tolesni etapai.",
+      "pilotDisclaimer": "Kandidatų tikrinimas nedaromas automatiškai. Niekas netampa viešu be jūsų sprendimo. Galite ramiai paruošti pasiūlymą — jis iškart išsaugomas ir lieka privatus.",
       "firstAction": {
         "title": "Sukurti kandidatų / paslaugų pasiūlymo juodraštį",
         "body": "Pirmas naudingas veiksmas: aprašykite, kokius darbuotojus galite pasiūlyti arba kokių užsakymų ieškote. Juodraštis bus privatus, prieinamas tik jums."
@@ -255,7 +255,7 @@
           },
           "notes": {
             "label": "Papildoma informacija",
-            "placeholder": "Bet kokios pastabos pilotui"
+            "placeholder": "Bet kokios pastabos"
           }
         },
         "saveButton": "Išsaugoti juodraštį",
@@ -388,9 +388,9 @@
     },
     "buyer": {
       "eyebrow": "PIRKĖJO ERDVĖ",
-      "title": "Pirkėjo pilotinis skydas",
+      "title": "Pirkėjo darbo erdvė",
       "subtitle": "Pirkėjo vaidmuo yra įėjimo taškas. Galite vėliau pridėti ir kitus vaidmenis.",
-      "pilotDisclaimer": "Tai pilotinis režimas. Nepateikiame netikrų pasiūlymų. Jūsų užklausa lieka privati, kol nenuspręsite kitaip.",
+      "pilotDisclaimer": "Nepateikiame netikrų pasiūlymų. Jūsų užklausa lieka privati, kol nenuspręsite kitaip.",
       "firstAction": {
         "title": "Sukurti paslaugos / komandos / rangovo užklausą",
         "body": "Pirmas naudingas veiksmas: aprašykite, ko jums reikia (paslauga, komanda, rangovas). Juodraštis bus privatus."
@@ -415,7 +415,7 @@
           },
           "notes": {
             "label": "Papildoma informacija",
-            "placeholder": "Bet kokios pastabos pilotui"
+            "placeholder": "Bet kokios pastabos"
           }
         },
         "saveButton": "Išsaugoti juodraštį",
@@ -601,7 +601,7 @@
   "jobPostings": {
     "list": {
       "title": "Mano darbo skelbimai",
-      "body": "Realūs darbo skelbimai, kuriuos paskelbėte. Privatūs pilotiniai juodraščiai lieka atskirai žemiau.",
+      "body": "Realūs darbo skelbimai, kuriuos paskelbėte. Privatūs juodraščiai lieka atskirai žemiau.",
       "empty": "Jūs dar neesate paskelbę nė vieno darbo. Atidarykite formą žemiau, kad sukurtumėte pirmą.",
       "untitledRole": "(be pavadinimo)",
       "project": "Projektas",
@@ -883,7 +883,7 @@
     "preparingReason": {
       "default": "Šis vaidmuo dar ruošiamas. Įjungsime jį, kai bus paruoštas saugiai.",
       "startAvailable": "Nustatymo kelias jau veikia: vienu lauku įrašai pavadinimą, ir paskyra realiai išsaugoma DB. Pilnas darbo erdvės sluoksnis vis dar pildomas.",
-      "customerPartial": "Trūksta pirmaeilės public.customers lentelės — pirkėjo entitetas dar nesukurtas DB lygmenyje (M3 etapas). Galite pridėti customer vaidmenį ir pildyti pilot užklausą."
+      "customerPartial": "Trūksta pirmaeilės public.customers lentelės — pirkėjo entitetas dar nesukurtas DB lygmenyje (M3 etapas). Galite pridėti customer vaidmenį ir pildyti užklausą."
     },
     "worker": {
       "description": "Darbuotojas: text-first profilis, įgūdžiai ir darbo dienoraštis. Aktyvu šiandien."
@@ -1413,7 +1413,7 @@
             "c1": "Apibrėžkite poreikį",
             "c2": "Paruoškite kriterijus",
             "c3": "Peržiūrėkite tinkamumą",
-            "c4": "Užsakyti pilotą"
+            "c4": "Pateikti poreikį"
           }
         },
         "startingPoint": "Tai tik jūsų pradžios taškas. Vėliau galėsite pridėti daugiau veiklų, rolių, įmonių, komandų, projektų ar galimybių.",
@@ -1467,11 +1467,11 @@
           "p3": "Pasiūlykite savo paslaugas rinkai."
         },
         "pilot": {
-          "title": "Užsisakykite bandomąją prieigą",
-          "body": "Gaukite ankstyvą, asmeninį komandos įvedimą. Kiekvieną užklausą peržiūrime asmeniškai.",
-          "cta": "Prašyti bandomosios prieigos",
+          "title": "Pasakykite, ko jums reikia",
+          "body": "Aprašykite, ko ieškote. Užklausa iškart išsaugoma ir matoma jūsų erdvėje — esate pirmas, todėl viskas, ką sukuriate, yra realu.",
+          "cta": "Pateikti poreikį",
           "sending": "Siunčiama...",
-          "done": "Ačiū — gavome jūsų užklausą ir susisieksime.",
+          "done": "Išsaugota. Jūsų poreikis matomas jūsų erdvėje.",
           "error": "Nepavyko išsiųsti. Bandykite dar kartą."
         }
       },
@@ -2065,32 +2065,7 @@
     "eyebrow": "Kainos",
     "title": "Aiškūs planai —",
     "titleAccent": "sąžininga kaina.",
-    "subcopy": "Kainos dar nėra galutinės ir sąskaitos už jus šiame puslapyje niekada nepradedamos. Žemiau pateikti planai apibūdina apimtį; pilotinis aktyvavimas vyksta rankiniu būdu — paprašykite pilotinės peržiūros ir prieš pradedant suderinsime kainą bei apimtį.",
-    "pilotActivation": {
-      "badge": "Aktyvavimas rankiniu būdu",
-      "title": "Pilotinė kaina — aktyvuojama tik rankiniu būdu",
-      "body": "Šiame puslapyje nėra atsiskaitymo mygtuko. Produktas yra pilotinėje stadijoje. Kortelė nesurinkama, planas savaime nepradeda veikti ir jokio mokėjimo neimame be aiškaus jūsų sprendimo.",
-      "items": [
-        "Sąskaitos už jus niekada nepradedamos — kai pradės veikti mokami planai, kainą paskelbsime mažiausiai dvi savaites iš anksto.",
-        "Organizacijos statusas už jus niekada nenustatomas — kiekvienas statusas atsiranda iš savininko ar administratoriaus peržiūros.",
-        "Jokio tylaus bandymo — pasibaigus bandymo laikotarpiui tyliai netaikysime mokėjimo."
-      ],
-      "manualCta": "Užsakyti pilotinę peržiūrą"
-    },
-    "pilotWorkflow": {
-      "eyebrow": "Pirmas veikiantis pilotas",
-      "title": "Pirmasis realus pilotinis procesas",
-      "body": "Tai pirmasis nuo pradžios iki pabaigos veikiantis procesas, kurį vykdome su pilotinėmis organizacijomis. Kiekvienas žingsnis žemiau yra realus veiksmas produkte — niekas nenusprendžiama už jus ir niekas nevykdoma jūsų vardu automatiškai; aktyvavimas lieka rankinis.",
-      "steps": [
-        "Įmonė arba agentūra susieja realų darbuotoją — pakviečia el. paštu, o darbuotojas priima.",
-        "Savininkas įjungia darbo žurnalo peržiūrą tam darbuotojo ryšiui.",
-        "Darbuotojas užregistruoja realų darbo žurnalo įrašą toje organizacijoje.",
-        "Vadovas jį peržiūri — patvirtina, atmeta arba paprašo pataisymų — ir sprendimas išsaugomas kaip įrodymas.",
-        "Darbuotojas, įmonė ir administratorius mato išsaugotą peržiūros rezultatą."
-      ],
-      "ctaNote": "Pilotinis aktyvavimas yra rankinis. Kortelė nerenkama, joks planas neprasideda savaime, o kaina ir apimtis suderinamos su jumis prieš pradedant.",
-      "cta": "Užsakyti pilotą"
-    },
+    "subcopy": "Kainos dar nėra galutinės ir sąskaitos už jus šiame puslapyje niekada nepradedamos. Žemiau pateikti planai apibūdina apimtį; aktyvavimas vyksta rankiniu būdu — susisiekite ir prieš pradedant suderinsime kainą bei apimtį.",
     "planCta": "Užsirašyti į šio plano sąrašą",
     "featuresLabel": "Apima",
     "plans": {
@@ -2166,36 +2141,6 @@
       "title": "Slapukų politika"
     }
   },
-  "pilotReadiness": {
-    "title": "Bandomoji versija",
-    "badge": "Pilotas",
-    "body": "Tai bandomoji (pilot) labourmarket.ai versija realiems testuotojams. Įrašai privatūs. Be viešo „verified“ žymeklio. Be matchingo. Tikriname pamatą — patikimą darbo įrodymų grandinę.",
-    "links": {
-      "communication": "Pokalbiai ir pagalba →"
-    },
-    "feedbackHint": "Tekstas painus? Pažymėkite + spauskite „Pranešti apie tekstą“ apačioje.",
-    "telemetryNote": "Privatumas: renkame tik užduočių laikus + klaidų kodus + maršrutus. Be jūsų teksto. Be klavišų. Be paslėpto sekimo."
-  },
-  "tier2Readiness": {
-    "badge": "Tik rankinė peržiūra",
-    "title": "Ko reikės rankiniam Tier-2 aktyvavimui",
-    "body": "Tier-2 yra rankiniu būdu aktyvuojamas lygmuo organizacijoms, norinčioms rimto piloto. Ši kortelė rodo, ko savininkas arba administratorius klaus, kai paprašysite pilotinės peržiūros. Šiame puslapyje niekas neperduodama į Tier-2 schemą, o Tier-2 būsena išlieka 'pilot' tol, kol savininko ar administratoriaus peržiūra užbaigiama.",
-    "requirementsTitle": "Informacija, kurios paprašys rankinė peržiūra",
-    "requirements": [
-      "Organizacijos juridinis pavadinimas ir registracijos šalis.",
-      "Šaliai būdingas registracijos kodas (pvz., 9 skaitmenų LT, 11 skaitmenų LV).",
-      "Korespondencinis adresas: šalis, miestas, gatvės eilutė, pašto kodas.",
-      "Vienas įvardytas žmogus atstovas ir jo vaidmuo (direktorius, įgaliotas atstovas, darbuotojas arba rangovas).",
-      "Veikla keliose šalyse, kai organizacija dirba daugiau nei vienoje šalyje."
-    ],
-    "reviewNote": "Savininkas arba administratorius rankiniu būdu peržiūri kiekvieną pateikimą. Tier-2 būsena išlieka 'pilot' tol, kol ši peržiūra užbaigiama; aktyvavimas įvyksta tik po to, kai žmogaus peržiūra užfiksuoja sprendimą.",
-    "notWritingNote": "Šis puslapis yra peržiūra. Jis nieko neperduoda į Tier-2 schemą. Jis nesurenka kortelės. Jis nepradeda sąskaitų pateikimo.",
-    "ctaLabel": "Užsakyti pilotinę peržiūrą"
-  },
-  "pilotMode": {
-    "title": "Pilotinis režimas",
-    "body": "Mokėjimas, samdymo sprendimas ar patvirtinimas čia automatiškai nevykdomas. Realus aktyvavimas reikalauja savininko ar administratoriaus peržiūros."
-  },
   "communication": {
     "title": "Pokalbiai",
     "subtitle": "Vidinis bendravimas tarp testuotojų, įmonių, agentūrų ir administratoriaus.",
@@ -2205,7 +2150,7 @@
     "unread": "Naujas",
     "kind": {
       "direct": "Asmeninis",
-      "support": "Pagalba / pilotas",
+      "support": "Pagalba",
       "team": "Komanda"
     },
     "backToList": "← Visi pokalbiai",
@@ -2251,8 +2196,8 @@
     }
   },
   "orgTier1Warning": {
-    "eyebrow": "Bandomasis etapas",
-    "body": "Ši rolė skirta realiai organizacijai ar atstovaujamam klientui. Bandomajame etape juodraščiai privatūs ir realių pasekmių nesukelia. Rimtam naudojimui reikės įmonės duomenų (šalies, pavadinimo, registracijos kodo, korespondencijos adreso, atstovo vaidmens)."
+    "eyebrow": "Jūsų organizacija",
+    "body": "Ši rolė skirta realiai organizacijai ar atstovaujamam klientui. Juodraščiai lieka privatūs, kol nuspręsite kitaip. Rimtam naudojimui reikės įmonės duomenų (šalies, pavadinimo, registracijos kodo, korespondencijos adreso, atstovo vaidmens)."
   },
   "profileCvClarity": {
     "title": "Iš ko susideda tavo profilis",

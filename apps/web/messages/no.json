@@ -143,7 +143,7 @@
             "c1": "Definer behov",
             "c2": "Forbered kriterier",
             "c3": "Vurder match",
-            "c4": "Be om pilot"
+            "c4": "Send behovet ditt"
           }
         },
         "startingPoint": "[EN] This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
@@ -192,11 +192,11 @@
           "p3": "[EN] Offer your services to the market."
         },
         "pilot": {
-          "title": "[EN] Request a pilot",
-          "body": "[EN] Get early, hands-on onboarding from our team. We review every request personally.",
-          "cta": "[EN] Request pilot access",
+          "title": "[EN] Tell us what you need",
+          "body": "[EN] Describe what you're looking for. Your request is saved and visible in your space right away — you're first here, so everything you create is real.",
+          "cta": "[EN] Submit your need",
           "sending": "[EN] Sending...",
-          "done": "[EN] Thanks - we've got your request and will be in touch.",
+          "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again."
         }
       },
@@ -849,20 +849,9 @@
         "tagline": "[EN] Get on the market."
       }
     },
-    "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; pilot activation is manual — request a pilot review and we'll confirm pricing and scope with you before anything starts.",
+    "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
     "title": "[EN] Simple tiers,",
-    "titleAccent": "[EN] set fairly.",
-    "pilotActivation": {
-      "badge": "[EN] Manual activation",
-      "title": "[EN] Pilot pricing — manual activation only",
-      "body": "[EN] There is no checkout button on this page. The product is in a pilot stage. No card is collected, no plan activates by itself, and no payment is taken without your explicit decision.",
-      "items": [
-        "[EN] Billing is never started for you — when paid plans launch, pricing will be announced at least two weeks in advance.",
-        "[EN] Organisation status is never set for you — every status comes from owner or admin review.",
-        "[EN] No silent trial — we won't quietly start charging after a trial window."
-      ],
-      "manualCta": "[EN] Request pilot review"
-    }
+    "titleAccent": "[EN] set fairly."
   },
   "secondary": {
     "comm": {
@@ -1075,26 +1064,6 @@
       },
       "subcopy": "[EN] Your card is built from real completed work and confirmed skills, not a self-written CV. Fit signals are shown in context — coverage and readiness for a specific need, never one universal rating."
     }
-  },
-  "pilotMode": {
-    "title": "[EN] Pilot mode",
-    "body": "[EN] No payment, hiring decision, or verification happens automatically here. Real activation requires owner or admin review."
-  },
-  "tier2Readiness": {
-    "badge": "[EN] Manual review only",
-    "title": "[EN] What Tier-2 (manual activation) will eventually require",
-    "body": "[EN] Tier-2 is the manual-activation tier for organisations that want a serious pilot. This card is a preview of what an owner or admin will ask for when you request a pilot review. Nothing on this page is submitted to the Tier-2 schema today, and Tier-2 status stays 'pilot' until owner / admin review completes.",
-    "requirementsTitle": "[EN] Information the manual review will ask for",
-    "requirements": [
-      "[EN] Organisation legal name and country of registration.",
-      "[EN] Country-specific registration code (e.g., 9-digit LT, 11-digit LV).",
-      "[EN] Correspondence address: country, city, street line, postcode.",
-      "[EN] One named human representative with their role (director, authorised representative, employee, or contractor).",
-      "[EN] Multi-country presence, when the organisation operates in more than one country."
-    ],
-    "reviewNote": "[EN] An owner or admin reviews each submission manually. Tier-2 status stays 'pilot' until that review completes; activation happens only after the human review records a decision.",
-    "notWritingNote": "[EN] This page is a preview. It does not submit anything to the Tier-2 schema. It does not collect a card. It does not start billing.",
-    "ctaLabel": "[EN] Request pilot review"
   },
   "journal": {
     "inbox": {
