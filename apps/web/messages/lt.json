@@ -1,5 +1,11 @@
 {
   "companyOps": {
+    "counts": {
+      "pending": "Laukiantys kvietimai",
+      "accepted": "Priimti darbuotojai",
+      "members": "Organizacijos nariai",
+      "review": "Įjungta peržiūra"
+    },
     "title": "Operacijų erdvė",
     "intro": "Ką jau galite valdyti šiandien šiame puslapyje ir kas bus toliau.",
     "teamTitle": "Darbuotojai / Komanda",
