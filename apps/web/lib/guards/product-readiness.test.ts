@@ -1232,7 +1232,12 @@ describe("no migration files added by this sprint", () => {
     // 20260530150000_demand_intake_consolidation (customer_requests +=
     // kind/payload/original_language + draft index + save_demand_draft RPC;
     // folds pilot_drafts). Committed + queued for the gate, NOT applied.
-    const SPRINT_BASELINE = 40;
+    // Bumped 40 → 41 for the journal_entry_work_items RED gate (PR #196):
+    // additive 20260601090000_journal_entry_work_items (durable per-work-item
+    // storage for journal recognition; new table + RLS + grants to
+    // authenticated only). Owner-approved and APPLIED to prod via Supabase MCP
+    // apply_migration (gorgitwvdzxbnaxhrsrw); this bump lets the gate pass.
+    const SPRINT_BASELINE = 41;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
