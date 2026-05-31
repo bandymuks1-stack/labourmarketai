@@ -19,6 +19,7 @@ import {
 } from "@/lib/company/company-workers";
 import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
+import { getCompanyProjectContext } from "@/lib/company/project-context";
 
 const COMPANY_FIELDS = [
   { key: "title" as const, labelKey: "field.title.label", placeholderKey: "field.title.placeholder", variant: "text" as const },
@@ -88,6 +89,9 @@ export default async function CompanyDashboardPage({
     orgMembers?.members.filter((m) => m.reviewEnabled).length ?? 0;
   // Slice 3 — pending entries the owner can review now (gated RPC; 0 if none).
   const reviewPendingCount = ownCompany ? await countReviewablePendingEntries() : 0;
+  // Project/client context readiness (read-only): the data model is live but
+  // empty — show a truthful empty state, never a fabricated project/client.
+  const projectContext = await getCompanyProjectContext(ownCompany?.id ?? null);
   // System-evidenced management activity (computed from the caller's own
   // recorded review actions — read-only, never an external verification).
   const managerEvidence = await getManagerEvidence();
@@ -336,13 +340,23 @@ export default async function CompanyDashboardPage({
             </Link>
           </div>
           <div
-            className="flex flex-col gap-1 rounded-md border border-state-warning/30 bg-state-warning/5 p-4"
+            className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-4"
             data-testid="company-ops-projects"
           >
-            <h3 className="font-display text-sm font-semibold text-text-primary">
-              {tOps("projectsTitle")}
-            </h3>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="font-display text-sm font-semibold text-text-primary">
+                {tOps("projectsTitle")}
+              </h3>
+              <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-medium text-brand-blue">
+                {tOps("projectsReadyBadge")}
+              </span>
+            </div>
             <p className="text-xs leading-relaxed text-text-secondary">{tOps("projectsBody")}</p>
+            <p className="text-[11px] text-text-muted" data-testid="company-ops-projects-count">
+              {tOps("projectsCount")}:{" "}
+              <span className="font-semibold text-text-primary">{projectContext.projects}</span>
+              {projectContext.projects === 0 ? ` · ${tOps("projectsEmpty")}` : ""}
+            </p>
           </div>
           <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-4">
             <h3 className="font-display text-sm font-semibold text-text-primary">

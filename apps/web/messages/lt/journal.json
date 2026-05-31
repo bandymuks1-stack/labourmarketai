@@ -101,7 +101,7 @@
       "pending": "Laukia peržiūros",
       "confirmed": "Patvirtinta"
     },
-    "projectNote": "Kol kas įrašai siejami su darbuotoju ir įmone. Projektų, objektų ir užsakovo sluoksnis ruošiamas atskiru duomenų modelio pjūviu.",
+    "projectNote": "Įrašai gali būti susieti su projektu — duomenų modelis paruoštas, bet kol kas nė vienas įrašas nesusietas ir niekas neužpildoma automatiškai. Projektų, objektų ir užsakovų sluoksnis pildomas atskirame pjūvyje.",
     "openReport": "Peržiūros ataskaita →",
     "approve": "Patvirtinti",
     "cancel": "Atšaukti",
