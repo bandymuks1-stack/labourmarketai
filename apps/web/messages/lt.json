@@ -1,4 +1,8 @@
 {
+  "messaging": {
+    "messageWorker": "Rašyti darbuotojui",
+    "messageCompany": "Rašyti įmonei"
+  },
   "workerReadiness": {
     "title": "Darbo pasirengimo signalai",
     "note": "Tai signalai iš esamų duomenų, o ne reitingas ar įvertinimas. Darbuotojai nerikiuojami pagal „geriausią“.",

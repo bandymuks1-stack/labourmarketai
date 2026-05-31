@@ -4,6 +4,8 @@ import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileCvClarityCard } from "@/components/app/profile-cv-clarity-card";
 import { WorkerEvidenceCard } from "@/components/app/worker-evidence-card";
+import { MessageButton } from "@/components/app/message-button";
+import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
@@ -100,6 +102,7 @@ export default async function ProfilePage({
     .map(({ id, slug }) => ({ id, slug }));
 
   let currentProfessionId: string | null = null;
+  let employerOwnerProfileId: string | null = null;
   let workerDirections: WorkerDirection[] = [];
   let initialSkillIds: string[] = [];
   let savedSkills: CvSkill[] = [];
@@ -126,6 +129,9 @@ export default async function ProfilePage({
       .select("*", { count: "exact", head: true })
       .eq("worker_id", workerId);
     journalCount = jCount ?? 0;
+    // Resolve the employing company owner (if any) so the worker can message
+    // them — read-only, RLS-scoped to the worker's own accepted invitation.
+    employerOwnerProfileId = await getEmployerOwnerProfileId();
     // All of the worker's directions (primary + additional) — non-locking (§1).
     workerDirections = (wpAll ?? [])
       .map((r) => {
@@ -289,6 +295,10 @@ export default async function ProfilePage({
           selfDeclaredSkills={skillDots.filter((s) => !s.verified).map((s) => s.name)}
           journalEntries={journalCount}
         />
+      )}
+
+      {workerId && employerOwnerProfileId && (
+        <MessageButton profileId={employerOwnerProfileId} labelKey="messageCompany" />
       )}
 
       {/* Text-first composer — universal. Available to every authenticated
