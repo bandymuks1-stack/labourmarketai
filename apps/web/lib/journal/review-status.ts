@@ -27,6 +27,8 @@ export interface ConfirmationRow {
   readonly confirmation_scope: unknown;
   /** ISO timestamp; used for latest-wins ordering when present. */
   readonly created_at?: string | null;
+  /** The reviewer's engagement role (manager / owner / external_manager). */
+  readonly confirmer_role?: string | null;
 }
 
 export function isReviewDecision(value: unknown): value is ReviewDecision {
@@ -78,4 +80,33 @@ export function deriveReviewResult(
     if (decision) return decision;
   }
   return "submitted";
+}
+
+/** The latest review decision's ORIGIN — who (engagement role) + when.
+ *  Returns null while the entry is still `submitted` (no decision yet). */
+export interface ReviewOrigin {
+  readonly result: ReviewDecision;
+  readonly role: string | null;
+  readonly at: string | null;
+}
+
+export function deriveReviewOrigin(
+  confirmations: readonly ConfirmationRow[] | null | undefined,
+): ReviewOrigin | null {
+  if (!confirmations || confirmations.length === 0) return null;
+  const ordered = [...confirmations].sort((a, b) => {
+    const ta = a.created_at ? Date.parse(a.created_at) : 0;
+    const tb = b.created_at ? Date.parse(b.created_at) : 0;
+    return ta - tb;
+  });
+  for (let i = ordered.length - 1; i >= 0; i--) {
+    const decision = rowDecision(ordered[i]);
+    if (decision)
+      return {
+        result: decision,
+        role: ordered[i].confirmer_role ?? null,
+        at: ordered[i].created_at ?? null,
+      };
+  }
+  return null;
 }

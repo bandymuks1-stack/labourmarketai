@@ -7,6 +7,7 @@ import {
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
 import { formatDuration } from "@/lib/journal/format-duration";
 import {
+  deriveReviewOrigin,
   deriveReviewResult,
   type ReviewResult,
 } from "@/lib/journal/review-status";
@@ -191,7 +192,7 @@ export default async function JournalPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const v3 = await (supabase.from("journal_entries") as any)
     .select(
-      "id, original_text, created_at, deleted_at, superseded_by, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at)",
+      "id, original_text, created_at, deleted_at, superseded_by, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
     )
     .eq("worker_id", worker.id)
     .order("created_at", { ascending: false });
@@ -199,7 +200,7 @@ export default async function JournalPage({
     const legacy = await supabase
       .from("journal_entries")
       .select(
-        "id, original_text, created_at, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at)",
+        "id, original_text, created_at, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
       )
       .eq("worker_id", worker.id)
       .order("created_at", { ascending: false });
@@ -294,6 +295,12 @@ export default async function JournalPage({
           <ul className="flex flex-col gap-3">
             {(entries ?? []).map((e) => {
               const status = deriveReviewResult(e.journal_entry_confirmations);
+              const origin = deriveReviewOrigin(e.journal_entry_confirmations);
+              const originRole =
+                origin?.role &&
+                ["manager", "owner", "external_manager"].includes(origin.role)
+                  ? t(`entry.confirmerRole.${origin.role}`)
+                  : null;
               const metrics = e.journal_entry_metrics ?? [];
               const area =
                 metrics.find((m) => m.metric_slug === "quantity") ??
@@ -318,6 +325,13 @@ export default async function JournalPage({
                       {t(`entry.status.${status}`)}
                     </span>
                   </div>
+                  {origin && (
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {t("entry.reviewedBy")}
+                      {originRole ? ` ${originRole}` : ""}
+                      {origin.at ? ` · ${origin.at.slice(0, 10)}` : ""}
+                    </p>
+                  )}
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
                     {dir?.value_text && <span>{tProf(dir.value_text)}</span>}
                     {site?.value_text && <span>{site.value_text}</span>}
