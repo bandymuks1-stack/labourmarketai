@@ -1348,6 +1348,7 @@
       "retry": "Bandyti dar kartą"
     },
     "onboarding": {
+      "pendingInviteNote": "Turite laukiantį kvietimą iš {org}. Užbaikite paskyros nustatymą žemiau — tada galėsite jį priimti savo skydelyje.",
       "rolePicker": {
         "heading": "Nuo ko norite pradėti šiandien?",
         "worker": {

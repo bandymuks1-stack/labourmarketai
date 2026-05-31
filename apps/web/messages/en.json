@@ -1348,6 +1348,7 @@
       "retry": "Try again"
     },
     "onboarding": {
+      "pendingInviteNote": "You have a pending invitation from {org}. Finish setting up your account below — then you can accept it on your dashboard.",
       "rolePicker": {
         "heading": "What do you want to start with today?",
         "worker": {
