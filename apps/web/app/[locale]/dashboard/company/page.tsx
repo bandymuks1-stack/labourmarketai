@@ -66,6 +66,7 @@ export default async function CompanyDashboardPage({
     addButton: tOrg("addButton"),
     noMembers: tOrg("noMembers"),
     noAddable: tOrg("noAddable"),
+    allAdded: tOrg("allAdded"),
     reviewEnabledBadge: tOrg("reviewEnabledBadge"),
     reviewDisabledBadge: tOrg("reviewDisabledBadge"),
   };

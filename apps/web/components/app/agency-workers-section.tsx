@@ -176,17 +176,8 @@ export function AgencyWorkersSection({
             <p className="text-xs text-text-secondary">{labels.noWorkersBody}</p>
           </div>
         ) : (
-          <table className="w-full text-xs">
-            <thead className="text-text-muted">
-              <tr>
-                <th className="py-1 text-left">{labels.columnEmail}</th>
-                <th className="py-1 text-left">{labels.columnStatus}</th>
-                <th className="py-1 text-left">{labels.operations.columnHeading}</th>
-                <th className="py-1 text-left">{labels.columnInvitedAt}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activeWorkers.map((w) => {
+          <ul className="flex flex-col gap-2">
+            {activeWorkers.map((w) => {
                 const ctx = computeEmploymentJournalContext({
                   relationship: "agency",
                   operationsRole: w.operationsRole,
@@ -198,16 +189,18 @@ export function AgencyWorkersSection({
                     : (labels.operations.roleLabels[ctx.operationsRole] ??
                       labels.operations.notAssigned);
                 return (
-                  <tr
+                  <li
                     key={w.workerId}
-                    className={`border-t border-ink-700 ${REVIEW_RAIL[ctx.reviewCapability] ?? ""}`}
+                    className={`card-border flex flex-col gap-2 p-3 ${REVIEW_RAIL[ctx.reviewCapability] ?? ""}`}
                     data-testid={`agency-worker-row-${w.workerId}`}
                     data-review-capability={ctx.reviewCapability}
                   >
-                    <td className="py-1 text-text-primary">{w.email ?? "—"}</td>
-                    <td className="py-1 text-text-secondary">{w.status ?? "active"}</td>
-                    <td className="py-1 text-text-secondary">
-                      <div className="flex flex-col gap-0.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="break-all text-sm font-medium text-text-primary">{w.email ?? "—"}</span>
+                      <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 text-xs text-text-secondary">
+                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
                         <span>
                           {w.operationsTitle?.trim()
                             ? w.operationsTitle
@@ -244,14 +237,14 @@ export function AgencyWorkersSection({
                             }}
                           />
                         ) : null}
-                      </div>
-                    </td>
-                    <td className="py-1 text-text-muted">{w.createdAt.slice(0, 10)}</td>
-                  </tr>
+                    </div>
+                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
+                    </span>
+                  </li>
                 );
               })}
-            </tbody>
-          </table>
+          </ul>
         )}
       </section>
 
@@ -359,30 +352,23 @@ export function AgencyWorkersSection({
             {labels.invitationsEmpty}
           </p>
         ) : (
-          <table className="w-full text-xs">
-            <thead className="text-text-muted">
-              <tr>
-                <th className="py-1 text-left">{labels.columnEmail}</th>
-                <th className="py-1 text-left">{labels.columnStatus}</th>
-                <th className="py-1 text-left">{labels.columnInvitedAt}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingInvitations.map((inv) => (
-                <tr
-                  key={inv.id}
-                  className="border-t border-ink-700"
-                  data-testid={`agency-invitation-row-${inv.id}`}
-                >
-                  <td className="py-1 text-text-primary">{inv.invitedEmail}</td>
-                  <td className="py-1 text-text-secondary">{inv.status}</td>
-                  <td className="py-1 text-text-muted">
-                    {inv.createdAt.slice(0, 10)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ul className="flex flex-col gap-2">
+            {pendingInvitations.map((inv) => (
+              <li
+                key={inv.id}
+                className="card-border flex flex-col gap-1 p-3"
+                data-testid={`agency-invitation-row-${inv.id}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
+                  <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">{inv.status}</span>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
     </section>
