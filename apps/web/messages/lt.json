@@ -1,4 +1,13 @@
 {
+  "workerReadiness": {
+    "title": "Darbo pasirengimo signalai",
+    "note": "Tai signalai iš esamų duomenų, o ne reitingas ar įvertinimas. Darbuotojai nerikiuojami pagal „geriausią“.",
+    "journalEntries": "Žurnalo įrašai",
+    "declaredSkills": "Nurodyti įgūdžiai",
+    "confirmedSkills": "Patvirtinti įgūdžiai",
+    "openReview": "Laukia peržiūros",
+    "lastActivity": "Paskutinė veikla"
+  },
   "workerEvidence": {
     "title": "Mano įrodymai",
     "intro": "Čia matote, kuo paremtas jūsų profilis. Tai nėra išorinis patvirtinimas — tik tai, ką pateikėte patys ir ką užfiksavo sistema.",
