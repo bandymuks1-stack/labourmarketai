@@ -1,4 +1,10 @@
 {
+  "demandReadback": {
+    "heading": "[EN] Your submitted requests",
+    "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
+    "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
+    "created": "[EN] Created"
+  },
   "journey": {
     "eyebrow": "Sådan fungerer det",
     "title": "Én profil. En guidet vej til muligheder.",

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PilotRequestButton } from "@/components/app/pilot-request-button";
+import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
@@ -9,6 +10,7 @@ import { DashboardChainActions } from "@/components/app/dashboard-chain-actions"
 import { getVisibleRoleOptions } from "@/lib/config/roles";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -147,6 +149,31 @@ export default async function DashboardOverviewPage({
   // ── Company / agency / customer: operating cockpit (define → submit need) ──
   if (role !== "worker") {
     const intent = role === "agency" ? "partner" : "hire_workers";
+    // Slice 1 — demand read-back for the org's own submitted requests
+    // (company/agency only; the customer/buyer role has its own detailed
+    // requests surface on /dashboard/buyer). Honest status only — no matching.
+    const showDemandReadback = role === "company" || role === "agency";
+    const demandReadback = showDemandReadback
+      ? await listOwnCustomerRequests()
+      : null;
+    const tReadback = await getTranslations("demandReadback");
+    const tReqStatus = await getTranslations(
+      "roleDashboards.buyer.requests.understanding.requestStatus",
+    );
+    const readbackLabels = {
+      heading: tReadback("heading"),
+      note: tReadback("note"),
+      empty: tReadback("empty"),
+      created: tReadback("created"),
+      status: {
+        draft: tReqStatus("draft"),
+        submitted: tReqStatus("submitted"),
+        in_review: tReqStatus("in_review"),
+        needs_followup: tReqStatus("needs_followup"),
+        approved: tReqStatus("approved"),
+        closed: tReqStatus("closed"),
+      },
+    };
     const lanes = [
       { step: tf("company.c1"), body: tw("activity.p1") },
       { step: tf("company.c2"), body: tw("activity.p2") },
@@ -223,6 +250,10 @@ export default async function DashboardOverviewPage({
             <PilotRequestButton intent={intent} />
           </div>
         </section>
+
+        {demandReadback && (
+          <DemandRequestsReadback result={demandReadback} labels={readbackLabels} />
+        )}
 
         {/* Same config-driven landscape as the worker dashboard (PR #36),
             now DEMOTED into a compact "Coming later" section so the live
