@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { OnboardingWizard } from "@/components/app/onboarding-wizard";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 
 /** Unified onboarding shell. Role is picked here (Step 1), so we no longer
  *  pre-read active_role. Display name is prefilled from the auth identity:
@@ -31,6 +32,11 @@ export default async function OnboardingPage({
   // Already onboarded — a direct visit shouldn't show the form again.
   if (profile?.onboarded_at) redirect(`/${locale}/dashboard`);
 
+  // Slice 10 — an invited-but-not-yet-onboarded user lands here; surface the
+  // real pending invitation so they aren't confused by a bare role-start screen.
+  const pendingInvites = await listMyPendingWorkerInvitations();
+  const tOnboard = await getTranslations("auth.onboarding");
+
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const metaFullName =
     typeof meta.full_name === "string" ? meta.full_name : "";
@@ -53,6 +59,16 @@ export default async function OnboardingPage({
         </Link>
       </header>
       <main className="relative z-10 mx-auto flex max-w-md flex-col px-6 pb-20">
+        {pendingInvites.length > 0 && (
+          <div
+            className="card-border mb-4 bg-brand-blue/5 p-4"
+            data-testid="onboarding-pending-invite"
+          >
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {tOnboard("pendingInviteNote", { org: pendingInvites[0].orgName })}
+            </p>
+          </div>
+        )}
         <OnboardingWizard defaultName={defaultName} />
       </main>
     </div>
