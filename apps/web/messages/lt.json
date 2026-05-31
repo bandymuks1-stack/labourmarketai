@@ -1,4 +1,17 @@
 {
+  "companyOps": {
+    "title": "Operacijų erdvė",
+    "intro": "Ką jau galite valdyti šiandien šiame puslapyje ir kas bus toliau.",
+    "teamTitle": "Darbuotojai / Komanda",
+    "teamBody": "Pakvieskite darbuotojus, matykite priimtų sąrašą, pridėkite juos prie organizacijos ir įjunkite žurnalo peržiūrą — viskas žemiau šiame puslapyje.",
+    "reviewTitle": "Žurnalo peržiūra",
+    "reviewSteps": "1) darbuotojas priima · 2) pridedate prie organizacijos · 3) įjungiate peržiūrą · 4) darbuotojas žymi darbą · 5) jūs patvirtinate.",
+    "projectsTitle": "Projektai ir užduotys ruošiami",
+    "projectsBody": "Šiuo metu realiai veikia darbuotojų susiejimas, organizacijos narystė ir darbo žurnalo peržiūra. Užduočių priskyrimas bus kitas duomenų modelio pjūvis.",
+    "needsTitle": "Poreikiai",
+    "needsBody": "Pateikite struktūruotą poreikį ir sekite jo būseną.",
+    "needsCta": "Atidaryti poreikius"
+  },
   "demandReadback": {
     "heading": "Jūsų pateikti poreikiai",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
@@ -704,10 +717,10 @@
     }
   },
   "admin": {
-    "eyebrow": "PILOTO VALDYMAS",
-    "title": "Pilotinis valdymo skydas",
+    "eyebrow": "OPERACIJŲ VALDYMAS",
+    "title": "Operacijų valdymo skydas",
     "subtitle": "Tik superadminams. Saugomi serverio pusės RLS ir profiles.active_role = 'admin'.",
-    "back": "Grįžti į pilotinį skydą",
+    "back": "Grįžti į operacijų skydą",
     "metric": {
       "totalUsers": "Profiliai iš viso",
       "totalClaims": "Įgūdžių teiginiai iš viso"
@@ -723,13 +736,13 @@
     },
     "hub": {
       "agentOs": "Agentų OS",
-      "telemetry": "Piloto telemetrija",
+      "telemetry": "Operacijų telemetrija",
       "languageFeedback": "Kalbos pranešimai",
       "communication": "Pokalbiai",
       "support": "Pagalbos pokalbiai"
     },
     "drafts": {
-      "title": "Pilotiniai juodraščiai",
+      "title": "Operaciniai juodraščiai",
       "help": "Įmonių / agentūrų / pirkėjų privatūs juodraščiai. Skaityti gali tik savininkas ir adminas.",
       "total": "Iš viso",
       "byType": {
@@ -780,8 +793,8 @@
       "profileTextEmpty": "Profilio tekstas dar neįrašytas.",
       "claimsTitle": "Paties nurodyti įgūdžiai",
       "claimsEmpty": "Šis vartotojas dar neturi paties nurodytų įgūdžių.",
-      "draftsTitle": "Pilotiniai juodraščiai",
-      "draftsEmpty": "Šis vartotojas dar neturi pilotinių juodraščių.",
+      "draftsTitle": "Operaciniai juodraščiai",
+      "draftsEmpty": "Šis vartotojas dar neturi operacinių juodraščių.",
       "draftEmpty": "Juodraštis tuščias.",
       "draftType": {
         "company_request": "Įmonės paklausa",
@@ -971,7 +984,7 @@
     },
     "footer": "Sistemoje paskelbtas vizijos žemėlapis nereiškia, kad visos sritys jau veikia. Ką galima naudoti šiandien — pažymėta „Šiandien veikia“. Visa kita yra arba „Ruošiama“, arba ateities sluoksnis.",
     "internalPreviewBadge": "Vidinė peržiūra",
-    "internalPreviewBanner": "Puslapis dar nepaviešintas. Tai vidinė peržiūra savininkui ir pakviestiems pilotiniams dalyviams. Nepublikuokite nuorodos viešai, kol owner production smoke nebus PASSED."
+    "internalPreviewBanner": "Puslapis dar nepaviešintas. Tai vidinė peržiūra savininkui ir pakviestiems dalyviams. Nepublikuokite nuorodos viešai, kol owner production smoke nebus PASSED."
   },
   "suggestionStatuses": {
     "detected": "Pasiūlyta",
@@ -1373,7 +1386,7 @@
       "cancel": "Atšaukti",
       "confirm": "Pridėti",
       "adminMode": "Admin režimas",
-      "adminPanelLink": "Atidaryti pilotinį valdymo skydą",
+      "adminPanelLink": "Atidaryti operacijų valdymo skydą",
       "clarityNote": "Vaidmens keitimas keičia darbo erdvės vaizdą, ne jūsų paskyrą. Įmonės, agentūros ir pirkėjo erdvės vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
@@ -2275,7 +2288,7 @@
       "sales": "Pardavimai"
     },
     "links": {
-      "telemetry": "→ Piloto telemetrija",
+      "telemetry": "→ Operacijų telemetrija",
       "languageFeedback": "→ Kalbos pranešimai",
       "adminHome": "→ Admin pradžia"
     },
@@ -2341,7 +2354,7 @@
         "login": "Prisijungimas su Google veikia",
         "journal": "Darbo dienoraščio įrašai išsaugomi",
         "language": "Kalbos pranešimai gaunami",
-        "telemetry": "Pilot telemetrija fiksuojama (paskutinės 24 val.)",
+        "telemetry": "Operacijų telemetrija fiksuojama (paskutinės 24 val.)",
         "drafts": "Įmonės / agentūros / pirkėjo juodraščiai išsaugomi",
         "communication": "Pokalbių žinutės persiunčiamos"
       },
@@ -2349,7 +2362,7 @@
     }
   },
   "pilotTelemetry": {
-    "title": "Piloto telemetrija (v1)",
+    "title": "Operacijų telemetrija (v1)",
     "subtitle": "Saugūs testuotojų QA įvykiai. Read-only sąrašas. Tik administratoriai mato.",
     "loadError": "Nepavyko užkrauti įvykių: {msg}",
     "tasks": {

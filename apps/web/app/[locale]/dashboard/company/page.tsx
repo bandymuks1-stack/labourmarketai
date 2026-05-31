@@ -55,6 +55,7 @@ export default async function CompanyDashboardPage({
     ? await getOrgMembersData("company", ownCompany.id)
     : null;
   const tOrg = await getTranslations("orgMembers");
+  const tOps = await getTranslations("companyOps");
   const orgMembersLabels = {
     title: tOrg("title"),
     intro: tOrg("intro"),
@@ -243,6 +244,54 @@ export default async function CompanyDashboardPage({
         </h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
+
+      <section
+        className="card-border flex flex-col gap-4 p-5"
+        data-testid="company-ops-workspace"
+      >
+        <header className="flex flex-col gap-1">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {tOps("title")}
+          </h2>
+          <p className="text-sm text-text-secondary">{tOps("intro")}</p>
+        </header>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-4">
+            <h3 className="font-display text-sm font-semibold text-text-primary">
+              {tOps("teamTitle")}
+            </h3>
+            <p className="text-xs leading-relaxed text-text-secondary">{tOps("teamBody")}</p>
+          </div>
+          <div className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-4">
+            <h3 className="font-display text-sm font-semibold text-text-primary">
+              {tOps("reviewTitle")}
+            </h3>
+            <p className="text-xs leading-relaxed text-text-secondary">{tOps("reviewSteps")}</p>
+          </div>
+          <div
+            className="flex flex-col gap-1 rounded-md border border-state-warning/30 bg-state-warning/5 p-4"
+            data-testid="company-ops-projects"
+          >
+            <h3 className="font-display text-sm font-semibold text-text-primary">
+              {tOps("projectsTitle")}
+            </h3>
+            <p className="text-xs leading-relaxed text-text-secondary">{tOps("projectsBody")}</p>
+          </div>
+          <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-4">
+            <h3 className="font-display text-sm font-semibold text-text-primary">
+              {tOps("needsTitle")}
+            </h3>
+            <p className="text-xs leading-relaxed text-text-secondary">{tOps("needsBody")}</p>
+            <Link
+              href="/dashboard"
+              className="self-start text-xs font-semibold text-brand-blue hover:underline"
+              data-testid="company-ops-needs-link"
+            >
+              {tOps("needsCta")} →
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section
         className="card-border flex flex-col gap-2 p-4"
