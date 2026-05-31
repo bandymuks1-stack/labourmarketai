@@ -2284,7 +2284,7 @@
   "agentOs": {
     "missionEyebrow": "Misijos valdymas",
     "title": "Agentų OS (v1)",
-    "subtitle": "Vidiniai agentų vaidmenys, padedantys vykdyti realių testuotojų piloto programą. Read-only versija — vykdymas dar nesujungtas.",
+    "subtitle": "Vidiniai agentų vaidmenys, padedantys vykdyti realių testuotojų programą. Read-only versija — vykdymas dar nesujungtas.",
     "statusEyebrow": "Būsena",
     "statusV1Body": "v1 pateikia tik agentų vaidmenų korteles + nuorodas į specifikacijas docs/agent-os/. Realių agentų vykdymo dar nėra — kiekvienas vaidmuo aprašytas kaip atskaitos taškas savininkui.",
     "scope": {
@@ -2337,17 +2337,17 @@
       "summary": "Tikrina admin-only prieigą, RLS lūkesčius, jokio service_role runtime, jokio neapdoroto teksto telemetrijoje, jokio viešo atvėrimo."
     },
     "pilotSalesReadiness": {
-      "title": "Piloto pardavimų pasiruošimas",
-      "summary": "Company/agency/buyer drafts, užduočių trintis, piloto pasiruošimo įvertinimas."
+      "title": "Pardavimų pasiruošimas",
+      "summary": "Company/agency/buyer drafts, užduočių trintis, pasiruošimo įvertinimas."
     },
     "commandCenter": {
-      "title": "Piloto valdymo centras",
+      "title": "Operacijų valdymo centras",
       "window": "Paskutinės 24 val.",
       "metric": {
-        "events24h": "Pilot įvykiai",
+        "events24h": "Operacijų įvykiai",
         "errors24h": "Klaidos",
         "languageOpen": "Kalbos pranešimai (open)",
-        "draftsTotal": "Pilot juodraščiai (viso)",
+        "draftsTotal": "Operaciniai juodraščiai (viso)",
         "draftsBreakdown": "Įmonės: {company} · Agentūros: {agency} · Pirkėjo: {buyer}",
         "supportThreads": "Pagalbos pokalbiai (viso)",
         "communicationMessages": "Pokalbių žinutės (viso)"
@@ -2355,7 +2355,7 @@
       "footnote": "Skaičiai iš live DB per admin RLS. „—“ reiškia, kad atitinkama lentelė dar nepritaikyta šioje aplinkoje (peržiūrėkite migracijų ledger)."
     },
     "checklist": {
-      "title": "Piloto pradžios būsena",
+      "title": "Operacijų pradžios būsena",
       "scope": "Sveikatos patikra",
       "item": {
         "login": "Prisijungimas su Google veikia",
