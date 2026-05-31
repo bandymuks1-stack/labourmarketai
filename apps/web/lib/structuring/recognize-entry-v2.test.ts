@@ -142,3 +142,35 @@ describe("review inbox depth UI — human labels, no raw keys, hours + evidence"
     });
   }
 });
+
+describe("v3 reviewer correction loop — suggested clarification message", () => {
+  const src = readFileSync(
+    join(__dirname, "..", "..", "components", "app", "journal-inbox-entry.tsx"),
+    "utf8",
+  );
+  it("builds a suggestion, offers copy, and prefills the request-changes note", () => {
+    expect(src).toMatch(/clarificationSuggestion/);
+    expect(src).toMatch(/t\("inbox\.copySuggestion"\)/);
+    expect(src).toMatch(/t\("inbox\.clarifySuggestionPrefix"\)/);
+    // The note field is prefilled with the suggestion when clarification is needed.
+    expect(src).toMatch(/defaultValue=\{[\s\S]*clarificationSuggestion/);
+    // Uses the EXISTING request-changes flow (decision=changes_requested), no new storage.
+    expect(src).toMatch(/name="decision" value=\{mode\}/);
+  });
+  for (const locale of ["en", "lt"] as const) {
+    it(`${locale} inbox has the v3 correction keys`, () => {
+      const j = JSON.parse(
+        readFileSync(join(__dirname, "..", "..", "messages", locale, "journal.json"), "utf8"),
+      ) as { inbox: Record<string, string> };
+      for (const k of [
+        "clarifyHoursIntro",
+        "clarifySuggestionPrefix",
+        "clarifyGeneric",
+        "copySuggestion",
+        "copied",
+      ]) {
+        expect(j.inbox[k], `${locale} inbox.${k}`).toBeTruthy();
+      }
+    });
+  }
+});

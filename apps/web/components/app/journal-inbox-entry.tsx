@@ -61,6 +61,25 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
   const declaredUnverified = entry.skills.filter((s) => !s.verified);
   const alreadyVerified = entry.skills.filter((s) => s.verified);
 
+  // Reviewer correction loop (v3): when recognition is partial/unclear, offer a
+  // ready clarification message the reviewer can copy or send via the existing
+  // request-changes flow. No new storage — this only prefills the note field.
+  const recognizedNames = entry.recognized.map((r) => r.name);
+  const clarificationSuggestion =
+    recognizedNames.length > 0
+      ? `${t("inbox.clarifySuggestionPrefix")} ${recognizedNames.join(", ")}.`
+      : t("inbox.clarifyGeneric");
+  const [copied, setCopied] = useState(false);
+  const copySuggestion = async () => {
+    try {
+      await navigator.clipboard.writeText(clarificationSuggestion);
+      setCopied(true);
+    } catch {
+      // Clipboard unavailable (e.g. insecure context) — the reviewer can still
+      // read and retype the suggestion; no error surfaced.
+    }
+  };
+
   const resultMessage: { text: string; ok: boolean } | null = (() => {
     if (confirmState) {
       if (confirmState.ok) {
@@ -319,8 +338,36 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
           <input type="hidden" name="entry_id" value={entry.id} />
           <input type="hidden" name="decision" value={mode} />
           <input type="hidden" name="locale" value={locale} />
+          {mode === "changes_requested" && entry.needsClarification ? (
+            <div
+              className="flex flex-col gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/[0.05] p-2.5"
+              data-testid={`journal-clarify-suggestion-${entry.id}`}
+            >
+              {entry.hours && !entry.hours.certain && (
+                <p className="text-[11px] leading-relaxed text-amber-700">
+                  {t("inbox.clarifyHoursIntro")}
+                </p>
+              )}
+              <p className="text-[11px] leading-relaxed text-text-secondary">
+                {clarificationSuggestion}
+              </p>
+              <button
+                type="button"
+                onClick={copySuggestion}
+                className="w-fit rounded-md border border-amber-500/40 px-2 py-0.5 text-[10px] font-medium text-amber-700 hover:bg-amber-500/10"
+              >
+                {copied ? t("inbox.copied") : t("inbox.copySuggestion")}
+              </button>
+            </div>
+          ) : null}
           <Input
+            key={mode}
             name="note"
+            defaultValue={
+              mode === "changes_requested" && entry.needsClarification
+                ? clarificationSuggestion
+                : ""
+            }
             placeholder={mode === "rejected" ? t("inbox.rejectReason") : t("inbox.changesNote")}
             required
             data-testid={`journal-review-note-${entry.id}`}
