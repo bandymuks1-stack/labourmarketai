@@ -102,6 +102,7 @@
       "confirmed": "Confirmed"
     },
     "projectNote": "For now, entries are tied to the worker and the company. A projects / sites / client layer is being prepared as a separate data-model slice.",
+    "openReport": "Review report →",
     "approve": "Approve",
     "cancel": "Cancel",
     "changesNote": "What needs changing?",

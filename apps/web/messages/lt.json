@@ -1,4 +1,22 @@
 {
+  "reviewReport": {
+    "title": "Peržiūros ataskaita",
+    "print": "Spausdinti",
+    "origin": "Peržiūrą atlieka įmonės vadovas. Ataskaita sudaryta iš sistemos įrašų, be išorinio patvirtinimo.",
+    "empty": "Kol kas nėra peržiūrai laukiančių įrašų.",
+    "noWorks": "Darbų pagal įrašą neatpažinta.",
+    "uncertaintyNote": "Dalis įrašo neaiški — reikia patikslinti.",
+    "projectNote": "Kol kas įrašai siejami su darbuotoju ir įmone. Projektų, objektų ir užsakovo sluoksnis ruošiamas atskiru duomenų modelio pjūviu.",
+    "totals": {
+      "pending": "Laukia peržiūros",
+      "workers": "Darbuotojai",
+      "confirmations": "Patvirtinimai",
+      "corrections": "Prašyta patikslinti"
+    },
+    "status": {
+      "pending": "Laukia peržiūros"
+    }
+  },
   "managerEvidence": {
     "title": "Vadovavimo veikla",
     "systemEvidenced": "Įrodyta sistemos veikla",

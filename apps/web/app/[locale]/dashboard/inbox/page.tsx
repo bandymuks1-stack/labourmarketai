@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
 import {
   JournalInboxEntry,
   type InboxEntry,
@@ -169,6 +170,13 @@ export default async function InboxPage({
         >
           {t("inbox.projectNote")}
         </p>
+        <Link
+          href="/dashboard/inbox/report"
+          className="w-fit text-xs font-medium text-brand-blue hover:underline"
+          data-testid="inbox-report-link"
+        >
+          {t("inbox.openReport")}
+        </Link>
       </header>
 
       {pending.length === 0 ? (
