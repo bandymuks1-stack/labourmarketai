@@ -112,12 +112,43 @@ export default async function InboxPage({
     });
   }
 
+  // Confirmed entries the caller can see (RLS-scoped: own / their org).
+  let confirmedCount = 0;
+  const { data: confRows } = await supabase
+    .from("journal_entry_confirmations")
+    .select("confirmation_scope");
+  if (Array.isArray(confRows)) {
+    confirmedCount = confRows.filter((r) => {
+      const s = (r as { confirmation_scope?: { action?: string; decision?: string } | null }).confirmation_scope ?? null;
+      return s?.decision === "approved" || s?.action === "confirm";
+    }).length;
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <header>
+      <header className="flex flex-col gap-2">
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("inbox.title")}
         </h1>
+        <div
+          className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary"
+          data-testid="inbox-summary"
+        >
+          <span>
+            {t("inbox.summary.pending")}:{" "}
+            <span className="font-semibold text-text-primary">{pending.length}</span>
+          </span>
+          <span>
+            {t("inbox.summary.confirmed")}:{" "}
+            <span className="font-semibold text-text-primary">{confirmedCount}</span>
+          </span>
+        </div>
+        <p
+          className="text-[11px] leading-relaxed text-text-muted"
+          data-testid="inbox-project-note"
+        >
+          {t("inbox.projectNote")}
+        </p>
       </header>
 
       {pending.length === 0 ? (
