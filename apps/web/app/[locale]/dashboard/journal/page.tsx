@@ -74,12 +74,18 @@ export default async function JournalPage({
   const { data: ecRows } = await supabase
     .from("engagement_contexts")
     .select(
-      "id, relationship_slug, title, is_primary, organizations(display_name, legal_name, organization_type)",
+      "id, relationship_slug, title, is_primary, journal_review_enabled, organizations(display_name, legal_name, organization_type)",
     )
     .eq("profile_id", user.id)
     .eq("status", "active")
     .in("relationship_slug", WORKER_RELATIONSHIPS)
     .order("is_primary", { ascending: false });
+  // State 4 vs 5: the worker has a context but review may not be enabled by
+  // the owner yet. Honest signal — they can log work, but it won't be
+  // confirmable until review is enabled for them.
+  const anyReviewEnabled = (ecRows ?? []).some(
+    (r) => (r as { journal_review_enabled?: boolean }).journal_review_enabled === true,
+  );
 
   const engagements: JournalEngagement[] = (ecRows ?? []).map((e) => {
     const org = e.organizations as
@@ -288,6 +294,16 @@ export default async function JournalPage({
           a confirmed-id is silently ignored so the worker can't be tricked
           into "editing" a confirmed entry — they would need the explicit
           correction-request UI for that. */}
+      {!anyReviewEnabled && (
+        <div
+          className="card-border bg-state-warning/5 p-4"
+          data-testid="journal-review-not-enabled-note"
+        >
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("reviewNotEnabledNote")}
+          </p>
+        </div>
+      )}
       <div id="journal-composer">
         <JournalEntryComposer
           engagements={engagements}
