@@ -102,8 +102,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // salvaged journal_integrity_guards migration), then to 39 on the keystone
     // (TASK 01 membership_engagement_reroute), then to 40 (TASK 05
     // demand-intake consolidation), then to 41 for the journal_entry_work_items
-    // RED gate (PR #196, owner-approved + applied to prod via Supabase MCP).
-    // The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 41/);
+    // RED gate (PR #196, owner-approved + applied to prod via Supabase MCP),
+    // then to 42 for the project/object/client RED gate (PR #197, owner-approved
+    // + applied to prod via Supabase MCP). The baseline only ever grows
+    // deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 42/);
   });
 });
