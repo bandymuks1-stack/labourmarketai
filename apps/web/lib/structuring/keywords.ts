@@ -35,6 +35,15 @@ export const SKILL_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "team-coordination", needles: ["komand", "brigad", "vadovav"] },
   { slug: "site-management", needles: ["statyb vadov", "objekt vadov"] },
   { slug: "quality-control", needles: ["kokyb"] },
+  // v1 construction work recognition — additional real-journal phrases,
+  // mapped to existing skill-names.json slugs (no new taxonomy).
+  { slug: "earthworks", needles: ["kasiau", "kasim", "iškas", "kasė", "smėl", "smel"] },
+  { slug: "wallpapering", needles: ["tapet"] },
+  { slug: "timber-framing", needles: ["karkas", "sij", "gegn", "apkal"] },
+  { slug: "formwork", needles: ["klojin"] },
+  { slug: "concrete-pouring", needles: ["sąram", "saram"] },
+  { slug: "blueprint-reading", needles: ["brėžin", "brezin"] },
+  { slug: "general-labour", needles: ["darbo paruoš", "darbo pasiruoš"] },
 ];
 
 /** Lowercase substrings that map a free-text mention to a profession slug. */

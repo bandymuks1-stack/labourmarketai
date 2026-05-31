@@ -20,6 +20,8 @@ export type InboxEntry = {
   createdAt: string;
   metrics: { label: string; value: string }[];
   skills: InboxSkill[];
+  /** Deterministic work tags recognized from the entry text (display only). */
+  recognized: { slug: string; name: string }[];
 };
 
 /**
@@ -73,7 +75,11 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
     if (reviewState) {
       if (reviewState.ok) {
         const key =
-          reviewState.decision === "rejected" ? "result.rejected" : "result.changesRequested";
+          reviewState.decision === "rejected"
+            ? "result.rejected"
+            : reviewState.decision === "approved"
+              ? "result.approved"
+              : "result.changesRequested";
         return { text: t(`inbox.${key}`), ok: true };
       }
       switch (reviewState.code) {
@@ -119,6 +125,31 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         </div>
       )}
 
+      {/* Recognized work tags from the text — deterministic suggestions,
+          not verified facts. Honest fallback when nothing is recognized. */}
+      {entry.recognized.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2" data-testid={`inbox-recognized-${entry.id}`}>
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("inbox.suggestedFromEntry")}
+          </span>
+          {entry.recognized.map((s) => (
+            <span
+              key={s.slug}
+              className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-[11px] text-brand-blue"
+            >
+              {s.name}
+            </span>
+          ))}
+        </div>
+      ) : declaredUnverified.length === 0 && alreadyVerified.length === 0 ? (
+        <p
+          className="text-[11px] leading-relaxed text-text-muted"
+          data-testid={`inbox-no-recognition-${entry.id}`}
+        >
+          {t("inbox.noSkillsRecognized")} {t("inbox.writeConcreteWorks")}
+        </p>
+      ) : null}
+
       {/* Skills already verified on this worker (context for the reviewer). */}
       {alreadyVerified.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
@@ -138,15 +169,33 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
 
       {!done && mode === "idle" ? (
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="primary"
-            onClick={() => setMode("confirm")}
-            data-testid={`journal-confirm-skills-${entry.id}`}
-          >
-            {t("inbox.confirmSkills")}
-          </Button>
+          {/* Approve the entry (acknowledge the real work) — no skill
+              verification required; works even with no declared skills. */}
+          <form action={reviewAction}>
+            <input type="hidden" name="entry_id" value={entry.id} />
+            <input type="hidden" name="decision" value="approved" />
+            <input type="hidden" name="locale" value={locale} />
+            <Button
+              type="submit"
+              size="sm"
+              variant="primary"
+              disabled={isPending}
+              data-testid={`journal-approve-entry-${entry.id}`}
+            >
+              {t("inbox.confirmEntry")}
+            </Button>
+          </form>
+          {declaredUnverified.length > 0 ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setMode("confirm")}
+              data-testid={`journal-confirm-skills-${entry.id}`}
+            >
+              {t("inbox.confirmSkills")}
+            </Button>
+          ) : null}
           <Button
             type="button"
             size="sm"
