@@ -42,9 +42,9 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "COMPANY WORKSPACE",
-      "title": "Company pilot panel",
+      "title": "Company workspace",
       "subtitle": "Company context is an entry point, not a limit. You can hold other roles and add more later via the role switcher.",
-      "pilotDisclaimer": "Pilot mode. Matching is not yet offered. Nothing becomes public automatically. You can safely prepare a first request and wait for the next pilot stage.",
+      "pilotDisclaimer": "Matching is not offered yet. Nothing becomes public automatically. You can prepare your first request calmly — it's saved right away and stays private to you.",
       "firstAction": {
         "title": "Create a worker / team / service request",
         "body": "First useful action: describe the worker, team, or service you need. The draft stays private to you until you decide otherwise."
@@ -82,7 +82,7 @@
           },
           "notes": {
             "label": "Notes",
-            "placeholder": "Any notes for the pilot"
+            "placeholder": "Any notes"
           }
         },
         "saveButton": "Save draft",
@@ -220,9 +220,9 @@
     },
     "agency": {
       "eyebrow": "AGENCY WORKSPACE",
-      "title": "Agency pilot panel",
+      "title": "Agency workspace",
       "subtitle": "Agency role is an entry point. You can grow into other roles when ready.",
-      "pilotDisclaimer": "Pilot mode. We don't auto-verify candidates. Nothing becomes public without your decision. You can safely prepare an offer and wait for the next pilot stage.",
+      "pilotDisclaimer": "We don't auto-verify candidates. Nothing becomes public without your decision. You can prepare an offer calmly — it's saved right away and stays private to you.",
       "firstAction": {
         "title": "Create a candidates / services offer draft",
         "body": "First useful action: describe the workers you can supply or the assignments you're looking for. The draft stays private to you."
@@ -255,7 +255,7 @@
           },
           "notes": {
             "label": "Notes",
-            "placeholder": "Any notes for the pilot"
+            "placeholder": "Any notes"
           }
         },
         "saveButton": "Save draft",
@@ -388,9 +388,9 @@
     },
     "buyer": {
       "eyebrow": "BUYER WORKSPACE",
-      "title": "Buyer pilot panel",
+      "title": "Buyer workspace",
       "subtitle": "Buyer role is an entry point. You can add other roles later.",
-      "pilotDisclaimer": "Pilot mode. We don't present fake offers. Your request stays private to you until you decide otherwise.",
+      "pilotDisclaimer": "We don't show fake offers. Your request stays private to you until you decide otherwise.",
       "firstAction": {
         "title": "Create a service / team / contractor request",
         "body": "First useful action: describe what you need (service, team, contractor). The draft stays private."
@@ -415,7 +415,7 @@
           },
           "notes": {
             "label": "Notes",
-            "placeholder": "Any notes for the pilot"
+            "placeholder": "Any notes"
           }
         },
         "saveButton": "Save draft",
@@ -601,7 +601,7 @@
   "jobPostings": {
     "list": {
       "title": "My job postings",
-      "body": "Real job postings you have published. Private pilot drafts stay separate below.",
+      "body": "Real job postings you have published. Private drafts stay separate below.",
       "empty": "You have not published any jobs yet. Open the form below to create your first.",
       "untitledRole": "(untitled)",
       "project": "Project",
@@ -883,7 +883,7 @@
     "preparingReason": {
       "default": "This role is still being prepared. We'll enable it once it can ship honestly.",
       "startAvailable": "The setup path already works: one field, the legal name, and your row is saved in the DB for real. The full workspace surface is still being filled out.",
-      "customerPartial": "The first-class public.customers table is missing — the buyer entity is not yet at the DB level (M3 scope). You can add the customer role and fill the pilot request."
+      "customerPartial": "The first-class public.customers table is missing — the buyer entity is not yet at the DB level (M3 scope). You can add the customer role and fill the request."
     },
     "worker": {
       "description": "Worker: text-first profile, skills, and work journal. Active today."
@@ -1413,7 +1413,7 @@
             "c1": "Define need",
             "c2": "Prepare criteria",
             "c3": "Review fit",
-            "c4": "Request pilot"
+            "c4": "Submit your need"
           }
         },
         "startingPoint": "This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
@@ -1467,11 +1467,11 @@
           "p3": "Offer your services to the market."
         },
         "pilot": {
-          "title": "Request a pilot",
-          "body": "Get early, hands-on onboarding from our team. We review every request personally.",
-          "cta": "Request pilot access",
+          "title": "Tell us what you need",
+          "body": "Describe what you're looking for. Your request is saved and visible in your space right away — you're first here, so everything you create is real.",
+          "cta": "Submit your need",
           "sending": "Sending...",
-          "done": "Thanks - we've got your request and will be in touch.",
+          "done": "Saved. Your need is now visible in your space.",
           "error": "Couldn't send. Please try again."
         }
       },
@@ -2065,32 +2065,7 @@
     "eyebrow": "Pricing",
     "title": "Simple tiers,",
     "titleAccent": "set fairly.",
-    "subcopy": "Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; pilot activation is manual — request a pilot review and we'll confirm pricing and scope with you before anything starts.",
-    "pilotActivation": {
-      "badge": "Manual activation",
-      "title": "Pilot pricing — manual activation only",
-      "body": "There is no checkout button on this page. The product is in a pilot stage. No card is collected, no plan activates by itself, and no payment is taken without your explicit decision.",
-      "items": [
-        "Billing is never started for you — when paid plans launch, pricing will be announced at least two weeks in advance.",
-        "Organisation status is never set for you — every status comes from owner or admin review.",
-        "No silent trial — we won't quietly start charging after a trial window."
-      ],
-      "manualCta": "Request pilot review"
-    },
-    "pilotWorkflow": {
-      "eyebrow": "First working pilot",
-      "title": "The first real pilot workflow",
-      "body": "This is the first end-to-end workflow we run with pilot organisations. Every step below is a real action in the product — nothing is decided for you and nothing is automated on your behalf; activation stays manual.",
-      "steps": [
-        "A company or agency links a real worker — they invite by email and the worker accepts.",
-        "The owner enables work-journal review for that worker relationship.",
-        "The worker logs a real work-journal entry against that organisation.",
-        "A manager reviews it — approve, reject, or request changes — and the decision is saved as evidence.",
-        "The worker, the company and the admin can all see the saved review result."
-      ],
-      "ctaNote": "Pilot activation is manual. No card is collected, no plan starts by itself, and pricing and scope are confirmed with you before anything begins.",
-      "cta": "Request a pilot"
-    },
+    "subcopy": "Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
     "planCta": "Join the waitlist for this plan",
     "featuresLabel": "Includes",
     "plans": {
@@ -2166,36 +2141,6 @@
       "title": "Cookie Policy"
     }
   },
-  "pilotReadiness": {
-    "title": "Pilot version",
-    "badge": "Pilot",
-    "body": "This is a pilot release of labourmarket.ai for real testers. Your entries are private. No public 'verified' marker. No matching. We're proving the foundation — a reliable evidence chain from free text to confirmed work.",
-    "links": {
-      "communication": "Conversations & support →"
-    },
-    "feedbackHint": "Confusing copy? Highlight + click 'Report copy' bottom-right.",
-    "telemetryNote": "Privacy: we collect task durations + error codes + route paths only. No text from you. No keystrokes. No hidden tracking."
-  },
-  "pilotMode": {
-    "title": "Pilot mode",
-    "body": "No payment, hiring decision, or verification happens automatically here. Real activation requires owner or admin review."
-  },
-  "tier2Readiness": {
-    "badge": "Manual review only",
-    "title": "What Tier-2 (manual activation) will eventually require",
-    "body": "Tier-2 is the manual-activation tier for organisations that want a serious pilot. This card is a preview of what an owner or admin will ask for when you request a pilot review. Nothing on this page is submitted to the Tier-2 schema today, and Tier-2 status stays 'pilot' until owner / admin review completes.",
-    "requirementsTitle": "Information the manual review will ask for",
-    "requirements": [
-      "Organisation legal name and country of registration.",
-      "Country-specific registration code (e.g., 9-digit LT, 11-digit LV).",
-      "Correspondence address: country, city, street line, postcode.",
-      "One named human representative with their role (director, authorised representative, employee, or contractor).",
-      "Multi-country presence, when the organisation operates in more than one country."
-    ],
-    "reviewNote": "An owner or admin reviews each submission manually. Tier-2 status stays 'pilot' until that review completes; activation happens only after the human review records a decision.",
-    "notWritingNote": "This page is a preview. It does not submit anything to the Tier-2 schema. It does not collect a card. It does not start billing.",
-    "ctaLabel": "Request pilot review"
-  },
   "communication": {
     "title": "Conversations",
     "subtitle": "Internal communication between testers, companies, agencies, and the admin.",
@@ -2205,7 +2150,7 @@
     "unread": "New",
     "kind": {
       "direct": "Direct",
-      "support": "Support / pilot",
+      "support": "Support",
       "team": "Team"
     },
     "backToList": "← All conversations",
@@ -2251,8 +2196,8 @@
     }
   },
   "orgTier1Warning": {
-    "eyebrow": "Pilot phase",
-    "body": "This role is for a real organisation or a client you represent. In pilot mode, drafts are private and have no real consequence. Serious use will require company details (country, legal name, registration code, correspondence address, representative role)."
+    "eyebrow": "Your organisation",
+    "body": "This role is for a real organisation or a client you represent. Drafts stay private until you decide otherwise. Serious use will ask for company details (country, legal name, registration code, correspondence address, representative role)."
   },
   "profileCvClarity": {
     "title": "What your profile is built from",

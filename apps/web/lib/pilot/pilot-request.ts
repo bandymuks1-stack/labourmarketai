@@ -55,17 +55,16 @@ export async function submitPilotRequest(
   const kind = INTENT_KIND[intent];
   const title =
     intent === "partner"
-      ? "Pilot request — agency partnership"
-      : "Pilot request — hiring workers";
+      ? "Agency partnership — offer"
+      : "Hiring workers — demand";
 
   const { data, error } = await (supabase as unknown as DemandRpc).rpc(
     "submit_demand_request",
     {
       p_kind: kind,
       p_title: title,
-      p_need_summary:
-        "Pilot conversation requested from the dashboard. The team reviews every request personally.",
-      p_payload: { source: "dashboard_pilot", intent },
+      p_need_summary: "Demand submitted from the dashboard.",
+      p_payload: { source: "dashboard_demand", intent },
       p_original_language: "lt",
     },
   );

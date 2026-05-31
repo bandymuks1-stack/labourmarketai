@@ -2,8 +2,8 @@ import { getTranslations } from "next-intl/server";
 
 /**
  * Tier-1 organisation-profile warning, shown above company / agency /
- * buyer workspace pages. Sets expectations honestly: pilot drafts are
- * private and consequence-free; serious operation will later require
+ * buyer workspace pages. Sets expectations honestly: drafts stay
+ * private until the owner decides otherwise; serious operation will later require
  * organisation rekvizitai (country, legal name, registration code,
  * correspondence address, representative role).
  *
@@ -11,8 +11,8 @@ import { getTranslations } from "next-intl/server";
  *   docs/policies/organization-profile-creation-policy-v1.md
  *   docs/audit/organization-profile-creation-gap-audit-v1.md
  *
- * v1 ships only this copy. Tier-2 migration + verification gate are
- * separate, careful slices (see the audit doc).
+ * v1 ships only this copy. Organisation verification + rekvizitai gating
+ * are separate, careful slices (see the audit doc).
  */
 export async function OrgTier1Warning() {
   const t = await getTranslations("orgTier1Warning");
