@@ -7,6 +7,8 @@ import { CompanyWorkersSection } from "@/components/app/company-workers-section"
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
+import { getManagerEvidence } from "@/lib/operations/manager-evidence";
+import { ManagerEvidenceCard } from "@/components/app/manager-evidence-card";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import {
   getOwnCompany,
@@ -68,6 +70,9 @@ export default async function CompanyDashboardPage({
     orgMembers?.members.filter((m) => m.reviewEnabled).length ?? 0;
   // Slice 3 — pending entries the owner can review now (gated RPC; 0 if none).
   const reviewPendingCount = ownCompany ? await countReviewablePendingEntries() : 0;
+  // System-evidenced management activity (computed from the caller's own
+  // recorded review actions — read-only, never an external verification).
+  const managerEvidence = await getManagerEvidence();
   const orgMembersLabels = {
     title: tOrg("title"),
     intro: tOrg("intro"),
@@ -336,6 +341,8 @@ export default async function CompanyDashboardPage({
           </div>
         </div>
       </section>
+
+      {managerEvidence && <ManagerEvidenceCard evidence={managerEvidence} />}
 
       <section
         className="card-border flex flex-col gap-2 p-4"

@@ -1,4 +1,14 @@
 {
+  "managerEvidence": {
+    "title": "Vadovavimo veikla",
+    "systemEvidenced": "Įrodyta sistemos veikla",
+    "description": "Vadovavimo veikla įrodyta sistemos įrašais: peržiūrėti įrašai, patvirtinimai ir komandos valdymo veiksmai.",
+    "entriesReviewed": "Peržiūrėti įrašai",
+    "confirmations": "Patvirtinimai",
+    "correctionsRequested": "Prašyta patikslinti",
+    "lastActivity": "Paskutinė veikla",
+    "distinctionNote": "Tai sistemos užfiksuota veikla, o ne išorinis patvirtinimas. Įgūdžiai gali būti: paties nurodyti, įrodyti sistemos veikla arba išoriškai patvirtinti. Ši kortelė rodo įrodytą sistemos veiklą."
+  },
   "companyOps": {
     "counts": {
       "pending": "Laukiantys kvietimai",
