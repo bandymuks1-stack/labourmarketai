@@ -7,6 +7,9 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
 import { ROLE_BY_ID, type LabourMarketRoleId } from "@/lib/config/roles";
+import { deriveIsAdmin } from "@/lib/auth/admin-signal";
+import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
+import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 
 const ROLE_ICON: Record<Role, string> = {
   worker: "🔨",
@@ -58,6 +61,11 @@ export default async function AccountPage({
     .in("relationship_slug", ["manager", "owner", "external_manager"])
     .limit(1);
   const managesOrg = (mgrEc ?? []).length > 0;
+  const isAdmin = deriveIsAdmin({
+    activeRole: profile?.active_role ?? null,
+    profileRoles: rolesRows ?? [],
+  });
+  const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
 
   return (
     <div className="flex flex-col gap-8">
@@ -78,6 +86,20 @@ export default async function AccountPage({
           {profile?.email ?? user.email}
         </p>
       </section>
+
+      {isAdmin && (
+        <AdminUiToggle
+          hidden={adminUiHidden}
+          labels={{
+            title: t("account.adminUi.title"),
+            description: t("account.adminUi.description"),
+            statusShown: t("account.adminUi.statusShown"),
+            statusHidden: t("account.adminUi.statusHidden"),
+            show: t("account.adminUi.show"),
+            hide: t("account.adminUi.hide"),
+          }}
+        />
+      )}
 
       <section className="card-border p-6">
         <p className="mb-3 font-mono text-[11px] uppercase tracking-label text-text-muted">

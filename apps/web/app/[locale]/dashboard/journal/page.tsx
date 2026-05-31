@@ -12,6 +12,8 @@ import {
   type ReviewResult,
 } from "@/lib/journal/review-status";
 import { createClient } from "@/lib/supabase/server";
+import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { Link } from "@/lib/i18n/navigation";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -107,6 +109,19 @@ export default async function JournalPage({
   });
 
   if (!worker || engagements.length === 0) {
+    // Fix C — distinguish the REAL reason there is no writable context, so
+    // the worker knows the exact next step instead of a flat "no context".
+    const pending = await listMyPendingWorkerInvitations();
+    let hasRosterLink = false;
+    if (worker) {
+      const [cw, aw] = await Promise.all([
+        supabase.from("company_workers").select("worker_id").eq("worker_id", worker.id).eq("status", "active").limit(1),
+        supabase.from("agency_workers").select("worker_id").eq("worker_id", worker.id).eq("status", "active").limit(1),
+      ]);
+      hasRosterLink = (cw.data?.length ?? 0) > 0 || (aw.data?.length ?? 0) > 0;
+    }
+    const contextState =
+      pending.length > 0 ? "pending" : hasRosterLink ? "roster" : "none";
     return (
       <div className="flex flex-col gap-6">
         <header>
@@ -116,8 +131,16 @@ export default async function JournalPage({
         </header>
         <div className="card-border max-w-2xl p-6">
           <p className="text-sm leading-relaxed text-text-secondary">
-            {t("noEngagement")}
+            {t(`noContext.${contextState}`)}
           </p>
+          {contextState === "pending" && (
+            <Link
+              href="/dashboard"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+            >
+              {t("noContextCta")}
+            </Link>
+          )}
         </div>
       </div>
     );

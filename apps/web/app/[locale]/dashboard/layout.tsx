@@ -11,6 +11,7 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
+import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -74,6 +75,8 @@ export default async function DashboardLayout({
     activeRole: profile.active_role,
     profileRoles: rolesRows ?? [],
   });
+  // Display-only admin-UI preference (Fix D) — never a permission change.
+  const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
   const activeRole = ROLES.has(profile.active_role as Role)
     ? (profile.active_role as Role)
     : (roles[0] ?? null);
@@ -89,6 +92,7 @@ export default async function DashboardLayout({
         activeRole,
         roles,
         isAdmin,
+        adminUiHidden,
         notifications: [],
       }}
     >

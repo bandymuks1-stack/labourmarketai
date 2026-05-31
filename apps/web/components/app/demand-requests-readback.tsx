@@ -2,6 +2,7 @@ import type {
   CustomerRequestStatus,
   CustomerRequestsListResult,
 } from "@/lib/buyer/customer-requests";
+import { sanitizeDemandTitle } from "@/lib/demand/sanitize-demand-title";
 
 /**
  * Demand read-back (Slice 1 — demand → matching readiness).
@@ -69,7 +70,7 @@ export function DemandRequestsReadback({
             >
               <div className="flex min-w-0 flex-col">
                 <span className="truncate text-sm font-medium text-text-primary">
-                  {r.title}
+                  {sanitizeDemandTitle(r.title)}
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
                   {labels.created}: {r.createdAt.slice(0, 10)}

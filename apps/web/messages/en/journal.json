@@ -1,4 +1,10 @@
 {
+  "noContext": {
+    "none": "No active work context yet. When an organization invites you to its team and adds you, your journal opens here.",
+    "pending": "You have a pending invitation. Open your dashboard to accept it — then the owner can add you to the organization.",
+    "roster": "You've accepted and you're on the team roster. The organization owner still needs to add you to the organization before you can log work here."
+  },
+  "noContextCta": "Go to dashboard",
   "chooseWorkType": "Choose work type",
   "whatDidYouDo": "What did you work on today?",
   "textPlaceholder": "e.g. Worked 6 hours. Handled customer support, resolved 12 requests and prepared a daily report.",
