@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
+import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   ASSIGNABLE_OPERATIONS_ROLES,
   type AssignRoleActionState,
@@ -261,6 +262,7 @@ export function WorkerOperationsRoleForm({
     currentRole && (ASSIGNABLE_OPERATIONS_ROLES as readonly string[]).includes(currentRole)
       ? currentRole
       : "";
+  const [opsRole, setOpsRole] = useState(defaultRole);
 
   // When the toggle is interactive, the next desired state is the opposite of
   // the current REAL review state.
@@ -279,19 +281,20 @@ export function WorkerOperationsRoleForm({
         <input type="hidden" name="workerId" value={workerId} />
         <label className="flex flex-col gap-0.5 text-[11px]">
           <span className="text-text-secondary">{labels.roleLabel}</span>
-          <select
+          <DarkListbox
             name="operationsRole"
-            defaultValue={defaultRole}
-            className="w-full rounded-md border border-border-default bg-ink-700 px-3 py-2.5 text-text-primary outline-none focus:border-brand-blue sm:w-auto sm:py-1.5"
-            data-testid={`worker-ops-role-select-${workerId}`}
-          >
-            <option value="">{labels.none}</option>
-            {ASSIGNABLE_OPERATIONS_ROLES.map((r) => (
-              <option key={r} value={r}>
-                {labels.roleOptionLabels[r] ?? r}
-              </option>
-            ))}
-          </select>
+            value={opsRole}
+            onChange={setOpsRole}
+            ariaLabel={labels.roleLabel}
+            testId={`worker-ops-role-select-${workerId}`}
+            options={[
+              { value: "", label: labels.none },
+              ...ASSIGNABLE_OPERATIONS_ROLES.map((r) => ({
+                value: r,
+                label: labels.roleOptionLabels[r] ?? r,
+              })),
+            ]}
+          />
         </label>
 
         <label className="flex flex-col gap-0.5 text-[11px]">

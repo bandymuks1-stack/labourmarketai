@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { CvPreview, type CvSkill } from "@/components/app/cv-preview";
 import { ProfessionSkillsPicker } from "@/components/app/profession-skills-picker";
+import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   addWorkerDirection,
   removeWorkerDirection,
@@ -71,8 +72,6 @@ export function WorkerTradeProfile({
     run(() => setPrimaryProfession(next));
   }
 
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none focus:border-brand-blue disabled:opacity-60";
 
   const directionIds = new Set(directions.map((d) => d.id));
   const available = professions.filter((p) => !directionIds.has(p.id));
@@ -85,21 +84,14 @@ export function WorkerTradeProfile({
       {/* Primary work direction */}
       <label className="flex max-w-md flex-col gap-1.5 text-xs text-text-secondary">
         {t("primaryDirection")}
-        <select
+        <DarkListbox
           value={currentProfessionId ?? ""}
-          onChange={(e) => onPrimaryChange(e.target.value)}
+          onChange={onPrimaryChange}
           disabled={pending}
-          className={inputCls}
-        >
-          <option value="" disabled>
-            {t("professionPlaceholder")}
-          </option>
-          {professions.map((p) => (
-            <option key={p.id} value={p.id}>
-              {tProf(p.slug)}
-            </option>
-          ))}
-        </select>
+          placeholder={t("professionPlaceholder")}
+          ariaLabel={t("primaryDirection")}
+          options={professions.map((p) => ({ value: p.id, label: tProf(p.slug) }))}
+        />
       </label>
 
       {/* Work directions — calmer capability-group chips. Click a chip to edit
@@ -176,21 +168,14 @@ export function WorkerTradeProfile({
           {available.length > 0 && (
             <label className="flex max-w-xs flex-col gap-1.5 text-xs text-text-secondary">
               {t("addDirection")}
-              <select
+              <DarkListbox
                 value=""
-                onChange={(e) =>
-                  e.target.value && run(() => addWorkerDirection(e.target.value))
-                }
+                onChange={(v) => v && run(() => addWorkerDirection(v))}
                 disabled={pending}
-                className={inputCls}
-              >
-                <option value="">{t("addDirectionCta")}</option>
-                {available.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {tProf(p.slug)}
-                  </option>
-                ))}
-              </select>
+                placeholder={t("addDirectionCta")}
+                ariaLabel={t("addDirection")}
+                options={available.map((p) => ({ value: p.id, label: tProf(p.slug) }))}
+              />
             </label>
           )}
         </section>
