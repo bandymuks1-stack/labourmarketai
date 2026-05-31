@@ -56,6 +56,15 @@ export default async function CompanyDashboardPage({
     : null;
   const tOrg = await getTranslations("orgMembers");
   const tOps = await getTranslations("companyOps");
+  // Slice 1 — operational status counts from existing data (read-back only).
+  const acceptedCount = workersResult.kind === "ok" ? workersResult.rows.length : 0;
+  const pendingCount =
+    invitationsResult.kind === "ok"
+      ? invitationsResult.rows.filter((i) => i.status === "pending").length
+      : 0;
+  const memberCount = orgMembers?.members.length ?? 0;
+  const reviewCount =
+    orgMembers?.members.filter((m) => m.reviewEnabled).length ?? 0;
   const orgMembersLabels = {
     title: tOrg("title"),
     intro: tOrg("intro"),
@@ -255,6 +264,30 @@ export default async function CompanyDashboardPage({
           </h2>
           <p className="text-sm text-text-secondary">{tOps("intro")}</p>
         </header>
+        <dl
+          className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+          data-testid="company-ops-counts"
+        >
+          {[
+            { key: "pending", value: pendingCount },
+            { key: "accepted", value: acceptedCount },
+            { key: "members", value: memberCount },
+            { key: "review", value: reviewCount },
+          ].map((c) => (
+            <div
+              key={c.key}
+              className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+              data-testid={`company-ops-count-${c.key}`}
+            >
+              <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                {tOps(`counts.${c.key}`)}
+              </dt>
+              <dd className="font-display text-xl font-semibold text-text-primary">
+                {c.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-4">
             <h3 className="font-display text-sm font-semibold text-text-primary">

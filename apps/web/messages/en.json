@@ -1,5 +1,11 @@
 {
   "companyOps": {
+    "counts": {
+      "pending": "Pending invites",
+      "accepted": "Accepted roster",
+      "members": "Org members",
+      "review": "Review enabled"
+    },
     "title": "Operations workspace",
     "intro": "What you can run today on this page, and what's next.",
     "teamTitle": "Workers / Team",
