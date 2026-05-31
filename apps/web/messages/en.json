@@ -12,6 +12,7 @@
     "teamBody": "Invite workers, see the accepted roster, add them to the organization and enable journal review — all below on this page.",
     "reviewTitle": "Journal review",
     "reviewSteps": "1) worker accepts · 2) add to organization · 3) enable review · 4) worker logs work · 5) you confirm.",
+    "reviewCta": "Review entries",
     "projectsTitle": "Projects and tasks are being prepared",
     "projectsBody": "Worker linking, organization membership and work-journal review work for real today. Task assignment is the next data-model slice.",
     "needsTitle": "Needs",
