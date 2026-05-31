@@ -2284,7 +2284,7 @@
   "agentOs": {
     "missionEyebrow": "Mission control",
     "title": "Agent OS (v1)",
-    "subtitle": "Internal agent roles helping run the real-tester pilot. Read-only — no live agent runtime yet.",
+    "subtitle": "Internal agent roles helping run the real-tester programme. Read-only — no live agent runtime yet.",
     "statusEyebrow": "Status",
     "statusV1Body": "v1 ships role cards only + links to the specs under docs/agent-os/. No live agent execution yet — each role is a written contract for the owner to reason against.",
     "scope": {
@@ -2337,14 +2337,14 @@
       "summary": "Checks admin-only access, RLS expectations, no service_role runtime, no raw text in telemetry, no public exposure."
     },
     "pilotSalesReadiness": {
-      "title": "Pilot Sales Readiness",
-      "summary": "Company/agency/buyer drafts, task friction, pilot readiness score."
+      "title": "Sales readiness",
+      "summary": "Company/agency/buyer drafts, task friction, operations readiness score."
     },
     "commandCenter": {
-      "title": "Pilot command center",
+      "title": "Operations command center",
       "window": "Last 24h",
       "metric": {
-        "events24h": "Pilot events",
+        "events24h": "Operations events",
         "errors24h": "Errors",
         "languageOpen": "Language reports (open)",
         "draftsTotal": "Operations drafts (total)",
@@ -2355,7 +2355,7 @@
       "footnote": "Counts pulled from the live DB via admin RLS. '—' means the underlying table is not yet applied in this environment (check the migration ledger)."
     },
     "checklist": {
-      "title": "Pilot start checklist",
+      "title": "Operations start checklist",
       "scope": "Health check",
       "item": {
         "login": "Google sign-in observed",
