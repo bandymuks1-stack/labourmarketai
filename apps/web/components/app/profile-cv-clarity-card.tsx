@@ -11,16 +11,27 @@ import { getTranslations } from "next-intl/server";
  * explains the surface around them.
  *
  * Server component. No client JS. No telemetry call. Pure render.
+ *
+ * Each actionable step now reflects REAL saved state (Added / To add)
+ * when the parent passes `state` — read straight from persisted data, so
+ * it can never drift from what is stored. `awaitingProof` stays a calm
+ * informational note (no chip), and there is no aggregate %/score.
  */
-export async function ProfileCvClarityCard() {
+type ActionableStep = "about" | "skills" | "journal" | "selfDeclared";
+
+export async function ProfileCvClarityCard({
+  state,
+}: {
+  state?: Partial<Record<ActionableStep, boolean>>;
+} = {}) {
   const t = await getTranslations("profileCvClarity");
   const steps = [
-    { key: "about" as const, status: "info" as const },
-    { key: "skills" as const, status: "info" as const },
-    { key: "journal" as const, status: "info" as const },
-    { key: "selfDeclared" as const, status: "info" as const },
-    { key: "awaitingProof" as const, status: "info" as const },
-  ];
+    "about",
+    "skills",
+    "journal",
+    "selfDeclared",
+    "awaitingProof",
+  ] as const;
   return (
     <section
       className="card-border flex flex-col gap-3 p-4"
@@ -36,20 +47,38 @@ export async function ProfileCvClarityCard() {
       </header>
       <p className="text-xs leading-relaxed text-text-secondary">{t("intro")}</p>
       <ul className="flex flex-col gap-1.5 text-xs">
-        {steps.map((s) => (
-          <li
-            key={s.key}
-            className="flex items-baseline gap-3"
-            data-testid={`profile-cv-step-${s.key}`}
-          >
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t(`step.${s.key}.label`)}
-            </span>
-            <span className="flex-1 text-text-secondary">
-              {t(`step.${s.key}.body`)}
-            </span>
-          </li>
-        ))}
+        {steps.map((key) => {
+          const done =
+            state && key !== "awaitingProof"
+              ? state[key as ActionableStep]
+              : undefined;
+          return (
+            <li
+              key={key}
+              className="flex items-baseline gap-3"
+              data-testid={`profile-cv-step-${key}`}
+            >
+              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                {t(`step.${key}.label`)}
+              </span>
+              <span className="flex-1 text-text-secondary">
+                {t(`step.${key}.body`)}
+              </span>
+              {typeof done === "boolean" && (
+                <span
+                  data-status={done ? "done" : "todo"}
+                  className={`shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label ${
+                    done
+                      ? "border-state-success/40 text-state-success"
+                      : "border-state-warning/40 text-state-warning"
+                  }`}
+                >
+                  {done ? t("statusDone") : t("statusTodo")}
+                </span>
+              )}
+            </li>
+          );
+        })}
       </ul>
       <p className="text-[11px] leading-relaxed text-text-muted">
         {t("footnote")}

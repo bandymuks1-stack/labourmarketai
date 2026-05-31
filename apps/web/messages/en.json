@@ -2210,6 +2210,8 @@
     "body": "This role is for a real organisation or a client you represent. Drafts stay private until you decide otherwise. Serious use will ask for company details (country, legal name, registration code, correspondence address, representative role)."
   },
   "profileCvClarity": {
+    "statusDone": "Added",
+    "statusTodo": "To add",
     "title": "What your profile is built from",
     "scope": "Clarity",
     "intro": "Your profile grows from real work, not promises. Here are the pieces that shape it, and what is still waiting for evidence.",

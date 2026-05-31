@@ -105,6 +105,7 @@ export default async function ProfilePage({
   let skillDots: SkillDot[] = [];
   let engagementCards: EngagementCard[] = [];
   let professionIconSlug: string | null = null;
+  let journalCount = 0;
   // Skills the worker is allowed to pick from across all their directions.
   // The text-first flow needs this catalogue (id + slug + localized name) so
   // confirmed parser matches can be mapped back to a real skill_id.
@@ -117,6 +118,13 @@ export default async function ProfilePage({
       .order("is_primary", { ascending: false });
     const wp = (wpAll ?? []).find((r) => r.is_primary) ?? null;
     currentProfessionId = wp?.profession_id ?? null;
+
+    // Journal entries count — feeds the real profile-completion status.
+    const { count: jCount } = await supabase
+      .from("journal_entries")
+      .select("*", { count: "exact", head: true })
+      .eq("worker_id", workerId);
+    journalCount = jCount ?? 0;
     // All of the worker's directions (primary + additional) — non-locking (§1).
     workerDirections = (wpAll ?? [])
       .map((r) => {
@@ -263,7 +271,15 @@ export default async function ProfilePage({
         </p>
       </header>
 
-      <ProfileCvClarityCard />
+      <ProfileCvClarityCard
+        state={{
+          about: savedProfileText.trim().length > 0,
+          selfDeclared: savedSkillClaims.length > 0,
+          ...(workerId
+            ? { skills: savedSkills.length > 0, journal: journalCount > 0 }
+            : {}),
+        }}
+      />
 
       {/* Text-first composer — universal. Available to every authenticated
           user regardless of role. The catalogued worker_skills picker
