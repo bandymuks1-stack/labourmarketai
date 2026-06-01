@@ -167,7 +167,9 @@ export function WaitlistModal({
                 </label>
 
                 {status === "error" && (
-                  <p className="text-xs text-state-danger">{t("error")}</p>
+                  <p role="alert" className="text-xs text-state-danger">
+                    {t("error")}
+                  </p>
                 )}
 
                 <div className="mt-1 flex items-center justify-end gap-3">
