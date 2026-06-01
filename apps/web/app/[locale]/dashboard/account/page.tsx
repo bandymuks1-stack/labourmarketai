@@ -254,6 +254,12 @@ export default async function AccountPage({
             {tSpaces("addSpace")}
           </p>
         </header>
+        <p
+          className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+          data-testid="my-spaces-available"
+        >
+          {tSpaces("availableSpaces")}
+        </p>
         <RoleCatalogueGrid roles={getVisibleRoleOptions()} />
         <FeatureAvailabilityGrid comingLater />
       </section>

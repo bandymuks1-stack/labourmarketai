@@ -53,6 +53,7 @@ export default async function JournalPage({
       : null;
   setRequestLocale(locale);
   const t = await getTranslations("journal");
+  const tSpaces = await getTranslations("spaces");
   const tRel = await getTranslations("relationshipTypes");
   const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
@@ -247,9 +248,18 @@ export default async function JournalPage({
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("navTitle")}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+            {t("navTitle")}
+          </h1>
+          <Link
+            href="/dashboard/account"
+            className="shrink-0 text-xs font-medium text-brand-blue hover:underline"
+            data-testid="room-my-spaces-link"
+          >
+            {tSpaces("mySpaces")} →
+          </Link>
+        </div>
       </header>
 
       {/* Honest pilot framing — the manager / client confirmation + audit
