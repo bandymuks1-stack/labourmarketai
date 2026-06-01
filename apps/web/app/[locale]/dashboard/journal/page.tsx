@@ -261,6 +261,26 @@ export default async function JournalPage({
         {t("pilotBackboneNote")}
       </p>
 
+      {/* Read-only project-context note (no write UI). The project layer is
+          structurally live in the DB (PRs #196/#197) but linking is NOT enabled
+          yet and nothing is auto-filled — surface that honestly to the worker. */}
+      <section
+        className="card-border flex flex-col gap-1 p-4"
+        data-testid="journal-project-context"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="font-display text-sm font-semibold text-text-primary">
+            {t("projectContext.title")}
+          </h2>
+          <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-medium text-brand-blue">
+            {t("projectContext.readyBadge")}
+          </span>
+        </div>
+        <p className="text-xs leading-relaxed text-text-secondary">
+          {t("projectContext.body")}
+        </p>
+      </section>
+
       {/* Self-progress counter (§15) */}
       <div className="card-border flex flex-col gap-2 p-4">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">

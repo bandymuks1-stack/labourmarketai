@@ -25,6 +25,11 @@
   "savedTitle": "Įrašas išsaugotas",
   "savedBody": "Jūsų patvirtinti duomenys pridėti prie darbo istorijos.",
   "pilotBackboneNote": "Įrašai privatūs, kol nepasirinksite kitaip. Patvirtinimo sluoksnis rodomas tik kai yra realus patvirtinimas.",
+  "projectContext": {
+    "title": "Projekto kontekstas",
+    "readyBadge": "Struktūra paruošta",
+    "body": "Šio darbo žurnalo įrašai galės būti susieti su projektu, kai bus įjungtas projektų sluoksnis. Struktūra jau paruošta, bet susiejimas dar neaktyvus ir niekas neužpildoma automatiškai."
+  },
   "quantitySummaryHint": "Neprivaloma greita santrauka — visus kiekius ir vienetus taip pat galite surašyti aprašyme aukščiau.",
   "workDirectionOptional": "Darbo kryptis (neprivaloma)",
   "classifyLater": "Ateityje sistema galės pasiūlyti darbo kryptį, įgūdžius, kiekius ir vienetus pagal jūsų įrašą. Pasiūlymai turės būti peržiūrimi prieš išsaugant kaip faktą.",

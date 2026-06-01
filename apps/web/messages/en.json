@@ -69,6 +69,7 @@
     "projectsBody": "The data model for this layer is now live: projects, clients, project workers, work items, and linking a journal entry to a project. Nothing is filled automatically — you'll be able to create projects and clients in a later, write-enabled slice. Journal entries will then be linkable to a project.",
     "projectsCount": "Projects",
     "projectsEmpty": "no projects created yet",
+    "projectsLinkingNote": "Creating projects and linking entries to a project are not enabled yet. Nothing is filled automatically.",
     "needsTitle": "Needs",
     "needsBody": "Submit a structured demand and track its status.",
     "needsCta": "Open needs"
