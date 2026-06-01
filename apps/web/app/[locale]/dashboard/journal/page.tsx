@@ -254,7 +254,7 @@ export default async function JournalPage({
           </h1>
           <Link
             href="/dashboard/account"
-            className="shrink-0 text-xs font-medium text-brand-blue hover:underline"
+            className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
             data-testid="room-my-spaces-link"
           >
             {tSpaces("mySpaces")} →
