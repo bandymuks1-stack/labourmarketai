@@ -16,6 +16,8 @@ const account = read("app/[locale]/dashboard/account/page.tsx");
 const buyer = read("app/[locale]/dashboard/buyer/page.tsx");
 const company = read("app/[locale]/dashboard/company/page.tsx");
 const profile = read("app/[locale]/dashboard/profile/page.tsx");
+const agency = read("app/[locale]/dashboard/agency/page.tsx");
+const journal = read("app/[locale]/dashboard/journal/page.tsx");
 
 describe("active /dashboard room stays focused", () => {
   it("renders no all-roles catalogue and no future-module grid", () => {
@@ -34,6 +36,33 @@ describe("/dashboard/account is the ONLY cross-space switcher/catalogue surface"
     expect(account).toMatch(/<RoleCatalogueGrid\b/);
     expect(account).toMatch(/<FeatureAvailabilityGrid\b/);
     expect(account).toMatch(/data-testid="my-spaces-current"/);
+  });
+  it("orders the My-spaces room: current → available → modules later", () => {
+    expect(account).toMatch(/data-testid="my-spaces-available"/);
+    const cur = account.indexOf('data-testid="my-spaces-current"');
+    const avail = account.indexOf('data-testid="my-spaces-available"');
+    const grid = account.indexOf("<FeatureAvailabilityGrid");
+    expect(cur).toBeGreaterThan(-1);
+    expect(avail).toBeGreaterThan(cur);
+    expect(grid).toBeGreaterThan(avail);
+  });
+});
+
+describe("agency room shows candidate/team supply only (+ compact switcher)", () => {
+  it("imports no buyer / private-person / catalogue blocks", () => {
+    expect(agency).not.toMatch(/BuyerRequestsSection|getOwnCustomer\b|listOwnCustomerRequests|RoleCatalogueGrid|FeatureAvailabilityGrid/);
+  });
+  it("offers a compact My-spaces switch link", () => {
+    expect(agency).toMatch(/data-testid="room-my-spaces-link"/);
+  });
+});
+
+describe("journal room shows work-evidence only (+ compact switcher)", () => {
+  it("imports no buyer / agency / company-as-buyer / catalogue blocks", () => {
+    expect(journal).not.toMatch(/BuyerRequestsSection|AgencyWorkersSection|CompanyWorkersSection|RoleCatalogueGrid|FeatureAvailabilityGrid/);
+  });
+  it("offers a compact My-spaces switch link", () => {
+    expect(journal).toMatch(/data-testid="room-my-spaces-link"/);
   });
 });
 

@@ -35,6 +35,7 @@ export default async function AgencyDashboardPage({
   await requireRoleOrRedirect(locale, "agency");
 
   const t = await getTranslations("roleDashboards.agency");
+  const tSpaces = await getTranslations("spaces");
   const tWorkers = await getTranslations("roleDashboards.agency.workers");
   const existingDraft = await getPilotDraft("agency_offer");
 
@@ -230,9 +231,18 @@ export default async function AgencyDashboardPage({
   return (
     <div className="flex flex-col gap-6" data-testid="agency-dashboard">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
-          {t("eyebrow")}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+            {t("eyebrow")}
+          </p>
+          <Link
+            href="/dashboard/account"
+            className="shrink-0 text-xs font-medium text-brand-blue hover:underline"
+            data-testid="room-my-spaces-link"
+          >
+            {tSpaces("mySpaces")} →
+          </Link>
+        </div>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("title")}
         </h1>
