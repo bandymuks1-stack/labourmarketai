@@ -6,7 +6,9 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
-import { ROLE_BY_ID, type LabourMarketRoleId } from "@/lib/config/roles";
+import { ROLE_BY_ID, type LabourMarketRoleId, getVisibleRoleOptions } from "@/lib/config/roles";
+import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
+import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
@@ -34,6 +36,7 @@ export default async function AccountPage({
   const tCommon = await getTranslations("common");
   const tSkills = await getTranslations("skills");
   const tJournal = await getTranslations("journal");
+  const tSpaces = await getTranslations("spaces");
 
   const supabase = await createClient();
   const {
@@ -218,6 +221,22 @@ export default async function AccountPage({
         <div className="mt-3">
           <LocaleSwitcher />
         </div>
+      </section>
+
+      {/* Room-based IA (PR #204 review): cross-space content lives HERE, in the
+          "Mano erdvės / My spaces" surface — not inside any active dashboard
+          room. This is where other spaces are shown, added, or explained. */}
+      <section className="card-border flex flex-col gap-4 p-6" data-testid="my-spaces">
+        <header className="flex flex-col gap-1">
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            {tSpaces("mySpaces")}
+          </h2>
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {tSpaces("addSpace")}
+          </p>
+        </header>
+        <RoleCatalogueGrid roles={getVisibleRoleOptions()} />
+        <FeatureAvailabilityGrid comingLater />
       </section>
 
       <section className="card-border p-6">

@@ -489,8 +489,10 @@ describe("feature-availability + config-driven dashboard", () => {
     );
   });
 
-  it("dashboard page reads features from the central catalogue", () => {
-    const txt = readWeb("app/[locale]/dashboard/page.tsx");
+  it("the My-spaces (account) surface reads features from the central catalogue", () => {
+    // Room-based IA (PR #204 review): the feature grid lives in the account /
+    // "Mano erdvės" surface, not the active dashboard room.
+    const txt = readWeb("app/[locale]/dashboard/account/page.tsx");
     expect(txt).toMatch(/FeatureAvailabilityGrid/);
   });
 
@@ -697,8 +699,10 @@ describe("role catalogue + shared role-card model", () => {
     expect(linkOpens.length).toBe(1);
   });
 
-  it("dashboard mounts RoleCatalogueGrid from the role catalogue", () => {
-    const txt = readWeb("app/[locale]/dashboard/page.tsx");
+  it("the My-spaces (account) surface mounts RoleCatalogueGrid from the catalogue", () => {
+    // Room-based IA (PR #204 review): the all-roles catalogue lives in the
+    // account / "Mano erdvės" surface, not the active dashboard room.
+    const txt = readWeb("app/[locale]/dashboard/account/page.tsx");
     expect(txt).toMatch(/RoleCatalogueGrid/);
     expect(txt).toMatch(/getVisibleRoleOptions/);
   });

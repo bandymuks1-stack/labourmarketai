@@ -132,12 +132,19 @@ describe("assign actions never enable journal review", () => {
 
 // ── Part B — dashboard ready-today cleanup ──────────────────────────────
 
-describe("dashboard demotes preparing cards into a Coming-later section", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+describe("preparing cards live in the My-spaces surface, not the active room", () => {
+  // Room-based IA (PR #204 review): the feature/module grid moved OUT of the
+  // active /dashboard space into /dashboard/account → "Mano erdvės / My spaces".
+  const dashboard = read("app/[locale]/dashboard/page.tsx");
+  const account = read("app/[locale]/dashboard/account/page.tsx");
 
-  it("both FeatureAvailabilityGrid mounts use the comingLater variant", () => {
-    const mounts = page.match(/<FeatureAvailabilityGrid\b[^>]*\/>/g) ?? [];
-    expect(mounts.length).toBeGreaterThanOrEqual(2);
+  it("the active dashboard room renders NO FeatureAvailabilityGrid", () => {
+    expect(dashboard).not.toMatch(/<FeatureAvailabilityGrid\b/);
+  });
+
+  it("the My-spaces (account) surface mounts FeatureAvailabilityGrid as comingLater", () => {
+    const mounts = account.match(/<FeatureAvailabilityGrid\b[^>]*\/>/g) ?? [];
+    expect(mounts.length).toBeGreaterThanOrEqual(1);
     for (const m of mounts) {
       expect(m, `grid mount must be comingLater: ${m}`).toMatch(/comingLater/);
     }
