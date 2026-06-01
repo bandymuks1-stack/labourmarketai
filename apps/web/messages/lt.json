@@ -1578,8 +1578,9 @@
           "cta": "Peržiūrėti vaidmenis"
         },
         "activitySetup": {
+          "eyebrow": "VEIKLOS PRADŽIA",
           "title": "Pradėti agentūros, įmonės arba pirkėjo veiklą",
-          "body": "Tikra DB rašymas — agentūros ir įmonės nustatymas išsaugomas po pateikimo ir išlieka po perkrovimo. Pirkėjas — sąžinga dalinė būsena.",
+          "body": "Agentūros ir įmonės nustatymas išsaugomas ir išlieka po perkrovimo. Pirkėjo erdvė — sąžininga dalinė būsena.",
           "cta": "Atidaryti veiklos pradžią"
         },
         "activity": {

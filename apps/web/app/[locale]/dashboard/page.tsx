@@ -474,7 +474,7 @@ export default async function DashboardOverviewPage({
       >
         <div className="flex flex-col gap-0.5">
           <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
-            VEIKLOS PRADŽIA
+            {tw("activitySetup.eyebrow")}
           </p>
           <p className="text-sm font-semibold text-text-primary">
             {tw("activitySetup.title")}

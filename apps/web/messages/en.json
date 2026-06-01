@@ -1578,8 +1578,9 @@
           "cta": "Review roles"
         },
         "activitySetup": {
+          "eyebrow": "GET STARTED",
           "title": "Start agency, company or buyer activity",
-          "body": "Real DB writes — agency and company setup persists after submit and survives reload. Buyer — honest partial state.",
+          "body": "Agency and company setup is saved and survives reload. Buyer space — honest partial state.",
           "cta": "Open activity start"
         },
         "activity": {
