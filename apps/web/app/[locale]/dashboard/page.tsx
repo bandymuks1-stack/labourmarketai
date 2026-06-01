@@ -7,6 +7,7 @@ import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-g
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
+import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { getVisibleRoleOptions } from "@/lib/config/roles";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -191,6 +192,7 @@ export default async function DashboardOverviewPage({
     return (
       <div className="flex flex-col gap-7">
         {Header}
+        <CurrentSpaceHeader role={role} />
 
         {/* TOP priority — the real next actions for the chain
             (invite worker / accept / enable review / review entries). Placed
@@ -360,6 +362,8 @@ export default async function DashboardOverviewPage({
   return (
     <div className="flex flex-col gap-7">
       {Header}
+      <CurrentSpaceHeader role={role} />
+
 
       {/* TOP priority — real chain next actions + pending invitation accept,
           placed first so the next action is always visible. */}

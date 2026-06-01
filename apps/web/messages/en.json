@@ -1,4 +1,26 @@
 {
+  "spaces": {
+    "current": "Current space",
+    "mySpaces": "My spaces",
+    "switchSpace": "Switch space",
+    "addSpace": "Add space",
+    "profile": {
+      "name": "Personal profile",
+      "purpose": "Manage your avatar, CV, skills, and work status."
+    },
+    "company": {
+      "name": "Company workspace",
+      "purpose": "Manage projects, teams, and hiring."
+    },
+    "agency": {
+      "name": "Agency space",
+      "purpose": "Offer candidates or teams and find assignments."
+    },
+    "buyer": {
+      "name": "Buyer space",
+      "purpose": "Create and manage requests for products, services, specialists, suppliers, or teams."
+    }
+  },
   "messaging": {
     "messageWorker": "Message worker",
     "messageCompany": "Message company"
@@ -969,7 +991,7 @@
     }
   },
   "roles": {
-    "nonLockingIntro": "Your first role is not a limit. You can start with what works today and add other roles when they are ready.",
+    "nonLockingIntro": "Your first space is not a limit. You can start with what works today and add other spaces when they are ready.",
     "addLaterHint": "You'll be able to add more roles later — they appear in the catalogue once they're ready.",
     "status": {
       "active": "Active",
@@ -1596,7 +1618,7 @@
       },
       "chainActions": {
         "buyerTitle": "Buyer requests",
-        "buyerSubtitle": "Create and track your requests — what you're looking for in the marketplace (product, service, worker, or team).",
+        "buyerSubtitle": "Create and track your requests — what you're looking for in the marketplace (product, service, specialist, master, contractor, supplier, or team).",
         "buyerRequests": "My requests",
         "buyerRequestsDesc": "Create or update a request and track its status.",
         "title": "Work-journal review chain",

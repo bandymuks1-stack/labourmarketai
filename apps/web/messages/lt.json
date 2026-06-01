@@ -1,4 +1,26 @@
 {
+  "spaces": {
+    "current": "Dabartinė erdvė",
+    "mySpaces": "Mano erdvės",
+    "switchSpace": "Keisti erdvę",
+    "addSpace": "Pridėti erdvę",
+    "profile": {
+      "name": "Asmeninis profilis",
+      "purpose": "Tvarkykite avatarą, CV, įgūdžius ir darbo statusą."
+    },
+    "company": {
+      "name": "Įmonės darbo erdvė",
+      "purpose": "Valdykite projektus, komandas ir darbuotojų paiešką."
+    },
+    "agency": {
+      "name": "Agentūros erdvė",
+      "purpose": "Siūlykite kandidatus ar komandas ir ieškokite užsakymų."
+    },
+    "buyer": {
+      "name": "Pirkėjo erdvė",
+      "purpose": "Kurkite ir valdykite užklausas dėl prekių, paslaugų, specialistų, tiekėjų ar komandų."
+    }
+  },
   "messaging": {
     "messageWorker": "Rašyti darbuotojui",
     "messageCompany": "Rašyti įmonei"
@@ -969,7 +991,7 @@
     }
   },
   "roles": {
-    "nonLockingIntro": "Jūsų pradinis vaidmuo nėra apribojimas. Galite pradėti nuo to, kas veikia šiandien, o kitus vaidmenis pridėti, kai jie bus paruošti.",
+    "nonLockingIntro": "Jūsų pradinė erdvė nėra apribojimas. Galite pradėti nuo to, kas veikia šiandien, o kitas erdves pridėti, kai jos bus paruoštos.",
     "addLaterHint": "Vėliau galėsite pridėti daugiau vaidmenų — kataloge jie pasirodys, kai bus paruošti.",
     "status": {
       "active": "Aktyvu",
@@ -1596,7 +1618,7 @@
       },
       "chainActions": {
         "buyerTitle": "Pirkėjo užklausos",
-        "buyerSubtitle": "Sukurkite ir sekite savo užklausas — ko ieškote rinkoje (prekės, paslaugos, darbuotojo ar komandos).",
+        "buyerSubtitle": "Sukurkite ir sekite savo užklausas — ko ieškote rinkoje (prekės, paslaugos, specialisto, meistro, rangovo, tiekėjo ar komandos).",
         "buyerRequests": "Mano užklausos",
         "buyerRequestsDesc": "Sukurkite ar papildykite užklausą ir sekite jos būseną.",
         "title": "Darbo žurnalo peržiūros grandinė",
