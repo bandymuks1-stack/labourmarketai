@@ -154,7 +154,7 @@ export function RoleSwitcher() {
                       {chipKey && !isHonestlyActive && (
                         <span
                           className={cn(
-                            "rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                            "rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
                             chipTone,
                           )}
                           data-testid={`role-switcher-chip-${r}`}
@@ -219,7 +219,7 @@ export function RoleSwitcher() {
                           {chipKey && !isHonestlyActive && (
                             <span
                               className={cn(
-                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
                                 chipTone,
                               )}
                               data-testid={`role-switcher-chip-missing-${r}`}
@@ -244,7 +244,7 @@ export function RoleSwitcher() {
                           {chipKey && !isHonestlyActive && (
                             <span
                               className={cn(
-                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label",
+                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
                                 chipTone,
                               )}
                             >

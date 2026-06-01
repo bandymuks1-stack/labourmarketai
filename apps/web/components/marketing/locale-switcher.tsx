@@ -101,7 +101,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
                 <span className="flex items-center gap-2">
                   {NATIVE[l] ?? l.toUpperCase()}
                   {preview && (
-                    <span className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
                       {t("localePreview")}
                     </span>
                   )}

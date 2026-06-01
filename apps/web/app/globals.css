@@ -32,7 +32,7 @@
   /* text */
   --c-text-primary: 244 246 251;
   --c-text-secondary: 155 163 184;
-  --c-text-muted: 110 120 146; /* lifted from #5C6480 for AA contrast on ink-900 */
+  --c-text-muted: 134 144 168; /* lifted again (was 110 120 146) so the pervasive 10-11px mono labels clear WCAG AA 4.5:1 on the lighter ink-800 / tinted (/40) panels too, not only on ink-900 (audit PR-A) */
   /* tier — player-card ratings */
   --c-tier-diamond: 91 224 255;
   --c-tier-gold: 255 200 87;
@@ -69,7 +69,7 @@
   --c-state-danger: 200 44 44;
   --c-text-primary: 11 13 23; /* near-black on light */
   --c-text-secondary: 74 82 104;
-  --c-text-muted: 99 108 130;
+  --c-text-muted: 84 93 116; /* darkened (was 99 108 130) to clear AA 4.5:1 on the light page bg (ink-900) too, mirroring the dark-theme lift (audit PR-A) */
   --c-tier-gold: 176 122 0;
   color-scheme: light;
 }

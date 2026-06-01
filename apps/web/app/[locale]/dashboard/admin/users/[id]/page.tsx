@@ -118,7 +118,7 @@ export default async function AdminUserPage({
                 className="flex items-center gap-2 rounded-md border border-state-success/40 bg-state-success/5 px-2 py-1 text-sm text-text-primary"
               >
                 <span>{c.label}</span>
-                <span className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
                   {c.status}
                 </span>
               </li>
@@ -154,7 +154,7 @@ export default async function AdminUserPage({
                         `user.draftType.${d.draft_type as DraftType}`,
                       )}
                     </span>
-                    <span className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
                       {d.visibility}
                     </span>
                   </header>
@@ -166,7 +166,7 @@ export default async function AdminUserPage({
                     <dl className="grid gap-1 sm:grid-cols-2 text-xs">
                       {entries.map(([k, v]) => (
                         <div key={k} className="flex flex-col gap-0.5">
-                          <dt className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                          <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
                             {k}
                           </dt>
                           <dd className="text-text-secondary">
