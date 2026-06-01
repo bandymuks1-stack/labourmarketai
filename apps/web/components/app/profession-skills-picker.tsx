@@ -130,7 +130,7 @@ export function ProfessionSkillsPicker({
                   {s.isCore && (
                     <span
                       className={cn(
-                        "rounded-sm px-1 font-mono text-[9px] uppercase tracking-label",
+                        "rounded-sm px-1 font-mono text-[10px] uppercase tracking-label",
                         isSelected
                           ? "bg-ink-900/20 text-ink-900"
                           : "text-text-muted",

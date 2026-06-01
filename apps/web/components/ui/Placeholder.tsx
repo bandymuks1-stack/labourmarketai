@@ -61,7 +61,7 @@ export async function Placeholder({
         className={className}
       >
         {content}
-        <sup className="ml-0.5 select-none font-mono text-[9px] uppercase tracking-label text-text-muted">
+        <sup className="ml-0.5 select-none font-mono text-[10px] uppercase tracking-label text-text-muted">
           sample
         </sup>
       </span>
@@ -79,7 +79,7 @@ export async function Placeholder({
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-1 -top-3 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-[9px] uppercase tracking-label text-brand-blue"
+        className="pointer-events-none absolute -right-1 -top-3 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-[10px] uppercase tracking-label text-brand-blue"
       >
         Placeholder
       </span>

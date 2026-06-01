@@ -90,8 +90,8 @@ export function OrgMembersPanel({
                 <span
                   className={
                     m.reviewEnabled
-                      ? "rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-label text-state-success"
-                      : "rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted"
+                      ? "rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-success"
+                      : "rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-muted"
                   }
                 >
                   {m.reviewEnabled ? labels.reviewEnabledBadge : labels.reviewDisabledBadge}

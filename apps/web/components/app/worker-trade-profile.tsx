@@ -136,7 +136,7 @@ export function WorkerTradeProfile({
                       <span className="block truncate text-sm font-semibold text-text-primary">
                         {d.name}
                       </span>
-                      <span className="block font-mono text-[9px] uppercase tracking-label text-text-muted">
+                      <span className="block font-mono text-[10px] uppercase tracking-label text-text-muted">
                         {d.isPrimary
                           ? t("primaryBadge")
                           : isActive

@@ -67,7 +67,7 @@ export async function ProfileCvClarityCard({
               {typeof done === "boolean" && (
                 <span
                   data-status={done ? "done" : "todo"}
-                  className={`shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label ${
+                  className={`shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label ${
                     done
                       ? "border-state-success/40 text-state-success"
                       : "border-state-warning/40 text-state-warning"
