@@ -15,6 +15,7 @@ import type {
 } from "@/components/app/cv-engagement-cards";
 import { type Role } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
+import { Link } from "@/lib/i18n/navigation";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -39,6 +40,7 @@ export default async function ProfilePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("skills");
+  const tSpaces = await getTranslations("spaces");
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
   const tRole = await getTranslations("auth.signup.role");
@@ -271,9 +273,18 @@ export default async function ProfilePage({
   return (
     <div className="flex flex-col gap-8">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+            {t("pageTitle")}
+          </h1>
+          <Link
+            href="/dashboard/account"
+            className="shrink-0 text-xs font-medium text-brand-blue hover:underline"
+            data-testid="room-my-spaces-link"
+          >
+            {tSpaces("mySpaces")} →
+          </Link>
+        </div>
         <p className="mt-2 text-sm text-text-secondary">
           {t("pageSubtitle")}
         </p>

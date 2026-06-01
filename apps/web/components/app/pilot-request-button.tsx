@@ -49,7 +49,9 @@ export function PilotRequestButton({
         size="sm"
         onClick={request}
         disabled={state === "sending"}
-        className="self-start"
+        // Mobile-first: the room's primary action is a full-width tap target on
+        // phones, compact on larger screens.
+        className="w-full sm:w-auto sm:self-start"
       >
         {state === "sending" ? t("sending") : t(`${key}.cta`)}
       </Button>

@@ -26,7 +26,12 @@ type Stage = { label: string; state: StageState };
  *  never a claim of live activity (DEMO_TO_REAL_DATA_POLICY). */
 function JourneyRail({ stages, label }: { stages: Stage[]; label: string }) {
   const last = stages.length - 1;
+  // Mobile-first room polish: on phones a row of N labelled circles reads like
+  // a compressed desktop stepper. Keep the circles, hide the per-step labels on
+  // mobile, and show one clear "current step" line instead.
+  const currentStage = stages.find((s) => s.state === "current") ?? stages[0];
   return (
+    <div className="flex flex-col gap-2">
     <nav aria-label={label} className="flex items-start">
       {stages.map((s, i) => {
         const leftActive = i > 0 && stages[i - 1].state === "done";
@@ -69,7 +74,7 @@ function JourneyRail({ stages, label }: { stages: Stage[]; label: string }) {
             </div>
             <span
               className={cn(
-                "mt-2 px-1 text-center font-mono text-[10px] uppercase leading-tight tracking-label",
+                "mt-2 hidden px-1 text-center font-mono text-[10px] uppercase leading-tight tracking-label sm:block",
                 s.state === "todo" ? "text-text-muted" : "text-text-secondary",
               )}
             >
@@ -79,6 +84,14 @@ function JourneyRail({ stages, label }: { stages: Stage[]; label: string }) {
         );
       })}
     </nav>
+      {/* Mobile-only current-step line — keeps the room focused, not crammed. */}
+      <p
+        className="text-center font-mono text-[10px] uppercase tracking-label text-text-secondary sm:hidden"
+        data-testid="journey-current-step"
+      >
+        {currentStage.label}
+      </p>
+    </div>
   );
 }
 

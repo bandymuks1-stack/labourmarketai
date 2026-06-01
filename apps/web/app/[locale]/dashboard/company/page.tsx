@@ -47,6 +47,7 @@ export default async function CompanyDashboardPage({
   await requireRoleOrRedirect(locale, "company");
 
   const t = await getTranslations("roleDashboards.company");
+  const tSpaces = await getTranslations("spaces");
   const tWorkers = await getTranslations("roleDashboards.company.workers");
   const existingDraft = await getPilotDraft("company_request");
 
@@ -275,9 +276,18 @@ export default async function CompanyDashboardPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-dashboard">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
-          {t("eyebrow")}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+            {t("eyebrow")}
+          </p>
+          <Link
+            href="/dashboard/account"
+            className="shrink-0 text-xs font-medium text-brand-blue hover:underline"
+            data-testid="room-my-spaces-link"
+          >
+            {tSpaces("mySpaces")} →
+          </Link>
+        </div>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("title")}
         </h1>
