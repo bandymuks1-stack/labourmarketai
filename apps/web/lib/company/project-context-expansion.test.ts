@@ -36,15 +36,18 @@ describe("no project write surface introduced by this slice", () => {
   // The project-context section markup must carry no create/edit/delete action.
   function projectContextRegion(src: string, anchor: string): string {
     const i = src.indexOf(anchor);
-    return i < 0 ? "" : src.slice(i, i + 1200);
+    return i < 0 ? "" : src.slice(i, i + 2200);
   }
-  it("journal project-context note has no create/edit/delete CTA", () => {
+  it("journal project-context note stays read-only (no create/edit/delete CTA)", () => {
     const region = projectContextRegion(journalPage, 'data-testid="journal-project-context"');
     expect(region).not.toMatch(/<form|<button|onClick|createProject|new project|sukurti projekt/i);
   });
-  it("company projects card has no create/edit/delete CTA", () => {
+  it("company projects card exposes ONLY the create-context link (no inline form/button/edit/delete)", () => {
     const region = projectContextRegion(companyPage, 'data-testid="company-ops-projects"');
-    expect(region).not.toMatch(/<form|<button|onClick|createProject|new project|sukurti projekt/i);
+    // The intended create entry point is a navigation Link to the gated route.
+    expect(region).toMatch(/data-testid="company-ops-projects-create"/);
+    // …and nothing mutates inline or offers edit/delete.
+    expect(region).not.toMatch(/<form|<button|onClick|editProject|deleteProject|delete project|remove project/i);
   });
   it("the read-only helper still performs no writes", () => {
     const helper = read("lib/company/project-context.ts");
