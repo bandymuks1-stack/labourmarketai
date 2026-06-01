@@ -90,6 +90,34 @@ describe("spaces stay separated", () => {
   });
 });
 
+describe("active /dashboard room shows only the current space (no cross-space soup)", () => {
+  const dashboard = read("app/[locale]/dashboard/page.tsx");
+  const account = read("app/[locale]/dashboard/account/page.tsx");
+  it("the active dashboard room renders NO all-roles catalogue as permanent content", () => {
+    expect(dashboard).not.toMatch(/<RoleCatalogueGrid\b/);
+    expect(dashboard).not.toMatch(/getVisibleRoleOptions/);
+  });
+  it("the active dashboard room renders NO generic future-module grid", () => {
+    expect(dashboard).not.toMatch(/<FeatureAvailabilityGrid\b/);
+  });
+  it("cross-space catalogue + module grid live under the My-spaces (account) surface", () => {
+    expect(account).toMatch(/data-testid="my-spaces"/);
+    expect(account).toMatch(/<RoleCatalogueGrid\b/);
+    expect(account).toMatch(/<FeatureAvailabilityGrid\b/);
+    expect(account).toMatch(/tSpaces\("mySpaces"\)/);
+  });
+  it("the active room keeps a compact switch handle into account, not the catalogue", () => {
+    expect(dashboard).toMatch(/href="\/dashboard\/account"/);
+  });
+});
+
+describe("space pages do not render other spaces' blocks by default", () => {
+  it("buyer space renders no personal-CV / company / agency space components", () => {
+    const buyer = read("app/[locale]/dashboard/buyer/page.tsx");
+    expect(buyer).not.toMatch(/ProfileCvClarityCard|RoleCatalogueGrid|CompanyWorkersSection|WorkerEvidenceCard|FeatureAvailabilityGrid/);
+  });
+});
+
 describe("no abstract identity framing, no internal tech text in space copy", () => {
   for (const [name, json] of [["lt", lt], ["en", en]] as const) {
     it(`${name} has no "kas esu operacijoje" / "operacijos vaidmuo" / "subjekto režimas"`, () => {

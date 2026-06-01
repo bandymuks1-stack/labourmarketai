@@ -3,12 +3,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PilotRequestButton } from "@/components/app/pilot-request-button";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
-import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
-import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
-import { getVisibleRoleOptions } from "@/lib/config/roles";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
@@ -263,11 +260,10 @@ export default async function DashboardOverviewPage({
           <DemandRequestsReadback result={demandReadback} labels={readbackLabels} />
         )}
 
-        {/* Same config-driven landscape as the worker dashboard (PR #36),
-            now DEMOTED into a compact "Coming later" section so the live
-            cockpit above stays dominant. Preparing cards carry no primary
-            open buttons (the grid gates CTAs on isFeatureActive). */}
-        <FeatureAvailabilityGrid comingLater />
+        {/* Room-based IA (PR #204 review): the all-roles catalogue and the
+            cross-space "coming later" module grid no longer live in the active
+            space. They moved to /dashboard/account → "Mano erdvės / My spaces",
+            so this room shows only what belongs to the current space. */}
       </div>
     );
   }
@@ -479,14 +475,10 @@ export default async function DashboardOverviewPage({
         </span>
       </Link>
 
-      {/* ── Role expansion (non-locking, catalogue-driven) ──
-          The card list is generated from `lib/config/roles.ts` via
-          `getVisibleRoleOptions()`. Active roles render a navigating
-          link; preparing roles render the `RUOŠIAMA` chip + reason
-          and never a broken CTA. Adding a future role is a one-row
-          change in the role catalogue. The small <Link> below stays
-          as the explicit "go manage roles" handle into account. */}
-      <RoleCatalogueGrid roles={getVisibleRoleOptions()} />
+      {/* Room-based IA (PR #204 review): the all-roles catalogue and the
+          cross-space "coming later" module grid moved OUT of this active
+          space into /dashboard/account → "Mano erdvės / My spaces". This
+          room keeps only a compact switch handle into that spaces surface. */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dashed border-ink-500 px-4 py-3">
         <p className="text-xs leading-relaxed text-text-muted">
           {tw("addMore.body")}
@@ -498,19 +490,6 @@ export default async function DashboardOverviewPage({
           {tw("addMore.cta")} →
         </Link>
       </div>
-
-      {/*  Config-driven "Coming later" surface (PR #36, demoted in the
-          ready-today cleanup): the central feature catalogue renders the
-          PREPARING features as a compact lower section with no primary
-          open buttons (the grid gates CTAs on isFeatureActive). Adding a
-          future feature is a one-row change in
-          lib/config/feature-availability.ts — no edits here. The active
-          surfaces (profile / journal / roles) already lead the page as
-          their own cards above, so they are not repeated here. */}
-      <FeatureAvailabilityGrid
-        comingLater
-        excludeKeys={["profile_text_first", "journal_text_first"]}
-      />
     </div>
   );
 }
