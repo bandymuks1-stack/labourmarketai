@@ -231,6 +231,25 @@ export default async function AccountPage({
           <h2 className="font-display text-base font-semibold text-text-primary">
             {tSpaces("mySpaces")}
           </h2>
+          {(() => {
+            const SPACE_KEY: Record<string, "profile" | "company" | "agency" | "buyer"> = {
+              worker: "profile",
+              company: "company",
+              agency: "agency",
+              customer: "buyer",
+            };
+            const key = profile?.active_role ? SPACE_KEY[profile.active_role] : undefined;
+            return key ? (
+              <p className="text-xs text-text-secondary" data-testid="my-spaces-current">
+                <span className="font-mono uppercase tracking-label text-text-muted">
+                  {tSpaces("current")}:
+                </span>{" "}
+                <span className="font-semibold text-text-primary">
+                  {tSpaces(`${key}.name`)}
+                </span>
+              </p>
+            ) : null;
+          })()}
           <p className="text-xs leading-relaxed text-text-secondary">
             {tSpaces("addSpace")}
           </p>

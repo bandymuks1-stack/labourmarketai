@@ -2,49 +2,71 @@
 
 **Provisional owner review before deploy. Final verdict after deploy.**
 
-> Note: the referenced spec file `docs/agent-goals/mobile-first-room-polish-v1.md`
-> was not present on disk. This slice executes the inline `/goal` directive:
-> after the room-based IA reset, each page must feel like one clear room on
-> mobile — current space + primary action + only that space's cards — not a
-> compressed desktop dashboard. CSS/layout only.
+The missing spec file was restored at
+`docs/agent-goals/mobile-first-room-polish-v1.md`. This slice broadens the
+polish across the five room routes and pins room separation with guards.
+CSS/layout + copy + guards only — no DB, no logic, no redesign.
 
-## Problem summary
-After PR #204 the dashboard is already a focused room, but two desktop-shaped
-elements still read as "compressed desktop" on a phone:
-1. the journey rail showed a row of 4 labelled circles — the uppercase,
-   letter-spaced labels cram under tiny circles on a narrow screen;
-2. the room's primary action (pilot CTA) was a small, left-aligned `size="sm"`
-   button — not an obvious mobile tap target.
+## Route-by-route mobile notes
 
-## Fix (CSS/layout only)
-1. **Journey rail (mobile):** per-step labels are now **hidden on mobile**
-   (`hidden … sm:block`); the circles remain, and a single **current-step line**
-   (`sm:hidden`, `data-testid="journey-current-step"`) is shown below — so the
-   phone shows one clear "you are here" step instead of 4 crammed labels.
-   Desktop (≥640px) is unchanged.
-2. **Primary action (mobile):** the pilot CTA is now **full-width on mobile**
-   (`w-full sm:w-auto sm:self-start`) — a clear primary tap target, compact at
-   sm+.
+### `/dashboard` (active space)
+- Journey rail: per-step labels **hidden on mobile**; circles + one clear
+  **current-step line** (`journey-current-step`). Desktop unchanged.
+- Primary action (pilot CTA): **full-width on phones**, compact at sm+.
+- Stays focused — **no all-roles catalogue, no future-module grid** (guard-enforced).
+- Current-space header kept.
 
-No structural/logic change: the rail still renders the same accessible
-`<nav aria-label>` over all stages; the button still does the same action.
+### `/dashboard/account` — "Mano erdvės / My spaces"
+- The single cross-space switcher/catalogue surface. The `my-spaces` section now
+  shows **current space** (`my-spaces-current` → active role's space name) →
+  **available / add space** (role catalogue) → **modules coming later**
+  (`FeatureAvailabilityGrid comingLater`, secondary + inactive-looking).
+- This is the only place the all-roles catalogue + future-module grid render
+  (guard-enforced).
 
-## Before → after (mobile)
-| Element | Before | After |
-|---|---|---|
-| Journey rail | 4 crammed uppercase labels under tiny circles | circles + one clear current-step line; labels return at ≥640px |
-| Primary CTA | small left-aligned button | full-width tap target on phones |
+### `/dashboard/buyer` — buyer / requests only
+- Renders **no** profile-CV / company / agency / catalogue blocks
+  (guard-enforced; the page imports none of those components).
+- Buyer copy uses **specialist / supplier / team** — **no "darbuotojo" / worker
+  purchase** wording (guard-enforced).
+- Header gains a **compact "Mano erdvės / My spaces" switch link** (`room-my-spaces-link`).
+
+### `/dashboard/company` — company work management
+- Renders **no** buyer-request blocks (no `BuyerRequestsSection` / customer-request
+  reads — guard-enforced). Keeps projects / teams / hiring / project-context.
+- Header gains the compact **My spaces** switch link.
+
+### `/dashboard/profile` — personal profile
+- Renders avatar / CV / skills / status surfaces only; **no** buyer / company /
+  agency / catalogue blocks (guard-enforced). The only cross-space element is the
+  **compact My-spaces switch link** in the header.
+
+## What was simplified
+- Mobile journey rail decluttered (labels → single current step).
+- Primary action made a clear full-width mobile tap target.
+- Every room now self-names + offers a single compact path to switch spaces,
+  with all cross-space content consolidated in `/dashboard/account`.
+
+## What remains future work
+- Deeper per-space mobile treatments (sticky primary action, per-room spacing
+  tokens), and a real per-space route/persistence model + company-as-buyer mode.
+  Flagged, not faked.
+
+## Guards (added/updated)
+- `room-separation.test.ts` (new): `/dashboard` has no catalogue/future-grid;
+  `/dashboard/account` is the only cross-space surface; buyer/company/profile
+  render none of the other spaces' blocks; each room has the compact switch link;
+  no worker-purchase / DB-RPC-schema text in buyer copy.
+- `mobile-first-room-polish.test.ts`: mobile journey labels hidden + current-step
+  line; primary CTA full-width on mobile.
 
 ## Routes affected
-- `/[locale]/dashboard` (journey rail; pilot primary CTA on the company/agency cockpit)
-
-## Known limitations
-- This is a targeted polish, not a redesign. Deeper per-space mobile treatments
-  (e.g. sticky primary action, per-room mobile spacing tokens) are future work.
+`/[locale]/dashboard`, `/dashboard/account`, `/dashboard/buyer`,
+`/dashboard/company`, `/dashboard/profile`.
 
 ## Validation
 typecheck ✓ · lint ✓ (pre-existing warning only) · build ✓ · full vitest
-**1378 passed / 100 files** ✓ · migration-safety **GREEN** · `git diff --check` clean.
+**1389 passed / 101 files** ✓ · migration-safety **GREEN** · `git diff --check` clean.
 
 ## Identifiers
 - Branch: `feat/cc/mobile-first-room-polish-v1`
