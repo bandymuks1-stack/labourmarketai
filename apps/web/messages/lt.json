@@ -543,8 +543,8 @@
         "countryPlaceholder": "Pvz., LT",
         "market": "Rinka / regionas",
         "marketPlaceholder": "Pvz., Baltijos / EU",
-        "needSummary": "Poreikio aprašymas",
-        "needSummaryHelp": "Trumpas paaiškinimas, ką ieškote. Neprivaloma. Saugoma kartu su profiliu.",
+        "needSummary": "Užklausos aprašymas",
+        "needSummaryHelp": "Trumpas paaiškinimas, ko ieškote. Neprivaloma. Saugoma kartu su profiliu.",
         "contactPreference": "Susisiekimo būdas",
         "contactPreferenceOptions": {
           "email": "El. paštas",
@@ -574,7 +574,7 @@
         "fieldTitle": "Pavadinimas",
         "fieldTitlePlaceholder": "pvz. Stogo dengėjai vasarai",
         "fieldTitleHelp": "Privaloma. 1-200 simbolių.",
-        "fieldNeedSummary": "Poreikio aprašymas",
+        "fieldNeedSummary": "Užklausos aprašymas",
         "fieldNeedSummaryPlaceholder": "Trumpas, ką ieškote.",
         "fieldCountry": "Šalis",
         "fieldCountryPlaceholder": "pvz. LT",
@@ -1078,8 +1078,8 @@
   "dashboard": {
     "comingLater": {
       "eyebrow": "Vėliau",
-      "title": "Vėliau įjungiamos galimybės",
-      "body": "Šios sritys ruošiamos ir bus įjungtos vėliau. Kol kas jos be veikiančių mygtukų."
+      "title": "Vėliau įjungiami moduliai",
+      "body": "Šios sritys ruošiamos ir bus įjungtos atskirais etapais. Kol kas jos nėra aktyvūs veiksmai."
     },
     "featuresHeading": {
       "eyebrow": "Galimybės ir ruošiama",
@@ -1511,10 +1511,10 @@
           },
           "company": {
             "eyebrow": "Veiklos pultas",
-            "c1": "Apibrėžkite poreikį",
+            "c1": "Apibrėžkite darbą",
             "c2": "Paruoškite kriterijus",
             "c3": "Peržiūrėkite tinkamumą",
-            "c4": "Pateikti poreikį"
+            "c4": "Sukurti darbo pasiūlymą"
           }
         },
         "startingPoint": "Tai tik jūsų pradžios taškas. Vėliau galėsite pridėti daugiau veiklų, rolių, įmonių, komandų, projektų ar galimybių.",
@@ -1568,12 +1568,21 @@
           "p3": "Pasiūlykite savo paslaugas rinkai."
         },
         "pilot": {
-          "title": "Pasakykite, ko jums reikia",
-          "body": "Aprašykite, ko ieškote. Užklausa iškart išsaugoma ir matoma jūsų erdvėje — esate pirmas, todėl viskas, ką sukuriate, yra realu.",
-          "cta": "Pateikti poreikį",
           "sending": "Siunčiama...",
-          "done": "Išsaugota. Jūsų poreikis matomas jūsų erdvėje.",
-          "error": "Nepavyko išsiųsti. Bandykite dar kartą."
+          "error": "Nepavyko išsiųsti. Bandykite dar kartą.",
+          "progressHelper": "Šie žingsniai rodo eigą. Aktyvūs veiksmai pateikiami žemiau.",
+          "hire": {
+            "title": "Ieškoti darbuotojo ar komandos",
+            "body": "Aprašykite, kokio darbuotojo ar komandos reikia jūsų darbui. Užklausa iškart išsaugoma ir lieka privati.",
+            "cta": "Sukurti darbo pasiūlymą",
+            "done": "Išsaugota. Jūsų darbo pasiūlymas matomas jūsų erdvėje."
+          },
+          "partner": {
+            "title": "Pasiūlykite kandidatą ar komandą",
+            "body": "Aprašykite, kokius kandidatus ar paslaugas siūlote. Pasiūlymas iškart išsaugomas ir lieka privatus.",
+            "cta": "Siūlyti kandidatą ar komandą",
+            "done": "Išsaugota. Jūsų pasiūlymas matomas jūsų erdvėje."
+          }
         }
       },
       "greeting": "Sveiki, {name}",
@@ -1586,10 +1595,10 @@
         "account": "Mano paskyra"
       },
       "chainActions": {
-        "buyerTitle": "Jūsų poreikių erdvė",
-        "buyerSubtitle": "Atverkite poreikių erdvę, kad sukurtumėte, papildytumėte ir sektumėte savo poreikius.",
-        "buyerRequests": "Tvarkyti poreikius",
-        "buyerRequestsDesc": "Sukurkite ar papildykite poreikį ir sekite jo būseną.",
+        "buyerTitle": "Pirkėjo užklausos",
+        "buyerSubtitle": "Sukurkite ir sekite savo užklausas — ko ieškote rinkoje (prekės, paslaugos, darbuotojo ar komandos).",
+        "buyerRequests": "Mano užklausos",
+        "buyerRequestsDesc": "Sukurkite ar papildykite užklausą ir sekite jos būseną.",
         "title": "Darbo žurnalo peržiūros grandinė",
         "subtitle": "Pradėkite čia: pakvieskite darbuotoją, įjunkite peržiūrą ir peržiūrėkite jo įrašus.",
         "inviteWorker": "Pakviesti darbuotoją",

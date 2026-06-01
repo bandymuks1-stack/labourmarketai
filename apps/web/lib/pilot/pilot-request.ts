@@ -63,7 +63,13 @@ export async function submitPilotRequest(
     {
       p_kind: kind,
       p_title: title,
-      p_need_summary: "Demand submitted from the dashboard.",
+      // LT need-summary (p_original_language is "lt") — intent-specific so the
+      // saved request never shows an English fallback on the LT UI, and a
+      // company hiring request reads as hiring, not a generic buyer "need".
+      p_need_summary:
+        intent === "partner"
+          ? "Kandidatų ar paslaugų pasiūla, pateikta iš skydelio."
+          : "Darbuotojų ar komandos paieška, pateikta iš skydelio.",
       p_payload: { source: "dashboard_demand", intent },
       p_original_language: "lt",
     },

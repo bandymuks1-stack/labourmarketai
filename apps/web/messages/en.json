@@ -543,7 +543,7 @@
         "countryPlaceholder": "e.g. LT",
         "market": "Market / region",
         "marketPlaceholder": "e.g. Baltic / EU",
-        "needSummary": "Need summary",
+        "needSummary": "Request summary",
         "needSummaryHelp": "Brief description of what you're looking for. Optional. Saved with the profile.",
         "contactPreference": "Contact preference",
         "contactPreferenceOptions": {
@@ -574,7 +574,7 @@
         "fieldTitle": "Title",
         "fieldTitlePlaceholder": "e.g. Roofers for summer",
         "fieldTitleHelp": "Required. 1-200 characters.",
-        "fieldNeedSummary": "Need summary",
+        "fieldNeedSummary": "Request summary",
         "fieldNeedSummaryPlaceholder": "Briefly what you are looking for.",
         "fieldCountry": "Country",
         "fieldCountryPlaceholder": "e.g. LT",
@@ -1078,8 +1078,8 @@
   "dashboard": {
     "comingLater": {
       "eyebrow": "Later",
-      "title": "Coming later",
-      "body": "These areas are being prepared and will be enabled later. For now they have no working buttons."
+      "title": "Modules coming later",
+      "body": "These areas are being prepared and will be enabled in separate stages. They are not active actions yet."
     },
     "featuresHeading": {
       "eyebrow": "What's here and what's coming",
@@ -1511,10 +1511,10 @@
           },
           "company": {
             "eyebrow": "Activity cockpit",
-            "c1": "Define need",
+            "c1": "Define the work",
             "c2": "Prepare criteria",
             "c3": "Review fit",
-            "c4": "Submit your need"
+            "c4": "Create job request"
           }
         },
         "startingPoint": "This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
@@ -1568,12 +1568,21 @@
           "p3": "Offer your services to the market."
         },
         "pilot": {
-          "title": "Tell us what you need",
-          "body": "Describe what you're looking for. Your request is saved and visible in your space right away — you're first here, so everything you create is real.",
-          "cta": "Submit your need",
           "sending": "Sending...",
-          "done": "Saved. Your need is now visible in your space.",
-          "error": "Couldn't send. Please try again."
+          "error": "Couldn't send. Please try again.",
+          "progressHelper": "These steps show progress. Active actions are shown below.",
+          "hire": {
+            "title": "Find a worker or team",
+            "body": "Describe what worker or team your company needs. Your request is saved and stays private.",
+            "cta": "Create job request",
+            "done": "Saved. Your job request is now visible in your space."
+          },
+          "partner": {
+            "title": "Offer a candidate or team",
+            "body": "Describe which candidates or services you offer. Your offer is saved and stays private.",
+            "cta": "Offer a candidate or team",
+            "done": "Saved. Your offer is now visible in your space."
+          }
         }
       },
       "greeting": "Welcome back, {name}",
@@ -1586,10 +1595,10 @@
         "account": "My account"
       },
       "chainActions": {
-        "buyerTitle": "Your requests workspace",
-        "buyerSubtitle": "Open your requests workspace to create, complete and track your demand.",
-        "buyerRequests": "Manage your requests",
-        "buyerRequestsDesc": "Create or complete a request and track its status.",
+        "buyerTitle": "Buyer requests",
+        "buyerSubtitle": "Create and track your requests — what you're looking for in the marketplace (product, service, worker, or team).",
+        "buyerRequests": "My requests",
+        "buyerRequestsDesc": "Create or update a request and track its status.",
         "title": "Work-journal review chain",
         "subtitle": "Start here: invite a worker, enable review, and review their entries.",
         "inviteWorker": "Invite a worker",

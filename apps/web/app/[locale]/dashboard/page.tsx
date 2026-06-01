@@ -149,6 +149,9 @@ export default async function DashboardOverviewPage({
   // ── Company / agency / customer: operating cockpit (define → submit need) ──
   if (role !== "worker") {
     const intent = role === "agency" ? "partner" : "hire_workers";
+    // Intent-specific pilot copy: a company hiring sees hiring language, an
+    // agency sees candidate-supply language — never a generic buyer "need".
+    const pilotKey = intent === "hire_workers" ? "hire" : "partner";
     // Slice 1 — demand read-back for the org's own submitted requests
     // (company/agency only; the customer/buyer role has its own detailed
     // requests surface on /dashboard/buyer). Honest status only — no matching.
@@ -198,6 +201,9 @@ export default async function DashboardOverviewPage({
         {StartingPoint}
 
         <JourneyRail stages={stages} label={tf("company.eyebrow")} />
+        <p className="text-[11px] leading-relaxed text-text-muted" data-testid="journey-progress-helper">
+          {tw("pilot.progressHelper")}
+        </p>
 
         {/* Cinematic cockpit panel */}
         <section className="card-border wow-card flex flex-col gap-5 p-6 sm:p-8">
@@ -242,10 +248,10 @@ export default async function DashboardOverviewPage({
               {tf("company.c4")}
             </span>
             <h3 className="font-display text-base font-semibold text-text-primary">
-              {tw("pilot.title")}
+              {tw(`pilot.${pilotKey}.title`)}
             </h3>
             <p className="mb-3 mt-1 text-sm leading-relaxed text-text-secondary">
-              {tw("pilot.body")}
+              {tw(`pilot.${pilotKey}.body`)}
             </p>
             <PilotRequestButton intent={intent} />
           </div>
@@ -370,6 +376,9 @@ export default async function DashboardOverviewPage({
       <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
 
       <JourneyRail stages={wstages} label={tf("worker.eyebrow")} />
+      <p className="text-[11px] leading-relaxed text-text-muted" data-testid="journey-progress-helper">
+        {tw("pilot.progressHelper")}
+      </p>
 
       {/* ── Next move — one cinematic, guided action ── */}
       <section className="card-border wow-card flex flex-col gap-3 p-6 sm:p-7">

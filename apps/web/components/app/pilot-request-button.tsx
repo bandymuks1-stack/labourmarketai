@@ -18,6 +18,8 @@ export function PilotRequestButton({
   intent: "hire_workers" | "partner";
 }) {
   const t = useTranslations("auth.dashboard.wow.pilot");
+  // Intent-specific copy: company hiring is NOT a generic buyer "need".
+  const key = intent === "hire_workers" ? "hire" : "partner";
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">(
     "idle",
   );
@@ -35,7 +37,7 @@ export function PilotRequestButton({
   if (state === "done") {
     return (
       <p className="text-sm text-state-success" role="status">
-        {t("done")}
+        {t(`${key}.done`)}
       </p>
     );
   }
@@ -49,7 +51,7 @@ export function PilotRequestButton({
         disabled={state === "sending"}
         className="self-start"
       >
-        {state === "sending" ? t("sending") : t("cta")}
+        {state === "sending" ? t("sending") : t(`${key}.cta`)}
       </Button>
       {state === "error" && (
         <p className="text-xs text-state-danger" role="alert">
