@@ -196,8 +196,8 @@
       "workersBlocker": {
         "title": "Įmonės darbuotojų sąsaja — laukia migracijos",
         "subtitle": "Įmonės kelias laikinai blokuotas DB lygmenyje. Realus darbuotojų pridėjimas / pakvietimas jau veikia agentūros pusėje.",
-        "statusLabel": "Trūksta lentelės public.company_workers + invitations RPC",
-        "statusBody": "Schemoje šiandien yra tik public.agency_workers + 0025 migracija public.agency_worker_invitations. Įmonės atitikmuo dar nesukurtas. Sekanti migracija (planuojama 0026): public.company_workers (company_id, worker_id, status, …) + RLS pagal owns_company() + RPC invite_company_worker().",
+        "statusLabel": "Funkcija dar nepasiekiama",
+        "statusBody": "Įmonės darbuotojų valdymas dar ruošiamas ir bus įjungtas vėliau.",
         "nextStep": "Iki tol naudokitės agentūros sąsaja arba palaukite, kol bus paleista 0026 migracija. Savaiminis užsiregistravimas darbuotojams lieka atviras visada."
       },
       "workers": {
@@ -311,7 +311,7 @@
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
         "statusNoCompany": "Pirmiausia užbaikite įmonės nustatymą per /dashboard/start/company.",
         "migrationBlockerHeading": "Reikia migracijos 0027_company_workers",
-        "migrationBlockerBody": "Įmonės darbuotojų lentelė + RPC dar nepritaikyti production DB. Savininkas turi pritaikyti supabase/migrations/0027_company_workers.sql per Supabase SQL Editor arba MCP apply_migration. Po pritaikymo forma veikia be jokių kodo pakeitimų.",
+        "migrationBlockerBody": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
         "columnInvitedAt": "Data"
@@ -479,7 +479,7 @@
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
         "statusNoAgency": "Pirmiausia užbaikite agentūros nustatymą per /dashboard/start/agency.",
         "migrationBlockerHeading": "Reikia migracijos 0025_agency_worker_invitations",
-        "migrationBlockerBody": "Pakvietimų lentelė ir RPC dar nepritaikytos production DB. Savininkas turi pritaikyti supabase/migrations/0025_agency_worker_invitations.sql per Supabase SQL Editor arba MCP apply_migration. Po pritaikymo forma veikia be jokių kodų pakeitimų.",
+        "migrationBlockerBody": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
         "columnInvitedAt": "Data"
@@ -528,10 +528,10 @@
       "profileLink": "Mano gebėjimai",
       "setup": {
         "formTitle": "Pirkėjo profilis",
-        "formSubtitle": "Šie laukai išsaugomi į public.customers per save_customer_setup RPC. Idempotentinis: pakartotinai pateikus, atnaujinami tik tie laukai, kuriuos pakeitėte.",
+        "formSubtitle": "Šie duomenys saugomi jūsų paskyroje. Juos galite keisti vėliau.",
         "existingHeading": "Pirkėjo profilis pradėtas",
         "contactName": "Kontaktinio asmens vardas / įmonės etiketė",
-        "contactNameHelp": "Privaloma. 2-200 simbolių. Tampa public.customers.contact_name reikšme.",
+        "contactNameHelp": "Privaloma. 2–200 simbolių.",
         "customerType": "Tipas",
         "customerTypeOptions": {
           "individual": "Asmuo",
@@ -555,11 +555,11 @@
         "manualReviewNoteHelp": "Neprivaloma. Operatoriaus / administratoriaus akimis matoma pastaba.",
         "submit": "Išsaugoti pirkėjo profilį",
         "statusSaved": "Pirkėjo profilis išsaugotas tikrai. Atidarykite puslapį iš naujo — duomenys lieka.",
-        "statusNeedsMigration": "Reikia migracijos 0026_customer_entity — public.customers lentelė ir save_customer_setup RPC dar nepritaikyti production DB. Savininkas turi pritaikyti supabase/migrations/0026_customer_entity.sql per Supabase SQL Editor arba MCP apply_migration.",
+        "statusNeedsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
         "statusInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
-        "migrationBlockerHeading": "Reikia migracijos 0026_customer_entity",
-        "migrationBlockerBody": "Pirkėjo lentelė + save_customer_setup RPC dar nepritaikyti production DB. Forma matoma, bet nepateikiama. Po migracijos pritaikymo forma veikia be jokių kodo pakeitimų.",
+        "migrationBlockerHeading": "Funkcija dar nepasiekiama",
+        "migrationBlockerBody": "Forma matoma, bet kol kas nepateikiama. Pabandykite vėliau.",
         "reviewStatus": "Peržiūros būsena"
       },
       "requests": {
@@ -570,7 +570,7 @@
         "emptyStateHeading": "Dar nėra pirkėjo užklausų — sukurkite užklausą",
         "emptyStateBody": "Užpildykite formą žemiau. Galite išsaugoti kaip juodraštį arba iškart pateikti rankinei peržiūrai.",
         "newRequestHeading": "Nauja užklausa",
-        "newRequestSubtitle": "Šie laukai išsaugomi į public.customer_requests per save_customer_request RPC. RLS riboja matomumą tik jūsų paskyrai ir administratoriui.",
+        "newRequestSubtitle": "Šie duomenys saugomi jūsų paskyroje ir matomi tik jums. Juos galite keisti vėliau.",
         "fieldTitle": "Pavadinimas",
         "fieldTitlePlaceholder": "pvz. Stogo dengėjai vasarai",
         "fieldTitleHelp": "Privaloma. 1-200 simbolių.",
@@ -598,14 +598,14 @@
         "statusHelp": "Pasirinkimas tarp juodraščio ir pateikimo. Toliau būsenas keičia tik administratorius (in_review / approved / closed).",
         "submit": "Išsaugoti užklausą",
         "resultSaved": "Užklausa išsaugota. Perkrovus puslapį ji liks matoma.",
-        "resultNeedsMigration": "Reikia migracijos 0028_customer_requests. Savininkas turi pritaikyti supabase/migrations/0028_customer_requests.sql per Supabase SQL Editor arba MCP apply_migration.",
+        "resultNeedsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
         "resultInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
         "resultError": "Įvyko klaida. Pabandykite dar kartą.",
         "columnTitle": "Pavadinimas",
         "columnStatus": "Būsena",
         "columnUpdated": "Atnaujinta",
-        "migrationBlockerHeading": "Reikia migracijos 0028_customer_requests",
-        "migrationBlockerBody": "public.customer_requests lentelė ir save_customer_request RPC dar nepritaikyti production DB. Forma matoma, bet nepateikiama. Po migracijos pritaikymo veikia be jokių kodo pakeitimų.",
+        "migrationBlockerHeading": "Funkcija dar nepasiekiama",
+        "migrationBlockerBody": "Forma matoma, bet kol kas nepateikiama. Pabandykite vėliau.",
         "attachments": {
           "heading": "Pridėti failai",
           "empty": "Dar nėra pridėtų failų. Galite pridėti planą, receptą, graviravimo tekstą, nuotrauką ar specifikaciją.",
@@ -983,7 +983,7 @@
     "preparingReason": {
       "default": "Šis vaidmuo dar ruošiamas. Įjungsime jį, kai bus paruoštas saugiai.",
       "startAvailable": "Nustatymo kelias jau veikia: vienu lauku įrašai pavadinimą, ir paskyra realiai išsaugoma DB. Pilnas darbo erdvės sluoksnis vis dar pildomas.",
-      "customerPartial": "Trūksta pirmaeilės public.customers lentelės — pirkėjo entitetas dar nesukurtas DB lygmenyje (M3 etapas). Galite pridėti customer vaidmenį ir pildyti užklausą."
+      "customerPartial": "Pirkėjo erdvė dar ruošiama. Galite pridėti pirkėjo vaidmenį ir pildyti užklausą."
     },
     "worker": {
       "description": "Darbuotojas: text-first profilis, įgūdžiai ir darbo dienoraštis. Aktyvu šiandien."
@@ -2311,7 +2311,7 @@
       "loadError": "Nepavyko užkrauti pokalbių: {msg}",
       "unnamed": "(be temos)",
       "createdBy": "Sukūrė: {id}…",
-      "footnote": "Tik administratoriai mato šį sąrašą. RLS riboja SELECT iki participants OR is_admin().",
+      "footnote": "Šį sąrašą mato tik administratoriai.",
       "joinHint": "Esate administratorius, bet dar ne šio pokalbio dalyvis. Prisijunkite, kad galėtumėte atsakyti.",
       "joinLabel": "Prisijungti prie pokalbio",
       "joinPending": "Jungiamasi..."
@@ -2330,23 +2330,23 @@
     "step": {
       "about": {
         "label": "Apie mane / patirtis",
-        "body": "Trumpas, paties parašytas pristatymas. Niekas jo automatiškai netikrina ir nepublikuoja viešai."
+        "body": "Trumpas, paties parašytas prisistatymas. Viešai nerodomas, kol nepasirenki."
       },
       "skills": {
         "label": "Įgūdžiai",
-        "body": "Įgūdžių etiketės, kurias pasirenki pats. Jos rodomos tik tau ir adminui — darbdaviams neatskleidžiamos, kol nenuspręsi kitaip."
+        "body": "Pasirinktos įgūdžių etiketės. Matomos tik tau ir adminui."
       },
       "journal": {
         "label": "Darbo žurnalas",
-        "body": "Realių pamainų ir užduočių įrašai. Pridedamas tik nauji įrašai — istorija nekeičiama. Tai pats stipriausias signalas apie tavo patirtį."
+        "body": "Realių pamainų ir užduočių įrašai. Istorija nekeičiama — stipriausias patirties signalas."
       },
       "selfDeclared": {
         "label": "Kas paties nurodyta",
-        "body": "Viskas, ką įrašei pats (kalbos, dokumentai, ankstesnis darbas) yra paties pareikšti faktai. Sistema jų nepatvirtina automatiškai ir nesako, kad esi „verifikuotas“."
+        "body": "Tavo paties nurodyti faktai. Sistema jų automatiškai netikrina."
       },
       "awaitingProof": {
         "label": "Kas laukia įrodymų / išorinio patvirtinimo",
-        "body": "Įgūdžiai ar darbo pasiekimai, kuriems reikia darbdavio ar institucijos patvirtinimo, lieka pažymėti kaip „laukia įrodymo“. Jokio netikro dirbtinio intelekto sugeneruoto patvirtinimo ar „Verified“ ženklelio nebus."
+        "body": "Pasiekimai, kuriems reikia darbdavio ar institucijos patvirtinimo. Jokių netikrų „Verified“ ženklelių."
       }
     },
     "footnote": "Jei sistema kažko nežino — ji apie tai pasako. Mes neslepiame neaiškumo už dirbtinio pasitikėjimo."

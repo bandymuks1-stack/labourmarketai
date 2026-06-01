@@ -196,8 +196,8 @@
       "workersBlocker": {
         "title": "Company workers link — waiting on a migration",
         "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",
-        "statusLabel": "Missing table public.company_workers + invitations RPC",
-        "statusBody": "The schema today carries only public.agency_workers + the 0025 migration public.agency_worker_invitations. The company equivalent is not yet created. Next planned migration 0026: public.company_workers (company_id, worker_id, status, …) + RLS via owns_company() + RPC invite_company_worker().",
+        "statusLabel": "Feature not available yet",
+        "statusBody": "Company worker management is still being prepared and will be enabled later.",
         "nextStep": "Until then use the agency surface, or wait for the 0026 migration. Self-entry for workers stays open at all times."
       },
       "workers": {
@@ -311,7 +311,7 @@
         "statusError": "Something went wrong. Please try again.",
         "statusNoCompany": "Finish company setup first at /dashboard/start/company.",
         "migrationBlockerHeading": "Migration 0027_company_workers required",
-        "migrationBlockerBody": "The company workers table + RPC are not yet applied to production DB. The owner must apply supabase/migrations/0027_company_workers.sql via Supabase SQL Editor or MCP apply_migration. After it lands the form works end-to-end with no code change.",
+        "migrationBlockerBody": "This feature is not available yet. Please try later.",
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date"
@@ -479,7 +479,7 @@
         "statusError": "Something went wrong. Please try again.",
         "statusNoAgency": "Finish agency setup first at /dashboard/start/agency.",
         "migrationBlockerHeading": "Migration 0025_agency_worker_invitations required",
-        "migrationBlockerBody": "The invitations table and RPC are not applied to production yet. The owner must apply supabase/migrations/0025_agency_worker_invitations.sql via Supabase SQL Editor or MCP apply_migration. After it lands the form works end-to-end with no code change.",
+        "migrationBlockerBody": "This feature is not available yet. Please try later.",
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date"
@@ -528,10 +528,10 @@
       "profileLink": "My capabilities",
       "setup": {
         "formTitle": "Buyer profile",
-        "formSubtitle": "These fields persist to public.customers via the save_customer_setup RPC. Idempotent: resubmitting only updates the fields you changed.",
+        "formSubtitle": "These details are saved to your account. You can update them later.",
         "existingHeading": "Buyer profile started",
         "contactName": "Contact name / company label",
-        "contactNameHelp": "Required. 2-200 chars. Becomes public.customers.contact_name.",
+        "contactNameHelp": "Required. 2–200 characters.",
         "customerType": "Type",
         "customerTypeOptions": {
           "individual": "Individual",
@@ -555,11 +555,11 @@
         "manualReviewNoteHelp": "Optional. Visible to the operator / admin.",
         "submit": "Save buyer profile",
         "statusSaved": "Buyer profile saved for real. Reload the page — the data remains.",
-        "statusNeedsMigration": "Migration 0026_customer_entity required — public.customers table and save_customer_setup RPC are not yet applied to production DB. The owner must apply supabase/migrations/0026_customer_entity.sql via Supabase SQL Editor or MCP apply_migration.",
+        "statusNeedsMigration": "This feature is not available yet. Please try later.",
         "statusInvalid": "Form incomplete. Check required fields.",
         "statusError": "Something went wrong. Please try again.",
-        "migrationBlockerHeading": "Migration 0026_customer_entity required",
-        "migrationBlockerBody": "The buyer table + save_customer_setup RPC are not yet applied to production DB. Form is visible but submit returns the migration blocker. After applying the migration the form works end-to-end with no code change.",
+        "migrationBlockerHeading": "Feature not available yet",
+        "migrationBlockerBody": "The form is visible but cannot be submitted yet. Please try later.",
         "reviewStatus": "Review status"
       },
       "requests": {
@@ -570,7 +570,7 @@
         "emptyStateHeading": "No buyer requests yet — create a request",
         "emptyStateBody": "Fill the form below. You can save as a draft or submit straight to manual review.",
         "newRequestHeading": "New request",
-        "newRequestSubtitle": "These fields persist to public.customer_requests via save_customer_request. RLS limits visibility to you + admin.",
+        "newRequestSubtitle": "These details are saved to your account and visible only to you. You can update them later.",
         "fieldTitle": "Title",
         "fieldTitlePlaceholder": "e.g. Roofers for summer",
         "fieldTitleHelp": "Required. 1-200 characters.",
@@ -598,14 +598,14 @@
         "statusHelp": "You choose draft vs submit. Further statuses (in_review / approved / closed) are admin-only.",
         "submit": "Save request",
         "resultSaved": "Request saved. It will remain visible after reload.",
-        "resultNeedsMigration": "Migration 0028_customer_requests required. Owner must apply supabase/migrations/0028_customer_requests.sql via Supabase SQL Editor or MCP apply_migration.",
+        "resultNeedsMigration": "This feature is not available yet. Please try later.",
         "resultInvalid": "Form incomplete. Check required fields.",
         "resultError": "Something went wrong. Please try again.",
         "columnTitle": "Title",
         "columnStatus": "Status",
         "columnUpdated": "Updated",
-        "migrationBlockerHeading": "Migration 0028_customer_requests required",
-        "migrationBlockerBody": "public.customer_requests + save_customer_request RPC are not applied to production DB yet. Form is visible but submit returns the migration blocker. After applying it works end-to-end with no code change.",
+        "migrationBlockerHeading": "Feature not available yet",
+        "migrationBlockerBody": "The form is visible but cannot be submitted yet. Please try later.",
         "attachments": {
           "heading": "Attached files",
           "empty": "No files attached yet. You can attach a plan, recipe, engraving text, photo or specification.",
@@ -983,7 +983,7 @@
     "preparingReason": {
       "default": "This role is still being prepared. We'll enable it once it can ship honestly.",
       "startAvailable": "The setup path already works: one field, the legal name, and your row is saved in the DB for real. The full workspace surface is still being filled out.",
-      "customerPartial": "The first-class public.customers table is missing — the buyer entity is not yet at the DB level (M3 scope). You can add the customer role and fill the request."
+      "customerPartial": "The buyer space is still being prepared. You can add the buyer role and fill in a request."
     },
     "worker": {
       "description": "Worker: text-first profile, skills, and work journal. Active today."
@@ -2311,7 +2311,7 @@
       "loadError": "Could not load conversations: {msg}",
       "unnamed": "(no subject)",
       "createdBy": "Created by: {id}…",
-      "footnote": "Admins only. RLS scopes SELECT to participants OR is_admin().",
+      "footnote": "Admins only.",
       "joinHint": "You're an admin but not yet a participant of this thread. Join to reply.",
       "joinLabel": "Join conversation",
       "joinPending": "Joining..."
@@ -2330,23 +2330,23 @@
     "step": {
       "about": {
         "label": "About me / experience",
-        "body": "A short self-written intro. Nothing checks or publishes it automatically."
+        "body": "A short, self-written intro. Not shown publicly unless you choose to share it."
       },
       "skills": {
         "label": "Skills",
-        "body": "Self-chosen skill labels. Visible only to you and the admin — never exposed to employers until you decide otherwise."
+        "body": "Self-chosen skill labels. Visible only to you and the admin."
       },
       "journal": {
         "label": "Work journal",
-        "body": "Real shifts and tasks you log. Entries are append-only — history is never rewritten. This is the strongest signal about your experience."
+        "body": "Real shifts and tasks you log. History is never rewritten — your strongest experience signal."
       },
       "selfDeclared": {
         "label": "What you declared yourself",
-        "body": "Everything you typed yourself (languages, documents, prior employers) is a self-declared fact. The system does not auto-confirm it or call you 'verified'."
+        "body": "Facts you typed yourself. The system does not auto-confirm them."
       },
       "awaitingProof": {
         "label": "What is awaiting proof / external confirmation",
-        "body": "Skills or achievements that need an employer or institution to confirm them stay marked 'awaiting proof'. There will be no fake 'AI confirmed' or 'Verified' badge."
+        "body": "Achievements that need an employer or institution to confirm them. No fake 'Verified' badges."
       }
     },
     "footnote": "If the system does not know something — it says so. We do not hide uncertainty behind fake confidence."

@@ -55,10 +55,12 @@ export async function ProfileCvClarityCard({
           return (
             <li
               key={key}
-              className="flex items-baseline gap-3"
+              // Mobile: stacked card (label → body → status) so the columns
+              // never collapse into unreadable narrow strips. sm+: original row.
+              className="flex flex-col gap-1 rounded-md border border-border/40 p-2.5 sm:flex-row sm:items-baseline sm:gap-3 sm:rounded-none sm:border-0 sm:p-0"
               data-testid={`profile-cv-step-${key}`}
             >
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted sm:shrink-0">
                 {t(`step.${key}.label`)}
               </span>
               <span className="flex-1 text-text-secondary">
@@ -67,7 +69,7 @@ export async function ProfileCvClarityCard({
               {typeof done === "boolean" && (
                 <span
                   data-status={done ? "done" : "todo"}
-                  className={`shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+                  className={`w-fit shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label ${
                     done
                       ? "border-state-success/40 text-state-success"
                       : "border-state-warning/40 text-state-warning"
