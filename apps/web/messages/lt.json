@@ -838,6 +838,7 @@
       "inspect": "Tikrinti →"
     },
     "hub": {
+      "projectTruth": "Projekto tiesa · P0",
       "agentOs": "Agentų OS",
       "telemetry": "Operacijų telemetrija",
       "languageFeedback": "Kalbos pranešimai",

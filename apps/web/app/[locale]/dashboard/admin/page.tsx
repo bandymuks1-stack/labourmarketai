@@ -154,7 +154,7 @@ export default async function AdminDashboardPage({
           className="rounded-md border border-brand-orange/60 px-4 py-2 text-xs font-medium text-brand-orange hover:border-brand-orange hover:text-text-primary"
           data-testid="admin-tools-hub-project-truth"
         >
-          Project truth · P0
+          {t("hub.projectTruth")}
         </Link>
         <Link
           href="/dashboard/admin/agent-os"

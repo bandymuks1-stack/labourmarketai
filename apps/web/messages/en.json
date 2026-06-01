@@ -838,6 +838,7 @@
       "inspect": "Inspect →"
     },
     "hub": {
+      "projectTruth": "Project truth · P0",
       "agentOs": "Agent OS",
       "telemetry": "Operations telemetry",
       "languageFeedback": "Language reports",
