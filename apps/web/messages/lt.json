@@ -45,6 +45,32 @@
     "empty": "Kol kas nėra įgūdžių ar darbo įrašų. Pridėkite įgūdžių arba parašykite žurnalo įrašą.",
     "footnote": "Įgūdžiai gali būti paties nurodyti, įrodyti sistemos veikla arba patvirtinti vadovo. Sistema nieko nepatvirtina automatiškai."
   },
+  "profileHub": {
+    "eyebrow": "Profesinis profilis",
+    "lead": "CV, įgūdžiai ir darbo įrodymai vienoje vietoje.",
+    "explainer": "Įgūdžiai gali būti savarankiškai nurodyti, paremti CV arba darbo žurnalo įrašais.",
+    "notVerified": "Dar nepatvirtinta žmogaus ar dokumentais.",
+    "primaryAction": "Papildyti profilį",
+    "journalLink": "Darbo žurnalas",
+    "pillars": {
+      "cv": {
+        "label": "CV",
+        "yes": "Pateiktas",
+        "no": "Nepateiktas"
+      },
+      "skills": {
+        "label": "Įgūdžiai",
+        "count": "Savarankiškai nurodyta: {n}",
+        "none": "Dar nenurodyta"
+      },
+      "journal": {
+        "label": "Darbo įrodymai",
+        "available": "Žurnalo įrašai: {n}",
+        "none": "Dar nesusieta",
+        "preparing": "Darbo įrodymų ryšys ruošiamas"
+      }
+    }
+  },
   "reviewReport": {
     "title": "Peržiūros ataskaita",
     "print": "Spausdinti",
