@@ -16,7 +16,7 @@ Tests under this folder are run by `pnpm -F web test` (vitest picks up
 | No misleading AI / verification / automation claims in `apps/web/messages/*.json`. | TASK rule §5–§8 — no fake AI, no fake verified, no auto-approval. |
 | `ProfileTextFirstFlow` renders **before** the manual chip picker on the profile page. | TASK acceptance — manual selection is the secondary path, never the first one. |
 | Journal composer's first labelled field uses the `whatDidYouDo` key. | TASK acceptance — first action is text, not taxonomy. |
-| Account roles list references the `preview_workspace` (`RUOŠIAMA`) tag. | TASK acceptance — inactive roles are honestly labelled. |
+| Account roles list reads status from the single source `roleStatusChipKey`; no blanket `preview_workspace` tag, and `admin` is never "Ruošiama". | Canonical-paths sprint — one status vocabulary, admin honestly labelled (see `canonical-paths-integrity.test.ts`). |
 | Dashboard `<main>` keeps the bottom safe-spacing class. | Mobile UX §3-§4 — bottom nav doesn't cover CTAs. |
 | The PR #30 smoke checklist stays `Status: PENDING` until manually flipped. | TASK §11 — production smoke is owner-only. |
 
