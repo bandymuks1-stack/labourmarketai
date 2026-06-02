@@ -52,14 +52,14 @@
   },
   "profileHub": {
     "eyebrow": "Profesinis profilis",
-    "lead": "CV, įgūdžiai ir darbo įrodymai vienoje vietoje.",
+    "lead": "CV, įgūdžiai ir veiklos įrodymai vienoje vietoje.",
     "explainer": "Įgūdžiai gali būti savarankiškai nurodyti, paremti CV arba darbo žurnalo įrašais.",
     "notVerified": "Dar nepatvirtinta žmogaus ar dokumentais.",
     "primaryAction": "Papildyti profilį",
     "primaryActionJournal": "Pildyti darbo žurnalą",
     "journalLink": "Darbo žurnalas",
     "evidence": {
-      "intro": "Įgūdžiai stipresni, kai juos paremia darbo įrašai.",
+      "intro": "Įgūdžiai stipresni, kai juos paremia tikri darbo, mokymosi ar veiklos įrašai.",
       "supported": "Paremta darbo įrašais: {supported} iš {declared}",
       "noneYet": "Dar nėra darbo įrašų, kurie paremtų šiuos įgūdžius."
     },
@@ -1549,7 +1549,7 @@
         "heading": "Nuo ko norite pradėti šiandien?",
         "worker": {
           "title": "Darbuotojas",
-          "desc": "Ieškoti darbo, kurti CV, gauti patvirtinimus."
+          "desc": "Fiksuok darbą, mokslus ar veiklą — kurk CV, gauk patvirtinimų."
         },
         "company": {
           "title": "Įmonė",
