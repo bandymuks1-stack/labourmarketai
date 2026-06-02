@@ -37,6 +37,8 @@ export function ProfessionSkillsPicker({
   const t = useTranslations("skills");
   const tName = useTranslations("skillNames");
   const [skills, setSkills] = useState<ApiSkill[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(initialSelectedIds),
   );
@@ -47,16 +49,28 @@ export function ProfessionSkillsPicker({
   useEffect(() => {
     let active = true;
     setSkills(null);
+    setLoadError(false);
     fetch(`/api/professions/${professionId}/skills`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (active) setSkills(d.ok ? (d.skills as ApiSkill[]) : []);
+      .then((r) => {
+        if (!r.ok) throw new Error(`load failed: ${r.status}`);
+        return r.json();
       })
-      .catch(() => active && setSkills([]));
+      .then((d) => {
+        if (!active) return;
+        // A failed fetch is an ERROR, not an empty profession. Only an `ok`
+        // payload with an empty list is the real "no skills yet" empty state.
+        if (d.ok) setSkills(d.skills as ApiSkill[]);
+        else throw new Error("load failed: payload not ok");
+      })
+      .catch((e) => {
+        if (!active) return;
+        console.error("[skills-picker] load failed:", e);
+        setLoadError(true);
+      });
     return () => {
       active = false;
     };
-  }, [professionId]);
+  }, [professionId, reloadKey]);
 
   function toggle(id: string) {
     setSaved(false);
@@ -106,7 +120,26 @@ export function ProfessionSkillsPicker({
       </div>
 
       {skills === null ? (
-        <p className="text-sm text-text-secondary">{t("loading")}</p>
+        loadError ? (
+          <div className="flex flex-col items-start gap-2" role="alert">
+            <p className="text-sm text-state-danger">{t("loadError")}</p>
+            <button
+              type="button"
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="text-xs text-brand-blue underline hover:text-brand-cyan"
+            >
+              {t("retry")}
+            </button>
+          </div>
+        ) : (
+          <p
+            className="text-sm text-text-secondary"
+            role="status"
+            aria-busy="true"
+          >
+            {t("loading")}
+          </p>
+        )
       ) : skills.length === 0 ? (
         <p className="text-sm text-text-secondary">{t("empty")}</p>
       ) : (
