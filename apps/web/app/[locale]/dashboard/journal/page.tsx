@@ -303,7 +303,7 @@ export default async function JournalPage({
           live with `visibility_scope: "closed"` and there is no external
           attestation yet. Surface that clearly so workers can't be misled
           into thinking the legal backbone is fully live. */}
-      <p className="card-border bg-state-warning/5 text-text-secondary p-3 text-xs leading-relaxed">
+      <p className="order-5 card-border bg-state-warning/5 text-text-secondary p-3 text-xs leading-relaxed">
         {t("pilotBackboneNote")}
       </p>
 
@@ -311,7 +311,7 @@ export default async function JournalPage({
           structurally live in the DB (PRs #196/#197) but linking is NOT enabled
           yet and nothing is auto-filled — surface that honestly to the worker. */}
       <section
-        className="card-border flex flex-col gap-1 p-4"
+        className="order-6 card-border flex flex-col gap-1 p-4"
         data-testid="journal-project-context"
       >
         <div className="flex flex-wrap items-center gap-2">
@@ -328,7 +328,7 @@ export default async function JournalPage({
       </section>
 
       {/* Self-progress counter (§15) */}
-      <div className="card-border flex flex-col gap-2 p-4">
+      <div className="order-3 card-border flex flex-col gap-2 p-4">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <span className="font-display text-sm font-semibold text-text-primary">
             {t("self_progress.title", { n: totalSkills })}
@@ -362,7 +362,7 @@ export default async function JournalPage({
           correction-request UI for that. */}
       {!anyReviewEnabled && (
         <div
-          className="card-border bg-state-warning/5 p-4"
+          className="order-4 card-border bg-state-warning/5 p-4"
           data-testid="journal-review-not-enabled-note"
         >
           <p className="text-sm leading-relaxed text-text-secondary">
@@ -370,7 +370,7 @@ export default async function JournalPage({
           </p>
         </div>
       )}
-      <div id="journal-composer">
+      <div id="journal-composer" className="order-2">
         <JournalEntryComposer
           engagements={engagements}
           directions={directions}
@@ -394,10 +394,20 @@ export default async function JournalPage({
         />
       </div>
 
-      {/* Entry list */}
-      <section className="flex flex-col gap-3">
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+      {/* Entry list — lifted to the top so a worker who just logged work sees
+          their entries first (P0 UX rescue), not a wall of notices + the form.
+          Visual order is set with `order-*` on these flex-column children. */}
+      <section className="order-1 flex flex-col gap-3" data-testid="journal-entries">
+        <h2 className="flex items-baseline gap-2 font-display text-lg font-semibold text-text-primary">
           {t("listTitle")}
+          {(entries ?? []).length > 0 && (
+            <span
+              className="font-mono text-xs font-normal text-text-muted"
+              data-testid="journal-entries-count"
+            >
+              {(entries ?? []).length}
+            </span>
+          )}
         </h2>
         {(entries ?? []).length === 0 ? (
           <p className="text-sm text-text-secondary">{t("listEmpty")}</p>
