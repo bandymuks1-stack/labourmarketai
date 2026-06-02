@@ -1255,7 +1255,13 @@ describe("no migration files added by this sprint", () => {
     // project_members / project_worker_assignments tables + can_manage_project
     // predicate + nullable journal_entries.project_id; RLS + grants to
     // authenticated only). Owner-approved and APPLIED to prod via Supabase MCP.
-    const SPRINT_BASELINE = 42;
+    // Bumped 42 → 43 for the journal-entry-skill-links-v1 slice: additive
+    // 20260602120000_journal_entry_skills (durable journal_entry ↔ skill
+    // EVIDENCE-SUPPORT relation; new table + owner-scoped RLS mirroring
+    // journal_entry_work_items + grant to authenticated only; NOT verification).
+    // Committed + queued for the gate, NOT applied by the agent. See
+    // journal-entry-skill-links.test.ts.
+    const SPRINT_BASELINE = 43;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

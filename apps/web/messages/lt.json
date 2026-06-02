@@ -120,6 +120,14 @@
       "suggestionOnly": "Tai tik pasiūlymai — sprendimą priimate jūs."
     }
   },
+  "journalSkillLinks": {
+    "helper": "Pažymėkite savo įgūdžius, kuriuos paremia šis darbo įrašas. Tai įrodymas, ne patvirtinimas.",
+    "saving": "Saugoma…",
+    "saved": "Išsaugota",
+    "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "none": "Pirma pridėkite įgūdžių savo profilyje.",
+    "profileLink": "Mano gebėjimai"
+  },
   "reviewReport": {
     "title": "Peržiūros ataskaita",
     "print": "Spausdinti",

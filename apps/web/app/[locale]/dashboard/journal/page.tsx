@@ -7,6 +7,10 @@ import {
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
 import { formatDuration } from "@/lib/journal/format-duration";
 import {
+  groupLinkedSkillIdsByEntry,
+  type EntrySkillLinkRow,
+} from "@/lib/journal/journal-entry-skills";
+import {
   deriveReviewOrigin,
   deriveReviewResult,
   type ReviewResult,
@@ -193,6 +197,38 @@ export default async function JournalPage({
     .map((r) => (r.skills as { slug: string | null } | null)?.slug ?? null)
     .filter((slug): slug is string => !!slug)
     .map((slug) => ({ slug, name: tSkillName(slug) }));
+
+  // Journal Entry ↔ Skill links v1 — the worker's declared skills (id + name)
+  // they can mark an entry as supporting, plus their current durable links.
+  const { data: skillIdRows } = await supabase
+    .from("worker_skills")
+    .select("skill_id, skills(slug)")
+    .eq("worker_id", worker.id);
+  const availableSkillsForLinks = (skillIdRows ?? [])
+    .map((r) => {
+      const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
+      return slug && r.skill_id
+        ? { id: r.skill_id as string, name: tSkillName(slug) }
+        : null;
+    })
+    .filter((x): x is { id: string; name: string } => x !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Durable links read — gracefully no-ops if the migration is not applied yet
+  // (mirrors the v3-column fallback below), so the page stays renderable.
+  let linksByEntry = new Map<string, string[]>();
+  let skillLinksReady = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const linkRes = await (supabase as any)
+    .from("journal_entry_skills")
+    .select("journal_entry_id, skill_id")
+    .eq("worker_id", worker.id);
+  if (!linkRes.error) {
+    skillLinksReady = true;
+    linksByEntry = groupLinkedSkillIdsByEntry(
+      (linkRes.data ?? []) as EntrySkillLinkRow[],
+    );
+  }
 
   // Entries with their metrics + confirmation status. The select reads the
   // v3 lifecycle columns (deleted_at, superseded_by) so the list filter
@@ -390,6 +426,14 @@ export default async function JournalPage({
                   key={e.id}
                   entryId={e.id}
                   canDelete={canDelete}
+                  skillLinks={
+                    skillLinksReady
+                      ? {
+                          availableSkills: availableSkillsForLinks,
+                          linkedSkillIds: linksByEntry.get(e.id) ?? [],
+                        }
+                      : undefined
+                  }
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm text-text-primary">{e.original_text}</p>

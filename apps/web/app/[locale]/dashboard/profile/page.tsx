@@ -5,7 +5,15 @@ import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileCvClarityCard } from "@/components/app/profile-cv-clarity-card";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
 import { ProfileProcessAssistant } from "@/components/app/profile-process-assistant";
-import { deriveSkillEvidence } from "@/lib/profile/skill-evidence";
+import {
+  deriveSkillEvidence,
+  isSkillSupportedByWork,
+  type SkillEvidenceInput,
+} from "@/lib/profile/skill-evidence";
+import {
+  supportedSkillIds,
+  type EntrySkillLinkRow,
+} from "@/lib/journal/journal-entry-skills";
 import { WorkerEvidenceCard } from "@/components/app/worker-evidence-card";
 import { MessageButton } from "@/components/app/message-button";
 import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
@@ -115,6 +123,8 @@ export default async function ProfilePage({
   let engagementCards: EngagementCard[] = [];
   let professionIconSlug: string | null = null;
   let journalCount = 0;
+  // Per-skill evidence-support inputs (provenance + DURABLE journal links).
+  let skillEvidenceInputs: SkillEvidenceInput[] = [];
   // Skills the worker is allowed to pick from across all their directions.
   // The text-first flow needs this catalogue (id + slug + localized name) so
   // confirmed parser matches can be mapped back to a real skill_id.
@@ -168,6 +178,26 @@ export default async function ProfilePage({
     initialSkillIds = rows
       .map((r) => r.skill_id)
       .filter((id): id is string => id !== null);
+
+    // DURABLE journal→skill links (v1) — graceful no-op if the migration is not
+    // applied yet. Replaces the loose provenance-only "supported" assumption:
+    // a skill counts as supported when a real journal entry links it.
+    let durableSupported = new Set<string>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const linkRes = await (supabase as any)
+      .from("journal_entry_skills")
+      .select("journal_entry_id, skill_id")
+      .eq("worker_id", workerId);
+    if (!linkRes.error) {
+      durableSupported = supportedSkillIds(
+        (linkRes.data ?? []) as EntrySkillLinkRow[],
+      );
+    }
+    skillEvidenceInputs = rows.map((r) => ({
+      source: (r.source as string | null) ?? "self_declared",
+      verified: r.verified === true,
+      journalSupported: r.skill_id ? durableSupported.has(r.skill_id) : false,
+    }));
     savedSkills = rows
       .map((r) => {
         const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
@@ -306,7 +336,7 @@ export default async function ProfilePage({
         journalCount={journalCount}
         skillEvidence={
           workerId
-            ? deriveSkillEvidence(skillDots, savedSkillClaims.length)
+            ? deriveSkillEvidence(skillEvidenceInputs, savedSkillClaims.length)
             : undefined
         }
       />
@@ -319,12 +349,8 @@ export default async function ProfilePage({
         signals={{
           hasCv: savedProfileText.trim().length > 0,
           selfDeclaredSkillCount: savedSkillClaims.length + savedSkills.length,
-          supportedSkillCount: skillDots.filter(
-            (d) =>
-              d.verified ||
-              d.source === "work_journal" ||
-              d.source === "manager_confirmed",
-          ).length,
+          supportedSkillCount: skillEvidenceInputs.filter(isSkillSupportedByWork)
+            .length,
           journalEntryCount: journalCount,
           hasWorker: workerId !== null,
         }}

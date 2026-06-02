@@ -18,6 +18,30 @@ describe("isSkillSupportedByWork", () => {
     expect(isSkillSupportedByWork({})).toBe(false); // defaults to self_declared
     expect(isSkillSupportedByWork({ source: null })).toBe(false);
   });
+
+  it("counts a DURABLE journal→skill link as supported (v1)", () => {
+    // A self-declared skill with at least one journal entry linked to it is now
+    // supported — independent of the loose source value.
+    expect(
+      isSkillSupportedByWork({ source: "self_declared", journalSupported: true }),
+    ).toBe(true);
+    expect(
+      isSkillSupportedByWork({ source: "self_declared", journalSupported: false }),
+    ).toBe(false);
+  });
+});
+
+describe("deriveSkillEvidence with durable journal links", () => {
+  it("a self-declared skill backed by a journal link counts as supported", () => {
+    const s = deriveSkillEvidence(
+      [
+        { source: "self_declared", journalSupported: true },
+        { source: "self_declared", journalSupported: false },
+      ],
+      0,
+    );
+    expect(s).toEqual({ declared: 2, supported: 1, unsupported: 1 });
+  });
 });
 
 describe("deriveSkillEvidence", () => {
