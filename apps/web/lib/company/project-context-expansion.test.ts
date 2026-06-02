@@ -17,11 +17,13 @@ const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
 const companyPage = read("app/[locale]/dashboard/company/page.tsx");
 
-describe("journal page — read-only project-context section", () => {
-  it("renders the project-context section with title + body", () => {
-    expect(journalPage).toMatch(/data-testid="journal-project-context"/);
-    expect(journalPage).toMatch(/t\("projectContext\.title"\)/);
-    expect(journalPage).toMatch(/t\("projectContext\.body"\)/);
+describe("journal page — project-context note removed (P0 UX rescue)", () => {
+  it("no longer renders the read-only project-context note (noise removed)", () => {
+    // The journal is now a single clear path (entries → create → links); the
+    // non-actionable project-context note was removed. The company-side linking
+    // note + copy below are unaffected. See journal-profile-single-path.test.ts.
+    expect(journalPage).not.toMatch(/data-testid="journal-project-context"/);
+    expect(journalPage).not.toMatch(/t\("projectContext\./);
   });
 });
 

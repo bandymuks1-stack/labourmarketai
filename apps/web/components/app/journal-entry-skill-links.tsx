@@ -60,11 +60,20 @@ export function JournalEntrySkillLinks({
   }
 
   return (
-    <div className="mt-3 flex flex-col gap-2 border-t border-border/40 pt-3">
-      <p className="text-[11px] leading-relaxed text-text-secondary">
-        {t("helper")}
-      </p>
-      <ul className="flex flex-wrap gap-1.5" data-testid={`entry-skill-links-${entryId}`}>
+    <div className="mt-2 flex flex-col gap-1.5 border-t border-border/40 pt-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-[10px] leading-relaxed text-text-muted">{t("helper")}</p>
+        {status === "error" ? (
+          <span className="shrink-0 text-[10px] text-state-danger" role="alert">
+            {t("error")}
+          </span>
+        ) : status !== "idle" ? (
+          <span className="shrink-0 text-[10px] text-text-muted" role="status">
+            {status === "saving" ? t("saving") : t("saved")}
+          </span>
+        ) : null}
+      </div>
+      <ul className="flex flex-wrap gap-1" data-testid={`entry-skill-links-${entryId}`}>
         {availableSkills.map((s) => {
           const on = selected.has(s.id);
           return (
@@ -75,7 +84,7 @@ export function JournalEntrySkillLinks({
                 disabled={pending}
                 aria-pressed={on}
                 className={cn(
-                  "rounded-full border px-2.5 py-1 text-[11px] transition-colors disabled:opacity-50",
+                  "rounded-full border px-2 py-0.5 text-[10px] transition-colors disabled:opacity-50",
                   on
                     ? "border-brand-blue bg-brand-blue/10 text-brand-blue"
                     : "border-ink-500 text-text-secondary hover:border-text-muted",
@@ -89,15 +98,6 @@ export function JournalEntrySkillLinks({
           );
         })}
       </ul>
-      {status === "error" ? (
-        <span className="text-[11px] text-state-danger" role="alert">
-          {t("error")}
-        </span>
-      ) : status !== "idle" ? (
-        <span className="text-[11px] text-text-muted" role="status">
-          {status === "saving" ? t("saving") : t("saved")}
-        </span>
-      ) : null}
     </div>
   );
 }

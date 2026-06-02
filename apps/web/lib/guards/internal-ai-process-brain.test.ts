@@ -109,10 +109,13 @@ describe("Guard: the brain emits the structured, reasoned shape", () => {
 // ── 3. Integration: canonical profile only, names all three pillars ───────
 
 describe("Guard: integrated on the canonical profile hub only", () => {
-  it("the profile page renders the assistant", () => {
+  it("the standalone assistant panel is consolidated out of the profile (no competing helper)", () => {
+    // P0 profile rescue: the single ProfileHubOverview now carries summary +
+    // what's-missing + one next action. The pure, read-only process brain (lib)
+    // stays tested below and available for reuse, but is no longer rendered as a
+    // separate competing panel. See journal-profile-single-path.test.ts.
     const page = read(PROFILE_PAGE);
-    expect(page).toMatch(/import\s*\{\s*ProfileProcessAssistant\s*\}/);
-    expect(page).toMatch(/<ProfileProcessAssistant/);
+    expect(page).not.toMatch(/<ProfileProcessAssistant/);
   });
 
   it("the assistant names CV + skills + journal/evidence together", () => {

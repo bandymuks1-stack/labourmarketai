@@ -16,15 +16,14 @@ function read(rel: string): string {
   return readFileSync(join(APP, rel), "utf8");
 }
 
-describe("Guard: profile page feeds the clarity card REAL saved state", () => {
+describe("Guard: profile completion status is consolidated into the hub", () => {
   const page = read("app/[locale]/dashboard/profile/page.tsx");
 
-  it("passes a state prop derived from persisted data", () => {
-    expect(page).toMatch(/<ProfileCvClarityCard\b[\s\S]*?state=\{\{/);
-    expect(page).toMatch(/about:\s*savedProfileText\.trim\(\)\.length\s*>\s*0/);
-    expect(page).toMatch(/selfDeclared:\s*savedSkillClaims\.length\s*>\s*0/);
-    expect(page).toMatch(/skills:\s*savedSkills\.length\s*>\s*0/);
-    expect(page).toMatch(/journal:\s*journalCount\s*>\s*0/);
+  it("the standalone clarity card is no longer a competing panel on the page", () => {
+    // Consolidated (P0 profile rescue): the single ProfileHubOverview now shows
+    // CV/skills/journal status (incl. what's missing). The component + its i18n
+    // are still tested below. See journal-profile-single-path.test.ts.
+    expect(page).not.toMatch(/<ProfileCvClarityCard\b/);
   });
 
   it("counts journal entries from the real table (read-back, not invented)", () => {

@@ -2,19 +2,15 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
-import { ProfileCvClarityCard } from "@/components/app/profile-cv-clarity-card";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
-import { ProfileProcessAssistant } from "@/components/app/profile-process-assistant";
 import {
   deriveSkillEvidence,
-  isSkillSupportedByWork,
   type SkillEvidenceInput,
 } from "@/lib/profile/skill-evidence";
 import {
   supportedSkillIds,
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
-import { WorkerEvidenceCard } from "@/components/app/worker-evidence-card";
 import { MessageButton } from "@/components/app/message-button";
 import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
@@ -341,38 +337,13 @@ export default async function ProfilePage({
         }
       />
 
-      {/* Internal AI Process Brain v0 — deterministic, read-only process
-          assistant. Reads the same already-fetched signals and suggests next
-          steps with reasons. Suggests only: mutates nothing, verifies nothing.
-          See docs/agent-skills/internal-ai-process-brain-v0.md. */}
-      <ProfileProcessAssistant
-        signals={{
-          hasCv: savedProfileText.trim().length > 0,
-          selfDeclaredSkillCount: savedSkillClaims.length + savedSkills.length,
-          supportedSkillCount: skillEvidenceInputs.filter(isSkillSupportedByWork)
-            .length,
-          journalEntryCount: journalCount,
-          hasWorker: workerId !== null,
-        }}
-      />
-
-      <ProfileCvClarityCard
-        state={{
-          about: savedProfileText.trim().length > 0,
-          selfDeclared: savedSkillClaims.length > 0,
-          ...(workerId
-            ? { skills: savedSkills.length > 0, journal: journalCount > 0 }
-            : {}),
-        }}
-      />
-
-      {workerId && (
-        <WorkerEvidenceCard
-          confirmedSkills={skillDots.filter((s) => s.verified).map((s) => s.name)}
-          selfDeclaredSkills={skillDots.filter((s) => !s.verified).map((s) => s.name)}
-          journalEntries={journalCount}
-        />
-      )}
+      {/* Consolidated (P0 profile rescue): the ProfileHubOverview above is the
+          SINGLE output summary — CV + skills + journal-evidence pillars (which
+          also show what's missing), the compact "Supported by work entries: N",
+          the not-verified disclaimer, and ONE next action. The former duplicate
+          panels (ProfileCvClarityCard checklist, WorkerEvidenceCard, and the
+          standalone ProfileProcessAssistant) were removed so the profile no
+          longer splits into competing summary/evidence/helper panels. */}
 
       {workerId && employerOwnerProfileId && (
         <MessageButton profileId={employerOwnerProfileId} labelKey="messageCompany" />
