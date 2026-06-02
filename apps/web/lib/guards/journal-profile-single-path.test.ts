@@ -33,6 +33,13 @@ describe("Guard: journal is the canonical entry INPUT", () => {
     expect(journal).toMatch(/<JournalEntryComposer/);
   });
 
+  it("has ONE clear primary action that jumps to the single composer", () => {
+    // The "New entry" CTA anchors to #journal-composer (no duplicate create
+    // route/surface). dashboard-primary-action-clarity enforces <= 1 primary CTA.
+    expect(journal).toMatch(/journal-new-entry-cta/);
+    expect(journal).toMatch(/href="#journal-composer"/);
+  });
+
   it("entries render first (order-1), composer after (order-2)", () => {
     expect(journal).toMatch(/order-1[^"]*"\s*data-testid="journal-entries"/);
     expect(journal).toMatch(/id="journal-composer"\s+className="order-2"/);

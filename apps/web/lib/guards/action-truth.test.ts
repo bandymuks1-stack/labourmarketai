@@ -34,8 +34,11 @@ const ACTION_COMPONENTS = [
 describe("no dead links / no-op handlers in rooms", () => {
   for (const rel of [...ROOM_PAGES, ...ACTION_COMPONENTS]) {
     const src = read(rel);
-    it(`${rel} has no href="#"`, () => {
-      expect(src).not.toMatch(/href=["'{]#/);
+    it(`${rel} has no dead href="#"`, () => {
+      // A BARE `href="#"` is a dead link. A real in-page anchor
+      // (`href="#journal-composer"`, `href="#profile-edit"`) is legitimate
+      // navigation to an element id — allow it; only flag the empty hash.
+      expect(src).not.toMatch(/href=["'{]#["'\s}>]/);
     });
     it(`${rel} has no empty/no-op onClick`, () => {
       expect(src).not.toMatch(/onClick=\{\(\)\s*=>\s*(\{\s*\}|null|undefined)\}/);
