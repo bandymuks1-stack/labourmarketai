@@ -443,6 +443,16 @@ export function ProfileTextFirstFlow({
             </span>{" "}
             · {t("addedToProfile")} · {t("needsExternalConfirmation")}
           </p>
+          {/* Make the result reachable — link straight to the capabilities
+              surface below where the saved chips now live, so the save is not
+              a silent dead end. */}
+          <a
+            href="#capabilities"
+            className="mt-2 inline-flex text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+            data-testid="profile-text-flow-view-capabilities"
+          >
+            {t("viewCapabilities")} →
+          </a>
         </div>
       )}
 

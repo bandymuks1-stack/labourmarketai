@@ -352,7 +352,7 @@ export default async function JournalPage({
       {/* Entry list — lifted to the top so a worker who just logged work sees
           their entries first (P0 UX rescue), not a wall of notices + the form.
           Visual order is set with `order-*` on these flex-column children. */}
-      <section className="order-1 flex flex-col gap-3" data-testid="journal-entries">
+      <section id="journal-entries" className="order-1 flex flex-col gap-3 scroll-mt-4" data-testid="journal-entries">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-baseline gap-2 font-display text-lg font-semibold text-text-primary">
             {t("listTitle")}

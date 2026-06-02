@@ -1077,6 +1077,7 @@
       "confirmedByYou": "Self-declared",
       "addedToProfile": "Added to your profile",
       "needsExternalConfirmation": "Needs external confirmation later",
+      "viewCapabilities": "View your capabilities",
       "textSavingLabel": "Saving…",
       "textSavedLabel": "Your text is saved",
       "textSaveErrorLabel": "Could not save your text. Please try again.",
