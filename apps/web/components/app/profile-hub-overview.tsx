@@ -26,11 +26,15 @@ export async function ProfileHubOverview({
   selfDeclaredCount,
   hasWorker,
   journalCount,
+  skillEvidence,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
   hasWorker: boolean;
   journalCount: number;
+  /** Evidence-support summary for workers (journal → skill linkage v1).
+   *  Omitted for non-workers (no work-journal access yet). */
+  skillEvidence?: { declared: number; supported: number; unsupported: number };
 }) {
   const t = await getTranslations("profileHub");
 
@@ -96,6 +100,34 @@ export async function ProfileHubOverview({
           </li>
         ))}
       </ul>
+
+      {/* Journal → skill evidence-support layer (v1). Derived from stored
+          per-skill provenance — honest "supported by work entries" vs
+          "not yet supported", never a verification claim. Workers only. */}
+      {skillEvidence && skillEvidence.declared > 0 && (
+        <div
+          className="flex flex-col gap-1 rounded-md border border-border/40 p-3"
+          data-testid="profile-hub-skill-evidence"
+        >
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {t("evidence.intro")}
+          </p>
+          <p className="text-xs font-medium text-text-primary">
+            {t("evidence.supported", {
+              supported: skillEvidence.supported,
+              declared: skillEvidence.declared,
+            })}
+          </p>
+          {skillEvidence.unsupported > 0 && (
+            <p
+              className="text-[11px] leading-relaxed text-text-muted"
+              data-testid="profile-hub-skill-evidence-none"
+            >
+              {t("evidence.noneYet")}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* The single honest verification disclaimer for the unified profile. */}
       <p

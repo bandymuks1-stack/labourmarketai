@@ -180,6 +180,49 @@ describe("Guard: single canonical CV upload surface + canonical account link", (
   });
 });
 
+// ── 5. Journal → skill evidence-support layer (v1) ────────────────────────
+
+describe("Guard: the hub surfaces journal→skill evidence support (not verification)", () => {
+  it("profile page derives + passes skillEvidence to the hub", () => {
+    const page = read(PROFILE_PAGE);
+    expect(page).toMatch(/deriveSkillEvidence/);
+    expect(page).toMatch(/skillEvidence=\{/);
+  });
+
+  it("hub renders the evidence-support block from real provenance", () => {
+    const hub = read(HUB);
+    expect(hub).toMatch(/evidence\.intro/);
+    expect(hub).toMatch(/evidence\.supported/);
+    expect(hub).toMatch(/profile-hub-skill-evidence/);
+    // missing-evidence state must exist AND the journal path stays reachable.
+    expect(hub).toMatch(/evidence\.noneYet/);
+    expect(hub).toMatch(/href="\/dashboard\/journal"/);
+  });
+
+  it("the derivation helper exists (durable evidence mapping layer)", () => {
+    expect(existsSync(join(APP_ROOT, "lib/profile/skill-evidence.ts"))).toBe(true);
+  });
+
+  for (const loc of LOCALES) {
+    it(`${loc}: evidence-support copy is journal-backing, NOT verified/confirmed`, () => {
+      const evidence = (loadJson(`messages/${loc}.json`).profileHub as Record<string, unknown>)
+        .evidence as Record<string, string>;
+      expect(evidence, `${loc} profileHub.evidence missing`).toBeTruthy();
+      for (const k of ["intro", "supported", "noneYet"]) {
+        expect(typeof evidence[k] === "string" && evidence[k].trim().length > 0, `${loc} evidence.${k} missing`).toBe(true);
+        // evidence-support wording must never read as verification.
+        expect(
+          VERIFY_CLAIM.test(evidence[k]),
+          `${loc} evidence.${k} must not claim verified/confirmed: "${evidence[k]}"`,
+        ).toBe(false);
+      }
+      // The "supported" line is explicitly about WORK ENTRIES, not verification.
+      const supportPhrase = loc === "lt" ? /darbo įraš/i : /work entr/i;
+      expect(supportPhrase.test(evidence.supported), `${loc} evidence.supported must say work entries`).toBe(true);
+    });
+  }
+});
+
 // ── Negative controls: prove the detectors bite ───────────────────────────
 
 describe("Guard: detectors are real (negative controls)", () => {
