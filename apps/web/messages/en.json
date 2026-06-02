@@ -52,6 +52,11 @@
     "notVerified": "Not yet human-verified or document-verified.",
     "primaryAction": "Complete profile",
     "journalLink": "Work journal",
+    "evidence": {
+      "intro": "Skills are stronger when backed by real work entries.",
+      "supported": "Supported by work entries: {supported} of {declared}",
+      "noneYet": "No work entries support these skills yet."
+    },
     "pillars": {
       "cv": {
         "label": "CV",
