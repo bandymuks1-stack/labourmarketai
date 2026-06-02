@@ -11,6 +11,7 @@ import {
   type SuggestionStatus,
 } from "@/components/app/detected-suggestion-card";
 import { DetectedSuggestionList } from "@/components/app/detected-suggestion-list";
+import { SuggestionProvenanceLabel } from "@/components/app/suggestion-provenance";
 import {
   extractJournalSuggestions,
   type JournalFragmentSuggestion,
@@ -741,6 +742,18 @@ export function JournalEntryComposer({
             title={tBucket("skills")}
             count={skillSuggestions.length}
           >
+            {skillSuggestions.length > 0 && (
+              // Honest framing for the whole skills bucket: these are
+              // self-declared suggestions surfaced from the entry, never
+              // verified by us. Per-card chips repeat the triad so a single
+              // skill is never read out of context.
+              <p
+                className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
+                data-testid="skill-suggestions-provenance-note"
+              >
+                {t("skillProvenanceNote")}
+              </p>
+            )}
             {skillSuggestions.map((row) => (
               <DetectedSuggestionCard
                 key={row.slug}
@@ -749,7 +762,9 @@ export function JournalEntryComposer({
                 status={skillStatuses[row.slug] ?? "pending"}
                 onConfirm={() => setSkillStatus(row.slug, "confirmed")}
                 onDiscard={() => setSkillStatus(row.slug, "discarded")}
-              />
+              >
+                <SuggestionProvenanceLabel />
+              </DetectedSuggestionCard>
             ))}
           </DetectedSuggestionList>
         </div>

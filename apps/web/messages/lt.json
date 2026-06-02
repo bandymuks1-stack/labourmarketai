@@ -1270,6 +1270,11 @@
   "structuring": {
     "groupEyebrow": "Paties nurodyti pasiūlymai",
     "ruleBasedNotice": "Pastaba: kol kas naudojame paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai netampa faktais, kol jūs jų nepasirenkate — niekas neišsaugoma automatiškai.",
+    "provenance": {
+      "suggestedFromEntry": "Pasiūlyta pagal įrašą",
+      "selfDeclared": "Paties nurodyta",
+      "notVerified": "Dar nepatvirtinta"
+    },
     "emptyBucket": "Šiame teksto fragmente nieko aiškaus neradome. Galite parašyti daugiau arba praleisti.",
     "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau, arba pridėkite reikšmingus įrašus rankiniu būdu.",
     "buckets": {
