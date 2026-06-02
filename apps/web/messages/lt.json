@@ -52,6 +52,11 @@
     "notVerified": "Dar nepatvirtinta žmogaus ar dokumentais.",
     "primaryAction": "Papildyti profilį",
     "journalLink": "Darbo žurnalas",
+    "evidence": {
+      "intro": "Įgūdžiai stipresni, kai juos paremia darbo įrašai.",
+      "supported": "Paremta darbo įrašais: {supported} iš {declared}",
+      "noneYet": "Dar nėra darbo įrašų, kurie paremtų šiuos įgūdžius."
+    },
     "pillars": {
       "cv": {
         "label": "CV",

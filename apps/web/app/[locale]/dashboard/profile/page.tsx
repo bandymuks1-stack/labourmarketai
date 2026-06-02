@@ -4,6 +4,7 @@ import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileCvClarityCard } from "@/components/app/profile-cv-clarity-card";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
+import { deriveSkillEvidence } from "@/lib/profile/skill-evidence";
 import { WorkerEvidenceCard } from "@/components/app/worker-evidence-card";
 import { MessageButton } from "@/components/app/message-button";
 import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
@@ -302,6 +303,11 @@ export default async function ProfilePage({
         selfDeclaredCount={savedSkillClaims.length + savedSkills.length}
         hasWorker={workerId !== null}
         journalCount={journalCount}
+        skillEvidence={
+          workerId
+            ? deriveSkillEvidence(skillDots, savedSkillClaims.length)
+            : undefined
+        }
       />
 
       <ProfileCvClarityCard
