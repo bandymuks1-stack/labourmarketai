@@ -120,6 +120,14 @@
       "suggestionOnly": "These are only suggestions — you decide."
     }
   },
+  "journalSkillLinks": {
+    "helper": "Mark your skills that this work entry supports. This is evidence, not verification.",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "error": "Could not save. Please try again.",
+    "none": "Add skills in your profile first.",
+    "profileLink": "My capabilities"
+  },
   "reviewReport": {
     "title": "Review report",
     "print": "Print",

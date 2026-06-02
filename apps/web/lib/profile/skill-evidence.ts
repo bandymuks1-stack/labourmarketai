@@ -19,6 +19,11 @@
 export type SkillEvidenceInput = {
   source?: string | null;
   verified?: boolean;
+  /** v1 DURABLE journal→skill link: the worker has marked ≥1 work-journal entry
+   *  as supporting this skill (`journal_entry_skills`). A real, queryable
+   *  relation — preferred over the loose `source` provenance assumption. Still
+   *  evidence-support, NOT verification. */
+  journalSupported?: boolean;
 };
 
 export type SkillEvidenceSummary = {
@@ -35,7 +40,11 @@ const SUPPORTED_SOURCES = new Set(["work_journal", "manager_confirmed"]);
 /** True when a worker skill's stored provenance shows real work-journal
  *  backing. Not a verification claim — only "work entries back this". */
 export function isSkillSupportedByWork(s: SkillEvidenceInput): boolean {
-  return s.verified === true || SUPPORTED_SOURCES.has(s.source ?? "self_declared");
+  return (
+    s.journalSupported === true ||
+    s.verified === true ||
+    SUPPORTED_SOURCES.has(s.source ?? "self_declared")
+  );
 }
 
 /**

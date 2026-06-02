@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { softDeleteJournalEntry } from "@/lib/journal/actions";
+import { JournalEntrySkillLinks } from "@/components/app/journal-entry-skill-links";
 import { recordEvent } from "@/lib/telemetry/task";
 
 /**
@@ -19,10 +20,17 @@ export function JournalEntryRow({
   entryId,
   canDelete,
   children,
+  skillLinks,
 }: {
   entryId: string;
   canDelete: boolean;
   children: React.ReactNode;
+  /** Journal Entry ↔ Skill links v1 — present only when the worker owns the
+   *  entry and the durable relation is available. Omitted → no link UI. */
+  skillLinks?: {
+    availableSkills: { id: string; name: string }[];
+    linkedSkillIds: string[];
+  };
 }) {
   const t = useTranslations("journal");
   const locale = useLocale();
@@ -48,6 +56,13 @@ export function JournalEntryRow({
   return (
     <li className="card-border p-4">
       {children}
+      {skillLinks && (
+        <JournalEntrySkillLinks
+          entryId={entryId}
+          availableSkills={skillLinks.availableSkills}
+          linkedSkillIds={skillLinks.linkedSkillIds}
+        />
+      )}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-3">
           {canDelete ? (
