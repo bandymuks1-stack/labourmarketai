@@ -2,7 +2,9 @@
   "noContext": {
     "none": "Kol kas nėra aktyvaus darbo konteksto. Kai organizacija pakvies jus į komandą ir pridės, žurnalas atsidarys čia.",
     "pending": "Turite laukiantį kvietimą. Atidarykite skydelį ir priimkite jį — tada savininkas galės pridėti jus prie organizacijos.",
-    "roster": "Priėmėte kvietimą ir esate komandos sąraše. Organizacijos savininkas dar turi pridėti jus prie organizacijos, kad galėtumėte žymėti darbą."
+    "pendingNamed": "Turite laukiantį {org} kvietimą. Atidarykite skydelį ir priimkite jį — tada savininkas galės pridėti jus prie organizacijos.",
+    "roster": "Priėmėte kvietimą ir esate komandos sąraše. Organizacijos savininkas dar turi pridėti jus prie organizacijos, kad galėtumėte žymėti darbą.",
+    "rosterNamed": "Esate {org} komandos sąraše. Organizacijos savininkas dar turi pridėti jus prie organizacijos, kad galėtumėte žymėti darbą."
   },
   "noContextCta": "Į skydelį",
   "personalEntry": "Asmeninis darbuotojo įrašas",
