@@ -1,4 +1,9 @@
 {
+  "errorBoundary": {
+    "reloading": "Kraunama iš naujo…",
+    "body": "Įvyko klaida. Bandykite dar kartą.",
+    "retry": "Bandyti dar kartą"
+  },
   "spaces": {
     "current": "Dabartinė erdvė",
     "mySpaces": "Mano erdvės",

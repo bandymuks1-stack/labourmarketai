@@ -1,4 +1,9 @@
 {
+  "errorBoundary": {
+    "reloading": "Reloading…",
+    "body": "Something went wrong. Please try again.",
+    "retry": "Try again"
+  },
   "spaces": {
     "current": "Current space",
     "mySpaces": "My spaces",
