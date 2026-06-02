@@ -25,10 +25,12 @@ describe("worker evidence card — honest provenance, no overclaim", () => {
     expect(src).toMatch(/t\("awaitingNote"\)/);
     expect(src).toMatch(/t\("systemEntries"\)/);
   });
-  it("derives confirmed from verified state only (no fabricated verification)", () => {
+  it("the standalone worker-evidence card is consolidated out of the page", () => {
+    // Consolidated (P0 profile rescue): ProfileHubOverview is the one evidence
+    // summary; per-skill provenance still lives in cv-engagement-cards. The
+    // component + its honest copy stay tested here.
     const page = read("app/[locale]/dashboard/profile/page.tsx");
-    expect(page).toMatch(/skillDots\.filter\(\(s\) => s\.verified\)/);
-    expect(page).toMatch(/skillDots\.filter\(\(s\) => !s\.verified\)/);
+    expect(page).not.toMatch(/<WorkerEvidenceCard\b/);
   });
   it("contains no score/percentage/rating gamification", () => {
     expect(src).not.toMatch(/score|rating|percent|%|\/100|points/i);

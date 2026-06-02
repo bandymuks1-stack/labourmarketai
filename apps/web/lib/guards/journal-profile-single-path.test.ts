@@ -85,6 +85,15 @@ describe("Guard: profile is the canonical OUTPUT, not a journal manager", () => 
     ).not.toMatch(/JournalEntryComposer/);
   });
 
+  it("ONE output hub — no competing summary/evidence/helper panels", () => {
+    // The profile summarizes via the single ProfileHubOverview. The former
+    // duplicate panels (clarity checklist, worker-evidence card, standalone
+    // process assistant) were consolidated out so the profile doesn't re-split.
+    expect(profile).not.toMatch(/<ProfileCvClarityCard\b/);
+    expect(profile).not.toMatch(/<WorkerEvidenceCard\b/);
+    expect(profile).not.toMatch(/<ProfileProcessAssistant\b/);
+  });
+
   it("the profile evidence wording stays support-only (Supported by work entries)", () => {
     for (const loc of ["lt", "en"] as const) {
       const ns = JSON.parse(read(`messages/${loc}.json`)).profileHub as {
