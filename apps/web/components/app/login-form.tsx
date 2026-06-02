@@ -222,6 +222,25 @@ export function LoginForm() {
           </Link>
         </span>
       </div>
+
+      {/* Prominent, mobile-clear password recovery — the inline link above is
+          easy to miss on a phone. No old password is needed; a reset link is
+          emailed. */}
+      <div
+        className="flex flex-col items-center gap-1 border-t border-ink-600/60 pt-4 text-center"
+        data-testid="login-recover"
+      >
+        <Link
+          href="/auth/forgot-password"
+          className="text-sm font-semibold text-brand-blue hover:text-brand-cyan"
+          data-testid="login-recover-link"
+        >
+          {t("reset_password_cta")}
+        </Link>
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {t("reset_password_help")}
+        </p>
+      </div>
     </form>
   );
 }
