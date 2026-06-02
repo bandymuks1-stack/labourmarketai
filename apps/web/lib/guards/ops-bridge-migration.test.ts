@@ -106,8 +106,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 42 for the project/object/client RED gate (PR #197, owner-approved
     // + applied to prod via Supabase MCP), then to 43 for the
     // journal-entry-skill-links-v1 slice (additive journal_entry_skills durable
-    // evidence-support relation, committed + queued, NOT applied). The baseline
-    // only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 43/);
+    // evidence-support relation, committed + queued, NOT applied), then to 44
+    // for the confirmation-role-schema-hardening-v1 slice (additive
+    // 20260602130000_confirmation_role_check CHECK constraint, RED/human-gated,
+    // committed + queued, NOT applied). The baseline only ever grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 44/);
   });
 });

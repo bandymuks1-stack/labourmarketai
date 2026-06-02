@@ -1261,7 +1261,13 @@ describe("no migration files added by this sprint", () => {
     // journal_entry_work_items + grant to authenticated only; NOT verification).
     // Committed + queued for the gate, NOT applied by the agent. See
     // journal-entry-skill-links.test.ts.
-    const SPRINT_BASELINE = 43;
+    // Bumped 43 → 44 for the confirmation-role-schema-hardening-v1 slice (PR A):
+    // additive 20260602130000_confirmation_role_check (CHECK pinning
+    // journal_entry_confirmations.confirmer_role to manager/owner/external_manager;
+    // no new table, no RLS change, reversible + pre-flight guarded). RED /
+    // human-gated, committed + queued for the gate, NOT applied by the agent.
+    // See confirmation-honesty.test.ts.
+    const SPRINT_BASELINE = 44;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

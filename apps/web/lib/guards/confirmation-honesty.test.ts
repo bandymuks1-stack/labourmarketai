@@ -68,6 +68,45 @@ describe("Guard: the backend restricts confirmers to the supported set", () => {
   });
 });
 
+// ── 1b. The DB CHECK constraint pins confirmer_role to the supported set ──
+
+describe("Guard: the confirmer_role CHECK allows only the supported set", () => {
+  const sql = readMigration(/_confirmation_role_check\.sql$/);
+
+  it("adds a CHECK constraint listing exactly manager/owner/external_manager", () => {
+    expect(sql).toMatch(
+      /add constraint journal_entry_confirmations_confirmer_role_check\s+check \(confirmer_role in \('manager', 'owner', 'external_manager'\)\)/i,
+    );
+  });
+
+  it("does NOT accept any broad confirmer role yet", () => {
+    const clause =
+      sql.match(/check \(confirmer_role in \(([^)]*)\)\)/i)?.[1] ?? "";
+    expect(clause, "CHECK clause not found").toBeTruthy();
+    for (const broad of [
+      "parent",
+      "guardian",
+      "teacher",
+      "mentor",
+      "buyer",
+      "customer",
+      "family",
+      "child",
+    ]) {
+      expect(clause.includes(broad), `CHECK must not allow ${broad}`).toBe(false);
+    }
+  });
+
+  it("ships a pre-flight assertion + a reversible rollback (idempotent)", () => {
+    expect(sql).toMatch(/raise exception/i);
+    expect(sql).toMatch(/--[^\n]*\brollback\b/i);
+    expect(sql).toMatch(
+      /drop constraint if exists journal_entry_confirmations_confirmer_role_check/i,
+    );
+    expect(sql).toMatch(/if not exists \(\s*select 1\s*from pg_constraint/i);
+  });
+});
+
 // ── 2. The confirmer-role labels are EXACTLY the supported set ─────────────
 
 describe("Guard: confirmer-role labels match the backend, no broad roles", () => {
