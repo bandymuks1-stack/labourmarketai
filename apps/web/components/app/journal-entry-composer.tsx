@@ -28,6 +28,7 @@ import {
   startTask,
 } from "@/lib/telemetry/task";
 import { cn } from "@/lib/utils";
+import { Link } from "@/lib/i18n/navigation";
 
 export type JournalEngagement = {
   id: string;
@@ -97,6 +98,11 @@ export function JournalEntryComposer({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  // How many structured details were actually persisted with the last save —
+  // drives the "N details added" line in the success banner so the result is
+  // visible, not silent. Counts only what the save action truly writes
+  // (metrics + confirmed fragments), never the display-only skill hints.
+  const [savedDetailCount, setSavedDetailCount] = useState(0);
 
   const [timeStatus, setTimeStatus] = useState<SuggestionStatus>("pending");
   const [timeValue, setTimeValue] = useState<string>("");
@@ -297,6 +303,21 @@ export function JournalEntryComposer({
       completeTask(taskName, {
         fragment_count: confirmedFragments.length,
       });
+      // Count only what the action actually persisted (metrics + confirmed
+      // fragments) so the success banner can honestly say how much structure
+      // was saved. A plain direct save (no review) yields 0 and the banner
+      // shows the base saved state without an inflated count.
+      const savedDetails =
+        (siteStatus === "confirmed" && siteName.trim() ? 1 : 0) +
+        (dirStatus === "confirmed" && dirSlug ? 1 : 0) +
+        ((qtyStatus === "confirmed" && qtyValue) ||
+        (timeStatus === "confirmed" && timeValue)
+          ? 1
+          : 0) +
+        (institutionStatus === "confirmed" && institutionName.trim() ? 1 : 0) +
+        (topicStatus === "confirmed" && topic.trim() ? 1 : 0) +
+        confirmedFragments.length;
+      setSavedDetailCount(savedDetails);
       formRef.current?.reset();
       setStage("compose");
       setText("");
@@ -357,14 +378,39 @@ export function JournalEntryComposer({
         {savedAt !== null && (
           <div
             role="status"
-            className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2"
+            data-testid="journal-saved-banner"
+            className="flex flex-col gap-2 rounded-md border border-state-success/40 bg-state-success/5 px-3 py-3"
           >
             <p className="text-sm font-semibold text-state-success">
               ✓ {t("savedTitle")}
             </p>
-            <p className="mt-0.5 text-xs text-text-secondary">
-              {t("savedBody")}
+            <p className="text-xs text-text-secondary">
+              {savedDetailCount > 0
+                ? t("savedBodyWithDetails", { count: savedDetailCount })
+                : t("savedBody")}
             </p>
+            {/* Honest "what's next + who confirms" — saving is never a dead end:
+                the entry is below, skills surface in the profile, and it stays
+                private until a real human confirms it. */}
+            <p className="text-[11px] leading-relaxed text-text-muted">
+              {t("savedConfirmNote")}
+            </p>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              <a
+                href="#journal-entries"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                data-testid="journal-saved-see-entries"
+              >
+                {t("savedSeeEntries")} →
+              </a>
+              <Link
+                href="/dashboard/profile#capabilities"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                data-testid="journal-saved-open-profile"
+              >
+                {t("savedOpenProfile")} →
+              </Link>
+            </div>
           </div>
         )}
         <h3 className="font-display text-lg font-semibold text-text-primary">

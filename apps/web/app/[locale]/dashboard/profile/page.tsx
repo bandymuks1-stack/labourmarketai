@@ -389,12 +389,14 @@ export default async function ProfilePage({
           they remain visible regardless of the user's currently-selected
           work category (PLATFORM_DOCTRINE §1: a person is not locked into
           one category). */}
-      <CapabilityProfileSection
-        claims={savedSkillClaims}
-        engagements={workerId ? engagementCards : []}
-        workerSkillDots={workerId ? skillDots : []}
-        professionIconSlug={workerId ? professionIconSlug : null}
-      />
+      <div id="capabilities" className="scroll-mt-4">
+        <CapabilityProfileSection
+          claims={savedSkillClaims}
+          engagements={workerId ? engagementCards : []}
+          workerSkillDots={workerId ? skillDots : []}
+          professionIconSlug={workerId ? professionIconSlug : null}
+        />
+      </div>
     </div>
   );
 }

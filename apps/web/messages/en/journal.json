@@ -29,6 +29,10 @@
   "suggestionReviewIntro": "These are suggestions. Confirm only what is correct. Unconfirmed suggestions are not saved as facts.",
   "savedTitle": "Entry saved",
   "savedBody": "Your confirmed details were added to your work history.",
+  "savedBodyWithDetails": "Saved to your work history with {count} structured detail(s).",
+  "savedConfirmNote": "It stays private until a manager or client confirms it.",
+  "savedSeeEntries": "See your entries",
+  "savedOpenProfile": "Open your profile",
   "pilotBackboneNote": "Your entries are private until you choose otherwise. The confirmation layer is shown only when there is a real confirmation.",
   "projectContext": {
     "title": "Project context",
