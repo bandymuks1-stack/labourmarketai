@@ -76,6 +76,50 @@
       }
     }
   },
+  "processAssistant": {
+    "title": "Vidinis proceso asistentas",
+    "intro": "Sistema pradeda jungti CV, įgūdžius ir darbo įrašus į vieną aiškų vaizdą.",
+    "knownHeading": "Ką sistema mato",
+    "missingHeading": "Ko dar trūksta",
+    "actionsHeading": "Siūlomi kiti žingsniai",
+    "whyLabel": "Kodėl siūloma",
+    "allGood": "Pagrindiniai profilio elementai jau pateikti.",
+    "signals": {
+      "cv": {
+        "known": "Aprašymas pateiktas",
+        "missing": "Nėra aprašymo"
+      },
+      "skills": {
+        "known": "Nurodyta įgūdžių: {n}",
+        "missing": "Dar nenurodyta įgūdžių"
+      },
+      "journal": {
+        "known": "Darbo įrašai: {n}",
+        "missing": "Nėra darbo įrašų"
+      }
+    },
+    "actions": {
+      "addCv": {
+        "label": "Papildyti aprašymą",
+        "reason": "Profilis aiškesnis, kai trumpai papasakojate apie save."
+      },
+      "addSkills": {
+        "label": "Pridėti įgūdžių",
+        "reason": "Įgūdžiai parodo, ką mokate dirbti."
+      },
+      "addJournal": {
+        "label": "Pildyti darbo žurnalą",
+        "reason": "Darbo įrašai vėliau gali paremti jūsų įgūdžius."
+      }
+    },
+    "evidence": {
+      "journalLabel": "Darbo žurnalas"
+    },
+    "safety": {
+      "notAutomaticVerification": "Sistema nieko nepatvirtina automatiškai.",
+      "suggestionOnly": "Tai tik pasiūlymai — sprendimą priimate jūs."
+    }
+  },
   "reviewReport": {
     "title": "Peržiūros ataskaita",
     "print": "Spausdinti",

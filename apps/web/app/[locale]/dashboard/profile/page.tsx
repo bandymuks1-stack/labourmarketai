@@ -4,6 +4,7 @@ import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileCvClarityCard } from "@/components/app/profile-cv-clarity-card";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
+import { ProfileProcessAssistant } from "@/components/app/profile-process-assistant";
 import { deriveSkillEvidence } from "@/lib/profile/skill-evidence";
 import { WorkerEvidenceCard } from "@/components/app/worker-evidence-card";
 import { MessageButton } from "@/components/app/message-button";
@@ -308,6 +309,25 @@ export default async function ProfilePage({
             ? deriveSkillEvidence(skillDots, savedSkillClaims.length)
             : undefined
         }
+      />
+
+      {/* Internal AI Process Brain v0 — deterministic, read-only process
+          assistant. Reads the same already-fetched signals and suggests next
+          steps with reasons. Suggests only: mutates nothing, verifies nothing.
+          See docs/agent-skills/internal-ai-process-brain-v0.md. */}
+      <ProfileProcessAssistant
+        signals={{
+          hasCv: savedProfileText.trim().length > 0,
+          selfDeclaredSkillCount: savedSkillClaims.length + savedSkills.length,
+          supportedSkillCount: skillDots.filter(
+            (d) =>
+              d.verified ||
+              d.source === "work_journal" ||
+              d.source === "manager_confirmed",
+          ).length,
+          journalEntryCount: journalCount,
+          hasWorker: workerId !== null,
+        }}
       />
 
       <ProfileCvClarityCard
