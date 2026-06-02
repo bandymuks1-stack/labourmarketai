@@ -2702,5 +2702,71 @@
     "allAdded": "Visi priimti darbuotojai jau pridėti į organizaciją.",
     "reviewEnabledBadge": "Peržiūra",
     "reviewDisabledBadge": "Be peržiūros"
+  },
+  "services": {
+    "eyebrow": "Mes padarome už jus",
+    "title": "Produktizuoti pasiūlymai,",
+    "titleAccent": "realios kainos.",
+    "subcopy": "Aiškūs DI ir automatizavimo paslaugų paketai su sąžiningomis pradinėmis kainomis. Pasirinkite artimiausią poreikiui, o tikslią apimtį suderinsime kartu.",
+    "includesLabel": "Įeina",
+    "cta": "Gauti pasiūlymą",
+    "note": "Kainos yra orientacinės įprasto projekto pradžios sumos. Galutinę apimtį ir kainą suderiname kartu prieš pradedant darbą, o sąskaitos už jus čia niekada nepradedamos — kiekvienas paketas prasideda pokalbiu.",
+    "offers": [
+      {
+        "name": "DI procesų automatizavimas",
+        "summary": "Išsiaiškiname pasikartojantį darbą jūsų versle ir rankinį procesą pakeičiame patikimu automatizuotu srautu, kuris priklauso jums.",
+        "priceFrom": "Nuo 900 €",
+        "timeline": "Įprastai įgyvendinama per 1–3 sav.",
+        "includes": [
+          "Proceso analizė ir apimties pokalbis",
+          "Vienas pilnas automatizuotas srautas",
+          "Perdavimo dokumentai ir trumpas pristatymas"
+        ]
+      },
+      {
+        "name": "Integracijos · n8n · API srautai",
+        "summary": "Sujungiame įrankius, kuriuos jau naudojate — CRM, paštą, lenteles, vidines programas — per n8n ar tiesiogines API, kad duomenys judėtų be kopijavimo.",
+        "priceFrom": "Nuo 600 €",
+        "timeline": "Įprastai įgyvendinama per 1–2 sav.",
+        "includes": [
+          "Iki 3 sujungtų sistemų",
+          "n8n arba individualus API srautas",
+          "Klaidų pranešimai ir pakartojimai"
+        ]
+      },
+      {
+        "name": "Verslo procesų automatizavimas",
+        "summary": "Didesnis darbas: keli susieti srautai, perimantys visą procesą — priėmimą, paskirstymą, priminimus — iš jūsų komandos.",
+        "priceFrom": "Nuo 1 200 €",
+        "timeline": "Įprastai įgyvendinama per 2–5 sav.",
+        "includes": [
+          "Kelių žingsnių proceso automatizavimas",
+          "Būsenos lentos ir matomumas",
+          "Du tobulinimo etapai po paleidimo"
+        ]
+      },
+      {
+        "name": "Individualus DI asistentas",
+        "summary": "Vidinis asistentas, paremtas jūsų pačių dokumentais ir duomenimis, kuriantis atsakymus bei juodraščius komandai — ne viešas pokalbių robotas.",
+        "priceFrom": "Nuo 1 500 €",
+        "timeline": "Įprastai įgyvendinama per 2–4 sav.",
+        "includes": [
+          "Asistentas, paremtas jūsų turiniu",
+          "Privatus, prieigos kontroliuojamas diegimas",
+          "Užklausų ir apsaugų derinimas"
+        ]
+      },
+      {
+        "name": "Svetainė + rinkodaros automatizavimas",
+        "summary": "Moderni svetainė kartu su už jos veikiančiomis automatizacijomis — kontaktų rinkimu, priminimų sekomis ir ataskaitomis.",
+        "priceFrom": "Nuo 1 900 €",
+        "timeline": "Įprastai įgyvendinama per 3–6 sav.",
+        "includes": [
+          "Rinkodaros svetainės kūrimas",
+          "Kontaktų rinkimas ir priminimai",
+          "Analitikos ir ataskaitų paruošimas"
+        ]
+      }
+    ]
   }
 }
