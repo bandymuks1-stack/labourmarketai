@@ -85,6 +85,15 @@ describe("Guard: profile is the canonical OUTPUT, not a journal manager", () => 
     expect(profile).toMatch(/<ProfileHubOverview/);
   });
 
+  it("the hub's ONE primary action comes from the deterministic helper", () => {
+    const hub = readFileSync(join(APP_ROOT, "components/app/profile-hub-overview.tsx"), "utf8");
+    expect(hub).toMatch(/deriveProfileNextAction/);
+    expect(hub).toMatch(/profile-hub-primary-action/);
+    // The helper is pure (no AI/network/random).
+    const helper = readFileSync(join(APP_ROOT, "lib/profile/profile-next-action.ts"), "utf8");
+    expect(helper).not.toMatch(/fetch\(|createClient|Math\.random|Date\.now/);
+  });
+
   it("the profile page does NOT host the journal entry composer", () => {
     expect(
       profile,
