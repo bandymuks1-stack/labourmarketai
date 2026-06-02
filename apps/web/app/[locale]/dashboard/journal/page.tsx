@@ -129,15 +129,28 @@ export default async function JournalPage({
     // the worker knows the exact next step instead of a flat "no context".
     const pending = await listMyPendingWorkerInvitations();
     let hasRosterLink = false;
+    let rosterOrgName: string | null = null;
     if (worker) {
       const [cw, aw] = await Promise.all([
-        supabase.from("company_workers").select("worker_id").eq("worker_id", worker.id).eq("status", "active").limit(1),
-        supabase.from("agency_workers").select("worker_id").eq("worker_id", worker.id).eq("status", "active").limit(1),
+        supabase.from("company_workers").select("companies(display_name, legal_name)").eq("worker_id", worker.id).eq("status", "active").limit(1),
+        supabase.from("agency_workers").select("agencies(legal_name)").eq("worker_id", worker.id).eq("status", "active").limit(1),
       ]);
       hasRosterLink = (cw.data?.length ?? 0) > 0 || (aw.data?.length ?? 0) > 0;
+      const cwOrg = (cw.data?.[0] as { companies?: { display_name: string | null; legal_name: string | null } | null } | undefined)?.companies;
+      const awOrg = (aw.data?.[0] as { agencies?: { legal_name: string | null } | null } | undefined)?.agencies;
+      rosterOrgName =
+        cwOrg?.display_name ?? cwOrg?.legal_name ?? awOrg?.legal_name ?? null;
     }
     const contextState =
       pending.length > 0 ? "pending" : hasRosterLink ? "roster" : "none";
+    // Surface the REAL org the worker is waiting on (no fabrication) — which
+    // makes the canonical "owner must provision you" path concrete.
+    const noContextOrg =
+      contextState === "pending"
+        ? (pending[0]?.orgName ?? null)
+        : contextState === "roster"
+          ? rosterOrgName
+          : null;
     return (
       <div className="flex flex-col gap-6">
         <header>
@@ -147,7 +160,9 @@ export default async function JournalPage({
         </header>
         <div className="card-border max-w-2xl p-6">
           <p className="text-sm leading-relaxed text-text-secondary">
-            {t(`noContext.${contextState}`)}
+            {noContextOrg
+              ? t(`noContext.${contextState}Named`, { org: noContextOrg })
+              : t(`noContext.${contextState}`)}
           </p>
           {contextState === "pending" && (
             <Link
