@@ -960,6 +960,8 @@
     "saveError": "Nepavyko išsaugoti. Bandyk dar kartą.",
     "empty": "Šiai profesijai dar nėra įgūdžių sąrašo",
     "loading": "Kraunama...",
+    "loadError": "Nepavyko įkelti įgūdžių. Bandykite dar kartą.",
+    "retry": "Bandyti dar kartą",
     "viewProfile": "Peržiūrėti profilį",
     "importPrompt": "Turite seną CV? Galite pasirinkti failą (PDF arba DOCX)",
     "importComingSoon": "Įgūdžių nuskaitymas iš CV dar neaktyvus.",

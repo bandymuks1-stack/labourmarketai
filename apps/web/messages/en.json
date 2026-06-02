@@ -960,6 +960,8 @@
     "saveError": "Could not save. Please try again.",
     "empty": "No skills yet for this profession",
     "loading": "Loading...",
+    "loadError": "Could not load skills. Please try again.",
+    "retry": "Try again",
     "viewProfile": "View profile",
     "importPrompt": "Have an old CV? You can pick a file (PDF or DOCX)",
     "importComingSoon": "Reading skills from a CV is not active yet.",
