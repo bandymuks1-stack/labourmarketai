@@ -149,14 +149,23 @@ describe("journal composer is text-first", () => {
   });
 });
 
-// ── 5. Account page tags inactive roles as preparing ─────────────────────
+// ── 5. Account page labels roles from ONE status source ──────────────────
+// (Updated by the canonical-paths sprint: the role list no longer blanket-tags
+//  every non-active role as "Ruošiama". It reads the SAME status vocabulary as
+//  the role catalogue via `roleStatusChipKey`, so company/agency/customer read
+//  "Pradėti" — not "Ruošiama" — and `admin` is never tagged preparing. The
+//  "Ruošiama" label still exists in messages and is owned by the role switcher's
+//  genuinely-preparing fallback. See canonical-paths-integrity.test.ts.)
 
-describe("account page marks inactive roles honestly", () => {
-  it("references the preview_workspace label and the rolesIntro paragraph", () => {
+describe("account page marks roles from a single honest status source", () => {
+  it("uses roleStatusChipKey + the rolesIntro paragraph (no blanket preparing tag)", () => {
     const txt = readWeb("app/[locale]/dashboard/account/page.tsx");
-    expect(txt).toMatch(/preview_workspace/);
+    expect(txt).toMatch(/roleStatusChipKey/);
     expect(txt).toMatch(/account\.rolesIntro/);
+    // The old blanket tag (every non-active role → preview_workspace) is gone.
+    expect(txt).not.toMatch(/account\.preview_workspace/);
     const lt = readWeb("messages/lt.json");
+    // The label itself still exists (role switcher owns it now).
     expect(lt).toMatch(/"preview_workspace":\s*"Ruošiama"/);
     expect(lt).toMatch(/"rolesIntro":/);
   });

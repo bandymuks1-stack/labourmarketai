@@ -6,7 +6,12 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
-import { ROLE_BY_ID, type LabourMarketRoleId, getVisibleRoleOptions } from "@/lib/config/roles";
+import {
+  ROLE_BY_ID,
+  type LabourMarketRoleId,
+  getVisibleRoleOptions,
+  roleStatusChipKey,
+} from "@/lib/config/roles";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
@@ -31,6 +36,7 @@ export default async function AccountPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("auth.dashboard");
+  const tRoot = await getTranslations();
   const tRole = await getTranslations("auth.signup.role");
   const tSwitcher = await getTranslations("auth.roleSwitcher");
   const tCommon = await getTranslations("common");
@@ -129,13 +135,31 @@ export default async function AccountPage({
         </p>
         <ul className="mt-3 flex flex-col gap-2">
           {(rolesRows ?? []).map((r) => {
-            const isActive = r.role === profile?.active_role;
+            const isActiveView = r.role === profile?.active_role;
             const role = r.role as Role;
-            // Single source for "is this role preparing?" — the catalogue at
-            // `lib/config/roles.ts`. Future roles (freelancer, team_lead, …)
-            // and any preparing role automatically render the RUOŠIAMA tag.
             const cfg = ROLE_BY_ID[role as LabourMarketRoleId];
-            const isLiveRole = cfg?.availability === "active";
+            // ONE status vocabulary for this page. Catalogue roles read their
+            // chip from the single source in `lib/config/roles.ts` (Aktyvu /
+            // Pradėti / Dalinis / Ruošiama) — the SAME chips the role catalogue
+            // below renders — so the account page can never show two different
+            // statuses for one role. `admin` is a PERMISSION grant, not a
+            // workspace role: it has no catalogue row and its access surface is
+            // the admin UI toggle above, so it must NEVER be tagged "Ruošiama"
+            // while that toggle is reachable — it reads as active access.
+            const isAdminRole = r.role === "admin";
+            const chipKey = isAdminRole
+              ? isAdmin
+                ? "roles.status.active"
+                : null
+              : cfg && cfg.availability !== "active"
+                ? roleStatusChipKey(cfg.availability)
+                : null;
+            const chipTone =
+              isAdminRole || cfg?.availability === "active"
+                ? "border-state-success/40 bg-state-success/5 text-state-success"
+                : cfg?.availability === "start-available"
+                  ? "border-brand-blue/40 bg-brand-blue/5 text-brand-blue"
+                  : "border-state-warning/40 bg-state-warning/5 text-state-warning";
             return (
               <li
                 key={r.role}
@@ -146,12 +170,14 @@ export default async function AccountPage({
                   {tRole(role)}
                 </span>
                 <span className="flex items-center gap-2">
-                  {!isLiveRole && (
-                    <span className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">
-                      {t("account.preview_workspace")}
+                  {chipKey && (
+                    <span
+                      className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${chipTone}`}
+                    >
+                      {tRoot(chipKey)}
                     </span>
                   )}
-                  {isActive && (
+                  {isActiveView && (
                     <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
                       ● {tSwitcher("active_label")}
                     </span>
