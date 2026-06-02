@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileCvClarityCard } from "@/components/app/profile-cv-clarity-card";
+import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
 import { WorkerEvidenceCard } from "@/components/app/worker-evidence-card";
 import { MessageButton } from "@/components/app/message-button";
 import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
@@ -290,6 +291,19 @@ export default async function ProfilePage({
         </p>
       </header>
 
+      {/* Unifying "professional passport" lead: states that CV, skills and
+          work-journal evidence are ONE profile, shows each pillar's honest
+          status from real saved data, carries the single not-verified
+          disclaimer, and gives one primary next action + a bridge to the
+          Work Journal. Uses only data already fetched above — no new reads,
+          no invented counts. */}
+      <ProfileHubOverview
+        cvProvided={savedProfileText.trim().length > 0}
+        selfDeclaredCount={savedSkillClaims.length + savedSkills.length}
+        hasWorker={workerId !== null}
+        journalCount={journalCount}
+      />
+
       <ProfileCvClarityCard
         state={{
           about: savedProfileText.trim().length > 0,
@@ -317,8 +331,10 @@ export default async function ProfilePage({
           (manualSlot) only renders for users with a worker row; pure
           company/agency/customer accounts see only the self-declared
           composer + chips, which is the right canonical surface for
-          their narrative-derived skills. */}
-      <ProfileTextFirstFlow
+          their narrative-derived skills. The wrapper id is the anchor target
+          for the hub overview's single "Complete profile" primary action. */}
+      <div id="profile-edit" className="scroll-mt-4">
+        <ProfileTextFirstFlow
         initialText={savedProfileText}
         savedClaimNormalizedLabels={savedSkillClaims.map(
           (c) => c.normalized_label,
@@ -338,7 +354,8 @@ export default async function ProfilePage({
             />
           ) : undefined
         }
-      />
+        />
+      </div>
 
       {/* Unified CAPABILITY surface — the canonical home for self-declared
           skills (`profile_skill_claims`) and worker work history. Always

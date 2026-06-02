@@ -45,6 +45,32 @@
     "empty": "No skills or work entries yet. Add skills or write a journal entry.",
     "footnote": "Skills can be self-declared, evidenced by system activity, or confirmed by a manager. Nothing is confirmed automatically."
   },
+  "profileHub": {
+    "eyebrow": "Professional profile",
+    "lead": "CV, skills and work evidence in one place.",
+    "explainer": "Skills can be self-declared, CV-supported or supported by work journal entries.",
+    "notVerified": "Not yet human-verified or document-verified.",
+    "primaryAction": "Complete profile",
+    "journalLink": "Work journal",
+    "pillars": {
+      "cv": {
+        "label": "CV",
+        "yes": "Provided",
+        "no": "Not provided"
+      },
+      "skills": {
+        "label": "Skills",
+        "count": "Self-declared: {n}",
+        "none": "None yet"
+      },
+      "journal": {
+        "label": "Work evidence",
+        "available": "Journal entries: {n}",
+        "none": "Not yet linked",
+        "preparing": "Work-evidence connection is being prepared"
+      }
+    }
+  },
   "reviewReport": {
     "title": "Review report",
     "print": "Print",
