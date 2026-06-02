@@ -1493,6 +1493,8 @@
       "email_label": "El. paštas",
       "password_label": "Slaptažodis",
       "forgot_password": "Pamiršai slaptažodį?",
+      "reset_password_cta": "Atkurti slaptažodį",
+      "reset_password_help": "Atsiųsime atkūrimo nuorodą jūsų el. paštu — seno slaptažodžio žinoti nereikia.",
       "submit_label": "Prisijungti",
       "signing": "Jungiamasi...",
       "no_account": "Neturi paskyros?",

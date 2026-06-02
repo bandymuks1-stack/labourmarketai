@@ -347,7 +347,9 @@ export function JournalEntryComposer({
         onSubmit={(e) => {
           e.preventDefault();
           setSavedAt(null);
-          analyse(text);
+          // Primary action is now SAVE — write and save in one step. Structuring
+          // is an optional secondary step (the "Sutvarkyti tekstą" button below).
+          void submit();
         }}
         className="card-border flex flex-col gap-4 p-4 sm:p-6"
       >
@@ -424,13 +426,38 @@ export function JournalEntryComposer({
         </p>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" disabled={text.trim().length === 0}>
-            {t("analyseSubmit")}
+          {/* PRIMARY: save the entry directly — one obvious step. */}
+          <Button
+            type="submit"
+            disabled={text.trim().length === 0 || submitting}
+            data-testid="journal-save-entry"
+          >
+            {submitting
+              ? t("saving")
+              : editingEntry
+                ? t("updateEntry")
+                : t("saveEntry")}
           </Button>
-          <span className="text-[11px] text-text-muted">
-            {t("classifyLater")}
-          </span>
+          {/* SECONDARY (optional): tidy the text into structured fields first.
+              Not a primary action and makes no AI/auto claim. */}
+          <button
+            type="button"
+            onClick={() => {
+              setSavedAt(null);
+              analyse(text);
+            }}
+            disabled={text.trim().length === 0 || submitting}
+            className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+            data-testid="journal-organize-text"
+          >
+            {t("organizeText")}
+          </button>
         </div>
+        {/* Honest note about the OPTIONAL structuring step (guard-pinned
+            suggestion→fact disclaimer). Saving never requires it. */}
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {t("classifyLater")}
+        </p>
       </form>
     );
   }
