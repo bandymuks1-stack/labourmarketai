@@ -71,6 +71,50 @@
       }
     }
   },
+  "processAssistant": {
+    "title": "Internal process assistant",
+    "intro": "The system starts connecting CV, skills and work entries into one clear view.",
+    "knownHeading": "What the system sees",
+    "missingHeading": "What is still missing",
+    "actionsHeading": "Suggested next steps",
+    "whyLabel": "Why this is suggested",
+    "allGood": "The main profile parts are already in place.",
+    "signals": {
+      "cv": {
+        "known": "Description provided",
+        "missing": "No description yet"
+      },
+      "skills": {
+        "known": "Skills declared: {n}",
+        "missing": "No skills declared yet"
+      },
+      "journal": {
+        "known": "Work entries: {n}",
+        "missing": "No work entries yet"
+      }
+    },
+    "actions": {
+      "addCv": {
+        "label": "Add a description",
+        "reason": "Your profile is clearer when you briefly describe yourself."
+      },
+      "addSkills": {
+        "label": "Add skills",
+        "reason": "Skills show what you can do."
+      },
+      "addJournal": {
+        "label": "Add a work journal entry",
+        "reason": "Work entries can later support your skills."
+      }
+    },
+    "evidence": {
+      "journalLabel": "Work journal"
+    },
+    "safety": {
+      "notAutomaticVerification": "Nothing is confirmed automatically.",
+      "suggestionOnly": "These are only suggestions — you decide."
+    }
+  },
   "reviewReport": {
     "title": "Review report",
     "print": "Print",
