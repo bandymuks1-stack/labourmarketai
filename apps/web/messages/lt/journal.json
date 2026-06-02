@@ -19,6 +19,7 @@
   "confirmAllSuggestions": "Patvirtinti visus pasiūlymus",
   "editText": "Grįžti prie teksto",
   "strengthensHint": "Šis įrašas gali stiprinti šį įgūdį, jei jį patvirtinsite",
+  "skillProvenanceNote": "Šie įgūdžiai pasiūlyti pagal jūsų pačių įrašą. Patvirtinę juos, įrašote kaip paties nurodytus — jie dar nėra patikrinti kito žmogaus ar dokumentų.",
   "freeTextLead": "Aprašykite viską laisvai: darbą arba veiklą, kiekius, vienetus, laiką, vietą ir pastabas. Sistema pabandys pasiūlyti struktūrą, bet faktais ji taps tik tada, kai patvirtinsite.",
   "examplesTitle": "Pavyzdžiai iš skirtingų sričių",
   "example1": "Dirbau 6 valandas, aptarnavau klientus ir sutvarkiau 12 užklausų.",

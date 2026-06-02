@@ -19,6 +19,7 @@
   "confirmAllSuggestions": "Confirm all suggestions",
   "editText": "Back to text",
   "strengthensHint": "This entry can strengthen this skill once you confirm it",
+  "skillProvenanceNote": "These skills are suggested from your own entry. Confirming them records them as self-declared — they are not yet checked by another person or by documents.",
   "freeTextLead": "Describe work or activity freely: quantities, units, time, location, and notes. The system will suggest a structure, but it only becomes a fact once you confirm it.",
   "examplesTitle": "Examples from different domains",
   "example1": "Worked 6 hours, helped customers, and handled 12 requests.",
