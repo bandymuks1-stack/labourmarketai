@@ -52,14 +52,14 @@
   },
   "profileHub": {
     "eyebrow": "Professional profile",
-    "lead": "CV, skills and work evidence in one place.",
+    "lead": "Your CV, skills and activity evidence in one place.",
     "explainer": "Skills can be self-declared, CV-supported or supported by work journal entries.",
     "notVerified": "Not yet human-verified or document-verified.",
     "primaryAction": "Complete profile",
     "primaryActionJournal": "Add work journal evidence",
     "journalLink": "Work journal",
     "evidence": {
-      "intro": "Skills are stronger when backed by real work entries.",
+      "intro": "Skills are stronger when backed by real work, learning or activity entries.",
       "supported": "Supported by work entries: {supported} of {declared}",
       "noneYet": "No work entries support these skills yet."
     },
@@ -1549,7 +1549,7 @@
         "heading": "What do you want to start with today?",
         "worker": {
           "title": "Worker",
-          "desc": "Seek work, build your CV, get verified."
+          "desc": "Log work, studies or activity — build a CV, earn confirmations."
         },
         "company": {
           "title": "Company",
