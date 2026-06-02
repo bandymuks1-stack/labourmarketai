@@ -51,6 +51,7 @@
     "explainer": "Skills can be self-declared, CV-supported or supported by work journal entries.",
     "notVerified": "Not yet human-verified or document-verified.",
     "primaryAction": "Complete profile",
+    "primaryActionJournal": "Add work journal evidence",
     "journalLink": "Work journal",
     "evidence": {
       "intro": "Skills are stronger when backed by real work entries.",

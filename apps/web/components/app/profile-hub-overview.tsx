@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
+import { deriveProfileNextAction } from "@/lib/profile/profile-next-action";
 
 /**
  * Profile/CV/Evidence hub overview — the unifying "professional passport"
@@ -37,6 +38,15 @@ export async function ProfileHubOverview({
   skillEvidence?: { declared: number; supported: number; unsupported: number };
 }) {
   const t = await getTranslations("profileHub");
+
+  // ONE deterministic next action from real signals (no AI/network/random).
+  const nextAction = deriveProfileNextAction({
+    cvProvided,
+    selfDeclaredCount,
+    hasWorker,
+    unsupportedSkillCount: skillEvidence?.unsupported ?? 0,
+  });
+  const journalIsPrimary = nextAction.href === "/dashboard/journal";
 
   const pillars: { label: string; value: string; ok: boolean }[] = [
     {
@@ -138,16 +148,29 @@ export async function ProfileHubOverview({
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
-        {/* ONE primary next action — anchors to the canonical in-page editor. */}
-        <a
-          href="#profile-edit"
-          className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3.5 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
-          data-testid="profile-hub-primary-action"
-        >
-          {t("primaryAction")} ↓
-        </a>
-        {/* Bridge to the Work Journal so evidence is never a dead-end count. */}
-        {hasWorker && (
+        {/* ONE primary next action — contextual, from the deterministic helper.
+            Either finish the profile (in-page editor) or, when a worker's skills
+            lack work-journal evidence, go add it (canonical journal route). */}
+        {journalIsPrimary ? (
+          <Link
+            href="/dashboard/journal"
+            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3.5 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            data-testid="profile-hub-primary-action"
+          >
+            {t(nextAction.labelKey)} →
+          </Link>
+        ) : (
+          <a
+            href="#profile-edit"
+            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3.5 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            data-testid="profile-hub-primary-action"
+          >
+            {t(nextAction.labelKey)} ↓
+          </a>
+        )}
+        {/* Secondary bridge to the Work Journal — only when it is NOT already
+            the primary action, so there is never a duplicate journal link. */}
+        {hasWorker && !journalIsPrimary && (
           <Link
             href="/dashboard/journal"
             className="inline-flex w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-cyan"
