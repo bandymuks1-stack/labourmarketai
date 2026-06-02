@@ -338,17 +338,28 @@ export default async function JournalPage({
           their entries first (P0 UX rescue), not a wall of notices + the form.
           Visual order is set with `order-*` on these flex-column children. */}
       <section className="order-1 flex flex-col gap-3" data-testid="journal-entries">
-        <h2 className="flex items-baseline gap-2 font-display text-lg font-semibold text-text-primary">
-          {t("listTitle")}
-          {(entries ?? []).length > 0 && (
-            <span
-              className="font-mono text-xs font-normal text-text-muted"
-              data-testid="journal-entries-count"
-            >
-              {(entries ?? []).length}
-            </span>
-          )}
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="flex items-baseline gap-2 font-display text-lg font-semibold text-text-primary">
+            {t("listTitle")}
+            {(entries ?? []).length > 0 && (
+              <span
+                className="font-mono text-xs font-normal text-text-muted"
+                data-testid="journal-entries-count"
+              >
+                {(entries ?? []).length}
+              </span>
+            )}
+          </h2>
+          {/* ONE clear primary action — jump to the create/edit composer below
+              (the single create surface; no duplicate route). */}
+          <a
+            href="#journal-composer"
+            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            data-testid="journal-new-entry-cta"
+          >
+            + {t("newEntry")}
+          </a>
+        </div>
         {(entries ?? []).length === 0 ? (
           <p className="text-sm text-text-secondary">{t("listEmpty")}</p>
         ) : (
