@@ -162,18 +162,6 @@ export default async function JournalPage({
     );
   }
 
-  // Self-progress counts by confidence bin (§15 private self-view).
-  const { data: skills } = await supabase
-    .from("worker_skills")
-    .select("confidence_bin")
-    .eq("worker_id", worker.id);
-  const bins = { red: 0, green: 0, yellow: 0 };
-  for (const s of skills ?? []) {
-    const b = s.confidence_bin as keyof typeof bins;
-    if (b in bins) bins[b] += 1;
-  }
-  const totalSkills = skills?.length ?? 0;
-
   // The worker's work directions (primary + additional) for the entry form —
   // so the journal is no longer locked to one tiler template.
   const { data: dirRows } = await supabase
@@ -298,60 +286,14 @@ export default async function JournalPage({
         </div>
       </header>
 
-      {/* Honest pilot framing — the manager / client confirmation + audit
-          layer ships with PR #18 (issue #32). Until then, journal entries
-          live with `visibility_scope: "closed"` and there is no external
-          attestation yet. Surface that clearly so workers can't be misled
-          into thinking the legal backbone is fully live. */}
-      <p className="order-5 card-border bg-state-warning/5 text-text-secondary p-3 text-xs leading-relaxed">
+      {/* P0 UX rescue: removed the read-only project-context note and the
+          self-progress counter (noise, not actionable here). The pilot note is
+          kept but demoted to ONE compact footnote — it is guard-required
+          (journal-evidence-clarity + product-readiness) and stays honest
+          (private + not yet externally confirmed). */}
+      <p className="order-5 text-[11px] leading-relaxed text-text-muted">
         {t("pilotBackboneNote")}
       </p>
-
-      {/* Read-only project-context note (no write UI). The project layer is
-          structurally live in the DB (PRs #196/#197) but linking is NOT enabled
-          yet and nothing is auto-filled — surface that honestly to the worker. */}
-      <section
-        className="order-6 card-border flex flex-col gap-1 p-4"
-        data-testid="journal-project-context"
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <h2 className="font-display text-sm font-semibold text-text-primary">
-            {t("projectContext.title")}
-          </h2>
-          <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-medium text-brand-blue">
-            {t("projectContext.readyBadge")}
-          </span>
-        </div>
-        <p className="text-xs leading-relaxed text-text-secondary">
-          {t("projectContext.body")}
-        </p>
-      </section>
-
-      {/* Self-progress counter (§15) */}
-      <div className="order-3 card-border flex flex-col gap-2 p-4">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <span className="font-display text-sm font-semibold text-text-primary">
-            {t("self_progress.title", { n: totalSkills })}
-          </span>
-          <span className="text-xs text-state-success">
-            {t("self_progress.strongly_confirmed", { n: bins.yellow })}
-          </span>
-          <span className="text-xs text-text-secondary">
-            {t("self_progress.confirmed", { n: bins.green })}
-          </span>
-          <span className="text-xs text-text-muted">
-            {t("self_progress.awaiting", { n: bins.red })}
-          </span>
-        </div>
-        {bins.red > 0 && (
-          // Honest explanation of the awaiting count — without it the row
-          // reads as "you owe the system 8 entries" instead of "8 of your
-          // self-declared skills don't yet have journal evidence".
-          <p className="text-[11px] leading-relaxed text-text-muted">
-            {t("self_progress.awaitingHint")}
-          </p>
-        )}
-      </div>
 
       {/* v4 — when the worker arrived via ?editing=<id> from the entries
           list, prefill the composer with that entry's original_text and
@@ -361,14 +303,12 @@ export default async function JournalPage({
           into "editing" a confirmed entry — they would need the explicit
           correction-request UI for that. */}
       {!anyReviewEnabled && (
-        <div
-          className="order-4 card-border bg-state-warning/5 p-4"
+        <p
+          className="order-4 text-[11px] leading-relaxed text-text-muted"
           data-testid="journal-review-not-enabled-note"
         >
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {t("reviewNotEnabledNote")}
-          </p>
-        </div>
+          {t("reviewNotEnabledNote")}
+        </p>
       )}
       <div id="journal-composer" className="order-2">
         <JournalEntryComposer
