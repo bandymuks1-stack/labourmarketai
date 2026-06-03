@@ -1750,6 +1750,44 @@
         "workJournal": "Darbo žurnalas",
         "workJournalDesc": "Užregistruokite realų darbo žurnalo įrašą."
       },
+      "nextAction": {
+        "eyebrow": "Kitas žingsnis",
+        "worker_complete_profile": {
+          "title": "Užpildykite profilį",
+          "body": "Nurodykite, ką dirbate, ir savo įgūdžius — kad jūsų darbo įrašai turėtų vertę.",
+          "cta": "Užpildyti profilį"
+        },
+        "worker_first_entry": {
+          "title": "Sukurkite pirmą darbo įrašą",
+          "body": "Profilis paruoštas. Užrašykite, ką nuveikėte — įrašas privatus, kol nuspręsite jį parodyti.",
+          "cta": "Sukurti įrašą"
+        },
+        "worker_waiting": {
+          "title": "Jūsų įrašai laukia patvirtinimo",
+          "body": "Išsaugota ir privatu. Laukia vadovo patvirtinimo: {waiting}. Daugiau iš jūsų nieko nereikia.",
+          "cta": "Peržiūrėti įrodymų būseną"
+        },
+        "worker_all_confirmed": {
+          "title": "Viskas padaryta",
+          "body": "Visi jūsų įrašai jau patvirtinti. Pridėkite naują, kad darbo istorija augtų.",
+          "cta": "Pridėti įrašą"
+        },
+        "manager_review_pending": {
+          "title": "Peržiūrėkite darbuotojų įrašus",
+          "body": "Jūsų peržiūros laukia įrašų: {pending}.",
+          "cta": "Peržiūrėti įrašus"
+        },
+        "manager_invite": {
+          "title": "Pakvieskite darbuotoją",
+          "body": "Laukiančių įrašų nėra. Pakvieskite darbuotoją arba atidarykite komandą.",
+          "cta": "Atidaryti erdvę"
+        },
+        "customer_requests": {
+          "title": "Tvarkykite užklausas",
+          "body": "Sukurkite naują užklausą arba sekite jau išsiųstų būseną.",
+          "cta": "Atidaryti užklausas"
+        }
+      },
       "section": {
         "offer": {
           "title": "Ką siūlau"

@@ -5,10 +5,18 @@ import { DemandRequestsReadback } from "@/components/app/demand-requests-readbac
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
+import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import { deriveReviewResult } from "@/lib/journal/review-status";
+import {
+  workerNextAction,
+  managerNextAction,
+  customerNextAction,
+  type NextAction,
+} from "@/lib/dashboard/next-action";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -159,6 +167,23 @@ export default async function DashboardOverviewPage({
 
   // ── Company / agency / customer: operating cockpit (define → submit need) ──
   if (role !== "worker") {
+    // Role-based single Next Action. For an org reviewer we read the SAME gated
+    // pending-review set the inbox uses (RPC), so the priority is data-driven:
+    // entries waiting → review; nothing waiting → invite/open team (real route).
+    // Degrades to 0 (honest "nothing waiting") if the RPC isn't applied (42883).
+    let pendingReview = 0;
+    if (role === "company" || role === "agency") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: idRows } = await (supabase as any).rpc(
+        "reviewable_journal_entry_ids",
+      );
+      if (Array.isArray(idRows)) pendingReview = idRows.length;
+    }
+    const nextAction: NextAction =
+      role === "company" || role === "agency"
+        ? managerNextAction(role, pendingReview)
+        : customerNextAction();
+
     const intent = role === "agency" ? "partner" : "hire_workers";
     // Intent-specific pilot copy: a company hiring sees hiring language, an
     // agency sees candidate-supply language — never a generic buyer "need".
@@ -204,9 +229,16 @@ export default async function DashboardOverviewPage({
         {Header}
         <CurrentSpaceHeader role={role} />
 
-        {/* TOP priority — the real next actions for the chain
-            (invite worker / accept / enable review / review entries). Placed
-            first so a company/agency owner always lands on a visible CTA. */}
+        {/* The single, clear primary action for this role/state (data-driven:
+            entries waiting → review; nothing waiting → invite/open team). The
+            chain-actions grid below is the secondary "all steps" index. */}
+        <DashboardNextAction
+          action={nextAction}
+          counts={{ pending: pendingReview }}
+        />
+
+        {/* Secondary — the full set of chain entry points
+            (invite worker / enable review / review entries). */}
         <DashboardChainActions role={role} />
         <WorkerInvitationsCard />
 
@@ -285,15 +317,19 @@ export default async function DashboardOverviewPage({
   let professionName: string | null = null;
   let skillsCount = 0;
   let entriesCount = 0;
+  // How many of the worker's entries a human has actually confirmed — drives
+  // the honest "waiting vs all-confirmed" Next Action state. Read from the same
+  // append-only evidence rows; no extra DB object, no fake state.
+  let confirmedCount = 0;
   const { data: workerRow } = await supabase
     .from("workers")
     .select("id")
     .eq("profile_id", user.id)
     .maybeSingle();
   if (workerRow?.id) {
-    // The three reads (primary profession, skill count, journal count) are
-    // independent of each other; run them in parallel to cut the worker
-    // overview's tail latency.
+    // The three reads (primary profession, skill count, journal entries +
+    // their confirmations) are independent; run them in parallel to cut the
+    // worker overview's tail latency.
     const [wpRes, scRes, ecRes] = await Promise.all([
       supabase
         .from("worker_professions")
@@ -307,47 +343,36 @@ export default async function DashboardOverviewPage({
         .eq("worker_id", workerRow.id),
       supabase
         .from("journal_entries")
-        .select("*", { count: "exact", head: true })
+        .select("id, journal_entry_confirmations(confirmation_scope, created_at)")
         .eq("worker_id", workerRow.id),
     ]);
     const slug =
       (wpRes.data?.professions as { slug: string } | null)?.slug ?? null;
     if (slug) professionName = tProf(slug);
     skillsCount = scRes.count ?? 0;
-    entriesCount = ecRes.count ?? 0;
+    type EntryRow = {
+      journal_entry_confirmations:
+        | { confirmation_scope: unknown; created_at?: string | null }[]
+        | null;
+    };
+    const entryRows = (ecRes.data ?? []) as EntryRow[];
+    entriesCount = entryRows.length;
+    confirmedCount = entryRows.filter(
+      (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
+    ).length;
   }
+  const hasProfile = !!professionName && skillsCount > 0;
+  const workerAction = workerNextAction({
+    hasProfile,
+    entriesTotal: entriesCount,
+    confirmedCount,
+  });
+  const waitingCount = Math.max(0, entriesCount - confirmedCount);
 
-  const steps = [
-    {
-      done: !!professionName,
-      title: tw("nextSteps.profession.title"),
-      body: professionName
-        ? tw("nextSteps.profession.bodyDone", { profession: professionName })
-        : tw("nextSteps.profession.body"),
-      href: "/dashboard/profile" as const,
-    },
-    {
-      done: skillsCount > 0,
-      title: tw("nextSteps.skills.title"),
-      body:
-        skillsCount > 0
-          ? tw("nextSteps.skills.bodyDone", { n: skillsCount })
-          : tw("nextSteps.skills.body"),
-      href: "/dashboard/profile" as const,
-    },
-    {
-      done: entriesCount > 0,
-      title: tw("nextSteps.journal.title"),
-      body:
-        entriesCount > 0
-          ? tw("nextSteps.journal.bodyDone", { n: entriesCount })
-          : tw("nextSteps.journal.body"),
-      href: "/dashboard/journal" as const,
-    },
-  ];
-
-  // Higher-level journey stages (identity → proof → opportunities).
-  const idDone = !!professionName && skillsCount > 0;
+  // Higher-level journey stages (identity → proof → opportunities). The single
+  // next best action now comes from <DashboardNextAction>; the journey rail
+  // keeps showing real progress.
+  const idDone = hasProfile;
   const proofDone = entriesCount > 0;
   const stageDone = [idDone, proofDone, false];
   const currentStage = stageDone.findIndex((d) => !d);
@@ -358,9 +383,6 @@ export default async function DashboardOverviewPage({
     { label: tf("worker.s2"), state: stageState(1) },
     { label: tf("worker.s3"), state: stageState(2) },
   ];
-
-  // The single next best action.
-  const nextStep = steps.find((s) => !s.done) ?? null;
 
   // Phase 3: a worker is in "first-use" until they have BOTH a profession set
   // AND at least one journal entry. We show the full first-use panel during
@@ -373,10 +395,15 @@ export default async function DashboardOverviewPage({
       {Header}
       <CurrentSpaceHeader role={role} />
 
-
-      {/* TOP priority — real chain next actions + pending invitation accept,
-          placed first so the next action is always visible. */}
-      <DashboardChainActions role={role} />
+      {/* The single, clear primary action for this worker's state
+          (complete profile → first entry → waiting → all confirmed). This is
+          the ONE primary CTA on the surface; the cards below are secondary
+          navigation. The worker chain-actions card (a lone "Work journal"
+          link) was removed — it duplicated this action and the Proof card. */}
+      <DashboardNextAction
+        action={workerAction}
+        counts={{ waiting: waitingCount, confirmed: confirmedCount }}
+      />
       <WorkerInvitationsCard />
 
       {professionName && (
@@ -386,34 +413,22 @@ export default async function DashboardOverviewPage({
       )}
       {StartingPoint}
 
-      <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
+      {/* First-use panel is educational here (steps only); its profile/journal/
+          account CTA row is hidden so those CTAs don't repeat — the Next Action
+          block + the two cards below already own that navigation. */}
+      <DashboardFirstUsePanel
+        variant={isFirstUse ? "full" : "compact"}
+        showCtas={false}
+      />
 
       <JourneyRail stages={wstages} label={tf("worker.eyebrow")} />
       <p className="text-[11px] leading-relaxed text-text-muted" data-testid="journey-progress-helper">
         {tw("pilot.progressHelper")}
       </p>
 
-      {/* ── Next move — one cinematic, guided action ── */}
-      <section className="card-border wow-card flex flex-col gap-3 p-6 sm:p-7">
-        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-orange">
-          <span className="live-dot signal-dot" aria-hidden />
-          {tf("worker.eyebrow")} · {tf("worker.nextMove")}
-        </span>
-        <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {nextStep ? nextStep.title : tf("worker.ready")}
-        </h2>
-        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
-          {nextStep ? nextStep.body : tw("journal.body")}
-        </p>
-        <Link
-          href={nextStep ? nextStep.href : "/dashboard/journal"}
-          className="mt-1 inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5"
-        >
-          {nextStep ? tw("nextSteps.open") : tw("journal.cta")} →
-        </Link>
-      </section>
-
-      {/* ── Two canonical surfaces — ONE entry per workflow (no duplicates) ── */}
+      {/* ── Two canonical surfaces — ONE entry per workflow (no duplicates).
+          The primary "next move" now lives in <DashboardNextAction> at the top
+          (single primary CTA); these two are secondary navigation homes. ── */}
       <div className="grid gap-4 sm:grid-cols-2">
         {/* A. Work Identity — the single home for profession, directions, skills, CV */}
         <section className="card-border flex flex-col gap-2 p-6">

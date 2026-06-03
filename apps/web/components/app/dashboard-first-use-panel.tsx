@@ -22,9 +22,15 @@ import { cn } from "@/lib/utils";
  */
 export async function DashboardFirstUsePanel({
   variant = "full",
+  showCtas = true,
 }: {
   /** "full" shows steps + all CTAs; "compact" is the short call-to-action card. */
   variant?: "full" | "compact";
+  /** When false, the panel is purely educational (eyebrow + title + steps) and
+   *  the profile/journal/account CTA row is omitted — used when a single
+   *  role-based "Next Action" block already owns navigation, so the same CTAs
+   *  don't repeat on one surface. The i18n keys stay defined for reuse. */
+  showCtas?: boolean;
 }) {
   const t = await getTranslations("auth.dashboard.firstUse");
   const linkCls =
@@ -95,17 +101,19 @@ export async function DashboardFirstUsePanel({
         ))}
       </ol>
 
-      <div className="flex flex-wrap gap-2">
-        <Link href="/dashboard/profile" className={cn(linkCls)}>
-          {t("completeProfileCta")} →
-        </Link>
-        <Link href="/dashboard/journal" className={cn(linkCls)}>
-          {t("addJournalCta")} →
-        </Link>
-        <Link href="/dashboard/account" className={cn(linkCls)}>
-          {t("reviewRolesCta")} →
-        </Link>
-      </div>
+      {showCtas && (
+        <div className="flex flex-wrap gap-2">
+          <Link href="/dashboard/profile" className={cn(linkCls)}>
+            {t("completeProfileCta")} →
+          </Link>
+          <Link href="/dashboard/journal" className={cn(linkCls)}>
+            {t("addJournalCta")} →
+          </Link>
+          <Link href="/dashboard/account" className={cn(linkCls)}>
+            {t("reviewRolesCta")} →
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

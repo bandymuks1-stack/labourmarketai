@@ -141,12 +141,18 @@ describe("Guard: at most one primary action per room (page level)", () => {
   }
 
   it("the /dashboard primary CTA is a real interactive element (not a dead card)", () => {
-    const src = read(`${DASH}/page.tsx`);
+    // The single /dashboard primary CTA moved into <DashboardNextAction>
+    // (slice role-next-action-simplicity-v1): one role-based gradient CTA,
+    // mounted from the page. Assert it's mounted and the gradient lives in a
+    // real interactive element inside that component.
+    const page = read(`${DASH}/page.tsx`);
+    expect(page).toMatch(/<DashboardNextAction\b/);
+    const src = read("components/app/dashboard-next-action.tsx");
     const idx = src.indexOf("from-brand-blue to-brand-cyan");
-    expect(idx, "expected the /dashboard primary CTA gradient").toBeGreaterThan(0);
+    expect(idx, "expected the Next Action primary CTA gradient").toBeGreaterThan(0);
     expect(
       isInteractive(controllingOpener(src, idx)?.tag ?? null),
-      "the /dashboard primary CTA must be a <Link>/<Button>/<a>, not a styled <div>",
+      "the Next Action primary CTA must be a <Link>/<Button>/<a>, not a styled <div>",
     ).toBe(true);
   });
 });

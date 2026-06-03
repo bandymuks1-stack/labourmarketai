@@ -1750,6 +1750,44 @@
         "workJournal": "Work journal",
         "workJournalDesc": "Log a real work-journal entry."
       },
+      "nextAction": {
+        "eyebrow": "Next step",
+        "worker_complete_profile": {
+          "title": "Complete your profile",
+          "body": "Add what you do and your skills, so your work record means something.",
+          "cta": "Complete profile"
+        },
+        "worker_first_entry": {
+          "title": "Add your first work entry",
+          "body": "Your profile is set. Write down something you did — it stays private until you choose to share it.",
+          "cta": "Create entry"
+        },
+        "worker_waiting": {
+          "title": "Your entries are waiting for confirmation",
+          "body": "Saved and private. Waiting for a manager to confirm: {waiting}. Nothing else is needed from you right now.",
+          "cta": "Check evidence status"
+        },
+        "worker_all_confirmed": {
+          "title": "You're all set",
+          "body": "Every entry is confirmed. Add a new one to keep your work record growing.",
+          "cta": "Add an entry"
+        },
+        "manager_review_pending": {
+          "title": "Review worker entries",
+          "body": "Entries waiting for your review: {pending}.",
+          "cta": "Review entries"
+        },
+        "manager_invite": {
+          "title": "Invite a worker",
+          "body": "No entries are waiting. Invite a worker or open your team to get started.",
+          "cta": "Open workspace"
+        },
+        "customer_requests": {
+          "title": "Manage your requests",
+          "body": "Create a new request or track the status of the ones you already sent.",
+          "cta": "Open requests"
+        }
+      },
       "section": {
         "offer": {
           "title": "What I offer"
