@@ -9,6 +9,7 @@ import {
   EvidenceStatusStrip,
   type EvidenceStatus,
 } from "@/components/app/evidence-status-strip";
+import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 
@@ -202,7 +203,12 @@ export default async function InboxPage({
       </header>
 
       {pending.length === 0 ? (
-        <p className="text-sm text-text-secondary">{t("inbox.empty")}</p>
+        <EmptyState
+          testId="inbox-empty-state"
+          title={t("inbox.emptyTitle")}
+          why={t("inbox.empty")}
+          next={t("inbox.emptyNext")}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {pending.map((e) => (

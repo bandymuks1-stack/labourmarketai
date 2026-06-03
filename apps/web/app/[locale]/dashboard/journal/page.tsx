@@ -19,6 +19,7 @@ import {
   deriveReviewTimeline,
 } from "@/lib/journal/review-status";
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
+import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { Link } from "@/lib/i18n/navigation";
@@ -375,14 +376,18 @@ export default async function JournalPage({
             )}
           </h2>
           {/* ONE clear primary action — jump to the create/edit composer below
-              (the single create surface; no duplicate route). */}
-          <a
-            href="#journal-composer"
-            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
-            data-testid="journal-new-entry-cta"
-          >
-            + {t("newEntry")}
-          </a>
+              (the single create surface; no duplicate route). When the list is
+              empty the EmptyState below owns the single primary CTA instead, so
+              this header button only shows once there are entries. */}
+          {(entries ?? []).length > 0 && (
+            <a
+              href="#journal-composer"
+              className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+              data-testid="journal-new-entry-cta"
+            >
+              + {t("newEntry")}
+            </a>
+          )}
         </div>
         {/* Honest "who can confirm" line above the entry list: the status chips
             below show "confirmed / awaiting", so name plainly who can actually
@@ -405,7 +410,13 @@ export default async function JournalPage({
           />
         )}
         {(entries ?? []).length === 0 ? (
-          <p className="text-sm text-text-secondary">{t("listEmpty")}</p>
+          <EmptyState
+            testId="journal-empty-state"
+            title={t("listEmptyTitle")}
+            why={t("listEmpty")}
+            next={t("listEmptyNext")}
+            cta={{ label: t("listEmptyCta"), href: "#journal-composer" }}
+          />
         ) : (
           <ul className="flex flex-col gap-3">
             {(entries ?? []).map((e) => {

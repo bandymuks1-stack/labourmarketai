@@ -47,8 +47,20 @@ type Entry = { room: string; key: string; src: Source };
 // The empty-state copy contract. Every key here is rendered by an empty-state
 // branch in the room's page/section (wiring asserted below).
 const EMPTY_STATE_KEYS: Entry[] = [
-  // journal room (split namespace)
+  // journal room (split namespace) — first-use empty state (slice
+  // first-use-empty-states-v1): title + why + next + a real CTA.
   { room: "journal", key: "listEmpty", src: "journal" },
+  { room: "journal", key: "listEmptyTitle", src: "journal" },
+  { room: "journal", key: "listEmptyNext", src: "journal" },
+  { room: "journal", key: "listEmptyCta", src: "journal" },
+  // manager inbox empty (was uncovered) — explanatory, no fake CTA.
+  { room: "inbox", key: "inbox.empty", src: "journal" },
+  { room: "inbox", key: "inbox.emptyTitle", src: "journal" },
+  { room: "inbox", key: "inbox.emptyNext", src: "journal" },
+  // worker profile evidence empty (was uncovered).
+  { room: "workerEvidence", key: "workerEvidence.empty", src: "mono" },
+  { room: "workerEvidence", key: "workerEvidence.emptyTitle", src: "mono" },
+  { room: "workerEvidence", key: "workerEvidence.emptyCta", src: "mono" },
   { room: "journal", key: "noContext.none", src: "journal" },
   { room: "journal", key: "noContext.pending", src: "journal" },
   { room: "journal", key: "noContext.roster", src: "journal" },
@@ -153,10 +165,25 @@ describe("Guard: empty-state copy carries no overclaim", () => {
 });
 
 describe("Guard: rooms still render their empty-state branches", () => {
-  it("journal page renders the no-context + empty-list states", () => {
+  it("journal page renders the no-context + empty-list states (via EmptyState)", () => {
     const src = read("app/[locale]/dashboard/journal/page.tsx");
     expect(src).toMatch(/noContext/);
     expect(src).toMatch(/listEmpty/);
+    expect(src).toMatch(/<EmptyState\b/);
+  });
+
+  it("manager inbox renders an EmptyState when nothing is waiting", () => {
+    const src = read("app/[locale]/dashboard/inbox/page.tsx");
+    expect(src).toMatch(/pending\.length === 0/);
+    expect(src).toMatch(/<EmptyState\b/);
+    expect(src).toMatch(/inbox\.emptyTitle/);
+  });
+
+  it("worker evidence card renders an EmptyState when there's no evidence", () => {
+    const src = read("components/app/worker-evidence-card.tsx");
+    expect(src).toMatch(/!hasAny/);
+    expect(src).toMatch(/<EmptyState\b/);
+    expect(src).toMatch(/emptyTitle/);
   });
 
   it("buyer requests section renders empty list + empty attachments", () => {
