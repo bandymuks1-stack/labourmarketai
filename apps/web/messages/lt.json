@@ -54,7 +54,7 @@
   "evidenceStatus": {
     "aria": "Įrodymo būsena",
     "self_declared": {
-      "label": "Mano įrašas",
+      "label": "Paties nurodyta",
       "hint": "Jūsų paties įrašas — tai, ką nurodėte patys."
     },
     "awaiting_confirmation": {

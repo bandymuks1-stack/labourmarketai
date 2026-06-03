@@ -17,7 +17,6 @@ import {
 import {
   deriveReviewResult,
   deriveReviewTimeline,
-  type ReviewResult,
 } from "@/lib/journal/review-status";
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
 import { createClient } from "@/lib/supabase/server";
@@ -33,16 +32,6 @@ const WORKER_RELATIONSHIPS = [
   "owner",
   "collaborator",
 ];
-
-// Worker-facing review/evidence result per entry (slice
-// manager-review-evidence-result-v1). Derived purely from the append-only
-// evidence rows; latest decision wins.
-const STATUS_CLASS: Record<ReviewResult, string> = {
-  submitted: "text-state-warning",
-  approved: "text-state-success",
-  rejected: "text-state-error",
-  changes_requested: "text-brand-blue",
-};
 
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
  *  against an engagement context; entries stay private (visibility 'closed')
@@ -420,10 +409,12 @@ export default async function JournalPage({
         ) : (
           <ul className="flex flex-col gap-3">
             {(entries ?? []).map((e) => {
-              const status = deriveReviewResult(e.journal_entry_confirmations);
               // Evidence Decision Timeline v1 — the real, ordered human-decision
               // history (append-only rows). Empty while still submitted → the
               // timeline shows "created → waiting", never a fabricated step.
+              // This is the SINGLE status display per entry; the old top-right
+              // status chip was removed (polish v1) — it repeated the timeline's
+              // terminal step and used different words for the same state.
               const timeline = deriveReviewTimeline(e.journal_entry_confirmations);
               const metrics = e.journal_entry_metrics ?? [];
               const area =
@@ -449,14 +440,7 @@ export default async function JournalPage({
                       : undefined
                   }
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm text-text-primary">{e.original_text}</p>
-                    <span
-                      className={`shrink-0 font-mono text-[11px] uppercase tracking-label ${STATUS_CLASS[status]}`}
-                    >
-                      {t(`entry.status.${status}`)}
-                    </span>
-                  </div>
+                  <p className="text-sm text-text-primary">{e.original_text}</p>
                   <EvidenceDecisionTimeline
                     createdAt={e.created_at}
                     events={timeline}
