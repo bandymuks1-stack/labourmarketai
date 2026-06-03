@@ -117,6 +117,14 @@
       "confirmed": "Confirmed"
     },
     "projectNote": "Entries can be linked to a project — the data model is ready, but no entry is linked yet and nothing is filled automatically. The projects / sites / client layer is filled in a separate slice.",
+    "reviewClarity": {
+      "lead": "Your review is the real confirmation step — it turns a worker's self-declared entry into confirmed evidence. Only a manager, the owner, or an external (client) manager can do this, and every confirmation is a real human decision.",
+      "actionsTitle": "What each action does",
+      "approveMeans": "Confirm entry — it becomes confirmed evidence for the worker.",
+      "confirmSkillsMeans": "Confirm skills — also marks the picked declared skills as verified.",
+      "requestChangesMeans": "Request changes — sends it back; it stays self-declared until updated.",
+      "rejectMeans": "Reject — it stays the worker's own self-declared record, not confirmed."
+    },
     "openReport": "Review report →",
     "approve": "Approve",
     "cancel": "Cancel",
