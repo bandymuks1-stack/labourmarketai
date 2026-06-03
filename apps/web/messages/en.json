@@ -47,7 +47,9 @@
     "selfDeclared": "Self-declared",
     "awaitingNote": "Awaiting manager confirmation.",
     "systemEntries": "System-recorded work entries",
-    "empty": "No skills or work entries yet. Add skills or write a journal entry.",
+    "empty": "Evidence appears once you create a journal entry and a manager reviews it.",
+    "emptyTitle": "No evidence yet",
+    "emptyCta": "Go to your journal",
     "whoCanConfirm": "Who can confirm an entry today: your manager, the business owner, or an external (client) manager — the people who actually oversee your work. Until one of them confirms it, every entry stays your own self-declared record.",
     "footnote": "Skills can be self-declared, evidenced by system activity, or confirmed by a manager. Nothing is confirmed automatically."
   },

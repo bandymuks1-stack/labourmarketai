@@ -3,6 +3,7 @@ import {
   EvidenceStatusStrip,
   type EvidenceStatus,
 } from "@/components/app/evidence-status-strip";
+import { EmptyState } from "@/components/app/empty-state";
 
 /**
  * Worker-facing evidence view (v1). Shows what the worker's profile is actually
@@ -87,7 +88,18 @@ export async function WorkerEvidenceCard({
         {t("systemEntries")}: <span className="font-semibold text-text-primary">{journalEntries}</span>
       </p>
 
-      {!hasAny && <p className="text-[11px] text-text-muted">{t("empty")}</p>}
+      {!hasAny && (
+        <EmptyState
+          testId="worker-evidence-empty-state"
+          title={t("emptyTitle")}
+          why={t("empty")}
+          cta={{
+            label: t("emptyCta"),
+            href: "/dashboard/journal",
+            variant: "secondary",
+          }}
+        />
+      )}
 
       {/* Honest "who can confirm this today" line — names ONLY the confirmer
           roles the backend can actually store (manager / owner / external
