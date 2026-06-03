@@ -71,6 +71,15 @@
       "rejected": "Rejected",
       "submitted": "Submitted"
     },
+    "timeline": {
+      "title": "What happened with this entry",
+      "created": "Record created",
+      "waiting": "Waiting for human confirmation",
+      "approved": "Confirmed",
+      "changes_requested": "Changes requested",
+      "rejected": "Not confirmed",
+      "reasonLabel": "Reason"
+    },
     "delete": "Delete entry",
     "deleting": "Deleting...",
     "deleteConfirm": "Really delete this entry? It becomes soft-deleted — the row stays in history but won't show in the list.",

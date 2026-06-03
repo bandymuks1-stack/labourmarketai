@@ -110,3 +110,51 @@ export function deriveReviewOrigin(
   }
   return null;
 }
+
+/** One human decision in an entry's review history (Evidence Decision Timeline
+ *  v1). Ordered oldest→newest by the caller. `note` is the manager's REAL
+ *  reason text stored in confirmation_scope.note — null when none was given,
+ *  never a fabricated default. */
+export interface ReviewTimelineEvent {
+  readonly result: ReviewDecision;
+  readonly role: string | null;
+  readonly at: string | null;
+  readonly note: string | null;
+}
+
+/** Pull the real reason note off a confirmation row, or null. Never invents. */
+function rowNote(row: ConfirmationRow): string | null {
+  const scope = row.confirmation_scope as { note?: unknown } | null;
+  if (!scope || typeof scope.note !== "string") return null;
+  const trimmed = scope.note.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+/**
+ * Derive the ordered (oldest→newest) list of REAL human decisions on an entry,
+ * straight from the append-only evidence rows. Rows without a recognised
+ * decision are ignored. Returns [] while the entry is still `submitted` — the
+ * UI shows "record created → waiting" from this emptiness, never a fake step.
+ */
+export function deriveReviewTimeline(
+  confirmations: readonly ConfirmationRow[] | null | undefined,
+): ReviewTimelineEvent[] {
+  if (!confirmations || confirmations.length === 0) return [];
+  const ordered = [...confirmations].sort((a, b) => {
+    const ta = a.created_at ? Date.parse(a.created_at) : 0;
+    const tb = b.created_at ? Date.parse(b.created_at) : 0;
+    return ta - tb;
+  });
+  const events: ReviewTimelineEvent[] = [];
+  for (const row of ordered) {
+    const decision = rowDecision(row);
+    if (!decision) continue;
+    events.push({
+      result: decision,
+      role: row.confirmer_role ?? null,
+      at: row.created_at ?? null,
+      note: rowNote(row),
+    });
+  }
+  return events;
+}
