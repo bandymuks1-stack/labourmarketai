@@ -51,6 +51,21 @@
     "whoCanConfirm": "Who can confirm an entry today: your manager, the business owner, or an external (client) manager — the people who actually oversee your work. Until one of them confirms it, every entry stays your own self-declared record.",
     "footnote": "Skills can be self-declared, evidenced by system activity, or confirmed by a manager. Nothing is confirmed automatically."
   },
+  "evidenceStatus": {
+    "aria": "Evidence status",
+    "self_declared": {
+      "label": "Self-declared",
+      "hint": "Your own record — what you entered yourself."
+    },
+    "awaiting_confirmation": {
+      "label": "Waiting for confirmation",
+      "hint": "Waiting for your manager, the business owner, or an external (client) manager to confirm it."
+    },
+    "confirmed": {
+      "label": "Confirmed",
+      "hint": "Confirmed by your manager, the owner, or an external (client) manager."
+    }
+  },
   "profileHub": {
     "eyebrow": "Professional profile",
     "lead": "Your CV, skills and activity evidence in one place.",

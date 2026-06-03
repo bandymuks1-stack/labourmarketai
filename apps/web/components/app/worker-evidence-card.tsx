@@ -1,4 +1,8 @@
 import { getTranslations } from "next-intl/server";
+import {
+  EvidenceStatusStrip,
+  type EvidenceStatus,
+} from "@/components/app/evidence-status-strip";
 
 /**
  * Worker-facing evidence view (v1). Shows what the worker's profile is actually
@@ -27,10 +31,20 @@ export async function WorkerEvidenceCard({
   const hasAny =
     confirmedSkills.length > 0 || selfDeclaredSkills.length > 0 || journalEntries > 0;
 
+  // Evidence status strip — which honest states this profile currently has.
+  // self_declared is the baseline (the card always reflects the worker's own
+  // record); "confirmed" is added ONLY when a real manager-confirmed skill
+  // exists, so the strip never shows confirmed without a real signal.
+  const evidenceActive: EvidenceStatus[] = ["self_declared"];
+  if (selfDeclaredSkills.length > 0) evidenceActive.push("awaiting_confirmation");
+  if (confirmedSkills.length > 0) evidenceActive.push("confirmed");
+
   return (
     <section className="card-border flex flex-col gap-3 p-4" data-testid="worker-evidence-card">
       <h2 className="font-display text-base font-semibold text-text-primary">{t("title")}</h2>
       <p className="text-xs leading-relaxed text-text-secondary">{t("intro")}</p>
+
+      {hasAny && <EvidenceStatusStrip active={evidenceActive} />}
 
       {confirmedSkills.length > 0 && (
         <div className="flex flex-col gap-1.5" data-testid="worker-evidence-confirmed">
