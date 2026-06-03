@@ -117,6 +117,14 @@
       "confirmed": "Patvirtinta"
     },
     "projectNote": "Įrašai gali būti susieti su projektu — duomenų modelis paruoštas, bet kol kas nė vienas įrašas nesusietas ir niekas neužpildoma automatiškai. Projektų, objektų ir užsakovų sluoksnis pildomas atskirame pjūvyje.",
+    "reviewClarity": {
+      "lead": "Jūsų peržiūra yra tikrasis patvirtinimo žingsnis — ji paverčia darbuotojo paties nurodytą įrašą patvirtintu įrodymu. Tai gali padaryti tik vadovas, savininkas arba išorinis (kliento) vadovas, ir kiekvienas patvirtinimas yra realus žmogaus sprendimas.",
+      "actionsTitle": "Ką daro kiekvienas veiksmas",
+      "approveMeans": "Patvirtinti įrašą — jis tampa patvirtintu darbuotojo įrodymu.",
+      "confirmSkillsMeans": "Patvirtinti įgūdžius — pažymėti nurodyti įgūdžiai tampa patvirtinti.",
+      "requestChangesMeans": "Prašyti pataisymų — grąžinama darbuotojui; lieka paties nurodyta, kol bus atnaujinta.",
+      "rejectMeans": "Atmesti — lieka darbuotojo paties nurodytas įrašas, nepatvirtintas."
+    },
     "openReport": "Peržiūros ataskaita →",
     "approve": "Patvirtinti",
     "cancel": "Atšaukti",

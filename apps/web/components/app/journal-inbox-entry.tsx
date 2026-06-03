@@ -288,6 +288,26 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         </div>
       ) : null}
 
+      {/* Review clarity — what each action does to the worker's evidence, so
+          the reviewer confirms with intent. Shown only in the idle state to
+          avoid overloading the open forms. */}
+      {!done && mode === "idle" ? (
+        <div
+          className="flex flex-col gap-0.5 text-[10px] leading-relaxed text-text-muted"
+          data-testid={`inbox-review-clarity-${entry.id}`}
+        >
+          <span className="font-mono uppercase tracking-label">
+            {t("inbox.reviewClarity.actionsTitle")}
+          </span>
+          <span>{t("inbox.reviewClarity.approveMeans")}</span>
+          {declaredUnverified.length > 0 ? (
+            <span>{t("inbox.reviewClarity.confirmSkillsMeans")}</span>
+          ) : null}
+          <span>{t("inbox.reviewClarity.requestChangesMeans")}</span>
+          <span>{t("inbox.reviewClarity.rejectMeans")}</span>
+        </div>
+      ) : null}
+
       {/* Confirm-skills: pick which declared skills this entry proves → verify. */}
       {!done && mode === "confirm" ? (
         declaredUnverified.length === 0 ? (

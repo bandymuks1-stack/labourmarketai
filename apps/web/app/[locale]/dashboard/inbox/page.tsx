@@ -5,6 +5,10 @@ import {
   JournalInboxEntry,
   type InboxEntry,
 } from "@/components/app/journal-inbox-entry";
+import {
+  EvidenceStatusStrip,
+  type EvidenceStatus,
+} from "@/components/app/evidence-status-strip";
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 
@@ -145,6 +149,14 @@ export default async function InboxPage({
     }).length;
   }
 
+  // Manager Evidence Review Clarity v1 — the inbox lists only unconfirmed
+  // entries awaiting this reviewer, so the legend shows them as self-declared +
+  // awaiting. "confirmed" lights up ONLY when the caller already has real
+  // confirmed evidence in scope — never automatically.
+  const reviewLegend: EvidenceStatus[] = ["self_declared"];
+  if (pending.length > 0) reviewLegend.push("awaiting_confirmation");
+  if (confirmedCount > 0) reviewLegend.push("confirmed");
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
@@ -170,6 +182,16 @@ export default async function InboxPage({
         >
           {t("inbox.projectNote")}
         </p>
+        {/* Review clarity — what the manager's review actually does, plus the
+            shared evidence-status legend so the reviewer sees the lifecycle
+            their decision moves an entry through. Honest, no auto-confirm. */}
+        <p
+          className="text-xs leading-relaxed text-text-secondary"
+          data-testid="inbox-review-clarity-lead"
+        >
+          {t("inbox.reviewClarity.lead")}
+        </p>
+        <EvidenceStatusStrip active={reviewLegend} data-testid="inbox-evidence-status-strip" />
         <Link
           href="/dashboard/inbox/report"
           className="w-fit text-xs font-medium text-brand-blue hover:underline"
