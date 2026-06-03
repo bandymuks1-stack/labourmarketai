@@ -81,9 +81,13 @@ describe("Guard: confirmer-role labels match the backend, no broad roles", () =>
     });
   }
 
-  it("the journal page review filter uses exactly the supported set", () => {
-    const page = read("app/[locale]/dashboard/journal/page.tsx");
-    expect(page).toMatch(/\["manager",\s*"owner",\s*"external_manager"\]/);
+  it("the journal decision timeline filters confirmer roles to the supported set", () => {
+    // The per-entry confirmer-role allow-list moved from the journal page into
+    // the Evidence Decision Timeline component (slice
+    // evidence-decision-timeline-v1) when the latest-wins origin line became a
+    // full decision history. The honesty pin follows it.
+    const timeline = read("components/app/evidence-decision-timeline.tsx");
+    expect(timeline).toMatch(/\["manager",\s*"owner",\s*"external_manager"\]/);
   });
 });
 

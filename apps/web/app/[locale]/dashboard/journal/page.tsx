@@ -15,10 +15,11 @@ import {
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
 import {
-  deriveReviewOrigin,
   deriveReviewResult,
+  deriveReviewTimeline,
   type ReviewResult,
 } from "@/lib/journal/review-status";
+import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
 import { createClient } from "@/lib/supabase/server";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { Link } from "@/lib/i18n/navigation";
@@ -420,12 +421,10 @@ export default async function JournalPage({
           <ul className="flex flex-col gap-3">
             {(entries ?? []).map((e) => {
               const status = deriveReviewResult(e.journal_entry_confirmations);
-              const origin = deriveReviewOrigin(e.journal_entry_confirmations);
-              const originRole =
-                origin?.role &&
-                ["manager", "owner", "external_manager"].includes(origin.role)
-                  ? t(`entry.confirmerRole.${origin.role}`)
-                  : null;
+              // Evidence Decision Timeline v1 — the real, ordered human-decision
+              // history (append-only rows). Empty while still submitted → the
+              // timeline shows "created → waiting", never a fabricated step.
+              const timeline = deriveReviewTimeline(e.journal_entry_confirmations);
               const metrics = e.journal_entry_metrics ?? [];
               const area =
                 metrics.find((m) => m.metric_slug === "quantity") ??
@@ -458,13 +457,10 @@ export default async function JournalPage({
                       {t(`entry.status.${status}`)}
                     </span>
                   </div>
-                  {origin && (
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
-                      {t("entry.reviewedBy")}
-                      {originRole ? ` ${originRole}` : ""}
-                      {origin.at ? ` · ${origin.at.slice(0, 10)}` : ""}
-                    </p>
-                  )}
+                  <EvidenceDecisionTimeline
+                    createdAt={e.created_at}
+                    events={timeline}
+                  />
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
                     {dir?.value_text && <span>{tProf(dir.value_text)}</span>}
                     {site?.value_text && <span>{site.value_text}</span>}

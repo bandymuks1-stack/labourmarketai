@@ -71,6 +71,15 @@
       "rejected": "Atmesta",
       "submitted": "Pateikta"
     },
+    "timeline": {
+      "title": "Kas įvyko su šiuo įrašu",
+      "created": "Įrašas sukurtas",
+      "waiting": "Laukia žmogaus patvirtinimo",
+      "approved": "Patvirtinta",
+      "changes_requested": "Paprašyta pataisyti",
+      "rejected": "Nepatvirtinta",
+      "reasonLabel": "Priežastis"
+    },
     "delete": "Pašalinti įrašą",
     "deleting": "Šalinama...",
     "deleteConfirm": "Tikrai pašalinti šį įrašą? Veiksmas grąžinamas — soft-delete (įrašas nedingsta iš istorijos, tik nebematomas sąraše).",
