@@ -51,6 +51,21 @@
     "whoCanConfirm": "Kas šiandien gali patvirtinti įrašą: jūsų vadovas, įmonės savininkas arba išorinis (kliento) vadovas — tie, kurie realiai prižiūri jūsų darbą. Kol kuris nors iš jų įrašo nepatvirtins, jis lieka jūsų paties nurodytas.",
     "footnote": "Įgūdžiai gali būti paties nurodyti, įrodyti sistemos veikla arba patvirtinti vadovo. Sistema nieko nepatvirtina automatiškai."
   },
+  "evidenceStatus": {
+    "aria": "Įrodymo būsena",
+    "self_declared": {
+      "label": "Mano įrašas",
+      "hint": "Jūsų paties įrašas — tai, ką nurodėte patys."
+    },
+    "awaiting_confirmation": {
+      "label": "Laukia patvirtinimo",
+      "hint": "Laukia, kol jūsų vadovas, įmonės savininkas arba išorinis (kliento) vadovas tai patvirtins."
+    },
+    "confirmed": {
+      "label": "Patvirtinta",
+      "hint": "Patvirtino jūsų vadovas, savininkas arba išorinis (kliento) vadovas."
+    }
+  },
   "profileHub": {
     "eyebrow": "Profesinis profilis",
     "lead": "CV, įgūdžiai ir veiklos įrodymai vienoje vietoje.",

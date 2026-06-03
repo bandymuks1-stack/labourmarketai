@@ -5,6 +5,10 @@ import {
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
+import {
+  EvidenceStatusStrip,
+  type EvidenceStatus,
+} from "@/components/app/evidence-status-strip";
 import { formatDuration } from "@/lib/journal/format-duration";
 import {
   groupLinkedSkillIdsByEntry,
@@ -284,6 +288,21 @@ export default async function JournalPage({
     entries = rows.filter((e) => !e.deleted_at && !e.superseded_by);
   }
 
+  // Evidence Status Strip (v1) for the list status zone — a compact legend
+  // showing which honest states the worker's entries are actually in. Derived
+  // purely from the existing review result; "confirmed" lights up ONLY when a
+  // real approved confirmation exists, never automatically.
+  const evidenceStatuses = (entries ?? []).map((e) =>
+    deriveReviewResult(e.journal_entry_confirmations),
+  );
+  const journalEvidenceActive: EvidenceStatus[] = ["self_declared"];
+  if (
+    evidenceStatuses.some((s) => s === "submitted" || s === "changes_requested")
+  )
+    journalEvidenceActive.push("awaiting_confirmation");
+  if (evidenceStatuses.some((s) => s === "approved"))
+    journalEvidenceActive.push("confirmed");
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-1">
@@ -386,6 +405,15 @@ export default async function JournalPage({
         >
           {t("whoCanConfirm")}
         </p>
+        {/* Evidence Status Strip — one compact legend in the status zone (not
+            per row, to avoid overloading the list) that visually separates a
+            worker's own self-declared record from a real confirmation. */}
+        {(entries ?? []).length > 0 && (
+          <EvidenceStatusStrip
+            active={journalEvidenceActive}
+            data-testid="journal-evidence-status-strip"
+          />
+        )}
         {(entries ?? []).length === 0 ? (
           <p className="text-sm text-text-secondary">{t("listEmpty")}</p>
         ) : (
