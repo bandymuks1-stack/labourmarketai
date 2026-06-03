@@ -375,6 +375,17 @@ export default async function JournalPage({
             + {t("newEntry")}
           </a>
         </div>
+        {/* Honest "who can confirm" line above the entry list: the status chips
+            below show "confirmed / awaiting", so name plainly who can actually
+            move an entry to confirmed today — only manager / owner / external
+            (client) manager. Until then it stays self-declared. No broad
+            confirmer is implied. */}
+        <p
+          className="text-[11px] leading-relaxed text-text-muted"
+          data-testid="journal-who-can-confirm"
+        >
+          {t("whoCanConfirm")}
+        </p>
         {(entries ?? []).length === 0 ? (
           <p className="text-sm text-text-secondary">{t("listEmpty")}</p>
         ) : (

@@ -31,6 +31,7 @@
   "savedBody": "Your confirmed details were added to your work history.",
   "savedBodyWithDetails": "Saved to your work history with {count} structured detail(s).",
   "savedConfirmNote": "It stays private until a manager or client confirms it.",
+  "whoCanConfirm": "Only a manager, the owner, or an external (client) manager can confirm an entry — the people who oversee your work. Until then it is your own self-declared record.",
   "savedSeeEntries": "See your entries",
   "savedOpenProfile": "Open your profile",
   "pilotBackboneNote": "Your entries are private until you choose otherwise. The confirmation layer is shown only when there is a real confirmation.",

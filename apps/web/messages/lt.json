@@ -48,6 +48,7 @@
     "awaitingNote": "Laukia vadovo patvirtinimo.",
     "systemEntries": "Sistemos užfiksuoti darbo įrašai",
     "empty": "Kol kas nėra įgūdžių ar darbo įrašų. Pridėkite įgūdžių arba parašykite žurnalo įrašą.",
+    "whoCanConfirm": "Kas šiandien gali patvirtinti įrašą: jūsų vadovas, įmonės savininkas arba išorinis (kliento) vadovas — tie, kurie realiai prižiūri jūsų darbą. Kol kuris nors iš jų įrašo nepatvirtins, jis lieka jūsų paties nurodytas.",
     "footnote": "Įgūdžiai gali būti paties nurodyti, įrodyti sistemos veikla arba patvirtinti vadovo. Sistema nieko nepatvirtina automatiškai."
   },
   "profileHub": {

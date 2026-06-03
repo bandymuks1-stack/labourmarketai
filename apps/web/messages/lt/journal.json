@@ -31,6 +31,7 @@
   "savedBody": "Jūsų patvirtinti duomenys pridėti prie darbo istorijos.",
   "savedBodyWithDetails": "Išsaugota darbo istorijoje su {count} struktūruota (-omis) detale (-ėmis).",
   "savedConfirmNote": "Įrašas privatus, kol jo nepatvirtins vadovas ar klientas.",
+  "whoCanConfirm": "Įrašą gali patvirtinti tik vadovas, savininkas arba išorinis (kliento) vadovas — tie, kurie prižiūri jūsų darbą. Iki tol tai jūsų paties nurodytas įrašas.",
   "savedSeeEntries": "Žiūrėti įrašus",
   "savedOpenProfile": "Atidaryti profilį",
   "pilotBackboneNote": "Įrašai privatūs, kol nepasirinksite kitaip. Patvirtinimo sluoksnis rodomas tik kai yra realus patvirtinimas.",
