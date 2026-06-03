@@ -75,6 +75,19 @@ export async function WorkerEvidenceCard({
 
       {!hasAny && <p className="text-[11px] text-text-muted">{t("empty")}</p>}
 
+      {/* Honest "who can confirm this today" line — names ONLY the confirmer
+          roles the backend can actually store (manager / owner / external
+          (client) manager) and states plainly that an entry stays
+          self-declared until one of them confirms it. No broad confirmer
+          (parent/teacher/buyer) is claimed; adding those is a deferred
+          migration (docs/design/universal-confirmation-roles-v1.md). */}
+      <p
+        className="text-[11px] leading-relaxed text-text-secondary"
+        data-testid="worker-evidence-who-can-confirm"
+      >
+        {t("whoCanConfirm")}
+      </p>
+
       <p className="text-[10px] leading-relaxed text-text-muted">{t("footnote")}</p>
     </section>
   );
