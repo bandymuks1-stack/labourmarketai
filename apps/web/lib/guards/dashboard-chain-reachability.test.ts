@@ -16,15 +16,21 @@ function read(rel: string): string {
 }
 
 describe("dashboard surfaces the chain entry points", () => {
-  it("the dashboard page mounts <DashboardChainActions /> in BOTH render branches", () => {
+  it("the dashboard keeps the org chain entry points + a Next Action in both branches", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(
       /from\s+["']@\/components\/app\/dashboard-chain-actions["']/,
     );
-    // The dashboard has TWO return branches: company/agency (role !== "worker")
-    // and worker. The chain actions + accept card must render in BOTH, or the
-    // company/agency user (who hits the first branch) sees no invite/accept.
-    expect((page.match(/<DashboardChainActions\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    // The dashboard has TWO return branches: company/agency/customer
+    // (role !== "worker") and worker. The org branch keeps the chain-actions
+    // grid so an owner always has the invite / enable-review / review-inbox
+    // entry points (slice role-next-action-simplicity-v1 removed the worker's
+    // lone "Work journal" chain card — it duplicated the Next Action + Proof
+    // card; the journal stays reachable via primary nav + those surfaces).
+    expect((page.match(/<DashboardChainActions\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
+    // BOTH branches surface the single role-based primary Next Action + the
+    // accept-invitation card, so neither user lands without a clear next move.
+    expect((page.match(/<DashboardNextAction\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
     expect((page.match(/<WorkerInvitationsCard\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 
