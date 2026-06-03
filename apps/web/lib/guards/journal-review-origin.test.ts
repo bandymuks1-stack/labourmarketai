@@ -60,6 +60,14 @@ describe("the journal page surfaces the review origin (via the timeline)", () =>
     expect(timeline).toMatch(/entry\.confirmerRole\.\$\{ev\.role\}/);
     expect(timeline).toMatch(/\.slice\(0, 10\)/);
   });
+
+  it("the timeline is the SINGLE per-entry status surface (no duplicate chip)", () => {
+    // Polish v1: the old top-right per-entry status chip was removed because it
+    // repeated the timeline's terminal step and used different words for the
+    // same state ("Atmesta" vs "Nepatvirtinta"). Keep it gone.
+    expect(page).not.toMatch(/entry\.status\.\$\{status\}/);
+    expect(page).not.toMatch(/STATUS_CLASS/);
+  });
 });
 
 describe("review-origin i18n present (lt + en journal namespace)", () => {
