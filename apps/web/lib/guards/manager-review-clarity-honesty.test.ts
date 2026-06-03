@@ -169,3 +169,82 @@ describe("Guard: the reviewClarity detectors are real", () => {
     }
   });
 });
+
+// ── 5. The after-action RESULT messages are clear, distinct and honest ─────
+//
+// slice form-result-feedback-clarity-v1: after a manager confirms / requests
+// changes / rejects, the green result box must say a distinct, human outcome —
+// not a one-word label, an auto/AI claim, or a raw error/RPC dump.
+
+const RESULT_DECISION_KEYS = ["approved", "changesRequested", "rejected"] as const;
+
+// Tokens that would betray a raw DB/RPC/stack dump leaking into user copy.
+const RAW_DUMP = /\b(rpc|econnrefused|stacktrace|undefined|null|exception)\b|pgrst\d*|\b[45]\d\d\b|error:/i;
+
+// Each decision result must carry its own true meaning (not be swappable).
+const RESULT_MEANS = {
+  en: { approved: /confirm/i, changesRequested: /change/i, rejected: /not confirmed/i },
+  lt: { approved: /patvirtin/i, changesRequested: /pataisym/i, rejected: /nepatvirtin/i },
+} as const;
+
+function result(loc: "lt" | "en"): Record<string, string> {
+  const inbox = (loadJson(`messages/${loc}/journal.json`).inbox ?? {}) as {
+    result?: Record<string, string>;
+  };
+  return inbox.result ?? {};
+}
+
+describe("Guard: manager review result messages are clear, distinct and honest", () => {
+  for (const loc of LOCALES) {
+    it(`${loc}: each decision result is present, non-trivial and mutually distinct`, () => {
+      const r = result(loc);
+      const seen = new Set<string>();
+      for (const k of RESULT_DECISION_KEYS) {
+        const v = r[k] ?? "";
+        // a real sentence, not a one-word stub like "Approved."
+        expect(v.trim().length > 12, `${loc} inbox.result.${k} too terse: "${v}"`).toBe(true);
+        expect(seen.has(v), `${loc} inbox.result.${k} duplicates another decision: "${v}"`).toBe(
+          false,
+        );
+        seen.add(v);
+      }
+    });
+
+    it(`${loc}: each decision result carries its own true meaning`, () => {
+      const r = result(loc);
+      for (const k of RESULT_DECISION_KEYS) {
+        expect(
+          RESULT_MEANS[loc][k].test(r[k] ?? ""),
+          `${loc} inbox.result.${k} must convey its decision: "${r[k]}"`,
+        ).toBe(true);
+      }
+    });
+
+    it(`${loc}: no result string fakes auto/AI confirmation or leaks a raw dump`, () => {
+      const r = result(loc);
+      for (const [k, v] of Object.entries(r)) {
+        expect(FAKE_AUTO_CONFIRM[loc].test(v), `${loc} inbox.result.${k} fakes auto: "${v}"`).toBe(
+          false,
+        );
+        expect(FAKE_AI_CONFIRM[loc].test(v), `${loc} inbox.result.${k} fakes AI: "${v}"`).toBe(
+          false,
+        );
+        expect(RAW_DUMP.test(v), `${loc} inbox.result.${k} leaks a raw dump: "${v}"`).toBe(false);
+      }
+    });
+  }
+});
+
+describe("Guard: the result-clarity detectors are real", () => {
+  it("flags terse stubs and raw dumps; passes the honest result copy", () => {
+    expect(RAW_DUMP.test("PGRST116: row not found")).toBe(true);
+    expect(RAW_DUMP.test("request failed with 500")).toBe(true);
+    expect(RAW_DUMP.test("Entry confirmed — it's now confirmed evidence.")).toBe(false);
+    // the live decision results pass every honesty + distinctness check
+    for (const loc of LOCALES) {
+      const r = result(loc);
+      const vals = RESULT_DECISION_KEYS.map((k) => r[k] ?? "");
+      expect(new Set(vals).size).toBe(RESULT_DECISION_KEYS.length);
+    }
+  });
+});
