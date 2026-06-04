@@ -110,7 +110,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // for the company-profile-request-v1 slice (additive company_profile_request
     // migration: org-detail columns + 4-state verification ladder +
     // save_company_setup upsert that requests but never fabricates verified;
-    // committed + queued, NOT applied). The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 44/);
+    // committed + queued, NOT applied), then to 45 for the
+    // company-verification-admin slice (additive admin_set_company_verification
+    // SECURITY DEFINER RPC, admin-only + audit-logged, applied to prod after
+    // owner approval). The baseline only ever grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 45/);
   });
 });

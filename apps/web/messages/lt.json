@@ -999,7 +999,8 @@
       "telemetry": "Operacijų telemetrija",
       "languageFeedback": "Kalbos pranešimai",
       "communication": "Pokalbiai",
-      "support": "Pagalbos pokalbiai"
+      "support": "Pagalbos pokalbiai",
+      "companyVerification": "Įmonių patvirtinimas"
     },
     "drafts": {
       "title": "Operaciniai juodraščiai",
@@ -1060,6 +1061,48 @@
         "company_request": "Įmonės paklausa",
         "agency_offer": "Agentūros pasiūlymas",
         "buyer_request": "Pirkėjo užklausa"
+      }
+    },
+    "companyVerification": {
+      "eyebrow": "ĮMONIŲ PATVIRTINIMAS",
+      "title": "Įmonių patvirtinimo užklausos",
+      "subtitle": "Peržiūrėkite įmonių profilių užklausas ir nuspręskite jų patvirtinimo būseną. Patvirtinimą rankiniu būdu atlieka žmogus — niekas nepatvirtinama automatiškai.",
+      "back": "Grįžti į operacijų skydą",
+      "empty": "Įmonių patvirtinimo užklausų dar nėra.",
+      "migrationBlocker": "Ši funkcija dar nepasiekiama — administratoriaus patvirtinimo migracija dar nepritaikyta. Bandykite vėliau.",
+      "pendingCount": "{count, plural, =0 {Nėra užklausų, laukiančių patvirtinimo} one {# užklausa laukia patvirtinimo} few {# užklausos laukia patvirtinimo} other {# užklausų laukia patvirtinimo}}",
+      "user": "Vartotojas",
+      "fields": {
+        "country": "Šalis",
+        "registrationCode": "Registracijos kodas",
+        "address": "Adresas / vieta",
+        "website": "Svetainė",
+        "contactEmail": "Kontaktinis el. paštas",
+        "contactPhone": "Kontaktinis telefonas",
+        "requesterRole": "Vaidmuo įmonėje",
+        "requestedAt": "Pateikta",
+        "note": "Pastaba"
+      },
+      "status": {
+        "draft": "Juodraštis",
+        "pending_verification": "Laukia patvirtinimo",
+        "unverified": "Nepatvirtinta",
+        "verified": "Patvirtinta"
+      },
+      "noteLabel": "Patvirtinimo pastaba (neprivaloma)",
+      "notePlaceholder": "Kodėl patvirtinta / nepatvirtinta — matoma administratoriams.",
+      "actions": {
+        "approve": "Patvirtinti",
+        "keepUnverified": "Palikti nepatvirtintą",
+        "returnToPending": "Grąžinti į laukiančias"
+      },
+      "result": {
+        "saved": "Patvirtinimo būsena atnaujinta.",
+        "notAdmin": "Veiksmas atmestas: tik administratoriui.",
+        "invalid": "Neteisinga užklausa.",
+        "notFound": "Įmonė nerasta.",
+        "needsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
+        "error": "Įvyko klaida. Pabandykite dar kartą."
       }
     }
   },

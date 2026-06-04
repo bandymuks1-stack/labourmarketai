@@ -999,7 +999,8 @@
       "telemetry": "Operations telemetry",
       "languageFeedback": "Language reports",
       "communication": "Conversations",
-      "support": "Support conversations"
+      "support": "Support conversations",
+      "companyVerification": "Company verification"
     },
     "drafts": {
       "title": "Operations drafts",
@@ -1060,6 +1061,48 @@
         "company_request": "Company request",
         "agency_offer": "Agency offer",
         "buyer_request": "Buyer request"
+      }
+    },
+    "companyVerification": {
+      "eyebrow": "COMPANY VERIFICATION",
+      "title": "Company verification requests",
+      "subtitle": "Review company profile requests and decide their verification status. Verification is a manual human decision — nothing is verified automatically.",
+      "back": "Back to operations panel",
+      "empty": "There are no company verification requests yet.",
+      "migrationBlocker": "This feature is not available yet — the admin verification migration has not been applied. Try later.",
+      "pendingCount": "{count, plural, =0 {No requests waiting for verification} one {# request waiting for verification} other {# requests waiting for verification}}",
+      "user": "User",
+      "fields": {
+        "country": "Country",
+        "registrationCode": "Registration code",
+        "address": "Address / location",
+        "website": "Website",
+        "contactEmail": "Contact email",
+        "contactPhone": "Contact phone",
+        "requesterRole": "Role in company",
+        "requestedAt": "Requested at",
+        "note": "Note"
+      },
+      "status": {
+        "draft": "Draft",
+        "pending_verification": "Pending verification",
+        "unverified": "Unverified",
+        "verified": "Verified"
+      },
+      "noteLabel": "Verification note (optional)",
+      "notePlaceholder": "Why verified / not verified — visible to admins.",
+      "actions": {
+        "approve": "Approve (verify)",
+        "keepUnverified": "Keep unverified",
+        "returnToPending": "Return to pending"
+      },
+      "result": {
+        "saved": "Verification status updated.",
+        "notAdmin": "Action rejected: admin only.",
+        "invalid": "Invalid request.",
+        "notFound": "Company not found.",
+        "needsMigration": "This feature is not available yet. Try later.",
+        "error": "Something went wrong. Please try again."
       }
     }
   },
