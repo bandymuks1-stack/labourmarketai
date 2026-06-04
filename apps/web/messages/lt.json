@@ -10,6 +10,7 @@
     "switchSpace": "Keisti erdvę",
     "addSpace": "Pridėti erdvę",
     "availableSpaces": "Galimos erdvės",
+    "comingLaterToggle": "Vėliau įjungiami moduliai (rodyti)",
     "profile": {
       "name": "Asmeninis profilis",
       "purpose": "Tvarkykite avatarą, CV, įgūdžius ir darbo statusą."
@@ -323,6 +324,54 @@
         "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
       "profileLink": "Mano gebėjimai (jei esate ir asmuo, ne tik įmonė)",
+      "setup": {
+        "formTitle": "Įmonės profilio užklausa",
+        "formSubtitle": "Pradėkite organizacijos profilį iš savo asmeninės paskyros. Iš pradžių tai juodraštis arba peržiūros užklausa — pilnam įmonės naudojimui reikia patvirtinimo.",
+        "existingHeading": "Įmonės profilis",
+        "legalName": "Įmonės teisinis pavadinimas",
+        "legalNameHelp": "Privaloma. 2–200 simbolių.",
+        "legalNamePlaceholder": "pvz. UAB / MB pavadinimas",
+        "country": "Šalis",
+        "countryPlaceholder": "pvz. LT",
+        "registrationCode": "Įmonės / registracijos kodas",
+        "registrationCodeHelp": "Neprivaloma. Padeda vėliau patvirtinti įmonę.",
+        "address": "Adresas / vieta",
+        "addressPlaceholder": "pvz. Gedimino pr. 1, Vilnius",
+        "website": "Svetainė",
+        "websitePlaceholder": "pvz. https://imone.lt",
+        "contactEmail": "Kontaktinis el. paštas",
+        "contactPhone": "Kontaktinis telefonas",
+        "requesterRole": "Jūsų vaidmuo įmonėje",
+        "requesterRoleOptions": {
+          "owner": "Savininkas",
+          "director": "Direktorius",
+          "manager": "Vadovas",
+          "hr": "Personalas (HR)",
+          "other": "Kita"
+        },
+        "verificationNotice": "Šis profilis kuriamas kaip užklausa, o ne kaip patvirtinta įmonė. Pilnam įmonės naudojimui reikia patvirtinimo, kurį rankiniu būdu atlieka žmogus — tai nevyksta savaime. Niekas netampa patvirtinta automatiškai.",
+        "saveDraft": "Išsaugoti juodraštį",
+        "submitRequest": "Pateikti patvirtinimo užklausą",
+        "statusDraftSaved": "Juodraštis išsaugotas. Galite tęsti vėliau.",
+        "statusSubmitted": "Užklausa pateikta peržiūrai (būsena: laukia patvirtinimo). Patvirtinimą rankiniu būdu atlieka žmogus.",
+        "statusNeedsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
+        "statusInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
+        "statusError": "Įvyko klaida. Pabandykite dar kartą.",
+        "migrationBlockerHeading": "Funkcija dar nepasiekiama",
+        "migrationBlockerBody": "Forma matoma, bet kol kas nepateikiama. Reikia pritaikyti DB migraciją (20260604120000). Pabandykite vėliau.",
+        "verificationStatus": {
+          "draft": "Juodraštis",
+          "pending_verification": "Laukia patvirtinimo",
+          "unverified": "Nepatvirtinta",
+          "verified": "Patvirtinta"
+        },
+        "verificationExplainer": {
+          "draft": "Juodraštis matomas tik jums. Pateikite užklausą, kai duomenys teisingi.",
+          "pending_verification": "Užklausa laukia žmogaus peržiūros. Pilnos įmonės funkcijos įsijungs tik po patvirtinimo.",
+          "unverified": "Įmonė dar nepatvirtinta. Galite naudotis ribotai, kol patvirtinimas neatliktas.",
+          "verified": "Įmonė patvirtinta žmogaus peržiūros metu."
+        }
+      },
       "workersBlocker": {
         "title": "Įmonės darbuotojų sąsaja — laukia migracijos",
         "subtitle": "Įmonės kelias laikinai blokuotas DB lygmenyje. Realus darbuotojų pridėjimas / pakvietimas jau veikia agentūros pusėje.",

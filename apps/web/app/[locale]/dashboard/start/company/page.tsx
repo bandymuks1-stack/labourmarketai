@@ -1,23 +1,41 @@
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
-import { addRole } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getOwnCompany,
+  type CompanyVerificationStatus,
+} from "@/lib/company/company-setup";
+import {
+  CompanySetupForm,
+  type CompanySetupFormLabels,
+} from "@/components/app/company-setup-form";
 
 /**
- * Stage 2 — Company setup (real persistence).
+ * Company profile-REQUEST setup (real persistence + honest verification).
  *
- * Mirrors `/dashboard/start/agency` for the company role. The same
- * `addRole('company', formData)` server action drives the insert
- * into `public.companies` (legal_name + display_name + country)
- * via the migration 0007 RPC. Idempotent on retry.
+ * Replaces the old one-field (`name` only) form. A user starts an
+ * organisation profile request from their personal account with real
+ * details (name, country, registration code, address, website, contact,
+ * their role in the company). The row is created with a verification ladder
+ * — draft → pending_verification → unverified → verified — and full company
+ * use is gated on a VERIFIED status that only a human admin can grant. This
+ * page never fakes a verified company.
+ *
+ * When migration 20260604120000 is not yet applied, getOwnCompany() returns
+ * kind: "needs-migration" and the page shows an explicit blocker (mirrors the
+ * buyer / customer pattern from migration 0026). No crash, no fake success.
  */
 
-async function startCompanyAction(formData: FormData): Promise<void> {
-  "use server";
-  await addRole("company", formData);
-}
+const KNOWN_REQUESTER_ROLES = ["owner", "director", "manager", "hr", "other"];
+
+const STATUS_TONE: Record<CompanyVerificationStatus, string> = {
+  draft: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+  pending_verification: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  unverified: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+  verified: "border-state-success/40 bg-state-success/5 text-state-success",
+};
 
 export default async function CompanyStartPage({
   params,
@@ -33,14 +51,47 @@ export default async function CompanyStartPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: company } = await supabase
-    .from("companies")
-    .select("id, legal_name, display_name, country, created_at")
-    .eq("profile_id", user.id)
-    .maybeSingle();
+  const t = await getTranslations("roleDashboards.company.setup");
+  const companyRead = await getOwnCompany();
+  const migrationNeeded = companyRead.kind === "needs-migration";
+  const company = companyRead.kind === "ok" ? companyRead.row : null;
 
   const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
   const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
+
+  const formLabels: CompanySetupFormLabels = {
+    title: t("formTitle"),
+    subtitle: t("formSubtitle"),
+    legalName: t("legalName"),
+    legalNameHelp: t("legalNameHelp"),
+    legalNamePlaceholder: t("legalNamePlaceholder"),
+    country: t("country"),
+    countryPlaceholder: t("countryPlaceholder"),
+    registrationCode: t("registrationCode"),
+    registrationCodeHelp: t("registrationCodeHelp"),
+    address: t("address"),
+    addressPlaceholder: t("addressPlaceholder"),
+    website: t("website"),
+    websitePlaceholder: t("websitePlaceholder"),
+    contactEmail: t("contactEmail"),
+    contactPhone: t("contactPhone"),
+    requesterRole: t("requesterRole"),
+    requesterRoleOptions: {
+      owner: t("requesterRoleOptions.owner"),
+      director: t("requesterRoleOptions.director"),
+      manager: t("requesterRoleOptions.manager"),
+      hr: t("requesterRoleOptions.hr"),
+      other: t("requesterRoleOptions.other"),
+    },
+    verificationNotice: t("verificationNotice"),
+    saveDraft: t("saveDraft"),
+    submitRequest: t("submitRequest"),
+    statusDraftSaved: t("statusDraftSaved"),
+    statusSubmitted: t("statusSubmitted"),
+    statusNeedsMigration: t("statusNeedsMigration"),
+    statusInvalid: t("statusInvalid"),
+    statusError: t("statusError"),
+  };
 
   return (
     <div className="flex flex-col gap-6" data-testid="company-start-page">
@@ -60,135 +111,97 @@ export default async function CompanyStartPage({
         ← {label("Grįžti į veiklos pradžią", "Back to activity start")}
       </Link>
 
+      {migrationNeeded ? (
+        <section
+          className="card-border flex flex-col gap-2 p-5"
+          data-testid="company-start-migration-blocker"
+        >
+          <header className="flex items-center gap-2">
+            <span className="rounded bg-state-warning/20 px-2 py-0.5 text-xs text-state-warning">
+              {label("blokuota", "blocked")}
+            </span>
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              {t("migrationBlockerHeading")}
+            </h2>
+          </header>
+          <p className="text-sm text-text-secondary">{t("migrationBlockerBody")}</p>
+        </section>
+      ) : null}
+
       {company ? (
         <section
           className="card-border flex flex-col gap-3 p-5"
-          data-testid="company-start-already-started"
+          data-testid="company-start-existing"
         >
-          <header className="flex items-center gap-2">
-            <span className="rounded bg-state-success/20 px-2 py-0.5 text-xs text-state-success">
-              {label("✓ Pradėta", "✓ Started")}
-            </span>
+          <header className="flex flex-wrap items-center gap-2">
             <h2 className="font-display text-lg font-semibold text-text-primary">
-              {label("Įmonės profilis pradėtas", "Company profile started")}
+              {t("existingHeading")}
             </h2>
+            <span
+              className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[company.verificationStatus]}`}
+              data-testid="company-start-verification-status"
+            >
+              {t(`verificationStatus.${company.verificationStatus}`)}
+            </span>
           </header>
+          <p
+            className="text-xs leading-relaxed text-text-secondary"
+            data-testid="company-start-verification-explainer"
+          >
+            {t(`verificationExplainer.${company.verificationStatus}`)}
+          </p>
           <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-xs text-text-muted">
-                {label("Teisinis pavadinimas", "Legal name")}
-              </dt>
+              <dt className="text-xs text-text-muted">{t("legalName")}</dt>
+              <dd className="text-text-primary">{company.legalName ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("country")}</dt>
+              <dd className="text-text-primary">{company.country ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("registrationCode")}</dt>
               <dd className="text-text-primary">
-                {company.legal_name ?? "—"}
+                {company.registrationCode ?? "—"}
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-text-muted">
-                {label("Šalis", "Country")}
-              </dt>
-              <dd className="text-text-primary">{company.country ?? "—"}</dd>
+              <dt className="text-xs text-text-muted">{t("address")}</dt>
+              <dd className="text-text-primary">{company.address ?? "—"}</dd>
             </div>
-            <div className="sm:col-span-2">
-              <dt className="text-xs text-text-muted">
-                {label("Sukurta", "Created at")}
-              </dt>
-              <dd className="text-text-primary">{company.created_at}</dd>
+            <div>
+              <dt className="text-xs text-text-muted">{t("website")}</dt>
+              <dd className="text-text-primary">{company.website ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("requesterRole")}</dt>
+              <dd className="text-text-primary">
+                {company.requesterRole
+                  ? KNOWN_REQUESTER_ROLES.includes(company.requesterRole)
+                    ? t(`requesterRoleOptions.${company.requesterRole}`)
+                    : company.requesterRole
+                  : "—"}
+              </dd>
             </div>
           </dl>
-          <p className="text-xs text-text-secondary">
-            {label(
-              "Šie duomenys saugomi public.companies lentelėje. Perkrovus puslapį būsena išliks.",
-              "This data is stored in public.companies. Reload preserves the state.",
-            )}
-          </p>
-
-          <section
-            className="card-border flex flex-col gap-2 p-4"
-            data-testid="company-start-workers-empty"
-          >
-            <h3 className="font-display text-sm font-semibold text-text-primary">
-              {label("Savi darbuotojai", "Own workers")}
-            </h3>
-            <p className="text-sm text-text-secondary">
-              {label(
-                "Dar nėra darbuotojų — pridėkite arba pakvieskite darbuotoją.",
-                "No workers yet — add or invite a worker.",
-              )}
-            </p>
-            <p className="text-xs text-text-secondary">
-              {label(
-                "Darbo skelbimų lentelė jau veikia — galite atidaryti įmonės dashboardą ir sukurti skelbimą.",
-                "Job postings already work — open the company dashboard to create one.",
-              )}
-            </p>
-          </section>
-
           <Link
             href={"/dashboard/company" as "/dashboard"}
             className="self-start text-sm text-brand-blue hover:underline"
             data-testid="company-start-goto-dashboard"
           >
-            {label("Eiti į įmonės dashboardą →", "Go to company dashboard →")}
+            {label("Eiti į įmonės erdvę →", "Go to company space →")}
           </Link>
         </section>
-      ) : (
+      ) : null}
+
+      {!migrationNeeded ? (
         <section
           className="card-border flex flex-col gap-4 p-5"
           data-testid="company-start-form-section"
         >
-          <header className="flex flex-col gap-1">
-            <h2 className="font-display text-lg font-semibold text-text-primary">
-              {label("Pradėti įmonės nustatymą", "Start company setup")}
-            </h2>
-            <p className="text-sm text-text-secondary">
-              {label(
-                "Vienas laukas — pavadinimas. Po pateikimo įrašoma į public.companies (legal_name + display_name), profile_roles pridedamas 'company' įrašas, aktyvus vaidmuo pasikeičia į 'company'.",
-                "One field — the name. On submit it's written to public.companies (legal_name + display_name), a profile_roles 'company' row is added, and active workspace switches to 'company'.",
-              )}
-            </p>
-          </header>
-          <form
-            action={startCompanyAction}
-            className="flex flex-col gap-3"
-            data-testid="company-start-form"
-          >
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-secondary">
-                {label("Įmonės teisinis pavadinimas", "Company legal name")}
-              </span>
-              <input
-                name="name"
-                type="text"
-                required
-                minLength={2}
-                maxLength={200}
-                placeholder={label("pvz. UAB Statybos sprendimai", "e.g. UAB Build Solutions")}
-                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-                data-testid="company-start-form-name"
-              />
-              <span className="text-xs text-text-muted">
-                {label(
-                  "Privaloma. 2-200 simbolių. Tampa companies.legal_name ir companies.display_name reikšme.",
-                  "Required. 2-200 chars. Becomes companies.legal_name AND companies.display_name verbatim.",
-                )}
-              </span>
-            </label>
-            <button
-              type="submit"
-              className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80"
-              data-testid="company-start-form-submit"
-            >
-              {label("Pradėti įmonės nustatymą", "Start company setup")}
-            </button>
-            <p className="text-xs text-text-secondary">
-              {label(
-                "Po pateikimo puslapis perkraunamas; pamatysite ✓ Pradėta būseną.",
-                "After submit the page reloads; you'll see the ✓ Started state.",
-              )}
-            </p>
-          </form>
+          <CompanySetupForm existing={company} labels={formLabels} />
         </section>
-      )}
+      ) : null}
     </div>
   );
 }

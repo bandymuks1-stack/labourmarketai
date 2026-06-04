@@ -106,8 +106,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 42 for the project/object/client RED gate (PR #197, owner-approved
     // + applied to prod via Supabase MCP), then to 43 for the
     // journal-entry-skill-links-v1 slice (additive journal_entry_skills durable
-    // evidence-support relation, committed + queued, NOT applied). The baseline
-    // only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 43/);
+    // evidence-support relation, committed + queued, NOT applied), then to 44
+    // for the company-profile-request-v1 slice (additive company_profile_request
+    // migration: org-detail columns + 4-state verification ladder +
+    // save_company_setup upsert that requests but never fabricates verified;
+    // committed + queued, NOT applied). The baseline only ever grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 44/);
   });
 });
