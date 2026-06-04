@@ -104,16 +104,38 @@ while a large "coming later" block dominated the account screen.
   `drop constraint` (CHECK re-runnability), comments are stripped, and a
   `Rollback` block is present, so the migration stays GREEN class.
 
-## Visual smoke — NOT captured here (owner step)
-This environment has no `.env.local` and no stored auth session, so the three
-auth-gated routes cannot be screenshotted with a real session. The `build`
-proves they compile. After applying the migration on preview, the owner should
-visually confirm:
-- `/lt/dashboard/account` — coming-later block is collapsed; role catalogue is primary.
-- `/lt/dashboard/start/company` — full form (name/country required + optional
-  fields + your role); honest status + verification explainer; no fake verified badge.
-- `/lt/dashboard/journal` — a non-construction entry (e.g. "3h kasininku") yields
-  an honest label-only suggestion, not a construction label.
+## Owner final smoke — automated (run it; it writes the 3 LT screenshots)
+This environment has no `.env.local`, no Supabase auth backend, and Docker is
+down, so authenticated browser screenshots cannot be produced here (a bare
+Postgres can't serve the app's auth; faking a session would not be a real
+smoke). The `build` proves the routes compile and the preview-DB gate proves
+the data/security behavior. To get the three required screenshots + the PASS
+assertions, run the dedicated Playwright spec against a real preview/local with
+a Supabase test user (migration applied first):
+
+```
+# 1) once
+pnpm -F web e2e:install
+# 2) mint a session for a real test user (needs NEXT_PUBLIC_SUPABASE_URL /
+#    ANON_KEY / SUPABASE_SERVICE_ROLE_KEY in apps/web/.env.local)
+E2E_OWNER_EMAIL=<test-user@…> pnpm -F web exec tsx scripts/e2e-mint-session.ts
+# 3) run the PR #250 smoke against the target (omit E2E_BASE_URL to use local dev)
+E2E_BASE_URL=<preview-url> pnpm -F web exec playwright test \
+  tests/e2e/pr250-company-multisector-smoke.spec.ts
+```
+
+`apps/web/tests/e2e/pr250-company-multisector-smoke.spec.ts` signs in, asserts
+every owner PASS criterion (account coming-later is a collapsed `<details>` with
+the real role catalogue primary; company form has name+country + optional fields,
+saves a draft and submits a request, status visible, no fake `verified`; journal
+recognises a non-construction entry as its honest sector label, not construction),
+and writes:
+- `runtime/review-evidence/labourmarketai/pr250-company-multisector/screenshots/01-lt-account.png`
+- `…/02-lt-start-company.png`
+- `…/03-lt-journal.png`
+
+It is gated on a minted session and **skips cleanly** when absent (CI-safe), so it
+never blocks the quality gate.
 
 ## What remains PENDING (owner / follow-up)
 1. **Apply the migration.** `20260604120000_company_profile_request.sql` is
