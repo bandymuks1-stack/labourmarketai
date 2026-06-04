@@ -185,9 +185,22 @@ describe("Guard: admin i18n surfaces honest labels (no fake verification)", () =
       // No fake-verified wording anywhere in the admin copy. The
       // panel describes pilot state honestly — it does not say a
       // user's claims are "verified", "confirmed", or "patvirtinta".
-      const flat = JSON.stringify(admin).toLowerCase();
+      // EXCEPTION: `companyVerification` is the legitimate company-
+      // verification review surface (admin verifies a COMPANY); its ladder
+      // vocabulary is asserted honest separately below.
+      const adminSansVerify: Record<string, unknown> = { ...admin };
+      delete adminSansVerify.companyVerification;
+      const flat = JSON.stringify(adminSansVerify).toLowerCase();
       expect(flat).not.toMatch(/\bverified\b|\bconfirmed\b/);
       expect(flat).not.toMatch(/\bpatvirtinta\b|\bpatvirtinti\b/);
+
+      // The company verification ladder is honest: explicit unverified +
+      // pending states, no automatic-verification claim.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cv = admin.companyVerification as any;
+      expect(cv?.status?.unverified, `${locale} cv.status.unverified`).toBeTruthy();
+      expect(cv?.status?.pending_verification, `${locale} cv.pending`).toBeTruthy();
+      expect(String(cv?.subtitle ?? "")).not.toMatch(/\bautomatic\s+verification\b/i);
     });
   }
 });

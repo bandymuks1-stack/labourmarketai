@@ -1272,7 +1272,13 @@ describe("no migration files added by this sprint", () => {
     // No drops of the companies table/columns; reversible. Committed + queued
     // for the gate, NOT applied by the agent. See
     // company-profile-request-honesty.test.ts.
-    const SPRINT_BASELINE = 44;
+    // Bumped 44 → 45 for the company-verification-admin slice: additive
+    // 20260604130000_admin_company_verification adds ONE SECURITY DEFINER
+    // function (admin_set_company_verification) — admin-only, audit-logged,
+    // sets verified/unverified/pending_verification, no new companies grant, no
+    // change to the PR#250 trigger. Committed + queued for the gate, NOT
+    // applied by the agent. See company-verification-admin.test.ts.
+    const SPRINT_BASELINE = 45;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
