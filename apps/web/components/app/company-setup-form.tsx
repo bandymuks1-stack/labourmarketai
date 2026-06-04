@@ -233,11 +233,14 @@ export function CompanySetupForm({
       </label>
 
       <div className="flex flex-wrap gap-3">
+        {/* AUTOMATIC-FIRST: the primary action saves the company as usable
+            now (active_unverified / needs_checks). Requesting a manual review
+            is an OPTIONAL secondary action, never required to use the company. */}
         <button
           type="submit"
           onClick={() => setIntent("draft")}
           disabled={isPending}
-          className="rounded-md border border-border-default bg-surface-1 px-4 py-2 text-sm font-semibold text-text-primary hover:border-brand-blue disabled:opacity-50"
+          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
           data-testid="company-setup-save-draft"
         >
           {labels.saveDraft}
@@ -246,7 +249,7 @@ export function CompanySetupForm({
           type="submit"
           onClick={() => setIntent("submit")}
           disabled={isPending}
-          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+          className="rounded-md border border-border-default bg-surface-1 px-4 py-2 text-sm font-medium text-text-secondary hover:border-brand-blue disabled:opacity-50"
           data-testid="company-setup-submit-request"
         >
           {labels.submitRequest}

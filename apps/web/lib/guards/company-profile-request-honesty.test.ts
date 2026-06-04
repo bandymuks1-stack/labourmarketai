@@ -176,7 +176,9 @@ describe("Guard: setup copy is multi-sector + honest in LT and EN", () => {
       expect(notice.length).toBeGreaterThan(0);
       expect(notice).not.toMatch(/\bautomatic\s+verification\b/i);
       // It must state verification is required / human, not automatic.
-      const honest = loc === "lt" ? /patvirtinim/i : /verif/i;
+      // Accept the LT verification stem in any form (patvirtint* / patvirtinim*)
+      // — the automatic-first notice uses "Patvirtinta" rather than the noun.
+      const honest = loc === "lt" ? /patvirtint|patvirtinim/i : /verif/i;
       expect(notice).toMatch(honest);
     });
   }

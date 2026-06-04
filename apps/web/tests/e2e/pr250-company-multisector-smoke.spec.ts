@@ -101,26 +101,33 @@ test("LT company setup — fields save, request works, no fake verified", async 
   await expect(page.getByTestId("company-setup-save-draft")).toBeVisible();
   await expect(page.getByTestId("company-setup-submit-request")).toBeVisible();
 
-  // Fill the minimum (name + country) and SAVE DRAFT — real end-to-end write.
+  // AUTOMATIC-FIRST: the primary action (Save company) creates a USABLE company
+  // immediately — name + country present → active_unverified (not a draft, not
+  // "pending admin"). Real end-to-end write.
   await page.getByTestId("company-setup-legal-name").fill("Smoke Test UAB");
   await page.getByTestId("company-setup-country").fill("LT");
   await page.getByTestId("company-setup-save-draft").click();
   await expect(page.getByTestId("company-setup-result")).toBeVisible({ timeout: 15_000 });
+  await page.reload();
+  const statusAfterSave = page.getByTestId("company-start-verification-status");
+  await expect(statusAfterSave).toBeVisible({ timeout: 10_000 });
+  const savedTxt = ((await statusAfterSave.textContent()) ?? "").toLowerCase();
+  // Usable now, NOT a fake verified, NOT blocked on admin. (Note: the LT
+  // unverified label "nepatvirtinta" contains the verified stem, so we assert
+  // the positive active label + absence of the EN "verified" word instead of a
+  // brittle "patvirtinta" substring.)
+  expect(/aktyvi|active/.test(savedTxt), `status was "${savedTxt}"`).toBe(true);
+  expect(savedTxt).not.toContain("verified");
   await shot(page, "02-lt-start-company");
 
-  // Submit a verification REQUEST and confirm the status actually moves to
-  // pending_verification (regression guard: the submit button must not behave
-  // like save-draft).
+  // The manual review is OPTIONAL (escalation) — clicking it moves to a
+  // "manual review requested" state, but the company was already usable.
   await page.getByTestId("company-setup-submit-request").click();
   await expect(page.getByTestId("company-setup-result")).toBeVisible({ timeout: 15_000 });
   await page.reload();
-  const status = page.getByTestId("company-start-verification-status");
-  await expect(status).toBeVisible({ timeout: 10_000 });
-  const txt = ((await status.textContent()) ?? "").toLowerCase();
-  // Honest pending state, NOT a fake verified.
-  expect(/laukia|pending/.test(txt), `status was "${txt}"`).toBe(true);
-  expect(txt).not.toContain("patvirtinta"); // LT "verified"
-  expect(txt).not.toContain("verified");
+  const escalated = ((await page.getByTestId("company-start-verification-status").textContent()) ?? "").toLowerCase();
+  expect(/peržiūr|review|laukia|pending/.test(escalated), `status was "${escalated}"`).toBe(true);
+  expect(escalated).not.toContain("verified");
 });
 
 // ── 3. Journal: multi-sector, non-construction not forced into construction ─

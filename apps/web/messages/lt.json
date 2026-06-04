@@ -326,7 +326,7 @@
       "profileLink": "Mano gebėjimai (jei esate ir asmuo, ne tik įmonė)",
       "setup": {
         "formTitle": "Įmonės profilio užklausa",
-        "formSubtitle": "Pradėkite organizacijos profilį iš savo asmeninės paskyros. Iš pradžių tai juodraštis arba peržiūros užklausa — pilnam įmonės naudojimui reikia patvirtinimo.",
+        "formSubtitle": "Sukurkite organizacijos profilį iš savo asmeninės paskyros. Jis iškart aktyvus ir naudojamas — nereikia laukti patvirtinimo. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis.",
         "existingHeading": "Įmonės profilis",
         "legalName": "Įmonės teisinis pavadinimas",
         "legalNameHelp": "Privaloma. 2–200 simbolių.",
@@ -349,11 +349,11 @@
           "hr": "Personalas (HR)",
           "other": "Kita"
         },
-        "verificationNotice": "Šis profilis kuriamas kaip užklausa, o ne kaip patvirtinta įmonė. Pilnam įmonės naudojimui reikia patvirtinimo, kurį rankiniu būdu atlieka žmogus — tai nevyksta savaime. Niekas netampa patvirtinta automatiškai.",
-        "saveDraft": "Išsaugoti juodraštį",
-        "submitRequest": "Pateikti patvirtinimo užklausą",
-        "statusDraftSaved": "Juodraštis išsaugotas. Galite tęsti vėliau.",
-        "statusSubmitted": "Užklausa pateikta peržiūrai (būsena: laukia patvirtinimo). Patvirtinimą rankiniu būdu atlieka žmogus.",
+        "verificationNotice": "Jūsų įmonė sukuriama ir iškart naudojama po bazinių automatinių patikrų (pavadinimas, šalis ir įvesto kodo / svetainės / el. pašto formatas). Ji dar nėra tapatybės patvirtinta — „Patvirtinta\" yra stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros, niekada automatiškai. Norėdami naudotis įmone, neturite laukti administratoriaus.",
+        "saveDraft": "Išsaugoti įmonę",
+        "submitRequest": "Prašyti rankinės peržiūros (neprivaloma)",
+        "statusDraftSaved": "Įmonė išsaugota — ji aktyvi ir naudojama dabar.",
+        "statusSubmitted": "Rankinė peržiūra paprašyta (neprivaloma). Įmonė tuo metu lieka naudojama.",
         "statusNeedsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
         "statusInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
@@ -361,15 +361,19 @@
         "migrationBlockerBody": "Forma matoma, bet kol kas nepateikiama. Reikia pritaikyti DB migraciją (20260604120000). Pabandykite vėliau.",
         "verificationStatus": {
           "draft": "Juodraštis",
-          "pending_verification": "Laukia patvirtinimo",
+          "active_unverified": "Aktyvi · nepatvirtinta",
+          "needs_checks": "Reikia pataisymų",
+          "pending_verification": "Paprašyta rankinės peržiūros",
           "unverified": "Nepatvirtinta",
           "verified": "Patvirtinta"
         },
         "verificationExplainer": {
-          "draft": "Juodraštis matomas tik jums. Pateikite užklausą, kai duomenys teisingi.",
-          "pending_verification": "Užklausa laukia žmogaus peržiūros. Pilnos įmonės funkcijos įsijungs tik po patvirtinimo.",
-          "unverified": "Įmonė dar nepatvirtinta. Galite naudotis ribotai, kol patvirtinimas neatliktas.",
-          "verified": "Įmonė patvirtinta žmogaus peržiūros metu."
+          "draft": "Juodraštis. Išsaugokite, kad aktyvuotumėte įmonę — ji iškart taps naudojama.",
+          "active_unverified": "Aktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis.",
+          "needs_checks": "Aktyvi ir naudojama, bet vieną bazinę patikrą reikia patikslinti (pvz., nurodyti šalį arba pataisyti netaisyklingą kodą / svetainę / el. paštą).",
+          "pending_verification": "Paprašėte neprivalomos rankinės peržiūros. Įmonė lieka pilnai naudojama, kol laukiama.",
+          "unverified": "Nepatvirtinta. Galite toliau normaliai naudotis įmone.",
+          "verified": "Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros."
         }
       },
       "workersBlocker": {
@@ -1066,9 +1070,9 @@
     "companyVerification": {
       "eyebrow": "ĮMONIŲ PATVIRTINIMAS",
       "title": "Įmonių patvirtinimo užklausos",
-      "subtitle": "Peržiūrėkite įmonių profilių užklausas ir nuspręskite jų patvirtinimo būseną. Patvirtinimą rankiniu būdu atlieka žmogus — niekas nepatvirtinama automatiškai.",
+      "subtitle": "Išimčių / eskalavimo peržiūra. Įmonės sukuriamos ir naudojamos automatiškai — tai NĖRA patvirtinimo eilė. Naudokite norėdami patvirtinti paprašius, ištaisyti pažymėtas patikras ar perrašyti įtartiną įmonę. Patvirtinimą rankiniu būdu atlieka žmogus; niekas nepatvirtinama automatiškai.",
       "back": "Grįžti į operacijų skydą",
-      "empty": "Įmonių patvirtinimo užklausų dar nėra.",
+      "empty": "Šiuo metu administratoriaus dėmesio nereikia. Įmonės naudojamos be administratoriaus veiksmų.",
       "migrationBlocker": "Ši funkcija dar nepasiekiama — administratoriaus patvirtinimo migracija dar nepritaikyta. Bandykite vėliau.",
       "pendingCount": "{count, plural, =0 {Nėra užklausų, laukiančių patvirtinimo} one {# užklausa laukia patvirtinimo} few {# užklausos laukia patvirtinimo} other {# užklausų laukia patvirtinimo}}",
       "user": "Vartotojas",
@@ -1085,7 +1089,9 @@
       },
       "status": {
         "draft": "Juodraštis",
-        "pending_verification": "Laukia patvirtinimo",
+        "active_unverified": "Aktyvi · nepatvirtinta",
+        "needs_checks": "Reikia pataisymų",
+        "pending_verification": "Paprašyta rankinės peržiūros",
         "unverified": "Nepatvirtinta",
         "verified": "Patvirtinta"
       },

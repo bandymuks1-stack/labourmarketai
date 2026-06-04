@@ -34,16 +34,31 @@ function asAny(supabase: SupabaseClient): any {
   return supabase;
 }
 
-/** Honest 4-state verification ladder. There is intentionally no client path
- *  that sets `verified` — only an (future) admin review can. */
+/** Honest verification ladder (AUTOMATIC-FIRST).
+ *  - active_unverified: created + automated checks passed; usable now, not
+ *    identity/registry-verified. This is the normal state after creation.
+ *  - needs_checks: a basic automated check failed; still usable, flagged.
+ *  - pending_verification: OPTIONAL manual-review escalation (exception path).
+ *  - verified: stronger trust state — admin / real-registry only (never the
+ *    client, never automatic, never "user filled the form").
+ *  - draft / unverified: legacy + explicit-not-verified states, still allowed. */
 export type CompanyVerificationStatus =
   | "draft"
+  | "active_unverified"
+  | "needs_checks"
   | "pending_verification"
   | "unverified"
   | "verified";
 
 export const COMPANY_VERIFICATION_STATUSES: readonly CompanyVerificationStatus[] =
-  ["draft", "pending_verification", "unverified", "verified"];
+  [
+    "draft",
+    "active_unverified",
+    "needs_checks",
+    "pending_verification",
+    "unverified",
+    "verified",
+  ];
 
 /** The user's own role inside the company they are requesting. Free-text in
  *  the DB; the form offers a small honest allowlist + "other". */
@@ -94,8 +109,9 @@ export interface SaveCompanyInput {
   readonly contactEmail?: string;
   readonly contactPhone?: string;
   readonly requesterRole?: string;
-  /** true = submit the request for verification (→ pending_verification);
-   *  false = keep as a draft the user can still edit. */
+  /** AUTOMATIC-FIRST: false (default) saves the company as active_unverified /
+   *  needs_checks (usable immediately). true is the OPTIONAL escalation to a
+   *  manual review (→ pending_verification) — never required for basic use. */
   readonly submit: boolean;
 }
 
@@ -146,7 +162,7 @@ export async function getOwnCompany(): Promise<CompanyReadResult> {
       contactPhone: (r.contact_phone as string | null) ?? null,
       requesterRole: (r.requester_role as string | null) ?? null,
       verificationStatus:
-        (r.verification_status as CompanyVerificationStatus) ?? "draft",
+        (r.verification_status as CompanyVerificationStatus) ?? "active_unverified",
       verificationNote: (r.verification_note as string | null) ?? null,
       requestedAt: (r.requested_at as string | null) ?? null,
       createdAt: r.created_at as string,
