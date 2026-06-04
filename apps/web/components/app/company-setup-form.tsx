@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 
 import {
   saveCompanySetupAction,
@@ -72,6 +72,14 @@ export function CompanySetupForm({
     FormData
   >(saveCompanySetupAction, null);
 
+  // Which button was pressed must reach the server action. In React 19 the
+  // submitter button's name/value is NOT carried into a function `formAction`,
+  // so we drive the intent through a hidden field set on click instead.
+  const intentRef = useRef<HTMLInputElement>(null);
+  const setIntent = (v: "draft" | "submit") => {
+    if (intentRef.current) intentRef.current.value = v;
+  };
+
   const banner: { tone: "success" | "warning"; text: string } | null = (() => {
     if (!state) return null;
     if (state.ok) {
@@ -91,7 +99,12 @@ export function CompanySetupForm({
   })();
 
   return (
-    <form className="flex flex-col gap-4" data-testid="company-setup-form">
+    <form
+      action={formAction}
+      className="flex flex-col gap-4"
+      data-testid="company-setup-form"
+    >
+      <input type="hidden" name="intent" ref={intentRef} defaultValue="draft" />
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {labels.title}
@@ -222,9 +235,7 @@ export function CompanySetupForm({
       <div className="flex flex-wrap gap-3">
         <button
           type="submit"
-          name="intent"
-          value="draft"
-          formAction={formAction}
+          onClick={() => setIntent("draft")}
           disabled={isPending}
           className="rounded-md border border-border-default bg-surface-1 px-4 py-2 text-sm font-semibold text-text-primary hover:border-brand-blue disabled:opacity-50"
           data-testid="company-setup-save-draft"
@@ -233,9 +244,7 @@ export function CompanySetupForm({
         </button>
         <button
           type="submit"
-          name="intent"
-          value="submit"
-          formAction={formAction}
+          onClick={() => setIntent("submit")}
           disabled={isPending}
           className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
           data-testid="company-setup-submit-request"

@@ -104,7 +104,42 @@ while a large "coming later" block dominated the account screen.
   `drop constraint` (CHECK re-runnability), comments are stripped, and a
   `Rollback` block is present, so the migration stays GREEN class.
 
-## Owner final smoke — automated (run it; it writes the 3 LT screenshots)
+## Authenticated browser smoke — EXECUTED (real signed-in run)
+
+Ran end-to-end in a **fully local real stack** (no production, no owner action):
+- **Environment:** `supabase start` (local Docker stack) — Auth (GoTrue) + PostgREST
+  + Postgres at `127.0.0.1:54321/54322`, all repo migrations applied (incl.
+  `20260604120000`). Next dev server at `127.0.0.1:3000` against that local
+  Supabase via a gitignored local `.env.local` (public local demo keys only).
+- **Test user:** a created+onboarded local user (worker+company roles), real
+  magic-link session minted into Playwright `storageState` (no fake/forged auth).
+- **Spec:** `apps/web/tests/e2e/pr250-company-multisector-smoke.spec.ts` — **6/6 passed.**
+
+Screenshots (committed for review under `docs/evidence/pr250-company-multisector/`):
+- `01-lt-account.png` — `/lt/dashboard/account`: real role catalogue ("Mano erdvės")
+  is primary; "Vėliau įjungiami moduliai" is the collapsed `<details>` at the bottom.
+- `02-lt-start-company.png` — `/lt/dashboard/start/company`: full request form
+  (legal name + country + registration code + address + website + contact
+  email/phone + your role), honest verification notice, draft + request buttons,
+  honest status; no fake verified.
+- `03-lt-journal.png` — `/lt/dashboard/journal`: real composer; a non-construction
+  entry ("…kasininku…") yields its honest sector label, not a construction trade.
+
+Verified at the data layer (browser-driven writes landed in the local DB):
+draft save persists all fields; **Submit request → `pending_verification` +
+`requested_at`** (see bug fix below); cross-checks confirm no fake verified.
+
+### Bug found & fixed during this smoke
+The "Pateikti patvirtinimo užklausą" (Submit request) button behaved like Save
+draft — it left the company at `draft`. Cause: in Next.js 15 / React 19 a
+submit button's `name`/`value` is **not** carried into a function `formAction`,
+so `intent=submit` never reached the server action. Fixed
+`components/app/company-setup-form.tsx` to use `<form action={formAction}>` + a
+hidden `intent` field set on each button's `onClick`. Re-verified in-browser:
+submit now moves the company to `pending_verification`. The smoke spec now
+asserts the pending status after submit so this can't silently regress.
+
+## Owner final smoke — automated (also re-runnable on a real preview)
 This environment has no `.env.local`, no Supabase auth backend, and Docker is
 down, so authenticated browser screenshots cannot be produced here (a bare
 Postgres can't serve the app's auth; faking a session would not be a real
