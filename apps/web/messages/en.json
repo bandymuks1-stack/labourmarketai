@@ -326,7 +326,7 @@
       "profileLink": "My capabilities (if you're also a person, not only a company)",
       "setup": {
         "formTitle": "Company profile request",
-        "formSubtitle": "Start an organisation profile from your personal account. It begins as a draft or a review request — full company use requires verification.",
+        "formSubtitle": "Create your organisation profile from your personal account. It's active and usable straight away — no waiting for approval. Verification is a stronger, separate trust step.",
         "existingHeading": "Company profile",
         "legalName": "Company legal name",
         "legalNameHelp": "Required. 2–200 characters.",
@@ -349,11 +349,11 @@
           "hr": "HR / People",
           "other": "Other"
         },
-        "verificationNotice": "This profile is created as a request, not as a verified company. Full company use requires verification, which is a manual human step and does not happen on its own. Nothing becomes verified by itself.",
-        "saveDraft": "Save draft",
-        "submitRequest": "Submit verification request",
-        "statusDraftSaved": "Draft saved. You can continue later.",
-        "statusSubmitted": "Request submitted for review (status: pending verification). Verification is done manually by a person.",
+        "verificationNotice": "Your company is created and usable right away after basic automated checks (name, country, and the format of any code / website / email you add). It is not yet identity-verified — \"Verified\" is a stronger trust state granted only after a real check, never automatically. You do not need to wait for an admin to use your company.",
+        "saveDraft": "Save company",
+        "submitRequest": "Request manual review (optional)",
+        "statusDraftSaved": "Company saved — it's active and usable now.",
+        "statusSubmitted": "Manual review requested (optional). Your company stays usable in the meantime.",
         "statusNeedsMigration": "This feature is not available yet. Please try later.",
         "statusInvalid": "The form is incomplete. Check the required fields.",
         "statusError": "Something went wrong. Please try again.",
@@ -361,15 +361,19 @@
         "migrationBlockerBody": "The form is visible but cannot submit yet. The DB migration (20260604120000) needs to be applied. Please try later.",
         "verificationStatus": {
           "draft": "Draft",
-          "pending_verification": "Pending verification",
+          "active_unverified": "Active · not verified",
+          "needs_checks": "Needs a few fixes",
+          "pending_verification": "Manual review requested",
           "unverified": "Unverified",
           "verified": "Verified"
         },
         "verificationExplainer": {
-          "draft": "The draft is visible only to you. Submit the request when the details are correct.",
-          "pending_verification": "The request is waiting for human review. Full company features unlock only after verification.",
-          "unverified": "The company is not verified yet. You can use it in a limited way until verification is done.",
-          "verified": "The company was verified during human review."
+          "draft": "Draft. Save to activate your company — it becomes usable straight away.",
+          "active_unverified": "Active and usable now. Basic automated checks passed. Not yet identity-verified — that's a separate, stronger step.",
+          "needs_checks": "Active and usable, but a basic check needs attention (e.g. add your country, or fix a malformed code / website / email).",
+          "pending_verification": "You asked for an optional manual review. Your company stays fully usable while it waits.",
+          "unverified": "Not verified. You can keep using your company normally.",
+          "verified": "Verified — a stronger trust state, granted only after a real check."
         }
       },
       "workersBlocker": {
@@ -1066,9 +1070,9 @@
     "companyVerification": {
       "eyebrow": "COMPANY VERIFICATION",
       "title": "Company verification requests",
-      "subtitle": "Review company profile requests and decide their verification status. Verification is a manual human decision — nothing is verified automatically.",
+      "subtitle": "Exception / escalation review. Companies are created and usable automatically — this is NOT an approval queue. Use it to verify on request, fix flagged checks, or override a suspicious company. Verification is a manual human decision; nothing is verified automatically.",
       "back": "Back to operations panel",
-      "empty": "There are no company verification requests yet.",
+      "empty": "Nothing needs admin attention right now. Companies are usable without admin action.",
       "migrationBlocker": "This feature is not available yet — the admin verification migration has not been applied. Try later.",
       "pendingCount": "{count, plural, =0 {No requests waiting for verification} one {# request waiting for verification} other {# requests waiting for verification}}",
       "user": "User",
@@ -1085,7 +1089,9 @@
       },
       "status": {
         "draft": "Draft",
-        "pending_verification": "Pending verification",
+        "active_unverified": "Active · not verified",
+        "needs_checks": "Needs a few fixes",
+        "pending_verification": "Manual review requested",
         "unverified": "Unverified",
         "verified": "Verified"
       },

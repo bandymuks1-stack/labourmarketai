@@ -79,12 +79,15 @@ export type SetVerificationResult =
 const SELECT_COLUMNS =
   "id, profile_id, legal_name, country, registration_code, address, website, contact_email, contact_phone, requester_role, requested_at, verification_status, verification_note, created_at";
 
-/** Most-actionable first: pending → draft → unverified → verified, then newest. */
+/** Exception-review ordering: things that may need admin attention first
+ *  (flagged checks + explicit escalations), then the rest, verified last. */
 const STATUS_ORDER: Record<CompanyVerificationStatus, number> = {
-  pending_verification: 0,
-  draft: 1,
-  unverified: 2,
-  verified: 3,
+  needs_checks: 0,
+  pending_verification: 1,
+  active_unverified: 2,
+  unverified: 3,
+  draft: 4,
+  verified: 5,
 };
 
 export async function listCompanyVerificationRequests(): Promise<CompanyVerificationListResult> {

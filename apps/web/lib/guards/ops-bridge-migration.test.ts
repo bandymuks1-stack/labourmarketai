@@ -113,7 +113,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // committed + queued, NOT applied), then to 45 for the
     // company-verification-admin slice (additive admin_set_company_verification
     // SECURITY DEFINER RPC, admin-only + audit-logged, applied to prod after
-    // owner approval). The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 45/);
+    // owner approval), then to 46 for the company-automatic-first correction
+    // (additive company_automatic_first: widen CHECK + active_unverified default
+    // + automatic-status save_company_setup). The baseline only ever grows
+    // deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 46/);
   });
 });

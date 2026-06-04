@@ -1278,7 +1278,15 @@ describe("no migration files added by this sprint", () => {
     // sets verified/unverified/pending_verification, no new companies grant, no
     // change to the PR#250 trigger. Committed + queued for the gate, NOT
     // applied by the agent. See company-verification-admin.test.ts.
-    const SPRINT_BASELINE = 45;
+    // Bumped 45 → 46 for the company-automatic-first correction: additive
+    // 20260604140000_company_automatic_first widens the verification_status
+    // CHECK (+active_unverified, +needs_checks), sets the column default to
+    // 'active_unverified', backfills draft→active_unverified, and CREATE OR
+    // REPLACEs save_company_setup to derive status from automated checks
+    // (manual review = optional escalation, not the default gate). PR#250
+    // trigger untouched; no new companies grant. Committed + queued, NOT
+    // applied by the agent. See company-automatic-first.test.ts.
+    const SPRINT_BASELINE = 46;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

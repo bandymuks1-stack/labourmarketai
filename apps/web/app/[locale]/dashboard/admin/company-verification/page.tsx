@@ -21,6 +21,8 @@ import {
 
 const STATUS_TONE: Record<CompanyVerificationStatus, string> = {
   draft: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+  active_unverified: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  needs_checks: "border-state-warning/40 bg-state-warning/5 text-state-warning",
   pending_verification: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
   unverified: "border-state-warning/40 bg-state-warning/5 text-state-warning",
   verified: "border-state-success/40 bg-state-success/5 text-state-success",

@@ -181,9 +181,12 @@ never blocks the quality gate.
    `verified`. An admin review surface that flips
    `pending_verification → verified` (and writes `verification_note`) is the
    next slice. Today a request simply sits at `pending_verification`.
-3. **Gate full company features on `verified`.** The company dashboard still
-   opens on role-hold; a follow-up should gate full company actions on
-   `verification_status = 'verified'` and show the pending/unverified state.
+3. ~~**Gate full company features on `verified`.**~~ **SUPERSEDED — wrong
+   direction.** The corrected model is **automatic-first** (see
+   `company-automatic-first-onboarding-v1.md` / the `fix/cc/company-automatic-first-onboarding`
+   PR): a company is usable immediately as `active_unverified`; `verified` is a
+   stronger trust state, NOT a gate on basic use. Do **not** block company
+   features behind `verified`.
 4. **Catalogue skills for non-construction sectors.** Recognition is multi-sector
    now, but the seeded `skills` / `professions` taxonomy is still construction.
    Non-construction work surfaces as honest free-text labels (no fake catalogue
