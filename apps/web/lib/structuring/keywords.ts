@@ -7,7 +7,15 @@
  * Slugs match the taxonomy in `messages/{locale}/skill-names.json` and
  * `messages/{locale}/professions.json` so the UI can render localized names
  * without duplicating copy.
+ *
+ * Sector awareness: activity rows carry a `sector` (see ./sectors). Construction
+ * is one sector among many — NOT the default. The lexicon recognises non-
+ * construction day-work (transport, retail, hospitality, care, office, IT,
+ * education, cleaning, agriculture) and surfaces those as honest label-only
+ * suggestions when the catalogue has no verified skill for them.
  */
+
+import type { SectorKey } from "./sectors";
 
 /** Lowercase substrings that map a free-text mention to a canonical skill slug. */
 export const SKILL_HINTS_LT: { slug: string; needles: string[] }[] = [
@@ -91,6 +99,9 @@ export const ACTIVITY_HINTS_LT: {
   slug: string | null;
   label: string;
   needles: string[];
+  /** Sector this activity belongs to. Construction is one sector among many;
+   *  there is no construction default. Defaults to "other" when omitted. */
+  sector?: SectorKey;
 }[] = [
   // ── Specific-before-generic ────────────────────────────────────────────
   // Order matters: the activity matcher picks the FIRST row whose needle
@@ -137,6 +148,7 @@ export const ACTIVITY_HINTS_LT: {
   {
     // App / software testing.
     slug: null,
+    sector: "it_software",
     label: "Programėlės / programinės įrangos testavimas",
     needles: [
       "programėlės patikrinim",
@@ -154,6 +166,7 @@ export const ACTIVITY_HINTS_LT: {
   {
     // Programming / software fixes — distinct from testing.
     slug: null,
+    sector: "it_software",
     label: "Programavimas / kodo pataisymai",
     needles: [
       "programavau",
@@ -190,6 +203,7 @@ export const ACTIVITY_HINTS_LT: {
   {
     // Horse / animal care.
     slug: null,
+    sector: "agriculture",
     label: "Žirgų / gyvulių priežiūra",
     needles: [
       "prižiūrėjau žirg",
@@ -205,6 +219,7 @@ export const ACTIVITY_HINTS_LT: {
   {
     // Lecturing / teaching. Captures `dėsčiau paskaitą`, `vedžiau seminarą`.
     slug: null,
+    sector: "education",
     label: "Paskaitos / mokymai",
     needles: [
       "dėsčiau paskait",
@@ -224,6 +239,7 @@ export const ACTIVITY_HINTS_LT: {
   // ── Construction trades ────────────────────────────────────────────────
   {
     slug: "roofer",
+    sector: "construction",
     label: "Stogo dengimas",
     needles: ["stog", "dengiau stog", "dengti stog"],
   },
@@ -257,6 +273,7 @@ export const ACTIVITY_HINTS_LT: {
   // only, no fake slug so it stays a review-only suggestion.
   {
     slug: null,
+    sector: "transport_logistics",
     label: "Pavežėjimas / vairavimas",
     needles: [
       "pavežėj",
@@ -273,6 +290,7 @@ export const ACTIVITY_HINTS_LT: {
   },
   {
     slug: null,
+    sector: "retail_sales",
     label: "Kasininko / parduotuvės darbas",
     needles: [
       "kasinink",
@@ -286,8 +304,81 @@ export const ACTIVITY_HINTS_LT: {
   },
   {
     slug: null,
+    sector: "retail_sales",
     label: "Klientų aptarnavimas",
     needles: ["klient aptarn", "aptarnav"],
+  },
+  // ── Further non-construction sectors (v4) — label-only, honest. ────────
+  {
+    slug: null,
+    sector: "hospitality_food",
+    label: "Maisto gaminimas / virtuvė",
+    needles: [
+      "gaminau maist",
+      "maisto gamin",
+      "virėj",
+      "virtuvėj",
+      "virtuvej",
+      "cooking",
+      "kitchen",
+      "chef",
+    ],
+  },
+  {
+    slug: null,
+    sector: "care_health",
+    label: "Slauga / vaikų priežiūra",
+    needles: [
+      "slaug",
+      "pacient",
+      "prižiūrėjau vaik",
+      "prizurejau vaik",
+      "vaikų priežiūr",
+      "vaiku prieziur",
+      "childcare",
+      "caregiv",
+      "nursing",
+    ],
+  },
+  {
+    slug: null,
+    sector: "office_admin",
+    label: "Biuro / administracinis darbas",
+    needles: [
+      "dokument tvark",
+      "administrac",
+      "biuro darb",
+      "sąskaitų",
+      "saskaitu",
+      "buhalter",
+      "office admin",
+      "paperwork",
+    ],
+  },
+  {
+    slug: null,
+    sector: "cleaning_facility",
+    label: "Valymo darbai",
+    needles: [
+      "valymo darb",
+      "valiau patalp",
+      "valytoj",
+      "cleaning",
+      "cleaner",
+    ],
+  },
+  {
+    slug: null,
+    sector: "transport_logistics",
+    label: "Sandėlio / logistikos darbai",
+    needles: [
+      "sandėl",
+      "sandel",
+      "krovini",
+      "pakrov",
+      "warehouse",
+      "logistics",
+    ],
   },
 ];
 

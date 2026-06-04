@@ -10,6 +10,7 @@
     "switchSpace": "Switch space",
     "addSpace": "Add space",
     "availableSpaces": "Available spaces",
+    "comingLaterToggle": "Modules coming later (show)",
     "profile": {
       "name": "Personal profile",
       "purpose": "Manage your avatar, CV, skills, and work status."
@@ -323,6 +324,54 @@
         "deleteError": "Could not remove. Please try again."
       },
       "profileLink": "My capabilities (if you're also a person, not only a company)",
+      "setup": {
+        "formTitle": "Company profile request",
+        "formSubtitle": "Start an organisation profile from your personal account. It begins as a draft or a review request — full company use requires verification.",
+        "existingHeading": "Company profile",
+        "legalName": "Company legal name",
+        "legalNameHelp": "Required. 2–200 characters.",
+        "legalNamePlaceholder": "e.g. Acme Ltd",
+        "country": "Country",
+        "countryPlaceholder": "e.g. LT",
+        "registrationCode": "Company / registration code",
+        "registrationCodeHelp": "Optional. Helps verify the company later.",
+        "address": "Address / location",
+        "addressPlaceholder": "e.g. 1 Main St, Vilnius",
+        "website": "Website",
+        "websitePlaceholder": "e.g. https://company.com",
+        "contactEmail": "Contact email",
+        "contactPhone": "Contact phone",
+        "requesterRole": "Your role in the company",
+        "requesterRoleOptions": {
+          "owner": "Owner",
+          "director": "Director",
+          "manager": "Manager",
+          "hr": "HR / People",
+          "other": "Other"
+        },
+        "verificationNotice": "This profile is created as a request, not as a verified company. Full company use requires verification, which is a manual human step and does not happen on its own. Nothing becomes verified by itself.",
+        "saveDraft": "Save draft",
+        "submitRequest": "Submit verification request",
+        "statusDraftSaved": "Draft saved. You can continue later.",
+        "statusSubmitted": "Request submitted for review (status: pending verification). Verification is done manually by a person.",
+        "statusNeedsMigration": "This feature is not available yet. Please try later.",
+        "statusInvalid": "The form is incomplete. Check the required fields.",
+        "statusError": "Something went wrong. Please try again.",
+        "migrationBlockerHeading": "Feature not available yet",
+        "migrationBlockerBody": "The form is visible but cannot submit yet. The DB migration (20260604120000) needs to be applied. Please try later.",
+        "verificationStatus": {
+          "draft": "Draft",
+          "pending_verification": "Pending verification",
+          "unverified": "Unverified",
+          "verified": "Verified"
+        },
+        "verificationExplainer": {
+          "draft": "The draft is visible only to you. Submit the request when the details are correct.",
+          "pending_verification": "The request is waiting for human review. Full company features unlock only after verification.",
+          "unverified": "The company is not verified yet. You can use it in a limited way until verification is done.",
+          "verified": "The company was verified during human review."
+        }
+      },
       "workersBlocker": {
         "title": "Company workers link — waiting on a migration",
         "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",

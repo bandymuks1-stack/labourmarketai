@@ -1261,7 +1261,18 @@ describe("no migration files added by this sprint", () => {
     // journal_entry_work_items + grant to authenticated only; NOT verification).
     // Committed + queued for the gate, NOT applied by the agent. See
     // journal-entry-skill-links.test.ts.
-    const SPRINT_BASELINE = 43;
+    // Bumped 43 → 44 for the company-profile-request-v1 slice: additive
+    // 20260604120000_company_profile_request adds nullable org-detail columns
+    // (registration_code / address / contact_email / contact_phone /
+    // requester_role / verification_note / requested_at) + a 4-state
+    // verification_status ladder (draft|pending_verification|unverified|
+    // verified, default draft, legacy rows backfilled to unverified) +
+    // save_company_setup() SECURITY DEFINER upsert that can REQUEST (pending)
+    // but never fabricate a verified company + a guarded unique(profile_id).
+    // No drops of the companies table/columns; reversible. Committed + queued
+    // for the gate, NOT applied by the agent. See
+    // company-profile-request-honesty.test.ts.
+    const SPRINT_BASELINE = 44;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
