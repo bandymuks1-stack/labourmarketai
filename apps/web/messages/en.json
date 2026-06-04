@@ -324,6 +324,40 @@
         "deleteError": "Could not remove. Please try again."
       },
       "profileLink": "My capabilities (if you're also a person, not only a company)",
+      "nextActions": {
+        "heading": "Next steps",
+        "missingHeading": "Add to strengthen your profile",
+        "fixHeading": "A few details need attention",
+        "fixCta": "Open company details",
+        "optionalBadge": "Optional",
+        "cards": {
+          "completeDetails": {
+            "title": "Complete company details",
+            "body": "Add country, registration code, address, website and contact so others can recognise your company.",
+            "cta": "Edit details"
+          },
+          "team": {
+            "title": "Team members",
+            "body": "Invite workers by email or link people who sign up themselves. No account is created for them automatically.",
+            "cta": "Manage team"
+          },
+          "requests": {
+            "title": "Work / team request",
+            "body": "Describe the worker, team or service you need. Your draft stays private to you until you decide otherwise.",
+            "cta": "Create a request"
+          },
+          "verification": {
+            "title": "Request stronger verification",
+            "body": "Optional. Ask for a manual review to reach a stronger trust level. Your company stays usable meanwhile.",
+            "cta": "Request review"
+          }
+        },
+        "noCompany": {
+          "title": "Start your company profile",
+          "body": "You don't have a company profile yet. Create one — it's active and usable straight away, no waiting for approval.",
+          "cta": "Start company setup"
+        }
+      },
       "setup": {
         "formTitle": "Company profile request",
         "formSubtitle": "Create your organisation profile from your personal account. It's active and usable straight away — no waiting for approval. Verification is a stronger, separate trust step.",

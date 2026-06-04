@@ -324,6 +324,40 @@
         "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
       "profileLink": "Mano gebėjimai (jei esate ir asmuo, ne tik įmonė)",
+      "nextActions": {
+        "heading": "Tolesni žingsniai",
+        "missingHeading": "Pridėkite, kad sustiprintumėte profilį",
+        "fixHeading": "Kelias detales reikia patikslinti",
+        "fixCta": "Atidaryti įmonės duomenis",
+        "optionalBadge": "Neprivaloma",
+        "cards": {
+          "completeDetails": {
+            "title": "Užpildyti įmonės duomenis",
+            "body": "Pridėkite šalį, registracijos kodą, adresą, svetainę ir kontaktą, kad kiti atpažintų jūsų įmonę.",
+            "cta": "Redaguoti duomenis"
+          },
+          "team": {
+            "title": "Komandos nariai",
+            "body": "Pakvieskite darbuotojus el. paštu arba susiekite tuos, kurie užsiregistruoja patys. Paskyra už juos nesukuriama automatiškai.",
+            "cta": "Valdyti komandą"
+          },
+          "requests": {
+            "title": "Darbo / komandos paklausa",
+            "body": "Aprašykite, kokio darbuotojo, komandos ar paslaugos reikia. Juodraštis lieka privatus, kol nenuspręsite kitaip.",
+            "cta": "Sukurti paklausą"
+          },
+          "verification": {
+            "title": "Prašyti stipresnio patvirtinimo",
+            "body": "Neprivaloma. Paprašykite rankinės peržiūros, kad pasiektumėte stipresnį pasitikėjimo lygį. Įmonė tuo metu lieka naudojama.",
+            "cta": "Prašyti peržiūros"
+          }
+        },
+        "noCompany": {
+          "title": "Pradėkite įmonės profilį",
+          "body": "Dar neturite įmonės profilio. Sukurkite jį — jis iškart aktyvus ir naudojamas, nereikia laukti patvirtinimo.",
+          "cta": "Pradėti įmonės nustatymą"
+        }
+      },
       "setup": {
         "formTitle": "Įmonės profilio užklausa",
         "formSubtitle": "Sukurkite organizacijos profilį iš savo asmeninės paskyros. Jis iškart aktyvus ir naudojamas — nereikia laukti patvirtinimo. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis.",
