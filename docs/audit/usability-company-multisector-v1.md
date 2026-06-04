@@ -71,13 +71,49 @@ while a large "coming later" block dominated the account screen.
   `form-submit-feedback.test.ts` (company setup is now a client-async form, not a
   NATIVE-NAV exemption).
 
+## Hardening pass (pre-undraft review)
+- **Access model proven.** `authenticated` holds only `SELECT` on
+  `public.companies` (0023); there is NO table-level INSERT/UPDATE grant, so the
+  only write path is the `SECURITY DEFINER` RPC, which writes
+  `WHERE profile_id = auth.uid()`. A user can therefore only create/update
+  THEIR OWN request, never another user's, and never self-verify. A new guard
+  asserts no migration ever grants INSERT/UPDATE on companies to authenticated.
+- **Defense-in-depth trigger.** `enforce_company_verification_guard()` +
+  `trg_company_verification_guard` (BEFORE INSERT/UPDATE) make promotion to
+  `verified` admin-only on EVERY write path, even if a future migration adds a
+  direct UPDATE grant. `auth.uid()`/`is_admin()` reflect the end user inside the
+  SECURITY DEFINER RPC, so the self-service RPC can never verify.
+- **RPC robustness.** `save_company_setup` now branches on existence instead of
+  `ON CONFLICT`, so it does not depend on a unique constraint that could fail to
+  apply on legacy duplicate rows. The `unique(profile_id)` is added only when no
+  duplicates exist (apply never fails).
+- **Sector coverage proven.** Guard asserts the activity lexicon recognises all
+  owner-named sectors (construction, transport/logistics, retail, hospitality,
+  care, office/admin, IT, education, cleaning, agriculture) — construction is
+  one of them, not the default.
+
 ## Verification (this branch)
 - `pnpm -F web typecheck` → clean
 - `pnpm -F web lint` → 0 errors (1 pre-existing unrelated warning in
   `design-tokens.test.ts`)
-- `pnpm -F web build` → success
-- `pnpm -F web test` → 140 files, **2140 passed**
-- `check:pilot-honesty-copy`, `check:constitution`, `check:fit-signal-copy` → clean
+- `pnpm -F web build` → success (all three target routes compile)
+- `pnpm -F web test` → 140 files, **2144 passed**
+- `check:pilot-honesty-copy`, `check:constitution`, `check:fit-signal-copy`,
+  `check:pricing-honesty-copy` → clean
+- `migration-safety` (static gate) → the only `drop` in executable SQL is
+  `drop constraint` (CHECK re-runnability), comments are stripped, and a
+  `Rollback` block is present, so the migration stays GREEN class.
+
+## Visual smoke — NOT captured here (owner step)
+This environment has no `.env.local` and no stored auth session, so the three
+auth-gated routes cannot be screenshotted with a real session. The `build`
+proves they compile. After applying the migration on preview, the owner should
+visually confirm:
+- `/lt/dashboard/account` — coming-later block is collapsed; role catalogue is primary.
+- `/lt/dashboard/start/company` — full form (name/country required + optional
+  fields + your role); honest status + verification explainer; no fake verified badge.
+- `/lt/dashboard/journal` — a non-construction entry (e.g. "3h kasininku") yields
+  an honest label-only suggestion, not a construction label.
 
 ## What remains PENDING (owner / follow-up)
 1. **Apply the migration.** `20260604120000_company_profile_request.sql` is

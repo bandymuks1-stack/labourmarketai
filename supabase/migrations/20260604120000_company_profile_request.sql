@@ -22,15 +22,30 @@
 --   3. save_company_setup() — a SECURITY DEFINER upsert RPC (mirrors
 --      save_customer_setup from 0026). It NEVER sets 'verified'. It can only
 --      move a company to 'pending_verification' (submit) or keep 'draft'.
---      Verification to 'verified' is reserved for an admin path that does not
---      exist yet — so the platform cannot fake a verified company.
+--   4. enforce_company_verification_guard() + a BEFORE INSERT/UPDATE trigger:
+--      defense-in-depth so that promoting a company to 'verified' is admin-only
+--      on EVERY write path (direct table write or any RPC), independent of
+--      table grants. The self-service RPC never promotes, so the trigger never
+--      blocks it.
+--
+-- Access model (verified intentionally NOT reachable by normal users):
+--   * `authenticated` has only SELECT on public.companies (0023); there is NO
+--     table-level INSERT/UPDATE grant, so the ONLY write path is the
+--     SECURITY DEFINER RPC, which writes WHERE profile_id = auth.uid() and can
+--     never set 'verified'. A user can therefore only create / update THEIR
+--     OWN company request, never another user's, and never self-verify.
+--   * The trigger is belt-and-braces if a future migration ever adds a direct
+--     UPDATE grant.
 --
 -- Reversibility (PLATFORM_DOCTRINE §16):
---   Rollback = drop the added columns + drop save_company_setup(). The base
---   companies table (0001) and add_role()/complete_onboarding() RPCs are not
---   touched, so existing flows keep working with or without this migration.
---   Down-path (run manually only if reverting):
+--   The base companies table (0001) and add_role()/complete_onboarding() RPCs
+--   are not touched, so existing flows keep working with or without this
+--   migration. ROLLBACK (run manually only if reverting):
+--     drop trigger if exists trg_company_verification_guard on public.companies;
+--     drop function if exists public.enforce_company_verification_guard();
 --     drop function if exists public.save_company_setup(text,text,text,text,text,text,text,text,boolean);
+--     alter table public.companies drop constraint if exists companies_verification_status_check;
+--     alter table public.companies drop constraint if exists companies_profile_id_key;
 --     alter table public.companies
 --       drop column if exists registration_code,
 --       drop column if exists address,
@@ -82,10 +97,14 @@ alter table public.companies
 -- It (a) creates the company row if absent, (b) updates it if present, and
 -- (c) ensures the user holds the 'company' role via profile_roles.
 --
+-- It branches on existence (NOT `on conflict`) so it does not depend on a
+-- unique constraint that could fail to apply on a table with legacy duplicate
+-- rows.
+--
 -- HONESTY GUARANTEE: this RPC can NEVER set verification_status = 'verified'.
 -- When p_submit is true it moves the company to 'pending_verification'
 -- (a request awaiting human review). Otherwise it keeps/sets 'draft'. A
--- company that is already 'verified' is left untouched (an admin can verify;
+-- company that is already 'verified' is left verified (an admin verified it;
 -- this self-service path can only request).
 create or replace function public.save_company_setup(
   p_legal_name        text,
@@ -103,11 +122,11 @@ security definer
 set search_path = public
 as $$
 declare
-  uid           uuid := auth.uid();
-  company_uuid  uuid;
-  cleaned_name  text := nullif(trim(coalesce(p_legal_name, '')), '');
+  uid            uuid := auth.uid();
+  company_uuid   uuid;
+  cleaned_name   text := nullif(trim(coalesce(p_legal_name, '')), '');
   current_status text;
-  next_status   text;
+  next_status    text;
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
@@ -130,66 +149,99 @@ begin
    where profile_id = uid;
 
   if current_status = 'verified' then
-    -- A truly verified company stays verified; the self-service form must
-    -- not silently un-verify or re-request it.
-    next_status := 'verified';
+    next_status := 'verified';        -- stays verified; never re-requested here
   elsif p_submit then
     next_status := 'pending_verification';
   else
     next_status := 'draft';
   end if;
 
-  insert into public.companies (
-    profile_id, legal_name, display_name, country,
-    registration_code, address, website, contact_email, contact_phone,
-    requester_role, verification_status, requested_at
-  ) values (
-    uid,
-    cleaned_name,
-    cleaned_name,
-    nullif(trim(coalesce(p_country, '')), ''),
-    nullif(trim(coalesce(p_registration_code, '')), ''),
-    nullif(trim(coalesce(p_address, '')), ''),
-    nullif(trim(coalesce(p_website, '')), ''),
-    nullif(trim(coalesce(p_contact_email, '')), ''),
-    nullif(trim(coalesce(p_contact_phone, '')), ''),
-    nullif(trim(coalesce(p_requester_role, '')), ''),
-    next_status,
-    case when p_submit then now() else null end
-  )
-  on conflict (profile_id) do update set
-    legal_name          = excluded.legal_name,
-    display_name        = excluded.display_name,
-    country             = coalesce(excluded.country, public.companies.country),
-    registration_code   = coalesce(excluded.registration_code, public.companies.registration_code),
-    address             = coalesce(excluded.address, public.companies.address),
-    website             = coalesce(excluded.website, public.companies.website),
-    contact_email       = coalesce(excluded.contact_email, public.companies.contact_email),
-    contact_phone       = coalesce(excluded.contact_phone, public.companies.contact_phone),
-    requester_role      = coalesce(excluded.requester_role, public.companies.requester_role),
-    verification_status = next_status,
-    requested_at        = case
-                            when p_submit then now()
-                            else public.companies.requested_at
-                          end,
-    updated_at          = now()
-  returning id into company_uuid;
+  if exists (select 1 from public.companies where profile_id = uid) then
+    update public.companies set
+      legal_name          = cleaned_name,
+      display_name        = cleaned_name,
+      country             = coalesce(nullif(trim(coalesce(p_country, '')), ''), country),
+      registration_code   = coalesce(nullif(trim(coalesce(p_registration_code, '')), ''), registration_code),
+      address             = coalesce(nullif(trim(coalesce(p_address, '')), ''), address),
+      website             = coalesce(nullif(trim(coalesce(p_website, '')), ''), website),
+      contact_email       = coalesce(nullif(trim(coalesce(p_contact_email, '')), ''), contact_email),
+      contact_phone       = coalesce(nullif(trim(coalesce(p_contact_phone, '')), ''), contact_phone),
+      requester_role      = coalesce(nullif(trim(coalesce(p_requester_role, '')), ''), requester_role),
+      verification_status = next_status,
+      requested_at        = case when p_submit then now() else requested_at end,
+      updated_at          = now()
+    where profile_id = uid
+    returning id into company_uuid;
+  else
+    insert into public.companies (
+      profile_id, legal_name, display_name, country,
+      registration_code, address, website, contact_email, contact_phone,
+      requester_role, verification_status, requested_at
+    ) values (
+      uid,
+      cleaned_name,
+      cleaned_name,
+      nullif(trim(coalesce(p_country, '')), ''),
+      nullif(trim(coalesce(p_registration_code, '')), ''),
+      nullif(trim(coalesce(p_address, '')), ''),
+      nullif(trim(coalesce(p_website, '')), ''),
+      nullif(trim(coalesce(p_contact_email, '')), ''),
+      nullif(trim(coalesce(p_contact_phone, '')), ''),
+      nullif(trim(coalesce(p_requester_role, '')), ''),
+      next_status,
+      case when p_submit then now() else null end
+    )
+    returning id into company_uuid;
+  end if;
 
   return company_uuid;
 end $$;
 
--- companies has no unique(profile_id) in 0001; add it so the upsert above is
--- well-defined. A profile owns at most one company row (1:1, per project
--- model). Guarded: only add if it doesn't already exist.
+revoke all on function public.save_company_setup(text, text, text, text, text, text, text, text, boolean) from public;
+grant execute on function public.save_company_setup(text, text, text, text, text, text, text, text, boolean) to authenticated;
+
+-- ── 3. Verification guard (defense-in-depth) ─────────────────────────
+-- Only an admin may promote a company to 'verified', on ANY write path.
+-- auth.uid() / is_admin() reflect the END user even inside a SECURITY DEFINER
+-- RPC (the JWT GUC is preserved), so a non-admin calling save_company_setup can
+-- only request. The RPC keeps an already-verified row verified (NEW = OLD), so
+-- this trigger never blocks the legitimate flow.
+create or replace function public.enforce_company_verification_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.verification_status = 'verified'
+     and (tg_op = 'INSERT' or old.verification_status is distinct from 'verified')
+     and not public.is_admin() then
+    raise exception 'Only an admin can mark a company verified'
+      using errcode = '42501';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists trg_company_verification_guard on public.companies;
+create trigger trg_company_verification_guard
+  before insert or update on public.companies
+  for each row execute function public.enforce_company_verification_guard();
+
+-- ── 4. Optional hygiene: one company per profile ─────────────────────
+-- A profile owns at most one company row (1:1, per project model). The RPC no
+-- longer depends on this, so it is added only when it can be added safely (no
+-- pre-existing duplicates) — apply never fails on legacy data.
 do $$
 begin
   if not exists (
     select 1 from pg_constraint where conname = 'companies_profile_id_key'
+  ) and not exists (
+    select 1 from public.companies
+     where profile_id is not null
+     group by profile_id
+    having count(*) > 1
   ) then
     alter table public.companies
       add constraint companies_profile_id_key unique (profile_id);
   end if;
 end $$;
-
-revoke all on function public.save_company_setup(text, text, text, text, text, text, text, text, boolean) from public;
-grant execute on function public.save_company_setup(text, text, text, text, text, text, text, text, boolean) to authenticated;

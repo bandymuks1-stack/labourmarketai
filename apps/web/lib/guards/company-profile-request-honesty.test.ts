@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -51,8 +51,54 @@ describe("Guard: migration declares an honest verification ladder", () => {
   });
 
   it("is additive — no destructive drops of the companies table/columns", () => {
-    expect(sql).not.toMatch(/drop\s+table\s+[^;]*companies/i);
+    // Strip SQL comments — the rollback block legitimately documents drops.
+    const code = sql.replace(/--[^\n]*/g, " ");
+    expect(code).not.toMatch(/drop\s+table\s+[^;]*companies/i);
+    expect(code).not.toMatch(/drop\s+column/i);
     // (A guarded DROP CONSTRAINT for the re-runnable CHECK is allowed.)
+  });
+
+  it("a trigger makes promotion to verified admin-only on every write path", () => {
+    expect(sql).toContain("enforce_company_verification_guard");
+    expect(sql).toMatch(/before\s+insert\s+or\s+update\s+on\s+public\.companies/i);
+    expect(sql).toMatch(/not\s+public\.is_admin\(\)/);
+  });
+});
+
+describe("Guard: access model — users cannot write another company or self-verify", () => {
+  const MIGR_DIR = join(REPO_ROOT, "supabase", "migrations");
+  const sqlFiles = readdirSync(MIGR_DIR).filter((f) => f.endsWith(".sql"));
+
+  it("no migration grants INSERT/UPDATE on companies to authenticated", () => {
+    // The only write path to public.companies is a SECURITY DEFINER RPC that
+    // writes WHERE profile_id = auth.uid(). If a direct INSERT/UPDATE grant
+    // ever appears, a user could write rows directly (and, combined with the
+    // owner RLS policy, edit their own verification_status) — block that here.
+    const offenders: string[] = [];
+    for (const f of sqlFiles) {
+      const code = readFileSync(join(MIGR_DIR, f), "utf8").replace(
+        /--[^\n]*/g,
+        " ",
+      );
+      // grant ... (insert|update) ... on ... companies ... to authenticated
+      if (
+        /\bgrant\b[\s\S]{0,80}?\b(insert|update)\b[\s\S]{0,120}?\bon\b[\s\S]{0,40}?\bcompanies\b[\s\S]{0,60}?\bto\s+authenticated\b/i.test(
+          code,
+        )
+      ) {
+        offenders.push(f);
+      }
+    }
+    expect(offenders, `direct write grant on companies in: ${offenders.join(", ")}`).toEqual([]);
+  });
+
+  it("the setup RPC writes only the caller's own row (profile_id = auth.uid())", () => {
+    const sql = read(MIGRATION, REPO_ROOT);
+    // The RPC derives the target from auth.uid(), never from a caller-supplied
+    // profile id — so it cannot touch another user's company.
+    expect(sql).toMatch(/uid\s+uuid\s*:=\s*auth\.uid\(\)/);
+    expect(sql).toMatch(/where\s+profile_id\s*=\s*uid/i);
+    expect(sql).not.toMatch(/p_profile_id|p_owner/i);
   });
 });
 

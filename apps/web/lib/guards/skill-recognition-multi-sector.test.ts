@@ -69,6 +69,28 @@ describe("Guard: the activity lexicon spans many sectors", () => {
     expect(nonConstruction.length).toBeGreaterThanOrEqual(4);
   });
 
+  it("covers the owner-named sectors end-to-end", () => {
+    // The lexicon must recognise day-work across these sectors (construction
+    // is just one of them). "other" is the honest fallback, not a lexicon row.
+    for (const s of [
+      "construction",
+      "transport_logistics",
+      "retail_sales",
+      "hospitality_food",
+      "care_health",
+      "office_admin",
+      "it_software",
+      "education",
+      "cleaning_facility",
+      "agriculture",
+    ]) {
+      expect(
+        sectorsCovered.has(s as never),
+        `activity lexicon is missing sector "${s}"`,
+      ).toBe(true);
+    }
+  });
+
   it("every tagged sector is a known sector key", () => {
     for (const r of ACTIVITY_HINTS_LT) {
       if (r.sector) expect(isKnownSector(r.sector)).toBe(true);
