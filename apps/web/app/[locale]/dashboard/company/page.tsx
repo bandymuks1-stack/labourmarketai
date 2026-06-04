@@ -471,6 +471,25 @@ export default async function CompanyDashboardPage({
             {t("firstAction.body")}
           </p>
         </header>
+        {/* Persistent (reload-safe) empty / saved-private state. The form's own
+            "saved" line only appears right after an in-session save; this tells
+            the company, on every visit, whether a private draft exists — and is
+            careful to NEVER imply it was submitted, sent, matched, or reviewed. */}
+        {existingDraft ? (
+          <p
+            className="rounded-md border border-state-success/30 bg-state-success/5 px-3 py-2 text-xs text-state-success"
+            data-testid="company-request-saved-state"
+          >
+            ✓ {t("firstAction.savedState")}
+          </p>
+        ) : (
+          <p
+            className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+            data-testid="company-request-empty-state"
+          >
+            {t("firstAction.emptyState")}
+          </p>
+        )}
         <PilotDraftForm
           draftType="company_request"
           fields={COMPANY_FIELDS}

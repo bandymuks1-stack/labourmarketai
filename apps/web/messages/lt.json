@@ -276,8 +276,10 @@
       "subtitle": "Įmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.",
       "pilotDisclaimer": "Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite ramiai paruošti pirmą poreikį — jis iškart išsaugomas ir lieka privatus.",
       "firstAction": {
-        "title": "Sukurti darbo / paslaugos / komandos paklausą",
-        "body": "Pirmas naudingas veiksmas: aprašykite kokio darbuotojo, komandos ar paslaugos jums reikia. Juodraštis bus privatus, prieinamas tik jums, kol nenuspręsite kitaip."
+        "title": "Sukurkite pirmą darbo / komandos paklausą",
+        "body": "Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia. Tai išsaugoma kaip privatus juodraštis, matomas tik jums.",
+        "emptyState": "Užklausos dar nėra. Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia — juodraštis lieka privatus, matomas tik jums.",
+        "savedState": "Išsaugota kaip privatus juodraštis. Matote tik jūs."
       },
       "draftForm": {
         "field": {

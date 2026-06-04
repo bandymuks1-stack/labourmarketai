@@ -276,8 +276,10 @@
       "subtitle": "Company context is an entry point, not a limit. You can hold other roles and add more later via the role switcher.",
       "pilotDisclaimer": "Matching is not offered yet. Nothing becomes public automatically. You can prepare your first request calmly — it's saved right away and stays private to you.",
       "firstAction": {
-        "title": "Create a worker / team / service request",
-        "body": "First useful action: describe the worker, team, or service you need. The draft stays private to you until you decide otherwise."
+        "title": "Create your first work / team request",
+        "body": "Describe the workers, team, or project help you need. It's saved as a private draft only you can see.",
+        "emptyState": "No request yet. Describe the workers, team, or project help you need — your draft stays private to you.",
+        "savedState": "Saved as a private draft. Only you can see it."
       },
       "draftForm": {
         "field": {
