@@ -32,7 +32,8 @@ If it doesn't, it is hidden, demoted, or moved deeper.
 | #259 | RPC Execute Hardening v1 (revoke PUBLIC/anon execute) | ✅ merged + applied | `5a8f368` |
 | #260 | Profile becomes Work Card Source (benefit-first reframe) | ✅ merged | `8208d4a` |
 | #261 | Work Journal becomes "Mano darbo įrodymai" | ✅ merged | `f08471e` |
-| PR D* | Documents/CV become Evidence Library | ▶ this PR | — |
+| #262 | Documents/CV become Evidence Library | ✅ merged | `77fa0a6` |
+| PR E* | Human navigation / dashboard cleanup | ▶ this PR | — |
 
 \* number assigned on open.
 
@@ -143,8 +144,31 @@ merge; no manual deploy run).
 - New guard `evidence-library-framing.test.ts` pins the framing, benefit-by-type,
   explicit privacy, no admin/file-cabinet wording, and one primary CTA.
 
+## PR E — Human navigation / dashboard cleanup (this PR)
+
+- **Humanized the primary nav** (desktop tabs + mobile bottom nav, sourced from
+  `lib/config/navigation`): "Apžvalga" → **"Mano erdvė"**, "Profilis" → **"Darbo
+  kortelė"**, "Žurnalas" → **"Įrodymai"**, account stays **"Mano paskyra"** (LT+EN).
+  No dashboard/cockpit/module wording in worker nav.
+- **Removed duplicate doors** from the worker dashboard: the two cards
+  ("Mano veiklos ir įgūdžiai" → profile, "Mano įrodymai" → journal) and the bottom
+  "Kitos mano erdvės" account handle — all now covered by the primary nav tabs +
+  the `CurrentSpaceHeader` "Mano erdvės" link + the `AccountMenu`. The dashboard
+  is now: space header → work card → invitations → first-use guidance. No card wall.
+- **One primary CTA** preserved (the work card's next action); the dashboard page
+  carries no inline gradient CTA.
+- All routes stay reachable (nav tabs + AccountMenu). Company/agency/admin
+  untouched. No fake evidence/visibility/verification.
+- Updated `room-based-account-spaces` guard (account doorway is now the
+  current-space header + nav tab, not a duplicate page handle); new guard
+  `worker-nav-human-labels.test.ts` pins human labels + route reachability +
+  no-duplicate-door + one-CTA.
+
 ## What remains heavy (next PRs)
 
+- **"Mano pranešimai"** is not yet a primary nav tab (notifications live in the
+  header bell + /dashboard/communication). Promoting it belongs to **PR F**
+  (Notifications → "what matters now"), which owns that surface.
 - **Worker document file storage** is genuinely not built yet (scaffold). A real
   evidence-file feature (private storage + owner-only access) is a future,
   security-reviewed slice — not bundled here to avoid a fake/unsafe surface.

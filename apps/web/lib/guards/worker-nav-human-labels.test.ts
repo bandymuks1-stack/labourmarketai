@@ -1,0 +1,80 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
+
+/**
+ * Human navigation guard (slice human-nav-cleanup-v1, PR E).
+ *
+ * The logged-in worker navigation must follow the human work-card logic
+ * (Mano erdvė / Darbo kortelė / Įrodymai / Mano paskyra), every primary route
+ * stays reachable, and the dashboard keeps no duplicate doors / card wall.
+ */
+
+const root = join(__dirname, "..", "..");
+const read = (rel: string) => readFileSync(join(root, rel), "utf8");
+const lt = JSON.parse(read("messages/lt.json"));
+const en = JSON.parse(read("messages/en.json"));
+const tabs = (j: Record<string, unknown>) =>
+  ((j.auth as { dashboard: { tabs: Record<string, string> } }).dashboard).tabs;
+const DASH = "app/[locale]/dashboard/page.tsx";
+
+describe("primary nav uses human work-card labels, not module words", () => {
+  it("LT tabs read as space / work card / evidence / account", () => {
+    const tl = tabs(lt);
+    expect(tl.overview).toMatch(/erdvė/i);
+    expect(tl.profile).toMatch(/kortel/i);
+    expect(tl.journal).toMatch(/įrodym/i);
+    expect(tl.account).toMatch(/paskyr/i);
+  });
+  it("EN tabs mirror the human labels", () => {
+    const tl = tabs(en);
+    expect(tl.overview).toMatch(/space/i);
+    expect(tl.profile).toMatch(/card/i);
+    expect(tl.journal).toMatch(/evidence/i);
+    expect(tl.account).toMatch(/account/i);
+  });
+  it("no module / cockpit / dashboard wording in the primary tab labels", () => {
+    for (const j of [lt, en]) {
+      const blob = [
+        tabs(j).overview,
+        tabs(j).profile,
+        tabs(j).journal,
+        tabs(j).account,
+      ].join(" ");
+      expect(blob).not.toMatch(/\bdashboard\b|cockpit|\bmodul/i);
+      expect(blob).not.toMatch(/Apžvalga|Profilis|Žurnalas|profile completion|profilio užbaigim/i);
+    }
+  });
+});
+
+describe("every primary worker route stays reachable", () => {
+  it("the nav exposes my-space + work-card + evidence + account routes", () => {
+    const hrefs = VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.href);
+    for (const r of [
+      "/dashboard",
+      "/dashboard/profile",
+      "/dashboard/journal",
+      "/dashboard/account",
+    ]) {
+      expect(hrefs, `nav must reach ${r}`).toContain(r);
+    }
+  });
+});
+
+describe("worker dashboard has no duplicate doors / card wall", () => {
+  const page = read(DASH);
+  it("removed the bottom 'other spaces' account handle (duplicate doorway)", () => {
+    expect(page).not.toMatch(/my-space-account-handle/);
+  });
+  it("removed the profile/journal duplicate cards (the nav tabs own those doors)", () => {
+    expect(page).not.toMatch(/tMy\("activities|tMy\("proofCard|mySpace\.activities/);
+  });
+  it("still mounts the work card + current-space header (identity preserved)", () => {
+    expect(page).toMatch(/<WorkCard\b/);
+    expect(page).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
+  });
+  it("keeps the page free of inline primary gradient CTAs (the one CTA is the work card's)", () => {
+    expect(page).not.toMatch(/from-brand-blue to-brand-cyan/);
+  });
+});

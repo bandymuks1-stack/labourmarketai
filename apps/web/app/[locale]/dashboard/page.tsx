@@ -9,7 +9,6 @@ import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { WorkCard } from "@/components/app/work-card";
 import { getWorkerCard } from "@/lib/worker/work-card";
-import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import {
@@ -131,7 +130,6 @@ export default async function DashboardOverviewPage({
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.wow");
   const tf = await getTranslations("auth.dashboard.wow.flow");
-  const tMy = await getTranslations("auth.dashboard.mySpace");
   const tRole = await getTranslations("auth.signup.role");
   const tProf = await getTranslations("professions");
 
@@ -161,9 +159,6 @@ export default async function DashboardOverviewPage({
       {tw("startingPoint")}
     </p>
   );
-
-  const linkCls =
-    "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
 
   // ── Company / agency / customer: operating cockpit (define → submit need) ──
   if (role !== "worker") {
@@ -352,7 +347,6 @@ export default async function DashboardOverviewPage({
   // least one journal entry. The gentle first-use guidance shows only during
   // that window, then disappears — it never nags a settled person.
   const isFirstUse = !professionName || entriesCount === 0;
-  const hasProof = entriesCount > 0;
 
   // ── "Mano darbo kortelė" — state-aware continuity (slice
   // work-card-state-aware-v1). The card decides new/returning/stale from the
@@ -380,61 +374,12 @@ export default async function DashboardOverviewPage({
 
       {/* First-use guidance appears ONLY while the person is still starting
           (no profession or no entries yet) — a gentle path, not a permanent
-          panel. Its profile/journal/account CTA row stays hidden so CTAs don't
-          repeat; the Next Action + the cards below own that navigation. */}
+          panel. The profile/journal/account doors live in the primary nav
+          (Mano erdvė / Darbo kortelė / Įrodymai / Mano paskyra), so the
+          dashboard keeps no duplicate card wall — just the work card itself. */}
       {isFirstUse && (
         <DashboardFirstUsePanel variant="full" showCtas={false} />
       )}
-
-      {/* ── The person's own surfaces, in human terms (no module/role cards).
-          "Mano veiklos ir įgūdžiai" is always offered; "Mano įrodymai" only
-          appears once there is real evidence to open. ── */}
-      <div className={cn("grid gap-4", hasProof && "sm:grid-cols-2")}>
-        <section className="card-border flex flex-col gap-2 p-6">
-          <h2 className="font-display text-base font-semibold text-text-primary">
-            {tMy("activities.title")}
-          </h2>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {tMy("activities.body")}
-          </p>
-          <Link
-            href="/dashboard/profile"
-            className={cn(linkCls, "mt-2 self-start")}
-          >
-            {tMy("activities.cta")} →
-          </Link>
-        </section>
-        {hasProof && (
-          <section className="card-border flex flex-col gap-2 p-6">
-            <h2 className="font-display text-base font-semibold text-text-primary">
-              {tMy("proofCard.title")}
-            </h2>
-            <p className="text-sm leading-relaxed text-text-secondary">
-              {tMy("proofCard.body")}
-            </p>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
-              {tw("nextSteps.journal.bodyDone", { n: entriesCount })}
-            </p>
-            <Link
-              href="/dashboard/journal"
-              className={cn(linkCls, "mt-2 self-start")}
-            >
-              {tMy("proofCard.cta")} →
-            </Link>
-          </section>
-        )}
-      </div>
-
-      {/* A single quiet doorway to the person's other spaces. The cross-space
-          catalogue + module grid stay under /dashboard/account → "Mano erdvės";
-          this room keeps only the compact handle (room-based IA). */}
-      <Link
-        href="/dashboard/account"
-        className={cn(linkCls, "self-start")}
-        data-testid="my-space-account-handle"
-      >
-        {tMy("otherSpaces")} →
-      </Link>
     </div>
   );
 }
