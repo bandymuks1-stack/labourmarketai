@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { WorkCardData } from "@/lib/worker/work-card";
 import { deriveWorkCardState, type WorkDim } from "@/lib/worker/work-card-state";
 import { WorkCardEditor, type WorkCardLabels } from "./work-card-editor";
+import { EmployerPreview } from "./employer-preview";
 import { cn } from "@/lib/utils";
 
 /**
@@ -190,6 +191,30 @@ export async function WorkCard({ data }: { data: WorkCardData }) {
           labels={editorLabels}
         />
       </div>
+
+      {/* "Taip jus galėtų matyti darbdavys" — read-only mirror of the worker's
+          OWN saved data, so the value of completing the card is tangible. Only
+          shown once there is something real to preview. Not a match/score/claim
+          that anyone is looking. Secondary (a collapsed toggle). */}
+      {clear.length > 0 && (
+        <div className="border-t border-ink-600 pt-5">
+          <EmployerPreview
+            rows={(["work", "availability", "location", "pay", "evidence"] as WorkDim[]).map(
+              (d) => ({
+                label: tw(`dim.${d}.label`),
+                value: dimValue[d] || null,
+              }),
+            )}
+            labels={{
+              toggle: tw("employerPreview.toggle"),
+              title: tw("employerPreview.title"),
+              intro: tw("employerPreview.intro"),
+              notSet: tw("employerPreview.notSet"),
+              unverifiedNote: tw("employerPreview.unverifiedNote"),
+            }}
+          />
+        </div>
+      )}
     </section>
   );
 }
