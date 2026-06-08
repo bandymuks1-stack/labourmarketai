@@ -1294,7 +1294,11 @@ describe("no migration files added by this sprint", () => {
     // blanket UPDATE grant on workers, no RLS loosening, reversible. Committed +
     // queued for the gate, NOT applied by the agent. See
     // worker-work-card-migration.test.ts.
-    const SPRINT_BASELINE = 47;
+    // Bumped 47 → 48 for the RPC execute hardening slice: additive
+    // 20260608140000_worker_work_card_execute_hardening revokes the implicit
+    // PUBLIC/anon EXECUTE on the two work-card RPCs (keeps authenticated) —
+    // hardening-only, no body/schema/data change, reversible.
+    const SPRINT_BASELINE = 48;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -14,12 +14,22 @@ const sql = readFileSync(
   join(repo, "supabase", "migrations", "20260608120000_worker_work_card.sql"),
   "utf8",
 );
+const hardenSql = readFileSync(
+  join(
+    repo,
+    "supabase",
+    "migrations",
+    "20260608140000_worker_work_card_execute_hardening.sql",
+  ),
+  "utf8",
+);
 
 // Mirror migration-safety.mjs: risk patterns are judged on EXECUTABLE SQL only,
 // so a commented `-- drop ...` inside the ROLLBACK block is not a real drop.
 const code = sql
   .replace(/\/\*[\s\S]*?\*\//g, " ")
   .replace(/--[^\n]*/g, " ");
+const hardenCode = hardenSql.replace(/--[^\n]*/g, " ");
 
 describe("work-card migration is additive + reversible", () => {
   it("adds the confirmation column with IF NOT EXISTS (additive)", () => {
@@ -72,5 +82,29 @@ describe("writes are owner-scoped + SECURITY DEFINER, never system fields", () =
     expect(sql).toMatch(
       /grant execute on function public\.confirm_worker_card\(\) to authenticated/i,
     );
+  });
+});
+
+describe("execute-hardening migration is hardening-only + reversible", () => {
+  it("revokes PUBLIC and anon EXECUTE on both RPCs", () => {
+    for (const fn of ["save_worker_card", "confirm_worker_card"]) {
+      expect(hardenCode).toMatch(
+        new RegExp(`revoke execute on function public\\.${fn}[\\s\\S]*?from public`, "i"),
+      );
+      expect(hardenCode).toMatch(
+        new RegExp(`revoke execute on function public\\.${fn}[\\s\\S]*?from anon`, "i"),
+      );
+    }
+  });
+  it("keeps the authenticated grant (re-affirmed)", () => {
+    expect(hardenCode).toMatch(/grant execute[\s\S]*?save_worker_card[\s\S]*?to authenticated/i);
+    expect(hardenCode).toMatch(/grant execute[\s\S]*?confirm_worker_card\(\) to authenticated/i);
+  });
+  it("changes no RPC body / schema / data (hardening-only) + is reversible", () => {
+    expect(hardenCode).not.toMatch(/create or replace function|alter table|drop |update |delete |insert /i);
+    expect(hardenSql).toMatch(/ROLLBACK \(reversible\)/);
+  });
+  it("grants only to authenticated, never anon/public", () => {
+    expect(hardenCode).not.toMatch(/grant[\s\S]{0,120}?to\s+(anon|public)\b/i);
   });
 });
