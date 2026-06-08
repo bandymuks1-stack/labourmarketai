@@ -28,9 +28,16 @@ If it doesn't, it is hidden, demoted, or moved deeper.
 |----|-------|-------|-------|
 | #256 | Calm "Mano erdvė" worker entry foundation | ✅ merged | `a0cdfbf` |
 | #257 | State-aware "Mano darbo kortelė" (new/returning/stale) + RPC | ✅ merged | `5b1a827` |
-| #258* | Employer preview — "Taip jus galėtų matyti darbdavys" | ▶ this PR | — |
+| #258 | Employer preview — "Taip jus galėtų matyti darbdavys" | ✅ merged | `27c2fcb` |
+| #259 | RPC Execute Hardening v1 (revoke PUBLIC/anon execute) | ✅ merged + applied | `5a8f368` |
+| PR B* | Profile becomes Work Card Source (benefit-first reframe) | ▶ this PR | — |
 
 \* number assigned on open.
+
+**Hardening applied to prod** (`20260608140000`): `save_worker_card` /
+`confirm_worker_card` now `public_exec=false`, `anon_exec=false`,
+`auth_exec=true` — the "Public Can Execute SECURITY DEFINER Function" advisor is
+cleared; RPC bodies untouched.
 
 **Migration applied to prod** (`gorgitwvdzxbnaxhrsrw`): `worker_work_card`
 (add `workers.work_card_confirmed_at` + `save_worker_card` / `confirm_worker_card`
@@ -80,11 +87,23 @@ merge; no manual deploy run).
 
 ---
 
+## PR B — Profile becomes Work Card Source (this PR)
+
+- Reframed `profileHub` + profile page subtitle to **"Mano darbo kortelės
+  šaltinis"**, benefit-first: eyebrow names the work card; lead is *"Štai ką apie
+  jus jau žinome."*; explainer states the **employer** benefit (*"Tai padeda
+  darbdaviui greičiau suprasti, kokiam darbui tinkate."*).
+- CTAs reframed off form-language: "Papildyti profilį" → **"Pridėti, ko trūksta"**;
+  "Pildyti darbo žurnalą" → **"Pridėti darbo įrodymą"**; journal link → "Mano
+  darbo įrodymai". No completion nagging, no percentage, no module wording.
+- Kept the already-consolidated structure (one primary CTA, single not-verified
+  negation, no standalone skill-verification card — those were removed in the
+  prior P0 rescue) and all real editing/CV/skills functionality.
+- New guard `profile-work-card-source.test.ts` pins the framing + anti-nagging +
+  one-primary-CTA + no-skill-verification-card invariants.
+
 ## What remains heavy (next PRs)
 
-- **Profile** (`/dashboard/profile`) still reads as a hub with completion-style
-  framing → **PR B**: reframe as the source behind the work card; demote
-  completion nagging, duplicate CV CTAs, standalone skill-verification surfaces.
 - **Work Journal** is still framed as a technical journal → **PR C**: reframe as
   *"Mano darbo įrodymai"*; simplify entry; hide draft/state language.
 - **Documents/CV** → **PR D**: reframe as an evidence library that strengthens the
