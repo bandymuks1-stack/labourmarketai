@@ -115,8 +115,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // SECURITY DEFINER RPC, admin-only + audit-logged, applied to prod after
     // owner approval), then to 46 for the company-automatic-first correction
     // (additive company_automatic_first: widen CHECK + active_unverified default
-    // + automatic-status save_company_setup). The baseline only ever grows
-    // deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 46/);
+    // + automatic-status save_company_setup), then to 47 for the worker
+    // work-card slice (additive 20260608120000_worker_work_card: add
+    // workers.work_card_confirmed_at + owner-scoped save/confirm RPCs). The
+    // baseline only ever grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 47/);
   });
 });

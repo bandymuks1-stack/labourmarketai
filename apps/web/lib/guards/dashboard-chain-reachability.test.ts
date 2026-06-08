@@ -28,9 +28,13 @@ describe("dashboard surfaces the chain entry points", () => {
     // lone "Work journal" chain card — it duplicated the Next Action + Proof
     // card; the journal stays reachable via primary nav + those surfaces).
     expect((page.match(/<DashboardChainActions\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
-    // BOTH branches surface the single role-based primary Next Action + the
-    // accept-invitation card, so neither user lands without a clear next move.
-    expect((page.match(/<DashboardNextAction\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    // Neither user lands without a clear next move + the accept-invitation card.
+    // The ORG branch surfaces the role-based <DashboardNextAction>; the WORKER
+    // branch surfaces the state-aware <WorkCard>, which owns the worker's single
+    // best next action (slice work-card-state-aware-v1 replaced the worker's
+    // <DashboardNextAction> with the work card).
+    expect((page.match(/<DashboardNextAction\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
+    expect((page.match(/<WorkCard\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
     expect((page.match(/<WorkerInvitationsCard\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 

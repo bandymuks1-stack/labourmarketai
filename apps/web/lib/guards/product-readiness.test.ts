@@ -1286,7 +1286,15 @@ describe("no migration files added by this sprint", () => {
     // (manual review = optional escalation, not the default gate). PR#250
     // trigger untouched; no new companies grant. Committed + queued, NOT
     // applied by the agent. See company-automatic-first.test.ts.
-    const SPRINT_BASELINE = 46;
+    // Bumped 46 → 47 for the worker work-card slice: additive
+    // 20260608120000_worker_work_card adds workers.work_card_confirmed_at
+    // (IF NOT EXISTS) + two owner-scoped SECURITY DEFINER RPCs (save_worker_card
+    // / confirm_worker_card) writing ONLY whitelisted card fields WHERE
+    // profile_id = auth.uid() — never trust_score/profile_completeness, no
+    // blanket UPDATE grant on workers, no RLS loosening, reversible. Committed +
+    // queued for the gate, NOT applied by the agent. See
+    // worker-work-card-migration.test.ts.
+    const SPRINT_BASELINE = 47;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
