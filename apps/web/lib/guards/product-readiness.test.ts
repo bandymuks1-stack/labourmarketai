@@ -1298,7 +1298,10 @@ describe("no migration files added by this sprint", () => {
     // 20260608140000_worker_work_card_execute_hardening revokes the implicit
     // PUBLIC/anon EXECUTE on the two work-card RPCs (keeps authenticated) —
     // hardening-only, no body/schema/data change, reversible.
-    const SPRINT_BASELINE = 48;
+    // Bumped 48 -> 49 for work-instructions v1: additive instruction columns on
+    // conversation_messages + owner-scoped, relationship-gated SECURITY DEFINER
+    // send_work_instruction RPC (reuses existing participant-scoped message RLS).
+    const SPRINT_BASELINE = 49;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

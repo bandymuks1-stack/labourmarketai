@@ -34,9 +34,40 @@ If it doesn't, it is hidden, demoted, or moved deeper.
 | #261 | Work Journal becomes "Mano darbo įrodymai" | ✅ merged | `f08471e` |
 | #262 | Documents/CV become Evidence Library | ✅ merged | `77fa0a6` |
 | #263 | Human navigation / dashboard cleanup | ✅ merged | `abec3cb` |
-| PR F* | Notifications/messages become "Kas dabar svarbu" | ▶ this PR | — |
+| #264 | Notifications/messages become "Kas dabar svarbu" | ✅ merged | `fce451a` |
+| PR F1* | Multilingual Work Instructions (honest scaffold) | 🔒 DRAFT — security review | — |
 
-\* number assigned on open.
+\* PR F1 touches private messaging (DB + SECURITY DEFINER RPC). Per the operating
+rules it is opened as a **draft, NOT auto-merged, NOT applied to prod** until the
+owner's migration/security review passes.
+
+## PR F1 — Multilingual Work Instructions (this PR, DRAFT — security review)
+
+Owner re-prioritised: build the multilingual work-instruction channel before the
+company calming pass. **No translation service exists**, so this is **Option B**
+(honest scaffold): the manager writes in their own language, the worker reads the
+**original** (a real translation lands in a later reviewed slice), and the
+original is always the source of truth + always viewable.
+
+- **Reuses the secure communication tables** (0021): an instruction is a
+  `conversation_messages` row flagged `is_instruction` → the existing
+  participant-scoped RLS applies unchanged (no cross-thread/cross-company leak).
+- **Additive migration** `20260608150000_work_instructions.sql`: instruction
+  columns + a **relationship-gated, owner-scoped SECURITY DEFINER**
+  `send_work_instruction` RPC (a manager may instruct a worker only via an ACTIVE
+  roster link to a company/agency they own — `owns_company`/`owns_agency` — or
+  admin). Revoked from PUBLIC/anon; granted to `authenticated` only. Reversible.
+- **Manager** `/dashboard/instructions`: "Nurodymas darbuotojui" composer (pick a
+  managed worker, write in own language, send). **Worker**: "Mano nurodymai" —
+  original preserved + honest *"Vertimas dar neparuoštas. Rodomas originalas."* +
+  "Rodyti originalą" + **"Paprašyti patikslinti"** (a real reply in the thread).
+- No fake translation / delivered-read / AI understanding / demo data.
+- Guards: `work-instructions-migration` (additive/owner-scoped/relationship-gated/
+  no-public-execute/original-never-overwritten) + `work-instructions-integrity`
+  (original preserved + viewable, translation never replaces, honest unavailable
+  state, no fake receipts/AI).
+- **Migration NOT applied to prod; PR opened as draft for the mandated security
+  review.**
 
 **Hardening applied to prod** (`20260608140000`): `save_worker_card` /
 `confirm_worker_card` now `public_exec=false`, `anon_exec=false`,
