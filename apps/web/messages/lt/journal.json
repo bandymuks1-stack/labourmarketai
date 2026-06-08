@@ -1,6 +1,6 @@
 {
   "noContext": {
-    "none": "Kol kas nėra aktyvaus darbo konteksto. Kai organizacija pakvies jus į komandą ir pridės, žurnalas atsidarys čia.",
+    "none": "Kol kas nėra aktyvaus darbo konteksto. Kai organizacija pakvies jus į komandą ir pridės, jūsų darbo įrodymai atsidarys čia.",
     "pending": "Turite laukiantį kvietimą. Atidarykite skydelį ir priimkite jį — tada savininkas galės pridėti jus prie organizacijos.",
     "pendingNamed": "Turite laukiantį {org} kvietimą. Atidarykite skydelį ir priimkite jį — tada savininkas galės pridėti jus prie organizacijos.",
     "roster": "Priėmėte kvietimą ir esate komandos sąraše. Organizacijos savininkas dar turi pridėti jus prie organizacijos, kad galėtumėte žymėti darbą.",
@@ -10,7 +10,7 @@
   "personalEntry": "Asmeninis darbuotojo įrašas",
   "reviewNotEnabledNote": "Žurnalo peržiūra dar neįjungta. Galite žymėti darbą jau dabar — bet kad įrašai būtų patvirtinami, organizacijos savininkas turi įjungti jūsų žurnalo peržiūrą.",
   "chooseWorkType": "Pasirinkite darbo tipą",
-  "whatDidYouDo": "Ką šiandien nuveikei?",
+  "whatDidYouDo": "Ką šiandien parodote apie savo darbą?",
   "textPlaceholder": "Pvz.: Mokiausi 2 valandas ir baigiau mokyklos projektą. Arba numezgiau 3 poras kojinių ir nufotografavau. Arba dirbau 6 valandas, sutvarkiau 12 klientų užklausų ir paruošiau ataskaitą.",
   "analyseSubmit": "Pasiūlykite struktūrą",
   "saveEntry": "Išsaugoti įrašą",
@@ -164,14 +164,17 @@
     "skills": "Įgūdžiai",
     "title": "Patvirtinti įrašai"
   },
-  "listEmpty": "Kol kas nieko nepažymėjote — jūsų įrašai atsiras čia.",
-  "listEmptyTitle": "Pradėkite darbo žurnalą",
-  "listEmptyNext": "Sukurkite pirmą įrašą žemiau; jis lieka privatus, kol patvirtinsite.",
+  "listEmpty": "Kol kas neturite darbo įrodymų — jūsų įrašai atsiras čia.",
+  "listEmptyTitle": "Pradėkite kurti darbo įrodymus",
+  "listEmptyNext": "Sukurkite pirmą įrašą žemiau. Jis parodo, ką realiai dirbote, ir lieka privatus, kol patvirtinsite.",
   "listEmptyCta": "Sukurti pirmą įrašą",
-  "listTitle": "Įrašai",
-  "navTitle": "Mano dienoraštis",
+  "listTitle": "Darbo įrašai",
+  "navTitle": "Mano darbo įrodymai",
+  "navSubtitle": "Įrašai parodo, ką realiai dirbote, ir sustiprina jūsų darbo kortelę.",
+  "composerBenefit": "Šis įrašas sustiprina jūsų darbo kortelę.",
+  "benefitNotAuto": "Įrodymai didina pasitikėjimą. Patvirtinti gali tik žmogus — vadovas ar klientas.",
   "newEntry": "Naujas įrašas",
-  "noEngagement": "Kol kas neturi aktyvaus darbo konteksto, todėl nėra prie ko fiksuoti įrašų. Kai vadovas ar klientas pridės tave prie organizacijos ar projekto, dienoraštis atsidarys čia.",
+  "noEngagement": "Kol kas neturi aktyvaus darbo konteksto, todėl nėra prie ko fiksuoti įrašų. Kai vadovas ar klientas pridės tave prie organizacijos ar projekto, jūsų darbo įrodymai atsidarys čia.",
   "notes": "Pastabos",
   "prompt": {
     "tiler": "Aprašyk, ką nuveikei šiandien (nebūtina)"
