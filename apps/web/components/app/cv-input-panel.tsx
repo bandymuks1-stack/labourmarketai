@@ -92,6 +92,31 @@ export function CvInputPanel({
           </Button>
         </div>
       </div>
+
+      {/* Evidence library framing — what each kind of evidence helps show, so a
+          document is collected for a benefit, not as file admin. Benefit-first,
+          honest: file upload is being prepared (see uploadComingSoon above). */}
+      <div
+        className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+        data-testid="cv-evidence-types"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("evidenceTitle")}
+        </span>
+        <ul className="flex flex-col gap-0.5 text-xs leading-relaxed text-text-secondary">
+          <li>{t("evidenceCv")}</li>
+          <li>{t("evidenceCerts")}</li>
+          <li>{t("evidencePhotos")}</li>
+          <li>{t("evidenceRecs")}</li>
+          <li>{t("evidenceLegal")}</li>
+        </ul>
+      </div>
+      <p
+        className="text-[11px] leading-relaxed text-text-muted"
+        data-testid="cv-privacy-note"
+      >
+        {t("privacyNote")}
+      </p>
     </section>
   );
 }
