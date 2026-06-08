@@ -1927,6 +1927,13 @@
           "change": "Change",
           "saved": "Thanks, confirmed"
         },
+        "employerPreview": {
+          "toggle": "How an employer would see me",
+          "title": "This is how an employer would see your card",
+          "intro": "Only what you entered is shown. This is not an offer and nobody is looking for you yet — you simply see how your card reads.",
+          "notSet": "not set yet",
+          "unverifiedNote": "This is information you provided yourself. It is not verified unless the card clearly says so."
+        },
         "value": {
           "from": "from {date}",
           "payRange": "€{min}–{max}",
