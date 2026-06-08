@@ -2110,9 +2110,9 @@
       "onboarding_required": "Pirmiausia užpildykite profilį."
     },
     "notifications": {
-      "label": "Pranešimai",
-      "emptyTitle": "Pranešimų dar nėra",
-      "emptyBody": "Pranešimai pasirodys čia, kai sistema augs.",
+      "label": "Mano pranešimai",
+      "emptyTitle": "Šiuo metu nieko nereikia daryti.",
+      "emptyBody": "Jei atsiras svarbus prašymas ar žinutė, matysite tai čia.",
       "switchRoleCta": "Persijungti į {role} norėdami pamatyti",
       "markAllRead": "Pažymėti visus skaitytais"
     }
@@ -2690,10 +2690,10 @@
     }
   },
   "communication": {
-    "title": "Pokalbiai",
-    "subtitle": "Vidinis bendravimas tarp testuotojų, įmonių, agentūrų ir administratoriaus.",
-    "v1Notice": "v1 versija: bendravimas atnaujinamas perkrovus puslapį (ne realiu laiku). Be failų prikabinimo. Be „delivered/read“ žymeklių — tik sąžiningas „atidaryta“ laiko žymeklis dalyviui.",
-    "empty": "Pokalbių dar nėra. Jei jus pakvietė į pokalbį, jis čia atsiras.",
+    "title": "Mano pranešimai",
+    "subtitle": "Kas dabar svarbu ir į ką verta atsakyti. Čia matysite žinutes ir svarbius prašymus.",
+    "v1Notice": "Žinutės atnaujinamos perkrovus puslapį. Rodome tik sąžiningą „atidaryta“ laiką, be netikrų „pristatyta / perskaityta“ žymeklių.",
+    "empty": "Kol kas žinučių nėra. Jei kas nors parašys ar atsiras svarbus prašymas, matysite tai čia.",
     "unnamedThread": "(be temos)",
     "unread": "Naujas",
     "kind": {
@@ -2701,11 +2701,11 @@
       "support": "Pagalba",
       "team": "Komanda"
     },
-    "backToList": "← Visi pokalbiai",
+    "backToList": "← Visi pranešimai",
     "noMessages": "Šiame pokalbyje dar nėra žinučių. Pradėkite rašydami žemiau.",
     "byYou": "Jūs",
     "byOther": "Pašnekovas",
-    "footnote": "Pokalbiai matomi tik dalyviams ir administratoriui. Privatūs. Be viešos prieigos.",
+    "footnote": "Žinutės matomos tik dalyviams ir administratoriui. Privatu. Be viešos prieigos.",
     "composer": {
       "label": "Nauja žinutė",
       "placeholder": "Parašykite žinutę…",
