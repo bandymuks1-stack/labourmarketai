@@ -77,8 +77,9 @@ export default async function CommunicationListPage({
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
-      {/* v1 honest framing — communication is poll-on-page, not real-time. */}
-      <p className="card-border bg-state-warning/5 p-3 text-xs leading-relaxed text-text-secondary">
+      {/* Honest framing — messages are poll-on-page, not real-time. Calm muted
+          note (not an alert), so it reads as reassurance, not a warning. */}
+      <p className="text-xs leading-relaxed text-text-muted" data-testid="communication-honest-note">
         {t("v1Notice")}
       </p>
 

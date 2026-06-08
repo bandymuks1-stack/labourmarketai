@@ -33,7 +33,8 @@ If it doesn't, it is hidden, demoted, or moved deeper.
 | #260 | Profile becomes Work Card Source (benefit-first reframe) | ✅ merged | `8208d4a` |
 | #261 | Work Journal becomes "Mano darbo įrodymai" | ✅ merged | `f08471e` |
 | #262 | Documents/CV become Evidence Library | ✅ merged | `77fa0a6` |
-| PR E* | Human navigation / dashboard cleanup | ▶ this PR | — |
+| #263 | Human navigation / dashboard cleanup | ✅ merged | `abec3cb` |
+| PR F* | Notifications/messages become "Kas dabar svarbu" | ▶ this PR | — |
 
 \* number assigned on open.
 
@@ -164,11 +165,32 @@ merge; no manual deploy run).
   `worker-nav-human-labels.test.ts` pins human labels + route reachability +
   no-duplicate-door + one-CTA.
 
+## PR F — Notifications/messages become "Kas dabar svarbu" (this PR)
+
+- **Reality check:** there is no notifications table yet, so the header bell is an
+  empty state; `/dashboard/communication` holds REAL messages. So PR F is an
+  honest framing reframe — no fake notifications, no fake priority groups.
+- **Header bell** (`auth.notifications`): "Pranešimai" → **"Mano pranešimai"**;
+  empty state "Pranešimų dar nėra / …kai sistema augs" → calm
+  *"Šiuo metu nieko nereikia daryti." / "Jei atsiras svarbus prašymas ar žinutė,
+  matysite tai čia."*
+- **Messages page** (`communication`): "Pokalbiai" → **"Mano pranešimai"**;
+  subtitle → *"Kas dabar svarbu ir į ką verta atsakyti…"*; the honest "not
+  real-time / no fake read receipts" note demoted from a **warning banner** to a
+  calm muted line; empty state reassuring (*"…matysite tai čia"*).
+- No fake urgency / matches / employer-interest / "someone viewed you"; no admin
+  inbox / module / pipeline wording. Privacy footnote kept. Shared page → the
+  first-person framing works for all roles; **company/admin comms unchanged**
+  (copy only, no logic/RLS change).
+- New guard `worker-notifications-framing.test.ts` pins the framing, calm empty
+  states, no-fake-signal, no-admin-inbox-wording, and the muted (non-warning) note.
+- **"Mano pranešimai" was NOT added as a 5th nav tab** — the mobile bottom nav
+  already carries 4, and a 5th would crowd + needs a feature-catalogue change.
+  Messages stay reachable via the header bell + `MessageButton` + direct route.
+  (Promoting to a tab can be revisited later if the catalogue is widened.)
+
 ## What remains heavy (next PRs)
 
-- **"Mano pranešimai"** is not yet a primary nav tab (notifications live in the
-  header bell + /dashboard/communication). Promoting it belongs to **PR F**
-  (Notifications → "what matters now"), which owns that surface.
 - **Worker document file storage** is genuinely not built yet (scaffold). A real
   evidence-file feature (private storage + owner-only access) is a future,
   security-reviewed slice — not bundled here to avoid a fake/unsafe surface.

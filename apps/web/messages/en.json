@@ -2110,9 +2110,9 @@
       "onboarding_required": "Please finish setting up your profile first."
     },
     "notifications": {
-      "label": "Notifications",
-      "emptyTitle": "No notifications yet",
-      "emptyBody": "Notifications will appear here as the system grows.",
+      "label": "My notifications",
+      "emptyTitle": "Nothing needs your attention right now.",
+      "emptyBody": "If something important comes up, you'll see it here.",
       "switchRoleCta": "Switch to {role} to view",
       "markAllRead": "Mark all as read"
     }
@@ -2690,10 +2690,10 @@
     }
   },
   "communication": {
-    "title": "Conversations",
-    "subtitle": "Internal communication between testers, companies, agencies, and the admin.",
-    "v1Notice": "v1: messages update on page refresh (not real-time). No file attachments. No fake delivered/read indicators — just an honest per-participant 'opened' timestamp.",
-    "empty": "No conversations yet. Invitations land here.",
+    "title": "My messages",
+    "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
+    "v1Notice": "Messages update on page refresh. We show only an honest 'opened' timestamp — no fake delivered / read indicators.",
+    "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
     "unnamedThread": "(no subject)",
     "unread": "New",
     "kind": {
@@ -2701,11 +2701,11 @@
       "support": "Support",
       "team": "Team"
     },
-    "backToList": "← All conversations",
+    "backToList": "← All messages",
     "noMessages": "No messages in this conversation yet. Start typing below.",
     "byYou": "You",
     "byOther": "Other",
-    "footnote": "Conversations are visible only to participants + the admin. Private. No public access.",
+    "footnote": "Messages are visible only to participants + the admin. Private. No public access.",
     "composer": {
       "label": "New message",
       "placeholder": "Write a message…",
