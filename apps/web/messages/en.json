@@ -1204,7 +1204,7 @@
     "loadError": "Could not load skills. Please try again.",
     "retry": "Try again",
     "viewProfile": "View profile",
-    "importPrompt": "Have an old CV? You can pick a file (PDF or DOCX)",
+    "importPrompt": "Have a CV file? A CV helps explain your experience.",
     "importComingSoon": "Reading skills from a CV is not active yet.",
     "importAddManually": "Add your skills manually or through journal entries.",
     "importNotSaved": "Selected: {file}. The file isn't uploaded or stored yet.",
@@ -1463,13 +1463,20 @@
       "pending": "Suggestion"
     },
     "cv": {
-      "title": "Upload or paste a CV",
-      "helper": "Upload a PDF / DOCX or paste your CV text. File upload is not stored yet — for now, use paste.",
+      "title": "Your CV — your first piece of evidence",
+      "helper": "A CV helps people understand your experience faster and strengthens your work card. It stays private. For now, paste your CV text.",
       "uploadLabel": "Upload CV file",
-      "uploadComingSoon": "File upload lands in M2 — for now paste the text.",
+      "uploadComingSoon": "Your evidence library (certificates, photos, documents) is being prepared. For now, paste your CV text.",
       "pasteLabel": "Paste CV text",
       "pastePlaceholder": "Paste your CV text here.",
-      "pasteSubmit": "Suggest from CV text"
+      "pasteSubmit": "Use CV text",
+      "evidenceTitle": "What evidence strengthens your work card",
+      "evidenceCv": "CV — helps people understand your experience faster.",
+      "evidenceCerts": "Certificates and qualifications — build trust.",
+      "evidencePhotos": "Work photos and files — show work you actually did.",
+      "evidenceRecs": "References — help back up your reliability.",
+      "evidenceLegal": "ID or legal documents — used only when needed for hiring or a legal process.",
+      "privacyNote": "Your documents stay private. They are not shown to an employer or client without a clear basis."
     }
   },
   "live": {

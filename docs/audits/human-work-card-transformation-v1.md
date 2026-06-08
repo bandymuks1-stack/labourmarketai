@@ -31,7 +31,8 @@ If it doesn't, it is hidden, demoted, or moved deeper.
 | #258 | Employer preview — "Taip jus galėtų matyti darbdavys" | ✅ merged | `27c2fcb` |
 | #259 | RPC Execute Hardening v1 (revoke PUBLIC/anon execute) | ✅ merged + applied | `5a8f368` |
 | #260 | Profile becomes Work Card Source (benefit-first reframe) | ✅ merged | `8208d4a` |
-| PR C* | Work Journal becomes "Mano darbo įrodymai" | ▶ this PR | — |
+| #261 | Work Journal becomes "Mano darbo įrodymai" | ✅ merged | `f08471e` |
+| PR D* | Documents/CV become Evidence Library | ▶ this PR | — |
 
 \* number assigned on open.
 
@@ -121,10 +122,32 @@ merge; no manual deploy run).
 - New guard `journal-evidence-framing.test.ts` pins the evidence + work-card
   framing, the no-heavy-wording rule, the honest benefit line, and one-CTA.
 
+## PR D — Documents/CV become Evidence Library (this PR)
+
+- **Reality check:** there is **no active worker document storage** — CV file
+  upload is an explicit M1/M2 **scaffold** (`CvImportUpload` stores nothing;
+  `CvInputPanel` upload is "coming soon"). The only real worker CV is the pasted
+  **text** → `profiles.profile_text`. So PR D is an **honest copy reframe** of the
+  existing CV surface — **not** a new (fake) file cabinet.
+- Reframed `structuring.cv` (`CvInputPanel`) from "Įkelti arba įklijuoti CV"
+  file-admin into evidence-library framing: title **"CV — pirmasis jūsų
+  įrodymas"**; helper leads with the work-card benefit + privacy; file upload is
+  honestly **"Įrodymų biblioteka … dar ruošiama"** (no fake upload).
+- Added a **benefit-by-type** list + **privacy note** in the panel:
+  CV→experience, certificates→trust, photos/files→real work, references→reliability,
+  ID/legal→only when needed; *"Jūsų dokumentai privatūs. Jie nerodomi darbdaviui
+  ar klientui be aiškaus pagrindo."*
+- Light touch on `skills.import*` prompt (benefit-first), keeping the honest
+  "not saved" lines. **No storage/access/DB change**; the real CV-text path is
+  unchanged; no fake verification / employer visibility / score.
+- New guard `evidence-library-framing.test.ts` pins the framing, benefit-by-type,
+  explicit privacy, no admin/file-cabinet wording, and one primary CTA.
+
 ## What remains heavy (next PRs)
 
-- **Documents/CV** → **PR D**: reframe as an evidence library that strengthens the
-  card.
+- **Worker document file storage** is genuinely not built yet (scaffold). A real
+  evidence-file feature (private storage + owner-only access) is a future,
+  security-reviewed slice — not bundled here to avoid a fake/unsafe surface.
 - **Navigation** → **PR E**: human nav (Mano erdvė / darbo kortelė / įrodymai /
   pranešimai / paskyra); remove duplicate doors; merge stacked headers.
 - **Notifications/tasks** → **PR F**: "what matters now", not admin inbox noise.

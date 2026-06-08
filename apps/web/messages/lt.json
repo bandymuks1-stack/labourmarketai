@@ -1204,7 +1204,7 @@
     "loadError": "Nepavyko įkelti įgūdžių. Bandykite dar kartą.",
     "retry": "Bandyti dar kartą",
     "viewProfile": "Peržiūrėti profilį",
-    "importPrompt": "Turite seną CV? Galite pasirinkti failą (PDF arba DOCX)",
+    "importPrompt": "Turite CV failą? CV padeda paaiškinti jūsų patirtį.",
     "importComingSoon": "Įgūdžių nuskaitymas iš CV dar neaktyvus.",
     "importAddManually": "Įgūdžius pridėkite rankiniu būdu arba per žurnalo įrašus.",
     "importNotSaved": "Pasirinkta: {file}. Failas dar neįkeltas ir neišsaugotas.",
@@ -1463,13 +1463,20 @@
       "pending": "Pasiūlymas"
     },
     "cv": {
-      "title": "Įkelti arba įklijuoti CV",
-      "helper": "Įkelkite PDF / DOCX arba įklijuokite CV tekstą. CV įkėlimas dar nesaugomas — kol kas naudokite teksto įklijavimą.",
+      "title": "CV — pirmasis jūsų įrodymas",
+      "helper": "CV padeda greičiau suprasti jūsų patirtį ir stiprina jūsų darbo kortelę. Jis privatus. Kol kas įklijuokite CV tekstą.",
       "uploadLabel": "Įkelti CV failą",
-      "uploadComingSoon": "Failo įkėlimas bus aktyvuotas M2 etape — kol kas naudokite teksto įklijavimą.",
+      "uploadComingSoon": "Įrodymų biblioteka (sertifikatai, nuotraukos, dokumentai) dar ruošiama. Kol kas įklijuokite CV tekstą.",
       "pasteLabel": "Įklijuoti CV tekstą",
       "pastePlaceholder": "Įklijuokite savo CV tekstą čia.",
-      "pasteSubmit": "Pasiūlyti pagal CV tekstą"
+      "pasteSubmit": "Naudoti CV tekstą",
+      "evidenceTitle": "Kokie įrodymai stiprina jūsų darbo kortelę",
+      "evidenceCv": "CV — padeda greičiau suprasti jūsų patirtį.",
+      "evidenceCerts": "Sertifikatai ir kvalifikacijos — didina pasitikėjimą.",
+      "evidencePhotos": "Darbo nuotraukos ir failai — parodo realiai atliktą darbą.",
+      "evidenceRecs": "Rekomendacijos — padeda pagrįsti patikimumą.",
+      "evidenceLegal": "Asmens ar teisiniai dokumentai — naudojami tik tada, kai reikia įdarbinimo ar teisiniam procesui.",
+      "privacyNote": "Jūsų dokumentai privatūs. Jie nerodomi darbdaviui ar klientui be aiškaus pagrindo."
     }
   },
   "live": {
