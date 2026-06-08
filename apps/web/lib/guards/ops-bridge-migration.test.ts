@@ -117,8 +117,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (additive company_automatic_first: widen CHECK + active_unverified default
     // + automatic-status save_company_setup), then to 47 for the worker
     // work-card slice (additive 20260608120000_worker_work_card: add
-    // workers.work_card_confirmed_at + owner-scoped save/confirm RPCs). The
-    // baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 47/);
+    // workers.work_card_confirmed_at + owner-scoped save/confirm RPCs), then to
+    // 48 for the RPC execute hardening slice (additive
+    // 20260608140000_worker_work_card_execute_hardening: revoke PUBLIC/anon
+    // EXECUTE on the two RPCs, keep authenticated). The baseline only ever grows
+    // deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 48/);
   });
 });
