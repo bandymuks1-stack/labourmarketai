@@ -1862,6 +1862,32 @@
         }
       },
       "greeting": "Welcome back, {name}",
+      "mySpace": {
+        "eyebrow": "Me right now",
+        "intro": "This is your space. Your work, skills and evidence take shape here — at your own pace.",
+        "snapshot": {
+          "work": "What I do",
+          "workEmpty": "No profession set yet",
+          "skills": "What I can do",
+          "skillsValue": "Skills: {n}",
+          "skillsEmpty": "No skills added yet",
+          "proof": "What proves it",
+          "proofValue": "Work entries: {n}",
+          "proofEmpty": "No evidence yet"
+        },
+        "unverifiedNote": "This is what you say about yourself. Not yet confirmed by a person — and that's fine.",
+        "activities": {
+          "title": "My activities and skills",
+          "body": "Tell us what you can do and what you'd like to work on. All in one place.",
+          "cta": "Open"
+        },
+        "proofCard": {
+          "title": "My evidence",
+          "body": "The work you log gradually becomes proof of your skills.",
+          "cta": "Open journal"
+        },
+        "otherSpaces": "My other spaces"
+      },
       "tabs": {
         "overview": "Overview",
         "profile": "Profile",

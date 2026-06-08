@@ -7,6 +7,7 @@ import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card"
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
+import { MySpaceNow } from "@/components/app/my-space-now";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
@@ -131,7 +132,7 @@ export default async function DashboardOverviewPage({
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.wow");
   const tf = await getTranslations("auth.dashboard.wow.flow");
-  const tc = await getTranslations("auth.dashboard.wow.canonical");
+  const tMy = await getTranslations("auth.dashboard.mySpace");
   const tRole = await getTranslations("auth.signup.role");
   const tProf = await getTranslations("professions");
 
@@ -369,155 +370,99 @@ export default async function DashboardOverviewPage({
   });
   const waitingCount = Math.max(0, entriesCount - confirmedCount);
 
-  // Higher-level journey stages (identity → proof → opportunities). The single
-  // next best action now comes from <DashboardNextAction>; the journey rail
-  // keeps showing real progress.
-  const idDone = hasProfile;
-  const proofDone = entriesCount > 0;
-  const stageDone = [idDone, proofDone, false];
-  const currentStage = stageDone.findIndex((d) => !d);
-  const stageState = (i: number): StageState =>
-    stageDone[i] ? "done" : i === currentStage ? "current" : "todo";
-  const wstages: Stage[] = [
-    { label: tf("worker.s1"), state: stageState(0) },
-    { label: tf("worker.s2"), state: stageState(1) },
-    { label: tf("worker.s3"), state: stageState(2) },
-  ];
-
-  // Phase 3: a worker is in "first-use" until they have BOTH a profession set
-  // AND at least one journal entry. We show the full first-use panel during
-  // that window, and switch to a compact greeting card after — never both,
-  // never blank.
+  // A worker is in "first-use" until they have BOTH a profession set AND at
+  // least one journal entry. The gentle first-use guidance shows only during
+  // that window, then disappears — it never nags a settled person.
   const isFirstUse = !professionName || entriesCount === 0;
+
+  // ── "Mano erdvė" — calm personal entry (slice my-space-human-entry-v1) ──
+  // The worker no longer lands in an admin cockpit (stepper rail + role/module
+  // cards + platform banners). The space opens with a quiet human summary
+  // ("Aš dabar"), ONE clear next step, then only the surfaces that help the
+  // person express themselves: their activities/skills and (when it exists)
+  // their evidence. No wall of cards; nothing fabricated.
+  const hasProof = entriesCount > 0;
 
   return (
     <div className="flex flex-col gap-7">
-      {Header}
+      {/* Space identity + the calm doorway to other spaces (My spaces). */}
       <CurrentSpaceHeader role={role} />
 
-      {/* The single, clear primary action for this worker's state
+      {/* "Aš dabar" — who I am now, what I can do, what already proves it.
+          Real counts only; clearly self-described and not yet human-confirmed. */}
+      <MySpaceNow
+        name={name}
+        professionName={professionName}
+        skillsCount={skillsCount}
+        entriesCount={entriesCount}
+      />
+
+      {/* The single clear next step for this worker's state
           (complete profile → first entry → waiting → all confirmed). This is
-          the ONE primary CTA on the surface; the cards below are secondary
-          navigation. The worker chain-actions card (a lone "Work journal"
-          link) was removed — it duplicated this action and the Proof card. */}
+          the ONE primary CTA on the surface. */}
       <DashboardNextAction
         action={workerAction}
         counts={{ waiting: waitingCount, confirmed: confirmedCount }}
       />
       <WorkerInvitationsCard />
 
-      {professionName && (
-        <p className="-mt-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
-          {professionName}
-        </p>
+      {/* First-use guidance appears ONLY while the person is still starting
+          (no profession or no entries yet) — a gentle path, not a permanent
+          panel. Its profile/journal/account CTA row stays hidden so CTAs don't
+          repeat; the Next Action + the cards below own that navigation. */}
+      {isFirstUse && (
+        <DashboardFirstUsePanel variant="full" showCtas={false} />
       )}
-      {StartingPoint}
 
-      {/* First-use panel is educational here (steps only); its profile/journal/
-          account CTA row is hidden so those CTAs don't repeat — the Next Action
-          block + the two cards below already own that navigation. */}
-      <DashboardFirstUsePanel
-        variant={isFirstUse ? "full" : "compact"}
-        showCtas={false}
-      />
-
-      <JourneyRail stages={wstages} label={tf("worker.eyebrow")} />
-      <p className="text-[11px] leading-relaxed text-text-muted" data-testid="journey-progress-helper">
-        {tw("pilot.progressHelper")}
-      </p>
-
-      {/* ── Two canonical surfaces — ONE entry per workflow (no duplicates).
-          The primary "next move" now lives in <DashboardNextAction> at the top
-          (single primary CTA); these two are secondary navigation homes. ── */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {/* A. Work Identity — the single home for profession, directions, skills, CV */}
+      {/* ── The person's own surfaces, in human terms (no module/role cards).
+          "Mano veiklos ir įgūdžiai" is always offered; "Mano įrodymai" only
+          appears once there is real evidence to open. ── */}
+      <div className={cn("grid gap-4", hasProof && "sm:grid-cols-2")}>
         <section className="card-border flex flex-col gap-2 p-6">
-          <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-state-success">
-            <span className="live-dot signal-dot" aria-hidden />
-            {tf("worker.s1")}
-          </span>
           <h2 className="font-display text-base font-semibold text-text-primary">
-            {tc("identity.title")}
+            {tMy("activities.title")}
           </h2>
           <p className="text-sm leading-relaxed text-text-secondary">
-            {tc("identity.body")}
-          </p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
-            {professionName ?? "—"} ·{" "}
-            {tw("nextSteps.skills.bodyDone", { n: skillsCount })}
+            {tMy("activities.body")}
           </p>
           <Link
             href="/dashboard/profile"
             className={cn(linkCls, "mt-2 self-start")}
           >
-            {tc("identity.cta")} →
+            {tMy("activities.cta")} →
           </Link>
         </section>
-        {/* B. Work Proof / Journal — the single home for proof entries */}
-        <section className="card-border flex flex-col gap-2 p-6">
-          <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
-            <span className="live-dot signal-dot" aria-hidden />
-            {tf("worker.s2")}
-          </span>
-          <h2 className="font-display text-base font-semibold text-text-primary">
-            {tc("proof.title")}
-          </h2>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {tc("proof.body")}
-          </p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
-            {tw("nextSteps.journal.bodyDone", { n: entriesCount })}
-          </p>
-          <Link
-            href="/dashboard/journal"
-            className={cn(linkCls, "mt-2 self-start")}
-          >
-            {tc("proof.cta")} →
-          </Link>
-        </section>
+        {hasProof && (
+          <section className="card-border flex flex-col gap-2 p-6">
+            <h2 className="font-display text-base font-semibold text-text-primary">
+              {tMy("proofCard.title")}
+            </h2>
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {tMy("proofCard.body")}
+            </p>
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
+              {tw("nextSteps.journal.bodyDone", { n: entriesCount })}
+            </p>
+            <Link
+              href="/dashboard/journal"
+              className={cn(linkCls, "mt-2 self-start")}
+            >
+              {tMy("proofCard.cta")} →
+            </Link>
+          </section>
+        )}
       </div>
 
-      {/* ── Activity Setup Hub link (Stage 2) ──
-          Direct path into /dashboard/start where the owner can see
-          real Agency / Company / Buyer state and start the first
-          two end-to-end. Surfaced above the role-catalogue grid so
-          it does not get buried under the "preparing" chips. */}
+      {/* A single quiet doorway to the person's other spaces. The cross-space
+          catalogue + module grid stay under /dashboard/account → "Mano erdvės";
+          this room keeps only the compact handle (room-based IA). */}
       <Link
-        href="/dashboard/start"
-        className="card-border flex items-center justify-between gap-3 px-4 py-3 hover:border-brand-blue"
-        data-testid="dashboard-activity-setup-link"
+        href="/dashboard/account"
+        className={cn(linkCls, "self-start")}
+        data-testid="my-space-account-handle"
       >
-        <div className="flex flex-col gap-0.5">
-          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
-            {tw("activitySetup.eyebrow")}
-          </p>
-          <p className="text-sm font-semibold text-text-primary">
-            {tw("activitySetup.title")}
-          </p>
-          <p className="text-xs text-text-secondary">
-            {tw("activitySetup.body")}
-          </p>
-        </div>
-        <span className="shrink-0 text-sm text-brand-blue">
-          {tw("activitySetup.cta")} →
-        </span>
+        {tMy("otherSpaces")} →
       </Link>
-
-      {/* Room-based IA (PR #204 review): the all-roles catalogue and the
-          cross-space "coming later" module grid moved OUT of this active
-          space into /dashboard/account → "Mano erdvės / My spaces". This
-          room keeps only a compact switch handle into that spaces surface. */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dashed border-ink-500 px-4 py-3">
-        <p className="text-xs leading-relaxed text-text-muted">
-          {tw("addMore.body")}
-        </p>
-        <Link
-          href="/dashboard/account"
-          className={cn(linkCls, "shrink-0")}
-        >
-          {tw("addMore.cta")} →
-        </Link>
-      </div>
     </div>
   );
 }

@@ -1862,6 +1862,32 @@
         }
       },
       "greeting": "Sveiki, {name}",
+      "mySpace": {
+        "eyebrow": "Aš dabar",
+        "intro": "Tai jūsų erdvė. Čia jūsų darbas, įgūdžiai ir įrodymai pamažu įgauna formą — be skubos.",
+        "snapshot": {
+          "work": "Ką dirbu",
+          "workEmpty": "Profesija dar nenurodyta",
+          "skills": "Ką moku",
+          "skillsValue": "Įgūdžių: {n}",
+          "skillsEmpty": "Įgūdžių dar nepridėjote",
+          "proof": "Kuo įrodau",
+          "proofValue": "Darbo įrašų: {n}",
+          "proofEmpty": "Įrodymų dar nėra"
+        },
+        "unverifiedNote": "Tai, ką pasakojate apie save. Dar ne patvirtinta žmogaus — ir tai normalu.",
+        "activities": {
+          "title": "Mano veiklos ir įgūdžiai",
+          "body": "Papasakokite, ką mokate ir ką norėtumėte veikti. Viskas vienoje vietoje.",
+          "cta": "Atverti"
+        },
+        "proofCard": {
+          "title": "Mano įrodymai",
+          "body": "Užfiksuotas darbas pamažu virsta jūsų įgūdžių įrodymais.",
+          "cta": "Atverti dienoraštį"
+        },
+        "otherSpaces": "Kitos mano erdvės"
+      },
       "tabs": {
         "overview": "Apžvalga",
         "profile": "Profilis",
