@@ -1975,9 +1975,9 @@
         }
       },
       "tabs": {
-        "overview": "Overview",
-        "profile": "Profile",
-        "journal": "Journal",
+        "overview": "My space",
+        "profile": "Work card",
+        "journal": "Evidence",
         "discover": "Discover",
         "search": "Search",
         "account": "My account"
