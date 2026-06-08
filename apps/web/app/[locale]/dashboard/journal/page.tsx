@@ -148,10 +148,13 @@ export default async function JournalPage({
           : null;
     return (
       <div className="flex flex-col gap-6">
-        <header>
+        <header className="flex flex-col gap-1">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("navTitle")}
           </h1>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("navSubtitle")}
+          </p>
         </header>
         <div className="card-border max-w-2xl p-6">
           <p className="text-sm leading-relaxed text-text-secondary">
@@ -309,6 +312,9 @@ export default async function JournalPage({
             {tSpaces("mySpaces")} →
           </Link>
         </div>
+        <p className="text-sm leading-relaxed text-text-secondary" data-testid="journal-nav-subtitle">
+          {t("navSubtitle")}
+        </p>
       </header>
 
       {/* P0 UX rescue: removed the read-only project-context note and the
@@ -336,6 +342,16 @@ export default async function JournalPage({
         </p>
       )}
       <div id="journal-composer" className="order-2">
+        <div className="flex flex-col gap-2">
+        {/* Benefit-first framing: an entry is proof that strengthens the work
+            card, not timesheet admin — confirmation is a real human decision. */}
+        <p
+          className="text-sm leading-relaxed text-text-secondary"
+          data-testid="journal-composer-benefit"
+        >
+          {t("composerBenefit")}{" "}
+          <span className="text-text-muted">{t("benefitNotAuto")}</span>
+        </p>
         <JournalEntryComposer
           engagements={engagements}
           directions={directions}
@@ -357,6 +373,7 @@ export default async function JournalPage({
               : null
           }
         />
+        </div>
       </div>
 
       {/* Entry list — lifted to the top so a worker who just logged work sees

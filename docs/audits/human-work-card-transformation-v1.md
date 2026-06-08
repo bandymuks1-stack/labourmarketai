@@ -30,7 +30,8 @@ If it doesn't, it is hidden, demoted, or moved deeper.
 | #257 | State-aware "Mano darbo kortelė" (new/returning/stale) + RPC | ✅ merged | `5b1a827` |
 | #258 | Employer preview — "Taip jus galėtų matyti darbdavys" | ✅ merged | `27c2fcb` |
 | #259 | RPC Execute Hardening v1 (revoke PUBLIC/anon execute) | ✅ merged + applied | `5a8f368` |
-| PR B* | Profile becomes Work Card Source (benefit-first reframe) | ▶ this PR | — |
+| #260 | Profile becomes Work Card Source (benefit-first reframe) | ✅ merged | `8208d4a` |
+| PR C* | Work Journal becomes "Mano darbo įrodymai" | ▶ this PR | — |
 
 \* number assigned on open.
 
@@ -102,10 +103,26 @@ merge; no manual deploy run).
 - New guard `profile-work-card-source.test.ts` pins the framing + anti-nagging +
   one-primary-CTA + no-skill-verification-card invariants.
 
+## PR C — Work Journal becomes "Mano darbo įrodymai" (this PR)
+
+- Worker-facing journal reframed from a diary/module to an **evidence path**:
+  `navTitle` "Mano dienoraštis" → **"Mano darbo įrodymai"**; new subtitle
+  *"Įrašai parodo, ką realiai dirbote, ir sustiprina jūsų darbo kortelę."*;
+  composer prompt "Ką šiandien nuveikei?" → **"Ką šiandien parodote apie savo
+  darbą?"**; empty state "Pradėkite darbo žurnalą" → "Pradėkite kurti darbo
+  įrodymus".
+- **Work-card connection** is explicit: a benefit line above the composer —
+  *"Šis įrašas sustiprina jūsų darbo kortelę."* + the honest, affirmatively-phrased
+  *"Patvirtinti gali tik žmogus — vadovas ar klientas."* (no "automatic
+  verification" phrasing — that trips the honesty guards even as a negation).
+- Removed diary/module wording from the worker-facing copy (no "dienoraštis",
+  no "žurnalas atsidarys"). Structure, autosave/draft safety, entry creation,
+  project context, entry list/history, confirmation/honesty rules all unchanged.
+- New guard `journal-evidence-framing.test.ts` pins the evidence + work-card
+  framing, the no-heavy-wording rule, the honest benefit line, and one-CTA.
+
 ## What remains heavy (next PRs)
 
-- **Work Journal** is still framed as a technical journal → **PR C**: reframe as
-  *"Mano darbo įrodymai"*; simplify entry; hide draft/state language.
 - **Documents/CV** → **PR D**: reframe as an evidence library that strengthens the
   card.
 - **Navigation** → **PR E**: human nav (Mano erdvė / darbo kortelė / įrodymai /

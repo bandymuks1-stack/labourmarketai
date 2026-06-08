@@ -1,6 +1,6 @@
 {
   "noContext": {
-    "none": "No active work context yet. When an organization invites you to its team and adds you, your journal opens here.",
+    "none": "No active work context yet. When an organization invites you to its team and adds you, your work evidence opens here.",
     "pending": "You have a pending invitation. Open your dashboard to accept it — then the owner can add you to the organization.",
     "pendingNamed": "You have a pending invitation from {org}. Open your dashboard to accept it — then the owner can add you to the organization.",
     "roster": "You've accepted and you're on the team roster. The organization owner still needs to add you to the organization before you can log work here.",
@@ -10,7 +10,7 @@
   "personalEntry": "Personal worker entry",
   "reviewNotEnabledNote": "Review is not enabled yet. You can log your work now — but for entries to be confirmed, the organization owner needs to enable journal review for you.",
   "chooseWorkType": "Choose work type",
-  "whatDidYouDo": "What did you do today?",
+  "whatDidYouDo": "What are you showing about your work today?",
   "textPlaceholder": "e.g. Studied 2 hours and finished a school project. Or knitted 3 pairs of socks and photographed them. Or worked 6 hours, handled 12 customer requests and prepared a report.",
   "analyseSubmit": "Suggest a structure",
   "saveEntry": "Save entry",
@@ -164,14 +164,17 @@
     "skills": "Skills",
     "title": "Entries to confirm"
   },
-  "listEmpty": "You haven't logged any work yet — your entries will show up here.",
-  "listEmptyTitle": "Start your work journal",
-  "listEmptyNext": "Create your first entry below; it stays private until you choose to share it.",
+  "listEmpty": "You don't have any work evidence yet — your entries will show up here.",
+  "listEmptyTitle": "Start building work evidence",
+  "listEmptyNext": "Create your first entry below. It shows what you actually did and stays private until you confirm it.",
   "listEmptyCta": "Create your first entry",
-  "listTitle": "Entries",
-  "navTitle": "My journal",
+  "listTitle": "Work entries",
+  "navTitle": "My work evidence",
+  "navSubtitle": "Entries show what you actually did and strengthen your work card.",
+  "composerBenefit": "This entry strengthens your work card.",
+  "benefitNotAuto": "Evidence builds trust. Only a person — a manager or client — can confirm it.",
   "newEntry": "New entry",
-  "noEngagement": "You don't have an active work engagement yet, so there is nothing to log against. Once a manager or client adds you to an organization or project, your journal opens here.",
+  "noEngagement": "You don't have an active work engagement yet, so there is nothing to log against. Once a manager or client adds you to an organization or project, your work evidence opens here.",
   "notes": "Notes",
   "prompt": {
     "tiler": "Describe what you did today (optional)"
