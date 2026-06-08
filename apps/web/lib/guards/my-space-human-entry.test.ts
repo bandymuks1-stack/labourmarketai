@@ -34,22 +34,17 @@ const en = JSON.parse(read("messages/en.json"));
 const DASH_PAGE = "app/[locale]/dashboard/page.tsx";
 const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 
-describe("worker entry opens with the calm 'Aš dabar' summary", () => {
+describe("worker entry opens with the state-aware work card", () => {
   const page = read(DASH_PAGE);
-  it("mounts <MySpaceNow> on the dashboard", () => {
-    expect(page).toMatch(/<MySpaceNow\b/);
+  it("mounts <WorkCard> on the dashboard (the calm 'Mano darbo kortelė')", () => {
+    expect(page).toMatch(/<WorkCard\b/);
   });
-  it("the 'Aš dabar' card carries no primary gradient CTA (the one CTA stays in Next Action)", () => {
-    const card = read("components/app/my-space-now.tsx");
-    expect(card).not.toMatch(/from-brand-blue to-brand-cyan/);
-  });
-  it("the 'Aš dabar' card shows honest empty states, never a fabricated value", () => {
-    const card = read("components/app/my-space-now.tsx");
-    // Empty-state keys are wired, so a person with no profession/skills/entries
-    // sees "not set yet", not a fake "0 verified" or invented number.
-    for (const k of ["workEmpty", "skillsEmpty", "proofEmpty"]) {
-      expect(card, `snapshot.${k} must be wired`).toContain(`snapshot.${k}`);
-    }
+  it("the work card surfaces honest missing states, never a fabricated value", () => {
+    const card = read("components/app/work-card.tsx");
+    // Missing dimensions show a "dar nenurodyta" hint, not a fake 0/score.
+    expect(card).toContain("dim.${dim}.missing");
+    // No system/score field is ever surfaced to the user.
+    expect(card).not.toMatch(/trust_score|profile_completeness/);
   });
   it("the worker entry no longer renders the role/module activity-setup link", () => {
     // The "start a company/agency/buyer" card is not a person's next natural
@@ -164,5 +159,59 @@ describe("'Mano erdvė' copy is human, calm, present in LT + EN", () => {
     expect(all).not.toMatch(/verification_status|server draft|stale draft|\bmodule\b|\bmodulis\b|\bmoduli/i);
     expect(all).not.toMatch(/užpildyk\w*\s+sistem|fill (?:in |out )?the system/i);
     expect(all).not.toMatch(/\bdemo\b|\bsample\b|\bfake\b|pavyzdiniai duomenys/i);
+  });
+});
+
+describe("'Mano darbo kortelė' (work card) copy is complete + honest in LT + EN", () => {
+  const card = (json: Record<string, unknown>) =>
+    (json.auth as { dashboard: { workCard: Record<string, unknown> } }).dashboard
+      .workCard;
+
+  // Every suggested action must explain WHY it helps — the four benefit lines.
+  const WHY_KEYS = ["work", "availability", "location", "pay", "evidence", "complete"];
+
+  for (const [name, json] of [["lt", lt], ["en", en]] as const) {
+    it(`${name} exposes the state intros + dimension labels + why lines`, () => {
+      const w = card(json) as {
+        intro: Record<string, string>;
+        dim: Record<string, { label: string; missing: string }>;
+        next: Record<string, string>;
+        why: Record<string, string>;
+        stale: Record<string, string>;
+      };
+      for (const s of ["new", "returning", "stale"]) {
+        expect(w.intro?.[s], `${name} intro.${s}`).toBeTruthy();
+      }
+      for (const d of ["work", "availability", "location", "pay", "evidence"]) {
+        expect(w.dim?.[d]?.label, `${name} dim.${d}.label`).toBeTruthy();
+        expect(w.dim?.[d]?.missing, `${name} dim.${d}.missing`).toBeTruthy();
+        expect(w.next?.[d], `${name} next.${d}`).toBeTruthy();
+      }
+      for (const k of WHY_KEYS) {
+        expect(w.why?.[k], `${name} why.${k}`).toBeTruthy();
+      }
+      // The stale confirmation is "Taip / Pakeisti", a small ask — not onboarding.
+      for (const k of ["title", "body", "yes", "change"]) {
+        expect(w.stale?.[k], `${name} stale.${k}`).toBeTruthy();
+      }
+    });
+  }
+
+  it("LT why-copy matches the mandated benefit sentences", () => {
+    const w = card(lt) as { why: Record<string, string> };
+    expect(w.why.work).toMatch(/kokiam darbui jus galima siūlyti/);
+    expect(w.why.pay).toMatch(/pagrįsti jūsų pageidaujamą tarifą/);
+    expect(w.why.evidence).toMatch(/galite juos pridėti vėliau/);
+  });
+
+  it("work-card copy makes no fake score / no fabricated matching claim", () => {
+    const all = [card(lt), card(en)].map((c) => JSON.stringify(c)).join(" ");
+    // No score / percentage / ranking, no internal tech, no demo/fake/sample.
+    expect(all).not.toMatch(/\bscore\b|balas|reitingas|\d+\s?%|trust_score/i);
+    expect(all).not.toMatch(/verification_status|\bRPC\b|\bRLS\b|server draft/i);
+    expect(all).not.toMatch(/\bdemo\b|\bsample\b|\bfake\b|pavyzdiniai duomenys/i);
+    // "Suggested for" / "offers" describe a benefit of giving data — never a
+    // promise that matching exists today (no "guaranteed"/"automatic match").
+    expect(all).not.toMatch(/guarantee|garantuo|automat\w*\s+(match|suderin|atitik)/i);
   });
 });

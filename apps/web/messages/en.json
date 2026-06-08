@@ -1888,6 +1888,78 @@
         },
         "otherSpaces": "My other spaces"
       },
+      "workCard": {
+        "eyebrow": "My work card",
+        "intro": {
+          "new": "Let's create your work card. A few things are enough — you can add more later.",
+          "returning": "Here is your work card. The system remembers what you already told it — no need to fill it in again.",
+          "stale": "Some details are getting old. Just confirm whether they still hold."
+        },
+        "clearTitle": "What's already clear",
+        "missingTitle": "What's still missing",
+        "nextEyebrow": "One clear next step",
+        "dim": {
+          "work": { "label": "What I can do", "missing": "No profession or skills yet" },
+          "availability": { "label": "When I can start", "missing": "Not set yet" },
+          "location": { "label": "Where I can work", "missing": "Not set yet" },
+          "pay": { "label": "What I expect", "missing": "Not set yet" },
+          "evidence": { "label": "What proves it", "missing": "No evidence yet" }
+        },
+        "next": {
+          "work": "Set what I do",
+          "availability": "Set when I can start",
+          "location": "Set where I can work",
+          "pay": "Set what I expect",
+          "evidence": "Add a work entry"
+        },
+        "why": {
+          "work": "This helps understand what work you can be suggested for.",
+          "availability": "This helps avoid showing you unsuitable offers.",
+          "location": "This helps avoid showing you unsuitable offers.",
+          "pay": "This helps justify your expected rate.",
+          "evidence": "Evidence builds trust, but you can add it later.",
+          "complete": "Your work card is complete — work entries keep making it stronger."
+        },
+        "stale": {
+          "title": "Is this still valid?",
+          "body": "Earlier you set your availability, location and expected rate. Is that still right?",
+          "yes": "Yes, still valid",
+          "change": "Change",
+          "saved": "Thanks, confirmed"
+        },
+        "value": {
+          "from": "from {date}",
+          "payRange": "€{min}–{max}",
+          "payFrom": "from €{min}",
+          "payTo": "up to €{max}",
+          "skills": "skills: {n}",
+          "entries": "work entries: {n}",
+          "set": "Set"
+        },
+        "editor": {
+          "open": "Edit work card",
+          "title": "Work card details",
+          "availabilityLabel": "Availability",
+          "availabilityOption": {
+            "available": "Available to work",
+            "busy": "Currently busy",
+            "unavailable": "Not available right now",
+            "none": "Not set"
+          },
+          "availableFromLabel": "Can start from",
+          "locationLabel": "Country I'm in (code, e.g. LT)",
+          "locationHint": "LT",
+          "preferredLabel": "Countries I'd like to work in",
+          "preferredHint": "LT, DE, NL",
+          "salaryMinLabel": "Rate from (€)",
+          "salaryMaxLabel": "Rate to (€)",
+          "save": "Save",
+          "saving": "Saving...",
+          "saved": "Saved",
+          "error": "Could not save. Please try again.",
+          "needsMigration": "This feature is being prepared. Try later."
+        }
+      },
       "tabs": {
         "overview": "Overview",
         "profile": "Profile",

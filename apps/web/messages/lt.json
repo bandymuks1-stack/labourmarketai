@@ -1888,6 +1888,78 @@
         },
         "otherSpaces": "Kitos mano erdvės"
       },
+      "workCard": {
+        "eyebrow": "Mano darbo kortelė",
+        "intro": {
+          "new": "Sukurkime jūsų darbo kortelę. Užtenka kelių dalykų — vėliau galėsite papildyti.",
+          "returning": "Štai jūsų darbo kortelė. Sistema prisimena, ką jau nurodėte — pildyti iš naujo nereikia.",
+          "stale": "Kai kuri informacija jau senstelėjo. Tiesiog patvirtinkite, ar ji vis dar galioja."
+        },
+        "clearTitle": "Kas jau aišku",
+        "missingTitle": "Ko dar trūksta",
+        "nextEyebrow": "Vienas aiškus kitas žingsnis",
+        "dim": {
+          "work": { "label": "Ką galiu dirbti", "missing": "Dar nenurodyta profesija ar įgūdžiai" },
+          "availability": { "label": "Kada galiu pradėti", "missing": "Dar nenurodyta" },
+          "location": { "label": "Kur galiu dirbti", "missing": "Dar nenurodyta" },
+          "pay": { "label": "Kiek tikiuosi", "missing": "Dar nenurodyta" },
+          "evidence": { "label": "Kuo galiu įrodyti", "missing": "Įrodymų dar nėra" }
+        },
+        "next": {
+          "work": "Nurodyti, ką dirbu",
+          "availability": "Nurodyti, kada galiu",
+          "location": "Nurodyti, kur galiu dirbti",
+          "pay": "Nurodyti, kiek tikiuosi",
+          "evidence": "Pridėti darbo įrašą"
+        },
+        "why": {
+          "work": "Tai padeda suprasti, kokiam darbui jus galima siūlyti.",
+          "availability": "Tai padeda nerodyti jums netinkamų pasiūlymų.",
+          "location": "Tai padeda nerodyti jums netinkamų pasiūlymų.",
+          "pay": "Tai padeda pagrįsti jūsų pageidaujamą tarifą.",
+          "evidence": "Įrodymai didina pasitikėjimą, bet galite juos pridėti vėliau.",
+          "complete": "Jūsų darbo kortelė pilna — toliau ją stiprina darbo įrašai."
+        },
+        "stale": {
+          "title": "Ar tai vis dar galioja?",
+          "body": "Anksčiau nurodėte savo prieinamumą, vietą ir pageidaujamą tarifą. Ar tai vis dar teisinga?",
+          "yes": "Taip, galioja",
+          "change": "Pakeisti",
+          "saved": "Ačiū, patvirtinta"
+        },
+        "value": {
+          "from": "nuo {date}",
+          "payRange": "{min}–{max} €",
+          "payFrom": "nuo {min} €",
+          "payTo": "iki {max} €",
+          "skills": "įgūdžių: {n}",
+          "entries": "darbo įrašų: {n}",
+          "set": "Nurodyta"
+        },
+        "editor": {
+          "open": "Keisti darbo kortelę",
+          "title": "Darbo kortelės informacija",
+          "availabilityLabel": "Prieinamumas",
+          "availabilityOption": {
+            "available": "Galiu dirbti",
+            "busy": "Šiuo metu užimtas",
+            "unavailable": "Šiuo metu negaliu",
+            "none": "Nenurodyta"
+          },
+          "availableFromLabel": "Galiu pradėti nuo",
+          "locationLabel": "Šalis, kurioje esu (kodas, pvz. LT)",
+          "locationHint": "LT",
+          "preferredLabel": "Šalys, kuriose norėčiau dirbti",
+          "preferredHint": "LT, DE, NL",
+          "salaryMinLabel": "Tarifas nuo (€)",
+          "salaryMaxLabel": "Tarifas iki (€)",
+          "save": "Išsaugoti",
+          "saving": "Saugoma...",
+          "saved": "Išsaugota",
+          "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+          "needsMigration": "Ši funkcija dar ruošiama. Bandykite vėliau."
+        }
+      },
       "tabs": {
         "overview": "Apžvalga",
         "profile": "Profilis",

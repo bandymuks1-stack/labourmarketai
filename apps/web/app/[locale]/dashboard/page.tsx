@@ -7,13 +7,12 @@ import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card"
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
-import { MySpaceNow } from "@/components/app/my-space-now";
+import { WorkCard } from "@/components/app/work-card";
+import { getWorkerCard } from "@/lib/worker/work-card";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
-import { deriveReviewResult } from "@/lib/journal/review-status";
 import {
-  workerNextAction,
   managerNextAction,
   customerNextAction,
   type NextAction,
@@ -314,23 +313,18 @@ export default async function DashboardOverviewPage({
     );
   }
 
-  // ── Worker: "work cockpit" — identity → proof → opportunities ──
+  // ── Worker: "Mano darbo kortelė" — state-aware personal entry ──
   let professionName: string | null = null;
   let skillsCount = 0;
   let entriesCount = 0;
-  // How many of the worker's entries a human has actually confirmed — drives
-  // the honest "waiting vs all-confirmed" Next Action state. Read from the same
-  // append-only evidence rows; no extra DB object, no fake state.
-  let confirmedCount = 0;
   const { data: workerRow } = await supabase
     .from("workers")
     .select("id")
     .eq("profile_id", user.id)
     .maybeSingle();
   if (workerRow?.id) {
-    // The three reads (primary profession, skill count, journal entries +
-    // their confirmations) are independent; run them in parallel to cut the
-    // worker overview's tail latency.
+    // The three reads (primary profession, skill count, journal entry count)
+    // are independent; run them in parallel to cut the overview's tail latency.
     const [wpRes, scRes, ecRes] = await Promise.all([
       supabase
         .from("worker_professions")
@@ -344,66 +338,44 @@ export default async function DashboardOverviewPage({
         .eq("worker_id", workerRow.id),
       supabase
         .from("journal_entries")
-        .select("id, journal_entry_confirmations(confirmation_scope, created_at)")
+        .select("*", { count: "exact", head: true })
         .eq("worker_id", workerRow.id),
     ]);
     const slug =
       (wpRes.data?.professions as { slug: string } | null)?.slug ?? null;
     if (slug) professionName = tProf(slug);
     skillsCount = scRes.count ?? 0;
-    type EntryRow = {
-      journal_entry_confirmations:
-        | { confirmation_scope: unknown; created_at?: string | null }[]
-        | null;
-    };
-    const entryRows = (ecRes.data ?? []) as EntryRow[];
-    entriesCount = entryRows.length;
-    confirmedCount = entryRows.filter(
-      (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
-    ).length;
+    entriesCount = ecRes.count ?? 0;
   }
-  const hasProfile = !!professionName && skillsCount > 0;
-  const workerAction = workerNextAction({
-    hasProfile,
-    entriesTotal: entriesCount,
-    confirmedCount,
-  });
-  const waitingCount = Math.max(0, entriesCount - confirmedCount);
 
   // A worker is in "first-use" until they have BOTH a profession set AND at
   // least one journal entry. The gentle first-use guidance shows only during
   // that window, then disappears — it never nags a settled person.
   const isFirstUse = !professionName || entriesCount === 0;
-
-  // ── "Mano erdvė" — calm personal entry (slice my-space-human-entry-v1) ──
-  // The worker no longer lands in an admin cockpit (stepper rail + role/module
-  // cards + platform banners). The space opens with a quiet human summary
-  // ("Aš dabar"), ONE clear next step, then only the surfaces that help the
-  // person express themselves: their activities/skills and (when it exists)
-  // their evidence. No wall of cards; nothing fabricated.
   const hasProof = entriesCount > 0;
+
+  // ── "Mano darbo kortelė" — state-aware continuity (slice
+  // work-card-state-aware-v1). The card decides new/returning/stale from the
+  // worker's REAL saved data and shows ONE best next action; it never re-asks a
+  // saved dimension and never restarts onboarding on a returning login. ──
+  const cardData = await getWorkerCard({
+    workerId: workerRow?.id ?? null,
+    name,
+    professionName,
+    skillsCount,
+    evidenceCount: entriesCount,
+  });
 
   return (
     <div className="flex flex-col gap-7">
       {/* Space identity + the calm doorway to other spaces (My spaces). */}
       <CurrentSpaceHeader role={role} />
 
-      {/* "Aš dabar" — who I am now, what I can do, what already proves it.
-          Real counts only; clearly self-described and not yet human-confirmed. */}
-      <MySpaceNow
-        name={name}
-        professionName={professionName}
-        skillsCount={skillsCount}
-        entriesCount={entriesCount}
-      />
-
-      {/* The single clear next step for this worker's state
-          (complete profile → first entry → waiting → all confirmed). This is
-          the ONE primary CTA on the surface. */}
-      <DashboardNextAction
-        action={workerAction}
-        counts={{ waiting: waitingCount, confirmed: confirmedCount }}
-      />
+      {/* "Mano darbo kortelė" — the state-aware entry. It owns the greeting,
+          the what's-clear / what's-missing summary, the ONE best next action
+          (+ why it helps), the small "Ar tai vis dar galioja?" confirmation
+          when data is stale, and the secondary/collapsed editor. */}
+      <WorkCard data={cardData} />
       <WorkerInvitationsCard />
 
       {/* First-use guidance appears ONLY while the person is still starting
