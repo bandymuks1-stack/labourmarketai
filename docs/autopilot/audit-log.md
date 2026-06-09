@@ -12,16 +12,21 @@ Append-only record of autonomous merges/deploys (policy §5 of
 | UTC | Slice | Branch | PR | Risk | Checks | Merge commit | Deploy | Smoke |
 |-----|-------|--------|----|------|--------|--------------|--------|-------|
 | 2026-06-09 | A — autopilot execution policy | `docs/cc/autopilot-execution-policy-v1` | #268 | GREEN (docs) | quality ✓ · migration-safety ✓ | `6883010` | Vercel auto (docs-only) | n/a (docs) |
+| 2026-06-09 | A — autopilot audit log (step 8) | `docs/cc/autopilot-audit-log` | #270 | GREEN (docs) | quality ✓ · migration-safety ✓ | `558f8f5` | Vercel auto (docs-only) | n/a (docs) |
+| 2026-06-09 | B — F4 worker→project assignment | `feat/cc/f4-worker-project-assignment-v1` | #269 | YELLOW→approved | typecheck ✓ · lint ✓ · test 2378 ✓ · build ✓ · migration-safety ✓ · quality ✓ | `a76a588` | Vercel auto | root 200 · /lt→sign-in 200 ✓ |
 
-## Held — awaiting owner review (NOT auto-merged)
+**F4 migration `20260609120000` applied to prod** (owner-approved 2026-06-09):
+3 SECURITY DEFINER fns (`assign_worker_to_project`, `end_worker_project_assignment`,
+`caller_manages_worker`), all `search_path=public`, EXECUTE authenticated-only
+(anon/public=false); direct insert/update/delete on `project_worker_assignments`
+revoked from `authenticated` (RPC-only writes); PWA RLS unchanged; 0 rows (no fake
+data). Dual gate (`can_manage_project` AND `caller_manages_worker`).
 
-| Slice | Branch | PR | Risk | Reason held |
-|-------|--------|----|------|-------------|
-| B — F4 worker→project assignment | `feat/cc/f4-worker-project-assignment-v1` | #269 (draft) | YELLOW | permission-logic migration + production RPC → owner security review before apply/merge; migration NOT applied to prod |
+## Status channel
+`TELEGRAM_STATUS: unavailable_fallback_to_text` — `AGENTAI_TELEGRAM_*` not present
+in this environment (not harvested, not faked); statuses emitted as text + this log.
 
-## Pending owner inputs (block further autonomous execution)
-1. **Telegram channel** — token + chat id (or authorise text-only status). Plan
-   rule: status can't be sent → STOP.
-2. **F4 (#269) security review** — approve the migration + dual gate (project +
-   caller-roster). On approval: apply via MCP → verify privileges → `db:types` →
-   ready + merge → F5.
+## Next (in order)
+F5 project-scoped instruction gate → real translation provider (safe service
+layer, no private-data external AI without separate approval) → adaptive skill
+discovery → worker-first avatar/player-card + My Work Space → company calming (last).
