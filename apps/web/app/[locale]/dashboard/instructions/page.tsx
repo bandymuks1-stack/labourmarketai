@@ -6,6 +6,7 @@ import {
   listWorkerInstructions,
   listManagedWorkers,
 } from "@/lib/instructions/instructions";
+import { listManagedProjects } from "@/lib/projects/projects";
 import {
   WorkerInstructionCard,
   type InstructionCardLabels,
@@ -71,7 +72,10 @@ export default async function InstructionsPage({
   );
 
   if (isManager) {
-    const workers = await listManagedWorkers();
+    const [workers, projects] = await Promise.all([
+      listManagedWorkers(),
+      listManagedProjects(),
+    ]);
     const labels: ComposerLabels = {
       workerLabel: t("manager.workerLabel"),
       workerPlaceholder: t("manager.workerPlaceholder"),
@@ -86,12 +90,15 @@ export default async function InstructionsPage({
       errorMsg: t("manager.error"),
       noWorkers: t("manager.noWorkers"),
       scopeNote: t("manager.scopeNote"),
+      projectScopeLabel: t("manager.projectScopeLabel"),
+      teamLevelOption: t("manager.teamLevelOption"),
     };
     return (
       <div className="flex max-w-2xl flex-col gap-6">
         {Header}
         <ManagerInstructionComposer
           workers={workers}
+          projects={projects}
           defaultLanguage={locale}
           labels={labels}
         />

@@ -60,6 +60,9 @@ export async function sendWorkInstructionAction(
   const body = String(formData.get("body") ?? "").trim();
   const originalLanguage =
     String(formData.get("original_language") ?? "").trim() || null;
+  // Optional project scope (F5): empty = team/roster-level. When set, the RPC
+  // requires the worker to be ACTIVELY assigned to this project.
+  const projectId = String(formData.get("project_id") ?? "").trim() || null;
   if (!workerProfileId || body.length === 0) {
     return { ok: false, code: "invalid" };
   }
@@ -68,6 +71,7 @@ export async function sendWorkInstructionAction(
     p_worker_profile_id: workerProfileId,
     p_body: body,
     p_original_language: originalLanguage,
+    p_project_id: projectId,
   });
 
   if (error) {

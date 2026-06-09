@@ -7,6 +7,7 @@ import {
   type InstructionActionResult,
 } from "@/lib/instructions/actions";
 import type { ManagedWorker } from "@/lib/instructions/instructions";
+import type { ManagedProject } from "@/lib/projects/projects";
 
 /**
  * Manager/foreman "Nurodymas darbuotojui" composer (slice work-instructions-v1).
@@ -31,14 +32,19 @@ export interface ComposerLabels {
   errorMsg: string;
   noWorkers: string;
   scopeNote: string;
+  projectScopeLabel: string;
+  teamLevelOption: string;
 }
 
 export function ManagerInstructionComposer({
   workers,
+  projects,
   defaultLanguage,
   labels,
 }: {
   workers: ManagedWorker[];
+  /** Projects the manager can manage — for optional project-scoped instructions (F5). */
+  projects: ManagedProject[];
   /** The manager's current UI locale — stored as the instruction's original language. */
   defaultLanguage: string;
   labels: ComposerLabels;
@@ -85,6 +91,31 @@ export function ManagerInstructionComposer({
         </select>
       </label>
 
+      {/* F5 — optional project scope. "" = team/roster-level (unchanged). When a
+          project is chosen the RPC requires the worker to be ACTIVELY assigned to
+          it, else returns not_authorized. Only shown when the manager has projects. */}
+      {projects.length > 0 && (
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="font-mono uppercase tracking-label text-text-muted">
+            {labels.projectScopeLabel}
+          </span>
+          <select
+            name="project_id"
+            defaultValue=""
+            data-testid="instruction-project-scope"
+            className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+          >
+            <option value="">{labels.teamLevelOption}</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.title ?? p.id.slice(0, 8)}
+                {p.city ? ` · ${p.city}` : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
       <label className="flex flex-col gap-1 text-xs">
         <span className="font-mono uppercase tracking-label text-text-muted">
           {labels.bodyLabel}
@@ -102,10 +133,9 @@ export function ManagerInstructionComposer({
         {labels.languageNote}
       </p>
 
-      {/* Honest permission-scope label: today instructions are gated at ROSTER
-          (whole-team) level; precise project/site scope activates once workers
-          are assigned to projects (project_worker_assignments is empty). No fake
-          project precision is claimed. See work-instructions-project-scope-design-v1. */}
+      {/* Honest permission-scope label: an instruction is either TEAM-level (no
+          project) or PROJECT-level (a worker actively assigned to that project).
+          Project scope is real as of F5 — see the project selector above. */}
       <p
         className="text-[11px] leading-relaxed text-text-muted"
         data-testid="instruction-scope-note"

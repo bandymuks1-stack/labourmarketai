@@ -22,56 +22,47 @@ const en = JSON.parse(read("messages/en.json"));
 const mgr = (j: Record<string, unknown>) =>
   (j.instructions as { manager: Record<string, string> }).manager;
 
-describe("the manager composer honestly labels the current (roster) scope", () => {
+describe("the manager composer offers team-level OR project-level scope (F5)", () => {
   const comp = read("components/app/manager-instruction-composer.tsx");
-  it("renders the scope note", () => {
+  it("renders the scope note + the optional project selector", () => {
     expect(comp).toMatch(/data-testid="instruction-scope-note"/);
     expect(comp).toMatch(/labels\.scopeNote/);
+    expect(comp).toMatch(/data-testid="instruction-project-scope"/);
+    expect(comp).toMatch(/name="project_id"/);
   });
-  it("LT scope note says roster/team level now, project/site later (no fake precision)", () => {
+  it("LT scope note describes team-level OR project-level (project = assigned only)", () => {
     const s = mgr(lt).scopeNote;
     expect(s).toBeTruthy();
-    expect(s).toMatch(/komandos lygiu/i);
+    expect(s).toMatch(/komandos lyg/i);
     expect(s).toMatch(/projekt/i);
-    expect(s).toMatch(/bus įjungta|kai darbuotojai bus priskirti/i); // FUTURE, not active
+    expect(s).toMatch(/priskirti/i); // project instruction → only assigned workers
   });
-  it("EN scope note says team (roster) level now, project/site later", () => {
+  it("EN scope note describes team-level OR project-level", () => {
     const s = mgr(en).scopeNote;
     expect(s).toBeTruthy();
-    expect(s).toMatch(/team \(roster\) level|roster/i);
+    expect(s).toMatch(/team-level|team level/i);
     expect(s).toMatch(/project/i);
-    expect(s).toMatch(/will activate|once workers are assigned/i); // FUTURE, not active
+    expect(s).toMatch(/assigned/i);
   });
 });
 
-describe("no fake project precision shipped — the send gate is still roster-scoped", () => {
-  const mig = readRepo("supabase/migrations/20260608150000_work_instructions.sql");
-  it("the instruction sender does NOT (yet) gate on project assignment", () => {
-    // No project_worker_assignments / can_manage_project / project_id gate in the
-    // applied sender — project scope is design-only until assignments exist.
-    expect(mig).not.toMatch(/project_worker_assignments/i);
-    expect(mig).not.toMatch(/can_manage_project/i);
+describe("F5 ships the real project-scoped gate (no fake precision)", () => {
+  const mig = readRepo(
+    "supabase/migrations/20260609140000_work_instruction_project_scope.sql",
+  );
+  it("project-scoped send requires an ACTIVE assignment + can_manage_project", () => {
+    expect(mig).toMatch(/project_worker_assignments[\s\S]*status = 'active'/i);
+    expect(mig).toMatch(/can_manage_project\(pid\)/i);
+    expect(mig).toMatch(/Not authorized to instruct this worker on this project/i);
   });
-  it("the roster relationship gate remains (owns_company/owns_agency + active roster)", () => {
+  it("the team-level (roster) branch is preserved for null project", () => {
     expect(mig).toMatch(/owns_company\(/i);
     expect(mig).toMatch(/owns_agency\(/i);
-    expect(mig).toMatch(/status = 'active'/i);
   });
-});
-
-describe("the design/audit doc names the missing primitive + forward gate", () => {
-  const doc = readRepo("docs/audits/work-instructions-project-scope-design-v1.md");
-  it("exists and is labelled audit/design only", () => {
-    expect(doc).toMatch(/AUDIT \/ DESIGN ONLY/i);
-  });
-  it("names the missing primitive: the worker→project assignment write flow", () => {
-    expect(doc).toMatch(/project_worker_assignments/);
-    expect(doc).toMatch(/assignment write flow/i);
-    expect(doc).toMatch(/0 rows|empty/i);
-  });
-  it("specifies the forward project-scoped gate (can_manage_project + active assignment)", () => {
-    expect(doc).toMatch(/can_manage_project/);
-    expect(doc).toMatch(/project_worker_assignments[\s\S]*status\s*=\s*'active'/i);
+  it("stores project_id + never overwrites the original body; participant RLS unchanged", () => {
+    expect(mig).toMatch(/add column if not exists project_id/i);
+    expect(mig).not.toMatch(/update public\.conversation_messages\s+set\s+body/i);
+    expect(mig).not.toMatch(/create policy|alter policy|using\s*\(\s*true\s*\)|to anon/i);
   });
 });
 
