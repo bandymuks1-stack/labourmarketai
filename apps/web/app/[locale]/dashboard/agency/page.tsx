@@ -4,6 +4,7 @@ import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { PilotDraftForm } from "@/components/app/pilot-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { AgencyWorkersSection } from "@/components/app/agency-workers-section";
+import { SetupRoleChoice } from "@/components/app/setup-role-choice";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
@@ -40,6 +41,47 @@ export default async function AgencyDashboardPage({
   const existingDraft = await getPilotDraft("agency_offer");
 
   const ownAgency = await getOwnAgency();
+
+  // Demand-first correction (remove-wrong-agency-gate): agency SETUP is required
+  // only for the agency flow. A role-holder who has not completed agency setup
+  // must NOT be dead-ended into the invite form (which can only return the
+  // "finish agency setup" error). Show an honest neutral role choice instead so
+  // the user can start as a requester / company / worker, or finish agency setup
+  // deliberately — never a forced agency-only gate.
+  if (!ownAgency) {
+    return (
+      <div className="flex flex-col gap-6" data-testid="agency-dashboard">
+        <header className="flex flex-col gap-1">
+          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+            {t("eyebrow")}
+          </p>
+          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+            {t("title")}
+          </h1>
+        </header>
+        <section
+          className="card-border flex flex-col gap-3 p-6"
+          data-testid="agency-no-entity-guide"
+        >
+          <h2 className="font-display text-xl font-semibold text-text-primary">
+            {t("noAgency.title")}
+          </h2>
+          <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
+            {t("noAgency.body")}
+          </p>
+          <Link
+            href={"/dashboard/start/agency" as "/dashboard"}
+            className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80"
+            data-testid="agency-no-entity-cta"
+          >
+            {t("noAgency.cta")} →
+          </Link>
+        </section>
+        <SetupRoleChoice />
+      </div>
+    );
+  }
+
   const workersResult = ownAgency
     ? await listActiveAgencyWorkers(ownAgency.id)
     : ({ kind: "ok", rows: [] } as const);

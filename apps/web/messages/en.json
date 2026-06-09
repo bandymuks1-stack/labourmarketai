@@ -585,6 +585,11 @@
         "deleteError": "Could not remove. Please try again."
       },
       "profileLink": "My capabilities",
+      "noAgency": {
+        "title": "Agency setup is not finished yet",
+        "body": "Agency setup is only needed for the agency workflow. It is not required if you want to act as a requester, a company, or a worker. Choose how you want to start below, or finish agency setup.",
+        "cta": "Finish agency setup"
+      },
       "workers": {
         "title": "Agency workers",
         "subtitle": "Link your agency with real workers. Self-entry stays open: a person can sign up on their own and be linked later. Invitations by email are an additional channel, not the only one.",
@@ -696,7 +701,7 @@
         "statusNotOwner": "Action rejected: you are not the agency owner.",
         "statusInvalidEmail": "Invalid email address.",
         "statusError": "Something went wrong. Please try again.",
-        "statusNoAgency": "Finish agency setup first at /dashboard/start/agency.",
+        "statusNoAgency": "To invite a worker through an agency, finish your agency setup first.",
         "migrationBlockerHeading": "Migration 0025_agency_worker_invitations required",
         "migrationBlockerBody": "This feature is not available yet. Please try later.",
         "columnEmail": "Email",
@@ -2915,6 +2920,38 @@
       "docsReceived": "Docs received",
       "docsChecked": "Docs checked",
       "docsBlocked": "Rejected/expired"
+    }
+  },
+  "setupRoleChoice": {
+    "title": "How would you like to start?",
+    "body": "labourmarket.ai is demand-first — you do not have to be an agency. Pick the way that matches you. You can start a request, invite people, or offer your own work; nothing forces a worker to register first.",
+    "options": {
+      "findHuman": {
+        "label": "I'm looking for a person or a service",
+        "hint": "Start as a requester / customer and create a request or demand."
+      },
+      "representCompany": {
+        "label": "I represent a company",
+        "hint": "Set up your company to invite workers and run projects."
+      },
+      "representAgency": {
+        "label": "I represent an agency / team",
+        "hint": "Set up your agency to link and coordinate workers."
+      },
+      "offerWork": {
+        "label": "I offer my own work or services",
+        "hint": "Build your profile and capabilities as a worker / provider."
+      }
+    },
+    "draft": {
+      "title": "Person not ready to register yet?",
+      "body": "If the person is not ready to register, you can later create a candidate / provider draft and fill in details afterwards. A draft is never a real account — no account, consent, or verification is created for them, and it can be linked to a real account later.",
+      "labels": {
+        "notRegistered": "Not registered",
+        "notVerified": "Not verified",
+        "draft": "Draft",
+        "canLinkLater": "Can be linked later"
+      }
     }
   },
   "communication": {
