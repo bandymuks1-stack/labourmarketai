@@ -61,6 +61,12 @@ export default async function InstructionsPage({
       <p className="text-sm leading-relaxed text-text-secondary">
         {isManager ? t("managerIntro") : t("workerIntro")}
       </p>
+      <p
+        className="mt-1 text-[11px] leading-relaxed text-text-muted"
+        data-testid="instructions-foundation-note"
+      >
+        {t("foundationNote")}
+      </p>
     </header>
   );
 

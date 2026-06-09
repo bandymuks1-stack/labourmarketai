@@ -2694,6 +2694,7 @@
     "managerTitle": "Instruction to a worker",
     "workerIntro": "Instructions from your manager. The original is always kept, and you can ask for clarification.",
     "managerIntro": "Write an instruction in your own language. The worker will see it, and the original stays preserved.",
+    "foundationNote": "Clear, multilingual project communication — a foundation for both safety and convenience. Easy to find, easy to understand, original preserved.",
     "needsMigration": "This feature is being prepared. Try again later.",
     "worker": {
       "empty": "No instructions yet. When your manager sends one, you'll see it here."

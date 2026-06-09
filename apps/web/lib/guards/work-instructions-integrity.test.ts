@@ -75,6 +75,21 @@ describe("no demo/sample data; instructions render only real passed-in values", 
   });
 });
 
+describe("framed as a safety + convenience communication foundation", () => {
+  const fLt = ins(lt).foundationNote as unknown as string;
+  const fEn = ins(en).foundationNote as unknown as string;
+  it("LT + EN carry a foundation note naming both safety AND convenience", () => {
+    expect(fLt).toMatch(/saug/i);
+    expect(fLt).toMatch(/patog/i);
+    expect(fEn).toMatch(/safety/i);
+    expect(fEn).toMatch(/convenience/i);
+  });
+  it("the page surfaces the foundation note", () => {
+    expect(page).toMatch(/data-testid="instructions-foundation-note"/);
+    expect(page).toMatch(/foundationNote/);
+  });
+});
+
 describe("route is role-aware + reachable; copy present in LT + EN", () => {
   it("the instructions route renders manager composer or worker view by role", () => {
     expect(page).toMatch(/<ManagerInstructionComposer\b/);

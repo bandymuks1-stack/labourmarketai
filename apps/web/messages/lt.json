@@ -2694,6 +2694,7 @@
     "managerTitle": "Nurodymas darbuotojui",
     "workerIntro": "Nurodymai iš jūsų vadovo. Originalas visada išsaugotas, o jūs galite paprašyti patikslinti.",
     "managerIntro": "Parašykite nurodymą savo kalba. Darbuotojas jį matys, o originalas išliks išsaugotas.",
+    "foundationNote": "Aiškus, daugiakalbis bendravimas projekte — ir saugumo, ir patogumo pagrindas. Lengva rasti, lengva suprasti, originalas išsaugotas.",
     "needsMigration": "Ši funkcija dar ruošiama. Bandykite vėliau.",
     "worker": {
       "empty": "Kol kas nurodymų nėra. Kai vadovas atsiųs nurodymą, matysite jį čia."
