@@ -1,21 +1,20 @@
 -- ─────────────────────────────────────────────────────────────────────────
 -- F5 — Project-scoped work instructions (slice f5-project-scoped-instructions-v1)
 --
--- WHY: F4 made worker→project assignment real (project_worker_assignments). Now a
--- manager can scope an instruction to a worker ON A SPECIFIC PROJECT. This is the
+-- WHY: F4 made worker→project assignment real (project_worker_assignments). A
+-- manager can now scope an instruction to a worker ON A SPECIFIC PROJECT — the
 -- precise on-site control F3 deferred.
 --
--- WHAT (additive + reversible; tightening only; no RLS policy change):
+-- WHAT (purely ADDITIVE + reversible; no drop, no RLS policy change):
 --   1. conversation_messages.project_id (nullable; null = team/roster-level).
---   2. send_work_instruction gains an OPTIONAL 4th arg p_project_id:
---      - p_project_id PROVIDED  → STRICT project gate: the worker must be ACTIVELY
---        assigned to THAT project (project_worker_assignments status='active') AND
---        the caller must can_manage_project it (or admin). Roster alone is NOT
---        enough — an ended assignment or a different project is rejected (42501).
---      - p_project_id NULL      → the EXISTING roster gate, unchanged (team-level).
---      The instruction message records project_id so the scope is auditable.
---   The 3-arg signature is dropped and replaced; the 4th arg defaults to null, so
---   existing 3-arg callers keep working as team-level (no app breakage).
+--   2. NEW send_work_instruction_to_project(...) — the PROJECT-scoped sender:
+--      a STRICT gate — the worker must be ACTIVELY assigned to THAT project
+--      (project_worker_assignments status='active') AND the caller must
+--      can_manage_project it (or admin). An ended assignment / different project /
+--      unrelated manager all fail (42501). Records project_id on the message.
+--   The existing team-level send_work_instruction(text,text,text) (migration
+--   20260608150000) is LEFT UNTOUCHED — the app calls it for team-level and the
+--   new function for project-level. No signature change, so nothing is dropped.
 --
 -- Unchanged: SECURITY DEFINER + search_path; EXECUTE authenticated-only; original
 -- body never overwritten; conversation_messages participant-scoped RLS (a worker
@@ -23,18 +22,14 @@
 -- cross-company leakage). No anon/PUBLIC execute. No broad manager-to-any-worker.
 --
 -- ROLLBACK (reversible):
---   drop function if exists public.send_work_instruction(text, text, text, text);
---   -- recreate the prior 3-arg roster-only sender (see migration 20260608150000);
+--   drop function if exists public.send_work_instruction_to_project(text, text, text, text);
 --   alter table public.conversation_messages drop column if exists project_id;
 -- ─────────────────────────────────────────────────────────────────────────
 
 alter table public.conversation_messages
   add column if not exists project_id uuid references public.projects(id) on delete set null;
 
--- Signature change (adds p_project_id) → drop the 3-arg form, then recreate.
-drop function if exists public.send_work_instruction(text, text, text);
-
-create or replace function public.send_work_instruction(
+create or replace function public.send_work_instruction_to_project(
   p_worker_profile_id text,
   p_body              text,
   p_original_language text default null,
@@ -59,6 +54,9 @@ begin
   if worker_pid is null then
     raise exception 'Worker is required' using errcode = '22023';
   end if;
+  if pid is null then
+    raise exception 'Project is required' using errcode = '22023';
+  end if;
   if cleaned is null then
     raise exception 'Instruction text is required' using errcode = '22023';
   end if;
@@ -68,40 +66,21 @@ begin
     raise exception 'No such worker' using errcode = 'P0002';
   end if;
 
-  if pid is not null then
-    -- PROJECT/SITE SCOPE: the worker must be ACTIVELY assigned to THIS project AND
-    -- the caller must manage it. An ended assignment / different project / unrelated
-    -- manager all fail here (no cross-project, no cross-company).
-    if not (
-      (
-        exists (
-          select 1 from public.project_worker_assignments pwa
-           where pwa.project_id = pid and pwa.worker_id = w_id and pwa.status = 'active'
-        )
-        and public.can_manage_project(pid)
-      )
-      or public.is_admin()
-    ) then
-      raise exception 'Not authorized to instruct this worker on this project'
-        using errcode = '42501';
-    end if;
-  else
-    -- ROSTER SCOPE (team-level) — unchanged from migration 20260608150000.
-    if not (
+  -- PROJECT/SITE SCOPE: the worker must be ACTIVELY assigned to THIS project AND
+  -- the caller must manage it. An ended assignment / different project / unrelated
+  -- manager all fail here (no cross-project, no cross-company).
+  if not (
+    (
       exists (
-        select 1 from public.company_workers cw
-         where cw.worker_id = w_id and cw.status = 'active'
-           and public.owns_company(cw.company_id)
+        select 1 from public.project_worker_assignments pwa
+         where pwa.project_id = pid and pwa.worker_id = w_id and pwa.status = 'active'
       )
-      or exists (
-        select 1 from public.agency_workers aw
-         where aw.worker_id = w_id and aw.status = 'active'
-           and public.owns_agency(aw.agency_id)
-      )
-      or public.is_admin()
-    ) then
-      raise exception 'Not authorized to instruct this worker' using errcode = '42501';
-    end if;
+      and public.can_manage_project(pid)
+    )
+    or public.is_admin()
+  ) then
+    raise exception 'Not authorized to instruct this worker on this project'
+      using errcode = '42501';
   end if;
 
   -- Find an existing direct conversation with BOTH participants; else create one.
@@ -134,5 +113,5 @@ begin
 end;
 $$;
 
-revoke all     on function public.send_work_instruction(text, text, text, text) from public;
-grant execute  on function public.send_work_instruction(text, text, text, text) to authenticated;
+revoke all     on function public.send_work_instruction_to_project(text, text, text, text) from public;
+grant execute  on function public.send_work_instruction_to_project(text, text, text, text) to authenticated;

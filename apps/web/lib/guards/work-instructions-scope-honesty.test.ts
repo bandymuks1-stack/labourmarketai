@@ -55,9 +55,14 @@ describe("F5 ships the real project-scoped gate (no fake precision)", () => {
     expect(mig).toMatch(/can_manage_project\(pid\)/i);
     expect(mig).toMatch(/Not authorized to instruct this worker on this project/i);
   });
-  it("the team-level (roster) branch is preserved for null project", () => {
-    expect(mig).toMatch(/owns_company\(/i);
-    expect(mig).toMatch(/owns_agency\(/i);
+  it("leaves the team-level send_work_instruction untouched (additive, no drop)", () => {
+    // Project scope is a SEPARATE additive function; the team-level sender is not
+    // modified or dropped, so team-level behaviour is preserved unchanged.
+    // (Strip comments so the reversible-rollback note doesn't false-positive.)
+    const exec = mig.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
+    expect(exec).not.toMatch(/drop\s+function/i);
+    expect(exec).not.toMatch(/create or replace function public\.send_work_instruction\(/i);
+    expect(exec).toMatch(/send_work_instruction_to_project/);
   });
   it("stores project_id + never overwrites the original body; participant RLS unchanged", () => {
     expect(mig).toMatch(/add column if not exists project_id/i);

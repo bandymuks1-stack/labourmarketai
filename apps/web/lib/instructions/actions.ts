@@ -60,19 +60,27 @@ export async function sendWorkInstructionAction(
   const body = String(formData.get("body") ?? "").trim();
   const originalLanguage =
     String(formData.get("original_language") ?? "").trim() || null;
-  // Optional project scope (F5): empty = team/roster-level. When set, the RPC
-  // requires the worker to be ACTIVELY assigned to this project.
+  // Optional project scope (F5): empty = team/roster-level (the unchanged
+  // send_work_instruction RPC). When a project is chosen, route through the
+  // separate project-scoped RPC, which requires the worker to be ACTIVELY
+  // assigned to that project.
   const projectId = String(formData.get("project_id") ?? "").trim() || null;
   if (!workerProfileId || body.length === 0) {
     return { ok: false, code: "invalid" };
   }
 
-  const { error } = await asAny(supabase).rpc("send_work_instruction", {
-    p_worker_profile_id: workerProfileId,
-    p_body: body,
-    p_original_language: originalLanguage,
-    p_project_id: projectId,
-  });
+  const { error } = projectId
+    ? await asAny(supabase).rpc("send_work_instruction_to_project", {
+        p_worker_profile_id: workerProfileId,
+        p_body: body,
+        p_original_language: originalLanguage,
+        p_project_id: projectId,
+      })
+    : await asAny(supabase).rpc("send_work_instruction", {
+        p_worker_profile_id: workerProfileId,
+        p_body: body,
+        p_original_language: originalLanguage,
+      });
 
   if (error) {
     if (migMissing(error.code)) return { ok: false, code: "needs_migration" };

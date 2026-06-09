@@ -6,10 +6,11 @@ import { join } from "node:path";
  * F5 project-scoped instruction migration guard
  * (slice f5-project-scoped-instructions-v1, migration 20260609140000).
  *
- * Pins: additive project_id + an OPTIONAL project gate on send_work_instruction
- * (strict ACTIVE-assignment + can_manage_project when a project is chosen; the
- * unchanged roster gate otherwise), owner-scoped SECURITY DEFINER, authenticated-
- * only EXECUTE, reversible, no RLS loosening, original body never overwritten.
+ * Purely ADDITIVE: adds project_id + a SEPARATE project-scoped sender
+ * (send_work_instruction_to_project) with a STRICT active-assignment +
+ * can_manage_project gate. The team-level send_work_instruction is left
+ * untouched (no drop, no signature change). Owner-scoped SECURITY DEFINER,
+ * authenticated-only, reversible, no RLS loosening, original body untouched.
  */
 
 const repo = join(__dirname, "..", "..", "..", "..");
@@ -19,31 +20,34 @@ const sql = readFileSync(
 );
 const code = sql.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
 
-describe("F5 migration is additive + reversible, no destructive data op", () => {
-  it("adds project_id (no drop table/column, no delete, no truncate)", () => {
+describe("F5 migration is purely additive + reversible (NO drop)", () => {
+  it("adds project_id; no drop/delete/truncate of any kind", () => {
     expect(code).toMatch(/add column if not exists project_id uuid/i);
     expect(code).not.toMatch(/drop\s+table/i);
     expect(code).not.toMatch(/drop\s+column/i);
+    expect(code).not.toMatch(/drop\s+function/i);
     expect(code).not.toMatch(/delete\s+from/i);
     expect(code).not.toMatch(/truncate/i);
   });
-  it("replaces the sender by signature change with a documented rollback", () => {
-    expect(code).toMatch(/drop function if exists public\.send_work_instruction\(text, text, text\)/i);
+  it("does NOT modify the team-level send_work_instruction (no signature change)", () => {
+    expect(code).not.toMatch(/create or replace function public\.send_work_instruction\(/i);
+    expect(code).toMatch(/create or replace function public\.send_work_instruction_to_project\(/i);
+  });
+  it("ships a documented rollback", () => {
     expect(sql).toMatch(/ROLLBACK \(reversible\)/);
+    expect(sql).toMatch(/drop function if exists public\.send_work_instruction_to_project/i);
     expect(sql).toMatch(/drop column if exists project_id/i);
   });
 });
 
-describe("dual scope: strict project gate OR unchanged roster gate", () => {
-  it("project scope requires ACTIVE assignment AND can_manage_project", () => {
+describe("the project-scoped sender enforces a STRICT assignment gate", () => {
+  it("requires an ACTIVE assignment AND can_manage_project (or admin)", () => {
     expect(code).toMatch(/pwa\.status = 'active'/i);
     expect(code).toMatch(/can_manage_project\(pid\)/i);
     expect(code).toMatch(/Not authorized to instruct this worker on this project/i);
   });
-  it("roster scope (null project) keeps owns_company/owns_agency active gate", () => {
-    expect(code).toMatch(/owns_company\(/i);
-    expect(code).toMatch(/owns_agency\(/i);
-    expect(code).toMatch(/Not authorized to instruct this worker'/i);
+  it("a project is required (no silent team-level fallback in this RPC)", () => {
+    expect(code).toMatch(/if pid is null then[\s\S]*Project is required/i);
   });
   it("records project_id on the instruction; original body untouched", () => {
     expect(code).toMatch(/insert into public\.conversation_messages[\s\S]*project_id/i);
@@ -52,13 +56,13 @@ describe("dual scope: strict project gate OR unchanged roster gate", () => {
 });
 
 describe("security: SECURITY DEFINER, authenticated-only, no RLS loosening", () => {
-  it("the sender is SECURITY DEFINER with fixed search_path", () => {
+  it("SECURITY DEFINER with fixed search_path", () => {
     expect(code).toMatch(/security definer/i);
     expect(code).toMatch(/set search_path = public/i);
   });
-  it("revoked from public + granted only to authenticated (4-arg signature)", () => {
-    expect(code).toMatch(/revoke all\s+on function public\.send_work_instruction\(text, text, text, text\) from public/i);
-    expect(code).toMatch(/grant execute\s+on function public\.send_work_instruction\(text, text, text, text\) to authenticated/i);
+  it("revoked from public + granted only to authenticated", () => {
+    expect(code).toMatch(/revoke all\s+on function public\.send_work_instruction_to_project\(text, text, text, text\) from public/i);
+    expect(code).toMatch(/grant execute\s+on function public\.send_work_instruction_to_project\(text, text, text, text\) to authenticated/i);
     expect(code).not.toMatch(/to\s+anon\b/i);
   });
   it("does not create/alter a policy nor open using(true)", () => {
