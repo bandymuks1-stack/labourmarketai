@@ -4,6 +4,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getProjectOperations } from "@/lib/projects/operations";
 import {
+  OPERATIONAL_STATUSES,
+  READINESS_STATUSES,
+  type OperationalStatus,
+  type ReadinessStatus,
+} from "@/lib/projects/operations-derive";
+import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import {
   ProjectOperationsBoard,
   type OperationsBoardLabels,
 } from "@/components/app/project-operations-board";
@@ -112,6 +119,55 @@ export default async function ProjectOperationsPage({
     documentsNote: t("notes.documents"),
     candidateSkillNote: t("notes.candidateSkill"),
     readinessHonestyNote: t("notes.readiness"),
+    // v2 — operational status
+    statusTitle: t("statusTitle"),
+    statusEmpty: t("statusEmpty"),
+    statusHelper: t("statusHelper"),
+    save: t("save"),
+    saving: t("saving"),
+    saved: t("saved"),
+    saveError: t("saveError"),
+    needsMigration: t("needsMigration"),
+    statusLabels: Object.fromEntries(
+      OPERATIONAL_STATUSES.map((s) => [s, t(`statuses.${s}`)]),
+    ) as Record<OperationalStatus, string>,
+    // v2 — checklist
+    checklist: {
+      title: t("checklist.title"),
+      empty: t("checklist.empty"),
+      seed: t("checklist.seed"),
+      addItem: t("checklist.addItem"),
+      addPlaceholder: t("checklist.addPlaceholder"),
+      missing: t("checklist.missing"),
+      received: t("checklist.received"),
+      checked: t("checklist.checked"),
+      blocked: t("checklist.blocked"),
+      helper: t("checklist.helper"),
+    },
+    readinessStatusLabels: Object.fromEntries(
+      READINESS_STATUSES.map((s) => [s, t(`readinessStatuses.${s}`)]),
+    ) as Record<ReadinessStatus, string>,
+    defaultItemLabels: Object.fromEntries(
+      DEFAULT_READINESS_ITEM_KEYS.map((k) => [k, t(`defaults.${k}`)]),
+    ) as Record<string, string>,
+    // v2 — filters
+    filters: {
+      title: t("filters.title"),
+      all: t("filters.all"),
+      byStatus: t("filters.byStatus"),
+      anyStatus: t("filters.anyStatus"),
+      missingDocs: t("filters.missingDocs"),
+      ready: t("filters.ready"),
+      needsSkillInfo: t("filters.needsSkillInfo"),
+      followUp: t("filters.followUp"),
+      none: t("filters.none"),
+    },
+    counters2: {
+      withMissingDocs: t("counters2.withMissingDocs"),
+      docsReceived: t("counters2.docsReceived"),
+      docsChecked: t("counters2.docsChecked"),
+      docsBlocked: t("counters2.docsBlocked"),
+    },
   };
 
   return (
@@ -120,6 +176,7 @@ export default async function ProjectOperationsPage({
         ops={ops}
         labels={labels}
         locale={locale}
+        projectId={id}
         csvHref={`/${locale}/dashboard/projects/${id}/operations/report`}
       />
     </div>

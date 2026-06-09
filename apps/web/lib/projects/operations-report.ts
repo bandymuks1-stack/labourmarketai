@@ -25,11 +25,17 @@ function csvRow(cells: string[]): string {
 function workerRow(w: WorkerOps): string[] {
   return [
     w.name,
+    w.operationalStatus ?? "not_set",
     w.ready ? "ready_checked_fields" : "not_ready",
     String(w.declaredSkills),
     String(w.confirmedSkills),
     String(w.journalEntries),
     String(w.openReviewItems),
+    String(w.docsMissing),
+    String(w.docsReceived),
+    String(w.docsChecked),
+    String(w.docsBlocked),
+    w.declaredSkills <= 0 ? "yes" : "no", // needs_skill_info (manager-visible proxy)
     w.lastActivity ?? "",
     w.missing.join("|"),
     w.needsFollowUp ? "yes" : "no",
@@ -39,11 +45,17 @@ function workerRow(w: WorkerOps): string[] {
 
 export const OPS_CSV_HEADER = [
   "worker_name",
+  "operational_status",
   "readiness",
   "declared_skills",
   "confirmed_skills",
   "work_evidence_entries",
   "open_review_items",
+  "docs_missing",
+  "docs_received",
+  "docs_checked",
+  "docs_blocked",
+  "needs_skill_info",
   "last_activity",
   "missing",
   "needs_follow_up",

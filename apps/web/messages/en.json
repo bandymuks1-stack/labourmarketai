@@ -2850,6 +2850,71 @@
     },
     "report": {
       "title": "Operational status report"
+    },
+    "statusTitle": "Operational status",
+    "statusEmpty": "No status set yet",
+    "statusHelper": "\"Ready\" means ready according to the operational fields you track here — it is not automatic legal verification or document approval.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Could not save. Please try again.",
+    "needsMigration": "This feature is being prepared (database update pending). Try again shortly.",
+    "statuses": {
+      "candidate": "Candidate",
+      "contacted": "Contacted",
+      "interested": "Interested",
+      "documents_needed": "Documents needed",
+      "ready": "Ready",
+      "assigned": "Assigned",
+      "unavailable": "Unavailable",
+      "rejected": "Rejected"
+    },
+    "checklist": {
+      "title": "Readiness / documents",
+      "empty": "Not tracked yet. Add the standard checklist or your own items.",
+      "seed": "Add standard checklist",
+      "addItem": "Add item",
+      "addPlaceholder": "New item label",
+      "missing": "Missing",
+      "received": "Received",
+      "checked": "Checked",
+      "blocked": "Rejected / expired",
+      "helper": "\"Checked\" means a manager marked it checked here — not a legal verification. A document is only \"received\" or \"checked\" when a manager sets it; nothing is approved automatically."
+    },
+    "readinessStatuses": {
+      "not_required": "Not required",
+      "needed": "Needed",
+      "missing": "Missing",
+      "received": "Received",
+      "checked": "Checked",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "defaults": {
+      "identity_document": "Identity document",
+      "a1_or_posting_document": "A1 / posting document",
+      "employment_contract_or_assignment_basis": "Employment contract / assignment basis",
+      "qualification_or_skill_evidence": "Qualification / skill evidence",
+      "safety_instruction_acknowledgement": "Safety instruction acknowledgement",
+      "travel_or_start_availability": "Travel / start availability",
+      "client_specific_requirement": "Client-specific requirement"
+    },
+    "filters": {
+      "title": "Filter",
+      "all": "All",
+      "byStatus": "Status",
+      "anyStatus": "Any status",
+      "missingDocs": "Missing docs/info",
+      "ready": "Ready (checked fields)",
+      "needsSkillInfo": "Needs skill info",
+      "followUp": "Follow-up needed",
+      "none": "No workers match this filter."
+    },
+    "counters2": {
+      "withMissingDocs": "Missing docs/info",
+      "docsReceived": "Docs received",
+      "docsChecked": "Docs checked",
+      "docsBlocked": "Rejected/expired"
     }
   },
   "communication": {

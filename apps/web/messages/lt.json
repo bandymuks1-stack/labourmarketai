@@ -2850,6 +2850,71 @@
     },
     "report": {
       "title": "Operacijų būsenos ataskaita"
+    },
+    "statusTitle": "Operacinė būsena",
+    "statusEmpty": "Būsena dar nenustatyta",
+    "statusHelper": "„Paruošta“ reiškia paruošta pagal čia jūsų sekamus operacinius laukus — tai nėra automatinis teisinis patvirtinimas ar dokumentų priėmimas.",
+    "save": "Išsaugoti",
+    "saving": "Saugoma…",
+    "saved": "Išsaugota",
+    "saveError": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "needsMigration": "Funkcija ruošiama (laukiama duomenų bazės atnaujinimo). Bandykite netrukus.",
+    "statuses": {
+      "candidate": "Kandidatas",
+      "contacted": "Susisiekta",
+      "interested": "Suinteresuotas",
+      "documents_needed": "Reikia dokumentų",
+      "ready": "Paruošta",
+      "assigned": "Priskirta",
+      "unavailable": "Neprieinamas",
+      "rejected": "Atmesta"
+    },
+    "checklist": {
+      "title": "Pasiruošimas / dokumentai",
+      "empty": "Dar nesekama. Pridėkite standartinį sąrašą arba savo punktus.",
+      "seed": "Pridėti standartinį sąrašą",
+      "addItem": "Pridėti punktą",
+      "addPlaceholder": "Naujo punkto pavadinimas",
+      "missing": "Trūksta",
+      "received": "Gauta",
+      "checked": "Patikrinta",
+      "blocked": "Atmesta / pasibaigę",
+      "helper": "„Patikrinta“ reiškia, kad vadovas čia pažymėjo kaip patikrintą — tai nėra teisinis patvirtinimas. Dokumentas yra „gautas“ ar „patikrintas“ tik kai vadovas tai nustato; niekas nepriimama automatiškai."
+    },
+    "readinessStatuses": {
+      "not_required": "Nereikalingas",
+      "needed": "Reikalingas",
+      "missing": "Trūksta",
+      "received": "Gauta",
+      "checked": "Patikrinta",
+      "rejected": "Atmesta",
+      "expired": "Pasibaigęs"
+    },
+    "defaults": {
+      "identity_document": "Asmens dokumentas",
+      "a1_or_posting_document": "A1 / komandiravimo dokumentas",
+      "employment_contract_or_assignment_basis": "Darbo sutartis / priskyrimo pagrindas",
+      "qualification_or_skill_evidence": "Kvalifikacijos / įgūdžių įrodymas",
+      "safety_instruction_acknowledgement": "Saugos instruktažo patvirtinimas",
+      "travel_or_start_availability": "Kelionės / pradžios prieinamumas",
+      "client_specific_requirement": "Kliento specifinis reikalavimas"
+    },
+    "filters": {
+      "title": "Filtras",
+      "all": "Visi",
+      "byStatus": "Būsena",
+      "anyStatus": "Bet kuri būsena",
+      "missingDocs": "Trūksta dokumentų/info",
+      "ready": "Paruošta (patikrinti laukai)",
+      "needsSkillInfo": "Reikia įgūdžių info",
+      "followUp": "Reikia susisiekti",
+      "none": "Nėra darbuotojų pagal šį filtrą."
+    },
+    "counters2": {
+      "withMissingDocs": "Trūksta dokumentų/info",
+      "docsReceived": "Gauta dokumentų",
+      "docsChecked": "Patikrinta dokumentų",
+      "docsBlocked": "Atmesta/pasibaigę"
     }
   },
   "communication": {
