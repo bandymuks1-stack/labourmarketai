@@ -1310,7 +1310,11 @@ describe("no migration files added by this sprint", () => {
     // with SELECT-only grants + RPC-only writes (set_worker_operational_status,
     // upsert_worker_readiness_item) gated by can_manage_project AND an active F4
     // assignment. No existing table/policy/grant changed; reversible.
-    const SPRINT_BASELINE = 53;
+    // Bumped 53 -> 54 for candidate-provider-draft-v1: additive owner-scoped
+    // candidate_drafts table (owner_id = auth.uid() RLS + admin read, direct
+    // authenticated writes, explicit grants). No account/consent/verification;
+    // a draft is not assignable until linked. Reversible.
+    const SPRINT_BASELINE = 54;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

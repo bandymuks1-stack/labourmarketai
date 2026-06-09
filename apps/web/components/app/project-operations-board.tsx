@@ -56,6 +56,7 @@ export interface OperationsBoardLabels {
   instructionsAction: string;
   csvAction: string;
   printAction: string;
+  candidatesAction: string;
   // worker cards
   workersTitle: string;
   noWorkers: string;
@@ -648,6 +649,13 @@ export function ProjectOperationsBoard({
           >
             {labels.csvAction}
           </a>
+          <Link
+            href={`/${locale}/dashboard/candidates`}
+            className="rounded-md border border-ink-600 px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary"
+            data-testid="ops-candidates-link"
+          >
+            {labels.candidatesAction}
+          </Link>
           <PrintButton label={labels.printAction} />
         </div>
       </section>

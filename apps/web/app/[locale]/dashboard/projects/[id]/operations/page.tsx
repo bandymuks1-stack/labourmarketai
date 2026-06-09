@@ -96,6 +96,7 @@ export default async function ProjectOperationsPage({
     instructionsAction: t("actions.instructions"),
     csvAction: t("actions.csv"),
     printAction: t("actions.print"),
+    candidatesAction: t("actions.candidates"),
     workersTitle: t("workersTitle"),
     noWorkers: t("noWorkers"),
     readyChip: t("worker.readyChip"),

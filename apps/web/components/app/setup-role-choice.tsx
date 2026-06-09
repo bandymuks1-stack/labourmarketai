@@ -73,6 +73,13 @@ export async function SetupRoleChoice() {
             </span>
           ))}
         </div>
+        <Link
+          href={"/dashboard/candidates" as "/dashboard"}
+          className="self-start text-[11px] font-medium text-brand-cyan hover:underline"
+          data-testid="role-choice-candidates-link"
+        >
+          {t("draft.cta")} →
+        </Link>
       </div>
     </section>
   );
