@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -108,6 +109,26 @@ export default async function ProjectsPage({
         workers={workers}
         labels={labels}
       />
+      {withAssignments.length > 0 ? (
+        <section className="flex flex-col gap-2">
+          <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("operationsTitle")}
+          </h2>
+          <ul className="flex flex-col gap-1">
+            {withAssignments.map((p) => (
+              <li key={p.id}>
+                <Link
+                  href={`/${locale}/dashboard/projects/${p.id}/operations`}
+                  className="text-sm text-brand-cyan hover:underline"
+                  data-testid="project-operations-link"
+                >
+                  {(p.title ?? t("untitledFallback")) + " →"}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }
