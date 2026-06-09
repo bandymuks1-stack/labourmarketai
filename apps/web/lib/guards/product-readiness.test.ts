@@ -1301,7 +1301,10 @@ describe("no migration files added by this sprint", () => {
     // Bumped 48 -> 49 for work-instructions v1: additive instruction columns on
     // conversation_messages + owner-scoped, relationship-gated SECURITY DEFINER
     // send_work_instruction RPC (reuses existing participant-scoped message RLS).
-    const SPRINT_BASELINE = 49;
+    // Bumped 49 -> 50 for F4 worker-project assignment: additive owner-scoped
+    // SECURITY DEFINER assign_worker_to_project/end_worker_project_assignment RPCs
+    // (can_manage_project AND caller roster gate) + revoke direct PWA writes.
+    const SPRINT_BASELINE = 50;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
