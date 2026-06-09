@@ -27,6 +27,12 @@ const worker = (over: Partial<WorkerOps>): WorkerOps => ({
   ready: true,
   missing: [],
   needsFollowUp: false,
+  operationalStatus: null,
+  readinessItems: [],
+  docsMissing: 0,
+  docsReceived: 0,
+  docsChecked: 0,
+  docsBlocked: 0,
   ...over,
 });
 
@@ -49,6 +55,21 @@ const ops = (workers: WorkerOps[]): ProjectOperations => ({
     needsFollowUp: 0,
     openReviewItems: 0,
     instructionsSent: 0,
+    byOperationalStatus: {
+      candidate: 0,
+      contacted: 0,
+      interested: 0,
+      documents_needed: 0,
+      ready: 0,
+      assigned: 0,
+      unavailable: 0,
+      rejected: 0,
+    },
+    withMissingDocs: 0,
+    docsMissing: 0,
+    docsReceived: 0,
+    docsChecked: 0,
+    docsBlocked: 0,
   },
 });
 
@@ -82,6 +103,25 @@ describe("buildOperationsCsv — real data only", () => {
   it("escapes a worker name with a comma so columns stay aligned", () => {
     const csv = buildOperationsCsv(ops([worker({ name: "Doe, John" })]));
     expect(csv).toContain('"Doe, John"');
+  });
+
+  it("includes v2 operational status + checklist columns from real data", () => {
+    expect(OPS_CSV_HEADER).toContain("operational_status");
+    expect(OPS_CSV_HEADER).toContain("docs_missing");
+    expect(OPS_CSV_HEADER).toContain("docs_checked");
+    const csv = buildOperationsCsv(
+      ops([worker({ operationalStatus: "documents_needed", docsMissing: 3, docsChecked: 1 })]),
+    );
+    const cols = csv.trimEnd().split("\r\n")[1].split(",");
+    expect(cols[OPS_CSV_HEADER.indexOf("operational_status")]).toBe("documents_needed");
+    expect(cols[OPS_CSV_HEADER.indexOf("docs_missing")]).toBe("3");
+    expect(cols[OPS_CSV_HEADER.indexOf("docs_checked")]).toBe("1");
+  });
+
+  it("shows not_set when no operational status is assigned (never invented)", () => {
+    const csv = buildOperationsCsv(ops([worker({ operationalStatus: null })]));
+    const cols = csv.trimEnd().split("\r\n")[1].split(",");
+    expect(cols[OPS_CSV_HEADER.indexOf("operational_status")]).toBe("not_set");
   });
 
   it("filename is scoped to the project and filesystem-safe", () => {

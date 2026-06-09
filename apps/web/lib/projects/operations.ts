@@ -6,8 +6,13 @@ import { getWorkerReadiness, type WorkerReadiness } from "@/lib/company/worker-r
 import {
   deriveOpsCounters,
   deriveWorkerOps,
+  OPERATIONAL_STATUSES,
+  READINESS_STATUSES,
+  type OperationalStatus,
   type ProjectOperations,
   type ProjectSummary,
+  type ReadinessItem,
+  type ReadinessStatus,
 } from "@/lib/projects/operations-derive";
 
 export type {
@@ -16,6 +21,9 @@ export type {
   OpsCounters,
   ProjectOperations,
   WorkerOpsInput,
+  OperationalStatus,
+  ReadinessStatus,
+  ReadinessItem,
 } from "@/lib/projects/operations-derive";
 export { deriveWorkerOps, deriveOpsCounters } from "@/lib/projects/operations-derive";
 
@@ -104,6 +112,69 @@ async function readActiveAssignments(
   return out;
 }
 
+/** Current operational status per worker_id for a project (RLS-scoped, v2). */
+async function readOperationalStatuses(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  projectId: string,
+): Promise<Map<string, OperationalStatus>> {
+  const out = new Map<string, OperationalStatus>();
+  try {
+    const res = await supabase
+      .from("project_worker_operational_statuses")
+      .select("worker_id, status")
+      .eq("project_id", projectId);
+    if (res.error) return out; // not-yet-migrated / no access → empty, never fake.
+    for (const r of (res.data ?? []) as { worker_id: string; status: string }[]) {
+      if (r.worker_id && (OPERATIONAL_STATUSES as readonly string[]).includes(r.status)) {
+        out.set(r.worker_id, r.status as OperationalStatus);
+      }
+    }
+  } catch {
+    /* graceful */
+  }
+  return out;
+}
+
+/** Readiness checklist items per worker_id for a project (RLS-scoped, v2). */
+async function readReadinessItems(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  projectId: string,
+): Promise<Map<string, ReadinessItem[]>> {
+  const out = new Map<string, ReadinessItem[]>();
+  try {
+    const res = await supabase
+      .from("project_worker_readiness_items")
+      .select("worker_id, item_key, label, status, note")
+      .eq("project_id", projectId)
+      .order("item_key", { ascending: true });
+    if (res.error) return out;
+    type Row = {
+      worker_id: string;
+      item_key: string;
+      label: string;
+      status: string;
+      note: string | null;
+    };
+    for (const r of (res.data ?? []) as Row[]) {
+      if (!r.worker_id) continue;
+      if (!(READINESS_STATUSES as readonly string[]).includes(r.status)) continue;
+      const list = out.get(r.worker_id) ?? [];
+      list.push({
+        itemKey: r.item_key,
+        label: r.label,
+        status: r.status as ReadinessStatus,
+        note: r.note ?? null,
+      });
+      out.set(r.worker_id, list);
+    }
+  } catch {
+    /* graceful */
+  }
+  return out;
+}
+
 /** Count of project-scoped instructions the manager has sent (RLS-scoped). */
 async function countInstructionsSent(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -167,7 +238,11 @@ export async function getProjectOperations(
   };
 
   const assignments = await readActiveAssignments(asAny(supabase), projectId);
-  const readiness = await getWorkerReadiness(assignments.map((a) => a.workerId));
+  const [readiness, statuses, items] = await Promise.all([
+    getWorkerReadiness(assignments.map((a) => a.workerId)),
+    readOperationalStatuses(asAny(supabase), projectId),
+    readReadinessItems(asAny(supabase), projectId),
+  ]);
 
   const EMPTY: WorkerReadiness = {
     journalEntries: 0,
@@ -185,6 +260,8 @@ export async function getProjectOperations(
       hasRealName: a.hasRealName,
       assignedAt: a.assignedAt,
       readiness: readiness.get(a.workerId) ?? EMPTY,
+      operationalStatus: statuses.get(a.workerId) ?? null,
+      readinessItems: items.get(a.workerId) ?? [],
     }),
   );
 

@@ -1304,7 +1304,13 @@ describe("no migration files added by this sprint", () => {
     // Bumped 49 -> 50 for F4 worker-project assignment: additive owner-scoped
     // SECURITY DEFINER assign_worker_to_project/end_worker_project_assignment RPCs
     // (can_manage_project AND caller roster gate) + revoke direct PWA writes.
-    const SPRINT_BASELINE = 52;
+    // Bumped 52 -> 53 for Pilot Operations v2 (pilot-ops-v2-status-docs):
+    // additive 20260609180000_pilot_ops_v2_status_readiness adds two RLS-enabled
+    // tables (project_worker_operational_statuses, project_worker_readiness_items)
+    // with SELECT-only grants + RPC-only writes (set_worker_operational_status,
+    // upsert_worker_readiness_item) gated by can_manage_project AND an active F4
+    // assignment. No existing table/policy/grant changed; reversible.
+    const SPRINT_BASELINE = 53;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

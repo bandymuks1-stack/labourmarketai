@@ -97,6 +97,12 @@ describe("deriveOpsCounters — exact rolls", () => {
     ready: false,
     missing: [],
     needsFollowUp: false,
+    operationalStatus: null,
+    readinessItems: [],
+    docsMissing: 0,
+    docsReceived: 0,
+    docsChecked: 0,
+    docsBlocked: 0,
     ...over,
   });
 
@@ -125,10 +131,98 @@ describe("deriveOpsCounters — exact rolls", () => {
       needsFollowUp: 0,
       openReviewItems: 0,
       instructionsSent: 0,
+      byOperationalStatus: {
+        candidate: 0,
+        contacted: 0,
+        interested: 0,
+        documents_needed: 0,
+        ready: 0,
+        assigned: 0,
+        unavailable: 0,
+        rejected: 0,
+      },
+      withMissingDocs: 0,
+      docsMissing: 0,
+      docsReceived: 0,
+      docsChecked: 0,
+      docsBlocked: 0,
     });
   });
 
   it("never reports a negative instructions count", () => {
     expect(deriveOpsCounters([], -3).instructionsSent).toBe(0);
+  });
+});
+
+describe("v2 — manager-set status + checklist are carried through honestly", () => {
+  it("operational status passes through verbatim and is null when unset", () => {
+    expect(deriveWorkerOps(base).operationalStatus).toBeNull();
+    expect(
+      deriveWorkerOps({ ...base, operationalStatus: "documents_needed" }).operationalStatus,
+    ).toBe("documents_needed");
+  });
+
+  it("does NOT let a manager-set 'ready' status override derived readiness", () => {
+    // operationalStatus 'ready' is a manager assertion; derived `ready` still
+    // reflects only the checked fields (here: missing skills + evidence).
+    const r = deriveWorkerOps({ ...base, operationalStatus: "ready" });
+    expect(r.operationalStatus).toBe("ready");
+    expect(r.ready).toBe(false);
+  });
+
+  it("rolls checklist item statuses into honest counts", () => {
+    const r = deriveWorkerOps({
+      ...base,
+      readinessItems: [
+        { itemKey: "id", label: "ID", status: "needed", note: null },
+        { itemKey: "a1", label: "A1", status: "missing", note: null },
+        { itemKey: "contract", label: "Contract", status: "received", note: null },
+        { itemKey: "safety", label: "Safety", status: "checked", note: null },
+        { itemKey: "qual", label: "Qual", status: "expired", note: null },
+        { itemKey: "client", label: "Client", status: "not_required", note: null },
+      ],
+    });
+    expect(r.docsMissing).toBe(2); // needed + missing
+    expect(r.docsReceived).toBe(1);
+    expect(r.docsChecked).toBe(1);
+    expect(r.docsBlocked).toBe(1); // expired (rejected would also count)
+  });
+
+  it("counts workers per operational status and with-missing-docs", () => {
+    const mkw = (over: Partial<WorkerOps>): WorkerOps => ({
+      workerId: "w",
+      workerProfileId: "p",
+      name: "n",
+      assignedAt: "t",
+      journalEntries: 0,
+      declaredSkills: 0,
+      confirmedSkills: 0,
+      openReviewItems: 0,
+      lastActivity: null,
+      ready: false,
+      missing: [],
+      needsFollowUp: false,
+      operationalStatus: null,
+      readinessItems: [],
+      docsMissing: 0,
+      docsReceived: 0,
+      docsChecked: 0,
+      docsBlocked: 0,
+      ...over,
+    });
+    const c = deriveOpsCounters(
+      [
+        mkw({ operationalStatus: "ready" }),
+        mkw({ operationalStatus: "documents_needed", docsMissing: 2 }),
+        mkw({ operationalStatus: "documents_needed", docsMissing: 1 }),
+        mkw({ operationalStatus: null }),
+      ],
+      0,
+    );
+    expect(c.byOperationalStatus.ready).toBe(1);
+    expect(c.byOperationalStatus.documents_needed).toBe(2);
+    expect(c.byOperationalStatus.candidate).toBe(0);
+    expect(c.withMissingDocs).toBe(2);
+    expect(c.docsMissing).toBe(3);
   });
 });
