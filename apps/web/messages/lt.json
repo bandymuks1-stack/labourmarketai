@@ -1906,11 +1906,26 @@
         "missingTitle": "Ko dar trūksta",
         "nextEyebrow": "Vienas aiškus kitas žingsnis",
         "dim": {
-          "work": { "label": "Ką galiu dirbti", "missing": "Dar nenurodyta profesija ar įgūdžiai" },
-          "availability": { "label": "Kada galiu pradėti", "missing": "Dar nenurodyta" },
-          "location": { "label": "Kur galiu dirbti", "missing": "Dar nenurodyta" },
-          "pay": { "label": "Kiek tikiuosi", "missing": "Dar nenurodyta" },
-          "evidence": { "label": "Kuo galiu įrodyti", "missing": "Įrodymų dar nėra" }
+          "work": {
+            "label": "Ką galiu dirbti",
+            "missing": "Dar nenurodyta profesija ar įgūdžiai"
+          },
+          "availability": {
+            "label": "Kada galiu pradėti",
+            "missing": "Dar nenurodyta"
+          },
+          "location": {
+            "label": "Kur galiu dirbti",
+            "missing": "Dar nenurodyta"
+          },
+          "pay": {
+            "label": "Kiek tikiuosi",
+            "missing": "Dar nenurodyta"
+          },
+          "evidence": {
+            "label": "Kuo galiu įrodyti",
+            "missing": "Įrodymų dar nėra"
+          }
         },
         "next": {
           "work": "Nurodyti, ką dirbu",
@@ -3158,5 +3173,22 @@
         ]
       }
     ]
+  },
+  "playerCard": {
+    "pageTitle": "Mano kortelė",
+    "pageIntro": "Tavo darbo profilio santrauka — matoma tik tau.",
+    "title": "Darbuotojo kortelė",
+    "subtitle": "Tavo profilio apžvalga. Skaičiai tikri — nieko nepridėta.",
+    "skillsLabel": "Įgūdžiai",
+    "skillsHint": "Tavo nurodyti įgūdžiai (savideklaruoti, nepatvirtinti).",
+    "evidenceLabel": "Įrodymai",
+    "evidenceHint": "Tavo darbo žurnalo įrašai.",
+    "attentionLabel": "Reikia dėmesio",
+    "attentionHint": "Nauji nurodymai, kuriuos verta peržiūrėti.",
+    "attentionZero": "Šiuo metu nieko nereikia daryti.",
+    "workCardLabel": "Darbo kortelė",
+    "workCardConfirmed": "Patvirtinta",
+    "workCardPending": "Dar nepatvirtinta",
+    "namePlaceholder": "Mano profilis"
   }
 }

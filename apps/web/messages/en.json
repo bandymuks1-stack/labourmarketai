@@ -1906,11 +1906,26 @@
         "missingTitle": "What's still missing",
         "nextEyebrow": "One clear next step",
         "dim": {
-          "work": { "label": "What I can do", "missing": "No profession or skills yet" },
-          "availability": { "label": "When I can start", "missing": "Not set yet" },
-          "location": { "label": "Where I can work", "missing": "Not set yet" },
-          "pay": { "label": "What I expect", "missing": "Not set yet" },
-          "evidence": { "label": "What proves it", "missing": "No evidence yet" }
+          "work": {
+            "label": "What I can do",
+            "missing": "No profession or skills yet"
+          },
+          "availability": {
+            "label": "When I can start",
+            "missing": "Not set yet"
+          },
+          "location": {
+            "label": "Where I can work",
+            "missing": "Not set yet"
+          },
+          "pay": {
+            "label": "What I expect",
+            "missing": "Not set yet"
+          },
+          "evidence": {
+            "label": "What proves it",
+            "missing": "No evidence yet"
+          }
         },
         "next": {
           "work": "Set what I do",
@@ -3158,5 +3173,22 @@
         ]
       }
     ]
+  },
+  "playerCard": {
+    "pageTitle": "My card",
+    "pageIntro": "A summary of your work profile — visible only to you.",
+    "title": "Worker card",
+    "subtitle": "An overview of your profile. The numbers are real — nothing added.",
+    "skillsLabel": "Skills",
+    "skillsHint": "Skills you listed (self-declared, not verified).",
+    "evidenceLabel": "Evidence",
+    "evidenceHint": "Your work-journal entries.",
+    "attentionLabel": "Needs attention",
+    "attentionHint": "New instructions worth reviewing.",
+    "attentionZero": "Nothing to do right now.",
+    "workCardLabel": "Work card",
+    "workCardConfirmed": "Confirmed",
+    "workCardPending": "Not confirmed yet",
+    "namePlaceholder": "My profile"
   }
 }
