@@ -2768,6 +2768,8 @@
     "noProjects": "Kol kas neturite projektų. Sukurkite pirmą aukščiau.",
     "assignmentsTitle": "Priskirti darbuotojai",
     "noAssignments": "Darbuotojai dar nepriskirti šiam projektui.",
+    "operationsTitle": "Operacijų lentos",
+    "untitledFallback": "Projektas be pavadinimo",
     "end": "Užbaigti",
     "sending": "Saugoma…",
     "create": {
@@ -2789,6 +2791,65 @@
       "assigned": "Priskirta",
       "notAuthorized": "Galite priskirti tik savo komandos darbuotojus savo projektams.",
       "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje."
+    }
+  },
+  "projectOps": {
+    "eyebrow": "Projekto operacijos",
+    "managerOnly": "Ši lenta skirta įmonės arba agentūros vadovui.",
+    "notAuthorized": "Operacijų lentą galite atidaryti tik savo valdomam projektui.",
+    "untitledProject": "Projektas be pavadinimo",
+    "statusLabel": "Būsena",
+    "locationLabel": "Vieta",
+    "startLabel": "Pradžia",
+    "notSet": "—",
+    "schemaNote": "Rodomi tik realūs projekto laukai. Reikalingos profesijos, žmonių skaičius ir tikslus objektas dar nesaugomi, todėl nerodomi.",
+    "countersTitle": "Operacijos",
+    "counters": {
+      "totalAssigned": "Priskirta",
+      "ready": "Pasiruošę",
+      "readyBasis": "Tik pagal čia patikrintus laukus.",
+      "needsDeclaredSkills": "Nėra nurodytų įgūdžių",
+      "needsEvidence": "Nėra darbo įrodymų",
+      "needsFollowUp": "Reikia susisiekti",
+      "openReviewItems": "Laukia peržiūros",
+      "instructionsSent": "Išsiųsti nurodymai"
+    },
+    "actionsTitle": "Veiksmai",
+    "actions": {
+      "assign": "Priskirti darbuotojus",
+      "instructions": "Siųsti nurodymą",
+      "csv": "Eksportuoti CSV",
+      "print": "Spausdinti ataskaitą"
+    },
+    "workersTitle": "Šio projekto darbuotojai",
+    "noWorkers": "Šiam projektui dar nepriskirta darbuotojų. Priskirkite darbuotojus iš savo komandos, kad pradėtumėte operacijas.",
+    "worker": {
+      "readyChip": "Pasiruošęs (patikrinti laukai)",
+      "notReadyChip": "Dar nepasiruošęs",
+      "declaredSkills": "Nurodyti įgūdžiai",
+      "confirmedSkills": "Patvirtinti įgūdžiai",
+      "evidence": "Darbo įrodymai",
+      "reviewItems": "Laukia peržiūros",
+      "lastActivity": "Paskutinė veikla",
+      "noActivity": "Kol kas nėra veiklos",
+      "assignedAt": "Priskirta",
+      "missingTitle": "Dar reikia",
+      "missingName": "Vardas",
+      "missingDeclaredSkills": "Nurodytų įgūdžių",
+      "missingEvidence": "Darbo įrodymų",
+      "followUpChip": "Nėra veiklos — susisiekite",
+      "playerCardLink": "Kortelė",
+      "instructionLink": "Nurodymai",
+      "skillClarifyLink": "Įgūdžių patikslinimas"
+    },
+    "notesTitle": "Ką reiškia šie skaičiai",
+    "notes": {
+      "readiness": "„Pasiruošęs“ reiškia tik tai, kad yra čia tikrinami laukai (vardas, bent vienas nurodytas įgūdis, bent vienas darbo įrodymo įrašas). Tai nėra patvirtinimas, dokumento priėmimas ar dirbtinio intelekto vertinimas.",
+      "documents": "Dokumentai dar nesekami — jokioje šios lentos vietoje dokumentas nerodomas kaip priimtas ar patvirtintas.",
+      "candidateSkill": "Įgūdžių patikslinimai yra privatūs kiekvienam darbuotojui; jie rodomi paties darbuotojo kortelėje, o ne čia."
+    },
+    "report": {
+      "title": "Operacijų būsenos ataskaita"
     }
   },
   "communication": {

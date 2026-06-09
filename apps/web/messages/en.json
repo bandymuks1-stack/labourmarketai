@@ -2768,6 +2768,8 @@
     "noProjects": "You don't have any projects yet. Create your first one above.",
     "assignmentsTitle": "Assigned workers",
     "noAssignments": "No workers assigned to this project yet.",
+    "operationsTitle": "Operations boards",
+    "untitledFallback": "Untitled project",
     "end": "End",
     "sending": "Saving…",
     "create": {
@@ -2789,6 +2791,65 @@
       "assigned": "Assigned",
       "notAuthorized": "You can only assign workers from your team to your own projects.",
       "noWorkers": "You don't have any assignable workers on your team yet."
+    }
+  },
+  "projectOps": {
+    "eyebrow": "Project operations",
+    "managerOnly": "This board is for a company or agency manager.",
+    "notAuthorized": "You can only open the operations board for a project you manage.",
+    "untitledProject": "Untitled project",
+    "statusLabel": "Status",
+    "locationLabel": "Location",
+    "startLabel": "Start",
+    "notSet": "—",
+    "schemaNote": "Shown from real project fields only. Needed professions, headcount and exact site precision are not stored yet, so they are not shown.",
+    "countersTitle": "Operations",
+    "counters": {
+      "totalAssigned": "Assigned",
+      "ready": "Ready",
+      "readyBasis": "Based only on the fields checked here.",
+      "needsDeclaredSkills": "No declared skills",
+      "needsEvidence": "No work evidence",
+      "needsFollowUp": "Needs follow-up",
+      "openReviewItems": "Open review items",
+      "instructionsSent": "Instructions sent"
+    },
+    "actionsTitle": "Actions",
+    "actions": {
+      "assign": "Assign workers",
+      "instructions": "Send instruction",
+      "csv": "Export CSV",
+      "print": "Print report"
+    },
+    "workersTitle": "Workers on this project",
+    "noWorkers": "No workers are assigned to this project yet. Assign workers from your team to start operations.",
+    "worker": {
+      "readyChip": "Ready (checked fields)",
+      "notReadyChip": "Not ready yet",
+      "declaredSkills": "Declared skills",
+      "confirmedSkills": "Verified skills",
+      "evidence": "Work evidence",
+      "reviewItems": "Open reviews",
+      "lastActivity": "Last activity",
+      "noActivity": "No activity yet",
+      "assignedAt": "Assigned",
+      "missingTitle": "Still needs",
+      "missingName": "Name",
+      "missingDeclaredSkills": "Declared skills",
+      "missingEvidence": "Work evidence",
+      "followUpChip": "No activity — follow up",
+      "playerCardLink": "Player card",
+      "instructionLink": "Instructions",
+      "skillClarifyLink": "Skill clarification"
+    },
+    "notesTitle": "What these numbers mean",
+    "notes": {
+      "readiness": "\"Ready\" means only that the fields checked here are present (name, at least one declared skill, at least one work-evidence entry). It is not a verification, a document approval, or an AI judgement.",
+      "documents": "Documents are not tracked yet — no document is shown as approved or verified anywhere on this board.",
+      "candidateSkill": "Candidate skill clarifications are private to each worker; they are shown on the worker's own player card, not here."
+    },
+    "report": {
+      "title": "Operational status report"
     }
   },
   "communication": {
