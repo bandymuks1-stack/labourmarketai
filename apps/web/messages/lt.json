@@ -2119,6 +2119,11 @@
         "body_main": "Šiuo metu mes baigiame ruošti įmonių/agentūrų funkcionalumą.",
         "body_notify": "Pranešime iškart, kai bus paruošta.",
         "body_meanwhile": "Tuo tarpu — gali apžiūrėti platformą per „Naršyti\" skiltį (read-only)."
+      },
+      "menuLinks": {
+        "playerCard": "Mano kortelė",
+        "projects": "Projektai",
+        "instructions": "Nurodymai"
       }
     },
     "middleware": {
