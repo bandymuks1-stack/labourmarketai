@@ -2824,7 +2824,8 @@
       "assign": "Assign workers",
       "instructions": "Send instruction",
       "csv": "Export CSV",
-      "print": "Print report"
+      "print": "Print report",
+      "candidates": "Candidate drafts"
     },
     "workersTitle": "Workers on this project",
     "noWorkers": "No workers are assigned to this project yet. Assign workers from your team to start operations.",
@@ -2951,7 +2952,54 @@
         "notVerified": "Not verified",
         "draft": "Draft",
         "canLinkLater": "Can be linked later"
-      }
+      },
+      "cta": "Open candidate / provider drafts"
+    }
+  },
+  "candidates": {
+    "eyebrow": "Candidates / providers",
+    "title": "Candidate & provider drafts",
+    "intro": "Start managing a person or service provider before they register. These are your private working notes — only you (the creator) can see them.",
+    "honestyNote": "A draft is not a user account. No account, invite acceptance, consent, verification, or document is created for the person. There is no automatic candidate matching. A draft can be linked to a real account later, and can only be assigned to a project after it is linked.",
+    "labels": {
+      "notRegistered": "Not registered",
+      "notVerified": "Not verified",
+      "draft": "Draft",
+      "canLinkLater": "Can be linked later",
+      "linked": "Linked to an account"
+    },
+    "notAssignableNote": "This draft cannot be assigned to a project yet — link it to a registered account first.",
+    "create": {
+      "title": "Add a candidate / provider draft",
+      "nameLabel": "Name or title",
+      "namePlaceholder": "e.g. Jonas P. — steel fixer",
+      "contactLabel": "Contact (if known)",
+      "contactPlaceholder": "e.g. email or phone",
+      "professionLabel": "Profession / service",
+      "professionPlaceholder": "e.g. steel fixer, cleaning service",
+      "languageLabel": "Language",
+      "languagePlaceholder": "e.g. LT, EN, PL",
+      "skillsLabel": "Skills / services (free text)",
+      "skillsPlaceholder": "e.g. rebar, formwork, 10 years",
+      "notesLabel": "Notes",
+      "notesPlaceholder": "Anything useful to remember",
+      "statusLabel": "Status",
+      "submit": "Create draft",
+      "submitting": "Saving…"
+    },
+    "listTitle": "Your drafts",
+    "empty": "No drafts yet. Add your first candidate or provider above.",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete",
+    "saved": "Saved",
+    "saveError": "Could not save. Please try again.",
+    "needsMigration": "This feature is being prepared (database update pending). Try again shortly.",
+    "statuses": {
+      "draft": "Draft",
+      "contacted": "Contacted",
+      "shortlisted": "Shortlisted",
+      "archived": "Archived"
     }
   },
   "communication": {

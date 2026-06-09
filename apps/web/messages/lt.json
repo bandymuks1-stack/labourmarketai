@@ -2824,7 +2824,8 @@
       "assign": "Priskirti darbuotojus",
       "instructions": "Siųsti nurodymą",
       "csv": "Eksportuoti CSV",
-      "print": "Spausdinti ataskaitą"
+      "print": "Spausdinti ataskaitą",
+      "candidates": "Kandidatų juodraščiai"
     },
     "workersTitle": "Šio projekto darbuotojai",
     "noWorkers": "Šiam projektui dar nepriskirta darbuotojų. Priskirkite darbuotojus iš savo komandos, kad pradėtumėte operacijas.",
@@ -2951,7 +2952,54 @@
         "notVerified": "Nepatikrintas",
         "draft": "Juodraštis",
         "canLinkLater": "Galima susieti vėliau"
-      }
+      },
+      "cta": "Atidaryti kandidatų / teikėjų juodraščius"
+    }
+  },
+  "candidates": {
+    "eyebrow": "Kandidatai / teikėjai",
+    "title": "Kandidatų ir teikėjų juodraščiai",
+    "intro": "Pradėkite valdyti žmogų ar paslaugos teikėją dar prieš jam užsiregistruojant. Tai jūsų privatūs darbiniai užrašai — juos matote tik jūs (kūrėjas).",
+    "honestyNote": "Juodraštis nėra naudotojo paskyra. Žmogui nesukuriama jokia paskyra, kvietimo priėmimas, sutikimas, patikrinimas ar dokumentas. Niekas nesuporuojama dirbtiniu intelektu. Juodraštį vėliau galima susieti su realia paskyra, o priskirti projektui galima tik po susiejimo.",
+    "labels": {
+      "notRegistered": "Neužregistruotas",
+      "notVerified": "Nepatikrintas",
+      "draft": "Juodraštis",
+      "canLinkLater": "Galima susieti vėliau",
+      "linked": "Susieta su paskyra"
+    },
+    "notAssignableNote": "Šio juodraščio dar negalima priskirti projektui — pirmiausia susiekite jį su registruota paskyra.",
+    "create": {
+      "title": "Pridėti kandidato / teikėjo juodraštį",
+      "nameLabel": "Vardas arba pavadinimas",
+      "namePlaceholder": "pvz. Jonas P. — armatūrininkas",
+      "contactLabel": "Kontaktai (jei žinomi)",
+      "contactPlaceholder": "pvz. el. paštas arba telefonas",
+      "professionLabel": "Profesija / paslauga",
+      "professionPlaceholder": "pvz. armatūrininkas, valymo paslauga",
+      "languageLabel": "Kalba",
+      "languagePlaceholder": "pvz. LT, EN, PL",
+      "skillsLabel": "Įgūdžiai / paslaugos (laisvas tekstas)",
+      "skillsPlaceholder": "pvz. armatūra, klojiniai, 10 metų",
+      "notesLabel": "Pastabos",
+      "notesPlaceholder": "Viskas, ką verta prisiminti",
+      "statusLabel": "Būsena",
+      "submit": "Sukurti juodraštį",
+      "submitting": "Saugoma…"
+    },
+    "listTitle": "Jūsų juodraščiai",
+    "empty": "Juodraščių dar nėra. Pridėkite pirmą kandidatą ar teikėją viršuje.",
+    "save": "Išsaugoti",
+    "saving": "Saugoma…",
+    "delete": "Ištrinti",
+    "saved": "Išsaugota",
+    "saveError": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "needsMigration": "Funkcija ruošiama (laukiama duomenų bazės atnaujinimo). Bandykite netrukus.",
+    "statuses": {
+      "draft": "Juodraštis",
+      "contacted": "Susisiekta",
+      "shortlisted": "Atrinktas",
+      "archived": "Archyvuota"
     }
   },
   "communication": {

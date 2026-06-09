@@ -122,8 +122,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // 20260608140000_worker_work_card_execute_hardening: revoke PUBLIC/anon
     // EXECUTE on the two RPCs, keep authenticated), then to 53 for Pilot
     // Operations v2 (pilot-ops-v2-status-docs: additive operational-status +
-    // readiness-checklist tables with RPC-only writes). The baseline only ever
-    // grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 53/);
+    // readiness-checklist tables with RPC-only writes), then to 54 for
+    // candidate-provider-draft-v1 (additive owner-scoped candidate_drafts table).
+    // The baseline only ever grows deliberately.
+    expect(guard).toMatch(/SPRINT_BASELINE = 54/);
   });
 });
