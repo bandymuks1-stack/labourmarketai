@@ -2717,7 +2717,8 @@
       "sent": "Nurodymas išsiųstas",
       "notAuthorized": "Galite siųsti nurodymus tik savo komandos darbuotojams.",
       "error": "Nepavyko išsiųsti. Bandykite dar kartą.",
-      "noWorkers": "Kol kas neturite priskirtų darbuotojų. Kai pridėsite darbuotoją prie komandos, galėsite siųsti nurodymus."
+      "noWorkers": "Kol kas neturite priskirtų darbuotojų. Kai pridėsite darbuotoją prie komandos, galėsite siųsti nurodymus.",
+      "scopeNote": "Šiuo metu nurodymai siunčiami komandos lygiu — jūsų komandos darbuotojams. Tiksli projekto ar objekto apimtis bus įjungta, kai darbuotojai bus priskirti projektams."
     },
     "card": {
       "autoTranslation": "Automatinis vertimas",

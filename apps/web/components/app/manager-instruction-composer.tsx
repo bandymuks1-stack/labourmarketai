@@ -30,6 +30,7 @@ export interface ComposerLabels {
   needsMigration: string;
   errorMsg: string;
   noWorkers: string;
+  scopeNote: string;
 }
 
 export function ManagerInstructionComposer({
@@ -99,6 +100,17 @@ export function ManagerInstructionComposer({
 
       <p className="text-[11px] leading-relaxed text-text-muted">
         {labels.languageNote}
+      </p>
+
+      {/* Honest permission-scope label: today instructions are gated at ROSTER
+          (whole-team) level; precise project/site scope activates once workers
+          are assigned to projects (project_worker_assignments is empty). No fake
+          project precision is claimed. See work-instructions-project-scope-design-v1. */}
+      <p
+        className="text-[11px] leading-relaxed text-text-muted"
+        data-testid="instruction-scope-note"
+      >
+        {labels.scopeNote}
       </p>
 
       <div className="flex items-center gap-3">

@@ -85,6 +85,7 @@ export default async function InstructionsPage({
       needsMigration: t("needsMigration"),
       errorMsg: t("manager.error"),
       noWorkers: t("manager.noWorkers"),
+      scopeNote: t("manager.scopeNote"),
     };
     return (
       <div className="flex max-w-2xl flex-col gap-6">
