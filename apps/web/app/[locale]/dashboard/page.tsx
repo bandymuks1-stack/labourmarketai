@@ -224,6 +224,16 @@ export default async function DashboardOverviewPage({
         {Header}
         <CurrentSpaceHeader role={role} />
 
+        {/* G — company/agency calming pass: a single calm, human framing line
+            (copy-only, no structural change), mirroring the worker foundationNote.
+            One clear next step at a time; honest status, never fabricated demand. */}
+        <p
+          className="-mt-3 text-[11px] leading-relaxed text-text-muted"
+          data-testid="company-calm-note"
+        >
+          {tf("company.calmNote")}
+        </p>
+
         {/* The single, clear primary action for this role/state (data-driven:
             entries waiting → review; nothing waiting → invite/open team). The
             chain-actions grid below is the secondary "all steps" index. */}

@@ -1796,7 +1796,8 @@
             "c1": "Apibrėžkite darbą",
             "c2": "Paruoškite kriterijus",
             "c3": "Peržiūrėkite tinkamumą",
-            "c4": "Sukurti darbo pasiūlymą"
+            "c4": "Sukurti darbo pasiūlymą",
+            "calmNote": "Po vieną aiškų žingsnį. Statusas tikras — poreikiai ir atitikmenys nepramanyti."
           }
         },
         "startingPoint": "Tai tik jūsų pradžios taškas. Vėliau galėsite pridėti daugiau veiklų, rolių, įmonių, komandų, projektų ar galimybių.",
