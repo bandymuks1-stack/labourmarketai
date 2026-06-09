@@ -1,0 +1,99 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * Remove-wrong-agency-gate guard.
+ *
+ * labourmarket.ai is demand-first: agency setup gates ONLY the agency flow. A
+ * user without a completed agency must not be dead-ended into the agency invite
+ * form (whose only outcome is the "finish agency setup" error). They get a
+ * neutral, honest role choice instead — and the candidate/provider draft path is
+ * shown without creating any fake account / consent / verification.
+ */
+
+const APP = join(__dirname, "..", "..");
+const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
+
+const agencyPage = read("app/[locale]/dashboard/agency/page.tsx");
+const roleChoice = read("components/app/setup-role-choice.tsx");
+const companyNext = read("components/app/company-next-actions.tsx");
+const en = JSON.parse(read("messages/en.json")) as Record<string, unknown>;
+const lt = JSON.parse(read("messages/lt.json")) as Record<string, unknown>;
+
+describe("agency dashboard does not dead-end a user without an agency", () => {
+  it("returns the neutral guide + role choice when there is no agency entity", () => {
+    expect(agencyPage).toMatch(/if \(!ownAgency\)/);
+    expect(agencyPage).toMatch(/agency-no-entity-guide/);
+    expect(agencyPage).toMatch(/<SetupRoleChoice/);
+  });
+  it("renders the neutral choice BEFORE (instead of) the agency invite form", () => {
+    const guideIdx = agencyPage.indexOf("agency-no-entity-guide");
+    const inviteIdx = agencyPage.indexOf("<AgencyWorkersSection");
+    expect(guideIdx).toBeGreaterThan(-1);
+    expect(inviteIdx).toBeGreaterThan(-1);
+    // The no-entity early return (which `return`s) comes before the section that
+    // would otherwise render the dead-ending invite form.
+    expect(guideIdx).toBeLessThan(inviteIdx);
+  });
+});
+
+describe("neutral role choice offers real, non-agency-only paths", () => {
+  it("links to requester, company, agency, and worker routes", () => {
+    expect(roleChoice).toMatch(/\/dashboard\/start\/buyer/); // requester / customer
+    expect(roleChoice).toMatch(/\/dashboard\/start\/company/);
+    expect(roleChoice).toMatch(/\/dashboard\/start\/agency/);
+    expect(roleChoice).toMatch(/\/dashboard\/profile/); // offer own work
+    expect(roleChoice).toMatch(/setup-role-choice/);
+  });
+  it("shows the candidate/provider draft path honestly (no fake account)", () => {
+    expect(roleChoice).toMatch(/candidate-draft-note/);
+    expect(roleChoice).toMatch(/notRegistered/);
+    expect(roleChoice).toMatch(/canLinkLater/);
+  });
+});
+
+describe("copy is honest and context-aware (en + lt)", () => {
+  const choice = (m: Record<string, unknown>) =>
+    (m as { setupRoleChoice?: Record<string, unknown> }).setupRoleChoice ?? {};
+  const agencyWorkers = (m: Record<string, unknown>) => {
+    const rd = (m as { roleDashboards?: { agency?: { workers?: Record<string, string> } } })
+      .roleDashboards;
+    return rd?.agency?.workers ?? {};
+  };
+
+  it("the four neutral options exist in both locales", () => {
+    for (const m of [en, lt]) {
+      const opts = JSON.stringify((choice(m) as { options?: unknown }).options ?? {});
+      expect(opts).toMatch(/findHuman/);
+      expect(opts).toMatch(/representCompany/);
+      expect(opts).toMatch(/representAgency/);
+      expect(opts).toMatch(/offerWork/);
+    }
+  });
+
+  it("draft copy never claims a real account/consent/verification was created", () => {
+    const enDraft = JSON.stringify((choice(en) as { draft?: unknown }).draft ?? {}).toLowerCase();
+    expect(enDraft).toMatch(/never a real account|no account, consent, or verification/);
+    const ltDraft = JSON.stringify((choice(lt) as { draft?: unknown }).draft ?? {}).toLowerCase();
+    expect(ltDraft).toMatch(/niekada nėra reali paskyra/);
+  });
+
+  it("statusNoAgency is now agency-context-specific, not a universal gate", () => {
+    // Must mention agency explicitly (it only applies to the agency flow) ...
+    expect((agencyWorkers(en) as { statusNoAgency?: string }).statusNoAgency).toMatch(/agency/i);
+    expect((agencyWorkers(lt) as { statusNoAgency?: string }).statusNoAgency).toMatch(/agentūr/i);
+    // ... and must NOT be the old universal "finish agency setup first" wording
+    // that pointed every invite at /dashboard/start/agency.
+    expect((agencyWorkers(en) as { statusNoAgency?: string }).statusNoAgency).not.toMatch(
+      /\/dashboard\/start\/agency/,
+    );
+  });
+});
+
+describe("company / requester flows never require agency setup", () => {
+  it("the company no-profile guide routes to company setup, not agency", () => {
+    expect(companyNext).toMatch(/\/dashboard\/start\/company/);
+    expect(companyNext).not.toMatch(/\/dashboard\/start\/agency/);
+  });
+});

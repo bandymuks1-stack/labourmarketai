@@ -585,6 +585,11 @@
         "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
       "profileLink": "Mano gebėjimai",
+      "noAgency": {
+        "title": "Agentūros nustatymas dar nebaigtas",
+        "body": "Agentūros nustatymas reikalingas tik agentūros darbo eigai. Jis neprivalomas, jei norite veikti kaip užsakovas, įmonė ar darbuotojas. Pasirinkite žemiau, kaip norite pradėti, arba užbaikite agentūros nustatymą.",
+        "cta": "Užbaigti agentūros nustatymą"
+      },
       "workers": {
         "title": "Agentūros darbuotojai",
         "subtitle": "Susiekite savo agentūrą su realiais darbuotojais. Savaiminis užsiregistravimas lieka atviras: žmogus gali užsiregistruoti pats ir vėliau būti susietas. Pakvietimas el. paštu — papildomas kanalas, ne vienintelis.",
@@ -696,7 +701,7 @@
         "statusNotOwner": "Veiksmas atmestas: jūs neturite šios agentūros savininko teisės.",
         "statusInvalidEmail": "Neteisingas el. pašto adresas.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
-        "statusNoAgency": "Pirmiausia užbaikite agentūros nustatymą per /dashboard/start/agency.",
+        "statusNoAgency": "Norėdami pakviesti darbuotoją per agentūrą, pirmiausia užbaikite agentūros nustatymą.",
         "migrationBlockerHeading": "Reikia migracijos 0025_agency_worker_invitations",
         "migrationBlockerBody": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
         "columnEmail": "El. paštas",
@@ -2915,6 +2920,38 @@
       "docsReceived": "Gauta dokumentų",
       "docsChecked": "Patikrinta dokumentų",
       "docsBlocked": "Atmesta/pasibaigę"
+    }
+  },
+  "setupRoleChoice": {
+    "title": "Kaip norėtumėte pradėti?",
+    "body": "labourmarket.ai pirmiausia orientuotas į poreikį — jums nebūtina būti agentūra. Pasirinkite tinkamą variantą. Galite sukurti užklausą, pakviesti žmonių arba pasiūlyti savo darbą; niekas neverčia darbuotojo registruotis pirmo.",
+    "options": {
+      "findHuman": {
+        "label": "Ieškau žmogaus ar paslaugos",
+        "hint": "Pradėkite kaip užsakovas / klientas ir sukurkite užklausą arba poreikį."
+      },
+      "representCompany": {
+        "label": "Atstovauju įmonei",
+        "hint": "Nustatykite įmonę, kad galėtumėte kviesti darbuotojus ir valdyti projektus."
+      },
+      "representAgency": {
+        "label": "Atstovauju agentūrai / komandai",
+        "hint": "Nustatykite agentūrą, kad susietumėte ir koordinuotumėte darbuotojus."
+      },
+      "offerWork": {
+        "label": "Siūlau savo darbą ar paslaugas",
+        "hint": "Susikurkite profilį ir gebėjimus kaip darbuotojas / paslaugų teikėjas."
+      }
+    },
+    "draft": {
+      "title": "Žmogus dar nepasiruošęs registruotis?",
+      "body": "Jei žmogus dar nėra pasiruošęs registruotis, vėliau galėsite sukurti kandidato / paslaugos teikėjo juodraštį ir papildyti duomenis. Juodraštis niekada nėra reali paskyra — jokia paskyra, sutikimas ar patikrinimas jam nesukuriamas, o vėliau jį galima susieti su realia paskyra.",
+      "labels": {
+        "notRegistered": "Neužregistruotas",
+        "notVerified": "Nepatikrintas",
+        "draft": "Juodraštis",
+        "canLinkLater": "Galima susieti vėliau"
+      }
     }
   },
   "communication": {
