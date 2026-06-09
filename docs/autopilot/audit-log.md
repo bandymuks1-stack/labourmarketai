@@ -14,6 +14,7 @@ Append-only record of autonomous merges/deploys (policy §5 of
 | 2026-06-09 | A — autopilot execution policy | `docs/cc/autopilot-execution-policy-v1` | #268 | GREEN (docs) | quality ✓ · migration-safety ✓ | `6883010` | Vercel auto (docs-only) | n/a (docs) |
 | 2026-06-09 | A — autopilot audit log (step 8) | `docs/cc/autopilot-audit-log` | #270 | GREEN (docs) | quality ✓ · migration-safety ✓ | `558f8f5` | Vercel auto (docs-only) | n/a (docs) |
 | 2026-06-09 | B — F4 worker→project assignment | `feat/cc/f4-worker-project-assignment-v1` | #269 | YELLOW→approved | typecheck ✓ · lint ✓ · test 2378 ✓ · build ✓ · migration-safety ✓ · quality ✓ | `a76a588` | Vercel auto | root 200 · /lt→sign-in 200 ✓ |
+| 2026-06-09 | C — F5 project-scoped instructions | `feat/cc/f5-project-scoped-instructions-v1` | #272 | additive perm → approved | typecheck ✓ · lint ✓ · test 2385 ✓ · build ✓ · migration-safety ✓ GREEN · quality ✓ | `35ee118` | Vercel auto | root 200 · /lt→auth 307 ✓ |
 
 **F4 migration `20260609120000` applied to prod** (owner-approved 2026-06-09):
 3 SECURITY DEFINER fns (`assign_worker_to_project`, `end_worker_project_assignment`,
