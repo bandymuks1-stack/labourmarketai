@@ -2123,7 +2123,8 @@
       "menuLinks": {
         "playerCard": "My card",
         "projects": "Projects",
-        "instructions": "Instructions"
+        "instructions": "Instructions",
+        "skills": "My skills"
       }
     },
     "middleware": {
@@ -3196,5 +3197,31 @@
     "workCardConfirmed": "Confirmed",
     "workCardPending": "Not confirmed yet",
     "namePlaceholder": "My profile"
+  },
+  "skillClarify": {
+    "title": "My skills",
+    "intro": "Add a skill that isn't in the list yet — in your own words.",
+    "listTitle": "My candidate skills",
+    "empty": "You haven't added anything yet.",
+    "candidateBadge": "Self-declared · needs clarification",
+    "needsMigration": "This feature is being prepared. Try again later.",
+    "selfDeclaredNote": "These skills are self-declared and not verified. Nothing checks them automatically.",
+    "relatedLabel": "Related to",
+    "toolsLabel": "Tools / materials",
+    "oftenLabel": "Often together with",
+    "form": {
+      "labelLabel": "What do you call it?",
+      "labelPlaceholder": "e.g. monolithic concreting",
+      "relatedLabel": "What trade is it part of?",
+      "relatedPlaceholder": "e.g. concreter",
+      "toolsLabel": "What tools / materials?",
+      "toolsPlaceholder": "e.g. vibrator, formwork",
+      "oftenLabel": "What does it go together with?",
+      "oftenPlaceholder": "e.g. rebar tying",
+      "save": "Save skill",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "error": "Could not save. Please try again."
+    }
   }
 }

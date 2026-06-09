@@ -2258,6 +2258,50 @@ export type Database = {
         }
         Relationships: []
       }
+      skill_candidate_clarifications: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          normalized_label: string
+          often_with: string | null
+          profile_id: string
+          related_to: string | null
+          tools_materials: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          normalized_label: string
+          often_with?: string | null
+          profile_id: string
+          related_to?: string | null
+          tools_materials?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          normalized_label?: string
+          often_with?: string | null
+          profile_id?: string
+          related_to?: string | null
+          tools_materials?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_candidate_clarifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skill_icons: {
         Row: {
           created_at: string

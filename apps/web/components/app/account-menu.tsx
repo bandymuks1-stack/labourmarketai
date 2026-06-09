@@ -33,7 +33,10 @@ export function AccountMenu() {
   const isManager = activeRole === "company" || activeRole === "agency";
   const featureLinks: { href: string; label: string; icon: string; testid: string }[] = [
     ...(activeRole === "worker"
-      ? [{ href: "/dashboard/player-card", label: t("menuLinks.playerCard"), icon: "🪪", testid: "account-menu-player-card-link" }]
+      ? [
+          { href: "/dashboard/player-card", label: t("menuLinks.playerCard"), icon: "🪪", testid: "account-menu-player-card-link" },
+          { href: "/dashboard/profile#candidate-skills", label: t("menuLinks.skills"), icon: "🧰", testid: "account-menu-skills-link" },
+        ]
       : []),
     ...(isManager
       ? [{ href: "/dashboard/projects", label: t("menuLinks.projects"), icon: "🏗️", testid: "account-menu-projects-link" }]

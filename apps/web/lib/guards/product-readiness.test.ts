@@ -1304,7 +1304,7 @@ describe("no migration files added by this sprint", () => {
     // Bumped 49 -> 50 for F4 worker-project assignment: additive owner-scoped
     // SECURITY DEFINER assign_worker_to_project/end_worker_project_assignment RPCs
     // (can_manage_project AND caller roster gate) + revoke direct PWA writes.
-    const SPRINT_BASELINE = 51;
+    const SPRINT_BASELINE = 52;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
