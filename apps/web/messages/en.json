@@ -2689,6 +2689,44 @@
       "title": "Cookie Policy"
     }
   },
+  "instructions": {
+    "workerTitle": "My instructions",
+    "managerTitle": "Instruction to a worker",
+    "workerIntro": "Instructions from your manager. The original is always kept, and you can ask for clarification.",
+    "managerIntro": "Write an instruction in your own language. The worker will see it, and the original stays preserved.",
+    "foundationNote": "Clear, multilingual project communication — a foundation for both safety and convenience. Easy to find, easy to understand, original preserved.",
+    "needsMigration": "This feature is being prepared. Try again later.",
+    "worker": {
+      "empty": "No instructions yet. When your manager sends one, you'll see it here."
+    },
+    "manager": {
+      "workerLabel": "Worker",
+      "workerPlaceholder": "Choose a worker",
+      "bodyLabel": "Instruction",
+      "bodyPlaceholder": "Write the instruction in your own language…",
+      "languageNote": "Write in your own language. The original is saved; a translation will be added later.",
+      "send": "Send instruction",
+      "sending": "Sending…",
+      "sent": "Instruction sent",
+      "notAuthorized": "You can only send instructions to workers on your team.",
+      "error": "Could not send. Please try again.",
+      "noWorkers": "You don't have any assigned workers yet. Once you add a worker to your team, you can send instructions."
+    },
+    "card": {
+      "autoTranslation": "Automatic translation",
+      "translationUnavailable": "Translation not ready yet. Showing the original.",
+      "showOriginal": "Show original",
+      "hideOriginal": "Hide original",
+      "originalLabel": "Original preserved",
+      "originalLanguagePrefix": "original language:",
+      "clarify": "Ask for clarification",
+      "clarifyBody": "I didn't understand the instruction, please clarify.",
+      "clarifySent": "Request sent",
+      "clarifySending": "Sending…",
+      "safetyNote": "Confirm important safety instructions clearly.",
+      "helpLine": "A translation helps you understand the instruction, but the original stays preserved."
+    }
+  },
   "communication": {
     "title": "My messages",
     "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",

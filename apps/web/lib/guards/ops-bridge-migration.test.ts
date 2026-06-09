@@ -122,6 +122,6 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // 20260608140000_worker_work_card_execute_hardening: revoke PUBLIC/anon
     // EXECUTE on the two RPCs, keep authenticated). The baseline only ever grows
     // deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 48/);
+    expect(guard).toMatch(/SPRINT_BASELINE = 49/);
   });
 });

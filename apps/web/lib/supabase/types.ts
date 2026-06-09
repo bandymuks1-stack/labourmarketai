@@ -200,6 +200,9 @@ export type Database = {
       }
       companies: {
         Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
           country: string | null
           created_at: string
           description: string | null
@@ -207,12 +210,20 @@ export type Database = {
           id: string
           legal_name: string | null
           profile_id: string | null
+          registration_code: string | null
+          requested_at: string | null
+          requester_role: string | null
           trust_score: number
           updated_at: string
           vat_number: string | null
+          verification_note: string | null
+          verification_status: string
           website: string | null
         }
         Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           country?: string | null
           created_at?: string
           description?: string | null
@@ -220,12 +231,20 @@ export type Database = {
           id?: string
           legal_name?: string | null
           profile_id?: string | null
+          registration_code?: string | null
+          requested_at?: string | null
+          requester_role?: string | null
           trust_score?: number
           updated_at?: string
           vat_number?: string | null
+          verification_note?: string | null
+          verification_status?: string
           website?: string | null
         }
         Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           country?: string | null
           created_at?: string
           description?: string | null
@@ -233,16 +252,21 @@ export type Database = {
           id?: string
           legal_name?: string | null
           profile_id?: string | null
+          registration_code?: string | null
+          requested_at?: string | null
+          requester_role?: string | null
           trust_score?: number
           updated_at?: string
           vat_number?: string | null
+          verification_note?: string | null
+          verification_status?: string
           website?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "companies_profile_id_fkey"
             columns: ["profile_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -401,6 +425,12 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
+          is_clarification_request: boolean
+          is_instruction: boolean
+          original_language: string | null
+          target_language: string | null
+          translated_text: string | null
+          translation_status: string
         }
         Insert: {
           author_id: string
@@ -408,6 +438,12 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
+          is_clarification_request?: boolean
+          is_instruction?: boolean
+          original_language?: string | null
+          target_language?: string | null
+          translated_text?: string | null
+          translation_status?: string
         }
         Update: {
           author_id?: string
@@ -415,6 +451,12 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
+          is_clarification_request?: boolean
+          is_instruction?: boolean
+          original_language?: string | null
+          target_language?: string | null
+          translated_text?: string | null
+          translation_status?: string
         }
         Relationships: [
           {
@@ -906,6 +948,7 @@ export type Database = {
           original_language: string
           original_text: string
           profession_id: string | null
+          project_id: string | null
           superseded_by: string | null
           updated_at: string
           visibility_scope: string
@@ -923,6 +966,7 @@ export type Database = {
           original_language: string
           original_text: string
           profession_id?: string | null
+          project_id?: string | null
           superseded_by?: string | null
           updated_at?: string
           visibility_scope?: string
@@ -940,6 +984,7 @@ export type Database = {
           original_language?: string
           original_text?: string
           profession_id?: string | null
+          project_id?: string | null
           superseded_by?: string | null
           updated_at?: string
           visibility_scope?: string
@@ -965,6 +1010,13 @@ export type Database = {
             columns: ["profession_id"]
             isOneToOne: false
             referencedRelation: "professions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
           {
@@ -1127,6 +1179,125 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "productivity_units"
             referencedColumns: ["slug"]
+          },
+        ]
+      }
+      journal_entry_skills: {
+        Row: {
+          created_at: string
+          id: string
+          journal_entry_id: string
+          skill_id: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          journal_entry_id: string
+          skill_id: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          journal_entry_id?: string
+          skill_id?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_skills_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_skills_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_work_items: {
+        Row: {
+          certainty: string
+          created_at: string
+          evidence_phrase: string | null
+          hours_numeric: number | null
+          id: string
+          journal_entry_id: string
+          organization_id: string | null
+          source: string
+          status: string
+          title: string
+          unit: string | null
+          updated_at: string
+          work_type_key: string | null
+          worker_id: string
+        }
+        Insert: {
+          certainty?: string
+          created_at?: string
+          evidence_phrase?: string | null
+          hours_numeric?: number | null
+          id?: string
+          journal_entry_id: string
+          organization_id?: string | null
+          source?: string
+          status?: string
+          title: string
+          unit?: string | null
+          updated_at?: string
+          work_type_key?: string | null
+          worker_id: string
+        }
+        Update: {
+          certainty?: string
+          created_at?: string
+          evidence_phrase?: string | null
+          hours_numeric?: number | null
+          id?: string
+          journal_entry_id?: string
+          organization_id?: string | null
+          source?: string
+          status?: string
+          title?: string
+          unit?: string | null
+          updated_at?: string
+          work_type_key?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_work_items_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_work_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_work_items_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1874,6 +2045,128 @@ export type Database = {
         }
         Relationships: []
       }
+      project_clients: {
+        Row: {
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_clients_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_members: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          project_id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          project_id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          project_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_worker_assignments: {
+        Row: {
+          assigned_at: string
+          ended_at: string | null
+          id: string
+          project_id: string
+          status: string
+          worker_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          ended_at?: string | null
+          id?: string
+          project_id: string
+          status?: string
+          worker_id: string
+        }
+        Update: {
+          assigned_at?: string
+          ended_at?: string | null
+          id?: string
+          project_id?: string
+          status?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_worker_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_worker_assignments_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           city: string | null
@@ -2268,6 +2561,7 @@ export type Database = {
           salary_min_eur: number | null
           trust_score: number
           updated_at: string
+          work_card_confirmed_at: string | null
         }
         Insert: {
           availability_status?: string | null
@@ -2286,6 +2580,7 @@ export type Database = {
           salary_min_eur?: number | null
           trust_score?: number
           updated_at?: string
+          work_card_confirmed_at?: string | null
         }
         Update: {
           availability_status?: string | null
@@ -2304,6 +2599,7 @@ export type Database = {
           salary_min_eur?: number | null
           trust_score?: number
           updated_at?: string
+          work_card_confirmed_at?: string | null
         }
         Relationships: [
           {
@@ -2336,6 +2632,10 @@ export type Database = {
         Args: { p_role: string; p_role_data: Json }
         Returns: undefined
       }
+      admin_set_company_verification: {
+        Args: { p_company_id: string; p_note?: string; p_status: string }
+        Returns: string
+      }
       agency_worker_engagement_links: {
         Args: { p_agency_id: string }
         Returns: string[]
@@ -2361,6 +2661,7 @@ export type Database = {
         Returns: string
       }
       can_access_match: { Args: { m: string }; Returns: boolean }
+      can_manage_project: { Args: { p_project_id: string }; Returns: boolean }
       company_worker_engagement_links: {
         Args: { p_company_id: string }
         Returns: string[]
@@ -2379,6 +2680,7 @@ export type Database = {
         Args: { p_entry_id: string; p_note?: string; p_skill_ids: string[] }
         Returns: string
       }
+      confirm_worker_card: { Args: never; Returns: string }
       create_journal_entry_full: {
         Args: {
           p_engagement_context_id: string
@@ -2464,6 +2766,20 @@ export type Database = {
         Returns: string
       }
       reviewable_journal_entry_ids: { Args: never; Returns: string[] }
+      save_company_setup: {
+        Args: {
+          p_address?: string
+          p_contact_email?: string
+          p_contact_phone?: string
+          p_country?: string
+          p_legal_name: string
+          p_registration_code?: string
+          p_requester_role?: string
+          p_submit?: boolean
+          p_website?: string
+        }
+        Returns: string
+      }
       save_customer_request: {
         Args: {
           p_country?: string
@@ -2499,6 +2815,25 @@ export type Database = {
           p_original_language?: string
           p_payload?: Json
           p_title: string
+        }
+        Returns: string
+      }
+      save_worker_card: {
+        Args: {
+          p_availability_status?: string
+          p_available_from?: string
+          p_location_country?: string
+          p_preferred_countries?: string[]
+          p_salary_max?: number
+          p_salary_min?: number
+        }
+        Returns: string
+      }
+      send_work_instruction: {
+        Args: {
+          p_body: string
+          p_original_language?: string
+          p_worker_profile_id: string
         }
         Returns: string
       }

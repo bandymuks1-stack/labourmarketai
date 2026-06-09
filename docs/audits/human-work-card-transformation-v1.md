@@ -34,9 +34,58 @@ If it doesn't, it is hidden, demoted, or moved deeper.
 | #261 | Work Journal becomes "Mano darbo įrodymai" | ✅ merged | `f08471e` |
 | #262 | Documents/CV become Evidence Library | ✅ merged | `77fa0a6` |
 | #263 | Human navigation / dashboard cleanup | ✅ merged | `abec3cb` |
-| PR F* | Notifications/messages become "Kas dabar svarbu" | ▶ this PR | — |
+| #264 | Notifications/messages become "Kas dabar svarbu" | ✅ merged | `fce451a` |
+| PR F1* | Multilingual Work Instructions (honest scaffold) | 🔒 DRAFT — security review | — |
 
-\* number assigned on open.
+\* PR F1 touches private messaging (DB + SECURITY DEFINER RPC). Per the operating
+rules it is opened as a **draft, NOT auto-merged, NOT applied to prod** until the
+owner's migration/security review passes.
+
+## PR F1 — Multilingual Work Instructions: safety + convenience foundation (this PR)
+
+**This is the first safety-critical AND convenience-critical multilingual project
+communication foundation** — not a fake translation product, and not merely a
+legal/WADI/posting/documentation feature. In construction and workforce projects,
+**a misunderstood instruction can affect health, safety and life**, so every
+project needs a multilingual instruction/communication layer for urgent
+coordination, safety discussions, task clarification and manager↔worker
+communication. Safety and convenience are not opposites: **difficult communication
+becomes unsafe communication**, so the channel must be easy to find, easy to
+understand, mobile-friendly, original-preserving, translation-honest and
+clarification-friendly.
+
+**No translation service exists yet**, so v1 is an honest **original-preserving,
+multilingual-ready scaffold** (Option B): the manager writes in their own
+language; the worker reads the **original**, which is always the source of truth
+and always viewable; a real translation lands in a later reviewed slice.
+
+- **Reuses the secure communication tables** (0021): an instruction is a
+  `conversation_messages` row flagged `is_instruction` → the existing
+  participant-scoped RLS applies unchanged (no cross-thread/cross-company leak).
+- **Additive migration** `20260608150000_work_instructions.sql`: instruction
+  columns + a **relationship-gated, owner-scoped SECURITY DEFINER**
+  `send_work_instruction` RPC. Revoked from PUBLIC/anon; granted to
+  `authenticated` only. Reversible. The original `body` is never overwritten.
+- **Manager** `/dashboard/instructions`: "Nurodymas darbuotojui" composer (pick a
+  managed worker, write in own language, send). **Worker**: "Mano nurodymai" —
+  original preserved + honest *"Vertimas dar neparuoštas. Rodomas originalas."* +
+  "Rodyti originalą" + low-friction **"Paprašyti patikslinti"** (a real reply in
+  the thread). A foundation note states the safety + convenience purpose.
+- No fake translation / delivered-read / AI understanding / demo data.
+- Guards: `work-instructions-migration` + `work-instructions-integrity`.
+
+> ⚠️ **Permission scope (roster-scoped v1 ONLY):** a manager/admin may instruct a
+> worker only when an **ACTIVE** `company_workers`/`agency_workers` row links that
+> worker to a company/agency the manager owns. **Future project/object/site-scoped
+> permissions are required before this can be used as precise on-site task
+> control** — roster-level scope is broader than a single site/assignment.
+
+**Migration APPLIED to prod** (`gorgitwvdzxbnaxhrsrw`, after owner SQL/security
+review): 6 instruction columns present; `send_work_instruction` is **SECURITY
+DEFINER** with **`search_path=public`**, **EXECUTE granted to `authenticated`
+only** (`anon=false`, `public=false`); `conversation_messages` RLS **unchanged**
+(SELECT = participant/admin, INSERT = author=self AND participant — no loosening);
+original body never overwritten. `pnpm db:types` regenerated via Supabase MCP.
 
 **Hardening applied to prod** (`20260608140000`): `save_worker_card` /
 `confirm_worker_card` now `public_exec=false`, `anon_exec=false`,

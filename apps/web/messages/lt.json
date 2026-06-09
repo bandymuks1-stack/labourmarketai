@@ -2689,6 +2689,44 @@
       "title": "Slapukų politika"
     }
   },
+  "instructions": {
+    "workerTitle": "Mano nurodymai",
+    "managerTitle": "Nurodymas darbuotojui",
+    "workerIntro": "Nurodymai iš jūsų vadovo. Originalas visada išsaugotas, o jūs galite paprašyti patikslinti.",
+    "managerIntro": "Parašykite nurodymą savo kalba. Darbuotojas jį matys, o originalas išliks išsaugotas.",
+    "foundationNote": "Aiškus, daugiakalbis bendravimas projekte — ir saugumo, ir patogumo pagrindas. Lengva rasti, lengva suprasti, originalas išsaugotas.",
+    "needsMigration": "Ši funkcija dar ruošiama. Bandykite vėliau.",
+    "worker": {
+      "empty": "Kol kas nurodymų nėra. Kai vadovas atsiųs nurodymą, matysite jį čia."
+    },
+    "manager": {
+      "workerLabel": "Darbuotojas",
+      "workerPlaceholder": "Pasirinkite darbuotoją",
+      "bodyLabel": "Nurodymas",
+      "bodyPlaceholder": "Parašykite nurodymą savo kalba…",
+      "languageNote": "Rašykite savo kalba. Originalas išsaugomas; vertimas bus pridėtas vėliau.",
+      "send": "Siųsti nurodymą",
+      "sending": "Siunčiama…",
+      "sent": "Nurodymas išsiųstas",
+      "notAuthorized": "Galite siųsti nurodymus tik savo komandos darbuotojams.",
+      "error": "Nepavyko išsiųsti. Bandykite dar kartą.",
+      "noWorkers": "Kol kas neturite priskirtų darbuotojų. Kai pridėsite darbuotoją prie komandos, galėsite siųsti nurodymus."
+    },
+    "card": {
+      "autoTranslation": "Automatinis vertimas",
+      "translationUnavailable": "Vertimas dar neparuoštas. Rodomas originalas.",
+      "showOriginal": "Rodyti originalą",
+      "hideOriginal": "Slėpti originalą",
+      "originalLabel": "Originalas išsaugotas",
+      "originalLanguagePrefix": "originalo kalba:",
+      "clarify": "Paprašyti patikslinti",
+      "clarifyBody": "Nesupratau nurodymo, prašau patikslinti.",
+      "clarifySent": "Prašymas išsiųstas",
+      "clarifySending": "Siunčiama…",
+      "safetyNote": "Svarbius saugos nurodymus patvirtinkite aiškiai.",
+      "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas."
+    }
+  },
   "communication": {
     "title": "Mano pranešimai",
     "subtitle": "Kas dabar svarbu ir į ką verta atsakyti. Čia matysite žinutes ir svarbius prašymus.",
