@@ -2660,6 +2660,11 @@ export type Database = {
         }
         Returns: string
       }
+      assign_worker_to_project: {
+        Args: { p_project_id: string; p_worker_profile_id: string }
+        Returns: string
+      }
+      caller_manages_worker: { Args: { p_worker_id: string }; Returns: boolean }
       can_access_match: { Args: { m: string }; Returns: boolean }
       can_manage_project: { Args: { p_project_id: string }; Returns: boolean }
       company_worker_engagement_links: {
@@ -2695,6 +2700,10 @@ export type Database = {
           p_worker_id: string
         }
         Returns: string
+      }
+      end_worker_project_assignment: {
+        Args: { p_project_id: string; p_worker_profile_id: string }
+        Returns: undefined
       }
       grant_org_manager: {
         Args: {
