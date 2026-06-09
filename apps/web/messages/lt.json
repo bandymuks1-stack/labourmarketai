@@ -2123,7 +2123,8 @@
       "menuLinks": {
         "playerCard": "Mano kortelė",
         "projects": "Projektai",
-        "instructions": "Nurodymai"
+        "instructions": "Nurodymai",
+        "skills": "Mano įgūdžiai"
       }
     },
     "middleware": {
@@ -3196,5 +3197,31 @@
     "workCardConfirmed": "Patvirtinta",
     "workCardPending": "Dar nepatvirtinta",
     "namePlaceholder": "Mano profilis"
+  },
+  "skillClarify": {
+    "title": "Mano įgūdžiai",
+    "intro": "Pridėk įgūdį, kurio dar nėra sąraše — savais žodžiais.",
+    "listTitle": "Mano kandidatiniai įgūdžiai",
+    "empty": "Kol kas nieko nepridėjai.",
+    "candidateBadge": "Savideklaruota · tikslinama",
+    "needsMigration": "Ši funkcija dar ruošiama. Bandyk vėliau.",
+    "selfDeclaredNote": "Šie įgūdžiai yra savideklaruoti ir nepatvirtinti. Niekas jų automatiškai netikrina.",
+    "relatedLabel": "Susiję su",
+    "toolsLabel": "Įrankiai / medžiagos",
+    "oftenLabel": "Dažnai kartu su",
+    "form": {
+      "labelLabel": "Kaip tai vadini?",
+      "labelPlaceholder": "Pvz.: monolitinis betonavimas",
+      "relatedLabel": "Su kuo susiję (profesija)?",
+      "relatedPlaceholder": "Pvz.: betonuotojas",
+      "toolsLabel": "Kokie įrankiai / medžiagos?",
+      "toolsPlaceholder": "Pvz.: vibratorius, klojiniai",
+      "oftenLabel": "Su kuo dažnai eina kartu?",
+      "oftenPlaceholder": "Pvz.: armatūros rišimas",
+      "save": "Išsaugoti įgūdį",
+      "saving": "Saugoma…",
+      "saved": "Išsaugota",
+      "error": "Nepavyko. Bandyk dar kartą."
+    }
   }
 }

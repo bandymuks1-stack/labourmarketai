@@ -14,6 +14,7 @@ import {
 import { MessageButton } from "@/components/app/message-button";
 import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
+import { SkillClarifySection } from "@/components/app/skill-clarify-section";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
 import type {
@@ -397,6 +398,14 @@ export default async function ProfilePage({
           professionIconSlug={workerId ? professionIconSlug : null}
         />
       </div>
+
+      {/* Candidate skill clarify-capture (slice skill-clarify-capture-v1) — on
+          the canonical capability surface, NOT a new route. Worker-only. */}
+      {workerId ? (
+        <div id="candidate-skills" className="scroll-mt-4">
+          <SkillClarifySection />
+        </div>
+      ) : null}
     </div>
   );
 }
