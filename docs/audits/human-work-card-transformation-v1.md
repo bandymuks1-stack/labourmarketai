@@ -34,6 +34,8 @@ If it doesn't, it is hidden, demoted, or moved deeper.
 | #261 | Work Journal becomes "Mano darbo įrodymai" | ✅ merged | `f08471e` |
 | #262 | Documents/CV become Evidence Library | ✅ merged | `77fa0a6` |
 | #263 | Human navigation / dashboard cleanup | ✅ merged | `abec3cb` |
+| F1/F2 | Multilingual work instructions + attention surfacing | ✅ merged | `1742bbf` / `c7e9663` |
+| PR F3 | Instruction permissions: project-scope **audit/design** | ▶ this PR | — |
 | #264 | Notifications/messages become "Kas dabar svarbu" | ✅ merged | `fce451a` |
 | PR F1* | Multilingual Work Instructions (honest scaffold) | 🔒 DRAFT — security review | — |
 
