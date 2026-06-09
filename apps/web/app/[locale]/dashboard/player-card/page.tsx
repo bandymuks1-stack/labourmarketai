@@ -30,6 +30,8 @@ export default async function PlayerCardPage({
     subtitle: t("subtitle"),
     skillsLabel: t("skillsLabel"),
     skillsHint: t("skillsHint"),
+    candidateLabel: t("candidateLabel"),
+    candidateHint: t("candidateHint"),
     evidenceLabel: t("evidenceLabel"),
     evidenceHint: t("evidenceHint"),
     attentionLabel: t("attentionLabel"),

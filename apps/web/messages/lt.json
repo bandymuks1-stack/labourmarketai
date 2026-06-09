@@ -3196,7 +3196,9 @@
     "workCardLabel": "Darbo kortelė",
     "workCardConfirmed": "Patvirtinta",
     "workCardPending": "Dar nepatvirtinta",
-    "namePlaceholder": "Mano profilis"
+    "namePlaceholder": "Mano profilis",
+    "candidateLabel": "Kandidatiniai įgūdžiai",
+    "candidateHint": "Įgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, nepatvirtinta)."
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",

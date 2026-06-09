@@ -3196,7 +3196,9 @@
     "workCardLabel": "Work card",
     "workCardConfirmed": "Confirmed",
     "workCardPending": "Not confirmed yet",
-    "namePlaceholder": "My profile"
+    "namePlaceholder": "My profile",
+    "candidateLabel": "Candidate skills",
+    "candidateHint": "Skills you added in your own words (needs clarification, not verified)."
   },
   "skillClarify": {
     "title": "My skills",
