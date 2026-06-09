@@ -92,6 +92,42 @@ export async function listWorkerInstructions(): Promise<InstructionRead> {
   return { kind: "ok", instructions };
 }
 
+/**
+ * Instructions that need the user's attention NOW — instructions addressed to
+ * them that they have not opened yet (created after their last_read_at for that
+ * conversation). Real data only: an empty result means there is genuinely
+ * nothing to attend to (the caller shows an honest empty state, never a fake
+ * count or fake urgency). Drives the "Reikia jūsų dėmesio" block inside
+ * "Kas dabar svarbu / Mano pranešimai".
+ */
+export async function listAttentionInstructions(): Promise<WorkerInstruction[]> {
+  const read = await listWorkerInstructions();
+  if (read.kind !== "ok" || read.instructions.length === 0) return [];
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const parts = await asAny(supabase)
+    .from("conversation_participants")
+    .select("conversation_id, last_read_at")
+    .eq("profile_id", user.id);
+  if (parts.error) return [];
+
+  const lastRead = new Map<string, string | null>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const p of (parts.data ?? []) as any[])
+    lastRead.set(p.conversation_id, p.last_read_at ?? null);
+
+  return read.instructions.filter((ins) => {
+    const lr = lastRead.get(ins.conversationId);
+    if (lr == null) return true; // never opened → needs attention
+    return Date.parse(ins.createdAt) > Date.parse(lr);
+  });
+}
+
 export interface ManagedWorker {
   profileId: string;
   name: string;

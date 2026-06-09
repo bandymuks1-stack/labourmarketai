@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { SupportConversationLauncher } from "@/components/app/support-conversation-launcher";
+import { AttentionInstructions } from "@/components/app/attention-instructions";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -76,6 +77,11 @@ export default async function CommunicationListPage({
         </h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
+
+      {/* "Reikia jūsų dėmesio" — real new work instructions surfaced here so an
+          urgent instruction is not hidden on a separate page. Renders nothing
+          when there is nothing to attend to (honest, no fake urgency). */}
+      <AttentionInstructions />
 
       {/* Honest framing — messages are poll-on-page, not real-time. Calm muted
           note (not an alert), so it reads as reassurance, not a warning. */}

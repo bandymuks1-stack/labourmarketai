@@ -2696,6 +2696,13 @@
     "managerIntro": "Write an instruction in your own language. The worker will see it, and the original stays preserved.",
     "foundationNote": "Clear, multilingual project communication — a foundation for both safety and convenience. Easy to find, easy to understand, original preserved.",
     "needsMigration": "This feature is being prepared. Try again later.",
+    "attention": {
+      "eyebrow": "What matters now",
+      "title": "Needs your attention",
+      "subtitle": "New instructions worth reviewing. The original is preserved.",
+      "from": "from {name}",
+      "viewCta": "View instruction"
+    },
     "worker": {
       "empty": "No instructions yet. When your manager sends one, you'll see it here."
     },

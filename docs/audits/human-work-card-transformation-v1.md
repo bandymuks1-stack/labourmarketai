@@ -87,6 +87,25 @@ only** (`anon=false`, `public=false`); `conversation_messages` RLS **unchanged**
 (SELECT = participant/admin, INSERT = author=self AND participant — no loosening);
 original body never overwritten. `pnpm db:types` regenerated via Supabase MCP.
 
+## PR F2 — Surface instructions in "Kas dabar svarbu / Mano pranešimai"
+
+Real **new (unread)** work instructions now appear as **"Reikia jūsų dėmesio"** at
+the top of "Mano pranešimai" (`/dashboard/communication`) — so an urgent
+instruction is not hidden on a separate page. Mobile-friendly, one-tap
+**"Peržiūrėti nurodymą"** → the full instruction + original + clarification.
+
+- `listAttentionInstructions()` returns instructions addressed to the user whose
+  `created_at` is newer than their `last_read_at` for that conversation (real
+  unread data — RLS-scoped). **No DB change** (reuses F1 tables + 0021 RLS).
+- `<AttentionInstructions>` renders **nothing** when there is nothing to attend to
+  — honest empty state, **no fake count / urgency / "someone needs you"**. The
+  snippet is the **original** text (translation not ready yet), never a fake
+  translation.
+- Guard `instructions-attention-framing.test.ts` pins the surfacing, the
+  null-when-empty honesty, real `last_read_at` driving, original-not-fake-translation,
+  and calm LT/EN copy.
+
+
 **Hardening applied to prod** (`20260608140000`): `save_worker_card` /
 `confirm_worker_card` now `public_exec=false`, `anon_exec=false`,
 `auth_exec=true` — the "Public Can Execute SECURITY DEFINER Function" advisor is
