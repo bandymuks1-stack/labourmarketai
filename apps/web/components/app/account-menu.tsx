@@ -22,9 +22,24 @@ import { cn } from "@/lib/utils";
 export function AccountMenu() {
   const t = useTranslations("auth.dashboard");
   const locale = useLocale();
-  const { user, profile } = useAuth();
+  const { user, profile, activeRole } = useAuth();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  // Secondary reachability for the routes that are NOT primary nav tabs (the
+  // primary nav is intentionally capped at 4 to avoid mobile crowding). Role-
+  // gated: a worker reaches their card + instructions; a manager reaches
+  // projects + instructions. Additive — never replaces the account link/logout.
+  const isManager = activeRole === "company" || activeRole === "agency";
+  const featureLinks: { href: string; label: string; icon: string; testid: string }[] = [
+    ...(activeRole === "worker"
+      ? [{ href: "/dashboard/player-card", label: t("menuLinks.playerCard"), icon: "🪪", testid: "account-menu-player-card-link" }]
+      : []),
+    ...(isManager
+      ? [{ href: "/dashboard/projects", label: t("menuLinks.projects"), icon: "🏗️", testid: "account-menu-projects-link" }]
+      : []),
+    { href: "/dashboard/instructions", label: t("menuLinks.instructions"), icon: "📋", testid: "account-menu-instructions-link" },
+  ];
 
   useEffect(() => {
     if (!open) return;
@@ -72,6 +87,19 @@ export function AccountMenu() {
               {displayName}
             </p>
           )}
+          {featureLinks.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              data-testid={l.testid}
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+            >
+              <span aria-hidden>{l.icon}</span>
+              {l.label}
+            </Link>
+          ))}
           <Link
             href="/dashboard/account"
             role="menuitem"

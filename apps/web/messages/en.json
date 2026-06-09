@@ -2119,6 +2119,11 @@
         "body_main": "We're finishing the company / agency functionality right now.",
         "body_notify": "We'll let you know the moment it's ready.",
         "body_meanwhile": "In the meantime — you can browse the platform via the \"Discover\" tab (read-only)."
+      },
+      "menuLinks": {
+        "playerCard": "My card",
+        "projects": "Projects",
+        "instructions": "Instructions"
       }
     },
     "middleware": {
