@@ -2718,7 +2718,9 @@
       "notAuthorized": "You can only send instructions to workers on your team.",
       "error": "Could not send. Please try again.",
       "noWorkers": "You don't have any assigned workers yet. Once you add a worker to your team, you can send instructions.",
-      "scopeNote": "Right now instructions are sent at team (roster) level — to workers on your team. Precise project or site scope will activate once workers are assigned to projects."
+      "scopeNote": "You can send a team-level instruction or pick a project. A project instruction reaches only workers actively assigned to that project.",
+      "projectScopeLabel": "Scope (optional)",
+      "teamLevelOption": "Team-level instruction (whole team)"
     },
     "card": {
       "autoTranslation": "Automatic translation",

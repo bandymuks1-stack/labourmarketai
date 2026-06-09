@@ -428,6 +428,7 @@ export type Database = {
           is_clarification_request: boolean
           is_instruction: boolean
           original_language: string | null
+          project_id: string | null
           target_language: string | null
           translated_text: string | null
           translation_status: string
@@ -441,6 +442,7 @@ export type Database = {
           is_clarification_request?: boolean
           is_instruction?: boolean
           original_language?: string | null
+          project_id?: string | null
           target_language?: string | null
           translated_text?: string | null
           translation_status?: string
@@ -454,6 +456,7 @@ export type Database = {
           is_clarification_request?: boolean
           is_instruction?: boolean
           original_language?: string | null
+          project_id?: string | null
           target_language?: string | null
           translated_text?: string | null
           translation_status?: string
@@ -471,6 +474,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -2842,6 +2852,15 @@ export type Database = {
         Args: {
           p_body: string
           p_original_language?: string
+          p_worker_profile_id: string
+        }
+        Returns: string
+      }
+      send_work_instruction_to_project: {
+        Args: {
+          p_body: string
+          p_original_language?: string
+          p_project_id?: string
           p_worker_profile_id: string
         }
         Returns: string
