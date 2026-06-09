@@ -2735,6 +2735,38 @@
       "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas."
     }
   },
+  "projects": {
+    "title": "Projektai ir priskyrimai",
+    "intro": "Sukurkite projektą ir priskirkite jam savo komandos darbuotojus. Vėliau galėsite siųsti projekto lygio nurodymus.",
+    "managerOnly": "Šis puslapis skirtas įmonės ar agentūros vadovui.",
+    "needsMigration": "Ši funkcija dar ruošiama. Bandykite vėliau.",
+    "error": "Nepavyko. Bandykite dar kartą.",
+    "noProjects": "Kol kas neturite projektų. Sukurkite pirmą aukščiau.",
+    "assignmentsTitle": "Priskirti darbuotojai",
+    "noAssignments": "Darbuotojai dar nepriskirti šiam projektui.",
+    "end": "Užbaigti",
+    "sending": "Saugoma…",
+    "create": {
+      "title": "Naujas projektas",
+      "nameLabel": "Pavadinimas",
+      "namePlaceholder": "Pvz.: Vilniaus objektas",
+      "cityLabel": "Miestas (neprivaloma)",
+      "cityPlaceholder": "Pvz.: Vilnius",
+      "submit": "Sukurti projektą",
+      "noCompany": "Pirma sukurkite įmonės profilį."
+    },
+    "assign": {
+      "title": "Priskirti darbuotoją projektui",
+      "projectLabel": "Projektas",
+      "projectPlaceholder": "Pasirinkite projektą",
+      "workerLabel": "Darbuotojas",
+      "workerPlaceholder": "Pasirinkite darbuotoją",
+      "submit": "Priskirti",
+      "assigned": "Priskirta",
+      "notAuthorized": "Galite priskirti tik savo komandos darbuotojus savo projektams.",
+      "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje."
+    }
+  },
   "communication": {
     "title": "Mano pranešimai",
     "subtitle": "Kas dabar svarbu ir į ką verta atsakyti. Čia matysite žinutes ir svarbius prašymus.",

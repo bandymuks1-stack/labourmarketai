@@ -2735,6 +2735,38 @@
       "helpLine": "A translation helps you understand the instruction, but the original stays preserved."
     }
   },
+  "projects": {
+    "title": "Projects and assignments",
+    "intro": "Create a project and assign workers from your team to it. You'll be able to send project-level instructions later.",
+    "managerOnly": "This page is for a company or agency manager.",
+    "needsMigration": "This feature is being prepared. Try again later.",
+    "error": "Something went wrong. Please try again.",
+    "noProjects": "You don't have any projects yet. Create your first one above.",
+    "assignmentsTitle": "Assigned workers",
+    "noAssignments": "No workers assigned to this project yet.",
+    "end": "End",
+    "sending": "Saving…",
+    "create": {
+      "title": "New project",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Vilnius site",
+      "cityLabel": "City (optional)",
+      "cityPlaceholder": "e.g. Vilnius",
+      "submit": "Create project",
+      "noCompany": "Create a company profile first."
+    },
+    "assign": {
+      "title": "Assign a worker to a project",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project",
+      "workerLabel": "Worker",
+      "workerPlaceholder": "Choose a worker",
+      "submit": "Assign",
+      "assigned": "Assigned",
+      "notAuthorized": "You can only assign workers from your team to your own projects.",
+      "noWorkers": "You don't have any assignable workers on your team yet."
+    }
+  },
   "communication": {
     "title": "My messages",
     "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
