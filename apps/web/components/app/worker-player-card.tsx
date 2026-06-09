@@ -12,6 +12,8 @@ export interface PlayerCardLabels {
   subtitle: string;
   skillsLabel: string;
   skillsHint: string;
+  candidateLabel: string;
+  candidateHint: string;
   evidenceLabel: string;
   evidenceHint: string;
   attentionLabel: string;
@@ -75,6 +77,12 @@ export function WorkerPlayerCard({
           value={String(card.skillsDeclared)}
           label={labels.skillsLabel}
           hint={labels.skillsHint}
+        />
+        <Stat
+          testid="player-card-candidate"
+          value={String(card.candidateSkills)}
+          label={labels.candidateLabel}
+          hint={labels.candidateHint}
         />
         <Stat
           testid="player-card-evidence"

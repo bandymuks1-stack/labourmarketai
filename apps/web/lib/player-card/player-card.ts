@@ -21,6 +21,9 @@ export interface WorkerPlayerCard {
   displayName: string | null;
   /** Self-declared skill claims (NOT verified). */
   skillsDeclared: number;
+  /** Candidate skills the worker added in their own words (needs-clarification,
+   *  NOT verified) — from the clarify-capture flow. */
+  candidateSkills: number;
   /** Work-journal entries the worker has recorded (their own evidence). */
   evidenceEntries: number;
   /** New unread work/safety instructions needing attention. */
@@ -61,10 +64,16 @@ export async function getWorkerPlayerCard(): Promise<WorkerPlayerCard | null> {
 
   const workerId: string | null = worker?.id ?? null;
 
-  const [skillsDeclared, evidenceEntries, attention] = await Promise.all([
+  const [skillsDeclared, candidateSkills, evidenceEntries, attention] = await Promise.all([
     safeCount(
       asAny(supabase)
         .from("profile_skill_claims")
+        .select("*", { count: "exact", head: true })
+        .eq("profile_id", user.id),
+    ),
+    safeCount(
+      asAny(supabase)
+        .from("skill_candidate_clarifications")
         .select("*", { count: "exact", head: true })
         .eq("profile_id", user.id),
     ),
@@ -84,6 +93,7 @@ export async function getWorkerPlayerCard(): Promise<WorkerPlayerCard | null> {
   return {
     displayName: profile?.full_name ?? null,
     skillsDeclared,
+    candidateSkills,
     evidenceEntries,
     attentionInstructions: attention,
     workCardConfirmed: Boolean(worker?.work_card_confirmed_at),

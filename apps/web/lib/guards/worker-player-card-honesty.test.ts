@@ -39,8 +39,14 @@ describe("the card renders real values + an honest zero state", () => {
   });
   it("renders the counts verbatim (String(card.x)), inventing nothing", () => {
     expect(comp).toMatch(/String\(card\.skillsDeclared\)/);
+    expect(comp).toMatch(/String\(card\.candidateSkills\)/);
     expect(comp).toMatch(/String\(card\.evidenceEntries\)/);
     expect(comp).toMatch(/String\(card\.attentionInstructions\)/);
+  });
+  it("the candidate-skills count is a real owner-scoped count (not fabricated)", () => {
+    expect(svc).toMatch(/skill_candidate_clarifications/);
+    expect(lt.playerCard.candidateHint).toMatch(/nepatvirtint|tikslinam/i);
+    expect(en.playerCard.candidateHint).toMatch(/not verified|needs clarification/i);
   });
   it("shows a calm zero message when nothing needs attention", () => {
     expect(comp).toMatch(/attentionInstructions === 0 \? labels\.attentionZero/);
