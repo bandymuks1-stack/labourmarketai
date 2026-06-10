@@ -1213,5 +1213,37 @@
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Kinnitatud CV",
+    "exportButton": "Ekspordi CV (PDF)",
+    "print": "Laadi alla PDF",
+    "back": "← Tagasi profiilile",
+    "primary": "põhiline",
+    "skills": "Oskused",
+    "skillsEmpty": "Oskusi pole veel salvestatud.",
+    "tiers": {
+      "confirmed": "Juhi kinnitatud",
+      "evidence": "Toetatud töösissekannetega",
+      "declared": "Enda märgitud"
+    },
+    "tierHints": {
+      "confirmed": "juht kinnitas tegeliku töösissekande põhjal",
+      "evidence": "tööpäeviku sissekanded toetavad seda oskust; juht pole seda veel kinnitanud",
+      "declared": "inimese enda väide, väliselt kinnitamata"
+    },
+    "summary": {
+      "verifiedSkills": "Kinnitatud oskused",
+      "managerConfirmations": "Juhi kinnitused",
+      "journalEntries": "Päeviku sissekanded"
+    },
+    "proofTitle": "Kinnitatud tööde tõendid",
+    "proofDate": "Kuupäev",
+    "proofProject": "Projekt",
+    "proofRole": "Kinnitas (roll)",
+    "proofEmpty": "Kinnitatud sissekandeid pole veel.",
+    "generatedAt": "Loodud",
+    "verifyNote": "Kinnitusi saab kontrollida platvormil.",
+    "notWorker": "CV eksport on saadaval töötaja profiilile — see koostatakse tööpäevikust ja kinnitatud oskustest."
   }
 }

@@ -3540,5 +3540,37 @@
     "managerConfirmations": "Vadovo patvirtinimai",
     "journalEntries": "Žurnalo įrašai",
     "zeroHint": "Pasitikėjimas auga iš realaus darbo: užfiksuok žurnalo įrašą ir paprašyk ten buvusio vadovo jį patvirtinti."
+  },
+  "cvExport": {
+    "pageTitle": "Patvirtintas CV",
+    "exportButton": "Eksportuoti CV (PDF)",
+    "print": "Atsisiųsti PDF",
+    "back": "← Grįžti į profilį",
+    "primary": "pagrindinė",
+    "skills": "Įgūdžiai",
+    "skillsEmpty": "Įgūdžių dar neišsaugota.",
+    "tiers": {
+      "confirmed": "Patvirtinta vadovo",
+      "evidence": "Paremta darbo įrašais",
+      "declared": "Paties nurodyta"
+    },
+    "tierHints": {
+      "confirmed": "vadovas patvirtino remdamasis tikru darbo įrašu",
+      "evidence": "darbo žurnalo įrašai paremia šį įgūdį; vadovas jo dar nepatvirtino",
+      "declared": "paties žmogaus nurodyta, išoriškai nepatvirtinta"
+    },
+    "summary": {
+      "verifiedSkills": "Patvirtinti įgūdžiai",
+      "managerConfirmations": "Vadovo patvirtinimai",
+      "journalEntries": "Žurnalo įrašai"
+    },
+    "proofTitle": "Patvirtinti darbo įrodymai",
+    "proofDate": "Data",
+    "proofProject": "Projektas",
+    "proofRole": "Patvirtino (rolė)",
+    "proofEmpty": "Patvirtintų įrašų dar nėra.",
+    "generatedAt": "Sugeneruota",
+    "verifyNote": "Patvirtinimus galima patikrinti platformoje.",
+    "notWorker": "CV eksportas galimas darbuotojo profiliui — jis sudaromas iš darbo žurnalo ir patvirtintų įgūdžių."
   }
 }

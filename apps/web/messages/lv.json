@@ -1213,5 +1213,37 @@
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Apstiprinātais CV",
+    "exportButton": "Eksportēt CV (PDF)",
+    "print": "Lejupielādēt PDF",
+    "back": "← Atpakaļ uz profilu",
+    "primary": "galvenā",
+    "skills": "Prasmes",
+    "skillsEmpty": "Prasmes vēl nav saglabātas.",
+    "tiers": {
+      "confirmed": "Vadītāja apstiprināts",
+      "evidence": "Pamatots ar darba ierakstiem",
+      "declared": "Paša norādīts"
+    },
+    "tierHints": {
+      "confirmed": "vadītājs apstiprināja, pamatojoties uz īstu darba ierakstu",
+      "evidence": "darba žurnāla ieraksti pamato šo prasmi; vadītājs to vēl nav apstiprinājis",
+      "declared": "paša cilvēka norādīts, ārēji neapstiprināts"
+    },
+    "summary": {
+      "verifiedSkills": "Apstiprinātas prasmes",
+      "managerConfirmations": "Vadītāja apstiprinājumi",
+      "journalEntries": "Žurnāla ieraksti"
+    },
+    "proofTitle": "Apstiprināti darba pierādījumi",
+    "proofDate": "Datums",
+    "proofProject": "Projekts",
+    "proofRole": "Apstiprināja (loma)",
+    "proofEmpty": "Apstiprinātu ierakstu vēl nav.",
+    "generatedAt": "Izveidots",
+    "verifyNote": "Apstiprinājumus var pārbaudīt platformā.",
+    "notWorker": "CV eksports ir pieejams darbinieka profilam — to veido no darba žurnāla un apstiprinātām prasmēm."
   }
 }

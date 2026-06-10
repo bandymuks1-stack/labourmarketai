@@ -42,7 +42,25 @@
     "rejectReason": "[EN] Reason for rejection",
     "showOriginal": "[EN] Show original",
     "skills": "[EN] Skills",
-    "title": "[EN] Entries to confirm"
+    "title": "[EN] Entries to confirm",
+    "quick": {
+      "openQuick": "Kiirkinnitamine →",
+      "title": "Kiirkinnitamine",
+      "subtitle": "Üks pilk, üks puudutus: kaardil on näha töötaja, kuupäev, tööd ja oskused, mida kinnitate. Iga kinnitus on teie tegelik otsus, mis salvestatakse alles teie puudutusel.",
+      "detailedReview": "Üksikasjalik ülevaatus",
+      "willConfirm": "Kinnitatakse:",
+      "entryOnlyNote": "Kinnitamata oskusi pole — puudutus kinnitab sissekande enda.",
+      "confirmTap": "Kinnita sissekanne",
+      "confirmTapSkills": "Kinnita sissekanne ja oskused ({count})",
+      "confirmedCard": "Kinnitatud — {name}",
+      "rejectedCard": "Tagasi lükatud — {name}. Sissekanne jääb töötaja enda märgituks tema päevikus.",
+      "batchButton": "Kinnita kõik tänased ({count})",
+      "batchSummaryTitle": "Mida te kinnitate",
+      "batchSummaryLead": "Üks kinnitus hõlmab kõiki allpool loetletud sissekandeid ja salvestatakse teie otsusena igaühe kohta. Vaadake nimekiri enne kinnitamist üle.",
+      "batchConfirm": "Kinnita ({count})",
+      "batchDone": "Kinnitatud sissekandeid: {confirmed}. Kinnitatud oskusi: {skills}.",
+      "batchFailed": "Ei õnnestunud kinnitada: {count} — avage üksikasjalik ülevaatus."
+    }
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",

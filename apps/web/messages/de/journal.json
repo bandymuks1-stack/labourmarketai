@@ -42,7 +42,25 @@
     "rejectReason": "[EN] Reason for rejection",
     "showOriginal": "[EN] Show original",
     "skills": "[EN] Skills",
-    "title": "[EN] Entries to confirm"
+    "title": "[EN] Entries to confirm",
+    "quick": {
+      "openQuick": "Schnellbestätigung →",
+      "title": "Schnellbestätigung",
+      "subtitle": "Ein Blick, ein Tippen: Die Karte zeigt die Arbeitskraft, das Datum, die Arbeiten und die Fähigkeiten, die Sie bestätigen. Jede Bestätigung ist Ihre echte Entscheidung und wird erst durch Ihr Tippen erfasst.",
+      "detailedReview": "Detaillierte Prüfung",
+      "willConfirm": "Wird bestätigt:",
+      "entryOnlyNote": "Keine unbestätigten Fähigkeiten — das Tippen bestätigt den Eintrag selbst.",
+      "confirmTap": "Eintrag bestätigen",
+      "confirmTapSkills": "Eintrag + Fähigkeiten bestätigen ({count})",
+      "confirmedCard": "Bestätigt — {name}",
+      "rejectedCard": "Abgelehnt — {name}. Der Eintrag bleibt im Journal als eigene Angabe der Arbeitskraft.",
+      "batchButton": "Alle von heute bestätigen ({count})",
+      "batchSummaryTitle": "Was Sie bestätigen",
+      "batchSummaryLead": "Eine Bestätigung umfasst alle unten aufgeführten Einträge und wird als Ihre Entscheidung für jeden einzelnen erfasst. Prüfen Sie die Liste vor dem Bestätigen.",
+      "batchConfirm": "Bestätigen ({count})",
+      "batchDone": "Bestätigte Einträge: {confirmed}. Bestätigte Fähigkeiten: {skills}.",
+      "batchFailed": "Nicht bestätigt: {count} — öffnen Sie die detaillierte Prüfung."
+    }
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",
