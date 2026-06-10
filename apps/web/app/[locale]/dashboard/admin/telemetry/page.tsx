@@ -37,7 +37,7 @@ type EventRow = {
   app_version: string | null;
 };
 
-export default async function AdminPilotTelemetryPage({
+export default async function AdminTelemetryPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -45,7 +45,7 @@ export default async function AdminPilotTelemetryPage({
   const { locale } = await params;
   await requireSuperadmin(locale);
   setRequestLocale(locale);
-  const t = await getTranslations("pilotTelemetry");
+  const t = await getTranslations("telemetry");
 
   const supabase = await createClient();
   // The generated `Database` type doesn't include `pilot_events` until

@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
-import { getPilotDraftCounts } from "@/lib/pilot/pilot-drafts";
+import { getDemandDraftCounts } from "@/lib/demand/demand-drafts";
 import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
@@ -92,7 +92,7 @@ export default async function AdminDashboardPage({
 
   // Pilot-drafts metrics (added in feat/cc/pilot-draft-flows). Admin
   // RLS allows the broad SELECT via is_admin() on pilot_drafts.
-  const draftCounts = await getPilotDraftCounts();
+  const draftCounts = await getDemandDraftCounts();
   const draftsTotal =
     draftCounts.company_request +
     draftCounts.agency_offer +
@@ -163,7 +163,7 @@ export default async function AdminDashboardPage({
           {t("hub.agentOs")}
         </Link>
         <Link
-          href="/dashboard/admin/pilot-telemetry"
+          href="/dashboard/admin/telemetry"
           className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
         >
           {t("hub.telemetry")}
@@ -192,6 +192,13 @@ export default async function AdminDashboardPage({
           data-testid="admin-tools-hub-company-verification"
         >
           {t("hub.companyVerification")}
+        </Link>
+        <Link
+          href={"/dashboard/admin/matching" as "/dashboard"}
+          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+          data-testid="admin-tools-hub-matching"
+        >
+          {t("hub.matching")}
         </Link>
       </section>
 

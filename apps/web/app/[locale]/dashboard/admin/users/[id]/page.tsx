@@ -5,9 +5,9 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import {
-  listPilotDraftsForProfile,
+  listDemandDraftsForProfile,
   type DraftType,
-} from "@/lib/pilot/pilot-drafts";
+} from "@/lib/demand/demand-drafts";
 
 type ClaimRow = {
   id: string;
@@ -65,7 +65,7 @@ export default async function AdminUserPage({
 
   // Pilot drafts for this profile (feat/cc/pilot-draft-flows). Admin
   // RLS allows broad SELECT via is_admin().
-  const userDrafts = await listPilotDraftsForProfile(id);
+  const userDrafts = await listDemandDraftsForProfile(id);
 
   return (
     <div

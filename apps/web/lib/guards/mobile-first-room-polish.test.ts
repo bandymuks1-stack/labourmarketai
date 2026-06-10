@@ -27,7 +27,7 @@ describe("journey rail is not a compressed desktop stepper on mobile", () => {
 
 describe("room primary action is a full-width tap target on mobile", () => {
   it("pilot CTA is w-full on mobile, compact at sm+", () => {
-    const btn = read("components/app/pilot-request-button.tsx");
+    const btn = read("components/app/demand-request-button.tsx");
     expect(btn).toMatch(/w-full sm:w-auto/);
   });
 });

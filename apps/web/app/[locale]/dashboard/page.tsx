@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { PilotRequestButton } from "@/components/app/pilot-request-button";
+import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
@@ -306,7 +306,7 @@ export default async function DashboardOverviewPage({
             <p className="mb-3 mt-1 text-sm leading-relaxed text-text-secondary">
               {tw(`pilot.${pilotKey}.body`)}
             </p>
-            <PilotRequestButton intent={intent} />
+            <DemandRequestButton intent={intent} />
           </div>
         </section>
 

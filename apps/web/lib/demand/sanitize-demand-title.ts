@@ -6,7 +6,7 @@
  * instead the PRODUCT UI runs every saved title through this map so a real user
  * never sees pilot/demo wording. Raw values stay intact for internal/admin
  * surfaces. New submissions already use the de-piloted titles
- * (lib/pilot/pilot-request.ts), so this only rewrites historical rows.
+ * (lib/demand/demand-request.ts), so this only rewrites historical rows.
  */
 const LEGACY_EXACT: Readonly<Record<string, string>> = {
   "Pilot request — hiring workers": "Hiring workers — demand",

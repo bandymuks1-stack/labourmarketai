@@ -50,9 +50,9 @@ describe("Guard: matching UI is removed from the app surface", () => {
     expect(src).not.toMatch(/company-dashboard-job-postings/);
     expect(src).not.toMatch(/JobPostingForm|JobPostingsList/);
     expect(src).not.toMatch(/@\/lib\/job-postings\//);
-    // The canonical pilot-draft intake stays.
+    // The canonical demand-draft intake stays.
     expect(src).toMatch(/company-dashboard-first-action/);
-    expect(src).toMatch(/PilotDraftForm/);
+    expect(src).toMatch(/DemandDraftForm/);
   });
 
   it("admin project-truth no longer advertises a /dashboard/discover route", () => {

@@ -153,7 +153,7 @@ async function main(): Promise<void> {
 ## Read this brief
 
 - "—" means the underlying table is missing or your service key can't see it. Not a zero.
-- Any non-zero \`pilot errors last 24 h\` row warrants a glance at \`/lt/dashboard/admin/pilot-telemetry\` → "Top error codes" panel.
+- Any non-zero \`pilot errors last 24 h\` row warrants a glance at \`/lt/dashboard/admin/telemetry\` → "Top error codes" panel.
 - \`language reports — open\` > 0 means there's tester feedback waiting at \`/lt/dashboard/admin/language-feedback\`.
 - Use \`docs/pilot/PILOT_FEEDBACK_REVIEW_PROCESS_LT.md\` as the daily 15-min review playbook.
 

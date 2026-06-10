@@ -99,9 +99,9 @@ describe("Guard: each role dashboard calls the gate FIRST", () => {
         expect(src).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
       });
 
-      it("does not write to the DB directly (mutations go through pilot-drafts-actions)", () => {
+      it("does not write to the DB directly (mutations go through demand-drafts-actions)", () => {
         // The page itself is pure read + render. Mutations live in the
-        // server-action wrapper used by PilotDraftForm; the page never
+        // server-action wrapper used by DemandDraftForm; the page never
         // calls supabase.from(...).insert/update/delete inline.
         expect(src).not.toMatch(/\.insert\(/);
         expect(src).not.toMatch(/\.update\(/);

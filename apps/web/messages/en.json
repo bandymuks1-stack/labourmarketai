@@ -1045,7 +1045,8 @@
       "languageFeedback": "Language reports",
       "communication": "Conversations",
       "support": "Support conversations",
-      "companyVerification": "Company verification"
+      "companyVerification": "Company verification",
+      "matching": "Matching workbench"
     },
     "drafts": {
       "title": "Operations drafts",
@@ -1150,6 +1151,82 @@
         "notFound": "Company not found.",
         "needsMigration": "This feature is not available yet. Try later.",
         "error": "Something went wrong. Please try again."
+      }
+    },
+    "matching": {
+      "eyebrow": "ADMIN · PHASE 3",
+      "title": "Matching workbench",
+      "subtitle": "Open requests next to the worker supply — review, decide, record.",
+      "humanNote": "Every match here is selected by a human, not an algorithm. The system does not rank or suggest — it only shows real data and records your decision with a feedback note.",
+      "back": "Back to admin",
+      "migrationBlocker": "The demand intake consolidation migration is not applied in this environment yet — the workbench is blocked until it lands.",
+      "demand": {
+        "title": "Open demand",
+        "count": "{count} open requests",
+        "empty": "No open requests right now. New submitted requests will appear here."
+      },
+      "kind": {
+        "company_request": "Company request",
+        "agency_offer": "Agency offer",
+        "buyer_request": "Buyer request",
+        "customer_request": "Customer request"
+      },
+      "status": {
+        "submitted": "Submitted",
+        "in_review": "In review",
+        "needs_followup": "Needs follow-up",
+        "approved": "Approved"
+      },
+      "fields": {
+        "created": "Created",
+        "country": "Country",
+        "location": "Location",
+        "role": "Role / work type",
+        "teamSize": "Team size",
+        "startPeriod": "Start",
+        "duration": "Duration",
+        "language": "Languages",
+        "notes": "Notes",
+        "payload": "Form details",
+        "reviewNote": "Review note"
+      },
+      "log": {
+        "title": "Human match log"
+      },
+      "supply": {
+        "title": "Worker supply",
+        "count": "{count} workers",
+        "empty": "No workers yet — the list fills as people register.",
+        "unnamed": "Unnamed worker",
+        "noProfession": "No profession set",
+        "years": "{count} y. experience",
+        "availability": {
+          "available": "Available",
+          "busy": "Busy",
+          "unavailable": "Unavailable",
+          "unknown": "Availability not set"
+        },
+        "skillsDeclared": "Declared skills",
+        "skillsConfirmed": "Confirmed skills",
+        "entries": "Journal entries",
+        "confirmations": "Manager confirmations"
+      },
+      "match": {
+        "workerLabel": "Worker (human pick)",
+        "workerPlaceholder": "Choose a worker…",
+        "noteLabel": "Feedback note (what fits, what is missing)",
+        "notePlaceholder": "E.g. profession fits, A1 document still needed…",
+        "recordInReview": "Record match · in review",
+        "recordFollowup": "Record · needs follow-up",
+        "recordApproved": "Record · approved"
+      },
+      "result": {
+        "saved": "Decision recorded.",
+        "notAdmin": "Your session does not have admin rights for this request.",
+        "invalid": "Invalid decision — pick a worker and an action.",
+        "notFound": "Request or worker no longer exists.",
+        "needsMigration": "Consolidation migration not applied — recording is blocked.",
+        "error": "Could not record the decision."
       }
     }
   },
@@ -3191,7 +3268,7 @@
       "footnote": "✓ = at least one signal observed live. · = nothing seen yet. '—' = the underlying table is not applied here. Count on the right is the lifetime total."
     }
   },
-  "pilotTelemetry": {
+  "telemetry": {
     "title": "Operations telemetry (v1)",
     "subtitle": "Safe tester QA events. Read-only. Admins only.",
     "loadError": "Could not load events: {msg}",

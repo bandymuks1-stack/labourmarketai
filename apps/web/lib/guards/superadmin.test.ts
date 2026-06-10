@@ -185,14 +185,28 @@ describe("Guard: admin i18n surfaces honest labels (no fake verification)", () =
       // No fake-verified wording anywhere in the admin copy. The
       // panel describes pilot state honestly — it does not say a
       // user's claims are "verified", "confirmed", or "patvirtinta".
-      // EXCEPTION: `companyVerification` is the legitimate company-
+      // EXCEPTIONS: `companyVerification` is the legitimate company-
       // verification review surface (admin verifies a COMPANY); its ladder
-      // vocabulary is asserted honest separately below.
+      // vocabulary is asserted honest separately below. `matching` is the
+      // Phase 3.2 workbench surfacing the REAL skill ladder (worker_skills
+      // verified=true = manager-confirmed loop) + the request status ladder;
+      // its declared-vs-confirmed honesty is asserted below and in
+      // matching-workbench.test.ts.
       const adminSansVerify: Record<string, unknown> = { ...admin };
       delete adminSansVerify.companyVerification;
+      delete adminSansVerify.matching;
       const flat = JSON.stringify(adminSansVerify).toLowerCase();
       expect(flat).not.toMatch(/\bverified\b|\bconfirmed\b/);
       expect(flat).not.toMatch(/\bpatvirtinta\b|\bpatvirtinti\b/);
+
+      // The matching workbench keeps the declared/confirmed distinction
+      // explicit — "confirmed" is allowed there ONLY because the declared
+      // counterpart is rendered next to it and the match is human-recorded.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const matching = admin.matching as any;
+      expect(matching?.supply?.skillsDeclared, `${locale} matching declared label`).toBeTruthy();
+      expect(matching?.supply?.skillsConfirmed, `${locale} matching confirmed label`).toBeTruthy();
+      expect(matching?.humanNote, `${locale} matching human note`).toBeTruthy();
 
       // The company verification ladder is honest: explicit unverified +
       // pending states, no automatic-verification claim.

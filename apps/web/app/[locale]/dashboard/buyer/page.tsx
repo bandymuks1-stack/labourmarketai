@@ -1,10 +1,10 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
-import { PilotDraftForm } from "@/components/app/pilot-draft-form";
+import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { BuyerRequestsSection } from "@/components/app/buyer-requests-section";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
-import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
+import { getDemandDraft } from "@/lib/demand/demand-drafts";
 import { getOwnCustomer } from "@/lib/buyer/customers";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listOwnAttachments } from "@/lib/buyer/customer-request-attachments";
@@ -30,7 +30,7 @@ export default async function BuyerDashboardPage({
   const tSpaces = await getTranslations("spaces");
   const tSetup = await getTranslations("roleDashboards.buyer.setup");
   const tRequests = await getTranslations("roleDashboards.buyer.requests");
-  const existingDraft = await getPilotDraft("buyer_request");
+  const existingDraft = await getDemandDraft("buyer_request");
   const customerRead = await getOwnCustomer();
   const customer = customerRead.kind === "ok" ? customerRead.row : null;
   const migrationNeeded = customerRead.kind === "needs-migration";
@@ -359,7 +359,7 @@ export default async function BuyerDashboardPage({
             {t("firstAction.body")}
           </p>
         </header>
-        <PilotDraftForm
+        <DemandDraftForm
           draftType="buyer_request"
           fields={BUYER_FIELDS}
           i18nNamespace="roleDashboards.buyer.draftForm"

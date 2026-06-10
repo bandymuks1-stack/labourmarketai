@@ -1,5 +1,5 @@
 /**
- * Pilot-request submission — the dashboard "Request a pilot" CTA, landing on the
+ * Demand-request submission — the dashboard demand-request CTA, landing on the
  * CANONICAL demand intake `customer_requests` (Phase 3 / Slice 3.1). An
  * authenticated company / agency owner expressing a real need is structured
  * demand, so it writes the one canonical model (status='submitted', classified
@@ -18,23 +18,23 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-export type PilotIntent = "hire_workers" | "partner";
+export type DemandIntent = "hire_workers" | "partner";
 
-export type PilotRequestResult =
+export type DemandRequestResult =
   | { ok: true; requestId: string | null }
   | { ok: false; code: "unauthenticated" | "save_failed" };
 
 // hire_workers → a company expressing demand; partner → an agency expressing an
 // offer. (The buyer/customer's structured need has its own buyer_request draft
-// form; the lightweight pilot CTA defaults a company_request.)
-const INTENT_KIND: Record<PilotIntent, "company_request" | "agency_offer"> = {
+// form; the lightweight demand CTA defaults a company_request.)
+const INTENT_KIND: Record<DemandIntent, "company_request" | "agency_offer"> = {
   hire_workers: "company_request",
   partner: "agency_offer",
 };
 
 // submit_demand_request + the new demand columns are not in the generated
 // `Database` type until `pnpm db:types` runs post-apply — cast at the boundary,
-// same pattern lib/pilot/pilot-drafts.ts uses for the (folded) draft path.
+// same pattern lib/demand/demand-drafts.ts uses for the (folded) draft path.
 type DemandRpc = {
   rpc: (
     name: string,
@@ -43,9 +43,9 @@ type DemandRpc = {
 };
 
 /** Submit the signed-in owner's pilot request onto the canonical intake. */
-export async function submitPilotRequest(
-  intent: PilotIntent,
-): Promise<PilotRequestResult> {
+export async function submitDemandRequest(
+  intent: DemandIntent,
+): Promise<DemandRequestResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -76,7 +76,7 @@ export async function submitPilotRequest(
   );
 
   if (error) {
-    console.error("[pilot-request] submit failed:", error.message);
+    console.error("[demand-request] submit failed:", error.message);
     return { ok: false, code: "save_failed" };
   }
 

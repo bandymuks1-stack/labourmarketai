@@ -20,6 +20,12 @@ That is "done" at the product level. Everything below is the ordered march towar
 - **Self-driving delivery live:** auto-merge envelope — GREEN slices merge themselves once CI (quality + migration-safety) is green; RED (destructive/RLS/auth) stops for human review.
 - **Keystone in progress:** making the first real **verified Work Proof** happen end-to-end (TASK 01).
 
+> **Owner-locked sequence (2026-06-10):** Phase 3 → **TASK 07** (living-arena
+> UI, starts only after the owner's visual lock) → **M4+ AI**. TASK 07 is a UX
+> layer and may run alongside Phase 4–5 engineering, but the AI layer always
+> comes last, on verified Work Proof data. This pins the §21-C3 conflict of
+> `docs/product/labourmarketai-full-product-overview-and-implementation-plan.md`.
+
 ## THE MARCH (direction — ordered, flexible)
 - **Phase 1 — Verified proof is real (NOW).** The work-journal loop produces genuine confirmed proof on prod. *Everything downstream depends on this; until it flows, the rest is hollow.*
 - **Phase 2 — Make the loop usable by a real company.** A clear company control center (on the canonical org model); onboarding that lands every user on a real first action (worker → log an entry; owner → add a worker / review); one canonical demand/intake (customer_requests; fold pilot_drafts; decide leads); continuous production smoke + honest empty-states + small UX fixes. Goal: a real foreman/owner can walk the whole path unaided.

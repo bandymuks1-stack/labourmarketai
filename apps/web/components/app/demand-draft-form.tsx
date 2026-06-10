@@ -3,15 +3,15 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import type { DraftType, PilotDraftRow } from "@/lib/pilot/pilot-drafts";
+import type { DraftType, DemandDraftRow } from "@/lib/demand/demand-drafts";
 import { recordEvent } from "@/lib/telemetry/task";
 import {
-  savePilotDraftAction,
-  deletePilotDraftAction,
-} from "@/lib/pilot/pilot-drafts-actions";
+  saveDemandDraftAction,
+  deleteDemandDraftAction,
+} from "@/lib/demand/demand-drafts-actions";
 
 /**
- * Generic pilot draft form. One form per draft_type — the caller
+ * Generic demand draft form. One form per draft_type — the caller
  * passes the field schema + i18n namespace; the form handles save +
  * delete + the loading states.
  *
@@ -25,7 +25,7 @@ import {
  */
 export type FormField = {
   /** Key in the payload object (e.g. `title`). Broad `string` here
-   *  because `keyof PilotDraftPayload` narrows to the intersection
+   *  because `keyof DemandDraftPayload` narrows to the intersection
    *  of the three payload unions; the server action validates the
    *  per-type allowlist before any DB write. */
   key: string;
@@ -38,7 +38,7 @@ export type FormField = {
   selectOptionsKey?: string;
 };
 
-export function PilotDraftForm({
+export function DemandDraftForm({
   draftType,
   fields,
   i18nNamespace,
@@ -49,7 +49,7 @@ export function PilotDraftForm({
   fields: readonly FormField[];
   /** e.g. "roleDashboards.company.draftForm" */
   i18nNamespace: string;
-  initialDraft: PilotDraftRow | null;
+  initialDraft: DemandDraftRow | null;
   /** For each `select` field, the options keyed by `selectOptionsKey`.
    *  Each option is `{ value, labelKey }`. */
   selectOptions?: Record<
@@ -86,10 +86,10 @@ export function PilotDraftForm({
       payload[f.key as string] = v;
     }
     startSave(() => {
-      savePilotDraftAction(draftType, payload)
+      saveDemandDraftAction(draftType, payload)
         .then(() => {
           setSavedAt(new Date().toISOString());
-          // Pilot telemetry — event name per draft type so the admin
+          // Telemetry — event name per draft type so the admin
           // dashboard can split funnels.
           recordEvent(`${draftType.replace("_request", "_draft").replace("_offer", "_draft")}_saved`, {
             draft_type: draftType,
@@ -97,7 +97,7 @@ export function PilotDraftForm({
           router.refresh();
         })
         .catch((e: unknown) => {
-          console.error("[pilot-draft-form] save failed", e);
+          console.error("[demand-draft-form] save failed", e);
           setError(t("saveError"));
           recordEvent("task_error", {
             draft_type: draftType,
@@ -110,7 +110,7 @@ export function PilotDraftForm({
   function onDelete(): void {
     setError(null);
     startDelete(() => {
-      deletePilotDraftAction(draftType)
+      deleteDemandDraftAction(draftType)
         .then(() => {
           // Reset visible state so the user sees a fresh form.
           const empty: Record<string, string> = {};
@@ -120,7 +120,7 @@ export function PilotDraftForm({
           router.refresh();
         })
         .catch((e: unknown) => {
-          console.error("[pilot-draft-form] delete failed", e);
+          console.error("[demand-draft-form] delete failed", e);
           setError(t("deleteError"));
         });
     });
