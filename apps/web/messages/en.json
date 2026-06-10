@@ -1227,6 +1227,23 @@
         "notFound": "Request or worker no longer exists.",
         "needsMigration": "Consolidation migration not applied — recording is blocked.",
         "error": "Could not record the decision."
+      },
+      "suggestions": {
+        "title": "Rule-based shortlist",
+        "humanRule": "Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "start": "Start conversation",
+        "reasons": {
+          "country_match": "In country",
+          "preferred_country_match": "Prefers country",
+          "available_now": "Available",
+          "profession_token_match": "Profession fits request text",
+          "verified_skills": "Verified skills",
+          "manager_confirmations": "Manager confirmations",
+          "journal_evidence": "Journal evidence"
+        }
+      },
+      "filters": {
+        "all": "All countries"
       }
     }
   },

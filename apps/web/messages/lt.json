@@ -1227,6 +1227,23 @@
         "notFound": "Užklausa arba darbuotojas nebeegzistuoja.",
         "needsMigration": "Konsolidacijos migracija nepritaikyta — fiksavimas užblokuotas.",
         "error": "Nepavyko užfiksuoti sprendimo."
+      },
+      "suggestions": {
+        "title": "Taisyklėmis paremtas sąrašas",
+        "humanRule": "Rikiuota pagal realius įrodymus (atitikę filtrai, patvirtinti įgūdžiai, patvirtinimai) — jokio skaičiuojamo balo; sprendžia žmogus.",
+        "start": "Pradėti pokalbį",
+        "reasons": {
+          "country_match": "Šalyje",
+          "preferred_country_match": "Nori dirbti šalyje",
+          "available_now": "Laisvas",
+          "profession_token_match": "Profesija atitinka užklausos tekstą",
+          "verified_skills": "Patvirtinti įgūdžiai",
+          "manager_confirmations": "Vadovo patvirtinimai",
+          "journal_evidence": "Žurnalo įrodymai"
+        }
+      },
+      "filters": {
+        "all": "Visos šalys"
       }
     }
   },

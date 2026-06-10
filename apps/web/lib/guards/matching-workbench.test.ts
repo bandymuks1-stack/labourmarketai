@@ -125,3 +125,53 @@ describe("matching workbench — copy honesty in all 10 locales", () => {
     expect(page).toMatch(/bus pakeistas TASK 07/);
   });
 });
+
+describe("matching MVP — rule-based shortlist stays §7-honest", () => {
+  const SUGGEST = "lib/admin/match-suggestions.ts";
+
+  it("suggestions module is pure (no supabase, no rpc, no fetch)", () => {
+    const code = stripComments(read(SUGGEST));
+    expect(code).not.toMatch(/supabase|\.rpc\(|fetch\(|createClient/);
+  });
+
+  it("reasons come from the fixed evidence enum only", () => {
+    const code = read(SUGGEST);
+    for (const reason of [
+      "country_match",
+      "preferred_country_match",
+      "available_now",
+      "profession_token_match",
+      "verified_skills",
+      "manager_confirmations",
+      "journal_evidence",
+    ]) {
+      expect(code).toContain(`"${reason}"`);
+    }
+    // No composite numeric score is exported or rendered as a fact.
+    expect(stripComments(code)).not.toMatch(/score\s*[:=]/i);
+    const page = read(PAGE);
+    expect(page).not.toMatch(/\{\s*s\.score|matchScore|fitScore/);
+  });
+
+  it("start-conversation reuses the canonical messaging entry", () => {
+    const page = read(PAGE);
+    expect(page).toMatch(
+      /from "@\/lib\/communication\/open-conversation-action"/,
+    );
+    expect(page).toMatch(/action=\{openDirectConversationAction\}/);
+    // The transparent-ordering statement is shown to the human.
+    expect(page).toMatch(/suggestions\.humanRule/);
+  });
+
+  it("suggestion copy exists in all 10 locales", () => {
+    for (const locale of LOCALES) {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as {
+        admin?: { matching?: { suggestions?: { humanRule?: string } } };
+      };
+      expect(
+        json.admin?.matching?.suggestions?.humanRule,
+        `${locale} suggestions.humanRule`,
+      ).toBeTruthy();
+    }
+  });
+});

@@ -84,6 +84,8 @@ export interface DemandRow {
 
 export interface SupplyWorkerRow {
   readonly id: string;
+  /** profiles.id — the messaging identity for "start conversation". */
+  readonly profileId: string | null;
   readonly displayName: string | null;
   readonly headline: string | null;
   readonly availabilityStatus: string | null;
@@ -193,7 +195,7 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
   const { data: workers, error: wErr } = await asAny(supabase)
     .from("workers")
     .select(
-      "id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, experience_years, created_at",
+      "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, experience_years, created_at",
     )
     .order("created_at", { ascending: false });
   if (wErr) return { kind: "error", message: wErr.message };
@@ -280,6 +282,7 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
 
   const supply: SupplyWorkerRow[] = workerRows.map((w) => ({
     id: w.id as string,
+    profileId: (w.profile_id as string | null) ?? null,
     displayName: (w.display_name as string | null) ?? null,
     headline: (w.headline as string | null) ?? null,
     availabilityStatus: (w.availability_status as string | null) ?? null,
