@@ -110,7 +110,7 @@ describe("0020 — pilot_events table + RLS", () => {
   });
 });
 
-describe("recordPilotEvent server action — privacy contract", () => {
+describe("recordTelemetryEvent server action — privacy contract", () => {
   it("exports a tagged RecordPilotEventResult", () => {
     expect(action).toMatch(/export type RecordPilotEventResult\s*=/);
     expect(action).toMatch(/ok:\s*true/);
@@ -132,7 +132,7 @@ describe("recordPilotEvent server action — privacy contract", () => {
     expect(action).toMatch(/const\s+profileId\s*=\s*user\??\.id\s*\?\?\s*null/);
     // The client-side helper MUST NOT pass a profile_id through — pin
     // that on the input type shape (no profileId / userId field).
-    expect(action).toMatch(/export type PilotEventInput\s*=/);
+    expect(action).toMatch(/export type TelemetryEventInput\s*=/);
     expect(action).not.toMatch(/profileId\??:\s*string/);
   });
 

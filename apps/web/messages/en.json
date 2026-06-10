@@ -1933,7 +1933,7 @@
           "p2": "Say what people, teams or partners you need.",
           "p3": "Offer your services to the market."
         },
-        "pilot": {
+        "demand": {
           "sending": "Sending...",
           "error": "Couldn't send. Please try again.",
           "progressHelper": "These steps show progress. Active actions are shown below.",
