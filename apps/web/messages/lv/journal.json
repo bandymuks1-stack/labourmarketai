@@ -42,7 +42,25 @@
     "rejectReason": "[EN] Reason for rejection",
     "showOriginal": "[EN] Show original",
     "skills": "[EN] Skills",
-    "title": "[EN] Entries to confirm"
+    "title": "[EN] Entries to confirm",
+    "quick": {
+      "openQuick": "Ātrā apstiprināšana →",
+      "title": "Ātrā apstiprināšana",
+      "subtitle": "Viens skatiens, viens pieskāriens: kartītē redzams darbinieks, datums, darbi un prasmes, ko apstiprināsiet. Katrs apstiprinājums ir jūsu īsts lēmums, ko ieraksta tikai pēc jūsu pieskāriena.",
+      "detailedReview": "Detalizēta pārskatīšana",
+      "willConfirm": "Tiks apstiprināts:",
+      "entryOnlyNote": "Neapstiprinātu prasmju nav — ar pieskārienu apstiprina pašu ierakstu.",
+      "confirmTap": "Apstiprināt ierakstu",
+      "confirmTapSkills": "Apstiprināt ierakstu un prasmes ({count})",
+      "confirmedCard": "Apstiprināts — {name}",
+      "rejectedCard": "Noraidīts — {name}. Ieraksts paliek paša darbinieka norādīts viņa žurnālā.",
+      "batchButton": "Apstiprināt visus šīsdienas ({count})",
+      "batchSummaryTitle": "Ko jūs apstiprināt",
+      "batchSummaryLead": "Viens apstiprinājums aptver visus zemāk uzskaitītos ierakstus un tiek ierakstīts kā jūsu lēmums par katru no tiem. Pārskatiet sarakstu pirms apstiprināšanas.",
+      "batchConfirm": "Apstiprināt ({count})",
+      "batchDone": "Apstiprināti ieraksti: {confirmed}. Apstiprinātas prasmes: {skills}.",
+      "batchFailed": "Neizdevās apstiprināt: {count} — atveriet detalizēto pārskatīšanu."
+    }
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",

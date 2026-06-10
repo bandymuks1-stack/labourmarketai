@@ -7,5 +7,6 @@
   "owner": "[EN] Owner",
   "student": "[EN] Student",
   "unemployed": "[EN] Unemployed",
-  "volunteer": "[EN] Volunteer"
+  "volunteer": "[EN] Volunteer",
+  "external_manager": "Kierownik zewnętrzny (zleceniodawca)"
 }

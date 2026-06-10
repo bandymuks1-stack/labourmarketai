@@ -3540,5 +3540,37 @@
     "managerConfirmations": "Manager confirmations",
     "journalEntries": "Journal entries",
     "zeroHint": "Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Verified CV",
+    "exportButton": "Export CV (PDF)",
+    "print": "Download PDF",
+    "back": "← Back to profile",
+    "primary": "primary",
+    "skills": "Skills",
+    "skillsEmpty": "No skills saved yet.",
+    "tiers": {
+      "confirmed": "Manager-confirmed",
+      "evidence": "Backed by work entries",
+      "declared": "Self-declared"
+    },
+    "tierHints": {
+      "confirmed": "confirmed by a manager on a real work entry",
+      "evidence": "work-journal entries back this skill; a manager has not confirmed it yet",
+      "declared": "the person's own claim, not externally confirmed"
+    },
+    "summary": {
+      "verifiedSkills": "Verified skills",
+      "managerConfirmations": "Manager confirmations",
+      "journalEntries": "Journal entries"
+    },
+    "proofTitle": "Confirmed work proof",
+    "proofDate": "Date",
+    "proofProject": "Project",
+    "proofRole": "Confirmed by (role)",
+    "proofEmpty": "No confirmed entries yet.",
+    "generatedAt": "Generated",
+    "verifyNote": "Confirmations can be checked on the platform.",
+    "notWorker": "CV export is available for worker profiles — it is built from the work journal and confirmed skills."
   }
 }

@@ -1213,5 +1213,37 @@
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Potwierdzone CV",
+    "exportButton": "Eksportuj CV (PDF)",
+    "print": "Pobierz PDF",
+    "back": "← Wróć do profilu",
+    "primary": "główny",
+    "skills": "Umiejętności",
+    "skillsEmpty": "Nie zapisano jeszcze umiejętności.",
+    "tiers": {
+      "confirmed": "Potwierdzone przez kierownika",
+      "evidence": "Poparte wpisami pracy",
+      "declared": "Deklarowane samodzielnie"
+    },
+    "tierHints": {
+      "confirmed": "potwierdzone przez kierownika na podstawie rzeczywistego wpisu pracy",
+      "evidence": "wpisy dziennika pracy popierają tę umiejętność; kierownik jeszcze jej nie potwierdził",
+      "declared": "własna deklaracja osoby, niepotwierdzona zewnętrznie"
+    },
+    "summary": {
+      "verifiedSkills": "Potwierdzone umiejętności",
+      "managerConfirmations": "Potwierdzenia kierownika",
+      "journalEntries": "Wpisy w dzienniku"
+    },
+    "proofTitle": "Potwierdzone dowody pracy",
+    "proofDate": "Data",
+    "proofProject": "Projekt",
+    "proofRole": "Potwierdził (rola)",
+    "proofEmpty": "Brak potwierdzonych wpisów.",
+    "generatedAt": "Wygenerowano",
+    "verifyNote": "Potwierdzenia można sprawdzić na platformie.",
+    "notWorker": "Eksport CV jest dostępny dla profili pracowników — powstaje z dziennika pracy i potwierdzonych umiejętności."
   }
 }

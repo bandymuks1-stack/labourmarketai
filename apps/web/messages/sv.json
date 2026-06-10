@@ -1213,5 +1213,37 @@
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Bekräftat CV",
+    "exportButton": "Exportera CV (PDF)",
+    "print": "Ladda ner PDF",
+    "back": "← Tillbaka till profilen",
+    "primary": "primär",
+    "skills": "Färdigheter",
+    "skillsEmpty": "Inga färdigheter sparade ännu.",
+    "tiers": {
+      "confirmed": "Bekräftad av chef",
+      "evidence": "Stöds av arbetsposter",
+      "declared": "Självangiven"
+    },
+    "tierHints": {
+      "confirmed": "bekräftad av en chef utifrån en verklig arbetspost",
+      "evidence": "arbetsjournalens poster stöder denna färdighet; ännu inte bekräftad av en chef",
+      "declared": "personens egen uppgift, inte externt bekräftad"
+    },
+    "summary": {
+      "verifiedSkills": "Bekräftade färdigheter",
+      "managerConfirmations": "Chefsbekräftelser",
+      "journalEntries": "Journalposter"
+    },
+    "proofTitle": "Bekräftade arbetsbevis",
+    "proofDate": "Datum",
+    "proofProject": "Projekt",
+    "proofRole": "Bekräftad av (roll)",
+    "proofEmpty": "Inga bekräftade poster ännu.",
+    "generatedAt": "Genererad",
+    "verifyNote": "Bekräftelser kan kontrolleras på plattformen.",
+    "notWorker": "CV-export är tillgänglig för arbetarprofiler — det byggs av arbetsjournalen och bekräftade färdigheter."
   }
 }

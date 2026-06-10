@@ -42,7 +42,25 @@
     "rejectReason": "[EN] Reason for rejection",
     "showOriginal": "[EN] Show original",
     "skills": "[EN] Skills",
-    "title": "[EN] Entries to confirm"
+    "title": "[EN] Entries to confirm",
+    "quick": {
+      "openQuick": "Snabb bekräftelse →",
+      "title": "Snabb bekräftelse",
+      "subtitle": "En blick, ett tryck: kortet visar arbetaren, datumet, arbetet och de färdigheter du bekräftar. Varje bekräftelse är ditt verkliga beslut och registreras först när du trycker.",
+      "detailedReview": "Detaljerad granskning",
+      "willConfirm": "Bekräftas:",
+      "entryOnlyNote": "Inga obekräftade färdigheter — trycket bekräftar själva posten.",
+      "confirmTap": "Bekräfta post",
+      "confirmTapSkills": "Bekräfta post + färdigheter ({count})",
+      "confirmedCard": "Bekräftad — {name}",
+      "rejectedCard": "Avvisad — {name}. Posten förblir arbetarens egen uppgift i journalen.",
+      "batchButton": "Bekräfta alla från i dag ({count})",
+      "batchSummaryTitle": "Vad du bekräftar",
+      "batchSummaryLead": "En bekräftelse omfattar alla poster nedan och registreras som ditt beslut för var och en. Granska listan innan du bekräftar.",
+      "batchConfirm": "Bekräfta ({count})",
+      "batchDone": "Bekräftade poster: {confirmed}. Bekräftade färdigheter: {skills}.",
+      "batchFailed": "Kunde inte bekräftas: {count} — öppna den detaljerade granskningen."
+    }
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",

@@ -162,7 +162,25 @@
     },
     "showOriginal": "Show original",
     "skills": "Skills",
-    "title": "Entries to confirm"
+    "title": "Entries to confirm",
+    "quick": {
+      "openQuick": "Quick confirm →",
+      "title": "Quick confirm",
+      "subtitle": "One glance, one tap: the card shows the worker, the date, the works and the exact skills your tap confirms. Every confirmation is your real decision, recorded only when you tap.",
+      "detailedReview": "Detailed review",
+      "willConfirm": "Will be confirmed:",
+      "entryOnlyNote": "No unconfirmed skills — the tap confirms the entry itself.",
+      "confirmTap": "Confirm entry",
+      "confirmTapSkills": "Confirm entry + skills ({count})",
+      "confirmedCard": "Confirmed — {name}",
+      "rejectedCard": "Rejected — {name}. The entry stays self-declared in the worker's journal.",
+      "batchButton": "Confirm all of today ({count})",
+      "batchSummaryTitle": "What you are confirming",
+      "batchSummaryLead": "One confirmation covers every entry listed below and is recorded as your decision for each of them. Review the list before confirming.",
+      "batchConfirm": "Confirm ({count})",
+      "batchDone": "Entries confirmed: {confirmed}. Skills confirmed: {skills}.",
+      "batchFailed": "Could not confirm: {count} — open the detailed review."
+    }
   },
   "listEmpty": "You don't have any work evidence yet — your entries will show up here.",
   "listEmptyTitle": "Start building work evidence",

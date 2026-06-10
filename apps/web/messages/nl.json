@@ -1213,5 +1213,37 @@
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Bevestigd CV",
+    "exportButton": "CV exporteren (PDF)",
+    "print": "PDF downloaden",
+    "back": "← Terug naar profiel",
+    "primary": "primair",
+    "skills": "Vaardigheden",
+    "skillsEmpty": "Nog geen vaardigheden opgeslagen.",
+    "tiers": {
+      "confirmed": "Door manager bevestigd",
+      "evidence": "Onderbouwd door werkregistraties",
+      "declared": "Zelf opgegeven"
+    },
+    "tierHints": {
+      "confirmed": "door een manager bevestigd op basis van een echte werkregistratie",
+      "evidence": "werkdagboekregistraties onderbouwen deze vaardigheid; een manager heeft deze nog niet bevestigd",
+      "declared": "eigen opgave van de persoon, niet extern bevestigd"
+    },
+    "summary": {
+      "verifiedSkills": "Bevestigde vaardigheden",
+      "managerConfirmations": "Managerbevestigingen",
+      "journalEntries": "Dagboekregistraties"
+    },
+    "proofTitle": "Bevestigd werkbewijs",
+    "proofDate": "Datum",
+    "proofProject": "Project",
+    "proofRole": "Bevestigd door (rol)",
+    "proofEmpty": "Nog geen bevestigde registraties.",
+    "generatedAt": "Gegenereerd",
+    "verifyNote": "Bevestigingen zijn te controleren op het platform.",
+    "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden."
   }
 }

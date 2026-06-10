@@ -1213,5 +1213,37 @@
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Bestätigter Lebenslauf",
+    "exportButton": "Lebenslauf exportieren (PDF)",
+    "print": "PDF herunterladen",
+    "back": "← Zurück zum Profil",
+    "primary": "primär",
+    "skills": "Fähigkeiten",
+    "skillsEmpty": "Noch keine Fähigkeiten gespeichert.",
+    "tiers": {
+      "confirmed": "Vom Vorgesetzten bestätigt",
+      "evidence": "Durch Arbeitseinträge belegt",
+      "declared": "Selbst angegeben"
+    },
+    "tierHints": {
+      "confirmed": "von einem Vorgesetzten auf Basis eines echten Arbeitseintrags bestätigt",
+      "evidence": "Arbeitsjournal-Einträge belegen diese Fähigkeit; noch nicht vom Vorgesetzten bestätigt",
+      "declared": "eigene Angabe der Person, nicht extern bestätigt"
+    },
+    "summary": {
+      "verifiedSkills": "Bestätigte Fähigkeiten",
+      "managerConfirmations": "Bestätigungen durch Vorgesetzte",
+      "journalEntries": "Journaleinträge"
+    },
+    "proofTitle": "Bestätigte Arbeitsnachweise",
+    "proofDate": "Datum",
+    "proofProject": "Projekt",
+    "proofRole": "Bestätigt von (Rolle)",
+    "proofEmpty": "Noch keine bestätigten Einträge.",
+    "generatedAt": "Erstellt",
+    "verifyNote": "Bestätigungen können auf der Plattform geprüft werden.",
+    "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt."
   }
 }
