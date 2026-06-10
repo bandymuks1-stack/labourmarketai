@@ -193,13 +193,22 @@ export default async function InboxPage({
           {t("inbox.reviewClarity.lead")}
         </p>
         <EvidenceStatusStrip active={reviewLegend} data-testid="inbox-evidence-status-strip" />
-        <Link
-          href="/dashboard/inbox/report"
-          className="w-fit text-xs font-medium text-brand-blue hover:underline"
-          data-testid="inbox-report-link"
-        >
-          {t("inbox.openReport")}
-        </Link>
+        <div className="flex flex-wrap gap-x-4">
+          <Link
+            href="/dashboard/inbox/quick"
+            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            data-testid="inbox-quick-link"
+          >
+            {t("inbox.quick.openQuick")}
+          </Link>
+          <Link
+            href="/dashboard/inbox/report"
+            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            data-testid="inbox-report-link"
+          >
+            {t("inbox.openReport")}
+          </Link>
+        </div>
       </header>
 
       {pending.length === 0 ? (

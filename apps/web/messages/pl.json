@@ -1115,7 +1115,8 @@
       "demand": {
         "title": "[EN] Open demand",
         "count": "[EN] {count} open requests",
-        "empty": "[EN] No open requests right now. New submitted requests will appear here."
+        "empty": "[EN] No open requests right now. New submitted requests will appear here.",
+        "messageRequester": "[EN] Message requester"
       },
       "kind": {
         "company_request": "[EN] Company request",
@@ -1179,6 +1180,23 @@
         "notFound": "[EN] Request or worker no longer exists.",
         "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
         "error": "[EN] Could not record the decision."
+      },
+      "suggestions": {
+        "title": "[EN] Rule-based shortlist",
+        "humanRule": "[EN] Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "start": "[EN] Start conversation",
+        "reasons": {
+          "country_match": "[EN] In country",
+          "preferred_country_match": "[EN] Prefers country",
+          "available_now": "[EN] Available",
+          "profession_token_match": "[EN] Profession fits request text",
+          "verified_skills": "[EN] Verified skills",
+          "manager_confirmations": "[EN] Manager confirmations",
+          "journal_evidence": "[EN] Journal evidence"
+        }
+      },
+      "filters": {
+        "all": "[EN] All countries"
       }
     },
     "hub": {
@@ -1228,5 +1246,48 @@
       "conditional": "[EN] Conditional"
     },
     "sourceFlag": "[EN] Needs legal source"
+  },
+  "communication": {
+    "originalLanguage": "[EN] Original ({lang})"
+  },
+  "trust": {
+    "title": "[EN] Trust signals",
+    "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "verifiedSkills": "[EN] Verified skills",
+    "managerConfirmations": "[EN] Manager confirmations",
+    "journalEntries": "[EN] Journal entries",
+    "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Potwierdzone CV",
+    "exportButton": "Eksportuj CV (PDF)",
+    "print": "Pobierz PDF",
+    "back": "← Wróć do profilu",
+    "primary": "główny",
+    "skills": "Umiejętności",
+    "skillsEmpty": "Nie zapisano jeszcze umiejętności.",
+    "tiers": {
+      "confirmed": "Potwierdzone przez kierownika",
+      "evidence": "Poparte wpisami pracy",
+      "declared": "Deklarowane samodzielnie"
+    },
+    "tierHints": {
+      "confirmed": "potwierdzone przez kierownika na podstawie rzeczywistego wpisu pracy",
+      "evidence": "wpisy dziennika pracy popierają tę umiejętność; kierownik jeszcze jej nie potwierdził",
+      "declared": "własna deklaracja osoby, niepotwierdzona zewnętrznie"
+    },
+    "summary": {
+      "verifiedSkills": "Potwierdzone umiejętności",
+      "managerConfirmations": "Potwierdzenia kierownika",
+      "journalEntries": "Wpisy w dzienniku"
+    },
+    "proofTitle": "Potwierdzone dowody pracy",
+    "proofDate": "Data",
+    "proofProject": "Projekt",
+    "proofRole": "Potwierdził (rola)",
+    "proofEmpty": "Brak potwierdzonych wpisów.",
+    "generatedAt": "Wygenerowano",
+    "verifyNote": "Potwierdzenia można sprawdzić na platformie.",
+    "notWorker": "Eksport CV jest dostępny dla profili pracowników — powstaje z dziennika pracy i potwierdzonych umiejętności."
   }
 }

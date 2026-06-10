@@ -42,7 +42,25 @@
     "rejectReason": "[EN] Reason for rejection",
     "showOriginal": "[EN] Show original",
     "skills": "[EN] Skills",
-    "title": "[EN] Entries to confirm"
+    "title": "[EN] Entries to confirm",
+    "quick": {
+      "openQuick": "Szybkie potwierdzanie →",
+      "title": "Szybkie potwierdzanie",
+      "subtitle": "Jedno spojrzenie, jedno dotknięcie: karta pokazuje pracownika, datę, prace i umiejętności, które potwierdzasz. Każde potwierdzenie to Twoja rzeczywista decyzja, zapisywana dopiero po Twoim dotknięciu.",
+      "detailedReview": "Szczegółowy przegląd",
+      "willConfirm": "Zostanie potwierdzone:",
+      "entryOnlyNote": "Brak niepotwierdzonych umiejętności — dotknięcie potwierdza sam wpis.",
+      "confirmTap": "Potwierdź wpis",
+      "confirmTapSkills": "Potwierdź wpis i umiejętności ({count})",
+      "confirmedCard": "Potwierdzono — {name}",
+      "rejectedCard": "Odrzucono — {name}. Wpis pozostaje deklaracją pracownika w jego dzienniku.",
+      "batchButton": "Potwierdź wszystkie z dzisiaj ({count})",
+      "batchSummaryTitle": "Co potwierdzasz",
+      "batchSummaryLead": "Jedno potwierdzenie obejmuje wszystkie wpisy wymienione poniżej i jest zapisywane jako Twoja decyzja dla każdego z nich. Przejrzyj listę przed potwierdzeniem.",
+      "batchConfirm": "Potwierdź ({count})",
+      "batchDone": "Potwierdzone wpisy: {confirmed}. Potwierdzone umiejętności: {skills}.",
+      "batchFailed": "Nie udało się potwierdzić: {count} — otwórz szczegółowy przegląd."
+    }
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",

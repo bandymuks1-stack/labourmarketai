@@ -1314,14 +1314,26 @@ describe("no migration files added by this sprint", () => {
     // candidate_drafts table (owner_id = auth.uid() RLS + admin read, direct
     // authenticated writes, explicit grants). No account/consent/verification;
     // a draft is not assignable until linked. Reversible.
-    // Bumped 54 -> 55 for s3-documents-readiness: ONE needs-human-gate DRAFT
+    // Bumped 54 -> 55 for conversations-ui (Workstream B): ONE additive DRAFT
+    // (20260610190000_conversation_message_language: nullable original_language
+    // on conversation_messages, doctrine 2.3; applied ONLY via MCP by owner).
+    // Bumped 55 -> 58 for esco-taxonomy-foundation (S2): three migrations -
+    // 20260610130000 (esco_occupations/skills/relations/labels, read-only RLS,
+    // admin writes), 20260610130100 (additive esco_uri refs on
+    // professions/skills, no data change), 20260610130200 (candidate_skills,
+    // doctrine 2.3 original_text/original_language, default-closed, no
+    // auto-approve). All additive + reversible; APPLIED to prod via MCP
+    // apply_migration after owner review (2026-06-10, ledger 20260610172207/
+    // 172226/172251). Authored as 54 -> 57; resolved to 58 at merge because
+    // main had moved to 55. Design: docs/product/esco-taxonomy-design.md.
+    // Bumped 58 -> 59 for s3-documents-readiness
     // (20260610170000_worker_documents_readiness: document_types slug registry
     // + worker_documents inventory + append-only events + country requirement
     // STRUCTURE with needs_legal_source flags; RPC-only writes, default-closed
-    // RLS). Additive + reversible; applied ONLY via MCP after owner review.
-    // NOTE: PR #286 (S2 ESCO, gated draft) carries its own 54 -> 57 bump for
-    // three more drafts - whichever merges second resolves to 58.
-    const SPRINT_BASELINE = 55;
+    // RLS). Additive + reversible; APPLIED to prod via MCP apply_migration
+    // after owner review (2026-06-10, ledger 20260610172333). Authored as
+    // 54 -> 55; resolved to 59 at merge on top of main's 58.
+    const SPRINT_BASELINE = 59;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

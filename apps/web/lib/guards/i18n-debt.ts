@@ -35,12 +35,14 @@ export const PRIMARY_LOCALES = ["en", "lt"] as const;
  * When real translations land, lower these numbers to tighten the ratchet.
  */
 export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
-  // 2026-06-10 (+56 admin.matching, +30 documents keys per locale, doctrine
-  // §2.4: every new key lands in all 10 locales in the same PR; [EN] markers
-  // until human translation). Feature keys raise the ceiling; translations
-  // lower it.
-  da: 703,
-  de: 703,
+  // 2026-06-10 (+56 admin.matching, +11 matching suggestions/filters, +30
+  // documents keys per locale, doctrine §2.4: every new key lands in all 10
+  // locales in the same PR; [EN] markers until human translation). Feature
+  // keys raise the ceiling; translations lower it. MEASURED 722 at the S3
+  // documents merge (main 692 + 30 documents; the PR-note '714' was stale
+  // arithmetic — measurement wins).
+  da: 722,
+  de: 722,
 };
 
 export interface LocaleDebt {

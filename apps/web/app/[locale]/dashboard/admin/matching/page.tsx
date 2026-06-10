@@ -11,6 +11,11 @@ import {
   MatchingWorkbenchReview,
   type MatchingReviewLabels,
 } from "@/components/app/matching-workbench-review";
+import {
+  buildMatchSuggestions,
+  filterSupply,
+} from "@/lib/admin/match-suggestions";
+import { openDirectConversationAction } from "@/lib/communication/open-conversation-action";
 import type { DarkListboxOption } from "@/components/ui/DarkListbox";
 
 /**
@@ -39,12 +44,16 @@ const AVAILABILITY_KEYS = ["available", "busy", "unavailable"] as const;
 
 export default async function AdminMatchingWorkbenchPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ country?: string; availability?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   await requireSuperadmin(locale);
+  const { country: filterCountry, availability: filterAvailability } =
+    await searchParams;
 
   const t = await getTranslations("admin.matching");
   const tProf = await getTranslations("professions");
@@ -186,6 +195,27 @@ export default async function AdminMatchingWorkbenchPage({
                       <Field label={t("fields.notes")} value={r.notes} />
                     </dl>
 
+                    {/* Workstream B entry point: conversation FROM a
+                        customer_request — message the requester directly. */}
+                    {r.profileId ? (
+                      <form action={openDirectConversationAction} className="self-start">
+                        <input type="hidden" name="profileId" value={r.profileId} />
+                        <input type="hidden" name="locale" value={locale} />
+                        <input
+                          type="hidden"
+                          name="fallback"
+                          value={`/${locale}/dashboard/admin/matching`}
+                        />
+                        <button
+                          type="submit"
+                          className="rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                          data-testid={`matching-message-requester-${r.id}`}
+                        >
+                          {t("demand.messageRequester")}
+                        </button>
+                      </form>
+                    ) : null}
+
                     {r.payloadFields.length > 0 ? (
                       <div className="rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1">
                         <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
@@ -232,6 +262,69 @@ export default async function AdminMatchingWorkbenchPage({
                       </p>
                     ) : null}
 
+                    {/* Rule-based shortlist — evidence reasons only (§7),
+                        the human decides; "start conversation" reuses the
+                        canonical messaging entry (B entry point). */}
+                    {(() => {
+                      const suggestions = buildMatchSuggestions(r, supply);
+                      if (suggestions.length === 0) return null;
+                      return (
+                        <div
+                          className="rounded-md border border-brand-blue/20 bg-brand-blue/5 p-2"
+                          data-testid={`matching-suggestions-${r.id}`}
+                        >
+                          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            {t("suggestions.title")}
+                          </p>
+                          <p className="text-[11px] text-text-secondary">
+                            {t("suggestions.humanRule")}
+                          </p>
+                          <ul className="mt-1 flex flex-col gap-1.5">
+                            {suggestions.map((s) => (
+                              <li
+                                key={s.worker.id}
+                                className="flex flex-wrap items-center justify-between gap-2 rounded-sm border border-ink-600 bg-ink-800/40 px-2 py-1.5"
+                              >
+                                <span className="flex min-w-0 flex-col">
+                                  <span className="text-xs font-semibold text-text-primary">
+                                    {s.worker.displayName ?? t("supply.unnamed")}
+                                  </span>
+                                  <span className="flex flex-wrap gap-1">
+                                    {s.reasons.map((reason) => (
+                                      <span
+                                        key={reason}
+                                        className="rounded-sm border border-brand-blue/30 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-blue"
+                                      >
+                                        {t(`suggestions.reasons.${reason}` as never)}
+                                      </span>
+                                    ))}
+                                  </span>
+                                </span>
+                                {s.worker.profileId ? (
+                                  <form action={openDirectConversationAction}>
+                                    <input type="hidden" name="profileId" value={s.worker.profileId} />
+                                    <input type="hidden" name="locale" value={locale} />
+                                    <input
+                                      type="hidden"
+                                      name="fallback"
+                                      value={`/${locale}/dashboard/admin/matching`}
+                                    />
+                                    <button
+                                      type="submit"
+                                      className="rounded-md border border-brand-blue/50 px-2 py-1 text-[11px] font-semibold text-brand-blue hover:border-brand-blue"
+                                      data-testid={`matching-start-conversation-${r.id}-${s.worker.id}`}
+                                    >
+                                      {t("suggestions.start")}
+                                    </button>
+                                  </form>
+                                ) : null}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
+
                     <MatchingWorkbenchReview
                       requestId={r.id}
                       workers={workerOptions}
@@ -251,13 +344,78 @@ export default async function AdminMatchingWorkbenchPage({
             <p className="text-xs text-text-secondary">
               {t("supply.count", { count: supply.length })}
             </p>
+            {/* Server-rendered filters (searchParams links — themed, no
+                native OS controls). */}
+            {(() => {
+              const countries = [
+                ...new Set(
+                  supply
+                    .flatMap((w) => [w.locationCountry, ...w.preferredCountries])
+                    .filter((c): c is string => !!c)
+                    .map((c) => c.toUpperCase()),
+                ),
+              ].sort();
+              const link = (c: string | null, a: string | null): string => {
+                const q = new URLSearchParams();
+                if (c) q.set("country", c);
+                if (a) q.set("availability", a);
+                const qs = q.toString();
+                return `/dashboard/admin/matching${qs ? `?${qs}` : ""}`;
+              };
+              const chip = (active: boolean): string =>
+                `rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-label ${
+                  active
+                    ? "border-brand-blue text-brand-blue"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
+                }`;
+              return (
+                <div
+                  className="flex flex-wrap items-center gap-1.5"
+                  data-testid="matching-supply-filters"
+                >
+                  <Link
+                    href={link(null, filterAvailability ?? null) as "/dashboard"}
+                    className={chip(!filterCountry)}
+                  >
+                    {t("filters.all")}
+                  </Link>
+                  {countries.map((c) => (
+                    <Link
+                      key={c}
+                      href={link(c, filterAvailability ?? null) as "/dashboard"}
+                      className={chip(filterCountry?.toUpperCase() === c)}
+                    >
+                      {c}
+                    </Link>
+                  ))}
+                  <span className="mx-1 text-ink-500">·</span>
+                  {(["available", "busy", "unavailable"] as const).map((a) => (
+                    <Link
+                      key={a}
+                      href={
+                        link(
+                          filterCountry ?? null,
+                          filterAvailability === a ? null : a,
+                        ) as "/dashboard"
+                      }
+                      className={chip(filterAvailability === a)}
+                    >
+                      {t(`supply.availability.${a}` as never)}
+                    </Link>
+                  ))}
+                </div>
+              );
+            })()}
             {supply.length === 0 ? (
               <p className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted">
                 {t("supply.empty")}
               </p>
             ) : (
               <ul className="flex flex-col gap-2">
-                {supply.map((w) => (
+                {filterSupply(supply, {
+                  country: filterCountry ?? null,
+                  availability: filterAvailability ?? null,
+                }).map((w) => (
                   <li
                     key={w.id}
                     className="card-border flex flex-col gap-1.5 p-3"

@@ -1115,7 +1115,8 @@
       "demand": {
         "title": "[EN] Open demand",
         "count": "[EN] {count} open requests",
-        "empty": "[EN] No open requests right now. New submitted requests will appear here."
+        "empty": "[EN] No open requests right now. New submitted requests will appear here.",
+        "messageRequester": "[EN] Message requester"
       },
       "kind": {
         "company_request": "[EN] Company request",
@@ -1179,6 +1180,23 @@
         "notFound": "[EN] Request or worker no longer exists.",
         "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
         "error": "[EN] Could not record the decision."
+      },
+      "suggestions": {
+        "title": "[EN] Rule-based shortlist",
+        "humanRule": "[EN] Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "start": "[EN] Start conversation",
+        "reasons": {
+          "country_match": "[EN] In country",
+          "preferred_country_match": "[EN] Prefers country",
+          "available_now": "[EN] Available",
+          "profession_token_match": "[EN] Profession fits request text",
+          "verified_skills": "[EN] Verified skills",
+          "manager_confirmations": "[EN] Manager confirmations",
+          "journal_evidence": "[EN] Journal evidence"
+        }
+      },
+      "filters": {
+        "all": "[EN] All countries"
       }
     },
     "hub": {
@@ -1228,5 +1246,48 @@
       "conditional": "[EN] Conditional"
     },
     "sourceFlag": "[EN] Needs legal source"
+  },
+  "communication": {
+    "originalLanguage": "[EN] Original ({lang})"
+  },
+  "trust": {
+    "title": "[EN] Trust signals",
+    "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "verifiedSkills": "[EN] Verified skills",
+    "managerConfirmations": "[EN] Manager confirmations",
+    "journalEntries": "[EN] Journal entries",
+    "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Bekräftat CV",
+    "exportButton": "Exportera CV (PDF)",
+    "print": "Ladda ner PDF",
+    "back": "← Tillbaka till profilen",
+    "primary": "primär",
+    "skills": "Färdigheter",
+    "skillsEmpty": "Inga färdigheter sparade ännu.",
+    "tiers": {
+      "confirmed": "Bekräftad av chef",
+      "evidence": "Stöds av arbetsposter",
+      "declared": "Självangiven"
+    },
+    "tierHints": {
+      "confirmed": "bekräftad av en chef utifrån en verklig arbetspost",
+      "evidence": "arbetsjournalens poster stöder denna färdighet; ännu inte bekräftad av en chef",
+      "declared": "personens egen uppgift, inte externt bekräftad"
+    },
+    "summary": {
+      "verifiedSkills": "Bekräftade färdigheter",
+      "managerConfirmations": "Chefsbekräftelser",
+      "journalEntries": "Journalposter"
+    },
+    "proofTitle": "Bekräftade arbetsbevis",
+    "proofDate": "Datum",
+    "proofProject": "Projekt",
+    "proofRole": "Bekräftad av (roll)",
+    "proofEmpty": "Inga bekräftade poster ännu.",
+    "generatedAt": "Genererad",
+    "verifyNote": "Bekräftelser kan kontrolleras på plattformen.",
+    "notWorker": "CV-export är tillgänglig för arbetarprofiler — det byggs av arbetsjournalen och bekräftade färdigheter."
   }
 }

@@ -23,6 +23,8 @@ import type {
 } from "@/components/app/cv-engagement-cards";
 import { type Role } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
+import { TrustBlock } from "@/components/app/trust-block";
+import { getOwnTrustSignals } from "@/lib/profile/trust-signals";
 import { Link } from "@/lib/i18n/navigation";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
@@ -52,6 +54,8 @@ export default async function ProfilePage({
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
   const tRole = await getTranslations("auth.signup.role");
+  const tTrust = await getTranslations("trust");
+  const tCv = await getTranslations("cvExport");
 
   const supabase = await createClient();
   const {
@@ -307,13 +311,24 @@ export default async function ProfilePage({
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("pageTitle")}
           </h1>
-          <Link
-            href="/dashboard/account"
-            className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
-            data-testid="room-my-spaces-link"
-          >
-            {tSpaces("mySpaces")} →
-          </Link>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {workerId ? (
+              <Link
+                href="/cv"
+                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                data-testid="profile-cv-export-link"
+              >
+                {tCv("exportButton")}
+              </Link>
+            ) : null}
+            <Link
+              href="/dashboard/account"
+              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              data-testid="room-my-spaces-link"
+            >
+              {tSpaces("mySpaces")} →
+            </Link>
+          </div>
         </div>
         <p className="mt-2 text-sm text-text-secondary">
           {t("pageSubtitle")}
@@ -337,6 +352,23 @@ export default async function ProfilePage({
             : undefined
         }
       />
+
+      {/* Workstream C: the trust chain made VISIBLE on the person — counts
+          straight from canonical tables (verified skills, manager
+          confirmations, journal entries). Honest zeros with a growth hint. */}
+      {workerId ? (
+        <TrustBlock
+          signals={await getOwnTrustSignals(workerId)}
+          labels={{
+            title: tTrust("title"),
+            caption: tTrust("caption"),
+            verifiedSkills: tTrust("verifiedSkills"),
+            managerConfirmations: tTrust("managerConfirmations"),
+            journalEntries: tTrust("journalEntries"),
+            zeroHint: tTrust("zeroHint"),
+          }}
+        />
+      ) : null}
 
       {/* Consolidated (P0 profile rescue): the ProfileHubOverview above is the
           SINGLE output summary — CV + skills + journal-evidence pillars (which
