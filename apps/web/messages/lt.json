@@ -3533,6 +3533,50 @@
       "error": "Nepavyko. Bandyk dar kartą."
     }
   },
+  "documents": {
+    "eyebrow": "MANO DOKUMENTAI",
+    "title": "Mano dokumentai",
+    "subtitle": "Ką turi, ko trūksta ir koks kitas žingsnis — pagal šalį.",
+    "preparing": "Dokumentų parengtis ruošiama — funkcija įsijungs, kai dokumentų saugojimo sluoksnis bus peržiūrėtas ir įjungtas. Kol kas čia niekas neaktyvu.",
+    "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
+    "needsMigration": "Dokumentų saugojimo sluoksnis šioje aplinkoje dar neįjungtas.",
+    "noWorker": "Pirmiausia susikurk darbuotojo profilį — dokumentai priklauso jam.",
+    "error": "Nepavyko įkelti tavo dokumentų.",
+    "empty": "Dokumentų dar neužfiksuota. Pradėk nuo CV ir asmens dokumento.",
+    "list": {
+      "title": "Tavo dokumentai"
+    },
+    "status": {
+      "missing": "Trūksta",
+      "ready": "Paruošta",
+      "expiring": "Greitai baigsis",
+      "blocked": "Užblokuota"
+    },
+    "fields": {
+      "validUntil": "Galioja iki"
+    },
+    "country": {
+      "title": "Ko trūksta į šalį",
+      "help": "Pasirink paskirties šalį ir matysi, kokių dokumentų ji prašo.",
+      "unknown": "Šalies {country} reikalavimų sąrašas dar nesuvestas — nerodome nieko, vietoj spėliojimo.",
+      "next": "Kitas žingsnis: pasirūpink — {doc}.",
+      "ok": "Visi suvesti {country} reikalavimai padengti."
+    },
+    "types": {
+      "cv": "CV",
+      "id_document": "Asmens dokumentas",
+      "a1_certificate": "A1 pažymėjimas",
+      "employment_contract": "Darbo sutartis",
+      "posted_worker_package": "Komandiruoto darbuotojo paketas",
+      "professional_certificate": "Profesinis sertifikatas"
+    },
+    "requirement": {
+      "required": "Privalomas",
+      "recommended": "Rekomenduojamas",
+      "conditional": "Sąlyginis"
+    },
+    "sourceFlag": "Reikia teisinio šaltinio"
+  },
   "trust": {
     "title": "Pasitikėjimo signalai",
     "caption": "Skaičiai imami tiesiai iš realių įrašų — deklaruoti įgūdžiai tampa patikimi tik per žurnalo įrašus, kuriuos patvirtino vadovas. Niekas čia nesveriama ir neišgalvojama.",

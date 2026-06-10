@@ -3533,6 +3533,50 @@
       "error": "Could not save. Please try again."
     }
   },
+  "documents": {
+    "eyebrow": "MY DOCUMENTS",
+    "title": "My documents",
+    "subtitle": "What you have, what is missing, and the next step — per country.",
+    "preparing": "Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
+    "needsMigration": "The documents storage layer is not enabled in this environment yet.",
+    "noWorker": "Create your worker profile first — documents attach to it.",
+    "error": "Could not load your documents.",
+    "empty": "No documents recorded yet. Start with your CV and ID document.",
+    "list": {
+      "title": "Your documents"
+    },
+    "status": {
+      "missing": "Missing",
+      "ready": "Ready",
+      "expiring": "Expiring soon",
+      "blocked": "Blocked"
+    },
+    "fields": {
+      "validUntil": "Valid until"
+    },
+    "country": {
+      "title": "What is missing for a country",
+      "help": "Pick a destination country to see which documents it asks for.",
+      "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
+      "next": "Next step: take care of — {doc}.",
+      "ok": "All curated requirements for {country} are covered."
+    },
+    "types": {
+      "cv": "CV",
+      "id_document": "ID document",
+      "a1_certificate": "A1 certificate",
+      "employment_contract": "Employment contract",
+      "posted_worker_package": "Posted worker package",
+      "professional_certificate": "Professional certificate"
+    },
+    "requirement": {
+      "required": "Required",
+      "recommended": "Recommended",
+      "conditional": "Conditional"
+    },
+    "sourceFlag": "Needs legal source"
+  },
   "trust": {
     "title": "Trust signals",
     "caption": "Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
