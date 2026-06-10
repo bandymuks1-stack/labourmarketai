@@ -106,7 +106,11 @@ function JourneyRail({ stages, label }: { stages: Stage[]; label: string }) {
  *  (real profession/skills/journal counts); no fake matching/metrics (PV §10,
  *  PRODUCT_CONSTITUTION §5/§9). Non-locking by design: the active role is the
  *  current workspace, not a permanent category (§1). The redesign turns the old
- *  static card list into an action path: journey rail → next move → readiness. */
+ *  static card list into an action path: journey rail → next move → readiness.
+ *
+ *  Personal command center: dokumentuotas pirmas sluoksnis — vizualiai bus
+ *  pakeistas TASK 07 (living-arena UI po owner vizualinio užrakto); logika,
+ *  sąžiningi signalai ir next-action principas lieka. */
 export default async function DashboardOverviewPage({
   params,
 }: {
