@@ -287,23 +287,23 @@ async function main() {
 
   // Paginated id-map fetch — PostgREST caps a select at 1000 rows, so a
   // plain select would silently truncate the uri→id map and the label
-  // filter below would silently drop most rows (dishonest import).
-  async function fetchIdMap(table) {
+  // filter below would silently drop most rows (dishonest import). The
+  // call sites keep literal .from("esco_*") table names (guard-scanned).
+  async function fetchIdMap(name, buildPage) {
     const map = new Map();
     const PAGE = 1000;
     for (let from = 0; ; from += PAGE) {
-      const { data, error } = await db
-        .from(table)
-        .select("id, esco_uri")
-        .range(from, from + PAGE - 1);
-      if (error) throw new Error(`${table} id fetch failed: ${error.message}`);
+      const { data, error } = await buildPage(from, from + PAGE - 1);
+      if (error) throw new Error(`${name} id fetch failed: ${error.message}`);
       for (const r of data ?? []) map.set(r.esco_uri, r.id);
       if (!data || data.length < PAGE) break;
     }
     return map;
   }
-  const occId = await fetchIdMap("esco_occupations");
-  const sklId = await fetchIdMap("esco_skills");
+  const occId = await fetchIdMap("esco_occupations", (a, b) =>
+    db.from("esco_occupations").select("id, esco_uri").range(a, b));
+  const sklId = await fetchIdMap("esco_skills", (a, b) =>
+    db.from("esco_skills").select("id, esco_uri").range(a, b));
   console.log(`id maps: ${occId.size} occupations, ${sklId.size} skills`);
 
   const labelUpserts = labelRowsDeduped
