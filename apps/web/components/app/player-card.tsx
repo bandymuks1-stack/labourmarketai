@@ -1,5 +1,8 @@
 "use client";
 
+// Low-fidelity preview, bus pakeistas TASK 07 (living-arena UI po owner
+// vizualinio užrakto). Koncepcinė FIFA-stiliaus kortelė — ne galutinė estetika.
+
 import { useRef } from "react";
 import Image from "next/image";
 import { motion, useInView, useReducedMotion } from "framer-motion";

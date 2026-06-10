@@ -5,6 +5,9 @@ import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
  * of the worker's OWN real dimensions. Honest by construction: zero is shown as a
  * plain zero with a gentle next step, never inflated; skills are labelled
  * self-declared (not verified); nothing here implies AI or employer interest.
+ *
+ * Visual layer: low-fidelity preview, bus pakeistas TASK 07 (living-arena UI
+ * po owner vizualinio užrakto). Logika ir sąžiningi skaitliukai lieka.
  */
 
 export interface PlayerCardLabels {

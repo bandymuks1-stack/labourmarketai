@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { Sparkline } from "@/components/ui/Sparkline";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
-import { DemoChip } from "@/components/app/demo-chip";
+import { PreviewChip } from "@/components/app/preview-chip";
 import { LiveClock } from "@/components/app/live-clock";
 import { LiveMap } from "@/components/app/live-map";
 import { LiveTicker } from "@/components/app/live-ticker";
@@ -100,7 +100,7 @@ export default async function LandingPage({
         {/* Hero right — live mission-control map (5b.2) */}
         <div className="relative">
           <div className="relative mb-5 flex items-start justify-between gap-4">
-            <DemoChip />
+            <PreviewChip />
             <LiveClock />
           </div>
           <LiveMap />

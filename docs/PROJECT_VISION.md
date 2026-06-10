@@ -10,6 +10,9 @@
 
 # LABMA OS — Projekto vizija / Project Vision
 
+> Pilna produkto apžvalga ir įgyvendinimo planas (human-first):
+> [`docs/product/labourmarketai-full-product-overview-and-implementation-plan.md`](product/labourmarketai-full-product-overview-and-implementation-plan.md)
+
 ---
 
 ## 1. Vienas sakinys / One sentence

@@ -3,6 +3,9 @@
 Persistent backlog for work that outlives a single PR. PR-specific handoffs
 live in `docs/handoffs/`.
 
+> Canonical full product overview + implementation plan (human-first):
+> `docs/product/labourmarketai-full-product-overview-and-implementation-plan.md`
+
 ## Convergence follow-ups (post-PR #152)
 
 Staged from the single-product convergence (`feat/cc/converge-single-product`,

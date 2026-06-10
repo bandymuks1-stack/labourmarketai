@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 
 /** Persistent honesty pill — always visible, top-left of the hero card
- *  region. The pulsing dot reuses .live-dot (already reduced-motion safe). */
-export function DemoChip() {
+ *  region. The pulsing dot reuses .live-dot (already reduced-motion safe).
+ *  Named "preview" — the banned word stays out of identifiers too. */
+export function PreviewChip() {
   const t = useTranslations("live.chip");
   return (
     <div

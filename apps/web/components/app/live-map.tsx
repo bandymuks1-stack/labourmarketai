@@ -1,5 +1,9 @@
 "use client";
 
+// Live market preview: low-fidelity preview, bus pakeistas TASK 07 (living-arena
+// UI po owner vizualinio užrakto). Hero PreviewChip ("PRE-ALPHA · Activity
+// preview") laiko šį žemėlapį sąžiningą — koncepcija, ne live duomenys.
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
