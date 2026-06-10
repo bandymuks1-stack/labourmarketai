@@ -1317,9 +1317,16 @@ describe("no migration files added by this sprint", () => {
     // Bumped 54 -> 55 for conversations-ui (Workstream B): ONE additive DRAFT
     // (20260610190000_conversation_message_language: nullable original_language
     // on conversation_messages, doctrine 2.3; applied ONLY via MCP by owner).
-    // NOTE: gated PR #288 (S3 documents) bumps independently - second merger
-    // resolves upward.
-    const SPRINT_BASELINE = 55;
+    // Bumped 55 -> 58 for esco-taxonomy-foundation (S2): three migrations -
+    // 20260610130000 (esco_occupations/skills/relations/labels, read-only RLS,
+    // admin writes), 20260610130100 (additive esco_uri refs on
+    // professions/skills, no data change), 20260610130200 (candidate_skills,
+    // doctrine 2.3 original_text/original_language, default-closed, no
+    // auto-approve). All additive + reversible; APPLIED to prod via MCP
+    // apply_migration after owner review (2026-06-10, ledger 20260610172207/
+    // 172226/172251). Authored as 54 -> 57; resolved to 58 at merge because
+    // main had moved to 55. Design: docs/product/esco-taxonomy-design.md.
+    const SPRINT_BASELINE = 58;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
