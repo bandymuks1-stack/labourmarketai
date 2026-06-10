@@ -198,6 +198,123 @@ export type Database = {
           },
         ]
       }
+      candidate_drafts: {
+        Row: {
+          contact: string | null
+          created_at: string
+          id: string
+          language: string | null
+          linked_profile_id: string | null
+          name_or_title: string
+          notes: string | null
+          owner_id: string
+          profession_service: string | null
+          project_id: string | null
+          skills_text: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contact?: string | null
+          created_at?: string
+          id?: string
+          language?: string | null
+          linked_profile_id?: string | null
+          name_or_title: string
+          notes?: string | null
+          owner_id: string
+          profession_service?: string | null
+          project_id?: string | null
+          skills_text?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contact?: string | null
+          created_at?: string
+          id?: string
+          language?: string | null
+          linked_profile_id?: string | null
+          name_or_title?: string
+          notes?: string | null
+          owner_id?: string
+          profession_service?: string | null
+          project_id?: string | null
+          skills_text?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_drafts_linked_profile_id_fkey"
+            columns: ["linked_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_drafts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_drafts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_skills: {
+        Row: {
+          created_at: string
+          id: string
+          mapped_esco_uri: string | null
+          mention_count: number
+          original_language: string
+          original_text: string
+          profile_id: string
+          review_note: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mapped_esco_uri?: string | null
+          mention_count?: number
+          original_language: string
+          original_text: string
+          profile_id: string
+          review_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mapped_esco_uri?: string | null
+          mention_count?: number
+          original_language?: string
+          original_text?: string
+          profile_id?: string
+          review_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_skills_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
@@ -593,6 +710,53 @@ export type Database = {
         }
         Relationships: []
       }
+      country_document_requirements: {
+        Row: {
+          condition_note: string | null
+          country: string
+          created_at: string
+          document_type_slug: string
+          id: string
+          is_active: boolean
+          requirement_level: string
+          source_status: string
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          condition_note?: string | null
+          country: string
+          created_at?: string
+          document_type_slug: string
+          id?: string
+          is_active?: boolean
+          requirement_level?: string
+          source_status?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          condition_note?: string | null
+          country?: string
+          created_at?: string
+          document_type_slug?: string
+          id?: string
+          is_active?: boolean
+          requirement_level?: string
+          source_status?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "country_document_requirements_document_type_slug_fkey"
+            columns: ["document_type_slug"]
+            isOneToOne: false
+            referencedRelation: "document_types"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       customer_request_attachments: {
         Row: {
           analysis_status: string
@@ -793,6 +957,33 @@ export type Database = {
           },
         ]
       }
+      document_types: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       engagement_contexts: {
         Row: {
           country_code: string | null
@@ -891,6 +1082,135 @@ export type Database = {
             referencedColumns: ["slug"]
           },
         ]
+      }
+      esco_labels: {
+        Row: {
+          concept_id: string
+          concept_type: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          label_type: string
+          locale: string
+        }
+        Insert: {
+          concept_id: string
+          concept_type: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          label_type?: string
+          locale: string
+        }
+        Update: {
+          concept_id?: string
+          concept_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          label_type?: string
+          locale?: string
+        }
+        Relationships: []
+      }
+      esco_occupation_skills: {
+        Row: {
+          created_at: string
+          is_active: boolean
+          occupation_id: string
+          relation_type: string
+          skill_id: string
+        }
+        Insert: {
+          created_at?: string
+          is_active?: boolean
+          occupation_id: string
+          relation_type?: string
+          skill_id: string
+        }
+        Update: {
+          created_at?: string
+          is_active?: boolean
+          occupation_id?: string
+          relation_type?: string
+          skill_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esco_occupation_skills_occupation_id_fkey"
+            columns: ["occupation_id"]
+            isOneToOne: false
+            referencedRelation: "esco_occupations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esco_occupation_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "esco_skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      esco_occupations: {
+        Row: {
+          created_at: string
+          esco_uri: string
+          id: string
+          is_active: boolean
+          isco_group: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          esco_uri: string
+          id?: string
+          is_active?: boolean
+          isco_group?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          esco_uri?: string
+          id?: string
+          is_active?: boolean
+          isco_group?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      esco_skills: {
+        Row: {
+          created_at: string
+          esco_uri: string
+          id: string
+          is_active: boolean
+          reuse_level: string | null
+          skill_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          esco_uri: string
+          id?: string
+          is_active?: boolean
+          reuse_level?: string | null
+          skill_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          esco_uri?: string
+          id?: string
+          is_active?: boolean
+          reuse_level?: string | null
+          skill_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       job_demands: {
         Row: {
@@ -1901,6 +2221,7 @@ export type Database = {
       professions: {
         Row: {
           created_at: string
+          esco_uri: string | null
           id: string
           is_active: boolean
           sector: string
@@ -1909,6 +2230,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          esco_uri?: string | null
           id?: string
           is_active?: boolean
           sector: string
@@ -1917,6 +2239,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          esco_uri?: string | null
           id?: string
           is_active?: boolean
           sector?: string
@@ -2177,6 +2500,122 @@ export type Database = {
           },
         ]
       }
+      project_worker_operational_statuses: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          project_id: string
+          status: string
+          updated_at: string
+          updated_by: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          project_id: string
+          status: string
+          updated_at?: string
+          updated_by: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          project_id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_worker_operational_statuses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_worker_operational_statuses_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_worker_operational_statuses_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_worker_readiness_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_key: string
+          label: string
+          note: string | null
+          project_id: string
+          status: string
+          updated_at: string
+          updated_by: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_key: string
+          label: string
+          note?: string | null
+          project_id: string
+          status?: string
+          updated_at?: string
+          updated_by: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_key?: string
+          label?: string
+          note?: string | null
+          project_id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_worker_readiness_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_worker_readiness_items_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_worker_readiness_items_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           city: string | null
@@ -2374,6 +2813,7 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
+          esco_uri: string | null
           id: string
           is_active: boolean
           slug: string | null
@@ -2382,6 +2822,7 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
+          esco_uri?: string | null
           id?: string
           is_active?: boolean
           slug?: string | null
@@ -2390,6 +2831,7 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
+          esco_uri?: string | null
           id?: string
           is_active?: boolean
           slug?: string | null
@@ -2471,6 +2913,118 @@ export type Database = {
           source?: string
         }
         Relationships: []
+      }
+      worker_document_events: {
+        Row: {
+          actor_id: string
+          after_state: Json | null
+          before_state: Json | null
+          created_at: string
+          event_type: string
+          id: string
+          worker_document_id: string
+        }
+        Insert: {
+          actor_id: string
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          event_type: string
+          id?: string
+          worker_document_id: string
+        }
+        Update: {
+          actor_id?: string
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          worker_document_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_document_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_document_events_worker_document_id_fkey"
+            columns: ["worker_document_id"]
+            isOneToOne: false
+            referencedRelation: "worker_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_documents: {
+        Row: {
+          country: string | null
+          created_at: string
+          document_type_slug: string
+          file_path: string | null
+          id: string
+          note: string | null
+          status: string
+          updated_at: string
+          updated_by: string
+          valid_from: string | null
+          valid_until: string | null
+          worker_id: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          document_type_slug: string
+          file_path?: string | null
+          id?: string
+          note?: string | null
+          status?: string
+          updated_at?: string
+          updated_by: string
+          valid_from?: string | null
+          valid_until?: string | null
+          worker_id: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          document_type_slug?: string
+          file_path?: string | null
+          id?: string
+          note?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string
+          valid_from?: string | null
+          valid_until?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_documents_document_type_slug_fkey"
+            columns: ["document_type_slug"]
+            isOneToOne: false
+            referencedRelation: "document_types"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "worker_documents_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_documents_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       worker_professions: {
         Row: {
@@ -2921,6 +3475,15 @@ export type Database = {
         Args: { p_enabled: boolean; p_engagement_id: string }
         Returns: string
       }
+      set_worker_operational_status: {
+        Args: {
+          p_note: string
+          p_project_id: string
+          p_status: string
+          p_worker_profile_id: string
+        }
+        Returns: string
+      }
       submit_demand_request: {
         Args: {
           p_kind: string
@@ -2928,6 +3491,28 @@ export type Database = {
           p_original_language?: string
           p_payload?: Json
           p_title: string
+        }
+        Returns: string
+      }
+      upsert_worker_document: {
+        Args: {
+          p_country: string
+          p_document_type_slug: string
+          p_note: string
+          p_status: string
+          p_valid_from: string
+          p_valid_until: string
+        }
+        Returns: string
+      }
+      upsert_worker_readiness_item: {
+        Args: {
+          p_item_key: string
+          p_label: string
+          p_note: string
+          p_project_id: string
+          p_status: string
+          p_worker_profile_id: string
         }
         Returns: string
       }
