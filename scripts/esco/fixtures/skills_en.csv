@@ -1,0 +1,4 @@
+﻿conceptType,conceptUri,skillType,reuseLevel,preferredLabel,altLabels
+KnowledgeSkillCompetence,http://data.europa.eu/esco/skill/s001,skill/competence,sector-specific,lay tiles,tile laying
+KnowledgeSkillCompetence,http://data.europa.eu/esco/skill/s002,skill/competence,sector-specific,install pipes,pipe installation
+KnowledgeSkillCompetence,http://data.europa.eu/esco/skill/s003,knowledge,cross-sector,construction safety,site safety

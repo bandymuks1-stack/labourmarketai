@@ -1314,7 +1314,15 @@ describe("no migration files added by this sprint", () => {
     // candidate_drafts table (owner_id = auth.uid() RLS + admin read, direct
     // authenticated writes, explicit grants). No account/consent/verification;
     // a draft is not assignable until linked. Reversible.
-    const SPRINT_BASELINE = 54;
+    // Bumped 54 -> 57 for esco-taxonomy-foundation (S2): three DRAFT
+    // migrations - 20260610130000 (esco_occupations/skills/relations/labels,
+    // read-only RLS, admin writes), 20260610130100 (additive esco_uri refs on
+    // professions/skills, no data change), 20260610130200 (candidate_skills,
+    // doctrine 2.3 original_text/original_language, default-closed, no
+    // auto-approve). All additive + reversible; files are needs-human-gate
+    // DRAFTS, applied ONLY via MCP apply_migration after owner review (never
+    // auto, never db push). Design: docs/product/esco-taxonomy-design.md.
+    const SPRINT_BASELINE = 57;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

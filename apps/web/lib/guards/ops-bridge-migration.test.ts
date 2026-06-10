@@ -124,7 +124,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Operations v2 (pilot-ops-v2-status-docs: additive operational-status +
     // readiness-checklist tables with RPC-only writes), then to 54 for
     // candidate-provider-draft-v1 (additive owner-scoped candidate_drafts table).
-    // The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 54/);
+    // The baseline only ever grows deliberately. Then to 57 for the S2
+    // esco-taxonomy-foundation DRAFT set (three needs-human-gate additive
+    // migrations: esco core catalogue, esco_uri refs, candidate_skills) -
+    // committed as drafts, applied ONLY via MCP after owner review.
+    expect(guard).toMatch(/SPRINT_BASELINE = 57/);
   });
 });
