@@ -1,4 +1,6 @@
 # labourmarket.ai — North Star & Build Sequence
+
+> Vykdymo programa (10 sprintų iki pilnos vizijos): [`PROJECT_EXECUTION_PLAN_10_SPRINTS.md`](PROJECT_EXECUTION_PLAN_10_SPRINTS.md)
 **For:** Claude Code (executor) + DI (founder) · **From:** Chat Claude (architect) · **Date:** 2026-05-30
 **What this is:** the orienting map — the full-product destination and the *sequenced* path toward it. It pairs with `PROJECT_VISION.md` (the *what*) by giving the *how-we-get-there, in order*. **It is NOT a single sprint to execute now.** Build toward it deliberately, ONE coherent slice at a time, each on the clean canonical line, each through the auto-merge gate. Every future slice handoff should cite where it sits in this map.
 
