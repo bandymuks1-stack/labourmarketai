@@ -1163,7 +1163,8 @@
       "demand": {
         "title": "Open demand",
         "count": "{count} open requests",
-        "empty": "No open requests right now. New submitted requests will appear here."
+        "empty": "No open requests right now. New submitted requests will appear here.",
+        "messageRequester": "Message requester"
       },
       "kind": {
         "company_request": "Company request",
@@ -1227,6 +1228,23 @@
         "notFound": "Request or worker no longer exists.",
         "needsMigration": "Consolidation migration not applied — recording is blocked.",
         "error": "Could not record the decision."
+      },
+      "suggestions": {
+        "title": "Rule-based shortlist",
+        "humanRule": "Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "start": "Start conversation",
+        "reasons": {
+          "country_match": "In country",
+          "preferred_country_match": "Prefers country",
+          "available_now": "Available",
+          "profession_token_match": "Profession fits request text",
+          "verified_skills": "Verified skills",
+          "manager_confirmations": "Manager confirmations",
+          "journal_evidence": "Journal evidence"
+        }
+      },
+      "filters": {
+        "all": "All countries"
       }
     }
   },
@@ -1933,7 +1951,7 @@
           "p2": "Say what people, teams or partners you need.",
           "p3": "Offer your services to the market."
         },
-        "pilot": {
+        "demand": {
           "sending": "Sending...",
           "error": "Couldn't send. Please try again.",
           "progressHelper": "These steps show progress. Active actions are shown below.",
@@ -3131,7 +3149,8 @@
       "joinHint": "You're an admin but not yet a participant of this thread. Join to reply.",
       "joinLabel": "Join conversation",
       "joinPending": "Joining..."
-    }
+    },
+    "originalLanguage": "Original ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
@@ -3513,5 +3532,45 @@
       "saved": "Saved",
       "error": "Could not save. Please try again."
     }
+  },
+  "trust": {
+    "title": "Trust signals",
+    "caption": "Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "verifiedSkills": "Verified skills",
+    "managerConfirmations": "Manager confirmations",
+    "journalEntries": "Journal entries",
+    "zeroHint": "Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Verified CV",
+    "exportButton": "Export CV (PDF)",
+    "print": "Download PDF",
+    "back": "← Back to profile",
+    "primary": "primary",
+    "skills": "Skills",
+    "skillsEmpty": "No skills saved yet.",
+    "tiers": {
+      "confirmed": "Manager-confirmed",
+      "evidence": "Backed by work entries",
+      "declared": "Self-declared"
+    },
+    "tierHints": {
+      "confirmed": "confirmed by a manager on a real work entry",
+      "evidence": "work-journal entries back this skill; a manager has not confirmed it yet",
+      "declared": "the person's own claim, not externally confirmed"
+    },
+    "summary": {
+      "verifiedSkills": "Verified skills",
+      "managerConfirmations": "Manager confirmations",
+      "journalEntries": "Journal entries"
+    },
+    "proofTitle": "Confirmed work proof",
+    "proofDate": "Date",
+    "proofProject": "Project",
+    "proofRole": "Confirmed by (role)",
+    "proofEmpty": "No confirmed entries yet.",
+    "generatedAt": "Generated",
+    "verifyNote": "Confirmations can be checked on the platform.",
+    "notWorker": "CV export is available for worker profiles — it is built from the work journal and confirmed skills."
   }
 }

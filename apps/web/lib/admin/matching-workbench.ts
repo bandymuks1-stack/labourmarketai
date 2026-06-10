@@ -62,6 +62,9 @@ export interface MatchLogEntry {
 
 export interface DemandRow {
   readonly id: string;
+  /** Requester's profiles.id — the messaging identity for the
+   *  "message requester" entry point (Workstream B). */
+  readonly profileId: string | null;
   readonly title: string;
   readonly kind: string | null;
   readonly needSummary: string | null;
@@ -84,6 +87,8 @@ export interface DemandRow {
 
 export interface SupplyWorkerRow {
   readonly id: string;
+  /** profiles.id — the messaging identity for "start conversation". */
+  readonly profileId: string | null;
   readonly displayName: string | null;
   readonly headline: string | null;
   readonly availabilityStatus: string | null;
@@ -154,7 +159,7 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
   const { data: requests, error } = await asAny(supabase)
     .from("customer_requests")
     .select(
-      "id, title, kind, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, status, manual_review_note, payload, created_at",
+      "id, profile_id, title, kind, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, status, manual_review_note, payload, created_at",
     )
     .in("status", [...OPEN_STATUSES])
     .order("created_at", { ascending: false });
@@ -171,6 +176,7 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const demand: DemandRow[] = ((requests ?? []) as any[]).map((r) => ({
     id: r.id as string,
+    profileId: (r.profile_id as string | null) ?? null,
     title: (r.title as string) ?? "—",
     kind: (r.kind as string | null) ?? null,
     needSummary: (r.need_summary as string | null) ?? null,
@@ -193,7 +199,7 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
   const { data: workers, error: wErr } = await asAny(supabase)
     .from("workers")
     .select(
-      "id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, experience_years, created_at",
+      "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, experience_years, created_at",
     )
     .order("created_at", { ascending: false });
   if (wErr) return { kind: "error", message: wErr.message };
@@ -280,6 +286,7 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
 
   const supply: SupplyWorkerRow[] = workerRows.map((w) => ({
     id: w.id as string,
+    profileId: (w.profile_id as string | null) ?? null,
     displayName: (w.display_name as string | null) ?? null,
     headline: (w.headline as string | null) ?? null,
     availabilityStatus: (w.availability_status as string | null) ?? null,

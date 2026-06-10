@@ -162,7 +162,25 @@
     },
     "showOriginal": "Rodyti originalą",
     "skills": "Įgūdžiai",
-    "title": "Patvirtinti įrašai"
+    "title": "Patvirtinti įrašai",
+    "quick": {
+      "openQuick": "Greitas patvirtinimas →",
+      "title": "Greitas patvirtinimas",
+      "subtitle": "Vienas žvilgsnis, vienas palietimas: kortelėje matosi darbuotojas, data, darbai ir įgūdžiai, kuriuos patvirtinsite. Kiekvienas patvirtinimas — tikras jūsų sprendimas, įrašomas tik jums palietus.",
+      "detailedReview": "Detali peržiūra",
+      "willConfirm": "Bus patvirtinta:",
+      "entryOnlyNote": "Nepatvirtintų įgūdžių nėra — palietimu patvirtinamas pats įrašas.",
+      "confirmTap": "Patvirtinti įrašą",
+      "confirmTapSkills": "Patvirtinti įrašą ir įgūdžius ({count})",
+      "confirmedCard": "Patvirtinta — {name}",
+      "rejectedCard": "Atmesta — {name}. Įrašas lieka paties darbuotojo nurodytas jo žurnale.",
+      "batchButton": "Patvirtinti visus šios dienos ({count})",
+      "batchSummaryTitle": "Ką patvirtinate",
+      "batchSummaryLead": "Vienas patvirtinimas apima visus žemiau išvardytus įrašus ir įrašomas kaip jūsų sprendimas dėl kiekvieno iš jų. Peržiūrėkite sąrašą prieš patvirtindami.",
+      "batchConfirm": "Patvirtinti ({count})",
+      "batchDone": "Patvirtinta įrašų: {confirmed}. Patvirtinta įgūdžių: {skills}.",
+      "batchFailed": "Nepavyko patvirtinti: {count} — atidarykite detalią peržiūrą."
+    }
   },
   "listEmpty": "Kol kas neturite darbo įrodymų — jūsų įrašai atsiras čia.",
   "listEmptyTitle": "Pradėkite kurti darbo įrodymus",

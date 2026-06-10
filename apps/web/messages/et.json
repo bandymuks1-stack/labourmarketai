@@ -197,7 +197,7 @@
           "p2": "[EN] Say what people, teams or partners you need.",
           "p3": "[EN] Offer your services to the market."
         },
-        "pilot": {
+        "demand": {
           "title": "[EN] Tell us what you need",
           "body": "[EN] Describe what you're looking for. Your request is saved and visible in your space right away — you're first here, so everything you create is real.",
           "cta": "[EN] Submit your need",
@@ -1115,7 +1115,8 @@
       "demand": {
         "title": "[EN] Open demand",
         "count": "[EN] {count} open requests",
-        "empty": "[EN] No open requests right now. New submitted requests will appear here."
+        "empty": "[EN] No open requests right now. New submitted requests will appear here.",
+        "messageRequester": "[EN] Message requester"
       },
       "kind": {
         "company_request": "[EN] Company request",
@@ -1179,10 +1180,70 @@
         "notFound": "[EN] Request or worker no longer exists.",
         "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
         "error": "[EN] Could not record the decision."
+      },
+      "suggestions": {
+        "title": "[EN] Rule-based shortlist",
+        "humanRule": "[EN] Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "start": "[EN] Start conversation",
+        "reasons": {
+          "country_match": "[EN] In country",
+          "preferred_country_match": "[EN] Prefers country",
+          "available_now": "[EN] Available",
+          "profession_token_match": "[EN] Profession fits request text",
+          "verified_skills": "[EN] Verified skills",
+          "manager_confirmations": "[EN] Manager confirmations",
+          "journal_evidence": "[EN] Journal evidence"
+        }
+      },
+      "filters": {
+        "all": "[EN] All countries"
       }
     },
     "hub": {
       "matching": "[EN] Matching workbench"
     }
+  },
+  "communication": {
+    "originalLanguage": "[EN] Original ({lang})"
+  },
+  "trust": {
+    "title": "[EN] Trust signals",
+    "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "verifiedSkills": "[EN] Verified skills",
+    "managerConfirmations": "[EN] Manager confirmations",
+    "journalEntries": "[EN] Journal entries",
+    "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Kinnitatud CV",
+    "exportButton": "Ekspordi CV (PDF)",
+    "print": "Laadi alla PDF",
+    "back": "← Tagasi profiilile",
+    "primary": "põhiline",
+    "skills": "Oskused",
+    "skillsEmpty": "Oskusi pole veel salvestatud.",
+    "tiers": {
+      "confirmed": "Juhi kinnitatud",
+      "evidence": "Toetatud töösissekannetega",
+      "declared": "Enda märgitud"
+    },
+    "tierHints": {
+      "confirmed": "juht kinnitas tegeliku töösissekande põhjal",
+      "evidence": "tööpäeviku sissekanded toetavad seda oskust; juht pole seda veel kinnitanud",
+      "declared": "inimese enda väide, väliselt kinnitamata"
+    },
+    "summary": {
+      "verifiedSkills": "Kinnitatud oskused",
+      "managerConfirmations": "Juhi kinnitused",
+      "journalEntries": "Päeviku sissekanded"
+    },
+    "proofTitle": "Kinnitatud tööde tõendid",
+    "proofDate": "Kuupäev",
+    "proofProject": "Projekt",
+    "proofRole": "Kinnitas (roll)",
+    "proofEmpty": "Kinnitatud sissekandeid pole veel.",
+    "generatedAt": "Loodud",
+    "verifyNote": "Kinnitusi saab kontrollida platvormil.",
+    "notWorker": "CV eksport on saadaval töötaja profiilile — see koostatakse tööpäevikust ja kinnitatud oskustest."
   }
 }

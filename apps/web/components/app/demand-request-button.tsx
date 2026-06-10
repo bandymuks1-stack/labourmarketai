@@ -17,7 +17,7 @@ export function DemandRequestButton({
 }: {
   intent: "hire_workers" | "partner";
 }) {
-  const t = useTranslations("auth.dashboard.wow.pilot");
+  const t = useTranslations("auth.dashboard.wow.demand");
   // Intent-specific copy: company hiring is NOT a generic buyer "need".
   const key = intent === "hire_workers" ? "hire" : "partner";
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">(

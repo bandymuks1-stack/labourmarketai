@@ -23,7 +23,7 @@ import { createClient } from "@/lib/supabase/server";
  *     free-text profile / journal body. The action returns a tagged
  *     result so callers can tell why a record was rejected.
  */
-export type PilotEventInput = {
+export type TelemetryEventInput = {
   sessionId: string;
   route: string;
   locale: string;
@@ -76,8 +76,8 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
 const SCALAR_VALUE_MAX = 200;
 const METADATA_BYTE_MAX = 2048;
 
-export async function recordPilotEvent(
-  input: PilotEventInput,
+export async function recordTelemetryEvent(
+  input: TelemetryEventInput,
 ): Promise<RecordPilotEventResult> {
   const sessionId = (input.sessionId ?? "").trim().slice(0, 64);
   const route = (input.route ?? "").trim().slice(0, 240);

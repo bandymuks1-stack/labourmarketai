@@ -45,6 +45,7 @@ const SUBMIT = /type=\s*["']submit["']/;
 const NATIVE_NAV = new Set([
   "components/app/account-menu.tsx", // logout POST → redirect
   "components/app/message-button.tsx", // open-conversation action → redirect
+  "app/[locale]/dashboard/admin/matching/page.tsx", // start-conversation = same openDirectConversationAction → redirect; the review form on this page is the client MatchingWorkbenchReview (covered separately)
   "app/[locale]/dashboard/account/page.tsx", // logout POST
   "app/[locale]/dashboard/start/agency/page.tsx", // startAgencyAction → reload to ✓ state
   // company setup moved to the client <CompanySetupForm> (useActionState +

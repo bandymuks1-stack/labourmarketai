@@ -157,15 +157,34 @@ export async function sendMessage(input: {
   // Table is `conversation_messages`, NOT `messages` — see migration
   // 0021's header for the naming rationale (legacy `public.messages`
   // chain pre-existed in prod and is left untouched).
-  const result = await asAny(supabase)
+  //
+  // §2.3: stamp the author's language (their UI locale) so viewers can get
+  // translation-on-read later. The column ships as a DRAFT migration
+  // (20260610190000) — until the owner applies it, the insert degrades to
+  // the legacy shape (42703 = undefined column) instead of failing sends.
+  const KNOWN_LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+  const originalLanguage = KNOWN_LOCALES.includes(input.locale) ? input.locale : null;
+  let result = await asAny(supabase)
     .from("conversation_messages")
     .insert({
       conversation_id: input.conversationId,
       author_id: user.id,
       body,
+      original_language: originalLanguage,
     })
     .select("id")
     .single();
+  if (result.error?.code === "42703" || /original_language/.test(result.error?.message ?? "")) {
+    result = await asAny(supabase)
+      .from("conversation_messages")
+      .insert({
+        conversation_id: input.conversationId,
+        author_id: user.id,
+        body,
+      })
+      .select("id")
+      .single();
+  }
   if (result.error || !result.data?.id) {
     console.error("[communication] send message failed:", result.error?.message);
     // RLS denial surfaces as a 42501 / "row level security" message —

@@ -676,7 +676,7 @@ const FEATURE_STATUS: readonly FeatureStatusRow[] = [
     route: "/[locale]/dashboard/company",
     status: "partial",
     note:
-      "PilotDraftForm persists draft to pilot_drafts; full workspace not active. Role catalogue marks 'preparing'.",
+      "DemandDraftForm persists draft to pilot_drafts; full workspace not active. Role catalogue marks 'preparing'.",
   },
   {
     id: "agency-setup",

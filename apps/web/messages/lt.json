@@ -1163,7 +1163,8 @@
       "demand": {
         "title": "Atviri poreikiai",
         "count": "{count} atvirų užklausų",
-        "empty": "Šiuo metu atvirų užklausų nėra. Naujos pateiktos užklausos atsiras čia."
+        "empty": "Šiuo metu atvirų užklausų nėra. Naujos pateiktos užklausos atsiras čia.",
+        "messageRequester": "Parašyti užklausos teikėjui"
       },
       "kind": {
         "company_request": "Įmonės poreikis",
@@ -1227,6 +1228,23 @@
         "notFound": "Užklausa arba darbuotojas nebeegzistuoja.",
         "needsMigration": "Konsolidacijos migracija nepritaikyta — fiksavimas užblokuotas.",
         "error": "Nepavyko užfiksuoti sprendimo."
+      },
+      "suggestions": {
+        "title": "Taisyklėmis paremtas sąrašas",
+        "humanRule": "Rikiuota pagal realius įrodymus (atitikę filtrai, patvirtinti įgūdžiai, patvirtinimai) — jokio skaičiuojamo balo; sprendžia žmogus.",
+        "start": "Pradėti pokalbį",
+        "reasons": {
+          "country_match": "Šalyje",
+          "preferred_country_match": "Nori dirbti šalyje",
+          "available_now": "Laisvas",
+          "profession_token_match": "Profesija atitinka užklausos tekstą",
+          "verified_skills": "Patvirtinti įgūdžiai",
+          "manager_confirmations": "Vadovo patvirtinimai",
+          "journal_evidence": "Žurnalo įrodymai"
+        }
+      },
+      "filters": {
+        "all": "Visos šalys"
       }
     }
   },
@@ -1933,7 +1951,7 @@
           "p2": "Nurodykite, kokių žmonių, komandų ar partnerių ieškote.",
           "p3": "Pasiūlykite savo paslaugas rinkai."
         },
-        "pilot": {
+        "demand": {
           "sending": "Siunčiama...",
           "error": "Nepavyko išsiųsti. Bandykite dar kartą.",
           "progressHelper": "Šie žingsniai rodo eigą. Aktyvūs veiksmai pateikiami žemiau.",
@@ -3131,7 +3149,8 @@
       "joinHint": "Esate administratorius, bet dar ne šio pokalbio dalyvis. Prisijunkite, kad galėtumėte atsakyti.",
       "joinLabel": "Prisijungti prie pokalbio",
       "joinPending": "Jungiamasi..."
-    }
+    },
+    "originalLanguage": "Originalas ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Jūsų organizacija",
@@ -3513,5 +3532,45 @@
       "saved": "Išsaugota",
       "error": "Nepavyko. Bandyk dar kartą."
     }
+  },
+  "trust": {
+    "title": "Pasitikėjimo signalai",
+    "caption": "Skaičiai imami tiesiai iš realių įrašų — deklaruoti įgūdžiai tampa patikimi tik per žurnalo įrašus, kuriuos patvirtino vadovas. Niekas čia nesveriama ir neišgalvojama.",
+    "verifiedSkills": "Patvirtinti įgūdžiai",
+    "managerConfirmations": "Vadovo patvirtinimai",
+    "journalEntries": "Žurnalo įrašai",
+    "zeroHint": "Pasitikėjimas auga iš realaus darbo: užfiksuok žurnalo įrašą ir paprašyk ten buvusio vadovo jį patvirtinti."
+  },
+  "cvExport": {
+    "pageTitle": "Patvirtintas CV",
+    "exportButton": "Eksportuoti CV (PDF)",
+    "print": "Atsisiųsti PDF",
+    "back": "← Grįžti į profilį",
+    "primary": "pagrindinė",
+    "skills": "Įgūdžiai",
+    "skillsEmpty": "Įgūdžių dar neišsaugota.",
+    "tiers": {
+      "confirmed": "Patvirtinta vadovo",
+      "evidence": "Paremta darbo įrašais",
+      "declared": "Paties nurodyta"
+    },
+    "tierHints": {
+      "confirmed": "vadovas patvirtino remdamasis tikru darbo įrašu",
+      "evidence": "darbo žurnalo įrašai paremia šį įgūdį; vadovas jo dar nepatvirtino",
+      "declared": "paties žmogaus nurodyta, išoriškai nepatvirtinta"
+    },
+    "summary": {
+      "verifiedSkills": "Patvirtinti įgūdžiai",
+      "managerConfirmations": "Vadovo patvirtinimai",
+      "journalEntries": "Žurnalo įrašai"
+    },
+    "proofTitle": "Patvirtinti darbo įrodymai",
+    "proofDate": "Data",
+    "proofProject": "Projektas",
+    "proofRole": "Patvirtino (rolė)",
+    "proofEmpty": "Patvirtintų įrašų dar nėra.",
+    "generatedAt": "Sugeneruota",
+    "verifyNote": "Patvirtinimus galima patikrinti platformoje.",
+    "notWorker": "CV eksportas galimas darbuotojo profiliui — jis sudaromas iš darbo žurnalo ir patvirtintų įgūdžių."
   }
 }

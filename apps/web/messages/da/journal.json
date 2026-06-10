@@ -42,7 +42,25 @@
     "rejectReason": "[EN] Reason for rejection",
     "showOriginal": "[EN] Show original",
     "skills": "[EN] Skills",
-    "title": "[EN] Entries to confirm"
+    "title": "[EN] Entries to confirm",
+    "quick": {
+      "openQuick": "Hurtig bekræftelse →",
+      "title": "Hurtig bekræftelse",
+      "subtitle": "Ét blik, ét tryk: kortet viser medarbejderen, datoen, arbejdet og de færdigheder, du bekræfter. Hver bekræftelse er din reelle beslutning og registreres først, når du trykker.",
+      "detailedReview": "Detaljeret gennemgang",
+      "willConfirm": "Bekræftes:",
+      "entryOnlyNote": "Ingen ubekræftede færdigheder — trykket bekræfter selve registreringen.",
+      "confirmTap": "Bekræft registrering",
+      "confirmTapSkills": "Bekræft registrering + færdigheder ({count})",
+      "confirmedCard": "Bekræftet — {name}",
+      "rejectedCard": "Afvist — {name}. Registreringen forbliver medarbejderens egen angivelse i journalen.",
+      "batchButton": "Bekræft alle fra i dag ({count})",
+      "batchSummaryTitle": "Hvad du bekræfter",
+      "batchSummaryLead": "Én bekræftelse dækker alle registreringer nedenfor og registreres som din beslutning for hver enkelt. Gennemgå listen, før du bekræfter.",
+      "batchConfirm": "Bekræft ({count})",
+      "batchDone": "Bekræftede registreringer: {confirmed}. Bekræftede færdigheder: {skills}.",
+      "batchFailed": "Kunne ikke bekræftes: {count} — åbn den detaljerede gennemgang."
+    }
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",

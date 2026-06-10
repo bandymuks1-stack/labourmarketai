@@ -50,7 +50,7 @@ describe("buyer chain-action wording uses 'užklausa', not 'poreikis'", () => {
 describe("company hiring is NOT presented as a generic buyer 'poreikis' by default", () => {
   it("pilot copy is intent-specific (hire vs partner), not a single generic 'need' CTA", () => {
     for (const locale of [lt, en]) {
-      const pilot = locale.auth.dashboard.wow.pilot;
+      const pilot = locale.auth.dashboard.wow.demand;
       expect(pilot.hire?.cta, "hire cta").toBeTruthy();
       expect(pilot.partner?.cta, "partner cta").toBeTruthy();
       // No single top-level generic cta/title remains.
@@ -59,7 +59,7 @@ describe("company hiring is NOT presented as a generic buyer 'poreikis' by defau
     }
   });
   it("LT hire CTA uses hiring language and contains no 'poreik'", () => {
-    const hire = lt.auth.dashboard.wow.pilot.hire;
+    const hire = lt.auth.dashboard.wow.demand.hire;
     expect(`${hire.title} ${hire.body} ${hire.cta} ${hire.done}`).not.toMatch(/poreik/i);
     expect(hire.cta).toBe("Sukurti darbo pasiūlymą");
   });
@@ -84,8 +84,8 @@ describe("no English fallback string on LT submissions", () => {
 
 describe("stepper + future modules clarity", () => {
   it("a static progress helper exists (LT + EN) and is rendered", () => {
-    expect(lt.auth.dashboard.wow.pilot.progressHelper).toMatch(/rodo eigą/);
-    expect(en.auth.dashboard.wow.pilot.progressHelper).toMatch(/show progress/);
+    expect(lt.auth.dashboard.wow.demand.progressHelper).toMatch(/rodo eigą/);
+    expect(en.auth.dashboard.wow.demand.progressHelper).toMatch(/show progress/);
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(/journey-progress-helper/);
     expect(page).toMatch(/pilot\.progressHelper/);

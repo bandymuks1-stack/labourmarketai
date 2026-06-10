@@ -35,11 +35,12 @@ export const PRIMARY_LOCALES = ["en", "lt"] as const;
  * When real translations land, lower these numbers to tighten the ratchet.
  */
 export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
-  // 2026-06-10 (+56 admin.matching keys per locale, doctrine §2.4: every new
-  // key lands in all 10 locales in the same PR; [EN] markers until human
-  // translation). New-feature keys raise the ceiling; translations lower it.
-  da: 673,
-  de: 673,
+  // 2026-06-10 (+56 admin.matching, +11 matching suggestions/filters keys per
+  // locale, doctrine §2.4: every new key lands in all 10 locales in the same
+  // PR; [EN] markers until human translation). NOTE: gated PR #288 (S3
+  // documents) carries its own +30 — whichever merges second resolves to 714.
+  da: 692,
+  de: 692,
 };
 
 export interface LocaleDebt {
