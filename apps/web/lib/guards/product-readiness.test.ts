@@ -1314,7 +1314,14 @@ describe("no migration files added by this sprint", () => {
     // candidate_drafts table (owner_id = auth.uid() RLS + admin read, direct
     // authenticated writes, explicit grants). No account/consent/verification;
     // a draft is not assignable until linked. Reversible.
-    const SPRINT_BASELINE = 54;
+    // Bumped 54 -> 55 for s3-documents-readiness: ONE needs-human-gate DRAFT
+    // (20260610170000_worker_documents_readiness: document_types slug registry
+    // + worker_documents inventory + append-only events + country requirement
+    // STRUCTURE with needs_legal_source flags; RPC-only writes, default-closed
+    // RLS). Additive + reversible; applied ONLY via MCP after owner review.
+    // NOTE: PR #286 (S2 ESCO, gated draft) carries its own 54 -> 57 bump for
+    // three more drafts - whichever merges second resolves to 58.
+    const SPRINT_BASELINE = 55;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

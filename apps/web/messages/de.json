@@ -1184,5 +1184,49 @@
     "hub": {
       "matching": "[EN] Matching workbench"
     }
+  },
+  "documents": {
+    "eyebrow": "[EN] MY DOCUMENTS",
+    "title": "[EN] My documents",
+    "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
+    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
+    "needsMigration": "[EN] The documents storage layer is not enabled in this environment yet.",
+    "noWorker": "[EN] Create your worker profile first — documents attach to it.",
+    "error": "[EN] Could not load your documents.",
+    "empty": "[EN] No documents recorded yet. Start with your CV and ID document.",
+    "list": {
+      "title": "[EN] Your documents"
+    },
+    "status": {
+      "missing": "[EN] Missing",
+      "ready": "[EN] Ready",
+      "expiring": "[EN] Expiring soon",
+      "blocked": "[EN] Blocked"
+    },
+    "fields": {
+      "validUntil": "[EN] Valid until"
+    },
+    "country": {
+      "title": "[EN] What is missing for a country",
+      "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
+      "next": "[EN] Next step: take care of — {doc}.",
+      "ok": "[EN] All curated requirements for {country} are covered."
+    },
+    "types": {
+      "cv": "[EN] CV",
+      "id_document": "[EN] ID document",
+      "a1_certificate": "[EN] A1 certificate",
+      "employment_contract": "[EN] Employment contract",
+      "posted_worker_package": "[EN] Posted worker package",
+      "professional_certificate": "[EN] Professional certificate"
+    },
+    "requirement": {
+      "required": "[EN] Required",
+      "recommended": "[EN] Recommended",
+      "conditional": "[EN] Conditional"
+    },
+    "sourceFlag": "[EN] Needs legal source"
   }
 }
