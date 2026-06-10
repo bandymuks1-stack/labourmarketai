@@ -24,13 +24,19 @@ export function EscoTypeahead({
   ariaLabel,
   onPick,
   className,
+  name,
+  required,
 }: {
   readonly locale: string;
   readonly conceptType: "occupation" | "skill";
   readonly placeholder: string;
   readonly ariaLabel: string;
-  readonly onPick: (s: EscoSuggestion) => void;
+  readonly onPick?: (s: EscoSuggestion) => void;
   readonly className?: string;
+  /** When set, the input submits its text as this form field — the wiring
+   *  mode: typed free text stays valid, a pick fills the canonical label. */
+  readonly name?: string;
+  readonly required?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<readonly EscoSuggestion[]>([]);
@@ -80,6 +86,8 @@ export function EscoTypeahead({
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
         aria-label={ariaLabel}
+        name={name}
+        required={required}
         className="w-full rounded-md border border-border-default bg-surface-1 px-2 py-1.5 text-sm text-text-primary outline-none focus:border-brand-blue"
         data-testid={`esco-typeahead-${conceptType}`}
       />
@@ -93,7 +101,7 @@ export function EscoTypeahead({
               <button
                 type="button"
                 onClick={() => {
-                  onPick(s);
+                  onPick?.(s);
                   setQuery(s.label);
                   setOpen(false);
                 }}

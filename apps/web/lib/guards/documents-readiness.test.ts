@@ -85,10 +85,13 @@ describe("S3 migration draft — gated, additive, hardened", () => {
   });
 });
 
-describe("S3 app layer — flag off, honest derivation, honest copy", () => {
-  it("DOCUMENTS_READINESS_ENABLED ships OFF", () => {
+describe("S3 app layer — flag on post-gate, honest derivation, honest copy", () => {
+  // Flag-flip (2026-06-10): worker_documents_readiness is APPLIED to prod
+  // via MCP (ledger 20260610172333), so the flag is ON. The flag-off
+  // RUOŠIAMA mechanics stay pinned below as the honest pull-back path.
+  it("DOCUMENTS_READINESS_ENABLED is ON (post-gate flag-flip)", () => {
     expect(read("lib/config/documents.ts")).toMatch(
-      /export const DOCUMENTS_READINESS_ENABLED = false/,
+      /export const DOCUMENTS_READINESS_ENABLED = true/,
     );
   });
 
@@ -107,7 +110,7 @@ describe("S3 app layer — flag off, honest derivation, honest copy", () => {
     );
   });
 
-  it("page renders the RUOŠIAMA note while flag is off + TASK 07 marker", () => {
+  it("page keeps the flag-off RUOŠIAMA branch + TASK 07 marker", () => {
     const page = read("app/[locale]/dashboard/documents/page.tsx");
     expect(page).toMatch(/documents-preparing/);
     expect(page).toMatch(/bus pakeista TASK 07/);

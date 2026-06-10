@@ -100,9 +100,13 @@ describe("recognition never touches verification", () => {
 });
 
 describe("flag + attribution", () => {
-  it("ESCO autocomplete ships OFF", () => {
+  // Flag-flip slice (design doc §9 step 3, 2026-06-10): the three S2
+  // migrations are APPLIED to prod via MCP (ledger 20260610172207/172226/
+  // 172251), so the flag is ON. The flag-off mechanics stay pinned below —
+  // they are the honest-degradation path if the flag is ever pulled back.
+  it("ESCO autocomplete is ON (post-gate flag-flip)", () => {
     expect(read("lib/config/esco.ts")).toMatch(
-      /export const ESCO_AUTOCOMPLETE_ENABLED = false/,
+      /export const ESCO_AUTOCOMPLETE_ENABLED = true/,
     );
   });
   it("lib + component honor the flag (empty list / render nothing)", () => {
@@ -112,6 +116,16 @@ describe("flag + attribution", () => {
     expect(read("components/app/esco-typeahead.tsx")).toMatch(
       /if \(!ESCO_AUTOCOMPLETE_ENABLED\) return null;/,
     );
+  });
+  it("flag-flip wiring: the skill-clarify label field is the typeahead, with attribution", () => {
+    const form = read("components/app/skill-clarify-form.tsx");
+    // ONE input, no parallel CTA: the typeahead carries the form field name.
+    expect(form).toMatch(/<EscoTypeahead/);
+    expect(form).toMatch(/name="label"/);
+    expect(form).toContain("ESCO_ATTRIBUTION");
+    // A pick stays self-declared — the form never writes verification
+    // surfaces (prose may SAY "never verified"; code may not touch them).
+    expect(form).not.toMatch(/worker_skills|verified\s*[:=]\s*true|\.update\(|\.upsert\(/);
   });
   it("EU attribution present in config, import script and design doc", () => {
     const phrase = "ESCO classification of the European Commission";

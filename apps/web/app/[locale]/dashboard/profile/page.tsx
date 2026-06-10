@@ -22,6 +22,7 @@ import type {
   SkillDot,
 } from "@/components/app/cv-engagement-cards";
 import { type Role } from "@/lib/auth/actions";
+import { DOCUMENTS_READINESS_ENABLED } from "@/lib/config/documents";
 import { createClient } from "@/lib/supabase/server";
 import { TrustBlock } from "@/components/app/trust-block";
 import { getOwnTrustSignals } from "@/lib/profile/trust-signals";
@@ -56,6 +57,7 @@ export default async function ProfilePage({
   const tRole = await getTranslations("auth.signup.role");
   const tTrust = await getTranslations("trust");
   const tCv = await getTranslations("cvExport");
+  const tDocs = await getTranslations("documents");
 
   const supabase = await createClient();
   const {
@@ -319,6 +321,17 @@ export default async function ProfilePage({
                 data-testid="profile-cv-export-link"
               >
                 {tCv("exportButton")}
+              </Link>
+            ) : null}
+            {/* Documents & readiness entry point (flag-flip slice) — the
+                page is not in the primary nav yet (separate IA slice). */}
+            {workerId && DOCUMENTS_READINESS_ENABLED ? (
+              <Link
+                href={"/dashboard/documents" as "/dashboard"}
+                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                data-testid="profile-documents-link"
+              >
+                {tDocs("title")}
               </Link>
             ) : null}
             <Link

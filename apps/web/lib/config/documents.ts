@@ -1,12 +1,14 @@
 /**
  * Documents & readiness engine config (S3 / s3-documents-readiness).
  *
- * Ships OFF: the worker_documents / country_document_requirements tables
- * exist only as a needs-human-gate DRAFT migration until the owner applies
- * it via MCP (docs/product/documents-readiness-design.md §6). The flag-flip
- * slice turns this on together with the nav links and the file-upload slice.
+ * Flag-flip: ON since 2026-06-10 — the worker_documents_readiness migration
+ * is APPLIED to prod via MCP apply_migration (ledger 20260610172333). The
+ * page derives statuses from the worker's own rows + date arithmetic and
+ * stays honest while empty; country_document_requirements ships EMPTY
+ * (needs_legal_source — no invented legal facts). File upload and the
+ * primary-nav promotion are separate follow-up slices.
  */
-export const DOCUMENTS_READINESS_ENABLED = false;
+export const DOCUMENTS_READINESS_ENABLED = true;
 
 /** Days before valid_until at which a ready document counts as expiring. */
 export const DOCUMENT_EXPIRING_WINDOW_DAYS = 30;
