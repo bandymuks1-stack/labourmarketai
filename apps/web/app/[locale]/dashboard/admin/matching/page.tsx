@@ -195,6 +195,27 @@ export default async function AdminMatchingWorkbenchPage({
                       <Field label={t("fields.notes")} value={r.notes} />
                     </dl>
 
+                    {/* Workstream B entry point: conversation FROM a
+                        customer_request — message the requester directly. */}
+                    {r.profileId ? (
+                      <form action={openDirectConversationAction} className="self-start">
+                        <input type="hidden" name="profileId" value={r.profileId} />
+                        <input type="hidden" name="locale" value={locale} />
+                        <input
+                          type="hidden"
+                          name="fallback"
+                          value={`/${locale}/dashboard/admin/matching`}
+                        />
+                        <button
+                          type="submit"
+                          className="rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                          data-testid={`matching-message-requester-${r.id}`}
+                        >
+                          {t("demand.messageRequester")}
+                        </button>
+                      </form>
+                    ) : null}
+
                     {r.payloadFields.length > 0 ? (
                       <div className="rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1">
                         <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">

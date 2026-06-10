@@ -1115,7 +1115,8 @@
       "demand": {
         "title": "[EN] Open demand",
         "count": "[EN] {count} open requests",
-        "empty": "[EN] No open requests right now. New submitted requests will appear here."
+        "empty": "[EN] No open requests right now. New submitted requests will appear here.",
+        "messageRequester": "[EN] Message requester"
       },
       "kind": {
         "company_request": "[EN] Company request",
@@ -1201,5 +1202,8 @@
     "hub": {
       "matching": "[EN] Matching workbench"
     }
+  },
+  "communication": {
+    "originalLanguage": "[EN] Original ({lang})"
   }
 }

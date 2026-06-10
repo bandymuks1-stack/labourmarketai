@@ -1163,7 +1163,8 @@
       "demand": {
         "title": "Atviri poreikiai",
         "count": "{count} atvirų užklausų",
-        "empty": "Šiuo metu atvirų užklausų nėra. Naujos pateiktos užklausos atsiras čia."
+        "empty": "Šiuo metu atvirų užklausų nėra. Naujos pateiktos užklausos atsiras čia.",
+        "messageRequester": "Parašyti užklausos teikėjui"
       },
       "kind": {
         "company_request": "Įmonės poreikis",
@@ -3148,7 +3149,8 @@
       "joinHint": "Esate administratorius, bet dar ne šio pokalbio dalyvis. Prisijunkite, kad galėtumėte atsakyti.",
       "joinLabel": "Prisijungti prie pokalbio",
       "joinPending": "Jungiamasi..."
-    }
+    },
+    "originalLanguage": "Originalas ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Jūsų organizacija",
