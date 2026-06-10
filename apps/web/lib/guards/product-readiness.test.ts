@@ -1314,7 +1314,12 @@ describe("no migration files added by this sprint", () => {
     // candidate_drafts table (owner_id = auth.uid() RLS + admin read, direct
     // authenticated writes, explicit grants). No account/consent/verification;
     // a draft is not assignable until linked. Reversible.
-    const SPRINT_BASELINE = 54;
+    // Bumped 54 -> 55 for conversations-ui (Workstream B): ONE additive DRAFT
+    // (20260610190000_conversation_message_language: nullable original_language
+    // on conversation_messages, doctrine 2.3; applied ONLY via MCP by owner).
+    // NOTE: gated PR #288 (S3 documents) bumps independently - second merger
+    // resolves upward.
+    const SPRINT_BASELINE = 55;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -125,6 +125,6 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // readiness-checklist tables with RPC-only writes), then to 54 for
     // candidate-provider-draft-v1 (additive owner-scoped candidate_drafts table).
     // The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 54/);
+    expect(guard).toMatch(/SPRINT_BASELINE = 5[56]/);
   });
 });

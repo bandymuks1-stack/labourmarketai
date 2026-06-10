@@ -1163,7 +1163,8 @@
       "demand": {
         "title": "Open demand",
         "count": "{count} open requests",
-        "empty": "No open requests right now. New submitted requests will appear here."
+        "empty": "No open requests right now. New submitted requests will appear here.",
+        "messageRequester": "Message requester"
       },
       "kind": {
         "company_request": "Company request",
@@ -3148,7 +3149,8 @@
       "joinHint": "You're an admin but not yet a participant of this thread. Join to reply.",
       "joinLabel": "Join conversation",
       "joinPending": "Joining..."
-    }
+    },
+    "originalLanguage": "Original ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
