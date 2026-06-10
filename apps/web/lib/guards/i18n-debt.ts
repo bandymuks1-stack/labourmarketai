@@ -39,8 +39,8 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // locale, doctrine §2.4: every new key lands in all 10 locales in the same
   // PR; [EN] markers until human translation). NOTE: gated PR #288 (S3
   // documents) carries its own +30 — whichever merges second resolves to 714.
-  da: 686,
-  de: 686,
+  da: 692,
+  de: 692,
 };
 
 export interface LocaleDebt {
