@@ -25,7 +25,15 @@ import { createRequire } from "node:module";
 export const ESCO_ATTRIBUTION =
   "This service uses the ESCO classification of the European Commission.";
 
-export const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+// ALL 28 official ESCO v1.2.1 languages (owner decision 2026-06-10) — the
+// esco_labels locale CHECK is widened to this exact set by migration
+// 20260610230000. Russian is NOT an official ESCO language (RU practical
+// aliases are a separate curated layer, never esco_labels).
+export const LOCALES = [
+  "ar", "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "ga",
+  "hr", "hu", "is", "it", "lt", "lv", "mt", "nl", "no", "pl", "pt", "ro",
+  "sk", "sl", "sv", "uk",
+];
 
 // ── tiny RFC-4180-ish CSV parser (quoted fields, embedded newlines) ───────
 export function parseCsv(text) {
