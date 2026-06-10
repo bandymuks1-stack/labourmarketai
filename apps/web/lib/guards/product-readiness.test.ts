@@ -1338,9 +1338,14 @@ describe("no migration files added by this sprint", () => {
     // esco_labels.locale CHECK from the 10 platform locales to all 28
     // official ESCO v1.2.1 languages (pure superset, no schema/RLS/grant
     // change; ru deliberately absent — not an official ESCO language).
+    // Bumped 60 -> 61 for esco-service-role-grants (20260610234500):
+    // GRANTS-ONLY fix — MCP-created tables get no service_role default
+    // privileges, so the official importer's upserts hit "permission denied";
+    // grants select/insert/update on the four esco_* tables to service_role,
+    // no RLS change, anon untouched.
     // NOTE: gated PR #296 (S4) carries its own 59 -> 61 bump for two more
-    // drafts — whichever merges second resolves upward (to 62).
-    const SPRINT_BASELINE = 60;
+    // drafts — whichever merges second resolves upward (to 63).
+    const SPRINT_BASELINE = 61;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
