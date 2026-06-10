@@ -3532,5 +3532,13 @@
       "saved": "Saved",
       "error": "Could not save. Please try again."
     }
+  },
+  "trust": {
+    "title": "Trust signals",
+    "caption": "Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "verifiedSkills": "Verified skills",
+    "managerConfirmations": "Manager confirmations",
+    "journalEntries": "Journal entries",
+    "zeroHint": "Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
   }
 }

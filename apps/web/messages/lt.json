@@ -3532,5 +3532,13 @@
       "saved": "Išsaugota",
       "error": "Nepavyko. Bandyk dar kartą."
     }
+  },
+  "trust": {
+    "title": "Pasitikėjimo signalai",
+    "caption": "Skaičiai imami tiesiai iš realių įrašų — deklaruoti įgūdžiai tampa patikimi tik per žurnalo įrašus, kuriuos patvirtino vadovas. Niekas čia nesveriama ir neišgalvojama.",
+    "verifiedSkills": "Patvirtinti įgūdžiai",
+    "managerConfirmations": "Vadovo patvirtinimai",
+    "journalEntries": "Žurnalo įrašai",
+    "zeroHint": "Pasitikėjimas auga iš realaus darbo: užfiksuok žurnalo įrašą ir paprašyk ten buvusio vadovo jį patvirtinti."
   }
 }
