@@ -2,9 +2,11 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
+import { getOwnThermometer } from "@/lib/market/thermometer-data";
 import {
   WorkerPlayerCard,
   type PlayerCardLabels,
+  type ThermometerView,
 } from "@/components/app/worker-player-card";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,19 @@ export default async function PlayerCardPage({
   const card = await getWorkerPlayerCard();
   if (!card) redirect(`/${locale}/auth/login`);
 
+  // Thermometer (S4): a score ONLY when both formula components exist;
+  // otherwise the honest missing state — null for non-worker accounts.
+  const thermo = await getOwnThermometer();
+  const thermometer: ThermometerView | null = thermo
+    ? thermo.result.kind === "score"
+      ? {
+          kind: "score",
+          scoreEur: thermo.result.scoreEur,
+          smallSample: thermo.smallSample,
+        }
+      : { kind: "insufficient_data", missing: thermo.result.missing }
+    : null;
+
   const labels: PlayerCardLabels = {
     title: t("title"),
     subtitle: t("subtitle"),
@@ -41,6 +56,12 @@ export default async function PlayerCardPage({
     workCardConfirmed: t("workCardConfirmed"),
     workCardPending: t("workCardPending"),
     namePlaceholder: t("namePlaceholder"),
+    thermoLabel: t("thermoLabel"),
+    thermoHint: t("thermoHint"),
+    thermoMissingPosition: t("thermoMissingPosition"),
+    thermoMissingMarket: t("thermoMissingMarket"),
+    thermoMissingBoth: t("thermoMissingBoth"),
+    thermoSmallSample: t("thermoSmallSample"),
   };
 
   return (
@@ -51,7 +72,7 @@ export default async function PlayerCardPage({
         </h1>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageIntro")}</p>
       </header>
-      <WorkerPlayerCard card={card} labels={labels} />
+      <WorkerPlayerCard card={card} labels={labels} thermometer={thermometer} />
     </div>
   );
 }

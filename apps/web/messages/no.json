@@ -1196,11 +1196,71 @@
         }
       },
       "filters": {
-        "all": "[EN] All countries"
+        "all": "[EN] All countries",
+        "confirmedOnly": "[EN] Confirmed skills ✓"
       }
     },
     "hub": {
-      "matching": "[EN] Matching workbench"
+      "matching": "[EN] Matching workbench",
+      "market": "[EN] Market situation"
+    },
+    "market": {
+      "eyebrow": "[EN] Admin · Market",
+      "title": "[EN] Market situation",
+      "subtitle": "[EN] Supply, demand, admin-entered market averages and gaps — real platform counts only.",
+      "methodNote": "[EN] Every number on this page is a real count of real rows. Market averages are entered by an admin by hand from a named source — the platform never estimates them. Small samples (n<5) are flagged.",
+      "back": "[EN] Admin dashboard",
+      "needsMigration": "[EN] Market averages are not ready yet — the S4 migration awaits the owner gate.",
+      "smallSample": "[EN] ⚠ n<5",
+      "unknownCountry": "[EN] Not specified",
+      "averages": {
+        "title": "[EN] Admin market averages",
+        "help": "[EN] Component 2 of the thermometer formula: profession × country × average (EUR/month) + entry date + source note.",
+        "empty": "[EN] No market averages entered yet — the thermometer stays at 'insufficient market data' until real, sourced figures are entered."
+      },
+      "basis": {
+        "monthly_eur": "[EN] month"
+      },
+      "sourceStatus": {
+        "needs_source": "[EN] Needs source",
+        "sourced": "[EN] Sourced",
+        "reviewed": "[EN] Reviewed"
+      },
+      "form": {
+        "profession": "[EN] Profession",
+        "country": "[EN] Country",
+        "rate": "[EN] Average (EUR/month)",
+        "sourceNote": "[EN] Source note",
+        "sourceNotePlaceholder": "[EN] e.g. State Data Agency, 2026 Q1",
+        "sourceStatus": "[EN] Source status",
+        "save": "[EN] Save average",
+        "saving": "[EN] Saving…",
+        "saved": "[EN] Saved.",
+        "error": "[EN] Could not save."
+      },
+      "supply": {
+        "title": "[EN] Supply — workers",
+        "help": "[EN] Workers by profession × country (worker location; confirmed = workers with at least one manager-confirmed skill).",
+        "empty": "[EN] No workers with professions yet.",
+        "profession": "[EN] Profession",
+        "country": "[EN] Country",
+        "workers": "[EN] Workers",
+        "confirmed": "[EN] With confirmed skills"
+      },
+      "demand": {
+        "title": "[EN] Demand — customer requests",
+        "freeTextNote": "[EN] The intake stores the role as free text (no profession link), so demand cannot be joined to supply by profession yet — the gaps below are country-level.",
+        "empty": "[EN] No customer requests yet.",
+        "country": "[EN] Country",
+        "role": "[EN] Role (free text)",
+        "requests": "[EN] Requests"
+      },
+      "gaps": {
+        "title": "[EN] Gaps",
+        "help": "[EN] Countries with demand, ordered by weakest supply. A row with 0 supply is the gap to act on.",
+        "empty": "[EN] No demand recorded yet.",
+        "row": "[EN] demand {demand} · supply {supply}"
+      }
     }
   },
   "documents": {

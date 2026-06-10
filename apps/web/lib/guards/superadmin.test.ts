@@ -192,9 +192,14 @@ describe("Guard: admin i18n surfaces honest labels (no fake verification)", () =
       // verified=true = manager-confirmed loop) + the request status ladder;
       // its declared-vs-confirmed honesty is asserted below and in
       // matching-workbench.test.ts.
+      // `market` (S4) is excluded for the same reason as `matching`: it
+      // surfaces the REAL skill ladder (workers with manager-confirmed
+      // skills are counted NEXT TO the total, never alone) — its honest
+      // pairing is asserted below.
       const adminSansVerify: Record<string, unknown> = { ...admin };
       delete adminSansVerify.companyVerification;
       delete adminSansVerify.matching;
+      delete adminSansVerify.market;
       const flat = JSON.stringify(adminSansVerify).toLowerCase();
       expect(flat).not.toMatch(/\bverified\b|\bconfirmed\b/);
       expect(flat).not.toMatch(/\bpatvirtinta\b|\bpatvirtinti\b/);
@@ -207,6 +212,15 @@ describe("Guard: admin i18n surfaces honest labels (no fake verification)", () =
       expect(matching?.supply?.skillsDeclared, `${locale} matching declared label`).toBeTruthy();
       expect(matching?.supply?.skillsConfirmed, `${locale} matching confirmed label`).toBeTruthy();
       expect(matching?.humanNote, `${locale} matching human note`).toBeTruthy();
+
+      // S4 market view honest pairing: the confirmed-skills sub-count label
+      // exists ONLY next to the total-workers label + the real-counts method
+      // note (no standalone "verified" claim).
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const market = admin.market as any;
+      expect(market?.supply?.workers, `${locale} market workers label`).toBeTruthy();
+      expect(market?.supply?.confirmed, `${locale} market confirmed label`).toBeTruthy();
+      expect(market?.methodNote, `${locale} market method note`).toBeTruthy();
 
       // The company verification ladder is honest: explicit unverified +
       // pending states, no automatic-verification claim.

@@ -40,9 +40,10 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // locales in the same PR; [EN] markers until human translation). Feature
   // keys raise the ceiling; translations lower it. MEASURED 722 at the S3
   // documents merge (main 692 + 30 documents; the PR-note '714' was stale
-  // arithmetic — measurement wins).
-  da: 722,
-  de: 722,
+  // arithmetic — measurement wins). MEASURED 766 at S4 (+44: admin.market
+  // analysis view + hub link + matching confirmed-only filter).
+  da: 766,
+  de: 766,
 };
 
 export interface LocaleDebt {

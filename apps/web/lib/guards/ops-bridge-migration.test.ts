@@ -129,7 +129,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // catalogue, esco_uri refs, candidate_skills - applied to prod via MCP
     // after owner review) on top of main's 55 (conversations-ui draft), then
     // to 59 for s3-documents-readiness (worker_documents_readiness, applied
-    // to prod via MCP after owner review).
-    expect(guard).toMatch(/SPRINT_BASELINE = 59/);
+    // to prod via MCP after owner review), then to 61 for the S4
+    // termometras+market DRAFT pair (project autolink body-replace +
+    // market_rate_averages; needs-human-gate, not applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 61/);
   });
 });

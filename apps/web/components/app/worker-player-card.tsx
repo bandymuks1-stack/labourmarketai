@@ -26,7 +26,20 @@ export interface PlayerCardLabels {
   workCardConfirmed: string;
   workCardPending: string;
   namePlaceholder: string;
+  thermoLabel: string;
+  thermoHint: string;
+  thermoMissingPosition: string;
+  thermoMissingMarket: string;
+  thermoMissingBoth: string;
+  thermoSmallSample: string;
 }
+
+/** Thermometer view-model (S4). A score renders ONLY when both formula
+ *  components existed server-side; otherwise the honest insufficient-data
+ *  state names the missing component. Never an invented number. */
+export type ThermometerView =
+  | { kind: "score"; scoreEur: number; smallSample: boolean }
+  | { kind: "insufficient_data"; missing: "position" | "market" | "both" };
 
 function Stat({
   value,
@@ -55,9 +68,11 @@ function Stat({
 export function WorkerPlayerCard({
   card,
   labels,
+  thermometer,
 }: {
   card: WorkerPlayerCard;
   labels: PlayerCardLabels;
+  thermometer?: ThermometerView | null;
 }) {
   return (
     <section
@@ -115,6 +130,48 @@ export function WorkerPlayerCard({
           </span>
         </div>
       </div>
+
+      {/* Thermometer (S4) — owner-locked formula; renders a number ONLY when
+          both components exist, otherwise the honest missing-data state. */}
+      {thermometer ? (
+        <div
+          className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+          data-testid="player-card-thermometer"
+        >
+          {thermometer.kind === "score" ? (
+            <>
+              <span className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+                ~{thermometer.scoreEur} €
+              </span>
+              {thermometer.smallSample ? (
+                <span
+                  className="text-[11px] leading-relaxed text-state-warning"
+                  data-testid="player-card-thermometer-small-sample"
+                >
+                  {labels.thermoSmallSample}
+                </span>
+              ) : null}
+            </>
+          ) : (
+            <span
+              className="font-display text-base font-semibold text-text-secondary"
+              data-testid="player-card-thermometer-missing"
+            >
+              {thermometer.missing === "position"
+                ? labels.thermoMissingPosition
+                : thermometer.missing === "market"
+                  ? labels.thermoMissingMarket
+                  : labels.thermoMissingBoth}
+            </span>
+          )}
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {labels.thermoLabel}
+          </span>
+          <span className="text-[11px] leading-relaxed text-text-secondary">
+            {labels.thermoHint}
+          </span>
+        </div>
+      ) : null}
     </section>
   );
 }

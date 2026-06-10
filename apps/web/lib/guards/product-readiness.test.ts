@@ -1333,7 +1333,14 @@ describe("no migration files added by this sprint", () => {
     // RLS). Additive + reversible; APPLIED to prod via MCP apply_migration
     // after owner review (2026-06-10, ledger 20260610172333). Authored as
     // 54 -> 55; resolved to 59 at merge on top of main's 58.
-    const SPRINT_BASELINE = 59;
+    // Bumped 59 -> 61 for S4 termometras+market: TWO needs-human-gate DRAFTs -
+    // 20260610213000 (journal_entries.project_id autolink: body-replace of the
+    // two save-path RPCs, no schema/RLS/grant change, link only when exactly
+    // one active same-org assignment) and 20260610214000 (market_rate_averages
+    // admin-entered table + admin_set_market_rate_average RPC + the
+    // project_position_salary_avg aggregate RPC). Applied ONLY via MCP after
+    // owner review.
+    const SPRINT_BASELINE = 61;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -1046,7 +1046,8 @@
       "communication": "Conversations",
       "support": "Support conversations",
       "companyVerification": "Company verification",
-      "matching": "Matching workbench"
+      "matching": "Matching workbench",
+      "market": "Market situation"
     },
     "drafts": {
       "title": "Operations drafts",
@@ -1244,7 +1245,66 @@
         }
       },
       "filters": {
-        "all": "All countries"
+        "all": "All countries",
+        "confirmedOnly": "Confirmed skills ✓"
+      }
+    },
+    "market": {
+      "eyebrow": "Admin · Market",
+      "title": "Market situation",
+      "subtitle": "Supply, demand, admin-entered market averages and gaps — real platform counts only.",
+      "methodNote": "Every number on this page is a real count of real rows. Market averages are entered by an admin by hand from a named source — the platform never estimates them. Small samples (n<5) are flagged.",
+      "back": "Admin dashboard",
+      "needsMigration": "Market averages are not ready yet — the S4 migration awaits the owner gate.",
+      "smallSample": "⚠ n<5",
+      "unknownCountry": "Not specified",
+      "averages": {
+        "title": "Admin market averages",
+        "help": "Component 2 of the thermometer formula: profession × country × average (EUR/month) + entry date + source note.",
+        "empty": "No market averages entered yet — the thermometer stays at 'insufficient market data' until real, sourced figures are entered."
+      },
+      "basis": {
+        "monthly_eur": "month"
+      },
+      "sourceStatus": {
+        "needs_source": "Needs source",
+        "sourced": "Sourced",
+        "reviewed": "Reviewed"
+      },
+      "form": {
+        "profession": "Profession",
+        "country": "Country",
+        "rate": "Average (EUR/month)",
+        "sourceNote": "Source note",
+        "sourceNotePlaceholder": "e.g. State Data Agency, 2026 Q1",
+        "sourceStatus": "Source status",
+        "save": "Save average",
+        "saving": "Saving…",
+        "saved": "Saved.",
+        "error": "Could not save."
+      },
+      "supply": {
+        "title": "Supply — workers",
+        "help": "Workers by profession × country (worker location; confirmed = workers with at least one manager-confirmed skill).",
+        "empty": "No workers with professions yet.",
+        "profession": "Profession",
+        "country": "Country",
+        "workers": "Workers",
+        "confirmed": "With confirmed skills"
+      },
+      "demand": {
+        "title": "Demand — customer requests",
+        "freeTextNote": "The intake stores the role as free text (no profession link), so demand cannot be joined to supply by profession yet — the gaps below are country-level.",
+        "empty": "No customer requests yet.",
+        "country": "Country",
+        "role": "Role (free text)",
+        "requests": "Requests"
+      },
+      "gaps": {
+        "title": "Gaps",
+        "help": "Countries with demand, ordered by weakest supply. A row with 0 supply is the gap to act on.",
+        "empty": "No demand recorded yet.",
+        "row": "demand {demand} · supply {supply}"
       }
     }
   },
@@ -3505,7 +3565,13 @@
     "workCardPending": "Not confirmed yet",
     "namePlaceholder": "My profile",
     "candidateLabel": "Candidate skills",
-    "candidateHint": "Skills you added in your own words (needs clarification, not verified)."
+    "candidateHint": "Skills you added in your own words (needs clarification, not verified).",
+    "thermoLabel": "Thermometer",
+    "thermoHint": "(average of declared salary expectations in your project + admin-entered market average) / 2 — shown only when both components exist.",
+    "thermoMissingPosition": "Insufficient project data",
+    "thermoMissingMarket": "Insufficient market data",
+    "thermoMissingBoth": "Insufficient market data",
+    "thermoSmallSample": "Small sample (n<5) — interpret with care."
   },
   "skillClarify": {
     "title": "My skills",
