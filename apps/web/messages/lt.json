@@ -1933,7 +1933,7 @@
           "p2": "Nurodykite, kokių žmonių, komandų ar partnerių ieškote.",
           "p3": "Pasiūlykite savo paslaugas rinkai."
         },
-        "pilot": {
+        "demand": {
           "sending": "Siunčiama...",
           "error": "Nepavyko išsiųsti. Bandykite dar kartą.",
           "progressHelper": "Šie žingsniai rodo eigą. Aktyvūs veiksmai pateikiami žemiau.",

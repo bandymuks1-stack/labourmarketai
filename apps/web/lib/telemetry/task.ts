@@ -1,7 +1,7 @@
 /**
  * Client-side task / event tracker (Pilot Telemetry v1).
  *
- * Thin wrapper around the `recordPilotEvent` server action. Owns:
+ * Thin wrapper around the `recordTelemetryEvent` server action. Owns:
  *   - a pseudonymous, per-tab `session_id` cached in sessionStorage so a
  *     single tester's actions correlate across page navigations within
  *     a tab (and don't bleed across tabs);
@@ -20,7 +20,7 @@
  */
 
 import {
-  recordPilotEvent,
+  recordTelemetryEvent,
   type PilotEventResult,
 } from "@/lib/telemetry/actions";
 
@@ -107,7 +107,7 @@ function fire(
     metadata: opts.metadata ?? null,
   };
   // The server action is async; we deliberately do not await it.
-  void recordPilotEvent(payload).catch((e) => {
+  void recordTelemetryEvent(payload).catch((e) => {
     console.warn("[pilot-events] fire failed", {
       eventName,
       name: e instanceof Error ? e.name : "unknown",
