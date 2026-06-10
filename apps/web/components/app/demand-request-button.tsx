@@ -3,16 +3,16 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { submitPilotRequestAction } from "@/lib/pilot/pilot-request-actions";
+import { submitDemandRequestAction } from "@/lib/demand/demand-request-actions";
 
-/** Pilot-request CTA → the CANONICAL demand intake (§17). Submits a real
+/** Demand-request CTA → the CANONICAL demand intake (§17). Submits a real
  *  `customer_request` (status='submitted', kind by intent) through the
  *  owner-scoped `submit_demand_request` RPC — the single structured-demand front
  *  door. It no longer posts to `/api/leads`: that endpoint stays a DISTINCT
  *  anonymous pre-auth funnel (§17.2), not a path for an authenticated need. The
  *  server action resolves the owner from the session (auth.uid()), so no client
  *  email is read or sent. */
-export function PilotRequestButton({
+export function DemandRequestButton({
   intent,
 }: {
   intent: "hire_workers" | "partner";
@@ -27,7 +27,7 @@ export function PilotRequestButton({
   async function request() {
     setState("sending");
     try {
-      const res = await submitPilotRequestAction(intent);
+      const res = await submitDemandRequestAction(intent);
       setState(res.ok ? "done" : "error");
     } catch {
       setState("error");

@@ -134,6 +134,15 @@ unless it actually is.
 **EN:** Seven roles: worker, team_leader, company_manager, hr_personnel,
 agency, admin, customer (B2C). See `docs/ROLES.md`.
 
+> **Realizacijos būsena (owner sprendimas, 2026-06-10):** schemoje realizuotos
+> rolės = `worker`, `company`, `agency`, `customer`, `admin` (fiksuotas RBAC
+> rinkinys, doktrinos §5.2). `team_leader` ir `hr_personnel` — **future /
+> vision only**: modeliuojamos kaip organizacijos pozicijos (§5.4) arba
+> catalogue eilutės vėliau, ne kaip nauji RBAC įrašai. Jokių schema pakeitimų.
+> **EN:** Realized roles in schema = worker/company/agency/customer/admin;
+> team_leader + hr_personnel are future / vision only (org positions per §5.4),
+> not new RBAC entries.
+
 ---
 
 ## 8. Sistemos moduliai (13) / System modules

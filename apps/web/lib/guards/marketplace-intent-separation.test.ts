@@ -68,7 +68,7 @@ describe("company hiring is NOT presented as a generic buyer 'poreikis' by defau
     expect(lt.auth.dashboard.wow.flow.company.c4).not.toMatch(/poreik/i);
   });
   it("the pilot button selects copy by intent", () => {
-    const btn = read("components/app/pilot-request-button.tsx");
+    const btn = read("components/app/demand-request-button.tsx");
     expect(btn).toMatch(/intent === "hire_workers" \? "hire" : "partner"/);
     expect(btn).toMatch(/\$\{key\}\.cta/);
   });
@@ -76,7 +76,7 @@ describe("company hiring is NOT presented as a generic buyer 'poreikis' by defau
 
 describe("no English fallback string on LT submissions", () => {
   it("pilot-request.ts no longer writes the English dashboard need-summary", () => {
-    const src = read("lib/pilot/pilot-request.ts");
+    const src = read("lib/demand/demand-request.ts");
     expect(src).not.toContain("Demand submitted from the dashboard.");
     expect(src).toMatch(/pateikta iš skydelio/);
   });

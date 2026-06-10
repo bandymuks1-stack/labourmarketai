@@ -2,7 +2,7 @@
  * Structured-demand draft persistence — now on the CANONICAL intake
  * `customer_requests` (Phase 3 / Slice 3.1 fold). The "express your need/offer"
  * form is the single demand front door; this module keeps its old
- * getPilotDraft / savePilotDraft API but writes/reads `customer_requests`
+ * getDemandDraft / saveDemandDraft API but writes/reads `customer_requests`
  * (status='draft', kind=<draft_type>, payload=<per-type fields>) instead of the
  * retired `pilot_drafts` path. `leads` is a separate pre-auth funnel, not this.
  *
@@ -52,16 +52,16 @@ export type BuyerRequestPayload = {
   notes?: string;
 };
 
-export type PilotDraftPayload =
+export type DemandDraftPayload =
   | CompanyRequestPayload
   | AgencyOfferPayload
   | BuyerRequestPayload;
 
-export type PilotDraftRow = {
+export type DemandDraftRow = {
   id: string;
   profile_id: string;
   draft_type: DraftType;
-  payload: PilotDraftPayload;
+  payload: DemandDraftPayload;
   visibility: "closed";
   created_at: string;
   updated_at: string;
@@ -72,7 +72,7 @@ const MAX_NOTES_LEN = 4000;
 
 // Keys allowed PER draft type. Anything else gets dropped before the
 // row is written. Typed as `ReadonlySet<string>` (not
-// `ReadonlySet<keyof PilotDraftPayload>`) because the union of payload
+// `ReadonlySet<keyof DemandDraftPayload>`) because the union of payload
 // types narrows to only the shared keys — defeating the per-type
 // whitelist intent. The allowed-keys check still uses Set.has() so the
 // behavior is identical; only the type position is broader.
@@ -118,21 +118,21 @@ type DemandClient = {
 function cr(supabase: SupabaseClient) {
   return (supabase as unknown as DemandClient).from("customer_requests");
 }
-function rowToDraft(r: unknown): PilotDraftRow | null {
+function rowToDraft(r: unknown): DemandDraftRow | null {
   if (r === null || typeof r !== "object") return null;
   const row = r as Record<string, unknown>;
   return {
     id: row.id as string,
     profile_id: row.profile_id as string,
     draft_type: row.kind as DraftType,
-    payload: (row.payload ?? {}) as PilotDraftPayload,
+    payload: (row.payload ?? {}) as DemandDraftPayload,
     visibility: "closed",
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
   };
 }
 
-function sanitize<T extends PilotDraftPayload>(
+function sanitize<T extends DemandDraftPayload>(
   type: DraftType,
   raw: unknown,
 ): T {
@@ -152,9 +152,9 @@ function sanitize<T extends PilotDraftPayload>(
 
 /** Read the signed-in user's structured-demand draft of the given type, or
  *  null. Backed by customer_requests (status='draft', kind=type). */
-export async function getPilotDraft(
+export async function getDemandDraft(
   type: DraftType,
-): Promise<PilotDraftRow | null> {
+): Promise<DemandDraftRow | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -178,10 +178,10 @@ export async function getPilotDraft(
 /** Upsert the user's structured-demand draft of the given type onto the
  *  canonical intake via the owner-scoped save_demand_draft RPC (one draft per
  *  profile+kind enforced by a partial unique index). */
-export async function savePilotDraft(
+export async function saveDemandDraft(
   type: DraftType,
   rawPayload: unknown,
-): Promise<PilotDraftRow | null> {
+): Promise<DemandDraftRow | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -210,13 +210,13 @@ export async function savePilotDraft(
   }
 
   revalidatePath("/", "layout");
-  return getPilotDraft(type);
+  return getDemandDraft(type);
 }
 
 /** "Remove" the user's draft of the given type. customer_requests DELETE is
  *  admin-only RLS; an owner closes their own draft (owner UPDATE is allowed),
  *  which honestly takes it out of the draft form. */
-export async function deletePilotDraft(type: DraftType): Promise<void> {
+export async function deleteDemandDraft(type: DraftType): Promise<void> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -238,7 +238,7 @@ export async function deletePilotDraft(type: DraftType): Promise<void> {
 
 /** Admin-only: aggregate draft counts per kind (read-only metrics). Non-admins
  *  get empty counts (RLS scopes the read). */
-export async function getPilotDraftCounts(): Promise<
+export async function getDemandDraftCounts(): Promise<
   Record<DraftType, number>
 > {
   const supabase = await createClient();
@@ -256,9 +256,9 @@ export async function getPilotDraftCounts(): Promise<
 }
 
 /** Admin-only: list a profile's structured-demand drafts (per-user inspect). */
-export async function listPilotDraftsForProfile(
+export async function listDemandDraftsForProfile(
   profileId: string,
-): Promise<PilotDraftRow[]> {
+): Promise<DemandDraftRow[]> {
   const supabase = await createClient();
   const { data, error } = await cr(supabase)
     .select("id, profile_id, kind, payload, created_at, updated_at")
@@ -268,5 +268,5 @@ export async function listPilotDraftsForProfile(
   if (error) return [];
   return (data ?? [])
     .map(rowToDraft)
-    .filter((x): x is PilotDraftRow => x !== null);
+    .filter((x): x is DemandDraftRow => x !== null);
 }

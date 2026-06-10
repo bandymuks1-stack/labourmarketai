@@ -18,9 +18,9 @@ function loadJson(rel: string): Record<string, unknown> {
 }
 
 const PAGE = "app/[locale]/dashboard/company/page.tsx";
-const FORM = "components/app/pilot-draft-form.tsx";
+const FORM = "components/app/demand-draft-form.tsx";
 const NEXT = "components/app/company-next-actions.tsx";
-const DRAFTS_LIB = "lib/pilot/pilot-drafts.ts";
+const DRAFTS_LIB = "lib/demand/demand-drafts.ts";
 const LOCALES = ["lt", "en"] as const;
 
 // Fake-claim / wrong-state tokens that must NOT appear in the request copy.
@@ -30,10 +30,10 @@ const FORBIDDEN =
 describe("Guard: the company dashboard exposes the private request draft", () => {
   const page = read(PAGE);
 
-  it("renders the request section + PilotDraftForm(company_request)", () => {
+  it("renders the request section + DemandDraftForm(company_request)", () => {
     expect(page).toContain('id="company-requests"');
     expect(page).toContain('data-testid="company-dashboard-first-action"');
-    expect(page).toMatch(/<PilotDraftForm[\s\S]{0,120}draftType="company_request"/);
+    expect(page).toMatch(/<DemandDraftForm[\s\S]{0,120}draftType="company_request"/);
   });
 
   it("shows a reload-safe empty OR saved-private state", () => {

@@ -1,14 +1,14 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
-import { PilotDraftForm } from "@/components/app/pilot-draft-form";
+import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { AgencyWorkersSection } from "@/components/app/agency-workers-section";
 import { SetupRoleChoice } from "@/components/app/setup-role-choice";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
-import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
+import { getDemandDraft } from "@/lib/demand/demand-drafts";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import {
   getOwnAgency,
@@ -38,7 +38,7 @@ export default async function AgencyDashboardPage({
   const t = await getTranslations("roleDashboards.agency");
   const tSpaces = await getTranslations("spaces");
   const tWorkers = await getTranslations("roleDashboards.agency.workers");
-  const existingDraft = await getPilotDraft("agency_offer");
+  const existingDraft = await getDemandDraft("agency_offer");
 
   const ownAgency = await getOwnAgency();
 
@@ -331,7 +331,7 @@ export default async function AgencyDashboardPage({
             {t("firstAction.body")}
           </p>
         </header>
-        <PilotDraftForm
+        <DemandDraftForm
           draftType="agency_offer"
           fields={AGENCY_FIELDS}
           i18nNamespace="roleDashboards.agency.draftForm"

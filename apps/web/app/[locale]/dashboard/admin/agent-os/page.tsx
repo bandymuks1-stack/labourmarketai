@@ -394,7 +394,7 @@ export default async function AdminAgentOsPage({
 
       <section className="flex flex-wrap gap-3">
         <Link
-          href="/dashboard/admin/pilot-telemetry"
+          href="/dashboard/admin/telemetry"
           className="rounded-md border border-brand-blue/40 bg-brand-blue/[0.04] px-4 py-2 text-xs text-text-secondary transition-all hover:border-brand-blue hover:bg-brand-blue/[0.08] hover:text-text-primary hover:shadow-[0_0_16px_rgba(57,124,255,0.25)]"
         >
           {t("links.telemetry")}

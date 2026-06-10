@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
-import { PilotDraftForm } from "@/components/app/pilot-draft-form";
+import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
@@ -17,7 +17,7 @@ import {
   listActiveCompanyWorkers,
   listCompanyWorkerInvitations,
 } from "@/lib/company/company-workers";
-import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
+import { getDemandDraft } from "@/lib/demand/demand-drafts";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
 import { getOwnCompany as getOwnCompanyProfile } from "@/lib/company/company-setup";
@@ -77,7 +77,7 @@ export default async function CompanyDashboardPage({
     companyProfile.kind === "ok" ? companyProfile.row : null;
 
   const tWorkers = await getTranslations("roleDashboards.company.workers");
-  const existingDraft = await getPilotDraft("company_request");
+  const existingDraft = await getDemandDraft("company_request");
 
   const ownCompany = await getOwnCompany();
   const workersResult = ownCompany
@@ -490,7 +490,7 @@ export default async function CompanyDashboardPage({
             {t("firstAction.emptyState")}
           </p>
         )}
-        <PilotDraftForm
+        <DemandDraftForm
           draftType="company_request"
           fields={COMPANY_FIELDS}
           i18nNamespace="roleDashboards.company.draftForm"

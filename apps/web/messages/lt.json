@@ -1045,7 +1045,8 @@
       "languageFeedback": "Kalbos pranešimai",
       "communication": "Pokalbiai",
       "support": "Pagalbos pokalbiai",
-      "companyVerification": "Įmonių patvirtinimas"
+      "companyVerification": "Įmonių patvirtinimas",
+      "matching": "Matching darbastalis"
     },
     "drafts": {
       "title": "Operaciniai juodraščiai",
@@ -1150,6 +1151,82 @@
         "notFound": "Įmonė nerasta.",
         "needsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
         "error": "Įvyko klaida. Pabandykite dar kartą."
+      }
+    },
+    "matching": {
+      "eyebrow": "ADMIN · PHASE 3",
+      "title": "Matching darbastalis",
+      "subtitle": "Atviri poreikiai šalia darbuotojų pasiūlos — peržiūrėk, nuspręsk, užfiksuok.",
+      "humanNote": "Kiekvienas match čia parinktas žmogaus, ne algoritmo. Sistema nereitinguoja ir nesiūlo — ji tik rodo realius duomenis ir užfiksuoja tavo sprendimą su grįžtamojo ryšio pastaba.",
+      "back": "Grįžti į admin",
+      "migrationBlocker": "Demand intake konsolidacijos migracija šioje aplinkoje dar nepritaikyta — darbastalis užblokuotas, kol ji bus pritaikyta.",
+      "demand": {
+        "title": "Atviri poreikiai",
+        "count": "{count} atvirų užklausų",
+        "empty": "Šiuo metu atvirų užklausų nėra. Naujos pateiktos užklausos atsiras čia."
+      },
+      "kind": {
+        "company_request": "Įmonės poreikis",
+        "agency_offer": "Agentūros pasiūlymas",
+        "buyer_request": "Pirkėjo užklausa",
+        "customer_request": "Kliento užklausa"
+      },
+      "status": {
+        "submitted": "Pateikta",
+        "in_review": "Peržiūrima",
+        "needs_followup": "Reikia patikslinti",
+        "approved": "Patvirtinta"
+      },
+      "fields": {
+        "created": "Sukurta",
+        "country": "Šalis",
+        "location": "Vieta",
+        "role": "Rolė / darbo tipas",
+        "teamSize": "Komandos dydis",
+        "startPeriod": "Pradžia",
+        "duration": "Trukmė",
+        "language": "Kalbos",
+        "notes": "Pastabos",
+        "payload": "Formos laukai",
+        "reviewNote": "Peržiūros pastaba"
+      },
+      "log": {
+        "title": "Žmogaus match žurnalas"
+      },
+      "supply": {
+        "title": "Darbuotojų pasiūla",
+        "count": "{count} darbuotojų",
+        "empty": "Darbuotojų dar nėra — sąrašas pildysis žmonėms registruojantis.",
+        "unnamed": "Darbuotojas be vardo",
+        "noProfession": "Profesija nenurodyta",
+        "years": "{count} m. patirties",
+        "availability": {
+          "available": "Laisvas",
+          "busy": "Užimtas",
+          "unavailable": "Nepasiekiamas",
+          "unknown": "Prieinamumas nenurodytas"
+        },
+        "skillsDeclared": "Deklaruoti įgūdžiai",
+        "skillsConfirmed": "Patvirtinti įgūdžiai",
+        "entries": "Žurnalo įrašai",
+        "confirmations": "Vadovo patvirtinimai"
+      },
+      "match": {
+        "workerLabel": "Darbuotojas (žmogaus pasirinkimas)",
+        "workerPlaceholder": "Pasirink darbuotoją…",
+        "noteLabel": "Grįžtamojo ryšio pastaba (kas tiko, ko trūko)",
+        "notePlaceholder": "Pvz. profesija tinka, dar trūksta A1 dokumento…",
+        "recordInReview": "Užfiksuoti match · peržiūrima",
+        "recordFollowup": "Užfiksuoti · reikia patikslinti",
+        "recordApproved": "Užfiksuoti · patvirtinta"
+      },
+      "result": {
+        "saved": "Sprendimas užfiksuotas.",
+        "notAdmin": "Tavo sesija neturi admin teisių šiai užklausai.",
+        "invalid": "Netinkamas sprendimas — pasirink darbuotoją ir veiksmą.",
+        "notFound": "Užklausa arba darbuotojas nebeegzistuoja.",
+        "needsMigration": "Konsolidacijos migracija nepritaikyta — fiksavimas užblokuotas.",
+        "error": "Nepavyko užfiksuoti sprendimo."
       }
     }
   },
@@ -3191,7 +3268,7 @@
       "footnote": "✓ = bent vienas signalas užfiksuotas live DB. · = dar nieko nematyta. „—“ = atitinkama lentelė nėra pritaikyta šioje aplinkoje. Skaičius dešinėje rodo bendrą įvykių kiekį."
     }
   },
-  "pilotTelemetry": {
+  "telemetry": {
     "title": "Operacijų telemetrija (v1)",
     "subtitle": "Saugūs testuotojų QA įvykiai. Read-only sąrašas. Tik administratoriai mato.",
     "loadError": "Nepavyko užkrauti įvykių: {msg}",

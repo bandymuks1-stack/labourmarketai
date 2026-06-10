@@ -1103,5 +1103,86 @@
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "reviewEnabledBadge": "Review",
     "reviewDisabledBadge": "No review"
+  },
+  "admin": {
+    "matching": {
+      "eyebrow": "[EN] ADMIN · PHASE 3",
+      "title": "[EN] Matching workbench",
+      "subtitle": "[EN] Open requests next to the worker supply — review, decide, record.",
+      "humanNote": "[EN] Every match here is selected by a human, not an algorithm. The system does not rank or suggest — it only shows real data and records your decision with a feedback note.",
+      "back": "[EN] Back to admin",
+      "migrationBlocker": "[EN] The demand intake consolidation migration is not applied in this environment yet — the workbench is blocked until it lands.",
+      "demand": {
+        "title": "[EN] Open demand",
+        "count": "[EN] {count} open requests",
+        "empty": "[EN] No open requests right now. New submitted requests will appear here."
+      },
+      "kind": {
+        "company_request": "[EN] Company request",
+        "agency_offer": "[EN] Agency offer",
+        "buyer_request": "[EN] Buyer request",
+        "customer_request": "[EN] Customer request"
+      },
+      "status": {
+        "submitted": "[EN] Submitted",
+        "in_review": "[EN] In review",
+        "needs_followup": "[EN] Needs follow-up",
+        "approved": "[EN] Approved"
+      },
+      "fields": {
+        "created": "[EN] Created",
+        "country": "[EN] Country",
+        "location": "[EN] Location",
+        "role": "[EN] Role / work type",
+        "teamSize": "[EN] Team size",
+        "startPeriod": "[EN] Start",
+        "duration": "[EN] Duration",
+        "language": "[EN] Languages",
+        "notes": "[EN] Notes",
+        "payload": "[EN] Form details",
+        "reviewNote": "[EN] Review note"
+      },
+      "log": {
+        "title": "[EN] Human match log"
+      },
+      "supply": {
+        "title": "[EN] Worker supply",
+        "count": "[EN] {count} workers",
+        "empty": "[EN] No workers yet — the list fills as people register.",
+        "unnamed": "[EN] Unnamed worker",
+        "noProfession": "[EN] No profession set",
+        "years": "[EN] {count} y. experience",
+        "availability": {
+          "available": "[EN] Available",
+          "busy": "[EN] Busy",
+          "unavailable": "[EN] Unavailable",
+          "unknown": "[EN] Availability not set"
+        },
+        "skillsDeclared": "[EN] Declared skills",
+        "skillsConfirmed": "[EN] Confirmed skills",
+        "entries": "[EN] Journal entries",
+        "confirmations": "[EN] Manager confirmations"
+      },
+      "match": {
+        "workerLabel": "[EN] Worker (human pick)",
+        "workerPlaceholder": "[EN] Choose a worker…",
+        "noteLabel": "[EN] Feedback note (what fits, what is missing)",
+        "notePlaceholder": "[EN] E.g. profession fits, A1 document still needed…",
+        "recordInReview": "[EN] Record match · in review",
+        "recordFollowup": "[EN] Record · needs follow-up",
+        "recordApproved": "[EN] Record · approved"
+      },
+      "result": {
+        "saved": "[EN] Decision recorded.",
+        "notAdmin": "[EN] Your session does not have admin rights for this request.",
+        "invalid": "[EN] Invalid decision — pick a worker and an action.",
+        "notFound": "[EN] Request or worker no longer exists.",
+        "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
+        "error": "[EN] Could not record the decision."
+      }
+    },
+    "hub": {
+      "matching": "[EN] Matching workbench"
+    }
   }
 }

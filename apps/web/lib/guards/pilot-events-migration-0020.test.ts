@@ -38,7 +38,7 @@ const action = readApp("lib/telemetry/actions.ts");
 const helper = readApp("lib/telemetry/task.ts");
 const adminAgent = readApp("app/[locale]/dashboard/admin/agent-os/page.tsx");
 const adminTelemetry = readApp(
-  "app/[locale]/dashboard/admin/pilot-telemetry/page.tsx",
+  "app/[locale]/dashboard/admin/telemetry/page.tsx",
 );
 
 describe("0020 — pilot_events table + RLS", () => {
@@ -184,7 +184,7 @@ describe("admin pages are admin-only (server gate + RLS)", () => {
     expect(adminAgent).toMatch(/await\s+requireSuperadmin\(\s*locale\s*\)/);
   });
 
-  it("pilot-telemetry page requires superadmin server-side", () => {
+  it("telemetry page requires superadmin server-side", () => {
     expect(adminTelemetry).toMatch(/await\s+requireSuperadmin\(\s*locale\s*\)/);
   });
 
