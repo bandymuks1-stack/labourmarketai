@@ -1333,7 +1333,19 @@ describe("no migration files added by this sprint", () => {
     // RLS). Additive + reversible; APPLIED to prod via MCP apply_migration
     // after owner review (2026-06-10, ledger 20260610172333). Authored as
     // 54 -> 55; resolved to 59 at merge on top of main's 58.
-    const SPRINT_BASELINE = 59;
+    // Bumped 59 -> 60 for esco-labels-all-official-languages: ONE
+    // needs-human-gate DRAFT (20260610230000) widening the
+    // esco_labels.locale CHECK from the 10 platform locales to all 28
+    // official ESCO v1.2.1 languages (pure superset, no schema/RLS/grant
+    // change; ru deliberately absent — not an official ESCO language).
+    // Bumped 60 -> 61 for esco-service-role-grants (20260610234500):
+    // GRANTS-ONLY fix — MCP-created tables get no service_role default
+    // privileges, so the official importer's upserts hit "permission denied";
+    // grants select/insert/update on the four esco_* tables to service_role,
+    // no RLS change, anon untouched.
+    // NOTE: gated PR #296 (S4) carries its own 59 -> 61 bump for two more
+    // drafts — whichever merges second resolves upward (to 63).
+    const SPRINT_BASELINE = 61;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
