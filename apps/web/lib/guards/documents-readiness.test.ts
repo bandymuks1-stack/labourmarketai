@@ -110,10 +110,13 @@ describe("S3 app layer — flag on post-gate, honest derivation, honest copy", (
     );
   });
 
-  it("page keeps the flag-off RUOŠIAMA branch + TASK 07 marker", () => {
+  it("page keeps the flag-off RUOŠIAMA branch + the TASK 07 final-skin marker", () => {
     const page = read("app/[locale]/dashboard/documents/page.tsx");
     expect(page).toMatch(/documents-preparing/);
-    expect(page).toMatch(/bus pakeista TASK 07/);
+    // TASK 07 polish delivered the final skin — the preview marker is gone
+    // and must NOT come back.
+    expect(page).toMatch(/TASK 07 final skin/);
+    expect(page).not.toMatch(/bus pakeista TASK 07/);
   });
 
   for (const locale of LOCALES) {

@@ -16,8 +16,8 @@ import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
 
 /**
  * "Mano dokumentai" — worker document inventory + country readiness (S3).
- * Low-fidelity preview, bus pakeista TASK 07 (living-arena UI po owner
- * vizualinio užrakto).
+ * UI: TASK 07 final skin (living-arena tokens — arena eyebrow, card glow,
+ * rise-in; logic unchanged).
  *
  * Honest by construction: while DOCUMENTS_READINESS_ENABLED is false the
  * page is an open RUOŠIAMA roadmap note (doctrine §18) — no fake content.
@@ -112,7 +112,7 @@ export default async function WorkerDocumentsPage({
                   return (
                     <li
                       key={d.id}
-                      className="card-border flex flex-wrap items-center justify-between gap-2 p-3"
+                      className="card-border glow-hover rise-in flex flex-wrap items-center justify-between gap-2 p-3"
                       data-status={status}
                     >
                       <div className="flex min-w-0 flex-col gap-0.5">
@@ -182,7 +182,7 @@ export default async function WorkerDocumentsPage({
                       {readiness.items.map((i) => (
                         <li
                           key={i.documentTypeSlug}
-                          className="card-border flex flex-wrap items-center justify-between gap-2 p-3"
+                          className="card-border glow-hover rise-in flex flex-wrap items-center justify-between gap-2 p-3"
                         >
                           <span className="text-sm text-text-primary">
                             {t(`types.${i.documentTypeSlug}` as never)}
