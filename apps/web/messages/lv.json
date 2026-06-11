@@ -1198,6 +1198,36 @@
       "filters": {
         "all": "[EN] All countries",
         "confirmedOnly": "[EN] Confirmed skills ✓"
+      },
+      "fit": {
+        "title": "[EN] Contextual fit (this request only)",
+        "needLine": "[EN] Required skills ({n}):",
+        "basis": "[EN] matches {matched} of {total} skills, {confirmed} of them confirmed",
+        "missing": "[EN] Missing",
+        "noOverlap": "[EN] No candidate holds any of the required ESCO-linked skills yet — honest empty result, nothing is invented.",
+        "unstructured": "[EN] This request is not structured yet — no percentage is shown for unstructured needs. Structure it below (a human pick, ESCO typeahead).",
+        "humanNote": "[EN] Fit is a lantern inside THIS request only — the decision below stays a human act, and the same person shows a different fit in a different request by design."
+      },
+      "structure": {
+        "title": "[EN] Structure this need (ESCO)",
+        "hint": "[EN] Pick the required skills (and optionally the occupation). Your pick is the structure — nothing is guessed from the free text.",
+        "skillPlaceholder": "[EN] Add a required skill…",
+        "occupationPlaceholder": "[EN] Occupation (optional)…",
+        "occupationPicked": "[EN] Occupation",
+        "removeSkill": "[EN] Remove",
+        "submit": "[EN] Save structure ({n} skills)",
+        "saving": "[EN] Saving…",
+        "done": "[EN] Structured: {n} required skills saved. Fit will render on the next load.",
+        "error": {
+          "invalid": "[EN] Pick at least one skill.",
+          "not_found": "[EN] The request no longer exists.",
+          "not_admin": "[EN] Admin only.",
+          "error": "[EN] Could not save. Try again."
+        }
+      },
+      "agencyOffers": {
+        "title": "[EN] Agencies: we can offer",
+        "unnamed": "[EN] Unnamed agency"
       }
     },
     "hub": {
@@ -1321,7 +1351,21 @@
       "recommended": "[EN] Recommended",
       "conditional": "[EN] Conditional"
     },
-    "sourceFlag": "[EN] Needs legal source"
+    "sourceFlag": "[EN] Needs legal source",
+    "consent": {
+      "title": "[EN] What my agency may see",
+      "explainer": "[EN] If you switch this on, YOUR agency sees only category-level counts of your document readiness (valid / expiring / needs attention). It never sees document contents, files, notes or types. Default is off; you can switch it off any time.",
+      "needsGate": "[EN] The consent layer is in preparation — it activates after the owner-gated change is applied.",
+      "onLabel": "[EN] Sharing aggregates: ON",
+      "offLabel": "[EN] Sharing aggregates: OFF",
+      "onHint": "[EN] Your agency sees counts only. Tap to switch off.",
+      "offHint": "[EN] Nothing is shared. Tap to share category-level counts.",
+      "saving": "[EN] Saving…",
+      "error": {
+        "error": "[EN] Could not save. Try again.",
+        "no_worker": "[EN] Create your worker profile first."
+      }
+    }
   },
   "communication": {
     "originalLanguage": "[EN] Original ({lang})"
@@ -1483,6 +1527,11 @@
         "needs_gate": "[EN] This feature is in preparation (gated change pending).",
         "error": "[EN] Could not save the mark. Try again."
       }
+    },
+    "docs": {
+      "valid": "[EN] Docs valid",
+      "expiring": "[EN] Expiring",
+      "attention": "[EN] Needs attention"
     }
   }
 }

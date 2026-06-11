@@ -202,6 +202,29 @@ export default async function AgencyPoolPage({
                       {t("evidenceLocked")}
                     </p>
                   )}
+
+                  {/* S6 — consent-gated docs aggregates (categories only;
+                      renders ONLY when the worker really consented). */}
+                  {w.docsAggregates ? (
+                    <p
+                      className="flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-label"
+                      data-testid="pool-docs-aggregates"
+                    >
+                      <span className="text-state-success">
+                        {t("docs.valid")}: {w.docsAggregates.valid}
+                      </span>
+                      {w.docsAggregates.expiring > 0 ? (
+                        <span className="text-state-warning">
+                          {t("docs.expiring")}: {w.docsAggregates.expiring}
+                        </span>
+                      ) : null}
+                      {w.docsAggregates.attention > 0 ? (
+                        <span className="text-state-warning">
+                          {t("docs.attention")}: {w.docsAggregates.attention}
+                        </span>
+                      ) : null}
+                    </p>
+                  ) : null}
                 </li>
               );
             })}

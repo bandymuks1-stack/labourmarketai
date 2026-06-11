@@ -140,6 +140,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // not applied).
     // then to 66 for the confirmation-role CHECK (20260602130000;
     // APPLIED to prod 2026-06-11, ledger 20260611091834).
-    expect(guard).toMatch(/SPRINT_BASELINE = 66/);
+    // then to 67 for the S6 worker-docs-consent DRAFT (20260611170000;
+    // needs-human-gate, not applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 67/);
   });
 });

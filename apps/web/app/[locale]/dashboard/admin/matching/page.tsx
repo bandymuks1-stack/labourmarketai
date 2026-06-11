@@ -15,6 +15,8 @@ import {
   buildMatchSuggestions,
   filterSupply,
 } from "@/lib/admin/match-suggestions";
+import { computeContextFit } from "@/lib/market/fit";
+import { StructureNeedForm } from "@/components/app/structure-need-form";
 import { openDirectConversationAction } from "@/lib/communication/open-conversation-action";
 import type { DarkListboxOption } from "@/components/ui/DarkListbox";
 
@@ -59,6 +61,7 @@ export default async function AdminMatchingWorkbenchPage({
     country?: string;
     availability?: string;
     confirmed?: string;
+    profession?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -68,6 +71,7 @@ export default async function AdminMatchingWorkbenchPage({
     country: filterCountry,
     availability: filterAvailability,
     confirmed: filterConfirmedRaw,
+    profession: filterProfession,
   } = await searchParams;
   // Trust→visibility (S4 item 5): a FACTUAL signal filter — workers with ≥1
   // manager-confirmed skill. Never an invented numeric rating.
@@ -75,12 +79,16 @@ export default async function AdminMatchingWorkbenchPage({
 
   const t = await getTranslations("admin.matching");
   const tProf = await getTranslations("professions");
-  const result = await listWorkbench();
+  const result = await listWorkbench(locale);
 
   const demand: readonly DemandRow[] =
     result.kind === "ok" ? result.demand : [];
   const supply: readonly SupplyWorkerRow[] =
     result.kind === "ok" ? result.supply : [];
+  const escoLabel = (uri: string): string =>
+    (result.kind === "ok" ? result.escoLabelsByUri[uri] : undefined) ??
+    uri.split("/").pop() ??
+    uri;
   const migrationNeeded = result.kind === "needs-migration";
   const loadError = result.kind === "error" ? result.message : null;
 
@@ -343,6 +351,121 @@ export default async function AdminMatchingWorkbenchPage({
                       );
                     })()}
 
+                    {/* ── S6 §19: contextual fit — ONLY inside this need's
+                        context, ONLY with the full basis, never persisted.
+                        Unstructured need = NO percentage + the one-click
+                        human structuring path. ── */}
+                    {r.structuredNeed ? (
+                      (() => {
+                        const need = r.structuredNeed.escoSkillUris;
+                        const fits = supply
+                          .map((w) => ({
+                            w,
+                            fit: computeContextFit(need, w.escoSkills),
+                          }))
+                          .filter(
+                            (x): x is { w: SupplyWorkerRow; fit: NonNullable<ReturnType<typeof computeContextFit>> } =>
+                              x.fit !== null && x.fit.matchedTotal > 0,
+                          )
+                          // Fit ordering is allowed ONLY here — inside one
+                          // need's context (§19 d); never a people ranking.
+                          .sort(
+                            (a, b) =>
+                              b.fit.pct - a.fit.pct ||
+                              b.fit.matchedConfirmed - a.fit.matchedConfirmed,
+                          )
+                          .slice(0, 8);
+                        return (
+                          <div
+                            className="rounded-md border border-brand-cyan/20 bg-brand-cyan/5 p-2.5"
+                            data-testid={`matching-fit-${r.id}`}
+                          >
+                            <p className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+                              {t("fit.title")}
+                            </p>
+                            <p className="text-[11px] leading-relaxed text-text-secondary">
+                              {t("fit.needLine", { n: r.structuredNeed.escoSkillUris.length })}{" "}
+                              {r.structuredNeed.escoSkillUris.map(escoLabel).join(", ")}
+                            </p>
+                            {fits.length === 0 ? (
+                              <p
+                                className="mt-1 text-[11px] text-text-muted"
+                                data-testid="fit-no-overlap"
+                              >
+                                {t("fit.noOverlap")}
+                              </p>
+                            ) : (
+                              <ul className="mt-1.5 flex flex-col gap-1.5">
+                                {fits.map(({ w, fit }) => (
+                                  <li
+                                    key={w.id}
+                                    className="flex flex-col gap-0.5 rounded-sm border border-ink-600 bg-ink-800/40 px-2 py-1.5"
+                                    data-testid="fit-row"
+                                  >
+                                    <span className="flex flex-wrap items-baseline justify-between gap-2">
+                                      <span className="text-xs font-semibold text-text-primary">
+                                        {w.displayName ?? t("supply.unnamed")}
+                                      </span>
+                                      <span className="font-mono text-sm font-bold text-brand-cyan">
+                                        {fit.pct}%
+                                      </span>
+                                    </span>
+                                    {/* §19 b/c: the basis, with the confirmed
+                                        share always separated. */}
+                                    <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                                      {t("fit.basis", {
+                                        matched: fit.matchedTotal,
+                                        total: fit.needTotal,
+                                        confirmed: fit.matchedConfirmed,
+                                      })}
+                                    </span>
+                                    {fit.missingUris.length > 0 ? (
+                                      <span className="text-[11px] text-text-muted">
+                                        {t("fit.missing")}:{" "}
+                                        {fit.missingUris.map(escoLabel).join(", ")}
+                                      </span>
+                                    ) : null}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                            <p className="mt-1.5 text-[10px] leading-relaxed text-text-muted">
+                              {t("fit.humanNote")}
+                            </p>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="flex flex-col gap-1.5" data-testid={`fit-unstructured-${r.id}`}>
+                        <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-[11px] leading-relaxed text-text-muted">
+                          {t("fit.unstructured")}
+                        </p>
+                        <StructureNeedForm requestId={r.id} />
+                      </div>
+                    )}
+
+                    {/* S5/S6: agency proposal marks — visible NEXT TO fit;
+                        the decision stays the human's below. */}
+                    {r.agencyOffers.length > 0 ? (
+                      <div
+                        className="rounded-md border border-state-success/20 bg-state-success/5 px-2 py-1.5"
+                        data-testid={`agency-offers-${r.id}`}
+                      >
+                        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          {t("agencyOffers.title")}
+                        </p>
+                        <ul className="mt-0.5 flex flex-col gap-0.5 text-[11px] text-text-secondary">
+                          {r.agencyOffers.map((o, i) => (
+                            <li key={`${o.agencyName ?? "x"}-${i}`}>
+                              {o.agencyName ?? t("agencyOffers.unnamed")}
+                              {o.markedAt ? ` · ${o.markedAt.slice(0, 10)}` : ""}
+                              {o.note ? ` — ${o.note}` : ""}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+
                     <MatchingWorkbenchReview
                       requestId={r.id}
                       workers={workerOptions}
@@ -377,14 +500,19 @@ export default async function AdminMatchingWorkbenchPage({
                 c: string | null,
                 a: string | null,
                 conf: boolean = filterConfirmed,
+                prof: string | null = filterProfession ?? null,
               ): string => {
                 const q = new URLSearchParams();
                 if (c) q.set("country", c);
                 if (a) q.set("availability", a);
                 if (conf) q.set("confirmed", "1");
+                if (prof) q.set("profession", prof);
                 const qs = q.toString();
                 return `/dashboard/admin/matching${qs ? `?${qs}` : ""}`;
               };
+              const professions = [
+                ...new Set(supply.flatMap((w) => w.professionSlugs)),
+              ].sort();
               const chip = (active: boolean): string =>
                 `rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-label ${
                   active
@@ -440,6 +568,28 @@ export default async function AdminMatchingWorkbenchPage({
                   >
                     {t("filters.confirmedOnly")}
                   </Link>
+                  {professions.length > 0 ? (
+                    <>
+                      <span className="mx-1 text-ink-500">·</span>
+                      {professions.map((p) => (
+                        <Link
+                          key={p}
+                          href={
+                            link(
+                              filterCountry ?? null,
+                              filterAvailability ?? null,
+                              filterConfirmed,
+                              filterProfession === p ? null : p,
+                            ) as "/dashboard"
+                          }
+                          className={chip(filterProfession === p)}
+                          data-testid="matching-filter-profession"
+                        >
+                          {professionLabel(p)}
+                        </Link>
+                      ))}
+                    </>
+                  ) : null}
                 </div>
               );
             })()}
@@ -455,6 +605,12 @@ export default async function AdminMatchingWorkbenchPage({
                 })
                   // Factual visibility signal — never a score (doctrine §7).
                   .filter((w) => !filterConfirmed || w.skillsConfirmed > 0)
+                  // Factual profession filter (slug membership, no ranking).
+                  .filter(
+                    (w) =>
+                      !filterProfession ||
+                      w.professionSlugs.includes(filterProfession),
+                  )
                   .map((w) => (
                   <li
                     key={w.id}

@@ -1198,6 +1198,36 @@
       "filters": {
         "all": "[EN] All countries",
         "confirmedOnly": "[EN] Confirmed skills ✓"
+      },
+      "fit": {
+        "title": "Kontekstuel pasform (kun denne forespørgsel)",
+        "needLine": "Krævede færdigheder ({n}):",
+        "basis": "matcher {matched} af {total} færdigheder, heraf {confirmed} bekræftet",
+        "missing": "Mangler",
+        "noOverlap": "Ingen kandidat har endnu nogen af de krævede ESCO-færdigheder — ærligt tomt resultat, intet opfindes.",
+        "unstructured": "Denne forespørgsel er endnu ikke struktureret — der vises ingen procent for ustrukturerede behov. Strukturer den nedenfor (menneskeligt valg, ESCO-typeahead).",
+        "humanNote": "Pasformen er en lygte KUN inden for denne forespørgsel — beslutningen nedenfor forbliver menneskelig, og samme person viser bevidst en anden procent i en anden forespørgsel."
+      },
+      "structure": {
+        "title": "Strukturer behovet (ESCO)",
+        "hint": "Vælg de krævede færdigheder (og evt. faget). Dit valg ER strukturen — intet gættes ud fra fritekst.",
+        "skillPlaceholder": "Tilføj en krævet færdighed…",
+        "occupationPlaceholder": "Fag (valgfrit)…",
+        "occupationPicked": "Fag",
+        "removeSkill": "Fjern",
+        "submit": "Gem struktur ({n} færdigheder)",
+        "saving": "Gemmer…",
+        "done": "Struktureret: {n} krævede færdigheder gemt. Pasformen vises ved næste indlæsning.",
+        "error": {
+          "invalid": "Vælg mindst én færdighed.",
+          "not_found": "Forespørgslen findes ikke længere.",
+          "not_admin": "Kun for admins.",
+          "error": "Kunne ikke gemme. Prøv igen."
+        }
+      },
+      "agencyOffers": {
+        "title": "Bureauer: vi kan tilbyde",
+        "unnamed": "Bureau uden navn"
       }
     },
     "hub": {
@@ -1321,7 +1351,21 @@
       "recommended": "[EN] Recommended",
       "conditional": "[EN] Conditional"
     },
-    "sourceFlag": "[EN] Needs legal source"
+    "sourceFlag": "[EN] Needs legal source",
+    "consent": {
+      "title": "Hvad mit bureau må se",
+      "explainer": "Hvis du slår dette til, ser DIT bureau kun tal på kategoriniveau om din dokumentparathed (gyldige / udløber snart / kræver opmærksomhed). Det ser aldrig dokumentindhold, filer, noter eller typer. Standard er fra; du kan slå det fra når som helst.",
+      "needsGate": "Samtykkelaget er under forberedelse — det aktiveres, når den godkendelseskrævende ændring er anvendt.",
+      "onLabel": "Deling af aggregater: TIL",
+      "offLabel": "Deling af aggregater: FRA",
+      "onHint": "Dit bureau ser kun tal. Tryk for at slå fra.",
+      "offHint": "Intet deles. Tryk for at dele tal på kategoriniveau.",
+      "saving": "Gemmer…",
+      "error": {
+        "error": "Kunne ikke gemme. Prøv igen.",
+        "no_worker": "Opret først din arbejderprofil."
+      }
+    }
   },
   "communication": {
     "originalLanguage": "[EN] Original ({lang})"
@@ -1483,6 +1527,11 @@
         "needs_gate": "Funktionen er under forberedelse (afventer godkendelse).",
         "error": "Markeringen kunne ikke gemmes. Prøv igen."
       }
+    },
+    "docs": {
+      "valid": "Dok. gyldige",
+      "expiring": "Udløber",
+      "attention": "Kræver opmærksomhed"
     }
   }
 }

@@ -1363,7 +1363,11 @@ describe("no migration files added by this sprint", () => {
     // Bumped 65 -> 66 for the confirmation-role CHECK (20260602130000):
     // additive confirmer_role pin, APPLIED to prod via MCP after owner review
     // (2026-06-11, ledger 20260611091834).
-    const SPRINT_BASELINE = 66;
+    // Bumped 66 -> 67 for the S6 worker-docs-consent DRAFT (20260611170000;
+    // needs-human-gate, NOT applied): workers.docs_aggregate_consent
+    // default-false column + the worker-owned audited switch RPC + the
+    // consent-gated agency aggregates RPC (category counts only).
+    const SPRINT_BASELINE = 67;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

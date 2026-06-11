@@ -1249,6 +1249,36 @@
       "filters": {
         "all": "Visos šalys",
         "confirmedOnly": "Patvirtinti įgūdžiai ✓"
+      },
+      "fit": {
+        "title": "Kontekstinė atitiktis (tik šiai užklausai)",
+        "needLine": "Reikalaujami įgūdžiai ({n}):",
+        "basis": "atitinka {matched} iš {total} įgūdžių, iš jų {confirmed} patvirtinti",
+        "missing": "Trūksta",
+        "noOverlap": "Nė vienas kandidatas dar neturi nė vieno reikalaujamo ESCO įgūdžio — sąžiningas tuščias rezultatas, niekas neišgalvota.",
+        "unstructured": "Ši užklausa dar nestruktūruota — nestruktūruotam poreikiui procentas nerodomas. Struktūruok žemiau (žmogaus pasirinkimas, ESCO typeahead).",
+        "humanNote": "Atitiktis — žibintas TIK šios užklausos viduje: sprendimas žemiau lieka žmogaus, o tas pats žmogus kitoje užklausoje turi kitą % — taip ir turi būti."
+      },
+      "structure": {
+        "title": "Struktūruoti poreikį (ESCO)",
+        "hint": "Pasirink reikalaujamus įgūdžius (ir, jei nori, profesiją). Tavo pasirinkimas ir yra struktūra — iš laisvo teksto niekas nespėjama.",
+        "skillPlaceholder": "Pridėti reikalaujamą įgūdį…",
+        "occupationPlaceholder": "Profesija (nebūtina)…",
+        "occupationPicked": "Profesija",
+        "removeSkill": "Pašalinti",
+        "submit": "Išsaugoti struktūrą ({n} įgūdž.)",
+        "saving": "Saugoma…",
+        "done": "Struktūruota: išsaugota {n} reikalaujamų įgūdžių. Atitiktis matysis kitame užkrovime.",
+        "error": {
+          "invalid": "Pasirink bent vieną įgūdį.",
+          "not_found": "Užklausos nebėra.",
+          "not_admin": "Tik administratoriui.",
+          "error": "Nepavyko išsaugoti. Pabandyk dar kartą."
+        }
+      },
+      "agencyOffers": {
+        "title": "Agentūros: galim pasiūlyti",
+        "unnamed": "Agentūra be pavadinimo"
       }
     },
     "market": {
@@ -3696,7 +3726,21 @@
       "recommended": "Rekomenduojamas",
       "conditional": "Sąlyginis"
     },
-    "sourceFlag": "Reikia teisinio šaltinio"
+    "sourceFlag": "Reikia teisinio šaltinio",
+    "consent": {
+      "title": "Ką gali matyti mano agentūra",
+      "explainer": "Jei įjungsi, TAVO agentūra matys tik kategorijų lygio skaičius apie dokumentų parengtį (galiojantys / besibaigiantys / reikia dėmesio). Ji niekada nemato dokumentų turinio, failų, pastabų ar tipų. Pagal nutylėjimą išjungta; gali išjungti bet kada.",
+      "needsGate": "Sutikimo sluoksnis ruošiamas — įsijungs, kai owner patvirtins vartų pakeitimą.",
+      "onLabel": "Suvestinės dalinamos: ĮJUNGTA",
+      "offLabel": "Suvestinės dalinamos: IŠJUNGTA",
+      "onHint": "Agentūra mato tik skaičius. Bakstelėk, kad išjungtum.",
+      "offHint": "Niekas nesidalinama. Bakstelėk, kad dalintum kategorijų skaičius.",
+      "saving": "Saugoma…",
+      "error": {
+        "error": "Nepavyko išsaugoti. Pabandyk dar kartą.",
+        "no_worker": "Pirmiausia susikurk darbuotojo profilį."
+      }
+    }
   },
   "trust": {
     "title": "Pasitikėjimo signalai",
@@ -3811,6 +3855,11 @@
         "needs_gate": "Funkcija ruošiama (laukia vartų pakeitimo).",
         "error": "Nepavyko išsaugoti žymos. Pabandyk dar kartą."
       }
+    },
+    "docs": {
+      "valid": "Dok. galioja",
+      "expiring": "Baigiasi",
+      "attention": "Reikia dėmesio"
     }
   }
 }
