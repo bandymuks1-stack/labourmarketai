@@ -1449,6 +1449,21 @@
       "cta": "[EN] Add to my skills",
       "empty": "[EN] Once your trade and skills are set, you will see here where to grow next.",
       "emptyCta": "[EN] Open my profile"
+    },
+    "queue": {
+      "renewDocument": "[EN] Document \"{doc}\" needs attention (valid until {date}) — renew it",
+      "weekGaps": "[EN] {n, plural, one {# day this week has no entry yet — fill it in} other {# days this week have no entries yet — fill them in}}"
+    },
+    "layout": {
+      "editButton": "[EN] Layout",
+      "doneButton": "[EN] Done",
+      "deviceNote": "[EN] The layout is saved on THIS device only.",
+      "hiddenNote": "[EN] \"{section}\" is hidden — tap the eye to bring it back.",
+      "sections": {
+        "action": "[EN] Today's action",
+        "overview": "[EN] Week & growth",
+        "playerCard": "[EN] Player card"
+      }
     }
   },
   "playerCard": {

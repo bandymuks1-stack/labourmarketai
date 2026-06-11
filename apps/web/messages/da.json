@@ -1449,6 +1449,21 @@
       "cta": "Tilføj til mine færdigheder",
       "empty": "Når dit fag og dine færdigheder er på plads, kan du her se, hvor du kan vokse videre.",
       "emptyCta": "Åbn min profil"
+    },
+    "queue": {
+      "renewDocument": "Dokumentet \"{doc}\" kræver opmærksomhed (gyldigt til {date}) — forny det",
+      "weekGaps": "{n, plural, one {# dag i denne uge mangler stadig en post — udfyld den} other {# dage i denne uge mangler stadig poster — udfyld dem}}"
+    },
+    "layout": {
+      "editButton": "Layout",
+      "doneButton": "Færdig",
+      "deviceNote": "Layoutet gemmes KUN på denne enhed.",
+      "hiddenNote": "\"{section}\" er skjult — tryk på øjet for at få den tilbage.",
+      "sections": {
+        "action": "Dagens handling",
+        "overview": "Uge & vækst",
+        "playerCard": "Spillerkort"
+      }
     }
   },
   "playerCard": {

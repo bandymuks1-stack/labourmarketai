@@ -1449,6 +1449,21 @@
       "cta": "Zu meinen Fähigkeiten hinzufügen",
       "empty": "Sobald dein Beruf und deine Fähigkeiten eingetragen sind, siehst du hier, wo du als Nächstes wachsen kannst.",
       "emptyCta": "Mein Profil öffnen"
+    },
+    "queue": {
+      "renewDocument": "Dokument „{doc}“ braucht Aufmerksamkeit (gültig bis {date}) — erneuere es",
+      "weekGaps": "{n, plural, one {# Tag dieser Woche hat noch keinen Eintrag — trage ihn nach} other {# Tage dieser Woche haben noch keine Einträge — trage sie nach}}"
+    },
+    "layout": {
+      "editButton": "Layout",
+      "doneButton": "Fertig",
+      "deviceNote": "Das Layout wird NUR auf diesem Gerät gespeichert.",
+      "hiddenNote": "„{section}“ ist ausgeblendet — tippe auf das Auge, um es zurückzuholen.",
+      "sections": {
+        "action": "Heutige Aktion",
+        "overview": "Woche & Wachstum",
+        "playerCard": "Spielerkarte"
+      }
     }
   },
   "playerCard": {

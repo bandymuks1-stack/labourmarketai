@@ -32,6 +32,10 @@ export interface TodayScreenData {
   readonly pendingReview: number;
   /** Entries the worker wrote this calendar week (Mon 00:00). */
   readonly weekEntries: number;
+  /** DISTINCT days of this week that have at least one entry (real dates). */
+  readonly weekDaysWithEntries: number;
+  /** Days elapsed this week incl. today (1 = Monday). */
+  readonly weekDaysElapsed: number;
   /** Entries whose latest-wins decision is `approved` AND was made this week. */
   readonly weekConfirmedEntries: number;
   /**
@@ -67,6 +71,12 @@ function weekStartMs(now: Date): number {
   return d.getTime();
 }
 
+/** Days elapsed this week incl. today (Mon=1 … Sun=7). */
+function weekDaysElapsedNow(): number {
+  const day = new Date().getDay();
+  return ((day + 6) % 7) + 1;
+}
+
 /** Today 00:00:00 (server clock). */
 function dayStartMs(now: Date): number {
   const d = new Date(now);
@@ -81,6 +91,8 @@ export async function getTodayScreen(
     entriesToday: 0,
     pendingReview: 0,
     weekEntries: 0,
+    weekDaysWithEntries: 0,
+    weekDaysElapsed: weekDaysElapsedNow(),
     weekConfirmedEntries: 0,
     weekConfirmedHours: null,
     skillSuggestion: null,
@@ -108,9 +120,13 @@ export async function getTodayScreen(
     const entriesToday = entries.filter(
       (e) => Date.parse(e.created_at) >= dayStart,
     ).length;
-    const weekEntryIds = entries
-      .filter((e) => Date.parse(e.created_at) >= weekStart)
-      .map((e) => e.id);
+    const weekEntries = entries.filter(
+      (e) => Date.parse(e.created_at) >= weekStart,
+    );
+    const weekEntryIds = weekEntries.map((e) => e.id);
+    const weekDaysWithEntries = new Set(
+      weekEntries.map((e) => new Date(e.created_at).toDateString()),
+    ).size;
 
     // Review evidence for ALL fetched entries (append-only rows, latest wins).
     const byEntry = new Map<string, ConfRow[]>();
@@ -179,6 +195,8 @@ export async function getTodayScreen(
       entriesToday,
       pendingReview,
       weekEntries: weekEntryIds.length,
+      weekDaysWithEntries,
+      weekDaysElapsed: weekDaysElapsedNow(),
       weekConfirmedEntries: approvedThisWeek.length,
       weekConfirmedHours,
       skillSuggestion: await getSkillSuggestion(supabase, workerId),

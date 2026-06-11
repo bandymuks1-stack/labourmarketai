@@ -3821,6 +3821,21 @@
       "cta": "Add to my skills",
       "empty": "Once your trade and skills are set, you will see here where to grow next.",
       "emptyCta": "Open my profile"
+    },
+    "queue": {
+      "renewDocument": "Document \"{doc}\" needs attention (valid until {date}) — renew it",
+      "weekGaps": "{n, plural, one {# day this week has no entry yet — fill it in} other {# days this week have no entries yet — fill them in}}"
+    },
+    "layout": {
+      "editButton": "Layout",
+      "doneButton": "Done",
+      "deviceNote": "The layout is saved on THIS device only.",
+      "hiddenNote": "\"{section}\" is hidden — tap the eye to bring it back.",
+      "sections": {
+        "action": "Today's action",
+        "overview": "Week & growth",
+        "playerCard": "Player card"
+      }
     }
   },
   "agencyPool": {
