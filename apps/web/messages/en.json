@@ -3505,7 +3505,11 @@
     "workCardPending": "Not confirmed yet",
     "namePlaceholder": "My profile",
     "candidateLabel": "Candidate skills",
-    "candidateHint": "Skills you added in your own words (needs clarification, not verified)."
+    "candidateHint": "Skills you added in your own words (needs clarification, not verified).",
+    "verifiedTitle": "Verified skills",
+    "verifiedEmpty": "No verified skills yet. They appear when a manager confirms your journal entries.",
+    "latestEvidenceLabel": "Latest proof",
+    "latestEvidenceEmpty": "No proof entries yet — your first journal entry will be the first."
   },
   "skillClarify": {
     "title": "My skills",
@@ -3616,5 +3620,33 @@
     "generatedAt": "Generated",
     "verifyNote": "Confirmations can be checked on the platform.",
     "notWorker": "CV export is available for worker profiles — it is built from the work journal and confirmed skills."
+  },
+  "todayScreen": {
+    "eyebrow": "Today",
+    "action": {
+      "title": "Write down what you did today",
+      "body": "A few lines in your own words — and your day stays on record as lasting proof of your work.",
+      "doneTitle": "Today's work is recorded",
+      "doneBody": "Good — today is already in your record. Add more if you did more.",
+      "pending": "{n, plural, one {# entry is waiting for your manager's confirmation} other {# entries are waiting for your manager's confirmation}}",
+      "cta": "Fill in today's journal",
+      "ctaAgain": "Add another entry"
+    },
+    "week": {
+      "eyebrow": "This week",
+      "confirmedHeadline": "{n, plural, one {Your work was confirmed # time this week} other {Your work was confirmed # times this week}}",
+      "writtenHeadline": "{n, plural, one {You recorded # work entry this week} other {You recorded # work entries this week}}",
+      "emptyHeadline": "A new week — its first entry is still ahead of you.",
+      "entries": "Entries",
+      "confirmed": "Confirmed",
+      "hours": "Confirmed hrs"
+    },
+    "path": {
+      "eyebrow": "Path to more",
+      "body": "This skill is often needed in your trade, and it is not on your card yet. Add it and your card grows.",
+      "cta": "Add to my skills",
+      "empty": "Once your trade and skills are set, you will see here where to grow next.",
+      "emptyCta": "Open my profile"
+    }
   }
 }
