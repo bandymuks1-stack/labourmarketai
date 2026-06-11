@@ -1356,7 +1356,11 @@ describe("no migration files added by this sprint", () => {
     // (batch_review_exceptions + review_journal_entries_batch, delegating
     // per-entry to 0034 review_journal_entry). APPLIED to prod via MCP after
     // owner review (2026-06-11, ledger 20260611064423).
-    const SPRINT_BASELINE = 64;
+    // Bumped 64 -> 65 for s5_agency_demand_visibility (20260611150000): the
+    // S5 DRAFT (needs-human-gate, NOT applied) — two gated DEFINER RPCs
+    // (curated open-demand read for agency owners + the append-only
+    // "galim pasiūlyti" proposal marker); no RLS change, no new table.
+    const SPRINT_BASELINE = 65;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

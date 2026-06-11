@@ -707,7 +707,8 @@
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date"
-      }
+      },
+      "poolLink": "Worker pool"
     },
     "buyer": {
       "eyebrow": "BUYER WORKSPACE",
@@ -3763,6 +3764,53 @@
       "cta": "Add to my skills",
       "empty": "Once your trade and skills are set, you will see here where to grow next.",
       "emptyCta": "Open my profile"
+    }
+  },
+  "agencyPool": {
+    "eyebrow": "Agency pool",
+    "title": "My worker pool",
+    "intro": "Your own people, their real readiness and open demand — everything through the trust layer, nothing around it.",
+    "manageLink": "Invitations and coordination",
+    "backToAgency": "Back to agency space",
+    "noAgency": "Finish agency setup first — the pool belongs to a real agency.",
+    "needsMigration": "The agency link layer is not active in this environment yet.",
+    "loadError": "Could not load the pool. Try again.",
+    "poolTitle": "The pool — your people",
+    "empty": "Your pool is empty — invite the first person and the cards appear by themselves.",
+    "emptyCta": "Invite a worker",
+    "unnamed": "Unnamed",
+    "noProfession": "Trade not set",
+    "availability": {
+      "available": "Available",
+      "busy": "Busy",
+      "unavailable": "Unavailable",
+      "unknown": "Availability not set"
+    },
+    "reviewOff": "Journal review off",
+    "evidenceLocked": "Work evidence opens after you provision the cooperation link and the person's journal review — manage it in the agency space.",
+    "readiness": {
+      "title": "Readiness by market",
+      "empty": "No declared countries in the pool yet — readiness appears with the first ones.",
+      "availableNow": "available now",
+      "docsNote": "Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch (a gated change, in preparation). You never see document contents here."
+    },
+    "demand": {
+      "title": "Open demand",
+      "humanNote": "\"We can offer\" is your proposal on a request — the final match is always recorded by a person on the platform side.",
+      "needsGate": "Open-demand visibility for agencies is in preparation — it activates after the owner-gated change is applied.",
+      "empty": "No open requests right now.",
+      "noRole": "Role not specified",
+      "teamSize": "{n} people",
+      "marked": "Marked: we can offer",
+      "markButton": "We can offer",
+      "marking": "Marking…",
+      "outcome": {
+        "not_agency": "Finish agency setup first.",
+        "request_not_found": "The request no longer exists.",
+        "request_not_open": "The request is no longer open.",
+        "needs_gate": "This feature is in preparation (gated change pending).",
+        "error": "Could not save the mark. Try again."
+      }
     }
   }
 }

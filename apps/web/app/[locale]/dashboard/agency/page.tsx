@@ -277,13 +277,23 @@ export default async function AgencyDashboardPage({
           <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
             {t("eyebrow")}
           </p>
-          <Link
-            href="/dashboard/account"
-            className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
-            data-testid="room-my-spaces-link"
-          >
-            {tSpaces("mySpaces")} →
-          </Link>
+          <span className="flex shrink-0 flex-wrap items-center gap-2">
+            {/* S5 — the agency's own pool room (TASK 07 cards). */}
+            <Link
+              href={"/dashboard/agency/pool" as "/dashboard"}
+              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              data-testid="agency-pool-link"
+            >
+              {t("poolLink")} →
+            </Link>
+            <Link
+              href="/dashboard/account"
+              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              data-testid="room-my-spaces-link"
+            >
+              {tSpaces("mySpaces")} →
+            </Link>
+          </span>
         </div>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("title")}
