@@ -1202,7 +1202,8 @@
     },
     "hub": {
       "matching": "[EN] Matching workbench",
-      "market": "[EN] Market situation"
+      "market": "[EN] Market situation",
+      "league": "Länderliga"
     },
     "market": {
       "eyebrow": "[EN] Admin · Market",
@@ -1261,6 +1262,21 @@
         "empty": "[EN] No demand recorded yet.",
         "row": "[EN] demand {demand} · supply {supply}"
       }
+    },
+    "league": {
+      "eyebrow": "Länderliga",
+      "title": "Arbeitsmarkt-Liga",
+      "subtitle": "Berufstabellen pro Land — echte Teams, Verfügbarkeit und das Markt-Thermometer.",
+      "methodNote": "Ein Thermometerwert erscheint NUR dort, wo ein Admin einen belegten Marktdurchschnitt eingetragen hat UND die Stichprobe der erklärten Erwartungen mindestens 2 Personen umfasst. Überall sonst sagt die Zelle „unzureichende Marktdaten“ — die Tabelle bewertet niemals einen Menschen.",
+      "back": "Zurück zum Admin-Hub",
+      "empty": "Noch keine Liga-Daten — Tabellen erscheinen von selbst, sobald Arbeitskräfte ihre Berufe angeben.",
+      "unknownCountry": "Land nicht angegeben",
+      "cellCount": "{n, plural, one {# Beruf} other {# Berufe}}",
+      "availableNow": "jetzt verfügbar",
+      "confirmedSkillWorkers": "mit bestätigten Fähigkeiten",
+      "insufficientData": "Unzureichende Marktdaten",
+      "smallSample": "Kleine Stichprobe (n<5)",
+      "declaredSample": "Stichprobe erklärter Erwartungen: {n}"
     }
   },
   "documents": {

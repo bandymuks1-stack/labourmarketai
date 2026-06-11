@@ -1047,7 +1047,8 @@
       "support": "Pagalbos pokalbiai",
       "companyVerification": "Įmonių patvirtinimas",
       "matching": "Matching darbastalis",
-      "market": "Rinkos situacija"
+      "market": "Rinkos situacija",
+      "league": "Šalies lyga"
     },
     "drafts": {
       "title": "Operaciniai juodraščiai",
@@ -1306,6 +1307,21 @@
         "empty": "Paklausos įrašų dar nėra.",
         "row": "paklausa {demand} · pasiūla {supply}"
       }
+    },
+    "league": {
+      "eyebrow": "Šalies lyga",
+      "title": "Darbo rinkos lyga",
+      "subtitle": "Profesijų lentelės pagal šalį — realios komandos, prieinamumas ir rinkos termometras.",
+      "methodNote": "Termometro reikšmė rodoma TIK ten, kur admin įvedė pagrįstą rinkos vidurkį IR deklaruotų lūkesčių imtis yra bent 2 žmonės. Visur kitur langelis sako „nepakanka rinkos duomenų“ — lentelė niekada nevertina žmogaus.",
+      "back": "Į admin centrą",
+      "empty": "Lygai dar nėra duomenų — kai darbuotojai pasižymės profesijas, lentelės atsiras savaime.",
+      "unknownCountry": "Šalis nenurodyta",
+      "cellCount": "{n, plural, one {# profesija} few {# profesijos} other {# profesijų}}",
+      "availableNow": "laisvi dabar",
+      "confirmedSkillWorkers": "su patvirtintais įgūdžiais",
+      "insufficientData": "Nepakanka rinkos duomenų",
+      "smallSample": "Maža imtis (n<5)",
+      "declaredSample": "Deklaruotų lūkesčių imtis: {n}"
     }
   },
   "profileSkillClaims": {

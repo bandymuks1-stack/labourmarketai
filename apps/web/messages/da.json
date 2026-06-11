@@ -1202,7 +1202,8 @@
     },
     "hub": {
       "matching": "[EN] Matching workbench",
-      "market": "[EN] Market situation"
+      "market": "[EN] Market situation",
+      "league": "Landsliga"
     },
     "market": {
       "eyebrow": "[EN] Admin · Market",
@@ -1261,6 +1262,21 @@
         "empty": "[EN] No demand recorded yet.",
         "row": "[EN] demand {demand} · supply {supply}"
       }
+    },
+    "league": {
+      "eyebrow": "Landsliga",
+      "title": "Arbejdsmarkedsliga",
+      "subtitle": "Faglige tabeller pr. land — rigtige hold, tilgængelighed og markedstermometeret.",
+      "methodNote": "En termometerværdi vises KUN dér, hvor en admin har indtastet et kildebelagt markedsgennemsnit, OG stikprøven af erklærede forventninger er mindst 2 personer. Alle andre steder siger cellen \"utilstrækkelige markedsdata\" — tabellen vurderer aldrig et menneske.",
+      "back": "Tilbage til admin-hub",
+      "empty": "Ingen liga-data endnu — tabellerne kommer af sig selv, når arbejdere angiver deres fag.",
+      "unknownCountry": "Land ikke angivet",
+      "cellCount": "{n, plural, one {# fag} other {# fag}}",
+      "availableNow": "ledige nu",
+      "confirmedSkillWorkers": "med bekræftede færdigheder",
+      "insufficientData": "Utilstrækkelige markedsdata",
+      "smallSample": "Lille stikprøve (n<5)",
+      "declaredSample": "Stikprøve af erklærede forventninger: {n}"
     }
   },
   "documents": {

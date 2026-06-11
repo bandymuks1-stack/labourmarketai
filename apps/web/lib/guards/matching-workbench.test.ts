@@ -119,10 +119,13 @@ describe("matching workbench — copy honesty in all 10 locales", () => {
     expect(page).toMatch(/w\.managerConfirmations > 0\s*\?\s*"text-state-success"/);
   });
 
-  it("page renders the human-note banner + TASK 07 preview marker", () => {
+  it("page renders the human-note banner + the TASK 07.4 final-skin marker", () => {
     const page = read(PAGE);
     expect(page).toMatch(/data-testid="admin-matching-human-note"/);
-    expect(page).toMatch(/bus pakeistas TASK 07/);
+    // TASK 07.4 delivered the final DRAFT-board skin — the preview marker is
+    // gone and must NOT come back; the human-decision rule stays in the skin.
+    expect(page).toMatch(/TASK 07\.4 final skin/);
+    expect(page).not.toMatch(/bus pakeistas TASK 07/);
   });
 });
 

@@ -28,9 +28,17 @@ import type { DarkListboxOption } from "@/components/ui/DarkListbox";
  * Reads + the match write both ride the EXISTING RLS (admin) — no migration,
  * no new table (decision lives in payload.match_log, append-only).
  *
- * UI: low-fidelity preview, bus pakeistas TASK 07 (living-arena UI po owner
- * vizualinio užrakto). Funkcija > grožis; mobile-first stack.
+ * UI: TASK 07.4 final skin — the DRAFT board (living-arena, FUT draft
+ * energy): demand and supply as arena cards, supply rows as mini player
+ * cards. The decision stays 100% human — no scoring, no ranking, no
+ * auto-pick; mobile-first stack.
  */
+
+function initialsOf(name: string | null): string {
+  if (!name) return "•";
+  const parts = name.trim().split(/\s+/).slice(0, 2);
+  return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "•";
+}
 
 const STATUS_TONE: Record<string, string> = {
   submitted: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
@@ -164,7 +172,7 @@ export default async function AdminMatchingWorkbenchPage({
                 {demand.map((r) => (
                   <li
                     key={r.id}
-                    className="card-border flex flex-col gap-3 p-4"
+                    className="card-border glow-hover rise-in flex flex-col gap-3 p-4"
                     data-testid={`matching-demand-row-${r.id}`}
                     data-status={r.status}
                   >
@@ -450,14 +458,29 @@ export default async function AdminMatchingWorkbenchPage({
                   .map((w) => (
                   <li
                     key={w.id}
-                    className="card-border flex flex-col gap-1.5 p-3"
+                    className="card-border glow-hover rise-in flex flex-col gap-1.5 p-3"
                     data-testid={`matching-supply-row-${w.id}`}
                   >
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="text-sm font-semibold text-text-primary">
-                        {w.displayName ?? t("supply.unnamed")}
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span
+                          aria-hidden
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-xs font-bold text-text-primary ${
+                            w.skillsConfirmed > 0
+                              ? "border-trust-accent/50"
+                              : "border-ink-500"
+                          }`}
+                        >
+                          {initialsOf(w.displayName)}
+                        </span>
+                        <span className="truncate text-sm font-semibold text-text-primary">
+                          {w.displayName ?? t("supply.unnamed")}
+                        </span>
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {w.availabilityStatus === "available" ? (
+                          <span className="live-dot" aria-hidden />
+                        ) : null}
                         {w.availabilityStatus &&
                         (AVAILABILITY_KEYS as readonly string[]).includes(
                           w.availabilityStatus,
