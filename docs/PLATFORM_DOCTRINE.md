@@ -374,6 +374,39 @@ matching dizainas privalo skaičiuoti atitiktį per ESCO kanoninius ID —
 
 ---
 
+## Section 20 — Privatumo bazė (visomis kryptimis)
+
+> **§20 Privatumo bazė (binding; owner tekstas 2026-06-11, įrašytas 1:1).**
+
+1. Privatūs žmogaus pasirinkimai ir veikla (pirkimai, būstas, kelionės,
+   gyvenimo sluoksnis, asmeninis elgesys platformoje) NIEKADA nematomi
+   darbdaviams, agentūroms ar užsakovams — jokia forma, jokiu agregatu,
+   jokiu netiesioginiu keliu.
+2. Simetrija: darbuotojai lygiai taip pat nemato įmonių ar kitų darbuotojų
+   privačių duomenų. Privatumas galioja visiems vaidmenims vienodai — tai
+   ne darbuotojo privilegija, o platformos fizika.
+3. Tik pati sistema mato — statistikos ir mokslo pagrindu: agreguoti
+   duomenys su mažos imties slenksčiu (n<5 šablonas). Individualių elgsenos
+   dosjė neegzistuoja kaip duomenų struktūra.
+4. MOKSLAS DIRBA TIK SU ANONIMINIAIS DUOMENIMIS — be išimčių. Tyrimų
+   sluoksnis struktūriškai neturi prieigos prie vardų, pavardžių, kontaktų,
+   tikslių adresų ar tiesioginių identifikatorių: anonimizacija
+   (pseudonimizuoti ID + agregacija + k-slenkstis) įvyksta PRIEŠ duomenims
+   pasiekiant tyrimų sluoksnį. Identifikuotų tyrimų kategorija platformoje
+   neegzistuoja.
+5. Tyrimų įžvalgos gerina produktą visiems, bet niekada nekeičia konkretaus
+   žmogaus galimybių — matching, matomumo, kainų ar pasiūlymų — jo privačių
+   elgsenos duomenų pagrindu.
+6. Tyrimų tikslai skaidriai aprašomi privacy policy; duomenų minimalizmas
+   (§6) galioja ir tyrimams.
+
+Sąsajos: §4 (default-closed), §6 (storage minimalizmas), §19 (Atitikties
+principas — 5 punktas yra jo privatumo pusė), S12 anti-company-store
+pasiūlymas (1 punkto atvejis). Techniniai invariantai užrakinti
+`apps/web/lib/guards/privacy-base.test.ts`.
+
+---
+
 ## Section 9 — Changelog (doctrine evolution)
 
 | Date | Section(s) | Change | Author |
@@ -383,6 +416,7 @@ matching dizainas privalo skaičiuoti atitiktį per ESCO kanoninius ID —
 | 2026-05-21 | §5, §7.1, §15 | Amend §5 to the four-layer person→world model (personhood / RBAC / profession+skill / positions / engagement contexts). Insert §7.1 (AI as translator, not author). Add §15 (skill trust signals & productivity). Bundled with the M1 Work Journal implementation (TASK-M1-WORK-JOURNAL). | DI + Architect (Chat Claude) |
 | 2026-05-30 | §16 | Add §16 Migration naming convention (forward-only `YYYYMMDDHHMMSS_snake_case.sql`; never rename applied `000N` migrations; ordering preserved; reversibility restated). Bundled with the single-product convergence PR (`feat/cc/converge-single-product`). | DI + Claude Code |
 | 2026-05-30 | §17 | Add §17 Canonical demand intake (one model: `customer_requests`; draft via `save_demand_draft`, submit via `submit_demand_request`; `pilot_drafts` folded §17.1; `leads` kept as a distinct anonymous pre-auth funnel §17.2). The authenticated dashboard pilot-request CTA was repointed off `/api/leads` onto the canonical intake. Phase 3 / Slice 3.1 — 🟡 migration queued for the gate. | DI + Claude Code |
+| 2026-06-11 | §20 | Add §20 Privatumo bazė (visomis kryptimis) — owner text 1:1 (the ONLY sanctioned doctrine edit of this slice): private choices/activity never visible to employers/agencies/customers in any form or aggregate; privacy is symmetric across all roles (platform physics, not a worker privilege); only the system sees statistics-grade aggregates with the n<5 small-sample pattern and behavioral dossiers do not exist as a data structure; SCIENCE WORKS ONLY WITH ANONYMOUS DATA (pseudonymized IDs + aggregation + k-threshold BEFORE the research layer; no identified-research category); research insights never alter an individual's matching/visibility/prices/offers based on their private behavioral data; research purposes transparent in the privacy policy, §6 minimalism applies. Guarded by `lib/guards/privacy-base.test.ts` (technical invariants + §20 text pins). Supersedes `docs/proposals/privacy-base-v2-DRAFT.md`. | DI + Claude Code |
 | 2026-06-11 | §19 | Add §19 Atitikties principas (Fit, ne reitingas) — owner text 1:1 (the ONLY sanctioned doctrine edit of the S5 slice): people are never rated; a percentage exists only inside a concrete need context, always with its basis ("19 of 20 skills, 14 confirmed"), confirmed-vs-declared share always separated, per-context values differ by design. Guarded by `lib/guards/fit-not-rating.test.ts`; S6 fit spec note added. | DI + Claude Code |
 | 2026-05-31 | §18 | Add §18 Realumo principas (no demo/pilot/intermediate layer — neither as text nor as concept in architecture/UX; real persisting features + honest empty states framed as a founder moment; only an honest `RUOŠIAMA` roadmap is allowed; honest product truth like "records are private / no matching engine" is NOT pilot framing and stays). Reinforces §7 + "no unlabeled fake data". Applied in product: removed the "order a pilot / request trial access" CTA framing, the Tier-2 readiness card, the pilot-readiness / pilot-mode framing, and the "thank you — we'll contact you" wrapper; lifted empty / first-login states to the founder moment. GREEN / additive — no schema, RLS, or auth change. | DI + Claude Code |
 
