@@ -135,7 +135,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 63 at the S4 merge (project autolink body-replace +
     // market_rate_averages with the prod n>=2 fix; APPLIED 2026-06-11),
     // then to 64 for batch_journal_review (exceptions-pyramid batch confirm;
-    // APPLIED 2026-06-11, ledger 20260611064423).
-    expect(guard).toMatch(/SPRINT_BASELINE = 64/);
+    // APPLIED 2026-06-11, ledger 20260611064423), then to 65 for the S5
+    // agency-demand-visibility DRAFT (20260611150000; needs-human-gate,
+    // not applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 65/);
   });
 });

@@ -1437,5 +1437,52 @@
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
     }
+  },
+  "agencyPool": {
+    "eyebrow": "[EN] Agency pool",
+    "title": "[EN] My worker pool",
+    "intro": "[EN] Your own people, their real readiness and open demand — everything through the trust layer, nothing around it.",
+    "manageLink": "[EN] Invitations and coordination",
+    "backToAgency": "[EN] Back to agency space",
+    "noAgency": "[EN] Finish agency setup first — the pool belongs to a real agency.",
+    "needsMigration": "[EN] The agency link layer is not active in this environment yet.",
+    "loadError": "[EN] Could not load the pool. Try again.",
+    "poolTitle": "[EN] The pool — your people",
+    "empty": "[EN] Your pool is empty — invite the first person and the cards appear by themselves.",
+    "emptyCta": "[EN] Invite a worker",
+    "unnamed": "[EN] Unnamed",
+    "noProfession": "[EN] Trade not set",
+    "availability": {
+      "available": "[EN] Available",
+      "busy": "[EN] Busy",
+      "unavailable": "[EN] Unavailable",
+      "unknown": "[EN] Availability not set"
+    },
+    "reviewOff": "[EN] Journal review off",
+    "evidenceLocked": "[EN] Work evidence opens after you provision the cooperation link and the person's journal review — manage it in the agency space.",
+    "readiness": {
+      "title": "[EN] Readiness by market",
+      "empty": "[EN] No declared countries in the pool yet — readiness appears with the first ones.",
+      "availableNow": "[EN] available now",
+      "docsNote": "[EN] Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch (a gated change, in preparation). You never see document contents here."
+    },
+    "demand": {
+      "title": "[EN] Open demand",
+      "humanNote": "[EN] \"We can offer\" is your proposal on a request — the final match is always recorded by a person on the platform side.",
+      "needsGate": "[EN] Open-demand visibility for agencies is in preparation — it activates after the owner-gated change is applied.",
+      "empty": "[EN] No open requests right now.",
+      "noRole": "[EN] Role not specified",
+      "teamSize": "[EN] {n} people",
+      "marked": "[EN] Marked: we can offer",
+      "markButton": "[EN] We can offer",
+      "marking": "[EN] Marking…",
+      "outcome": {
+        "not_agency": "[EN] Finish agency setup first.",
+        "request_not_found": "[EN] The request no longer exists.",
+        "request_not_open": "[EN] The request is no longer open.",
+        "needs_gate": "[EN] This feature is in preparation (gated change pending).",
+        "error": "[EN] Could not save the mark. Try again."
+      }
+    }
   }
 }

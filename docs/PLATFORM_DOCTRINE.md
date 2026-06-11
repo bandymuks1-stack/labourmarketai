@@ -337,6 +337,43 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 
 ---
 
+## Section 19 — Atitikties principas (Fit, ne reitingas)
+
+> **§19 Atitikties principas (binding; owner tekstas 2026-06-11, įrašytas 1:1).**
+>
+> „Žmonių mes niekada nereitinguojame. Reitingas atsiranda tik atitikties
+> perspektyvoje: darbas X reikalauja įgūdžių Y; žmogus ar įmonė Z turi
+> įgūdžius C, kurie atitinka N% Y — čia ir gaunasi reitingavimas.
+> Termometras tik rodo išraišką, kiek atitinka paieškos kriterijus,
+> numatytus darbus ar kainas."
+
+**Techninės pasekmės (privalomos):**
+
+- **(a) Jokio globalaus asmens ar įmonės balo** — jokioje lentelėje, API
+  atsakyme ar UI. Laukai/raktai kaip `overall_score`, `person_score`,
+  `worker_rating`, `trust_score`, `profile_strength`, OVR yra draudžiami.
+  (Per-įgūdžio `confidence_score` pagal §15 lieka — jis yra įgūdžio, ne
+  žmogaus, signalas ir išorėje pagal nutylėjimą nerodomas.)
+- **(b) Bet koks atitikties % visada pririštas prie konkretaus poreikio
+  konteksto ir rodomas SU PAGRINDU** — pavyzdinė privaloma forma:
+  „atitinka 95% šio darbo įgūdžių: 19 iš 20, iš jų 14 patvirtinti".
+  % be konteksto ir be pagrindo neegzistuoja.
+- **(c) Patvirtintų vs deklaruotų įgūdžių dalis atitiktyje visada
+  atskirta** — vartotojas visada mato, kiek atitikties remiasi
+  manager-patvirtintais faktais, o kiek savideklaracija.
+- **(d) Tas pats subjektas skirtinguose kontekstuose turi skirtingus %
+  — tai principo esmė, ne klaida.** Niekada nekešuojamas ir nerodomas
+  „bendras" subjekto %; kiekvienas skaičiavimas gyvena savo poreikio
+  kontekste.
+
+Sąsajos: §7 (AI niekada nemeluoja), §15 (įgūdžio trust signalai),
+PRODUCT_CONSTITUTION §10 (jokios universalios žmogaus vertės) ir S4
+termometro geležinė taisyklė (reikšmė tik su abiem komponentais). S6
+matching dizainas privalo skaičiuoti atitiktį per ESCO kanoninius ID —
+žr. `docs/product/s6-matching-fit-spec-note.md`.
+
+---
+
 ## Section 9 — Changelog (doctrine evolution)
 
 | Date | Section(s) | Change | Author |
@@ -346,6 +383,7 @@ When Claude Code, Antigravity, or Codex picks up any task involving schema, cont
 | 2026-05-21 | §5, §7.1, §15 | Amend §5 to the four-layer person→world model (personhood / RBAC / profession+skill / positions / engagement contexts). Insert §7.1 (AI as translator, not author). Add §15 (skill trust signals & productivity). Bundled with the M1 Work Journal implementation (TASK-M1-WORK-JOURNAL). | DI + Architect (Chat Claude) |
 | 2026-05-30 | §16 | Add §16 Migration naming convention (forward-only `YYYYMMDDHHMMSS_snake_case.sql`; never rename applied `000N` migrations; ordering preserved; reversibility restated). Bundled with the single-product convergence PR (`feat/cc/converge-single-product`). | DI + Claude Code |
 | 2026-05-30 | §17 | Add §17 Canonical demand intake (one model: `customer_requests`; draft via `save_demand_draft`, submit via `submit_demand_request`; `pilot_drafts` folded §17.1; `leads` kept as a distinct anonymous pre-auth funnel §17.2). The authenticated dashboard pilot-request CTA was repointed off `/api/leads` onto the canonical intake. Phase 3 / Slice 3.1 — 🟡 migration queued for the gate. | DI + Claude Code |
+| 2026-06-11 | §19 | Add §19 Atitikties principas (Fit, ne reitingas) — owner text 1:1 (the ONLY sanctioned doctrine edit of the S5 slice): people are never rated; a percentage exists only inside a concrete need context, always with its basis ("19 of 20 skills, 14 confirmed"), confirmed-vs-declared share always separated, per-context values differ by design. Guarded by `lib/guards/fit-not-rating.test.ts`; S6 fit spec note added. | DI + Claude Code |
 | 2026-05-31 | §18 | Add §18 Realumo principas (no demo/pilot/intermediate layer — neither as text nor as concept in architecture/UX; real persisting features + honest empty states framed as a founder moment; only an honest `RUOŠIAMA` roadmap is allowed; honest product truth like "records are private / no matching engine" is NOT pilot framing and stays). Reinforces §7 + "no unlabeled fake data". Applied in product: removed the "order a pilot / request trial access" CTA framing, the Tier-2 readiness card, the pilot-readiness / pilot-mode framing, and the "thank you — we'll contact you" wrapper; lifted empty / first-login states to the founder moment. GREEN / additive — no schema, RLS, or auth change. | DI + Claude Code |
 
 ---
