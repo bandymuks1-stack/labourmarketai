@@ -1526,7 +1526,7 @@
     },
     "workflowSteps": {
       "s1": "Aprašykite, ką mokate, arba įkelkite CV tekstą",
-      "s2": "Sistema struktūruoja įgūdžius — jūs patvirtinate",
+      "s2": "Pasižymi savo įgūdžius — ir patvirtini, kas tavo",
       "s3": "Užfiksuokite šiandienos darbą darbo dienoraštyje",
       "s4": "Įrašai virsta įrodymais",
       "s5": "Įrodymus vėliau patvirtins vadovas ar klientas",
@@ -2690,7 +2690,7 @@
     "chip": "Darbo rinkos sistema",
     "headline": "Gyva darbo rinkos",
     "headlineAccent": "valdymo sistema.",
-    "subcopy": "Vienas profilis. Darbuotojai, įmonės ir agentūros vienoje sujungtoje rinkoje — gyvas galimybių srautas, atitikimas realiu laiku, sąžiningi signalai. Platforma kuriama; tai M0 pagrindas.",
+    "subcopy": "Vienas profilis. Darbuotojai, įmonės ir agentūros vienoje sujungtoje rinkoje — gyvas galimybių srautas ir sąžiningi signalai. Platforma kuriama; tai M0 pagrindas.",
     "ctaPrimary": "Pradėti dabar",
     "businessNote": "Įmonėms ir agentūroms ·",
     "businessLink": "Sužinoti daugiau"
@@ -2810,15 +2810,15 @@
       "eyebrow": "Įmonėms",
       "title": "Galimybių srautas —",
       "titleAccent": "kontekste.",
-      "subcopy": "Nurodykite, ko reikia kiekviename projekte, ir matykite paaiškinamą atitikimo kryptį iš laisvų darbuotojų ir agentūrų.",
+      "subcopy": "Nurodykite, ko reikia kiekviename projekte, ir matykite, kurie laisvi darbuotojai ir agentūros tam tinka.",
       "benefits": [
         {
           "title": "Paklausa pagal projektą",
           "body": "Apibrėžkite pareigybes, žmonių skaičių ir įgūdžius kiekvienam projektui — ne miglotus skelbimus."
         },
         {
-          "title": "Paaiškinama atitikimo kryptis",
-          "body": "Kiekvienas atitikimo signalas pateikiamas su priežastimis, todėl sprendimai lieka atsekami."
+          "title": "Atitiktis konkrečiam darbui",
+          "body": "Matote, kurie laisvi darbuotojai ir agentūros tinka kiekvienam konkrečiam poreikiui — sąžiningai, pagal poreikį."
         },
         {
           "title": "Agentūros, kai reikia",

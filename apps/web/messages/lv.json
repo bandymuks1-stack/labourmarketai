@@ -580,7 +580,7 @@
     "ctaPrimary": "[EN] Start now",
     "headline": "[EN] The labour market,",
     "headlineAccent": "[EN] alive.",
-    "subcopy": "[EN] One profile. Workers, companies and agencies on a single connected market — live demand, real-time matching, honest signals. The platform is being built; this is the M0 foundation."
+    "subcopy": "[EN] One profile. Workers, companies and agencies on a single connected market — a live opportunity flow and honest signals. The platform is being built; this is the M0 foundation."
   },
   "heroCards": {
     "action": {
@@ -726,8 +726,8 @@
           "title": "[EN] Post demand per project"
         },
         {
-          "body": "[EN] Every fit signal comes with the reasons behind it, so hiring decisions stay accountable.",
-          "title": "[EN] Explainable fit direction"
+          "title": "[EN] Fit to the specific job",
+          "body": "[EN] You see which available workers and agencies fit each concrete need — honestly, per need."
         },
         {
           "body": "[EN] Tap vetted agency pools for surge capacity without losing visibility.",
@@ -737,7 +737,7 @@
       "cta": "[EN] Join the company waitlist",
       "eyebrow": "[EN] For companies",
       "screenshot": "[EN] Company demand flow",
-      "subcopy": "[EN] Post what you need on each project and see explainable fit direction from available workers and agencies.",
+      "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
       "titleAccent": "[EN] in context."
     },

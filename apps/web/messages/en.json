@@ -1526,7 +1526,7 @@
     },
     "workflowSteps": {
       "s1": "Write what you can do, or paste a CV",
-      "s2": "The system structures skills — you confirm",
+      "s2": "You set down your skills — and confirm what is yours",
       "s3": "Record today's work in the work journal",
       "s4": "Entries become evidence",
       "s5": "Evidence is later confirmed by a manager or client",
@@ -2690,7 +2690,7 @@
     "chip": "The labour market OS",
     "headline": "The labour market,",
     "headlineAccent": "alive.",
-    "subcopy": "One profile. Workers, companies and agencies on a single connected market — a live opportunity flow, real-time matching, honest signals. The platform is being built; this is the M0 foundation.",
+    "subcopy": "One profile. Workers, companies and agencies on a single connected market — a live opportunity flow and honest signals. The platform is being built; this is the M0 foundation.",
     "ctaPrimary": "Start now",
     "businessNote": "For companies & agencies ·",
     "businessLink": "Learn more"
@@ -2810,15 +2810,15 @@
       "eyebrow": "For companies",
       "title": "Opportunity flow,",
       "titleAccent": "in context.",
-      "subcopy": "Post what you need on each project and see explainable fit direction from available workers and agencies.",
+      "subcopy": "Post what you need on each project and see which available workers and agencies fit it.",
       "benefits": [
         {
           "title": "Post demand per project",
           "body": "Define roles, headcount and skills per project — not vague job ads."
         },
         {
-          "title": "Explainable fit direction",
-          "body": "Every fit signal comes with the reasons behind it, so hiring decisions stay accountable."
+          "title": "Fit to the specific job",
+          "body": "You see which available workers and agencies fit each concrete need — honestly, per need."
         },
         {
           "title": "Agencies, when you need them",
