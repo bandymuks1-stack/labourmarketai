@@ -1291,6 +1291,19 @@
         "help": "[EN] Countries with demand, ordered by weakest supply. A row with 0 supply is the gap to act on.",
         "empty": "[EN] No demand recorded yet.",
         "row": "[EN] demand {demand} · supply {supply}"
+      },
+      "pulse": {
+        "title": "Markedspuls — live-aggregater",
+        "supplyTitle": "Udbud (personer pr. fag × land)",
+        "supplyEmpty": "Ingen fag angivet endnu — bjælkerne kommer med de første arbejdere.",
+        "demandTitle": "Efterspørgsel (åbne forespørgsler)",
+        "demandEmpty": "Ingen åbne forespørgsler lige nu — et ærligt roligt marked.",
+        "gapsTitle": "Landehuller (efterspørgsel vs. udbud)",
+        "gapsEmpty": "Ingen efterspørgsel registreret endnu.",
+        "gapLine": "{demand} forespørgsler / {supply} personer",
+        "thermoTitle": "Termometre (kun hvor begge komponenter findes)",
+        "thermoEmpty": "Ingen termometerværdier endnu — de kommer, når et kildebelagt markedsgennemsnit er indtastet, OG en celle har en stikprøve på mindst 2 erklærede forventninger.",
+        "smallSample": "n<{n}"
       }
     },
     "league": {

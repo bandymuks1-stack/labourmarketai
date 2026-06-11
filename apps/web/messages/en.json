@@ -1337,6 +1337,19 @@
         "help": "Countries with demand, ordered by weakest supply. A row with 0 supply is the gap to act on.",
         "empty": "No demand recorded yet.",
         "row": "demand {demand} · supply {supply}"
+      },
+      "pulse": {
+        "title": "Market pulse — live aggregates",
+        "supplyTitle": "Supply (workers per trade × country)",
+        "supplyEmpty": "No declared trades yet — the bars appear with the first workers.",
+        "demandTitle": "Demand (open requests)",
+        "demandEmpty": "No open requests right now — an honest quiet market.",
+        "gapsTitle": "Country gaps (demand vs supply)",
+        "gapsEmpty": "No demand recorded yet.",
+        "gapLine": "{demand} requests / {supply} workers",
+        "thermoTitle": "Thermometers (only where both components exist)",
+        "thermoEmpty": "No thermometer values yet — they appear once a sourced market average is entered AND a cell has a declared-expectation sample of at least 2.",
+        "smallSample": "n<{n}"
       }
     },
     "league": {
