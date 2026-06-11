@@ -47,13 +47,23 @@ export default async function AdminMatchingWorkbenchPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ country?: string; availability?: string }>;
+  searchParams: Promise<{
+    country?: string;
+    availability?: string;
+    confirmed?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   await requireSuperadmin(locale);
-  const { country: filterCountry, availability: filterAvailability } =
-    await searchParams;
+  const {
+    country: filterCountry,
+    availability: filterAvailability,
+    confirmed: filterConfirmedRaw,
+  } = await searchParams;
+  // Trust→visibility (S4 item 5): a FACTUAL signal filter — workers with ≥1
+  // manager-confirmed skill. Never an invented numeric rating.
+  const filterConfirmed = filterConfirmedRaw === "1";
 
   const t = await getTranslations("admin.matching");
   const tProf = await getTranslations("professions");
@@ -355,10 +365,15 @@ export default async function AdminMatchingWorkbenchPage({
                     .map((c) => c.toUpperCase()),
                 ),
               ].sort();
-              const link = (c: string | null, a: string | null): string => {
+              const link = (
+                c: string | null,
+                a: string | null,
+                conf: boolean = filterConfirmed,
+              ): string => {
                 const q = new URLSearchParams();
                 if (c) q.set("country", c);
                 if (a) q.set("availability", a);
+                if (conf) q.set("confirmed", "1");
                 const qs = q.toString();
                 return `/dashboard/admin/matching${qs ? `?${qs}` : ""}`;
               };
@@ -403,6 +418,20 @@ export default async function AdminMatchingWorkbenchPage({
                       {t(`supply.availability.${a}` as never)}
                     </Link>
                   ))}
+                  <span className="mx-1 text-ink-500">·</span>
+                  <Link
+                    href={
+                      link(
+                        filterCountry ?? null,
+                        filterAvailability ?? null,
+                        !filterConfirmed,
+                      ) as "/dashboard"
+                    }
+                    className={chip(filterConfirmed)}
+                    data-testid="matching-filter-confirmed"
+                  >
+                    {t("filters.confirmedOnly")}
+                  </Link>
                 </div>
               );
             })()}
@@ -415,7 +444,10 @@ export default async function AdminMatchingWorkbenchPage({
                 {filterSupply(supply, {
                   country: filterCountry ?? null,
                   availability: filterAvailability ?? null,
-                }).map((w) => (
+                })
+                  // Factual visibility signal — never a score (doctrine §7).
+                  .filter((w) => !filterConfirmed || w.skillsConfirmed > 0)
+                  .map((w) => (
                   <li
                     key={w.id}
                     className="card-border flex flex-col gap-1.5 p-3"

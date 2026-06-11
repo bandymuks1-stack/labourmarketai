@@ -60,5 +60,11 @@ export async function buildPlayerCardLabels(
         )
       : null,
     latestEvidenceEmpty: t("latestEvidenceEmpty"),
+    thermoLabel: t("thermoLabel"),
+    thermoHint: t("thermoHint"),
+    thermoMissingPosition: t("thermoMissingPosition"),
+    thermoMissingMarket: t("thermoMissingMarket"),
+    thermoMissingBoth: t("thermoMissingBoth"),
+    thermoSmallSample: t("thermoSmallSample"),
   };
 }

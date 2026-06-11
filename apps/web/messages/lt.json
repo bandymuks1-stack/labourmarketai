@@ -1046,7 +1046,8 @@
       "communication": "Pokalbiai",
       "support": "Pagalbos pokalbiai",
       "companyVerification": "Įmonių patvirtinimas",
-      "matching": "Matching darbastalis"
+      "matching": "Matching darbastalis",
+      "market": "Rinkos situacija"
     },
     "drafts": {
       "title": "Operaciniai juodraščiai",
@@ -1244,7 +1245,66 @@
         }
       },
       "filters": {
-        "all": "Visos šalys"
+        "all": "Visos šalys",
+        "confirmedOnly": "Patvirtinti įgūdžiai ✓"
+      }
+    },
+    "market": {
+      "eyebrow": "Admin · Rinka",
+      "title": "Rinkos situacija",
+      "subtitle": "Pasiūla, paklausa, admin įvesti rinkos vidurkiai ir spragos — tik realūs platformos skaičiai.",
+      "methodNote": "Kiekvienas skaičius šiame puslapyje — realus realių eilučių skaičius. Rinkos vidurkius admin įveda ranka iš įvardyto šaltinio — platforma jų niekada nespėja. Mažos imtys (n<5) pažymimos.",
+      "back": "Admin skydelis",
+      "needsMigration": "Rinkos vidurkiai dar neparuošti — S4 migracija laukia savininko vartų.",
+      "smallSample": "⚠ n<5",
+      "unknownCountry": "Nenurodyta",
+      "averages": {
+        "title": "Admin rinkos vidurkiai",
+        "help": "Antrasis termometro formulės dėmuo: profesija × šalis × vidurkis (EUR/mėn.) + įvedimo data + šaltinio pastaba.",
+        "empty": "Rinkos vidurkių dar neįvesta — termometras lieka būsenoje „nepakanka rinkos duomenų”, kol bus įvesti realūs, šaltiniu pagrįsti skaičiai."
+      },
+      "basis": {
+        "monthly_eur": "mėn."
+      },
+      "sourceStatus": {
+        "needs_source": "Reikia šaltinio",
+        "sourced": "Su šaltiniu",
+        "reviewed": "Peržiūrėta"
+      },
+      "form": {
+        "profession": "Profesija",
+        "country": "Šalis",
+        "rate": "Vidurkis (EUR/mėn.)",
+        "sourceNote": "Šaltinio pastaba",
+        "sourceNotePlaceholder": "pvz., Valstybės duomenų agentūra, 2026 K1",
+        "sourceStatus": "Šaltinio būsena",
+        "save": "Išsaugoti vidurkį",
+        "saving": "Saugoma…",
+        "saved": "Išsaugota.",
+        "error": "Nepavyko išsaugoti."
+      },
+      "supply": {
+        "title": "Pasiūla — darbuotojai",
+        "help": "Darbuotojai pagal profesiją × šalį (darbuotojo lokacija; patvirtinti = darbuotojai su bent vienu vadovo patvirtintu įgūdžiu).",
+        "empty": "Darbuotojų su profesijomis dar nėra.",
+        "profession": "Profesija",
+        "country": "Šalis",
+        "workers": "Darbuotojai",
+        "confirmed": "Su patvirtintais įgūdžiais"
+      },
+      "demand": {
+        "title": "Paklausa — užsakovų užklausos",
+        "freeTextNote": "Užklausoje rolė saugoma laisvu tekstu (be profesijos ryšio), todėl paklausos su pasiūla pagal profesiją sujungti dar negalima — spragos žemiau yra šalies lygio.",
+        "empty": "Užsakovų užklausų dar nėra.",
+        "country": "Šalis",
+        "role": "Rolė (laisvas tekstas)",
+        "requests": "Užklausos"
+      },
+      "gaps": {
+        "title": "Spragos",
+        "help": "Šalys su paklausa, rikiuojamos nuo silpniausios pasiūlos. Eilutė su 0 pasiūla — sprendžiama spraga.",
+        "empty": "Paklausos įrašų dar nėra.",
+        "row": "paklausa {demand} · pasiūla {supply}"
       }
     }
   },
@@ -3540,6 +3600,12 @@
     "namePlaceholder": "Mano profilis",
     "candidateLabel": "Kandidatiniai įgūdžiai",
     "candidateHint": "Įgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, nepatvirtinta).",
+    "thermoLabel": "Termometras",
+    "thermoHint": "(deklaruotų atlygio lūkesčių vidurkis jūsų projekte + admin įvestas rinkos vidurkis) / 2 — rodoma tik kai yra abu dėmenys.",
+    "thermoMissingPosition": "Nepakanka projekto duomenų",
+    "thermoMissingMarket": "Nepakanka rinkos duomenų",
+    "thermoMissingBoth": "Nepakanka rinkos duomenų",
+    "thermoSmallSample": "Maža imtis (n<5) — vertinkite atsargiai.",
     "verifiedTitle": "Patvirtinti įgūdžiai",
     "verifiedEmpty": "Patvirtintų įgūdžių dar nėra. Jie atsiranda, kai vadovas patvirtina tavo darbo įrašus.",
     "latestEvidenceLabel": "Naujausias įrodymas",

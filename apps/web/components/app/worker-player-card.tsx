@@ -1,4 +1,10 @@
-import { ShieldCheck, Shield, CalendarCheck2, Sparkle } from "lucide-react";
+import {
+  ShieldCheck,
+  Shield,
+  CalendarCheck2,
+  Sparkle,
+  Thermometer,
+} from "lucide-react";
 
 import type { WorkerPlayerCard as WorkerPlayerCardData } from "@/lib/player-card/player-card";
 import { CountUp } from "@/components/app/today/count-up";
@@ -46,7 +52,20 @@ export interface PlayerCardLabels {
   /** Formatted date of the newest entry, or null when there is none yet. */
   latestEvidenceValue: string | null;
   latestEvidenceEmpty: string;
+  thermoLabel: string;
+  thermoHint: string;
+  thermoMissingPosition: string;
+  thermoMissingMarket: string;
+  thermoMissingBoth: string;
+  thermoSmallSample: string;
 }
+
+/** Thermometer view-model (S4). A score renders ONLY when both formula
+ *  components existed server-side; otherwise the honest insufficient-data
+ *  state names the missing component. Never an invented number. */
+export type ThermometerView =
+  | { kind: "score"; scoreEur: number; smallSample: boolean }
+  | { kind: "insufficient_data"; missing: "position" | "market" | "both" };
 
 function initialsOf(name: string | null): string {
   if (!name) return "•";
@@ -86,9 +105,11 @@ function Stat({
 export function WorkerPlayerCard({
   card,
   labels,
+  thermometer,
 }: {
   card: WorkerPlayerCardData;
   labels: PlayerCardLabels;
+  thermometer?: ThermometerView | null;
 }) {
   const confirmed = card.workCardConfirmed;
   return (
@@ -207,6 +228,49 @@ export function WorkerPlayerCard({
           hint={card.attentionInstructions === 0 ? labels.attentionZero : labels.attentionHint}
         />
       </div>
+
+      {/* ── Thermometer (S4) — owner-locked formula; a number ONLY when both
+            components exist, otherwise the honest missing-data state ── */}
+      {thermometer ? (
+        <div
+          className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+          data-testid="player-card-thermometer"
+        >
+          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <Thermometer className="h-3.5 w-3.5" aria-hidden />
+            {labels.thermoLabel}
+          </span>
+          {thermometer.kind === "score" ? (
+            <>
+              <span className="font-mono text-2xl font-bold tracking-tightest text-text-primary">
+                ~{thermometer.scoreEur} €
+              </span>
+              {thermometer.smallSample ? (
+                <span
+                  className="text-[11px] leading-relaxed text-state-warning"
+                  data-testid="player-card-thermometer-small-sample"
+                >
+                  {labels.thermoSmallSample}
+                </span>
+              ) : null}
+              <span className="text-[11px] leading-relaxed text-text-secondary">
+                {labels.thermoHint}
+              </span>
+            </>
+          ) : (
+            <span
+              className="text-[11px] leading-relaxed text-text-muted"
+              data-testid="player-card-thermometer-missing"
+            >
+              {thermometer.missing === "position"
+                ? labels.thermoMissingPosition
+                : thermometer.missing === "market"
+                  ? labels.thermoMissingMarket
+                  : labels.thermoMissingBoth}
+            </span>
+          )}
+        </div>
+      ) : null}
 
       {/* ── Latest work proof (real entry or honest emptiness) ── */}
       <div

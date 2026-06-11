@@ -3,6 +3,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import { buildPlayerCardLabels } from "@/lib/player-card/labels";
+import {
+  getOwnThermometer,
+  toThermometerView,
+} from "@/lib/market/thermometer-data";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +29,9 @@ export default async function PlayerCardPage({
   if (!card) redirect(`/${locale}/auth/login`);
 
   const labels = await buildPlayerCardLabels(card);
+  // Thermometer (S4): a score ONLY when both formula components exist;
+  // otherwise the honest missing state — null for non-worker accounts.
+  const thermometer = toThermometerView(await getOwnThermometer());
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
@@ -34,7 +41,7 @@ export default async function PlayerCardPage({
         </h1>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageIntro")}</p>
       </header>
-      <WorkerPlayerCard card={card} labels={labels} />
+      <WorkerPlayerCard card={card} labels={labels} thermometer={thermometer} />
     </div>
   );
 }

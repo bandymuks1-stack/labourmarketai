@@ -131,7 +131,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // to 59 for s3-documents-readiness (worker_documents_readiness, applied
     // to prod via MCP after owner review), then to 60 for the
     // esco-labels-all-official-languages widening DRAFT (20260610230000),
-    // then to 61 for the esco-service-role-grants fix (20260610234500).
-    expect(guard).toMatch(/SPRINT_BASELINE = 61/);
+    // then to 61 for the esco-service-role-grants fix (20260610234500),
+    // then to 63 at the S4 merge (project autolink body-replace +
+    // market_rate_averages with the prod n>=2 fix; APPLIED 2026-06-11),
+    // then to 64 for batch_journal_review (exceptions-pyramid batch confirm;
+    // APPLIED 2026-06-11, ledger 20260611064423).
+    expect(guard).toMatch(/SPRINT_BASELINE = 64/);
   });
 });

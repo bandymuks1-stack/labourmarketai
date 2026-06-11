@@ -132,11 +132,19 @@ describe("copy passes the honesty + i18n bar", () => {
     }
   });
   it("LT/EN copy never fabricates money, rank or matching outcomes", () => {
+    // The S4 thermometer keys (thermo*) are the ONE sanctioned money signal:
+    // owner-locked formula over declared expectations + admin-sourced market
+    // averages, shown only when both components really exist. Everything
+    // else on the today screen / player card stays money-free.
+    const dropThermo = (o: Record<string, unknown>) =>
+      Object.fromEntries(
+        Object.entries(o).filter(([k]) => !k.startsWith("thermo")),
+      );
     const blob =
       JSON.stringify(lt.todayScreen) +
       JSON.stringify(en.todayScreen) +
-      JSON.stringify(lt.playerCard) +
-      JSON.stringify(en.playerCard);
+      JSON.stringify(dropThermo(lt.playerCard)) +
+      JSON.stringify(dropThermo(en.playerCard));
     expect(blob).not.toMatch(/€|eur|salary|atlyginim|top \d|%|guarant|garantuo/i);
     expect(blob).not.toMatch(/employer (viewed|is interested)|darbdavys (peržiūrėjo|domisi)/i);
   });

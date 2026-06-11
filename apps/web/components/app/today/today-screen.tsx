@@ -11,6 +11,10 @@ import { Link } from "@/lib/i18n/navigation";
 import { getTodayScreen } from "@/lib/worker/today-screen";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import { buildPlayerCardLabels } from "@/lib/player-card/labels";
+import {
+  getOwnThermometer,
+  toThermometerView,
+} from "@/lib/market/thermometer-data";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { CountUp } from "@/components/app/today/count-up";
 import { SkillIcon } from "@/components/app/today/skill-icon";
@@ -32,9 +36,10 @@ import { SkillIcon } from "@/components/app/today/skill-icon";
  * fake matching/score/demand claims; empty states are real empty states.
  */
 export async function TodayScreen({ workerId }: { workerId: string | null }) {
-  const [data, playerCard] = await Promise.all([
+  const [data, playerCard, thermo] = await Promise.all([
     getTodayScreen(workerId),
     getWorkerPlayerCard(),
+    getOwnThermometer(),
   ]);
   const t = await getTranslations("todayScreen");
   const tSkill = await getTranslations("skillNames");
@@ -199,6 +204,7 @@ export async function TodayScreen({ workerId }: { workerId: string | null }) {
         <WorkerPlayerCard
           card={playerCard}
           labels={await buildPlayerCardLabels(playerCard)}
+          thermometer={toThermometerView(thermo)}
         />
       ) : null}
     </div>

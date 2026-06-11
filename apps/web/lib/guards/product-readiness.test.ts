@@ -1343,9 +1343,20 @@ describe("no migration files added by this sprint", () => {
     // privileges, so the official importer's upserts hit "permission denied";
     // grants select/insert/update on the four esco_* tables to service_role,
     // no RLS change, anon untouched.
-    // NOTE: gated PR #296 (S4) carries its own 59 -> 61 bump for two more
-    // drafts — whichever merges second resolves upward (to 63).
-    const SPRINT_BASELINE = 61;
+    // Bumped 61 -> 63 at the S4 merge for termometras+market:
+    // 20260610213000 (journal_entries.project_id autolink: body-replace of the
+    // two save-path RPCs, no schema/RLS/grant change, link only when exactly
+    // one active same-org assignment) and 20260610214000 (market_rate_averages
+    // admin-entered table + admin_set_market_rate_average RPC + the
+    // project_position_salary_avg aggregate RPC, prod-fixed to return avg ONLY
+    // when sample_n >= 2). Both APPLIED to prod via MCP apply_migration after
+    // owner review (2026-06-11, ledger 20260611064312/064340).
+    // Bumped 63 -> 64 for batch_journal_review (20260611120000): the
+    // DESIGN_SOUL §3 exceptions-pyramid batch confirm RPC pair
+    // (batch_review_exceptions + review_journal_entries_batch, delegating
+    // per-entry to 0034 review_journal_entry). APPLIED to prod via MCP after
+    // owner review (2026-06-11, ledger 20260611064423).
+    const SPRINT_BASELINE = 64;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
