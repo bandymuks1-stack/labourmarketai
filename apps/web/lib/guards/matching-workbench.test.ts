@@ -46,6 +46,12 @@ describe("matching workbench — admin gate + canonical model", () => {
       "worker_skills",
       "journal_entries",
       "journal_entry_confirmations",
+      // S6 (§19): the fit C set + need-label resolution ride the APPLIED
+      // canonical ESCO layer — read-only catalogue tables, still no new
+      // table and no RPC write.
+      "candidate_skills",
+      "esco_skills",
+      "esco_labels",
     ]);
     expect(fromCalls.length).toBeGreaterThan(0);
     for (const t of fromCalls) expect(allowed.has(t), `table ${t}`).toBe(true);

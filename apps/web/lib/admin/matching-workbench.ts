@@ -3,6 +3,12 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  parseAgencyOffers,
+  parseStructuredNeed,
+  type AgencyOfferMark,
+  type StructuredNeed,
+} from "@/lib/market/fit";
 
 /**
  * Phase 3.2 Human-Run Matching Workbench — data layer.
@@ -83,6 +89,11 @@ export interface DemandRow {
   readonly payloadFields: ReadonlyArray<{ key: string; value: string }>;
   readonly matchLog: readonly MatchLogEntry[];
   readonly createdAt: string;
+  /** §19 structured need (payload.structured_need) — null until a HUMAN
+   *  structures the request; nothing is ever invented for old rows. */
+  readonly structuredNeed: StructuredNeed | null;
+  /** S5 "galim pasiūlyti" agency proposal marks (payload.agency_offers). */
+  readonly agencyOffers: readonly AgencyOfferMark[];
 }
 
 export interface SupplyWorkerRow {
@@ -104,6 +115,10 @@ export interface SupplyWorkerRow {
   /** Journal evidence — real counts, 0 is a plain 0. */
   readonly journalEntries: number;
   readonly managerConfirmations: number;
+  /** The subject's C set for §19 fit: ESCO URIs from curated worker_skills
+   *  (verified flag = manager-confirmed) + approved candidate_skills
+   *  mappings (always declared, never verified). */
+  readonly escoSkills: ReadonlyArray<{ uri: string; verified: boolean }>;
 }
 
 export type WorkbenchListResult =
@@ -111,6 +126,9 @@ export type WorkbenchListResult =
       kind: "ok";
       demand: readonly DemandRow[];
       supply: readonly SupplyWorkerRow[];
+      /** Viewer-locale labels (EN fallback) for every structured-need ESCO
+       *  skill URI — so the fit basis names skills, not raw URIs. */
+      escoLabelsByUri: Readonly<Record<string, string>>;
     }
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
@@ -149,12 +167,14 @@ function payloadFields(
     .map(([key, value]) => ({ key, value: String(value) }));
 }
 
-export async function listWorkbench(): Promise<WorkbenchListResult> {
+export async function listWorkbench(
+  locale: string = "en",
+): Promise<WorkbenchListResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { kind: "ok", demand: [], supply: [] };
+  if (!user) return { kind: "ok", demand: [], supply: [], escoLabelsByUri: {} };
 
   const { data: requests, error } = await asAny(supabase)
     .from("customer_requests")
@@ -193,6 +213,8 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
     payloadFields: payloadFields(r.payload),
     matchLog: parseMatchLog(r.payload),
     createdAt: r.created_at as string,
+    structuredNeed: parseStructuredNeed(r.payload),
+    agencyOffers: parseAgencyOffers(r.payload),
   }));
 
   // ── Supply: workers + honest signal counts (recency order, NO ranking) ──
@@ -213,6 +235,8 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
   const confirmedByWorker = new Map<string, number>();
   const entriesByWorker = new Map<string, number>();
   const confirmationsByWorker = new Map<string, number>();
+  /** worker_id → (esco_uri → verified). */
+  const escoByWorker = new Map<string, Map<string, boolean>>();
 
   if (workerIds.length > 0) {
     const [profs, skills, entries] = await Promise.all([
@@ -222,7 +246,7 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
         .in("worker_id", workerIds),
       asAny(supabase)
         .from("worker_skills")
-        .select("worker_id, verified")
+        .select("worker_id, verified, skills ( esco_uri )")
         .in("worker_id", workerIds),
       asAny(supabase)
         .from("journal_entries")
@@ -243,6 +267,7 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
     for (const s of (skills.data ?? []) as {
       worker_id: string;
       verified: boolean;
+      skills: { esco_uri: string | null } | null;
     }[]) {
       declaredByWorker.set(
         s.worker_id,
@@ -253,6 +278,14 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
           s.worker_id,
           (confirmedByWorker.get(s.worker_id) ?? 0) + 1,
         );
+      }
+      // C set (§19): only ESCO-curated skills can join a fit computation.
+      const uri = s.skills?.esco_uri;
+      if (uri) {
+        const list = escoByWorker.get(s.worker_id) ?? new Map<string, boolean>();
+        // verified wins if the same URI appears twice.
+        list.set(uri, (list.get(uri) ?? false) || s.verified);
+        escoByWorker.set(s.worker_id, list);
       }
     }
 
@@ -284,6 +317,36 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
     }
   }
 
+  // Approved candidate-skill mappings join the C set as DECLARED (never
+  // verified) — the mapping is an admin-curated fact, the skill stays
+  // self-declared until a manager confirms real work (§7 / §19 c).
+  const profileToWorker = new Map<string, string>();
+  for (const w of workerRows) {
+    if (w.profile_id) profileToWorker.set(w.profile_id as string, w.id as string);
+  }
+  if (profileToWorker.size > 0) {
+    try {
+      const { data: candRows } = await asAny(supabase)
+        .from("candidate_skills")
+        .select("profile_id, mapped_esco_uri")
+        .eq("status", "approved")
+        .not("mapped_esco_uri", "is", null)
+        .in("profile_id", [...profileToWorker.keys()]);
+      for (const c of (candRows ?? []) as {
+        profile_id: string;
+        mapped_esco_uri: string | null;
+      }[]) {
+        const wid = profileToWorker.get(c.profile_id);
+        if (!wid || !c.mapped_esco_uri) continue;
+        const list = escoByWorker.get(wid) ?? new Map<string, boolean>();
+        if (!list.has(c.mapped_esco_uri)) list.set(c.mapped_esco_uri, false);
+        escoByWorker.set(wid, list);
+      }
+    } catch {
+      // table absent → C stays curated-skills-only (honest subset)
+    }
+  }
+
   const supply: SupplyWorkerRow[] = workerRows.map((w) => ({
     id: w.id as string,
     profileId: (w.profile_id as string | null) ?? null,
@@ -299,9 +362,56 @@ export async function listWorkbench(): Promise<WorkbenchListResult> {
     skillsConfirmed: confirmedByWorker.get(w.id as string) ?? 0,
     journalEntries: entriesByWorker.get(w.id as string) ?? 0,
     managerConfirmations: confirmationsByWorker.get(w.id as string) ?? 0,
+    escoSkills: [...(escoByWorker.get(w.id as string) ?? new Map()).entries()]
+      .map(([uri, verified]) => ({ uri, verified: Boolean(verified) }))
+      .sort((a, b) => a.uri.localeCompare(b.uri)),
   }));
 
-  return { kind: "ok", demand, supply };
+  // Viewer-locale labels for every structured-need URI (EN fallback) so the
+  // fit basis names skills, never raw URIs (§2 slug→JSON spirit).
+  const needUris = [
+    ...new Set(demand.flatMap((d) => d.structuredNeed?.escoSkillUris ?? [])),
+  ];
+  const escoLabelsByUri: Record<string, string> = {};
+  if (needUris.length > 0) {
+    try {
+      const { data: skillRows } = await asAny(supabase)
+        .from("esco_skills")
+        .select("id, esco_uri")
+        .in("esco_uri", needUris);
+      const idToUri = new Map(
+        ((skillRows ?? []) as { id: string; esco_uri: string }[]).map((r) => [
+          r.id,
+          r.esco_uri,
+        ]),
+      );
+      if (idToUri.size > 0) {
+        const { data: labelRows } = await asAny(supabase)
+          .from("esco_labels")
+          .select("concept_id, label, locale")
+          .eq("concept_type", "skill")
+          .eq("label_type", "preferred")
+          .in("locale", locale === "en" ? ["en"] : [locale, "en"])
+          .in("concept_id", [...idToUri.keys()]);
+        for (const r of (labelRows ?? []) as {
+          concept_id: string;
+          label: string;
+          locale: string;
+        }[]) {
+          const uri = idToUri.get(r.concept_id);
+          if (!uri) continue;
+          // viewer locale wins over the en fallback
+          if (!escoLabelsByUri[uri] || r.locale === locale) {
+            escoLabelsByUri[uri] = r.label;
+          }
+        }
+      }
+    } catch {
+      // labels stay URIs — degraded but honest
+    }
+  }
+
+  return { kind: "ok", demand, supply, escoLabelsByUri };
 }
 
 /**

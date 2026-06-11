@@ -1198,6 +1198,36 @@
       "filters": {
         "all": "[EN] All countries",
         "confirmedOnly": "[EN] Confirmed skills ✓"
+      },
+      "fit": {
+        "title": "Kontextuelle Passung (nur diese Anfrage)",
+        "needLine": "Geforderte Fähigkeiten ({n}):",
+        "basis": "deckt {matched} von {total} Fähigkeiten, davon {confirmed} bestätigt",
+        "missing": "Fehlt",
+        "noOverlap": "Noch hält kein Kandidat eine der geforderten ESCO-Fähigkeiten — ehrliches leeres Ergebnis, nichts wird erfunden.",
+        "unstructured": "Diese Anfrage ist noch nicht strukturiert — für unstrukturierte Bedarfe wird kein Prozentwert gezeigt. Strukturiere sie unten (menschliche Auswahl, ESCO-Typeahead).",
+        "humanNote": "Die Passung ist eine Laterne NUR innerhalb dieser Anfrage — die Entscheidung darunter bleibt ein menschlicher Akt, und dieselbe Person zeigt in einer anderen Anfrage bewusst einen anderen Wert."
+      },
+      "structure": {
+        "title": "Bedarf strukturieren (ESCO)",
+        "hint": "Wähle die geforderten Fähigkeiten (und optional den Beruf). Deine Auswahl IST die Struktur — aus dem Freitext wird nichts geraten.",
+        "skillPlaceholder": "Geforderte Fähigkeit hinzufügen…",
+        "occupationPlaceholder": "Beruf (optional)…",
+        "occupationPicked": "Beruf",
+        "removeSkill": "Entfernen",
+        "submit": "Struktur speichern ({n} Fähigkeiten)",
+        "saving": "Wird gespeichert…",
+        "done": "Strukturiert: {n} geforderte Fähigkeiten gespeichert. Die Passung erscheint beim nächsten Laden.",
+        "error": {
+          "invalid": "Wähle mindestens eine Fähigkeit.",
+          "not_found": "Die Anfrage existiert nicht mehr.",
+          "not_admin": "Nur für Admins.",
+          "error": "Speichern fehlgeschlagen. Versuche es erneut."
+        }
+      },
+      "agencyOffers": {
+        "title": "Agenturen: wir können anbieten",
+        "unnamed": "Agentur ohne Namen"
       }
     },
     "hub": {
@@ -1321,7 +1351,21 @@
       "recommended": "[EN] Recommended",
       "conditional": "[EN] Conditional"
     },
-    "sourceFlag": "[EN] Needs legal source"
+    "sourceFlag": "[EN] Needs legal source",
+    "consent": {
+      "title": "Was meine Agentur sehen darf",
+      "explainer": "Wenn du dies einschaltest, sieht DEINE Agentur nur Zählwerte deiner Dokumentenbereitschaft auf Kategorienebene (gültig / bald ablaufend / Aufmerksamkeit nötig). Sie sieht niemals Dokumenteninhalte, Dateien, Notizen oder Typen. Standard ist aus; du kannst jederzeit ausschalten.",
+      "needsGate": "Die Zustimmungsschicht ist in Vorbereitung — sie wird aktiv, sobald die freigabepflichtige Änderung angewendet ist.",
+      "onLabel": "Aggregate werden geteilt: AN",
+      "offLabel": "Aggregate werden geteilt: AUS",
+      "onHint": "Deine Agentur sieht nur Zahlen. Tippe zum Ausschalten.",
+      "offHint": "Nichts wird geteilt. Tippe, um Zählwerte auf Kategorienebene zu teilen.",
+      "saving": "Wird gespeichert…",
+      "error": {
+        "error": "Speichern fehlgeschlagen. Versuche es erneut.",
+        "no_worker": "Lege zuerst dein Arbeitskraft-Profil an."
+      }
+    }
   },
   "communication": {
     "originalLanguage": "[EN] Original ({lang})"
@@ -1483,6 +1527,11 @@
         "needs_gate": "Diese Funktion ist in Vorbereitung (Freigabe ausstehend).",
         "error": "Markierung konnte nicht gespeichert werden. Versuche es erneut."
       }
+    },
+    "docs": {
+      "valid": "Dok. gültig",
+      "expiring": "Läuft ab",
+      "attention": "Braucht Aufmerksamkeit"
     }
   }
 }

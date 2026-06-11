@@ -50,6 +50,15 @@ export interface PoolWorkerCard {
    *  never a fabricated zero. */
   readonly journalEntries: number | null;
   readonly managerConfirmations: number | null;
+  /** S6 consent-gated documents-readiness AGGREGATES (category counts only;
+   *  never contents). null = worker has not consented OR the gated draft is
+   *  not applied — the worker simply shows no docs signal. */
+  readonly docsAggregates: {
+    readonly total: number;
+    readonly valid: number;
+    readonly expiring: number;
+    readonly attention: number;
+  } | null;
 }
 
 export interface CountryReadinessRow {
@@ -196,6 +205,35 @@ export async function getAgencyPool(): Promise<AgencyPoolResult> {
     }
   }
 
+  // S6 — consent-gated documents aggregates (draft RPC; absent/off → null).
+  const docsByWorker = new Map<
+    string,
+    { total: number; valid: number; expiring: number; attention: number }
+  >();
+  try {
+    const { data: docRows, error: docErr } = await asAny(supabase).rpc(
+      "agency_pool_docs_readiness",
+    );
+    if (!docErr && Array.isArray(docRows)) {
+      for (const d of docRows as {
+        worker_id: string;
+        docs_total: number;
+        docs_valid: number;
+        docs_expiring: number;
+        docs_attention: number;
+      }[]) {
+        docsByWorker.set(d.worker_id, {
+          total: d.docs_total ?? 0,
+          valid: d.docs_valid ?? 0,
+          expiring: d.docs_expiring ?? 0,
+          attention: d.docs_attention ?? 0,
+        });
+      }
+    }
+  } catch {
+    // gated draft not applied → no docs signals (honest)
+  }
+
   const workers: PoolWorkerCard[] = linked.rows.map((r) => {
     const meta = workerMeta.get(r.workerId);
     return {
@@ -212,6 +250,7 @@ export async function getAgencyPool(): Promise<AgencyPoolResult> {
       journalReviewEnabled: r.journalReviewEnabled,
       journalEntries: entriesByWorker.get(r.workerId) ?? null,
       managerConfirmations: confirmationsByWorker.get(r.workerId) ?? null,
+      docsAggregates: docsByWorker.get(r.workerId) ?? null,
     };
   });
 

@@ -1249,6 +1249,36 @@
       "filters": {
         "all": "All countries",
         "confirmedOnly": "Confirmed skills ✓"
+      },
+      "fit": {
+        "title": "Contextual fit (this request only)",
+        "needLine": "Required skills ({n}):",
+        "basis": "matches {matched} of {total} skills, {confirmed} of them confirmed",
+        "missing": "Missing",
+        "noOverlap": "No candidate holds any of the required ESCO-linked skills yet — honest empty result, nothing is invented.",
+        "unstructured": "This request is not structured yet — no percentage is shown for unstructured needs. Structure it below (a human pick, ESCO typeahead).",
+        "humanNote": "Fit is a lantern inside THIS request only — the decision below stays a human act, and the same person shows a different fit in a different request by design."
+      },
+      "structure": {
+        "title": "Structure this need (ESCO)",
+        "hint": "Pick the required skills (and optionally the occupation). Your pick is the structure — nothing is guessed from the free text.",
+        "skillPlaceholder": "Add a required skill…",
+        "occupationPlaceholder": "Occupation (optional)…",
+        "occupationPicked": "Occupation",
+        "removeSkill": "Remove",
+        "submit": "Save structure ({n} skills)",
+        "saving": "Saving…",
+        "done": "Structured: {n} required skills saved. Fit will render on the next load.",
+        "error": {
+          "invalid": "Pick at least one skill.",
+          "not_found": "The request no longer exists.",
+          "not_admin": "Admin only.",
+          "error": "Could not save. Try again."
+        }
+      },
+      "agencyOffers": {
+        "title": "Agencies: we can offer",
+        "unnamed": "Unnamed agency"
       }
     },
     "market": {
@@ -3696,7 +3726,21 @@
       "recommended": "Recommended",
       "conditional": "Conditional"
     },
-    "sourceFlag": "Needs legal source"
+    "sourceFlag": "Needs legal source",
+    "consent": {
+      "title": "What my agency may see",
+      "explainer": "If you switch this on, YOUR agency sees only category-level counts of your document readiness (valid / expiring / needs attention). It never sees document contents, files, notes or types. Default is off; you can switch it off any time.",
+      "needsGate": "The consent layer is in preparation — it activates after the owner-gated change is applied.",
+      "onLabel": "Sharing aggregates: ON",
+      "offLabel": "Sharing aggregates: OFF",
+      "onHint": "Your agency sees counts only. Tap to switch off.",
+      "offHint": "Nothing is shared. Tap to share category-level counts.",
+      "saving": "Saving…",
+      "error": {
+        "error": "Could not save. Try again.",
+        "no_worker": "Create your worker profile first."
+      }
+    }
   },
   "trust": {
     "title": "Trust signals",
@@ -3811,6 +3855,11 @@
         "needs_gate": "This feature is in preparation (gated change pending).",
         "error": "Could not save the mark. Try again."
       }
+    },
+    "docs": {
+      "valid": "Docs valid",
+      "expiring": "Expiring",
+      "attention": "Needs attention"
     }
   }
 }

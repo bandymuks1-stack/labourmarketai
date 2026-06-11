@@ -11,6 +11,8 @@ import {
   listMyDocuments,
   type DerivedDocumentStatus,
 } from "@/lib/documents/readiness";
+import { getDocsConsent } from "@/lib/documents/consent-actions";
+import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
 
 /**
  * "Mano dokumentai" — worker document inventory + country readiness (S3).
@@ -65,6 +67,9 @@ export default async function WorkerDocumentsPage({
 
   const result = await listMyDocuments();
   const now = new Date();
+  // S6 — the worker's documents-aggregate consent (null until the gated
+  // draft is applied → honest needs-gate state inside the toggle).
+  const docsConsent = await getDocsConsent();
 
   return (
     <div className="flex flex-col gap-6" data-testid="documents-page">
@@ -75,6 +80,8 @@ export default async function WorkerDocumentsPage({
       >
         {t("disclaimer")}
       </p>
+
+      <DocsConsentToggle current={docsConsent} />
 
       {result.kind === "needs-migration" ? (
         <p className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning">
