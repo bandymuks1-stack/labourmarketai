@@ -3821,6 +3821,21 @@
       "cta": "Pridėti prie savo įgūdžių",
       "empty": "Kai pasižymėsi profesiją ir įgūdžius, čia matysi, kur augti toliau.",
       "emptyCta": "Atsidaryti profilį"
+    },
+    "queue": {
+      "renewDocument": "Dokumentui „{doc}“ reikia dėmesio (galioja iki {date}) — atnaujink",
+      "weekGaps": "{n, plural, one {# šios savaitės diena dar be įrašo — užpildyk} few {# šios savaitės dienos dar be įrašų — užpildyk} other {# šios savaitės dienų dar be įrašų — užpildyk}}"
+    },
+    "layout": {
+      "editButton": "Išdėstymas",
+      "doneButton": "Baigta",
+      "deviceNote": "Išdėstymas saugomas TIK šiame įrenginyje.",
+      "hiddenNote": "„{section}“ paslėpta — bakstelėk akį, kad grąžintum.",
+      "sections": {
+        "action": "Šiandienos veiksmas",
+        "overview": "Savaitė ir augimas",
+        "playerCard": "Žaidėjo kortelė"
+      }
     }
   },
   "agencyPool": {

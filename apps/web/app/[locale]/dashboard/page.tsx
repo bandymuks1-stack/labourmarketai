@@ -383,7 +383,7 @@ export default async function DashboardOverviewPage({
       {/* "Šiandienos ekranas" (TASK 07 / DESIGN_SOUL) — today's ONE action,
           this week's confirmed work, one honest growth path, and the premium
           scouting player card. Real journal-chain data only. */}
-      <TodayScreen workerId={workerRow?.id ?? null} />
+      <TodayScreen workerId={workerRow?.id ?? null} locale={locale} />
 
       {/* "Mano darbo kortelė" — the state-aware entry. It owns the greeting,
           the what's-clear / what's-missing summary, the ONE best next action

@@ -18,6 +18,11 @@ import {
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { CountUp } from "@/components/app/today/count-up";
 import { SkillIcon } from "@/components/app/today/skill-icon";
+import { CommandQueue } from "@/components/app/today/command-queue";
+import {
+  SectionPrefs,
+  type PrefSection,
+} from "@/components/app/today/section-prefs";
 
 /**
  * Worker "šiandienos ekranas" (TASK 07 slice design-soul-scouting-ui-v1).
@@ -35,7 +40,13 @@ import { SkillIcon } from "@/components/app/today/skill-icon";
  * journal chain (lib/worker/today-screen); no euros (no pay data exists), no
  * fake matching/score/demand claims; empty states are real empty states.
  */
-export async function TodayScreen({ workerId }: { workerId: string | null }) {
+export async function TodayScreen({
+  workerId,
+  locale,
+}: {
+  workerId: string | null;
+  locale: string;
+}) {
   const [data, playerCard, thermo] = await Promise.all([
     getTodayScreen(workerId),
     getWorkerPlayerCard(),
@@ -46,8 +57,9 @@ export async function TodayScreen({ workerId }: { workerId: string | null }) {
 
   const hasEntryToday = data.entriesToday > 0;
 
-  return (
-    <div className="flex flex-col gap-4" data-testid="worker-today-screen">
+  // ── S9: the customizable command-center sections (device-local prefs) ──
+  const actionSection = (
+    <>
       {/* ── 1 · ŠIANDIENOS VEIKSMAS — the one big move of the day ── */}
       <section
         className="card-border wow-card rise-in flex flex-col gap-3 p-6 sm:p-7"
@@ -94,8 +106,11 @@ export async function TodayScreen({ workerId }: { workerId: string | null }) {
           {hasEntryToday ? t("action.ctaAgain") : t("action.cta")} →
         </Link>
       </section>
+    </>
+  );
 
-      <div className="grid gap-4 sm:grid-cols-2">
+  const overviewSection = (
+    <div className="grid gap-4 sm:grid-cols-2">
         {/* ── 2 · SAVAITĖS SITUACIJA — real confirmed work, no euros ── */}
         <section
           className="card-border glow-hover flex flex-col gap-3 p-5"
@@ -197,16 +212,38 @@ export async function TodayScreen({ workerId }: { workerId: string | null }) {
             </>
           )}
         </section>
-      </div>
+    </div>
+  );
 
-      {/* ── 4 · PLAYER CARD — the scouting card of the real person ── */}
-      {playerCard ? (
-        <WorkerPlayerCard
-          card={playerCard}
-          labels={await buildPlayerCardLabels(playerCard)}
-          thermometer={toThermometerView(thermo)}
-        />
-      ) : null}
+  const playerCardSection = playerCard ? (
+    <WorkerPlayerCard
+      card={playerCard}
+      labels={await buildPlayerCardLabels(playerCard)}
+      thermometer={toThermometerView(thermo)}
+    />
+  ) : null;
+
+  const sections: PrefSection[] = [
+    { id: "action", label: t("layout.sections.action"), node: actionSection },
+    { id: "overview", label: t("layout.sections.overview"), node: overviewSection },
+    ...(playerCardSection
+      ? [{ id: "playerCard", label: t("layout.sections.playerCard"), node: playerCardSection }]
+      : []),
+  ];
+
+  return (
+    <div className="flex flex-col gap-4" data-testid="worker-today-screen">
+      {/* ── S9 command queue: real document expiries + week gaps only ── */}
+      <CommandQueue
+        locale={locale}
+        signals={{
+          entriesToday: data.entriesToday,
+          weekDaysWithEntries: data.weekDaysWithEntries,
+          weekDaysElapsed: data.weekDaysElapsed,
+          skillSuggestionSlug: data.skillSuggestion?.slug ?? null,
+        }}
+      />
+      <SectionPrefs storageKey="lm.todayScreen.layout.v1" sections={sections} />
     </div>
   );
 }
