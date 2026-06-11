@@ -1323,5 +1323,24 @@
     "verifiedEmpty": "Ingen bekræftede færdigheder endnu. De vises, når en leder bekræfter dine journalposter.",
     "latestEvidenceLabel": "Seneste bevis",
     "latestEvidenceEmpty": "Ingen beviser endnu — din første journalpost bliver den første."
+  },
+  "projects": {
+    "map": {
+      "eyebrow": "Lederkort",
+      "title": "Dine projekter",
+      "untitled": "Projekt uden navn",
+      "teamLabel": "På holdet",
+      "openArena": "Åbn arenaen"
+    },
+    "pulse": {
+      "pendingTitle": "{n, plural, one {# post venter på din bekræftelse} other {# poster venter på din bekræftelse}}",
+      "pendingBody": "Ét tryk — og en persons arbejde bliver til bekræftet bevis.",
+      "cta": "Bekræft nu",
+      "zero": "Intet venter på bekræftelse lige nu — holdets rytme er rolig.",
+      "zeroCta": "Gennemgangskø"
+    },
+    "draft": {
+      "title": "Draft — projekter og hold"
+    }
   }
 }

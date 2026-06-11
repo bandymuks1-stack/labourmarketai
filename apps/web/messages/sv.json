@@ -1323,5 +1323,24 @@
     "verifiedEmpty": "[EN] No verified skills yet. They appear when a manager confirms your journal entries.",
     "latestEvidenceLabel": "[EN] Latest proof",
     "latestEvidenceEmpty": "[EN] No proof entries yet — your first journal entry will be the first."
+  },
+  "projects": {
+    "map": {
+      "eyebrow": "[EN] Manager map",
+      "title": "[EN] Your projects",
+      "untitled": "[EN] Untitled project",
+      "teamLabel": "[EN] On the team",
+      "openArena": "[EN] Open arena"
+    },
+    "pulse": {
+      "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
+      "pendingBody": "[EN] One tap — and a person's work becomes confirmed proof.",
+      "cta": "[EN] Confirm now",
+      "zero": "[EN] Nothing is waiting for confirmation right now — the team's rhythm is calm.",
+      "zeroCta": "[EN] Review queue"
+    },
+    "draft": {
+      "title": "[EN] Draft — projects and teams"
+    }
   }
 }

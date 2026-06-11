@@ -12,11 +12,18 @@ import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects"
 import type { ManagedWorker } from "@/lib/instructions/instructions";
 
 /**
- * Manager surface for F4: create a project + assign a roster worker to it +
- * end an assignment. Every write goes through the gated server actions / RPCs
- * (project + caller-roster gate); an unrelated worker or project returns
- * not_authorized. No fake rows, no destructive delete (assignments END).
+ * Manager DRAFT surface for F4 (living-arena skin, TASK 07 slice 2): create a
+ * project + assign a roster worker to it + end an assignment. Every write
+ * goes through the gated server actions / RPCs (project + caller-roster
+ * gate); an unrelated worker or project returns not_authorized. The pick is
+ * ALWAYS a human decision — no ranking, no score, no auto-pick. No fake rows,
+ * no destructive delete (assignments END).
  */
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).slice(0, 2);
+  return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "•";
+}
 
 export interface ProjectManagerLabels {
   createTitle: string;
@@ -173,7 +180,15 @@ export function ProjectAssignmentManager({
                 const isEnded = ended.has(key);
                 return (
                   <li key={key} className="flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2">
-                    <span className={`text-sm ${isEnded ? "text-text-muted line-through" : "text-text-primary"}`}>{a.name}</span>
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <span
+                        aria-hidden
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-ink-500 bg-ink-700 font-display text-[11px] font-bold text-text-primary"
+                      >
+                        {initialsOf(a.name)}
+                      </span>
+                      <span className={`truncate text-sm ${isEnded ? "text-text-muted line-through" : "text-text-primary"}`}>{a.name}</span>
+                    </span>
                     {!isEnded && (
                       <button
                         type="button"

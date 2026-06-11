@@ -14,6 +14,7 @@ import {
   ProjectOperationsBoard,
   type OperationsBoardLabels,
 } from "@/components/app/project-operations-board";
+import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { type Role } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -173,6 +174,9 @@ export default async function ProjectOperationsPage({
 
   return (
     <div className="flex max-w-4xl flex-col gap-6">
+      {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
+          pulse — the real gated reviewable count, one tap to confirm. */}
+      <ConfirmPulse />
       <ProjectOperationsBoard
         ops={ops}
         labels={labels}
