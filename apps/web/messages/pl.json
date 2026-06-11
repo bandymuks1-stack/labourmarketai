@@ -1289,5 +1289,39 @@
     "generatedAt": "Wygenerowano",
     "verifyNote": "Potwierdzenia można sprawdzić na platformie.",
     "notWorker": "Eksport CV jest dostępny dla profili pracowników — powstaje z dziennika pracy i potwierdzonych umiejętności."
+  },
+  "todayScreen": {
+    "eyebrow": "[EN] Today",
+    "action": {
+      "title": "[EN] Write down what you did today",
+      "body": "[EN] A few lines in your own words — and your day stays on record as lasting proof of your work.",
+      "doneTitle": "[EN] Today's work is recorded",
+      "doneBody": "[EN] Good — today is already in your record. Add more if you did more.",
+      "pending": "[EN] {n, plural, one {# entry is waiting for your manager's confirmation} other {# entries are waiting for your manager's confirmation}}",
+      "cta": "[EN] Fill in today's journal",
+      "ctaAgain": "[EN] Add another entry"
+    },
+    "week": {
+      "eyebrow": "[EN] This week",
+      "confirmedHeadline": "[EN] {n, plural, one {Your work was confirmed # time this week} other {Your work was confirmed # times this week}}",
+      "writtenHeadline": "[EN] {n, plural, one {You recorded # work entry this week} other {You recorded # work entries this week}}",
+      "emptyHeadline": "[EN] A new week — its first entry is still ahead of you.",
+      "entries": "[EN] Entries",
+      "confirmed": "[EN] Confirmed",
+      "hours": "[EN] Confirmed hrs"
+    },
+    "path": {
+      "eyebrow": "[EN] Path to more",
+      "body": "[EN] This skill is often needed in your trade, and it is not on your card yet. Add it and your card grows.",
+      "cta": "[EN] Add to my skills",
+      "empty": "[EN] Once your trade and skills are set, you will see here where to grow next.",
+      "emptyCta": "[EN] Open my profile"
+    }
+  },
+  "playerCard": {
+    "verifiedTitle": "[EN] Verified skills",
+    "verifiedEmpty": "[EN] No verified skills yet. They appear when a manager confirms your journal entries.",
+    "latestEvidenceLabel": "[EN] Latest proof",
+    "latestEvidenceEmpty": "[EN] No proof entries yet — your first journal entry will be the first."
   }
 }

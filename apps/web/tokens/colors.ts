@@ -45,4 +45,8 @@ export const colors = {
     silver: c("tier-silver"),
     bronze: c("tier-bronze"),
   },
+  // DESIGN_SOUL: single semantic gold trust accent (aliases tier-gold channels).
+  trust: {
+    accent: c("trust-accent"),
+  },
 } as const;

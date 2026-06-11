@@ -3505,7 +3505,11 @@
     "workCardPending": "Dar nepatvirtinta",
     "namePlaceholder": "Mano profilis",
     "candidateLabel": "Kandidatiniai įgūdžiai",
-    "candidateHint": "Įgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, nepatvirtinta)."
+    "candidateHint": "Įgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, nepatvirtinta).",
+    "verifiedTitle": "Patvirtinti įgūdžiai",
+    "verifiedEmpty": "Patvirtintų įgūdžių dar nėra. Jie atsiranda, kai vadovas patvirtina tavo darbo įrašus.",
+    "latestEvidenceLabel": "Naujausias įrodymas",
+    "latestEvidenceEmpty": "Įrodymų dar nėra — pirmas žurnalo įrašas bus pirmasis."
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",
@@ -3616,5 +3620,33 @@
     "generatedAt": "Sugeneruota",
     "verifyNote": "Patvirtinimus galima patikrinti platformoje.",
     "notWorker": "CV eksportas galimas darbuotojo profiliui — jis sudaromas iš darbo žurnalo ir patvirtintų įgūdžių."
+  },
+  "todayScreen": {
+    "eyebrow": "Šiandien",
+    "action": {
+      "title": "Užrašyk, ką šiandien padarei",
+      "body": "Kelios eilutės savais žodžiais — ir tavo diena lieka įraše kaip ilgalaikis darbo įrodymas.",
+      "doneTitle": "Šiandienos darbas užrašytas",
+      "doneBody": "Šaunu — ši diena jau tavo įrašuose. Jei nuveikei daugiau, papildyk.",
+      "pending": "{n, plural, one {# įrašas laukia vadovo patvirtinimo} few {# įrašai laukia vadovo patvirtinimo} other {# įrašų laukia vadovo patvirtinimo}}",
+      "cta": "Pildyti dienos žurnalą",
+      "ctaAgain": "Pridėti dar vieną įrašą"
+    },
+    "week": {
+      "eyebrow": "Ši savaitė",
+      "confirmedHeadline": "{n, plural, one {Šią savaitę tavo darbas patvirtintas # kartą} few {Šią savaitę tavo darbas patvirtintas # kartus} other {Šią savaitę tavo darbas patvirtintas # kartų}}",
+      "writtenHeadline": "{n, plural, one {Šią savaitę užrašei # darbo įrašą} few {Šią savaitę užrašei # darbo įrašus} other {Šią savaitę užrašei # darbo įrašų}}",
+      "emptyHeadline": "Nauja savaitė — pirmas jos įrašas dar laukia tavęs.",
+      "entries": "Įrašai",
+      "confirmed": "Patvirtinta",
+      "hours": "Patvirtintos val."
+    },
+    "path": {
+      "eyebrow": "Kelias į daugiau",
+      "body": "Tavo profesijoje šio įgūdžio dažnai prireikia, o tavo kortelėje jo dar nėra. Pridėk — ir kortelė paaugs.",
+      "cta": "Pridėti prie savo įgūdžių",
+      "empty": "Kai pasižymėsi profesiją ir įgūdžius, čia matysi, kur augti toliau.",
+      "emptyCta": "Atsidaryti profilį"
+    }
   }
 }

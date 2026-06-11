@@ -1289,5 +1289,39 @@
     "generatedAt": "Erstellt",
     "verifyNote": "Bestätigungen können auf der Plattform geprüft werden.",
     "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt."
+  },
+  "todayScreen": {
+    "eyebrow": "Heute",
+    "action": {
+      "title": "Halte fest, was du heute getan hast",
+      "body": "Ein paar Zeilen in deinen eigenen Worten — und dein Tag bleibt als dauerhafter Arbeitsnachweis erhalten.",
+      "doneTitle": "Die heutige Arbeit ist erfasst",
+      "doneBody": "Gut — der heutige Tag steht schon in deinem Verzeichnis. Ergänze mehr, wenn du mehr geschafft hast.",
+      "pending": "{n, plural, one {# Eintrag wartet auf die Bestätigung deiner Führungskraft} other {# Einträge warten auf die Bestätigung deiner Führungskraft}}",
+      "cta": "Tagesjournal ausfüllen",
+      "ctaAgain": "Weiteren Eintrag hinzufügen"
+    },
+    "week": {
+      "eyebrow": "Diese Woche",
+      "confirmedHeadline": "{n, plural, one {Deine Arbeit wurde diese Woche # Mal bestätigt} other {Deine Arbeit wurde diese Woche # Mal bestätigt}}",
+      "writtenHeadline": "{n, plural, one {Du hast diese Woche # Arbeitseintrag erfasst} other {Du hast diese Woche # Arbeitseinträge erfasst}}",
+      "emptyHeadline": "Eine neue Woche — ihr erster Eintrag liegt noch vor dir.",
+      "entries": "Einträge",
+      "confirmed": "Bestätigt",
+      "hours": "Bestätigte Std."
+    },
+    "path": {
+      "eyebrow": "Weg zu mehr",
+      "body": "Diese Fähigkeit wird in deinem Beruf oft gebraucht und steht noch nicht auf deiner Karte. Füge sie hinzu — und deine Karte wächst.",
+      "cta": "Zu meinen Fähigkeiten hinzufügen",
+      "empty": "Sobald dein Beruf und deine Fähigkeiten eingetragen sind, siehst du hier, wo du als Nächstes wachsen kannst.",
+      "emptyCta": "Mein Profil öffnen"
+    }
+  },
+  "playerCard": {
+    "verifiedTitle": "Bestätigte Fähigkeiten",
+    "verifiedEmpty": "Noch keine bestätigten Fähigkeiten. Sie erscheinen, wenn eine Führungskraft deine Journaleinträge bestätigt.",
+    "latestEvidenceLabel": "Neuester Nachweis",
+    "latestEvidenceEmpty": "Noch keine Nachweise — dein erster Journaleintrag wird der erste sein."
   }
 }
