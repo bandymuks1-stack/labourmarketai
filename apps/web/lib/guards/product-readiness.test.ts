@@ -1356,13 +1356,14 @@ describe("no migration files added by this sprint", () => {
     // (batch_review_exceptions + review_journal_entries_batch, delegating
     // per-entry to 0034 review_journal_entry). APPLIED to prod via MCP after
     // owner review (2026-06-11, ledger 20260611064423).
-    // Bumped 64 -> 65 for the confirmation-role-schema-hardening-v1 draft:
-    // additive 20260602130000_confirmation_role_check (CHECK pinning
-    // confirmer_role to manager/owner/external_manager; reversible +
-    // pre-flight guarded). RED/human-gated, committed + queued, NOT applied.
-    // NOTE: PR #304 (S5) carries its own 64 -> 65 bump - whichever merges
-    // second resolves upward (to 66).
-    const SPRINT_BASELINE = 65;
+    // Bumped 64 -> 65 for s5_agency_demand_visibility (20260611150000): the
+    // S5 DRAFT (needs-human-gate, NOT applied) — two gated DEFINER RPCs
+    // (curated open-demand read for agency owners + the append-only
+    // "galim pasiūlyti" proposal marker); no RLS change, no new table.
+    // Bumped 65 -> 66 for the confirmation-role CHECK (20260602130000):
+    // additive confirmer_role pin, APPLIED to prod via MCP after owner review
+    // (2026-06-11, ledger 20260611091834).
+    const SPRINT_BASELINE = 66;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

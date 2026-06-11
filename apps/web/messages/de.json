@@ -1437,5 +1437,52 @@
       "positionsEmpty": "Das Modul für Positionsbedarf ist noch in Vorbereitung — sobald es da ist, siehst du hier, welche Leute fehlen.",
       "openOps": "Management-Arena öffnen"
     }
+  },
+  "agencyPool": {
+    "eyebrow": "Agentur-Pool",
+    "title": "Mein Arbeitskräfte-Pool",
+    "intro": "Deine Leute, ihre reale Bereitschaft und offene Nachfrage — alles durch die Vertrauensschicht, nichts daran vorbei.",
+    "manageLink": "Einladungen und Koordination",
+    "backToAgency": "Zurück zum Agenturbereich",
+    "noAgency": "Schließe zuerst die Agentur-Einrichtung ab — der Pool gehört zu einer realen Agentur.",
+    "needsMigration": "Die Agentur-Verknüpfungsschicht ist in dieser Umgebung noch nicht aktiv.",
+    "loadError": "Pool konnte nicht geladen werden. Versuche es erneut.",
+    "poolTitle": "Der Pool — deine Leute",
+    "empty": "Dein Pool ist noch leer — lade die erste Person ein, und die Karten erscheinen von selbst.",
+    "emptyCta": "Arbeitskraft einladen",
+    "unnamed": "Ohne Namen",
+    "noProfession": "Beruf nicht angegeben",
+    "availability": {
+      "available": "Verfügbar",
+      "busy": "Beschäftigt",
+      "unavailable": "Nicht verfügbar",
+      "unknown": "Verfügbarkeit nicht angegeben"
+    },
+    "reviewOff": "Journalprüfung aus",
+    "evidenceLocked": "Arbeitsnachweise öffnen sich, sobald du die Kooperationsverknüpfung und die Journalprüfung der Person aktivierst — das verwaltest du im Agenturbereich.",
+    "readiness": {
+      "title": "Bereitschaft nach Markt",
+      "empty": "Noch keine angegebenen Länder im Pool — die Bereitschaft erscheint mit den ersten.",
+      "availableNow": "jetzt verfügbar",
+      "docsNote": "Die Dokumentenbereitschaft bleibt bei der Arbeitskraft: Aggregate auf Kategorienebene erscheinen hier erst mit dem Zustimmungsschalter (eine freigabepflichtige Änderung, in Vorbereitung). Dokumenteninhalte siehst du hier nie."
+    },
+    "demand": {
+      "title": "Offene Nachfrage",
+      "humanNote": "„Wir können anbieten“ ist dein Vorschlag zu einer Anfrage — den endgültigen Match hält immer ein Mensch auf der Plattformseite fest.",
+      "needsGate": "Die Sichtbarkeit offener Nachfrage für Agenturen ist in Vorbereitung — sie wird aktiv, sobald die freigabepflichtige Änderung angewendet ist.",
+      "empty": "Derzeit keine offenen Anfragen.",
+      "noRole": "Rolle nicht angegeben",
+      "teamSize": "{n} Pers.",
+      "marked": "Markiert: wir können anbieten",
+      "markButton": "Wir können anbieten",
+      "marking": "Wird markiert…",
+      "outcome": {
+        "not_agency": "Schließe zuerst die Agentur-Einrichtung ab.",
+        "request_not_found": "Die Anfrage existiert nicht mehr.",
+        "request_not_open": "Die Anfrage ist nicht mehr offen.",
+        "needs_gate": "Diese Funktion ist in Vorbereitung (Freigabe ausstehend).",
+        "error": "Markierung konnte nicht gespeichert werden. Versuche es erneut."
+      }
+    }
   }
 }

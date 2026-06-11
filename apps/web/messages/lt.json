@@ -707,7 +707,8 @@
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
         "columnInvitedAt": "Data"
-      }
+      },
+      "poolLink": "Darbuotojų pool"
     },
     "buyer": {
       "eyebrow": "PIRKĖJO ERDVĖ",
@@ -3763,6 +3764,53 @@
       "cta": "Pridėti prie savo įgūdžių",
       "empty": "Kai pasižymėsi profesiją ir įgūdžius, čia matysi, kur augti toliau.",
       "emptyCta": "Atsidaryti profilį"
+    }
+  },
+  "agencyPool": {
+    "eyebrow": "Agentūros pool",
+    "title": "Mano darbuotojų pool",
+    "intro": "Tavo žmonės, jų reali parengtis ir atvira paklausa — viskas per pasitikėjimo sluoksnį, nieko aplink jį.",
+    "manageLink": "Kvietimai ir koordinavimas",
+    "backToAgency": "Į agentūros erdvę",
+    "noAgency": "Pirmiausia užbaik agentūros paskyrą — pool priklauso realiai agentūrai.",
+    "needsMigration": "Agentūros ryšių sluoksnis šioje aplinkoje dar neaktyvus.",
+    "loadError": "Nepavyko užkrauti pool. Pabandyk dar kartą.",
+    "poolTitle": "Pool — tavo žmonės",
+    "empty": "Tavo pool dar tuščias — pakviesk pirmą žmogų, ir kortelės atsiras savaime.",
+    "emptyCta": "Pakviesti darbuotoją",
+    "unnamed": "Be vardo",
+    "noProfession": "Profesija nenurodyta",
+    "availability": {
+      "available": "Laisvas",
+      "busy": "Užimtas",
+      "unavailable": "Nepasiekiamas",
+      "unknown": "Prieinamumas nenurodytas"
+    },
+    "reviewOff": "Žurnalo peržiūra išjungta",
+    "evidenceLocked": "Darbo įrodymai atsiveria, kai įjungi bendradarbiavimo ryšį ir žmogaus žurnalo peržiūrą — tai valdai agentūros erdvėje.",
+    "readiness": {
+      "title": "Parengtis pagal rinką",
+      "empty": "Pool dar nėra nurodytų šalių — parengtis atsiras su pirmomis.",
+      "availableNow": "laisvi dabar",
+      "docsNote": "Dokumentų parengtis lieka pas darbuotoją: kategorijų lygio suvestinės čia atsiras tik su darbuotojo sutikimo jungikliu (vartų reikalaujantis pakeitimas, ruošiama). Dokumentų turinio čia niekada nematysi."
+    },
+    "demand": {
+      "title": "Atvira paklausa",
+      "humanNote": "„Galim pasiūlyti“ — tai tavo pasiūlymas prie užklausos; galutinį match visada užfiksuoja žmogus platformos pusėje.",
+      "needsGate": "Atviros paklausos matomumas agentūroms ruošiamas — įsijungs, kai owner patvirtins vartų reikalaujantį pakeitimą.",
+      "empty": "Šiuo metu atvirų užklausų nėra.",
+      "noRole": "Rolė nenurodyta",
+      "teamSize": "{n} žm.",
+      "marked": "Pažymėta: galim pasiūlyti",
+      "markButton": "Galim pasiūlyti",
+      "marking": "Žymima…",
+      "outcome": {
+        "not_agency": "Pirmiausia užbaik agentūros paskyrą.",
+        "request_not_found": "Užklausos nebėra.",
+        "request_not_open": "Užklausa nebeatvira.",
+        "needs_gate": "Funkcija ruošiama (laukia vartų pakeitimo).",
+        "error": "Nepavyko išsaugoti žymos. Pabandyk dar kartą."
+      }
     }
   }
 }

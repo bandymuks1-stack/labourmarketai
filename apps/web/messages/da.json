@@ -1437,5 +1437,52 @@
       "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
       "openOps": "Åbn management-arenaen"
     }
+  },
+  "agencyPool": {
+    "eyebrow": "Bureau-pool",
+    "title": "Min arbejdsstyrke-pool",
+    "intro": "Dine folk, deres reelle parathed og åben efterspørgsel — alt gennem tillidslaget, intet udenom.",
+    "manageLink": "Invitationer og koordinering",
+    "backToAgency": "Tilbage til bureauområdet",
+    "noAgency": "Fuldfør først bureau-opsætningen — poolen tilhører et rigtigt bureau.",
+    "needsMigration": "Bureau-koblingslaget er endnu ikke aktivt i dette miljø.",
+    "loadError": "Poolen kunne ikke indlæses. Prøv igen.",
+    "poolTitle": "Poolen — dine folk",
+    "empty": "Din pool er stadig tom — inviter den første person, og kortene kommer af sig selv.",
+    "emptyCta": "Inviter en arbejder",
+    "unnamed": "Uden navn",
+    "noProfession": "Fag ikke angivet",
+    "availability": {
+      "available": "Ledig",
+      "busy": "Optaget",
+      "unavailable": "Utilgængelig",
+      "unknown": "Tilgængelighed ikke angivet"
+    },
+    "reviewOff": "Journalgennemgang slået fra",
+    "evidenceLocked": "Arbejdsbeviser åbner, når du aktiverer samarbejdskoblingen og personens journalgennemgang — det styrer du i bureauområdet.",
+    "readiness": {
+      "title": "Parathed pr. marked",
+      "empty": "Ingen angivne lande i poolen endnu — paratheden kommer med de første.",
+      "availableNow": "ledige nu",
+      "docsNote": "Dokumentparathed bliver hos arbejderen: aggregater på kategoriniveau vises her først med samtykke-kontakten (en ændring der kræver godkendelse, under forberedelse). Du ser aldrig dokumentindhold her."
+    },
+    "demand": {
+      "title": "Åben efterspørgsel",
+      "humanNote": "\"Vi kan tilbyde\" er dit forslag til en forespørgsel — det endelige match registreres altid af et menneske på platformsiden.",
+      "needsGate": "Synlighed af åben efterspørgsel for bureauer er under forberedelse — den aktiveres, når den godkendelseskrævende ændring er anvendt.",
+      "empty": "Ingen åbne forespørgsler lige nu.",
+      "noRole": "Rolle ikke angivet",
+      "teamSize": "{n} pers.",
+      "marked": "Markeret: vi kan tilbyde",
+      "markButton": "Vi kan tilbyde",
+      "marking": "Markerer…",
+      "outcome": {
+        "not_agency": "Fuldfør først bureau-opsætningen.",
+        "request_not_found": "Forespørgslen findes ikke længere.",
+        "request_not_open": "Forespørgslen er ikke længere åben.",
+        "needs_gate": "Funktionen er under forberedelse (afventer godkendelse).",
+        "error": "Markeringen kunne ikke gemmes. Prøv igen."
+      }
+    }
   }
 }

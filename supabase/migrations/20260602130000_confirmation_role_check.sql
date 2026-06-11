@@ -1,5 +1,7 @@
 -- 20260602130000 — Confirmation role schema hardening v1 (additive CHECK).
 -- @human-gate-approved
+-- APPLIED to prod via Supabase MCP apply_migration after owner review
+-- (2026-06-11, ledger version 20260611091834).
 --
 -- WHY: `journal_entry_confirmations.confirmer_role` is `text not null` with no
 -- database constraint (migration 0013). Today every write path already limits

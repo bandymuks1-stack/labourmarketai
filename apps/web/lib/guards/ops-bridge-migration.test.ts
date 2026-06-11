@@ -135,11 +135,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 63 at the S4 merge (project autolink body-replace +
     // market_rate_averages with the prod n>=2 fix; APPLIED 2026-06-11),
     // then to 64 for batch_journal_review (exceptions-pyramid batch confirm;
-    // APPLIED 2026-06-11, ledger 20260611064423), then to 65 for the
-    // confirmation-role-schema-hardening-v1 draft (additive 20260602130000
-    // confirmation_role_check CHECK, RED/human-gated, committed + queued,
-    // NOT applied). NOTE: PR #304 (S5) carries its own 64 -> 65 bump —
-    // whichever merges second resolves upward (to 66).
-    expect(guard).toMatch(/SPRINT_BASELINE = 65/);
+    // APPLIED 2026-06-11, ledger 20260611064423), then to 65 for the S5
+    // agency-demand-visibility DRAFT (20260611150000; needs-human-gate,
+    // not applied).
+    // then to 66 for the confirmation-role CHECK (20260602130000;
+    // APPLIED to prod 2026-06-11, ledger 20260611091834).
+    expect(guard).toMatch(/SPRINT_BASELINE = 66/);
   });
 });
