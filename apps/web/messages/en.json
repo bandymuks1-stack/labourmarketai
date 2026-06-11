@@ -2951,6 +2951,23 @@
       "assigned": "Assigned",
       "notAuthorized": "You can only assign workers from your team to your own projects.",
       "noWorkers": "You don't have any assignable workers on your team yet."
+    },
+    "map": {
+      "eyebrow": "Manager map",
+      "title": "Your projects",
+      "untitled": "Untitled project",
+      "teamLabel": "On the team",
+      "openArena": "Open arena"
+    },
+    "pulse": {
+      "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
+      "pendingBody": "One tap — and a person's work becomes confirmed proof.",
+      "cta": "Confirm now",
+      "zero": "Nothing is waiting for confirmation right now — the team's rhythm is calm.",
+      "zeroCta": "Review queue"
+    },
+    "draft": {
+      "title": "Draft — projects and teams"
     }
   },
   "projectOps": {
@@ -3076,6 +3093,23 @@
       "docsReceived": "Docs received",
       "docsChecked": "Docs checked",
       "docsBlocked": "Rejected/expired"
+    },
+    "stadium": {
+      "eyebrow": "Stadium",
+      "fieldCount": "{n, plural, one {# person on the field} other {# people on the field}}",
+      "todayCount": "{n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
+      "todayZero": "No entries yet today — the day is still waiting for its first record.",
+      "fieldTitle": "The field — who is on the team today",
+      "positionUnknown": "Position not set",
+      "docsMissingChip": "Docs missing: {n}",
+      "docsCheckedChip": "Docs checked: {n}",
+      "lastActivity": "Last entry: {date}",
+      "noActivity": "No entries yet.",
+      "emptyTeam": "This project has no team yet — start the draft and bring the first people onto the field.",
+      "emptyTeamCta": "Start the draft",
+      "positionsTitle": "Missing positions",
+      "positionsEmpty": "The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "openOps": "Open the management arena"
     }
   },
   "setupRoleChoice": {
@@ -3571,7 +3605,11 @@
     "thermoMissingPosition": "Insufficient project data",
     "thermoMissingMarket": "Insufficient market data",
     "thermoMissingBoth": "Insufficient market data",
-    "thermoSmallSample": "Small sample (n<5) — interpret with care."
+    "thermoSmallSample": "Small sample (n<5) — interpret with care.",
+    "verifiedTitle": "Verified skills",
+    "verifiedEmpty": "No verified skills yet. They appear when a manager confirms your journal entries.",
+    "latestEvidenceLabel": "Latest proof",
+    "latestEvidenceEmpty": "No proof entries yet — your first journal entry will be the first."
   },
   "skillClarify": {
     "title": "My skills",
@@ -3682,5 +3720,33 @@
     "generatedAt": "Generated",
     "verifyNote": "Confirmations can be checked on the platform.",
     "notWorker": "CV export is available for worker profiles — it is built from the work journal and confirmed skills."
+  },
+  "todayScreen": {
+    "eyebrow": "Today",
+    "action": {
+      "title": "Write down what you did today",
+      "body": "A few lines in your own words — and your day stays on record as lasting proof of your work.",
+      "doneTitle": "Today's work is recorded",
+      "doneBody": "Good — today is already in your record. Add more if you did more.",
+      "pending": "{n, plural, one {# entry is waiting for your manager's confirmation} other {# entries are waiting for your manager's confirmation}}",
+      "cta": "Fill in today's journal",
+      "ctaAgain": "Add another entry"
+    },
+    "week": {
+      "eyebrow": "This week",
+      "confirmedHeadline": "{n, plural, one {Your work was confirmed # time this week} other {Your work was confirmed # times this week}}",
+      "writtenHeadline": "{n, plural, one {You recorded # work entry this week} other {You recorded # work entries this week}}",
+      "emptyHeadline": "A new week — its first entry is still ahead of you.",
+      "entries": "Entries",
+      "confirmed": "Confirmed",
+      "hours": "Confirmed hrs"
+    },
+    "path": {
+      "eyebrow": "Path to more",
+      "body": "This skill is often needed in your trade, and it is not on your card yet. Add it and your card grows.",
+      "cta": "Add to my skills",
+      "empty": "Once your trade and skills are set, you will see here where to grow next.",
+      "emptyCta": "Open my profile"
+    }
   }
 }

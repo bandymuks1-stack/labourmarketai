@@ -1,7 +1,6 @@
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after owner + Chat Claude
--- review (S4 / feat/cc/s4-termometras-market). Never `db push`.
+-- APPLIED to prod via Supabase MCP apply_migration after owner + Chat Claude
+-- review (2026-06-11, ledger version 20260611064312). Never `db push`.
 --
 -- journal_entries.project_id write flow (S4 item 1). The column exists since
 -- 20260601091000 but NOTHING writes it: the save path is the

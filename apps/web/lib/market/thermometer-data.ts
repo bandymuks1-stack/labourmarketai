@@ -35,6 +35,20 @@ export interface OwnThermometer {
   readonly country: string | null;
 }
 
+/** Map the own-thermometer read to the player-card view-model — one mapper
+ *  for every mount (page + today screen), zero duplication. */
+export function toThermometerView(
+  t: OwnThermometer | null,
+):
+  | { kind: "score"; scoreEur: number; smallSample: boolean }
+  | { kind: "insufficient_data"; missing: "position" | "market" | "both" }
+  | null {
+  if (!t) return null;
+  return t.result.kind === "score"
+    ? { kind: "score", scoreEur: t.result.scoreEur, smallSample: t.smallSample }
+    : { kind: "insufficient_data", missing: t.result.missing };
+}
+
 const MISSING_FN_CODES = new Set(["42883", "PGRST202"]);
 const MISSING_TABLE_CODE = "42P01";
 

@@ -38,6 +38,9 @@
   --c-tier-gold: 255 200 87;
   --c-tier-silver: 198 205 216;
   --c-tier-bronze: 199 137 90;
+  /* DESIGN_SOUL: the ONE semantic gold trust accent (alias of tier-gold).
+     Confirmed/trust/readiness highlights ONLY — never a gold palette. */
+  --c-trust-accent: 255 200 87;
 
   /* motion tokens (single source; mirrored in tokens/motion.ts) */
   --motion-instant: 90ms;
@@ -71,6 +74,7 @@
   --c-text-secondary: 74 82 104;
   --c-text-muted: 84 93 116; /* darkened (was 99 108 130) to clear AA 4.5:1 on the light page bg (ink-900) too, mirroring the dark-theme lift (audit PR-A) */
   --c-tier-gold: 176 122 0;
+  --c-trust-accent: 176 122 0;
   color-scheme: light;
 }
 
@@ -143,6 +147,26 @@ a {
       transparent 60%
     );
     pointer-events: none;
+  }
+
+  /* DESIGN_SOUL §1: quiet gold trust ring — ONLY on a really-confirmed thing
+     (work card confirmed, manager-verified skill). Static, calm, no pulse. */
+  .trust-ring {
+    box-shadow:
+      0 0 0 1px rgb(var(--c-trust-accent) / 0.5),
+      0 0 24px -10px rgb(var(--c-trust-accent) / 0.45);
+  }
+
+  /* Subtle hover glow for interactive cards (Ramybės testas: a whisper). */
+  .glow-hover {
+    transition:
+      box-shadow var(--motion-fast) var(--motion-ease-out),
+      border-color var(--motion-fast) var(--motion-ease-out),
+      transform var(--motion-fast) var(--motion-ease-out);
+  }
+  .glow-hover:hover {
+    box-shadow: 0 0 28px -10px rgb(var(--c-brand-blue) / 0.45);
+    transform: translateY(-1px);
   }
 
   /* pulsing green LIVE dot (never a solid status badge) */
@@ -369,5 +393,10 @@ a {
   .verified-pop,
   .rise-in {
     animation: none !important;
+  }
+  .glow-hover,
+  .glow-hover:hover {
+    transition: none !important;
+    transform: none !important;
   }
 }

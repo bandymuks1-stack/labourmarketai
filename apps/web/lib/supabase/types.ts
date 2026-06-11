@@ -1725,6 +1725,66 @@ export type Database = {
           },
         ]
       }
+      market_rate_averages: {
+        Row: {
+          avg_rate_eur: number
+          basis: string
+          country: string
+          created_at: string
+          entered_at: string
+          entered_by: string
+          id: string
+          is_active: boolean
+          profession_id: string
+          source_note: string | null
+          source_status: string
+          updated_at: string
+        }
+        Insert: {
+          avg_rate_eur: number
+          basis?: string
+          country: string
+          created_at?: string
+          entered_at?: string
+          entered_by: string
+          id?: string
+          is_active?: boolean
+          profession_id: string
+          source_note?: string | null
+          source_status?: string
+          updated_at?: string
+        }
+        Update: {
+          avg_rate_eur?: number
+          basis?: string
+          country?: string
+          created_at?: string
+          entered_at?: string
+          entered_by?: string
+          id?: string
+          is_active?: boolean
+          profession_id?: string
+          source_note?: string | null
+          source_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_rate_averages_entered_by_fkey"
+            columns: ["entered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_rate_averages_profession_id_fkey"
+            columns: ["profession_id"]
+            isOneToOne: false
+            referencedRelation: "professions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_actions: {
         Row: {
           action: string | null
@@ -3244,6 +3304,16 @@ export type Database = {
         Args: { p_company_id: string; p_note?: string; p_status: string }
         Returns: string
       }
+      admin_set_market_rate_average: {
+        Args: {
+          p_avg_rate_eur: number
+          p_country: string
+          p_profession_id: string
+          p_source_note: string
+          p_source_status?: string
+        }
+        Returns: string
+      }
       agency_worker_engagement_links: {
         Args: { p_agency_id: string }
         Returns: string[]
@@ -3271,6 +3341,13 @@ export type Database = {
       assign_worker_to_project: {
         Args: { p_project_id: string; p_worker_profile_id: string }
         Returns: string
+      }
+      batch_review_exceptions: {
+        Args: { p_entry_ids: string[] }
+        Returns: {
+          entry_id: string
+          exception_slug: string
+        }[]
       }
       caller_manages_worker: { Args: { p_worker_id: string }; Returns: boolean }
       can_access_match: { Args: { m: string }; Returns: boolean }
@@ -3359,6 +3436,13 @@ export type Database = {
       owns_customer: { Args: { c: string }; Returns: boolean }
       owns_worker: { Args: { w: string }; Returns: boolean }
       profile_role: { Args: never; Returns: string }
+      project_position_salary_avg: {
+        Args: { p_profession_id: string; p_project_id: string }
+        Returns: {
+          avg_mid_eur: number
+          sample_n: number
+        }[]
+      }
       provision_agency_worker_engagement_context: {
         Args: { p_agency_id: string; p_worker_id: string }
         Returns: string
@@ -3377,6 +3461,18 @@ export type Database = {
           p_storage_path: string
         }
         Returns: string
+      }
+      review_journal_entries_batch: {
+        Args: {
+          p_acknowledged_exception_ids?: string[]
+          p_decision: string
+          p_entry_ids: string[]
+          p_note?: string
+        }
+        Returns: {
+          entry_id: string
+          outcome: string
+        }[]
       }
       review_journal_entry: {
         Args: { p_decision: string; p_entry_id: string; p_note?: string }

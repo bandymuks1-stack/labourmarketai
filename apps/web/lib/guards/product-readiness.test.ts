@@ -1333,14 +1333,30 @@ describe("no migration files added by this sprint", () => {
     // RLS). Additive + reversible; APPLIED to prod via MCP apply_migration
     // after owner review (2026-06-10, ledger 20260610172333). Authored as
     // 54 -> 55; resolved to 59 at merge on top of main's 58.
-    // Bumped 59 -> 61 for S4 termometras+market: TWO needs-human-gate DRAFTs -
+    // Bumped 59 -> 60 for esco-labels-all-official-languages: ONE
+    // needs-human-gate DRAFT (20260610230000) widening the
+    // esco_labels.locale CHECK from the 10 platform locales to all 28
+    // official ESCO v1.2.1 languages (pure superset, no schema/RLS/grant
+    // change; ru deliberately absent — not an official ESCO language).
+    // Bumped 60 -> 61 for esco-service-role-grants (20260610234500):
+    // GRANTS-ONLY fix — MCP-created tables get no service_role default
+    // privileges, so the official importer's upserts hit "permission denied";
+    // grants select/insert/update on the four esco_* tables to service_role,
+    // no RLS change, anon untouched.
+    // Bumped 61 -> 63 at the S4 merge for termometras+market:
     // 20260610213000 (journal_entries.project_id autolink: body-replace of the
     // two save-path RPCs, no schema/RLS/grant change, link only when exactly
     // one active same-org assignment) and 20260610214000 (market_rate_averages
     // admin-entered table + admin_set_market_rate_average RPC + the
-    // project_position_salary_avg aggregate RPC). Applied ONLY via MCP after
-    // owner review.
-    const SPRINT_BASELINE = 61;
+    // project_position_salary_avg aggregate RPC, prod-fixed to return avg ONLY
+    // when sample_n >= 2). Both APPLIED to prod via MCP apply_migration after
+    // owner review (2026-06-11, ledger 20260611064312/064340).
+    // Bumped 63 -> 64 for batch_journal_review (20260611120000): the
+    // DESIGN_SOUL §3 exceptions-pyramid batch confirm RPC pair
+    // (batch_review_exceptions + review_journal_entries_batch, delegating
+    // per-entry to 0034 review_journal_entry). APPLIED to prod via MCP after
+    // owner review (2026-06-11, ledger 20260611064423).
+    const SPRINT_BASELINE = 64;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

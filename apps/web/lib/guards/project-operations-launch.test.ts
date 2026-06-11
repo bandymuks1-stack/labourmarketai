@@ -59,8 +59,15 @@ describe("access control — manager-gated, project-scoped", () => {
 
 describe("reachability", () => {
   it("the projects page links to each project's operations board", () => {
-    expect(projectsPage).toMatch(/operations/);
-    expect(projectsPage).toMatch(/project-operations-link/);
+    // TASK 07 slice 2: the per-project link moved into the MAP card component
+    // mounted by the page — reachability is page → <ProjectMap> → link.
+    expect(projectsPage).toMatch(/<ProjectMap\b/);
+    const mapCard = readFileSync(
+      join(root, "components/app/arena/project-map.tsx"),
+      "utf8",
+    );
+    expect(mapCard).toMatch(/operations/);
+    expect(mapCard).toMatch(/project-operations-link/);
   });
   it("the board links player-card, instructions, and skill clarify", () => {
     expect(board).toMatch(/dashboard\/player-card/);

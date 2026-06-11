@@ -2951,6 +2951,23 @@
       "assigned": "Priskirta",
       "notAuthorized": "Galite priskirti tik savo komandos darbuotojus savo projektams.",
       "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje."
+    },
+    "map": {
+      "eyebrow": "Vadovo žemėlapis",
+      "title": "Tavo projektai",
+      "untitled": "Projektas be pavadinimo",
+      "teamLabel": "Komandoje",
+      "openArena": "Atidaryti areną"
+    },
+    "pulse": {
+      "pendingTitle": "{n, plural, one {# įrašas laukia tavo patvirtinimo} few {# įrašai laukia tavo patvirtinimo} other {# įrašų laukia tavo patvirtinimo}}",
+      "pendingBody": "Vienas bakstelėjimas — ir žmogaus darbas tampa patvirtintu įrodymu.",
+      "cta": "Patvirtinti dabar",
+      "zero": "Šiuo metu patvirtinimų nelaukia — komandos ritmas ramus.",
+      "zeroCta": "Peržiūros eilė"
+    },
+    "draft": {
+      "title": "Draftas — projektai ir komandos"
     }
   },
   "projectOps": {
@@ -3076,6 +3093,23 @@
       "docsReceived": "Gauta dokumentų",
       "docsChecked": "Patikrinta dokumentų",
       "docsBlocked": "Atmesta/pasibaigę"
+    },
+    "stadium": {
+      "eyebrow": "Stadionas",
+      "fieldCount": "{n, plural, one {# žmogus aikštėje} few {# žmonės aikštėje} other {# žmonių aikštėje}}",
+      "todayCount": "{n, plural, one {# šiandienos žurnalo įrašas — diena juda} few {# šiandienos žurnalo įrašai — diena juda} other {# šiandienos žurnalo įrašų — diena juda}}",
+      "todayZero": "Šiandien įrašų dar nėra — diena dar laukia pirmo įrašo.",
+      "fieldTitle": "Aikštė — kas šiandien komandoje",
+      "positionUnknown": "Pozicija nenurodyta",
+      "docsMissingChip": "Trūksta dok.: {n}",
+      "docsCheckedChip": "Dok. patikrinta: {n}",
+      "lastActivity": "Paskutinis įrašas: {date}",
+      "noActivity": "Įrašų dar nėra.",
+      "emptyTeam": "Projektas dar be komandos — pradėk draftą ir pakviesk pirmus žmones į aikštę.",
+      "emptyTeamCta": "Pradėti draftą",
+      "positionsTitle": "Trūkstamos pozicijos",
+      "positionsEmpty": "Pozicijų poreikių modulis dar ruošiamas — kai jis atsiras, čia matysi, kokių žmonių trūksta.",
+      "openOps": "Atidaryti valdymo areną"
     }
   },
   "setupRoleChoice": {
@@ -3571,7 +3605,11 @@
     "thermoMissingPosition": "Nepakanka projekto duomenų",
     "thermoMissingMarket": "Nepakanka rinkos duomenų",
     "thermoMissingBoth": "Nepakanka rinkos duomenų",
-    "thermoSmallSample": "Maža imtis (n<5) — vertinkite atsargiai."
+    "thermoSmallSample": "Maža imtis (n<5) — vertinkite atsargiai.",
+    "verifiedTitle": "Patvirtinti įgūdžiai",
+    "verifiedEmpty": "Patvirtintų įgūdžių dar nėra. Jie atsiranda, kai vadovas patvirtina tavo darbo įrašus.",
+    "latestEvidenceLabel": "Naujausias įrodymas",
+    "latestEvidenceEmpty": "Įrodymų dar nėra — pirmas žurnalo įrašas bus pirmasis."
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",
@@ -3682,5 +3720,33 @@
     "generatedAt": "Sugeneruota",
     "verifyNote": "Patvirtinimus galima patikrinti platformoje.",
     "notWorker": "CV eksportas galimas darbuotojo profiliui — jis sudaromas iš darbo žurnalo ir patvirtintų įgūdžių."
+  },
+  "todayScreen": {
+    "eyebrow": "Šiandien",
+    "action": {
+      "title": "Užrašyk, ką šiandien padarei",
+      "body": "Kelios eilutės savais žodžiais — ir tavo diena lieka įraše kaip ilgalaikis darbo įrodymas.",
+      "doneTitle": "Šiandienos darbas užrašytas",
+      "doneBody": "Šaunu — ši diena jau tavo įrašuose. Jei nuveikei daugiau, papildyk.",
+      "pending": "{n, plural, one {# įrašas laukia vadovo patvirtinimo} few {# įrašai laukia vadovo patvirtinimo} other {# įrašų laukia vadovo patvirtinimo}}",
+      "cta": "Pildyti dienos žurnalą",
+      "ctaAgain": "Pridėti dar vieną įrašą"
+    },
+    "week": {
+      "eyebrow": "Ši savaitė",
+      "confirmedHeadline": "{n, plural, one {Šią savaitę tavo darbas patvirtintas # kartą} few {Šią savaitę tavo darbas patvirtintas # kartus} other {Šią savaitę tavo darbas patvirtintas # kartų}}",
+      "writtenHeadline": "{n, plural, one {Šią savaitę užrašei # darbo įrašą} few {Šią savaitę užrašei # darbo įrašus} other {Šią savaitę užrašei # darbo įrašų}}",
+      "emptyHeadline": "Nauja savaitė — pirmas jos įrašas dar laukia tavęs.",
+      "entries": "Įrašai",
+      "confirmed": "Patvirtinta",
+      "hours": "Patvirtintos val."
+    },
+    "path": {
+      "eyebrow": "Kelias į daugiau",
+      "body": "Tavo profesijoje šio įgūdžio dažnai prireikia, o tavo kortelėje jo dar nėra. Pridėk — ir kortelė paaugs.",
+      "cta": "Pridėti prie savo įgūdžių",
+      "empty": "Kai pasižymėsi profesiją ir įgūdžius, čia matysi, kur augti toliau.",
+      "emptyCta": "Atsidaryti profilį"
+    }
   }
 }

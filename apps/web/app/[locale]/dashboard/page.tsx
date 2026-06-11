@@ -7,6 +7,7 @@ import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card"
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
+import { TodayScreen } from "@/components/app/today/today-screen";
 import { WorkCard } from "@/components/app/work-card";
 import { getWorkerCard } from "@/lib/worker/work-card";
 import { createClient } from "@/lib/supabase/server";
@@ -378,6 +379,11 @@ export default async function DashboardOverviewPage({
     <div className="flex flex-col gap-7">
       {/* Space identity + the calm doorway to other spaces (My spaces). */}
       <CurrentSpaceHeader role={role} />
+
+      {/* "Šiandienos ekranas" (TASK 07 / DESIGN_SOUL) — today's ONE action,
+          this week's confirmed work, one honest growth path, and the premium
+          scouting player card. Real journal-chain data only. */}
+      <TodayScreen workerId={workerRow?.id ?? null} />
 
       {/* "Mano darbo kortelė" — the state-aware entry. It owns the greeting,
           the what's-clear / what's-missing summary, the ONE best next action

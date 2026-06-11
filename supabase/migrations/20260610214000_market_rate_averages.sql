@@ -1,7 +1,8 @@
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after owner + Chat Claude
--- review (S4 / feat/cc/s4-termometras-market). Never `db push`.
+-- APPLIED to prod via Supabase MCP apply_migration after owner + Chat Claude
+-- review (2026-06-11, ledger version 20260611064340). Never `db push`.
+-- Review fix carried into prod AND this file: project_position_salary_avg
+-- returns avg ONLY when sample_n >= 2 (n < 2 → NULL → insufficient_data).
 --
 -- Admin market rate averages (S4 item 2) — the SECOND component of the
 -- owner-locked thermometer formula:
@@ -124,7 +125,9 @@ grant execute on function public.admin_set_market_rate_average(uuid, text, numer
 -- ((salary_min_eur+salary_max_eur)/2, monthly EUR) of ACTIVELY assigned
 -- workers holding the given profession — the only real per-position pay
 -- signal in the platform today (Step-0 inventory). n is returned so the UI
--- can show the mandatory small-sample warning (n<5).
+-- can show the mandatory small-sample warning (n<5). Review fix (prod):
+-- avg is returned ONLY when sample_n >= 2 — a single person's declared range
+-- is not an "average" and would also leak that individual's figure.
 create or replace function public.project_position_salary_avg(
   p_project_id    uuid,
   p_profession_id uuid
@@ -155,7 +158,9 @@ begin
   end if;
 
   return query
-  select avg((w.salary_min_eur + w.salary_max_eur) / 2.0)::numeric,
+  select case when count(*) >= 2
+              then avg((w.salary_min_eur + w.salary_max_eur) / 2.0)::numeric
+              else null end,
          count(*)::int
     from public.project_worker_assignments pwa
     join public.workers w on w.id = pwa.worker_id

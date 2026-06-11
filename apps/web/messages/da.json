@@ -1349,5 +1349,77 @@
     "generatedAt": "Genereret",
     "verifyNote": "Bekræftelser kan kontrolleres på platformen.",
     "notWorker": "CV-eksport er tilgængelig for medarbejderprofiler — det opbygges af arbejdsjournalen og bekræftede færdigheder."
+  },
+  "todayScreen": {
+    "eyebrow": "I dag",
+    "action": {
+      "title": "Skriv ned, hvad du har lavet i dag",
+      "body": "Et par linjer med dine egne ord — og din dag bliver stående som varigt bevis på dit arbejde.",
+      "doneTitle": "Dagens arbejde er registreret",
+      "doneBody": "Godt — dagen er allerede i din journal. Tilføj mere, hvis du har lavet mere.",
+      "pending": "{n, plural, one {# post venter på din leders bekræftelse} other {# poster venter på din leders bekræftelse}}",
+      "cta": "Udfyld dagens journal",
+      "ctaAgain": "Tilføj endnu en post"
+    },
+    "week": {
+      "eyebrow": "Denne uge",
+      "confirmedHeadline": "{n, plural, one {Dit arbejde er blevet bekræftet # gang i denne uge} other {Dit arbejde er blevet bekræftet # gange i denne uge}}",
+      "writtenHeadline": "{n, plural, one {Du har registreret # arbejdspost i denne uge} other {Du har registreret # arbejdsposter i denne uge}}",
+      "emptyHeadline": "En ny uge — dens første post venter stadig på dig.",
+      "entries": "Poster",
+      "confirmed": "Bekræftet",
+      "hours": "Bekræftede timer"
+    },
+    "path": {
+      "eyebrow": "Vejen til mere",
+      "body": "Denne færdighed er ofte nødvendig i dit fag, og den står endnu ikke på dit kort. Tilføj den — og dit kort vokser.",
+      "cta": "Tilføj til mine færdigheder",
+      "empty": "Når dit fag og dine færdigheder er på plads, kan du her se, hvor du kan vokse videre.",
+      "emptyCta": "Åbn min profil"
+    }
+  },
+  "playerCard": {
+    "verifiedTitle": "Bekræftede færdigheder",
+    "verifiedEmpty": "Ingen bekræftede færdigheder endnu. De vises, når en leder bekræfter dine journalposter.",
+    "latestEvidenceLabel": "Seneste bevis",
+    "latestEvidenceEmpty": "Ingen beviser endnu — din første journalpost bliver den første."
+  },
+  "projects": {
+    "map": {
+      "eyebrow": "Lederkort",
+      "title": "Dine projekter",
+      "untitled": "Projekt uden navn",
+      "teamLabel": "På holdet",
+      "openArena": "Åbn arenaen"
+    },
+    "pulse": {
+      "pendingTitle": "{n, plural, one {# post venter på din bekræftelse} other {# poster venter på din bekræftelse}}",
+      "pendingBody": "Ét tryk — og en persons arbejde bliver til bekræftet bevis.",
+      "cta": "Bekræft nu",
+      "zero": "Intet venter på bekræftelse lige nu — holdets rytme er rolig.",
+      "zeroCta": "Gennemgangskø"
+    },
+    "draft": {
+      "title": "Draft — projekter og hold"
+    }
+  },
+  "projectOps": {
+    "stadium": {
+      "eyebrow": "Stadion",
+      "fieldCount": "{n, plural, one {# person på banen} other {# personer på banen}}",
+      "todayCount": "{n, plural, one {# journalpost i dag — dagen er i bevægelse} other {# journalposter i dag — dagen er i bevægelse}}",
+      "todayZero": "Ingen poster endnu i dag — dagen venter stadig på sin første post.",
+      "fieldTitle": "Banen — hvem er på holdet i dag",
+      "positionUnknown": "Position ikke angivet",
+      "docsMissingChip": "Dok. mangler: {n}",
+      "docsCheckedChip": "Dok. kontrolleret: {n}",
+      "lastActivity": "Seneste post: {date}",
+      "noActivity": "Ingen poster endnu.",
+      "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
+      "emptyTeamCta": "Start draften",
+      "positionsTitle": "Manglende positioner",
+      "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
+      "openOps": "Åbn management-arenaen"
+    }
   }
 }

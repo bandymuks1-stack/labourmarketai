@@ -25,7 +25,15 @@ import { createRequire } from "node:module";
 export const ESCO_ATTRIBUTION =
   "This service uses the ESCO classification of the European Commission.";
 
-export const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+// ALL 28 official ESCO v1.2.1 languages (owner decision 2026-06-10) — the
+// esco_labels locale CHECK is widened to this exact set by migration
+// 20260610230000. Russian is NOT an official ESCO language (RU practical
+// aliases are a separate curated layer, never esco_labels).
+export const LOCALES = [
+  "ar", "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "ga",
+  "hr", "hu", "is", "it", "lt", "lv", "mt", "nl", "no", "pl", "pt", "ro",
+  "sk", "sl", "sv", "uk",
+];
 
 // ── tiny RFC-4180-ish CSV parser (quoted fields, embedded newlines) ───────
 export function parseCsv(text) {
@@ -122,6 +130,73 @@ function normSkillType(v) {
   return null;
 }
 
+// ── Deterministic label dedupe (fix: "ON CONFLICT DO UPDATE command cannot
+//    affect row a second time" — a single upsert batch may not contain the
+//    same conflict key twice). DB unique key: (concept_type, concept_id,
+//    locale, label, label_type). Two deterministic passes, stable order:
+//      1. exact-key dedupe — keep the FIRST occurrence;
+//      2. same text under several label_types for one (kind,uri,locale) —
+//         keep only the best-ranked type (preferred > alternative > hidden).
+//    Pure transform of the in-memory rows; NO schema change, NO deletes of
+//    existing DB rows. Returns dropped counts per locale for the report.
+const TYPE_RANK = { preferred: 0, alternative: 1, hidden: 2 };
+
+export function dedupeLabelRows(labelRows) {
+  const droppedByLocale = new Map(); // locale -> { exact, crossType }
+  const bump = (locale, kind) => {
+    const d = droppedByLocale.get(locale) ?? { exact: 0, crossType: 0 };
+    d[kind] += 1;
+    droppedByLocale.set(locale, d);
+  };
+
+  // Pass 1 — exact unique key, first stable occurrence wins.
+  const byKey = new Map();
+  for (const r of labelRows) {
+    const key = `${r.kind}${r.uri}${r.locale}${r.label}${r.label_type}`;
+    if (byKey.has(key)) bump(r.locale, "exact");
+    else byKey.set(key, r);
+  }
+
+  // Pass 2 — same text in several label_types: best rank wins.
+  const bestByText = new Map();
+  for (const r of byKey.values()) {
+    const tkey = `${r.kind}${r.uri}${r.locale}${r.label}`;
+    const cur = bestByText.get(tkey);
+    if (!cur || TYPE_RANK[r.label_type] < TYPE_RANK[cur.label_type]) {
+      bestByText.set(tkey, r);
+    }
+  }
+  const rows = [];
+  for (const r of byKey.values()) {
+    if (bestByText.get(`${r.kind}${r.uri}${r.locale}${r.label}`) === r) {
+      rows.push(r);
+    } else {
+      bump(r.locale, "crossType");
+    }
+  }
+  return { rows, droppedByLocale };
+}
+
+// Relations pair dedupe (same batch-collision class; DB key:
+// occupation_id,skill_id). Deterministic winner: 'essential' over
+// 'optional', else first stable occurrence.
+export function dedupeRelations(relations) {
+  const byPair = new Map();
+  let dropped = 0;
+  for (const r of relations) {
+    const key = `${r.occupationUri}${r.skillUri}`;
+    const cur = byPair.get(key);
+    if (!cur) byPair.set(key, r);
+    else {
+      dropped += 1;
+      if (cur.relation_type === "optional" && r.relation_type === "essential") {
+        byPair.set(key, r);
+      }
+    }
+  }
+  return { rows: [...byPair.values()], dropped };
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const dirIdx = args.indexOf("--dir");
@@ -165,7 +240,23 @@ async function main() {
     console.log(`relations: ${relations.length}`);
   }
 
-  console.log(`\nTOTAL: ${occByUri.size} occupations, ${sklByUri.size} skills, ${labelRows.length} labels, ${relations.length} relations`);
+  // Deterministic dedupe before any upsert (and reported in dry-run too).
+  const { rows: labelRowsDeduped, droppedByLocale } = dedupeLabelRows(labelRows);
+  const { rows: relationsDeduped, dropped: relDropped } = dedupeRelations(relations);
+  if (droppedByLocale.size > 0) {
+    console.log(`\nDUPLICATE LABELS DROPPED (deterministic: exact-key first occurrence; preferred > alternative > hidden):`);
+    let totalDropped = 0;
+    for (const [loc, d] of [...droppedByLocale.entries()].sort()) {
+      console.log(`  ${loc}: ${d.exact} exact-key + ${d.crossType} cross-type = ${d.exact + d.crossType}`);
+      totalDropped += d.exact + d.crossType;
+    }
+    console.log(`  total dropped: ${totalDropped}; labels remaining: ${labelRowsDeduped.length}`);
+  }
+  if (relDropped > 0) {
+    console.log(`DUPLICATE RELATION PAIRS DROPPED: ${relDropped} (essential preferred); remaining: ${relationsDeduped.length}`);
+  }
+
+  console.log(`\nTOTAL: ${occByUri.size} occupations, ${sklByUri.size} skills, ${labelRowsDeduped.length} labels (${labelRows.length} raw), ${relationsDeduped.length} relations (${relations.length} raw)`);
   if (plan.gaps.length > 0) {
     console.log(`LANGUAGE GAPS (no home-made translations are created — handoff rule):`);
     for (const g of plan.gaps) console.log(`  - ${g}`);
@@ -194,14 +285,28 @@ async function main() {
   await upsertBatched("esco_occupations", [...occByUri.values()], "esco_uri");
   await upsertBatched("esco_skills", [...sklByUri.values()], "esco_uri");
 
-  const { data: occIds, error: e1 } = await db.from("esco_occupations").select("id, esco_uri");
-  if (e1) throw new Error(e1.message);
-  const { data: sklIds, error: e2 } = await db.from("esco_skills").select("id, esco_uri");
-  if (e2) throw new Error(e2.message);
-  const occId = new Map(occIds.map((r) => [r.esco_uri, r.id]));
-  const sklId = new Map(sklIds.map((r) => [r.esco_uri, r.id]));
+  // Paginated id-map fetch — PostgREST caps a select at 1000 rows, so a
+  // plain select would silently truncate the uri→id map and the label
+  // filter below would silently drop most rows (dishonest import). The
+  // call sites keep literal .from("esco_*") table names (guard-scanned).
+  async function fetchIdMap(name, buildPage) {
+    const map = new Map();
+    const PAGE = 1000;
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await buildPage(from, from + PAGE - 1);
+      if (error) throw new Error(`${name} id fetch failed: ${error.message}`);
+      for (const r of data ?? []) map.set(r.esco_uri, r.id);
+      if (!data || data.length < PAGE) break;
+    }
+    return map;
+  }
+  const occId = await fetchIdMap("esco_occupations", (a, b) =>
+    db.from("esco_occupations").select("id, esco_uri").range(a, b));
+  const sklId = await fetchIdMap("esco_skills", (a, b) =>
+    db.from("esco_skills").select("id, esco_uri").range(a, b));
+  console.log(`id maps: ${occId.size} occupations, ${sklId.size} skills`);
 
-  const labelUpserts = labelRows
+  const labelUpserts = labelRowsDeduped
     .map((l) => ({
       concept_type: l.kind,
       concept_id: l.kind === "occupation" ? occId.get(l.uri) : sklId.get(l.uri),
@@ -210,15 +315,21 @@ async function main() {
       label_type: l.label_type,
     }))
     .filter((l) => l.concept_id);
+  if (labelUpserts.length < labelRowsDeduped.length) {
+    console.log(`labels without a resolved concept id (skipped, reported honestly): ${labelRowsDeduped.length - labelUpserts.length}`);
+  }
   await upsertBatched("esco_labels", labelUpserts, "concept_type,concept_id,locale,label,label_type");
 
-  const relUpserts = relations
+  const relUpserts = relationsDeduped
     .map((r) => ({
       occupation_id: occId.get(r.occupationUri),
       skill_id: sklId.get(r.skillUri),
       relation_type: r.relation_type,
     }))
     .filter((r) => r.occupation_id && r.skill_id);
+  if (relUpserts.length < relationsDeduped.length) {
+    console.log(`relations without resolved ids (skipped, reported honestly): ${relationsDeduped.length - relUpserts.length}`);
+  }
   await upsertBatched("esco_occupation_skills", relUpserts, "occupation_id,skill_id");
 
   console.log("\napply complete (idempotent — re-run safe for ESCO version updates).");

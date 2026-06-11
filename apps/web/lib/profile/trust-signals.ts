@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
  * Every number is a direct count from canonical tables under the viewer's
  * own RLS — nothing weighted, nothing invented, zero is a plain zero
  * (doctrine §7 + VISION §10: colours/numbers never lie). The visual layer
- * is low-fidelity; TASK 07 re-skins it without changing these semantics.
+ * is the TASK 07 living-arena trust block; these semantics stay unchanged.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
