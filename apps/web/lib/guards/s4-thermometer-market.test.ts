@@ -96,13 +96,13 @@ describe("S4 iron rule — no score without BOTH components", () => {
   });
 });
 
-describe("S4 draft migrations — draft-headed, additive, reversible", () => {
+describe("S4 migrations — applied-marked, additive, reversible", () => {
   for (const rel of MIGRATIONS) {
     const raw = readRepo(rel);
     const code = stripSqlComments(raw).toLowerCase();
-    it(`${rel} is explicitly a needs-human-gate DRAFT`, () => {
-      expect(raw).toMatch(/DRAFT — needs-human-gate — DO NOT APPLY/);
-      expect(raw).toMatch(/apply_migration/);
+    it(`${rel} carries the APPLIED-to-prod ledger mark (2026-06-11)`, () => {
+      expect(raw).toMatch(/APPLIED to prod via Supabase MCP apply_migration/);
+      expect(raw).toMatch(/2026-06-11, ledger version 2026061106/);
     });
     it(`${rel} is additive only and carries a ROLLBACK block`, () => {
       expect(code).not.toMatch(/\bdrop\s+(table|column|function)/);
@@ -131,6 +131,9 @@ describe("S4 draft migrations — draft-headed, additive, reversible", () => {
     const sql = readRepo(MIGRATIONS[1]);
     const code = stripSqlComments(sql).toLowerCase();
     expect(code).toMatch(/returns table \(avg_mid_eur numeric, sample_n int\)/);
+    // Review fix (prod parity): a 1-person "average" is refused — avg only
+    // when sample_n >= 2, else NULL (insufficient_data, no individual leak).
+    expect(code).toMatch(/case when count\(\*\) >= 2/);
     // The market table's write path is the admin RPC; direct writes revoked.
     expect(code).toMatch(/revoke insert, update, delete on public\.market_rate_averages/);
     expect(code).toMatch(/source_status\s+text not null default 'needs_source'/);
