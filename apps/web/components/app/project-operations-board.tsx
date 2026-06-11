@@ -21,8 +21,10 @@ import { PrintButton } from "@/components/app/print-button";
 
 /**
  * Project worker operations board (slices pilot-ops-launch-v1 +
- * pilot-ops-v2-status-docs). Mobile-first, card-based — a manager operations /
- * player-card workflow, not an admin table.
+ * pilot-ops-v2-status-docs; TASK 07 polish — arena card skin: initials with
+ * the gold trust border ONLY for real manager-confirmed skills, glow/rise
+ * tokens). Mobile-first, card-based — a manager operations / player-card
+ * workflow, not an admin table.
  *
  * Honest by construction: every number is a real, RLS-scoped count; derived
  * "ready" reflects only the checked fields; the manager-set operational status
@@ -408,12 +410,33 @@ function WorkerCard({
           ? labels.missingEvidence
           : code;
 
+  const initials =
+    worker.name
+      .trim()
+      .split(/s+/)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase() ?? "")
+      .join("") || "•";
+
   return (
-    <article className="card-border flex flex-col gap-3 p-4" data-testid="ops-worker-card">
+    <article
+      className="card-border glow-hover rise-in flex flex-col gap-3 p-4"
+      data-testid="ops-worker-card"
+    >
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-display text-base font-semibold tracking-tightest text-text-primary">
-          {worker.name}
-        </h3>
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span
+            aria-hidden
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-xs font-bold text-text-primary ${
+              worker.confirmedSkills > 0 ? "border-trust-accent/50" : "border-ink-500"
+            }`}
+          >
+            {initials}
+          </span>
+          <h3 className="truncate font-display text-base font-semibold tracking-tightest text-text-primary">
+            {worker.name}
+          </h3>
+        </span>
         <div className="flex flex-wrap items-center gap-1.5">
           {worker.operationalStatus ? (
             <span
