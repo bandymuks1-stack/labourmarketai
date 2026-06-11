@@ -1,5 +1,7 @@
-// Typography (brief §8.3). Display: Geist · Body: Inter · Mono: Geist Mono.
-// Font CSS vars are wired in app/[locale]/layout.tsx via next/font.
+// Typography — TASK 07 lock (owner, 2026-06-11): Display: Bricolage Grotesque
+// (headings/cards) · Body: Inter · Mono: JetBrains Mono (numbers/labels).
+// Font CSS vars are wired in app/[locale]/layout.tsx via next/font; swapping
+// a font is a token swap there — components never name a typeface.
 export const typography = {
   fontFamily: {
     display: ["var(--font-display)", "system-ui", "sans-serif"],
