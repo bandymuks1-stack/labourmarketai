@@ -196,10 +196,15 @@ describe("Guard: admin i18n surfaces honest labels (no fake verification)", () =
       // surfaces the REAL skill ladder (workers with manager-confirmed
       // skills are counted NEXT TO the total, never alone) — its honest
       // pairing is asserted below.
+      // `league` (TASK 07.4) is excluded for the same reason: its
+      // "with confirmed skills" count is the REAL worker_skills
+      // verified=true ladder, rendered next to the raw team-size count;
+      // honesty is asserted in t07-league.test.ts.
       const adminSansVerify: Record<string, unknown> = { ...admin };
       delete adminSansVerify.companyVerification;
       delete adminSansVerify.matching;
       delete adminSansVerify.market;
+      delete adminSansVerify.league;
       const flat = JSON.stringify(adminSansVerify).toLowerCase();
       expect(flat).not.toMatch(/\bverified\b|\bconfirmed\b/);
       expect(flat).not.toMatch(/\bpatvirtinta\b|\bpatvirtinti\b/);

@@ -1202,7 +1202,8 @@
     },
     "hub": {
       "matching": "[EN] Matching workbench",
-      "market": "[EN] Market situation"
+      "market": "[EN] Market situation",
+      "league": "[EN] Country league"
     },
     "market": {
       "eyebrow": "[EN] Admin · Market",
@@ -1261,6 +1262,21 @@
         "empty": "[EN] No demand recorded yet.",
         "row": "[EN] demand {demand} · supply {supply}"
       }
+    },
+    "league": {
+      "eyebrow": "[EN] Country league",
+      "title": "[EN] Labour market league",
+      "subtitle": "[EN] Profession tables per country — real teams, availability and the market thermometer.",
+      "methodNote": "[EN] A thermometer value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
+      "back": "[EN] Back to admin hub",
+      "empty": "[EN] No league data yet — tables appear by themselves once workers set their professions.",
+      "unknownCountry": "[EN] Country not set",
+      "cellCount": "[EN] {n, plural, one {# profession} other {# professions}}",
+      "availableNow": "[EN] available now",
+      "confirmedSkillWorkers": "[EN] with confirmed skills",
+      "insufficientData": "[EN] Insufficient market data",
+      "smallSample": "[EN] Small sample (n<5)",
+      "declaredSample": "[EN] Declared-expectation sample: {n}"
     }
   },
   "documents": {

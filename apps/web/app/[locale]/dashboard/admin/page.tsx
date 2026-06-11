@@ -207,6 +207,13 @@ export default async function AdminDashboardPage({
         >
           {t("hub.market")}
         </Link>
+        <Link
+          href={"/dashboard/admin/league" as "/dashboard"}
+          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
+          data-testid="admin-tools-hub-league"
+        >
+          {t("hub.league")}
+        </Link>
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2">
