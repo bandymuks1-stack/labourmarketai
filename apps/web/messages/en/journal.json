@@ -179,7 +179,17 @@
       "batchSummaryLead": "One confirmation covers every entry listed below and is recorded as your decision for each of them. Review the list before confirming.",
       "batchConfirm": "Confirm ({count})",
       "batchDone": "Entries confirmed: {confirmed}. Skills confirmed: {skills}.",
-      "batchFailed": "Could not confirm: {count} — open the detailed review."
+      "batchFailed": "Could not confirm: {count} — open the detailed review.",
+      "exception": {
+        "worker_first_entries": "Person's first entries",
+        "unusual_hours": "Unusual hours",
+        "new_skill": "New skill"
+      },
+      "ackButton": "Reviewed — confirm this one too",
+      "ackDone": "Will be confirmed ✓",
+      "excludedNote": "{count, plural, =0 {All exceptions reviewed — the whole list will be confirmed.} one {# entry with an exception will NOT be confirmed until you mark it reviewed.} other {# entries with exceptions will NOT be confirmed until you mark them reviewed.}}",
+      "outcomeNotAcknowledged": "not confirmed — the exception was left unreviewed",
+      "outcomeBlocked": "not confirmed ({code})"
     }
   },
   "listEmpty": "You don't have any work evidence yet — your entries will show up here.",

@@ -8,6 +8,7 @@ import {
 } from "@/components/app/quick-confirm-card";
 import { QuickConfirmBatch } from "@/components/app/quick-confirm-batch";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
+import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
 
 /** One-Tap Confirm (S3.5) — the manager's mobile-first confirm queue. Same
@@ -48,6 +49,12 @@ export default async function QuickConfirmPage({
     (e) => new Date(e.createdAt).toDateString() === todayKey,
   );
 
+  // Exceptions pyramid (DESIGN_SOUL §3): the REAL server-flagged exceptions
+  // for the batch candidates, surfaced BEFORE the confirm click. RPC absent
+  // → empty map (the write side then enforces nothing extra either).
+  const exceptionMap = await fetchBatchExceptions(todays.map((e) => e.id));
+  const exceptions = Object.fromEntries(exceptionMap);
+
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-5">
       <header className="flex flex-col gap-1.5">
@@ -75,7 +82,9 @@ export default async function QuickConfirmPage({
         />
       ) : (
         <>
-          {todays.length > 1 ? <QuickConfirmBatch entries={todays} /> : null}
+          {todays.length > 1 ? (
+            <QuickConfirmBatch entries={todays} exceptions={exceptions} />
+          ) : null}
           <ul className="flex flex-col gap-3">
             {entries.map((e) => (
               <QuickConfirmCard key={e.id} entry={e} />

@@ -59,7 +59,17 @@
       "batchSummaryLead": "Üks kinnitus hõlmab kõiki allpool loetletud sissekandeid ja salvestatakse teie otsusena igaühe kohta. Vaadake nimekiri enne kinnitamist üle.",
       "batchConfirm": "Kinnita ({count})",
       "batchDone": "Kinnitatud sissekandeid: {confirmed}. Kinnitatud oskusi: {skills}.",
-      "batchFailed": "Ei õnnestunud kinnitada: {count} — avage üksikasjalik ülevaatus."
+      "batchFailed": "Ei õnnestunud kinnitada: {count} — avage üksikasjalik ülevaatus.",
+      "exception": {
+        "worker_first_entries": "[EN] Person's first entries",
+        "unusual_hours": "[EN] Unusual hours",
+        "new_skill": "[EN] New skill"
+      },
+      "ackButton": "[EN] Reviewed — confirm this one too",
+      "ackDone": "[EN] Will be confirmed ✓",
+      "excludedNote": "[EN] {count, plural, =0 {All exceptions reviewed — the whole list will be confirmed.} one {# entry with an exception will NOT be confirmed until you mark it reviewed.} other {# entries with exceptions will NOT be confirmed until you mark them reviewed.}}",
+      "outcomeNotAcknowledged": "[EN] not confirmed — the exception was left unreviewed",
+      "outcomeBlocked": "[EN] not confirmed ({code})"
     }
   },
   "listEmpty": "[EN] No entries yet.",

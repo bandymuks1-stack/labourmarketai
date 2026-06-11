@@ -59,7 +59,17 @@
       "batchSummaryLead": "Eine Bestätigung umfasst alle unten aufgeführten Einträge und wird als Ihre Entscheidung für jeden einzelnen erfasst. Prüfen Sie die Liste vor dem Bestätigen.",
       "batchConfirm": "Bestätigen ({count})",
       "batchDone": "Bestätigte Einträge: {confirmed}. Bestätigte Fähigkeiten: {skills}.",
-      "batchFailed": "Nicht bestätigt: {count} — öffnen Sie die detaillierte Prüfung."
+      "batchFailed": "Nicht bestätigt: {count} — öffnen Sie die detaillierte Prüfung.",
+      "exception": {
+        "worker_first_entries": "Erste Einträge der Person",
+        "unusual_hours": "Ungewöhnliche Stunden",
+        "new_skill": "Neue Fähigkeit"
+      },
+      "ackButton": "Geprüft — diesen auch bestätigen",
+      "ackDone": "Wird bestätigt ✓",
+      "excludedNote": "{count, plural, =0 {Alle Ausnahmen geprüft — die ganze Liste wird bestätigt.} one {# Eintrag mit Ausnahme wird NICHT bestätigt, bis du ihn als geprüft markierst.} other {# Einträge mit Ausnahmen werden NICHT bestätigt, bis du sie als geprüft markierst.}}",
+      "outcomeNotAcknowledged": "nicht bestätigt — die Ausnahme blieb ungeprüft",
+      "outcomeBlocked": "nicht bestätigt ({code})"
     }
   },
   "listEmpty": "[EN] No entries yet.",

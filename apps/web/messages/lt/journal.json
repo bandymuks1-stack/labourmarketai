@@ -179,7 +179,17 @@
       "batchSummaryLead": "Vienas patvirtinimas apima visus žemiau išvardytus įrašus ir įrašomas kaip jūsų sprendimas dėl kiekvieno iš jų. Peržiūrėkite sąrašą prieš patvirtindami.",
       "batchConfirm": "Patvirtinti ({count})",
       "batchDone": "Patvirtinta įrašų: {confirmed}. Patvirtinta įgūdžių: {skills}.",
-      "batchFailed": "Nepavyko patvirtinti: {count} — atidarykite detalią peržiūrą."
+      "batchFailed": "Nepavyko patvirtinti: {count} — atidarykite detalią peržiūrą.",
+      "exception": {
+        "worker_first_entries": "Pirmieji žmogaus įrašai",
+        "unusual_hours": "Neįprastos valandos",
+        "new_skill": "Naujas įgūdis"
+      },
+      "ackButton": "Peržiūrėjau — patvirtinti ir šį",
+      "ackDone": "Bus patvirtintas ✓",
+      "excludedNote": "{count, plural, =0 {Visos išimtys peržiūrėtos — bus patvirtintas visas sąrašas.} one {# įrašas su išimtimi NEBUS patvirtintas, kol jo nepažymėsi peržiūrėtu.} few {# įrašai su išimtimis NEBUS patvirtinti, kol jų nepažymėsi peržiūrėtais.} other {# įrašų su išimtimis NEBUS patvirtinti, kol jų nepažymėsi peržiūrėtais.}}",
+      "outcomeNotAcknowledged": "nepatvirtinta — išimtis liko nepažymėta",
+      "outcomeBlocked": "nepatvirtinta ({code})"
     }
   },
   "listEmpty": "Kol kas neturite darbo įrodymų — jūsų įrašai atsiras čia.",

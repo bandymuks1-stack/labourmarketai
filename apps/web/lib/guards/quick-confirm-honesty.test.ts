@@ -100,6 +100,67 @@ describe("Guard: no auto-confirm, no default-checked, explicit confirm set", () 
   });
 });
 
+describe("Guard: exceptions pyramid (DESIGN_SOUL §3) on the batch flow", () => {
+  const batchLib = readFileSync(
+    join(APP_ROOT, "lib", "journal", "batch-review.ts"),
+    "utf8",
+  );
+
+  it("the batch rail is the REAL applied RPC pair (20260611120000)", () => {
+    expect(batchLib).toContain("batch_review_exceptions");
+    expect(batchLib).toContain("review_journal_entries_batch");
+  });
+
+  it("the action re-checks exceptions SERVER-side and refuses unacknowledged", () => {
+    expect(actions).toContain("fetchBatchExceptions");
+    expect(actions).toContain("exception_not_acknowledged");
+    expect(actions).toMatch(/!acknowledged\.has\(i\.entryId\)/);
+  });
+
+  it("skills entries keep the only skill-flipping chain (no double-confirm)", () => {
+    expect(actions).toMatch(/withSkills[\s\S]*confirmOne/);
+    expect(actions).toContain("entryOnly");
+  });
+
+  it("exceptions render BEFORE the confirm button; acknowledge is a deliberate tap", () => {
+    const excIdx = batch.indexOf("quick-batch-exception");
+    const confirmIdx = batch.indexOf("quick-batch-confirm");
+    expect(excIdx).toBeGreaterThan(-1);
+    expect(confirmIdx).toBeGreaterThan(excIdx);
+    expect(batch).toContain("quick-batch-ack");
+    expect(batch).toContain("aria-pressed");
+    expect(batch).toContain("quick-batch-excluded-note");
+  });
+
+  it("per-entry outcomes are reported after the write", () => {
+    expect(batch).toContain("quick-batch-outcomes");
+    expect(actions).toContain("outcomes: items.map");
+  });
+
+  it("exception copy exists in all 10 locales", () => {
+    for (const locale of LOCALES) {
+      const journal = JSON.parse(
+        readFileSync(join(APP_ROOT, "messages", locale, "journal.json"), "utf8"),
+      );
+      const quick = journal?.inbox?.quick;
+      for (const k of [
+        "ackButton",
+        "ackDone",
+        "excludedNote",
+        "outcomeNotAcknowledged",
+      ]) {
+        expect(quick?.[k], `inbox.quick.${k} missing in ${locale}`).toBeTruthy();
+      }
+      for (const slug of ["worker_first_entries", "unusual_hours", "new_skill"]) {
+        expect(
+          quick?.exception?.[slug],
+          `inbox.quick.exception.${slug} missing in ${locale}`,
+        ).toBeTruthy();
+      }
+    }
+  });
+});
+
 describe("Guard: inbox.quick copy exists in all 10 locales", () => {
   const KEYS = [
     "openQuick",
