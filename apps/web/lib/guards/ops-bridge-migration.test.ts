@@ -107,9 +107,39 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // + applied to prod via Supabase MCP), then to 43 for the
     // journal-entry-skill-links-v1 slice (additive journal_entry_skills durable
     // evidence-support relation, committed + queued, NOT applied), then to 44
-    // for the confirmation-role-schema-hardening-v1 slice (additive
-    // 20260602130000_confirmation_role_check CHECK constraint, RED/human-gated,
-    // committed + queued, NOT applied). The baseline only ever grows deliberately.
-    expect(guard).toMatch(/SPRINT_BASELINE = 44/);
+    // for the company-profile-request-v1 slice (additive company_profile_request
+    // migration: org-detail columns + 4-state verification ladder +
+    // save_company_setup upsert that requests but never fabricates verified;
+    // committed + queued, NOT applied), then to 45 for the
+    // company-verification-admin slice (additive admin_set_company_verification
+    // SECURITY DEFINER RPC, admin-only + audit-logged, applied to prod after
+    // owner approval), then to 46 for the company-automatic-first correction
+    // (additive company_automatic_first: widen CHECK + active_unverified default
+    // + automatic-status save_company_setup), then to 47 for the worker
+    // work-card slice (additive 20260608120000_worker_work_card: add
+    // workers.work_card_confirmed_at + owner-scoped save/confirm RPCs), then to
+    // 48 for the RPC execute hardening slice (additive
+    // 20260608140000_worker_work_card_execute_hardening: revoke PUBLIC/anon
+    // EXECUTE on the two RPCs, keep authenticated), then to 53 for Pilot
+    // Operations v2 (pilot-ops-v2-status-docs: additive operational-status +
+    // readiness-checklist tables with RPC-only writes), then to 54 for
+    // candidate-provider-draft-v1 (additive owner-scoped candidate_drafts table).
+    // The baseline only ever grows deliberately. Then to 58 for the S2
+    // esco-taxonomy-foundation set (three additive migrations: esco core
+    // catalogue, esco_uri refs, candidate_skills - applied to prod via MCP
+    // after owner review) on top of main's 55 (conversations-ui draft), then
+    // to 59 for s3-documents-readiness (worker_documents_readiness, applied
+    // to prod via MCP after owner review), then to 60 for the
+    // esco-labels-all-official-languages widening DRAFT (20260610230000),
+    // then to 61 for the esco-service-role-grants fix (20260610234500),
+    // then to 63 at the S4 merge (project autolink body-replace +
+    // market_rate_averages with the prod n>=2 fix; APPLIED 2026-06-11),
+    // then to 64 for batch_journal_review (exceptions-pyramid batch confirm;
+    // APPLIED 2026-06-11, ledger 20260611064423), then to 65 for the
+    // confirmation-role-schema-hardening-v1 draft (additive 20260602130000
+    // confirmation_role_check CHECK, RED/human-gated, committed + queued,
+    // NOT applied). NOTE: PR #304 (S5) carries its own 64 -> 65 bump —
+    // whichever merges second resolves upward (to 66).
+    expect(guard).toMatch(/SPRINT_BASELINE = 65/);
   });
 });

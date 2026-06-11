@@ -43,18 +43,30 @@ describe("deriveReviewOrigin returns the latest decision's role + timestamp", ()
   });
 });
 
-describe("the journal page surfaces the review origin", () => {
+describe("the journal page surfaces the review origin (via the timeline)", () => {
   const page = read("app/[locale]/dashboard/journal/page.tsx");
+  const timeline = read("components/app/evidence-decision-timeline.tsx");
 
-  it("reads confirmer_role and derives the origin", () => {
+  it("reads confirmer_role and derives the decision history", () => {
     expect(page).toMatch(/confirmation_scope, created_at, confirmer_role/);
-    expect(page).toMatch(/deriveReviewOrigin\(e\.journal_entry_confirmations\)/);
+    // The single latest-wins origin line was superseded by the full Evidence
+    // Decision Timeline v1, which is derived from the same append-only rows.
+    expect(page).toMatch(/deriveReviewTimeline\(e\.journal_entry_confirmations\)/);
+    expect(page).toMatch(/<EvidenceDecisionTimeline/);
   });
 
-  it("renders the who/when origin labels", () => {
-    expect(page).toMatch(/t\("entry\.reviewedBy"\)/);
-    expect(page).toMatch(/entry\.confirmerRole\.\$\{origin\.role\}/);
-    expect(page).toMatch(/origin\.at\.slice\(0, 10\)/);
+  it("the timeline renders the who/when origin labels per decision", () => {
+    expect(timeline).toMatch(/t\("entry\.reviewedBy"\)/);
+    expect(timeline).toMatch(/entry\.confirmerRole\.\$\{ev\.role\}/);
+    expect(timeline).toMatch(/\.slice\(0, 10\)/);
+  });
+
+  it("the timeline is the SINGLE per-entry status surface (no duplicate chip)", () => {
+    // Polish v1: the old top-right per-entry status chip was removed because it
+    // repeated the timeline's terminal step and used different words for the
+    // same state ("Atmesta" vs "Nepatvirtinta"). Keep it gone.
+    expect(page).not.toMatch(/entry\.status\.\$\{status\}/);
+    expect(page).not.toMatch(/STATUS_CLASS/);
   });
 });
 

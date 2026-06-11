@@ -5,16 +5,21 @@ import {
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
+import {
+  EvidenceStatusStrip,
+  type EvidenceStatus,
+} from "@/components/app/evidence-status-strip";
 import { formatDuration } from "@/lib/journal/format-duration";
 import {
   groupLinkedSkillIdsByEntry,
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
 import {
-  deriveReviewOrigin,
   deriveReviewResult,
-  type ReviewResult,
+  deriveReviewTimeline,
 } from "@/lib/journal/review-status";
+import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
+import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { Link } from "@/lib/i18n/navigation";
@@ -28,16 +33,6 @@ const WORKER_RELATIONSHIPS = [
   "owner",
   "collaborator",
 ];
-
-// Worker-facing review/evidence result per entry (slice
-// manager-review-evidence-result-v1). Derived purely from the append-only
-// evidence rows; latest decision wins.
-const STATUS_CLASS: Record<ReviewResult, string> = {
-  submitted: "text-state-warning",
-  approved: "text-state-success",
-  rejected: "text-state-error",
-  changes_requested: "text-brand-blue",
-};
 
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
  *  against an engagement context; entries stay private (visibility 'closed')
@@ -153,10 +148,13 @@ export default async function JournalPage({
           : null;
     return (
       <div className="flex flex-col gap-6">
-        <header>
+        <header className="flex flex-col gap-1">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("navTitle")}
           </h1>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("navSubtitle")}
+          </p>
         </header>
         <div className="card-border max-w-2xl p-6">
           <p className="text-sm leading-relaxed text-text-secondary">
@@ -284,6 +282,21 @@ export default async function JournalPage({
     entries = rows.filter((e) => !e.deleted_at && !e.superseded_by);
   }
 
+  // Evidence Status Strip (v1) for the list status zone — a compact legend
+  // showing which honest states the worker's entries are actually in. Derived
+  // purely from the existing review result; "confirmed" lights up ONLY when a
+  // real approved confirmation exists, never automatically.
+  const evidenceStatuses = (entries ?? []).map((e) =>
+    deriveReviewResult(e.journal_entry_confirmations),
+  );
+  const journalEvidenceActive: EvidenceStatus[] = ["self_declared"];
+  if (
+    evidenceStatuses.some((s) => s === "submitted" || s === "changes_requested")
+  )
+    journalEvidenceActive.push("awaiting_confirmation");
+  if (evidenceStatuses.some((s) => s === "approved"))
+    journalEvidenceActive.push("confirmed");
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-1">
@@ -299,6 +312,9 @@ export default async function JournalPage({
             {tSpaces("mySpaces")} →
           </Link>
         </div>
+        <p className="text-sm leading-relaxed text-text-secondary" data-testid="journal-nav-subtitle">
+          {t("navSubtitle")}
+        </p>
       </header>
 
       {/* P0 UX rescue: removed the read-only project-context note and the
@@ -326,6 +342,16 @@ export default async function JournalPage({
         </p>
       )}
       <div id="journal-composer" className="order-2">
+        <div className="flex flex-col gap-2">
+        {/* Benefit-first framing: an entry is proof that strengthens the work
+            card, not timesheet admin — confirmation is a real human decision. */}
+        <p
+          className="text-sm leading-relaxed text-text-secondary"
+          data-testid="journal-composer-benefit"
+        >
+          {t("composerBenefit")}{" "}
+          <span className="text-text-muted">{t("benefitNotAuto")}</span>
+        </p>
         <JournalEntryComposer
           engagements={engagements}
           directions={directions}
@@ -347,6 +373,7 @@ export default async function JournalPage({
               : null
           }
         />
+        </div>
       </div>
 
       {/* Entry list — lifted to the top so a worker who just logged work sees
@@ -366,27 +393,57 @@ export default async function JournalPage({
             )}
           </h2>
           {/* ONE clear primary action — jump to the create/edit composer below
-              (the single create surface; no duplicate route). */}
-          <a
-            href="#journal-composer"
-            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
-            data-testid="journal-new-entry-cta"
-          >
-            + {t("newEntry")}
-          </a>
+              (the single create surface; no duplicate route). When the list is
+              empty the EmptyState below owns the single primary CTA instead, so
+              this header button only shows once there are entries. */}
+          {(entries ?? []).length > 0 && (
+            <a
+              href="#journal-composer"
+              className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+              data-testid="journal-new-entry-cta"
+            >
+              + {t("newEntry")}
+            </a>
+          )}
         </div>
+        {/* Honest "who can confirm" line above the entry list: the status chips
+            below show "confirmed / awaiting", so name plainly who can actually
+            move an entry to confirmed today — only manager / owner / external
+            (client) manager. Until then it stays self-declared. No broad
+            confirmer is implied. */}
+        <p
+          className="text-[11px] leading-relaxed text-text-muted"
+          data-testid="journal-who-can-confirm"
+        >
+          {t("whoCanConfirm")}
+        </p>
+        {/* Evidence Status Strip — one compact legend in the status zone (not
+            per row, to avoid overloading the list) that visually separates a
+            worker's own self-declared record from a real confirmation. */}
+        {(entries ?? []).length > 0 && (
+          <EvidenceStatusStrip
+            active={journalEvidenceActive}
+            data-testid="journal-evidence-status-strip"
+          />
+        )}
         {(entries ?? []).length === 0 ? (
-          <p className="text-sm text-text-secondary">{t("listEmpty")}</p>
+          <EmptyState
+            testId="journal-empty-state"
+            title={t("listEmptyTitle")}
+            why={t("listEmpty")}
+            next={t("listEmptyNext")}
+            cta={{ label: t("listEmptyCta"), href: "#journal-composer" }}
+          />
         ) : (
           <ul className="flex flex-col gap-3">
             {(entries ?? []).map((e) => {
-              const status = deriveReviewResult(e.journal_entry_confirmations);
-              const origin = deriveReviewOrigin(e.journal_entry_confirmations);
-              const originRole =
-                origin?.role &&
-                ["manager", "owner", "external_manager"].includes(origin.role)
-                  ? t(`entry.confirmerRole.${origin.role}`)
-                  : null;
+              // Evidence Decision Timeline v1 — the real, ordered human-decision
+              // history (append-only rows). Empty while still submitted → the
+              // timeline shows "created → waiting", never a fabricated step.
+              // This is the SINGLE status display per entry; the old top-right
+              // status chip was removed (polish v1) — it repeated the timeline's
+              // terminal step and used different words for the same state.
+              const timeline = deriveReviewTimeline(e.journal_entry_confirmations);
               const metrics = e.journal_entry_metrics ?? [];
               const area =
                 metrics.find((m) => m.metric_slug === "quantity") ??
@@ -411,21 +468,11 @@ export default async function JournalPage({
                       : undefined
                   }
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm text-text-primary">{e.original_text}</p>
-                    <span
-                      className={`shrink-0 font-mono text-[11px] uppercase tracking-label ${STATUS_CLASS[status]}`}
-                    >
-                      {t(`entry.status.${status}`)}
-                    </span>
-                  </div>
-                  {origin && (
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
-                      {t("entry.reviewedBy")}
-                      {originRole ? ` ${originRole}` : ""}
-                      {origin.at ? ` · ${origin.at.slice(0, 10)}` : ""}
-                    </p>
-                  )}
+                  <p className="text-sm text-text-primary">{e.original_text}</p>
+                  <EvidenceDecisionTimeline
+                    createdAt={e.created_at}
+                    events={timeline}
+                  />
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
                     {dir?.value_text && <span>{tProf(dir.value_text)}</span>}
                     {site?.value_text && <span>{site.value_text}</span>}

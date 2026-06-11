@@ -1,14 +1,22 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { PilotRequestButton } from "@/components/app/pilot-request-button";
+import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
+import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
-import { Link } from "@/lib/i18n/navigation";
+import { TodayScreen } from "@/components/app/today/today-screen";
+import { WorkCard } from "@/components/app/work-card";
+import { getWorkerCard } from "@/lib/worker/work-card";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import {
+  managerNextAction,
+  customerNextAction,
+  type NextAction,
+} from "@/lib/dashboard/next-action";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -99,7 +107,11 @@ function JourneyRail({ stages, label }: { stages: Stage[]; label: string }) {
  *  (real profession/skills/journal counts); no fake matching/metrics (PV §10,
  *  PRODUCT_CONSTITUTION §5/§9). Non-locking by design: the active role is the
  *  current workspace, not a permanent category (§1). The redesign turns the old
- *  static card list into an action path: journey rail → next move → readiness. */
+ *  static card list into an action path: journey rail → next move → readiness.
+ *
+ *  Personal command center: dokumentuotas pirmas sluoksnis — vizualiai bus
+ *  pakeistas TASK 07 (living-arena UI po owner vizualinio užrakto); logika,
+ *  sąžiningi signalai ir next-action principas lieka. */
 export default async function DashboardOverviewPage({
   params,
 }: {
@@ -123,7 +135,6 @@ export default async function DashboardOverviewPage({
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.wow");
   const tf = await getTranslations("auth.dashboard.wow.flow");
-  const tc = await getTranslations("auth.dashboard.wow.canonical");
   const tRole = await getTranslations("auth.signup.role");
   const tProf = await getTranslations("professions");
 
@@ -154,11 +165,25 @@ export default async function DashboardOverviewPage({
     </p>
   );
 
-  const linkCls =
-    "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
-
   // ── Company / agency / customer: operating cockpit (define → submit need) ──
   if (role !== "worker") {
+    // Role-based single Next Action. For an org reviewer we read the SAME gated
+    // pending-review set the inbox uses (RPC), so the priority is data-driven:
+    // entries waiting → review; nothing waiting → invite/open team (real route).
+    // Degrades to 0 (honest "nothing waiting") if the RPC isn't applied (42883).
+    let pendingReview = 0;
+    if (role === "company" || role === "agency") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: idRows } = await (supabase as any).rpc(
+        "reviewable_journal_entry_ids",
+      );
+      if (Array.isArray(idRows)) pendingReview = idRows.length;
+    }
+    const nextAction: NextAction =
+      role === "company" || role === "agency"
+        ? managerNextAction(role, pendingReview)
+        : customerNextAction();
+
     const intent = role === "agency" ? "partner" : "hire_workers";
     // Intent-specific pilot copy: a company hiring sees hiring language, an
     // agency sees candidate-supply language — never a generic buyer "need".
@@ -204,9 +229,26 @@ export default async function DashboardOverviewPage({
         {Header}
         <CurrentSpaceHeader role={role} />
 
-        {/* TOP priority — the real next actions for the chain
-            (invite worker / accept / enable review / review entries). Placed
-            first so a company/agency owner always lands on a visible CTA. */}
+        {/* G — company/agency calming pass: a single calm, human framing line
+            (copy-only, no structural change), mirroring the worker foundationNote.
+            One clear next step at a time; honest status, never fabricated demand. */}
+        <p
+          className="-mt-3 text-[11px] leading-relaxed text-text-muted"
+          data-testid="company-calm-note"
+        >
+          {tf("company.calmNote")}
+        </p>
+
+        {/* The single, clear primary action for this role/state (data-driven:
+            entries waiting → review; nothing waiting → invite/open team). The
+            chain-actions grid below is the secondary "all steps" index. */}
+        <DashboardNextAction
+          action={nextAction}
+          counts={{ pending: pendingReview }}
+        />
+
+        {/* Secondary — the full set of chain entry points
+            (invite worker / enable review / review entries). */}
         <DashboardChainActions role={role} />
         <WorkerInvitationsCard />
 
@@ -265,7 +307,7 @@ export default async function DashboardOverviewPage({
             <p className="mb-3 mt-1 text-sm leading-relaxed text-text-secondary">
               {tw(`pilot.${pilotKey}.body`)}
             </p>
-            <PilotRequestButton intent={intent} />
+            <DemandRequestButton intent={intent} />
           </div>
         </section>
 
@@ -281,7 +323,7 @@ export default async function DashboardOverviewPage({
     );
   }
 
-  // ── Worker: "work cockpit" — identity → proof → opportunities ──
+  // ── Worker: "Mano darbo kortelė" — state-aware personal entry ──
   let professionName: string | null = null;
   let skillsCount = 0;
   let entriesCount = 0;
@@ -291,9 +333,8 @@ export default async function DashboardOverviewPage({
     .eq("profile_id", user.id)
     .maybeSingle();
   if (workerRow?.id) {
-    // The three reads (primary profession, skill count, journal count) are
-    // independent of each other; run them in parallel to cut the worker
-    // overview's tail latency.
+    // The three reads (primary profession, skill count, journal entry count)
+    // are independent; run them in parallel to cut the overview's tail latency.
     const [wpRes, scRes, ecRes] = await Promise.all([
       supabase
         .from("worker_professions")
@@ -317,192 +358,48 @@ export default async function DashboardOverviewPage({
     entriesCount = ecRes.count ?? 0;
   }
 
-  const steps = [
-    {
-      done: !!professionName,
-      title: tw("nextSteps.profession.title"),
-      body: professionName
-        ? tw("nextSteps.profession.bodyDone", { profession: professionName })
-        : tw("nextSteps.profession.body"),
-      href: "/dashboard/profile" as const,
-    },
-    {
-      done: skillsCount > 0,
-      title: tw("nextSteps.skills.title"),
-      body:
-        skillsCount > 0
-          ? tw("nextSteps.skills.bodyDone", { n: skillsCount })
-          : tw("nextSteps.skills.body"),
-      href: "/dashboard/profile" as const,
-    },
-    {
-      done: entriesCount > 0,
-      title: tw("nextSteps.journal.title"),
-      body:
-        entriesCount > 0
-          ? tw("nextSteps.journal.bodyDone", { n: entriesCount })
-          : tw("nextSteps.journal.body"),
-      href: "/dashboard/journal" as const,
-    },
-  ];
-
-  // Higher-level journey stages (identity → proof → opportunities).
-  const idDone = !!professionName && skillsCount > 0;
-  const proofDone = entriesCount > 0;
-  const stageDone = [idDone, proofDone, false];
-  const currentStage = stageDone.findIndex((d) => !d);
-  const stageState = (i: number): StageState =>
-    stageDone[i] ? "done" : i === currentStage ? "current" : "todo";
-  const wstages: Stage[] = [
-    { label: tf("worker.s1"), state: stageState(0) },
-    { label: tf("worker.s2"), state: stageState(1) },
-    { label: tf("worker.s3"), state: stageState(2) },
-  ];
-
-  // The single next best action.
-  const nextStep = steps.find((s) => !s.done) ?? null;
-
-  // Phase 3: a worker is in "first-use" until they have BOTH a profession set
-  // AND at least one journal entry. We show the full first-use panel during
-  // that window, and switch to a compact greeting card after — never both,
-  // never blank.
+  // A worker is in "first-use" until they have BOTH a profession set AND at
+  // least one journal entry. The gentle first-use guidance shows only during
+  // that window, then disappears — it never nags a settled person.
   const isFirstUse = !professionName || entriesCount === 0;
+
+  // ── "Mano darbo kortelė" — state-aware continuity (slice
+  // work-card-state-aware-v1). The card decides new/returning/stale from the
+  // worker's REAL saved data and shows ONE best next action; it never re-asks a
+  // saved dimension and never restarts onboarding on a returning login. ──
+  const cardData = await getWorkerCard({
+    workerId: workerRow?.id ?? null,
+    name,
+    professionName,
+    skillsCount,
+    evidenceCount: entriesCount,
+  });
 
   return (
     <div className="flex flex-col gap-7">
-      {Header}
+      {/* Space identity + the calm doorway to other spaces (My spaces). */}
       <CurrentSpaceHeader role={role} />
 
+      {/* "Šiandienos ekranas" (TASK 07 / DESIGN_SOUL) — today's ONE action,
+          this week's confirmed work, one honest growth path, and the premium
+          scouting player card. Real journal-chain data only. */}
+      <TodayScreen workerId={workerRow?.id ?? null} />
 
-      {/* TOP priority — real chain next actions + pending invitation accept,
-          placed first so the next action is always visible. */}
-      <DashboardChainActions role={role} />
+      {/* "Mano darbo kortelė" — the state-aware entry. It owns the greeting,
+          the what's-clear / what's-missing summary, the ONE best next action
+          (+ why it helps), the small "Ar tai vis dar galioja?" confirmation
+          when data is stale, and the secondary/collapsed editor. */}
+      <WorkCard data={cardData} />
       <WorkerInvitationsCard />
 
-      {professionName && (
-        <p className="-mt-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
-          {professionName}
-        </p>
+      {/* First-use guidance appears ONLY while the person is still starting
+          (no profession or no entries yet) — a gentle path, not a permanent
+          panel. The profile/journal/account doors live in the primary nav
+          (Mano erdvė / Darbo kortelė / Įrodymai / Mano paskyra), so the
+          dashboard keeps no duplicate card wall — just the work card itself. */}
+      {isFirstUse && (
+        <DashboardFirstUsePanel variant="full" showCtas={false} />
       )}
-      {StartingPoint}
-
-      <DashboardFirstUsePanel variant={isFirstUse ? "full" : "compact"} />
-
-      <JourneyRail stages={wstages} label={tf("worker.eyebrow")} />
-      <p className="text-[11px] leading-relaxed text-text-muted" data-testid="journey-progress-helper">
-        {tw("pilot.progressHelper")}
-      </p>
-
-      {/* ── Next move — one cinematic, guided action ── */}
-      <section className="card-border wow-card flex flex-col gap-3 p-6 sm:p-7">
-        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-orange">
-          <span className="live-dot signal-dot" aria-hidden />
-          {tf("worker.eyebrow")} · {tf("worker.nextMove")}
-        </span>
-        <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {nextStep ? nextStep.title : tf("worker.ready")}
-        </h2>
-        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
-          {nextStep ? nextStep.body : tw("journal.body")}
-        </p>
-        <Link
-          href={nextStep ? nextStep.href : "/dashboard/journal"}
-          className="mt-1 inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5"
-        >
-          {nextStep ? tw("nextSteps.open") : tw("journal.cta")} →
-        </Link>
-      </section>
-
-      {/* ── Two canonical surfaces — ONE entry per workflow (no duplicates) ── */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {/* A. Work Identity — the single home for profession, directions, skills, CV */}
-        <section className="card-border flex flex-col gap-2 p-6">
-          <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-state-success">
-            <span className="live-dot signal-dot" aria-hidden />
-            {tf("worker.s1")}
-          </span>
-          <h2 className="font-display text-base font-semibold text-text-primary">
-            {tc("identity.title")}
-          </h2>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {tc("identity.body")}
-          </p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
-            {professionName ?? "—"} ·{" "}
-            {tw("nextSteps.skills.bodyDone", { n: skillsCount })}
-          </p>
-          <Link
-            href="/dashboard/profile"
-            className={cn(linkCls, "mt-2 self-start")}
-          >
-            {tc("identity.cta")} →
-          </Link>
-        </section>
-        {/* B. Work Proof / Journal — the single home for proof entries */}
-        <section className="card-border flex flex-col gap-2 p-6">
-          <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
-            <span className="live-dot signal-dot" aria-hidden />
-            {tf("worker.s2")}
-          </span>
-          <h2 className="font-display text-base font-semibold text-text-primary">
-            {tc("proof.title")}
-          </h2>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {tc("proof.body")}
-          </p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-label text-text-muted">
-            {tw("nextSteps.journal.bodyDone", { n: entriesCount })}
-          </p>
-          <Link
-            href="/dashboard/journal"
-            className={cn(linkCls, "mt-2 self-start")}
-          >
-            {tc("proof.cta")} →
-          </Link>
-        </section>
-      </div>
-
-      {/* ── Activity Setup Hub link (Stage 2) ──
-          Direct path into /dashboard/start where the owner can see
-          real Agency / Company / Buyer state and start the first
-          two end-to-end. Surfaced above the role-catalogue grid so
-          it does not get buried under the "preparing" chips. */}
-      <Link
-        href="/dashboard/start"
-        className="card-border flex items-center justify-between gap-3 px-4 py-3 hover:border-brand-blue"
-        data-testid="dashboard-activity-setup-link"
-      >
-        <div className="flex flex-col gap-0.5">
-          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
-            {tw("activitySetup.eyebrow")}
-          </p>
-          <p className="text-sm font-semibold text-text-primary">
-            {tw("activitySetup.title")}
-          </p>
-          <p className="text-xs text-text-secondary">
-            {tw("activitySetup.body")}
-          </p>
-        </div>
-        <span className="shrink-0 text-sm text-brand-blue">
-          {tw("activitySetup.cta")} →
-        </span>
-      </Link>
-
-      {/* Room-based IA (PR #204 review): the all-roles catalogue and the
-          cross-space "coming later" module grid moved OUT of this active
-          space into /dashboard/account → "Mano erdvės / My spaces". This
-          room keeps only a compact switch handle into that spaces surface. */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dashed border-ink-500 px-4 py-3">
-        <p className="text-xs leading-relaxed text-text-muted">
-          {tw("addMore.body")}
-        </p>
-        <Link
-          href="/dashboard/account"
-          className={cn(linkCls, "shrink-0")}
-        >
-          {tw("addMore.cta")} →
-        </Link>
-      </div>
     </div>
   );
 }

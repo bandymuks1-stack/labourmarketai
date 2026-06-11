@@ -104,7 +104,7 @@ describe("Guard: 0016 migration is owner-only, closed-by-default, explicit grant
 });
 
 describe("Guard: pilot-drafts server module sanitises + stays owner-scoped", () => {
-  const src = read("lib/pilot/pilot-drafts.ts");
+  const src = read("lib/demand/demand-drafts.ts");
 
   it("uses the user-scoped supabase client (createClient from server.ts)", () => {
     expect(src).toMatch(
@@ -116,15 +116,15 @@ describe("Guard: pilot-drafts server module sanitises + stays owner-scoped", () 
   });
 
   it("scopes every write to the authenticated user (RPC, no caller profile_id)", () => {
-    // savePilotDraft resolves the user then writes through the owner-scoped
+    // saveDemandDraft resolves the user then writes through the owner-scoped
     // save_demand_draft RPC, which sets profile_id = auth.uid() server-side; it
     // never accepts a caller-supplied profile_id.
     expect(src).toMatch(
-      /savePilotDraft[\s\S]*?auth\.getUser\(\)[\s\S]*?save_demand_draft/,
+      /saveDemandDraft[\s\S]*?auth\.getUser\(\)[\s\S]*?save_demand_draft/,
     );
-    // deletePilotDraft still filters by the authenticated user.
+    // deleteDemandDraft still filters by the authenticated user.
     expect(src).toMatch(
-      /deletePilotDraft[\s\S]*?auth\.getUser\(\)[\s\S]*?\.eq\(\s*["']profile_id["']\s*,\s*user\.id\s*\)/,
+      /deleteDemandDraft[\s\S]*?auth\.getUser\(\)[\s\S]*?\.eq\(\s*["']profile_id["']\s*,\s*user\.id\s*\)/,
     );
   });
 
@@ -158,31 +158,31 @@ describe("Guard: pilot-drafts server module sanitises + stays owner-scoped", () 
 });
 
 describe("Guard: server-action wrapper is a thin pass-through", () => {
-  const src = read("lib/pilot/pilot-drafts-actions.ts");
+  const src = read("lib/demand/demand-drafts-actions.ts");
 
   it("declares 'use server' as the file directive", () => {
     expect(src.trimStart()).toMatch(/^"use server"/);
   });
 
   it("re-exports only save/delete (no list-all / share / publish)", () => {
-    expect(src).toMatch(/export\s+async\s+function\s+savePilotDraftAction/);
-    expect(src).toMatch(/export\s+async\s+function\s+deletePilotDraftAction/);
-    expect(src).not.toMatch(/sharePilotDraftAction/);
-    expect(src).not.toMatch(/publishPilotDraftAction/);
+    expect(src).toMatch(/export\s+async\s+function\s+saveDemandDraftAction/);
+    expect(src).toMatch(/export\s+async\s+function\s+deleteDemandDraftAction/);
+    expect(src).not.toMatch(/shareDemandDraftAction/);
+    expect(src).not.toMatch(/publishDemandDraftAction/);
   });
 });
 
 describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
   for (const role of ["company", "agency", "buyer"] as const) {
-    it(`${role}/page.tsx calls requireRoleOrRedirect before getPilotDraft`, () => {
+    it(`${role}/page.tsx calls requireRoleOrRedirect before getDemandDraft`, () => {
       const src = read(`app/[locale]/dashboard/${role}/page.tsx`);
       const requireAt = src.indexOf("requireRoleOrRedirect");
-      const fetchAt = src.indexOf("getPilotDraft(");
+      const fetchAt = src.indexOf("getDemandDraft(");
       expect(requireAt, `${role}: requireRoleOrRedirect missing`).toBeGreaterThan(-1);
-      expect(fetchAt, `${role}: getPilotDraft missing`).toBeGreaterThan(-1);
+      expect(fetchAt, `${role}: getDemandDraft missing`).toBeGreaterThan(-1);
       expect(
         requireAt,
-        `${role}: requireRoleOrRedirect must precede getPilotDraft`,
+        `${role}: requireRoleOrRedirect must precede getDemandDraft`,
       ).toBeLessThan(fetchAt);
     });
   }
@@ -194,7 +194,7 @@ describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
     expect(src).toMatch(/requireRoleOrRedirect\(\s*locale\s*,\s*["']customer["']\s*\)/);
   });
 
-  it("each page renders the PilotDraftForm for its own draft_type", () => {
+  it("each page renders the DemandDraftForm for its own draft_type", () => {
     const cases = [
       { role: "company", draftType: "company_request" },
       { role: "agency", draftType: "agency_offer" },
@@ -210,30 +210,30 @@ describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
 });
 
 describe("Guard: admin metrics surface is READ-ONLY", () => {
-  it("admin dashboard page imports getPilotDraftCounts only — no save/delete", () => {
+  it("admin dashboard page imports getDemandDraftCounts only — no save/delete", () => {
     const src = read("app/[locale]/dashboard/admin/page.tsx");
-    expect(src).toMatch(/getPilotDraftCounts/);
+    expect(src).toMatch(/getDemandDraftCounts/);
     // No mutation paths in the admin metrics tile.
-    expect(src).not.toMatch(/savePilotDraft/);
-    expect(src).not.toMatch(/deletePilotDraft/);
-    expect(src).not.toMatch(/PilotDraftForm/);
+    expect(src).not.toMatch(/saveDemandDraft/);
+    expect(src).not.toMatch(/deleteDemandDraft/);
+    expect(src).not.toMatch(/DemandDraftForm/);
   });
 
   it("admin per-user page lists drafts read-only — no form / save / delete", () => {
     const src = read("app/[locale]/dashboard/admin/users/[id]/page.tsx");
-    expect(src).toMatch(/listPilotDraftsForProfile/);
-    expect(src).not.toMatch(/savePilotDraft/);
-    expect(src).not.toMatch(/deletePilotDraft/);
-    expect(src).not.toMatch(/PilotDraftForm/);
+    expect(src).toMatch(/listDemandDraftsForProfile/);
+    expect(src).not.toMatch(/saveDemandDraft/);
+    expect(src).not.toMatch(/deleteDemandDraft/);
+    expect(src).not.toMatch(/DemandDraftForm/);
   });
 });
 
 describe("Guard: no public exposure / fake matching / billing in this slice", () => {
   // Spot-check every file added or rewritten in this PR.
   const files = [
-    "lib/pilot/pilot-drafts.ts",
-    "lib/pilot/pilot-drafts-actions.ts",
-    "components/app/pilot-draft-form.tsx",
+    "lib/demand/demand-drafts.ts",
+    "lib/demand/demand-drafts-actions.ts",
+    "components/app/demand-draft-form.tsx",
     "app/[locale]/dashboard/company/page.tsx",
     "app/[locale]/dashboard/agency/page.tsx",
     "app/[locale]/dashboard/buyer/page.tsx",

@@ -14,6 +14,7 @@ const preset = {
         state: colors.state,
         text: colors.text,
         tier: colors.tier,
+        trust: colors.trust,
       },
       borderRadius: { ...radii },
       boxShadow: {

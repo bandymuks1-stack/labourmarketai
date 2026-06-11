@@ -120,9 +120,13 @@ describe("Guard: confirmer-role labels match the backend, no broad roles", () =>
     });
   }
 
-  it("the journal page review filter uses exactly the supported set", () => {
-    const page = read("app/[locale]/dashboard/journal/page.tsx");
-    expect(page).toMatch(/\["manager",\s*"owner",\s*"external_manager"\]/);
+  it("the journal decision timeline filters confirmer roles to the supported set", () => {
+    // The per-entry confirmer-role allow-list moved from the journal page into
+    // the Evidence Decision Timeline component (slice
+    // evidence-decision-timeline-v1) when the latest-wins origin line became a
+    // full decision history. The honesty pin follows it.
+    const timeline = read("components/app/evidence-decision-timeline.tsx");
+    expect(timeline).toMatch(/\["manager",\s*"owner",\s*"external_manager"\]/);
   });
 });
 
@@ -139,8 +143,13 @@ function confirmationStrings(loc: "lt" | "en"): { key: string; value: string }[]
     ["workerEvidence.confirmed", we.confirmed],
     ["workerEvidence.footnote", we.footnote],
     ["workerEvidence.awaitingNote", we.awaitingNote],
+    // "Who can confirm this today" clarity lines (profile + journal). They name
+    // the confirmer roles explicitly, so they are the most likely place for a
+    // broad-confirmer claim to creep in — scan them too.
+    ["workerEvidence.whoCanConfirm", we.whoCanConfirm],
     ["journal.reviewMetaNote", j.reviewMetaNote],
     ["journal.savedConfirmNote", j.savedConfirmNote],
+    ["journal.whoCanConfirm", j.whoCanConfirm],
     ["journal.inbox.confirmSkillsHint", inbox.confirmSkillsHint],
   ]
     .filter(([, v]) => typeof v === "string" && v.length > 0)
@@ -167,6 +176,48 @@ describe("Guard: confirmation copy never over-claims who can confirm", () => {
           ? /nieko nepatvirtina automat/i
           : /nothing is confirmed automatically/i;
       expect(honest.test(we.footnote ?? ""), `${loc} footnote: "${we.footnote}"`).toBe(true);
+    });
+  }
+});
+
+// ── 3b. The "who can confirm today" lines are honest AND informative ───────
+
+// Terms that prove the line names the real supported confirmers, and that it
+// keeps an unconfirmed entry honestly self-declared.
+const WHO_CAN_CONFIRM_TERMS = {
+  en: { manager: /\bmanager\b/i, owner: /\bowner\b/i, selfDeclared: /self-declared/i },
+  lt: { manager: /vadov/i, owner: /savinink/i, selfDeclared: /nurodyt/i },
+} as const;
+
+describe("Guard: the who-can-confirm clarity lines name the supported roles", () => {
+  for (const loc of LOCALES) {
+    it(`${loc}: profile + journal whoCanConfirm name manager + owner, mark self-declared, no broad role`, () => {
+      const we = (loadJson(`messages/${loc}.json`).workerEvidence ?? {}) as {
+        whoCanConfirm?: string;
+      };
+      const j = loadJson(`messages/${loc}/journal.json`) as { whoCanConfirm?: string };
+      const terms = WHO_CAN_CONFIRM_TERMS[loc];
+      for (const [key, value] of [
+        ["workerEvidence.whoCanConfirm", we.whoCanConfirm],
+        ["journal.whoCanConfirm", j.whoCanConfirm],
+      ] as const) {
+        expect(typeof value === "string" && value.length > 0, `${loc} ${key} missing`).toBe(
+          true,
+        );
+        const v = value as string;
+        expect(terms.manager.test(v), `${loc} ${key} must name the manager confirmer`).toBe(
+          true,
+        );
+        expect(terms.owner.test(v), `${loc} ${key} must name the owner confirmer`).toBe(true);
+        expect(
+          terms.selfDeclared.test(v),
+          `${loc} ${key} must state the entry stays self-declared until confirmed`,
+        ).toBe(true);
+        expect(
+          BROAD_CONFIRMER[loc].test(v),
+          `${loc} ${key} must not name a broad confirmer the backend can't store: "${v}"`,
+        ).toBe(false);
+      }
     });
   }
 });

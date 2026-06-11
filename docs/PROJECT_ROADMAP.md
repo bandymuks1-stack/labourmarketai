@@ -1,4 +1,6 @@
 # labourmarket.ai — North Star & Build Sequence
+
+> Vykdymo programa (10 sprintų iki pilnos vizijos): [`PROJECT_EXECUTION_PLAN_10_SPRINTS.md`](PROJECT_EXECUTION_PLAN_10_SPRINTS.md)
 **For:** Claude Code (executor) + DI (founder) · **From:** Chat Claude (architect) · **Date:** 2026-05-30
 **What this is:** the orienting map — the full-product destination and the *sequenced* path toward it. It pairs with `PROJECT_VISION.md` (the *what*) by giving the *how-we-get-there, in order*. **It is NOT a single sprint to execute now.** Build toward it deliberately, ONE coherent slice at a time, each on the clean canonical line, each through the auto-merge gate. Every future slice handoff should cite where it sits in this map.
 
@@ -17,6 +19,12 @@ That is "done" at the product level. Everything below is the ordered march towar
 - **Foundation converged:** one canonical data model (organizations + engagement_contexts; conversations*; customer_requests; projects on organization_id), legacy parallels removed, one Supabase project, one clean `main`. No parallel project — proven by audit.
 - **Self-driving delivery live:** auto-merge envelope — GREEN slices merge themselves once CI (quality + migration-safety) is green; RED (destructive/RLS/auth) stops for human review.
 - **Keystone in progress:** making the first real **verified Work Proof** happen end-to-end (TASK 01).
+
+> **Owner-locked sequence (2026-06-10):** Phase 3 → **TASK 07** (living-arena
+> UI, starts only after the owner's visual lock) → **M4+ AI**. TASK 07 is a UX
+> layer and may run alongside Phase 4–5 engineering, but the AI layer always
+> comes last, on verified Work Proof data. This pins the §21-C3 conflict of
+> `docs/product/labourmarketai-full-product-overview-and-implementation-plan.md`.
 
 ## THE MARCH (direction — ordered, flexible)
 - **Phase 1 — Verified proof is real (NOW).** The work-journal loop produces genuine confirmed proof on prod. *Everything downstream depends on this; until it flows, the rest is hollow.*

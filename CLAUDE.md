@@ -143,6 +143,6 @@ Non-negotiable principles for the sequence:
 - No tiler hardcode
 - New worker must start without company / project
 - CV is the central living trust object
-- No unlabeled fake data (placeholders allowed only when visually marked `Sample` / `Demo`); no fake verification; no fake AI (§7)
+- No unlabeled fake data — placeholders allowed only when visually marked as `preview` / `concept` / `not live yet`; the word "demo" is banned from all product copy (doctrine §18, enforced by `lib/guards/product-copy-forbidden-terms.test.ts`); no fake verification; no fake AI (§7)
 
 See the strategic doc for full rationale.

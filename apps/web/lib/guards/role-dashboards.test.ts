@@ -99,9 +99,9 @@ describe("Guard: each role dashboard calls the gate FIRST", () => {
         expect(src).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
       });
 
-      it("does not write to the DB directly (mutations go through pilot-drafts-actions)", () => {
+      it("does not write to the DB directly (mutations go through demand-drafts-actions)", () => {
         // The page itself is pure read + render. Mutations live in the
-        // server-action wrapper used by PilotDraftForm; the page never
+        // server-action wrapper used by DemandDraftForm; the page never
         // calls supabase.from(...).insert/update/delete inline.
         expect(src).not.toMatch(/\.insert\(/);
         expect(src).not.toMatch(/\.update\(/);
@@ -170,14 +170,48 @@ describe("Guard: roleDashboards i18n is honest (LT + EN)", () => {
           ).toBeTruthy();
         }
 
-        // Honesty: no fake verified/confirmed copy.
-        const flat = JSON.stringify(r).toLowerCase();
+        // Honesty: no fake verified/confirmed copy. The company `setup` block
+        // introduces an HONEST verification ladder (draft → pending →
+        // unverified → verified) — that legitimate vocabulary is asserted
+        // separately below, so it is excluded from this blanket word ban.
+        const rest: Record<string, unknown> = { ...(r as Record<string, unknown>) };
+        delete rest.setup;
+        const flat = JSON.stringify(rest).toLowerCase();
         expect(flat).not.toMatch(/\bverified\b|\bconfirmed\b/);
         expect(flat).not.toMatch(/\bpatvirtinta\b|\bpatvirtinti\b/);
         // No "match found" / "atitikimas rastas" claims — matching is
         // deferred.
         expect(flat).not.toMatch(/match found|atitikimas rastas/);
       }
+    });
+  }
+
+  // The company profile-request ladder must be present AND honest: it carries
+  // an explicit `unverified` + `pending_verification` state and explains that
+  // full company use requires verification (it never asserts auto-verify).
+  for (const locale of ["lt", "en"] as const) {
+    it(`${locale}.json company.setup verification ladder is honest`, () => {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as Record<
+        string,
+        unknown
+      >;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const setup = (json.roleDashboards as any)?.company?.setup;
+      expect(setup, `${locale}.roleDashboards.company.setup missing`).toBeTruthy();
+      const vstatus = setup.verificationStatus ?? {};
+      for (const s of [
+        "draft",
+        "pending_verification",
+        "unverified",
+        "verified",
+      ]) {
+        expect(vstatus[s], `${locale} verificationStatus.${s}`).toBeTruthy();
+      }
+      // The notice states verification is required / human — not automatic.
+      expect(setup.verificationNotice).toBeTruthy();
+      expect(String(setup.verificationNotice)).not.toMatch(
+        /\bautomatic\s+verification\b/i,
+      );
     });
   }
 });

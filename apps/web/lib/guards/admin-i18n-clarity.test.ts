@@ -62,7 +62,7 @@ const ADMIN_NAMESPACES = [
   "admin",
   "agentOs",
   "languageFeedback.admin",
-  "pilotTelemetry",
+  "telemetry",
   "communication.adminSupport",
 ] as const;
 
@@ -72,7 +72,7 @@ const I18N_DRIVEN_ADMIN_PAGES = [
   "page.tsx",
   "agent-os/page.tsx",
   "language-feedback/page.tsx",
-  "pilot-telemetry/page.tsx",
+  "telemetry/page.tsx",
   "support/page.tsx",
   "users/[id]/page.tsx",
 ] as const;

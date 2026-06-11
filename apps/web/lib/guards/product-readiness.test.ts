@@ -1261,13 +1261,108 @@ describe("no migration files added by this sprint", () => {
     // journal_entry_work_items + grant to authenticated only; NOT verification).
     // Committed + queued for the gate, NOT applied by the agent. See
     // journal-entry-skill-links.test.ts.
-    // Bumped 43 → 44 for the confirmation-role-schema-hardening-v1 slice (PR A):
+    // Bumped 43 → 44 for the company-profile-request-v1 slice: additive
+    // 20260604120000_company_profile_request adds nullable org-detail columns
+    // (registration_code / address / contact_email / contact_phone /
+    // requester_role / verification_note / requested_at) + a 4-state
+    // verification_status ladder (draft|pending_verification|unverified|
+    // verified, default draft, legacy rows backfilled to unverified) +
+    // save_company_setup() SECURITY DEFINER upsert that can REQUEST (pending)
+    // but never fabricate a verified company + a guarded unique(profile_id).
+    // No drops of the companies table/columns; reversible. Committed + queued
+    // for the gate, NOT applied by the agent. See
+    // company-profile-request-honesty.test.ts.
+    // Bumped 44 → 45 for the company-verification-admin slice: additive
+    // 20260604130000_admin_company_verification adds ONE SECURITY DEFINER
+    // function (admin_set_company_verification) — admin-only, audit-logged,
+    // sets verified/unverified/pending_verification, no new companies grant, no
+    // change to the PR#250 trigger. Committed + queued for the gate, NOT
+    // applied by the agent. See company-verification-admin.test.ts.
+    // Bumped 45 → 46 for the company-automatic-first correction: additive
+    // 20260604140000_company_automatic_first widens the verification_status
+    // CHECK (+active_unverified, +needs_checks), sets the column default to
+    // 'active_unverified', backfills draft→active_unverified, and CREATE OR
+    // REPLACEs save_company_setup to derive status from automated checks
+    // (manual review = optional escalation, not the default gate). PR#250
+    // trigger untouched; no new companies grant. Committed + queued, NOT
+    // applied by the agent. See company-automatic-first.test.ts.
+    // Bumped 46 → 47 for the worker work-card slice: additive
+    // 20260608120000_worker_work_card adds workers.work_card_confirmed_at
+    // (IF NOT EXISTS) + two owner-scoped SECURITY DEFINER RPCs (save_worker_card
+    // / confirm_worker_card) writing ONLY whitelisted card fields WHERE
+    // profile_id = auth.uid() — never trust_score/profile_completeness, no
+    // blanket UPDATE grant on workers, no RLS loosening, reversible. Committed +
+    // queued for the gate, NOT applied by the agent. See
+    // worker-work-card-migration.test.ts.
+    // Bumped 47 → 48 for the RPC execute hardening slice: additive
+    // 20260608140000_worker_work_card_execute_hardening revokes the implicit
+    // PUBLIC/anon EXECUTE on the two work-card RPCs (keeps authenticated) —
+    // hardening-only, no body/schema/data change, reversible.
+    // Bumped 48 -> 49 for work-instructions v1: additive instruction columns on
+    // conversation_messages + owner-scoped, relationship-gated SECURITY DEFINER
+    // send_work_instruction RPC (reuses existing participant-scoped message RLS).
+    // Bumped 49 -> 50 for F4 worker-project assignment: additive owner-scoped
+    // SECURITY DEFINER assign_worker_to_project/end_worker_project_assignment RPCs
+    // (can_manage_project AND caller roster gate) + revoke direct PWA writes.
+    // Bumped 52 -> 53 for Pilot Operations v2 (pilot-ops-v2-status-docs):
+    // additive 20260609180000_pilot_ops_v2_status_readiness adds two RLS-enabled
+    // tables (project_worker_operational_statuses, project_worker_readiness_items)
+    // with SELECT-only grants + RPC-only writes (set_worker_operational_status,
+    // upsert_worker_readiness_item) gated by can_manage_project AND an active F4
+    // assignment. No existing table/policy/grant changed; reversible.
+    // Bumped 53 -> 54 for candidate-provider-draft-v1: additive owner-scoped
+    // candidate_drafts table (owner_id = auth.uid() RLS + admin read, direct
+    // authenticated writes, explicit grants). No account/consent/verification;
+    // a draft is not assignable until linked. Reversible.
+    // Bumped 54 -> 55 for conversations-ui (Workstream B): ONE additive DRAFT
+    // (20260610190000_conversation_message_language: nullable original_language
+    // on conversation_messages, doctrine 2.3; applied ONLY via MCP by owner).
+    // Bumped 55 -> 58 for esco-taxonomy-foundation (S2): three migrations -
+    // 20260610130000 (esco_occupations/skills/relations/labels, read-only RLS,
+    // admin writes), 20260610130100 (additive esco_uri refs on
+    // professions/skills, no data change), 20260610130200 (candidate_skills,
+    // doctrine 2.3 original_text/original_language, default-closed, no
+    // auto-approve). All additive + reversible; APPLIED to prod via MCP
+    // apply_migration after owner review (2026-06-10, ledger 20260610172207/
+    // 172226/172251). Authored as 54 -> 57; resolved to 58 at merge because
+    // main had moved to 55. Design: docs/product/esco-taxonomy-design.md.
+    // Bumped 58 -> 59 for s3-documents-readiness
+    // (20260610170000_worker_documents_readiness: document_types slug registry
+    // + worker_documents inventory + append-only events + country requirement
+    // STRUCTURE with needs_legal_source flags; RPC-only writes, default-closed
+    // RLS). Additive + reversible; APPLIED to prod via MCP apply_migration
+    // after owner review (2026-06-10, ledger 20260610172333). Authored as
+    // 54 -> 55; resolved to 59 at merge on top of main's 58.
+    // Bumped 59 -> 60 for esco-labels-all-official-languages: ONE
+    // needs-human-gate DRAFT (20260610230000) widening the
+    // esco_labels.locale CHECK from the 10 platform locales to all 28
+    // official ESCO v1.2.1 languages (pure superset, no schema/RLS/grant
+    // change; ru deliberately absent — not an official ESCO language).
+    // Bumped 60 -> 61 for esco-service-role-grants (20260610234500):
+    // GRANTS-ONLY fix — MCP-created tables get no service_role default
+    // privileges, so the official importer's upserts hit "permission denied";
+    // grants select/insert/update on the four esco_* tables to service_role,
+    // no RLS change, anon untouched.
+    // Bumped 61 -> 63 at the S4 merge for termometras+market:
+    // 20260610213000 (journal_entries.project_id autolink: body-replace of the
+    // two save-path RPCs, no schema/RLS/grant change, link only when exactly
+    // one active same-org assignment) and 20260610214000 (market_rate_averages
+    // admin-entered table + admin_set_market_rate_average RPC + the
+    // project_position_salary_avg aggregate RPC, prod-fixed to return avg ONLY
+    // when sample_n >= 2). Both APPLIED to prod via MCP apply_migration after
+    // owner review (2026-06-11, ledger 20260611064312/064340).
+    // Bumped 63 -> 64 for batch_journal_review (20260611120000): the
+    // DESIGN_SOUL §3 exceptions-pyramid batch confirm RPC pair
+    // (batch_review_exceptions + review_journal_entries_batch, delegating
+    // per-entry to 0034 review_journal_entry). APPLIED to prod via MCP after
+    // owner review (2026-06-11, ledger 20260611064423).
+    // Bumped 64 -> 65 for the confirmation-role-schema-hardening-v1 draft:
     // additive 20260602130000_confirmation_role_check (CHECK pinning
-    // journal_entry_confirmations.confirmer_role to manager/owner/external_manager;
-    // no new table, no RLS change, reversible + pre-flight guarded). RED /
-    // human-gated, committed + queued for the gate, NOT applied by the agent.
-    // See confirmation-honesty.test.ts.
-    const SPRINT_BASELINE = 44;
+    // confirmer_role to manager/owner/external_manager; reversible +
+    // pre-flight guarded). RED/human-gated, committed + queued, NOT applied.
+    // NOTE: PR #304 (S5) carries its own 64 -> 65 bump - whichever merges
+    // second resolves upward (to 66).
+    const SPRINT_BASELINE = 65;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

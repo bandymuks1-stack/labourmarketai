@@ -10,6 +10,9 @@
 
 # LABMA OS — Projekto vizija / Project Vision
 
+> Pilna produkto apžvalga ir įgyvendinimo planas (human-first):
+> [`docs/product/labourmarketai-full-product-overview-and-implementation-plan.md`](product/labourmarketai-full-product-overview-and-implementation-plan.md)
+
 ---
 
 ## 1. Vienas sakinys / One sentence
@@ -130,6 +133,15 @@ unless it actually is.
 
 **EN:** Seven roles: worker, team_leader, company_manager, hr_personnel,
 agency, admin, customer (B2C). See `docs/ROLES.md`.
+
+> **Realizacijos būsena (owner sprendimas, 2026-06-10):** schemoje realizuotos
+> rolės = `worker`, `company`, `agency`, `customer`, `admin` (fiksuotas RBAC
+> rinkinys, doktrinos §5.2). `team_leader` ir `hr_personnel` — **future /
+> vision only**: modeliuojamos kaip organizacijos pozicijos (§5.4) arba
+> catalogue eilutės vėliau, ne kaip nauji RBAC įrašai. Jokių schema pakeitimų.
+> **EN:** Realized roles in schema = worker/company/agency/customer/admin;
+> team_leader + hr_personnel are future / vision only (org positions per §5.4),
+> not new RBAC entries.
 
 ---
 

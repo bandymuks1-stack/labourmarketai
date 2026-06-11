@@ -7,6 +7,7 @@ import { CommunicationComposer } from "@/components/app/communication-composer";
 import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
+import { resolveViewerText } from "@/lib/communication/translation";
 
 type MessageRow = {
   id: string;
@@ -52,7 +53,10 @@ export default async function ConversationDetailPage({
   // for why (legacy public.messages chain pre-exists in prod).
   const messagesRes = await asAny(supabase)
     .from("conversation_messages")
-    .select("id, author_id, body, created_at")
+    // select("*") instead of an explicit column list so the optional
+    // original_language column (DRAFT migration 20260610190000) is picked up
+    // automatically once applied, with no error while it is absent.
+    .select("*")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })
     .limit(500);
@@ -141,9 +145,33 @@ export default async function ConversationDetailPage({
                     {new Date(m.created_at).toLocaleString(locale)}
                   </span>
                 </div>
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">
-                  {m.body}
-                </p>
+                {(() => {
+                  // §2 stub: ALWAYS the original text (never fake-translated);
+                  // a language badge appears when the author's language is
+                  // known and differs from the viewer's locale.
+                  const vt = resolveViewerText({
+                    body: m.body,
+                    originalLanguage:
+                      (m as { original_language?: string | null })
+                        .original_language ?? null,
+                    viewerLocale: locale,
+                  });
+                  return (
+                    <>
+                      {vt.languageBadge ? (
+                        <span
+                          className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted"
+                          data-testid={`message-lang-${m.id}`}
+                        >
+                          {t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
+                        </span>
+                      ) : null}
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">
+                        {vt.text}
+                      </p>
+                    </>
+                  );
+                })()}
               </li>
             );
           })}

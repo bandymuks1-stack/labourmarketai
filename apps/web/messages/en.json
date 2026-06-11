@@ -10,6 +10,7 @@
     "switchSpace": "Switch space",
     "addSpace": "Add space",
     "availableSpaces": "Available spaces",
+    "comingLaterToggle": "Modules coming later (show)",
     "profile": {
       "name": "Personal profile",
       "purpose": "Manage your avatar, CV, skills, and work status."
@@ -47,17 +48,35 @@
     "selfDeclared": "Self-declared",
     "awaitingNote": "Awaiting manager confirmation.",
     "systemEntries": "System-recorded work entries",
-    "empty": "No skills or work entries yet. Add skills or write a journal entry.",
+    "empty": "Evidence appears once you create a journal entry and a manager reviews it.",
+    "emptyTitle": "No evidence yet",
+    "emptyCta": "Go to your journal",
+    "whoCanConfirm": "Who can confirm an entry today: your manager, the business owner, or an external (client) manager — the people who actually oversee your work. Until one of them confirms it, every entry stays your own self-declared record.",
     "footnote": "Skills can be self-declared, evidenced by system activity, or confirmed by a manager. Nothing is confirmed automatically."
   },
+  "evidenceStatus": {
+    "aria": "Evidence status",
+    "self_declared": {
+      "label": "Self-declared",
+      "hint": "Your own record — what you entered yourself."
+    },
+    "awaiting_confirmation": {
+      "label": "Waiting for confirmation",
+      "hint": "Waiting for your manager, the business owner, or an external (client) manager to confirm it."
+    },
+    "confirmed": {
+      "label": "Confirmed",
+      "hint": "Confirmed by your manager, the owner, or an external (client) manager."
+    }
+  },
   "profileHub": {
-    "eyebrow": "Professional profile",
-    "lead": "Your CV, skills and activity evidence in one place.",
-    "explainer": "Skills can be self-declared, CV-supported or supported by work journal entries.",
-    "notVerified": "Not yet human-verified or document-verified.",
-    "primaryAction": "Complete profile",
-    "primaryActionJournal": "Add work journal evidence",
-    "journalLink": "Work journal",
+    "eyebrow": "My work card source",
+    "lead": "Here's what we already know about you.",
+    "explainer": "This data feeds your work card. It helps an employer quickly understand what work you fit.",
+    "notVerified": "This is information you provided yourself — not yet verified by a person or documents. Evidence builds trust, but you can add it later.",
+    "primaryAction": "Add what's missing",
+    "primaryActionJournal": "Add work evidence",
+    "journalLink": "My work evidence",
     "evidence": {
       "intro": "Skills are stronger when backed by real work, learning or activity entries.",
       "supported": "Supported by work entries: {supported} of {declared}",
@@ -257,8 +276,10 @@
       "subtitle": "Company context is an entry point, not a limit. You can hold other roles and add more later via the role switcher.",
       "pilotDisclaimer": "Matching is not offered yet. Nothing becomes public automatically. You can prepare your first request calmly — it's saved right away and stays private to you.",
       "firstAction": {
-        "title": "Create a worker / team / service request",
-        "body": "First useful action: describe the worker, team, or service you need. The draft stays private to you until you decide otherwise."
+        "title": "Create your first work / team request",
+        "body": "Describe the workers, team, or project help you need. It's saved as a private draft only you can see.",
+        "emptyState": "No request yet. Describe the workers, team, or project help you need — your draft stays private to you.",
+        "savedState": "Saved as a private draft. Only you can see it."
       },
       "draftForm": {
         "field": {
@@ -305,6 +326,92 @@
         "deleteError": "Could not remove. Please try again."
       },
       "profileLink": "My capabilities (if you're also a person, not only a company)",
+      "nextActions": {
+        "heading": "Next steps",
+        "missingHeading": "Add to strengthen your profile",
+        "fixHeading": "A few details need attention",
+        "fixCta": "Open company details",
+        "optionalBadge": "Optional",
+        "cards": {
+          "completeDetails": {
+            "title": "Complete company details",
+            "body": "Add country, registration code, address, website and contact so others can recognise your company.",
+            "cta": "Edit details"
+          },
+          "team": {
+            "title": "Team members",
+            "body": "Invite workers by email or link people who sign up themselves. No account is created for them automatically.",
+            "cta": "Manage team"
+          },
+          "requests": {
+            "title": "Work / team request",
+            "body": "Describe the worker, team or service you need. Your draft stays private to you until you decide otherwise.",
+            "cta": "Create a request"
+          },
+          "verification": {
+            "title": "Request stronger verification",
+            "body": "Optional. Ask for a manual review to reach a stronger trust level. Your company stays usable meanwhile.",
+            "cta": "Request review"
+          }
+        },
+        "noCompany": {
+          "title": "Start your company profile",
+          "body": "You don't have a company profile yet. Create one — it's active and usable straight away, no waiting for approval.",
+          "cta": "Start company setup"
+        }
+      },
+      "setup": {
+        "formTitle": "Company profile request",
+        "formSubtitle": "Create your organisation profile from your personal account. It's active and usable straight away — no waiting for approval. Verification is a stronger, separate trust step.",
+        "existingHeading": "Company profile",
+        "legalName": "Company legal name",
+        "legalNameHelp": "Required. 2–200 characters.",
+        "legalNamePlaceholder": "e.g. Acme Ltd",
+        "country": "Country",
+        "countryPlaceholder": "e.g. LT",
+        "registrationCode": "Company / registration code",
+        "registrationCodeHelp": "Optional. Helps verify the company later.",
+        "address": "Address / location",
+        "addressPlaceholder": "e.g. 1 Main St, Vilnius",
+        "website": "Website",
+        "websitePlaceholder": "e.g. https://company.com",
+        "contactEmail": "Contact email",
+        "contactPhone": "Contact phone",
+        "requesterRole": "Your role in the company",
+        "requesterRoleOptions": {
+          "owner": "Owner",
+          "director": "Director",
+          "manager": "Manager",
+          "hr": "HR / People",
+          "other": "Other"
+        },
+        "verificationNotice": "Your company is created and usable right away after basic automated checks (name, country, and the format of any code / website / email you add). It is not yet identity-verified — \"Verified\" is a stronger trust state granted only after a real check, never automatically. You do not need to wait for an admin to use your company.",
+        "saveDraft": "Save company",
+        "submitRequest": "Request manual review (optional)",
+        "statusDraftSaved": "Company saved — it's active and usable now.",
+        "statusSubmitted": "Manual review requested (optional). Your company stays usable in the meantime.",
+        "statusNeedsMigration": "This feature is not available yet. Please try later.",
+        "statusInvalid": "The form is incomplete. Check the required fields.",
+        "statusError": "Something went wrong. Please try again.",
+        "migrationBlockerHeading": "Feature not available yet",
+        "migrationBlockerBody": "The form is visible but cannot submit yet. The DB migration (20260604120000) needs to be applied. Please try later.",
+        "verificationStatus": {
+          "draft": "Draft",
+          "active_unverified": "Active · not verified",
+          "needs_checks": "Needs a few fixes",
+          "pending_verification": "Manual review requested",
+          "unverified": "Unverified",
+          "verified": "Verified"
+        },
+        "verificationExplainer": {
+          "draft": "Draft. Save to activate your company — it becomes usable straight away.",
+          "active_unverified": "Active and usable now. Basic automated checks passed. Not yet identity-verified — that's a separate, stronger step.",
+          "needs_checks": "Active and usable, but a basic check needs attention (e.g. add your country, or fix a malformed code / website / email).",
+          "pending_verification": "You asked for an optional manual review. Your company stays fully usable while it waits.",
+          "unverified": "Not verified. You can keep using your company normally.",
+          "verified": "Verified — a stronger trust state, granted only after a real check."
+        }
+      },
       "workersBlocker": {
         "title": "Company workers link — waiting on a migration",
         "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",
@@ -478,6 +585,11 @@
         "deleteError": "Could not remove. Please try again."
       },
       "profileLink": "My capabilities",
+      "noAgency": {
+        "title": "Agency setup is not finished yet",
+        "body": "Agency setup is only needed for the agency workflow. It is not required if you want to act as a requester, a company, or a worker. Choose how you want to start below, or finish agency setup.",
+        "cta": "Finish agency setup"
+      },
       "workers": {
         "title": "Agency workers",
         "subtitle": "Link your agency with real workers. Self-entry stays open: a person can sign up on their own and be linked later. Invitations by email are an additional channel, not the only one.",
@@ -589,7 +701,7 @@
         "statusNotOwner": "Action rejected: you are not the agency owner.",
         "statusInvalidEmail": "Invalid email address.",
         "statusError": "Something went wrong. Please try again.",
-        "statusNoAgency": "Finish agency setup first at /dashboard/start/agency.",
+        "statusNoAgency": "To invite a worker through an agency, finish your agency setup first.",
         "migrationBlockerHeading": "Migration 0025_agency_worker_invitations required",
         "migrationBlockerBody": "This feature is not available yet. Please try later.",
         "columnEmail": "Email",
@@ -932,7 +1044,11 @@
       "telemetry": "Operations telemetry",
       "languageFeedback": "Language reports",
       "communication": "Conversations",
-      "support": "Support conversations"
+      "support": "Support conversations",
+      "companyVerification": "Company verification",
+      "matching": "Matching workbench",
+      "market": "Market situation",
+      "league": "Country league"
     },
     "drafts": {
       "title": "Operations drafts",
@@ -994,6 +1110,218 @@
         "agency_offer": "Agency offer",
         "buyer_request": "Buyer request"
       }
+    },
+    "companyVerification": {
+      "eyebrow": "COMPANY VERIFICATION",
+      "title": "Company verification requests",
+      "subtitle": "Exception / escalation review. Companies are created and usable automatically — this is NOT an approval queue. Use it to verify on request, fix flagged checks, or override a suspicious company. Verification is a manual human decision; nothing is verified automatically.",
+      "back": "Back to operations panel",
+      "empty": "Nothing needs admin attention right now. Companies are usable without admin action.",
+      "migrationBlocker": "This feature is not available yet — the admin verification migration has not been applied. Try later.",
+      "pendingCount": "{count, plural, =0 {No requests waiting for verification} one {# request waiting for verification} other {# requests waiting for verification}}",
+      "user": "User",
+      "fields": {
+        "country": "Country",
+        "registrationCode": "Registration code",
+        "address": "Address / location",
+        "website": "Website",
+        "contactEmail": "Contact email",
+        "contactPhone": "Contact phone",
+        "requesterRole": "Role in company",
+        "requestedAt": "Requested at",
+        "note": "Note"
+      },
+      "status": {
+        "draft": "Draft",
+        "active_unverified": "Active · not verified",
+        "needs_checks": "Needs a few fixes",
+        "pending_verification": "Manual review requested",
+        "unverified": "Unverified",
+        "verified": "Verified"
+      },
+      "noteLabel": "Verification note (optional)",
+      "notePlaceholder": "Why verified / not verified — visible to admins.",
+      "actions": {
+        "approve": "Approve (verify)",
+        "keepUnverified": "Keep unverified",
+        "returnToPending": "Return to pending"
+      },
+      "result": {
+        "saved": "Verification status updated.",
+        "notAdmin": "Action rejected: admin only.",
+        "invalid": "Invalid request.",
+        "notFound": "Company not found.",
+        "needsMigration": "This feature is not available yet. Try later.",
+        "error": "Something went wrong. Please try again."
+      }
+    },
+    "matching": {
+      "eyebrow": "ADMIN · PHASE 3",
+      "title": "Matching workbench",
+      "subtitle": "Open requests next to the worker supply — review, decide, record.",
+      "humanNote": "Every match here is selected by a human, not an algorithm. The system does not rank or suggest — it only shows real data and records your decision with a feedback note.",
+      "back": "Back to admin",
+      "migrationBlocker": "The demand intake consolidation migration is not applied in this environment yet — the workbench is blocked until it lands.",
+      "demand": {
+        "title": "Open demand",
+        "count": "{count} open requests",
+        "empty": "No open requests right now. New submitted requests will appear here.",
+        "messageRequester": "Message requester"
+      },
+      "kind": {
+        "company_request": "Company request",
+        "agency_offer": "Agency offer",
+        "buyer_request": "Buyer request",
+        "customer_request": "Customer request"
+      },
+      "status": {
+        "submitted": "Submitted",
+        "in_review": "In review",
+        "needs_followup": "Needs follow-up",
+        "approved": "Approved"
+      },
+      "fields": {
+        "created": "Created",
+        "country": "Country",
+        "location": "Location",
+        "role": "Role / work type",
+        "teamSize": "Team size",
+        "startPeriod": "Start",
+        "duration": "Duration",
+        "language": "Languages",
+        "notes": "Notes",
+        "payload": "Form details",
+        "reviewNote": "Review note"
+      },
+      "log": {
+        "title": "Human match log"
+      },
+      "supply": {
+        "title": "Worker supply",
+        "count": "{count} workers",
+        "empty": "No workers yet — the list fills as people register.",
+        "unnamed": "Unnamed worker",
+        "noProfession": "No profession set",
+        "years": "{count} y. experience",
+        "availability": {
+          "available": "Available",
+          "busy": "Busy",
+          "unavailable": "Unavailable",
+          "unknown": "Availability not set"
+        },
+        "skillsDeclared": "Declared skills",
+        "skillsConfirmed": "Confirmed skills",
+        "entries": "Journal entries",
+        "confirmations": "Manager confirmations"
+      },
+      "match": {
+        "workerLabel": "Worker (human pick)",
+        "workerPlaceholder": "Choose a worker…",
+        "noteLabel": "Feedback note (what fits, what is missing)",
+        "notePlaceholder": "E.g. profession fits, A1 document still needed…",
+        "recordInReview": "Record match · in review",
+        "recordFollowup": "Record · needs follow-up",
+        "recordApproved": "Record · approved"
+      },
+      "result": {
+        "saved": "Decision recorded.",
+        "notAdmin": "Your session does not have admin rights for this request.",
+        "invalid": "Invalid decision — pick a worker and an action.",
+        "notFound": "Request or worker no longer exists.",
+        "needsMigration": "Consolidation migration not applied — recording is blocked.",
+        "error": "Could not record the decision."
+      },
+      "suggestions": {
+        "title": "Rule-based shortlist",
+        "humanRule": "Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "start": "Start conversation",
+        "reasons": {
+          "country_match": "In country",
+          "preferred_country_match": "Prefers country",
+          "available_now": "Available",
+          "profession_token_match": "Profession fits request text",
+          "verified_skills": "Verified skills",
+          "manager_confirmations": "Manager confirmations",
+          "journal_evidence": "Journal evidence"
+        }
+      },
+      "filters": {
+        "all": "All countries",
+        "confirmedOnly": "Confirmed skills ✓"
+      }
+    },
+    "market": {
+      "eyebrow": "Admin · Market",
+      "title": "Market situation",
+      "subtitle": "Supply, demand, admin-entered market averages and gaps — real platform counts only.",
+      "methodNote": "Every number on this page is a real count of real rows. Market averages are entered by an admin by hand from a named source — the platform never estimates them. Small samples (n<5) are flagged.",
+      "back": "Admin dashboard",
+      "needsMigration": "Market averages are not ready yet — the S4 migration awaits the owner gate.",
+      "smallSample": "⚠ n<5",
+      "unknownCountry": "Not specified",
+      "averages": {
+        "title": "Admin market averages",
+        "help": "Component 2 of the thermometer formula: profession × country × average (EUR/month) + entry date + source note.",
+        "empty": "No market averages entered yet — the thermometer stays at 'insufficient market data' until real, sourced figures are entered."
+      },
+      "basis": {
+        "monthly_eur": "month"
+      },
+      "sourceStatus": {
+        "needs_source": "Needs source",
+        "sourced": "Sourced",
+        "reviewed": "Reviewed"
+      },
+      "form": {
+        "profession": "Profession",
+        "country": "Country",
+        "rate": "Average (EUR/month)",
+        "sourceNote": "Source note",
+        "sourceNotePlaceholder": "e.g. State Data Agency, 2026 Q1",
+        "sourceStatus": "Source status",
+        "save": "Save average",
+        "saving": "Saving…",
+        "saved": "Saved.",
+        "error": "Could not save."
+      },
+      "supply": {
+        "title": "Supply — workers",
+        "help": "Workers by profession × country (worker location; confirmed = workers with at least one manager-confirmed skill).",
+        "empty": "No workers with professions yet.",
+        "profession": "Profession",
+        "country": "Country",
+        "workers": "Workers",
+        "confirmed": "With confirmed skills"
+      },
+      "demand": {
+        "title": "Demand — customer requests",
+        "freeTextNote": "The intake stores the role as free text (no profession link), so demand cannot be joined to supply by profession yet — the gaps below are country-level.",
+        "empty": "No customer requests yet.",
+        "country": "Country",
+        "role": "Role (free text)",
+        "requests": "Requests"
+      },
+      "gaps": {
+        "title": "Gaps",
+        "help": "Countries with demand, ordered by weakest supply. A row with 0 supply is the gap to act on.",
+        "empty": "No demand recorded yet.",
+        "row": "demand {demand} · supply {supply}"
+      }
+    },
+    "league": {
+      "eyebrow": "Country league",
+      "title": "Labour market league",
+      "subtitle": "Profession tables per country — real teams, availability and the market thermometer.",
+      "methodNote": "A thermometer value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
+      "back": "Back to admin hub",
+      "empty": "No league data yet — tables appear by themselves once workers set their professions.",
+      "unknownCountry": "Country not set",
+      "cellCount": "{n, plural, one {# profession} other {# professions}}",
+      "availableNow": "available now",
+      "confirmedSkillWorkers": "with confirmed skills",
+      "insufficientData": "Insufficient market data",
+      "smallSample": "Small sample (n<5)",
+      "declaredSample": "Declared-expectation sample: {n}"
     }
   },
   "profileSkillClaims": {
@@ -1033,7 +1361,7 @@
     "primaryBadge": "Primary",
     "directionAdded": "Direction added",
     "pageTitle": "My capabilities",
-    "pageSubtitle": "All your skills and experience in one place. The work category you picked is only context, not a limit — you can hold skills from any field.",
+    "pageSubtitle": "Everything that makes up your work card lives here: what you do, what you can do, and what proves it. Your chosen field is context, not a limit.",
     "professionLabel": "Your profession",
     "professionPlaceholder": "Select a profession",
     "professionSaved": "Profession saved",
@@ -1052,7 +1380,7 @@
     "loadError": "Could not load skills. Please try again.",
     "retry": "Try again",
     "viewProfile": "View profile",
-    "importPrompt": "Have an old CV? You can pick a file (PDF or DOCX)",
+    "importPrompt": "Have a CV file? A CV helps explain your experience.",
     "importComingSoon": "Reading skills from a CV is not active yet.",
     "importAddManually": "Add your skills manually or through journal entries.",
     "importNotSaved": "Selected: {file}. The file isn't uploaded or stored yet.",
@@ -1311,13 +1639,20 @@
       "pending": "Suggestion"
     },
     "cv": {
-      "title": "Upload or paste a CV",
-      "helper": "Upload a PDF / DOCX or paste your CV text. File upload is not stored yet — for now, use paste.",
+      "title": "Your CV — your first piece of evidence",
+      "helper": "A CV helps people understand your experience faster and strengthens your work card. It stays private. For now, paste your CV text.",
       "uploadLabel": "Upload CV file",
-      "uploadComingSoon": "File upload lands in M2 — for now paste the text.",
+      "uploadComingSoon": "Your evidence library (certificates, photos, documents) is being prepared. For now, paste your CV text.",
       "pasteLabel": "Paste CV text",
       "pastePlaceholder": "Paste your CV text here.",
-      "pasteSubmit": "Suggest from CV text"
+      "pasteSubmit": "Use CV text",
+      "evidenceTitle": "What evidence strengthens your work card",
+      "evidenceCv": "CV — helps people understand your experience faster.",
+      "evidenceCerts": "Certificates and qualifications — build trust.",
+      "evidencePhotos": "Work photos and files — show work you actually did.",
+      "evidenceRecs": "References — help back up your reliability.",
+      "evidenceLegal": "ID or legal documents — used only when needed for hiring or a legal process.",
+      "privacyNote": "Your documents stay private. They are not shown to an employer or client without a clear basis."
     }
   },
   "live": {
@@ -1637,7 +1972,8 @@
             "c1": "Define the work",
             "c2": "Prepare criteria",
             "c3": "Review fit",
-            "c4": "Create job request"
+            "c4": "Create job request",
+            "calmNote": "One clear step at a time. The status is real — demand and matches are never fabricated."
           }
         },
         "startingPoint": "This is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later.",
@@ -1691,7 +2027,7 @@
           "p2": "Say what people, teams or partners you need.",
           "p3": "Offer your services to the market."
         },
-        "pilot": {
+        "demand": {
           "sending": "Sending...",
           "error": "Couldn't send. Please try again.",
           "progressHelper": "These steps show progress. Active actions are shown below.",
@@ -1710,10 +2046,130 @@
         }
       },
       "greeting": "Welcome back, {name}",
+      "mySpace": {
+        "eyebrow": "Me right now",
+        "intro": "This is your space. Your work, skills and evidence take shape here — at your own pace.",
+        "snapshot": {
+          "work": "What I do",
+          "workEmpty": "No profession set yet",
+          "skills": "What I can do",
+          "skillsValue": "Skills: {n}",
+          "skillsEmpty": "No skills added yet",
+          "proof": "What proves it",
+          "proofValue": "Work entries: {n}",
+          "proofEmpty": "No evidence yet"
+        },
+        "unverifiedNote": "This is what you say about yourself. Not yet confirmed by a person — and that's fine.",
+        "activities": {
+          "title": "My activities and skills",
+          "body": "Tell us what you can do and what you'd like to work on. All in one place.",
+          "cta": "Open"
+        },
+        "proofCard": {
+          "title": "My evidence",
+          "body": "The work you log gradually becomes proof of your skills.",
+          "cta": "Open journal"
+        },
+        "otherSpaces": "My other spaces"
+      },
+      "workCard": {
+        "eyebrow": "My work card",
+        "intro": {
+          "new": "Let's create your work card. A few things are enough — you can add more later.",
+          "returning": "Here is your work card. The system remembers what you already told it — no need to fill it in again.",
+          "stale": "Some details are getting old. Just confirm whether they still hold."
+        },
+        "clearTitle": "What's already clear",
+        "missingTitle": "What's still missing",
+        "nextEyebrow": "One clear next step",
+        "dim": {
+          "work": {
+            "label": "What I can do",
+            "missing": "No profession or skills yet"
+          },
+          "availability": {
+            "label": "When I can start",
+            "missing": "Not set yet"
+          },
+          "location": {
+            "label": "Where I can work",
+            "missing": "Not set yet"
+          },
+          "pay": {
+            "label": "What I expect",
+            "missing": "Not set yet"
+          },
+          "evidence": {
+            "label": "What proves it",
+            "missing": "No evidence yet"
+          }
+        },
+        "next": {
+          "work": "Set what I do",
+          "availability": "Set when I can start",
+          "location": "Set where I can work",
+          "pay": "Set what I expect",
+          "evidence": "Add a work entry"
+        },
+        "why": {
+          "work": "This helps understand what work you can be suggested for.",
+          "availability": "This helps avoid showing you unsuitable offers.",
+          "location": "This helps avoid showing you unsuitable offers.",
+          "pay": "This helps justify your expected rate.",
+          "evidence": "Evidence builds trust, but you can add it later.",
+          "complete": "Your work card is complete — work entries keep making it stronger."
+        },
+        "stale": {
+          "title": "Is this still valid?",
+          "body": "Earlier you set your availability, location and expected rate. Is that still right?",
+          "yes": "Yes, still valid",
+          "change": "Change",
+          "saved": "Thanks, confirmed"
+        },
+        "employerPreview": {
+          "toggle": "How an employer would see me",
+          "title": "This is how an employer would see your card",
+          "intro": "Only what you entered is shown. This is not an offer and nobody is looking for you yet — you simply see how your card reads.",
+          "notSet": "not set yet",
+          "unverifiedNote": "This is information you provided yourself. It is not verified unless the card clearly says so."
+        },
+        "value": {
+          "from": "from {date}",
+          "payRange": "€{min}–{max}",
+          "payFrom": "from €{min}",
+          "payTo": "up to €{max}",
+          "skills": "skills: {n}",
+          "entries": "work entries: {n}",
+          "set": "Set"
+        },
+        "editor": {
+          "open": "Edit work card",
+          "title": "Work card details",
+          "availabilityLabel": "Availability",
+          "availabilityOption": {
+            "available": "Available to work",
+            "busy": "Currently busy",
+            "unavailable": "Not available right now",
+            "none": "Not set"
+          },
+          "availableFromLabel": "Can start from",
+          "locationLabel": "Country I'm in (code, e.g. LT)",
+          "locationHint": "LT",
+          "preferredLabel": "Countries I'd like to work in",
+          "preferredHint": "LT, DE, NL",
+          "salaryMinLabel": "Rate from (€)",
+          "salaryMaxLabel": "Rate to (€)",
+          "save": "Save",
+          "saving": "Saving...",
+          "saved": "Saved",
+          "error": "Could not save. Please try again.",
+          "needsMigration": "This feature is being prepared. Try later."
+        }
+      },
       "tabs": {
-        "overview": "Overview",
-        "profile": "Profile",
-        "journal": "Journal",
+        "overview": "My space",
+        "profile": "Work card",
+        "journal": "Evidence",
         "discover": "Discover",
         "search": "Search",
         "account": "My account"
@@ -1733,6 +2189,44 @@
         "reviewEntriesDesc": "Approve, reject, or request changes on submitted entries.",
         "workJournal": "Work journal",
         "workJournalDesc": "Log a real work-journal entry."
+      },
+      "nextAction": {
+        "eyebrow": "Next step",
+        "worker_complete_profile": {
+          "title": "Complete your profile",
+          "body": "Add what you do and your skills, so your work record means something.",
+          "cta": "Complete profile"
+        },
+        "worker_first_entry": {
+          "title": "Add your first work entry",
+          "body": "Your profile is set. Write down something you did — it stays private until you choose to share it.",
+          "cta": "Create entry"
+        },
+        "worker_waiting": {
+          "title": "Your entries are waiting for confirmation",
+          "body": "Saved and private. Waiting for a manager to confirm: {waiting}. Nothing else is needed from you right now.",
+          "cta": "Check evidence status"
+        },
+        "worker_all_confirmed": {
+          "title": "You're all set",
+          "body": "Every entry is confirmed. Add a new one to keep your work record growing.",
+          "cta": "Add an entry"
+        },
+        "manager_review_pending": {
+          "title": "Review worker entries",
+          "body": "Entries waiting for your review: {pending}.",
+          "cta": "Review entries"
+        },
+        "manager_invite": {
+          "title": "Invite a worker",
+          "body": "No entries are waiting. Invite a worker or open your team to get started.",
+          "cta": "Open workspace"
+        },
+        "customer_requests": {
+          "title": "Manage your requests",
+          "body": "Create a new request or track the status of the ones you already sent.",
+          "cta": "Open requests"
+        }
       },
       "section": {
         "offer": {
@@ -1801,6 +2295,12 @@
         "body_main": "We're finishing the company / agency functionality right now.",
         "body_notify": "We'll let you know the moment it's ready.",
         "body_meanwhile": "In the meantime — you can browse the platform via the \"Discover\" tab (read-only)."
+      },
+      "menuLinks": {
+        "playerCard": "My card",
+        "projects": "Projects",
+        "instructions": "Instructions",
+        "skills": "My skills"
       }
     },
     "middleware": {
@@ -1808,9 +2308,9 @@
       "onboarding_required": "Please finish setting up your profile first."
     },
     "notifications": {
-      "label": "Notifications",
-      "emptyTitle": "No notifications yet",
-      "emptyBody": "Notifications will appear here as the system grows.",
+      "label": "My notifications",
+      "emptyTitle": "Nothing needs your attention right now.",
+      "emptyBody": "If something important comes up, you'll see it here.",
       "switchRoleCta": "Switch to {role} to view",
       "markAllRead": "Mark all as read"
     }
@@ -2387,11 +2887,331 @@
       "title": "Cookie Policy"
     }
   },
+  "instructions": {
+    "workerTitle": "My instructions",
+    "managerTitle": "Instruction to a worker",
+    "workerIntro": "Instructions from your manager. The original is always kept, and you can ask for clarification.",
+    "managerIntro": "Write an instruction in your own language. The worker will see it, and the original stays preserved.",
+    "foundationNote": "Clear, multilingual project communication — a foundation for both safety and convenience. Easy to find, easy to understand, original preserved.",
+    "needsMigration": "This feature is being prepared. Try again later.",
+    "attention": {
+      "eyebrow": "What matters now",
+      "title": "Needs your attention",
+      "subtitle": "New instructions worth reviewing. The original is preserved.",
+      "from": "from {name}",
+      "viewCta": "View instruction"
+    },
+    "worker": {
+      "empty": "No instructions yet. When your manager sends one, you'll see it here."
+    },
+    "manager": {
+      "workerLabel": "Worker",
+      "workerPlaceholder": "Choose a worker",
+      "bodyLabel": "Instruction",
+      "bodyPlaceholder": "Write the instruction in your own language…",
+      "languageNote": "Write in your own language. The original is saved; a translation will be added later.",
+      "send": "Send instruction",
+      "sending": "Sending…",
+      "sent": "Instruction sent",
+      "notAuthorized": "You can only send instructions to workers on your team.",
+      "error": "Could not send. Please try again.",
+      "noWorkers": "You don't have any assigned workers yet. Once you add a worker to your team, you can send instructions.",
+      "scopeNote": "You can send a team-level instruction or pick a project. A project instruction reaches only workers actively assigned to that project.",
+      "projectScopeLabel": "Scope (optional)",
+      "teamLevelOption": "Team-level instruction (whole team)"
+    },
+    "card": {
+      "autoTranslation": "Automatic translation",
+      "translationUnavailable": "Translation not ready yet. Showing the original.",
+      "showOriginal": "Show original",
+      "hideOriginal": "Hide original",
+      "originalLabel": "Original preserved",
+      "originalLanguagePrefix": "original language:",
+      "clarify": "Ask for clarification",
+      "clarifyBody": "I didn't understand the instruction, please clarify.",
+      "clarifySent": "Request sent",
+      "clarifySending": "Sending…",
+      "safetyNote": "Confirm important safety instructions clearly.",
+      "helpLine": "A translation helps you understand the instruction, but the original stays preserved."
+    }
+  },
+  "projects": {
+    "title": "Projects and assignments",
+    "intro": "Create a project and assign workers from your team to it. You'll be able to send project-level instructions later.",
+    "managerOnly": "This page is for a company or agency manager.",
+    "needsMigration": "This feature is being prepared. Try again later.",
+    "error": "Something went wrong. Please try again.",
+    "noProjects": "You don't have any projects yet. Create your first one above.",
+    "assignmentsTitle": "Assigned workers",
+    "noAssignments": "No workers assigned to this project yet.",
+    "operationsTitle": "Operations boards",
+    "untitledFallback": "Untitled project",
+    "end": "End",
+    "sending": "Saving…",
+    "create": {
+      "title": "New project",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Vilnius site",
+      "cityLabel": "City (optional)",
+      "cityPlaceholder": "e.g. Vilnius",
+      "submit": "Create project",
+      "noCompany": "Create a company profile first."
+    },
+    "assign": {
+      "title": "Assign a worker to a project",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project",
+      "workerLabel": "Worker",
+      "workerPlaceholder": "Choose a worker",
+      "submit": "Assign",
+      "assigned": "Assigned",
+      "notAuthorized": "You can only assign workers from your team to your own projects.",
+      "noWorkers": "You don't have any assignable workers on your team yet."
+    },
+    "map": {
+      "eyebrow": "Manager map",
+      "title": "Your projects",
+      "untitled": "Untitled project",
+      "teamLabel": "On the team",
+      "openArena": "Open arena"
+    },
+    "pulse": {
+      "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
+      "pendingBody": "One tap — and a person's work becomes confirmed proof.",
+      "cta": "Confirm now",
+      "zero": "Nothing is waiting for confirmation right now — the team's rhythm is calm.",
+      "zeroCta": "Review queue"
+    },
+    "draft": {
+      "title": "Draft — projects and teams"
+    }
+  },
+  "projectOps": {
+    "eyebrow": "Project operations",
+    "managerOnly": "This board is for a company or agency manager.",
+    "notAuthorized": "You can only open the operations board for a project you manage.",
+    "untitledProject": "Untitled project",
+    "statusLabel": "Status",
+    "locationLabel": "Location",
+    "startLabel": "Start",
+    "notSet": "—",
+    "schemaNote": "Shown from real project fields only. Needed professions, headcount and exact site precision are not stored yet, so they are not shown.",
+    "countersTitle": "Operations",
+    "counters": {
+      "totalAssigned": "Assigned",
+      "ready": "Ready",
+      "readyBasis": "Based only on the fields checked here.",
+      "needsDeclaredSkills": "No declared skills",
+      "needsEvidence": "No work evidence",
+      "needsFollowUp": "Needs follow-up",
+      "openReviewItems": "Open review items",
+      "instructionsSent": "Instructions sent"
+    },
+    "actionsTitle": "Actions",
+    "actions": {
+      "assign": "Assign workers",
+      "instructions": "Send instruction",
+      "csv": "Export CSV",
+      "print": "Print report",
+      "candidates": "Candidate drafts"
+    },
+    "workersTitle": "Workers on this project",
+    "noWorkers": "No workers are assigned to this project yet. Assign workers from your team to start operations.",
+    "worker": {
+      "readyChip": "Ready (checked fields)",
+      "notReadyChip": "Not ready yet",
+      "declaredSkills": "Declared skills",
+      "confirmedSkills": "Verified skills",
+      "evidence": "Work evidence",
+      "reviewItems": "Open reviews",
+      "lastActivity": "Last activity",
+      "noActivity": "No activity yet",
+      "assignedAt": "Assigned",
+      "missingTitle": "Still needs",
+      "missingName": "Name",
+      "missingDeclaredSkills": "Declared skills",
+      "missingEvidence": "Work evidence",
+      "followUpChip": "No activity — follow up",
+      "playerCardLink": "Player card",
+      "instructionLink": "Instructions",
+      "skillClarifyLink": "Skill clarification"
+    },
+    "notesTitle": "What these numbers mean",
+    "notes": {
+      "readiness": "\"Ready\" means only that the fields checked here are present (name, at least one declared skill, at least one work-evidence entry). It is not a verification, a document approval, or an AI judgement.",
+      "documents": "Documents are not tracked yet — no document is shown as approved or verified anywhere on this board.",
+      "candidateSkill": "Candidate skill clarifications are private to each worker; they are shown on the worker's own player card, not here."
+    },
+    "report": {
+      "title": "Operational status report"
+    },
+    "statusTitle": "Operational status",
+    "statusEmpty": "No status set yet",
+    "statusHelper": "\"Ready\" means ready according to the operational fields you track here — it is not automatic legal verification or document approval.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Could not save. Please try again.",
+    "needsMigration": "This feature is being prepared (database update pending). Try again shortly.",
+    "statuses": {
+      "candidate": "Candidate",
+      "contacted": "Contacted",
+      "interested": "Interested",
+      "documents_needed": "Documents needed",
+      "ready": "Ready",
+      "assigned": "Assigned",
+      "unavailable": "Unavailable",
+      "rejected": "Rejected"
+    },
+    "checklist": {
+      "title": "Readiness / documents",
+      "empty": "Not tracked yet. Add the standard checklist or your own items.",
+      "seed": "Add standard checklist",
+      "addItem": "Add item",
+      "addPlaceholder": "New item label",
+      "missing": "Missing",
+      "received": "Received",
+      "checked": "Checked",
+      "blocked": "Rejected / expired",
+      "helper": "\"Checked\" means a manager marked it checked here — not a legal verification. A document is only \"received\" or \"checked\" when a manager sets it; nothing is approved automatically."
+    },
+    "readinessStatuses": {
+      "not_required": "Not required",
+      "needed": "Needed",
+      "missing": "Missing",
+      "received": "Received",
+      "checked": "Checked",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "defaults": {
+      "identity_document": "Identity document",
+      "a1_or_posting_document": "A1 / posting document",
+      "employment_contract_or_assignment_basis": "Employment contract / assignment basis",
+      "qualification_or_skill_evidence": "Qualification / skill evidence",
+      "safety_instruction_acknowledgement": "Safety instruction acknowledgement",
+      "travel_or_start_availability": "Travel / start availability",
+      "client_specific_requirement": "Client-specific requirement"
+    },
+    "filters": {
+      "title": "Filter",
+      "all": "All",
+      "byStatus": "Status",
+      "anyStatus": "Any status",
+      "missingDocs": "Missing docs/info",
+      "ready": "Ready (checked fields)",
+      "needsSkillInfo": "Needs skill info",
+      "followUp": "Follow-up needed",
+      "none": "No workers match this filter."
+    },
+    "counters2": {
+      "withMissingDocs": "Missing docs/info",
+      "docsReceived": "Docs received",
+      "docsChecked": "Docs checked",
+      "docsBlocked": "Rejected/expired"
+    },
+    "stadium": {
+      "eyebrow": "Stadium",
+      "fieldCount": "{n, plural, one {# person on the field} other {# people on the field}}",
+      "todayCount": "{n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
+      "todayZero": "No entries yet today — the day is still waiting for its first record.",
+      "fieldTitle": "The field — who is on the team today",
+      "positionUnknown": "Position not set",
+      "docsMissingChip": "Docs missing: {n}",
+      "docsCheckedChip": "Docs checked: {n}",
+      "lastActivity": "Last entry: {date}",
+      "noActivity": "No entries yet.",
+      "emptyTeam": "This project has no team yet — start the draft and bring the first people onto the field.",
+      "emptyTeamCta": "Start the draft",
+      "positionsTitle": "Missing positions",
+      "positionsEmpty": "The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "openOps": "Open the management arena"
+    }
+  },
+  "setupRoleChoice": {
+    "title": "How would you like to start?",
+    "body": "labourmarket.ai is demand-first — you do not have to be an agency. Pick the way that matches you. You can start a request, invite people, or offer your own work; nothing forces a worker to register first.",
+    "options": {
+      "findHuman": {
+        "label": "I'm looking for a person or a service",
+        "hint": "Start as a requester / customer and create a request or demand."
+      },
+      "representCompany": {
+        "label": "I represent a company",
+        "hint": "Set up your company to invite workers and run projects."
+      },
+      "representAgency": {
+        "label": "I represent an agency / team",
+        "hint": "Set up your agency to link and coordinate workers."
+      },
+      "offerWork": {
+        "label": "I offer my own work or services",
+        "hint": "Build your profile and capabilities as a worker / provider."
+      }
+    },
+    "draft": {
+      "title": "Person not ready to register yet?",
+      "body": "If the person is not ready to register, you can later create a candidate / provider draft and fill in details afterwards. A draft is never a real account — no account, consent, or verification is created for them, and it can be linked to a real account later.",
+      "labels": {
+        "notRegistered": "Not registered",
+        "notVerified": "Not verified",
+        "draft": "Draft",
+        "canLinkLater": "Can be linked later"
+      },
+      "cta": "Open candidate / provider drafts"
+    }
+  },
+  "candidates": {
+    "eyebrow": "Candidates / providers",
+    "title": "Candidate & provider drafts",
+    "intro": "Start managing a person or service provider before they register. These are your private working notes — only you (the creator) can see them.",
+    "honestyNote": "A draft is not a user account. No account, invite acceptance, consent, verification, or document is created for the person. There is no automatic candidate matching. A draft can be linked to a real account later, and can only be assigned to a project after it is linked.",
+    "labels": {
+      "notRegistered": "Not registered",
+      "notVerified": "Not verified",
+      "draft": "Draft",
+      "canLinkLater": "Can be linked later",
+      "linked": "Linked to an account"
+    },
+    "notAssignableNote": "This draft cannot be assigned to a project yet — link it to a registered account first.",
+    "create": {
+      "title": "Add a candidate / provider draft",
+      "nameLabel": "Name or title",
+      "namePlaceholder": "e.g. Jonas P. — steel fixer",
+      "contactLabel": "Contact (if known)",
+      "contactPlaceholder": "e.g. email or phone",
+      "professionLabel": "Profession / service",
+      "professionPlaceholder": "e.g. steel fixer, cleaning service",
+      "languageLabel": "Language",
+      "languagePlaceholder": "e.g. LT, EN, PL",
+      "skillsLabel": "Skills / services (free text)",
+      "skillsPlaceholder": "e.g. rebar, formwork, 10 years",
+      "notesLabel": "Notes",
+      "notesPlaceholder": "Anything useful to remember",
+      "statusLabel": "Status",
+      "submit": "Create draft",
+      "submitting": "Saving…"
+    },
+    "listTitle": "Your drafts",
+    "empty": "No drafts yet. Add your first candidate or provider above.",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete",
+    "saved": "Saved",
+    "saveError": "Could not save. Please try again.",
+    "needsMigration": "This feature is being prepared (database update pending). Try again shortly.",
+    "statuses": {
+      "draft": "Draft",
+      "contacted": "Contacted",
+      "shortlisted": "Shortlisted",
+      "archived": "Archived"
+    }
+  },
   "communication": {
-    "title": "Conversations",
-    "subtitle": "Internal communication between testers, companies, agencies, and the admin.",
-    "v1Notice": "v1: messages update on page refresh (not real-time). No file attachments. No fake delivered/read indicators — just an honest per-participant 'opened' timestamp.",
-    "empty": "No conversations yet. Invitations land here.",
+    "title": "My messages",
+    "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
+    "v1Notice": "Messages update on page refresh. We show only an honest 'opened' timestamp — no fake delivered / read indicators.",
+    "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
     "unnamedThread": "(no subject)",
     "unread": "New",
     "kind": {
@@ -2399,11 +3219,11 @@
       "support": "Support",
       "team": "Team"
     },
-    "backToList": "← All conversations",
+    "backToList": "← All messages",
     "noMessages": "No messages in this conversation yet. Start typing below.",
     "byYou": "You",
     "byOther": "Other",
-    "footnote": "Conversations are visible only to participants + the admin. Private. No public access.",
+    "footnote": "Messages are visible only to participants + the admin. Private. No public access.",
     "composer": {
       "label": "New message",
       "placeholder": "Write a message…",
@@ -2439,7 +3259,8 @@
       "joinHint": "You're an admin but not yet a participant of this thread. Join to reply.",
       "joinLabel": "Join conversation",
       "joinPending": "Joining..."
-    }
+    },
+    "originalLanguage": "Original ({lang})"
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
@@ -2576,7 +3397,7 @@
       "footnote": "✓ = at least one signal observed live. · = nothing seen yet. '—' = the underlying table is not applied here. Count on the right is the lifetime total."
     }
   },
-  "pilotTelemetry": {
+  "telemetry": {
     "title": "Operations telemetry (v1)",
     "subtitle": "Safe tester QA events. Read-only. Admins only.",
     "loadError": "Could not load events: {msg}",
@@ -2776,5 +3597,172 @@
         ]
       }
     ]
+  },
+  "playerCard": {
+    "pageTitle": "My card",
+    "pageIntro": "A summary of your work profile — visible only to you.",
+    "title": "Worker card",
+    "subtitle": "An overview of your profile. The numbers are real — nothing added.",
+    "skillsLabel": "Skills",
+    "skillsHint": "Skills you listed (self-declared, not verified).",
+    "evidenceLabel": "Evidence",
+    "evidenceHint": "Your work-journal entries.",
+    "attentionLabel": "Needs attention",
+    "attentionHint": "New instructions worth reviewing.",
+    "attentionZero": "Nothing to do right now.",
+    "workCardLabel": "Work card",
+    "workCardConfirmed": "Confirmed",
+    "workCardPending": "Not confirmed yet",
+    "namePlaceholder": "My profile",
+    "candidateLabel": "Candidate skills",
+    "candidateHint": "Skills you added in your own words (needs clarification, not verified).",
+    "thermoLabel": "Thermometer",
+    "thermoHint": "(average of declared salary expectations in your project + admin-entered market average) / 2 — shown only when both components exist.",
+    "thermoMissingPosition": "Insufficient project data",
+    "thermoMissingMarket": "Insufficient market data",
+    "thermoMissingBoth": "Insufficient market data",
+    "thermoSmallSample": "Small sample (n<5) — interpret with care.",
+    "verifiedTitle": "Verified skills",
+    "verifiedEmpty": "No verified skills yet. They appear when a manager confirms your journal entries.",
+    "latestEvidenceLabel": "Latest proof",
+    "latestEvidenceEmpty": "No proof entries yet — your first journal entry will be the first."
+  },
+  "skillClarify": {
+    "title": "My skills",
+    "intro": "Add a skill that isn't in the list yet — in your own words.",
+    "listTitle": "My candidate skills",
+    "empty": "You haven't added anything yet.",
+    "candidateBadge": "Self-declared · needs clarification",
+    "needsMigration": "This feature is being prepared. Try again later.",
+    "selfDeclaredNote": "These skills are self-declared and not verified. Nothing checks them automatically.",
+    "relatedLabel": "Related to",
+    "toolsLabel": "Tools / materials",
+    "oftenLabel": "Often together with",
+    "form": {
+      "labelLabel": "What do you call it?",
+      "labelPlaceholder": "e.g. monolithic concreting",
+      "relatedLabel": "What trade is it part of?",
+      "relatedPlaceholder": "e.g. concreter",
+      "toolsLabel": "What tools / materials?",
+      "toolsPlaceholder": "e.g. vibrator, formwork",
+      "oftenLabel": "What does it go together with?",
+      "oftenPlaceholder": "e.g. rebar tying",
+      "save": "Save skill",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "error": "Could not save. Please try again."
+    }
+  },
+  "documents": {
+    "eyebrow": "MY DOCUMENTS",
+    "title": "My documents",
+    "subtitle": "What you have, what is missing, and the next step — per country.",
+    "preparing": "Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
+    "needsMigration": "The documents storage layer is not enabled in this environment yet.",
+    "noWorker": "Create your worker profile first — documents attach to it.",
+    "error": "Could not load your documents.",
+    "empty": "No documents recorded yet. Start with your CV and ID document.",
+    "list": {
+      "title": "Your documents"
+    },
+    "status": {
+      "missing": "Missing",
+      "ready": "Ready",
+      "expiring": "Expiring soon",
+      "blocked": "Blocked"
+    },
+    "fields": {
+      "validUntil": "Valid until"
+    },
+    "country": {
+      "title": "What is missing for a country",
+      "help": "Pick a destination country to see which documents it asks for.",
+      "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
+      "next": "Next step: take care of — {doc}.",
+      "ok": "All curated requirements for {country} are covered."
+    },
+    "types": {
+      "cv": "CV",
+      "id_document": "ID document",
+      "a1_certificate": "A1 certificate",
+      "employment_contract": "Employment contract",
+      "posted_worker_package": "Posted worker package",
+      "professional_certificate": "Professional certificate"
+    },
+    "requirement": {
+      "required": "Required",
+      "recommended": "Recommended",
+      "conditional": "Conditional"
+    },
+    "sourceFlag": "Needs legal source"
+  },
+  "trust": {
+    "title": "Trust signals",
+    "caption": "Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "verifiedSkills": "Verified skills",
+    "managerConfirmations": "Manager confirmations",
+    "journalEntries": "Journal entries",
+    "zeroHint": "Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Verified CV",
+    "exportButton": "Export CV (PDF)",
+    "print": "Download PDF",
+    "back": "← Back to profile",
+    "primary": "primary",
+    "skills": "Skills",
+    "skillsEmpty": "No skills saved yet.",
+    "tiers": {
+      "confirmed": "Manager-confirmed",
+      "evidence": "Backed by work entries",
+      "declared": "Self-declared"
+    },
+    "tierHints": {
+      "confirmed": "confirmed by a manager on a real work entry",
+      "evidence": "work-journal entries back this skill; a manager has not confirmed it yet",
+      "declared": "the person's own claim, not externally confirmed"
+    },
+    "summary": {
+      "verifiedSkills": "Verified skills",
+      "managerConfirmations": "Manager confirmations",
+      "journalEntries": "Journal entries"
+    },
+    "proofTitle": "Confirmed work proof",
+    "proofDate": "Date",
+    "proofProject": "Project",
+    "proofRole": "Confirmed by (role)",
+    "proofEmpty": "No confirmed entries yet.",
+    "generatedAt": "Generated",
+    "verifyNote": "Confirmations can be checked on the platform.",
+    "notWorker": "CV export is available for worker profiles — it is built from the work journal and confirmed skills."
+  },
+  "todayScreen": {
+    "eyebrow": "Today",
+    "action": {
+      "title": "Write down what you did today",
+      "body": "A few lines in your own words — and your day stays on record as lasting proof of your work.",
+      "doneTitle": "Today's work is recorded",
+      "doneBody": "Good — today is already in your record. Add more if you did more.",
+      "pending": "{n, plural, one {# entry is waiting for your manager's confirmation} other {# entries are waiting for your manager's confirmation}}",
+      "cta": "Fill in today's journal",
+      "ctaAgain": "Add another entry"
+    },
+    "week": {
+      "eyebrow": "This week",
+      "confirmedHeadline": "{n, plural, one {Your work was confirmed # time this week} other {Your work was confirmed # times this week}}",
+      "writtenHeadline": "{n, plural, one {You recorded # work entry this week} other {You recorded # work entries this week}}",
+      "emptyHeadline": "A new week — its first entry is still ahead of you.",
+      "entries": "Entries",
+      "confirmed": "Confirmed",
+      "hours": "Confirmed hrs"
+    },
+    "path": {
+      "eyebrow": "Path to more",
+      "body": "This skill is often needed in your trade, and it is not on your card yet. Add it and your card grows.",
+      "cta": "Add to my skills",
+      "empty": "Once your trade and skills are set, you will see here where to grow next.",
+      "emptyCta": "Open my profile"
+    }
   }
 }

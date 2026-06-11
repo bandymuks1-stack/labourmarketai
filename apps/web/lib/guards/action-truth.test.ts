@@ -28,7 +28,7 @@ const ACTION_COMPONENTS = [
   "components/app/feature-availability-grid.tsx",
   "components/app/dashboard-chain-actions.tsx",
   "components/app/current-space-header.tsx",
-  "components/app/pilot-request-button.tsx",
+  "components/app/demand-request-button.tsx",
 ] as const;
 
 describe("no dead links / no-op handlers in rooms", () => {

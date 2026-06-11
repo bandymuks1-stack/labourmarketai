@@ -287,7 +287,20 @@ export default async function AccountPage({
           {tSpaces("availableSpaces")}
         </p>
         <RoleCatalogueGrid roles={getVisibleRoleOptions()} />
-        <FeatureAvailabilityGrid comingLater />
+        {/* Coming-soon modules are SECONDARY: collapsed by default so the
+            real, actionable spaces above remain the main account experience.
+            Still honestly discoverable — one click opens the preparing list. */}
+        <details
+          className="rounded-md border border-ink-600 bg-ink-800/20"
+          data-testid="my-spaces-coming-later"
+        >
+          <summary className="cursor-pointer list-none px-4 py-3 font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-secondary">
+            {tSpaces("comingLaterToggle")}
+          </summary>
+          <div className="px-4 pb-4">
+            <FeatureAvailabilityGrid comingLater showHeading={false} />
+          </div>
+        </details>
       </section>
 
       <section className="card-border p-6">

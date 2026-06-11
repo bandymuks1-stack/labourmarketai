@@ -197,7 +197,7 @@
           "p2": "[EN] Say what people, teams or partners you need.",
           "p3": "[EN] Offer your services to the market."
         },
-        "pilot": {
+        "demand": {
           "title": "[EN] Tell us what you need",
           "body": "[EN] Describe what you're looking for. Your request is saved and visible in your space right away — you're first here, so everything you create is real.",
           "cta": "[EN] Submit your need",
@@ -1103,5 +1103,339 @@
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "reviewEnabledBadge": "Review",
     "reviewDisabledBadge": "No review"
+  },
+  "admin": {
+    "matching": {
+      "eyebrow": "[EN] ADMIN · PHASE 3",
+      "title": "[EN] Matching workbench",
+      "subtitle": "[EN] Open requests next to the worker supply — review, decide, record.",
+      "humanNote": "[EN] Every match here is selected by a human, not an algorithm. The system does not rank or suggest — it only shows real data and records your decision with a feedback note.",
+      "back": "[EN] Back to admin",
+      "migrationBlocker": "[EN] The demand intake consolidation migration is not applied in this environment yet — the workbench is blocked until it lands.",
+      "demand": {
+        "title": "[EN] Open demand",
+        "count": "[EN] {count} open requests",
+        "empty": "[EN] No open requests right now. New submitted requests will appear here.",
+        "messageRequester": "[EN] Message requester"
+      },
+      "kind": {
+        "company_request": "[EN] Company request",
+        "agency_offer": "[EN] Agency offer",
+        "buyer_request": "[EN] Buyer request",
+        "customer_request": "[EN] Customer request"
+      },
+      "status": {
+        "submitted": "[EN] Submitted",
+        "in_review": "[EN] In review",
+        "needs_followup": "[EN] Needs follow-up",
+        "approved": "[EN] Approved"
+      },
+      "fields": {
+        "created": "[EN] Created",
+        "country": "[EN] Country",
+        "location": "[EN] Location",
+        "role": "[EN] Role / work type",
+        "teamSize": "[EN] Team size",
+        "startPeriod": "[EN] Start",
+        "duration": "[EN] Duration",
+        "language": "[EN] Languages",
+        "notes": "[EN] Notes",
+        "payload": "[EN] Form details",
+        "reviewNote": "[EN] Review note"
+      },
+      "log": {
+        "title": "[EN] Human match log"
+      },
+      "supply": {
+        "title": "[EN] Worker supply",
+        "count": "[EN] {count} workers",
+        "empty": "[EN] No workers yet — the list fills as people register.",
+        "unnamed": "[EN] Unnamed worker",
+        "noProfession": "[EN] No profession set",
+        "years": "[EN] {count} y. experience",
+        "availability": {
+          "available": "[EN] Available",
+          "busy": "[EN] Busy",
+          "unavailable": "[EN] Unavailable",
+          "unknown": "[EN] Availability not set"
+        },
+        "skillsDeclared": "[EN] Declared skills",
+        "skillsConfirmed": "[EN] Confirmed skills",
+        "entries": "[EN] Journal entries",
+        "confirmations": "[EN] Manager confirmations"
+      },
+      "match": {
+        "workerLabel": "[EN] Worker (human pick)",
+        "workerPlaceholder": "[EN] Choose a worker…",
+        "noteLabel": "[EN] Feedback note (what fits, what is missing)",
+        "notePlaceholder": "[EN] E.g. profession fits, A1 document still needed…",
+        "recordInReview": "[EN] Record match · in review",
+        "recordFollowup": "[EN] Record · needs follow-up",
+        "recordApproved": "[EN] Record · approved"
+      },
+      "result": {
+        "saved": "[EN] Decision recorded.",
+        "notAdmin": "[EN] Your session does not have admin rights for this request.",
+        "invalid": "[EN] Invalid decision — pick a worker and an action.",
+        "notFound": "[EN] Request or worker no longer exists.",
+        "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
+        "error": "[EN] Could not record the decision."
+      },
+      "suggestions": {
+        "title": "[EN] Rule-based shortlist",
+        "humanRule": "[EN] Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "start": "[EN] Start conversation",
+        "reasons": {
+          "country_match": "[EN] In country",
+          "preferred_country_match": "[EN] Prefers country",
+          "available_now": "[EN] Available",
+          "profession_token_match": "[EN] Profession fits request text",
+          "verified_skills": "[EN] Verified skills",
+          "manager_confirmations": "[EN] Manager confirmations",
+          "journal_evidence": "[EN] Journal evidence"
+        }
+      },
+      "filters": {
+        "all": "[EN] All countries",
+        "confirmedOnly": "[EN] Confirmed skills ✓"
+      }
+    },
+    "hub": {
+      "matching": "[EN] Matching workbench",
+      "market": "[EN] Market situation",
+      "league": "[EN] Country league"
+    },
+    "market": {
+      "eyebrow": "[EN] Admin · Market",
+      "title": "[EN] Market situation",
+      "subtitle": "[EN] Supply, demand, admin-entered market averages and gaps — real platform counts only.",
+      "methodNote": "[EN] Every number on this page is a real count of real rows. Market averages are entered by an admin by hand from a named source — the platform never estimates them. Small samples (n<5) are flagged.",
+      "back": "[EN] Admin dashboard",
+      "needsMigration": "[EN] Market averages are not ready yet — the S4 migration awaits the owner gate.",
+      "smallSample": "[EN] ⚠ n<5",
+      "unknownCountry": "[EN] Not specified",
+      "averages": {
+        "title": "[EN] Admin market averages",
+        "help": "[EN] Component 2 of the thermometer formula: profession × country × average (EUR/month) + entry date + source note.",
+        "empty": "[EN] No market averages entered yet — the thermometer stays at 'insufficient market data' until real, sourced figures are entered."
+      },
+      "basis": {
+        "monthly_eur": "[EN] month"
+      },
+      "sourceStatus": {
+        "needs_source": "[EN] Needs source",
+        "sourced": "[EN] Sourced",
+        "reviewed": "[EN] Reviewed"
+      },
+      "form": {
+        "profession": "[EN] Profession",
+        "country": "[EN] Country",
+        "rate": "[EN] Average (EUR/month)",
+        "sourceNote": "[EN] Source note",
+        "sourceNotePlaceholder": "[EN] e.g. State Data Agency, 2026 Q1",
+        "sourceStatus": "[EN] Source status",
+        "save": "[EN] Save average",
+        "saving": "[EN] Saving…",
+        "saved": "[EN] Saved.",
+        "error": "[EN] Could not save."
+      },
+      "supply": {
+        "title": "[EN] Supply — workers",
+        "help": "[EN] Workers by profession × country (worker location; confirmed = workers with at least one manager-confirmed skill).",
+        "empty": "[EN] No workers with professions yet.",
+        "profession": "[EN] Profession",
+        "country": "[EN] Country",
+        "workers": "[EN] Workers",
+        "confirmed": "[EN] With confirmed skills"
+      },
+      "demand": {
+        "title": "[EN] Demand — customer requests",
+        "freeTextNote": "[EN] The intake stores the role as free text (no profession link), so demand cannot be joined to supply by profession yet — the gaps below are country-level.",
+        "empty": "[EN] No customer requests yet.",
+        "country": "[EN] Country",
+        "role": "[EN] Role (free text)",
+        "requests": "[EN] Requests"
+      },
+      "gaps": {
+        "title": "[EN] Gaps",
+        "help": "[EN] Countries with demand, ordered by weakest supply. A row with 0 supply is the gap to act on.",
+        "empty": "[EN] No demand recorded yet.",
+        "row": "[EN] demand {demand} · supply {supply}"
+      }
+    },
+    "league": {
+      "eyebrow": "[EN] Country league",
+      "title": "[EN] Labour market league",
+      "subtitle": "[EN] Profession tables per country — real teams, availability and the market thermometer.",
+      "methodNote": "[EN] A thermometer value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
+      "back": "[EN] Back to admin hub",
+      "empty": "[EN] No league data yet — tables appear by themselves once workers set their professions.",
+      "unknownCountry": "[EN] Country not set",
+      "cellCount": "[EN] {n, plural, one {# profession} other {# professions}}",
+      "availableNow": "[EN] available now",
+      "confirmedSkillWorkers": "[EN] with confirmed skills",
+      "insufficientData": "[EN] Insufficient market data",
+      "smallSample": "[EN] Small sample (n<5)",
+      "declaredSample": "[EN] Declared-expectation sample: {n}"
+    }
+  },
+  "documents": {
+    "eyebrow": "[EN] MY DOCUMENTS",
+    "title": "[EN] My documents",
+    "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
+    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
+    "needsMigration": "[EN] The documents storage layer is not enabled in this environment yet.",
+    "noWorker": "[EN] Create your worker profile first — documents attach to it.",
+    "error": "[EN] Could not load your documents.",
+    "empty": "[EN] No documents recorded yet. Start with your CV and ID document.",
+    "list": {
+      "title": "[EN] Your documents"
+    },
+    "status": {
+      "missing": "[EN] Missing",
+      "ready": "[EN] Ready",
+      "expiring": "[EN] Expiring soon",
+      "blocked": "[EN] Blocked"
+    },
+    "fields": {
+      "validUntil": "[EN] Valid until"
+    },
+    "country": {
+      "title": "[EN] What is missing for a country",
+      "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
+      "next": "[EN] Next step: take care of — {doc}.",
+      "ok": "[EN] All curated requirements for {country} are covered."
+    },
+    "types": {
+      "cv": "[EN] CV",
+      "id_document": "[EN] ID document",
+      "a1_certificate": "[EN] A1 certificate",
+      "employment_contract": "[EN] Employment contract",
+      "posted_worker_package": "[EN] Posted worker package",
+      "professional_certificate": "[EN] Professional certificate"
+    },
+    "requirement": {
+      "required": "[EN] Required",
+      "recommended": "[EN] Recommended",
+      "conditional": "[EN] Conditional"
+    },
+    "sourceFlag": "[EN] Needs legal source"
+  },
+  "communication": {
+    "originalLanguage": "[EN] Original ({lang})"
+  },
+  "trust": {
+    "title": "[EN] Trust signals",
+    "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "verifiedSkills": "[EN] Verified skills",
+    "managerConfirmations": "[EN] Manager confirmations",
+    "journalEntries": "[EN] Journal entries",
+    "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+  },
+  "cvExport": {
+    "pageTitle": "Bevestigd CV",
+    "exportButton": "CV exporteren (PDF)",
+    "print": "PDF downloaden",
+    "back": "← Terug naar profiel",
+    "primary": "primair",
+    "skills": "Vaardigheden",
+    "skillsEmpty": "Nog geen vaardigheden opgeslagen.",
+    "tiers": {
+      "confirmed": "Door manager bevestigd",
+      "evidence": "Onderbouwd door werkregistraties",
+      "declared": "Zelf opgegeven"
+    },
+    "tierHints": {
+      "confirmed": "door een manager bevestigd op basis van een echte werkregistratie",
+      "evidence": "werkdagboekregistraties onderbouwen deze vaardigheid; een manager heeft deze nog niet bevestigd",
+      "declared": "eigen opgave van de persoon, niet extern bevestigd"
+    },
+    "summary": {
+      "verifiedSkills": "Bevestigde vaardigheden",
+      "managerConfirmations": "Managerbevestigingen",
+      "journalEntries": "Dagboekregistraties"
+    },
+    "proofTitle": "Bevestigd werkbewijs",
+    "proofDate": "Datum",
+    "proofProject": "Project",
+    "proofRole": "Bevestigd door (rol)",
+    "proofEmpty": "Nog geen bevestigde registraties.",
+    "generatedAt": "Gegenereerd",
+    "verifyNote": "Bevestigingen zijn te controleren op het platform.",
+    "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden."
+  },
+  "todayScreen": {
+    "eyebrow": "[EN] Today",
+    "action": {
+      "title": "[EN] Write down what you did today",
+      "body": "[EN] A few lines in your own words — and your day stays on record as lasting proof of your work.",
+      "doneTitle": "[EN] Today's work is recorded",
+      "doneBody": "[EN] Good — today is already in your record. Add more if you did more.",
+      "pending": "[EN] {n, plural, one {# entry is waiting for your manager's confirmation} other {# entries are waiting for your manager's confirmation}}",
+      "cta": "[EN] Fill in today's journal",
+      "ctaAgain": "[EN] Add another entry"
+    },
+    "week": {
+      "eyebrow": "[EN] This week",
+      "confirmedHeadline": "[EN] {n, plural, one {Your work was confirmed # time this week} other {Your work was confirmed # times this week}}",
+      "writtenHeadline": "[EN] {n, plural, one {You recorded # work entry this week} other {You recorded # work entries this week}}",
+      "emptyHeadline": "[EN] A new week — its first entry is still ahead of you.",
+      "entries": "[EN] Entries",
+      "confirmed": "[EN] Confirmed",
+      "hours": "[EN] Confirmed hrs"
+    },
+    "path": {
+      "eyebrow": "[EN] Path to more",
+      "body": "[EN] This skill is often needed in your trade, and it is not on your card yet. Add it and your card grows.",
+      "cta": "[EN] Add to my skills",
+      "empty": "[EN] Once your trade and skills are set, you will see here where to grow next.",
+      "emptyCta": "[EN] Open my profile"
+    }
+  },
+  "playerCard": {
+    "verifiedTitle": "[EN] Verified skills",
+    "verifiedEmpty": "[EN] No verified skills yet. They appear when a manager confirms your journal entries.",
+    "latestEvidenceLabel": "[EN] Latest proof",
+    "latestEvidenceEmpty": "[EN] No proof entries yet — your first journal entry will be the first."
+  },
+  "projects": {
+    "map": {
+      "eyebrow": "[EN] Manager map",
+      "title": "[EN] Your projects",
+      "untitled": "[EN] Untitled project",
+      "teamLabel": "[EN] On the team",
+      "openArena": "[EN] Open arena"
+    },
+    "pulse": {
+      "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
+      "pendingBody": "[EN] One tap — and a person's work becomes confirmed proof.",
+      "cta": "[EN] Confirm now",
+      "zero": "[EN] Nothing is waiting for confirmation right now — the team's rhythm is calm.",
+      "zeroCta": "[EN] Review queue"
+    },
+    "draft": {
+      "title": "[EN] Draft — projects and teams"
+    }
+  },
+  "projectOps": {
+    "stadium": {
+      "eyebrow": "[EN] Stadium",
+      "fieldCount": "[EN] {n, plural, one {# person on the field} other {# people on the field}}",
+      "todayCount": "[EN] {n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
+      "todayZero": "[EN] No entries yet today — the day is still waiting for its first record.",
+      "fieldTitle": "[EN] The field — who is on the team today",
+      "positionUnknown": "[EN] Position not set",
+      "docsMissingChip": "[EN] Docs missing: {n}",
+      "docsCheckedChip": "[EN] Docs checked: {n}",
+      "lastActivity": "[EN] Last entry: {date}",
+      "noActivity": "[EN] No entries yet.",
+      "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
+      "emptyTeamCta": "[EN] Start the draft",
+      "positionsTitle": "[EN] Missing positions",
+      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "openOps": "[EN] Open the management arena"
+    }
   }
 }

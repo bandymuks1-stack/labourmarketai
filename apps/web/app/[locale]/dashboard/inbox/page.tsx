@@ -5,6 +5,11 @@ import {
   JournalInboxEntry,
   type InboxEntry,
 } from "@/components/app/journal-inbox-entry";
+import {
+  EvidenceStatusStrip,
+  type EvidenceStatus,
+} from "@/components/app/evidence-status-strip";
+import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 
@@ -145,6 +150,14 @@ export default async function InboxPage({
     }).length;
   }
 
+  // Manager Evidence Review Clarity v1 — the inbox lists only unconfirmed
+  // entries awaiting this reviewer, so the legend shows them as self-declared +
+  // awaiting. "confirmed" lights up ONLY when the caller already has real
+  // confirmed evidence in scope — never automatically.
+  const reviewLegend: EvidenceStatus[] = ["self_declared"];
+  if (pending.length > 0) reviewLegend.push("awaiting_confirmation");
+  if (confirmedCount > 0) reviewLegend.push("confirmed");
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
@@ -170,17 +183,41 @@ export default async function InboxPage({
         >
           {t("inbox.projectNote")}
         </p>
-        <Link
-          href="/dashboard/inbox/report"
-          className="w-fit text-xs font-medium text-brand-blue hover:underline"
-          data-testid="inbox-report-link"
+        {/* Review clarity — what the manager's review actually does, plus the
+            shared evidence-status legend so the reviewer sees the lifecycle
+            their decision moves an entry through. Honest, no auto-confirm. */}
+        <p
+          className="text-xs leading-relaxed text-text-secondary"
+          data-testid="inbox-review-clarity-lead"
         >
-          {t("inbox.openReport")}
-        </Link>
+          {t("inbox.reviewClarity.lead")}
+        </p>
+        <EvidenceStatusStrip active={reviewLegend} data-testid="inbox-evidence-status-strip" />
+        <div className="flex flex-wrap gap-x-4">
+          <Link
+            href="/dashboard/inbox/quick"
+            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            data-testid="inbox-quick-link"
+          >
+            {t("inbox.quick.openQuick")}
+          </Link>
+          <Link
+            href="/dashboard/inbox/report"
+            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            data-testid="inbox-report-link"
+          >
+            {t("inbox.openReport")}
+          </Link>
+        </div>
       </header>
 
       {pending.length === 0 ? (
-        <p className="text-sm text-text-secondary">{t("inbox.empty")}</p>
+        <EmptyState
+          testId="inbox-empty-state"
+          title={t("inbox.emptyTitle")}
+          why={t("inbox.empty")}
+          next={t("inbox.emptyNext")}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {pending.map((e) => (

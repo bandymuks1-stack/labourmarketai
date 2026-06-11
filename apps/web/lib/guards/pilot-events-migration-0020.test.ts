@@ -38,7 +38,7 @@ const action = readApp("lib/telemetry/actions.ts");
 const helper = readApp("lib/telemetry/task.ts");
 const adminAgent = readApp("app/[locale]/dashboard/admin/agent-os/page.tsx");
 const adminTelemetry = readApp(
-  "app/[locale]/dashboard/admin/pilot-telemetry/page.tsx",
+  "app/[locale]/dashboard/admin/telemetry/page.tsx",
 );
 
 describe("0020 — pilot_events table + RLS", () => {
@@ -110,7 +110,7 @@ describe("0020 — pilot_events table + RLS", () => {
   });
 });
 
-describe("recordPilotEvent server action — privacy contract", () => {
+describe("recordTelemetryEvent server action — privacy contract", () => {
   it("exports a tagged RecordPilotEventResult", () => {
     expect(action).toMatch(/export type RecordPilotEventResult\s*=/);
     expect(action).toMatch(/ok:\s*true/);
@@ -132,7 +132,7 @@ describe("recordPilotEvent server action — privacy contract", () => {
     expect(action).toMatch(/const\s+profileId\s*=\s*user\??\.id\s*\?\?\s*null/);
     // The client-side helper MUST NOT pass a profile_id through — pin
     // that on the input type shape (no profileId / userId field).
-    expect(action).toMatch(/export type PilotEventInput\s*=/);
+    expect(action).toMatch(/export type TelemetryEventInput\s*=/);
     expect(action).not.toMatch(/profileId\??:\s*string/);
   });
 
@@ -184,7 +184,7 @@ describe("admin pages are admin-only (server gate + RLS)", () => {
     expect(adminAgent).toMatch(/await\s+requireSuperadmin\(\s*locale\s*\)/);
   });
 
-  it("pilot-telemetry page requires superadmin server-side", () => {
+  it("telemetry page requires superadmin server-side", () => {
     expect(adminTelemetry).toMatch(/await\s+requireSuperadmin\(\s*locale\s*\)/);
   });
 

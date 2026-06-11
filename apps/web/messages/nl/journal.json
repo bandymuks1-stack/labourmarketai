@@ -42,7 +42,35 @@
     "rejectReason": "[EN] Reason for rejection",
     "showOriginal": "[EN] Show original",
     "skills": "[EN] Skills",
-    "title": "[EN] Entries to confirm"
+    "title": "[EN] Entries to confirm",
+    "quick": {
+      "openQuick": "Snel bevestigen →",
+      "title": "Snel bevestigen",
+      "subtitle": "Eén blik, één tik: de kaart toont de werknemer, de datum, de werkzaamheden en de vaardigheden die u bevestigt. Elke bevestiging is uw echte beslissing en wordt pas vastgelegd wanneer u tikt.",
+      "detailedReview": "Uitgebreide beoordeling",
+      "willConfirm": "Wordt bevestigd:",
+      "entryOnlyNote": "Geen onbevestigde vaardigheden — de tik bevestigt de registratie zelf.",
+      "confirmTap": "Registratie bevestigen",
+      "confirmTapSkills": "Registratie + vaardigheden bevestigen ({count})",
+      "confirmedCard": "Bevestigd — {name}",
+      "rejectedCard": "Afgewezen — {name}. De registratie blijft door de werknemer zelf opgegeven in zijn dagboek.",
+      "batchButton": "Alles van vandaag bevestigen ({count})",
+      "batchSummaryTitle": "Wat u bevestigt",
+      "batchSummaryLead": "Eén bevestiging dekt alle onderstaande registraties en wordt vastgelegd als uw beslissing voor elk ervan. Bekijk de lijst voordat u bevestigt.",
+      "batchConfirm": "Bevestigen ({count})",
+      "batchDone": "Bevestigde registraties: {confirmed}. Bevestigde vaardigheden: {skills}.",
+      "batchFailed": "Niet bevestigd: {count} — open de uitgebreide beoordeling.",
+      "exception": {
+        "worker_first_entries": "[EN] Person's first entries",
+        "unusual_hours": "[EN] Unusual hours",
+        "new_skill": "[EN] New skill"
+      },
+      "ackButton": "[EN] Reviewed — confirm this one too",
+      "ackDone": "[EN] Will be confirmed ✓",
+      "excludedNote": "[EN] {count, plural, =0 {All exceptions reviewed — the whole list will be confirmed.} one {# entry with an exception will NOT be confirmed until you mark it reviewed.} other {# entries with exceptions will NOT be confirmed until you mark them reviewed.}}",
+      "outcomeNotAcknowledged": "[EN] not confirmed — the exception was left unreviewed",
+      "outcomeBlocked": "[EN] not confirmed ({code})"
+    }
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",

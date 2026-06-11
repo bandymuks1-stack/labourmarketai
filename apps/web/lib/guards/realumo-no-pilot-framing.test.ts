@@ -59,21 +59,21 @@ describe("§18 Realumo principas — no pilot/demo/Tier-2 framing in product cop
     });
 
     it(`${locale}.json demand-intake done state is a founder moment, not a "we'll contact you" wrapper`, () => {
-      const pilot = (
+      const demand = (
         json as {
           auth?: {
             dashboard?: {
               wow?: {
-                pilot?: { hire?: { done?: string }; partner?: { done?: string } };
+                demand?: { hire?: { done?: string }; partner?: { done?: string } };
               };
             };
           };
         }
-      ).auth?.dashboard?.wow?.pilot;
+      ).auth?.dashboard?.wow?.demand;
       // Intent-specific done states (hire vs partner) — both must be present
       // and neither may be a "we'll contact you" wrapper.
-      for (const done of [pilot?.hire?.done, pilot?.partner?.done]) {
-        expect(done, `${locale} auth.dashboard.wow.pilot.*.done present`).toBeTruthy();
+      for (const done of [demand?.hire?.done, demand?.partner?.done]) {
+        expect(done, `${locale} auth.dashboard.wow.demand.*.done present`).toBeTruthy();
         expect(/susisieksime|be in touch|will be in touch/i.test(done!)).toBe(false);
       }
     });

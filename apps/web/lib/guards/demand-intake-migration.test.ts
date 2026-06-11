@@ -4,7 +4,7 @@
  * owner-scoped save_demand_draft (draft) + submit_demand_request (submitted)
  * RPCs (no RLS loosening, no direct cross-profile insert), pilot_drafts folded
  * (not dropped here), default-closed preserved — and that the shipped
- * pilot-request CTA writes the canonical intake, never the leads pre-auth funnel.
+ * demand-request CTA writes the canonical intake, never the leads pre-auth funnel.
  */
 
 import { describe, expect, it } from "vitest";
@@ -50,7 +50,7 @@ describe("Guard: demand-intake consolidation migration", () => {
   });
 
   it("submit_demand_request is owner-scoped, status='submitted', stamps kind", () => {
-    // The pilot-request CTA submit path — repointed off the leads funnel onto the
+    // The demand-request CTA submit path — repointed off the leads funnel onto the
     // canonical intake. Owner-scoped SECURITY DEFINER (same admin-only INSERT RLS
     // reason as the draft RPC); status hard-pinned to 'submitted' (no self-promote
     // into the admin-only review statuses).
@@ -84,18 +84,18 @@ describe("Guard: demand-intake consolidation migration", () => {
   });
 });
 
-describe("Guard: the pilot-request CTA writes the CANONICAL intake (not leads)", () => {
+describe("Guard: the demand-request CTA writes the CANONICAL intake (not leads)", () => {
   // Strip comments so the "must not" checks test real CODE, not the prose that
   // (legitimately) names /api/leads to explain why it is NOT used.
   const stripComments = (s: string) =>
     s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
-  const button = stripComments(readWeb("components/app/pilot-request-button.tsx"));
-  const helper = stripComments(readWeb("lib/pilot/pilot-request.ts"));
+  const button = stripComments(readWeb("components/app/demand-request-button.tsx"));
+  const helper = stripComments(readWeb("lib/demand/demand-request.ts"));
 
-  it("PilotRequestButton submits via the canonical action — no leads fetch", () => {
-    // The shipped pilot-request CTA is the single demand front door. It must go
+  it("DemandRequestButton submits via the canonical action — no leads fetch", () => {
+    // The shipped demand-request CTA is the single demand front door. It must go
     // through the canonical submit action, never re-fork back onto the funnel.
-    expect(button).toMatch(/submitPilotRequestAction/);
+    expect(button).toMatch(/submitDemandRequestAction/);
     expect(button).not.toMatch(/\/api\/leads/);
     expect(button).not.toMatch(/fetch\(/); // server action, not a network POST
   });

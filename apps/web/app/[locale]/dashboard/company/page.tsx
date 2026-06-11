@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
-import { PilotDraftForm } from "@/components/app/pilot-draft-form";
+import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
@@ -17,9 +17,14 @@ import {
   listActiveCompanyWorkers,
   listCompanyWorkerInvitations,
 } from "@/lib/company/company-workers";
-import { getPilotDraft } from "@/lib/pilot/pilot-drafts";
+import { getDemandDraft } from "@/lib/demand/demand-drafts";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
+import { getOwnCompany as getOwnCompanyProfile } from "@/lib/company/company-setup";
+import {
+  CompanyNextActions,
+  CompanyNoProfileGuide,
+} from "@/components/app/company-next-actions";
 
 const COMPANY_FIELDS = [
   { key: "title" as const, labelKey: "field.title.label", placeholderKey: "field.title.placeholder", variant: "text" as const },
@@ -48,8 +53,31 @@ export default async function CompanyDashboardPage({
 
   const t = await getTranslations("roleDashboards.company");
   const tSpaces = await getTranslations("spaces");
+
+  // Automatic-first status + next actions. Read the caller's OWN company
+  // profile (RLS-scoped). When a company-role holder has no company row yet,
+  // show a clean guide to the setup route — never empty technical blocks.
+  const companyProfile = await getOwnCompanyProfile();
+  if (companyProfile.kind === "ok" && companyProfile.row === null) {
+    return (
+      <div className="flex flex-col gap-6" data-testid="company-dashboard">
+        <header className="flex flex-col gap-1">
+          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+            {t("eyebrow")}
+          </p>
+          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+            {t("title")}
+          </h1>
+        </header>
+        <CompanyNoProfileGuide />
+      </div>
+    );
+  }
+  const companyRow =
+    companyProfile.kind === "ok" ? companyProfile.row : null;
+
   const tWorkers = await getTranslations("roleDashboards.company.workers");
-  const existingDraft = await getPilotDraft("company_request");
+  const existingDraft = await getDemandDraft("company_request");
 
   const ownCompany = await getOwnCompany();
   const workersResult = ownCompany
@@ -294,6 +322,8 @@ export default async function CompanyDashboardPage({
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
+      {companyRow ? <CompanyNextActions company={companyRow} /> : null}
+
       <section
         className="card-border flex flex-col gap-4 p-5"
         data-testid="company-ops-workspace"
@@ -407,13 +437,15 @@ export default async function CompanyDashboardPage({
 
       <TeamRosterEmptyState variant="company" />
 
-      <CompanyWorkersSection
-        workersResult={workersResult}
-        invitationsResult={invitationsResult}
-        labels={workersLabels}
-        roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
-        canAssignRoles
-      />
+      <div id="company-team" className="scroll-mt-20">
+        <CompanyWorkersSection
+          workersResult={workersResult}
+          invitationsResult={invitationsResult}
+          labels={workersLabels}
+          roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
+          canAssignRoles
+        />
+      </div>
 
       <WorkerReadinessSummary rows={readinessRows} />
 
@@ -427,7 +459,8 @@ export default async function CompanyDashboardPage({
       )}
 
       <section
-        className="card-border flex flex-col gap-4 p-5"
+        id="company-requests"
+        className="card-border flex flex-col gap-4 p-5 scroll-mt-20"
         data-testid="company-dashboard-first-action"
       >
         <header className="flex flex-col gap-1">
@@ -438,7 +471,26 @@ export default async function CompanyDashboardPage({
             {t("firstAction.body")}
           </p>
         </header>
-        <PilotDraftForm
+        {/* Persistent (reload-safe) empty / saved-private state. The form's own
+            "saved" line only appears right after an in-session save; this tells
+            the company, on every visit, whether a private draft exists — and is
+            careful to NEVER imply it was submitted, sent, matched, or reviewed. */}
+        {existingDraft ? (
+          <p
+            className="rounded-md border border-state-success/30 bg-state-success/5 px-3 py-2 text-xs text-state-success"
+            data-testid="company-request-saved-state"
+          >
+            ✓ {t("firstAction.savedState")}
+          </p>
+        ) : (
+          <p
+            className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+            data-testid="company-request-empty-state"
+          >
+            {t("firstAction.emptyState")}
+          </p>
+        )}
+        <DemandDraftForm
           draftType="company_request"
           fields={COMPANY_FIELDS}
           i18nNamespace="roleDashboards.company.draftForm"
