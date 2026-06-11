@@ -1323,5 +1323,24 @@
     "verifiedEmpty": "Noch keine bestätigten Fähigkeiten. Sie erscheinen, wenn eine Führungskraft deine Journaleinträge bestätigt.",
     "latestEvidenceLabel": "Neuester Nachweis",
     "latestEvidenceEmpty": "Noch keine Nachweise — dein erster Journaleintrag wird der erste sein."
+  },
+  "projects": {
+    "map": {
+      "eyebrow": "Manager-Karte",
+      "title": "Deine Projekte",
+      "untitled": "Projekt ohne Namen",
+      "teamLabel": "Im Team",
+      "openArena": "Arena öffnen"
+    },
+    "pulse": {
+      "pendingTitle": "{n, plural, one {# Eintrag wartet auf deine Bestätigung} other {# Einträge warten auf deine Bestätigung}}",
+      "pendingBody": "Ein Tippen — und die Arbeit eines Menschen wird zum bestätigten Nachweis.",
+      "cta": "Jetzt bestätigen",
+      "zero": "Derzeit wartet nichts auf Bestätigung — der Rhythmus des Teams ist ruhig.",
+      "zeroCta": "Prüfwarteschlange"
+    },
+    "draft": {
+      "title": "Draft — Projekte und Teams"
+    }
   }
 }

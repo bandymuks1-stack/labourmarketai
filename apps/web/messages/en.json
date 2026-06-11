@@ -2891,6 +2891,23 @@
       "assigned": "Assigned",
       "notAuthorized": "You can only assign workers from your team to your own projects.",
       "noWorkers": "You don't have any assignable workers on your team yet."
+    },
+    "map": {
+      "eyebrow": "Manager map",
+      "title": "Your projects",
+      "untitled": "Untitled project",
+      "teamLabel": "On the team",
+      "openArena": "Open arena"
+    },
+    "pulse": {
+      "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
+      "pendingBody": "One tap — and a person's work becomes confirmed proof.",
+      "cta": "Confirm now",
+      "zero": "Nothing is waiting for confirmation right now — the team's rhythm is calm.",
+      "zeroCta": "Review queue"
+    },
+    "draft": {
+      "title": "Draft — projects and teams"
     }
   },
   "projectOps": {

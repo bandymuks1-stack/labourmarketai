@@ -1,17 +1,16 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
-import {
-  listManagedProjects,
-  listProjectAssignments,
-} from "@/lib/projects/projects";
+import { listProjectAssignments } from "@/lib/projects/projects";
+import { listProjectMap } from "@/lib/projects/map";
 import { listManagedWorkers } from "@/lib/instructions/instructions";
 import {
   ProjectAssignmentManager,
   type ProjectManagerLabels,
 } from "@/components/app/project-assignment-manager";
+import { ProjectMap } from "@/components/app/arena/project-map";
+import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { type Role } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -19,9 +18,12 @@ export const dynamic = "force-dynamic";
 const MANAGER_ROLES = new Set<Role>(["company", "agency"]);
 
 /**
- * F4 — manager surface to create projects and assign roster workers to them
- * (the prerequisite for project-scoped instructions, F5). Manager-only; every
- * write is gated by the project + caller-roster RPCs. Honest empty states.
+ * The manager MAP (TASK 07 slice 2 — MAP → ARENA → DRAFT, living-arena skin
+ * over the F4 surface). MAP: arena cards with real team sizes, one click to
+ * the ARENA (operations). Pulse: the S3.5 confirm queue woven into the
+ * rhythm. DRAFT: the existing gated create/assign flow — every write still
+ * goes through the project + caller-roster RPCs; the human decides. Honest
+ * empty states throughout.
  */
 export default async function ProjectsPage({
   params,
@@ -58,7 +60,7 @@ export default async function ProjectsPage({
   }
 
   const [projects, workers] = await Promise.all([
-    listManagedProjects(),
+    listProjectMap(),
     listManagedWorkers(),
   ]);
   const withAssignments = await Promise.all(
@@ -95,8 +97,12 @@ export default async function ProjectsPage({
   };
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="flex max-w-4xl flex-col gap-6">
       <header className="flex flex-col gap-1">
+        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+          <span className="live-dot" aria-hidden />
+          {t("map.eyebrow")}
+        </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("title")}
         </h1>
@@ -104,31 +110,24 @@ export default async function ProjectsPage({
           {t("intro")}
         </p>
       </header>
-      <ProjectAssignmentManager
-        projects={withAssignments}
-        workers={workers}
-        labels={labels}
-      />
-      {withAssignments.length > 0 ? (
-        <section className="flex flex-col gap-2">
-          <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("operationsTitle")}
-          </h2>
-          <ul className="flex flex-col gap-1">
-            {withAssignments.map((p) => (
-              <li key={p.id}>
-                <Link
-                  href={`/${locale}/dashboard/projects/${p.id}/operations`}
-                  className="text-sm text-brand-cyan hover:underline"
-                  data-testid="project-operations-link"
-                >
-                  {(p.title ?? t("untitledFallback")) + " →"}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+
+      {/* ARENA rhythm: the real S3.5 confirm queue pulse, never a fake. */}
+      <ConfirmPulse />
+
+      {/* MAP — projects → teams → people; one click into each ARENA. */}
+      <ProjectMap projects={projects} locale={locale} />
+
+      {/* DRAFT — the gated create/assign flow (human decision, RPC writes). */}
+      <section className="flex flex-col gap-3" data-testid="draft-section">
+        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("draft.title")}
+        </h2>
+        <ProjectAssignmentManager
+          projects={withAssignments}
+          workers={workers}
+          labels={labels}
+        />
+      </section>
     </div>
   );
 }
