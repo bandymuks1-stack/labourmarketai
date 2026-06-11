@@ -3033,6 +3033,23 @@
       "docsReceived": "Docs received",
       "docsChecked": "Docs checked",
       "docsBlocked": "Rejected/expired"
+    },
+    "stadium": {
+      "eyebrow": "Stadium",
+      "fieldCount": "{n, plural, one {# person on the field} other {# people on the field}}",
+      "todayCount": "{n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
+      "todayZero": "No entries yet today — the day is still waiting for its first record.",
+      "fieldTitle": "The field — who is on the team today",
+      "positionUnknown": "Position not set",
+      "docsMissingChip": "Docs missing: {n}",
+      "docsCheckedChip": "Docs checked: {n}",
+      "lastActivity": "Last entry: {date}",
+      "noActivity": "No entries yet.",
+      "emptyTeam": "This project has no team yet — start the draft and bring the first people onto the field.",
+      "emptyTeamCta": "Start the draft",
+      "positionsTitle": "Missing positions",
+      "positionsEmpty": "The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "openOps": "Open the management arena"
     }
   },
   "setupRoleChoice": {

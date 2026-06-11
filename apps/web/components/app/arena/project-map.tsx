@@ -29,11 +29,15 @@ export async function ProjectMap({
       </h2>
       <ul className="grid gap-4 sm:grid-cols-2">
         {projects.map((p) => (
-          <li key={p.id}>
+          <li
+            key={p.id}
+            className="card-border glow-hover rise-in flex h-full flex-col gap-3 p-5"
+          >
+            {/* Card body → STADIONAS (the live project view, T07.3). */}
             <Link
-              href={`/${locale}/dashboard/projects/${p.id}/operations`}
-              data-testid="project-operations-link"
-              className="card-border glow-hover rise-in flex h-full flex-col gap-3 p-5"
+              href={`/${locale}/dashboard/projects/${p.id}`}
+              data-testid="project-stadium-link"
+              className="flex flex-1 flex-col gap-3"
             >
               <span className="font-display text-lg font-semibold tracking-tightest text-text-primary">
                 {p.title ?? t("untitled")}
@@ -44,21 +48,24 @@ export async function ProjectMap({
                   {p.city}
                 </span>
               ) : null}
-              <span className="mt-auto flex items-end justify-between gap-3">
-                <span className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-brand-cyan" aria-hidden />
-                  <CountUp
-                    text={String(p.assignedCount)}
-                    className="font-mono text-2xl font-bold tracking-tightest text-text-primary"
-                  />
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                    {t("teamLabel")}
-                  </span>
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-label text-brand-blue">
-                  {t("openArena")} →
+              <span className="mt-auto flex items-center gap-2">
+                <Users className="h-4 w-4 text-brand-cyan" aria-hidden />
+                <CountUp
+                  text={String(p.assignedCount)}
+                  className="font-mono text-2xl font-bold tracking-tightest text-text-primary"
+                />
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {t("teamLabel")}
                 </span>
               </span>
+            </Link>
+            {/* Direct door into the management ARENA (operations board). */}
+            <Link
+              href={`/${locale}/dashboard/projects/${p.id}/operations`}
+              data-testid="project-operations-link"
+              className="inline-flex min-h-8 w-fit items-center font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+            >
+              {t("openArena")} →
             </Link>
           </li>
         ))}

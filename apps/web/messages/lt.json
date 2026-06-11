@@ -3033,6 +3033,23 @@
       "docsReceived": "Gauta dokumentų",
       "docsChecked": "Patikrinta dokumentų",
       "docsBlocked": "Atmesta/pasibaigę"
+    },
+    "stadium": {
+      "eyebrow": "Stadionas",
+      "fieldCount": "{n, plural, one {# žmogus aikštėje} few {# žmonės aikštėje} other {# žmonių aikštėje}}",
+      "todayCount": "{n, plural, one {# šiandienos žurnalo įrašas — diena juda} few {# šiandienos žurnalo įrašai — diena juda} other {# šiandienos žurnalo įrašų — diena juda}}",
+      "todayZero": "Šiandien įrašų dar nėra — diena dar laukia pirmo įrašo.",
+      "fieldTitle": "Aikštė — kas šiandien komandoje",
+      "positionUnknown": "Pozicija nenurodyta",
+      "docsMissingChip": "Trūksta dok.: {n}",
+      "docsCheckedChip": "Dok. patikrinta: {n}",
+      "lastActivity": "Paskutinis įrašas: {date}",
+      "noActivity": "Įrašų dar nėra.",
+      "emptyTeam": "Projektas dar be komandos — pradėk draftą ir pakviesk pirmus žmones į aikštę.",
+      "emptyTeamCta": "Pradėti draftą",
+      "positionsTitle": "Trūkstamos pozicijos",
+      "positionsEmpty": "Pozicijų poreikių modulis dar ruošiamas — kai jis atsiras, čia matysi, kokių žmonių trūksta.",
+      "openOps": "Atidaryti valdymo areną"
     }
   },
   "setupRoleChoice": {

@@ -1342,5 +1342,24 @@
     "draft": {
       "title": "Draft — projekter og hold"
     }
+  },
+  "projectOps": {
+    "stadium": {
+      "eyebrow": "Stadion",
+      "fieldCount": "{n, plural, one {# person på banen} other {# personer på banen}}",
+      "todayCount": "{n, plural, one {# journalpost i dag — dagen er i bevægelse} other {# journalposter i dag — dagen er i bevægelse}}",
+      "todayZero": "Ingen poster endnu i dag — dagen venter stadig på sin første post.",
+      "fieldTitle": "Banen — hvem er på holdet i dag",
+      "positionUnknown": "Position ikke angivet",
+      "docsMissingChip": "Dok. mangler: {n}",
+      "docsCheckedChip": "Dok. kontrolleret: {n}",
+      "lastActivity": "Seneste post: {date}",
+      "noActivity": "Ingen poster endnu.",
+      "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
+      "emptyTeamCta": "Start draften",
+      "positionsTitle": "Manglende positioner",
+      "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
+      "openOps": "Åbn management-arenaen"
+    }
   }
 }
