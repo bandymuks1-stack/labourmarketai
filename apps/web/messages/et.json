@@ -1342,5 +1342,24 @@
     "draft": {
       "title": "[EN] Draft — projects and teams"
     }
+  },
+  "projectOps": {
+    "stadium": {
+      "eyebrow": "[EN] Stadium",
+      "fieldCount": "[EN] {n, plural, one {# person on the field} other {# people on the field}}",
+      "todayCount": "[EN] {n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
+      "todayZero": "[EN] No entries yet today — the day is still waiting for its first record.",
+      "fieldTitle": "[EN] The field — who is on the team today",
+      "positionUnknown": "[EN] Position not set",
+      "docsMissingChip": "[EN] Docs missing: {n}",
+      "docsCheckedChip": "[EN] Docs checked: {n}",
+      "lastActivity": "[EN] Last entry: {date}",
+      "noActivity": "[EN] No entries yet.",
+      "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
+      "emptyTeamCta": "[EN] Start the draft",
+      "positionsTitle": "[EN] Missing positions",
+      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "openOps": "[EN] Open the management arena"
+    }
   }
 }
