@@ -72,9 +72,10 @@ describe("'galim pasiūlyti' is a proposal, never a match", () => {
   });
 });
 
-describe("S5 demand-visibility migration stays a gated, narrow DRAFT", () => {
-  it("is explicitly a needs-human-gate DRAFT with a rollback", () => {
-    expect(migration).toMatch(/DRAFT — needs-human-gate — DO NOT APPLY/);
+describe("S5 demand-visibility migration is applied-marked, narrow, reversible", () => {
+  it("carries the APPLIED-to-prod ledger mark with a rollback", () => {
+    expect(migration).toMatch(/APPLIED to prod via Supabase MCP apply_migration/);
+    expect(migration).toMatch(/20260611091820/);
     expect(migration).toMatch(/-- ROLLBACK/);
   });
   it("returns ONLY curated, non-personal demand columns", () => {

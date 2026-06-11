@@ -1,7 +1,6 @@
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after owner + Chat Claude
--- review (S5 / feat/cc/s5-agency-pool). Never `db push`.
+-- APPLIED to prod via Supabase MCP apply_migration after owner + Chat Claude
+-- review (2026-06-11, ledger version 20260611091820). Never `db push`.
 --
 -- S5 agency demand visibility — the narrowest possible bridge that lets an
 -- AGENCY see open demand and raise a hand, with NO RLS widening:
