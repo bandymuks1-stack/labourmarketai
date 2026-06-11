@@ -1337,6 +1337,19 @@
         "help": "Šalys su paklausa, rikiuojamos nuo silpniausios pasiūlos. Eilutė su 0 pasiūla — sprendžiama spraga.",
         "empty": "Paklausos įrašų dar nėra.",
         "row": "paklausa {demand} · pasiūla {supply}"
+      },
+      "pulse": {
+        "title": "Rinkos pulsas — gyvi agregatai",
+        "supplyTitle": "Pasiūla (žmonės pagal profesiją × šalį)",
+        "supplyEmpty": "Profesijų dar nepažymėta — juostos atsiras su pirmais darbuotojais.",
+        "demandTitle": "Paklausa (atviros užklausos)",
+        "demandEmpty": "Atvirų užklausų šiuo metu nėra — sąžiningai rami rinka.",
+        "gapsTitle": "Šalių spragos (paklausa vs pasiūla)",
+        "gapsEmpty": "Paklausos įrašų dar nėra.",
+        "gapLine": "{demand} užklausos / {supply} žmonės",
+        "thermoTitle": "Termometrai (tik kur yra abu dėmenys)",
+        "thermoEmpty": "Termometro reikšmių dar nėra — jos atsiras, kai bus įvestas pagrįstas rinkos vidurkis IR langelis turės bent 2 žmonių deklaruotų lūkesčių imtį.",
+        "smallSample": "n<{n}"
       }
     },
     "league": {

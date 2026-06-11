@@ -6,10 +6,12 @@ import {
   getMarketAnalysis,
   UNKNOWN_BUCKET,
 } from "@/lib/admin/market-analysis";
+import { getLeague } from "@/lib/admin/league";
 import {
   MarketAverageForm,
   type MarketAverageFormLabels,
 } from "@/components/app/market-average-form";
+import { MarketPulseBoard } from "@/components/app/market-pulse-board";
 
 /**
  * "Kokia situacija rinkoje" — admin market analysis v1 (S4 item 4).
@@ -22,7 +24,10 @@ import {
  * needs-migration note until the S4 draft is applied. No estimates, no
  * invented numbers, no silent zeros.
  *
- * UI: low-fidelity preview, bus pakeista TASK 07.
+ * UI: S8 living-arena skin — the MarketPulseBoard renders the same real
+ * aggregates visually (pure CSS bars proportional to row counts, thermometer
+ * chips only where the owner-locked formula has both components); the
+ * detailed tables below stay the audit surface.
  */
 
 export default async function AdminMarketPage({
@@ -36,7 +41,10 @@ export default async function AdminMarketPage({
 
   const t = await getTranslations("admin.market");
   const tProf = await getTranslations("professions");
-  const analysis = await getMarketAnalysis();
+  const [analysis, league] = await Promise.all([
+    getMarketAnalysis(),
+    getLeague(),
+  ]);
 
   const professionLabel = (slug: string): string => {
     try {
@@ -90,6 +98,14 @@ export default async function AdminMarketPage({
           ← {t("back")}
         </Link>
       </header>
+
+      {/* ── S8: the living market pulse — the SAME real aggregates, visual ── */}
+      <MarketPulseBoard
+        analysis={analysis}
+        league={league}
+        professionLabel={professionLabel}
+        countryLabel={countryLabel}
+      />
 
       {/* ── Admin market averages (thermometer component 2) ──────────────── */}
       <section className="flex flex-col gap-3" data-testid="admin-market-averages">

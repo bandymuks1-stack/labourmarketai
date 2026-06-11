@@ -1291,6 +1291,19 @@
         "help": "[EN] Countries with demand, ordered by weakest supply. A row with 0 supply is the gap to act on.",
         "empty": "[EN] No demand recorded yet.",
         "row": "[EN] demand {demand} · supply {supply}"
+      },
+      "pulse": {
+        "title": "Marktpuls — Live-Aggregate",
+        "supplyTitle": "Angebot (Personen pro Beruf × Land)",
+        "supplyEmpty": "Noch keine Berufe angegeben — die Balken erscheinen mit den ersten Arbeitskräften.",
+        "demandTitle": "Nachfrage (offene Anfragen)",
+        "demandEmpty": "Derzeit keine offenen Anfragen — ein ehrlich ruhiger Markt.",
+        "gapsTitle": "Länderlücken (Nachfrage vs. Angebot)",
+        "gapsEmpty": "Noch keine Nachfrage erfasst.",
+        "gapLine": "{demand} Anfragen / {supply} Personen",
+        "thermoTitle": "Thermometer (nur wo beide Komponenten existieren)",
+        "thermoEmpty": "Noch keine Thermometerwerte — sie erscheinen, sobald ein belegter Marktdurchschnitt eingetragen ist UND eine Zelle eine Stichprobe von mindestens 2 erklärten Erwartungen hat.",
+        "smallSample": "n<{n}"
       }
     },
     "league": {
