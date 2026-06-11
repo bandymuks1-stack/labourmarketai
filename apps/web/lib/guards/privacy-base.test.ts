@@ -3,13 +3,10 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Privatumo bazės guard'as (v2 parengiamasis sluoksnis, 2026-06-11).
+ * Privatumo bazės guard'as (doktrinos §20, owner tekstas 1:1 — 2026-06-11).
  *
- * PASTABA: doktrinos skyriaus „Privatumo bazė (visomis kryptimis)" owner
- * tekstas 1:1 dar NEgautas — šis guard'as užrakina TECHNINIUS invariantus,
- * kuriuos owner įvardijo struktūriškai (žr. docs/proposals/
- * privacy-base-v2-DRAFT.md). Tekstui atėjus, skyrius įrašomas, o guard'as
- * papildomas teksto pin'ais.
+ * Pina ir DOKTRINOS TEKSTĄ (visi 6 punktai §20 skyriuje), ir TECHNINIUS
+ * invariantus:
  *
  *   1. Cross-role keliai lieka uždari (worker dokumentai/pirkimo istorijos
  *      tipo duomenys niekada neteka darbdaviui/agentūrai be sutikimo).
@@ -32,6 +29,39 @@ const MIGRATIONS_DIR = join(REPO, "supabase", "migrations");
 const migrationFiles = readdirSync(MIGRATIONS_DIR).filter((f) =>
   f.endsWith(".sql"),
 );
+
+describe("§20 Privatumo bazė is in the doctrine (owner text 1:1)", () => {
+  const doctrine = readFileSync(
+    join(REPO, "docs", "PLATFORM_DOCTRINE.md"),
+    "utf8",
+  );
+  it("section exists with the owner heading", () => {
+    expect(doctrine).toMatch(
+      /Section 20 — Privatumo bazė \(visomis kryptimis\)/,
+    );
+    expect(doctrine).toContain("owner tekstas 2026-06-11, įrašytas 1:1");
+  });
+  it("all six points are present verbatim (key phrases)", () => {
+    for (const phrase of [
+      "NIEKADA nematomi",
+      "jokiu netiesioginiu keliu",
+      "ne darbuotojo privilegija, o platformos fizika",
+      "mažos imties slenksčiu (n<5 šablonas)",
+      "Individualių elgsenos",
+      "MOKSLAS DIRBA TIK SU ANONIMINIAIS DUOMENIMIS — be išimčių",
+      "pseudonimizuoti ID + agregacija + k-slenkstis",
+      "Identifikuotų tyrimų kategorija platformoje",
+      "niekada nekeičia konkretaus",
+      "matching, matomumo, kainų ar pasiūlymų",
+      "skaidriai aprašomi privacy policy",
+    ]) {
+      expect(doctrine, `§20 missing phrase: ${phrase}`).toContain(phrase);
+    }
+  });
+  it("the changelog records the §20 amendment", () => {
+    expect(doctrine).toMatch(/\| 2026-06-11 \| §20 \|/);
+  });
+});
 
 describe("1 · cross-role paths stay closed", () => {
   it("agency pool never reads worker_documents (aggregates only via consent RPC)", () => {
