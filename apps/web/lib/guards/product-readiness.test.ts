@@ -1360,7 +1360,10 @@ describe("no migration files added by this sprint", () => {
     // S5 DRAFT (needs-human-gate, NOT applied) — two gated DEFINER RPCs
     // (curated open-demand read for agency owners + the append-only
     // "galim pasiūlyti" proposal marker); no RLS change, no new table.
-    const SPRINT_BASELINE = 65;
+    // Bumped 65 -> 66 for the confirmation-role CHECK (20260602130000):
+    // additive confirmer_role pin, APPLIED to prod via MCP after owner review
+    // (2026-06-11, ledger 20260611091834).
+    const SPRINT_BASELINE = 66;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
