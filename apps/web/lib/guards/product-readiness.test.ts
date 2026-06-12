@@ -1381,7 +1381,11 @@ describe("no migration files added by this sprint", () => {
     // APPLIED to prod via the owner channel and verified 2026-06-12
     // (revoked_at/revoked_by + SECURITY DEFINER recursion fix + revoke RPC +
     // grant hardening). Landed in the ledger sync-only.
-    const SPRINT_BASELINE = 71;
+    // Bumped 71 -> 72 for Phase A search_path hygiene (20260612180000
+    // pin_function_search_path) — additive GREEN ALTER FUNCTION ... SET
+    // search_path = public on 4 SECURITY INVOKER functions; no RLS/grant/
+    // policy/data change.
+    const SPRINT_BASELINE = 72;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

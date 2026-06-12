@@ -150,6 +150,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 71 for the chat-visibility revocation migration
     // (20260612170000 conversation_participant_revocation — RED, applied via
     // owner channel + verified, landed sync-only).
-    expect(guard).toMatch(/SPRINT_BASELINE = 71/);
+    // then to 72 for Phase A search_path hygiene (20260612180000
+    // pin_function_search_path — additive GREEN, ALTER FUNCTION SET only).
+    expect(guard).toMatch(/SPRINT_BASELINE = 72/);
   });
 });
