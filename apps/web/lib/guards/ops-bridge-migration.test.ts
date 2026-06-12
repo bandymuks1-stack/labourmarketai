@@ -142,6 +142,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // APPLIED to prod 2026-06-11, ledger 20260611091834).
     // then to 67 for the S6 worker-docs-consent DRAFT (20260611170000;
     // needs-human-gate, not applied).
-    expect(guard).toMatch(/SPRINT_BASELINE = 67/);
+    // then to 69 for company-role-simplicity-v1 (20260612090000 company_type
+    // + save_company_setup_v2 country validation; 20260612091000
+    // journal_entry_photos free-tier photo evidence — both additive GREEN).
+    expect(guard).toMatch(/SPRINT_BASELINE = 69/);
   });
 });

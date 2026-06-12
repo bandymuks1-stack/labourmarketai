@@ -320,6 +320,35 @@ export default async function CompanyDashboardPage({
           {t("title")}
         </h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+        {/* ONE canonical company profile — the workspace re-labels itself
+            from companies.company_type after every save/refresh. An agency
+            is this same profile with type 'staffing_agency', never a
+            separate root role or a stale legacy mode. */}
+        {companyRow ? (
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <span
+              className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-cyan"
+              data-testid="company-dashboard-type-chip"
+            >
+              {t(`setup.companyTypeOptions.${companyRow.companyType}`)}
+            </span>
+            {companyRow.companyType === "staffing_agency" ? (
+              <span
+                className="text-[11px] text-text-muted"
+                data-testid="company-dashboard-type-note"
+              >
+                {t("typeNotes.staffing_agency")}
+              </span>
+            ) : companyRow.companyType === "client_customer" ? (
+              <span
+                className="text-[11px] text-text-muted"
+                data-testid="company-dashboard-type-note"
+              >
+                {t("typeNotes.client_customer")}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
       </header>
 
       {companyRow ? <CompanyNextActions company={companyRow} /> : null}

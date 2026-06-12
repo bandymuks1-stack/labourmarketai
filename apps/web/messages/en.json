@@ -360,6 +360,10 @@
           "cta": "Start company setup"
         }
       },
+      "typeNotes": {
+        "staffing_agency": "You are in staffing-agency mode — the same company profile, only the type changed.",
+        "client_customer": "You are in client / requester mode — the same company profile, only the type changed."
+      },
       "setup": {
         "formTitle": "Company profile request",
         "formSubtitle": "Create your organisation profile from your personal account. It's active and usable straight away — no waiting for approval. Verification is a stronger, separate trust step.",
@@ -367,8 +371,31 @@
         "legalName": "Company legal name",
         "legalNameHelp": "Required. 2–200 characters.",
         "legalNamePlaceholder": "e.g. Acme Ltd",
+        "companyType": "Company type",
+        "companyTypeHelp": "One company profile for every type. Changing the type (e.g. to a staffing agency and back) keeps the same profile — only labels and visible blocks change.",
+        "companyTypeOptions": {
+          "construction": "Construction company",
+          "staffing_agency": "Staffing agency",
+          "subcontractor": "Subcontractor",
+          "manufacturing": "Manufacturing",
+          "services": "Services",
+          "client_customer": "Client / requester",
+          "other": "Other"
+        },
         "country": "Country",
         "countryPlaceholder": "e.g. LT",
+        "countryOptions": {
+          "LT": "Lithuania",
+          "LV": "Latvia",
+          "EE": "Estonia",
+          "PL": "Poland",
+          "NL": "Netherlands",
+          "DK": "Denmark",
+          "DE": "Germany",
+          "SE": "Sweden",
+          "NO": "Norway"
+        },
+        "statusInvalidCountry": "Choose a country from the list — other values are not supported yet.",
         "registrationCode": "Company / registration code",
         "registrationCodeHelp": "Optional. Helps verify the company later.",
         "address": "Address / location",
@@ -2356,7 +2383,8 @@
       "emptyTitle": "Nothing needs your attention right now.",
       "emptyBody": "If something important comes up, you'll see it here.",
       "switchRoleCta": "Switch to {role} to view",
-      "markAllRead": "Mark all as read"
+      "markAllRead": "Mark all as read",
+      "close": "Close"
     }
   },
   "shared": {
@@ -2959,6 +2987,7 @@
       "sent": "Instruction sent",
       "notAuthorized": "You can only send instructions to workers on your team.",
       "error": "Could not send. Please try again.",
+      "selectWorkerError": "Choose a worker from the list first.",
       "noWorkers": "You don't have any assigned workers yet. Once you add a worker to your team, you can send instructions.",
       "scopeNote": "You can send a team-level instruction or pick a project. A project instruction reaches only workers actively assigned to that project.",
       "projectScopeLabel": "Scope (optional)",
@@ -3174,23 +3203,15 @@
   },
   "setupRoleChoice": {
     "title": "How would you like to start?",
-    "body": "labourmarket.ai is demand-first — you do not have to be an agency. Pick the way that matches you. You can start a request, invite people, or offer your own work; nothing forces a worker to register first.",
+    "body": "The start is simple: you either work yourself, or you represent a company. An agency is not a separate role — it is a company type (staffing agency) you pick inside the company profile. The client / requester type is picked there too.",
     "options": {
-      "findHuman": {
-        "label": "I'm looking for a person or a service",
-        "hint": "Start as a requester / customer and create a request or demand."
+      "offerWork": {
+        "label": "I work myself (worker)",
+        "hint": "Build your profile and capabilities as a worker / provider."
       },
       "representCompany": {
         "label": "I represent a company",
-        "hint": "Set up your company to invite workers and run projects."
-      },
-      "representAgency": {
-        "label": "I represent an agency / team",
-        "hint": "Set up your agency to link and coordinate workers."
-      },
-      "offerWork": {
-        "label": "I offer my own work or services",
-        "hint": "Build your profile and capabilities as a worker / provider."
+        "hint": "One company profile — you pick the type (construction, staffing agency, subcontractor, manufacturing, services, client / requester, other) inside it."
       }
     },
     "draft": {

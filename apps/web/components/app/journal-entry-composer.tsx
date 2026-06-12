@@ -20,6 +20,11 @@ import {
   createJournalEntry,
   supersedeJournalEntry,
 } from "@/lib/journal/actions";
+import {
+  isValidJournalPhoto,
+  uploadJournalEntryPhoto,
+  type JournalPhotoUploadResult,
+} from "@/lib/journal/photo-upload";
 import { formatDuration } from "@/lib/journal/format-duration";
 import {
   completeTask,
@@ -103,6 +108,13 @@ export function JournalEntryComposer({
   // visible, not silent. Counts only what the save action truly writes
   // (metrics + confirmed fragments), never the display-only skill hints.
   const [savedDetailCount, setSavedDetailCount] = useState(0);
+  // Free-tier photo evidence: ONE photo per entry (more = future VIP/Pro,
+  // stated honestly in copy). The file is uploaded AFTER the entry saves;
+  // photoOutcome drives an honest line in the success banner.
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoOutcome, setPhotoOutcome] =
+    useState<JournalPhotoUploadResult | null>(null);
 
   const [timeStatus, setTimeStatus] = useState<SuggestionStatus>("pending");
   const [timeValue, setTimeValue] = useState<string>("");
@@ -297,6 +309,19 @@ export function JournalEntryComposer({
         });
         return;
       }
+      // Photo evidence (free tier: 1 photo) — uploaded only AFTER the entry
+      // is truly saved, so a photo failure can never lose the entry. The
+      // outcome is reported honestly in the success banner.
+      if (photoFile) {
+        const outcome = await uploadJournalEntryPhoto(
+          result.entryId,
+          photoFile,
+        );
+        setPhotoOutcome(outcome);
+        recordEvent("journal_photo_outcome", { outcome });
+      } else {
+        setPhotoOutcome(null);
+      }
       recordEvent("journal_save_success", {
         fragment_count: confirmedFragments.length,
       });
@@ -330,6 +355,8 @@ export function JournalEntryComposer({
       setFragments([]);
       setInstitutionName("");
       setTopic("");
+      setPhotoFile(null);
+      setPhotoError(null);
       setSavedAt(Date.now());
     } catch (e) {
       // Network / unexpected — only the truly unexpected path falls through
@@ -395,6 +422,27 @@ export function JournalEntryComposer({
             <p className="text-[11px] leading-relaxed text-text-muted">
               {t("savedConfirmNote")}
             </p>
+            {photoOutcome ? (
+              <p
+                className={cn(
+                  "text-[11px] leading-relaxed",
+                  photoOutcome === "uploaded"
+                    ? "text-state-success"
+                    : "text-state-warning",
+                )}
+                data-testid="journal-photo-outcome"
+              >
+                {photoOutcome === "uploaded"
+                  ? t("photo.uploaded")
+                  : photoOutcome === "limit"
+                    ? t("photo.limitReached")
+                    : photoOutcome === "not-ready"
+                      ? t("photo.notReady")
+                      : photoOutcome === "invalid"
+                        ? t("photo.invalidFile")
+                        : t("photo.uploadFailed")}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               <a
                 href="#journal-entries"
@@ -455,6 +503,43 @@ export function JournalEntryComposer({
             className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
           />
         </label>
+
+        {/* Photo evidence — free tier: ONE photo per entry, enforced
+            server-side; more photos are an honestly-labelled future
+            VIP feature (no fake tier, no fake upload). */}
+        <div
+          className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+          data-testid="journal-photo-field"
+        >
+          <Label>{t("photo.label")}</Label>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            data-testid="journal-photo-input"
+            onChange={(e) => {
+              const f = e.target.files?.[0] ?? null;
+              if (f && !isValidJournalPhoto(f)) {
+                setPhotoFile(null);
+                setPhotoError(t("photo.invalidFile"));
+                return;
+              }
+              setPhotoError(null);
+              setPhotoFile(f);
+            }}
+            className="text-xs text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-xs file:text-text-primary"
+          />
+          {photoError ? (
+            <p className="text-xs text-state-danger" role="alert">
+              {photoError}
+            </p>
+          ) : null}
+          <p
+            className="text-[11px] leading-relaxed text-text-muted"
+            data-testid="journal-photo-free-tier-note"
+          >
+            {t("photo.freeTierNote")}
+          </p>
+        </div>
 
         <details className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-xs text-text-secondary">
           <summary className="cursor-pointer select-none font-mono text-[10px] uppercase tracking-label text-text-muted">

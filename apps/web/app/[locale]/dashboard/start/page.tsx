@@ -89,79 +89,60 @@ export default async function ActivitySetupHubPage({
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
         data-testid="activity-setup-lane-grid"
       >
-        {/* ── Agency lane ────────────────────────────────────── */}
-        <article
-          className="card-border flex flex-col gap-3 p-4"
-          data-testid="activity-setup-lane-agency"
-        >
-          <header className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold text-text-primary">
-              {label("Agentūra", "Agency")}
-            </h2>
-            {agency ? (
+        {/* ── Agency lane (LEGACY holders only) ──────────────────
+            Owner directive (company-role-simplicity-v1): an agency is a
+            COMPANY TYPE ('staffing_agency') inside the company profile, not
+            a separate root role. The lane renders ONLY for users who already
+            have a legacy agencies row, so their tools stay reachable. New
+            users never see an agency start path here. */}
+        {agency ? (
+          <article
+            className="card-border flex flex-col gap-3 p-4"
+            data-testid="activity-setup-lane-agency"
+          >
+            <header className="flex items-center justify-between">
+              <h2 className="font-display text-lg font-semibold text-text-primary">
+                {label("Agentūra", "Agency")}
+              </h2>
               <span className="rounded bg-state-success/20 px-2 py-0.5 text-xs text-state-success">
                 {label("✓ Pradėta", "✓ Started")}
               </span>
-            ) : (
-              <span className="rounded bg-ink-700/40 px-2 py-0.5 text-xs text-text-muted">
-                {label("dar nepradėta", "not started")}
-              </span>
-            )}
-          </header>
-          {agency ? (
-            <>
-              <p className="text-sm text-text-secondary">
-                {label("Agentūros profilis pradėtas.", "Agency profile started.")}
-              </p>
-              <dl className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <dt className="text-text-muted">
-                    {label("Pavadinimas", "Legal name")}
-                  </dt>
-                  <dd className="text-text-primary">
-                    {agency.legal_name ?? "—"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-text-muted">
-                    {label("Šalis", "Country")}
-                  </dt>
-                  <dd className="text-text-primary">
-                    {agency.country ?? "—"}
-                  </dd>
-                </div>
-              </dl>
-              <Link
-                href={"/dashboard/start/agency" as "/dashboard"}
-                className="self-start text-sm text-brand-blue hover:underline"
-              >
-                {label("Atidaryti agentūros nustatymą →", "Open agency setup →")}
-              </Link>
-              <Link
-                href={"/dashboard/agency" as "/dashboard"}
-                className="self-start text-xs text-text-secondary hover:underline"
-              >
-                {label("Eiti į agentūros dashboardą →", "Go to agency dashboard →")}
-              </Link>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-text-secondary">
-                {label(
-                  "Sukurkite agentūros profilį. Vienas laukas — pavadinimas. Po pateikimo paskyra iškart matoma DB ir išliks po perkrovimo.",
-                  "Create an agency profile. One field — the name. After submit it persists in the DB and survives reload.",
-                )}
-              </p>
-              <Link
-                href={"/dashboard/start/agency" as "/dashboard"}
-                className="self-start rounded-md border border-brand-blue px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
-                data-testid="activity-setup-lane-agency-start"
-              >
-                {label("Pradėti agentūros nustatymą →", "Start agency setup →")}
-              </Link>
-            </>
-          )}
-        </article>
+            </header>
+            <p className="text-sm text-text-secondary">
+              {label("Agentūros profilis pradėtas.", "Agency profile started.")}
+            </p>
+            <p className="text-xs text-text-muted">
+              {label(
+                "Nuo šiol agentūra yra įmonės tipas — naują agentūrą kurkite kaip įmonę, kurios tipas „Personalo agentūra“.",
+                "Going forward an agency is a company type — start a new agency as a company whose type is “Staffing agency”.",
+              )}
+            </p>
+            <dl className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <dt className="text-text-muted">
+                  {label("Pavadinimas", "Legal name")}
+                </dt>
+                <dd className="text-text-primary">
+                  {agency.legal_name ?? "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-muted">
+                  {label("Šalis", "Country")}
+                </dt>
+                <dd className="text-text-primary">
+                  {agency.country ?? "—"}
+                </dd>
+              </div>
+            </dl>
+            <Link
+              href={"/dashboard/agency" as "/dashboard"}
+              className="self-start text-xs text-text-secondary hover:underline"
+            >
+              {label("Eiti į agentūros dashboardą →", "Go to agency dashboard →")}
+            </Link>
+          </article>
+        ) : null}
 
         {/* ── Company lane ───────────────────────────────────── */}
         <article
@@ -222,8 +203,8 @@ export default async function ActivitySetupHubPage({
             <>
               <p className="text-sm text-text-secondary">
                 {label(
-                  "Sukurkite įmonės profilį. Pavadinimas išsaugomas į DB, paskyra išlieka po perkrovimo.",
-                  "Create a company profile. The name persists in the DB and survives reload.",
+                  "Sukurkite įmonės profilį. Tipą (statyba, personalo agentūra, subrangovas, gamyba, paslaugos, klientas / užsakovas, kita) pasirinksite profilyje — vienas profilis visiems tipams.",
+                  "Create a company profile. You pick the type (construction, staffing agency, subcontractor, manufacturing, services, client / requester, other) inside it — one profile for every type.",
                 )}
               </p>
               <Link

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   sendWorkInstructionAction,
@@ -30,6 +30,9 @@ export interface ComposerLabels {
   notAuthorized: string;
   needsMigration: string;
   errorMsg: string;
+  /** Friendly localized "pick a worker first" message — replaces the
+   *  browser-default "Please select an item in the list" popup. */
+  selectWorkerError: string;
   noWorkers: string;
   scopeNote: string;
   projectScopeLabel: string;
@@ -54,6 +57,16 @@ export function ManagerInstructionComposer({
     FormData
   >(sendWorkInstructionAction, null);
 
+  // CONTROLLED worker selection (owner smoke fix): React 19 resets
+  // uncontrolled fields after every form action, so the select could LOOK
+  // chosen while its submitted value was empty — surfacing the browser's
+  // native "Please select an item in the list" popup. Controlled state
+  // survives re-renders, and validation shows a calm localized message.
+  const [workerId, setWorkerId] = useState(
+    workers.length === 1 ? workers[0].profileId : "",
+  );
+  const [selectError, setSelectError] = useState<string | null>(null);
+
   if (workers.length === 0) {
     return (
       <p className="card-border p-4 text-sm text-text-secondary" data-testid="composer-no-workers">
@@ -65,6 +78,16 @@ export function ManagerInstructionComposer({
   return (
     <form
       action={action}
+      onSubmit={(e) => {
+        // Custom validation instead of the native popup: if no worker is
+        // chosen, stop the action and show the localized message inline.
+        if (!workerId) {
+          e.preventDefault();
+          setSelectError(labels.selectWorkerError);
+          return;
+        }
+        setSelectError(null);
+      }}
       className="card-border flex flex-col gap-4 p-5"
       data-testid="manager-instruction-composer"
     >
@@ -76,8 +99,12 @@ export function ManagerInstructionComposer({
         </span>
         <select
           name="worker_profile_id"
-          defaultValue=""
-          required
+          value={workerId}
+          onChange={(e) => {
+            setWorkerId(e.target.value);
+            if (e.target.value) setSelectError(null);
+          }}
+          data-testid="instruction-worker-select"
           className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
         >
           <option value="" disabled>
@@ -89,6 +116,15 @@ export function ManagerInstructionComposer({
             </option>
           ))}
         </select>
+        {selectError ? (
+          <span
+            className="text-xs text-state-danger"
+            role="alert"
+            data-testid="instruction-worker-select-error"
+          >
+            {selectError}
+          </span>
+        ) : null}
       </label>
 
       {/* F5 — optional project scope. "" = team/roster-level (unchanged). When a

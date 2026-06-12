@@ -38,12 +38,15 @@ describe("agency dashboard does not dead-end a user without an agency", () => {
   });
 });
 
-describe("neutral role choice offers real, non-agency-only paths", () => {
-  it("links to requester, company, agency, and worker routes", () => {
-    expect(roleChoice).toMatch(/\/dashboard\/start\/buyer/); // requester / customer
+describe("neutral role choice offers the SIMPLE start paths", () => {
+  // company-role-simplicity-v1: the start is two simple choices — work
+  // yourself (worker) or represent a company. Agency / client are COMPANY
+  // TYPES picked inside the canonical company profile, never start paths.
+  it("links to worker + company routes and NEVER to an agency start path", () => {
     expect(roleChoice).toMatch(/\/dashboard\/start\/company/);
-    expect(roleChoice).toMatch(/\/dashboard\/start\/agency/);
     expect(roleChoice).toMatch(/\/dashboard\/profile/); // offer own work
+    expect(roleChoice).not.toMatch(/\/dashboard\/start\/agency/);
+    expect(roleChoice).not.toMatch(/\/dashboard\/start\/buyer/);
     expect(roleChoice).toMatch(/setup-role-choice/);
   });
   it("shows the candidate/provider draft path honestly (no fake account)", () => {
@@ -62,13 +65,13 @@ describe("copy is honest and context-aware (en + lt)", () => {
     return rd?.agency?.workers ?? {};
   };
 
-  it("the four neutral options exist in both locales", () => {
+  it("the two simple start options exist in both locales (agency is a company type, not an option)", () => {
     for (const m of [en, lt]) {
       const opts = JSON.stringify((choice(m) as { options?: unknown }).options ?? {});
-      expect(opts).toMatch(/findHuman/);
       expect(opts).toMatch(/representCompany/);
-      expect(opts).toMatch(/representAgency/);
       expect(opts).toMatch(/offerWork/);
+      expect(opts).not.toMatch(/representAgency/);
+      expect(opts).not.toMatch(/findHuman/);
     }
   });
 

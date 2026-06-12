@@ -124,17 +124,24 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     sortOrder: 20,
   },
   {
+    // Owner directive (company-role-simplicity-v1): an agency is NOT a
+    // separate root role — it is a COMPANY whose company_type is
+    // 'staffing_agency', picked inside the one canonical company profile.
+    // `hidden` removes agency from every add-role / start surface for new
+    // users. Users who ALREADY hold the agency role keep it: the switcher
+    // renders held roles from profile_roles regardless of availability, and
+    // /dashboard/agency + its tools stay live for them (legacy continuity).
     id: "agency",
     labelKey: "auth.signup.role.agency",
     descriptionKey: "roles.agency.description",
-    availability: "start-available",
+    availability: "hidden",
     entryPoint: false,
-    canBeAddedLater: true,
+    canBeAddedLater: false,
     primaryFeatureKey: "agency_workspace",
     primaryRoute: "/dashboard",
     setupRoute: "/dashboard/start/agency",
-    preparingReasonKey: "roles.preparingReason.startAvailable",
-    safeToShowInRoleSurfaces: true,
+    preparingReasonKey: "roles.preparingReason.default",
+    safeToShowInRoleSurfaces: false,
     sortOrder: 30,
   },
   {

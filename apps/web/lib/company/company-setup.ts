@@ -60,6 +60,17 @@ export const COMPANY_VERIFICATION_STATUSES: readonly CompanyVerificationStatus[]
     "verified",
   ];
 
+// Shared client-safe constants (CompanyType, COMPANY_TYPES,
+// COMPANY_COUNTRY_CODES, isKnownCountryCode) live in
+// company-profile-shared.ts so the client form can import them without
+// pulling in this server-only module; re-exported here for server callers.
+export * from "./company-profile-shared";
+import {
+  COMPANY_TYPES,
+  isKnownCountryCode,
+  type CompanyType,
+} from "./company-profile-shared";
+
 /** The user's own role inside the company they are requesting. Free-text in
  *  the DB; the form offers a small honest allowlist + "other". */
 export type CompanyRequesterRole =
@@ -82,6 +93,7 @@ export interface CompanyRow {
   readonly profileId: string;
   readonly legalName: string | null;
   readonly displayName: string | null;
+  readonly companyType: CompanyType;
   readonly country: string | null;
   readonly registrationCode: string | null;
   readonly address: string | null;
@@ -102,6 +114,7 @@ export type CompanyReadResult =
 
 export interface SaveCompanyInput {
   readonly legalName: string;
+  readonly companyType?: string;
   readonly country?: string;
   readonly registrationCode?: string;
   readonly address?: string;
@@ -119,10 +132,13 @@ export type SaveCompanyResult =
   | { kind: "ok"; companyId: string }
   | { kind: "needs-migration" }
   | { kind: "invalid"; message: string }
+  /** Country was not one of the known countries.code values. The UI maps
+   *  this to a calm localized message — never the raw FK/RPC error text. */
+  | { kind: "invalid-country" }
   | { kind: "error"; message: string };
 
 const SELECT_COLUMNS =
-  "id, profile_id, legal_name, display_name, country, registration_code, address, website, contact_email, contact_phone, requester_role, verification_status, verification_note, requested_at, created_at";
+  "id, profile_id, legal_name, display_name, company_type, country, registration_code, address, website, contact_email, contact_phone, requester_role, verification_status, verification_note, requested_at, created_at";
 
 export async function getOwnCompany(): Promise<CompanyReadResult> {
   const supabase = await createClient();
@@ -154,6 +170,7 @@ export async function getOwnCompany(): Promise<CompanyReadResult> {
       profileId: r.profile_id as string,
       legalName: (r.legal_name as string | null) ?? null,
       displayName: (r.display_name as string | null) ?? null,
+      companyType: (r.company_type as CompanyType | null) ?? "other",
       country: (r.country as string | null) ?? null,
       registrationCode: (r.registration_code as string | null) ?? null,
       address: (r.address as string | null) ?? null,
@@ -180,10 +197,26 @@ export async function saveCompanySetup(
       message: "Company legal name must be between 2 and 200 characters.",
     };
   }
+  // Country is validated BEFORE any DB call: only seeded countries.code
+  // values may reach the RPC (the mirror trigger copies companies.country
+  // into organizations.country, which has an FK to countries(code) — free
+  // text used to surface as a raw organizations_country_fkey crash).
+  const rawCountry = input.country?.trim().toUpperCase() || null;
+  if (rawCountry !== null && !isKnownCountryCode(rawCountry)) {
+    return { kind: "invalid-country" };
+  }
+  const rawType = input.companyType?.trim().toLowerCase() || null;
+  if (
+    rawType !== null &&
+    !(COMPANY_TYPES as readonly string[]).includes(rawType)
+  ) {
+    return { kind: "invalid", message: "Unknown company type." };
+  }
+
   const supabase = await createClient();
-  const { data, error } = await asAny(supabase).rpc("save_company_setup", {
+  const params = {
     p_legal_name: name,
-    p_country: input.country?.trim() || null,
+    p_country: rawCountry,
     p_registration_code: input.registrationCode?.trim() || null,
     p_address: input.address?.trim() || null,
     p_website: input.website?.trim() || null,
@@ -191,7 +224,20 @@ export async function saveCompanySetup(
     p_contact_phone: input.contactPhone?.trim() || null,
     p_requester_role: input.requesterRole?.trim() || null,
     p_submit: input.submit,
+  };
+  let { data, error } = await asAny(supabase).rpc("save_company_setup_v2", {
+    ...params,
+    p_company_type: rawType,
   });
+  if (error && error.code === RPC_NOT_FOUND_CODE) {
+    // v2 (migration 20260612090000) not applied yet — fall back to the v1
+    // RPC so the profile itself still saves; the type is kept client-side
+    // only until the migration lands.
+    console.warn(
+      "save_company_setup_v2 missing; falling back to v1 (company_type not persisted)",
+    );
+    ({ data, error } = await asAny(supabase).rpc("save_company_setup", params));
+  }
   if (error) {
     if (
       error.code === RPC_NOT_FOUND_CODE ||
@@ -199,7 +245,19 @@ export async function saveCompanySetup(
     ) {
       return { kind: "needs-migration" };
     }
-    return { kind: "error", message: error.message };
+    // Defense-in-depth: a country problem from ANY path (the v2 RPC's
+    // allowlist check or the organizations_country_fkey mirror) is mapped to
+    // the calm localized message — the raw technical text never reaches UI.
+    if (
+      error.message?.includes("invalid_country") ||
+      error.message?.includes("organizations_country_fkey")
+    ) {
+      return { kind: "invalid-country" };
+    }
+    // Never surface raw Postgres/PostgREST text to the user; log it for
+    // diagnostics and return a generic, localizable failure instead.
+    console.error("save_company_setup failed:", error.code, error.message);
+    return { kind: "error", message: "save_failed" };
   }
   return { kind: "ok", companyId: data as string };
 }

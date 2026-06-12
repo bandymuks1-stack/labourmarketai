@@ -88,6 +88,7 @@ export default async function InstructionsPage({
       notAuthorized: t("manager.notAuthorized"),
       needsMigration: t("needsMigration"),
       errorMsg: t("manager.error"),
+      selectWorkerError: t("manager.selectWorkerError"),
       noWorkers: t("manager.noWorkers"),
       scopeNote: t("manager.scopeNote"),
       projectScopeLabel: t("manager.projectScopeLabel"),

@@ -119,9 +119,10 @@ describe("Guard: header chip parity with the dashboard catalogue per role", () =
     expect(ROLE_BY_ID.company.setupRoute).toBe("/dashboard/start/company");
   });
 
-  it("agency is start-available with setupRoute /dashboard/start/agency", () => {
-    expect(ROLE_BY_ID.agency.availability).toBe("start-available");
-    expect(ROLE_BY_ID.agency.setupRoute).toBe("/dashboard/start/agency");
+  it("agency is HIDDEN from add/start surfaces (company-role-simplicity-v1: agency is a companyType, not a root role)", () => {
+    expect(ROLE_BY_ID.agency.availability).toBe("hidden");
+    expect(ROLE_BY_ID.agency.safeToShowInRoleSurfaces).toBe(false);
+    expect(ROLE_BY_ID.agency.canBeAddedLater).toBe(false);
   });
 
   it("customer is start-available with setupRoute /dashboard/start/buyer (PR #101: migration 0026 applied → partial flipped to start-available)", () => {

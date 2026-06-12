@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
-/** Role cards. Internal identifiers stay worker/company/agency/customer (the
- *  DB + dashboard contract); LT/EN labels render via i18n (incl. Pirkėjas). */
+/** Role cards — the START is intentionally simple (owner directive,
+ *  company-role-simplicity-v1): a person either WORKS THEMSELVES or
+ *  REPRESENTS A COMPANY. An agency is NOT a root role — it is a company
+ *  type ('staffing_agency') picked inside the company profile; the same
+ *  goes for a client / requester organisation ('client_customer').
+ *  Internal identifiers stay within the DB Role contract. */
 const ROLE_CARDS: { key: Role; icon: string }[] = [
   { key: "worker", icon: "🔨" },
   { key: "company", icon: "🏢" },
-  { key: "agency", icon: "🎯" },
-  { key: "customer", icon: "👤" },
 ];
 
 // The 9 launch markets, LT first (default).
