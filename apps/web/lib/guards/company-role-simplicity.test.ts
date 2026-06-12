@@ -217,6 +217,22 @@ describe("work-report photo: 1 free photo, server-enforced, honest copy", () => 
   });
 });
 
+// ── 5b. /dashboard/start carries no stale technical copy ────────────────
+
+describe("activity-setup hub has no outdated technical buyer copy", () => {
+  const startPage = read("app/[locale]/dashboard/start/page.tsx");
+  it("no longer claims the buyer entity is missing / schema-blocked", () => {
+    expect(startPage).not.toMatch(/pilot_drafts/);
+    expect(startPage).not.toMatch(/M3 etap|M3 scope/);
+    expect(startPage).not.toMatch(/lentelė dar nesukurta|does not yet exist/);
+    expect(startPage).not.toMatch(/Migracija atskirame PR|Migration in a separate PR/);
+  });
+  it("buyer lane reads the REAL customers row and renders live state", () => {
+    expect(startPage).toMatch(/from\("customers"\)/);
+    expect(startPage).toMatch(/activity-setup-lane-buyer/);
+  });
+});
+
 // ── 6. companyType change updates the visible workspace ─────────────────
 
 describe("companyType drives the canonical profile/dashboard state", () => {
