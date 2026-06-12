@@ -3910,5 +3910,11 @@
       "expiring": "Expiring",
       "attention": "Needs attention"
     }
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page not found",
+    "body": "This address doesn't exist — it may be mistyped, or the page has moved.",
+    "cta": "Back to the start"
   }
 }

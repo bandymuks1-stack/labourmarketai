@@ -1561,5 +1561,11 @@
       "expiring": "[EN] Expiring",
       "attention": "[EN] Needs attention"
     }
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Sidan hittades inte",
+    "body": "Den här adressen finns inte — den kan vara felskriven, eller så har sidan flyttats.",
+    "cta": "Tillbaka till start"
   }
 }
