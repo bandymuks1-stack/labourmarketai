@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Labourmarket.ai — Launch Readiness Self-Test v1 (Owner Review)</title>
+<style>
+  :root { --ok:#11633a; --okbg:#e7f7ec; --warn:#8a6100; --warnbg:#fff4d6; --bad:#a01818; --badbg:#fdecec; --ink:#13171f; --muted:#5a6472; --line:#e2e6ec; }
+  * { box-sizing: border-box; }
+  body { font:16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); max-width:960px; margin:0 auto; padding:1.2rem 1.1rem 4rem; }
+  h1 { font-size:1.6rem; margin:.2rem 0 .3rem; }
+  h2 { font-size:1.2rem; margin:2rem 0 .6rem; padding-top:.4rem; border-top:2px solid var(--line); }
+  h3 { font-size:1.02rem; margin:1.1rem 0 .3rem; }
+  p.sub { color:var(--muted); margin:.1rem 0 1rem; }
+  .badge { display:inline-block; padding:.28rem .7rem; border-radius:999px; font-weight:700; font-size:.85rem; }
+  .go { background:var(--okbg); color:var(--ok); }
+  .pill { display:inline-block; font-size:.74rem; font-weight:700; padding:.12rem .5rem; border-radius:6px; vertical-align:middle; }
+  .p-ok { background:var(--okbg); color:var(--ok); }
+  .p-warn { background:var(--warnbg); color:var(--warn); }
+  table { border-collapse:collapse; width:100%; margin:.6rem 0; }
+  th,td { border:1px solid var(--line); padding:.5rem .6rem; text-align:left; font-size:.9rem; vertical-align:top; }
+  th { background:#f6f8fa; }
+  code { background:#f1f3f6; padding:1px 5px; border-radius:4px; font-size:.85em; }
+  ol.steps { padding-left:1.2rem; } ol.steps li { margin:.35rem 0; }
+  .card { border:1px solid var(--line); border-radius:10px; padding:.9rem 1.1rem; margin:.8rem 0; }
+  .where { background:#f6f8fa; border-left:4px solid #9aa7b8; padding:.5rem .8rem; border-radius:0 6px 6px 0; font-size:.9rem; }
+  .note { color:var(--muted); font-size:.86rem; }
+  ul.tight { margin:.3rem 0; } ul.tight li { margin:.2rem 0; }
+  .legend span { margin-right:1rem; font-size:.85rem; }
+</style>
+</head>
+<body>
+
+<h1>Launch Readiness Self-Test v1 — Owner Review</h1>
+<p class="sub">Labourmarket.ai · core cycle: worker onboarding → profile / player card → Work Journal evidence → company need → matching v1 → scouting → shortlist → manager confirmation</p>
+
+<p>
+  <span class="badge go">GO for first testers</span>
+  &nbsp; <span class="note">No critical blocker on any path · no fake data · production untouched · generated for branch <code>feat/cc/launch-readiness-self-test-v1</code></span>
+</p>
+
+<div class="card">
+  <strong>What this is.</strong> An automatic, no-fake-data check of the whole real product path before humans log in.
+  Open this file in a browser — no terminal needed. Each section below tells you <em>exactly where to click</em> and what a healthy
+  screen looks like, so when a tester reports something you can reproduce it in seconds.
+  <p class="legend" style="margin:.6rem 0 0;">
+    <span><span class="pill p-ok">READY</span> renders + honest empty state</span>
+    <span><span class="pill p-warn">MINOR</span> non-blocking polish</span>
+  </p>
+</div>
+
+<h2>1 · Routes a first tester touches</h2>
+<table>
+  <tr><th>Path</th><th>Route</th><th>Status</th></tr>
+  <tr><td>Worker</td><td><code>/auth/login</code> → <code>/onboarding</code> → <code>/dashboard</code></td><td><span class="pill p-ok">READY</span></td></tr>
+  <tr><td>Worker</td><td><code>/dashboard/profile</code> (trade + skills)</td><td><span class="pill p-ok">READY</span></td></tr>
+  <tr><td>Worker</td><td><code>/dashboard/player-card</code> (evidence tiers)</td><td><span class="pill p-ok">READY</span></td></tr>
+  <tr><td>Worker</td><td><code>/dashboard/journal</code> (Work Journal + skill links)</td><td><span class="pill p-ok">READY</span></td></tr>
+  <tr><td>Company</td><td><code>/dashboard/company</code> (need draft = "First action")</td><td><span class="pill p-ok">READY</span></td></tr>
+  <tr><td>Company</td><td><code>/dashboard/company/scouting?request=&lt;id&gt;</code></td><td><span class="pill p-ok">READY</span></td></tr>
+  <tr><td>Manager</td><td><code>/dashboard/inbox</code> (journal confirmation)</td><td><span class="pill p-ok">READY</span></td></tr>
+</table>
+<p class="note">Unauthenticated visits to <code>/dashboard*</code> redirect to the locale login (verified in <code>middleware.ts</code>) — never a blank page or 500. Locale-prefixed routes (LT default; EN/RU/PL) resolve through the same middleware.</p>
+
+<h2>2 · Worker path <span class="pill p-ok">READY</span></h2>
+<div class="card">
+  <h3>First 5 minutes</h3>
+  <ol class="steps">
+    <li><strong>Sign in</strong> at <code>/auth/login</code> → land on <code>/dashboard</code>. A new account is routed through <code>/onboarding</code> (role, name, country) first — expected.</li>
+    <li><strong>Set trade + skills</strong> at <code>/dashboard/profile</code>. Empty = honest "none yet" pillars + "add profession first" prompt.</li>
+    <li><strong>Open the player card</strong> at <code>/dashboard/player-card</code>. Empty = honest zeros + "None yet" for verified skills. Nothing faked.</li>
+    <li><strong>Write a journal entry</strong> at <code>/dashboard/journal</code>. No employer yet = honest "waiting on organization". With one = composer is visible.</li>
+    <li><strong>Link entry → skill</strong> on the entry row. Raises that skill to the <em>work-journal</em> tier on the card automatically.</li>
+  </ol>
+  <div class="where"><strong>Healthy screen:</strong> the dashboard work card states one clear next action; every empty screen has a message + a button, never a blank panel.</div>
+</div>
+
+<h2>3 · Company path <span class="pill p-ok">READY</span></h2>
+<div class="card">
+  <h3>First 5 minutes</h3>
+  <ol class="steps">
+    <li><strong>Company dashboard</strong> <code>/dashboard/company</code>. No company yet → guided to create one at <code>/dashboard/start/company</code>.</li>
+    <li><strong>Create a need</strong> — the "First action" block. Saves a <em>private draft</em> (<code>customer_requests</code>) and says so; not auto-submitted, not billed.</li>
+    <li><strong>Structure the need's skills</strong>, then <strong>scout</strong> <code>/dashboard/company/scouting?request=&lt;id&gt;</code>.</li>
+    <li><strong>Shortlist</strong> — status buttons persist per-demand to <code>demand_shortlist</code> (your own rows only).</li>
+  </ol>
+  <div class="where"><strong>Sparse-data behaviour (all honest, no error):</strong> "need not structured yet" · "no matching workers yet" · ranked candidates with <em>why / gaps / confirmed-vs-declared</em> — never a global person score.</div>
+  <p class="note">While testing on prod, do <strong>not</strong> create fake shortlist rows or fake needs.</p>
+</div>
+
+<h2>4 · Manager path <span class="pill p-ok">READY</span></h2>
+<div class="card">
+  <ol class="steps">
+    <li><strong>Inbox</strong> <code>/dashboard/inbox</code>. Nothing pending → honest empty state (no fake entries).</li>
+    <li><strong>Confirm skills</strong> on a pending entry → pick which declared skills it proves → submit. Calls the live <code>confirm_entry_and_verify_skills</code> RPC and raises them to the <em>manager-confirmed</em> tier. A real human decision — nothing auto-confirms.</li>
+  </ol>
+  <div class="where"><strong>Verified on prod (read-only, 2026-06-12):</strong> both <code>confirm_entry_and_verify_skills</code> and <code>review_journal_entry</code> RPCs exist; 2 real <code>manager_confirmed</code> skill rows. The evidence loop is closed.</div>
+</div>
+
+<h2>5 · Matching / scouting / shortlist <span class="pill p-ok">READY</span></h2>
+<ul class="tight">
+  <li><strong>Matching v1</strong> (<code>lib/market/match-v1.ts</code>) — deterministic, evidence-weighted (manager-confirmed &gt; work-journal &gt; self-declared), §19-compliant; tested for sparse / insufficient-data / determinism.</li>
+  <li><strong>Scouting</strong> returns a tagged state for every path (not-found / needs-migration / not-structured / no-candidates / ok) — never throws on thin data.</li>
+  <li><strong>Shortlist</strong> buttons wire to a server action backed by the owner-scoped <code>demand_shortlist</code> contract.</li>
+</ul>
+
+<h2>6 · Checks run</h2>
+<table>
+  <tr><th>Check</th><th>Result</th></tr>
+  <tr><td>typecheck / lint / build</td><td><span class="pill p-ok">green</span></td></tr>
+  <tr><td>unit + guard tests (incl. new launch-readiness guard)</td><td><span class="pill p-ok">all pass</span></td></tr>
+  <tr><td><code>check:primary-route-smoke</code></td><td><span class="pill p-ok">22 routes, 0 blocking</span></td></tr>
+  <tr><td>migration-safety</td><td><span class="pill p-ok">no migration in this PR</span></td></tr>
+</table>
+
+<h2>7 · Known limitations (honest)</h2>
+<ul class="tight">
+  <li><code>work_journal</code> tier shows 0 on prod today — no worker has linked an entry yet; fills in on first real use.</li>
+  <li>Live Playwright E2E needs Docker / local Supabase — not in this CI-only pass; the static guard + engine tests are the automated net.</li>
+  <li>Minor polish: generic error text on a failed shortlist save; mobile/visual polish is owner-eyes (source-level guard does not render pixels).</li>
+</ul>
+
+<h2>8 · What a tester should send you</h2>
+<ul class="tight">
+  <li>The URL + their role (worker / company / manager).</li>
+  <li>A screenshot of the broken/confusing screen.</li>
+  <li>Expected vs. actual ("button did nothing").</li>
+  <li>Any red error text, copied verbatim. No passwords or others' personal data.</li>
+</ul>
+
+<p class="note" style="margin-top:2rem;">Production was not modified. No DB migration, no <code>db push</code>, no MCP apply, no fake data, no billing, no external AI. Companion: <code>docs/audits/LAUNCH_READINESS_SELF_TEST_V1.md</code>.</p>
+
+</body>
+</html>
