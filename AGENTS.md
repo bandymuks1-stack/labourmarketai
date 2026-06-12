@@ -52,17 +52,38 @@ First line ≤72 chars, present tense, no period. Body (optional) explains WHY.
 ## Migrations
 
 - Migration files (`supabase/migrations/*.sql`) — **commit and push automatically**
-- Running migrations on production — **NEVER automatic.** Agents never run 
-  `pnpm supabase db push` or `prisma migrate deploy` against production. 
-  DI runs migrations manually via Supabase SQL Editor or local CLI.
+- **PROD APPLY AUTONOMY (conditional — DI decision 2026-06-12).** The old hard
+  blocker ("running migrations on production is NEVER automatic") is replaced.
+  The executing agent MAY apply a **merged** migration to prod via Supabase MCP
+  `apply_migration` when **ALL** hold:
+  - (a) classified **GREEN** by the upgraded `migration-safety` patterns;
+  - (b) strictly **additive/widening** — existing rows and behavior stay valid;
+  - (c) a tested rollback script exists at
+    `supabase/rollbacks/<same_name>.down.sql` in the same PR;
+  - (d) immediately after apply, **verify the change on prod via an MCP read
+    query and record the verification output in the task log**;
+  - (e) reported in the session summary as
+    `APPLIED TO PROD: <name> (rollback: <file>)`.
+
+  If **ANY** condition fails or is uncertain → **stop and hand off to the owner
+  review channel. Uncertainty itself is a RED signal; reclassification only
+  goes in the cautious direction (RED → human review, never the reverse).**
+  Always Supabase MCP `apply_migration` — **never** `supabase db push` /
+  `prisma migrate deploy` (repo filenames don't match the ledger; a push
+  re-runs applied migrations).
+
+  **RED remains absolute:** needs-human-gate, owner-channel apply only — no
+  self-apply, regardless of the above.
 - **Naming (binding, see PLATFORM_DOCTRINE §16):** NEW migrations are named
   `YYYYMMDDHHMMSS_snake_case.sql` (14-digit UTC timestamp prefix). The legacy
   sequential `000N_*.sql` files (`0001`–`0036`) are already applied and
   **frozen** — never rename, renumber, or reformat them. The convention is
   forward-only; timestamp prefixes sort after the `000N` set so order is kept.
-- **Reversibility (binding):** every DB-touching migration ships a rollback
-  path. `DROP TABLE` / `DROP COLUMN` only after asserting the target has zero
-  rows, and must still ship a reversible recreate.
+- **Reversibility (binding):** every DB-touching migration ships a paired
+  `supabase/rollbacks/<name>.down.sql` in the same PR (CI fails otherwise via
+  `migration-safety` `missing-rollback-file`). `DROP TABLE` / `DROP COLUMN`
+  only after asserting the target has zero rows, and must still ship a
+  reversible recreate.
 
 ## Merge model — Auto-merge Safety Envelope
 
@@ -80,9 +101,16 @@ or guarded migrations that **pass `migration-safety`** (no RED flags).
   required checks pass. No DI action, no manual merge, no waiting human.
 
 **RED class → hard human gate (no auto-merge).** Any of:
-- a migration that trips `migration-safety` (unguarded `drop`, missing rollback,
-  RLS-loosening — `using (true)` / `to anon` / grant to anon|public, or an
-  auth-core change), **including** one marked `-- @human-gate-approved`;
+- a migration that trips `migration-safety` — unguarded `drop`, missing
+  rollback (in-file or the `supabase/rollbacks/*.down.sql` file),
+  RLS-loosening (`using (true)` / `to anon` / grant to anon|public),
+  **`SECURITY DEFINER` functions, any `GRANT`/`REVOKE`, `ALTER … OWNER`,
+  `ALTER`/`DROP POLICY`, `SET ROLE`, `SET`/`DROP NOT NULL`, a bare
+  `DROP CONSTRAINT`, any data `UPDATE`/`DELETE`, `TRUNCATE`,
+  `DISABLE ROW LEVEL SECURITY`, `ALTER DEFAULT PRIVILEGES`, `CREATE EXTENSION`,
+  `CREATE TRIGGER`, `ALTER TYPE`, or any unrecognized statement shape
+  (fail-closed)**, an auth-core change — **including** one marked
+  `-- @human-gate-approved`;
 - any change to auth-core logic, destructive data ops, new secrets, billing, or
   live outreach.
 

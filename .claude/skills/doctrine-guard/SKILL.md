@@ -104,18 +104,47 @@ These are schema-level defaults, not per-feature decisions:
 - **GREEN (auto-merge):** additive or guarded migrations that pass the
   `migration-safety` CI check.
 - **RED (hard human gate):** unguarded `DROP`, RLS-loosening
-  (`using (true)`, grants to `anon`/`public`), or auth-core changes → open the
-  PR as **draft** with the `needs-human-gate` label and post the exact SQL +
-  RLS diff in the description. *Why:* these are the irreversible class — a
-  bad merge here can't be fixed by a follow-up PR.
-- **Prod apply:** only via Supabase MCP `apply_migration` after approval —
-  never `supabase db push` (repo filenames don't match the ledger; a push
-  re-runs applied migrations).
+  (`using (true)`, grants to `anon`/`public`), `SECURITY DEFINER` functions,
+  any `GRANT`/`REVOKE`, `ALTER … OWNER`, `ALTER`/`DROP POLICY`, `SET ROLE`,
+  narrowing/dropping a `CHECK`/`NOT NULL`/column, any `DELETE`/`UPDATE` of
+  data, or auth-core changes → open the PR as **draft** with the
+  `needs-human-gate` label and post the exact SQL + RLS diff in the
+  description. RED is absolute: needs-human-gate, owner-channel apply only.
+  *Why:* these are the irreversible / RLS-bypassing class — a bad merge here
+  can't be fixed by a follow-up PR.
+
+- **PROD APPLY AUTONOMY (conditional):** the executing agent MAY apply a
+  merged migration to prod via Supabase MCP when **ALL** hold:
+  - **(a)** classified **GREEN** by the upgraded `migration-safety` patterns
+    (`.github/scripts/migration-safety.mjs`);
+  - **(b)** strictly **additive/widening** — existing rows and behavior remain
+    valid;
+  - **(c)** a tested rollback script exists at
+    `supabase/rollbacks/<same_name>.down.sql` in the same PR;
+  - **(d)** **immediately after apply, verify the change on prod via an MCP
+    read query and record the verification output in the task log**;
+  - **(e)** the apply is reported in the session summary as
+    `APPLIED TO PROD: <name> (rollback: <file>)`.
+
+  If **ANY** condition fails or is uncertain — **stop and hand off to the owner
+  review channel. Uncertainty itself is a RED signal: never reason your way
+  from RED to GREEN; reclassification only goes in the cautious direction.**
+  Prod apply is always Supabase MCP `apply_migration` — never `supabase db
+  push` (repo filenames don't match the ledger; a push re-runs applied
+  migrations).
+
 - **Naming (§16):** `YYYYMMDDHHMMSS_snake_case.sql` (14-digit UTC timestamp).
-  Never rename an applied migration. Every migration ships a rollback path.
+  Never rename an applied migration. Every migration ships a paired
+  `supabase/rollbacks/<name>.down.sql` (CI `missing-rollback-file` fails
+  otherwise).
 - **Repo-specific:** every new migration bumps the dual baseline — the
   `product-readiness` SPRINT_BASELINE and the `ops-bridge-migration` count
   assertion — or CI goes red.
+- **The classifier is the load-bearing control** (§7): the RED patterns above
+  live as `migration-safety` detectors + self-test fixtures, NOT prose. The
+  gate **fails closed** — an unrecognized statement shape is RED by default.
+  PR #322 (SECURITY DEFINER swap + grants) is the canonical RED fixture; PR
+  #321 (`original_language` CHECK widening) is the canonical GREEN fixture.
 
 ## 5. VERIFICATION RULE — exercise the app, don't just read the code
 
