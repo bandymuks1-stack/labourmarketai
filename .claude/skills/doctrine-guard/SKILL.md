@@ -142,9 +142,12 @@ Binding tokens (origin PR #162, current lock in code):
 
 - **Typography:** `apps/web/tokens/typography.ts` is the single source —
   components reference `var(--font-display|sans|mono)` CSS vars, never a
-  typeface name. Current owner lock: Bricolage Grotesque (display), Inter
-  (body), JetBrains Mono (numbers/labels) — wired in
-  `app/[locale]/layout.tsx`.
+  typeface name. DI decision lock (2026-06-12, research-backed), four roles:
+  Bricolage Grotesque (display/headings), Inter (body/UI — a dedicated UI
+  sans; legibility research keeps it as body), JetBrains Mono
+  (numbers/labels), Instrument Serif (**accent ONLY**: hero headlines, pull
+  quotes, founder-moment empty states, min ~28px — never body/UI text).
+  Wired in `app/[locale]/layout.tsx`.
 - **Color:** `rgb(var(--c-*))` channel tokens in `apps/web/app/globals.css`;
   **dark is the default theme**; light is the override. No raw hex/rgb in
   components.

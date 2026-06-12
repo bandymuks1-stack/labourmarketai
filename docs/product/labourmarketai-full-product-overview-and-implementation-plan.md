@@ -366,10 +366,16 @@ boring admin tables kaip primary experience; cards, live boards, player
 profiles, market maps; mobile app feel.
 
 Remtis ESAMA design token sistema (token-first colors, dark/light, motion
-tokens — `docs/DESIGN_TOKENS.md`, `premium-design-map-v1.md`) ir typefaces:
-Bricolage Grotesque, Instrument Serif, JetBrains Mono. **Brand lieka
-Labourmarket.ai** be atskiro owner patvirtinimo. Galutinis living-arena look —
-TASK 07 po vizualinio užrakto.
+tokens — `docs/DESIGN_TOKENS.md`, `premium-design-map-v1.md`) ir typefaces
+pagal TYPOGRAPHY DECISION LOCK (DI, 2026-06-12, research-backed): Bricolage
+Grotesque (display/headings), Inter (body/UI — ekrano įskaitomumo tyrimai
+palaiko dedikuotą UI sans body tekstui), JetBrains Mono (skaičiai/etiketės),
+Instrument Serif — TIK akcentas (hero antraštės, pull quotes, founder-moment
+tuščios būsenos, min ~28px; niekada body/UI tekstui — single-weight condensed
+display šriftas, skirtas tik dideliems dydžiams). Šaltinis:
+`apps/web/tokens/typography.ts`; guard — `lib/guards/design-tokens.test.ts`.
+**Brand lieka Labourmarket.ai** be atskiro owner patvirtinimo. Galutinis
+living-arena look — TASK 07 po vizualinio užrakto.
 
 ---
 
