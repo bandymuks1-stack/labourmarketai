@@ -1389,7 +1389,11 @@ describe("no migration files added by this sprint", () => {
     // phase_b1_fk_indexes) — 15 additive GREEN CREATE INDEX on active-path
     // foreign keys (chat/journal/engagement/requests/matches/invitations);
     // no RLS/grant/policy/data change.
-    const SPRINT_BASELINE = 73;
+    // Bumped 73 -> 74 for Phase B2 FK indexes (20260612200000
+    // phase_b2_fk_indexes) — 10 additive GREEN CREATE INDEX on taxonomy/
+    // reference foreign keys (skills/professions/esco/document_types/
+    // productivity_units/plans/countries); no RLS/grant/policy/data change.
+    const SPRINT_BASELINE = 74;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
