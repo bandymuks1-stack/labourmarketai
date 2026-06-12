@@ -27,6 +27,7 @@
     "admin:grant-superadmin": "tsx scripts/admin-grant-superadmin.ts",
     "generate-pilot-owner-brief": "tsx scripts/generate-pilot-owner-brief.ts",
     "e2e": "playwright test",
+    "e2e:local": "tsx scripts/e2e-local.ts",
     "e2e:install": "playwright install chromium"
   },
   "dependencies": {

@@ -104,12 +104,38 @@ function main(): void {
   );
 
   if (res.error && (res.error as NodeJS.ErrnoException).code === "ENOENT") {
-    console.error(
-      "`psql` not found. Install the PostgreSQL client, or apply manually:\n" +
-        `  psql "${dbUrl}" -f supabase/dev-fixtures.sql\n` +
-        "(ensure `supabase start` is running first).",
+    // No host psql (common on Windows) — fall back to the psql inside the
+    // local Supabase db container, feeding the SQL through stdin.
+    console.log("`psql` not on PATH — using the supabase db container…");
+    const viaDocker = spawnSync(
+      "docker",
+      [
+        "exec",
+        "-i",
+        "supabase_db_labourmarketai",
+        "psql",
+        "-U",
+        "postgres",
+        "-d",
+        "postgres",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-f",
+        "-",
+      ],
+      { input: readFileSync(sqlPath), stdio: ["pipe", "inherit", "inherit"] },
     );
-    process.exit(1);
+    if (viaDocker.error || viaDocker.status !== 0) {
+      console.error(
+        "Container fallback failed too. Install the PostgreSQL client, or " +
+          "apply manually:\n" +
+          `  psql "${dbUrl}" -f supabase/dev-fixtures.sql\n` +
+          "(ensure `supabase start` is running first).",
+      );
+      process.exit(viaDocker.status ?? 1);
+    }
+    console.log("Dev fixtures applied to the local instance (via container).");
+    return;
   }
   if (res.status !== 0) process.exit(res.status ?? 1);
   console.log("Dev fixtures applied to the local instance.");
