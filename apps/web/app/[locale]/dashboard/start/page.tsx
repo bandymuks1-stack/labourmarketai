@@ -15,10 +15,8 @@ import { createClient } from "@/lib/supabase/server";
  *   - "Already started" (✓) — the entity row exists, show its
  *     legal_name + country + a link to the role dashboard;
  *   - "Start now" — no entity row yet, link to the setup form;
- *   - "Honest partial / blocker" — for Buyer, where the schema does
- *     not yet have a customer/buyer entity table (M3 scope per
- *     migration 0007 comment), surface that explicitly with a link
- *     to the existing pilot-draft form which DOES persist.
+ *   - Buyer reads public.customers (real since 0026) and renders the
+ *     same started / start-now pattern in plain language.
  *
  * No fake counts, no fake names, no static preview labels.
  */
@@ -41,7 +39,7 @@ export default async function ActivitySetupHubPage({
   //   - agencies.agencies_select policy: (profile_id = auth.uid())
   //   - companies.companies_select policy: same shape
   // If no row exists for this user, data is null.
-  const [agencyRes, companyRes, rolesRes] = await Promise.all([
+  const [agencyRes, companyRes, customerRes] = await Promise.all([
     supabase
       .from("agencies")
       .select("id, legal_name, country, created_at")
@@ -53,17 +51,14 @@ export default async function ActivitySetupHubPage({
       .eq("profile_id", user.id)
       .maybeSingle(),
     supabase
-      .from("profile_roles")
-      .select("role")
+      .from("customers")
+      .select("id, contact_name, country, created_at")
       .eq("profile_id", user.id)
-      .eq("is_active", true),
+      .maybeSingle(),
   ]);
   const agency = agencyRes.data;
   const company = companyRes.data;
-  const heldRoles = new Set(
-    (rolesRes.data ?? []).map((r) => r.role as string),
-  );
-  const hasCustomerRole = heldRoles.has("customer");
+  const customer = customerRes.data;
 
   const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
   const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
@@ -218,7 +213,11 @@ export default async function ActivitySetupHubPage({
           )}
         </article>
 
-        {/* ── Buyer lane (honest partial) ────────────────────── */}
+        {/* ── Buyer lane (real state, plain language) ─────────────
+            The buyer profile has been REAL since the customers entity
+            shipped — this lane previously still showed an outdated
+            technical blocker. Now it mirrors the company lane: live
+            state + a plain-language description of what works. */}
         <article
           className="card-border flex flex-col gap-3 p-4"
           data-testid="activity-setup-lane-buyer"
@@ -227,50 +226,59 @@ export default async function ActivitySetupHubPage({
             <h2 className="font-display text-lg font-semibold text-text-primary">
               {label("Pirkėjas", "Buyer")}
             </h2>
-            <span className="rounded bg-state-warning/20 px-2 py-0.5 text-xs text-state-warning">
-              {label("dalinis", "partial")}
-            </span>
+            {customer ? (
+              <span className="rounded bg-state-success/20 px-2 py-0.5 text-xs text-state-success">
+                {label("✓ Pradėta", "✓ Started")}
+              </span>
+            ) : (
+              <span className="rounded bg-ink-700/40 px-2 py-0.5 text-xs text-text-muted">
+                {label("dar nepradėta", "not started")}
+              </span>
+            )}
           </header>
-          <p className="text-sm text-text-secondary">
-            {label(
-              "Pirkėjo (customer) entiteto lentelė dar nesukurta (M3 etapas pagal 0007 migracijos komentarą).",
-              "The buyer (customer) entity table does not yet exist (M3 scope per migration 0007 comment).",
-            )}
-          </p>
-          <p className="text-xs text-text-secondary">
-            {label("Kas veikia dabar:", "What works now:")}
-          </p>
-          <ul className="ml-4 list-disc text-xs text-text-secondary">
-            <li>
+          {customer ? (
+            <>
+              <p className="text-sm text-text-secondary">
+                {label(
+                  "Pirkėjo profilis pradėtas. Galite kurti darbo užklausas — jos lieka privačios, kol nenuspręsite kitaip.",
+                  "Buyer profile started. You can create work requests — they stay private until you decide otherwise.",
+                )}
+              </p>
+              <dl className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <dt className="text-text-muted">
+                    {label("Vardas / kontaktas", "Name / contact")}
+                  </dt>
+                  <dd className="text-text-primary">
+                    {customer.contact_name ?? "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-text-muted">
+                    {label("Šalis", "Country")}
+                  </dt>
+                  <dd className="text-text-primary">
+                    {customer.country ?? "—"}
+                  </dd>
+                </div>
+              </dl>
+            </>
+          ) : (
+            <p className="text-sm text-text-secondary">
               {label(
-                "pilot_drafts lentelė — pirkėjo užklausos juodraštis išsaugomas tikrai;",
-                "pilot_drafts table — your buyer request draft persists for real;",
+                "Ieškote žmogaus ar paslaugos sau? Susikurkite pirkėjo profilį ir aprašykite, ko reikia. Užklausos juodraštis išsaugomas ir lieka privatus. Jei perkate įmonės vardu — kurkite įmonės profilį su tipu „Klientas / užsakovas“.",
+                "Looking for a person or a service for yourself? Start a buyer profile and describe what you need. Your request draft is saved and stays private. Buying on behalf of a company? Create a company profile with the “Client / requester” type instead.",
               )}
-            </li>
-            <li>
-              {label(
-                hasCustomerRole
-                  ? "jūs jau turite customer vaidmenį profile_roles kataloge."
-                  : "customer vaidmuo dar nepridėtas — galite jį pridėti per /dashboard/start/buyer.",
-                hasCustomerRole
-                  ? "you already hold the customer role in profile_roles."
-                  : "the customer role is not yet added — add it via /dashboard/start/buyer.",
-              )}
-            </li>
-          </ul>
-          <p className="text-xs text-state-warning">
-            {label("Blokas:", "Blocker:")}{" "}
-            {label(
-              "trūksta DB lentelės pvz. public.customers su profile_id + service_area + budget_range. Migracija atskirame PR.",
-              "missing DB table e.g. public.customers with profile_id + service_area + budget_range. Migration in a separate PR.",
-            )}
-          </p>
+            </p>
+          )}
           <Link
             href={"/dashboard/start/buyer" as "/dashboard"}
-            className="self-start rounded-md border border-state-warning px-3 py-1.5 text-sm text-state-warning hover:bg-state-warning/10"
+            className="self-start rounded-md border border-brand-blue px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
             data-testid="activity-setup-lane-buyer-start"
           >
-            {label("Atidaryti pirkėjo būseną →", "Open buyer state →")}
+            {customer
+              ? label("Atidaryti pirkėjo nustatymą →", "Open buyer setup →")
+              : label("Pradėti pirkėjo profilį →", "Start buyer profile →")}
           </Link>
         </article>
       </section>
