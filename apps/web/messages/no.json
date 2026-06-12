@@ -1569,5 +1569,51 @@
     "title": "Siden ble ikke funnet",
     "body": "Denne adressen finnes ikke — den kan være feilskrevet, eller siden er flyttet.",
     "cta": "Tilbake til start"
+  },
+  "scouting": {
+    "title": "[EN] Scouting",
+    "intro": "[EN] Pick one of your structured needs to see matching workers, why they fit, and shortlist them.",
+    "pickDemand": "[EN] Pick a need",
+    "noDemands": "[EN] You have no needs yet. Create a need first, then structure its required skills.",
+    "unstructuredTag": "[EN] not structured",
+    "notStructured": "[EN] This need has no structured skills yet, so no match can be computed. Structure the required skills first.",
+    "needsSetup": "[EN] Scouting is not available yet on this environment.",
+    "noCandidates": "[EN] No matching workers yet for this need.",
+    "namePlaceholder": "[EN] Worker",
+    "skillFit": "[EN] {pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
+    "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "shortlistError": "[EN] Could not save. Try again.",
+    "footnote": "[EN] Matches are computed deterministically for this need only. No global rating, no fake candidates.",
+    "status": {
+      "strong": "[EN] Strong fit",
+      "possible": "[EN] Possible fit",
+      "weak": "[EN] Weak fit",
+      "insufficient_data": "[EN] Not enough data"
+    },
+    "shortlist": {
+      "saved": "[EN] Saved",
+      "interested": "[EN] Interested",
+      "not_fit": "[EN] Not a fit",
+      "reviewed": "[EN] Reviewed"
+    },
+    "reason": {
+      "skills_manager_confirmed": "[EN] Manager-confirmed skills",
+      "skills_journal_supported": "[EN] Journal-supported skills",
+      "country_match": "[EN] Country matches",
+      "mobility_match": "[EN] Willing to work in this country",
+      "available_now": "[EN] Available now",
+      "language_match": "[EN] Language matches",
+      "profession_match": "[EN] Profession matches",
+      "pay_within_offer": "[EN] Pay within offer",
+      "accommodation_ok": "[EN] Accommodation works"
+    },
+    "gap": {
+      "skills_missing": "[EN] Some required skills missing",
+      "language_missing": "[EN] Required language missing",
+      "country_mismatch": "[EN] Different country",
+      "pay_above_offer": "[EN] Pay expectation above offer",
+      "accommodation_needed_not_provided": "[EN] Needs accommodation, not provided",
+      "profession_mismatch": "[EN] Different profession"
+    }
   }
 }

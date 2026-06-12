@@ -3918,5 +3918,51 @@
     "title": "Page not found",
     "body": "This address doesn't exist — it may be mistyped, or the page has moved.",
     "cta": "Back to the start"
+  },
+  "scouting": {
+    "title": "Scouting",
+    "intro": "Pick one of your structured needs to see matching workers, why they fit, and shortlist them.",
+    "pickDemand": "Pick a need",
+    "noDemands": "You have no needs yet. Create a need first, then structure its required skills.",
+    "unstructuredTag": "not structured",
+    "notStructured": "This need has no structured skills yet, so no match can be computed. Structure the required skills first.",
+    "needsSetup": "Scouting is not available yet on this environment.",
+    "noCandidates": "No matching workers yet for this need.",
+    "namePlaceholder": "Worker",
+    "skillFit": "{pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
+    "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "shortlistError": "Could not save. Try again.",
+    "footnote": "Matches are computed deterministically for this need only. No global rating, no fake candidates.",
+    "status": {
+      "strong": "Strong fit",
+      "possible": "Possible fit",
+      "weak": "Weak fit",
+      "insufficient_data": "Not enough data"
+    },
+    "shortlist": {
+      "saved": "Saved",
+      "interested": "Interested",
+      "not_fit": "Not a fit",
+      "reviewed": "Reviewed"
+    },
+    "reason": {
+      "skills_manager_confirmed": "Manager-confirmed skills",
+      "skills_journal_supported": "Journal-supported skills",
+      "country_match": "Country matches",
+      "mobility_match": "Willing to work in this country",
+      "available_now": "Available now",
+      "language_match": "Language matches",
+      "profession_match": "Profession matches",
+      "pay_within_offer": "Pay within offer",
+      "accommodation_ok": "Accommodation works"
+    },
+    "gap": {
+      "skills_missing": "Some required skills missing",
+      "language_missing": "Required language missing",
+      "country_mismatch": "Different country",
+      "pay_above_offer": "Pay expectation above offer",
+      "accommodation_needed_not_provided": "Needs accommodation, not provided",
+      "profession_mismatch": "Different profession"
+    }
   }
 }

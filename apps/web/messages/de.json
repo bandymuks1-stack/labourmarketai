@@ -1569,5 +1569,51 @@
     "title": "Seite nicht gefunden",
     "body": "Diese Adresse existiert nicht — vielleicht wurde sie falsch eingegeben oder die Seite wurde verschoben.",
     "cta": "Zurück zum Start"
+  },
+  "scouting": {
+    "title": "Scouting",
+    "intro": "Wähle einen deiner strukturierten Bedarfe, um passende Arbeitskräfte, ihre Eignungsgründe und eine Shortlist zu sehen.",
+    "pickDemand": "Bedarf wählen",
+    "noDemands": "Du hast noch keine Bedarfe. Erstelle zuerst einen Bedarf und strukturiere dann die benötigten Fähigkeiten.",
+    "unstructuredTag": "nicht strukturiert",
+    "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
+    "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
+    "noCandidates": "Noch keine passenden Arbeitskräfte für diesen Bedarf.",
+    "namePlaceholder": "Arbeitskraft",
+    "skillFit": "{pct}% — {matched}/{total} benötigte Fähigkeiten, {confirmed} vom Manager bestätigt",
+    "evidence": "Nachweise — bestätigt: {confirmed} · Journal: {journal} · selbst angegeben: {self}",
+    "shortlistError": "Konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "footnote": "Matches werden deterministisch nur für diesen Bedarf berechnet. Keine globale Bewertung, keine erfundenen Kandidaten.",
+    "status": {
+      "strong": "Starke Eignung",
+      "possible": "Mögliche Eignung",
+      "weak": "Schwache Eignung",
+      "insufficient_data": "Nicht genug Daten"
+    },
+    "shortlist": {
+      "saved": "Gespeichert",
+      "interested": "Interessiert",
+      "not_fit": "Passt nicht",
+      "reviewed": "Geprüft"
+    },
+    "reason": {
+      "skills_manager_confirmed": "Vom Manager bestätigte Fähigkeiten",
+      "skills_journal_supported": "Journal-gestützte Fähigkeiten",
+      "country_match": "Land passt",
+      "mobility_match": "Bereit, in diesem Land zu arbeiten",
+      "available_now": "Jetzt verfügbar",
+      "language_match": "Sprache passt",
+      "profession_match": "Beruf passt",
+      "pay_within_offer": "Bezahlung im Rahmen des Angebots",
+      "accommodation_ok": "Unterkunft passt"
+    },
+    "gap": {
+      "skills_missing": "Einige benötigte Fähigkeiten fehlen",
+      "language_missing": "Benötigte Sprache fehlt",
+      "country_mismatch": "Anderes Land",
+      "pay_above_offer": "Gehaltsvorstellung über dem Angebot",
+      "accommodation_needed_not_provided": "Benötigt Unterkunft, nicht angeboten",
+      "profession_mismatch": "Anderer Beruf"
+    }
   }
 }

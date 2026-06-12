@@ -2,10 +2,22 @@ import { describe, expect, it } from "vitest";
 import {
   matchWorkerToNeed,
   matchStrengthOrder,
+  sourceToEvidence,
   type MatchNeed,
   type MatchSubject,
   type EvidenceTier,
 } from "./match-v1";
+
+describe("sourceToEvidence — maps worker_skills.source to the evidence tier", () => {
+  it("maps the three real sources; unknown/missing → self_declared (never inflated)", () => {
+    expect(sourceToEvidence("manager_confirmed")).toBe("manager_confirmed");
+    expect(sourceToEvidence("work_journal")).toBe("work_journal");
+    expect(sourceToEvidence("self_declared")).toBe("self_declared");
+    expect(sourceToEvidence(null)).toBe("self_declared");
+    expect(sourceToEvidence(undefined)).toBe("self_declared");
+    expect(sourceToEvidence("anything_else")).toBe("self_declared");
+  });
+});
 
 // Three ESCO skill URIs reused across cases.
 const S1 = "http://data.europa.eu/esco/skill/aaaa";

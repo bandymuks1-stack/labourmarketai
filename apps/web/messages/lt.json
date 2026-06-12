@@ -3918,5 +3918,51 @@
     "title": "Puslapis nerastas",
     "body": "Tokio adreso nėra — galbūt jis įvestas klaidingai arba puslapis buvo perkeltas.",
     "cta": "Grįžti į pradžią"
+  },
+  "scouting": {
+    "title": "Žvalgyba",
+    "intro": "Pasirink vieną iš savo struktūruotų poreikių, kad matytum tinkamus darbuotojus, kodėl jie tinka, ir įtrauktum į trumpąjį sąrašą.",
+    "pickDemand": "Pasirink poreikį",
+    "noDemands": "Kol kas neturi poreikių. Pirma sukurk poreikį, tada struktūruok reikalingus įgūdžius.",
+    "unstructuredTag": "nestruktūruotas",
+    "notStructured": "Šis poreikis dar neturi struktūruotų įgūdžių, todėl atitiktis neskaičiuojama. Pirma struktūruok reikalingus įgūdžius.",
+    "needsSetup": "Žvalgyba šioje aplinkoje dar neprieinama.",
+    "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų.",
+    "namePlaceholder": "Darbuotojas",
+    "skillFit": "{pct}% — {matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
+    "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",
+    "shortlistError": "Nepavyko išsaugoti. Bandyk dar kartą.",
+    "footnote": "Atitiktis skaičiuojama deterministiškai tik šiam poreikiui. Jokio bendro reitingo, jokių išgalvotų kandidatų.",
+    "status": {
+      "strong": "Stipri atitiktis",
+      "possible": "Galima atitiktis",
+      "weak": "Silpna atitiktis",
+      "insufficient_data": "Per mažai duomenų"
+    },
+    "shortlist": {
+      "saved": "Išsaugota",
+      "interested": "Domina",
+      "not_fit": "Netinka",
+      "reviewed": "Peržiūrėta"
+    },
+    "reason": {
+      "skills_manager_confirmed": "Vadovo patvirtinti įgūdžiai",
+      "skills_journal_supported": "Žurnalu pagrįsti įgūdžiai",
+      "country_match": "Šalis sutampa",
+      "mobility_match": "Sutiktų dirbti šioje šalyje",
+      "available_now": "Šiuo metu laisvas",
+      "language_match": "Kalba sutampa",
+      "profession_match": "Profesija sutampa",
+      "pay_within_offer": "Atlygis telpa į pasiūlymą",
+      "accommodation_ok": "Apgyvendinimas tinka"
+    },
+    "gap": {
+      "skills_missing": "Trūksta dalies reikalaujamų įgūdžių",
+      "language_missing": "Trūksta reikalaujamos kalbos",
+      "country_mismatch": "Kita šalis",
+      "pay_above_offer": "Atlygio lūkestis viršija pasiūlymą",
+      "accommodation_needed_not_provided": "Reikia apgyvendinimo, nesiūloma",
+      "profession_mismatch": "Kita profesija"
+    }
   }
 }

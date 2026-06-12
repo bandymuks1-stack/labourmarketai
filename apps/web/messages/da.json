@@ -1569,5 +1569,51 @@
     "title": "Siden blev ikke fundet",
     "body": "Denne adresse findes ikke — den kan være tastet forkert, eller siden er flyttet.",
     "cta": "Tilbage til start"
+  },
+  "scouting": {
+    "title": "Scouting",
+    "intro": "Vælg et af dine strukturerede behov for at se matchende arbejdere, hvorfor de passer, og tilføj dem til en shortlist.",
+    "pickDemand": "Vælg et behov",
+    "noDemands": "Du har ingen behov endnu. Opret et behov først, og strukturér derefter de krævede færdigheder.",
+    "unstructuredTag": "ikke struktureret",
+    "notStructured": "Dette behov har endnu ingen strukturerede færdigheder, så der kan ikke beregnes match. Strukturér de krævede færdigheder først.",
+    "needsSetup": "Scouting er ikke tilgængelig i dette miljø endnu.",
+    "noCandidates": "Ingen matchende arbejdere endnu til dette behov.",
+    "namePlaceholder": "Arbejder",
+    "skillFit": "{pct}% — {matched}/{total} krævede færdigheder, {confirmed} bekræftet af leder",
+    "evidence": "Dokumentation — bekræftet: {confirmed} · journal: {journal} · selvangivet: {self}",
+    "shortlistError": "Kunne ikke gemme. Prøv igen.",
+    "footnote": "Match beregnes deterministisk kun for dette behov. Ingen global rating, ingen falske kandidater.",
+    "status": {
+      "strong": "Stærkt match",
+      "possible": "Muligt match",
+      "weak": "Svagt match",
+      "insufficient_data": "Ikke nok data"
+    },
+    "shortlist": {
+      "saved": "Gemt",
+      "interested": "Interesseret",
+      "not_fit": "Passer ikke",
+      "reviewed": "Gennemgået"
+    },
+    "reason": {
+      "skills_manager_confirmed": "Lederbekræftede færdigheder",
+      "skills_journal_supported": "Journal-understøttede færdigheder",
+      "country_match": "Land matcher",
+      "mobility_match": "Villig til at arbejde i dette land",
+      "available_now": "Tilgængelig nu",
+      "language_match": "Sprog matcher",
+      "profession_match": "Profession matcher",
+      "pay_within_offer": "Løn inden for tilbud",
+      "accommodation_ok": "Indkvartering passer"
+    },
+    "gap": {
+      "skills_missing": "Nogle krævede færdigheder mangler",
+      "language_missing": "Krævet sprog mangler",
+      "country_mismatch": "Andet land",
+      "pay_above_offer": "Lønforventning over tilbud",
+      "accommodation_needed_not_provided": "Behøver indkvartering, ikke tilbudt",
+      "profession_mismatch": "Anden profession"
+    }
   }
 }

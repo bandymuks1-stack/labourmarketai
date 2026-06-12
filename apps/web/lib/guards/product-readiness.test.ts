@@ -1397,7 +1397,11 @@ describe("no migration files added by this sprint", () => {
     // phase_b3_fk_indexes) — 24 additive GREEN CREATE INDEX on the remaining
     // person/actor + org/project foreign keys (closes Phase B, all tables
     // tiny); no RLS/grant/policy/data change.
-    const SPRINT_BASELINE = 75;
+    // Bumped 75 -> 76 for Full Cycle Sprint v1 scouting (20260612220000
+    // demand_shortlist) — additive GREEN owner-scoped shortlist table (NEW
+    // table + NEW owner-scoped policies; NO existing RLS changed); no prod
+    // apply.
+    const SPRINT_BASELINE = 76;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
