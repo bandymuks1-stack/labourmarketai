@@ -1385,7 +1385,11 @@ describe("no migration files added by this sprint", () => {
     // pin_function_search_path) — additive GREEN ALTER FUNCTION ... SET
     // search_path = public on 4 SECURITY INVOKER functions; no RLS/grant/
     // policy/data change.
-    const SPRINT_BASELINE = 72;
+    // Bumped 72 -> 73 for Phase B1 FK indexes (20260612190000
+    // phase_b1_fk_indexes) — 15 additive GREEN CREATE INDEX on active-path
+    // foreign keys (chat/journal/engagement/requests/matches/invitations);
+    // no RLS/grant/policy/data change.
+    const SPRINT_BASELINE = 73;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
