@@ -22,7 +22,12 @@
 // contexts fails CI).
 export const typography = {
   fontFamily: {
-    display: ["var(--font-display)", "system-ui", "sans-serif"],
+    // Cyrillic fallback (RU locale): Bricolage Grotesque has no cyrillic
+    // subset, so the display stack falls back to Inter (var(--font-sans),
+    // loaded with the cyrillic subset in layout.tsx) BEFORE any system face.
+    // Per-glyph font matching makes this exact: latin glyphs render in
+    // Bricolage, Cyrillic glyphs in Inter — never a browser-picked serif.
+    display: ["var(--font-display)", "var(--font-sans)", "system-ui", "sans-serif"],
     sans: ["var(--font-sans)", "system-ui", "sans-serif"],
     mono: ["var(--font-mono)", "ui-monospace", "monospace"],
   },

@@ -439,3 +439,93 @@ describe("extractJournalSuggestions — single-fragment per-domain mappings", ()
     expect(s.hasAny).toBe(false);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Russian (RU) detection — workers on the first real sites operate primarily
+// in Russian (owner goal 2026-06-12). RU needles + time units ride the SAME
+// extractor (one detection path, same canonical slugs — §2/§10 no parallel
+// structures). These tests pin the acceptance sentence shape: a tiler entry
+// written in Russian is detected exactly like its LT equivalent.
+
+describe("extractJournalSuggestions (rule-based, RU)", () => {
+  it("parses a Russian tiler entry: hours + m² + tiling skill + tiler direction", () => {
+    const s = extractJournalSuggestions(
+      "Работал 8 часов, укладывал плитку в ванной, сделал примерно 12 м².",
+    );
+    expect(s.time).toEqual({ value: 8, unitSlug: "hours" });
+    expect(s.quantity).toEqual({ value: 12, unitSlug: "square_meters" });
+    expect(s.skillSlugs).toContain("tiling");
+    expect(s.hasAny).toBe(true);
+  });
+
+  it("fragment carries the tiler activity slug for «4 часа клал плитку»", () => {
+    const s = extractJournalSuggestions("4 часа клал плитку на кухне.");
+    expect(s.fragments).toHaveLength(1);
+    expect(s.fragments[0].time).toEqual({ value: 4, unitSlug: "hours" });
+    expect(s.fragments[0].activitySlug).toBe("tiler");
+  });
+
+  it("recognises Russian minutes and days", () => {
+    expect(extractJournalSuggestions("30 минут чистил инструмент.").time).toEqual({
+      value: 30,
+      unitSlug: "minutes",
+    });
+    expect(extractJournalSuggestions("Работал 2 дня на объекте.").time).toEqual({
+      value: 2,
+      unitSlug: "days",
+    });
+  });
+
+  it("recognises «8 ч» digit-abbreviation hours", () => {
+    const s = extractJournalSuggestions("8 ч штукатурил стены.");
+    expect(s.time).toEqual({ value: 8, unitSlug: "hours" });
+    expect(s.skillSlugs).toContain("plastering");
+  });
+
+  it("Russian half-hour idioms: «полчаса» and «полтора часа»", () => {
+    expect(extractJournalSuggestions("Полчаса убирал площадку.").time).toEqual({
+      value: 0.5,
+      unitSlug: "hours",
+    });
+    expect(extractJournalSuggestions("Полтора часа красил стены.").time).toEqual({
+      value: 1.5,
+      unitSlug: "hours",
+    });
+  });
+
+  it("«два часа с половиной» style: digit hours + «с половиной» adds 0.5", () => {
+    const s = extractJournalSuggestions("Работал 2 часа с половиной, клал плитку.");
+    expect(s.fragments.some((f) => f.time?.value === 2.5)).toBe(true);
+  });
+
+  it("multi-fragment Russian entry splits on «и» and commas", () => {
+    const s = extractJournalSuggestions(
+      "2 часа возил материалы и 3 часа клал плитку.",
+    );
+    expect(s.fragments.length).toBe(2);
+    const driving = s.fragments.find((f) => f.activityLabel?.match(/pavežėjimas|vairavimas/i));
+    const tiling = s.fragments.find((f) => f.activitySlug === "tiler");
+    expect(driving?.time?.value).toBe(2);
+    expect(tiling?.time?.value).toBe(3);
+  });
+
+  it("Russian profession mentions map to the SAME canonical slugs as LT", () => {
+    const s = extractJournalSuggestions(
+      "Помогал сварщику, потом вязал арматуру и делал опалубку.",
+    );
+    expect(s.skillSlugs).toContain("rebar-cutting");
+    expect(s.skillSlugs).toContain("formwork");
+    expect(s.skillSlugs).toContain("welding-blueprint");
+  });
+
+  it("«кран» as a water tap does NOT suggest crane operator", () => {
+    const s = extractJournalSuggestions("Поменял кран в ванной, 1 час.");
+    expect(s.skillSlugs).not.toContain("crane_operator");
+  });
+
+  it("vague Russian text does not invent work", () => {
+    const s = extractJournalSuggestions("Сегодня было неплохо.");
+    expect(s.fragments).toHaveLength(0);
+    expect(s.hasAny).toBe(false);
+  });
+});

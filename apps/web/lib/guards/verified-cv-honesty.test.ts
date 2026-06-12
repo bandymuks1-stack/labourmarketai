@@ -24,7 +24,7 @@ import {
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"] as const;
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"] as const;
 
 function baseMessages(locale: string): Record<string, unknown> {
   return JSON.parse(

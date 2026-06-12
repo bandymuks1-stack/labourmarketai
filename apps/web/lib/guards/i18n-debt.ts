@@ -23,8 +23,10 @@ import { resolve } from "node:path";
 /** The user-visible marker for a not-yet-translated string. */
 export const UNTRANSLATED_MARKER = "[EN]";
 
-/** Locales whose debt is inventoried + ratcheted (owner scope: DA/DE). */
-export const TRACKED_LOCALES = ["da", "de"] as const;
+/** Locales whose debt is inventoried + ratcheted (owner scope: DA/DE; RU
+ *  added 2026-06-12 with a ZERO baseline — RU is an ACTIVE worker locale,
+ *  so any future `[EN]` marker in ru.json fails the gate immediately). */
+export const TRACKED_LOCALES = ["da", "de", "ru"] as const;
 
 /** Locales that must stay fully translated (0 markers) — regression guard. */
 export const PRIMARY_LOCALES = ["en", "lt"] as const;
@@ -44,6 +46,9 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // analysis view + hub link + matching confirmed-only filter).
   da: 766,
   de: 766,
+  // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
+  // review) — the ratchet starts and stays at zero.
+  ru: 0,
 };
 
 export interface LocaleDebt {

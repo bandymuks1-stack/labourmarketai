@@ -19,7 +19,7 @@ const lib = read("lib/projects/stadium.ts");
 const page = read("app/[locale]/dashboard/projects/[id]/page.tsx");
 const mapComp = read("components/app/arena/project-map.tsx");
 
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 describe("stadium read service is real-data-only", () => {
   it("composes the manager-gated operations read (no second gate system)", () => {

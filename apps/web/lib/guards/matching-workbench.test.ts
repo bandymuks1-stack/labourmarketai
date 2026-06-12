@@ -22,7 +22,7 @@ const LIB = "lib/admin/matching-workbench.ts";
 const ACTION = "lib/admin/matching-workbench-actions.ts";
 const PAGE = "app/[locale]/dashboard/admin/matching/page.tsx";
 const REVIEW = "components/app/matching-workbench-review.tsx";
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 describe("matching workbench — admin gate + canonical model", () => {
   it("page gates with requireSuperadmin before any data load", () => {

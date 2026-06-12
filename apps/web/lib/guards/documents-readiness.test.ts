@@ -26,7 +26,7 @@ const stripSql = (s: string): string =>
 
 const MIGRATION =
   "supabase/migrations/20260610170000_worker_documents_readiness.sql";
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 describe("S3 migration draft — gated, additive, hardened", () => {
   const raw = readRepo(MIGRATION);

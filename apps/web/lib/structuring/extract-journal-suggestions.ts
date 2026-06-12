@@ -90,14 +90,22 @@ function toNumber(raw: string): number | null {
 }
 
 /** Match every hours/minutes/days mention in the text, returning normalized
- *  values. */
+ *  values.
+ *
+ *  RU (2026-06-12): Russian unit forms ride the SAME regexes («4 часа»,
+ *  «30 минут», «2 дня», «8 ч»). Note `\b` is useless next to Cyrillic just
+ *  like next to LT diacritics — the RU alternatives end with `[\p{L}]*`
+ *  (consume the inflection) or an explicit lookahead instead. */
 function findAllTimes(
   lower: string,
 ): { value: number; unitSlug: "hours" | "days" | "minutes" }[] {
   const out: { value: number; unitSlug: "hours" | "days" | "minutes" }[] = [];
-  const hoursRe = /(\d+(?:[.,]\d+)?)\s*(?:valand[\p{L}]*|val\.?|h\b)/giu;
-  const daysRe = /(\d+(?:[.,]\d+)?)\s*(?:dien[\p{L}]*|d\.?)\b/giu;
-  const minutesRe = /(\d+(?:[.,]\d+)?)\s*(?:minu[čt][\p{L}]*|min\.?)/giu;
+  const hoursRe =
+    /(\d+(?:[.,]\d+)?)\s*(?:valand[\p{L}]*|val\.?|h\b|час[\p{L}]*|ч\.?(?=\s|[.,!?]|$))/giu;
+  const daysRe =
+    /(\d+(?:[.,]\d+)?)\s*(?:dien[\p{L}]*\b|d\.?\b|дн[\p{L}]*|день)/giu;
+  const minutesRe =
+    /(\d+(?:[.,]\d+)?)\s*(?:minu[čt][\p{L}]*|min\.?|мин[\p{L}]*\.?)/giu;
   for (const m of lower.matchAll(hoursRe)) {
     const v = toNumber(m[1]);
     if (v !== null) out.push({ value: v, unitSlug: "hours" });
@@ -158,6 +166,9 @@ function numberWordKeysAlternation(): string {
 function detectHoursWord(f: string): number | null {
   if (/(?:^|\s)pusvaland[įio]/.test(f)) return 0.5;
   if (/(?:^|\s)pusę\s+valandos(?=\s|[.,!?]|$)/.test(f)) return 0.5;
+  // RU idioms: «полчаса» = 0.5h, «полтора часа» = 1.5h.
+  if (/(?:^|[^\p{L}])полчаса(?=\s|[.,!?]|$)/u.test(f)) return 0.5;
+  if (/(?:^|[^\p{L}])полтора\s+час[\p{L}]*(?=\s|[.,!?]|$)/u.test(f)) return 1.5;
   const keys = numberWordKeysAlternation();
   // Number-word + valand*
   const m = new RegExp(
@@ -172,6 +183,14 @@ function detectHoursWord(f: string): number | null {
   if (
     /(?:^|[^\d])valand[ąoų](?=\s|[.,!?]|$)/.test(f) &&
     !/\d\s*valand/.test(f)
+  ) {
+    return 1;
+  }
+  // RU: bare «час» / «часа» (= 1 hour, «работал час») when no digit precedes.
+  if (
+    /(?:^|[^\p{L}\d])час(?:а|у)?(?=\s|[.,!?]|$)/u.test(f) &&
+    !/\d\s*час/u.test(f) &&
+    !/полчаса|полтора/u.test(f)
   ) {
     return 1;
   }
@@ -226,14 +245,18 @@ function detectFragmentTime(
 
   // Hours contribution (digit OR word OR special idiom).
   let hours: number | null = null;
-  const digitHourMatch = f.match(/(\d+(?:[.,]\d+)?)\s*(?:valand[\p{L}]*|val\.?|h\b)/u);
+  const digitHourMatch = f.match(
+    /(\d+(?:[.,]\d+)?)\s*(?:valand[\p{L}]*|val\.?|h\b|час[\p{L}]*|ч\.?(?=\s|[.,!?]|$))/u,
+  );
   if (digitHourMatch) hours = toNumber(digitHourMatch[1]);
   if (hours === null) hours = detectHoursWord(f);
 
-  // "su puse" = "and a half" — adds 0.5h to the hours we already have.
-  if (hours !== null && /\s+su\s+puse/.test(f)) {
+  // "su puse" (LT) / «с половиной» (RU) = "and a half" — adds 0.5h to the
+  // hours we already have.
+  const andAHalf = /\s+su\s+puse/.test(f) || /\s+с\s+половиной/u.test(f);
+  if (hours !== null && andAHalf) {
     hours = hours + 0.5;
-  } else if (hours === null && /\s+su\s+puse/.test(f)) {
+  } else if (hours === null && andAHalf) {
     // "valandą su puse" already detected via detectHoursWord (= 1) plus +0.5;
     // but if hours is still null, default to 1.5.
     hours = 1.5;
@@ -241,7 +264,9 @@ function detectFragmentTime(
 
   // Minutes contribution.
   let minutes: number | null = null;
-  const digitMinMatch = f.match(/(\d+(?:[.,]\d+)?)\s*(?:minu[čt][\p{L}]*|min\.?)/u);
+  const digitMinMatch = f.match(
+    /(\d+(?:[.,]\d+)?)\s*(?:minu[čt][\p{L}]*|min\.?|мин[\p{L}]*\.?)/u,
+  );
   if (digitMinMatch) minutes = toNumber(digitMinMatch[1]);
   if (minutes === null) minutes = detectMinutesWord(f);
 
@@ -249,7 +274,9 @@ function detectFragmentTime(
   // compound with sub-hour units in journal language).
   if (hours === null && minutes === null) {
     let days: number | null = null;
-    const digitDayMatch = f.match(/(\d+(?:[.,]\d+)?)\s*(?:dien[\p{L}]*|d\.?)/u);
+    const digitDayMatch = f.match(
+      /(\d+(?:[.,]\d+)?)\s*(?:dien[\p{L}]*|d\.?|дн[\p{L}]*|день)/u,
+    );
     if (digitDayMatch) days = toNumber(digitDayMatch[1]);
     if (days === null) days = detectDaysWord(f);
     if (days !== null) return { value: days, unitSlug: "days" };
@@ -266,10 +293,11 @@ function detectFragmentTime(
 
 /** Split a free-text entry into discrete work fragments. */
 function splitFragments(text: string): string[] {
+  // RU «и» joins work items the same way LT "ir"/"bei" do.
   const normalized = text
     .replace(/\r/g, "")
-    .replace(/,\s*(ir|bei)\s+/gi, " | ")
-    .replace(/\s+(ir|bei)\s+/gi, " | ");
+    .replace(/,\s*(ir|bei|и)\s+/gi, " | ")
+    .replace(/\s+(ir|bei|и)\s+/gi, " | ");
   // Do not split on plain commas if the next chunk introduces a `tema:`
   // (theme) qualifier — the theme is metadata for the previous fragment,
   // not a new fragment. We protect it with a placeholder first.
@@ -291,6 +319,12 @@ function isTimeOnlyFragment(fragment: string): boolean {
     "pusvaland",
     "pusvalandį",
     "pusvalandi",
+    // RU time-idiom tokens («два часа с половиной», «полчаса», «и»).
+    "с",
+    "половиной",
+    "полчаса",
+    "полтора",
+    "и",
     ...Object.keys(LT_NUMBER_WORDS),
   ]);
   const words = fragment
@@ -304,6 +338,12 @@ function isTimeOnlyFragment(fragment: string): boolean {
     if (/^valand[\p{L}]*$/u.test(w)) continue;
     if (/^minu[čt][\p{L}]*$/u.test(w)) continue;
     if (/^dien[\p{L}]*$/u.test(w)) continue;
+    // RU duration nouns: час/часа/часов, мин/минут, дн/дня/дней, день, ч.
+    if (/^час[\p{L}]*$/u.test(w)) continue;
+    if (/^мин[\p{L}]*$/u.test(w)) continue;
+    if (/^дн[\p{L}]*$/u.test(w)) continue;
+    if (/^день$/u.test(w)) continue;
+    if (/^ч\.?$/u.test(w)) continue;
     if (TIME_TOKENS.has(w)) continue;
     return false;
   }
@@ -421,15 +461,18 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     if (v) time = v;
   }
 
-  // 2) Quantity + unit.
+  // 2) Quantity + unit. RU unit spellings (Cyrillic «м²», «кв.м», «шт»,
+  //    «кг», «упак») ride the same regexes — same canonical unit slugs.
   let quantity: JournalSuggestions["quantity"] = null;
   const sqm = lower.match(
-    /(\d+(?:[.,]\d+)?)\s*(?:m\s*2|m²|kv\.?\s*m|kvadrat)/i,
+    /(\d+(?:[.,]\d+)?)\s*(?:m\s*2|m²|kv\.?\s*m|kvadrat|м\s*2|м²|кв\.?\s*м|квадрат)/iu,
   );
-  const meters = sqm ? null : lower.match(/(\d+(?:[.,]\d+)?)\s*m\b(?!²)/i);
-  const pieces = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:vnt\.?|štuk)/i);
-  const kg = lower.match(/(\d+(?:[.,]\d+)?)\s*kg\b/i);
-  const pkg = lower.match(/(\d+(?:[.,]\d+)?)\s*pakuo/i);
+  const meters = sqm
+    ? null
+    : lower.match(/(\d+(?:[.,]\d+)?)\s*(?:m\b(?!²)|м(?=\s|[.,!?]|$))/iu);
+  const pieces = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:vnt\.?|štuk|шт\.?)/iu);
+  const kg = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:kg\b|кг(?=\s|[.,!?]|$))/iu);
+  const pkg = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:pakuo|упак)/iu);
   if (sqm) {
     const v = toNumber(sqm[1]);
     if (v !== null) quantity = { value: v, unitSlug: "square_meters" };

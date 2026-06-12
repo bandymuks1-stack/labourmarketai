@@ -100,7 +100,7 @@ describe("layout prefs are device-local and reversible", () => {
 });
 
 describe("S9 copy exists in all 10 locales", () => {
-  const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+  const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
   it("queue + layout keys present everywhere", () => {
     for (const locale of LOCALES) {
       const j = JSON.parse(read(`messages/${locale}.json`));

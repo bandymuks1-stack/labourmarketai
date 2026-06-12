@@ -16,7 +16,7 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 const board = read("components/app/market-pulse-board.tsx");
 const page = read("app/[locale]/dashboard/admin/market/page.tsx");
 
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 describe("market pulse renders only real aggregates", () => {
   it("consumes the existing analysis + league read models (no own reads)", () => {

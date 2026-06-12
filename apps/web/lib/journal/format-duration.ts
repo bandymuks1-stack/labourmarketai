@@ -13,7 +13,7 @@
  */
 export type DurationUnit = "hours" | "minutes" | "days";
 
-export type DurationFormatLocale = "lt" | "en";
+export type DurationFormatLocale = "lt" | "en" | "ru";
 
 export type FormatDurationOpts = {
   /** When false, the formatter returns the raw value + the localized unit
@@ -102,7 +102,8 @@ export function formatDuration(
 function formatNumber(n: number, locale: DurationFormatLocale): string {
   if (Number.isInteger(n)) return String(n);
   const fixed = n.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
-  if (locale === "lt") return fixed.replace(".", ",");
+  // LT and RU both write decimals with a comma.
+  if (locale === "lt" || locale === "ru") return fixed.replace(".", ",");
   return fixed;
 }
 
@@ -116,5 +117,10 @@ const LABELS: Record<DurationFormatLocale, Record<DurationUnit, string>> = {
     hours: "h",
     minutes: "min",
     days: "d",
+  },
+  ru: {
+    hours: "ч",
+    minutes: "мин",
+    days: "дн.",
   },
 };

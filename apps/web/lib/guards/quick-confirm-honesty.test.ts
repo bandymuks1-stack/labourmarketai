@@ -19,7 +19,7 @@ import { join } from "node:path";
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"] as const;
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"] as const;
 
 const actions = readFileSync(
   join(APP_ROOT, "lib", "journal", "quick-confirm-actions.ts"),

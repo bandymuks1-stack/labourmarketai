@@ -69,7 +69,7 @@ describe("conversations language — draft migration + honest degrade", () => {
   });
 
   it("language badge copy exists in all 10 locales", () => {
-    for (const locale of ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"]) {
+    for (const locale of ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"]) {
       const json = JSON.parse(read(`messages/${locale}.json`)) as {
         communication?: { originalLanguage?: string };
         admin?: { matching?: { demand?: { messageRequester?: string } } };

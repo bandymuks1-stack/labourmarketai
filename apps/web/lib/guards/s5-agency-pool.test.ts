@@ -27,7 +27,7 @@ const migration = readRepo(
   "supabase/migrations/20260611150000_s5_agency_demand_visibility.sql",
 );
 
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 describe("pool visibility boundary — own agency only", () => {
   it("every read starts at getOwnAgency (no-agency → no pool)", () => {

@@ -125,7 +125,7 @@ describe("Guard: typography decision lock (DI, 2026-06-12)", () => {
 });
 
 describe("Guard: no raw i18n role slug renders (admin label present)", () => {
-  for (const locale of ["en", "lt", "de", "nl", "pl", "lv", "et", "da", "no", "sv"]) {
+  for (const locale of ["en", "lt", "de", "nl", "pl", "lv", "et", "da", "no", "sv", "ru"]) {
     it(`${locale}.json has auth.signup.role.admin`, () => {
       const json = JSON.parse(read(`messages/${locale}.json`));
       expect(json.auth?.signup?.role?.admin, `${locale}: admin role label missing`).toBeTruthy();

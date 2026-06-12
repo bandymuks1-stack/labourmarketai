@@ -23,7 +23,7 @@ const pulse = read("components/app/arena/confirm-pulse.tsx");
 const projectsPage = read("app/[locale]/dashboard/projects/page.tsx");
 const opsPage = read("app/[locale]/dashboard/projects/[id]/operations/page.tsx");
 
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 describe("MAP counts only real rows", () => {
   it("team size comes from active project_worker_assignments (RLS-scoped)", () => {

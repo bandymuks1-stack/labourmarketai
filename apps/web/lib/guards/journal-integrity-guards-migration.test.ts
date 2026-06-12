@@ -48,17 +48,37 @@ describe("Guard: journal_integrity_guards migration", () => {
     const localesBlock = cfg.match(/export const locales\s*=\s*\[([\s\S]*?)\]\s*as const/);
     expect(localesBlock, "could not find `locales` array in config.ts").toBeTruthy();
     const canonical = codesFrom(localesBlock![1]);
-    expect(canonical.length).toBe(10); // EN + 9 launch markets (§2.4)
+    expect(canonical.length).toBe(11); // EN + 9 launch markets + RU (§2.4, amended 2026-06-12)
 
-    // set inside the migration's CHECK (original_language in ( ... ))
-    const checkBlock = sql.match(/original_language\s+in\s*\(([^)]*)\)/i);
-    expect(checkBlock, "could not find original_language IN (...) in the migration").toBeTruthy();
-    const migrationSet = codesFrom(checkBlock![1]);
+    // The CHECK is widened forward-only (§16.1: applied migrations are
+    // frozen) — the AUTHORITATIVE set lives in the LATEST migration that
+    // declares an `original_language in (...)` CHECK. Frozen older
+    // migrations legitimately carry the historical (narrower) set.
+    const withCheck = readdirSync(MIG_DIR)
+      .filter((f) => f.endsWith(".sql"))
+      .filter((f) => /original_language\s+in\s*\(/i.test(readFileSync(join(MIG_DIR, f), "utf8")))
+      .sort();
+    expect(withCheck.length, "no migration declares an original_language CHECK").toBeGreaterThan(0);
+    const latest = withCheck[withCheck.length - 1];
+    const latestSql = readFileSync(join(MIG_DIR, latest), "utf8");
+    // Strip comments (the ROLLBACK block legitimately carries the OLD set).
+    const latestCode = latestSql.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
 
-    expect(
-      migrationSet,
-      "journal_integrity_guards CHECK set must equal apps/web/lib/i18n/config.ts `locales` — update both or neither (no second list)",
-    ).toEqual(canonical);
+    // EVERY executable CHECK in the latest migration must equal the canonical set.
+    const checks = [...latestCode.matchAll(/original_language\s+in\s*\(([^)]*)\)/gi)];
+    expect(checks.length, `no original_language IN (...) in ${latest}`).toBeGreaterThan(0);
+    for (const c of checks) {
+      expect(
+        codesFrom(c[1]),
+        `${latest} CHECK set must equal apps/web/lib/i18n/config.ts \`locales\` — update both or neither (no second list)`,
+      ).toEqual(canonical);
+    }
+
+    // And the frozen journal_integrity_guards migration keeps its original
+    // 10-code set untouched (§16.1 — never edit an applied migration).
+    const frozen = sql.match(/original_language\s+in\s*\(([^)]*)\)/i);
+    expect(frozen).toBeTruthy();
+    expect(codesFrom(frozen![1]).length).toBe(10);
   });
 
   it("narrows the direct INSERT policy to own-worker AND closed-only (no loosening)", () => {

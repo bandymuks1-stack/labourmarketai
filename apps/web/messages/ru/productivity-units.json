@@ -1,0 +1,12 @@
+{
+  "minutes": "минуты",
+  "hours": "часы",
+  "days": "дни",
+  "square_meters": "м²",
+  "meters": "м",
+  "pieces": "шт.",
+  "kilograms": "кг",
+  "packages": "упаковки",
+  "box_per_day": "упак./день",
+  "square_meters_per_day": "м²/день"
+}

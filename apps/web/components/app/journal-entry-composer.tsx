@@ -657,7 +657,7 @@ export function JournalEntryComposer({
                   ? formatDuration(
                       f.time.value,
                       f.time.unitSlug,
-                      locale === "en" ? "en" : "lt",
+                      locale === "en" || locale === "ru" ? locale : "lt",
                     )
                   : t("fragment.noTime");
                 const activityName = f.isUnknown
@@ -954,7 +954,12 @@ export function JournalEntryComposer({
       )}
 
       <div className={cn("flex flex-wrap items-center gap-3")}>
-        <Button type="button" onClick={submit} disabled={submitting}>
+        <Button
+          type="button"
+          onClick={submit}
+          disabled={submitting}
+          data-testid="journal-confirm-entry"
+        >
           {submitting
             ? t("saving")
             : editingEntry
@@ -965,6 +970,7 @@ export function JournalEntryComposer({
           <button
             type="button"
             onClick={confirmAllPending}
+            data-testid="journal-confirm-all-suggestions"
             className="rounded-md border border-state-success/40 px-3 py-1.5 text-xs font-semibold text-state-success hover:border-state-success"
           >
             {t("confirmAllSuggestions")}

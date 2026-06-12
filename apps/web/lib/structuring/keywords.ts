@@ -17,70 +17,82 @@
 
 import type { SectorKey } from "./sectors";
 
-/** Lowercase substrings that map a free-text mention to a canonical skill slug. */
+/** Lowercase substrings that map a free-text mention to a canonical skill slug.
+ *
+ *  RU (2026-06-12): Russian needles live in the SAME rows — the matcher
+ *  lowercases the haystack and does substring containment, so Cyrillic
+ *  needles ride the existing mechanism (one detection path, same canonical
+ *  slugs — no parallel RU table, mirroring how EN needles were added). RU
+ *  needles use stems of the inflected forms a worker actually writes
+ *  («укладывал плитку», «штукатурил») and avoid stems that collide with
+ *  unrelated common words (e.g. «кран» also means a water tap — the crane
+ *  needle is «крановщик»). */
 export const SKILL_HINTS_LT: { slug: string; needles: string[] }[] = [
-  { slug: "tiling", needles: ["plytel", "klijav"] },
-  { slug: "drywall", needles: ["gipso", "gipskart"] },
-  { slug: "ceiling-systems", needles: ["lub"] },
-  { slug: "partition-walls", needles: ["pertvar"] },
-  { slug: "plastering", needles: ["tinkav", "tinkov"] },
-  { slug: "skim-coating", needles: ["glaist"] },
-  { slug: "painting", needles: ["daž", "dazym"] },
-  { slug: "flooring", needles: ["grind"] },
-  { slug: "floor-screeding", needles: ["išlygin", "isl ygin"] },
-  { slug: "plumbing", needles: ["santechn"] },
-  { slug: "electrical-install", needles: ["elektr"] },
-  { slug: "carpentry", needles: ["stali", "medien"] },
-  { slug: "insulation", needles: ["šiltin", "siltin"] },
-  { slug: "waterproofing", needles: ["hidroizoli"] },
-  { slug: "bricklaying", needles: ["mūr", "mur "] },
-  { slug: "concrete-pouring", needles: ["bet liej", "betonav"] },
-  { slug: "rebar-cutting", needles: ["armatūr", "armatur"] },
-  { slug: "welding-blueprint", needles: ["suvirin"] },
-  { slug: "scaffolding", needles: ["pastol"] },
-  { slug: "demolition", needles: ["griovi", "ardym"] },
-  { slug: "site-cleaning", needles: ["valym"] },
-  { slug: "team-coordination", needles: ["komand", "brigad", "vadovav"] },
-  { slug: "site-management", needles: ["statyb vadov", "objekt vadov"] },
-  { slug: "quality-control", needles: ["kokyb"] },
+  { slug: "tiling", needles: ["plytel", "klijav", "плитк", "плиточ"] },
+  { slug: "drywall", needles: ["gipso", "gipskart", "гипсокартон", "гкл"] },
+  { slug: "ceiling-systems", needles: ["lub", "потолок", "потолк"] },
+  { slug: "partition-walls", needles: ["pertvar", "перегородк"] },
+  { slug: "plastering", needles: ["tinkav", "tinkov", "штукатур"] },
+  { slug: "skim-coating", needles: ["glaist", "шпаклев", "шпаклёв", "шпатлев"] },
+  { slug: "painting", needles: ["daž", "dazym", "красил", "покраск", "маляр", "окраш"] },
+  { slug: "flooring", needles: ["grind", "ламинат", "паркет", "напольн"] },
+  { slug: "floor-screeding", needles: ["išlygin", "isl ygin", "стяжк"] },
+  { slug: "plumbing", needles: ["santechn", "сантехник"] },
+  { slug: "electrical-install", needles: ["elektr", "электр"] },
+  { slug: "carpentry", needles: ["stali", "medien", "столярн", "плотник", "плотниц"] },
+  { slug: "insulation", needles: ["šiltin", "siltin", "утепл", "теплоизоляц"] },
+  { slug: "waterproofing", needles: ["hidroizoli", "гидроизоляц"] },
+  { slug: "bricklaying", needles: ["mūr", "mur ", "кладк", "кирпич"] },
+  { slug: "concrete-pouring", needles: ["bet liej", "betonav", "бетонир", "заливал бетон", "заливка бетон"] },
+  { slug: "rebar-cutting", needles: ["armatūr", "armatur", "арматур"] },
+  { slug: "welding-blueprint", needles: ["suvirin", "сварк", "сварщик", "сваривал"] },
+  { slug: "scaffolding", needles: ["pastol", "подмост", "строительные леса", "строительных лесов"] },
+  { slug: "demolition", needles: ["griovi", "ardym", "демонтаж", "снос "] },
+  { slug: "site-cleaning", needles: ["valym", "уборк"] },
+  { slug: "team-coordination", needles: ["komand", "brigad", "vadovav", "бригад"] },
+  { slug: "site-management", needles: ["statyb vadov", "objekt vadov", "прораб"] },
+  { slug: "quality-control", needles: ["kokyb", "качеств"] },
   // v1 construction work recognition — additional real-journal phrases,
   // mapped to existing skill-names.json slugs (no new taxonomy).
-  { slug: "earthworks", needles: ["kasiau", "kasim", "iškas", "kasė", "smėl", "smel"] },
-  { slug: "wallpapering", needles: ["tapet"] },
-  { slug: "timber-framing", needles: ["karkas", "sij", "gegn", "apkal"] },
-  { slug: "formwork", needles: ["klojin"] },
+  { slug: "earthworks", needles: ["kasiau", "kasim", "iškas", "kasė", "smėl", "smel", "копал", "котлован", "транше", "землян"] },
+  { slug: "wallpapering", needles: ["tapet", "обои", "обоев", "поклейк"] },
+  { slug: "timber-framing", needles: ["karkas", "sij", "gegn", "apkal", "каркас", "стропил"] },
+  { slug: "formwork", needles: ["klojin", "опалубк"] },
   { slug: "concrete-pouring", needles: ["sąram", "saram"] },
-  { slug: "blueprint-reading", needles: ["brėžin", "brezin", "pagal projekt", "projekto skaitym"] },
-  { slug: "general-labour", needles: ["darbo paruoš", "darbo pasiruoš"] },
+  { slug: "blueprint-reading", needles: ["brėžin", "brezin", "pagal projekt", "projekto skaitym", "чертеж", "чертёж", "по проекту"] },
+  { slug: "general-labour", needles: ["darbo paruoš", "darbo pasiruoš", "подсобн", "разнорабоч"] },
 ];
 
-/** Lowercase substrings that map a free-text mention to a profession slug. */
+/** Lowercase substrings that map a free-text mention to a profession slug.
+ *  RU needles ride the same rows (see SKILL_HINTS_LT note). */
 export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
-  { slug: "tiler", needles: ["plytel"] },
-  { slug: "drywaller", needles: ["gipso", "gipskart"] },
-  { slug: "painter", needles: ["daž", "dazym"] },
-  { slug: "plumber", needles: ["santechn"] },
-  { slug: "electrician", needles: ["elektr"] },
-  { slug: "carpenter", needles: ["stali", "medien"] },
-  { slug: "mason", needles: ["mūr", "mur "] },
-  { slug: "concrete_worker", needles: ["beton"] },
-  { slug: "welder", needles: ["suvirin"] },
-  { slug: "rebar_worker", needles: ["armatūr", "armatur"] },
-  { slug: "roofer", needles: ["stog"] },
-  { slug: "foreman", needles: ["brigadin", "vadovav"] },
-  { slug: "site_manager", needles: ["statyb vadov", "objekt vadov"] },
-  { slug: "general_laborer", needles: ["bendr darb", "pagalbin"] },
-  { slug: "crane_operator", needles: ["kran"] },
-  { slug: "heavy_equipment_operator", needles: ["ekskavator", "buldoz", "krautuv"] },
+  { slug: "tiler", needles: ["plytel", "плитк", "плиточ"] },
+  { slug: "drywaller", needles: ["gipso", "gipskart", "гипсокартон", "гкл"] },
+  { slug: "painter", needles: ["daž", "dazym", "красил", "покраск", "маляр"] },
+  { slug: "plumber", needles: ["santechn", "сантехник"] },
+  { slug: "electrician", needles: ["elektr", "электр"] },
+  { slug: "carpenter", needles: ["stali", "medien", "плотник", "столяр"] },
+  { slug: "mason", needles: ["mūr", "mur ", "каменщик", "кладк", "кирпич"] },
+  { slug: "concrete_worker", needles: ["beton", "бетон"] },
+  { slug: "welder", needles: ["suvirin", "сварк", "сварщик", "сваривал"] },
+  { slug: "rebar_worker", needles: ["armatūr", "armatur", "арматур"] },
+  { slug: "roofer", needles: ["stog", "крыш", "кровл", "кровел"] },
+  { slug: "foreman", needles: ["brigadin", "vadovav", "бригадир"] },
+  { slug: "site_manager", needles: ["statyb vadov", "objekt vadov", "прораб"] },
+  { slug: "general_laborer", needles: ["bendr darb", "pagalbin", "разнорабоч", "подсобн"] },
+  // RU: «кран» alone also means a water tap (plumbing) — only the
+  // unambiguous operator/profession forms are needles.
+  { slug: "crane_operator", needles: ["kran", "крановщик", "башенный кран", "башенного крана"] },
+  { slug: "heavy_equipment_operator", needles: ["ekskavator", "buldoz", "krautuv", "экскаватор", "бульдозер", "погрузчик"] },
 ];
 
 /** Higher-level work directions surfaced as a separate suggestion bucket. */
 export const WORK_DIRECTION_HINTS_LT: { slug: string; needles: string[] }[] = [
-  { slug: "tiler", needles: ["vidaus apdail", "apdail"] },
-  { slug: "concrete_worker", needles: ["betonav", "konstruk"] },
-  { slug: "electrician", needles: ["elektros darb", "instaliac"] },
-  { slug: "plumber", needles: ["santechnik darb"] },
-  { slug: "carpenter", needles: ["medienos darb", "stalystės"] },
+  { slug: "tiler", needles: ["vidaus apdail", "apdail", "отделочн", "отделк"] },
+  { slug: "concrete_worker", needles: ["betonav", "konstruk", "бетонные работ", "монолитн"] },
+  { slug: "electrician", needles: ["elektros darb", "instaliac", "электромонтаж"] },
+  { slug: "plumber", needles: ["santechnik darb", "сантехнические работ"] },
+  { slug: "carpenter", needles: ["medienos darb", "stalystės", "столярные работ"] },
 ];
 
 /** Cross-domain per-fragment activity lexicon (not just construction).
@@ -113,7 +125,7 @@ export const ACTIVITY_HINTS_LT: {
     // building the timber structure, not laying the cover.
     slug: "carpenter",
     label: "Stogo karkaso darbai",
-    needles: ["stogo karkas", "stog karkas", "karkas stog"],
+    needles: ["stogo karkas", "stog karkas", "karkas stog", "каркас крыши", "стропильн"],
   },
   {
     // Door + window installation. Each LT form is listed explicitly to keep
@@ -125,7 +137,7 @@ export const ACTIVITY_HINTS_LT: {
       "langus", "langų", "langams", "langais", "languose",
       "stačiau duris", "stačiau langus",
       "dėjau duris", "dėjau langus",
-      "montav duris", "montav langus",
+      "montav duris", "montav langus", "ставил двери", "ставил окна", "монтаж дверей", "монтаж окон", "двери", "дверей", "оконн",
     ],
   },
   {
@@ -139,7 +151,7 @@ export const ACTIVITY_HINTS_LT: {
       "rengiau projekt",
       "projekto rengim",
       "rengiu projekt",
-      "projekt parengim",
+      "projekt parengim", "готовил проект", "разрабатывал проект", "разработка проекта",
     ],
   },
   // ── Non-construction day-work (v3) ────────────────────────────────────
@@ -159,7 +171,7 @@ export const ACTIVITY_HINTS_LT: {
       "programinės įrangos testav",
       "atlikau patikrinim",
       "qa testav",
-      "app testing",
+      "app testing", "тестировал приложени", "тестировал программ",
       "software testing",
     ],
   },
@@ -178,7 +190,7 @@ export const ACTIVITY_HINTS_LT: {
       "pataisymai",
       "bug fix",
       "coding",
-      "programming",
+      "programming", "программировал", "писал код", "исправлял баг", "правил код",
     ],
   },
   {
@@ -197,7 +209,7 @@ export const ACTIVITY_HINTS_LT: {
       "lygin sien",
       "wall plaster",
       "wall smoothing",
-      "skim coat",
+      "skim coat", "шпаклевал стен", "шпатлевал стен", "штукатурил стен", "выравнивал стен",
     ],
   },
   {
@@ -212,7 +224,7 @@ export const ACTIVITY_HINTS_LT: {
       "šėriau žirg",
       "valiau arklid",
       "gyvulių priežiūr",
-      "horse care",
+      "horse care", "ухаживал за лошад", "конюшн", "кормил лошад", "за животными",
       "stable",
     ],
   },
@@ -233,7 +245,7 @@ export const ACTIVITY_HINTS_LT: {
       "paskaitą",
       "lectured",
       "teaching session",
-      "workshop facilitation",
+      "workshop facilitation", "читал лекци", "вел семинар", "вёл семинар", "проводил занятия", "лекци",
     ],
   },
   // ── Construction trades ────────────────────────────────────────────────
@@ -241,33 +253,33 @@ export const ACTIVITY_HINTS_LT: {
     slug: "roofer",
     sector: "construction",
     label: "Stogo dengimas",
-    needles: ["stog", "dengiau stog", "dengti stog"],
+    needles: ["stog", "dengiau stog", "dengti stog", "крыш", "кровл", "кровел"],
   },
-  { slug: "tiler", label: "Plytelių klojimas", needles: ["plytel", "klijav"] },
+  { slug: "tiler", label: "Plytelių klojimas", needles: ["plytel", "klijav", "плитк", "плиточ"] },
   {
     slug: "drywaller",
     label: "Gipso kartono montavimas",
-    needles: ["gipso", "gipskart"],
+    needles: ["gipso", "gipskart", "гипсокартон", "гкл"],
   },
-  { slug: "painter", label: "Dažymas", needles: ["daž", "dazym"] },
-  { slug: "plumber", label: "Santechnika", needles: ["santechn"] },
-  { slug: "electrician", label: "Elektra", needles: ["elektr"] },
+  { slug: "painter", label: "Dažymas", needles: ["daž", "dazym", "красил", "покраск", "маляр"] },
+  { slug: "plumber", label: "Santechnika", needles: ["santechn", "сантехник"] },
+  { slug: "electrician", label: "Elektra", needles: ["elektr", "электр"] },
   {
     slug: "carpenter",
     label: "Staliaus darbai",
-    needles: ["stali", "medien"],
+    needles: ["stali", "medien", "столярн", "плотник", "плотниц"],
   },
-  { slug: "mason", label: "Mūrijimas", needles: ["mūr", "mur "] },
+  { slug: "mason", label: "Mūrijimas", needles: ["mūr", "mur ", "кладк", "кирпич", "каменщик"] },
   {
     slug: "concrete_worker",
     label: "Betonavimas",
-    needles: ["beton liej", "betonav"],
+    needles: ["beton liej", "betonav", "бетонир", "заливал бетон", "бетонщик"],
   },
-  { slug: "welder", label: "Suvirinimas", needles: ["suvirin"] },
+  { slug: "welder", label: "Suvirinimas", needles: ["suvirin", "сварк", "сварщик", "сваривал"] },
   {
     slug: "rebar_worker",
     label: "Armatūros darbai",
-    needles: ["armatūr", "armatur"],
+    needles: ["armatūr", "armatur", "арматур"],
   },
   // Adjacent day-work that the construction taxonomy doesn't model — label
   // only, no fake slug so it stays a review-only suggestion.
@@ -285,7 +297,7 @@ export const ACTIVITY_HINTS_LT: {
       "vairav",
       "ride-hail",
       "driver",
-      "driving",
+      "driving", "возил", "отвозил", "развозил", "перевозил", "водител", "таксовал",
     ],
   },
   {
@@ -299,14 +311,14 @@ export const ACTIVITY_HINTS_LT: {
       "parduotuv",
       "cashier",
       "retail",
-      "store ",
+      "store ", "кассир", "за кассой", "в кассе", "магазин",
     ],
   },
   {
     slug: null,
     sector: "retail_sales",
     label: "Klientų aptarnavimas",
-    needles: ["klient aptarn", "aptarnav"],
+    needles: ["klient aptarn", "aptarnav", "обслуживал клиент", "обслуживание клиент"],
   },
   // ── Further non-construction sectors (v4) — label-only, honest. ────────
   {
@@ -321,7 +333,7 @@ export const ACTIVITY_HINTS_LT: {
       "virtuvej",
       "cooking",
       "kitchen",
-      "chef",
+      "chef", "готовил еду", "готовил обед", "на кухне", "повар",
     ],
   },
   {
@@ -337,7 +349,7 @@ export const ACTIVITY_HINTS_LT: {
       "vaiku prieziur",
       "childcare",
       "caregiv",
-      "nursing",
+      "nursing", "ухаживал за", "сиделк", "медсестр", "присматривал за дет", "нянч", "за пациент",
     ],
   },
   {
@@ -352,7 +364,7 @@ export const ACTIVITY_HINTS_LT: {
       "saskaitu",
       "buhalter",
       "office admin",
-      "paperwork",
+      "paperwork", "оформлял документ", "бухгалтер", "офисн", "делопроизводств",
     ],
   },
   {
@@ -364,7 +376,7 @@ export const ACTIVITY_HINTS_LT: {
       "valiau patalp",
       "valytoj",
       "cleaning",
-      "cleaner",
+      "cleaner", "убирал", "уборк", "уборщ", "мыл полы",
     ],
   },
   {
@@ -377,7 +389,7 @@ export const ACTIVITY_HINTS_LT: {
       "krovini",
       "pakrov",
       "warehouse",
-      "logistics",
+      "logistics", "склад", "грузил", "погрузк", "разгру", "логистик",
     ],
   },
 ];
