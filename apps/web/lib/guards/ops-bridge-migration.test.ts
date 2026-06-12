@@ -152,6 +152,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // owner channel + verified, landed sync-only).
     // then to 72 for Phase A search_path hygiene (20260612180000
     // pin_function_search_path — additive GREEN, ALTER FUNCTION SET only).
-    expect(guard).toMatch(/SPRINT_BASELINE = 72/);
+    // then to 73 for Phase B1 FK indexes (20260612190000 phase_b1_fk_indexes
+    // — 15 additive GREEN CREATE INDEX on active-path foreign keys).
+    expect(guard).toMatch(/SPRINT_BASELINE = 73/);
   });
 });
