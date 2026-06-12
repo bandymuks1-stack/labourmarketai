@@ -1393,7 +1393,11 @@ describe("no migration files added by this sprint", () => {
     // phase_b2_fk_indexes) — 10 additive GREEN CREATE INDEX on taxonomy/
     // reference foreign keys (skills/professions/esco/document_types/
     // productivity_units/plans/countries); no RLS/grant/policy/data change.
-    const SPRINT_BASELINE = 74;
+    // Bumped 74 -> 75 for Phase B3 FK indexes (20260612210000
+    // phase_b3_fk_indexes) — 24 additive GREEN CREATE INDEX on the remaining
+    // person/actor + org/project foreign keys (closes Phase B, all tables
+    // tiny); no RLS/grant/policy/data change.
+    const SPRINT_BASELINE = 75;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

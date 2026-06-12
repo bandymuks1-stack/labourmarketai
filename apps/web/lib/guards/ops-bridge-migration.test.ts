@@ -156,6 +156,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // — 15 additive GREEN CREATE INDEX on active-path foreign keys).
     // then to 74 for Phase B2 FK indexes (20260612200000 phase_b2_fk_indexes
     // — 10 additive GREEN CREATE INDEX on taxonomy/reference foreign keys).
-    expect(guard).toMatch(/SPRINT_BASELINE = 74/);
+    // then to 75 for Phase B3 FK indexes (20260612210000 phase_b3_fk_indexes
+    // — 24 additive GREEN CREATE INDEX, remaining person/org FKs; closes B).
+    expect(guard).toMatch(/SPRINT_BASELINE = 75/);
   });
 });
