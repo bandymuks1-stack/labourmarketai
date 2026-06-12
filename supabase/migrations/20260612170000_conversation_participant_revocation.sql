@@ -9,6 +9,14 @@
 -- applied to prod ONLY via Supabase MCP apply_migration after DI approval.
 -- Never `db push`.
 --
+-- @human-gate-approved — DI approved + APPLIED to prod via the owner channel
+-- and verified (2026-06-12: 7/7 hostile negative tests green, F0 recursion
+-- confirmed fixed). This annotation lets the human-reviewed RED migration pass
+-- the migration-safety check so the file can land in the repo ledger. The PR
+-- merge is SYNC-ONLY — the migration is already live on prod; do NOT re-apply.
+-- The classifier still records the RED findings (SECURITY DEFINER, GRANT/
+-- REVOKE, data UPDATE) as notices for the audit trail.
+--
 -- WHAT THE AUDIT FOUND (see docs/audits/CHAT_VISIBILITY_AUDIT.md):
 --   F0. is_conversation_participant() shipped as SECURITY INVOKER and reads
 --       conversation_participants — whose OWN select policy calls
