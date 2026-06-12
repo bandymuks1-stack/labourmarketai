@@ -1469,6 +1469,8 @@
   "playerCard": {
     "verifiedTitle": "[EN] Verified skills",
     "verifiedEmpty": "[EN] No verified skills yet. They appear when a manager confirms your journal entries.",
+    "journalSupportedLabel": "Balstīts žurnālā",
+    "journalSupportedHint": "Prasmes, ko apstiprina jūsu darba žurnāla ieraksti — spēcīgāk nekā pašdeklarēts; gaida vadītāja apstiprinājumu.",
     "latestEvidenceLabel": "[EN] Latest proof",
     "latestEvidenceEmpty": "[EN] No proof entries yet — your first journal entry will be the first."
   },

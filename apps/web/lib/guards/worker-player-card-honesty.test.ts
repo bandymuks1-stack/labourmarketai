@@ -79,3 +79,28 @@ describe("skills are labelled self-declared (not verified); copy present LT+EN",
     expect(blob).not.toMatch(/employer (viewed|is interested)|artificial intelligence|dirbtin\w* intelekt|\bA\.?I\.?-(verified|matched)/i);
   });
 });
+
+describe("work-journal evidence tier is honest (middle rung, not 'verified')", () => {
+  const ru = JSON.parse(read("messages/ru.json"));
+  it("counts work_journal-source skills from the real column (graceful 0)", () => {
+    expect(svc).toMatch(/journalSupportedSkills/);
+    expect(svc).toMatch(/\.eq\("source", "work_journal"\)/);
+  });
+  it("renders the count verbatim, only when > 0, distinct from verified glow", () => {
+    expect(comp).toMatch(/card\.journalSupportedSkills > 0/);
+    expect(comp).toMatch(/player-card-journal-supported/);
+    // cyan tone, NOT the green manager-verified state-success glow
+    expect(comp).toMatch(/brand-cyan/);
+  });
+  it("the tier label across active locales does NOT claim manager confirmation", () => {
+    for (const [name, j] of [["lt", lt], ["en", en], ["ru", ru]] as const) {
+      const label = j.playerCard.journalSupportedLabel as string;
+      const hint = j.playerCard.journalSupportedHint as string;
+      expect(label, `${name} journalSupportedLabel`).toBeTruthy();
+      expect(hint, `${name} journalSupportedHint`).toBeTruthy();
+      // must not assert it IS verified/confirmed (it is journal-SUPPORTED)
+      expect(label).not.toMatch(/\b(verified|confirmed)\b/i);
+      expect(label).not.toMatch(/patvirtint|подтвержд/i);
+    }
+  });
+});

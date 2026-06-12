@@ -1469,6 +1469,8 @@
   "playerCard": {
     "verifiedTitle": "Bekræftede færdigheder",
     "verifiedEmpty": "Ingen bekræftede færdigheder endnu. De vises, når en leder bekræfter dine journalposter.",
+    "journalSupportedLabel": "Understøttet af journal",
+    "journalSupportedHint": "Færdigheder, som dine arbejdsjournalposter understøtter — stærkere end selvangivet; afventer lederens bekræftelse.",
     "latestEvidenceLabel": "Seneste bevis",
     "latestEvidenceEmpty": "Ingen beviser endnu — din første journalpost bliver den første."
   },

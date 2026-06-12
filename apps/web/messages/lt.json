@@ -3689,6 +3689,8 @@
     "thermoSmallSample": "Maža imtis (n<5) — vertinkite atsargiai.",
     "verifiedTitle": "Patvirtinti įgūdžiai",
     "verifiedEmpty": "Patvirtintų įgūdžių dar nėra. Jie atsiranda, kai vadovas patvirtina tavo darbo įrašus.",
+    "journalSupportedLabel": "Pagrįsta žurnalu",
+    "journalSupportedHint": "Įgūdžiai, kuriuos paremia tavo darbo žurnalo įrašai — stipriau nei savideklaruoti, laukia vadovo patvirtinimo.",
     "latestEvidenceLabel": "Naujausias įrodymas",
     "latestEvidenceEmpty": "Įrodymų dar nėra — pirmas žurnalo įrašas bus pirmasis."
   },

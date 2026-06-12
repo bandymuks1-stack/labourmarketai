@@ -50,6 +50,8 @@ export async function buildPlayerCardLabels(
         : null,
     verifiedTitle: t("verifiedTitle"),
     verifiedEmpty: t("verifiedEmpty"),
+    journalSupportedLabel: t("journalSupportedLabel"),
+    journalSupportedHint: t("journalSupportedHint"),
     verifiedSkillNames: card.verifiedSkills.map((s) =>
       tSkill.has(s.slug) ? tSkill(s.slug) : s.slug.replace(/-/g, " "),
     ),

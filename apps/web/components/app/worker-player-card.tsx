@@ -46,6 +46,8 @@ export interface PlayerCardLabels {
   availabilityLabel: string | null;
   verifiedTitle: string;
   verifiedEmpty: string;
+  journalSupportedLabel: string;
+  journalSupportedHint: string;
   /** Resolved names for the verified skill badges (parallel to card data). */
   verifiedSkillNames: string[];
   latestEvidenceLabel: string;
@@ -199,6 +201,21 @@ export function WorkerPlayerCard({
             {labels.verifiedEmpty}
           </p>
         )}
+        {/* Evidence ladder middle rung: work-journal-supported skills. Shown
+            ONLY when there are any — a calm cyan tone (NOT the green
+            manager-verified glow, NOT the gold trust ring), so the three
+            tiers stay visually distinct and honest (DESIGN_SOUL §1). */}
+        {card.journalSupportedSkills > 0 ? (
+          <p
+            className="inline-flex items-center gap-2 self-start rounded-md border border-brand-cyan/30 bg-brand-cyan/10 px-2.5 py-1.5 text-[11px] leading-relaxed text-brand-cyan"
+            data-testid="player-card-journal-supported"
+            title={labels.journalSupportedHint}
+          >
+            <Sparkle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="font-mono font-bold">{card.journalSupportedSkills}</span>
+            <span>· {labels.journalSupportedLabel}</span>
+          </p>
+        ) : null}
       </div>
 
       {/* ── Honest dimensions (real counts, plain zeros) ── */}

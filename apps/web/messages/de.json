@@ -1469,6 +1469,8 @@
   "playerCard": {
     "verifiedTitle": "Bestätigte Fähigkeiten",
     "verifiedEmpty": "Noch keine bestätigten Fähigkeiten. Sie erscheinen, wenn eine Führungskraft deine Journaleinträge bestätigt.",
+    "journalSupportedLabel": "Durch Journal belegt",
+    "journalSupportedHint": "Fähigkeiten, die deine Arbeitsjournal-Einträge belegen — stärker als selbst angegeben; warten auf Bestätigung durch die Führungskraft.",
     "latestEvidenceLabel": "Neuester Nachweis",
     "latestEvidenceEmpty": "Noch keine Nachweise — dein erster Journaleintrag wird der erste sein."
   },

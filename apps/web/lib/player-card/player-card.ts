@@ -33,6 +33,10 @@ export interface WorkerPlayerCard {
   displayName: string | null;
   /** Self-declared skill claims (NOT verified). */
   skillsDeclared: number;
+  /** Skills whose evidence tier is `work_journal` (worker_skills.source) —
+   *  backed by journal entries, stronger than self-declared, NOT yet
+   *  manager-confirmed. The middle rung of the honest evidence ladder. */
+  journalSupportedSkills: number;
   /** Candidate skills the worker added in their own words (needs-clarification,
    *  NOT verified) — from the clarify-capture flow. */
   candidateSkills: number;
@@ -156,6 +160,7 @@ export async function getWorkerPlayerCard(): Promise<WorkerPlayerCard | null> {
 
   const [
     skillsDeclared,
+    journalSupportedSkills,
     candidateSkills,
     evidenceEntries,
     attention,
@@ -170,6 +175,17 @@ export async function getWorkerPlayerCard(): Promise<WorkerPlayerCard | null> {
         .select("*", { count: "exact", head: true })
         .eq("profile_id", user.id),
     ),
+    // work_journal-tier skills (source column, migration 0010). 0 without a
+    // worker row or on any read error — never inferred.
+    workerId
+      ? safeCount(
+          asAny(supabase)
+            .from("worker_skills")
+            .select("*", { count: "exact", head: true })
+            .eq("worker_id", workerId)
+            .eq("source", "work_journal"),
+        )
+      : Promise.resolve(0),
     safeCount(
       asAny(supabase)
         .from("skill_candidate_clarifications")
@@ -220,6 +236,7 @@ export async function getWorkerPlayerCard(): Promise<WorkerPlayerCard | null> {
   return {
     displayName: profile?.full_name ?? null,
     skillsDeclared,
+    journalSupportedSkills,
     candidateSkills,
     evidenceEntries,
     attentionInstructions: attention,

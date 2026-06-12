@@ -1469,6 +1469,8 @@
   "playerCard": {
     "verifiedTitle": "[EN] Verified skills",
     "verifiedEmpty": "[EN] No verified skills yet. They appear when a manager confirms your journal entries.",
+    "journalSupportedLabel": "Støttet av journal",
+    "journalSupportedHint": "Ferdigheter som arbeidsjournalføringene dine støtter — sterkere enn egenerklært; venter på bekreftelse fra leder.",
     "latestEvidenceLabel": "[EN] Latest proof",
     "latestEvidenceEmpty": "[EN] No proof entries yet — your first journal entry will be the first."
   },
