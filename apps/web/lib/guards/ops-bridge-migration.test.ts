@@ -147,6 +147,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // journal_entry_photos free-tier photo evidence — both additive GREEN).
     // then to 70 for the RU-locale CHECK widening (20260612130000
     // widen_original_language_ru — additive GREEN, prod apply via MCP).
-    expect(guard).toMatch(/SPRINT_BASELINE = 70/);
+    // then to 71 for the chat-visibility revocation migration
+    // (20260612170000 conversation_participant_revocation — RED, applied via
+    // owner channel + verified, landed sync-only).
+    expect(guard).toMatch(/SPRINT_BASELINE = 71/);
   });
 });
