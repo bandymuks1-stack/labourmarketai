@@ -1561,5 +1561,11 @@
       "expiring": "Udløber",
       "attention": "Kræver opmærksomhed"
     }
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Siden blev ikke fundet",
+    "body": "Denne adresse findes ikke — den kan være tastet forkert, eller siden er flyttet.",
+    "cta": "Tilbage til start"
   }
 }

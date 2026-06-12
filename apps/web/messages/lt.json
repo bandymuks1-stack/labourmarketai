@@ -3910,5 +3910,11 @@
       "expiring": "Baigiasi",
       "attention": "Reikia dėmesio"
     }
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Puslapis nerastas",
+    "body": "Tokio adreso nėra — galbūt jis įvestas klaidingai arba puslapis buvo perkeltas.",
+    "cta": "Grįžti į pradžią"
   }
 }

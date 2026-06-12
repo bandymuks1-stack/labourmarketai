@@ -1561,5 +1561,11 @@
       "expiring": "[EN] Expiring",
       "attention": "[EN] Needs attention"
     }
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Nie znaleziono strony",
+    "body": "Taki adres nie istnieje — być może został błędnie wpisany albo strona została przeniesiona.",
+    "cta": "Wróć na początek"
   }
 }
