@@ -145,6 +145,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 69 for company-role-simplicity-v1 (20260612090000 company_type
     // + save_company_setup_v2 country validation; 20260612091000
     // journal_entry_photos free-tier photo evidence — both additive GREEN).
-    expect(guard).toMatch(/SPRINT_BASELINE = 69/);
+    // then to 70 for the RU-locale CHECK widening (20260612130000
+    // widen_original_language_ru — additive GREEN, prod apply via MCP).
+    expect(guard).toMatch(/SPRINT_BASELINE = 70/);
   });
 });

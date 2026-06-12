@@ -20,7 +20,7 @@ const code = (src: string) =>
 const lib = read("lib/admin/league.ts");
 const page = read("app/[locale]/dashboard/admin/league/page.tsx");
 
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 describe("league data is real-rows-only with the owner-locked thermometer", () => {
   it("thermometer values come ONLY from computeThermometer (iron rule §7)", () => {

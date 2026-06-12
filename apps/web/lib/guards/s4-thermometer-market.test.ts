@@ -165,7 +165,7 @@ describe("S4 honest market view + factual visibility signals", () => {
   });
 
   it("all 10 locales carry the admin.market namespace", () => {
-    for (const loc of ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"]) {
+    for (const loc of ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"]) {
       const j = JSON.parse(read(`messages/${loc}.json`));
       expect(j.admin?.market?.title, `admin.market missing in ${loc}`).toBeTruthy();
       expect(j.admin?.hub?.market, `admin.hub.market missing in ${loc}`).toBeTruthy();

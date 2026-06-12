@@ -1372,7 +1372,11 @@ describe("no migration files added by this sprint", () => {
     // with validated country, fixing the raw organizations_country_fkey
     // smoke crash; 20260612091000 journal_entry_photos free-tier 1-photo
     // evidence with private bucket + register RPC).
-    const SPRINT_BASELINE = 69;
+    // Bumped 69 -> 70 for the RU locale (20260612130000
+    // widen_original_language_ru — additive CHECK widening so the
+    // journal/chat/skill write paths accept 'ru'; doctrine §2.4 amended
+    // to 11 locales).
+    const SPRINT_BASELINE = 70;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

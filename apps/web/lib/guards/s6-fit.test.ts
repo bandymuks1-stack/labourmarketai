@@ -126,7 +126,7 @@ describe("consent draft stays default-off, aggregates-only, gated", () => {
 });
 
 describe("S6 copy exists in LT/EN (+ all locales for key sets)", () => {
-  const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+  const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
   it("fit/structure/consent keys present everywhere", () => {
     for (const locale of LOCALES) {
       const j = JSON.parse(read(`messages/${locale}.json`));

@@ -21,6 +21,7 @@ const NATIVE: Record<string, string> = {
   no: "Norsk",
   sv: "Svenska",
   pl: "Polski",
+  ru: "Русский",
 };
 
 /**

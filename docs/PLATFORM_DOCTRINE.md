@@ -56,16 +56,16 @@ If your migration creates a table where users write free-form text:
 **REQUIRED columns from day 1:**
 ```sql
 original_text       TEXT        NOT NULL,
-original_language   CHAR(2)     NOT NULL,  -- ISO 639-1: 'lt','en','pl','de','nl','lv','et','da','no','sv'
+original_language   CHAR(2)     NOT NULL,  -- ISO 639-1: 'lt','en','pl','de','nl','lv','et','da','no','sv','ru'
 ```
 
 **FORBIDDEN:** any column holding a translated copy (`text_en`, `body_translations`, etc.).
 
 ### 2.4 Locale set (binding)
 
-> **§2.4 Locale set (binding).** The canonical locale set is 10: EN (source) + 9 launch markets (LT, LV, EE, NL, DE, DK, NO, SE, PL). All 10 JSON files must exist in the repo at all times. No PR may remove a locale. New i18n keys must be added to all 10 files in the same PR — placeholder values `[EN] <english>` are acceptable for non-Tier-1 locales until human or community translation lands. Translation completeness is tracked per-locale: Tier 1 = human-verified (EN, LT for M1); Tier 2 = baseline + moderation (the other 8). Tier promotion is independent of the locale set — the locale set never shrinks.
+> **§2.4 Locale set (binding; amended 2026-06-12).** The canonical locale set is 11: EN (source) + 9 launch markets (LT, LV, EE, NL, DE, DK, NO, SE, PL) + RU (worker language across markets — most workers on the first real sites operate primarily in Russian; RU is not a market of its own). All 11 JSON files must exist in the repo at all times. No PR may remove a locale. New i18n keys must be added to all 11 files in the same PR — placeholder values `[EN] <english>` are acceptable for non-Tier-1, non-ACTIVE locales until human or community translation lands; ACTIVE locales (lt, en, ru) must receive real translations in the same PR (guarded by `lib/guards/i18n-lt-en-parity.test.ts` and the `ru: 0` debt ratchet). Translation completeness is tracked per-locale: Tier 1 = human-verified (EN, LT for M1); Tier 2 = baseline + moderation (the other 9, including RU — AI-seeded full translation pending human review per §7.4). Tier promotion is independent of the locale set — the locale set never shrinks.
 
-Implementation note (ISO 639-1 locale codes): `en, lt, lv, et, nl, de, da, no, sv, pl` (market → code: EE→et, DK→da, NO→no, SE→sv). The set lives in `apps/web/lib/i18n/config.ts`; routing + middleware derive from it; per-locale files are `messages/{locale}.json` plus the taxonomy layers `messages/{locale}/professions.json` and `messages/{locale}/skill-names.json`.
+Implementation note (ISO 639-1 locale codes): `en, lt, lv, et, nl, de, da, no, sv, pl, ru` (market → code: EE→et, DK→da, NO→no, SE→sv). The set lives in `apps/web/lib/i18n/config.ts`; routing + middleware derive from it; per-locale files are `messages/{locale}.json` plus the taxonomy layers `messages/{locale}/professions.json` and `messages/{locale}/skill-names.json`.
 
 ### 2.5 Why this matters
 
@@ -412,6 +412,7 @@ pasiūlymas (1 punkto atvejis). Techniniai invariantai užrakinti
 | Date | Section(s) | Change | Author |
 |---|---|---|---|
 | 2026-05-21 | All | Initial doctrine established from DI architecture conversation (translation tokens, legal proof, append-only, default-closed, storage minimalism, AI-never-lies). | DI + Chat Claude |
+| 2026-06-12 | §2.3, §2.4 | Amend §2.4 to an 11-locale canonical set: add RU as an ACTIVE worker language (DI goal 2026-06-12 — most workers on the first real sites operate primarily in Russian; journal → verified skills → trust must not exclude them). RU ships fully translated (AI-seeded, Tier 2 pending §7.4 human review), routed/active from day 1, with full-parity guard + zero-debt ratchet. `original_language` CHECKs widened forward-only via migration `20260612130000_widen_original_language_ru.sql` (§16.1 — frozen migrations untouched). User content remains original_text + original_language only (§2.2 — no translation columns). | DI + Claude Code |
 | 2026-05-21 | §2.4, §2.5, §10 | Add §2.4 Locale set (binding, 10-locale canonical set; existing "Why this matters" renumbered §2.5). Promote §10 Lego architecture (slug→JSON for all extensible taxonomy) from v1.1 pending to active. (PR #8 architect review B4/B6.) | DI + Architect (Chat Claude) |
 | 2026-05-21 | §5, §7.1, §15 | Amend §5 to the four-layer person→world model (personhood / RBAC / profession+skill / positions / engagement contexts). Insert §7.1 (AI as translator, not author). Add §15 (skill trust signals & productivity). Bundled with the M1 Work Journal implementation (TASK-M1-WORK-JOURNAL). | DI + Architect (Chat Claude) |
 | 2026-05-30 | §16 | Add §16 Migration naming convention (forward-only `YYYYMMDDHHMMSS_snake_case.sql`; never rename applied `000N` migrations; ordering preserved; reversibility restated). Bundled with the single-product convergence PR (`feat/cc/converge-single-product`). | DI + Claude Code |

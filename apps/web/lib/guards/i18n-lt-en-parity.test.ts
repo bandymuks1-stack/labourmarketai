@@ -3,9 +3,11 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * LT ↔ EN i18n parity. LT and EN are the two fully-served locales; every
- * user-facing change must land in both with the SAME key structure and no
- * empty/placeholder values, so EN never drifts weaker than LT (or vice versa).
+ * LT ↔ EN ↔ RU i18n parity. LT and EN are the two fully-served locales and
+ * RU is ACTIVE from 2026-06-12 (workers on the first real sites operate
+ * primarily in Russian — doctrine §2.4 amendment); every user-facing change
+ * must land in all three with the SAME key structure and no empty /
+ * placeholder values, so no active locale drifts weaker than another.
  * (The other locale files are intentionally partial and are not checked here.)
  */
 
@@ -37,34 +39,43 @@ function emptyValues(obj: Json, prefix = "", out: string[] = []): string[] {
   return out;
 }
 
-// Base files + every per-namespace file present under messages/lt/.
-const PAIRS = [
+// Base files + every per-namespace file present under messages/lt/, paired
+// against every other ACTIVE locale (en + ru) — active locales must be
+// full-parity or routed pages leak MISSING_MESSAGE (the 2026-05-28 P0).
+const NAMESPACE_FILES = readdirSync(join(messages, "lt")).filter((f) => f.endsWith(".json"));
+const PAIRS: ReadonlyArray<readonly [string, string]> = [
   ["lt.json", "en.json"],
-  ...readdirSync(join(messages, "lt"))
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => [`lt/${f}`, `en/${f}`] as const),
+  ["lt.json", "ru.json"],
+  ...NAMESPACE_FILES.flatMap((f) => [
+    [`lt/${f}`, `en/${f}`] as const,
+    [`lt/${f}`, `ru/${f}`] as const,
+  ]),
 ];
 
-describe("LT and EN message files have identical key structure", () => {
-  for (const [ltFile, enFile] of PAIRS) {
-    it(`${ltFile} ↔ ${enFile}: same keys`, () => {
+describe("active-locale message files (LT/EN/RU) have identical key structure", () => {
+  for (const [ltFile, otherFile] of PAIRS) {
+    it(`${ltFile} ↔ ${otherFile}: same keys`, () => {
       const lt = new Set(keyPaths(load(ltFile)));
-      const en = new Set(keyPaths(load(enFile)));
-      const ltOnly = [...lt].filter((k) => !en.has(k));
-      const enOnly = [...en].filter((k) => !lt.has(k));
-      expect(ltOnly, `keys missing from EN: ${ltOnly.slice(0, 20).join(", ")}`).toHaveLength(0);
-      expect(enOnly, `keys missing from LT: ${enOnly.slice(0, 20).join(", ")}`).toHaveLength(0);
+      const other = new Set(keyPaths(load(otherFile)));
+      const ltOnly = [...lt].filter((k) => !other.has(k));
+      const otherOnly = [...other].filter((k) => !lt.has(k));
+      expect(ltOnly, `keys missing from ${otherFile}: ${ltOnly.slice(0, 20).join(", ")}`).toHaveLength(0);
+      expect(otherOnly, `keys missing from ${ltFile}: ${otherOnly.slice(0, 20).join(", ")}`).toHaveLength(0);
     });
   }
 });
 
-describe("LT and EN have no empty/placeholder string values", () => {
-  for (const [ltFile, enFile] of PAIRS) {
-    for (const file of [ltFile, enFile]) {
-      it(`${file}: no empty string values`, () => {
-        const empties = emptyValues(load(file));
-        expect(empties, `empty values: ${empties.join(", ")}`).toHaveLength(0);
-      });
-    }
+describe("active locales have no empty/placeholder string values", () => {
+  const FILES = [
+    "lt.json",
+    "en.json",
+    "ru.json",
+    ...NAMESPACE_FILES.flatMap((f) => [`lt/${f}`, `en/${f}`, `ru/${f}`]),
+  ];
+  for (const file of FILES) {
+    it(`${file}: no empty string values`, () => {
+      const empties = emptyValues(load(file));
+      expect(empties, `empty values: ${empties.join(", ")}`).toHaveLength(0);
+    });
   }
 });

@@ -17,7 +17,7 @@ import { join } from "node:path";
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 /** Namespaces rendered on no-login routes (inventory 2026-06-11). */
 const PUBLIC_NAMESPACES = [

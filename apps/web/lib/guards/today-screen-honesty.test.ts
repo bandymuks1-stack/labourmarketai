@@ -24,7 +24,7 @@ const css = read("app/globals.css");
 const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
 
-const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
 describe("DESIGN_SOUL is a committed, binding document", () => {
   it("docs/DESIGN_SOUL.md exists with the five screen tests", () => {

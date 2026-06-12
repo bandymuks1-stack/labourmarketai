@@ -1,0 +1,20 @@
+{
+  "builder": "Строитель",
+  "carpenter": "Плотник",
+  "concrete_worker": "Бетонщик",
+  "crane_operator": "Крановщик",
+  "drywaller": "Гипсокартонщик",
+  "electrician": "Электрик",
+  "foreman": "Бригадир",
+  "general_laborer": "Разнорабочий",
+  "heavy_equipment_operator": "Оператор тяжёлой техники",
+  "mason": "Каменщик",
+  "painter": "Маляр",
+  "plumber": "Сантехник",
+  "rebar_worker": "Арматурщик",
+  "roofer": "Кровельщик",
+  "site_engineer": "Инженер строительной площадки",
+  "site_manager": "Прораб",
+  "tiler": "Плиточник",
+  "welder": "Сварщик"
+}
