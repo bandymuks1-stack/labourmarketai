@@ -12,7 +12,11 @@ import { saveCompanySetup } from "./company-setup";
  */
 export type CompanySetupFormState =
   | { ok: true; companyId: string; submitted: boolean }
-  | { ok: false; code: "needs_migration" | "invalid" | "error"; message?: string };
+  | {
+      ok: false;
+      code: "needs_migration" | "invalid" | "invalid_country" | "error";
+      message?: string;
+    };
 
 export async function saveCompanySetupAction(
   _prev: CompanySetupFormState | null,
@@ -24,6 +28,7 @@ export async function saveCompanySetupAction(
 
   const r = await saveCompanySetup({
     legalName: String(formData.get("legal_name") ?? ""),
+    companyType: formData.get("company_type")?.toString(),
     country: formData.get("country")?.toString(),
     registrationCode: formData.get("registration_code")?.toString(),
     address: formData.get("address")?.toString(),
@@ -38,7 +43,10 @@ export async function saveCompanySetupAction(
     return { ok: false, code: "needs_migration" };
   }
   if (r.kind === "invalid") return { ok: false, code: "invalid", message: r.message };
-  if (r.kind === "error") return { ok: false, code: "error", message: r.message };
+  if (r.kind === "invalid-country") return { ok: false, code: "invalid_country" };
+  // Generic failure: the localized form copy carries the user-facing text;
+  // no raw technical message crosses the boundary.
+  if (r.kind === "error") return { ok: false, code: "error" };
 
   revalidatePath("/", "layout");
   return { ok: true, companyId: r.companyId, submitted };

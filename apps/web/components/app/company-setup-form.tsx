@@ -6,6 +6,11 @@ import {
   saveCompanySetupAction,
   type CompanySetupFormState,
 } from "@/lib/company/setup-actions";
+import {
+  COMPANY_COUNTRY_CODES,
+  COMPANY_TYPES,
+  type CompanyType,
+} from "@/lib/company/company-profile-shared";
 import type {
   CompanyRow,
   CompanyRequesterRole,
@@ -30,8 +35,14 @@ export interface CompanySetupFormLabels {
   readonly legalName: string;
   readonly legalNameHelp: string;
   readonly legalNamePlaceholder: string;
+  readonly companyType: string;
+  readonly companyTypeHelp: string;
+  readonly companyTypeOptions: Record<CompanyType, string>;
   readonly country: string;
   readonly countryPlaceholder: string;
+  /** countries.code → localized country name (only seeded codes). */
+  readonly countryOptions: Record<string, string>;
+  readonly statusInvalidCountry: string;
   readonly registrationCode: string;
   readonly registrationCodeHelp: string;
   readonly address: string;
@@ -93,8 +104,12 @@ export function CompanySetupForm({
         return { tone: "warning", text: labels.statusNeedsMigration };
       case "invalid":
         return { tone: "warning", text: state.message ?? labels.statusInvalid };
+      case "invalid_country":
+        return { tone: "warning", text: labels.statusInvalidCountry };
       default:
-        return { tone: "warning", text: state.message ?? labels.statusError };
+        // Always the calm localized text — raw technical messages never
+        // reach this banner (owner smoke: organizations_country_fkey).
+        return { tone: "warning", text: labels.statusError };
     }
   })();
 
@@ -137,17 +152,44 @@ export function CompanySetupForm({
         <span className="text-[11px] text-text-muted">{labels.legalNameHelp}</span>
       </label>
 
+      {/* One canonical company profile — the TYPE is a property of the
+          profile (agency = company_type 'staffing_agency'), never a separate
+          root role or a different page/mode. */}
+      <label className="flex flex-col gap-1 text-xs">
+        <span className="text-text-secondary">{labels.companyType}</span>
+        <select
+          name="company_type"
+          defaultValue={existing?.companyType ?? "other"}
+          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+          data-testid="company-setup-company-type"
+        >
+          {COMPANY_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {labels.companyTypeOptions[type]}
+            </option>
+          ))}
+        </select>
+        <span className="text-[11px] text-text-muted">
+          {labels.companyTypeHelp}
+        </span>
+      </label>
+
+      {/* Country is a SELECT over the seeded countries (default Lietuva) —
+          free text here used to crash with a raw FK error (owner smoke). */}
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.country}</span>
-        <input
-          type="text"
+        <select
           name="country"
-          maxLength={100}
-          defaultValue={existing?.country ?? ""}
-          placeholder={labels.countryPlaceholder}
+          defaultValue={existing?.country ?? "LT"}
           className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
           data-testid="company-setup-country"
-        />
+        >
+          {COMPANY_COUNTRY_CODES.map((code) => (
+            <option key={code} value={code}>
+              {labels.countryOptions[code] ?? code}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className="flex flex-col gap-1 text-xs">

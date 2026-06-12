@@ -1367,7 +1367,12 @@ describe("no migration files added by this sprint", () => {
     // needs-human-gate, NOT applied): workers.docs_aggregate_consent
     // default-false column + the worker-owned audited switch RPC + the
     // consent-gated agency aggregates RPC (category counts only).
-    const SPRINT_BASELINE = 67;
+    // Bumped 67 -> 69 for company-role-simplicity-v1 (two additive GREEN
+    // migrations: 20260612090000 company_type column + save_company_setup_v2
+    // with validated country, fixing the raw organizations_country_fkey
+    // smoke crash; 20260612091000 journal_entry_photos free-tier 1-photo
+    // evidence with private bucket + register RPC).
+    const SPRINT_BASELINE = 69;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

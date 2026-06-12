@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { env } from "@/lib/env";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { MobileSheet } from "@/components/ui/MobileSheet";
+import { usePopoverDismiss } from "@/lib/hooks/use-popover-dismiss";
 import { cn } from "@/lib/utils";
 
 const ROLE_ICON: Record<Role, string> = {
@@ -27,8 +28,15 @@ export function NotificationPanel() {
   const [open, setOpen] = useState(false);
   const unread = notifications.filter((n) => !n.read_at).length;
 
+  // Owner smoke fix: the desktop popover used to stay open across page
+  // navigation and had no close affordance. Now it closes on route change,
+  // outside click, Escape — and renders an explicit ✕ button.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  usePopoverDismiss(open, close, rootRef);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={rootRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -67,6 +75,17 @@ export function NotificationPanel() {
           aria-label={t("label")}
           className="absolute right-0 z-30 mt-2 hidden max-h-[28rem] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card md:block"
         >
+          <div className="flex justify-end border-b border-ink-600 px-2 py-1.5">
+            <button
+              type="button"
+              onClick={close}
+              aria-label={t("close")}
+              data-testid="notification-panel-close"
+              className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            >
+              ✕
+            </button>
+          </div>
           <NotificationsBody
             label={t("label")}
             emptyTitle={t("emptyTitle")}

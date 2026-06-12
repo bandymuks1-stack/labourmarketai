@@ -232,5 +232,14 @@
     "strongly_confirmed": "Stipriai patvirtinti: {n}",
     "title": "Tu turi {n} įgūdžių"
   },
-  "unit": "Vienetas"
+  "unit": "Vienetas",
+  "photo": {
+    "label": "Darbo nuotrauka (neprivaloma)",
+    "freeTierNote": "Nemokamai galite pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrodymai bus VIP funkcija.",
+    "invalidFile": "Nuotrauka turi būti JPG, PNG arba WebP formato, iki 5 MB.",
+    "uploaded": "Nuotrauka pridėta prie įrašo.",
+    "limitReached": "Šis įrašas jau turi nuotrauką — nemokamai galima 1 nuotrauka vienam įrašui.",
+    "notReady": "Nuotraukų saugykla šioje aplinkoje dar neparuošta — įrašas išsaugotas be nuotraukos.",
+    "uploadFailed": "Nuotraukos įkelti nepavyko. Įrašas išsaugotas — pabandykite nuotrauką pridėti vėliau."
+  }
 }

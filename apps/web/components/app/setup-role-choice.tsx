@@ -2,22 +2,22 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 
 /**
- * Neutral role-choice guide (slice remove-wrong-agency-gate).
+ * Neutral role-choice guide (slice remove-wrong-agency-gate; simplified in
+ * slice company-role-simplicity-v1).
  *
- * labourmarket.ai is demand-first: a requester does NOT have to be an agency.
- * This block replaces the wrong agency-only setup error with an honest choice of
- * how to start — look for a person/service (requester), represent a company,
- * represent an agency/team, or offer your own work — each linking to a real,
- * existing route. It also surfaces the candidate/provider DRAFT path honestly
- * (not registered / not verified / draft / can be linked later) WITHOUT creating
- * any fake account, consent, or verification.
+ * The START choice is intentionally simple: a person either WORKS themselves
+ * (worker) or REPRESENTS A COMPANY. An agency is NOT a separate root role —
+ * it is a company whose type is 'staffing_agency'; a client/requester
+ * organisation is a company whose type is 'client_customer'. Both are picked
+ * inside the ONE canonical company profile (/dashboard/start/company).
+ * The candidate/provider DRAFT path stays surfaced honestly (not registered /
+ * not verified / draft / can be linked later) WITHOUT creating any fake
+ * account, consent, or verification.
  */
 
 const OPTIONS = [
-  { key: "findHuman", href: "/dashboard/start/buyer", testid: "role-choice-requester" },
-  { key: "representCompany", href: "/dashboard/start/company", testid: "role-choice-company" },
-  { key: "representAgency", href: "/dashboard/start/agency", testid: "role-choice-agency" },
   { key: "offerWork", href: "/dashboard/profile", testid: "role-choice-worker" },
+  { key: "representCompany", href: "/dashboard/start/company", testid: "role-choice-company" },
 ] as const;
 
 export async function SetupRoleChoice() {

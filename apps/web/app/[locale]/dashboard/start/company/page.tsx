@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
+  COMPANY_COUNTRY_CODES,
   getOwnCompany,
   type CompanyVerificationStatus,
 } from "@/lib/company/company-setup";
@@ -67,8 +68,23 @@ export default async function CompanyStartPage({
     legalName: t("legalName"),
     legalNameHelp: t("legalNameHelp"),
     legalNamePlaceholder: t("legalNamePlaceholder"),
+    companyType: t("companyType"),
+    companyTypeHelp: t("companyTypeHelp"),
+    companyTypeOptions: {
+      construction: t("companyTypeOptions.construction"),
+      staffing_agency: t("companyTypeOptions.staffing_agency"),
+      subcontractor: t("companyTypeOptions.subcontractor"),
+      manufacturing: t("companyTypeOptions.manufacturing"),
+      services: t("companyTypeOptions.services"),
+      client_customer: t("companyTypeOptions.client_customer"),
+      other: t("companyTypeOptions.other"),
+    },
     country: t("country"),
     countryPlaceholder: t("countryPlaceholder"),
+    countryOptions: Object.fromEntries(
+      COMPANY_COUNTRY_CODES.map((code) => [code, t(`countryOptions.${code}`)]),
+    ),
+    statusInvalidCountry: t("statusInvalidCountry"),
     registrationCode: t("registrationCode"),
     registrationCodeHelp: t("registrationCodeHelp"),
     address: t("address"),
@@ -156,6 +172,15 @@ export default async function CompanyStartPage({
             <div>
               <dt className="text-xs text-text-muted">{t("legalName")}</dt>
               <dd className="text-text-primary">{company.legalName ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("companyType")}</dt>
+              <dd
+                className="text-text-primary"
+                data-testid="company-start-company-type"
+              >
+                {t(`companyTypeOptions.${company.companyType}`)}
+              </dd>
             </div>
             <div>
               <dt className="text-xs text-text-muted">{t("country")}</dt>

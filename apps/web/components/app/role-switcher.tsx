@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
@@ -13,6 +13,7 @@ import {
   roleSwitcherTargetForRole,
   type LabourMarketRoleId,
 } from "@/lib/config/roles";
+import { usePopoverDismiss } from "@/lib/hooks/use-popover-dismiss";
 import { cn } from "@/lib/utils";
 
 // Role catalogue + icons read from the central role config so adding a
@@ -38,6 +39,12 @@ export function RoleSwitcher() {
     useAuth();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
+
+  // Same dismiss contract as the notification panel (owner smoke fix):
+  // close on route change / outside click / Escape.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  usePopoverDismiss(open, close, rootRef);
 
   // Renderable roles come from the central config. We still constrain the
   // pick / addRole branches to the LIVE role ids (`worker`/`company`/
@@ -86,7 +93,7 @@ export function RoleSwitcher() {
         </Link>
       )}
 
-      <div className="relative">
+      <div className="relative" ref={rootRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -108,9 +115,20 @@ export function RoleSwitcher() {
           role="menu"
           className="absolute right-0 z-30 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
-          <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {tSwitcher("label")}
-          </p>
+          <div className="flex items-center justify-between px-2 py-1">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {tSwitcher("label")}
+            </p>
+            <button
+              type="button"
+              onClick={close}
+              aria-label={tSwitcher("label")}
+              data-testid="role-switcher-close"
+              className="rounded-md border border-ink-500 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            >
+              ✕
+            </button>
+          </div>
           {/* Phase 6: honest non-locking framing right inside the menu so the
               user never wonders what RUOŠIAMA means. */}
           <p className="px-2 pb-2 text-[11px] leading-snug text-text-secondary">

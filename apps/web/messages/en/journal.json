@@ -232,5 +232,14 @@
     "strongly_confirmed": "Strongly confirmed: {n}",
     "title": "You have {n} skills"
   },
-  "unit": "Unit"
+  "unit": "Unit",
+  "photo": {
+    "label": "Work photo (optional)",
+    "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended evidence will be a VIP feature.",
+    "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
+    "uploaded": "Photo attached to the entry.",
+    "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",
+    "notReady": "Photo storage is not provisioned in this environment yet — the entry was saved without the photo.",
+    "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later."
+  }
 }
