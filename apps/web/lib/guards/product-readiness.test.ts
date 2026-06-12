@@ -1376,7 +1376,12 @@ describe("no migration files added by this sprint", () => {
     // widen_original_language_ru — additive CHECK widening so the
     // journal/chat/skill write paths accept 'ru'; doctrine §2.4 amended
     // to 11 locales).
-    const SPRINT_BASELINE = 70;
+    // Bumped 70 -> 71 for the chat-visibility revocation migration
+    // (20260612170000 conversation_participant_revocation) — RED tier,
+    // APPLIED to prod via the owner channel and verified 2026-06-12
+    // (revoked_at/revoked_by + SECURITY DEFINER recursion fix + revoke RPC +
+    // grant hardening). Landed in the ledger sync-only.
+    const SPRINT_BASELINE = 71;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
