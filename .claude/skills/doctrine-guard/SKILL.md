@@ -132,6 +132,11 @@ Therefore, for **any user-visible fix or feature**:
 double-check us — the verification burden belongs on us, before merge, in a
 real browser.
 
+Authenticated flows are testable locally via the seeded test environment
+(`docs/TESTING.md`: `npx supabase start` → `db reset` → `pnpm
+db:fixtures:local` → `pnpm -C apps/web e2e:local`) — "cannot log in locally"
+is no longer an accepted verification gap.
+
 ## 6. FRONTEND CONSTRAINTS
 
 Design-quality skills (frontend-design, baseline-ui, fixing-accessibility,
