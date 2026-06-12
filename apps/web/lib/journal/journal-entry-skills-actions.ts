@@ -3,6 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 
 /**
  * Server action for Journal Entry ↔ Skill links v1.
@@ -89,6 +90,15 @@ export async function setJournalEntrySkillLinks(
     const ins = await linkTable().insert(rows);
     if (ins.error) return { ok: false, code: "link_write_failed", message: ins.error.message };
   }
+
+  // Journal Evidence Auto-Recompute v1 (worker side, GREEN): derive the
+  // worker's OWN evidence tier from real journal support — a skill with ≥1
+  // journal_entry_skills row rises to the journal-supported tier; one with
+  // none falls back to self-declared. This is evidence-support, NOT
+  // verification: it never sets `verified` and never writes the confirmed
+  // tier (that is the separate owner-gated path). The write lives in a
+  // dedicated module so this link layer stays insert/delete-only. Best-effort.
+  await applyWorkerSkillSourceReconcile(supabase, worker.id);
 
   revalidatePath("/[locale]/dashboard/journal", "page");
   revalidatePath("/[locale]/dashboard/profile", "page");
