@@ -21,6 +21,8 @@
   "strengthensHint": "Patvirtinus, šis įrašas gali stiprinti šį įgūdį",
   "skillProvenanceNote": "Pasiūlyta pagal jūsų įrašą. Patvirtinti įgūdžiai lieka jūsų pačių nurodyti — dar nepatikrinti.",
   "skillNoMatch": "Aiškiai susijusių įgūdžių neradome — įgūdžius pasirinkite rankiniu būdu.",
+  "reasonFound": "Rasta: „{word}“",
+  "reasonWeak": "Silpnas signalas — patvirtinkite, jei tinka.",
   "freeTextLead": "Aprašykite darbą laisvai: kiekius, laiką, vietą. Sistema pasiūlys struktūrą — faktais ji tampa tik jums patvirtinus.",
   "examplesTitle": "Pavyzdžiai iš skirtingų sričių",
   "example1": "Dirbau 6 valandas, aptarnavau klientus ir sutvarkiau 12 užklausų.",

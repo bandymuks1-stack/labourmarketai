@@ -21,6 +21,8 @@
   "strengthensHint": "Once you confirm it, this entry can strengthen this skill",
   "skillProvenanceNote": "Suggested from your entry. Confirmed skills stay self-declared — not yet checked by a person or documents.",
   "skillNoMatch": "No clearly related skills found — add skills manually.",
+  "reasonFound": "Found: \"{word}\"",
+  "reasonWeak": "Weak signal — confirm if it fits.",
   "freeTextLead": "Describe your work freely: quantities, time, location. The system suggests a structure — it becomes fact only once you confirm.",
   "examplesTitle": "Examples from different domains",
   "example1": "Worked 6 hours, helped customers, and handled 12 requests.",

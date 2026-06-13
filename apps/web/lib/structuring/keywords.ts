@@ -28,7 +28,9 @@ import type { SectorKey } from "./sectors";
  *  unrelated common words (e.g. «кран» also means a water tap — the crane
  *  needle is «крановщик»). */
 export const SKILL_HINTS_LT: { slug: string; needles: string[] }[] = [
-  { slug: "tiling", needles: ["plytel", "klijav", "плитк", "плиточ"] },
+  // "klijav" (gluing) removed — too generic; it false-matched wallpapering /
+  // general gluing as tiling. Tiling stays anchored on the unambiguous stems.
+  { slug: "tiling", needles: ["plytel", "плитк", "плиточ"] },
   { slug: "drywall", needles: ["gipso", "gipskart", "гипсокартон", "гкл"] },
   { slug: "ceiling-systems", needles: ["lub", "потолок", "потолк"] },
   { slug: "partition-walls", needles: ["pertvar", "перегородк"] },
@@ -255,7 +257,7 @@ export const ACTIVITY_HINTS_LT: {
     label: "Stogo dengimas",
     needles: ["stog", "dengiau stog", "dengti stog", "крыш", "кровл", "кровел"],
   },
-  { slug: "tiler", label: "Plytelių klojimas", needles: ["plytel", "klijav", "плитк", "плиточ"] },
+  { slug: "tiler", label: "Plytelių klojimas", needles: ["plytel", "плитк", "плиточ"] },
   {
     slug: "drywaller",
     label: "Gipso kartono montavimas",
