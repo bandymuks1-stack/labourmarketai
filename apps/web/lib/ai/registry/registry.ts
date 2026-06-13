@@ -10,11 +10,15 @@
 import type { AiAgentKey, PromptRegistryEntry } from "./types";
 import { workerProfileEntry } from "./agents/worker-profile";
 import { countryReadinessEntry } from "./agents/country-readiness";
+import { workJournalEntry } from "./agents/work-journal";
+import { skillEvidenceEntry } from "./agents/skill-evidence";
 
 export const AI_PROMPT_REGISTRY: Partial<
   Record<AiAgentKey, PromptRegistryEntry>
 > = {
   worker_profile: workerProfileEntry,
+  work_journal: workJournalEntry,
+  skill_evidence: skillEvidenceEntry,
   country_readiness: countryReadinessEntry,
 };
 
