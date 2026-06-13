@@ -4,9 +4,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import {
+  DOCUMENT_COUNTRIES,
   DOCUMENT_EXPIRING_WINDOW_DAYS,
   DOCUMENTS_READINESS_ENABLED,
 } from "@/lib/config/documents";
+import { matrixRequirementRows } from "@/lib/country-readiness/requirement-rows";
 
 /**
  * Worker documents → country readiness derivation (S3, design doc §2).
@@ -51,6 +53,11 @@ export interface RequirementRow {
   readonly requirementLevel: "required" | "recommended" | "conditional";
   readonly conditionNote: string | null;
   readonly sourceStatus: "needs_legal_source" | "sourced" | "reviewed";
+  /** Official source backing this requirement (matrix-supplied; optional for
+   *  legacy DB rows that predate the country-readiness matrix). */
+  readonly sourceUrl?: string | null;
+  readonly sourceTitle?: string | null;
+  readonly confidence?: "official" | "strong" | "needs_legal_review" | null;
 }
 
 /** Pure: derive the user-visible status of one document at `now`. An expired
@@ -76,6 +83,9 @@ export interface CountryReadinessItem {
   readonly sourceStatus: RequirementRow["sourceStatus"];
   readonly status: DerivedDocumentStatus;
   readonly validUntil: string | null;
+  readonly sourceUrl: string | null;
+  readonly sourceTitle: string | null;
+  readonly confidence: "official" | "strong" | "needs_legal_review" | null;
 }
 
 export interface CountryReadiness {
@@ -113,6 +123,9 @@ export function computeCountryReadiness(
       sourceStatus: req.sourceStatus,
       status: doc ? deriveDocumentStatus(doc, now) : "missing",
       validUntil: doc?.validUntil ?? null,
+      sourceUrl: req.sourceUrl ?? null,
+      sourceTitle: req.sourceTitle ?? null,
+      confidence: req.confidence ?? null,
     };
   });
   const nextAction = items.find(
@@ -132,6 +145,8 @@ export type DocumentsListResult =
       documents: readonly WorkerDocumentRow[];
       requirements: readonly RequirementRow[];
       typeSlugs: readonly string[];
+      /** availability_status==='available' OR an available_from date set. */
+      availabilitySet: boolean;
     }
   | { kind: "disabled" }
   | { kind: "needs-migration" }
@@ -148,10 +163,13 @@ export async function listMyDocuments(): Promise<DocumentsListResult> {
 
   const { data: worker } = await asAny(supabase)
     .from("workers")
-    .select("id")
+    .select("id, availability_status, available_from")
     .eq("profile_id", user.id)
     .maybeSingle();
   if (!worker) return { kind: "no-worker" };
+  const availabilitySet =
+    worker.availability_status === "available" ||
+    Boolean(worker.available_from);
 
   const { data: docs, error } = await asAny(supabase)
     .from("worker_documents")
@@ -171,6 +189,40 @@ export async function listMyDocuments(): Promise<DocumentsListResult> {
     asAny(supabase).from("document_types").select("slug").eq("is_active", true),
   ]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dbRequirements: RequirementRow[] = ((reqs ?? []) as any[]).map((r) => ({
+    country: r.country as string,
+    documentTypeSlug: r.document_type_slug as string,
+    requirementLevel: r.requirement_level as RequirementRow["requirementLevel"],
+    conditionNote: (r.condition_note as string | null) ?? null,
+    sourceStatus: r.source_status as RequirementRow["sourceStatus"],
+    sourceUrl: null,
+    sourceTitle: null,
+    confidence: null,
+  }));
+
+  // The DB country_document_requirements table is the admin OVERRIDE surface
+  // and ships empty. Where a country has NO curated DB rows, supply the
+  // canonical, guard-enforced matrix rows (worker_posted scope — the platform's
+  // cross-border core) so the worker gets a real, sourced checklist now.
+  const dbCountries = new Set(dbRequirements.map((r) => r.country));
+  const matrixRequirements: RequirementRow[] = [];
+  for (const country of DOCUMENT_COUNTRIES) {
+    if (dbCountries.has(country)) continue;
+    for (const m of matrixRequirementRows(country, "worker_posted")) {
+      matrixRequirements.push({
+        country: m.country,
+        documentTypeSlug: m.documentTypeSlug,
+        requirementLevel: m.requirementLevel,
+        conditionNote: m.conditionNote,
+        sourceStatus: m.sourceStatus,
+        sourceUrl: m.sourceUrl,
+        sourceTitle: m.sourceTitle,
+        confidence: m.confidence,
+      });
+    }
+  }
+
   return {
     kind: "ok",
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -183,15 +235,9 @@ export async function listMyDocuments(): Promise<DocumentsListResult> {
       validUntil: (d.valid_until as string | null) ?? null,
       note: (d.note as string | null) ?? null,
     })),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    requirements: ((reqs ?? []) as any[]).map((r) => ({
-      country: r.country as string,
-      documentTypeSlug: r.document_type_slug as string,
-      requirementLevel: r.requirement_level as RequirementRow["requirementLevel"],
-      conditionNote: (r.condition_note as string | null) ?? null,
-      sourceStatus: r.source_status as RequirementRow["sourceStatus"],
-    })),
+    requirements: [...dbRequirements, ...matrixRequirements],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     typeSlugs: ((types ?? []) as any[]).map((t) => t.slug as string),
+    availabilitySet,
   };
 }

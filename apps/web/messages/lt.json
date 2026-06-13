@@ -3939,7 +3939,18 @@
         "error": "Nepavyko išsaugoti. Pabandyk dar kartą.",
         "no_worker": "Pirmiausia susikurk darbuotojo profilį."
       }
-    }
+    },
+    "overall": {
+      "not_enough_information": "Kol kas per mažai informacijos",
+      "missing_documents": "Trūksta dokumentų",
+      "needs_verification": "Pasiruošę po patikrinimo",
+      "almost_ready": "Beveik pasiruošę",
+      "ready_for_country": "Pasiruošę šiai šaliai",
+      "availabilityHint": "Nurodyk savo prieinamumą, kad užbaigtum pasiruošimą."
+    },
+    "needsLegalReview": "reikia teisinės peržiūros",
+    "sourceLink": "šaltinis",
+    "scopeNote": "Remiamasi oficialiais ES komandiruojamų darbuotojų šaltiniais — nacionalines detales pasitikslink kompetentingoje institucijoje. Tai informacija, ne teisinė konsultacija."
   },
   "trust": {
     "title": "Pasitikėjimo signalai",

@@ -13,6 +13,10 @@ import {
 } from "@/lib/documents/readiness";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
 import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
+import {
+  workerReadinessFromChecklist,
+  type WorkerCountryReadinessStatus,
+} from "@/lib/readiness/worker-readiness";
 
 /**
  * "Mano dokumentai" — worker document inventory + country readiness (S3).
@@ -31,6 +35,14 @@ const STATUS_TONE: Record<DerivedDocumentStatus, string> = {
   ready: "border-state-success/40 bg-state-success/5 text-state-success",
   expiring: "border-state-warning/40 bg-state-warning/5 text-state-warning",
   blocked: "border-state-warning/60 bg-state-warning/10 text-state-warning",
+};
+
+const OVERALL_TONE: Record<WorkerCountryReadinessStatus, string> = {
+  not_enough_information: "border-ink-500 bg-ink-800/40 text-text-muted",
+  missing_documents: "border-state-warning/50 bg-state-warning/10 text-state-warning",
+  needs_verification: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  almost_ready: "border-state-amber/50 bg-state-amber/10 text-state-amber",
+  ready_for_country: "border-state-success/50 bg-state-success/10 text-state-success",
 };
 
 export default async function WorkerDocumentsPage({
@@ -176,8 +188,26 @@ export default async function WorkerDocumentsPage({
                     </p>
                   );
                 }
+                const overall = workerReadinessFromChecklist(
+                  readiness.items,
+                  result.availabilitySet,
+                );
                 return (
                   <div className="flex flex-col gap-2">
+                    <div
+                      className={`flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 ${OVERALL_TONE[overall.status]}`}
+                      data-testid="documents-overall-status"
+                      data-status={overall.status}
+                    >
+                      <span className="font-mono text-[11px] uppercase tracking-label">
+                        {t(`overall.${overall.status}` as never)}
+                      </span>
+                      {!result.availabilitySet ? (
+                        <span className="text-[11px] text-text-muted">
+                          {t("overall.availabilityHint")}
+                        </span>
+                      ) : null}
+                    </div>
                     <ul className="flex flex-col gap-2">
                       {readiness.items.map((i) => (
                         <li
@@ -189,10 +219,21 @@ export default async function WorkerDocumentsPage({
                             <span className="ml-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
                               {t(`requirement.${i.requirementLevel}` as never)}
                             </span>
-                            {i.sourceStatus === "needs_legal_source" ? (
+                            {i.confidence === "needs_legal_review" ||
+                            i.sourceStatus === "needs_legal_source" ? (
                               <span className="ml-2 font-mono text-[10px] uppercase tracking-label text-state-warning">
-                                {t("sourceFlag")}
+                                {t("needsLegalReview")}
                               </span>
+                            ) : null}
+                            {i.sourceUrl ? (
+                              <a
+                                href={i.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-2 font-mono text-[10px] uppercase tracking-label text-brand-blue underline"
+                              >
+                                {t("sourceLink")}
+                              </a>
                             ) : null}
                           </span>
                           <span
@@ -203,6 +244,9 @@ export default async function WorkerDocumentsPage({
                         </li>
                       ))}
                     </ul>
+                    <p className="text-[11px] text-text-muted">
+                      {t("scopeNote")}
+                    </p>
                     {readiness.nextActionSlug ? (
                       <p
                         className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"
