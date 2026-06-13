@@ -18,9 +18,15 @@ import {
 } from "@/lib/structuring/extract-journal-suggestions";
 import type { SkillConfidence } from "@/lib/structuring/skill-recognition";
 import {
+  recognizeNewSkillSuggestions,
+  labelForLocale,
+  NEW_SKILL_LIMIT,
+} from "@/lib/structuring/new-skill-suggestions";
+import {
   createJournalEntry,
   supersedeJournalEntry,
 } from "@/lib/journal/actions";
+import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import {
   isValidJournalPhoto,
   uploadJournalEntryPhoto,
@@ -49,6 +55,16 @@ export type ComposerSkillSuggestion = JournalSkill & {
   matchedText: string;
   confidence: SkillConfidence;
 };
+/** A skill the entry hints at that the worker has NOT declared yet
+ *  (Recognition v1.1). Adding it creates ONLY a self-declared profile claim
+ *  — never verified, never manager-confirmed, never journal evidence. */
+export type ComposerNewSkillSuggestion = {
+  slug: string;
+  name: string;
+  matchedText: string;
+  confidence: SkillConfidence;
+};
+type NewSkillAddStatus = "idle" | "adding" | "added" | "error";
 
 const UNIT_OPTIONS = [
   "hours",
@@ -98,6 +114,7 @@ export function JournalEntryComposer({
   const tBucket = useTranslations("structuring.buckets");
   const tUnit = useTranslations("productivityUnits");
   const tProf = useTranslations("professions");
+  const tSkill = useTranslations("skillNames");
   const locale = useLocale();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -139,6 +156,14 @@ export function JournalEntryComposer({
   const [skillSuggestions, setSkillSuggestions] = useState<
     ComposerSkillSuggestion[]
   >([]);
+  // Recognition v1.1 — skills the entry hints at that the worker has NOT
+  // declared yet, surfaced separately as "possible new skills" they may add.
+  const [newSkillSuggestions, setNewSkillSuggestions] = useState<
+    ComposerNewSkillSuggestion[]
+  >([]);
+  const [newSkillStatus, setNewSkillStatus] = useState<
+    Record<string, NewSkillAddStatus>
+  >({});
   // Multi-fragment review state — populated when the parser splits the text
   // into more than one work fragment (the owner sentence yields 3).
   const [fragments, setFragments] = useState<FragmentReviewState[]>([]);
@@ -209,6 +234,45 @@ export function JournalEntryComposer({
     setSkillStatuses(
       Object.fromEntries(matchedSkills.map((row) => [row.slug, "pending"])),
     );
+
+    // Recognition v1.1 — possible NEW (undeclared) skills, surfaced separately.
+    // Two sources, both excluding what the worker already declared:
+    //   1. construction skills the engine recognised but the worker has not
+    //      declared (name from the skill taxonomy);
+    //   2. cross-sector skills from the sector-neutral catalogue (name carried
+    //      with the suggestion).
+    // Low-confidence (fuzzy) hits are NOT offered for add — they go to the
+    // manual-pick path, so a weak guess never becomes a one-tap profile claim.
+    const declaredSlugSet = new Set(workerSkills.map((w) => w.slug));
+    const undeclaredFromEngine: ComposerNewSkillSuggestion[] = s.skillSuggestions
+      .filter((m) => !declaredSlugSet.has(m.slug) && m.confidence !== "low")
+      .map((m) => ({
+        slug: m.slug,
+        name: tSkillSafe(tSkill, m.slug),
+        matchedText: m.matchedText,
+        confidence: m.confidence,
+      }));
+    const crossSector: ComposerNewSkillSuggestion[] = recognizeNewSkillSuggestions(
+      raw,
+      declaredSlugSet,
+    ).map((m) => ({
+      slug: m.slug,
+      name: labelForLocale(m.labels, locale),
+      matchedText: m.matchedText,
+      confidence: m.confidence,
+    }));
+    const mergedNew: ComposerNewSkillSuggestion[] = [];
+    const seenNew = new Set<string>();
+    for (const item of [...undeclaredFromEngine, ...crossSector]) {
+      if (declaredSlugSet.has(item.slug) || seenNew.has(item.slug)) continue;
+      seenNew.add(item.slug);
+      mergedNew.push(item);
+    }
+    const cappedNew = mergedNew.slice(0, NEW_SKILL_LIMIT);
+    setNewSkillSuggestions(cappedNew);
+    setNewSkillStatus(
+      Object.fromEntries(cappedNew.map((row) => [row.slug, "idle" as NewSkillAddStatus])),
+    );
     // Multi-fragment view is only meaningful when the worker logged more
     // than one work item — otherwise the single-bucket cards already cover
     // the entry without visual duplication.
@@ -233,6 +297,21 @@ export function JournalEntryComposer({
 
   function setSkillStatus(slug: string, next: SuggestionStatus) {
     setSkillStatuses((prev) => ({ ...prev, [slug]: next }));
+  }
+
+  /** Add an undeclared skill to the worker's profile as a SELF-DECLARED claim
+   *  only (profile_skill_claims). This never sets verified / manager_confirmed
+   *  and never creates Work-Journal evidence — the entry is not linked here. */
+  async function addNewSkill(slug: string, name: string) {
+    setNewSkillStatus((prev) => ({ ...prev, [slug]: "adding" }));
+    try {
+      await saveProfileSkillClaimsAction([name]);
+      setNewSkillStatus((prev) => ({ ...prev, [slug]: "added" }));
+      recordEvent("journal_new_skill_added", {});
+    } catch (e) {
+      console.error("[journal-composer] add new skill failed:", e);
+      setNewSkillStatus((prev) => ({ ...prev, [slug]: "error" }));
+    }
   }
 
   function setFragmentStatus(idx: number, next: SuggestionStatus) {
@@ -368,6 +447,8 @@ export function JournalEntryComposer({
       setSiteName("");
       setSkillSuggestions([]);
       setSkillStatuses({});
+      setNewSkillSuggestions([]);
+      setNewSkillStatus({});
       setFragments([]);
       setInstitutionName("");
       setTopic("");
@@ -623,6 +704,7 @@ export function JournalEntryComposer({
     (institutionName ? 1 : 0) +
     (topic ? 1 : 0) +
     skillSuggestions.length +
+    newSkillSuggestions.length +
     fragments.length;
 
   return (
@@ -933,6 +1015,80 @@ export function JournalEntryComposer({
               </DetectedSuggestionCard>
             ))}
           </DetectedSuggestionList>
+
+          {newSkillSuggestions.length > 0 && (
+            // Recognition v1.1 — possible NEW skills the worker has not declared
+            // yet. Adding one creates ONLY a self-declared profile claim (never
+            // verified, never manager-confirmed, never journal evidence until
+            // the worker explicitly links it). Kept visually separate from the
+            // "already in your profile" bucket above.
+            <DetectedSuggestionList
+              className="md:col-span-2"
+              title={t("newSkillGroupTitle")}
+              count={newSkillSuggestions.length}
+            >
+              <p
+                className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
+                data-testid="new-skill-suggestions-intro"
+              >
+                {t("newSkillIntro")}
+              </p>
+              {newSkillSuggestions.map((row) => {
+                const status = newSkillStatus[row.slug] ?? "idle";
+                return (
+                  <div
+                    key={row.slug}
+                    data-testid={`new-skill-suggestion-${row.slug}`}
+                    className="flex flex-col gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-3"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-text-primary">
+                        {row.name}
+                      </span>
+                      {status === "added" ? (
+                        <span
+                          className="text-xs font-semibold text-state-success"
+                          data-testid={`new-skill-added-${row.slug}`}
+                        >
+                          ✓ {t("newSkillAdded")}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={status === "adding"}
+                          onClick={() => addNewSkill(row.slug, row.name)}
+                          data-testid={`new-skill-add-${row.slug}`}
+                          className="rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                        >
+                          {status === "adding"
+                            ? t("newSkillAdding")
+                            : t("newSkillAdd")}
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-text-muted">
+                      {t("reasonFound", { word: row.matchedText })}
+                      {row.confidence === "medium" && ` · ${t("reasonWeak")}`}
+                    </p>
+                    {status === "error" && (
+                      <p
+                        className="text-[11px] text-state-danger"
+                        role="alert"
+                        data-testid={`new-skill-error-${row.slug}`}
+                      >
+                        {t("newSkillError")}
+                      </p>
+                    )}
+                    {status === "added" && (
+                      <p className="text-[11px] leading-relaxed text-text-muted">
+                        {t("newSkillSelfDeclaredNote")}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </DetectedSuggestionList>
+          )}
         </div>
       )}
 
@@ -1040,4 +1196,17 @@ function tProfSafe(
     /* fall through */
   }
   return fallback ?? slug;
+}
+
+/** Resolve a skill slug to its localized taxonomy name, falling back to the
+ *  raw slug when the namespace has no entry (keeps the composer renderable
+ *  even if a recognised slug is missing a name). */
+function tSkillSafe(tSkill: (key: string) => string, slug: string): string {
+  try {
+    const v = tSkill(slug);
+    if (v && v !== slug) return v;
+  } catch {
+    /* fall through */
+  }
+  return slug;
 }
