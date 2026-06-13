@@ -4307,5 +4307,24 @@
       "title": "Payment readiness",
       "body": "Payments are not enabled. {count} paid plans are described but not chargeable. A separate Stripe sprint clears the blocker list before any money moves."
     }
+  },
+  "companyReadiness": {
+    "title": "Company readiness",
+    "help": "What a real hire needs from your company. This is not legal advice — confirm specifics with your accountant or advisor.",
+    "allSet": "Core legal and billing details are complete.",
+    "verified": "Verified by an administrator",
+    "notVerified": "Not yet verified (a human admin decision)",
+    "status": {
+      "incomplete": "Incomplete",
+      "basic": "Basic",
+      "hiring_ready": "Hiring-ready"
+    },
+    "fields": {
+      "legal_name": "Legal name",
+      "country": "Country",
+      "registration_code": "Registration number",
+      "billing_email": "Billing email",
+      "activity": "Company activity"
+    }
   }
 }

@@ -26,6 +26,7 @@ import {
   CompanyNextActions,
   CompanyNoProfileGuide,
 } from "@/components/app/company-next-actions";
+import { CompanyReadinessSummary } from "@/components/app/company-readiness-summary";
 
 // Owner sequence: what is needed → where → when → which skills → role on THIS
 // need → accommodation/language → extra notes. The project/demand role is a
@@ -370,6 +371,18 @@ export default async function CompanyDashboardPage({
       </header>
 
       {companyRow ? <CompanyNextActions company={companyRow} /> : null}
+      {companyRow ? (
+        <CompanyReadinessSummary
+          company={{
+            legalName: companyRow.legalName,
+            country: companyRow.country,
+            registrationCode: companyRow.registrationCode,
+            contactEmail: companyRow.contactEmail,
+            companyType: companyRow.companyType,
+            verificationStatus: companyRow.verificationStatus,
+          }}
+        />
+      ) : null}
 
       <section
         className="card-border flex flex-col gap-4 p-5"

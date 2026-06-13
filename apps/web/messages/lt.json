@@ -4307,5 +4307,24 @@
       "title": "Mokėjimų pasiruošimas",
       "body": "Mokėjimai neįjungti. {count} mokami planai aprašyti, bet neapmokestinami. Atskiras Stripe sprintas išsprendžia kliūčių sąrašą prieš bet kokius pinigus."
     }
+  },
+  "companyReadiness": {
+    "title": "Įmonės pasiruošimas",
+    "help": "Ko realiam samdymui reikia iš tavo įmonės. Tai nėra teisinė konsultacija — detales pasitikslink su buhalteriu ar patarėju.",
+    "allSet": "Pagrindiniai teisiniai ir sąskaitų duomenys užpildyti.",
+    "verified": "Patvirtinta administratoriaus",
+    "notVerified": "Dar nepatvirtinta (žmogaus administratoriaus sprendimas)",
+    "status": {
+      "incomplete": "Neužbaigta",
+      "basic": "Pagrindinis",
+      "hiring_ready": "Pasiruošę samdyti"
+    },
+    "fields": {
+      "legal_name": "Juridinis pavadinimas",
+      "country": "Šalis",
+      "registration_code": "Registracijos numeris",
+      "billing_email": "Sąskaitų el. paštas",
+      "activity": "Įmonės veikla"
+    }
   }
 }
