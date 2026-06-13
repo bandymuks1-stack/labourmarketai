@@ -2255,6 +2255,15 @@
               "percent_out_of_range": "Percentages must be between 0 and 100.",
               "not_finite": "Please enter valid numbers.",
               "empty_labour": "Enter workers, hours and a rate for a labour estimate."
+            },
+            "clarify": {
+              "intro": "Optional: get clarifying questions to make your estimate inputs more complete.",
+              "ask": "Get clarifying questions",
+              "loading": "Loading…",
+              "disabledNote": "Assistance isn't available right now — your estimate is unaffected.",
+              "questionsTitle": "Clarifying questions",
+              "assumptionsTitle": "Assumption notes",
+              "humanConfirmNote": "These are suggestions only — you decide what to enter. They never change your numbers."
             }
           }
         }

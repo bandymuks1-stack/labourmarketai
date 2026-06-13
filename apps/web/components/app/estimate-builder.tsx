@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
 import { EstimateSummary } from "@/components/app/estimate-summary";
+import { EstimateClarifyAssist } from "@/components/app/estimate-clarify-assist";
 import {
   computeEstimate,
   validateEstimateInputs,
@@ -178,6 +179,13 @@ export function EstimateBuilder({
           missingInfo={estimateMissingInfoKeys(inputs)}
         />
       )}
+
+      {/* Estimate-clarify assist insertion point (Step 1/6). INERT by default —
+          renders nothing while the AI flags are off. Never produces numbers. */}
+      <EstimateClarifyAssist
+        missingInfoKeys={estimateMissingInfoKeys(inputs)}
+        workContext={inputs.workType}
+      />
     </div>
   );
 }
