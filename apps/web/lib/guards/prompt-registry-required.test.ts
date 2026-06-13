@@ -10,14 +10,19 @@ import { describe, it, expect } from "vitest";
 import {
   AI_PROMPT_REGISTRY,
   REGISTERED_AGENTS,
+  ALL_AGENT_KEYS,
   getPromptEntry,
   hasPromptEntry,
 } from "../ai/registry/registry";
+import type { AiAgentKey } from "../ai/registry/types";
 
 describe("prompt registry is the source of truth", () => {
-  it("registers at least the two PR3 proof agents", () => {
-    expect(REGISTERED_AGENTS).toContain("worker_profile");
-    expect(REGISTERED_AGENTS).toContain("country_readiness");
+  it("registers ALL eleven product agents", () => {
+    for (const key of ALL_AGENT_KEYS) {
+      expect(REGISTERED_AGENTS, `${key} must be registered`).toContain(key);
+      expect(hasPromptEntry(key)).toBe(true);
+    }
+    expect(REGISTERED_AGENTS.length).toBe(11);
   });
 
   it("every registered entry is well-formed", () => {
@@ -39,8 +44,9 @@ describe("prompt registry is the source of truth", () => {
   });
 
   it("getPromptEntry throws for an unregistered agent (no promptless run)", () => {
-    expect(() => getPromptEntry("admin_risk")).toThrow();
-    expect(hasPromptEntry("admin_risk")).toBe(false);
+    const bogus = "nonexistent_agent" as AiAgentKey;
+    expect(() => getPromptEntry(bogus)).toThrow();
+    expect(hasPromptEntry(bogus)).toBe(false);
   });
 
   it("every output schema is a strict suggestion envelope (rejects suggestion:false)", () => {
