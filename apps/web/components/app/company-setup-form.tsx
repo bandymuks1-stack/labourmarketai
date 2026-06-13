@@ -11,6 +11,7 @@ import {
   COMPANY_TYPES,
   type CompanyType,
 } from "@/lib/company/company-profile-shared";
+import { OptionCards } from "@/components/ui/OptionCards";
 import type {
   CompanyRow,
   CompanyRequesterRole,
@@ -152,27 +153,27 @@ export function CompanySetupForm({
         <span className="text-[11px] text-text-muted">{labels.legalNameHelp}</span>
       </label>
 
-      {/* One canonical company profile — the TYPE is a property of the
-          profile (agency = company_type 'staffing_agency'), never a separate
-          root role or a different page/mode. */}
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-text-secondary">{labels.companyType}</span>
-        <select
+      {/* One canonical company profile. The field is the org's PRIMARY ACTIVITY,
+          not a permanent identity — copy says plainly it does not lock the org in,
+          and the per-project role is chosen later on each need. Agency stays a
+          companyType ('staffing_agency'), never a separate root role/mode.
+          Radio cards replace the clumsy mobile <select> (one-tap, no native modal). */}
+      <fieldset className="flex flex-col gap-1.5 text-xs">
+        <legend className="text-text-secondary">{labels.companyType}</legend>
+        <OptionCards
           name="company_type"
+          ariaLabel={labels.companyType}
           defaultValue={existing?.companyType ?? "other"}
-          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-          data-testid="company-setup-company-type"
-        >
-          {COMPANY_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {labels.companyTypeOptions[type]}
-            </option>
-          ))}
-        </select>
+          testId="company-setup-company-type"
+          options={COMPANY_TYPES.map((type) => ({
+            value: type,
+            label: labels.companyTypeOptions[type],
+          }))}
+        />
         <span className="text-[11px] text-text-muted">
           {labels.companyTypeHelp}
         </span>
-      </label>
+      </fieldset>
 
       {/* Country is a SELECT over the seeded countries (default Lietuva) —
           free text here used to crash with a raw FK error (owner smoke). */}
@@ -258,21 +259,20 @@ export function CompanySetupForm({
         </label>
       </div>
 
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-text-secondary">{labels.requesterRole}</span>
-        <select
+      <fieldset className="flex flex-col gap-1.5 text-xs">
+        <legend className="text-text-secondary">{labels.requesterRole}</legend>
+        <OptionCards
           name="requester_role"
+          ariaLabel={labels.requesterRole}
           defaultValue={existing?.requesterRole ?? "owner"}
-          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-          data-testid="company-setup-requester-role"
-        >
-          {REQUESTER_ROLE_ORDER.map((role) => (
-            <option key={role} value={role}>
-              {labels.requesterRoleOptions[role]}
-            </option>
-          ))}
-        </select>
-      </label>
+          columns={3}
+          testId="company-setup-requester-role"
+          options={REQUESTER_ROLE_ORDER.map((role) => ({
+            value: role,
+            label: labels.requesterRoleOptions[role],
+          }))}
+        />
+      </fieldset>
 
       <div className="flex flex-wrap gap-3">
         {/* AUTOMATIC-FIRST: the primary action saves the company as usable

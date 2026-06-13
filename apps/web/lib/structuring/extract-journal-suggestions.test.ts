@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { extractJournalSuggestions } from "./extract-journal-suggestions";
+import {
+  extractJournalSuggestions,
+  rankSkillSlugs,
+  SKILL_SUGGESTION_LIMIT,
+} from "./extract-journal-suggestions";
 
 describe("extractJournalSuggestions (rule-based, LT)", () => {
   it("returns an empty result for blank input", () => {
@@ -527,5 +531,51 @@ describe("extractJournalSuggestions (rule-based, RU)", () => {
     const s = extractJournalSuggestions("Сегодня было неплохо.");
     expect(s.fragments).toHaveLength(0);
     expect(s.hasAny).toBe(false);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Skill suggestion ranking + cap (Product Logic + Mobile UX Correction v1).
+// Owner mobile review: a short entry surfaced a broad, illogical skill cloud.
+// The extractor now ranks by needle specificity and caps the count so a narrow
+// entry never produces a large pile of suggestions.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("skill suggestions are ranked + capped (no broad cloud)", () => {
+  it("never returns more than the cap for one entry", () => {
+    // A deliberately busy multi-trade sentence touching many skill stems.
+    const s = extractJournalSuggestions(
+      "Dirbau: plyteles, gipso, tinkavau, glaisčiau, dažiau, grindis, " +
+        "santechnika, elektra, mūrijau, betonavau, suvirinau, šiltinau.",
+    );
+    expect(s.skillSlugs.length).toBeLessThanOrEqual(SKILL_SUGGESTION_LIMIT);
+  });
+
+  it("a narrow entry yields only its directly-evidenced skill(s)", () => {
+    const s = extractJournalSuggestions("4 valandas klijavau plyteles vonioje.");
+    // Tiling is evidenced; the result must be tight, not a worker's whole list.
+    expect(s.skillSlugs).toContain("tiling");
+    expect(s.skillSlugs.length).toBeLessThanOrEqual(SKILL_SUGGESTION_LIMIT);
+  });
+
+  it("rankSkillSlugs is deterministic and order-stable", () => {
+    const text = "montavau gipso lubas ir tinkavau sienas".toLowerCase();
+    const a = rankSkillSlugs(text, ["drywall", "plastering", "ceiling-systems"]);
+    const b = rankSkillSlugs(text, ["ceiling-systems", "plastering", "drywall"]);
+    expect(a).toEqual(b);
+  });
+
+  it("ranks a more specific (longer) matched stem above a short ambiguous one", () => {
+    // "gipskart" (8) is a more specific stem than "lub" (3); given a text that
+    // contains both, drywall outranks ceiling-systems.
+    const text = "montavau gipskartono lubas".toLowerCase();
+    const ranked = rankSkillSlugs(text, ["ceiling-systems", "drywall"]);
+    expect(ranked[0]).toBe("drywall");
+  });
+
+  it("respects an explicit smaller limit", () => {
+    const text = "plyteles, gipso, tinkavau".toLowerCase();
+    const ranked = rankSkillSlugs(text, ["tiling", "drywall", "plastering"], 1);
+    expect(ranked).toHaveLength(1);
   });
 });

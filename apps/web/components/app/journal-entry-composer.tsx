@@ -885,6 +885,16 @@ export function JournalEntryComposer({
                 {t("skillProvenanceNote")}
               </p>
             )}
+            {skillSuggestions.length === 0 && (
+              // Honest empty state: no clearly-related skill matched the entry —
+              // never a broad cloud of guesses. The worker links skills manually.
+              <p
+                className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
+                data-testid="skill-suggestions-empty-note"
+              >
+                {t("skillNoMatch")}
+              </p>
+            )}
             {skillSuggestions.map((row) => (
               <DetectedSuggestionCard
                 key={row.slug}
