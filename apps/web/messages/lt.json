@@ -4326,5 +4326,13 @@
       "billing_email": "Sąskaitų el. paštas",
       "activity": "Įmonės veikla"
     }
+  },
+  "billingTest": {
+    "badge": "TEST MODE",
+    "title": "Testinis apmokėjimas (vidiniam testavimui)",
+    "body": "Stripe test mode įjungtas. Šie mygtukai atidaro TESTINĮ apmokėjimą — jokių realių pinigų, jokio realaus nuskaitymo. Naudok tik Stripe test korteles.",
+    "start": "Pradėti testinį apmokėjimą",
+    "starting": "Pradedama…",
+    "error": "Nepavyko pradėti"
   }
 }

@@ -4326,5 +4326,13 @@
       "billing_email": "Billing email",
       "activity": "Company activity"
     }
+  },
+  "billingTest": {
+    "badge": "TEST MODE",
+    "title": "Test checkout (internal testing)",
+    "body": "Stripe test mode is on. These buttons open a TEST checkout — no real money, no live charge. Use Stripe test cards only.",
+    "start": "Start test checkout",
+    "starting": "Starting…",
+    "error": "Could not start"
   }
 }

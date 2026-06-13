@@ -29,6 +29,10 @@ const schema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  // TEST price ids (price_…) per paid plan — owner sets these in Stripe test.
+  STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
+  STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
+  STRIPE_PRICE_AGENCY_PILOT: z.string().optional(),
 });
 
 const parsed = schema.safeParse({
@@ -45,6 +49,9 @@ const parsed = schema.safeParse({
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
+  STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
+  STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,
 });
 
 if (!parsed.success) {

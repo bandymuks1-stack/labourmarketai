@@ -3,6 +3,7 @@ import { PageHero } from "@/components/marketing/page-hero";
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { ServiceOffers } from "@/components/marketing/service-offers";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
+import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
 
 // getPlans() reads the live `plans` table; keep this page request-time so
 // the build never needs Supabase. It degrades gracefully if unreachable.
@@ -31,6 +32,7 @@ export default async function PricingPage({
       />
       <PricingTable />
       <PrePaymentPlanBoundary />
+      <BillingTestCheckout />
       <ServiceOffers />
 
       <section className="mx-auto max-w-container px-6 pb-20 sm:px-12">
