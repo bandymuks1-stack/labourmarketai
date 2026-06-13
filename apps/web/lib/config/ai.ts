@@ -21,3 +21,20 @@
  * Guarded by apps/web/lib/guards/ai-readiness.test.ts.
  */
 export const AI_ASSIST_ENABLED = false;
+
+/**
+ * Per-use-case assist flags — ALL default to `false` and stay false until the
+ * owner flips them in a future activation slice. They are gated by the master
+ * `AI_ASSIST_ENABLED` above: a use case is live only when BOTH the master flag
+ * and its own flag are true (and a real provider has been wired — none exists
+ * today). Adding a flag here NEVER enables anything by itself.
+ *
+ * Typed boundary that consumes these: apps/web/lib/ai/ (provider + noop + types
+ * + schemas). The default provider is the inert no-op; no SDK, no network, no
+ * API key exists in this repo. See docs/audits/ai-readiness.md.
+ */
+export const AI_ASSIST_FLAGS = {
+  demand_draft: false,
+  estimate_clarify: false,
+  worker_profile_draft: false,
+} as const;
