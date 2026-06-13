@@ -2255,6 +2255,15 @@
               "percent_out_of_range": "Procentai turi būti nuo 0 iki 100.",
               "not_finite": "Įveskite teisingus skaičius.",
               "empty_labour": "Nurodykite darbuotojus, valandas ir tarifą darbo sąmatai."
+            },
+            "clarify": {
+              "intro": "Neprivaloma: gaukite patikslinančių klausimų, kad sąmatos duomenys būtų išsamesni.",
+              "ask": "Gauti patikslinančių klausimų",
+              "loading": "Įkeliama…",
+              "disabledNote": "Pagalba šiuo metu neprieinama — jūsų sąmata nepakeista.",
+              "questionsTitle": "Patikslinantys klausimai",
+              "assumptionsTitle": "Prielaidų pastabos",
+              "humanConfirmNote": "Tai tik pasiūlymai — sprendžiate jūs. Jie niekada nekeičia jūsų skaičių."
             }
           }
         }
