@@ -182,10 +182,17 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       }
     };
     for (const r of roots) walk(join(APP, r), `/${r}`);
+    // Audited service-role callers:
+    //  - app/api/leads/route.ts — the anon leads funnel (§17.2).
+    //  - lib/billing/subscription-store.ts — the Stripe TEST webhook write path.
+    //    A webhook has NO user session (Stripe calls it), so service-role is the
+    //    correct path for the billing tables, which by design carry NO
+    //    authenticated write policy (owner/admin SELECT only). It never touches
+    //    a chat table; writes only billing_* / payment_webhook_events.
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
-    ).toEqual(["app/api/leads/route.ts"]);
+    ).toEqual(["app/api/leads/route.ts", "lib/billing/subscription-store.ts"]);
   });
 
   it("the anon leads funnel writes only `leads` — never a chat table", () => {
