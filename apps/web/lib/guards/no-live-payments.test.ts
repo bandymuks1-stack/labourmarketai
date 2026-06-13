@@ -50,9 +50,12 @@ describe("no live payments (Stripe test-mode guard)", () => {
     expect(PAYMENTS_ENABLED).toBe(false);
   });
 
-  it("Stripe SDK is imported ONLY in the allowlisted adapter", () => {
+  it("Stripe SDK is imported ONLY in the allowlisted adapter (production code)", () => {
     const offenders: string[] = [];
     for (const file of [...sources(join(webRoot, "lib")), ...sources(join(webRoot, "app"))]) {
+      // Test files may import the SDK to sign/verify TEST events — the rule is
+      // about PRODUCTION code never reaching Stripe except via the adapter.
+      if (/\.(test|integration\.test)\.tsx?$/.test(file)) continue;
       const r = rel(file);
       const txt = readFileSync(file, "utf8");
       const importsSdk = txt.split(/\r?\n/).some((l) => SDK_IMPORT.test(l));
