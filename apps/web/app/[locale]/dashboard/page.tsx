@@ -212,6 +212,22 @@ export default async function DashboardOverviewPage({
         approved: tReqStatus("approved"),
         closed: tReqStatus("closed"),
       },
+      // Submitted-detail read-back (what the owner entered, echoed from the
+      // request's need_summary + payload). Honest read-back only — no matching.
+      detailsLabel: tReadback("detailsLabel"),
+      fields: {
+        description: tReadback("fields.description"),
+        role: tReadback("fields.role"),
+        location: tReadback("fields.location"),
+        skills: tReadback("fields.skills"),
+        urgency: tReadback("fields.urgency"),
+        notes: tReadback("fields.notes"),
+      },
+      urgencyValues: {
+        flexible: tw("demand.form.urgencyFlexible"),
+        this_week: tw("demand.form.urgencyThisWeek"),
+        urgent: tw("demand.form.urgencyUrgent"),
+      },
     };
     const stages: Stage[] = [
       { label: tf("company.c1"), state: "current" },

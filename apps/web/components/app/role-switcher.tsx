@@ -99,6 +99,7 @@ export function RoleSwitcher() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={tSwitcher("label")}
+        data-testid="role-switcher-toggle"
         className="inline-flex shrink-0 items-center gap-2 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary hover:border-brand-blue sm:px-3"
       >
         <span aria-hidden>{activeRole ? ROLE_ICON[activeRole] : "•"}</span>

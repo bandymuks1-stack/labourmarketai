@@ -50,6 +50,9 @@ export interface CustomerRequestRow {
   readonly duration: string | null;
   readonly languageRequirement: string | null;
   readonly notes: string | null;
+  /** Per-type fields with no dedicated column (the dashboard demand form stores
+   *  role / location / skills / urgency / notes here via submit_demand_request). */
+  readonly payload: Record<string, unknown> | null;
   readonly status: CustomerRequestStatus;
   readonly manualReviewNote: string | null;
   readonly createdAt: string;
@@ -100,6 +103,10 @@ function mapRow(
     duration: (r.duration as string | null) ?? null,
     languageRequirement: (r.language_requirement as string | null) ?? null,
     notes: (r.notes as string | null) ?? null,
+    payload:
+      r.payload && typeof r.payload === "object"
+        ? (r.payload as Record<string, unknown>)
+        : null,
     status: r.status as CustomerRequestStatus,
     manualReviewNote: (r.manual_review_note as string | null) ?? null,
     createdAt: r.created_at as string,
@@ -116,7 +123,7 @@ export async function listOwnCustomerRequests(): Promise<CustomerRequestsListRes
   const { data, error } = await asAny(supabase)
     .from("customer_requests")
     .select(
-      "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, status, manual_review_note, created_at, updated_at",
+      "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, payload, status, manual_review_note, created_at, updated_at",
     )
     .eq("profile_id", user.id)
     .order("created_at", { ascending: false })

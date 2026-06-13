@@ -227,7 +227,16 @@
     "heading": "Your submitted requests",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
     "empty": "No requests submitted yet. Submit your need above and it will appear here with its status.",
-    "created": "Created"
+    "created": "Created",
+    "detailsLabel": "Submitted details",
+    "fields": {
+      "description": "Description",
+      "role": "Role / work",
+      "location": "Location",
+      "skills": "Skills / criteria",
+      "urgency": "When needed",
+      "notes": "Notes"
+    }
   },
   "journey": {
     "eyebrow": "How it works",
@@ -2132,7 +2141,8 @@
             "urgencyThisWeek": "This week",
             "urgencyUrgent": "Urgent",
             "notesLabel": "Extra notes",
-            "notesPlaceholder": "Anything else worth knowing"
+            "notesPlaceholder": "Anything else worth knowing",
+            "submittedHeading": "What you submitted:"
           },
           "hire": {
             "title": "Find a worker or team",
