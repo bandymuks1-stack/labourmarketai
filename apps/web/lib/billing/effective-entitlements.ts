@@ -81,8 +81,10 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
   if (!error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = (subs ?? []) as any[];
-    const override = rows.find((r) =>
-      String(r.provider_subscription_id ?? "").startsWith("manual_"),
+    const override = rows.find(
+      (r) =>
+        String(r.provider_subscription_id ?? "").startsWith("manual_") &&
+        r.status === "active",
     );
     if (override) manualOverridePlanKey = override.plan_key ?? null;
     const real = rows.find(

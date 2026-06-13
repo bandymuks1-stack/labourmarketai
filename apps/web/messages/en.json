@@ -1110,7 +1110,8 @@
       "matching": "Matching workbench",
       "market": "Market situation",
       "league": "Country league",
-      "readiness": "Readiness center"
+      "readiness": "Readiness center",
+      "billing": "Billing (test)"
     },
     "drafts": {
       "title": "Operations drafts",
@@ -4335,5 +4336,51 @@
     "start": "Start test checkout",
     "starting": "Starting…",
     "error": "Could not start"
+  },
+  "adminBilling": {
+    "eyebrow": "BILLING — TEST MODE",
+    "title": "Billing center",
+    "intro": "Stripe test-mode billing. Payments are test/disabled only — no live keys, no real money, no live checkout.",
+    "on": "On",
+    "off": "Off",
+    "testModeOn": "Test mode ON",
+    "testModeOff": "Test mode off",
+    "liveNever": "live is hard-blocked",
+    "state": {
+      "disabled": "Billing disabled",
+      "stripe_test": "Stripe TEST mode",
+      "stripe_live_blocked": "Live blocked"
+    },
+    "tiles": {
+      "payments": "Payments",
+      "testSecret": "Test secret",
+      "webhookSecret": "Webhook secret",
+      "lastPayment": "Last payment"
+    },
+    "blockers": {
+      "title": "Blockers to live payments",
+      "none": "Test chain config is complete."
+    },
+    "subs": {
+      "title": "Subscriptions",
+      "unavailable": "Billing tables not applied yet (PR2 pending).",
+      "empty": "No subscriptions yet.",
+      "manual": "manual override"
+    },
+    "override": {
+      "title": "Manual pilot access",
+      "help": "Grant a TEST entitlement without a Stripe subscription. Test mode only — never live.",
+      "ownerId": "Owner profile id",
+      "plan": "Plan",
+      "grant": "Grant",
+      "revoke": "Revoke",
+      "granting": "Saving…",
+      "done": "Saved",
+      "error": "Failed"
+    },
+    "events": {
+      "title": "Recent webhook events",
+      "empty": "No webhook events yet."
+    }
   }
 }

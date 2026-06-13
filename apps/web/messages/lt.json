@@ -1110,7 +1110,8 @@
       "matching": "Matching darbastalis",
       "market": "Rinkos situacija",
       "league": "Šalies lyga",
-      "readiness": "Pasiruošimo centras"
+      "readiness": "Pasiruošimo centras",
+      "billing": "Mokėjimai (test)"
     },
     "drafts": {
       "title": "Operaciniai juodraščiai",
@@ -4335,5 +4336,51 @@
     "start": "Pradėti testinį apmokėjimą",
     "starting": "Pradedama…",
     "error": "Nepavyko pradėti"
+  },
+  "adminBilling": {
+    "eyebrow": "MOKĖJIMAI — TEST MODE",
+    "title": "Mokėjimų centras",
+    "intro": "Stripe test-mode mokėjimai. Mokėjimai tik test/išjungti — jokių live raktų, jokių realių pinigų, jokio live checkout.",
+    "on": "Įjungta",
+    "off": "Išjungta",
+    "testModeOn": "Test mode ĮJUNGTAS",
+    "testModeOff": "Test mode išjungtas",
+    "liveNever": "live griežtai blokuojamas",
+    "state": {
+      "disabled": "Mokėjimai išjungti",
+      "stripe_test": "Stripe TEST režimas",
+      "stripe_live_blocked": "Live blokuojamas"
+    },
+    "tiles": {
+      "payments": "Mokėjimai",
+      "testSecret": "Test raktas",
+      "webhookSecret": "Webhook raktas",
+      "lastPayment": "Paskutinis mokėjimas"
+    },
+    "blockers": {
+      "title": "Kliūtys live mokėjimams",
+      "none": "Test grandinės konfigūracija pilna."
+    },
+    "subs": {
+      "title": "Prenumeratos",
+      "unavailable": "Mokėjimų lentelės dar nepritaikytos (laukiama PR2).",
+      "empty": "Prenumeratų dar nėra.",
+      "manual": "rankinis override"
+    },
+    "override": {
+      "title": "Rankinė piloto prieiga",
+      "help": "Suteik TESTINĮ entitlement be Stripe prenumeratos. Tik test mode — niekada live.",
+      "ownerId": "Savininko profilio id",
+      "plan": "Planas",
+      "grant": "Suteikti",
+      "revoke": "Atšaukti",
+      "granting": "Saugoma…",
+      "done": "Išsaugota",
+      "error": "Nepavyko"
+    },
+    "events": {
+      "title": "Naujausi webhook įvykiai",
+      "empty": "Webhook įvykių dar nėra."
+    }
   }
 }
