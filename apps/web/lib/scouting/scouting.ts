@@ -169,6 +169,7 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
         professionSlug: c.professionSlug,
         subject: c.subject,
         match: matchWorkerToNeed(need, c.subject),
+        needCountry: need.country,
         shortlistStatus: shortlist.get(c.workerId) ?? null,
       }),
     )

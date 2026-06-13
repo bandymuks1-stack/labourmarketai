@@ -18,6 +18,10 @@ import {
   type WorkerShortlistSafePreview,
 } from "@/lib/visibility/worker-profile-visibility";
 import type { MatchResultV1, MatchSubject } from "@/lib/market/match-v1";
+import {
+  companyCandidateReadiness,
+  type CompanyCandidateReadiness,
+} from "@/lib/scouting/candidate-readiness";
 
 export type ShortlistStatus = "saved" | "interested" | "not_fit" | "reviewed";
 
@@ -31,6 +35,8 @@ export interface ScoutSafeCandidate {
   readonly canContact: boolean;
   /** Deterministic, need-context match (status/why/gaps/skill-fit). No PII. */
   readonly match: MatchResultV1;
+  /** Safe readiness signal (country/availability fit; docs stay consent-gated). */
+  readonly readiness: CompanyCandidateReadiness;
   readonly shortlistStatus: ShortlistStatus | null;
 }
 
@@ -51,6 +57,8 @@ export function toScoutSafeCandidate(input: {
   readonly professionSlug: string | null;
   readonly subject: MatchSubject;
   readonly match: MatchResultV1;
+  /** The need's country (for the country-fit signal). Optional. */
+  readonly needCountry?: string | null;
   readonly shortlistStatus: ShortlistStatus | null;
 }): ScoutSafeCandidate {
   const preview = toShortlistSafePreview({
@@ -75,12 +83,15 @@ export function toScoutSafeCandidate(input: {
     availableFrom: input.subject.availableFrom ?? null,
   });
 
+  const readiness = companyCandidateReadiness(input.needCountry, preview);
+
   return {
     workerId: input.workerId,
     professionSlug: input.professionSlug,
     preview,
     canContact,
     match: input.match,
+    readiness,
     shortlistStatus: input.shortlistStatus,
   };
 }
