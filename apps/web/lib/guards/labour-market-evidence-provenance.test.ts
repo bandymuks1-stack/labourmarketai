@@ -30,6 +30,18 @@ describe("labour-market evidence provenance", () => {
     }
   });
 
+  it("every item links a specific https source URL for its figure", () => {
+    for (const e of LABOUR_MARKET_EVIDENCE) {
+      expect(e.sourceUrl, `${e.id} sourceUrl`).toMatch(/^https:\/\//);
+    }
+  });
+
+  it("every item has an ISO last-checked (verified) date", () => {
+    for (const e of LABOUR_MARKET_EVIDENCE) {
+      expect(e.lastChecked, `${e.id} lastChecked`).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
+
   it("only recognised official statistics bodies are allowlisted", () => {
     for (const s of Object.values(LABOUR_MARKET_SOURCES)) {
       expect(s.name.length).toBeGreaterThan(0);

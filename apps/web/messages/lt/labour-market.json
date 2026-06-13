@@ -10,7 +10,6 @@
   "aEmployers": "Darbdaviai",
   "aAgencies": "Agentūros ir įdarbintojai",
   "aClients": "Klientai ir projektų savininkai",
-
   "pillarsEyebrow": "Kodėl tai svarbu dabar",
   "pillarsTitle": "Jūsų ateitis priklauso nuo to, ką rinka iš tiesų mato",
   "p1Title": "Neleiskite savo įgūdžiams likti nematomiems",
@@ -21,14 +20,12 @@
   "p3Body": "Darbdaviams reikalingi įgūdžiai nuolat keičiasi. Profilis, augantis su jūsų darbu, išlaiko jus matomus rinkai keičiantis.",
   "p4Title": "Darbdaviai neturėtų spėlioti iš silpno CV",
   "p4Body": "Įmonės ir agentūros aprašo realų poreikį ir lygina žmones pagal įrodymus, prieinamumą, kalbą ir šalį — ne pagal vieno puslapio spėjimą.",
-
   "workerPathTitle": "Pradėkite gyvą darbo profilį",
   "workerPathBody": "Aprašykite įgūdžius, pridėkite darbo dienoraščio įrašą ir pamatykite, kuriuos įgūdžius patvirtina jūsų pačių žodžiai. Laikui bėgant tai virsta CV ir žaidėjo kortele.",
   "workerPathCta": "Pradėti profilį",
   "employerPathTitle": "Aprašykite realų poreikį — nustokite spėlioti",
   "employerPathBody": "Pasakykite, kokio darbo reikia, ir prieš susisiekdami palyginkite kandidatus pagal nurodytus įgūdžius, įrodymų lygį, prieinamumą, kalbą ir šalį.",
   "employerPathCta": "Įmonėms ir agentūroms",
-
   "evidenceEyebrow": "Pagrįsta realiais darbo rinkos duomenimis",
   "evidenceTitle": "Rinka keičiasi greičiau nei CV",
   "evidenceSubcopy": "Vieša statistika iš oficialių ES šaltinių apie tai, kodėl svarbūs matomi įgūdžiai, įrodymai ir mobilumas. Kiekviena kortelė turi nuorodą į šaltinį su duomenų data ir regionu.",
@@ -39,5 +36,6 @@
   "claimTrend": "Tendencija",
   "claimForecast": "Prognozė",
   "claimShortage": "Trūkumo signalas",
-  "claimSkills": "Įgūdžių signalas"
+  "claimSkills": "Įgūdžių signalas",
+  "illustrativeSample": "Iliustracinis pavyzdys — koncepciniai duomenys, dar ne realūs platformos skaičiai."
 }

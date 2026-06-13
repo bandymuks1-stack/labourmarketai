@@ -74,7 +74,7 @@ export async function LabourMarketEvidence() {
                 <dt className="font-mono uppercase tracking-label">{t("fieldSource")}</dt>
                 <dd>
                   <a
-                    href={source.url}
+                    href={e.sourceUrl || source.url}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                     className="text-brand-blue hover:text-brand-cyan"

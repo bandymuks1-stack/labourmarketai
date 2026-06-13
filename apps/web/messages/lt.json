@@ -210,7 +210,7 @@
       "locationLabel": "Vieta arba adresas (nebūtina)",
       "locationPlaceholder": "pvz. Vilnius",
       "clientLabel": "Užsakovas (nebūtina)",
-      "clientPlaceholder": "pvz. UAB „Statyba“",
+      "clientPlaceholder": "pvz. UAB „Šiaurės logistika“",
       "journalLinkingDisabled": "Susiejimas su darbo žurnalu dar neįjungtas.",
       "submit": "Sukurti",
       "success": "Projekto kontekstas sukurtas.",
@@ -995,7 +995,7 @@
       "field": {
         "roleTitle": {
           "label": "Pareigybė *",
-          "placeholder": "Pvz., Statybos brigadininkas"
+          "placeholder": "Pvz., Sandėlio komandos vadovas"
         },
         "projectTitle": {
           "label": "Projekto pavadinimas (neprivaloma)",
