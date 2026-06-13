@@ -3,6 +3,8 @@ import type {
   CustomerRequestsListResult,
 } from "@/lib/buyer/customer-requests";
 import { sanitizeDemandTitle } from "@/lib/demand/sanitize-demand-title";
+import { parseStoredEstimate } from "@/lib/estimate/estimate-payload";
+import { EstimateSummary } from "@/components/app/estimate-summary";
 
 /**
  * Demand read-back (Slice 1 — demand → matching readiness).
@@ -108,6 +110,8 @@ export function DemandRequestsReadback({
               [labels.fields.urgency, urgency],
               [labels.fields.notes, notes],
             ].filter(([, v]) => v.length > 0) as Array<[string, string]>;
+            // Tolerant: older requests have no estimate → null, section omitted.
+            const estimate = parseStoredEstimate(r.payload);
             return (
               <li
                 key={r.id}
@@ -141,6 +145,16 @@ export function DemandRequestsReadback({
                       ))}
                     </dl>
                   </details>
+                )}
+                {estimate && (
+                  <div className="mt-1" data-testid="demand-readback-estimate">
+                    <EstimateSummary
+                      result={estimate.result}
+                      assumptions={estimate.assumptions}
+                      missingInfo={estimate.missingInfo}
+                      compact
+                    />
+                  </div>
                 )}
               </li>
             );

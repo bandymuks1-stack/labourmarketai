@@ -2163,6 +2163,99 @@
             "rolePlaceholder": "e.g. a team of 5 welders, cleaning services",
             "descLabel": "Describe the offer",
             "descPlaceholder": "Which people or services you offer, on what terms"
+          },
+          "estimate": {
+            "toggle": "Add a preliminary estimate",
+            "optionalTag": "(optional)",
+            "intro": "A transparent, deterministic estimate from your own numbers — not a binding quote.",
+            "preliminaryTitle": "Preliminary estimate",
+            "sectionEntered": "Your entered numbers",
+            "sectionResult": "Calculated result",
+            "clear": "Clear estimate",
+            "f": {
+              "template": "Work / project type",
+              "workType": "Describe the work",
+              "workTypePlaceholder": "e.g. concrete works, warehouse shift, cleaning contract",
+              "unitType": "Unit",
+              "quantity": "Quantity",
+              "workerCount": "Workers",
+              "hoursPerWorker": "Hours per worker",
+              "totalHours": "Total hours (optional override)",
+              "rate": "Hourly / day rate",
+              "ratePlaceholder": "e.g. 20",
+              "country": "Country / location",
+              "materials": "Materials",
+              "equipment": "Equipment / tools",
+              "transport": "Transport / accommodation",
+              "overhead": "Overhead %",
+              "margin": "Margin %",
+              "contingency": "Contingency / risk %",
+              "currency": "Currency"
+            },
+            "units": {
+              "hours": "Hours",
+              "days": "Days",
+              "square_meters": "m²",
+              "cubic_meters": "m³",
+              "units": "Units",
+              "custom": "Custom"
+            },
+            "templates": {
+              "construction": "Construction",
+              "logistics": "Logistics",
+              "cleaning": "Cleaning",
+              "hospitality": "Hospitality",
+              "manufacturing": "Manufacturing",
+              "care": "Care",
+              "admin": "Admin / office",
+              "it_service": "IT / service",
+              "general": "General"
+            },
+            "r": {
+              "labourSubtotal": "Labour cost",
+              "materials": "Materials",
+              "equipment": "Equipment",
+              "transport": "Transport / accommodation",
+              "directCosts": "Direct costs",
+              "overhead": "Overhead",
+              "margin": "Margin",
+              "contingency": "Risk reserve",
+              "estimatedTotal": "Preliminary total",
+              "low": "Low",
+              "base": "Base",
+              "high": "High",
+              "range": "Estimate range",
+              "labourHours": "Labour hours"
+            },
+            "assumptionsTitle": "Assumptions used",
+            "missingTitle": "What would improve accuracy",
+            "disclaimer": "This is a preliminary estimate, not a final commercial offer or binding quote.",
+            "assumptions": {
+              "preliminary": "Preliminary estimate based only on the numbers you entered.",
+              "totalHoursUsed": "Labour uses your total hours.",
+              "labourFromWorkersHours": "Labour = workers × hours per worker × rate.",
+              "noOverhead": "No overhead applied.",
+              "noMargin": "No margin applied.",
+              "rangeFromContingency": "Low/high range derived from the risk reserve."
+            },
+            "missing": {
+              "rate": "Add an hourly / day rate.",
+              "hours": "Add worker hours.",
+              "materials": "Add a materials estimate if relevant.",
+              "contingency": "Add a risk reserve % for a low–high range."
+            },
+            "errors": {
+              "negative_quantity": "Quantity cannot be negative.",
+              "negative_worker_count": "Worker count cannot be negative.",
+              "negative_hours": "Hours cannot be negative.",
+              "negative_rate": "Rate cannot be negative.",
+              "negative_materials": "Materials cannot be negative.",
+              "negative_equipment": "Equipment cannot be negative.",
+              "negative_transport": "Transport cannot be negative.",
+              "percent_out_of_range": "Percentages must be between 0 and 100.",
+              "not_finite": "Please enter valid numbers.",
+              "empty_labour": "Enter workers, hours and a rate for a labour estimate."
+            }
           }
         }
       },
