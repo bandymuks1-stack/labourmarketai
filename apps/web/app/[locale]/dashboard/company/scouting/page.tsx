@@ -5,6 +5,7 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
+import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 
 /**
  * Company scouting (Step 3B). The company picks one of its OWN structured
@@ -254,16 +255,35 @@ export default async function CompanyScoutingPage({
                   </div>
                 ) : null}
 
-                {/* Communication/booking — NOT built yet. Transparent status only,
-                    driven by canStartCommunicationOrBooking (Step 3A rule 6). */}
-                <p
-                  className="flex items-center gap-1.5 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-1.5 text-[11px] text-text-muted"
+                {/* Communication — IN-APP only, contacts stay hidden. The
+                    request action is gated by canStartCommunicationOrBooking
+                    (Step 3A rule 6) + ownership + shortlist, re-checked
+                    server-side. When not contactable, only a transparent status
+                    shows (no dead/broken button). No booking persistence yet. */}
+                <div
+                  className="flex flex-col gap-2 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-2"
                   data-testid={`scout-comms-${c.workerId}`}
                   data-can-contact={c.canContact ? "true" : "false"}
                 >
-                  <span aria-hidden>{c.canContact ? "💬" : "⏳"}</span>
-                  {c.canContact ? t("comms.eligible") : t("comms.blocked")}
-                </p>
+                  <p className="flex items-center gap-1.5 text-[11px] text-text-muted">
+                    <span aria-hidden>{c.canContact ? "💬" : "⏳"}</span>
+                    {c.canContact ? t("comms.eligible") : t("comms.blocked")}
+                  </p>
+                  {c.canContact ? (
+                    <RequestCommunicationButton
+                      locale={locale}
+                      requestId={result.demand.id}
+                      workerId={c.workerId}
+                      labels={{
+                        button: t("request.button"),
+                        opening: t("request.opening"),
+                        opened: t("request.opened"),
+                        view: t("request.view"),
+                        error: t("request.error"),
+                      }}
+                    />
+                  ) : null}
+                </div>
 
                 <ScoutingShortlistButtons
                   locale={locale}
