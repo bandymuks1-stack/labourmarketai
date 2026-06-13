@@ -1401,7 +1401,18 @@ describe("no migration files added by this sprint", () => {
     // demand_shortlist) — additive GREEN owner-scoped shortlist table (NEW
     // table + NEW owner-scoped policies; NO existing RLS changed); no prod
     // apply.
-    const SPRINT_BASELINE = 76;
+    // Bumped 76 -> 79 for the pre-payment readiness sprint PR2 — three additive
+    // RED (needs-human-gate) migrations, NOT applied by the agent:
+    //  - 20260613100000_worker_availability_preferences (8 nullable workers
+    //    columns + owner-scoped save_worker_availability_prefs RPC);
+    //  - 20260613100100_booking_requests (persists the booking-state machine:
+    //    booking_requests + append-only events + propose/respond/withdraw RPCs;
+    //    worker-only accept, overlap-conflict block, immutable readiness
+    //    snapshot; contacts NOT stored);
+    //  - 20260613100200_worker_document_verification (additive verification axis
+    //    unverified/pending/verified/rejected — verified is admin-RPC-only +
+    //    FI support). All additive + reversible (supabase/rollbacks/*).
+    const SPRINT_BASELINE = 79;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

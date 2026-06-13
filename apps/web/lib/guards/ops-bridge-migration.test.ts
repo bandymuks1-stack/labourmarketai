@@ -160,6 +160,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // — 24 additive GREEN CREATE INDEX, remaining person/org FKs; closes B).
     // then to 76 for Full Cycle Sprint v1 scouting (20260612220000
     // demand_shortlist — additive GREEN owner-scoped table, no existing RLS).
-    expect(guard).toMatch(/SPRINT_BASELINE = 76/);
+    // then to 79 for the pre-payment readiness sprint PR2 — three additive RED
+    // migrations (worker_availability_preferences, booking_requests,
+    // worker_document_verification); see product-readiness.test.ts for detail.
+    expect(guard).toMatch(/SPRINT_BASELINE = 79/);
   });
 });
