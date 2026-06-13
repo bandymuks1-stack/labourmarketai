@@ -6,6 +6,13 @@ import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/sco
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
+import type { CompanyCandidateLabel } from "@/lib/scouting/candidate-readiness";
+
+const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
+  can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
+  limited_information: "border-state-amber/40 bg-state-amber/10 text-state-amber",
+  not_enough_information: "border-ink-500 bg-ink-800/40 text-text-muted",
+};
 
 /**
  * Company scouting (Step 3B). The company picks one of its OWN structured
@@ -248,6 +255,27 @@ export default async function CompanyScoutingPage({
                     self: c.match.evidence.matchedSelfDeclared,
                   })}
                 </p>
+
+                {/* Stage 7 — safe readiness signal: country + availability fit
+                    only. Document readiness stays consent-gated (a company can
+                    never see a worker's private documents). No fake doc claim. */}
+                <div
+                  className="flex flex-wrap items-center gap-1.5"
+                  data-testid={`scout-readiness-${c.workerId}`}
+                  data-readiness={c.readiness.label}
+                >
+                  <span
+                    className={`rounded-md border px-2 py-0.5 text-[11px] ${READINESS_TONE[c.readiness.label]}`}
+                  >
+                    {t(`readiness.label.${c.readiness.label}` as never)}
+                  </span>
+                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary">
+                    {t(`readiness.country.${c.readiness.countryFit}` as never)}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    {t("readiness.docsConsent")}
+                  </span>
+                </div>
 
                 {/* Why */}
                 {c.match.reasons.length > 0 ? (

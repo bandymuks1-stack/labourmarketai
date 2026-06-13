@@ -4181,6 +4181,20 @@
       "evidence": "Evidence tiers, strongest first: manager-confirmed, then work-journal, then self-declared. Counts are real — 0 means 0.",
       "contacts": "Worker contacts stay hidden. You connect in-app, and only when a worker has open availability.",
       "next": "Next: shortlist the workers you like, then request to communicate when they're available."
+    },
+    "readiness": {
+      "label": {
+        "can_be_considered": "Can be considered",
+        "limited_information": "Limited information",
+        "not_enough_information": "Not enough information"
+      },
+      "country": {
+        "match": "Country fit",
+        "maybe": "Country: open",
+        "mismatch": "Different country preference",
+        "unknown": "Country: not specified"
+      },
+      "docsConsent": "Documents: shared only with the worker's consent"
     }
   },
   "planBoundary": {

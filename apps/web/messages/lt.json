@@ -4181,6 +4181,20 @@
       "evidence": "Įrodymų lygiai, nuo stipriausio: vadovo patvirtinta, tada darbų žurnalas, tada paties nurodyta. Skaičiai tikri — 0 reiškia 0.",
       "contacts": "Darbuotojų kontaktai lieka paslėpti. Susisiekiate programėlėje ir tik kai darbuotojas turi laisvą prieinamumą.",
       "next": "Toliau: įtraukite patikusius darbuotojus į sąrašą ir paprašykite susisiekti, kai jie bus laisvi."
+    },
+    "readiness": {
+      "label": {
+        "can_be_considered": "Galima svarstyti",
+        "limited_information": "Ribota informacija",
+        "not_enough_information": "Per mažai informacijos"
+      },
+      "country": {
+        "match": "Tinka šaliai",
+        "maybe": "Šalis: atvira",
+        "mismatch": "Kita šalies pirmenybė",
+        "unknown": "Šalis: nenurodyta"
+      },
+      "docsConsent": "Dokumentai: rodomi tik darbuotojui sutikus"
     }
   },
   "planBoundary": {
