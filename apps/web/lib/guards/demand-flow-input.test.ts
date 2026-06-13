@@ -16,6 +16,8 @@ const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
 const form = read("components/app/demand-request-button.tsx");
 const page = read("app/[locale]/dashboard/page.tsx");
 const helper = read("lib/demand/demand-request.ts");
+const readback = read("components/app/demand-requests-readback.tsx");
+const requestsLib = read("lib/buyer/customer-requests.ts");
 
 describe("demand flow has a real input", () => {
   it("renders a real description textarea + a role input", () => {
@@ -79,9 +81,42 @@ describe("no animated sweep / purple band over the form", () => {
   });
 });
 
+describe("submitted values are read back to the owner", () => {
+  it("the form shows a post-submit confirmation panel echoing the input", () => {
+    expect(form).toContain('data-testid="demand-submitted-summary"');
+    expect(form).toContain("submittedHeading");
+    // The same summary list is shown on review AND after submit (one source).
+    expect(form).toContain("summaryList");
+    expect(form).toContain('data-testid="demand-summary-description"');
+  });
+  it("the persistent read-back surfaces the submitted payload fields", () => {
+    expect(readback).toContain('data-testid="demand-readback-details"');
+    for (const f of ["description", "role", "location", "skills", "urgency", "notes"]) {
+      expect(readback).toContain(`labels.fields.${f}`);
+    }
+    // It reads role/location/skills/urgency/notes from the request payload.
+    expect(readback).toMatch(/r\.payload/);
+  });
+  it("listOwnCustomerRequests selects the payload jsonb", () => {
+    expect(requestsLib).toMatch(/notes, payload, status/);
+    expect(requestsLib).toMatch(/payload:\s*\n?\s*r\.payload/);
+  });
+});
+
+describe("no fake AI / matching / verification language in the demand surface", () => {
+  for (const [name, src] of [
+    ["form", form],
+    ["read-back", readback],
+  ] as const) {
+    it(`${name} makes no matched/verified/AI claim`, () => {
+      expect(src).not.toMatch(/\bmatched\b|\bverified\b|\bAI\b|\bautomatically matched\b/i);
+    });
+  }
+});
+
 describe("copy is localized for active locales (lt/en/ru)", () => {
   for (const locale of ["lt", "en", "ru"] as const) {
-    it(`${locale}: demand.form + intent role/description keys exist`, () => {
+    it(`${locale}: demand.form + intent role/description + read-back keys exist`, () => {
       const j = JSON.parse(read(`messages/${locale}.json`));
       const d = j.auth.dashboard.wow.demand;
       for (const k of [
@@ -93,6 +128,7 @@ describe("copy is localized for active locales (lt/en/ru)", () => {
         "urgencyLabel",
         "notesLabel",
         "reviewIntro",
+        "submittedHeading",
       ]) {
         expect(typeof d.form[k], `${locale} demand.form.${k}`).toBe("string");
       }
@@ -100,6 +136,12 @@ describe("copy is localized for active locales (lt/en/ru)", () => {
         for (const k of ["roleLabel", "rolePlaceholder", "descLabel", "descPlaceholder"]) {
           expect(typeof d[intent][k], `${locale} demand.${intent}.${k}`).toBe("string");
         }
+      }
+      // Read-back field labels (detailsLabel + per-field) must exist.
+      const rb = j.demandReadback;
+      expect(typeof rb.detailsLabel, `${locale} demandReadback.detailsLabel`).toBe("string");
+      for (const f of ["description", "role", "location", "skills", "urgency", "notes"]) {
+        expect(typeof rb.fields[f], `${locale} demandReadback.fields.${f}`).toBe("string");
       }
     });
   }

@@ -227,7 +227,16 @@
     "heading": "Jūsų pateikti poreikiai",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
     "empty": "Dar nepateikėte nė vieno poreikio. Pateikite poreikį viršuje ir jis atsiras čia su savo būsena.",
-    "created": "Sukurta"
+    "created": "Sukurta",
+    "detailsLabel": "Pateikti duomenys",
+    "fields": {
+      "description": "Aprašymas",
+      "role": "Rolė / darbas",
+      "location": "Vieta",
+      "skills": "Įgūdžiai / kriterijai",
+      "urgency": "Kada reikia",
+      "notes": "Pastabos"
+    }
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",
@@ -2132,7 +2141,8 @@
             "urgencyThisWeek": "Šią savaitę",
             "urgencyUrgent": "Skubu",
             "notesLabel": "Papildomos pastabos",
-            "notesPlaceholder": "Bet kas, ką dar svarbu žinoti"
+            "notesPlaceholder": "Bet kas, ką dar svarbu žinoti",
+            "submittedHeading": "Ką pateikėte:"
           },
           "hire": {
             "title": "Ieškoti darbuotojo ar komandos",

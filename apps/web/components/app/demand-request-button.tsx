@@ -88,14 +88,6 @@ export function DemandRequestButton({
     }
   }
 
-  if (state === "done") {
-    return (
-      <p className="text-sm text-state-success" role="status" data-testid="demand-done">
-        {t(`${key}.done`)}
-      </p>
-    );
-  }
-
   const urgencyOptions: { value: DemandUrgency; label: string }[] = [
     { value: "flexible", label: t("form.urgencyFlexible") },
     { value: "this_week", label: t("form.urgencyThisWeek") },
@@ -103,6 +95,64 @@ export function DemandRequestButton({
   ];
   const urgencyLabel =
     urgencyOptions.find((o) => o.value === urgency)?.label ?? "";
+
+  // The submitted-values summary — shown on the review step AND, after a
+  // successful submit, as a read-back panel so the owner can see exactly what
+  // they created. This is purely their own input echoed back (no fabricated
+  // content, no matching / verification claims).
+  const summaryList = (
+    <dl
+      className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-md border border-ink-600 bg-ink-800/40 p-4 text-sm"
+      data-testid="demand-summary-list"
+    >
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t(`${key}.roleLabel`)}
+      </dt>
+      <dd className="text-text-primary">{role.trim() || "—"}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t(`${key}.descLabel`)}
+      </dt>
+      <dd className="whitespace-pre-wrap text-text-primary" data-testid="demand-summary-description">
+        {description.trim()}
+      </dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("form.locationLabel")}
+      </dt>
+      <dd className="text-text-primary">{location.trim() || "—"}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("form.skillsLabel")}
+      </dt>
+      <dd className="text-text-primary">{skills.trim() || "—"}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("form.urgencyLabel")}
+      </dt>
+      <dd className="text-text-primary">{urgencyLabel}</dd>
+      {notes.trim() && (
+        <>
+          <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("form.notesLabel")}
+          </dt>
+          <dd className="whitespace-pre-wrap text-text-primary">{notes.trim()}</dd>
+        </>
+      )}
+    </dl>
+  );
+
+  if (state === "done") {
+    return (
+      <div className="flex flex-col gap-3" data-testid="demand-submitted-summary">
+        <p
+          className="text-sm font-semibold text-state-success"
+          role="status"
+          data-testid="demand-done"
+        >
+          ✓ {t(`${key}.done`)}
+        </p>
+        <p className="text-xs text-text-secondary">{t("form.submittedHeading")}</p>
+        {summaryList}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-5" data-testid="demand-form">
@@ -245,40 +295,7 @@ export function DemandRequestButton({
       {step === 3 && (
         <div className="flex flex-col gap-3" data-testid="demand-review">
           <p className="text-sm text-text-secondary">{t("form.reviewIntro")}</p>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-md border border-ink-600 bg-ink-800/40 p-4 text-sm">
-            <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t(`${key}.roleLabel`)}
-            </dt>
-            <dd className="text-text-primary">{role.trim() || "—"}</dd>
-            <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t(`${key}.descLabel`)}
-            </dt>
-            <dd className="whitespace-pre-wrap text-text-primary">
-              {description.trim()}
-            </dd>
-            <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("form.locationLabel")}
-            </dt>
-            <dd className="text-text-primary">{location.trim() || "—"}</dd>
-            <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("form.skillsLabel")}
-            </dt>
-            <dd className="text-text-primary">{skills.trim() || "—"}</dd>
-            <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("form.urgencyLabel")}
-            </dt>
-            <dd className="text-text-primary">{urgencyLabel}</dd>
-            {notes.trim() && (
-              <>
-                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                  {t("form.notesLabel")}
-                </dt>
-                <dd className="whitespace-pre-wrap text-text-primary">
-                  {notes.trim()}
-                </dd>
-              </>
-            )}
-          </dl>
+          {summaryList}
         </div>
       )}
 
