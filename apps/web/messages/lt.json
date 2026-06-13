@@ -584,6 +584,16 @@
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
         "columnInvitedAt": "Data"
+      },
+      "scoutingBridge": {
+        "title": "Raskite darbuotojų šiam poreikiui",
+        "intro": "Kai užklausa aprašo vaidmenį ir įgūdžius, atverkite žvalgybą ir pamatykite tinkančius darbuotojus — privačiai ir sąžiningai.",
+        "points": {
+          "matches": "Atitikmenys apskaičiuojami deterministiškai tik šiam poreikiui — tai tinkamumo signalai, o ne garantija.",
+          "contacts": "Darbuotojų kontaktai lieka paslėpti. Susisiekiate programėlėje ir tik kai darbuotojas turi laisvą prieinamumą.",
+          "estimate": "Bet kuri sąmata yra preliminari ir neįpareigojanti — planavimo pagalba, ne pasiūlymas."
+        },
+        "cta": "Atverti žvalgybą"
       }
     },
     "agency": {

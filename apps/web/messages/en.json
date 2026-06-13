@@ -584,6 +584,16 @@
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date"
+      },
+      "scoutingBridge": {
+        "title": "Find workers for this need",
+        "intro": "When your request describes the role and skills, open scouting to see workers who match — privately and honestly.",
+        "points": {
+          "matches": "Matches are computed deterministically for this need only — signals of fit, never a guarantee.",
+          "contacts": "Worker contacts stay hidden. You connect in-app, and only when a worker has open availability.",
+          "estimate": "Any estimate is preliminary and non-binding — a planning aid, not a quote."
+        },
+        "cta": "Open scouting"
       }
     },
     "agency": {
