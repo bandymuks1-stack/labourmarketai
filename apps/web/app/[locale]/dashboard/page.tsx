@@ -213,11 +213,6 @@ export default async function DashboardOverviewPage({
         closed: tReqStatus("closed"),
       },
     };
-    const lanes = [
-      { step: tf("company.c1"), body: tw("activity.p1") },
-      { step: tf("company.c2"), body: tw("activity.p2") },
-      { step: tf("company.c3"), body: tw("activity.p3") },
-    ];
     const stages: Stage[] = [
       { label: tf("company.c1"), state: "current" },
       { label: tf("company.c2"), state: "todo" },
@@ -259,56 +254,33 @@ export default async function DashboardOverviewPage({
           {tw("pilot.progressHelper")}
         </p>
 
-        {/* Cinematic cockpit panel */}
-        <section className="card-border wow-card flex flex-col gap-5 p-6 sm:p-8">
+        {/* Demand intake — one clear purpose: create a structured work need
+            (a canonical customer_request, status='submitted'). The title +
+            body are intent-specific (hiring company vs agency offer) so the
+            screen never reads as a vague "activity space". No sweeping overlay
+            (the wow-card sheen was removed — it read as a broken band over the
+            form on mobile). The numbered steps are a REAL form wizard below. */}
+        <section
+          className="card-border flex flex-col gap-5 p-6 sm:p-8"
+          data-testid="demand-intake-section"
+        >
           <div className="flex flex-col gap-1">
             <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
-              <span className="live-dot signal-dot" aria-hidden />
-              {tf("company.eyebrow")} · {tw("activity.earlyAccess")}
+              <span className="live-dot" aria-hidden />
+              {tf("company.eyebrow")}
             </span>
             <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
-              {tw("activity.title")}
+              {tw(`demand.${pilotKey}.title`)}
             </h2>
             <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
-              {tw("activity.body")}
+              {tw(`demand.${pilotKey}.body`)}
             </p>
           </div>
 
-          {/* Action lanes — each stage is a move, not a passive bullet */}
-          <ol className="grid gap-3 sm:grid-cols-3">
-            {lanes.map((l, i) => (
-              <li
-                key={l.step}
-                className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/60 p-4"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-blue/40 bg-brand-blue/10 font-mono text-[11px] font-semibold text-brand-blue">
-                  {i + 1}
-                </span>
-                <span className="font-display text-sm font-semibold text-text-primary">
-                  {l.step}
-                </span>
-                <span className="text-xs leading-relaxed text-text-muted">
-                  {l.body}
-                </span>
-              </li>
-            ))}
-          </ol>
-
-          {/* Terminal action — the live, real path: submits a canonical
-              customer_request (status='submitted') via submit_demand_request.
-              The single demand front door (§17), not the leads pre-auth funnel. */}
-          <div className="flex flex-col gap-1 border-t border-ink-600 pt-5">
-            <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
-              {tf("company.c4")}
-            </span>
-            <h3 className="font-display text-base font-semibold text-text-primary">
-              {tw(`pilot.${pilotKey}.title`)}
-            </h3>
-            <p className="mb-3 mt-1 text-sm leading-relaxed text-text-secondary">
-              {tw(`pilot.${pilotKey}.body`)}
-            </p>
-            <DemandRequestButton intent={intent} />
-          </div>
+          <DemandRequestButton
+            intent={intent}
+            stepTitles={[tf("company.c1"), tf("company.c2"), tf("company.c3")]}
+          />
         </section>
 
         {demandReadback && (
