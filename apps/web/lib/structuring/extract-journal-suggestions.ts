@@ -83,6 +83,49 @@ function pickSlug(
   return [...found];
 }
 
+/** Max skill suggestions surfaced for one entry. The matcher uses short
+ *  substring stems (e.g. "stali", "klijav") that can each touch several of a
+ *  worker's declared skills; without a cap a single short entry produced a
+ *  broad, illogical-looking skill cloud (owner mobile review). We keep the
+ *  most specifically-evidenced few and let the worker add the rest manually. */
+export const SKILL_SUGGESTION_LIMIT = 4;
+
+/** Longest needle from `table` for `slug` that is actually present in `lower`.
+ *  Longer matched stem = more specific evidence in the worker's own words. */
+function bestNeedleLength(
+  lower: string,
+  slug: string,
+  table: { slug: string; needles: string[] }[],
+): number {
+  let best = 0;
+  for (const row of table) {
+    if (row.slug !== slug) continue;
+    for (const n of row.needles) {
+      if (n && lower.includes(n) && n.length > best) best = n.length;
+    }
+  }
+  return best;
+}
+
+/**
+ * Deterministically rank skill slugs by how specifically the entry text
+ * evidences them, then cap to `limit`. Pure + order-stable (ties break
+ * alphabetically) so the same entry always yields the same short list. This is
+ * NOT new detection — it only orders + trims what `pickSlug` already matched, so
+ * a narrow entry surfaces a few relevant suggestions instead of a wide cloud.
+ */
+export function rankSkillSlugs(
+  lower: string,
+  slugs: readonly string[],
+  limit: number = SKILL_SUGGESTION_LIMIT,
+): string[] {
+  return [...slugs]
+    .map((slug) => ({ slug, score: bestNeedleLength(lower, slug, SKILL_HINTS_LT) }))
+    .sort((a, b) => b.score - a.score || a.slug.localeCompare(b.slug))
+    .slice(0, Math.max(0, limit))
+    .map((x) => x.slug);
+}
+
 function toNumber(raw: string): number | null {
   const cleaned = raw.replace(/\s+/g, "").replace(",", ".");
   const n = Number(cleaned);
@@ -490,8 +533,9 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     if (v !== null) quantity = { value: v, unitSlug: "packages" };
   }
 
-  // 3) Skills + work direction.
-  const skillSlugs = pickSlug(lower, SKILL_HINTS_LT);
+  // 3) Skills + work direction. Rank by needle specificity and cap so a short
+  //    entry never surfaces a broad, illogical skill cloud (owner mobile review).
+  const skillSlugs = rankSkillSlugs(lower, pickSlug(lower, SKILL_HINTS_LT));
   const dirs = pickSlug(lower, WORK_DIRECTION_HINTS_LT);
   const workDirectionSlug = dirs[0] ?? null;
 

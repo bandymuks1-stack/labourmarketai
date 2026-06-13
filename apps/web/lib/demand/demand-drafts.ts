@@ -29,6 +29,16 @@ export type CompanyRequestPayload = {
   capabilities?: string;
   location?: string;
   timing?: string;
+  /** Organisation's role ON THIS need — situational, not a permanent identity. */
+  projectRole?:
+    | "client"
+    | "general_contractor"
+    | "contractor"
+    | "subcontractor"
+    | "labour_supplier"
+    | "service_provider"
+    | "other"
+    | "";
   accommodation?: "yes" | "no" | "unknown" | "";
   languages?: string;
   notes?: string;
@@ -82,6 +92,7 @@ const ALLOWED_KEYS: Record<DraftType, ReadonlySet<string>> = {
     "capabilities",
     "location",
     "timing",
+    "projectRole",
     "accommodation",
     "languages",
     "notes",

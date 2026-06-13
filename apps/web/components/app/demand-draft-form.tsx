@@ -9,6 +9,7 @@ import {
   saveDemandDraftAction,
   deleteDemandDraftAction,
 } from "@/lib/demand/demand-drafts-actions";
+import { OptionCards } from "@/components/ui/OptionCards";
 
 /**
  * Generic demand draft form. One form per draft_type — the caller
@@ -32,10 +33,15 @@ export type FormField = {
   /** i18n key under the form's namespace (e.g. `field.title.label`). */
   labelKey: string;
   placeholderKey: string;
-  /** "text" (input) | "textarea" | "select" (accommodation). */
-  variant: "text" | "textarea" | "select";
-  /** For variant=select. */
+  /** "text" (input) | "textarea" | "select" | "optioncards" (radio cards for
+   *  a small finite set — replaces the clumsy mobile <select>). */
+  variant: "text" | "textarea" | "select" | "optioncards";
+  /** For variant=select / optioncards. */
   selectOptionsKey?: string;
+  /** Optional grid columns for variant=optioncards (default 2). */
+  optionColumns?: 1 | 2 | 3;
+  /** Optional i18n key for a one-line helper under an optioncards field. */
+  helpKey?: string;
 };
 
 export function DemandDraftForm({
@@ -163,6 +169,34 @@ export function DemandDraftForm({
                   disabled={isSaving || isDeleting}
                 />
               </label>
+            );
+          }
+          if (f.variant === "optioncards" && f.selectOptionsKey) {
+            const opts = selectOptions[f.selectOptionsKey] ?? [];
+            return (
+              <div key={id} className="sm:col-span-2 flex flex-col gap-1.5">
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {label}
+                </span>
+                <OptionCards
+                  name={id}
+                  ariaLabel={label}
+                  value={values[f.key as string] ?? ""}
+                  onChange={(v) => setValue(f.key as string, v)}
+                  columns={f.optionColumns ?? 2}
+                  testId={`pilot-draft-${draftType}-${String(f.key)}`}
+                  disabled={isSaving || isDeleting}
+                  options={opts.map((opt) => ({
+                    value: opt.value,
+                    label: t(opt.labelKey),
+                  }))}
+                />
+                {f.helpKey ? (
+                  <span className="text-[11px] leading-snug text-text-muted">
+                    {t(f.helpKey)}
+                  </span>
+                ) : null}
+              </div>
             );
           }
           if (f.variant === "select" && f.selectOptionsKey) {

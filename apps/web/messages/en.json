@@ -277,7 +277,7 @@
       "pilotDisclaimer": "Matching is not offered yet. Nothing becomes public automatically. You can prepare your first request calmly — it's saved right away and stays private to you.",
       "firstAction": {
         "title": "Create your first work / team request",
-        "body": "Describe the workers, team, or project help you need. It's saved as a private draft only you can see.",
+        "body": "Describe the workers, team, or project help you need. It's a private draft — not a public advert, only you can see it.",
         "emptyState": "No request yet. Describe the workers, team, or project help you need — your draft stays private to you.",
         "savedState": "Saved as a private draft. Only you can see it."
       },
@@ -298,6 +298,20 @@
           "timing": {
             "label": "Start timing",
             "placeholder": "e.g. in March, this week"
+          },
+          "projectRole": {
+            "label": "Your role on this need",
+            "placeholder": "Choose",
+            "help": "The role depends on the specific project, not on a company type.",
+            "options": {
+              "client": "Client / requester",
+              "general_contractor": "General contractor",
+              "contractor": "Contractor",
+              "subcontractor": "Subcontractor",
+              "labour_supplier": "Labour supplier",
+              "service_provider": "Service provider",
+              "other": "Other"
+            }
           },
           "accommodation": {
             "label": "Accommodation",
@@ -361,8 +375,8 @@
         }
       },
       "typeNotes": {
-        "staffing_agency": "You are in staffing-agency mode — the same company profile, only the type changed.",
-        "client_customer": "You are in client / requester mode — the same company profile, only the type changed."
+        "staffing_agency": "Staffing agency is an operating mode, not a separate world — the same company profile.",
+        "client_customer": "Client / requester is an operating mode, not a separate world — the same company profile."
       },
       "setup": {
         "formTitle": "Company profile request",
@@ -371,8 +385,8 @@
         "legalName": "Company legal name",
         "legalNameHelp": "Required. 2–200 characters.",
         "legalNamePlaceholder": "e.g. Acme Ltd",
-        "companyType": "Company type",
-        "companyTypeHelp": "One company profile for every type. Changing the type (e.g. to a staffing agency and back) keeps the same profile — only labels and visible blocks change.",
+        "companyType": "Primary activity area",
+        "companyTypeHelp": "This is just your main activity — it doesn't lock you in. You'll pick the specific role (client, contractor, subcontractor, etc.) when you create each need.",
         "companyTypeOptions": {
           "construction": "Construction company",
           "staffing_agency": "Staffing agency",

@@ -26,12 +26,17 @@ import {
   CompanyNoProfileGuide,
 } from "@/components/app/company-next-actions";
 
+// Owner sequence: what is needed → where → when → which skills → role on THIS
+// need → accommodation/language → extra notes. The project/demand role is a
+// per-need question (not a permanent company identity) and is stored in the
+// existing customer_requests.payload jsonb — no DB migration.
 const COMPANY_FIELDS = [
   { key: "title" as const, labelKey: "field.title.label", placeholderKey: "field.title.placeholder", variant: "text" as const },
-  { key: "capabilities" as const, labelKey: "field.capabilities.label", placeholderKey: "field.capabilities.placeholder", variant: "text" as const },
   { key: "location" as const, labelKey: "field.location.label", placeholderKey: "field.location.placeholder", variant: "text" as const },
   { key: "timing" as const, labelKey: "field.timing.label", placeholderKey: "field.timing.placeholder", variant: "text" as const },
-  { key: "accommodation" as const, labelKey: "field.accommodation.label", placeholderKey: "field.accommodation.placeholder", variant: "select" as const, selectOptionsKey: "accommodation" },
+  { key: "capabilities" as const, labelKey: "field.capabilities.label", placeholderKey: "field.capabilities.placeholder", variant: "text" as const },
+  { key: "projectRole" as const, labelKey: "field.projectRole.label", placeholderKey: "field.projectRole.placeholder", variant: "optioncards" as const, selectOptionsKey: "projectRole", optionColumns: 2 as const, helpKey: "field.projectRole.help" },
+  { key: "accommodation" as const, labelKey: "field.accommodation.label", placeholderKey: "field.accommodation.placeholder", variant: "optioncards" as const, selectOptionsKey: "accommodation", optionColumns: 3 as const },
   { key: "languages" as const, labelKey: "field.languages.label", placeholderKey: "field.languages.placeholder", variant: "text" as const },
   { key: "notes" as const, labelKey: "field.notes.label", placeholderKey: "field.notes.placeholder", variant: "textarea" as const },
 ];
@@ -40,6 +45,18 @@ const ACCOMMODATION_OPTIONS = [
   { value: "yes", labelKey: "field.accommodation.options.yes" },
   { value: "no", labelKey: "field.accommodation.options.no" },
   { value: "unknown", labelKey: "field.accommodation.options.unknown" },
+];
+
+// Role the organisation takes ON THIS specific need — situational, not a
+// permanent identity. Stored as payload.projectRole (free jsonb, no enum/migration).
+const PROJECT_ROLE_OPTIONS = [
+  { value: "client", labelKey: "field.projectRole.options.client" },
+  { value: "general_contractor", labelKey: "field.projectRole.options.general_contractor" },
+  { value: "contractor", labelKey: "field.projectRole.options.contractor" },
+  { value: "subcontractor", labelKey: "field.projectRole.options.subcontractor" },
+  { value: "labour_supplier", labelKey: "field.projectRole.options.labour_supplier" },
+  { value: "service_provider", labelKey: "field.projectRole.options.service_provider" },
+  { value: "other", labelKey: "field.projectRole.options.other" },
 ];
 
 export default async function CompanyDashboardPage({
@@ -524,7 +541,10 @@ export default async function CompanyDashboardPage({
           fields={COMPANY_FIELDS}
           i18nNamespace="roleDashboards.company.draftForm"
           initialDraft={existingDraft}
-          selectOptions={{ accommodation: ACCOMMODATION_OPTIONS }}
+          selectOptions={{
+            accommodation: ACCOMMODATION_OPTIONS,
+            projectRole: PROJECT_ROLE_OPTIONS,
+          }}
         />
       </section>
 

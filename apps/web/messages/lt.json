@@ -277,7 +277,7 @@
       "pilotDisclaimer": "Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite ramiai paruošti pirmą poreikį — jis iškart išsaugomas ir lieka privatus.",
       "firstAction": {
         "title": "Sukurkite pirmą darbo / komandos paklausą",
-        "body": "Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia. Tai išsaugoma kaip privatus juodraštis, matomas tik jums.",
+        "body": "Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia. Tai privatus juodraštis — ne vieša reklama, matomas tik jums.",
         "emptyState": "Užklausos dar nėra. Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia — juodraštis lieka privatus, matomas tik jums.",
         "savedState": "Išsaugota kaip privatus juodraštis. Matote tik jūs."
       },
@@ -298,6 +298,20 @@
           "timing": {
             "label": "Pradžios laikas",
             "placeholder": "Pvz., kovo mėnesį, šią savaitę"
+          },
+          "projectRole": {
+            "label": "Jūsų rolė šiame poreikyje",
+            "placeholder": "Pasirinkti",
+            "help": "Rolė priklauso nuo konkretaus projekto, ne nuo įmonės tipo.",
+            "options": {
+              "client": "Užsakovas / klientas",
+              "general_contractor": "Generalinis rangovas",
+              "contractor": "Rangovas",
+              "subcontractor": "Subrangovas",
+              "labour_supplier": "Darbuotojų tiekėjas",
+              "service_provider": "Paslaugų teikėjas",
+              "other": "Kita"
+            }
           },
           "accommodation": {
             "label": "Apgyvendinimas",
@@ -361,8 +375,8 @@
         }
       },
       "typeNotes": {
-        "staffing_agency": "Dirbate personalo agentūros režimu — tai tas pats įmonės profilis, pakeistas tik tipas.",
-        "client_customer": "Dirbate kliento / užsakovo režimu — tai tas pats įmonės profilis, pakeistas tik tipas."
+        "staffing_agency": "Personalo agentūra — tai veikimo modelis, ne atskiras pasaulis. Tas pats įmonės profilis.",
+        "client_customer": "Užsakovo režimas — tai veikimo modelis, ne atskiras pasaulis. Tas pats įmonės profilis."
       },
       "setup": {
         "formTitle": "Įmonės profilio užklausa",
@@ -371,8 +385,8 @@
         "legalName": "Įmonės teisinis pavadinimas",
         "legalNameHelp": "Privaloma. 2–200 simbolių.",
         "legalNamePlaceholder": "pvz. UAB / MB pavadinimas",
-        "companyType": "Įmonės tipas",
-        "companyTypeHelp": "Vienas įmonės profilis visiems tipams. Keičiant tipą (pvz., į personalo agentūrą ar atgal) profilis lieka tas pats — keičiasi tik pavadinimai ir matomi blokai.",
+        "companyType": "Pagrindinė veiklos sritis",
+        "companyTypeHelp": "Tai tik pagrindinė veikla — ji jūsų neužrakina. Konkrečią rolę (užsakovas, rangovas, subrangovas ir kt.) pasirinksite kurdami kiekvieną poreikį.",
         "companyTypeOptions": {
           "construction": "Statybos įmonė",
           "staffing_agency": "Personalo agentūra",
