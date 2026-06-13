@@ -12,6 +12,10 @@ import { resolve } from "node:path";
 
 const webRoot = resolve(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
+/** Strip comments so honesty checks scan real code/strings, not docstrings
+ *  that legitimately say "no AI" / "no fake match". */
+const code = (src: string) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
 
 const form = read("components/app/demand-request-button.tsx");
 const page = read("app/[locale]/dashboard/page.tsx");
@@ -36,7 +40,9 @@ describe("demand flow has a real input", () => {
 describe("empty creation is blocked", () => {
   it("create is disabled without a description (client)", () => {
     expect(form).toMatch(/descOk\s*=\s*description\.trim\(\)\.length\s*>\s*0/);
-    expect(form).toMatch(/disabled=\{state === "sending" \|\| !descOk\}/);
+    // Create is gated on the description (and, additionally, an engaged-but-
+    // invalid estimate) — match the prefix so the estimate gate can extend it.
+    expect(form).toMatch(/disabled=\{state === "sending" \|\| !descOk/);
   });
   it("the server blocks an empty need (no placeholder request)", () => {
     expect(helper).toMatch(/empty_description/);
@@ -109,7 +115,7 @@ describe("no fake AI / matching / verification language in the demand surface", 
     ["read-back", readback],
   ] as const) {
     it(`${name} makes no matched/verified/AI claim`, () => {
-      expect(src).not.toMatch(/\bmatched\b|\bverified\b|\bAI\b|\bautomatically matched\b/i);
+      expect(code(src)).not.toMatch(/\bmatched\b|\bverified\b|\bAI\b|\bautomatically matched\b/i);
     });
   }
 });

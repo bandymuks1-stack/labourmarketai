@@ -10,6 +10,17 @@ import {
   submitDemandRequestAction,
 } from "@/lib/demand/demand-request-actions";
 import type { DemandUrgency } from "@/lib/demand/demand-request";
+import { EstimateBuilder } from "@/components/app/estimate-builder";
+import { EstimateSummary } from "@/components/app/estimate-summary";
+import {
+  computeEstimate,
+  validateEstimateInputs,
+  hasMeaningfulEstimate,
+  estimateAssumptionKeys,
+  estimateMissingInfoKeys,
+  EMPTY_ESTIMATE_INPUTS,
+  type EstimateInputs,
+} from "@/lib/estimate/estimate";
 
 /**
  * Demand-request FORM → the CANONICAL demand intake (§17). A real 3-step input
@@ -44,12 +55,21 @@ export function DemandRequestButton({
   const [skills, setSkills] = useState("");
   const [urgency, setUrgency] = useState<DemandUrgency>("flexible");
   const [notes, setNotes] = useState("");
+  const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">(
     "idle",
   );
 
   const descOk = description.trim().length > 0;
+  // The estimate is OPTIONAL. It only blocks submit when the user actually
+  // engaged it AND it is invalid (negatives / impossible %). An untouched
+  // estimate never blocks and is never persisted.
+  const estimateEngaged = hasMeaningfulEstimate(estimate);
+  const estimateProblems = estimateEngaged
+    ? validateEstimateInputs(estimate, true)
+    : [];
+  const estimateOk = estimateProblems.length === 0;
 
   function goNext() {
     // Step 1 gate: a request with no description is meaningless — block it and
@@ -81,6 +101,7 @@ export function DemandRequestButton({
         skills,
         urgency,
         notes,
+        estimate: estimateEngaged ? estimate : undefined,
       });
       setState(res.ok ? "done" : "error");
     } catch {
@@ -138,6 +159,18 @@ export function DemandRequestButton({
     </dl>
   );
 
+  // The preliminary estimate summary — rendered on review + after submit when
+  // the user actually filled in a (valid) estimate. Optional: omitted otherwise.
+  const estimateSummary =
+    estimateEngaged && estimateOk ? (
+      <EstimateSummary
+        result={computeEstimate(estimate)}
+        assumptions={estimateAssumptionKeys(estimate)}
+        missingInfo={estimateMissingInfoKeys(estimate)}
+        compact
+      />
+    ) : null;
+
   if (state === "done") {
     return (
       <div className="flex flex-col gap-3" data-testid="demand-submitted-summary">
@@ -150,6 +183,7 @@ export function DemandRequestButton({
         </p>
         <p className="text-xs text-text-secondary">{t("form.submittedHeading")}</p>
         {summaryList}
+        {estimateSummary}
       </div>
     );
   }
@@ -288,6 +322,9 @@ export function DemandRequestButton({
               className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
             />
           </label>
+
+          {/* Optional preliminary Estimate Builder (deterministic, no AI). */}
+          <EstimateBuilder inputs={estimate} onChange={setEstimate} />
         </div>
       )}
 
@@ -296,6 +333,9 @@ export function DemandRequestButton({
         <div className="flex flex-col gap-3" data-testid="demand-review">
           <p className="text-sm text-text-secondary">{t("form.reviewIntro")}</p>
           {summaryList}
+          {estimateSummary && (
+            <div data-testid="demand-review-estimate">{estimateSummary}</div>
+          )}
         </div>
       )}
 
@@ -319,8 +359,9 @@ export function DemandRequestButton({
             type="button"
             size="sm"
             onClick={goNext}
-            // Step 1: disabled until a description exists — no empty creation path.
-            disabled={step === 1 && !descOk}
+            // Step 1: needs a description (no empty creation). Step 2: an engaged
+            // estimate must be valid before advancing (no impossible numbers).
+            disabled={(step === 1 && !descOk) || (step === 2 && !estimateOk)}
             className="w-full sm:w-auto sm:self-start"
             data-testid="demand-next"
           >
@@ -331,7 +372,7 @@ export function DemandRequestButton({
             type="button"
             size="sm"
             onClick={create}
-            disabled={state === "sending" || !descOk}
+            disabled={state === "sending" || !descOk || !estimateOk}
             // Mobile-first: the room's primary action is a full-width tap target
             // on phones, compact on larger screens.
             className="w-full sm:w-auto sm:self-start"

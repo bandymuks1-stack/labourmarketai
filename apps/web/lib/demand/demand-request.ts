@@ -17,6 +17,12 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import {
+  hasMeaningfulEstimate,
+  validateEstimateInputs,
+  type EstimateInputs,
+} from "@/lib/estimate/estimate";
+import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
 
 export type DemandIntent = "hire_workers" | "partner";
 
@@ -37,11 +43,21 @@ export type DemandFields = {
   urgency?: DemandUrgency;
   /** Extra notes. */
   notes?: string;
+  /** Optional preliminary estimate inputs — stored in payload.estimate when the
+   *  user filled it in. Recomputed server-side; never trusted from the client. */
+  estimate?: EstimateInputs;
 };
 
 export type DemandRequestResult =
   | { ok: true; requestId: string | null }
-  | { ok: false; code: "unauthenticated" | "save_failed" | "empty_description" };
+  | {
+      ok: false;
+      code:
+        | "unauthenticated"
+        | "save_failed"
+        | "empty_description"
+        | "invalid_estimate";
+    };
 
 const MAX_TITLE = 120;
 const MAX_TEXT = 4000;
@@ -107,6 +123,18 @@ export async function submitDemandRequest(
     urgency: fields?.urgency ?? null,
     notes: clamp(fields?.notes, MAX_TEXT) || null,
   };
+
+  // Optional preliminary estimate. Only persisted when the user actually filled
+  // it in; if engaged but invalid (negatives / impossible %), block — an invalid
+  // estimate is never stored. The result is RECOMPUTED here (deterministic), so
+  // a client cannot inject a fabricated total.
+  if (fields?.estimate && hasMeaningfulEstimate(fields.estimate)) {
+    if (validateEstimateInputs(fields.estimate, true).length > 0) {
+      return { ok: false, code: "invalid_estimate" };
+    }
+    const stored = buildEstimatePayload(fields.estimate);
+    if (stored) payload.estimate = stored;
+  }
 
   const { data, error } = await (supabase as unknown as DemandRpc).rpc(
     "submit_demand_request",

@@ -2163,6 +2163,99 @@
             "rolePlaceholder": "Pvz., 5 suvirintojų komanda, valymo paslaugos",
             "descLabel": "Aprašykite pasiūlymą",
             "descPlaceholder": "Kokius žmones ar paslaugas siūlote, kokiomis sąlygomis"
+          },
+          "estimate": {
+            "toggle": "Pridėti preliminarią sąmatą",
+            "optionalTag": "(nebūtina)",
+            "intro": "Skaidri, deterministinė sąmata pagal jūsų pačių skaičius — tai nėra įpareigojantis pasiūlymas.",
+            "preliminaryTitle": "Preliminari sąmata",
+            "sectionEntered": "Jūsų įvesti skaičiai",
+            "sectionResult": "Apskaičiuotas rezultatas",
+            "clear": "Išvalyti sąmatą",
+            "f": {
+              "template": "Darbo / projekto tipas",
+              "workType": "Aprašykite darbą",
+              "workTypePlaceholder": "pvz., betonavimas, sandėlio pamaina, valymo sutartis",
+              "unitType": "Vienetas",
+              "quantity": "Kiekis",
+              "workerCount": "Darbuotojų",
+              "hoursPerWorker": "Valandų vienam darbuotojui",
+              "totalHours": "Iš viso valandų (nebūtina, pakeičia)",
+              "rate": "Valandinis / dienos tarifas",
+              "ratePlaceholder": "pvz., 20",
+              "country": "Šalis / vieta",
+              "materials": "Medžiagos",
+              "equipment": "Įranga / įrankiai",
+              "transport": "Transportas / apgyvendinimas",
+              "overhead": "Administracinės išlaidos %",
+              "margin": "Marža %",
+              "contingency": "Rizikos rezervas %",
+              "currency": "Valiuta"
+            },
+            "units": {
+              "hours": "Valandos",
+              "days": "Dienos",
+              "square_meters": "m²",
+              "cubic_meters": "m³",
+              "units": "Vienetai",
+              "custom": "Kita"
+            },
+            "templates": {
+              "construction": "Statyba",
+              "logistics": "Logistika",
+              "cleaning": "Valymas",
+              "hospitality": "Apgyvendinimas ir maitinimas",
+              "manufacturing": "Gamyba",
+              "care": "Priežiūra",
+              "admin": "Administravimas / biuras",
+              "it_service": "IT / paslaugos",
+              "general": "Bendra"
+            },
+            "r": {
+              "labourSubtotal": "Darbo sąnaudos",
+              "materials": "Medžiagos",
+              "equipment": "Įranga",
+              "transport": "Transportas / apgyvendinimas",
+              "directCosts": "Tiesioginės sąnaudos",
+              "overhead": "Administracinės išlaidos",
+              "margin": "Marža",
+              "contingency": "Rizikos rezervas",
+              "estimatedTotal": "Preliminari suma",
+              "low": "Žema",
+              "base": "Bazinė",
+              "high": "Aukšta",
+              "range": "Sąmatos intervalas",
+              "labourHours": "Darbo valandos"
+            },
+            "assumptionsTitle": "Naudotos prielaidos",
+            "missingTitle": "Kas patikslintų skaičiavimą",
+            "disclaimer": "Tai nėra galutinis komercinis pasiūlymas. Tai preliminari sąmata.",
+            "assumptions": {
+              "preliminary": "Preliminari sąmata tik pagal jūsų įvestus skaičius.",
+              "totalHoursUsed": "Darbo sąnaudos skaičiuotos pagal bendrą valandų skaičių.",
+              "labourFromWorkersHours": "Darbas = darbuotojai × valandos × tarifas.",
+              "noOverhead": "Administracinės išlaidos nepritaikytos.",
+              "noMargin": "Marža nepritaikyta.",
+              "rangeFromContingency": "Žemos/aukštos ribos apskaičiuotos pagal rizikos rezervą."
+            },
+            "missing": {
+              "rate": "Nurodykite valandinį / dienos tarifą.",
+              "hours": "Nurodykite darbo valandas.",
+              "materials": "Pridėkite medžiagų sąmatą, jei aktualu.",
+              "contingency": "Pridėkite rizikos rezervo %, kad būtų intervalas."
+            },
+            "errors": {
+              "negative_quantity": "Kiekis negali būti neigiamas.",
+              "negative_worker_count": "Darbuotojų skaičius negali būti neigiamas.",
+              "negative_hours": "Valandos negali būti neigiamos.",
+              "negative_rate": "Tarifas negali būti neigiamas.",
+              "negative_materials": "Medžiagos negali būti neigiamos.",
+              "negative_equipment": "Įranga negali būti neigiama.",
+              "negative_transport": "Transportas negali būti neigiamas.",
+              "percent_out_of_range": "Procentai turi būti nuo 0 iki 100.",
+              "not_finite": "Įveskite teisingus skaičius.",
+              "empty_labour": "Nurodykite darbuotojus, valandas ir tarifą darbo sąmatai."
+            }
           }
         }
       },
