@@ -6,6 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { BookingStatus } from "@/lib/booking/booking-state";
+import { hasFeature } from "@/lib/billing/effective-entitlements";
 
 /**
  * Booking server actions (Stage 6) — the live wiring of the booking-state
@@ -33,6 +34,7 @@ export type BookingActionResult =
   | { kind: "needs-migration" }
   | { kind: "conflict" }
   | { kind: "not-authed" }
+  | { kind: "not-entitled" }
   | { kind: "error"; message: string };
 
 function classify(error: { code?: string; message?: string }): BookingActionResult {
@@ -62,6 +64,10 @@ export async function proposeBookingAction(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
+
+  // Entitlement enforcement (PR5). Permissive while billing is disabled (pilot
+  // preserved); enforced once test mode is active + no active Company Pilot.
+  if (!(await hasFeature("booking_requests"))) return { kind: "not-entitled" };
 
   const { error } = await asAny(supabase).rpc("propose_booking_request", {
     p_request_id: input.requestId,
