@@ -3939,7 +3939,18 @@
         "error": "Could not save. Try again.",
         "no_worker": "Create your worker profile first."
       }
-    }
+    },
+    "overall": {
+      "not_enough_information": "Not enough information yet",
+      "missing_documents": "Missing documents",
+      "needs_verification": "Ready after verification",
+      "almost_ready": "Almost ready",
+      "ready_for_country": "Ready for this country",
+      "availabilityHint": "Set your availability to complete readiness."
+    },
+    "needsLegalReview": "needs legal review",
+    "sourceLink": "source",
+    "scopeNote": "Based on official EU posted-worker sources — confirm the national specifics with the competent authority. This is information, not legal advice."
   },
   "trust": {
     "title": "Trust signals",
