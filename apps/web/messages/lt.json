@@ -4116,6 +4116,29 @@
       "pay_above_offer": "Atlygio lūkestis viršija pasiūlymą",
       "accommodation_needed_not_provided": "Reikia apgyvendinimo, nesiūloma",
       "profession_mismatch": "Kita profesija"
+    },
+    "candidate": "Kandidatas",
+    "privacy": {
+      "contactsHidden": "Kontaktai lieka paslėpti — jokio telefono, el. pašto ar vardo.",
+      "profileSafe": "Matote tik saugius profilio signalus: įgūdžių įrodymus, vietą, prieinamumą ir įkainį. Susisiekimas vyksta vėliau, atskiru žingsniu."
+    },
+    "fields": {
+      "location": "Vieta",
+      "availability": "Prieinamumas",
+      "rate": "Įkainis",
+      "evidence": "Įgūdžių įrodymai"
+    },
+    "availabilityValue": {
+      "available": "Laisvas",
+      "busy": "Užimtas",
+      "unavailable": "Neprieinamas",
+      "unknown": "Nenurodyta"
+    },
+    "rateFrom": "nuo {min} €/mėn.",
+    "noRate": "Nenurodyta",
+    "comms": {
+      "eligible": "Šis darbuotojas turi laisvą prieinamumą — žinutės atsiras vėliau, atskiru žingsniu.",
+      "blocked": "Komunikacija taps prieinama, kai darbuotojas turės laisvą prieinamumą arba datą „laisvas nuo“."
     }
   }
 }

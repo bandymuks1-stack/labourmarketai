@@ -7,9 +7,13 @@ import {
   matchWorkerToNeed,
   matchStrengthOrder,
   type MatchNeed,
-  type MatchResultV1,
 } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
+import {
+  toScoutSafeCandidate,
+  type ScoutSafeCandidate,
+  type ShortlistStatus as SafeShortlistStatus,
+} from "@/lib/scouting/scout-safe-view";
 
 /**
  * Company scouting (Full Cycle Sprint v1, Slice 3) — the demand→matching→
@@ -32,7 +36,7 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
-export type ShortlistStatus = "saved" | "interested" | "not_fit" | "reviewed";
+export type ShortlistStatus = SafeShortlistStatus;
 export const SHORTLIST_STATUSES: readonly ShortlistStatus[] = [
   "saved",
   "interested",
@@ -40,22 +44,15 @@ export const SHORTLIST_STATUSES: readonly ShortlistStatus[] = [
   "reviewed",
 ];
 
+/** Re-export the safe company-facing candidate shape (the ONLY one the UI gets). */
+export type { ScoutSafeCandidate } from "@/lib/scouting/scout-safe-view";
+
 export interface CompanyDemand {
   readonly id: string;
   readonly title: string;
   readonly status: string;
   readonly structured: boolean;
   readonly createdAt: string;
-}
-
-export interface ScoutCandidate {
-  readonly workerId: string;
-  readonly profileId: string | null;
-  readonly displayName: string | null;
-  readonly headline: string | null;
-  readonly professionSlug: string | null;
-  readonly match: MatchResultV1;
-  readonly shortlistStatus: ShortlistStatus | null;
 }
 
 function buildNeed(row: {
@@ -108,7 +105,7 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
 }
 
 export type ScoutResult =
-  | { kind: "ok"; demand: CompanyDemand; candidates: ScoutCandidate[] }
+  | { kind: "ok"; demand: CompanyDemand; candidates: ScoutSafeCandidate[] }
   | { kind: "not-found" }
   | { kind: "not-structured"; demand: CompanyDemand }
   | { kind: "needs-migration" }
@@ -165,16 +162,16 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
     // table absent (pre-apply) → no shortlist statuses yet
   }
 
-  const candidates: ScoutCandidate[] = supply
-    .map((c) => ({
-      workerId: c.workerId,
-      profileId: c.profileId,
-      displayName: c.displayName,
-      headline: c.headline,
-      professionSlug: c.professionSlug,
-      match: matchWorkerToNeed(need, c.subject),
-      shortlistStatus: shortlist.get(c.workerId) ?? null,
-    }))
+  const candidates: ScoutSafeCandidate[] = supply
+    .map((c) =>
+      toScoutSafeCandidate({
+        workerId: c.workerId,
+        professionSlug: c.professionSlug,
+        subject: c.subject,
+        match: matchWorkerToNeed(need, c.subject),
+        shortlistStatus: shortlist.get(c.workerId) ?? null,
+      }),
+    )
     // Rank by match strength, then by skill-fit coverage, then confirmed share
     // — all need-context (§19), never a global person score.
     .sort((a, b) => {
