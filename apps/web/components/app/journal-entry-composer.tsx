@@ -16,6 +16,7 @@ import {
   extractJournalSuggestions,
   type JournalFragmentSuggestion,
 } from "@/lib/structuring/extract-journal-suggestions";
+import type { SkillConfidence } from "@/lib/structuring/skill-recognition";
 import {
   createJournalEntry,
   supersedeJournalEntry,
@@ -42,6 +43,12 @@ export type JournalEngagement = {
 };
 export type JournalDirection = { slug: string; name: string };
 export type JournalSkill = { slug: string; name: string };
+/** A worker skill matched to the entry, carrying why it was suggested and how
+ *  strong the evidence is (Recognition v1). */
+export type ComposerSkillSuggestion = JournalSkill & {
+  matchedText: string;
+  confidence: SkillConfidence;
+};
 
 const UNIT_OPTIONS = [
   "hours",
@@ -129,7 +136,9 @@ export function JournalEntryComposer({
   const [skillStatuses, setSkillStatuses] = useState<
     Record<string, SuggestionStatus>
   >({});
-  const [skillSuggestions, setSkillSuggestions] = useState<JournalSkill[]>([]);
+  const [skillSuggestions, setSkillSuggestions] = useState<
+    ComposerSkillSuggestion[]
+  >([]);
   // Multi-fragment review state — populated when the parser splits the text
   // into more than one work fragment (the owner sentence yields 3).
   const [fragments, setFragments] = useState<FragmentReviewState[]>([]);
@@ -186,9 +195,16 @@ export function JournalEntryComposer({
     );
     setSiteStatus("pending");
     setSiteName(s.siteName ?? "");
-    const matchedSkills = s.skillSlugs
-      .map((slug) => workerSkillBySlug.get(slug))
-      .filter((row): row is JournalSkill => !!row);
+    // Layer E narrowing: keep only skills the worker has actually declared
+    // (no broad cloud), carrying the match reason + confidence for each.
+    const matchedSkills: ComposerSkillSuggestion[] = s.skillSuggestions
+      .map((m) => {
+        const row = workerSkillBySlug.get(m.slug);
+        return row
+          ? { ...row, matchedText: m.matchedText, confidence: m.confidence }
+          : null;
+      })
+      .filter((row): row is ComposerSkillSuggestion => !!row);
     setSkillSuggestions(matchedSkills);
     setSkillStatuses(
       Object.fromEntries(matchedSkills.map((row) => [row.slug, "pending"])),
@@ -899,11 +915,20 @@ export function JournalEntryComposer({
               <DetectedSuggestionCard
                 key={row.slug}
                 label={row.name}
-                hint={t("strengthensHint")}
+                // Reason: WHY this skill was suggested (the word we found).
+                hint={t("reasonFound", { word: row.matchedText })}
                 status={skillStatuses[row.slug] ?? "pending"}
                 onConfirm={() => setSkillStatus(row.slug, "confirmed")}
                 onDiscard={() => setSkillStatus(row.slug, "discarded")}
               >
+                {row.confidence === "low" && (
+                  <span
+                    className="text-[10px] text-text-muted"
+                    data-testid="skill-suggestion-weak"
+                  >
+                    {t("reasonWeak")}
+                  </span>
+                )}
                 <SuggestionProvenanceLabel />
               </DetectedSuggestionCard>
             ))}

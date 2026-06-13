@@ -3,6 +3,11 @@ import {
   WORK_DIRECTION_HINTS_LT,
   ACTIVITY_HINTS_LT,
 } from "./keywords";
+import {
+  recognizeSkills,
+  RECOGNITION_LIMIT,
+  type RecognizedSkill,
+} from "./skill-recognition";
 
 /**
  * RULE-BASED suggestion extractor for a free-text work journal entry. This is
@@ -16,8 +21,12 @@ export type JournalSuggestions = {
   time: { value: number; unitSlug: "hours" | "days" | "minutes" } | null;
   /** Detected quantity + unit (e.g. 35 m²). */
   quantity: { value: number; unitSlug: string } | null;
-  /** Canonical skill slugs the parser thinks were mentioned. */
+  /** Canonical skill slugs the parser thinks were mentioned (capped). */
   skillSlugs: string[];
+  /** Rich, evidence-ordered skill suggestions (slug + confidence + reason).
+   *  Superset of `skillSlugs` — the composer renders these so each suggestion
+   *  can show WHY it appeared and how strong the match is. */
+  skillSuggestions: RecognizedSkill[];
   /** Canonical work direction slug (a profession slug). */
   workDirectionSlug: string | null;
   /** Site / location mention if the worker named one (e.g. "objektas Vilniuje"). */
@@ -59,6 +68,7 @@ const EMPTY: JournalSuggestions = {
   time: null,
   quantity: null,
   skillSlugs: [],
+  skillSuggestions: [],
   workDirectionSlug: null,
   siteName: null,
   institutionName: null,
@@ -533,9 +543,12 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     if (v !== null) quantity = { value: v, unitSlug: "packages" };
   }
 
-  // 3) Skills + work direction. Rank by needle specificity and cap so a short
-  //    entry never surfaces a broad, illogical skill cloud (owner mobile review).
-  const skillSlugs = rankSkillSlugs(lower, pickSlug(lower, SKILL_HINTS_LT));
+  // 3) Skills + work direction. Tiered recognition (exact > synonym > fuzzy)
+  //    on folded text — LT without diacritics, RU, EN; capped + ordered so a
+  //    short entry never surfaces a broad, illogical skill cloud, and each
+  //    suggestion carries a reason + confidence (Recognition v1).
+  const skillSuggestions = recognizeSkills(text, RECOGNITION_LIMIT);
+  const skillSlugs = skillSuggestions.map((m) => m.slug);
   const dirs = pickSlug(lower, WORK_DIRECTION_HINTS_LT);
   const workDirectionSlug = dirs[0] ?? null;
 
@@ -585,6 +598,7 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     time,
     quantity,
     skillSlugs,
+    skillSuggestions,
     workDirectionSlug,
     siteName,
     institutionName,
