@@ -1412,7 +1412,13 @@ describe("no migration files added by this sprint", () => {
     //  - 20260613100200_worker_document_verification (additive verification axis
     //    unverified/pending/verified/rejected — verified is admin-RPC-only +
     //    FI support). All additive + reversible (supabase/rollbacks/*).
-    const SPRINT_BASELINE = 79;
+    // Bumped 79 -> 80 for the Stripe test-mode sprint PR2 — one additive RED
+    // migration 20260613200000_billing_test_mode_records: three test-mode
+    // billing tables (billing_customers / billing_subscriptions /
+    // payment_webhook_events) with owner/admin SELECT RLS, server-only writes
+    // (service_role), idempotent webhook events, NO money amount stored. Legacy
+    // `subscriptions` (0 rows) left untouched. Additive + reversible.
+    const SPRINT_BASELINE = 80;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
