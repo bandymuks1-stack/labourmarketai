@@ -150,6 +150,39 @@
         "title": "Digital skills demand is rising",
         "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Estonia."
       }
+    },
+    "PL": {
+      "intro": "Poland — a priority market. Source-backed signals for workers and employers.",
+      "shortages": {
+        "title": "Shortages in building trades, drivers and skilled manufacturing",
+        "summary": "EURES reporting places Poland's shortage occupations in building and related trades, heavy-vehicle drivers and transport, and skilled manufacturing and welding — alongside the EU-wide gaps in healthcare and IT."
+      },
+      "digital-skills": {
+        "title": "Digital skills demand is rising",
+        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Poland."
+      }
+    },
+    "DE": {
+      "intro": "Germany — a priority market. Source-backed signals for workers and employers.",
+      "shortages": {
+        "title": "Broad shortages across care, trades, IT and engineering",
+        "summary": "EURES reporting places Germany among the EU's broadest shortage profiles — health and care occupations, skilled construction, electrical and mechatronics trades, IT and engineering."
+      },
+      "digital-skills": {
+        "title": "Digital skills demand is rising",
+        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Germany."
+      }
+    },
+    "NL": {
+      "intro": "Netherlands — a priority market. Source-backed signals for workers and employers.",
+      "shortages": {
+        "title": "A tight market with technical, care and IT shortages",
+        "summary": "EURES reporting places the Netherlands among the EU's tightest labour markets, with shortages in technical and engineering trades, health and care, education and IT."
+      },
+      "digital-skills": {
+        "title": "Digital skills demand is rising",
+        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in the Netherlands."
+      }
     }
   }
 }
