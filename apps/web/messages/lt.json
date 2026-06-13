@@ -4157,6 +4157,19 @@
       "opened": "Pokalbis pradėtas — laukiama darbuotojo atsakymo.",
       "view": "Atverti pokalbį",
       "error": "Pokalbio atverti nepavyko. Bandykite dar kartą."
+    },
+    "how": {
+      "title": "Kaip veikia atitikimas",
+      "intro": "Atitikimas yra deterministinis ir skirtas būtent šiam poreikiui — jokio DI, jokio bendro balo, jokių išgalvotų kandidatų. Kiekvienas darbuotojas rodomas tik kaip anonimizuota, saugi profilio peržiūra.",
+      "legend": {
+        "strong": "Stiprus atitikimas — patvirtinti įrodymai apima didžiąją dalį poreikio.",
+        "possible": "Galimas atitikimas — dalinė atitiktis; peržiūrėkite spragas po kiekvienu kandidatu.",
+        "weak": "Silpnas atitikimas — mažai sutapimo su šiuo poreikiu.",
+        "insufficient_data": "Nepakanka duomenų — poreikis arba darbuotojas dar neturi struktūruotų įgūdžių."
+      },
+      "evidence": "Įrodymų lygiai, nuo stipriausio: vadovo patvirtinta, tada darbų žurnalas, tada paties nurodyta. Skaičiai tikri — 0 reiškia 0.",
+      "contacts": "Darbuotojų kontaktai lieka paslėpti. Susisiekiate programėlėje ir tik kai darbuotojas turi laisvą prieinamumą.",
+      "next": "Toliau: įtraukite patikusius darbuotojus į sąrašą ir paprašykite susisiekti, kai jie bus laisvi."
     }
   }
 }
