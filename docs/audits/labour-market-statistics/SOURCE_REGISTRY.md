@@ -22,6 +22,11 @@ marker — see `app/[locale]/(marketing)/page.tsx`).
 | 4 | **Eurofound** | Labour shortages, skills mismatch, job-quality indices | EU | https://www.eurofound.europa.eu/ |
 | 5 | **OECD — Employment & Skills Outlook** | Employment outlook, skills outlook, skills-for-jobs database | OECD members | https://www.oecd.org/employment/ |
 | 6 | **National statistics offices** | Authoritative country-level figures for country pages | Per country (e.g. LT: https://osp.stat.gov.lt, EE: https://www.stat.ee, LV: https://stat.gov.lv) | per office |
+| 7 | **European Commission** (Eurobarometer · DG Employment) | EU survey instruments (Eurobarometer SME skills) + the Annual Report on Intra-EU Labour Mobility | EU / EEA | https://employment-social-affairs.ec.europa.eu/ |
+
+> Source #7 (European Commission) was added in **Step 2** so the SME skills-shortage
+> Eurobarometer and the Intra-EU Labour Mobility report can be cited with precise,
+> properly-attributed figures. ILO + OECD remain registered for future cards.
 
 > National-office figures (row 6) are the **preferred source for a single
 > country page**; EU-level sources (rows 1–5) are preferred for cross-country

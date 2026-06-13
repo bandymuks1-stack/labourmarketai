@@ -239,18 +239,22 @@ function expand(plan: Record<string, number>): string[] {
   return out;
 }
 
+// Whole-labour-market sample roles (Step 2): spread across sectors so the
+// public preview never reads as construction-only. Construction trades remain
+// as a normal minority among logistics, care, hospitality, retail, IT,
+// manufacturing, cleaning and customer service.
 const ROLES = [
-  "Steel fixer", "Welder", "Formwork carpenter", "Concreter",
-  "Scaffolder", "Electrician", "Plumber", "HVAC fitter",
-  "Site supervisor", "General labour", "Crane operator", "Excavator operator",
+  "Warehouse operative", "Delivery driver", "Care assistant", "Chef de partie",
+  "Retail associate", "Electrician", "CNC machinist", "Cleaner",
+  "IT support technician", "Welder", "Customer service agent", "Site supervisor",
 ] as const;
 const PROJ = [
-  { lt: "Renovacijos darbai", en: "Renovation works" },
-  { lt: "Gyvenamasis kvartalas", en: "Residential quarter" },
+  { lt: "Sandėlio operacijos", en: "Warehouse operations" },
+  { lt: "Viešbučio atidarymas", en: "Hotel opening" },
   { lt: "Logistikos centras", en: "Logistics centre" },
-  { lt: "Tilto rekonstrukcija", en: "Bridge reconstruction" },
-  { lt: "Pramonės pastatas", en: "Industrial facility" },
-  { lt: "Mokyklos statyba", en: "School build" },
+  { lt: "Slaugos namų pamaina", en: "Care-home staffing" },
+  { lt: "Mažmeninės prekybos tinklas", en: "Retail rollout" },
+  { lt: "Gamyklos linija", en: "Factory line" },
 ] as const;
 
 function mapPlaceholderSet(): Placeholder[] {
@@ -394,10 +398,10 @@ export const placeholders: readonly Placeholder[] = [
     id: "workers.featured.1",
     type: "person",
     value: {
-      lt: "Lukas van der Berg — Armatūrininkų brigadininkas",
-      en: "Lukas van der Berg — Steel-fixing Foreman",
+      lt: "Lukas van der Berg — Sandėlio komandos vadovas",
+      en: "Lukas van der Berg — Warehouse Team Lead",
     },
-    description: "PlayerCard showcase — gold-tier worker profile (NL).",
+    description: "PlayerCard showcase — gold-tier worker profile (NL, logistics).",
     replacementSource:
       "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
     status: "placeholder",
@@ -406,7 +410,7 @@ export const placeholders: readonly Placeholder[] = [
     notes: "consented:false — sample persona; photo is a placeholder.",
     card: {
       name: { lt: "Lukas van der Berg", en: "Lukas van der Berg" },
-      role: { lt: "Armatūrininkų brigadininkas", en: "Steel-fixing Foreman" },
+      role: { lt: "Sandėlio komandos vadovas", en: "Warehouse Team Lead" },
       country: "NL",
       flag: "🇳🇱",
       ovr: 92,
@@ -420,17 +424,17 @@ export const placeholders: readonly Placeholder[] = [
         },
       },
       stats: { SKL: 95, REL: 94, SPD: 88, SAF: 96, ADP: 87, TRS: 93 },
-      skills: ["Steel fixing", "Formwork", "Safety+"],
+      skills: ["Forklift operation", "Inventory control", "Safety+"],
     },
   },
   {
     id: "workers.featured.2",
     type: "person",
     value: {
-      lt: "Stefan Bauer — Statybvietės vadovas",
-      en: "Stefan Bauer — Site Manager",
+      lt: "Stefan Bauer — Slaugos koordinatorius",
+      en: "Stefan Bauer — Care Coordinator",
     },
-    description: "PlayerCard showcase — silver-tier worker profile (DE).",
+    description: "PlayerCard showcase — silver-tier worker profile (DE, care/health).",
     replacementSource:
       "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
     status: "placeholder",
@@ -439,7 +443,7 @@ export const placeholders: readonly Placeholder[] = [
     notes: "consented:false — sample persona; photo is a placeholder.",
     card: {
       name: { lt: "Stefan Bauer", en: "Stefan Bauer" },
-      role: { lt: "Statybvietės vadovas", en: "Site Manager" },
+      role: { lt: "Slaugos koordinatorius", en: "Care Coordinator" },
       country: "DE",
       flag: "🇩🇪",
       ovr: 87,
@@ -453,17 +457,17 @@ export const placeholders: readonly Placeholder[] = [
         },
       },
       stats: { SKL: 84, REL: 95, SPD: 80, SAF: 90, ADP: 83, TRS: 94 },
-      skills: ["Site management", "Planning", "Safety+"],
+      skills: ["Elderly care", "Scheduling", "First aid"],
     },
   },
   {
     id: "workers.featured.3",
     type: "person",
     value: {
-      lt: "Mantas Petrauskas — Elektrikas",
-      en: "Mantas Petrauskas — Electrician",
+      lt: "Mantas Petrauskas — Virėjas",
+      en: "Mantas Petrauskas — Chef de partie",
     },
-    description: "PlayerCard showcase — bronze-tier worker profile (LT).",
+    description: "PlayerCard showcase — bronze-tier worker profile (LT, hospitality).",
     replacementSource:
       "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
     status: "placeholder",
@@ -472,7 +476,7 @@ export const placeholders: readonly Placeholder[] = [
     notes: "consented:false — sample persona; photo is a placeholder.",
     card: {
       name: { lt: "Mantas Petrauskas", en: "Mantas Petrauskas" },
-      role: { lt: "Elektrikas", en: "Electrician" },
+      role: { lt: "Virėjas", en: "Chef de partie" },
       country: "LT",
       flag: "🇱🇹",
       ovr: 79,
@@ -486,7 +490,7 @@ export const placeholders: readonly Placeholder[] = [
         },
       },
       stats: { SKL: 80, REL: 78, SPD: 79, SAF: 81, ADP: 77, TRS: 80 },
-      skills: ["Electrical install", "Industrial electric", "Safety"],
+      skills: ["Cooking", "Food safety", "Teamwork"],
     },
   },
   {
@@ -624,11 +628,11 @@ export const placeholders: readonly Placeholder[] = [
     [
       ["join", "Naujas darbuotojas prisijungė – Vilnius", "New worker joined — Vilnius"],
       ["demand", "Naujas darbo poreikis – Roterdamas", "New job demand — Rotterdam"],
-      ["match", "Atitikimas: suvirintojas → projektas", "Match: welder → project"],
+      ["match", "Atitikimas: slaugytojas → pamaina", "Match: care assistant → shift"],
       ["checkin", "Darbuotojas pažymėjo atvykimą – Amsterdamas", "Worker checked in — Amsterdam"],
-      ["join", "Agentūra įtraukė 4 montuotojus", "Agency added 4 fitters"],
+      ["join", "Agentūra įtraukė 4 vairuotojus", "Agency added 4 drivers"],
       ["demand", "Naujas darbo poreikis – Kopenhaga", "New job demand — Copenhagen"],
-      ["match", "Atitikimas: betonuotojas → projektas", "Match: concreter → project"],
+      ["match", "Atitikimas: sandėlininkas → pamaina", "Match: warehouse operative → shift"],
       ["checkin", "Pamaina pradėta – Hamburgas", "Shift started — Hamburg"],
       ["join", "Darbuotojas patvirtino prieinamumą", "Worker confirmed availability"],
       ["demand", "Komanda suformuota projektui – Oslas", "Team formed for a project — Oslo"],
@@ -651,13 +655,13 @@ export const placeholders: readonly Placeholder[] = [
   ...Array.from({ length: 12 }, (_, i): Placeholder => {
     const n = i + 1;
     const samples: Record<number, { lt: string; en: string }> = {
-      1: { lt: "Naujas poreikis · Roterdamas · 6 montuotojų", en: "New demand · Rotterdam · 6 fitters" },
+      1: { lt: "Naujas poreikis · Roterdamas · 6 sandėlio darbuotojų", en: "New demand · Rotterdam · 6 warehouse staff" },
       2: { lt: "Atitikimas patvirtintas · Amsterdamas", en: "Match confirmed · Amsterdam" },
       3: { lt: "Agentūra prisijungė · Vilnius", en: "Agency joined · Vilnius" },
       4: { lt: "Pamaina pradėta · Hamburgas", en: "Shift started · Hamburg" },
       5: { lt: "12 darbuotojų laisvi · Kopenhaga", en: "12 workers available · Copenhagen" },
       6: { lt: "Naujas projektas · Oslas", en: "New project · Oslo" },
-      7: { lt: "Suvirintojų paklausa +18% · Šiaurės Europa", en: "Welder demand +18% · Northern Europe" },
+      7: { lt: "Slaugytojų paklausa +18% · Šiaurės Europa", en: "Care-worker demand +18% · Northern Europe" },
       8: { lt: "Komanda suformuota · Roterdamas", en: "Team formed · Rotterdam" },
       9: { lt: "Atvykimas pažymėtas · Amsterdamas", en: "Check-in logged · Amsterdam" },
       10: { lt: "Naujas poreikis · Berlynas · 4 elektrikai", en: "New demand · Berlin · 4 electricians" },
@@ -760,8 +764,8 @@ export const placeholders: readonly Placeholder[] = [
     id: "team.onsite.roles",
     type: "metric",
     value: {
-      lt: "8 montuotojai · 6 betonuotojai · 5 suvirintojai · 5 pagalbiniai",
-      en: "8 fitters · 6 concreters · 5 welders · 5 helpers",
+      lt: "8 sandėlininkai · 6 vairuotojai · 5 slaugytojai · 5 pagalbiniai",
+      en: "8 warehouse · 6 drivers · 5 carers · 5 helpers",
     },
     description: "Second-row 'Team on site' card — role breakdown summary.",
     replacementSource:
@@ -778,8 +782,8 @@ export const placeholders: readonly Placeholder[] = [
         en: "Contractor: “Tomorrow's shift starts 6:30” · 4 min ago",
       },
       2: {
-        lt: "Agentūra: „Patvirtinti dar 3 suvirintojai“ · prieš 1 val",
-        en: "Agency: “3 more welders confirmed” · 1 h ago",
+        lt: "Agentūra: „Patvirtinti dar 3 vairuotojai“ · prieš 1 val",
+        en: "Agency: “3 more drivers confirmed” · 1 h ago",
       },
       3: {
         lt: "Darbuotojas: „Atvykstu pirmadienį“ · prieš 2 val",
@@ -866,8 +870,8 @@ export const placeholders: readonly Placeholder[] = [
     id: "market.top_skills",
     type: "metric",
     value: {
-      lt: "Armatūros rišimas · Klojiniai · MIG/MAG suvirinimas · Pastoliai · ŠVOK",
-      en: "Steel fixing · Formwork · MIG/MAG welding · Scaffolding · HVAC",
+      lt: "Slauga · Programavimas · Sandėlio operacijos · Maisto gaminimas · Vairavimas C/CE",
+      en: "Nursing & care · Software development · Warehouse ops · Cooking · Truck driving",
     },
     description: "Market-intelligence band — top in-demand skills list.",
     replacementSource: SQL(
@@ -936,12 +940,12 @@ export const placeholders: readonly Placeholder[] = [
     consentRequired: false,
     demand: {
       project: {
-        lt: "Renovacijos darbai – Roterdamas",
-        en: "Renovation works – Rotterdam",
+        lt: "Sandėlio operacijos – Roterdamas",
+        en: "Warehouse operations – Rotterdam",
       },
       location: { lt: "Roterdamas, NL", en: "Rotterdam, NL" },
       headcount: 8,
-      skills: ["Steel fixing", "Formwork", "Welding", "Safety+"],
+      skills: ["Forklift operation", "Inventory control", "Order picking", "Safety+"],
       intensity: "HOT",
       rankedMatches: 47,
     },
@@ -963,10 +967,10 @@ export const placeholders: readonly Placeholder[] = [
     pool: {
       poolSize: 86,
       breakdown: [
-        { trade: "Steel", count: 22 },
-        { trade: "Concrete", count: 18 },
-        { trade: "Welding", count: 15 },
-        { trade: "Electrical", count: 17 },
+        { trade: "Logistics", count: 22 },
+        { trade: "Care", count: 18 },
+        { trade: "Hospitality", count: 15 },
+        { trade: "Retail", count: 17 },
         { trade: "General", count: 14 },
       ],
       status: { active: 31, pending: 9, available: 46 },
@@ -1005,16 +1009,16 @@ export const placeholders: readonly Placeholder[] = [
   },
   ...(
     [
-      { id: "draft.onDeck.1", name: "Andrius K.", country: "LT", flag: "🇱🇹", role: { lt: "Armatūrininkas", en: "Steel fixer" }, ovr: 88, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
-      { id: "draft.onDeck.2", name: "Lukas H.",  country: "DE", flag: "🇩🇪", role: { lt: "Suvirintojas",  en: "Welder" },      ovr: 92, tier: "gold" as PlayerTier,   status: "reviewing" as DraftStatus },
-      { id: "draft.onDeck.3", name: "Emil J.",   country: "DK", flag: "🇩🇰", role: { lt: "Betonuotojas",  en: "Concreter" },   ovr: 79, tier: "bronze" as PlayerTier, status: "reviewing" as DraftStatus },
-      { id: "draft.onDeck.4", name: "Jonas P.",  country: "LV", flag: "🇱🇻", role: { lt: "Elektrikas",    en: "Electrician" }, ovr: 84, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.1", name: "Andrius K.", country: "LT", flag: "🇱🇹", role: { lt: "Sandėlininkas", en: "Warehouse operative" }, ovr: 88, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.2", name: "Lukas H.",  country: "DE", flag: "🇩🇪", role: { lt: "CNC operatorius",  en: "CNC machinist" },      ovr: 92, tier: "gold" as PlayerTier,   status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.3", name: "Emil J.",   country: "DK", flag: "🇩🇰", role: { lt: "Virėjas",  en: "Chef de partie" },   ovr: 79, tier: "bronze" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.4", name: "Jonas P.",  country: "LV", flag: "🇱🇻", role: { lt: "Pardavėjas konsultantas",    en: "Sales assistant" }, ovr: 84, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
       { id: "draft.live.1",   name: "Pieter V.", country: "NL", flag: "🇳🇱", role: { lt: "Statybvietės vadovas", en: "Site Supervisor" }, ovr: 91, tier: "gold" as PlayerTier,   status: "deciding" as DraftStatus },
-      { id: "draft.live.2",   name: "Mateusz S.",country: "PL", flag: "🇵🇱", role: { lt: "Santechnikas",  en: "Plumber" },     ovr: 82, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
-      { id: "draft.live.3",   name: "Erik N.",   country: "SE", flag: "🇸🇪", role: { lt: "Klojinių dailidė", en: "Formwork carpenter" }, ovr: 86, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
+      { id: "draft.live.2",   name: "Mateusz S.",country: "PL", flag: "🇵🇱", role: { lt: "Slaugytojas",  en: "Care assistant" },     ovr: 82, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
+      { id: "draft.live.3",   name: "Erik N.",   country: "SE", flag: "🇸🇪", role: { lt: "Valymo vadovas", en: "Cleaning supervisor" }, ovr: 86, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
       { id: "draft.drafted.1",name: "Henrik O.", country: "NO", flag: "🇳🇴", role: { lt: "Krano operatorius", en: "Crane operator" }, ovr: 90, tier: "gold" as PlayerTier,   status: "hired" as DraftStatus },
-      { id: "draft.drafted.2",name: "Jaak R.",   country: "EE", flag: "🇪🇪", role: { lt: "ŠVOK montuotojas", en: "HVAC fitter" }, ovr: 81, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
-      { id: "draft.drafted.3",name: "Marek W.",  country: "PL", flag: "🇵🇱", role: { lt: "Pastolininkas",  en: "Scaffolder" }, ovr: 77, tier: "bronze" as PlayerTier, status: "hired" as DraftStatus },
+      { id: "draft.drafted.2",name: "Jaak R.",   country: "EE", flag: "🇪🇪", role: { lt: "IT specialistas", en: "IT support technician" }, ovr: 81, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
+      { id: "draft.drafted.3",name: "Marek W.",  country: "PL", flag: "🇵🇱", role: { lt: "Vairuotojas",  en: "Delivery driver" }, ovr: 77, tier: "bronze" as PlayerTier, status: "hired" as DraftStatus },
       { id: "draft.drafted.4",name: "Tomas K.",  country: "LT", flag: "🇱🇹", role: { lt: "Saugos specialistas", en: "Safety officer" }, ovr: 89, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
     ] as const
   ).map(
@@ -1087,14 +1091,14 @@ export const placeholders: readonly Placeholder[] = [
     marketPanel: {
       kind: "skills_top",
       rows: [
-        { name: { lt: "Armatūros rišimas",     en: "Steel fixing" },           trend: "up",   score: 94 },
-        { name: { lt: "Klojinių dailidė",      en: "Concrete formwork" },      trend: "up",   score: 89 },
-        { name: { lt: "Elektros instaliacija", en: "Electrical installation" },trend: "up",   score: 86 },
-        { name: { lt: "Suvirinimas",           en: "Welding" },                trend: "flat", score: 83 },
-        { name: { lt: "Pastoliai",             en: "Scaffolding" },            trend: "up",   score: 79 },
-        { name: { lt: "ŠVOK",                  en: "HVAC" },                   trend: "down", score: 76 },
-        { name: { lt: "Santechnika",           en: "Plumbing" },               trend: "flat", score: 72 },
-        { name: { lt: "Statybos priežiūra",    en: "Site supervision" },       trend: "up",   score: 70 },
+        { name: { lt: "Slauga ir priežiūra",   en: "Nursing & care" },         trend: "up",   score: 94 },
+        { name: { lt: "Programavimas",         en: "Software development" },    trend: "up",   score: 89 },
+        { name: { lt: "Sandėlio operacijos",   en: "Warehouse operations" },   trend: "up",   score: 86 },
+        { name: { lt: "Maisto gaminimas",      en: "Cooking" },                trend: "flat", score: 83 },
+        { name: { lt: "Elektros instaliacija", en: "Electrical installation" },trend: "up",   score: 79 },
+        { name: { lt: "Vairavimas C/CE",       en: "Truck driving" },          trend: "up",   score: 76 },
+        { name: { lt: "Klientų aptarnavimas",  en: "Customer service" },       trend: "flat", score: 72 },
+        { name: { lt: "CNC apdirbimas",        en: "CNC machining" },          trend: "up",   score: 70 },
       ],
     },
   },
@@ -1138,14 +1142,14 @@ export const placeholders: readonly Placeholder[] = [
     marketPanel: {
       kind: "recent_matches",
       rows: [
-        { initials: "AK", project: { lt: "Roterdamas · Armatūrininkas", en: "Rotterdam · Steel fixer" },     minutesAgo: 2 },
-        { initials: "LH", project: { lt: "Berlynas · Suvirintojas",     en: "Berlin · Welder" },             minutesAgo: 5 },
-        { initials: "EJ", project: { lt: "Kopenhaga · Betonuotojas",    en: "Copenhagen · Concreter" },      minutesAgo: 9 },
+        { initials: "AK", project: { lt: "Roterdamas · Sandėlininkas",  en: "Rotterdam · Warehouse operative" }, minutesAgo: 2 },
+        { initials: "LH", project: { lt: "Berlynas · CNC operatorius",  en: "Berlin · CNC machinist" },      minutesAgo: 5 },
+        { initials: "EJ", project: { lt: "Kopenhaga · Virėjas",         en: "Copenhagen · Chef" },           minutesAgo: 9 },
         { initials: "PV", project: { lt: "Amsterdamas · Vadovas",       en: "Amsterdam · Supervisor" },      minutesAgo: 14 },
-        { initials: "MS", project: { lt: "Varšuva · Santechnikas",      en: "Warsaw · Plumber" },            minutesAgo: 21 },
-        { initials: "EN", project: { lt: "Stokholmas · Dailidė",        en: "Stockholm · Carpenter" },       minutesAgo: 33 },
-        { initials: "HO", project: { lt: "Oslas · Krano operatorius",   en: "Oslo · Crane operator" },       minutesAgo: 48 },
-        { initials: "JR", project: { lt: "Talinas · ŠVOK",              en: "Tallinn · HVAC" },              minutesAgo: 72 },
+        { initials: "MS", project: { lt: "Varšuva · Slaugytojas",       en: "Warsaw · Care assistant" },     minutesAgo: 21 },
+        { initials: "EN", project: { lt: "Stokholmas · Valytojas",      en: "Stockholm · Cleaner" },         minutesAgo: 33 },
+        { initials: "HO", project: { lt: "Oslas · Vairuotojas",         en: "Oslo · Delivery driver" },      minutesAgo: 48 },
+        { initials: "JR", project: { lt: "Talinas · IT specialistas",   en: "Tallinn · IT support" },        minutesAgo: 72 },
       ],
     },
   },

@@ -2,8 +2,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Placeholder } from "@/components/ui/Placeholder";
-import { Sparkline } from "@/components/ui/Sparkline";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { PreviewChip } from "@/components/app/preview-chip";
 import { LiveClock } from "@/components/app/live-clock";
@@ -16,14 +14,6 @@ import { MarketPulse } from "@/components/marketing/market-pulse";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { LabourMarketEvidence } from "@/components/marketing/labour-market-evidence";
 
-// Deterministic sample series — governed as market.*.series placeholders
-// (the caption under each carries the visible PLACEHOLDER marker).
-const SPARK = {
-  demand: [4, 6, 5, 8, 7, 11, 10, 14, 13, 17],
-  workers: [9, 8, 10, 9, 12, 11, 13, 12, 14, 15],
-  competition: [6, 7, 6, 9, 8, 7, 9, 8, 10, 9],
-};
-
 export default async function LandingPage({
   params,
 }: {
@@ -32,7 +22,6 @@ export default async function LandingPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("hero");
-  const mk = await getTranslations("market");
   const tj = await getTranslations("journey");
   const tlm = await getTranslations("labourMarket");
   const audienceKeys = [
@@ -51,10 +40,6 @@ export default async function LandingPage({
     ["p3Title", "p3Body"],
     ["p4Title", "p4Body"],
   ] as const;
-  // Honest sample-data label, reused from the market counters (exists in every
-  // locale): "Pre-alpha preview — sample signals, not real platform figures."
-  const lv = await getTranslations("live.counters");
-
   // Landing↔app journey band — the same stage rail the user meets inside the
   // cockpit after signup (visual continuity). Honest product explanation of the
   // real flow; no fake metrics, no fake matching (DEMO_TO_REAL_DATA_POLICY).
@@ -279,38 +264,18 @@ export default async function LandingPage({
        * the void usage in the JSX comment block below.
        */}
 
-      {/* ── Market intelligence ──────────────────────────────────────── */}
-      <section className="mt-16">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
-          {mk("label")}
-        </p>
-        {/* Honesty: this section shows sample signals, not real platform
-            figures. Label it in production too (markers are env-gated). */}
-        <p className="mt-1 text-xs text-text-muted">{lv("previewNote")}</p>
-        <div className="mt-4 grid gap-5 lg:grid-cols-4">
-          {(["demand", "workers", "competition"] as const).map((k) => (
-            <Card key={k}>
-              <p className="text-sm text-text-secondary">{mk(k)}</p>
-              <div className="mt-3">
-                <Sparkline points={SPARK[k]} className="h-10 w-full" />
-              </div>
-              <p className="mt-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
-                <Placeholder id={`market.${k}.series`} />
-              </p>
-            </Card>
-          ))}
-          <Card>
-            <p className="text-sm text-text-secondary">{mk("topSkills")}</p>
-            <p className="mt-3 text-sm leading-relaxed text-text-primary">
-              <Placeholder id="market.top_skills" />
-            </p>
-            {/* Dead CTA removed: "View full insights" linked to "#" (no
-                destination). No fake CTA on the primary flow. The `market.cta`
-                i18n key is kept for a future restore when a real insights page
-                exists. */}
-          </Card>
-        </div>
-      </section>
+      {/*
+       * Step 2 (evidence hardening): the sample "Market intelligence"
+       * sparkline cards (demand / workers / competition + a top-skills
+       * placeholder) were REMOVED. They were illustrative sample series,
+       * and on a now source-backed page they read as fake trendlines —
+       * exactly what the evidence-hardening pass forbids. The real,
+       * fully-sourced `<LabourMarketEvidence />` module above supersedes
+       * them. The `market.*` i18n keys are kept in messages/*.json so a
+       * future restore (with REAL, provenanced series) is a one-file
+       * change. No-fake-charts is enforced by
+       * lib/guards/public-no-fake-claims.test.ts.
+       */}
 
       {/*
        * Premium-impression cleanup v1: the placeholder testimonial

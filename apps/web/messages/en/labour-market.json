@@ -10,7 +10,6 @@
   "aEmployers": "Employers",
   "aAgencies": "Agencies & recruiters",
   "aClients": "Clients & project owners",
-
   "pillarsEyebrow": "Why it matters now",
   "pillarsTitle": "Your future depends on what the market can actually see",
   "p1Title": "Don't let your skills stay invisible",
@@ -21,14 +20,12 @@
   "p3Body": "The skills employers need keep shifting. A profile that grows with your work keeps you visible as the market moves.",
   "p4Title": "Employers shouldn't guess from a weak CV",
   "p4Body": "Companies and agencies describe a real need and compare people by evidence, availability, language and country — not a one-page guess.",
-
   "workerPathTitle": "Start your living work profile",
   "workerPathBody": "Describe your skills, add a Work Journal entry, and see which skills your own words support. Grow it into a CV and player card over time.",
   "workerPathCta": "Start your profile",
   "employerPathTitle": "Describe a real need — stop guessing",
   "employerPathBody": "Tell us the work you need done and compare candidates by declared skills, evidence level, availability, language and country before you reach out.",
   "employerPathCta": "For companies & agencies",
-
   "evidenceEyebrow": "Grounded in real labour-market evidence",
   "evidenceTitle": "The market is changing faster than a CV",
   "evidenceSubcopy": "Public statistics from official EU sources on why visible skills, proof and mobility matter. Every card links to its source with a figure date and region.",
@@ -39,5 +36,65 @@
   "claimTrend": "Trend",
   "claimForecast": "Forecast",
   "claimShortage": "Shortage signal",
-  "claimSkills": "Skills signal"
+  "claimSkills": "Skills signal",
+  "illustrativeSample": "Illustrative sample — concept data, not live platform figures yet.",
+  "evidenceDisclaimer": "Each claim links to its official public source with the figure date and region. Figures are transcribed from published reports (last verified on the date shown on each card), not a live data feed — always verify against the linked source for the authoritative, latest number.",
+  "sourceLabel": {
+    "eurostat": "Eurostat source",
+    "eures": "EURES / European Labour Authority source",
+    "cedefop": "Cedefop source",
+    "eurofound": "Eurofound source",
+    "oecd": "OECD source",
+    "ilo": "ILO source",
+    "ec": "European Commission source"
+  },
+  "evidence": {
+    "employment-participation": {
+      "title": "Employment is at a record high — competition for skills is tight",
+      "summary": "Eurostat reports the EU employment rate for people aged 20–64 reached 75.8% in 2024 — the highest since the series began in 2009 (and rising above 76% in 2025). A tight market makes visible, evidenced skills more valuable, not less.",
+      "figureDate": "2024 annual",
+      "region": "EU",
+      "unit": "% employed (age 20–64), 2024",
+      "methodNote": "Eurostat Labour Force Survey, EU employment rate age 20–64, 2024 annual (published Apr 2025); highest since the 2009 series start."
+    },
+    "shortage-occupations": {
+      "title": "Shortages span the whole labour market",
+      "summary": "The EURES / European Labour Authority report on labour shortages & surpluses lists long-standing shortages in healthcare, construction and hospitality, plus highly-skilled gaps in engineering and IT, and — in the 2024 edition — transport and storage (drivers, mobile-plant operators). The gap is economy-wide, not one sector.",
+      "figureDate": "2024 report (published Jun 2025)",
+      "region": "EU / EEA + Norway, Iceland, Switzerland",
+      "methodNote": "EURES Report on labour shortages and surpluses 2024; shortage occupations are listed per country at the source."
+    },
+    "skills-mismatch": {
+      "title": "Almost half of employers can't find the right skills",
+      "summary": "A European Commission Eurobarometer survey found 46% of EU SMEs found it difficult or very difficult to find staff with the right skills over the past two years — rising to about 70% among SMEs that actually hired. It is a matching problem, not only a supply problem.",
+      "figureDate": "2024 Eurobarometer (SME skills)",
+      "region": "EU",
+      "unit": "% of SMEs (≈70% of those hiring)",
+      "methodNote": "European Commission Eurobarometer on SMEs and skill shortages, 2024: 46% of SMEs found it (very) difficult to find rightly-skilled staff in the prior 24 months; ~70% among SMEs that hired."
+    },
+    "digital-skills-demand": {
+      "title": "The skills jobs need are shifting to digital",
+      "summary": "Cedefop's analysis points to nearly 9 in 10 jobs requiring digital skills, while only about 55.6% of EU adults have at least basic digital skills. The skills profile of many jobs is changing faster than a static CV can show.",
+      "figureDate": "Cedefop Skills Forecast / digital-skills analysis (2024)",
+      "region": "EU",
+      "unit": "% of EU adults with basic digital skills",
+      "methodNote": "Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 jobs will require digital skills; ~55.6% of EU adults have at least basic digital skills."
+    },
+    "demographic-pressure": {
+      "title": "The working-age population is shrinking",
+      "summary": "Eurostat population projections show 22 of the 27 EU countries are expected to see their working-age (20–64) population decline by 2050, with the old-age dependency ratio rising substantially. Retaining, re-skilling and matching workers to need becomes structurally more important.",
+      "figureDate": "Eurostat population projections (2024 base)",
+      "region": "EU",
+      "unit": "EU countries with working-age decline by 2050",
+      "methodNote": "Eurostat population projections / 'Old-age dependency growing across EU regions' (Oct 2025): 22 of 27 EU countries projected to see working-age (20–64) population decline by 2050."
+    },
+    "labour-mobility": {
+      "title": "Cross-border mobility helps balance shortages",
+      "summary": "The European Commission's Annual Report on Intra-EU Labour Mobility shows about 10.1 million EU citizens of working age work in another member state and roughly 1.83 million are cross-border workers — and movers' employment rate (78%) exceeds nationals' (76%). Relevant for a Baltic & Northern European market where people work across borders.",
+      "figureDate": "2024 edition (published Feb 2025)",
+      "region": "EU / EEA",
+      "unit": "cross-border workers (10.1M work abroad)",
+      "methodNote": "EC Annual Report on Intra-EU Labour Mobility 2024 (data 2022–2023): ~10.1M working-age EU citizens work abroad; ~1.83M cross-border workers; movers' employment rate 78% vs 76% for nationals."
+    }
+  }
 }

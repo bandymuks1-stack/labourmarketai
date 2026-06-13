@@ -1,25 +1,27 @@
 /**
- * Labour-market EVIDENCE layer (Step 1 — Whole Labour Market public reset).
+ * Labour-market EVIDENCE layer (Step 2 — hardened; localization fix).
  *
  * The typed, app-usable evidence behind the public "labour-market evidence"
- * module. Each item is a SOURCED statement about the EU labour market that
- * grounds the product's framing (skills visibility, shortages, future skills,
- * demographics, mismatch, mobility) — never a platform metric, never invented.
+ * module. Each item is a SOURCED statement about the EU labour market.
  *
- * HONESTY (binding, doctrine §7):
- *   - Every item carries full provenance: source, figure/publication date,
- *     region, last-checked date, claim type.
- *   - Items are written as QUALITATIVE sourced statements (durable, true of the
- *     cited source's reporting) rather than precise contested numbers we cannot
- *     verify live. Where an approximate magnitude is given, `value`/`unit` are
- *     set and `methodNote` flags it.
- *   - `lastChecked` is the date this layer was COMPILED from the cited source's
- *     published reporting. It is NOT a live fetch. Re-verify against `sourceUrl`
- *     before any external/marketing use (see EVIDENCE_DISCLAIMER).
+ * LOCALIZATION (binding): user-facing prose (title, summary, figureDate, region,
+ * unit, methodNote) lives in messages/{locale}/labour-market.json under the
+ * `evidence.<id>.*` keys, so LT/RU/EN users only ever see their own language.
+ * THIS module keeps only locale-neutral PROVENANCE: id, sourceId, sourceUrl,
+ * claimType, value (numeric), lastChecked. The component renders localized text
+ * by id; it never prints an English literal from here.
  *
- * Adding an item is a one-row change here; the provenance guard
- * (lib/guards/labour-market-evidence-provenance.test.ts) fails the build if any
- * required field is missing or the source id is unknown.
+ * HONESTY (doctrine §7): every item carries full provenance, the source URL is
+ * the real authoritative page, and `value` (a number) always has a localized
+ * `methodNote` (enforced by the i18n-content guard). `lastChecked` is the date
+ * the claim was verified against the source.
+ *
+ * Guards:
+ *   - lib/guards/labour-market-evidence-provenance.test.ts — data-level
+ *     provenance (known source, https url, ISO lastChecked, unique ids).
+ *   - lib/guards/labour-market-evidence-i18n.test.ts — every active locale has
+ *     localized content for every id, a methodNote where a value exists, and no
+ *     English leakage on LT/RU.
  *
  * Pure data + types. No IO.
  */
@@ -32,146 +34,115 @@ export type ClaimType =
   | "shortage_signal"
   | "skills_signal";
 
+/** Locale-neutral provenance for one evidence item. All user-facing prose is in
+ *  i18n under `evidence.<id>.*` — NEVER here. */
 export interface EvidenceItem {
   readonly id: string;
-  /** Short headline of the sourced claim. */
-  readonly title: string;
-  /** One- to two-sentence sourced statement. */
-  readonly summary: string;
-  /** Geography the claim covers (e.g. "EU", "EU / EEA"). */
-  readonly region: string;
-  /** Sector the claim is about, or all sectors. */
-  readonly sector: string | "all_sectors";
   /** Source id — must exist in ./sources. */
   readonly sourceId: SourceId;
-  /** Reference period / publication the claim describes (e.g. "2024 annual"). */
-  readonly figureDate: string;
-  /** Date this item was compiled/checked against the source (ISO). */
-  readonly lastChecked: string;
+  /** Exact report / news page for THIS figure. Must be https. The REAL,
+   *  authoritative source URL — never localized, never changed for display. */
+  readonly sourceUrl: string;
   readonly claimType: ClaimType;
-  /** Optional approximate magnitude (with `unit`). Flagged in `methodNote`. */
+  /** Optional precise magnitude — kept locale-neutral (digits + ASCII). The
+   *  unit + caveat live in the localized `evidence.<id>.unit` / `.methodNote`. */
   readonly value?: string;
-  readonly unit?: string;
-  /** Honesty note about precision / derivation. */
-  readonly methodNote?: string;
+  /** Date this item was verified against the source (ISO). */
+  readonly lastChecked: string;
 }
 
-/** Compilation date for this evidence set (NOT a live fetch — see disclaimer). */
-const COMPILED = "2026-06-13";
+/** Date this evidence set was re-verified against the live sources. */
+const VERIFIED = "2026-06-13";
 
 /**
- * Public evidence set. Qualitative, sourced, EU-focused (matches the product's
- * Baltic & Northern Europe + EU framing). Construction appears only as ONE
- * example among shortage sectors — never the whole story.
+ * Public evidence set — re-verified against live official sources (2026-06-13).
+ * Provenance only; prose is localized. Construction appears only as ONE example
+ * among shortage sectors (see the localized `shortage-occupations` summary).
  */
 export const LABOUR_MARKET_EVIDENCE: readonly EvidenceItem[] = [
   {
     id: "employment-participation",
-    title: "Employment is at a record high — and so is competition for skills",
-    summary:
-      "Eurostat's Labour Force Survey reports the EU employment rate for people aged 20–64 at a record level of roughly three-quarters of the working-age population. A tight labour market makes visible, evidenced skills more valuable, not less.",
-    region: "EU",
-    sector: "all_sectors",
     sourceId: "eurostat",
-    figureDate: "2024 annual",
-    lastChecked: COMPILED,
+    sourceUrl:
+      "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20250415-1",
     claimType: "statistic",
-    value: "~75",
-    unit: "% (age 20–64)",
-    methodNote:
-      "Approximate magnitude from Eurostat LFS headline reporting; re-verify the exact latest figure at the source before external use.",
+    value: "75.8",
+    lastChecked: VERIFIED,
   },
   {
     id: "shortage-occupations",
-    title: "Shortages span the whole labour market",
-    summary:
-      "The EURES labour shortages & surpluses report consistently identifies widespread shortages across health and care, ICT, engineering, construction, hospitality, and transport/driving — evidence that the gap is economy-wide, not one sector.",
-    region: "EU / EEA",
-    sector: "all_sectors",
     sourceId: "eures",
-    figureDate: "2023–2024 report cycle",
-    lastChecked: COMPILED,
+    sourceUrl:
+      "https://www.ela.europa.eu/en/publications/labour-shortages-and-surpluses-europe-2024",
     claimType: "shortage_signal",
-    methodNote:
-      "Qualitative summary of recurring shortage occupations in the EURES report; see source for the current occupation list per country.",
-  },
-  {
-    id: "future-skills",
-    title: "The skills employers need are shifting",
-    summary:
-      "Cedefop's Skills Forecast and Skills-OVATE point to rising demand for digital and higher-level skills across occupations, with the skills profile of many jobs changing faster than a static CV can show.",
-    region: "EU",
-    sector: "all_sectors",
-    sourceId: "cedefop",
-    figureDate: "Skills Forecast (latest cycle)",
-    lastChecked: COMPILED,
-    claimType: "forecast",
-    methodNote:
-      "Qualitative synthesis of Cedefop forecast themes; figures vary by occupation and country at the source.",
-  },
-  {
-    id: "demographic-pressure",
-    title: "A shrinking working-age population",
-    summary:
-      "Eurostat demographic data shows the EU's working-age population declining and the old-age dependency ratio rising — structural pressure that makes retaining, re-skilling, and matching workers to need increasingly important.",
-    region: "EU",
-    sector: "all_sectors",
-    sourceId: "eurostat",
-    figureDate: "2024 demographic statistics",
-    lastChecked: COMPILED,
-    claimType: "trend",
-    methodNote:
-      "Directional demographic trend reported by Eurostat; exact ratios available at the source.",
+    lastChecked: VERIFIED,
   },
   {
     id: "skills-mismatch",
-    title: "Many vacancies are hard to fill",
-    summary:
-      "Eurofound and Cedefop document persistent skills mismatch and hard-to-fill vacancies, with a significant share of employers reporting difficulty finding workers with the right skills — a matching problem, not only a supply problem.",
-    region: "EU",
-    sector: "all_sectors",
-    sourceId: "eurofound",
-    figureDate: "Eurofound labour-market change (recent reporting)",
-    lastChecked: COMPILED,
+    sourceId: "ec",
+    sourceUrl:
+      "https://single-market-economy.ec.europa.eu/news/eurobarometer-smes-and-skill-shortages-2024-03-14_en",
     claimType: "skills_signal",
-    methodNote:
-      "Qualitative summary; specific mismatch indicators are published at the source.",
+    value: "46",
+    lastChecked: VERIFIED,
+  },
+  {
+    id: "digital-skills-demand",
+    sourceId: "cedefop",
+    sourceUrl: "https://www.cedefop.europa.eu/en/publications/4218",
+    claimType: "forecast",
+    value: "55.6",
+    lastChecked: VERIFIED,
+  },
+  {
+    id: "demographic-pressure",
+    sourceId: "eurostat",
+    sourceUrl:
+      "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20251001-2",
+    claimType: "forecast",
+    value: "22 / 27",
+    lastChecked: VERIFIED,
   },
   {
     id: "labour-mobility",
-    title: "Cross-border mobility helps balance shortages",
-    summary:
-      "EURES / European Labour Authority reporting shows intra-EU labour mobility and cross-border work remain important for matching workers to shortage regions — relevant for a Baltic & Northern European market where people work across borders.",
-    region: "EU / EEA",
-    sector: "all_sectors",
-    sourceId: "eures",
-    figureDate: "EURES mobility reporting (recent)",
-    lastChecked: COMPILED,
-    claimType: "trend",
-    methodNote:
-      "Qualitative summary of EURES mobility themes; country-level flows available at the source.",
+    sourceId: "ec",
+    sourceUrl:
+      "https://employment-social-affairs.ec.europa.eu/annual-report-intra-eu-labour-mobility-2024_en",
+    claimType: "statistic",
+    value: "1.83M",
+    lastChecked: VERIFIED,
   },
 ];
 
-/** Shown in the UI so the provenance is honest about freshness + precision. */
-export const EVIDENCE_DISCLAIMER =
-  "Each claim links to an official public source with its figure date and region. Figures are compiled from published reporting, not a live data feed — verify against the linked source before relying on them.";
+/** Ids that publish a numeric `value` — the i18n guard requires a localized
+ *  `methodNote` for each of these in every active locale. */
+export const EVIDENCE_IDS_WITH_VALUE: readonly string[] =
+  LABOUR_MARKET_EVIDENCE.filter((e) => e.value !== undefined).map((e) => e.id);
 
-/** Required provenance fields every public evidence item must carry. */
+/** All evidence ids (order = display order). */
+export const EVIDENCE_IDS: readonly string[] = LABOUR_MARKET_EVIDENCE.map(
+  (e) => e.id,
+);
+
+/** Required locale-neutral provenance fields every item must carry. */
 export const REQUIRED_EVIDENCE_FIELDS = [
   "id",
-  "title",
-  "summary",
-  "region",
-  "sector",
   "sourceId",
-  "figureDate",
-  "lastChecked",
+  "sourceUrl",
   "claimType",
+  "lastChecked",
 ] as const;
 
-/** Pure validator (also used by the provenance guard test). Returns the list of
- *  problems; empty array means every item is fully sourced. */
+/** Localized prose keys each item MUST have in every active locale's catalog. */
+export const REQUIRED_EVIDENCE_I18N_FIELDS = [
+  "title",
+  "summary",
+  "figureDate",
+  "region",
+] as const;
+
+/** Pure data-level provenance validator (no i18n). Returns the list of
+ *  problems; empty array means every item is fully provenanced. */
 export function findEvidenceProvenanceProblems(
   items: readonly EvidenceItem[] = LABOUR_MARKET_EVIDENCE,
 ): string[] {
@@ -188,8 +159,16 @@ export function findEvidenceProvenanceProblems(
     if (!isKnownSource(item.sourceId)) {
       problems.push(`${where}: unknown sourceId "${item.sourceId}"`);
     }
-    if (item.value !== undefined && !item.methodNote) {
-      problems.push(`${where}: numeric value without a methodNote`);
+    if (typeof item.sourceUrl === "string" && !/^https:\/\//.test(item.sourceUrl)) {
+      problems.push(`${where}: sourceUrl is not https`);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(item.lastChecked)) {
+      problems.push(`${where}: lastChecked is not an ISO date`);
+    }
+    // A value must stay locale-neutral (digits + ASCII punctuation only) so no
+    // English prose hides inside it.
+    if (item.value !== undefined && !/^[\d.,/\sMBKkm%+–-]+$/.test(item.value)) {
+      problems.push(`${where}: value "${item.value}" is not locale-neutral`);
     }
     if (seen.has(item.id)) problems.push(`${where}: duplicate id`);
     seen.add(item.id);

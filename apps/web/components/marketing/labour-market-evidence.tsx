@@ -2,17 +2,22 @@ import { getTranslations } from "next-intl/server";
 import { Card } from "@/components/ui/Card";
 import {
   LABOUR_MARKET_EVIDENCE,
-  EVIDENCE_DISCLAIMER,
   type ClaimType,
 } from "@/lib/labour-market/evidence";
 import { getSource } from "@/lib/labour-market/sources";
 
 /**
- * Public labour-market EVIDENCE module (Step 1). Renders sourced, qualitative
- * evidence cards that ground the product in real public statistics. Every card
- * shows its full provenance (source · figure date · region · last checked) and
- * links to the official source. Content comes from the typed evidence layer —
- * the provenance guard forbids an un-sourced card. No platform metrics here.
+ * Public labour-market EVIDENCE module. Renders sourced evidence cards that
+ * ground the product in real public statistics. Every card shows its full
+ * provenance (source · figure date · region · last checked) and links to the
+ * official source.
+ *
+ * LOCALIZATION: all user-facing prose (title, summary, figure date, region,
+ * unit, method note, source label, disclaimer) is read from the `labourMarket`
+ * i18n catalog by evidence id, so LT/RU/EN users only see their own language.
+ * Only the locale-neutral provenance (numeric value, ISO last-checked date, the
+ * real source URL) comes from the typed data. No English literals are printed
+ * here; the real source href is never localized.
  */
 const CLAIM_BADGE: Record<ClaimType, string> = {
   statistic: "claimStatistic",
@@ -48,57 +53,54 @@ export async function LabourMarketEvidence() {
                   {t(CLAIM_BADGE[e.claimType])}
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                  {e.region}
+                  {t(`evidence.${e.id}.region`)}
                 </span>
               </div>
 
               <h3 className="font-display text-lg font-semibold leading-snug text-text-primary">
-                {e.title}
+                {t(`evidence.${e.id}.title`)}
               </h3>
               {e.value && (
                 <p className="font-display text-2xl font-bold text-text-primary">
                   {e.value}
-                  {e.unit ? (
-                    <span className="ml-1 text-sm font-normal text-text-secondary">
-                      {e.unit}
-                    </span>
-                  ) : null}
+                  <span className="ml-1 text-sm font-normal text-text-secondary">
+                    {t(`evidence.${e.id}.unit`)}
+                  </span>
                 </p>
               )}
               <p className="text-sm leading-relaxed text-text-secondary">
-                {e.summary}
+                {t(`evidence.${e.id}.summary`)}
               </p>
 
-              {/* Provenance — always visible, never optional. */}
+              {/* Provenance — always visible, never optional. Labels + values
+                  localized; only the date + the real source href are neutral. */}
               <dl className="mt-auto grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-ink-600 pt-3 text-[11px] text-text-muted">
                 <dt className="font-mono uppercase tracking-label">{t("fieldSource")}</dt>
                 <dd>
                   <a
-                    href={source.url}
+                    href={e.sourceUrl || source.url}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                     className="text-brand-blue hover:text-brand-cyan"
                   >
-                    {source.name}
+                    {t(`sourceLabel.${e.sourceId}`)}
                   </a>
                 </dd>
                 <dt className="font-mono uppercase tracking-label">{t("fieldFigureDate")}</dt>
-                <dd>{e.figureDate}</dd>
+                <dd>{t(`evidence.${e.id}.figureDate`)}</dd>
                 <dt className="font-mono uppercase tracking-label">{t("fieldLastChecked")}</dt>
                 <dd>{e.lastChecked}</dd>
               </dl>
-              {e.methodNote && (
-                <p className="text-[10px] leading-relaxed text-text-muted">
-                  {e.methodNote}
-                </p>
-              )}
+              <p className="text-[10px] leading-relaxed text-text-muted">
+                {t(`evidence.${e.id}.methodNote`)}
+              </p>
             </Card>
           );
         })}
       </div>
 
       <p className="mt-5 max-w-3xl text-[11px] leading-relaxed text-text-muted">
-        {EVIDENCE_DISCLAIMER}
+        {t("evidenceDisclaimer")}
       </p>
     </section>
   );

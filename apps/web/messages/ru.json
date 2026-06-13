@@ -210,7 +210,7 @@
       "locationLabel": "Место или адрес (необязательно)",
       "locationPlaceholder": "напр., Вильнюс",
       "clientLabel": "Заказчик (необязательно)",
-      "clientPlaceholder": "напр., Statyba Ltd",
+      "clientPlaceholder": "напр., Nordic Logistics",
       "journalLinkingDisabled": "Привязка журнала ещё не включена.",
       "submit": "Создать",
       "success": "Контекст проекта создан.",
@@ -995,7 +995,7 @@
       "field": {
         "roleTitle": {
           "label": "Название роли *",
-          "placeholder": "Напр., прораб на строительном объекте"
+          "placeholder": "Напр., руководитель склада"
         },
         "projectTitle": {
           "label": "Название проекта (необязательно)",

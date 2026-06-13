@@ -210,7 +210,7 @@
       "locationLabel": "Location or address (optional)",
       "locationPlaceholder": "e.g. Vilnius",
       "clientLabel": "Client (optional)",
-      "clientPlaceholder": "e.g. Statyba Ltd",
+      "clientPlaceholder": "e.g. Nordic Logistics",
       "journalLinkingDisabled": "Journal linking is not enabled yet.",
       "submit": "Create",
       "success": "Project context created.",
@@ -995,7 +995,7 @@
       "field": {
         "roleTitle": {
           "label": "Role title *",
-          "placeholder": "E.g., Construction site foreman"
+          "placeholder": "E.g., Warehouse team lead"
         },
         "projectTitle": {
           "label": "Project title (optional)",
