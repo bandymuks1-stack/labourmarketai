@@ -3844,7 +3844,8 @@
     "journalSupportedLabel": "Journal-supported",
     "journalSupportedHint": "Skills your work-journal entries back up — stronger than self-declared, awaiting manager confirmation.",
     "latestEvidenceLabel": "Latest proof",
-    "latestEvidenceEmpty": "No proof entries yet — your first journal entry will be the first."
+    "latestEvidenceEmpty": "No proof entries yet — your first journal entry will be the first.",
+    "availabilityFrom": "Available from {date}"
   },
   "skillClarify": {
     "title": "My skills",

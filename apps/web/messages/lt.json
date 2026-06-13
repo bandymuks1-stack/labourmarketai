@@ -3844,7 +3844,8 @@
     "journalSupportedLabel": "Pagrįsta žurnalu",
     "journalSupportedHint": "Įgūdžiai, kuriuos paremia tavo darbo žurnalo įrašai — stipriau nei savideklaruoti, laukia vadovo patvirtinimo.",
     "latestEvidenceLabel": "Naujausias įrodymas",
-    "latestEvidenceEmpty": "Įrodymų dar nėra — pirmas žurnalo įrašas bus pirmasis."
+    "latestEvidenceEmpty": "Įrodymų dar nėra — pirmas žurnalo įrašas bus pirmasis.",
+    "availabilityFrom": "Laisvas nuo {date}"
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",

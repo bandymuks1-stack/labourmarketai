@@ -44,6 +44,9 @@ export interface PlayerCardLabels {
   professionName: string | null;
   /** Resolved availability label, or null when not saved yet. */
   availabilityLabel: string | null;
+  /** "Available from {date}" with a locale-formatted date, or null when no
+   *  available-from date is set. Real `workers.available_from` only. */
+  availabilityFrom: string | null;
   verifiedTitle: string;
   verifiedEmpty: string;
   journalSupportedLabel: string;
@@ -158,6 +161,14 @@ export function WorkerPlayerCard({
               <span className="live-dot" aria-hidden />
             ) : null}
             {labels.availabilityLabel}
+          </span>
+        ) : null}
+        {labels.availabilityFrom ? (
+          <span
+            className="inline-flex min-h-7 items-center rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-[11px] text-text-secondary"
+            data-testid="player-card-available-from"
+          >
+            {labels.availabilityFrom}
           </span>
         ) : null}
         <span
