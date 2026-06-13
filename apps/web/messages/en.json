@@ -1109,7 +1109,8 @@
       "companyVerification": "Company verification",
       "matching": "Matching workbench",
       "market": "Market situation",
-      "league": "Country league"
+      "league": "Country league",
+      "readiness": "Readiness center"
     },
     "drafts": {
       "title": "Operations drafts",
@@ -4268,6 +4269,43 @@
       "declined": "You declined",
       "conflict": "You already have an accepted booking for these dates.",
       "error": "Something went wrong."
+    }
+  },
+  "adminReadiness": {
+    "eyebrow": "PAYMENT READINESS",
+    "title": "Readiness center",
+    "intro": "The blockers to switching payments on, in one place. Read-mostly; verify/reject documents with an audit trail.",
+    "on": "On",
+    "off": "Off",
+    "tiles": {
+      "countryReview": "Country rules to review",
+      "pendingDocs": "Docs pending verification",
+      "docsAttention": "Docs needing attention",
+      "companies": "Companies to check",
+      "payments": "Payments"
+    },
+    "docQueue": {
+      "title": "Document verification queue",
+      "unavailable": "The verification field is not enabled yet (migration pending).",
+      "empty": "No documents are waiting for verification.",
+      "verify": "Verify",
+      "reject": "Reject",
+      "done": "Saved",
+      "error": "Something went wrong."
+    },
+    "countryReview": {
+      "title": "Country rules needing review",
+      "help": "Requirements not yet legally confirmed — shown openly rather than hidden. Confirm against the official source.",
+      "source": "source"
+    },
+    "bookings": {
+      "title": "Booking activity",
+      "unavailable": "Booking is not enabled yet (migration pending).",
+      "empty": "No bookings yet."
+    },
+    "payment": {
+      "title": "Payment readiness",
+      "body": "Payments are not enabled. {count} paid plans are described but not chargeable. A separate Stripe sprint clears the blocker list before any money moves."
     }
   }
 }

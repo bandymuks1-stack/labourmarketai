@@ -1109,7 +1109,8 @@
       "companyVerification": "Įmonių patvirtinimas",
       "matching": "Matching darbastalis",
       "market": "Rinkos situacija",
-      "league": "Šalies lyga"
+      "league": "Šalies lyga",
+      "readiness": "Pasiruošimo centras"
     },
     "drafts": {
       "title": "Operaciniai juodraščiai",
@@ -4268,6 +4269,43 @@
       "declined": "Atmetei",
       "conflict": "Tu jau turi priimtą rezervaciją šioms datoms.",
       "error": "Kažkas nepavyko."
+    }
+  },
+  "adminReadiness": {
+    "eyebrow": "MOKĖJIMŲ PASIRUOŠIMAS",
+    "title": "Pasiruošimo centras",
+    "intro": "Kliūtys iki mokėjimų įjungimo vienoje vietoje. Daugiausia skaitymui; dokumentus patvirtink/atmesk su audito seka.",
+    "on": "Įjungta",
+    "off": "Išjungta",
+    "tiles": {
+      "countryReview": "Šalių taisyklės peržiūrai",
+      "pendingDocs": "Dokumentai laukia patvirtinimo",
+      "docsAttention": "Dokumentai reikalauja dėmesio",
+      "companies": "Įmonės patikrai",
+      "payments": "Mokėjimai"
+    },
+    "docQueue": {
+      "title": "Dokumentų patvirtinimo eilė",
+      "unavailable": "Patvirtinimo laukas dar neįjungtas (laukiama migracijos).",
+      "empty": "Nė vienas dokumentas nelaukia patvirtinimo.",
+      "verify": "Patvirtinti",
+      "reject": "Atmesti",
+      "done": "Išsaugota",
+      "error": "Kažkas nepavyko."
+    },
+    "countryReview": {
+      "title": "Šalių taisyklės, kurias reikia peržiūrėti",
+      "help": "Reikalavimai, dar teisiškai nepatvirtinti — rodomi atvirai, o ne slepiami. Pasitikrink oficialiame šaltinyje.",
+      "source": "šaltinis"
+    },
+    "bookings": {
+      "title": "Rezervacijų aktyvumas",
+      "unavailable": "Rezervacija dar neįjungta (laukiama migracijos).",
+      "empty": "Rezervacijų dar nėra."
+    },
+    "payment": {
+      "title": "Mokėjimų pasiruošimas",
+      "body": "Mokėjimai neįjungti. {count} mokami planai aprašyti, bet neapmokestinami. Atskiras Stripe sprintas išsprendžia kliūčių sąrašą prieš bet kokius pinigus."
     }
   }
 }
