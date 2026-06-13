@@ -4116,6 +4116,29 @@
       "pay_above_offer": "Pay expectation above offer",
       "accommodation_needed_not_provided": "Needs accommodation, not provided",
       "profession_mismatch": "Different profession"
+    },
+    "candidate": "Candidate",
+    "privacy": {
+      "contactsHidden": "Contacts stay hidden — no phone, email, or name.",
+      "profileSafe": "You see only profile-safe signals: skill evidence, location, availability and rate. Reaching out happens later, through an explicit step."
+    },
+    "fields": {
+      "location": "Location",
+      "availability": "Availability",
+      "rate": "Rate",
+      "evidence": "Skill evidence"
+    },
+    "availabilityValue": {
+      "available": "Available",
+      "busy": "Busy",
+      "unavailable": "Unavailable",
+      "unknown": "Not stated"
+    },
+    "rateFrom": "from €{min}/mo",
+    "noRate": "Not stated",
+    "comms": {
+      "eligible": "This worker has open availability — messaging opens in a later step.",
+      "blocked": "Communication becomes available when the worker has open availability or an available-from date."
     }
   }
 }
