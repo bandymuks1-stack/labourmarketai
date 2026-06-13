@@ -4,6 +4,7 @@ import { PricingTable } from "@/components/marketing/pricing-table";
 import { ServiceOffers } from "@/components/marketing/service-offers";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
 import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
+import { BillingStatusBanner } from "@/components/marketing/billing-status-banner";
 
 // getPlans() reads the live `plans` table; keep this page request-time so
 // the build never needs Supabase. It degrades gracefully if unreachable.
@@ -30,6 +31,7 @@ export default async function PricingPage({
         ctaLabel={t("planCta")}
         ctaSource="pricing_hero"
       />
+      <BillingStatusBanner />
       <PricingTable />
       <PrePaymentPlanBoundary />
       <BillingTestCheckout />
