@@ -96,5 +96,60 @@
       "unit": "cross-border workers (10.1M work abroad)",
       "methodNote": "EC Annual Report on Intra-EU Labour Mobility 2024 (data 2022–2023): ~10.1M working-age EU citizens work abroad; ~1.83M cross-border workers; movers' employment rate 78% vs 76% for nationals."
     }
+  },
+  "countryNames": {
+    "LT": "Lithuania",
+    "LV": "Latvia",
+    "EE": "Estonia",
+    "PL": "Poland",
+    "DE": "Germany",
+    "NL": "Netherlands",
+    "DK": "Denmark",
+    "NO": "Norway",
+    "SE": "Sweden",
+    "FI": "Finland"
+  },
+  "countryIndexEyebrow": "Labour markets by country",
+  "countryIndexTitle": "Source-backed evidence for the markets we serve",
+  "countryIndexSubcopy": "Baltic & Northern European labour markets. Live pages start with the Baltic core; each figure links to its official source.",
+  "countryComingSoon": "Coming soon",
+  "countryView": "View",
+  "countryBackToIndex": "All countries",
+  "countryWorkerFraming": "For workers: visible, evidenced skills and mobility matter more where demand is tight.",
+  "countryEmployerFraming": "For employers: describe the real need and compare people by evidence — not a weak CV.",
+  "countryEvidence": {
+    "LT": {
+      "intro": "Lithuania — the home market. Source-backed signals for workers and employers.",
+      "shortages": {
+        "title": "Shortages concentrated in trades and operators",
+        "summary": "EURES reporting places Lithuania's shortage occupations in stationary plant & machine operators, building and related trades, and food-processing, woodworking and craft trades — alongside the EU-wide gaps in healthcare, IT and transport."
+      },
+      "digital-skills": {
+        "title": "Digital skills demand is rising",
+        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Lithuania."
+      }
+    },
+    "LV": {
+      "intro": "Latvia — source-backed signals for workers and employers.",
+      "surplus": {
+        "title": "A more surplus-leaning market",
+        "summary": "In the EURES 2024 reporting Latvia stands out among the Baltics with notable worker surpluses in several occupations — a different dynamic from Lithuania and Estonia."
+      },
+      "digital-skills": {
+        "title": "Digital skills demand is rising",
+        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Latvia."
+      }
+    },
+    "EE": {
+      "intro": "Estonia — source-backed signals for workers and employers.",
+      "balanced": {
+        "title": "A relatively balanced market",
+        "summary": "EURES 2024 reporting describes Estonia's labour market as relatively more balanced than many EURES countries, with the EU-wide pressures in healthcare, IT and transport still present."
+      },
+      "digital-skills": {
+        "title": "Digital skills demand is rising",
+        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Estonia."
+      }
+    }
   }
 }
