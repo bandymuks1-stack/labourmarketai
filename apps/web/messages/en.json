@@ -3968,7 +3968,8 @@
     "proofEmpty": "No confirmed entries yet.",
     "generatedAt": "Generated",
     "verifyNote": "Confirmations can be checked on the platform.",
-    "notWorker": "CV export is available for worker profiles — it is built from the work journal and confirmed skills."
+    "notWorker": "CV export is available for worker profiles — it is built from the work journal and confirmed skills.",
+    "summaryTitle": "Professional summary"
   },
   "todayScreen": {
     "eyebrow": "Today",
