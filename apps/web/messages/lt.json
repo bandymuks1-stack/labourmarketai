@@ -4186,7 +4186,7 @@
   "planBoundary": {
     "title": "Ką apims mokami planai",
     "subcopy": "Mokėjimai dar neįjungti — jokio mokėjimo puslapio ir jokios kortelės. Mokami planai rodomi, kad žinotum apimtį; piloto prieiga suteikiama rankiniu būdu.",
-    "note": "Planai aprašo apimtį, ne aktyvų atsiskaitymą. Šiame puslapyje niekas neapmokestinama.",
+    "note": "Planai aprašo apimtį, ne aktyvų mokėjimą. Šiame puslapyje pinigai neimami.",
     "plans": {
       "free_worker": "Nemokamas darbuotojas",
       "worker_plus": "Worker Plus",
