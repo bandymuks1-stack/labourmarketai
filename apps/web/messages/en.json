@@ -4195,6 +4195,17 @@
         "unknown": "Country: not specified"
       },
       "docsConsent": "Documents: shared only with the worker's consent"
+    },
+    "booking": {
+      "open": "Propose booking",
+      "startDate": "Start date",
+      "note": "Note (optional)",
+      "send": "Send proposal",
+      "sending": "Sending…",
+      "sent": "Proposal sent",
+      "unavailable": "Booking is not available yet.",
+      "error": "Something went wrong.",
+      "cancel": "Cancel"
     }
   },
   "planBoundary": {
@@ -4223,6 +4234,40 @@
       "use": "Available now",
       "request_pilot_access": "Request pilot access",
       "contact": "Contact us"
+    }
+  },
+  "bookings": {
+    "eyebrow": "BOOKINGS",
+    "title": "Bookings",
+    "intro": "Proposed engagements. A booking is confirmed only when the worker accepts.",
+    "notAuthed": "Please sign in to see your bookings.",
+    "unavailable": "Booking is being prepared and is not available yet.",
+    "noDate": "No start date set",
+    "startsOn": "Starts {date}",
+    "incoming": {
+      "title": "Proposals for you",
+      "help": "A company proposed working with you. You decide.",
+      "empty": "No proposals yet."
+    },
+    "outgoing": {
+      "title": "Proposals you sent",
+      "help": "Workers you proposed to. They accept or decline.",
+      "empty": "You haven't sent any proposals yet."
+    },
+    "status": {
+      "proposed": "Proposed",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "withdrawn": "Withdrawn",
+      "expired": "Expired"
+    },
+    "actions": {
+      "accept": "Accept",
+      "decline": "Decline",
+      "accepted": "You accepted",
+      "declined": "You declined",
+      "conflict": "You already have an accepted booking for these dates.",
+      "error": "Something went wrong."
     }
   }
 }

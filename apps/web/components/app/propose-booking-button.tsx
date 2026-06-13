@@ -1,0 +1,119 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { proposeBookingAction } from "@/lib/booking/booking-actions";
+
+/**
+ * Company "propose booking" for a shortlisted, contactable candidate (Stage 6).
+ * Sends only the safe requestId + workerId + a start date/note; the worker's
+ * identity/contact never reaches the client. The worker alone accepts later.
+ * Honest states only; degrades to "unavailable" until the migration is applied.
+ */
+export function ProposeBookingButton({
+  locale,
+  requestId,
+  workerId,
+  countryCode,
+  labels,
+}: {
+  locale: string;
+  requestId: string;
+  workerId: string;
+  countryCode: string | null;
+  labels: {
+    open: string;
+    startDate: string;
+    note: string;
+    send: string;
+    sending: string;
+    sent: string;
+    unavailable: string;
+    error: string;
+    cancel: string;
+  };
+}) {
+  const [open, setOpen] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [note, setNote] = useState("");
+  const [pending, startTransition] = useTransition();
+  const [state, setState] = useState<"idle" | "sent" | "unavailable" | "error">("idle");
+
+  function send() {
+    startTransition(async () => {
+      const res = await proposeBookingAction({
+        locale,
+        requestId,
+        workerId,
+        startDate,
+        locationCountry: countryCode,
+        note,
+      });
+      if (res.kind === "ok") setState("sent");
+      else if (res.kind === "needs-migration") setState("unavailable");
+      else setState("error");
+    });
+  }
+
+  if (state === "sent") {
+    return <span className="text-[11px] font-medium text-state-success">{labels.sent}</span>;
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-[11px] font-medium text-brand-blue hover:bg-brand-blue/10"
+        data-testid="propose-booking-open"
+      >
+        {labels.open}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5" data-testid="propose-booking-form">
+      <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        {labels.startDate}
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        {labels.note}
+        <input
+          type="text"
+          maxLength={2000}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+        />
+      </label>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={pending}
+          onClick={send}
+          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+        >
+          {pending ? labels.sending : labels.send}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-[11px] text-text-muted hover:text-text-secondary"
+        >
+          {labels.cancel}
+        </button>
+      </div>
+      {state === "unavailable" ? (
+        <span className="text-[11px] text-text-muted">{labels.unavailable}</span>
+      ) : state === "error" ? (
+        <span className="text-[11px] text-state-danger">{labels.error}</span>
+      ) : null}
+    </div>
+  );
+}
