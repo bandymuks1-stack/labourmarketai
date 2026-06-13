@@ -4182,5 +4182,33 @@
       "contacts": "Darbuotojų kontaktai lieka paslėpti. Susisiekiate programėlėje ir tik kai darbuotojas turi laisvą prieinamumą.",
       "next": "Toliau: įtraukite patikusius darbuotojus į sąrašą ir paprašykite susisiekti, kai jie bus laisvi."
     }
+  },
+  "planBoundary": {
+    "title": "Ką apims mokami planai",
+    "subcopy": "Mokėjimai dar neįjungti — jokio mokėjimo puslapio ir jokios kortelės. Mokami planai rodomi, kad žinotum apimtį; piloto prieiga suteikiama rankiniu būdu.",
+    "note": "Planai aprašo apimtį, ne aktyvų mokėjimą. Šiame puslapyje pinigai neimami.",
+    "plans": {
+      "free_worker": "Nemokamas darbuotojas",
+      "worker_plus": "Worker Plus",
+      "company_pilot": "Įmonės pilotas",
+      "agency_pilot": "Agentūros pilotas",
+      "admin_internal": "Administratorius / vidinis"
+    },
+    "access": {
+      "free": "Nemokama",
+      "payment_not_enabled": "Mokėjimas neįjungtas",
+      "internal": "Vidinis"
+    },
+    "audience": {
+      "worker": "Darbuotojas",
+      "company": "Įmonė",
+      "agency": "Agentūra",
+      "admin": "Administratorius"
+    },
+    "cta": {
+      "use": "Galima dabar",
+      "request_pilot_access": "Prašyti piloto prieigos",
+      "contact": "Susisiek su mumis"
+    }
   }
 }
