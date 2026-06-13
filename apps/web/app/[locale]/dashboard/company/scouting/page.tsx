@@ -348,6 +348,7 @@ export default async function CompanyScoutingPage({
                           sending: t("booking.sending"),
                           sent: t("booking.sent"),
                           unavailable: t("booking.unavailable"),
+                          notEntitled: t("booking.notEntitled"),
                           error: t("booking.error"),
                           cancel: t("booking.cancel"),
                         }}

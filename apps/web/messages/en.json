@@ -4206,7 +4206,8 @@
       "sent": "Proposal sent",
       "unavailable": "Booking is not available yet.",
       "error": "Something went wrong.",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "notEntitled": "Your plan does not include booking — start a test checkout or request pilot access."
     }
   },
   "planBoundary": {

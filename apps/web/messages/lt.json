@@ -4206,7 +4206,8 @@
       "sent": "Pasiūlymas išsiųstas",
       "unavailable": "Rezervacija kol kas neprieinama.",
       "error": "Kažkas nepavyko.",
-      "cancel": "Atšaukti"
+      "cancel": "Atšaukti",
+      "notEntitled": "Tavo planas neapima rezervacijų — pradėk testinį apmokėjimą arba paprašyk piloto prieigos."
     }
   },
   "planBoundary": {

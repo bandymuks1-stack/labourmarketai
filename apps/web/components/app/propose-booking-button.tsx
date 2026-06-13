@@ -28,6 +28,7 @@ export function ProposeBookingButton({
     sending: string;
     sent: string;
     unavailable: string;
+    notEntitled: string;
     error: string;
     cancel: string;
   };
@@ -36,7 +37,9 @@ export function ProposeBookingButton({
   const [startDate, setStartDate] = useState("");
   const [note, setNote] = useState("");
   const [pending, startTransition] = useTransition();
-  const [state, setState] = useState<"idle" | "sent" | "unavailable" | "error">("idle");
+  const [state, setState] = useState<
+    "idle" | "sent" | "unavailable" | "not_entitled" | "error"
+  >("idle");
 
   function send() {
     startTransition(async () => {
@@ -50,6 +53,7 @@ export function ProposeBookingButton({
       });
       if (res.kind === "ok") setState("sent");
       else if (res.kind === "needs-migration") setState("unavailable");
+      else if (res.kind === "not-entitled") setState("not_entitled");
       else setState("error");
     });
   }
@@ -111,6 +115,8 @@ export function ProposeBookingButton({
       </div>
       {state === "unavailable" ? (
         <span className="text-[11px] text-text-muted">{labels.unavailable}</span>
+      ) : state === "not_entitled" ? (
+        <span className="text-[11px] text-state-amber">{labels.notEntitled}</span>
       ) : state === "error" ? (
         <span className="text-[11px] text-state-danger">{labels.error}</span>
       ) : null}
