@@ -19,6 +19,16 @@ const schema = z.object({
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: z
     .enum(["true", "false"])
     .default("true"),
+  // ── Billing (Stripe TEST-mode only; live is hard-blocked in config) ────────
+  // All default to the OFF state. Payments activate ONLY when the owner injects
+  // a valid test config (sk_test_ + whsec_) via Vercel env / .env.local —
+  // never committed. The safety logic lives in lib/billing/config.ts.
+  PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false"),
+  BILLING_PROVIDER: z.enum(["stripe", "none"]).default("none"),
+  STRIPE_MODE: z.enum(["test", "live"]).default("test"),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
 });
 
 const parsed = schema.safeParse({
@@ -28,6 +38,13 @@ const parsed = schema.safeParse({
   SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
     process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,
+  PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,
+  BILLING_PROVIDER: process.env.BILLING_PROVIDER,
+  STRIPE_MODE: process.env.STRIPE_MODE,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 });
 
 if (!parsed.success) {
