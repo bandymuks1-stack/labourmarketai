@@ -2116,17 +2116,43 @@
           "sending": "Siunčiama...",
           "error": "Nepavyko išsiųsti. Bandykite dar kartą.",
           "progressHelper": "Šie žingsniai rodo eigą. Aktyvūs veiksmai pateikiami žemiau.",
+          "form": {
+            "progressLabel": "Žingsnių eiga",
+            "back": "Atgal",
+            "next": "Toliau",
+            "descRequired": "Įrašykite aprašymą, kad galėtumėte tęsti.",
+            "optionalTag": "(nebūtina)",
+            "reviewIntro": "Peržiūrėkite ir sukurkite. Užklausa lieka privati jūsų erdvėje.",
+            "locationLabel": "Vieta ar šalis",
+            "locationPlaceholder": "Pvz., Vilnius, Lietuva",
+            "skillsLabel": "Reikalingi įgūdžiai ar kriterijai",
+            "skillsPlaceholder": "Pvz., B kategorija, anglų kalba, patirtis",
+            "urgencyLabel": "Kada reikia",
+            "urgencyFlexible": "Lankstu",
+            "urgencyThisWeek": "Šią savaitę",
+            "urgencyUrgent": "Skubu",
+            "notesLabel": "Papildomos pastabos",
+            "notesPlaceholder": "Bet kas, ką dar svarbu žinoti"
+          },
           "hire": {
             "title": "Ieškoti darbuotojo ar komandos",
             "body": "Aprašykite, kokio darbuotojo ar komandos reikia jūsų darbui. Užklausa iškart išsaugoma ir lieka privati.",
             "cta": "Sukurti darbo pasiūlymą",
-            "done": "Išsaugota. Jūsų darbo pasiūlymas matomas jūsų erdvėje."
+            "done": "Išsaugota. Jūsų darbo pasiūlymas matomas jūsų erdvėje.",
+            "roleLabel": "Kokio darbuotojo ar komandos ieškote?",
+            "rolePlaceholder": "Pvz., sandėlio darbuotojas, statybų komanda, padavėjas",
+            "descLabel": "Aprašykite darbą",
+            "descPlaceholder": "Kokį darbą reikia atlikti, kiek žmonių, kokiomis sąlygomis"
           },
           "partner": {
             "title": "Pasiūlykite kandidatą ar komandą",
             "body": "Aprašykite, kokius kandidatus ar paslaugas siūlote. Pasiūlymas iškart išsaugomas ir lieka privatus.",
             "cta": "Siūlyti kandidatą ar komandą",
-            "done": "Išsaugota. Jūsų pasiūlymas matomas jūsų erdvėje."
+            "done": "Išsaugota. Jūsų pasiūlymas matomas jūsų erdvėje.",
+            "roleLabel": "Kokius kandidatus ar paslaugas siūlote?",
+            "rolePlaceholder": "Pvz., 5 suvirintojų komanda, valymo paslaugos",
+            "descLabel": "Aprašykite pasiūlymą",
+            "descPlaceholder": "Kokius žmones ar paslaugas siūlote, kokiomis sąlygomis"
           }
         }
       },

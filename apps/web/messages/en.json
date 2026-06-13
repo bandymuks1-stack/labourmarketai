@@ -2116,17 +2116,43 @@
           "sending": "Sending...",
           "error": "Couldn't send. Please try again.",
           "progressHelper": "These steps show progress. Active actions are shown below.",
+          "form": {
+            "progressLabel": "Step progress",
+            "back": "Back",
+            "next": "Next",
+            "descRequired": "Add a description to continue.",
+            "optionalTag": "(optional)",
+            "reviewIntro": "Review and create. The request stays private in your space.",
+            "locationLabel": "Location or country",
+            "locationPlaceholder": "e.g. Vilnius, Lithuania",
+            "skillsLabel": "Required skills or criteria",
+            "skillsPlaceholder": "e.g. driving licence, English, experience",
+            "urgencyLabel": "When you need it",
+            "urgencyFlexible": "Flexible",
+            "urgencyThisWeek": "This week",
+            "urgencyUrgent": "Urgent",
+            "notesLabel": "Extra notes",
+            "notesPlaceholder": "Anything else worth knowing"
+          },
           "hire": {
             "title": "Find a worker or team",
             "body": "Describe what worker or team your company needs. Your request is saved and stays private.",
             "cta": "Create job request",
-            "done": "Saved. Your job request is now visible in your space."
+            "done": "Saved. Your job request is now visible in your space.",
+            "roleLabel": "What worker or team do you need?",
+            "rolePlaceholder": "e.g. warehouse operative, construction team, waiter",
+            "descLabel": "Describe the work",
+            "descPlaceholder": "What needs doing, how many people, on what terms"
           },
           "partner": {
             "title": "Offer a candidate or team",
             "body": "Describe which candidates or services you offer. Your offer is saved and stays private.",
             "cta": "Offer a candidate or team",
-            "done": "Saved. Your offer is now visible in your space."
+            "done": "Saved. Your offer is now visible in your space.",
+            "roleLabel": "What candidates or services do you offer?",
+            "rolePlaceholder": "e.g. a team of 5 welders, cleaning services",
+            "descLabel": "Describe the offer",
+            "descPlaceholder": "Which people or services you offer, on what terms"
           }
         }
       },

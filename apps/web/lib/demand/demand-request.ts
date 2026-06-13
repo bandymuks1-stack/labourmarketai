@@ -20,9 +20,33 @@ import { createClient } from "@/lib/supabase/server";
 
 export type DemandIntent = "hire_workers" | "partner";
 
+export type DemandUrgency = "flexible" | "this_week" | "urgent";
+
+/** The structured detail the dashboard demand form collects before creating a
+ *  request. `description` is REQUIRED — an empty need is never persisted. */
+export type DemandFields = {
+  /** Role / work needed (hire) or what's offered (partner). */
+  role?: string;
+  /** Free-text description of the need — required, non-empty. */
+  description: string;
+  /** Location / country / context. */
+  location?: string;
+  /** Required skills / criteria. */
+  skills?: string;
+  /** Start date / urgency. */
+  urgency?: DemandUrgency;
+  /** Extra notes. */
+  notes?: string;
+};
+
 export type DemandRequestResult =
   | { ok: true; requestId: string | null }
-  | { ok: false; code: "unauthenticated" | "save_failed" };
+  | { ok: false; code: "unauthenticated" | "save_failed" | "empty_description" };
+
+const MAX_TITLE = 120;
+const MAX_TEXT = 4000;
+const clamp = (s: string | undefined, max: number) =>
+  (s ?? "").trim().replace(/\s+/g, " ").slice(0, max);
 
 // hire_workers → a company expressing demand; partner → an agency expressing an
 // offer. (The buyer/customer's structured need has its own buyer_request draft
@@ -42,10 +66,24 @@ type DemandRpc = {
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
 };
 
-/** Submit the signed-in owner's pilot request onto the canonical intake. */
+/**
+ * Submit the signed-in owner's structured request onto the canonical intake.
+ *
+ * `fields.description` is REQUIRED — an empty/whitespace-only need returns
+ * `empty_description` and writes NOTHING (no placeholder request, §7). The real
+ * user-entered text becomes the request's `p_need_summary`; the role + the rest
+ * of the criteria (location, skills, urgency, notes) ride the existing
+ * `p_payload` jsonb — so this richer intake needs NO schema migration.
+ */
 export async function submitDemandRequest(
   intent: DemandIntent,
+  fields?: DemandFields,
 ): Promise<DemandRequestResult> {
+  // Block meaningless creation up-front (defence in depth — the client also
+  // disables the create action until a description exists).
+  const description = clamp(fields?.description, MAX_TEXT);
+  if (description.length === 0) return { ok: false, code: "empty_description" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -53,24 +91,33 @@ export async function submitDemandRequest(
   if (!user) return { ok: false, code: "unauthenticated" };
 
   const kind = INTENT_KIND[intent];
+  const role = clamp(fields?.role, MAX_TITLE);
+  // The request title reads from the user's role/work text; falls back to an
+  // intent-specific label only when they did not name the role.
   const title =
-    intent === "partner"
-      ? "Agency partnership — offer"
-      : "Hiring workers — demand";
+    role ||
+    (intent === "partner" ? "Agency partnership — offer" : "Hiring workers — demand");
+
+  const payload: Record<string, unknown> = {
+    source: "dashboard_demand",
+    intent,
+    role: role || null,
+    location: clamp(fields?.location, MAX_TITLE) || null,
+    skills: clamp(fields?.skills, MAX_TEXT) || null,
+    urgency: fields?.urgency ?? null,
+    notes: clamp(fields?.notes, MAX_TEXT) || null,
+  };
 
   const { data, error } = await (supabase as unknown as DemandRpc).rpc(
     "submit_demand_request",
     {
       p_kind: kind,
-      p_title: title,
-      // LT need-summary (p_original_language is "lt") — intent-specific so the
-      // saved request never shows an English fallback on the LT UI, and a
-      // company hiring request reads as hiring, not a generic buyer "need".
-      p_need_summary:
-        intent === "partner"
-          ? "Kandidatų ar paslaugų pasiūla, pateikta iš skydelio."
-          : "Darbuotojų ar komandos paieška, pateikta iš skydelio.",
-      p_payload: { source: "dashboard_demand", intent },
+      p_title: title.slice(0, MAX_TITLE),
+      // The real user-entered description is the need summary (no fabricated
+      // placeholder text). p_original_language stays "lt" — the saved request
+      // surfaces on the LT-first owner UI.
+      p_need_summary: description,
+      p_payload: payload,
       p_original_language: "lt",
     },
   );

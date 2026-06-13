@@ -9,11 +9,13 @@ import "server-only";
 import {
   submitDemandRequest as _submitDemandRequest,
   type DemandIntent,
+  type DemandFields,
   type DemandRequestResult,
 } from "./demand-request";
 
 export async function submitDemandRequestAction(
   intent: DemandIntent,
+  fields: DemandFields,
 ): Promise<DemandRequestResult> {
-  return _submitDemandRequest(intent);
+  return _submitDemandRequest(intent, fields);
 }

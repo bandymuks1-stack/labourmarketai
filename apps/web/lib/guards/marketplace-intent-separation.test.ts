@@ -75,10 +75,15 @@ describe("company hiring is NOT presented as a generic buyer 'poreikis' by defau
 });
 
 describe("no English fallback string on LT submissions", () => {
-  it("pilot-request.ts no longer writes the English dashboard need-summary", () => {
+  it("demand-request.ts writes the user's real description, no fabricated fallback", () => {
     const src = read("lib/demand/demand-request.ts");
+    // No hardcoded English dashboard summary.
     expect(src).not.toContain("Demand submitted from the dashboard.");
-    expect(src).toMatch(/pateikta iš skydelio/);
+    // The need summary is now the user's REAL, validated description — not a
+    // fabricated LT or English placeholder string.
+    expect(src).toMatch(/p_need_summary:\s*description/);
+    // Empty needs are blocked, never written as a placeholder request.
+    expect(src).toMatch(/empty_description/);
   });
 });
 
