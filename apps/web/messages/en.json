@@ -4382,5 +4382,18 @@
       "title": "Recent webhook events",
       "empty": "No webhook events yet."
     }
+  },
+  "billingStatus": {
+    "badge": {
+      "disabled": "PAYMENTS OFF",
+      "stripe_test": "TEST MODE",
+      "stripe_live_blocked": "LIVE BLOCKED"
+    },
+    "body": {
+      "disabled": "Payments are not enabled. Plans below describe scope; request pilot access to start.",
+      "stripe_test": "Stripe test mode is on for internal testing — no real money, no live charge.",
+      "stripe_live_blocked": "A live key/mode was detected and hard-blocked by safety. Live is never enabled here."
+    },
+    "futureLive": "Live payments are prepared but inactive — no live checkout until the owner signs off."
   }
 }

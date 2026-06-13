@@ -4382,5 +4382,18 @@
       "title": "Naujausi webhook įvykiai",
       "empty": "Webhook įvykių dar nėra."
     }
+  },
+  "billingStatus": {
+    "badge": {
+      "disabled": "MOKĖJIMAI IŠJUNGTI",
+      "stripe_test": "TEST MODE",
+      "stripe_live_blocked": "LIVE BLOKUOJAMAS"
+    },
+    "body": {
+      "disabled": "Mokėjimai neįjungti. Žemiau planai aprašo apimtį; paprašyk piloto prieigos, kad pradėtum.",
+      "stripe_test": "Stripe test mode įjungtas vidiniam testavimui — jokių realių pinigų, jokio realaus nuskaitymo.",
+      "stripe_live_blocked": "Aptiktas live raktas/režimas ir saugumo sumetimais griežtai užblokuotas. Live čia niekada neįjungiamas."
+    },
+    "futureLive": "Live mokėjimai paruošti, bet neaktyvūs — jokio live checkout, kol savininkas nepatvirtins."
   }
 }
