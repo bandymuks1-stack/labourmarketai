@@ -83,6 +83,29 @@ export default async function CompanyScoutingPage({
         </p>
       </section>
 
+      {/* Trust: how matching works — deterministic, honest, no fake score. */}
+      <details className="group rounded-lg border border-ink-600 bg-ink-800/40" data-testid="scouting-how">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-text-primary marker:text-text-muted">
+          {t("how.title")}
+        </summary>
+        <div className="flex flex-col gap-3 px-4 pb-4 text-xs leading-relaxed text-text-secondary">
+          <p>{t("how.intro")}</p>
+          <ul className="flex flex-col gap-1.5">
+            {(["strong", "possible", "weak", "insufficient_data"] as const).map((k) => (
+              <li key={k} className="flex flex-col gap-0.5 sm:flex-row sm:gap-2">
+                <span className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {statusLabels[k]}
+                </span>
+                <span>{t(`how.legend.${k}`)}</span>
+              </li>
+            ))}
+          </ul>
+          <p>{t("how.evidence")}</p>
+          <p className="text-text-primary">🔒 {t("how.contacts")}</p>
+          <p>{t("how.next")}</p>
+        </div>
+      </details>
+
       {/* Demand picker */}
       {demands.length === 0 ? (
         <p className="rounded-md border border-dashed border-ink-500 px-4 py-6 text-sm text-text-secondary">
