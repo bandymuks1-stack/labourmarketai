@@ -42,6 +42,9 @@ export interface RunAgentOptions {
   readonly maxOutputTokens?: number;
   /** Deterministic mock output for tests/dev (ignored by the live provider). */
   readonly mock?: unknown;
+  /** Audit context (server wrapper writes an ai_runs row; hashes only). */
+  readonly ownerId?: string | null;
+  readonly orgId?: string | null;
 }
 
 export async function runAiAgentCore<T = unknown>(

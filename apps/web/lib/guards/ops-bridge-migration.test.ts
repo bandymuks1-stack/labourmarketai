@@ -165,6 +165,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // worker_document_verification); see product-readiness.test.ts for detail.
     // then to 80 for the Stripe test-mode sprint PR2 — one additive RED migration
     // (billing_test_mode_records: 3 test-mode billing tables).
-    expect(guard).toMatch(/SPRINT_BASELINE = 80/);
+    // then to 81 for the Internal LLM Agents v1 sprint PR4 — one additive RED
+    // migration (ai_runs_suggestions: AI audit log + suggestion lifecycle).
+    expect(guard).toMatch(/SPRINT_BASELINE = 81/);
   });
 });

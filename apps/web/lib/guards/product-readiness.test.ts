@@ -1418,7 +1418,14 @@ describe("no migration files added by this sprint", () => {
     // payment_webhook_events) with owner/admin SELECT RLS, server-only writes
     // (service_role), idempotent webhook events, NO money amount stored. Legacy
     // `subscriptions` (0 rows) left untouched. Additive + reversible.
-    const SPRINT_BASELINE = 80;
+    // Bumped 80 -> 81 for the Internal LLM Agents v1 sprint PR4 — one additive
+    // RED migration 20260614120000_ai_runs_suggestions: two AI tables (ai_runs
+    // append-only audit with HASHES only + ai_suggestions draft→accepted/rejected
+    // lifecycle), owner/admin SELECT RLS, append-only ai_runs (server writes),
+    // owner may UPDATE only their own suggestion (human-confirm, touches no
+    // factual table). Additive + reversible (supabase/rollbacks/*). Not applied
+    // by the agent.
+    const SPRINT_BASELINE = 81;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

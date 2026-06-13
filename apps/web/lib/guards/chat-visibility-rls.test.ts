@@ -190,13 +190,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    authenticated write policy (owner/admin SELECT only).
     //  - lib/admin/billing-actions.ts — admin manual pilot-access override
     //    (admin-gated via isSuperadmin); same billing tables, no chat table.
-    // None touch a chat table; they write only billing_* / payment_webhook_events.
+    //  - lib/ai/audit/ai-run-store.ts — the Internal LLM Agents v1 append-only
+    //    AI audit log writer. ai_runs has NO authenticated write policy (owner/
+    //    admin SELECT only), so the service role is the correct write path; it
+    //    writes only ai_runs (hashes only), never a chat table.
+    // None touch a chat table; they write only billing_* / payment_webhook_events
+    // / ai_runs.
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
       "app/api/leads/route.ts",
       "lib/admin/billing-actions.ts",
+      "lib/ai/audit/ai-run-store.ts",
       "lib/billing/subscription-store.ts",
     ]);
   });
