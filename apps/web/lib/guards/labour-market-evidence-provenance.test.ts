@@ -8,7 +8,6 @@ import { describe, it, expect } from "vitest";
 import {
   LABOUR_MARKET_EVIDENCE,
   findEvidenceProvenanceProblems,
-  EVIDENCE_DISCLAIMER,
 } from "../labour-market/evidence";
 import { LABOUR_MARKET_SOURCES, isKnownSource } from "../labour-market/sources";
 
@@ -50,23 +49,21 @@ describe("labour-market evidence provenance", () => {
     }
   });
 
-  it("a numeric value is never published without a method note", () => {
+  it("any numeric value stays locale-neutral (no English prose hidden in it)", () => {
     for (const e of LABOUR_MARKET_EVIDENCE) {
       if (e.value !== undefined) {
-        expect(e.methodNote, `${e.id} has value but no methodNote`).toBeTruthy();
+        expect(
+          /^[\d.,/\sMBKkm%+–-]+$/.test(e.value),
+          `${e.id} value "${e.value}" must be locale-neutral`,
+        ).toBe(true);
       }
     }
   });
 
-  it("an honesty disclaimer is present (figures are not a live feed)", () => {
-    expect(EVIDENCE_DISCLAIMER.toLowerCase()).toContain("source");
-    expect(EVIDENCE_DISCLAIMER.toLowerCase()).toContain("verify");
-  });
-
   it("the provenance validator actually catches a broken item", () => {
     const broken = findEvidenceProvenanceProblems([
-      // @ts-expect-error — deliberately missing fields for the negative test
-      { id: "x", title: "t", summary: "s", sourceId: "nope" },
+      // @ts-expect-error — deliberately missing/invalid fields for the negative test
+      { id: "x", sourceId: "nope", sourceUrl: "http://x", claimType: "statistic", lastChecked: "nope" },
     ]);
     expect(broken.length).toBeGreaterThan(0);
   });

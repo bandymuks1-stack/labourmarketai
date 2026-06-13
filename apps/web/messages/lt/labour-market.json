@@ -37,5 +37,64 @@
   "claimForecast": "Prognozė",
   "claimShortage": "Trūkumo signalas",
   "claimSkills": "Įgūdžių signalas",
-  "illustrativeSample": "Iliustracinis pavyzdys — koncepciniai duomenys, dar ne realūs platformos skaičiai."
+  "illustrativeSample": "Iliustracinis pavyzdys — koncepciniai duomenys, dar ne realūs platformos skaičiai.",
+  "evidenceDisclaimer": "Kiekvienas teiginys turi nuorodą į oficialų viešą šaltinį su duomenų data ir regionu. Skaičiai perimti iš paskelbtų ataskaitų (paskutinį kartą patikrinta kortelėje nurodytą dieną), tai nėra tiesioginis duomenų srautas — naujausią ir tikslų skaičių visada pasitikrinkite nurodytame šaltinyje.",
+  "sourceLabel": {
+    "eurostat": "Eurostato šaltinis",
+    "eures": "EURES / Europos darbo institucijos šaltinis",
+    "cedefop": "Cedefop šaltinis",
+    "eurofound": "Eurofound šaltinis",
+    "oecd": "EBPO šaltinis",
+    "ilo": "TDO šaltinis",
+    "ec": "Europos Komisijos šaltinis"
+  },
+  "evidence": {
+    "employment-participation": {
+      "title": "Užimtumas rekordiškai aukštas — konkurencija dėl įgūdžių didelė",
+      "summary": "Eurostato duomenimis, ES užimtumo lygis tarp 20–64 metų gyventojų 2024 m. pasiekė 75,8 % — aukščiausias nuo duomenų eilutės pradžios 2009 m. (2025 m. peržengė 76 %). Įtemptoje rinkoje matomi, įrodyti įgūdžiai tampa vertingesni, ne mažiau vertingi.",
+      "figureDate": "2024 m. metiniai duomenys",
+      "region": "ES",
+      "unit": "% dirbančių (20–64 m.), 2024 m.",
+      "methodNote": "Eurostato darbo jėgos tyrimas, ES užimtumo lygis 20–64 m., 2024 m. metinis (paskelbta 2025 m. balandį); aukščiausias nuo 2009 m. eilutės pradžios."
+    },
+    "shortage-occupations": {
+      "title": "Darbuotojų trūkumas apima visą darbo rinką",
+      "summary": "EURES / Europos darbo institucijos ataskaita dėl darbo jėgos trūkumo ir pertekliaus rodo ilgalaikį trūkumą sveikatos priežiūros, statybų ir apgyvendinimo / maitinimo srityse, taip pat aukštos kvalifikacijos spragas inžinerijoje ir IT, o 2024 m. leidime — transporto ir sandėliavimo srityje (vairuotojai, savaeigių mašinų operatoriai). Trūkumas apima visą ekonomiką, ne vieną sektorių.",
+      "figureDate": "2024 m. ataskaita (paskelbta 2025 m. birželį)",
+      "region": "ES / EEE + Norvegija, Islandija, Šveicarija",
+      "methodNote": "EURES 2024 m. ataskaita dėl darbo jėgos trūkumo ir pertekliaus; trūkstamos profesijos pagal šalį pateikiamos šaltinyje."
+    },
+    "skills-mismatch": {
+      "title": "Beveik pusė darbdavių neranda reikiamų įgūdžių",
+      "summary": "Europos Komisijos „Eurobarometro“ apklausa nustatė, kad 46 % ES mažų ir vidutinių įmonių per pastaruosius dvejus metus sunkiai arba labai sunkiai rado reikiamų įgūdžių darbuotojų — tarp pastaruoju metu samdžiusių įmonių šis rodiklis siekia apie 70 %. Tai atitikimo, o ne vien pasiūlos problema.",
+      "figureDate": "2024 m. „Eurobarometras“ (MVĮ įgūdžiai)",
+      "region": "ES",
+      "unit": "% MVĮ (≈70 % iš tų, kurios samdė)",
+      "methodNote": "Europos Komisijos „Eurobarometras“ apie MVĮ ir įgūdžių trūkumą, 2024 m.: 46 % MVĮ sunkiai (arba labai sunkiai) rado reikiamų įgūdžių darbuotojų per pastaruosius 24 mėn.; ~70 % tarp samdžiusių MVĮ."
+    },
+    "digital-skills-demand": {
+      "title": "Reikalingi įgūdžiai krypsta į skaitmeninius",
+      "summary": "Cedefop analizė rodo, kad beveik 9 iš 10 darbų reikalauja skaitmeninių įgūdžių, o bent pagrindinius skaitmeninius įgūdžius turi tik apie 55,6 % ES suaugusiųjų. Daugelio darbų įgūdžių profilis keičiasi greičiau, nei gali parodyti statiškas CV.",
+      "figureDate": "Cedefop įgūdžių prognozė / skaitmeninių įgūdžių analizė (2024 m.)",
+      "region": "ES",
+      "unit": "% ES suaugusiųjų, turinčių pagrindinius skaitmeninius įgūdžius",
+      "methodNote": "Cedefop, „Digital skills ambitions in action“ / įgūdžių prognozė (2024 m.): ~9/10 darbų reikalaus skaitmeninių įgūdžių; ~55,6 % ES suaugusiųjų turi bent pagrindinius skaitmeninius įgūdžius."
+    },
+    "demographic-pressure": {
+      "title": "Darbingo amžiaus gyventojų mažėja",
+      "summary": "Eurostato gyventojų prognozės rodo, kad 22 iš 27 ES šalių iki 2050 m. patirs darbingo amžiaus (20–64 m.) gyventojų mažėjimą, o senatvės priklausomumo rodiklis gerokai augs. Darbuotojų išlaikymas, perkvalifikavimas ir atitikimas poreikiui tampa struktūriškai vis svarbesni.",
+      "figureDate": "Eurostato gyventojų prognozės (2024 m. bazė)",
+      "region": "ES",
+      "unit": "ES šalys, kuriose darbingo amžiaus gyventojų mažės iki 2050 m.",
+      "methodNote": "Eurostato gyventojų prognozės / „Old-age dependency growing across EU regions“ (2025 m. spalis): prognozuojama, kad 22 iš 27 ES šalių iki 2050 m. patirs darbingo amžiaus (20–64 m.) gyventojų mažėjimą."
+    },
+    "labour-mobility": {
+      "title": "Tarpvalstybinis mobilumas padeda subalansuoti trūkumą",
+      "summary": "Europos Komisijos metinė ataskaita apie darbo jėgos judumą ES viduje rodo, kad apie 10,1 mln. darbingo amžiaus ES piliečių dirba kitoje valstybėje narėje, o apie 1,83 mln. yra tarpvalstybiniai darbuotojai — be to, judžiųjų užimtumo lygis (78 %) viršija šalies gyventojų (76 %). Tai aktualu Baltijos ir Šiaurės Europos rinkai, kur žmonės dirba kitapus sienų.",
+      "figureDate": "2024 m. leidimas (paskelbta 2025 m. vasarį)",
+      "region": "ES / EEE",
+      "unit": "tarpvalstybinių darbuotojų (10,1 mln. dirba užsienyje)",
+      "methodNote": "EK metinė ataskaita apie darbo judumą ES viduje, 2024 m. (2022–2023 m. duomenys): ~10,1 mln. darbingo amžiaus ES piliečių dirba užsienyje; ~1,83 mln. tarpvalstybinių darbuotojų; judžiųjų užimtumo lygis 78 %, palyginti su 76 % šalies gyventojų."
+    }
+  }
 }

@@ -1,29 +1,27 @@
 /**
- * Labour-market EVIDENCE layer (Step 2 — evidence hardening).
+ * Labour-market EVIDENCE layer (Step 2 — hardened; localization fix).
  *
  * The typed, app-usable evidence behind the public "labour-market evidence"
- * module. Each item is a SOURCED statement about the EU labour market that
- * grounds the product's framing (skills visibility, shortages, mismatch,
- * demographics, changing skills, mobility) — never a platform metric, never
- * invented.
+ * module. Each item is a SOURCED statement about the EU labour market.
  *
- * HARDENING (Step 2): every item was re-verified against its live public source
- * on `lastChecked`. Figures, `figureDate`, `region` and `methodNote` were
- * tightened to the latest published numbers. Where a precise number exists it is
- * now stated (with the exact report + date in `methodNote`); where only a
- * qualitative statement is safe, it stays qualitative.
+ * LOCALIZATION (binding): user-facing prose (title, summary, figureDate, region,
+ * unit, methodNote) lives in messages/{locale}/labour-market.json under the
+ * `evidence.<id>.*` keys, so LT/RU/EN users only ever see their own language.
+ * THIS module keeps only locale-neutral PROVENANCE: id, sourceId, sourceUrl,
+ * claimType, value (numeric), lastChecked. The component renders localized text
+ * by id; it never prints an English literal from here.
  *
- * HONESTY (binding, doctrine §7):
- *   - Every item carries full provenance: source, specific source URL, figure /
- *     publication date, region, last-checked date, claim type.
- *   - `value` (a number) is only set when transcribed from the cited report, and
- *     always carries a `methodNote` naming the report + reference period.
- *   - `lastChecked` is the date the claim was verified against the source.
+ * HONESTY (doctrine §7): every item carries full provenance, the source URL is
+ * the real authoritative page, and `value` (a number) always has a localized
+ * `methodNote` (enforced by the i18n-content guard). `lastChecked` is the date
+ * the claim was verified against the source.
  *
- * Adding/editing an item is a one-row change here; the provenance guard
- * (lib/guards/labour-market-evidence-provenance.test.ts) fails the build if any
- * required field is missing, the source id is unknown, a number lacks a
- * methodNote, or a sourceUrl is not https.
+ * Guards:
+ *   - lib/guards/labour-market-evidence-provenance.test.ts — data-level
+ *     provenance (known source, https url, ISO lastChecked, unique ids).
+ *   - lib/guards/labour-market-evidence-i18n.test.ts — every active locale has
+ *     localized content for every id, a methodNote where a value exists, and no
+ *     English leakage on LT/RU.
  *
  * Pure data + types. No IO.
  */
@@ -36,169 +34,115 @@ export type ClaimType =
   | "shortage_signal"
   | "skills_signal";
 
+/** Locale-neutral provenance for one evidence item. All user-facing prose is in
+ *  i18n under `evidence.<id>.*` — NEVER here. */
 export interface EvidenceItem {
   readonly id: string;
-  /** Short headline of the sourced claim. */
-  readonly title: string;
-  /** One- to two-sentence sourced statement. */
-  readonly summary: string;
-  /** Geography the claim covers (e.g. "EU", "EU / EEA"). */
-  readonly region: string;
-  /** Sector the claim is about, or all sectors. */
-  readonly sector: string | "all_sectors";
   /** Source id — must exist in ./sources. */
   readonly sourceId: SourceId;
-  /** Exact report / news page for THIS figure (overrides the source landing
-   *  URL). Must be https. */
+  /** Exact report / news page for THIS figure. Must be https. The REAL,
+   *  authoritative source URL — never localized, never changed for display. */
   readonly sourceUrl: string;
-  /** Reference period / publication the claim describes (e.g. "2024 annual"). */
-  readonly figureDate: string;
+  readonly claimType: ClaimType;
+  /** Optional precise magnitude — kept locale-neutral (digits + ASCII). The
+   *  unit + caveat live in the localized `evidence.<id>.unit` / `.methodNote`. */
+  readonly value?: string;
   /** Date this item was verified against the source (ISO). */
   readonly lastChecked: string;
-  readonly claimType: ClaimType;
-  /** Optional precise magnitude (with `unit`). Requires a `methodNote`. */
-  readonly value?: string;
-  readonly unit?: string;
-  /** Honesty note: which report, reference period, and any precision caveat. */
-  readonly methodNote?: string;
 }
 
 /** Date this evidence set was re-verified against the live sources. */
 const VERIFIED = "2026-06-13";
 
 /**
- * Public evidence set — re-verified against live official sources (Step 2).
- * EU-focused (matches the product's Baltic & Northern Europe + EU framing).
- * Construction appears only as ONE example among shortage sectors.
+ * Public evidence set — re-verified against live official sources (2026-06-13).
+ * Provenance only; prose is localized. Construction appears only as ONE example
+ * among shortage sectors (see the localized `shortage-occupations` summary).
  */
 export const LABOUR_MARKET_EVIDENCE: readonly EvidenceItem[] = [
   {
     id: "employment-participation",
-    title: "Employment is at a record high — competition for skills is tight",
-    summary:
-      "Eurostat reports the EU employment rate for people aged 20–64 reached 75.8% in 2024 — the highest since the series began in 2009 (and rising above 76% in 2025). A tight market makes visible, evidenced skills more valuable, not less.",
-    region: "EU",
-    sector: "all_sectors",
     sourceId: "eurostat",
     sourceUrl:
       "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20250415-1",
-    figureDate: "2024 annual",
-    lastChecked: VERIFIED,
     claimType: "statistic",
     value: "75.8",
-    unit: "% employed (age 20–64), 2024",
-    methodNote:
-      "Eurostat Labour Force Survey, EU employment rate age 20–64, 2024 annual (published Apr 2025); highest since the 2009 series start. 2025 figure has since risen above 76%.",
+    lastChecked: VERIFIED,
   },
   {
     id: "shortage-occupations",
-    title: "Shortages span the whole labour market",
-    summary:
-      "The EURES / European Labour Authority report on labour shortages & surpluses lists long-standing shortages in healthcare, construction and hospitality, plus highly-skilled gaps in engineering and IT, and — in the 2024 edition — transport and storage (drivers, mobile-plant operators). The gap is economy-wide, not one sector.",
-    region: "EU / EEA + Norway, Iceland, Switzerland",
-    sector: "all_sectors",
     sourceId: "eures",
     sourceUrl:
       "https://www.ela.europa.eu/en/publications/labour-shortages-and-surpluses-europe-2024",
-    figureDate: "2024 report (published Jun 2025)",
-    lastChecked: VERIFIED,
     claimType: "shortage_signal",
-    methodNote:
-      "EURES Report on labour shortages and surpluses 2024; shortage occupations are listed per country at the source.",
+    lastChecked: VERIFIED,
   },
   {
     id: "skills-mismatch",
-    title: "Almost half of employers can't find the right skills",
-    summary:
-      "A European Commission Eurobarometer survey found 46% of EU SMEs found it difficult or very difficult to find staff with the right skills over the past two years — rising to about 70% among SMEs that actually hired. It is a matching problem, not only a supply problem.",
-    region: "EU",
-    sector: "all_sectors",
     sourceId: "ec",
     sourceUrl:
       "https://single-market-economy.ec.europa.eu/news/eurobarometer-smes-and-skill-shortages-2024-03-14_en",
-    figureDate: "2024 Eurobarometer (SME skills)",
-    lastChecked: VERIFIED,
     claimType: "skills_signal",
     value: "46",
-    unit: "% of SMEs (≈70% of those hiring)",
-    methodNote:
-      "European Commission Eurobarometer on SMEs and skill shortages, 2024: 46% of SMEs found it (very) difficult to find rightly-skilled staff in the prior 24 months; ~70% among SMEs that hired.",
+    lastChecked: VERIFIED,
   },
   {
     id: "digital-skills-demand",
-    title: "The skills jobs need are shifting to digital",
-    summary:
-      "Cedefop's analysis points to nearly 9 in 10 jobs requiring digital skills, while only about 55.6% of EU adults have at least basic digital skills. The skills profile of many jobs is changing faster than a static CV can show.",
-    region: "EU",
-    sector: "all_sectors",
     sourceId: "cedefop",
     sourceUrl: "https://www.cedefop.europa.eu/en/publications/4218",
-    figureDate: "Cedefop Skills Forecast / digital-skills analysis (2024)",
-    lastChecked: VERIFIED,
     claimType: "forecast",
     value: "55.6",
-    unit: "% of EU adults with basic digital skills",
-    methodNote:
-      "Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 jobs will require digital skills; ~55.6% of EU adults have at least basic digital skills (Eurostat DESI input).",
+    lastChecked: VERIFIED,
   },
   {
     id: "demographic-pressure",
-    title: "The working-age population is shrinking",
-    summary:
-      "Eurostat population projections show 22 of the 27 EU countries are expected to see their working-age (20–64) population decline by 2050, with the old-age dependency ratio rising substantially. Retaining, re-skilling and matching workers to need becomes structurally more important.",
-    region: "EU",
-    sector: "all_sectors",
     sourceId: "eurostat",
     sourceUrl:
       "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20251001-2",
-    figureDate: "Eurostat population projections (2024 base)",
-    lastChecked: VERIFIED,
     claimType: "forecast",
-    value: "22 of 27",
-    unit: "EU countries: working-age decline by 2050",
-    methodNote:
-      "Eurostat population projections / 'Old-age dependency growing across EU regions' (Oct 2025): 22 of 27 EU countries projected to see working-age (20–64) population decline by 2050; old-age dependency ratio projected to rise toward 2100.",
+    value: "22 / 27",
+    lastChecked: VERIFIED,
   },
   {
     id: "labour-mobility",
-    title: "Cross-border mobility helps balance shortages",
-    summary:
-      "The European Commission's Annual Report on Intra-EU Labour Mobility shows about 10.1 million EU citizens of working age work in another member state and roughly 1.83 million are cross-border workers — and movers' employment rate (78%) exceeds nationals' (76%). Relevant for a Baltic & Northern European market where people work across borders.",
-    region: "EU / EEA",
-    sector: "all_sectors",
     sourceId: "ec",
     sourceUrl:
       "https://employment-social-affairs.ec.europa.eu/annual-report-intra-eu-labour-mobility-2024_en",
-    figureDate: "2024 edition (published Feb 2025)",
-    lastChecked: VERIFIED,
     claimType: "statistic",
     value: "1.83M",
-    unit: "cross-border workers (10.1M work abroad)",
-    methodNote:
-      "EC Annual Report on Intra-EU Labour Mobility 2024 (data 2022–2023): ~10.1M working-age EU citizens work abroad; ~1.83M cross-border workers; movers' employment rate 78% vs 76% for nationals.",
+    lastChecked: VERIFIED,
   },
 ];
 
-/** Shown in the UI so the provenance is honest about freshness + precision. */
-export const EVIDENCE_DISCLAIMER =
-  "Each claim links to its official public source with the figure date and region. Figures are transcribed from published reports (last verified on the date shown on each card), not a live data feed — always verify against the linked source for the authoritative, latest number.";
+/** Ids that publish a numeric `value` — the i18n guard requires a localized
+ *  `methodNote` for each of these in every active locale. */
+export const EVIDENCE_IDS_WITH_VALUE: readonly string[] =
+  LABOUR_MARKET_EVIDENCE.filter((e) => e.value !== undefined).map((e) => e.id);
 
-/** Required provenance fields every public evidence item must carry. */
+/** All evidence ids (order = display order). */
+export const EVIDENCE_IDS: readonly string[] = LABOUR_MARKET_EVIDENCE.map(
+  (e) => e.id,
+);
+
+/** Required locale-neutral provenance fields every item must carry. */
 export const REQUIRED_EVIDENCE_FIELDS = [
   "id",
-  "title",
-  "summary",
-  "region",
-  "sector",
   "sourceId",
   "sourceUrl",
-  "figureDate",
-  "lastChecked",
   "claimType",
+  "lastChecked",
 ] as const;
 
-/** Pure validator (also used by the provenance guard test). Returns the list of
- *  problems; empty array means every item is fully sourced. */
+/** Localized prose keys each item MUST have in every active locale's catalog. */
+export const REQUIRED_EVIDENCE_I18N_FIELDS = [
+  "title",
+  "summary",
+  "figureDate",
+  "region",
+] as const;
+
+/** Pure data-level provenance validator (no i18n). Returns the list of
+ *  problems; empty array means every item is fully provenanced. */
 export function findEvidenceProvenanceProblems(
   items: readonly EvidenceItem[] = LABOUR_MARKET_EVIDENCE,
 ): string[] {
@@ -218,12 +162,13 @@ export function findEvidenceProvenanceProblems(
     if (typeof item.sourceUrl === "string" && !/^https:\/\//.test(item.sourceUrl)) {
       problems.push(`${where}: sourceUrl is not https`);
     }
-    if (item.value !== undefined && !item.methodNote) {
-      problems.push(`${where}: numeric value without a methodNote`);
-    }
-    // A date-stamped ISO lastChecked keeps "verified on" honest.
     if (!/^\d{4}-\d{2}-\d{2}$/.test(item.lastChecked)) {
       problems.push(`${where}: lastChecked is not an ISO date`);
+    }
+    // A value must stay locale-neutral (digits + ASCII punctuation only) so no
+    // English prose hides inside it.
+    if (item.value !== undefined && !/^[\d.,/\sMBKkm%+–-]+$/.test(item.value)) {
+      problems.push(`${where}: value "${item.value}" is not locale-neutral`);
     }
     if (seen.has(item.id)) problems.push(`${where}: duplicate id`);
     seen.add(item.id);

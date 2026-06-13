@@ -32,6 +32,20 @@
 - **Skills-mismatch card upgraded** from a qualitative Eurofound statement to the
   46% EC Eurobarometer figure (Eurofound stays registered as an allowed source).
 
+## Localization (fix before merge)
+
+Evidence card prose was English-only and rendered on every locale — a bug. Fixed:
+all user-facing text (title, summary, figureDate, region, unit, methodNote,
+source link label, disclaimer) now lives in `messages/{locale}/labour-market.json`
+under `evidence.<id>.*` / `sourceLabel.*` / `evidenceDisclaimer`, and the card
+renders by locale key. **lt + ru fully translated; en stays English.** The typed
+`evidence.ts` keeps only locale-neutral provenance (numeric `value`, ISO
+`lastChecked`, the real `sourceUrl`, `sourceId`, `claimType`). The real source
+hrefs are unchanged. The 8 inactive locales carry `[EN]`-marked evidence content
+(honest untranslated marker; these dir files are outside i18n-debt scope, so no
+regression). Guards: `labour-market-evidence-i18n.test.ts` (every active locale
+localized; LT/RU contain no English card phrases and differ from EN).
+
 ## Honesty caveats (still true)
 
 - `lastChecked` reflects verification against **published reports**, not a live
