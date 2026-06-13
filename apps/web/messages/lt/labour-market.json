@@ -96,5 +96,60 @@
       "unit": "tarpvalstybinių darbuotojų (10,1 mln. dirba užsienyje)",
       "methodNote": "EK metinė ataskaita apie darbo judumą ES viduje, 2024 m. (2022–2023 m. duomenys): ~10,1 mln. darbingo amžiaus ES piliečių dirba užsienyje; ~1,83 mln. tarpvalstybinių darbuotojų; judžiųjų užimtumo lygis 78 %, palyginti su 76 % šalies gyventojų."
     }
+  },
+  "countryNames": {
+    "LT": "Lietuva",
+    "LV": "Latvija",
+    "EE": "Estija",
+    "PL": "Lenkija",
+    "DE": "Vokietija",
+    "NL": "Nyderlandai",
+    "DK": "Danija",
+    "NO": "Norvegija",
+    "SE": "Švedija",
+    "FI": "Suomija"
+  },
+  "countryIndexEyebrow": "Darbo rinkos pagal šalį",
+  "countryIndexTitle": "Šaltiniais pagrįsti duomenys mūsų aptarnaujamoms rinkoms",
+  "countryIndexSubcopy": "Baltijos ir Šiaurės Europos darbo rinkos. Aktyvūs puslapiai prasideda nuo Baltijos šalių; kiekviena išvada turi nuorodą į oficialų šaltinį.",
+  "countryComingSoon": "Netrukus",
+  "countryView": "Peržiūrėti",
+  "countryBackToIndex": "Visos šalys",
+  "countryWorkerFraming": "Darbuotojams: matomi, įrodyti įgūdžiai ir mobilumas svarbesni ten, kur paklausa didelė.",
+  "countryEmployerFraming": "Darbdaviams: aprašykite realų poreikį ir lyginkite žmones pagal įrodymus, o ne pagal silpną CV.",
+  "countryEvidence": {
+    "LT": {
+      "intro": "Lietuva — pagrindinė rinka. Šaltiniais pagrįsti signalai darbuotojams ir darbdaviams.",
+      "shortages": {
+        "title": "Trūkumas sutelktas tarp amatininkų ir operatorių",
+        "summary": "EURES ataskaitose Lietuvos trūkstamos profesijos – stacionarių įrenginių ir mašinų operatoriai, statybų ir susijusių sričių darbuotojai bei maisto perdirbimo, medienos apdirbimo ir amatų darbuotojai – kartu su visos ES spragomis sveikatos priežiūroje, IT ir transporte."
+      },
+      "digital-skills": {
+        "title": "Skaitmeninių įgūdžių paklausa auga",
+        "summary": "Cedefop įgūdžių prognozė rodo augančią skaitmeninių ir aukštesnio lygio įgūdžių paklausą įvairiose profesijose, taip pat ir Lietuvoje."
+      }
+    },
+    "LV": {
+      "intro": "Latvija — šaltiniais pagrįsti signalai darbuotojams ir darbdaviams.",
+      "surplus": {
+        "title": "Labiau pertekliumi linkusi rinka",
+        "summary": "EURES 2024 m. ataskaitoje Latvija tarp Baltijos šalių išsiskiria pastebimu darbuotojų pertekliumi keliose profesijose — kitokia dinamika nei Lietuvoje ir Estijoje."
+      },
+      "digital-skills": {
+        "title": "Skaitmeninių įgūdžių paklausa auga",
+        "summary": "Cedefop įgūdžių prognozė rodo augančią skaitmeninių ir aukštesnio lygio įgūdžių paklausą įvairiose profesijose, taip pat ir Latvijoje."
+      }
+    },
+    "EE": {
+      "intro": "Estija — šaltiniais pagrįsti signalai darbuotojams ir darbdaviams.",
+      "balanced": {
+        "title": "Santykinai subalansuota rinka",
+        "summary": "EURES 2024 m. ataskaitoje Estijos darbo rinka apibūdinama kaip santykinai labiau subalansuota nei daugelio EURES šalių, nors visos ES spaudimas sveikatos priežiūroje, IT ir transporte išlieka."
+      },
+      "digital-skills": {
+        "title": "Skaitmeninių įgūdžių paklausa auga",
+        "summary": "Cedefop įgūdžių prognozė rodo augančią skaitmeninių ir aukštesnio lygio įgūdžių paklausą įvairiose profesijose, taip pat ir Estijoje."
+      }
+    }
   }
 }
