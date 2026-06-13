@@ -33,6 +33,18 @@ const schema = z.object({
   STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
   STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
   STRIPE_PRICE_AGENCY_PILOT: z.string().optional(),
+  // ── Internal LLM Agents (disabled by default; mock for tests/dev) ──────────
+  // The runtime is `disabled` unless AI_PROVIDER_MODE is `mock` or `live`.
+  // `live` additionally requires AI_API_KEY (owner-set in Vercel env / .env.local,
+  // NEVER committed, NEVER in the client). Safety logic: lib/ai/runtime/config-core.ts.
+  AI_PROVIDER_MODE: z.enum(["disabled", "mock", "live"]).default("disabled"),
+  AI_PROVIDER: z.enum(["anthropic", "openai"]).default("anthropic"),
+  AI_API_KEY: z.string().optional(),
+  AI_MODEL: z.string().optional(),
+  AI_REQUEST_TIMEOUT_MS: z.string().optional(),
+  AI_MAX_RETRIES: z.string().optional(),
+  AI_MAX_OUTPUT_TOKENS: z.string().optional(),
+  AI_DAILY_RUN_BUDGET: z.string().optional(),
 });
 
 const parsed = schema.safeParse({
@@ -52,6 +64,14 @@ const parsed = schema.safeParse({
   STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
   STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
   STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,
+  AI_PROVIDER_MODE: process.env.AI_PROVIDER_MODE,
+  AI_PROVIDER: process.env.AI_PROVIDER,
+  AI_API_KEY: process.env.AI_API_KEY,
+  AI_MODEL: process.env.AI_MODEL,
+  AI_REQUEST_TIMEOUT_MS: process.env.AI_REQUEST_TIMEOUT_MS,
+  AI_MAX_RETRIES: process.env.AI_MAX_RETRIES,
+  AI_MAX_OUTPUT_TOKENS: process.env.AI_MAX_OUTPUT_TOKENS,
+  AI_DAILY_RUN_BUDGET: process.env.AI_DAILY_RUN_BUDGET,
 });
 
 if (!parsed.success) {

@@ -16,7 +16,11 @@ import { join } from "node:path";
  *      a suggestion.
  *   3. Every prompt template is explicitly marked TEMPLATE ONLY.
  *   4. No file under apps/web/lib imports an LLM SDK
- *      (`@anthropic-ai/sdk`, `openai`).
+ *      (`@anthropic-ai/sdk`, `openai`) EXCEPT the single allowlisted live
+ *      adapter (`lib/ai/runtime/providers/anthropic.ts`) — the Internal LLM
+ *      Agents v1 evolution: the real provider is env-gated and inert without a
+ *      key, and the SDK is reachable from exactly one file (parallel to the
+ *      allowlisted Stripe adapter). The guard is STRENGTHENED, never disabled.
  *
  * Runs in CI via `pnpm -F web test`. Pure source assertions.
  */
@@ -111,19 +115,36 @@ function walkSourceFiles(dir: string, acc: string[] = []): string[] {
   return acc;
 }
 
-describe("Guard: no LLM SDK is imported under apps/web/lib", () => {
-  it("no lib source file imports @anthropic-ai/sdk or openai", () => {
-    const files = walkSourceFiles(join(APP_ROOT, "lib")).filter(
+/**
+ * The ONE file permitted to import the LLM SDK: the env-gated live adapter.
+ * Anything else importing the SDK fails the build.
+ */
+const SDK_ADAPTER_ALLOWLIST = ["lib/ai/runtime/providers/anthropic.ts"];
+
+describe("Guard: no LLM SDK is imported under apps/web/lib (except the adapter)", () => {
+  it("no lib source file imports @anthropic-ai/sdk or openai outside the allowlisted adapter", () => {
+    const libRoot = join(APP_ROOT, "lib");
+    const files = walkSourceFiles(libRoot).filter(
       // Guard tests may quote forbidden patterns as negative controls.
       (f) => !f.endsWith(".test.ts"),
     );
     expect(files.length).toBeGreaterThan(0);
+    const offenders: string[] = [];
     for (const file of files) {
-      expect(
-        LLM_SDK_IMPORT.test(read(file)),
-        `${file} imports an LLM SDK — forbidden until the owner gates open`,
-      ).toBe(false);
+      if (!LLM_SDK_IMPORT.test(read(file))) continue;
+      const rel = file.slice(libRoot.length + 1).replace(/\\/g, "/");
+      if (!SDK_ADAPTER_ALLOWLIST.includes(`lib/${rel}`)) offenders.push(`lib/${rel}`);
     }
+    expect(
+      offenders,
+      `LLM SDK imported outside the allowlisted adapter:\n${offenders.join("\n")}`,
+    ).toEqual([]);
+  });
+
+  it("the allowlisted adapter exists and is the SDK boundary", () => {
+    const adapter = join(APP_ROOT, "lib", "ai", "runtime", "providers", "anthropic.ts");
+    expect(existsSync(adapter)).toBe(true);
+    expect(LLM_SDK_IMPORT.test(read(adapter))).toBe(true);
   });
 
   // Negative controls: the detector is real.
