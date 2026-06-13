@@ -6,6 +6,7 @@ import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/sco
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
+import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import type { CompanyCandidateLabel } from "@/lib/scouting/candidate-readiness";
 
 const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
@@ -321,18 +322,37 @@ export default async function CompanyScoutingPage({
                     {c.canContact ? t("comms.eligible") : t("comms.blocked")}
                   </p>
                   {c.canContact ? (
-                    <RequestCommunicationButton
-                      locale={locale}
-                      requestId={result.demand.id}
-                      workerId={c.workerId}
-                      labels={{
-                        button: t("request.button"),
-                        opening: t("request.opening"),
-                        opened: t("request.opened"),
-                        view: t("request.view"),
-                        error: t("request.error"),
-                      }}
-                    />
+                    <div className="flex flex-col gap-2">
+                      <RequestCommunicationButton
+                        locale={locale}
+                        requestId={result.demand.id}
+                        workerId={c.workerId}
+                        labels={{
+                          button: t("request.button"),
+                          opening: t("request.opening"),
+                          opened: t("request.opened"),
+                          view: t("request.view"),
+                          error: t("request.error"),
+                        }}
+                      />
+                      <ProposeBookingButton
+                        locale={locale}
+                        requestId={result.demand.id}
+                        workerId={c.workerId}
+                        countryCode={c.readiness.countryFit === "match" ? p.location : null}
+                        labels={{
+                          open: t("booking.open"),
+                          startDate: t("booking.startDate"),
+                          note: t("booking.note"),
+                          send: t("booking.send"),
+                          sending: t("booking.sending"),
+                          sent: t("booking.sent"),
+                          unavailable: t("booking.unavailable"),
+                          error: t("booking.error"),
+                          cancel: t("booking.cancel"),
+                        }}
+                      />
+                    </div>
                   ) : null}
                 </div>
 

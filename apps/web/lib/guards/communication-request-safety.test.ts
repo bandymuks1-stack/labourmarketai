@@ -63,7 +63,9 @@ describe("client button — anonymized, never receives a profileId", () => {
 describe("page — request button only when contactable", () => {
   const src = code(read(PAGE));
   it("renders RequestCommunicationButton behind canContact", () => {
-    expect(src).toMatch(/c\.canContact\s*\?\s*\(?\s*<RequestCommunicationButton/);
+    // Tolerates an optional wrapper element (PR6 places the ProposeBookingButton
+    // alongside it, both gated behind the same canContact check).
+    expect(src).toMatch(/c\.canContact\s*\?\s*\(?[\s\S]{0,200}?<RequestCommunicationButton/);
   });
   it("passes no worker profileId to the button", () => {
     const idx = src.indexOf("<RequestCommunicationButton");

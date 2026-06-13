@@ -4195,6 +4195,17 @@
         "unknown": "Šalis: nenurodyta"
       },
       "docsConsent": "Dokumentai: rodomi tik darbuotojui sutikus"
+    },
+    "booking": {
+      "open": "Siūlyti rezervaciją",
+      "startDate": "Pradžios data",
+      "note": "Pastaba (nebūtina)",
+      "send": "Siųsti pasiūlymą",
+      "sending": "Siunčiama…",
+      "sent": "Pasiūlymas išsiųstas",
+      "unavailable": "Rezervacija kol kas neprieinama.",
+      "error": "Kažkas nepavyko.",
+      "cancel": "Atšaukti"
     }
   },
   "planBoundary": {
@@ -4223,6 +4234,40 @@
       "use": "Galima dabar",
       "request_pilot_access": "Prašyti piloto prieigos",
       "contact": "Susisiek su mumis"
+    }
+  },
+  "bookings": {
+    "eyebrow": "REZERVACIJOS",
+    "title": "Rezervacijos",
+    "intro": "Pasiūlytos darbo galimybės. Rezervacija patvirtinama tik darbuotojui sutikus.",
+    "notAuthed": "Prisijunk, kad matytum savo rezervacijas.",
+    "unavailable": "Rezervacija dar ruošiama ir kol kas neprieinama.",
+    "noDate": "Pradžios data nenurodyta",
+    "startsOn": "Pradžia {date}",
+    "incoming": {
+      "title": "Pasiūlymai tau",
+      "help": "Įmonė pasiūlė dirbti su tavimi. Tu sprendi.",
+      "empty": "Kol kas pasiūlymų nėra."
+    },
+    "outgoing": {
+      "title": "Tavo išsiųsti pasiūlymai",
+      "help": "Darbuotojai, kuriems pasiūlei. Jie priima arba atmeta.",
+      "empty": "Dar neišsiuntei pasiūlymų."
+    },
+    "status": {
+      "proposed": "Pasiūlyta",
+      "accepted": "Priimta",
+      "declined": "Atmesta",
+      "withdrawn": "Atšaukta",
+      "expired": "Nebegalioja"
+    },
+    "actions": {
+      "accept": "Priimti",
+      "decline": "Atmesti",
+      "accepted": "Priėmei",
+      "declined": "Atmetei",
+      "conflict": "Tu jau turi priimtą rezervaciją šioms datoms.",
+      "error": "Kažkas nepavyko."
     }
   }
 }
