@@ -48,6 +48,13 @@ export async function buildPlayerCardLabels(
       availabilityKey && tWorkCard.has(availabilityKey)
         ? tWorkCard(availabilityKey)
         : null,
+    availabilityFrom: card.availableFrom
+      ? t("availabilityFrom", {
+          date: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
+            new Date(card.availableFrom),
+          ),
+        })
+      : null,
     verifiedTitle: t("verifiedTitle"),
     verifiedEmpty: t("verifiedEmpty"),
     journalSupportedLabel: t("journalSupportedLabel"),
