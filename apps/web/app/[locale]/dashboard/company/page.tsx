@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
+import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
@@ -547,6 +548,8 @@ export default async function CompanyDashboardPage({
           }}
         />
       </section>
+
+      <CompanyScoutingBridge />
 
       <Link
         href="/dashboard/profile"
