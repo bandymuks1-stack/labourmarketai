@@ -19,10 +19,17 @@
 import { type SourceId, isKnownSource } from "./sources";
 import type { ClaimType } from "./evidence";
 
-/** Countries with a live evidence page today (MVP — the home Baltic market). */
-export type CountryCode = "LT" | "LV" | "EE";
+/** Countries with a live evidence page (Baltic home market + priority EU). */
+export type CountryCode = "LT" | "LV" | "EE" | "PL" | "DE" | "NL";
 
-export const SUPPORTED_COUNTRIES: readonly CountryCode[] = ["LT", "LV", "EE"];
+export const SUPPORTED_COUNTRIES: readonly CountryCode[] = [
+  "LT",
+  "LV",
+  "EE",
+  "PL",
+  "DE",
+  "NL",
+];
 
 /** The full priority-market list shown on the index (others are "coming"). */
 export const PRIORITY_MARKETS: readonly string[] = [
@@ -117,6 +124,66 @@ export const COUNTRY_SIGNALS: Record<CountryCode, readonly CountrySignal[]> = {
     },
     {
       country: "EE",
+      id: "digital-skills",
+      sourceId: "cedefop",
+      sourceUrl: CEDEFOP_SKILLS,
+      figureDate: "Cedefop Skills Forecast (latest)",
+      lastChecked: VERIFIED,
+      claimType: "skills_signal",
+    },
+  ],
+  PL: [
+    {
+      country: "PL",
+      id: "shortages",
+      sourceId: "eures",
+      sourceUrl: EURES_REPORT_2024,
+      figureDate: "EURES 2024 report",
+      lastChecked: VERIFIED,
+      claimType: "shortage_signal",
+    },
+    {
+      country: "PL",
+      id: "digital-skills",
+      sourceId: "cedefop",
+      sourceUrl: CEDEFOP_SKILLS,
+      figureDate: "Cedefop Skills Forecast (latest)",
+      lastChecked: VERIFIED,
+      claimType: "skills_signal",
+    },
+  ],
+  DE: [
+    {
+      country: "DE",
+      id: "shortages",
+      sourceId: "eures",
+      sourceUrl: EURES_REPORT_2024,
+      figureDate: "EURES 2024 report",
+      lastChecked: VERIFIED,
+      claimType: "shortage_signal",
+    },
+    {
+      country: "DE",
+      id: "digital-skills",
+      sourceId: "cedefop",
+      sourceUrl: CEDEFOP_SKILLS,
+      figureDate: "Cedefop Skills Forecast (latest)",
+      lastChecked: VERIFIED,
+      claimType: "skills_signal",
+    },
+  ],
+  NL: [
+    {
+      country: "NL",
+      id: "shortages",
+      sourceId: "eures",
+      sourceUrl: EURES_REPORT_2024,
+      figureDate: "EURES 2024 report",
+      lastChecked: VERIFIED,
+      claimType: "shortage_signal",
+    },
+    {
+      country: "NL",
       id: "digital-skills",
       sourceId: "cedefop",
       sourceUrl: CEDEFOP_SKILLS,

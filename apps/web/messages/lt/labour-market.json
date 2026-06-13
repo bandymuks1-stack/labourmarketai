@@ -150,6 +150,39 @@
         "title": "Skaitmeninių įgūdžių paklausa auga",
         "summary": "Cedefop įgūdžių prognozė rodo augančią skaitmeninių ir aukštesnio lygio įgūdžių paklausą įvairiose profesijose, taip pat ir Estijoje."
       }
+    },
+    "PL": {
+      "intro": "Lenkija — prioritetinė rinka. Šaltiniais pagrįsti signalai darbuotojams ir darbdaviams.",
+      "shortages": {
+        "title": "Trūkumas statybų, vairuotojų ir kvalifikuotos gamybos srityse",
+        "summary": "EURES ataskaitose Lenkijos trūkstamos profesijos – statybų ir susijusių sričių darbuotojai, krovininių transporto priemonių vairuotojai bei kvalifikuoti gamybos ir suvirinimo specialistai – kartu su visos ES spragomis sveikatos priežiūroje ir IT."
+      },
+      "digital-skills": {
+        "title": "Skaitmeninių įgūdžių paklausa auga",
+        "summary": "Cedefop įgūdžių prognozė rodo augančią skaitmeninių ir aukštesnio lygio įgūdžių paklausą įvairiose profesijose, taip pat ir Lenkijoje."
+      }
+    },
+    "DE": {
+      "intro": "Vokietija — prioritetinė rinka. Šaltiniais pagrįsti signalai darbuotojams ir darbdaviams.",
+      "shortages": {
+        "title": "Platus trūkumas priežiūros, amatų, IT ir inžinerijos srityse",
+        "summary": "EURES ataskaitose Vokietija yra tarp plačiausių ES trūkumo profilių – sveikatos ir priežiūros profesijos, kvalifikuoti statybų, elektros ir mechatronikos amatai, IT ir inžinerija."
+      },
+      "digital-skills": {
+        "title": "Skaitmeninių įgūdžių paklausa auga",
+        "summary": "Cedefop įgūdžių prognozė rodo augančią skaitmeninių ir aukštesnio lygio įgūdžių paklausą įvairiose profesijose, taip pat ir Vokietijoje."
+      }
+    },
+    "NL": {
+      "intro": "Nyderlandai — prioritetinė rinka. Šaltiniais pagrįsti signalai darbuotojams ir darbdaviams.",
+      "shortages": {
+        "title": "Įtempta rinka su technikos, priežiūros ir IT trūkumu",
+        "summary": "EURES ataskaitose Nyderlandai yra tarp labiausiai įtemptų ES darbo rinkų – trūksta technikos ir inžinerijos specialistų, sveikatos ir priežiūros, švietimo bei IT specialistų."
+      },
+      "digital-skills": {
+        "title": "Skaitmeninių įgūdžių paklausa auga",
+        "summary": "Cedefop įgūdžių prognozė rodo augančią skaitmeninių ir aukštesnio lygio įgūdžių paklausą įvairiose profesijose, taip pat ir Nyderlanduose."
+      }
     }
   }
 }
