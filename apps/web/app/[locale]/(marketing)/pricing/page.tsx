@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHero } from "@/components/marketing/page-hero";
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { ServiceOffers } from "@/components/marketing/service-offers";
+import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
 
 // getPlans() reads the live `plans` table; keep this page request-time so
 // the build never needs Supabase. It degrades gracefully if unreachable.
@@ -29,6 +30,7 @@ export default async function PricingPage({
         ctaSource="pricing_hero"
       />
       <PricingTable />
+      <PrePaymentPlanBoundary />
       <ServiceOffers />
 
       <section className="mx-auto max-w-container px-6 pb-20 sm:px-12">
