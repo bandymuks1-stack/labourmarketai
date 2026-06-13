@@ -14,6 +14,7 @@ import { MicroActivityFeed } from "@/components/app/micro-activity-feed";
 import { DraftBoard } from "@/components/marketing/draft-board";
 import { MarketPulse } from "@/components/marketing/market-pulse";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
+import { LabourMarketEvidence } from "@/components/marketing/labour-market-evidence";
 
 // Deterministic sample series — governed as market.*.series placeholders
 // (the caption under each carries the visible PLACEHOLDER marker).
@@ -33,6 +34,23 @@ export default async function LandingPage({
   const t = await getTranslations("hero");
   const mk = await getTranslations("market");
   const tj = await getTranslations("journey");
+  const tlm = await getTranslations("labourMarket");
+  const audienceKeys = [
+    "aWorkers",
+    "aJobseekers",
+    "aFreelancers",
+    "aStudents",
+    "aChangers",
+    "aEmployers",
+    "aAgencies",
+    "aClients",
+  ] as const;
+  const pillarKeys = [
+    ["p1Title", "p1Body"],
+    ["p2Title", "p2Body"],
+    ["p3Title", "p3Body"],
+    ["p4Title", "p4Body"],
+  ] as const;
   // Honest sample-data label, reused from the market counters (exists in every
   // locale): "Pre-alpha preview — sample signals, not real platform figures."
   const lv = await getTranslations("live.counters");
@@ -161,6 +179,81 @@ export default async function LandingPage({
           </Link>
         </div>
       </section>
+
+      {/* ── Audience band — whole labour market, not construction-only ─── */}
+      <section className="mt-16">
+        <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+          <span className="live-dot" aria-hidden />
+          {tlm("audienceEyebrow")}
+        </p>
+        <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
+          {tlm("audienceTitle")}
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-text-secondary sm:text-base">
+          {tlm("audienceSubcopy")}
+        </p>
+        <ul className="mt-6 flex flex-wrap gap-2">
+          {audienceKeys.map((k) => (
+            <li
+              key={k}
+              className="rounded-sm border border-ink-500 bg-ink-800/40 px-3 py-1.5 text-sm text-text-secondary"
+            >
+              {tlm(k)}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ── Why-now pillars ──────────────────────────────────────────── */}
+      <section className="mt-16">
+        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          {tlm("pillarsEyebrow")}
+        </p>
+        <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
+          {tlm("pillarsTitle")}
+        </h2>
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
+          {pillarKeys.map(([titleKey, bodyKey]) => (
+            <Card key={titleKey} className="flex flex-col gap-2">
+              <h3 className="font-display text-lg font-semibold text-text-primary">
+                {tlm(titleKey)}
+              </h3>
+              <p className="text-sm leading-relaxed text-text-secondary">
+                {tlm(bodyKey)}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Two paths: worker-first + employer ───────────────────────── */}
+      <section className="mt-16 grid gap-5 md:grid-cols-2">
+        <Card className="flex flex-col items-start gap-3">
+          <h3 className="font-display text-xl font-semibold text-text-primary">
+            {tlm("workerPathTitle")}
+          </h3>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {tlm("workerPathBody")}
+          </p>
+          <Link href="/auth/signup" className="mt-2">
+            <Button>{tlm("workerPathCta")} →</Button>
+          </Link>
+        </Card>
+        <Card className="flex flex-col items-start gap-3">
+          <h3 className="font-display text-xl font-semibold text-text-primary">
+            {tlm("employerPathTitle")}
+          </h3>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {tlm("employerPathBody")}
+          </p>
+          <Link href="/for-companies" className="mt-2">
+            <Button variant="secondary">{tlm("employerPathCta")} →</Button>
+          </Link>
+        </Card>
+      </section>
+
+      {/* ── Labour-market evidence (source-backed, Step 1) ───────────── */}
+      <LabourMarketEvidence />
 
       {/* ── Player card showcase (5b.3) ──────────────────────────────── */}
       <PlayerCardShowcase />
