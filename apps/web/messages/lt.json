@@ -3968,7 +3968,8 @@
     "proofEmpty": "Patvirtintų įrašų dar nėra.",
     "generatedAt": "Sugeneruota",
     "verifyNote": "Patvirtinimus galima patikrinti platformoje.",
-    "notWorker": "CV eksportas galimas darbuotojo profiliui — jis sudaromas iš darbo žurnalo ir patvirtintų įgūdžių."
+    "notWorker": "CV eksportas galimas darbuotojo profiliui — jis sudaromas iš darbo žurnalo ir patvirtintų įgūdžių.",
+    "summaryTitle": "Profesinis aprašymas"
   },
   "todayScreen": {
     "eyebrow": "Šiandien",

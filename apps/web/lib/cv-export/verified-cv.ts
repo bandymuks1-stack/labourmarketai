@@ -41,6 +41,9 @@ export type VerifiedCvProofRow = {
 
 export type VerifiedCvData = {
   personName: string;
+  /** The worker's own self-written professional summary (`profiles.profile_text`).
+   *  Self-declared, never verified; null/empty when not written. */
+  professionalSummary: string | null;
   professionSlugs: { slug: string; isPrimary: boolean }[];
   /** Catalogued worker skills, grouped by honest tier (slugs). */
   tiers: CvSkillTiers;
@@ -73,7 +76,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     await Promise.all([
       supabase
         .from("profiles")
-        .select("full_name, email")
+        .select("full_name, email, profile_text")
         .eq("id", user.id)
         .single(),
       supabase
@@ -102,6 +105,12 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   const personName =
     profileRes.data?.full_name ??
     (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "—");
+
+  const professionalSummary =
+    (
+      (profileRes.data as { profile_text?: string | null } | null)
+        ?.profile_text ?? ""
+    ).trim() || null;
 
   const professionSlugs = (wpRes.data ?? [])
     .map((r) => {
@@ -204,6 +213,14 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
 
   return {
     ok: true,
-    cv: { personName, professionSlugs, tiers, declaredClaims, signals, proof },
+    cv: {
+      personName,
+      professionalSummary,
+      professionSlugs,
+      tiers,
+      declaredClaims,
+      signals,
+      proof,
+    },
   };
 }

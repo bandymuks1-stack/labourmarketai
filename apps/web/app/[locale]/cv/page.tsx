@@ -136,6 +136,18 @@ export default async function VerifiedCvPage({
           </dl>
         </header>
 
+        {/* Professional summary — the worker's OWN self-written text
+            (profiles.profile_text). Self-declared, never verified. Omitted
+            entirely when empty so the print CV stays clean. */}
+        {cv.professionalSummary ? (
+          <section className="flex flex-col gap-2" data-testid="cv-summary-section">
+            <h2 className="font-display text-lg font-bold">{t("summaryTitle")}</h2>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">
+              {cv.professionalSummary}
+            </p>
+          </section>
+        ) : null}
+
         {/* Skills by honest tier — visually distinct, labelled, hinted. */}
         <section className="flex flex-col gap-4" data-testid="cv-skills">
           <h2 className="font-display text-lg font-bold">{t("skills")}</h2>
