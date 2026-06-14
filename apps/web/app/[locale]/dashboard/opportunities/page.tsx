@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { loadWorkerOpportunities } from "@/lib/opportunities/load-worker-opportunities";
+import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import type {
   OpportunityGap,
   OpportunityStatus,
@@ -34,11 +35,22 @@ export default async function OpportunitiesPage({
   await requireRoleOrRedirect(locale, "worker");
 
   const t = await getTranslations("opportunities");
+  const tlm = await getTranslations("labourMarket");
   const result = await loadWorkerOpportunities();
 
+  const workLabels = buildWorkTypeLabelMap(locale);
   const profileHref = `/${locale}/dashboard/profile`;
   const statusLabel = (s: OpportunityStatus) => t(`status.${s}`);
   const gapLabel = (g: OpportunityGap) => t(`gap.${g}`);
+  // role_text is a work-type slug → localized label; country is ISO-2 → name;
+  // start_period is the urgency enum → localized timing label. All from closed
+  // sets the RPC exposes — never free text.
+  const roleLabel = (slug: string | null) =>
+    (slug && workLabels[slug]) || t("fieldRoleUnknown");
+  const countryLabel = (code: string | null) =>
+    code && tlm.has(`countryNames.${code}`) ? tlm(`countryNames.${code}`) : (code ?? "—");
+  const startLabel = (val: string | null) =>
+    val && t.has(`urgency.${val}`) ? t(`urgency.${val}`) : (val ?? "—");
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8">
@@ -140,7 +152,7 @@ export default async function OpportunitiesPage({
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <p className="font-display text-base font-bold text-text-primary">
-                      {need.roleText ?? t("fieldRoleUnknown")}
+                      {roleLabel(need.roleText)}
                     </p>
                     <span
                       className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[fit.status]}`}
@@ -154,7 +166,7 @@ export default async function OpportunitiesPage({
                         {t("fieldCountry")}
                       </dt>
                       <dd className="truncate text-xs text-text-primary">
-                        {need.country ?? "—"}
+                        {countryLabel(need.country)}
                       </dd>
                     </div>
                     <div className="min-w-0">
@@ -162,7 +174,7 @@ export default async function OpportunitiesPage({
                         {t("fieldStart")}
                       </dt>
                       <dd className="truncate text-xs text-text-primary">
-                        {need.startPeriod ?? "—"}
+                        {startLabel(need.startPeriod)}
                       </dd>
                     </div>
                     <div className="min-w-0">

@@ -23,6 +23,16 @@ import {
   type EstimateInputs,
 } from "@/lib/estimate/estimate";
 import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
+import { isWorkTypeSlug, isMarketCountry } from "@/lib/taxonomy/work-categories";
+
+/** Accommodation offers that are safe to expose on the worker board (enum, no
+ *  free text). Mirrors the worker RPC's accommodation whitelist. */
+const ACCOMMODATION_OFFER_VALUES = new Set([
+  "provided_free",
+  "provided_paid",
+  "provided_deducted",
+  "not_provided",
+]);
 
 export type DemandIntent = "hire_workers" | "partner";
 
@@ -46,6 +56,20 @@ export type DemandFields = {
   /** Optional preliminary estimate inputs — stored in payload.estimate when the
    *  user filled it in. Recomputed server-side; never trusted from the client. */
   estimate?: EstimateInputs;
+  // ── Structured, worker-board-safe fields ──────────────────────────────────
+  // These populate the structured customer_requests columns (role_or_work_type
+  // / country / team_size / start_period) + the whitelisted payload.accommodation
+  // so the worker opportunities board can show useful, NON-personal facts. The
+  // free-text fields above (role/location/skills/notes) stay in payload and are
+  // NEVER exposed to workers.
+  /** Work-type slug from the shared taxonomy (lib/taxonomy/work-categories). */
+  workType?: string;
+  /** ISO-3166 alpha-2 market country. */
+  country?: string;
+  /** Number of workers needed. */
+  teamSize?: number;
+  /** Accommodation offer (enum). */
+  accommodation?: string;
 };
 
 export type DemandRequestResult =
@@ -114,6 +138,32 @@ export async function submitDemandRequest(
     role ||
     (intent === "partner" ? "Agency partnership — offer" : "Hiring workers — demand");
 
+  // ── Structured, worker-board-safe values ──────────────────────────────────
+  // Each is validated against a CLOSED set so a client can never inject free
+  // text into the columns/keys the worker board exposes.
+  const workType =
+    typeof fields?.workType === "string" && isWorkTypeSlug(fields.workType)
+      ? fields.workType
+      : null;
+  const country =
+    typeof fields?.country === "string" && isMarketCountry(fields.country.toUpperCase())
+      ? fields.country.toUpperCase()
+      : null;
+  const teamSize =
+    typeof fields?.teamSize === "number" &&
+    Number.isInteger(fields.teamSize) &&
+    fields.teamSize > 0 &&
+    fields.teamSize <= 100000
+      ? fields.teamSize
+      : null;
+  const accommodation =
+    typeof fields?.accommodation === "string" &&
+    ACCOMMODATION_OFFER_VALUES.has(fields.accommodation)
+      ? fields.accommodation
+      : null;
+  // The urgency enum is a safe, structured timing signal → stored as start_period.
+  const startPeriod = fields?.urgency ?? null;
+
   const payload: Record<string, unknown> = {
     source: "dashboard_demand",
     intent,
@@ -122,6 +172,9 @@ export async function submitDemandRequest(
     skills: clamp(fields?.skills, MAX_TEXT) || null,
     urgency: fields?.urgency ?? null,
     notes: clamp(fields?.notes, MAX_TEXT) || null,
+    // The ONLY payload key the worker RPC exposes — a whitelisted enum, never
+    // free text. Stored here because there is no accommodation COLUMN.
+    accommodation,
   };
 
   // Optional preliminary estimate. Only persisted when the user actually filled
@@ -155,6 +208,31 @@ export async function submitDemandRequest(
     return { ok: false, code: "save_failed" };
   }
 
+  const requestId = typeof data === "string" ? data : null;
+
+  // Populate the structured, worker-board-safe COLUMNS on the row just created
+  // — an owner-scoped UPDATE under the existing customer_requests RLS
+  // (using profile_id = auth.uid()). No migration, no RPC change, no admin op.
+  // Best-effort: a failure here never fails the submit (the request is already
+  // saved); the worker board just shows generic labels until columns are set.
+  if (requestId && (workType || country || teamSize != null || startPeriod)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const { error: upErr } = await sb
+      .from("customer_requests")
+      .update({
+        role_or_work_type: workType,
+        country,
+        team_size: teamSize,
+        start_period: startPeriod,
+      })
+      .eq("id", requestId)
+      .eq("profile_id", user.id);
+    if (upErr) {
+      console.error("[demand-request] structured-field update failed:", upErr.message);
+    }
+  }
+
   revalidatePath("/", "layout");
-  return { ok: true, requestId: typeof data === "string" ? data : null };
+  return { ok: true, requestId };
 }

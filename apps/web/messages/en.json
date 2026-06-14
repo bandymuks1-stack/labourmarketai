@@ -4471,6 +4471,11 @@
       "provided_deducted": "Deducted from pay",
       "not_provided": "Not provided"
     },
+    "urgency": {
+      "flexible": "Flexible timing",
+      "this_week": "This week",
+      "urgent": "Urgent"
+    },
     "possibleNote": "Once your profile is ready, employers can find you and reach out through your account.",
     "footnote": "These are honest signals from your profile — not a rating or a promise. Final fit is always decided by people."
   },

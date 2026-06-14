@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -10,6 +10,10 @@ import {
   submitDemandRequestAction,
 } from "@/lib/demand/demand-request-actions";
 import type { DemandUrgency } from "@/lib/demand/demand-request";
+import {
+  buildWorkCategoryOptions,
+  MARKET_COUNTRIES,
+} from "@/lib/taxonomy/work-categories";
 import { EstimateBuilder } from "@/components/app/estimate-builder";
 import { EstimateSummary } from "@/components/app/estimate-summary";
 import {
@@ -45,6 +49,13 @@ export function DemandRequestButton({
   stepTitles: [string, string, string];
 }) {
   const t = useTranslations("auth.dashboard.wow.demand");
+  // Structured field labels reuse the existing 3-locale catalogues (no new
+  // 11-locale keys): companyNeed for the field labels + accommodation options,
+  // labourMarket for the country names.
+  const tc = useTranslations("companyNeed");
+  const tlm = useTranslations("labourMarket");
+  const locale = useLocale();
+  const workCategories = buildWorkCategoryOptions(locale);
   // Intent-specific copy: company hiring is NOT a generic buyer "need".
   const key = intent === "hire_workers" ? "hire" : "partner";
 
@@ -55,6 +66,21 @@ export function DemandRequestButton({
   const [skills, setSkills] = useState("");
   const [urgency, setUrgency] = useState<DemandUrgency>("flexible");
   const [notes, setNotes] = useState("");
+  // Structured, worker-board-safe fields.
+  const [workType, setWorkType] = useState("");
+  const [country, setCountry] = useState("");
+  const [teamSize, setTeamSize] = useState("");
+  const [accommodation, setAccommodation] = useState("");
+  const accommodationOptions: { value: string; label: string }[] = [
+    { value: "provided_free", label: tc("accFree") },
+    { value: "provided_paid", label: tc("accPaid") },
+    { value: "provided_deducted", label: tc("accDeducted") },
+    { value: "not_provided", label: tc("accNone") },
+  ];
+  const workTypeLabel =
+    workCategories.flatMap((c) => c.options).find((o) => o.slug === workType)?.label ?? "";
+  const accommodationLabel =
+    accommodationOptions.find((o) => o.value === accommodation)?.label ?? "";
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">(
@@ -101,6 +127,10 @@ export function DemandRequestButton({
         skills,
         urgency,
         notes,
+        workType: workType || undefined,
+        country: country || undefined,
+        teamSize: teamSize.trim() ? Number(teamSize) : undefined,
+        accommodation: accommodation || undefined,
         estimate: estimateEngaged ? estimate : undefined,
       });
       setState(res.ok ? "done" : "error");
@@ -148,6 +178,24 @@ export function DemandRequestButton({
         {t("form.urgencyLabel")}
       </dt>
       <dd className="text-text-primary">{urgencyLabel}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {tc("profession")}
+      </dt>
+      <dd className="text-text-primary">{workTypeLabel || "—"}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {tc("country")}
+      </dt>
+      <dd className="text-text-primary">
+        {country ? tlm(`countryNames.${country}`) : "—"}
+      </dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {tc("numberOfWorkers")}
+      </dt>
+      <dd className="text-text-primary">{teamSize.trim() || "—"}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {tc("accommodation")}
+      </dt>
+      <dd className="text-text-primary">{accommodationLabel || "—"}</dd>
       {notes.trim() && (
         <>
           <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
@@ -270,6 +318,75 @@ export function DemandRequestButton({
       {/* STEP 2 — criteria / context */}
       {step === 2 && (
         <div className="flex flex-col gap-4">
+          {/* Structured, worker-board-safe fields — these are what a worker
+              sees on the opportunities board (no free text exposed). */}
+          <label className="flex flex-col gap-1.5">
+            <Label>{tc("profession")}</Label>
+            <select
+              value={workType}
+              onChange={(e) => setWorkType(e.target.value)}
+              className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none focus:border-brand-blue"
+              data-testid="demand-work-type"
+            >
+              <option value="">—</option>
+              {workCategories.map((c) => (
+                <optgroup key={c.key} label={c.sector}>
+                  {c.options.map((o) => (
+                    <option key={o.slug} value={o.slug}>
+                      {o.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="flex flex-col gap-1.5">
+              <Label>{tc("country")}</Label>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none focus:border-brand-blue"
+                data-testid="demand-country-select"
+              >
+                <option value="">—</option>
+                {MARKET_COUNTRIES.map((code) => (
+                  <option key={code} value={code}>
+                    {tlm(`countryNames.${code}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <Label>{tc("numberOfWorkers")}</Label>
+              <Input
+                type="number"
+                min={1}
+                max={100000}
+                value={teamSize}
+                placeholder="1"
+                onChange={(e) => setTeamSize(e.target.value)}
+                data-testid="demand-team-size"
+              />
+            </label>
+          </div>
+          <label className="flex flex-col gap-1.5">
+            <Label>{tc("accommodation")}</Label>
+            <select
+              value={accommodation}
+              onChange={(e) => setAccommodation(e.target.value)}
+              className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none focus:border-brand-blue"
+              data-testid="demand-accommodation"
+            >
+              <option value="">—</option>
+              {accommodationOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <label className="flex flex-col gap-1.5">
             <Label>
               {t("form.locationLabel")}{" "}
