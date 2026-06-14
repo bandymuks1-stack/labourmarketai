@@ -1,10 +1,10 @@
 "use client";
 
-// Live market preview: low-fidelity preview, bus pakeistas TASK 07 (living-arena
-// UI po owner vizualinio užrakto). Hero PreviewChip ("PRE-ALPHA · Activity
-// preview") laiko šį žemėlapį sąžiningą — koncepcija, ne live duomenys.
+// Europe directions map: low-fidelity directional overview of the Baltic and
+// Northern-European labour-market directions the platform serves. Concept
+// visual, not live data — no pseudo-live clock or "live" status framing.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   EUROPE_GEO,
@@ -42,15 +42,6 @@ export function LiveMap() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<Hover>(null);
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [utc, setUtc] = useState<string | null>(null);
-
-  useEffect(() => {
-    const tick = () =>
-      setUtc(new Date().toISOString().slice(11, 19)); // HH:MM:SS UTC
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
 
   const workers = useMemo(
     () => geoPayloads("map.marker.worker.", "worker"),
@@ -97,14 +88,9 @@ export function LiveMap() {
       onMouseMove={onMove}
       className="relative w-full overflow-hidden card-border"
     >
-      {/* top-right synced UTC label */}
-      <div className="pointer-events-none absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-sm border border-state-live/40 bg-ink-900/70 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-state-live">
-        <span className="live-dot" aria-hidden />
-        {t("label.live")} ·{" "}
-        <span suppressHydrationWarning className="tabular-nums">
-          {utc ?? "--:--:--"}
-        </span>{" "}
-        {t("label.utc")}
+      {/* top-right static directions label */}
+      <div className="pointer-events-none absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-sm border border-ink-600/70 bg-ink-900/70 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("label.live")}
       </div>
 
       {/* legend bottom-right */}

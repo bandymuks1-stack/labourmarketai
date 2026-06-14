@@ -1763,42 +1763,42 @@
   },
   "live": {
     "chip": {
-      "text": "PRE-ALPHA · Aktyvumo preview · Gyva rinka auga"
+      "text": "Europos darbo kryptys"
     },
     "clock": {
-      "badge": "EU-Š RINKA · GYVA"
+      "badge": "Šiaurės ir Baltijos Europa"
     },
     "ticker": {
-      "label": "Gyvo rinkos aktyvumo juosta"
+      "label": "Darbo rinkos veiklos juosta"
     },
     "counters": {
-      "activeWorkers": "Aktyvūs darbuotojai",
-      "liveDemand": "Atviros galimybės",
-      "matchesToday": "Veikla šiandien",
-      "previewNote": "Pre-alpha peržiūra — pavyzdiniai signalai, ne realūs platformos skaičiai.",
-      "avgOvr": "Vid. pasirengimas · peržiūra"
+      "activeWorkers": "Darbuotojų profiliai",
+      "liveDemand": "Darbo galimybės",
+      "matchesToday": "Nauji veiksmai",
+      "previewNote": "Skaičiai pildysis platformai augant.",
+      "avgOvr": "Profilio užpildymas"
     },
     "activity": {
-      "label": "Gyvo aktyvumo srautas"
+      "label": "Veiklos srautas"
     }
   },
   "map": {
     "label": {
-      "live": "EU GYVA",
+      "live": "Darbo kryptys",
       "utc": "UTC"
     },
     "tooltip": {
       "workers": "darbuotojai",
       "projects": "projektai",
       "companies": "įmonės",
-      "matchesToday": "atitikimai šiandien",
+      "matchesToday": "atitikimai",
       "expansion_candidate": "Plėtros kandidatė"
     },
     "legend": {
-      "active_markets": "Aktyvios rinkos (9)",
+      "active_markets": "Pagrindinės kryptys (9)",
       "expansion_candidates": "Plėtros kandidatės"
     },
-    "caption": "9 aktyvios rinkos · greita plėtra toliau"
+    "caption": "Baltijos ir Šiaurės Europos darbo kryptys"
   },
   "company": {
     "score": {
@@ -1815,10 +1815,10 @@
       "line1": "Štai kaip darbuotojai",
       "line2": "atranda jiems tinkantį darbą."
     },
-    "subcopy": "Atitikimo kryptis su priežastimis. Kiekvienas atitikimas parodo \"kodėl\" — be neskaidraus algoritmo ar užmaskuoto įvertinimo. Koncepcijos peržiūra, kaip veiks galimybių atitikimas.",
+    "subcopy": "Atitikimo kryptis su priežastimis. Kiekvienas atitikimas parodo \"kodėl\" — be neskaidraus algoritmo ar užmaskuoto įvertinimo. Taip veiks galimybių atitikimas.",
     "column": {
       "onDeck": "Eilėje",
-      "live": "Vyksta dabar",
+      "live": "Šiuo metu",
       "drafted": "Atrinkti"
     },
     "status": {
@@ -1826,15 +1826,15 @@
       "deciding": "Sprendimas",
       "hired": "Atrinkta"
     },
-    "liveCounter": "Koncepcijos peržiūra · pavyzdinė atranka"
+    "liveCounter": "Kaip veiks atitikimo eiga"
   },
   "marketPulse": {
-    "eyebrow": "Rinkos pulsas",
+    "eyebrow": "Darbo rinkos apžvalga",
     "headline": {
       "line1": "Darbo rinka,",
-      "line2": "matoma realiu laiku."
+      "line2": "kurią matote aiškiai."
     },
-    "subcopy": "Rinkos analitika — sistemos dalis: pasiūla, paklausa ir signalai matomi visiems, kam jų reikia.",
+    "subcopy": "Rinkos apžvalga — sistemos dalis: pasiūla ir paklausa matomos visiems, kam jų reikia.",
     "panel": {
       "demandByCountry": "Paklausa pagal šalį",
       "topSkills": "Paklausiausi įgūdžiai",
@@ -1847,7 +1847,7 @@
       "supply": "Pasiūla",
       "demand": "Paklausa"
     },
-    "autoUpdate": "Auto-atnaujinimas",
+    "autoUpdate": "Apžvalga",
     "timeAgo": {
       "justNow": "ką tik",
       "minutes": "prieš {n}min",
@@ -1860,7 +1860,7 @@
       "line1": "Kiekvienas darbuotojas — kontekste",
       "line2": "ir paruoštas."
     },
-    "subcopy": "Atitikimas ir pasirengimas kyla iš realiai atlikto darbo, patvirtintų įgūdžių ir įrodymų objekte — visada rodomi kontekste, niekada kaip vienas universalus įvertinimas. Koncepcijos peržiūra su pavyzdiniais profiliais.",
+    "subcopy": "Atitikimas ir pasirengimas kyla iš realiai atlikto darbo, patvirtintų įgūdžių ir įrodymų objekte — visada rodomi kontekste, niekada kaip vienas universalus įvertinimas. Taip atrodys darbuotojų kortelės.",
     "stat": {
       "SKL": "Įgūdis",
       "REL": "Patikimumas",
@@ -1875,7 +1875,7 @@
       "bronze": "Bronza"
     },
     "status": {
-      "live": "Gyva",
+      "live": "Dirba",
       "available": "Laisvas",
       "drafted": "Atrinktas",
       "busy": "Užimtas"
@@ -2556,7 +2556,7 @@
       "expand_aria": "Išskleisti atsakymą"
     },
     "preview": {
-      "conceptChip": "Koncepcijos peržiūra · pre-alpha",
+      "conceptChip": "Kaip tai veiks",
       "rankedMatches": "atitikimo kryptis",
       "headcount": "Žmonių skaičius",
       "intensity": {
@@ -2586,7 +2586,7 @@
         "Atitikimo ir pasirengimo signalai — aprėptis konkrečiam poreikiui pagal patvirtintus įgūdžius, patikimumą ir saugą. Niekada vienas universalus įvertinimas.",
         "Statų juostos — Įgūdis, Patikimumas, Greitis, Sauga, Prisitaikymas, Pasitikėjimas.",
         "Patvirtinti įgūdžiai — patvirtinti darbdavių ir pažymėjimų, ne savadarbiai.",
-        "Būsenos ženklas — Laisvas, Gyva, Atrinktas ar Užimtas, visada aktualus."
+        "Būsenos ženklas — Laisvas, Dirba, Atrinktas ar Užimtas, visada aktualus."
       ]
     },
     "journey": {
@@ -2880,12 +2880,12 @@
   },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",
-    "headline": "Bendra darbo rinkos platforma, kuri padeda darbuotojams, darbdaviams, agentūroms ir partneriams dirbti",
-    "headlineAccent": "aiškiau, skaidriau ir patikimiau.",
-    "subcopy": "Tikslūs profiliai, aiškūs poreikiai, dokumentų pasirengimo signalai, sąžiningi susitarimai ir reputacija padeda mažinti rizikas visiems rinkos dalyviams.",
-    "ctaPrimary": "Pradėti dabar",
-    "businessNote": "Įmonėms ir agentūroms ·",
-    "businessLink": "Sužinoti daugiau"
+    "headline": "Darbas užsienyje ir darbuotojų paieška",
+    "headlineAccent": "be spėlionių.",
+    "subcopy": "Darbuotojai pildo savo įgūdžius, patirtį ir dokumentus. Darbdaviai pateikia realų poreikį. Labourmarket.ai padeda greičiau suprasti, kurie žmonės tinka konkretiems darbams.",
+    "ctaPrimary": "Pildyti darbuotojo profilį",
+    "businessNote": "Įmonėms ir darbdaviams ·",
+    "businessLink": "Pateikti darbuotojų poreikį"
   },
   "waitlist": {
     "title": "Įmonėms ir agentūroms — netrukus",
@@ -2965,8 +2965,8 @@
     "cta": "Visa analitika"
   },
   "footer": {
-    "tagline": "Gyva visų sektorių darbo rinka — Baltijos ir Šiaurės Europa.",
-    "activity": "Gyvas rinkos aktyvumas",
+    "tagline": "Visų sektorių darbo rinka — Baltijos ir Šiaurės Europa.",
+    "activity": "Rinkos apžvalga",
     "product": "Produktas",
     "company": "Apie mus",
     "legalGroup": "Teisinė informacija",

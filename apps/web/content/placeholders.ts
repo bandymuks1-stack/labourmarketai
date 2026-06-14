@@ -626,16 +626,16 @@ export const placeholders: readonly Placeholder[] = [
   ),
   ...(
     [
-      ["join", "Naujas darbuotojas prisijungė – Vilnius", "New worker joined — Vilnius"],
-      ["demand", "Naujas darbo poreikis – Roterdamas", "New job demand — Rotterdam"],
-      ["match", "Atitikimas: slaugytojas → pamaina", "Match: care assistant → shift"],
-      ["checkin", "Darbuotojas pažymėjo atvykimą – Amsterdamas", "Worker checked in — Amsterdam"],
-      ["join", "Agentūra įtraukė 4 vairuotojus", "Agency added 4 drivers"],
-      ["demand", "Naujas darbo poreikis – Kopenhaga", "New job demand — Copenhagen"],
-      ["match", "Atitikimas: sandėlininkas → pamaina", "Match: warehouse operative → shift"],
-      ["checkin", "Pamaina pradėta – Hamburgas", "Shift started — Hamburg"],
-      ["join", "Darbuotojas patvirtino prieinamumą", "Worker confirmed availability"],
-      ["demand", "Komanda suformuota projektui – Oslas", "Team formed for a project — Oslo"],
+      ["join", "Statybos ir apdailos darbai", "Construction & finishing work"],
+      ["demand", "Logistika ir sandėliai", "Logistics & warehousing"],
+      ["match", "Slauga ir priežiūra", "Care & nursing"],
+      ["checkin", "Gamyba ir surinkimas", "Manufacturing & assembly"],
+      ["join", "Transportas ir vairuotojai", "Transport & drivers"],
+      ["demand", "Apgyvendinimas ir maitinimas", "Hospitality & catering"],
+      ["match", "Elektra ir mechanika", "Electrical & mechanical"],
+      ["checkin", "Valymas ir pastatų priežiūra", "Cleaning & facilities"],
+      ["join", "Suvirinimas ir metalo darbai", "Welding & metalwork"],
+      ["demand", "Žemės ūkis ir sezoniniai darbai", "Agriculture & seasonal work"],
     ] as const
   ).map(
     ([icon, lt, en], i): Placeholder => ({
@@ -655,18 +655,18 @@ export const placeholders: readonly Placeholder[] = [
   ...Array.from({ length: 12 }, (_, i): Placeholder => {
     const n = i + 1;
     const samples: Record<number, { lt: string; en: string }> = {
-      1: { lt: "Naujas poreikis · Roterdamas · 6 sandėlio darbuotojų", en: "New demand · Rotterdam · 6 warehouse staff" },
-      2: { lt: "Atitikimas patvirtintas · Amsterdamas", en: "Match confirmed · Amsterdam" },
-      3: { lt: "Agentūra prisijungė · Vilnius", en: "Agency joined · Vilnius" },
-      4: { lt: "Pamaina pradėta · Hamburgas", en: "Shift started · Hamburg" },
-      5: { lt: "12 darbuotojų laisvi · Kopenhaga", en: "12 workers available · Copenhagen" },
-      6: { lt: "Naujas projektas · Oslas", en: "New project · Oslo" },
-      7: { lt: "Slaugytojų paklausa +18% · Šiaurės Europa", en: "Care-worker demand +18% · Northern Europe" },
-      8: { lt: "Komanda suformuota · Roterdamas", en: "Team formed · Rotterdam" },
-      9: { lt: "Atvykimas pažymėtas · Amsterdamas", en: "Check-in logged · Amsterdam" },
-      10: { lt: "Naujas poreikis · Berlynas · 4 elektrikai", en: "New demand · Berlin · 4 electricians" },
-      11: { lt: "Profilis patvirtintas · Klaipėda", en: "Profile verified · Klaipėda" },
-      12: { lt: "Sutartis pasirašyta · Stokholmas", en: "Contract signed · Stockholm" },
+      1: { lt: "Statyba ir apdaila", en: "Construction & finishing" },
+      2: { lt: "Logistika ir sandėliai", en: "Logistics & warehousing" },
+      3: { lt: "Slauga ir priežiūra", en: "Care & nursing" },
+      4: { lt: "Gamyba ir surinkimas", en: "Manufacturing & assembly" },
+      5: { lt: "Transportas ir vairuotojai", en: "Transport & drivers" },
+      6: { lt: "Apgyvendinimas ir maitinimas", en: "Hospitality & catering" },
+      7: { lt: "Žemės ūkis ir sezoniniai darbai", en: "Agriculture & seasonal work" },
+      8: { lt: "Valymas ir pastatų priežiūra", en: "Cleaning & facilities" },
+      9: { lt: "Elektra ir mechanika", en: "Electrical & mechanical" },
+      10: { lt: "Suvirinimas ir metalo darbai", en: "Welding & metalwork" },
+      11: { lt: "Nyderlandai · Vokietija · Skandinavija", en: "Netherlands · Germany · Scandinavia" },
+      12: { lt: "Baltijos šalys · Šiaurės Europa", en: "Baltics · Northern Europe" },
     };
     return {
       id: `ticker.event.${n}`,

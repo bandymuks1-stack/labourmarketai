@@ -83,10 +83,10 @@ export function MarketCounters() {
         );
       })}
       </div>
-      {/* P0.2: explicit preview governance so the figures don't read as real
-          platform scale. Decorative/sample only — never a real metric. */}
-      <p className="inline-flex w-fit items-center gap-2 rounded-sm border border-state-warning/40 bg-ink-800/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning">
-        <span className="live-dot" aria-hidden />
+      {/* Calm forward-looking caption so the figures read as an illustrative
+          interface overview, not real platform scale — no warning/pseudo-live
+          styling. */}
+      <p className="w-fit font-mono text-[10px] uppercase tracking-label text-text-muted">
         {t("previewNote")}
       </p>
     </div>

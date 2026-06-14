@@ -2,17 +2,13 @@
 
 import { useTranslations } from "next-intl";
 
-/** Persistent honesty pill — always visible, top-left of the hero card
- *  region. The pulsing dot reuses .live-dot (already reduced-motion safe).
- *  Named "preview" — the banned word stays out of identifiers too. */
+/** Static directions label — top-left of the hero map region. Calm, neutral
+ *  styling (no warning colour, no pulsing dot) so it reads as a section label,
+ *  not a pseudo-live status badge. */
 export function PreviewChip() {
   const t = useTranslations("live.chip");
   return (
-    <div
-      role="status"
-      className="inline-flex items-center gap-2 rounded-sm border border-state-warning/40 bg-ink-800/70 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning"
-    >
-      <span className="live-dot" aria-hidden />
+    <div className="inline-flex items-center gap-2 rounded-sm border border-ink-600/70 bg-ink-800/70 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
       {t("text")}
     </div>
   );
