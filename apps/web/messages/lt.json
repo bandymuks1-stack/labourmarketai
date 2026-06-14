@@ -4427,6 +4427,31 @@
     "ctaTrades": "Žiūrėti amatus, su kuriais dirbame",
     "disclaimer": "Mes nežadame darbo ar uždarbio, o pasiruošimo informacija nėra teisinė konsultacija."
   },
+  "needStructuring": {
+    "pageTitle": "Poreikių struktūrinimas",
+    "pageIntro": "Pateikti poreikiai be struktūrinių laukų. Sistema pasiūlo darbo tipą, šalį, kiekį, terminą ir apgyvendinimą iš teksto — patvirtinkite arba pataisykite. Į darbuotojų sąrašą patenka tik patvirtinti uždari laukai.",
+    "empty": "Visi pateikti poreikiai jau turi struktūrinius laukus.",
+    "footnote": "Pasiūlymai deterministiniai (pagal raktažodžius), ne AI. Laisvas tekstas matomas tik čia ir niekada nepatenka į darbuotojų sąrašą.",
+    "freeTextHeading": "Originalus tekstas (matomas tik adminui)",
+    "freeText": {
+      "role": "Rolė",
+      "description": "Aprašymas",
+      "location": "Vieta",
+      "notes": "Pastabos"
+    },
+    "confidence": {
+      "high": "Aukštas patikimumas",
+      "medium": "Vidutinis",
+      "low": "Žemas"
+    },
+    "needsReview": "reikia peržiūros",
+    "startPeriodLabel": "Pradžios laikas",
+    "applyButton": "Patvirtinti laukus",
+    "applying": "Saugoma…",
+    "applied": "Pritaikyta",
+    "applyError": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "applyNotAdmin": "Reikia administratoriaus teisių (active_role='admin')."
+  },
   "opportunities": {
     "title": "Man tinkamos galimybės",
     "intro": "Čia matysite darbdavių poreikius, kurie gali jums tikti, ir ką verta papildyti profilyje, kad būtumėte paruošti.",
@@ -4573,7 +4598,8 @@
     "statusError": "Kažkas nepavyko. Bandykite dar kartą.",
     "bridgeNote": "Tai peržiūra. Kad pateiktumėte realų poreikį ir matytumėte galimus atitikimus, susikurkite paskyrą.",
     "bridgeSignup": "Susikurti paskyrą ir pateikti poreikį",
-    "bridgeLogin": "Jau turite paskyrą? Prisijungti"
+    "bridgeLogin": "Jau turite paskyrą? Prisijungti",
+    "autoSuggested": "Pasiūlyta pagal jūsų aprašymą — patikrinkite ir, jei reikia, pataisykite. Nieko nepateikiame automatiškai."
   },
   "candidatePool": {
     "title": "Kandidatų telkinys",
