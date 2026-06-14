@@ -1,4 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
+import { Button } from "@/components/ui/Button";
 import {
   WorkerIntakeForm,
   type WorkerIntakeFormLabels,
@@ -96,8 +98,26 @@ export default async function WorkerIntakePage({
   }));
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12" id="main-content">
+    <div
+      className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-14 sm:px-12"
+      id="main-content"
+    >
       <WorkerIntakeForm labels={labels} professions={professions} />
+
+      {/* Funnel bridge: this public form only previews/drafts (no persistence).
+          To actually save the profile + skills/documents/country/accommodation,
+          the worker continues into the real account flow. */}
+      <div className="card-border flex flex-col gap-3 p-5" data-testid="intake-bridge">
+        <p className="text-sm leading-relaxed text-text-secondary">{t("bridgeNote")}</p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link href="/auth/signup">
+            <Button>{t("bridgeSignup")} →</Button>
+          </Link>
+          <Link href="/auth/login">
+            <Button variant="secondary">{t("bridgeLogin")}</Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

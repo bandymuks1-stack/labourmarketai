@@ -4477,7 +4477,10 @@
     "insurance": "Draudimas",
     "invoiceReady": "Ar galite išrašyti sąskaitą?",
     "invoiceYes": "Taip",
-    "invoiceNo": "Ne"
+    "invoiceNo": "Ne",
+    "bridgeNote": "Tai peržiūra. Kad išsaugotumėte profilį — įgūdžius, patirtį, dokumentus, šalį ir apgyvendinimo poreikį — susikurkite paskyrą.",
+    "bridgeSignup": "Susikurti darbuotojo profilį",
+    "bridgeLogin": "Jau turite paskyrą? Prisijungti"
   },
   "companyNeed": {
     "title": "Paskelbti darbuotojų poreikį",
@@ -4515,7 +4518,10 @@
     "aiBlockers": "Pasiruošimo kliūtys",
     "aiNone": "Pasiūlymas nesukurtas — peržiūrėkite savo duomenis.",
     "statusInvalid": "Kai kuriuos duomenis reikia pataisyti. Patikrinkite formą.",
-    "statusError": "Kažkas nepavyko. Bandykite dar kartą."
+    "statusError": "Kažkas nepavyko. Bandykite dar kartą.",
+    "bridgeNote": "Tai peržiūra. Kad pateiktumėte realų poreikį ir matytumėte galimus atitikimus, susikurkite paskyrą.",
+    "bridgeSignup": "Susikurti paskyrą ir pateikti poreikį",
+    "bridgeLogin": "Jau turite paskyrą? Prisijungti"
   },
   "candidatePool": {
     "title": "Kandidatų telkinys",
