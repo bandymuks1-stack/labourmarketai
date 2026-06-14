@@ -4463,7 +4463,20 @@
     "aiMissing": "Still missing",
     "aiNone": "No suggestion was produced — please review your details.",
     "statusInvalid": "Some details need fixing. Please check the form.",
-    "statusError": "Something went wrong. Please try again."
+    "statusError": "Something went wrong. Please try again.",
+    "zzpHeading": "If you are ZZP or a brigade",
+    "zzpNote": "Optional — only fill this if you offer a service as ZZP / self-employed or a team as a brigade.",
+    "businessName": "Business name",
+    "vatNumber": "VAT / registration number",
+    "teamSize": "Team size",
+    "teamProfessions": "Professions in the team",
+    "teamProfessionsHelp": "Comma separated.",
+    "tools": "Tools you bring",
+    "toolsHelp": "Comma separated.",
+    "insurance": "Insurance",
+    "invoiceReady": "Can you invoice?",
+    "invoiceYes": "Yes",
+    "invoiceNo": "No"
   },
   "companyNeed": {
     "title": "Post a worker need",

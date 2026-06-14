@@ -75,6 +75,19 @@ export default async function WorkerIntakePage({
     aiNone: t("aiNone"),
     statusInvalid: t("statusInvalid"),
     statusError: t("statusError"),
+    zzpHeading: t("zzpHeading"),
+    zzpNote: t("zzpNote"),
+    businessName: t("businessName"),
+    vatNumber: t("vatNumber"),
+    teamSize: t("teamSize"),
+    teamProfessions: t("teamProfessions"),
+    teamProfessionsHelp: t("teamProfessionsHelp"),
+    tools: t("tools"),
+    toolsHelp: t("toolsHelp"),
+    insurance: t("insurance"),
+    invoiceReady: t("invoiceReady"),
+    invoiceYes: t("invoiceYes"),
+    invoiceNo: t("invoiceNo"),
   };
 
   const professions = INTAKE_PROFESSIONS.map((slug) => ({

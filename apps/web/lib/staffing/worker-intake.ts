@@ -106,6 +106,16 @@ export const workerIntakeSchema = z
     contractPreference: z.enum(CONTRACT_PREFERENCES).default("any"),
     // documents (names/types only — never contents)
     documents: z.array(z.string().max(120)).max(50).default([]),
+    // ── ZZP / subcontractor / brigade details (all optional; PR5) ───────────
+    // Filled only when the worker offers a SERVICE (ZZP) or a TEAM (brigade),
+    // not when applying as an employee. Self-declared; nothing here is verified.
+    businessName: z.string().max(200).optional(),
+    vatNumber: z.string().max(40).optional(),
+    teamSize: z.number().int().min(1).max(200).optional(),
+    teamProfessions: z.array(z.string().max(120)).max(40).default([]),
+    tools: z.array(z.string().max(120)).max(60).default([]),
+    insurance: z.string().max(200).optional(),
+    invoiceReady: z.boolean().default(false),
     // free text the AI structures
     comment: z.string().max(8000).optional(),
   })
