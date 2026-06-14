@@ -14,6 +14,7 @@ import {
   buildWorkCategoryOptions,
   MARKET_COUNTRIES,
 } from "@/lib/taxonomy/work-categories";
+import { structureNeed } from "@/lib/structuring/structure-need";
 import { EstimateBuilder } from "@/components/app/estimate-builder";
 import { EstimateSummary } from "@/components/app/estimate-summary";
 import {
@@ -83,6 +84,7 @@ export function DemandRequestButton({
     accommodationOptions.find((o) => o.value === accommodation)?.label ?? "";
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
+  const [autoSuggested, setAutoSuggested] = useState(false);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">(
     "idle",
   );
@@ -105,6 +107,18 @@ export function DemandRequestButton({
       return;
     }
     setShowDescError(false);
+    // Deterministic auto-suggest: when entering the criteria step, pre-fill the
+    // structured selects from the free text (only empty ones, never overriding
+    // the user). Closed-set values only; the user reviews and can correct.
+    if (step === 1) {
+      const s = structureNeed({ role, description });
+      if (s.workType && !workType) setWorkType(s.workType);
+      if (s.country && !country) setCountry(s.country);
+      if (s.teamSize != null && !teamSize.trim()) setTeamSize(String(s.teamSize));
+      if (s.startPeriod) setUrgency(s.startPeriod);
+      if (s.accommodation && !accommodation) setAccommodation(s.accommodation);
+      setAutoSuggested(s.reasons.length > 0);
+    }
     setStep((s) => (s < 3 ? ((s + 1) as 1 | 2 | 3) : s));
   }
   function goBack() {
@@ -318,6 +332,14 @@ export function DemandRequestButton({
       {/* STEP 2 — criteria / context */}
       {step === 2 && (
         <div className="flex flex-col gap-4">
+          {autoSuggested && (
+            <p
+              className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+              data-testid="demand-auto-suggested"
+            >
+              {tc("autoSuggested")}
+            </p>
+          )}
           {/* Structured, worker-board-safe fields — these are what a worker
               sees on the opportunities board (no free text exposed). */}
           <label className="flex flex-col gap-1.5">

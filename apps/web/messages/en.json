@@ -4427,6 +4427,31 @@
     "ctaTrades": "See trades we work with",
     "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice."
   },
+  "needStructuring": {
+    "pageTitle": "Need structuring",
+    "pageIntro": "Submitted needs that lack structured fields. The system suggests work type, country, count, timing and accommodation from the text — confirm or correct. Only confirmed closed-set fields reach the worker board.",
+    "empty": "All submitted needs already have structured fields.",
+    "footnote": "Suggestions are deterministic (keyword-based), not AI. Free text is shown here only and never reaches the worker board.",
+    "freeTextHeading": "Original text (admin-only)",
+    "freeText": {
+      "role": "Role",
+      "description": "Description",
+      "location": "Location",
+      "notes": "Notes"
+    },
+    "confidence": {
+      "high": "High confidence",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "needsReview": "needs review",
+    "startPeriodLabel": "Start period",
+    "applyButton": "Confirm fields",
+    "applying": "Saving…",
+    "applied": "Applied",
+    "applyError": "Couldn't save. Please try again.",
+    "applyNotAdmin": "Admin rights required (active_role='admin')."
+  },
   "opportunities": {
     "title": "Opportunities for you",
     "intro": "Here you'll see employer needs that could fit you, and what's worth adding to your profile to be ready.",
@@ -4573,7 +4598,8 @@
     "statusError": "Something went wrong. Please try again.",
     "bridgeNote": "This is a preview. To post a real need and see possible matches, create your account.",
     "bridgeSignup": "Create an account and post your need",
-    "bridgeLogin": "Already have an account? Sign in"
+    "bridgeLogin": "Already have an account? Sign in",
+    "autoSuggested": "Suggested from your description — please check and adjust if needed. Nothing is submitted automatically."
   },
   "candidatePool": {
     "title": "Candidate pool",
