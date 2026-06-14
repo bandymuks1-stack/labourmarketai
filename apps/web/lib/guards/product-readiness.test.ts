@@ -1418,7 +1418,14 @@ describe("no migration files added by this sprint", () => {
     // payment_webhook_events) with owner/admin SELECT RLS, server-only writes
     // (service_role), idempotent webhook events, NO money amount stored. Legacy
     // `subscriptions` (0 rows) left untouched. Additive + reversible.
-    const SPRINT_BASELINE = 80;
+    // Bumped 80 -> 81 for the worker demand-visibility RPC
+    // (20260614120000_worker_demand_visibility): one additive RED migration — a
+    // read-only SECURITY DEFINER `list_open_demand_for_workers()` that lights up
+    // the worker opportunities board with curated, non-personal open-demand rows
+    // (worker-gated, status='submitted' only, structured columns + accommodation
+    // enum whitelist; no profile_id / location / notes / free-text). Applied to
+    // prod via Supabase MCP after a strict security review. Additive + reversible.
+    const SPRINT_BASELINE = 81;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
