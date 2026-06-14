@@ -4395,5 +4395,35 @@
       "stripe_live_blocked": "Aptiktas live raktas/režimas ir saugumo sumetimais griežtai užblokuotas. Live čia niekada neįjungiamas."
     },
     "futureLive": "Live mokėjimai paruošti, bet neaktyvūs — jokio live checkout, kol savininkas nepatvirtins."
+  },
+  "workAbroad": {
+    "eyebrow": "Darbas užsienyje",
+    "title": "Jūsų kelias dirbti užsienyje,",
+    "titleAccent": "žingsnis po žingsnio",
+    "subcopy": "Labourmarket.ai yra skaitmeninė tarptautinės darbo jėgos agentūra. Susikurkite vieną darbuotojo profilį, pamatykite, ko reikia kiekvienoje šalyje, ir leiskite darbdaviams jus rasti, kai būsite pasiruošę. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
+    "stepsTitle": "Kaip tai veikia",
+    "steps": [
+      { "title": "1. Nurodykite savo amatą", "body": "Pridėkite profesiją, patirtį ir laisvumą. Užtrunka kelias minutes." },
+      { "title": "2. DI paruošia juodraštį", "body": "Asistentas jūsų žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūrite ir redaguojate. Jis niekada neišgalvoja patirties ir nieko nepatvirtina." },
+      { "title": "3. Patikrinkite šalies pasiruošimą", "body": "Pamatykite, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija." },
+      { "title": "4. Būkite suderinti", "body": "Kai darbdavio poreikis atitinka jūsų amatą, laisvumą, apgyvendinimą, transportą ir kalbą, patenkate į trumpąjį sąrašą. Neatitikimai rodomi sąžiningai." },
+      { "title": "5. Rezervacija ir startas", "body": "Susitarkite dėl rezervacijos su aiškiu pasiruošimo patikrinimu. Sutarties ir mokėjimo žingsniai kol kas lieka rankiniai." }
+    ],
+    "needTitle": "Ko gali prireikti",
+    "needItems": [
+      "Profesijos ar amato, kuriame dirbate",
+      "Jūsų laisvumo nuo datos",
+      "Ar reikia apgyvendinimo, ar turite savo",
+      "Transporto: savo, vairuotojo pažymėjimo ar paėmimo",
+      "Dokumentų, kurių gali prireikti šaliai"
+    ],
+    "directionsTitle": "Kur žmonės dirba",
+    "directionsNote": "Atverkite šalių puslapius ir pamatykite darbo rinkos signalus su šaltiniais.",
+    "directionsCta": "Žiūrėti šalis",
+    "aiNote": "DI padeda paruošti gyvenimo aprašymą ir profilį. Jis nepatvirtina jūsų įgūdžių, dokumentų ar teisinio statuso — tai daro žmogus ir jūsų dokumentai.",
+    "ctaProfile": "Sukurti darbuotojo profilį",
+    "ctaReadiness": "Patikrinti šalies pasiruošimą",
+    "ctaTrades": "Žiūrėti amatus, su kuriais dirbame",
+    "disclaimer": "Mes nežadame darbo ar uždarbio, o pasiruošimo informacija nėra teisinė konsultacija."
   }
 }
