@@ -4472,6 +4472,10 @@
     "needsAccessBody": "Darbdavių poreikiai čia pasirodys, kai bus įjungta jų peržiūra darbuotojams. Kol kas užpildykite profilį — taip būsite paruošti, vos atsiradus tinkamiems poreikiams.",
     "emptyTitle": "Šiuo metu atvirų poreikių nėra",
     "emptyBody": "Kai darbdaviai pateiks naujų poreikių, jie pasirodys čia. Tuo tarpu verta papildyti profilį.",
+    "trustNote": "Darbuotojams pirmiausia rodome tik patvirtintas arba saugiai administruojamas galimybes. Taip mažiname riziką ir padedame kurti patikimesnę darbo rinką.",
+    "approvedEmptyTitle": "Patvirtintų galimybių dar nėra.",
+    "approvedEmptyBody": "Papildykite savo profilį — taip galėsime geriau parinkti jums tinkamas galimybes, kai jos bus patvirtintos.",
+    "fieldCompany": "Įmonė / partneris",
     "status": {
       "possible_match": "Galimas atitikimas",
       "check_conditions": "Reikia patikrinti sąlygas",

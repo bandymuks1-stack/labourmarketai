@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
   computeOpportunityFit,
+  isApprovedRouteRow,
+  safeApprovedCompanyName,
   type OpportunityFit,
   type OpportunityNeed,
   type WorkerOpportunityProfile,
@@ -101,17 +103,28 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
     const { data, error } = await asAny(supabase).rpc("list_open_demand_for_workers");
     if (!error && Array.isArray(data)) {
       needsDataAccess = false;
-      opportunities = (data as Record<string, unknown>[]).map((row) => {
-        const need: OpportunityNeed = {
-          id: String(row.id),
-          roleText: (row.role_text as string | null) ?? null,
-          country: (row.country as string | null) ?? null,
-          teamSize: (row.team_size as number | null) ?? null,
-          startPeriod: (row.start_period as string | null) ?? null,
-          accommodation: (row.accommodation as string | null) ?? null,
-        };
-        return { need, fit: computeOpportunityFit(readiness, need) };
-      });
+      opportunities = (data as Record<string, unknown>[])
+        // DEFAULT-CLOSED (Worker Opportunities v1): a worker only ever sees a
+        // need that arrived through an APPROVED supply route — never a raw,
+        // unreviewed employer. The current RPC does not yet expose an approval
+        // signal, so this filter currently lets NOTHING through and the board
+        // shows the honest "no approved opportunities yet" state. The
+        // owner-gated migration (see docs/handoffs/worker-opportunities-
+        // approved-route.md) adds `approved_route` + a safe `company_name`,
+        // and this predicate then lights the board up.
+        .filter(isApprovedRouteRow)
+        .map((row) => {
+          const need: OpportunityNeed = {
+            id: String(row.id),
+            roleText: (row.role_text as string | null) ?? null,
+            country: (row.country as string | null) ?? null,
+            teamSize: (row.team_size as number | null) ?? null,
+            startPeriod: (row.start_period as string | null) ?? null,
+            accommodation: (row.accommodation as string | null) ?? null,
+            companyName: safeApprovedCompanyName(row),
+          };
+          return { need, fit: computeOpportunityFit(readiness, need) };
+        });
     }
   } catch {
     // RPC absent (not yet applied) → needsDataAccess stays true. Never fake.

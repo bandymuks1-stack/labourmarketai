@@ -117,7 +117,16 @@ export default async function OpportunitiesPage({
             </Link>
           </section>
 
-          {/* ── Opportunities ──────────────────────────────────────────── */}
+          {/* Trust note — workers first see only approved / safely-managed
+              opportunities (Worker Opportunities v1). */}
+          <p
+            className="rounded-md border border-brand-blue/25 bg-brand-blue/5 px-4 py-3 text-xs leading-relaxed text-text-secondary"
+            data-testid="opportunities-trust-note"
+          >
+            {t("trustNote")}
+          </p>
+
+          {/* ── Opportunities (approved supply routes only) ────────────── */}
           {result.needsDataAccess ? (
             <section
               className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
@@ -136,10 +145,10 @@ export default async function OpportunitiesPage({
               data-testid="opportunities-empty"
             >
               <h2 className="font-display text-base font-semibold text-text-primary">
-                {t("emptyTitle")}
+                {t("approvedEmptyTitle")}
               </h2>
               <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-                {t("emptyBody")}
+                {t("approvedEmptyBody")}
               </p>
             </section>
           ) : (
@@ -160,6 +169,14 @@ export default async function OpportunitiesPage({
                       {statusLabel(fit.status)}
                     </span>
                   </div>
+                  {need.companyName ? (
+                    <p className="text-xs text-text-secondary" data-testid="opportunity-company">
+                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {t("fieldCompany")}:
+                      </span>{" "}
+                      {need.companyName}
+                    </p>
+                  ) : null}
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
                     <div className="min-w-0">
                       <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
