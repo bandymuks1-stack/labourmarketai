@@ -4477,7 +4477,10 @@
     "insurance": "Insurance",
     "invoiceReady": "Can you invoice?",
     "invoiceYes": "Yes",
-    "invoiceNo": "No"
+    "invoiceNo": "No",
+    "bridgeNote": "This is a preview. To save your profile — skills, experience, documents, country and accommodation needs — create your account.",
+    "bridgeSignup": "Create your worker profile",
+    "bridgeLogin": "Already have an account? Sign in"
   },
   "companyNeed": {
     "title": "Post a worker need",
@@ -4515,7 +4518,10 @@
     "aiBlockers": "Readiness blockers",
     "aiNone": "No suggestion was produced — please review your details.",
     "statusInvalid": "Some details need fixing. Please check the form.",
-    "statusError": "Something went wrong. Please try again."
+    "statusError": "Something went wrong. Please try again.",
+    "bridgeNote": "This is a preview. To post a real need and see possible matches, create your account.",
+    "bridgeSignup": "Create an account and post your need",
+    "bridgeLogin": "Already have an account? Sign in"
   },
   "candidatePool": {
     "title": "Candidate pool",
