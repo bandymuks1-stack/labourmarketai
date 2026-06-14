@@ -5,6 +5,7 @@ import {
   submitCompanyNeedAction,
   type CompanyNeedFormState,
 } from "@/lib/staffing/company-need-form-actions";
+import type { WorkCategoryOptionGroup } from "@/lib/taxonomy/work-categories";
 
 /**
  * Company need / vacancy form (Staffing Operating Model v1, PR4 UI / PR10).
@@ -58,10 +59,10 @@ const HELP = "text-[11px] text-text-muted";
 
 export function CompanyNeedForm({
   labels,
-  professions,
+  categories,
 }: {
   readonly labels: CompanyNeedFormLabels;
-  readonly professions: readonly { slug: string; label: string }[];
+  readonly categories: readonly WorkCategoryOptionGroup[];
 }) {
   const [state, formAction, isPending] = useActionState<
     CompanyNeedFormState | null,
@@ -85,8 +86,12 @@ export function CompanyNeedForm({
           <span className="text-text-secondary">{labels.profession}</span>
           <select name="profession" required defaultValue="" className={FIELD}>
             <option value="" disabled>—</option>
-            {professions.map((p) => (
-              <option key={p.slug} value={p.slug}>{p.label}</option>
+            {categories.map((c) => (
+              <optgroup key={c.key} label={c.sector}>
+                {c.options.map((o) => (
+                  <option key={o.slug} value={o.slug}>{o.label}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>
