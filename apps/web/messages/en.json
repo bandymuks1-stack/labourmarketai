@@ -4427,6 +4427,53 @@
     "ctaTrades": "See trades we work with",
     "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice."
   },
+  "opportunities": {
+    "title": "Opportunities for you",
+    "intro": "Here you'll see employer needs that could fit you, and what's worth adding to your profile to be ready.",
+    "noWorkerBody": "Finish your worker profile first to see opportunities that fit you.",
+    "readinessTitle": "Your readiness",
+    "readinessIntro": "The fuller your profile, the easier it is for employers to find you — and the more precisely we can show fitting needs.",
+    "ready": {
+      "workType": "Sector & work type",
+      "skills": "Skills",
+      "country": "Country",
+      "documents": "Documents",
+      "availability": "Availability",
+      "set": "set",
+      "missing": "missing"
+    },
+    "ctaProfile": "Complete your profile",
+    "needsAccessTitle": "Opportunities are being prepared",
+    "needsAccessBody": "Employer needs will appear here once worker visibility is enabled. In the meantime, complete your profile so you're ready the moment fitting needs appear.",
+    "emptyTitle": "No open needs right now",
+    "emptyBody": "When employers post new needs, they'll show up here. In the meantime it's worth completing your profile.",
+    "status": {
+      "possible_match": "Possible match",
+      "check_conditions": "Check the conditions",
+      "needs_documents": "Documents needed",
+      "missing_profile_info": "Profile info missing"
+    },
+    "gap": {
+      "incomplete_profile": "Complete your profile first",
+      "no_documents": "Add your documents",
+      "country_mismatch": "A different country than yours",
+      "country_unknown": "Your country isn't set",
+      "availability_unknown": "Availability not set"
+    },
+    "fieldRoleUnknown": "Work need",
+    "fieldCountry": "Country",
+    "fieldStart": "Start",
+    "fieldTeam": "People",
+    "fieldAccommodation": "Accommodation",
+    "accommodation": {
+      "provided_free": "Provided, free",
+      "provided_paid": "Provided, paid",
+      "provided_deducted": "Deducted from pay",
+      "not_provided": "Not provided"
+    },
+    "possibleNote": "Once your profile is ready, employers can find you and reach out through your account.",
+    "footnote": "These are honest signals from your profile — not a rating or a promise. Final fit is always decided by people."
+  },
   "workerIntake": {
     "title": "Worker intake",
     "subtitle": "Tell us your trade and availability. We turn it into a draft profile you review — we never verify or auto-publish anything.",

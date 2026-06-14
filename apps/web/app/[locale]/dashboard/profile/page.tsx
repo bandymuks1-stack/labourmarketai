@@ -58,6 +58,7 @@ export default async function ProfilePage({
   const tTrust = await getTranslations("trust");
   const tCv = await getTranslations("cvExport");
   const tDocs = await getTranslations("documents");
+  const tOpp = await getTranslations("opportunities");
 
   const supabase = await createClient();
   const {
@@ -314,6 +315,15 @@ export default async function ProfilePage({
             {t("pageTitle")}
           </h1>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {workerId ? (
+              <Link
+                href={"/dashboard/opportunities" as "/dashboard"}
+                className="rounded-md border border-brand-blue/40 bg-brand-blue/10 px-2.5 py-1 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/20"
+                data-testid="profile-opportunities-link"
+              >
+                {tOpp("title")} →
+              </Link>
+            ) : null}
             {workerId ? (
               <Link
                 href="/cv"

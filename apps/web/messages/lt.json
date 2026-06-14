@@ -4427,6 +4427,53 @@
     "ctaTrades": "Žiūrėti amatus, su kuriais dirbame",
     "disclaimer": "Mes nežadame darbo ar uždarbio, o pasiruošimo informacija nėra teisinė konsultacija."
   },
+  "opportunities": {
+    "title": "Man tinkamos galimybės",
+    "intro": "Čia matysite darbdavių poreikius, kurie gali jums tikti, ir ką verta papildyti profilyje, kad būtumėte paruošti.",
+    "noWorkerBody": "Pirmiausia užbaikite darbuotojo profilį, kad matytumėte jums tinkančias galimybes.",
+    "readinessTitle": "Jūsų pasirengimas",
+    "readinessIntro": "Kuo pilnesnis profilis, tuo lengviau darbdaviams jus rasti ir tuo tiksliau parodome tinkančius poreikius.",
+    "ready": {
+      "workType": "Sektorius ir darbo tipas",
+      "skills": "Įgūdžiai",
+      "country": "Šalis",
+      "documents": "Dokumentai",
+      "availability": "Prieinamumas",
+      "set": "nurodyta",
+      "missing": "trūksta"
+    },
+    "ctaProfile": "Papildyti profilį",
+    "needsAccessTitle": "Galimybių sąrašas ruošiamas",
+    "needsAccessBody": "Darbdavių poreikiai čia pasirodys, kai bus įjungta jų peržiūra darbuotojams. Kol kas užpildykite profilį — taip būsite paruošti, vos atsiradus tinkamiems poreikiams.",
+    "emptyTitle": "Šiuo metu atvirų poreikių nėra",
+    "emptyBody": "Kai darbdaviai pateiks naujų poreikių, jie pasirodys čia. Tuo tarpu verta papildyti profilį.",
+    "status": {
+      "possible_match": "Galimas atitikimas",
+      "check_conditions": "Reikia patikrinti sąlygas",
+      "needs_documents": "Reikia dokumentų",
+      "missing_profile_info": "Trūksta profilio informacijos"
+    },
+    "gap": {
+      "incomplete_profile": "Pirmiausia užpildykite profilį",
+      "no_documents": "Pridėkite dokumentus",
+      "country_mismatch": "Kita šalis nei jūsų",
+      "country_unknown": "Nenurodyta jūsų šalis",
+      "availability_unknown": "Nenurodytas prieinamumas"
+    },
+    "fieldRoleUnknown": "Darbo poreikis",
+    "fieldCountry": "Šalis",
+    "fieldStart": "Pradžia",
+    "fieldTeam": "Žmonių",
+    "fieldAccommodation": "Apgyvendinimas",
+    "accommodation": {
+      "provided_free": "Suteikiamas, nemokamai",
+      "provided_paid": "Suteikiamas, mokamai",
+      "provided_deducted": "Išskaičiuojama iš atlyginimo",
+      "not_provided": "Nesuteikiamas"
+    },
+    "possibleNote": "Kai profilis paruoštas, darbdaviai gali jus rasti ir susisiekti per paskyrą.",
+    "footnote": "Tai sąžiningi signalai pagal jūsų profilį — ne įvertinimas ir ne pažadas. Galutinį tinkamumą visada nusprendžia žmonės."
+  },
   "workerIntake": {
     "title": "Darbuotojo registracija",
     "subtitle": "Nurodykite savo amatą ir laisvumą. Iš to sukuriame profilio juodraštį, kurį peržiūrite — mes nieko nepatvirtiname ir automatiškai nepublikuojame.",
