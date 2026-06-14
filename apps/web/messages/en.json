@@ -4472,6 +4472,10 @@
     "needsAccessBody": "Employer needs will appear here once worker visibility is enabled. In the meantime, complete your profile so you're ready the moment fitting needs appear.",
     "emptyTitle": "No open needs right now",
     "emptyBody": "When employers post new needs, they'll show up here. In the meantime it's worth completing your profile.",
+    "trustNote": "Workers first see only approved or safely managed opportunities. This helps reduce risk and build a more reliable labour market.",
+    "approvedEmptyTitle": "No approved opportunities yet.",
+    "approvedEmptyBody": "Complete your profile so we can better match you with suitable opportunities once they are approved.",
+    "fieldCompany": "Company / partner",
     "status": {
       "possible_match": "Possible match",
       "check_conditions": "Check the conditions",

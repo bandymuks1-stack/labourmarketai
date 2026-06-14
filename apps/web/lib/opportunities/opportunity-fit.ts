@@ -46,13 +46,17 @@ export interface WorkerOpportunityProfile {
 
 export interface OpportunityNeed {
   readonly id: string;
-  /** Employer's role / work-direction text (free text from the need). */
+  /** Work-type slug (structured) — NEVER free text. */
   readonly roleText: string | null;
   /** ISO-2 country of the need. */
   readonly country: string | null;
   readonly teamSize: number | null;
   readonly startPeriod: string | null;
   readonly accommodation: string | null;
+  /** Display name of the APPROVED supply company/partner, only when it is safe
+   *  to show (i.e. the need arrived through an approved route). Null otherwise —
+   *  an unapproved employer's identity is never exposed to a worker. */
+  readonly companyName?: string | null;
 }
 
 export interface OpportunityFit {
@@ -107,3 +111,37 @@ export const OPPORTUNITY_STATUSES: readonly OpportunityStatus[] = [
   "needs_documents",
   "missing_profile_info",
 ];
+
+// ── Worker Opportunities v1 — approved-route gate (default-closed) ───────────
+//
+// A worker only ever sees a need that arrived through an APPROVED supply route.
+// These are the worker-visible route statuses; everything else (not_reviewed,
+// documents_requested, limited_access, risk_flagged, blocked, …) is hidden.
+
+export const WORKER_VISIBLE_ROUTE_STATUSES: readonly string[] = [
+  "approved_direct_partner",
+  "trusted_partner",
+  "works_through_approved_route",
+  "our_operating_company_approved",
+];
+
+/**
+ * Whether an open-demand row is worker-visible. TRUE only when the row carries
+ * an explicit approved-route signal. The current RPC does not yet expose one,
+ * so this is false for every real row today (default-closed: no raw employer
+ * need reaches a worker). It lights up once the approved-route migration adds
+ * `approved_route` / `route_status`.
+ */
+export function isApprovedRouteRow(row: Record<string, unknown>): boolean {
+  if (row.approved_route === true) return true;
+  const status = typeof row.route_status === "string" ? row.route_status : null;
+  return status !== null && WORKER_VISIBLE_ROUTE_STATUSES.includes(status);
+}
+
+/** The approved company/partner name is read ONLY from the dedicated safe RPC
+ *  column (present only for approved routes) — never from free text. */
+export function safeApprovedCompanyName(row: Record<string, unknown>): string | null {
+  return typeof row.company_name === "string" && row.company_name.trim() !== ""
+    ? row.company_name
+    : null;
+}
