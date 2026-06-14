@@ -199,6 +199,22 @@ export const ALL_WORK_TYPE_SLUGS: readonly string[] = WORK_CATEGORIES.flatMap((c
   c.types.map((t) => t.slug),
 );
 
+/** Whether a slug is a known work type (for validating stored values). */
+export function isWorkTypeSlug(slug: string): boolean {
+  return ALL_WORK_TYPE_SLUGS.includes(slug);
+}
+
+/** The ISO-3166 alpha-2 markets the platform serves (Baltic + Northern Europe).
+ *  Used as the allowed country set for structured demand intake; display names
+ *  come from the `labourMarket.countryNames` i18n catalogue. */
+export const MARKET_COUNTRIES = [
+  "LT", "LV", "EE", "PL", "DE", "NL", "DK", "NO", "SE", "FI",
+] as const;
+export type MarketCountry = (typeof MARKET_COUNTRIES)[number];
+export function isMarketCountry(code: string): code is MarketCountry {
+  return (MARKET_COUNTRIES as readonly string[]).includes(code);
+}
+
 /** Locale-aware slug → label map for every work type. Used where a stored
  *  `profession` slug must be rendered (e.g. the operator candidate pool). */
 export function buildWorkTypeLabelMap(locale: string): Record<string, string> {

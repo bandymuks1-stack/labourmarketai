@@ -4471,6 +4471,11 @@
       "provided_deducted": "Išskaičiuojama iš atlyginimo",
       "not_provided": "Nesuteikiamas"
     },
+    "urgency": {
+      "flexible": "Lankstus laikas",
+      "this_week": "Šią savaitę",
+      "urgent": "Skubu"
+    },
     "possibleNote": "Kai profilis paruoštas, darbdaviai gali jus rasti ir susisiekti per paskyrą.",
     "footnote": "Tai sąžiningi signalai pagal jūsų profilį — ne įvertinimas ir ne pažadas. Galutinį tinkamumą visada nusprendžia žmonės."
   },
