@@ -24,6 +24,14 @@
 -- DEFINER function with a curated projection, not a policy. §19: nothing here
 -- ranks anything; the list is recency-ordered facts. §7: no match decision is
 -- made here. ROLLBACK at the bottom (new function only; fully reversible).
+--
+-- @human-gate-approved
+--   Reviewed + APPLIED to prod via Supabase MCP apply_migration on 2026-06-14
+--   after a strict security review (structured-columns-only projection,
+--   accommodation enum whitelist, anon/public execute revoked, worker-gated,
+--   non-worker returns empty, no profile_id/location/notes/free-text leak —
+--   verified live: function exists, security definer, search_path=public,
+--   acl {postgres,authenticated}). RED → human-gated.
 -- ============================================================================
 
 begin;
