@@ -1401,7 +1401,7 @@
         "row": "paklausa {demand} · pasiūla {supply}"
       },
       "pulse": {
-        "title": "Rinkos pulsas — gyvi agregatai",
+        "title": "Rinkos apžvalga — tikri agregatai",
         "supplyTitle": "Pasiūla (žmonės pagal profesiją × šalį)",
         "supplyEmpty": "Profesijų dar nepažymėta — juostos atsiras su pirmais darbuotojais.",
         "demandTitle": "Paklausa (atviros užklausos)",
