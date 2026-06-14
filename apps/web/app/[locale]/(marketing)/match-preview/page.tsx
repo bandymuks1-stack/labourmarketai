@@ -3,27 +3,15 @@ import {
   MatchPreviewForm,
   type MatchPreviewLabels,
 } from "@/components/app/match-preview-form";
+import { buildWorkCategoryOptions } from "@/lib/taxonomy/work-categories";
 
 /**
  * Match preview (Staffing Operating Model v1, PR8). NON-PERSISTED. Enter a
  * worker's facts + a company need → deterministic fit + an AI fit explanation.
  * Clearly "preview only — not booked / not saved as a booking request". No
- * booking, no persistence, no contact, no migration.
+ * booking, no persistence, no contact, no migration. Work-type options come
+ * from the shared multi-sector taxonomy (lib/taxonomy/work-categories).
  */
-const TRADE_SLUGS = [
-  "general_laborer",
-  "carpenter",
-  "concrete_worker",
-  "drywaller",
-  "electrician",
-  "mason",
-  "painter",
-  "plumber",
-  "rebar_worker",
-  "roofer",
-  "tiler",
-  "welder",
-] as const;
 
 export default async function MatchPreviewPage({
   params,
@@ -33,7 +21,6 @@ export default async function MatchPreviewPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("matchPreview");
-  const tp = await getTranslations("professions");
 
   const labels: MatchPreviewLabels = {
     title: t("title"),
@@ -82,11 +69,11 @@ export default async function MatchPreviewPage({
     statusInvalid: t("statusInvalid"),
   };
 
-  const professions = TRADE_SLUGS.map((s) => ({ slug: s, label: tp(s) }));
+  const categories = buildWorkCategoryOptions(locale);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12 sm:px-12" id="main-content">
-      <MatchPreviewForm labels={labels} professions={professions} />
+      <MatchPreviewForm labels={labels} categories={categories} />
     </div>
   );
 }

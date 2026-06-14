@@ -18,6 +18,7 @@
 
 export type SectorKey =
   | "construction"
+  | "manufacturing"
   | "transport_logistics"
   | "retail_sales"
   | "hospitality_food"
@@ -40,6 +41,7 @@ export interface SectorDef {
  *  row — deliberately not first-and-special. */
 export const SECTORS: readonly SectorDef[] = [
   { key: "construction", nameLt: "Statyba", nameEn: "Construction" },
+  { key: "manufacturing", nameLt: "Gamyba", nameEn: "Manufacturing" },
   {
     key: "transport_logistics",
     nameLt: "Transportas ir logistika",

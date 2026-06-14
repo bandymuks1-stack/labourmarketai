@@ -5,6 +5,7 @@ import {
   previewMatchAction,
   type MatchPreviewState,
 } from "@/lib/staffing/match-preview-actions";
+import type { WorkCategoryOptionGroup } from "@/lib/taxonomy/work-categories";
 
 /**
  * Match preview form (Staffing Operating Model v1, PR8). NON-PERSISTED: enter a
@@ -65,10 +66,10 @@ const LBL = "flex flex-col gap-1 text-xs";
 
 export function MatchPreviewForm({
   labels,
-  professions,
+  categories,
 }: {
   readonly labels: MatchPreviewLabels;
-  readonly professions: readonly { slug: string; label: string }[];
+  readonly categories: readonly WorkCategoryOptionGroup[];
 }) {
   const [state, formAction, isPending] = useActionState<
     MatchPreviewState | null,
@@ -96,8 +97,12 @@ export function MatchPreviewForm({
   const ProfessionSelect = ({ name }: { name: string }) => (
     <select name={name} required defaultValue="" className={FIELD}>
       <option value="" disabled>—</option>
-      {professions.map((p) => (
-        <option key={p.slug} value={p.slug}>{p.label}</option>
+      {categories.map((c) => (
+        <optgroup key={c.key} label={c.sector}>
+          {c.options.map((o) => (
+            <option key={o.slug} value={o.slug}>{o.label}</option>
+          ))}
+        </optgroup>
       ))}
     </select>
   );
