@@ -118,11 +118,13 @@ export async function SiteFooter() {
 
         <div className="flex flex-col gap-2 border-t border-ink-600/60 py-6 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
           <span>
-            © {new Date().getFullYear()} labourmarket.ai — {t("rights")}
+            © {new Date().getFullYear()} Labourmarket.ai. {t("rights")}
           </span>
-          <span className="font-mono uppercase tracking-label">
-            {t("preview")}
-          </span>
+          <span className="font-mono uppercase tracking-label">{t("preview")}</span>
+          {/* Created by Rexora — text only; no approved Rexora URL was found in
+              the repo / brand config, so no link is fabricated (owner to confirm
+              the URL, then it can become a link). */}
+          <span>{t("rexora")}</span>
         </div>
       </div>
     </footer>

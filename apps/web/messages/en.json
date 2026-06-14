@@ -2973,7 +2973,8 @@
     "about": "About",
     "contact": "Contact",
     "rights": "All rights reserved.",
-    "preview": "M0 preview build — not a public launch."
+    "preview": "Early platform — some features are still being expanded.",
+    "rexora": "Created by Rexora"
   },
   "pages": {
     "workers": {
