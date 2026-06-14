@@ -1763,42 +1763,42 @@
   },
   "live": {
     "chip": {
-      "text": "PRE-ALPHA · Activity preview · Live market growing"
+      "text": "Work directions across Europe"
     },
     "clock": {
-      "badge": "EU-N MARKET · LIVE"
+      "badge": "Northern & Baltic Europe"
     },
     "ticker": {
-      "label": "Live market activity ticker"
+      "label": "Labour-market activity strip"
     },
     "counters": {
-      "activeWorkers": "Active workers",
-      "liveDemand": "Open opportunities",
-      "matchesToday": "Activity today",
-      "previewNote": "Pre-alpha preview — sample signals, not real platform figures.",
-      "avgOvr": "Avg readiness · preview"
+      "activeWorkers": "Worker profiles",
+      "liveDemand": "Job opportunities",
+      "matchesToday": "New actions",
+      "previewNote": "These figures grow as the platform fills.",
+      "avgOvr": "Profile completion"
     },
     "activity": {
-      "label": "Live activity feed"
+      "label": "Activity feed"
     }
   },
   "map": {
     "label": {
-      "live": "EU LIVE",
+      "live": "Work directions",
       "utc": "UTC"
     },
     "tooltip": {
       "workers": "workers",
       "projects": "projects",
       "companies": "companies",
-      "matchesToday": "matches today",
+      "matchesToday": "matches",
       "expansion_candidate": "Expansion candidate"
     },
     "legend": {
-      "active_markets": "Active markets (9)",
+      "active_markets": "Core directions (9)",
       "expansion_candidates": "Expansion candidates"
     },
-    "caption": "9 active markets · fast expansion to follow"
+    "caption": "Work directions across the Baltics and Northern Europe"
   },
   "company": {
     "score": {
@@ -1815,10 +1815,10 @@
       "line1": "Here's how workers",
       "line2": "find work that fits."
     },
-    "subcopy": "Fit direction, with reasons. You always see the why — no opaque algorithm, no black-box score. A concept preview of how opportunity-fit will work.",
+    "subcopy": "Fit direction, with reasons. You always see the why — no opaque algorithm, no black-box score. This is how opportunity-fit will work.",
     "column": {
       "onDeck": "On deck",
-      "live": "Live now",
+      "live": "In progress",
       "drafted": "Drafted"
     },
     "status": {
@@ -1826,15 +1826,15 @@
       "deciding": "Deciding",
       "hired": "Hired"
     },
-    "liveCounter": "Concept preview · sample draft board"
+    "liveCounter": "How the matching flow will work"
   },
   "marketPulse": {
-    "eyebrow": "Market pulse",
+    "eyebrow": "Labour-market overview",
     "headline": {
       "line1": "The labour market,",
-      "line2": "seen in real time."
+      "line2": "seen clearly."
     },
-    "subcopy": "Market intelligence is part of the platform — supply, demand and signals visible to everyone who needs them.",
+    "subcopy": "Market overview is part of the platform — supply and demand visible to everyone who needs them.",
     "panel": {
       "demandByCountry": "Demand by country",
       "topSkills": "Top in-demand skills",
@@ -1847,7 +1847,7 @@
       "supply": "Supply",
       "demand": "Demand"
     },
-    "autoUpdate": "Auto-update",
+    "autoUpdate": "Overview",
     "timeAgo": {
       "justNow": "just now",
       "minutes": "{n}min ago",
@@ -1860,7 +1860,7 @@
       "line1": "Every worker, in context",
       "line2": "and ready."
     },
-    "subcopy": "Fit and readiness come from real completed work, confirmed skills and on-site proof — always shown in context, never one universal rating. Concept preview with sample profiles.",
+    "subcopy": "Fit and readiness come from real completed work, confirmed skills and on-site proof — always shown in context, never one universal rating. This is how worker cards will look.",
     "stat": {
       "SKL": "Skill",
       "REL": "Reliability",
@@ -1875,7 +1875,7 @@
       "bronze": "Bronze"
     },
     "status": {
-      "live": "Live",
+      "live": "Working",
       "available": "Available",
       "drafted": "Drafted",
       "busy": "Busy"
@@ -2556,7 +2556,7 @@
       "expand_aria": "Expand answer"
     },
     "preview": {
-      "conceptChip": "Concept preview · pre-alpha",
+      "conceptChip": "How this will work",
       "rankedMatches": "fit direction",
       "headcount": "Headcount",
       "intensity": {
@@ -2586,7 +2586,7 @@
         "Fit & readiness signals — coverage against a specific need from confirmed skills, reliability and on-site proof. Never one universal rating.",
         "Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
         "Skill evidence — built from confirmed work and certificates, not self-claimed.",
-        "Status badge — Available, Live, Drafted or Busy, always current."
+        "Status badge — Available, Working, Drafted or Busy, always current."
       ]
     },
     "journey": {
@@ -2880,12 +2880,12 @@
   },
   "hero": {
     "chip": "General labour-market platform",
-    "headline": "A general labour-market platform that helps workers, employers, agencies and partners work",
-    "headlineAccent": "more clearly, transparently and reliably.",
-    "subcopy": "Accurate profiles, clear needs, document-readiness signals, fair agreements and reputation help reduce risk for every market participant.",
-    "ctaPrimary": "Start now",
-    "businessNote": "For companies & agencies ·",
-    "businessLink": "Learn more"
+    "headline": "Work abroad and hiring",
+    "headlineAccent": "without guesswork.",
+    "subcopy": "Workers fill in their skills, experience and documents. Employers post a real need. Labourmarket.ai helps you see faster which people fit specific jobs.",
+    "ctaPrimary": "Fill in your worker profile",
+    "businessNote": "For companies & employers ·",
+    "businessLink": "Submit a worker need"
   },
   "waitlist": {
     "title": "For companies & agencies — coming soon",
@@ -2965,8 +2965,8 @@
     "cta": "View full insights"
   },
   "footer": {
-    "tagline": "The living labour market across every sector — Baltic & Northern Europe.",
-    "activity": "Live market activity",
+    "tagline": "A labour market across every sector — Baltic & Northern Europe.",
+    "activity": "Market overview",
     "product": "Product",
     "company": "Company",
     "legalGroup": "Legal",

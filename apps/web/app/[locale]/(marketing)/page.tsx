@@ -2,13 +2,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { PreviewChip } from "@/components/app/preview-chip";
-import { LiveClock } from "@/components/app/live-clock";
 import { LiveMap } from "@/components/app/live-map";
 import { LiveTicker } from "@/components/app/live-ticker";
 import { MarketCounters } from "@/components/app/market-counters";
-import { MicroActivityFeed } from "@/components/app/micro-activity-feed";
 import { DraftBoard } from "@/components/marketing/draft-board";
 import { MarketPulse } from "@/components/marketing/market-pulse";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
@@ -69,24 +66,17 @@ export default async function LandingPage({
           <p className="mt-6 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">
             {t("subcopy")}
           </p>
-          <div className="mt-8 flex flex-col items-start gap-3">
+          <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
             <Link href="/auth/signup">
               <Button>{t("ctaPrimary")} →</Button>
             </Link>
-            <p className="text-xs text-text-muted">
-              {t("businessNote")}{" "}
-              <WaitlistModal
-                trigger={t("businessLink")}
-                source="hero_business_link"
-              />
-            </p>
+            <Link href="/company-need">
+              <Button variant="secondary">{t("businessLink")} →</Button>
+            </Link>
           </div>
 
           <div className="mt-12">
             <MarketCounters />
-            <div className="mt-6">
-              <MicroActivityFeed />
-            </div>
           </div>
 
           {/*
@@ -104,7 +94,6 @@ export default async function LandingPage({
         <div className="relative">
           <div className="relative mb-5 flex items-start justify-between gap-4">
             <PreviewChip />
-            <LiveClock />
           </div>
           <LiveMap />
         </div>
