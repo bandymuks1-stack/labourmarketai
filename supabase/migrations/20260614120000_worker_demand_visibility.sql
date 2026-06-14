@@ -58,13 +58,23 @@ begin
 
   return query
   select cr.id,
+         -- Structured columns ONLY — never the free-text title / need_summary /
+         -- notes, never payload.role, never payload.location. They may be NULL
+         -- for demands that stored detail only in payload; the board then shows
+         -- a generic label, which is the safe, honest default.
          cr.role_or_work_type,
-         cr.country,
-         cr.team_size,
+         cr.country,                 -- ISO-2 country column, never a city/location
+         cr.team_size,               -- typed integer column, no cast/parse risk
          cr.start_period,
-         -- accommodation is an enum offer value (provided_free / provided_paid
-         -- / provided_deducted / not_provided), not free text → safe to expose.
-         nullif(btrim(coalesce(cr.payload ->> 'accommodation', '')), '') as accommodation,
+         -- accommodation: STRICT whitelist of known enum offer values only, so
+         -- no free text / PII can ever leak even if a path wrote something else.
+         case
+           when cr.payload ->> 'accommodation' in (
+             'provided_free', 'provided_paid', 'provided_deducted',
+             'not_provided', 'yes', 'no', 'unknown'
+           ) then cr.payload ->> 'accommodation'
+           else null
+         end as accommodation,
          cr.created_at
     from public.customer_requests cr
    where cr.status = 'submitted'
