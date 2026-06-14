@@ -4515,5 +4515,32 @@
     "aiNone": "No suggestion was produced — please review your details.",
     "statusInvalid": "Some details need fixing. Please check the form.",
     "statusError": "Something went wrong. Please try again."
+  },
+  "candidatePool": {
+    "title": "Candidate pool",
+    "subtitle": "Operator view of the worker supply. Filter and review — this is internal; it confirms nothing and publishes nothing.",
+    "notVerifiedNote": "Statuses are honest signals, not verification. 'Confirmed evidence' means manager-confirmed records exist; it does not mean the person is verified.",
+    "filterProfession": "Trade",
+    "filterCountry": "Country",
+    "filterAvailableBy": "Available by",
+    "filterEvidence": "Evidence",
+    "search": "Search",
+    "any": "Any",
+    "evidenceConfirmed": "Confirmed evidence",
+    "evidenceSelfDeclared": "Self-declared — not verified",
+    "evidenceMissing": "Missing info",
+    "count": "Candidates",
+    "colName": "Name",
+    "colTrade": "Trade",
+    "colCountry": "Country",
+    "colAvailable": "Available",
+    "colExperience": "Experience",
+    "colEvidence": "Evidence",
+    "colMissing": "Missing",
+    "expYears": "yrs",
+    "none": "—",
+    "empty": "No candidates match these filters.",
+    "needsMigration": "The worker supply tables are not available yet.",
+    "error": "Could not load the candidate pool."
   }
 }

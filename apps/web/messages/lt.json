@@ -4515,5 +4515,32 @@
     "aiNone": "Pasiūlymas nesukurtas — peržiūrėkite savo duomenis.",
     "statusInvalid": "Kai kuriuos duomenis reikia pataisyti. Patikrinkite formą.",
     "statusError": "Kažkas nepavyko. Bandykite dar kartą."
+  },
+  "candidatePool": {
+    "title": "Kandidatų telkinys",
+    "subtitle": "Operatoriaus darbo jėgos pasiūlos vaizdas. Filtruokite ir peržiūrėkite — tai vidinis vaizdas; jis nieko nepatvirtina ir nepublikuoja.",
+    "notVerifiedNote": "Statusai yra sąžiningi signalai, ne patvirtinimas. „Patvirtinti įrodymai“ reiškia, kad yra vadovo patvirtintų įrašų; tai nereiškia, kad asmuo patikrintas.",
+    "filterProfession": "Amatas",
+    "filterCountry": "Šalis",
+    "filterAvailableBy": "Laisvas iki",
+    "filterEvidence": "Įrodymai",
+    "search": "Paieška",
+    "any": "Bet kuris",
+    "evidenceConfirmed": "Patvirtinti įrodymai",
+    "evidenceSelfDeclared": "Paties nurodyta — nepatvirtinta",
+    "evidenceMissing": "Trūksta informacijos",
+    "count": "Kandidatai",
+    "colName": "Vardas",
+    "colTrade": "Amatas",
+    "colCountry": "Šalis",
+    "colAvailable": "Laisvas",
+    "colExperience": "Patirtis",
+    "colEvidence": "Įrodymai",
+    "colMissing": "Trūksta",
+    "expYears": "m.",
+    "none": "—",
+    "empty": "Pagal šiuos filtrus kandidatų nėra.",
+    "needsMigration": "Darbo jėgos pasiūlos lentelės dar neprieinamos.",
+    "error": "Nepavyko įkelti kandidatų telkinio."
   }
 }
