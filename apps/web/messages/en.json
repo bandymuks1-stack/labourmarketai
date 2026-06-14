@@ -1401,7 +1401,7 @@
         "row": "demand {demand} · supply {supply}"
       },
       "pulse": {
-        "title": "Market pulse — live aggregates",
+        "title": "Market overview — real aggregates",
         "supplyTitle": "Supply (workers per trade × country)",
         "supplyEmpty": "No declared trades yet — the bars appear with the first workers.",
         "demandTitle": "Demand (open requests)",
