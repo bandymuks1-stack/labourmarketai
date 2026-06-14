@@ -4395,5 +4395,35 @@
       "stripe_live_blocked": "A live key/mode was detected and hard-blocked by safety. Live is never enabled here."
     },
     "futureLive": "Live payments are prepared but inactive — no live checkout until the owner signs off."
+  },
+  "workAbroad": {
+    "eyebrow": "Work abroad",
+    "title": "Your path to working abroad,",
+    "titleAccent": "step by step",
+    "subcopy": "Labourmarket.ai is a digital international labour-force agency. Build one worker profile, see what each country needs, and let employers reach you when you are ready. We never promise a job or a wage — we help you get ready and get matched.",
+    "stepsTitle": "How it works",
+    "steps": [
+      { "title": "1. Tell us your trade", "body": "Add your profession, experience and availability. It takes a few minutes." },
+      { "title": "2. AI prepares a draft", "body": "The assistant turns your words into a structured profile and CV draft — a suggestion you review and edit. It never invents experience and verifies nothing." },
+      { "title": "3. Check country readiness", "body": "See what documents and steps are likely required for the country you want — sourced, and not legal advice." },
+      { "title": "4. Get matched", "body": "When an employer's need fits your trade, availability, accommodation, transport and language, you are shortlisted. Mismatches are shown honestly." },
+      { "title": "5. Booking and start", "body": "Agree a booking with a clear readiness check. Contract and payment steps stay manual for now." }
+    ],
+    "needTitle": "What you may need",
+    "needItems": [
+      "A profession or trade you work in",
+      "Your availability from a date",
+      "Whether you need accommodation or have your own",
+      "Transport: your own, a licence, or a pickup",
+      "Documents that may be required for the country"
+    ],
+    "directionsTitle": "Where people are working",
+    "directionsNote": "Open the per-country pages to see sourced labour-market signals.",
+    "directionsCta": "See countries",
+    "aiNote": "AI helps prepare your CV and profile. It does not verify your skills, documents or legal status — a human and your documents do.",
+    "ctaProfile": "Create worker profile",
+    "ctaReadiness": "Check country readiness",
+    "ctaTrades": "See trades we work with",
+    "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice."
   }
 }
