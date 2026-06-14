@@ -4463,7 +4463,20 @@
     "aiMissing": "Vis dar trūksta",
     "aiNone": "Pasiūlymas nesukurtas — peržiūrėkite savo duomenis.",
     "statusInvalid": "Kai kuriuos duomenis reikia pataisyti. Patikrinkite formą.",
-    "statusError": "Kažkas nepavyko. Bandykite dar kartą."
+    "statusError": "Kažkas nepavyko. Bandykite dar kartą.",
+    "zzpHeading": "Jei esate ZZP arba brigada",
+    "zzpNote": "Neprivaloma — pildykite tik jei siūlote paslaugą kaip ZZP / savarankiškai dirbantis arba komandą kaip brigada.",
+    "businessName": "Verslo pavadinimas",
+    "vatNumber": "PVM / registracijos numeris",
+    "teamSize": "Komandos dydis",
+    "teamProfessions": "Komandos profesijos",
+    "teamProfessionsHelp": "Atskirtos kableliais.",
+    "tools": "Įrankiai, kuriuos turite",
+    "toolsHelp": "Atskirti kableliais.",
+    "insurance": "Draudimas",
+    "invoiceReady": "Ar galite išrašyti sąskaitą?",
+    "invoiceYes": "Taip",
+    "invoiceNo": "Ne"
   },
   "companyNeed": {
     "title": "Paskelbti darbuotojų poreikį",

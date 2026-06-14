@@ -125,3 +125,45 @@ describe("intake → AI draft (mock pipeline, end-to-end)", () => {
     expect(out.status).toBe("disabled");
   });
 });
+
+describe("ZZP / brigade details (optional, PR5)", () => {
+  it("a brigade intake parses with team/business details (defaults when omitted)", () => {
+    const base = workerIntakeSchema.parse({
+      fullName: "Brigada UAB",
+      profession: "tiler",
+      engagementType: "brigade",
+      worksWith: "brigade",
+    });
+    expect(base.teamProfessions).toEqual([]);
+    expect(base.tools).toEqual([]);
+    expect(base.invoiceReady).toBe(false);
+    expect(base.businessName).toBeUndefined();
+
+    const zzp = workerIntakeSchema.parse({
+      fullName: "Jonas",
+      profession: "tiler",
+      engagementType: "zzp_self_employed",
+      businessName: "Jonas Tiling",
+      vatNumber: "LT123456789",
+      teamSize: 3,
+      teamProfessions: ["tiler", "plasterer"],
+      tools: ["tile cutter", "mixer"],
+      insurance: "liability cover",
+      invoiceReady: true,
+    });
+    expect(zzp.businessName).toBe("Jonas Tiling");
+    expect(zzp.teamSize).toBe(3);
+    expect(zzp.teamProfessions).toEqual(["tiler", "plasterer"]);
+    expect(zzp.invoiceReady).toBe(true);
+  });
+
+  it("rejects an out-of-range team size", () => {
+    expect(
+      workerIntakeSchema.safeParse({
+        fullName: "X",
+        profession: "tiler",
+        teamSize: 0,
+      }).success,
+    ).toBe(false);
+  });
+});

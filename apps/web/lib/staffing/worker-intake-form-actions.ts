@@ -43,6 +43,7 @@ export async function submitWorkerIntakeAction(
   _prev: WorkerIntakeFormState | null,
   formData: FormData,
 ): Promise<WorkerIntakeFormState> {
+  const teamSizeRaw = Number(formData.get("team_size"));
   const raw = {
     fullName: str(formData.get("full_name")) ?? "",
     profession: str(formData.get("profession")) ?? "",
@@ -52,6 +53,14 @@ export async function submitWorkerIntakeAction(
     transport: str(formData.get("transport")) ?? "none",
     engagementType: str(formData.get("engagement_type")) ?? "employee",
     languages: csv(formData.get("languages")),
+    // ZZP / brigade details (optional)
+    businessName: str(formData.get("business_name")),
+    vatNumber: str(formData.get("vat_number")),
+    teamSize: Number.isFinite(teamSizeRaw) && teamSizeRaw > 0 ? Math.trunc(teamSizeRaw) : undefined,
+    teamProfessions: csv(formData.get("team_professions")),
+    tools: csv(formData.get("tools")),
+    insurance: str(formData.get("insurance")),
+    invoiceReady: formData.get("invoice_ready") === "yes",
     comment: str(formData.get("comment")),
   };
 

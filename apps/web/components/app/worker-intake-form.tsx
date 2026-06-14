@@ -50,6 +50,20 @@ export interface WorkerIntakeFormLabels {
   readonly aiNone: string;
   readonly statusInvalid: string;
   readonly statusError: string;
+  // ZZP / brigade (PR5)
+  readonly zzpHeading: string;
+  readonly zzpNote: string;
+  readonly businessName: string;
+  readonly vatNumber: string;
+  readonly teamSize: string;
+  readonly teamProfessions: string;
+  readonly teamProfessionsHelp: string;
+  readonly tools: string;
+  readonly toolsHelp: string;
+  readonly insurance: string;
+  readonly invoiceReady: string;
+  readonly invoiceYes: string;
+  readonly invoiceNo: string;
 }
 
 const FIELD =
@@ -139,6 +153,50 @@ export function WorkerIntakeForm({
           <input type="text" name="languages" maxLength={120} placeholder="en, lt" className={FIELD} />
           <span className={HELP}>{labels.languagesHelp}</span>
         </label>
+
+        <fieldset className="flex flex-col gap-4 rounded-xl border border-border-default p-4">
+          <legend className="px-1 text-xs font-semibold text-text-secondary">
+            {labels.zzpHeading}
+          </legend>
+          <p className={HELP}>{labels.zzpNote}</p>
+          <div className="grid grid-cols-2 gap-4">
+            <label className={LABEL}>
+              <span className="text-text-secondary">{labels.businessName}</span>
+              <input type="text" name="business_name" maxLength={200} className={FIELD} />
+            </label>
+            <label className={LABEL}>
+              <span className="text-text-secondary">{labels.vatNumber}</span>
+              <input type="text" name="vat_number" maxLength={40} className={FIELD} />
+            </label>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <label className={LABEL}>
+              <span className="text-text-secondary">{labels.teamSize}</span>
+              <input type="number" name="team_size" min={1} max={200} className={FIELD} />
+            </label>
+            <label className={LABEL}>
+              <span className="text-text-secondary">{labels.insurance}</span>
+              <input type="text" name="insurance" maxLength={200} className={FIELD} />
+            </label>
+          </div>
+          <label className={LABEL}>
+            <span className="text-text-secondary">{labels.teamProfessions}</span>
+            <input type="text" name="team_professions" maxLength={300} className={FIELD} />
+            <span className={HELP}>{labels.teamProfessionsHelp}</span>
+          </label>
+          <label className={LABEL}>
+            <span className="text-text-secondary">{labels.tools}</span>
+            <input type="text" name="tools" maxLength={300} className={FIELD} />
+            <span className={HELP}>{labels.toolsHelp}</span>
+          </label>
+          <label className={LABEL}>
+            <span className="text-text-secondary">{labels.invoiceReady}</span>
+            <select name="invoice_ready" defaultValue="no" className={FIELD}>
+              <option value="yes">{labels.invoiceYes}</option>
+              <option value="no">{labels.invoiceNo}</option>
+            </select>
+          </label>
+        </fieldset>
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.comment}</span>
