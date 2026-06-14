@@ -5,6 +5,7 @@ import {
   WorkerIntakeForm,
   type WorkerIntakeFormLabels,
 } from "@/components/app/worker-intake-form";
+import { buildWorkCategoryOptions } from "@/lib/taxonomy/work-categories";
 
 /**
  * Worker intake page (Staffing Operating Model v1, PR2 UI + PR10 AI display).
@@ -12,22 +13,6 @@ import {
  * and gets an AI profile DRAFT as a labelled suggestion (disabled until the
  * owner enables a provider). Nothing is persisted here; the draft is reviewed.
  */
-
-// Profession slugs known to exist in the shared professions taxonomy.
-const INTAKE_PROFESSIONS = [
-  "general_laborer",
-  "carpenter",
-  "concrete_worker",
-  "drywaller",
-  "electrician",
-  "mason",
-  "painter",
-  "plumber",
-  "rebar_worker",
-  "roofer",
-  "tiler",
-  "welder",
-] as const;
 
 export default async function WorkerIntakePage({
   params,
@@ -37,7 +22,6 @@ export default async function WorkerIntakePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("workerIntake");
-  const tp = await getTranslations("professions");
 
   const labels: WorkerIntakeFormLabels = {
     title: t("title"),
@@ -92,17 +76,14 @@ export default async function WorkerIntakePage({
     invoiceNo: t("invoiceNo"),
   };
 
-  const professions = INTAKE_PROFESSIONS.map((slug) => ({
-    slug,
-    label: tp(slug),
-  }));
+  const categories = buildWorkCategoryOptions(locale);
 
   return (
     <div
       className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-14 sm:px-12"
       id="main-content"
     >
-      <WorkerIntakeForm labels={labels} professions={professions} />
+      <WorkerIntakeForm labels={labels} categories={categories} />
 
       {/* Funnel bridge: this public form only previews/drafts (no persistence).
           To actually save the profile + skills/documents/country/accommodation,

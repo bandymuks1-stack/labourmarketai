@@ -5,6 +5,7 @@ import {
   CompanyNeedForm,
   type CompanyNeedFormLabels,
 } from "@/components/app/company-need-form";
+import { buildWorkCategoryOptions } from "@/lib/taxonomy/work-categories";
 
 /**
  * Company need / vacancy page (Staffing Operating Model v1, PR4 UI / PR10).
@@ -12,21 +13,6 @@ import {
  * as a labelled AI suggestion (disabled until the owner enables a provider).
  * Nothing is published here; the company reviews the draft.
  */
-const NEED_PROFESSIONS = [
-  "general_laborer",
-  "carpenter",
-  "concrete_worker",
-  "drywaller",
-  "electrician",
-  "mason",
-  "painter",
-  "plumber",
-  "rebar_worker",
-  "roofer",
-  "tiler",
-  "welder",
-] as const;
-
 export default async function CompanyNeedPage({
   params,
 }: {
@@ -35,7 +21,6 @@ export default async function CompanyNeedPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("companyNeed");
-  const tp = await getTranslations("professions");
 
   const labels: CompanyNeedFormLabels = {
     title: t("title"),
@@ -76,14 +61,14 @@ export default async function CompanyNeedPage({
     statusError: t("statusError"),
   };
 
-  const professions = NEED_PROFESSIONS.map((slug) => ({ slug, label: tp(slug) }));
+  const categories = buildWorkCategoryOptions(locale);
 
   return (
     <div
       className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-14 sm:px-12"
       id="main-content"
     >
-      <CompanyNeedForm labels={labels} professions={professions} />
+      <CompanyNeedForm labels={labels} categories={categories} />
 
       {/* Funnel bridge: this public form only previews/drafts (no persistence).
           To post a real need and run scouting/matching, the employer continues

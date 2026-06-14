@@ -5,6 +5,7 @@ import {
   submitWorkerIntakeAction,
   type WorkerIntakeFormState,
 } from "@/lib/staffing/worker-intake-form-actions";
+import type { WorkCategoryOptionGroup } from "@/lib/taxonomy/work-categories";
 
 /**
  * Worker intake form (Staffing Operating Model v1, PR10 UI). Posts the intake
@@ -73,10 +74,10 @@ const HELP = "text-[11px] text-text-muted";
 
 export function WorkerIntakeForm({
   labels,
-  professions,
+  categories,
 }: {
   readonly labels: WorkerIntakeFormLabels;
-  readonly professions: readonly { slug: string; label: string }[];
+  readonly categories: readonly WorkCategoryOptionGroup[];
 }) {
   const [state, formAction, isPending] = useActionState<
     WorkerIntakeFormState | null,
@@ -100,8 +101,12 @@ export function WorkerIntakeForm({
           <span className="text-text-secondary">{labels.profession}</span>
           <select name="profession" required defaultValue="" className={FIELD}>
             <option value="" disabled>—</option>
-            {professions.map((p) => (
-              <option key={p.slug} value={p.slug}>{p.label}</option>
+            {categories.map((c) => (
+              <optgroup key={c.key} label={c.sector}>
+                {c.options.map((o) => (
+                  <option key={o.slug} value={o.slug}>{o.label}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>
