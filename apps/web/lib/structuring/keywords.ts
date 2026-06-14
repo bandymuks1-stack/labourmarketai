@@ -394,6 +394,29 @@ export const ACTIVITY_HINTS_LT: {
       "logistics", "склад", "грузил", "погрузк", "разгру", "логистик",
     ],
   },
+  {
+    // Factory / production-line / assembly day-work. Label-only (no verified
+    // catalogue skill behind it — §7). Needles use specific stems so they do
+    // not collide with cooking ("gaminau maistą") or unrelated words.
+    slug: null,
+    sector: "manufacturing",
+    label: "Gamybos / surinkimo darbai",
+    needles: [
+      "surink",
+      "konvejer",
+      "gamykl",
+      "fabrik",
+      "gamybos lin",
+      "assembly",
+      "production line",
+      "factory",
+      "сборк",
+      "конвейер",
+      "производств",
+      "завод",
+      "цех",
+    ],
+  },
 ];
 
 /** English aliases for the activity lexicon. The matcher in the extractor

@@ -198,3 +198,13 @@ export function buildWorkCategoryOptions(locale: string): WorkCategoryOptionGrou
 export const ALL_WORK_TYPE_SLUGS: readonly string[] = WORK_CATEGORIES.flatMap((c) =>
   c.types.map((t) => t.slug),
 );
+
+/** Locale-aware slug → label map for every work type. Used where a stored
+ *  `profession` slug must be rendered (e.g. the operator candidate pool). */
+export function buildWorkTypeLabelMap(locale: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const c of WORK_CATEGORIES) {
+    for (const t of c.types) out[t.slug] = pick(t, locale);
+  }
+  return out;
+}
