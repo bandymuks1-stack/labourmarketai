@@ -20,11 +20,11 @@
       "purpose": "Manage projects, teams, and hiring."
     },
     "agency": {
-      "name": "Agency space",
+      "name": "Partner services",
       "purpose": "Offer candidates or teams and find assignments."
     },
     "buyer": {
-      "name": "Buyer space",
+      "name": "My requests",
       "purpose": "Create and manage requests for products, services, specialists, suppliers, or teams."
     }
   },
@@ -598,9 +598,9 @@
       }
     },
     "agency": {
-      "eyebrow": "AGENCY WORKSPACE",
-      "title": "Agency workspace",
-      "subtitle": "Agency role is an entry point. You can grow into other roles when ready.",
+      "eyebrow": "PARTNER SERVICES",
+      "title": "Partner services — offer workers & teams",
+      "subtitle": "Acting as a staffing partner is one way to use your company — an entry point, not a separate product. You can grow into other roles when ready.",
       "pilotDisclaimer": "We don't auto-verify candidates. Nothing becomes public without your decision. You can prepare an offer calmly — it's saved right away and stays private to you.",
       "firstAction": {
         "title": "Create a candidates / services offer draft",
@@ -772,9 +772,9 @@
       "poolLink": "Worker pool"
     },
     "buyer": {
-      "eyebrow": "BUYER WORKSPACE",
-      "title": "Buyer workspace",
-      "subtitle": "Buyer role is an entry point. You can add other roles later.",
+      "eyebrow": "MY REQUESTS",
+      "title": "My requests",
+      "subtitle": "Submitting a request is an action — anyone, a person or a company, can do it. An entry point, not a separate product. You can add other roles later.",
       "pilotDisclaimer": "We don't show fake offers. Your request stays private to you until you decide otherwise.",
       "firstAction": {
         "title": "Create a service / team / contractor request",
@@ -1467,6 +1467,11 @@
     "removeDirection": "Remove",
     "primaryBadge": "Primary",
     "directionAdded": "Direction added",
+    "reviewBanner": {
+      "title": "Some skills need review",
+      "body": "Some entries are not clearly classified yet. Review or add more information so your profile can be matched more accurately.",
+      "cta": "Review skills"
+    },
     "pageTitle": "My capabilities",
     "pageSubtitle": "Everything that makes up your work card lives here: what you do, what you can do, and what proves it. Your chosen field is context, not a limit.",
     "professionLabel": "Your profession",

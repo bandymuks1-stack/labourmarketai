@@ -82,7 +82,9 @@ describe("spaces stay separated", () => {
   it("agency space is not labelled as a buyer", () => {
     expect(lt.spaces.agency.name).not.toMatch(/pirkėj/i);
     expect(en.spaces.agency.name).not.toMatch(/buyer/i);
-    expect(lt.spaces.agency.name).toBe("Agentūros erdvė");
+    // Action/capability framing (no-silo sweep): agency = partner services,
+    // not a separate "space". Still clearly distinct from the buyer space.
+    expect(lt.spaces.agency.name).toBe("Partnerio paslaugos");
   });
   it("company workspace is hiring, not buyer", () => {
     expect(lt.spaces.company.name).toBe("Įmonės darbo erdvė");
