@@ -142,6 +142,19 @@
     "layerSignalOnly": "signal only",
     "demandSchemaNote": "Company demand locations are prepared as a human-gated RED schema plan; points appear only after the migration is approved and applied and real locations exist.",
     "demandSignalNote": "{count} of your demand locations captured as signals — no map points yet, because coordinates are not confirmed.",
+    "signalLayer": {
+      "title": "Demand signals ({count})",
+      "note": "Real demand locations you captured — where workers are needed — grouped by country. These are signals, not map points.",
+      "countryCount": "{count} signal(s)",
+      "noPoints": "No map points are drawn — coordinates are not confirmed. Points will appear only once a location is geocoded and verified.",
+      "precision": {
+        "country": "country-level",
+        "city": "city / region",
+        "address": "address",
+        "coordinates": "coordinates",
+        "unknown": "location given"
+      }
+    },
     "layers": {
       "workers": { "label": "Workers — preferred locations", "desc": "Where people want to work, from real worker profiles." },
       "demand": { "label": "Company needs", "desc": "Where employers have submitted real workforce needs." },

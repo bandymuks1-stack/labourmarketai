@@ -142,6 +142,19 @@
     "layerSignalOnly": "tik signalas",
     "demandSchemaNote": "Įmonių poreikių vietos paruoštos kaip žmogaus tvirtinamas RED schemos planas; taškai bus rodomi tik po patvirtintos ir pritaikytos migracijos bei realių vietų.",
     "demandSignalNote": "{count} jūsų poreikių vietų užfiksuota kaip signalai — dar jokių taškų žemėlapyje, nes koordinatės nepatvirtintos.",
+    "signalLayer": {
+      "title": "Poreikių signalai ({count})",
+      "note": "Realios jūsų užfiksuotos poreikių vietos — kur reikia darbuotojų — sugrupuotos pagal šalį. Tai signalai, ne taškai žemėlapyje.",
+      "countryCount": "{count} signalas (-ai)",
+      "noPoints": "Jokie taškai nepiešiami — koordinatės nepatvirtintos. Taškai atsiras tik kai vieta bus geokoduota ir patvirtinta.",
+      "precision": {
+        "country": "šalies lygmuo",
+        "city": "miestas / regionas",
+        "address": "adresas",
+        "coordinates": "koordinatės",
+        "unknown": "nurodyta vieta"
+      }
+    },
     "layers": {
       "workers": { "label": "Darbuotojai — pageidaujamos vietos", "desc": "Kur žmonės nori dirbti, pagal realius darbuotojų profilius." },
       "demand": { "label": "Įmonių poreikiai", "desc": "Kur darbdaviai pateikė realius darbo jėgos poreikius." },

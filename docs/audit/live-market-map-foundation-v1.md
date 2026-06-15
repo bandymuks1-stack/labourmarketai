@@ -36,7 +36,7 @@ Accommodation is shown as a **planned future layer note**, not an action (no rou
 | Layer | Current source (real) | Has geo/location field? | Needs migration? | Future PR |
 |-------|-----------------------|--------------------------|------------------|-----------|
 | Workers — preferred locations | `worker_professions` / profiles; preferred country not modelled | ❌ no preferred-location field | ✅ additive column/table | worker preferred-locations |
-| Company needs (demand) | `customer_requests` / company demand payload (has free-text location) | 🟦 **RED draft prepared** — `company_demand_locations` table (additive, owner-scoped RLS, optional verified-only coords) | ✅ migration authored, **NOT applied** (human-gated) | **company-demand-locations-red-draft-v1** ← first real candidate; see `docs/plans/company-demand-locations-red-draft-v1.md` |
+| Company needs (demand) | `company_demand_locations` (applied #423; signal-only write hardened #424) | 🟢 **SIGNAL-ONLY LIVE** — owner write path captures country/city/label/address (no coords); market map renders a signal read layer grouped by country, **no markers** | ✅ table + RLS applied; coordinates/markers = future geocoder | **market-map-signal-read-layer-v1** (this) → next: geocoder/admin verified-coordinate marker layer |
 | Projects | `projects` (`map.ts` has city text) | ⚠️ city text, not lat/lng | ✅ structured geo | project-locations |
 | Accommodation | none yet | ❌ no entity | ✅ new table | accommodation-locations |
 | Teams / brigades | agency pool / company workers | ❌ no location | ✅ derive/extend | teams-availability |

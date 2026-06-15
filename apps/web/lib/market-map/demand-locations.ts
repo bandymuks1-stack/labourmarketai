@@ -136,3 +136,64 @@ export function isSupportedDemandCountry(
 ): boolean {
   return (supported as readonly string[]).includes(code);
 }
+
+/**
+ * One demand signal for the market-map read layer. By design this shape carries
+ * NO latitude/longitude — the signal layer can render only "where need exists"
+ * (country/city/label), never a coordinate or a plotted point.
+ */
+export interface DemandSignalEntry {
+  id: string;
+  requestId: string;
+  countryCode: string;
+  city: string | null;
+  locality: string | null;
+  label: string;
+  precision: DemandGeoPrecision;
+}
+
+export interface DemandSignalCountryGroup {
+  countryCode: string;
+  count: number;
+  entries: DemandSignalEntry[];
+}
+
+export interface DemandSignalBoard {
+  total: number;
+  groups: DemandSignalCountryGroup[];
+}
+
+/**
+ * Build the signal-only read board: real demand locations grouped by country,
+ * showing where need exists WITHOUT any coordinate. A coordinate-confirmed,
+ * mappable row is deliberately EXCLUDED — that belongs to a future marker layer,
+ * not the signal layer. The output type has no lat/lng, so a point can never be
+ * rendered from it. Groups are sorted by count (desc) then country code.
+ */
+export function buildDemandSignalBoard(
+  rows: readonly DemandLocation[],
+): DemandSignalBoard {
+  const byCountry = new Map<string, DemandSignalEntry[]>();
+  for (const row of rows) {
+    // signal-only: never include a mappable (coordinate-confirmed) row here.
+    if (isMappableDemandLocation(row)) continue;
+    const entry: DemandSignalEntry = {
+      id: row.id,
+      requestId: row.requestId,
+      countryCode: row.countryCode,
+      city: row.city,
+      locality: row.locality,
+      label: row.locationLabel,
+      precision: row.geoPrecision,
+    };
+    const list = byCountry.get(row.countryCode);
+    if (list) list.push(entry);
+    else byCountry.set(row.countryCode, [entry]);
+  }
+
+  const groups: DemandSignalCountryGroup[] = [...byCountry.entries()]
+    .map(([countryCode, entries]) => ({ countryCode, count: entries.length, entries }))
+    .sort((a, b) => b.count - a.count || a.countryCode.localeCompare(b.countryCode));
+
+  return { total: groups.reduce((n, g) => n + g.count, 0), groups };
+}
