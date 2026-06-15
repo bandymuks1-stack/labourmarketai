@@ -28,6 +28,33 @@
       "purpose": "Kurkite ir valdykite užklausas dėl prekių, paslaugų, specialistų, tiekėjų ar komandų."
     }
   },
+  "identityActions": {
+    "ariaLabel": "Jūsų tapatybės ir veiksmai",
+    "person": {
+      "title": "Jūs kaip asmuo",
+      "subtitle": "Jūsų asmeninė paskyra.",
+      "actions": {
+        "profile": { "title": "Profilis ir CV", "desc": "Kurkite profilį, įgūdžius ir CV." },
+        "findWork": { "title": "Ieškoti darbo", "desc": "Peržiūrėkite darbo galimybes įvairiuose sektoriuose." },
+        "readiness": { "title": "Pasirengimas", "desc": "Tvarkykite dokumentus ir darbo statusą." }
+      }
+    },
+    "company": {
+      "title": "Jūsų įmonė",
+      "subtitle": "Jūsų organizacijos paskyra ir ką ji gali.",
+      "actions": {
+        "need": { "title": "Pateikti poreikį", "desc": "Aprašykite reikalingus darbuotojus ar paslaugas." },
+        "hire": { "title": "Samdyti", "desc": "Peržiūrėkite kandidatus ir trumpuosius sąrašus." },
+        "buy": { "title": "Pirkti paslaugas", "desc": "Kurkite ir sekite užklausas." },
+        "offer": { "title": "Siūlyti darbuotojus / komandas", "desc": "Pristatykite kandidatus ar komandas kaip partneris." },
+        "projects": { "title": "Valdyti projektus", "desc": "Vykdykite projektus ir operacijas." }
+      },
+      "empty": {
+        "cta": "Sukurti įmonę",
+        "desc": "Pridėkite organizaciją, kad atrakintumėte įmonės veiksmus. Jokie duomenys nesukuriami, kol jų neįvesite."
+      }
+    }
+  },
   "messaging": {
     "messageWorker": "Rašyti darbuotojui",
     "messageCompany": "Rašyti įmonei"

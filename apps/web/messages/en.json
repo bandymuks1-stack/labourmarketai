@@ -28,6 +28,33 @@
       "purpose": "Create and manage requests for products, services, specialists, suppliers, or teams."
     }
   },
+  "identityActions": {
+    "ariaLabel": "Your identities and actions",
+    "person": {
+      "title": "You as a person",
+      "subtitle": "Your individual account.",
+      "actions": {
+        "profile": { "title": "Profile & CV", "desc": "Build your profile, skills and CV." },
+        "findWork": { "title": "Find work", "desc": "See work opportunities across sectors." },
+        "readiness": { "title": "Readiness", "desc": "Manage your documents and work status." }
+      }
+    },
+    "company": {
+      "title": "Your company",
+      "subtitle": "Your organization account and what it can do.",
+      "actions": {
+        "need": { "title": "Submit a need", "desc": "Describe the workers or services you need." },
+        "hire": { "title": "Hire", "desc": "Browse candidates and shortlists." },
+        "buy": { "title": "Buy services", "desc": "Create and track requests." },
+        "offer": { "title": "Offer workers / teams", "desc": "Present candidates or teams as a partner." },
+        "projects": { "title": "Manage projects", "desc": "Run your projects and operations." }
+      },
+      "empty": {
+        "cta": "Create a company",
+        "desc": "Add your organization to unlock company actions. Nothing is created until you fill it in."
+      }
+    }
+  },
   "messaging": {
     "messageWorker": "Message worker",
     "messageCompany": "Message company"
