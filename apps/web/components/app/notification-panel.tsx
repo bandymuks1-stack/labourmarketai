@@ -8,13 +8,7 @@ import { type Role } from "@/lib/auth/actions";
 import { MobileSheet } from "@/components/ui/MobileSheet";
 import { usePopoverDismiss } from "@/lib/hooks/use-popover-dismiss";
 import { cn } from "@/lib/utils";
-
-const ROLE_ICON: Record<Role, string> = {
-  worker: "🔨",
-  company: "🏗️",
-  agency: "🤝",
-  customer: "🛒",
-};
+import { RoleIcon } from "@/components/app/role-icon";
 
 /** Authenticated-header notifications dropdown. Empty state today (no
  *  notifications table yet — schema sketched in DATA_MODEL.md as M2). The
@@ -210,7 +204,7 @@ function NotificationsBody({
                 )}
               >
                 <p className="flex items-center gap-2 text-xs text-text-secondary">
-                  <span aria-hidden>{ROLE_ICON[n.role]}</span>
+                  <RoleIcon role={n.role} className="h-4 w-4" />
                   <span className="text-text-primary">{n.type}</span>
                 </p>
                 {crossRole && (

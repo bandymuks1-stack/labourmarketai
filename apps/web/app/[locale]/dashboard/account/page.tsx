@@ -14,16 +14,11 @@ import {
 } from "@/lib/config/roles";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
+import { RoleIcon } from "@/components/app/role-icon";
+import { Wrench, NotebookPen, Inbox } from "lucide-react";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
-
-const ROLE_ICON: Record<Role, string> = {
-  worker: "🔨",
-  company: "🏗️",
-  agency: "🤝",
-  customer: "🛒",
-};
 
 /** Account tab — email + role catalogue + logout. Manage-roles UI lives
  *  in the RoleSwitcher header dropdown; this page is the canonical place
@@ -166,7 +161,7 @@ export default async function AccountPage({
                 className="flex items-center justify-between gap-3 rounded-md border border-ink-500 px-3 py-2"
               >
                 <span className="flex items-center gap-2 text-sm text-text-primary">
-                  <span aria-hidden>{ROLE_ICON[role] ?? "•"}</span>
+                  <RoleIcon role={role} className="h-4 w-4 text-text-secondary" />
                   {tRole(role)}
                 </span>
                 <span className="flex items-center gap-2">
@@ -195,7 +190,7 @@ export default async function AccountPage({
           className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
         >
           <span className="flex items-center gap-2">
-            <span aria-hidden>🔧</span>
+            <Wrench className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
             {tSkills("pageTitle")}
           </span>
           <span aria-hidden className="text-text-muted">
@@ -211,7 +206,7 @@ export default async function AccountPage({
             className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
           >
             <span className="flex items-center gap-2">
-              <span aria-hidden>📓</span>
+              <NotebookPen className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
               {tJournal("navTitle")}
             </span>
             <span aria-hidden className="text-text-muted">
@@ -228,7 +223,7 @@ export default async function AccountPage({
             className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
           >
             <span className="flex items-center gap-2">
-              <span aria-hidden>✅</span>
+              <Inbox className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
               {tJournal("inbox.title")}
             </span>
             <span aria-hidden className="text-text-muted">

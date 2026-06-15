@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
+import { RoleIcon } from "@/components/app/role-icon";
 
 /** Role cards — the START is intentionally simple (owner directive,
  *  company-role-simplicity-v1): a person either WORKS THEMSELVES or
@@ -12,10 +13,7 @@ import { cn } from "@/lib/utils";
  *  type ('staffing_agency') picked inside the company profile; the same
  *  goes for a client / requester organisation ('client_customer').
  *  Internal identifiers stay within the DB Role contract. */
-const ROLE_CARDS: { key: Role; icon: string }[] = [
-  { key: "worker", icon: "🔨" },
-  { key: "company", icon: "🏢" },
-];
+const ROLE_CARDS: { key: Role }[] = [{ key: "worker" }, { key: "company" }];
 
 // The 9 launch markets, LT first (default).
 const COUNTRIES = ["LT", "LV", "EE", "NL", "DE", "DK", "NO", "SE", "PL"] as const;
@@ -126,9 +124,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
                   </span>
                   <span className="flex flex-col gap-1">
                     <span className="flex items-center gap-2">
-                      <span aria-hidden className="text-xl">
-                        {r.icon}
-                      </span>
+                      <RoleIcon role={r.key} className="h-5 w-5 text-text-secondary" />
                       <span className="font-display text-sm font-semibold text-text-primary">
                         {t(`rolePicker.${r.key}.title`)}
                       </span>

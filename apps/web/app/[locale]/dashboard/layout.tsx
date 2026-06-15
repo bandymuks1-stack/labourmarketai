@@ -100,8 +100,12 @@ export default async function DashboardLayout({
         <AmbientGlow />
         <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
           <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
+            {/* App-shell logo links to the dashboard, NOT the public home —
+                clicking it inside the authenticated app keeps the user in
+                their workspace (never bounce to the marketing site / out of
+                the session). The public marketing logo still points to "/". */}
             <Link
-              href="/"
+              href="/dashboard"
               className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
             >
               labourmarket<span className="text-gradient-accent">.ai</span>

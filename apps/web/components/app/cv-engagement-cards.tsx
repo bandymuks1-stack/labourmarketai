@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type EngagementCard = {
@@ -31,11 +32,10 @@ const BIN_DOT: Record<string, string> = {
   yellow: "bg-state-warning",
 };
 
-// Profession/skill icon slug → glyph. Minimal M1 registry (icons live in a
-// slug registry per §10; richer asset set is M3).
-const ICON_GLYPH: Record<string, string> = {
-  "icon.tile": "🟫",
-};
+// Profession/skill icon slugs the M1 registry recognises (icons live in a
+// slug registry per §10). Rendered as a neutral lucide outline icon (no
+// emoji); a richer asset set is M3.
+const PROFESSION_ICON_SLUGS = new Set<string>(["icon.tile"]);
 
 /**
  * CV view — engagement-context cards (§8.1, current first). Each card is one
@@ -61,7 +61,9 @@ export function CvEngagementCards({
 
   const fmt = (d: string | null) =>
     d ? new Date(d).toLocaleDateString(locale, { year: "numeric", month: "short" }) : null;
-  const profGlyph = professionIconSlug ? ICON_GLYPH[professionIconSlug] : null;
+  const hasProfIcon = professionIconSlug
+    ? PROFESSION_ICON_SLUGS.has(professionIconSlug)
+    : false;
 
   return (
     <section className="flex flex-col gap-3">
@@ -77,7 +79,13 @@ export function CvEngagementCards({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-display text-sm font-semibold text-text-primary">
-                    {profGlyph && <span aria-hidden className="mr-1.5">{profGlyph}</span>}
+                    {hasProfIcon && (
+                      <Wrench
+                        aria-hidden
+                        strokeWidth={1.75}
+                        className="mr-1.5 inline h-3.5 w-3.5 text-text-muted"
+                      />
+                    )}
                     {c.orgName}
                   </p>
                   <p className="mt-0.5 text-[11px] text-text-secondary">
