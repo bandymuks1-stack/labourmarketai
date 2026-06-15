@@ -168,6 +168,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 81 for the worker demand-visibility RPC — one additive RED
     // migration (list_open_demand_for_workers, applied to prod via MCP after
     // strict security review; read-only, worker-gated, curated non-personal).
-    expect(guard).toMatch(/SPRINT_BASELINE = 81/);
+    // then to 82 for company-demand-locations-red-draft-v1 (20260615120000
+    // company_demand_locations — additive RED-draft owner-scoped geo table, the
+    // first real market-map demand layer candidate; NOT applied, human-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 82/);
   });
 });

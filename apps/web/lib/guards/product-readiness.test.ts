@@ -1425,7 +1425,16 @@ describe("no migration files added by this sprint", () => {
     // (worker-gated, status='submitted' only, structured columns + accommodation
     // enum whitelist; no profile_id / location / notes / free-text). Applied to
     // prod via Supabase MCP after a strict security review. Additive + reversible.
-    const SPRINT_BASELINE = 81;
+    // Bumped 81 -> 82 for company-demand-locations-red-draft-v1
+    // (20260615120000_company_demand_locations): ONE additive RED-draft migration
+    // — a NEW owner-scoped child table of customer_requests holding WHERE a
+    // company actually needs workers (the first real market-map geo layer
+    // candidate). Owner/admin SELECT RLS mirroring demand_shortlist, NO anon/
+    // public read, grant to authenticated only, NO new SECURITY DEFINER function.
+    // Coordinates are optional and the DB itself forbids random/unverified points
+    // (CHECK: coords only when geocode_status verified/manual). Additive +
+    // reversible (supabase/rollbacks/*). NOT applied — human-gated for owner.
+    const SPRINT_BASELINE = 82;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
