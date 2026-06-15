@@ -138,6 +138,8 @@
     },
     "layersTitle": "Planned layers",
     "layerPlanned": "planned",
+    "layerSchemaPrepared": "schema prepared",
+    "demandSchemaNote": "Company demand locations are prepared as a human-gated RED schema plan; points appear only after the migration is approved and applied and real locations exist.",
     "layers": {
       "workers": { "label": "Workers — preferred locations", "desc": "Where people want to work, from real worker profiles." },
       "demand": { "label": "Company needs", "desc": "Where employers have submitted real workforce needs." },

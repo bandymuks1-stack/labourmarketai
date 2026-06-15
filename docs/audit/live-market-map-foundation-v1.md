@@ -36,7 +36,7 @@ Accommodation is shown as a **planned future layer note**, not an action (no rou
 | Layer | Current source (real) | Has geo/location field? | Needs migration? | Future PR |
 |-------|-----------------------|--------------------------|------------------|-----------|
 | Workers — preferred locations | `worker_professions` / profiles; preferred country not modelled | ❌ no preferred-location field | ✅ additive column/table | worker preferred-locations |
-| Company needs (demand) | `customer_requests` / company demand payload (has free-text location) | ⚠️ free-text only, not geocoded | ✅ structured location + geocode | demand-locations |
+| Company needs (demand) | `customer_requests` / company demand payload (has free-text location) | 🟦 **RED draft prepared** — `company_demand_locations` table (additive, owner-scoped RLS, optional verified-only coords) | ✅ migration authored, **NOT applied** (human-gated) | **company-demand-locations-red-draft-v1** ← first real candidate; see `docs/plans/company-demand-locations-red-draft-v1.md` |
 | Projects | `projects` (`map.ts` has city text) | ⚠️ city text, not lat/lng | ✅ structured geo | project-locations |
 | Accommodation | none yet | ❌ no entity | ✅ new table | accommodation-locations |
 | Teams / brigades | agency pool / company workers | ❌ no location | ✅ derive/extend | teams-availability |

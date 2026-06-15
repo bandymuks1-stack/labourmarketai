@@ -28,19 +28,30 @@ import { SECTORS } from "@/lib/structuring/sectors";
  * company needs / projects / accommodation — never invented points.
  */
 
-/** Planned data layers. Each is "planned" until a real geo source exists
- *  (see docs/audit/live-market-map-foundation-v1.md data-source matrix). */
+/** Data layers. Most are "planned" until a real geo source exists; the demand
+ *  layer is the FIRST real candidate — its additive geo table is prepared as a
+ *  human-gated RED schema draft (company-demand-locations-red-draft-v1). It
+ *  shows "schema prepared" (not "planned", not "live") and plots NO points until
+ *  the migration is owner-applied AND real, geocode-verified rows exist.
+ *  See docs/audit/live-market-map-foundation-v1.md data-source matrix. */
 const LAYERS = [
-  { key: "workers", icon: Users },
-  { key: "demand", icon: ClipboardList },
-  { key: "projects", icon: FolderKanban },
-  { key: "accommodation", icon: Home },
-  { key: "teams", icon: UsersRound },
-  { key: "readiness", icon: ShieldCheck },
-  { key: "rates", icon: Coins },
-  { key: "countryFit", icon: Globe2 },
-  { key: "nextActions", icon: Compass },
+  { key: "workers", icon: Users, status: "planned" },
+  { key: "demand", icon: ClipboardList, status: "schemaPrepared" },
+  { key: "projects", icon: FolderKanban, status: "planned" },
+  { key: "accommodation", icon: Home, status: "planned" },
+  { key: "teams", icon: UsersRound, status: "planned" },
+  { key: "readiness", icon: ShieldCheck, status: "planned" },
+  { key: "rates", icon: Coins, status: "planned" },
+  { key: "countryFit", icon: Globe2, status: "planned" },
+  { key: "nextActions", icon: Compass, status: "planned" },
 ] as const;
+
+/** Pill copy + tone per layer status. "schemaPrepared" is a deliberately
+ *  distinct, honest state: the schema is ready (RED draft) but no points show. */
+const LAYER_STATUS_KEY = {
+  planned: "layerPlanned",
+  schemaPrepared: "layerSchemaPrepared",
+} as const;
 
 /** Safe first actions → real existing routes. Accommodation is a PLANNED
  *  layer note, not a link (no route / no data yet). */
@@ -150,8 +161,8 @@ export async function MarketMapShell() {
               {t("layersTitle")}
             </p>
             <ul className="flex flex-col gap-2.5">
-              {LAYERS.map(({ key, icon: Icon }) => (
-                <li key={key} className="flex items-start gap-2.5">
+              {LAYERS.map(({ key, icon: Icon, status }) => (
+                <li key={key} className="flex items-start gap-2.5" data-testid={`market-map-layer-${key}`}>
                   <Icon
                     className="mt-0.5 h-4 w-4 shrink-0 text-brand-blue"
                     strokeWidth={1.75}
@@ -160,13 +171,27 @@ export async function MarketMapShell() {
                   <span className="flex flex-col gap-0.5">
                     <span className="flex items-center gap-2 text-sm text-text-primary">
                       {t(`layers.${key}.label`)}
-                      <span className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-state-warning">
-                        {t("layerPlanned")}
+                      <span
+                        className={`rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label ${
+                          status === "schemaPrepared"
+                            ? "border-brand-blue/40 bg-brand-blue/5 text-brand-blue"
+                            : "border-state-warning/40 bg-state-warning/5 text-state-warning"
+                        }`}
+                      >
+                        {t(LAYER_STATUS_KEY[status])}
                       </span>
                     </span>
                     <span className="text-xs leading-relaxed text-text-muted">
                       {t(`layers.${key}.desc`)}
                     </span>
+                    {status === "schemaPrepared" && (
+                      <span
+                        className="mt-0.5 text-[11px] leading-relaxed text-text-muted"
+                        data-testid="market-map-demand-schema-note"
+                      >
+                        {t("demandSchemaNote")}
+                      </span>
+                    )}
                   </span>
                 </li>
               ))}

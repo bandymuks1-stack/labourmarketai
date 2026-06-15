@@ -138,6 +138,8 @@
     },
     "layersTitle": "Planuojami sluoksniai",
     "layerPlanned": "planuojama",
+    "layerSchemaPrepared": "schema parengta",
+    "demandSchemaNote": "Įmonių poreikių vietos paruoštos kaip žmogaus tvirtinamas RED schemos planas; taškai bus rodomi tik po patvirtintos ir pritaikytos migracijos bei realių vietų.",
     "layers": {
       "workers": { "label": "Darbuotojai — pageidaujamos vietos", "desc": "Kur žmonės nori dirbti, pagal realius darbuotojų profilius." },
       "demand": { "label": "Įmonių poreikiai", "desc": "Kur darbdaviai pateikė realius darbo jėgos poreikius." },
