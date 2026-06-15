@@ -15,8 +15,9 @@ import {
 import { Link } from "@/lib/i18n/navigation";
 import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
 import { SECTORS } from "@/lib/structuring/sectors";
-import { getOwnDemandLocationSummary } from "@/lib/demand/demand-location";
+import { getOwnDemandLocationSummary, getOwnDemandSignalBoard } from "@/lib/demand/demand-location";
 import { demandLayerStatus } from "@/lib/market-map/demand-locations";
+import { MarketMapSignalLayer } from "@/components/app/market-map-signal-layer";
 
 /**
  * Live market map — FOUNDATION shell (v1). NO fake markers, NO seeded geo
@@ -92,6 +93,10 @@ export async function MarketMapShell() {
       : "schemaPrepared";
   const demandSignalCount = demandSummary?.total ?? 0;
 
+  // Signal-only READ LAYER: real demand signals grouped by country, no points.
+  const signalBoard = await getOwnDemandSignalBoard();
+  const hasSignals = !!signalBoard && signalBoard.total > 0;
+
   return (
     <div className="flex flex-col gap-6" data-testid="market-map-shell">
       {/* Hero */}
@@ -139,19 +144,30 @@ export async function MarketMapShell() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-        {/* Map canvas — empty foundation state, no markers */}
-        <section
-          className="card-border flex min-h-[320px] flex-col items-center justify-center gap-2 p-6 text-center"
-          data-testid="market-map-canvas"
-        >
-          <MapIcon className="h-10 w-10 text-text-muted" strokeWidth={1.25} aria-hidden />
-          <h2 className="font-display text-lg font-semibold text-text-primary">
-            {t("canvasEmptyTitle")}
-          </h2>
-          <p className="max-w-md text-sm leading-relaxed text-text-secondary">
-            {t("canvasEmptyBody")}
-          </p>
-        </section>
+        {/* Map canvas — the signal-only READ LAYER when real signals exist
+            (grouped by country, NO markers / NO coordinates), else the honest
+            empty foundation state. */}
+        {hasSignals && signalBoard ? (
+          <section
+            className="card-border flex min-h-[320px] flex-col gap-4 p-6"
+            data-testid="market-map-canvas"
+          >
+            <MarketMapSignalLayer board={signalBoard} />
+          </section>
+        ) : (
+          <section
+            className="card-border flex min-h-[320px] flex-col items-center justify-center gap-2 p-6 text-center"
+            data-testid="market-map-canvas"
+          >
+            <MapIcon className="h-10 w-10 text-text-muted" strokeWidth={1.25} aria-hidden />
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              {t("canvasEmptyTitle")}
+            </h2>
+            <p className="max-w-md text-sm leading-relaxed text-text-secondary">
+              {t("canvasEmptyBody")}
+            </p>
+          </section>
+        )}
 
         {/* Side: legend + layers */}
         <aside className="flex flex-col gap-6">

@@ -5,8 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { isMarketCountry } from "@/lib/taxonomy/work-categories";
 import {
   summarizeDemandLocations,
+  buildDemandSignalBoard,
   type DemandLocation,
   type DemandLocationSummary,
+  type DemandSignalBoard,
   type DemandGeoPrecision,
 } from "@/lib/market-map/demand-locations";
 
@@ -179,7 +181,7 @@ export async function addDemandLocation(
  * needs-migration/error so callers can fall back to the static "schema
  * prepared" state.
  */
-export async function getOwnDemandLocationSummary(): Promise<DemandLocationSummary | null> {
+async function fetchOwnDemandRows(): Promise<DemandLocation[] | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -195,7 +197,7 @@ export async function getOwnDemandLocationSummary(): Promise<DemandLocationSumma
 
   if (error || !Array.isArray(data)) return null;
 
-  const rows: DemandLocation[] = data.map((r: Record<string, unknown>) => ({
+  return data.map((r: Record<string, unknown>) => ({
     id: String(r.id),
     requestId: String(r.request_id),
     ownerId: String(r.owner_id),
@@ -211,6 +213,19 @@ export async function getOwnDemandLocationSummary(): Promise<DemandLocationSumma
     geocodeStatus: r.geocode_status as DemandLocation["geocodeStatus"],
     source: r.source as DemandLocation["source"],
   }));
+}
 
-  return summarizeDemandLocations(rows);
+export async function getOwnDemandLocationSummary(): Promise<DemandLocationSummary | null> {
+  const rows = await fetchOwnDemandRows();
+  return rows ? summarizeDemandLocations(rows) : null;
+}
+
+/**
+ * The market-map SIGNAL-ONLY read layer: the caller's own demand locations
+ * grouped by country, coordinate-free. Returns null when unauthenticated or on
+ * any read error so the shell falls back to the empty/foundation state.
+ */
+export async function getOwnDemandSignalBoard(): Promise<DemandSignalBoard | null> {
+  const rows = await fetchOwnDemandRows();
+  return rows ? buildDemandSignalBoard(rows) : null;
 }
