@@ -72,6 +72,27 @@ describe("skills review banner copy is present + honest in every active locale",
   }
 });
 
+describe("two-identity / action model (Asmuo vs Įmonė)", () => {
+  const SILO_DESC = /\bspace\b|erdvė|пространств|workspace/i;
+  const PERSON = /person|asmuo|человек/i;
+  const WORKSPACE_VIEW = /workspace view|darbo erdvės vaizdą|вид рабочего пространства/i;
+  for (const locale of ACTIVE) {
+    const m = loadMessages(locale);
+    it(`${locale}: roles.agency.description has no silo framing`, () => {
+      expect(str(m, "roles.agency.description")).not.toMatch(SILO_DESC);
+    });
+    it(`${locale}: roles.customer.description has no silo framing`, () => {
+      expect(str(m, "roles.customer.description")).not.toMatch(SILO_DESC);
+    });
+    it(`${locale}: onboarding presents the PERSON identity (not a "worker" silo)`, () => {
+      expect(str(m, "auth.onboarding.rolePicker.worker.title")).toMatch(PERSON);
+    });
+    it(`${locale}: role-switch clarity note is account/action framed, not "workspace view"`, () => {
+      expect(str(m, "auth.roleSwitcher.clarityNote")).not.toMatch(WORKSPACE_VIEW);
+    });
+  }
+});
+
 describe("skills review banner is wired into the profile page", () => {
   const page = read("app/[locale]/dashboard/profile/page.tsx");
   it("imports + renders SkillsReviewBanner with reviewBanner copy", () => {

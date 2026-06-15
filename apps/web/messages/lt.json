@@ -1542,16 +1542,16 @@
       "customerPartial": "Pirkėjo erdvė dar ruošiama. Galite pridėti pirkėjo vaidmenį ir pildyti užklausą."
     },
     "worker": {
-      "description": "Darbuotojas: text-first profilis, įgūdžiai ir darbo dienoraštis. Aktyvu šiandien."
+      "description": "Veikla kaip asmuo: text-first profilis, įgūdžiai ir darbo dienoraštis. Aktyvu šiandien."
     },
     "company": {
-      "description": "Įmonės erdvė: komandų, projektų ir poreikių valdymas. Bus įjungta vėliau."
+      "description": "Jūsų įmonė: komandų, projektų ir poreikių valdymas. Bus įjungta vėliau."
     },
     "agency": {
-      "description": "Agentūros erdvė: kandidatų rezervas ir paslaugų pasiūlos valdymas. Bus įjungta vėliau."
+      "description": "Įmonės veikla — siūlyti kandidatus ar komandas ir ieškoti užsakymų. Bus įjungta vėliau."
     },
     "customer": {
-      "description": "Pirkėjo erdvė: paslaugų užsakymas ir ataskaitos. Bus įjungta vėliau."
+      "description": "Veiksmas — pateikti ir valdyti užklausas dėl paslaugų, specialistų ar komandų. Bus įjungta vėliau."
     },
     "freelancer": {
       "description": "Laisvai samdomas: jūsų paslaugos ir darbo istorija viename profilyje. Ruošiama."
@@ -1661,11 +1661,11 @@
     },
     "account_roles": {
       "label": "Vaidmenys",
-      "description": "Peržiūrėkite savo vaidmenis. Šiandien aktyvi darbuotojo erdvė; kiti vaidmenys bus pridėti palaipsniui."
+      "description": "Peržiūrėkite savo vaidmenis. Veikla kaip asmuo aktyvi šiandien; kiti veiksmai pridedami palaipsniui."
     },
     "role_expansion": {
       "label": "Daugiau vaidmenų",
-      "description": "Vėliau galėsite pridėti įmonės, agentūros, kliento ir kitas erdves, kai jos bus paruoštos."
+      "description": "Vėliau galėsite pridėti įmonės, agentūros ir pirkimo veiksmus, kai jie bus paruošti."
     },
     "external_confirmation": {
       "label": "Išorinis patvirtinimas",
@@ -1994,14 +1994,14 @@
     "onboarding": {
       "pendingInviteNote": "Turite laukiantį kvietimą iš {org}. Užbaikite paskyros nustatymą žemiau — tada galėsite jį priimti savo skydelyje.",
       "rolePicker": {
-        "heading": "Nuo ko norite pradėti šiandien?",
+        "heading": "Pradedate kaip asmuo ar įmonė?",
         "worker": {
-          "title": "Darbuotojas",
-          "desc": "Fiksuok darbą, mokslus ar veiklą — kurk CV, gauk patvirtinimų."
+          "title": "Asmuo",
+          "desc": "Ieškau darbo, siūlau savo darbą arba fiksuoju mokslus ir veiklą — profilis, įgūdžiai, CV ir darbo dienoraštis."
         },
         "company": {
           "title": "Įmonė",
-          "desc": "Samdyti, valdyti komandas, skelbti darbus."
+          "desc": "Atstovauju organizacijai — samdyti, valdyti projektus, siūlyti darbuotojus ar komandas, pateikti poreikį."
         },
         "agency": {
           "title": "Agentūra",
@@ -2011,9 +2011,9 @@
           "title": "Pirkėjas",
           "desc": "Užsisakyti paslaugas, gauti ataskaitas."
         },
-        "infoBox": "💡 Žinoma, kad ir kokią rolę pasirinkai — tavo darbo patirtis bus tyliai kaupiama Darbo Dienoraštyje. Vieną dieną tai gali būti vertingiausia tavo CV dalis.",
+        "infoBox": "Ką bepasirinktum — tai tik pradžios taškas; tavo darbo patirtis tyliai kaupiama Darbo Dienoraštyje. Vieną dieną tai gali būti vertingiausia tavo CV dalis.",
         "continue": "Tęsti",
-        "multiNote": "Pasirinkite vieną ar kelis — tai tik jūsų pradžios taškas. Vėliau galėsite pridėti daugiau veiklų, rolių, įmonių, komandų, projektų ar galimybių."
+        "multiNote": "Pasirinkite vieną ar abu — tai tik pradžios taškas. Asmuo ir įmonė yra tapatybės; samdymas, pirkimas, darbuotojų siūlymas ar projektų valdymas yra veiksmai, kuriuos pridėsite vėliau."
       },
       "step2": {
         "heading": "Šiek tiek apie tave",
@@ -2039,7 +2039,7 @@
       "confirm": "Pridėti",
       "adminMode": "Admin režimas",
       "adminPanelLink": "Atidaryti operacijų valdymo skydą",
-      "clarityNote": "Vaidmens keitimas keičia darbo erdvės vaizdą, ne jūsų paskyrą. Įmonės, agentūros ir pirkėjo erdvės vėliau gali prireikti organizacijos profilio."
+      "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
       "firstUse": {

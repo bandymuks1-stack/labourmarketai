@@ -1542,16 +1542,16 @@
       "customerPartial": "The buyer space is still being prepared. You can add the buyer role and fill in a request."
     },
     "worker": {
-      "description": "Worker: text-first profile, skills, and work journal. Active today."
+      "description": "Working as a person: text-first profile, skills, and work journal. Active today."
     },
     "company": {
-      "description": "Company space: team, project and need management. Will be enabled later."
+      "description": "Your company: team, project and need management. Will be enabled later."
     },
     "agency": {
-      "description": "Agency space: candidate pool and service-offer management. Will be enabled later."
+      "description": "A company capability — offer candidates or teams and find assignments. Will be enabled later."
     },
     "customer": {
-      "description": "Customer space: service ordering and reports. Will be enabled later."
+      "description": "An action — submit and manage requests for services, specialists or teams. Will be enabled later."
     },
     "freelancer": {
       "description": "Freelancer: services and work history in one profile. Preparing."
@@ -1661,11 +1661,11 @@
     },
     "account_roles": {
       "label": "Roles",
-      "description": "Review your roles. The worker space is active today; other roles are added step by step."
+      "description": "Review your roles. Working as a person is active today; other actions are added step by step."
     },
     "role_expansion": {
       "label": "More roles",
-      "description": "Later you'll be able to add company, agency, customer and other spaces when they are ready."
+      "description": "Later you'll be able to add company, agency and buying actions when they are ready."
     },
     "external_confirmation": {
       "label": "External confirmation",
@@ -1994,14 +1994,14 @@
     "onboarding": {
       "pendingInviteNote": "You have a pending invitation from {org}. Finish setting up your account below — then you can accept it on your dashboard.",
       "rolePicker": {
-        "heading": "What do you want to start with today?",
+        "heading": "Are you starting as a person or a company?",
         "worker": {
-          "title": "Worker",
-          "desc": "Log work, studies or activity — build a CV, earn confirmations."
+          "title": "Person",
+          "desc": "I look for work, offer my own work, or log studies and activity — profile, skills, CV and a work journal."
         },
         "company": {
           "title": "Company",
-          "desc": "Recruit, manage teams, post jobs."
+          "desc": "I represent an organization — hire, manage projects, offer workers or teams, submit needs."
         },
         "agency": {
           "title": "Agency",
@@ -2011,9 +2011,9 @@
           "title": "Customer",
           "desc": "Order services, get work reports."
         },
-        "infoBox": "💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
+        "infoBox": "Whatever you pick is only a starting point — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "continue": "Continue",
-        "multiNote": "Pick one or more — this is only your starting point. You can add more activities, roles, companies, teams, projects, or opportunities later."
+        "multiNote": "Pick one or both — this is only a starting point. Person and company are identities; hiring, buying, offering workers or running projects are actions you add later."
       },
       "step2": {
         "heading": "A bit about you",
@@ -2039,7 +2039,7 @@
       "confirm": "Add",
       "adminMode": "Admin mode",
       "adminPanelLink": "Open operations control panel",
-      "clarityNote": "Switching role changes the workspace view, not your account. Company, agency and buyer workspaces may need an organization profile later."
+      "clarityNote": "One account, two identities — you as a person and your company. Switching only changes which actions you see (find work, offer services, hire, submit a need); agency and buying are actions, not separate systems. Some company actions may need an organization profile later."
     },
     "dashboard": {
       "firstUse": {
