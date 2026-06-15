@@ -62,35 +62,60 @@
       "whatTitle": "What you can do here",
       "whatBody": "Manage your company details and submit a workforce need.",
       "primaryLabel": "New need / project",
-      "nextLine": "Next: your need is saved to your account, ready for matching."
+      "nextLine": "Next: your need is saved to your account, ready for matching.",
+      "flow": {
+        "step1": "Enter your need (profession, location, how many people).",
+        "step2": "The system structures the need and prepares it for matching.",
+        "step3": "Review the ones who fit and start a conversation."
+      }
     },
     "candidates": {
       "context": "Company · Hire",
       "whatTitle": "What you can do here",
       "whatBody": "Review candidates and shortlists for your needs.",
       "primaryLabel": "Find workers",
-      "nextLine": "Next: mark the ones who fit and start a conversation."
+      "nextLine": "Next: mark the ones who fit and start a conversation.",
+      "flow": {
+        "step1": "Add a candidate or review your drafts.",
+        "step2": "The system keeps them private until you decide.",
+        "step3": "Mark the ones who fit and start a conversation."
+      }
     },
     "buyer": {
       "context": "Company · Buy services",
       "whatTitle": "What you can do here",
       "whatBody": "Submit a request for services, specialists or teams.",
       "primaryLabel": "Start a request",
-      "nextLine": "Next: your request is saved and waits for review — no fake offers."
+      "nextLine": "Next: your request is saved and waits for review — no fake offers.",
+      "flow": {
+        "step1": "Describe what you need (service, timing, budget).",
+        "step2": "Your request is saved and waits for review.",
+        "step3": "Add a file or details so the reply is more accurate."
+      }
     },
     "agency": {
       "context": "Company · Offer workers",
       "whatTitle": "What you can do here",
       "whatBody": "Offer workers or teams as a staffing partner.",
       "primaryLabel": "Manage your pool",
-      "nextLine": "Next: your offer stays private until you decide otherwise."
+      "nextLine": "Next: your offer stays private until you decide otherwise.",
+      "flow": {
+        "step1": "Offer candidates or a team (profession, skills, languages).",
+        "step2": "Your offer stays private until you decide otherwise.",
+        "step3": "Link real workers to your pool."
+      }
     },
     "projects": {
       "context": "Company · Projects",
       "whatTitle": "What you can do here",
       "whatBody": "Run your projects and operations in one place.",
       "primaryLabel": "New project",
-      "nextLine": "Next: track progress and teams as the project moves."
+      "nextLine": "Next: track progress and teams as the project moves.",
+      "flow": {
+        "step1": "Create a project (name, location).",
+        "step2": "Assign workers to the project.",
+        "step3": "Track progress and teams in the ARENA view."
+      }
     }
   },
   "messaging": {

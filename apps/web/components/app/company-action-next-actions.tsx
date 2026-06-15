@@ -36,6 +36,21 @@ export async function CompanyActionNextActions({
         {t("whatTitle")}
       </h2>
       <p className="text-sm leading-relaxed text-text-secondary">{t("whatBody")}</p>
+      {/* Practical 3-step flow: what to fill/choose → what the system does
+          next → the human action after. Operational copy, no fake data. */}
+      <ol
+        className="mt-1 flex flex-col gap-1.5"
+        data-testid="company-action-flow"
+      >
+        {(["step1", "step2", "step3"] as const).map((step, i) => (
+          <li key={step} className="flex items-start gap-2 text-sm text-text-secondary">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-brand-blue/40 font-mono text-[11px] text-brand-blue">
+              {i + 1}
+            </span>
+            <span className="leading-relaxed">{t(`flow.${step}`)}</span>
+          </li>
+        ))}
+      </ol>
       {primaryHref ? (
         <Link
           href={primaryHref as "/dashboard"}
