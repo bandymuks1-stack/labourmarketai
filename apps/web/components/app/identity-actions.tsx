@@ -49,18 +49,20 @@ function ActionCard({
   desc,
   href,
   testid,
+  compact = false,
 }: {
   icon: LucideIcon;
   title: string;
   desc: string;
   href: string;
   testid: string;
+  compact?: boolean;
 }) {
   return (
     <Link
       href={href as "/dashboard"}
       data-testid={testid}
-      className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-1 p-4 transition-colors hover:border-brand-blue"
+      className={`flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-1 transition-colors hover:border-brand-blue ${compact ? "p-3" : "p-4"}`}
     >
       <Icon
         className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue"
@@ -71,7 +73,11 @@ function ActionCard({
         <span className="font-display text-sm font-semibold text-text-primary">
           {title}
         </span>
-        <span className="text-xs leading-relaxed text-text-secondary">{desc}</span>
+        {/* Compact entry (dashboard) drops the descriptions — it is a quick
+            action launcher, not the full account explainer. */}
+        {compact ? null : (
+          <span className="text-xs leading-relaxed text-text-secondary">{desc}</span>
+        )}
       </span>
     </Link>
   );
@@ -79,29 +85,33 @@ function ActionCard({
 
 export async function IdentityActions({
   hasCompany,
+  compact = false,
 }: {
   readonly hasCompany: boolean;
+  /** Compact dashboard entry: tighter spacing, no subtitles/descriptions. The
+   *  full explainer view lives on /dashboard/account. */
+  readonly compact?: boolean;
 }) {
   const t = await getTranslations("identityActions");
+  const blockCls = `flex flex-col gap-3 rounded-2xl border border-border-subtle bg-ink-800/20 ${compact ? "p-4" : "p-5"}`;
 
   return (
     <section
-      className="flex flex-col gap-5"
+      className={compact ? "flex flex-col gap-3" : "flex flex-col gap-5"}
       data-testid="identity-actions"
       aria-label={t("ariaLabel")}
     >
       {/* Asmuo — person identity */}
-      <div
-        className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-ink-800/20 p-5"
-        data-testid="identity-person"
-      >
+      <div className={blockCls} data-testid="identity-person">
         <header className="flex items-center gap-2">
           <User className="h-5 w-5 text-text-secondary" strokeWidth={1.75} aria-hidden />
           <div className="flex flex-col">
             <h2 className="font-display text-base font-semibold text-text-primary">
               {t("person.title")}
             </h2>
-            <p className="text-xs text-text-secondary">{t("person.subtitle")}</p>
+            {compact ? null : (
+              <p className="text-xs text-text-secondary">{t("person.subtitle")}</p>
+            )}
           </div>
         </header>
         <div className="grid gap-3 sm:grid-cols-3">
@@ -113,23 +123,23 @@ export async function IdentityActions({
               title={t(`person.actions.${a.key}.title`)}
               desc={t(`person.actions.${a.key}.desc`)}
               testid={`identity-action-person-${a.key}`}
+              compact={compact}
             />
           ))}
         </div>
       </div>
 
       {/* Įmonė — company identity */}
-      <div
-        className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-ink-800/20 p-5"
-        data-testid="identity-company"
-      >
+      <div className={blockCls} data-testid="identity-company">
         <header className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-text-secondary" strokeWidth={1.75} aria-hidden />
           <div className="flex flex-col">
             <h2 className="font-display text-base font-semibold text-text-primary">
               {t("company.title")}
             </h2>
-            <p className="text-xs text-text-secondary">{t("company.subtitle")}</p>
+            {compact ? null : (
+              <p className="text-xs text-text-secondary">{t("company.subtitle")}</p>
+            )}
           </div>
         </header>
         {hasCompany ? (
@@ -142,6 +152,7 @@ export async function IdentityActions({
                 title={t(`company.actions.${a.key}.title`)}
                 desc={t(`company.actions.${a.key}.desc`)}
                 testid={`identity-action-company-${a.key}`}
+                compact={compact}
               />
             ))}
           </div>
@@ -149,16 +160,18 @@ export async function IdentityActions({
           <Link
             href={"/dashboard/start/company" as "/dashboard"}
             data-testid="identity-company-create"
-            className="flex items-start gap-3 rounded-xl border border-dashed border-brand-blue/50 bg-brand-blue/5 p-4 transition-colors hover:border-brand-blue"
+            className={`flex items-start gap-3 rounded-xl border border-dashed border-brand-blue/50 bg-brand-blue/5 transition-colors hover:border-brand-blue ${compact ? "p-3" : "p-4"}`}
           >
             <Plus className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue" strokeWidth={1.75} aria-hidden />
             <span className="flex flex-col gap-0.5">
               <span className="font-display text-sm font-semibold text-text-primary">
                 {t("company.empty.cta")}
               </span>
-              <span className="text-xs leading-relaxed text-text-secondary">
-                {t("company.empty.desc")}
-              </span>
+              {compact ? null : (
+                <span className="text-xs leading-relaxed text-text-secondary">
+                  {t("company.empty.desc")}
+                </span>
+              )}
             </span>
           </Link>
         )}

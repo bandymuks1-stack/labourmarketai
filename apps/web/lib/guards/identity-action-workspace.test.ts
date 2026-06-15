@@ -44,6 +44,12 @@ describe("identity/action workspace component", () => {
     expect(account).toMatch(/<IdentityActions\s+hasCompany=\{hasCompany\}/);
     expect(account).toMatch(/getOwnCompany\(\)/);
   });
+
+  it("is also surfaced on the main dashboard (compact entry)", () => {
+    const dashboard = read("app/[locale]/dashboard/page.tsx");
+    expect(dashboard).toMatch(/<IdentityActions\s+hasCompany=\{hasCompany\}\s+compact/);
+    expect(dashboard).toMatch(/getOwnCompany\(\)/);
+  });
 });
 
 describe("identity/action copy present in every active locale", () => {
