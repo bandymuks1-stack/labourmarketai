@@ -15,16 +15,8 @@ import {
 } from "@/lib/config/roles";
 import { usePopoverDismiss } from "@/lib/hooks/use-popover-dismiss";
 import { cn } from "@/lib/utils";
-
-// Role catalogue + icons read from the central role config so adding a
-// future role is a one-file change. Icons stay in this client component
-// because they are pure presentation.
-const ROLE_ICON: Record<Role, string> = {
-  worker: "🔨",
-  company: "🏗️",
-  agency: "🤝",
-  customer: "🛒",
-};
+import { RoleIcon } from "@/components/app/role-icon";
+import { Settings } from "lucide-react";
 
 /** Authenticated-header role switcher. Always visible (even for users with
  *  one role) so adding a second role stays discoverable (PV §15).
@@ -86,7 +78,7 @@ export function RoleSwitcher() {
           data-testid="role-switcher-admin-badge"
           className="inline-flex shrink-0 items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/10 px-2 py-1.5 text-sm font-semibold text-brand-orange hover:border-brand-orange sm:px-3"
         >
-          <span aria-hidden>⚙</span>
+          <Settings className="h-4 w-4" strokeWidth={1.75} aria-hidden />
           <span className="hidden font-mono text-[11px] uppercase tracking-label sm:inline">
             {tSwitcher("adminMode")}
           </span>
@@ -102,7 +94,11 @@ export function RoleSwitcher() {
         data-testid="role-switcher-toggle"
         className="inline-flex shrink-0 items-center gap-2 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary hover:border-brand-blue sm:px-3"
       >
-        <span aria-hidden>{activeRole ? ROLE_ICON[activeRole] : "•"}</span>
+        {activeRole ? (
+          <RoleIcon role={activeRole} className="h-4 w-4" />
+        ) : (
+          <span aria-hidden>•</span>
+        )}
         <span className="hidden font-mono text-[11px] uppercase tracking-label text-text-secondary sm:inline">
           {activeRole ? t(`signup.role.${activeRole}`) : tSwitcher("label")}
         </span>
@@ -166,7 +162,7 @@ export function RoleSwitcher() {
                     )}
                   >
                     <span className="flex items-center gap-2">
-                      <span aria-hidden>{ROLE_ICON[r]}</span>
+                      <RoleIcon role={r} className="h-4 w-4" />
                       {t(`signup.role.${r}`)}
                     </span>
                     <span className="ml-auto flex items-center gap-2">
@@ -233,7 +229,7 @@ export function RoleSwitcher() {
                           className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
                           data-testid={`role-switcher-missing-${r}-link`}
                         >
-                          <span aria-hidden>{ROLE_ICON[r]}</span>
+                          <RoleIcon role={r} className="h-4 w-4" />
                           {t(`signup.role.${r}`)}
                           {chipKey && !isHonestlyActive && (
                             <span
@@ -258,7 +254,7 @@ export function RoleSwitcher() {
                           disabled={pending !== null}
                           className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
                         >
-                          <span aria-hidden>{ROLE_ICON[r]}</span>
+                          <RoleIcon role={r} className="h-4 w-4" />
                           {t(`signup.role.${r}`)}
                           {chipKey && !isHonestlyActive && (
                             <span

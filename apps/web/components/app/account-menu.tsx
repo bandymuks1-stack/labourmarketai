@@ -5,6 +5,15 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
+import {
+  IdCard,
+  Wrench,
+  FolderKanban,
+  ClipboardList,
+  User,
+  LogOut,
+  type LucideIcon,
+} from "lucide-react";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -31,17 +40,17 @@ export function AccountMenu() {
   // gated: a worker reaches their card + instructions; a manager reaches
   // projects + instructions. Additive — never replaces the account link/logout.
   const isManager = activeRole === "company" || activeRole === "agency";
-  const featureLinks: { href: string; label: string; icon: string; testid: string }[] = [
+  const featureLinks: { href: string; label: string; icon: LucideIcon; testid: string }[] = [
     ...(activeRole === "worker"
       ? [
-          { href: "/dashboard/player-card", label: t("menuLinks.playerCard"), icon: "🪪", testid: "account-menu-player-card-link" },
-          { href: "/dashboard/profile#candidate-skills", label: t("menuLinks.skills"), icon: "🧰", testid: "account-menu-skills-link" },
+          { href: "/dashboard/player-card", label: t("menuLinks.playerCard"), icon: IdCard, testid: "account-menu-player-card-link" },
+          { href: "/dashboard/profile#candidate-skills", label: t("menuLinks.skills"), icon: Wrench, testid: "account-menu-skills-link" },
         ]
       : []),
     ...(isManager
-      ? [{ href: "/dashboard/projects", label: t("menuLinks.projects"), icon: "🏗️", testid: "account-menu-projects-link" }]
+      ? [{ href: "/dashboard/projects", label: t("menuLinks.projects"), icon: FolderKanban, testid: "account-menu-projects-link" }]
       : []),
-    { href: "/dashboard/instructions", label: t("menuLinks.instructions"), icon: "📋", testid: "account-menu-instructions-link" },
+    { href: "/dashboard/instructions", label: t("menuLinks.instructions"), icon: ClipboardList, testid: "account-menu-instructions-link" },
   ];
 
   useEffect(() => {
@@ -99,7 +108,7 @@ export function AccountMenu() {
               data-testid={l.testid}
               className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
             >
-              <span aria-hidden>{l.icon}</span>
+              <l.icon className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
               {l.label}
             </Link>
           ))}
@@ -110,7 +119,7 @@ export function AccountMenu() {
             data-testid="account-menu-account-link"
             className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
           >
-            <span aria-hidden>👤</span>
+            <User className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
             {t("tabs.account")}
           </Link>
           <form
@@ -124,7 +133,7 @@ export function AccountMenu() {
               data-testid="account-menu-signout"
               className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-state-danger hover:bg-state-danger/10"
             >
-              <span aria-hidden>↩</span>
+              <LogOut className="h-4 w-4" strokeWidth={1.75} aria-hidden />
               {t("account.logout")}
             </button>
           </form>
