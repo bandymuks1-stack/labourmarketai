@@ -45,6 +45,47 @@ const WRITE = "lib/demand/demand-location.ts";
 const ACTION = "lib/demand/demand-location-actions.ts";
 const UI = "components/app/demand-location-capture.tsx";
 const SHELL = "components/app/market-map-shell.tsx";
+const HARDEN_MIGRATION =
+  "../../supabase/migrations/20260615210000_company_demand_locations_signal_only_write.sql";
+
+describe("signal-only write hardening migration — clamps the owner write policy", () => {
+  const sql = readFileSync(join(APP, HARDEN_MIGRATION), "utf8");
+  const lower = sql.toLowerCase();
+
+  it("is human-gated (RED) with an in-file rollback marker", () => {
+    expect(sql).toMatch(/--\s*@human-gate-approved/i);
+    expect(sql).toMatch(/--\s*rollback/i);
+  });
+
+  it("recreates the write policy clamped to signal-only", () => {
+    expect(lower).toMatch(/drop\s+policy\s+if\s+exists\s+company_demand_locations_write/);
+    expect(lower).toMatch(/create\s+policy\s+company_demand_locations_write/);
+    expect(lower).toMatch(/latitude\s+is\s+null/);
+    expect(lower).toMatch(/longitude\s+is\s+null/);
+    expect(lower).toMatch(/geo_precision\s*<>\s*'coordinates'/);
+    expect(lower).toMatch(/geocode_status\s+in\s*\(\s*'pending'\s*,\s*'manual'\s*\)/);
+  });
+
+  it("never allows 'verified' through the owner write path", () => {
+    // the only geocode_status values the clamp permits are pending/manual
+    const checkBlock = lower.slice(lower.indexOf("with check"));
+    expect(checkBlock).not.toMatch(/'verified'/);
+  });
+
+  it("adds a dedup index but keeps multi-site (partial on signal-only rows)", () => {
+    expect(lower).toMatch(/create\s+unique\s+index[\s\S]*?company_demand_locations_signal_dedup_idx/);
+    expect(lower).toMatch(/where\s+latitude\s+is\s+null/);
+  });
+
+  it("has a sibling rollback that restores the prior policy", () => {
+    const down = readFileSync(
+      join(APP, "../../supabase/rollbacks/20260615210000_company_demand_locations_signal_only_write.down.sql"),
+      "utf8",
+    ).toLowerCase();
+    expect(down).toMatch(/drop\s+index\s+if\s+exists[\s\S]*?company_demand_locations_signal_dedup_idx/);
+    expect(down).toMatch(/create\s+policy\s+company_demand_locations_write/);
+  });
+});
 
 describe("demand-location write path — signal-only, never coordinates/verified", () => {
   const src = read(WRITE);
@@ -81,6 +122,11 @@ describe("demand-location write path — signal-only, never coordinates/verified
     expect(code).not.toMatch(/mapbox|google[^\n]*maps|nominatim|opencage|geocod(e|ing)\s*api|maps\.googleapis/i);
     expect(code).not.toMatch(/\bfetch\s*\(|axios|https?:\/\//i);
     expect(code).not.toMatch(/process\.env[^\n]*(MAP|GEOCODE|TOKEN|KEY)/i);
+  });
+
+  it("surfaces an exact duplicate as a clean result, not an error", () => {
+    expect(code).toMatch(/UNIQUE_VIOLATION/);
+    expect(code).toMatch(/kind:\s*["']duplicate["']/);
   });
 });
 

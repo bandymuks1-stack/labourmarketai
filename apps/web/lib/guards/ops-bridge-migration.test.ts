@@ -171,6 +171,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 82 for company-demand-locations-red-draft-v1 (20260615120000
     // company_demand_locations — additive RED-draft owner-scoped geo table, the
     // first real market-map demand layer candidate; NOT applied, human-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 82/);
+    // then to 83 for company-demand-locations-signal-only-write (20260615210000
+    // — RED policy hardening: owner writes clamped to signal-only + dedup index;
+    // closes the verified+coordinates direct-write bypass; NOT applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 83/);
   });
 });

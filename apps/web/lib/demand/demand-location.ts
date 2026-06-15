@@ -33,6 +33,7 @@ import {
  */
 
 const RELATION_NOT_FOUND = "42P01";
+const UNIQUE_VIOLATION = "23505";
 const MAX_LABEL = 200;
 const MAX_REGION = 160;
 const MAX_ADDRESS = 400;
@@ -61,6 +62,7 @@ export interface AddDemandLocationInput {
 
 export type AddDemandLocationResult =
   | { kind: "ok"; id: string }
+  | { kind: "duplicate" }
   | { kind: "invalid"; message: string }
   | { kind: "unauthenticated" }
   | { kind: "not-owner" }
@@ -159,6 +161,10 @@ export async function addDemandLocation(
 
   if (error) {
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
+    // Exact-duplicate signal for this demand (the partial unique index from the
+    // signal-only-write hardening migration) — surfaced as a clean duplicate,
+    // not an error. Multi-site demands stay allowed (different city/label).
+    if (error.code === UNIQUE_VIOLATION) return { kind: "duplicate" };
     console.error("[demand-location] insert failed:", error.message);
     return { kind: "error", message: "save_failed" };
   }

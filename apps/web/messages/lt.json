@@ -176,6 +176,7 @@
     "saving": "Saugoma…",
     "cancel": "Atšaukti",
     "done": "Vietos signalas išsaugotas. Jis lieka privatus jums, dar be taško žemėlapyje — koordinatės nepatvirtintos.",
+    "duplicate": "Ši tiksli vieta jau yra šio poreikio signalas — nieko nedubliuota. Pridėkite kitą miestą ar adresą kitam objektui.",
     "errorCountry": "Pasirinkite šalį.",
     "errorSave": "Nepavyko išsaugoti vietos signalo. Bandykite dar kartą."
   },

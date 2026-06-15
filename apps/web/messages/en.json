@@ -176,6 +176,7 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "done": "Location signal saved. It stays private to you, with no map point yet — coordinates are not confirmed.",
+    "duplicate": "This exact location is already a signal on this demand — nothing duplicated. Add a different city or address for another site.",
     "errorCountry": "Please choose a country.",
     "errorSave": "Could not save the location signal. Please try again."
   },

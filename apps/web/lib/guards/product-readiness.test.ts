@@ -1434,7 +1434,15 @@ describe("no migration files added by this sprint", () => {
     // Coordinates are optional and the DB itself forbids random/unverified points
     // (CHECK: coords only when geocode_status verified/manual). Additive +
     // reversible (supabase/rollbacks/*). NOT applied — human-gated for owner.
-    const SPRINT_BASELINE = 82;
+    // Bumped 82 -> 83 for company-demand-locations-signal-only-write
+    // (20260615210000): RED hardening — replaces the owner write POLICY so
+    // direct authenticated PostgREST writes can only create SIGNAL-ONLY rows
+    // (lat/lng null, geo_precision != coordinates, geocode_status pending|manual)
+    // — closing the bypass where an owner could self-insert verified+coordinates.
+    // verified+coords reserved for a future admin/geocoder RPC. Adds a partial
+    // unique index to block exact-duplicate signals per demand (multi-site still
+    // allowed). Reversible (rollbacks/*). NOT applied — human-gated for owner.
+    const SPRINT_BASELINE = 83;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

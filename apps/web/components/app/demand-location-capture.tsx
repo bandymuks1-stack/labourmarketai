@@ -26,6 +26,7 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
   const [address, setAddress] = useState("");
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState(false);
+  const [duplicate, setDuplicate] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function submit() {
@@ -42,8 +43,9 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
         locationLabel: label,
         addressText: address,
       });
-      if (res.kind === "ok") {
+      if (res.kind === "ok" || res.kind === "duplicate") {
         setDone(true);
+        setDuplicate(res.kind === "duplicate");
         setCity("");
         setLabel("");
         setAddress("");
@@ -88,7 +90,7 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
           className="rounded-md border border-state-success/40 bg-state-success/5 px-2.5 py-2 text-[11px] leading-relaxed text-text-secondary"
           data-testid="demand-location-capture-done"
         >
-          {t("done")}
+          {duplicate ? t("duplicate") : t("done")}
         </p>
       ) : (
         <>

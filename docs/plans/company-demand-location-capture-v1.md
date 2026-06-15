@@ -1,8 +1,35 @@
 # Company demand location capture v1 — owner review
 
 > First REAL data path into `public.company_demand_locations` (applied via #423).
-> **No DB migration, no schema/RLS change, no Supabase apply, no geocoding, no
-> map markers, no deploy/merge without owner approval.**
+> **No geocoding, no map markers, no deploy/merge/apply without owner approval.**
+> **Now RED/human-gated** — see the pre-merge safety review below (it adds one
+> hardening migration that must be owner-applied before merge).
+
+## Pre-merge write-path safety review (v1.1)
+
+**Risk found (confirmed against live prod #423 schema).** The #423 owner write
+policy gated only `owner_id = auth.uid()` + demand ownership. It did **not**
+restrict coordinates or `geocode_status`, and the table CHECKs allow a
+`verified` row with coordinates. So an authenticated user could **bypass the app
+helper** via a direct PostgREST write and self-insert — on **their own** demand —
+a row with `geocode_status='verified'`, `geo_precision='coordinates'` and real
+`latitude`/`longitude`, i.e. fabricate a "verified" map point. (The app helper
+was already signal-only; the gap was the DB allowing direct writes to exceed it.)
+
+**Fix (this PR — now RED).** Migration
+`20260615210000_company_demand_locations_signal_only_write.sql` (human-gated,
+NOT applied) **replaces the owner write policy** so direct authenticated writes
+(insert AND update) can only create **signal-only** rows:
+`latitude/longitude null`, `geo_precision <> 'coordinates'`,
+`geocode_status in ('pending','manual')`, plus the existing owner + demand-
+ownership checks. `verified` + coordinates are **reserved for a future
+admin/geocoder path** (a SECURITY DEFINER RPC bypasses RLS — not built here).
+It also adds a **partial unique index** preventing exact-duplicate signal rows
+per demand (multi-site demands stay allowed).
+
+**Consequence:** #424 is **no longer no-schema** — it is **RED/human-gated**.
+The hardening migration must be **owner-applied** (Supabase MCP `apply_migration`,
+never `db push`) **before** merge for the DB to actually enforce signal-only.
 
 ## Flow — before / after
 
