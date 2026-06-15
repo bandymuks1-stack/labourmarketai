@@ -7,6 +7,8 @@ import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card"
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
+import { IdentityActions } from "@/components/app/identity-actions";
+import { getOwnCompany } from "@/lib/company/company-setup";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { WorkCard } from "@/components/app/work-card";
 import { getWorkerCard } from "@/lib/worker/work-card";
@@ -141,6 +143,11 @@ export default async function DashboardOverviewPage({
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : "worker";
+  // Real company existence (RLS-scoped) → drives the compact identity/action
+  // entry block: company actions vs an honest "create a company" CTA. Read
+  // failure / missing migration falls back to "no company" (CTA shown).
+  const companyRead = await getOwnCompany();
+  const hasCompany = companyRead.kind === "ok" && companyRead.row !== null;
   const name =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
 
@@ -239,6 +246,10 @@ export default async function DashboardOverviewPage({
       <div className="flex flex-col gap-7">
         {Header}
         <CurrentSpaceHeader role={role} />
+        {/* Compact identity/action entry — the same Asmuo/Įmonė model from
+            /dashboard/account, surfaced on the main dashboard so the user
+            doesn't have to dig into account settings. */}
+        <IdentityActions hasCompany={hasCompany} compact />
 
         {/* G — company/agency calming pass: a single calm, human framing line
             (copy-only, no structural change), mirroring the worker foundationNote.
@@ -367,6 +378,9 @@ export default async function DashboardOverviewPage({
     <div className="flex flex-col gap-7">
       {/* Space identity + the calm doorway to other spaces (My spaces). */}
       <CurrentSpaceHeader role={role} />
+      {/* Compact identity/action entry — same Asmuo/Įmonė model as
+          /dashboard/account, surfaced on the main dashboard. */}
+      <IdentityActions hasCompany={hasCompany} compact />
 
       {/* "Šiandienos ekranas" (TASK 07 / DESIGN_SOUL) — today's ONE action,
           this week's confirmed work, one honest growth path, and the premium
