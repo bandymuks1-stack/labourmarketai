@@ -55,6 +55,9 @@ export interface CompanySetupFormLabels {
   readonly requesterRole: string;
   readonly requesterRoleOptions: Record<CompanyRequesterRole, string>;
   readonly verificationNotice: string;
+  /** Shown above the legal fields when the company is VERIFIED and its
+   *  legal-registry data is locked (read-only) against silent overwrite. */
+  readonly legalLockedNotice: string;
   readonly saveDraft: string;
   readonly submitRequest: string;
   readonly statusDraftSaved: string;
@@ -91,6 +94,15 @@ export function CompanySetupForm({
   const setIntent = (v: "draft" | "submit") => {
     if (intentRef.current) intentRef.current.value = v;
   };
+
+  // Verified companies have LOCKED legal-registry fields (legal name,
+  // country, registration code, address): rendered read-only so a normal
+  // user can't overwrite verified data. Contacts / website / type / role
+  // stay editable. The server (saveCompanySetup) enforces this too.
+  const legalLocked = existing?.verificationStatus === "verified";
+  const lockedInputCls = legalLocked
+    ? "cursor-not-allowed border-border-default bg-ink-800 text-text-muted"
+    : "border-border-default bg-surface-1 text-text-primary focus:border-brand-blue";
 
   const banner: { tone: "success" | "warning"; text: string } | null = (() => {
     if (!state) return null;
@@ -137,6 +149,15 @@ export function CompanySetupForm({
         {labels.verificationNotice}
       </p>
 
+      {legalLocked ? (
+        <p
+          className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="company-setup-legal-locked-notice"
+        >
+          {labels.legalLockedNotice}
+        </p>
+      ) : null}
+
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.legalName}</span>
         <input
@@ -147,7 +168,9 @@ export function CompanySetupForm({
           maxLength={200}
           defaultValue={existing?.legalName ?? ""}
           placeholder={labels.legalNamePlaceholder}
-          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+          readOnly={legalLocked}
+          aria-readonly={legalLocked}
+          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
           data-testid="company-setup-legal-name"
         />
         <span className="text-[11px] text-text-muted">{labels.legalNameHelp}</span>
@@ -182,7 +205,9 @@ export function CompanySetupForm({
         <select
           name="country"
           defaultValue={existing?.country ?? "LT"}
-          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+          disabled={legalLocked}
+          aria-disabled={legalLocked}
+          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
           data-testid="company-setup-country"
         >
           {COMPANY_COUNTRY_CODES.map((code) => (
@@ -200,7 +225,9 @@ export function CompanySetupForm({
           name="registration_code"
           maxLength={100}
           defaultValue={existing?.registrationCode ?? ""}
-          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+          readOnly={legalLocked}
+          aria-readonly={legalLocked}
+          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
           data-testid="company-setup-registration-code"
         />
         <span className="text-[11px] text-text-muted">
@@ -216,7 +243,9 @@ export function CompanySetupForm({
           maxLength={300}
           defaultValue={existing?.address ?? ""}
           placeholder={labels.addressPlaceholder}
-          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+          readOnly={legalLocked}
+          aria-readonly={legalLocked}
+          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
           data-testid="company-setup-address"
         />
       </label>

@@ -26,6 +26,23 @@ size) across the app chrome:
 - `components/app/notification-panel.tsx` — role icons.
 - `components/app/onboarding-wizard.tsx` — role cards.
 
+### #1/#2 — Company identity: verified-legal lock (safe app-layer slice, no migration)
+A normal user can no longer silently overwrite a **verified** company's legal-registry data.
+- `lib/company/company-legal-lock.ts` (PURE) — `resolveCompanyLegalParams`: when the company is
+  verified, the stored legal fields (legal name, registration code, country, address) are forced;
+  input is ignored (`locked: true`). Unit-tested in `lib/company/company-legal-lock.test.ts`.
+- `lib/company/company-setup.ts` `saveCompanySetup` reads the current row and applies the lock
+  before the RPC — server-side enforcement (contacts / website / company type / role stay editable).
+- `components/app/company-setup-form.tsx` renders the legal fields **read-only** when verified +
+  a `legalLockedNotice` banner (new i18n key in en/lt/ru). The page passes the label.
+This is the spec's accepted minimum ("aiškus read-only verified state"); the full pending-change
+request workflow + admin verification queue remain the next slice.
+
+### #5 — CV profession-tile glyph
+Replaced the `🟫` placeholder emoji with a neutral lucide `Wrench` icon in
+`components/app/capability-profile-section.tsx` + `components/app/cv-engagement-cards.tsx`
+(slug registry kept; richer asset set is M3).
+
 ### Guard
 `lib/guards/app-chrome-premium.test.ts` — pins (1) logo href = `/dashboard` (and no logo `<Link href="/">`),
 (2) a lucide `RoleIcon` exists, (3) the chrome files carry no pictographic emoji (arrows `→` and check `✓`
@@ -45,17 +62,14 @@ are allowed UI glyphs).
 
 ## Next slice (documented, not in this PR — needs schema/RLS or a copy sweep)
 
-1. **Company legal-change request model** — additive migration + RLS: contacts editable freely;
-   verified legal fields (legal name / code / country / address) go through a pending change request,
-   never silent overwrite. Admin verification queue.
+1. **Company legal-change request model** — additive migration + RLS: the full pending change-request
+   workflow + admin verification queue (this PR ships the read-only-verified lock as the safe minimum).
 2. **Skills "needs review / unclassified" surface** + dry-run backfill/recalc for old journal entries
    (no auto-overwrite of confirmed states).
 3. **Role copy sweep** — replace "Agentūra"/"Pirkėjas" nouns with action framing
    (Mano poreikiai / pasiūlymai / užklausos).
-4. **CV profession-tile icon** — replace the `🟫` placeholder glyph in the M1 icon registry
-   (`capability-profile-section.tsx`, `cv-engagement-cards.tsx`) with a lucide icon.
 
 ## Validation
 
-`typecheck` ✅ · `lint` ✅ · `test` ✅ (274 files / 3979 tests) · `build` ✅ ·
+`typecheck` ✅ · `lint` ✅ · `test` ✅ (275 files / 3983 tests) · `build` ✅ ·
 `check:public-seo-indexing` ✅ (SEO from #410/#411/#412 intact).

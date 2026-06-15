@@ -436,6 +436,7 @@
           "other": "Kita"
         },
         "verificationNotice": "Jūsų įmonė sukuriama ir iškart naudojama po bazinių automatinių patikrų (pavadinimas, šalis ir įvesto kodo / svetainės / el. pašto formatas). Ji dar nėra tapatybės patvirtinta — „Patvirtinta\" yra stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros, niekada automatiškai. Norėdami naudotis įmone, neturite laukti administratoriaus.",
+        "legalLockedNotice": "Ši įmonė yra patvirtinta. Jos juridiniai duomenys (pavadinimas, įmonės kodas, šalis ir registracijos adresas) čia užrakinti ir negali būti perrašyti — dėl juridinių duomenų keitimo kreipkitės į palaikymą. Kontaktus, svetainę, veiklos tipą ir savo vaidmenį vis tiek galite atnaujinti.",
         "saveDraft": "Išsaugoti įmonę",
         "submitRequest": "Prašyti rankinės peržiūros (neprivaloma)",
         "statusDraftSaved": "Įmonė išsaugota — ji aktyvi ir naudojama dabar.",

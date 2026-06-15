@@ -436,6 +436,7 @@
           "other": "Other"
         },
         "verificationNotice": "Your company is created and usable right away after basic automated checks (name, country, and the format of any code / website / email you add). It is not yet identity-verified — \"Verified\" is a stronger trust state granted only after a real check, never automatically. You do not need to wait for an admin to use your company.",
+        "legalLockedNotice": "This company is verified. Its legal details (legal name, registration code, country and registered address) are locked here and cannot be overwritten — contact support to request a legal change. You can still update contacts, website, company type and your role.",
         "saveDraft": "Save company",
         "submitRequest": "Request manual review (optional)",
         "statusDraftSaved": "Company saved — it's active and usable now.",

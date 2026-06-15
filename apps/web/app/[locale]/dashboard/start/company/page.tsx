@@ -102,6 +102,7 @@ export default async function CompanyStartPage({
       other: t("requesterRoleOptions.other"),
     },
     verificationNotice: t("verificationNotice"),
+    legalLockedNotice: t("legalLockedNotice"),
     saveDraft: t("saveDraft"),
     submitRequest: t("submitRequest"),
     statusDraftSaved: t("statusDraftSaved"),

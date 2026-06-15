@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ProfileSkillClaimRow } from "@/lib/profile/profile-skill-claims";
 import {
@@ -125,10 +126,9 @@ export function CapabilityProfileSection({
           month: "short",
         })
       : null;
-  const profGlyph =
-    professionIconSlug && ICON_GLYPH[professionIconSlug]
-      ? ICON_GLYPH[professionIconSlug]
-      : null;
+  const hasProfIcon = professionIconSlug
+    ? PROFESSION_ICON_SLUGS.has(professionIconSlug)
+    : false;
 
   return (
     <section
@@ -241,10 +241,12 @@ export function CapabilityProfileSection({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-display text-sm font-semibold text-text-primary">
-                        {profGlyph && (
-                          <span aria-hidden className="mr-1.5">
-                            {profGlyph}
-                          </span>
+                        {hasProfIcon && (
+                          <Wrench
+                            aria-hidden
+                            strokeWidth={1.75}
+                            className="mr-1.5 inline h-3.5 w-3.5 text-text-muted"
+                          />
                         )}
                         {c.orgName}
                       </p>
@@ -313,6 +315,6 @@ const BIN_DOT: Record<string, string> = {
   yellow: "bg-state-warning",
 };
 
-const ICON_GLYPH: Record<string, string> = {
-  "icon.tile": "🟫",
-};
+// Profession/skill icon slugs the M1 registry recognises. Rendered as a
+// neutral lucide outline icon (no emoji); a richer asset set is M3.
+const PROFESSION_ICON_SLUGS = new Set<string>(["icon.tile"]);

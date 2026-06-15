@@ -70,6 +70,10 @@ import {
   isKnownCountryCode,
   type CompanyType,
 } from "./company-profile-shared";
+import { resolveCompanyLegalParams } from "./company-legal-lock";
+
+export type { CompanyLegalFields } from "./company-legal-lock";
+export { resolveCompanyLegalParams } from "./company-legal-lock";
 
 /** The user's own role inside the company they are requesting. Free-text in
  *  the DB; the form offers a small honest allowlist + "other". */
@@ -190,7 +194,24 @@ export async function getOwnCompany(): Promise<CompanyReadResult> {
 export async function saveCompanySetup(
   input: SaveCompanyInput,
 ): Promise<SaveCompanyResult> {
-  const name = input.legalName.trim();
+  // Read the current row first so a VERIFIED company's legal fields can be
+  // locked (never overwritten by a self-service save). A read failure /
+  // missing migration leaves `verified` null and the save proceeds normally.
+  const existing = await getOwnCompany();
+  const verifiedRow =
+    existing.kind === "ok" && existing.row?.verificationStatus === "verified"
+      ? existing.row
+      : null;
+
+  const legal = resolveCompanyLegalParams({
+    inputLegalName: input.legalName,
+    inputCountry: input.country,
+    inputRegistrationCode: input.registrationCode,
+    inputAddress: input.address,
+    verified: verifiedRow,
+  });
+
+  const name = legal.legalName;
   if (name.length < 2 || name.length > 200) {
     return {
       kind: "invalid",
@@ -200,9 +221,10 @@ export async function saveCompanySetup(
   // Country is validated BEFORE any DB call: only seeded countries.code
   // values may reach the RPC (the mirror trigger copies companies.country
   // into organizations.country, which has an FK to countries(code) — free
-  // text used to surface as a raw organizations_country_fkey crash).
-  const rawCountry = input.country?.trim().toUpperCase() || null;
-  if (rawCountry !== null && !isKnownCountryCode(rawCountry)) {
+  // text used to surface as a raw organizations_country_fkey crash). A
+  // locked (verified) country is already a stored, valid value — skip.
+  const rawCountry = legal.country;
+  if (!legal.locked && rawCountry !== null && !isKnownCountryCode(rawCountry)) {
     return { kind: "invalid-country" };
   }
   const rawType = input.companyType?.trim().toLowerCase() || null;
@@ -217,8 +239,8 @@ export async function saveCompanySetup(
   const params = {
     p_legal_name: name,
     p_country: rawCountry,
-    p_registration_code: input.registrationCode?.trim() || null,
-    p_address: input.address?.trim() || null,
+    p_registration_code: legal.registrationCode,
+    p_address: legal.address,
     p_website: input.website?.trim() || null,
     p_contact_email: input.contactEmail?.trim() || null,
     p_contact_phone: input.contactPhone?.trim() || null,
