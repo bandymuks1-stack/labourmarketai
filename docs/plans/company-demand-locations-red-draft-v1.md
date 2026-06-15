@@ -71,7 +71,7 @@ public.company_demand_locations
 |---------|----------|---------------|
 | Who can read | `owner_id = auth.uid()` **or** `public.is_admin()` | Mirrors `demand_shortlist` (20260612220000). Owner sees only their own demand locations; admin via existing predicate. |
 | Public / anon read | **None** | No `to anon`, no `to public`, no `using (true)`. There is no consented public-demand model yet, so demand locations stay private. |
-| Who can write | `owner_id = auth.uid()` (USING + WITH CHECK) | Owner-only writes; no admin write override; no broad UPDATE. |
+| Who can write | `owner_id = auth.uid()` (USING + WITH CHECK) **and** the referenced `customer_requests` row must belong to the caller (EXISTS in WITH CHECK) | Owner-only writes; no admin write override; no broad UPDATE; **cannot attach a location to another user's `request_id`** (request-spoofing closed). |
 | Grants | `select, insert, update, delete` to `authenticated` **only** | The single migration-safety RED flag → `-- @human-gate-approved`. No anon/public/service_role grant. |
 | New SECURITY DEFINER fn | **None** | Writes go through normal RLS; no RLS-bypassing function in this draft. |
 | Auth core | **Untouched** | No `auth.*` change. |

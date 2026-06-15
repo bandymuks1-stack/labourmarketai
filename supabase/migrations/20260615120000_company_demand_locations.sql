@@ -94,10 +94,24 @@ create policy company_demand_locations_select on public.company_demand_locations
   for select
   using (owner_id = auth.uid() or public.is_admin());
 
+-- Write: owner-only, and you may only attach a location to YOUR OWN demand.
+-- The WITH CHECK additionally requires the referenced customer_requests row to
+-- belong to auth.uid() — so a caller cannot point a location at someone else's
+-- request_id even with their own owner_id (the request-spoofing gap). The
+-- subquery is itself RLS-filtered (customer_requests select = profile_id =
+-- auth.uid() or is_admin), so this is defence in depth.
 create policy company_demand_locations_write on public.company_demand_locations
   for all
   using (owner_id = auth.uid())
-  with check (owner_id = auth.uid());
+  with check (
+    owner_id = auth.uid()
+    and exists (
+      select 1
+        from public.customer_requests cr
+       where cr.id = request_id
+         and cr.profile_id = auth.uid()
+    )
+  );
 
 grant select, insert, update, delete on public.company_demand_locations to authenticated;
 

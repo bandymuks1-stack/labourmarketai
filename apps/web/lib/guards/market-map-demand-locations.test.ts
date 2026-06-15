@@ -83,6 +83,13 @@ describe("demand-locations migration — additive, human-gated, owner-scoped", (
     expect(code).not.toMatch(/\bto\s+public\b/);
   });
 
+  it("write policy forbids attaching a location to someone else's demand", () => {
+    // WITH CHECK requires owner_id = auth.uid() AND the referenced
+    // customer_requests row to belong to auth.uid() (no request_id spoofing).
+    expect(lower).toMatch(/with\s+check\s*\([\s\S]*?owner_id\s*=\s*auth\.uid\(\)/);
+    expect(lower).toMatch(/exists\s*\([\s\S]*?from\s+public\.customer_requests\s+cr[\s\S]*?cr\.id\s*=\s*request_id[\s\S]*?cr\.profile_id\s*=\s*auth\.uid\(\)/);
+  });
+
   it("grants to authenticated only — never anon/public/service_role", () => {
     expect(lower).toMatch(/grant[\s\S]*?on\s+public\.company_demand_locations\s+to\s+authenticated/);
     expect(code).not.toMatch(/grant[\s\S]{0,120}?to\s+(anon|public|service_role)\b/);
