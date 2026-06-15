@@ -5,6 +5,7 @@ import type {
 import { sanitizeDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { parseStoredEstimate } from "@/lib/estimate/estimate-payload";
 import { EstimateSummary } from "@/components/app/estimate-summary";
+import { DemandLocationCapture } from "@/components/app/demand-location-capture";
 
 /**
  * Demand read-back (Slice 1 — demand → matching readiness).
@@ -156,6 +157,10 @@ export function DemandRequestsReadback({
                     />
                   </div>
                 )}
+                {/* Signal-only location capture for THIS demand (#423 table).
+                    Writes country/city/label/address with no coordinates — a
+                    map point only appears once coordinates are confirmed. */}
+                <DemandLocationCapture requestId={r.id} />
               </li>
             );
           })}

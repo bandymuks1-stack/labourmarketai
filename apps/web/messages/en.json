@@ -139,7 +139,9 @@
     "layersTitle": "Planned layers",
     "layerPlanned": "planned",
     "layerSchemaPrepared": "schema prepared",
+    "layerSignalOnly": "signal only",
     "demandSchemaNote": "Company demand locations are prepared as a human-gated RED schema plan; points appear only after the migration is approved and applied and real locations exist.",
+    "demandSignalNote": "{count} of your demand locations captured as signals — no map points yet, because coordinates are not confirmed.",
     "layers": {
       "workers": { "label": "Workers — preferred locations", "desc": "Where people want to work, from real worker profiles." },
       "demand": { "label": "Company needs", "desc": "Where employers have submitted real workforce needs." },
@@ -158,6 +160,24 @@
       "project": "Create a project",
       "accommodationNote": "Marking accommodation locations is a planned future data layer — not added with fake points."
     }
+  },
+  "demandLocationCapture": {
+    "open": "Add a location signal",
+    "title": "Where is this work?",
+    "note": "Record where the workers / brigade / service are actually needed. This is a signal only — no map point appears until coordinates are confirmed later. This is not the company's registration address.",
+    "country": "Country",
+    "city": "City / region",
+    "cityPlaceholder": "e.g. Rotterdam",
+    "label": "Location label",
+    "labelPlaceholder": "e.g. Warehouse site, port district",
+    "address": "Address (optional)",
+    "addressPlaceholder": "Street / site, if known",
+    "save": "Save location signal",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "done": "Location signal saved. It stays private to you, with no map point yet — coordinates are not confirmed.",
+    "errorCountry": "Please choose a country.",
+    "errorSave": "Could not save the location signal. Please try again."
   },
   "messaging": {
     "messageWorker": "Message worker",
