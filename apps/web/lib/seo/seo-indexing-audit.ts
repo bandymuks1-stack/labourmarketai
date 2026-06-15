@@ -42,6 +42,18 @@ const BANNED_BRAND = [
   /\blabma\s+os\b/i,
 ];
 
+/**
+ * Construction-FIRST brand signals banned (owner 2026-06-15): LabourMarket.ai
+ * is a cross-sector labour-market platform — construction is one sector among
+ * many, never the brand centre. A brand title line `"LabourMarket.ai — …
+ * construction…"` (any active locale) re-narrows the whole platform to one
+ * sector and fails here. Construction is still allowed as ONE example among
+ * several in page-level copy (e.g. "logistics, manufacturing, … construction").
+ */
+const CONSTRUCTION_FIRST_BRAND = [
+  /"LabourMarket\.ai\s*[—–-][^"]*\b(construction|statyb\w*|строит\w*|стройк\w*)/i,
+];
+
 /** Fabricated-traction phrases banned from public SEO copy. */
 const FAKE_CLAIMS = [
   /thousands of (workers|companies|employers|clients|users|teams)/i,
@@ -149,13 +161,23 @@ export function auditPublicSeoIndexing(read: SeoFileReader): {
     }
   }
 
-  // 6. No banned brand signal in the public SEO metadata layer.
+  // 6. No banned brand signal + no construction-FIRST brand title in the
+  //    public SEO metadata layer.
   for (const rel of ["app/[locale]/layout.tsx", "lib/seo/metadata.ts"]) {
     const c = files[rel];
     if (!c) continue;
     for (const re of BANNED_BRAND) {
       if (re.test(c)) {
         add(violations, rel, `banned legacy brand signal matched ${re}`);
+      }
+    }
+    for (const re of CONSTRUCTION_FIRST_BRAND) {
+      if (re.test(c)) {
+        add(
+          violations,
+          rel,
+          `construction-first brand title matched ${re} — LabourMarket.ai is cross-sector; construction is one example, not the brand centre`,
+        );
       }
     }
   }
