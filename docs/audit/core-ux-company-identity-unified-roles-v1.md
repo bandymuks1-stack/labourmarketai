@@ -38,6 +38,18 @@ A normal user can no longer silently overwrite a **verified** company's legal-re
 This is the spec's accepted minimum ("aiškus read-only verified state"); the full pending-change
 request workflow + admin verification queue remain the next slice.
 
+### #6 — Universal skills: explicit evidence states + dry-run backfill (read-only)
+- `lib/profile/skill-evidence-state.ts` (PURE, +unit test): one honest state per skill —
+  `verified / manager_confirmed / work_supported / self_declared / unclassified`. Never
+  over-stated; a skill the system could not map to the taxonomy is **unclassified (needs review)**,
+  not silently classified. `aggregateSkillEvidenceStates` + `hasUnreviewedSkills` drive an honest
+  "not everything is confirmed yet" summary.
+- `scripts/skills-evidence-report.ts` (`pnpm -F web skills:evidence-report`): **dry-run, read-only**
+  inventory of the state breakdown (incl. how many need review). NO DB writes, NO network, NO
+  migration — it never overwrites a confirmed state (file-based, mirrors `recognition:unknown-report`).
+The existing `evidence-status-strip` already renders per-skill states; an aggregate "N need review"
+banner in the skills UI remains a small follow-up.
+
 ### #5 — CV profession-tile glyph
 Replaced the `🟫` placeholder emoji with a neutral lucide `Wrench` icon in
 `components/app/capability-profile-section.tsx` + `components/app/cv-engagement-cards.tsx`
@@ -64,12 +76,12 @@ are allowed UI glyphs).
 
 1. **Company legal-change request model** — additive migration + RLS: the full pending change-request
    workflow + admin verification queue (this PR ships the read-only-verified lock as the safe minimum).
-2. **Skills "needs review / unclassified" surface** + dry-run backfill/recalc for old journal entries
-   (no auto-overwrite of confirmed states).
+2. **Skills aggregate "N need review" banner** in the skills UI (state classifier + dry-run report
+   ship in this PR; the in-page aggregate banner + its i18n is the small remaining bit).
 3. **Role copy sweep** — replace "Agentūra"/"Pirkėjas" nouns with action framing
    (Mano poreikiai / pasiūlymai / užklausos).
 
 ## Validation
 
-`typecheck` ✅ · `lint` ✅ · `test` ✅ (275 files / 3983 tests) · `build` ✅ ·
-`check:public-seo-indexing` ✅ (SEO from #410/#411/#412 intact).
+`typecheck` ✅ · `lint` ✅ · `test` ✅ · `build` ✅ · `check:public-seo-indexing` ✅
+(SEO from #410/#411/#412 intact). `skills:evidence-report` runs dry-run, read-only.
