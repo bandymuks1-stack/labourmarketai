@@ -118,6 +118,45 @@
       }
     }
   },
+  "marketMap": {
+    "backToActions": "Veiksmų centras",
+    "title": "Gyvas darbo rinkos žemėlapis",
+    "subtitle": "Ruošiamas iš realių darbuotojų, įmonių poreikių, projektų ir apgyvendinimo duomenų — gyvas vaizdas, kur yra žmonės, kur yra poreikis ir kur galite veikti dabar.",
+    "foundationNotice": "Jokių netikrų taškų — žemėlapis užsipildys tik realiais duomenimis, kai kiekvienas šaltinis turės vietos lauką.",
+    "preparing": "ruošiama",
+    "filtersTitle": "Filtrai",
+    "filterCountry": "Šalis",
+    "filterSector": "Sektorius",
+    "filterAll": "visi",
+    "canvasEmptyTitle": "Žemėlapio drobė ruošiama",
+    "canvasEmptyBody": "Kai realūs duomenys turės vietos lauką, jie pasirodys čia — ne anksčiau. Jokių netikrų taškų.",
+    "legendTitle": "Būsenos",
+    "legend": {
+      "ready": "Galima veikti",
+      "needsDocs": "Trūksta dokumentų / pasirengimo",
+      "noData": "Kol kas nėra duomenų"
+    },
+    "layersTitle": "Planuojami sluoksniai",
+    "layerPlanned": "planuojama",
+    "layers": {
+      "workers": { "label": "Darbuotojai — pageidaujamos vietos", "desc": "Kur žmonės nori dirbti, pagal realius darbuotojų profilius." },
+      "demand": { "label": "Įmonių poreikiai", "desc": "Kur darbdaviai pateikė realius darbo jėgos poreikius." },
+      "projects": { "label": "Projektai", "desc": "Kur vyksta realūs projektai ir operacijos." },
+      "accommodation": { "label": "Apgyvendinimas", "desc": "Kur yra būstas — būsimas duomenų sluoksnis." },
+      "teams": { "label": "Brigados / komandos", "desc": "Kur prieinamos paruoštos komandos." },
+      "readiness": { "label": "Pasirengimas / dokumentai / įgūdžiai", "desc": "Kur dokumentai ir įgūdžiai paruošti ar trūksta." },
+      "rates": { "label": "Darbo įkainiai", "desc": "Sąžiningi įkainių signalai pagal vietą — be sugalvotų kainų." },
+      "countryFit": { "label": "Šalies atitiktis", "desc": "Kur šalies reikalavimai atitinka darbuotojo pasirengimą." },
+      "nextActions": { "label": "Sekančio veiksmo signalai", "desc": "Kur galite veikti dabar — pagal realias spragas." }
+    },
+    "nextActionsTitle": "Ką galite padaryti dabar",
+    "nextActions": {
+      "workerCountry": "Pridėti ar patikslinti pageidaujamą šalį",
+      "companyNeed": "Pateikti įmonės poreikį",
+      "project": "Sukurti projektą",
+      "accommodationNote": "Apgyvendinimo vietų žymėjimas — planuojamas būsimas duomenų sluoksnis, nepildomas netikrais taškais."
+    }
+  },
   "messaging": {
     "messageWorker": "Rašyti darbuotojui",
     "messageCompany": "Rašyti įmonei"
