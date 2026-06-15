@@ -14,6 +14,8 @@ import {
 } from "@/lib/config/roles";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
+import { IdentityActions } from "@/components/app/identity-actions";
+import { getOwnCompany } from "@/lib/company/company-setup";
 import { RoleIcon } from "@/components/app/role-icon";
 import { Wrench, NotebookPen, Inbox } from "lucide-react";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
@@ -70,6 +72,12 @@ export default async function AccountPage({
     profileRoles: rolesRows ?? [],
   });
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
+
+  // Real company existence (RLS-scoped read) → drives the company identity
+  // block: show actions when a company exists, else an honest "create" CTA.
+  // A read error / missing migration falls back to "no company" (CTA shown).
+  const companyRead = await getOwnCompany();
+  const hasCompany = companyRead.kind === "ok" && companyRead.row !== null;
 
   return (
     <div className="flex flex-col gap-8">
@@ -243,6 +251,11 @@ export default async function AccountPage({
           <LocaleSwitcher />
         </div>
       </section>
+
+      {/* Visible identity / action workspace (v1): the real model — two legal
+          identities (Asmuo / Įmonė), each with concrete ACTIONS — shown before
+          the legacy "My spaces" catalogue so the action-centred view leads. */}
+      <IdentityActions hasCompany={hasCompany} />
 
       {/* Room-based IA (PR #204 review): cross-space content lives HERE, in the
           "Mano erdvės / My spaces" surface — not inside any active dashboard
