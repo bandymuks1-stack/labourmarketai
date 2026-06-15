@@ -18,6 +18,9 @@ const STATIC_PATHS: readonly string[] = [
   "/for-companies",
   "/for-agencies",
   "/work-abroad",
+  "/work-opportunities",
+  "/skills",
+  "/professions",
   "/company-need",
   "/worker-intake",
   "/labour-market",
@@ -42,6 +45,9 @@ const CORE_PATHS: readonly string[] = [
   "/labour-market",
   "/company-need",
   "/worker-intake",
+  "/work-opportunities",
+  "/skills",
+  "/professions",
 ];
 
 function priorityFor(path: string): number {

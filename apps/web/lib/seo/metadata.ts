@@ -99,7 +99,10 @@ export type PageKey =
   | "companyNeed"
   | "workerIntake"
   | "labourMarket"
-  | "pricing";
+  | "pricing"
+  | "workOpportunities"
+  | "skills"
+  | "professions";
 
 /**
  * Curated, honest per-page SEO copy (active locales). No fabricated
@@ -242,6 +245,57 @@ export const PAGE_SEO: Readonly<
       title: "Цены — честная модель раннего доступа",
       description:
         "Как работают цены LabourMarket.ai в период раннего доступа. Понятные и честные цены для работников, работодателей и агентств — без скрытых платежей и пустых обещаний.",
+    },
+  },
+  workOpportunities: {
+    en: {
+      title: "Work Opportunities — Find work across sectors",
+      description:
+        "Looking for work in Europe? LabourMarket.ai helps workers across sectors — construction, logistics, manufacturing, hospitality, care and more — build a profile and CV and reach real employer needs.",
+    },
+    lt: {
+      title: "Darbo galimybės — rask darbą įvairiuose sektoriuose",
+      description:
+        "Ieškai darbo Europoje? LabourMarket.ai padeda įvairių sektorių darbuotojams — statyba, logistika, gamyba, apgyvendinimas, priežiūra ir kt. — susikurti profilį ir CV ir pasiekti realius darbdavių poreikius.",
+    },
+    ru: {
+      title: "Возможности работы — найдите работу в разных секторах",
+      description:
+        "Ищете работу в Европе? LabourMarket.ai помогает работникам разных секторов — строительство, логистика, производство, гостеприимство, уход и др. — создать профиль и CV и выйти на реальные потребности работодателей.",
+    },
+  },
+  skills: {
+    en: {
+      title: "Skills — Verified and self-declared, never mixed",
+      description:
+        "Show and check real skills on LabourMarket.ai. Skills are marked verified or self-declared so workers can prove what they can do and employers can see real experience.",
+    },
+    lt: {
+      title: "Įgūdžiai — patvirtinti ir savideklaruoti, nesumaišomi",
+      description:
+        "Parodyk ir patikrink realius įgūdžius LabourMarket.ai. Įgūdžiai žymimi kaip patvirtinti arba savideklaruoti, kad darbuotojai įrodytų, ką moka, o darbdaviai matytų realią patirtį.",
+    },
+    ru: {
+      title: "Навыки — подтверждённые и самозаявленные, без смешивания",
+      description:
+        "Показывайте и проверяйте реальные навыки на LabourMarket.ai. Навыки помечены как подтверждённые или самозаявленные, чтобы работники доказали умения, а работодатели видели реальный опыт.",
+    },
+  },
+  professions: {
+    en: {
+      title: "Professions & Sectors — Who LabourMarket.ai is for",
+      description:
+        "From construction workers, welders and drivers to warehouse, production, cleaning, hospitality, care and admin roles — LabourMarket.ai covers professions and sectors across Europe, plus teams, agencies and employers.",
+    },
+    lt: {
+      title: "Profesijos ir sektoriai — kam skirta LabourMarket.ai",
+      description:
+        "Nuo statybininkų, suvirintojų ir vairuotojų iki sandėlio, gamybos, valymo, apgyvendinimo, priežiūros ir administracijos — LabourMarket.ai apima profesijas ir sektorius Europoje, taip pat brigadas, agentūras ir darbdavius.",
+    },
+    ru: {
+      title: "Профессии и секторы — для кого LabourMarket.ai",
+      description:
+        "От строителей, сварщиков и водителей до склада, производства, уборки, гостеприимства, ухода и администрации — LabourMarket.ai охватывает профессии и секторы Европы, а также бригады, агентства и работодателей.",
     },
   },
 };

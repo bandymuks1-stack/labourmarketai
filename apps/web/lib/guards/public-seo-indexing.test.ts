@@ -7,6 +7,10 @@ import {
 } from "@/lib/seo/seo-indexing-audit";
 import { BRAND_SEO } from "@/lib/seo/metadata";
 import { activeLocales } from "@/lib/i18n/config";
+import {
+  SEO_PROFESSIONS,
+  SEO_PROBLEMS,
+} from "@/lib/seo/profession-problem-content";
 
 /** A construction-first signal in any active language. */
 const CONSTRUCTION = /construction|statyb|строит|стройк/i;
@@ -57,5 +61,32 @@ describe("public SEO indexing foundation guard", () => {
         expect(BRAND_SEO[locale].title).toMatch(CROSS_SECTOR);
       });
     }
+  });
+
+  // The SEO strategy must COVER breadth — many professions across many
+  // sectors (construction included, never alone). Professions are NOT hidden.
+  describe("SEO covers many professions and sectors (not one)", () => {
+    it("names a broad set of professions", () => {
+      expect(SEO_PROFESSIONS.length).toBeGreaterThanOrEqual(15);
+    });
+
+    it("spans at least 5 distinct sectors", () => {
+      const sectors = new Set(SEO_PROFESSIONS.map((p) => p.sector));
+      expect(sectors.size).toBeGreaterThanOrEqual(5);
+    });
+
+    it("includes construction AND at least 4 non-construction sectors", () => {
+      const sectors = new Set(SEO_PROFESSIONS.map((p) => p.sector));
+      expect(sectors.has("construction")).toBe(true); // not hidden
+      const nonConstruction = [...sectors].filter((s) => s !== "construction");
+      expect(nonConstruction.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it("covers a broad set of real labour-market problems", () => {
+      expect(SEO_PROBLEMS.length).toBeGreaterThanOrEqual(8);
+      const audiences = new Set(SEO_PROBLEMS.map((p) => p.audience));
+      expect(audiences.has("worker")).toBe(true);
+      expect(audiences.has("employer")).toBe(true);
+    });
   });
 });
