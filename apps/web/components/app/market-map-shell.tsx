@@ -15,6 +15,8 @@ import {
 import { Link } from "@/lib/i18n/navigation";
 import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
 import { SECTORS } from "@/lib/structuring/sectors";
+import { getOwnDemandLocationSummary } from "@/lib/demand/demand-location";
+import { demandLayerStatus } from "@/lib/market-map/demand-locations";
 
 /**
  * Live market map — FOUNDATION shell (v1). NO fake markers, NO seeded geo
@@ -46,12 +48,16 @@ const LAYERS = [
   { key: "nextActions", icon: Compass, status: "planned" },
 ] as const;
 
-/** Pill copy + tone per layer status. "schemaPrepared" is a deliberately
- *  distinct, honest state: the schema is ready (RED draft) but no points show. */
+/** Pill copy + tone per layer status. "schemaPrepared" = schema ready, no rows
+ *  yet; "signalOnly" = REAL captured rows exist but none are mappable (no
+ *  confirmed coordinates) — still zero markers. */
 const LAYER_STATUS_KEY = {
   planned: "layerPlanned",
   schemaPrepared: "layerSchemaPrepared",
+  signalOnly: "layerSignalOnly",
 } as const;
+
+type LayerStatus = keyof typeof LAYER_STATUS_KEY;
 
 /** Safe first actions → real existing routes. Accommodation is a PLANNED
  *  layer note, not a link (no route / no data yet). */
@@ -70,6 +76,21 @@ const LEGEND_TONE: Record<(typeof LEGEND)[number], string> = {
 
 export async function MarketMapShell() {
   const t = await getTranslations("marketMap");
+
+  // Real signal-only count from the company_demand_locations table (#423),
+  // RLS-scoped to the caller's own demands. Defensive: any null → fall back to
+  // the static "schema prepared" state. Still ZERO markers either way — a row
+  // is only mappable once coordinates are confirmed (verified/manual).
+  const demandSummary = await getOwnDemandLocationSummary();
+  // schema_prepared (0 rows) → "schemaPrepared"; any real rows → "signalOnly".
+  // This v1 never reaches "live" (signal-only rows carry no coordinates, so
+  // none are mappable) — kept defensive so a stray mappable row still shows as
+  // a signal, never a marker.
+  const demandStatus: LayerStatus =
+    demandSummary && demandLayerStatus(demandSummary) !== "schema_prepared"
+      ? "signalOnly"
+      : "schemaPrepared";
+  const demandSignalCount = demandSummary?.total ?? 0;
 
   return (
     <div className="flex flex-col gap-6" data-testid="market-map-shell">
@@ -161,7 +182,16 @@ export async function MarketMapShell() {
               {t("layersTitle")}
             </p>
             <ul className="flex flex-col gap-2.5">
-              {LAYERS.map(({ key, icon: Icon, status }) => (
+              {LAYERS.map(({ key, icon: Icon, status }) => {
+                // The demand layer's status is REAL/dynamic (#423 table); the
+                // rest stay as declared. signalOnly + schemaPrepared are both
+                // "blue" (prepared/real-but-no-markers); planned is "warning".
+                const effectiveStatus: LayerStatus =
+                  key === "demand" ? demandStatus : status;
+                const blue =
+                  effectiveStatus === "schemaPrepared" ||
+                  effectiveStatus === "signalOnly";
+                return (
                 <li key={key} className="flex items-start gap-2.5" data-testid={`market-map-layer-${key}`}>
                   <Icon
                     className="mt-0.5 h-4 w-4 shrink-0 text-brand-blue"
@@ -172,19 +202,20 @@ export async function MarketMapShell() {
                     <span className="flex items-center gap-2 text-sm text-text-primary">
                       {t(`layers.${key}.label`)}
                       <span
+                        data-testid={`market-map-layer-${key}-status`}
                         className={`rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label ${
-                          status === "schemaPrepared"
+                          blue
                             ? "border-brand-blue/40 bg-brand-blue/5 text-brand-blue"
                             : "border-state-warning/40 bg-state-warning/5 text-state-warning"
                         }`}
                       >
-                        {t(LAYER_STATUS_KEY[status])}
+                        {t(LAYER_STATUS_KEY[effectiveStatus])}
                       </span>
                     </span>
                     <span className="text-xs leading-relaxed text-text-muted">
                       {t(`layers.${key}.desc`)}
                     </span>
-                    {status === "schemaPrepared" && (
+                    {key === "demand" && effectiveStatus === "schemaPrepared" && (
                       <span
                         className="mt-0.5 text-[11px] leading-relaxed text-text-muted"
                         data-testid="market-map-demand-schema-note"
@@ -192,9 +223,18 @@ export async function MarketMapShell() {
                         {t("demandSchemaNote")}
                       </span>
                     )}
+                    {key === "demand" && effectiveStatus === "signalOnly" && (
+                      <span
+                        className="mt-0.5 text-[11px] leading-relaxed text-text-muted"
+                        data-testid="market-map-demand-signal-note"
+                      >
+                        {t("demandSignalNote", { count: demandSignalCount })}
+                      </span>
+                    )}
                   </span>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </section>
         </aside>

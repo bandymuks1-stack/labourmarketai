@@ -139,7 +139,9 @@
     "layersTitle": "Planuojami sluoksniai",
     "layerPlanned": "planuojama",
     "layerSchemaPrepared": "schema parengta",
+    "layerSignalOnly": "tik signalas",
     "demandSchemaNote": "Įmonių poreikių vietos paruoštos kaip žmogaus tvirtinamas RED schemos planas; taškai bus rodomi tik po patvirtintos ir pritaikytos migracijos bei realių vietų.",
+    "demandSignalNote": "{count} jūsų poreikių vietų užfiksuota kaip signalai — dar jokių taškų žemėlapyje, nes koordinatės nepatvirtintos.",
     "layers": {
       "workers": { "label": "Darbuotojai — pageidaujamos vietos", "desc": "Kur žmonės nori dirbti, pagal realius darbuotojų profilius." },
       "demand": { "label": "Įmonių poreikiai", "desc": "Kur darbdaviai pateikė realius darbo jėgos poreikius." },
@@ -158,6 +160,25 @@
       "project": "Sukurti projektą",
       "accommodationNote": "Apgyvendinimo vietų žymėjimas — planuojamas būsimas duomenų sluoksnis, nepildomas netikrais taškais."
     }
+  },
+  "demandLocationCapture": {
+    "open": "Pridėti vietos signalą",
+    "title": "Kur yra šis darbas?",
+    "note": "Nurodykite, kur realiai reikia darbuotojų / brigados / paslaugos. Tai tik signalas — taškas žemėlapyje atsiras tik vėliau patvirtinus koordinates. Tai nėra įmonės registracijos adresas.",
+    "country": "Šalis",
+    "city": "Miestas / regionas",
+    "cityPlaceholder": "pvz. Roterdamas",
+    "label": "Vietos pavadinimas",
+    "labelPlaceholder": "pvz. Sandėlio aikštelė, uosto rajonas",
+    "address": "Adresas (neprivaloma)",
+    "addressPlaceholder": "Gatvė / objektas, jei žinomas",
+    "save": "Išsaugoti vietos signalą",
+    "saving": "Saugoma…",
+    "cancel": "Atšaukti",
+    "done": "Vietos signalas išsaugotas. Jis lieka privatus jums, dar be taško žemėlapyje — koordinatės nepatvirtintos.",
+    "duplicate": "Ši tiksli vieta jau yra šio poreikio signalas — nieko nedubliuota. Pridėkite kitą miestą ar adresą kitam objektui.",
+    "errorCountry": "Pasirinkite šalį.",
+    "errorSave": "Nepavyko išsaugoti vietos signalo. Bandykite dar kartą."
   },
   "messaging": {
     "messageWorker": "Rašyti darbuotojui",
