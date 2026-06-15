@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
+import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
@@ -72,6 +73,7 @@ export default async function CompanyDashboardPage({
 
   const t = await getTranslations("roleDashboards.company");
   const tSpaces = await getTranslations("spaces");
+  const tRooms = await getTranslations("companyActionRooms");
 
   // Automatic-first status + next actions. Read the caller's OWN company
   // profile (RLS-scoped). When a company-role holder has no company row yet,
@@ -324,9 +326,13 @@ export default async function CompanyDashboardPage({
     <div className="flex flex-col gap-6" data-testid="company-dashboard">
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
-            {t("eyebrow")}
-          </p>
+          <Link
+            href="/dashboard"
+            className="shrink-0 text-xs font-medium text-brand-blue transition-colors hover:underline"
+            data-testid="back-to-action-center"
+          >
+            ← {tRooms("backToActions")}
+          </Link>
           <Link
             href="/dashboard/account"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
@@ -335,6 +341,14 @@ export default async function CompanyDashboardPage({
             {tSpaces("mySpaces")} →
           </Link>
         </div>
+        {/* Breadcrumb: this is the company identity workspace, framed as an
+            action context, not a separate system. */}
+        <p
+          className="font-mono text-[10px] uppercase tracking-label text-brand-orange"
+          data-testid="company-context"
+        >
+          {tRooms("company.context")}
+        </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("title")}
         </h1>
@@ -369,6 +383,11 @@ export default async function CompanyDashboardPage({
           </div>
         ) : null}
       </header>
+
+      <CompanyActionNextActions
+        room="company"
+        primaryHref="/dashboard/company/projects/new"
+      />
 
       {companyRow ? <CompanyNextActions company={companyRow} /> : null}
       {companyRow ? (

@@ -55,6 +55,44 @@
       }
     }
   },
+  "companyActionRooms": {
+    "backToActions": "Veiksmų centras",
+    "company": {
+      "context": "Įmonė · Profilis ir poreikiai",
+      "whatTitle": "Ką čia galite padaryti",
+      "whatBody": "Tvarkykite įmonės duomenis ir pateikite darbuotojų poreikį.",
+      "primaryLabel": "Naujas poreikis / projektas",
+      "nextLine": "Po to: poreikis išsaugomas jūsų paskyroje ir paruoštas atrankai."
+    },
+    "candidates": {
+      "context": "Įmonė · Samdyti",
+      "whatTitle": "Ką čia galite padaryti",
+      "whatBody": "Peržiūrėkite kandidatus ir trumpuosius sąrašus pagal savo poreikius.",
+      "primaryLabel": "Ieškoti darbuotojų",
+      "nextLine": "Po to: pažymėkite tinkamus ir pradėkite pokalbį."
+    },
+    "buyer": {
+      "context": "Įmonė · Pirkti paslaugas",
+      "whatTitle": "Ką čia galite padaryti",
+      "whatBody": "Pateikite užklausą dėl paslaugų, specialistų ar komandų.",
+      "primaryLabel": "Sukurti užklausą",
+      "nextLine": "Po to: užklausa išsaugoma ir laukia peržiūros — be netikrų pasiūlymų."
+    },
+    "agency": {
+      "context": "Įmonė · Siūlyti darbuotojus",
+      "whatTitle": "Ką čia galite padaryti",
+      "whatBody": "Pasiūlykite darbuotojus ar komandas kaip personalo partneris.",
+      "primaryLabel": "Tvarkyti rezervą",
+      "nextLine": "Po to: pasiūlymas lieka privatus, kol nuspręsite kitaip."
+    },
+    "projects": {
+      "context": "Įmonė · Projektai",
+      "whatTitle": "Ką čia galite padaryti",
+      "whatBody": "Valdykite projektus ir operacijas vienoje vietoje.",
+      "primaryLabel": "Naujas projektas",
+      "nextLine": "Po to: sekite eigą ir komandas, kol projektas juda."
+    }
+  },
   "messaging": {
     "messageWorker": "Rašyti darbuotojui",
     "messageCompany": "Rašyti įmonei"

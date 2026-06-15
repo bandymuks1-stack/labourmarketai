@@ -4,6 +4,7 @@ import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { AgencyWorkersSection } from "@/components/app/agency-workers-section";
+import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { SetupRoleChoice } from "@/components/app/setup-role-choice";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { getOrgMembersData } from "@/lib/operations/org-members";
@@ -322,6 +323,8 @@ export default async function AgencyDashboardPage({
         </h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
+
+      <CompanyActionNextActions room="agency" primaryHref="/dashboard/agency/pool" />
 
       <section
         className="card-border flex flex-col gap-2 p-4"

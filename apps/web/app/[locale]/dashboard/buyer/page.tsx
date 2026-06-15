@@ -3,6 +3,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { BuyerRequestsSection } from "@/components/app/buyer-requests-section";
+import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getDemandDraft } from "@/lib/demand/demand-drafts";
 import { getOwnCustomer } from "@/lib/buyer/customers";
@@ -257,6 +258,8 @@ export default async function BuyerDashboardPage({
         </h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
+
+      <CompanyActionNextActions room="buyer" primaryHref="/dashboard/start/buyer" />
 
       <section
         className="card-border flex flex-col gap-2 p-4"

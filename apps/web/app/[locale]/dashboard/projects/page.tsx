@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { listProjectAssignments } from "@/lib/projects/projects";
 import { listProjectMap } from "@/lib/projects/map";
 import { listManagedWorkers } from "@/lib/instructions/instructions";
@@ -33,6 +35,7 @@ export default async function ProjectsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("projects");
+  const tRooms = await getTranslations("companyActionRooms");
 
   const supabase = await createClient();
   const {
@@ -99,10 +102,19 @@ export default async function ProjectsPage({
   return (
     <div className="flex max-w-4xl flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
-          <span className="live-dot" aria-hidden />
-          {t("map.eyebrow")}
-        </span>
+        <Link
+          href="/dashboard"
+          className="self-start text-xs font-medium text-brand-blue transition-colors hover:underline"
+          data-testid="back-to-action-center"
+        >
+          ← {tRooms("backToActions")}
+        </Link>
+        <p
+          className="font-mono text-[10px] uppercase tracking-label text-brand-orange"
+          data-testid="company-context"
+        >
+          {tRooms("projects.context")}
+        </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("title")}
         </h1>
@@ -110,6 +122,11 @@ export default async function ProjectsPage({
           {t("intro")}
         </p>
       </header>
+
+      <CompanyActionNextActions
+        room="projects"
+        primaryHref="/dashboard/company/projects/new"
+      />
 
       {/* ARENA rhythm: the real S3.5 confirm queue pulse, never a fake. */}
       <ConfirmPulse />
