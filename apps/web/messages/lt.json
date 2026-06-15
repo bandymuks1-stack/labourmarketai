@@ -20,11 +20,11 @@
       "purpose": "Valdykite projektus, komandas ir darbuotojų paiešką."
     },
     "agency": {
-      "name": "Agentūros erdvė",
+      "name": "Partnerio paslaugos",
       "purpose": "Siūlykite kandidatus ar komandas ir ieškokite užsakymų."
     },
     "buyer": {
-      "name": "Pirkėjo erdvė",
+      "name": "Mano užklausos",
       "purpose": "Kurkite ir valdykite užklausas dėl prekių, paslaugų, specialistų, tiekėjų ar komandų."
     }
   },
@@ -598,9 +598,9 @@
       }
     },
     "agency": {
-      "eyebrow": "AGENTŪROS ERDVĖ",
-      "title": "Agentūros darbo erdvė",
-      "subtitle": "Agentūros vaidmuo yra įėjimo taškas. Galite plėstis į kitas roles, kai pasiruošę.",
+      "eyebrow": "PARTNERIO PASLAUGOS",
+      "title": "Partnerio paslaugos — siūlykite darbuotojus ir komandas",
+      "subtitle": "Veikti kaip personalo partneris — vienas iš būdų naudoti savo įmonę, įėjimo taškas, ne atskiras produktas. Galite plėstis į kitas roles, kai pasiruošę.",
       "pilotDisclaimer": "Kandidatų tikrinimas nedaromas automatiškai. Niekas netampa viešu be jūsų sprendimo. Galite ramiai paruošti pasiūlymą — jis iškart išsaugomas ir lieka privatus.",
       "firstAction": {
         "title": "Sukurti kandidatų / paslaugų pasiūlymo juodraštį",
@@ -772,9 +772,9 @@
       "poolLink": "Darbuotojų pool"
     },
     "buyer": {
-      "eyebrow": "PIRKĖJO ERDVĖ",
-      "title": "Pirkėjo darbo erdvė",
-      "subtitle": "Pirkėjo vaidmuo yra įėjimo taškas. Galite vėliau pridėti ir kitus vaidmenis.",
+      "eyebrow": "MANO UŽKLAUSOS",
+      "title": "Mano užklausos",
+      "subtitle": "Pateikti užklausą — tai veiksmas; jį gali atlikti ir žmogus, ir įmonė. Įėjimo taškas, ne atskiras produktas. Galite vėliau pridėti ir kitus vaidmenis.",
       "pilotDisclaimer": "Nepateikiame netikrų pasiūlymų. Jūsų užklausa lieka privati, kol nenuspręsite kitaip.",
       "firstAction": {
         "title": "Sukurti paslaugos / komandos / rangovo užklausą",
@@ -1467,6 +1467,11 @@
     "removeDirection": "Pašalinti",
     "primaryBadge": "Pagrindinė",
     "directionAdded": "Kryptis pridėta",
+    "reviewBanner": {
+      "title": "Dalis įgūdžių laukia peržiūros",
+      "body": "Kai kurie įrašai dar nėra aiškiai suklasifikuoti. Papildykite informaciją arba peržiūrėkite įgūdžius, kad profilis būtų tikslesnis.",
+      "cta": "Peržiūrėti įgūdžius"
+    },
     "pageTitle": "Mano gebėjimai",
     "pageSubtitle": "Čia gyvena viskas, kas sudaro jūsų darbo kortelę: ką dirbate, ką mokate ir kuo galite tai įrodyti. Pasirinkta sritis — tik kontekstas, ne apribojimas.",
     "professionLabel": "Tavo profesija",

@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
+import { SkillsReviewBanner } from "@/components/app/skills-review-banner";
 import {
   deriveSkillEvidence,
   type SkillEvidenceInput,
@@ -375,6 +376,26 @@ export default async function ProfilePage({
             : undefined
         }
       />
+
+      {/* Honest "needs review" banner — only when real data shows declared
+          skills not yet backed by work evidence (unsupported, incl. unmapped
+          free-label claims). Never says "verified"; count is real. */}
+      {workerId
+        ? (() => {
+            const ev = deriveSkillEvidence(
+              skillEvidenceInputs,
+              savedSkillClaims.length,
+            );
+            return (
+              <SkillsReviewBanner
+                count={ev.unsupported}
+                title={t("reviewBanner.title")}
+                body={t("reviewBanner.body")}
+                cta={t("reviewBanner.cta")}
+              />
+            );
+          })()
+        : null}
 
       {/* Workstream C: the trust chain made VISIBLE on the person — counts
           straight from canonical tables (verified skills, manager
