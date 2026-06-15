@@ -118,6 +118,45 @@
       }
     }
   },
+  "marketMap": {
+    "backToActions": "Action center",
+    "title": "Live labour-market map",
+    "subtitle": "Built from real workers, company needs, projects and accommodation data — a living picture of where people are, where the need is, and where you can act now.",
+    "foundationNotice": "No fake points — the map fills only with real data, once each source has a location field.",
+    "preparing": "preparing",
+    "filtersTitle": "Filters",
+    "filterCountry": "Country",
+    "filterSector": "Sector",
+    "filterAll": "all",
+    "canvasEmptyTitle": "Map canvas is being prepared",
+    "canvasEmptyBody": "When real data carries a location, it appears here — never before. No fake markers.",
+    "legendTitle": "Status",
+    "legend": {
+      "ready": "Ready to act",
+      "needsDocs": "Documents / readiness missing",
+      "noData": "No data yet"
+    },
+    "layersTitle": "Planned layers",
+    "layerPlanned": "planned",
+    "layers": {
+      "workers": { "label": "Workers — preferred locations", "desc": "Where people want to work, from real worker profiles." },
+      "demand": { "label": "Company needs", "desc": "Where employers have submitted real workforce needs." },
+      "projects": { "label": "Projects", "desc": "Where real projects and operations run." },
+      "accommodation": { "label": "Accommodation", "desc": "Where housing is available — a future data layer." },
+      "teams": { "label": "Teams / brigades", "desc": "Where ready teams are available." },
+      "readiness": { "label": "Readiness / documents / skills", "desc": "Where documents and skills are ready or missing." },
+      "rates": { "label": "Work rates", "desc": "Honest rate signals by location — no invented prices." },
+      "countryFit": { "label": "Country fit", "desc": "Where country requirements match worker readiness." },
+      "nextActions": { "label": "Next-action signals", "desc": "Where you can act now — based on real gaps." }
+    },
+    "nextActionsTitle": "What you can do now",
+    "nextActions": {
+      "workerCountry": "Add or refine your preferred country",
+      "companyNeed": "Submit a company need",
+      "project": "Create a project",
+      "accommodationNote": "Marking accommodation locations is a planned future data layer — not added with fake points."
+    }
+  },
   "messaging": {
     "messageWorker": "Message worker",
     "messageCompany": "Message company"

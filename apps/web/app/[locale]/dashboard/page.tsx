@@ -8,6 +8,7 @@ import { DashboardChainActions } from "@/components/app/dashboard-chain-actions"
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
+import { Link } from "@/lib/i18n/navigation";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { WorkCard } from "@/components/app/work-card";
@@ -135,6 +136,7 @@ export default async function DashboardOverviewPage({
     .single();
 
   const t = await getTranslations("auth.dashboard");
+  const tMap = await getTranslations("marketMap");
   const tw = await getTranslations("auth.dashboard.wow");
   const tf = await getTranslations("auth.dashboard.wow.flow");
   const tRole = await getTranslations("auth.signup.role");
@@ -250,6 +252,15 @@ export default async function DashboardOverviewPage({
             /dashboard/account, surfaced on the main dashboard so the user
             doesn't have to dig into account settings. */}
         <IdentityActions hasCompany={hasCompany} compact />
+        {/* Entry into the live labour-market map (foundation). */}
+        <Link
+          href="/dashboard/market-map"
+          data-testid="dashboard-market-map-link"
+          className="flex items-center justify-between gap-2 rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue"
+        >
+          {tMap("title")}
+          <span aria-hidden className="text-brand-blue">→</span>
+        </Link>
 
         {/* G — company/agency calming pass: a single calm, human framing line
             (copy-only, no structural change), mirroring the worker foundationNote.
@@ -381,6 +392,15 @@ export default async function DashboardOverviewPage({
       {/* Compact identity/action entry — same Asmuo/Įmonė model as
           /dashboard/account, surfaced on the main dashboard. */}
       <IdentityActions hasCompany={hasCompany} compact />
+      {/* Entry into the live labour-market map (foundation). */}
+      <Link
+        href="/dashboard/market-map"
+        data-testid="dashboard-market-map-link"
+        className="flex items-center justify-between gap-2 rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue"
+      >
+        {tMap("title")}
+        <span aria-hidden className="text-brand-blue">→</span>
+      </Link>
 
       {/* "Šiandienos ekranas" (TASK 07 / DESIGN_SOUL) — today's ONE action,
           this week's confirmed work, one honest growth path, and the premium
