@@ -50,6 +50,12 @@ describe("company action rooms — consistent next-actions + framing", () => {
     expect(comp).toMatch(/companyActionRooms/);
     expect(comp).toMatch(/data-testid="company-action-primary"/);
   });
+
+  it("the shared card renders a practical 3-step flow", () => {
+    const comp = read("components/app/company-action-next-actions.tsx");
+    expect(comp).toMatch(/data-testid="company-action-flow"/);
+    expect(comp).toMatch(/flow\.\$\{step\}|flow\.step/);
+  });
 });
 
 describe("company action room copy present + non-silo in every active locale", () => {
@@ -64,6 +70,14 @@ describe("company action room copy present + non-silo in every active locale", (
           expect(
             str(m, `companyActionRooms.${room}.${k}`),
             `${locale} ${room}.${k}`,
+          ).toBeTruthy();
+        }
+      });
+      it(`${locale}: ${room} has a 3-step practical flow`, () => {
+        for (const s of ["step1", "step2", "step3"]) {
+          expect(
+            str(m, `companyActionRooms.${room}.flow.${s}`),
+            `${locale} ${room}.flow.${s}`,
           ).toBeTruthy();
         }
       });
