@@ -3,11 +3,15 @@
  * description and per-page canonical + hreflang on the apex public
  * marketing surface (https://labourmarket.ai).
  *
- * Policy (2026-06-15): LabourMarket.ai surfaces as a public labour-
- * market platform for construction / technical workers, teams,
- * agencies and employers across Europe. The apex is the canonical
- * host (see lib/domain/canonical.ts); every public canonical URL,
- * hreflang alternate and OpenGraph URL points there.
+ * Positioning (2026-06-15, owner — cross-sector, NOT construction-first):
+ * LabourMarket.ai is a whole-labour-market platform — workers, employers,
+ * companies and agencies across many sectors and countries in Europe.
+ * Construction is one sector among the 11 in lib/structuring/sectors.ts
+ * (manufacturing, transport & logistics, retail, hospitality, care,
+ * office/admin, IT, education, cleaning, agriculture, …) — it must NOT be
+ * the brand centre of the title/description/H1. The apex is the canonical
+ * host (see lib/domain/canonical.ts); every public canonical URL, hreflang
+ * alternate and OpenGraph URL points there.
  *
  * Copy lives here as a pure per-locale map (lt / en / ru — the active
  * locales) rather than in messages/*.json so the SEO layer has no
@@ -30,21 +34,21 @@ type BrandCopy = { title: string; description: string };
 export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
   en: {
     title:
-      "LabourMarket.ai — Construction Workers, Teams and Employer Needs in Europe",
+      "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
     description:
-      "LabourMarket.ai connects construction and technical workers, teams, agencies and employers across Europe. Workers create profiles/CVs, employers submit workforce needs, and the system helps structure matching, accommodation and next steps.",
+      "LabourMarket.ai helps workers, companies and agencies structure profiles, skills, work opportunities, workforce needs and next steps across sectors and countries.",
   },
   lt: {
     title:
-      "LabourMarket.ai — darbuotojai, brigados ir darbdavių poreikiai Europoje",
+      "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
     description:
-      "LabourMarket.ai sujungia statybos ir technikos darbuotojus, brigadas, agentūras ir darbdavius Europoje. Darbuotojai pildo profilį/CV, darbdaviai pateikia poreikį, o sistema padeda struktūruoti atranką, apgyvendinimą ir tolimesnius veiksmus.",
+      "LabourMarket.ai padeda darbuotojams, įmonėms ir agentūroms struktūruoti profilius, įgūdžius, darbo galimybes, darbuotojų poreikius ir tolimesnius veiksmus skirtinguose sektoriuose bei šalyse.",
   },
   ru: {
     title:
-      "LabourMarket.ai — строители, бригады и потребности работодателей в Европе",
+      "LabourMarket.ai — работники, работодатели, навыки и возможности работы в Европе",
     description:
-      "LabourMarket.ai соединяет строителей и технических работников, бригады, агентства и работодателей по всей Европе. Работники создают профили/CV, работодатели подают кадровые потребности, а система помогает структурировать подбор, проживание и дальнейшие шаги.",
+      "LabourMarket.ai помогает работникам, компаниям и агентствам структурировать профили, навыки, рабочие возможности, потребности в рабочей силе и следующие шаги в разных секторах и странах.",
   },
 };
 
@@ -108,17 +112,17 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "For Workers — Build your profile and CV",
       description:
-        "Construction and technical workers: create a profile and CV on LabourMarket.ai, show your skills and availability, and get matched with employer needs across Europe.",
+        "Workers across sectors — from logistics and manufacturing to hospitality, care, construction and more: create a profile and CV on LabourMarket.ai, show your skills and availability, and get matched with work opportunities and employer needs across Europe.",
     },
     lt: {
       title: "Darbuotojams — susikurk profilį ir CV",
       description:
-        "Statybos ir technikos darbuotojai: susikurk profilį ir CV LabourMarket.ai, parodyk įgūdžius ir prieinamumą, ir gauk atitikimą su darbdavių poreikiais Europoje.",
+        "Įvairių sektorių darbuotojai — nuo logistikos ir gamybos iki apgyvendinimo, priežiūros, statybos ir kt.: susikurk profilį ir CV LabourMarket.ai, parodyk įgūdžius ir prieinamumą, ir gauk atitikimą su darbo galimybėmis bei darbdavių poreikiais Europoje.",
     },
     ru: {
       title: "Работникам — создайте профиль и CV",
       description:
-        "Строители и технические работники: создайте профиль и CV на LabourMarket.ai, покажите навыки и доступность и получайте подбор под потребности работодателей в Европе.",
+        "Работники разных секторов — от логистики и производства до гостеприимства, ухода, строительства и других: создайте профиль и CV на LabourMarket.ai, покажите навыки и доступность и получайте подбор под рабочие возможности и потребности работодателей в Европе.",
     },
   },
   companies: {
@@ -157,19 +161,19 @@ export const PAGE_SEO: Readonly<
   },
   workAbroad: {
     en: {
-      title: "Work Abroad — Construction jobs across Europe",
+      title: "Work Abroad — Jobs across sectors in Europe",
       description:
-        "Considering construction or technical work abroad? See how LabourMarket.ai structures matching, documents and accommodation so workers and employers can plan the next steps across Europe.",
+        "Considering work abroad in any sector? See how LabourMarket.ai structures skills, matching, documents and accommodation so workers and employers can plan the next steps across Europe.",
     },
     lt: {
-      title: "Darbas užsienyje — statybos darbai Europoje",
+      title: "Darbas užsienyje — darbai įvairiuose sektoriuose Europoje",
       description:
-        "Svarstai statybos ar technikos darbą užsienyje? Sužinok, kaip LabourMarket.ai struktūruoja atranką, dokumentus ir apgyvendinimą, kad darbuotojai ir darbdaviai galėtų planuoti tolimesnius veiksmus Europoje.",
+        "Svarstai darbą užsienyje bet kuriame sektoriuje? Sužinok, kaip LabourMarket.ai struktūruoja įgūdžius, atranką, dokumentus ir apgyvendinimą, kad darbuotojai ir darbdaviai galėtų planuoti tolimesnius veiksmus Europoje.",
     },
     ru: {
-      title: "Работа за границей — стройка по всей Европе",
+      title: "Работа за границей — вакансии в разных секторах Европы",
       description:
-        "Думаете о строительной или технической работе за границей? Узнайте, как LabourMarket.ai структурирует подбор, документы и проживание, чтобы работники и работодатели планировали дальнейшие шаги в Европе.",
+        "Думаете о работе за границей в любом секторе? Узнайте, как LabourMarket.ai структурирует навыки, подбор, документы и проживание, чтобы работники и работодатели планировали дальнейшие шаги в Европе.",
     },
   },
   companyNeed: {

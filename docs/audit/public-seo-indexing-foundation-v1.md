@@ -46,11 +46,14 @@ public surface so search engines re-index it.)
 | Guard | `lib/seo/seo-indexing-audit.ts`, `lib/guards/public-seo-indexing.test.ts`, `scripts/check-public-seo-indexing.ts` | Pure audit + CI vitest guard + `pnpm -F web check:public-seo-indexing`. |
 | Tests | `lib/domain/canonical.test.ts`, `lib/domain/middleware-redirect.test.ts` | Rewritten to the new policy (anti-regression now protects apex-as-canonical). |
 
-The brand title is now (homepage, by locale):
+The brand title shipped by this PR was construction-first; it was **superseded**
+by the cross-sector positioning in
+[`cross-sector-public-positioning-v1.md`](./cross-sector-public-positioning-v1.md)
+(branch `fix/cross-sector-public-positioning-v1`). Current brand title (by locale):
 
-- **en:** `LabourMarket.ai — Construction Workers, Teams and Employer Needs in Europe`
-- **lt:** `LabourMarket.ai — darbuotojai, brigados ir darbdavių poreikiai Europoje`
-- **ru:** `LabourMarket.ai — строители, бригады и потребности работодателей в Европе`
+- **en:** `LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe`
+- **lt:** `LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje`
+- **ru:** `LabourMarket.ai — работники, работодатели, навыки и возможности работы в Европе`
 
 ---
 

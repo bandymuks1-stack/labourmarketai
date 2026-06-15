@@ -34,8 +34,19 @@ const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.map(
   (c) => `/labour-market/${c.toLowerCase()}`,
 );
 
+/** Core cross-sector audience pages — prioritised over secondary pages. */
+const CORE_PATHS: readonly string[] = [
+  "/for-workers",
+  "/for-companies",
+  "/for-agencies",
+  "/labour-market",
+  "/company-need",
+  "/worker-intake",
+];
+
 function priorityFor(path: string): number {
   if (path === "") return 1;
+  if (CORE_PATHS.includes(path)) return 0.8;
   if (path.startsWith("/legal")) return 0.3;
   return 0.7;
 }
