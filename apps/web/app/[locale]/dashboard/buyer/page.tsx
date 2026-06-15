@@ -229,9 +229,13 @@ export default async function BuyerDashboardPage({
     <div className="flex flex-col gap-6" data-testid="buyer-dashboard">
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
-            {t("eyebrow")}
-          </p>
+          <Link
+            href="/dashboard"
+            className="shrink-0 text-xs font-medium text-brand-blue transition-colors hover:underline"
+            data-testid="back-to-action-center"
+          >
+            ← {t("backToActions")}
+          </Link>
           <Link
             href="/dashboard/account"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
@@ -240,6 +244,14 @@ export default async function BuyerDashboardPage({
             {tSpaces("mySpaces")} →
           </Link>
         </div>
+        {/* Breadcrumb: this is an ACTION under the company identity, not a
+            separate top-level system. */}
+        <p
+          className="font-mono text-[10px] uppercase tracking-label text-brand-orange"
+          data-testid="company-context"
+        >
+          {t("companyContext")}
+        </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("title")}
         </h1>

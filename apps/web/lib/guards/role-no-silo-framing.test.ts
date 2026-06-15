@@ -93,6 +93,35 @@ describe("two-identity / action model (Asmuo vs Įmonė)", () => {
   }
 });
 
+describe("company action rooms (buyer/agency) read as actions under Įmonė", () => {
+  const buyer = read("app/[locale]/dashboard/buyer/page.tsx");
+  const agency = read("app/[locale]/dashboard/agency/page.tsx");
+  const COMPANY = /Įmonė|Company|Компани/i;
+
+  it("both pages show a company-context breadcrumb + a back-to-action-center link", () => {
+    for (const [name, src] of [["buyer", buyer], ["agency", agency]] as const) {
+      expect(src, `${name} company-context`).toMatch(/data-testid="company-context"/);
+      expect(src, `${name} back link`).toMatch(/data-testid="back-to-action-center"/);
+      expect(src, `${name} backToActions copy`).toMatch(/companyContext|backToActions/);
+    }
+  });
+
+  for (const locale of ACTIVE) {
+    const m = loadMessages(locale);
+    for (const room of ["buyer", "agency"] as const) {
+      it(`${locale}: roleDashboards.${room}.companyContext frames it under the company, no silo`, () => {
+        const ctx = str(m, `roleDashboards.${room}.companyContext`);
+        expect(ctx, `${locale} ${room} companyContext`).toBeTruthy();
+        expect(ctx).toMatch(COMPANY);
+        expect(ctx).not.toMatch(SILO);
+      });
+      it(`${locale}: roleDashboards.${room}.backToActions exists`, () => {
+        expect(str(m, `roleDashboards.${room}.backToActions`)).toBeTruthy();
+      });
+    }
+  }
+});
+
 describe("skills review banner is wired into the profile page", () => {
   const page = read("app/[locale]/dashboard/profile/page.tsx");
   it("imports + renders SkillsReviewBanner with reviewBanner copy", () => {

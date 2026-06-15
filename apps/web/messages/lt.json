@@ -626,6 +626,8 @@
     },
     "agency": {
       "eyebrow": "PARTNERIO PASLAUGOS",
+      "companyContext": "Įmonė · Siūlyti darbuotojus / komandas",
+      "backToActions": "Veiksmų centras",
       "title": "Partnerio paslaugos — siūlykite darbuotojus ir komandas",
       "subtitle": "Veikti kaip personalo partneris — vienas iš būdų naudoti savo įmonę, įėjimo taškas, ne atskiras produktas. Galite plėstis į kitas roles, kai pasiruošę.",
       "pilotDisclaimer": "Kandidatų tikrinimas nedaromas automatiškai. Niekas netampa viešu be jūsų sprendimo. Galite ramiai paruošti pasiūlymą — jis iškart išsaugomas ir lieka privatus.",
@@ -800,6 +802,8 @@
     },
     "buyer": {
       "eyebrow": "MANO UŽKLAUSOS",
+      "companyContext": "Įmonė · Pirkti paslaugas / pateikti užklausą",
+      "backToActions": "Veiksmų centras",
       "title": "Mano užklausos",
       "subtitle": "Pateikti užklausą — tai veiksmas; jį gali atlikti ir žmogus, ir įmonė. Įėjimo taškas, ne atskiras produktas. Galite vėliau pridėti ir kitus vaidmenis.",
       "pilotDisclaimer": "Nepateikiame netikrų pasiūlymų. Jūsų užklausa lieka privati, kol nenuspręsite kitaip.",
