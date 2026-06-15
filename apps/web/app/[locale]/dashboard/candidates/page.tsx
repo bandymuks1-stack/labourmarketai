@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { listOwnCandidateDrafts } from "@/lib/candidates/candidate-drafts";
 import { CANDIDATE_DRAFT_STATUSES, type CandidateDraftStatus } from "@/lib/candidates/candidate-draft-types";
 import {
@@ -26,6 +28,7 @@ export default async function CandidatesPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("candidates");
+  const tRooms = await getTranslations("companyActionRooms");
 
   const supabase = await createClient();
   const {
@@ -77,6 +80,26 @@ export default async function CandidatesPage({
 
   return (
     <div className="flex max-w-4xl flex-col gap-6">
+      {/* Company action framing: this is the "Hire" action under the company
+          identity, not a separate system. */}
+      <div className="flex flex-col gap-1">
+        <Link
+          href="/dashboard"
+          className="self-start text-xs font-medium text-brand-blue transition-colors hover:underline"
+          data-testid="back-to-action-center"
+        >
+          ← {tRooms("backToActions")}
+        </Link>
+        <p
+          className="font-mono text-[10px] uppercase tracking-label text-brand-orange"
+          data-testid="company-context"
+        >
+          {tRooms("candidates.context")}
+        </p>
+      </div>
+
+      <CompanyActionNextActions room="candidates" primaryHref="/dashboard/search" />
+
       <CandidateDraftsManager
         drafts={read.kind === "ok" ? read.drafts : []}
         labels={labels}

@@ -55,6 +55,44 @@
       }
     }
   },
+  "companyActionRooms": {
+    "backToActions": "Action center",
+    "company": {
+      "context": "Company · Profile & needs",
+      "whatTitle": "What you can do here",
+      "whatBody": "Manage your company details and submit a workforce need.",
+      "primaryLabel": "New need / project",
+      "nextLine": "Next: your need is saved to your account, ready for matching."
+    },
+    "candidates": {
+      "context": "Company · Hire",
+      "whatTitle": "What you can do here",
+      "whatBody": "Review candidates and shortlists for your needs.",
+      "primaryLabel": "Find workers",
+      "nextLine": "Next: mark the ones who fit and start a conversation."
+    },
+    "buyer": {
+      "context": "Company · Buy services",
+      "whatTitle": "What you can do here",
+      "whatBody": "Submit a request for services, specialists or teams.",
+      "primaryLabel": "Start a request",
+      "nextLine": "Next: your request is saved and waits for review — no fake offers."
+    },
+    "agency": {
+      "context": "Company · Offer workers",
+      "whatTitle": "What you can do here",
+      "whatBody": "Offer workers or teams as a staffing partner.",
+      "primaryLabel": "Manage your pool",
+      "nextLine": "Next: your offer stays private until you decide otherwise."
+    },
+    "projects": {
+      "context": "Company · Projects",
+      "whatTitle": "What you can do here",
+      "whatBody": "Run your projects and operations in one place.",
+      "primaryLabel": "New project",
+      "nextLine": "Next: track progress and teams as the project moves."
+    }
+  },
   "messaging": {
     "messageWorker": "Message worker",
     "messageCompany": "Message company"
