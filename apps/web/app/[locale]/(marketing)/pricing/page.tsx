@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { PageHero } from "@/components/marketing/page-hero";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return buildPageMetadataFor("pricing", locale, "/pricing");
+}
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { ServiceOffers } from "@/components/marketing/service-offers";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";

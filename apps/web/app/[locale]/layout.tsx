@@ -4,7 +4,8 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
-import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
+import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
+import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
 import "../globals.css";
 
 // TASK 07 typography lock (owner, 2026-06-11): Bricolage Grotesque carries
@@ -34,15 +35,38 @@ const mono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(CANONICAL_ORIGIN),
-  title: "labourmarket.ai — the living labour market",
-  description:
-    "A real-time, two-sided labour-market platform connecting workers, companies and agencies.",
-  alternates: {
-    canonical: "/",
-  },
-};
+// Brand SEO defaults for the whole locale subtree. Per-page canonical +
+// hreflang are intentionally NOT set here — pages set those via
+// buildPageMetadata() so a subpage never inherits the homepage's canonical
+// (which would deindex it). The apex (labourmarket.ai) is the metadataBase
+// so every relative/OG URL resolves to the public marketing surface.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const active = resolveActiveLocale(locale);
+  const brand = BRAND_SEO[active];
+  return {
+    metadataBase: new URL(MARKETING_ORIGIN),
+    title: brand.title,
+    description: brand.description,
+    applicationName: BRAND_NAME,
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: "website",
+      siteName: BRAND_NAME,
+      title: brand.title,
+      description: brand.description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: brand.title,
+      description: brand.description,
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

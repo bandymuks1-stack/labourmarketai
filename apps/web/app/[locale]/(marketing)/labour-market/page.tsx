@@ -1,6 +1,17 @@
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { Link } from "@/lib/i18n/navigation";
 import { Card } from "@/components/ui/Card";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return buildPageMetadataFor("labourMarket", locale, "/labour-market");
+}
 import {
   PRIORITY_MARKETS,
   isSupportedCountry,

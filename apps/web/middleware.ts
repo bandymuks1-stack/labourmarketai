@@ -4,26 +4,31 @@ import { createServerClient } from "@supabase/ssr";
 import { routing } from "@/lib/i18n/routing";
 import { env } from "@/lib/env";
 import {
-  CANONICAL_ORIGIN,
-  isLegacyRedirectHost,
+  MARKETING_ORIGIN,
+  isWwwRedirectHost,
 } from "@/lib/domain/canonical";
 
 const intl = createIntlMiddleware(routing);
 
-/** Pure host-normalization: if request lands on labourmarket.ai
- *  or www.labourmarket.ai, 308-redirect to the canonical
- *  app.labourmarket.ai origin preserving path + query. Returns
- *  undefined when no redirect is needed. */
-function maybeRedirectToCanonicalHost(request: NextRequest): NextResponse | undefined {
+/** Pure host-normalization: if a request lands on
+ *  www.labourmarket.ai, permanently (308) redirect to the apex
+ *  https://labourmarket.ai/<same-path>?<same-query>. The apex itself
+ *  serves content (it is the public marketing canonical), so it is
+ *  NEVER redirected. Returns undefined when no redirect is needed.
+ *
+ *  Policy (2026-06-15): apex = public marketing canonical, www → apex,
+ *  app.labourmarket.ai stays the app host. The public marketing
+ *  domain must not auto-redirect to the app subdomain — only an
+ *  explicit login/app CTA sends a user there. */
+function maybeRedirectWwwToApex(request: NextRequest): NextResponse | undefined {
   const host = request.headers.get("host");
-  if (!isLegacyRedirectHost(host)) return undefined;
+  if (!isWwwRedirectHost(host)) return undefined;
   const target = new URL(
     `${request.nextUrl.pathname}${request.nextUrl.search}`,
-    CANONICAL_ORIGIN,
+    MARKETING_ORIGIN,
   );
-  // 308 = permanent + method-preserving. Owner wants the apex/www
-  // surface to stop showing old LABMA content; the redirect makes
-  // every request land on the new labourmarket.ai product.
+  // 308 = permanent + method-preserving (301-class for SEO). Consolidates
+  // the www alias onto the apex so Google indexes a single host.
   return NextResponse.redirect(target, 308);
 }
 
@@ -40,10 +45,10 @@ function stripLocale(pathname: string): { locale: string; rest: string } {
 const REQUIRES_AUTH = ["/dashboard", "/onboarding"];
 
 export async function middleware(request: NextRequest) {
-  // 0. Canonical host normalization runs BEFORE locale/intl + auth
-  //    so labourmarket.ai + www.labourmarket.ai never even reach
-  //    the app shell — they 308 straight to app.labourmarket.ai.
-  const hostRedirect = maybeRedirectToCanonicalHost(request);
+  // 0. Host normalization runs BEFORE locale/intl + auth so the www
+  //    alias never reaches the app shell — it 308s straight to the
+  //    apex. The apex + app hosts both fall through and serve content.
+  const hostRedirect = maybeRedirectWwwToApex(request);
   if (hostRedirect) return hostRedirect;
 
   // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite.
