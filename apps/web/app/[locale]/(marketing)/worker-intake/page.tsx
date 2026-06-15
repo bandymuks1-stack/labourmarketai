@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { Link } from "@/lib/i18n/navigation";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return buildPageMetadataFor("workerIntake", locale, "/worker-intake");
+}
 import { Button } from "@/components/ui/Button";
 import {
   WorkerIntakeForm,

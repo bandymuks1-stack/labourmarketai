@@ -22,6 +22,7 @@
     "check:migration-0022-static-preview": "tsx scripts/check-migration-0022-static-preview.ts",
     "check:primary-route-smoke": "tsx scripts/check-primary-route-smoke.ts",
     "check:i18n-debt": "tsx scripts/check-i18n-debt.ts",
+    "check:public-seo-indexing": "tsx scripts/check-public-seo-indexing.ts",
     "recognition:unknown-report": "tsx scripts/recognition-unknown-report.ts",
     "db:fixtures:local": "tsx scripts/db-fixtures-local.ts",
     "admin:promote": "tsx scripts/admin-promote.ts",
