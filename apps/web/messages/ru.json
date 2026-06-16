@@ -4070,6 +4070,23 @@
     "thermoMissingMarket": "Недостаточно рыночных данных",
     "thermoMissingBoth": "Недостаточно рыночных данных",
     "thermoSmallSample": "Малая выборка (n<5) — интерпретируйте с осторожностью.",
+      "readiness": {
+        "label": "Готовность",
+        "hint": "Все основные сигналы собраны.",
+        "levelReady": "Готов",
+        "levelBuilding": "Набирается",
+        "levelStart": "Начало",
+        "signalsTemplate": "сигналов собрано",
+        "nextLabel": "Дальше:",
+        "pillars": {
+          "profession": "Профессия",
+          "availability": "Доступность",
+          "skills": "Навыки",
+          "journal": "Рабочий журнал",
+          "evidence": "Подтверждения",
+          "workCard": "Рабочая карта"
+        }
+      },
     "verifiedTitle": "Подтверждённые навыки",
     "verifiedEmpty": "Подтверждённых навыков пока нет. Они появляются, когда руководитель подтверждает записи вашего журнала.",
     "journalSupportedLabel": "Подкреплено журналом",

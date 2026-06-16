@@ -4070,6 +4070,23 @@
     "thermoMissingMarket": "Insufficient market data",
     "thermoMissingBoth": "Insufficient market data",
     "thermoSmallSample": "Small sample (n<5) — interpret with care.",
+      "readiness": {
+        "label": "Readiness",
+        "hint": "All core signals are in place.",
+        "levelReady": "Ready",
+        "levelBuilding": "Building",
+        "levelStart": "Getting started",
+        "signalsTemplate": "signals met",
+        "nextLabel": "Next:",
+        "pillars": {
+          "profession": "Profession",
+          "availability": "Availability",
+          "skills": "Skills",
+          "journal": "Work journal",
+          "evidence": "Evidence",
+          "workCard": "Work card"
+        }
+      },
     "verifiedTitle": "Verified skills",
     "verifiedEmpty": "No verified skills yet. They appear when a manager confirms your journal entries.",
     "journalSupportedLabel": "Journal-supported",
