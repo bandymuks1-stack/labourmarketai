@@ -97,7 +97,7 @@ export function DemandRequestButton({
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error">(
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration">(
     "idle",
   );
 
@@ -159,7 +159,13 @@ export function DemandRequestButton({
         accommodation: accommodation || undefined,
         estimate: estimateEngaged ? estimate : undefined,
       });
-      setState(res.ok ? "done" : "error");
+      setState(
+        res.ok
+          ? "done"
+          : res.code === "needs_migration"
+            ? "needsMigration"
+            : "error",
+      );
     } catch {
       setState("error");
     }
@@ -517,6 +523,15 @@ export function DemandRequestButton({
       {state === "error" && (
         <p className="text-xs text-state-danger" role="alert" data-testid="demand-error">
           {t("error")}
+        </p>
+      )}
+      {state === "needsMigration" && (
+        <p
+          className="text-xs text-state-warning"
+          role="alert"
+          data-testid="demand-needs-migration"
+        >
+          {t("needsMigration")}
         </p>
       )}
     </div>

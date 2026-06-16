@@ -79,9 +79,28 @@ export type DemandRequestResult =
       code:
         | "unauthenticated"
         | "save_failed"
+        // The submit RPC / a column is not present in the live DB (function or
+        // relation missing). Surfaced honestly so the user sees "awaiting a DB
+        // update" instead of a generic "try again" that hides the real cause.
+        | "needs_migration"
         | "empty_description"
         | "invalid_estimate";
     };
+
+/**
+ * Map a Postgres/PostgREST error code to a result code, instead of collapsing
+ * every failure into a generic "save_failed" (which masks a missing RPC/column
+ * behind "try again"). Mirrors the convention used across the app
+ * (lib/demand/demand-location.ts, lib/worker/work-card-actions.ts, etc.).
+ *   42883 = undefined_function, PGRST202 = function not found in schema cache,
+ *   42P01 = undefined_table, 42703 = undefined_column → not applied in prod.
+ */
+function classifyDbError(code: string | undefined): "needs_migration" | "save_failed" {
+  if (code && ["42883", "PGRST202", "42P01", "42703"].includes(code)) {
+    return "needs_migration";
+  }
+  return "save_failed";
+}
 
 const MAX_TITLE = 120;
 const MAX_TEXT = 4000;
@@ -103,7 +122,7 @@ type DemandRpc = {
   rpc: (
     name: string,
     args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+  ) => Promise<{ data: unknown; error: { message: string; code?: string } | null }>;
 };
 
 /**
@@ -204,8 +223,10 @@ export async function submitDemandRequest(
   );
 
   if (error) {
-    console.error("[demand-request] submit failed:", error.message);
-    return { ok: false, code: "save_failed" };
+    // Log the code too so prod logs disambiguate a missing RPC (42883/PGRST202)
+    // from a transient failure — the old log dropped it.
+    console.error("[demand-request] submit failed:", error.code, error.message);
+    return { ok: false, code: classifyDbError(error.code) };
   }
 
   const requestId = typeof data === "string" ? data : null;

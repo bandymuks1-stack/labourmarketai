@@ -23,7 +23,7 @@ import {
 /** Icon ids — concrete icon imports live in the nav components
  *  (`BottomNav`, `DashboardTabs`), so this config stays
  *  framework-agnostic. */
-export type NavIconKey = "home" | "idCard" | "fileText" | "user";
+export type NavIconKey = "home" | "idCard" | "fileText" | "inbox" | "user";
 
 type TabMeta = {
   /** i18n key for the SHORT tab label (e.g. "Apžvalga" vs the feature's
@@ -50,6 +50,10 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
   journal_text_first: {
     tabLabelKey: "auth.dashboard.tabs.journal",
     iconKey: "fileText",
+  },
+  communication: {
+    tabLabelKey: "auth.dashboard.tabs.communication",
+    iconKey: "inbox",
   },
   account_roles: {
     tabLabelKey: "auth.dashboard.tabs.account",

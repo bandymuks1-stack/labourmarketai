@@ -1893,6 +1893,10 @@
       "label": "Work or activity record",
       "description": "Record today's work or activity. The system helps you structure it, but you confirm the facts."
     },
+    "communication": {
+      "label": "Messages",
+      "description": "Conversations and requests you receive. When someone messages you or sends a request, you'll find it here."
+    },
     "account_roles": {
       "label": "Roles",
       "description": "Review your roles. Working as a person is active today; other actions are added step by step."
@@ -2378,6 +2382,7 @@
         "demand": {
           "sending": "Sending...",
           "error": "Couldn't send. Please try again.",
+          "needsMigration": "This feature is waiting on a database update, so your need can't be saved yet. Nothing was sent. Please try again later or contact an administrator.",
           "progressHelper": "These steps show progress. Active actions are shown below.",
           "form": {
             "progressLabel": "Step progress",
@@ -2647,6 +2652,7 @@
         "overview": "My space",
         "profile": "Work card",
         "journal": "Evidence",
+        "communication": "Messages",
         "discover": "Discover",
         "search": "Search",
         "account": "My account"

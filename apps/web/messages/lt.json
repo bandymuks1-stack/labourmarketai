@@ -1893,6 +1893,10 @@
       "label": "Darbo ar veiklos įrašas",
       "description": "Užfiksuokite šiandienos darbą arba veiklą. Sistema padės struktūruoti, bet tik jūs patvirtinate faktus."
     },
+    "communication": {
+      "label": "Žinutės",
+      "description": "Pokalbiai ir gauti prašymai. Kai kas nors jums parašo arba atsiunčia prašymą, jį rasite čia."
+    },
     "account_roles": {
       "label": "Vaidmenys",
       "description": "Peržiūrėkite savo vaidmenis. Veikla kaip asmuo aktyvi šiandien; kiti veiksmai pridedami palaipsniui."
@@ -2378,6 +2382,7 @@
         "demand": {
           "sending": "Siunčiama...",
           "error": "Nepavyko išsiųsti. Bandykite dar kartą.",
+          "needsMigration": "Ši funkcija laukia duomenų bazės atnaujinimo, todėl poreikio kol kas išsaugoti negalima. Nieko neišsiuntėme. Pabandykite vėliau arba susisiekite su administratoriumi.",
           "progressHelper": "Šie žingsniai rodo eigą. Aktyvūs veiksmai pateikiami žemiau.",
           "form": {
             "progressLabel": "Žingsnių eiga",
@@ -2647,6 +2652,7 @@
         "overview": "Mano erdvė",
         "profile": "Darbo kortelė",
         "journal": "Įrodymai",
+        "communication": "Žinutės",
         "discover": "Naršyti",
         "search": "Ieškoti",
         "account": "Mano paskyra"

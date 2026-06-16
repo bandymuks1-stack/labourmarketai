@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Home, IdCard, User } from "lucide-react";
+import { FileText, Home, IdCard, Inbox, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
@@ -8,6 +8,7 @@ import {
   VISIBLE_PRIMARY_NAV_ITEMS,
   type NavIconKey,
 } from "@/lib/config/navigation";
+import type { FeatureKey } from "@/lib/config/feature-availability";
 import { cn } from "@/lib/utils";
 
 // Tabs are sourced from `lib/config/navigation.ts`, which itself derives
@@ -20,6 +21,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   home: Home,
   idCard: IdCard,
   fileText: FileText,
+  inbox: Inbox,
   user: User,
 };
 
@@ -28,7 +30,12 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
  *  catalogue (`lib/config/navigation.ts`). Hidden on tablet/desktop
  *  (`md:hidden`). Honours the iOS home-indicator inset via
  *  `env(safe-area-inset-bottom)`. */
-export function BottomNav() {
+export function BottomNav({
+  badges,
+}: {
+  /** Per-feature unread/attention counts, e.g. { communication: 3 }. */
+  badges?: Partial<Record<FeatureKey, number>>;
+}) {
   const t = useTranslations();
   const pathname = usePathname();
 
@@ -44,19 +51,30 @@ export function BottomNav() {
             href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname === href || pathname.startsWith(href + "/");
+          const badge = badges?.[id] ?? 0;
           return (
             <li key={id} className="flex-1">
               <Link
                 href={href as "/dashboard"}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-tight transition-colors",
+                  "relative flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-tight transition-colors",
                   active
                     ? "text-brand-orange"
                     : "text-text-muted hover:text-text-secondary",
                 )}
               >
-                <Icon aria-hidden className="h-5 w-5" strokeWidth={2} />
+                <span className="relative">
+                  <Icon aria-hidden className="h-5 w-5" strokeWidth={2} />
+                  {badge > 0 && (
+                    <span
+                      className="absolute -right-2 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-[9px] font-bold leading-none text-white"
+                      data-testid={`bottom-nav-badge-${id}`}
+                    >
+                      {badge > 9 ? "9+" : badge}
+                    </span>
+                  )}
+                </span>
                 <span className="leading-none">{t(tabLabelKey)}</span>
               </Link>
             </li>
