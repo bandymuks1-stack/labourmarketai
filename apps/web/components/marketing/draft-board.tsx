@@ -31,11 +31,10 @@ export async function DraftBoard() {
         </p>
 
         <div className="mt-8 flex items-center gap-2">
-          <span
-            className="inline-flex items-center gap-2 rounded-sm border border-state-live/40 bg-ink-900/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-live"
-            role="status"
-          >
-            <span className="live-dot" aria-hidden />
+          {/* Concept/illustrative label — NOT a live feed. Uses the warning
+              (concept) style, not the green "live" style, so an illustrative
+              example is never dressed up as live platform activity. */}
+          <span className="inline-flex items-center rounded-sm border border-state-warning/40 bg-ink-800/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning">
             {t("liveCounter")}
           </span>
         </div>

@@ -123,7 +123,6 @@ export async function SiteFooter() {
           <span>
             © {new Date().getFullYear()} Labourmarket.ai. {t("rights")}
           </span>
-          <span className="font-mono uppercase tracking-label">{t("preview")}</span>
           {/* Created by Rexora — text only; no approved Rexora URL was found in
               the repo / brand config, so no link is fabricated (owner to confirm
               the URL, then it can become a link). */}
