@@ -26,6 +26,7 @@ import {
   createJournalEntry,
   supersedeJournalEntry,
 } from "@/lib/journal/actions";
+import { autoLinkRecognizedJournalSkills } from "@/lib/journal/journal-entry-skills-actions";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import {
   isValidJournalPhoto,
@@ -417,6 +418,11 @@ export function JournalEntryComposer({
       } else {
         setPhotoOutcome(null);
       }
+      // systemic-ux-skills-v1: recognition → evidence on save. Links the
+      // recognised skills the worker already declared to this entry (real
+      // journal-supported evidence). Best-effort + additive: never invents a
+      // skill, never verifies, and a failure here never loses the saved entry.
+      void autoLinkRecognizedJournalSkills(result.entryId, text);
       recordEvent("journal_save_success", {
         fragment_count: confirmedFragments.length,
       });

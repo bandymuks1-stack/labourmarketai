@@ -14,6 +14,10 @@ import type {
   EngagementCard,
   SkillDot,
 } from "@/components/app/cv-engagement-cards";
+import {
+  groupSkillsByFunction,
+  skillGroupLabelKey,
+} from "@/lib/skills/skill-groups";
 
 /**
  * Unified CV / capability surface (replaces the disconnected
@@ -60,6 +64,7 @@ export function CapabilityProfileSection({
   const t = useTranslations("capabilityProfile");
   const tEng = useTranslations("journal.cv");
   const tRel = useTranslations("relationshipTypes");
+  const tGroups = useTranslations();
   const locale = useLocale();
 
   const router = useRouter();
@@ -267,33 +272,52 @@ export function CapabilityProfileSection({
                     </p>
                   )}
 
-                  {/* Worker skill dots — unchanged: render under the
-                      primary engagement card as before (M1 convention). */}
+                  {/* Worker skill dots — grouped by functional taxonomy
+                      (systemic-ux-skills-v1) so a profession, a specific task
+                      skill, a general ability and a business ability are no
+                      longer dumped in one flat list. */}
                   {c.isPrimary && workerSkillDots.length > 0 && (
-                    <ul className="mt-3 flex flex-col gap-1.5 border-t border-ink-600 pt-3">
-                      {workerSkillDots.map((s) => (
-                        <li
-                          key={s.slug}
-                          className="flex items-center justify-between gap-2 text-sm text-text-primary"
-                        >
-                          <span className="flex items-center gap-2">
-                            <span
-                              aria-hidden
-                              className={cn(
-                                "inline-block size-2 flex-none rounded-full",
-                                BIN_DOT[s.bin] ?? "bg-ink-500",
-                              )}
-                            />
-                            {s.name}
-                          </span>
-                          {s.isCore && (
-                            <span className="flex-none rounded-sm px-1 font-mono text-[10px] uppercase tracking-label text-brand-orange">
-                              {tEng("primary")}
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
+                    <div
+                      className="mt-3 flex flex-col gap-3 border-t border-ink-600 pt-3"
+                      data-testid="capability-worker-skill-groups"
+                    >
+                      {groupSkillsByFunction(workerSkillDots).map(
+                        ({ group, items }) => (
+                          <div key={group} className="flex flex-col gap-1.5">
+                            <p
+                              className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+                              data-skill-group={group}
+                            >
+                              {tGroups(skillGroupLabelKey(group))}
+                            </p>
+                            <ul className="flex flex-col gap-1.5">
+                              {items.map((s) => (
+                                <li
+                                  key={s.slug}
+                                  className="flex items-center justify-between gap-2 text-sm text-text-primary"
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <span
+                                      aria-hidden
+                                      className={cn(
+                                        "inline-block size-2 flex-none rounded-full",
+                                        BIN_DOT[s.bin] ?? "bg-ink-500",
+                                      )}
+                                    />
+                                    {s.name}
+                                  </span>
+                                  {s.isCore && (
+                                    <span className="flex-none rounded-sm px-1 font-mono text-[10px] uppercase tracking-label text-brand-orange">
+                                      {tEng("primary")}
+                                    </span>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ),
+                      )}
+                    </div>
                   )}
                 </li>
               );

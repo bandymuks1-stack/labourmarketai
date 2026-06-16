@@ -62,3 +62,25 @@ export function deriveSkillEvidence(
   const declared = workerSkills.length + Math.max(0, selfDeclaredClaimCount);
   return { declared, supported, unsupported: declared - supported };
 }
+
+/**
+ * systemic-ux-skills-v1 — ONE deterministic evidence status, never two
+ * contradictory lines. The old UI showed "Paremta darbo įrašais: 6 iš 21" AND
+ * "Dar nėra darbo įrašų..." at the same time (the second fired whenever any
+ * skill was unsupported, even when 6 already were). This collapses the state
+ * to a single honest key derived only from the counts:
+ *   • none      → 0 supported            ("Dar nėra darbo įrašų...")
+ *   • some      → 1..declared-1 supported ("Kai kuriuos įgūdžius jau paremia...")
+ *   • all       → declared supported      ("Visi šie įgūdžiai turi pagrindimą.")
+ * Returns `null` when there is nothing declared (caller renders no block).
+ */
+export type SkillEvidenceStatus = "none" | "some" | "all";
+
+export function skillEvidenceStatus(
+  summary: Pick<SkillEvidenceSummary, "declared" | "supported">,
+): SkillEvidenceStatus | null {
+  if (summary.declared <= 0) return null;
+  if (summary.supported <= 0) return "none";
+  if (summary.supported >= summary.declared) return "all";
+  return "some";
+}

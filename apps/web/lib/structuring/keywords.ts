@@ -63,6 +63,19 @@ export const SKILL_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "concrete-pouring", needles: ["sąram", "saram"] },
   { slug: "blueprint-reading", needles: ["brėžin", "brezin", "pagal projekt", "projekto skaitym", "чертеж", "чертёж", "по проекту"] },
   { slug: "general-labour", needles: ["darbo paruoš", "darbo pasiruoš", "подсобн", "разнорабоч"] },
+  // systemic-ux-skills-v1 — coverage gaps the recognition audit found.
+  // These slugs already exist in skill-names.json but had NO needle, so a
+  // worker who wrote them in the journal got nothing recognised. Needles use
+  // diacritic + diacritic-free stems (the matcher folds both) and avoid
+  // collisions (e.g. "šildym" heating ≠ "šiltin" insulation).
+  { slug: "drainage", needles: ["nuotek", "nuotekų", "kanalizac", "lietaus vanden", "канализац", "ливнев", "дренаж"] },
+  { slug: "pipefitting", needles: ["vamzd", "vamzdyn", "трубопровод", "трубоукладч", "монтаж труб"] },
+  { slug: "ventilation", needles: ["vėdin", "vedin", "ventiliac", "вентиляц", "вентиляцион"] },
+  { slug: "hvac-install", needles: ["šildymo ir vėdinim", "klimat", "kondicion", "климат", "кондицион"] },
+  { slug: "heating-install", needles: ["šildym", "sildym", "šildymo sistem", "отоплен", "отопительн"] },
+  { slug: "roofing", needles: ["stog", "dengė stog", "dengėm stog", "perdeng stog", "крыш", "кровл", "кровел"] },
+  { slug: "sanitary-install", needles: ["santechnik prietais", "santechnik įreng", "santechnikos prietais", "сантехприбор", "санприбор"] },
+  { slug: "work-scheduling", needles: ["grafik", "derin grafik", "tvarkarašt", "darbų eiliškum", "график", "расписан", "планир график"] },
 ];
 
 /** Lowercase substrings that map a free-text mention to a profession slug.

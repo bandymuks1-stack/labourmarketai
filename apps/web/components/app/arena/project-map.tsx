@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, MessageSquare, Users } from "lucide-react";
 
 import type { ProjectMapCard } from "@/lib/projects/map";
 import { CountUp } from "@/components/app/today/count-up";
@@ -59,14 +59,25 @@ export async function ProjectMap({
                 </span>
               </span>
             </Link>
-            {/* Direct door into the management ARENA (operations board). */}
-            <Link
-              href={`/${locale}/dashboard/projects/${p.id}/operations`}
-              data-testid="project-operations-link"
-              className="inline-flex min-h-8 w-fit items-center font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
-            >
-              {t("openArena")} →
-            </Link>
+            {/* Project-scoped actions: open the project board + a clearly
+                scoped communication entry (systemic-ux-project-v1). */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <Link
+                href={`/${locale}/dashboard/projects/${p.id}/operations`}
+                data-testid="project-operations-link"
+                className="inline-flex min-h-8 w-fit items-center font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+              >
+                {t("openArena")} →
+              </Link>
+              <Link
+                href={`/${locale}/dashboard/communication`}
+                data-testid="project-card-chat-cta"
+                className="inline-flex min-h-8 w-fit items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
+              >
+                <MessageSquare className="h-3.5 w-3.5" aria-hidden />
+                {t("chatCta")}
+              </Link>
+            </div>
           </li>
         ))}
       </ul>

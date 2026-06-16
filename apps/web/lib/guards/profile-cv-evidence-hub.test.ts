@@ -194,8 +194,9 @@ describe("Guard: the hub surfaces journal→skill evidence support (not verifica
     expect(hub).toMatch(/evidence\.intro/);
     expect(hub).toMatch(/evidence\.supported/);
     expect(hub).toMatch(/profile-hub-skill-evidence/);
-    // missing-evidence state must exist AND the journal path stays reachable.
-    expect(hub).toMatch(/evidence\.noneYet/);
+    // systemic-ux-skills-v1: ONE deterministic status line (none/some/all),
+    // never the old contradictory "supported N" + flat "noneYet" pair.
+    expect(hub).toMatch(/evidence\.status_/);
     expect(hub).toMatch(/href="\/dashboard\/journal"/);
   });
 
@@ -208,7 +209,7 @@ describe("Guard: the hub surfaces journal→skill evidence support (not verifica
       const evidence = (loadJson(`messages/${loc}.json`).profileHub as Record<string, unknown>)
         .evidence as Record<string, string>;
       expect(evidence, `${loc} profileHub.evidence missing`).toBeTruthy();
-      for (const k of ["intro", "supported", "noneYet"]) {
+      for (const k of ["intro", "supported", "status_none", "status_some", "status_all"]) {
         expect(typeof evidence[k] === "string" && evidence[k].trim().length > 0, `${loc} evidence.${k} missing`).toBe(true);
         // evidence-support wording must never read as verification.
         expect(

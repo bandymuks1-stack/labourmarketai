@@ -114,7 +114,7 @@
       "flow": {
         "step1": "Sukurkite projektą (pavadinimas, vieta).",
         "step2": "Priskirkite darbuotojus prie projekto.",
-        "step3": "Sekite eigą ir komandas ARENA rodinyje."
+        "step3": "Sekite eigą ir komandas projekto eigos rodinyje."
       }
     }
   },
@@ -245,7 +245,9 @@
     "evidence": {
       "intro": "Įgūdžiai stipresni, kai juos paremia tikri darbo, mokymosi ar veiklos įrašai.",
       "supported": "Paremta darbo įrašais: {supported} iš {declared}",
-      "noneYet": "Dar nėra darbo įrašų, kurie paremtų šiuos įgūdžius."
+      "status_none": "Dar nėra darbo įrašų, kurie paremtų šiuos įgūdžius.",
+      "status_some": "Kai kuriuos įgūdžius jau paremia darbo įrašai.",
+      "status_all": "Visi šie įgūdžiai turi darbo įrašų pagrindimą."
     },
     "pillars": {
       "cv": {
@@ -1617,6 +1619,12 @@
     "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
     "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
   },
+  "skillGroups": {
+    "profession": "Profesija / darbo kryptis",
+    "specific": "Konkretūs darbo įgūdžiai",
+    "general": "Bendrieji gebėjimai",
+    "administrative": "Administraciniai / verslo gebėjimai"
+  },
   "skills": {
     "workDirectionsTitle": "Darbo kryptys",
     "editingDirection": "Redaguojate kryptį",
@@ -2208,6 +2216,8 @@
       "confirm": "Pridėti",
       "adminMode": "Admin režimas",
       "adminPanelLink": "Atidaryti operacijų valdymo skydą",
+      "personSpace": "Asmens erdvė",
+      "companySpace": "Įmonės erdvė",
       "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
@@ -2704,7 +2714,7 @@
         "greeting": "👋 Sveiki, {name}",
         "body_main": "Šiuo metu mes baigiame ruošti įmonių/agentūrų funkcionalumą.",
         "body_notify": "Pranešime iškart, kai bus paruošta.",
-        "body_meanwhile": "Tuo tarpu — gali apžiūrėti platformą per „Naršyti\" skiltį (read-only)."
+        "body_meanwhile": "Tuo tarpu — gali apžiūrėti platformą per „Naršyti\" skiltį (tik peržiūrai)."
       },
       "menuLinks": {
         "playerCard": "Mano kortelė",
@@ -3386,7 +3396,8 @@
       "title": "Tavo projektai",
       "untitled": "Projektas be pavadinimo",
       "teamLabel": "Komandoje",
-      "openArena": "Atidaryti areną"
+      "openArena": "Atidaryti projekto eigą",
+      "chatCta": "Pokalbis dėl projekto"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# įrašas laukia tavo patvirtinimo} few {# įrašai laukia tavo patvirtinimo} other {# įrašų laukia tavo patvirtinimo}}",
@@ -3396,7 +3407,7 @@
       "zeroCta": "Peržiūros eilė"
     },
     "draft": {
-      "title": "Draftas — projektai ir komandos"
+      "title": "Ruošiama — projektai ir komandos"
     }
   },
   "projectOps": {
@@ -3525,6 +3536,21 @@
     },
     "stadium": {
       "eyebrow": "Stadionas",
+      "location": {
+        "title": "Vieta",
+        "place": "{place}",
+        "statusMissing": "Vieta dar nenurodyta. Pridėkite miestą ar šalį, kad projektas turėtų vietos kontekstą.",
+        "statusTextOnly": "Vieta nurodyta tekstu, žemėlapio taškas dar nepatvirtintas.",
+        "statusUnverified": "Koordinatės dar nepatvirtintos — žemėlapio taškas nerodomas.",
+        "statusVerified": "Vieta patvirtinta žemėlapyje.",
+        "noMarkerNote": "Taškas žemėlapyje atsiras tik su patvirtintomis koordinatėmis — jokių spėjamų žymeklių."
+      },
+      "communication": {
+        "title": "Komunikacija",
+        "context": "Pokalbis yra dėl šio projekto.",
+        "cta": "Pokalbis dėl projekto",
+        "notReadyNote": "Atskira projekto pokalbių gija dar ruošiama. Kol kas pokalbį pradėkite bendroje komunikacijoje — kontekstas (projektas) nurodytas viršuje."
+      },
       "fieldCount": "{n, plural, one {# žmogus aikštėje} few {# žmonės aikštėje} other {# žmonių aikštėje}}",
       "todayCount": "{n, plural, one {# šiandienos žurnalo įrašas — diena juda} few {# šiandienos žurnalo įrašai — diena juda} other {# šiandienos žurnalo įrašų — diena juda}}",
       "todayZero": "Šiandien įrašų dar nėra — diena dar laukia pirmo įrašo.",
@@ -3538,7 +3564,7 @@
       "emptyTeamCta": "Pradėti draftą",
       "positionsTitle": "Trūkstamos pozicijos",
       "positionsEmpty": "Pozicijų poreikių modulis dar ruošiamas — kai jis atsiras, čia matysi, kokių žmonių trūksta.",
-      "openOps": "Atidaryti valdymo areną"
+      "openOps": "Atidaryti projekto valdymą"
     }
   },
   "setupRoleChoice": {
@@ -3655,7 +3681,7 @@
     },
     "adminSupport": {
       "title": "Pagalbos pokalbiai",
-      "subtitle": "Testuotojų pradėti pagalbos pokalbiai. Read-only sąrašas — administratorius gali prisijungti prie pokalbio detalės puslapyje.",
+      "subtitle": "Testuotojų pradėti pagalbos pokalbiai. Sąrašas tik peržiūrai — administratorius gali prisijungti prie pokalbio detalės puslapyje.",
       "empty": "Pagalbos pokalbių dar nėra.",
       "loadError": "Nepavyko užkrauti pokalbių: {msg}",
       "unnamed": "(be temos)",
@@ -3863,7 +3889,7 @@
     "privacyNote": "Saugoma: maršrutas, kalba, pažymėtas tekstas, jūsų pastaba ir (jei prisijungę) jūsų vartotojo ID. Be administratoriaus niekas šių pranešimų nemato.",
     "admin": {
       "title": "Kalbos pranešimai (testavimas)",
-      "subtitle": "Testuotojų pažymėti painūs / klaidingi LT/EN tekstai. Sąrašas read-only — statuso keitimas bus pridėtas vėliau.",
+      "subtitle": "Testuotojų pažymėti painūs / klaidingi LT/EN tekstai. Sąrašas tik peržiūrai — statuso keitimas bus pridėtas vėliau.",
       "empty": "Pranešimų dar nėra.",
       "loadError": "Nepavyko užkrauti pranešimų: {msg}",
       "anonymous": "neprisij.",

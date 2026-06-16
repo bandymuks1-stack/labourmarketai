@@ -19,7 +19,7 @@ export async function ConfirmPulse() {
 
   return (
     <section
-      className="card-border glow-hover flex flex-wrap items-center gap-4 p-5"
+      className="card-border glow-hover flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 p-5"
       data-testid="arena-confirm-pulse"
     >
       {pending > 0 ? (
@@ -42,7 +42,7 @@ export async function ConfirmPulse() {
           <Link
             href={"/dashboard/inbox/quick" as "/dashboard"}
             data-testid="confirm-pulse-cta"
-            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-3 text-sm font-semibold text-ink-900 transition-transform duration-fast ease-out hover:-translate-y-0.5"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-3 text-sm font-semibold text-ink-900 transition-transform duration-fast ease-out hover:-translate-y-0.5 sm:w-auto sm:justify-start"
           >
             {t("cta")} →
           </Link>
@@ -56,7 +56,7 @@ export async function ConfirmPulse() {
           <Link
             href={"/dashboard/inbox/quick" as "/dashboard"}
             data-testid="confirm-pulse-cta"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors duration-fast hover:bg-ink-700"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-md border border-ink-500 px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors duration-fast hover:bg-ink-700 sm:w-auto sm:justify-start"
           >
             {t("zeroCta")} →
           </Link>

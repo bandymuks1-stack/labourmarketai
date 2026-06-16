@@ -311,11 +311,14 @@ export default async function ProfilePage({
   return (
     <div className="flex flex-col gap-8">
       <header>
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("pageTitle")}
           </h1>
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {/* systemic-ux-mobile-v1: action cluster never clips on 360px — it
+              stacks to a 2-column grid on mobile (max 2 actions across) and
+              flows inline only from sm+. */}
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:items-center [&>a]:text-center sm:[&>a]:text-left">
             {workerId ? (
               <Link
                 href={"/dashboard/opportunities" as "/dashboard"}

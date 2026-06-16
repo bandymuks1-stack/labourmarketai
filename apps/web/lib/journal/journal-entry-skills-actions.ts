@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
+import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 
 /**
  * Server action for Journal Entry ↔ Skill links v1.
@@ -103,4 +104,93 @@ export async function setJournalEntrySkillLinks(
   revalidatePath("/[locale]/dashboard/journal", "page");
   revalidatePath("/[locale]/dashboard/profile", "page");
   return { ok: true, linked: unique.length };
+}
+
+/**
+ * systemic-ux-skills-v1 — Recognition → evidence, on save.
+ *
+ * Runs the deterministic skill recognition over a saved entry's notes and
+ * links the recognised skills that the worker ALREADY declared. This is what
+ * makes "a new journal entry creates skill evidence" true: before this, the
+ * `journal_entry_skills` link table had no caller, so no entry ever produced
+ * journal-supported evidence.
+ *
+ * Strictly honest + additive:
+ *   • only links skills the worker has already declared (`worker_skills`) — it
+ *     never invents a skill or links one the worker has not claimed;
+ *   • evidence-support only — never sets `verified` / manager-confirmed;
+ *   • additive upsert (ignore duplicates) — never wipes manual links;
+ *   • best-effort — a failure never blocks or fails the journal save.
+ *
+ * No DB migration: `journal_entry_skills` already exists (20260602120000).
+ */
+export async function autoLinkRecognizedJournalSkills(
+  entryId: string,
+  notes: string,
+): Promise<{ ok: true; linked: number } | { ok: false }> {
+  try {
+    const recognized = recognizeSkills(notes, 8);
+    if (recognized.length === 0) return { ok: true, linked: 0 };
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false };
+
+    const { data: worker } = await supabase
+      .from("workers")
+      .select("id")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    if (!worker?.id) return { ok: false };
+
+    // Entry must be the caller's own (RLS re-enforces this on write anyway).
+    const { data: entry } = await supabase
+      .from("journal_entries")
+      .select("id, worker_id")
+      .eq("id", entryId)
+      .maybeSingle();
+    if (!entry || entry.worker_id !== worker.id) return { ok: false };
+
+    // Resolve recognised slugs → skill ids.
+    const slugs = [...new Set(recognized.map((r) => r.slug))];
+    const { data: skillRows } = await supabase
+      .from("skills")
+      .select("id, slug")
+      .in("slug", slugs);
+    const skillIds = (skillRows ?? []).map((r) => r.id);
+    if (skillIds.length === 0) return { ok: true, linked: 0 };
+
+    // Keep only skills the worker has actually declared — never invent one.
+    const { data: owned } = await supabase
+      .from("worker_skills")
+      .select("skill_id")
+      .eq("worker_id", worker.id)
+      .in("skill_id", skillIds);
+    const ownedIds = (owned ?? []).map((r) => r.skill_id);
+    if (ownedIds.length === 0) return { ok: true, linked: 0 };
+
+    // Additive insert; the (journal_entry_id, skill_id) unique constraint makes
+    // re-saves idempotent. ignoreDuplicates keeps any manual links intact.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const linkTable = () => (supabase as any).from("journal_entry_skills");
+    const rows = ownedIds.map((skill_id) => ({
+      journal_entry_id: entryId,
+      worker_id: worker.id,
+      skill_id,
+    }));
+    const ins = await linkTable().upsert(rows, {
+      onConflict: "journal_entry_id,skill_id",
+      ignoreDuplicates: true,
+    });
+    if (ins.error) return { ok: false };
+
+    await applyWorkerSkillSourceReconcile(supabase, worker.id);
+    revalidatePath("/[locale]/dashboard/journal", "page");
+    revalidatePath("/[locale]/dashboard/profile", "page");
+    return { ok: true, linked: ownedIds.length };
+  } catch {
+    return { ok: false };
+  }
 }
