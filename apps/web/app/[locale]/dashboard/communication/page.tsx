@@ -82,6 +82,9 @@ export default async function CommunicationListPage({
       <FeatureNote testId="feature-note-communication">
         {(await getTranslations("featureNotes"))("communicationInbox")}
       </FeatureNote>
+      <FeatureNote testId="feature-note-feedback-loop">
+        {(await getTranslations("featureNotes"))("feedbackLoop")}
+      </FeatureNote>
 
       {/* "Reikia jūsų dėmesio" — real new work instructions surfaced here so an
           urgent instruction is not hidden on a separate page. Renders nothing
