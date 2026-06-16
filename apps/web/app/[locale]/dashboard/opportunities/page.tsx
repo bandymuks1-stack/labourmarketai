@@ -71,6 +71,13 @@ export default async function OpportunitiesPage({
       <FeatureNote testId="feature-note-opportunities">
         {(await getTranslations("featureNotes"))("opportunities")}
       </FeatureNote>
+      <Link
+        href={`/${locale}/dashboard/market-map`}
+        data-testid="opportunities-market-map-link"
+        className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-cyan"
+      >
+        {t("marketMapLink")} →
+      </Link>
 
       {result.kind === "no-worker" ? (
         <section className="rounded-lg border border-dashed border-ink-500 px-4 py-6">

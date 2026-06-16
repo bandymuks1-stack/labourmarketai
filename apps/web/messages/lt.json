@@ -38,7 +38,8 @@
         "findWork": { "title": "Ieškoti darbo", "desc": "Peržiūrėkite darbo galimybes įvairiuose sektoriuose." },
         "readiness": { "title": "Pasirengimas", "desc": "Tvarkykite dokumentus ir darbo statusą." },
         "playerCard": { "title": "Mano kortelė", "desc": "Jūsų pasiruošimo ir įgūdžių kortelė." },
-        "communication": { "title": "Komunikacija", "desc": "Pokalbiai ir žinutės." }
+        "communication": { "title": "Komunikacija", "desc": "Pokalbiai ir žinutės." },
+        "marketMap": { "title": "Rinkos žemėlapis", "desc": "Matykite rinkos signalus: poreikius, pasirengimą, dokumentų trūkumus ir rizikas. Jei duomenys dar preview, jie pažymimi kaip preview." }
       }
     },
     "company": {
@@ -50,7 +51,8 @@
         "buy": { "title": "Pirkti paslaugas", "desc": "Kurkite ir sekite užklausas." },
         "offer": { "title": "Siūlyti darbuotojus / komandas", "desc": "Pristatykite kandidatus ar komandas kaip partneris." },
         "projects": { "title": "Valdyti projektus", "desc": "Vykdykite projektus ir operacijas." },
-        "communication": { "title": "Komunikacija", "desc": "Pokalbiai su žmonėmis ir dėl projektų." }
+        "communication": { "title": "Komunikacija", "desc": "Pokalbiai su žmonėmis ir dėl projektų." },
+        "marketMap": { "title": "Rinkos žemėlapis", "desc": "Matykite rinkos signalus: poreikius, pasirengimą, dokumentų trūkumus ir rizikas. Jei duomenys dar preview, jie pažymimi kaip preview." }
       },
       "empty": {
         "cta": "Sukurti įmonę",
@@ -4750,6 +4752,7 @@
     "noWorkerBody": "Pirmiausia užbaikite darbuotojo profilį, kad matytumėte jums tinkančias galimybes.",
     "readinessTitle": "Jūsų pasirengimas",
       "matchTitle": "Atitikimo apžvalga",
+    "marketMapLink": "Rinkos žemėlapis",
       "matchDim": {
         "workType": "Darbo kryptis",
         "skills": "Įgūdžiai",

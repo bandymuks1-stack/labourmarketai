@@ -38,7 +38,8 @@
         "findWork": { "title": "Find work", "desc": "See work opportunities across sectors." },
         "readiness": { "title": "Readiness", "desc": "Manage your documents and work status." },
         "playerCard": { "title": "My card", "desc": "Your readiness and skills card." },
-        "communication": { "title": "Communication", "desc": "Conversations and messages." }
+        "communication": { "title": "Communication", "desc": "Conversations and messages." },
+        "marketMap": { "title": "Market map", "desc": "See market signals: demand, readiness, document gaps and risks. If data is still preview, it is marked as preview." }
       }
     },
     "company": {
@@ -50,7 +51,8 @@
         "buy": { "title": "Buy services", "desc": "Create and track requests." },
         "offer": { "title": "Offer workers / teams", "desc": "Present candidates or teams as a partner." },
         "projects": { "title": "Manage projects", "desc": "Run your projects and operations." },
-        "communication": { "title": "Communication", "desc": "Conversations with people and about projects." }
+        "communication": { "title": "Communication", "desc": "Conversations with people and about projects." },
+        "marketMap": { "title": "Market map", "desc": "See market signals: demand, readiness, document gaps and risks. If data is still preview, it is marked as preview." }
       },
       "empty": {
         "cta": "Create a company",
@@ -4750,6 +4752,7 @@
     "noWorkerBody": "Finish your worker profile first to see opportunities that fit you.",
     "readinessTitle": "Your readiness",
       "matchTitle": "Match breakdown",
+    "marketMapLink": "Market map",
       "matchDim": {
         "workType": "Work direction",
         "skills": "Skills",
