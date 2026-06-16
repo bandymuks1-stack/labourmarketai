@@ -123,6 +123,25 @@
       }
     }
   },
+  "searchRoom": {
+    "backToActions": "Action center",
+    "title": "Worker search",
+    "subtitle": "How to reach workers for your need — through real, structured paths, with no invented results.",
+    "reason": "There is no free-text people search yet: building one before there is consented, verified worker supply would mean showing fake results. Below is the real path that works today.",
+    "paths": {
+      "scouting": {
+        "title": "Search by need",
+        "body": "Pick your structured need — the match engine surfaces suitable candidates with the basis and the gaps. No invented scores.",
+        "cta": "Open search by need"
+      },
+      "need": {
+        "title": "Post a need",
+        "body": "No structured need yet? Describe what you need — it gets structured and made ready for search.",
+        "cta": "Post a need"
+      }
+    },
+    "matchingNote": "Matching is based on the fields of your need and worker profiles — no invented rankings and no fake verification. Contacts stay hidden until both sides agree."
+  },
   "marketMap": {
     "backToActions": "Action center",
     "title": "Live labour-market map",
@@ -130,10 +149,11 @@
     "foundationNotice": "No fake points — the map fills only with real data, once each source has a location field.",
     "preparing": "preparing",
     "filtersTitle": "Filters",
+    "scopeTitle": "Signal scope",
     "filterCountry": "Country",
     "filterSector": "Sector",
     "filterAll": "all",
-    "canvasEmptyTitle": "Map canvas is being prepared",
+    "canvasEmptyTitle": "Signal map — empty for now",
     "canvasEmptyBody": "When real data carries a location, it appears here — never before. No fake markers.",
     "legendTitle": "Status",
     "legend": {
@@ -141,8 +161,8 @@
       "needsDocs": "Documents / readiness missing",
       "noData": "No data yet"
     },
-    "layersTitle": "Planned layers",
-    "layerPlanned": "planned",
+    "layersTitle": "Signal layers",
+    "layerPlanned": "no data yet",
     "layerSchemaPrepared": "schema prepared",
     "layerSignalOnly": "signal only",
     "demandSchemaNote": "Company demand locations are prepared as a human-gated RED schema plan; points appear only after the migration is approved and applied and real locations exist.",
@@ -190,7 +210,7 @@
       "workerCountry": "Add or refine your preferred country",
       "companyNeed": "Submit a company need",
       "project": "Create a project",
-      "accommodationNote": "Marking accommodation locations is a planned future data layer — not added with fake points."
+      "accommodationNote": "Accommodation locations are not a separate data layer yet — and will never be filled with fake points."
     }
   },
   "demandLocationCapture": {
@@ -1711,7 +1731,7 @@
     "importAddManually": "Add your skills manually or through journal entries.",
     "importNotSaved": "Selected: {file}. The file isn't uploaded or stored yet.",
     "customPrompt": "Can't find your skill?",
-    "customComingSoon": "coming soon",
+    "customComingSoon": "free entry not active yet",
     "textFirst": {
       "title": "Tell us what you do",
       "helper": "Write in your own words or upload a CV. We'll suggest skills, work directions, roles and CV entries — but you select every suggestion. Nothing is saved without your selection.",
@@ -2698,26 +2718,26 @@
       },
       "empty": {
         "worker": {
-          "offer": "Empty. Skills, work history and proofs management ships in M2.",
-          "seek": "Empty. Job preferences and availability settings ship in M2.",
-          "proofs": "Empty. Evidence-backed skills and the work journal ship in M2."
+          "offer": "Empty. Skills, work history and proofs management will be enabled later.",
+          "seek": "Empty. Job preferences and availability settings will be enabled later.",
+          "proofs": "Empty. Evidence-backed skills and the work journal will be enabled later."
         },
         "company": {
-          "offer": "Empty. Open positions and projects management ships in M2.",
-          "seek": "Empty. Posting workforce needs ships in M2.",
-          "proofs": "Empty. Company fit signals and project history ship in M2."
+          "offer": "Empty. Open positions and projects management will be enabled later.",
+          "seek": "Empty. Posting workforce needs will be enabled later.",
+          "proofs": "Empty. Company fit signals and project history will be enabled later."
         },
         "agency": {
-          "offer": "Empty. Candidate pool and service offerings ship in M2.",
-          "seek": "Empty. Client needs and demand signals ship in M2.",
-          "proofs": "Empty. Track record and client testimonials ship in M2/M3."
+          "offer": "Empty. Candidate pool and service offerings will be enabled later.",
+          "seek": "Empty. Client needs and demand signals will be enabled later.",
+          "proofs": "Empty. Track record and client testimonials will be enabled later."
         },
         "customer": {
-          "seek": "Empty. Service ordering and search ships in M3.",
-          "proofs": "Empty. Order history and reviews given ship in M3."
+          "seek": "Empty. Service ordering and search will be enabled later.",
+          "proofs": "Empty. Order history and reviews given will be enabled later."
         },
-        "discover": "Discover feed — expected in M3.",
-        "search": "Detailed search — expected in M2.",
+        "discover": "The discovery feed will be enabled later.",
+        "search": "Detailed search will be enabled later.",
         "account_intro": "Manage your email and roles."
       },
       "customer": {
@@ -3335,7 +3355,7 @@
     ]
   },
   "legal": {
-    "draftNote": "This document is a draft. The final, binding text will be reviewed by legal counsel before public launch (M5).",
+    "draftNote": "This document is a draft. The final, binding text will be reviewed by legal counsel before public launch.",
       "marketplaceRules": {
         "title": "Marketplace rules",
         "intro": "These rules keep the marketplace safe and fair. They apply to all users and offers.",

@@ -136,7 +136,7 @@ export async function MarketMapShell() {
         data-testid="market-map-filters"
       >
         <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-          {t("filtersTitle")} · {t("preparing")}
+          {t("scopeTitle")}
         </p>
         <div className="flex flex-wrap gap-2">
           <span className="rounded-full border border-border-subtle bg-surface-1 px-3 py-1 text-xs text-text-secondary">
