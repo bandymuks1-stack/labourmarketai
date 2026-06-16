@@ -167,6 +167,20 @@
       "nextActions": { "label": "Next-action signals", "desc": "Where you can act now — based on real gaps." }
     },
     "nextActionsTitle": "What you can do now",
+      "atlas": {
+        "title": "Market atlas",
+        "intro": "The map layers come from the work-market atlas: {categories} of {blocks} blocks can appear on the map. Every layer is signal-only.",
+        "signalOnlyNote": "A map point appears only with verified coordinates — no fake markers, no personal address.",
+        "kind": {
+          "demand": "Demand",
+          "worker_signal": "Worker signals",
+          "offer": "Offers",
+          "accommodation": "Accommodation",
+          "brigade": "Brigades",
+          "readiness_warning": "Readiness gaps",
+          "rate": "Rates / prices"
+        }
+      },
     "nextActions": {
       "workerCountry": "Add or refine your preferred country",
       "companyNeed": "Submit a company need",

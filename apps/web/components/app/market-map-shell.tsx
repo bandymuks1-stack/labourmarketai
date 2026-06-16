@@ -18,6 +18,11 @@ import { SECTORS } from "@/lib/structuring/sectors";
 import { getOwnDemandLocationSummary, getOwnDemandSignalBoard } from "@/lib/demand/demand-location";
 import { demandLayerStatus } from "@/lib/market-map/demand-locations";
 import { MarketMapSignalLayer } from "@/components/app/market-map-signal-layer";
+import {
+  MAP_LAYER_KINDS,
+  mapEligibleCategories,
+  ATLAS_BLOCK_COUNT,
+} from "@/lib/work-market/atlas";
 
 /**
  * Live market map — FOUNDATION shell (v1). NO fake markers, NO seeded geo
@@ -255,6 +260,37 @@ export async function MarketMapShell() {
           </section>
         </aside>
       </div>
+
+      {/* Work Market Atlas binding — the map's layer taxonomy comes from the
+          atlas (PR 5). Every layer is SIGNAL-ONLY: a point appears only with
+          verified coordinates, so nothing here plots a marker. */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="market-map-atlas-layers"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            {t("atlas.title")}
+          </h2>
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {t("atlas.intro", { categories: mapEligibleCategories().length, blocks: ATLAS_BLOCK_COUNT })}
+          </p>
+        </div>
+        <ul className="flex flex-wrap gap-2" data-testid="market-map-atlas-kinds">
+          {MAP_LAYER_KINDS.map((kind) => (
+            <li
+              key={kind}
+              className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-[11px] text-text-secondary"
+              data-layer-kind={kind}
+            >
+              {t(`atlas.kind.${kind}`)}
+            </li>
+          ))}
+        </ul>
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {t("atlas.signalOnlyNote")}
+        </p>
+      </section>
 
       {/* Next action panel */}
       <section
