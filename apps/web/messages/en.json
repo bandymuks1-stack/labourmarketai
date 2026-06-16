@@ -36,7 +36,9 @@
       "actions": {
         "profile": { "title": "Profile & CV", "desc": "Build your profile, skills and CV." },
         "findWork": { "title": "Find work", "desc": "See work opportunities across sectors." },
-        "readiness": { "title": "Readiness", "desc": "Manage your documents and work status." }
+        "readiness": { "title": "Readiness", "desc": "Manage your documents and work status." },
+        "playerCard": { "title": "My card", "desc": "Your readiness and skills card." },
+        "communication": { "title": "Communication", "desc": "Conversations and messages." }
       }
     },
     "company": {
@@ -47,7 +49,8 @@
         "hire": { "title": "Hire", "desc": "Browse candidates and shortlists." },
         "buy": { "title": "Buy services", "desc": "Create and track requests." },
         "offer": { "title": "Offer workers / teams", "desc": "Present candidates or teams as a partner." },
-        "projects": { "title": "Manage projects", "desc": "Run your projects and operations." }
+        "projects": { "title": "Manage projects", "desc": "Run your projects and operations." },
+        "communication": { "title": "Communication", "desc": "Conversations with people and about projects." }
       },
       "empty": {
         "cta": "Create a company",
