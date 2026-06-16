@@ -1,7 +1,12 @@
+-- @human-gate-approved — owner approved this exact migration on 2026-06-16 and it
+-- is already applied to prod (Supabase MCP apply_migration). RED class is real
+-- (SECURITY DEFINER + grants); the human gate is satisfied. This annotation only
+-- acknowledges the RED findings for CI; it does not loosen anything.
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after owner + Chat Claude
--- review (S6 / feat/cc/s6-marketplace-fit). Never `db push`.
+-- APPLIED 2026-06-16 via Supabase MCP apply_migration (owner-approved, version
+-- s6_worker_docs_consent). Additive + reversible, no RLS widened. Verified:
+-- workers.docs_aggregate_consent exists; set_docs_aggregate_consent +
+-- agency_pool_docs_readiness exist; granted to authenticated, NOT to anon.
 --
 -- S6 — worker documents-readiness CONSENT switch (the S5 leftover):
 -- a worker-level toggle that lets THEIR agency see document-readiness

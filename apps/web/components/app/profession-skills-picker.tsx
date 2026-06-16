@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { CvImportUpload } from "@/components/app/cv-import-upload";
 import { Link } from "@/lib/i18n/navigation";
 import { SAVE_TIMEOUT_MS } from "@/lib/async/with-timeout";
 import { cn } from "@/lib/utils";
@@ -215,14 +214,6 @@ export function ProfessionSkillsPicker({
         )}
       </div>
 
-      {/* M2 scaffolds — clearly not active yet (doctrine: M1 curated only) */}
-      <CvImportUpload />
-      <p className="text-xs text-text-muted">
-        {t("customPrompt")}{" "}
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-          ({t("customComingSoon")})
-        </span>
-      </p>
     </div>
   );
 }

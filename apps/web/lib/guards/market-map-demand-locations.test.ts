@@ -214,7 +214,12 @@ describe("demand-locations copy — present in every active locale", () => {
       expect(str(m, "marketMap.demandSchemaNote"), `${locale} demandSchemaNote`).toBeTruthy();
     });
   }
-  it("lt schema note frames it as a RED schema plan, not a live point", () => {
-    expect(str(loadMessages("lt"), "marketMap.demandSchemaNote")).toMatch(/RED schemos planas/i);
+  it("lt schema note frames demand as signal-only, not a live point (migration now applied)", () => {
+    // company_demand_locations is applied (2026-06-16); the note no longer
+    // references a RED/unapplied migration — it honestly frames demand as
+    // signals, with exact points only once locations are confirmed.
+    const note = str(loadMessages("lt"), "marketMap.demandSchemaNote");
+    expect(note).toMatch(/signal/i);
+    expect(note).not.toMatch(/RED|migracij/i);
   });
 });

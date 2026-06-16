@@ -10,6 +10,7 @@ import {
   Wrench,
   FolderKanban,
   ClipboardList,
+  CalendarCheck,
   User,
   LogOut,
   type LucideIcon,
@@ -51,6 +52,10 @@ export function AccountMenu() {
       ? [{ href: "/dashboard/projects", label: t("menuLinks.projects"), icon: FolderKanban, testid: "account-menu-projects-link" }]
       : []),
     { href: "/dashboard/instructions", label: t("menuLinks.instructions"), icon: ClipboardList, testid: "account-menu-instructions-link" },
+    // Bookings (backend live: booking_requests). Worker reaches incoming
+    // proposals; manager tracks the ones they sent. Without this link a worker
+    // had no way to find a booking proposed to them.
+    { href: "/dashboard/bookings", label: t("menuLinks.bookings"), icon: CalendarCheck, testid: "account-menu-bookings-link" },
   ];
 
   useEffect(() => {

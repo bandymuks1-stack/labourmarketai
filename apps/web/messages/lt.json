@@ -165,7 +165,7 @@
     "layerPlanned": "nėra duomenų",
     "layerSchemaPrepared": "schema parengta",
     "layerSignalOnly": "tik signalas",
-    "demandSchemaNote": "Įmonių poreikių vietos paruoštos kaip žmogaus tvirtinamas RED schemos planas; taškai bus rodomi tik po patvirtintos ir pritaikytos migracijos bei realių vietų.",
+    "demandSchemaNote": "Įmonių poreikių vietos kaupiamos kaip signalai; tikslūs taškai bus rodomi tik turint patvirtintas vietas.",
     "demandSignalNote": "{count} jūsų poreikių vietų užfiksuota kaip signalai — dar jokių taškų žemėlapyje, nes koordinatės nepatvirtintos.",
     "signalLayer": {
       "title": "Poreikių signalai ({count})",
@@ -647,11 +647,11 @@
         "submitRequest": "Prašyti rankinės peržiūros (neprivaloma)",
         "statusDraftSaved": "Įmonė išsaugota — ji aktyvi ir naudojama dabar.",
         "statusSubmitted": "Rankinė peržiūra paprašyta (neprivaloma). Įmonė tuo metu lieka naudojama.",
-        "statusNeedsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
+        "statusNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "statusInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
-        "migrationBlockerHeading": "Funkcija dar nepasiekiama",
-        "migrationBlockerBody": "Forma matoma, bet kol kas nepateikiama. Reikia pritaikyti DB migraciją (20260604120000). Pabandykite vėliau.",
+        "migrationBlockerHeading": "Nepavyko",
+        "migrationBlockerBody": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "verificationStatus": {
           "draft": "Juodraštis",
           "active_unverified": "Aktyvi · nepatvirtinta",
@@ -670,11 +670,11 @@
         }
       },
       "workersBlocker": {
-        "title": "Įmonės darbuotojų sąsaja — laukia migracijos",
+        "title": "Nepavyko",
         "subtitle": "Įmonės kelias laikinai blokuotas DB lygmenyje. Realus darbuotojų pridėjimas / pakvietimas jau veikia agentūros pusėje.",
-        "statusLabel": "Funkcija dar nepasiekiama",
+        "statusLabel": "Nepavyko",
         "statusBody": "Įmonės darbuotojų valdymas dar ruošiamas ir bus įjungtas vėliau.",
-        "nextStep": "Iki tol naudokitės agentūros sąsaja arba palaukite, kol bus paleista 0026 migracija. Savaiminis užsiregistravimas darbuotojams lieka atviras visada."
+        "nextStep": "Savaiminis užsiregistravimas darbuotojams lieka atviras visada."
       },
       "workers": {
         "title": "Įmonės darbuotojai",
@@ -721,7 +721,7 @@
             "outcomeInvalidRole": "Netinkama rolė.",
             "outcomeReviewNotAllowed": "Peržiūros kol kas negalima įjungti.",
             "outcomeError": "Nepavyko išsaugoti.",
-            "outcomeNeedsMigration": "Funkcija dar neparuošta.",
+            "outcomeNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
             "bridgeReasons": {
               "connected": "Peržiūra įjungta ir sujungta su darbo žurnalo kontekstu.",
               "review_not_enabled": "Paruošta peržiūros nustatymui.",
@@ -744,7 +744,7 @@
               "outcomeRoleNotAllowed": "Peržiūros sujungimas galimas tik įmonės arba agentūros administratoriaus ryšiams.",
               "outcomeOrganizationMissing": "Jūsų organizacijos įrašas dar neparuoštas.",
               "outcomeError": "Nepavyko sujungti. Bandykite dar kartą.",
-              "outcomeNeedsMigration": "Funkcija dar neparuošta."
+              "outcomeNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą."
             },
             "review": {
               "toggleLabel": "Darbo žurnalo peržiūra",
@@ -765,7 +765,7 @@
               "outcomeOrganizationMissing": "Jūsų organizacijos įrašas dar neparuoštas.",
               "outcomeEngagementMissing": "Prieš įjungdami peržiūrą sujunkite darbo žurnalo kontekstą.",
               "outcomeError": "Nepavyko atnaujinti peržiūros. Bandykite dar kartą.",
-              "outcomeNeedsMigration": "Funkcija dar neparuošta."
+              "outcomeNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą."
             }
           }
         },
@@ -786,8 +786,8 @@
         "statusInvalidEmail": "Neteisingas el. pašto adresas.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
         "statusNoCompany": "Pirmiausia užbaikite įmonės nustatymą per /dashboard/start/company.",
-        "migrationBlockerHeading": "Reikia migracijos 0027_company_workers",
-        "migrationBlockerBody": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
+        "migrationBlockerHeading": "Nepavyko",
+        "migrationBlockerBody": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
         "columnInvitedAt": "Data"
@@ -906,7 +906,7 @@
             "outcomeInvalidRole": "Netinkama rolė.",
             "outcomeReviewNotAllowed": "Peržiūros kol kas negalima įjungti.",
             "outcomeError": "Nepavyko išsaugoti.",
-            "outcomeNeedsMigration": "Funkcija dar neparuošta.",
+            "outcomeNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
             "bridgeReasons": {
               "connected": "Peržiūra įjungta ir sujungta su darbo žurnalo kontekstu.",
               "review_not_enabled": "Paruošta peržiūros nustatymui.",
@@ -929,7 +929,7 @@
               "outcomeRoleNotAllowed": "Peržiūros sujungimas galimas tik įmonės arba agentūros administratoriaus ryšiams.",
               "outcomeOrganizationMissing": "Jūsų organizacijos įrašas dar neparuoštas.",
               "outcomeError": "Nepavyko sujungti. Bandykite dar kartą.",
-              "outcomeNeedsMigration": "Funkcija dar neparuošta."
+              "outcomeNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą."
             },
             "review": {
               "toggleLabel": "Darbo žurnalo peržiūra",
@@ -950,7 +950,7 @@
               "outcomeOrganizationMissing": "Jūsų organizacijos įrašas dar neparuoštas.",
               "outcomeEngagementMissing": "Prieš įjungdami peržiūrą sujunkite darbo žurnalo kontekstą.",
               "outcomeError": "Nepavyko atnaujinti peržiūros. Bandykite dar kartą.",
-              "outcomeNeedsMigration": "Funkcija dar neparuošta."
+              "outcomeNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą."
             }
           }
         },
@@ -971,8 +971,8 @@
         "statusInvalidEmail": "Neteisingas el. pašto adresas.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
         "statusNoAgency": "Norėdami pakviesti darbuotoją per agentūrą, pirmiausia užbaikite agentūros nustatymą.",
-        "migrationBlockerHeading": "Reikia migracijos 0025_agency_worker_invitations",
-        "migrationBlockerBody": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
+        "migrationBlockerHeading": "Nepavyko",
+        "migrationBlockerBody": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
         "columnInvitedAt": "Data"
@@ -1051,11 +1051,11 @@
         "manualReviewNoteHelp": "Neprivaloma. Operatoriaus / administratoriaus akimis matoma pastaba.",
         "submit": "Išsaugoti pirkėjo profilį",
         "statusSaved": "Pirkėjo profilis išsaugotas tikrai. Atidarykite puslapį iš naujo — duomenys lieka.",
-        "statusNeedsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
+        "statusNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "statusInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
-        "migrationBlockerHeading": "Funkcija dar nepasiekiama",
-        "migrationBlockerBody": "Forma matoma, bet kol kas nepateikiama. Pabandykite vėliau.",
+        "migrationBlockerHeading": "Nepavyko",
+        "migrationBlockerBody": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "reviewStatus": "Peržiūros būsena"
       },
       "requests": {
@@ -1094,25 +1094,25 @@
         "statusHelp": "Pasirinkimas tarp juodraščio ir pateikimo. Toliau būsenas keičia tik administratorius (in_review / approved / closed).",
         "submit": "Išsaugoti užklausą",
         "resultSaved": "Užklausa išsaugota. Perkrovus puslapį ji liks matoma.",
-        "resultNeedsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
+        "resultNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "resultInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
         "resultError": "Įvyko klaida. Pabandykite dar kartą.",
         "columnTitle": "Pavadinimas",
         "columnStatus": "Būsena",
         "columnUpdated": "Atnaujinta",
-        "migrationBlockerHeading": "Funkcija dar nepasiekiama",
-        "migrationBlockerBody": "Forma matoma, bet kol kas nepateikiama. Pabandykite vėliau.",
+        "migrationBlockerHeading": "Nepavyko",
+        "migrationBlockerBody": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "attachments": {
           "heading": "Pridėti failai",
           "empty": "Dar nėra pridėtų failų. Galite pridėti planą, receptą, graviravimo tekstą, nuotrauką ar specifikaciją.",
-          "migrationBlocker": "Reikia migracijos 0029_customer_request_attachments. Po pritaikymo failų pridėjimas veiks be kodo pakeitimų.",
+          "migrationBlocker": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
           "analysisFallback": "Failas pridėtas. Automatinis nuskaitymas dar neįjungtas — administratorius peržiūrės rankiniu būdu.",
           "addButton": "Pridėti failą",
           "uploadingLabel": "Įkeliama…",
           "successLabel": "Failas pridėtas.",
           "errorTooLarge": "Failas per didelis. Maksimalus dydis — 10 MB.",
           "errorBadType": "Neleistinas failo tipas. Leidžiami: PDF, JPG, PNG, WebP, TXT.",
-          "errorNeedsMigration": "Failo saugykla dar neparuošta. Reikia migracijos 0029_customer_request_attachments ir privačios saugyklos bucket.",
+          "errorNeedsMigration": "Nepavyko įkelti failo. Bandykite dar kartą.",
           "errorGeneric": "Nepavyko įkelti failo. Pabandykite dar kartą.",
           "removeLabel": "Pašalinti",
           "removingLabel": "Šalinama…",
@@ -1391,7 +1391,7 @@
       "subtitle": "Išimčių / eskalavimo peržiūra. Įmonės sukuriamos ir naudojamos automatiškai — tai NĖRA patvirtinimo eilė. Naudokite norėdami patvirtinti paprašius, ištaisyti pažymėtas patikras ar perrašyti įtartiną įmonę. Patvirtinimą rankiniu būdu atlieka žmogus; niekas nepatvirtinama automatiškai.",
       "back": "Grįžti į operacijų skydą",
       "empty": "Šiuo metu administratoriaus dėmesio nereikia. Įmonės naudojamos be administratoriaus veiksmų.",
-      "migrationBlocker": "Ši funkcija dar nepasiekiama — administratoriaus patvirtinimo migracija dar nepritaikyta. Bandykite vėliau.",
+      "migrationBlocker": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
       "pendingCount": "{count, plural, =0 {Nėra užklausų, laukiančių patvirtinimo} one {# užklausa laukia patvirtinimo} few {# užklausos laukia patvirtinimo} other {# užklausų laukia patvirtinimo}}",
       "user": "Vartotojas",
       "fields": {
@@ -1425,7 +1425,7 @@
         "notAdmin": "Veiksmas atmestas: tik administratoriui.",
         "invalid": "Neteisinga užklausa.",
         "notFound": "Įmonė nerasta.",
-        "needsMigration": "Ši funkcija dar nepasiekiama. Bandykite vėliau.",
+        "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "error": "Įvyko klaida. Pabandykite dar kartą."
       }
     },
@@ -2382,7 +2382,7 @@
         "demand": {
           "sending": "Siunčiama...",
           "error": "Nepavyko išsiųsti. Bandykite dar kartą.",
-          "needsMigration": "Ši funkcija laukia duomenų bazės atnaujinimo, todėl poreikio kol kas išsaugoti negalima. Nieko neišsiuntėme. Pabandykite vėliau arba susisiekite su administratoriumi.",
+          "needsMigration": "Nepavyko išsiųsti. Bandykite dar kartą.",
           "progressHelper": "Šie žingsniai rodo eigą. Aktyvūs veiksmai pateikiami žemiau.",
           "form": {
             "progressLabel": "Žingsnių eiga",
@@ -2645,7 +2645,7 @@
           "saving": "Saugoma...",
           "saved": "Išsaugota",
           "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
-          "needsMigration": "Ši funkcija dar ruošiama. Bandykite vėliau."
+          "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą."
         }
       },
       "tabs": {
@@ -2783,6 +2783,7 @@
         "playerCard": "Mano kortelė",
         "projects": "Projektai",
         "instructions": "Nurodymai",
+        "bookings": "Rezervacijos",
         "skills": "Mano įgūdžiai"
       }
     },
@@ -3391,7 +3392,7 @@
     "workerIntro": "Nurodymai iš jūsų vadovo. Originalas visada išsaugotas, o jūs galite paprašyti patikslinti.",
     "managerIntro": "Parašykite nurodymą savo kalba. Darbuotojas jį matys, o originalas išliks išsaugotas.",
     "foundationNote": "Aiškus, daugiakalbis bendravimas projekte — ir saugumo, ir patogumo pagrindas. Lengva rasti, lengva suprasti, originalas išsaugotas.",
-    "needsMigration": "Ši funkcija dar ruošiama. Bandykite vėliau.",
+    "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "attention": {
       "eyebrow": "Kas dabar svarbu",
       "title": "Reikia jūsų dėmesio",
@@ -3438,7 +3439,7 @@
     "title": "Projektai ir priskyrimai",
     "intro": "Sukurkite projektą ir priskirkite jam savo komandos darbuotojus. Vėliau galėsite siųsti projekto lygio nurodymus.",
     "managerOnly": "Šis puslapis skirtas įmonės ar agentūros vadovui.",
-    "needsMigration": "Ši funkcija dar ruošiama. Bandykite vėliau.",
+    "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "error": "Nepavyko. Bandykite dar kartą.",
     "noProjects": "Kol kas neturite projektų. Sukurkite pirmą aukščiau.",
     "assignmentsTitle": "Priskirti darbuotojai",
@@ -3552,7 +3553,7 @@
     "saving": "Saugoma…",
     "saved": "Išsaugota",
     "saveError": "Nepavyko išsaugoti. Bandykite dar kartą.",
-    "needsMigration": "Ši funkcija dar neaktyvi (laukiama duomenų bazės atnaujinimo). Bandykite vėliau.",
+    "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "statuses": {
       "candidate": "Kandidatas",
       "contacted": "Susisiekta",
@@ -3706,7 +3707,7 @@
     "delete": "Ištrinti",
     "saved": "Išsaugota",
     "saveError": "Nepavyko išsaugoti. Bandykite dar kartą.",
-    "needsMigration": "Ši funkcija dar neaktyvi (laukiama duomenų bazės atnaujinimo). Bandykite vėliau.",
+    "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "statuses": {
       "draft": "Juodraštis",
       "contacted": "Susisiekta",
@@ -4184,7 +4185,7 @@
     "listTitle": "Mano kandidatiniai įgūdžiai",
     "empty": "Kol kas nieko nepridėjai.",
     "candidateBadge": "Savideklaruota · tikslinama",
-    "needsMigration": "Ši funkcija dar ruošiama. Bandyk vėliau.",
+    "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "selfDeclaredNote": "Šie įgūdžiai yra savideklaruoti ir nepatvirtinti. Niekas jų automatiškai netikrina.",
     "relatedLabel": "Susiję su",
     "toolsLabel": "Įrankiai / medžiagos",
@@ -4364,7 +4365,7 @@
     "manageLink": "Kvietimai ir koordinavimas",
     "backToAgency": "Į agentūros erdvę",
     "noAgency": "Pirmiausia užbaik agentūros paskyrą — pool priklauso realiai agentūrai.",
-    "needsMigration": "Agentūros ryšių sluoksnis šioje aplinkoje dar neaktyvus.",
+    "needsMigration": "Nepavyko įkelti. Bandykite dar kartą.",
     "loadError": "Nepavyko užkrauti pool. Pabandyk dar kartą.",
     "poolTitle": "Pool — tavo žmonės",
     "empty": "Tavo pool dar tuščias — pakviesk pirmą žmogų, ir kortelės atsiras savaime.",
@@ -4399,7 +4400,7 @@
         "not_agency": "Pirmiausia užbaik agentūros paskyrą.",
         "request_not_found": "Užklausos nebėra.",
         "request_not_open": "Užklausa nebeatvira.",
-        "needs_gate": "Funkcija ruošiama (laukia vartų pakeitimo).",
+        "needs_gate": "Nepavyko įkelti. Bandykite dar kartą.",
         "error": "Nepavyko išsaugoti žymos. Pabandyk dar kartą."
       }
     },
@@ -4423,7 +4424,7 @@
     "noDemands": "Kol kas neturi poreikių. Pirma sukurk poreikį, tada struktūruok reikalingus įgūdžius.",
     "unstructuredTag": "nestruktūruotas",
     "notStructured": "Šis poreikis dar neturi struktūruotų įgūdžių, todėl atitiktis neskaičiuojama. Pirma struktūruok reikalingus įgūdžius.",
-    "needsSetup": "Žvalgyba šioje aplinkoje dar neprieinama.",
+    "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
     "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų.",
     "namePlaceholder": "Darbuotojas",
     "skillFit": "{pct}% — {matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
@@ -4525,7 +4526,7 @@
       "send": "Siųsti pasiūlymą",
       "sending": "Siunčiama…",
       "sent": "Pasiūlymas išsiųstas",
-      "unavailable": "Rezervacija kol kas neprieinama.",
+      "unavailable": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
       "error": "Kažkas nepavyko.",
       "cancel": "Atšaukti",
       "notEntitled": "Tavo planas neapima rezervacijų — pradėk testinį apmokėjimą arba paprašyk piloto prieigos."
@@ -4564,7 +4565,7 @@
     "title": "Rezervacijos",
     "intro": "Pasiūlytos darbo galimybės. Rezervacija patvirtinama tik darbuotojui sutikus.",
     "notAuthed": "Prisijunk, kad matytum savo rezervacijas.",
-    "unavailable": "Rezervacija dar ruošiama ir kol kas neprieinama.",
+    "unavailable": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "noDate": "Pradžios data nenurodyta",
     "startsOn": "Pradžia {date}",
     "incoming": {

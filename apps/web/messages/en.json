@@ -165,7 +165,7 @@
     "layerPlanned": "no data yet",
     "layerSchemaPrepared": "schema prepared",
     "layerSignalOnly": "signal only",
-    "demandSchemaNote": "Company demand locations are prepared as a human-gated RED schema plan; points appear only after the migration is approved and applied and real locations exist.",
+    "demandSchemaNote": "Company demand locations are collected as signals; exact points appear only once locations are confirmed.",
     "demandSignalNote": "{count} of your demand locations captured as signals — no map points yet, because coordinates are not confirmed.",
     "signalLayer": {
       "title": "Demand signals ({count})",
@@ -647,11 +647,11 @@
         "submitRequest": "Request manual review (optional)",
         "statusDraftSaved": "Company saved — it's active and usable now.",
         "statusSubmitted": "Manual review requested (optional). Your company stays usable in the meantime.",
-        "statusNeedsMigration": "This feature is not available yet. Please try later.",
+        "statusNeedsMigration": "Couldn’t complete the action. Please try again.",
         "statusInvalid": "The form is incomplete. Check the required fields.",
         "statusError": "Something went wrong. Please try again.",
-        "migrationBlockerHeading": "Feature not available yet",
-        "migrationBlockerBody": "The form is visible but cannot submit yet. The DB migration (20260604120000) needs to be applied. Please try later.",
+        "migrationBlockerHeading": "Something went wrong",
+        "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
         "verificationStatus": {
           "draft": "Draft",
           "active_unverified": "Active · not verified",
@@ -670,11 +670,11 @@
         }
       },
       "workersBlocker": {
-        "title": "Company workers link — waiting on a migration",
+        "title": "Something went wrong",
         "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",
-        "statusLabel": "Feature not available yet",
+        "statusLabel": "Something went wrong",
         "statusBody": "Company worker management is still being prepared and will be enabled later.",
-        "nextStep": "Until then use the agency surface, or wait for the 0026 migration. Self-entry for workers stays open at all times."
+        "nextStep": "Self-entry for workers stays open at all times."
       },
       "workers": {
         "title": "Company workers",
@@ -721,7 +721,7 @@
             "outcomeInvalidRole": "Invalid role.",
             "outcomeReviewNotAllowed": "Review cannot be enabled yet.",
             "outcomeError": "Could not save.",
-            "outcomeNeedsMigration": "Not ready yet.",
+            "outcomeNeedsMigration": "Couldn’t complete the action. Please try again.",
             "bridgeReasons": {
               "connected": "Review is connected and enabled.",
               "review_not_enabled": "Ready for review setup.",
@@ -744,7 +744,7 @@
               "outcomeRoleNotAllowed": "Only company or agency admin relationships can be connected for review.",
               "outcomeOrganizationMissing": "Your organization record is not ready yet.",
               "outcomeError": "Could not connect. Please try again.",
-              "outcomeNeedsMigration": "Not ready yet."
+              "outcomeNeedsMigration": "Couldn’t complete the action. Please try again."
             },
             "review": {
               "toggleLabel": "Work journal review",
@@ -765,7 +765,7 @@
               "outcomeOrganizationMissing": "Your organization record is not ready yet.",
               "outcomeEngagementMissing": "Connect the work journal context before enabling review.",
               "outcomeError": "Could not update review. Please try again.",
-              "outcomeNeedsMigration": "Not ready yet."
+              "outcomeNeedsMigration": "Couldn’t complete the action. Please try again."
             }
           }
         },
@@ -786,8 +786,8 @@
         "statusInvalidEmail": "Invalid email address.",
         "statusError": "Something went wrong. Please try again.",
         "statusNoCompany": "Finish company setup first at /dashboard/start/company.",
-        "migrationBlockerHeading": "Migration 0027_company_workers required",
-        "migrationBlockerBody": "This feature is not available yet. Please try later.",
+        "migrationBlockerHeading": "Something went wrong",
+        "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date"
@@ -906,7 +906,7 @@
             "outcomeInvalidRole": "Invalid role.",
             "outcomeReviewNotAllowed": "Review cannot be enabled yet.",
             "outcomeError": "Could not save.",
-            "outcomeNeedsMigration": "Not ready yet.",
+            "outcomeNeedsMigration": "Couldn’t complete the action. Please try again.",
             "bridgeReasons": {
               "connected": "Review is connected and enabled.",
               "review_not_enabled": "Ready for review setup.",
@@ -929,7 +929,7 @@
               "outcomeRoleNotAllowed": "Only company or agency admin relationships can be connected for review.",
               "outcomeOrganizationMissing": "Your organization record is not ready yet.",
               "outcomeError": "Could not connect. Please try again.",
-              "outcomeNeedsMigration": "Not ready yet."
+              "outcomeNeedsMigration": "Couldn’t complete the action. Please try again."
             },
             "review": {
               "toggleLabel": "Work journal review",
@@ -950,7 +950,7 @@
               "outcomeOrganizationMissing": "Your organization record is not ready yet.",
               "outcomeEngagementMissing": "Connect the work journal context before enabling review.",
               "outcomeError": "Could not update review. Please try again.",
-              "outcomeNeedsMigration": "Not ready yet."
+              "outcomeNeedsMigration": "Couldn’t complete the action. Please try again."
             }
           }
         },
@@ -971,8 +971,8 @@
         "statusInvalidEmail": "Invalid email address.",
         "statusError": "Something went wrong. Please try again.",
         "statusNoAgency": "To invite a worker through an agency, finish your agency setup first.",
-        "migrationBlockerHeading": "Migration 0025_agency_worker_invitations required",
-        "migrationBlockerBody": "This feature is not available yet. Please try later.",
+        "migrationBlockerHeading": "Something went wrong",
+        "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date"
@@ -1051,11 +1051,11 @@
         "manualReviewNoteHelp": "Optional. Visible to the operator / admin.",
         "submit": "Save buyer profile",
         "statusSaved": "Buyer profile saved for real. Reload the page — the data remains.",
-        "statusNeedsMigration": "This feature is not available yet. Please try later.",
+        "statusNeedsMigration": "Couldn’t complete the action. Please try again.",
         "statusInvalid": "Form incomplete. Check required fields.",
         "statusError": "Something went wrong. Please try again.",
-        "migrationBlockerHeading": "Feature not available yet",
-        "migrationBlockerBody": "The form is visible but cannot be submitted yet. Please try later.",
+        "migrationBlockerHeading": "Something went wrong",
+        "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
         "reviewStatus": "Review status"
       },
       "requests": {
@@ -1094,25 +1094,25 @@
         "statusHelp": "You choose draft vs submit. Further statuses (in_review / approved / closed) are admin-only.",
         "submit": "Save request",
         "resultSaved": "Request saved. It will remain visible after reload.",
-        "resultNeedsMigration": "This feature is not available yet. Please try later.",
+        "resultNeedsMigration": "Couldn’t complete the action. Please try again.",
         "resultInvalid": "Form incomplete. Check required fields.",
         "resultError": "Something went wrong. Please try again.",
         "columnTitle": "Title",
         "columnStatus": "Status",
         "columnUpdated": "Updated",
-        "migrationBlockerHeading": "Feature not available yet",
-        "migrationBlockerBody": "The form is visible but cannot be submitted yet. Please try later.",
+        "migrationBlockerHeading": "Something went wrong",
+        "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
         "attachments": {
           "heading": "Attached files",
           "empty": "No files attached yet. You can attach a plan, recipe, engraving text, photo or specification.",
-          "migrationBlocker": "Migration 0029_customer_request_attachments required. After applying it, attachments work end-to-end with no code change.",
+          "migrationBlocker": "Couldn’t complete the action. Please try again.",
           "analysisFallback": "File attached. Automatic reading is not enabled yet — an administrator will review manually.",
           "addButton": "Attach file",
           "uploadingLabel": "Uploading…",
           "successLabel": "File attached.",
           "errorTooLarge": "File is too large. Maximum size is 10 MB.",
           "errorBadType": "File type not allowed. Allowed: PDF, JPG, PNG, WebP, TXT.",
-          "errorNeedsMigration": "File storage is not ready yet. Migration 0029_customer_request_attachments and the private storage bucket need to be applied.",
+          "errorNeedsMigration": "Couldn’t upload the file. Please try again.",
           "errorGeneric": "Upload failed. Please try again.",
           "removeLabel": "Remove",
           "removingLabel": "Removing…",
@@ -1391,7 +1391,7 @@
       "subtitle": "Exception / escalation review. Companies are created and usable automatically — this is NOT an approval queue. Use it to verify on request, fix flagged checks, or override a suspicious company. Verification is a manual human decision; nothing is verified automatically.",
       "back": "Back to operations panel",
       "empty": "Nothing needs admin attention right now. Companies are usable without admin action.",
-      "migrationBlocker": "This feature is not available yet — the admin verification migration has not been applied. Try later.",
+      "migrationBlocker": "Couldn’t complete the action. Please try again.",
       "pendingCount": "{count, plural, =0 {No requests waiting for verification} one {# request waiting for verification} other {# requests waiting for verification}}",
       "user": "User",
       "fields": {
@@ -1425,7 +1425,7 @@
         "notAdmin": "Action rejected: admin only.",
         "invalid": "Invalid request.",
         "notFound": "Company not found.",
-        "needsMigration": "This feature is not available yet. Try later.",
+        "needsMigration": "Couldn’t complete the action. Please try again.",
         "error": "Something went wrong. Please try again."
       }
     },
@@ -2382,7 +2382,7 @@
         "demand": {
           "sending": "Sending...",
           "error": "Couldn't send. Please try again.",
-          "needsMigration": "This feature is waiting on a database update, so your need can't be saved yet. Nothing was sent. Please try again later or contact an administrator.",
+          "needsMigration": "Couldn’t send. Please try again.",
           "progressHelper": "These steps show progress. Active actions are shown below.",
           "form": {
             "progressLabel": "Step progress",
@@ -2645,7 +2645,7 @@
           "saving": "Saving...",
           "saved": "Saved",
           "error": "Could not save. Please try again.",
-          "needsMigration": "This feature is being prepared. Try later."
+          "needsMigration": "Couldn’t complete the action. Please try again."
         }
       },
       "tabs": {
@@ -2783,6 +2783,7 @@
         "playerCard": "My card",
         "projects": "Projects",
         "instructions": "Instructions",
+        "bookings": "Bookings",
         "skills": "My skills"
       }
     },
@@ -3391,7 +3392,7 @@
     "workerIntro": "Instructions from your manager. The original is always kept, and you can ask for clarification.",
     "managerIntro": "Write an instruction in your own language. The worker will see it, and the original stays preserved.",
     "foundationNote": "Clear, multilingual project communication — a foundation for both safety and convenience. Easy to find, easy to understand, original preserved.",
-    "needsMigration": "This feature is being prepared. Try again later.",
+    "needsMigration": "Couldn’t complete the action. Please try again.",
     "attention": {
       "eyebrow": "What matters now",
       "title": "Needs your attention",
@@ -3438,7 +3439,7 @@
     "title": "Projects and assignments",
     "intro": "Create a project and assign workers from your team to it. You'll be able to send project-level instructions later.",
     "managerOnly": "This page is for a company or agency manager.",
-    "needsMigration": "This feature is being prepared. Try again later.",
+    "needsMigration": "Couldn’t complete the action. Please try again.",
     "error": "Something went wrong. Please try again.",
     "noProjects": "You don't have any projects yet. Create your first one above.",
     "assignmentsTitle": "Assigned workers",
@@ -3552,7 +3553,7 @@
     "saving": "Saving…",
     "saved": "Saved",
     "saveError": "Could not save. Please try again.",
-    "needsMigration": "This feature is not active yet (database update pending). Try again later.",
+    "needsMigration": "Couldn’t complete the action. Please try again.",
     "statuses": {
       "candidate": "Candidate",
       "contacted": "Contacted",
@@ -3706,7 +3707,7 @@
     "delete": "Delete",
     "saved": "Saved",
     "saveError": "Could not save. Please try again.",
-    "needsMigration": "This feature is not active yet (database update pending). Try again later.",
+    "needsMigration": "Couldn’t complete the action. Please try again.",
     "statuses": {
       "draft": "Draft",
       "contacted": "Contacted",
@@ -4003,7 +4004,7 @@
     "outcomeNoInvitation": "Invitation not found.",
     "outcomeNoWorker": "Your worker profile is not ready yet.",
     "outcomeError": "Could not accept. Please try again.",
-    "outcomeNeedsMigration": "Not ready yet."
+    "outcomeNeedsMigration": "Couldn’t complete the action. Please try again."
   },
   "journal": {
     "inbox": {
@@ -4184,7 +4185,7 @@
     "listTitle": "My candidate skills",
     "empty": "You haven't added anything yet.",
     "candidateBadge": "Self-declared · needs clarification",
-    "needsMigration": "This feature is being prepared. Try again later.",
+    "needsMigration": "Couldn’t complete the action. Please try again.",
     "selfDeclaredNote": "These skills are self-declared and not verified. Nothing checks them automatically.",
     "relatedLabel": "Related to",
     "toolsLabel": "Tools / materials",
@@ -4364,7 +4365,7 @@
     "manageLink": "Invitations and coordination",
     "backToAgency": "Back to agency space",
     "noAgency": "Finish agency setup first — the pool belongs to a real agency.",
-    "needsMigration": "The agency link layer is not active in this environment yet.",
+    "needsMigration": "Couldn’t load. Please try again.",
     "loadError": "Could not load the pool. Try again.",
     "poolTitle": "The pool — your people",
     "empty": "Your pool is empty — invite the first person and the cards appear by themselves.",
@@ -4399,7 +4400,7 @@
         "not_agency": "Finish agency setup first.",
         "request_not_found": "The request no longer exists.",
         "request_not_open": "The request is no longer open.",
-        "needs_gate": "This feature is in preparation (gated change pending).",
+        "needs_gate": "Couldn’t load. Please try again.",
         "error": "Could not save the mark. Try again."
       }
     },
@@ -4423,7 +4424,7 @@
     "noDemands": "You have no needs yet. Create a need first, then structure its required skills.",
     "unstructuredTag": "not structured",
     "notStructured": "This need has no structured skills yet, so no match can be computed. Structure the required skills first.",
-    "needsSetup": "Scouting is not available yet on this environment.",
+    "needsSetup": "Couldn’t load. Please try again.",
     "noCandidates": "No matching workers yet for this need.",
     "namePlaceholder": "Worker",
     "skillFit": "{pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
@@ -4525,7 +4526,7 @@
       "send": "Send proposal",
       "sending": "Sending…",
       "sent": "Proposal sent",
-      "unavailable": "Booking is not available yet.",
+      "unavailable": "Couldn’t complete the action. Please try again.",
       "error": "Something went wrong.",
       "cancel": "Cancel",
       "notEntitled": "Your plan does not include booking — start a test checkout or request pilot access."
@@ -4564,7 +4565,7 @@
     "title": "Bookings",
     "intro": "Proposed engagements. A booking is confirmed only when the worker accepts.",
     "notAuthed": "Please sign in to see your bookings.",
-    "unavailable": "Booking is being prepared and is not available yet.",
+    "unavailable": "Couldn’t complete the action. Please try again.",
     "noDate": "No start date set",
     "startsOn": "Starts {date}",
     "incoming": {
