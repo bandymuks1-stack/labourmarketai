@@ -3552,7 +3552,7 @@
     "saving": "Saugoma…",
     "saved": "Išsaugota",
     "saveError": "Nepavyko išsaugoti. Bandykite dar kartą.",
-    "needsMigration": "Funkcija ruošiama (laukiama duomenų bazės atnaujinimo). Bandykite netrukus.",
+    "needsMigration": "Ši funkcija dar neaktyvi (laukiama duomenų bazės atnaujinimo). Bandykite vėliau.",
     "statuses": {
       "candidate": "Kandidatas",
       "contacted": "Susisiekta",
@@ -3706,7 +3706,7 @@
     "delete": "Ištrinti",
     "saved": "Išsaugota",
     "saveError": "Nepavyko išsaugoti. Bandykite dar kartą.",
-    "needsMigration": "Funkcija ruošiama (laukiama duomenų bazės atnaujinimo). Bandykite netrukus.",
+    "needsMigration": "Ši funkcija dar neaktyvi (laukiama duomenų bazės atnaujinimo). Bandykite vėliau.",
     "statuses": {
       "draft": "Juodraštis",
       "contacted": "Susisiekta",
