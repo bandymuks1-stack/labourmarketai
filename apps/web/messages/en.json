@@ -3552,7 +3552,7 @@
     "saving": "Saving…",
     "saved": "Saved",
     "saveError": "Could not save. Please try again.",
-    "needsMigration": "This feature is being prepared (database update pending). Try again shortly.",
+    "needsMigration": "This feature is not active yet (database update pending). Try again later.",
     "statuses": {
       "candidate": "Candidate",
       "contacted": "Contacted",
@@ -3706,7 +3706,7 @@
     "delete": "Delete",
     "saved": "Saved",
     "saveError": "Could not save. Please try again.",
-    "needsMigration": "This feature is being prepared (database update pending). Try again shortly.",
+    "needsMigration": "This feature is not active yet (database update pending). Try again later.",
     "statuses": {
       "draft": "Draft",
       "contacted": "Contacted",
