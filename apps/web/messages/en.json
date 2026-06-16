@@ -4070,6 +4070,30 @@
     "thermoMissingMarket": "Insufficient market data",
     "thermoMissingBoth": "Insufficient market data",
     "thermoSmallSample": "Small sample (n<5) — interpret with care.",
+      "readinessPanel": {
+        "title": "How to improve your readiness",
+        "intro": "Here is what to complete next to make your card stronger.",
+        "allReady": "All core readiness signals are in place.",
+        "countryFit": "Working in another country needs the right documents. Without them you are not shown as ready to work abroad — you only see legal routes (company handles paperwork, document support). The system never promises the right to work without documents."
+      },
+      "readinessSteps": {
+        "pillar": {
+          "profession": "Profession set",
+          "availability": "Availability set",
+          "skills": "Skills added",
+          "journal": "Work journal entries",
+          "evidence": "Skills backed by work",
+          "workCard": "Work card confirmed"
+        },
+        "action": {
+          "profession": "Set profession",
+          "availability": "Set availability",
+          "skills": "Add skills",
+          "journal": "Write an entry",
+          "evidence": "Add a work entry",
+          "workCard": "Confirm card"
+        }
+      },
       "readiness": {
         "label": "Readiness",
         "hint": "All core signals are in place.",

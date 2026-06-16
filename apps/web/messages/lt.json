@@ -4070,6 +4070,30 @@
     "thermoMissingMarket": "Nepakanka rinkos duomenų",
     "thermoMissingBoth": "Nepakanka rinkos duomenų",
     "thermoSmallSample": "Maža imtis (n<5) — vertinkite atsargiai.",
+      "readinessPanel": {
+        "title": "Kaip pagerinti pasiruošimą",
+        "intro": "Štai ką dar verta sutvarkyti, kad jūsų kortelė būtų stipresnė.",
+        "allReady": "Visi pagrindiniai pasiruošimo signalai surinkti.",
+        "countryFit": "Darbui kitoje šalyje reikia atitinkamų dokumentų. Be jų nesate rodomi kaip pasiruošę dirbti užsienyje — matote tik teisėtus kelius (įmonė tvarko dokumentus, pagalba su dokumentais). Sistema nežada teisės dirbti be dokumentų."
+      },
+      "readinessSteps": {
+        "pillar": {
+          "profession": "Profesija nurodyta",
+          "availability": "Prieinamumas nurodytas",
+          "skills": "Pridėti įgūdžiai",
+          "journal": "Darbo žurnalo įrašai",
+          "evidence": "Įgūdžiai paremti darbu",
+          "workCard": "Darbo kortelė patvirtinta"
+        },
+        "action": {
+          "profession": "Nurodyti profesiją",
+          "availability": "Nurodyti prieinamumą",
+          "skills": "Pridėti įgūdžių",
+          "journal": "Rašyti įrašą",
+          "evidence": "Pridėti darbo įrašą",
+          "workCard": "Patvirtinti kortelę"
+        }
+      },
       "readiness": {
         "label": "Pasiruošimas",
         "hint": "Visi pagrindiniai signalai surinkti.",

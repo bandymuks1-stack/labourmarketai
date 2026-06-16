@@ -8,6 +8,7 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
+import { WorkerReadinessPanel } from "@/components/app/worker-readiness-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export default async function PlayerCardPage({
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageIntro")}</p>
       </header>
       <WorkerPlayerCard card={card} labels={labels} thermometer={thermometer} />
+      <WorkerReadinessPanel card={card} />
     </div>
   );
 }
