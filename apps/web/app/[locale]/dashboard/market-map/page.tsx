@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { MarketMapShell } from "@/components/app/market-map-shell";
+import { FeatureNote } from "@/components/app/feature-note";
 
 /**
  * Live market map — FOUNDATION route (v1). Authenticated (under /dashboard,
@@ -24,5 +25,13 @@ export default async function MarketMapPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  return <MarketMapShell />;
+  const tNote = await getTranslations("featureNotes");
+  return (
+    <div className="flex flex-col gap-4">
+      <FeatureNote testId="feature-note-market-map">
+        {tNote("marketplaceMap")}
+      </FeatureNote>
+      <MarketMapShell />
+    </div>
+  );
 }

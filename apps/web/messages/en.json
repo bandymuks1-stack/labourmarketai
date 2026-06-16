@@ -51,7 +51,7 @@
       },
       "empty": {
         "cta": "Create a company",
-        "desc": "Add your organization to unlock company actions. Nothing is created until you fill it in."
+        "desc": "Add your organization to use company actions. Nothing is created until you fill it in."
       }
     }
   },
@@ -1618,6 +1618,23 @@
     "noNewSuggestions": "No new suggestions. You can edit the text and try again.",
     "saveError": "Could not save. Please try again.",
     "deleteError": "Could not remove. Please try again."
+  },
+  "featureNotes": {
+    "personSpace": "Your personal space: manage your profile, look for work, work, buy or offer services as a person.",
+    "companySpace": "Your company space: raise needs, hire, manage teams and projects, buy or sell services.",
+    "workerProfile": "Your professional passport: CV, skills and work journal in one place. Skills are shown honestly — what is self-declared and what is backed.",
+    "companyProfile": "Company profile: your organisation details and activity type. Agency activity is a company function, not a separate identity.",
+    "documentsReadiness": "Readiness and documents: we show honestly whether you are ready to work locally or abroad. Without the right documents we never promise the right to work abroad.",
+    "skillRecognition": "Skill recognition: when you describe your work, the system suggests skills. It is a suggestion you confirm — not a confirmed fact.",
+    "workJournal": "Work journal: write what you did. On save, skills are recognised and linked to the entry as supporting evidence.",
+    "evidenceTrust": "Evidence and trust signals: we show what your profile is backed by. These are signals, not a final verification.",
+    "companyNeeds": "Needs: describe what you need (profession, country, team). The request is saved for real — no fake matches.",
+    "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
+    "marketplaceMap": "Market map: shows signals by country and city. A map point appears only with verified coordinates — no fake markers.",
+    "communicationInbox": "Communication: a real conversation inbox. A project conversation opens with the project context.",
+    "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
+    "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
+    "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
   },
   "skillGroups": {
     "profession": "Profession / work direction",

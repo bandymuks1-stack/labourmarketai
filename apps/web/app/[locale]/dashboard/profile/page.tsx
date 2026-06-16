@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
+import { FeatureNote } from "@/components/app/feature-note";
 import { SkillsReviewBanner } from "@/components/app/skills-review-banner";
 import {
   deriveSkillEvidence,
@@ -361,6 +362,10 @@ export default async function ProfilePage({
           {t("pageSubtitle")}
         </p>
       </header>
+
+      <FeatureNote testId="feature-note-profile">
+        {(await getTranslations("featureNotes"))("workerProfile")}
+      </FeatureNote>
 
       {/* Unifying "professional passport" lead: states that CV, skills and
           work-journal evidence are ONE profile, shows each pillar's honest
