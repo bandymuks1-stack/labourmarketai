@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { SAVE_TIMEOUT_MS } from "@/lib/async/with-timeout";
 import { cn } from "@/lib/utils";
 
 type Status = "idle" | "sending" | "success" | "duplicate" | "error";
@@ -63,6 +64,10 @@ export function WaitlistModal({
           locale,
           source,
         }),
+        // Bounded so a stalled mobile request can't leave the public signup
+        // stuck on "sending" — on timeout it rejects into the error state below
+        // and the user can retry.
+        signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
       });
       const data = (await res.json().catch(() => ({ ok: false }))) as {
         ok?: boolean;
