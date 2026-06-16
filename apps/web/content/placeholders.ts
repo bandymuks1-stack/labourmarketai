@@ -914,8 +914,8 @@ export const placeholders: readonly Placeholder[] = [
       id: `legal.${doc}`,
       type: "metric",
       value: {
-        lt: `${lt}: juodraštis — galutinį tekstą peržiūrės teisininkai (M5).`,
-        en: `${en}: draft — final text to be reviewed by counsel (M5).`,
+        lt: `${lt}: juodraštis — galutinį, įpareigojantį tekstą prieš viešą startą peržiūrės teisininkai.`,
+        en: `${en}: draft — final, binding text to be reviewed by counsel before public launch.`,
       },
       description: `Legal page body content — ${en}.`,
       replacementSource: "Final text reviewed by counsel — see M5.",
