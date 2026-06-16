@@ -13,6 +13,7 @@ import {
   User,
   Trophy,
   MessageSquare,
+  Map as MapIcon,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
@@ -35,6 +36,7 @@ const PERSON_ACTIONS: readonly ActionDef[] = [
   { key: "profile", href: "/dashboard/profile", icon: IdCard },
   { key: "playerCard", href: "/dashboard/player-card", icon: Trophy },
   { key: "findWork", href: "/dashboard/opportunities", icon: Search },
+  { key: "marketMap", href: "/dashboard/market-map", icon: MapIcon },
   { key: "readiness", href: "/dashboard/documents", icon: FileCheck },
   { key: "communication", href: "/dashboard/communication", icon: MessageSquare },
 ];
@@ -42,6 +44,7 @@ const PERSON_ACTIONS: readonly ActionDef[] = [
 const COMPANY_ACTIONS: readonly ActionDef[] = [
   { key: "need", href: "/dashboard/company", icon: ClipboardList },
   { key: "hire", href: "/dashboard/candidates", icon: Users },
+  { key: "marketMap", href: "/dashboard/market-map", icon: MapIcon },
   { key: "buy", href: "/dashboard/buyer", icon: ShoppingCart },
   { key: "offer", href: "/dashboard/agency", icon: Handshake },
   { key: "projects", href: "/dashboard/projects", icon: FolderKanban },
