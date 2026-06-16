@@ -11,6 +11,8 @@ import {
   Building2,
   Plus,
   User,
+  Trophy,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
@@ -31,8 +33,10 @@ type ActionDef = { key: string; href: string; icon: LucideIcon };
 
 const PERSON_ACTIONS: readonly ActionDef[] = [
   { key: "profile", href: "/dashboard/profile", icon: IdCard },
+  { key: "playerCard", href: "/dashboard/player-card", icon: Trophy },
   { key: "findWork", href: "/dashboard/opportunities", icon: Search },
   { key: "readiness", href: "/dashboard/documents", icon: FileCheck },
+  { key: "communication", href: "/dashboard/communication", icon: MessageSquare },
 ];
 
 const COMPANY_ACTIONS: readonly ActionDef[] = [
@@ -41,6 +45,7 @@ const COMPANY_ACTIONS: readonly ActionDef[] = [
   { key: "buy", href: "/dashboard/buyer", icon: ShoppingCart },
   { key: "offer", href: "/dashboard/agency", icon: Handshake },
   { key: "projects", href: "/dashboard/projects", icon: FolderKanban },
+  { key: "communication", href: "/dashboard/communication", icon: MessageSquare },
 ];
 
 function ActionCard({
