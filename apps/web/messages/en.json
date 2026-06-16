@@ -2019,7 +2019,7 @@
       "activeWorkers": "Worker profiles",
       "liveDemand": "Job opportunities",
       "matchesToday": "New actions",
-      "previewNote": "These figures grow as the platform fills.",
+      "previewNote": "Illustrative figures — not current totals.",
       "avgOvr": "Profile completion"
     },
     "activity": {
@@ -2059,7 +2059,7 @@
       "line1": "Here's how workers",
       "line2": "find work that fits."
     },
-    "subcopy": "Fit direction, with reasons. You always see the why — no opaque algorithm, no black-box score. This is how opportunity-fit will work.",
+    "subcopy": "Fit direction, with reasons. You always see the why — no opaque algorithm, no black-box score.",
     "column": {
       "onDeck": "On deck",
       "live": "In progress",
@@ -2070,7 +2070,7 @@
       "deciding": "Deciding",
       "hired": "Hired"
     },
-    "liveCounter": "How the matching flow will work"
+    "liveCounter": "Matching example"
   },
   "marketPulse": {
     "eyebrow": "Labour-market overview",
@@ -2104,7 +2104,7 @@
       "line1": "Every worker, in context",
       "line2": "and ready."
     },
-    "subcopy": "Fit and readiness come from real completed work, confirmed skills and on-site proof — always shown in context, never one universal rating. This is how worker cards will look.",
+    "subcopy": "Fit and readiness come from real completed work, confirmed skills and on-site proof — always shown in context, never one universal rating.",
     "stat": {
       "SKL": "Skill",
       "REL": "Reliability",
@@ -2164,7 +2164,7 @@
       "confirm_password_label": "Confirm password",
       "submit_label": "Sign up",
       "signing": "Creating...",
-      "disclaimer": "The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
+      "disclaimer": "Your feedback shapes the product — tell us what works and what's missing.",
       "has_account": "Already have an account?",
       "login_link": "Sign in",
       "error_generic": "Something went wrong. Please try again shortly.",
@@ -2804,7 +2804,7 @@
       "expand_aria": "Expand answer"
     },
     "preview": {
-      "conceptChip": "How this will work",
+      "conceptChip": "Example",
       "rankedMatches": "fit direction",
       "headcount": "Headcount",
       "intensity": {
@@ -3136,9 +3136,9 @@
     "businessLink": "Submit a worker need"
   },
   "waitlist": {
-    "title": "For companies & agencies — coming soon",
+    "title": "For companies & agencies",
     "body_intro": "LabourMarket.ai is currently open to workers.",
-    "body_detail": "Company functionality (hiring, workforce management) and agency functionality (placement) will ship in the coming months.",
+    "body_detail": "Join the list for company (hiring, workforce management) and agency (placement) features — we'll let you know when they open for your account.",
     "body_cta": "Leave your email — we'll notify the first batch.",
     "email_label": "Email",
     "email_placeholder": "name@company.com",
@@ -3221,7 +3221,6 @@
     "about": "About",
     "contact": "Contact",
     "rights": "All rights reserved.",
-    "preview": "Early platform — some features are still being expanded.",
     "rexora": "Created by Rexora"
   },
   "pages": {
@@ -3352,7 +3351,7 @@
       },
       {
         "q": "How is billing handled?",
-        "a": "Billing integration is planned for a later milestone. In M0 you can only join a waitlist — no card is collected."
+        "a": "Payments are not enabled yet and no card details are collected. For now you can join the waitlist — paid access is arranged directly."
       },
       {
         "q": "Can I change tiers later?",
@@ -4533,7 +4532,7 @@
     }
   },
   "planBoundary": {
-    "title": "What paid plans will include",
+    "title": "What paid plans include",
     "subcopy": "Payments are not enabled yet — no payment page and no card. Paid plans are shown so you know the scope; pilot access is granted manually.",
     "note": "Plans describe scope, not active billing. Nothing is charged on this page.",
     "plans": {

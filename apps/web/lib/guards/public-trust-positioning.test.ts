@@ -59,7 +59,7 @@ describe("public copy avoids forbidden positioning", () => {
     const m = msg(l);
     const text = [
       m.hero.chip, m.hero.headline, m.hero.headlineAccent, m.hero.subcopy,
-      m.footer.tagline, m.footer.preview, m.footer.rexora,
+      m.footer.tagline, m.footer.rexora,
     ].join(" ");
     for (const re of FORBIDDEN) {
       expect(re.test(text), `${l}: forbidden positioning matched ${re}`).toBe(false);

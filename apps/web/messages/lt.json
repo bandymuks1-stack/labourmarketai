@@ -2019,7 +2019,7 @@
       "activeWorkers": "Darbuotojų profiliai",
       "liveDemand": "Darbo galimybės",
       "matchesToday": "Nauji veiksmai",
-      "previewNote": "Skaičiai pildysis platformai augant.",
+      "previewNote": "Iliustraciniai skaičiai — ne realūs rodikliai.",
       "avgOvr": "Profilio užpildymas"
     },
     "activity": {
@@ -2059,7 +2059,7 @@
       "line1": "Štai kaip darbuotojai",
       "line2": "atranda jiems tinkantį darbą."
     },
-    "subcopy": "Atitikimo kryptis su priežastimis. Kiekvienas atitikimas parodo \"kodėl\" — be neskaidraus algoritmo ar užmaskuoto įvertinimo. Taip veiks galimybių atitikimas.",
+    "subcopy": "Atitikimo kryptis su priežastimis. Kiekvienas atitikimas parodo \"kodėl\" — be neskaidraus algoritmo ar užmaskuoto įvertinimo.",
     "column": {
       "onDeck": "Eilėje",
       "live": "Šiuo metu",
@@ -2070,7 +2070,7 @@
       "deciding": "Sprendimas",
       "hired": "Atrinkta"
     },
-    "liveCounter": "Kaip veiks atitikimo eiga"
+    "liveCounter": "Atitikimo pavyzdys"
   },
   "marketPulse": {
     "eyebrow": "Darbo rinkos apžvalga",
@@ -2104,7 +2104,7 @@
       "line1": "Kiekvienas darbuotojas — kontekste",
       "line2": "ir paruoštas."
     },
-    "subcopy": "Atitikimas ir pasirengimas kyla iš realiai atlikto darbo, patvirtintų įgūdžių ir įrodymų objekte — visada rodomi kontekste, niekada kaip vienas universalus įvertinimas. Taip atrodys darbuotojų kortelės.",
+    "subcopy": "Atitikimas ir pasirengimas kyla iš realiai atlikto darbo, patvirtintų įgūdžių ir įrodymų objekte — visada rodomi kontekste, niekada kaip vienas universalus įvertinimas.",
     "stat": {
       "SKL": "Įgūdis",
       "REL": "Patikimumas",
@@ -2164,7 +2164,7 @@
       "confirm_password_label": "Pakartok slaptažodį",
       "submit_label": "Registruotis",
       "signing": "Kuriama...",
-      "disclaimer": "Šiuo metu platforma yra ankstyvame etape — daugiau funkcijų bus pridėta artimiausiomis savaitėmis. Jūsų atsiliepimai padės kurti.",
+      "disclaimer": "Jūsų atsiliepimai formuoja produktą — parašykite, kas veikia ir ko trūksta.",
       "has_account": "Jau turi paskyrą?",
       "login_link": "Prisijungti",
       "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
@@ -2804,7 +2804,7 @@
       "expand_aria": "Išskleisti atsakymą"
     },
     "preview": {
-      "conceptChip": "Kaip tai veiks",
+      "conceptChip": "Pavyzdys",
       "rankedMatches": "atitikimo kryptis",
       "headcount": "Žmonių skaičius",
       "intensity": {
@@ -3136,9 +3136,9 @@
     "businessLink": "Pateikti darbuotojų poreikį"
   },
   "waitlist": {
-    "title": "Įmonėms ir agentūroms — netrukus",
+    "title": "Įmonėms ir agentūroms",
     "body_intro": "LabourMarket.ai platforma šiuo metu atvira darbuotojams.",
-    "body_detail": "Įmonių (samdymas, darbuotojų valdymas) ir agentūrų (tarpininkavimas) funkcionalumą paleisime artimiausiais mėnesiais.",
+    "body_detail": "Užsirašykite į sąrašą įmonių (samdymas, darbuotojų valdymas) ir agentūrų (tarpininkavimas) funkcijoms — pranešime, kai jas atidarysime jūsų paskyrai.",
     "body_cta": "Palik el. paštą — pranešime pirmiems.",
     "email_label": "El. paštas",
     "email_placeholder": "vardas@imone.lt",
@@ -3221,7 +3221,6 @@
     "about": "Apie",
     "contact": "Kontaktai",
     "rights": "Visos teisės saugomos.",
-    "preview": "Ankstyva platforma — kai kurios funkcijos dar plečiamos.",
     "rexora": "Sukurta Rexora"
   },
   "pages": {
@@ -3352,7 +3351,7 @@
       },
       {
         "q": "Kaip vyks atsiskaitymai?",
-        "a": "Atsiskaitymų integracija planuojama vėlesniame etape. M0 galite tik užsirašyti į sąrašą — kortelės duomenys nerenkami."
+        "a": "Mokėjimai dar neįjungti ir kortelės duomenys nerenkami. Kol kas galite užsirašyti į sąrašą — mokama prieiga suteikiama tiesiogiai."
       },
       {
         "q": "Ar galėsiu keisti planą vėliau?",
@@ -4533,7 +4532,7 @@
     }
   },
   "planBoundary": {
-    "title": "Ką apims mokami planai",
+    "title": "Ką apima mokami planai",
     "subcopy": "Mokėjimai dar neįjungti — jokio mokėjimo puslapio ir jokios kortelės. Mokami planai rodomi, kad žinotum apimtį; piloto prieiga suteikiama rankiniu būdu.",
     "note": "Planai aprašo apimtį, ne aktyvų mokėjimą. Šiame puslapyje pinigai neimami.",
     "plans": {
