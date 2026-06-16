@@ -6,7 +6,9 @@
  * CTA removal) and PR #125 (always-on Sample affordance) so the following
  * regressions can never silently return to a primary route:
  *
- *   - dead CTA / dead link (`href="#"`, empty `href=""`)
+ *   - dead CTA / dead link (an href/to value that is empty or only a lone "#" —
+ *     see DEAD_LINK_RE for the exact detector; never written here as raw markup
+ *     so this anti-pattern is not a copy-pasteable example)
  *   - user-visible placeholder leaks (lorem ipsum, untranslated `[XX]` tags)
  *   - a renamed/deleted primary route page (primary-flow render regression)
  *
@@ -110,9 +112,13 @@ export interface SmokeReport {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Bare/empty href = dead link. A real fragment anchor (`href="#main-content"`)
+ * Bare/empty href = dead link. A real fragment anchor (an id like #main-content)
  * or any real path is NOT matched — only an empty value or a lone `#`.
  * Covers string and `{...}` JSX expression forms, plus the `to=` prop.
+ *
+ * This regex is the SINGLE, intentional home of the dead-href token. The literal
+ * lives here (inside a detector) and is never repeated as a prose example, so the
+ * guard cannot itself normalize the anti-pattern into a copy-pasteable snippet.
  */
 const DEAD_LINK_RE =
   /\b(?:href|to)\s*=\s*(?:"#"|'#'|""|''|\{\s*["'](?:#)?["']\s*\})/g;

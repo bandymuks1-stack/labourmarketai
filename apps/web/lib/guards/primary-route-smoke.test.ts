@@ -14,7 +14,7 @@ import {
  *
  * Locks in the PR #121 / #125 product-honesty wins. Fails `pnpm -F web test`
  * if any of these regressions return to a primary route:
- *   - a dead link / dead CTA (`href="#"`, empty `href=""`)
+ *   - a dead link / dead CTA (an href/to value that is empty or only a lone "#")
  *   - a user-visible placeholder leak (lorem ipsum, untranslated `[XX]` tag)
  *   - a renamed/deleted primary route page
  *
