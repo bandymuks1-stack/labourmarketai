@@ -104,8 +104,10 @@ describe("structuring is an explicit human act on existing rails", () => {
 });
 
 describe("consent draft stays default-off, aggregates-only, gated", () => {
-  it("is a needs-human-gate DRAFT with rollback", () => {
-    expect(consentSql).toMatch(/DRAFT — needs-human-gate — DO NOT APPLY/);
+  it("is owner-applied and reversible (rollback present)", () => {
+    // Applied 2026-06-16 via owner-approved Supabase MCP apply_migration; the
+    // file header records the apply + verification, and the rollback stays.
+    expect(consentSql).toMatch(/APPLIED 2026-06-16 via Supabase MCP/);
     expect(consentSql).toMatch(/-- ROLLBACK/);
   });
   it("consent defaults to FALSE (§4 default-closed)", () => {
