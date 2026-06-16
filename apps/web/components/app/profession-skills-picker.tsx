@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { CvImportUpload } from "@/components/app/cv-import-upload";
 import { Link } from "@/lib/i18n/navigation";
+import { SAVE_TIMEOUT_MS } from "@/lib/async/with-timeout";
 import { cn } from "@/lib/utils";
 
 type ApiSkill = {
@@ -50,7 +51,12 @@ export function ProfessionSkillsPicker({
     let active = true;
     setSkills(null);
     setLoadError(false);
-    fetch(`/api/professions/${professionId}/skills`)
+    // Bounded so a hung mobile request can't leave the picker stuck on the
+    // loading state forever — on timeout the fetch aborts and the catch below
+    // shows the (retryable) load-error state instead.
+    fetch(`/api/professions/${professionId}/skills`, {
+      signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
+    })
       .then((r) => {
         if (!r.ok) throw new Error(`load failed: ${r.status}`);
         return r.json();
@@ -91,6 +97,10 @@ export function ProfessionSkillsPicker({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ skillIds: [...selected] }),
+        // Bounded so a stalled mobile request rejects instead of hanging — the
+        // catch shows the error and `finally` clears "saving" (a finally alone
+        // does NOT help: a fetch that never settles never reaches it).
+        signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
       });
       if (!res.ok) throw new Error(`save failed: ${res.status}`);
       setSaved(true);
