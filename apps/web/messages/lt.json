@@ -1649,6 +1649,7 @@
     "opportunities": "Galimybės: matote jums tinkančius darbus. Matomumas priklauso nuo tinklo dydžio ir jūsų pasiruošimo.",
     "marketplaceMap": "Rinkos žemėlapis: rodo signalus pagal šalį ir miestą. Taškas žemėlapyje atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
     "communicationInbox": "Komunikacija: tikras pokalbių aplankas. Pokalbis dėl projekto atveriamas su projekto kontekstu.",
+    "feedbackLoop": "Po darbo: užfiksuokite jį darbo žurnale, o vadovas ar klientas gali patvirtinti įrašą. Patvirtinimas tampa įrodymu ir pakelia pasitikėjimo signalą jūsų kortelėje. Jokių žvaigždučių ar netikros reputacijos — tik realūs žmonių patvirtinimai.",
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
     "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi. Kol kas pirmi vartotojai jungiami rankiniu / owner-review būdu. Stripe bus prijungtas kitame etape.",
     "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."

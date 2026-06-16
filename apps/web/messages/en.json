@@ -1649,6 +1649,7 @@
     "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
     "marketplaceMap": "Market map: shows signals by country and city. A map point appears only with verified coordinates — no fake markers.",
     "communicationInbox": "Communication: a real conversation inbox. A project conversation opens with the project context.",
+    "feedbackLoop": "After work: log it in your work journal, and a manager or client can confirm the entry. The confirmation becomes evidence and raises a trust signal on your card. No stars, no fake reputation — only real human confirmations.",
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
     "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
