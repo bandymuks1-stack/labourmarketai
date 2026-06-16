@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Link } from "@/lib/i18n/navigation";
+import { FeatureNote } from "@/components/app/feature-note";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
 import {
@@ -89,6 +90,12 @@ export default async function AccountPage({
           {t("empty.account_intro")}
         </p>
       </header>
+
+      {/* Honest payment readiness — payments are not active yet (billing
+          disabled). No pay-now, no subscription-active, no paid unlock. */}
+      <FeatureNote testId="account-payment-readiness">
+        {tRoot("featureNotes.paymentReadiness")}
+      </FeatureNote>
 
       <section className="card-border p-6">
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
