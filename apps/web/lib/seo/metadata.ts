@@ -36,19 +36,19 @@ export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
     title:
       "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
     description:
-      "LabourMarket.ai helps workers, companies and agencies structure profiles, skills, work opportunities, workforce needs and next steps across sectors and countries.",
+      "LabourMarket.ai is a general labour-market platform where people and companies see needs, readiness, skills, work opportunities and market signals — locally and internationally, across sectors.",
   },
   lt: {
     title:
       "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
     description:
-      "LabourMarket.ai padeda darbuotojams, įmonėms ir agentūroms struktūruoti profilius, įgūdžius, darbo galimybes, darbuotojų poreikius ir tolimesnius veiksmus skirtinguose sektoriuose bei šalyse.",
+      "LabourMarket.ai — bendra darbo rinkos platforma, kurioje žmonės ir įmonės mato poreikius, pasirengimą, įgūdžius, darbo galimybes ir rinkos signalus — vietoje ir tarptautiniu mastu, įvairiuose sektoriuose.",
   },
   ru: {
     title:
       "LabourMarket.ai — работники, работодатели, навыки и возможности работы в Европе",
     description:
-      "LabourMarket.ai помогает работникам, компаниям и агентствам структурировать профили, навыки, рабочие возможности, потребности в рабочей силе и следующие шаги в разных секторах и странах.",
+      "LabourMarket.ai — общая платформа рынка труда, где люди и компании видят потребности, готовность, навыки, рабочие возможности и рыночные сигналы — локально и на международном уровне, в разных секторах.",
   },
 };
 
