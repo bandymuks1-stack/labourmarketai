@@ -2,6 +2,12 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 
 import { FeatureNote } from "@/components/app/feature-note";
+import { MatchSignals } from "@/components/app/match-signals";
+import {
+  buildMatchCardView,
+  type MatchSignal,
+  type MatchSignalState,
+} from "@/lib/opportunities/match-card-view";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { loadWorkerOpportunities } from "@/lib/opportunities/load-worker-opportunities";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -220,6 +226,19 @@ export default async function OpportunitiesPage({
                       </dd>
                     </div>
                   </dl>
+                  {/* Match breakdown — honest per-dimension fit (why it fits /
+                      what to check), reusing the deterministic fit engine. No
+                      score, no percentage, no guaranteed match. */}
+                  <div className="flex flex-col gap-1.5" data-testid="opportunity-match-breakdown">
+                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {t("matchTitle")}
+                    </span>
+                    <MatchSignals
+                      signals={buildMatchCardView(result.readiness, need).signals}
+                      dimensionLabel={(k: MatchSignal["key"]) => t(`matchDim.${k}`)}
+                      stateLabel={(s: MatchSignalState) => t(`matchState.${s}`)}
+                    />
+                  </div>
                   {fit.gaps.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {fit.gaps.map((g) => (

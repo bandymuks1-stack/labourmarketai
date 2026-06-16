@@ -4716,6 +4716,19 @@
     "intro": "Here you'll see employer needs that could fit you, and what's worth adding to your profile to be ready.",
     "noWorkerBody": "Finish your worker profile first to see opportunities that fit you.",
     "readinessTitle": "Your readiness",
+      "matchTitle": "Match breakdown",
+      "matchDim": {
+        "workType": "Work direction",
+        "skills": "Skills",
+        "country": "Country",
+        "availability": "Availability",
+        "documents": "Documents"
+      },
+      "matchState": {
+        "fit": "fits",
+        "check": "check",
+        "unknown": "unknown"
+      },
     "readinessIntro": "The fuller your profile, the easier it is for employers to find you — and the more precisely we can show fitting needs.",
     "ready": {
       "workType": "Sector & work type",
