@@ -75,5 +75,22 @@ export async function buildPlayerCardLabels(
     thermoMissingMarket: t("thermoMissingMarket"),
     thermoMissingBoth: t("thermoMissingBoth"),
     thermoSmallSample: t("thermoSmallSample"),
+    readiness: {
+      label: t("readiness.label"),
+      hint: t("readiness.hint"),
+      levelReady: t("readiness.levelReady"),
+      levelBuilding: t("readiness.levelBuilding"),
+      levelStart: t("readiness.levelStart"),
+      signalsTemplate: t("readiness.signalsTemplate"),
+      nextLabel: t("readiness.nextLabel"),
+      pillars: {
+        profession: t("readiness.pillars.profession"),
+        availability: t("readiness.pillars.availability"),
+        skills: t("readiness.pillars.skills"),
+        journal: t("readiness.pillars.journal"),
+        evidence: t("readiness.pillars.evidence"),
+        workCard: t("readiness.pillars.workCard"),
+      },
+    },
   };
 }

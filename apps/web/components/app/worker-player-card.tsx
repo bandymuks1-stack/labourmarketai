@@ -9,6 +9,12 @@ import {
 import type { WorkerPlayerCard as WorkerPlayerCardData } from "@/lib/player-card/player-card";
 import { CountUp } from "@/components/app/today/count-up";
 import { SkillIcon } from "@/components/app/today/skill-icon";
+import { ReadinessRing } from "@/components/app/readiness-ring";
+import {
+  deriveWorkerReadiness,
+  missingReadinessPillars,
+  type ReadinessLevel,
+} from "@/lib/player-card/readiness";
 import { cn } from "@/lib/utils";
 
 /**
@@ -63,7 +69,36 @@ export interface PlayerCardLabels {
   thermoMissingMarket: string;
   thermoMissingBoth: string;
   thermoSmallSample: string;
+  /** Readiness ring + signal line (real met/total signals, never a rating). */
+  readiness: {
+    label: string;
+    hint: string;
+    levelReady: string;
+    levelBuilding: string;
+    levelStart: string;
+    /** "{met}/{total} signals met" with values interpolated by the caller-free
+     *  component — stored as a template the component fills. */
+    signalsTemplate: string;
+    pillars: {
+      profession: string;
+      availability: string;
+      skills: string;
+      journal: string;
+      evidence: string;
+      workCard: string;
+    };
+    nextLabel: string;
+  };
 }
+
+// Top-accent by readiness level. NOT gold: gold stays the reserved trust accent
+// (real work-card confirmation), so the readiness accent uses premium brand
+// tokens instead (DESIGN_SOUL §1; today-screen-honesty guard).
+const LEVEL_ACCENT: Record<ReadinessLevel, string> = {
+  ready: "border-brand-cyan/40",
+  building: "border-brand-blue/30",
+  start: "border-ink-500",
+};
 
 /** Thermometer view-model (S4). A score renders ONLY when both formula
  *  components existed server-side; otherwise the honest insufficient-data
@@ -117,38 +152,92 @@ export function WorkerPlayerCard({
   thermometer?: ThermometerView | null;
 }) {
   const confirmed = card.workCardConfirmed;
+  // Honest readiness signals (real met/total), drives the status ring + line.
+  const readiness = deriveWorkerReadiness(card);
+  const levelLabel =
+    readiness.level === "ready"
+      ? labels.readiness.levelReady
+      : readiness.level === "building"
+        ? labels.readiness.levelBuilding
+        : labels.readiness.levelStart;
+  const missing = missingReadinessPillars(readiness);
   return (
     <section
       className={cn(
-        "card-border rise-in flex flex-col gap-5 p-5 sm:p-6",
+        // Premium scouting chrome shared with the landing card (card-border +
+        // glow + hover lift), with a tier corner accent driven by REAL
+        // readiness level — never a fabricated rating.
+        "card-border bg-card-glow glow-hover rise-in flex flex-col gap-5 border-t-2 p-5 transition-shadow hover:shadow-card-hover sm:p-6",
+        LEVEL_ACCENT[readiness.level],
         // Gold ONLY as the real-confirmation trust accent (DESIGN_SOUL §1).
         confirmed && "trust-ring",
       )}
       data-testid="worker-player-card"
     >
-      {/* ── Identity: avatar initials + name + profession ── */}
-      <header className="flex items-center gap-4">
-        <span
-          aria-hidden
-          className={cn(
-            "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
-            confirmed ? "border-trust-accent/50" : "border-ink-500",
-          )}
-        >
-          {initialsOf(card.displayName)}
-        </span>
-        <div className="min-w-0 flex-col">
-          <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
-            {labels.title}
+      {/* ── Identity: avatar + name + profession + readiness ring ── */}
+      <header className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-4">
+          <span
+            aria-hidden
+            className={cn(
+              "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
+              confirmed ? "border-trust-accent/50" : "border-ink-500",
+            )}
+          >
+            {initialsOf(card.displayName)}
           </span>
-          <h2 className="truncate font-display text-xl font-bold tracking-tightest text-text-primary">
-            {card.displayName ?? labels.namePlaceholder}
-          </h2>
-          <p className="truncate text-xs leading-relaxed text-text-secondary">
-            {labels.professionName ?? labels.subtitle}
-          </p>
+          <div className="min-w-0 flex-col">
+            <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+              {labels.title}
+            </span>
+            <h2 className="truncate font-display text-xl font-bold tracking-tightest text-text-primary">
+              {card.displayName ?? labels.namePlaceholder}
+            </h2>
+            <p className="truncate text-xs leading-relaxed text-text-secondary">
+              {labels.professionName ?? labels.subtitle}
+            </p>
+          </div>
         </div>
+        {/* Status ring — same premium gauge as the landing card, honest signals */}
+        <ReadinessRing
+          met={readiness.met}
+          total={readiness.total}
+          level={readiness.level}
+          levelLabel={levelLabel}
+          size="md"
+        />
       </header>
+
+      {/* ── Readiness signal line: what is met + what to do next (honest) ── */}
+      <div
+        className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+        data-testid="player-card-readiness"
+        data-readiness-level={readiness.level}
+      >
+        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {labels.readiness.label}
+          <span className="text-text-secondary">
+            {readiness.met}/{readiness.total} {labels.readiness.signalsTemplate}
+          </span>
+        </span>
+        {missing.length > 0 ? (
+          <span className="flex flex-wrap items-center gap-1.5 text-[11px] leading-relaxed text-text-secondary">
+            <span className="text-text-muted">{labels.readiness.nextLabel}</span>
+            {missing.map((k) => (
+              <span
+                key={k}
+                className="inline-flex items-center rounded-sm border border-ink-500 px-1.5 py-0.5 text-[10px] text-text-secondary"
+              >
+                {labels.readiness.pillars[k]}
+              </span>
+            ))}
+          </span>
+        ) : (
+          <span className="text-[11px] leading-relaxed text-text-secondary">
+            {labels.readiness.hint}
+          </span>
+        )}
+      </div>
 
       {/* ── Real-state chips: availability + work-card confirmation ── */}
       <div className="flex flex-wrap items-center gap-2">

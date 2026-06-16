@@ -4070,6 +4070,23 @@
     "thermoMissingMarket": "Nepakanka rinkos duomenų",
     "thermoMissingBoth": "Nepakanka rinkos duomenų",
     "thermoSmallSample": "Maža imtis (n<5) — vertinkite atsargiai.",
+      "readiness": {
+        "label": "Pasiruošimas",
+        "hint": "Visi pagrindiniai signalai surinkti.",
+        "levelReady": "Pasiruošęs",
+        "levelBuilding": "Renkasi",
+        "levelStart": "Pradžia",
+        "signalsTemplate": "signalų surinkta",
+        "nextLabel": "Toliau:",
+        "pillars": {
+          "profession": "Profesija",
+          "availability": "Prieinamumas",
+          "skills": "Įgūdžiai",
+          "journal": "Darbo žurnalas",
+          "evidence": "Įrodymai",
+          "workCard": "Darbo kortelė"
+        }
+      },
     "verifiedTitle": "Patvirtinti įgūdžiai",
     "verifiedEmpty": "Patvirtintų įgūdžių dar nėra. Jie atsiranda, kai vadovas patvirtina tavo darbo įrašus.",
     "journalSupportedLabel": "Pagrįsta žurnalu",
