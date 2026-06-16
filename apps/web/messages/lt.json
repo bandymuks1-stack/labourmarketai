@@ -167,6 +167,20 @@
       "nextActions": { "label": "Sekančio veiksmo signalai", "desc": "Kur galite veikti dabar — pagal realias spragas." }
     },
     "nextActionsTitle": "Ką galite padaryti dabar",
+      "atlas": {
+        "title": "Rinkos atlasas",
+        "intro": "Žemėlapio sluoksniai ateina iš darbo rinkos atlaso: {categories} sričių iš {blocks} galimos žemėlapyje. Visi sluoksniai — tik signalai.",
+        "signalOnlyNote": "Taškas žemėlapyje atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių, jokio asmeninio adreso.",
+        "kind": {
+          "demand": "Poreikis",
+          "worker_signal": "Žmonių signalai",
+          "offer": "Pasiūlymai",
+          "accommodation": "Apgyvendinimas",
+          "brigade": "Brigados",
+          "readiness_warning": "Pasiruošimo spragos",
+          "rate": "Kainos / įkainiai"
+        }
+      },
     "nextActions": {
       "workerCountry": "Pridėti ar patikslinti pageidaujamą šalį",
       "companyNeed": "Pateikti įmonės poreikį",
