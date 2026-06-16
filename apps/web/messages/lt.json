@@ -4716,6 +4716,19 @@
     "intro": "Čia matysite darbdavių poreikius, kurie gali jums tikti, ir ką verta papildyti profilyje, kad būtumėte paruošti.",
     "noWorkerBody": "Pirmiausia užbaikite darbuotojo profilį, kad matytumėte jums tinkančias galimybes.",
     "readinessTitle": "Jūsų pasirengimas",
+      "matchTitle": "Atitikimo apžvalga",
+      "matchDim": {
+        "workType": "Darbo kryptis",
+        "skills": "Įgūdžiai",
+        "country": "Šalis",
+        "availability": "Prieinamumas",
+        "documents": "Dokumentai"
+      },
+      "matchState": {
+        "fit": "tinka",
+        "check": "patikrinti",
+        "unknown": "nežinoma"
+      },
     "readinessIntro": "Kuo pilnesnis profilis, tuo lengviau darbdaviams jus rasti ir tuo tiksliau parodome tinkančius poreikius.",
     "ready": {
       "workType": "Sektorius ir darbo tipas",
