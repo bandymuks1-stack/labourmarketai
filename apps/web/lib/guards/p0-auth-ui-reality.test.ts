@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { placeholders } from "@/content/placeholders";
 
 /**
  * Guard: P0 authenticated UI reality audit (2026-06-16).
@@ -59,6 +60,26 @@ describe("P0 reality: no internal milestone codes in user-facing copy", () => {
       expect(offenders, `milestone codes leaked:\n${offenders.join("\n")}`).toEqual([]);
     });
   }
+});
+
+describe("P0 reality: no milestone codes in rendered placeholder values", () => {
+  // content/placeholders.ts `value.{lt,en,ru}` strings ARE rendered to users
+  // (e.g. the legal-page draft notes). Internal metadata (addedIn / Milestone
+  // type / replacementSource) is NOT scanned — only the user-facing value.
+  it("no placeholder value (lt/en/ru) leaks an M0–M9 code", () => {
+    const offenders: string[] = [];
+    for (const p of placeholders) {
+      const v = p.value as Record<string, unknown> | undefined;
+      if (!v) continue;
+      for (const loc of ACTIVE_LOCALES) {
+        const s = v[loc];
+        if (typeof s === "string" && MILESTONE.test(s)) {
+          offenders.push(`${p.id}.${loc}: "${s}"`);
+        }
+      }
+    }
+    expect(offenders, `milestone codes in placeholder values:\n${offenders.join("\n")}`).toEqual([]);
+  });
 });
 
 // ── Rule B: NO roadmap-placeholder words in authenticated product copy ──
