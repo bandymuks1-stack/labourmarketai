@@ -4359,6 +4359,7 @@
   "scouting": {
     "title": "Scouting",
     "intro": "Pick one of your structured needs to see matching workers, why they fit, and shortlist them.",
+    "visibilityNote": "Visibility is based on readiness, trust and permissions — not payment. Paid wider access is not active yet (payments are being prepared). Only safe, anonymized previews are shown — no fake listings.",
     "pickDemand": "Pick a need",
     "noDemands": "You have no needs yet. Create a need first, then structure its required skills.",
     "unstructuredTag": "not structured",

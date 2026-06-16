@@ -5,6 +5,7 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
+import { FeatureNote } from "@/components/app/feature-note";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import type { CompanyCandidateLabel } from "@/lib/scouting/candidate-readiness";
@@ -90,6 +91,10 @@ export default async function CompanyScoutingPage({
           {t("privacy.profileSafe")}
         </p>
       </section>
+
+      {/* Honest visibility: based on readiness/trust/permissions — NOT payment.
+          Paid wider access is inert while billing is disabled; no fake unlock. */}
+      <FeatureNote testId="scouting-visibility-note">{t("visibilityNote")}</FeatureNote>
 
       {/* Trust: how matching works — deterministic, honest, no fake score. */}
       <details className="group rounded-lg border border-ink-600 bg-ink-800/40" data-testid="scouting-how">

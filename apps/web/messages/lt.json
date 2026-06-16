@@ -4359,6 +4359,7 @@
   "scouting": {
     "title": "Žvalgyba",
     "intro": "Pasirink vieną iš savo struktūruotų poreikių, kad matytum tinkamus darbuotojus, kodėl jie tinka, ir įtrauktum į trumpąjį sąrašą.",
+    "visibilityNote": "Matomumas remiasi pasiruošimu, patikimumu ir leidimais — ne mokėjimu. Mokama platesnė prieiga dar neaktyvi (mokėjimai ruošiami). Rodomos tik saugios, anonimizuotos peržiūros — jokių netikrų skelbimų.",
     "pickDemand": "Pasirink poreikį",
     "noDemands": "Kol kas neturi poreikių. Pirma sukurk poreikį, tada struktūruok reikalingus įgūdžius.",
     "unstructuredTag": "nestruktūruotas",
