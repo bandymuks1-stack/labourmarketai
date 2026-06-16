@@ -483,6 +483,11 @@ describe("feature-availability + config-driven dashboard", () => {
         "overview",
         "profile_text_first",
         "journal_text_first",
+        // P0 (request-not-received fix): communication / inbox is a real,
+        // shipping surface — it is the recipient's only entry point for a
+        // request another user starts with them, so it is active + in primary
+        // nav. The conversation table + RLS already exist and work.
+        "communication",
         "account_roles",
       ]),
     );

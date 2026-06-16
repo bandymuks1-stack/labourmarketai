@@ -25,6 +25,7 @@ export type FeatureKey =
   | "overview"
   | "profile_text_first"
   | "journal_text_first"
+  | "communication"
   | "account_roles"
   // Adjacent capabilities — visible but honestly preparing.
   | "role_expansion"
@@ -88,6 +89,18 @@ export const FEATURES: readonly FeatureConfig[] = [
     labelKey: "features.journal_text_first.label",
     descriptionKey: "features.journal_text_first.description",
     primaryRoute: "/dashboard/journal",
+    safeToShowInPrimaryNav: true,
+  },
+  {
+    // Inbox / messages. Active and primary-nav-safe: it is the recipient's
+    // ONLY entry point for a request another user starts with them. Without a
+    // permanent nav item a worker had no way to notice an incoming request
+    // even though the conversation row really exists and RLS lets them read it.
+    key: "communication",
+    availability: "active",
+    labelKey: "features.communication.label",
+    descriptionKey: "features.communication.description",
+    primaryRoute: "/dashboard/communication",
     safeToShowInPrimaryNav: true,
   },
   {

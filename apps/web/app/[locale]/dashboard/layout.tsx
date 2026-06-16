@@ -14,6 +14,7 @@ import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getUnreadConversationCount } from "@/lib/communication/unread";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
@@ -43,7 +44,7 @@ export default async function DashboardLayout({
   // comment: the project's source-level guards run a comment-stripping
   // regex that treats it as a block comment opener and would consume
   // past this Promise.all into the JSX below.)
-  const [profileRes, rolesRes] = await Promise.all([
+  const [profileRes, rolesRes, unreadConversations] = await Promise.all([
     supabase
       .from("profiles")
       .select("full_name, email, active_role, onboarded_at")
@@ -54,9 +55,14 @@ export default async function DashboardLayout({
       .select("role")
       .eq("profile_id", user.id)
       .eq("is_active", true),
+    // Unread inbox count → Messages nav badge, so an incoming request is
+    // actually noticed. Defensive (returns 0 on any error) so it never
+    // breaks the auth shell.
+    getUnreadConversationCount(),
   ]);
   const profile = profileRes.data;
   const rolesRows = rolesRes.data;
+  const navBadges = { communication: unreadConversations } as const;
 
   if (!profile?.onboarded_at) redirect(`/${locale}/onboarding`);
 
@@ -110,7 +116,7 @@ export default async function DashboardLayout({
             >
               labourmarket<span className="text-gradient-accent">.ai</span>
             </Link>
-            <DashboardTabs className="hidden md:flex" />
+            <DashboardTabs className="hidden md:flex" badges={navBadges} />
             <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
               <LocaleSwitcher className="hidden md:flex" />
               <NotificationPanel />
@@ -125,7 +131,7 @@ export default async function DashboardLayout({
         <main className="relative z-10 mx-auto max-w-container px-6 py-10 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-10">
           {children}
         </main>
-        <BottomNav />
+        <BottomNav badges={navBadges} />
         {/* v1 tester language-feedback widget. Mounted INSIDE the auth
             shell so it's only visible to authenticated sessions — the
             inbox is also admin-only via RLS, so this is double-gated. */}

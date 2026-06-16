@@ -10,6 +10,7 @@ import { TextFirstComposer } from "@/components/app/text-first-composer";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
+import { withTimeout } from "@/lib/async/with-timeout";
 import { recordEvent } from "@/lib/telemetry/task";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -153,7 +154,9 @@ export function ProfileTextFirstFlow({
     // (0001) keeps the text owner-only — employers cannot read it.
     if (raw.trim().length > 0) {
       setTextSaveState("saving");
-      void saveWorkerProfileText(raw)
+      // Bounded so a hung mobile request can never leave the indicator stuck
+      // on "Įrašoma…" — on timeout it flips to the retryable error state.
+      void withTimeout(saveWorkerProfileText(raw), undefined, "save-profile-text")
         .then(() => setTextSaveState("saved"))
         .catch((e) => {
           console.error("[profile-text-first] save text failed:", e);
