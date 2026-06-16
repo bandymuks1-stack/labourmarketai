@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
+import { FeatureNote } from "@/components/app/feature-note";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
@@ -383,6 +384,10 @@ export default async function CompanyDashboardPage({
           </div>
         ) : null}
       </header>
+
+      <FeatureNote testId="feature-note-company">
+        {(await getTranslations("featureNotes"))("companySpace")}
+      </FeatureNote>
 
       <CompanyActionNextActions
         room="company"

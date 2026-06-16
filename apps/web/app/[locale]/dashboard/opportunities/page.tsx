@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 
+import { FeatureNote } from "@/components/app/feature-note";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { loadWorkerOpportunities } from "@/lib/opportunities/load-worker-opportunities";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -60,6 +61,10 @@ export default async function OpportunitiesPage({
         </h1>
         <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
       </header>
+
+      <FeatureNote testId="feature-note-opportunities">
+        {(await getTranslations("featureNotes"))("opportunities")}
+      </FeatureNote>
 
       {result.kind === "no-worker" ? (
         <section className="rounded-lg border border-dashed border-ink-500 px-4 py-6">

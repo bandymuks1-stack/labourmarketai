@@ -51,7 +51,7 @@
       },
       "empty": {
         "cta": "Sukurti įmonę",
-        "desc": "Pridėkite organizaciją, kad atrakintumėte įmonės veiksmus. Jokie duomenys nesukuriami, kol jų neįvesite."
+        "desc": "Pridėkite organizaciją, kad galėtumėte naudoti įmonės veiksmus. Jokie duomenys nesukuriami, kol jų neįvesite."
       }
     }
   },
@@ -1618,6 +1618,23 @@
     "noNewSuggestions": "Nerasta naujų pasiūlymų. Galite redaguoti tekstą ir paspausti pakartotinai.",
     "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
     "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
+  },
+  "featureNotes": {
+    "personSpace": "Jūsų asmeninė erdvė: tvarkykite profilį, ieškokite darbo, dirbkite, pirkite ar siūlykite paslaugas kaip žmogus.",
+    "companySpace": "Jūsų įmonės erdvė: kelkite poreikius, samdykite, valdykite komandas ir projektus, pirkite ar parduokite paslaugas.",
+    "workerProfile": "Jūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.",
+    "companyProfile": "Įmonės profilis: jūsų organizacijos duomenys ir veiklos tipas. Agentūrinė veikla yra įmonės funkcija, ne atskira tapatybė.",
+    "documentsReadiness": "Pasiruošimas ir dokumentai: rodome sąžiningai, ar esate pasiruošę dirbti vietoje ar kitoje šalyje. Be reikiamų dokumentų nežadame teisės dirbti užsienyje.",
+    "skillRecognition": "Įgūdžių atpažinimas: parašius darbo aprašymą, sistema pasiūlo įgūdžius. Tai pasiūlymas, kurį patvirtinate jūs — ne galutinis faktas.",
+    "workJournal": "Darbo žurnalas: užrašykite, ką nuveikėte. Išsaugojus, įgūdžiai atpažįstami ir susiejami su įrašu kaip pagrindimas.",
+    "evidenceTrust": "Įrodymai ir pasitikėjimo signalai: rodome, kuo paremtas profilis. Tai signalai, ne galutinis patikrinimas.",
+    "companyNeeds": "Poreikiai: aprašykite, ko reikia (profesija, šalis, komanda). Užklausa išsaugoma realiai — be netikrų atitikčių.",
+    "opportunities": "Galimybės: matote jums tinkančius darbus. Matomumas priklauso nuo tinklo dydžio ir jūsų pasiruošimo.",
+    "marketplaceMap": "Rinkos žemėlapis: rodo signalus pagal šalį ir miestą. Taškas žemėlapyje atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
+    "communicationInbox": "Komunikacija: tikras pokalbių aplankas. Pokalbis dėl projekto atveriamas su projekto kontekstu.",
+    "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
+    "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi. Kol kas pirmi vartotojai jungiami rankiniu / owner-review būdu. Stripe bus prijungtas kitame etape.",
+    "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."
   },
   "skillGroups": {
     "profession": "Profesija / darbo kryptis",
