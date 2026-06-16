@@ -100,6 +100,9 @@ export async function SiteFooter() {
             <Link href="/legal/cookies" className="text-sm text-text-secondary hover:text-text-primary">
               {legal("cookies.title")}
             </Link>
+            <Link href="/legal/marketplace-rules" className="text-sm text-text-secondary hover:text-text-primary">
+              {legal("marketplaceRules.title")}
+            </Link>
           </div>
 
           <div className="flex flex-col gap-3">

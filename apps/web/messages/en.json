@@ -3334,6 +3334,20 @@
   },
   "legal": {
     "draftNote": "This document is a draft. The final, binding text will be reviewed by legal counsel before public launch (M5).",
+      "marketplaceRules": {
+        "title": "Marketplace rules",
+        "intro": "These rules keep the marketplace safe and fair. They apply to all users and offers.",
+        "rules": [
+          "The system never confirms the right to work or legal eligibility without the required documents.",
+          "A verified status appears only after a real human check — never automatically.",
+          "Contacts are not shown without the user's permission.",
+          "Public offers appear only after moderation; untrusted or suspicious offers are hidden.",
+          "Trading regulated or illegal goods and services is prohibited.",
+          "A map point appears only with verified coordinates — no fake markers.",
+          "Payments are not active yet; no payments run through the platform at this stage.",
+          "Inappropriate behaviour or suspicious activity can be reported — moderators review it."
+        ]
+      },
     "terms": {
       "title": "Terms of Service"
     },

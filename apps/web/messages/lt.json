@@ -3334,6 +3334,20 @@
   },
   "legal": {
     "draftNote": "Šis dokumentas yra juodraštis. Galutinį, įpareigojantį tekstą prieš viešą startą peržiūrės teisininkai (M5).",
+      "marketplaceRules": {
+        "title": "Prekyvietės taisyklės",
+        "intro": "Šios taisyklės užtikrina, kad prekyvietė liktų saugi ir sąžininga. Jos galioja visiems vartotojams ir pasiūlymams.",
+        "rules": [
+          "Sistema nepatvirtina teisės dirbti ar legalaus tinkamumo be reikiamų dokumentų.",
+          "Statusas „patvirtinta“ rodomas tik po realaus žmogaus patikrinimo — jokio automatinio patvirtinimo.",
+          "Kontaktai nerodomi be vartotojo leidimo.",
+          "Vieši pasiūlymai rodomi tik po moderavimo; nepatikimi ar įtartini pasiūlymai paslepiami.",
+          "Draudžiama prekiauti reguliuojamomis ar neteisėtomis prekėmis ir paslaugomis.",
+          "Žemėlapyje taškas atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
+          "Mokėjimai dar neaktyvūs; jokių mokėjimų per platformą šiame etape.",
+          "Apie netinkamą elgesį ar įtartiną veiklą galima pranešti — moderatoriai peržiūri."
+        ]
+      },
     "terms": {
       "title": "Naudojimo sąlygos"
     },
