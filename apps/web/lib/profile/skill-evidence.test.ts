@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   deriveSkillEvidence,
   isSkillSupportedByWork,
+  skillEvidenceStatus,
 } from "./skill-evidence";
 
 describe("isSkillSupportedByWork", () => {
@@ -85,5 +86,20 @@ describe("deriveSkillEvidence", () => {
   it("unsupported never goes negative", () => {
     const s = deriveSkillEvidence([{ source: "work_journal" }], 0);
     expect(s.unsupported).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("skillEvidenceStatus — deterministic single status (no contradiction)", () => {
+  it("nothing declared → null (render no block)", () => {
+    expect(skillEvidenceStatus({ declared: 0, supported: 0 })).toBeNull();
+  });
+  it("0 of N supported → none", () => {
+    expect(skillEvidenceStatus({ declared: 21, supported: 0 })).toBe("none");
+  });
+  it("6 of 21 supported → some (never 'none' alongside a positive count)", () => {
+    expect(skillEvidenceStatus({ declared: 21, supported: 6 })).toBe("some");
+  });
+  it("all supported → all", () => {
+    expect(skillEvidenceStatus({ declared: 21, supported: 21 })).toBe("all");
   });
 });

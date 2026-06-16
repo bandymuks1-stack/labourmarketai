@@ -125,8 +125,10 @@ describe("Guard: header chip parity with the dashboard catalogue per role", () =
     expect(ROLE_BY_ID.agency.canBeAddedLater).toBe(false);
   });
 
-  it("customer is start-available with setupRoute /dashboard/start/buyer (PR #101: migration 0026 applied → partial flipped to start-available)", () => {
-    expect(ROLE_BY_ID.customer.availability).toBe("start-available");
+  it("customer is HIDDEN from add/start surfaces (systemic-ux-roles-v1: buying is an action, not a top-level identity); setupRoute kept for the legacy form", () => {
+    expect(ROLE_BY_ID.customer.availability).toBe("hidden");
+    expect(ROLE_BY_ID.customer.safeToShowInRoleSurfaces).toBe(false);
+    expect(ROLE_BY_ID.customer.canBeAddedLater).toBe(false);
     expect(ROLE_BY_ID.customer.setupRoute).toBe("/dashboard/start/buyer");
   });
 

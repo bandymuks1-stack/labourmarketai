@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { deriveProfileNextAction } from "@/lib/profile/profile-next-action";
+import { skillEvidenceStatus } from "@/lib/profile/skill-evidence";
 
 /**
  * Profile/CV/Evidence hub overview — the unifying "professional passport"
@@ -128,14 +129,22 @@ export async function ProfileHubOverview({
               declared: skillEvidence.declared,
             })}
           </p>
-          {skillEvidence.unsupported > 0 && (
-            <p
-              className="text-[11px] leading-relaxed text-text-muted"
-              data-testid="profile-hub-skill-evidence-none"
-            >
-              {t("evidence.noneYet")}
-            </p>
-          )}
+          {/* systemic-ux-skills-v1: ONE deterministic status line that always
+              agrees with the count above — never "6 iš 21" next to a flat
+              "Dar nėra darbo įrašų...". */}
+          {(() => {
+            const status = skillEvidenceStatus(skillEvidence);
+            if (!status) return null;
+            return (
+              <p
+                className="text-[11px] leading-relaxed text-text-muted"
+                data-testid="profile-hub-skill-evidence-status"
+                data-status={status}
+              >
+                {t(`evidence.status_${status}`)}
+              </p>
+            );
+          })()}
         </div>
       )}
 

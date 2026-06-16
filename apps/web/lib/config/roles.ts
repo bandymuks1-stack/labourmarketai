@@ -145,17 +145,26 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     sortOrder: 30,
   },
   {
+    // Owner directive (systemic-ux-roles-v1): "Pirkėjas" (buyer) is NOT a
+    // top-level identity — buying is an ACTION a person or a company takes.
+    // Mirrors the agency treatment: `hidden` removes buyer from every
+    // add-role / start / "My spaces" surface. Buying stays reachable as an
+    // action card (IdentityActions → /dashboard/buyer). Users who already
+    // hold the customer role keep route access (legacy continuity); the
+    // switcher folds it into the Įmonė identity rather than showing
+    // "Pirkėjas" as a peer space. setupRoute is kept so the legacy
+    // /dashboard/start/buyer form still resolves.
     id: "customer",
     labelKey: "auth.signup.role.customer",
     descriptionKey: "roles.customer.description",
-    availability: "start-available",
+    availability: "hidden",
     entryPoint: false,
-    canBeAddedLater: true,
+    canBeAddedLater: false,
     primaryFeatureKey: "customer_workspace",
     primaryRoute: "/dashboard",
     setupRoute: "/dashboard/start/buyer",
     preparingReasonKey: "roles.preparingReason.startAvailable",
-    safeToShowInRoleSurfaces: true,
+    safeToShowInRoleSurfaces: false,
     sortOrder: 40,
   },
   // ── Forward-looking roles — hidden until UI surfaces ship ─────────
@@ -296,4 +305,41 @@ export function isLiveRoleId(id: string): id is LiveRoleId {
 
 export function rolePreparingLabelKey(): string {
   return "roles.status.preparing";
+}
+
+// ── Base identities (systemic-ux-roles-v1) ──────────────────────────
+//
+// The owner model has exactly TWO base identities a user can switch
+// between — Asmuo (person) and Įmonė (company) — plus an Admin space
+// that is handled separately (admin badge, never a role chip). Buy /
+// sell / hire / agency activity are ACTIONS inside an identity, not
+// identities themselves. The role switcher renders base identities, not
+// raw `profile_roles` values, so "Agentūra" / "Pirkėjas" never appear as
+// top-level switchable spaces. The legacy 4-role DB enum is untouched;
+// agency/customer simply fold into the company identity here.
+
+export type BaseIdentity = "person" | "company";
+
+/** The base identity a live role belongs to. `worker` → person; every
+ *  company-family role (`company`, `agency`, `customer`) → company.
+ *  Returns null for roles that are not a base identity surface. */
+export function baseIdentityForRole(id: string): BaseIdentity | null {
+  if (id === "worker") return "person";
+  if (id === "company" || id === "agency" || id === "customer") return "company";
+  return null;
+}
+
+/** Canonical role to switch to for a base identity (the value passed to
+ *  `switchRole`). Person → worker; company → company. */
+export const BASE_IDENTITY_PRIMARY_ROLE: Record<BaseIdentity, LiveRoleId> = {
+  person: "worker",
+  company: "company",
+};
+
+/** Render order for base identities in the switcher. */
+export const BASE_IDENTITY_ORDER: readonly BaseIdentity[] = ["person", "company"];
+
+/** i18n key (under `auth.roleSwitcher`) for a base identity's space label. */
+export function baseIdentityLabelKey(identity: BaseIdentity): "personSpace" | "companySpace" {
+  return identity === "person" ? "personSpace" : "companySpace";
 }

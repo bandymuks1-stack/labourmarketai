@@ -82,6 +82,18 @@ export function DemandRequestButton({
     workCategories.flatMap((c) => c.options).find((o) => o.slug === workType)?.label ?? "";
   const accommodationLabel =
     accommodationOptions.find((o) => o.value === accommodation)?.label ?? "";
+  // systemic-ux-mobile-v1: dark-listbox option sets (replace the native white
+  // dropdown on mobile). Profession options are flattened from the sector
+  // groups, sector context kept in the label so nothing is lost.
+  const professionOptions: { value: string; label: string }[] =
+    workCategories.flatMap((c) =>
+      c.options.map((o) => ({ value: o.slug, label: `${o.label} · ${c.sector}` })),
+    );
+  const countryOptions: { value: string; label: string }[] =
+    MARKET_COUNTRIES.map((code) => ({
+      value: code,
+      label: tlm(`countryNames.${code}`),
+    }));
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
@@ -344,40 +356,26 @@ export function DemandRequestButton({
               sees on the opportunities board (no free text exposed). */}
           <label className="flex flex-col gap-1.5">
             <Label>{tc("profession")}</Label>
-            <select
+            <DarkListbox
               value={workType}
-              onChange={(e) => setWorkType(e.target.value)}
-              className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none focus:border-brand-blue"
-              data-testid="demand-work-type"
-            >
-              <option value="">—</option>
-              {workCategories.map((c) => (
-                <optgroup key={c.key} label={c.sector}>
-                  {c.options.map((o) => (
-                    <option key={o.slug} value={o.slug}>
-                      {o.label}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+              onChange={setWorkType}
+              options={professionOptions}
+              ariaLabel={tc("profession")}
+              placeholder="—"
+              testId="demand-work-type"
+            />
           </label>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-1.5">
               <Label>{tc("country")}</Label>
-              <select
+              <DarkListbox
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none focus:border-brand-blue"
-                data-testid="demand-country-select"
-              >
-                <option value="">—</option>
-                {MARKET_COUNTRIES.map((code) => (
-                  <option key={code} value={code}>
-                    {tlm(`countryNames.${code}`)}
-                  </option>
-                ))}
-              </select>
+                onChange={setCountry}
+                options={countryOptions}
+                ariaLabel={tc("country")}
+                placeholder="—"
+                testId="demand-country-select"
+              />
             </label>
             <label className="flex flex-col gap-1.5">
               <Label>{tc("numberOfWorkers")}</Label>
@@ -394,19 +392,14 @@ export function DemandRequestButton({
           </div>
           <label className="flex flex-col gap-1.5">
             <Label>{tc("accommodation")}</Label>
-            <select
+            <DarkListbox
               value={accommodation}
-              onChange={(e) => setAccommodation(e.target.value)}
-              className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none focus:border-brand-blue"
-              data-testid="demand-accommodation"
-            >
-              <option value="">—</option>
-              {accommodationOptions.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+              onChange={setAccommodation}
+              options={accommodationOptions}
+              ariaLabel={tc("accommodation")}
+              placeholder="—"
+              testId="demand-accommodation"
+            />
           </label>
 
           <label className="flex flex-col gap-1.5">

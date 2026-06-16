@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LabourMarket.ai — Systemic UX / Roles / Map / Comms / Skills — Owner Review v1</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#0f1420; --ink:#e6edf6; --muted:#9fb0c3;
+    --line:#243044; --blue:#4aa3ff; --cyan:#39d0d8; --green:#37d39b; --warn:#ffb454; --red:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:28px;margin:0 0 4px;letter-spacing:-.02em}
+  h2{font-size:18px;margin:34px 0 12px;border-left:3px solid var(--blue);padding-left:10px}
+  h3{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px}
+  .sub{color:var(--muted);margin:0 0 20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:720px){.grid{grid-template-columns:1fr}}
+  .before,.after{border-radius:10px;padding:12px 14px;border:1px solid var(--line)}
+  .before{background:#1a1320;border-color:#3a2330}
+  .after{background:#0f1b18;border-color:#1f3a31}
+  .tag{display:inline-block;font:600 10px/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;padding:4px 7px;border-radius:5px;border:1px solid}
+  .t-before{color:var(--red);border-color:#5a2330}
+  .t-after{color:var(--green);border-color:#1f3a31}
+  .t-p0{color:var(--warn);border-color:#5a4023}
+  code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#0a0e16;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:#cfe2ff}
+  pre{background:#0a0e16;border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;font-size:12.5px}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-weight:600}
+  .ok{color:var(--green);font-weight:700}
+  .note{color:var(--muted);font-size:13px}
+  ul{margin:6px 0 6px 18px;padding:0}
+  li{margin:3px 0}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+  a{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Systemic UX · Roles · Map · Communication · Skills — Owner Review</h1>
+      <p class="sub">Branch <code>fix/systemic-ux-roles-skills-map-comms-v1</code> · 2026-06-16 · audit-first, root-cause sprint</p>
+    </div>
+    <div>
+      <span class="tag t-after">typecheck 0</span>
+      <span class="tag t-after">lint 0</span>
+      <span class="tag t-after">4227 tests</span>
+      <span class="tag t-after">build OK</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <strong>How to read this.</strong> Each section is a real, reported problem with its <span class="tag t-before">before</span>
+    and <span class="tag t-after">after</span>, plus the exact code/guard that proves the fix. Screens are auth-gated, so
+    behaviour is proven by deterministic tests + source guards (named per row). To capture live screenshots, run the app
+    and visit the listed routes (see <em>Screenshot routes</em> at the end). No DB migration was performed; the no-migration
+    boundary is listed at the end.
+  </div>
+
+  <h2>1 · Role / identity — “Agentūra” and “Pirkėjas” removed as top-level roles</h2>
+  <div class="grid">
+    <div class="before"><span class="tag t-before">before</span><span class="tag t-p0">P0</span>
+      <p>The switcher rendered every held role verbatim — a legacy holder saw <b>Pirkėjas</b> and <b>Agentūra</b> as peer,
+      switchable top-level spaces; <code>customer</code> was also offered under “Add role”.</p>
+    </div>
+    <div class="after"><span class="tag t-after">after</span>
+      <p>The switcher renders <b>base identities</b> only: <b>Asmens erdvė</b> / <b>Įmonės erdvė</b> (+ admin badge for admins).
+      Buy / sell / hire / agency are <b>actions</b> (cards under Įmonė). <code>agency</code> + <code>customer</code> fold into
+      the company identity; both are <code>availability:"hidden"</code>.</p>
+    </div>
+  </div>
+  <p class="note">Files: <code>lib/config/roles.ts</code> (hide customer + <code>baseIdentityForRole</code>/<code>BASE_IDENTITY_PRIMARY_ROLE</code>),
+  <code>components/app/role-switcher.tsx</code> (identity rendering), <code>messages/{lt,en,ru}.json</code>
+  (<code>auth.roleSwitcher.personSpace/companySpace</code>).
+  Guards: <code>systemic-ux-sprint-v1</code>, <code>header-role-switcher-parity</code>, <code>role-no-silo-framing</code>, <code>company-role-simplicity</code>.</p>
+
+  <h2>2 · Skill recognition from text — actually works now</h2>
+  <div class="grid">
+    <div class="before"><span class="tag t-before">before</span><span class="tag t-p0">P0</span>
+      <ul>
+        <li>Recognition ran only behind a secondary button, never on Save.</li>
+        <li>The link table <code>journal_entry_skills</code> had <b>zero callers</b> — no entry ever created evidence.</li>
+        <li>Lexicon had no needles for nuotekos, vėdinimas, šildymas, stogas, grafikų derinimas.</li>
+      </ul>
+    </div>
+    <div class="after"><span class="tag t-after">after</span>
+      <ul>
+        <li>On Save, <code>autoLinkRecognizedJournalSkills()</code> runs recognition server-side and links the worker’s
+        <b>declared</b> skills (additive, never invents, never verifies — no migration).</li>
+        <li>Lexicon gaps filled (drainage / pipefitting / ventilation / hvac / heating / roofing / work-scheduling).</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Proof — owner’s LT test sentences (vitest <code>skill-recognition-lt-sentences</code>)</h3>
+  <table>
+    <tr><th>Sakinys</th><th>Atpažinti įgūdžiai</th></tr>
+    <tr><td>“Šiandien montavau nuotekų vamzdžius ir pajungiau santechnikos prietaisus.”</td><td><code>plumbing</code>, <code>drainage</code>, <code>pipefitting</code></td></tr>
+    <tr><td>“Dirbau su vėdinimo sistema ir skaičiau brėžinius.”</td><td><code>ventilation</code>, <code>blueprint-reading</code></td></tr>
+    <tr><td>“Dengėme stogą, montavome konstrukcijas ir ruošėme medieną.”</td><td><code>roofing</code>, <code>carpentry</code></td></tr>
+    <tr><td>“Koordinavau komandą objekte ir pildžiau dokumentus.”</td><td><code>team-coordination</code></td></tr>
+    <tr><td>“Ieškojau darbuotojų, derinau grafikus ir bendravau su klientu.”</td><td><code>work-scheduling</code></td></tr>
+    <tr><td>Be diakritikų: “Dirbau su vedinimo sistema ir skaiciau brezinius.”</td><td><code>ventilation</code>, <code>blueprint-reading</code> (folding works)</td></tr>
+  </table>
+  <p class="note">Files: <code>lib/structuring/keywords.ts</code>, <code>lib/journal/journal-entry-skills-actions.ts</code>,
+  <code>components/app/journal-entry-composer.tsx</code>. All 216 structuring tests still green (no false positives).</p>
+
+  <h2>3 · Skill evidence text — one deterministic status, no contradiction</h2>
+  <div class="grid">
+    <div class="before"><span class="tag t-before">before</span><span class="tag t-p0">P0</span>
+      <p>“Paremta darbo įrašais: <b>6 iš 21</b>” shown <b>together with</b> “Dar nėra darbo įrašų, kurie paremtų šiuos įgūdžius.”</p>
+    </div>
+    <div class="after"><span class="tag t-after">after</span>
+      <p>One line from <code>skillEvidenceStatus()</code>:</p>
+      <ul>
+        <li><b>0 / N</b> → “Dar nėra darbo įrašų, kurie paremtų šiuos įgūdžius.”</li>
+        <li><b>1…N-1</b> → “Kai kuriuos įgūdžius jau paremia darbo įrašai.”</li>
+        <li><b>N / N</b> → “Visi šie įgūdžiai turi darbo įrašų pagrindimą.”</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">Files: <code>lib/profile/skill-evidence.ts</code>, <code>components/app/profile-hub-overview.tsx</code>,
+  <code>messages.*.profileHub.evidence.status_{none,some,all}</code>. Guards: <code>skill-evidence</code>, <code>profile-cv-evidence-hub</code>.</p>
+
+  <h2>4 · Skill taxonomy — functional groups instead of one flat pile</h2>
+  <div class="grid">
+    <div class="before"><span class="tag t-before">before</span>
+      <p>Profession (“Santechnikas”), specific task (“Nuotekų montavimas”), general (“Vairavimas”) and business
+      (“Apskaitos sistemos”) skills were all one undifferentiated list.</p>
+    </div>
+    <div class="after"><span class="tag t-after">after</span>
+      <p>Single source of truth <code>classifySkillSlug()</code> → 4 functional groups, rendered with headings:</p>
+      <span class="pill">Profesija / darbo kryptis</span><span class="pill">Konkretūs darbo įgūdžiai</span>
+      <span class="pill">Bendrieji gebėjimai</span><span class="pill">Administraciniai / verslo gebėjimai</span>
+      <p class="note">The 5th owner group “Įrodymais paremti” is a <b>status</b> axis (already in <code>skill-evidence-state.ts</code>) and composes with the 4 categories.</p>
+    </div>
+  </div>
+  <p class="note">Files: <code>lib/skills/skill-groups.ts</code> (+ test), <code>components/app/capability-profile-section.tsx</code>,
+  <code>messages.*.skillGroups.*</code>.</p>
+
+  <h2>5 · Project page — a real work object: Location + Communication</h2>
+  <div class="grid">
+    <div class="before"><span class="tag t-before">before</span><span class="tag t-p0">P0</span>
+      <p>Only a tiny city chip; <code>country</code> fetched but never shown; no location status, no map zone, no chat entry.</p>
+    </div>
+    <div class="after"><span class="tag t-after">after</span>
+      <p><b>Location block</b> (city + country + honest status), reusing the signal-only market-map mappability rule —
+      <b>no fake marker</b>:</p>
+      <pre>„Vieta nurodyta tekstu, žemėlapio taškas dar nepatvirtintas.”
+Taškas atsiras tik su patvirtintomis koordinatėmis — jokių spėjamų žymeklių.</pre>
+      <p><b>Communication block</b> + “Pokalbis dėl projekto” CTA wired to the real inbox (<code>/dashboard/communication</code>),
+      clearly scoped to this project. No fake chat.</p>
+    </div>
+  </div>
+  <p class="note">Files: <code>lib/projects/location.ts</code> (+ test), <code>app/[locale]/dashboard/projects/[id]/page.tsx</code>,
+  <code>components/app/arena/project-map.tsx</code> (card chat CTA). Guard: <code>systemic-ux-sprint-v1</code>.
+  Marker layer + a project-bound thread = owner-gated migration (see boundary).</p>
+
+  <h2>6 · Admin / telemetry isolation + technical-term cleanup</h2>
+  <div class="grid">
+    <div class="before"><span class="tag t-before">before</span><span class="tag t-p0">P0</span>
+      <p>15 admin pages each gated individually (a new page that forgot would leak). User copy leaked
+      <b>ARENA</b>, <b>Draftas</b>, <b>read-only</b>.</p>
+    </div>
+    <div class="after"><span class="tag t-after">after</span>
+      <p>New fail-closed <code>dashboard/admin/layout.tsx</code> calls <code>requireSuperadmin</code> once for the whole subtree.
+      Terms renamed: ARENA→“Projekto eiga”, Draftas→“Ruošiama”, read-only→“tik peržiūrai”.
+      A namespace-aware guard now blocks any technical token (telemetry/QA/v1/task_name/read-only/ARENA/Draftas) in non-admin copy.</p>
+    </div>
+  </div>
+  <p class="note">Files: <code>app/[locale]/dashboard/admin/layout.tsx</code>, <code>messages.*</code>.
+  Guards: <code>user-facing-term-leak</code> (all 3 locales clean), <code>admin-visibility</code>.</p>
+
+  <h2>7 · Mobile UX — overflow + dark premium pickers</h2>
+  <div class="grid">
+    <div class="before"><span class="tag t-before">before</span><span class="tag t-p0">P0</span>
+      <ul>
+        <li>“N įrašai laukia patvirtinimo” CTA squeezed/overlapped the text on 360px.</li>
+        <li>Profile 4-action row wrapped raggedly / clipped right.</li>
+        <li>Native <b>white</b> <code>&lt;select&gt;</code> (profesija / šalis / apgyvendinimas) in a dark app.</li>
+      </ul>
+    </div>
+    <div class="after"><span class="tag t-after">after</span>
+      <ul>
+        <li>Confirm-pulse stacks on mobile; CTA is <code>w-full</code>+<code>shrink-0</code> (no overlap).</li>
+        <li>Profile actions become a 2-column grid on mobile (max 2 across, never clip).</li>
+        <li>The 3 native selects are now the dark <code>DarkListbox</code> (search/clear close, large tap targets).</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">Files: <code>components/app/arena/confirm-pulse.tsx</code>, <code>app/[locale]/dashboard/profile/page.tsx</code>,
+  <code>components/app/demand-request-button.tsx</code>. Guards: <code>systemic-ux-sprint-v1</code>, <code>mobile-layout</code>,
+  <code>employer-need-structured-fields</code>. (Role switcher + skill picker were already custom dark.)</p>
+
+  <h2>Validation</h2>
+  <table>
+    <tr><th>Check</th><th>Result</th></tr>
+    <tr><td><code>pnpm -F web typecheck</code></td><td class="ok">exit 0</td></tr>
+    <tr><td><code>pnpm -F web lint</code></td><td class="ok">exit 0</td></tr>
+    <tr><td><code>npx vitest run</code> (full)</td><td class="ok">288 files · 4227 tests passed</td></tr>
+    <tr><td><code>pnpm -F web build</code></td><td class="ok">exit 0</td></tr>
+    <tr><td>New guards</td><td class="ok">systemic-ux-sprint-v1 · user-facing-term-leak · skill-recognition-lt-sentences · skill-groups · projects/location</td></tr>
+    <tr><td>DB migration</td><td>None (all fixes app-layer; <code>journal_entry_skills</code> already existed)</td></tr>
+  </table>
+
+  <h3>Screenshot routes (capture live)</h3>
+  <p class="note">Run the app and visit, at 360 / 390 / 430 px:
+  <code>/lt/dashboard</code> (role switcher) · <code>/lt/dashboard/profile</code> (skills groups + evidence + action row) ·
+  <code>/lt/dashboard/projects</code> (card chat CTA) · a project detail (location + communication) ·
+  company need flow (dark pickers) · <code>/lt/dashboard/admin</code> as a non-admin (redirects to /dashboard).</p>
+
+  <h3>No-migration boundary (next safe sprint, owner-gated)</h3>
+  <ul>
+    <li>Identity data collapse (agency/customer enum → company + company_type) — RED migration.</li>
+    <li>Verified project map <b>markers</b> (lat/lng on <code>projects</code>) — migration; v1 stays honest text-only.</li>
+    <li>One persistent <b>project-bound</b> conversation (<code>conversations.project_id</code>) — additive migration; v1 uses the existing inbox.</li>
+  </ul>
+</div>
+</body>
+</html>

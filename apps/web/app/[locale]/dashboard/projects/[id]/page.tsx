@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   FileWarning,
   MapPin,
+  MessageSquare,
   NotebookPen,
   ShieldCheck,
   Users,
@@ -14,6 +15,10 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import { getProjectStadium } from "@/lib/projects/stadium";
+import {
+  deriveProjectLocation,
+  formatProjectPlace,
+} from "@/lib/projects/location";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { CountUp } from "@/components/app/today/count-up";
 import { type Role } from "@/lib/auth/actions";
@@ -89,6 +94,24 @@ export default async function ProjectStadiumPage({
   const { ops, positions, entriesToday } = stadium;
   const hasTeam = ops.workers.length > 0;
 
+  // systemic-ux-project-v1: honest location status (no fake marker) + project
+  // place line, reusing the signal-only market-map mappability rule.
+  const location = deriveProjectLocation({
+    city: ops.project.city,
+    country: ops.project.country,
+  });
+  const place = formatProjectPlace(location);
+  const tLoc = await getTranslations("projectOps.stadium.location");
+  const tComm = await getTranslations("projectOps.stadium.communication");
+  const locationStatusText =
+    location.status === "missing"
+      ? tLoc("statusMissing")
+      : location.status === "verified"
+        ? tLoc("statusVerified")
+        : location.status === "unverified"
+          ? tLoc("statusUnverified")
+          : tLoc("statusTextOnly");
+
   const initialsOf = (name: string) => {
     const parts = name.trim().split(/\s+/).slice(0, 2);
     return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "•";
@@ -130,6 +153,62 @@ export default async function ProjectStadiumPage({
           </span>
         </div>
       </header>
+
+      {/* ── Location: a project is a real work object, with honest place
+            context. NO fake marker — a map point only ever appears with
+            verified coordinates (systemic-ux-project-v1). ── */}
+      <section
+        className="card-border flex flex-col gap-2 p-5"
+        data-testid="project-location"
+        data-location-status={location.status}
+      >
+        <h2 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <MapPin className="h-3.5 w-3.5" aria-hidden />
+          {tLoc("title")}
+        </h2>
+        {place ? (
+          <p className="text-base font-semibold text-text-primary">{place}</p>
+        ) : null}
+        <p className="text-xs leading-relaxed text-text-secondary">
+          {locationStatusText}
+        </p>
+        {!location.mappable && (
+          <div
+            className="mt-1 flex items-center gap-2 rounded-md border border-dashed border-ink-500 px-3 py-3 text-[11px] leading-relaxed text-text-muted"
+            data-testid="project-location-no-marker"
+          >
+            <MapPin className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
+            {tLoc("noMarkerNote")}
+          </div>
+        )}
+      </section>
+
+      {/* ── Communication: every project has a clearly-scoped way in. The
+            real chat persistence is the existing inbox; a dedicated
+            project-bound thread is an owner-gated follow-up. No fake chat. ── */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="project-communication"
+      >
+        <h2 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <MessageSquare className="h-3.5 w-3.5" aria-hidden />
+          {tComm("title")}
+        </h2>
+        <p className="text-xs leading-relaxed text-text-secondary">
+          {tComm("context")}
+        </p>
+        <Link
+          href={`/${locale}/dashboard/communication`}
+          data-testid="project-chat-cta"
+          className="inline-flex min-h-11 w-fit items-center gap-2 rounded-md border border-brand-blue/40 px-4 py-2.5 text-sm font-medium text-brand-blue transition-colors duration-fast hover:bg-brand-blue/10"
+        >
+          <MessageSquare className="h-4 w-4" aria-hidden />
+          {tComm("cta")}
+        </Link>
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {tComm("notReadyNote")}
+        </p>
+      </section>
 
       {/* ── Confirm pulse — the S3.5 queue in the stadium rhythm ── */}
       <ConfirmPulse />

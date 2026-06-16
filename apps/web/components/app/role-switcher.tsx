@@ -6,11 +6,14 @@ import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import {
-  LABOUR_MARKET_ROLES,
   ROLE_BY_ID,
-  isLiveRoleId,
   roleStatusChipKey,
   roleSwitcherTargetForRole,
+  baseIdentityForRole,
+  baseIdentityLabelKey,
+  BASE_IDENTITY_ORDER,
+  BASE_IDENTITY_PRIMARY_ROLE,
+  type BaseIdentity,
   type LabourMarketRoleId,
 } from "@/lib/config/roles";
 import { usePopoverDismiss } from "@/lib/hooks/use-popover-dismiss";
@@ -24,7 +27,6 @@ import { Settings } from "lucide-react";
  *  surface) — we tag them honestly with "Ruošiama" so the user is not
  *  misled into expecting full feature parity. */
 export function RoleSwitcher() {
-  const t = useTranslations("auth");
   const tSwitcher = useTranslations("auth.roleSwitcher");
   const tAccount = useTranslations("auth.dashboard.account");
   const { roles, activeRole, isAdmin, adminUiHidden, switchRole, addRole } =
@@ -38,15 +40,30 @@ export function RoleSwitcher() {
   const close = useCallback(() => setOpen(false), []);
   usePopoverDismiss(open, close, rootRef);
 
-  // Renderable roles come from the central config. We still constrain the
-  // pick / addRole branches to the LIVE role ids (`worker`/`company`/
-  // `agency`/`customer`) because those are the values the auth backend
-  // accepts today; preparing FUTURE roles (freelancer, team_lead, …) are
-  // intentionally `availability: "hidden"` and never reach this list.
-  const liveRoleIds = LABOUR_MARKET_ROLES.filter(
-    (r) => r.availability !== "hidden" && isLiveRoleId(r.id),
-  ).map((r) => r.id as Role);
-  const missing = liveRoleIds.filter((r) => !roles.includes(r));
+  // systemic-ux-roles-v1: the switcher renders BASE IDENTITIES (Asmuo /
+  // Įmonė), not raw `profile_roles` values. "Agentūra" / "Pirkėjas" are
+  // company ACTIONS, not top-level identities, so they fold into the Įmonė
+  // identity instead of appearing as peer switchable spaces. The legacy
+  // 4-role DB enum is untouched — `roleForIdentity` resolves each identity
+  // back to the concrete role the backend accepts.
+  const heldIdentitySet = new Set<BaseIdentity>();
+  for (const r of roles) {
+    const id = baseIdentityForRole(r);
+    if (id) heldIdentitySet.add(id);
+  }
+  const heldIdentities = BASE_IDENTITY_ORDER.filter((i) => heldIdentitySet.has(i));
+  const missingIdentities = BASE_IDENTITY_ORDER.filter((i) => !heldIdentitySet.has(i));
+  const activeIdentity = activeRole ? baseIdentityForRole(activeRole) : null;
+
+  /** Concrete role to switch to for a base identity — the canonical primary
+   *  (worker / company) when held, else any held role that maps to it
+   *  (e.g. a legacy agency/customer holder switching to Įmonė). */
+  function roleForIdentity(identity: BaseIdentity): Role | null {
+    const primary = BASE_IDENTITY_PRIMARY_ROLE[identity];
+    if (roles.includes(primary)) return primary;
+    const fallback = roles.find((r) => baseIdentityForRole(r) === identity);
+    return (fallback as Role) ?? null;
+  }
 
   async function pick(r: Role) {
     if (r === activeRole) {
@@ -100,7 +117,7 @@ export function RoleSwitcher() {
           <span aria-hidden>•</span>
         )}
         <span className="hidden font-mono text-[11px] uppercase tracking-label text-text-secondary sm:inline">
-          {activeRole ? t(`signup.role.${activeRole}`) : tSwitcher("label")}
+          {activeIdentity ? tSwitcher(baseIdentityLabelKey(activeIdentity)) : tSwitcher("label")}
         </span>
         <span aria-hidden className="text-text-muted">
           ▾
@@ -137,33 +154,37 @@ export function RoleSwitcher() {
             {tSwitcher("clarityNote")}
           </p>
           <ul className="flex flex-col gap-0.5">
-            {roles.map((r) => {
-              // Single source for "what chip belongs on this role?" — the
-              // catalogue + the shared roleStatusChipKey helper. Keeps the
-              // header dropdown and the dashboard catalogue card in
-              // lock-step so they cannot disagree (PR #98 parity fix).
-              const cfg = ROLE_BY_ID[r as LabourMarketRoleId];
+            {heldIdentities.map((identity) => {
+              // Each switchable entry is a BASE IDENTITY (Asmuo / Įmonė).
+              // The status chip reflects the identity's canonical role
+              // availability, read through the shared roleStatusChipKey
+              // helper so the header + dashboard catalogue stay in lock-step.
+              const primary = BASE_IDENTITY_PRIMARY_ROLE[identity];
+              const target = roleForIdentity(identity);
+              const cfg = ROLE_BY_ID[primary as LabourMarketRoleId];
               const chipKey = cfg ? roleStatusChipKey(cfg.availability) : null;
               const isHonestlyActive = chipKey === "roles.status.active";
+              const isActive = identity === activeIdentity;
               const chipTone = isHonestlyActive
                 ? "border-state-success/40 text-state-success"
                 : chipKey === "roles.status.start"
                   ? "border-brand-blue/40 text-brand-blue"
                   : "border-state-warning/40 text-state-warning";
               return (
-                <li key={r}>
+                <li key={identity}>
                   <button
                     type="button"
-                    onClick={() => pick(r)}
-                    disabled={pending !== null}
+                    onClick={() => target && pick(target)}
+                    disabled={pending !== null || !target}
+                    data-testid={`role-switcher-identity-${identity}`}
                     className={cn(
                       "flex w-full items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-sm hover:bg-ink-700",
-                      r === activeRole && "text-brand-blue",
+                      isActive && "text-brand-blue",
                     )}
                   >
                     <span className="flex items-center gap-2">
-                      <RoleIcon role={r} className="h-4 w-4" />
-                      {t(`signup.role.${r}`)}
+                      <RoleIcon role={primary} className="h-4 w-4" />
+                      {tSwitcher(baseIdentityLabelKey(identity))}
                     </span>
                     <span className="ml-auto flex items-center gap-2">
                       {chipKey && !isHonestlyActive && (
@@ -172,7 +193,7 @@ export function RoleSwitcher() {
                             "rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
                             chipTone,
                           )}
-                          data-testid={`role-switcher-chip-${r}`}
+                          data-testid={`role-switcher-chip-${identity}`}
                         >
                           {chipKey === "roles.status.start"
                             ? tSwitcher("chip_start")
@@ -181,7 +202,7 @@ export function RoleSwitcher() {
                               : tAccount("preview_workspace")}
                         </span>
                       )}
-                      {r === activeRole && (
+                      {isActive && (
                         <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
                           {tSwitcher("active_label")}
                         </span>
@@ -193,15 +214,16 @@ export function RoleSwitcher() {
             })}
           </ul>
 
-          {missing.length > 0 && (
+          {missingIdentities.length > 0 && (
             <>
               <hr className="my-2 border-ink-600" />
               <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
                 {tSwitcher("add_role")}
               </p>
               <ul className="flex flex-col gap-0.5">
-                {missing.map((r) => {
-                  const cfg = ROLE_BY_ID[r as LabourMarketRoleId];
+                {missingIdentities.map((identity) => {
+                  const primary = BASE_IDENTITY_PRIMARY_ROLE[identity];
+                  const cfg = ROLE_BY_ID[primary as LabourMarketRoleId];
                   const chipKey = cfg
                     ? roleStatusChipKey(cfg.availability)
                     : null;
@@ -211,33 +233,31 @@ export function RoleSwitcher() {
                     : chipKey === "roles.status.start"
                       ? "border-brand-blue/40 text-brand-blue"
                       : "border-state-warning/40 text-state-warning";
+                  // Adding the Įmonė identity routes to the company setup
+                  // form (roleSwitcherTargetForRole → setupRoute), never a
+                  // blank-name addRole insert. The Asmuo identity has no
+                  // setup form, so it falls back to addRole(worker).
                   const target = cfg
                     ? roleSwitcherTargetForRole(cfg, false)
                     : { kind: "switch" as const };
-                  // PR #98 fix: clicking Įmonė / Agentūra / Pirkėjas no
-                  // longer triggers addRole(r) with empty FormData (which
-                  // previously inserted a row with legal_name=null — a
-                  // half-baked entity). Instead we render a Link to the
-                  // role's setupRoute so the user lands on the form and
-                  // types the legal name there.
                   return (
-                    <li key={r}>
+                    <li key={identity}>
                       {target.kind === "navigate" ? (
                         <Link
                           href={target.route as "/dashboard"}
                           onClick={() => setOpen(false)}
                           className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
-                          data-testid={`role-switcher-missing-${r}-link`}
+                          data-testid={`role-switcher-add-${identity}-link`}
                         >
-                          <RoleIcon role={r} className="h-4 w-4" />
-                          {t(`signup.role.${r}`)}
+                          <RoleIcon role={primary} className="h-4 w-4" />
+                          {tSwitcher(baseIdentityLabelKey(identity))}
                           {chipKey && !isHonestlyActive && (
                             <span
                               className={cn(
                                 "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
                                 chipTone,
                               )}
-                              data-testid={`role-switcher-chip-missing-${r}`}
+                              data-testid={`role-switcher-chip-add-${identity}`}
                             >
                               {chipKey === "roles.status.start"
                                 ? tSwitcher("chip_start")
@@ -250,12 +270,12 @@ export function RoleSwitcher() {
                       ) : (
                         <button
                           type="button"
-                          onClick={() => pick(r)}
+                          onClick={() => pick(primary as Role)}
                           disabled={pending !== null}
                           className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-secondary hover:bg-ink-700"
                         >
-                          <RoleIcon role={r} className="h-4 w-4" />
-                          {t(`signup.role.${r}`)}
+                          <RoleIcon role={primary} className="h-4 w-4" />
+                          {tSwitcher(baseIdentityLabelKey(identity))}
                           {chipKey && !isHonestlyActive && (
                             <span
                               className={cn(
@@ -270,7 +290,7 @@ export function RoleSwitcher() {
                                   : tAccount("preview_workspace")}
                             </span>
                           )}
-                          {pending === r && (
+                          {pending === primary && (
                             <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
                               {tSwitcher("switching")}
                             </span>

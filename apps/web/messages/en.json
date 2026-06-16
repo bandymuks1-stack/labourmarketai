@@ -114,7 +114,7 @@
       "flow": {
         "step1": "Create a project (name, location).",
         "step2": "Assign workers to the project.",
-        "step3": "Track progress and teams in the ARENA view."
+        "step3": "Track progress and teams in the project board view."
       }
     }
   },
@@ -245,7 +245,9 @@
     "evidence": {
       "intro": "Skills are stronger when backed by real work, learning or activity entries.",
       "supported": "Supported by work entries: {supported} of {declared}",
-      "noneYet": "No work entries support these skills yet."
+      "status_none": "No work entries support these skills yet.",
+      "status_some": "Some of these skills are already backed by work entries.",
+      "status_all": "All of these skills are backed by work entries."
     },
     "pillars": {
       "cv": {
@@ -1617,6 +1619,12 @@
     "saveError": "Could not save. Please try again.",
     "deleteError": "Could not remove. Please try again."
   },
+  "skillGroups": {
+    "profession": "Profession / work direction",
+    "specific": "Specific work skills",
+    "general": "General abilities",
+    "administrative": "Administrative / business abilities"
+  },
   "skills": {
     "workDirectionsTitle": "Work directions",
     "editingDirection": "Editing direction",
@@ -2208,6 +2216,8 @@
       "confirm": "Add",
       "adminMode": "Admin mode",
       "adminPanelLink": "Open operations control panel",
+      "personSpace": "Personal space",
+      "companySpace": "Company space",
       "clarityNote": "One account, two identities — you as a person and your company. Switching only changes which actions you see (find work, offer services, hire, submit a need); agency and buying are actions, not separate systems. Some company actions may need an organization profile later."
     },
     "dashboard": {
@@ -2704,7 +2714,7 @@
         "greeting": "👋 Welcome, {name}",
         "body_main": "We're finishing the company / agency functionality right now.",
         "body_notify": "We'll let you know the moment it's ready.",
-        "body_meanwhile": "In the meantime — you can browse the platform via the \"Discover\" tab (read-only)."
+        "body_meanwhile": "In the meantime — you can browse the platform via the \"Discover\" tab (view only)."
       },
       "menuLinks": {
         "playerCard": "My card",
@@ -3386,7 +3396,8 @@
       "title": "Your projects",
       "untitled": "Untitled project",
       "teamLabel": "On the team",
-      "openArena": "Open arena"
+      "openArena": "Open project board",
+      "chatCta": "Message about this project"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -3396,7 +3407,7 @@
       "zeroCta": "Review queue"
     },
     "draft": {
-      "title": "Draft — projects and teams"
+      "title": "In preparation — projects and teams"
     }
   },
   "projectOps": {
@@ -3525,6 +3536,21 @@
     },
     "stadium": {
       "eyebrow": "Stadium",
+      "location": {
+        "title": "Location",
+        "place": "{place}",
+        "statusMissing": "No location set yet. Add a city or country so the project has location context.",
+        "statusTextOnly": "Location is given as text; the map point is not confirmed yet.",
+        "statusUnverified": "Coordinates are not verified yet — no map point is shown.",
+        "statusVerified": "Location confirmed on the map.",
+        "noMarkerNote": "A map point appears only with verified coordinates — no guessed markers."
+      },
+      "communication": {
+        "title": "Communication",
+        "context": "This conversation is about this project.",
+        "cta": "Message about this project",
+        "notReadyNote": "A dedicated project thread is being prepared. For now start the conversation in your general inbox — the project context is shown above."
+      },
       "fieldCount": "{n, plural, one {# person on the field} other {# people on the field}}",
       "todayCount": "{n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "No entries yet today — the day is still waiting for its first record.",
@@ -3538,7 +3564,7 @@
       "emptyTeamCta": "Start the draft",
       "positionsTitle": "Missing positions",
       "positionsEmpty": "The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
-      "openOps": "Open the management arena"
+      "openOps": "Open project management"
     }
   },
   "setupRoleChoice": {
@@ -3655,7 +3681,7 @@
     },
     "adminSupport": {
       "title": "Support conversations",
-      "subtitle": "Support threads started by testers. Read-only list — admin joins from the thread detail page.",
+      "subtitle": "Support threads started by testers. View-only list — admin joins from the thread detail page.",
       "empty": "No support conversations yet.",
       "loadError": "Could not load conversations: {msg}",
       "unnamed": "(no subject)",
@@ -3863,7 +3889,7 @@
     "privacyNote": "Stored: route, locale, selected text, your comment, and (if signed in) your user id. Nobody except the admin sees these reports.",
     "admin": {
       "title": "Language reports (testing)",
-      "subtitle": "Confusing or wrong LT/EN copy flagged by testers. Read-only for v1 — status flipping will be added later.",
+      "subtitle": "Confusing or wrong LT/EN copy flagged by testers. View-only for now — status flipping will be added later.",
       "empty": "No reports yet.",
       "loadError": "Could not load reports: {msg}",
       "anonymous": "anonymous",
