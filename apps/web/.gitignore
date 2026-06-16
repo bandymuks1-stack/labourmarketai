@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Work Market Atlas — external-names denylist is supplied out-of-band (never committed)
+lib/guards/external-names.denylist.json
