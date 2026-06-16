@@ -123,6 +123,25 @@
       }
     }
   },
+  "searchRoom": {
+    "backToActions": "Veiksmų centras",
+    "title": "Darbuotojų paieška",
+    "subtitle": "Kaip pasiekti darbuotojus jūsų poreikiui — tikrais, struktūruotais keliais, be sugalvotų rezultatų.",
+    "reason": "Laisvos žodžių paieškos pagal žmones dar nėra: sukurti ją anksčiau, nei atsiranda sutikimą davusių ir patikrintų darbuotojų, reikštų rodyti netikrus rezultatus. Žemiau — tikras kelias, kuris veikia jau dabar.",
+    "paths": {
+      "scouting": {
+        "title": "Ieškoti pagal poreikį",
+        "body": "Pasirinkite savo struktūruotą poreikį — atitikties variklis parodys tinkamus kandidatus su pagrindimu ir trūkumais. Be sugalvotų balų.",
+        "cta": "Atidaryti paiešką pagal poreikį"
+      },
+      "need": {
+        "title": "Pateikti poreikį",
+        "body": "Dar neturite struktūruoto poreikio? Aprašykite, ko reikia — jis bus struktūruotas ir paruoštas paieškai.",
+        "cta": "Pateikti poreikį"
+      }
+    },
+    "matchingNote": "Atitiktis grindžiama jūsų poreikio ir darbuotojų profilių laukais — be sugalvotų reitingų ir be netikro patvirtinimo. Kontaktai lieka paslėpti, kol abi pusės nesutaria."
+  },
   "marketMap": {
     "backToActions": "Veiksmų centras",
     "title": "Gyvas darbo rinkos žemėlapis",
@@ -130,10 +149,11 @@
     "foundationNotice": "Jokių netikrų taškų — žemėlapis užsipildys tik realiais duomenimis, kai kiekvienas šaltinis turės vietos lauką.",
     "preparing": "ruošiama",
     "filtersTitle": "Filtrai",
+    "scopeTitle": "Signalų apimtis",
     "filterCountry": "Šalis",
     "filterSector": "Sektorius",
     "filterAll": "visi",
-    "canvasEmptyTitle": "Žemėlapio drobė ruošiama",
+    "canvasEmptyTitle": "Signalų žemėlapis — kol kas tuščias",
     "canvasEmptyBody": "Kai realūs duomenys turės vietos lauką, jie pasirodys čia — ne anksčiau. Jokių netikrų taškų.",
     "legendTitle": "Būsenos",
     "legend": {
@@ -141,8 +161,8 @@
       "needsDocs": "Trūksta dokumentų / pasirengimo",
       "noData": "Kol kas nėra duomenų"
     },
-    "layersTitle": "Planuojami sluoksniai",
-    "layerPlanned": "planuojama",
+    "layersTitle": "Signalų sluoksniai",
+    "layerPlanned": "nėra duomenų",
     "layerSchemaPrepared": "schema parengta",
     "layerSignalOnly": "tik signalas",
     "demandSchemaNote": "Įmonių poreikių vietos paruoštos kaip žmogaus tvirtinamas RED schemos planas; taškai bus rodomi tik po patvirtintos ir pritaikytos migracijos bei realių vietų.",
@@ -190,7 +210,7 @@
       "workerCountry": "Pridėti ar patikslinti pageidaujamą šalį",
       "companyNeed": "Pateikti įmonės poreikį",
       "project": "Sukurti projektą",
-      "accommodationNote": "Apgyvendinimo vietų žymėjimas — planuojamas būsimas duomenų sluoksnis, nepildomas netikrais taškais."
+      "accommodationNote": "Apgyvendinimo vietos dar nėra atskiras duomenų sluoksnis — ir niekada nebus pildomos netikrais taškais."
     }
   },
   "demandLocationCapture": {
@@ -1711,7 +1731,7 @@
     "importAddManually": "Įgūdžius pridėkite rankiniu būdu arba per žurnalo įrašus.",
     "importNotSaved": "Pasirinkta: {file}. Failas dar neįkeltas ir neišsaugotas.",
     "customPrompt": "Nerandate savo įgūdžio?",
-    "customComingSoon": "netrukus",
+    "customComingSoon": "laisvas įrašymas dar neaktyvus",
     "textFirst": {
       "title": "Papasakokite, ką mokate",
       "helper": "Parašykite savais žodžiais arba įkelkite CV. Sistema pasiūlys įgūdžius, darbo kryptis, vaidmenis ir CV įrašus — bet kiekvieną pasiūlymą pasirenkate jūs. Be jūsų pasirinkimo nieko neišsaugome.",
@@ -2698,26 +2718,26 @@
       },
       "empty": {
         "worker": {
-          "offer": "Tuščia. Įgūdžių, darbo istorijos ir įrodymų valdymas ateina su M2.",
-          "seek": "Tuščia. Pageidaujamo darbo nustatymas ir prieinamumas ateina su M2.",
-          "proofs": "Tuščia. Patvirtinti įgūdžiai ir darbo žurnalas ateina su M2."
+          "offer": "Tuščia. Įgūdžių, darbo istorijos ir įrodymų valdymas bus įjungtas vėliau.",
+          "seek": "Tuščia. Pageidaujamo darbo nustatymas ir prieinamumas bus įjungti vėliau.",
+          "proofs": "Tuščia. Patvirtinti įgūdžiai ir darbo žurnalas bus įjungti vėliau."
         },
         "company": {
-          "offer": "Tuščia. Atvirų pozicijų ir projektų valdymas ateina su M2.",
-          "seek": "Tuščia. Darbo poreikių paskelbimas ateina su M2.",
-          "proofs": "Tuščia. Įmonės atitikimo signalai ir projektų istorija ateina su M2."
+          "offer": "Tuščia. Atvirų pozicijų ir projektų valdymas bus įjungtas vėliau.",
+          "seek": "Tuščia. Darbo poreikių paskelbimas bus įjungtas vėliau.",
+          "proofs": "Tuščia. Įmonės atitikimo signalai ir projektų istorija bus įjungti vėliau."
         },
         "agency": {
-          "offer": "Tuščia. Kandidatų rezervas ir paslaugų pasiūla ateina su M2.",
-          "seek": "Tuščia. Klientų poreikiai ir paklausos signalai ateina su M2.",
-          "proofs": "Tuščia. Veiklos istorija ir klientų atsiliepimai ateina su M2/M3."
+          "offer": "Tuščia. Kandidatų rezervas ir paslaugų pasiūla bus įjungti vėliau.",
+          "seek": "Tuščia. Klientų poreikiai ir paklausos signalai bus įjungti vėliau.",
+          "proofs": "Tuščia. Veiklos istorija ir klientų atsiliepimai bus įjungti vėliau."
         },
         "customer": {
-          "seek": "Tuščia. Paslaugų užsakymo paieška ateina su M3.",
-          "proofs": "Tuščia. Užsakymų istorija ir atsiliepimai ateina su M3."
+          "seek": "Tuščia. Paslaugų užsakymo paieška bus įjungta vėliau.",
+          "proofs": "Tuščia. Užsakymų istorija ir atsiliepimai bus įjungti vėliau."
         },
-        "discover": "Atrasimo srautas — numatomas M3.",
-        "search": "Detali paieška — numatoma M2.",
+        "discover": "Atrasimo srautas bus įjungtas vėliau.",
+        "search": "Detali paieška bus įjungta vėliau.",
         "account_intro": "Tvarkykite savo el. paštą ir vaidmenis."
       },
       "customer": {
@@ -3335,7 +3355,7 @@
     ]
   },
   "legal": {
-    "draftNote": "Šis dokumentas yra juodraštis. Galutinį, įpareigojantį tekstą prieš viešą startą peržiūrės teisininkai (M5).",
+    "draftNote": "Šis dokumentas yra juodraštis. Galutinį, įpareigojantį tekstą prieš viešą startą peržiūrės teisininkai.",
       "marketplaceRules": {
         "title": "Prekyvietės taisyklės",
         "intro": "Šios taisyklės užtikrina, kad prekyvietė liktų saugi ir sąžininga. Jos galioja visiems vartotojams ir pasiūlymams.",

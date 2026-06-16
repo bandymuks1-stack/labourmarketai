@@ -98,7 +98,7 @@ export default async function CandidatesPage({
         </p>
       </div>
 
-      <CompanyActionNextActions room="candidates" primaryHref="/dashboard/search" />
+      <CompanyActionNextActions room="candidates" primaryHref="/dashboard/company/scouting" />
 
       <CandidateDraftsManager
         drafts={read.kind === "ok" ? read.drafts : []}
