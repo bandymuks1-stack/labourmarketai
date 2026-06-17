@@ -92,8 +92,10 @@ describe("UI wiring — real CTAs, add/edit/disable + consent", () => {
     expect(UI).toContain("capture-login-");
     expect(UI).toMatch(/"not_requested",\s*"consented",\s*"revoked"/);
   });
-  it("demand disable wired; create links to a real route (no coming-soon)", () => {
+  it("demand disable + visibility edit wired; create links to a real route", () => {
     expect(UI).toMatch(/setDemandLocationActiveAction/);
+    expect(UI).toMatch(/updateDemandLocationAction/);
+    expect(UI).toContain("capture-demand-visibility");
     expect(UI).toMatch(/\/dashboard\/company/);
     expect(UI).not.toMatch(/coming.?soon|ruošiam|готовится/i);
   });

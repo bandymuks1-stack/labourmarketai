@@ -13,6 +13,7 @@ import {
   updatePreferredLocationAction,
   setLoginLocationConsentAction,
   setDemandLocationActiveAction,
+  updateDemandLocationAction,
 } from "@/lib/market-map/capture-actions";
 import type {
   PreferredLocationRow,
@@ -231,6 +232,18 @@ export function MarketMapCapture({
             {demand.map((d) => (
               <li key={d.id} className="flex items-center gap-2 rounded-md border border-ink-600 bg-ink-800/50 px-2.5 py-1.5 text-xs" data-testid="capture-demand-row" data-active={d.active}>
                 <span className="text-text-primary">{d.locationLabel || countryName(d.countryCode)}</span>
+                {/* Inline edit: change this company-need location's visibility. */}
+                <select
+                  className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
+                  value={d.visibilityLevel}
+                  disabled={pending}
+                  data-testid="capture-demand-visibility"
+                  onChange={(e) => run(() => updateDemandLocationAction(d.id, { visibilityLevel: e.target.value }))}
+                >
+                  {["company_only", "region_visible", "city_visible", "aggregated"].map((v) => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
                 <button
                   type="button"
                   disabled={pending}
