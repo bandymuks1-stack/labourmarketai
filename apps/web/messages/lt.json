@@ -189,16 +189,25 @@
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "disable": "Išjungti",
       "enable": "Įjungti",
+      "aggregatedHint": "Rodoma agreguotai tik tada, kai bus įjungtas viešas sluoksnis.",
       "preferred": {
         "title": "Norimos lokacijos",
         "country": "Šalis",
         "countryPlaceholder": "Pasirinkite šalį",
         "city": "Miestas (nebūtina)",
         "cityPlaceholder": "Pvz., Vilnius",
-        "intents": "Ką norite čia daryti",
+        "intents": "Ką norite veikti šioje vietoje?",
+        "priorityLabel": "Kryptis",
+        "note": "Trumpa pastaba (nebūtina)",
+        "notePlaceholder": "Pvz., domina nuo pavasario",
         "visibility": "Matomumas",
         "add": "Pridėti lokaciją",
         "added": "Norima lokacija pridėta."
+      },
+      "priority": {
+        "primary": "Pagrindinė kryptis",
+        "secondary": "Papildoma kryptis",
+        "optional": "Pasirenkama kryptis"
       },
       "intent": {
         "work": "Dirbti",
@@ -218,6 +227,21 @@
         "city_visible": "Miesto lygiu",
         "aggregated": "Agreguotai"
       },
+      "needType": {
+        "workers": "Reikia žmonių",
+        "team": "Reikia komandos",
+        "subcontractors": "Reikia subrangovų",
+        "freelancers": "Reikia laisvai samdomų",
+        "service_provider": "Reikia paslaugų tiekėjo",
+        "project_capacity": "Reikia projekto pajėgumo",
+        "accommodation_support": "Reikia apgyvendinimo pagalbos",
+        "transport_support": "Reikia transporto pagalbos"
+      },
+      "urgency": {
+        "low": "Neskubu",
+        "medium": "Vidutiniškai",
+        "high": "Skubu"
+      },
       "login": {
         "title": "Prisijungimo vietos sutikimas",
         "note": "Prisijungimo vieta rodoma tik apytiksliai (šalies / regiono) ir tik su jūsų sutikimu. Tikslus adresas ar koordinatės nesaugomos.",
@@ -228,6 +252,12 @@
       "demand": {
         "title": "Įmonės poreikio lokacijos",
         "empty": "Dar nėra įmonės poreikio lokacijų.",
+        "needTypeLabel": "Poreikio tipas",
+        "people": "Žmonių skaičius",
+        "urgencyLabel": "Skubumas",
+        "mobility": "Reikia mobilumo",
+        "accommodation": "Reikia apgyvendinimo",
+        "dates": "Laikotarpis",
         "addCta": "Pridėti per įmonės erdvę"
       }
     },

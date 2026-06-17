@@ -69,6 +69,7 @@ export interface PreferredLocationRow {
   granularity: string;
   intents: string[];
   priority: string;
+  shortNote: string | null;
   visibilityLevel: string;
   active: boolean;
 }
@@ -90,7 +91,7 @@ export async function listOwnPreferredLocations(): Promise<PreferredLocationRow[
   if (!user) return [];
   const { data } = await asAny(supabase)
     .from("preferred_locations")
-    .select("id, country_code, region, city, granularity, intents, priority, visibility_level, active")
+    .select("id, country_code, region, city, granularity, intents, priority, short_note, visibility_level, active")
     .eq("profile_id", user.id)
     .order("created_at", { ascending: true });
   return (Array.isArray(data) ? data : []).map((r: Record<string, unknown>) => ({
@@ -101,6 +102,7 @@ export async function listOwnPreferredLocations(): Promise<PreferredLocationRow[
     granularity: String(r.granularity),
     intents: Array.isArray(r.intents) ? (r.intents as string[]) : [],
     priority: String(r.priority),
+    shortNote: (r.short_note as string | null) ?? null,
     visibilityLevel: String(r.visibility_level),
     active: r.active !== false,
   }));
@@ -260,9 +262,21 @@ export interface OwnDemandRow {
   id: string;
   countryCode: string;
   locationLabel: string;
+  granularity: string;
   needType: string | null;
+  peopleCountMin: number | null;
+  peopleCountMax: number | null;
+  startDate: string | null;
+  endDate: string | null;
+  urgency: string | null;
+  mobilityRequired: boolean;
+  accommodationNeeded: boolean;
   visibilityLevel: string;
   active: boolean;
+}
+
+function numOrNull(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
 
 export async function listOwnDemandLocations(): Promise<OwnDemandRow[]> {
@@ -271,14 +285,24 @@ export async function listOwnDemandLocations(): Promise<OwnDemandRow[]> {
   if (!user) return [];
   const { data } = await asAny(supabase)
     .from("company_demand_locations")
-    .select("id, country_code, location_label, need_type, visibility_level, active")
+    .select(
+      "id, country_code, location_label, granularity, need_type, people_count_min, people_count_max, start_date, end_date, urgency, mobility_required, accommodation_needed, visibility_level, active",
+    )
     .eq("owner_id", user.id)
     .order("created_at", { ascending: true });
   return (Array.isArray(data) ? data : []).map((r: Record<string, unknown>) => ({
     id: String(r.id),
     countryCode: String(r.country_code),
     locationLabel: String(r.location_label ?? ""),
+    granularity: String(r.granularity ?? "country"),
     needType: (r.need_type as string | null) ?? null,
+    peopleCountMin: numOrNull(r.people_count_min),
+    peopleCountMax: numOrNull(r.people_count_max),
+    startDate: (r.start_date as string | null) ?? null,
+    endDate: (r.end_date as string | null) ?? null,
+    urgency: (r.urgency as string | null) ?? null,
+    mobilityRequired: r.mobility_required === true,
+    accommodationNeeded: r.accommodation_needed === true,
     visibilityLevel: String(r.visibility_level ?? "company_only"),
     active: r.active !== false,
   }));

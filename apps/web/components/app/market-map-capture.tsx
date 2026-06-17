@@ -42,7 +42,19 @@ const INTENTS = [
 ] as const;
 
 const VISIBILITIES = ["self_only", "region_visible", "city_visible", "aggregated"] as const;
+const DEMAND_VISIBILITIES = ["company_only", "region_visible", "city_visible", "aggregated"] as const;
 const CONSENTS = ["not_requested", "consented", "revoked"] as const;
+const PRIORITIES = ["primary", "secondary", "optional"] as const;
+const NEED_TYPES = [
+  "workers",
+  "team",
+  "subcontractors",
+  "freelancers",
+  "service_provider",
+  "project_capacity",
+  "accommodation_support",
+  "transport_support",
+] as const;
 
 export function MarketMapCapture({
   preferred,
@@ -67,8 +79,24 @@ export function MarketMapCapture({
   const [pCountry, setPCountry] = useState("");
   const [pCity, setPCity] = useState("");
   const [pIntents, setPIntents] = useState<string[]>([]);
+  const [pPriority, setPPriority] = useState<string>("secondary");
+  const [pNote, setPNote] = useState("");
   const [pVisibility, setPVisibility] = useState<string>("self_only");
   const [msg, setMsg] = useState<string | null>(null);
+
+  const peopleRange = (d: OwnDemandRow): string | null => {
+    const lo = d.peopleCountMin;
+    const hi = d.peopleCountMax;
+    if (lo == null && hi == null) return null;
+    if (lo != null && hi != null) return lo === hi ? `${lo}` : `${lo}–${hi}`;
+    return `${lo ?? hi}`;
+  };
+  const dateRange = (d: OwnDemandRow): string | null => {
+    const f = d.startDate?.slice(0, 10);
+    const tt = d.endDate?.slice(0, 10);
+    if (!f && !tt) return null;
+    return [f, tt].filter(Boolean).join(" → ");
+  };
 
   const run = (fn: () => Promise<{ kind: string }>, okKey = "saved") =>
     startTransition(async () => {
@@ -96,29 +124,55 @@ export function MarketMapCapture({
         {preferred.length > 0 && (
           <ul className="flex flex-col gap-1.5">
             {preferred.map((p) => (
-              <li key={p.id} className="flex items-center gap-2 rounded-md border border-ink-600 bg-ink-800/50 px-2.5 py-1.5 text-xs" data-testid="capture-preferred-row" data-active={p.active}>
-                <span className="text-text-primary">{countryName(p.countryCode)}{p.city ? `, ${p.city}` : ""}</span>
-                {/* Inline edit: change this location's visibility. */}
-                <select
-                  className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
-                  value={p.visibilityLevel}
-                  disabled={pending}
-                  data-testid="capture-preferred-visibility"
-                  onChange={(e) => run(() => updatePreferredLocationAction(p.id, { visibilityLevel: e.target.value }))}
-                >
-                  {VISIBILITIES.map((v) => (
-                    <option key={v} value={v}>{t(`visibility.${v}`)}</option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => run(() => setPreferredLocationActiveAction(p.id, !p.active))}
-                  className="ml-auto text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
-                  data-testid="capture-preferred-toggle"
-                >
-                  {p.active ? t("disable") : t("enable")}
-                </button>
+              <li
+                key={p.id}
+                className={`flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/50 px-2.5 py-2 text-xs ${p.active ? "" : "opacity-60"}`}
+                data-testid="capture-preferred-row"
+                data-active={p.active}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-text-primary">{countryName(p.countryCode)}{p.city ? `, ${p.city}` : ""}</span>
+                  {/* Direction: primary / secondary / optional (localized, not raw enum). */}
+                  <span
+                    className="rounded-full border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-blue"
+                    data-testid="capture-preferred-priority"
+                  >
+                    {t(`priority.${p.priority}`)}
+                  </span>
+                </div>
+                {p.intents.length > 0 && (
+                  <div className="flex flex-wrap gap-1" data-testid="capture-preferred-intents">
+                    {p.intents.map((i) => (
+                      <span key={i} className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-[11px] text-text-secondary">
+                        {t(`intent.${i}`)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {p.shortNote && <p className="text-[11px] italic leading-relaxed text-text-muted">{p.shortNote}</p>}
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Inline edit: change this location's visibility. */}
+                  <select
+                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
+                    value={p.visibilityLevel}
+                    disabled={pending}
+                    data-testid="capture-preferred-visibility"
+                    onChange={(e) => run(() => updatePreferredLocationAction(p.id, { visibilityLevel: e.target.value }))}
+                  >
+                    {VISIBILITIES.map((v) => (
+                      <option key={v} value={v}>{t(`visibility.${v}`)}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => run(() => setPreferredLocationActiveAction(p.id, !p.active))}
+                    className="ml-auto text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                    data-testid="capture-preferred-toggle"
+                  >
+                    {p.active ? t("disable") : t("enable")}
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -158,6 +212,28 @@ export function MarketMapCapture({
           })}
         </fieldset>
 
+        <div className="grid gap-2 sm:grid-cols-2">
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("preferred.priorityLabel")}
+            <select className={fieldCls} value={pPriority} onChange={(e) => setPPriority(e.target.value)} data-testid="capture-preferred-priority-select">
+              {PRIORITIES.map((p) => (
+                <option key={p} value={p}>{t(`priority.${p}`)}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("preferred.note")}
+            <input
+              className={fieldCls}
+              value={pNote}
+              maxLength={280}
+              onChange={(e) => setPNote(e.target.value)}
+              placeholder={t("preferred.notePlaceholder")}
+              data-testid="capture-preferred-note"
+            />
+          </label>
+        </div>
+
         <div className="flex flex-wrap items-end gap-2">
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
             {t("preferred.visibility")}
@@ -178,6 +254,8 @@ export function MarketMapCapture({
                   countryCode: pCountry,
                   city: pCity || undefined,
                   intents: pIntents,
+                  priority: pPriority,
+                  shortNote: pNote || undefined,
                   granularity: pCity ? "city" : "country",
                   visibilityLevel: pVisibility,
                 });
@@ -185,6 +263,8 @@ export function MarketMapCapture({
                   setPCity("");
                   setPIntents([]);
                   setPCountry("");
+                  setPPriority("secondary");
+                  setPNote("");
                 }
                 return r;
               }, "preferred.added")
@@ -193,6 +273,7 @@ export function MarketMapCapture({
             {t("preferred.add")}
           </Button>
         </div>
+        <p className="text-[11px] leading-relaxed text-text-muted">{t("aggregatedHint")}</p>
       </div>
 
       {/* ── Login location consent ────────────────────────────────────── */}
@@ -229,32 +310,78 @@ export function MarketMapCapture({
         </h3>
         {demand.length > 0 ? (
           <ul className="flex flex-col gap-1.5">
-            {demand.map((d) => (
-              <li key={d.id} className="flex items-center gap-2 rounded-md border border-ink-600 bg-ink-800/50 px-2.5 py-1.5 text-xs" data-testid="capture-demand-row" data-active={d.active}>
-                <span className="text-text-primary">{d.locationLabel || countryName(d.countryCode)}</span>
-                {/* Inline edit: change this company-need location's visibility. */}
-                <select
-                  className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
-                  value={d.visibilityLevel}
-                  disabled={pending}
-                  data-testid="capture-demand-visibility"
-                  onChange={(e) => run(() => updateDemandLocationAction(d.id, { visibilityLevel: e.target.value }))}
-                >
-                  {["company_only", "region_visible", "city_visible", "aggregated"].map((v) => (
-                    <option key={v} value={v}>{t(`visibility.${v}`)}</option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => run(() => setDemandLocationActiveAction(d.id, !d.active))}
-                  className="ml-auto text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
-                  data-testid="capture-demand-toggle"
-                >
-                  {d.active ? t("disable") : t("enable")}
-                </button>
+            {demand.map((d) => {
+              const people = peopleRange(d);
+              const dates = dateRange(d);
+              return (
+              <li
+                key={d.id}
+                className={`flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/50 px-2.5 py-2 text-xs ${d.active ? "" : "opacity-60"}`}
+                data-testid="capture-demand-row"
+                data-active={d.active}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-text-primary">{d.locationLabel || countryName(d.countryCode)}</span>
+                  {d.urgency && (
+                    <span
+                      className="rounded-full border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-[9px] uppercase tracking-label text-state-warning"
+                      data-testid="capture-demand-urgency"
+                    >
+                      {t(`urgency.${d.urgency}`)}
+                    </span>
+                  )}
+                  {d.mobilityRequired && (
+                    <span className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-[10px] text-text-secondary">{t("demand.mobility")}</span>
+                  )}
+                  {d.accommodationNeeded && (
+                    <span className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-[10px] text-text-secondary">{t("demand.accommodation")}</span>
+                  )}
+                </div>
+                {(people || dates) && (
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-text-muted">
+                    {people && <span>{t("demand.people")}: {people}</span>}
+                    {dates && <span>{t("demand.dates")}: {dates}</span>}
+                  </div>
+                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Inline edit: need type (localized, not a raw enum). */}
+                  <select
+                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
+                    value={d.needType ?? ""}
+                    disabled={pending}
+                    data-testid="capture-demand-needtype"
+                    onChange={(e) => run(() => updateDemandLocationAction(d.id, { needType: e.target.value }))}
+                  >
+                    <option value="" disabled>{t("demand.needTypeLabel")}</option>
+                    {NEED_TYPES.map((n) => (
+                      <option key={n} value={n}>{t(`needType.${n}`)}</option>
+                    ))}
+                  </select>
+                  {/* Inline edit: change this company-need location's visibility. */}
+                  <select
+                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
+                    value={d.visibilityLevel}
+                    disabled={pending}
+                    data-testid="capture-demand-visibility"
+                    onChange={(e) => run(() => updateDemandLocationAction(d.id, { visibilityLevel: e.target.value }))}
+                  >
+                    {DEMAND_VISIBILITIES.map((v) => (
+                      <option key={v} value={v}>{t(`visibility.${v}`)}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => run(() => setDemandLocationActiveAction(d.id, !d.active))}
+                    className="ml-auto text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                    data-testid="capture-demand-toggle"
+                  >
+                    {d.active ? t("disable") : t("enable")}
+                  </button>
+                </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         ) : (
           <p className="text-xs leading-relaxed text-text-secondary">{t("demand.empty")}</p>
