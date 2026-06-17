@@ -51,10 +51,12 @@ describe("atlas layer copy exists in every active locale", () => {
         expect(a.kind?.[k], `${loc} atlas.kind.${k}`).toBeTruthy();
       }
     });
-    it(`${loc}: signal-only note forbids fake markers + personal address`, () => {
+    it(`${loc}: signal-only note is country/region-level and not "fake"-framed`, () => {
       const txt = (JSON.parse(read(`messages/${loc}.json`)).marketMap.atlas.signalOnlyNote as string).toLowerCase();
-      expect(/verified|patvirtin|подтвержд/.test(txt)).toBe(true);
-      expect(/fake|netikr|фальшив/.test(txt)).toBe(true);
+      // Country/region-level honesty (a real country signal IS real)...
+      expect(/country|region|šali|regio|стран|регио/.test(txt)).toBe(true);
+      // ...and never the banned "fake"/netikr/фальшив framing.
+      expect(/\bfake\b|netikr|фальшив/.test(txt)).toBe(false);
     });
   }
 });

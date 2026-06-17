@@ -146,25 +146,37 @@
     "backToActions": "Veiksmų centras",
     "title": "Gyvas darbo rinkos žemėlapis",
     "subtitle": "Sudėliotas iš realių darbuotojų, įmonių poreikių, projektų ir apgyvendinimo duomenų — gyvas vaizdas, kur yra žmonės, kur yra poreikis ir kur galite veikti dabar.",
-    "foundationNotice": "Jokių netikrų taškų — žemėlapis užsipildys tik realiais duomenimis, kai kiekvienas šaltinis turės vietos lauką.",
+    "foundationNotice": "Gyvas darbo rinkos signalų vaizdas — rodomas šalies / regiono lygiu. Tiksli vieta nerodoma, kol jos nepatvirtinate. Signalai nėra garantijos — jie padeda greičiau suprasti rinką.",
     "selfSignal": {
       "title": "Jūs žemėlapyje",
-      "note": "Jūsų pačių signalas bendrame žemėlapyje — šalies lygmens, pagal jūsų nurodytą vietą. Jokių koordinačių, jokio adreso.",
-      "workerLabel": "Profilio signalas",
-      "companyLabel": "Įmonės signalas",
+      "note": "Jūsų pačių signalai bendrame žemėlapyje — pagal jūsų nurodytą vietą ir pageidavimus.",
+      "countryLevelNotice": "Žemėlapis rodomas šalies / regiono lygiu",
+      "exactHidden": "Tiksli vieta nerodoma, kol jos nepatvirtinate",
+      "profileLabel": "Profilio vieta",
+      "companyLabel": "Įmonės vieta",
+      "loginLabel": "Prisijungimo vieta",
+      "loginNeutral": "Prisijungimo vietos signalas bus rodomas, kai galėsime jį patikimai nustatyti.",
+      "preferredLabel": "Norimos lokacijos",
+      "preferredNote": "Norimos lokacijos rodo, kur norite dirbti, pirkti, siūlyti paslaugas ar vykdyti projektus.",
+      "preferredEmpty": "Dar nepridėjote norimų lokacijų.",
       "countryLevel": "šalies lygmens signalas",
       "selfDeclared": "jūsų nurodyta vieta",
       "workerMissingBody": "Pridėkite savo šalį profilyje, kad matytumėte save žemėlapyje.",
       "companyMissingBody": "Pridėkite įmonės šalį, kad įmonė matytųsi žemėlapyje.",
-      "addLocationCta": "Pridėti vietą"
+      "addLocationCta": "Pridėti vietą",
+      "ctaRefineProfile": "Patikslinti profilio vietą",
+      "ctaRefineCompany": "Patikslinti įmonės vietą",
+      "ctaAddPreferred": "Pridėti norimą lokaciją"
     },
     "filtersTitle": "Filtrai",
     "scopeTitle": "Signalų apimtis",
     "filterCountry": "Šalis",
     "filterSector": "Sektorius",
     "filterAll": "visi",
-    "canvasEmptyTitle": "Signalų žemėlapis — kol kas tuščias",
-    "canvasEmptyBody": "Kai realūs duomenys turės vietos lauką, jie pasirodys čia — ne anksčiau. Jokių netikrų taškų.",
+    "demandPromptTitle": "Įmonių poreikių signalai",
+    "demandPromptBody": "Pridėkite įmonės poreikio vietą — kur reikia žmonių — ir ji pasirodys kaip paklausos signalas šalies lygiu.",
+    "demandPromptCta": "Pridėti įmonės poreikio vietą",
+    "noSignalHint": "Pridėkite šalį profilyje arba įmonėje, kad pasirodytų jūsų pirmas rinkos signalas.",
     "legendTitle": "Būsenos",
     "legend": {
       "ready": "Galima veikti",
@@ -181,7 +193,7 @@
       "title": "Poreikių signalai ({count})",
       "note": "Realios jūsų užfiksuotos poreikių vietos — kur reikia darbuotojų — sugrupuotos pagal šalį. Tai signalai, ne taškai žemėlapyje.",
       "countryCount": "{count} signalas (-ai)",
-      "noPoints": "Jokie taškai nepiešiami — koordinatės nepatvirtintos. Taškai atsiras tik kai vieta bus geokoduota ir patvirtinta.",
+      "noPoints": "Rodoma šalies lygiu. Tikslesnė vieta atsiras, kai ją patvirtinsite.",
       "precision": {
         "country": "šalies lygmuo",
         "city": "miestas / regionas",
@@ -205,7 +217,7 @@
       "atlas": {
         "title": "Rinkos atlasas",
         "intro": "Žemėlapio sluoksniai ateina iš darbo rinkos atlaso: {categories} sričių iš {blocks} galimos žemėlapyje. Visi sluoksniai — tik signalai.",
-        "signalOnlyNote": "Taškas žemėlapyje atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių, jokio asmeninio adreso.",
+        "signalOnlyNote": "Signalai rodomi šalies / regiono lygiu; tikslesnė vieta — tik jums patvirtinus. Asmeninis adresas nerodomas.",
         "kind": {
           "demand": "Poreikis",
           "worker_signal": "Žmonių signalai",
@@ -220,7 +232,7 @@
       "workerCountry": "Pridėti ar patikslinti pageidaujamą šalį",
       "companyNeed": "Pateikti įmonės poreikį",
       "project": "Sukurti projektą",
-      "accommodationNote": "Apgyvendinimo vietos dar nėra atskiras duomenų sluoksnis — ir niekada nebus pildomos netikrais taškais."
+      "accommodationNote": "Apgyvendinimo vietos dar nėra atskiras duomenų sluoksnis — jos pasirodys kaip realūs signalai, kai sluoksnis bus pridėtas."
     }
   },
   "demandLocationCapture": {
@@ -1679,7 +1691,7 @@
     "evidenceTrust": "Įrodymai ir pasitikėjimo signalai: rodome, kuo paremtas profilis. Tai signalai, ne galutinis patikrinimas.",
     "companyNeeds": "Poreikiai: aprašykite, ko reikia (profesija, šalis, komanda). Užklausa išsaugoma realiai — be netikrų atitikčių.",
     "opportunities": "Galimybės: matote jums tinkančius darbus. Matomumas priklauso nuo tinklo dydžio ir jūsų pasiruošimo.",
-    "marketplaceMap": "Rinkos žemėlapis: rodo signalus pagal šalį ir miestą. Taškas žemėlapyje atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
+    "marketplaceMap": "Rinkos žemėlapis: realūs darbo rinkos signalai pagal šalį ir regioną. Tikslesnė vieta atsiranda, kai ją patvirtinate.",
     "communicationInbox": "Komunikacija: tikras pokalbių aplankas. Pokalbis dėl projekto atveriamas su projekto kontekstu.",
     "feedbackLoop": "Po darbo: užfiksuokite jį darbo žurnale, o vadovas ar klientas gali patvirtinti įrašą. Patvirtinimas tampa įrodymu ir pakelia pasitikėjimo signalą jūsų kortelėje. Jokių žvaigždučių ar netikros reputacijos — tik realūs žmonių patvirtinimai.",
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
@@ -1897,7 +1909,7 @@
     },
     "market_map": {
       "label": "Rinkos žemėlapis",
-      "description": "Vieningas darbo rinkos žemėlapis — jūsų pačių signalas, įmonių poreikiai ir realūs duomenys pagal šalį. Be netikrų žymeklių."
+      "description": "Vieningas darbo rinkos žemėlapis — jūsų pačių signalas, įmonių poreikiai ir realūs duomenys pagal šalį / regioną."
     },
     "profile_text_first": {
       "label": "Profilis",

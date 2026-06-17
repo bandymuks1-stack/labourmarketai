@@ -16,7 +16,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
 import { SECTORS } from "@/lib/structuring/sectors";
 import { getOwnDemandLocationSummary, getOwnDemandSignalBoard } from "@/lib/demand/demand-location";
-import { getOwnSelfSignals } from "@/lib/market-map/self-signal";
+import { getOwnSelfSignals, hasAnySelfSignal } from "@/lib/market-map/self-signal";
 import { demandLayerStatus } from "@/lib/market-map/demand-locations";
 import { MarketMapSignalLayer } from "@/components/app/market-map-signal-layer";
 import { MarketMapSelfSignal } from "@/components/app/market-map-self-signal";
@@ -105,9 +105,13 @@ export async function MarketMapShell() {
   const hasSignals = !!signalBoard && signalBoard.total > 0;
 
   // SELF-SIGNAL: the logged-in user on the shared map — their own worker/person
-  // and (when owned) company country signal, or a real location-completion
-  // action. Always shown after login so the map is never "empty" for the user.
+  // and (when owned) company country signal, preferred locations, or a real
+  // location-completion action. Always shown after login so the map is never
+  // "empty" for the user.
   const selfBoard = await getOwnSelfSignals();
+  // A real country/region-level signal (profile / company / preferred / demand)
+  // is a REAL signal — the map renders a live surface, never an empty state.
+  const hasRealSignal = hasAnySelfSignal(selfBoard) || hasSignals;
 
   return (
     <div className="flex flex-col gap-6" data-testid="market-map-shell">
@@ -167,21 +171,44 @@ export async function MarketMapShell() {
         >
           {selfBoard && <MarketMapSelfSignal board={selfBoard} />}
 
+          {/* Company-need / demand signals: the real board when locations exist,
+              else an action-oriented prompt — NOT an "empty map" claim, because
+              the self-signal above is already a real signal. */}
           {hasSignals && signalBoard ? (
             <MarketMapSignalLayer board={signalBoard} />
           ) : (
             <div
-              className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-ink-600 p-6 text-center"
+              className="flex flex-col gap-2 rounded-md border border-dashed border-ink-600 p-4"
               data-testid="market-map-demand-empty"
             >
-              <MapIcon className="h-10 w-10 text-text-muted" strokeWidth={1.25} aria-hidden />
-              <h2 className="font-display text-base font-semibold text-text-primary">
-                {t("canvasEmptyTitle")}
+              <h2 className="flex items-center gap-2 font-display text-sm font-semibold text-text-primary">
+                <ClipboardList className="h-4 w-4 text-brand-blue" strokeWidth={1.75} aria-hidden />
+                {t("demandPromptTitle")}
               </h2>
-              <p className="max-w-md text-sm leading-relaxed text-text-secondary">
-                {t("canvasEmptyBody")}
+              <p className="max-w-md text-xs leading-relaxed text-text-secondary">
+                {t("demandPromptBody")}
               </p>
+              <Link
+                href={"/dashboard/company" as "/dashboard"}
+                data-testid="market-map-demand-add"
+                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-2.5 py-1 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue"
+              >
+                {t("demandPromptCta")}
+                <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              </Link>
             </div>
+          )}
+
+          {/* When the user has no location signal at all, the self-signal panel
+              already shows a real location-completion action; the map is never
+              a bare "empty/fake" state. */}
+          {!hasRealSignal && (
+            <p
+              className="text-[11px] leading-relaxed text-text-muted"
+              data-testid="market-map-no-signal-hint"
+            >
+              {t("noSignalHint")}
+            </p>
           )}
         </section>
 
