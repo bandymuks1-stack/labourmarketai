@@ -146,25 +146,37 @@
     "backToActions": "Action center",
     "title": "Live labour-market map",
     "subtitle": "Built from real workers, company needs, projects and accommodation data — a living picture of where people are, where the need is, and where you can act now.",
-    "foundationNotice": "No fake points — the map fills only with real data, once each source has a location field.",
+    "foundationNotice": "A live labour-market signal view — shown at country / region level. Exact location is not shown until you confirm it. Signals are not guarantees — they help you read the market faster.",
     "selfSignal": {
       "title": "You on the map",
-      "note": "Your own signal on the shared map — country-level, from the location you set. No coordinates, no address.",
-      "workerLabel": "Profile signal",
-      "companyLabel": "Company signal",
+      "note": "Your own signals on the shared map — from the location and preferences you set.",
+      "countryLevelNotice": "Map shown at country / region level",
+      "exactHidden": "Exact location is not shown until you confirm it",
+      "profileLabel": "Profile location",
+      "companyLabel": "Company location",
+      "loginLabel": "Login location",
+      "loginNeutral": "Login location signal will appear when it can be determined reliably.",
+      "preferredLabel": "Preferred locations",
+      "preferredNote": "Preferred locations show where you want to work, buy, offer services or run projects.",
+      "preferredEmpty": "You haven't added preferred locations yet.",
       "countryLevel": "country-level signal",
       "selfDeclared": "self-declared location",
       "workerMissingBody": "Add your country in your profile to appear on the map.",
       "companyMissingBody": "Add your company country to appear on the map.",
-      "addLocationCta": "Complete location"
+      "addLocationCta": "Complete location",
+      "ctaRefineProfile": "Refine profile location",
+      "ctaRefineCompany": "Refine company location",
+      "ctaAddPreferred": "Add a preferred location"
     },
     "filtersTitle": "Filters",
     "scopeTitle": "Signal scope",
     "filterCountry": "Country",
     "filterSector": "Sector",
     "filterAll": "all",
-    "canvasEmptyTitle": "Signal map — empty for now",
-    "canvasEmptyBody": "When real data carries a location, it appears here — never before. No fake markers.",
+    "demandPromptTitle": "Company-need signals",
+    "demandPromptBody": "Add a company-need location — where people are needed — and it appears as a demand signal at country level.",
+    "demandPromptCta": "Add a company-need location",
+    "noSignalHint": "Add a country in your profile or company to surface your first market signal.",
     "legendTitle": "Status",
     "legend": {
       "ready": "Ready to act",
@@ -181,7 +193,7 @@
       "title": "Demand signals ({count})",
       "note": "Real demand locations you captured — where workers are needed — grouped by country. These are signals, not map points.",
       "countryCount": "{count} signal(s)",
-      "noPoints": "No map points are drawn — coordinates are not confirmed. Points will appear only once a location is geocoded and verified.",
+      "noPoints": "Shown at country level. A more precise location appears once you confirm it.",
       "precision": {
         "country": "country-level",
         "city": "city / region",
@@ -205,7 +217,7 @@
       "atlas": {
         "title": "Market atlas",
         "intro": "The map layers come from the work-market atlas: {categories} of {blocks} blocks can appear on the map. Every layer is signal-only.",
-        "signalOnlyNote": "A map point appears only with verified coordinates — no fake markers, no personal address.",
+        "signalOnlyNote": "Signals are shown at country / region level; a more precise location only after you confirm it. Personal address is not shown.",
         "kind": {
           "demand": "Demand",
           "worker_signal": "Worker signals",
@@ -220,7 +232,7 @@
       "workerCountry": "Add or refine your preferred country",
       "companyNeed": "Submit a company need",
       "project": "Create a project",
-      "accommodationNote": "Accommodation locations are not a separate data layer yet — and will never be filled with fake points."
+      "accommodationNote": "Accommodation locations are not a separate data layer yet — they appear as real signals once that layer is added."
     }
   },
   "demandLocationCapture": {
@@ -1679,7 +1691,7 @@
     "evidenceTrust": "Evidence and trust signals: we show what your profile is backed by. These are signals, not a final verification.",
     "companyNeeds": "Needs: describe what you need (profession, country, team). The request is saved for real — no fake matches.",
     "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
-    "marketplaceMap": "Market map: shows signals by country and city. A map point appears only with verified coordinates — no fake markers.",
+    "marketplaceMap": "Market map: real labour-market signals by country and region. A more precise point appears once a location is confirmed.",
     "communicationInbox": "Communication: a real conversation inbox. A project conversation opens with the project context.",
     "feedbackLoop": "After work: log it in your work journal, and a manager or client can confirm the entry. The confirmation becomes evidence and raises a trust signal on your card. No stars, no fake reputation — only real human confirmations.",
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
@@ -1897,7 +1909,7 @@
     },
     "market_map": {
       "label": "Market map",
-      "description": "One unified labour-market map — your own signal, company needs and real data by country. No fake markers."
+      "description": "One unified labour-market map — your own signal, company needs and real data by country / region."
     },
     "profile_text_first": {
       "label": "Profile",

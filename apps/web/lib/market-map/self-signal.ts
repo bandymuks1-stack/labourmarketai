@@ -46,6 +46,22 @@ export interface SelfSignalBoard {
   readonly worker: SelfSignal;
   /** The company signal — only when the caller owns a company row. */
   readonly company: SelfSignal | null;
+  /** Desired / preferred countries the worker selected (where they want to
+   *  work) — a SEPARATE intent signal from their registration location.
+   *  Normalized, deduped; empty when none set. */
+  readonly preferred: readonly string[];
+}
+
+/** True when the caller has at least one real market signal — used to decide
+ *  whether the map renders a live country/region surface (never an empty-state
+ *  when this is true). Demand signals are checked separately by the shell. */
+export function hasAnySelfSignal(board: SelfSignalBoard | null): boolean {
+  if (!board) return false;
+  return (
+    board.worker.hasLocation ||
+    !!board.company?.hasLocation ||
+    board.preferred.length > 0
+  );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,7 +115,10 @@ export async function getOwnSelfSignals(): Promise<SelfSignalBoard | null> {
   // ── Worker card location (richer person signal; optional) ─────────────────
   // Prefer the worker's current location, else their first preferred country,
   // else the profile country. Degrades silently if the worker row is absent.
+  // We ALSO surface the full preferred list as a separate "desired locations"
+  // intent signal (where the person wants to work), distinct from registration.
   let workerCountry: string | null = null;
+  const preferred: string[] = [];
   {
     const { data } = await asAny(supabase)
       .from("workers")
@@ -111,8 +130,11 @@ export async function getOwnSelfSignals(): Promise<SelfSignalBoard | null> {
       const preferredList = Array.isArray(data.preferred_countries)
         ? (data.preferred_countries as string[])
         : [];
-      const preferred = normalizeCountry(preferredList[0]);
-      workerCountry = firstNonEmpty(current, preferred);
+      for (const raw of preferredList) {
+        const c = normalizeCountry(raw);
+        if (c && !preferred.includes(c)) preferred.push(c);
+      }
+      workerCountry = firstNonEmpty(current, preferred[0] ?? null);
     }
   }
 
@@ -147,5 +169,5 @@ export async function getOwnSelfSignals(): Promise<SelfSignalBoard | null> {
     }
   }
 
-  return { worker, company };
+  return { worker, company, preferred };
 }

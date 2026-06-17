@@ -88,13 +88,18 @@ describe("market map carries the self-signal copy and no 'preparing' framing", (
       for (const k of [
         "title",
         "note",
-        "workerLabel",
+        "profileLabel",
         "companyLabel",
+        "loginLabel",
+        "loginNeutral",
+        "preferredLabel",
+        "countryLevelNotice",
         "countryLevel",
         "selfDeclared",
         "workerMissingBody",
         "companyMissingBody",
         "addLocationCta",
+        "ctaAddPreferred",
       ]) {
         expect(s[k], `${locale} selfSignal.${k}`).toBeTruthy();
       }
