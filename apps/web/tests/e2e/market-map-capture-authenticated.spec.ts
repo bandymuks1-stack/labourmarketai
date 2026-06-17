@@ -69,6 +69,31 @@ test("login consent: consented shows approximate signal → revoked hides it", a
   ).toHaveAttribute("data-count", "0", { timeout: 15_000 });
 });
 
+test("mobile (390px): no horizontal overflow, chips + capture reachable", async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoMap(page);
+
+  // No horizontal overflow at 390px (a common iPhone width).
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(1);
+
+  // Filter chips render and the "all" chip is visible.
+  await expect(page.getByTestId("market-map-filter-chips")).toBeVisible();
+  await expect(page.getByTestId("market-map-filter-all")).toBeVisible();
+
+  // The capture controls are reachable by scrolling (not hidden under nav).
+  const addBtn = page.getByTestId("capture-preferred-add");
+  await addBtn.scrollIntoViewIfNeeded();
+  await expect(addBtn).toBeVisible();
+  // The on-page CTA scrolls to the add form rather than navigating away.
+  await page.getByTestId("market-map-cta-preferred_location").click();
+  await expect(page).toHaveURL(/\/lt\/dashboard\/market-map/);
+  await expect(page.locator("#market-map-add-preferred")).toBeVisible();
+});
+
 test("company-need: edit visibility on an owner row (no new insert)", async ({ page }) => {
   test.setTimeout(120_000);
   await gotoMap(page);

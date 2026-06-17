@@ -212,6 +212,7 @@
         "remote_if_possible": "Nuotoliu, jei galima"
       },
       "visibility": {
+        "company_only": "Tik įmonei",
         "self_only": "Tik man",
         "region_visible": "Regiono lygiu",
         "city_visible": "Miesto lygiu",

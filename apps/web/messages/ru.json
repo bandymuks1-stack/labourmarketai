@@ -212,6 +212,7 @@
         "remote_if_possible": "Удалённо, если возможно"
       },
       "visibility": {
+        "company_only": "Только для компании",
         "self_only": "Только я",
         "region_visible": "Уровень региона",
         "city_visible": "Уровень города",
