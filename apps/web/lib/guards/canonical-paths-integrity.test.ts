@@ -117,7 +117,10 @@ describe("Guard: exactly one canonical CV upload surface", () => {
     .sort();
 
   it(`discovered the CV file-pick primitives (no-op floor): ${cvAcceptFiles.length}`, () => {
-    expect(cvAcceptFiles.length).toBeGreaterThanOrEqual(2);
+    // Consolidated to ONE real file-pick primitive (cv-import-upload.tsx),
+    // reused by cv-input-panel.tsx (which mounts <CvImportUpload/> rather than
+    // rendering its own input). At least one canonical primitive must exist.
+    expect(cvAcceptFiles.length).toBeGreaterThanOrEqual(1);
   });
 
   it("every CV file-pick input lives in an allowlisted CV primitive", () => {
