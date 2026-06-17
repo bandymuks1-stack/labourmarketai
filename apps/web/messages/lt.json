@@ -182,6 +182,54 @@
       "ctaAddDemand": "Pridėti įmonės poreikio vietą",
       "ctaProject": "Tvarkyti projektus"
     },
+    "capture": {
+      "title": "Tvarkyti savo lokacijas",
+      "note": "Pridėkite ar valdykite savo signalus. Matote tik savo duomenis; rodoma šalies / regiono lygiu.",
+      "saved": "Išsaugota.",
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "disable": "Išjungti",
+      "enable": "Įjungti",
+      "preferred": {
+        "title": "Norimos lokacijos",
+        "country": "Šalis",
+        "countryPlaceholder": "Pasirinkite šalį",
+        "city": "Miestas (nebūtina)",
+        "cityPlaceholder": "Pvz., Vilnius",
+        "intents": "Ką norite čia daryti",
+        "visibility": "Matomumas",
+        "add": "Pridėti lokaciją",
+        "added": "Norima lokacija pridėta."
+      },
+      "intent": {
+        "work": "Dirbti",
+        "find_job": "Ieškoti darbo",
+        "sell_services": "Siūlyti paslaugas",
+        "buy_services": "Pirkti paslaugas",
+        "join_team": "Jungtis prie komandos",
+        "hire_team": "Samdyti komandą",
+        "project_interest": "Projektai",
+        "relocate": "Persikelti",
+        "remote_if_possible": "Nuotoliu, jei galima"
+      },
+      "visibility": {
+        "self_only": "Tik man",
+        "region_visible": "Regiono lygiu",
+        "city_visible": "Miesto lygiu",
+        "aggregated": "Agreguotai"
+      },
+      "login": {
+        "title": "Prisijungimo vietos sutikimas",
+        "note": "Prisijungimo vieta rodoma tik apytiksliai (šalies / regiono) ir tik su jūsų sutikimu. Tikslus adresas ar koordinatės nesaugomos.",
+        "not_requested": "Nepasirinkta",
+        "consented": "Sutinku",
+        "revoked": "Atšaukti"
+      },
+      "demand": {
+        "title": "Įmonės poreikio lokacijos",
+        "empty": "Dar nėra įmonės poreikio lokacijų.",
+        "addCta": "Pridėti per įmonės erdvę"
+      }
+    },
     "filtersTitle": "Filtrai",
     "scopeTitle": "Signalų apimtis",
     "filterCountry": "Šalis",

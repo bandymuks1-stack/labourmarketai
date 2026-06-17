@@ -182,6 +182,54 @@
       "ctaAddDemand": "Add a company-need location",
       "ctaProject": "Manage projects"
     },
+    "capture": {
+      "title": "Manage your locations",
+      "note": "Add or manage your own signals. You see only your own data; shown at country / region level.",
+      "saved": "Saved.",
+      "error": "Could not save. Please try again.",
+      "disable": "Disable",
+      "enable": "Enable",
+      "preferred": {
+        "title": "Preferred locations",
+        "country": "Country",
+        "countryPlaceholder": "Select a country",
+        "city": "City (optional)",
+        "cityPlaceholder": "e.g. Vilnius",
+        "intents": "What you want to do here",
+        "visibility": "Visibility",
+        "add": "Add location",
+        "added": "Preferred location added."
+      },
+      "intent": {
+        "work": "Work",
+        "find_job": "Find a job",
+        "sell_services": "Offer services",
+        "buy_services": "Buy services",
+        "join_team": "Join a team",
+        "hire_team": "Hire a team",
+        "project_interest": "Projects",
+        "relocate": "Relocate",
+        "remote_if_possible": "Remote if possible"
+      },
+      "visibility": {
+        "self_only": "Only me",
+        "region_visible": "Region level",
+        "city_visible": "City level",
+        "aggregated": "Aggregated"
+      },
+      "login": {
+        "title": "Login-location consent",
+        "note": "Login location is shown approximately (country / region) and only with your consent. No exact address or coordinates are stored.",
+        "not_requested": "Not set",
+        "consented": "I consent",
+        "revoked": "Revoke"
+      },
+      "demand": {
+        "title": "Company-need locations",
+        "empty": "No company-need locations yet.",
+        "addCta": "Add via the company workspace"
+      }
+    },
     "filtersTitle": "Filters",
     "scopeTitle": "Signal scope",
     "filterCountry": "Country",
