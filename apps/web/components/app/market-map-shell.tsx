@@ -16,10 +16,10 @@ import { Link } from "@/lib/i18n/navigation";
 import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
 import { SECTORS } from "@/lib/structuring/sectors";
 import { getOwnDemandLocationSummary, getOwnDemandSignalBoard } from "@/lib/demand/demand-location";
-import { getOwnSelfSignals, hasAnySelfSignal } from "@/lib/market-map/self-signal";
+import { getOwnMarketSignals } from "@/lib/market-map/signals";
 import { demandLayerStatus } from "@/lib/market-map/demand-locations";
 import { MarketMapSignalLayer } from "@/components/app/market-map-signal-layer";
-import { MarketMapSelfSignal } from "@/components/app/market-map-self-signal";
+import { MarketMapMySignals } from "@/components/app/market-map-my-signals";
 import {
   MAP_LAYER_KINDS,
   mapEligibleCategories,
@@ -104,14 +104,14 @@ export async function MarketMapShell() {
   const signalBoard = await getOwnDemandSignalBoard();
   const hasSignals = !!signalBoard && signalBoard.total > 0;
 
-  // SELF-SIGNAL: the logged-in user on the shared map — their own worker/person
-  // and (when owned) company country signal, preferred locations, or a real
-  // location-completion action. Always shown after login so the map is never
-  // "empty" for the user.
-  const selfBoard = await getOwnSelfSignals();
-  // A real country/region-level signal (profile / company / preferred / demand)
-  // is a REAL signal — the map renders a live surface, never an empty state.
-  const hasRealSignal = hasAnySelfSignal(selfBoard) || hasSignals;
+  // OWNER VIEW: the logged-in user's OWN normalized market signals (profile,
+  // company, login [consent-gated], preferred, company-need, project) via the
+  // #459 read layer — RLS-scoped, owner-only, country/region level. This is NOT
+  // the public/cross-user aggregate (that stays a future owner-gated source).
+  const mySignals = (await getOwnMarketSignals()) ?? [];
+  // A real country/region-level signal is a REAL signal — the map renders a live
+  // surface, never an empty state.
+  const hasRealSignal = mySignals.length > 0 || hasSignals;
 
   return (
     <div className="flex flex-col gap-6" data-testid="market-map-shell">
@@ -169,7 +169,7 @@ export async function MarketMapShell() {
           className="card-border flex min-h-[320px] flex-col gap-5 p-6"
           data-testid="market-map-canvas"
         >
-          {selfBoard && <MarketMapSelfSignal board={selfBoard} />}
+          <MarketMapMySignals signals={mySignals} />
 
           {/* Company-need / demand signals: the real board when locations exist,
               else an action-oriented prompt — NOT an "empty map" claim, because

@@ -86,9 +86,9 @@ describe("B. A real signal means a live surface, never an empty state", () => {
     expect(hasAnySelfSignal(null)).toBe(false);
   });
 
-  it("shell gates the empty state on hasAnySelfSignal + demand, not demand alone", () => {
+  it("shell gates the empty state on the owner read layer + demand, not demand alone", () => {
     const shell = read(SHELL);
-    expect(shell).toMatch(/hasAnySelfSignal/);
+    expect(shell).toMatch(/getOwnMarketSignals/);
     expect(shell).toMatch(/hasRealSignal/);
     // The banned empty-state keys are gone.
     expect(shell).not.toMatch(/canvasEmptyTitle|canvasEmptyBody/);
