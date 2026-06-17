@@ -1,31 +1,30 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { CvImportUpload } from "@/components/app/cv-import-upload";
 import { cn } from "@/lib/utils";
 
 /**
- * CV input panel (text-first onboarding). The worker can either UPLOAD a file
- * (PDF / DOCX — passed up as ArrayBuffer for the caller to handle) or paste
- * the CV text. The pasted text is fed to the rule-based parser; the upload
- * path defers to the caller (M2 will text-extract server-side per PLATFORM
- * doctrine §7.2 / DOCTRINE.md). We do not store the file from this component.
+ * CV input panel (text-first onboarding). The worker can either UPLOAD a CV
+ * file (PDF / DOCX / TXT) or paste the CV text. Both paths converge on the same
+ * deterministic parser via the caller: the upload extracts the text server-side
+ * (`CvImportUpload` → `/api/cv/extract`) and hands it up through `onPasteSubmit`
+ * exactly like pasted text, so review + save are identical. We store no file.
  */
 export function CvInputPanel({
   className,
   onPasteSubmit,
-  onFile,
   pasting,
 }: {
   className?: string;
+  /** Receives CV text — whether pasted OR extracted from an uploaded file. */
   onPasteSubmit: (text: string) => void;
-  onFile?: (file: File) => void;
   pasting?: boolean;
 }) {
   const t = useTranslations("structuring.cv");
   const id = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
   const [pasted, setPasted] = useState("");
   const canSubmit = pasted.trim().length > 0 && !pasting;
 
@@ -52,18 +51,11 @@ export function CvInputPanel({
           <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
             {t("uploadLabel")}
           </span>
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".pdf,.doc,.docx,.txt"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f && onFile) onFile(f);
-            }}
-            className="text-xs text-text-secondary file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-text-primary hover:file:border-brand-blue"
-          />
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("uploadComingSoon")}
+          {/* Real upload → server-side text extraction. The extracted text is
+              fed into the SAME review/save path as pasted text. */}
+          <CvImportUpload onExtracted={onPasteSubmit} disabled={pasting} />
+          <span className="text-[11px] leading-relaxed text-text-muted">
+            {t("uploadHint")}
           </span>
         </div>
 
@@ -94,8 +86,7 @@ export function CvInputPanel({
       </div>
 
       {/* Evidence library framing — what each kind of evidence helps show, so a
-          document is collected for a benefit, not as file admin. Benefit-first,
-          honest: file upload is being prepared (see uploadComingSoon above). */}
+          document is collected for a benefit, not as file admin. Benefit-first. */}
       <div
         className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
         data-testid="cv-evidence-types"

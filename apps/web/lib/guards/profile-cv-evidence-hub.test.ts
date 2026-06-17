@@ -158,19 +158,27 @@ describe("Guard: profileHub copy is honest (self-declared, never fake-verified)"
 // ── 4. One canonical CV upload surface; account → canonical profile ───────
 
 const CV_ACCEPT = /accept=\{?["'][^"'}]*(?:pdf|docx)/i;
-const CV_UPLOAD_PRIMITIVES = new Set([
-  "components/app/cv-import-upload.tsx",
-  "components/app/cv-input-panel.tsx",
-]);
+// The single canonical CV file-pick primitive (renders the file input).
+const CV_UPLOAD_PRIMITIVE = "components/app/cv-import-upload.tsx";
+// Reuses the primitive instead of duplicating the input.
+const CV_UPLOAD_CONSUMER = "components/app/cv-input-panel.tsx";
 
 describe("Guard: single canonical CV upload surface + canonical account link", () => {
   it("no CV file-pick surface outside the allowlisted primitives", () => {
     // Mirrors canonical-paths-integrity; kept here so the hub guard is
     // self-contained against a second CV upload flow appearing.
-    for (const f of CV_UPLOAD_PRIMITIVES) {
-      expect(existsSync(join(APP_ROOT, f)), `${f} missing — update allowlist`).toBe(true);
-      expect(CV_ACCEPT.test(read(f)), `${f} should carry the CV file-pick input`).toBe(true);
-    }
+    expect(existsSync(join(APP_ROOT, CV_UPLOAD_PRIMITIVE)), `${CV_UPLOAD_PRIMITIVE} missing`).toBe(true);
+    expect(
+      CV_ACCEPT.test(read(CV_UPLOAD_PRIMITIVE)),
+      `${CV_UPLOAD_PRIMITIVE} should carry the CV file-pick input`,
+    ).toBe(true);
+    // The consumer reuses the primitive (mounts <CvImportUpload/>) and does NOT
+    // render its own duplicate file input.
+    expect(read(CV_UPLOAD_CONSUMER)).toMatch(/<CvImportUpload\b/);
+    expect(
+      CV_ACCEPT.test(read(CV_UPLOAD_CONSUMER)),
+      `${CV_UPLOAD_CONSUMER} must not duplicate the file-pick input`,
+    ).toBe(false);
     // The hub itself must NOT introduce a CV upload input.
     expect(CV_ACCEPT.test(read(HUB)), "the hub overview must not host a CV upload input").toBe(false);
   });
