@@ -44,6 +44,16 @@ function stripLocale(pathname: string): { locale: string; rest: string } {
 
 const REQUIRES_AUTH = ["/dashboard", "/onboarding"];
 
+/** True if the request carries a Supabase auth cookie. `@supabase/ssr` names
+ *  the session cookie `sb-<ref>-auth-token` (chunked: `…-auth-token.0`, …). We
+ *  only run the (network) session refresh when such a cookie exists, so
+ *  anonymous public/marketing traffic stays fast and never hits Supabase. */
+function hasSupabaseAuthCookie(request: NextRequest): boolean {
+  return request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
+}
+
 export async function middleware(request: NextRequest) {
   // 0. Host normalization runs BEFORE locale/intl + auth so the www
   //    alias never reaches the app shell — it 308s straight to the
@@ -51,22 +61,35 @@ export async function middleware(request: NextRequest) {
   const hostRedirect = maybeRedirectWwwToApex(request);
   if (hostRedirect) return hostRedirect;
 
-  // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite.
+  // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite. When intl
+  //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)
+  //    we return it as-is; the redirected request re-enters middleware with a
+  //    locale prefix and the session/auth logic runs then.
   const intlResponse = intl(request);
+  if (intlResponse.headers.get("location")) return intlResponse;
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
   const needsAuth = REQUIRES_AUTH.some((p) => rest === p || rest.startsWith(p + "/"));
   const onboardingPage = rest === "/onboarding";
 
-  // Marketing / auth flow / static routes — no session check needed.
-  if (!needsAuth) return intlResponse;
-
-  // Without the anon key configured we cannot check the session; let the
-  // request through (page itself will surface the misconfiguration).
+  // Without the anon key we cannot touch sessions; let the request through
+  // (the page itself surfaces the misconfiguration).
   if (!env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return intlResponse;
 
-  // 2. Authenticated route — verify session and onboarding state.
-  let response = NextResponse.next({ request });
+  // 2. Session refresh. The canonical @supabase/ssr pattern refreshes the
+  //    session in middleware so a logged-in user's access token is rotated on
+  //    every navigation — NOT only when they happen to open a /dashboard route.
+  //    Skipping this (the prior behaviour) let tokens silently expire while a
+  //    user browsed public pages, so the next protected hit bounced them back
+  //    to login. We only do it when an auth cookie is present, so anonymous
+  //    traffic on the public marketing surface never pays a Supabase round-trip.
+  const isAuthedRequest = hasSupabaseAuthCookie(request);
+  if (!needsAuth && !isAuthedRequest) return intlResponse;
+
+  // Refreshed Set-Cookie headers are written onto the intl response so BOTH the
+  // locale handling and the rotated session cookies survive (the prior code
+  // discarded the intl response on authed routes).
+  const response = intlResponse;
   const supabase = createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -74,10 +97,6 @@ export async function middleware(request: NextRequest) {
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (cookies) => {
-          cookies.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          response = NextResponse.next({ request });
           cookies.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
@@ -86,9 +105,14 @@ export async function middleware(request: NextRequest) {
     },
   );
 
+  // getUser() validates + refreshes the session (rotating cookies via setAll).
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Public route (auth cookie present but maybe expired): just propagate the
+  // refreshed session — never gate.
+  if (!needsAuth) return response;
 
   if (!user) {
     const loginUrl = request.nextUrl.clone();

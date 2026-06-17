@@ -53,6 +53,56 @@ test.describe("Existing user login", () => {
   });
 });
 
+test.describe("Auth smoke — protected routes + login surface (no test DB needed)", () => {
+  // These run WITHOUT SUPABASE_TEST_URL: they assert the middleware/login
+  // surface contract that the login P0 fix locks in. No real session needed.
+
+  for (const path of [
+    "/lt/dashboard",
+    "/lt/dashboard/market-map",
+    "/lt/dashboard/communication",
+    "/lt/dashboard/profile",
+  ]) {
+    test(`anonymous ${path} redirects to /auth/login with a next param`, async ({
+      page,
+    }) => {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/lt\/auth\/login\?.*next=/);
+    });
+  }
+
+  test("login page renders Google + email/password (both methods live)", async ({
+    page,
+  }) => {
+    await page.goto("/lt/auth/login");
+    await expect(
+      page.getByRole("heading", { name: /Prisijungti|Sign in/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Google/i }),
+    ).toBeVisible();
+    await expect(page.getByLabel(/El\. paštas|Email/i)).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+  });
+
+  test("signup page renders the Google + email/password form", async ({
+    page,
+  }) => {
+    await page.goto("/lt/auth/signup");
+    await expect(
+      page.getByRole("button", { name: /Google/i }),
+    ).toBeVisible();
+    await expect(page.getByLabel(/El\. paštas|Email/i)).toBeVisible();
+  });
+
+  test("a protected route preserves its return path through to login", async ({
+    page,
+  }) => {
+    await page.goto("/lt/dashboard/market-map");
+    await expect(page).toHaveURL(/next=%2Flt%2Fdashboard%2Fmarket-map/);
+  });
+});
+
 test.describe("Onboarding entity creation (migration 0006)", () => {
   // No SUPABASE_TEST_URL needed: anonymous visit to /onboarding must
   // bounce to /auth/login because the page itself checks auth.getUser().
