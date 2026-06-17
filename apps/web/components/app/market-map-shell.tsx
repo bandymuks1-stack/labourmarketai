@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   Coins,
   Globe2,
-  Compass,
   ArrowRight,
 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
@@ -17,7 +16,6 @@ import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
 import { SECTORS } from "@/lib/structuring/sectors";
 import { getOwnDemandLocationSummary, getOwnDemandSignalBoard } from "@/lib/demand/demand-location";
 import { getOwnMarketSignals } from "@/lib/market-map/signals";
-import { demandLayerStatus } from "@/lib/market-map/demand-locations";
 import { MarketMapSignalLayer } from "@/components/app/market-map-signal-layer";
 import { MarketMapMySignals } from "@/components/app/market-map-my-signals";
 import {
@@ -27,45 +25,35 @@ import {
 } from "@/lib/work-market/atlas";
 
 /**
- * Live market map — FOUNDATION shell (v1). NO fake markers, NO seeded geo
- * points, NO external map API / key. It is an honest scaffold: hero, an empty
- * map canvas, the planned data layers (each marked "planned" — they fill only
- * from REAL data once a geo field exists), a filter bar over real dimensions
- * (countries + sectors that already exist in the app), a status legend, and a
- * next-action panel that links to real existing flows.
+ * Market map — the logged-in owner's working market-signal space. It renders
+ * the caller's OWN signals (profile / company / preferred / login / company-need
+ * / project) via the #459 owner read layer — RLS-scoped, country/region level,
+ * no fake markers, no external map API / key. The capture panel (page.tsx) lets
+ * the owner add/manage those signals.
  *
- * Copy says plainly: a living labour-market map, built from real workers /
- * company needs / projects / accommodation — never invented points.
+ * Honest limits stay explicit: no public cross-user aggregate yet (a future
+ * owner-gated layer with aggregation safeguards), other users' signals are not
+ * shown, exact location is hidden until confirmed, login is approximate +
+ * consent-gated. Future signal layers are clearly separated as "next stage".
  */
 
-/** Data layers. Most are "planned" until a real geo source exists; the demand
- *  layer is the FIRST real candidate — its additive geo table is prepared as a
- *  human-gated RED schema draft (company-demand-locations-red-draft-v1). It
- *  shows "schema prepared" (not "planned", not "live") and plots NO points until
- *  the migration is owner-applied AND real, geocode-verified rows exist.
- *  See docs/audit/live-market-map-foundation-v1.md data-source matrix. */
-const LAYERS = [
-  { key: "workers", icon: Users, status: "planned" },
-  { key: "demand", icon: ClipboardList, status: "schemaPrepared" },
-  { key: "projects", icon: FolderKanban, status: "planned" },
-  { key: "accommodation", icon: Home, status: "planned" },
-  { key: "teams", icon: UsersRound, status: "planned" },
-  { key: "readiness", icon: ShieldCheck, status: "planned" },
-  { key: "rates", icon: Coins, status: "planned" },
-  { key: "countryFit", icon: Globe2, status: "planned" },
-  { key: "nextActions", icon: Compass, status: "planned" },
+/** Signal layers. ACTIVE layers already surface the owner's own signals today
+ *  (preferred → workers, company-need → demand, projects). NEXT-STAGE layers are
+ *  honestly separated as future additions — they fill only from real signals,
+ *  never invented points. */
+const ACTIVE_LAYERS = [
+  { key: "workers", icon: Users },
+  { key: "demand", icon: ClipboardList },
+  { key: "projects", icon: FolderKanban },
 ] as const;
 
-/** Pill copy + tone per layer status. "schemaPrepared" = schema ready, no rows
- *  yet; "signalOnly" = REAL captured rows exist but none are mappable (no
- *  confirmed coordinates) — still zero markers. */
-const LAYER_STATUS_KEY = {
-  planned: "layerPlanned",
-  schemaPrepared: "layerSchemaPrepared",
-  signalOnly: "layerSignalOnly",
-} as const;
-
-type LayerStatus = keyof typeof LAYER_STATUS_KEY;
+const NEXT_STAGE_LAYERS = [
+  { key: "accommodation", icon: Home },
+  { key: "teams", icon: UsersRound },
+  { key: "readiness", icon: ShieldCheck },
+  { key: "rates", icon: Coins },
+  { key: "countryFit", icon: Globe2 },
+] as const;
 
 /** Safe first actions → real existing routes. Accommodation is a PLANNED
  *  layer note, not a link (no route / no data yet). */
@@ -85,19 +73,10 @@ const LEGEND_TONE: Record<(typeof LEGEND)[number], string> = {
 export async function MarketMapShell() {
   const t = await getTranslations("marketMap");
 
-  // Real signal-only count from the company_demand_locations table (#423),
-  // RLS-scoped to the caller's own demands. Defensive: any null → fall back to
-  // the static "schema prepared" state. Still ZERO markers either way — a row
-  // is only mappable once coordinates are confirmed (verified/manual).
+  // Real signal count from the company_demand_locations table (#423),
+  // RLS-scoped to the caller's own demands. Country/region signals only — a row
+  // is never a marker (no confirmed coordinates are surfaced here).
   const demandSummary = await getOwnDemandLocationSummary();
-  // schema_prepared (0 rows) → "schemaPrepared"; any real rows → "signalOnly".
-  // This v1 never reaches "live" (signal-only rows carry no coordinates, so
-  // none are mappable) — kept defensive so a stray mappable row still shows as
-  // a signal, never a marker.
-  const demandStatus: LayerStatus =
-    demandSummary && demandLayerStatus(demandSummary) !== "schema_prepared"
-      ? "signalOnly"
-      : "schemaPrepared";
   const demandSignalCount = demandSummary?.total ?? 0;
 
   // Signal-only READ LAYER: real demand signals grouped by country, no points.
@@ -133,12 +112,12 @@ export async function MarketMapShell() {
         </p>
       </header>
 
-      {/* Honest foundation notice — no fake markers */}
+      {/* Owner scope note — working space + honest limits (no public aggregate) */}
       <p
-        className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
-        data-testid="market-map-foundation-notice"
+        className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+        data-testid="market-map-owner-scope-note"
       >
-        {t("foundationNotice")}
+        {t("ownerScopeNote")}
       </p>
 
       {/* Filter bar over REAL dimensions (countries + sectors already in app) */}
@@ -232,7 +211,8 @@ export async function MarketMapShell() {
             </ul>
           </section>
 
-          {/* Planned layers */}
+          {/* Signal layers — ACTIVE now (driven by the owner's own signals) +
+              a clearly separated "next stage" group for future layers. */}
           <section
             className="card-border flex flex-col gap-3 p-4"
             data-testid="market-map-layers"
@@ -241,48 +221,23 @@ export async function MarketMapShell() {
               {t("layersTitle")}
             </p>
             <ul className="flex flex-col gap-2.5">
-              {LAYERS.map(({ key, icon: Icon, status }) => {
-                // The demand layer's status is REAL/dynamic (#423 table); the
-                // rest stay as declared. signalOnly + schemaPrepared are both
-                // "blue" (prepared/real-but-no-markers); planned is "warning".
-                const effectiveStatus: LayerStatus =
-                  key === "demand" ? demandStatus : status;
-                const blue =
-                  effectiveStatus === "schemaPrepared" ||
-                  effectiveStatus === "signalOnly";
-                return (
+              {ACTIVE_LAYERS.map(({ key, icon: Icon }) => (
                 <li key={key} className="flex items-start gap-2.5" data-testid={`market-map-layer-${key}`}>
-                  <Icon
-                    className="mt-0.5 h-4 w-4 shrink-0 text-brand-blue"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
+                  <Icon className="mt-0.5 h-4 w-4 shrink-0 text-brand-blue" strokeWidth={1.75} aria-hidden />
                   <span className="flex flex-col gap-0.5">
                     <span className="flex items-center gap-2 text-sm text-text-primary">
                       {t(`layers.${key}.label`)}
                       <span
                         data-testid={`market-map-layer-${key}-status`}
-                        className={`rounded-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label ${
-                          blue
-                            ? "border-brand-blue/40 bg-brand-blue/5 text-brand-blue"
-                            : "border-state-warning/40 bg-state-warning/5 text-state-warning"
-                        }`}
+                        className="rounded-sm border border-brand-blue/40 bg-brand-blue/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-blue"
                       >
-                        {t(LAYER_STATUS_KEY[effectiveStatus])}
+                        {t("layerActive")}
                       </span>
                     </span>
                     <span className="text-xs leading-relaxed text-text-muted">
                       {t(`layers.${key}.desc`)}
                     </span>
-                    {key === "demand" && effectiveStatus === "schemaPrepared" && (
-                      <span
-                        className="mt-0.5 text-[11px] leading-relaxed text-text-muted"
-                        data-testid="market-map-demand-schema-note"
-                      >
-                        {t("demandSchemaNote")}
-                      </span>
-                    )}
-                    {key === "demand" && effectiveStatus === "signalOnly" && (
+                    {key === "demand" && demandSignalCount > 0 && (
                       <span
                         className="mt-0.5 text-[11px] leading-relaxed text-text-muted"
                         data-testid="market-map-demand-signal-note"
@@ -292,9 +247,40 @@ export async function MarketMapShell() {
                     )}
                   </span>
                 </li>
-                );
-              })}
+              ))}
             </ul>
+
+            {/* Next stage — future layers, honestly separated (not the centre). */}
+            <div
+              className="mt-1 flex flex-col gap-2 border-t border-ink-600/60 pt-3"
+              data-testid="market-map-next-stage"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                {t("nextStageTitle")}
+              </p>
+              <ul className="flex flex-col gap-2">
+                {NEXT_STAGE_LAYERS.map(({ key, icon: Icon }) => (
+                  <li key={key} className="flex items-start gap-2.5 opacity-70" data-testid={`market-map-layer-${key}`}>
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-text-muted" strokeWidth={1.75} aria-hidden />
+                    <span className="flex flex-col gap-0.5">
+                      <span className="flex items-center gap-2 text-sm text-text-secondary">
+                        {t(`layers.${key}.label`)}
+                        <span
+                          data-testid={`market-map-layer-${key}-status`}
+                          className="rounded-sm border border-border-subtle bg-surface-1 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted"
+                        >
+                          {t("layerNextStage")}
+                        </span>
+                      </span>
+                      <span className="text-xs leading-relaxed text-text-muted">
+                        {t(`layers.${key}.desc`)}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[11px] leading-relaxed text-text-muted">{t("nextStageNote")}</p>
+            </div>
           </section>
         </aside>
       </div>

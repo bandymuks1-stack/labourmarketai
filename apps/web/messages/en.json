@@ -144,9 +144,9 @@
   },
   "marketMap": {
     "backToActions": "Action center",
-    "title": "Live labour-market map",
-    "subtitle": "Built from real workers, company needs, projects and accommodation data — a living picture of where people are, where the need is, and where you can act now.",
-    "foundationNotice": "A live labour-market signal view — shown at country / region level. Exact location is not shown until you confirm it. Signals are not guarantees — they help you read the market faster.",
+    "title": "My market map",
+    "subtitle": "Where you are, where you want to act, and where the demand is — shown only through your own safe, private signals.",
+    "ownerScopeNote": "This is your own market-map space — shown only through your own signals, at country / region level. Other users' signals are not shown, and an exact location appears only once you confirm it. A public market layer will be added separately, only with aggregation safeguards.",
     "mySignals": {
       "title": "Your signals on the map",
       "note": "Your own signals — from the location, preferences, needs and projects you set.",
@@ -247,10 +247,10 @@
       "noData": "No data yet"
     },
     "layersTitle": "Signal layers",
-    "layerPlanned": "no data yet",
-    "layerSchemaPrepared": "schema prepared",
-    "layerSignalOnly": "signal only",
-    "demandSchemaNote": "Company demand locations are collected as signals; exact points appear only once locations are confirmed.",
+    "layerActive": "active",
+    "layerNextStage": "next stage",
+    "nextStageTitle": "Next stage",
+    "nextStageNote": "These layers come in later stages — only from real signals, never invented points.",
     "demandSignalNote": "{count} of your demand locations captured as signals — no map points yet, because coordinates are not confirmed.",
     "signalLayer": {
       "title": "Demand signals ({count})",
