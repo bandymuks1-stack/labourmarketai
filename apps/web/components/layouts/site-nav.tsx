@@ -1,6 +1,7 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
+import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { isVisionPublic } from "@/lib/config/vision-publication";
 
@@ -33,6 +34,7 @@ function visibleLinks(): readonly NavLink[] {
 
 export async function SiteNav() {
   const t = await getTranslations("nav");
+  const locale = await getLocale();
   const links = visibleLinks();
 
   return (
@@ -58,15 +60,17 @@ export async function SiteNav() {
         </nav>
 
         <div className="ml-auto flex items-center gap-3 sm:gap-4">
-          <Link
-            href="/auth/login"
+          {/* Auth CTAs pin to the app origin on marketing hosts so OAuth's
+              PKCE round-trip stays same-origin (see AuthCtaLink). */}
+          <AuthCtaLink
+            relPath={`/${locale}/auth/login`}
             className="text-sm text-text-secondary transition-colors hover:text-text-primary"
           >
             {t("login")}
-          </Link>
-          <Link href="/auth/signup">
+          </AuthCtaLink>
+          <AuthCtaLink relPath={`/${locale}/auth/signup`}>
             <Button size="sm">{t("startNow")}</Button>
-          </Link>
+          </AuthCtaLink>
           <LocaleSwitcher className="hidden sm:flex" />
         </div>
       </div>

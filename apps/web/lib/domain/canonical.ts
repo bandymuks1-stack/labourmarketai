@@ -124,3 +124,39 @@ export function buildAppUrl(pathname: string, search: string = ""): string {
   const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
   return `${APP_ORIGIN}${path}${search ?? ""}`;
 }
+
+/**
+ * Decide the href an auth CTA (login / signup) should use given the host the
+ * page is currently served on.
+ *
+ * Why: OAuth uses PKCE — the `code_verifier` cookie is written on the origin
+ * where sign-in STARTS and must be readable by the callback. If a visitor on
+ * the apex public marketing host (`labourmarket.ai`) clicks a relative
+ * `/auth/login`, sign-in starts on the apex but the flow returns to the app
+ * host — the verifier is missing and the exchange fails. Pinning the auth CTA
+ * to the app origin keeps the whole OAuth round-trip same-origin.
+ *
+ * - App host → return the relative path unchanged (normal same-host nav).
+ * - localhost / loopback (dev) → relative (never bounce dev to production).
+ * - Any other host (apex, www, vercel alias) → absolute app-origin URL.
+ *
+ * `relPath` is an already locale-prefixed internal path, e.g. `/lt/auth/login`.
+ */
+export function preferAppHostHref(
+  host: string | null | undefined,
+  relPath: string,
+): string {
+  const normalised = normalizeHost(host);
+  if (!normalised) return relPath;
+  if (normalised === APP_HOST) return relPath;
+  if (
+    normalised === "localhost" ||
+    normalised === "127.0.0.1" ||
+    normalised === "0.0.0.0" ||
+    normalised === "[::1]" ||
+    normalised === "::1"
+  ) {
+    return relPath;
+  }
+  return `${APP_ORIGIN}${relPath.startsWith("/") ? relPath : `/${relPath}`}`;
+}
