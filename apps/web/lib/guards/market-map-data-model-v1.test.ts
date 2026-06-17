@@ -29,7 +29,7 @@ const up = readFileSync(MIGRATION, "utf8");
 // SQL with `--` comments stripped — so prose like "no `using (true)`" in the
 // header doesn't trip the destructive/RLS checks (we test real statements).
 const codeLc = up
-  .split("\n")
+  .split(/\r?\n/) // CRLF-safe: a trailing \r would break the comment strip below
   .map((l) => l.replace(/--.*$/, ""))
   .join("\n")
   .toLowerCase();
