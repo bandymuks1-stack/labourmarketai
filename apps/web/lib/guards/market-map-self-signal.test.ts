@@ -42,12 +42,14 @@ describe("market map is a first-class primary-nav route", () => {
   });
 });
 
-describe("the shell renders the logged-in user's self-signal", () => {
+describe("the shell renders the logged-in user's signals", () => {
   const shell = read("components/app/market-map-shell.tsx");
 
-  it("fetches the self-signal board and renders the self-signal panel", () => {
-    expect(shell).toMatch(/getOwnSelfSignals/);
-    expect(shell).toMatch(/MarketMapSelfSignal/);
+  it("fetches the owner read layer and renders the owner-signals panel", () => {
+    // UI wiring v1 (#459 read layer): the shell now drives the owner view from
+    // getOwnMarketSignals() / MarketMapMySignals (superset of the old panel).
+    expect(shell).toMatch(/getOwnMarketSignals/);
+    expect(shell).toMatch(/MarketMapMySignals/);
   });
 });
 

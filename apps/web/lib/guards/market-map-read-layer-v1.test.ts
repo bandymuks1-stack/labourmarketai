@@ -81,20 +81,22 @@ describe("owner-scoped fetcher — RLS only, no privileged cross-user read", () 
   });
 });
 
-describe("NO UI wiring in this PR", () => {
+describe("owner view wired; public/cross-user aggregate NOT", () => {
   const SHELL = read("components/app/market-map-shell.tsx");
-  const SELF = read("components/app/market-map-self-signal.tsx");
-  it("the map components do not import the new read layer yet", () => {
-    for (const ui of [SHELL, SELF]) {
-      expect(ui).not.toMatch(/market-map\/signals\b/);
-      expect(ui).not.toMatch(/getOwnMarketSignals|signal-model/);
-    }
+  it("the shell wires the OWNER read layer (getOwnMarketSignals)", () => {
+    expect(SHELL).toMatch(/getOwnMarketSignals/);
+    expect(SHELL).toMatch(/MarketMapMySignals/);
   });
-  it("no public/market aggregated output is wired into any component", () => {
+  it("the owner-view component takes data via props, not the server fetcher", () => {
+    const my = read("components/app/market-map-my-signals.tsx");
+    expect(my).not.toMatch(/from\s+"@\/lib\/market-map\/signals"/);
+    expect(my).not.toMatch(/getOwnMarketSignals/);
+  });
+  it("NO component uses the public/cross-user aggregate (marketSignals)", () => {
     const compDir = join(APP, "components", "app");
     const offenders = readdirSync(compDir)
       .filter((f) => f.endsWith(".tsx"))
-      .filter((f) => /marketSignals\b/.test(readFileSync(join(compDir, f), "utf8")));
+      .filter((f) => /\bmarketSignals\b/.test(readFileSync(join(compDir, f), "utf8")));
     expect(offenders).toEqual([]);
   });
 });
