@@ -5,13 +5,13 @@ import { join } from "node:path";
 import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
 
 /**
- * Market Map SELF-SIGNAL + primary-nav guard (unified market map handoff, P0).
+ * Market Map owner-signal + primary-nav guard.
  *
- * The logged-in user must be able to SEE THEMSELVES on the one shared market
- * map — a real country-level worker/company signal or a real
- * location-completion action — and the map must be a first-class primary-nav
- * route (desktop tabs + mobile bottom nav). No fake markers, no coordinates,
- * no "preparing / ruošiama" framing.
+ * The logged-in user sees their OWN signals on the one shared market map (via
+ * the #459 owner read layer), and the map is a first-class primary-nav route
+ * (desktop tabs + mobile bottom nav). No "preparing / ruošiama" framing.
+ * (Detailed owner-view category/privacy assertions live in
+ * market-map-ui-wiring-v1; this guard owns the nav route + copy honesty.)
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -31,7 +31,6 @@ describe("market map is a first-class primary-nav route", () => {
     const bottom = read("components/app/bottom-nav.tsx");
     expect(tabs).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
     expect(bottom).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
-    // The mobile nav needs a concrete icon for the map tab.
     expect(bottom).toMatch(/map:\s*MapIcon/);
   });
 
@@ -42,82 +41,31 @@ describe("market map is a first-class primary-nav route", () => {
   });
 });
 
-describe("the shell renders the logged-in user's signals", () => {
+describe("the shell renders the owner's signals via the read layer", () => {
   const shell = read("components/app/market-map-shell.tsx");
-
   it("fetches the owner read layer and renders the owner-signals panel", () => {
-    // UI wiring v1 (#459 read layer): the shell now drives the owner view from
-    // getOwnMarketSignals() / MarketMapMySignals (superset of the old panel).
     expect(shell).toMatch(/getOwnMarketSignals/);
     expect(shell).toMatch(/MarketMapMySignals/);
   });
-});
-
-describe("self-signal is real, country-level, and never a fake marker", () => {
-  const src = read("lib/market-map/self-signal.ts");
-  const ui = read("components/app/market-map-self-signal.tsx");
-
-  it("reads the caller's own profile / worker / company rows", () => {
-    expect(src).toMatch(/from\("profiles"\)/);
-    expect(src).toMatch(/from\("workers"\)/);
-    expect(src).toMatch(/from\("companies"\)/);
-    // Scoped to the authenticated user — no cross-user reads.
-    expect(src).toMatch(/auth\.getUser/);
-  });
-
-  it("emits NO coordinates / lat-lng (signal-only, country level)", () => {
-    for (const s of [src, ui]) {
-      expect(s).not.toMatch(/\blatitude\b|\blongitude\b/);
-      expect(s).not.toMatch(/\blat\b\s*[:=].*\blng\b/i);
-      expect(s).not.toMatch(/mapbox|google[^\n]*maps/i);
-    }
-  });
-
-  it("offers a real location-completion action when no country is set", () => {
-    expect(ui).toMatch(/hasLocation/);
-    expect(ui).toMatch(/\/dashboard\/profile/);
-    expect(ui).toMatch(/\/dashboard\/company/);
-    expect(ui).toMatch(/addLocationCta/);
+  it("there is no leftover self-signal panel (single owner architecture)", () => {
+    expect(shell).not.toMatch(/MarketMapSelfSignal|getOwnSelfSignals/);
   });
 });
 
-describe("market map carries the self-signal copy and no 'preparing' framing", () => {
+describe("market map copy carries no 'preparing' framing", () => {
   for (const locale of ACTIVE_LOCALES) {
     const m = JSON.parse(read(`messages/${locale}.json`));
-    it(`${locale}: marketMap.selfSignal keys exist`, () => {
-      const s = m.marketMap?.selfSignal;
-      expect(s, `${locale} selfSignal block`).toBeTruthy();
-      for (const k of [
-        "title",
-        "note",
-        "profileLabel",
-        "companyLabel",
-        "loginLabel",
-        "loginNeutral",
-        "preferredLabel",
-        "countryLevelNotice",
-        "countryLevel",
-        "selfDeclared",
-        "workerMissingBody",
-        "companyMissingBody",
-        "addLocationCta",
-        "ctaAddPreferred",
-      ]) {
-        expect(s[k], `${locale} selfSignal.${k}`).toBeTruthy();
-      }
-    });
-
-    it(`${locale}: no leftover 'preparing' token + subtitle isn't 'being prepared'`, () => {
-      // The unused banned-token key is gone.
+    it(`${locale}: no 'preparing' key + subtitle isn't 'being prepared'`, () => {
       expect(m.marketMap.preparing).toBeUndefined();
-      // The subtitle must not read as "being prepared".
       expect(String(m.marketMap.subtitle)).not.toMatch(
         /ruošiam|готовится|being prepared/i,
       );
     });
-
     it(`${locale}: market_map nav tab label exists`, () => {
       expect(m.auth.dashboard.tabs.marketMap).toBeTruthy();
+    });
+    it(`${locale}: the retired selfSignal block is gone`, () => {
+      expect(m.marketMap.selfSignal).toBeUndefined();
     });
   }
 });
