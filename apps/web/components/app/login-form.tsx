@@ -46,6 +46,9 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "signing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  // True after a failed email/password attempt — the most common cause is a
+  // Google-only account (no password), so we point the user back to Google.
+  const [passwordFailed, setPasswordFailed] = useState(false);
   const [isPreviewHost, setIsPreviewHost] = useState(false);
 
   // Detect Vercel preview host (e.g. labourmarketai-<sha>.vercel.app)
@@ -68,6 +71,7 @@ export function LoginForm() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setPasswordFailed(false);
     if (!isValidEmail(email)) {
       setError(t("error_email"));
       return;
@@ -93,6 +97,10 @@ export function LoginForm() {
       setStatus("error");
       const info = mapAuthError(e);
       setError(tErr(info.key, info.params));
+      // Password sign-in failed — surface the Google path. A Google-created
+      // account has no password, so "invalid credentials" here usually means
+      // "you signed up with Google", not "wrong password".
+      setPasswordFailed(true);
     }
   }
 
@@ -169,7 +177,10 @@ export function LoginForm() {
           autoComplete="email"
           required
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (passwordFailed) setPasswordFailed(false);
+          }}
           className={inputCls}
         />
       </label>
@@ -198,6 +209,19 @@ export function LoginForm() {
       {error && (
         <p className="text-xs text-state-danger" role="alert">
           {error}
+        </p>
+      )}
+      {passwordFailed && (
+        // The most common reason an email/password attempt fails for this
+        // product is that the account was created with Google (no password).
+        // Point the user back up to the Google button instead of leaving them
+        // stuck on a password they never set.
+        <p
+          className="rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          role="status"
+          data-testid="login-google-hint"
+        >
+          ↑ {t("google_hint")}
         </p>
       )}
 
