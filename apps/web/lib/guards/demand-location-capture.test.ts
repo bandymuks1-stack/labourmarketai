@@ -199,7 +199,7 @@ describe("demand-location capture copy — present in every active locale", () =
       expect(val(m, "demandLocationCapture.open"), `${locale} open`).toBeTruthy();
       expect(val(m, "demandLocationCapture.note"), `${locale} note`).toBeTruthy();
       expect(val(m, "demandLocationCapture.done"), `${locale} done`).toBeTruthy();
-      expect(val(m, "marketMap.layerSignalOnly"), `${locale} layerSignalOnly`).toBeTruthy();
+      expect(val(m, "marketMap.layerActive"), `${locale} layerActive`).toBeTruthy();
       expect(val(m, "marketMap.demandSignalNote"), `${locale} demandSignalNote`).toBeTruthy();
     });
     it(`${locale}: signal note carries the {count} placeholder`, () => {

@@ -192,10 +192,16 @@ describe("demand-locations read model — no geocoder, never invents a point", (
 describe("market-map demand layer — first real candidate, still 0 fake markers", () => {
   const shell = readApp(SHELL);
 
-  it("marks the demand layer as schemaPrepared and renders the schema note", () => {
-    expect(shell).toMatch(/key:\s*"demand"[^}]*status:\s*"schemaPrepared"/);
-    expect(shell).toMatch(/data-testid="market-map-demand-schema-note"/);
-    expect(shell).toMatch(/layerSchemaPrepared/);
+  it("renders the demand layer as ACTIVE with a real signal-count note", () => {
+    // Post working-owner-framing: demand is an active owner-signal layer, not a
+    // "schema prepared" scaffold. The count note shows only when real signals
+    // exist; no fake markers either way.
+    expect(shell).toMatch(/ACTIVE_LAYERS\b/);
+    expect(shell).toMatch(/key === "demand" && demandSignalCount > 0/);
+    expect(shell).toMatch(/data-testid="market-map-demand-signal-note"/);
+    expect(shell).toMatch(/layerActive/);
+    // The old scaffold framing is gone.
+    expect(shell).not.toMatch(/schemaPrepared|layerSchemaPrepared|demandSchemaNote/);
   });
 
   it("still seeds NO markers / coordinates in the shell", () => {
@@ -209,17 +215,16 @@ describe("market-map demand layer — first real candidate, still 0 fake markers
 describe("demand-locations copy — present in every active locale", () => {
   for (const locale of ACTIVE) {
     const m = loadMessages(locale);
-    it(`${locale}: layerSchemaPrepared + demandSchemaNote present`, () => {
-      expect(str(m, "marketMap.layerSchemaPrepared"), `${locale} layerSchemaPrepared`).toBeTruthy();
-      expect(str(m, "marketMap.demandSchemaNote"), `${locale} demandSchemaNote`).toBeTruthy();
+    it(`${locale}: layerActive + demandSignalNote present`, () => {
+      expect(str(m, "marketMap.layerActive"), `${locale} layerActive`).toBeTruthy();
+      expect(str(m, "marketMap.demandSignalNote"), `${locale} demandSignalNote`).toBeTruthy();
     });
   }
-  it("lt schema note frames demand as signal-only, not a live point (migration now applied)", () => {
-    // company_demand_locations is applied (2026-06-16); the note no longer
-    // references a RED/unapplied migration — it honestly frames demand as
-    // signals, with exact points only once locations are confirmed.
-    const note = str(loadMessages("lt"), "marketMap.demandSchemaNote");
+  it("lt demand signal note frames demand as signals, not a live point", () => {
+    // The note honestly frames demand as country-level signals — no scaffold /
+    // "schema prepared" framing, no RED/migration reference.
+    const note = str(loadMessages("lt"), "marketMap.demandSignalNote");
     expect(note).toMatch(/signal/i);
-    expect(note).not.toMatch(/RED|migracij/i);
+    expect(note).not.toMatch(/RED|migracij|schema/i);
   });
 });

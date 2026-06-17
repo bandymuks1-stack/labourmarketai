@@ -81,7 +81,7 @@ describe("market map foundation — shell sections", () => {
     "market-map-layers",
     "market-map-next-actions",
     "back-to-action-center",
-    "market-map-foundation-notice",
+    "market-map-owner-scope-note",
   ]) {
     it(`renders ${id}`, () => {
       expect(shell).toMatch(new RegExp(`data-testid="${id}"`));
@@ -93,9 +93,9 @@ describe("market map foundation — honest copy in every active locale", () => {
   const DIRECTORY = /\bdirectory\b|katalog|каталог/i;
   for (const locale of ACTIVE) {
     const m = loadMessages(locale);
-    it(`${locale}: title + foundation notice + layers + next actions present`, () => {
+    it(`${locale}: title + owner scope note + layers + next actions present`, () => {
       expect(str(m, "marketMap.title"), `${locale} title`).toBeTruthy();
-      expect(str(m, "marketMap.foundationNotice"), `${locale} foundationNotice`).toBeTruthy();
+      expect(str(m, "marketMap.ownerScopeNote"), `${locale} ownerScopeNote`).toBeTruthy();
       expect(str(m, "marketMap.layers.workers.label"), `${locale} layer`).toBeTruthy();
       expect(str(m, "marketMap.layers.accommodation.label"), `${locale} accommodation`).toBeTruthy();
       expect(str(m, "marketMap.nextActions.companyNeed"), `${locale} action`).toBeTruthy();
@@ -105,7 +105,7 @@ describe("market map foundation — honest copy in every active locale", () => {
       expect(str(m, "marketMap.subtitle")).not.toMatch(DIRECTORY);
     });
   }
-  it("lt title is the living labour-market map phrasing", () => {
-    expect(str(loadMessages("lt"), "marketMap.title")).toMatch(/gyvas darbo rinkos žemėlapis/i);
+  it("lt title frames it as the owner's own working market map", () => {
+    expect(str(loadMessages("lt"), "marketMap.title")).toMatch(/mano rinkos žemėlapis/i);
   });
 });

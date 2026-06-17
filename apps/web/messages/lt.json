@@ -144,9 +144,9 @@
   },
   "marketMap": {
     "backToActions": "Veiksmų centras",
-    "title": "Gyvas darbo rinkos žemėlapis",
-    "subtitle": "Sudėliotas iš realių darbuotojų, įmonių poreikių, projektų ir apgyvendinimo duomenų — gyvas vaizdas, kur yra žmonės, kur yra poreikis ir kur galite veikti dabar.",
-    "foundationNotice": "Gyvas darbo rinkos signalų vaizdas — rodomas šalies / regiono lygiu. Tiksli vieta nerodoma, kol jos nepatvirtinate. Signalai nėra garantijos — jie padeda greičiau suprasti rinką.",
+    "title": "Mano rinkos žemėlapis",
+    "subtitle": "Kur esate, kur norite veikti ir kur yra poreikis — rodoma tik jūsų pačių saugiais, privačiais signalais.",
+    "ownerScopeNote": "Tai jūsų asmeninė rinkos žemėlapio erdvė — rodoma tik jūsų pačių signalais, šalies / regiono lygiu. Kitų vartotojų signalai nerodomi, o tiksli vieta — tik jums patvirtinus. Viešas rinkos sluoksnis bus jungiamas atskirai, tik su agregavimo apsauga.",
     "mySignals": {
       "title": "Jūsų signalai žemėlapyje",
       "note": "Jūsų pačių signalai — pagal jūsų nurodytą vietą, pageidavimus, poreikius ir projektus.",
@@ -247,10 +247,10 @@
       "noData": "Kol kas nėra duomenų"
     },
     "layersTitle": "Signalų sluoksniai",
-    "layerPlanned": "nėra duomenų",
-    "layerSchemaPrepared": "schema parengta",
-    "layerSignalOnly": "tik signalas",
-    "demandSchemaNote": "Įmonių poreikių vietos kaupiamos kaip signalai; tikslūs taškai bus rodomi tik turint patvirtintas vietas.",
+    "layerActive": "veikia",
+    "layerNextStage": "kitas etapas",
+    "nextStageTitle": "Kitas etapas",
+    "nextStageNote": "Šie sluoksniai bus jungiami vėlesniuose etapuose — tik su realiais signalais, be sugalvotų taškų.",
     "demandSignalNote": "{count} jūsų poreikių vietų užfiksuota kaip signalai — dar jokių taškų žemėlapyje, nes koordinatės nepatvirtintos.",
     "signalLayer": {
       "title": "Poreikių signalai ({count})",
