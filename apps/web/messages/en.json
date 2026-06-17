@@ -261,6 +261,32 @@
         "addCta": "Add via the company workspace"
       }
     },
+    "readiness": {
+      "title": "Availability & mobility",
+      "note": "Shown only to you — from your profile. No one else sees this data here.",
+      "addAction": "Complete your profile to show availability",
+      "mobilityAdd": "Add where you are and where you'd like to work",
+      "availableFrom": "Available from {date}",
+      "currentLabel": "You are in",
+      "preferredLabel": "Would work in",
+      "state": {
+        "available": "Available now",
+        "busy": "Busy",
+        "unavailable": "Unavailable",
+        "unknown": "Availability not set"
+      }
+    },
+    "capabilities": {
+      "title": "Capability signals",
+      "note": "Only your own capabilities. Confirmed is shown only when there is real platform verification.",
+      "addAction": "Add skills in your profile",
+      "legend": "Self-declared — what you listed; From work — backed by your journal entries; Confirmed — verified on the platform.",
+      "status": {
+        "confirmed": "Confirmed",
+        "suggested": "From work",
+        "self_declared": "Self-declared"
+      }
+    },
     "filtersTitle": "Filters",
     "scopeTitle": "Signal scope",
     "filterCountry": "Country",
