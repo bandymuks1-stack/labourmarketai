@@ -189,16 +189,25 @@
       "error": "Could not save. Please try again.",
       "disable": "Disable",
       "enable": "Enable",
+      "aggregatedHint": "Shown aggregated only once a public layer is turned on.",
       "preferred": {
         "title": "Preferred locations",
         "country": "Country",
         "countryPlaceholder": "Select a country",
         "city": "City (optional)",
         "cityPlaceholder": "e.g. Vilnius",
-        "intents": "What you want to do here",
+        "intents": "What do you want to do here?",
+        "priorityLabel": "Direction",
+        "note": "Short note (optional)",
+        "notePlaceholder": "e.g. open from spring",
         "visibility": "Visibility",
         "add": "Add location",
         "added": "Preferred location added."
+      },
+      "priority": {
+        "primary": "Primary direction",
+        "secondary": "Secondary direction",
+        "optional": "Optional direction"
       },
       "intent": {
         "work": "Work",
@@ -218,6 +227,21 @@
         "city_visible": "City level",
         "aggregated": "Aggregated"
       },
+      "needType": {
+        "workers": "Workers needed",
+        "team": "Team needed",
+        "subcontractors": "Subcontractors needed",
+        "freelancers": "Freelancers needed",
+        "service_provider": "Service provider needed",
+        "project_capacity": "Project capacity needed",
+        "accommodation_support": "Accommodation support needed",
+        "transport_support": "Transport support needed"
+      },
+      "urgency": {
+        "low": "Not urgent",
+        "medium": "Moderate",
+        "high": "Urgent"
+      },
       "login": {
         "title": "Login-location consent",
         "note": "Login location is shown approximately (country / region) and only with your consent. No exact address or coordinates are stored.",
@@ -228,6 +252,12 @@
       "demand": {
         "title": "Company-need locations",
         "empty": "No company-need locations yet.",
+        "needTypeLabel": "Need type",
+        "people": "People",
+        "urgencyLabel": "Urgency",
+        "mobility": "Mobility required",
+        "accommodation": "Accommodation needed",
+        "dates": "Window",
         "addCta": "Add via the company workspace"
       }
     },

@@ -23,27 +23,40 @@ async function gotoMap(page: Page) {
   await page.getByTestId("market-map-capture").waitFor({ state: "visible", timeout: 30_000 });
 }
 
-test("preferred location: create → map shows it → disable", async ({ page }) => {
+test("preferred location: create with intents + priority + note → depth shown → disable", async ({ page }) => {
   test.setTimeout(150_000);
   await gotoMap(page);
 
-  // Create a preferred location (LT) with an intent.
+  // Create a preferred location (LT) with two intents, optional priority + note.
   await page.getByTestId("capture-preferred-country").selectOption("LT");
   await page.getByTestId("capture-intent-work").click();
+  await page.getByTestId("capture-intent-relocate").click();
+  await page.getByTestId("capture-preferred-priority-select").selectOption("optional");
+  await page.getByTestId("capture-preferred-note").fill("e2e note");
   await page.getByTestId("capture-preferred-add").click();
 
-  // Row appears in the capture list, active.
+  // Row appears in the capture list, active, with priority + intent chips + note.
   const row = page.getByTestId("capture-preferred-row").first();
   await expect(row).toBeVisible({ timeout: 15_000 });
   await expect(row).toHaveAttribute("data-active", "true");
+  await expect(row.getByTestId("capture-preferred-priority")).toBeVisible();
+  await expect(row.getByTestId("capture-preferred-intents")).toBeVisible();
+  await expect(row).toContainText("e2e note");
 
   // The map's owner view now shows a preferred_location signal (revalidated).
   await expect(
     page.locator('[data-testid="market-map-category-preferred_location"][data-count]'),
   ).toHaveAttribute("data-count", /[1-9]/, { timeout: 15_000 });
 
+  // Edit visibility on the row (localized control, not a raw enum).
+  await row.getByTestId("capture-preferred-visibility").selectOption("region_visible");
+  await page.waitForTimeout(1200);
+  await expect(
+    page.getByTestId("capture-preferred-row").first().getByTestId("capture-preferred-visibility"),
+  ).toHaveValue("region_visible", { timeout: 15_000 });
+
   // Disable it → row marked inactive.
-  await row.getByTestId("capture-preferred-toggle").click();
+  await page.getByTestId("capture-preferred-row").first().getByTestId("capture-preferred-toggle").click();
   await expect(
     page.getByTestId("capture-preferred-row").first(),
   ).toHaveAttribute("data-active", "false", { timeout: 15_000 });
@@ -94,7 +107,7 @@ test("mobile (390px): no horizontal overflow, chips + capture reachable", async 
   await expect(page.locator("#market-map-add-preferred")).toBeVisible();
 });
 
-test("company-need: edit visibility on an owner row (no new insert)", async ({ page }) => {
+test("company-need: edit visibility + need type on an owner row (no new insert)", async ({ page }) => {
   test.setTimeout(120_000);
   await gotoMap(page);
 
@@ -111,4 +124,12 @@ test("company-need: edit visibility on an owner row (no new insert)", async ({ p
   await expect(
     page.getByTestId("capture-demand-row").first().getByTestId("capture-demand-visibility"),
   ).toHaveValue("region_visible", { timeout: 15_000 });
+
+  // Edit need type → team (localized select, owner-scoped, still no insert).
+  await page.getByTestId("capture-demand-row").first().getByTestId("capture-demand-needtype").selectOption("team");
+  await page.waitForTimeout(1500);
+  await expect(rows).toHaveCount(before);
+  await expect(
+    page.getByTestId("capture-demand-row").first().getByTestId("capture-demand-needtype"),
+  ).toHaveValue("team", { timeout: 15_000 });
 });
