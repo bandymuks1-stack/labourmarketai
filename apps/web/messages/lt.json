@@ -261,6 +261,32 @@
         "addCta": "Pridėti per įmonės erdvę"
       }
     },
+    "readiness": {
+      "title": "Prieinamumas ir mobilumas",
+      "note": "Rodoma tik jums — pagal jūsų profilį. Niekam kitam šie duomenys čia nematomi.",
+      "addAction": "Užpildyti profilį, kad matytųsi prieinamumas",
+      "mobilityAdd": "Pridėti, kur esate ir kur norėtumėte dirbti",
+      "availableFrom": "Galima veikti nuo {date}",
+      "currentLabel": "Esate",
+      "preferredLabel": "Norėtumėte dirbti",
+      "state": {
+        "available": "Galima veikti dabar",
+        "busy": "Užimta",
+        "unavailable": "Neprieinama",
+        "unknown": "Prieinamumas nenurodytas"
+      }
+    },
+    "capabilities": {
+      "title": "Gebėjimų signalai",
+      "note": "Tik jūsų pačių gebėjimai. Patvirtinta rodoma tik tada, kai yra realus platformos patvirtinimas.",
+      "addAction": "Pridėti įgūdžių profilyje",
+      "legend": "Savideklaruota — jūsų nurodyta; Iš darbų — pagrįsta jūsų žurnalo įrašais; Patvirtinta — patvirtinta platformoje.",
+      "status": {
+        "confirmed": "Patvirtinta",
+        "suggested": "Iš darbų",
+        "self_declared": "Savideklaruota"
+      }
+    },
     "filtersTitle": "Filtrai",
     "scopeTitle": "Signalų apimtis",
     "filterCountry": "Šalis",
