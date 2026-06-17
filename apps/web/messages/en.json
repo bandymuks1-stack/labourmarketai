@@ -2217,6 +2217,7 @@
       "error_email": "Please enter a valid email address.",
       "error_password_required": "Please enter your password.",
       "error_invalid_credentials": "Invalid email or password.",
+      "google_hint": "Signed up with Google? Then you don't have a password — use \"Continue with Google\" above.",
       "preview_host_notice": "You're on a Vercel preview deployment. Google sign-in is not configured for this URL — Supabase Site URL only allows the production origin. Sign in at https://app.labourmarket.ai. Email + password sign-in still works here."
     },
     "forgotPassword": {
