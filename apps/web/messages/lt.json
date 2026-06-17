@@ -145,9 +145,19 @@
   "marketMap": {
     "backToActions": "Veiksmų centras",
     "title": "Gyvas darbo rinkos žemėlapis",
-    "subtitle": "Ruošiamas iš realių darbuotojų, įmonių poreikių, projektų ir apgyvendinimo duomenų — gyvas vaizdas, kur yra žmonės, kur yra poreikis ir kur galite veikti dabar.",
+    "subtitle": "Sudėliotas iš realių darbuotojų, įmonių poreikių, projektų ir apgyvendinimo duomenų — gyvas vaizdas, kur yra žmonės, kur yra poreikis ir kur galite veikti dabar.",
     "foundationNotice": "Jokių netikrų taškų — žemėlapis užsipildys tik realiais duomenimis, kai kiekvienas šaltinis turės vietos lauką.",
-    "preparing": "ruošiama",
+    "selfSignal": {
+      "title": "Jūs žemėlapyje",
+      "note": "Jūsų pačių signalas bendrame žemėlapyje — šalies lygmens, pagal jūsų nurodytą vietą. Jokių koordinačių, jokio adreso.",
+      "workerLabel": "Profilio signalas",
+      "companyLabel": "Įmonės signalas",
+      "countryLevel": "šalies lygmens signalas",
+      "selfDeclared": "jūsų nurodyta vieta",
+      "workerMissingBody": "Pridėkite savo šalį profilyje, kad matytumėte save žemėlapyje.",
+      "companyMissingBody": "Pridėkite įmonės šalį, kad įmonė matytųsi žemėlapyje.",
+      "addLocationCta": "Pridėti vietą"
+    },
     "filtersTitle": "Filtrai",
     "scopeTitle": "Signalų apimtis",
     "filterCountry": "Šalis",
@@ -1885,6 +1895,10 @@
       "label": "Apžvalga",
       "description": "Pagrindinis langas su pradžia, pasiūlymais ir galimybėmis."
     },
+    "market_map": {
+      "label": "Rinkos žemėlapis",
+      "description": "Vieningas darbo rinkos žemėlapis — jūsų pačių signalas, įmonių poreikiai ir realūs duomenys pagal šalį. Be netikrų žymeklių."
+    },
     "profile_text_first": {
       "label": "Profilis",
       "description": "Apibūdinkite save savais žodžiais arba įklijuokite CV. Sistema pasiūlys įgūdžius, kuriuos patvirtinsite jūs."
@@ -2650,6 +2664,7 @@
       },
       "tabs": {
         "overview": "Mano erdvė",
+        "marketMap": "Žemėlapis",
         "profile": "Darbo kortelė",
         "journal": "Įrodymai",
         "communication": "Žinutės",
