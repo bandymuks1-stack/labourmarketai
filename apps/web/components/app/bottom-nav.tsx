@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Home, IdCard, Inbox, User } from "lucide-react";
+import { FileText, Home, IdCard, Inbox, Map as MapIcon, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 // only carries the icon ID.
 const ICONS: Record<NavIconKey, LucideIcon> = {
   home: Home,
+  map: MapIcon,
   idCard: IdCard,
   fileText: FileText,
   inbox: Inbox,

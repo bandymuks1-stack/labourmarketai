@@ -147,7 +147,17 @@
     "title": "Live labour-market map",
     "subtitle": "Built from real workers, company needs, projects and accommodation data — a living picture of where people are, where the need is, and where you can act now.",
     "foundationNotice": "No fake points — the map fills only with real data, once each source has a location field.",
-    "preparing": "preparing",
+    "selfSignal": {
+      "title": "You on the map",
+      "note": "Your own signal on the shared map — country-level, from the location you set. No coordinates, no address.",
+      "workerLabel": "Profile signal",
+      "companyLabel": "Company signal",
+      "countryLevel": "country-level signal",
+      "selfDeclared": "self-declared location",
+      "workerMissingBody": "Add your country in your profile to appear on the map.",
+      "companyMissingBody": "Add your company country to appear on the map.",
+      "addLocationCta": "Complete location"
+    },
     "filtersTitle": "Filters",
     "scopeTitle": "Signal scope",
     "filterCountry": "Country",
@@ -1885,6 +1895,10 @@
       "label": "Overview",
       "description": "Main view with the starting steps, suggestions and opportunities."
     },
+    "market_map": {
+      "label": "Market map",
+      "description": "One unified labour-market map — your own signal, company needs and real data by country. No fake markers."
+    },
     "profile_text_first": {
       "label": "Profile",
       "description": "Describe yourself in your own words or paste a CV. The system suggests skills, but you confirm them."
@@ -2650,6 +2664,7 @@
       },
       "tabs": {
         "overview": "My space",
+        "marketMap": "Map",
         "profile": "Work card",
         "journal": "Evidence",
         "communication": "Messages",

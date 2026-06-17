@@ -481,6 +481,11 @@ describe("feature-availability + config-driven dashboard", () => {
         // nav from the catalogue. The three text-first surfaces remain
         // the only feature workflows that ship today.
         "overview",
+        // Unified market map (P0): one shared map surface, active + in primary
+        // nav. The logged-in user always sees their own country-level
+        // self-signal (or a real location-completion action) plus real demand
+        // signals — signal-only, no fake markers.
+        "market_map",
         "profile_text_first",
         "journal_text_first",
         // P0 (request-not-received fix): communication / inbox is a real,
@@ -533,6 +538,7 @@ describe("feature-availability + config-driven dashboard", () => {
       expect(m.features.preparing_generic_reason).toBeTruthy();
       for (const key of [
         "overview",
+        "market_map",
         "profile_text_first",
         "journal_text_first",
         "account_roles",
@@ -589,17 +595,19 @@ describe("catalogue-driven primary nav", () => {
     expect(dt).not.toMatch(/^const TABS\s*=/m);
   });
 
-  it("only the four active beta surfaces become primary nav tabs", () => {
+  it("only the expected active surfaces become primary nav tabs", () => {
     // Mirrors the static set callers expect. If a future PR adds a tab,
     // both this assertion and the TAB_META map have to change — keeps
-    // visual changes obvious in code review.
+    // visual changes obvious in code review. The market map is a required
+    // first-class primary-nav surface (unified map handoff, P0).
     const navTxt = readWeb("lib/config/navigation.ts");
-    const tabFeatures = [...navTxt.matchAll(/\b(overview|profile_text_first|journal_text_first|account_roles):\s*\{\s*tabLabelKey/g)].map(
+    const tabFeatures = [...navTxt.matchAll(/\b(overview|market_map|profile_text_first|journal_text_first|account_roles):\s*\{\s*tabLabelKey/g)].map(
       (m) => m[1],
     );
     expect(new Set(tabFeatures)).toEqual(
       new Set([
         "overview",
+        "market_map",
         "profile_text_first",
         "journal_text_first",
         "account_roles",

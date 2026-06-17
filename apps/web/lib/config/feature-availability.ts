@@ -23,6 +23,7 @@ export type FeatureAvailability = "active" | "preparing" | "hidden";
 export type FeatureKey =
   // Active surfaces backing the first working beta.
   | "overview"
+  | "market_map"
   | "profile_text_first"
   | "journal_text_first"
   | "communication"
@@ -73,6 +74,19 @@ export const FEATURES: readonly FeatureConfig[] = [
     labelKey: "features.overview.label",
     descriptionKey: "features.overview.description",
     primaryRoute: "/dashboard",
+    safeToShowInPrimaryNav: true,
+  },
+  {
+    // Unified market map — one shared product surface for every role
+    // (worker / company / agency), reachable immediately after login. Active
+    // and primary-nav-safe: the logged-in user always sees their own
+    // country-level self-signal (or a real location-completion action) plus
+    // their real demand signals. Signal-only — no fake markers, no coordinates.
+    key: "market_map",
+    availability: "active",
+    labelKey: "features.market_map.label",
+    descriptionKey: "features.market_map.description",
+    primaryRoute: "/dashboard/market-map",
     safeToShowInPrimaryNav: true,
   },
   {
