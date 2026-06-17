@@ -212,6 +212,7 @@
         "remote_if_possible": "Remote if possible"
       },
       "visibility": {
+        "company_only": "Company only",
         "self_only": "Only me",
         "region_visible": "Region level",
         "city_visible": "City level",

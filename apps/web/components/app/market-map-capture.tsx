@@ -87,7 +87,7 @@ export function MarketMapCapture({
       <p className="text-xs leading-relaxed text-text-muted">{t("note")}</p>
 
       {/* ── Preferred locations ───────────────────────────────────────── */}
-      <div className="flex flex-col gap-3" data-testid="capture-preferred">
+      <div id="market-map-add-preferred" className="flex scroll-mt-24 flex-col gap-3" data-testid="capture-preferred">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
           <Compass className="h-4 w-4 text-brand-blue" strokeWidth={1.75} aria-hidden />
           {t("preferred.title")}
@@ -196,7 +196,7 @@ export function MarketMapCapture({
       </div>
 
       {/* ── Login location consent ────────────────────────────────────── */}
-      <div className="flex flex-col gap-2 border-t border-ink-600/60 pt-4" data-testid="capture-login">
+      <div id="market-map-login-consent" className="flex scroll-mt-24 flex-col gap-2 border-t border-ink-600/60 pt-4" data-testid="capture-login">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
           <LogIn className="h-4 w-4 text-brand-blue" strokeWidth={1.75} aria-hidden />
           {t("login.title")}
@@ -241,7 +241,7 @@ export function MarketMapCapture({
                   onChange={(e) => run(() => updateDemandLocationAction(d.id, { visibilityLevel: e.target.value }))}
                 >
                   {["company_only", "region_visible", "city_visible", "aggregated"].map((v) => (
-                    <option key={v} value={v}>{v}</option>
+                    <option key={v} value={v}>{t(`visibility.${v}`)}</option>
                   ))}
                 </select>
                 <button

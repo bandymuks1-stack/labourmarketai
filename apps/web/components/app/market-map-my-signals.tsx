@@ -28,11 +28,21 @@ import type { NormalizedSignal, SignalType } from "@/lib/market-map/signal-model
 
 type Filter = "all" | SignalType;
 
-const CATEGORY_ORDER: { type: SignalType; icon: typeof UserRound; labelKey: string; href: string; ctaKey: string }[] = [
+// `anchor` points the CTA at the on-page capture control (preferred add form /
+// login consent) so it does exactly what it says without leaving the map; the
+// rest link to where that signal is actually edited (profile / company).
+const CATEGORY_ORDER: {
+  type: SignalType;
+  icon: typeof UserRound;
+  labelKey: string;
+  href: string;
+  ctaKey: string;
+  anchor?: string;
+}[] = [
   { type: "profile_location", icon: UserRound, labelKey: "profileLabel", href: "/dashboard/profile", ctaKey: "ctaRefineProfile" },
   { type: "company_location", icon: Building2, labelKey: "companyLabel", href: "/dashboard/company", ctaKey: "ctaRefineCompany" },
-  { type: "login_location", icon: LogIn, labelKey: "loginLabel", href: "/dashboard/account", ctaKey: "ctaLogin" },
-  { type: "preferred_location", icon: Compass, labelKey: "preferredLabel", href: "/dashboard/profile", ctaKey: "ctaAddPreferred" },
+  { type: "login_location", icon: LogIn, labelKey: "loginLabel", href: "/dashboard/account", ctaKey: "ctaLogin", anchor: "#market-map-login-consent" },
+  { type: "preferred_location", icon: Compass, labelKey: "preferredLabel", href: "/dashboard/profile", ctaKey: "ctaAddPreferred", anchor: "#market-map-add-preferred" },
   { type: "company_need_location", icon: ClipboardList, labelKey: "demandLabel", href: "/dashboard/company", ctaKey: "ctaAddDemand" },
   { type: "project_location", icon: FolderKanban, labelKey: "projectLabel", href: "/dashboard/company", ctaKey: "ctaProject" },
 ];
@@ -126,7 +136,7 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
 
       <ul className="flex flex-col gap-2">
         {CATEGORY_ORDER.filter((c) => filter === "all" || filter === c.type).map(
-          ({ type, icon: Icon, labelKey, href, ctaKey }) => {
+          ({ type, icon: Icon, labelKey, href, ctaKey, anchor }) => {
             const rows = byType.get(type) ?? [];
             const isLogin = type === "login_location";
             return (
@@ -164,14 +174,26 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
                   </p>
                 )}
 
-                <Link
-                  href={href as "/dashboard"}
-                  data-testid={`market-map-cta-${type}`}
-                  className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
-                >
-                  {t(ctaKey)}
-                  <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
-                </Link>
+                {anchor ? (
+                  // On-page scroll to the matching capture control (no nav away).
+                  <a
+                    href={anchor}
+                    data-testid={`market-map-cta-${type}`}
+                    className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                  >
+                    {t(ctaKey)}
+                    <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
+                  </a>
+                ) : (
+                  <Link
+                    href={href as "/dashboard"}
+                    data-testid={`market-map-cta-${type}`}
+                    className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                  >
+                    {t(ctaKey)}
+                    <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
+                  </Link>
+                )}
               </li>
             );
           },
