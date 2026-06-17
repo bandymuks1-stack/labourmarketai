@@ -1455,7 +1455,16 @@ describe("no migration files added by this sprint", () => {
     // verified+coords reserved for a future admin/geocoder RPC. Adds a partial
     // unique index to block exact-duplicate signals per demand (multi-site still
     // allowed). Reversible (rollbacks/*). NOT applied — human-gated for owner.
-    const SPRINT_BASELINE = 83;
+    // Bumped 83 -> 84 for market-map-data-model-v1
+    // (20260617120000_market_map_data_model_v1): ONE additive RED-draft migration
+    // — two NEW owner-scoped tables (preferred_locations with intent + visibility;
+    // consented_login_location_signals, approximate + consent-gated, NO lat/lng/
+    // address columns by design) plus additive columns on company_demand_locations
+    // (need shape) and projects (granularity/visibility). Owner-scoped RLS, NO
+    // anon/public, grant to authenticated only, NO new SECURITY DEFINER. Additive
+    // + reversible (supabase/rollbacks/*). NOT applied — human-gated for owner
+    // (docs/audits/market-map-data-model-v1-owner-signoff.md).
+    const SPRINT_BASELINE = 84;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
