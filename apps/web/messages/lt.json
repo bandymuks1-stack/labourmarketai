@@ -3293,17 +3293,17 @@
   },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",
-    "headline": "Ne tik CV.",
-    "headlineAccent": "Gyvas darbo pasas.",
-    "subcopy": "Susikurkite Labourmarket.ai profilį, importuokite CV, pridėkite įgūdžius, fiksuokite kasdienį darbą ir rodykite prieinamumą — kad žmonės, komandos ir įmonės suprastų tikrą patirtį vietinėms ir tarptautinėms galimybėms.",
+    "headline": "Ne paprastas CV.",
+    "headlineAccent": "Realių įgūdžių ir darbo poreikių atitiktys.",
+    "subcopy": "Susikurkite Labourmarket.ai profilį, importuokite CV, pridėkite realius įgūdžius, prieinamumą ir darbo patirtį — kad žmonės, komandos ir įmonės aiškiau matytų, kur jūsų galimybės atitinka realius darbo poreikius vietinėje ir tarptautinėje rinkoje.",
     "ctaPrimary": "Susikurti profilį",
     "businessNote": "Įmonėms ir darbdaviams ·",
-    "businessLink": "Pateikti darbo poreikį",
+    "businessLink": "Pradėti darbo poreikį",
     "signals": {
-      "s1": "Gyvas profilis",
+      "s1": "Realus profilis",
       "s2": "Įgūdžių įrodymai",
       "s3": "Prieinamumas",
-      "s4": "Kasdienis darbas"
+      "s4": "Darbo poreikiai"
     }
   },
   "waitlist": {

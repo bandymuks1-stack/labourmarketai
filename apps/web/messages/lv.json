@@ -576,16 +576,16 @@
   "hero": {
     "chip": "Vispārēja darba tirgus platforma",
     "headline": "Ne tikai CV.",
-    "headlineAccent": "Dzīva darba pase.",
-    "subcopy": "Izveido savu Labourmarket.ai profilu, importē CV, pievieno prasmes, fiksē ikdienas darbu un rādi pieejamību — lai cilvēki, komandas un uzņēmumi saprastu reālo pieredzi vietējām un starptautiskām iespējām.",
+    "headlineAccent": "Reālas prasmes, kas atbilst reālām darba vajadzībām.",
+    "subcopy": "Izveido savu Labourmarket.ai profilu, importē CV, pievieno reālas prasmes, pieejamību un darba pieredzi — lai cilvēki, komandas un uzņēmumi skaidrāk redzētu, kur tavas iespējas atbilst reālām darba vajadzībām vietējā un starptautiskā tirgū.",
     "ctaPrimary": "Izveidot profilu",
     "businessNote": "Uzņēmumiem un darba devējiem ·",
-    "businessLink": "Iesniegt darba vajadzību",
+    "businessLink": "Sākt darba vajadzību",
     "signals": {
-      "s1": "Dzīvs profils",
+      "s1": "Reāls profils",
       "s2": "Prasmju pierādījumi",
       "s3": "Pieejamība",
-      "s4": "Ikdienas darbs"
+      "s4": "Darba vajadzības"
     }
   },
   "heroCards": {

@@ -576,16 +576,16 @@
   "hero": {
     "chip": "Ogólna platforma rynku pracy",
     "headline": "To nie tylko CV.",
-    "headlineAccent": "Żywy paszport pracy.",
-    "subcopy": "Utwórz profil w Labourmarket.ai, zaimportuj CV, dodaj umiejętności, zapisuj codzienną pracę i pokazuj dostępność — aby ludzie, zespoły i firmy rozumiały realne doświadczenie dla lokalnych i międzynarodowych możliwości.",
+    "headlineAccent": "Realne umiejętności dopasowane do realnych potrzeb pracy.",
+    "subcopy": "Utwórz profil w Labourmarket.ai, zaimportuj CV, dodaj realne umiejętności, dostępność i doświadczenie zawodowe — aby ludzie, zespoły i firmy jaśniej widziały, gdzie Twoje możliwości odpowiadają realnym potrzebom pracy lokalnie i międzynarodowo.",
     "ctaPrimary": "Utwórz profil",
     "businessNote": "Dla firm i pracodawców ·",
-    "businessLink": "Zgłoś zapotrzebowanie na pracę",
+    "businessLink": "Rozpocznij zapotrzebowanie na pracę",
     "signals": {
-      "s1": "Żywy profil",
+      "s1": "Realny profil",
       "s2": "Dowody umiejętności",
       "s3": "Dostępność",
-      "s4": "Codzienna praca"
+      "s4": "Potrzeby pracy"
     }
   },
   "heroCards": {

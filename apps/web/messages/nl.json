@@ -576,16 +576,16 @@
   "hero": {
     "chip": "Algemeen arbeidsmarktplatform",
     "headline": "Niet zomaar een cv.",
-    "headlineAccent": "Een levend werkpaspoort.",
-    "subcopy": "Maak je Labourmarket.ai-profiel, importeer je cv, voeg vaardigheden toe, leg dagelijks werk vast en toon beschikbaarheid — zodat mensen, teams en bedrijven echte ervaring begrijpen, voor lokale en internationale kansen.",
+    "headlineAccent": "Echte vaardigheden afgestemd op echte werkbehoeften.",
+    "subcopy": "Maak je Labourmarket.ai-profiel, importeer je cv, voeg echte vaardigheden, beschikbaarheid en werkervaring toe — zodat mensen, teams en bedrijven duidelijker zien waar jouw mogelijkheden aansluiten op echte werkbehoeften, lokaal en internationaal.",
     "ctaPrimary": "Profiel aanmaken",
     "businessNote": "Voor bedrijven en werkgevers ·",
-    "businessLink": "Werkbehoefte plaatsen",
+    "businessLink": "Werkbehoefte starten",
     "signals": {
-      "s1": "Levend profiel",
+      "s1": "Echt profiel",
       "s2": "Bewijs van vaardigheden",
       "s3": "Beschikbaarheid",
-      "s4": "Dagelijks werk"
+      "s4": "Werkbehoeften"
     }
   },
   "heroCards": {

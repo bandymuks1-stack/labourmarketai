@@ -576,16 +576,16 @@
   "hero": {
     "chip": "Üldine tööturu platvorm",
     "headline": "Mitte ainult CV.",
-    "headlineAccent": "Elav tööpass.",
-    "subcopy": "Loo oma Labourmarket.ai profiil, impordi CV, lisa oskused, märgi igapäevane töö ja näita saadavust — et inimesed, tiimid ja ettevõtted mõistaksid tegelikku kogemust kohalike ja rahvusvaheliste võimaluste jaoks.",
+    "headlineAccent": "Tegelikud oskused vastavalt tegelikele töövajadustele.",
+    "subcopy": "Loo oma Labourmarket.ai profiil, impordi CV, lisa tegelikud oskused, saadavus ja töökogemus — et inimesed, tiimid ja ettevõtted näeksid selgemini, kus sinu võimalused vastavad tegelikele töövajadustele kohalikul ja rahvusvahelisel turul.",
     "ctaPrimary": "Loo profiil",
     "businessNote": "Ettevõtetele ja tööandjatele ·",
-    "businessLink": "Esita töövajadus",
+    "businessLink": "Alusta töövajadust",
     "signals": {
-      "s1": "Elav profiil",
+      "s1": "Tegelik profiil",
       "s2": "Oskuste tõendid",
       "s3": "Saadavus",
-      "s4": "Igapäevane töö"
+      "s4": "Töövajadused"
     }
   },
   "heroCards": {

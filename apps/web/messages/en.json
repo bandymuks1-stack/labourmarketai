@@ -3294,16 +3294,16 @@
   "hero": {
     "chip": "General labour-market platform",
     "headline": "Not just a CV.",
-    "headlineAccent": "A living work passport.",
-    "subcopy": "Create your Labourmarket.ai profile, import your CV, add skills, log daily work and show availability — so people, teams and companies understand real experience, for local and international opportunities.",
+    "headlineAccent": "Real skills matched with real work needs.",
+    "subcopy": "Create your Labourmarket.ai profile, import your CV, add real skills, availability and work experience — so people, teams and companies can see where your strengths fit real work needs, locally and internationally.",
     "ctaPrimary": "Create your profile",
     "businessNote": "For companies & employers ·",
-    "businessLink": "Post a work need",
+    "businessLink": "Start a work need",
     "signals": {
-      "s1": "Living profile",
+      "s1": "Real profile",
       "s2": "Skill evidence",
       "s3": "Availability",
-      "s4": "Daily work"
+      "s4": "Work needs"
     }
   },
   "waitlist": {

@@ -576,16 +576,16 @@
   "hero": {
     "chip": "Allmän arbetsmarknadsplattform",
     "headline": "Inte bara ett CV.",
-    "headlineAccent": "Ett levande arbetspass.",
-    "subcopy": "Skapa din Labourmarket.ai-profil, importera ditt CV, lägg till färdigheter, registrera dagligt arbete och visa tillgänglighet — så att människor, team och företag förstår verklig erfarenhet, för lokala och internationella möjligheter.",
+    "headlineAccent": "Riktiga färdigheter matchade med riktiga arbetsbehov.",
+    "subcopy": "Skapa din Labourmarket.ai-profil, importera ditt CV, lägg till riktiga färdigheter, tillgänglighet och arbetslivserfarenhet — så att människor, team och företag tydligare ser var dina möjligheter matchar riktiga arbetsbehov, lokalt och internationellt.",
     "ctaPrimary": "Skapa profil",
     "businessNote": "För företag och arbetsgivare ·",
-    "businessLink": "Skicka in ett arbetsbehov",
+    "businessLink": "Starta ett arbetsbehov",
     "signals": {
-      "s1": "Levande profil",
+      "s1": "Riktig profil",
       "s2": "Bevis på färdigheter",
       "s3": "Tillgänglighet",
-      "s4": "Dagligt arbete"
+      "s4": "Arbetsbehov"
     }
   },
   "heroCards": {

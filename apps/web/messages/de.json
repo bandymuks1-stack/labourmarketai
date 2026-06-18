@@ -576,16 +576,16 @@
   "hero": {
     "chip": "Allgemeine Arbeitsmarktplattform",
     "headline": "Nicht nur ein Lebenslauf.",
-    "headlineAccent": "Ein lebendiger Arbeitspass.",
-    "subcopy": "Erstelle dein Labourmarket.ai-Profil, importiere deinen Lebenslauf, füge Fähigkeiten hinzu, halte tägliche Arbeit fest und zeige Verfügbarkeit — damit Menschen, Teams und Unternehmen echte Erfahrung verstehen, für lokale und internationale Chancen.",
+    "headlineAccent": "Echte Fähigkeiten passend zu echtem Arbeitsbedarf.",
+    "subcopy": "Erstelle dein Labourmarket.ai-Profil, importiere deinen Lebenslauf, füge echte Fähigkeiten, Verfügbarkeit und Arbeitserfahrung hinzu — damit Menschen, Teams und Unternehmen klarer sehen, wo deine Möglichkeiten zu echtem Arbeitsbedarf passen, lokal und international.",
     "ctaPrimary": "Profil erstellen",
     "businessNote": "Für Unternehmen und Arbeitgeber ·",
-    "businessLink": "Arbeitsbedarf melden",
+    "businessLink": "Arbeitsbedarf starten",
     "signals": {
-      "s1": "Lebendiges Profil",
+      "s1": "Echtes Profil",
       "s2": "Nachweis der Fähigkeiten",
       "s3": "Verfügbarkeit",
-      "s4": "Tägliche Arbeit"
+      "s4": "Arbeitsbedarf"
     }
   },
   "heroCards": {
