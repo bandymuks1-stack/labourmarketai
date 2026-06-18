@@ -30,6 +30,7 @@
   },
   "identityActions": {
     "ariaLabel": "Your identities and actions",
+    "manageSpaces": "Switch role / Manage spaces",
     "person": {
       "title": "You as a person",
       "subtitle": "Your individual account.",

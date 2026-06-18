@@ -46,14 +46,13 @@ describe("no dead links / no-op handlers in rooms", () => {
   }
 });
 
-describe("the journey stepper is progress-only (no button/link semantics)", () => {
+describe("the journey stepper was removed (active-role overview)", () => {
   const page = read("app/[locale]/dashboard/page.tsx");
-  const start = page.indexOf("function JourneyRail");
-  const end = page.indexOf("Overview tab", start);
-  const rail = page.slice(start, end > start ? end : start + 2000);
-  it("renders an accessible nav but no button/Link/onClick/href", () => {
-    expect(rail).toMatch(/<nav aria-label/);
-    expect(rail).not.toMatch(/<button|<Link\b|onClick|href=|role="button"/);
+  // dashboard-active-role-overview-v1: the stage-rail no longer lives on the
+  // overview; the first screen leads with one clear next action instead.
+  it("no journey stage-rail remains on the overview", () => {
+    expect(page).not.toMatch(/function JourneyRail/);
+    expect(page).not.toMatch(/<nav aria-label=\{label\}/);
   });
 });
 

@@ -30,6 +30,7 @@
   },
   "identityActions": {
     "ariaLabel": "Jūsų tapatybės ir veiksmai",
+    "manageSpaces": "Keisti vaidmenį / Tvarkyti erdves",
     "person": {
       "title": "Jūs kaip asmuo",
       "subtitle": "Jūsų asmeninė paskyra.",
