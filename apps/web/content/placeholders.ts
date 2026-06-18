@@ -112,9 +112,8 @@ export type SkillDemandRow = {
   score: number;
 };
 export type RecentMatchEvent = {
-  initials: string;
-  project: { lt: string; en: string };
-  minutesAgo: number;
+  from: { lt: string; en: string };
+  to: { lt: string; en: string };
 };
 export type MarketPanel =
   | { kind: "demand_by_country"; rows: RegionDemand[] }
@@ -365,8 +364,8 @@ export const placeholders: readonly Placeholder[] = [
     id: "hero.worker.featured",
     type: "person",
     value: {
-      lt: "Tomas Jankauskas — Statybos vadovas",
-      en: "Tomas Jankauskas — Site Supervisor",
+      lt: "Statybvietės vadovas · Nyderlandai",
+      en: "Site Supervisor · Netherlands",
     },
     description: "Featured worker on the landing hero profile card.",
     replacementSource:
@@ -376,13 +375,13 @@ export const placeholders: readonly Placeholder[] = [
     consentRequired: true,
     notes: "consented:false — same persona as reference imagery.",
     card: {
-      name: { lt: "Tomas Jankauskas", en: "Tomas Jankauskas" },
-      role: { lt: "Statybos vadovas", en: "Site Supervisor" },
+      name: { lt: "Statybvietės vadovas", en: "Site Supervisor" },
+      role: { lt: "Statyba · Nyderlandai", en: "Construction · Netherlands" },
       country: "NL",
       flag: "🇳🇱",
       ovr: 90,
       tier: "gold",
-      status: "LIVE",
+      status: "AVAILABLE",
       photo: {
         src: "/placeholders/worker-portrait.svg",
         alt: {
@@ -398,8 +397,8 @@ export const placeholders: readonly Placeholder[] = [
     id: "workers.featured.1",
     type: "person",
     value: {
-      lt: "Lukas van der Berg — Sandėlio komandos vadovas",
-      en: "Lukas van der Berg — Warehouse Team Lead",
+      lt: "Sandėlio komandos vadovas · Nyderlandai",
+      en: "Warehouse Team Lead · Netherlands",
     },
     description: "PlayerCard showcase — gold-tier worker profile (NL, logistics).",
     replacementSource:
@@ -409,8 +408,8 @@ export const placeholders: readonly Placeholder[] = [
     consentRequired: true,
     notes: "consented:false — sample persona; photo is a placeholder.",
     card: {
-      name: { lt: "Lukas van der Berg", en: "Lukas van der Berg" },
-      role: { lt: "Sandėlio komandos vadovas", en: "Warehouse Team Lead" },
+      name: { lt: "Sandėlio komandos vadovas", en: "Warehouse Team Lead" },
+      role: { lt: "Logistika · Nyderlandai", en: "Logistics · Netherlands" },
       country: "NL",
       flag: "🇳🇱",
       ovr: 92,
@@ -431,8 +430,8 @@ export const placeholders: readonly Placeholder[] = [
     id: "workers.featured.2",
     type: "person",
     value: {
-      lt: "Stefan Bauer — Slaugos koordinatorius",
-      en: "Stefan Bauer — Care Coordinator",
+      lt: "Slaugos koordinatorius · Vokietija",
+      en: "Care Coordinator · Germany",
     },
     description: "PlayerCard showcase — silver-tier worker profile (DE, care/health).",
     replacementSource:
@@ -442,13 +441,13 @@ export const placeholders: readonly Placeholder[] = [
     consentRequired: true,
     notes: "consented:false — sample persona; photo is a placeholder.",
     card: {
-      name: { lt: "Stefan Bauer", en: "Stefan Bauer" },
-      role: { lt: "Slaugos koordinatorius", en: "Care Coordinator" },
+      name: { lt: "Slaugos koordinatorius", en: "Care Coordinator" },
+      role: { lt: "Slauga · Vokietija", en: "Care & health · Germany" },
       country: "DE",
       flag: "🇩🇪",
       ovr: 87,
       tier: "silver",
-      status: "LIVE",
+      status: "AVAILABLE",
       photo: {
         src: "/placeholders/worker-portrait.svg",
         alt: {
@@ -464,8 +463,8 @@ export const placeholders: readonly Placeholder[] = [
     id: "workers.featured.3",
     type: "person",
     value: {
-      lt: "Mantas Petrauskas — Virėjas",
-      en: "Mantas Petrauskas — Chef de partie",
+      lt: "Virėjas · Lietuva",
+      en: "Chef de partie · Lithuania",
     },
     description: "PlayerCard showcase — bronze-tier worker profile (LT, hospitality).",
     replacementSource:
@@ -475,8 +474,8 @@ export const placeholders: readonly Placeholder[] = [
     consentRequired: true,
     notes: "consented:false — sample persona; photo is a placeholder.",
     card: {
-      name: { lt: "Mantas Petrauskas", en: "Mantas Petrauskas" },
-      role: { lt: "Virėjas", en: "Chef de partie" },
+      name: { lt: "Virėjas", en: "Chef de partie" },
+      role: { lt: "Apgyvendinimas · Lietuva", en: "Hospitality · Lithuania" },
       country: "LT",
       flag: "🇱🇹",
       ovr: 79,
@@ -522,8 +521,7 @@ export const placeholders: readonly Placeholder[] = [
   {
     id: "stats.active_workers",
     type: "stat",
-    value: "320K+",
-    cycle: ["318K+", "320K+", "321K+", "323K+"],
+    value: { lt: "Darbuotojų profiliai", en: "Worker profiles" },
     description: "Hero stat row — active workers count.",
     replacementSource: SQL(
       "SELECT count(*) FROM workers WHERE status='available'",
@@ -535,8 +533,7 @@ export const placeholders: readonly Placeholder[] = [
   {
     id: "stats.live_projects",
     type: "stat",
-    value: "18K+",
-    cycle: ["17K+", "18K+", "18K+", "19K+"],
+    value: { lt: "Aktyvūs projektai", en: "Active projects" },
     description: "Hero stat row — live projects count.",
     replacementSource: SQL(
       "SELECT count(*) FROM projects WHERE status='live'",
@@ -548,8 +545,7 @@ export const placeholders: readonly Placeholder[] = [
   {
     id: "stats.companies",
     type: "stat",
-    value: "4.2K",
-    cycle: ["4.1K", "4.2K", "4.2K", "4.3K"],
+    value: { lt: "Įmonės", en: "Companies" },
     description: "Hero stat row — companies count.",
     replacementSource: SQL("SELECT count(*) FROM companies"),
     status: "placeholder",
@@ -559,8 +555,7 @@ export const placeholders: readonly Placeholder[] = [
   {
     id: "stats.success_rate",
     type: "stat",
-    value: "92%",
-    cycle: ["91%", "92%", "92%", "93%"],
+    value: { lt: "Atitikimo kryptis", en: "Fit direction" },
     description: "Hero stat row — success rate.",
     replacementSource:
       "Derived from `match_actions` accept rate over the last 90 days.",
@@ -590,8 +585,8 @@ export const placeholders: readonly Placeholder[] = [
     id: "testimonial.featured",
     type: "testimonial",
     value: {
-      lt: "Perėjus prie labourmarket.ai, įdarbinimo laikas sutrumpėjo 42% — Markus de Vries",
-      en: "Since switching to labourmarket.ai, our time to hire dropped by 42% — Markus de Vries",
+      lt: "Aiški atitikimo kryptis — žinai, ko reikia, kas pasiruošęs ir koks kitas veiksmas.",
+      en: "A clear fit direction — know what's needed, who's ready and what comes next.",
     },
     description: "Featured testimonial quote on the landing page.",
     replacementSource: "Real quote with a signed release on file.",
@@ -778,16 +773,16 @@ export const placeholders: readonly Placeholder[] = [
     const n = i + 1;
     const samples: Record<number, { lt: string; en: string }> = {
       1: {
-        lt: "Rangovas: „Rytojaus pamaina prasideda 6:30“ · prieš 4 min",
-        en: "Contractor: “Tomorrow's shift starts 6:30” · 4 min ago",
+        lt: "Pamainos koordinavimas · komandos pasirengimas",
+        en: "Shift coordination · team readiness",
       },
       2: {
-        lt: "Agentūra: „Patvirtinti dar 3 vairuotojai“ · prieš 1 val",
-        en: "Agency: “3 more drivers confirmed” · 1 h ago",
+        lt: "Patvirtinimai · komandos sudarymas",
+        en: "Confirmations · team forming",
       },
       3: {
-        lt: "Darbuotojas: „Atvykstu pirmadienį“ · prieš 2 val",
-        en: "Worker: “Arriving Monday” · 2 h ago",
+        lt: "Atvykimo planavimas · kitas veiksmas",
+        en: "Arrival planning · next action",
       },
     };
     return {
@@ -1009,17 +1004,17 @@ export const placeholders: readonly Placeholder[] = [
   },
   ...(
     [
-      { id: "draft.onDeck.1", name: "Andrius K.", country: "LT", flag: "🇱🇹", role: { lt: "Sandėlininkas", en: "Warehouse operative" }, ovr: 88, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
-      { id: "draft.onDeck.2", name: "Lukas H.",  country: "DE", flag: "🇩🇪", role: { lt: "CNC operatorius",  en: "CNC machinist" },      ovr: 92, tier: "gold" as PlayerTier,   status: "reviewing" as DraftStatus },
-      { id: "draft.onDeck.3", name: "Emil J.",   country: "DK", flag: "🇩🇰", role: { lt: "Virėjas",  en: "Chef de partie" },   ovr: 79, tier: "bronze" as PlayerTier, status: "reviewing" as DraftStatus },
-      { id: "draft.onDeck.4", name: "Jonas P.",  country: "LV", flag: "🇱🇻", role: { lt: "Pardavėjas konsultantas",    en: "Sales assistant" }, ovr: 84, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
-      { id: "draft.live.1",   name: "Pieter V.", country: "NL", flag: "🇳🇱", role: { lt: "Statybvietės vadovas", en: "Site Supervisor" }, ovr: 91, tier: "gold" as PlayerTier,   status: "deciding" as DraftStatus },
-      { id: "draft.live.2",   name: "Mateusz S.",country: "PL", flag: "🇵🇱", role: { lt: "Slaugytojas",  en: "Care assistant" },     ovr: 82, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
-      { id: "draft.live.3",   name: "Erik N.",   country: "SE", flag: "🇸🇪", role: { lt: "Valymo vadovas", en: "Cleaning supervisor" }, ovr: 86, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
-      { id: "draft.drafted.1",name: "Henrik O.", country: "NO", flag: "🇳🇴", role: { lt: "Krano operatorius", en: "Crane operator" }, ovr: 90, tier: "gold" as PlayerTier,   status: "hired" as DraftStatus },
-      { id: "draft.drafted.2",name: "Jaak R.",   country: "EE", flag: "🇪🇪", role: { lt: "IT specialistas", en: "IT support technician" }, ovr: 81, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
-      { id: "draft.drafted.3",name: "Marek W.",  country: "PL", flag: "🇵🇱", role: { lt: "Vairuotojas",  en: "Delivery driver" }, ovr: 77, tier: "bronze" as PlayerTier, status: "hired" as DraftStatus },
-      { id: "draft.drafted.4",name: "Tomas K.",  country: "LT", flag: "🇱🇹", role: { lt: "Saugos specialistas", en: "Safety officer" }, ovr: 89, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
+      { id: "draft.onDeck.1", name: "Warehouse operative", country: "LT", flag: "🇱🇹", role: { lt: "Sandėlininkas", en: "Warehouse operative" }, ovr: 88, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.2", name: "CNC machinist",  country: "DE", flag: "🇩🇪", role: { lt: "CNC operatorius",  en: "CNC machinist" },      ovr: 92, tier: "gold" as PlayerTier,   status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.3", name: "Chef de partie",   country: "DK", flag: "🇩🇰", role: { lt: "Virėjas",  en: "Chef de partie" },   ovr: 79, tier: "bronze" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.onDeck.4", name: "Sales assistant",  country: "LV", flag: "🇱🇻", role: { lt: "Pardavėjas konsultantas",    en: "Sales assistant" }, ovr: 84, tier: "silver" as PlayerTier, status: "reviewing" as DraftStatus },
+      { id: "draft.live.1",   name: "Site Supervisor", country: "NL", flag: "🇳🇱", role: { lt: "Statybvietės vadovas", en: "Site Supervisor" }, ovr: 91, tier: "gold" as PlayerTier,   status: "deciding" as DraftStatus },
+      { id: "draft.live.2",   name: "Care assistant",country: "PL", flag: "🇵🇱", role: { lt: "Slaugytojas",  en: "Care assistant" },     ovr: 82, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
+      { id: "draft.live.3",   name: "Cleaning supervisor",   country: "SE", flag: "🇸🇪", role: { lt: "Valymo vadovas", en: "Cleaning supervisor" }, ovr: 86, tier: "silver" as PlayerTier, status: "deciding" as DraftStatus },
+      { id: "draft.drafted.1",name: "Crane operator", country: "NO", flag: "🇳🇴", role: { lt: "Krano operatorius", en: "Crane operator" }, ovr: 90, tier: "gold" as PlayerTier,   status: "hired" as DraftStatus },
+      { id: "draft.drafted.2",name: "IT support technician",   country: "EE", flag: "🇪🇪", role: { lt: "IT specialistas", en: "IT support technician" }, ovr: 81, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
+      { id: "draft.drafted.3",name: "Delivery driver",  country: "PL", flag: "🇵🇱", role: { lt: "Vairuotojas",  en: "Delivery driver" }, ovr: 77, tier: "bronze" as PlayerTier, status: "hired" as DraftStatus },
+      { id: "draft.drafted.4",name: "Safety officer",  country: "LT", flag: "🇱🇹", role: { lt: "Saugos specialistas", en: "Safety officer" }, ovr: 89, tier: "silver" as PlayerTier, status: "hired" as DraftStatus },
     ] as const
   ).map(
     (c): Placeholder => ({
@@ -1142,14 +1137,14 @@ export const placeholders: readonly Placeholder[] = [
     marketPanel: {
       kind: "recent_matches",
       rows: [
-        { initials: "AK", project: { lt: "Roterdamas · Sandėlininkas",  en: "Rotterdam · Warehouse operative" }, minutesAgo: 2 },
-        { initials: "LH", project: { lt: "Berlynas · CNC operatorius",  en: "Berlin · CNC machinist" },      minutesAgo: 5 },
-        { initials: "EJ", project: { lt: "Kopenhaga · Virėjas",         en: "Copenhagen · Chef" },           minutesAgo: 9 },
-        { initials: "PV", project: { lt: "Amsterdamas · Vadovas",       en: "Amsterdam · Supervisor" },      minutesAgo: 14 },
-        { initials: "MS", project: { lt: "Varšuva · Slaugytojas",       en: "Warsaw · Care assistant" },     minutesAgo: 21 },
-        { initials: "EN", project: { lt: "Stokholmas · Valytojas",      en: "Stockholm · Cleaner" },         minutesAgo: 33 },
-        { initials: "HO", project: { lt: "Oslas · Vairuotojas",         en: "Oslo · Delivery driver" },      minutesAgo: 48 },
-        { initials: "JR", project: { lt: "Talinas · IT specialistas",   en: "Tallinn · IT support" },        minutesAgo: 72 },
+        { from: { lt: "Plytelių klojimas", en: "Tiling" }, to: { lt: "Brigada objektui", en: "Site crew" } },
+        { from: { lt: "Gipso montavimas", en: "Drywall fitting" }, to: { lt: "Komanda nuo pirmadienio", en: "Team from Monday" } },
+        { from: { lt: "Sandėlio komanda", en: "Warehouse team" }, to: { lt: "Gamybos pamaina", en: "Production shift" } },
+        { from: { lt: "Vairuotojas CE", en: "Driver (CE)" }, to: { lt: "Maršrutas paruoštas", en: "Route ready" } },
+        { from: { lt: "Projekto poreikis", en: "Project need" }, to: { lt: "Komandos pasirengimas", en: "Team readiness" } },
+        { from: { lt: "Įgūdžių signalas", en: "Skill signal" }, to: { lt: "Vaidmens atitikimas", en: "Role fit" } },
+        { from: { lt: "Įrodymų būsena", en: "Evidence status" }, to: { lt: "Pasitikėjimas", en: "Trust" } },
+        { from: { lt: "Kitas veiksmas", en: "Next action" }, to: { lt: "Aiškus žingsnis", en: "One clear step" } },
       ],
     },
   },

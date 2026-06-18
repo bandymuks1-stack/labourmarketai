@@ -65,22 +65,12 @@ export function LiveMap() {
       m.set(g.code, g.intensity);
     return m;
   }, []);
-  const counts = useMemo(() => {
-    const m = new Map<
-      string,
-      { workers: number; projects: number; companies: number; matchesToday: number }
-    >();
-    for (const g of geoPayloads("map.country.counts.", "counts"))
-      m.set(g.code, g);
-    return m;
-  }, []);
 
   function onMove(e: React.MouseEvent) {
     const r = wrapRef.current?.getBoundingClientRect();
     if (r) setPos({ x: e.clientX - r.left, y: e.clientY - r.top });
   }
 
-  const c = hover ? counts.get(hover.code) : undefined;
 
   return (
     <div
@@ -282,14 +272,12 @@ export function LiveMap() {
           className="pointer-events-none absolute z-20 max-w-[16rem] -translate-y-full rounded-md border border-ink-500 bg-ink-900/95 px-3 py-2 text-xs text-text-secondary shadow-card"
           style={{ left: pos.x + 12, top: pos.y - 6 }}
         >
-          {hover.tier === "target" && c ? (
+          {hover.tier === "target" ? (
             <span>
               <span className="font-mono text-text-primary">
                 {hover.code}
               </span>{" "}
-              · {c.workers} {t("tooltip.workers")} · {c.projects}{" "}
-              {t("tooltip.projects")} · {c.matchesToday}{" "}
-              {t("tooltip.matchesToday")}
+              · {t("tooltip.activeDirection")}
             </span>
           ) : (
             <span className="flex items-center gap-2">

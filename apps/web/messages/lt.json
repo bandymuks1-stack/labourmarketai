@@ -2190,6 +2190,7 @@
       "projects": "projektai",
       "companies": "įmonės",
       "matchesToday": "atitikimai",
+      "activeDirection": "Aktyvi darbo kryptis",
       "expansion_candidate": "Plėtros kandidatė"
     },
     "legend": {
@@ -2222,7 +2223,7 @@
     "status": {
       "reviewing": "Svarstoma",
       "deciding": "Sprendimas",
-      "hired": "Atrinkta"
+      "hired": "Suderinta"
     },
     "liveCounter": "Atitikimo pavyzdys"
   },
@@ -2236,11 +2237,17 @@
     "panel": {
       "demandByCountry": "Paklausa pagal šalį",
       "topSkills": "Paklausiausi įgūdžiai",
-      "supplyDemand": "Pasiūla vs paklausa (30d)",
-      "recentMatches": "Paskutiniai atitikimai"
+      "supplyDemand": "Pasiūla vs paklausa",
+      "recentMatches": "Atitikimo logika"
     },
     "hot": "Karšta",
     "gap": "Trūkumas",
+    "demandLed": "Vyrauja paklausa",
+    "demandLevel": {
+      "high": "Aukšta",
+      "building": "Auga",
+      "open": "Atvira"
+    },
     "legend": {
       "supply": "Pasiūla",
       "demand": "Paklausa"
@@ -2253,12 +2260,12 @@
     }
   },
   "playercards": {
-    "eyebrow": "Darbuotojai kaip gyvi profiliai",
+    "eyebrow": "Profilis, kuris stiprėja su kiekvienu įrašu",
     "headline": {
-      "line1": "Kiekvienas darbuotojas — kontekste",
-      "line2": "ir paruoštas."
+      "line1": "Kuo aiškiau parodote savo darbus,",
+      "line2": "tuo daugiau galimybių atsiveria."
     },
-    "subcopy": "Atitikimas ir pasirengimas kyla iš realiai atlikto darbo, patvirtintų įgūdžių ir įrodymų objekte — visada rodomi kontekste, niekada kaip vienas universalus įvertinimas.",
+    "subcopy": "Labourmarket.ai padeda jūsų įgūdžius, patirtį, dokumentus ir atliktų darbų aprašymus paversti aiškiais profilio signalais. Kuo tiksliau pildomas profilis, tuo lengviau įvertinti pasirengimą, patikimumą ir tinkamas galimybes.",
     "stat": {
       "SKL": "Įgūdis",
       "REL": "Patikimumas",

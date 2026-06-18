@@ -8,15 +8,13 @@ import { useMounted } from "@/lib/use-mounted";
 
 type Item = {
   key: number;
-  initials: string;
-  project: { lt: string; en: string };
-  minutesAgo: number;
+  from: { lt: string; en: string };
+  to: { lt: string; en: string };
 };
 
-/** MarketPulse · Panel 4 — streaming recent-matches feed (~7s tick).
- *  Same visual language as 5b.1's MicroActivityFeed. Initial 5 items are
- *  deterministic; AnimatePresence `initial={false}` suppresses the
- *  first-render entrance so SSR + first client render match exactly. */
+/** MarketPulse · Panel 4 — match-logic flow. Streams how the system turns a
+ *  signal into a next step (need → readiness, skill → role fit). No people,
+ *  no timestamps, no fabricated live counters. */
 export function RecentMatchesFeed() {
   const data = getMarketPanel("market.recentMatches.feed", "recent_matches");
   const locale = useLocale();
@@ -26,12 +24,7 @@ export function RecentMatchesFeed() {
   const pool = data.rows;
 
   const [items, setItems] = useState<Item[]>(() =>
-    pool.slice(0, 5).map((r, i) => ({
-      key: i,
-      initials: r.initials,
-      project: r.project,
-      minutesAgo: r.minutesAgo,
-    })),
+    pool.slice(0, 5).map((r, i) => ({ key: i, from: r.from, to: r.to })),
   );
 
   useEffect(() => {
@@ -41,23 +34,14 @@ export function RecentMatchesFeed() {
       setItems((cur) => {
         const r = pool[n % pool.length];
         n += 1;
-        const fresh: Item = {
-          key: Date.now() + n,
-          initials: r.initials,
-          project: r.project,
-          minutesAgo: r.minutesAgo,
-        };
+        const fresh: Item = { key: n, from: r.from, to: r.to };
         return [fresh, ...cur].slice(0, 5);
       });
     }, 7000);
     return () => clearInterval(iv);
   }, [mounted, pool]);
 
-  function ago(min: number): string {
-    if (min < 1) return t("timeAgo.justNow");
-    if (min < 60) return t("timeAgo.minutes", { n: min });
-    return t("timeAgo.hours", { n: Math.floor(min / 60) });
-  }
+  const lc = (v: { lt: string; en: string }) => (locale === "lt" ? v.lt : v.en);
 
   return (
     <section
@@ -81,22 +65,16 @@ export function RecentMatchesFeed() {
               animate={{ opacity: 1, y: 0 }}
               exit={reduce ? { opacity: 0 } : { opacity: 0, y: 8 }}
               transition={{ duration: reduce ? 0 : 0.4, ease: "easeOut" }}
-              className="flex items-center gap-3 text-xs text-text-secondary"
+              className="flex items-center gap-3 text-xs"
             >
-              <span
-                aria-hidden
-                className="inline-grid h-6 w-6 shrink-0 place-items-center rounded-full border border-brand-blue/40 font-mono text-[10px] text-brand-blue"
-              >
-                {it.initials}
+              <span className="min-w-0 flex-1 truncate text-text-secondary">
+                {lc(it.from)}
               </span>
-              <span aria-hidden className="text-text-muted">
+              <span aria-hidden className="font-mono text-brand-cyan">
                 →
               </span>
-              <span className="min-w-0 flex-1 truncate text-text-primary">
-                {locale === "lt" ? it.project.lt : it.project.en}
-              </span>
-              <span className="font-mono text-[10px] tabular-nums text-text-muted">
-                {ago(it.minutesAgo)}
+              <span className="min-w-0 flex-1 truncate text-right text-text-primary">
+                {lc(it.to)}
               </span>
             </motion.li>
           ))}

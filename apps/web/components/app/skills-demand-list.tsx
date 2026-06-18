@@ -36,7 +36,7 @@ export function SkillsDemandList() {
         {data.rows.map((r, i) => (
           <li
             key={r.name.en}
-            className="grid grid-cols-[1.25rem_1fr_1.5rem_2.5rem] items-center gap-2 text-xs"
+            className="grid grid-cols-[1.25rem_1fr_1.5rem] items-center gap-2 text-xs"
           >
             <span className="font-mono text-text-muted">{i + 1}.</span>
             <span className="truncate text-text-secondary">
@@ -44,9 +44,6 @@ export function SkillsDemandList() {
             </span>
             <span aria-hidden className={`text-right font-mono ${TREND_COLOR[r.trend]}`}>
               {TREND_GLYPH[r.trend]}
-            </span>
-            <span className="text-right font-mono tabular-nums text-text-primary">
-              {r.score}
             </span>
           </li>
         ))}

@@ -2190,6 +2190,7 @@
       "projects": "projects",
       "companies": "companies",
       "matchesToday": "matches",
+      "activeDirection": "Active work direction",
       "expansion_candidate": "Expansion candidate"
     },
     "legend": {
@@ -2222,7 +2223,7 @@
     "status": {
       "reviewing": "Reviewing",
       "deciding": "Deciding",
-      "hired": "Hired"
+      "hired": "Matched"
     },
     "liveCounter": "Matching example"
   },
@@ -2236,11 +2237,17 @@
     "panel": {
       "demandByCountry": "Demand by country",
       "topSkills": "Top in-demand skills",
-      "supplyDemand": "Supply vs demand (30d)",
-      "recentMatches": "Recent matches"
+      "supplyDemand": "Supply vs demand",
+      "recentMatches": "Match logic"
     },
     "hot": "Hot",
     "gap": "Gap",
+    "demandLed": "Demand-led",
+    "demandLevel": {
+      "high": "High",
+      "building": "Building",
+      "open": "Open"
+    },
     "legend": {
       "supply": "Supply",
       "demand": "Demand"
@@ -2253,12 +2260,12 @@
     }
   },
   "playercards": {
-    "eyebrow": "Workers as living profiles",
+    "eyebrow": "A profile that grows stronger with every entry",
     "headline": {
-      "line1": "Every worker, in context",
-      "line2": "and ready."
+      "line1": "The clearer you show your work,",
+      "line2": "the more opportunities open up."
     },
-    "subcopy": "Fit and readiness come from real completed work, confirmed skills and on-site proof — always shown in context, never one universal rating.",
+    "subcopy": "Labourmarket.ai turns your skills, experience, documents and described work into clear profile signals. The more precisely your profile is filled in, the easier it is to gauge readiness, reliability and the right opportunities.",
     "stat": {
       "SKL": "Skill",
       "REL": "Reliability",

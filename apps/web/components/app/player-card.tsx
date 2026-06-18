@@ -65,7 +65,7 @@ export function PlayerCard({ id }: { id: string }) {
     <motion.article
       ref={ref}
       role="article"
-      aria-label={`${name} — ${role}, concept fit signal ${card.ovr} of 99 (preview)`}
+      aria-label={`${name} — ${role}, readiness signal ${card.ovr} of 99`}
       whileHover={reduce ? undefined : { y: -8 }}
       transition={{ duration: reduce ? 0 : 0.25, ease: "easeOut" }}
       className={cn(
@@ -190,16 +190,13 @@ export function PlayerCard({ id }: { id: string }) {
         })}
       </div>
 
-      {/* d) bottom band — verified skills */}
+      {/* d) bottom band — skill signals */}
       <div className="mt-3 flex h-8 items-center gap-2 overflow-hidden">
         {card.skills.map((s) => (
           <span
             key={s}
             className="inline-flex items-center gap-1 truncate rounded-sm border border-ink-500 px-2 py-1 text-[10px] text-text-secondary"
           >
-            <span aria-hidden className="text-state-live">
-              ✓
-            </span>
             {s}
           </span>
         ))}

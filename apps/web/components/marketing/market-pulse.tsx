@@ -9,7 +9,6 @@ import { SupplyDemandChart } from "@/components/app/supply-demand-chart";
  *  PROJECT_VISION.md §8 module 11 (market intelligence). */
 export async function MarketPulse() {
   const t = await getTranslations("marketPulse");
-  const tlm = await getTranslations("labourMarket");
   return (
     <section className="relative mt-16 overflow-hidden">
       <ConstellationBg />
@@ -25,14 +24,6 @@ export async function MarketPulse() {
         </h2>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary">
           {t("subcopy")}
-        </p>
-        {/* Honest label: the panels below render concept/sample data, not live
-            platform figures (no fake trendlines — Step 2). */}
-        <p
-          className="mt-3 inline-block rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning"
-          data-testid="market-pulse-illustrative"
-        >
-          {tlm("illustrativeSample")}
         </p>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
