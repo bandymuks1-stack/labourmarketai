@@ -2420,6 +2420,14 @@
         "heading": "Šiek tiek apie tave",
         "continue": "Baigti"
       },
+      "nextSteps": {
+        "eyebrow": "Po šio žingsnio — jūsų realus profilis",
+        "s1": "Importuokite CV (nebūtina), kad profilį užpildytumėte greičiau",
+        "s2": "Pridėkite realius įgūdžius",
+        "s3": "Nurodykite prieinamumą",
+        "s4": "Pridėkite darbo patirtį ir įrodymus",
+        "note": "Įgūdžiai pradžioje yra jūsų pačių nurodyti. Dokumentai, darbo žurnalas ir žmonių patvirtinimai laikui bėgant juos sustiprina."
+      },
       "display_name_label": "Rodomas vardas",
       "country_label": "Šalis",
       "back": "Atgal",
@@ -5068,7 +5076,7 @@
     "bridgeLogin": "Jau turite paskyrą? Prisijungti"
   },
   "companyNeed": {
-    "title": "Paskelbti darbuotojų poreikį",
+    "title": "Pradėti darbo poreikį",
     "subtitle": "Aprašykite, kokių žmonių jums reikia. Iš to sukuriame tvarkingą skelbimo juodraštį, kurį peržiūrite — mes neišgalvojame atlyginimo ir nepublikuojame automatiškai.",
     "companyName": "Įmonės pavadinimas",
     "profession": "Reikalingas sektorius ir darbo tipas",

@@ -324,6 +324,14 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "nextSteps": {
+        "eyebrow": "Efter detta — din riktiga profil",
+        "s1": "Importera ditt CV (valfritt) för att fylla i profilen snabbare",
+        "s2": "Lägg till dina riktiga färdigheter",
+        "s3": "Ange din tillgänglighet",
+        "s4": "Lägg till arbetslivserfarenhet och bevis",
+        "note": "Färdigheter är först självangivna. Dokument, din arbetsdagbok och bekräftelser från personer gör dem starkare med tiden."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",

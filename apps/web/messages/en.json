@@ -2420,6 +2420,14 @@
         "heading": "A bit about you",
         "continue": "Finish"
       },
+      "nextSteps": {
+        "eyebrow": "After this — your real profile",
+        "s1": "Import your CV (optional) to fill your profile faster",
+        "s2": "Add your real skills",
+        "s3": "Set your availability",
+        "s4": "Add work experience and evidence",
+        "note": "Skills start as self-declared. Documents, your work journal and confirmations from people make them stronger over time."
+      },
       "display_name_label": "Display name",
       "country_label": "Country",
       "back": "Back",
@@ -5068,7 +5076,7 @@
     "bridgeLogin": "Already have an account? Sign in"
   },
   "companyNeed": {
-    "title": "Post a worker need",
+    "title": "Start a work need",
     "subtitle": "Describe the people you need. We turn it into a clean vacancy draft you review — we never invent pay and never publish automatically.",
     "companyName": "Company name",
     "profession": "Sector & work type needed",
