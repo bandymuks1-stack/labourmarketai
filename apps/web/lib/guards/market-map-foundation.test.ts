@@ -62,11 +62,17 @@ describe("market map foundation — no fake data, no external map API", () => {
     expect(shell).not.toMatch(/\bgeoPayloads\b|placeholders/);
     expect(shell).not.toMatch(/\blat\b\s*[:=].*\blng\b/i);
   });
-  it("has NO Mapbox / Google Maps / map API key or env dependency", () => {
+  it("the signal-board shell has NO external map API / key (Mapbox / Google Maps)", () => {
+    // The real Google Maps BASE now lives in the dedicated, config-gated
+    // <MarketMapBase> component (slice market-map-google-base-v1). The signal
+    // board shell stays free of external map APIs and never plots markers.
+    expect(shell).not.toMatch(/mapbox/i);
+    expect(shell).not.toMatch(/google[^\n]*maps/i);
+    expect(shell).not.toMatch(/process\.env[^\n]*MAP|NEXT_PUBLIC_[A-Z_]*MAP|access[_-]?token/i);
+    // Neither the shell nor the page uses Mapbox or an access token anywhere.
     for (const src of [shell, page]) {
       expect(src).not.toMatch(/mapbox/i);
-      expect(src).not.toMatch(/google[^\n]*maps/i);
-      expect(src).not.toMatch(/process\.env[^\n]*MAP|NEXT_PUBLIC_[A-Z_]*MAP|access[_-]?token/i);
+      expect(src).not.toMatch(/access[_-]?token/i);
     }
   });
 });
