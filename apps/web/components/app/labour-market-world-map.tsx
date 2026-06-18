@@ -14,6 +14,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { getOwnAvailability, getOwnCapabilities } from "@/lib/market-map/owner-readiness";
 import { getOwnMarketSignals } from "@/lib/market-map/signals";
 import { getOwnDemandLocationSummary } from "@/lib/demand/demand-location";
+import { getOwnAcceptedClaimCount } from "@/lib/signals/connected-skill-signal";
 import {
   buildWorldMapZones,
   WORLD_MAP_LEGEND,
@@ -61,11 +62,12 @@ const LEGEND_DOT: Record<(typeof WORLD_MAP_LEGEND)[number], string> = {
 export async function LabourMarketWorldMap() {
   const t = await getTranslations("worldMap");
 
-  const [availability, capabilities, signals, demandSummary] = await Promise.all([
+  const [availability, capabilities, signals, demandSummary, claimCount] = await Promise.all([
     getOwnAvailability(),
     getOwnCapabilities(),
     getOwnMarketSignals(),
     getOwnDemandLocationSummary(),
+    getOwnAcceptedClaimCount(),
   ]);
   const sig = signals ?? [];
 
@@ -75,7 +77,7 @@ export async function LabourMarketWorldMap() {
     skillCounts: {
       confirmed: capabilities.counts.confirmed,
       suggested: capabilities.counts.suggested,
-      selfDeclared: capabilities.counts.self_declared,
+      selfDeclared: capabilities.counts.self_declared + claimCount,
     },
     availabilityState: availability.state,
     preferredCount: availability.preferredCountries.length,

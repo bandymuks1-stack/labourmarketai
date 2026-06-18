@@ -16,6 +16,7 @@ import { getOwnAvailability, getOwnCapabilities } from "@/lib/market-map/owner-r
 import { getOwnMarketSignals } from "@/lib/market-map/signals";
 import { getOwnDemandLocationSummary } from "@/lib/demand/demand-location";
 import { buildWorldMapZones } from "@/lib/work-market/world-map";
+import { getOwnAcceptedClaimCount, mergeSkillSignal } from "@/lib/signals/connected-skill-signal";
 import {
   buildWorkViewBlocks,
   buildWorkViewActions,
@@ -85,21 +86,23 @@ export async function MyWorkView() {
     journalCount = jc.count ?? 0;
   }
 
-  const [availability, capabilities, signals, demandSummary] = await Promise.all([
+  const [availability, capabilities, signals, demandSummary, claimCount] = await Promise.all([
     getOwnAvailability(),
     getOwnCapabilities(),
     getOwnMarketSignals(),
     getOwnDemandLocationSummary(),
+    getOwnAcceptedClaimCount(),
   ]);
   const sig = signals ?? [];
+  const skill = mergeSkillSignal(capabilities.counts, claimCount);
 
   const worldZones = buildWorldMapZones({
     hasWorker: availability.hasWorker,
     hasProfileSignal: sig.some((s) => s.signalType === "profile_location"),
     skillCounts: {
-      confirmed: capabilities.counts.confirmed,
-      suggested: capabilities.counts.suggested,
-      selfDeclared: capabilities.counts.self_declared,
+      confirmed: skill.confirmed,
+      suggested: skill.supported,
+      selfDeclared: skill.selfDeclared,
     },
     availabilityState: availability.state,
     preferredCount: availability.preferredCountries.length,
@@ -114,11 +117,11 @@ export async function MyWorkView() {
     hasProfile: !!(profile?.full_name || profile?.country),
     hasSummary: !!(typeof profile?.profile_text === "string" && profile.profile_text.trim().length > 0),
     hasWorker: !!workerRow?.id || availability.hasWorker,
-    skillCount,
+    skillCount: skillCount + claimCount,
     skillCounts: {
-      confirmed: capabilities.counts.confirmed,
-      suggested: capabilities.counts.suggested,
-      selfDeclared: capabilities.counts.self_declared,
+      confirmed: skill.confirmed,
+      suggested: skill.supported,
+      selfDeclared: skill.selfDeclared,
     },
     availabilityState: availability.state,
     journalCount,
