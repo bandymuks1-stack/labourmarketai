@@ -17,10 +17,16 @@ const note = (j: Record<string, unknown>) =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (j as any).auth.dashboard.wow.flow.company.calmNote as string;
 
-describe("cockpit shows a calm framing note (copy-only)", () => {
-  it("the dashboard renders the calm note for company/agency", () => {
-    expect(page).toMatch(/data-testid="company-calm-note"/);
-    expect(page).toMatch(/company\.calmNote/);
+describe("active-role overview is action-first (calm explanation note removed)", () => {
+  // Superseded by dashboard-active-role-overview-v1 (owner decision A-minimal):
+  // the company/agency overview leads with one clear next action, not an
+  // explanation note. The calm-note copy is retained in i18n (honesty pinned
+  // below) but is no longer rendered on the first screen.
+  it("the dashboard no longer renders the calm explanation note", () => {
+    expect(page).not.toMatch(/data-testid="company-calm-note"/);
+  });
+  it("the overview leads with the role's single next action", () => {
+    expect(page).toMatch(/<DashboardNextAction\b/);
   });
 });
 

@@ -21,7 +21,6 @@ import {
   type NextAction,
 } from "@/lib/dashboard/next-action";
 import { type Role } from "@/lib/auth/actions";
-import { cn } from "@/lib/utils";
 
 // Authenticated cockpit — must never be served from a stale cache, or a logged-in
 // owner can see a pre-deploy render (e.g. missing the chain action CTAs).
@@ -29,92 +28,16 @@ export const dynamic = "force-dynamic";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
-type StageState = "done" | "current" | "todo";
-type Stage = { label: string; state: StageState };
-
-/** Cinematic journey rail — connected, animated stage map (not a flat list).
- *  Reflects the user's REAL progress; the moving gradient is decorative only,
- *  never a claim of live activity (DEMO_TO_REAL_DATA_POLICY). */
-function JourneyRail({ stages, label }: { stages: Stage[]; label: string }) {
-  const last = stages.length - 1;
-  // Mobile-first room polish: on phones a row of N labelled circles reads like
-  // a compressed desktop stepper. Keep the circles, hide the per-step labels on
-  // mobile, and show one clear "current step" line instead.
-  const currentStage = stages.find((s) => s.state === "current") ?? stages[0];
-  return (
-    <div className="flex flex-col gap-2">
-    <nav aria-label={label} className="flex items-start">
-      {stages.map((s, i) => {
-        const leftActive = i > 0 && stages[i - 1].state === "done";
-        const rightActive = s.state === "done";
-        return (
-          <div key={s.label} className="flex flex-1 flex-col items-center">
-            <div className="flex w-full items-center">
-              <span
-                className={cn(
-                  "h-0.5 flex-1 rounded-full",
-                  i === 0
-                    ? "bg-transparent"
-                    : leftActive
-                      ? "stage-line"
-                      : "bg-ink-600",
-                )}
-              />
-              <span
-                className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] font-semibold",
-                  s.state === "done"
-                    ? "border-state-success/50 bg-state-success/15 text-state-success"
-                    : s.state === "current"
-                      ? "stage-current border-brand-orange bg-brand-orange/15 text-brand-orange"
-                      : "border-ink-500 bg-ink-800 text-text-muted",
-                )}
-              >
-                {s.state === "done" ? "✓" : i + 1}
-              </span>
-              <span
-                className={cn(
-                  "h-0.5 flex-1 rounded-full",
-                  i === last
-                    ? "bg-transparent"
-                    : rightActive
-                      ? "stage-line"
-                      : "bg-ink-600",
-                )}
-              />
-            </div>
-            <span
-              className={cn(
-                "mt-2 hidden px-1 text-center font-mono text-[10px] uppercase leading-tight tracking-label sm:block",
-                s.state === "todo" ? "text-text-muted" : "text-text-secondary",
-              )}
-            >
-              {s.label}
-            </span>
-          </div>
-        );
-      })}
-    </nav>
-      {/* Mobile-only current-step line — keeps the room focused, not crammed. */}
-      <p
-        className="text-center font-mono text-[10px] uppercase tracking-label text-text-secondary sm:hidden"
-        data-testid="journey-current-step"
-      >
-        {currentStage.label}
-      </p>
-    </div>
-  );
-}
-
-/** Overview tab — the WOW Public Beta "operating cockpit". Honest signals only
- *  (real profession/skills/journal counts); no fake matching/metrics (PV §10,
- *  PRODUCT_CONSTITUTION §5/§9). Non-locking by design: the active role is the
- *  current workspace, not a permanent category (§1). The redesign turns the old
- *  static card list into an action path: journey rail → next move → readiness.
+/** Overview tab — active-role overview (slice dashboard-active-role-overview-v1).
+ *  Honest signals only (real profession/skills/journal counts); no fake
+ *  matching/metrics (PV §10, PRODUCT_CONSTITUTION §5/§9). Non-locking by design:
+ *  the active role is the current workspace, not a permanent category (§1).
  *
- *  Personal command center: dokumentuotas pirmas sluoksnis — vizualiai bus
- *  pakeistas TASK 07 (living-arena UI po owner vizualinio užrakto); logika,
- *  sąžiningi signalai ir next-action principas lieka. */
+ *  First-screen clarity: each role sees ONLY its own primary path. Identity
+ *  actions are focused to the active role (the other identity stays one tap away
+ *  via "Switch role / Manage spaces"). The heavy explanation surfaces (journey
+ *  stage-rail, "starting point" banner, calm explanation note) are gone — the
+ *  overview leads with one clear next action, not a product explainer. */
 export default async function DashboardOverviewPage({
   params,
 }: {
@@ -145,9 +68,9 @@ export default async function DashboardOverviewPage({
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : "worker";
-  // Real company existence (RLS-scoped) → drives the compact identity/action
-  // entry block: company actions vs an honest "create a company" CTA. Read
-  // failure / missing migration falls back to "no company" (CTA shown).
+  // Real company existence (RLS-scoped) → drives the focused identity entry:
+  // company actions vs an honest "create a company" CTA. Read failure / missing
+  // migration falls back to "no company" (CTA shown).
   const companyRead = await getOwnCompany();
   const hasCompany = companyRead.kind === "ok" && companyRead.row !== null;
   const name =
@@ -167,14 +90,7 @@ export default async function DashboardOverviewPage({
     </header>
   );
 
-  // Non-locking banner — present on every role's overview.
-  const StartingPoint = (
-    <p className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-4 py-3 text-sm leading-relaxed text-text-secondary">
-      {tw("startingPoint")}
-    </p>
-  );
-
-  // ── Company / agency / customer: operating cockpit (define → submit need) ──
+  // ── Company / agency / customer: active-role overview (one clear next move) ──
   if (role !== "worker") {
     // Role-based single Next Action. For an org reviewer we read the SAME gated
     // pending-review set the inbox uses (RPC), so the priority is data-driven:
@@ -194,12 +110,12 @@ export default async function DashboardOverviewPage({
         : customerNextAction();
 
     const intent = role === "agency" ? "partner" : "hire_workers";
-    // Intent-specific pilot copy: a company hiring sees hiring language, an
-    // agency sees candidate-supply language — never a generic buyer "need".
+    // Intent-specific copy: a company hiring sees hiring language, an agency sees
+    // candidate-supply language — never a generic buyer "need".
     const pilotKey = intent === "hire_workers" ? "hire" : "partner";
-    // Slice 1 — demand read-back for the org's own submitted requests
-    // (company/agency only; the customer/buyer role has its own detailed
-    // requests surface on /dashboard/buyer). Honest status only — no matching.
+    // Demand read-back for the org's own submitted requests (company/agency
+    // only; the customer/buyer role has its own detailed requests surface on
+    // /dashboard/buyer). Honest status only — no matching.
     const showDemandReadback = role === "company" || role === "agency";
     const demandReadback = showDemandReadback
       ? await listOwnCustomerRequests()
@@ -221,8 +137,6 @@ export default async function DashboardOverviewPage({
         approved: tReqStatus("approved"),
         closed: tReqStatus("closed"),
       },
-      // Submitted-detail read-back (what the owner entered, echoed from the
-      // request's need_summary + payload). Honest read-back only — no matching.
       detailsLabel: tReadback("detailsLabel"),
       fields: {
         description: tReadback("fields.description"),
@@ -238,97 +152,65 @@ export default async function DashboardOverviewPage({
         urgent: tw("demand.form.urgencyUrgent"),
       },
     };
-    const stages: Stage[] = [
-      { label: tf("company.c1"), state: "current" },
-      { label: tf("company.c2"), state: "todo" },
-      { label: tf("company.c3"), state: "todo" },
-      { label: tf("company.c4"), state: "todo" },
-    ];
     return (
       <div className="flex flex-col gap-7">
         {Header}
         <CurrentSpaceHeader role={role} />
-        {/* Compact identity/action entry — the same Asmuo/Įmonė model from
-            /dashboard/account, surfaced on the main dashboard so the user
-            doesn't have to dig into account settings. */}
-        <IdentityActions hasCompany={hasCompany} compact />
-        {/* Entry into the live labour-market map (foundation). */}
-        <Link
-          href="/dashboard/market-map"
-          data-testid="dashboard-market-map-link"
-          className="flex items-center justify-between gap-2 rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue"
-        >
-          {tMap("title")}
-          <span aria-hidden className="text-brand-blue">→</span>
-        </Link>
-
-        {/* G — company/agency calming pass: a single calm, human framing line
-            (copy-only, no structural change), mirroring the worker foundationNote.
-            One clear next step at a time; honest status, never fabricated demand. */}
-        <p
-          className="-mt-3 text-[11px] leading-relaxed text-text-muted"
-          data-testid="company-calm-note"
-        >
-          {tf("company.calmNote")}
-        </p>
+        {/* Active-role focus: only this role's identity actions on the first
+            screen; the other identity stays reachable via Manage spaces. */}
+        <IdentityActions hasCompany={hasCompany} compact focusRole={role} />
 
         {/* The single, clear primary action for this role/state (data-driven:
-            entries waiting → review; nothing waiting → invite/open team). The
-            chain-actions grid below is the secondary "all steps" index. */}
+            entries waiting → review; nothing waiting → invite/open team; a
+            buyer → their requests room). */}
         <DashboardNextAction
           action={nextAction}
           counts={{ pending: pendingReview }}
         />
 
-        {/* Secondary — the full set of chain entry points
-            (invite worker / enable review / review entries). */}
+        {/* Secondary — the role's chain entry points. */}
         <DashboardChainActions role={role} />
         <WorkerInvitationsCard />
 
-        {StartingPoint}
-
-        <JourneyRail stages={stages} label={tf("company.eyebrow")} />
-        <p className="text-[11px] leading-relaxed text-text-muted" data-testid="journey-progress-helper">
-          {tw("pilot.progressHelper")}
-        </p>
-
-        {/* Demand intake — one clear purpose: create a structured work need
-            (a canonical customer_request, status='submitted'). The title +
-            body are intent-specific (hiring company vs agency offer) so the
-            screen never reads as a vague "activity space". No sweeping overlay
-            (the wow-card sheen was removed — it read as a broken band over the
-            form on mobile). The numbered steps are a REAL form wizard below. */}
-        <section
-          className="card-border flex flex-col gap-5 p-6 sm:p-8"
-          data-testid="demand-intake-section"
-        >
-          <div className="flex flex-col gap-1">
-            <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
-              <span className="live-dot" aria-hidden />
-              {tf("company.eyebrow")}
-            </span>
-            <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
-              {tw(`demand.${pilotKey}.title`)}
-            </h2>
-            <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
-              {tw(`demand.${pilotKey}.body`)}
+        {/* Company / agency: create a structured work need (hire / partner).
+            A buyer/customer leads with their own request room (next action
+            above → /dashboard/buyer), so no hiring intake is shown to them. */}
+        {role !== "customer" && (
+          <>
+            <p
+              className="text-[11px] leading-relaxed text-text-muted"
+              data-testid="journey-progress-helper"
+            >
+              {tw("pilot.progressHelper")}
             </p>
-          </div>
+            <section
+              className="card-border flex flex-col gap-5 p-6 sm:p-8"
+              data-testid="demand-intake-section"
+            >
+              <div className="flex flex-col gap-1">
+                <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+                  <span className="live-dot" aria-hidden />
+                  {tf("company.eyebrow")}
+                </span>
+                <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
+                  {tw(`demand.${pilotKey}.title`)}
+                </h2>
+                <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
+                  {tw(`demand.${pilotKey}.body`)}
+                </p>
+              </div>
 
-          <DemandRequestButton
-            intent={intent}
-            stepTitles={[tf("company.c1"), tf("company.c2"), tf("company.c3")]}
-          />
-        </section>
+              <DemandRequestButton
+                intent={intent}
+                stepTitles={[tf("company.c1"), tf("company.c2"), tf("company.c3")]}
+              />
+            </section>
+          </>
+        )}
 
         {demandReadback && (
           <DemandRequestsReadback result={demandReadback} labels={readbackLabels} />
         )}
-
-        {/* Room-based IA (PR #204 review): the all-roles catalogue and the
-            cross-space "coming later" module grid no longer live in the active
-            space. They moved to /dashboard/account → "Mano erdvės / My spaces",
-            so this room shows only what belongs to the current space. */}
       </div>
     );
   }
@@ -373,10 +255,10 @@ export default async function DashboardOverviewPage({
   // that window, then disappears — it never nags a settled person.
   const isFirstUse = !professionName || entriesCount === 0;
 
-  // ── "Mano darbo kortelė" — state-aware continuity (slice
-  // work-card-state-aware-v1). The card decides new/returning/stale from the
-  // worker's REAL saved data and shows ONE best next action; it never re-asks a
-  // saved dimension and never restarts onboarding on a returning login. ──
+  // ── "Mano darbo kortelė" — state-aware continuity. The card decides
+  // new/returning/stale from the worker's REAL saved data and shows ONE best
+  // next action; it never re-asks a saved dimension and never restarts
+  // onboarding on a returning login. ──
   const cardData = await getWorkerCard({
     workerId: workerRow?.id ?? null,
     name,
@@ -389,10 +271,10 @@ export default async function DashboardOverviewPage({
     <div className="flex flex-col gap-7">
       {/* Space identity + the calm doorway to other spaces (My spaces). */}
       <CurrentSpaceHeader role={role} />
-      {/* Compact identity/action entry — same Asmuo/Įmonė model as
-          /dashboard/account, surfaced on the main dashboard. */}
-      <IdentityActions hasCompany={hasCompany} compact />
-      {/* Entry into the live labour-market map (foundation). */}
+      {/* Active-role focus: the person's own quick actions only — no company
+          create / cockpit clutter on a job-seeker's first screen. */}
+      <IdentityActions hasCompany={hasCompany} compact focusRole={role} />
+      {/* Simple "where there may be work" entry into the labour-market map. */}
       <Link
         href="/dashboard/market-map"
         data-testid="dashboard-market-map-link"
@@ -402,9 +284,8 @@ export default async function DashboardOverviewPage({
         <span aria-hidden className="text-brand-blue">→</span>
       </Link>
 
-      {/* "Šiandienos ekranas" (TASK 07 / DESIGN_SOUL) — today's ONE action,
-          this week's confirmed work, one honest growth path, and the premium
-          scouting player card. Real journal-chain data only. */}
+      {/* "Šiandienos ekranas" — today's ONE action, this week's confirmed work,
+          one honest growth path. Real journal-chain data only. */}
       <TodayScreen workerId={workerRow?.id ?? null} locale={locale} />
 
       {/* "Mano darbo kortelė" — the state-aware entry. It owns the greeting,
@@ -416,9 +297,8 @@ export default async function DashboardOverviewPage({
 
       {/* First-use guidance appears ONLY while the person is still starting
           (no profession or no entries yet) — a gentle path, not a permanent
-          panel. The profile/journal/account doors live in the primary nav
-          (Mano erdvė / Darbo kortelė / Įrodymai / Mano paskyra), so the
-          dashboard keeps no duplicate card wall — just the work card itself. */}
+          panel. The profile/journal/account doors live in the primary nav, so
+          the dashboard keeps no duplicate card wall — just the work card. */}
       {isFirstUse && (
         <DashboardFirstUsePanel variant="full" showCtas={false} />
       )}

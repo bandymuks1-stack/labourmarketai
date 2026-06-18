@@ -12,16 +12,16 @@ import { join } from "node:path";
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
-describe("journey rail is not a compressed desktop stepper on mobile", () => {
+describe("the overview no longer crams a journey stepper on mobile", () => {
   const page = read("app/[locale]/dashboard/page.tsx");
-  it("per-step labels are hidden on mobile (shown at sm+)", () => {
-    // The per-step label span is hidden on mobile, shown at sm+.
-    expect(page).toMatch(/mt-2 hidden[\s\S]*tracking-label sm:block/);
-    expect(page).toMatch(/\{s\.label\}/);
+  // dashboard-active-role-overview-v1: the heavy stage-rail was removed so the
+  // first screen leads with one clear next action, not a desktop stepper.
+  it("the compressed journey rail is gone", () => {
+    expect(page).not.toMatch(/data-testid="journey-current-step"/);
+    expect(page).not.toMatch(/<nav aria-label=\{label\}/);
   });
-  it("shows a single current-step line on mobile only", () => {
-    expect(page).toMatch(/data-testid="journey-current-step"/);
-    expect(page).toMatch(/sm:hidden[\s\S]{0,80}currentStage\.label/);
+  it("the room still reads as one focused space (current-space header kept)", () => {
+    expect(page).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
   });
 });
 
@@ -33,9 +33,9 @@ describe("room primary action is a full-width tap target on mobile", () => {
 });
 
 describe("no broad redesign / no logic change", () => {
-  it("the journey rail still renders an accessible nav with all stages", () => {
+  it("the worker entry keeps its work card and the org entry its next action", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    expect(page).toMatch(/<nav aria-label=\{label\}/);
-    expect(page).toMatch(/stages\.map\(\(s, i\) =>/);
+    expect(page).toMatch(/<WorkCard\b/);
+    expect(page).toMatch(/<DashboardNextAction\b/);
   });
 });
