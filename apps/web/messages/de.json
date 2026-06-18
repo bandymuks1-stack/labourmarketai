@@ -1615,5 +1615,8 @@
       "accommodation_needed_not_provided": "Benötigt Unterkunft, nicht angeboten",
       "profession_mismatch": "Anderer Beruf"
     }
+  },
+  "waze": {
+    "open": "In Waze öffnen"
   }
 }
