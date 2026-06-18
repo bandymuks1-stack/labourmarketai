@@ -185,8 +185,13 @@ export default async function LandingPage({
             ))}
           </ol>
 
-          <Link href="/auth/signup" className="mt-8 inline-block">
-            <Button>{t("ctaPrimary")} →</Button>
+          <Link
+            href="/auth/signup"
+            className="mt-8 block w-full sm:inline-block sm:w-auto"
+          >
+            <Button className="w-full rounded-xl sm:w-auto">
+              {t("ctaPrimary")} →
+            </Button>
           </Link>
         </div>
       </section>
@@ -207,8 +212,12 @@ export default async function LandingPage({
           {audienceKeys.map((k) => (
             <li
               key={k}
-              className="rounded-sm border border-ink-500 bg-ink-800/40 px-3 py-1.5 text-sm text-text-secondary"
+              className="inline-flex items-center gap-2 rounded-full border border-ink-500 bg-ink-800/40 px-3.5 py-1.5 text-sm text-text-secondary transition-colors hover:border-brand-blue/50 hover:text-text-primary"
             >
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-brand-cyan/70"
+                aria-hidden
+              />
               {tlm(k)}
             </li>
           ))}
@@ -224,11 +233,19 @@ export default async function LandingPage({
           {tlm("pillarsTitle")}
         </h2>
         <div className="mt-8 grid gap-5 md:grid-cols-2">
-          {pillarKeys.map(([titleKey, bodyKey]) => (
-            <Card key={titleKey} className="flex flex-col gap-2">
-              <h3 className="font-display text-lg font-semibold text-text-primary">
-                {tlm(titleKey)}
-              </h3>
+          {pillarKeys.map(([titleKey, bodyKey], i) => (
+            <Card
+              key={titleKey}
+              className="glow-hover flex flex-col gap-3 sm:p-7"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-blue/30 bg-brand-blue/10 font-mono text-sm font-semibold text-brand-blue">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="font-display text-lg font-semibold text-text-primary">
+                  {tlm(titleKey)}
+                </h3>
+              </div>
               <p className="text-sm leading-relaxed text-text-secondary">
                 {tlm(bodyKey)}
               </p>
@@ -239,26 +256,44 @@ export default async function LandingPage({
 
       {/* ── Two paths: worker-first + employer ───────────────────────── */}
       <section className="mt-16 grid gap-5 md:grid-cols-2">
-        <Card className="flex flex-col items-start gap-3">
+        <Card className="glow-hover flex flex-col items-start gap-3 sm:p-7">
+          <span
+            className="h-1 w-12 rounded-full bg-brand-cyan"
+            aria-hidden
+          />
           <h3 className="font-display text-xl font-semibold text-text-primary">
             {tlm("workerPathTitle")}
           </h3>
           <p className="text-sm leading-relaxed text-text-secondary">
             {tlm("workerPathBody")}
           </p>
-          <Link href="/auth/signup" className="mt-2">
-            <Button>{tlm("workerPathCta")} →</Button>
+          <Link
+            href="/auth/signup"
+            className="mt-auto w-full pt-2 sm:w-auto"
+          >
+            <Button className="w-full rounded-xl sm:w-auto">
+              {tlm("workerPathCta")} →
+            </Button>
           </Link>
         </Card>
-        <Card className="flex flex-col items-start gap-3">
+        <Card className="glow-hover flex flex-col items-start gap-3 sm:p-7">
+          <span
+            className="h-1 w-12 rounded-full bg-brand-blue"
+            aria-hidden
+          />
           <h3 className="font-display text-xl font-semibold text-text-primary">
             {tlm("employerPathTitle")}
           </h3>
           <p className="text-sm leading-relaxed text-text-secondary">
             {tlm("employerPathBody")}
           </p>
-          <Link href="/for-companies" className="mt-2">
-            <Button variant="secondary">{tlm("employerPathCta")} →</Button>
+          <Link
+            href="/for-companies"
+            className="mt-auto w-full pt-2 sm:w-auto"
+          >
+            <Button variant="secondary" className="w-full rounded-xl sm:w-auto">
+              {tlm("employerPathCta")} →
+            </Button>
           </Link>
         </Card>
       </section>
