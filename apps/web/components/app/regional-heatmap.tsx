@@ -30,7 +30,7 @@ export function RegionalHeatmap() {
       </header>
       <ul className="flex flex-col gap-2">
         {data.rows.map((r) => (
-          <li key={r.code} className="grid grid-cols-[2rem_5rem_1fr_3rem] items-center gap-2 text-xs">
+          <li key={r.code} className="grid grid-cols-[2rem_5rem_1fr_4.5rem] items-center gap-2 text-xs">
             <span aria-hidden className="text-base">{r.flag}</span>
             <span className="truncate text-text-secondary">
               {locale === "lt" ? r.name.lt : r.name.en}
@@ -43,11 +43,15 @@ export function RegionalHeatmap() {
             </div>
             <span
               className={cn(
-                "text-right font-mono tabular-nums",
-                r.intensity >= 80 ? "text-state-danger" : "text-text-primary",
+                "text-right font-mono text-[10px] uppercase tracking-label",
+                r.intensity >= 80 ? "text-state-danger" : "text-text-muted",
               )}
             >
-              {r.intensity}%
+              {r.intensity >= 80
+                ? t("demandLevel.high")
+                : r.intensity >= 60
+                  ? t("demandLevel.building")
+                  : t("demandLevel.open")}
             </span>
           </li>
         ))}

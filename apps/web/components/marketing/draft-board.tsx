@@ -7,20 +7,14 @@ import { DraftBoardColumns } from "@/components/app/draft-board-columns";
  *  rotation and animation; this wrapper supplies the section chrome. */
 export async function DraftBoard() {
   const t = await getTranslations("draft");
-  const tp = await getTranslations("shared.preview");
   return (
     <section className="relative mt-16 overflow-hidden">
       <ConstellationBg />
       <div className="relative mx-auto max-w-container px-6 sm:px-12">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-[11px] uppercase tracking-label text-text-secondary">
-            <span className="live-dot" aria-hidden />
-            {t("eyebrow")}
-          </p>
-          <span className="inline-flex items-center rounded-sm border border-state-warning/40 bg-ink-800/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning">
-            {tp("conceptChip")}
-          </span>
-        </div>
+        <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          <span className="live-dot" aria-hidden />
+          {t("eyebrow")}
+        </p>
         <h2 className="mt-5 font-display text-4xl font-bold leading-[1.06] tracking-tightest sm:text-5xl">
           {t("headline.line1")}
           <br />
@@ -30,16 +24,7 @@ export async function DraftBoard() {
           {t("subcopy")}
         </p>
 
-        <div className="mt-8 flex items-center gap-2">
-          {/* Concept/illustrative label — NOT a live feed. Uses the warning
-              (concept) style, not the green "live" style, so an illustrative
-              example is never dressed up as live platform activity. */}
-          <span className="inline-flex items-center rounded-sm border border-state-warning/40 bg-ink-800/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning">
-            {t("liveCounter")}
-          </span>
-        </div>
-
-        <div className="mt-6">
+        <div className="mt-8">
           <DraftBoardColumns />
         </div>
       </div>

@@ -21,9 +21,10 @@ const PILL: Record<DraftStatus, string> = {
   hired: "border-state-live/40 text-state-live",
 };
 
-/** Compact horizontal draft card (~280×72). The status pill is sourced from
- *  the column the card currently sits in, not the card data, so a card
- *  picks up the right label as it slides through onDeck → live → drafted. */
+/** Compact horizontal draft card (~280×72). Identity is the ROLE + market
+ *  (sector/country), never a fabricated person. The status pill is sourced
+ *  from the column the card currently sits in, so a card picks up the right
+ *  label as it slides through onDeck → live → drafted. */
 export function MiniDraftCard({
   id,
   statusKey,
@@ -44,7 +45,7 @@ export function MiniDraftCard({
       whileHover={mounted && !reduce ? { y: -4 } : undefined}
       transition={{ duration: reduce ? 0 : 0.2, ease: "easeOut" }}
       role="listitem"
-      aria-label={`${card.name} — ${role}, ${statusText}`}
+      aria-label={`${role} — ${card.country}, ${statusText}`}
       className="group flex items-center gap-3 card-border p-2.5"
     >
       <span
@@ -58,12 +59,12 @@ export function MiniDraftCard({
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-semibold text-text-primary">
-          {card.name}{" "}
+          {role}{" "}
           <span aria-hidden className="ml-0.5">
             {card.flag}
           </span>
         </p>
-        <p className="truncate text-[11px] text-text-muted">{role}</p>
+        <p className="truncate text-[11px] text-text-muted">{card.country}</p>
       </div>
       <span
         className={cn(

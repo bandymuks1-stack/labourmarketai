@@ -40,10 +40,16 @@ describe("no fake market charts on the public homepage", () => {
     expect(page).toContain("LabourMarketEvidence");
   });
 
-  it("the MarketPulse concept panels carry a visible illustrative label", () => {
+  it("the MarketPulse panels use honest product-system language, not fabricated live metrics", () => {
+    // Honest-landing preview: the page no longer disclaims fabricated data with
+    // an "illustrative" chip — it removes the fabricated data instead. The
+    // recent-matches panel shows match LOGIC (need -> readiness), never people
+    // or "X min ago" timestamps.
+    const feed = read("components/app/recent-matches-feed.tsx");
+    expect(feed.includes("minutesAgo")).toBe(false);
+    expect(/\bmin ago\b|timeAgo/.test(feed)).toBe(false);
     const mp = read("components/marketing/market-pulse.tsx");
-    expect(mp).toContain("illustrativeSample");
-    expect(mp).toContain("market-pulse-illustrative");
+    expect(mp.includes("illustrativeSample")).toBe(false);
   });
 });
 

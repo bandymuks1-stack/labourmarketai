@@ -50,7 +50,7 @@ export function SupplyDemandChart() {
           {t("panel.supplyDemand")}
         </h3>
         <span className="inline-flex items-center gap-1.5 rounded-sm border border-state-amber/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-amber">
-          {t("gap")}: {data.gapPct}%
+          {t("demandLed")}
         </span>
       </header>
 
@@ -60,7 +60,7 @@ export function SupplyDemandChart() {
         preserveAspectRatio="none"
         className="block h-20 w-full"
         role="img"
-        aria-label={`${t("panel.supplyDemand")} — ${t("gap")} ${data.gapPct}%`}
+        aria-label={t("panel.supplyDemand")}
       >
         <motion.polyline
           points={supplyPts}
