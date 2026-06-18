@@ -3293,12 +3293,18 @@
   },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",
-    "headline": "Vietinės ir tarptautinės darbo galimybės",
-    "headlineAccent": "vienoje aiškioje sistemoje.",
-    "subcopy": "Žmonės pildo įgūdžius, patirtį ir dokumentus, o įmonės pateikia realų poreikį. Labourmarket.ai vienoje vietoje suveda darbo, projektų ir paslaugų poreikius, pasirengimą ir rinkos signalus — savo mieste, kitame regione ar užsienyje.",
-    "ctaPrimary": "Pildyti darbuotojo profilį",
+    "headline": "Ne paprastas CV.",
+    "headlineAccent": "Realių įgūdžių ir darbo poreikių atitiktys.",
+    "subcopy": "Susikurkite Labourmarket.ai profilį, importuokite CV, pridėkite realius įgūdžius, prieinamumą ir darbo patirtį — kad žmonės, komandos ir įmonės aiškiau matytų, kur jūsų galimybės atitinka realius darbo poreikius vietinėje ir tarptautinėje rinkoje.",
+    "ctaPrimary": "Susikurti profilį",
     "businessNote": "Įmonėms ir darbdaviams ·",
-    "businessLink": "Pateikti darbuotojų poreikį"
+    "businessLink": "Pradėti darbo poreikį",
+    "signals": {
+      "s1": "Realus profilis",
+      "s2": "Įgūdžių įrodymai",
+      "s3": "Prieinamumas",
+      "s4": "Darbo poreikiai"
+    }
   },
   "waitlist": {
     "title": "Įmonėms ir agentūroms",

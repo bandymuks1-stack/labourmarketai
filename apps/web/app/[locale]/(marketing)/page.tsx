@@ -77,12 +77,38 @@ export default async function LandingPage({
           <p className="mt-6 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">
             {t("subcopy")}
           </p>
-          <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-            <Link href="/auth/signup">
-              <Button>{t("ctaPrimary")} →</Button>
+
+          {/* Living work-passport signals (DESIGN.md hero: skill / evidence /
+              availability / daily-work). Honest concept labels; colours follow
+              the design system (cyan active · emerald confirmed · blue primary ·
+              amber attention) — no fabricated numbers. */}
+          <ul className="mt-6 flex flex-wrap gap-2" data-testid="hero-signals">
+            {(
+              [
+                ["s1", "bg-brand-cyan"],
+                ["s2", "bg-state-success"],
+                ["s3", "bg-brand-blue"],
+                ["s4", "bg-state-amber"],
+              ] as const
+            ).map(([k, dot]) => (
+              <li
+                key={k}
+                className="inline-flex items-center gap-2 rounded-full border border-ink-500 bg-ink-800/40 px-3 py-1.5 text-xs font-medium text-text-secondary"
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden />
+                {t(`signals.${k}`)}
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <Link href="/auth/signup" className="w-full sm:w-auto">
+              <Button className="w-full rounded-xl">{t("ctaPrimary")} →</Button>
             </Link>
-            <Link href="/company-need">
-              <Button variant="secondary">{t("businessLink")} →</Button>
+            <Link href="/company-need" className="w-full sm:w-auto">
+              <Button variant="secondary" className="w-full rounded-xl">
+                {t("businessLink")} →
+              </Button>
             </Link>
           </div>
 
