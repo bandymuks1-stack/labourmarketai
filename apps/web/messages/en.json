@@ -5256,5 +5256,24 @@
       "openMarketMap": "Open the market map"
     },
     "reason": { "needsManager": "Available once a manager or client confirms your work." }
+  },
+  "workEntryReview": {
+    "title": "Suggested skills from this entry",
+    "intro": "Suggestions from your text — needs review, not confirmed. Accepting adds a self-declared skill to your profile; confirmation comes from a person.",
+    "accept": "Accept",
+    "accepting": "Adding…",
+    "ignore": "Ignore",
+    "accepted": "Added",
+    "ignored": "Ignored",
+    "acceptedNote": "Added as a self-declared skill — confirmation by a person makes it stronger.",
+    "reasonLabel": "Why",
+    "quantityLabel": "Quantity",
+    "durationLabel": "Time",
+    "unit": { "hours": "h", "days": "d", "minutes": "min" },
+    "domain": { "construction": "Construction", "web_design": "Web / design", "admin": "Admin", "cleaning": "Cleaning", "electrical": "Electrical" },
+    "unmappedTitle": "Needs review",
+    "unmappedNote": "We recognised work here but no skill matched — kept for review, not turned into a skill.",
+    "needsMoreDetail": "Add more detail to get skill suggestions from this entry.",
+    "saveError": "Could not add. Please try again."
   }
 }

@@ -12,6 +12,7 @@ import {
 } from "@/components/app/detected-suggestion-card";
 import { DetectedSuggestionList } from "@/components/app/detected-suggestion-list";
 import { SuggestionProvenanceLabel } from "@/components/app/suggestion-provenance";
+import { WorkEntrySkillReview } from "@/components/app/work-entry-skill-review";
 import {
   extractJournalSuggestions,
   type JournalFragmentSuggestion,
@@ -734,6 +735,10 @@ export function JournalEntryComposer({
       <p className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary">
         {t("suggestionReviewIntro")}
       </p>
+
+      {/* PR #478 — cross-domain skill review (Universal Recognition #477): accept
+          -> self-declared profile claim (existing path, no DB); never confirmed automatically. */}
+      <WorkEntrySkillReview text={text} />
 
       {fragments.length > 0 && (
         // Multi-fragment summary — required by the supersprint goal so the

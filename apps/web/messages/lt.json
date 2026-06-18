@@ -5256,5 +5256,24 @@
       "openMarketMap": "Atverti rinkos žemėlapį"
     },
     "reason": { "needsManager": "Galima, kai vadovas ar klientas patvirtins jūsų darbą." }
+  },
+  "workEntryReview": {
+    "title": "Siūlomi įgūdžiai iš šio įrašo",
+    "intro": "Pasiūlymai iš jūsų teksto — reikia peržiūros, nepatvirtinta. Priėmus įgūdis pridedamas profilyje kaip jūsų pačių nurodytas; patvirtinimą suteikia žmogus.",
+    "accept": "Priimti",
+    "accepting": "Pridedama…",
+    "ignore": "Atmesti",
+    "accepted": "Pridėta",
+    "ignored": "Atmesta",
+    "acceptedNote": "Pridėta kaip jūsų pačių nurodytas įgūdis — žmogaus patvirtinimas jį sustiprina.",
+    "reasonLabel": "Kodėl",
+    "quantityLabel": "Kiekis",
+    "durationLabel": "Laikas",
+    "unit": { "hours": "val", "days": "d", "minutes": "min" },
+    "domain": { "construction": "Statybos", "web_design": "Internetas / dizainas", "admin": "Administravimas", "cleaning": "Valymas", "electrical": "Elektra" },
+    "unmappedTitle": "Reikia peržiūros",
+    "unmappedNote": "Atpažinome darbą, bet įgūdis neatitiko — paliekame peržiūrai, nepaverčiame įgūdžiu.",
+    "needsMoreDetail": "Pridėkite daugiau detalių, kad iš šio įrašo gautumėte įgūdžių pasiūlymų.",
+    "saveError": "Nepavyko pridėti. Bandykite dar kartą."
   }
 }
