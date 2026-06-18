@@ -5175,5 +5175,12 @@
     "aiDisabled": "AI explanation not generated yet — the assistant is not enabled.",
     "aiNone": "No explanation was produced.",
     "statusInvalid": "Please complete the worker and need fields."
+  },
+  "marketMapBase": {
+    "ariaLabel": "Labour-market base map",
+    "configNeededTitle": "Map base needs configuration",
+    "configNeededBody": "Add a Google Maps browser API key (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) to render the real map here. Until then the live map is not shown.",
+    "emptyBody": "The map is ready. Real people, teams, companies and needs will appear here when they choose visibility.",
+    "error": "The map could not load. Check the Google Maps key configuration."
   }
 }

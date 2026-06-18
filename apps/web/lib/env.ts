@@ -19,6 +19,12 @@ const schema = z.object({
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: z
     .enum(["true", "false"])
     .default("true"),
+  // ── Maps (real Google Maps base tiles) ─────────────────────────────────────
+  // Browser API key for the REAL Google Maps base map on /dashboard/market-map.
+  // OPTIONAL: when unset, the map renders an honest "config needed" fallback —
+  // never fake tiles, never fake markers. Owner sets it in Vercel env /
+  // .env.local; NEVER committed, NEVER printed.
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().min(1).optional(),
   // ── Billing (Stripe TEST-mode only; live is hard-blocked in config) ────────
   // All default to the OFF state. Payments activate ONLY when the owner injects
   // a valid test config (sk_test_ + whsec_) via Vercel env / .env.local —
@@ -54,6 +60,7 @@ const parsed = schema.safeParse({
   SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
     process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
   PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,
   BILLING_PROVIDER: process.env.BILLING_PROVIDER,
   STRIPE_MODE: process.env.STRIPE_MODE,

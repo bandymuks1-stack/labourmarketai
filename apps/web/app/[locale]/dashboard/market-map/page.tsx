@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { MarketMapShell } from "@/components/app/market-map-shell";
+import { MarketMapBase } from "@/components/app/market-map-base";
 import { MarketMapCapture } from "@/components/app/market-map-capture";
 import { MarketMapOwnerReadiness } from "@/components/app/market-map-owner-readiness";
 import {
@@ -50,6 +51,10 @@ export default async function MarketMapPage({
       <FeatureNote testId="feature-note-market-map">
         {tNote("marketplaceMap")}
       </FeatureNote>
+      {/* Real Google Maps base tiles (foundation) — real map when a browser key
+          is configured, else an honest config-needed fallback. No platform
+          markers yet (no real consent-gated location data); honest empty state. */}
+      <MarketMapBase />
       <MarketMapShell />
       <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
       <MarketMapCapture preferred={preferred} login={login} demand={demand} />
