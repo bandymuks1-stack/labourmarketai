@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { ConstellationBg } from "@/components/decor/constellation-bg";
 import { PlayerCard } from "@/components/app/player-card";
 
-/** "Workers as living profiles" — three FUT-style cards. Sits directly
+/** "Workers as work profiles" — three FUT-style cards. Sits directly
  *  after the hero; carries the same constellation ambient so it reads as
  *  part of the live system, not a separate brochure block. */
 export async function PlayerCardShowcase() {
