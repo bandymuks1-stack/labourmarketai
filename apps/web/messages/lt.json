@@ -1991,7 +1991,7 @@
     },
     "futureLayers": {
       "draft": "Scouting / draft / komandos sudarymas",
-      "monitor": "Gyvas darbo monitorius",
+      "monitor": "Aktyvus darbo monitorius",
       "agent": "AI / agentų orkestras (kai bus paruoštas saugiai)",
       "trust": "Reputacijos / pasitikėjimo sluoksnis"
     },
@@ -2515,7 +2515,7 @@
         },
         "identity": {
           "title": "Jūsų darbo tapatybė",
-          "body": "Įgūdžiai, patirtis, kalbos, mobilumas ir dokumentai — gyvas profilis, o ne statiškas CV.",
+          "body": "Įgūdžiai, patirtis, kalbos, mobilumas ir dokumentai — darbo profilis, o ne statiškas CV.",
           "cta": "Atidaryti profilį"
         },
         "journal": {
@@ -3193,7 +3193,7 @@
       "subcopy": "Valdykite darbuotojus, susiekite juos su klientų poreikiu ir tarpininkaukite — neprarasdami matomumo ir kontrolės.",
       "bullets": [
         "Rezervo dydis — visi kuruojami darbuotojai iškart.",
-        "Pasiskirstymas pagal profesiją — pajėgumas pagal įgūdį, gyvai.",
+        "Pasiskirstymas pagal profesiją — pajėgumas pagal įgūdį.",
         "Paskyrimų būsena — Aktyvūs, Laukiantys, Laisvi.",
         "Keli klientai — tinkami žmonės skirtingiems klientams."
       ]
@@ -3407,7 +3407,7 @@
         },
         {
           "title": "Reali paklausa realiu laiku",
-          "body": "Matykite gyvas galimybes ir raskite jums tinkančias pozicijas pagal profesiją, įkainį ir vietą."
+          "body": "Matykite aktyvias galimybes ir raskite jums tinkančias pozicijas pagal profesiją, įkainį ir vietą."
         },
         {
           "title": "Sąžiningi signalai",

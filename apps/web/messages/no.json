@@ -176,7 +176,7 @@
         },
         "identity": {
           "title": "[EN] Your work identity",
-          "body": "[EN] Skills, experience, languages, mobility and documents - a living profile, not a static CV.",
+          "body": "[EN] Skills, experience, languages, mobility and documents - a current work profile, not a static CV.",
           "cta": "[EN] Open your profile"
         },
         "journal": {
@@ -571,7 +571,7 @@
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
     "rights": "[EN] All rights reserved.",
-    "tagline": "[EN] The living labour market across every sector — Baltic & Northern Europe."
+    "tagline": "[EN] The active labour market across every sector — Baltic & Northern Europe."
   },
   "hero": {
     "chip": "Generell arbeidsmarkedsplattform",
@@ -771,7 +771,7 @@
     }
   },
   "playercards": {
-    "eyebrow": "[EN] Workers as living profiles",
+    "eyebrow": "[EN] Workers as work profiles",
     "headline": {
       "line1": "[EN] Every worker, in context",
       "line2": "[EN] and ready."
