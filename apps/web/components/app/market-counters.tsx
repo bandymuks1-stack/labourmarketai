@@ -83,12 +83,6 @@ export function MarketCounters() {
         );
       })}
       </div>
-      {/* Calm forward-looking caption so the figures read as an illustrative
-          interface overview, not real platform scale — no warning/pseudo-live
-          styling. */}
-      <p className="w-fit font-mono text-[10px] uppercase tracking-label text-text-muted">
-        {t("previewNote")}
-      </p>
     </div>
   );
 }
