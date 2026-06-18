@@ -5275,5 +5275,21 @@
     "unmappedNote": "We recognised work here but no skill matched — kept for review, not turned into a skill.",
     "needsMoreDetail": "Add more detail to get skill suggestions from this entry.",
     "saveError": "Could not add. Please try again."
+  },
+  "evidenceReport": {
+    "title": "Evidence report",
+    "subtitle": "Your real work evidence — self-declared, supported by entries, and confirmed by people. Built only from your own data.",
+    "print": "Print / save PDF",
+    "back": "Profile",
+    "notWorker": "This report is built from a worker profile's journal and skills. Create your worker profile to generate it.",
+    "ladderNote": "The evidence ladder: self-declared → supported by a work entry → confirmed by a responsible person. This is not a score; confirmation is a human decision.",
+    "s": { "profileEvidence": "Profile evidence", "skillsSupported": "Skills supported by work entries", "workEntrySummary": "Work-entry summary", "missingEvidence": "Missing evidence / confirmation needed", "fitReadiness": "Work-need fit readiness" },
+    "metric": { "total": "Skills", "selfDeclared": "Self-declared", "workSupported": "Supported", "confirmed": "Confirmed" },
+    "emptySupported": "No skills are backed by a work entry yet — log work to build evidence.",
+    "entrySummary": "{entries} work entries · {confirmations} confirmed by a person.",
+    "missingNote": "{needEvidence} self-declared skills need a work entry · {needConfirmation} supported skills await a person's confirmation.",
+    "fitReal": "Supported skills are ready to compare against real work needs.",
+    "fitNotAvailable": "Fit readiness appears when there is a real work-need context and supported evidence. No fit is guaranteed.",
+    "footer": "This report shows real signals only. Confirmation is a human decision."
   }
 }
