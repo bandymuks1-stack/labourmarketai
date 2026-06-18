@@ -574,13 +574,19 @@
     "tagline": "[EN] The living labour market across every sector — Baltic & Northern Europe."
   },
   "hero": {
-    "businessLink": "[EN] Learn more",
-    "businessNote": "[EN] For companies & agencies ·",
-    "chip": "[EN] The labour market OS",
-    "ctaPrimary": "[EN] Start now",
-    "headline": "[EN] The labour market,",
-    "headlineAccent": "[EN] alive.",
-    "subcopy": "[EN] One profile. Workers, companies and agencies on a single connected market — a live opportunity flow and honest signals. The platform is being built; this is the M0 foundation."
+    "chip": "Generell arbeidsmarkedsplattform",
+    "headline": "Ikke bare en CV.",
+    "headlineAccent": "Et levende arbeidspass.",
+    "subcopy": "Opprett Labourmarket.ai-profilen din, importer CV-en, legg til ferdigheter, registrer daglig arbeid og vis tilgjengelighet — slik at mennesker, team og bedrifter forstår ekte erfaring, for lokale og internasjonale muligheter.",
+    "ctaPrimary": "Opprett profil",
+    "businessNote": "For bedrifter og arbeidsgivere ·",
+    "businessLink": "Send inn et arbeidsbehov",
+    "signals": {
+      "s1": "Levende profil",
+      "s2": "Bevis på ferdigheter",
+      "s3": "Tilgjengelighet",
+      "s4": "Daglig arbeid"
+    }
   },
   "heroCards": {
     "action": {

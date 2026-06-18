@@ -3293,12 +3293,18 @@
   },
   "hero": {
     "chip": "General labour-market platform",
-    "headline": "Local and international work opportunities",
-    "headlineAccent": "in one clear system.",
-    "subcopy": "People fill in their skills, experience and documents, and companies post a real need. Labourmarket.ai brings work, project and service needs, readiness and market signals together — in your own city, another region, or abroad.",
-    "ctaPrimary": "Fill in your worker profile",
+    "headline": "Not just a CV.",
+    "headlineAccent": "A living work passport.",
+    "subcopy": "Create your Labourmarket.ai profile, import your CV, add skills, log daily work and show availability — so people, teams and companies understand real experience, for local and international opportunities.",
+    "ctaPrimary": "Create your profile",
     "businessNote": "For companies & employers ·",
-    "businessLink": "Submit a worker need"
+    "businessLink": "Post a work need",
+    "signals": {
+      "s1": "Living profile",
+      "s2": "Skill evidence",
+      "s3": "Availability",
+      "s4": "Daily work"
+    }
   },
   "waitlist": {
     "title": "For companies & agencies",
