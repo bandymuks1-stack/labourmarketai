@@ -8,7 +8,7 @@ import { DashboardChainActions } from "@/components/app/dashboard-chain-actions"
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
-import { Link } from "@/lib/i18n/navigation";
+import { MyWorkView } from "@/components/app/my-work-view";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { WorkCard } from "@/components/app/work-card";
@@ -59,7 +59,6 @@ export default async function DashboardOverviewPage({
     .single();
 
   const t = await getTranslations("auth.dashboard");
-  const tMap = await getTranslations("marketMap");
   const tw = await getTranslations("auth.dashboard.wow");
   const tf = await getTranslations("auth.dashboard.wow.flow");
   const tRole = await getTranslations("auth.signup.role");
@@ -274,15 +273,11 @@ export default async function DashboardOverviewPage({
       {/* Active-role focus: the person's own quick actions only — no company
           create / cockpit clutter on a job-seeker's first screen. */}
       <IdentityActions hasCompany={hasCompany} compact focusRole={role} />
-      {/* Simple "where there may be work" entry into the labour-market map. */}
-      <Link
-        href="/dashboard/market-map"
-        data-testid="dashboard-market-map-link"
-        className="flex items-center justify-between gap-2 rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue"
-      >
-        {tMap("title")}
-        <span aria-hidden className="text-brand-blue">→</span>
-      </Link>
+      {/* My Work View cockpit — the first authenticated workspace: connects
+          profile, CV, skills, evidence, availability, work journal, work needs
+          and the Labour Market World Map into one operational board with next
+          actions (replaces the standalone market-map link). */}
+      <MyWorkView />
 
       {/* "Šiandienos ekranas" — today's ONE action, this week's confirmed work,
           one honest growth path. Real journal-chain data only. */}

@@ -45,10 +45,11 @@ describe("market map foundation — route + auth", () => {
     expect(page).toMatch(/auth\.getUser\(\)/);
     expect(page).toMatch(/redirect\(`\/\$\{locale\}\/auth\/login`\)/);
   });
-  it("is reachable from the main dashboard", () => {
+  it("is reachable from the main dashboard (via the My Work View cockpit)", () => {
     const dash = read("app/[locale]/dashboard/page.tsx");
-    expect(dash).toMatch(/data-testid="dashboard-market-map-link"/);
-    expect(dash).toMatch(/\/dashboard\/market-map/);
+    expect(dash).toMatch(/<MyWorkView/);
+    const cockpit = read("lib/dashboard/my-work-view.ts");
+    expect(cockpit).toMatch(/\/dashboard\/market-map/);
   });
 });
 

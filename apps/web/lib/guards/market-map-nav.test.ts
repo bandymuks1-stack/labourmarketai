@@ -29,9 +29,10 @@ describe("market map is exposed in the command centers + dashboard", () => {
     expect(count).toBeGreaterThanOrEqual(2);
   });
 
-  it("the dashboard links to the market map", () => {
-    expect(dashboard).toMatch(/dashboard-market-map-link/);
-    expect(dashboard).toMatch(/\/dashboard\/market-map/);
+  it("the dashboard links to the market map (via the My Work View cockpit)", () => {
+    expect(dashboard).toMatch(/<MyWorkView/);
+    const cockpit = read("lib/dashboard/my-work-view.ts");
+    expect(cockpit).toMatch(/\/dashboard\/market-map/);
   });
 
   it("the opportunities surface links to the market map", () => {

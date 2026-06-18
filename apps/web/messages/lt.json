@@ -5230,5 +5230,31 @@
       "marketPulse": { "name": "Rinkos pulsas", "hint": "Galimo atitikimo signalai tarp profilių ir poreikių — be garantijų.", "state": { "possibleFit": "Galimo atitikimo signalai — reikia daugiau duomenų", "needsData": "Parenkite profilį, kad matytumėte signalus" } },
       "trust": { "name": "Pasitikėjimas ir patvirtinimas", "hint": "Įrodymai ir žmogaus patvirtinimas sustiprina teiginius.", "state": { "confirmedExists": "{count} patvirtino žmogus", "selfDeclaredOnly": "Nurodyta pačių — žmogaus patvirtinimas sustiprina" } }
     }
+  },
+  "myWorkView": {
+    "eyebrow": "Darbo pultas",
+    "title": "Mano darbo vaizdas",
+    "subtitle": "Jūsų realus profilis, įgūdžiai, įrodymai, prieinamumas ir darbo poreikiai vienoje vietoje — ir kaip jie susijungia darbo rinkos žemėlapyje.",
+    "actionsTitle": "Kiti veiksmai",
+    "block": {
+      "profile": { "name": "Profilis", "state": { "started": "Profilis pradėtas", "missing": "Profilio dar nėra" } },
+      "cv": { "name": "CV", "state": { "summaryAdded": "Profilio santrauka pridėta", "import": "Importuokite CV arba pridėkite santrauką" } },
+      "skills": { "name": "Įgūdžiai", "state": { "added": "Pridėta įgūdžių: {count}", "none": "Įgūdžių dar nėra" } },
+      "evidence": { "name": "Įrodymai", "state": { "supported": "{count} patvirtino žmonės", "hasEvidence": "{count} su darbo įrodymais", "needsEvidence": "Pridėkite darbų, kad atsirastų įrodymai", "noSkills": "Pirma pridėkite įgūdžių" } },
+      "availability": { "name": "Prieinamumas", "state": { "available": "Šiuo metu laisvas", "busy": "Šiuo metu užimtas", "unavailable": "Pažymėta neprieinama", "none": "Prieinamumas nenurodytas" } },
+      "journal": { "name": "Darbo žurnalas", "state": { "logged": "Darbo įrašų: {count}", "none": "Darbų dar neužfiksuota" } },
+      "workNeeds": { "name": "Darbo poreikiai", "state": { "drafts": "Darbo poreikių juodraščių: {count}", "none": "Darbo poreikis neparengtas" } },
+      "worldMap": { "name": "Pasaulio žemėlapis", "state": { "zones": "{count} zonų turi realių signalų", "noSignals": "Žemėlapio signalų dar nėra — pridėkite duomenų, kad zonos užsidegtų" } }
+    },
+    "action": {
+      "completeProfile": "Užbaikite profilį",
+      "addSkills": "Pridėkite įgūdžių",
+      "importCv": "Importuokite CV",
+      "setAvailability": "Nurodykite prieinamumą",
+      "logWork": "Užfiksuokite pirmą darbo įrašą",
+      "strengthenEvidence": "Sustiprinkite įgūdžius įrodymais",
+      "openMarketMap": "Atverti rinkos žemėlapį"
+    },
+    "reason": { "needsManager": "Galima, kai vadovas ar klientas patvirtins jūsų darbą." }
   }
 }

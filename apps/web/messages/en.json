@@ -5230,5 +5230,31 @@
       "marketPulse": { "name": "Market Pulse", "hint": "Possible fit signals between profiles and needs — no guarantees.", "state": { "possibleFit": "Possible fit signals — needs more data to grow", "needsData": "Prepare your profile to see market signals" } },
       "trust": { "name": "Trust & Confirmation", "hint": "Evidence and human confirmation make claims stronger.", "state": { "confirmedExists": "{count} confirmed by a person", "selfDeclaredOnly": "Self-declared — human confirmation makes it stronger" } }
     }
+  },
+  "myWorkView": {
+    "eyebrow": "Work cockpit",
+    "title": "My Work View",
+    "subtitle": "Your real profile, skills, evidence, availability and work needs in one place — and where they connect on the labour-market map.",
+    "actionsTitle": "Next actions",
+    "block": {
+      "profile": { "name": "Profile", "state": { "started": "Profile started", "missing": "No profile yet" } },
+      "cv": { "name": "CV", "state": { "summaryAdded": "Profile summary added", "import": "Import your CV or add a summary" } },
+      "skills": { "name": "Skills", "state": { "added": "{count} skills added", "none": "No skills yet" } },
+      "evidence": { "name": "Evidence", "state": { "supported": "{count} confirmed by people", "hasEvidence": "{count} with work evidence", "needsEvidence": "Add work to build evidence", "noSkills": "Add skills first" } },
+      "availability": { "name": "Availability", "state": { "available": "Available now", "busy": "Currently busy", "unavailable": "Marked unavailable", "none": "Availability not set" } },
+      "journal": { "name": "Work journal", "state": { "logged": "{count} work entries", "none": "No work logged yet" } },
+      "workNeeds": { "name": "Work needs", "state": { "drafts": "{count} work-need draft(s)", "none": "No work need prepared" } },
+      "worldMap": { "name": "World map", "state": { "zones": "{count} zones have real signals", "noSignals": "No map signals yet — add data to light up zones" } }
+    },
+    "action": {
+      "completeProfile": "Complete your profile",
+      "addSkills": "Add your skills",
+      "importCv": "Import your CV",
+      "setAvailability": "Set your availability",
+      "logWork": "Log your first work entry",
+      "strengthenEvidence": "Strengthen skills with evidence",
+      "openMarketMap": "Open the market map"
+    },
+    "reason": { "needsManager": "Available once a manager or client confirms your work." }
   }
 }
