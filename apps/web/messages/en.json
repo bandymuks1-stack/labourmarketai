@@ -5199,5 +5199,36 @@
   },
   "waze": {
     "open": "Open in Waze"
+  },
+  "worldMap": {
+    "eyebrow": "Labour market atlas",
+    "title": "Labour Market World Map",
+    "subtitle": "Your real profile, skills, evidence, availability and work needs as one connected labour-market world — local and international. Built only from your own signals, with honest empty states where data is missing.",
+    "legendTitle": "Signal legend",
+    "summaryTitle": "What this atlas shows",
+    "summaryBody": "Each zone is a real part of your labour-market presence. Signals appear as you add real data; nothing here is invented and no fit is guaranteed.",
+    "summaryCounts": "{real} of {total} zones have real signals",
+    "conceptTag": "Concept",
+    "emptyTag": "Add data",
+    "ctaProfile": "Open profile",
+    "ctaCompany": "Open company",
+    "legend": {
+      "active": "Active / profile signal",
+      "primary": "Work need",
+      "supported": "Supported / stronger",
+      "attention": "Missing / needs action",
+      "concept": "Concept / not enough data",
+      "blocker": "Real blocker / risk"
+    },
+    "zone": {
+      "profileHub": { "name": "Profile Hub", "hint": "Your real profile and where you work from.", "state": { "started": "Profile started", "none": "No profile data yet" } },
+      "skillsEvidence": { "name": "Skills & Evidence", "hint": "Your real skills and the proof behind them.", "state": { "confirmed": "{count} confirmed by people", "suggested": "{count} with work evidence", "selfDeclared": "{count} self-declared", "none": "Add skills to see skill signals" } },
+      "availability": { "name": "Availability", "hint": "When and where you can work — local and international.", "state": { "available": "Available now", "busy": "Currently busy", "unavailable": "Marked unavailable", "none": "Add availability to improve readiness" } },
+      "workNeeds": { "name": "Work Needs", "hint": "Company and customer needs you prepare — drafts you review.", "state": { "drafts": "{count} work-need signal(s) in draft / review", "none": "Prepare a work need as a draft" } },
+      "teams": { "name": "Teams & Brigades", "hint": "Teams and brigades — a connected-work concept.", "state": { "concept": "Not enough data yet" } },
+      "company": { "name": "Company / Organisation", "hint": "Your organisation, agency or client context.", "state": { "linked": "Organisation linked", "none": "Add your organisation context" } },
+      "marketPulse": { "name": "Market Pulse", "hint": "Possible fit signals between profiles and needs — no guarantees.", "state": { "possibleFit": "Possible fit signals — needs more data to grow", "needsData": "Prepare your profile to see market signals" } },
+      "trust": { "name": "Trust & Confirmation", "hint": "Evidence and human confirmation make claims stronger.", "state": { "confirmedExists": "{count} confirmed by a person", "selfDeclaredOnly": "Self-declared — human confirmation makes it stronger" } }
+    }
   }
 }

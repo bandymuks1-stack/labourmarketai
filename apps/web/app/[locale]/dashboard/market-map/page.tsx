@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { MarketMapShell } from "@/components/app/market-map-shell";
 import { MarketMapBase } from "@/components/app/market-map-base";
+import { LabourMarketWorldMap } from "@/components/app/labour-market-world-map";
 import { MarketMapCapture } from "@/components/app/market-map-capture";
 import { MarketMapOwnerReadiness } from "@/components/app/market-map-owner-readiness";
 import {
@@ -55,6 +56,11 @@ export default async function MarketMapPage({
           is configured, else an honest config-needed fallback. No platform
           markers yet (no real consent-gated location data); honest empty state. */}
       <MarketMapBase />
+      {/* Labour Market World Map v1 — stylized owner atlas of real signals
+          (profile, skills/evidence, availability, work needs, teams, company,
+          market pulse, trust). Real-data-driven with honest empty/concept states;
+          no fake markers/scores. The detailed signal shell stays below. */}
+      <LabourMarketWorldMap />
       <MarketMapShell />
       <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
       <MarketMapCapture preferred={preferred} login={login} demand={demand} />

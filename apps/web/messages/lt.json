@@ -5199,5 +5199,36 @@
   },
   "waze": {
     "open": "Atidaryti Waze"
+  },
+  "worldMap": {
+    "eyebrow": "Darbo rinkos atlasas",
+    "title": "Darbo rinkos pasaulio žemėlapis",
+    "subtitle": "Jūsų realus profilis, įgūdžiai, įrodymai, prieinamumas ir darbo poreikiai kaip vienas susietas darbo rinkos pasaulis — vietinis ir tarptautinis. Sudaryta tik iš jūsų pačių signalų, su sąžiningomis tuščiomis būsenomis, kai duomenų nėra.",
+    "legendTitle": "Signalų legenda",
+    "summaryTitle": "Ką rodo šis atlasas",
+    "summaryBody": "Kiekviena zona — reali jūsų darbo rinkos dalis. Signalai atsiranda pridėjus realių duomenų; niekas čia nėra prasimanyta ir joks atitikimas negarantuojamas.",
+    "summaryCounts": "{real} iš {total} zonų turi realių signalų",
+    "conceptTag": "Koncepcija",
+    "emptyTag": "Pridėti duomenų",
+    "ctaProfile": "Atverti profilį",
+    "ctaCompany": "Atverti įmonę",
+    "legend": {
+      "active": "Aktyvus / profilio signalas",
+      "primary": "Darbo poreikis",
+      "supported": "Patvirtintas / stipresnis",
+      "attention": "Trūksta / reikia veiksmo",
+      "concept": "Koncepcija / per mažai duomenų",
+      "blocker": "Realus blokatorius / rizika"
+    },
+    "zone": {
+      "profileHub": { "name": "Profilio centras", "hint": "Jūsų realus profilis ir iš kur dirbate.", "state": { "started": "Profilis pradėtas", "none": "Profilio duomenų dar nėra" } },
+      "skillsEvidence": { "name": "Įgūdžiai ir įrodymai", "hint": "Jūsų realūs įgūdžiai ir juos pagrindžiantys įrodymai.", "state": { "confirmed": "{count} patvirtino žmonės", "suggested": "{count} su darbo įrodymais", "selfDeclared": "{count} nurodyti pačių", "none": "Pridėkite įgūdžių, kad atsirastų signalai" } },
+      "availability": { "name": "Prieinamumas", "hint": "Kada ir kur galite dirbti — vietoje ir tarptautiniu mastu.", "state": { "available": "Šiuo metu laisvas", "busy": "Šiuo metu užimtas", "unavailable": "Pažymėta neprieinama", "none": "Nurodykite prieinamumą" } },
+      "workNeeds": { "name": "Darbo poreikiai", "hint": "Įmonių ir klientų poreikiai, kuriuos rengiate — juodraščiai peržiūrai.", "state": { "drafts": "{count} darbo poreikio signalų juodraštyje / peržiūroje", "none": "Parenkite darbo poreikį kaip juodraštį" } },
+      "teams": { "name": "Komandos ir brigados", "hint": "Komandų ir brigadų susieto darbo koncepcija.", "state": { "concept": "Per mažai duomenų" } },
+      "company": { "name": "Įmonė / organizacija", "hint": "Jūsų organizacijos, agentūros ar kliento kontekstas.", "state": { "linked": "Organizacija susieta", "none": "Pridėkite organizacijos kontekstą" } },
+      "marketPulse": { "name": "Rinkos pulsas", "hint": "Galimo atitikimo signalai tarp profilių ir poreikių — be garantijų.", "state": { "possibleFit": "Galimo atitikimo signalai — reikia daugiau duomenų", "needsData": "Parenkite profilį, kad matytumėte signalus" } },
+      "trust": { "name": "Pasitikėjimas ir patvirtinimas", "hint": "Įrodymai ir žmogaus patvirtinimas sustiprina teiginius.", "state": { "confirmedExists": "{count} patvirtino žmogus", "selfDeclaredOnly": "Nurodyta pačių — žmogaus patvirtinimas sustiprina" } }
+    }
   }
 }
