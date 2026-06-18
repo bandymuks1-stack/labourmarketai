@@ -5182,5 +5182,8 @@
     "configNeededBody": "Pridėkite Google Maps naršyklės API raktą (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY), kad čia būtų rodomas tikras žemėlapis. Kol kas tiesioginis žemėlapis nerodomas.",
     "emptyBody": "Žemėlapis paruoštas. Čia atsiras realūs žmonės, komandos, įmonės ir poreikiai, kai jie pasirinks matomumą.",
     "error": "Žemėlapio nepavyko įkelti. Patikrinkite Google Maps rakto konfigūraciją."
+  },
+  "waze": {
+    "open": "Atidaryti Waze"
   }
 }

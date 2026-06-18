@@ -5182,5 +5182,8 @@
     "configNeededBody": "Add a Google Maps browser API key (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) to render the real map here. Until then the live map is not shown.",
     "emptyBody": "The map is ready. Real people, teams, companies and needs will appear here when they choose visibility.",
     "error": "The map could not load. Check the Google Maps key configuration."
+  },
+  "waze": {
+    "open": "Open in Waze"
   }
 }
