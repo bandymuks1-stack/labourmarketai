@@ -5275,5 +5275,21 @@
     "unmappedNote": "Atpažinome darbą, bet įgūdis neatitiko — paliekame peržiūrai, nepaverčiame įgūdžiu.",
     "needsMoreDetail": "Pridėkite daugiau detalių, kad iš šio įrašo gautumėte įgūdžių pasiūlymų.",
     "saveError": "Nepavyko pridėti. Bandykite dar kartą."
+  },
+  "evidenceReport": {
+    "title": "Įrodymų ataskaita",
+    "subtitle": "Jūsų realūs darbo įrodymai — pačių nurodyti, pagrįsti įrašais ir patvirtinti žmonių. Sudaryta tik iš jūsų duomenų.",
+    "print": "Spausdinti / išsaugoti PDF",
+    "back": "Profilis",
+    "notWorker": "Ši ataskaita sudaroma iš darbuotojo profilio žurnalo ir įgūdžių. Susikurkite darbuotojo profilį, kad ją sugeneruotumėte.",
+    "ladderNote": "Įrodymų pakopos: pačių nurodyta → pagrįsta darbo įrašu → patvirtinta atsakingo žmogaus. Tai nėra balas; patvirtinimą priima žmogus.",
+    "s": { "profileEvidence": "Profilio įrodymai", "skillsSupported": "Įgūdžiai, pagrįsti darbo įrašais", "workEntrySummary": "Darbo įrašų santrauka", "missingEvidence": "Trūkstami įrodymai / reikia patvirtinimo", "fitReadiness": "Atitikties darbo poreikiui parengtis" },
+    "metric": { "total": "Įgūdžiai", "selfDeclared": "Pačių nurodyti", "workSupported": "Pagrįsti", "confirmed": "Patvirtinti" },
+    "emptySupported": "Kol kas nė vienas įgūdis nepagrįstas darbo įrašu — fiksuokite darbą, kad atsirastų įrodymų.",
+    "entrySummary": "{entries} darbo įrašų · {confirmations} patvirtino žmogus.",
+    "missingNote": "{needEvidence} pačių nurodytų įgūdžių reikia darbo įrašo · {needConfirmation} pagrįstų įgūdžių laukia žmogaus patvirtinimo.",
+    "fitReal": "Pagrįsti įgūdžiai parengti palyginti su realiais darbo poreikiais.",
+    "fitNotAvailable": "Atitikties parengtis atsiranda, kai yra realus darbo poreikio kontekstas ir pagrįsti įrodymai. Atitikimas negarantuojamas.",
+    "footer": "Ši ataskaita rodo tik realius signalus. Patvirtinimą priima žmogus."
   }
 }
