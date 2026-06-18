@@ -324,6 +324,14 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "nextSteps": {
+        "eyebrow": "Hierna — jouw echte profiel",
+        "s1": "Importeer je cv (optioneel) om je profiel sneller te vullen",
+        "s2": "Voeg je echte vaardigheden toe",
+        "s3": "Stel je beschikbaarheid in",
+        "s4": "Voeg werkervaring en bewijs toe",
+        "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, je werkdagboek en bevestigingen van mensen maken ze na verloop van tijd sterker."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",

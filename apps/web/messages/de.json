@@ -324,6 +324,14 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "nextSteps": {
+        "eyebrow": "Danach — dein echtes Profil",
+        "s1": "Importiere deinen Lebenslauf (optional), um dein Profil schneller zu füllen",
+        "s2": "Füge deine echten Fähigkeiten hinzu",
+        "s3": "Lege deine Verfügbarkeit fest",
+        "s4": "Füge Arbeitserfahrung und Nachweise hinzu",
+        "note": "Fähigkeiten sind zunächst selbst angegeben. Dokumente, dein Arbeitsjournal und Bestätigungen von Personen machen sie mit der Zeit stärker."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",

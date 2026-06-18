@@ -324,6 +324,14 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "nextSteps": {
+        "eyebrow": "Po tym kroku — Twój realny profil",
+        "s1": "Zaimportuj CV (opcjonalnie), aby szybciej uzupełnić profil",
+        "s2": "Dodaj realne umiejętności",
+        "s3": "Ustaw dostępność",
+        "s4": "Dodaj doświadczenie zawodowe i dowody",
+        "note": "Umiejętności są początkowo deklarowane przez Ciebie. Dokumenty, dziennik pracy i potwierdzenia od osób z czasem je wzmacniają."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",

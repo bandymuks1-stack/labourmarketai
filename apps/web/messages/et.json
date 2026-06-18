@@ -324,6 +324,14 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "nextSteps": {
+        "eyebrow": "Pärast seda — sinu tegelik profiil",
+        "s1": "Impordi oma CV (valikuline), et profiil kiiremini täita",
+        "s2": "Lisa oma tegelikud oskused",
+        "s3": "Määra oma saadavus",
+        "s4": "Lisa töökogemus ja tõendid",
+        "note": "Oskused on alguses sinu enda märgitud. Dokumendid, töömärkmik ja inimeste kinnitused muudavad need aja jooksul tugevamaks."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",

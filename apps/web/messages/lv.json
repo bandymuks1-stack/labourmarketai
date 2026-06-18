@@ -324,6 +324,14 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "nextSteps": {
+        "eyebrow": "Pēc tam — tavs reālais profils",
+        "s1": "Importē savu CV (pēc izvēles), lai ātrāk aizpildītu profilu",
+        "s2": "Pievieno savas reālās prasmes",
+        "s3": "Norādi savu pieejamību",
+        "s4": "Pievieno darba pieredzi un pierādījumus",
+        "note": "Prasmes sākotnēji ir tevis norādītas. Dokumenti, darba žurnāls un cilvēku apstiprinājumi laika gaitā padara tās stiprākas."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",

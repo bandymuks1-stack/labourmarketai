@@ -147,7 +147,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
           type="button"
           disabled={roles.size === 0}
           onClick={() => setStep(2)}
-          className="self-start"
+          className="w-full rounded-xl sm:w-auto sm:self-start"
         >
           {t("rolePicker.continue")}
         </Button>
@@ -198,14 +198,47 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
         </select>
       </label>
 
+      {/* Landing→profile continuity (DESIGN.md): honestly preview the real
+          profile the user builds next, so the first post-CTA screen does not
+          feel weaker than the premium landing. Concept labels only — no fake
+          data, nothing auto-verified. */}
+      <div
+        className="card-border flex flex-col gap-3 p-4"
+        data-testid="onboarding-next-steps"
+      >
+        <p className="font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+          {t("nextSteps.eyebrow")}
+        </p>
+        <ul className="flex flex-col gap-2">
+          {(["s1", "s2", "s3", "s4"] as const).map((k, i) => (
+            <li
+              key={k}
+              className="flex items-start gap-2.5 text-sm leading-relaxed text-text-secondary"
+            >
+              <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full border border-brand-blue/30 bg-brand-blue/10 font-mono text-[10px] font-semibold text-brand-blue">
+                {i + 1}
+              </span>
+              {t(`nextSteps.${k}`)}
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs leading-relaxed text-text-muted">
+          {t("nextSteps.note")}
+        </p>
+      </div>
+
       {error && (
         <p className="text-xs text-state-danger" role="alert">
           {error}
         </p>
       )}
 
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={pending}>
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+        <Button
+          type="submit"
+          disabled={pending}
+          className="w-full rounded-xl sm:w-auto"
+        >
           {pending ? t("saving") : t("step2.continue")}
         </Button>
         <button
