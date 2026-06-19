@@ -43,6 +43,27 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   const country = String(formData.get("country") ?? "").trim();
   const locale = String(formData.get("locale") ?? "lt");
 
+  // First-login bootstrap resilience (auth-owner-access-bootstrap-p0): ensure
+  // the caller's OWN profile shell exists before the RPC. handle_new_user
+  // (migration 0001) normally creates it on signup, but if that trigger did not
+  // run for a Google OAuth user, complete_onboarding's UPDATE would affect zero
+  // rows and the user would loop back to /onboarding forever. Idempotent +
+  // RLS-safe (profiles_insert allows id = auth.uid(); ON CONFLICT DO NOTHING
+  // never overwrites an existing row). No DB migration, no fake data — only the
+  // user's own shell, exactly what the trigger provides.
+  const { error: ensureProfileErr } = await supabase
+    .from("profiles")
+    .upsert(
+      { id: user.id, email: user.email ?? null, locale },
+      { onConflict: "id", ignoreDuplicates: true },
+    );
+  if (ensureProfileErr) {
+    console.error("[completeOnboarding] ensure profile row failed", {
+      code: ensureProfileErr.code,
+      message: ensureProfileErr.message,
+    });
+  }
+
   // company/agency entity rows seed a draft name from role_data.name.
   const roleData = (r: Role): Record<string, string> =>
     (r === "company" || r === "agency") && display_name
