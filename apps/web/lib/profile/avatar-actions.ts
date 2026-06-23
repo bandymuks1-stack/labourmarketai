@@ -21,10 +21,7 @@ export async function setProfileAvatarPath(path: string): Promise<{ ok: boolean 
   // Defence-in-depth: the path must live under the caller's own folder.
   if (!clean.startsWith(`${user.id}/`) || clean.length > 1024) return { ok: false };
 
-  // avatar_url is not in the generated Supabase types until the migration is
-  // applied; cast through any (same pattern as the journal v3 columns).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("profiles")
     .update({ avatar_url: clean })
     .eq("id", user.id);
@@ -43,16 +40,14 @@ export async function removeProfileAvatar(): Promise<{ ok: boolean }> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: prof } = await (supabase as any)
+  const { data: prof } = await supabase
     .from("profiles")
     .select("avatar_url")
     .eq("id", user.id)
     .single();
-  const path: string | null = (prof?.avatar_url as string | null) ?? null;
+  const path: string | null = prof?.avatar_url ?? null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("profiles")
     .update({ avatar_url: null })
     .eq("id", user.id);

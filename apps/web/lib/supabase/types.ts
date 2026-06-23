@@ -2989,6 +2989,7 @@ export type Database = {
       profiles: {
         Row: {
           active_role: string | null
+          avatar_url: string | null
           consent_data_processing: boolean
           consent_marketing: boolean
           country: string | null
@@ -3005,6 +3006,7 @@ export type Database = {
         }
         Insert: {
           active_role?: string | null
+          avatar_url?: string | null
           consent_data_processing?: boolean
           consent_marketing?: boolean
           country?: string | null
@@ -3021,6 +3023,7 @@ export type Database = {
         }
         Update: {
           active_role?: string | null
+          avatar_url?: string | null
           consent_data_processing?: boolean
           consent_marketing?: boolean
           country?: string | null

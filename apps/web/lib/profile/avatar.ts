@@ -20,15 +20,13 @@ export async function getOwnAvatar(): Promise<{
 
   let path: string | null = null;
   try {
-    // avatar_url is absent from generated types until the migration applies.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("profiles")
       .select("avatar_url")
       .eq("id", user.id)
       .single();
     if (error) return { path: null, signedUrl: null }; // column not provisioned
-    path = (data?.avatar_url as string | null) ?? null;
+    path = data?.avatar_url ?? null;
   } catch {
     return { path: null, signedUrl: null };
   }
