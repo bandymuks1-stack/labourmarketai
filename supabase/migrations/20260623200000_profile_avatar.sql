@@ -23,6 +23,22 @@
 --
 -- CLASS: RED (storage.buckets insert + storage.objects RLS policies). NOT
 -- applied here — open as draft, needs-human-gate, owner-channel apply only.
+--
+-- @human-gate-approved
+-- Intentional, human-reviewed RED migration: creating a private avatar bucket
+-- and its owner-scoped storage.objects policies necessarily trips the
+-- alter/drop-policy + bucket-config detectors. This annotation acknowledges the
+-- risk; it is NOT an auto-merge pass — the PR stays a draft with the
+-- needs-human-gate label until the owner approves and applies it.
+--
+-- ROLLBACK (run manually only if reverting; full script at
+-- supabase/rollbacks/20260623200000_profile_avatar.down.sql):
+--   -- drop policy if exists "profile-avatars owner select" on storage.objects;
+--   -- drop policy if exists "profile-avatars owner insert" on storage.objects;
+--   -- drop policy if exists "profile-avatars owner update" on storage.objects;
+--   -- drop policy if exists "profile-avatars owner delete" on storage.objects;
+--   -- delete from storage.buckets where id = 'profile-avatars';
+--   -- alter table public.profiles drop column if exists avatar_url;
 
 begin;
 
