@@ -131,6 +131,7 @@
     "reason": "Laisvos žodžių paieškos pagal žmones dar nėra: sukurti ją anksčiau, nei atsiranda sutikimą davusių ir patikrintų darbuotojų, reikštų rodyti netikrus rezultatus. Žemiau — tikras kelias, kuris veikia jau dabar.",
     "paths": {
       "scouting": {
+    "statusNote": { "title": "Kaip veikia atitikimas šiandien", "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.", "stream": "Aktyvus kandidatų srautas dar priklauso nuo realiai užpildytų profilių ir poreikių.", "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.", "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo." },
         "title": "Ieškoti pagal poreikį",
         "body": "Pasirinkite savo struktūruotą poreikį — atitikties variklis parodys tinkamus kandidatus su pagrindimu ir trūkumais. Be sugalvotų balų.",
         "cta": "Atidaryti paiešką pagal poreikį"
@@ -3540,6 +3541,7 @@
   },
   "legal": {
     "draftNote": "Šis dokumentas yra juodraštis. Galutinį, įpareigojantį tekstą prieš viešą startą peržiūrės teisininkai.",
+    "preparing": { "body": "Teisinė informacija ruošiama. Prieš pradedant mokamas paslaugas ar sutartinius santykius ši informacija bus pateikta ir atnaujinta.", "contact": "Iškilus klausimams susisiekite su mumis." },
       "marketplaceRules": {
         "title": "Prekyvietės taisyklės",
         "intro": "Šios taisyklės užtikrina, kad prekyvietė liktų saugi ir sąžininga. Jos galioja visiems vartotojams ir pasiūlymams.",
@@ -4595,6 +4597,7 @@
     "cta": "Grįžti į pradžią"
   },
   "scouting": {
+    "statusNote": { "title": "Kaip veikia atitikimas šiandien", "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.", "stream": "Aktyvus kandidatų srautas dar priklauso nuo realiai užpildytų profilių ir poreikių.", "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.", "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo." },
     "title": "Žvalgyba",
     "intro": "Pasirink vieną iš savo struktūruotų poreikių, kad matytum tinkamus darbuotojus, kodėl jie tinka, ir įtrauktum į trumpąjį sąrašą.",
     "visibilityNote": "Matomumas remiasi pasiruošimu, patikimumu ir leidimais — ne mokėjimu. Mokama platesnė prieiga dar neaktyvi (mokėjimai ruošiami). Rodomos tik saugios, anonimizuotos peržiūros — jokių netikrų skelbimų.",

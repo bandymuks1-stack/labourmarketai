@@ -131,6 +131,7 @@
     "reason": "There is no free-text people search yet: building one before there is consented, verified worker supply would mean showing fake results. Below is the real path that works today.",
     "paths": {
       "scouting": {
+    "statusNote": { "title": "How matching works today", "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.", "stream": "An active candidate stream still depends on real, filled-in profiles and needs.", "fill": "Fill in a need so the system can compare it against the available signals.", "disclaimer": "This does not mean employment or a confirmed match." },
         "title": "Search by need",
         "body": "Pick your structured need — the match engine surfaces suitable candidates with the basis and the gaps. No invented scores.",
         "cta": "Open search by need"
@@ -3540,6 +3541,7 @@
   },
   "legal": {
     "draftNote": "This document is a draft. The final, binding text will be reviewed by legal counsel before public launch.",
+    "preparing": { "body": "Legal information is being prepared. Before any paid services or contractual relationship begins, it will be provided and updated.", "contact": "If you have questions, get in touch with us." },
       "marketplaceRules": {
         "title": "Marketplace rules",
         "intro": "These rules keep the marketplace safe and fair. They apply to all users and offers.",
@@ -4595,6 +4597,7 @@
     "cta": "Back to the start"
   },
   "scouting": {
+    "statusNote": { "title": "How matching works today", "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.", "stream": "An active candidate stream still depends on real, filled-in profiles and needs.", "fill": "Fill in a need so the system can compare it against the available signals.", "disclaimer": "This does not mean employment or a confirmed match." },
     "title": "Scouting",
     "intro": "Pick one of your structured needs to see matching workers, why they fit, and shortlist them.",
     "visibilityNote": "Visibility is based on readiness, trust and permissions — not payment. Paid wider access is not active yet (payments are being prepared). Only safe, anonymized previews are shown — no fake listings.",

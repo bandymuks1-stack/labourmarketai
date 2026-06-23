@@ -76,6 +76,19 @@ export default async function CompanyScoutingPage({
         <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
       </header>
 
+      {/* Honest matching status (audit P1): what works today vs what an active
+          candidate stream still depends on. No guaranteed/instant/AI claims. */}
+      <section
+        className="flex flex-col gap-1.5 rounded-lg border border-ink-600 bg-ink-800/40 px-4 py-3"
+        data-testid="scouting-status-note"
+      >
+        <p className="text-sm font-semibold text-text-primary">{t("statusNote.title")}</p>
+        <p className="text-xs leading-relaxed text-text-secondary">{t("statusNote.signals")}</p>
+        <p className="text-xs leading-relaxed text-text-secondary">{t("statusNote.stream")}</p>
+        <p className="text-xs leading-relaxed text-text-secondary">{t("statusNote.fill")}</p>
+        <p className="text-xs leading-relaxed text-text-muted">{t("statusNote.disclaimer")}</p>
+      </section>
+
       {/* Privacy frame — contacts hidden, profile-safe only (Step 3A policy). */}
       <section
         className="flex flex-col gap-1.5 rounded-lg border border-brand-blue/25 bg-brand-blue/5 px-4 py-3"
