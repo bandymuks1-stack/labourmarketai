@@ -5190,12 +5190,29 @@
     "aiNone": "No explanation was produced.",
     "statusInvalid": "Please complete the worker and need fields."
   },
-  "marketMapBase": {
-    "ariaLabel": "Labour-market base map",
-    "configNeededTitle": "Map base needs configuration",
-    "configNeededBody": "Add a Google Maps browser API key (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) to render the real map here. Until then the live map is not shown.",
-    "emptyBody": "The map is ready. Real people, teams, companies and needs will appear here when they choose visibility.",
-    "error": "The map could not load. Check the Google Maps key configuration."
+    "marketMapBase": {
+    "ariaLabel": "Labour-market map",
+    "title": "Your location on the map",
+    "subtitle": "Use your current location automatically, or set a location manually — it will be used for job search and suggestions.",
+    "autoButton": "Use my location",
+    "autoLocating": "Finding your location…",
+    "autoDefaultLabel": "My current location",
+    "manualLabel": "Set location manually",
+    "manualPlaceholder": "City, region or address",
+    "manualButton": "Find location",
+    "manualSearching": "Searching…",
+    "selectedPrefix": "Selected location:",
+    "savedManualNote": "Location saved — it will be used for job search.",
+    "coordsHidden": "Your precise location is not shown publicly.",
+    "clearButton": "Clear",
+    "geoDenied": "We couldn''t get your location. Set a location manually instead.",
+    "geoUnavailable": "Your browser doesn''t support location. Set a location manually.",
+    "notFound": "We couldn''t find that place. Refine it and try again.",
+    "fallbackBody": "The map view isn''t available right now, but you can set a location manually. It will still be used for job search and suggestions.",
+    "configNeededTitle": "Map view is temporarily unavailable",
+    "configNeededBody": "We''re showing a simplified view for now. You can set a location manually — it will be used for job search and suggestions.",
+    "emptyBody": "You haven''t picked a location on the map yet.",
+    "error": "The map couldn''t load. You can set a location manually."
   },
   "waze": {
     "open": "Open in Waze"
@@ -5220,6 +5237,7 @@
       "concept": "Concept / not enough data",
       "blocker": "Real blocker / risk"
     },
+    "cta": { "fill": "Complete", "open": "Open" },
     "zone": {
       "profileHub": { "name": "Profile Hub", "hint": "Your real profile and where you work from.", "state": { "started": "Profile started", "none": "No profile data yet" } },
       "skillsEvidence": { "name": "Skills & Evidence", "hint": "Your real skills and the proof behind them.", "state": { "confirmed": "{count} confirmed by people", "suggested": "{count} with work evidence", "selfDeclared": "{count} self-declared", "none": "Add skills to see skill signals" } },

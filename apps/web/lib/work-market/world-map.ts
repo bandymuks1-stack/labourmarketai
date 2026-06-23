@@ -5,6 +5,10 @@
  * zones. Pure, deterministic, no DB, no coordinates, no external references.
  * Every zone is real-data-driven OR an honest empty/concept state — never fake
  * workers, companies, demand, scores, percentages, or verification.
+ *
+ * Every zone also carries a concrete `ctaHref` to its exact completion step, so
+ * the atlas cards are tappable and lead the worker straight to the form that
+ * fills that part of their profile (owner feedback, 2026-06-23).
  */
 
 /** Signal roles (DESIGN.md colours): active=cyan, primary=blue (work need),
@@ -24,6 +28,12 @@ export type ZoneKey =
   | "company"
   | "marketPulse"
   | "trust";
+
+/** Existing routes a zone card can open (the exact completion step). */
+export type ZoneHref =
+  | "/dashboard/profile"
+  | "/dashboard/profile#capabilities"
+  | "/dashboard/company";
 
 export interface WorldMapInput {
   readonly hasWorker: boolean;
@@ -49,11 +59,12 @@ export interface WorldMapZone {
   readonly metric: number | null;
   /** i18n suffix under worldMap.zone.<key>.state.<stateKey>. */
   readonly stateKey: string;
-  /** An existing route the zone action links to, or null. */
-  readonly ctaHref: "/dashboard/profile" | "/dashboard/company" | null;
+  /** The exact existing route the zone card opens (always tappable). */
+  readonly ctaHref: ZoneHref;
 }
 
 const PROFILE = "/dashboard/profile" as const;
+const CAPABILITIES = "/dashboard/profile#capabilities" as const;
 const COMPANY = "/dashboard/company" as const;
 
 /** Build the 8 atlas zones from real owner signals. Order is stable (guard-pinned). */
@@ -70,13 +81,13 @@ export function buildWorldMapZones(i: WorldMapInput): WorldMapZone[] {
   // 2. Skills & Evidence
   let skillsEvidence: WorldMapZone;
   if (!i.hasWorker || skillTotal === 0) {
-    skillsEvidence = { key: "skillsEvidence", status: "attention", dataState: "empty", metric: null, stateKey: "none", ctaHref: PROFILE };
+    skillsEvidence = { key: "skillsEvidence", status: "attention", dataState: "empty", metric: null, stateKey: "none", ctaHref: CAPABILITIES };
   } else if (i.skillCounts.confirmed > 0) {
-    skillsEvidence = { key: "skillsEvidence", status: "supported", dataState: "real", metric: i.skillCounts.confirmed, stateKey: "confirmed", ctaHref: PROFILE };
+    skillsEvidence = { key: "skillsEvidence", status: "supported", dataState: "real", metric: i.skillCounts.confirmed, stateKey: "confirmed", ctaHref: CAPABILITIES };
   } else if (i.skillCounts.suggested > 0) {
-    skillsEvidence = { key: "skillsEvidence", status: "active", dataState: "real", metric: i.skillCounts.suggested, stateKey: "suggested", ctaHref: PROFILE };
+    skillsEvidence = { key: "skillsEvidence", status: "active", dataState: "real", metric: i.skillCounts.suggested, stateKey: "suggested", ctaHref: CAPABILITIES };
   } else {
-    skillsEvidence = { key: "skillsEvidence", status: "active", dataState: "real", metric: i.skillCounts.selfDeclared, stateKey: "selfDeclared", ctaHref: PROFILE };
+    skillsEvidence = { key: "skillsEvidence", status: "active", dataState: "real", metric: i.skillCounts.selfDeclared, stateKey: "selfDeclared", ctaHref: CAPABILITIES };
   }
 
   // 3. Availability
@@ -97,8 +108,9 @@ export function buildWorldMapZones(i: WorldMapInput): WorldMapZone[] {
       ? { key: "workNeeds", status: "primary", dataState: "real", metric: i.demandTotal, stateKey: "drafts", ctaHref: COMPANY }
       : { key: "workNeeds", status: "attention", dataState: "empty", metric: null, stateKey: "none", ctaHref: COMPANY };
 
-  // 5. Teams / Brigades — concept zone (no team data surfaced to the frontend yet)
-  const teams: WorldMapZone = { key: "teams", status: "concept", dataState: "concept", metric: null, stateKey: "concept", ctaHref: null };
+  // 5. Teams / Brigades — concept zone (no team data surfaced to the frontend
+  //    yet); the card opens the company context where teams are organised.
+  const teams: WorldMapZone = { key: "teams", status: "concept", dataState: "concept", metric: null, stateKey: "concept", ctaHref: COMPANY };
 
   // 6. Company / Organisation
   const company: WorldMapZone =
@@ -110,7 +122,7 @@ export function buildWorldMapZones(i: WorldMapInput): WorldMapZone[] {
   const hasAnySignal = i.signalCount > 0 || i.demandTotal > 0;
   const marketPulse: WorldMapZone =
     hasAnySignal && i.hasWorker
-      ? { key: "marketPulse", status: "active", dataState: "real", metric: i.signalCount || null, stateKey: "possibleFit", ctaHref: null }
+      ? { key: "marketPulse", status: "active", dataState: "real", metric: i.signalCount || null, stateKey: "possibleFit", ctaHref: PROFILE }
       : { key: "marketPulse", status: "concept", dataState: "empty", metric: null, stateKey: "needsData", ctaHref: PROFILE };
 
   // 8. Trust / Confirmation — real verification only, never a fake verified badge

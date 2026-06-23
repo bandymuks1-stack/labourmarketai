@@ -34,6 +34,7 @@ import {
   uploadJournalEntryPhoto,
   type JournalPhotoUploadResult,
 } from "@/lib/journal/photo-upload";
+import { compressImageFile } from "@/lib/browser/image-compress";
 import { formatDuration } from "@/lib/journal/format-duration";
 import {
   completeTask,
@@ -140,7 +141,10 @@ export function JournalEntryComposer({
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoOutcome, setPhotoOutcome] =
-    useState<JournalPhotoUploadResult | null>(null);
+    useState<JournalPhotoUploadResult | null>(null);  const [photoPrep, setPhotoPrep] = useState<"idle" | "preparing" | "ready">(
+    "idle",
+  );
+
 
   const [timeStatus, setTimeStatus] = useState<SuggestionStatus>("pending");
   const [timeValue, setTimeValue] = useState<string>("");
@@ -461,6 +465,7 @@ export function JournalEntryComposer({
       setTopic("");
       setPhotoFile(null);
       setPhotoError(null);
+      setPhotoPrep("idle");
       setSavedAt(Date.now());
     } catch (e) {
       // Network / unexpected — only the truly unexpected path falls through
@@ -620,21 +625,56 @@ export function JournalEntryComposer({
             type="file"
             accept="image/jpeg,image/png,image/webp"
             data-testid="journal-photo-input"
-            onChange={(e) => {
+            onChange={async (e) => {
               const f = e.target.files?.[0] ?? null;
-              if (f && !isValidJournalPhoto(f)) {
+              if (!f) {
+                setPhotoFile(null);
+                setPhotoError(null);
+                setPhotoPrep("idle");
+                return;
+              }
+              // Wrong format → honest error; size is handled by compression.
+              if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
                 setPhotoFile(null);
                 setPhotoError(t("photo.invalidFile"));
+                setPhotoPrep("idle");
                 return;
               }
               setPhotoError(null);
-              setPhotoFile(f);
+              setPhotoPrep("preparing");
+              // Auto-resize/compress normal phone photos before upload.
+              const { file: prepared } = await compressImageFile(f);
+              if (!isValidJournalPhoto(prepared)) {
+                setPhotoFile(null);
+                setPhotoPrep("idle");
+                setPhotoError(t("photo.tooLargeAfter"));
+                return;
+              }
+              setPhotoFile(prepared);
+              setPhotoPrep("ready");
             }}
             className="text-xs text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-xs file:text-text-primary"
           />
           {photoError ? (
             <p className="text-xs text-state-danger" role="alert">
               {photoError}
+            </p>
+          ) : null}          {photoPrep === "preparing" ? (
+            <p
+              className="text-xs text-text-secondary"
+              role="status"
+              data-testid="journal-photo-preparing"
+            >
+              {t("photo.preparing")}
+            </p>
+          ) : null}
+          {photoPrep === "ready" ? (
+            <p
+              className="text-xs text-state-success"
+              role="status"
+              data-testid="journal-photo-prepared"
+            >
+              {t("photo.prepared")}
             </p>
           ) : null}
           <p

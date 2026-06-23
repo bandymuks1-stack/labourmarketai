@@ -250,6 +250,9 @@
     "uploaded": "Photo attached to the entry.",
     "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",
     "notReady": "Photo storage is not provisioned in this environment yet — the entry was saved without the photo.",
+    "preparing": "Preparing photo…",
+    "prepared": "Photo resized and ready to upload.",
+    "tooLargeAfter": "The photo is still too large. Try a different photo.",
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later."
   }
 }

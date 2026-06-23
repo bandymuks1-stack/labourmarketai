@@ -11,6 +11,10 @@ import {
   computeExtractionReadiness,
   type ExtractionReadiness,
 } from "@/lib/buyer/attachment-readiness";
+import {
+  compressImageFile,
+  isCompressibleImage,
+} from "@/lib/browser/image-compress";
 
 /**
  * Buyer request attachment uploader (Stage 2 attachments PR 1).
@@ -111,21 +115,30 @@ export function BuyerRequestAttachmentUploader({
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setErrorText(null);
     setSuccessText(null);
-    const file = e.target.files?.[0];
+    const picked = e.target.files?.[0];
     e.target.value = "";
-    if (!file) return;
+    if (!picked) return;
 
-    if (file.size <= 0 || file.size > MAX_BYTES) {
+    if (picked.size <= 0) {
       setErrorText(labels.errorTooLarge);
       return;
     }
-    if (!isAllowed(file.type)) {
+    if (!isAllowed(picked.type)) {
       setErrorText(labels.errorBadType);
       return;
     }
 
     setIsUploading(true);
     try {
+      // Auto-resize/compress normal phone photos before upload; non-image
+      // files (PDF / text) pass through untouched.
+      const file = isCompressibleImage(picked)
+        ? (await compressImageFile(picked)).file
+        : picked;
+      if (file.size <= 0 || file.size > MAX_BYTES) {
+        setErrorText(labels.errorTooLarge);
+        return;
+      }
       const supabase = createBrowserSupabaseClient();
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData?.user) {

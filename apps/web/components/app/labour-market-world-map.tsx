@@ -8,6 +8,7 @@ import {
   Building2,
   Radar,
   ShieldCheck,
+  ArrowRight,
 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { getOwnAvailability, getOwnCapabilities } from "@/lib/market-map/owner-readiness";
@@ -23,7 +24,7 @@ import {
 } from "@/lib/work-market/world-map";
 
 /**
- * Labour Market World Map — VISUAL v2 (PR #481).
+ * Labour Market World Map — VISUAL v2 (PR #481), tappable zones (2026-06-23).
  *
  * An original Labourmarket.ai labour-market WORLD, not a card grid and not a
  * street map: a central Profile Hub connected by glowing routes to its districts
@@ -31,8 +32,11 @@ import {
  * pulse). Real-data-driven from the owner's own signals (incl. accepted claims,
  * #480); empty zones stay honest. Desktop = map canvas + routes + side panel;
  * mobile = a vertical connected map path. No fake markers, no fake coordinates,
- * no scores, no external map. Routes are decorative (aria-hidden); every zone
- * carries an accessible text label.
+ * no scores, no external map. Routes are decorative (aria-hidden).
+ *
+ * Every zone card is a real LINK to its exact completion step (profile, skills,
+ * availability, work needs, company) with a visible CTA — pressing a missing
+ * card opens the form that fills it, instead of only describing the gap.
  */
 
 const ZONE_ICON: Record<ZoneKey, typeof IdCard> = {
@@ -81,6 +85,10 @@ const POS: Record<ZoneKey, { x: number; y: number }> = {
   teams: { x: 69, y: 88 },
 };
 
+/** Empty/attention zones invite filling; established zones invite opening. */
+const ctaActionKey = (z: WorldMapZone): "fill" | "open" =>
+  z.dataState === "real" ? "open" : "fill";
+
 export async function LabourMarketWorldMap() {
   const t = await getTranslations("worldMap");
 
@@ -108,12 +116,12 @@ export async function LabourMarketWorldMap() {
     hasProjectSignal: sig.some((s) => s.signalType === "project_location"),
     signalCount: sig.length,
   });
-  const byKey = Object.fromEntries(zones.map((z) => [z.key, z])) as Record<ZoneKey, WorldMapZone>;
   const realCount = zones.filter((z) => z.dataState === "real").length;
 
   const nodeLabel = (z: WorldMapZone) => t(`zone.${z.key}.name`);
   const nodeState = (z: WorldMapZone) =>
     t(`zone.${z.key}.state.${z.stateKey}`, { count: z.metric ?? 0 });
+  const ctaLabel = (z: WorldMapZone) => t(`cta.${ctaActionKey(z)}`);
 
   return (
     <section className="card-border flex flex-col gap-5 p-5 sm:p-6" data-testid="labour-market-world-map">
@@ -172,8 +180,11 @@ export async function LabourMarketWorldMap() {
                   className={`absolute -translate-x-1/2 -translate-y-1/2 ${z.dataState === "real" ? "" : "opacity-70"}`}
                   style={{ left: `${POS[z.key].x}%`, top: `${POS[z.key].y}%` }}
                 >
-                  <div
-                    className={`flex w-[150px] flex-col gap-1 rounded-xl border bg-ink-800/85 px-3 py-2 backdrop-blur-sm ${RING[z.status]} ${center ? "shadow-cta-glow" : ""}`}
+                  <Link
+                    href={z.ctaHref as "/dashboard"}
+                    data-testid={`world-zone-${z.key}-cta`}
+                    aria-label={`${nodeLabel(z)} — ${ctaLabel(z)}`}
+                    className={`group flex w-[150px] flex-col gap-1 rounded-xl border bg-ink-800/85 px-3 py-2 backdrop-blur-sm transition-colors hover:border-brand-blue focus-visible:border-brand-blue focus-visible:outline-none ${RING[z.status]} ${center ? "shadow-cta-glow" : ""}`}
                   >
                     <span className="flex items-center justify-between gap-2">
                       <span className="flex items-center gap-1.5">
@@ -185,7 +196,11 @@ export async function LabourMarketWorldMap() {
                     <span className="text-[10px] leading-snug text-text-muted" data-testid={`world-zone-${z.key}-state`}>
                       {nodeState(z)}
                     </span>
-                  </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-brand-blue transition-colors group-hover:text-brand-cyan">
+                      {ctaLabel(z)}
+                      <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
+                    </span>
+                  </Link>
                 </div>
               );
             })}
@@ -203,13 +218,24 @@ export async function LabourMarketWorldMap() {
                   <span className={`relative z-10 mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${RING[z.status]} bg-ink-800`}>
                     <span className={`h-2 w-2 rounded-full ${DOT[z.status]}`} aria-hidden />
                   </span>
-                  <div className={`flex flex-1 flex-col gap-0.5 rounded-xl border border-ink-500 bg-ink-800/60 px-3 py-2 ${z.dataState === "real" ? "" : "opacity-70"}`}>
-                    <span className="flex items-center gap-1.5">
-                      <Icon className="h-3.5 w-3.5 text-brand-cyan" strokeWidth={1.75} aria-hidden />
-                      <span className="font-display text-sm font-semibold text-text-primary">{nodeLabel(z)}</span>
+                  <Link
+                    href={z.ctaHref as "/dashboard"}
+                    data-testid={`world-zone-m-${z.key}-cta`}
+                    aria-label={`${nodeLabel(z)} — ${ctaLabel(z)}`}
+                    className={`group flex flex-1 flex-col gap-0.5 rounded-xl border border-ink-500 bg-ink-800/60 px-3 py-2 transition-colors hover:border-brand-blue focus-visible:border-brand-blue focus-visible:outline-none ${z.dataState === "real" ? "" : "opacity-70"}`}
+                  >
+                    <span className="flex items-center justify-between gap-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <Icon className="h-3.5 w-3.5 text-brand-cyan" strokeWidth={1.75} aria-hidden />
+                        <span className="font-display text-sm font-semibold text-text-primary">{nodeLabel(z)}</span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 text-brand-blue transition-colors group-hover:text-brand-cyan" strokeWidth={2} aria-hidden />
                     </span>
                     <span className="text-xs leading-relaxed text-text-muted">{nodeState(z)}</span>
-                  </div>
+                    <span className="mt-0.5 text-[11px] font-semibold text-brand-blue transition-colors group-hover:text-brand-cyan">
+                      {ctaLabel(z)}
+                    </span>
+                  </Link>
                 </li>
               );
             })}
