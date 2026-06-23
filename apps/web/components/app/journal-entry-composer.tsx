@@ -177,6 +177,10 @@ export function JournalEntryComposer({
   const [engagementId, setEngagementId] = useState<string>(primaryId);
   const [workDate, setWorkDate] = useState<string>(today);
 
+  const existingSkillRefs = useMemo(
+    () => workerSkills.map((s) => ({ slug: s.slug, label: s.name })),
+    [workerSkills],
+  );
   const workerSkillBySlug = useMemo(
     () => new Map(workerSkills.map((s) => [s.slug, s])),
     [workerSkills],
@@ -738,7 +742,7 @@ export function JournalEntryComposer({
 
       {/* PR #478 — cross-domain skill review (Universal Recognition #477): accept
           -> self-declared profile claim (existing path, no DB); never confirmed automatically. */}
-      <WorkEntrySkillReview text={text} />
+      <WorkEntrySkillReview text={text} existingSkills={existingSkillRefs} />
 
       {fragments.length > 0 && (
         // Multi-fragment summary — required by the supersprint goal so the

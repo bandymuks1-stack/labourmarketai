@@ -5257,7 +5257,7 @@
     },
     "reason": { "needsManager": "Galima, kai vadovas ar klientas patvirtins jūsų darbą." }
   },
-  "workEntryReview": {
+    "workEntryReview": {
     "title": "Siūlomi įgūdžiai iš šio įrašo",
     "intro": "Pasiūlymai iš jūsų teksto — reikia peržiūros, nepatvirtinta. Priėmus įgūdis pridedamas profilyje kaip jūsų pačių nurodytas; patvirtinimą suteikia žmogus.",
     "accept": "Priimti",
@@ -5270,7 +5270,17 @@
     "quantityLabel": "Kiekis",
     "durationLabel": "Laikas",
     "unit": { "hours": "val", "days": "d", "minutes": "min" },
-    "domain": { "construction": "Statybos", "web_design": "Internetas / dizainas", "admin": "Administravimas", "cleaning": "Valymas", "electrical": "Elektra" },
+    "domain": { "construction": "Statybos", "web_design": "Internetas / dizainas", "admin": "Administravimas", "cleaning": "Valymas", "electrical": "Elektra", "cooking": "Maitinimas", "gardening": "Aplinkos priežiūra", "driving_logistics": "Transportas / logistika", "warehouse": "Sandėlis", "customer_service": "Klientų aptarnavimas", "it": "IT", "language": "Kalbos / vertimai", "equipment": "Įrangos operavimas", "care": "Priežiūra / slauga" },
+    "existingTitle": "Jūsų profilio įgūdžiai, paminėti šiame įraše",
+    "existingNote": "Šie įgūdžiai jau yra jūsų profilyje — įrašas juos paremia kaip darbo įrodymą. Nepridedame jų antrą kartą.",
+    "existingBadge": "Jau profilyje",
+    "newTitle": "Galimi nauji įgūdžiai",
+    "newNote": "Naujos veiklos, kurių dar nenurodėte. Priėmus pridedama kaip jūsų pačių nurodyta — nepatvirtinta.",
+    "activitiesTitle": "Šiame įraše atliktos veiklos",
+    "activitiesNote": "Tai, ką realiai atlikote — pagal darbo rinkos sritį.",
+    "evidenceLabel": "Įrodymo šaltinis",
+    "evidenceJournal": "Darbo žurnalas",
+    "verificationNote": "Atpažinta automatiškai — nepatvirtinta. Patvirtinimą suteikia tik vadovas ar klientas.",
     "unmappedTitle": "Reikia peržiūros",
     "unmappedNote": "Atpažinome darbą, bet įgūdis neatitiko — paliekame peržiūrai, nepaverčiame įgūdžiu.",
     "needsMoreDetail": "Pridėkite daugiau detalių, kad iš šio įrašo gautumėte įgūdžių pasiūlymų.",
