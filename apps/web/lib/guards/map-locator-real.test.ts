@@ -1,67 +1,94 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import {
+  RADIUS_OPTIONS,
+  DEFAULT_RADIUS_KM,
+  isUsableForSearch,
+  type SelectedLocation,
+} from "@/lib/location/location-model";
 
 /**
- * Real map locator guard (owner correction, 2026-06-23).
+ * Provider-free location guard (PR #484 owner redirect).
  *
- * The map must WORK two real ways and must never leak developer configuration to
- * a user:
- *  1) Automatic  — browser geolocation centers the map + drops the user's marker.
- *  2) Manual     — a typed place is geocoded (with provider) or recorded as an
- *                  honest label-only fallback, and works even if geolocation is
- *                  denied or the provider is missing.
- *  3) No raw API/env-key strings (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
- *     GOOGLE_MAPS_API_KEY, "API key missing", …) may appear in ANY user-facing
- *     product copy (lt/en/ru) — the missing-config detail belongs in the PR /
- *     owner setup doc, not the UI.
- *
- * Static source + i18n assertions. Secret-free, no-DB.
+ * The location feature must work with NO Google Maps, NO paid provider, and NO
+ * external geocoding/tile service: automatic browser geolocation first, manual
+ * country/city/region/radius fallback, a no-tile location panel, and structured
+ * location that drives job search without a provider key. No raw provider/API/
+ * env text may reach users; no fake map-ready state.
  */
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const base = read("components/app/market-map-base.tsx");
-const loader = read("lib/maps/google-maps-loader.ts");
+const comp = read("components/app/market-map-base.tsx");
+const env = read("lib/env.ts");
 
-describe("automatic mode — real browser geolocation", () => {
-  it("requests the browser location", () => {
-    expect(base).toMatch(/navigator\.geolocation\.getCurrentPosition/);
+describe("no Google Maps / paid-provider dependency", () => {
+  it("the Google Maps loader is gone", () => {
+    expect(existsSync(join(ROOT, "lib/maps/google-maps-loader.ts"))).toBe(false);
   });
-  it("exposes a 'use my location' action and reverse-geocodes a readable place", () => {
-    expect(base).toMatch(/data-testid="map-locator-auto"/);
-    expect(base).toMatch(/reverseGeocode/);
+  it("the component imports no map provider and no Google key", () => {
+    expect(comp).not.toMatch(/google-maps-loader|googleapis|google\.maps/i);
+    expect(comp).not.toMatch(/NEXT_PUBLIC_GOOGLE_MAPS_API_KEY|GOOGLE_MAPS_API_KEY/);
+    expect(comp).not.toMatch(/mapbox|maplibre|leaflet|nominatim|tile\.openstreetmap/i);
+  });
+  it("env.ts no longer declares a Google Maps key", () => {
+    expect(env).not.toMatch(/GOOGLE_MAPS/);
   });
 });
 
-describe("manual mode — typed place, geocoded or honest fallback", () => {
-  it("has a manual input + submit", () => {
-    expect(base).toMatch(/data-testid="map-locator-manual-input"/);
-    expect(base).toMatch(/data-testid="map-locator-manual-submit"/);
-  });
-  it("forward-geocodes when a provider is available", () => {
-    expect(base).toMatch(/forwardGeocode/);
-  });
-  it("loads the places library so address search works", () => {
-    expect(loader).toMatch(/libraries=places/);
+describe("automatic geolocation path exists (first)", () => {
+  it("requests the browser location and exposes the primary action", () => {
+    expect(comp).toMatch(/navigator\.geolocation\.getCurrentPosition/);
+    expect(comp).toMatch(/data-testid="map-locator-auto"/);
   });
 });
 
-describe("persistence — the chosen location survives refresh (no DB/migration)", () => {
-  it("reads and writes the user's own location via the local store", () => {
-    expect(base).toMatch(/readMyLocation/);
-    expect(base).toMatch(/writeMyLocation/);
+describe("manual fallback path exists (country + region + radius)", () => {
+  it("has country, city/region and radius inputs + save", () => {
+    expect(comp).toMatch(/data-testid="map-locator-country"/);
+    expect(comp).toMatch(/data-testid="map-locator-region"/);
+    expect(comp).toMatch(/data-testid="map-locator-radius"/);
+    expect(comp).toMatch(/data-testid="map-locator-manual-submit"/);
+  });
+  it("opens the manual form automatically when geolocation is denied", () => {
+    expect(comp).toMatch(/setManualOpen\(true\)/);
   });
 });
 
-describe("no raw API/env-key config text reaches the user (lt/en/ru)", () => {
-  // Admin / ops namespaces legitimately reference configuration diagnostics.
+describe("provider-free, usable without any key", () => {
+  it("radius options are 10/25/50/100 with a sensible default", () => {
+    expect([...RADIUS_OPTIONS]).toEqual([10, 25, 50, 100]);
+    expect(RADIUS_OPTIONS).toContain(DEFAULT_RADIUS_KM);
+  });
+  it("auto coords AND manual country-only are both usable for search", () => {
+    const auto: SelectedLocation = { source: "auto", lat: 54.6, lng: 25.2, country: null, region: null, address: null, radiusKm: 25, savedAt: 1 };
+    const manual: SelectedLocation = { source: "manual", lat: null, lng: null, country: "LT", region: "Vilnius", address: null, radiusKm: 25, savedAt: 1 };
+    const empty: SelectedLocation = { source: "manual", lat: null, lng: null, country: null, region: null, address: null, radiusKm: 25, savedAt: 1 };
+    expect(isUsableForSearch(auto)).toBe(true);
+    expect(isUsableForSearch(manual)).toBe(true);
+    expect(isUsableForSearch(empty)).toBe(false);
+  });
+  it("persists the choice locally (this device), no DB/provider", () => {
+    expect(comp).toMatch(/readSelectedLocation/);
+    expect(comp).toMatch(/writeSelectedLocation/);
+  });
+});
+
+describe("provider-free visual panel, no fake map-ready state", () => {
+  it("renders an honest location panel, not external tiles", () => {
+    expect(comp).toMatch(/data-testid="location-panel"/);
+    expect(comp).not.toMatch(/maps\.googleapis\.com|tile\.openstreetmap\.org/);
+  });
+});
+
+describe("no raw Google/API/env text in user-facing copy (lt/en/ru)", () => {
   const EXCLUDED = new Set(["admin", "adminReadiness", "agentOs"]);
   const FORBIDDEN: RegExp[] = [
     /NEXT_PUBLIC_[A-Z0-9_]+/,
     /\bGOOGLE_MAPS_API_KEY\b/,
+    /Google Maps/i,
     /\bAPI key missing\b/i,
     /process\.env/,
-    /import\.meta\.env/,
   ];
   function leaves(node: unknown, prefix: string, out: [string, string][]): void {
     if (typeof node === "string") out.push([prefix, node]);
@@ -71,18 +98,27 @@ describe("no raw API/env-key config text reaches the user (lt/en/ru)", () => {
         leaves(v, prefix ? `${prefix}.${k}` : k, out);
   }
   for (const loc of ["lt", "en", "ru"] as const) {
-    it(`${loc}: product copy carries no env-key / raw-config strings`, () => {
+    it(`${loc}: no provider/env strings in product copy`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
       const offenders: string[] = [];
       for (const [ns, node] of Object.entries(m)) {
         if (EXCLUDED.has(ns)) continue;
         const out: [string, string][] = [];
         leaves(node, ns, out);
-        for (const [k, v] of out) {
-          if (FORBIDDEN.some((re) => re.test(v))) offenders.push(`${k}: "${v}"`);
-        }
+        for (const [k, v] of out) if (FORBIDDEN.some((re) => re.test(v))) offenders.push(`${k}: "${v}"`);
       }
-      expect(offenders, `${loc} leaks developer config to users:\n${offenders.join("\n")}`).toEqual([]);
+      expect(offenders, `${loc} leaks provider/env text:\n${offenders.join("\n")}`).toEqual([]);
+    });
+  }
+});
+
+describe("marketMapBase copy is provider-free + complete (lt/en/ru)", () => {
+  for (const loc of ["lt", "en", "ru"] as const) {
+    it(`${loc}: has the provider-free keys`, () => {
+      const b = JSON.parse(read(`messages/${loc}.json`)).marketMapBase;
+      for (const k of ["autoButton", "manualToggle", "countryLabel", "regionLabel", "radiusLabel", "radiusValue", "savedLocally", "usableNote", "sourceAuto", "sourceManual"]) {
+        expect(typeof b?.[k] === "string" && b[k].length > 0, `${loc} ${k}`).toBe(true);
+      }
     });
   }
 });
