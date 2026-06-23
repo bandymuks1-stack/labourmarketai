@@ -1,5 +1,19 @@
 {
-  "errorBoundary": {
+  "profileAvatar": {
+    "upload": "Įkelti nuotrauką",
+    "change": "Pakeisti nuotrauką",
+    "remove": "Pašalinti",
+    "removing": "Šalinama…",
+    "preparing": "Ruošiama nuotrauka…",
+    "uploading": "Įkeliama…",
+    "uploaded": "Nuotrauka įkelta.",
+    "uploadFailed": "Nepavyko įkelti nuotraukos. Bandykite dar kartą.",
+    "invalidFile": "Nuotrauka turi būti JPG, PNG arba WebP.",
+    "tooLarge": "Nuotrauka per didelė. Pabandykite kitą.",
+    "notReady": "Nuotraukų įkėlimas šioje aplinkoje dar neparuoštas.",
+    "alt": "Profilio nuotrauka",
+    "hint": "JPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums."
+  },  "errorBoundary": {
     "reloading": "Kraunama iš naujo…",
     "body": "Įvyko klaida. Bandykite dar kartą.",
     "retry": "Bandyti dar kartą"
