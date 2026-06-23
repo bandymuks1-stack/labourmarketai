@@ -250,6 +250,9 @@
     "uploaded": "Nuotrauka pridėta prie įrašo.",
     "limitReached": "Šis įrašas jau turi nuotrauką — nemokamai galima 1 nuotrauka vienam įrašui.",
     "notReady": "Nuotraukų saugykla šioje aplinkoje dar neparuošta — įrašas išsaugotas be nuotraukos.",
+    "preparing": "Ruošiama nuotrauka…",
+    "prepared": "Nuotrauka sumažinta ir paruošta įkėlimui.",
+    "tooLargeAfter": "Nuotrauka vis dar per didelė. Pabandykite kitą nuotrauką.",
     "uploadFailed": "Nuotraukos įkelti nepavyko. Įrašas išsaugotas — pabandykite nuotrauką pridėti vėliau."
   }
 }

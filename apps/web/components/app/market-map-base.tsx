@@ -1,140 +1,369 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Map as MapIcon, MapPinOff } from "lucide-react";
-import { env } from "@/lib/env";
+import {
+  MapPin,
+  Crosshair,
+  MapPinOff,
+  Pencil,
+  RotateCw,
+  Trash2,
+  Loader2,
+  Check,
+} from "lucide-react";
+import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import {
+  RADIUS_OPTIONS,
+  DEFAULT_RADIUS_KM,
+  hasCoords,
+  type RadiusKm,
+  type SelectedLocation,
+} from "@/lib/location/location-model";
+import {
+  readSelectedLocation,
+  writeSelectedLocation,
+  clearSelectedLocation,
+} from "@/lib/location/location-store";
 
 /**
- * Real Google Maps base map (market-map foundation, v1).
+ * Provider-free location picker (PR #484 — no Google, no paid provider).
  *
- * The base TILES are real Google Maps — rendered only when a browser API key
- * exists (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY). When no key is configured, an honest
- * "config needed" fallback is shown — NEVER fake tiles.
+ * Two real modes, minimum user effort:
+ *  1) Automatic FIRST — "Naudoti mano buvimo vietą" requests browser geolocation
+ *     and saves latitude/longitude. No typing needed when it works.
+ *  2) Manual fallback — if denied/unavailable, the user picks a country + city/
+ *     region + radius (full address NOT required). Saved as structured location
+ *     and usable for job search WITHOUT any geocoding/tile provider.
  *
- * Platform MARKERS are intentionally NOT rendered: there is no real, consent-
- * gated, coordinate-level location data yet (the precise-location tables are
- * owner-gated and unapplied — see docs). So the map shows an honest empty state.
- * No fake markers, no hardcoded/sample marker arrays, no placeholder coords, and
- * never an exact personal residence. The key is read from env, never printed.
+ * The "map" is a provider-free location PANEL (a radius diagram + the chosen
+ * place + source), never external map tiles, never a fake marker, never a
+ * "provider not configured" message. The choice persists on this device
+ * (localStorage) and is one-tap updatable/removable. No DB, no env key.
  */
-
-// Initial camera framing over the served region (Baltics + Northern Europe).
-// This is the map VIEWPORT only — it is NOT a data point and NOT a marker.
-const VIEW = { lat: 56.0, lng: 18.0, zoom: 4 } as const;
-
-interface GMaps {
-  maps?: { Map: new (el: HTMLElement, opts: Record<string, unknown>) => unknown };
-}
-declare global {
-  interface Window {
-    google?: GMaps;
-    __lmGmapsLoading?: Promise<void>;
-  }
-}
-
-function loadGoogleMaps(key: string): Promise<void> {
-  if (typeof window === "undefined") return Promise.resolve();
-  if (window.google?.maps) return Promise.resolve();
-  if (window.__lmGmapsLoading) return window.__lmGmapsLoading;
-  window.__lmGmapsLoading = new Promise<void>((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src =
-      "https://maps.googleapis.com/maps/api/js?key=" +
-      encodeURIComponent(key) +
-      "&loading=async&v=weekly";
-    s.async = true;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error("google-maps-load-failed"));
-    document.head.appendChild(s);
-  });
-  return window.__lmGmapsLoading;
-}
-
 export function MarketMapBase() {
   const t = useTranslations("marketMapBase");
-  const key = env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const ref = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<unknown>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const tc = useTranslations("labourMarket");
 
+  const [selected, setSelected] = useState<SelectedLocation | null>(null);
+  const [geoBusy, setGeoBusy] = useState(false);
+  const [geoHint, setGeoHint] = useState<"denied" | "unavailable" | null>(null);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [country, setCountry] = useState("");
+  const [region, setRegion] = useState("");
+  const [address, setAddress] = useState("");
+  const [radiusKm, setRadiusKm] = useState<RadiusKm>(DEFAULT_RADIUS_KM);
+  const [manualError, setManualError] = useState<string | null>(null);
+
+  // Restore the last chosen location (this device) and reuse it automatically.
   useEffect(() => {
-    if (!key || !ref.current) return;
-    let cancelled = false;
-    loadGoogleMaps(key)
-      .then(() => {
-        if (cancelled || !ref.current) return;
-        const g = window.google;
-        if (!g?.maps?.Map) {
-          setStatus("error");
-          return;
-        }
-        // Base map only — no markers are added (no real visible data yet).
-        mapRef.current = new g.maps.Map(ref.current, {
-          center: { lat: VIEW.lat, lng: VIEW.lng },
-          zoom: VIEW.zoom,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-        });
-        setStatus("ready");
-      })
-      .catch(() => {
-        if (!cancelled) setStatus("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [key]);
+    const stored = readSelectedLocation();
+    if (stored) {
+      setSelected(stored);
+      setRadiusKm(stored.radiusKm);
+    }
+  }, []);
 
-  // ── No browser key → honest config-needed fallback (no fake tiles/markers). ──
-  if (!key) {
-    return (
-      <section
-        className="card-border flex flex-col gap-2 p-6"
-        data-testid="market-map-base-config-needed"
-      >
+  const persist = useCallback((loc: SelectedLocation) => {
+    writeSelectedLocation(loc);
+    setSelected(loc);
+  }, []);
+
+  // ── Automatic mode: browser geolocation (no provider, no typing) ──
+  const useMyLocation = useCallback(() => {
+    setGeoHint(null);
+    setManualError(null);
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGeoHint("unavailable");
+      setManualOpen(true);
+      return;
+    }
+    setGeoBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        persist({
+          source: "auto",
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          country: null,
+          region: null,
+          address: null,
+          radiusKm,
+          savedAt: Date.now(),
+        });
+        setGeoBusy(false);
+      },
+      () => {
+        setGeoBusy(false);
+        setGeoHint("denied");
+        setManualOpen(true); // immediately offer the manual form
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  }, [persist, radiusKm]);
+
+  // ── Manual mode: structured location, no geocoding/provider ──
+  const saveManual = useCallback(() => {
+    setManualError(null);
+    if (!country) {
+      setManualError(t("errorCountry"));
+      return;
+    }
+    persist({
+      source: "manual",
+      lat: null,
+      lng: null,
+      country,
+      region: region.trim() || null,
+      address: address.trim() || null,
+      radiusKm,
+      savedAt: Date.now(),
+    });
+    setManualOpen(false);
+  }, [country, region, address, radiusKm, persist, t]);
+
+  // Change the radius of the current selection in place.
+  const changeRadius = useCallback(
+    (r: RadiusKm) => {
+      setRadiusKm(r);
+      if (selected) persist({ ...selected, radiusKm: r, savedAt: Date.now() });
+    },
+    [selected, persist],
+  );
+
+  const editManual = useCallback(() => {
+    if (selected) {
+      setCountry(selected.country ?? "");
+      setRegion(selected.region ?? "");
+      setAddress(selected.address ?? "");
+    }
+    setManualOpen(true);
+  }, [selected]);
+
+  const reset = useCallback(() => {
+    clearSelectedLocation();
+    setSelected(null);
+    setManualOpen(false);
+    setCountry("");
+    setRegion("");
+    setAddress("");
+  }, []);
+
+  const whereText = (loc: SelectedLocation): string => {
+    if (hasCoords(loc)) return `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`;
+    return [loc.region, loc.country ? tc(`countryNames.${loc.country}`) : null]
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  return (
+    <section
+      className="card-border flex flex-col gap-4 p-5 sm:p-6"
+      data-testid="market-map-base"
+    >
+      <header className="flex flex-col gap-1">
         <h2 className="flex items-center gap-2 font-display text-base font-semibold text-text-primary">
-          <MapIcon className="h-5 w-5 text-brand-blue" strokeWidth={1.75} aria-hidden />
-          {t("configNeededTitle")}
+          <MapPin className="h-5 w-5 text-brand-blue" strokeWidth={1.75} aria-hidden />
+          {t("title")}
         </h2>
         <p className="max-w-2xl text-sm leading-relaxed text-text-secondary">
-          {t("configNeededBody")}
+          {t("subtitle")}
         </p>
+      </header>
+
+      {/* Provider-free location PANEL — a radius diagram + the chosen place.
+          Not external map tiles, not a fake marker, honestly a location area. */}
+      <div
+        className="flex flex-col items-center gap-2 rounded-xl border border-ink-500 bg-ink-900/60 p-5"
+        data-testid="location-panel"
+        aria-label={t("panelTitle")}
+      >
+        <svg viewBox="0 0 120 120" className="h-32 w-32" role="img" aria-hidden>
+          <circle cx="60" cy="60" r="56" fill="none" stroke="rgb(var(--c-brand-blue))" strokeOpacity="0.18" />
+          <circle cx="60" cy="60" r="38" fill="none" stroke="rgb(var(--c-brand-blue))" strokeOpacity="0.28" />
+          <circle cx="60" cy="60" r="20" fill="rgb(var(--c-brand-blue))" fillOpacity="0.10" stroke="rgb(var(--c-brand-blue))" strokeOpacity="0.45" />
+          <circle cx="60" cy="60" r="4.5" fill="rgb(var(--c-brand-cyan))" />
+        </svg>
+        {selected ? (
+          <p className="text-center text-sm font-medium text-text-primary" data-testid="location-panel-where">
+            {whereText(selected) || t(selected.source === "auto" ? "sourceAuto" : "sourceManual")}
+          </p>
+        ) : (
+          <p className="text-center text-xs text-text-muted">{t("panelEmpty")}</p>
+        )}
+        <p className="text-center text-[11px] text-text-muted">
+          {t("radiusValue", { km: selected?.radiusKm ?? radiusKm })}
+        </p>
+      </div>
+
+      {/* Primary action: automatic location first. */}
+      <button
+        type="button"
+        onClick={useMyLocation}
+        disabled={geoBusy}
+        data-testid="map-locator-auto"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 py-3 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60"
+      >
+        {geoBusy ? (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+        ) : (
+          <Crosshair className="h-4 w-4" strokeWidth={2} aria-hidden />
+        )}
+        {geoBusy ? t("autoLocating") : t("autoButton")}
+      </button>
+
+      {geoHint && (
         <p
-          className="mt-1 flex items-start gap-2 text-xs leading-relaxed text-text-muted"
+          className="text-xs leading-relaxed text-state-warning"
+          data-testid="map-locator-geo-hint"
+          role="status"
+        >
+          {geoHint === "denied" ? t("geoDenied") : t("geoUnavailable")}
+        </p>
+      )}
+
+      {/* Manual fallback — minimal typing: country + city/region + radius. */}
+      {!manualOpen ? (
+        <button
+          type="button"
+          onClick={() => setManualOpen(true)}
+          data-testid="map-locator-manual-toggle"
+          className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+        >
+          <Pencil className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+          {t("manualToggle")}
+        </button>
+      ) : (
+        <div
+          className="flex flex-col gap-3 rounded-xl border border-ink-500 bg-ink-800/40 p-4"
+          data-testid="map-locator-manual"
+        >
+          <p className="text-xs leading-relaxed text-text-muted">{t("manualHint")}</p>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-text-secondary">{t("countryLabel")}</span>
+            <select
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              data-testid="map-locator-country"
+              className="w-full rounded-lg border border-ink-500 bg-ink-700 px-3 py-2.5 text-sm text-text-primary outline-none focus:border-brand-blue"
+            >
+              <option value="">—</option>
+              {MARKET_COUNTRIES.map((code) => (
+                <option key={code} value={code}>
+                  {tc(`countryNames.${code}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-text-secondary">{t("regionLabel")}</span>
+            <input
+              type="text"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              placeholder={t("regionPlaceholder")}
+              data-testid="map-locator-region"
+              className="w-full rounded-lg border border-ink-500 bg-ink-700 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-text-secondary">{t("addressLabel")}</span>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder={t("addressPlaceholder")}
+              data-testid="map-locator-address"
+              className="w-full rounded-lg border border-ink-500 bg-ink-700 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+            />
+          </label>
+          {manualError && (
+            <p className="text-xs text-state-danger" data-testid="map-locator-error" role="alert">
+              {manualError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={saveManual}
+            data-testid="map-locator-manual-submit"
+            className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 py-2.5 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue"
+          >
+            <Check className="h-4 w-4" strokeWidth={2} aria-hidden />
+            {t("save")}
+          </button>
+        </div>
+      )}
+
+      {/* Radius selector — sensible defaults, applies to the chosen location. */}
+      <label className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-text-secondary">{t("radiusLabel")}</span>
+        <select
+          value={radiusKm}
+          onChange={(e) => changeRadius(Number(e.target.value) as RadiusKm)}
+          data-testid="map-locator-radius"
+          className="w-full rounded-lg border border-ink-500 bg-ink-700 px-3 py-2.5 text-sm text-text-primary outline-none focus:border-brand-blue sm:w-fit"
+        >
+          {RADIUS_OPTIONS.map((r) => (
+            <option key={r} value={r}>
+              {t("radiusValue", { km: r })}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {/* Selected location readout + one-tap actions. */}
+      {selected ? (
+        <div
+          className="flex flex-col gap-2 rounded-xl border border-brand-blue/30 bg-brand-blue/5 px-4 py-3"
+          data-testid="map-locator-selected"
+        >
+          <p className="text-xs font-mono uppercase tracking-label text-text-muted">{t("selectedTitle")}</p>
+          <p className="flex items-center gap-1.5 text-sm font-medium text-text-primary">
+            <MapPin className="h-4 w-4 text-brand-blue" strokeWidth={2} aria-hidden />
+            {t(selected.source === "auto" ? "sourceAuto" : "sourceManual")}
+            {whereText(selected) ? ` · ${whereText(selected)}` : ""}
+          </p>
+          <p className="text-[11px] leading-relaxed text-text-secondary" data-testid="map-locator-usable">
+            {t("usableNote", { km: selected.radiusKm })}
+          </p>
+          <p className="text-[11px] leading-relaxed text-text-muted">{t("savedLocally")}</p>
+          <div className="mt-1 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={useMyLocation}
+              data-testid="map-locator-update"
+              className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+            >
+              <RotateCw className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              {t("updateButton")}
+            </button>
+            <button
+              type="button"
+              onClick={editManual}
+              data-testid="map-locator-edit"
+              className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+            >
+              <Pencil className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              {t("editButton")}
+            </button>
+            <button
+              type="button"
+              onClick={reset}
+              data-testid="map-locator-reset"
+              className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-muted transition-colors hover:border-state-danger hover:text-state-danger"
+            >
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              {t("resetButton")}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p
+          className="flex items-start gap-2 text-xs leading-relaxed text-text-muted"
           data-testid="market-map-base-empty"
         >
           <MapPinOff className="mt-0.5 h-4 w-4 shrink-0 text-text-muted" strokeWidth={1.75} aria-hidden />
           {t("emptyBody")}
-        </p>
-      </section>
-    );
-  }
-
-  // ── Real Google Maps base tiles + honest empty-state (no platform markers). ──
-  return (
-    <section
-      className="card-border relative flex flex-col overflow-hidden"
-      data-testid="market-map-base"
-    >
-      <div
-        ref={ref}
-        data-testid="market-map-base-canvas"
-        aria-label={t("ariaLabel")}
-        role="application"
-        className="h-[360px] w-full bg-ink-900"
-      />
-      <p
-        className="flex items-start gap-2 border-t border-border-subtle px-4 py-3 text-xs leading-relaxed text-text-muted"
-        data-testid="market-map-base-empty"
-      >
-        <MapPinOff className="mt-0.5 h-4 w-4 shrink-0 text-text-muted" strokeWidth={1.75} aria-hidden />
-        {t("emptyBody")}
-      </p>
-      {status === "error" && (
-        <p className="px-4 pb-3 text-xs text-state-warning" data-testid="market-map-base-error">
-          {t("error")}
         </p>
       )}
     </section>

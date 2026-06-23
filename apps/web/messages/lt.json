@@ -5190,12 +5190,35 @@
     "aiNone": "Paaiškinimas nesukurtas.",
     "statusInvalid": "Užpildykite darbuotojo ir poreikio laukus."
   },
-  "marketMapBase": {
-    "ariaLabel": "Darbo rinkos pagrindinis žemėlapis",
-    "configNeededTitle": "Žemėlapio pagrindą reikia sukonfigūruoti",
-    "configNeededBody": "Pridėkite Google Maps naršyklės API raktą (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY), kad čia būtų rodomas tikras žemėlapis. Kol kas tiesioginis žemėlapis nerodomas.",
-    "emptyBody": "Žemėlapis paruoštas. Čia atsiras realūs žmonės, komandos, įmonės ir poreikiai, kai jie pasirinks matomumą.",
-    "error": "Žemėlapio nepavyko įkelti. Patikrinkite Google Maps rakto konfigūraciją."
+      "marketMapBase": {
+    "title": "Jūsų vieta darbo paieškai",
+    "subtitle": "Darbo paieškai naudosime šią vietą ir pasirinktą atstumą.",
+    "panelTitle": "Vietos sritis",
+    "panelEmpty": "Vieta dar nepasirinkta",
+    "radiusValue": "{km} km spindulys",
+    "radiusLabel": "Atstumas nuo pasirinktos vietos",
+    "autoButton": "Naudoti mano buvimo vietą",
+    "autoLocating": "Nustatoma vieta…",
+    "geoDenied": "Nepavyko gauti buvimo vietos. Pasirinkite miestą arba regioną rankiniu būdu.",
+    "geoUnavailable": "Naršyklė nepalaiko vietos nustatymo. Pasirinkite vietą rankiniu būdu.",
+    "manualToggle": "Nurodyti vietą rankiniu būdu",
+    "manualHint": "Jeigu nenorite leisti buvimo vietos, pasirinkite miestą arba regioną rankiniu būdu.",
+    "countryLabel": "Šalis",
+    "regionLabel": "Miestas arba regionas",
+    "regionPlaceholder": "pvz. Vilnius",
+    "addressLabel": "Tikslesnė vieta (neprivaloma)",
+    "addressPlaceholder": "pvz. rajonas ar objektas",
+    "errorCountry": "Pasirinkite šalį.",
+    "save": "Išsaugoti vietą",
+    "selectedTitle": "Pasirinkta vieta",
+    "sourceAuto": "Dabartinė buvimo vieta",
+    "sourceManual": "Nurodyta rankiniu būdu",
+    "usableNote": "Darbo paieškai naudosime šią vietą ir {km} km spindulį.",
+    "savedLocally": "Vieta išsaugota šiame įrenginyje.",
+    "updateButton": "Atnaujinti vietą",
+    "editButton": "Keisti vietą",
+    "resetButton": "Pašalinti vietą",
+    "emptyBody": "Dar nepasirinkote vietos. Naudokite mygtuką aukščiau arba nurodykite rankiniu būdu."
   },
   "waze": {
     "open": "Atidaryti Waze"
@@ -5220,6 +5243,7 @@
       "concept": "Koncepcija / per mažai duomenų",
       "blocker": "Realus blokatorius / rizika"
     },
+    "cta": { "fill": "Pildyti", "open": "Atidaryti" },
     "zone": {
       "profileHub": { "name": "Profilio centras", "hint": "Jūsų realus profilis ir iš kur dirbate.", "state": { "started": "Profilis pradėtas", "none": "Profilio duomenų dar nėra" } },
       "skillsEvidence": { "name": "Įgūdžiai ir įrodymai", "hint": "Jūsų realūs įgūdžiai ir juos pagrindžiantys įrodymai.", "state": { "confirmed": "{count} patvirtino žmonės", "suggested": "{count} su darbo įrodymais", "selfDeclared": "{count} nurodyti pačių", "none": "Pridėkite įgūdžių, kad atsirastų signalai" } },

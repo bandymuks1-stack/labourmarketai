@@ -5190,12 +5190,35 @@
     "aiNone": "No explanation was produced.",
     "statusInvalid": "Please complete the worker and need fields."
   },
-  "marketMapBase": {
-    "ariaLabel": "Labour-market base map",
-    "configNeededTitle": "Map base needs configuration",
-    "configNeededBody": "Add a Google Maps browser API key (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) to render the real map here. Until then the live map is not shown.",
-    "emptyBody": "The map is ready. Real people, teams, companies and needs will appear here when they choose visibility.",
-    "error": "The map could not load. Check the Google Maps key configuration."
+      "marketMapBase": {
+    "title": "Your location for job search",
+    "subtitle": "We''ll use this location and the selected distance for job search.",
+    "panelTitle": "Location area",
+    "panelEmpty": "No location chosen yet",
+    "radiusValue": "{km} km radius",
+    "radiusLabel": "Distance from the chosen location",
+    "autoButton": "Use my location",
+    "autoLocating": "Finding your location…",
+    "geoDenied": "We couldn''t get your location. Choose a city or region manually.",
+    "geoUnavailable": "Your browser doesn''t support location. Choose a location manually.",
+    "manualToggle": "Set location manually",
+    "manualHint": "If you don''t want to allow location access, choose a city or region manually.",
+    "countryLabel": "Country",
+    "regionLabel": "City or region",
+    "regionPlaceholder": "e.g. Vilnius",
+    "addressLabel": "More specific place (optional)",
+    "addressPlaceholder": "e.g. district or site",
+    "errorCountry": "Choose a country.",
+    "save": "Save location",
+    "selectedTitle": "Selected location",
+    "sourceAuto": "Current location",
+    "sourceManual": "Set manually",
+    "usableNote": "We''ll use this location and a {km} km radius for job search.",
+    "savedLocally": "Location saved on this device.",
+    "updateButton": "Update location",
+    "editButton": "Change location",
+    "resetButton": "Remove location",
+    "emptyBody": "You haven''t chosen a location yet. Use the button above or set one manually."
   },
   "waze": {
     "open": "Open in Waze"
@@ -5220,6 +5243,7 @@
       "concept": "Concept / not enough data",
       "blocker": "Real blocker / risk"
     },
+    "cta": { "fill": "Complete", "open": "Open" },
     "zone": {
       "profileHub": { "name": "Profile Hub", "hint": "Your real profile and where you work from.", "state": { "started": "Profile started", "none": "No profile data yet" } },
       "skillsEvidence": { "name": "Skills & Evidence", "hint": "Your real skills and the proof behind them.", "state": { "confirmed": "{count} confirmed by people", "suggested": "{count} with work evidence", "selfDeclared": "{count} self-declared", "none": "Add skills to see skill signals" } },
