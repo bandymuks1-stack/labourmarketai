@@ -42,5 +42,10 @@ describe("legal i18n: preparing notice present (lt/en/ru), no draft wording show
       expect(typeof legal?.preparing?.body === "string" && legal.preparing.body.length > 0).toBe(true);
       expect(typeof legal?.preparing?.contact === "string" && legal.preparing.contact.length > 0).toBe(true);
     });
+    it(`${loc}: unused legal.draftNote key is removed (no draft text in payload)`, () => {
+      // Dead key — the legal pages no longer render it; removing it keeps the
+      // internal "draft" wording out of the served next-intl payload too.
+      expect(legal.draftNote).toBeUndefined();
+    });
   }
 });

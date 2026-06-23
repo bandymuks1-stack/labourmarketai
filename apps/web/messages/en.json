@@ -3540,7 +3540,6 @@
     ]
   },
   "legal": {
-    "draftNote": "This document is a draft. The final, binding text will be reviewed by legal counsel before public launch.",
     "preparing": { "body": "Legal information is being prepared. Before any paid services or contractual relationship begins, it will be provided and updated.", "contact": "If you have questions, get in touch with us." },
       "marketplaceRules": {
         "title": "Marketplace rules",
