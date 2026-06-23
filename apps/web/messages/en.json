@@ -5275,7 +5275,7 @@
     },
     "reason": { "needsManager": "Available once a manager or client confirms your work." }
   },
-  "workEntryReview": {
+    "workEntryReview": {
     "title": "Suggested skills from this entry",
     "intro": "Suggestions from your text — needs review, not confirmed. Accepting adds a self-declared skill to your profile; confirmation comes from a person.",
     "accept": "Accept",
@@ -5288,7 +5288,17 @@
     "quantityLabel": "Quantity",
     "durationLabel": "Time",
     "unit": { "hours": "h", "days": "d", "minutes": "min" },
-    "domain": { "construction": "Construction", "web_design": "Web / design", "admin": "Admin", "cleaning": "Cleaning", "electrical": "Electrical" },
+    "domain": { "construction": "Construction", "web_design": "Web / design", "admin": "Admin", "cleaning": "Cleaning", "electrical": "Electrical", "cooking": "Food / catering", "gardening": "Grounds & gardening", "driving_logistics": "Transport / logistics", "warehouse": "Warehouse", "customer_service": "Customer service", "it": "IT", "language": "Language / translation", "equipment": "Equipment operation", "care": "Care & nursing" },
+    "existingTitle": "Your profile skills mentioned in this entry",
+    "existingNote": "These skills are already on your profile — this entry supports them as Work Journal evidence. We don't add them again.",
+    "existingBadge": "Already on profile",
+    "newTitle": "Possible new skills",
+    "newNote": "New activities you haven't declared yet. Accepting adds them as self-declared — not verified.",
+    "activitiesTitle": "Activities performed in this entry",
+    "activitiesNote": "What you actually did — grouped by labour-market sector.",
+    "evidenceLabel": "Evidence source",
+    "evidenceJournal": "Work Journal",
+    "verificationNote": "Recognised automatically — not verified. Only a manager or client confirms a skill.",
     "unmappedTitle": "Needs review",
     "unmappedNote": "We recognised work here but no skill matched — kept for review, not turned into a skill.",
     "needsMoreDetail": "Add more detail to get skill suggestions from this entry.",

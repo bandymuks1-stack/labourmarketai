@@ -19,6 +19,7 @@ next-env.d.ts
 
 # local owner-review artifacts (screenshots, static review HTML) — never committed
 /runtime/
+/apps/web/runtime/
 
 # playwright / e2e local artifacts (never committed)
 /apps/web/tests/e2e/.storage-state.json

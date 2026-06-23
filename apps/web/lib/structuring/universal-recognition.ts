@@ -16,13 +16,49 @@
  * Recognition CORE only — no persistence, no DB, no UI. Builds on ./normalize.
  */
 import { foldText } from "./normalize";
+import type { SectorKey } from "./sectors";
 
 export type RecognitionDomain =
   | "construction"
   | "web_design"
   | "admin"
   | "cleaning"
-  | "electrical";
+  | "electrical"
+  | "cooking"
+  | "gardening"
+  | "driving_logistics"
+  | "warehouse"
+  | "customer_service"
+  | "it"
+  | "language"
+  | "equipment"
+  | "care";
+
+/** Each recognition domain maps to ONE labour-market sector (sectors.ts). This
+ *  is what makes the recogniser cross-sector rather than construction-leaning:
+ *  construction is just one of many domains, never a default. */
+export const DOMAIN_SECTOR: Record<RecognitionDomain, SectorKey> = {
+  construction: "construction",
+  electrical: "construction",
+  web_design: "it_software",
+  it: "it_software",
+  admin: "office_admin",
+  cleaning: "cleaning_facility",
+  cooking: "hospitality_food",
+  gardening: "agriculture",
+  driving_logistics: "transport_logistics",
+  warehouse: "transport_logistics",
+  customer_service: "retail_sales",
+  language: "education",
+  equipment: "manufacturing",
+  care: "care_health",
+};
+
+/** Recognition-derived signals are ALWAYS Work-Journal evidence (never CV /
+ *  profile / manager / client, which come through other paths) and are never
+ *  auto-verified (doctrine §7). */
+export const EVIDENCE_SOURCE = "work_journal" as const;
+export type EvidenceSource = typeof EVIDENCE_SOURCE;
 
 export type RecognitionConfidence = "high" | "medium" | "low";
 
@@ -42,12 +78,16 @@ export interface SkillSuggestion {
   readonly label: string;
   readonly canonicalSlug: string | null;
   readonly domain: RecognitionDomain;
+  /** The labour-market sector this suggestion belongs to (cross-sector model). */
+  readonly sector: SectorKey;
   readonly confidence: RecognitionConfidence;
   readonly reason: string;
   readonly sourcePhrase: string;
   readonly status: "suggested";
   readonly confirmed: false;
   readonly needsReview: true;
+  /** System-detected from the Work Journal text; never verified by recognition. */
+  readonly evidenceSource: EvidenceSource;
 }
 
 export interface UnmappedPhrase {
@@ -95,6 +135,20 @@ const RULES: readonly SkillRule[] = [
   { domain: "electrical", slug: null, label: "Kabelių montavimas", verbs: ["montav", "ties", "klot", "trauk"], objects: ["kabel", "laid"], confidence: "high" },
   { domain: "electrical", slug: "electrical-install", label: "Elektros skydo darbai", verbs: ["jung", "montav", "instal"], objects: ["skyd", "elektros skyd"], confidence: "high" },
   { domain: "electrical", slug: null, label: "Įtampos tikrinimas", verbs: ["tikrin", "matav", "matuo"], objects: ["itamp", "srov", "varz"], confidence: "high" },
+  // ── Cross-sector activity rules — the whole labour market, not construction-
+  //    only. Object-gated (a domain noun must be present) so a construction
+  //    worker who logs cooking / driving / cleaning gets those too, and a pure
+  //    cooking entry NEVER yields a construction suggestion. EN + RU folded
+  //    needles sit beside the LT ones (Cyrillic passes through foldText). ──
+  { domain: "cooking", slug: null, label: "Maisto gaminimas", objects: ["maist", "virtuv", "patiek", "pietus", "sriub", "salot", "kepin", "cook", "kitchen", "meal", "готов", "кухн", "блюд", "еда"], confidence: "high" },
+  { domain: "gardening", slug: null, label: "Sodininkystė / aplinkos priežiūra", objects: ["zole", "zoles", "vejos", "vejon", "krum", "geliu", "gelyn", "darzo", "medeli", "sodinim", "ravej", "garden", "lawn", "сад", "газон", "трав", "цвет"], confidence: "high" },
+  { domain: "driving_logistics", slug: null, label: "Vairavimas / transportas / logistika", objects: ["krovini", "marsrut", "logistik", "reisus", "reisai", "sunkvezim", "vilkik", "pristatym", "cargo", "delivery", "logistic", "груз", "маршрут", "достав", "рейс"], confidence: "high" },
+  { domain: "warehouse", slug: null, label: "Sandėlio darbai", objects: ["paletes", "palet", "komplektav", "iskrovim", "pakrovim", "stelaz", "sandelio darb", "prekiu surink", "pallet", "warehouse", "forklift", "склад", "палет", "комплект"], confidence: "high" },
+  { domain: "customer_service", slug: null, label: "Klientų aptarnavimas", objects: ["klient", "aptarnav", "konsultav", "kasos", "kasoje", "parduotuv", "customer", "cashier", "клиент", "касс", "продаж", "обслуж"], confidence: "high" },
+  { domain: "it", slug: null, label: "IT / programavimas", objects: ["programav", "kodo", "kodas", "duomenu baz", "serveri", "sistem", "aplikacij", "testav", "diegim", "konfigurav", "software", "server", "database", "программ", "сервер", "систем"], confidence: "medium" },
+  { domain: "language", slug: null, label: "Vertimas / kalbos darbai", objects: ["vertim", "verciau", "vert tekst", "kalbos darb", "teksto redagav", "korektur", "subtitr", "translat", "перевод", "редактир", "коррект"], confidence: "high" },
+  { domain: "equipment", slug: null, label: "Įrangos / mechanizmų operavimas", objects: ["krautuv", "ekskavator", "stakl", "mechanizm", "iranga", "traktori", "forklift", "excavator", "погрузчик", "экскаватор", "станок", "оборудован"], confidence: "high" },
+  { domain: "care", slug: null, label: "Priežiūra / slauga", objects: ["pacient", "slaug", "vaiku prieziur", "seneli", "ligoni", "globos", "patient", "nursing", "пациент", "уход", "больн"], confidence: "high" },
 ];
 
 /** Folded verb stems we treat as "real work happened" for unmapped detection.
@@ -104,6 +158,8 @@ const WORK_VERB_STEMS = [
   ...new Set(RULES.flatMap((r) => r.verbs ?? [])),
   "remont", "dazem", "daze", "pjov", "gren", "kas", "betonav", "muri", "suvir",
   "kalibrav", "derin", "program", "test", "vez", "kraun", "pakav",
+  "gamin", "sodin", "ravej", "vairav", "komplektav", "aptarnav", "konsultav",
+  "slaug", "operav", "vertim", "krovin",
 ];
 const GENERIC_VERB_STEMS = ["dirb", "buv", "ej", "atvy", "isvy"];
 
@@ -200,12 +256,14 @@ export function recognizeUniversal(text: string): UniversalRecognition {
         label: rule.label,
         canonicalSlug: rule.slug,
         domain: rule.domain,
+        sector: DOMAIN_SECTOR[rule.domain],
         confidence: rule.confidence,
         reason: reasonWords.length > 0 ? reasonWords.join(" + ") : clause,
         sourcePhrase: clause,
         status: "suggested",
         confirmed: false,
         needsReview: true,
+        evidenceSource: EVIDENCE_SOURCE,
       });
     }
 
