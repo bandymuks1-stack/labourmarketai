@@ -26,10 +26,13 @@ type SaveState = "idle" | "saving" | "done" | "error";
 
 export function WorkEntrySkillReview({
   text,
-  existingSkills = [],
+  existingSkills,
 }: {
   text: string;
-  existingSkills?: readonly ExistingSkillRef[];
+  /** REQUIRED: the worker's already-declared skills, so existing-vs-new is real
+   *  and a declared skill is never shown as a "new" candidate. Pass [] only for
+   *  a worker with no declared skills yet (an honest, explicit empty list). */
+  existingSkills: readonly ExistingSkillRef[];
 }) {
   const t = useTranslations("workEntryReview");
   const review = useMemo(
