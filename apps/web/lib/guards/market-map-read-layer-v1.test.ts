@@ -107,7 +107,8 @@ describe("NO new DB migration in this PR", () => {
     const count = existsSync(dir)
       ? readdirSync(dir).filter((f) => f.endsWith(".sql")).length
       : 0;
-    // 84 = baseline after market_map_data_model_v1 (#458). This PR must not grow it.
-    expect(count).toBeLessThanOrEqual(84);
+    // 85 = baseline after profile-avatar-upload-v1 (20260623200000). The read
+    // layer itself adds no migration; the global baseline only grows deliberately.
+    expect(count).toBeLessThanOrEqual(85);
   });
 });

@@ -177,6 +177,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 84 for market-map-data-model-v1 (20260617120000 — additive RED-draft:
     // preferred_locations + consented_login_location_signals tables + additive
     // columns on company_demand_locations/projects; NOT applied, human-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 84/);
+    // then to 85 for profile-avatar-upload-v1 (20260623200000_profile_avatar;
+    // additive RED: avatar_url column + private profile-avatars bucket +
+    // owner-scoped storage policies; NOT applied, human-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 85/);
   });
 });

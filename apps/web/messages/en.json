@@ -1,5 +1,19 @@
 {
-  "errorBoundary": {
+  "profileAvatar": {
+    "upload": "Upload photo",
+    "change": "Change photo",
+    "remove": "Remove",
+    "removing": "Removing…",
+    "preparing": "Preparing photo…",
+    "uploading": "Uploading…",
+    "uploaded": "Photo uploaded.",
+    "uploadFailed": "Couldn''t upload the photo. Please try again.",
+    "invalidFile": "The photo must be JPG, PNG or WebP.",
+    "tooLarge": "The photo is too large. Try another one.",
+    "notReady": "Photo upload isn''t available in this environment yet.",
+    "alt": "Profile photo",
+    "hint": "JPG, PNG or WebP, up to 5 MB. The photo is shown only to you."
+  },  "errorBoundary": {
     "reloading": "Reloading…",
     "body": "Something went wrong. Please try again.",
     "retry": "Try again"

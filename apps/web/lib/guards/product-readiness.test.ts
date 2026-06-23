@@ -1464,7 +1464,13 @@ describe("no migration files added by this sprint", () => {
     // anon/public, grant to authenticated only, NO new SECURITY DEFINER. Additive
     // + reversible (supabase/rollbacks/*). NOT applied — human-gated for owner
     // (docs/audits/market-map-data-model-v1-owner-signoff.md).
-    const SPRINT_BASELINE = 84;
+    // Bumped 84 -> 85 for profile-avatar-upload-v1 (20260623200000_profile_avatar):
+    // ONE additive RED migration — profiles.avatar_url column + private
+    // profile-avatars storage bucket + owner-scoped storage.objects policies
+    // (owner folder only; NO public/admin read). Reversible
+    // (supabase/rollbacks/20260623200000_profile_avatar.down.sql). NOT applied —
+    // human-gated for owner.
+    const SPRINT_BASELINE = 85;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

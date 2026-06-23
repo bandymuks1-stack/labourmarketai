@@ -4,6 +4,8 @@ import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
 import { FeatureNote } from "@/components/app/feature-note";
+import { ProfileAvatar } from "@/components/app/profile-avatar";
+import { getOwnAvatar } from "@/lib/profile/avatar";
 import { SkillsReviewBanner } from "@/components/app/skills-review-banner";
 import {
   deriveSkillEvidence,
@@ -99,6 +101,7 @@ export default async function ProfilePage({
 
   const personName =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
+  const avatar = await getOwnAvatar();
   const activeRole = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : null;
@@ -362,6 +365,10 @@ export default async function ProfilePage({
           {t("pageSubtitle")}
         </p>
       </header>
+
+      <section className="card-border flex flex-col gap-3 p-5" data-testid="profile-avatar-section">
+        <ProfileAvatar signedUrl={avatar.signedUrl} displayName={personName} />
+      </section>
 
       <FeatureNote testId="feature-note-profile">
         {(await getTranslations("featureNotes"))("workerProfile")}
