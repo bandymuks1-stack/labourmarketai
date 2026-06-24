@@ -592,14 +592,19 @@ export default async function JournalPage({
                       : undefined
                   }
                 >
-                  <p className="text-sm text-text-primary">{e.original_text}</p>
+                  {/* Work-record text must wrap cleanly — long unbroken
+                      strings (URLs, long tokens) break to the next line instead
+                      of overflowing horizontally (owner overflow fix). */}
+                  <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
+                    {e.original_text}
+                  </p>
                   <EvidenceDecisionTimeline
                     createdAt={e.created_at}
                     events={timeline}
                   />
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
-                    {dir?.value_text && <span>{tProf(dir.value_text)}</span>}
-                    {site?.value_text && <span>{site.value_text}</span>}
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 break-words text-[11px] text-text-muted">
+                    {dir?.value_text && <span className="min-w-0 break-words">{tProf(dir.value_text)}</span>}
+                    {site?.value_text && <span className="min-w-0 break-words">{site.value_text}</span>}
                     {area?.value_numeric != null && (
                       <span>
                         {/* Time-class units (hours / minutes / days) get the

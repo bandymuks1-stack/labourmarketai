@@ -87,7 +87,7 @@ export default async function AccountPage({
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
           {t("account.email_label")}
         </p>
-        <p className="mt-2 text-sm text-text-primary">
+        <p className="mt-2 break-words text-sm text-text-primary">
           {profile?.email ?? user.email}
         </p>
       </section>
