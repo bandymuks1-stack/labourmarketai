@@ -9,34 +9,47 @@ import {
 } from "@/lib/location/location-model";
 
 /**
- * Provider-free location guard (PR #484 owner redirect).
+ * Real Market Map guard (owner-smoke follow-up, PR #490).
  *
- * The location feature must work with NO Google Maps, NO paid provider, and NO
- * external geocoding/tile service: automatic browser geolocation first, manual
- * country/city/region/radius fallback, a no-tile location panel, and structured
- * location that drives job search without a provider key. No raw provider/API/
- * env text may reach users; no fake map-ready state.
+ * Owner decision: the Market Map must use a REAL online map provider/tile layer
+ * — not an SVG/coordinate-only locator. We use OpenStreetMap raster tiles via
+ * Leaflet: a free provider that needs NO API key and NO secret. Google / Mapbox
+ * and any provider key/secret remain forbidden (not approved). The location +
+ * radius controls stay as controls ON the real map.
  */
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const comp = read("components/app/market-map-base.tsx");
+const live = read("components/app/market-map-live.tsx");
 const env = read("lib/env.ts");
 
-describe("no Google Maps / paid-provider dependency", () => {
-  it("the Google Maps loader is gone", () => {
+describe("real provider map, no paid/secret provider", () => {
+  it("the live map uses OpenStreetMap tiles via Leaflet (free, no key)", () => {
+    expect(live).toMatch(/from "leaflet"/);
+    expect(live).toMatch(/tile\.openstreetmap\.org/);
+    expect(live).toMatch(/L\.tileLayer/);
+  });
+  it("no Google Maps loader / key anywhere", () => {
     expect(existsSync(join(ROOT, "lib/maps/google-maps-loader.ts"))).toBe(false);
-  });
-  it("the component imports no map provider and no Google key", () => {
-    expect(comp).not.toMatch(/google-maps-loader|googleapis|google\.maps/i);
-    expect(comp).not.toMatch(/NEXT_PUBLIC_GOOGLE_MAPS_API_KEY|GOOGLE_MAPS_API_KEY/);
-    expect(comp).not.toMatch(/mapbox|maplibre|leaflet|nominatim|tile\.openstreetmap/i);
-  });
-  it("env.ts no longer declares a Google Maps key", () => {
+    for (const src of [comp, live]) {
+      expect(src).not.toMatch(/google-maps-loader|googleapis|google\.maps/i);
+      expect(src).not.toMatch(/NEXT_PUBLIC_GOOGLE_MAPS_API_KEY|GOOGLE_MAPS_API_KEY/);
+    }
     expect(env).not.toMatch(/GOOGLE_MAPS/);
+  });
+  it("no Mapbox / paid provider and no provider key or secret", () => {
+    for (const src of [comp, live]) {
+      expect(src).not.toMatch(/mapbox|maplibre/i);
+      expect(src).not.toMatch(/access[_-]?token|api[_-]?key|process\.env/i);
+    }
+  });
+  it("the base mounts the real map component (not an SVG locator)", () => {
+    expect(comp).toMatch(/<MarketMapLive\b/);
+    expect(comp).not.toMatch(/<LocationMap\b/);
   });
 });
 
-describe("automatic geolocation path exists (first)", () => {
+describe("automatic geolocation path exists (a control on the map)", () => {
   it("requests the browser location and exposes the primary action", () => {
     expect(comp).toMatch(/navigator\.geolocation\.getCurrentPosition/);
     expect(comp).toMatch(/data-testid="map-locator-auto"/);
@@ -55,7 +68,7 @@ describe("manual fallback path exists (country + region + radius)", () => {
   });
 });
 
-describe("provider-free, usable without any key", () => {
+describe("usable without any key", () => {
   it("radius options are 10/25/50/100 with a sensible default", () => {
     expect([...RADIUS_OPTIONS]).toEqual([10, 25, 50, 100]);
     expect(RADIUS_OPTIONS).toContain(DEFAULT_RADIUS_KM);
@@ -74,14 +87,16 @@ describe("provider-free, usable without any key", () => {
   });
 });
 
-describe("provider-free visual panel, no fake map-ready state", () => {
-  it("renders an honest location panel, not external tiles", () => {
-    expect(comp).toMatch(/data-testid="location-panel"/);
-    expect(comp).not.toMatch(/maps\.googleapis\.com|tile\.openstreetmap\.org/);
+describe("privacy + honest empty state", () => {
+  it("the map only draws the worker's OWN selection (no other-user reads, no fake points)", () => {
+    // The live map plots only `selected`; it never fetches or renders other
+    // users' locations and seeds no fake market markers.
+    expect(live).not.toMatch(/markers?\s*[:=]\s*\[/i);
+    expect(live).toMatch(/pointFor\(selected\)/);
   });
 });
 
-describe("no raw Google/API/env text in user-facing copy (lt/en/ru)", () => {
+describe("no raw provider/env text in user-facing copy (lt/en/ru)", () => {
   const EXCLUDED = new Set(["admin", "adminReadiness", "agentOs"]);
   const FORBIDDEN: RegExp[] = [
     /NEXT_PUBLIC_[A-Z0-9_]+/,

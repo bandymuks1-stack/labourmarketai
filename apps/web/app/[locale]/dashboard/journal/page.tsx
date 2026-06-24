@@ -14,6 +14,7 @@ import {
   groupLinkedSkillIdsByEntry,
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
+import { buildEditingEntry } from "@/lib/journal/edit-entry";
 import {
   deriveReviewResult,
   deriveReviewTimeline,
@@ -282,6 +283,34 @@ export default async function JournalPage({
     entries = rows.filter((e) => !e.deleted_at && !e.superseded_by);
   }
 
+  // EDIT preload (v5): when the worker arrived via ?editing=<id>, reconstruct
+  // the entry's FULL editable state (text + date + hours/quantity + direction +
+  // linked skills) so a text-only edit re-sends them and never silently drops
+  // structured data. Only UNCONFIRMED entries are eligible (a confirmed id is
+  // ignored — confirmed entries need the explicit correction-request flow).
+  const skillIdToSlug = new Map<string, string>();
+  for (const r of skillIdRows ?? []) {
+    const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
+    if (r.skill_id && slug) skillIdToSlug.set(r.skill_id as string, slug);
+  }
+  const editingRow = editingId
+    ? ((entries ?? []).find(
+        (e) =>
+          e.id === editingId &&
+          (e.journal_entry_confirmations ?? []).length === 0,
+      ) ?? null)
+    : null;
+  const editingEntry = editingRow
+    ? buildEditingEntry({
+        id: editingRow.id,
+        originalText: editingRow.original_text,
+        metrics: editingRow.journal_entry_metrics,
+        linkedSkillSlugs: (linksByEntry.get(editingRow.id) ?? [])
+          .map((sid) => skillIdToSlug.get(sid))
+          .filter((s): s is string => !!s),
+      })
+    : null;
+
   // Evidence Status Strip (v1) for the list status zone — a compact legend
   // showing which honest states the worker's entries are actually in. Derived
   // purely from the existing review result; "confirmed" lights up ONLY when a
@@ -366,22 +395,7 @@ export default async function JournalPage({
           engagements={engagements}
           directions={directions}
           workerSkills={workerSkills}
-          editingEntry={
-            editingId
-              ? ((entries ?? []).find(
-                  (e) =>
-                    e.id === editingId &&
-                    (e.journal_entry_confirmations ?? []).length === 0,
-                )
-                  ? {
-                      id: editingId,
-                      originalText:
-                        (entries ?? []).find((e) => e.id === editingId)
-                          ?.original_text ?? "",
-                    }
-                  : null)
-              : null
-          }
+          editingEntry={editingEntry}
         />
         </div>
       </div>

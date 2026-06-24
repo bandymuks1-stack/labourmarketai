@@ -25,7 +25,7 @@ import {
   writeSelectedLocation,
   clearSelectedLocation,
 } from "@/lib/location/location-store";
-import { LocationMap } from "@/components/app/location-map";
+import { MarketMapLive } from "@/components/app/market-map-live";
 
 /**
  * Provider-free location picker (PR #484 — no Google, no paid provider).
@@ -194,16 +194,18 @@ export function MarketMapBase() {
         </p>
       </header>
 
-      {/* Provider-free location PANEL — a REAL interactive coordinate map of
-          the served markets. Not external tiles, not a fake marker: every
-          point is a real coordinate, the selection is plotted at its true
-          position, and tapping the map sets a real location (mobile-usable). */}
+      {/* REAL interactive map — OpenStreetMap tiles via Leaflet (free, no API
+          key, no secret, no paid/proprietary provider). The worker sees real
+          geography / streets / regions, pans/zooms, taps to set a coordinate. The
+          location + radius controls below act ON this map. The only marker is
+          the worker's OWN location (privacy: no other users, no fake market
+          points); honest empty state = the real map with no markers yet. */}
       <div
         className="flex flex-col gap-2 rounded-xl border border-ink-500 bg-ink-900/60 p-3"
         data-testid="location-panel"
         aria-label={t("panelTitle")}
       >
-        <LocationMap
+        <MarketMapLive
           selected={selected}
           radiusKm={selected?.radiusKm ?? radiusKm}
           onPick={pickFromMap}

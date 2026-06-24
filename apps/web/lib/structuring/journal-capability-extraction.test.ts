@@ -71,3 +71,23 @@ describe("journal capability extraction — no invention", () => {
     expect(labels("   ")).toEqual([]);
   });
 });
+
+describe("journal extraction — website-design entry is honest (owner smoke)", () => {
+  // "Dirbau su svetainės dizainu 9 h" = "I worked on website design for 9 h".
+  // Must read the time, must NOT guess unrelated construction skills, and must
+  // NOT silently pick website vs living-room/interior design.
+  const s = extractJournalSuggestions("Dirbau su svetainės dizainu 9 h");
+
+  it("reads the 9-hour duration with a text reason", () => {
+    expect(s.time).toEqual({ value: 9, unitSlug: "hours" });
+  });
+  it("suggests NO unrelated construction skills", () => {
+    expect(s.skillSlugs).toEqual([]);
+    expect(s.skillSuggestions).toEqual([]);
+  });
+  it("does not invent a website/interior design capability (ambiguity stays honest)", () => {
+    expect(s.capabilitySuggestions).toEqual([]);
+    // The activity is flagged unknown for the worker to clarify, not guessed.
+    expect(s.fragments.every((f) => f.activitySlug === null)).toBe(true);
+  });
+});

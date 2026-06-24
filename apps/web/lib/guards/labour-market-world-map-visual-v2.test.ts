@@ -36,12 +36,16 @@ describe("world map v2 — map canvas + routes + mobile path", () => {
   });
 });
 
-describe("market-map page — world view is the first impression", () => {
-  it("mounts the World Map before the Google Maps base notice", () => {
+describe("market-map page — canonical coordinate map leads, world view is secondary", () => {
+  // Updated for the owner-smoke follow-up (PR #490): the canonical provider-free
+  // coordinate map (<MarketMapBase>) must now be the FIRST impression; the
+  // conceptual world overview is a secondary surface mounted below it. (Full
+  // ordering is covered by lib/guards/market-map-canonical.test.ts.)
+  it("mounts the canonical coordinate map before the world overview", () => {
     const wm = page.indexOf("<LabourMarketWorldMap");
     const base = page.indexOf("<MarketMapBase");
     expect(wm).toBeGreaterThan(-1);
     expect(base).toBeGreaterThan(-1);
-    expect(wm).toBeLessThan(base);
+    expect(base).toBeLessThan(wm);
   });
 });

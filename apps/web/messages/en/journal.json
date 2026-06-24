@@ -99,6 +99,7 @@
   "editEntryTitle": "Edit entry",
   "editEntryBanner": "You're editing a saved entry. Suggest the structure again, confirm what you're changing, then \"Update entry\" replaces the old version. To back out —",
   "editEntryCancel": "cancel editing",
+  "editPreservedTitle": "Kept from the previous entry (you can change it):",
   "updateEntry": "Update entry",
   "field": {
     "work_direction": "Work direction",

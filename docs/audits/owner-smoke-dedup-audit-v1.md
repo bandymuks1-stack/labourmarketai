@@ -43,11 +43,28 @@ These are **not duplicates** — each has a distinct role (conceptual world
 overview, signal board, location picker, signal lists). They were left as-is to
 avoid a broad redesign.
 
-The one obvious same-purpose duplicate was **inside `market-map-base.tsx`**: a
-static decorative radius-circle `<svg>` that *pretended* to be the map but
-rendered identically for every location (it ignored the actual coordinates).
-**Removed** and replaced by the real `components/app/location-map.tsx`
-(interactive coordinate map). No parallel map component was kept.
+The first iteration replaced an obvious same-purpose duplicate **inside
+`market-map-base.tsx`** — a static decorative radius-circle `<svg>` that
+*pretended* to be the map but rendered identically for every location.
+
+**Real provider map (PR #490 owner decision — final).** Pre-merge review then
+established that neither a static circle NOR a self-built SVG/coordinate locator
+is acceptable as the Market Map: it must use a **real online map provider/tile
+layer**. The interim SVG locator (`components/app/location-map.tsx` +
+`lib/location/map-projection.ts` and their tests/evidence) was **deleted**, and
+the map is now `components/app/market-map-live.tsx` — **OpenStreetMap raster
+tiles via Leaflet** (free, no API key, no secret, not a paid/proprietary
+provider). It shows real geography/streets, the worker's own location marker, and
+the search radius; tap-to-set sets a real coordinate. No parallel/duplicate map
+component remains.
+
+**Canonical composition.** `app/[locale]/dashboard/market-map/page.tsx` renders
+**`MarketMapBase` (→ the real `MarketMapLive` map) FIRST**, with the signal
+board, owner-readiness, capture forms, and the conceptual world overview mounted
+BELOW it. The stale "Google Maps base" comment was removed. The world overview +
+signal board remain as **secondary** context surfaces (distinct purpose:
+conceptual zones / demand signals) and no longer lead the flow or sit above the
+real map.
 
 ## 3. Location libs (no duplicate)
 
