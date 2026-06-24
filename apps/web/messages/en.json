@@ -518,6 +518,15 @@
     "error": "Could not save. Please try again.",
     "none": "Add skills in your profile first.",
     "profileLink": "My capabilities",
+    "source": {
+      "recognized": "Recognized from text",
+      "confirmed": "Confirmed",
+      "manual": "Manually linked"
+    },
+    "reviewHeading": "Needs review",
+    "reviewHelper": "These skills are linked, but this entry's text doesn't support them. Review or unlink the wrong ones.",
+    "reviewAgain": "Review again",
+    "unlinkFlagged": "Unlink the wrong ones",
     "linkMore": "Link a skill",
     "linkDone": "Done"
   },

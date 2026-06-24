@@ -14,6 +14,9 @@ import {
   groupLinkedSkillIdsByEntry,
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
+import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
+import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
+import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { buildEditingEntry } from "@/lib/journal/edit-entry";
 import {
   deriveReviewResult,
@@ -202,9 +205,11 @@ export default async function JournalPage({
 
   // Journal Entry ↔ Skill links v1 — the worker's declared skills (id + name)
   // they can mark an entry as supporting, plus their current durable links.
+  // `verified` rides along so a manager/client-confirmed skill can read as
+  // "confirmed" on the entry chip (stale-skill review state, PR B).
   const { data: skillIdRows } = await supabase
     .from("worker_skills")
-    .select("skill_id, skills(slug)")
+    .select("skill_id, verified, skills(slug)")
     .eq("worker_id", worker.id);
   const availableSkillsForLinks = (skillIdRows ?? [])
     .map((r) => {
@@ -215,6 +220,21 @@ export default async function JournalPage({
     })
     .filter((x): x is { id: string; name: string } => x !== null)
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Real signals for the per-entry chip SOURCE (PR B): skill id → slug, and the
+  // set of confirmed (verified) skill ids. The recognizable vocabulary is the
+  // recognizer's full known-skill slug set — a linked skill INSIDE it that the
+  // entry text does not support is the stale/suspicious case ("Reikia peržiūrėti").
+  const idToSlug = new Map<string, string>();
+  const verifiedSkillIds = new Set<string>();
+  for (const r of skillIdRows ?? []) {
+    const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
+    if (r.skill_id && slug) idToSlug.set(r.skill_id as string, slug);
+    if (r.skill_id && (r as { verified?: boolean }).verified) {
+      verifiedSkillIds.add(r.skill_id as string);
+    }
+  }
+  const recognizableSlugs = new Set(SKILL_HINTS_LT.map((h) => h.slug));
 
   // Durable links read — gracefully no-ops if the migration is not applied yet
   // (mirrors the v3-column fallback below), so the page stays renderable.
@@ -478,6 +498,21 @@ export default async function JournalPage({
               // external confirmations yet. The RPC re-enforces the same
               // rule server-side, so a stale client can't escalate.
               const canDelete = (e.journal_entry_confirmations ?? []).length === 0;
+              // Per-entry chip SOURCE (PR B). Recognize skills from THIS entry's
+              // real text, then classify each linked chip honestly. An unsupported
+              // old link (e.g. a construction chip on a dog-walking entry) becomes
+              // "stale_needs_review" instead of clean current evidence.
+              const linkedForEntry = linksByEntry.get(e.id) ?? [];
+              const recognizedSlugs = new Set<string>(
+                extractJournalSuggestions(e.original_text ?? "").skillSlugs,
+              );
+              const skillSources = buildEntrySkillSources({
+                linkedSkillIds: linkedForEntry,
+                idToSlug,
+                verifiedSkillIds,
+                recognizedSlugs,
+                recognizableSlugs,
+              });
               return (
                 <JournalEntryRow
                   key={e.id}
@@ -487,7 +522,8 @@ export default async function JournalPage({
                     skillLinksReady
                       ? {
                           availableSkills: availableSkillsForLinks,
-                          linkedSkillIds: linksByEntry.get(e.id) ?? [],
+                          linkedSkillIds: linkedForEntry,
+                          skillSources,
                         }
                       : undefined
                   }

@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { softDeleteJournalEntry } from "@/lib/journal/actions";
 import { JournalEntrySkillLinks } from "@/components/app/journal-entry-skill-links";
+import type { EntrySkillSource } from "@/lib/journal/entry-skill-source";
 import { recordEvent } from "@/lib/telemetry/task";
 
 /**
@@ -30,6 +31,8 @@ export function JournalEntryRow({
   skillLinks?: {
     availableSkills: { id: string; name: string }[];
     linkedSkillIds: string[];
+    /** Per-entry honest source for each linked skill id (stale-skill review). */
+    skillSources?: Record<string, EntrySkillSource>;
   };
 }) {
   const t = useTranslations("journal");
@@ -61,6 +64,7 @@ export function JournalEntryRow({
           entryId={entryId}
           availableSkills={skillLinks.availableSkills}
           linkedSkillIds={skillLinks.linkedSkillIds}
+          skillSources={skillLinks.skillSources}
         />
       )}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
