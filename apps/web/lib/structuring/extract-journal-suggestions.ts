@@ -8,6 +8,10 @@ import {
   RECOGNITION_LIMIT,
   type RecognizedSkill,
 } from "./skill-recognition";
+import {
+  extractProfileSkillClaims,
+  type SkillClaimSuggestion,
+} from "@/lib/profile/skill-claim-extractor";
 
 /**
  * RULE-BASED suggestion extractor for a free-text work journal entry. This is
@@ -42,6 +46,15 @@ export type JournalSuggestions = {
    *  one entry ("1h driver, 3h cashier, 5h roofing"). Each fragment keeps the
    *  raw phrase so the UI can show evidence next to the interpretation. */
   fragments: JournalFragmentSuggestion[];
+  /** Explicit self-declared capabilities/specializations the worker NAMED in
+   *  the text (e.g. "lietuviškos virtuvės gamyba", "vairavimas", "pardavimai",
+   *  "sutarčių ruošimas"). Reuses the SAME dictionary as the profile composer
+   *  (`extractProfileSkillClaims`) so specializations are preserved and not
+   *  flattened into only a generic parent chip — a journal entry and a profile
+   *  narrative recognise capabilities identically. These are review-only,
+   *  unverified suggestions (doctrine §7); the worker confirms each before it
+   *  is added to their profile as a self-declared claim. */
+  capabilitySuggestions: SkillClaimSuggestion[];
   /** Did the parser find anything at all worth showing? */
   hasAny: boolean;
 };
@@ -74,6 +87,7 @@ const EMPTY: JournalSuggestions = {
   institutionName: null,
   topic: null,
   fragments: [],
+  capabilitySuggestions: [],
   hasAny: false,
 };
 
@@ -584,6 +598,12 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   // card — fragment-to-time pairing was wrong before this pass.
   const fragments = mergeContinuationFragments(initialFragments);
 
+  // 7) Explicit named capabilities / specializations. Same dictionary as the
+  //    profile composer so e.g. "lietuviškos virtuvės gamyba" surfaces BOTH
+  //    the parent ("Maisto gamyba") AND the specialization, instead of being
+  //    flattened to the generic parent only. Review-only, unverified (§7).
+  const capabilitySuggestions = extractProfileSkillClaims(text);
+
   const hasAny =
     time !== null ||
     quantity !== null ||
@@ -592,7 +612,8 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     siteName !== null ||
     institutionName !== null ||
     topic !== null ||
-    fragments.length > 0;
+    fragments.length > 0 ||
+    capabilitySuggestions.length > 0;
 
   return {
     time,
@@ -604,6 +625,7 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
     institutionName,
     topic,
     fragments,
+    capabilitySuggestions,
     hasAny,
   };
 }

@@ -39,6 +39,7 @@ export default async function MarketMapPage({
   if (!user) redirect(`/${locale}/auth/login`);
 
   const tNote = await getTranslations("featureNotes");
+  const tMap = await getTranslations("marketMap");
   // Owner-scoped current state for the capture forms (RLS — caller's own rows).
   const [preferred, login, demand, availability, capabilities] = await Promise.all([
     listOwnPreferredLocations(),
@@ -49,22 +50,29 @@ export default async function MarketMapPage({
   ]);
   return (
     <div className="flex flex-col gap-4">
+      <header className="flex flex-col gap-1" data-testid="market-map-page-header">
+        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+          {tMap("pageTitle")}
+        </h1>
+        <p className="text-sm leading-relaxed text-text-secondary">
+          {tMap("pageLead")}
+        </p>
+      </header>
       <FeatureNote testId="feature-note-market-map">
         {tNote("marketplaceMap")}
       </FeatureNote>
-      {/* Labour Market World Map v2 (PR #481) — the original world view is the
-          FIRST impression: a map-like canvas of real owner signals (central
-          Profile Hub + districts + routes), honest empty/concept states, no fake
-          markers/coordinates. */}
-      <LabourMarketWorldMap />
+      {/* CANONICAL map FIRST — the provider-free location coordinate map
+          (coordinate-map v1: real coordinates + search radius, no tile/street
+          layer, no external provider). This is the primary surface of the page;
+          everything below is secondary and must not lead the flow. */}
+      <MarketMapBase />
+      {/* Secondary surfaces, kept BELOW the canonical map so they never lead
+          the page or duplicate its purpose: the signal board, owner readiness,
+          capture forms, then the conceptual world overview last. */}
       <MarketMapShell />
       <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
       <MarketMapCapture preferred={preferred} login={login} demand={demand} />
-      {/* Secondary, FUTURE precise-location layer — the real Google Maps base
-          renders only when a browser key is configured; otherwise an honest
-          config-needed note. Kept BELOW the world view so it never creates a
-          broken first impression. */}
-      <MarketMapBase />
+      <LabourMarketWorldMap />
     </div>
   );
 }

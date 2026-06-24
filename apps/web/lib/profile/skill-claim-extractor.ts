@@ -26,6 +26,13 @@ export type SkillClaimSuggestion = {
   label: string;
   /** Lowercased/trimmed form used for dedupe; matches DB `normalized_label`. */
   normalizedLabel: string;
+  /** The text fragment/needle that triggered the suggestion — so every chip can
+   *  show WHY it appeared (no suggestion without a reason from the text). */
+  reason?: string;
+  /** True when this suggestion is one of several mutually-exclusive readings of
+   *  an ambiguous phrase (e.g. LT "svetainės dizainas" = website OR living-room
+   *  design). The UI presents these as a clarification to confirm, not a fact. */
+  ambiguous?: boolean;
 };
 
 type DictionaryRow = {
@@ -319,6 +326,8 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "santechnikos instal",
       "montuoju santechnik",
       "montuoti santechnik",
+      "montavau santechnik", // "montavau santechniką"
+      "montavo santechnik",
       "plumbing instal",
     ],
   },
@@ -327,6 +336,7 @@ const DICTIONARY: readonly DictionaryRow[] = [
     // for the specific category sits below; both can match.
     label: "Vairavimas",
     needles: [
+      "vairav", // vairavau / vairavo / vairavimas
       "vairuot",
       "vairuoj",
       "vairavim",
@@ -381,6 +391,109 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "contract prep",
     ],
   },
+
+  // ─── Soft / cross-domain capabilities the owner smoke flagged as missed ──
+  // (automation / motivation / communication). Stems are picked to match LT
+  // morphology while staying specific enough to avoid firing on unrelated
+  // words ("motyvas" = a reason is excluded — only the verb/role forms below).
+  {
+    // Automation — RPA / workflow / "automatizuoju procesus".
+    label: "Automatizavimas",
+    needles: [
+      "automatizav",
+      "automatizuoj",
+      "automatiz",
+      "automation",
+      "automate",
+      "automating",
+      "n8n",
+      "zapier",
+    ],
+  },
+  {
+    // Motivation — motivating / coaching a team ("motyvuoju komandą").
+    label: "Motyvavimas",
+    needles: [
+      "motyvav",
+      "motyvuoj",
+      "motyvacij",
+      "motivation",
+      "motivating",
+      "motivate",
+    ],
+  },
+  {
+    // Communication — client/team communication competence.
+    label: "Komunikacija",
+    needles: [
+      "komunikac",
+      "komunikav",
+      "bendrav", // bendravau / bendravimas / bendravo
+      "bendrauj",
+      "communication",
+      "communicating",
+      "communicate",
+    ],
+  },
+
+  // ─── Sector-neutral creative / language / logistics rows (cross-sector) ──
+  // Labourmarket.ai is sector-neutral: these are real non-construction work
+  // kinds the journal must recognise, not leave "unknown". (LT "svetainė" =
+  // BOTH "website" and "living room" — disambiguated below by the resolver.)
+  {
+    // Web / website design — fires when the text makes "website" explicit.
+    label: "Interneto svetainės dizainas",
+    needles: [
+      "interneto svetain",
+      "internetin svetain",
+      "internetinės svetain",
+      "tinklapio dizain",
+      "tinklalapio dizain",
+      "web dizain",
+      "web design",
+      "website design",
+      "ux dizain",
+      "ui dizain",
+    ],
+  },
+  {
+    // Interior / room design — fires when the text makes "interior/room" explicit.
+    label: "Interjero dizainas",
+    needles: [
+      "interjer",
+      "kambario dizain",
+      "kambario interjer",
+      "patalpų dizain",
+      "patalpos dizain",
+      "interior design",
+    ],
+  },
+  {
+    // Translation / languages.
+    label: "Vertimas",
+    needles: [
+      "vertėjav",
+      "vertėj",
+      "vertimo darb",
+      "vertimą",
+      "vertima",
+      "vertimas",
+      "translat",
+    ],
+  },
+  {
+    // SPECIALIZATION of Vairavimas — heavy goods / CE-category truck driving.
+    label: "Sunkvežimio vairavimas",
+    needles: [
+      "sunkvežim",
+      "sunkvezim",
+      "vilkik",
+      "ce kategorij",
+      "c kategorij",
+      "truck driv",
+      "lorry",
+    ],
+  },
 ];
 
 // Bumped from 12 → 24 for the max-capture upgrade: owner's expanded
@@ -406,24 +519,40 @@ export function extractProfileSkillClaims(
 
   const haystack = text.slice(0, MAX_INPUT_CHARS).toLowerCase();
   const found = new Map<string, SkillClaimSuggestion>();
+  const add = (label: string, reason: string, ambiguous = false): void => {
+    const normalized = label.toLowerCase();
+    if (!found.has(normalized)) {
+      found.set(normalized, { label, normalizedLabel: normalized, reason, ambiguous });
+    }
+  };
 
   for (const row of DICTIONARY) {
     for (const needle of row.needles) {
       if (needle && haystack.includes(needle)) {
-        const normalized = row.label.toLowerCase();
-        if (!found.has(normalized)) {
-          found.set(normalized, {
-            label: row.label,
-            normalizedLabel: normalized,
-          });
-        }
+        add(row.label, needle);
         break;
       }
     }
     if (found.size >= MAX_SUGGESTIONS) break;
   }
 
-  return [...found.values()];
+  // Structured ambiguity: LT "svetainė" means BOTH "website" AND "living room".
+  // "svetainės dizainas" with no disambiguator is genuinely ambiguous — surface
+  // BOTH readings as a clarification (the worker confirms one). Never guess one
+  // silently, and never drop meaningful design work to "unknown".
+  if (haystack.includes("svetain") && haystack.includes("dizain")) {
+    const webish =
+      /interneto svetain|internetin\w* svetain|web ?dizain|web ?design|website|tinklap|tinklalap|ux dizain|ui dizain/.test(
+        haystack,
+      );
+    const interiorish = /interjer|kambar|patalp|interior/.test(haystack);
+    if (!webish && !interiorish) {
+      add("Interneto svetainės dizainas", "svetainės dizain", true);
+      add("Interjero dizainas", "svetainės dizain", true);
+    }
+  }
+
+  return [...found.values()].slice(0, MAX_SUGGESTIONS);
 }
 
 /**

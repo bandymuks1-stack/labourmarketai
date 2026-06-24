@@ -125,7 +125,11 @@ const RULES: readonly SkillRule[] = [
   { domain: "construction", slug: "plastering", label: "Sienų tinkavimas", verbs: ["tinkav"], objects: ["sien", "tinkav"], confidence: "high" },
   { domain: "construction", slug: "roofing", label: "Stogo sijų / konstrukcijų darbai", verbs: ["keit", "montav", "keic", "dej"], objects: ["stogo sij", "sij", "gegn", "stogo karkas", "stropil"], confidence: "high" },
   { domain: "construction", slug: "roofing", label: "Čerpių klojimas / stogo dangos darbai", verbs: ["kloj", "deng", "klot"], objects: ["cerp", "stogo dang", "danga"], confidence: "high" },
-  { domain: "web_design", slug: null, label: "Puslapio / svetainės dizainas", objects: ["puslapio dizain", "svetaines dizain", "web dizain", "puslap", "svetain"], confidence: "medium" },
+  // Web design fires only on WEB-EXPLICIT wording. Bare "svetainė" is LT-
+  // ambiguous (website OR living room), so it is deliberately NOT an object
+  // here — the ambiguous "svetainės dizainas" must not silently resolve to web
+  // (the capability layer surfaces both readings as a clarification instead).
+  { domain: "web_design", slug: null, label: "Puslapio / svetainės dizainas", objects: ["puslapio dizain", "puslap", "web dizain", "web design", "interneto svetain", "internetin svetain", "tinklap"], confidence: "medium" },
   { domain: "admin", slug: null, label: "Sandėlio / atsargų administravimas", verbs: ["tvark", "skaiciav", "inventoriz", "tikrin"], objects: ["sandel", "likuc", "atsarg"], confidence: "medium" },
   { domain: "admin", slug: null, label: "Excel ataskaitų pildymas", objects: ["excel", "ataskait"], confidence: "medium" },
   { domain: "admin", slug: null, label: "Sąskaitų rengimas", verbs: ["ruos", "reng", "isras", "dar", "pild"], objects: ["saskait"], confidence: "medium" },

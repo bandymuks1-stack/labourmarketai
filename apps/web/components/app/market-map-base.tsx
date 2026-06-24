@@ -25,6 +25,7 @@ import {
   writeSelectedLocation,
   clearSelectedLocation,
 } from "@/lib/location/location-store";
+import { MarketMapLive } from "@/components/app/market-map-live";
 
 /**
  * Provider-free location picker (PR #484 — no Google, no paid provider).
@@ -122,6 +123,28 @@ export function MarketMapBase() {
     setManualOpen(false);
   }, [country, region, address, radiusKm, persist, t]);
 
+  // ── Map tap: set a real coordinate by tapping the interactive map ──
+  // A third, fully provider-free way to choose location (works on mobile —
+  // a tap is a click). The picked point is a real coordinate from the inverse
+  // projection, saved as an "auto"-source location.
+  const pickFromMap = useCallback(
+    (lat: number, lng: number) => {
+      setGeoHint(null);
+      setManualError(null);
+      persist({
+        source: "auto",
+        lat,
+        lng,
+        country: null,
+        region: null,
+        address: null,
+        radiusKm,
+        savedAt: Date.now(),
+      });
+    },
+    [persist, radiusKm],
+  );
+
   // Change the radius of the current selection in place.
   const changeRadius = useCallback(
     (r: RadiusKm) => {
@@ -171,19 +194,26 @@ export function MarketMapBase() {
         </p>
       </header>
 
-      {/* Provider-free location PANEL — a radius diagram + the chosen place.
-          Not external map tiles, not a fake marker, honestly a location area. */}
+      {/* REAL interactive map — OpenStreetMap tiles via Leaflet (free, no API
+          key, no secret, no paid/proprietary provider). The worker sees real
+          geography / streets / regions, pans/zooms, taps to set a coordinate. The
+          location + radius controls below act ON this map. The only marker is
+          the worker's OWN location (privacy: no other users, no fake market
+          points); honest empty state = the real map with no markers yet. */}
       <div
-        className="flex flex-col items-center gap-2 rounded-xl border border-ink-500 bg-ink-900/60 p-5"
+        className="flex flex-col gap-2 rounded-xl border border-ink-500 bg-ink-900/60 p-3"
         data-testid="location-panel"
         aria-label={t("panelTitle")}
       >
-        <svg viewBox="0 0 120 120" className="h-32 w-32" role="img" aria-hidden>
-          <circle cx="60" cy="60" r="56" fill="none" stroke="rgb(var(--c-brand-blue))" strokeOpacity="0.18" />
-          <circle cx="60" cy="60" r="38" fill="none" stroke="rgb(var(--c-brand-blue))" strokeOpacity="0.28" />
-          <circle cx="60" cy="60" r="20" fill="rgb(var(--c-brand-blue))" fillOpacity="0.10" stroke="rgb(var(--c-brand-blue))" strokeOpacity="0.45" />
-          <circle cx="60" cy="60" r="4.5" fill="rgb(var(--c-brand-cyan))" />
-        </svg>
+        <MarketMapLive
+          selected={selected}
+          radiusKm={selected?.radiusKm ?? radiusKm}
+          onPick={pickFromMap}
+          ariaLabel={t("panelTitle")}
+        />
+        <p className="text-center text-[11px] text-text-muted" data-testid="location-map-tap-hint">
+          {t("mapTapHint")}
+        </p>
         {selected ? (
           <p className="text-center text-sm font-medium text-text-primary" data-testid="location-panel-where">
             {whereText(selected) || t(selected.source === "auto" ? "sourceAuto" : "sourceManual")}

@@ -94,11 +94,12 @@
     "deleting": "Deleting...",
     "deleteConfirm": "Really delete this entry? It becomes soft-deleted — the row stays in history but won't show in the list.",
     "deleteBlocked": "Entry already confirmed — send a correction request instead of deleting.",
-    "edit": "Edit entry"
+    "edit": "Edit"
   },
   "editEntryTitle": "Edit entry",
   "editEntryBanner": "You're editing a saved entry. Suggest the structure again, confirm what you're changing, then \"Update entry\" replaces the old version. To back out —",
   "editEntryCancel": "cancel editing",
+  "editPreservedTitle": "Kept from the previous entry (you can change it):",
   "updateEntry": "Update entry",
   "field": {
     "work_direction": "Work direction",

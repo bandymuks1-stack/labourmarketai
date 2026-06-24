@@ -160,6 +160,8 @@
   },
   "marketMap": {
     "backToActions": "Action center",
+    "pageTitle": "Map",
+    "pageLead": "Mark your location and search radius on a real map.",
     "title": "My market map",
     "subtitle": "Where you are, where you want to act, and where the demand is — shown only through your own safe, private signals.",
     "ownerScopeNote": "This is your own market-map space — shown only through your own signals, at country / region level. Other users' signals are not shown, and an exact location appears only once you confirm it. A public market layer will be added separately, only with aggregation safeguards.",
@@ -514,7 +516,9 @@
     "saved": "Saved",
     "error": "Could not save. Please try again.",
     "none": "Add skills in your profile first.",
-    "profileLink": "My capabilities"
+    "profileLink": "My capabilities",
+    "linkMore": "Link a skill",
+    "linkDone": "Done"
   },
   "reviewReport": {
     "title": "Review report",
@@ -5211,6 +5215,7 @@
     "subtitle": "We''ll use this location and the selected distance for job search.",
     "panelTitle": "Location area",
     "panelEmpty": "No location chosen yet",
+    "mapTapHint": "Tap the map to mark your location",
     "radiusValue": "{km} km radius",
     "radiusLabel": "Distance from the chosen location",
     "autoButton": "Use my location",

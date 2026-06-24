@@ -29,6 +29,7 @@ import {
 } from "@/lib/journal/actions";
 import { autoLinkRecognizedJournalSkills } from "@/lib/journal/journal-entry-skills-actions";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
+import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
 import {
   isValidJournalPhoto,
   uploadJournalEntryPhoto,
@@ -91,10 +92,7 @@ type FragmentReviewState = JournalFragmentSuggestion & {
   userLabel: string;
 };
 
-export type JournalEditingEntry = {
-  id: string;
-  originalText: string;
-};
+export type { JournalEditingEntry };
 
 export function JournalEntryComposer({
   engagements,
@@ -125,6 +123,29 @@ export function JournalEntryComposer({
     engagements.find((e) => e.isPrimary)?.id ?? engagements[0]?.id ?? "";
   const today = new Date().toISOString().slice(0, 10);
 
+  // EDIT-mode preload (v5): when editing, reconstruct the saved structured
+  // state so the composer re-sends date / hours / quantity / direction / skills
+  // even on a text-only edit — `supersedeJournalEntry` rebuilds metrics from
+  // the form, so anything not preloaded here would be silently dropped. The
+  // composer is remounted per edit target (page `key`), so these initial values
+  // re-run for each edit. Preloaded values open as `confirmed` so they persist
+  // without forcing the worker to re-run "Sutvarkyti tekstą".
+  const editSkillSuggestions: ComposerSkillSuggestion[] = (
+    editingEntry?.skillSlugs ?? []
+  )
+    .map((slug) => {
+      const w = workerSkills.find((s) => s.slug === slug);
+      return w
+        ? {
+            slug: w.slug,
+            name: w.name,
+            matchedText: w.name,
+            confidence: "high" as SkillConfidence,
+          }
+        : null;
+    })
+    .filter((row): row is ComposerSkillSuggestion => !!row);
+
   const [stage, setStage] = useState<Stage>("compose");
   const [text, setText] = useState(editingEntry?.originalText ?? "");
   const [submitting, setSubmitting] = useState(false);
@@ -146,22 +167,40 @@ export function JournalEntryComposer({
   );
 
 
-  const [timeStatus, setTimeStatus] = useState<SuggestionStatus>("pending");
-  const [timeValue, setTimeValue] = useState<string>("");
-  const [timeUnit, setTimeUnit] = useState<string>("hours");
-  const [qtyStatus, setQtyStatus] = useState<SuggestionStatus>("pending");
-  const [qtyValue, setQtyValue] = useState<string>("");
-  const [qtyUnit, setQtyUnit] = useState<string>("square_meters");
-  const [dirStatus, setDirStatus] = useState<SuggestionStatus>("pending");
-  const [dirSlug, setDirSlug] = useState<string>("");
-  const [siteStatus, setSiteStatus] = useState<SuggestionStatus>("pending");
-  const [siteName, setSiteName] = useState<string>("");
+  const [timeStatus, setTimeStatus] = useState<SuggestionStatus>(
+    editingEntry?.time ? "confirmed" : "pending",
+  );
+  const [timeValue, setTimeValue] = useState<string>(
+    editingEntry?.time ? String(editingEntry.time.value) : "",
+  );
+  const [timeUnit, setTimeUnit] = useState<string>(
+    editingEntry?.time?.unitSlug ?? "hours",
+  );
+  const [qtyStatus, setQtyStatus] = useState<SuggestionStatus>(
+    editingEntry?.quantity ? "confirmed" : "pending",
+  );
+  const [qtyValue, setQtyValue] = useState<string>(
+    editingEntry?.quantity ? String(editingEntry.quantity.value) : "",
+  );
+  const [qtyUnit, setQtyUnit] = useState<string>(
+    editingEntry?.quantity?.unitSlug ?? "square_meters",
+  );
+  const [dirStatus, setDirStatus] = useState<SuggestionStatus>(
+    editingEntry?.workDirectionSlug ? "confirmed" : "pending",
+  );
+  const [dirSlug, setDirSlug] = useState<string>(
+    editingEntry?.workDirectionSlug ?? "",
+  );
+  const [siteStatus, setSiteStatus] = useState<SuggestionStatus>(
+    editingEntry?.siteName ? "confirmed" : "pending",
+  );
+  const [siteName, setSiteName] = useState<string>(editingEntry?.siteName ?? "");
   const [skillStatuses, setSkillStatuses] = useState<
     Record<string, SuggestionStatus>
-  >({});
+  >(Object.fromEntries(editSkillSuggestions.map((s) => [s.slug, "confirmed"])));
   const [skillSuggestions, setSkillSuggestions] = useState<
     ComposerSkillSuggestion[]
-  >([]);
+  >(editSkillSuggestions);
   // Recognition v1.1 — skills the entry hints at that the worker has NOT
   // declared yet, surfaced separately as "possible new skills" they may add.
   const [newSkillSuggestions, setNewSkillSuggestions] = useState<
@@ -174,12 +213,21 @@ export function JournalEntryComposer({
   // into more than one work fragment (the owner sentence yields 3).
   const [fragments, setFragments] = useState<FragmentReviewState[]>([]);
   // v3 — institution / topic detection cards.
-  const [institutionStatus, setInstitutionStatus] = useState<SuggestionStatus>("pending");
-  const [institutionName, setInstitutionName] = useState<string>("");
-  const [topicStatus, setTopicStatus] = useState<SuggestionStatus>("pending");
-  const [topic, setTopic] = useState<string>("");
+  const [institutionStatus, setInstitutionStatus] = useState<SuggestionStatus>(
+    editingEntry?.institutionName ? "confirmed" : "pending",
+  );
+  const [institutionName, setInstitutionName] = useState<string>(
+    editingEntry?.institutionName ?? "",
+  );
+  const [topicStatus, setTopicStatus] = useState<SuggestionStatus>(
+    editingEntry?.topic ? "confirmed" : "pending",
+  );
+  const [topic, setTopic] = useState<string>(editingEntry?.topic ?? "");
   const [engagementId, setEngagementId] = useState<string>(primaryId);
-  const [workDate, setWorkDate] = useState<string>(today);
+  // Preserve the entry's saved work date on edit (do NOT reset to today).
+  const [workDate, setWorkDate] = useState<string>(
+    editingEntry?.workDate ?? today,
+  );
 
   const existingSkillRefs = useMemo(
     () => workerSkills.map((s) => ({ slug: s.slug, label: s.name })),
@@ -271,14 +319,46 @@ export function JournalEntryComposer({
       matchedText: m.matchedText,
       confidence: m.confidence,
     }));
+    // Explicit named capabilities/specializations the worker wrote (e.g.
+    // "lietuviškos virtuvės gamyba", "vairavimas", "sutarčių ruošimas").
+    // These are the strongest evidence — the worker said them outright — and
+    // preserve specializations the slug engine would flatten, so they lead the
+    // list. They carry a synthetic `claim:` slug (no taxonomy row) and add to
+    // the profile as a self-declared claim via the SAME action as below.
+    const capabilityNew: ComposerNewSkillSuggestion[] = s.capabilitySuggestions.map(
+      (c) => ({
+        slug: `claim:${c.normalizedLabel}`,
+        name: c.label,
+        // Reason from the text fragment (every suggestion explains WHY it shows).
+        matchedText: c.reason ?? c.label,
+        confidence: "medium" as SkillConfidence,
+      }),
+    );
     const mergedNew: ComposerNewSkillSuggestion[] = [];
     const seenNew = new Set<string>();
-    for (const item of [...undeclaredFromEngine, ...crossSector]) {
-      if (declaredSlugSet.has(item.slug) || seenNew.has(item.slug)) continue;
+    // Dedupe by label too, so a capability never repeats a skill already shown
+    // as a declared/recognised chip above or another new-skill suggestion.
+    const seenName = new Set<string>(
+      [
+        ...workerSkills.map((w) => w.name),
+        ...matchedSkills.map((m) => m.name),
+      ].map((n) => n.trim().toLowerCase()),
+    );
+    for (const item of [...capabilityNew, ...undeclaredFromEngine, ...crossSector]) {
+      const nameKey = item.name.trim().toLowerCase();
+      if (
+        declaredSlugSet.has(item.slug) ||
+        seenNew.has(item.slug) ||
+        seenName.has(nameKey)
+      )
+        continue;
       seenNew.add(item.slug);
+      seenName.add(nameKey);
       mergedNew.push(item);
     }
-    const cappedNew = mergedNew.slice(0, NEW_SKILL_LIMIT);
+    // Allow headroom beyond NEW_SKILL_LIMIT so explicitly-named capabilities
+    // are not crowded out by engine guesses; still bounded for the review grid.
+    const cappedNew = mergedNew.slice(0, Math.max(NEW_SKILL_LIMIT, 12));
     setNewSkillSuggestions(cappedNew);
     setNewSkillStatus(
       Object.fromEntries(cappedNew.map((row) => [row.slug, "idle" as NewSkillAddStatus])),
@@ -592,6 +672,50 @@ export function JournalEntryComposer({
               {t("editEntryCancel")}
             </a>
           </p>
+        )}
+        {editingEntry && (
+          // v5 — show the structured state carried over from the saved entry so
+          // the worker can SEE that date / hours / quantity / direction / skills
+          // are preserved (and will be re-saved) even on a text-only edit.
+          <div
+            className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2"
+            data-testid="journal-edit-preserved"
+          >
+            <p className="text-[11px] font-medium text-text-secondary">
+              {t("editPreservedTitle")}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {workDate && (
+                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-date">
+                  {workDate}
+                </span>
+              )}
+              {timeValue && (
+                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-time">
+                  {timeValue} {tUnit(timeUnit)}
+                </span>
+              )}
+              {qtyValue && (
+                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-qty">
+                  {qtyValue} {tUnit(qtyUnit)}
+                </span>
+              )}
+              {dirSlug && (
+                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-dir">
+                  {directionBySlug.get(dirSlug)?.name ?? dirSlug}
+                </span>
+              )}
+              {skillSuggestions.map((s) => (
+                <span
+                  key={s.slug}
+                  className="rounded-md border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 text-[11px] text-brand-blue"
+                  data-testid={`journal-edit-preserved-skill-${s.slug}`}
+                >
+                  {s.name}
+                </span>
+              ))}
+            </div>
+          </div>
         )}
 
         <label className="flex flex-col gap-1.5">
