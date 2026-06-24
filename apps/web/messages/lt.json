@@ -160,6 +160,8 @@
   },
   "marketMap": {
     "backToActions": "Veiksmų centras",
+    "pageTitle": "Žemėlapis",
+    "pageLead": "Pažymėkite savo vietą ir paieškos atstumą tikrame žemėlapyje.",
     "title": "Mano rinkos žemėlapis",
     "subtitle": "Kur esate, kur norite veikti ir kur yra poreikis — rodoma tik jūsų pačių saugiais, privačiais signalais.",
     "ownerScopeNote": "Tai jūsų asmeninė rinkos žemėlapio erdvė — rodoma tik jūsų pačių signalais, šalies / regiono lygiu. Kitų vartotojų signalai nerodomi, o tiksli vieta — tik jums patvirtinus. Viešas rinkos sluoksnis bus jungiamas atskirai, tik su agregavimo apsauga.",
@@ -514,7 +516,9 @@
     "saved": "Išsaugota",
     "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "none": "Pirma pridėkite įgūdžių savo profilyje.",
-    "profileLink": "Mano gebėjimai"
+    "profileLink": "Mano gebėjimai",
+    "linkMore": "Susieti įgūdį",
+    "linkDone": "Baigta"
   },
   "reviewReport": {
     "title": "Peržiūros ataskaita",

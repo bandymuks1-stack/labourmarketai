@@ -39,6 +39,7 @@ export default async function MarketMapPage({
   if (!user) redirect(`/${locale}/auth/login`);
 
   const tNote = await getTranslations("featureNotes");
+  const tMap = await getTranslations("marketMap");
   // Owner-scoped current state for the capture forms (RLS — caller's own rows).
   const [preferred, login, demand, availability, capabilities] = await Promise.all([
     listOwnPreferredLocations(),
@@ -49,6 +50,14 @@ export default async function MarketMapPage({
   ]);
   return (
     <div className="flex flex-col gap-4">
+      <header className="flex flex-col gap-1" data-testid="market-map-page-header">
+        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+          {tMap("pageTitle")}
+        </h1>
+        <p className="text-sm leading-relaxed text-text-secondary">
+          {tMap("pageLead")}
+        </p>
+      </header>
       <FeatureNote testId="feature-note-market-map">
         {tNote("marketplaceMap")}
       </FeatureNote>

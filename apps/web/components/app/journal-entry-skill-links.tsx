@@ -32,6 +32,11 @@ export function JournalEntrySkillLinks({
     "idle",
   );
   const [pending, startTransition] = useTransition();
+  // Show ONLY the skills the worker explicitly linked to THIS entry by default
+  // (grounded in the entry). The full profile-skill picker is opt-in behind a
+  // disclosure — otherwise every entry card showed the worker's whole profile
+  // skill set (e.g. a construction worker's chips on a dog-walking entry).
+  const [picker, setPicker] = useState(false);
 
   if (availableSkills.length === 0) {
     return (
@@ -74,29 +79,48 @@ export function JournalEntrySkillLinks({
         ) : null}
       </div>
       <ul className="flex flex-wrap gap-1" data-testid={`entry-skill-links-${entryId}`}>
-        {availableSkills.map((s) => {
-          const on = selected.has(s.id);
-          return (
-            <li key={s.id}>
-              <button
-                type="button"
-                onClick={() => toggle(s.id)}
-                disabled={pending}
-                aria-pressed={on}
-                className={cn(
-                  "rounded-full border px-2 py-0.5 text-[10px] transition-colors disabled:opacity-50",
-                  on
-                    ? "border-brand-blue bg-brand-blue/10 text-brand-blue"
-                    : "border-ink-500 text-text-secondary hover:border-text-muted",
-                )}
-                data-testid={`entry-skill-toggle-${entryId}-${s.id}`}
-              >
-                {on ? "✓ " : ""}
-                {s.name}
-              </button>
-            </li>
-          );
-        })}
+        {/* Default: only skills linked to THIS entry. Picker open: all profile
+            skills (so the worker can link more). Never a profile-wide chip wall
+            on an unrelated entry. */}
+        {(picker ? availableSkills : availableSkills.filter((s) => selected.has(s.id))).map(
+          (s) => {
+            const on = selected.has(s.id);
+            return (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => toggle(s.id)}
+                  disabled={pending}
+                  aria-pressed={on}
+                  className={cn(
+                    "rounded-full border px-2 py-0.5 text-[10px] transition-colors disabled:opacity-50",
+                    on
+                      ? "border-brand-blue bg-brand-blue/10 text-brand-blue"
+                      : "border-ink-500 text-text-secondary hover:border-text-muted",
+                  )}
+                  data-testid={`entry-skill-toggle-${entryId}-${s.id}`}
+                >
+                  {on ? "✓ " : ""}
+                  {s.name}
+                </button>
+              </li>
+            );
+          },
+        )}
+        {/* Disclosure to open/close the full profile-skill picker. */}
+        {(availableSkills.some((s) => !selected.has(s.id)) || picker) && (
+          <li>
+            <button
+              type="button"
+              onClick={() => setPicker((v) => !v)}
+              className="rounded-full border border-dashed border-ink-500 px-2 py-0.5 text-[10px] text-text-muted transition-colors hover:border-text-secondary hover:text-text-secondary"
+              data-testid={`entry-skill-picker-toggle-${entryId}`}
+              aria-expanded={picker}
+            >
+              {picker ? t("linkDone") : t("linkMore")}
+            </button>
+          </li>
+        )}
       </ul>
     </div>
   );

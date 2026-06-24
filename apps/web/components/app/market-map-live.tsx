@@ -78,24 +78,30 @@ export function MarketMapLive({
     let cancelled = false;
     let created: LeafletTypes.Map | null = null;
     void (async () => {
-      const L = (await import("leaflet")).default;
-      if (cancelled || !containerRef.current || mapRef.current) return;
-      created = L.map(containerRef.current, {
-        scrollWheelZoom: false,
-        attributionControl: true,
-      }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(created);
-      created.on("click", (e: LeafletTypes.LeafletMouseEvent) => {
-        onPickRef.current(e.latlng.lat, e.latlng.lng);
-      });
-      mapRef.current = created;
-      layerRef.current = L.layerGroup().addTo(created);
-      // Tiles can mis-size when the container animates in.
-      created.invalidateSize();
+      try {
+        const L = (await import("leaflet")).default;
+        if (cancelled || !containerRef.current || mapRef.current) return;
+        created = L.map(containerRef.current, {
+          scrollWheelZoom: false,
+          attributionControl: true,
+        }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }).addTo(created);
+        created.on("click", (e: LeafletTypes.LeafletMouseEvent) => {
+          onPickRef.current(e.latlng.lat, e.latlng.lng);
+        });
+        mapRef.current = created;
+        layerRef.current = L.layerGroup().addTo(created);
+        // Tiles can mis-size when the container animates in.
+        created.invalidateSize();
+      } catch (err) {
+        // A map-runtime failure must never crash the page — the location +
+        // radius controls below stay usable as a provider-free fallback.
+        console.error("[market-map-live] init failed:", err);
+      }
     })();
     return () => {
       cancelled = true;
