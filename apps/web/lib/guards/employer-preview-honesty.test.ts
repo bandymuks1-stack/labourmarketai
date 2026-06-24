@@ -64,7 +64,9 @@ describe("employer-preview copy is honest in LT + EN", () => {
     // LT: "niekas jūsų dar neieško" / EN: "nobody is looking for you yet".
     expect(ep(lt).intro).toMatch(/niekas .*neieško/i);
     expect(ep(en).intro).toMatch(/nobody is looking/i);
-    expect(ep(lt).unverifiedNote).toMatch(/nėra patvirtinta/i);
-    expect(ep(en).unverifiedNote).toMatch(/not verified/i);
+    // Quiet-UI reframe (fix/cv): "verified" → "confirmed" wording; the note still
+    // honestly states the data is not (yet) confirmed.
+    expect(ep(lt).unverifiedNote).toMatch(/nėra patvirtinta|dar ne patvirtinta/i);
+    expect(ep(en).unverifiedNote).toMatch(/not (verified|confirmed)/i);
   });
 });

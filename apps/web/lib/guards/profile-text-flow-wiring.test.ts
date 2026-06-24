@@ -238,16 +238,17 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
       it("has the expected updated wording on the apply CTA + saved status", () => {
         const apply = textFirst.applyAll.toLowerCase();
         const confirmed = textFirst.confirmedByYou.toLowerCase();
+        // Quiet-UI reframe (fix/cv): the saved status reads "Laukia patvirtinimo"
+        // / "Awaiting confirmation" — honest (NOT affirmatively confirmed), no
+        // "self-declared" jargon.
         if (locale === "lt") {
           expect(apply).toContain("pasirinkt");
-          expect(apply).not.toMatch(/patvirtint/);
-          expect(confirmed).toContain("paties nurodyt");
-          expect(confirmed).not.toMatch(/patvirtint/);
+          expect(confirmed).toContain("laukia");
+          expect(confirmed).not.toBe("patvirtinta");
         } else {
           expect(apply).toContain("selected");
-          expect(apply).not.toMatch(/confirmed/);
-          expect(confirmed).toContain("self-declared");
-          expect(confirmed).not.toMatch(/confirmed/);
+          expect(confirmed).toContain("awaiting");
+          expect(confirmed).not.toBe("confirmed");
         }
       });
 
@@ -255,10 +256,11 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
         for (const [key, val] of entries) {
           if (WHITELIST.has(key)) continue;
           const lower = val.toLowerCase();
+          // Affirmative claims only — "laukia patvirtinimo" (awaiting) is allowed.
           expect(
             lower,
             `${locale}.skills.textFirst.${key} must not affirm verified/confirmed`,
-          ).not.toMatch(/\bverified\b|\bconfirmed\b|\bpatvirtin\w*/);
+          ).not.toMatch(/\bverified\b|\bconfirmed\b|\bpatvirtinta\b/);
         }
       });
     });
@@ -270,18 +272,16 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
       >;
       const structuring = json.structuring as Record<string, unknown>;
 
-      it("has the new selfDeclared bucket key + disclaimer", () => {
+      it("has the selfDeclared bucket key (disclaimer removed — quiet UI)", () => {
         const buckets = structuring.buckets as Record<string, string>;
         expect(buckets.selfDeclared, `${locale}.structuring.buckets.selfDeclared missing`).toBeTruthy();
-        expect(buckets.selfDeclaredDisclaimer, `${locale}.structuring.buckets.selfDeclaredDisclaimer missing`).toBeTruthy();
+        // selfDeclaredDisclaimer ("not yet confirmed by…") was removed from
+        // worker UI per the owner (no explanatory provenance paragraph).
+        expect(buckets.selfDeclaredDisclaimer).toBeUndefined();
         if (locale === "lt") {
-          expect(buckets.selfDeclared).toContain("Paties nurodyti");
-          expect(buckets.selfDeclaredDisclaimer).toContain("dar nėra patvirtinti");
+          expect(buckets.selfDeclared).toContain("Siūlomi");
         } else {
-          expect(buckets.selfDeclared.toLowerCase()).toContain("self-declared");
-          expect(buckets.selfDeclaredDisclaimer.toLowerCase()).toContain(
-            "not yet confirmed",
-          );
+          expect(buckets.selfDeclared.toLowerCase()).toContain("suggested");
         }
       });
 

@@ -46,8 +46,6 @@ const CANONICAL_LOCALES = ["lt", "en"] as const;
 // Top-level keys live in messages/<loc>/journal.json.
 const RENDERED_TOP_KEYS = [
   "savedBody",
-  "classifyLater",
-  "suggestionReviewIntro",
   "pilotBackboneNote",
 ] as const;
 const RENDERED_INBOX_KEYS = [
@@ -121,29 +119,24 @@ describe("Guard: journal clarity disclaimers present + honest (LT + EN)", () => 
       }
     });
 
-    it(`${locale} disclaimers still say the honest thing`, () => {
+    it(`${locale} remaining honest notes still say the honest thing`, () => {
+      // The composer suggestion→fact disclaimer paragraphs (suggestionReviewIntro,
+      // classifyLater) were REMOVED from normal user UI per the owner (quiet UI).
+      // The manager-review clarify hint + the confirmation-backbone note remain
+      // honest where they are still shown.
       const j = JSON.parse(read(`messages/${locale}/journal.json`)) as Record<
         string,
         unknown
       >;
-      const review = (j.suggestionReviewIntro as string).toLowerCase();
-      const later = (j.classifyLater as string).toLowerCase();
       const backbone = (j.pilotBackboneNote as string).toLowerCase();
       const clarify = (
         (j.inbox as Record<string, string>).clarifyHint
       ).toLowerCase();
 
       if (locale === "en") {
-        // Suggestions are not facts until confirmed.
-        expect(review).toMatch(/not\s+saved\s+as\s+facts/);
-        expect(later).toMatch(/reviewed\s+before\s+becoming\s+facts/);
-        // Confirmation layer only when a real confirmation exists.
         expect(backbone).toMatch(/real\s+confirmation/);
-        // The system does not guess which work the hours belong to.
         expect(clarify).toMatch(/does\s+not\s+guess/);
       } else {
-        expect(review).toMatch(/neišsaugomi\s+kaip\s+faktai/);
-        expect(later).toMatch(/prieš\s+išsaugant\s+kaip\s+faktą/);
         expect(backbone).toMatch(/realus\s+patvirtinimas/);
         expect(clarify).toMatch(/nespėlioja/);
       }
@@ -167,10 +160,11 @@ describe("Guard: no automatic/AI verification overclaim in journal copy", () => 
 });
 
 describe("Guard: components render the journal clarity keys", () => {
-  it("composer renders the suggestion→fact disclaimers", () => {
+  it("composer renders the saved-state copy (disclaimer paragraphs removed)", () => {
     const src = read("components/app/journal-entry-composer.tsx");
-    expect(src).toMatch(/t\("suggestionReviewIntro"\)/);
-    expect(src).toMatch(/t\("classifyLater"\)/);
+    // suggestionReviewIntro / classifyLater were removed from normal user UI.
+    expect(src).not.toMatch(/t\("suggestionReviewIntro"\)/);
+    expect(src).not.toMatch(/t\("classifyLater"\)/);
     expect(src).toMatch(/t\("savedBody"\)/);
   });
 

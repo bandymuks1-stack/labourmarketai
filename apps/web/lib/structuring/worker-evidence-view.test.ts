@@ -19,11 +19,16 @@ describe("worker evidence card — honest provenance, no overclaim", () => {
   // Strip comments — the doc comment intentionally names the forbidden
   // patterns ("no score", 'no fake "verified by AI"') to document the rule.
   const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  it("separates manager-confirmed from self-declared and shows awaiting note", () => {
+  it("shows short confirmed/self-declared status labels (no process explanation)", () => {
     expect(src).toMatch(/t\("confirmed"\)/);
     expect(src).toMatch(/t\("selfDeclared"\)/);
-    expect(src).toMatch(/t\("awaitingNote"\)/);
     expect(src).toMatch(/t\("systemEntries"\)/);
+    // Quiet UI (fix/cv): the intro, awaiting note, who-can-confirm + footnote
+    // explanations were removed — only short labels/status remain.
+    expect(src).not.toMatch(/t\("intro"\)/);
+    expect(src).not.toMatch(/t\("awaitingNote"\)/);
+    expect(src).not.toMatch(/t\("whoCanConfirm"\)/);
+    expect(src).not.toMatch(/t\("footnote"\)/);
   });
   it("the standalone worker-evidence card is consolidated out of the page", () => {
     // Consolidated (P0 profile rescue): ProfileHubOverview is the one evidence
@@ -48,15 +53,16 @@ describe("worker evidence i18n", () => {
       }).workerEvidence ?? {};
       for (const k of [
         "title",
-        "intro",
         "confirmed",
         "selfDeclared",
-        "awaitingNote",
         "systemEntries",
         "empty",
-        "footnote",
       ]) {
         expect(ns[k], `${locale} workerEvidence.${k}`).toBeTruthy();
+      }
+      // Removed (quiet UI): no explanatory intro/awaitingNote/whoCanConfirm/footnote.
+      for (const k of ["intro", "awaitingNote", "whoCanConfirm", "footnote"]) {
+        expect(ns[k], `${locale} workerEvidence.${k} must be removed`).toBeUndefined();
       }
     });
   }

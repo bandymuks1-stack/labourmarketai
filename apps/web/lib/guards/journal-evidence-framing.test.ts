@@ -3,13 +3,15 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Journal → "Mano darbo įrodymai" framing guard (slice journal-evidence-v1, PR C).
+ * Journal → "Mano CV" framing guard (slice journal-evidence-v1, reframed in
+ * fix/cv).
  *
- * The worker-facing Work Journal must read as a simple EVIDENCE path that
- * strengthens the work card — not a technical journal/draft module. Pins:
- *   - the surface is framed as evidence + connected to the work card,
+ * The worker-facing Work Journal must read as the worker's simple CV that
+ * strengthens the work card — NOT as bureaucratic "evidence/įrodymai" and not a
+ * technical journal/draft module. Pins:
+ *   - the surface is framed as the worker's CV + connected to the work card,
  *   - worker-facing copy carries no heavy draft/module/pipeline wording,
- *   - the benefit line is honest (evidence is NOT automatic verification),
+ *   - the benefit line is honest (adding to the CV is NOT automatic verification),
  *   - one primary CTA on the journal entry surface.
  */
 
@@ -25,7 +27,6 @@ const WORKER_KEYS = [
   "navTitle",
   "navSubtitle",
   "composerBenefit",
-  "benefitNotAuto",
   "listTitle",
   "listEmpty",
   "listEmptyTitle",
@@ -34,14 +35,16 @@ const WORKER_KEYS = [
   "whatDidYouDo",
 ] as const;
 
-describe("journal is framed as work evidence connected to the work card", () => {
-  it("LT title + subtitle name evidence and the work card", () => {
-    expect(ltJ.navTitle).toMatch(/įrodym/i);
+describe("journal is framed as the worker's CV connected to the work card", () => {
+  it("LT title reads as CV (not 'įrodymai'); subtitle + benefit name the work card", () => {
+    expect(ltJ.navTitle).toMatch(/cv/i);
+    expect(ltJ.navTitle).not.toMatch(/įrodym/i);
     expect(ltJ.navSubtitle).toMatch(/darbo kortel/i);
     expect(ltJ.composerBenefit).toMatch(/darbo kortel/i);
   });
-  it("EN title + subtitle mirror the evidence + work-card framing", () => {
-    expect(enJ.navTitle).toMatch(/evidence/i);
+  it("EN title reads as CV (not 'evidence'); subtitle + benefit name the work card", () => {
+    expect(enJ.navTitle).toMatch(/cv/i);
+    expect(enJ.navTitle).not.toMatch(/evidence/i);
     expect(enJ.navSubtitle).toMatch(/work card/i);
     expect(enJ.composerBenefit).toMatch(/work card/i);
   });
@@ -65,20 +68,11 @@ describe("no heavy technical / module / draft wording on worker-facing copy", ()
   }
 });
 
-describe("benefit copy is honest — only a person confirms (no auto-verify claim)", () => {
-  // Phrased AFFIRMATIVELY (a human confirms) so it never carries the forbidden
-  // "automatic verification" substring that the honesty guards block.
-  it("LT benefitNotAuto says only a person (manager/client) can confirm", () => {
-    expect(ltJ.benefitNotAuto).toMatch(/žmogus/i);
-    expect(ltJ.benefitNotAuto).toMatch(/vadovas|klient/i);
-    expect(ltJ.benefitNotAuto).not.toMatch(/automat/i);
-  });
-  it("EN benefitNotAuto says only a person (manager/client) can confirm", () => {
-    expect(enJ.benefitNotAuto).toMatch(/person/i);
-    expect(enJ.benefitNotAuto).toMatch(/manager|client/i);
-    expect(enJ.benefitNotAuto).not.toMatch(/automatic/i);
-  });
-});
+// Quiet-UI reframe (fix/cv): the section-level "only a person confirms" honesty
+// paragraph (benefitNotAuto) was REMOVED from normal user UI per the owner — the
+// composer now shows short labels/status only, no confirmation/verification
+// disclaimer. Honesty is preserved structurally (status labels reflect real
+// state; no fake-verified claim) and enforced by `no-disclaimer-ui.test.ts`.
 
 describe("journal entry surface stays focused", () => {
   const page = read(PAGE);

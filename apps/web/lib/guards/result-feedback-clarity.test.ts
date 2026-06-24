@@ -89,12 +89,11 @@ describe("Guard: feedback copy is present in LT + EN and honest", () => {
       }
     });
 
-    it(`${loc}: savedConfirmNote names a real human confirmer, not automation`, () => {
+    it(`${loc}: savedConfirmNote stays honest and claims no automation`, () => {
+      // Quiet-UI reframe (fix/cv): the save note was reduced to a short privacy
+      // label ("Įrašas privatus.") — it no longer explains who confirms. It must
+      // still never claim automatic / AI confirmation.
       const note = journal.savedConfirmNote ?? "";
-      const human = loc === "lt" ? /vadov|klient/i : /manager|client/i;
-      expect(human.test(note), `${loc} savedConfirmNote human confirmer: "${note}"`).toBe(true);
-      // never claim automatic / AI confirmation (AI matched case-sensitively to
-      // avoid the LT ASCII-\b false positive on words like "įrašai")
       expect(/automati(?:c|cally|nis|škai)|guaranteed/i.test(note)).toBe(false);
       expect(/(?<![A-Za-z])AI(?![A-Za-z])/.test(note)).toBe(false);
     });

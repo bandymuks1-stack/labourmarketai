@@ -54,13 +54,13 @@ describe("the card renders real values + an honest zero state", () => {
 });
 
 describe("skills are labelled self-declared (not verified); copy present LT+EN", () => {
-  it("LT skills hint says self-declared / not verified", () => {
-    expect(lt.playerCard.skillsHint).toMatch(/savideklaruot/i);
-    expect(lt.playerCard.skillsHint).toMatch(/nepatvirtint/i);
+  it("LT skills hint reads as your-listed / not-yet-confirmed (quiet UI)", () => {
+    expect(lt.playerCard.skillsHint).toMatch(/nurodyt/i);
+    expect(lt.playerCard.skillsHint).not.toMatch(/\bpatvirtinta\b/i);
   });
-  it("EN skills hint says self-declared / not verified", () => {
-    expect(en.playerCard.skillsHint).toMatch(/self-declared/i);
-    expect(en.playerCard.skillsHint).toMatch(/not verified/i);
+  it("EN skills hint reads as you-listed / awaiting (quiet UI)", () => {
+    expect(en.playerCard.skillsHint).toMatch(/listed|awaiting/i);
+    expect(en.playerCard.skillsHint).not.toMatch(/\bverified\b/i);
   });
   it("both locales expose every player-card key", () => {
     for (const [name, j] of [["lt", lt], ["en", en]] as const) {

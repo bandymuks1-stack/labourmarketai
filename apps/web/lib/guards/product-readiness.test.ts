@@ -251,24 +251,18 @@ describe("confirmation-required copy is present", () => {
     // ("Paties nurodyta" / "Self-declared") makes the trust posture
     // explicit. The accompanying needsExternalConfirmation key remains
     // unchanged — it describes the FUTURE confirmation flow honestly.
-    expect(lt.skills.textFirst.confirmedByYou).toBe("Paties nurodyta");
-    expect(en.skills.textFirst.confirmedByYou).toBe("Self-declared");
+    expect(lt.skills.textFirst.confirmedByYou).toBe("Laukia patvirtinimo");
+    expect(en.skills.textFirst.confirmedByYou).toBe("Awaiting confirmation");
     expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/išorinio/i);
     expect(en.skills.textFirst.needsExternalConfirmation).toMatch(
       /external/i,
     );
-    // PR #97 softened self-declared-flow wording: "nepatvirtinate" →
-    // "nepasirenkate" (LT) and "confirm" → "select" (EN). The rule still
-    // states "Suggestions only become saved when you select them.
-    // Nothing is saved automatically." — pinned via the new keywords.
-    expect(lt.structuring.ruleBasedNotice).toMatch(/nepasirenkate|nepatvirtin/i);
-    expect(en.structuring.ruleBasedNotice).toMatch(/select|confirm/i);
+    // Quiet-UI reframe (fix/cv): the rule-based/AI disclaimer (ruleBasedNotice)
+    // was REMOVED from normal user UI per the owner. Nothing replaces it.
   });
-  it("journal exposes a suggestionReviewIntro + saved-state strings", () => {
+  it("journal exposes the saved-state strings", () => {
     const lt = JSON.parse(readWeb("messages/lt/journal.json"));
     const en = JSON.parse(readWeb("messages/en/journal.json"));
-    expect(lt.suggestionReviewIntro).toMatch(/pasiūlym/i);
-    expect(en.suggestionReviewIntro).toMatch(/suggestions/i);
     expect(lt.savedTitle).toBeTruthy();
     expect(en.savedTitle).toBeTruthy();
     expect(lt.savedBody).toMatch(/patvirtint/i);

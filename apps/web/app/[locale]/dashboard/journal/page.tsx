@@ -392,14 +392,13 @@ export default async function JournalPage({
       )}
       <div id="journal-composer" className="order-2">
         <div className="flex flex-col gap-2">
-        {/* Benefit-first framing: an entry is proof that strengthens the work
-            card, not timesheet admin — confirmation is a real human decision. */}
+        {/* Benefit-first framing: an entry strengthens the work card. Quiet UI —
+            no confirmation/verification disclaimer paragraph. */}
         <p
           className="text-sm leading-relaxed text-text-secondary"
           data-testid="journal-composer-benefit"
         >
-          {t("composerBenefit")}{" "}
-          <span className="text-text-muted">{t("benefitNotAuto")}</span>
+          {t("composerBenefit")}
         </p>
         <JournalEntryComposer
           // Remount the composer whenever the edit target changes. The

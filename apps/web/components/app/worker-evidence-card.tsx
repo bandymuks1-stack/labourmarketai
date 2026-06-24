@@ -43,7 +43,6 @@ export async function WorkerEvidenceCard({
   return (
     <section className="card-border flex flex-col gap-3 p-4" data-testid="worker-evidence-card">
       <h2 className="font-display text-base font-semibold text-text-primary">{t("title")}</h2>
-      <p className="text-xs leading-relaxed text-text-secondary">{t("intro")}</p>
 
       {hasAny && <EvidenceStatusStrip active={evidenceActive} />}
 
@@ -80,7 +79,6 @@ export async function WorkerEvidenceCard({
               </span>
             ))}
           </div>
-          <span className="text-[10px] text-amber-700">{t("awaitingNote")}</span>
         </div>
       )}
 
@@ -101,20 +99,6 @@ export async function WorkerEvidenceCard({
         />
       )}
 
-      {/* Honest "who can confirm this today" line — names ONLY the confirmer
-          roles the backend can actually store (manager / owner / external
-          (client) manager) and states plainly that an entry stays
-          self-declared until one of them confirms it. No broad confirmer
-          (parent/teacher/buyer) is claimed; adding those is a deferred
-          migration (docs/design/universal-confirmation-roles-v1.md). */}
-      <p
-        className="text-[11px] leading-relaxed text-text-secondary"
-        data-testid="worker-evidence-who-can-confirm"
-      >
-        {t("whoCanConfirm")}
-      </p>
-
-      <p className="text-[10px] leading-relaxed text-text-muted">{t("footnote")}</p>
     </section>
   );
 }

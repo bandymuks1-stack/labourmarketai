@@ -406,22 +406,18 @@
     "lastActivity": "Paskutinė veikla"
   },
   "workerEvidence": {
-    "title": "Mano įrodymai",
-    "intro": "Čia matote, kuo paremtas jūsų profilis. Tai nėra išorinis patvirtinimas — tik tai, ką pateikėte patys ir ką užfiksavo sistema.",
-    "confirmed": "Patvirtinta vadovo",
-    "selfDeclared": "Paties nurodyta",
-    "awaitingNote": "Laukia vadovo patvirtinimo.",
-    "systemEntries": "Sistemos užfiksuoti darbo įrašai",
-    "empty": "Įrodymai atsiras, kai sukursite žurnalo įrašą ir jį peržiūrės vadovas.",
-    "emptyTitle": "Kol kas nėra įrodymų",
-    "emptyCta": "Atidaryti žurnalą",
-    "whoCanConfirm": "Kas šiandien gali patvirtinti įrašą: jūsų vadovas, įmonės savininkas arba išorinis (kliento) vadovas — tie, kurie realiai prižiūri jūsų darbą. Kol kuris nors iš jų įrašo nepatvirtins, jis lieka jūsų paties nurodytas.",
-    "footnote": "Įgūdžiai gali būti paties nurodyti, įrodyti sistemos veikla arba patvirtinti vadovo. Sistema nieko nepatvirtina automatiškai."
+    "title": "Mano CV",
+    "confirmed": "Patvirtinta",
+    "selfDeclared": "Laukia patvirtinimo",
+    "systemEntries": "Darbo įrašai",
+    "empty": "Pradėkite pildyti CV — sukurkite pirmą įrašą.",
+    "emptyTitle": "Kol kas tuščia",
+    "emptyCta": "Atidaryti žurnalą"
   },
   "evidenceStatus": {
-    "aria": "Įrodymo būsena",
+    "aria": "Įrašo būsena",
     "self_declared": {
-      "label": "Paties nurodyta",
+      "label": "Laukia patvirtinimo",
       "hint": "Jūsų paties įrašas — tai, ką nurodėte patys."
     },
     "awaiting_confirmation": {
@@ -437,10 +433,10 @@
     "eyebrow": "Mano darbo kortelės šaltinis",
     "lead": "Štai ką apie jus jau žinome.",
     "explainer": "Šie duomenys maitina jūsų darbo kortelę. Tai padeda darbdaviui greičiau suprasti, kokiam darbui tinkate.",
-    "notVerified": "Tai jūsų pačių pateikta informacija — dar nepatvirtinta žmogaus ar dokumentais. Įrodymai didina pasitikėjimą, bet galite juos pridėti vėliau.",
+    "notVerified": "Tai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.",
     "primaryAction": "Pridėti, ko trūksta",
-    "primaryActionJournal": "Pridėti darbo įrodymą",
-    "journalLink": "Mano darbo įrodymai",
+    "primaryActionJournal": "Pridėti prie CV",
+    "journalLink": "Mano CV",
     "evidence": {
       "intro": "Įgūdžiai stipresni, kai juos paremia tikri darbo, mokymosi ar veiklos įrašai.",
       "supported": "Paremta darbo įrašais: {supported} iš {declared}",
@@ -460,10 +456,10 @@
         "none": "Dar nenurodyta"
       },
       "journal": {
-        "label": "Darbo įrodymai",
+        "label": "CV įrašai",
         "available": "Žurnalo įrašai: {n}",
         "none": "Dar nesusieta",
-        "preparing": "Darbo įrodymų ryšys ruošiamas"
+        "preparing": "Darbo įrašų ryšys ruošiamas"
       }
     }
   },
@@ -512,7 +508,7 @@
     }
   },
   "journalSkillLinks": {
-    "helper": "Pažymėkite savo įgūdžius, kuriuos paremia šis darbo įrašas. Tai įrodymas, ne patvirtinimas.",
+    "helper": "Pažymėkite įgūdžius, kuriuos rodo šis įrašas — taip pildosi jūsų CV. Dar nepatvirtinta.",
     "saving": "Saugoma…",
     "saved": "Išsaugota",
     "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
@@ -526,7 +522,7 @@
     "reviewHeading": "Reikia peržiūrėti",
     "reviewHelper": "Šie įgūdžiai susieti, bet šio įrašo tekstas jų nepagrindžia. Peržiūrėkite arba atsiekite netinkamus.",
     "reviewAgain": "Peržiūrėti iš naujo",
-    "unlinkFlagged": "Atsieti netinkamus",
+    "unlinkFlagged": "Atsieti",
     "linkMore": "Susieti įgūdį",
     "linkDone": "Baigta"
   },
@@ -642,7 +638,7 @@
     "title": "Įgūdžiai ir patirtis",
     "intro": "Jūsų gebėjimai — iš jūsų pačių žodžių ir darbo istorijos. Nesate užrakinti viename vaidmenyje: čia tilps įgūdžiai iš bet kurios srities.",
     "skillsTitle": "Įgūdžiai",
-    "selfDeclaredStatus": "Paties nurodyta",
+    "selfDeclaredStatus": "Laukia patvirtinimo",
     "notExternallyVerified": "Nepatvirtinta išoriškai",
     "sourceProfileText": "Šaltinis: profilio tekstas",
     "disclaimer": "Šie įgūdžiai paimti iš jūsų pačių aprašymo. Jie dar nėra patvirtinti darbų žurnalu, dokumentais ar kito žmogaus patvirtinimu — bet jie yra jūsų bendros gebėjimų savybės dalis.",
@@ -1545,7 +1541,7 @@
       "notOnboarded": "Dar nepradėjęs",
       "profileTextTitle": "Profilio tekstas",
       "profileTextEmpty": "Profilio tekstas dar neįrašytas.",
-      "claimsTitle": "Paties nurodyti įgūdžiai",
+      "claimsTitle": "Siūlomi įgūdžiai",
       "claimsEmpty": "Šis vartotojas dar neturi paties nurodytų įgūdžių.",
       "draftsTitle": "Operaciniai juodraščiai",
       "draftsEmpty": "Šis vartotojas dar neturi operacinių juodraščių.",
@@ -1837,12 +1833,12 @@
     "documentsReadiness": "Pasiruošimas ir dokumentai: rodome sąžiningai, ar esate pasiruošę dirbti vietoje ar kitoje šalyje. Be reikiamų dokumentų nežadame teisės dirbti užsienyje.",
     "skillRecognition": "Įgūdžių atpažinimas: parašius darbo aprašymą, sistema pasiūlo įgūdžius. Tai pasiūlymas, kurį patvirtinate jūs — ne galutinis faktas.",
     "workJournal": "Darbo žurnalas: užrašykite, ką nuveikėte. Išsaugojus, įgūdžiai atpažįstami ir susiejami su įrašu kaip pagrindimas.",
-    "evidenceTrust": "Įrodymai ir pasitikėjimo signalai: rodome, kuo paremtas profilis. Tai signalai, ne galutinis patikrinimas.",
+    "evidenceTrust": "Jūsų įrašai ir signalai: rodome, kuo paremtas profilis.",
     "companyNeeds": "Poreikiai: aprašykite, ko reikia (profesija, šalis, komanda). Užklausa išsaugoma realiai — be netikrų atitikčių.",
     "opportunities": "Galimybės: matote jums tinkančius darbus. Matomumas priklauso nuo tinklo dydžio ir jūsų pasiruošimo.",
     "marketplaceMap": "Rinkos žemėlapis: realūs darbo rinkos signalai pagal šalį ir regioną. Tikslesnė vieta atsiranda, kai ją patvirtinate.",
     "communicationInbox": "Komunikacija: tikras pokalbių aplankas. Pokalbis dėl projekto atveriamas su projekto kontekstu.",
-    "feedbackLoop": "Po darbo: užfiksuokite jį darbo žurnale, o vadovas ar klientas gali patvirtinti įrašą. Patvirtinimas tampa įrodymu ir pakelia pasitikėjimo signalą jūsų kortelėje. Jokių žvaigždučių ar netikros reputacijos — tik realūs žmonių patvirtinimai.",
+    "feedbackLoop": "Po darbo užfiksuokite jį darbo žurnale. Jūsų įrašai pildo CV ir stiprina darbo kortelę.",
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
     "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi. Kol kas pirmi vartotojai jungiami rankiniu / owner-review būdu. Stripe bus prijungtas kitame etape.",
     "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."
@@ -1859,7 +1855,7 @@
     "skillsForDirection": "Šios krypties įgūdžiai",
     "othersRemainSaved": "Kitos kryptys išlieka išsaugotos",
     "canChangeLater": "Galite grįžti ir pakeisti vėliau",
-    "notConfirmedYet": "Tai dar nėra patvirtintas įgūdis. Jūs galite koreguoti savo kryptis ir įgūdžius, kol jie nėra patvirtinti darbų įrodymais.",
+    "notConfirmedYet": "Tai dar nėra patvirtintas įgūdis. Galite koreguoti kryptis ir įgūdžius, kol jie nepatvirtinti.",
     "removeConfirm": "Pašalinti {name} iš jūsų krypčių? Išsaugoti įgūdžiai lieka.",
     "selectedCount": "pasirinkta: {n}",
     "primaryDirection": "Pagrindinė darbo kryptis",
@@ -1886,7 +1882,7 @@
     "pickerTitle": "Tavo įgūdžiai",
     "pickerHelp": "Pasirink įgūdžius, kuriuos turi. Vėliau juos patvirtins darbų vadovas.",
     "coreBadge": "Pagrindinis",
-    "selfDeclared": "Tavo paties nurodyta",
+    "selfDeclared": "Tavo jūsų nurodyta",
     "verified": "Patvirtinta",
     "saveButton": "Išsaugoti įgūdžius",
     "saving": "Saugoma...",
@@ -1919,7 +1915,7 @@
       "appliedToast": "Pasirinktus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti arba papildyti rankiniu būdu.",
       "noSuggestionsFallback": "Kol kas neradome aiškių pasiūlymų. Galite parašyti plačiau arba pridėti informaciją rankiniu būdu.",
       "noNewSuggestions": "Naujų pasiūlymų neradome. Jau išsaugoti gebėjimai rodomi žemiau.",
-      "confirmedByYou": "Paties nurodyta",
+      "confirmedByYou": "Laukia patvirtinimo",
       "addedToProfile": "Pridėta į jūsų profilį",
       "needsExternalConfirmation": "Vėliau reikės išorinio patvirtinimo",
       "viewCapabilities": "Žiūrėti savo gebėjimus",
@@ -2122,18 +2118,11 @@
     }
   },
   "structuring": {
-    "groupEyebrow": "Paties nurodyti pasiūlymai",
-    "ruleBasedNotice": "Pastaba: kol kas naudojame paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai netampa faktais, kol jūs jų nepasirenkate — niekas neišsaugoma automatiškai.",
-    "provenance": {
-      "suggestedFromEntry": "Pasiūlyta pagal įrašą",
-      "selfDeclared": "Paties nurodyta",
-      "notVerified": "Dar nepatvirtinta"
-    },
+    "groupEyebrow": "Siūlomi įgūdžiai",
     "emptyBucket": "Šiame teksto fragmente nieko aiškaus neradome. Galite parašyti daugiau arba praleisti.",
     "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau, arba pridėkite reikšmingus įrašus rankiniu būdu.",
     "buckets": {
-      "selfDeclared": "Paties nurodyti įgūdžiai",
-      "selfDeclaredDisclaimer": "Tai jūsų pačių nurodyti įgūdžiai. Jie dar nėra patvirtinti darbų žurnalu, dokumentais ar kito žmogaus patvirtinimu.",
+      "selfDeclared": "Siūlomi įgūdžiai",
       "skills": "Rasti įgūdžiai",
       "directions": "Galimos darbo kryptys",
       "roles": "Galimi vaidmenys",
@@ -2164,7 +2153,7 @@
       "pending": "Pasiūlymas"
     },
     "cv": {
-      "title": "CV — pirmasis jūsų įrodymas",
+      "title": "CV — pirmasis jūsų įrašas",
       "helper": "CV padeda greičiau suprasti jūsų patirtį ir stiprina jūsų darbo kortelę. Jis privatus. Įkelkite PDF, DOCX ar TXT failą arba įklijuokite tekstą.",
       "uploadLabel": "Įkelti CV failą",
       "uploadPick": "Pasirinkti CV failą",
@@ -2180,7 +2169,7 @@
       "pasteLabel": "Įklijuoti CV tekstą",
       "pastePlaceholder": "Įklijuokite savo CV tekstą čia.",
       "pasteSubmit": "Naudoti CV tekstą",
-      "evidenceTitle": "Kokie įrodymai stiprina jūsų darbo kortelę",
+      "evidenceTitle": "Kokie įrašai stiprina jūsų darbo kortelę",
       "evidenceCv": "CV — padeda greičiau suprasti jūsų patirtį.",
       "evidenceCerts": "Sertifikatai ir kvalifikacijos — didina pasitikėjimą.",
       "evidencePhotos": "Darbo nuotraukos ir failai — parodo realiai atliktą darbą.",
@@ -2454,7 +2443,7 @@
         "s1": "Importuokite CV (nebūtina), kad profilį užpildytumėte greičiau",
         "s2": "Pridėkite realius įgūdžius",
         "s3": "Nurodykite prieinamumą",
-        "s4": "Pridėkite darbo patirtį ir įrodymus",
+        "s4": "Pridėkite darbo patirtį ir įrašus",
         "note": "Įgūdžiai pradžioje yra jūsų pačių nurodyti. Dokumentai, darbo žurnalas ir žmonių patvirtinimai laikui bėgant juos sustiprina."
       },
       "display_name_label": "Rodomas vardas",
@@ -2503,8 +2492,8 @@
             "cta": "Tvarkyti darbo tapatybę"
           },
           "proof": {
-            "title": "Darbo įrodymai",
-            "body": "Žurnale fiksuokite atliktą darbą. Vėliau įrašai taps įgūdžių įrodymais.",
+            "title": "Darbo įrašai",
+            "body": "Žurnale fiksuokite atliktą darbą. Vėliau įrašai taps įgūdžių įrašais.",
             "cta": "Atidaryti žurnalą"
           },
           "notLimit": "Jūsų pirmas pasirinkimas nėra riba — vėliau galėsite pridėti daugiau krypčių."
@@ -2516,7 +2505,7 @@
             "ready": "Esate pasiruošę atverti galimybes",
             "readiness": "Pasirengimo kelias",
             "s1": "Tapatybė",
-            "s2": "Įrodymai",
+            "s2": "Įrašai",
             "s3": "Galimybės"
           },
           "company": {
@@ -2541,12 +2530,12 @@
           },
           "skills": {
             "title": "Pridėkite įgūdžius",
-            "body": "Nurodykite, ką mokate — vėliau patvirtins vadovas.",
+            "body": "Nurodykite, ką mokate.",
             "bodyDone": "Pridėta įgūdžių: {n}"
           },
           "journal": {
             "title": "Įrašykite pirmą darbo įrašą",
-            "body": "Užfiksuokite, ką nuveikėte. Darbo dienoraštis tampa jūsų įrodymu.",
+            "body": "Užfiksuokite, ką nuveikėte. Darbo dienoraštis tampa jūsų įrašu.",
             "bodyDone": "Įrašų: {n}"
           }
         },
@@ -2557,7 +2546,7 @@
         },
         "journal": {
           "title": "Darbo dienoraštis",
-          "body": "Fiksuokite darbą pagal veiklą. Patvirtinti įrašai ilgainiui kaupia įgūdžių įrodymus.",
+          "body": "Fiksuokite darbą pagal veiklą. Patvirtinti įrašai ilgainiui kaupia įgūdžių įrašus.",
           "cta": "Atidaryti dienoraštį"
         },
         "addMore": {
@@ -2730,7 +2719,7 @@
       "greeting": "Sveiki, {name}",
       "mySpace": {
         "eyebrow": "Aš dabar",
-        "intro": "Tai jūsų erdvė. Čia jūsų darbas, įgūdžiai ir įrodymai pamažu įgauna formą — be skubos.",
+        "intro": "Tai jūsų erdvė. Čia jūsų darbas, įgūdžiai ir įrašai pamažu įgauna formą — be skubos.",
         "snapshot": {
           "work": "Ką dirbu",
           "workEmpty": "Profesija dar nenurodyta",
@@ -2739,7 +2728,7 @@
           "skillsEmpty": "Įgūdžių dar nepridėjote",
           "proof": "Kuo įrodau",
           "proofValue": "Darbo įrašų: {n}",
-          "proofEmpty": "Įrodymų dar nėra"
+          "proofEmpty": "Įrašų dar nėra"
         },
         "unverifiedNote": "Tai, ką pasakojate apie save. Dar ne patvirtinta žmogaus — ir tai normalu.",
         "activities": {
@@ -2748,8 +2737,8 @@
           "cta": "Atverti"
         },
         "proofCard": {
-          "title": "Mano įrodymai",
-          "body": "Užfiksuotas darbas pamažu virsta jūsų įgūdžių įrodymais.",
+          "title": "Mano CV",
+          "body": "Užfiksuotas darbas pamažu virsta jūsų įgūdžių įrašais.",
           "cta": "Atverti dienoraštį"
         },
         "otherSpaces": "Kitos mano erdvės"
@@ -2783,7 +2772,7 @@
           },
           "evidence": {
             "label": "Kuo galiu įrodyti",
-            "missing": "Įrodymų dar nėra"
+            "missing": "Įrašų dar nėra"
           }
         },
         "next": {
@@ -2798,7 +2787,7 @@
           "availability": "Tai padeda nerodyti jums netinkamų pasiūlymų.",
           "location": "Tai padeda nerodyti jums netinkamų pasiūlymų.",
           "pay": "Tai padeda pagrįsti jūsų pageidaujamą tarifą.",
-          "evidence": "Įrodymai didina pasitikėjimą, bet galite juos pridėti vėliau.",
+          "evidence": "Įrašai didina pasitikėjimą, bet galite juos pridėti vėliau.",
           "complete": "Jūsų darbo kortelė pilna — toliau ją stiprina darbo įrašai."
         },
         "stale": {
@@ -2852,7 +2841,7 @@
         "overview": "Mano erdvė",
         "marketMap": "Žemėlapis",
         "profile": "Darbo kortelė",
-        "journal": "Įrodymai",
+        "journal": "Mano CV",
         "communication": "Žinutės",
         "discover": "Naršyti",
         "search": "Ieškoti",
@@ -2888,8 +2877,8 @@
         },
         "worker_waiting": {
           "title": "Jūsų įrašai laukia patvirtinimo",
-          "body": "Išsaugota ir privatu. Laukia vadovo patvirtinimo: {waiting}. Daugiau iš jūsų nieko nereikia.",
-          "cta": "Peržiūrėti įrodymų būseną"
+          "body": "Išsaugota ir privatu. Laukia patvirtinimo: {waiting}. Daugiau iš jūsų nieko nereikia.",
+          "cta": "Peržiūrėti būseną"
         },
         "worker_all_confirmed": {
           "title": "Viskas padaryta",
@@ -2920,12 +2909,12 @@
           "title": "Ko ieškau"
         },
         "proofs": {
-          "title": "Mano įrodymai"
+          "title": "Mano CV"
         }
       },
       "empty": {
         "worker": {
-          "offer": "Tuščia. Įgūdžių, darbo istorijos ir įrodymų valdymas bus įjungtas vėliau.",
+          "offer": "Tuščia. Įgūdžių, darbo istorijos ir įrašų valdymas bus įjungtas vėliau.",
           "seek": "Tuščia. Pageidaujamo darbo nustatymas ir prieinamumas bus įjungti vėliau.",
           "proofs": "Tuščia. Patvirtinti įgūdžiai ir darbo žurnalas bus įjungti vėliau."
         },
@@ -3730,7 +3719,7 @@
       "notReadyChip": "Dar nepasiruošęs",
       "declaredSkills": "Nurodyti įgūdžiai",
       "confirmedSkills": "Patvirtinti įgūdžiai",
-      "evidence": "Darbo įrodymai",
+      "evidence": "Darbo įrašai",
       "reviewItems": "Laukia peržiūros",
       "lastActivity": "Paskutinė veikla",
       "noActivity": "Kol kas nėra veiklos",
@@ -4009,12 +3998,12 @@
         "body": "Realių pamainų ir užduočių įrašai. Istorija nekeičiama — stipriausias patirties signalas."
       },
       "selfDeclared": {
-        "label": "Kas paties nurodyta",
-        "body": "Tavo paties nurodyti faktai. Sistema jų automatiškai netikrina."
+        "label": "Kas jūsų nurodyta",
+        "body": "Tavo nurodyti faktai."
       },
       "awaitingProof": {
-        "label": "Kas laukia įrodymų / išorinio patvirtinimo",
-        "body": "Pasiekimai, kuriems reikia darbdavio ar institucijos patvirtinimo. Jokių netikrų „Verified“ ženklelių."
+        "label": "Kas laukia įrašų / išorinio patvirtinimo",
+        "body": "Pasiekimai, kuriems reikia darbdavio ar institucijos patvirtinimo."
       }
     },
     "footnote": "Jei sistema kažko nežino — ji apie tai pasako. Mes neslepiame neaiškumo už dirbtinio pasitikėjimo."
@@ -4327,8 +4316,8 @@
     "title": "Darbuotojo kortelė",
     "subtitle": "Tavo profilio apžvalga. Skaičiai tikri — nieko nepridėta.",
     "skillsLabel": "Įgūdžiai",
-    "skillsHint": "Tavo nurodyti įgūdžiai (savideklaruoti, nepatvirtinti).",
-    "evidenceLabel": "Įrodymai",
+    "skillsHint": "Tavo nurodyti įgūdžiai (jūsų nurodyti, nepatvirtinti).",
+    "evidenceLabel": "Įrašai",
     "evidenceHint": "Tavo darbo žurnalo įrašai.",
     "attentionLabel": "Reikia dėmesio",
     "attentionHint": "Nauji nurodymai, kuriuos verta peržiūrėti.",
@@ -4382,16 +4371,16 @@
           "availability": "Prieinamumas",
           "skills": "Įgūdžiai",
           "journal": "Darbo žurnalas",
-          "evidence": "Įrodymai",
+          "evidence": "Įrašai",
           "workCard": "Darbo kortelė"
         }
       },
     "verifiedTitle": "Patvirtinti įgūdžiai",
-    "verifiedEmpty": "Patvirtintų įgūdžių dar nėra. Jie atsiranda, kai vadovas patvirtina tavo darbo įrašus.",
+    "verifiedEmpty": "Patvirtintų įgūdžių dar nėra. Jie atsiranda, kai patvirtinami tavo darbo įrašai.",
     "journalSupportedLabel": "Pagrįsta žurnalu",
-    "journalSupportedHint": "Įgūdžiai, kuriuos paremia tavo darbo žurnalo įrašai — stipriau nei savideklaruoti, laukia vadovo patvirtinimo.",
-    "latestEvidenceLabel": "Naujausias įrodymas",
-    "latestEvidenceEmpty": "Įrodymų dar nėra — pirmas žurnalo įrašas bus pirmasis.",
+    "journalSupportedHint": "Įgūdžiai, kuriuos paremia tavo darbo žurnalo įrašai — laukia patvirtinimo.",
+    "latestEvidenceLabel": "Naujausias įrašas",
+    "latestEvidenceEmpty": "Įrašų dar nėra — pirmas žurnalo įrašas bus pirmasis.",
     "availabilityFrom": "Laisvas nuo {date}"
   },
   "skillClarify": {
@@ -4491,14 +4480,14 @@
   },
   "trust": {
     "title": "Pasitikėjimo signalai",
-    "caption": "Skaičiai imami tiesiai iš realių įrašų — deklaruoti įgūdžiai tampa patikimi tik per žurnalo įrašus, kuriuos patvirtino vadovas. Niekas čia nesveriama ir neišgalvojama.",
+    "caption": "Skaičiai imami tiesiai iš realių įrašų. Niekas čia nesveriama ir neišgalvojama.",
     "verifiedSkills": "Patvirtinti įgūdžiai",
-    "managerConfirmations": "Vadovo patvirtinimai",
+    "managerConfirmations": "Patvirtinimai",
     "journalEntries": "Žurnalo įrašai",
     "zeroHint": "Pasitikėjimas auga iš realaus darbo: užfiksuok žurnalo įrašą ir paprašyk ten buvusio vadovo jį patvirtinti."
   },
   "cvExport": {
-    "pageTitle": "Patvirtintas CV",
+    "pageTitle": "Mano CV",
     "exportButton": "Eksportuoti CV (PDF)",
     "print": "Atsisiųsti PDF",
     "back": "← Grįžti į profilį",
@@ -4506,38 +4495,32 @@
     "skills": "Įgūdžiai",
     "skillsEmpty": "Įgūdžių dar neišsaugota.",
     "tiers": {
-      "confirmed": "Patvirtinta vadovo",
+      "confirmed": "Patvirtinta",
       "evidence": "Paremta darbo įrašais",
-      "declared": "Paties nurodyta"
-    },
-    "tierHints": {
-      "confirmed": "vadovas patvirtino remdamasis tikru darbo įrašu",
-      "evidence": "darbo žurnalo įrašai paremia šį įgūdį; vadovas jo dar nepatvirtino",
-      "declared": "paties žmogaus nurodyta, išoriškai nepatvirtinta"
+      "declared": "Laukia patvirtinimo"
     },
     "summary": {
       "verifiedSkills": "Patvirtinti įgūdžiai",
-      "managerConfirmations": "Vadovo patvirtinimai",
+      "managerConfirmations": "Patvirtinimai",
       "journalEntries": "Žurnalo įrašai"
     },
-    "proofTitle": "Patvirtinti darbo įrodymai",
+    "proofTitle": "CV darbo įrašai",
     "proofDate": "Data",
     "proofProject": "Projektas",
-    "proofRole": "Patvirtino (rolė)",
+    "proofRole": "Patvirtinta (rolė)",
     "proofEmpty": "Patvirtintų įrašų dar nėra.",
     "generatedAt": "Sugeneruota",
-    "verifyNote": "Patvirtinimus galima patikrinti platformoje.",
-    "notWorker": "CV eksportas galimas darbuotojo profiliui — jis sudaromas iš darbo žurnalo ir patvirtintų įgūdžių.",
+    "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
     "summaryTitle": "Profesinis aprašymas"
   },
   "todayScreen": {
     "eyebrow": "Šiandien",
     "action": {
       "title": "Užrašyk, ką šiandien padarei",
-      "body": "Kelios eilutės savais žodžiais — ir tavo diena lieka įraše kaip ilgalaikis darbo įrodymas.",
+      "body": "Kelios eilutės savais žodžiais — ir tavo diena lieka įraše kaip ilgalaikis darbo įrašas.",
       "doneTitle": "Šiandienos darbas užrašytas",
       "doneBody": "Šaunu — ši diena jau tavo įrašuose. Jei nuveikei daugiau, papildyk.",
-      "pending": "{n, plural, one {# įrašas laukia vadovo patvirtinimo} few {# įrašai laukia vadovo patvirtinimo} other {# įrašų laukia vadovo patvirtinimo}}",
+      "pending": "{n, plural, one {# įrašas laukia patvirtinimo} few {# įrašai laukia patvirtinimo} other {# įrašų laukia patvirtinimo}}",
       "cta": "Pildyti dienos žurnalą",
       "ctaAgain": "Pridėti dar vieną įrašą"
     },
@@ -5162,7 +5145,7 @@
     "filterProfession": "Amatas",
     "filterCountry": "Šalis",
     "filterAvailableBy": "Laisvas iki",
-    "filterEvidence": "Įrodymai",
+    "filterEvidence": "Įrašai",
     "search": "Paieška",
     "any": "Bet kuris",
     "evidenceConfirmed": "Patvirtinti įrodymai",
@@ -5174,7 +5157,7 @@
     "colCountry": "Šalis",
     "colAvailable": "Laisvas",
     "colExperience": "Patirtis",
-    "colEvidence": "Įrodymai",
+    "colEvidence": "Įrašai",
     "colMissing": "Trūksta",
     "expYears": "m.",
     "none": "—",
@@ -5269,7 +5252,7 @@
   "worldMap": {
     "eyebrow": "Darbo rinkos atlasas",
     "title": "Darbo rinkos pasaulio žemėlapis",
-    "subtitle": "Jūsų realus profilis, įgūdžiai, įrodymai, prieinamumas ir darbo poreikiai kaip vienas susietas darbo rinkos pasaulis — vietinis ir tarptautinis. Sudaryta tik iš jūsų pačių signalų, su sąžiningomis tuščiomis būsenomis, kai duomenų nėra.",
+    "subtitle": "Jūsų realus profilis, įgūdžiai, įrašai, prieinamumas ir darbo poreikiai kaip vienas susietas darbo rinkos pasaulis — vietinis ir tarptautinis. Sudaryta tik iš jūsų pačių signalų, su sąžiningomis tuščiomis būsenomis, kai duomenų nėra.",
     "legendTitle": "Signalų legenda",
     "summaryTitle": "Ką rodo šis atlasas",
     "summaryBody": "Kiekviena zona — reali jūsų darbo rinkos dalis. Signalai atsiranda pridėjus realių duomenų; niekas čia nėra prasimanyta ir joks atitikimas negarantuojamas.",
@@ -5289,25 +5272,25 @@
     "cta": { "fill": "Pildyti", "open": "Atidaryti" },
     "zone": {
       "profileHub": { "name": "Profilio centras", "hint": "Jūsų realus profilis ir iš kur dirbate.", "state": { "started": "Profilis pradėtas", "none": "Profilio duomenų dar nėra" } },
-      "skillsEvidence": { "name": "Įgūdžiai ir įrodymai", "hint": "Jūsų realūs įgūdžiai ir juos pagrindžiantys įrodymai.", "state": { "confirmed": "{count} patvirtino žmonės", "suggested": "{count} su darbo įrodymais", "selfDeclared": "{count} nurodyti pačių", "none": "Pridėkite įgūdžių, kad atsirastų signalai" } },
+      "skillsEvidence": { "name": "Įgūdžiai ir įrašai", "hint": "Jūsų realūs įgūdžiai ir juos pagrindžiantys įrašai.", "state": { "confirmed": "{count} patvirtino žmonės", "suggested": "{count} su darbo įrašais", "selfDeclared": "{count} nurodyti pačių", "none": "Pridėkite įgūdžių, kad atsirastų signalai" } },
       "availability": { "name": "Prieinamumas", "hint": "Kada ir kur galite dirbti — vietoje ir tarptautiniu mastu.", "state": { "available": "Šiuo metu laisvas", "busy": "Šiuo metu užimtas", "unavailable": "Pažymėta neprieinama", "none": "Nurodykite prieinamumą" } },
       "workNeeds": { "name": "Darbo poreikiai", "hint": "Įmonių ir klientų poreikiai, kuriuos rengiate — juodraščiai peržiūrai.", "state": { "drafts": "{count} darbo poreikio signalų juodraštyje / peržiūroje", "none": "Parenkite darbo poreikį kaip juodraštį" } },
       "teams": { "name": "Komandos ir brigados", "hint": "Komandų ir brigadų susieto darbo koncepcija.", "state": { "concept": "Per mažai duomenų" } },
       "company": { "name": "Įmonė / organizacija", "hint": "Jūsų organizacijos, agentūros ar kliento kontekstas.", "state": { "linked": "Organizacija susieta", "none": "Pridėkite organizacijos kontekstą" } },
       "marketPulse": { "name": "Rinkos pulsas", "hint": "Galimo atitikimo signalai tarp profilių ir poreikių — be garantijų.", "state": { "possibleFit": "Galimo atitikimo signalai — reikia daugiau duomenų", "needsData": "Parenkite profilį, kad matytumėte signalus" } },
-      "trust": { "name": "Pasitikėjimas ir patvirtinimas", "hint": "Įrodymai ir žmogaus patvirtinimas sustiprina teiginius.", "state": { "confirmedExists": "{count} patvirtino žmogus", "selfDeclaredOnly": "Nurodyta pačių — žmogaus patvirtinimas sustiprina" } }
+      "trust": { "name": "Pasitikėjimas ir patvirtinimas", "hint": "Įrašai ir žmogaus patvirtinimas sustiprina teiginius.", "state": { "confirmedExists": "{count} patvirtino žmogus", "selfDeclaredOnly": "Nurodyta pačių — žmogaus patvirtinimas sustiprina" } }
     }
   },
   "myWorkView": {
     "eyebrow": "Darbo pultas",
     "title": "Mano darbo vaizdas",
-    "subtitle": "Jūsų realus profilis, įgūdžiai, įrodymai, prieinamumas ir darbo poreikiai vienoje vietoje — ir kaip jie susijungia darbo rinkos žemėlapyje.",
+    "subtitle": "Jūsų realus profilis, įgūdžiai, įrašai, prieinamumas ir darbo poreikiai vienoje vietoje — ir kaip jie susijungia darbo rinkos žemėlapyje.",
     "actionsTitle": "Kiti veiksmai",
     "block": {
       "profile": { "name": "Profilis", "state": { "started": "Profilis pradėtas", "missing": "Profilio dar nėra" } },
       "cv": { "name": "CV", "state": { "summaryAdded": "Profilio santrauka pridėta", "import": "Importuokite CV arba pridėkite santrauką" } },
       "skills": { "name": "Įgūdžiai", "state": { "added": "Pridėta įgūdžių: {count}", "none": "Įgūdžių dar nėra" } },
-      "evidence": { "name": "Įrodymai", "state": { "supported": "{count} patvirtino žmonės", "hasEvidence": "{count} su darbo įrodymais", "needsEvidence": "Pridėkite darbų, kad atsirastų įrodymai", "noSkills": "Pirma pridėkite įgūdžių" } },
+      "evidence": { "name": "Įrašai", "state": { "supported": "{count} patvirtino žmonės", "hasEvidence": "{count} su darbo įrašais", "needsEvidence": "Pridėkite darbų, kad atsirastų įrašai", "noSkills": "Pirma pridėkite įgūdžių" } },
       "availability": { "name": "Prieinamumas", "state": { "available": "Šiuo metu laisvas", "busy": "Šiuo metu užimtas", "unavailable": "Pažymėta neprieinama", "none": "Prieinamumas nenurodytas" } },
       "journal": { "name": "Darbo žurnalas", "state": { "logged": "Darbo įrašų: {count}", "none": "Darbų dar neužfiksuota" } },
       "workNeeds": { "name": "Darbo poreikiai", "state": { "drafts": "Darbo poreikių juodraščių: {count}", "none": "Darbo poreikis neparengtas" } },
@@ -5319,7 +5302,7 @@
       "importCv": "Importuokite CV",
       "setAvailability": "Nurodykite prieinamumą",
       "logWork": "Užfiksuokite pirmą darbo įrašą",
-      "strengthenEvidence": "Sustiprinkite įgūdžius įrodymais",
+      "strengthenEvidence": "Sustiprinkite įgūdžius įrašais",
       "openMarketMap": "Atverti rinkos žemėlapį"
     },
     "reason": { "needsManager": "Galima, kai vadovas ar klientas patvirtins jūsų darbą." }
@@ -5339,13 +5322,13 @@
     "unit": { "hours": "val", "days": "d", "minutes": "min" },
     "domain": { "construction": "Statybos", "web_design": "Internetas / dizainas", "admin": "Administravimas", "cleaning": "Valymas", "electrical": "Elektra", "cooking": "Maitinimas", "gardening": "Aplinkos priežiūra", "driving_logistics": "Transportas / logistika", "warehouse": "Sandėlis", "customer_service": "Klientų aptarnavimas", "it": "IT", "language": "Kalbos / vertimai", "equipment": "Įrangos operavimas", "care": "Priežiūra / slauga" },
     "existingTitle": "Jūsų profilio įgūdžiai, paminėti šiame įraše",
-    "existingNote": "Šie įgūdžiai jau yra jūsų profilyje — įrašas juos paremia kaip darbo įrodymą. Nepridedame jų antrą kartą.",
+    "existingNote": "Šie įgūdžiai jau yra jūsų profilyje — įrašas juos paremia kaip darbo įrašą. Nepridedame jų antrą kartą.",
     "existingBadge": "Jau profilyje",
     "newTitle": "Galimi nauji įgūdžiai",
     "newNote": "Naujos veiklos, kurių dar nenurodėte. Priėmus pridedama kaip jūsų pačių nurodyta — nepatvirtinta.",
     "activitiesTitle": "Šiame įraše atliktos veiklos",
     "activitiesNote": "Tai, ką realiai atlikote — pagal darbo rinkos sritį.",
-    "evidenceLabel": "Įrodymo šaltinis",
+    "evidenceLabel": "Įrašas",
     "evidenceJournal": "Darbo žurnalas",
     "verificationNote": "Atpažinta automatiškai — nepatvirtinta. Patvirtinimą suteikia tik vadovas ar klientas.",
     "unmappedTitle": "Reikia peržiūros",
@@ -5354,19 +5337,19 @@
     "saveError": "Nepavyko pridėti. Bandykite dar kartą."
   },
   "evidenceReport": {
-    "title": "Įrodymų ataskaita",
-    "subtitle": "Jūsų realūs darbo įrodymai — pačių nurodyti, pagrįsti įrašais ir patvirtinti žmonių. Sudaryta tik iš jūsų duomenų.",
+    "title": "Įrašų ataskaita",
+    "subtitle": "Jūsų realūs darbo įrašai — sudaryta tik iš jūsų duomenų.",
     "print": "Spausdinti / išsaugoti PDF",
     "back": "Profilis",
     "notWorker": "Ši ataskaita sudaroma iš darbuotojo profilio žurnalo ir įgūdžių. Susikurkite darbuotojo profilį, kad ją sugeneruotumėte.",
-    "ladderNote": "Įrodymų pakopos: pačių nurodyta → pagrįsta darbo įrašu → patvirtinta atsakingo žmogaus. Tai nėra balas; patvirtinimą priima žmogus.",
-    "s": { "profileEvidence": "Profilio įrodymai", "skillsSupported": "Įgūdžiai, pagrįsti darbo įrašais", "workEntrySummary": "Darbo įrašų santrauka", "missingEvidence": "Trūkstami įrodymai / reikia patvirtinimo", "fitReadiness": "Atitikties darbo poreikiui parengtis" },
+    "ladderNote": "CV pakopos: jūsų nurodyta → pagrįsta darbo įrašu → patvirtinta.",
+    "s": { "profileEvidence": "Profilio įrašai", "skillsSupported": "Įgūdžiai, pagrįsti darbo įrašais", "workEntrySummary": "Darbo įrašų santrauka", "missingEvidence": "Trūkstami įrašai / reikia patvirtinimo", "fitReadiness": "Atitikties darbo poreikiui parengtis" },
     "metric": { "total": "Įgūdžiai", "selfDeclared": "Pačių nurodyti", "workSupported": "Pagrįsti", "confirmed": "Patvirtinti" },
-    "emptySupported": "Kol kas nė vienas įgūdis nepagrįstas darbo įrašu — fiksuokite darbą, kad atsirastų įrodymų.",
+    "emptySupported": "Kol kas nė vienas įgūdis nepagrįstas darbo įrašu — fiksuokite darbą, kad atsirastų įrašų.",
     "entrySummary": "{entries} darbo įrašų · {confirmations} patvirtino žmogus.",
     "missingNote": "{needEvidence} pačių nurodytų įgūdžių reikia darbo įrašo · {needConfirmation} pagrįstų įgūdžių laukia žmogaus patvirtinimo.",
     "fitReal": "Pagrįsti įgūdžiai parengti palyginti su realiais darbo poreikiais.",
-    "fitNotAvailable": "Atitikties parengtis atsiranda, kai yra realus darbo poreikio kontekstas ir pagrįsti įrodymai. Atitikimas negarantuojamas.",
+    "fitNotAvailable": "Atitikties parengtis atsiranda, kai yra realus darbo poreikio kontekstas ir pagrįsti įrašai. Atitikimas negarantuojamas.",
     "footer": "Ši ataskaita rodo tik realius signalus. Patvirtinimą priima žmogus."
   }
 }

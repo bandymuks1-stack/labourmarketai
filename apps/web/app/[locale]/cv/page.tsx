@@ -161,9 +161,6 @@ export default async function VerifiedCvPage({
               <div key={tier} className="flex flex-col gap-1.5" data-testid={`cv-tier-${tier}`}>
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
                   {t(`tiers.${tier}`)}
-                  <span className="ml-2 font-normal normal-case text-zinc-500">
-                    {t(`tierHints.${tier}`)}
-                  </span>
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {names.map((name) => (
@@ -219,13 +216,10 @@ export default async function VerifiedCvPage({
           )}
         </section>
 
-        {/* Footer — generation date + how to check (no public link exists). */}
+        {/* Footer — generation date only (quiet UI: no verification process note). */}
         <footer className="mt-2 border-t border-zinc-300 pt-3 text-xs text-zinc-500">
           <p>
             {t("generatedAt")}: {generatedAt}
-          </p>
-          <p className="mt-0.5" data-testid="cv-verify-note">
-            {t("verifyNote")}
           </p>
         </footer>
       </div>

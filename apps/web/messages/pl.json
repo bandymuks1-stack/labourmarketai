@@ -128,8 +128,8 @@
             "cta": "[EN] Manage work identity"
           },
           "proof": {
-            "title": "[EN] Work proof",
-            "body": "[EN] Log completed work. Entries later become proof for skills.",
+            "title": "[EN] Work records",
+            "body": "[EN] Log completed work. Entries later become records for skills.",
             "cta": "[EN] Open journal"
           },
           "notLimit": "[EN] Your first choice is not a limit — you can add more directions later."
@@ -170,7 +170,7 @@
           },
           "journal": {
             "title": "[EN] Log your first work entry",
-            "body": "[EN] Record what you did. Your work journal becomes your proof.",
+            "body": "[EN] Record what you did. Your work journal becomes your records.",
             "bodyDone": "[EN] {n} entries logged"
           }
         },
@@ -181,7 +181,7 @@
         },
         "journal": {
           "title": "[EN] Work journal",
-          "body": "[EN] Log work against an engagement. Confirmed entries accumulate skill evidence over time.",
+          "body": "[EN] Log work against an engagement. Confirmed entries accumulate skill records over time.",
           "cta": "[EN] Open journal"
         },
         "addMore": {
@@ -246,8 +246,8 @@
         "discover": "[EN] Discover feed — expected in M3.",
         "search": "[EN] Detailed search — expected in M2.",
         "worker": {
-          "offer": "[EN] Empty. Skills, work history and proofs management ships in M2.",
-          "proofs": "[EN] Empty. Evidence-backed skills and the work journal ship in M2.",
+          "offer": "[EN] Empty. Skills, work history and records management ships in M2.",
+          "proofs": "[EN] Empty. Records-backed skills and the work journal ship in M2.",
           "seek": "[EN] Empty. Job preferences and availability settings ship in M2."
         }
       },
@@ -257,7 +257,7 @@
           "title": "[EN] What I offer"
         },
         "proofs": {
-          "title": "[EN] My proofs"
+          "title": "[EN] My records"
         },
         "seek": {
           "title": "[EN] What I seek"
@@ -353,7 +353,7 @@
         "infoBox": "[EN] 💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "multiNote": "[EN] You can choose several. Change later in settings.",
         "worker": {
-          "desc": "[EN] Seek work, build your CV, get verified.",
+          "desc": "[EN] Seek work, build your CV, get confirmed.",
           "title": "[EN] Worker"
         }
       },
@@ -926,7 +926,7 @@
     "skillsForDirection": "[EN] Skills for this direction",
     "othersRemainSaved": "[EN] Other directions remain saved",
     "canChangeLater": "[EN] You can return and change this later",
-    "notConfirmedYet": "[EN] This is not a confirmed skill yet. You can adjust your directions and skills until they are backed by work proof.",
+    "notConfirmedYet": "[EN] This is not a confirmed skill yet. You can adjust your directions and skills until they are backed by work records.",
     "removeConfirm": "[EN] Remove {name} from your directions? Your saved skills are kept.",
     "selectedCount": "[EN] {n} selected",
     "primaryDirection": "[EN] Primary work direction",
@@ -958,8 +958,8 @@
     "saveError": "[EN] Could not save. Please try again.",
     "savedToast": "[EN] Saved. Your profile is ready.",
     "saving": "[EN] Saving...",
-    "selfDeclared": "[EN] Self-declared",
-    "verified": "[EN] Verified",
+    "selfDeclared": "[EN] Awaiting confirmation",
+    "verified": "[EN] Confirmed",
     "viewProfile": "[EN] View profile"
   },
   "stats": {
@@ -1100,7 +1100,7 @@
       }
     },
     "cv": {
-      "verified": "Verified",
+      "verified": "Confirmed",
       "declared": "Declared"
     }
   },
@@ -1204,7 +1204,7 @@
           "preferred_country_match": "[EN] Prefers country",
           "available_now": "[EN] Available",
           "profession_token_match": "[EN] Profession fits request text",
-          "verified_skills": "[EN] Verified skills",
+          "verified_skills": "[EN] Confirmed skills",
           "manager_confirmations": "[EN] Manager confirmations",
           "journal_evidence": "[EN] Journal evidence"
         }
@@ -1400,7 +1400,7 @@
   "trust": {
     "title": "[EN] Trust signals",
     "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
-    "verifiedSkills": "[EN] Verified skills",
+    "verifiedSkills": "[EN] Confirmed skills",
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
@@ -1441,7 +1441,7 @@
     "eyebrow": "[EN] Today",
     "action": {
       "title": "[EN] Write down what you did today",
-      "body": "[EN] A few lines in your own words — and your day stays on record as lasting proof of your work.",
+      "body": "[EN] A few lines in your own words — and your day stays on record as lasting records of your work.",
       "doneTitle": "[EN] Today's work is recorded",
       "doneBody": "[EN] Good — today is already in your record. Add more if you did more.",
       "pending": "[EN] {n, plural, one {# entry is waiting for your manager's confirmation} other {# entries are waiting for your manager's confirmation}}",
@@ -1481,12 +1481,12 @@
     }
   },
   "playerCard": {
-    "verifiedTitle": "[EN] Verified skills",
-    "verifiedEmpty": "[EN] No verified skills yet. They appear when a manager confirms your journal entries.",
+    "verifiedTitle": "[EN] Confirmed skills",
+    "verifiedEmpty": "[EN] No confirmed skills yet. They appear when a manager confirms your journal entries.",
     "journalSupportedLabel": "Poparte dziennikiem",
     "journalSupportedHint": "Umiejętności potwierdzane wpisami w dzienniku pracy — mocniejsze niż zadeklarowane samodzielnie; czekają na potwierdzenie przez przełożonego.",
-    "latestEvidenceLabel": "[EN] Latest proof",
-    "latestEvidenceEmpty": "[EN] No proof entries yet — your first journal entry will be the first."
+    "latestEvidenceLabel": "[EN] Latest records",
+    "latestEvidenceEmpty": "[EN] No records entries yet — your first journal entry will be the first."
   },
   "projects": {
     "map": {
