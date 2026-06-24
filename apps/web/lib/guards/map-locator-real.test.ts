@@ -52,6 +52,16 @@ describe("real provider map, no paid/secret provider", () => {
     expect(comp).toMatch(/<MarketMapLive\b/);
     expect(comp).not.toMatch(/<LocationMap\b/);
   });
+  it("resolves city-level coordinates + shows an honest precision label", () => {
+    expect(live).toMatch(/resolveLocation/);
+    expect(comp).toMatch(/data-testid="location-precision"/);
+    for (const loc of ["lt", "en", "ru"] as const) {
+      const b = JSON.parse(read(`messages/${loc}.json`)).marketMapBase;
+      for (const k of ["precisionDevice", "precisionCity", "precisionCountry", "precisionUnset"]) {
+        expect(typeof b?.[k] === "string" && b[k].length > 0, `${loc} ${k}`).toBe(true);
+      }
+    }
+  });
 });
 
 describe("automatic geolocation path exists (a control on the map)", () => {
