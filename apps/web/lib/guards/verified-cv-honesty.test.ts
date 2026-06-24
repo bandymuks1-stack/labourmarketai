@@ -158,18 +158,19 @@ describe("Guard: cvExport copy is present + honest in all 10 locales", () => {
     // confirmation stem; the other tiers never do.
     expect(ns.tiers.confirmed).toBe("Patvirtinta");
     expect(ns.tiers.confirmed).not.toMatch(/vadov/i);
-    expect(ns.tiers.declared).toBe("Paties nurodyta");
-    expect(ns.tiers.declared).not.toMatch(/patvirtin/i);
-    expect(ns.tiers.evidence).not.toMatch(/patvirtin/i);
+    // declared = quiet "awaiting confirmation" (honest: NOT affirmatively confirmed).
+    expect(ns.tiers.declared).toBe("Laukia patvirtinimo");
+    expect(ns.tiers.declared).not.toBe("Patvirtinta");
+    expect(ns.tiers.evidence).not.toMatch(/^Patvirtinta$/i);
   });
 
   it("EN: pinned honest tier labels (quiet status, no 'who confirmed')", () => {
     const ns = cvNs("en");
     expect(ns.tiers.confirmed).toBe("Confirmed");
     expect(ns.tiers.confirmed).not.toMatch(/manager|by\b/i);
-    expect(ns.tiers.declared).toBe("Self-declared");
+    expect(ns.tiers.declared).toBe("Awaiting confirmation");
     expect(ns.tiers.declared).not.toMatch(/verified|confirmed by/i);
-    expect(ns.tiers.evidence).not.toMatch(/verif|confirm/i);
+    expect(ns.tiers.evidence).not.toMatch(/verif|confirmed by/i);
   });
 
   // The "PDF" is the browser's print of the CV sheet — rendering sanity for

@@ -30,10 +30,15 @@ describe("the feedback loop is explained on the communication surface", () => {
     expect(page).toMatch(/feedbackLoop/);
   });
   for (const loc of ["lt", "en", "ru"] as const) {
-    it(`${loc}: feedbackLoop copy says no fake reputation, real confirmations`, () => {
-      const txt = (JSON.parse(read(`messages/${loc}.json`)).featureNotes.feedbackLoop as string).toLowerCase();
-      expect(/confirm|patvirtin|подтвержд/.test(txt), `${loc} mentions confirmation`).toBe(true);
-      expect(/fake|netikr|фальшив|no star|jokių žvaigžd|никаких звёзд/.test(txt), `${loc} no fake reputation`).toBe(true);
+    it(`${loc}: feedbackLoop is quiet CV/work-card copy with no fake AI claim`, () => {
+      // Quiet-UI reframe (fix/cv): the confirmer/process + "no fake reputation"
+      // explanation was removed; the note now states the CV/work-card benefit.
+      const raw = JSON.parse(read(`messages/${loc}.json`)).featureNotes.feedbackLoop as string;
+      const txt = raw.toLowerCase();
+      expect(/cv|kortel|карточ|card/.test(txt), `${loc} names the CV / work card benefit`).toBe(true);
+      // No fake-AI claim. (Match "AI" case-sensitively to avoid the LT non-ASCII
+      // word-boundary false positive on words like "įrašai".)
+      expect(/\bAI\b/.test(raw) || /dirbtin\w* intelekt|искусственн\w* интеллект/i.test(raw), `${loc} no fake AI claim`).toBe(false);
     });
   }
 });

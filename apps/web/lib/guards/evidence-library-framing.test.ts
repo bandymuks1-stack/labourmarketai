@@ -33,14 +33,16 @@ const KEYS = [
 ] as const;
 
 describe("CV surface is framed as an evidence library that strengthens the card", () => {
-  it("LT title/helper lead with CV-as-evidence + work-card benefit + privacy", () => {
-    expect(cv(lt).title).toMatch(/įrodym/i);
+  it("LT title/helper lead with CV + work-card benefit + privacy", () => {
+    // Quiet-UI reframe (fix/cv): the CV surface is framed as the worker's CV /
+    // records, not "evidence".
+    expect(cv(lt).title).toMatch(/cv|įraš/i);
     expect(cv(lt).helper).toMatch(/darbo kortel/i);
     expect(cv(lt).helper).toMatch(/privat/i);
     expect(cv(lt).evidenceTitle).toMatch(/darbo kortel/i);
   });
-  it("EN title/helper mirror the evidence + work-card + privacy framing", () => {
-    expect(cv(en).title).toMatch(/evidence/i);
+  it("EN title/helper mirror the CV + work-card + privacy framing", () => {
+    expect(cv(en).title).toMatch(/cv|record/i);
     expect(cv(en).helper).toMatch(/work card/i);
     expect(cv(en).helper).toMatch(/private/i);
     expect(cv(en).evidenceTitle).toMatch(/work card/i);

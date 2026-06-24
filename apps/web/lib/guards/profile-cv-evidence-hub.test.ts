@@ -129,11 +129,13 @@ describe("Guard: profileHub copy is honest (self-declared, never fake-verified)"
       }
     });
 
-    it(`${loc}: the not-verified disclaimer is an honest negation`, () => {
+    it(`${loc}: notVerified makes no fake verified/confirmed claim (quiet UI)`, () => {
+      // Quiet-UI reframe (fix/cv): the explicit "not yet verified" disclaimer was
+      // removed; the note must simply not over-claim (no affirmative verified).
       const flat = flattenStrings(hub);
-      const v = flat["notVerified"] ?? "";
-      const negated = loc === "lt" ? /nepatvirtint/i.test(v) : /not\s+yet/i.test(v) && /verif/i.test(v);
-      expect(negated, `${loc} profileHub.notVerified must say it is NOT yet verified: "${v}"`).toBe(true);
+      const v = (flat["notVerified"] ?? "").toLowerCase();
+      expect(v.length, `${loc} profileHub.notVerified present`).toBeGreaterThan(0);
+      expect(v, `${loc} notVerified must not affirm verified`).not.toMatch(/\bverified\b|\bpatvirtinta\b/);
     });
 
     it(`${loc}: no profileHub value (except notVerified) claims verified/confirmed`, () => {

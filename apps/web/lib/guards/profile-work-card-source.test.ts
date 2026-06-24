@@ -48,10 +48,10 @@ describe("no bureaucratic / completion-nagging wording", () => {
       expect(hub(j).primaryAction).not.toMatch(/užbaig|complete your|finish/i);
     });
   }
-  it("the not-verified disclaimer stays an honest negation (no scary standalone verification)", () => {
-    expect(hub(lt).notVerified).toMatch(/nepatvirtint/i);
-    expect(hub(en).notVerified).toMatch(/not yet/i);
-    expect(hub(en).notVerified).toMatch(/verif/i);
+  it("notVerified is quiet and makes no fake verified claim (disclaimer removed)", () => {
+    // Quiet-UI reframe (fix/cv): the "not yet verified" disclaimer was removed.
+    expect(hub(lt).notVerified).not.toMatch(/\bpatvirtinta\b/i);
+    expect(hub(en).notVerified).not.toMatch(/\bverified\b/i);
   });
 });
 

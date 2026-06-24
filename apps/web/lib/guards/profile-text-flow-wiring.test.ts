@@ -238,16 +238,17 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
       it("has the expected updated wording on the apply CTA + saved status", () => {
         const apply = textFirst.applyAll.toLowerCase();
         const confirmed = textFirst.confirmedByYou.toLowerCase();
+        // Quiet-UI reframe (fix/cv): the saved status reads "Laukia patvirtinimo"
+        // / "Awaiting confirmation" — honest (NOT affirmatively confirmed), no
+        // "self-declared" jargon.
         if (locale === "lt") {
           expect(apply).toContain("pasirinkt");
-          expect(apply).not.toMatch(/patvirtint/);
-          expect(confirmed).toContain("paties nurodyt");
-          expect(confirmed).not.toMatch(/patvirtint/);
+          expect(confirmed).toContain("laukia");
+          expect(confirmed).not.toBe("patvirtinta");
         } else {
           expect(apply).toContain("selected");
-          expect(apply).not.toMatch(/confirmed/);
-          expect(confirmed).toContain("self-declared");
-          expect(confirmed).not.toMatch(/confirmed/);
+          expect(confirmed).toContain("awaiting");
+          expect(confirmed).not.toBe("confirmed");
         }
       });
 
@@ -255,10 +256,11 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
         for (const [key, val] of entries) {
           if (WHITELIST.has(key)) continue;
           const lower = val.toLowerCase();
+          // Affirmative claims only — "laukia patvirtinimo" (awaiting) is allowed.
           expect(
             lower,
             `${locale}.skills.textFirst.${key} must not affirm verified/confirmed`,
-          ).not.toMatch(/\bverified\b|\bconfirmed\b|\bpatvirtin\w*/);
+          ).not.toMatch(/\bverified\b|\bconfirmed\b|\bpatvirtinta\b/);
         }
       });
     });
@@ -277,9 +279,9 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
         // worker UI per the owner (no explanatory provenance paragraph).
         expect(buckets.selfDeclaredDisclaimer).toBeUndefined();
         if (locale === "lt") {
-          expect(buckets.selfDeclared).toContain("Paties nurodyti");
+          expect(buckets.selfDeclared).toContain("Siūlomi");
         } else {
-          expect(buckets.selfDeclared.toLowerCase()).toContain("self-declared");
+          expect(buckets.selfDeclared.toLowerCase()).toContain("suggested");
         }
       });
 

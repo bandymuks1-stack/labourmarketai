@@ -303,7 +303,7 @@
       "status": {
         "confirmed": "Confirmed",
         "suggested": "From work",
-        "self_declared": "Self-declared"
+        "self_declared": "Awaiting confirmation"
       }
     },
     "filtersTitle": "Filters",
@@ -415,9 +415,9 @@
     "emptyCta": "Go to your journal"
   },
   "evidenceStatus": {
-    "aria": "Evidence status",
+    "aria": "Records status",
     "self_declared": {
-      "label": "Self-declared",
+      "label": "Awaiting confirmation",
       "hint": "Your own record — what you entered yourself."
     },
     "awaiting_confirmation": {
@@ -426,14 +426,14 @@
     },
     "confirmed": {
       "label": "Confirmed",
-      "hint": "Confirmed by your manager, the owner, or an external (client) manager."
+      "hint": "Confirmed."
     }
   },
   "profileHub": {
     "eyebrow": "My work card source",
     "lead": "Here's what we already know about you.",
     "explainer": "This data feeds your work card. It helps an employer quickly understand what work you fit.",
-    "notVerified": "This is information you provided yourself — not yet verified by a person or documents. Evidence builds trust, but you can add it later.",
+    "notVerified": "This is information you provided yourself — not yet confirmed or documents. Records builds trust, but you can add it later.",
     "primaryAction": "Add what's missing",
     "primaryActionJournal": "Add to CV",
     "journalLink": "My CV",
@@ -452,14 +452,14 @@
       },
       "skills": {
         "label": "Skills",
-        "count": "Self-declared: {n}",
+        "count": "Awaiting confirmation: {n}",
         "none": "None yet"
       },
       "journal": {
         "label": "CV entries",
         "available": "Journal entries: {n}",
         "none": "Not yet linked",
-        "preparing": "Work-evidence connection is being prepared"
+        "preparing": "Work-records connection is being prepared"
       }
     }
   },
@@ -638,10 +638,10 @@
     "title": "Skills & experience",
     "intro": "Your capabilities — from your own words and your work history. You're not locked into one role: skills from any field belong here.",
     "skillsTitle": "Skills",
-    "selfDeclaredStatus": "Self-declared",
-    "notExternallyVerified": "Not externally verified",
+    "selfDeclaredStatus": "Awaiting confirmation",
+    "notExternallyVerified": "Not externally confirmed",
     "sourceProfileText": "Source: profile text",
-    "disclaimer": "These skills are taken from your own description. They are not yet confirmed by work journal evidence, documents, or another person — but they are part of your overall capability profile.",
+    "disclaimer": "These skills are taken from your own description. They are not yet confirmed.",
     "experienceTitle": "Work history",
     "removeLabel": "Remove skill",
     "deleteError": "Could not remove. Please try again.",
@@ -825,7 +825,7 @@
           "needs_checks": "Needs a few fixes",
           "pending_verification": "Manual review requested",
           "unverified": "Unverified",
-          "verified": "Verified"
+          "verified": "Confirmed"
         },
         "verificationExplainer": {
           "draft": "Draft. Save to activate your company — it becomes usable straight away.",
@@ -1541,7 +1541,7 @@
       "notOnboarded": "Not onboarded",
       "profileTextTitle": "Profile text",
       "profileTextEmpty": "No profile text yet.",
-      "claimsTitle": "Self-declared skills",
+      "claimsTitle": "Suggested skills",
       "claimsEmpty": "No self-declared skills yet.",
       "draftsTitle": "Operations drafts",
       "draftsEmpty": "No operations drafts yet.",
@@ -1578,7 +1578,7 @@
         "needs_checks": "Needs a few fixes",
         "pending_verification": "Manual review requested",
         "unverified": "Unverified",
-        "verified": "Verified"
+        "verified": "Confirmed"
       },
       "noteLabel": "Verification note (optional)",
       "notePlaceholder": "Why verified / not verified — visible to admins.",
@@ -1681,7 +1681,7 @@
           "preferred_country_match": "Prefers country",
           "available_now": "Available",
           "profession_token_match": "Profession fits request text",
-          "verified_skills": "Verified skills",
+          "verified_skills": "Confirmed skills",
           "manager_confirmations": "Manager confirmations",
           "journal_evidence": "Journal evidence"
         }
@@ -1828,17 +1828,17 @@
   "featureNotes": {
     "personSpace": "Your personal space: manage your profile, look for work, work, buy or offer services as a person.",
     "companySpace": "Your company space: raise needs, hire, manage teams and projects, buy or sell services.",
-    "workerProfile": "Your professional passport: CV, skills and work journal in one place. Skills are shown honestly — what is self-declared and what is backed.",
+    "workerProfile": "Your professional passport: CV, skills and work journal in one place. Skills are shown honestly — what is awaiting confirmation and what is backed.",
     "companyProfile": "Company profile: your organisation details and activity type. Agency activity is a company function, not a separate identity.",
     "documentsReadiness": "Readiness and documents: we show honestly whether you are ready to work locally or abroad. Without the right documents we never promise the right to work abroad.",
     "skillRecognition": "Skill recognition: when you describe your work, the system suggests skills. It is a suggestion you confirm — not a confirmed fact.",
-    "workJournal": "Work journal: write what you did. On save, skills are recognised and linked to the entry as supporting evidence.",
-    "evidenceTrust": "Evidence and trust signals: we show what your profile is backed by. These are signals, not a final verification.",
+    "workJournal": "Work journal: write what you did. On save, skills are recognised and linked to the entry as supporting records.",
+    "evidenceTrust": "Records and trust signals: we show what your profile is backed by. These are signals, not a final confirmation.",
     "companyNeeds": "Needs: describe what you need (profession, country, team). The request is saved for real — no fake matches.",
     "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
     "marketplaceMap": "Market map: real labour-market signals by country and region. A more precise point appears once a location is confirmed.",
     "communicationInbox": "Communication: a real conversation inbox. A project conversation opens with the project context.",
-    "feedbackLoop": "After work: log it in your work journal, and a manager or client can confirm the entry. The confirmation becomes evidence and raises a trust signal on your card. No stars, no fake reputation — only real human confirmations.",
+    "feedbackLoop": "After work: log it in your work journal, and a manager or client can confirm the entry. The confirmation becomes records and raises a trust signal on your card. No stars, no fake reputation — only real human confirmations.",
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
     "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
@@ -1855,7 +1855,7 @@
     "skillsForDirection": "Skills for this direction",
     "othersRemainSaved": "Other directions remain saved",
     "canChangeLater": "You can return and change this later",
-    "notConfirmedYet": "This is not a confirmed skill yet. You can adjust your directions and skills until they are backed by work proof.",
+    "notConfirmedYet": "This is not a confirmed skill yet. You can adjust your directions and skills until they are backed by work records.",
     "removeConfirm": "Remove {name} from your directions? Your saved skills are kept.",
     "selectedCount": "{n} selected",
     "primaryDirection": "Primary work direction",
@@ -1882,8 +1882,8 @@
     "pickerTitle": "Your skills",
     "pickerHelp": "Select skills you have. They will be confirmed later by a site manager.",
     "coreBadge": "Core",
-    "selfDeclared": "Self-declared",
-    "verified": "Verified",
+    "selfDeclared": "Awaiting confirmation",
+    "verified": "Confirmed",
     "saveButton": "Save skills",
     "saving": "Saving...",
     "savedToast": "Saved. Your profile is ready.",
@@ -1915,14 +1915,14 @@
       "appliedToast": "Selected suggestions added to your profile. You can still edit or extend them manually.",
       "noSuggestionsFallback": "No clear suggestions yet. You can add more detail or add information manually.",
       "noNewSuggestions": "No new suggestions. Your already-saved skills are shown below.",
-      "confirmedByYou": "Self-declared",
+      "confirmedByYou": "Awaiting confirmation",
       "addedToProfile": "Added to your profile",
       "needsExternalConfirmation": "Needs external confirmation later",
       "viewCapabilities": "View your capabilities",
       "textSavingLabel": "Saving…",
       "textSavedLabel": "Your text is saved",
       "textSaveErrorLabel": "Could not save your text. Please try again.",
-      "textClaimNotVerified": "This is your own claim — not externally verified yet"
+      "textClaimNotVerified": "This is your own claim — not externally confirmed yet"
     }
   },
   "roles": {
@@ -2122,7 +2122,7 @@
     "emptyBucket": "Nothing clear in this part. You can write more or skip it.",
     "noMatches": "Nothing clear in this text yet. Try adding more detail, or add meaningful entries manually.",
     "buckets": {
-      "selfDeclared": "Self-declared skills",
+      "selfDeclared": "Suggested skills",
       "skills": "Detected skills",
       "directions": "Possible work directions",
       "roles": "Possible roles",
@@ -2153,7 +2153,7 @@
       "pending": "Suggestion"
     },
     "cv": {
-      "title": "Your CV — your first piece of evidence",
+      "title": "Your CV — your first piece of records",
       "helper": "A CV helps people understand your experience faster and strengthens your work card. It stays private. Upload a PDF, DOCX or TXT file, or paste the text.",
       "uploadLabel": "Upload CV file",
       "uploadPick": "Choose CV file",
@@ -2169,7 +2169,7 @@
       "pasteLabel": "Paste CV text",
       "pastePlaceholder": "Paste your CV text here.",
       "pasteSubmit": "Use CV text",
-      "evidenceTitle": "What evidence strengthens your work card",
+      "evidenceTitle": "What records strengthens your work card",
       "evidenceCv": "CV — helps people understand your experience faster.",
       "evidenceCerts": "Certificates and qualifications — build trust.",
       "evidencePhotos": "Work photos and files — show work you actually did.",
@@ -2443,8 +2443,8 @@
         "s1": "Import your CV (optional) to fill your profile faster",
         "s2": "Add your real skills",
         "s3": "Set your availability",
-        "s4": "Add work experience and evidence",
-        "note": "Skills start as self-declared. Documents, your work journal and confirmations from people make them stronger over time."
+        "s4": "Add work experience and records",
+        "note": "Skills start as awaiting confirmation. Documents, your work journal and confirmations from people make them stronger over time."
       },
       "display_name_label": "Display name",
       "country_label": "Country",
@@ -2492,8 +2492,8 @@
             "cta": "Manage work identity"
           },
           "proof": {
-            "title": "Work proof",
-            "body": "Log completed work. Entries later become proof for skills.",
+            "title": "Work records",
+            "body": "Log completed work. Entries later become records for skills.",
             "cta": "Open journal"
           },
           "notLimit": "Your first choice is not a limit — you can add more directions later."
@@ -2505,7 +2505,7 @@
             "ready": "You're ready to open opportunities",
             "readiness": "Readiness path",
             "s1": "Identity",
-            "s2": "Proof",
+            "s2": "Records",
             "s3": "Opportunities"
           },
           "company": {
@@ -2530,12 +2530,12 @@
           },
           "skills": {
             "title": "Add your skills",
-            "body": "Tell us what you can do - a manager confirms them later.",
+            "body": "Tell us what you can do.",
             "bodyDone": "{n} skills added"
           },
           "journal": {
             "title": "Log your first work entry",
-            "body": "Record what you did. Your work journal becomes your proof.",
+            "body": "Record what you did. Your work journal becomes your records.",
             "bodyDone": "{n} entries logged"
           }
         },
@@ -2546,7 +2546,7 @@
         },
         "journal": {
           "title": "Work journal",
-          "body": "Log work against an engagement. Confirmed entries accumulate skill evidence over time.",
+          "body": "Log work against an engagement. Confirmed entries accumulate skill records over time.",
           "cta": "Open journal"
         },
         "addMore": {
@@ -2719,7 +2719,7 @@
       "greeting": "Welcome back, {name}",
       "mySpace": {
         "eyebrow": "Me right now",
-        "intro": "This is your space. Your work, skills and evidence take shape here — at your own pace.",
+        "intro": "This is your space. Your work, skills and records take shape here — at your own pace.",
         "snapshot": {
           "work": "What I do",
           "workEmpty": "No profession set yet",
@@ -2728,17 +2728,17 @@
           "skillsEmpty": "No skills added yet",
           "proof": "What proves it",
           "proofValue": "Work entries: {n}",
-          "proofEmpty": "No evidence yet"
+          "proofEmpty": "No records yet"
         },
-        "unverifiedNote": "This is what you say about yourself. Not yet confirmed by a person — and that's fine.",
+        "unverifiedNote": "This is what you say about yourself — and that's fine.",
         "activities": {
           "title": "My activities and skills",
           "body": "Tell us what you can do and what you'd like to work on. All in one place.",
           "cta": "Open"
         },
         "proofCard": {
-          "title": "My evidence",
-          "body": "The work you log gradually becomes proof of your skills.",
+          "title": "My records",
+          "body": "The work you log gradually becomes records of your skills.",
           "cta": "Open journal"
         },
         "otherSpaces": "My other spaces"
@@ -2772,7 +2772,7 @@
           },
           "evidence": {
             "label": "What proves it",
-            "missing": "No evidence yet"
+            "missing": "No records yet"
           }
         },
         "next": {
@@ -2787,7 +2787,7 @@
           "availability": "This helps avoid showing you unsuitable offers.",
           "location": "This helps avoid showing you unsuitable offers.",
           "pay": "This helps justify your expected rate.",
-          "evidence": "Evidence builds trust, but you can add it later.",
+          "evidence": "Records builds trust, but you can add it later.",
           "complete": "Your work card is complete — work entries keep making it stronger."
         },
         "stale": {
@@ -2802,7 +2802,7 @@
           "title": "This is how an employer would see your card",
           "intro": "Only what you entered is shown. This is not an offer and nobody is looking for you yet — you simply see how your card reads.",
           "notSet": "not set yet",
-          "unverifiedNote": "This is information you provided yourself. It is not verified unless the card clearly says so."
+          "unverifiedNote": "This is information you provided yourself. It is not confirmed unless the card clearly says so."
         },
         "value": {
           "from": "from {date}",
@@ -2878,7 +2878,7 @@
         "worker_waiting": {
           "title": "Your entries are waiting for confirmation",
           "body": "Saved and private. Waiting for a manager to confirm: {waiting}. Nothing else is needed from you right now.",
-          "cta": "Check evidence status"
+          "cta": "Check records status"
         },
         "worker_all_confirmed": {
           "title": "You're all set",
@@ -2909,14 +2909,14 @@
           "title": "What I seek"
         },
         "proofs": {
-          "title": "My proofs"
+          "title": "My records"
         }
       },
       "empty": {
         "worker": {
-          "offer": "Empty. Skills, work history and proofs management will be enabled later.",
+          "offer": "Empty. Skills, work history and records management will be enabled later.",
           "seek": "Empty. Job preferences and availability settings will be enabled later.",
-          "proofs": "Empty. Evidence-backed skills and the work journal will be enabled later."
+          "proofs": "Empty. Records-backed skills and the work journal will be enabled later."
         },
         "company": {
           "offer": "Empty. Open positions and projects management will be enabled later.",
@@ -3718,7 +3718,7 @@
       "readyChip": "Ready (checked fields)",
       "notReadyChip": "Not ready yet",
       "declaredSkills": "Declared skills",
-      "confirmedSkills": "Verified skills",
+      "confirmedSkills": "Confirmed skills",
       "evidence": "Work evidence",
       "reviewItems": "Open reviews",
       "lastActivity": "Last activity",
@@ -3983,7 +3983,7 @@
     "statusTodo": "To add",
     "title": "What your profile is built from",
     "scope": "Clarity",
-    "intro": "Your profile grows from real work, not promises. Here are the pieces that shape it, and what is still waiting for evidence.",
+    "intro": "Your profile grows from real work, not promises. Here are the pieces that shape it, and what is still waiting for records.",
     "step": {
       "about": {
         "label": "About me / experience",
@@ -4002,8 +4002,8 @@
         "body": "Facts you typed yourself. The system does not auto-confirm them."
       },
       "awaitingProof": {
-        "label": "What is awaiting proof / external confirmation",
-        "body": "Achievements that need an employer or institution to confirm them. No fake 'Verified' badges."
+        "label": "What is awaiting records / external confirmation",
+        "body": "Achievements that need an employer or institution to confirm them. No fake 'Confirmed' badges."
       }
     },
     "footnote": "If the system does not know something — it says so. We do not hide uncertainty behind fake confidence."
@@ -4225,7 +4225,7 @@
       }
     },
     "cv": {
-      "verified": "Verified",
+      "verified": "Confirmed",
       "declared": "Declared"
     }
   },
@@ -4316,8 +4316,8 @@
     "title": "Worker card",
     "subtitle": "An overview of your profile. The numbers are real — nothing added.",
     "skillsLabel": "Skills",
-    "skillsHint": "Skills you listed (self-declared, not verified).",
-    "evidenceLabel": "Evidence",
+    "skillsHint": "Skills you listed (awaiting confirmation, not confirmed).",
+    "evidenceLabel": "Records",
     "evidenceHint": "Your work-journal entries.",
     "attentionLabel": "Needs attention",
     "attentionHint": "New instructions worth reviewing.",
@@ -4327,7 +4327,7 @@
     "workCardPending": "Not confirmed yet",
     "namePlaceholder": "My profile",
     "candidateLabel": "Candidate skills",
-    "candidateHint": "Skills you added in your own words (needs clarification, not verified).",
+    "candidateHint": "Skills you added in your own words (needs clarification, not confirmed).",
     "thermoLabel": "Thermometer",
     "thermoHint": "(average of declared salary expectations in your project + admin-entered market average) / 2 — shown only when both components exist.",
     "thermoMissingPosition": "Insufficient project data",
@@ -4371,16 +4371,16 @@
           "availability": "Availability",
           "skills": "Skills",
           "journal": "Work journal",
-          "evidence": "Evidence",
+          "evidence": "Records",
           "workCard": "Work card"
         }
       },
-    "verifiedTitle": "Verified skills",
-    "verifiedEmpty": "No verified skills yet. They appear when a manager confirms your journal entries.",
+    "verifiedTitle": "Confirmed skills",
+    "verifiedEmpty": "No confirmed skills yet. They appear when your journal entries are confirmed.",
     "journalSupportedLabel": "Journal-supported",
-    "journalSupportedHint": "Skills your work-journal entries back up — stronger than self-declared, awaiting manager confirmation.",
-    "latestEvidenceLabel": "Latest proof",
-    "latestEvidenceEmpty": "No proof entries yet — your first journal entry will be the first.",
+    "journalSupportedHint": "Skills your work-journal entries back up — stronger than awaiting confirmation, awaiting confirmation.",
+    "latestEvidenceLabel": "Latest records",
+    "latestEvidenceEmpty": "No records entries yet — your first journal entry will be the first.",
     "availabilityFrom": "Available from {date}"
   },
   "skillClarify": {
@@ -4480,8 +4480,8 @@
   },
   "trust": {
     "title": "Trust signals",
-    "caption": "Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
-    "verifiedSkills": "Verified skills",
+    "caption": "Counts come straight from real records. Nothing here is weighted or invented.",
+    "verifiedSkills": "Confirmed skills",
     "managerConfirmations": "Confirmations",
     "journalEntries": "Journal entries",
     "zeroHint": "Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
@@ -4497,7 +4497,7 @@
     "tiers": {
       "confirmed": "Confirmed",
       "evidence": "Backed by work entries",
-      "declared": "Self-declared"
+      "declared": "Awaiting confirmation"
     },
     "summary": {
       "verifiedSkills": "Confirmed skills",
@@ -4517,7 +4517,7 @@
     "eyebrow": "Today",
     "action": {
       "title": "Write down what you did today",
-      "body": "A few lines in your own words — and your day stays on record as lasting proof of your work.",
+      "body": "A few lines in your own words — and your day stays on record as lasting records of your work.",
       "doneTitle": "Today's work is recorded",
       "doneBody": "Good — today is already in your record. Add more if you did more.",
       "pending": "{n, plural, one {# entry is waiting for your manager's confirmation} other {# entries are waiting for your manager's confirmation}}",
@@ -5145,7 +5145,7 @@
     "filterProfession": "Trade",
     "filterCountry": "Country",
     "filterAvailableBy": "Available by",
-    "filterEvidence": "Evidence",
+    "filterEvidence": "Records",
     "search": "Search",
     "any": "Any",
     "evidenceConfirmed": "Confirmed evidence",
@@ -5157,7 +5157,7 @@
     "colCountry": "Country",
     "colAvailable": "Available",
     "colExperience": "Experience",
-    "colEvidence": "Evidence",
+    "colEvidence": "Records",
     "colMissing": "Missing",
     "expYears": "yrs",
     "none": "—",
@@ -5252,7 +5252,7 @@
   "worldMap": {
     "eyebrow": "Labour market atlas",
     "title": "Labour Market World Map",
-    "subtitle": "Your real profile, skills, evidence, availability and work needs as one connected labour-market world — local and international. Built only from your own signals, with honest empty states where data is missing.",
+    "subtitle": "Your real profile, skills, records, availability and work needs as one connected labour-market world — local and international. Built only from your own signals, with honest empty states where data is missing.",
     "legendTitle": "Signal legend",
     "summaryTitle": "What this atlas shows",
     "summaryBody": "Each zone is a real part of your labour-market presence. Signals appear as you add real data; nothing here is invented and no fit is guaranteed.",
@@ -5272,25 +5272,25 @@
     "cta": { "fill": "Complete", "open": "Open" },
     "zone": {
       "profileHub": { "name": "Profile Hub", "hint": "Your real profile and where you work from.", "state": { "started": "Profile started", "none": "No profile data yet" } },
-      "skillsEvidence": { "name": "Skills & Evidence", "hint": "Your real skills and the proof behind them.", "state": { "confirmed": "{count} confirmed by people", "suggested": "{count} with work evidence", "selfDeclared": "{count} self-declared", "none": "Add skills to see skill signals" } },
+      "skillsEvidence": { "name": "Skills & Records", "hint": "Your real skills and the records behind them.", "state": { "confirmed": "{count} confirmed", "suggested": "{count} with work records", "selfDeclared": "{count} awaiting confirmation", "none": "Add skills to see skill signals" } },
       "availability": { "name": "Availability", "hint": "When and where you can work — local and international.", "state": { "available": "Available now", "busy": "Currently busy", "unavailable": "Marked unavailable", "none": "Add availability to improve readiness" } },
       "workNeeds": { "name": "Work Needs", "hint": "Company and customer needs you prepare — drafts you review.", "state": { "drafts": "{count} work-need signal(s) in draft / review", "none": "Prepare a work need as a draft" } },
       "teams": { "name": "Teams & Brigades", "hint": "Teams and brigades — a connected-work concept.", "state": { "concept": "Not enough data yet" } },
       "company": { "name": "Company / Organisation", "hint": "Your organisation, agency or client context.", "state": { "linked": "Organisation linked", "none": "Add your organisation context" } },
       "marketPulse": { "name": "Market Pulse", "hint": "Possible fit signals between profiles and needs — no guarantees.", "state": { "possibleFit": "Possible fit signals — needs more data to grow", "needsData": "Prepare your profile to see market signals" } },
-      "trust": { "name": "Trust & Confirmation", "hint": "Evidence and human confirmation make claims stronger.", "state": { "confirmedExists": "{count} confirmed by a person", "selfDeclaredOnly": "Self-declared — human confirmation makes it stronger" } }
+      "trust": { "name": "Trust & Confirmation", "hint": "Records and human confirmation make claims stronger.", "state": { "confirmedExists": "{count} confirmed", "selfDeclaredOnly": "Awaiting confirmation — human confirmation makes it stronger" } }
     }
   },
   "myWorkView": {
     "eyebrow": "Work cockpit",
     "title": "My Work View",
-    "subtitle": "Your real profile, skills, evidence, availability and work needs in one place — and where they connect on the labour-market map.",
+    "subtitle": "Your real profile, skills, records, availability and work needs in one place — and where they connect on the labour-market map.",
     "actionsTitle": "Next actions",
     "block": {
       "profile": { "name": "Profile", "state": { "started": "Profile started", "missing": "No profile yet" } },
       "cv": { "name": "CV", "state": { "summaryAdded": "Profile summary added", "import": "Import your CV or add a summary" } },
       "skills": { "name": "Skills", "state": { "added": "{count} skills added", "none": "No skills yet" } },
-      "evidence": { "name": "Evidence", "state": { "supported": "{count} confirmed by people", "hasEvidence": "{count} with work evidence", "needsEvidence": "Add work to build evidence", "noSkills": "Add skills first" } },
+      "evidence": { "name": "Records", "state": { "supported": "{count} confirmed", "hasEvidence": "{count} with work records", "needsEvidence": "Add work to build records", "noSkills": "Add skills first" } },
       "availability": { "name": "Availability", "state": { "available": "Available now", "busy": "Currently busy", "unavailable": "Marked unavailable", "none": "Availability not set" } },
       "journal": { "name": "Work journal", "state": { "logged": "{count} work entries", "none": "No work logged yet" } },
       "workNeeds": { "name": "Work needs", "state": { "drafts": "{count} work-need draft(s)", "none": "No work need prepared" } },
@@ -5302,54 +5302,54 @@
       "importCv": "Import your CV",
       "setAvailability": "Set your availability",
       "logWork": "Log your first work entry",
-      "strengthenEvidence": "Strengthen skills with evidence",
+      "strengthenEvidence": "Strengthen skills with records",
       "openMarketMap": "Open the market map"
     },
     "reason": { "needsManager": "Available once a manager or client confirms your work." }
   },
     "workEntryReview": {
     "title": "Suggested skills from this entry",
-    "intro": "Suggestions from your text — needs review, not confirmed. Accepting adds a self-declared skill to your profile; confirmation comes from a person.",
+    "intro": "Suggestions from your text — needs review, not confirmed. Accepting adds a awaiting confirmation skill to your profile; confirmation comes from a person.",
     "accept": "Accept",
     "accepting": "Adding…",
     "ignore": "Ignore",
     "accepted": "Added",
     "ignored": "Ignored",
-    "acceptedNote": "Added as a self-declared skill — confirmation by a person makes it stronger.",
+    "acceptedNote": "Added as a awaiting confirmation skill — confirmation by a person makes it stronger.",
     "reasonLabel": "Why",
     "quantityLabel": "Quantity",
     "durationLabel": "Time",
     "unit": { "hours": "h", "days": "d", "minutes": "min" },
     "domain": { "construction": "Construction", "web_design": "Web / design", "admin": "Admin", "cleaning": "Cleaning", "electrical": "Electrical", "cooking": "Food / catering", "gardening": "Grounds & gardening", "driving_logistics": "Transport / logistics", "warehouse": "Warehouse", "customer_service": "Customer service", "it": "IT", "language": "Language / translation", "equipment": "Equipment operation", "care": "Care & nursing" },
     "existingTitle": "Your profile skills mentioned in this entry",
-    "existingNote": "These skills are already on your profile — this entry supports them as Work Journal evidence. We don't add them again.",
+    "existingNote": "These skills are already on your profile — this entry supports them as Work Journal records. We don't add them again.",
     "existingBadge": "Already on profile",
     "newTitle": "Possible new skills",
-    "newNote": "New activities you haven't declared yet. Accepting adds them as self-declared — not verified.",
+    "newNote": "New activities you haven't declared yet. Accepting adds them as awaiting confirmation — not confirmed.",
     "activitiesTitle": "Activities performed in this entry",
     "activitiesNote": "What you actually did — grouped by labour-market sector.",
-    "evidenceLabel": "Evidence source",
+    "evidenceLabel": "Records source",
     "evidenceJournal": "Work Journal",
-    "verificationNote": "Recognised automatically — not verified. Only a manager or client confirms a skill.",
+    "verificationNote": "Recognised automatically — not confirmed. Only a manager or client confirms a skill.",
     "unmappedTitle": "Needs review",
     "unmappedNote": "We recognised work here but no skill matched — kept for review, not turned into a skill.",
     "needsMoreDetail": "Add more detail to get skill suggestions from this entry.",
     "saveError": "Could not add. Please try again."
   },
   "evidenceReport": {
-    "title": "Evidence report",
-    "subtitle": "Your real work evidence — self-declared, supported by entries, and confirmed by people. Built only from your own data.",
+    "title": "Records report",
+    "subtitle": "Your real work records — awaiting confirmation, supported by entries, and confirmed. Built only from your own data.",
     "print": "Print / save PDF",
     "back": "Profile",
     "notWorker": "This report is built from a worker profile's journal and skills. Create your worker profile to generate it.",
-    "ladderNote": "The evidence ladder: self-declared → supported by a work entry → confirmed by a responsible person. This is not a score; confirmation is a human decision.",
-    "s": { "profileEvidence": "Profile evidence", "skillsSupported": "Skills supported by work entries", "workEntrySummary": "Work-entry summary", "missingEvidence": "Missing evidence / confirmation needed", "fitReadiness": "Work-need fit readiness" },
-    "metric": { "total": "Skills", "selfDeclared": "Self-declared", "workSupported": "Supported", "confirmed": "Confirmed" },
-    "emptySupported": "No skills are backed by a work entry yet — log work to build evidence.",
-    "entrySummary": "{entries} work entries · {confirmations} confirmed by a person.",
-    "missingNote": "{needEvidence} self-declared skills need a work entry · {needConfirmation} supported skills await a person's confirmation.",
+    "ladderNote": "The records ladder: awaiting confirmation → supported by a work entry → confirmed. This is not a score; confirmation is a human decision.",
+    "s": { "profileEvidence": "Profile records", "skillsSupported": "Skills supported by work entries", "workEntrySummary": "Work-entry summary", "missingEvidence": "Missing records / confirmation needed", "fitReadiness": "Work-need fit readiness" },
+    "metric": { "total": "Skills", "selfDeclared": "Awaiting confirmation", "workSupported": "Supported", "confirmed": "Confirmed" },
+    "emptySupported": "No skills are backed by a work entry yet — log work to build records.",
+    "entrySummary": "{entries} work entries · {confirmations} confirmed.",
+    "missingNote": "{needEvidence} awaiting confirmation skills need a work entry · {needConfirmation} supported skills await a person's confirmation.",
     "fitReal": "Supported skills are ready to compare against real work needs.",
-    "fitNotAvailable": "Fit readiness appears when there is a real work-need context and supported evidence. No fit is guaranteed.",
+    "fitNotAvailable": "Fit readiness appears when there is a real work-need context and supported records. No fit is guaranteed.",
     "footer": "This report shows real signals only. Confirmation is a human decision."
   }
 }

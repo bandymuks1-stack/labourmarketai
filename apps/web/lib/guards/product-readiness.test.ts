@@ -251,8 +251,8 @@ describe("confirmation-required copy is present", () => {
     // ("Paties nurodyta" / "Self-declared") makes the trust posture
     // explicit. The accompanying needsExternalConfirmation key remains
     // unchanged — it describes the FUTURE confirmation flow honestly.
-    expect(lt.skills.textFirst.confirmedByYou).toBe("Paties nurodyta");
-    expect(en.skills.textFirst.confirmedByYou).toBe("Self-declared");
+    expect(lt.skills.textFirst.confirmedByYou).toBe("Laukia patvirtinimo");
+    expect(en.skills.textFirst.confirmedByYou).toBe("Awaiting confirmation");
     expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/išorinio/i);
     expect(en.skills.textFirst.needsExternalConfirmation).toMatch(
       /external/i,

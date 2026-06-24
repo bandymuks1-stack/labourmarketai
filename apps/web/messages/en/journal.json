@@ -1,6 +1,6 @@
 {
   "noContext": {
-    "none": "No active work context yet. When an organization invites you to its team and adds you, your work evidence opens here.",
+    "none": "No active work context yet. When an organization invites you to its team and adds you, your work records opens here.",
     "pending": "You have a pending invitation. Open your dashboard to accept it — then the owner can add you to the organization.",
     "pendingNamed": "You have a pending invitation from {org}. Open your dashboard to accept it — then the owner can add you to the organization.",
     "roster": "You've accepted and you're on the team roster. The organization owner still needs to add you to the organization before you can log work here.",
@@ -23,7 +23,7 @@
   "reasonFound": "Found: \"{word}\"",
   "reasonWeak": "Weak signal — confirm if it fits.",
   "newSkillGroupTitle": "Possible new skill",
-  "newSkillIntro": "These skills aren't in your profile yet. Your entry mentioned them — you can add one as a self-declared skill.",
+  "newSkillIntro": "These skills aren't in your profile yet. Your entry mentioned them — you can add one as a awaiting confirmation skill.",
   "newSkillAdd": "Add to profile",
   "newSkillAdding": "Adding…",
   "newSkillAdded": "Added to profile",
@@ -199,8 +199,8 @@
       "outcomeBlocked": "not confirmed ({code})"
     }
   },
-  "listEmpty": "You don't have any work evidence yet — your entries will show up here.",
-  "listEmptyTitle": "Start building work evidence",
+  "listEmpty": "You don't have any work records yet — your entries will show up here.",
+  "listEmptyTitle": "Start building work records",
   "listEmptyNext": "Create your first entry below — it stays private until you confirm it.",
   "listEmptyCta": "Create your first entry",
   "listTitle": "Work entries",
@@ -215,7 +215,7 @@
   },
   "save": "Save entry",
   "saveError": "Could not save. Please try again.",
-  "notesRequiredCopy": "Describe what you worked on — the free text is the proof of record.",
+  "notesRequiredCopy": "Describe what you worked on — the free text is the records of record.",
   "foundSummary": "Found: {times} time, {activities} work directions.",
   "reviewMetaNote": "Private entry · you review the suggestions. Manager / client confirmation comes later.",
   "fragment": {
@@ -233,7 +233,7 @@
   "saving": "Saving...",
   "self_progress": {
     "awaiting": "Awaiting entries: {n}",
-    "awaitingHint": "These skills have no confirmed journal entries yet. Add an entry that mentions the relevant work — suggestions will appear here, and your confirmations will build the evidence base.",
+    "awaitingHint": "These skills have no confirmed journal entries yet. Add an entry that mentions the relevant work — suggestions will appear here, and your confirmations will build the records base.",
     "confirmed": "Confirmed: {n}",
     "strongly_confirmed": "Strongly confirmed: {n}",
     "title": "You have {n} skills"
@@ -241,7 +241,7 @@
   "unit": "Unit",
   "photo": {
     "label": "Work photo (optional)",
-    "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended evidence will be a VIP feature.",
+    "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended records will be a VIP feature.",
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",
     "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",

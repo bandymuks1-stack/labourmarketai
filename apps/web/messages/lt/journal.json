@@ -1,6 +1,6 @@
 {
   "noContext": {
-    "none": "Kol kas nėra aktyvaus darbo konteksto. Kai organizacija pakvies jus į komandą ir pridės, jūsų darbo įrodymai atsidarys čia.",
+    "none": "Kol kas nėra aktyvaus darbo konteksto. Kai organizacija pakvies jus į komandą ir pridės, jūsų darbo įrašai atsidarys čia.",
     "pending": "Turite laukiantį kvietimą. Atidarykite skydelį ir priimkite jį — tada savininkas galės pridėti jus prie organizacijos.",
     "pendingNamed": "Turite laukiantį {org} kvietimą. Atidarykite skydelį ir priimkite jį — tada savininkas galės pridėti jus prie organizacijos.",
     "roster": "Priėmėte kvietimą ir esate komandos sąraše. Organizacijos savininkas dar turi pridėti jus prie organizacijos, kad galėtumėte žymėti darbą.",
@@ -23,7 +23,7 @@
   "reasonFound": "Rasta: „{word}“",
   "reasonWeak": "Silpnas signalas — patvirtinkite, jei tinka.",
   "newSkillGroupTitle": "Galimas naujas įgūdis",
-  "newSkillIntro": "Šių įgūdžių jūsų profilyje dar nėra. Įrašas juos paminėjo — galite pridėti kaip savideklaruotą įgūdį.",
+  "newSkillIntro": "Šių įgūdžių jūsų profilyje dar nėra. Įrašas juos paminėjo — galite pridėti kaip jūsų nurodyti įgūdį.",
   "newSkillAdd": "Pridėti prie profilio",
   "newSkillAdding": "Pridedama…",
   "newSkillAdded": "Pridėta prie profilio",
@@ -199,8 +199,8 @@
       "outcomeBlocked": "nepatvirtinta ({code})"
     }
   },
-  "listEmpty": "Kol kas neturite darbo įrodymų — jūsų įrašai atsiras čia.",
-  "listEmptyTitle": "Pradėkite kurti darbo įrodymus",
+  "listEmpty": "Kol kas neturite darbo įrašų — jūsų įrašai atsiras čia.",
+  "listEmptyTitle": "Pradėkite kurti darbo įrašus",
   "listEmptyNext": "Sukurkite pirmą įrašą žemiau — jis lieka privatus, kol patvirtinsite.",
   "listEmptyCta": "Sukurti pirmą įrašą",
   "listTitle": "Darbo įrašai",
@@ -215,7 +215,7 @@
   },
   "save": "Išsaugoti įrašą",
   "saveError": "Nepavyko išsaugoti. Bandyk dar kartą.",
-  "notesRequiredCopy": "Aprašykite ką dirbote — laisvas tekstas yra įrašo įrodymas.",
+  "notesRequiredCopy": "Aprašykite ką dirbote — laisvas tekstas yra įrašo įrašas.",
   "foundSummary": "Rasta: {times} laiko, {activities} darbo krypčių.",
   "reviewMetaNote": "Privatus įrašas · pasiūlymus peržiūrite jūs. Vadovo / kliento patvirtinimas — vėliau.",
   "fragment": {
@@ -233,7 +233,7 @@
   "saving": "Saugoma...",
   "self_progress": {
     "awaiting": "Dar laukia įrašų: {n}",
-    "awaitingHint": "Šie įgūdžiai dar neturi nei vieno patvirtinto darbo įrašo. Pridėkite įrašą, kuriame paminėtumėte šį darbą — pasiūlymai pasirodys čia, o po jūsų patvirtinimo prisirinks įrodymų bazė.",
+    "awaitingHint": "Šie įgūdžiai dar neturi nei vieno patvirtinto darbo įrašo. Pridėkite įrašą, kuriame paminėtumėte šį darbą — pasiūlymai pasirodys čia.",
     "confirmed": "Patvirtinti: {n}",
     "strongly_confirmed": "Stipriai patvirtinti: {n}",
     "title": "Tu turi {n} įgūdžių"
@@ -241,7 +241,7 @@
   "unit": "Vienetas",
   "photo": {
     "label": "Darbo nuotrauka (neprivaloma)",
-    "freeTierNote": "Nemokamai galite pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrodymai bus VIP funkcija.",
+    "freeTierNote": "Nemokamai galite pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrašai bus VIP funkcija.",
     "invalidFile": "Nuotrauka turi būti JPG, PNG arba WebP formato, iki 5 MB.",
     "uploaded": "Nuotrauka pridėta prie įrašo.",
     "limitReached": "Šis įrašas jau turi nuotrauką — nemokamai galima 1 nuotrauka vienam įrašui.",

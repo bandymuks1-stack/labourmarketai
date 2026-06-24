@@ -92,7 +92,7 @@
     "title": "[EN] You have {n} skills"
   },
   "unit": "[EN] Unit",
-  "notesRequiredCopy": "[EN] Describe what you worked on — the free text is the proof of record.",
+  "notesRequiredCopy": "[EN] Describe what you worked on — the free text is the records of record.",
   "foundSummary": "[EN] The system found {times} time entries and {activities} possible work directions. Confirm only what is true below.",
   "reviewMetaNote": "[EN] Private entry · suggestions reviewed by you. Manager / client confirmation will be added later.",
   "fragment": {
@@ -101,7 +101,7 @@
   },
   "photo": {
     "label": "Work photo (optional)",
-    "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended evidence will be a VIP feature.",
+    "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended records will be a VIP feature.",
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",
     "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",
