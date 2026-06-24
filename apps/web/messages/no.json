@@ -8,10 +8,10 @@
   "journey": {
     "eyebrow": "Slik fungerer det",
     "title": "Én profil. En veiledet vei til muligheter.",
-    "subcopy": "Ærlige profiler og ekte bevis, gjort om til muligheter — for arbeidstakere, bedrifter og byråer.",
+    "subcopy": "Ærlige profiler og ekte oppføringer, gjort om til muligheter — for arbeidstakere, bedrifter og byråer.",
     "s1": "Start ditt rom",
     "s2": "Bygg identitet",
-    "s3": "Legg til bevis",
+    "s3": "Legg til oppføringer",
     "s4": "Åpne muligheter"
   },
   "agencies": {
@@ -591,7 +591,7 @@
     "businessLink": "Start et arbeidsbehov",
     "signals": {
       "s1": "Ekte profil",
-      "s2": "Bevis på ferdigheter",
+      "s2": "Ferdighetsoppføringer",
       "s3": "Tilgjengelighet",
       "s4": "Arbeidsbehov"
     }

@@ -8,10 +8,10 @@
   "journey": {
     "eyebrow": "Kā tas darbojas",
     "title": "Viens profils. Vadīts ceļš uz iespējām.",
-    "subcopy": "Godīgi profili un reāli pierādījumi, pārvērsti iespējās — darbiniekiem, uzņēmumiem un aģentūrām.",
+    "subcopy": "Godīgi profili un reāli ieraksti, pārvērsti iespējās — darbiniekiem, uzņēmumiem un aģentūrām.",
     "s1": "Sāciet savu telpu",
     "s2": "Veidojiet identitāti",
-    "s3": "Pievienojiet pierādījumus",
+    "s3": "Pievienojiet ierakstus",
     "s4": "Atveriet iespējas"
   },
   "agencies": {
@@ -591,7 +591,7 @@
     "businessLink": "Sākt darba vajadzību",
     "signals": {
       "s1": "Reāls profils",
-      "s2": "Prasmju pierādījumi",
+      "s2": "Prasmju ieraksti",
       "s3": "Pieejamība",
       "s4": "Darba vajadzības"
     }
