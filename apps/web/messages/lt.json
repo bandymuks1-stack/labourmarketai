@@ -614,10 +614,10 @@
   "journey": {
     "eyebrow": "Kaip tai veikia",
     "title": "Vienas profilis. Vedamas kelias į galimybes.",
-    "subcopy": "Sąžiningi profiliai ir realūs įrodymai, paversti galimybėmis — darbuotojams, įmonėms ir agentūroms.",
+    "subcopy": "Sąžiningi profiliai ir realūs įrašai, paversti galimybėmis — darbuotojams, įmonėms ir agentūroms.",
     "s1": "Pradėkite erdvę",
     "s2": "Kurkite tapatybę",
-    "s3": "Pridėkite įrodymų",
+    "s3": "Pridėkite įrašų",
     "s4": "Atverkite galimybes"
   },
   "cv": {
@@ -1997,8 +1997,8 @@
       "s1": "Aprašykite, ką mokate, arba įkelkite CV tekstą",
       "s2": "Pasižymi savo įgūdžius — ir patvirtini, kas tavo",
       "s3": "Užfiksuokite šiandienos darbą darbo dienoraštyje",
-      "s4": "Įrašai virsta įrodymais",
-      "s5": "Įrodymus vėliau patvirtins vadovas ar klientas",
+      "s4": "Įrašai virsta CV",
+      "s5": "Įrašai vėliau patvirtinami",
       "s6": "Vystykite vaidmenis ir galimybes savo tempu"
     },
     "controlRoom": {
@@ -3327,7 +3327,7 @@
     "businessLink": "Pradėti darbo poreikį",
     "signals": {
       "s1": "Realus profilis",
-      "s2": "Įgūdžių įrodymai",
+      "s2": "Įgūdžių įrašai",
       "s3": "Prieinamumas",
       "s4": "Darbo poreikiai"
     }

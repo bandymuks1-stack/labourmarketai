@@ -614,10 +614,10 @@
   "journey": {
     "eyebrow": "How it works",
     "title": "One profile. A guided path to opportunities.",
-    "subcopy": "Honest profiles and real proof, turned into opportunities — for workers, companies and agencies alike.",
+    "subcopy": "Honest profiles and real records, turned into opportunities — for workers, companies and agencies alike.",
     "s1": "Start your space",
     "s2": "Build identity",
-    "s3": "Add proof",
+    "s3": "Add records",
     "s4": "Open opportunities"
   },
   "cv": {
@@ -1997,8 +1997,8 @@
       "s1": "Write what you can do, or paste a CV",
       "s2": "You set down your skills — and confirm what is yours",
       "s3": "Record today's work in the work journal",
-      "s4": "Entries become evidence",
-      "s5": "Evidence is later confirmed by a manager or client",
+      "s4": "Entries become your CV",
+      "s5": "Records are confirmed later",
       "s6": "Grow roles and opportunities at your own pace"
     },
     "controlRoom": {
@@ -3327,7 +3327,7 @@
     "businessLink": "Start a work need",
     "signals": {
       "s1": "Real profile",
-      "s2": "Skill evidence",
+      "s2": "Skill records",
       "s3": "Availability",
       "s4": "Work needs"
     }
