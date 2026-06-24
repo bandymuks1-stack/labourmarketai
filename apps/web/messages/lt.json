@@ -406,17 +406,13 @@
     "lastActivity": "Paskutinė veikla"
   },
   "workerEvidence": {
-    "title": "Mano įrodymai",
-    "intro": "Čia matote, kuo paremtas jūsų profilis. Tai nėra išorinis patvirtinimas — tik tai, ką pateikėte patys ir ką užfiksavo sistema.",
-    "confirmed": "Patvirtinta vadovo",
-    "selfDeclared": "Paties nurodyta",
-    "awaitingNote": "Laukia vadovo patvirtinimo.",
-    "systemEntries": "Sistemos užfiksuoti darbo įrašai",
-    "empty": "Įrodymai atsiras, kai sukursite žurnalo įrašą ir jį peržiūrės vadovas.",
-    "emptyTitle": "Kol kas nėra įrodymų",
-    "emptyCta": "Atidaryti žurnalą",
-    "whoCanConfirm": "Kas šiandien gali patvirtinti įrašą: jūsų vadovas, įmonės savininkas arba išorinis (kliento) vadovas — tie, kurie realiai prižiūri jūsų darbą. Kol kuris nors iš jų įrašo nepatvirtins, jis lieka jūsų paties nurodytas.",
-    "footnote": "Įgūdžiai gali būti paties nurodyti, įrodyti sistemos veikla arba patvirtinti vadovo. Sistema nieko nepatvirtina automatiškai."
+    "title": "Mano CV",
+    "confirmed": "Patvirtinta",
+    "selfDeclared": "Laukia patvirtinimo",
+    "systemEntries": "Darbo įrašai",
+    "empty": "Pradėkite pildyti CV — sukurkite pirmą įrašą.",
+    "emptyTitle": "Kol kas tuščia",
+    "emptyCta": "Atidaryti žurnalą"
   },
   "evidenceStatus": {
     "aria": "Įrodymo būsena",
@@ -2127,7 +2123,6 @@
     "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau, arba pridėkite reikšmingus įrašus rankiniu būdu.",
     "buckets": {
       "selfDeclared": "Paties nurodyti įgūdžiai",
-      "selfDeclaredDisclaimer": "Tai jūsų pačių nurodyti įgūdžiai. Jie dar nėra patvirtinti darbų žurnalu, dokumentais ar kito žmogaus patvirtinimu.",
       "skills": "Rasti įgūdžiai",
       "directions": "Galimos darbo kryptys",
       "roles": "Galimi vaidmenys",

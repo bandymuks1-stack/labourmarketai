@@ -339,14 +339,6 @@ export function ProfileTextFirstFlow({
         </div>
       </div>
 
-      {selfDeclared.length > 0 && (
-        <p
-          className="text-xs text-text-secondary"
-          data-testid="profile-text-flow-self-declared-disclaimer"
-        >
-          {tBucket("selfDeclaredDisclaimer")}
-        </p>
-      )}
 
       <TextSaveIndicator state={textSaveState} t={t} />
 

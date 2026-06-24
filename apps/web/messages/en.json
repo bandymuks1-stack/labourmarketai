@@ -406,17 +406,13 @@
     "lastActivity": "Last activity"
   },
   "workerEvidence": {
-    "title": "My evidence",
-    "intro": "Here is what your profile is backed by. This is not an external verification — only what you entered yourself and what the system recorded.",
-    "confirmed": "Confirmed by manager",
-    "selfDeclared": "Self-declared",
-    "awaitingNote": "Awaiting manager confirmation.",
-    "systemEntries": "System-recorded work entries",
-    "empty": "Evidence appears once you create a journal entry and a manager reviews it.",
-    "emptyTitle": "No evidence yet",
-    "emptyCta": "Go to your journal",
-    "whoCanConfirm": "Who can confirm an entry today: your manager, the business owner, or an external (client) manager — the people who actually oversee your work. Until one of them confirms it, every entry stays your own self-declared record.",
-    "footnote": "Skills can be self-declared, evidenced by system activity, or confirmed by a manager. Nothing is confirmed automatically."
+    "title": "My CV",
+    "confirmed": "Confirmed",
+    "selfDeclared": "Awaiting confirmation",
+    "systemEntries": "Work entries",
+    "empty": "Start building your CV — create your first entry.",
+    "emptyTitle": "Nothing yet",
+    "emptyCta": "Go to your journal"
   },
   "evidenceStatus": {
     "aria": "Evidence status",
@@ -2127,7 +2123,6 @@
     "noMatches": "Nothing clear in this text yet. Try adding more detail, or add meaningful entries manually.",
     "buckets": {
       "selfDeclared": "Self-declared skills",
-      "selfDeclaredDisclaimer": "These are self-declared skills. They are not yet confirmed by work journal evidence, documents, or another person.",
       "skills": "Detected skills",
       "directions": "Possible work directions",
       "roles": "Possible roles",

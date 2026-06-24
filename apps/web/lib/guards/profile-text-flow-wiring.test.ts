@@ -270,18 +270,16 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
       >;
       const structuring = json.structuring as Record<string, unknown>;
 
-      it("has the new selfDeclared bucket key + disclaimer", () => {
+      it("has the selfDeclared bucket key (disclaimer removed — quiet UI)", () => {
         const buckets = structuring.buckets as Record<string, string>;
         expect(buckets.selfDeclared, `${locale}.structuring.buckets.selfDeclared missing`).toBeTruthy();
-        expect(buckets.selfDeclaredDisclaimer, `${locale}.structuring.buckets.selfDeclaredDisclaimer missing`).toBeTruthy();
+        // selfDeclaredDisclaimer ("not yet confirmed by…") was removed from
+        // worker UI per the owner (no explanatory provenance paragraph).
+        expect(buckets.selfDeclaredDisclaimer).toBeUndefined();
         if (locale === "lt") {
           expect(buckets.selfDeclared).toContain("Paties nurodyti");
-          expect(buckets.selfDeclaredDisclaimer).toContain("dar nėra patvirtinti");
         } else {
           expect(buckets.selfDeclared.toLowerCase()).toContain("self-declared");
-          expect(buckets.selfDeclaredDisclaimer.toLowerCase()).toContain(
-            "not yet confirmed",
-          );
         }
       });
 

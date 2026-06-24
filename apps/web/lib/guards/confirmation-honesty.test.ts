@@ -167,61 +167,29 @@ describe("Guard: confirmation copy never over-claims who can confirm", () => {
       }
     });
 
-    it(`${loc}: the evidence footnote stays honest that nothing auto-confirms`, () => {
-      const we = (loadJson(`messages/${loc}.json`).workerEvidence ?? {}) as {
-        footnote?: string;
-      };
-      const honest =
-        loc === "lt"
-          ? /nieko nepatvirtina automat/i
-          : /nothing is confirmed automatically/i;
-      expect(honest.test(we.footnote ?? ""), `${loc} footnote: "${we.footnote}"`).toBe(true);
-    });
+    // Quiet-UI reframe (fix/cv): the CV-evidence-card process footnote
+    // ("Sistema nieko nepatvirtina automatiškai") was REMOVED from worker UI.
+    // No normal worker surface explains the confirmation process. Honesty is
+    // kept structurally (status labels reflect real state; no fake-verified
+    // claim) and enforced by no-disclaimer-ui.test.ts.
   }
 });
 
-// ── 3b. The "who can confirm today" lines are honest AND informative ───────
+// ── 3b. The "who can confirm" lines were REMOVED from worker UI (fix/cv) ───
+// No normal worker-facing surface explains who confirms what. The previous
+// describe pinned that workerEvidence.whoCanConfirm + journal.whoCanConfirm
+// named the supported confirmer roles; both have been removed/quietened, and
+// their absence is enforced by no-disclaimer-ui.test.ts.
 
-// Terms that prove the line names the real supported confirmers, and that it
-// keeps an unconfirmed entry honestly self-declared.
-const WHO_CAN_CONFIRM_TERMS = {
-  en: { manager: /\bmanager\b/i, owner: /\bowner\b/i, selfDeclared: /self-declared/i },
-  lt: { manager: /vadov/i, owner: /savinink/i, selfDeclared: /nurodyt/i },
-} as const;
-
-describe("Guard: the who-can-confirm clarity lines name the supported roles", () => {
-  for (const loc of LOCALES) {
-    it(`${loc}: profile whoCanConfirm names manager + owner, marks self-declared, no broad role`, () => {
-      // Quiet-UI reframe (fix/cv): journal.whoCanConfirm was reduced to a short
-      // privacy label ("Įrašai matomi tik tau.") — the worker journal no longer
-      // explains the confirmation process. The CV-evidence-card surface
-      // (workerEvidence.whoCanConfirm) still names the real confirmers.
-      const we = (loadJson(`messages/${loc}.json`).workerEvidence ?? {}) as {
-        whoCanConfirm?: string;
-      };
-      const terms = WHO_CAN_CONFIRM_TERMS[loc];
-      for (const [key, value] of [
-        ["workerEvidence.whoCanConfirm", we.whoCanConfirm],
-      ] as const) {
-        expect(typeof value === "string" && value.length > 0, `${loc} ${key} missing`).toBe(
-          true,
-        );
-        const v = value as string;
-        expect(terms.manager.test(v), `${loc} ${key} must name the manager confirmer`).toBe(
-          true,
-        );
-        expect(terms.owner.test(v), `${loc} ${key} must name the owner confirmer`).toBe(true);
-        expect(
-          terms.selfDeclared.test(v),
-          `${loc} ${key} must state the entry stays self-declared until confirmed`,
-        ).toBe(true);
-        expect(
-          BROAD_CONFIRMER[loc].test(v),
-          `${loc} ${key} must not name a broad confirmer the backend can't store: "${v}"`,
-        ).toBe(false);
-      }
-    });
-  }
+describe("Guard: who-can-confirm lines removed from worker UI", () => {
+  it("workerEvidence + journal no longer carry a whoCanConfirm explanation", () => {
+    for (const loc of LOCALES) {
+      const we = (loadJson(`messages/${loc}.json`).workerEvidence ?? {}) as { whoCanConfirm?: string };
+      const j = loadJson(`messages/${loc}/journal.json`) as { whoCanConfirm?: string };
+      expect(we.whoCanConfirm, `${loc} workerEvidence.whoCanConfirm must be removed`).toBeUndefined();
+      expect(j.whoCanConfirm == null || !/gali patvirtinti|can confirm/i.test(j.whoCanConfirm)).toBe(true);
+    }
+  });
 });
 
 // ── Negative controls — the detector is real ──────────────────────────────

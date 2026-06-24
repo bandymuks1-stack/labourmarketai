@@ -39,9 +39,20 @@ const FORBIDDEN_PHRASES: RegExp[] = [
   /pasiūlymas iš jūsų teksto/i,
   /Patvirtinimas atsiras/i,
   /Patvirtinti gali/i,
+  /gali patvirtinti/i,
   /vadovas ar klientas/i,
   /vartotojo pateikti įgūdžiai/i,
   /darbuotojo pateikti įgūdžiai/i,
+  // CV-evidence-card confirmer/process wording (fix/cv final cleanup):
+  /who can confirm/i,
+  /confirmed by/i,
+  /\bverifier\b/i,
+  /patvirtina žmogus/i,
+  /Patvirtinta vadov/i,
+  /Laukia vadov/i,
+  /Awaiting manager/i,
+  /Confirmed by manager/i,
+  /\bprovenance\b/i,
 ];
 // Raw source-taxonomy enum identifiers — forbidden only in user-visible message
 // VALUES. In component CODE they are legitimate type values / map keys (the
@@ -74,6 +85,7 @@ describe("Guard: no explanatory/disclaimer text in worker-facing journal/CV copy
         b.structuring?.buckets,
         b.profileHub?.journalLink,
         b.profileHub?.pillars?.journal,
+        b.workerEvidence, // CV-evidence-card surface
       ];
       const all = subtrees.flatMap((s) => values(s));
       const offenders = all.filter((v) => FORBIDDEN_VALUE.some((rx) => rx.test(v)));
@@ -89,6 +101,7 @@ describe("Guard: the worker composer/page no longer renders the disclaimer keys"
     "components/app/journal-entry-skill-links.tsx",
     "components/app/text-first-composer.tsx",
     "components/app/profile-text-first-flow.tsx",
+    "components/app/worker-evidence-card.tsx",
   ];
   const REMOVED_KEYS = [
     "ruleBasedNotice",
@@ -105,11 +118,15 @@ describe("Guard: the worker composer/page no longer renders the disclaimer keys"
       }
       expect(src).not.toMatch(/SuggestionProvenanceLabel/);
     });
-    it(`${rel} contains no forbidden EXPLANATION literal text`, () => {
-      // Phrases only — enum identifiers are legitimate code here, not UI.
-      const src = read(rel);
+    it(`${rel} renders no forbidden EXPLANATION literal text`, () => {
+      // Strip JS comments first — code comments are not user-facing, and may
+      // legitimately mention "who can confirm" etc. while documenting the
+      // removal. Enum identifiers are also legitimate code, not UI.
+      const src = read(rel)
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/(^|[^:])\/\/.*$/gm, "$1");
       const hit = FORBIDDEN_PHRASES.find((rx) => rx.test(src));
-      expect(hit, `${rel} contains forbidden literal: ${hit}`).toBeUndefined();
+      expect(hit, `${rel} renders forbidden literal: ${hit}`).toBeUndefined();
     });
   }
 });
