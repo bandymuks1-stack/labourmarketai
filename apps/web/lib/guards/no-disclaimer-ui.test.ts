@@ -57,6 +57,12 @@ const FORBIDDEN_PHRASES: RegExp[] = [
   /confirmed by .{0,5}manager/i,
   /vadovo patvirtin/i,
   /\bprovenance\b/i,
+  // CV-export proof-sheet wording (fix/cv final): use CV/status language.
+  /confirmed work proof/i,
+  /\bwork proof\b/i,
+  /confirmations can be checked/i,
+  /checked on the platform/i,
+  /patikrinti platformoje/i,
 ];
 // Raw source-taxonomy enum identifiers — forbidden only in user-visible message
 // VALUES. In component CODE they are legitimate type values / map keys (the
@@ -96,6 +102,20 @@ describe("Guard: no explanatory/disclaimer text in worker-facing journal/CV copy
       const all = subtrees.flatMap((s) => values(s));
       const offenders = all.filter((v) => FORBIDDEN_VALUE.some((rx) => rx.test(v)));
       expect(offenders, `${loc} forbidden disclaimer text: ${offenders.join(" | ")}`).toEqual([]);
+    });
+  }
+});
+
+describe("Guard: CV-export sheet uses CV/status language, not proof/evidence/verification", () => {
+  // The export-facing CV sheet (cvExport) must not carry proof / evidence /
+  // verification / process wording. Scanned at the VALUE level (key names like
+  // `proofTitle` are code, not user-facing).
+  const EXPORT_BANNED = [/\bproof\b/i, /\bįrodym/i, /\bverif/i, /\bplatform/i, /patikrint/i];
+  for (const loc of LOCS) {
+    it(`${loc}: cvExport values use CV/status language only`, () => {
+      const cv = base(loc).cvExport;
+      const offenders = values(cv).filter((v) => EXPORT_BANNED.some((rx) => rx.test(v)));
+      expect(offenders, `${loc} cvExport proof/evidence/verification wording: ${offenders.join(" | ")}`).toEqual([]);
     });
   }
 });

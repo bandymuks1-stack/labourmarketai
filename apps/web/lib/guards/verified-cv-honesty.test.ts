@@ -121,7 +121,6 @@ describe("Guard: cvExport copy is present + honest in all 10 locales", () => {
     "proofRole",
     "proofEmpty",
     "generatedAt",
-    "verifyNote",
     "notWorker",
   ];
 
@@ -148,9 +147,8 @@ describe("Guard: cvExport copy is present + honest in all 10 locales", () => {
       expect(new Set(labels).size).toBe(3);
     });
 
-    it(`${locale}: the verify note names no public link (none exists)`, () => {
-      expect(cvNs(locale).verifyNote).not.toMatch(/https?:\/\/|www\./i);
-    });
+    // verifyNote ("Confirmations can be checked on the platform.") was REMOVED
+    // from the export sheet per the owner (quiet UI, no process note).
   }
 
   it("LT: pinned honest tier labels (quiet status, no 'who confirmed')", () => {
@@ -187,7 +185,6 @@ describe("Guard: cvExport copy is present + honest in all 10 locales", () => {
         ns.summary.verifiedSkills,
         ns.proofTitle,
         ns.generatedAt,
-        ns.verifyNote,
       ].join("\n");
       expect(sheet.split("\n").every((s: string) => s.trim().length > 0)).toBe(true);
     }

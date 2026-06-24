@@ -216,13 +216,10 @@ export default async function VerifiedCvPage({
           )}
         </section>
 
-        {/* Footer — generation date + how to check (no public link exists). */}
+        {/* Footer — generation date only (quiet UI: no verification process note). */}
         <footer className="mt-2 border-t border-zinc-300 pt-3 text-xs text-zinc-500">
           <p>
             {t("generatedAt")}: {generatedAt}
-          </p>
-          <p className="mt-0.5" data-testid="cv-verify-note">
-            {t("verifyNote")}
           </p>
         </footer>
       </div>

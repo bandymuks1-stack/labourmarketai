@@ -4487,7 +4487,7 @@
     "zeroHint": "Pasitikėjimas auga iš realaus darbo: užfiksuok žurnalo įrašą ir paprašyk ten buvusio vadovo jį patvirtinti."
   },
   "cvExport": {
-    "pageTitle": "Patvirtintas CV",
+    "pageTitle": "Mano CV",
     "exportButton": "Eksportuoti CV (PDF)",
     "print": "Atsisiųsti PDF",
     "back": "← Grįžti į profilį",
@@ -4504,14 +4504,13 @@
       "managerConfirmations": "Patvirtinimai",
       "journalEntries": "Žurnalo įrašai"
     },
-    "proofTitle": "Patvirtinti darbo įrodymai",
+    "proofTitle": "CV darbo įrašai",
     "proofDate": "Data",
     "proofProject": "Projektas",
-    "proofRole": "Patvirtino (rolė)",
+    "proofRole": "Patvirtinta (rolė)",
     "proofEmpty": "Patvirtintų įrašų dar nėra.",
     "generatedAt": "Sugeneruota",
-    "verifyNote": "Patvirtinimus galima patikrinti platformoje.",
-    "notWorker": "CV eksportas galimas darbuotojo profiliui — jis sudaromas iš darbo žurnalo ir patvirtintų įgūdžių.",
+    "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
     "summaryTitle": "Profesinis aprašymas"
   },
   "todayScreen": {

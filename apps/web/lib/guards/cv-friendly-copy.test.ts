@@ -86,6 +86,18 @@ describe("Guard: CV tier label is quiet status, not 'who confirmed'", () => {
   });
 });
 
+describe("Guard: CV-export sheet uses CV language, not proof/verified", () => {
+  it("pageTitle is CV (not 'Verified CV'); proofTitle is CV records; verifyNote removed", () => {
+    expect(base("lt").cvExport.pageTitle).toBe("Mano CV");
+    expect(base("en").cvExport.pageTitle).toBe("My CV");
+    expect(base("en").cvExport.pageTitle).not.toMatch(/verif/i);
+    expect(base("lt").cvExport.proofTitle).toBe("CV darbo įrašai");
+    expect(base("en").cvExport.proofTitle).toBe("CV work records");
+    expect(base("lt").cvExport.verifyNote).toBeUndefined();
+    expect(base("en").cvExport.verifyNote).toBeUndefined();
+  });
+});
+
 describe("Guard: stale-skill unlink action is the simple 'Atsieti'", () => {
   it("journalSkillLinks.unlinkFlagged is simple, not 'the wrong ones / netinkamus'", () => {
     expect(base("lt").journalSkillLinks.unlinkFlagged).toBe("Atsieti");
