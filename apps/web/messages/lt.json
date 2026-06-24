@@ -518,6 +518,15 @@
     "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "none": "Pirma pridėkite įgūdžių savo profilyje.",
     "profileLink": "Mano gebėjimai",
+    "source": {
+      "recognized": "Atpažinta iš teksto",
+      "confirmed": "Patvirtinta",
+      "manual": "Susieta rankiniu būdu"
+    },
+    "reviewHeading": "Reikia peržiūrėti",
+    "reviewHelper": "Šie įgūdžiai susieti, bet šio įrašo tekstas jų nepagrindžia. Peržiūrėkite arba atsiekite netinkamus.",
+    "reviewAgain": "Peržiūrėti iš naujo",
+    "unlinkFlagged": "Atsieti netinkamus",
     "linkMore": "Susieti įgūdį",
     "linkDone": "Baigta"
   },
