@@ -510,7 +510,7 @@ function WorkerCard({
       <ChecklistEditor worker={worker} labels={labels} projectId={projectId} />
 
       <footer className="flex flex-wrap items-center gap-3 text-[11px] print:hidden">
-        <Link href={`/${locale}/dashboard/player-card`} className="text-brand-cyan hover:underline">
+        <Link href={`/${locale}/dashboard/journal`} className="text-brand-cyan hover:underline">
           {labels.playerCardLink}
         </Link>
         <Link href={`/${locale}/dashboard/instructions`} className="text-brand-cyan hover:underline">

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
 
 /**
  * Market Map first-class navigation guard.
@@ -23,10 +24,17 @@ describe("market map is exposed in the command centers + dashboard", () => {
     expect(identity).toMatch(/\/dashboard\/market-map/);
   });
 
-  it("the marketMap action appears in BOTH person and company lists", () => {
-    // two occurrences of the marketMap key (person + company)
-    const count = (identity.match(/key:\s*"marketMap"/g) ?? []).length;
-    expect(count).toBeGreaterThanOrEqual(2);
+  it("the market map is a shared first-class destination (person actions + primary nav)", () => {
+    // Marketplace IA: the map is the SHARED connection layer, exposed once in
+    // the person actions and as a primary-nav tab for everyone (person AND
+    // company) — not duplicated as a company commercial tile.
+    expect(identity).toMatch(/key:\s*"marketMap"/);
+    expect(
+      VISIBLE_PRIMARY_NAV_ITEMS.some(
+        (i) => i.href === "/dashboard/market-map",
+      ),
+      "market-map is a primary nav tab",
+    ).toBe(true);
   });
 
   it("the dashboard links to the market map (via the My Work View cockpit)", () => {

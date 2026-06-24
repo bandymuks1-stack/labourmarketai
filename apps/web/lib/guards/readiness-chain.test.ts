@@ -16,7 +16,9 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 describe("readiness panel makes signals actionable + is mounted", () => {
   const panel = read("components/app/worker-readiness-panel.tsx");
-  const page = read("app/[locale]/dashboard/player-card/page.tsx");
+  // Mano CV surface (the player-card identity + work records live here now;
+  // /dashboard/player-card redirects to it).
+  const page = read("app/[locale]/dashboard/journal/page.tsx");
 
   it("panel renders the readiness pillars with met/next-step", () => {
     expect(panel).toMatch(/deriveWorkerReadiness/);
@@ -31,7 +33,7 @@ describe("readiness panel makes signals actionable + is mounted", () => {
     expect(steps).toMatch(/\/dashboard\/journal/);
   });
 
-  it("panel is mounted on the player-card page", () => {
+  it("panel is mounted on the Mano CV surface", () => {
     expect(page).toMatch(/WorkerReadinessPanel/);
   });
 

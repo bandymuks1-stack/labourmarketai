@@ -102,11 +102,14 @@ describe("active /dashboard room shows only the current space (no cross-space so
   it("the active dashboard room renders NO generic future-module grid", () => {
     expect(dashboard).not.toMatch(/<FeatureAvailabilityGrid\b/);
   });
-  it("cross-space catalogue + module grid live under the My-spaces (account) surface", () => {
-    expect(account).toMatch(/data-testid="my-spaces"/);
-    expect(account).toMatch(/<RoleCatalogueGrid\b/);
-    expect(account).toMatch(/<FeatureAvailabilityGrid\b/);
-    expect(account).toMatch(/tSpaces\("mySpaces"\)/);
+  it("account is settings only — it does NOT host the cross-space catalogue (superseded PR #204)", () => {
+    // Owner override 2026-06-25: account must not be a second dashboard. The
+    // catalogue + future-module grid were removed from account; identity
+    // switching is the header role switcher, person↔company actions live on the
+    // dashboard overview. The active room staying clean (above) is unchanged.
+    expect(account).not.toMatch(/<RoleCatalogueGrid\b/);
+    expect(account).not.toMatch(/<FeatureAvailabilityGrid\b/);
+    expect(account).not.toMatch(/<IdentityActions\b/);
   });
   it("the active room reaches account via the current-space header (not a duplicate handle)", () => {
     // Slice human-nav-cleanup-v1 (PR E) removed the dashboard's bottom

@@ -268,7 +268,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profil",
-        "journal": "Journal",
+        "journal": "Mein CV",
         "search": "[EN] Search"
       }
     },
@@ -1086,7 +1086,10 @@
     }
   },
   "journal": {
+    "cvBridge": "{confirmed} von {total} Einträgen bestätigt — bestätigte Arbeit erscheint in deinem CV.",
+    "cvBridgeLink": "CV öffnen",
     "inbox": {
+      "title": "Arbeitsprüfung",
       "confirmSkills": "Confirm skills",
       "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
       "confirmNote": "Optional note",
@@ -1406,6 +1409,7 @@
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
   },
   "cvExport": {
+    "nameNotProvided": "Name noch nicht angegeben",
     "pageTitle": "Bestätigter Lebenslauf",
     "exportButton": "Lebenslauf exportieren (PDF)",
     "print": "PDF herunterladen",

@@ -2840,7 +2840,7 @@
       "tabs": {
         "overview": "My space",
         "marketMap": "Map",
-        "profile": "Work card",
+        "profile": "Profile",
         "journal": "My CV",
         "communication": "Messages",
         "discover": "Discover",
@@ -4211,7 +4211,10 @@
     "outcomeNeedsMigration": "Couldn’t complete the action. Please try again."
   },
   "journal": {
+    "cvBridge": "{confirmed} of {total} entries confirmed — confirmed work shows on your CV.",
+    "cvBridgeLink": "Open CV",
     "inbox": {
+      "title": "Work review",
       "confirmSkills": "Confirm skills",
       "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
       "confirmNote": "Optional note",
@@ -4487,6 +4490,7 @@
     "zeroHint": "Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
   },
   "cvExport": {
+    "nameNotProvided": "Name not added yet",
     "pageTitle": "My CV",
     "exportButton": "Export CV (PDF)",
     "print": "Download PDF",

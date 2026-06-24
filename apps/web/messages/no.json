@@ -268,7 +268,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profil",
-        "journal": "Journal",
+        "journal": "Min CV",
         "search": "[EN] Search"
       }
     },
@@ -1086,7 +1086,10 @@
     }
   },
   "journal": {
+    "cvBridge": "{confirmed} av {total} oppføringer bekreftet — bekreftet arbeid vises på CV-en din.",
+    "cvBridgeLink": "Åpne CV",
     "inbox": {
+      "title": "Arbeidsgjennomgang",
       "confirmSkills": "Confirm skills",
       "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
       "confirmNote": "Optional note",
@@ -1406,6 +1409,7 @@
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
   },
   "cvExport": {
+    "nameNotProvided": "Navn er ikke lagt til ennå",
     "pageTitle": "Bekreftet CV",
     "exportButton": "Eksporter CV (PDF)",
     "print": "Last ned PDF",

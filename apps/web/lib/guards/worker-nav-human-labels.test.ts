@@ -20,11 +20,13 @@ const tabs = (j: Record<string, unknown>) =>
 const DASH = "app/[locale]/dashboard/page.tsx";
 
 describe("primary nav uses human work-card labels, not module words", () => {
-  it("LT tabs read as space / work card / CV / settings", () => {
+  it("LT tabs read as space / profilis / Mano CV / settings", () => {
     const tl = tabs(lt);
     expect(tl.overview).toMatch(/erdvė/i);
-    expect(tl.profile).toMatch(/kortel/i);
-    // The worker's professional record reads as their CV, not "evidence".
+    // Marketplace IA: Profilis = edit identity; Mano CV = identity + work
+    // records. The two are distinct, no competing "Darbo kortelė" tab.
+    expect(tl.profile).toMatch(/profil/i);
+    expect(tl.profile).not.toMatch(/kortel/i);
     expect(tl.journal).toMatch(/cv/i);
     expect(tl.journal).not.toMatch(/įrodym/i);
     expect(tl.account).toMatch(/nustatym/i);
@@ -32,7 +34,8 @@ describe("primary nav uses human work-card labels, not module words", () => {
   it("EN tabs mirror the human labels", () => {
     const tl = tabs(en);
     expect(tl.overview).toMatch(/space/i);
-    expect(tl.profile).toMatch(/card/i);
+    expect(tl.profile).toMatch(/profile/i);
+    expect(tl.profile).not.toMatch(/card/i);
     expect(tl.journal).toMatch(/cv/i);
     expect(tl.journal).not.toMatch(/evidence/i);
     expect(tl.account).toMatch(/setting/i);
@@ -46,7 +49,7 @@ describe("primary nav uses human work-card labels, not module words", () => {
         tabs(j).account,
       ].join(" ");
       expect(blob).not.toMatch(/\bdashboard\b|cockpit|\bmodul/i);
-      expect(blob).not.toMatch(/Apžvalga|Profilis|Žurnalas|profile completion|profilio užbaigim/i);
+      expect(blob).not.toMatch(/Apžvalga|Žurnalas|profile completion|profilio užbaigim/i);
     }
   });
 });

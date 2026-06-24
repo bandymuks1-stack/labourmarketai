@@ -2840,7 +2840,7 @@
       "tabs": {
         "overview": "Mano erdvė",
         "marketMap": "Žemėlapis",
-        "profile": "Darbo kortelė",
+        "profile": "Profilis",
         "journal": "Mano CV",
         "communication": "Žinutės",
         "discover": "Naršyti",
@@ -4211,7 +4211,10 @@
     "outcomeNeedsMigration": "Dar neparuošta."
   },
   "journal": {
+    "cvBridge": "{confirmed} iš {total} įrašų patvirtinta — patvirtintas darbas matomas jūsų CV.",
+    "cvBridgeLink": "Atidaryti CV",
     "inbox": {
+      "title": "Darbų peržiūra",
       "confirmSkills": "Patvirtinti įgūdžius",
       "confirmSkillsHint": "Pažymėkite įgūdžius, kuriuos šis įrašas įrodo. Patvirtinimas juos patikrina.",
       "confirmNote": "Pastaba (nebūtina)",
@@ -4487,6 +4490,7 @@
     "zeroHint": "Pasitikėjimas auga iš realaus darbo: užfiksuok žurnalo įrašą ir paprašyk ten buvusio vadovo jį patvirtinti."
   },
   "cvExport": {
+    "nameNotProvided": "Vardas dar nenurodytas",
     "pageTitle": "Mano CV",
     "exportButton": "Eksportuoti CV (PDF)",
     "print": "Atsisiųsti PDF",

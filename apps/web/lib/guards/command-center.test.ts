@@ -16,19 +16,25 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 const comp = read("components/app/identity-actions.tsx");
 
 describe("command center exposes the person's complete quick actions", () => {
-  it("person actions include profile, player card, find work, readiness, communication", () => {
+  it("person actions include profile, find work, readiness, communication", () => {
+    // Player card is no longer a separate person action — it leads the Mano CV
+    // surface (work-records). Person quick actions point at real in-app routes.
     for (const route of [
       "/dashboard/profile",
-      "/dashboard/player-card",
       "/dashboard/opportunities",
       "/dashboard/documents",
       "/dashboard/communication",
     ]) {
       expect(comp, route).toContain(route);
     }
+    // No competing player-card destination in the quick actions.
+    expect(comp).not.toContain("/dashboard/player-card");
   });
-  it("company actions include a communication entry", () => {
-    expect(comp).toMatch(/key:\s*"communication"[\s\S]*?\/dashboard\/communication/);
+  it("the company / commercial channel groups the commercial actions", () => {
+    // One compact channel (not a scatter of peer tiles); the shared layer
+    // (map + messages) lives in the primary nav, not repeated as company tiles.
+    expect(comp).toMatch(/COMMERCIAL_ACTIONS/);
+    expect(comp).toMatch(/CompanyChannel/);
   });
   it("renders real Link cards (app-like), not a table", () => {
     expect(comp).toMatch(/<Link/);

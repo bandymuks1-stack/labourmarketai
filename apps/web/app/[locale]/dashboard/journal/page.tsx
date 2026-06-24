@@ -27,6 +27,18 @@ import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { Link } from "@/lib/i18n/navigation";
+// Mano CV identity lead — the player-card/avatar identity is the visual layer
+// at the TOP of the Mano CV surface (this work-records surface), with the work
+// records below (owner IA: Mano CV = marketplace identity + work records).
+import { WorkerPlayerCard } from "@/components/app/worker-player-card";
+import { WorkerReadinessPanel } from "@/components/app/worker-readiness-panel";
+import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
+import { buildPlayerCardLabels } from "@/lib/player-card/labels";
+import {
+  getOwnThermometer,
+  toThermometerView,
+} from "@/lib/market/thermometer-data";
+import { getOwnAvatar } from "@/lib/profile/avatar";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -61,6 +73,7 @@ export default async function JournalPage({
   const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
+  const tCv = await getTranslations("cvExport");
 
   const supabase = await createClient();
   const {
@@ -154,7 +167,7 @@ export default async function JournalPage({
       <div className="flex flex-col gap-6">
         <header className="flex flex-col gap-1">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("navTitle")}
+            {tCv("pageTitle")}
           </h1>
           <p className="text-sm leading-relaxed text-text-secondary">
             {t("navSubtitle")}
@@ -346,12 +359,30 @@ export default async function JournalPage({
   if (evidenceStatuses.some((s) => s === "approved"))
     journalEvidenceActive.push("confirmed");
 
+  // Journal → CV bridge (IA: one path between the work log and the CV it
+  // feeds). Honest counts only — confirmed entries are what surface as proof
+  // on the Verified CV; the link makes that relationship visible instead of
+  // leaving the worker to wonder where a logged entry "went".
+  const confirmedEntryCount = evidenceStatuses.filter((s) => s === "approved").length;
+  const totalEntryCount = (entries ?? []).length;
+
+  // Mano CV identity lead — the player-card/avatar identity that opens the Mano
+  // CV surface, above the work records. Worker-scoped real data only (null for
+  // non-worker accounts, which never reach this branch). The same premium card
+  // used elsewhere; `/dashboard/player-card` redirects here.
+  const manoCard = await getWorkerPlayerCard();
+  const manoCardLabels = manoCard ? await buildPlayerCardLabels(manoCard) : null;
+  const manoThermometer = manoCard
+    ? toThermometerView(await getOwnThermometer())
+    : null;
+  const manoAvatar = await getOwnAvatar();
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("navTitle")}
+            {tCv("pageTitle")}
           </h1>
           <Link
             href="/dashboard/account"
@@ -365,6 +396,22 @@ export default async function JournalPage({
           {t("navSubtitle")}
         </p>
       </header>
+
+      {/* Mano CV identity lead: player-card/avatar identity at the top of the
+          Mano CV surface; the work records follow below. The readiness panel
+          (signals → next step) sits with the identity, moved here from the old
+          standalone player-card route. */}
+      {manoCard && manoCardLabels ? (
+        <section className="flex flex-col gap-6" data-testid="mano-cv-player-card-lead">
+          <WorkerPlayerCard
+            card={manoCard}
+            labels={manoCardLabels}
+            thermometer={manoThermometer}
+            avatarUrl={manoAvatar.signedUrl}
+          />
+          <WorkerReadinessPanel card={manoCard} />
+        </section>
+      ) : null}
 
       {/* P0 UX rescue: removed the read-only project-context note and the
           self-progress counter (noise, not actionable here). The pilot note is
@@ -468,6 +515,24 @@ export default async function JournalPage({
             active={journalEvidenceActive}
             data-testid="journal-evidence-status-strip"
           />
+        )}
+        {/* Journal → CV bridge: make the one path between the work log and the
+            CV it feeds visible. Honest counts only; confirmed entries are what
+            surface as proof on the Verified CV. */}
+        {totalEntryCount > 0 && (
+          <p
+            className="text-[11px] leading-relaxed text-text-muted"
+            data-testid="journal-cv-bridge"
+          >
+            {t("cvBridge", { confirmed: confirmedEntryCount, total: totalEntryCount })}{" "}
+            <Link
+              href="/cv"
+              className="font-medium text-brand-blue hover:underline"
+              data-testid="journal-cv-bridge-link"
+            >
+              {t("cvBridgeLink")} →
+            </Link>
+          </p>
         )}
         {(entries ?? []).length === 0 ? (
           <EmptyState

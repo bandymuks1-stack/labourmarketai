@@ -6,7 +6,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
 import {
-  IdCard,
   Wrench,
   FolderKanban,
   ClipboardList,
@@ -42,9 +41,11 @@ export function AccountMenu() {
   // projects + instructions. Additive — never replaces the account link/logout.
   const isManager = activeRole === "company" || activeRole === "agency";
   const featureLinks: { href: string; label: string; icon: LucideIcon; testid: string }[] = [
+    // Mano kortelė / player-card link removed (marketplace IA cleanup): the
+    // player-card identity now leads the "Mano CV" surface, reachable from its
+    // own primary-nav tab — no separate competing "Mano kortelė" destination.
     ...(activeRole === "worker"
       ? [
-          { href: "/dashboard/player-card", label: t("menuLinks.playerCard"), icon: IdCard, testid: "account-menu-player-card-link" },
           { href: "/dashboard/profile#candidate-skills", label: t("menuLinks.skills"), icon: Wrench, testid: "account-menu-skills-link" },
         ]
       : []),

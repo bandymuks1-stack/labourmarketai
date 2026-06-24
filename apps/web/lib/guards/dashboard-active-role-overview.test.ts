@@ -25,7 +25,9 @@ describe("overview is focused to the active role", () => {
   });
   it("IdentityActions supports an active-role focus mode", () => {
     expect(identity).toMatch(/focusRole/);
-    expect(identity).toMatch(/FOCUS_KEYS/);
+    // Focus subsets: person actions + the commercial-channel subset per org role.
+    expect(identity).toMatch(/FOCUS_PERSON/);
+    expect(identity).toMatch(/FOCUS_COMMERCIAL/);
   });
   it("the non-active identity is reachable via Manage spaces, not duplicated", () => {
     expect(identity).toMatch(/data-testid="identity-manage-spaces"/);
@@ -48,8 +50,10 @@ describe("heavy explanation surfaces are gone from the overview", () => {
 
 describe("role-specific first screen", () => {
   it("worker focus excludes company machinery keys", () => {
-    const m = identity.match(/worker:\s*\[([^\]]*)\]/);
-    expect(m, "worker FOCUS_KEYS").toBeTruthy();
+    // Worker focus is the person-action subset (FOCUS_PERSON); commercial keys
+    // live only in the company channel (FOCUS_COMMERCIAL).
+    const m = identity.match(/FOCUS_PERSON[\s\S]*?\[([^\]]*)\]/);
+    expect(m, "FOCUS_PERSON").toBeTruthy();
     const set = m?.[1] ?? "";
     for (const k of ["need", "hire", "buy", "offer", "projects"]) {
       expect(set, `worker focus must not include "${k}"`).not.toContain(`"${k}"`);
