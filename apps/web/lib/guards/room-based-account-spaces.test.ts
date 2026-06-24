@@ -111,7 +111,7 @@ describe("active /dashboard room shows only the current space (no cross-space so
   it("the active room reaches account via the current-space header (not a duplicate handle)", () => {
     // Slice human-nav-cleanup-v1 (PR E) removed the dashboard's bottom
     // "Kitos mano erdvės" handle — it duplicated the account doorway that the
-    // <CurrentSpaceHeader> ("Mano erdvės" link) + the primary "Mano paskyra" nav
+    // <CurrentSpaceHeader> ("Mano erdvės" link) + the primary "Nustatymai" nav
     // tab + the AccountMenu already provide. The current-space header remains the
     // in-room doorway to account/other spaces.
     const comp = read("components/app/current-space-header.tsx");

@@ -6,6 +6,7 @@ import { SupportConversationLauncher } from "@/components/app/support-conversati
 import { AttentionInstructions } from "@/components/app/attention-instructions";
 import { FeatureNote } from "@/components/app/feature-note";
 import { createClient } from "@/lib/supabase/server";
+import { describeConversationCard } from "@/lib/communication/conversation-display";
 
 /**
  * Communication v1 — thread list page.
@@ -109,6 +110,10 @@ export default async function CommunicationListPage({
           {conversations.map((c) => {
             const lastRead = lastReadByConv.get(c.id);
             const unread = !lastRead;
+            // Clarity v1: never render a card where the user cannot tell WHO /
+            // WHAT / WHICH CONTEXT. Derived honestly from the real `kind`; when
+            // identity/workspace are not in the data model we say so, not fake it.
+            const card = describeConversationCard({ kind: c.kind });
             return (
               <li key={c.id}>
                 <Link
@@ -120,8 +125,38 @@ export default async function CommunicationListPage({
                     <span className="text-sm font-semibold text-text-primary">
                       {c.subject ?? t("unnamedThread")}
                     </span>
-                    <span className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted">
-                      {t(`kind.${c.kind}`)}
+                    <span
+                      className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted"
+                      data-testid={`conversation-type-${c.id}`}
+                    >
+                      {t(card.typeKey)}
+                    </span>
+                  </div>
+                  {/* Who + which context. Honest-unknown states are muted/italic
+                      so the user reads them as "not specified", not as a name. */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
+                    <span
+                      className={
+                        card.counterpartyKnown
+                          ? "text-text-secondary"
+                          : "italic text-text-muted"
+                      }
+                      data-testid={`conversation-counterparty-${c.id}`}
+                    >
+                      {t(card.counterpartyKey)}
+                    </span>
+                    <span aria-hidden className="text-text-muted">
+                      ·
+                    </span>
+                    <span
+                      className={
+                        card.scopeKnown
+                          ? "text-text-secondary"
+                          : "italic text-text-muted"
+                      }
+                      data-testid={`conversation-scope-${c.id}`}
+                    >
+                      {t(card.scopeKey)}
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-[11px] text-text-muted">
