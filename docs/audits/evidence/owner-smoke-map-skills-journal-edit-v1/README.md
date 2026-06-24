@@ -40,6 +40,21 @@ in `scripts/owner-evidence/`, then screenshot at desktop (1280px) and mobile
   on an unconfirmed entry — the textarea now shows the saved text; **Cancel**
   returns to a clean create form.
 
+## Real app evidence vs. rendered/simulated evidence (important)
+
+None of these images are screenshots of the **running authenticated app** (the
+dashboard is owner-Google-login-gated and cannot be driven headlessly). They are
+rendered from harnesses that import the **real production modules**, so the
+*data/logic* is real but the *surrounding UI chrome* is reconstructed:
+
+| Artifact | Real app part | Simulated / reconstructed part |
+| --- | --- | --- |
+| `journal-skills.*` | The capability **labels** come straight from the real `lib/profile/skill-claim-extractor.ts` (`extractProfileSkillClaims`) — the exact module the journal composer now calls. | The chip **styling/layout** is a static HTML mock, not the real `journal-entry-composer.tsx` React component. |
+| `market-map.*` | The marker/grid/centroid **coordinates** come from the real `lib/location/map-projection.ts` (project / invert / radius / centroids). | The **SVG markup is re-built in the harness** to mirror `components/app/location-map.tsx`; it is NOT the actual React component render, and the tap/click interaction is not exercised here (it is covered by `map-projection.test.ts`). |
+
+So: **real module output, simulated rendering.** A true in-app screenshot still
+requires an authenticated owner session (manual steps below / in the PR review).
+
 ## How to regenerate
 ```
 npx tsx scripts/owner-evidence/render-map-evidence.mts
