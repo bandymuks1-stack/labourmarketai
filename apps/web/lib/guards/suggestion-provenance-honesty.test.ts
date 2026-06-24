@@ -75,22 +75,26 @@ describe("Guard: SuggestionProvenanceLabel renders the honest triad", () => {
 
 // ── 2. Composer wiring into the skills bucket ─────────────────────────────
 
-describe("Guard: the composer wires provenance into skill suggestions", () => {
+describe("Guard: the composer carries honest skill-suggestion framing", () => {
   const src = read(COMPOSER);
 
-  it("imports the provenance label", () => {
-    expect(src).toMatch(/import \{ SuggestionProvenanceLabel \}/);
+  // CV-friendly reframing (fix/cv): the per-card provenance triad was replaced
+  // by ONE honest, friendly bucket-level note (no "self-declared / not verified"
+  // jargon per the worker), so the skills bucket must still carry the honest
+  // note — that is where the "this is a suggestion, not a verified fact" honesty
+  // now lives. The section-level ruleBasedNotice keeps the no-AI honesty.
+  it("does NOT render the per-card technical provenance triad", () => {
+    expect(src).not.toMatch(/<SuggestionProvenanceLabel\s*\/>/);
   });
 
-  it("renders the label inside a DetectedSuggestionCard for skills", () => {
-    // The skills bucket maps skillSuggestions → a card with the label child.
+  it("shows the honest bucket-level provenance note in the skills bucket", () => {
     const skillsBucket = src.slice(src.indexOf('tBucket("skills")'));
-    expect(skillsBucket).toMatch(/<SuggestionProvenanceLabel\s*\/>/);
+    expect(skillsBucket).toMatch(/t\("skillProvenanceNote"\)/);
+    expect(skillsBucket).toMatch(/data-testid="skill-suggestions-provenance-note"/);
   });
 
-  it("shows the honest bucket-level provenance note", () => {
-    expect(src).toMatch(/t\("skillProvenanceNote"\)/);
-    expect(src).toMatch(/data-testid="skill-suggestions-provenance-note"/);
+  it("keeps the section-level honesty notice (no fake AI / not auto-saved)", () => {
+    expect(src).toMatch(/tS\("ruleBasedNotice"\)/);
   });
 });
 

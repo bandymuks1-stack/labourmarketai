@@ -439,8 +439,8 @@
     "explainer": "This data feeds your work card. It helps an employer quickly understand what work you fit.",
     "notVerified": "This is information you provided yourself — not yet verified by a person or documents. Evidence builds trust, but you can add it later.",
     "primaryAction": "Add what's missing",
-    "primaryActionJournal": "Add work evidence",
-    "journalLink": "My work evidence",
+    "primaryActionJournal": "Add to CV",
+    "journalLink": "My CV",
     "evidence": {
       "intro": "Skills are stronger when backed by real work, learning or activity entries.",
       "supported": "Supported by work entries: {supported} of {declared}",
@@ -460,7 +460,7 @@
         "none": "None yet"
       },
       "journal": {
-        "label": "Work evidence",
+        "label": "CV entries",
         "available": "Journal entries: {n}",
         "none": "Not yet linked",
         "preparing": "Work-evidence connection is being prepared"
@@ -512,7 +512,7 @@
     }
   },
   "journalSkillLinks": {
-    "helper": "Mark your skills that this work entry supports. This is evidence, not verification.",
+    "helper": "Mark the skills this entry shows — it builds your CV. Not yet confirmed.",
     "saving": "Saving…",
     "saved": "Saved",
     "error": "Could not save. Please try again.",
@@ -526,7 +526,7 @@
     "reviewHeading": "Needs review",
     "reviewHelper": "These skills are linked, but this entry's text doesn't support them. Review or unlink the wrong ones.",
     "reviewAgain": "Review again",
-    "unlinkFlagged": "Unlink the wrong ones",
+    "unlinkFlagged": "Unlink",
     "linkMore": "Link a skill",
     "linkDone": "Done"
   },
@@ -2122,7 +2122,7 @@
     }
   },
   "structuring": {
-    "groupEyebrow": "Self-declared suggestions",
+    "groupEyebrow": "Suggested skills",
     "ruleBasedNotice": "Note: this still uses a small dictionary and rules — no AI. Suggestions only become saved when you select them. Nothing is saved automatically.",
     "provenance": {
       "suggestedFromEntry": "Suggested from entry",
@@ -2852,7 +2852,7 @@
         "overview": "My space",
         "marketMap": "Map",
         "profile": "Work card",
-        "journal": "Evidence",
+        "journal": "My CV",
         "communication": "Messages",
         "discover": "Discover",
         "search": "Search",

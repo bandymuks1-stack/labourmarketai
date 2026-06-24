@@ -22,10 +22,13 @@ import {
  * peržiūrėti" — never as clean current evidence — with safe review actions. No
  * link is ever removed without an explicit worker click.
  */
+// CV-friendly: a linked skill in the worker's CV needs NO provenance label —
+// only a real confirmation is worth surfacing ("Patvirtinta"). The technical
+// recognized/manual distinction stays internal (audit/classifier), never shown.
 const SOURCE_LABEL_KEY: Record<EntrySkillSource, string | null> = {
-  recognized_from_text: "source.recognized",
+  recognized_from_text: null,
   confirmed_by_person: "source.confirmed",
-  manually_linked_to_entry: "source.manual",
+  manually_linked_to_entry: null,
   stale_needs_review: null, // rendered in the review group, not as a clean chip
   profile_skill_available_to_link: null,
 };

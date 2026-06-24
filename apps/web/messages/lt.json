@@ -439,8 +439,8 @@
     "explainer": "Šie duomenys maitina jūsų darbo kortelę. Tai padeda darbdaviui greičiau suprasti, kokiam darbui tinkate.",
     "notVerified": "Tai jūsų pačių pateikta informacija — dar nepatvirtinta žmogaus ar dokumentais. Įrodymai didina pasitikėjimą, bet galite juos pridėti vėliau.",
     "primaryAction": "Pridėti, ko trūksta",
-    "primaryActionJournal": "Pridėti darbo įrodymą",
-    "journalLink": "Mano darbo įrodymai",
+    "primaryActionJournal": "Pridėti prie CV",
+    "journalLink": "Mano CV",
     "evidence": {
       "intro": "Įgūdžiai stipresni, kai juos paremia tikri darbo, mokymosi ar veiklos įrašai.",
       "supported": "Paremta darbo įrašais: {supported} iš {declared}",
@@ -460,7 +460,7 @@
         "none": "Dar nenurodyta"
       },
       "journal": {
-        "label": "Darbo įrodymai",
+        "label": "CV įrašai",
         "available": "Žurnalo įrašai: {n}",
         "none": "Dar nesusieta",
         "preparing": "Darbo įrodymų ryšys ruošiamas"
@@ -512,7 +512,7 @@
     }
   },
   "journalSkillLinks": {
-    "helper": "Pažymėkite savo įgūdžius, kuriuos paremia šis darbo įrašas. Tai įrodymas, ne patvirtinimas.",
+    "helper": "Pažymėkite įgūdžius, kuriuos rodo šis įrašas — taip pildosi jūsų CV. Dar nepatvirtinta.",
     "saving": "Saugoma…",
     "saved": "Išsaugota",
     "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
@@ -526,7 +526,7 @@
     "reviewHeading": "Reikia peržiūrėti",
     "reviewHelper": "Šie įgūdžiai susieti, bet šio įrašo tekstas jų nepagrindžia. Peržiūrėkite arba atsiekite netinkamus.",
     "reviewAgain": "Peržiūrėti iš naujo",
-    "unlinkFlagged": "Atsieti netinkamus",
+    "unlinkFlagged": "Atsieti",
     "linkMore": "Susieti įgūdį",
     "linkDone": "Baigta"
   },
@@ -2122,7 +2122,7 @@
     }
   },
   "structuring": {
-    "groupEyebrow": "Paties nurodyti pasiūlymai",
+    "groupEyebrow": "Siūlomi įgūdžiai",
     "ruleBasedNotice": "Pastaba: kol kas naudojame paprastą žodyną ir taisykles, ne dirbtinį intelektą. Pasiūlymai netampa faktais, kol jūs jų nepasirenkate — niekas neišsaugoma automatiškai.",
     "provenance": {
       "suggestedFromEntry": "Pasiūlyta pagal įrašą",
@@ -2852,7 +2852,7 @@
         "overview": "Mano erdvė",
         "marketMap": "Žemėlapis",
         "profile": "Darbo kortelė",
-        "journal": "Įrodymai",
+        "journal": "Mano CV",
         "communication": "Žinutės",
         "discover": "Naršyti",
         "search": "Ieškoti",

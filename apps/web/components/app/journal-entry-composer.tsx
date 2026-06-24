@@ -11,7 +11,6 @@ import {
   type SuggestionStatus,
 } from "@/components/app/detected-suggestion-card";
 import { DetectedSuggestionList } from "@/components/app/detected-suggestion-list";
-import { SuggestionProvenanceLabel } from "@/components/app/suggestion-provenance";
 import { WorkEntrySkillReview } from "@/components/app/work-entry-skill-review";
 import {
   extractJournalSuggestions,
@@ -1151,10 +1150,9 @@ export function JournalEntryComposer({
             count={skillSuggestions.length}
           >
             {skillSuggestions.length > 0 && (
-              // Honest framing for the whole skills bucket: these are
-              // self-declared suggestions surfaced from the entry, never
-              // verified by us. Per-card chips repeat the triad so a single
-              // skill is never read out of context.
+              // One honest, friendly note for the whole skills bucket: these are
+              // suggestions from the worker's own text that they add to their CV
+              // and that still await confirmation — no per-card provenance jargon.
               <p
                 className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
                 data-testid="skill-suggestions-provenance-note"
@@ -1190,7 +1188,6 @@ export function JournalEntryComposer({
                     {t("reasonWeak")}
                   </span>
                 )}
-                <SuggestionProvenanceLabel />
               </DetectedSuggestionCard>
             ))}
           </DetectedSuggestionList>
