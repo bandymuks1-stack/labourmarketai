@@ -7,7 +7,7 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
  * Human navigation guard (slice human-nav-cleanup-v1, PR E).
  *
  * The logged-in worker navigation must follow the human work-card logic
- * (Mano erdvė / Darbo kortelė / Įrodymai / Mano paskyra), every primary route
+ * (Mano erdvė / Darbo kortelė / Įrodymai / Nustatymai), every primary route
  * stays reachable, and the dashboard keeps no duplicate doors / card wall.
  */
 
@@ -20,19 +20,19 @@ const tabs = (j: Record<string, unknown>) =>
 const DASH = "app/[locale]/dashboard/page.tsx";
 
 describe("primary nav uses human work-card labels, not module words", () => {
-  it("LT tabs read as space / work card / evidence / account", () => {
+  it("LT tabs read as space / work card / evidence / settings", () => {
     const tl = tabs(lt);
     expect(tl.overview).toMatch(/erdvė/i);
     expect(tl.profile).toMatch(/kortel/i);
     expect(tl.journal).toMatch(/įrodym/i);
-    expect(tl.account).toMatch(/paskyr/i);
+    expect(tl.account).toMatch(/nustatym/i);
   });
   it("EN tabs mirror the human labels", () => {
     const tl = tabs(en);
     expect(tl.overview).toMatch(/space/i);
     expect(tl.profile).toMatch(/card/i);
     expect(tl.journal).toMatch(/evidence/i);
-    expect(tl.account).toMatch(/account/i);
+    expect(tl.account).toMatch(/setting/i);
   });
   it("no module / cockpit / dashboard wording in the primary tab labels", () => {
     for (const j of [lt, en]) {

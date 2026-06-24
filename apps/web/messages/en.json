@@ -2846,7 +2846,7 @@
         "communication": "Messages",
         "discover": "Discover",
         "search": "Search",
-        "account": "My account"
+        "account": "Settings"
       },
       "chainActions": {
         "buyerTitle": "Buyer requests",
@@ -3917,6 +3917,14 @@
     "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
     "v1Notice": "Messages update on page refresh. We show only an honest 'opened' timestamp — no fake delivered / read indicators.",
     "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
+    "counterparty": {
+      "support": "Support team",
+      "unknown": "Recipient not specified"
+    },
+    "scope": {
+      "support": "Support channel",
+      "unknown": "Context not specified"
+    },
     "unnamedThread": "(no subject)",
     "unread": "New",
     "kind": {

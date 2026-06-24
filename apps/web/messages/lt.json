@@ -2467,7 +2467,7 @@
       "confirm": "Pridėti",
       "adminMode": "Admin režimas",
       "adminPanelLink": "Atidaryti operacijų valdymo skydą",
-      "personSpace": "Asmens erdvė",
+      "personSpace": "Asmeninė erdvė",
       "companySpace": "Įmonės erdvė",
       "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
@@ -2846,7 +2846,7 @@
         "communication": "Žinutės",
         "discover": "Naršyti",
         "search": "Ieškoti",
-        "account": "Mano paskyra"
+        "account": "Nustatymai"
       },
       "chainActions": {
         "buyerTitle": "Pirkėjo užklausos",
@@ -3917,6 +3917,14 @@
     "subtitle": "Kas dabar svarbu ir į ką verta atsakyti. Čia matysite žinutes ir svarbius prašymus.",
     "v1Notice": "Žinutės atnaujinamos perkrovus puslapį. Rodome tik sąžiningą „atidaryta“ laiką, be netikrų „pristatyta / perskaityta“ žymeklių.",
     "empty": "Kol kas žinučių nėra. Jei kas nors parašys ar atsiras svarbus prašymas, matysite tai čia.",
+    "counterparty": {
+      "support": "Pagalbos komanda",
+      "unknown": "Pašnekovas nepatikslintas"
+    },
+    "scope": {
+      "support": "Pagalbos kanalas",
+      "unknown": "Kontekstas nepatikslintas"
+    },
     "unnamedThread": "(be temos)",
     "unread": "Naujas",
     "kind": {

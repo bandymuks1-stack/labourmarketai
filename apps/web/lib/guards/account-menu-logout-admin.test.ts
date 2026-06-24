@@ -211,9 +211,9 @@ describe("Guard: i18n keys for the account menu exist in every locale", () => {
     const en = JSON.parse(read("messages/en.json")) as Record<string, unknown>;
     const ltDash = ((lt.auth as Record<string, unknown>).dashboard ?? {}) as Record<string, Record<string, string>>;
     const enDash = ((en.auth as Record<string, unknown>).dashboard ?? {}) as Record<string, Record<string, string>>;
-    expect(ltDash.tabs.account).toBe("Mano paskyra");
+    expect(ltDash.tabs.account).toBe("Nustatymai");
     expect(ltDash.account.logout).toBe("Atsijungti");
-    expect(enDash.tabs.account).toBe("My account");
+    expect(enDash.tabs.account).toBe("Settings");
     expect(enDash.account.logout).toBe("Sign out");
   });
 });
