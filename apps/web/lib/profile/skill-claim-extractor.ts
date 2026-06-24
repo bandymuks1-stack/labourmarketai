@@ -482,6 +482,52 @@ const DICTIONARY: readonly DictionaryRow[] = [
     ],
   },
   {
+    // Pet care / dog walking.
+    label: "Gyvūnų priežiūra",
+    needles: [
+      "vedžiojau šun",
+      "vedziojau sun",
+      "šunį",
+      "šuns",
+      "šunų",
+      "augintin",
+      "gyvūnų priežiūr",
+      "gyvunu prieziur",
+      "dog walk",
+      "pet care",
+      "выгул собак",
+      "уход за животн",
+    ],
+  },
+  {
+    // Utility-meter replacement / maintenance ("keičiau skaitliuką").
+    label: "Skaitiklių keitimas / priežiūra",
+    needles: [
+      "skaitliuk",
+      "skaitlik",
+      "skaitik",
+      "counter replac",
+      "meter replac",
+      "utility meter",
+      "счётчик",
+      "счетчик",
+    ],
+  },
+  {
+    // Fence painting / maintenance ("dažiau tvorą").
+    label: "Tvoros priežiūra / dažymas",
+    needles: [
+      "tvoros daž",
+      "tvorą daž",
+      "tvora daz",
+      "dažiau tvor",
+      "daziau tvor",
+      "fence paint",
+      "fence repair",
+      "забор",
+    ],
+  },
+  {
     // SPECIALIZATION of Vairavimas — heavy goods / CE-category truck driving.
     label: "Sunkvežimio vairavimas",
     needles: [

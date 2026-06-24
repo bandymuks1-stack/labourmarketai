@@ -26,6 +26,14 @@ import {
   clearSelectedLocation,
 } from "@/lib/location/location-store";
 import { MarketMapLive } from "@/components/app/market-map-live";
+import { resolveLocation, type LocationPrecision } from "@/lib/location/city-coordinates";
+
+const PRECISION_KEY: Record<LocationPrecision, string> = {
+  device: "precisionDevice",
+  city: "precisionCity",
+  country: "precisionCountry",
+  unset: "precisionUnset",
+};
 
 /**
  * Provider-free location picker (PR #484 — no Google, no paid provider).
@@ -215,9 +223,19 @@ export function MarketMapBase() {
           {t("mapTapHint")}
         </p>
         {selected ? (
-          <p className="text-center text-sm font-medium text-text-primary" data-testid="location-panel-where">
-            {whereText(selected) || t(selected.source === "auto" ? "sourceAuto" : "sourceManual")}
-          </p>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-center text-sm font-medium text-text-primary" data-testid="location-panel-where">
+              {whereText(selected) || t(selected.source === "auto" ? "sourceAuto" : "sourceManual")}
+            </p>
+            {/* Honest precision: device / selected city / approximate country /
+                not pinpointed — so a marker never looks more precise than it is. */}
+            <span
+              className="rounded-full border border-ink-500 px-2 py-0.5 text-[10px] font-medium text-text-muted"
+              data-testid="location-precision"
+            >
+              {t(PRECISION_KEY[resolveLocation(selected).precision])}
+            </span>
+          </div>
         ) : (
           <p className="text-center text-xs text-text-muted">{t("panelEmpty")}</p>
         )}

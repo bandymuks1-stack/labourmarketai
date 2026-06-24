@@ -3,10 +3,8 @@
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef } from "react";
 import type * as LeafletTypes from "leaflet";
-import {
-  hasCoords,
-  type SelectedLocation,
-} from "@/lib/location/location-model";
+import { type SelectedLocation } from "@/lib/location/location-model";
+import { resolveLocation } from "@/lib/location/city-coordinates";
 
 /**
  * Real interactive Market Map — OpenStreetMap raster tiles via Leaflet.
@@ -32,26 +30,17 @@ import {
 const DEFAULT_CENTER: [number, number] = [56.5, 17];
 const DEFAULT_ZOOM = 4;
 
-/** Approx country centres for a manual country-only selection (real centroids,
- *  shown honestly as the country centre, never invented precision). */
-const COUNTRY_CENTER: Record<string, [number, number]> = {
-  LT: [55.2, 23.9],
-  LV: [56.9, 24.9],
-  EE: [58.9, 25.6],
-  PL: [52.0, 19.4],
-  DE: [51.2, 10.4],
-  NL: [52.2, 5.5],
-  DK: [56.0, 9.5],
-  NO: [60.8, 9.0],
-  SE: [62.0, 15.5],
-  FI: [63.0, 26.0],
-};
-
-function pointFor(loc: SelectedLocation | null): [number, number] | null {
-  if (!loc) return null;
-  if (hasCoords(loc)) return [loc.lat, loc.lng];
-  if (loc.country && COUNTRY_CENTER[loc.country]) return COUNTRY_CENTER[loc.country];
-  return null;
+/** City-level resolution (city table → city coords; country-only → approximate
+ *  centroid; unknown → no marker). City precision zooms in closer than an
+ *  approximate country point. */
+function pointFor(loc: SelectedLocation | null): {
+  point: [number, number] | null;
+  zoom: number;
+} {
+  const r = resolveLocation(loc);
+  if (!r.coord) return { point: null, zoom: DEFAULT_ZOOM };
+  const zoom = r.precision === "country" ? 6 : 11;
+  return { point: [r.coord.lat, r.coord.lng], zoom };
 }
 
 export function MarketMapLive({
@@ -119,7 +108,7 @@ export function MarketMapLive({
       const layer = layerRef.current;
       if (!map || !layer) return;
       layer.clearLayers();
-      const point = pointFor(selected);
+      const { point, zoom } = pointFor(selected);
       if (!point) return;
       L.circle(point, {
         radius: radiusKm * 1000,
@@ -135,7 +124,7 @@ export function MarketMapLive({
         fillColor: "#22D3EE",
         fillOpacity: 1,
       }).addTo(layer);
-      map.setView(point, Math.max(map.getZoom(), 9));
+      map.setView(point, zoom);
     })();
   }, [selected, radiusKm]);
 

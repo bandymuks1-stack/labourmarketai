@@ -96,3 +96,20 @@ describe("8. vague unrelated entry — unknown/clarify, never construction fallb
     noConstruction(r.skills);
   });
 });
+
+describe("9. owner everyday non-construction entries", () => {
+  it("'Vedžiojau šunį 1 val.' → pet care, no construction", () => {
+    const r = out("Vedžiojau šunį 1 val.");
+    expect(r.caps).toContain("Gyvūnų priežiūra");
+    noConstruction(r.skills);
+  });
+  it("'Keičiau skaitliuką 1 val.' → meter work, no broad construction bundle", () => {
+    const r = out("Keičiau skaitliuką 1 val.");
+    expect(r.caps).toContain("Skaitiklių keitimas / priežiūra");
+    noConstruction(r.skills);
+  });
+  it("'Dažiau tvorą 1 val.' → fence painting/maintenance (text-supported)", () => {
+    const r = out("Dažiau tvorą 1 val.");
+    expect(r.caps).toContain("Tvoros priežiūra / dažymas");
+  });
+});

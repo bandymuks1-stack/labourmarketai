@@ -43,6 +43,21 @@ describe("market map page — canonical coordinate map leads the flow", () => {
     expect(page).not.toMatch(/mapbox/i);
   });
 
+  it("compact control center: secondary surfaces are collapsed behind <details>", () => {
+    // The page must lead with the title + real map; the signal board, readiness,
+    // capture and world overview must sit inside the collapsed advanced section.
+    expect(page).toMatch(/data-testid="market-map-page-header"/);
+    const baseAt = idx(page, "<MarketMapBase");
+    const detailsAt = idx(page, 'data-testid="market-map-advanced"');
+    const shellAt = idx(page, "<MarketMapShell");
+    const worldAt = idx(page, "<LabourMarketWorldMap");
+    // Map first, then the collapsed <details>, then the secondary surfaces.
+    expect(baseAt).toBeLessThan(detailsAt);
+    expect(detailsAt).toBeLessThan(shellAt);
+    expect(detailsAt).toBeLessThan(worldAt);
+    expect(page).toMatch(/<details[^>]*market-map-advanced/);
+  });
+
   it("the canonical map is the REAL provider map, not an SVG/coordinate-only locator", () => {
     expect(base).toMatch(/<MarketMapLive\b/);
     expect(base).not.toMatch(/<LocationMap\b/);

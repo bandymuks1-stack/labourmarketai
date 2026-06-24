@@ -66,13 +66,24 @@ export default async function MarketMapPage({
           layer, no external provider). This is the primary surface of the page;
           everything below is secondary and must not lead the flow. */}
       <MarketMapBase />
-      {/* Secondary surfaces, kept BELOW the canonical map so they never lead
-          the page or duplicate its purpose: the signal board, owner readiness,
-          capture forms, then the conceptual world overview last. */}
-      <MarketMapShell />
-      <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
-      <MarketMapCapture preferred={preferred} login={login} demand={demand} />
-      <LabourMarketWorldMap />
+      {/* Compact control center: the real map + its controls are the ONE
+          primary surface. Every secondary surface (signal board, owner
+          readiness, capture forms, conceptual world overview) is collapsed
+          behind "Išsamiau" so entering the page reads as one clear room, not a
+          warehouse of panels. Nothing is removed — only progressively disclosed. */}
+      <details className="group flex flex-col gap-4" data-testid="market-map-advanced">
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted group-open:hidden">+</span>
+          <span className="hidden font-mono text-[10px] uppercase tracking-label text-text-muted group-open:inline">−</span>
+          {tMap("advanced")}
+        </summary>
+        <div className="mt-4 flex flex-col gap-4">
+          <MarketMapShell />
+          <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
+          <MarketMapCapture preferred={preferred} login={login} demand={demand} />
+          <LabourMarketWorldMap />
+        </div>
+      </details>
     </div>
   );
 }
