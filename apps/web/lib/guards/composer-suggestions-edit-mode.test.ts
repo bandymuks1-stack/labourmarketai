@@ -25,10 +25,11 @@ describe("Guard: composer shows suggestions in edit mode (text prefilled)", () =
   it("prefills the textarea from the edited entry's original text", () => {
     expect(src).toMatch(/useState\(editingEntry\?\.originalText \?\? ""\)/);
   });
-  it("renders the skills suggestion bucket + friendly heading + honest note", () => {
+  it("renders the skills suggestion bucket + friendly heading (no note paragraph)", () => {
     expect(src).toMatch(/tBucket\("skills"\)/);
     expect(src).toMatch(/tS\("groupEyebrow"\)/);
-    expect(src).toMatch(/t\("skillProvenanceNote"\)/);
+    // Quiet UI: the bucket-level note paragraph was removed.
+    expect(src).not.toMatch(/skillProvenanceNote/);
   });
   it("does not render the per-card technical provenance triad", () => {
     expect(src).not.toMatch(/SuggestionProvenanceLabel/);

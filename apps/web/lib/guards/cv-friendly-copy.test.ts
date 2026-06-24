@@ -62,16 +62,11 @@ describe("Guard: composer skill suggestions use friendly, not technical, copy", 
     expect(en).not.toMatch(/self-declared/i);
   });
 
-  it("the friendly bucket note exists and makes no AI / verification claim", () => {
-    const FAKE = /\bAI\b|dirbtin\w*\s*intelekt|automati|\bmatch(ed|ing)\b/i;
+  it("the suggestion bucket carries NO explanatory note paragraph (quiet UI)", () => {
+    // Owner: remove the disclaimer/explanation entirely — do not rephrase it.
     for (const loc of LOCS) {
-      const note = journalNs(loc).skillProvenanceNote;
-      expect(note, `${loc} skillProvenanceNote`).toBeTruthy();
-      expect(note).not.toMatch(FAKE);
+      expect(journalNs(loc).skillProvenanceNote, `${loc} skillProvenanceNote must be gone`).toBeUndefined();
     }
-    // LT/EN say "suggestion from your text".
-    expect(journalNs("lt").skillProvenanceNote).toMatch(/pasiūlymas iš jūsų teksto/i);
-    expect(journalNs("en").skillProvenanceNote).toMatch(/suggestion from your text/i);
   });
 
   it("the per-card technical provenance triad is NOT rendered in the composer", () => {

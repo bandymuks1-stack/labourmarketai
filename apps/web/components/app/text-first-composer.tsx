@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +36,6 @@ export function TextFirstComposer({
   initial?: string;
   busy?: boolean;
 }) {
-  const t = useTranslations("structuring");
   const id = useId();
   const ref = useRef<HTMLTextAreaElement>(null);
   const [value, setValue] = useState(initial);
@@ -72,11 +70,6 @@ export function TextFirstComposer({
         placeholder={placeholder}
         className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
       />
-
-      {/* Honesty banner — parser is rule-based, suggestions are not facts */}
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-        {t("ruleBasedNotice")}
-      </p>
 
       <div className="flex flex-wrap items-center gap-3">
         <Button

@@ -339,10 +339,6 @@ export function ProfileTextFirstFlow({
         </div>
       </div>
 
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-        {tS("ruleBasedNotice")}
-      </p>
-
       {selfDeclared.length > 0 && (
         <p
           className="text-xs text-text-secondary"
@@ -479,9 +475,6 @@ export function ProfileTextFirstFlow({
                 : t("applyAll")}
           </Button>
         )}
-        <span className="text-[11px] text-text-muted">
-          {tS("ruleBasedNotice")}
-        </span>
       </div>
     </div>
   );

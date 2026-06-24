@@ -146,12 +146,9 @@ describe("journal review UI is honest about state", () => {
   const ltJournal = JSON.parse(read("messages/lt/journal.json"));
   const enJournal = JSON.parse(read("messages/en/journal.json"));
 
-  it("does not call the suggestion-review block 'Patvirtinta' / 'Verified'", () => {
-    // We're scanning the composer literals for the hard-banned LT/EN copy on
-    // the review framing — `entry.status.confirmed` ("Patvirtinta") is a
-    // separate, legitimate use (externally confirmed entries in the list).
-    expect(ltJournal.suggestionReviewIntro).not.toMatch(/Patvirtinta/i);
-    expect(enJournal.suggestionReviewIntro).not.toMatch(/Verified/i);
+  it("keeps the review-meta note private-framed (suggestion disclaimer removed)", () => {
+    // suggestionReviewIntro was removed from normal user UI (quiet UI). The
+    // private-entry meta note remains.
     expect(ltJournal.reviewMetaNote).toMatch(/Privatus įrašas/);
     expect(enJournal.reviewMetaNote).toMatch(/Private entry/);
   });

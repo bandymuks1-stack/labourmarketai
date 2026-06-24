@@ -824,10 +824,6 @@ export function JournalEntryComposer({
           </ul>
         </details>
 
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-          {tS("ruleBasedNotice")}
-        </p>
-
         <div className="flex flex-wrap items-center gap-3">
           {/* PRIMARY: save the entry directly — one obvious step. */}
           <Button
@@ -856,11 +852,6 @@ export function JournalEntryComposer({
             {t("organizeText")}
           </button>
         </div>
-        {/* Honest note about the OPTIONAL structuring step (guard-pinned
-            suggestion→fact disclaimer). Saving never requires it. */}
-        <p className="text-[11px] leading-relaxed text-text-muted">
-          {t("classifyLater")}
-        </p>
       </form>
     );
   }
@@ -896,15 +887,6 @@ export function JournalEntryComposer({
         </button>
       </div>
 
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-        {tS("ruleBasedNotice")}
-      </p>
-      <p className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary">
-        {t("suggestionReviewIntro")}
-      </p>
-
-      {/* PR #478 — cross-domain skill review (Universal Recognition #477): accept
-          -> self-declared profile claim (existing path, no DB); never confirmed automatically. */}
       <WorkEntrySkillReview text={text} existingSkills={existingSkillRefs} />
 
       {fragments.length > 0 && (
@@ -1149,17 +1131,6 @@ export function JournalEntryComposer({
             title={tBucket("skills")}
             count={skillSuggestions.length}
           >
-            {skillSuggestions.length > 0 && (
-              // One honest, friendly note for the whole skills bucket: these are
-              // suggestions from the worker's own text that they add to their CV
-              // and that still await confirmation — no per-card provenance jargon.
-              <p
-                className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
-                data-testid="skill-suggestions-provenance-note"
-              >
-                {t("skillProvenanceNote")}
-              </p>
-            )}
             {skillSuggestions.length === 0 && (
               // Honest empty state: no clearly-related skill matched the entry —
               // never a broad cloud of guesses. The worker links skills manually.

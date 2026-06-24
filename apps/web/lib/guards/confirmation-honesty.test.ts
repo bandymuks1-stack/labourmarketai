@@ -191,15 +191,17 @@ const WHO_CAN_CONFIRM_TERMS = {
 
 describe("Guard: the who-can-confirm clarity lines name the supported roles", () => {
   for (const loc of LOCALES) {
-    it(`${loc}: profile + journal whoCanConfirm name manager + owner, mark self-declared, no broad role`, () => {
+    it(`${loc}: profile whoCanConfirm names manager + owner, marks self-declared, no broad role`, () => {
+      // Quiet-UI reframe (fix/cv): journal.whoCanConfirm was reduced to a short
+      // privacy label ("Įrašai matomi tik tau.") — the worker journal no longer
+      // explains the confirmation process. The CV-evidence-card surface
+      // (workerEvidence.whoCanConfirm) still names the real confirmers.
       const we = (loadJson(`messages/${loc}.json`).workerEvidence ?? {}) as {
         whoCanConfirm?: string;
       };
-      const j = loadJson(`messages/${loc}/journal.json`) as { whoCanConfirm?: string };
       const terms = WHO_CAN_CONFIRM_TERMS[loc];
       for (const [key, value] of [
         ["workerEvidence.whoCanConfirm", we.whoCanConfirm],
-        ["journal.whoCanConfirm", j.whoCanConfirm],
       ] as const) {
         expect(typeof value === "string" && value.length > 0, `${loc} ${key} missing`).toBe(
           true,

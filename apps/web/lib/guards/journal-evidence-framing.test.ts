@@ -27,7 +27,6 @@ const WORKER_KEYS = [
   "navTitle",
   "navSubtitle",
   "composerBenefit",
-  "benefitNotAuto",
   "listTitle",
   "listEmpty",
   "listEmptyTitle",
@@ -69,20 +68,11 @@ describe("no heavy technical / module / draft wording on worker-facing copy", ()
   }
 });
 
-describe("benefit copy is honest — only a person confirms (no auto-verify claim)", () => {
-  // Phrased AFFIRMATIVELY (a human confirms) so it never carries the forbidden
-  // "automatic verification" substring that the honesty guards block.
-  it("LT benefitNotAuto says only a person (manager/client) can confirm", () => {
-    expect(ltJ.benefitNotAuto).toMatch(/žmogus/i);
-    expect(ltJ.benefitNotAuto).toMatch(/vadovas|klient/i);
-    expect(ltJ.benefitNotAuto).not.toMatch(/automat/i);
-  });
-  it("EN benefitNotAuto says only a person (manager/client) can confirm", () => {
-    expect(enJ.benefitNotAuto).toMatch(/person/i);
-    expect(enJ.benefitNotAuto).toMatch(/manager|client/i);
-    expect(enJ.benefitNotAuto).not.toMatch(/automatic/i);
-  });
-});
+// Quiet-UI reframe (fix/cv): the section-level "only a person confirms" honesty
+// paragraph (benefitNotAuto) was REMOVED from normal user UI per the owner — the
+// composer now shows short labels/status only, no confirmation/verification
+// disclaimer. Honesty is preserved structurally (status labels reflect real
+// state; no fake-verified claim) and enforced by `no-disclaimer-ui.test.ts`.
 
 describe("journal entry surface stays focused", () => {
   const page = read(PAGE);
