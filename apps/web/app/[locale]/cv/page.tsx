@@ -161,9 +161,6 @@ export default async function VerifiedCvPage({
               <div key={tier} className="flex flex-col gap-1.5" data-testid={`cv-tier-${tier}`}>
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
                   {t(`tiers.${tier}`)}
-                  <span className="ml-2 font-normal normal-case text-zinc-500">
-                    {t(`tierHints.${tier}`)}
-                  </span>
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {names.map((name) => (

@@ -112,9 +112,6 @@ describe("Guard: cvExport copy is present + honest in all 10 locales", () => {
     "tiers.confirmed",
     "tiers.evidence",
     "tiers.declared",
-    "tierHints.confirmed",
-    "tierHints.evidence",
-    "tierHints.declared",
     "summary.verifiedSkills",
     "summary.managerConfirmations",
     "summary.journalEntries",
@@ -156,18 +153,22 @@ describe("Guard: cvExport copy is present + honest in all 10 locales", () => {
     });
   }
 
-  it("LT: pinned honest tier labels (consistent with the platform ladder)", () => {
+  it("LT: pinned honest tier labels (quiet status, no 'who confirmed')", () => {
     const ns = cvNs("lt");
-    expect(ns.tiers.confirmed).toBe("Patvirtinta vadovo");
+    // Quiet-UI reframe (fix/cv): the confirmed tier shows STATUS only, never the
+    // confirmer ("vadovo"). Honesty kept: only the confirmed tier carries the
+    // confirmation stem; the other tiers never do.
+    expect(ns.tiers.confirmed).toBe("Patvirtinta");
+    expect(ns.tiers.confirmed).not.toMatch(/vadov/i);
     expect(ns.tiers.declared).toBe("Paties nurodyta");
-    // Non-confirmed tier LABELS never carry the confirmation stem.
     expect(ns.tiers.declared).not.toMatch(/patvirtin/i);
     expect(ns.tiers.evidence).not.toMatch(/patvirtin/i);
   });
 
-  it("EN: pinned honest tier labels", () => {
+  it("EN: pinned honest tier labels (quiet status, no 'who confirmed')", () => {
     const ns = cvNs("en");
-    expect(ns.tiers.confirmed).toBe("Manager-confirmed");
+    expect(ns.tiers.confirmed).toBe("Confirmed");
+    expect(ns.tiers.confirmed).not.toMatch(/manager|by\b/i);
     expect(ns.tiers.declared).toBe("Self-declared");
     expect(ns.tiers.declared).not.toMatch(/verified|confirmed by/i);
     expect(ns.tiers.evidence).not.toMatch(/verif|confirm/i);

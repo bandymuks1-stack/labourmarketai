@@ -4482,7 +4482,7 @@
     "title": "Trust signals",
     "caption": "Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
     "verifiedSkills": "Verified skills",
-    "managerConfirmations": "Manager confirmations",
+    "managerConfirmations": "Confirmations",
     "journalEntries": "Journal entries",
     "zeroHint": "Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
   },
@@ -4495,18 +4495,13 @@
     "skills": "Skills",
     "skillsEmpty": "No skills saved yet.",
     "tiers": {
-      "confirmed": "Manager-confirmed",
+      "confirmed": "Confirmed",
       "evidence": "Backed by work entries",
       "declared": "Self-declared"
     },
-    "tierHints": {
-      "confirmed": "confirmed by a manager on a real work entry",
-      "evidence": "work-journal entries back this skill; a manager has not confirmed it yet",
-      "declared": "the person's own claim, not externally confirmed"
-    },
     "summary": {
       "verifiedSkills": "Verified skills",
-      "managerConfirmations": "Manager confirmations",
+      "managerConfirmations": "Confirmations",
       "journalEntries": "Journal entries"
     },
     "proofTitle": "Confirmed work proof",

@@ -75,6 +75,17 @@ describe("Guard: composer skill suggestions use friendly, not technical, copy", 
   });
 });
 
+describe("Guard: CV tier label is quiet status, not 'who confirmed'", () => {
+  it("cvExport.tiers.confirmed shows status only (no 'vadovo' / 'manager')", () => {
+    expect(base("lt").cvExport.tiers.confirmed).toBe("Patvirtinta");
+    expect(base("en").cvExport.tiers.confirmed).toBe("Confirmed");
+    expect(base("lt").cvExport.tiers.confirmed).not.toMatch(/vadov/i);
+    expect(base("en").cvExport.tiers.confirmed).not.toMatch(/manager|by\b/i);
+    // the process-explanation hints are removed entirely
+    expect(base("lt").cvExport.tierHints).toBeUndefined();
+  });
+});
+
 describe("Guard: stale-skill unlink action is the simple 'Atsieti'", () => {
   it("journalSkillLinks.unlinkFlagged is simple, not 'the wrong ones / netinkamus'", () => {
     expect(base("lt").journalSkillLinks.unlinkFlagged).toBe("Atsieti");

@@ -4482,7 +4482,7 @@
     "title": "Pasitikėjimo signalai",
     "caption": "Skaičiai imami tiesiai iš realių įrašų — deklaruoti įgūdžiai tampa patikimi tik per žurnalo įrašus, kuriuos patvirtino vadovas. Niekas čia nesveriama ir neišgalvojama.",
     "verifiedSkills": "Patvirtinti įgūdžiai",
-    "managerConfirmations": "Vadovo patvirtinimai",
+    "managerConfirmations": "Patvirtinimai",
     "journalEntries": "Žurnalo įrašai",
     "zeroHint": "Pasitikėjimas auga iš realaus darbo: užfiksuok žurnalo įrašą ir paprašyk ten buvusio vadovo jį patvirtinti."
   },
@@ -4495,18 +4495,13 @@
     "skills": "Įgūdžiai",
     "skillsEmpty": "Įgūdžių dar neišsaugota.",
     "tiers": {
-      "confirmed": "Patvirtinta vadovo",
+      "confirmed": "Patvirtinta",
       "evidence": "Paremta darbo įrašais",
       "declared": "Paties nurodyta"
     },
-    "tierHints": {
-      "confirmed": "vadovas patvirtino remdamasis tikru darbo įrašu",
-      "evidence": "darbo žurnalo įrašai paremia šį įgūdį; vadovas jo dar nepatvirtino",
-      "declared": "paties žmogaus nurodyta, išoriškai nepatvirtinta"
-    },
     "summary": {
       "verifiedSkills": "Patvirtinti įgūdžiai",
-      "managerConfirmations": "Vadovo patvirtinimai",
+      "managerConfirmations": "Patvirtinimai",
       "journalEntries": "Žurnalo įrašai"
     },
     "proofTitle": "Patvirtinti darbo įrodymai",

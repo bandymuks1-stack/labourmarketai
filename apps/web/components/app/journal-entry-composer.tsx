@@ -1226,11 +1226,6 @@ export function JournalEntryComposer({
                         {t("newSkillError")}
                       </p>
                     )}
-                    {status === "added" && (
-                      <p className="text-[11px] leading-relaxed text-text-muted">
-                        {t("newSkillSelfDeclaredNote")}
-                      </p>
-                    )}
                   </div>
                 );
               })}

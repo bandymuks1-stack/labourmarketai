@@ -52,6 +52,10 @@ const FORBIDDEN_PHRASES: RegExp[] = [
   /Laukia vadov/i,
   /Awaiting manager/i,
   /Confirmed by manager/i,
+  // CV-tier surface (fix/cv final): status only, never who confirmed it.
+  /manager[\s-]?confirmed/i,
+  /confirmed by .{0,5}manager/i,
+  /vadovo patvirtin/i,
   /\bprovenance\b/i,
 ];
 // Raw source-taxonomy enum identifiers — forbidden only in user-visible message
@@ -86,6 +90,8 @@ describe("Guard: no explanatory/disclaimer text in worker-facing journal/CV copy
         b.profileHub?.journalLink,
         b.profileHub?.pillars?.journal,
         b.workerEvidence, // CV-evidence-card surface
+        b.cvExport?.tiers, // CV-tier labels surface
+        b.cvExport?.summary, // CV summary stat labels
       ];
       const all = subtrees.flatMap((s) => values(s));
       const offenders = all.filter((v) => FORBIDDEN_VALUE.some((rx) => rx.test(v)));
