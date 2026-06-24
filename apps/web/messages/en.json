@@ -5211,6 +5211,7 @@
     "subtitle": "We''ll use this location and the selected distance for job search.",
     "panelTitle": "Location area",
     "panelEmpty": "No location chosen yet",
+    "mapTapHint": "Tap the map to mark your location",
     "radiusValue": "{km} km radius",
     "radiusLabel": "Distance from the chosen location",
     "autoButton": "Use my location",

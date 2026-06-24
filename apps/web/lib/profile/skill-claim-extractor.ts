@@ -319,6 +319,8 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "santechnikos instal",
       "montuoju santechnik",
       "montuoti santechnik",
+      "montavau santechnik", // "montavau santechniką"
+      "montavo santechnik",
       "plumbing instal",
     ],
   },
@@ -327,6 +329,7 @@ const DICTIONARY: readonly DictionaryRow[] = [
     // for the specific category sits below; both can match.
     label: "Vairavimas",
     needles: [
+      "vairav", // vairavau / vairavo / vairavimas
       "vairuot",
       "vairuoj",
       "vairavim",
@@ -379,6 +382,50 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "legal document",
       "contract draft",
       "contract prep",
+    ],
+  },
+
+  // ─── Soft / cross-domain capabilities the owner smoke flagged as missed ──
+  // (automation / motivation / communication). Stems are picked to match LT
+  // morphology while staying specific enough to avoid firing on unrelated
+  // words ("motyvas" = a reason is excluded — only the verb/role forms below).
+  {
+    // Automation — RPA / workflow / "automatizuoju procesus".
+    label: "Automatizavimas",
+    needles: [
+      "automatizav",
+      "automatizuoj",
+      "automatiz",
+      "automation",
+      "automate",
+      "automating",
+      "n8n",
+      "zapier",
+    ],
+  },
+  {
+    // Motivation — motivating / coaching a team ("motyvuoju komandą").
+    label: "Motyvavimas",
+    needles: [
+      "motyvav",
+      "motyvuoj",
+      "motyvacij",
+      "motivation",
+      "motivating",
+      "motivate",
+    ],
+  },
+  {
+    // Communication — client/team communication competence.
+    label: "Komunikacija",
+    needles: [
+      "komunikac",
+      "komunikav",
+      "bendrav", // bendravau / bendravimas / bendravo
+      "bendrauj",
+      "communication",
+      "communicating",
+      "communicate",
     ],
   },
 ];

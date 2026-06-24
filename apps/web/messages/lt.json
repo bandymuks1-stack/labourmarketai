@@ -5211,6 +5211,7 @@
     "subtitle": "Darbo paieškai naudosime šią vietą ir pasirinktą atstumą.",
     "panelTitle": "Vietos sritis",
     "panelEmpty": "Vieta dar nepasirinkta",
+    "mapTapHint": "Bakstelėkite žemėlapį, kad pažymėtumėte savo vietą",
     "radiusValue": "{km} km spindulys",
     "radiusLabel": "Atstumas nuo pasirinktos vietos",
     "autoButton": "Naudoti mano buvimo vietą",

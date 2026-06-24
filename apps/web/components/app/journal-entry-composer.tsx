@@ -271,14 +271,45 @@ export function JournalEntryComposer({
       matchedText: m.matchedText,
       confidence: m.confidence,
     }));
+    // Explicit named capabilities/specializations the worker wrote (e.g.
+    // "lietuviškos virtuvės gamyba", "vairavimas", "sutarčių ruošimas").
+    // These are the strongest evidence — the worker said them outright — and
+    // preserve specializations the slug engine would flatten, so they lead the
+    // list. They carry a synthetic `claim:` slug (no taxonomy row) and add to
+    // the profile as a self-declared claim via the SAME action as below.
+    const capabilityNew: ComposerNewSkillSuggestion[] = s.capabilitySuggestions.map(
+      (c) => ({
+        slug: `claim:${c.normalizedLabel}`,
+        name: c.label,
+        matchedText: c.label,
+        confidence: "medium" as SkillConfidence,
+      }),
+    );
     const mergedNew: ComposerNewSkillSuggestion[] = [];
     const seenNew = new Set<string>();
-    for (const item of [...undeclaredFromEngine, ...crossSector]) {
-      if (declaredSlugSet.has(item.slug) || seenNew.has(item.slug)) continue;
+    // Dedupe by label too, so a capability never repeats a skill already shown
+    // as a declared/recognised chip above or another new-skill suggestion.
+    const seenName = new Set<string>(
+      [
+        ...workerSkills.map((w) => w.name),
+        ...matchedSkills.map((m) => m.name),
+      ].map((n) => n.trim().toLowerCase()),
+    );
+    for (const item of [...capabilityNew, ...undeclaredFromEngine, ...crossSector]) {
+      const nameKey = item.name.trim().toLowerCase();
+      if (
+        declaredSlugSet.has(item.slug) ||
+        seenNew.has(item.slug) ||
+        seenName.has(nameKey)
+      )
+        continue;
       seenNew.add(item.slug);
+      seenName.add(nameKey);
       mergedNew.push(item);
     }
-    const cappedNew = mergedNew.slice(0, NEW_SKILL_LIMIT);
+    // Allow headroom beyond NEW_SKILL_LIMIT so explicitly-named capabilities
+    // are not crowded out by engine guesses; still bounded for the review grid.
+    const cappedNew = mergedNew.slice(0, Math.max(NEW_SKILL_LIMIT, 12));
     setNewSkillSuggestions(cappedNew);
     setNewSkillStatus(
       Object.fromEntries(cappedNew.map((row) => [row.slug, "idle" as NewSkillAddStatus])),

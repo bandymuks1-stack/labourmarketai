@@ -353,6 +353,16 @@ export default async function JournalPage({
           <span className="text-text-muted">{t("benefitNotAuto")}</span>
         </p>
         <JournalEntryComposer
+          // Remount the composer whenever the edit target changes. The
+          // composer derives its textarea state from `editingEntry` with
+          // useState (initial-value only). The Edit control is a client-side
+          // <Link> (no full reload), so without this key React keeps the same
+          // instance and the stale "" create-mode text — the entry's original
+          // text never loads (owner bug: "editing loses the text / blank
+          // editor"). Keying on the editing id forces a fresh mount so edit
+          // always shows the saved text, and cancel (back to no ?editing)
+          // resets cleanly to create mode.
+          key={editingId ?? "new"}
           engagements={engagements}
           directions={directions}
           workerSkills={workerSkills}
