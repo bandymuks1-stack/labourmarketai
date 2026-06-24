@@ -72,22 +72,25 @@ describe("journal capability extraction — no invention", () => {
   });
 });
 
-describe("journal extraction — website-design entry is honest (owner smoke)", () => {
-  // "Dirbau su svetainės dizainu 9 h" = "I worked on website design for 9 h".
-  // Must read the time, must NOT guess unrelated construction skills, and must
-  // NOT silently pick website vs living-room/interior design.
+describe("journal extraction — website-design entry exposes ambiguity (owner smoke)", () => {
+  // "Dirbau su svetainės dizainu 9 h" = "I worked on svetainė design for 9 h",
+  // where LT "svetainė" = website OR living room. Must read the time, must NOT
+  // guess construction, and must surface BOTH design readings as a clarification
+  // (never empty/unknown-only, never silently one).
   const s = extractJournalSuggestions("Dirbau su svetainės dizainu 9 h");
 
-  it("reads the 9-hour duration with a text reason", () => {
+  it("reads the 9-hour duration", () => {
     expect(s.time).toEqual({ value: 9, unitSlug: "hours" });
   });
-  it("suggests NO unrelated construction skills", () => {
+  it("suggests NO construction skills", () => {
     expect(s.skillSlugs).toEqual([]);
     expect(s.skillSuggestions).toEqual([]);
   });
-  it("does not invent a website/interior design capability (ambiguity stays honest)", () => {
-    expect(s.capabilitySuggestions).toEqual([]);
-    // The activity is flagged unknown for the worker to clarify, not guessed.
-    expect(s.fragments.every((f) => f.activitySlug === null)).toBe(true);
+  it("surfaces BOTH design readings as structured ambiguity (not empty)", () => {
+    const labels = s.capabilitySuggestions.map((c) => c.label);
+    expect(labels).toContain("Interneto svetainės dizainas");
+    expect(labels).toContain("Interjero dizainas");
+    expect(s.capabilitySuggestions.length).toBeGreaterThan(0);
+    expect(s.capabilitySuggestions.every((c) => c.reason && c.reason.length > 0)).toBe(true);
   });
 });

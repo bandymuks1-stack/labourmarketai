@@ -21,6 +21,11 @@ import {
  * Leaflet is loaded with a dynamic import inside an effect so it never evaluates
  * during SSR (it touches `window`). A vector `circleMarker` is used instead of
  * the default icon to avoid bundler image-path issues.
+ *
+ * MVP ONLY: `tile.openstreetmap.org` is the OSM community tile server — fine for
+ * owner review / low traffic, NOT production-scale infra. The migration target
+ * (free, key-free, no paid vendor) is documented separately in
+ * docs/audits/market-map-long-term-map-strategy.md.
  */
 
 /** Sensible default view (served-markets region) before any location is set. */

@@ -18,17 +18,23 @@ the app uses, screenshot at desktop (1280px) and mobile (390px).
 - Source harness: `market-map-live.html` (Leaflet 1.9.4 + OSM tiles, with SRI on
   the CDN assets).
 
-## 2. Work Journal skill/specialization recognition (bug 2)
+## 2. Work Journal skill recognition — sector-neutral + ambiguity (bug 2)
 - `journal-skills-desktop.png`, `journal-skills-mobile.png` — the capability
-  chips the journal now surfaces. Proves the flattening fix: "lietuviškos
-  virtuvės gamyba" yields BOTH "Maisto gamyba" AND "Lietuviškos virtuvės
-  gamyba". The broad entry captures all owner-flagged items (driving + the
-  passenger-car specialization, sales, plumbing install, legal/contract,
-  document handling, automation, motivation, communication, culinary).
+  chips the journal surfaces. Shows:
+  - **Structured ambiguity:** "Dirbau su svetainės dizainu 9 h" surfaces BOTH
+    "Interneto svetainės dizainas" AND "Interjero dizainas" (never empty, never
+    a silent single pick).
+  - **Sector-neutral:** driving/logistics + translation + cooking from one entry,
+    with NO construction.
+  - **Specialization preserved:** "lietuviškos virtuvės gamyba" → parent +
+    specialization. Broad entry → 13 capabilities.
 - Source harness: `scripts/owner-evidence/render-journal-evidence.mts`
   (imports `lib/profile/skill-claim-extractor.ts`, the same dictionary the
-  journal composer now uses).
-- Regression test: `lib/structuring/journal-capability-extraction.test.ts`.
+  journal composer uses).
+- Regression tests: `lib/structuring/cross-sector-journal-recognition.test.ts`
+  (the 8 owner cases), `lib/structuring/journal-capability-extraction.test.ts`,
+  `lib/guards/sector-neutral-recognition.test.ts`. The project's universal
+  cross-sector core is covered by `lib/structuring/cross-sector-recognition.test.ts`.
 
 ## 3. Journal edit — full state preserved (bug 3)
 - Behind the auth-gated dashboard, so verified by tests rather than a live

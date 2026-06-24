@@ -16,6 +16,14 @@ import { extractProfileSkillClaims } from "../../apps/web/lib/profile/skill-clai
 
 const CASES: { title: string; text: string }[] = [
   {
+    title: "Ambiguity — 'svetainės dizainas' surfaces BOTH readings (web + interior)",
+    text: "Dirbau su svetainės dizainu 9 h",
+  },
+  {
+    title: "Sector-neutral — driving/logistics, translation, cooking (no construction)",
+    text: "Vairavau CE kategorijos sunkvežimį 10 h; vertėjavau iš rusų į lietuvių; gaminau lietuviškus patiekalus",
+  },
+  {
     title: "Flattening fix — culinary specialization is preserved",
     text: "Šiandien gaminau lietuviškos virtuvės patiekalus.",
   },

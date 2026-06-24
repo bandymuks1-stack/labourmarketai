@@ -29,6 +29,11 @@ describe("real provider map, no paid/secret provider", () => {
     expect(live).toMatch(/tile\.openstreetmap\.org/);
     expect(live).toMatch(/L\.tileLayer/);
   });
+  it("shows the required OpenStreetMap attribution", () => {
+    expect(live).toMatch(/attribution/);
+    expect(live).toMatch(/OpenStreetMap/);
+    expect(live).toMatch(/openstreetmap\.org\/copyright/);
+  });
   it("no Google Maps loader / key anywhere", () => {
     expect(existsSync(join(ROOT, "lib/maps/google-maps-loader.ts"))).toBe(false);
     for (const src of [comp, live]) {

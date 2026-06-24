@@ -329,7 +329,8 @@ export function JournalEntryComposer({
       (c) => ({
         slug: `claim:${c.normalizedLabel}`,
         name: c.label,
-        matchedText: c.label,
+        // Reason from the text fragment (every suggestion explains WHY it shows).
+        matchedText: c.reason ?? c.label,
         confidence: "medium" as SkillConfidence,
       }),
     );
