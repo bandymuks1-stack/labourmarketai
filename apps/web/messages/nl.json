@@ -8,10 +8,10 @@
   "journey": {
     "eyebrow": "Hoe het werkt",
     "title": "Eén profiel. Een begeleid pad naar kansen.",
-    "subcopy": "Eerlijke profielen en echt bewijs, omgezet in kansen — voor werkenden, bedrijven en bureaus.",
+    "subcopy": "Eerlijke profielen en echte registraties, omgezet in kansen — voor werkenden, bedrijven en bureaus.",
     "s1": "Start je ruimte",
     "s2": "Bouw identiteit",
-    "s3": "Voeg bewijs toe",
+    "s3": "Voeg registraties toe",
     "s4": "Open kansen"
   },
   "agencies": {
@@ -591,7 +591,7 @@
     "businessLink": "Werkbehoefte starten",
     "signals": {
       "s1": "Echt profiel",
-      "s2": "Bewijs van vaardigheden",
+      "s2": "Vaardigheidsregistraties",
       "s3": "Beschikbaarheid",
       "s4": "Werkbehoeften"
     }

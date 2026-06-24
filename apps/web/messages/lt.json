@@ -1982,7 +1982,7 @@
     "metaDescription": "Darbo rinkos operacinė sistema, kurioje vienas žmogus gali augti per daug vaidmenų, veiklų ir galimybių.",
     "eyebrow": "Darbo rinkos OS",
     "headline": "Ne darbo skelbimų lenta. Darbo rinkos operacinė sistema.",
-    "lede": "Vienas asmuo. Daug vaidmenų laikui bėgant. CV gimsta iš realių darbų ir patvirtinimų, ne iš savadarbio teksto. Pirmas pasirinkimas yra įėjimo taškas, ne narvas.",
+    "lede": "Vienas asmuo. Daug vaidmenų laikui bėgant. CV gimsta iš realių darbų ir įrašų, ne iš savadarbio teksto. Pirmas pasirinkimas yra įėjimo taškas, ne narvas.",
     "honesty": "Pastaba: žemiau matote visą sistemos žemėlapį. Vieni paviršiai šiandien jau veikia, kiti aiškiai pažymėti kaip „Ruošiama“. Niekada nesakome, kad veikia tai, ko dar nėra.",
     "sections": {
       "today": "Šiandien veikia",
@@ -1995,10 +1995,10 @@
     },
     "workflowSteps": {
       "s1": "Aprašykite, ką mokate, arba įkelkite CV tekstą",
-      "s2": "Pasižymi savo įgūdžius — ir patvirtini, kas tavo",
+      "s2": "Pasižymi savo įgūdžius",
       "s3": "Užfiksuokite šiandienos darbą darbo dienoraštyje",
       "s4": "Įrašai virsta CV",
-      "s5": "Įrašai vėliau patvirtinami",
+      "s5": "Įrašai lieka aiškiai sudėti CV",
       "s6": "Vystykite vaidmenis ir galimybes savo tempu"
     },
     "controlRoom": {

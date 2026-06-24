@@ -1982,7 +1982,7 @@
     "metaDescription": "A labour-market operating system where one person can grow across many roles, activities, and opportunities.",
     "eyebrow": "Labour-market OS",
     "headline": "Not a job board. A labour-market operating system.",
-    "lede": "One person. Many roles over time. A CV born from real work and real confirmations, not self-written claims. The first choice is an entry point, not a cage.",
+    "lede": "One person. Many roles over time. A CV born from real work and real records, not self-written claims. The first choice is an entry point, not a cage.",
     "honesty": "Note: below is the whole system map. Some surfaces are live today; the rest are openly labelled \"Preparing\". We never say something works when it doesn't.",
     "sections": {
       "today": "Live today",
@@ -1995,10 +1995,10 @@
     },
     "workflowSteps": {
       "s1": "Write what you can do, or paste a CV",
-      "s2": "You set down your skills — and confirm what is yours",
+      "s2": "You set down your skills",
       "s3": "Record today's work in the work journal",
       "s4": "Entries become your CV",
-      "s5": "Records are confirmed later",
+      "s5": "Records stay structured in your CV",
       "s6": "Grow roles and opportunities at your own pace"
     },
     "controlRoom": {

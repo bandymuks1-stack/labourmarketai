@@ -8,10 +8,10 @@
   "journey": {
     "eyebrow": "So funktioniert es",
     "title": "Ein Profil. Ein geführter Weg zu Chancen.",
-    "subcopy": "Ehrliche Profile und echte Nachweise, verwandelt in Chancen — für Arbeitskräfte, Unternehmen und Agenturen.",
+    "subcopy": "Ehrliche Profile und echte Aufzeichnungen, verwandelt in Chancen — für Arbeitskräfte, Unternehmen und Agenturen.",
     "s1": "Starte deinen Raum",
     "s2": "Identität aufbauen",
-    "s3": "Nachweise hinzufügen",
+    "s3": "Aufzeichnungen hinzufügen",
     "s4": "Chancen öffnen"
   },
   "agencies": {
@@ -591,7 +591,7 @@
     "businessLink": "Arbeitsbedarf starten",
     "signals": {
       "s1": "Echtes Profil",
-      "s2": "Nachweis der Fähigkeiten",
+      "s2": "Kompetenzaufzeichnungen",
       "s3": "Verfügbarkeit",
       "s4": "Arbeitsbedarf"
     }
