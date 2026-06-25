@@ -9,48 +9,53 @@ import {
 import { getFeatureConfig } from "../config/feature-availability";
 
 /**
- * Compact navigation + Marketplace hub IA guard (IA cleanup v2).
+ * Compact, MAP-FIRST navigation IA guard.
  *
- * Owner correction after PR #496: the authenticated product was still too
- * modular. The global top nav must be the COMPACT, role-aware set —
- * Mano erdvė / Marketplace / Žinutės / Nustatymai (+ Admin only for admins).
- * Profile, Mano CV, the map, company, calendar, offers, shop and rentals live
- * as logical SUB-surfaces (inside the active identity / the Marketplace hub),
- * never as a global tab each.
+ * Owner direction: the map (Žemėlapis) is its own PRIMARY product surface — the
+ * central visual market layer — reached directly from the global nav, not
+ * hidden inside an abstract "marketplace" hub. The compact global nav is
+ * Mano erdvė / Žemėlapis / Žinutės / Nustatymai (+ Admin only for admins).
+ * Profile, Mano CV and the marketplace hub are NOT global tabs. The marketplace
+ * concept (offers / shop / rentals) becomes FUTURE LAYERS of the map (disabled
+ * legend filters), never fake data.
  *
- * This guard freezes that decision in CI so a later refactor can't quietly
- * re-bloat the global nav, and asserts the Marketplace hub is honest (links to
- * real surfaces; preparing surfaces are labelled, never fake listings).
+ * This guard freezes that decision in CI so a later refactor can't re-bury the
+ * map or re-bloat the global nav.
  */
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
-const HUB = "app/[locale]/dashboard/marketplace/page.tsx";
+const MAP = "app/[locale]/dashboard/market-map/page.tsx";
+const MARKETPLACE = "app/[locale]/dashboard/marketplace/page.tsx";
 
-describe("the global nav is the compact set, in order", () => {
-  it("primary nav ids = overview, marketplace_hub, communication, account_roles", () => {
+describe("the global nav is the compact, map-first set, in order", () => {
+  it("primary nav ids = overview, market_map, communication, account_roles", () => {
     expect(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id)).toEqual([
       "overview",
-      "marketplace_hub",
+      "market_map",
       "communication",
       "account_roles",
     ]);
   });
 
-  it("marketplace_hub is active, primary-nav-safe, routes to /dashboard/marketplace", () => {
-    const f = getFeatureConfig("marketplace_hub");
+  it("the Žemėlapis tab routes DIRECTLY to the real map surface", () => {
+    const f = getFeatureConfig("market_map");
     expect(f.availability).toBe("active");
     expect(f.safeToShowInPrimaryNav).toBe(true);
-    expect(f.primaryRoute).toBe("/dashboard/marketplace");
+    expect(f.primaryRoute).toBe("/dashboard/market-map");
+    const item = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === "market_map");
+    expect(item?.href).toBe("/dashboard/market-map");
   });
 
-  it("map / profile / Mano CV stay ACTIVE but are NOT primary-nav tabs", () => {
-    for (const key of [
-      "market_map",
-      "profile_text_first",
-      "journal_text_first",
-    ] as const) {
+  it("the marketplace hub is SECONDARY — active but not a global tab", () => {
+    const f = getFeatureConfig("marketplace_hub");
+    expect(f.availability).toBe("active");
+    expect(f.safeToShowInPrimaryNav).toBe(false);
+  });
+
+  it("profile + Mano CV stay ACTIVE but are NOT primary-nav tabs", () => {
+    for (const key of ["profile_text_first", "journal_text_first"] as const) {
       const f = getFeatureConfig(key);
       expect(f.availability, `${key} stays reachable`).toBe("active");
       expect(f.safeToShowInPrimaryNav, `${key} is not a global tab`).toBe(false);
@@ -76,52 +81,70 @@ describe("Admin is a permission-gated nav item, never shown to non-admins", () =
   });
 });
 
-describe("the Marketplace hub is real navigation, not fake listings", () => {
-  const hub = read(HUB);
+describe("the map is the primary surface; marketplace is secondary", () => {
+  const map = read(MAP);
 
-  it("links to the live surfaces (map + opportunities)", () => {
-    expect(hub).toMatch(/\/dashboard\/market-map/);
-    expect(hub).toMatch(/\/dashboard\/opportunities/);
+  it("the Žemėlapis nav tab uses the map label, not an abstract word", () => {
+    const nav = read("lib/config/navigation.ts");
+    expect(nav).toMatch(
+      /market_map:\s*\{[\s\S]{0,600}tabLabelKey:\s*"auth\.dashboard\.tabs\.marketMap"/,
+    );
   });
 
-  it("lists REAL owned companies via the owned-organizations read model", () => {
-    expect(hub).toMatch(/getOwnedOrganizations/);
-    // never a hardcoded company array (no fake companies)
-    expect(hub).not.toMatch(/const\s+companies\s*=\s*\[/);
+  it("the map page is map-first: the live map leads", () => {
+    expect(map).toMatch(/<MarketMapBase\b/);
   });
 
-  it("preparing surfaces (offers/shop) carry an honest prepare badge, no CTA", () => {
-    expect(hub).toMatch(/PrepareCard/);
-    expect(hub).toMatch(/prepareBadge/);
+  it("the map page carries a layers legend (visible now / future layers)", () => {
+    expect(map).toMatch(/<MapLayersLegend\b/);
   });
 
-  it("carries the no-fake disclosure note", () => {
-    expect(hub).toMatch(/notFakeNote/);
+  it("/dashboard/marketplace is secondary — redirects to the map", () => {
+    const mk = read(MARKETPLACE);
+    expect(mk).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/market-map`\)/);
   });
 });
 
-describe("compact nav + hub i18n exists in every active locale", () => {
+describe("the map layers legend is honest — real signals only, no fake data", () => {
+  const legend = read("components/app/map-layers-legend.tsx");
+
+  it("future layers render as DISABLED chips (aria-disabled), not fake markers", () => {
+    expect(legend).toMatch(/aria-disabled="true"/);
+    expect(legend).toMatch(/map-layers-future/);
+    expect(legend).toMatch(/map-layers-visible/);
+  });
+
+  it("no seeded marker / coordinate / fake data arrays in the legend", () => {
+    expect(legend).not.toMatch(/markers?\s*[:=]\s*\[/i);
+    expect(legend).not.toMatch(/coordinates\s*[:=]\s*\[/i);
+  });
+});
+
+describe("compact map-first nav + legend i18n exists in every active locale", () => {
   for (const loc of ACTIVE_LOCALES) {
     const m = JSON.parse(read(`messages/${loc}.json`));
-    it(`${loc}: marketplace + admin tab labels exist`, () => {
-      expect(m.auth.dashboard.tabs.marketplace).toBeTruthy();
+    it(`${loc}: map + admin tab labels exist`, () => {
+      expect(m.auth.dashboard.tabs.marketMap).toBeTruthy();
       expect(m.auth.dashboard.tabs.admin).toBeTruthy();
     });
-    it(`${loc}: marketplaceHub block has all six sections`, () => {
-      const h = m.marketplaceHub;
-      expect(h).toBeTruthy();
+    it(`${loc}: mapLayers legend has visible-now + the future-layer items`, () => {
+      const ml = m.mapLayers;
+      expect(ml).toBeTruthy();
+      expect(ml.visibleNow && ml.futureLayers && ml.futureBadge).toBeTruthy();
       for (const k of [
-        "map",
+        "selfSignal",
+        "companies",
+        "teams",
         "opportunities",
-        "offers",
-        "shop",
-        "individual",
-        "company",
+        "workNeeds",
+        "services",
+        "rentals",
+        "shops",
+        "availability",
+        "trust",
       ]) {
-        expect(h[k], `${loc}.marketplaceHub.${k}`).toBeTruthy();
+        expect(ml.items?.[k], `${loc}.mapLayers.items.${k}`).toBeTruthy();
       }
-      expect(h.notFakeNote).toBeTruthy();
-      expect(h.prepareBadge).toBeTruthy();
     });
   }
 });

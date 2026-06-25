@@ -51,9 +51,12 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
     tabLabelKey: "auth.dashboard.tabs.overview",
     iconKey: "home",
   },
-  marketplace_hub: {
-    tabLabelKey: "auth.dashboard.tabs.marketplace",
-    iconKey: "store",
+  // Žemėlapis — the map is its own PRIMARY product surface (map-first
+  // correction). The tab goes directly to the real map at /dashboard/market-map
+  // (the market_map feature's route), not the marketplace hub.
+  market_map: {
+    tabLabelKey: "auth.dashboard.tabs.marketMap",
+    iconKey: "map",
   },
   communication: {
     tabLabelKey: "auth.dashboard.tabs.communication",

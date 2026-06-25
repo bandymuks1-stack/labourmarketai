@@ -327,7 +327,7 @@ export default async function ProfilePage({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <header id="profile-top" className="scroll-mt-20">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

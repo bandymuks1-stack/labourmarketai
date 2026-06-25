@@ -14,6 +14,25 @@
     "capabilities": "Įgūdžiai ir darbo istorija",
     "fullRecordsInCv": "Visi darbo įrašai — Mano CV"
   },
+  "mapLayers": {
+    "title": "Žemėlapio sluoksniai",
+    "intro": "Žemėlapis pamažu taps pagrindiniu vizualiu rinkos sluoksniu. Žemiau – kas matoma dabar ir kokie sluoksniai ruošiami. Be netikrų duomenų.",
+    "visibleNow": "Matoma dabar",
+    "futureLayers": "Būsimi sluoksniai",
+    "futureBadge": "Ruošiama",
+    "items": {
+      "selfSignal": "Tavo vietos signalas",
+      "companies": "Įmonės",
+      "teams": "Komandos / brigados",
+      "opportunities": "Galimybės",
+      "workNeeds": "Darbo poreikiai",
+      "services": "Paslaugos",
+      "rentals": "Nuoma / būstas",
+      "shops": "Parduotuvės / pasiūlymai",
+      "availability": "Prieinamumas / kalendorius",
+      "trust": "Pasitikėjimas / pasirengimas"
+    }
+  },
   "marketplaceHub": {
     "title": "Prekyvietė",
     "subtitle": "Viena kompaktiška vieta, jungianti tave, tavo įmones, žemėlapį ir žinutes.",

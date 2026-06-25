@@ -151,7 +151,7 @@ export default async function DashboardOverviewPage({
       },
     };
     return (
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-6">
         {Header}
         <CurrentSpaceHeader role={role} />
         {/* Active-role focus: only this role's identity actions on the first
@@ -266,7 +266,7 @@ export default async function DashboardOverviewPage({
   });
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col gap-6">
       {/* Space identity + the calm doorway to other spaces (My spaces). */}
       <CurrentSpaceHeader role={role} />
       {/* Active-role focus: the person's own quick actions only — no company

@@ -23,27 +23,23 @@ describe("market map is exposed in the command centers + dashboard", () => {
     expect(identity).toMatch(/\/dashboard\/market-map/);
   });
 
-  it("the market map is a shared first-class destination (person actions + marketplace hub)", () => {
-    // IA cleanup v2: the map is the SHARED connection layer, reached from the
-    // person identity actions AND from the compact Marketplace hub (the map is
-    // no longer its own global tab). Reachability is preserved without bloating
-    // the global nav.
+  it("the market map is a first-class destination (its OWN primary nav tab)", () => {
+    // Map-first IA: the map is the central visual market surface. It is reached
+    // from the person identity actions AND directly as the "Žemėlapis" global
+    // nav tab (its own primary surface, not buried in a hub).
     expect(identity).toMatch(/key:\s*"marketMap"/);
-    const hub = read("app/[locale]/dashboard/marketplace/page.tsx");
-    expect(hub).toMatch(/\/dashboard\/market-map/);
-    // The Marketplace hub itself IS a primary nav tab, so the map is always
-    // one compact hop from the global nav.
     expect(
       VISIBLE_PRIMARY_NAV_ITEMS.some(
-        (i) => i.href === "/dashboard/marketplace",
+        (i) => i.href === "/dashboard/market-map",
       ),
-      "marketplace hub is a primary nav tab",
+      "market-map is a primary nav tab",
     ).toBe(true);
   });
 
-  it("the marketplace hub links to the market map (reachability)", () => {
-    const hub = read("app/[locale]/dashboard/marketplace/page.tsx");
-    expect(hub).toMatch(/\/dashboard\/market-map/);
+  it("the secondary marketplace route redirects to the map (no competing surface)", () => {
+    const mk = read("app/[locale]/dashboard/marketplace/page.tsx");
+    expect(mk).toMatch(/redirect\(/);
+    expect(mk).toMatch(/\/dashboard\/market-map/);
   });
 
   it("the opportunities surface links to the market map", () => {

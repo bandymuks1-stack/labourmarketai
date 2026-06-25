@@ -55,11 +55,11 @@ describe("primary nav uses human work-card labels, not module words", () => {
 });
 
 describe("compact global nav + sub-surface reachability (IA cleanup v2)", () => {
-  it("the global nav is the compact set: space + marketplace + messages + settings", () => {
+  it("the global nav is the compact, map-first set: space + map + messages + settings", () => {
     const hrefs = VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.href);
     for (const r of [
       "/dashboard",
-      "/dashboard/marketplace",
+      "/dashboard/market-map",
       "/dashboard/communication",
       "/dashboard/account",
     ]) {
@@ -67,15 +67,15 @@ describe("compact global nav + sub-surface reachability (IA cleanup v2)", () => 
     }
   });
 
-  it("profile + Mano CV + map are demoted OUT of the global nav (now sub-surfaces)", () => {
+  it("profile + Mano CV are demoted OUT of the global nav (now sub-surfaces)", () => {
     const hrefs = VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.href);
-    for (const r of [
-      "/dashboard/profile",
-      "/dashboard/journal",
-      "/dashboard/market-map",
-    ]) {
+    for (const r of ["/dashboard/profile", "/dashboard/journal"]) {
       expect(hrefs, `${r} must NOT be a global nav tab`).not.toContain(r);
     }
+    // the abstract marketplace hub is NOT a global tab (the map replaced it)
+    expect(hrefs, "marketplace hub is not a global tab").not.toContain(
+      "/dashboard/marketplace",
+    );
   });
 
   it("profile + Mano CV stay reachable as sub-surfaces (account menu / overview)", () => {

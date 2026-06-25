@@ -14,6 +14,25 @@
     "capabilities": "Skills & work history",
     "fullRecordsInCv": "Full work records — Mano CV"
   },
+  "mapLayers": {
+    "title": "Map layers",
+    "intro": "The map is becoming the main visual market layer. Below is what's visible now and which layers are preparing. No fake data.",
+    "visibleNow": "Visible now",
+    "futureLayers": "Future layers",
+    "futureBadge": "Preparing",
+    "items": {
+      "selfSignal": "Your location signal",
+      "companies": "Companies",
+      "teams": "Teams / brigades",
+      "opportunities": "Opportunities",
+      "workNeeds": "Work needs",
+      "services": "Services",
+      "rentals": "Rentals / housing",
+      "shops": "Shops / offers",
+      "availability": "Availability / calendar",
+      "trust": "Trust / readiness"
+    }
+  },
   "marketplaceHub": {
     "title": "Marketplace",
     "subtitle": "One compact place that connects you, your companies, the map and messages.",
