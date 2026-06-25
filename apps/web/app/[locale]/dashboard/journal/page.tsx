@@ -380,7 +380,7 @@ export default async function JournalPage({
   const manoAvatar = await getOwnAvatar();
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <header id="mano-cv-top" className="flex flex-col gap-1 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

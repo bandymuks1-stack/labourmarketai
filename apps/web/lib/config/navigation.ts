@@ -51,9 +51,13 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
     tabLabelKey: "auth.dashboard.tabs.overview",
     iconKey: "home",
   },
+  // Map-first label (IA polish): the map is the main visual market surface, so
+  // the user-facing tab is "Žemėlapis" with a map icon. The route stays
+  // /dashboard/marketplace internally (the page is map-first: live map +
+  // "Atverti žemėlapį" hero, with the marketplace concept below).
   marketplace_hub: {
-    tabLabelKey: "auth.dashboard.tabs.marketplace",
-    iconKey: "store",
+    tabLabelKey: "auth.dashboard.tabs.marketMap",
+    iconKey: "map",
   },
   communication: {
     tabLabelKey: "auth.dashboard.tabs.communication",

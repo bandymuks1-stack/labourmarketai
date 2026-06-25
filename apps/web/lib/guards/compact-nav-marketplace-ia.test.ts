@@ -79,6 +79,24 @@ describe("Admin is a permission-gated nav item, never shown to non-admins", () =
 describe("the Marketplace hub is real navigation, not fake listings", () => {
   const hub = read(HUB);
 
+  it("is MAP-FIRST: embeds the live map + a primary 'Atverti žemėlapį' action", () => {
+    // IA polish: the map is the main visual market surface, so the page leads
+    // with the live MarketMapBase and a primary CTA to the full map workspace.
+    expect(hub).toMatch(/<MarketMapBase\b/);
+    expect(hub).toMatch(/marketplace-open-map/);
+    // the map hero appears before the company/preparing sections (map-first)
+    expect(hub.indexOf("marketplace-map-hero")).toBeLessThan(
+      hub.indexOf("marketplace-company"),
+    );
+  });
+
+  it("the user-facing tab label is the map label (Žemėlapis), not an abstract word", () => {
+    const nav = read("lib/config/navigation.ts");
+    expect(nav).toMatch(
+      /marketplace_hub:\s*\{[\s\S]{0,600}tabLabelKey:\s*"auth\.dashboard\.tabs\.marketMap"/,
+    );
+  });
+
   it("links to the live surfaces (map + opportunities)", () => {
     expect(hub).toMatch(/\/dashboard\/market-map/);
     expect(hub).toMatch(/\/dashboard\/opportunities/);

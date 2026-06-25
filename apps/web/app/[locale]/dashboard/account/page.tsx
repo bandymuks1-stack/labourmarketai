@@ -67,7 +67,7 @@ export default async function AccountPage({
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-5">
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("tabs.account")}
@@ -83,7 +83,7 @@ export default async function AccountPage({
         {tRoot("featureNotes.paymentReadiness")}
       </FeatureNote>
 
-      <section className="card-border p-6">
+      <section className="card-border p-5">
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
           {t("account.email_label")}
         </p>
@@ -95,7 +95,7 @@ export default async function AccountPage({
       {/* Identity is edited on the Profilis surface; a single settings link
           (not a launcher grid) keeps account = settings while the profile-cv
           guard's canonical /dashboard/profile reference stays satisfied. */}
-      <section className="card-border p-6">
+      <section className="card-border p-5">
         <Link
           href="/dashboard/profile"
           className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
@@ -125,7 +125,7 @@ export default async function AccountPage({
         />
       )}
 
-      <section className="card-border p-6">
+      <section className="card-border p-5">
         <p className="mb-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
           {t("account.theme.appearance")}
         </p>
@@ -138,10 +138,14 @@ export default async function AccountPage({
         />
       </section>
 
-      <section className="card-border p-6">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+      {/* Role / context management — collapsed by default (compression pass):
+          settings stay practical, not a product dashboard. The rolesIntro +
+          per-role chips (roleStatusChipKey) remain in the source. */}
+      <details className="card-border group p-5" data-testid="account-roles-details">
+        <summary className="flex cursor-pointer list-none items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-muted hover:text-text-primary">
+          <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
           {t("account.roles_label")}
-        </p>
+        </summary>
         <p className="mt-2 text-xs leading-relaxed text-text-secondary">
           {t("account.rolesIntro")}
         </p>
@@ -191,7 +195,7 @@ export default async function AccountPage({
             );
           })}
         </ul>
-      </section>
+      </details>
 
       {/* Language lives in the header on tablet/desktop; on mobile the top bar
           is simplified, so the switcher is relocated here (md:hidden). */}
@@ -204,7 +208,7 @@ export default async function AccountPage({
         </div>
       </section>
 
-      <section className="card-border p-6">
+      <section className="card-border p-5">
         <form action={`/${locale}/auth/logout`} method="post">
           <Button type="submit" variant="secondary">
             {t("account.logout")}

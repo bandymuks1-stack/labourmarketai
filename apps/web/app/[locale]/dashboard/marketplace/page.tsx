@@ -1,25 +1,25 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Map as MapIcon, Briefcase, Tag, Store, UserRound, Building2 } from "lucide-react";
+import { Briefcase, Tag, Store, UserRound, Building2, Map as MapIcon } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { FeatureNote } from "@/components/app/feature-note";
+import { MarketMapBase } from "@/components/app/market-map-base";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
 
 /**
- * Marketplace hub (IA cleanup v2).
+ * Map-first market surface (IA polish v2).
  *
- * ONE compact place that connects the person + company identities, the live
- * map, real opportunities/search, and HONEST "preparing" states for the
- * supply-side surfaces (offers / shop / rentals / real estate) that have no
- * data model yet. It is NOT a second dashboard and NOT a fake-listing wall:
- *   - live sections link to the real existing surfaces;
- *   - preparing sections say so plainly (no fake items, no fake companies);
- *   - the company section lists the REAL organizations the user owns
- *     (2, 3, or 50) by NAME and offers an "add company" action.
+ * The map is the main visual market surface, so this page LEADS with the live
+ * map + a large "Atverti žemėlapį" primary action. The marketplace concept
+ * (offers / shop / rentals / individual activity / company channels) lives
+ * BELOW the map, compressed, with honest "preparing" states where no data
+ * model exists. The user-facing nav label is "Žemėlapis" (route stays
+ * /dashboard/marketplace internally).
  *
- * No schema change: every datum here is read from existing tables. Supply-side
- * offers / shop / calendar are documented as an owner-gated migration plan in
+ * No schema change, no fake listings / companies / map signals. The map shows
+ * only the user's own real location signal (MarketMapBase); supply-side offers
+ * / shop / calendar are documented as an owner-gated migration plan in
  * docs/owner-input/ia-compactness-marketplace-v2.md — not faked here.
  */
 export default async function MarketplacePage({
@@ -44,32 +44,34 @@ export default async function MarketplacePage({
       : [];
 
   return (
-    <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
+    <div className="flex flex-col gap-5">
+      <header className="flex flex-col gap-1">
+        <h1 className="flex items-center gap-2 font-display text-2xl font-bold tracking-tightest text-text-primary">
+          <MapIcon className="h-6 w-6 text-brand-blue" strokeWidth={1.75} aria-hidden />
+          {t("map.title")}
         </h1>
-        <p className="mt-2 max-w-prose text-sm text-text-secondary">
-          {t("subtitle")}
-        </p>
+        <p className="max-w-prose text-sm text-text-secondary">{t("map.desc")}</p>
       </header>
 
-      <FeatureNote testId="marketplace-not-fake-note">
-        {t("notFakeNote")}
-      </FeatureNote>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* 1 — Map (live) */}
-        <HubCard
-          icon={<MapIcon className="h-5 w-5" strokeWidth={1.75} aria-hidden />}
-          title={t("map.title")}
-          desc={t("map.desc")}
+      {/* MAP-FIRST hero: the live map is the dominant element, with the single
+          primary action — "Atverti žemėlapį" — opening the full map workspace
+          (advanced signals + capture tools) at /dashboard/market-map. */}
+      <section className="flex flex-col gap-3" data-testid="marketplace-map-hero">
+        <MarketMapBase />
+        <Link
           href="/dashboard/market-map"
-          cta={t("map.cta")}
-          testId="marketplace-map"
-        />
+          className="inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+          data-testid="marketplace-open-map"
+        >
+          <MapIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+          {t("map.cta")}
+        </Link>
+      </section>
 
-        {/* 2 — Work / needs / opportunities (live) */}
+      <FeatureNote testId="marketplace-not-fake-note">{t("notFakeNote")}</FeatureNote>
+
+      {/* Live, real sub-surfaces — compact cards. */}
+      <div className="grid gap-3 md:grid-cols-2">
         <HubCard
           icon={<Briefcase className="h-5 w-5" strokeWidth={1.75} aria-hidden />}
           title={t("opportunities.title")}
@@ -78,26 +80,6 @@ export default async function MarketplacePage({
           cta={t("opportunities.cta")}
           testId="marketplace-opportunities"
         />
-
-        {/* 3 — Company & personal offers (preparing — no supply-side schema) */}
-        <PrepareCard
-          icon={<Tag className="h-5 w-5" strokeWidth={1.75} aria-hidden />}
-          title={t("offers.title")}
-          desc={t("offers.desc")}
-          badge={t("prepareBadge")}
-          testId="marketplace-offers"
-        />
-
-        {/* 4 — Shop / services / rentals / real estate (preparing — no schema) */}
-        <PrepareCard
-          icon={<Store className="h-5 w-5" strokeWidth={1.75} aria-hidden />}
-          title={t("shop.title")}
-          desc={t("shop.desc")}
-          badge={t("prepareBadge")}
-          testId="marketplace-shop"
-        />
-
-        {/* 5 — Individual activity (person identity / self-employed) */}
         <HubCard
           icon={<UserRound className="h-5 w-5" strokeWidth={1.75} aria-hidden />}
           title={t("individual.title")}
@@ -106,60 +88,76 @@ export default async function MarketplacePage({
           cta={t("individual.cta")}
           testId="marketplace-individual"
         />
-
-        {/* 6 — Company channels (selected/owned companies — real, by name) */}
-        <section
-          className="card-border flex flex-col gap-3 p-5"
-          data-testid="marketplace-company"
-        >
-          <div className="flex items-center gap-2 text-text-primary">
-            <Building2 className="h-5 w-5" strokeWidth={1.75} aria-hidden />
-            <h2 className="font-display text-lg font-semibold">
-              {t("company.title")}
-            </h2>
-          </div>
-          {ownedCompanies.length > 0 ? (
-            <>
-              <p className="text-sm text-text-secondary">{t("company.desc")}</p>
-              <ul className="flex flex-col gap-2" data-testid="marketplace-company-list">
-                {ownedCompanies.map((c) => (
-                  <li key={c.id}>
-                    <Link
-                      href="/dashboard/company"
-                      className="flex items-center justify-between gap-3 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-primary hover:border-brand-blue hover:text-brand-blue"
-                    >
-                      <span className="truncate font-medium">{c.name}</span>
-                      <span aria-hidden className="shrink-0 text-text-muted">
-                        →
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/dashboard/start/company"
-                className="font-mono text-[11px] uppercase tracking-label text-brand-blue hover:underline"
-                data-testid="marketplace-add-company"
-              >
-                + {t("company.noCompanyCta")}
-              </Link>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-text-secondary">
-                {t("company.noCompanyDesc")}
-              </p>
-              <Link
-                href="/dashboard/start/company"
-                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
-                data-testid="marketplace-add-company"
-              >
-                + {t("company.noCompanyCta")}
-              </Link>
-            </>
-          )}
-        </section>
       </div>
+
+      {/* Company channels (real owned companies by name + add). */}
+      <section className="card-border flex flex-col gap-3 p-4" data-testid="marketplace-company">
+        <div className="flex items-center gap-2 text-text-primary">
+          <Building2 className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+          <h2 className="font-display text-base font-semibold">{t("company.title")}</h2>
+        </div>
+        {ownedCompanies.length > 0 ? (
+          <>
+            <ul className="flex flex-col gap-2" data-testid="marketplace-company-list">
+              {ownedCompanies.map((c) => (
+                <li key={c.id}>
+                  <Link
+                    href="/dashboard/company"
+                    className="flex items-center justify-between gap-3 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-primary hover:border-brand-blue hover:text-brand-blue"
+                  >
+                    <span className="truncate font-medium">{c.name}</span>
+                    <span aria-hidden className="shrink-0 text-text-muted">→</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/dashboard/start/company"
+              className="font-mono text-[11px] uppercase tracking-label text-brand-blue hover:underline"
+              data-testid="marketplace-add-company"
+            >
+              + {t("company.noCompanyCta")}
+            </Link>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-text-secondary">{t("company.noCompanyDesc")}</p>
+            <Link
+              href="/dashboard/start/company"
+              className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
+              data-testid="marketplace-add-company"
+            >
+              + {t("company.noCompanyCta")}
+            </Link>
+          </>
+        )}
+      </section>
+
+      {/* Preparing supply-side surfaces — collapsed by default (compression):
+          no data model yet, no CTA, no fake items. */}
+      <details className="group rounded-md border border-border-subtle bg-surface-1/40" data-testid="marketplace-preparing">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
+          <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+          {t("offers.title")} · {t("shop.title")}
+          <span className="ml-auto rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 text-state-warning">
+            {t("prepareBadge")}
+          </span>
+        </summary>
+        <div className="grid gap-3 px-4 pb-4 md:grid-cols-2">
+          <PrepareCard
+            icon={<Tag className="h-5 w-5" strokeWidth={1.75} aria-hidden />}
+            title={t("offers.title")}
+            desc={t("offers.desc")}
+            testId="marketplace-offers"
+          />
+          <PrepareCard
+            icon={<Store className="h-5 w-5" strokeWidth={1.75} aria-hidden />}
+            title={t("shop.title")}
+            desc={t("shop.desc")}
+            testId="marketplace-shop"
+          />
+        </div>
+      </details>
     </div>
   );
 }
@@ -181,10 +179,10 @@ function HubCard({
   testId: string;
 }) {
   return (
-    <section className="card-border flex flex-col gap-3 p-5" data-testid={testId}>
+    <section className="card-border flex flex-col gap-2 p-4" data-testid={testId}>
       <div className="flex items-center gap-2 text-text-primary">
         {icon}
-        <h2 className="font-display text-lg font-semibold">{title}</h2>
+        <h2 className="font-display text-base font-semibold">{title}</h2>
       </div>
       <p className="flex-1 text-sm text-text-secondary">{desc}</p>
       <Link
@@ -203,32 +201,20 @@ function PrepareCard({
   icon,
   title,
   desc,
-  badge,
   testId,
 }: {
   icon: React.ReactNode;
   title: string;
   desc: string;
-  badge: string;
   testId: string;
 }) {
   return (
-    <section
-      className="card-border flex flex-col gap-3 p-5 opacity-90"
-      data-testid={testId}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-text-secondary">
-          {icon}
-          <h2 className="font-display text-lg font-semibold text-text-primary">
-            {title}
-          </h2>
-        </div>
-        <span className="shrink-0 rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">
-          {badge}
-        </span>
+    <section className="rounded-md border border-border-subtle bg-surface-1/60 p-4" data-testid={testId}>
+      <div className="flex items-center gap-2 text-text-secondary">
+        {icon}
+        <h3 className="font-display text-sm font-semibold text-text-primary">{title}</h3>
       </div>
-      <p className="text-sm text-text-secondary">{desc}</p>
+      <p className="mt-1.5 text-sm text-text-secondary">{desc}</p>
     </section>
   );
 }
