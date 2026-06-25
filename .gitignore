@@ -26,6 +26,11 @@ next-env.d.ts
 /apps/web/test-results/
 /apps/web/playwright-report/
 
+# owner visual-proof capture (holds a live Google login session + authed
+# screenshots — never committed; see scripts/capture-ia-proof.mjs)
+/apps/web/.playwright-ia-proof-profile/
+/apps/web/ia-proof/
+
 # os / editor
 Thumbs.db
 .DS_Store
