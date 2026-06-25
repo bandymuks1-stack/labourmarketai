@@ -1,4 +1,40 @@
 {
+  "marketplaceHub": {
+    "title": "Marketplace",
+    "subtitle": "One compact place that connects you, your companies, the map and messages.",
+    "notFakeNote": "No fake listings, companies, calendar slots or products. Where no data model exists yet, an honest “preparing” state is shown.",
+    "map": {
+      "title": "Map",
+      "desc": "Your real signals and market signals on the map.",
+      "cta": "Open map"
+    },
+    "opportunities": {
+      "title": "Work, needs, opportunities",
+      "desc": "Real opportunities and search.",
+      "cta": "View opportunities"
+    },
+    "offers": {
+      "title": "Company & personal offers",
+      "desc": "The supply-side offers layer does not exist yet. Preparing honestly, with no fake listings."
+    },
+    "shop": {
+      "title": "Shop, services, rentals, real estate",
+      "desc": "No data model yet for products, services, rentals or real estate. No fake items."
+    },
+    "individual": {
+      "title": "Individual activity",
+      "desc": "Act as an independent provider — managed in your personal profile.",
+      "cta": "Open profile"
+    },
+    "company": {
+      "title": "Company channels",
+      "desc": "The selected company’s commercial channel and settings.",
+      "cta": "Open company",
+      "noCompanyCta": "Add company",
+      "noCompanyDesc": "You don’t have a company yet. Create your first one to get a company channel."
+    },
+    "prepareBadge": "Preparing"
+  },
   "profileAvatar": {
     "upload": "Upload photo",
     "change": "Change photo",
@@ -2115,6 +2151,10 @@
     "marketplace": {
       "label": "Marketplace",
       "description": "There is no marketplace layer yet."
+    },
+    "marketplace_hub": {
+      "label": "Marketplace",
+      "description": "A compact hub connecting the map, opportunities and your companies."
     }
   },
   "structuring": {
@@ -2839,13 +2879,15 @@
       },
       "tabs": {
         "overview": "My space",
+        "marketplace": "Marketplace",
         "marketMap": "Map",
         "profile": "Profile",
         "journal": "My CV",
         "communication": "Messages",
         "discover": "Discover",
         "search": "Search",
-        "account": "Settings"
+        "account": "Settings",
+        "admin": "Admin"
       },
       "chainActions": {
         "buyerTitle": "Buyer requests",

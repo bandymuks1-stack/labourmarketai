@@ -104,15 +104,16 @@ describe("mobile layout invariants", () => {
   describe("language feedback widget (apps/web/components/app/language-feedback-widget.tsx)", () => {
     const src = read("components/app/language-feedback-widget.tsx");
 
-    it("floating pill clears the bottom nav at all widths where the nav is visible", () => {
-      // The BottomNav is `md:hidden`, so the pill must clear it on every
-      // width below `md`. Previously sm:bottom-6 dropped it under the
-      // nav between 640-767px. The pill must also include the iOS
-      // safe-area inset so it never sits on the home indicator.
+    it("floating report button clears the bottom nav at all widths where the nav is visible", () => {
+      // The BottomNav is `md:hidden`, so the button must clear it on every
+      // width below `md`. It must also include the iOS safe-area inset so it
+      // never sits on the home indicator.
       expect(src).toContain(
         "bottom-[calc(5rem+env(safe-area-inset-bottom))]",
       );
-      expect(src).toMatch(/md:bottom-6/);
+      // IA cleanup v2 (#11): reduced to a low-profile button; desktop offset
+      // tightened to md:bottom-4.
+      expect(src).toMatch(/md:bottom-4/);
     });
 
     it("modal container fits a 360px viewport (max-w-md + p-4 backdrop)", () => {
@@ -122,8 +123,14 @@ describe("mobile layout invariants", () => {
       expect(src).toContain('className="fixed inset-0 z-50 flex items-end');
     });
 
-    it("floating pill itself is capped so a long localised label cannot push it off-screen", () => {
-      expect(src).toMatch(/max-w-\[calc\(100vw-1\.5rem\)\]/);
+    it("floating report button is a small fixed-size icon (can't be pushed off-screen, #11)", () => {
+      // IA cleanup v2: the always-on wide pill (which followed every page and
+      // covered content) is now a compact, fixed 9×9 icon-only button — a fixed
+      // size inherently can't overflow regardless of locale string length, and
+      // it sits at reduced opacity until hovered so it never competes with
+      // page content.
+      expect(src).toMatch(/h-9 w-9/);
+      expect(src).toMatch(/opacity-60/);
     });
   });
 });

@@ -5,13 +5,18 @@ import { join } from "node:path";
 import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
 
 /**
- * Market Map owner-signal + primary-nav guard.
+ * Market Map owner-signal + reachability guard.
  *
  * The logged-in user sees their OWN signals on the one shared market map (via
- * the #459 owner read layer), and the map is a first-class primary-nav route
- * (desktop tabs + mobile bottom nav). No "preparing / ruošiama" framing.
- * (Detailed owner-view category/privacy assertions live in
- * market-map-ui-wiring-v1; this guard owns the nav route + copy honesty.)
+ * the #459 owner read layer). No "preparing / ruošiama" framing.
+ *
+ * IA cleanup v2: the map is no longer a top-level nav tab — the compact global
+ * nav is Mano erdvė / Marketplace / Žinutės / Nustatymai (+ Admin). The map is
+ * still ACTIVE and is reached as a sub-surface from the Marketplace hub. This
+ * guard now asserts (a) market_map stays active with its canonical route and
+ * (b) the Marketplace hub links to it — so the surface never becomes
+ * unreachable. (Detailed owner-view category/privacy assertions live in
+ * market-map-ui-wiring-v1; this guard owns reachability + copy honesty.)
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -19,11 +24,10 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
 
-describe("market map is a first-class primary-nav route", () => {
-  it("market_map is a visible primary nav item pointing at /dashboard/market-map", () => {
+describe("market map stays active and reachable from the marketplace hub", () => {
+  it("market_map is NOT a top-level nav tab (compact nav, IA cleanup v2)", () => {
     const item = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === "market_map");
-    expect(item, "market_map must be a visible primary nav item").toBeTruthy();
-    expect(item?.href).toBe("/dashboard/market-map");
+    expect(item, "market_map must not be a primary nav tab anymore").toBeFalsy();
   });
 
   it("both nav surfaces render the catalogue-driven items (desktop + mobile)", () => {
@@ -34,10 +38,19 @@ describe("market map is a first-class primary-nav route", () => {
     expect(bottom).toMatch(/map:\s*MapIcon/);
   });
 
-  it("the feature catalogue marks market_map active + primary-nav-safe", () => {
+  it("the feature catalogue keeps market_map ACTIVE with its canonical route", () => {
     const cat = read("lib/config/feature-availability.ts");
     expect(cat).toMatch(/key:\s*"market_map"/);
     expect(cat).toMatch(/primaryRoute:\s*"\/dashboard\/market-map"/);
+    // Active (not preparing/hidden) so it stays a real, reachable surface.
+    expect(cat).toMatch(
+      /key:\s*"market_map",[\s\S]{0,120}availability:\s*"active"/,
+    );
+  });
+
+  it("the Marketplace hub links to the market map (reachability)", () => {
+    const hub = read("app/[locale]/dashboard/marketplace/page.tsx");
+    expect(hub).toMatch(/\/dashboard\/market-map/);
   });
 });
 

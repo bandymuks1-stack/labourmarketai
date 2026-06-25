@@ -475,10 +475,15 @@ describe("feature-availability + config-driven dashboard", () => {
         // nav from the catalogue. The three text-first surfaces remain
         // the only feature workflows that ship today.
         "overview",
-        // Unified market map (P0): one shared map surface, active + in primary
-        // nav. The logged-in user always sees their own country-level
-        // self-signal (or a real location-completion action) plus real demand
-        // signals — signal-only, no fake markers.
+        // IA cleanup v2: the Marketplace HUB is an active surface — one compact
+        // page that connects the map + opportunities + real owned companies,
+        // with honest "preparing" states for supply-side offers/shop. It is real
+        // navigation, NOT a fake matching marketplace (that stays the hidden
+        // `marketplace` key).
+        "marketplace_hub",
+        // Unified market map (P0): one shared map surface, still active and
+        // reachable (now a sub-surface of the Marketplace hub, no longer its own
+        // global tab). Signal-only, no fake markers.
         "market_map",
         "profile_text_first",
         "journal_text_first",
@@ -594,16 +599,18 @@ describe("catalogue-driven primary nav", () => {
     // both this assertion and the TAB_META map have to change — keeps
     // visual changes obvious in code review. The market map is a required
     // first-class primary-nav surface (unified map handoff, P0).
+    // IA cleanup v2: the compact global nav is overview / marketplace_hub /
+    // communication / account_roles. Map, profile and Mano CV are demoted to
+    // sub-surfaces (active but not primary-nav tabs).
     const navTxt = readWeb("lib/config/navigation.ts");
-    const tabFeatures = [...navTxt.matchAll(/\b(overview|market_map|profile_text_first|journal_text_first|account_roles):\s*\{\s*tabLabelKey/g)].map(
+    const tabFeatures = [...navTxt.matchAll(/\b(overview|marketplace_hub|communication|account_roles):\s*\{\s*tabLabelKey/g)].map(
       (m) => m[1],
     );
     expect(new Set(tabFeatures)).toEqual(
       new Set([
         "overview",
-        "market_map",
-        "profile_text_first",
-        "journal_text_first",
+        "marketplace_hub",
+        "communication",
         "account_roles",
       ]),
     );

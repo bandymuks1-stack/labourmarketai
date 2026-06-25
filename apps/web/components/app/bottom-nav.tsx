@@ -1,14 +1,25 @@
 "use client";
 
-import { FileText, Home, IdCard, Inbox, Map as MapIcon, User } from "lucide-react";
+import {
+  FileText,
+  Home,
+  IdCard,
+  Inbox,
+  Map as MapIcon,
+  Shield,
+  Store,
+  User,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import {
+  ADMIN_NAV_ITEM,
   VISIBLE_PRIMARY_NAV_ITEMS,
   type NavIconKey,
 } from "@/lib/config/navigation";
 import type { FeatureKey } from "@/lib/config/feature-availability";
+import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
 
 // Tabs are sourced from `lib/config/navigation.ts`, which itself derives
@@ -19,11 +30,13 @@ import { cn } from "@/lib/utils";
 // only carries the icon ID.
 const ICONS: Record<NavIconKey, LucideIcon> = {
   home: Home,
+  store: Store,
   map: MapIcon,
   idCard: IdCard,
   fileText: FileText,
   inbox: Inbox,
   user: User,
+  shield: Shield,
 };
 
 /** Mobile-only (<768px) bottom tab bar — the primary nav on phones, where
@@ -39,6 +52,11 @@ export function BottomNav({
 }) {
   const t = useTranslations();
   const pathname = usePathname();
+  const { isAdmin, adminUiHidden } = useAuth();
+  const items =
+    isAdmin && !adminUiHidden
+      ? [...VISIBLE_PRIMARY_NAV_ITEMS, ADMIN_NAV_ITEM]
+      : VISIBLE_PRIMARY_NAV_ITEMS;
 
   return (
     <nav
@@ -46,13 +64,13 @@ export function BottomNav({
       className="fixed inset-x-0 bottom-0 z-30 border-t border-ink-600/60 bg-ink-900/90 backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="flex items-stretch justify-around">
-        {VISIBLE_PRIMARY_NAV_ITEMS.map(({ id, href, tabLabelKey, iconKey }) => {
+        {items.map(({ id, href, tabLabelKey, iconKey }) => {
           const Icon = ICONS[iconKey];
           const active =
             href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname === href || pathname.startsWith(href + "/");
-          const badge = badges?.[id] ?? 0;
+          const badge = id === "admin" ? 0 : (badges?.[id] ?? 0);
           return (
             <li key={id} className="flex-1">
               <Link

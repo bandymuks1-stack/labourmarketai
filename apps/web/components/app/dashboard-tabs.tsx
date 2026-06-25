@@ -2,8 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import { VISIBLE_PRIMARY_NAV_ITEMS } from "@/lib/config/navigation";
+import {
+  ADMIN_NAV_ITEM,
+  VISIBLE_PRIMARY_NAV_ITEMS,
+} from "@/lib/config/navigation";
 import type { FeatureKey } from "@/lib/config/feature-availability";
+import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
 
 /**
@@ -23,17 +27,24 @@ export function DashboardTabs({
 }) {
   const t = useTranslations();
   const pathname = usePathname();
+  const { isAdmin, adminUiHidden } = useAuth();
+  // Admin is a permission dimension, not a catalogue feature — append the
+  // admin tab only for admins who haven't hidden admin chrome.
+  const items =
+    isAdmin && !adminUiHidden
+      ? [...VISIBLE_PRIMARY_NAV_ITEMS, ADMIN_NAV_ITEM]
+      : VISIBLE_PRIMARY_NAV_ITEMS;
   return (
     <nav
       aria-label="Dashboard sections"
       className={cn("flex items-center gap-1", className)}
     >
-      {VISIBLE_PRIMARY_NAV_ITEMS.map(({ id, href, tabLabelKey }) => {
+      {items.map(({ id, href, tabLabelKey }) => {
         const active =
           href === "/dashboard"
             ? pathname === "/dashboard"
             : pathname === href || pathname.startsWith(href + "/");
-        const badge = badges?.[id] ?? 0;
+        const badge = id === "admin" ? 0 : (badges?.[id] ?? 0);
         return (
           <Link
             key={id}

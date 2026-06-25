@@ -79,18 +79,23 @@ export function LanguageFeedbackWidget() {
 
   return (
     <>
+      {/* IA cleanup v2 (#11): reduced from an always-on wide pill that
+          followed every page and covered content, to a small, low-profile
+          icon-only report action. The label now lives in the tooltip /
+          aria-label only, and it sits at lower opacity until hovered so it
+          never competes with page content. The full report flow is unchanged. */}
       <button
         type="button"
         onClick={() => {
           recordEvent("language_feedback_opened");
           setOpen(true);
         }}
-        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-2 max-w-[calc(100vw-1.5rem)] rounded-full border border-brand-blue/40 bg-ink-800/90 p-3 font-mono text-[10px] uppercase tracking-label text-text-secondary shadow-lg backdrop-blur hover:border-brand-blue hover:text-text-primary sm:px-4 sm:py-2 md:bottom-6"
+        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-40 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-subtle bg-surface-1/70 text-xs text-text-muted opacity-60 shadow-sm backdrop-blur transition hover:border-brand-blue hover:text-text-primary hover:opacity-100 md:bottom-4"
         data-testid="language-feedback-open"
         aria-label={t("openAria")}
+        title={t("openLabel")}
       >
         <span aria-hidden>✎</span>
-        <span className="hidden sm:inline">{t("openLabel")}</span>
       </button>
       {open && (
         <div
