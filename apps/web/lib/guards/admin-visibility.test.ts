@@ -51,6 +51,10 @@ const ADMIN_GATED_FILES = new Set<string>([
   // shortcut ONLY when `isAdmin` (dual signal via deriveIsAdmin) is
   // true; non-admins never see the admin link.
   join(APP_ROOT, "app", "[locale]", "dashboard", "visual-os", "page.tsx"),
+  // Account dropdown renders the /dashboard/admin link ONLY when
+  // `isAdmin && !adminUiHidden` (mobile admins reach admin here since it was
+  // removed from the crowded bottom nav). Non-admins never see it.
+  join(APP_ROOT, "components", "app", "account-menu.tsx"),
 ]);
 
 describe("admin visibility — non-admin UI never renders /dashboard/admin links", () => {

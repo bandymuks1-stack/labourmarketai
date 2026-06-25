@@ -77,6 +77,11 @@ export function LanguageFeedbackWidget() {
     });
   }
 
+  // On the map workspace the floating button would obstruct the map controls /
+  // identity marker, so it is hidden there (the map is map-first). Feedback
+  // stays available on every other page. (Hooks above always run first.)
+  if (pathname.startsWith("/dashboard/market-map")) return null;
+
   return (
     <>
       {/* IA cleanup v2 (#11): reduced from an always-on wide pill that

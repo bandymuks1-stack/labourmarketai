@@ -231,8 +231,15 @@
   "marketMap": {
     "backToActions": "Action center",
     "pageTitle": "Map",
-    "pageLead": "Mark your location and search radius on a real map.",
+    "pageLead": "You and the market on one map: person or company identity and real market signals.",
     "advanced": "Details",
+    "companyContext": {
+      "title": "Company context",
+      "missingLocation": "Company location not added yet",
+      "missingLocationHint": "Add a company location signal so the company appears on the map."
+    },
+    "markerYou": "You",
+    "markerCompany": "Company",
     "title": "My market map",
     "subtitle": "Where you are, where you want to act, and where the demand is — shown only through your own safe, private signals.",
     "ownerScopeNote": "This is your own market-map space — shown only through your own signals, at country / region level. Other users' signals are not shown, and an exact location appears only once you confirm it. A public market layer will be added separately, only with aggregation safeguards.",
@@ -5293,8 +5300,8 @@
     "statusInvalid": "Please complete the worker and need fields."
   },
       "marketMapBase": {
-    "title": "Your location for job search",
-    "subtitle": "We''ll use this location and the selected distance for job search.",
+    "title": "Your place on the market map",
+    "subtitle": "We use this location and radius for your signals on the map.",
     "panelTitle": "Location area",
     "panelEmpty": "No location chosen yet",
     "mapTapHint": "Tap the map to mark your location",
@@ -5320,7 +5327,7 @@
     "selectedTitle": "Selected location",
     "sourceAuto": "Current location",
     "sourceManual": "Set manually",
-    "usableNote": "We''ll use this location and a {km} km radius for job search.",
+    "usableNote": "We''ll use this location and a {km} km radius for your market signals.",
     "savedLocally": "Location saved on this device.",
     "updateButton": "Update location",
     "editButton": "Change location",

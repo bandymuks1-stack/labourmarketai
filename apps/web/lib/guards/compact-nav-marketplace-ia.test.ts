@@ -69,15 +69,23 @@ describe("Admin is a permission-gated nav item, never shown to non-admins", () =
     expect(ADMIN_NAV_ITEM.id).toBe("admin");
   });
 
-  it("both nav surfaces gate the admin item behind isAdmin", () => {
-    for (const rel of [
-      "components/app/dashboard-tabs.tsx",
-      "components/app/bottom-nav.tsx",
-    ]) {
-      const src = read(rel);
-      expect(src, `${rel} imports ADMIN_NAV_ITEM`).toMatch(/ADMIN_NAV_ITEM/);
-      expect(src, `${rel} reads isAdmin`).toMatch(/isAdmin/);
-    }
+  it("desktop tabs gate the admin item behind isAdmin", () => {
+    const src = read("components/app/dashboard-tabs.tsx");
+    expect(src, "dashboard-tabs imports ADMIN_NAV_ITEM").toMatch(/ADMIN_NAV_ITEM/);
+    expect(src, "dashboard-tabs reads isAdmin").toMatch(/isAdmin/);
+  });
+
+  it("admin stays reachable for admins via the account dropdown", () => {
+    const menu = read("components/app/account-menu.tsx");
+    expect(menu).toMatch(/isAdmin/);
+    expect(menu).toMatch(/\/dashboard\/admin/);
+  });
+
+  it("the mobile bottom nav stays the focused core (NO admin tab crowding it)", () => {
+    const src = read("components/app/bottom-nav.tsx");
+    expect(src, "bottom-nav must not append the admin item").not.toMatch(
+      /ADMIN_NAV_ITEM/,
+    );
   });
 });
 

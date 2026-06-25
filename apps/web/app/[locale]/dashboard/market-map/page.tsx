@@ -19,6 +19,7 @@ import {
 } from "@/lib/market-map/owner-readiness";
 import { FeatureNote } from "@/components/app/feature-note";
 import { getOwnAvatar } from "@/lib/profile/avatar";
+import { getOwnCompany } from "@/lib/company/company-setup";
 
 /**
  * Live market map — FOUNDATION route (v1). Authenticated (under /dashboard,
@@ -51,9 +52,24 @@ export default async function MarketMapPage({
       listOwnDemandLocations(),
       getOwnAvailability(),
       getOwnCapabilities(),
-      supabase.from("profiles").select("full_name, email").eq("id", user.id).single(),
+      supabase
+        .from("profiles")
+        .select("full_name, email, active_role")
+        .eq("id", user.id)
+        .single(),
       getOwnAvatar(),
     ]);
+  // Active identity context (map-first marker correction): personal vs company.
+  // In company context the marker must show the COMPANY, never the personal
+  // username. Company location has no confirmed-coordinate data model yet, so
+  // company context renders an honest "location not added" note + NO marker.
+  const activeRole = profileRes.data?.active_role ?? null;
+  const isCompanyContext = activeRole === "company" || activeRole === "agency";
+  const companyRead = isCompanyContext ? await getOwnCompany() : null;
+  const companyRow =
+    companyRead && companyRead.kind === "ok" ? companyRead.row : null;
+  const companyName =
+    companyRow?.displayName?.trim() || companyRow?.legalName?.trim() || null;
   // The user's OWN identity for the premium map marker (real data only). Name
   // falls back to the email local-part; initial is the first letter. Never any
   // other user's identity, never a fake signal.
@@ -61,13 +77,22 @@ export default async function MarketMapPage({
     profileRes.data?.full_name?.trim() ||
     (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "") ||
     (user.email ? user.email.split("@")[0] : "");
-  const mapIdentity = ownName
-    ? {
-        name: ownName,
-        initial: ownName.slice(0, 1).toUpperCase(),
-        avatarUrl: avatar.signedUrl,
-      }
-    : undefined;
+  // PERSONAL context → person marker (real own name + avatar). COMPANY context →
+  // no person marker (suppressed); the company has no confirmed location signal
+  // yet, so we show an honest note instead of a fake company point.
+  const mapIdentity =
+    !isCompanyContext && ownName
+      ? {
+          kind: "person" as const,
+          name: ownName,
+          initial: ownName.slice(0, 1).toUpperCase(),
+          avatarUrl: avatar.signedUrl,
+          statusLabel: tMap("markerYou"),
+        }
+      : undefined;
+  // Company context currently never has a confirmed location → suppress any
+  // own-marker so the personal location is never shown as the company.
+  const suppressOwnMarker = isCompanyContext;
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1" data-testid="market-map-page-header">
@@ -78,14 +103,39 @@ export default async function MarketMapPage({
           {tMap("pageLead")}
         </p>
       </header>
+      {/* Company context (active company identity). No confirmed company
+          location signal exists yet → honest "location not added" state, never
+          a fake company marker and never the personal username. */}
+      {isCompanyContext && (
+        <section
+          className="card-border flex flex-col gap-1 p-3"
+          data-testid="market-map-company-context"
+        >
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {tMap("companyContext.title")}
+          </span>
+          {companyName && (
+            <span className="text-sm font-semibold text-text-primary">
+              {companyName}
+            </span>
+          )}
+          <span className="text-sm text-text-secondary">
+            {tMap("companyContext.missingLocation")}
+          </span>
+          <span className="text-xs leading-relaxed text-text-muted">
+            {tMap("companyContext.missingLocationHint")}
+          </span>
+        </section>
+      )}
+      {/* CANONICAL map FIRST — the provider-free location coordinate map. Map is
+          the dominant element (tall on mobile); the honest feature note is moved
+          BELOW the map so intro text never pushes the map down the screen.
+          Marker respects the active identity (person marker in personal context;
+          suppressed in company context until a real company location exists). */}
+      <MarketMapBase identity={mapIdentity} suppressOwnMarker={suppressOwnMarker} />
       <FeatureNote testId="feature-note-market-map">
         {tNote("marketplaceMap")}
       </FeatureNote>
-      {/* CANONICAL map FIRST — the provider-free location coordinate map
-          (coordinate-map v1: real coordinates + search radius, no tile/street
-          layer, no external provider). This is the primary surface of the page;
-          everything below is secondary and must not lead the flow. */}
-      <MarketMapBase identity={mapIdentity} />
       {/* Layers legend (map-first product direction): honestly states which
           market layers are REAL/visible today vs which are preparing (disabled
           chips) — companies, teams, opportunities, work needs, services,
