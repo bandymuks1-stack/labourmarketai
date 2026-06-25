@@ -12,6 +12,8 @@ import { getOwnCompany } from "@/lib/company/company-setup";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { WorkCard } from "@/components/app/work-card";
 import { getWorkerCard } from "@/lib/worker/work-card";
+import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import {
@@ -266,6 +268,13 @@ export default async function DashboardOverviewPage({
     evidenceCount: entriesCount,
   });
 
+  // Booking next-action: surface ONLY when there is a REAL pending incoming
+  // booking count (> 0). 0 on any missing-data state → no card, no fake badge.
+  // Bookings are not a primary nav item; their home is Žinutės (this card just
+  // links there / to the bookings detail).
+  const tBookings = await getTranslations("bookings");
+  const pendingBookings = await getPendingIncomingBookingCount();
+
   return (
     <div className="flex flex-col gap-6">
       {/* Space identity + the calm doorway to other spaces (My spaces). */}
@@ -289,6 +298,25 @@ export default async function DashboardOverviewPage({
           when data is stale, and the secondary/collapsed editor. */}
       <WorkCard data={cardData} />
       <WorkerInvitationsCard />
+
+      {/* Real booking next-action — only when there are pending incoming
+          proposals (> 0). Not a generic nav tile; a true action-needed card
+          that links to the bookings detail (home = Žinutės). No fake count. */}
+      {pendingBookings > 0 && (
+        <Link
+          href={"/dashboard/bookings" as "/dashboard"}
+          data-testid="dashboard-bookings-next-action"
+          className="flex items-center justify-between gap-3 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-4 py-3 text-sm text-text-primary hover:border-brand-blue"
+        >
+          <span className="flex flex-col">
+            <span className="font-semibold">{tBookings("pendingLink")}</span>
+            <span className="text-xs text-text-muted">{tBookings("pendingNote")}</span>
+          </span>
+          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white">
+            {pendingBookings}
+          </span>
+        </Link>
+      )}
 
       {/* First-use guidance appears ONLY while the person is still starting
           (no profession or no entries yet) — a gentle path, not a permanent

@@ -7,6 +7,7 @@ import { AttentionInstructions } from "@/components/app/attention-instructions";
 import { FeatureNote } from "@/components/app/feature-note";
 import { createClient } from "@/lib/supabase/server";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
+import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
 /**
  * Communication v1 — thread list page.
@@ -71,6 +72,12 @@ export default async function CommunicationListPage({
     participants.map((p) => [p.conversation_id, p.last_read_at]),
   );
 
+  // Bookings / reservation requests are conversation/request objects → their
+  // home is here under Žinutės. Surface them ONLY when there is a real pending
+  // incoming count (> 0); 0 on any missing-data state, so no fake badge.
+  const tBookings = await getTranslations("bookings");
+  const pendingBookings = await getPendingIncomingBookingCount();
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -91,6 +98,24 @@ export default async function CommunicationListPage({
           urgent instruction is not hidden on a separate page. Renders nothing
           when there is nothing to attend to (honest, no fake urgency). */}
       <AttentionInstructions />
+
+      {/* Booking proposals live here (request/communication objects). Shown only
+          when there is a REAL pending incoming count — never a fake badge. */}
+      {pendingBookings > 0 && (
+        <Link
+          href={"/dashboard/bookings" as "/dashboard"}
+          data-testid="communication-bookings-link"
+          className="flex items-center justify-between gap-3 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-2 text-sm text-text-primary hover:border-brand-blue"
+        >
+          <span className="flex flex-col">
+            <span className="font-medium">{tBookings("pendingLink")}</span>
+            <span className="text-[11px] text-text-muted">{tBookings("pendingNote")}</span>
+          </span>
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-[11px] font-bold text-white">
+            {pendingBookings}
+          </span>
+        </Link>
+      )}
 
       {/* Honest framing — messages are poll-on-page, not real-time. Calm muted
           note (not an alert), so it reads as reassurance, not a warning. */}

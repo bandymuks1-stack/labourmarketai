@@ -4856,6 +4856,8 @@
   "bookings": {
     "eyebrow": "REZERVACIJOS",
     "title": "Rezervacijos",
+    "pendingLink": "Rezervacijų pasiūlymai",
+    "pendingNote": "Laukia jūsų atsakymo",
     "intro": "Pasiūlytos darbo galimybės. Rezervacija patvirtinama tik darbuotojui sutikus.",
     "notAuthed": "Prisijunk, kad matytum savo rezervacijas.",
     "unavailable": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",

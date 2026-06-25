@@ -182,3 +182,16 @@ export async function listMyBookings(): Promise<BookingsListResult> {
   }
   return { kind: "ok", incoming, outgoing };
 }
+
+/**
+ * Real count of INCOMING booking proposals awaiting the worker's response
+ * (status = 'proposed'). Used to surface bookings honestly under Žinutės and as
+ * a dashboard next-action — ONLY when the count is real and > 0. Returns 0 on
+ * any non-ok state (needs-migration / not-authed / no rows) so a missing data
+ * model never produces a fake badge. Read-only; no schema/RLS change.
+ */
+export async function getPendingIncomingBookingCount(): Promise<number> {
+  const result = await listMyBookings();
+  if (result.kind !== "ok") return 0;
+  return result.incoming.filter((b) => b.status === "proposed").length;
+}
