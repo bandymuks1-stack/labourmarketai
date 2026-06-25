@@ -1,32 +1,60 @@
 import { Layers } from "lucide-react";
 
 /**
- * MapLayersLegend — the map's "what is visible now / future layers" panel
- * (map-first product direction). The map is becoming the central visual market
- * layer; this legend honestly states which layers are REAL and visible today
- * versus which are PREPARING — shown as disabled chips, never as fake markers
- * or fake data.
+ * MapLayersLegend — the ONE unified market-map layers panel.
  *
- * Presentational only: all strings arrive already-localized. The "visible now"
- * group lists genuinely live signals (today: the user's own location signal,
- * rendered by MarketMapBase). The "future" group is disabled filter chips.
+ * The map is a single shared market surface; the active identity only changes
+ * which layers are focused/highlighted, never whether a separate map exists.
+ * This panel lists the REAL "visible now" layers WITH their state —
+ *   - active     : a real signal is on the map (e.g. my person signal),
+ *   - incomplete : the layer exists in context but has no location yet (e.g. a
+ *                  selected company with no confirmed location — honest, never a
+ *                  fake company point),
+ *   - off-map    : real data exists but carries no coordinates yet (e.g. own
+ *                  needs/demands) so it lives in this panel, "not on map yet" —
+ * and the disabled "future layers" (preparing, never fake markers).
+ *
+ * Presentational only: all strings arrive already-localized. No coordinates,
+ * no fake markers, no fake data.
  */
+export type MapLayerState = "active" | "incomplete" | "off-map";
+
+export type MapVisibleRow = {
+  /** Already-localized label. */
+  label: string;
+  state: MapLayerState;
+  /** Optional already-localized one-line state caption. */
+  hint?: string | null;
+};
+
 export type MapLayersLabels = {
   title: string;
   intro: string;
   visibleNow: string;
   futureLayers: string;
   futureBadge: string;
-  /** Real, live layers (enabled). */
-  visibleItems: string[];
+  /** Real visible-now layers with state (active / incomplete / off-map). */
+  visibleRows: MapVisibleRow[];
   /** Preparing layers (disabled chips). */
   futureItems: string[];
+};
+
+const STATE_DOT: Record<MapLayerState, string> = {
+  active: "bg-state-live",
+  incomplete: "bg-state-warning",
+  "off-map": "bg-text-muted",
+};
+
+const STATE_RING: Record<MapLayerState, string> = {
+  active: "border-state-success/40 bg-state-success/5",
+  incomplete: "border-state-warning/40 bg-state-warning/5",
+  "off-map": "border-ink-500 bg-ink-800/40",
 };
 
 export function MapLayersLegend({ labels }: { labels: MapLayersLabels }) {
   return (
     <section
-      className="card-border flex flex-col gap-3 p-4"
+      className="flex flex-col gap-3"
       data-testid="map-layers-legend"
       aria-label={labels.title}
     >
@@ -37,16 +65,27 @@ export function MapLayersLegend({ labels }: { labels: MapLayersLabels }) {
       <p className="text-xs leading-relaxed text-text-secondary">{labels.intro}</p>
 
       <div className="flex flex-col gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
-          ● {labels.visibleNow}
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {labels.visibleNow}
         </span>
-        <ul className="flex flex-wrap gap-1.5" data-testid="map-layers-visible">
-          {labels.visibleItems.map((item) => (
+        <ul className="flex flex-col gap-1.5" data-testid="map-layers-visible">
+          {labels.visibleRows.map((row) => (
             <li
-              key={item}
-              className="rounded-full border border-state-success/40 bg-state-success/5 px-2.5 py-1 text-[11px] text-text-primary"
+              key={row.label}
+              className={`flex items-start gap-2 rounded-md border px-3 py-2 ${STATE_RING[row.state]}`}
             >
-              {item}
+              <span
+                aria-hidden
+                className={`mt-1 h-2 w-2 shrink-0 rounded-full ${STATE_DOT[row.state]}`}
+              />
+              <span className="min-w-0">
+                <span className="block text-sm text-text-primary">{row.label}</span>
+                {row.hint && (
+                  <span className="block text-[11px] leading-relaxed text-text-muted">
+                    {row.hint}
+                  </span>
+                )}
+              </span>
             </li>
           ))}
         </ul>

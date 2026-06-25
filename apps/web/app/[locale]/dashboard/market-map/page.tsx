@@ -59,10 +59,12 @@ export default async function MarketMapPage({
         .single(),
       getOwnAvatar(),
     ]);
-  // Active identity context (map-first marker correction): personal vs company.
-  // In company context the marker must show the COMPANY, never the personal
-  // username. Company location has no confirmed-coordinate data model yet, so
-  // company context renders an honest "location not added" note + NO marker.
+  // ONE unified market map. The active identity only changes which LAYER is
+  // focused — never whether a separate map exists. The personal "my person
+  // signal" marker stays visible whenever the user has a real location; the
+  // company is an additional layer/panel on the SAME map (incomplete when it
+  // has no confirmed location — never a fake company point, never the personal
+  // marker relabelled as the company).
   const activeRole = profileRes.data?.active_role ?? null;
   const isCompanyContext = activeRole === "company" || activeRole === "agency";
   const companyRead = isCompanyContext ? await getOwnCompany() : null;
@@ -70,29 +72,49 @@ export default async function MarketMapPage({
     companyRead && companyRead.kind === "ok" ? companyRead.row : null;
   const companyName =
     companyRow?.displayName?.trim() || companyRow?.legalName?.trim() || null;
-  // The user's OWN identity for the premium map marker (real data only). Name
-  // falls back to the email local-part; initial is the first letter. Never any
-  // other user's identity, never a fake signal.
+  // The user's OWN person identity for the player-card marker (real data only).
+  // ALWAYS built — the personal layer is never suppressed by company context.
   const ownName =
     profileRes.data?.full_name?.trim() ||
     (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "") ||
     (user.email ? user.email.split("@")[0] : "");
-  // PERSONAL context → person marker (real own name + avatar). COMPANY context →
-  // no person marker (suppressed); the company has no confirmed location signal
-  // yet, so we show an honest note instead of a fake company point.
-  const mapIdentity =
-    !isCompanyContext && ownName
-      ? {
-          kind: "person" as const,
-          name: ownName,
-          initial: ownName.slice(0, 1).toUpperCase(),
-          avatarUrl: avatar.signedUrl,
-          statusLabel: tMap("markerYou"),
-        }
-      : undefined;
-  // Company context currently never has a confirmed location → suppress any
-  // own-marker so the personal location is never shown as the company.
-  const suppressOwnMarker = isCompanyContext;
+  const mapIdentity = ownName
+    ? {
+        kind: "person" as const,
+        name: ownName,
+        initial: ownName.slice(0, 1).toUpperCase(),
+        avatarUrl: avatar.signedUrl,
+        statusLabel: tMap("markerYou"),
+      }
+    : undefined;
+  // Own needs/demands carry NO coordinates (capture stores country/region only),
+  // so they are an honest "not on map yet" panel row, never fake points.
+  const needsCount = Array.isArray(demand) ? demand.length : 0;
+  // Unified visible-now layer rows (real state only — no fake markers).
+  const visibleRows: {
+    label: string;
+    state: "active" | "incomplete" | "off-map";
+    hint?: string;
+  }[] = [
+    {
+      label: `${tLayers("personSignal")}${ownName ? `: ${ownName}` : ""}`,
+      state: "active",
+    },
+  ];
+  if (isCompanyContext) {
+    visibleRows.push({
+      label: `${tLayers("companyLayer")}${companyName ? `: ${companyName}` : ""}`,
+      state: "incomplete",
+      hint: tLayers("companyIncomplete"),
+    });
+  }
+  if (needsCount > 0) {
+    visibleRows.push({
+      label: `${tLayers("needsLayer")} (${needsCount})`,
+      state: "off-map",
+      hint: tLayers("notOnMapYet"),
+    });
+  }
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1" data-testid="market-map-page-header">
@@ -103,43 +125,15 @@ export default async function MarketMapPage({
           {tMap("pageLead")}
         </p>
       </header>
-      {/* Company context (active company identity). No confirmed company
-          location signal exists yet → honest "location not added" state, never
-          a fake company marker and never the personal username. */}
-      {isCompanyContext && (
-        <section
-          className="card-border flex flex-col gap-1 p-3"
-          data-testid="market-map-company-context"
-        >
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {tMap("companyContext.title")}
-          </span>
-          {companyName && (
-            <span className="text-sm font-semibold text-text-primary">
-              {companyName}
-            </span>
-          )}
-          <span className="text-sm text-text-secondary">
-            {tMap("companyContext.missingLocation")}
-          </span>
-          <span className="text-xs leading-relaxed text-text-muted">
-            {tMap("companyContext.missingLocationHint")}
-          </span>
-        </section>
-      )}
-      {/* CANONICAL map FIRST — the provider-free location coordinate map. Map is
-          the dominant element (tall on mobile); the honest feature note is moved
-          BELOW the map so intro text never pushes the map down the screen.
-          Marker respects the active identity (person marker in personal context;
-          suppressed in company context until a real company location exists). */}
-      <MarketMapBase identity={mapIdentity} suppressOwnMarker={suppressOwnMarker} />
-      <FeatureNote testId="feature-note-market-map">
-        {tNote("marketplaceMap")}
-      </FeatureNote>
-      {/* Layers legend (map-first product direction): honestly states which
-          market layers are REAL/visible today vs which are preparing (disabled
-          chips) — companies, teams, opportunities, work needs, services,
-          rentals, shops/offers, availability, trust. No fake markers/data. */}
+      {/* ONE unified map — the dominant, app-like surface (tall on mobile). The
+          personal player-card marker is ALWAYS shown when a real location
+          exists; the active context only changes the focused layer/panel below,
+          never whether a separate map exists. */}
+      <MarketMapBase identity={mapIdentity} />
+      {/* Unified layers panel — the real visible-now layers WITH state on the
+          SAME map: my person signal (active), the selected company (incomplete
+          when it has no confirmed location), own needs (off-map until
+          coordinates exist) + disabled future layers. No fake markers/data. */}
       <MapLayersLegend
         labels={{
           title: tLayers("title"),
@@ -147,8 +141,9 @@ export default async function MarketMapPage({
           visibleNow: tLayers("visibleNow"),
           futureLayers: tLayers("futureLayers"),
           futureBadge: tLayers("futureBadge"),
-          visibleItems: [tLayers("items.selfSignal")],
+          visibleRows,
           futureItems: [
+            tLayers("items.workers"),
             tLayers("items.companies"),
             tLayers("items.teams"),
             tLayers("items.opportunities"),
@@ -161,11 +156,9 @@ export default async function MarketMapPage({
           ],
         }}
       />
-      {/* Compact control center: the real map + its controls are the ONE
-          primary surface. Every secondary surface (signal board, owner
-          readiness, capture forms, conceptual world overview) is collapsed
-          behind "Išsamiau" so entering the page reads as one clear room, not a
-          warehouse of panels. Nothing is removed — only progressively disclosed. */}
+      {/* App-like: detailed explanatory layout + capture tools are collapsed so
+          the single map dominates the screen. Nothing removed — progressively
+          disclosed. */}
       <details className="group flex flex-col gap-4" data-testid="market-map-advanced">
         <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">
           <span className="font-mono text-[10px] uppercase tracking-label text-text-muted group-open:hidden">+</span>
@@ -173,6 +166,9 @@ export default async function MarketMapPage({
           {tMap("advanced")}
         </summary>
         <div className="mt-4 flex flex-col gap-4">
+          <FeatureNote testId="feature-note-market-map">
+            {tNote("marketplaceMap")}
+          </FeatureNote>
           <MarketMapShell />
           <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
           <MarketMapCapture preferred={preferred} login={login} demand={demand} />
