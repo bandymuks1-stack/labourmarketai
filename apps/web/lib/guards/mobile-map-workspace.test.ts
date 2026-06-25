@@ -38,30 +38,47 @@ describe("map page is map-first on mobile", () => {
   });
 });
 
-describe("active-identity marker logic (personal vs company)", () => {
+describe("ONE unified map — personal & company are layers, not separate maps", () => {
   const page = read(PAGE);
   const live = read(LIVE);
 
-  it("personal context builds a person marker with a real status pill", () => {
+  it("personal player-card marker is built from real own-user data, ALWAYS", () => {
     expect(page).toMatch(/kind:\s*"person"/);
     expect(page).toMatch(/markerYou/);
-    // person marker uses the user's own name + avatar (real data)
     expect(page).toMatch(/avatarUrl:\s*avatar\.signedUrl/);
+    // the personal identity is NOT gated by company context (unified map)
+    expect(page).not.toMatch(/!isCompanyContext\s*&&\s*ownName/);
   });
 
-  it("company context suppresses the own-marker (never reuses personal identity)", () => {
+  it("company context does NOT suppress the personal layer (no separate map)", () => {
+    // the page must not flip a per-context suppress flag; the personal marker
+    // stays visible regardless of active context.
+    expect(page).not.toMatch(/suppressOwnMarker\s*=\s*isCompanyContext/);
+    expect(page).not.toMatch(/suppressOwnMarker=\{suppressOwnMarker\}/);
+    // and there is no separate company empty-state section anymore
+    expect(page).not.toMatch(/market-map-company-context/);
+  });
+
+  it("company is a LAYER row (incomplete when it has no location), not a fake marker", () => {
     expect(page).toMatch(/isCompanyContext/);
-    expect(page).toMatch(/suppressOwnMarker\s*=\s*isCompanyContext/);
-    // the live marker honours the suppress flag (draws nothing)
-    expect(live).toMatch(/if\s*\(suppressOwnMarker\)\s*return/);
+    expect(page).toMatch(/companyLayer/);
+    expect(page).toMatch(/state:\s*"incomplete"/);
+    expect(page).toMatch(/companyIncomplete/);
+    // the real company name labels the layer — never the personal username
+    expect(page).toMatch(/companyName/);
   });
 
-  it("missing company location renders an HONEST state, not a fake marker", () => {
-    expect(page).toMatch(/market-map-company-context/);
-    expect(page).toMatch(/companyContext\.missingLocation/);
-    // the company name shown is the real company display/legal name, never the
-    // personal username
-    expect(page).toMatch(/companyName/);
+  it("own needs with no coordinates are an off-map layer row (not fake points)", () => {
+    expect(page).toMatch(/needsLayer/);
+    expect(page).toMatch(/state:\s*"off-map"/);
+    expect(page).toMatch(/notOnMapYet/);
+  });
+
+  it("there is ONE map engine on the page + the marketplace route redirects to it", () => {
+    expect((page.match(/<MarketMapBase\b/g) ?? []).length).toBe(1);
+    const mk = read("app/[locale]/dashboard/marketplace/page.tsx");
+    expect(mk).toMatch(/redirect\(/);
+    expect(mk).toMatch(/\/dashboard\/market-map/);
   });
 
   it("marker pin distinguishes person vs company (kind drives the shape)", () => {

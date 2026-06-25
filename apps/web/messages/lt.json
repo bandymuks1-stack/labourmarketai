@@ -20,7 +20,13 @@
     "visibleNow": "Matoma dabar",
     "futureLayers": "Būsimi sluoksniai",
     "futureBadge": "Ruošiama",
+    "personSignal": "Mano žmogaus signalas",
+    "companyLayer": "Įmonės sluoksnis",
+    "companyIncomplete": "vieta dar nepridėta",
+    "needsLayer": "Mano poreikiai",
+    "notOnMapYet": "dar ne žemėlapyje",
     "items": {
+      "workers": "Darbuotojai",
       "selfSignal": "Tavo vietos signalas",
       "companies": "Įmonės",
       "teams": "Komandos / brigados",

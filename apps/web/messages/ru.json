@@ -20,7 +20,13 @@
     "visibleNow": "Видно сейчас",
     "futureLayers": "Будущие слои",
     "futureBadge": "Готовится",
+    "personSignal": "Мой личный сигнал",
+    "companyLayer": "Слой компании",
+    "companyIncomplete": "местоположение ещё не добавлено",
+    "needsLayer": "Мои потребности",
+    "notOnMapYet": "ещё не на карте",
     "items": {
+      "workers": "Работники",
       "selfSignal": "Сигнал вашего местоположения",
       "companies": "Компании",
       "teams": "Команды / бригады",
