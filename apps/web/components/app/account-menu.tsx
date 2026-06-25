@@ -12,6 +12,7 @@ import {
   CalendarCheck,
   User,
   LogOut,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,7 +32,7 @@ import {
 export function AccountMenu() {
   const t = useTranslations("auth.dashboard");
   const locale = useLocale();
-  const { user, profile, activeRole } = useAuth();
+  const { user, profile, activeRole, isAdmin, adminUiHidden } = useAuth();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +58,11 @@ export function AccountMenu() {
     // proposals; manager tracks the ones they sent. Without this link a worker
     // had no way to find a booking proposed to them.
     { href: "/dashboard/bookings", label: t("menuLinks.bookings"), icon: CalendarCheck, testid: "account-menu-bookings-link" },
+    // Admin — reachable here for admins (kept OFF the mobile bottom nav to avoid
+    // crowding it). Gated by the same isAdmin signal as the desktop tab.
+    ...(isAdmin && !adminUiHidden
+      ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]
+      : []),
   ];
 
   useEffect(() => {

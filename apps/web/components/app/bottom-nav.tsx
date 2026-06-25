@@ -14,12 +14,10 @@ import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import {
-  ADMIN_NAV_ITEM,
   VISIBLE_PRIMARY_NAV_ITEMS,
   type NavIconKey,
 } from "@/lib/config/navigation";
 import type { FeatureKey } from "@/lib/config/feature-availability";
-import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
 
 // Tabs are sourced from `lib/config/navigation.ts`, which itself derives
@@ -52,11 +50,10 @@ export function BottomNav({
 }) {
   const t = useTranslations();
   const pathname = usePathname();
-  const { isAdmin, adminUiHidden } = useAuth();
-  const items =
-    isAdmin && !adminUiHidden
-      ? [...VISIBLE_PRIMARY_NAV_ITEMS, ADMIN_NAV_ITEM]
-      : VISIBLE_PRIMARY_NAV_ITEMS;
+  // Mobile bottom nav stays the focused core: Mano erdvė / Žemėlapis / Žinutės /
+  // Nustatymai — no Admin tab here (it crowds the small bar). Admin remains
+  // reachable for admins via the header account dropdown + the desktop tabs.
+  const items = VISIBLE_PRIMARY_NAV_ITEMS;
 
   return (
     <nav

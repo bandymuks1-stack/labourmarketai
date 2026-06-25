@@ -50,16 +50,26 @@ const PRECISION_KEY: Record<LocationPrecision, string> = {
  * "provider not configured" message. The choice persists on this device
  * (localStorage) and is one-tap updatable/removable. No DB, no env key.
  */
-/** The current user's OWN identity for the map marker (real data only — name,
- *  initial, optional avatar). When present, the map renders a premium identity
- *  pin at the user's chosen location instead of a plain dot. */
+/** The active identity for the map marker (real data only). `kind` keeps the
+ *  marker honest to the active context — a company context never reuses the
+ *  personal identity. When present, the map renders a premium identity pin at
+ *  the chosen location instead of a plain dot. */
 export type MapIdentity = {
+  kind: "person" | "company";
   name: string;
   initial: string;
   avatarUrl: string | null;
+  statusLabel?: string | null;
 };
 
-export function MarketMapBase({ identity }: { identity?: MapIdentity }) {
+export function MarketMapBase({
+  identity,
+  suppressOwnMarker,
+}: {
+  identity?: MapIdentity;
+  /** Draw no own-marker / radius (company context with no confirmed location). */
+  suppressOwnMarker?: boolean;
+}) {
   const t = useTranslations("marketMapBase");
   const tc = useTranslations("labourMarket");
 
@@ -228,6 +238,7 @@ export function MarketMapBase({ identity }: { identity?: MapIdentity }) {
           onPick={pickFromMap}
           ariaLabel={t("panelTitle")}
           identity={identity}
+          suppressOwnMarker={suppressOwnMarker}
         />
         <p className="text-center text-[11px] text-text-muted" data-testid="location-map-tap-hint">
           {t("mapTapHint")}
