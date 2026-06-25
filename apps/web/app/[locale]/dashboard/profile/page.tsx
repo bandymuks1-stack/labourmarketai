@@ -30,6 +30,9 @@ import { DOCUMENTS_READINESS_ENABLED } from "@/lib/config/documents";
 import { createClient } from "@/lib/supabase/server";
 import { TrustBlock } from "@/components/app/trust-block";
 import { getOwnTrustSignals } from "@/lib/profile/trust-signals";
+import { PageQuickNav } from "@/components/app/page-quick-nav";
+import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
+import { Building2 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
@@ -63,6 +66,8 @@ export default async function ProfilePage({
   const tCv = await getTranslations("cvExport");
   const tDocs = await getTranslations("documents");
   const tOpp = await getTranslations("opportunities");
+  const tQuick = await getTranslations("quickNav");
+  const tHub = await getTranslations("marketplaceHub");
 
   const supabase = await createClient();
   const {
@@ -102,6 +107,15 @@ export default async function ProfilePage({
   const personName =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
   const avatar = await getOwnAvatar();
+  // Managed companies (IA cleanup v2 #4): the profile is the person identity
+  // surface, so it shows the REAL companies this person owns/manages (account-
+  // linked professional identities) with a name + add action. No fake
+  // companies — an empty list simply renders the add CTA.
+  const ownedOrgsResult = await getOwnedOrganizations();
+  const managedCompanies =
+    ownedOrgsResult.kind === "ok"
+      ? ownedOrgsResult.organizations.filter((o) => o.organizationType !== "agency")
+      : [];
   const activeRole = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : null;
@@ -314,7 +328,7 @@ export default async function ProfilePage({
 
   return (
     <div className="flex flex-col gap-8">
-      <header>
+      <header id="profile-top" className="scroll-mt-20">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("pageTitle")}
@@ -366,8 +380,80 @@ export default async function ProfilePage({
         </p>
       </header>
 
-      <section className="card-border flex flex-col gap-3 p-5" data-testid="profile-avatar-section">
+      {/* Page-local quick nav (IA cleanup v2 #3) — anchors relevant to the
+          person identity surface so a long profile never loses the user. */}
+      <PageQuickNav
+        ariaLabel={tQuick("ariaLabel")}
+        items={[
+          { href: "#profile-top", label: tQuick("top") },
+          { href: "#profile-identity", label: tQuick("identity") },
+          { href: "#managed-companies", label: tQuick("companies") },
+          { href: "#profile-edit", label: tQuick("skills") },
+        ]}
+      />
+
+      <section
+        id="profile-identity"
+        className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
+        data-testid="profile-avatar-section"
+      >
         <ProfileAvatar signedUrl={avatar.signedUrl} displayName={personName} />
+      </section>
+
+      {/* Managed companies + individual activity (IA cleanup v2 #4): the person
+          identity carries the account-linked company identities (real owned
+          organizations, by name) and the add-company action. Self-employed /
+          individual activity is the person acting WITHOUT a company — framed
+          here, not as a separate top-level menu item. No fake companies. */}
+      <section
+        id="managed-companies"
+        className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
+        data-testid="profile-managed-companies"
+      >
+        <div className="flex items-center gap-2 text-text-primary">
+          <Building2 className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+          <h2 className="font-display text-lg font-semibold">
+            {tHub("company.title")}
+          </h2>
+        </div>
+        {managedCompanies.length > 0 ? (
+          <>
+            <ul className="flex flex-col gap-2">
+              {managedCompanies.map((c) => (
+                <li key={c.id}>
+                  <Link
+                    href="/dashboard/company"
+                    className="flex items-center justify-between gap-3 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-primary hover:border-brand-blue hover:text-brand-blue"
+                  >
+                    <span className="truncate font-medium">{c.name}</span>
+                    <span aria-hidden className="shrink-0 text-text-muted">→</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/dashboard/start/company"
+              className="font-mono text-[11px] uppercase tracking-label text-brand-blue hover:underline"
+              data-testid="profile-add-company"
+            >
+              + {tHub("company.noCompanyCta")}
+            </Link>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-text-secondary">{tHub("company.noCompanyDesc")}</p>
+            <Link
+              href="/dashboard/start/company"
+              className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
+              data-testid="profile-add-company"
+            >
+              + {tHub("company.noCompanyCta")}
+            </Link>
+          </>
+        )}
+        <p className="text-xs leading-relaxed text-text-muted">
+          {tHub("individual.desc")}
+        </p>
       </section>
 
       <FeatureNote testId="feature-note-profile">
@@ -481,14 +567,35 @@ export default async function ProfilePage({
           they remain visible regardless of the user's currently-selected
           work category (PLATFORM_DOCTRINE §1: a person is not locked into
           one category). */}
-      <div id="capabilities" className="scroll-mt-4">
-        <CapabilityProfileSection
-          claims={savedSkillClaims}
-          engagements={workerId ? engagementCards : []}
-          workerSkillDots={workerId ? skillDots : []}
-          professionIconSlug={workerId ? professionIconSlug : null}
-        />
-      </div>
+      {/* IA cleanup v2 (#4): the profile leads with person identity (avatar,
+          managed companies, skills text). The detailed capability + work-history
+          surface is collapsed into a disclosure so the profile is no longer a
+          work-history warehouse; the FULL work records live in Mano CV (linked
+          here), not duplicated open on the profile. The canonical
+          CapabilityProfileSection mount + order is preserved. */}
+      <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
+        <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+            {tQuick("capabilities")}
+          </span>
+        </summary>
+        <div className="flex flex-col gap-3 px-4 pb-4">
+          <Link
+            href="/dashboard/journal"
+            className="w-fit font-mono text-[11px] uppercase tracking-label text-brand-blue hover:underline"
+            data-testid="profile-mano-cv-records-link"
+          >
+            {tQuick("fullRecordsInCv")} →
+          </Link>
+          <CapabilityProfileSection
+            claims={savedSkillClaims}
+            engagements={workerId ? engagementCards : []}
+            workerSkillDots={workerId ? skillDots : []}
+            professionIconSlug={workerId ? professionIconSlug : null}
+          />
+        </div>
+      </details>
 
       {/* Candidate skill clarify-capture (slice skill-clarify-capture-v1) — on
           the canonical capability surface, NOT a new route. Worker-only. */}

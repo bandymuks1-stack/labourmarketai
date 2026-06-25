@@ -1,4 +1,19 @@
 {
+  "quickNav": {
+    "ariaLabel": "Quick page navigation",
+    "top": "Top",
+    "identity": "Card",
+    "records": "Records",
+    "skills": "Skills",
+    "offers": "Offers",
+    "companies": "Companies",
+    "calendar": "Calendar",
+    "addEntry": "Add entry",
+    "details": "Personal details",
+    "improve": "What to improve",
+    "capabilities": "Skills & work history",
+    "fullRecordsInCv": "Full work records — Mano CV"
+  },
   "marketplaceHub": {
     "title": "Marketplace",
     "subtitle": "One compact place that connects you, your companies, the map and messages.",

@@ -8,7 +8,6 @@ import { DashboardChainActions } from "@/components/app/dashboard-chain-actions"
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
-import { MyWorkView } from "@/components/app/my-work-view";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { WorkCard } from "@/components/app/work-card";
@@ -271,13 +270,13 @@ export default async function DashboardOverviewPage({
       {/* Space identity + the calm doorway to other spaces (My spaces). */}
       <CurrentSpaceHeader role={role} />
       {/* Active-role focus: the person's own quick actions only — no company
-          create / cockpit clutter on a job-seeker's first screen. */}
+          create / cockpit clutter on a job-seeker's first screen. These compact
+          links ARE the doorway to the sub-surfaces (profile, CV, map, find
+          work). IA cleanup v2 removed the 8-tile My Work View "warehouse" grid
+          that repeated Profile / CV / Skills / Records / Availability / Journal /
+          Work Needs / World Map as separate tiles — the command center now leads
+          with status + one next action, not a wall of doors. */}
       <IdentityActions hasCompany={hasCompany} compact focusRole={role} />
-      {/* My Work View cockpit — the first authenticated workspace: connects
-          profile, CV, skills, evidence, availability, work journal, work needs
-          and the Labour Market World Map into one operational board with next
-          actions (replaces the standalone market-map link). */}
-      <MyWorkView />
 
       {/* "Šiandienos ekranas" — today's ONE action, this week's confirmed work,
           one honest growth path. Real journal-chain data only. */}

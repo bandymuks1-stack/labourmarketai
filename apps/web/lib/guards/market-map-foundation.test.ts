@@ -45,11 +45,13 @@ describe("market map foundation — route + auth", () => {
     expect(page).toMatch(/auth\.getUser\(\)/);
     expect(page).toMatch(/redirect\(`\/\$\{locale\}\/auth\/login`\)/);
   });
-  it("is reachable from the main dashboard (via the My Work View cockpit)", () => {
-    const dash = read("app/[locale]/dashboard/page.tsx");
-    expect(dash).toMatch(/<MyWorkView/);
-    const cockpit = read("lib/dashboard/my-work-view.ts");
-    expect(cockpit).toMatch(/\/dashboard\/market-map/);
+  it("is reachable from the compact Marketplace hub (IA cleanup v2)", () => {
+    // The 8-tile My Work View cockpit was removed from the dashboard (it was the
+    // "warehouse" grid the owner asked to collapse). The map is now reached from
+    // the Marketplace hub, which is itself a primary nav tab — so the surface
+    // stays one compact hop away.
+    const hub = read("app/[locale]/dashboard/marketplace/page.tsx");
+    expect(hub).toMatch(/\/dashboard\/market-map/);
   });
 });
 

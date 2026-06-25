@@ -1,4 +1,19 @@
 {
+  "quickNav": {
+    "ariaLabel": "Greita puslapio navigacija",
+    "top": "Viršus",
+    "identity": "Kortelė",
+    "records": "Įrašai",
+    "skills": "Įgūdžiai",
+    "offers": "Pasiūlymai",
+    "companies": "Įmonės",
+    "calendar": "Kalendorius",
+    "addEntry": "Pridėti įrašą",
+    "details": "Asmens duomenys",
+    "improve": "Ką dar pagerinti",
+    "capabilities": "Įgūdžiai ir darbo istorija",
+    "fullRecordsInCv": "Visi darbo įrašai — Mano CV"
+  },
   "marketplaceHub": {
     "title": "Prekyvietė",
     "subtitle": "Viena kompaktiška vieta, jungianti tave, tavo įmones, žemėlapį ir žinutes.",
