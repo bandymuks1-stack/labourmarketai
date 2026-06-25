@@ -11,8 +11,6 @@ import {
   Building2,
   Plus,
   User,
-  MessageSquare,
-  Map as MapIcon,
   ArrowLeftRight,
   type LucideIcon,
 } from "lucide-react";
@@ -35,12 +33,13 @@ import { type Role } from "@/lib/auth/actions";
  */
 type ActionDef = { key: string; href: string; icon: LucideIcon };
 
+// Dashboard is a command center, NOT a second navigation menu. Map (Žemėlapis)
+// and Messages (Žinutės) are top-nav tabs, so they are NOT duplicated here as
+// generic dashboard tiles (IA cleanup). Only true person next-actions remain.
 const PERSON_ACTIONS: readonly ActionDef[] = [
   { key: "profile", href: "/dashboard/profile", icon: IdCard },
   { key: "findWork", href: "/dashboard/opportunities", icon: Search },
-  { key: "marketMap", href: "/dashboard/market-map", icon: MapIcon },
   { key: "readiness", href: "/dashboard/documents", icon: FileCheck },
-  { key: "communication", href: "/dashboard/communication", icon: MessageSquare },
 ];
 
 // One compact company / commercial channel. The shared layer (map + messages)
@@ -55,12 +54,7 @@ const COMMERCIAL_ACTIONS: readonly ActionDef[] = [
 
 // Active-role focus subsets (overview clarity). Each role sees only its own
 // primary actions on the first screen.
-const FOCUS_PERSON: readonly string[] = [
-  "profile",
-  "findWork",
-  "readiness",
-  "communication",
-];
+const FOCUS_PERSON: readonly string[] = ["profile", "findWork", "readiness"];
 const FOCUS_COMMERCIAL: Record<"company" | "agency" | "customer", readonly string[]> = {
   company: ["need", "hire", "projects"],
   agency: ["offer", "hire"],

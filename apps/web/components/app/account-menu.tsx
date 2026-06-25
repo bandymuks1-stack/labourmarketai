@@ -5,16 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import {
-  Wrench,
-  FolderKanban,
-  ClipboardList,
-  CalendarCheck,
-  User,
-  LogOut,
-  Shield,
-  type LucideIcon,
-} from "lucide-react";
+import { User, LogOut, Shield, type LucideIcon } from "lucide-react";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -32,34 +23,21 @@ import {
 export function AccountMenu() {
   const t = useTranslations("auth.dashboard");
   const locale = useLocale();
-  const { user, profile, activeRole, isAdmin, adminUiHidden } = useAuth();
+  const { user, profile, isAdmin, adminUiHidden } = useAuth();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Secondary reachability for the routes that are NOT primary nav tabs (the
-  // primary nav is intentionally capped at 4 to avoid mobile crowding). Role-
-  // gated: a worker reaches their card + instructions; a manager reaches
-  // projects + instructions. Additive — never replaces the account link/logout.
-  const isManager = activeRole === "company" || activeRole === "agency";
+  // UTILITY-ONLY dropdown (IA cleanup): the name menu carries only account
+  // utilities — Admin (gated) + Account + Logout. Product areas were REMOVED
+  // from here so they are not hidden in the user-name menu:
+  //   - Skills      → lives on the Profile surface (#candidate-skills).
+  //   - Projects    → reachable from the company / project-operations context.
+  //   - Instructions→ reachable from the attention-instructions / ops surfaces.
+  //   - Bookings    → no primary-IA home yet → documented RED (needs-IA), route
+  //                   stays valid (no dead link), just not surfaced here.
+  // (See docs/owner-input/contact-message-demand-cleanup-p0-audit.md §A.)
   const featureLinks: { href: string; label: string; icon: LucideIcon; testid: string }[] = [
-    // Mano kortelė / player-card link removed (marketplace IA cleanup): the
-    // player-card identity now leads the "Mano CV" surface, reachable from its
-    // own primary-nav tab — no separate competing "Mano kortelė" destination.
-    ...(activeRole === "worker"
-      ? [
-          { href: "/dashboard/profile#candidate-skills", label: t("menuLinks.skills"), icon: Wrench, testid: "account-menu-skills-link" },
-        ]
-      : []),
-    ...(isManager
-      ? [{ href: "/dashboard/projects", label: t("menuLinks.projects"), icon: FolderKanban, testid: "account-menu-projects-link" }]
-      : []),
-    { href: "/dashboard/instructions", label: t("menuLinks.instructions"), icon: ClipboardList, testid: "account-menu-instructions-link" },
-    // Bookings (backend live: booking_requests). Worker reaches incoming
-    // proposals; manager tracks the ones they sent. Without this link a worker
-    // had no way to find a booking proposed to them.
-    { href: "/dashboard/bookings", label: t("menuLinks.bookings"), icon: CalendarCheck, testid: "account-menu-bookings-link" },
-    // Admin — reachable here for admins (kept OFF the mobile bottom nav to avoid
-    // crowding it). Gated by the same isAdmin signal as the desktop tab.
+    // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     ...(isAdmin && !adminUiHidden
       ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]
       : []),

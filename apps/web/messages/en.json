@@ -4856,6 +4856,8 @@
   "bookings": {
     "eyebrow": "BOOKINGS",
     "title": "Bookings",
+    "pendingLink": "Booking proposals",
+    "pendingNote": "Awaiting your response",
     "intro": "Proposed engagements. A booking is confirmed only when the worker accepts.",
     "notAuthed": "Please sign in to see your bookings.",
     "unavailable": "Couldn’t complete the action. Please try again.",

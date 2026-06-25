@@ -16,19 +16,21 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 const comp = read("components/app/identity-actions.tsx");
 
 describe("command center exposes the person's complete quick actions", () => {
-  it("person actions include profile, find work, readiness, communication", () => {
+  it("person actions are the true next-actions (profile, find work, readiness)", () => {
     // Player card is no longer a separate person action — it leads the Mano CV
-    // surface (work-records). Person quick actions point at real in-app routes.
+    // surface. Map (Žemėlapis) + Messages (Žinutės) are top-nav tabs, so they
+    // are NOT duplicated here as generic dashboard tiles (IA cleanup).
     for (const route of [
       "/dashboard/profile",
       "/dashboard/opportunities",
       "/dashboard/documents",
-      "/dashboard/communication",
     ]) {
       expect(comp, route).toContain(route);
     }
-    // No competing player-card destination in the quick actions.
+    // No competing player-card destination, and no top-nav duplicates as tiles.
     expect(comp).not.toContain("/dashboard/player-card");
+    expect(comp).not.toContain('href: "/dashboard/communication"');
+    expect(comp).not.toContain('href: "/dashboard/market-map"');
   });
   it("the company / commercial channel groups the commercial actions", () => {
     // One compact channel (not a scatter of peer tiles); the shared layer
