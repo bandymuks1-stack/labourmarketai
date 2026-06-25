@@ -32,13 +32,22 @@ intentional decisions** (cross-identity reachability) or **context-appropriate**
 | **Admin** | `RoleSwitcher` badge + `dashboard-tabs` (desktop) + `account-menu` (mobile) — **not** in bottom nav | 🟢 OK — intentional gated hierarchy, doesn't dominate mobile |
 | **Manage spaces / role switch** | `RoleSwitcher` (header, real in-place switcher) + `IdentityActions` "Manage spaces" (→ account) | 🟡 "Manage spaces" label is misleading (navigates to account; the real switcher is the header `RoleSwitcher`) → **owner-decision** |
 
-**No dead/old routes found** — every link resolves (re-confirmed; consistent with the PR #499 nav audit). No misleading dead tiles.
+**No dead/old routes found** — every link resolves. No misleading dead tiles.
 
-**Why nothing was force-removed:** every flagged duplicate is either (a) pinned
-by a guard encoding a prior deliberate decision (e.g. `identity-manage-spaces`
-for cross-identity reachability), or (b) a context-appropriate second surface.
-Removing a user-reachable exit is a **product decision** — listed here for your
-per-item approval rather than changed unilaterally.
+### Disposition (what changed in this PR)
+
+| Duplicate / hidden exit | Disposition | File / component |
+|---|---|---|
+| Account dropdown **Skills** link (`/dashboard/profile#candidate-skills`) | **REMOVED** from dropdown — skills live on the Profile surface | `components/app/account-menu.tsx` |
+| Account dropdown **Projects** link (`/dashboard/projects`) | **REMOVED** from dropdown — reachable from the company / project-operations context | `components/app/account-menu.tsx` |
+| Account dropdown **Instructions** link (`/dashboard/instructions`) | **REMOVED** from dropdown — reachable from attention-instructions / ops board | `components/app/account-menu.tsx` |
+| Account dropdown **Bookings** link (`/dashboard/bookings`) | **REMOVED** from dropdown → **RED owner-gated**: route stays valid but has no primary-IA home yet (needs IA decision on where to surface incoming booking proposals) | `components/app/account-menu.tsx` |
+| Account dropdown = utility-only (Admin gated + Account + Logout) | **CONSOLIDATED** to the owner's required contents | `components/app/account-menu.tsx`; guard `feature-reachability.test.ts` updated |
+| `feature-reachability` guard (pinned product links IN the dropdown) | **GUARD UPDATED** to the corrected logic (utility-only dropdown; product routes reachable from product context) | `lib/guards/feature-reachability.test.ts` |
+| `IdentityActions` "Manage spaces" link (`identity-manage-spaces`) | **KEPT WITH REASON** — guard-pinned cross-identity reachability (`dashboard-active-role-overview.test.ts:33`); the dashboard also reaches account via `CurrentSpaceHeader`. Flagged for owner decision to remove (would need that guard updated). | — |
+| `IdentityActions` person tiles duplicating top-nav (**Market Map**, **Communication**) | **RED / owner-decision** — these duplicate top-nav as dashboard tiles; whether they are "true next actions" (discovery) vs duplicate exits is a product call. `market-map-nav.test.ts` pins `marketMap` in IdentityActions. Recommend removing Market Map + Communication tiles (keep Profile + Find Work as true next actions) on owner approval. | `components/app/identity-actions.tsx` |
+| Company **create** reachable 3 ways (identity create-CTA, role switcher, profile add) | **KEPT / owner-decision** — context-distinct, each guard-pinned; recommend one canonical "add company". | — |
+| Demand **entry** 2 ways for company/agency (dashboard hero + role-page form) | **KEPT / owner-decision** — recommend one canonical demand entry. | — |
 
 ---
 
@@ -100,14 +109,27 @@ needs show off-map. (Locked by `mobile-map-workspace.test.ts`.)
 
 ## What this PR changes (safe)
 
-- **No risky removals** — all flagged duplicate exits are guard-pinned
-  intentional decisions or context-appropriate; removing a user exit is a
-  product decision listed above for your per-item approval.
+- **Account dropdown is now utility-only** — removed the hidden product links
+  (Skills, Projects, Instructions, Bookings) from the user-name menu; kept
+  **Admin (gated) + Account + Logout** (`components/app/account-menu.tsx`). Skills
+  stays on Profile; Projects + Instructions stay reachable from their product
+  context; **Bookings** has no primary-IA home → documented RED (route valid,
+  not surfaced) — no dead link.
+- **Guard updated** `feature-reachability.test.ts` — rewritten to the corrected
+  logic (dropdown utility-only; product routes reachable from product context),
+  replacing the old assertions that pinned product links inside the dropdown.
 - **New guard** `no-duplicate-top-level-entries.test.ts` (owner priority #5):
   locks the cleanup invariants so duplicate top-level entries can't silently
-  return — the compact primary nav set, the focused mobile bottom nav (core 4,
-  no admin), admin reachable only via gated secondary surfaces, one canonical
-  map + marketplace redirect, and the single intended logout pair.
+  return — compact primary nav, focused mobile bottom nav (core 4, no admin),
+  admin only via gated secondary surfaces, one canonical map + marketplace
+  redirect, single logout pair.
+- **Top nav / bottom nav / account-as-settings / map-primary / profile↔CV /
+  single-Žinutės** (owner points 1,2,5,6,7,8): re-verified already satisfied by
+  PRs #497–#501 — no change needed.
+- **Owner-decision items** (KEPT/RED above): `identity-manage-spaces`, the
+  IdentityActions Market Map + Communication tiles, company-create paths, and
+  demand-entry paths — each needs your approval before removing a guard-pinned
+  path; recommendations recorded in the disposition table.
 
 ## RED — owner-gated gaps (not faked)
 

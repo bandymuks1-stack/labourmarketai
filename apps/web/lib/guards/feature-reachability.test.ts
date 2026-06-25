@@ -3,59 +3,76 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Feature reachability guard (slice feature-reachability-v1).
+ * Feature reachability guard — UTILITY-ONLY account menu (IA cleanup).
  *
- * The routes shipped by F4/F5/F (worker player-card, manager projects, work
- * instructions) are not primary nav tabs (the primary nav is capped at 4 to
- * avoid mobile crowding). They MUST stay reachable via the secondary account
- * menu, role-gated, without disturbing the account link / logout.
+ * Owner decision: the name/account dropdown must carry only account UTILITIES —
+ * Admin (gated) + Account + Logout. Product areas were REMOVED from the dropdown
+ * so they are not hidden in the user-name menu. This guard pins the corrected
+ * logic and confirms the product routes stay reachable from their PRODUCT
+ * context (no dead routes):
+ *   - skills        → the Profile surface (#candidate-skills),
+ *   - projects      → identity-actions / project-operations-board,
+ *   - instructions  → attention-instructions / project-operations-board,
+ *   - bookings      → no primary-IA home yet → documented RED (needs-IA) in
+ *                     docs/owner-input/contact-message-demand-cleanup-p0-audit.md;
+ *                     the route stays valid (no dead link), just not surfaced.
  */
 
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const menu = read("components/app/account-menu.tsx");
-const lt = JSON.parse(read("messages/lt.json"));
-const en = JSON.parse(read("messages/en.json"));
 
-describe("the account menu makes the shipped routes reachable, role-gated", () => {
-  it("no longer carries a competing player-card link (Mano CV is a primary nav tab)", () => {
-    // Marketplace IA: the player-card identity leads the Mano CV surface, which
-    // is a primary nav tab — so the account menu must NOT expose a separate
-    // /dashboard/player-card destination.
-    expect(menu).not.toMatch(/href:\s*"\/dashboard\/player-card"/);
-    expect(menu).toMatch(/activeRole === "worker"/);
+describe("the account dropdown is utility-only (no hidden product exits)", () => {
+  it("does NOT expose product links in the user-name menu", () => {
+    for (const t of [
+      "account-menu-skills-link",
+      "account-menu-projects-link",
+      "account-menu-instructions-link",
+      "account-menu-bookings-link",
+    ]) {
+      expect(menu, `dropdown must not carry ${t}`).not.toMatch(new RegExp(t));
+    }
+    expect(menu).not.toMatch(/href:\s*"\/dashboard\/projects"/);
+    expect(menu).not.toMatch(/href:\s*"\/dashboard\/bookings"/);
+    expect(menu).not.toMatch(/href:\s*"\/dashboard\/instructions"/);
   });
-  it("links to projects (manager only)", () => {
-    expect(menu).toMatch(/href:\s*"\/dashboard\/projects"/);
-    expect(menu).toMatch(/isManager/);
-    expect(menu).toMatch(/testid:\s*"account-menu-projects-link"/);
-  });
-  it("renders each feature link with its data-testid", () => {
-    expect(menu).toMatch(/data-testid=\{l\.testid\}/);
-  });
-  it("links to instructions (both roles)", () => {
-    expect(menu).toMatch(/href:\s*"\/dashboard\/instructions"/);
-  });
-});
 
-describe("reachability is additive — account link + logout untouched", () => {
-  it("still links to /dashboard/account and posts logout", () => {
+  it("no competing player-card link (Mano CV owns that identity)", () => {
+    expect(menu).not.toMatch(/\/dashboard\/player-card/);
+  });
+
+  it("keeps only account utilities: Admin (gated) + Account + Logout", () => {
+    expect(menu).toMatch(/account-menu-admin-link/);
+    expect(menu).toMatch(/isAdmin/);
+    expect(menu).toMatch(/\/dashboard\/admin/);
     expect(menu).toMatch(/href="\/dashboard\/account"/);
     expect(menu).toMatch(/action=\{`\/\$\{locale\}\/auth\/logout`\}/);
   });
 });
 
-describe("menu link labels present in LT + EN (no hardcoded strings)", () => {
-  it("uses t('menuLinks.*')", () => {
-    expect(menu).toMatch(/t\("menuLinks\.projects"\)/);
-    expect(menu).toMatch(/t\("menuLinks\.instructions"\)/);
+describe("product routes stay reachable from their product context (no dead route)", () => {
+  it("projects is reachable from a product surface (identity / ops board)", () => {
+    const identity = read("components/app/identity-actions.tsx");
+    const ops = read("components/app/project-operations-board.tsx");
+    expect(
+      identity.includes("/dashboard/projects") ||
+        ops.includes("/dashboard/projects"),
+      "projects must stay reachable from a product surface",
+    ).toBe(true);
   });
-  it("both locales define every menu link label", () => {
-    for (const [name, j] of [["lt", lt], ["en", en]] as const) {
-      const m = j.auth.dashboard.menuLinks;
-      for (const k of ["playerCard", "projects", "instructions"]) {
-        expect(m?.[k], `${name}.menuLinks.${k}`).toBeTruthy();
-      }
-    }
+
+  it("instructions is reachable from a product surface (attention / ops board)", () => {
+    const ai = read("components/app/attention-instructions.tsx");
+    const ops = read("components/app/project-operations-board.tsx");
+    expect(
+      ai.includes("/dashboard/instructions") ||
+        ops.includes("/dashboard/instructions"),
+      "instructions must stay reachable from a product surface",
+    ).toBe(true);
+  });
+
+  it("skills lives on the Profile surface (#candidate-skills anchor)", () => {
+    const profile = read("app/[locale]/dashboard/profile/page.tsx");
+    expect(profile).toMatch(/candidate-skills/);
   });
 });
