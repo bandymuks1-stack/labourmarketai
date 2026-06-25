@@ -78,32 +78,32 @@ export const FEATURES: readonly FeatureConfig[] = [
     safeToShowInPrimaryNav: true,
   },
   {
-    // Marketplace HUB — one compact place that connects the person + company
-    // identities, the live map, real opportunities/search, and honest
-    // "preparing" surfaces for supply-side offers / shop / rentals / calendar
-    // that have no data model yet (IA cleanup v2). The hub is genuinely active:
-    // it is real navigation + honest prepare states, NOT a fake matching
-    // marketplace. The full two-sided matching marketplace stays the separate
-    // `marketplace` key below, which remains `hidden` (honesty guard home).
+    // Marketplace hub — SECONDARY, no longer a nav tab (map-first correction).
+    // The map is the primary product surface; /dashboard/marketplace now
+    // redirects to /dashboard/market-map. The route/feature stays active so the
+    // redirect is valid and the concept can be renamed/re-homed later. The full
+    // two-sided matching marketplace stays the separate `marketplace` key below,
+    // which remains `hidden` (honesty guard home).
     key: "marketplace_hub",
     availability: "active",
     labelKey: "features.marketplace_hub.label",
     descriptionKey: "features.marketplace_hub.description",
     primaryRoute: "/dashboard/marketplace",
-    safeToShowInPrimaryNav: true,
+    safeToShowInPrimaryNav: false,
   },
   {
-    // Unified market map — one shared product surface for every role
-    // (worker / company / agency). Still ACTIVE and reachable, but no longer a
-    // top-level nav item (IA cleanup v2): it now lives as a sub-surface inside
-    // the Marketplace hub so the global nav stays compact. Signal-only — no
-    // fake markers, no coordinates.
+    // Market map — its OWN primary product surface (map-first correction). This
+    // is the central visual market layer (Google-Maps-like): the user opens it
+    // and sees the market visually. Real signals only — no fake markers; future
+    // layers (companies, teams, opportunities, services, rentals, shops,
+    // availability, trust) are shown as disabled/preparing legend filters, not
+    // fake data. It is the "Žemėlapis" global nav tab.
     key: "market_map",
     availability: "active",
     labelKey: "features.market_map.label",
     descriptionKey: "features.market_map.description",
     primaryRoute: "/dashboard/market-map",
-    safeToShowInPrimaryNav: false,
+    safeToShowInPrimaryNav: true,
   },
   {
     // Profile (person/account identity). Active and reachable, but demoted out

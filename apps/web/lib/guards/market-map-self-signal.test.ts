@@ -10,12 +10,10 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
  * The logged-in user sees their OWN signals on the one shared market map (via
  * the #459 owner read layer). No "preparing / ruošiama" framing.
  *
- * IA cleanup v2: the map is no longer a top-level nav tab — the compact global
- * nav is Mano erdvė / Marketplace / Žinutės / Nustatymai (+ Admin). The map is
- * still ACTIVE and is reached as a sub-surface from the Marketplace hub. This
- * guard now asserts (a) market_map stays active with its canonical route and
- * (b) the Marketplace hub links to it — so the surface never becomes
- * unreachable. (Detailed owner-view category/privacy assertions live in
+ * Map-first IA: the map is its OWN primary product surface — the "Žemėlapis"
+ * global nav tab routes directly to /dashboard/market-map. This guard asserts
+ * (a) market_map is a visible primary nav item with its canonical route and
+ * (b) it stays active. (Detailed owner-view category/privacy assertions live in
  * market-map-ui-wiring-v1; this guard owns reachability + copy honesty.)
  */
 
@@ -24,10 +22,11 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
 
-describe("market map stays active and reachable from the marketplace hub", () => {
-  it("market_map is NOT a top-level nav tab (compact nav, IA cleanup v2)", () => {
+describe("market map is the primary 'Žemėlapis' nav surface", () => {
+  it("market_map is a visible primary nav item → /dashboard/market-map", () => {
     const item = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === "market_map");
-    expect(item, "market_map must not be a primary nav tab anymore").toBeFalsy();
+    expect(item, "market_map must be a primary nav tab").toBeTruthy();
+    expect(item?.href).toBe("/dashboard/market-map");
   });
 
   it("both nav surfaces render the catalogue-driven items (desktop + mobile)", () => {

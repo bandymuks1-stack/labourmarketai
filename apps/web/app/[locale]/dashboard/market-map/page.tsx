@@ -7,6 +7,7 @@ import { MarketMapBase } from "@/components/app/market-map-base";
 import { LabourMarketWorldMap } from "@/components/app/labour-market-world-map";
 import { MarketMapCapture } from "@/components/app/market-map-capture";
 import { MarketMapOwnerReadiness } from "@/components/app/market-map-owner-readiness";
+import { MapLayersLegend } from "@/components/app/map-layers-legend";
 import {
   listOwnPreferredLocations,
   getOwnLoginConsent,
@@ -40,6 +41,7 @@ export default async function MarketMapPage({
 
   const tNote = await getTranslations("featureNotes");
   const tMap = await getTranslations("marketMap");
+  const tLayers = await getTranslations("mapLayers");
   // Owner-scoped current state for the capture forms (RLS — caller's own rows).
   const [preferred, login, demand, availability, capabilities] = await Promise.all([
     listOwnPreferredLocations(),
@@ -66,6 +68,31 @@ export default async function MarketMapPage({
           layer, no external provider). This is the primary surface of the page;
           everything below is secondary and must not lead the flow. */}
       <MarketMapBase />
+      {/* Layers legend (map-first product direction): honestly states which
+          market layers are REAL/visible today vs which are preparing (disabled
+          chips) — companies, teams, opportunities, work needs, services,
+          rentals, shops/offers, availability, trust. No fake markers/data. */}
+      <MapLayersLegend
+        labels={{
+          title: tLayers("title"),
+          intro: tLayers("intro"),
+          visibleNow: tLayers("visibleNow"),
+          futureLayers: tLayers("futureLayers"),
+          futureBadge: tLayers("futureBadge"),
+          visibleItems: [tLayers("items.selfSignal")],
+          futureItems: [
+            tLayers("items.companies"),
+            tLayers("items.teams"),
+            tLayers("items.opportunities"),
+            tLayers("items.workNeeds"),
+            tLayers("items.services"),
+            tLayers("items.rentals"),
+            tLayers("items.shops"),
+            tLayers("items.availability"),
+            tLayers("items.trust"),
+          ],
+        }}
+      />
       {/* Compact control center: the real map + its controls are the ONE
           primary surface. Every secondary surface (signal board, owner
           readiness, capture forms, conceptual world overview) is collapsed
