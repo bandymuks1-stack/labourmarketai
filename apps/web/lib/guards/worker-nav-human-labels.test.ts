@@ -54,17 +54,38 @@ describe("primary nav uses human work-card labels, not module words", () => {
   });
 });
 
-describe("every primary worker route stays reachable", () => {
-  it("the nav exposes my-space + work-card + evidence + account routes", () => {
+describe("compact global nav + sub-surface reachability (IA cleanup v2)", () => {
+  it("the global nav is the compact set: space + marketplace + messages + settings", () => {
     const hrefs = VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.href);
     for (const r of [
       "/dashboard",
-      "/dashboard/profile",
-      "/dashboard/journal",
+      "/dashboard/marketplace",
+      "/dashboard/communication",
       "/dashboard/account",
     ]) {
-      expect(hrefs, `nav must reach ${r}`).toContain(r);
+      expect(hrefs, `compact nav must include ${r}`).toContain(r);
     }
+  });
+
+  it("profile + Mano CV + map are demoted OUT of the global nav (now sub-surfaces)", () => {
+    const hrefs = VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.href);
+    for (const r of [
+      "/dashboard/profile",
+      "/dashboard/journal",
+      "/dashboard/market-map",
+    ]) {
+      expect(hrefs, `${r} must NOT be a global nav tab`).not.toContain(r);
+    }
+  });
+
+  it("profile + Mano CV stay reachable as sub-surfaces (account menu / overview)", () => {
+    // Account settings links to the profile identity surface; the overview
+    // identity actions reach profile + CV. Reachability is preserved without
+    // a global tab for each.
+    const account = read("app/[locale]/dashboard/account/page.tsx");
+    expect(account).toMatch(/\/dashboard\/profile/);
+    const identity = read("components/app/identity-actions.tsx");
+    expect(identity).toMatch(/\/dashboard\/(profile|journal)/);
   });
 });
 

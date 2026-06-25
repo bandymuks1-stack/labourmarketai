@@ -1,4 +1,55 @@
 {
+  "quickNav": {
+    "ariaLabel": "Greita puslapio navigacija",
+    "top": "Viršus",
+    "identity": "Kortelė",
+    "records": "Įrašai",
+    "skills": "Įgūdžiai",
+    "offers": "Pasiūlymai",
+    "companies": "Įmonės",
+    "calendar": "Kalendorius",
+    "addEntry": "Pridėti įrašą",
+    "details": "Asmens duomenys",
+    "improve": "Ką dar pagerinti",
+    "capabilities": "Įgūdžiai ir darbo istorija",
+    "fullRecordsInCv": "Visi darbo įrašai — Mano CV"
+  },
+  "marketplaceHub": {
+    "title": "Prekyvietė",
+    "subtitle": "Viena kompaktiška vieta, jungianti tave, tavo įmones, žemėlapį ir žinutes.",
+    "notFakeNote": "Be netikrų skelbimų, įmonių, kalendoriaus laikų ar prekių. Kur duomenų modelio dar nėra — rodoma sąžininga „ruošiama“ būsena.",
+    "map": {
+      "title": "Žemėlapis",
+      "desc": "Tikri tavo ir rinkos signalai žemėlapyje.",
+      "cta": "Atidaryti žemėlapį"
+    },
+    "opportunities": {
+      "title": "Darbai, poreikiai, galimybės",
+      "desc": "Tikros galimybės ir paieška.",
+      "cta": "Žiūrėti galimybes"
+    },
+    "offers": {
+      "title": "Įmonių ir asmenų pasiūlymai",
+      "desc": "Pasiūlymų (tiekimo pusės) sluoksnio dar nėra. Ruošiama sąžiningai, be netikrų skelbimų."
+    },
+    "shop": {
+      "title": "Parduotuvė, paslaugos, nuoma, NT",
+      "desc": "Prekių, paslaugų, nuomos ir NT skelbimų duomenų modelio dar nėra. Jokių netikrų prekių."
+    },
+    "individual": {
+      "title": "Individuali veikla",
+      "desc": "Veik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.",
+      "cta": "Atidaryti profilį"
+    },
+    "company": {
+      "title": "Įmonės kanalai",
+      "desc": "Pasirinktos įmonės komercinis kanalas ir nustatymai.",
+      "cta": "Atidaryti įmonę",
+      "noCompanyCta": "Pridėti įmonę",
+      "noCompanyDesc": "Dar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas."
+    },
+    "prepareBadge": "Ruošiama"
+  },
   "profileAvatar": {
     "upload": "Įkelti nuotrauką",
     "change": "Pakeisti nuotrauką",
@@ -2115,6 +2166,10 @@
     "marketplace": {
       "label": "Prekyvietė",
       "description": "Prekyvietės sluoksnio kol kas nėra."
+    },
+    "marketplace_hub": {
+      "label": "Prekyvietė",
+      "description": "Kompaktiškas centras, jungiantis žemėlapį, galimybes ir tavo įmones."
     }
   },
   "structuring": {
@@ -2839,13 +2894,15 @@
       },
       "tabs": {
         "overview": "Mano erdvė",
+        "marketplace": "Prekyvietė",
         "marketMap": "Žemėlapis",
         "profile": "Profilis",
         "journal": "Mano CV",
         "communication": "Žinutės",
         "discover": "Naršyti",
         "search": "Ieškoti",
-        "account": "Nustatymai"
+        "account": "Nustatymai",
+        "admin": "Administravimas"
       },
       "chainActions": {
         "buyerTitle": "Pirkėjo užklausos",

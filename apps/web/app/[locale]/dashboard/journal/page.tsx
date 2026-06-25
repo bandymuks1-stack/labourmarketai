@@ -24,6 +24,7 @@ import {
 } from "@/lib/journal/review-status";
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
 import { EmptyState } from "@/components/app/empty-state";
+import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { createClient } from "@/lib/supabase/server";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { Link } from "@/lib/i18n/navigation";
@@ -74,6 +75,7 @@ export default async function JournalPage({
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
   const tCv = await getTranslations("cvExport");
+  const tQuick = await getTranslations("quickNav");
 
   const supabase = await createClient();
   const {
@@ -379,7 +381,7 @@ export default async function JournalPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-1">
+      <header id="mano-cv-top" className="flex flex-col gap-1 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {tCv("pageTitle")}
@@ -397,19 +399,50 @@ export default async function JournalPage({
         </p>
       </header>
 
+      {/* Page-local quick nav (IA cleanup v2 #3): compact sticky jump bar so a
+          long Mano CV doesn't lose the user after scrolling. Only the anchors
+          relevant to this page (identity card, work records, add entry). */}
+      <PageQuickNav
+        ariaLabel={tQuick("ariaLabel")}
+        items={[
+          { href: "#mano-cv-top", label: tQuick("top") },
+          { href: "#mano-cv-identity", label: tQuick("identity") },
+          { href: "#journal-entries", label: tQuick("records") },
+          { href: "#journal-composer", label: tQuick("addEntry") },
+        ]}
+      />
+
       {/* Mano CV identity lead: player-card/avatar identity at the top of the
-          Mano CV surface; the work records follow below. The readiness panel
-          (signals → next step) sits with the identity, moved here from the old
-          standalone player-card route. */}
+          Mano CV surface; the work records follow below. IA cleanup v2 (#5):
+          the readiness PANEL (detailed pillars + next steps) is collapsed into
+          a disclosure so the readiness signal is shown ONCE prominently (the
+          player card), not twice stacked — the actionable detail stays one tap
+          away without lengthening the page. */}
       {manoCard && manoCardLabels ? (
-        <section className="flex flex-col gap-6" data-testid="mano-cv-player-card-lead">
+        <section
+          id="mano-cv-identity"
+          className="flex flex-col gap-4 scroll-mt-20"
+          data-testid="mano-cv-player-card-lead"
+        >
           <WorkerPlayerCard
             card={manoCard}
             labels={manoCardLabels}
             thermometer={manoThermometer}
             avatarUrl={manoAvatar.signedUrl}
           />
-          <WorkerReadinessPanel card={manoCard} />
+          <details className="group rounded-md border border-border-subtle bg-surface-1/50">
+            <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
+              <span className="inline-flex items-center gap-2">
+                <span aria-hidden className="transition-transform group-open:rotate-90">
+                  ›
+                </span>
+                {tQuick("improve")}
+              </span>
+            </summary>
+            <div className="px-4 pb-4">
+              <WorkerReadinessPanel card={manoCard} />
+            </div>
+          </details>
         </section>
       ) : null}
 

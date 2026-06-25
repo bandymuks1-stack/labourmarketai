@@ -23,6 +23,7 @@ export type FeatureAvailability = "active" | "preparing" | "hidden";
 export type FeatureKey =
   // Active surfaces backing the first working beta.
   | "overview"
+  | "marketplace_hub"
   | "market_map"
   | "profile_text_first"
   | "journal_text_first"
@@ -77,33 +78,54 @@ export const FEATURES: readonly FeatureConfig[] = [
     safeToShowInPrimaryNav: true,
   },
   {
+    // Marketplace HUB — one compact place that connects the person + company
+    // identities, the live map, real opportunities/search, and honest
+    // "preparing" surfaces for supply-side offers / shop / rentals / calendar
+    // that have no data model yet (IA cleanup v2). The hub is genuinely active:
+    // it is real navigation + honest prepare states, NOT a fake matching
+    // marketplace. The full two-sided matching marketplace stays the separate
+    // `marketplace` key below, which remains `hidden` (honesty guard home).
+    key: "marketplace_hub",
+    availability: "active",
+    labelKey: "features.marketplace_hub.label",
+    descriptionKey: "features.marketplace_hub.description",
+    primaryRoute: "/dashboard/marketplace",
+    safeToShowInPrimaryNav: true,
+  },
+  {
     // Unified market map — one shared product surface for every role
-    // (worker / company / agency), reachable immediately after login. Active
-    // and primary-nav-safe: the logged-in user always sees their own
-    // country-level self-signal (or a real location-completion action) plus
-    // their real demand signals. Signal-only — no fake markers, no coordinates.
+    // (worker / company / agency). Still ACTIVE and reachable, but no longer a
+    // top-level nav item (IA cleanup v2): it now lives as a sub-surface inside
+    // the Marketplace hub so the global nav stays compact. Signal-only — no
+    // fake markers, no coordinates.
     key: "market_map",
     availability: "active",
     labelKey: "features.market_map.label",
     descriptionKey: "features.market_map.description",
     primaryRoute: "/dashboard/market-map",
-    safeToShowInPrimaryNav: true,
+    safeToShowInPrimaryNav: false,
   },
   {
+    // Profile (person/account identity). Active and reachable, but demoted out
+    // of the global nav (IA cleanup v2) — it lives under the person identity,
+    // reachable from Mano erdvė and the account menu, not as a global tab.
     key: "profile_text_first",
     availability: "active",
     labelKey: "features.profile_text_first.label",
     descriptionKey: "features.profile_text_first.description",
     primaryRoute: "/dashboard/profile",
-    safeToShowInPrimaryNav: true,
+    safeToShowInPrimaryNav: false,
   },
   {
+    // Mano CV (work-records identity). Active and reachable, but demoted out of
+    // the global nav (IA cleanup v2) — it lives under the person identity,
+    // reachable from Mano erdvė / Marketplace, not as a global tab.
     key: "journal_text_first",
     availability: "active",
     labelKey: "features.journal_text_first.label",
     descriptionKey: "features.journal_text_first.description",
     primaryRoute: "/dashboard/journal",
-    safeToShowInPrimaryNav: true,
+    safeToShowInPrimaryNav: false,
   },
   {
     // Inbox / messages. Active and primary-nav-safe: it is the recipient's

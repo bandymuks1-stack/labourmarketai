@@ -16,7 +16,6 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 describe("market map is exposed in the command centers + dashboard", () => {
   const identity = read("components/app/identity-actions.tsx");
-  const dashboard = read("app/[locale]/dashboard/page.tsx");
   const opportunities = read("app/[locale]/dashboard/opportunities/page.tsx");
 
   it("IdentityActions has a marketMap action pointing at /dashboard/market-map", () => {
@@ -24,23 +23,27 @@ describe("market map is exposed in the command centers + dashboard", () => {
     expect(identity).toMatch(/\/dashboard\/market-map/);
   });
 
-  it("the market map is a shared first-class destination (person actions + primary nav)", () => {
-    // Marketplace IA: the map is the SHARED connection layer, exposed once in
-    // the person actions and as a primary-nav tab for everyone (person AND
-    // company) — not duplicated as a company commercial tile.
+  it("the market map is a shared first-class destination (person actions + marketplace hub)", () => {
+    // IA cleanup v2: the map is the SHARED connection layer, reached from the
+    // person identity actions AND from the compact Marketplace hub (the map is
+    // no longer its own global tab). Reachability is preserved without bloating
+    // the global nav.
     expect(identity).toMatch(/key:\s*"marketMap"/);
+    const hub = read("app/[locale]/dashboard/marketplace/page.tsx");
+    expect(hub).toMatch(/\/dashboard\/market-map/);
+    // The Marketplace hub itself IS a primary nav tab, so the map is always
+    // one compact hop from the global nav.
     expect(
       VISIBLE_PRIMARY_NAV_ITEMS.some(
-        (i) => i.href === "/dashboard/market-map",
+        (i) => i.href === "/dashboard/marketplace",
       ),
-      "market-map is a primary nav tab",
+      "marketplace hub is a primary nav tab",
     ).toBe(true);
   });
 
-  it("the dashboard links to the market map (via the My Work View cockpit)", () => {
-    expect(dashboard).toMatch(/<MyWorkView/);
-    const cockpit = read("lib/dashboard/my-work-view.ts");
-    expect(cockpit).toMatch(/\/dashboard\/market-map/);
+  it("the marketplace hub links to the market map (reachability)", () => {
+    const hub = read("app/[locale]/dashboard/marketplace/page.tsx");
+    expect(hub).toMatch(/\/dashboard\/market-map/);
   });
 
   it("the opportunities surface links to the market map", () => {

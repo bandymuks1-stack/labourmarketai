@@ -25,11 +25,13 @@ import {
  *  framework-agnostic. */
 export type NavIconKey =
   | "home"
+  | "store"
   | "map"
   | "idCard"
   | "fileText"
   | "inbox"
-  | "user";
+  | "user"
+  | "shield";
 
 type TabMeta = {
   /** i18n key for the SHORT tab label (e.g. "Apžvalga" vs the feature's
@@ -49,17 +51,9 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
     tabLabelKey: "auth.dashboard.tabs.overview",
     iconKey: "home",
   },
-  market_map: {
-    tabLabelKey: "auth.dashboard.tabs.marketMap",
-    iconKey: "map",
-  },
-  profile_text_first: {
-    tabLabelKey: "auth.dashboard.tabs.profile",
-    iconKey: "idCard",
-  },
-  journal_text_first: {
-    tabLabelKey: "auth.dashboard.tabs.journal",
-    iconKey: "fileText",
+  marketplace_hub: {
+    tabLabelKey: "auth.dashboard.tabs.marketplace",
+    iconKey: "store",
   },
   communication: {
     tabLabelKey: "auth.dashboard.tabs.communication",
@@ -72,8 +66,10 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
 };
 
 export type NavItem = {
-  /** The feature key the tab is sourced from. Useful for tests + telemetry. */
-  id: FeatureKey;
+  /** The feature key the tab is sourced from, or "admin" for the
+   *  permission-gated admin item (not a catalogue feature). Useful for
+   *  tests + telemetry + React keys. */
+  id: FeatureKey | "admin";
   /** Locale-prefixed app route. */
   href: string;
   tabLabelKey: string;
@@ -106,6 +102,20 @@ export function getVisiblePrimaryNavItems(): readonly NavItem[] {
  */
 export const VISIBLE_PRIMARY_NAV_ITEMS: readonly NavItem[] =
   getVisiblePrimaryNavItems();
+
+/**
+ * Admin nav item. NOT sourced from the feature catalogue — admin is a
+ * permission dimension, not a product feature (see dashboard layout's
+ * `deriveIsAdmin`). The nav components append it ONLY when the auth context
+ * reports `isAdmin`, so non-admins never see it. This is the "Admin only if
+ * admin" item the compact nav allows for.
+ */
+export const ADMIN_NAV_ITEM: NavItem = {
+  id: "admin",
+  href: "/dashboard/admin",
+  tabLabelKey: "auth.dashboard.tabs.admin",
+  iconKey: "shield",
+};
 
 /** Plain feature list backing the nav — used by audit / route-check docs. */
 export const PRIMARY_NAV_SOURCE_FEATURES: readonly FeatureConfig[] =

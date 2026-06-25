@@ -34,10 +34,15 @@ const BASE = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, ""
 mkdirSync(OUT, { recursive: true });
 
 // route id → path. Authenticated routes assume you are logged in.
+// IA cleanup v2 (PR #497): the compact-nav surfaces the owner verifies on the
+// preview — dashboard command center, marketplace hub, profile (identity),
+// Mano CV, account. Plus the player-card→Mano CV redirect proof and company.
 const ROUTES = [
   ["dashboard", "/lt/dashboard"],
-  ["account", "/lt/dashboard/account"],
+  ["marketplace", "/lt/dashboard/marketplace"],
+  ["profile", "/lt/dashboard/profile"],
   ["mano-cv", "/lt/dashboard/journal"],
+  ["account", "/lt/dashboard/account"],
   ["player-card-redirect", "/lt/dashboard/player-card"], // should redirect to Mano CV (/journal)
   ["company-channel", "/lt/dashboard/company"], // commercial/company surface from this branch
 ];
