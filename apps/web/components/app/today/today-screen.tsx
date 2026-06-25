@@ -16,6 +16,7 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
+import { getOwnAvatar } from "@/lib/profile/avatar";
 import { CountUp } from "@/components/app/today/count-up";
 import { SkillIcon } from "@/components/app/today/skill-icon";
 import { CommandQueue } from "@/components/app/today/command-queue";
@@ -47,10 +48,11 @@ export async function TodayScreen({
   workerId: string | null;
   locale: string;
 }) {
-  const [data, playerCard, thermo] = await Promise.all([
+  const [data, playerCard, thermo, avatar] = await Promise.all([
     getTodayScreen(workerId),
     getWorkerPlayerCard(),
     getOwnThermometer(),
+    getOwnAvatar(),
   ]);
   const t = await getTranslations("todayScreen");
   const tSkill = await getTranslations("skillNames");
@@ -220,6 +222,7 @@ export async function TodayScreen({
       card={playerCard}
       labels={await buildPlayerCardLabels(playerCard)}
       thermometer={toThermometerView(thermo)}
+      avatarUrl={avatar.signedUrl}
     />
   ) : null;
 

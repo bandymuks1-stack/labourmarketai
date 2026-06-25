@@ -502,11 +502,11 @@ describe("feature-availability + config-driven dashboard", () => {
     );
   });
 
-  it("the My-spaces (account) surface reads features from the central catalogue", () => {
-    // Room-based IA (PR #204 review): the feature grid lives in the account /
-    // "Mano erdvės" surface, not the active dashboard room.
+  it("account is settings only — no future-module grid (superseded PR #204)", () => {
+    // Owner override 2026-06-25: account is settings-only; the feature grid is
+    // retired from the nav surfaces.
     const txt = readWeb("app/[locale]/dashboard/account/page.tsx");
-    expect(txt).toMatch(/FeatureAvailabilityGrid/);
+    expect(txt).not.toMatch(/FeatureAvailabilityGrid/);
   });
 
   it("FeatureAvailabilityGrid gates CTAs on isFeatureActive", () => {
@@ -715,12 +715,12 @@ describe("role catalogue + shared role-card model", () => {
     expect(linkOpens.length).toBe(1);
   });
 
-  it("the My-spaces (account) surface mounts RoleCatalogueGrid from the catalogue", () => {
-    // Room-based IA (PR #204 review): the all-roles catalogue lives in the
-    // account / "Mano erdvės" surface, not the active dashboard room.
+  it("account is settings only — no all-roles catalogue (superseded PR #204)", () => {
+    // Owner override 2026-06-25: the all-roles catalogue is retired from
+    // account; identity switching is the header role switcher.
     const txt = readWeb("app/[locale]/dashboard/account/page.tsx");
-    expect(txt).toMatch(/RoleCatalogueGrid/);
-    expect(txt).toMatch(/getVisibleRoleOptions/);
+    expect(txt).not.toMatch(/RoleCatalogueGrid/);
+    expect(txt).not.toMatch(/getVisibleRoleOptions/);
   });
 
   it("RoleSwitcher + account page still consume the role catalogue", () => {

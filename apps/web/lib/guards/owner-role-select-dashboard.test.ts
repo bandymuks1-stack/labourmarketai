@@ -132,9 +132,9 @@ describe("assign actions never enable journal review", () => {
 
 // ── Part B — dashboard ready-today cleanup ──────────────────────────────
 
-describe("preparing cards live in the My-spaces surface, not the active room", () => {
-  // Room-based IA (PR #204 review): the feature/module grid moved OUT of the
-  // active /dashboard space into /dashboard/account → "Mano erdvės / My spaces".
+describe("the future-module grid is not mounted on the active room or account", () => {
+  // Superseded PR #204: the future-module grid is retired from the nav surfaces
+  // — neither the active /dashboard room nor account (settings only) mounts it.
   const dashboard = read("app/[locale]/dashboard/page.tsx");
   const account = read("app/[locale]/dashboard/account/page.tsx");
 
@@ -142,12 +142,8 @@ describe("preparing cards live in the My-spaces surface, not the active room", (
     expect(dashboard).not.toMatch(/<FeatureAvailabilityGrid\b/);
   });
 
-  it("the My-spaces (account) surface mounts FeatureAvailabilityGrid as comingLater", () => {
-    const mounts = account.match(/<FeatureAvailabilityGrid\b[^>]*\/>/g) ?? [];
-    expect(mounts.length).toBeGreaterThanOrEqual(1);
-    for (const m of mounts) {
-      expect(m, `grid mount must be comingLater: ${m}`).toMatch(/comingLater/);
-    }
+  it("the account (settings-only) surface renders NO FeatureAvailabilityGrid", () => {
+    expect(account).not.toMatch(/<FeatureAvailabilityGrid\b/);
   });
 });
 

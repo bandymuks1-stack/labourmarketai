@@ -18,16 +18,17 @@ const disp = read("components/app/avatar-display.tsx");
 const upload = read("lib/profile/avatar-upload.ts");
 const actions = read("lib/profile/avatar-actions.ts");
 const profilePage = read("app/[locale]/dashboard/profile/page.tsx");
-const playerCardPage = read("app/[locale]/dashboard/player-card/page.tsx");
+// Mano CV surface — the read-only avatar now leads here via the player card.
+const manoCvPage = read("app/[locale]/dashboard/journal/page.tsx");
 
 describe("avatar UI exists and is wired into identity surfaces", () => {
-  it("the profile page renders the upload control", () => {
+  it("the profile (edit identity) page renders the upload control", () => {
     expect(profilePage).toMatch(/<ProfileAvatar\b/);
     expect(profilePage).toMatch(/getOwnAvatar/);
   });
-  it("the player-card page renders the avatar (read-only)", () => {
-    expect(playerCardPage).toMatch(/<AvatarDisplay\b/);
-    expect(playerCardPage).toMatch(/getOwnAvatar/);
+  it("the Mano CV surface renders the avatar (read-only, via the player card)", () => {
+    expect(manoCvPage).toMatch(/getOwnAvatar/);
+    expect(manoCvPage).toMatch(/avatarUrl=\{manoAvatar\.signedUrl\}/);
   });
   it("the control exposes upload + remove affordances", () => {
     expect(ctrl).toMatch(/data-testid="profile-avatar"/);

@@ -32,7 +32,7 @@ describe("identity/action workspace component", () => {
   const comp = read("components/app/identity-actions.tsx");
   const account = read("app/[locale]/dashboard/account/page.tsx");
 
-  it("renders both identities (person + company)", () => {
+  it("renders both identities (person + the one company channel)", () => {
     expect(comp).toMatch(/data-testid="identity-person"/);
     expect(comp).toMatch(/data-testid="identity-company"/);
   });
@@ -40,12 +40,13 @@ describe("identity/action workspace component", () => {
     expect(comp).toMatch(/data-testid="identity-company-create"/);
     expect(comp).toMatch(/\/dashboard\/start\/company/);
   });
-  it("is mounted on the account page with a real hasCompany flag", () => {
-    expect(account).toMatch(/<IdentityActions\s+hasCompany=\{hasCompany\}/);
-    expect(account).toMatch(/getOwnCompany\(\)/);
+  it("is NOT mounted on the account page (account = settings only)", () => {
+    // Marketplace IA: account is settings-only; the identity/action workspace
+    // lives on the dashboard overview, not on account.
+    expect(account).not.toMatch(/<IdentityActions/);
   });
 
-  it("is also surfaced on the main dashboard (compact entry)", () => {
+  it("is surfaced on the main dashboard (compact, focused entry)", () => {
     const dashboard = read("app/[locale]/dashboard/page.tsx");
     expect(dashboard).toMatch(/<IdentityActions\s+hasCompany=\{hasCompany\}\s+compact/);
     expect(dashboard).toMatch(/getOwnCompany\(\)/);

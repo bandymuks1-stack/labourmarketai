@@ -69,8 +69,9 @@ describe("reachability", () => {
     expect(mapCard).toMatch(/operations/);
     expect(mapCard).toMatch(/project-operations-link/);
   });
-  it("the board links player-card, instructions, and skill clarify", () => {
-    expect(board).toMatch(/dashboard\/player-card/);
+  it("the board links Mano CV (work records), instructions, and skill clarify", () => {
+    // Player-card merged into the Mano CV surface (/dashboard/journal).
+    expect(board).toMatch(/dashboard\/journal/);
     expect(board).toMatch(/dashboard\/instructions/);
     expect(board).toMatch(/dashboard\/profile/);
   });

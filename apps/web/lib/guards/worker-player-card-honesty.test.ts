@@ -14,7 +14,9 @@ const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
 const svc = read("lib/player-card/player-card.ts");
 const comp = read("components/app/worker-player-card.tsx");
-const page = read("app/[locale]/dashboard/player-card/page.tsx");
+// Mano CV surface — the player card leads the work-records surface here now
+// (/dashboard/player-card redirects to it).
+const page = read("app/[locale]/dashboard/journal/page.tsx");
 
 describe("read service is real-data-only with graceful fallback", () => {
   it("counts via safeCount (returns 0 on error — never fabricates)", () => {

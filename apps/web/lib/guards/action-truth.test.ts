@@ -83,12 +83,12 @@ describe("info-only cards do not look clickable", () => {
 });
 
 describe("room boundaries preserved (regression)", () => {
-  it("/dashboard stays focused; account holds the cross-space catalogue", () => {
+  it("/dashboard stays focused; account is settings only (no cross-space catalogue)", () => {
     const dash = read("app/[locale]/dashboard/page.tsx");
     const account = read("app/[locale]/dashboard/account/page.tsx");
     expect(dash).not.toMatch(/<RoleCatalogueGrid\b|<FeatureAvailabilityGrid\b/);
-    expect(account).toMatch(/<RoleCatalogueGrid\b/);
-    expect(account).toMatch(/<FeatureAvailabilityGrid\b/);
+    expect(account).not.toMatch(/<RoleCatalogueGrid\b/);
+    expect(account).not.toMatch(/<FeatureAvailabilityGrid\b/);
   });
   it("buyer presents no worker as purchasable", () => {
     const buyer = JSON.stringify(JSON.parse(read("messages/lt.json")).roleDashboards.buyer);

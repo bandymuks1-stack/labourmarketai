@@ -146,10 +146,15 @@ export function WorkerPlayerCard({
   card,
   labels,
   thermometer,
+  avatarUrl = null,
 }: {
   card: WorkerPlayerCardData;
   labels: PlayerCardLabels;
   thermometer?: ThermometerView | null;
+  /** Short-lived signed URL of the worker's own consented photo. When present
+   *  the scouting card shows the real face; otherwise the honest initials
+   *  monogram — never a synthesised or placeholder face (DESIGN_SOUL §1). */
+  avatarUrl?: string | null;
 }) {
   const confirmed = card.workCardConfirmed;
   // Honest readiness signals (real met/total), drives the status ring + line.
@@ -177,15 +182,30 @@ export function WorkerPlayerCard({
       {/* ── Identity: avatar + name + profession + readiness ring ── */}
       <header className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
-          <span
-            aria-hidden
-            className={cn(
-              "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
-              confirmed ? "border-trust-accent/50" : "border-ink-500",
-            )}
-          >
-            {initialsOf(card.displayName)}
-          </span>
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarUrl}
+              alt={card.displayName ?? labels.namePlaceholder}
+              data-testid="player-card-avatar-photo"
+              loading="lazy"
+              className={cn(
+                "h-14 w-14 shrink-0 rounded-2xl border object-cover",
+                confirmed ? "border-trust-accent/50" : "border-ink-500",
+              )}
+            />
+          ) : (
+            <span
+              aria-hidden
+              data-testid="player-card-avatar-monogram"
+              className={cn(
+                "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
+                confirmed ? "border-trust-accent/50" : "border-ink-500",
+              )}
+            >
+              {initialsOf(card.displayName)}
+            </span>
+          )}
           <div className="min-w-0 flex-col">
             <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
               {labels.title}

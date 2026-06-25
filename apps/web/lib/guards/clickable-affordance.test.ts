@@ -61,10 +61,10 @@ describe("room IA preserved (regression guard)", () => {
     expect(dash).not.toMatch(/<RoleCatalogueGrid\b/);
     expect(dash).not.toMatch(/<FeatureAvailabilityGrid\b/);
   });
-  it("the cross-space catalogue stays only under /dashboard/account", () => {
+  it("account is settings only — no cross-space catalogue/future-grid", () => {
     const account = read("app/[locale]/dashboard/account/page.tsx");
-    expect(account).toMatch(/<RoleCatalogueGrid\b/);
-    expect(account).toMatch(/<FeatureAvailabilityGrid\b/);
+    expect(account).not.toMatch(/<RoleCatalogueGrid\b/);
+    expect(account).not.toMatch(/<FeatureAvailabilityGrid\b/);
   });
   it("buyer copy presents no worker as purchasable", () => {
     const buyer = JSON.stringify(JSON.parse(read("messages/lt.json")).roleDashboards.buyer);

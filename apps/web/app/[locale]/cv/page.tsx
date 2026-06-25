@@ -108,7 +108,13 @@ export default async function VerifiedCvPage({
             {t("pageTitle")}
           </p>
           <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">
-            {cv.personName}
+            {cv.personName.trim() && cv.personName.trim() !== "—" ? (
+              cv.personName
+            ) : (
+              <span className="italic text-zinc-400" data-testid="cv-name-missing">
+                {t("nameNotProvided")}
+              </span>
+            )}
           </h1>
           {cv.professionSlugs.length > 0 ? (
             <p className="mt-1 text-sm text-zinc-600" data-testid="cv-professions">

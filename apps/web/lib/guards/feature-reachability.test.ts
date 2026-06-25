@@ -18,10 +18,12 @@ const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
 
 describe("the account menu makes the shipped routes reachable, role-gated", () => {
-  it("links to the worker player-card (worker only)", () => {
-    expect(menu).toMatch(/href:\s*"\/dashboard\/player-card"/);
+  it("no longer carries a competing player-card link (Mano CV is a primary nav tab)", () => {
+    // Marketplace IA: the player-card identity leads the Mano CV surface, which
+    // is a primary nav tab — so the account menu must NOT expose a separate
+    // /dashboard/player-card destination.
+    expect(menu).not.toMatch(/href:\s*"\/dashboard\/player-card"/);
     expect(menu).toMatch(/activeRole === "worker"/);
-    expect(menu).toMatch(/testid:\s*"account-menu-player-card-link"/);
   });
   it("links to projects (manager only)", () => {
     expect(menu).toMatch(/href:\s*"\/dashboard\/projects"/);
@@ -45,7 +47,6 @@ describe("reachability is additive — account link + logout untouched", () => {
 
 describe("menu link labels present in LT + EN (no hardcoded strings)", () => {
   it("uses t('menuLinks.*')", () => {
-    expect(menu).toMatch(/t\("menuLinks\.playerCard"\)/);
     expect(menu).toMatch(/t\("menuLinks\.projects"\)/);
     expect(menu).toMatch(/t\("menuLinks\.instructions"\)/);
   });

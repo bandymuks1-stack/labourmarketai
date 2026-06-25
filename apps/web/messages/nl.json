@@ -268,7 +268,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profiel",
-        "journal": "Logboek",
+        "journal": "Mijn cv",
         "search": "[EN] Search"
       }
     },
@@ -1086,7 +1086,10 @@
     }
   },
   "journal": {
+    "cvBridge": "{confirmed} van {total} vermeldingen bevestigd — bevestigd werk verschijnt op je cv.",
+    "cvBridgeLink": "Cv openen",
     "inbox": {
+      "title": "Werkbeoordeling",
       "confirmSkills": "Confirm skills",
       "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
       "confirmNote": "Optional note",
@@ -1406,6 +1409,7 @@
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
   },
   "cvExport": {
+    "nameNotProvided": "Naam nog niet toegevoegd",
     "pageTitle": "Bevestigd CV",
     "exportButton": "CV exporteren (PDF)",
     "print": "PDF downloaden",

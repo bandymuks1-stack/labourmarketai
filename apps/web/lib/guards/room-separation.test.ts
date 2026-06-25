@@ -30,21 +30,21 @@ describe("active /dashboard room stays focused", () => {
   });
 });
 
-describe("/dashboard/account is the ONLY cross-space switcher/catalogue surface", () => {
-  it("hosts My-spaces with the catalogue + future-module grid + current space", () => {
-    expect(account).toMatch(/data-testid="my-spaces"/);
-    expect(account).toMatch(/<RoleCatalogueGrid\b/);
-    expect(account).toMatch(/<FeatureAvailabilityGrid\b/);
-    expect(account).toMatch(/data-testid="my-spaces-current"/);
+describe("/dashboard/account is settings only (marketplace IA cleanup)", () => {
+  // Superseded PR #204: account no longer hosts the cross-space catalogue or
+  // the future-module grid (it was acting as a second dashboard). Identity
+  // switching is the header role switcher; the person↔company actions live on
+  // the dashboard overview. Account = settings only.
+  it("hosts no catalogue, no future-module grid, and no identity-action workspace", () => {
+    expect(account).not.toMatch(/<RoleCatalogueGrid\b/);
+    expect(account).not.toMatch(/<FeatureAvailabilityGrid\b/);
+    expect(account).not.toMatch(/<IdentityActions\b/);
   });
-  it("orders the My-spaces room: current → available → modules later", () => {
-    expect(account).toMatch(/data-testid="my-spaces-available"/);
-    const cur = account.indexOf('data-testid="my-spaces-current"');
-    const avail = account.indexOf('data-testid="my-spaces-available"');
-    const grid = account.indexOf("<FeatureAvailabilityGrid");
-    expect(cur).toBeGreaterThan(-1);
-    expect(avail).toBeGreaterThan(cur);
-    expect(grid).toBeGreaterThan(avail);
+  it("still carries settings: email, appearance, roles list, sign out", () => {
+    expect(account).toMatch(/account\.email_label/);
+    expect(account).toMatch(/account\.theme\.appearance/);
+    expect(account).toMatch(/account\.roles_label/);
+    expect(account).toMatch(/account\.logout/);
   });
 });
 
