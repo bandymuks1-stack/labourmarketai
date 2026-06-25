@@ -671,6 +671,7 @@
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
     "empty": "No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "Created",
+    "manageHelp": "Drafts can be deleted. Submitted requests are reviewed manually — self-serve editing or closing is still being prepared.",
     "detailsLabel": "Submitted details",
     "fields": {
       "description": "Description",

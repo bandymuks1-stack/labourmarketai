@@ -127,6 +127,7 @@ export default async function DashboardOverviewPage({
       note: tReadback("note"),
       empty: tReadback("empty"),
       created: tReadback("created"),
+      manageHelp: tReadback("manageHelp"),
       status: {
         draft: tReqStatus("draft"),
         submitted: tReqStatus("submitted"),

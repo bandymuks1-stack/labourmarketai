@@ -671,6 +671,7 @@
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
     "empty": "Dar nepateikėte nė vieno poreikio. Pateikite poreikį viršuje ir jis atsiras čia su savo būsena.",
     "created": "Sukurta",
+    "manageHelp": "Juodraščius galite ištrinti. Pateiktas užklausas šiuo metu peržiūrime rankiniu būdu — savarankiškas redagavimas ar uždarymas dar ruošiamas.",
     "detailsLabel": "Pateikti duomenys",
     "fields": {
       "description": "Aprašymas",

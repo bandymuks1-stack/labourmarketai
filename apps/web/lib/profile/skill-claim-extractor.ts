@@ -423,7 +423,10 @@ const DICTIONARY: readonly DictionaryRow[] = [
     ],
   },
   {
-    // Communication — client/team communication competence.
+    // Communication — client/team communication competence, plus the
+    // public-speaking / presentation / negotiation / oratory family (P0 audit:
+    // these were unrecognised even though generic "komunikacija" matched).
+    // Review-only suggestion under one honest label — no new taxonomy slug.
     label: "Komunikacija",
     needles: [
       "komunikac",
@@ -433,6 +436,27 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "communication",
       "communicating",
       "communicate",
+      // presentations / public speaking
+      "prezentac", // prezentacija / prezentavau / prezentaciją
+      "prezentav",
+      "kalbėjim", // viešas kalbėjimas
+      "kalbejim",
+      "viešas kalb",
+      "viesas kalb",
+      "presentation",
+      "public speaking",
+      "презентац",
+      "публичн", // публичные выступления
+      // negotiation
+      "deryb", // derybos / derybose
+      "derėj", // derėjausi
+      "derej",
+      "negotiat",
+      "переговор",
+      // oratory
+      "orator",
+      "oratoryst",
+      "оратор",
     ],
   },
 
