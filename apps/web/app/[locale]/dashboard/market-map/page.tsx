@@ -18,6 +18,7 @@ import {
   getOwnCapabilities,
 } from "@/lib/market-map/owner-readiness";
 import { FeatureNote } from "@/components/app/feature-note";
+import { getOwnAvatar } from "@/lib/profile/avatar";
 
 /**
  * Live market map — FOUNDATION route (v1). Authenticated (under /dashboard,
@@ -43,13 +44,30 @@ export default async function MarketMapPage({
   const tMap = await getTranslations("marketMap");
   const tLayers = await getTranslations("mapLayers");
   // Owner-scoped current state for the capture forms (RLS — caller's own rows).
-  const [preferred, login, demand, availability, capabilities] = await Promise.all([
-    listOwnPreferredLocations(),
-    getOwnLoginConsent(),
-    listOwnDemandLocations(),
-    getOwnAvailability(),
-    getOwnCapabilities(),
-  ]);
+  const [preferred, login, demand, availability, capabilities, profileRes, avatar] =
+    await Promise.all([
+      listOwnPreferredLocations(),
+      getOwnLoginConsent(),
+      listOwnDemandLocations(),
+      getOwnAvailability(),
+      getOwnCapabilities(),
+      supabase.from("profiles").select("full_name, email").eq("id", user.id).single(),
+      getOwnAvatar(),
+    ]);
+  // The user's OWN identity for the premium map marker (real data only). Name
+  // falls back to the email local-part; initial is the first letter. Never any
+  // other user's identity, never a fake signal.
+  const ownName =
+    profileRes.data?.full_name?.trim() ||
+    (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "") ||
+    (user.email ? user.email.split("@")[0] : "");
+  const mapIdentity = ownName
+    ? {
+        name: ownName,
+        initial: ownName.slice(0, 1).toUpperCase(),
+        avatarUrl: avatar.signedUrl,
+      }
+    : undefined;
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1" data-testid="market-map-page-header">
@@ -67,7 +85,7 @@ export default async function MarketMapPage({
           (coordinate-map v1: real coordinates + search radius, no tile/street
           layer, no external provider). This is the primary surface of the page;
           everything below is secondary and must not lead the flow. */}
-      <MarketMapBase />
+      <MarketMapBase identity={mapIdentity} />
       {/* Layers legend (map-first product direction): honestly states which
           market layers are REAL/visible today vs which are preparing (disabled
           chips) — companies, teams, opportunities, work needs, services,

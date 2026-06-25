@@ -43,17 +43,56 @@ function pointFor(loc: SelectedLocation | null): {
   return { point: [r.coord.lat, r.coord.lng], zoom };
 }
 
+/** Escape user-controlled text before it goes into the Leaflet divIcon HTML. */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** The user's OWN identity for the location marker (real data only). */
+export type MapIdentity = {
+  name: string;
+  initial: string;
+  avatarUrl: string | null;
+};
+
+/** Build the premium identity-pin HTML for the Leaflet divIcon. Inline styles
+ *  (not Tailwind classes) because the marker DOM is injected by Leaflet and
+ *  would otherwise be purged. Shows the user's avatar (or initial) + name —
+ *  the user's own real identity at their own chosen location. */
+function identityPinHtml(identity: MapIdentity): string {
+  const safeName = escapeHtml(identity.name);
+  const safeInitial = escapeHtml(identity.initial || "•");
+  const inner = identity.avatarUrl
+    ? `<img src="${escapeHtml(identity.avatarUrl)}" alt="" style="width:38px;height:38px;border-radius:9999px;object-fit:cover;display:block" />`
+    : `<div style="width:38px;height:38px;border-radius:9999px;background:#22D3EE;color:#0B1014;display:flex;align-items:center;justify-content:center;font:700 15px/1 ui-sans-serif,system-ui,sans-serif">${safeInitial}</div>`;
+  return (
+    `<div style="display:flex;flex-direction:column;align-items:center">` +
+    `<div style="padding:2px;border-radius:9999px;background:#0B1014;border:2px solid #22D3EE;box-shadow:0 6px 16px rgba(0,0,0,.5)">${inner}</div>` +
+    `<div style="margin-top:3px;max-width:128px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(11,16,20,.92);color:#E8EEF2;font:600 10px/1.3 ui-sans-serif,system-ui,sans-serif;padding:2px 7px;border-radius:7px;border:1px solid rgba(34,211,238,.45)">${safeName}</div>` +
+    `</div>`
+  );
+}
+
 export function MarketMapLive({
   selected,
   radiusKm,
   onPick,
   ariaLabel,
+  identity,
 }: {
   selected: SelectedLocation | null;
   radiusKm: number;
   /** Called with real coordinates when the worker taps the map. */
   onPick: (lat: number, lng: number) => void;
   ariaLabel: string;
+  /** The user's own identity — when present the map renders a premium identity
+   *  pin instead of a plain dot. No other users / no fake signals. */
+  identity?: MapIdentity;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletTypes.Map | null>(null);
@@ -117,16 +156,29 @@ export function MarketMapLive({
         fillColor: "#22D3EE",
         fillOpacity: 0.12,
       }).addTo(layer);
-      L.circleMarker(point, {
-        radius: 7,
-        color: "#0B1014",
-        weight: 2,
-        fillColor: "#22D3EE",
-        fillOpacity: 1,
-      }).addTo(layer);
+      if (identity) {
+        // Premium identity marker — the user's OWN avatar/initial + name at
+        // their OWN chosen location (real data; no other users, no fake points).
+        const icon = L.divIcon({
+          html: identityPinHtml(identity),
+          className: "lm-map-identity-pin",
+          iconSize: [128, 60],
+          iconAnchor: [64, 30],
+        });
+        L.marker(point, { icon, keyboard: false, interactive: false }).addTo(layer);
+      } else {
+        // Fallback dot when no identity is supplied.
+        L.circleMarker(point, {
+          radius: 7,
+          color: "#0B1014",
+          weight: 2,
+          fillColor: "#22D3EE",
+          fillOpacity: 1,
+        }).addTo(layer);
+      }
       map.setView(point, zoom);
     })();
-  }, [selected, radiusKm]);
+  }, [selected, radiusKm, identity]);
 
   return (
     <div

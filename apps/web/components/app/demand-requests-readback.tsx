@@ -29,6 +29,9 @@ export interface DemandRequestsReadbackLabels {
   readonly note: string;
   readonly empty: string;
   readonly created: string;
+  /** Honest "what you can do next" line — drafts are deletable; self-serve
+   *  editing / closing of a SUBMITTED request is not available yet (RED gap). */
+  readonly manageHelp: string;
   readonly status: Readonly<Record<CustomerRequestStatus, string>>;
   /** "Submitted details" expander + the labels for each stored payload field. */
   readonly detailsLabel: string;
@@ -89,6 +92,15 @@ export function DemandRequestsReadback({
           {labels.note}
         </p>
       </div>
+
+      {rows.length > 0 && (
+        <p
+          className="rounded-md border border-border-subtle bg-surface-1/60 px-3 py-2 text-[11px] leading-relaxed text-text-muted"
+          data-testid="demand-readback-manage-help"
+        >
+          {labels.manageHelp}
+        </p>
+      )}
 
       {rows.length === 0 ? (
         <p className="text-sm text-text-muted">{labels.empty}</p>
