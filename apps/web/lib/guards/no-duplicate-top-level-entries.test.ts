@@ -82,6 +82,26 @@ describe("one canonical market map (no separate/competing map products)", () => 
   });
 });
 
+describe("the dashboard is a command center, not a second navigation menu", () => {
+  const identity = read("components/app/identity-actions.tsx");
+
+  it("does NOT duplicate top-nav destinations (map / messages) as generic tiles", () => {
+    // Map (Žemėlapis) and Messages (Žinutės) are primary nav tabs — they must
+    // not reappear as generic IdentityActions dashboard tiles. A map/message
+    // dashboard card is only allowed when tied to REAL action-needed data (e.g.
+    // an unread/pending count), never as a plain navigation duplicate.
+    expect(identity).not.toContain('href: "/dashboard/market-map"');
+    expect(identity).not.toContain('href: "/dashboard/communication"');
+  });
+
+  it("the person focus set is true next-actions only (profile / find work / readiness)", () => {
+    const m = identity.match(/FOCUS_PERSON[\s\S]*?\[([^\]]*)\]/);
+    const set = m?.[1] ?? "";
+    expect(set).not.toContain('"marketMap"');
+    expect(set).not.toContain('"communication"');
+  });
+});
+
 describe("logout is the single intended pair (header dropdown + settings), no scatter", () => {
   it("logout posts to the auth/logout route from the account menu + account page only", () => {
     const menu = read("components/app/account-menu.tsx");

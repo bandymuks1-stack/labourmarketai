@@ -18,16 +18,11 @@ describe("market map is exposed in the command centers + dashboard", () => {
   const identity = read("components/app/identity-actions.tsx");
   const opportunities = read("app/[locale]/dashboard/opportunities/page.tsx");
 
-  it("IdentityActions has a marketMap action pointing at /dashboard/market-map", () => {
-    expect(identity).toMatch(/key:\s*"marketMap"/);
-    expect(identity).toMatch(/\/dashboard\/market-map/);
-  });
-
-  it("the market map is a first-class destination (its OWN primary nav tab)", () => {
-    // Map-first IA: the map is the central visual market surface. It is reached
-    // from the person identity actions AND directly as the "Žemėlapis" global
-    // nav tab (its own primary surface, not buried in a hub).
-    expect(identity).toMatch(/key:\s*"marketMap"/);
+  it("the market map is reached via its OWN primary nav tab (not duplicated as a dashboard tile)", () => {
+    // IA cleanup: the map is the central visual market surface, reached directly
+    // as the "Žemėlapis" global nav tab. It is intentionally NOT duplicated as a
+    // generic IdentityActions dashboard tile (dashboard ≠ second nav menu).
+    expect(identity).not.toMatch(/key:\s*"marketMap"/);
     expect(
       VISIBLE_PRIMARY_NAV_ITEMS.some(
         (i) => i.href === "/dashboard/market-map",
