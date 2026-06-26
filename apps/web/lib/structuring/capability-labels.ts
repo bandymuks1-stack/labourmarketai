@@ -66,6 +66,7 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
     en: "Customer service",
     ru: "Обслуживание клиентов",
   },
+  "Valymo darbai": { en: "Cleaning", ru: "Уборка" },
   "Programavimas / kodo pataisymai": {
     en: "Programming / code fixes",
     ru: "Программирование / правки кода",

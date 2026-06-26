@@ -37,7 +37,12 @@ export const SKILL_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "plastering", needles: ["tinkav", "tinkov", "штукатур"] },
   { slug: "skim-coating", needles: ["glaist", "шпаклев", "шпаклёв", "шпатлев"] },
   { slug: "painting", needles: ["daž", "dazym", "красил", "покраск", "маляр", "окраш"] },
-  { slug: "flooring", needles: ["grind", "ламинат", "паркет", "напольн"] },
+  // "grind" is the ambiguous floor noun (laying vs washing) — a cleaning-context
+  // guard in skill-recognition drops it for washed-floor phrases. "laminat" /
+  // "parket" are unambiguous flooring MATERIALS (LT laminatas/parketas, EN
+  // laminate, via substring) so "klojau parketą" / "dėjau laminatą" recognise
+  // deterministically, not via fuzzy.
+  { slug: "flooring", needles: ["grind", "laminat", "parket", "ламинат", "паркет", "напольн"] },
   { slug: "floor-screeding", needles: ["išlygin", "isl ygin", "стяжк"] },
   { slug: "plumbing", needles: ["santechn", "сантехник"] },
   { slug: "electrical-install", needles: ["elektr", "электр"] },
@@ -404,8 +409,24 @@ export const ACTIVITY_HINTS_LT: {
       "valymo darb",
       "valiau patalp",
       "valytoj",
+      // Real-world audit: exact floor-WASHING phrases are cleaning work, not
+      // floor-laying. Mapping them here gives an honest cleaning signal while
+      // the flooring slug is suppressed in skill-recognition. Both diacritic
+      // and plain spellings (detectActivity matches raw lowercased text).
+      "ploviau grind",
+      "išploviau grind",
+      "isploviau grind",
+      "nuploviau grind",
+      "valiau grind",
+      "valau grind",
+      "šveičiau grind",
+      "sveiciau grind",
+      "siurbiau grind",
+      "washed the floor",
+      "mopped the floor",
+      "cleaned the floor",
       "cleaning",
-      "cleaner", "убирал", "уборк", "уборщ", "мыл полы",
+      "cleaner", "убирал", "уборк", "уборщ", "мыл полы", "помыл пол", "вымыл пол",
     ],
   },
   {

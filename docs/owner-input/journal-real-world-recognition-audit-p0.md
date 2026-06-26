@@ -25,17 +25,19 @@ tests, described in §4.
 
 | Score | Count | Meaning |
 |---|---|---|
-| **GOOD** | 31 | Correct signal(s), no false positive |
+| **GOOD** | 32 | Correct signal(s), no false positive |
 | **PARTIAL** | 3 | Right where it fired, but missed or loosely-labelled part of the entry |
 | **SAFE EMPTY** | 15 | Nothing recognised — and that is the honest, correct outcome (no hallucination) |
-| **BAD** | 1 | A wrong/misleading signal (worse than nothing) |
+| **BAD** | 0 | A wrong/misleading signal (worse than nothing) |
 | **DUPLICATE / RAW** | 0 | No raw-slug leak; no duplicate concept on screen |
 
 **Before the fixes in this PR there were 4 BAD entries** (false accounting from
 roof tiles, false earthworks from "rašiau", false concrete-worker from a crane,
-and the cleaning→flooring case). Three were safe-deterministic and are now fixed;
-**one remains** (cleaning→flooring) because it needs verb-sense parsing — an
-owner-gated RED item, documented in §5.
+and cleaning→flooring). **All four are now fixed.** The first three were simple
+narrowings; the cleaning→flooring case (#23) is fixed with a deterministic
+cleaning-context blocker that suppresses the flooring trade for washed-floor
+phrases and maps the exact phrases to the existing cleaning signal (§4.6).
+**BAD is now 0.**
 
 ---
 
@@ -67,7 +69,7 @@ Legend: ✅ GOOD · 🟡 PARTIAL · ⚪ SAFE EMPTY · 🔴 BAD
 | 20 | valiau sniega nuo taku, bariau druska | — | winter service missed; importantly NOT mis-read as cleaning-floor | ⚪ |
 | 21 | Gaminau pietus, kepiau ir viriau sriubą | **cooking** (3 frags) | **FIXED** — cooking verbs added | ✅ |
 | 22 | dirbau virtuvej, pjausčiau daržoves | cooking/kitchen | | ✅ |
-| 23 | Valiau biuro patalpas, ploviau grindis | flooring (exact) | **BAD** — "grindis" (floors, washed) read as flooring trade; cleaning not recognised | 🔴 |
+| 23 | Valiau biuro patalpas, ploviau grindis | **cleaning ("Valymo darbai"); NO flooring** | **FIXED** — washed-floor phrase no longer read as floor-laying; mapped to cleaning signal | ✅ |
 | 24 | tvarkiau kambarius viesbuty, patalyne | — | hotel housekeeping not in dictionary | ⚪ |
 | 25 | pristačiau atliktus darbus klientui | client handover | | ✅ |
 | 26 | Vedžiau derybas su tiekėju | communication | | ✅ |
@@ -106,6 +108,11 @@ Legend: ✅ GOOD · 🟡 PARTIAL · ⚪ SAFE EMPTY · 🔴 BAD
 - Cross-sector capabilities: IT/web/programming, driving/ride-hail, warehouse,
   gardening, sales, accounting/documents, communication, client handover, cooking.
 - Mixed RU and EN entries.
+- **Cleaning vs floor-laying:** a floor named with a washing verb ("ploviau
+  grindis", "valiau grindis", RU "мыл полы", EN "mopped the floor") is recognised
+  as cleaning, not as the flooring trade — while real installation ("klojau
+  grindis", "dėjau laminatą", "klojau parketą", "montavau grindis") still
+  triggers flooring.
 - **Safe-empty discipline:** generic filler, place-only, and unknown sectors
   produce **nothing** rather than a guessed chip. This is the single most
   important property and it holds (15/50).
@@ -114,11 +121,6 @@ Legend: ✅ GOOD · 🟡 PARTIAL · ⚪ SAFE EMPTY · 🔴 BAD
   stay as-is by design).
 
 **Fails / limited (documented, not silently hidden):**
-- **🔴 #23 cleaning → flooring** — "ploviau **grindis**" (washed floors) matches
-  the flooring needle "grind". Distinguishing "washed floors" (cleaning) from
-  "laid floors" (flooring) needs **verb-sense** logic, which the deterministic
-  substring matcher cannot do safely without risking real flooring detection.
-  **Not fixed here** (would create a mixed/!wrong signal) → RED, §5.
 - **🟡 #7 trench-for-water-supply → "Santechnika"** — earthworks skill is correct;
   the fragment label leans plumbing because of "vandentiekiui". Borderline, not
   misleading enough to suppress; left as-is.
@@ -139,7 +141,7 @@ Legend: ✅ GOOD · 🟡 PARTIAL · ⚪ SAFE EMPTY · 🔴 BAD
 
 ## 4. Fixes applied in this PR (safe, deterministic only)
 
-All four are **narrowing or precise additions** — none widens fuzzy matching.
+All are **narrowing or precise additions** — none widens fuzzy matching.
 
 1. **Fuzzy leading-character guard** (`skill-recognition.ts`). The light-fuzzy
    tier required only edit-distance ≤1 on the leading slice, so a 1-edit *first
@@ -178,12 +180,35 @@ All four are **narrowing or precise additions** — none widens fuzzy matching.
    aptarnavimas, Programavimas / kodo pataisymai. (Full capability i18n for every
    possible label remains a separate RED — see §5.)
 
-**Tests added** — `lib/guards/journal-realworld-recognition.test.ts` (21 tests,
-25-entry pack), covering: the three fixed false positives stay fixed; the fuzzy
-guard keeps real typos; web/design → no construction; generic/unknown stays
-safe-empty; RU + EN + safe-typo handling; **no LT leak in EN/RU across the whole
-pack**; no raw-slug in label-only fragments; cooking + forklift additions surface;
-≥20 entries run without throwing.
+6. **Cleaning-context flooring blocker** (`skill-recognition.ts` +
+   `keywords.ts` + `capability-labels.ts`) — the remaining BAD (#23). The
+   flooring needle `"grind"` is the one ambiguous floor noun (shared by *laying*
+   and *washing* a floor); EN `"floor"` and RU `"пол"` are the same. The blocker
+   logic, on folded text:
+   - **suppress** the `flooring` slug only when a floor noun appears with a
+     **washing/cleaning verb** (`plov`/`valiau`/`siurb`/`sutvark`/`švei`/`мыл`/
+     `убра`/`wash`/`mop`/`vacuum`/…) **and** there is **no** floor-laying verb or
+     unambiguous material (`kloj`/`dej`/`montav`/`укладыв`/`laid`/`laminat`/
+     `parket`/`parquet`/…). So "ploviau grindis" → no flooring; "klojau grindis",
+     "dėjau laminatą", "klojau parketą", "montavau grindis", and even the mixed
+     "klojau grindis ir paskui valiau dulkes" → flooring kept (laying verb wins).
+   - **map** the exact floor-washing phrases ("ploviau/išploviau/valiau grind…",
+     RU "мыл polы", EN "washed/mopped the floor") to the **existing** label-only
+     cleaning signal **"Valymo darbai"** (no fake slug; `Cleaning`/`Уборка` added
+     to the i18n map so it does not leak LT). Ambiguous maintenance phrasing
+     ("sutvarkiau grindis") yields **SAFE EMPTY** — honest, not wrong.
+   - Also added LT material stems `"laminat"`/`"parket"` to the flooring needles
+     so "klojau parketą" / "dėjau laminatą" recognise **deterministically**
+     rather than relying on fuzzy.
+
+**Tests added** — `lib/guards/journal-realworld-recognition.test.ts` (33 tests,
+25-entry pack + a dedicated cleaning-floor block), covering: the four fixed false
+positives stay fixed; the fuzzy guard keeps real typos; **washing a floor is
+never floor-laying (LT/RU/EN) while real installation still triggers flooring**;
+floor-washing maps to the cleaning signal with no raw slug / no duplicate / no
+cert wording; web/design → no construction; generic/unknown stays safe-empty;
+RU + EN + safe-typo handling; **no LT leak in EN/RU across the whole pack**;
+cooking + forklift additions surface; ≥20 entries run without throwing.
 
 ---
 
@@ -192,11 +217,13 @@ pack**; no raw-slug in label-only fragments; cooking + forklift additions surfac
 These need design decisions or non-deterministic/DB work and are deliberately
 left out of this audit PR:
 
-- **Verb-sense parsing** (the real fix for #23 cleaning→flooring and similar
-  "washed floors vs laid floors" cases). Requires understanding the verb acting
-  on a noun — a structured parser or NLP model, not substring matching.
-- **Cleaning as a first-class recognised sector** — only safe once verb-sense
-  exists, otherwise it co-fires with the flooring false positive.
+- **General verb-sense parsing** — the #23 floor-wash case is now handled
+  deterministically (§4.6), but the same verb-vs-noun ambiguity exists elsewhere
+  and a general solution still needs a structured parser / NLP model, not
+  substring matching. Other ambiguous trade nouns are not yet guarded.
+- **Cleaning as a first-class recognised sector** — only the exact floor-washing
+  phrases are mapped today; full cleaning recognition (all surfaces, equipment,
+  RU/EN breadth) is a separate dictionary slice.
 - **Full capability-label i18n** — translate *every* possible LT capability/
   activity label (this PR only translates the ones the pack exercised).
 - **EN "and" fragment splitting + EN driving verbs** — broaden the splitter and
@@ -216,7 +243,7 @@ left out of this audit PR:
 - **Draft PR only — NOT merged, NOT deployed.**
 - **No** DB/schema/RLS/RPC/Supabase/env/DNS/billing/payment/auth-core change; no
   production mutation; no fake skill; no public test route; no auth bypass.
-- **Validation:** `pnpm -F web typecheck` ✅ · `pnpm -F web lint` ✅ · full
-  `vitest` 395 files / 5653 tests ✅.
-- **Entries tested:** 50 · GOOD 31 · PARTIAL 3 · SAFE EMPTY 15 · BAD 1 ·
+- **Validation:** `pnpm -F web typecheck` ✅ · `pnpm -F web lint` ✅ ·
+  `pnpm -F web build` ✅ · full `vitest` 395 files / 5666 tests ✅.
+- **Entries tested:** 50 · GOOD 32 · PARTIAL 3 · SAFE EMPTY 15 · **BAD 0** ·
   DUPLICATE/RAW 0.

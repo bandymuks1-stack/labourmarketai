@@ -111,6 +111,83 @@ describe("Guard: audited false positives stay fixed (wrong signal is worse than 
   });
 });
 
+describe("Guard: washing a floor is cleaning, never floor-laying (#23)", () => {
+  // Owner rule: a wrong signal is worse than no signal. "ploviau grindis" (I
+  // washed the floors) must NOT become the flooring trade. The floor noun is
+  // only suppressed in a cleaning context — real installation is untouched.
+  const CLEANING_FLOOR = [
+    "ploviau grindis",
+    "išploviau grindis",
+    "valiau grindis",
+    "sutvarkiau grindis",
+    "Valiau biuro patalpas, siurbiau ir ploviau grindis",
+    "мыл полы в офисе",
+    "mopped the floor in the hall",
+  ];
+  for (const text of CLEANING_FLOOR) {
+    it(`"${text}" → no flooring / floor-laying skill`, () => {
+      expect(skillSlugs(text)).not.toContain("flooring");
+      // No construction skill at all from cleaning a floor.
+      for (const slug of skillSlugs(text)) {
+        expect(CONSTRUCTION_SLUGS.has(slug), `unexpected construction ${slug}`).toBe(false);
+      }
+    });
+  }
+
+  it("exact floor-washing phrases map to the cleaning signal (not empty)", () => {
+    // A safe, existing capability (Valymo darbai) — label-only, no fake slug.
+    expect(labelOnlyFragmentLabels("ploviau grindis")).toContain("Valymo darbai");
+    expect(labelOnlyFragmentLabels("Valiau biuro patalpas, siurbiau ir ploviau grindis"))
+      .toContain("Valymo darbai");
+  });
+
+  it("the cleaning signal localizes (no LT leak, no raw slug, no cert wording)", () => {
+    // Label-only signal carries a real localized label, never a raw slug.
+    for (const f of suggest("ploviau grindis").fragments) {
+      if (f.activityLabel === "Valymo darbai") {
+        expect(f.activitySlug).toBeNull(); // no invented skill slug
+      }
+    }
+    expect(localizeCapabilityLabel("Valymo darbai", "en")).toBe("Cleaning");
+    expect(localizeCapabilityLabel("Valymo darbai", "ru")).toBe("Уборка");
+    // No certification / verification wording on the cleaning signal.
+    const CERT = /confirm|verif|patvirtin|approved|certified|trusted/i;
+    for (const locale of ["lt", "en", "ru"]) {
+      expect(localizeCapabilityLabel("Valymo darbai", locale)).not.toMatch(CERT);
+    }
+  });
+
+  it("floor-washing produces no duplicate concept (one signal, once)", () => {
+    const text = "ploviau grindis";
+    const fragLabels = labelOnlyFragmentLabels(text);
+    const caps = capLabels(text);
+    const all = [...fragLabels, ...caps].map((s) => s.toLowerCase());
+    // No flooring concept alongside the cleaning concept; no repeated label.
+    expect(all).not.toContain("grindų klojimas");
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it("real floor INSTALLATION still triggers flooring", () => {
+    for (const text of [
+      "klojau grindis",
+      "dėjau laminatą",
+      "klojau parketą",
+      "montavau grindis",
+      // mixed: laid the floor THEN wiped dust — laying verb wins, flooring kept.
+      "klojau grindis ir paskui valiau dulkes",
+    ]) {
+      expect(skillSlugs(text), `flooring missing for "${text}"`).toContain("flooring");
+    }
+  });
+
+  it("unknown cleaning text with no exact safe signal stays safe-empty", () => {
+    // No floor noun, no exact cleaning-floor phrase → no invented chip.
+    const text = "tampiau šiukšles ir tvarkiau";
+    expect(skillSlugs(text)).toEqual([]);
+    expect(capLabels(text)).toEqual([]);
+  });
+});
+
 describe("Guard: web / design text never produces construction", () => {
   it("#9 website + React → IT signals only", () => {
     const text = "Dirbau prie naujos svetainės dizaino, taisiau CSS ir React komponentus 7h";

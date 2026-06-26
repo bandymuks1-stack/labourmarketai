@@ -39,6 +39,36 @@ const FUZZY_MIN_TOKEN_LEN = 6;
 const FUZZY_MIN_STEM_LEN = 6;
 const FUZZY_MAX_DISTANCE = 1;
 
+/**
+ * Cleaning-context guard for the flooring slug (real-world audit).
+ *
+ * "flooring" is the one trade with an ambiguous needle: a bare floor noun
+ * ("grind…" / EN "floor" / RU "пол") is shared between LAYING a floor and
+ * CLEANING one. "ploviau grindis" (I washed the floors) was wrongly read as
+ * floor-laying. Owner rule: a wrong signal is worse than none. So when a floor
+ * noun appears with a washing/cleaning verb AND no floor-laying verb (and no
+ * unambiguous flooring material like laminate/parquet), we DROP flooring.
+ * Real installation phrasings ("klojau/dėjau/montavau grindis", "dėjau
+ * laminatą", "klojau parketą") all carry a laying verb or a material, so they
+ * are never suppressed. Matching is on FOLDED text (diacritics stripped).
+ */
+const FLOOR_NOUN_RE = /grind|floor|пол/;
+/** Floor-laying verbs OR unambiguous flooring materials → real flooring, keep. */
+const FLOOR_INSTALL_RE =
+  /kloj|dej|montav|klijav|tiesi|ireng|uzdej|laminat|ламинат|parket|паркет|parquet|laminate|напольн|laid floor|укладыв|стелил|laid|install|fitt|\blay\b/;
+/** Washing / cleaning verbs (folded LT + RU + EN). */
+const FLOOR_CLEAN_RE =
+  /plov|plau|valiau|valau|valyt|svei|siurb|sluost|sutvark|sluav|мыл|помыл|мою|вымыл|убра|пропылесос|wash|mopp|mop |vacuum|hoover|swept|sweep|\bclean/;
+
+/** True when a floor is named in an unmistakably cleaning (not laying) context. */
+function isCleaningFloorContext(foldedText: string): boolean {
+  return (
+    FLOOR_NOUN_RE.test(foldedText) &&
+    FLOOR_CLEAN_RE.test(foldedText) &&
+    !FLOOR_INSTALL_RE.test(foldedText)
+  );
+}
+
 type Term = { slug: string; term: string; via: "exact" | "synonym"; len: number };
 
 /** Folded dictionary terms (built once). Exact terms come from the base
@@ -152,6 +182,12 @@ export function recognizeSkills(
         }
       }
     }
+  }
+
+  // Cleaning-context guard: drop a flooring suggestion that exists only because
+  // a floor was named in a washing/cleaning context (e.g. "ploviau grindis").
+  if (best.has("flooring") && isCleaningFloorContext(folded)) {
+    best.delete("flooring");
   }
 
   const list: RecognizedSkill[] = [...best.entries()].map(([slug, b]) => ({
