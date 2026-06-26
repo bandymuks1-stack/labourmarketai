@@ -41,12 +41,40 @@ export interface ConversationCardModel {
   readonly scopeKey: string;
   /** True when the scope is honestly known; false = honest-unknown fallback. */
   readonly scopeKnown: boolean;
+  /**
+   * i18n key (under `communication`) for who STARTED the thread — derived only
+   * from the real `conversations.created_by` vs the viewer's id (RLS-safe: the
+   * row is already readable by the viewer). `null` when `created_by` is missing
+   * (then render nothing — never guess). This is the one real, fake-free context
+   * signal available without a co-participant profile read or a schema link:
+   * "did I reach out, or did someone reach out to me?"
+   */
+  readonly originKey: string | null;
 }
 
-/** Build the honest card model from a conversation's real `kind`. */
-export function describeConversationCard(input: { kind: string }): ConversationCardModel {
+/**
+ * Honest "who started this thread" key from the real creator vs the viewer.
+ * Returns null when it cannot be known (no created_by / no viewer) so the UI
+ * renders nothing rather than inventing an origin. Never reveals WHO the other
+ * party is — only whether the viewer themselves started the conversation.
+ */
+export function deriveOriginKey(
+  createdBy: string | null | undefined,
+  viewerId: string | null | undefined,
+): string | null {
+  if (!createdBy || !viewerId) return null;
+  return createdBy === viewerId ? "origin.you" : "origin.other";
+}
+
+/** Build the honest card model from a conversation's real `kind` (+ creator). */
+export function describeConversationCard(input: {
+  kind: string;
+  createdBy?: string | null;
+  viewerId?: string | null;
+}): ConversationCardModel {
   const kind = normalizeKind(input.kind);
   const typeKey = `kind.${kind}`;
+  const originKey = deriveOriginKey(input.createdBy, input.viewerId);
 
   if (kind === "support") {
     return {
@@ -55,6 +83,7 @@ export function describeConversationCard(input: { kind: string }): ConversationC
       counterpartyKnown: true,
       scopeKey: "scope.support",
       scopeKnown: true,
+      originKey,
     };
   }
 
@@ -66,5 +95,6 @@ export function describeConversationCard(input: { kind: string }): ConversationC
     counterpartyKnown: false,
     scopeKey: "scope.unknown",
     scopeKnown: false,
+    originKey,
   };
 }
