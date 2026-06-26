@@ -60,6 +60,12 @@ export type MapIdentity = {
   initial: string;
   avatarUrl: string | null;
   statusLabel?: string | null;
+  /** Real localized profession / lead-capability label (omit when unset). */
+  professionLabel?: string | null;
+  /** Real localized availability label (omit when unknown). */
+  availabilityLabel?: string | null;
+  /** Real count of confirmed skills (worker_skills.verified); 0 → no badge. */
+  verifiedSkillsCount?: number;
 };
 
 export function MarketMapBase({

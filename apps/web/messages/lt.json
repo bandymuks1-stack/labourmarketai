@@ -246,6 +246,11 @@
     },
     "markerYou": "Jūs",
     "markerCompany": "Įmonė",
+    "markerAvail": {
+      "available": "Laisvas",
+      "busy": "Užimtas",
+      "unavailable": "Nedirba"
+    },
     "title": "Mano rinkos žemėlapis",
     "subtitle": "Kur esate, kur norite veikti ir kur yra poreikis — rodoma tik jūsų pačių saugiais, privačiais signalais.",
     "ownerScopeNote": "Tai jūsų asmeninė rinkos žemėlapio erdvė — rodoma tik jūsų pačių signalais, šalies / regiono lygiu. Kitų vartotojų signalai nerodomi, o tiksli vieta — tik jums patvirtinus. Viešas rinkos sluoksnis bus jungiamas atskirai, tik su agregavimo apsauga.",
@@ -604,6 +609,9 @@
     },
     "reviewHeading": "Reikia peržiūrėti",
     "reviewHelper": "Šie įgūdžiai susieti, bet šio įrašo tekstas jų nepagrindžia. Peržiūrėkite arba atsiekite netinkamus.",
+    "reviewSummary": "{count} anksčiau susietų įgūdžių nebeatitinka šio įrašo teksto. Jie nerodomi kaip šio įrašo įgūdžiai.",
+    "reviewShow": "Rodyti",
+    "reviewHide": "Slėpti",
     "reviewAgain": "Peržiūrėti iš naujo",
     "unlinkFlagged": "Atsieti",
     "linkMore": "Susieti įgūdį",

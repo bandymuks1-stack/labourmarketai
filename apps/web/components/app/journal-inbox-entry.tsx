@@ -127,6 +127,23 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
   const done = confirmState?.ok === true || reviewState?.ok === true;
   const isPending = reviewPending || confirmPending;
 
+  // A permission denial is TERMINAL for this card. When the server says the
+  // reviewer cannot act on this entry (not their org / no active reviewer
+  // engagement / review not enabled), we hide the action buttons so the UI
+  // never shows "Approve / Reject" right next to "Neturite teisės peržiūrėti
+  // šio įrašo" (owner mobile review found this contradiction). The single
+  // honest reason (`resultMessage`) is what remains. No fake approval, and no
+  // backend change — the buttons simply stop pretending an action is available
+  // when the real permission path already refused it.
+  const blockedCodes = ["not_authorized", "no_reviewer_engagement", "review_not_enabled"] as const;
+  const isBlocked = (code: string | undefined) =>
+    code != null && (blockedCodes as readonly string[]).includes(code);
+  const permissionBlocked =
+    (confirmState?.ok === false && isBlocked(confirmState.code)) ||
+    (reviewState?.ok === false && isBlocked(reviewState.code));
+  // Whether the reviewer may still act (drives every action surface below).
+  const canAct = !done && !permissionBlocked;
+
   return (
     <li className="card-border flex flex-col gap-3 p-4" data-testid={`inbox-entry-${entry.id}`}>
       <div className="flex items-start justify-between gap-3">
@@ -238,7 +255,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         </div>
       )}
 
-      {!done && mode === "idle" ? (
+      {canAct && mode === "idle" ? (
         <div className="flex flex-wrap items-center gap-2">
           {/* Approve the entry (acknowledge the real work) — no skill
               verification required; works even with no declared skills. */}
@@ -291,7 +308,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
       {/* Review clarity — what each action does to the worker's evidence, so
           the reviewer confirms with intent. Shown only in the idle state to
           avoid overloading the open forms. */}
-      {!done && mode === "idle" ? (
+      {canAct && mode === "idle" ? (
         <div
           className="flex flex-col gap-0.5 text-[10px] leading-relaxed text-text-muted"
           data-testid={`inbox-review-clarity-${entry.id}`}
@@ -309,7 +326,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
       ) : null}
 
       {/* Confirm-skills: pick which declared skills this entry proves → verify. */}
-      {!done && mode === "confirm" ? (
+      {canAct && mode === "confirm" ? (
         declaredUnverified.length === 0 ? (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-text-muted">{t("inbox.noSkillsToConfirm")}</p>
@@ -355,7 +372,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         )
       ) : null}
 
-      {!done && (mode === "rejected" || mode === "changes_requested") ? (
+      {canAct && (mode === "rejected" || mode === "changes_requested") ? (
         <form action={reviewAction} className="flex flex-col gap-2">
           <input type="hidden" name="entry_id" value={entry.id} />
           <input type="hidden" name="decision" value={mode} />

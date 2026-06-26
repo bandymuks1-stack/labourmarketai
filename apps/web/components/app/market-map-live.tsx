@@ -63,6 +63,14 @@ export type MapIdentity = {
   avatarUrl: string | null;
   /** Short real status/type pill (e.g. "Jūs" / "Įmonė"); omit when none. */
   statusLabel?: string | null;
+  /** Localized profession / lead-capability label (real, from the worker row);
+   *  omit when not set. */
+  professionLabel?: string | null;
+  /** Localized availability label (real availability_status); omit when unknown. */
+  availabilityLabel?: string | null;
+  /** Count of manager/client-confirmed skills (real worker_skills.verified). 0
+   *  or omitted → no trust badge (never a fabricated count). */
+  verifiedSkillsCount?: number;
 };
 
 /** Build the premium mini-player-card pin HTML for the Leaflet divIcon. Inline
@@ -74,18 +82,41 @@ function identityPinHtml(identity: MapIdentity): string {
   const safeName = escapeHtml(identity.name);
   const safeInitial = escapeHtml(identity.initial || "•");
   const isCompany = identity.kind === "company";
-  const radius = isCompany ? "10px" : "9999px";
+  const radius = isCompany ? "12px" : "9999px";
+  // Larger avatar (52px) — the own marker should read as a real player card on
+  // the map, especially on mobile, not a tiny dot.
   const inner = identity.avatarUrl
-    ? `<img src="${escapeHtml(identity.avatarUrl)}" alt="" style="width:40px;height:40px;border-radius:${radius};object-fit:cover;display:block" />`
-    : `<div style="width:40px;height:40px;border-radius:${radius};background:#22D3EE;color:#0B1014;display:flex;align-items:center;justify-content:center;font:700 16px/1 ui-sans-serif,system-ui,sans-serif">${safeInitial}</div>`;
-  const pill = identity.statusLabel
-    ? `<div style="margin-top:2px;background:rgba(34,211,238,.16);color:#22D3EE;font:700 8px/1.4 ui-sans-serif,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:9999px;border:1px solid rgba(34,211,238,.5)">${escapeHtml(identity.statusLabel)}</div>`
+    ? `<img src="${escapeHtml(identity.avatarUrl)}" alt="" style="width:52px;height:52px;border-radius:${radius};object-fit:cover;display:block" />`
+    : `<div style="width:52px;height:52px;border-radius:${radius};background:#22D3EE;color:#0B1014;display:flex;align-items:center;justify-content:center;font:700 20px/1 ui-sans-serif,system-ui,sans-serif">${safeInitial}</div>`;
+  const statusPill = identity.statusLabel
+    ? `<span style="background:rgba(34,211,238,.16);color:#22D3EE;font:700 8px/1.4 ui-sans-serif,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:9999px;border:1px solid rgba(34,211,238,.5)">${escapeHtml(identity.statusLabel)}</span>`
     : "";
+  // Availability — real availability_status only (omitted when unknown).
+  const availPill = identity.availabilityLabel
+    ? `<span style="background:rgba(232,238,242,.10);color:#E8EEF2;font:600 8px/1.4 ui-sans-serif,system-ui,sans-serif;padding:1px 6px;border-radius:9999px;border:1px solid rgba(232,238,242,.25)">${escapeHtml(identity.availabilityLabel)}</span>`
+    : "";
+  // Verified-skills — gold trust accent, shown ONLY for a real confirmed count.
+  const verified = identity.verifiedSkillsCount ?? 0;
+  const verifiedBadge =
+    verified > 0
+      ? `<span style="background:rgba(212,175,90,.14);color:#D4AF5A;font:700 8px/1.4 ui-sans-serif,system-ui,sans-serif;padding:1px 6px;border-radius:9999px;border:1px solid rgba(212,175,90,.5)">✓ ${verified}</span>`
+      : "";
+  // Profession / lead-capability — real localized label (omitted when unset).
+  const professionLine = identity.professionLabel
+    ? `<div style="margin-top:2px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#A9B4BD;font:500 9px/1.3 ui-sans-serif,system-ui,sans-serif">${escapeHtml(identity.professionLabel)}</div>`
+    : "";
+  const pills = [statusPill, availPill, verifiedBadge].filter(Boolean).join("");
+  const pillRow = pills
+    ? `<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;justify-content:center;max-width:160px">${pills}</div>`
+    : "";
+  // Gold trust ring only when there is a real confirmed signal.
+  const ringColor = verified > 0 ? "#D4AF5A" : "#22D3EE";
   return (
     `<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer">` +
-    `<div style="padding:3px;border-radius:${isCompany ? "13px" : "9999px"};background:#0B1014;border:2px solid #22D3EE;box-shadow:0 8px 20px rgba(0,0,0,.55)">${inner}</div>` +
-    `<div style="margin-top:4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(11,16,20,.94);color:#E8EEF2;font:600 11px/1.3 ui-sans-serif,system-ui,sans-serif;padding:2px 8px;border-radius:8px;border:1px solid rgba(34,211,238,.5)">${safeName}</div>` +
-    pill +
+    `<div style="padding:3px;border-radius:${isCompany ? "15px" : "9999px"};background:#0B1014;border:2px solid ${ringColor};box-shadow:0 8px 22px rgba(0,0,0,.6)">${inner}</div>` +
+    `<div style="margin-top:4px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(11,16,20,.94);color:#E8EEF2;font:700 11px/1.3 ui-sans-serif,system-ui,sans-serif;padding:2px 8px;border-radius:8px;border:1px solid rgba(34,211,238,.5)">${safeName}</div>` +
+    professionLine +
+    pillRow +
     `</div>`
   );
 }
@@ -184,8 +215,8 @@ export function MarketMapLive({
         const icon = L.divIcon({
           html: identityPinHtml(identity),
           className: "lm-map-identity-pin",
-          iconSize: [140, 74],
-          iconAnchor: [70, 40],
+          iconSize: [160, 108],
+          iconAnchor: [80, 29],
         });
         const marker = L.marker(point, {
           icon,
@@ -217,7 +248,7 @@ export function MarketMapLive({
       role="application"
       aria-label={ariaLabel}
       data-testid="market-map-live"
-      className="h-[58vh] min-h-[20rem] w-full overflow-hidden rounded-lg md:h-[28rem]"
+      className="h-[66vh] min-h-[24rem] w-full overflow-hidden rounded-lg md:h-[32rem]"
       style={{ touchAction: "pan-x pan-y" }}
     />
   );

@@ -59,6 +59,12 @@ export function JournalEntrySkillLinks({
   // disclosure — otherwise every entry card showed the worker's whole profile
   // skill set (e.g. a construction worker's chips on a dog-walking entry).
   const [picker, setPicker] = useState(false);
+  // Stale links the entry text no longer supports stay COLLAPSED by default:
+  // an old entry must not visibly show unrelated chips (owner mobile review —
+  // a web-design entry still showed eight construction skills). We surface only
+  // an honest one-line summary + a clean-up action; the actual chips expand on
+  // request. No DB mutation — the links remain until the worker unlinks them.
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const sourceOf = (id: string): EntrySkillSource =>
     skillSources?.[id] ?? "manually_linked_to_entry";
@@ -174,8 +180,10 @@ export function JournalEntrySkillLinks({
         )}
       </ul>
 
-      {/* Review bucket: linked skills the entry text does not support. Compact,
-          amber, and explicitly NOT presented as clean current evidence. */}
+      {/* Review bucket: linked skills the entry text does not support. COLLAPSED
+          by default — only an honest summary + clean-up action show, so stale
+          unrelated chips are never presented as this entry's skills. The chips
+          themselves expand on request. Amber, and explicitly NOT clean evidence. */}
       {reviewChips.length > 0 && (
         <div
           className="mt-1 flex flex-col gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/5 p-2"
@@ -184,13 +192,27 @@ export function JournalEntrySkillLinks({
           <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
             {t("reviewHeading")}
           </p>
-          <p className="text-[10px] leading-relaxed text-text-muted">
-            {t("reviewHelper")}
+          <p
+            className="text-[10px] leading-relaxed text-text-muted"
+            data-testid={`entry-skill-review-summary-${entryId}`}
+          >
+            {t("reviewSummary", { count: reviewChips.length })}
           </p>
-          <ul className="flex flex-wrap gap-1">
-            {reviewChips.map((s) => chip(s, "review"))}
-          </ul>
+          {reviewOpen && (
+            <ul className="flex flex-wrap gap-1">
+              {reviewChips.map((s) => chip(s, "review"))}
+            </ul>
+          )}
           <div className="flex flex-wrap items-center gap-3 pt-0.5">
+            <button
+              type="button"
+              onClick={() => setReviewOpen((v) => !v)}
+              className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-secondary"
+              data-testid={`entry-skill-review-toggle-${entryId}`}
+              aria-expanded={reviewOpen}
+            >
+              {reviewOpen ? t("reviewHide") : t("reviewShow")}
+            </button>
             <Link
               href={`/dashboard/journal?editing=${entryId}#journal-composer`}
               className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan"
