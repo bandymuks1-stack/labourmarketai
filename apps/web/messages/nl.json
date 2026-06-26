@@ -1122,6 +1122,52 @@
     "reviewDisabledBadge": "No review"
   },
   "admin": {
+    "room": {
+      "groups": {
+        "overview": {
+          "title": "[EN] Overview",
+          "purpose": "[EN] The state of the system right now."
+        },
+        "people": {
+          "title": "[EN] People",
+          "purpose": "[EN] Profiles to review and inspect."
+        },
+        "companies": {
+          "title": "[EN] Companies",
+          "purpose": "[EN] Company records and verification."
+        },
+        "demand": {
+          "title": "[EN] Demand",
+          "purpose": "[EN] Requests and unstructured needs to act on."
+        },
+        "matching": {
+          "title": "[EN] Matching",
+          "purpose": "[EN] Where people, demand and supply meet — the decision layer."
+        },
+        "marketSignals": {
+          "title": "[EN] Market signals",
+          "purpose": "[EN] Supply, demand and gaps across the market."
+        },
+        "quality": {
+          "title": "[EN] Quality & risk",
+          "purpose": "[EN] Data quality, readiness and operational risk."
+        },
+        "operations": {
+          "title": "[EN] Operations",
+          "purpose": "[EN] Support, billing and the next owner actions."
+        }
+      },
+      "kpi": {
+        "people": "[EN] Active people",
+        "peopleIncomplete": "[EN] Incomplete profiles",
+        "companies": "[EN] Companies",
+        "demand": "[EN] Open demand",
+        "reviewQueue": "[EN] Awaiting review",
+        "claims": "[EN] Skill claims"
+      },
+      "internalBadge": "[EN] Internal",
+      "internalNote": "[EN] Internal diagnostics — technical detail for the owner, not a product surface."
+    },
     "matching": {
       "eyebrow": "[EN] ADMIN · PHASE 3",
       "title": "[EN] Matching workbench",

@@ -156,9 +156,11 @@ export default async function MarketMapPage({
           ],
         }}
       />
-      {/* App-like: detailed explanatory layout + capture tools are collapsed so
-          the single map dominates the screen. Nothing removed — progressively
-          disclosed. */}
+      {/* The map + legend above carry the signal visually. Everything below is
+          a secondary "Manage my locations & market layers" panel, collapsed by
+          default so the map dominates: it LEADS with the functional capture +
+          readiness tools, and the explanatory signal board / world overview are
+          demoted to the end (progressive disclosure, not the main carrier). */}
       <details className="group flex flex-col gap-4" data-testid="market-map-advanced">
         <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">
           <span className="font-mono text-[10px] uppercase tracking-label text-text-muted group-open:hidden">+</span>
@@ -166,12 +168,14 @@ export default async function MarketMapPage({
           {tMap("advanced")}
         </summary>
         <div className="mt-4 flex flex-col gap-4">
+          {/* Functional tools first — manage your real locations + readiness. */}
+          <MarketMapCapture preferred={preferred} login={login} demand={demand} />
+          <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
+          {/* Explanatory surfaces demoted to the end — never the primary view. */}
           <FeatureNote testId="feature-note-market-map">
             {tNote("marketplaceMap")}
           </FeatureNote>
           <MarketMapShell />
-          <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
-          <MarketMapCapture preferred={preferred} login={login} demand={demand} />
           <LabourMarketWorldMap />
         </div>
       </details>

@@ -237,8 +237,8 @@
   "marketMap": {
     "backToActions": "Veiksmų centras",
     "pageTitle": "Žemėlapis",
-    "pageLead": "Tavo ir rinkos vaizdas viename žemėlapyje: asmens ar įmonės tapatybė ir tikri rinkos signalai.",
-    "advanced": "Išsamiau",
+    "pageLead": "Tavo ir rinkos vaizdas viename žemėlapyje.",
+    "advanced": "Mano vietos ir rinkos sluoksniai",
     "companyContext": {
       "title": "Įmonės kontekstas",
       "missingLocation": "Įmonės vieta dar nepridėta",
@@ -1544,9 +1544,55 @@
     }
   },
   "admin": {
+    "room": {
+      "groups": {
+        "overview": {
+          "title": "Apžvalga",
+          "purpose": "Dabartinė sistemos būklė."
+        },
+        "people": {
+          "title": "Žmonės",
+          "purpose": "Profiliai, kuriuos reikia peržiūrėti."
+        },
+        "companies": {
+          "title": "Įmonės",
+          "purpose": "Įmonių įrašai ir patvirtinimas."
+        },
+        "demand": {
+          "title": "Paklausa",
+          "purpose": "Užklausos ir nesutvarkyti poreikiai."
+        },
+        "matching": {
+          "title": "Suvedimas",
+          "purpose": "Kur susitinka žmonės, paklausa ir pasiūla — sprendimų sluoksnis."
+        },
+        "marketSignals": {
+          "title": "Rinkos signalai",
+          "purpose": "Pasiūla, paklausa ir spragos rinkoje."
+        },
+        "quality": {
+          "title": "Kokybė ir rizika",
+          "purpose": "Duomenų kokybė, pasirengimas ir operacinė rizika."
+        },
+        "operations": {
+          "title": "Operacijos",
+          "purpose": "Pagalba, mokėjimai ir artimiausi veiksmai."
+        }
+      },
+      "kpi": {
+        "people": "Aktyvūs žmonės",
+        "peopleIncomplete": "Nepilni profiliai",
+        "companies": "Įmonės",
+        "demand": "Atvira paklausa",
+        "reviewQueue": "Laukia peržiūros",
+        "claims": "Įgūdžių deklaracijos"
+      },
+      "internalBadge": "Vidinis",
+      "internalNote": "Vidinė diagnostika — techninė informacija savininkui, ne produkto paviršius."
+    },
     "eyebrow": "OPERACIJŲ VALDYMAS",
-    "title": "Operacijų valdymo skydas",
-    "subtitle": "Tik superadminams. Saugomi serverio pusės RLS ir profiles.active_role = 'admin'.",
+    "title": "Savininko / operacijų valdymo centras",
+    "subtitle": "Viskas, ką savininkui reikia matyti ir daryti — vienoje vietoje.",
     "back": "Grįžti į operacijų skydą",
     "metric": {
       "totalUsers": "Profiliai iš viso",
@@ -1562,7 +1608,7 @@
       "inspect": "Tikrinti →"
     },
     "hub": {
-      "projectTruth": "Projekto tiesa · P0",
+      "projectTruth": "Sistemos diagnostika",
       "agentOs": "Agentų OS",
       "telemetry": "Operacijų telemetrija",
       "languageFeedback": "Kalbos pranešimai",
@@ -1589,7 +1635,7 @@
       "title": "Pirkėjų užklausos — rankinė peržiūra",
       "help": "Pirmenybė nustatoma deterministiškai pagal realius laukus (aprašymą, failų skaičių, būseną). Be dirbtinio intelekto, be automatinio nuskaitymo.",
       "empty": "Pirkėjų užklausų dar nėra.",
-      "migrationBlocker": "Reikia migracijų 0028_customer_requests / 0029_customer_request_attachments.",
+      "migrationBlocker": "Šis skyrius laikinai nepasiekiamas, kol ruošiami jo duomenys.",
       "filesLabel": "Failai",
       "created": "Sukurta",
       "noDescription": "Aprašymas nenurodytas",
@@ -1686,7 +1732,7 @@
       "subtitle": "Atviri poreikiai šalia darbuotojų pasiūlos — peržiūrėk, nuspręsk, užfiksuok.",
       "humanNote": "Kiekvienas match čia parinktas žmogaus, ne algoritmo. Sistema nereitinguoja ir nesiūlo — ji tik rodo realius duomenis ir užfiksuoja tavo sprendimą su grįžtamojo ryšio pastaba.",
       "back": "Grįžti į admin",
-      "migrationBlocker": "Demand intake konsolidacijos migracija šioje aplinkoje dar nepritaikyta — darbastalis užblokuotas, kol ji bus pritaikyta.",
+      "migrationBlocker": "Suvedimo darbastalis laikinai nepasiekiamas, kol ruošiami jo duomenys.",
       "demand": {
         "title": "Atviri poreikiai",
         "count": "{count} atvirų užklausų",
@@ -1753,7 +1799,7 @@
         "notAdmin": "Tavo sesija neturi admin teisių šiai užklausai.",
         "invalid": "Netinkamas sprendimas — pasirink darbuotoją ir veiksmą.",
         "notFound": "Užklausa arba darbuotojas nebeegzistuoja.",
-        "needsMigration": "Konsolidacijos migracija nepritaikyta — fiksavimas užblokuotas.",
+        "needsMigration": "Fiksavimas laikinai nepasiekiamas, kol ruošiami duomenys.",
         "error": "Nepavyko užfiksuoti sprendimo."
       },
       "suggestions": {
@@ -1811,7 +1857,7 @@
       "subtitle": "Pasiūla, paklausa, admin įvesti rinkos vidurkiai ir spragos — tik realūs platformos skaičiai.",
       "methodNote": "Kiekvienas skaičius šiame puslapyje — realus realių eilučių skaičius. Rinkos vidurkius admin įveda ranka iš įvardyto šaltinio — platforma jų niekada nespėja. Mažos imtys (n<5) pažymimos.",
       "back": "Admin skydelis",
-      "needsMigration": "Rinkos vidurkiai dar neparuošti — S4 migracija laukia savininko vartų.",
+      "needsMigration": "Rinkos vidurkiai dar neparuošti.",
       "smallSample": "⚠ n<5",
       "unknownCountry": "Nenurodyta",
       "averages": {
@@ -4904,7 +4950,7 @@
     },
     "docQueue": {
       "title": "Dokumentų patvirtinimo eilė",
-      "unavailable": "Patvirtinimo laukas dar neįjungtas (laukiama migracijos).",
+      "unavailable": "Patvirtinimo laukas dar neįjungtas.",
       "empty": "Nė vienas dokumentas nelaukia patvirtinimo.",
       "verify": "Patvirtinti",
       "reject": "Atmesti",
@@ -4918,12 +4964,12 @@
     },
     "bookings": {
       "title": "Rezervacijų aktyvumas",
-      "unavailable": "Rezervacija dar neįjungta (laukiama migracijos).",
+      "unavailable": "Rezervacija dar neįjungta.",
       "empty": "Rezervacijų dar nėra."
     },
     "payment": {
       "title": "Mokėjimų pasiruošimas",
-      "body": "Mokėjimai neįjungti. {count} mokami planai aprašyti, bet neapmokestinami. Atskiras Stripe sprintas išsprendžia kliūčių sąrašą prieš bet kokius pinigus."
+      "body": "Mokėjimai neįjungti. {count} mokami planai aprašyti, bet neapmokestinami. Jie bus įjungti atskirai, kai bus pašalintos likusios kliūtys."
     }
   },
   "companyReadiness": {
@@ -5065,7 +5111,7 @@
     "applying": "Saugoma…",
     "applied": "Pritaikyta",
     "applyError": "Nepavyko išsaugoti. Bandykite dar kartą.",
-    "applyNotAdmin": "Reikia administratoriaus teisių (active_role='admin')."
+    "applyNotAdmin": "Reikia administratoriaus teisių."
   },
   "opportunities": {
     "title": "Man tinkamos galimybės",

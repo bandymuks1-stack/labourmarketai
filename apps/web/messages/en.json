@@ -237,8 +237,8 @@
   "marketMap": {
     "backToActions": "Action center",
     "pageTitle": "Map",
-    "pageLead": "You and the market on one map: person or company identity and real market signals.",
-    "advanced": "Details",
+    "pageLead": "You and the market on one map.",
+    "advanced": "My locations & market layers",
     "companyContext": {
       "title": "Company context",
       "missingLocation": "Company location not added yet",
@@ -1544,9 +1544,55 @@
     }
   },
   "admin": {
+    "room": {
+      "groups": {
+        "overview": {
+          "title": "Overview",
+          "purpose": "The state of the system right now."
+        },
+        "people": {
+          "title": "People",
+          "purpose": "Profiles to review and inspect."
+        },
+        "companies": {
+          "title": "Companies",
+          "purpose": "Company records and verification."
+        },
+        "demand": {
+          "title": "Demand",
+          "purpose": "Requests and unstructured needs to act on."
+        },
+        "matching": {
+          "title": "Matching",
+          "purpose": "Where people, demand and supply meet — the decision layer."
+        },
+        "marketSignals": {
+          "title": "Market signals",
+          "purpose": "Supply, demand and gaps across the market."
+        },
+        "quality": {
+          "title": "Quality & risk",
+          "purpose": "Data quality, readiness and operational risk."
+        },
+        "operations": {
+          "title": "Operations",
+          "purpose": "Support, billing and the next owner actions."
+        }
+      },
+      "kpi": {
+        "people": "Active people",
+        "peopleIncomplete": "Incomplete profiles",
+        "companies": "Companies",
+        "demand": "Open demand",
+        "reviewQueue": "Awaiting review",
+        "claims": "Skill claims"
+      },
+      "internalBadge": "Internal",
+      "internalNote": "Internal diagnostics — technical detail for the owner, not a product surface."
+    },
     "eyebrow": "OPERATIONS CONTROL",
-    "title": "Operations control panel",
-    "subtitle": "Superadmins only. Server-side RLS + profiles.active_role = 'admin'.",
+    "title": "Owner / Operations Control Room",
+    "subtitle": "Everything an owner needs to see and act on, in one place.",
     "back": "Back to operations panel",
     "metric": {
       "totalUsers": "Total profiles",
@@ -1562,7 +1608,7 @@
       "inspect": "Inspect →"
     },
     "hub": {
-      "projectTruth": "Project truth · P0",
+      "projectTruth": "System diagnostics",
       "agentOs": "Agent OS",
       "telemetry": "Operations telemetry",
       "languageFeedback": "Language reports",
@@ -1589,7 +1635,7 @@
       "title": "Buyer requests — manual review",
       "help": "Priority is computed deterministically from real fields (description, file count, status). No AI, no automatic reading.",
       "empty": "No buyer requests yet.",
-      "migrationBlocker": "Migrations 0028_customer_requests / 0029_customer_request_attachments required.",
+      "migrationBlocker": "This section is temporarily unavailable while its data is being prepared.",
       "filesLabel": "Files",
       "created": "Created",
       "noDescription": "No description provided",
@@ -1686,7 +1732,7 @@
       "subtitle": "Open requests next to the worker supply — review, decide, record.",
       "humanNote": "Every match here is selected by a human, not an algorithm. The system does not rank or suggest — it only shows real data and records your decision with a feedback note.",
       "back": "Back to admin",
-      "migrationBlocker": "The demand intake consolidation migration is not applied in this environment yet — the workbench is blocked until it lands.",
+      "migrationBlocker": "The matching workbench is temporarily unavailable while its data is being prepared.",
       "demand": {
         "title": "Open demand",
         "count": "{count} open requests",
@@ -1753,7 +1799,7 @@
         "notAdmin": "Your session does not have admin rights for this request.",
         "invalid": "Invalid decision — pick a worker and an action.",
         "notFound": "Request or worker no longer exists.",
-        "needsMigration": "Consolidation migration not applied — recording is blocked.",
+        "needsMigration": "Recording is temporarily unavailable while the data is being prepared.",
         "error": "Could not record the decision."
       },
       "suggestions": {
@@ -1811,7 +1857,7 @@
       "subtitle": "Supply, demand, admin-entered market averages and gaps — real platform counts only.",
       "methodNote": "Every number on this page is a real count of real rows. Market averages are entered by an admin by hand from a named source — the platform never estimates them. Small samples (n<5) are flagged.",
       "back": "Admin dashboard",
-      "needsMigration": "Market averages are not ready yet — the S4 migration awaits the owner gate.",
+      "needsMigration": "Market averages are not ready yet.",
       "smallSample": "⚠ n<5",
       "unknownCountry": "Not specified",
       "averages": {
@@ -4904,7 +4950,7 @@
     },
     "docQueue": {
       "title": "Document verification queue",
-      "unavailable": "The verification field is not enabled yet (migration pending).",
+      "unavailable": "The verification field is not enabled yet.",
       "empty": "No documents are waiting for verification.",
       "verify": "Verify",
       "reject": "Reject",
@@ -4918,12 +4964,12 @@
     },
     "bookings": {
       "title": "Booking activity",
-      "unavailable": "Booking is not enabled yet (migration pending).",
+      "unavailable": "Booking is not enabled yet.",
       "empty": "No bookings yet."
     },
     "payment": {
       "title": "Payment readiness",
-      "body": "Payments are not enabled. {count} paid plans are described but not chargeable. A separate Stripe sprint clears the blocker list before any money moves."
+      "body": "Payments are not enabled. {count} paid plans are described but not chargeable. Charging is enabled separately, once the remaining blockers are cleared."
     }
   },
   "companyReadiness": {
@@ -5065,7 +5111,7 @@
     "applying": "Saving…",
     "applied": "Applied",
     "applyError": "Couldn't save. Please try again.",
-    "applyNotAdmin": "Admin rights required (active_role='admin')."
+    "applyNotAdmin": "Admin rights required."
   },
   "opportunities": {
     "title": "Opportunities for you",

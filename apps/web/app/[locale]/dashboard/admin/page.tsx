@@ -8,7 +8,7 @@ import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
 
-/** Stable display order for the file-readiness summary (PR F). */
+/** Stable display order for the file-readiness summary. */
 const READINESS_KINDS: readonly ExtractionReadiness[] = [
   "future_readable_text_file",
   "future_pdf_reader_needed",
@@ -16,7 +16,7 @@ const READINESS_KINDS: readonly ExtractionReadiness[] = [
   "manual_review_only",
 ];
 
-/** Priority-chip tone for the admin manual-review list (PR B). */
+/** Priority-chip tone for the admin manual-review list. */
 const REVIEW_PRIORITY_CHIP: Record<AdminReviewPriorityStatus, string> = {
   review_ready:
     "rounded-full bg-state-success/15 px-2 py-0.5 text-[11px] text-state-success",
@@ -29,12 +29,9 @@ const REVIEW_PRIORITY_CHIP: Record<AdminReviewPriorityStatus, string> = {
 };
 
 /**
- * Type-escape for the `profile_skill_claims` table — the generated
- * `Database` type in `lib/supabase/types.ts` doesn't include the
- * table until `pnpm db:types` is re-run against prod (migration 0015
- * was applied via MCP under a timestamp version; remote and local
- * schemas drift on naming only). Same pattern used in
- * `lib/profile/profile-skill-claims.ts`.
+ * Type-escape for the `profile_skill_claims` table — the generated `Database`
+ * type doesn't carry it until `pnpm db:types` re-runs against prod. Same
+ * pattern as `lib/profile/profile-skill-claims.ts`.
  */
 function claims(supabase: SupabaseClient) {
   return (
@@ -45,24 +42,20 @@ function claims(supabase: SupabaseClient) {
 }
 
 /**
- * Minimal pilot control surface (Work Package A4 of the controlled
- * real-user pilot readiness sprint).
+ * Owner / Operations Control Room.
  *
- * Server-side gate: `requireSuperadmin(locale)` is the first awaited
- * call; non-admins get redirected to /<locale>/dashboard before any
- * data is loaded. The page itself uses the user-scoped supabase
- * client — admin reads succeed because the `is_admin()` RLS helper
- * on `profiles` and `profile_skill_claims` returns true for users
- * with `active_role = 'admin'`.
+ * One coherent control surface, not a flat grid of equal tiles. The screen
+ * answers the owner's 30-second question — what is the state of the system,
+ * what needs action now, and where do I go to act — in three bands:
+ *   1. Overview KPIs (real aggregate counts, status-framed).
+ *   2. Action queues (the live operational signals that need a decision).
+ *   3. Control areas (grouped navigation by real purpose: People, Companies,
+ *      Demand, Matching, Market signals, Quality & risk, Operations).
  *
- * Surface intentionally small:
- *   - total user count;
- *   - 10 most recent profiles (anonymised to "<email mask>");
- *   - profile_text presence + profile_skill_claims count per row;
- *   - link to per-user inspect page (next iteration).
- *
- * No mutations from this surface in this PR. Deletes/edits require
- * an explicit follow-up slice with confirmation prompts + audit log.
+ * Server-side gate: the admin layout runs `requireSuperadmin` for the whole
+ * subtree; the per-page call here is defense-in-depth. All reads use the
+ * user-scoped client — admin RLS (`is_admin()`) allows the broad SELECTs.
+ * No mutations from this surface; every count is real or shown as "—".
  */
 export default async function AdminDashboardPage({
   params,
@@ -72,17 +65,28 @@ export default async function AdminDashboardPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  // SECURITY: server-side gate. Returns the admin's own user.id; we
-  // ignore it here (no need for it) but the call still runs and
-  // redirects non-admins.
   await requireSuperadmin(locale);
 
   const t = await getTranslations("admin");
+  const tReview = await getTranslations("admin.requestReview");
+  const tNeed = await getTranslations("needStructuring");
+  const tPool = await getTranslations("candidatePool");
   const supabase = await createClient();
 
-  // Aggregate counts. Single queries; admin RLS allows broad SELECT.
+  // Aggregate counts. Single head queries; admin RLS allows broad SELECT.
   const { count: profileCount } = await supabase
     .from("profiles")
+    .select("id", { count: "exact", head: true });
+
+  // Honest "incomplete" proxy: profiles with no profile_text yet.
+  const { count: incompleteCount } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .is("profile_text", null);
+
+  // Companies count — defensive: if the read is unavailable, render "—".
+  const { count: companyCount, error: companyErr } = await supabase
+    .from("companies")
     .select("id", { count: "exact", head: true });
 
   const { count: claimsTotal } = await claims(supabase).select("id", {
@@ -90,28 +94,24 @@ export default async function AdminDashboardPage({
     head: true,
   });
 
-  // Pilot-drafts metrics (added in feat/cc/pilot-draft-flows). Admin
-  // RLS allows the broad SELECT via is_admin() on pilot_drafts.
   const draftCounts = await getDemandDraftCounts();
   const draftsTotal =
     draftCounts.company_request +
     draftCounts.agency_offer +
     draftCounts.buyer_request;
 
-  // Buyer requests needing manual review (deterministic priority, PR B).
-  const tReview = await getTranslations("admin.requestReview");
+  // Buyer requests needing manual review (deterministic priority).
   const adminReview = await listRequestsForAdminReview();
   const reviewRows = adminReview.kind === "ok" ? adminReview.rows : [];
   const reviewMigrationNeeded = adminReview.kind === "needs-migration";
 
-  // 10 most recent profile rows. Admin RLS allows SELECT on all rows.
+  // 10 most recent profile rows.
   const { data: recent } = await supabase
     .from("profiles")
     .select("id, email, full_name, active_role, profile_text, created_at")
     .order("created_at", { ascending: false })
     .limit(10);
 
-  // Claims-per-profile lookup for the same 10 rows.
   const recentIds = (recent ?? []).map((p) => p.id);
   const claimsByProfile = new Map<string, number>();
   if (recentIds.length > 0) {
@@ -124,8 +124,7 @@ export default async function AdminDashboardPage({
     }
   }
 
-  // Mask emails so the admin sees identity but the page screenshot
-  // doesn't leak full addresses if shared. Format: jo***@example.com.
+  // Mask emails so a shared screenshot doesn't leak full addresses.
   function maskEmail(email: string | null): string {
     if (!email) return "—";
     const [name = "", domain = ""] = email.split("@");
@@ -134,8 +133,177 @@ export default async function AdminDashboardPage({
     return `${visible}${name.length > 2 ? "***" : ""}@${domain}`;
   }
 
+  const num = (n: number | null | undefined) =>
+    typeof n === "number" ? n.toLocaleString() : "—";
+
+  type KpiTone = "neutral" | "risk";
+  const kpis: {
+    key: string;
+    label: string;
+    value: string;
+    tone: KpiTone;
+  }[] = [
+    {
+      key: "people",
+      label: t("room.kpi.people"),
+      value: num(profileCount),
+      tone: "neutral",
+    },
+    {
+      key: "peopleIncomplete",
+      label: t("room.kpi.peopleIncomplete"),
+      value: num(incompleteCount),
+      tone: (incompleteCount ?? 0) > 0 ? "risk" : "neutral",
+    },
+    {
+      key: "companies",
+      label: t("room.kpi.companies"),
+      value: companyErr ? "—" : num(companyCount),
+      tone: "neutral",
+    },
+    {
+      key: "demand",
+      label: t("room.kpi.demand"),
+      value: num(draftsTotal),
+      tone: "neutral",
+    },
+    {
+      key: "reviewQueue",
+      label: t("room.kpi.reviewQueue"),
+      value: reviewMigrationNeeded ? "—" : num(reviewRows.length),
+      tone: reviewRows.length > 0 ? "risk" : "neutral",
+    },
+    {
+      key: "claims",
+      label: t("room.kpi.claims"),
+      value: num(claimsTotal),
+      tone: "neutral",
+    },
+  ];
+
+  // Control-area navigation grouped by real purpose. Each link resolves to a
+  // real admin (or operations) page; nothing is a decorative tile.
+  type GroupLink = { href: string; label: string; testId?: string; internal?: boolean };
+  const groups: {
+    key: string;
+    title: string;
+    purpose: string;
+    links: GroupLink[];
+  }[] = [
+    {
+      key: "companies",
+      title: t("room.groups.companies.title"),
+      purpose: t("room.groups.companies.purpose"),
+      links: [
+        {
+          href: "/dashboard/admin/company-verification",
+          label: t("hub.companyVerification"),
+          testId: "admin-tools-hub-company-verification",
+        },
+      ],
+    },
+    {
+      key: "demand",
+      title: t("room.groups.demand.title"),
+      purpose: t("room.groups.demand.purpose"),
+      links: [
+        {
+          href: "/dashboard/admin/need-structuring",
+          label: tNeed("pageTitle"),
+          testId: "admin-tools-hub-need-structuring",
+        },
+      ],
+    },
+    {
+      key: "matching",
+      title: t("room.groups.matching.title"),
+      purpose: t("room.groups.matching.purpose"),
+      links: [
+        {
+          href: "/dashboard/admin/matching",
+          label: t("hub.matching"),
+          testId: "admin-tools-hub-matching",
+        },
+        {
+          href: "/dashboard/admin/candidate-pool",
+          label: tPool("title"),
+          testId: "admin-tools-hub-candidate-pool",
+        },
+      ],
+    },
+    {
+      key: "marketSignals",
+      title: t("room.groups.marketSignals.title"),
+      purpose: t("room.groups.marketSignals.purpose"),
+      links: [
+        {
+          href: "/dashboard/admin/market",
+          label: t("hub.market"),
+          testId: "admin-tools-hub-market",
+        },
+        {
+          href: "/dashboard/admin/league",
+          label: t("hub.league"),
+          testId: "admin-tools-hub-league",
+        },
+      ],
+    },
+    {
+      key: "quality",
+      title: t("room.groups.quality.title"),
+      purpose: t("room.groups.quality.purpose"),
+      links: [
+        {
+          href: "/dashboard/admin/readiness",
+          label: t("hub.readiness"),
+          testId: "admin-tools-hub-readiness",
+        },
+        {
+          href: "/dashboard/admin/telemetry",
+          label: t("hub.telemetry"),
+          internal: true,
+        },
+        {
+          href: "/dashboard/admin/language-feedback",
+          label: t("hub.languageFeedback"),
+        },
+        {
+          href: "/dashboard/admin/project-truth",
+          label: t("hub.projectTruth"),
+          testId: "admin-tools-hub-project-truth",
+          internal: true,
+        },
+      ],
+    },
+    {
+      key: "operations",
+      title: t("room.groups.operations.title"),
+      purpose: t("room.groups.operations.purpose"),
+      links: [
+        {
+          href: "/dashboard/admin/support",
+          label: t("hub.support"),
+        },
+        {
+          href: "/dashboard/admin/billing",
+          label: t("hub.billing"),
+          testId: "admin-tools-hub-billing",
+        },
+        {
+          href: "/dashboard/admin/agent-os",
+          label: t("hub.agentOs"),
+          internal: true,
+        },
+        {
+          href: "/dashboard/communication",
+          label: t("hub.communication"),
+        },
+      ],
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-6" data-testid="admin-dashboard">
+    <div className="flex flex-col gap-8" data-testid="admin-dashboard">
       <header className="flex flex-col gap-1">
         <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
@@ -146,161 +314,55 @@ export default async function AdminDashboardPage({
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
-      {/* Agent OS + telemetry + language-feedback hub (v1). The pages
-          themselves are gated by requireSuperadmin AND admin-only RLS. */}
-      <section className="flex flex-wrap gap-3" data-testid="admin-tools-hub">
-        <Link
-          href="/dashboard/admin/project-truth"
-          className="rounded-md border border-brand-orange/60 px-4 py-2 text-xs font-medium text-brand-orange hover:border-brand-orange hover:text-text-primary"
-          data-testid="admin-tools-hub-project-truth"
-        >
-          {t("hub.projectTruth")}
-        </Link>
-        <Link
-          href="/dashboard/admin/agent-os"
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-        >
-          {t("hub.agentOs")}
-        </Link>
-        <Link
-          href="/dashboard/admin/telemetry"
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-        >
-          {t("hub.telemetry")}
-        </Link>
-        <Link
-          href="/dashboard/admin/language-feedback"
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-        >
-          {t("hub.languageFeedback")}
-        </Link>
-        <Link
-          href="/dashboard/communication"
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-        >
-          {t("hub.communication")}
-        </Link>
-        <Link
-          href="/dashboard/admin/support"
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-        >
-          {t("hub.support")}
-        </Link>
-        <Link
-          href="/dashboard/admin/company-verification"
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-          data-testid="admin-tools-hub-company-verification"
-        >
-          {t("hub.companyVerification")}
-        </Link>
-        <Link
-          href={"/dashboard/admin/readiness" as "/dashboard"}
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-          data-testid="admin-tools-hub-readiness"
-        >
-          {t("hub.readiness")}
-        </Link>
-        <Link
-          href={"/dashboard/admin/billing" as "/dashboard"}
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-          data-testid="admin-tools-hub-billing"
-        >
-          {t("hub.billing")}
-        </Link>
-        <Link
-          href={"/dashboard/admin/matching" as "/dashboard"}
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-          data-testid="admin-tools-hub-matching"
-        >
-          {t("hub.matching")}
-        </Link>
-        <Link
-          href={"/dashboard/admin/market" as "/dashboard"}
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-          data-testid="admin-tools-hub-market"
-        >
-          {t("hub.market")}
-        </Link>
-        <Link
-          href={"/dashboard/admin/league" as "/dashboard"}
-          className="rounded-md border border-brand-blue/40 px-4 py-2 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary"
-          data-testid="admin-tools-hub-league"
-        >
-          {t("hub.league")}
-        </Link>
-      </section>
-
-      <section className="grid gap-3 sm:grid-cols-2">
-        <div className="card-border p-4">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("metric.totalUsers")}
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-text-primary">
-            {profileCount ?? 0}
+      {/* BAND 1 — Overview KPIs. Real aggregate counts, status-framed. */}
+      <section className="flex flex-col gap-3" data-testid="admin-overview-kpis">
+        <div className="flex flex-col gap-0.5">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("room.groups.overview.title")}
+          </h2>
+          <p className="text-xs text-text-secondary">
+            {t("room.groups.overview.purpose")}
           </p>
         </div>
-        <div className="card-border p-4">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("metric.totalClaims")}
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-text-primary">
-            {claimsTotal ?? 0}
-          </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {kpis.map((k) => (
+            <div
+              key={k.key}
+              className={`card-border p-4 ${
+                k.tone === "risk" ? "border-state-warning/40" : ""
+              }`}
+              data-testid={`admin-kpi-${k.key}`}
+              data-tone={k.tone}
+            >
+              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                {k.label}
+              </p>
+              <p
+                className={`mt-1 font-display text-2xl font-bold ${
+                  k.tone === "risk"
+                    ? "text-state-warning"
+                    : "text-text-primary"
+                }`}
+              >
+                {k.value}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section
-        className="flex flex-col gap-3"
-        data-testid="admin-pilot-drafts"
-      >
-        <h2 className="font-display text-lg font-semibold text-text-primary">
-          {t("drafts.title")}
-        </h2>
-        <p className="text-xs text-text-secondary">{t("drafts.help")}</p>
-        <div className="grid gap-3 sm:grid-cols-4">
-          <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("drafts.total")}
-            </p>
-            <p className="mt-1 font-display text-xl font-bold text-text-primary">
-              {draftsTotal}
-            </p>
-          </div>
-          <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("drafts.byType.company")}
-            </p>
-            <p className="mt-1 font-display text-xl font-bold text-text-primary">
-              {draftCounts.company_request}
-            </p>
-          </div>
-          <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("drafts.byType.agency")}
-            </p>
-            <p className="mt-1 font-display text-xl font-bold text-text-primary">
-              {draftCounts.agency_offer}
-            </p>
-          </div>
-          <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("drafts.byType.buyer")}
-            </p>
-            <p className="mt-1 font-display text-xl font-bold text-text-primary">
-              {draftCounts.buyer_request}
-            </p>
-          </div>
-        </div>
-      </section>
-
+      {/* BAND 2 — Action queues. The live operational signals that need a
+          decision now (real rows; honest empty/unavailable states). */}
       <section
         className="flex flex-col gap-3"
         data-testid="admin-request-review"
       >
-        <h2 className="font-display text-lg font-semibold text-text-primary">
-          {tReview("title")}
-        </h2>
-        <p className="text-xs text-text-secondary">{tReview("help")}</p>
+        <div className="flex flex-col gap-0.5">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {tReview("title")}
+          </h2>
+          <p className="text-xs text-text-secondary">{tReview("help")}</p>
+        </div>
         {reviewMigrationNeeded ? (
           <p
             className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
@@ -313,7 +375,10 @@ export default async function AdminDashboardPage({
             {tReview("empty")}
           </p>
         ) : (
-          <ul className="flex flex-col gap-2" data-testid="admin-request-review-list">
+          <ul
+            className="flex flex-col gap-2"
+            data-testid="admin-request-review-list"
+          >
             {reviewRows.map((r) => {
               const hasDescription = Boolean(r.needSummary?.trim());
               const fileSummary =
@@ -385,15 +450,61 @@ export default async function AdminDashboardPage({
         )}
       </section>
 
+      <section className="flex flex-col gap-3" data-testid="admin-pilot-drafts">
+        <div className="flex flex-col gap-0.5">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("drafts.title")}
+          </h2>
+          <p className="text-xs text-text-secondary">{t("drafts.help")}</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <div className="card-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("drafts.total")}
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-text-primary">
+              {draftsTotal}
+            </p>
+          </div>
+          <div className="card-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("drafts.byType.company")}
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-text-primary">
+              {draftCounts.company_request}
+            </p>
+          </div>
+          <div className="card-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("drafts.byType.agency")}
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-text-primary">
+              {draftCounts.agency_offer}
+            </p>
+          </div>
+          <div className="card-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("drafts.byType.buyer")}
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-text-primary">
+              {draftCounts.buyer_request}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* People — the recent profiles surface with inspect links. */}
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-lg font-semibold text-text-primary">
-          {t("recent.title")}
-        </h2>
-        <p className="text-xs text-text-secondary">{t("recent.help")}</p>
+        <div className="flex flex-col gap-0.5">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("room.groups.people.title")}
+          </h2>
+          <p className="text-xs text-text-secondary">{t("recent.help")}</p>
+        </div>
         <ul className="flex flex-col gap-2" data-testid="admin-recent-users">
           {(recent ?? []).map((p) => {
             const hasText = (p.profile_text ?? "").length > 0;
-            const claims = claimsByProfile.get(p.id) ?? 0;
+            const claimCount = claimsByProfile.get(p.id) ?? 0;
             return (
               <li key={p.id} className="card-border flex flex-col gap-1 p-3">
                 <div className="flex items-baseline justify-between gap-3">
@@ -409,16 +520,14 @@ export default async function AdminDashboardPage({
                     {t("recent.profileText")}:{" "}
                     <span
                       className={
-                        hasText
-                          ? "text-state-success"
-                          : "text-text-muted"
+                        hasText ? "text-state-success" : "text-text-muted"
                       }
                     >
                       {hasText ? t("recent.yes") : t("recent.no")}
                     </span>
                   </span>
                   <span>
-                    {t("recent.claims")}: {claims}
+                    {t("recent.claims")}: {claimCount}
                   </span>
                   <Link
                     href={`/dashboard/admin/users/${p.id}`}
@@ -431,6 +540,50 @@ export default async function AdminDashboardPage({
             );
           })}
         </ul>
+      </section>
+
+      {/* BAND 3 — Control areas. Grouped navigation by real purpose. Replaces
+          the old flat tile grid: each area carries a one-line purpose and the
+          real pages that belong to it. */}
+      <section className="flex flex-col gap-3" data-testid="admin-control-areas">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {groups.map((g) => (
+            <div
+              key={g.key}
+              className="card-border flex flex-col gap-3 p-4"
+              data-testid={`admin-area-${g.key}`}
+            >
+              <div className="flex flex-col gap-0.5">
+                <h3 className="font-display text-sm font-semibold text-text-primary">
+                  {g.title}
+                </h3>
+                <p className="text-[11px] text-text-muted">{g.purpose}</p>
+              </div>
+              <ul className="flex flex-col gap-1.5">
+                {g.links.map((l) => (
+                  <li key={l.href}>
+                    <Link
+                      href={l.href as "/dashboard"}
+                      className="flex items-center justify-between gap-2 rounded-md border border-ink-700/60 px-3 py-2 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+                      data-testid={l.testId}
+                    >
+                      <span>{l.label}</span>
+                      {l.internal ? (
+                        <span className="rounded-full bg-ink-700/60 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted">
+                          {t("room.internalBadge")}
+                        </span>
+                      ) : (
+                        <span aria-hidden className="text-text-muted">
+                          →
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
