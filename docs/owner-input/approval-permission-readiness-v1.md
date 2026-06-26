@@ -20,7 +20,9 @@ The first pass framed this as remove-`is_admin` (A) vs fake-admin-bypass (B). Bo
 | **D** | Client / project / property | the person who **observed** the work (project client, property owner, project owner) | `project`/`booking`/`object` or a subject-granted link | observed work, quality, hours, completion, service performed, skill observed | **observed** — NOT employer verification; never flips `worker_skills.verified` |
 | **E** | Agency / coordinator | real agency/coordinator over the worker/brigade | agency `external_manager` engagement (or explicit `agency_coordinator`) | worker/brigade entries under a real agency relation | **employer_verified** (staffing triangle) |
 
-**Core rule (binding):** the approval UI + audit row must always show *who · under what authority · for which context · what was confirmed*. An **observed** confirmation must read as client/observed, never as employer verification.
+**Core rule (binding):** the **audit row** must always store *who · under what authority · for which context · what was confirmed*. An **observed** confirmation must be recorded as client/observed, never as employer verification.
+
+> **Silent-trust rule (binding, owner — preserved):** Approval/confirmation data may be stored and used **internally** for ranking, trust, skill matching, and review logic, **but normal public user surfaces must not advertise approvals as public certification** unless the owner later explicitly approves a separate public trust model. Confirmations are collected **silently** as trust signals — they are not public-facing trust marketing text. The *who/authority/context/what* contract in this doc is an **audit-trail/storage** contract (review-only + internal logic), **not** a normal-user display contract.
 
 ## 2. Current code flow + the mismatch (still true)
 - **List (inbox):** `app/[locale]/dashboard/inbox/page.tsx` → RPC `reviewable_journal_entry_ids()`.
@@ -67,20 +69,49 @@ Extend `journal_entry_confirmations` (additive) so every row carries **who · au
 - **proof tier:** `confirmation_tier` (`employer_verified | observed`). **Only `employer_verified` (engagement authority) may flip `worker_skills.verified`.** `observed` is evidence only — this is the structural guarantee that client/property confirmation never masquerades as employer verification.
 - **when:** `created_at` — *exists*.
 
-## 6. UI states + labels
-- **A/B (employer):** "Patvirtinta — [Company] vadovas/savininkas" / "Confirmed — [Company] owner/manager". Multi-company: a context selector + visible "Approving as **[Company]**".
-- **C (platform):** "Patvirtinta — platformos operatorius" / "Confirmed — platform operator". Distinct styling; never the company-manager label.
-- **D (observed):** "Patvirtino užsakovas/objekto savininkas — *stebėtas darbas*" / "Confirmed by client/property owner — *observed work*", with the scope chip (observed/quality/hours/completion). Explicit *not employer verification* footnote.
-- **E (agency):** "Patvirtino agentūros koordinatorius" / "Confirmed by agency coordinator".
-- **Blocked:** keep #509 — no approve/reject/request-change buttons when the caller has no authority; one clear honest reason. Enforced by `lib/guards/production-reality-trust-p0.test.ts` + the existing `confirmation-honesty.test.ts`.
+## 6. Wording model — NEUTRAL CONTEXT ONLY (owner correction)
+The internal authority model in §5 is **storage/review-only**. The **normal-user UI must never** carry approval-authority, verifier, or confirmed/verified badge wording. Layer 0 shows only **neutral context** so a reviewer can tell which entry belongs to which company/project — nothing that implies the platform publicly certifies a person.
+
+**Forbidden (any served locale LT/EN/RU, normal-user/public UI):**
+- "Tvirtinate kaip [Company] savininkas / vadovas", "Approving as [Company] owner/manager"
+- "Patvirtino…", "Confirmed by…", "Patvirtino platformos operatorius / client / property owner / agency coordinator"
+- "Employer verified", "Observed work confirmed", "Patvirtintas įgūdis", "Confirmed skill", "Verified"
+- any public approval-authority label, verifier label, confirmed/verified label, trust badge, or text suggesting the platform publicly certifies the person.
+
+**Allowed (neutral, private review/normal-user context):**
+- "Įrašo kontekstas: [company/project/context]" / "Entry context: …" / "Контекст записи: …"
+- "Susijusi įmonė: [company]" / "Related company: …" / "Связанная компания: …"
+- "Susijęs projektas: [project]" / "Related project: …" / "Связанный проект: …"
+- "Kontekstas dar nerodomas" / "Context not shown yet" / "Контекст пока не показан"
+- "Veiksmas negalimas: trūksta teisės arba konteksto" / "Action unavailable: missing permission or context" / "Действие недоступно: нет прав или контекста"
+
+**Layer 0 may show:** (1) which company/project/context an entry belongs to, *if already available*; (2) whether an action is available or blocked; (3) one neutral reason if blocked. **It must not show:** public approval-authority labels, verifier labels, confirmed/verified labels, trust badges, or any text implying public certification.
+
+**Blocked state:** keep #509 — no approve/reject/request-change buttons when the caller has no authority/context; one neutral reason. Enforced by `lib/guards/production-reality-trust-p0.test.ts` + the existing `confirmation-honesty.test.ts` (and a new neutral-context guard for Layer 0).
+
+## 6b. Existing-wording audit (served UI LT/EN/RU)
+Searched the three served locales + the rendering components for `patvirtin*`, `tvirtin*`, `подтверж*`, `verified`, `confirmed`, `confirmation`, `proof`, `badge`, `trusted`, `observed`. Classification:
+
+| Wording | Surface / component | Class | Action |
+|---|---|---|---|
+| `playerCard.verifiedTitle` "Patvirtinti įgūdžiai" / "Confirmed skills"; `playerCard.confirmed` "Patvirtinta" | Worker **player card** (`worker-player-card.tsx`), mounted on `/dashboard/journal` (the worker's own view) | **Normal-user (self) — verification badge.** Not public-to-others, but it *is* confirmed/verified badge language on a normal-user surface. | **Owner decision (gray zone):** keep as private self-view, or neutralize to evidence-strength wording. Per the silent-trust rule, lean toward neutral. **Not changed here.** |
+| Market-map own-marker gold "✓ N" verified-skills badge (added #509) | `market-map-live.tsx`, `/dashboard/market-map` own marker (owner-scoped) | **Normal-user (self) — verification badge.** Visible only to the owner today, but if the player-card/marker is ever shown to scouts it becomes public certification. | **Owner decision (gray zone):** keep, or drop the ✓ badge / make it a neutral signal. **Not changed here.** |
+| `trust.verifiedSkills`, `cvExport.verifiedSkills` "Patvirtinti įgūdžiai" | Dashboard profile TrustBlock + the worker's own `/cv` export | **Normal-user (self).** Same gray zone. | Owner decision; not changed here. |
+| `journal.confirmedHeadline` "tavo darbas patvirtintas" / "your work was confirmed" | Journal this-week summary (`/dashboard/journal`, self) | **Normal-user (self) — confirmation phrasing.** | Owner decision; not changed here. |
+| Admin matching/scouting "Confirmed skills / Manager confirmations" (≈ lines 1796–1827), manager review inbox confirm copy | `requireSuperadmin` admin/* + manager review `/dashboard/inbox` | **ADMIN / review-only — allowed.** | Keep. |
+| `auth.company.verified` "Patvirtinta / Verified", admin company-verification | Company **identity** trust state (`auth.company.*`, admin company-verification) | **Company identity verification — separate concept** (a thing, not a person/skill certification). | Out of this rule's scope; flag for owner if a public company "Verified" badge should also be reconsidered. |
+| "Laukia patvirtinimo", "Nepatvirtinta išoriškai", "Sistema nieko nepatvirtina automatiškai", "Dar nepatvirtinta" | profile/skill/journal honesty notes | **Honest negation — reassures, does not advertise a badge.** | Keep. |
+
+**Finding:** there are **no public-to-third-party** certification badges today (no scouting/marketplace card advertises a worker as "Confirmed/Verified" to others). The open items are **normal-user self-view verification badges** (player card, map ✓ badge, trust block, CV, journal "confirmed" headline) — not public marketing, but they use confirmed/verified badge language on normal-user surfaces. Per the silent-trust rule these are a **gray zone for the owner to rule on**; they are **left unchanged in this readiness step** (no code change here).
 
 ## 7. MVP — the smallest honest model (layered)
-- **Layer 0 — code-only, now:** multi-company **context labels** in the inbox (the list already spans all owned/managed orgs; add the per-entry company label + "approving as [Company]" on confirm) + keep #509 honesty. **No schema. Safe now.** Delivers B's outcome.
+- **Layer 0 — code-only, now (NEUTRAL CONTEXT ONLY):** in the **review** surface, label each entry with its **neutral context** — "Įrašo kontekstas / Susijusi įmonė / Susijęs projektas: [name]" when already available, "Kontekstas dar nerodomas" otherwise — and keep the #509 blocked state (action available or one neutral "trūksta teisės arba konteksto" reason). **No approval-authority labels, no verifier labels, no confirmed/verified labels, no trust badges. No schema/RLS/RPC change. No production mutation.** Delivers B's "which company/context" clarity *without* public certification.
 - **Layer 1 — RED migration #1 (authority generalization, A/B/C):** add `confirmer_authority` (+widened CHECK), make `confirmer_engagement_context_id` nullable with a basis-CHECK, add `confirmation_tier`; generalize `review_journal_entry`→`can_confirm()` to record honest authority + context, and let `is_admin()` confirm **as `platform_operator`** (tier `employer_verified` only for the operator's managed contexts; else `observed`). Aligns list⇒action. Reversible. Covers A, B, C honestly.
 - **Layer 2 — RED migration #2 (observed-work D + explicit agency E):** add `client/project_owner/property_owner/observer/agency_coordinator` authorities + the non-engagement anchor (project/booking/object or a subject-granted `confirmation_links` row) + the `scope` vocabulary, enforcing the **observed tier never flips `worker_skills.verified`**. Biggest privacy/anti-abuse design (lean on `universal-confirmation-roles-v1.md`).
 
 ## 8. What can be done now safely / what stays RED
-- **Now (safe, ≤GREEN):** this audit; **Layer 0** code-only multi-company context labels; keep all confirmation-honesty guards green. No schema, no RPC, no prod mutation.
+- **Now (safe, ≤GREEN):** this audit; **Layer 0** code-only **neutral context labels** in the review surface (no approval/verifier/confirmed/verified wording, no badges); keep all confirmation-honesty guards green + add a neutral-context guard. No schema, no RPC, no prod mutation.
+- **Owner decision (no code here):** the §6b gray-zone normal-user self-view verification badges (player card, map ✓ badge, trust block, CV, journal "confirmed" headline) — keep or neutralize. A separate cleanup wagon if the owner wants them removed/renamed.
 - **RED, owner-gated (Supabase MCP `apply_migration`, never `db push`):** Layer 1 (authority columns + CHECK replacement + nullable engagement + `can_confirm` RPC + platform-operator authority) and Layer 2 (observed/client/agency + anchors + scope + tier enforcement + RLS). Every confirmer-set widening **replaces** the `confirmer_role` CHECK in a dedicated migration.
 
 ## 9. Rollback plan
@@ -97,7 +128,9 @@ Each layer reversible and additive:
 - E (agency): **YELLOW** today via `external_manager`; explicit label **RED** (Layer 2).
 - Migration/RPC/CHECK/RLS risk: **RED**, owner-gated apply via MCP, reversible.
 
-**Recommended next implementation PR:** **Layer 0 — code-only multi-company context labels** in the inbox + confirm UI (no schema, safe now), landing B's "approve from one place, show which company" outcome. **Then** Layer 1 as the first RED migration PR (authority generalization for A/B/C, including the honest `platform_operator`), followed by Layer 2 (observed-work D + agency E). No migration is written in this readiness step.
+**Recommended next implementation PR:** **Layer 0 — code-only NEUTRAL context labels** in the review surface (entry context / related company / related project, or "context not shown yet"; keep the #509 blocked state). **No approval-authority/verifier/confirmed/verified wording, no badges, no schema, no prod mutation** — safe to proceed. **Then** Layer 1 (RED migration: authority generalization A/B/C incl. honest `platform_operator` — storage/review-only, never public), then Layer 2 (observed-work D + agency E). No migration is written in this readiness step.
+
+**Can Layer 0 proceed safely after this correction?** **Yes** — scoped to neutral context labels + the existing blocked state only: no approval-authority labels, no public verifier labels, no verification badges, no schema/RLS/RPC change, no production mutation, no merge/deploy. The §6b normal-user self-view badges are a separate owner decision and are untouched.
 
 ---
 
