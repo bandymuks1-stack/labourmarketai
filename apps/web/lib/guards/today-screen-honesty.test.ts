@@ -71,9 +71,13 @@ describe("today-screen read service is real-data-only", () => {
 });
 
 describe("the today screen renders real states with one next step", () => {
-  it("mounts on the worker dashboard", () => {
+  it("is not stacked on the action-first worker home (today's work lives in Darbo žurnalas)", () => {
+    // Action-first IA v1: the worker home is the MyZone control room. The
+    // today/confirmed-work view is not re-stacked on the home; its honesty
+    // contract below still holds at the component level for where it is used.
     const dash = read("app/[locale]/dashboard/page.tsx");
-    expect(dash).toMatch(/<TodayScreen\b/);
+    expect(dash).toMatch(/<MyZone\b/);
+    expect(dash).not.toMatch(/<TodayScreen\b/);
   });
   it("pending-review line renders ONLY when entries really wait", () => {
     expect(screen).toMatch(/data\.pendingReview > 0 \?/);

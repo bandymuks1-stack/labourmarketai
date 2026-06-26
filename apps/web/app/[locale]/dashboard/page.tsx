@@ -2,14 +2,13 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
-import { DashboardFirstUsePanel } from "@/components/app/dashboard-first-use-panel";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
+import { MyZone } from "@/components/app/my-zone";
 import { getOwnCompany } from "@/lib/company/company-setup";
-import { TodayScreen } from "@/components/app/today/today-screen";
 import { WorkCard } from "@/components/app/work-card";
 import { getWorkerCard } from "@/lib/worker/work-card";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
@@ -277,26 +276,23 @@ export default async function DashboardOverviewPage({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Space identity + the calm doorway to other spaces (My spaces). */}
+      {/* Action-first control room (Mano erdvė). Three things, nothing else:
+          (1) who I am here + the ONE next action (CurrentSpaceHeader + WorkCard
+          status), (2) "Ką galite padaryti dabar" fast actions, (3) "Kas ką
+          gerina" — how the actions feed each other. The old loose stack
+          (8-tile identity strip + today screen + first-use panel) is gone: it
+          was a wall of loosely related cards, not an action-first room. */}
       <CurrentSpaceHeader role={role} />
-      {/* Active-role focus: the person's own quick actions only — no company
-          create / cockpit clutter on a job-seeker's first screen. These compact
-          links ARE the doorway to the sub-surfaces (profile, CV, map, find
-          work). IA cleanup v2 removed the 8-tile My Work View "warehouse" grid
-          that repeated Profile / CV / Skills / Records / Availability / Journal /
-          Work Needs / World Map as separate tiles — the command center now leads
-          with status + one next action, not a wall of doors. */}
-      <IdentityActions hasCompany={hasCompany} compact focusRole={role} />
 
-      {/* "Šiandienos ekranas" — today's ONE action, this week's confirmed work,
-          one honest growth path. Real journal-chain data only. */}
-      <TodayScreen workerId={workerRow?.id ?? null} locale={locale} />
-
-      {/* "Mano darbo kortelė" — the state-aware entry. It owns the greeting,
-          the what's-clear / what's-missing summary, the ONE best next action
-          (+ why it helps), the small "Ar tai vis dar galioja?" confirmation
-          when data is stale, and the secondary/collapsed editor. */}
+      {/* "Mano darbo kortelė" — the state-aware status: what's clear / what's
+          missing + the ONE best next action (+ why it helps). Real data only. */}
       <WorkCard data={cardData} />
+
+      {/* The action-first control room: readiness + fast actions + what-improves
+          -what. `incomplete` is the real first-use state (no profession or no
+          entries yet); company actions appear only when a real company exists. */}
+      <MyZone hasCompany={hasCompany} incomplete={isFirstUse} />
+
       <WorkerInvitationsCard />
 
       {/* Real booking next-action — only when there are pending incoming
@@ -316,14 +312,6 @@ export default async function DashboardOverviewPage({
             {pendingBookings}
           </span>
         </Link>
-      )}
-
-      {/* First-use guidance appears ONLY while the person is still starting
-          (no profession or no entries yet) — a gentle path, not a permanent
-          panel. The profile/journal/account doors live in the primary nav, so
-          the dashboard keeps no duplicate card wall — just the work card. */}
-      {isFirstUse && (
-        <DashboardFirstUsePanel variant="full" showCtas={false} />
       )}
     </div>
   );

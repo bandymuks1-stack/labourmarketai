@@ -6,9 +6,10 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
 /**
  * Human navigation guard (slice human-nav-cleanup-v1, PR E).
  *
- * The logged-in worker navigation must follow the human work-card logic
- * (Mano erdvė / Darbo kortelė / Įrodymai / Nustatymai), every primary route
- * stays reachable, and the dashboard keeps no duplicate doors / card wall.
+ * The logged-in navigation must follow the human, action-first logic
+ * (Mano erdvė / Žemėlapis / Darbo žurnalas / Žinutės), settings live in the
+ * avatar menu, every surface stays reachable, and the dashboard keeps no
+ * duplicate doors / card wall.
  */
 
 const root = join(__dirname, "..", "..");
@@ -19,57 +20,51 @@ const tabs = (j: Record<string, unknown>) =>
   ((j.auth as { dashboard: { tabs: Record<string, string> } }).dashboard).tabs;
 const DASH = "app/[locale]/dashboard/page.tsx";
 
-describe("primary nav uses human work-card labels, not module words", () => {
-  it("LT tabs read as space / profilis / Mano CV / settings", () => {
+describe("primary nav uses human, action-first labels (not module words)", () => {
+  it("LT primary tabs read as erdvė / žemėlapis / darbo žurnalas / žinutės", () => {
     const tl = tabs(lt);
     expect(tl.overview).toMatch(/erdvė/i);
-    // Marketplace IA: Profilis = edit identity; Mano CV = identity + work
-    // records. The two are distinct, no competing "Darbo kortelė" tab.
-    expect(tl.profile).toMatch(/profil/i);
-    expect(tl.profile).not.toMatch(/kortel/i);
-    expect(tl.journal).toMatch(/cv/i);
-    expect(tl.journal).not.toMatch(/įrodym/i);
-    expect(tl.account).toMatch(/nustatym/i);
+    expect(tl.marketMap).toMatch(/žemėlap/i);
+    expect(tl.journal).toMatch(/žurnal/i);
+    expect(tl.communication).toMatch(/žinut/i);
   });
-  it("EN tabs mirror the human labels", () => {
+  it("EN primary tabs mirror the human labels", () => {
     const tl = tabs(en);
     expect(tl.overview).toMatch(/space/i);
-    expect(tl.profile).toMatch(/profile/i);
-    expect(tl.profile).not.toMatch(/card/i);
-    expect(tl.journal).toMatch(/cv/i);
-    expect(tl.journal).not.toMatch(/evidence/i);
-    expect(tl.account).toMatch(/setting/i);
+    expect(tl.marketMap).toMatch(/map/i);
+    expect(tl.journal).toMatch(/journal/i);
+    expect(tl.communication).toMatch(/message/i);
   });
   it("no module / cockpit / dashboard wording in the primary tab labels", () => {
     for (const j of [lt, en]) {
       const blob = [
         tabs(j).overview,
-        tabs(j).profile,
+        tabs(j).marketMap,
         tabs(j).journal,
-        tabs(j).account,
+        tabs(j).communication,
       ].join(" ");
       expect(blob).not.toMatch(/\bdashboard\b|cockpit|\bmodul/i);
-      expect(blob).not.toMatch(/Apžvalga|Žurnalas|profile completion|profilio užbaigim/i);
+      expect(blob).not.toMatch(/profile completion|profilio užbaigim/i);
     }
   });
 });
 
-describe("compact global nav + sub-surface reachability (IA cleanup v2)", () => {
-  it("the global nav is the compact, map-first set: space + map + messages + settings", () => {
+describe("compact action-first global nav + sub-surface reachability", () => {
+  it("the global nav is the action-first set: space + map + journal + messages", () => {
     const hrefs = VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.href);
     for (const r of [
       "/dashboard",
       "/dashboard/market-map",
+      "/dashboard/journal",
       "/dashboard/communication",
-      "/dashboard/account",
     ]) {
       expect(hrefs, `compact nav must include ${r}`).toContain(r);
     }
   });
 
-  it("profile + Mano CV are demoted OUT of the global nav (now sub-surfaces)", () => {
+  it("profile + account/settings are NOT global tabs (sub-surface / avatar menu)", () => {
     const hrefs = VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.href);
-    for (const r of ["/dashboard/profile", "/dashboard/journal"]) {
+    for (const r of ["/dashboard/profile", "/dashboard/account"]) {
       expect(hrefs, `${r} must NOT be a global nav tab`).not.toContain(r);
     }
     // the abstract marketplace hub is NOT a global tab (the map replaced it)
@@ -78,14 +73,16 @@ describe("compact global nav + sub-surface reachability (IA cleanup v2)", () => 
     );
   });
 
-  it("profile + Mano CV stay reachable as sub-surfaces (account menu / overview)", () => {
-    // Account settings links to the profile identity surface; the overview
-    // identity actions reach profile + CV. Reachability is preserved without
-    // a global tab for each.
+  it("profile stays reachable as a sub-surface (account page / overview actions)", () => {
     const account = read("app/[locale]/dashboard/account/page.tsx");
     expect(account).toMatch(/\/dashboard\/profile/);
     const identity = read("components/app/identity-actions.tsx");
-    expect(identity).toMatch(/\/dashboard\/(profile|journal)/);
+    expect(identity).toMatch(/\/dashboard\/profile/);
+  });
+
+  it("account/settings stays reachable via the avatar account menu", () => {
+    const menu = read("components/app/account-menu.tsx");
+    expect(menu).toMatch(/\/dashboard\/account/);
   });
 });
 

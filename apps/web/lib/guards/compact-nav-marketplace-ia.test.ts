@@ -11,11 +11,13 @@ import { getFeatureConfig } from "../config/feature-availability";
 /**
  * Compact, MAP-FIRST navigation IA guard.
  *
- * Owner direction: the map (Žemėlapis) is its own PRIMARY product surface — the
- * central visual market layer — reached directly from the global nav, not
- * hidden inside an abstract "marketplace" hub. The compact global nav is
- * Mano erdvė / Žemėlapis / Žinutės / Nustatymai (+ Admin only for admins).
- * Profile, Mano CV and the marketplace hub are NOT global tabs. The marketplace
+ * Owner direction (action-first IA v1): the map (Žemėlapis) is its own PRIMARY
+ * product surface — the central visual market layer — reached directly from the
+ * global nav, not hidden inside an abstract "marketplace" hub. The compact
+ * global nav is ACTION-FIRST: Mano erdvė / Žemėlapis / Darbo žurnalas / Žinutės
+ * (+ Admin only for admins). Settings/account moved to the avatar menu (a
+ * utility, not a primary action). Profile / CV / player-card live UNDER Mano
+ * erdvė (the result of journaling), not as competing tabs. The marketplace
  * concept (offers / shop / rentals) becomes FUTURE LAYERS of the map (disabled
  * legend filters), never fake data.
  *
@@ -30,12 +32,12 @@ const MAP = "app/[locale]/dashboard/market-map/page.tsx";
 const MARKETPLACE = "app/[locale]/dashboard/marketplace/page.tsx";
 
 describe("the global nav is the compact, map-first set, in order", () => {
-  it("primary nav ids = overview, market_map, communication, account_roles", () => {
+  it("primary nav ids = overview, market_map, journal_text_first, communication (action-first)", () => {
     expect(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id)).toEqual([
       "overview",
       "market_map",
+      "journal_text_first",
       "communication",
-      "account_roles",
     ]);
   });
 
@@ -54,12 +56,25 @@ describe("the global nav is the compact, map-first set, in order", () => {
     expect(f.safeToShowInPrimaryNav).toBe(false);
   });
 
-  it("profile + Mano CV stay ACTIVE but are NOT primary-nav tabs", () => {
-    for (const key of ["profile_text_first", "journal_text_first"] as const) {
-      const f = getFeatureConfig(key);
-      expect(f.availability, `${key} stays reachable`).toBe("active");
-      expect(f.safeToShowInPrimaryNav, `${key} is not a global tab`).toBe(false);
-    }
+  it("Darbo žurnalas IS a primary action tab (action-first)", () => {
+    const f = getFeatureConfig("journal_text_first");
+    expect(f.availability).toBe("active");
+    expect(f.safeToShowInPrimaryNav).toBe(true);
+    expect(f.primaryRoute).toBe("/dashboard/journal");
+    const item = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === "journal_text_first");
+    expect(item?.href).toBe("/dashboard/journal");
+  });
+
+  it("profile stays ACTIVE but is NOT a primary tab (lives under Mano erdvė)", () => {
+    const f = getFeatureConfig("profile_text_first");
+    expect(f.availability).toBe("active");
+    expect(f.safeToShowInPrimaryNav).toBe(false);
+  });
+
+  it("account/settings is ACTIVE but NOT a primary tab (moved to avatar menu)", () => {
+    const f = getFeatureConfig("account_roles");
+    expect(f.availability).toBe("active");
+    expect(f.safeToShowInPrimaryNav).toBe(false);
   });
 });
 

@@ -2609,6 +2609,40 @@
       "clarityNote": "One account, two identities — you as a person and your company. Switching only changes which actions you see (find work, offer services, hire, submit a need); agency and buying are actions, not separate systems. Some company actions may need an organization profile later."
     },
     "dashboard": {
+      "myZone": {
+        "actionsHeading": "What you can do now",
+        "incompleteStatus": "Your information is not complete yet",
+        "readyStatus": "Your profile is ready",
+        "actions": {
+          "recordWork": {
+            "title": "Record work",
+            "desc": "Add what you did"
+          },
+          "improveProfile": {
+            "title": "Improve your profile",
+            "desc": "Profile and CV"
+          },
+          "mapVisibility": {
+            "title": "Be visible on the map",
+            "desc": "Where you are seen"
+          },
+          "checkMessages": {
+            "title": "Check messages",
+            "desc": "Your conversations"
+          },
+          "companyActions": {
+            "title": "Company actions",
+            "desc": "Your company"
+          }
+        },
+        "improvesHeading": "What improves what",
+        "improves": {
+          "journal": "Your work journal builds your skills, profile and CV.",
+          "profile": "Your profile and CV increase your visibility.",
+          "map": "The map controls where you are visible.",
+          "messages": "Messages are only for trusted, allowed contact."
+        }
+      },
       "firstUse": {
         "eyebrow": "Start here",
         "title": "Start from yourself",
@@ -2980,7 +3014,7 @@
         "marketplace": "Marketplace",
         "marketMap": "Map",
         "profile": "Profile",
-        "journal": "My CV",
+        "journal": "Work journal",
         "communication": "Messages",
         "discover": "Discover",
         "search": "Search",

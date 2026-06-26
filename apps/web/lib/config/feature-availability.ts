@@ -117,15 +117,18 @@ export const FEATURES: readonly FeatureConfig[] = [
     safeToShowInPrimaryNav: false,
   },
   {
-    // Mano CV (work-records identity). Active and reachable, but demoted out of
-    // the global nav (IA cleanup v2) — it lives under the person identity,
-    // reachable from Mano erdvė / Marketplace, not as a global tab.
+    // Darbo žurnalas (work/skill recording). PRIMARY action surface
+    // (action-first IA v1): recording work is one of the few core things a
+    // user comes to do, and it feeds the profile / CV / player-card. So it is
+    // a global nav tab ("Darbo žurnalas"). Profile / CV / player-card stay
+    // reachable under Mano erdvė as the RESULT of journaling, not competing
+    // primary tabs.
     key: "journal_text_first",
     availability: "active",
     labelKey: "features.journal_text_first.label",
     descriptionKey: "features.journal_text_first.description",
     primaryRoute: "/dashboard/journal",
-    safeToShowInPrimaryNav: false,
+    safeToShowInPrimaryNav: true,
   },
   {
     // Inbox / messages. Active and primary-nav-safe: it is the recipient's
@@ -140,12 +143,15 @@ export const FEATURES: readonly FeatureConfig[] = [
     safeToShowInPrimaryNav: true,
   },
   {
+    // Account / settings. Active and reachable, but NOT a primary action tab
+    // (action-first IA v1): settings is a utility, not something a user comes
+    // to "do" — it lives in the avatar / account menu, not the global nav.
     key: "account_roles",
     availability: "active",
     labelKey: "features.account_roles.label",
     descriptionKey: "features.account_roles.description",
     primaryRoute: "/dashboard/account",
-    safeToShowInPrimaryNav: true,
+    safeToShowInPrimaryNav: false,
   },
 
   // ── Preparing surfaces (visible as cards, no broken CTA) ───────────

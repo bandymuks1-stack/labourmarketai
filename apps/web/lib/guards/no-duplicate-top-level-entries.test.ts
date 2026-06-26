@@ -26,12 +26,12 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 describe("the global primary nav is the compact, non-duplicated set", () => {
-  it("primary nav = exactly overview / market_map / communication / account_roles", () => {
+  it("primary nav = exactly overview / market_map / journal_text_first / communication (action-first)", () => {
     expect(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id)).toEqual([
       "overview",
       "market_map",
+      "journal_text_first",
       "communication",
-      "account_roles",
     ]);
   });
 
@@ -92,6 +92,9 @@ describe("the dashboard is a command center, not a second navigation menu", () =
     // an unread/pending count), never as a plain navigation duplicate.
     expect(identity).not.toContain('href: "/dashboard/market-map"');
     expect(identity).not.toContain('href: "/dashboard/communication"');
+    // Darbo žurnalas is a primary tab now (action-first) — it must not also be
+    // duplicated as a generic identity-actions card.
+    expect(identity).not.toContain('href: "/dashboard/journal"');
   });
 
   it("the person focus set is true next-actions only (profile / find work / readiness)", () => {

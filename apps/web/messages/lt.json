@@ -2609,6 +2609,40 @@
       "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
+      "myZone": {
+        "actionsHeading": "Ką galite padaryti dabar",
+        "incompleteStatus": "Jūsų informacija dar nepilna",
+        "readyStatus": "Jūsų profilis paruoštas",
+        "actions": {
+          "recordWork": {
+            "title": "Įrašyti darbą",
+            "desc": "Pridėkite, ką nuveikėte"
+          },
+          "improveProfile": {
+            "title": "Papildyti profilį",
+            "desc": "Profilis ir CV"
+          },
+          "mapVisibility": {
+            "title": "Būti matomam žemėlapyje",
+            "desc": "Kur jus mato"
+          },
+          "checkMessages": {
+            "title": "Patikrinti žinutes",
+            "desc": "Jūsų pokalbiai"
+          },
+          "companyActions": {
+            "title": "Įmonės veiksmai",
+            "desc": "Jūsų įmonė"
+          }
+        },
+        "improvesHeading": "Kas ką gerina",
+        "improves": {
+          "journal": "Darbo žurnalas pildo jūsų įgūdžius, profilį ir CV.",
+          "profile": "Profilis ir CV didina jūsų matomumą.",
+          "map": "Žemėlapis nustato, kur esate matomi.",
+          "messages": "Žinutės skirtos tik patikimam, leistinam bendravimui."
+        }
+      },
       "firstUse": {
         "eyebrow": "Pradžia",
         "title": "Pradėkite nuo savęs",
@@ -2980,7 +3014,7 @@
         "marketplace": "Prekyvietė",
         "marketMap": "Žemėlapis",
         "profile": "Profilis",
-        "journal": "Mano CV",
+        "journal": "Darbo žurnalas",
         "communication": "Žinutės",
         "discover": "Naršyti",
         "search": "Ieškoti",
