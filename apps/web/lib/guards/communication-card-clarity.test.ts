@@ -24,7 +24,7 @@ describe("Guard: conversation card model always carries type + counterparty + sc
     it(`${kind}: every field is a non-empty key`, () => {
       const m = describeConversationCard({ kind });
       expect(m.typeKey, "typeKey").toBe(`kind.${kind}`);
-      expect(m.counterpartyKey, "counterpartyKey").toMatch(/^counterparty\.(support|unknown)$/);
+      expect(m.counterpartyKey, "counterpartyKey").toMatch(/^counterparty\.(support|restricted)$/);
       expect(m.scopeKey, "scopeKey").toMatch(/^scope\.(support|unknown)$/);
     });
   }
@@ -37,12 +37,13 @@ describe("Guard: conversation card model always carries type + counterparty + sc
     expect(m.scopeKey).toBe("scope.support");
   });
 
-  it("direct / team are honest-UNKNOWN, not faked", () => {
+  it("direct / team counterpart is RESTRICTED (details-not-shown), scope honest-UNKNOWN, not faked", () => {
     for (const kind of ["direct", "team"] as const) {
       const m = describeConversationCard({ kind });
       expect(m.counterpartyKnown, `${kind} counterparty`).toBe(false);
+      expect(m.counterpartyRestricted, `${kind} counterparty restricted`).toBe(true);
       expect(m.scopeKnown, `${kind} scope`).toBe(false);
-      expect(m.counterpartyKey).toBe("counterparty.unknown");
+      expect(m.counterpartyKey).toBe("counterparty.restricted");
       expect(m.scopeKey).toBe("scope.unknown");
     }
   });
@@ -51,7 +52,7 @@ describe("Guard: conversation card model always carries type + counterparty + sc
     const m = describeConversationCard({ kind: "totally-unknown" });
     expect(normalizeKind("totally-unknown")).toBe("direct");
     expect(m.typeKey).toBe("kind.direct");
-    expect(m.counterpartyKey).toBe("counterparty.unknown");
+    expect(m.counterpartyKey).toBe("counterparty.restricted");
     expect(m.scopeKey).toBe("scope.unknown");
   });
 });
@@ -79,8 +80,14 @@ describe("Guard: honest-unknown + support copy exists in all active locales", ()
     it(`${loc}: communication.counterparty.* and scope.* are present and non-empty`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
       const comm = j.communication as Record<string, Record<string, string>>;
+      // counterparty now carries {support, restricted} (the renamed honest
+      // details-not-shown key); scope keeps {support, unknown}.
+      const expected = {
+        counterparty: ["support", "restricted"],
+        scope: ["support", "unknown"],
+      } as const;
       for (const group of ["counterparty", "scope"] as const) {
-        for (const key of ["support", "unknown"] as const) {
+        for (const key of expected[group]) {
           const v = comm[group]?.[key];
           expect(v, `${loc}.communication.${group}.${key}`).toBeTruthy();
           expect(v.trim().length, `${loc}.communication.${group}.${key} non-empty`).toBeGreaterThan(0);

@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
+import { Lock } from "lucide-react";
 import { AdminJoinConversation } from "@/components/app/admin-join-conversation";
 import { CommunicationComposer } from "@/components/app/communication-composer";
 import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
@@ -119,19 +120,27 @@ export default async function ConversationDetailPage({
           >
             {t(card.typeKey)}
           </span>
-          {/* Who + which context — honest-unknown states are muted/italic so
-              they read as "not specified", never as a real name. */}
+          {/* Who + which context — a restricted counterparty renders as a
+              locked, system-limited chip (NOT a normal name, NOT a bland
+              "unspecified recipient"): the details are simply not shown yet. */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
-            <span
-              className={
-                card.counterpartyKnown
-                  ? "text-text-secondary"
-                  : "italic text-text-muted"
-              }
-              data-testid="thread-counterparty"
-            >
-              {t(card.counterpartyKey)}
-            </span>
+            {card.counterpartyRestricted ? (
+              <span
+                className="inline-flex items-center gap-1 rounded border border-ink-600/60 bg-ink-800/40 px-1.5 py-0.5 text-text-muted"
+                data-testid="thread-counterparty"
+                data-restricted="true"
+              >
+                <Lock className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+                {t(card.counterpartyKey)}
+              </span>
+            ) : (
+              <span
+                className="text-text-secondary"
+                data-testid="thread-counterparty"
+              >
+                {t(card.counterpartyKey)}
+              </span>
+            )}
             <span aria-hidden className="text-text-muted">
               ·
             </span>

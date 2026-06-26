@@ -4062,7 +4062,7 @@
     "empty": "Kol kas žinučių nėra. Jei kas nors parašys ar atsiras svarbus prašymas, matysite tai čia.",
     "counterparty": {
       "support": "Pagalbos komanda",
-      "unknown": "Pašnekovas nepatikslintas"
+      "restricted": "Pašnekovo duomenys dar nerodomi"
     },
     "scope": {
       "support": "Pagalbos kanalas",
