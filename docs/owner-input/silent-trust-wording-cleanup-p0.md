@@ -254,7 +254,49 @@ playercards, labourMarket, matchPreview`) and fails on any certification stem.
 
 ---
 
-## 7. Validation
+## 7. Owner correction — employer / external review framing removed (fourth pass)
+
+Owner: no public marketing or normal-user UI may suggest **employer-reviewed
+history**, **employer-approved history**, **externally reviewed skills**, or
+**public review/confirmation/verification by an employer/client/platform**.
+(This tightens pass 2/3, where "external review" / "externally reviewed" had
+been used as neutral-sounding labels.) Allowed: work records, structured work
+history, skill signals, profile data, clearer records, matching based on
+records.
+
+**Before → after (EN; LT/RU done in parallel):**
+
+| Path | Before | After |
+|---|---|---|
+| `companies.faq.items.3.a` | …workers' skill records, **employer-reviewed history**… | …workers' skill records, **structured work history**… |
+| `capabilityProfile.notExternallyVerified` | Not **externally reviewed** | **Not yet backed by work records** |
+| `skills.textFirst.needsExternalConfirmation` | Needs **external review** later | **Add work records later** |
+| `skills.textFirst.textClaimNotVerified` | …not **externally reviewed** yet | …**not yet backed by work records** |
+| `suggestionStatuses.needs_external_confirmation` | Needs **external review** | **Needs work records** |
+| `suggestionStatuses.externally_confirmed` | **Externally reviewed** | **Backed by work records** |
+| `features.external_confirmation.label` | **External review** | **Work records from others** |
+| `features.external_confirmation.description` | …able to **review** your work records. | …able to **add to** your work records. |
+| `profileCvClarity.step.awaitingProof.label` | What is awaiting records / **external review** | **What is awaiting work records** |
+
+(27 values across lt/en/ru.)
+
+**Kept (allowed exception):** the internal-workflow verb "waiting for a person /
+manager to review it" / "reviewed by a person" (pass-2 endorsed; private status,
+not a public trust claim), and the **reviewer/manager-only** surfaces
+`reviewReport.origin` and `managerEvidence.distinctionNote` ("without external
+verification" / "externally confirmed") — these are admin/reviewer/manager text,
+not normal-user/public/self-view, and are not scanned by the guard.
+
+**Guard extended:** `silent-trust-wording.test.ts` now also fails on
+employer/external review-as-trust-claim framing (`employer-reviewed`,
+`externally reviewed`, `external review/confirmation/verification`, plus LT
+`darbdavių/išorinė peržiūr…` and RU `внешн…/работодател… просмотр/подтвер`).
+Tight patterns: they catch the adjective/status framing but not the allowed
+workflow verb.
+
+---
+
+## 8. Validation
 
 - `pnpm -F web exec vitest run` — **388 files / 5515 tests pass** (incl. the
   silent-trust guard, 11 tests).

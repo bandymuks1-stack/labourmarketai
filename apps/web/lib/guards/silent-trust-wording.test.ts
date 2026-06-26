@@ -44,6 +44,22 @@ const get = (obj: any, path: string) =>
 // forbidden here.
 const CERT_STEM = /verif|confirm|tvirtin|подтверж|верифиц/i;
 
+// Employer/external REVIEW-as-trust-claim framing. The owner forbids presenting
+// employer/external review or approval of a worker's history/skills as a public
+// signal ("employer-reviewed history", "externally reviewed skills", "external
+// review"). Tight patterns: they catch the adjective/status framing but NOT the
+// allowed internal-workflow verb ("waiting for a person to review it").
+const EXTERNAL_REVIEW = [
+  /employer[-\s]?(?:review|approv|confirm)/i,
+  /externally\s+(?:review|confirm|verif)/i,
+  /external\s+(?:review|confirmation|verification)/i,
+  /darbdav\w*\s+(?:peržiūr|patvirtin|tvirtin)/i,
+  /išorin\w*\s+(?:peržiūr|patvirtin)/i,
+  /(?:peržiūrėt\w*|patvirtint\w*)\s+iš\s+išor/i,
+  /(?:внешн\w*|работодател\w*)\s+(?:просмотр|подтвер|провер)/i,
+  /просмотрен\w*\s+работодател/i,
+];
+
 // The positive-state labels: the rung that USED to read "Patvirtinta /
 // Confirmed / Verified". Each must now be neutral records language.
 const POSITIVE_LABELS = [
@@ -114,7 +130,9 @@ describe("Silent-trust: no pending/affirmative certification wording in trust UI
           const v = o[k];
           const p = path ? `${path}.${k}` : k;
           if (typeof v === "string") {
-            if (CERT_STEM.test(stripBraces(v))) offenders.push(`${p} = ${JSON.stringify(v)}`);
+            const text = stripBraces(v);
+            if (CERT_STEM.test(text) || EXTERNAL_REVIEW.some((rx) => rx.test(text)))
+              offenders.push(`${p} = ${JSON.stringify(v)}`);
           } else if (v && typeof v === "object") walk(v, p);
         }
       };

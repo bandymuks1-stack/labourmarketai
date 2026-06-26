@@ -40,10 +40,10 @@ describe("the flow never claims fake/auto/AI verification", () => {
       const blob = [tf.textClaimNotVerified, tf.needsExternalConfirmation, tf.savedToCapabilities]
         .join(" ")
         .toLowerCase();
-      // The honest framing must be present (silent-trust rule: neutral review
-      // wording, never certification)…
+      // The honest framing must be present (silent-trust rule: neutral
+      // work-record wording, never certification or external-review framing)…
       expect(blob).toMatch(
-        locale === "lt" ? /neperžiūr|peržiūr/ : /not reviewed|review/,
+        locale === "lt" ? /darbo įraš|įraš/ : /work records|records/,
       );
       // …and it must not assert AI / automatic / guaranteed verification.
       expect(blob).not.toMatch(/\bai[- ]verif|automatically verified|guaranteed|automati[šks]+kai patvirtinta/i);

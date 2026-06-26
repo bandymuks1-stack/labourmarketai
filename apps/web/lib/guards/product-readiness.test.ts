@@ -255,9 +255,11 @@ describe("confirmation-required copy is present", () => {
     // future external-review step is described honestly without "confirmation".
     expect(lt.skills.textFirst.confirmedByYou).toBe("Laukia peržiūros");
     expect(en.skills.textFirst.confirmedByYou).toBe("Not reviewed yet");
-    expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/išorin/i);
+    // Silent-trust rule: the future step is framed as work records, never as
+    // "external review" (which implies external approval as a public signal).
+    expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/darbo įraš/i);
     expect(en.skills.textFirst.needsExternalConfirmation).toMatch(
-      /external/i,
+      /work records/i,
     );
     // Quiet-UI reframe (fix/cv): the rule-based/AI disclaimer (ruleBasedNotice)
     // was REMOVED from normal user UI per the owner. Nothing replaces it.

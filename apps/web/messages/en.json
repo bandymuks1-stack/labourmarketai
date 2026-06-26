@@ -731,7 +731,7 @@
     "intro": "Your capabilities — from your own words and your work history. You're not locked into one role: skills from any field belong here.",
     "skillsTitle": "Skills",
     "selfDeclaredStatus": "Waiting for review",
-    "notExternallyVerified": "Not externally reviewed",
+    "notExternallyVerified": "Not yet backed by work records",
     "sourceProfileText": "Source: profile text",
     "disclaimer": "These skills are taken from your own description. They are not yet reviewed.",
     "experienceTitle": "Work history",
@@ -2059,12 +2059,12 @@
       "noNewSuggestions": "No new suggestions. Your already-saved skills are shown below.",
       "confirmedByYou": "Not reviewed yet",
       "addedToProfile": "Added to your profile",
-      "needsExternalConfirmation": "Needs external review later",
+      "needsExternalConfirmation": "Add work records later",
       "viewCapabilities": "View your capabilities",
       "textSavingLabel": "Saving…",
       "textSavedLabel": "Your text is saved",
       "textSaveErrorLabel": "Could not save your text. Please try again.",
-      "textClaimNotVerified": "This is your own claim — not externally reviewed yet"
+      "textClaimNotVerified": "This is your own claim — not yet backed by work records"
     }
   },
   "roles": {
@@ -2171,8 +2171,8 @@
     "confirmed_by_user": "Selected by you",
     "discarded_by_user": "Not included",
     "needs_more_detail": "Needs more detail",
-    "needs_external_confirmation": "Needs external review",
-    "externally_confirmed": "Externally reviewed"
+    "needs_external_confirmation": "Needs work records",
+    "externally_confirmed": "Backed by work records"
   },
   "dashboard": {
     "comingLater": {
@@ -2219,8 +2219,8 @@
       "description": "Later you'll be able to add company, agency and buying actions when they are ready."
     },
     "external_confirmation": {
-      "label": "External review",
-      "description": "A manager, client or partner will later be able to review your work records."
+      "label": "Work records from others",
+      "description": "A manager, client or partner will later be able to add to your work records."
     },
     "company_workspace": {
       "label": "Company space",
@@ -3378,7 +3378,7 @@
         },
         {
           "q": "How is worker experience guaranteed?",
-          "a": "Through workers' skill records, employer-reviewed history and contextual fit signals — not self-reported CVs."
+          "a": "Through workers' skill records, structured work history and contextual fit signals — not self-reported CVs."
         }
       ]
     },
@@ -4188,7 +4188,7 @@
         "body": "Facts you typed yourself. The system does not review them automatically."
       },
       "awaitingProof": {
-        "label": "What is awaiting records / external review",
+        "label": "What is awaiting work records",
         "body": "Achievements that need an employer or institution to review them. No fake 'Reviewed' badges."
       }
     },

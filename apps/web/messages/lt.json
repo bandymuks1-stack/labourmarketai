@@ -731,7 +731,7 @@
     "intro": "Jūsų gebėjimai — iš jūsų pačių žodžių ir darbo istorijos. Nesate užrakinti viename vaidmenyje: čia tilps įgūdžiai iš bet kurios srities.",
     "skillsTitle": "Įgūdžiai",
     "selfDeclaredStatus": "Laukia peržiūros",
-    "notExternallyVerified": "Neperžiūrėta išoriškai",
+    "notExternallyVerified": "Dar nepagrįsta darbo įrašais",
     "sourceProfileText": "Šaltinis: profilio tekstas",
     "disclaimer": "Šie įgūdžiai paimti iš jūsų pačių aprašymo. Jie dar neperžiūrėti darbų žurnalu, dokumentais ar kito žmogaus peržiūra — bet jie yra jūsų bendros gebėjimų savybės dalis.",
     "experienceTitle": "Darbo istorija",
@@ -2059,12 +2059,12 @@
       "noNewSuggestions": "Naujų pasiūlymų neradome. Jau išsaugoti gebėjimai rodomi žemiau.",
       "confirmedByYou": "Laukia peržiūros",
       "addedToProfile": "Pridėta į jūsų profilį",
-      "needsExternalConfirmation": "Vėliau reikės išorinės peržiūros",
+      "needsExternalConfirmation": "Vėliau pridėkite darbo įrašų",
       "viewCapabilities": "Žiūrėti savo gebėjimus",
       "textSavingLabel": "Įrašoma…",
       "textSavedLabel": "Jūsų tekstas išsaugotas",
       "textSaveErrorLabel": "Nepavyko išsaugoti teksto. Bandykite dar kartą.",
-      "textClaimNotVerified": "Tai jūsų pačių teiginys — dar ne išorinė peržiūra"
+      "textClaimNotVerified": "Tai jūsų pačių teiginys — dar nepagrįsta darbo įrašais"
     }
   },
   "roles": {
@@ -2171,8 +2171,8 @@
     "confirmed_by_user": "Paties pasirinkta",
     "discarded_by_user": "Neįtraukta",
     "needs_more_detail": "Reikia daugiau informacijos",
-    "needs_external_confirmation": "Laukia išorinės peržiūros",
-    "externally_confirmed": "Peržiūrėta iš išorės"
+    "needs_external_confirmation": "Reikia darbo įrašų",
+    "externally_confirmed": "Pagrįsta darbo įrašais"
   },
   "dashboard": {
     "comingLater": {
@@ -2219,8 +2219,8 @@
       "description": "Vėliau galėsite pridėti įmonės, agentūros ir pirkimo veiksmus, kai jie bus paruošti."
     },
     "external_confirmation": {
-      "label": "Išorinė peržiūra",
-      "description": "Vadovas, klientas ar partneris vėliau galės peržiūrėti jūsų darbo įrašus."
+      "label": "Darbo įrašai iš kitų",
+      "description": "Vadovas, klientas ar partneris vėliau galės papildyti jūsų darbo įrašus."
     },
     "company_workspace": {
       "label": "Įmonės erdvė",
@@ -3378,7 +3378,7 @@
         },
         {
           "q": "Kas garantuoja darbuotojo patirtį?",
-          "a": "Pagal darbuotojų įgūdžių įrašus, darbdavių peržiūrėtą istoriją ir kontekstinius atitikimo signalus — ne savadarbiai CV."
+          "a": "Pagal darbuotojų įgūdžių įrašus, struktūruotą darbo istoriją ir kontekstinius atitikimo signalus — ne savadarbiai CV."
         }
       ]
     },
@@ -4188,7 +4188,7 @@
         "body": "Tavo nurodyti faktai."
       },
       "awaitingProof": {
-        "label": "Kas laukia įrašų / išorinės peržiūros",
+        "label": "Kas laukia darbo įrašų",
         "body": "Pasiekimai, kuriems reikia darbdavio ar institucijos peržiūros."
       }
     },
