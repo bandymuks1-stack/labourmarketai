@@ -1544,9 +1544,55 @@
     }
   },
   "admin": {
+    "room": {
+      "groups": {
+        "overview": {
+          "title": "Apžvalga",
+          "purpose": "Dabartinė sistemos būklė."
+        },
+        "people": {
+          "title": "Žmonės",
+          "purpose": "Profiliai, kuriuos reikia peržiūrėti."
+        },
+        "companies": {
+          "title": "Įmonės",
+          "purpose": "Įmonių įrašai ir patvirtinimas."
+        },
+        "demand": {
+          "title": "Paklausa",
+          "purpose": "Užklausos ir nesutvarkyti poreikiai."
+        },
+        "matching": {
+          "title": "Suvedimas",
+          "purpose": "Kur susitinka žmonės, paklausa ir pasiūla — sprendimų sluoksnis."
+        },
+        "marketSignals": {
+          "title": "Rinkos signalai",
+          "purpose": "Pasiūla, paklausa ir spragos rinkoje."
+        },
+        "quality": {
+          "title": "Kokybė ir rizika",
+          "purpose": "Duomenų kokybė, pasirengimas ir operacinė rizika."
+        },
+        "operations": {
+          "title": "Operacijos",
+          "purpose": "Pagalba, atsiskaitymai ir artimiausi veiksmai."
+        }
+      },
+      "kpi": {
+        "people": "Aktyvūs žmonės",
+        "peopleIncomplete": "Nepilni profiliai",
+        "companies": "Įmonės",
+        "demand": "Atvira paklausa",
+        "reviewQueue": "Laukia peržiūros",
+        "claims": "Įgūdžių deklaracijos"
+      },
+      "internalBadge": "Vidinis",
+      "internalNote": "Vidinė diagnostika — techninė informacija savininkui, ne produkto paviršius."
+    },
     "eyebrow": "OPERACIJŲ VALDYMAS",
-    "title": "Operacijų valdymo skydas",
-    "subtitle": "Tik superadminams. Saugomi serverio pusės RLS ir profiles.active_role = 'admin'.",
+    "title": "Savininko / operacijų valdymo centras",
+    "subtitle": "Viskas, ką savininkui reikia matyti ir daryti — vienoje vietoje.",
     "back": "Grįžti į operacijų skydą",
     "metric": {
       "totalUsers": "Profiliai iš viso",
@@ -1562,7 +1608,7 @@
       "inspect": "Tikrinti →"
     },
     "hub": {
-      "projectTruth": "Projekto tiesa · P0",
+      "projectTruth": "Sistemos diagnostika",
       "agentOs": "Agentų OS",
       "telemetry": "Operacijų telemetrija",
       "languageFeedback": "Kalbos pranešimai",
@@ -1589,7 +1635,7 @@
       "title": "Pirkėjų užklausos — rankinė peržiūra",
       "help": "Pirmenybė nustatoma deterministiškai pagal realius laukus (aprašymą, failų skaičių, būseną). Be dirbtinio intelekto, be automatinio nuskaitymo.",
       "empty": "Pirkėjų užklausų dar nėra.",
-      "migrationBlocker": "Reikia migracijų 0028_customer_requests / 0029_customer_request_attachments.",
+      "migrationBlocker": "Šis skyrius laikinai nepasiekiamas, kol ruošiami jo duomenys.",
       "filesLabel": "Failai",
       "created": "Sukurta",
       "noDescription": "Aprašymas nenurodytas",

@@ -44,8 +44,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // documents merge (main 692 + 30 documents; the PR-note '714' was stale
   // arithmetic — measurement wins). MEASURED 766 at S4 (+44: admin.market
   // analysis view + hub link + matching confirmed-only filter).
-  da: 766,
-  de: 766,
+  // MEASURED 783 at admin-control-room-v1 (+24: admin.room control-room group
+  // titles, KPI labels + internal-diagnostics note land in all 11 locales;
+  // en/lt/ru translated, da/de [EN] until human translation).
+  da: 783,
+  de: 783,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,

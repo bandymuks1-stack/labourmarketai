@@ -1544,9 +1544,55 @@
     }
   },
   "admin": {
+    "room": {
+      "groups": {
+        "overview": {
+          "title": "Overview",
+          "purpose": "The state of the system right now."
+        },
+        "people": {
+          "title": "People",
+          "purpose": "Profiles to review and inspect."
+        },
+        "companies": {
+          "title": "Companies",
+          "purpose": "Company records and verification."
+        },
+        "demand": {
+          "title": "Demand",
+          "purpose": "Requests and unstructured needs to act on."
+        },
+        "matching": {
+          "title": "Matching",
+          "purpose": "Where people, demand and supply meet — the decision layer."
+        },
+        "marketSignals": {
+          "title": "Market signals",
+          "purpose": "Supply, demand and gaps across the market."
+        },
+        "quality": {
+          "title": "Quality & risk",
+          "purpose": "Data quality, readiness and operational risk."
+        },
+        "operations": {
+          "title": "Operations",
+          "purpose": "Support, billing and the next owner actions."
+        }
+      },
+      "kpi": {
+        "people": "Active people",
+        "peopleIncomplete": "Incomplete profiles",
+        "companies": "Companies",
+        "demand": "Open demand",
+        "reviewQueue": "Awaiting review",
+        "claims": "Skill claims"
+      },
+      "internalBadge": "Internal",
+      "internalNote": "Internal diagnostics — technical detail for the owner, not a product surface."
+    },
     "eyebrow": "OPERATIONS CONTROL",
-    "title": "Operations control panel",
-    "subtitle": "Superadmins only. Server-side RLS + profiles.active_role = 'admin'.",
+    "title": "Owner / Operations Control Room",
+    "subtitle": "Everything an owner needs to see and act on, in one place.",
     "back": "Back to operations panel",
     "metric": {
       "totalUsers": "Total profiles",
@@ -1562,7 +1608,7 @@
       "inspect": "Inspect →"
     },
     "hub": {
-      "projectTruth": "Project truth · P0",
+      "projectTruth": "System diagnostics",
       "agentOs": "Agent OS",
       "telemetry": "Operations telemetry",
       "languageFeedback": "Language reports",
@@ -1589,7 +1635,7 @@
       "title": "Buyer requests — manual review",
       "help": "Priority is computed deterministically from real fields (description, file count, status). No AI, no automatic reading.",
       "empty": "No buyer requests yet.",
-      "migrationBlocker": "Migrations 0028_customer_requests / 0029_customer_request_attachments required.",
+      "migrationBlocker": "This section is temporarily unavailable while its data is being prepared.",
       "filesLabel": "Files",
       "created": "Created",
       "noDescription": "No description provided",
