@@ -78,6 +78,14 @@ export default async function MarketMapPage({
     profileRes.data?.full_name?.trim() ||
     (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "") ||
     (user.email ? user.email.split("@")[0] : "");
+  // Real player-card signals for the own marker (no fabrication): availability
+  // only when the worker really set a status, and the confirmed-skills count
+  // straight from worker_skills.verified. Both omitted/zero → no badge shown.
+  const availabilityLabel =
+    availability.hasWorker && availability.state !== "unknown"
+      ? tMap(`markerAvail.${availability.state}`)
+      : null;
+  const verifiedSkillsCount = capabilities.counts.confirmed;
   const mapIdentity = ownName
     ? {
         kind: "person" as const,
@@ -85,6 +93,8 @@ export default async function MarketMapPage({
         initial: ownName.slice(0, 1).toUpperCase(),
         avatarUrl: avatar.signedUrl,
         statusLabel: tMap("markerYou"),
+        availabilityLabel,
+        verifiedSkillsCount,
       }
     : undefined;
   // Own needs/demands carry NO coordinates (capture stores country/region only),

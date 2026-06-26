@@ -246,6 +246,11 @@
     },
     "markerYou": "You",
     "markerCompany": "Company",
+    "markerAvail": {
+      "available": "Available",
+      "busy": "Busy",
+      "unavailable": "Not working"
+    },
     "title": "My market map",
     "subtitle": "Where you are, where you want to act, and where the demand is — shown only through your own safe, private signals.",
     "ownerScopeNote": "This is your own market-map space — shown only through your own signals, at country / region level. Other users' signals are not shown, and an exact location appears only once you confirm it. A public market layer will be added separately, only with aggregation safeguards.",
@@ -604,6 +609,9 @@
     },
     "reviewHeading": "Needs review",
     "reviewHelper": "These skills are linked, but this entry's text doesn't support them. Review or unlink the wrong ones.",
+    "reviewSummary": "{count} previously linked skills no longer match this entry's text. They are not shown as this entry's skills.",
+    "reviewShow": "Show",
+    "reviewHide": "Hide",
     "reviewAgain": "Review again",
     "unlinkFlagged": "Unlink",
     "linkMore": "Link a skill",
