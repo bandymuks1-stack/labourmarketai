@@ -186,7 +186,75 @@ contract: `employer-preview-honesty`, `journal-entry-skill-links`,
 
 ---
 
-## 6. Validation
+## 6. Owner decision — extend to public marketing (third pass)
+
+Owner: the rule applies **everywhere visible to normal users**, including public
+landing, `/for-workers`, `/for-companies`. No "one rule inside the app, another
+in marketing." Public certification wording removed and replaced with neutral
+work-record / profile-signal language (owner's allowed direction: "Build your
+work profile", "Show / Add your work records", "Skill signals from your
+entries", "Profile data from work records", "Better matching from clearer
+records").
+
+**Public pages / namespaces changed:** `/for-workers` (`workers.*`,
+`pages.workers.*`), `/for-companies` (`companies.*`, `pages.companies.*`), and
+the public `work-abroad` / `worker-intake` / `company-need` / `vision` pages.
+
+**Public before → after (EN; LT/RU done in parallel):**
+
+| Path | Before | After |
+|---|---|---|
+| `workers.journey.steps.1.title` | Verify your skills | **Build your work records** |
+| `workers.journey.steps.1.desc` | Employers and certificates confirm what you can do. | **Your work records and certificates show what you can do.** |
+| `workers.faq.items.0.q` | How are skills verified? | **Where do skill signals come from?** |
+| `workers.faq.items.0.a` | Through employer confirmations on completed work… | **From your work-journal records on completed work…** |
+| `workers.faq.items.2.a` | Only **verified** employers and agencies… | **Only registered employers and agencies…** |
+| `workers.profile.subcopy` | …real completed work and **confirmed skills**… | **…real completed work and work records…** |
+| `workers.profile.bullets.0` | …from **confirmed skills**, reliability and **on-site proof**. | **…from your work records, reliability and on-site records.** |
+| `workers.profile.bullets.2` | **Skill evidence — built from confirmed work**… | **Skill signals — built from your work records…** |
+| `workers.features.items.1.title` | **Evidence-backed skills** | **Records-backed skills** |
+| `workers.features.items.1.desc` | Built from **confirmed work** and certificates. | **Built from your work records and certificates.** |
+| `workers.features.items.0.desc` | …completed work and **proof**… | **…completed work and records…** |
+| `workers.journey.steps.3.desc` | …strengthens your **proof** and readiness. | **…strengthens your records and readiness.** |
+| `pages.workers.benefits.0.body` | …**evidence-backed skills**… visible to **vetted employers**… | **…records-backed skills… visible to registered employers…** |
+| `companies.demand.bullets.2` | …compared with **confirmed worker skills**. | **…compared with workers' skill records.** |
+| `companies.features.items.3.title` | **Confirmed skills** + fit signals | **Skill records + fit signals** |
+| `companies.features.items.3.desc` | Hire on **evidence**, not on claims. | **Hire on records, not on claims.** |
+| `companies.faq.items.0.a` | …from **confirmed skills**… **on-site proof**… | **…from workers' skill records… on-site records…** |
+| `companies.faq.items.3.a` | Through **confirmed skills, employer-confirmed history**… | **Through workers' skill records, employer-reviewed history…** |
+| `pages.companies.benefits.2.body` | Tap **vetted** agency pools… | **Tap registered agency pools…** |
+| `workAbroad.steps.1.body` | …**It never invents experience and verifies nothing.** | **…It never invents experience.** |
+| `workAbroad.aiNote` | It does not **verify** your skills, documents or legal status… | **It does not check your skills or documents on its own…** |
+| `workerIntake.subtitle` | …we never **verify** or auto-publish anything. | **…nothing is published automatically.** |
+| `workerIntake.aiNotVerified` | Review before saving — **not verified**, nothing is saved… | **Review before saving — nothing is saved automatically.** |
+| `companyNeed.aiNotVerified` | Review before publishing — **not verified**… | **Review before publishing — nothing is published automatically.** |
+| `vision.controlRoom.fakeClaimsLabel` | Fake AI / matching / **verified** | **Fake AI / fake matching / fake reputation** |
+
+(84 public values across lt/en/ru.)
+
+**Allowed exceptions KEPT (per owner):**
+- **email / account verification** — `auth.callback.verifying`,
+  `auth.*.confirm_password_label`.
+- **legal company-identity verification** where it clearly means legal identity
+  (not skill/work certification) — `companyReadiness` / `documents` legal status.
+- **strictly internal / admin / reviewer-only** workflow text — `journal.inbox`,
+  `auth.dashboard.chainActions.reviewEntriesDesc`, and the **employer-app**
+  `dashboard/company/scouting` (`scouting.*`) + `dashboard/search`
+  (`searchRoom.*`). These are not normal/public/self-view surfaces.
+- **commercial pricing confirmation** — `pricing.*` ("we'll confirm pricing").
+- **availability status badge** (Available/Working/Busy) — not a trust badge.
+- **certificates** (the worker's own uploaded documents) — real artefacts, not a
+  platform certification claim.
+- **"check" CTAs** — e.g. `workAbroad.ctaReadiness` "Check country readiness".
+
+**Guard extended:** `silent-trust-wording.test.ts` now also walks the public
+marketing namespaces (`workers, companies, agencies, pages, hero, journey,
+vision, workAbroad, workerIntake, companyNeed, services, marketPulse,
+playercards, labourMarket, matchPreview`) and fails on any certification stem.
+
+---
+
+## 7. Validation
 
 - `pnpm -F web exec vitest run` — **388 files / 5515 tests pass** (incl. the
   silent-trust guard, 11 tests).
@@ -194,6 +262,6 @@ contract: `employer-preview-honesty`, `journal-entry-skill-links`,
 - Risky-path scan: **NONE** — `git status` = message JSON (copy) + guard tests
   only. No DB/schema/RLS/RPC/Supabase/env/DNS/billing/auth-core/migration files;
   no production data mutation; no ranking/matching change; no internal trust
-  logic or stored data removed.
+  logic or stored data removed; no DB field/function renamed.
 
 **Held:** draft PR #512, unmerged, undeployed — awaiting owner review.

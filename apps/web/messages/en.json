@@ -2153,7 +2153,7 @@
       "pr18Status": "BLOCKED (issue #32)",
       "nonWorkerLabel": "Company / agency / customer spaces",
       "nonWorkerStatus": "Preparing",
-      "fakeClaimsLabel": "Fake AI / matching / verified",
+      "fakeClaimsLabel": "Fake AI / fake matching / fake reputation",
       "fakeClaimsStatus": "Never used"
     },
     "futureLayers": {
@@ -3202,11 +3202,11 @@
         "line1": "Here's what you'll look like —",
         "line2": "a card that speaks for you."
       },
-      "subcopy": "Your card is built from real completed work and confirmed skills, not a self-written CV. Fit signals are shown in context — coverage and readiness for a specific need, never one universal rating.",
+      "subcopy": "Your card is built from your real completed work and work records, not a self-written CV. Fit signals are shown in context — coverage and readiness for a specific need, never one universal rating.",
       "bullets": [
-        "Fit & readiness signals — coverage against a specific need from confirmed skills, reliability and on-site proof. Never one universal rating.",
+        "Fit & readiness signals — coverage against a specific need from your work records, reliability and on-site records. Never one universal rating.",
         "Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
-        "Skill evidence — built from confirmed work and certificates, not self-claimed.",
+        "Skill signals — built from your work records and certificates, not just a self-written CV.",
         "Status badge — Available, Working, Drafted or Busy, always current."
       ]
     },
@@ -3219,8 +3219,8 @@
           "desc": "Add your trade, experience and availability."
         },
         {
-          "title": "Verify your skills",
-          "desc": "Employers and certificates confirm what you can do."
+          "title": "Build your work records",
+          "desc": "Your work records and certificates show what you can do."
         },
         {
           "title": "See opportunity-fit direction",
@@ -3228,7 +3228,7 @@
         },
         {
           "title": "Work, earn, level up",
-          "desc": "Completed work strengthens your proof and readiness."
+          "desc": "Completed work strengthens your records and readiness."
         }
       ]
     },
@@ -3238,11 +3238,11 @@
       "items": [
         {
           "title": "Readiness from real work",
-          "desc": "Your readiness reflects completed work and proof, shown in context — not promises."
+          "desc": "Your readiness reflects completed work and records, shown in context — not promises."
         },
         {
-          "title": "Evidence-backed skills",
-          "desc": "Built from confirmed work and certificates."
+          "title": "Records-backed skills",
+          "desc": "Built from your work records and certificates."
         },
         {
           "title": "Cross-border opportunities",
@@ -3267,8 +3267,8 @@
       "headline": "Straight answers",
       "items": [
         {
-          "q": "How are skills verified?",
-          "a": "Through employer confirmations on completed work and uploaded certificates — never self-claim alone."
+          "q": "Where do skill signals come from?",
+          "a": "From your work-journal records on completed work and uploaded certificates — never a self-written claim alone."
         },
         {
           "q": "How much does it cost workers?",
@@ -3276,7 +3276,7 @@
         },
         {
           "q": "Who sees my profile?",
-          "a": "Only verified employers and agencies you're visible to — you control your availability and exposure."
+          "a": "Only registered employers and agencies you're visible to — you control your availability and exposure."
         },
         {
           "q": "Can I work for multiple companies?",
@@ -3304,7 +3304,7 @@
       "bullets": [
         "Project + location — scope each need precisely.",
         "Headcount — how many of each role you need.",
-        "Required skills — compared with confirmed worker skills.",
+        "Required skills — compared with workers' skill records.",
         "Fit direction — workers whose abilities may fit this need."
       ]
     },
@@ -3347,8 +3347,8 @@
           "desc": "You see and own the relationship."
         },
         {
-          "title": "Confirmed skills + fit signals",
-          "desc": "Hire on evidence, not on claims."
+          "title": "Skill records + fit signals",
+          "desc": "Hire on records, not on claims."
         },
         {
           "title": "Real-time supply signals",
@@ -3366,7 +3366,7 @@
       "items": [
         {
           "q": "How are fit signals shown?",
-          "a": "Always against a specific need: coverage and fit from confirmed skills, reliability and on-site proof, with the reasons. Never one universal rating comparable across people."
+          "a": "Always against a specific need: coverage and fit from workers' skill records, reliability and on-site records, with the reasons. Never one universal rating comparable across people."
         },
         {
           "q": "How much does it cost?",
@@ -3378,7 +3378,7 @@
         },
         {
           "q": "How is worker experience guaranteed?",
-          "a": "Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs."
+          "a": "Through workers' skill records, employer-reviewed history and contextual fit signals — not self-reported CVs."
         }
       ]
     },
@@ -3611,7 +3611,7 @@
       "benefits": [
         {
           "title": "One profile, every market",
-          "body": "Maintain a single avatar with evidence-backed skills and availability — visible to vetted employers across nine countries."
+          "body": "Maintain a single avatar with records-backed skills and availability — visible to registered employers across nine countries."
         },
         {
           "title": "Real demand, real-time",
@@ -3641,7 +3641,7 @@
         },
         {
           "title": "Agencies, when you need them",
-          "body": "Tap vetted agency pools for surge capacity without losing visibility."
+          "body": "Tap registered agency pools for surge capacity without losing visibility."
         }
       ],
       "screenshot": "Company demand flow",
@@ -5116,7 +5116,7 @@
     "stepsTitle": "How it works",
     "steps": [
       { "title": "1. Tell us your trade", "body": "Add your profession, experience and availability. It takes a few minutes." },
-      { "title": "2. AI prepares a draft", "body": "The assistant turns your words into a structured profile and CV draft — a suggestion you review and edit. It never invents experience and verifies nothing." },
+      { "title": "2. AI prepares a draft", "body": "The assistant turns your words into a structured profile and CV draft — a suggestion you review and edit. It never invents experience." },
       { "title": "3. Check country readiness", "body": "See what documents and steps are likely required for the country you want — sourced, and not legal advice." },
       { "title": "4. Get matched", "body": "When an employer's need fits your trade, availability, accommodation, transport and language, you are shortlisted. Mismatches are shown honestly." },
       { "title": "5. Booking and start", "body": "Agree a booking with a clear readiness check. Contract and payment steps stay manual for now." }
@@ -5132,7 +5132,7 @@
     "directionsTitle": "Where people are working",
     "directionsNote": "Open the per-country pages to see sourced labour-market signals.",
     "directionsCta": "See countries",
-    "aiNote": "AI helps prepare your CV and profile. It does not verify your skills, documents or legal status — a human and your documents do.",
+    "aiNote": "AI helps prepare your CV and profile. It does not check your skills or documents on its own — a person and your documents do.",
     "ctaProfile": "Create worker profile",
     "ctaReadiness": "Check country readiness",
     "ctaTrades": "See trades we work with",
@@ -5235,7 +5235,7 @@
   },
   "workerIntake": {
     "title": "Worker intake",
-    "subtitle": "Tell us your trade and availability. We turn it into a draft profile you review — we never verify or auto-publish anything.",
+    "subtitle": "Tell us your trade and availability. We turn it into a draft profile you review — nothing is published automatically.",
     "fullName": "Full name",
     "profession": "Sector & work type",
     "targetCountries": "Countries you want to work in",
@@ -5263,7 +5263,7 @@
     "commentHelp": "A few sentences about your experience — the assistant uses this to draft your profile.",
     "submit": "Create draft profile",
     "aiBadge": "AI suggestion",
-    "aiNotVerified": "Review before saving — not verified, nothing is saved automatically.",
+    "aiNotVerified": "Review before saving — nothing is saved automatically.",
     "aiDisabled": "AI draft not generated yet — the assistant is not enabled. Your details are not saved.",
     "aiHeadline": "Suggested headline",
     "aiSkills": "Suggested skills",
@@ -5315,7 +5315,7 @@
     "descriptionHelp": "What the work is, where, and any requirements — the assistant uses this to draft a clean vacancy.",
     "submit": "Create vacancy draft",
     "aiBadge": "AI suggestion",
-    "aiNotVerified": "Review before publishing — not verified, nothing is published automatically.",
+    "aiNotVerified": "Review before publishing — nothing is published automatically.",
     "aiDisabled": "AI draft not generated yet — the assistant is not enabled. Your details are not saved.",
     "aiRole": "Normalized role",
     "aiSkills": "Required skills",

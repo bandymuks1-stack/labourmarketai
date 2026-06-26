@@ -2153,7 +2153,7 @@
       "pr18Status": "BLOCKED (issue #32)",
       "nonWorkerLabel": "Įmonės / agentūros / pirkėjo erdvės",
       "nonWorkerStatus": "Ruošiama",
-      "fakeClaimsLabel": "Fake AI / matching / verified",
+      "fakeClaimsLabel": "Netikras dirbtinis intelektas / netikras atitikimas / netikra reputacija",
       "fakeClaimsStatus": "Niekada nenaudojama"
     },
     "futureLayers": {
@@ -3202,11 +3202,11 @@
         "line1": "Štai kaip atrodysite —",
         "line2": "kortelėje, kuri kalba už jus."
       },
-      "subcopy": "Jūsų kortelė kuriama iš realiai atlikto darbo ir patvirtintų įgūdžių, o ne pačių rašyto CV. Atitikimo signalai rodomi kontekste — aprėptis ir pasirengimas konkrečiam poreikiui, niekada kaip vienas universalus įvertinimas.",
+      "subcopy": "Jūsų kortelė kuriama iš realiai atlikto darbo ir darbo įrašų, o ne pačių rašyto CV. Atitikimo signalai rodomi kontekste — aprėptis ir pasirengimas konkrečiam poreikiui, niekada kaip vienas universalus įvertinimas.",
       "bullets": [
-        "Atitikimo ir pasirengimo signalai — aprėptis konkrečiam poreikiui pagal patvirtintus įgūdžius, patikimumą ir saugą. Niekada vienas universalus įvertinimas.",
+        "Atitikimo ir pasirengimo signalai — aprėptis konkrečiam poreikiui pagal darbo įrašus, patikimumą ir saugą. Niekada vienas universalus įvertinimas.",
         "Statų juostos — Įgūdis, Patikimumas, Greitis, Sauga, Prisitaikymas, Pasitikėjimas.",
-        "Patvirtinti įgūdžiai — patvirtinti darbdavių ir pažymėjimų, ne savadarbiai.",
+        "Įgūdžių signalai — iš jūsų darbo įrašų ir pažymėjimų, ne tik pačių rašytas CV.",
         "Būsenos ženklas — Laisvas, Dirba, Atrinktas ar Užimtas, visada aktualus."
       ]
     },
@@ -3219,8 +3219,8 @@
           "desc": "Nurodykite profesiją, patirtį ir prieinamumą."
         },
         {
-          "title": "Patvirtinkit įgūdžius",
-          "desc": "Darbdaviai ir pažymėjimai patvirtina, ką mokate."
+          "title": "Kaupkite darbo įrašus",
+          "desc": "Jūsų darbo įrašai ir pažymėjimai parodo, ką mokate."
         },
         {
           "title": "Matykite galimybių atitikimo kryptį",
@@ -3228,7 +3228,7 @@
         },
         {
           "title": "Dirbkite ir gaukite vertinimą",
-          "desc": "Atliktas darbas stiprina jūsų įrodymus ir pasirengimą."
+          "desc": "Atliktas darbas stiprina jūsų įrašus ir pasirengimą."
         }
       ]
     },
@@ -3238,11 +3238,11 @@
       "items": [
         {
           "title": "Pasirengimas pagal realų darbą",
-          "desc": "Pasirengimas atspindi atliktą darbą ir įrodymus, rodomas kontekste — ne pažadus."
+          "desc": "Pasirengimas atspindi atliktą darbą ir įrašus, rodomas kontekste — ne pažadus."
         },
         {
-          "title": "Patvirtinti įgūdžiai",
-          "desc": "Patvirtinti darbdavių ir pažymėjimų."
+          "title": "Įgūdžiai iš įrašų",
+          "desc": "Iš jūsų darbo įrašų ir pažymėjimų."
         },
         {
           "title": "Tarpvalstybinės galimybės",
@@ -3267,8 +3267,8 @@
       "headline": "Aiškūs atsakymai",
       "items": [
         {
-          "q": "Kaip patvirtinami įgūdžiai?",
-          "a": "Darbdavių patvirtinimais už atliktą darbą ir įkeltais pažymėjimais — niekada vien savadarbiai."
+          "q": "Iš kur atsiranda įgūdžių signalai?",
+          "a": "Iš jūsų darbo žurnalo įrašų už atliktą darbą ir įkeltų pažymėjimų — niekada vien iš pačių parašyto teiginio."
         },
         {
           "q": "Kiek kainuoja darbuotojui?",
@@ -3276,7 +3276,7 @@
         },
         {
           "q": "Kas mato mano profilį?",
-          "a": "Tik patvirtinti darbdaviai ir agentūros, kuriems esate matomas — jūs valdote prieinamumą ir matomumą."
+          "a": "Tik registruoti darbdaviai ir agentūros, kuriems esate matomas — jūs valdote prieinamumą ir matomumą."
         },
         {
           "q": "Ar galiu dirbti kelioms įmonėms?",
@@ -3304,7 +3304,7 @@
       "bullets": [
         "Projektas + vieta — tiksliai apibrėžkite poreikį.",
         "Žmonių skaičius — kiek kiekvienos pareigybės reikia.",
-        "Reikalingi įgūdžiai — lyginami su patvirtintais darbuotojų įgūdžiais.",
+        "Reikalingi įgūdžiai — lyginami su darbuotojų įgūdžių įrašais.",
         "Atitikimo kryptis — darbuotojai, kurių gebėjimai gali tikti šiam poreikiui."
       ]
     },
@@ -3347,8 +3347,8 @@
           "desc": "Jūs matote ir valdote santykį."
         },
         {
-          "title": "Patvirtinti įgūdžiai + atitikimo signalai",
-          "desc": "Samdykite pagal įrodymus, ne pažadus."
+          "title": "Įgūdžių įrašai + atitikimo signalai",
+          "desc": "Samdykite pagal įrašus, ne pažadus."
         },
         {
           "title": "Realaus laiko pasiūlos signalai",
@@ -3366,7 +3366,7 @@
       "items": [
         {
           "q": "Kaip rodomi atitikimo signalai?",
-          "a": "Visada konkrečiam poreikiui: aprėptis ir atitikimas pagal patvirtintus įgūdžius, patikimumą ir saugą, su priežastimis. Niekada vienas universalus įvertinimas, palyginamas tarp žmonių."
+          "a": "Visada konkrečiam poreikiui: aprėptis ir atitikimas pagal darbuotojų įgūdžių įrašus, patikimumą ir saugą, su priežastimis. Niekada vienas universalus įvertinimas, palyginamas tarp žmonių."
         },
         {
           "q": "Kiek kainuoja įmonei?",
@@ -3378,7 +3378,7 @@
         },
         {
           "q": "Kas garantuoja darbuotojo patirtį?",
-          "a": "Patvirtinti įgūdžiai, darbdavių patvirtinta istorija ir kontekstiniai atitikimo signalai — ne savadarbiai CV."
+          "a": "Pagal darbuotojų įgūdžių įrašus, darbdavių peržiūrėtą istoriją ir kontekstinius atitikimo signalus — ne savadarbiai CV."
         }
       ]
     },
@@ -3611,7 +3611,7 @@
       "benefits": [
         {
           "title": "Vienas profilis visoms rinkoms",
-          "body": "Vienas avataras su įrodymais paremtais įgūdžiais ir prieinamumu — matomas patikrintiems darbdaviams devyniose šalyse."
+          "body": "Vienas avataras su įrašais paremtais įgūdžiais ir prieinamumu — matomas registruotiems darbdaviams devyniose šalyse."
         },
         {
           "title": "Reali paklausa realiu laiku",
@@ -3641,7 +3641,7 @@
         },
         {
           "title": "Agentūros, kai reikia",
-          "body": "Pasinaudokite patikrintų agentūrų rezervu papildomam pajėgumui neprarasdami matomumo."
+          "body": "Pasinaudokite registruotų agentūrų rezervu papildomam pajėgumui neprarasdami matomumo."
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
@@ -5116,7 +5116,7 @@
     "stepsTitle": "Kaip tai veikia",
     "steps": [
       { "title": "1. Nurodykite savo amatą", "body": "Pridėkite profesiją, patirtį ir laisvumą. Užtrunka kelias minutes." },
-      { "title": "2. DI paruošia juodraštį", "body": "Asistentas jūsų žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūrite ir redaguojate. Jis niekada neišgalvoja patirties ir nieko nepatvirtina." },
+      { "title": "2. DI paruošia juodraštį", "body": "Asistentas jūsų žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūrite ir redaguojate. Jis niekada neišgalvoja patirties." },
       { "title": "3. Patikrinkite šalies pasiruošimą", "body": "Pamatykite, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija." },
       { "title": "4. Būkite suderinti", "body": "Kai darbdavio poreikis atitinka jūsų amatą, laisvumą, apgyvendinimą, transportą ir kalbą, patenkate į trumpąjį sąrašą. Neatitikimai rodomi sąžiningai." },
       { "title": "5. Rezervacija ir startas", "body": "Susitarkite dėl rezervacijos su aiškiu pasiruošimo patikrinimu. Sutarties ir mokėjimo žingsniai kol kas lieka rankiniai." }
@@ -5132,7 +5132,7 @@
     "directionsTitle": "Kur žmonės dirba",
     "directionsNote": "Atverkite šalių puslapius ir pamatykite darbo rinkos signalus su šaltiniais.",
     "directionsCta": "Žiūrėti šalis",
-    "aiNote": "DI padeda paruošti gyvenimo aprašymą ir profilį. Jis nepatvirtina jūsų įgūdžių, dokumentų ar teisinio statuso — tai daro žmogus ir jūsų dokumentai.",
+    "aiNote": "DI padeda paruošti gyvenimo aprašymą ir profilį. Jis pats netikrina jūsų įgūdžių ar dokumentų — tai daro žmogus ir jūsų dokumentai.",
     "ctaProfile": "Sukurti darbuotojo profilį",
     "ctaReadiness": "Patikrinti šalies pasiruošimą",
     "ctaTrades": "Žiūrėti amatus, su kuriais dirbame",
@@ -5235,7 +5235,7 @@
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",
-    "subtitle": "Nurodykite savo amatą ir laisvumą. Iš to sukuriame profilio juodraštį, kurį peržiūrite — mes nieko nepatvirtiname ir automatiškai nepublikuojame.",
+    "subtitle": "Nurodykite savo amatą ir laisvumą. Iš to sukuriame profilio juodraštį, kurį peržiūrite — niekas nepublikuojama automatiškai.",
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
     "targetCountries": "Šalys, kuriose norite dirbti",
@@ -5263,7 +5263,7 @@
     "commentHelp": "Keli sakiniai apie jūsų patirtį — asistentas pagal tai paruošia jūsų profilį.",
     "submit": "Sukurti profilio juodraštį",
     "aiBadge": "AI pasiūlymas",
-    "aiNotVerified": "Peržiūrėkite prieš išsaugant — nepatvirtinta, niekas neišsaugoma automatiškai.",
+    "aiNotVerified": "Peržiūrėkite prieš išsaugant — niekas neišsaugoma automatiškai.",
     "aiDisabled": "AI juodraštis dar nesukurtas — asistentas neįjungtas. Jūsų duomenys neišsaugomi.",
     "aiHeadline": "Siūloma antraštė",
     "aiSkills": "Siūlomi įgūdžiai",
@@ -5315,7 +5315,7 @@
     "descriptionHelp": "Koks darbas, kur ir kokie reikalavimai — asistentas pagal tai paruošia tvarkingą skelbimą.",
     "submit": "Sukurti skelbimo juodraštį",
     "aiBadge": "AI pasiūlymas",
-    "aiNotVerified": "Peržiūrėkite prieš publikuojant — nepatvirtinta, niekas nepublikuojama automatiškai.",
+    "aiNotVerified": "Peržiūrėkite prieš publikuojant — niekas nepublikuojama automatiškai.",
     "aiDisabled": "AI juodraštis dar nesukurtas — asistentas neįjungtas. Jūsų duomenys neišsaugomi.",
     "aiRole": "Normalizuota pareigybė",
     "aiSkills": "Reikalingi įgūdžiai",

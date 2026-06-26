@@ -82,11 +82,18 @@ describe("Silent-trust: positive-state labels are neutral records language", () 
 //   - auth.* password/email-link verification + reviewer chainActions
 //   - ICU placeholder NAMES like {confirmations} (not rendered text)
 const TRUST_NAMESPACES = [
+  // worker self-view / in-app
   "evidenceStatus", "workerEvidence", "playerCard", "trust", "cvExport",
   "todayScreen", "capabilityProfile", "workerReadiness", "journalSkillLinks",
   "skills", "profileHub", "profileSkillClaims", "profileCvClarity",
   "evidenceReport", "featureNotes", "features", "structuring",
   "suggestionStatuses", "skillClarify", "worldMap", "myWorkView", "workEntryReview",
+  // PUBLIC marketing (landing, /for-workers, /for-companies, public pages) — the
+  // rule is the same outside the app as inside it. (pricing = commercial
+  // "confirm pricing", scouting/searchRoom = employer app: out of scope.)
+  "workers", "companies", "agencies", "pages", "hero", "journey", "vision",
+  "workAbroad", "workerIntake", "companyNeed", "services", "marketPulse",
+  "playercards", "labourMarket", "matchPreview",
 ];
 // Strip ICU/placeholder braces so a variable NAME like {confirmations} is not
 // mistaken for rendered certification copy. Repeat to handle nested plurals.
