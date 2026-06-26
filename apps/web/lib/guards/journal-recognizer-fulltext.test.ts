@@ -108,16 +108,20 @@ describe("Guard: excavator / earthworks stays in its own sector", () => {
 });
 
 describe("Guard: mixed multi-task text yields multiple relevant signals", () => {
-  it("React + brick + client → IT and masonry, nothing unrelated", () => {
+  it("React + brick + client → IT, masonry AND client handover, nothing unrelated", () => {
     const text =
       "Dirbau su React svetaine, mūrijau sieną ir pristačiau darbą klientui";
     const labels = fragmentLabels(text);
     expect(labels).toContain("Programavimas");
     expect(labels).toContain("Mūrijimas");
-    // No hallucinated tiling / painting / interior on this entry.
+    // Client-facing work handover is a real signal — no longer dropped.
+    expect(labels).toContain("Darbų pristatymas klientui");
+    // No hallucinated tiling / painting / interior / sales / management.
     expect(labels).not.toContain("Plytelių klojimas");
     expect(labels).not.toContain("Dažymas");
     expect(labels).not.toContain("Interjero dizainas");
+    expect(labels).not.toContain("Pardavimai");
+    expect(labels).not.toContain("Vadovavimas komandai");
     expect(recognizedSlugs(text)).toContain("bricklaying");
   });
 
@@ -150,9 +154,47 @@ describe("Guard: mixed multi-task text yields multiple relevant signals", () => 
     // bricklaying surfaces ONLY as the localized "Mūrijimas", once.
     expect(norm.filter((v) => v === "mūrijimas")).toHaveLength(1);
     expect(visible).not.toContain("bricklaying");
-    // Relevant multiple signals are still present (IT + masonry).
+    // Relevant multiple signals are present: IT + masonry + client handover.
     expect(visible).toContain("Programavimas");
     expect(visible).toContain("Mūrijimas");
+    expect(visible).toContain("Darbų pristatymas klientui");
+  });
+
+  it("client-facing work handover is recognised, never an unrelated skill", () => {
+    const HANDOVER = [
+      "pristačiau darbą klientui",
+      "pristačiau atliktus darbus klientui",
+      "perdaviau darbus klientui",
+      "paaiškinau klientui atliktus darbus",
+    ];
+    for (const text of HANDOVER) {
+      const all = [...capabilityLabels(text), ...fragmentLabels(text)];
+      // The neutral client-handover signal is present...
+      expect(all, `missing handover for "${text}"`).toContain(
+        "Darbų pristatymas klientui",
+      );
+      // ...and it does NOT invent unrelated sales / management / construction.
+      for (const wrong of [
+        "Pardavimai",
+        "Vadovavimas komandai",
+        "Komandos koordinavimas",
+        ...CONSTRUCTION_OR_INTERIOR_LABELS,
+      ]) {
+        expect(all, `"${text}" must not produce ${wrong}`).not.toContain(wrong);
+      }
+      // No construction SKILL slug either.
+      for (const slug of recognizedSlugs(text)) {
+        expect(CONSTRUCTION_SLUGS.has(slug), `unexpected ${slug}`).toBe(false);
+      }
+    }
+  });
+
+  it("delivering goods to a client is NOT a handover signal (no overbroad match)", () => {
+    const all = [
+      ...capabilityLabels("pristačiau plyteles į objektą"),
+      ...fragmentLabels("pristačiau plyteles į objektą"),
+    ];
+    expect(all).not.toContain("Darbų pristatymas klientui");
   });
 
   it("long cross-sector entry understands every named task", () => {

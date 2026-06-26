@@ -364,13 +364,13 @@ chip.
   therefore always localized, label-dedupe IS concept-dedupe.
 
 **Mixed example final visible output** (`Dirbau su React svetaine, mūrijau sieną
-ir pristačiau darbą klientui`):
-- Fragments: **Programavimas** (React) · **Mūrijimas** (mason).
-- Deduped new-skill chips: **none** (Programavimas + Mūrijimas already shown as
-  fragments → dropped; the raw `bricklaying` never surfaces — only "Mūrijimas").
-- Net visible signals: **Programavimas, Mūrijimas** — each once, localized, no
-  unrelated sector, no `bricklaying`, no duplicate. (Client-presentation stays
-  unrecognised → no fake chip; the worker can link by hand.)
+ir pristačiau darbą klientui`) — see §11 for the round-4 client-handover signal:
+- Fragments: **Programavimas** (React) · **Mūrijimas** (mason) · **Darbų
+  pristatymas klientui** (client handover).
+- Deduped new-skill chips: **none** (all three already shown as fragments →
+  dropped; the raw `bricklaying` never surfaces — only "Mūrijimas").
+- Net visible signals: **Programavimas, Mūrijimas, Darbų pristatymas klientui**
+  — each once, localized, no unrelated sector, no `bricklaying`, no duplicate.
 
 Matched **declared-skill** chips keep their own labelled section (they drive
 entry↔skill linking) and are deduped against the new-skill bucket; they are not
@@ -382,3 +382,43 @@ collapsed into fragments, which are a distinct "what you did" view.
 `lib/guards/journal-card-render-order.test.ts` (rendered DOM order + collapse),
 and a mixed-example dedupe assertion added to
 `lib/guards/journal-recognizer-fulltext.test.ts`.
+
+---
+
+## 11. Round 4 — client-facing work handover signal
+
+**Gap:** "pristačiau darbą klientui" (presented/handed over work to a client)
+was dropped — yet it is a real work signal.
+
+**Fix (deterministic, safe):** a new label-only capability row in
+`lib/profile/skill-claim-extractor.ts` →
+
+| | value |
+| --- | --- |
+| Visible label (LT) | **Darbų pristatymas klientui** |
+| EN / RU UI | shows the same LT label — capability/label-only signals are LT by the existing design (not a raw slug); localized taxonomy applies only to real skill slugs |
+| Taxonomy slug | none (label-only — no fake sales/management skill, §7) |
+
+Needles are **anchored to a client context** so they never fire on unrelated
+delivery or construction. Exact phrases supported:
+- LT: `darbą klient…`, `darbus klient…`, `darbų klient…`, `klientui atliktus
+  darb…`, `klientui darb…`, `pristačiau klient…`, `pristatymas klient…`,
+  `perdaviau klient…`, `perdavimas klient…`, `paaiškinau klient…` (covers
+  "pristačiau darbą klientui", "pristačiau atliktus darbus klientui",
+  "perdaviau darbus klientui", "paaiškinau klientui atliktus darbus").
+- EN: `handed over the work`, `work handover`, `client handover`, `handed over
+  to the client`, `presented the work to (the client)`.
+- RU: `сдал работу клиент…`, `сдача работ клиент…`, `передал работы/работу
+  клиент…`, `сдал клиенту работ…`, `показал клиенту работ…`.
+
+**Not overbroad (verified):** "pristačiau plyteles į objektą" (delivered tiles)
+→ **no** handover signal (stays tiling); the handover phrases produce **no**
+"Pardavimai" / "Vadovavimas" / "Komandos koordinavimas" and **no** construction
+skill. One concept, deduped (round-3 dedupe drops the duplicate capability chip
+when it is already a fragment), localized, no raw slug.
+
+**Tests:** `journal-recognizer-fulltext.test.ts` gains (1) the handover label in
+the mixed-example fragment + dedupe assertions, (2) a per-phrase handover test
+asserting the signal exists with no unrelated sales/management/construction, and
+(3) a negative "delivering goods ≠ handover" control. web/design + excavator
+tests unchanged and still pass.

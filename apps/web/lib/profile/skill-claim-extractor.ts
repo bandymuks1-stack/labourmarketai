@@ -473,6 +473,52 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "оратор",
     ],
   },
+  {
+    // Client-facing work handover / presentation — a real work signal the owner
+    // flagged ("pristačiau darbą klientui"). Distinct from generic Komunikacija:
+    // it is specifically presenting/handing over/explaining DONE WORK to a
+    // client. Needles are deliberately ANCHORED to a client context
+    // ("...darbą/darbus klient...", "...klientui ... darb...", or an explicit
+    // present/hand-over/explain verb adjacent to "klient...") so they never fire
+    // on unrelated delivery ("pristačiau plyteles") or construction. Label-only,
+    // no fake sales/management taxonomy slug (§7).
+    label: "Darbų pristatymas klientui",
+    needles: [
+      // LT — work + client co-occurrence (verb may sit between the two words).
+      "darbą klient",
+      "darba klient",
+      "darbus klient",
+      "darbų klient",
+      "darbu klient",
+      "klientui atliktus darb",
+      "klientui darb",
+      "klientui atliktus",
+      // LT — explicit present / hand-over / explain verb adjacent to the client.
+      "pristačiau klient",
+      "pristaciau klient",
+      "pristatymas klient",
+      "perdaviau klient",
+      "perdaviau darbus klient",
+      "perdavimas klient",
+      "paaiškinau klient",
+      "paaiskinau klient",
+      // EN
+      "handed over the work",
+      "work handover",
+      "client handover",
+      "handed over to the client",
+      "presented the work to",
+      "presented the work to the client",
+      // RU
+      "сдал работу клиент",
+      "сдал работы клиент",
+      "сдача работ клиент",
+      "передал работы клиент",
+      "передал работу клиент",
+      "сдал клиенту работ",
+      "показал клиенту работ",
+    ],
+  },
 
   // ─── Sector-neutral creative / language / logistics rows (cross-sector) ──
   // Labourmarket.ai is sector-neutral: these are real non-construction work
