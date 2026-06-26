@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import {
   CheckCircle2,
-  ClipboardCheck,
+  CalendarRange,
   Hourglass,
   NotebookPen,
   Sparkles,
@@ -119,7 +119,7 @@ export async function TodayScreen({
           data-testid="week-situation-card"
         >
           <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
-            <ClipboardCheck className="h-3.5 w-3.5" aria-hidden />
+            <CalendarRange className="h-3.5 w-3.5" aria-hidden />
             {t("week.eyebrow")}
           </span>
           <h3 className="font-display text-base font-semibold leading-snug text-text-primary">
@@ -140,13 +140,10 @@ export async function TodayScreen({
               </dt>
             </div>
             <div className="flex flex-col">
+              {/* Silent-trust rule: neutral count, no gold trust accent. */}
               <CountUp
                 text={String(data.weekConfirmedEntries)}
-                className={`font-mono text-2xl font-bold tracking-tightest ${
-                  data.weekConfirmedEntries > 0
-                    ? "text-trust-accent"
-                    : "text-text-primary"
-                }`}
+                className="font-mono text-2xl font-bold tracking-tightest text-text-primary"
               />
               <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
                 {t("week.confirmed")}

@@ -1,5 +1,5 @@
 {
-  "cvBridge": "{confirmed} of {total} entries confirmed — confirmed work shows on your CV.",
+  "cvBridge": "{confirmed} of {total} entries reviewed — reviewed work shows on your CV.",
   "cvBridgeLink": "Open CV",
   "noContext": {
     "none": "No active work context yet. When an organization invites you to its team and adds you, your work records opens here.",

@@ -1,4 +1,4 @@
-import { ShieldCheck, ClipboardCheck, NotebookPen } from "lucide-react";
+import { Layers, Eye, NotebookPen } from "lucide-react";
 
 import type { OwnTrustSignals } from "@/lib/profile/trust-signals";
 import { CountUp } from "@/components/app/today/count-up";
@@ -50,14 +50,14 @@ export function TrustBlock({
         <Stat
           value={signals.verifiedSkills}
           label={labels.verifiedSkills}
-          icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden />}
+          icon={<Layers className="h-3.5 w-3.5" aria-hidden />}
           highlight={signals.verifiedSkills > 0}
           testId="trust-verified-skills"
         />
         <Stat
           value={signals.managerConfirmations}
           label={labels.managerConfirmations}
-          icon={<ClipboardCheck className="h-3.5 w-3.5" aria-hidden />}
+          icon={<Eye className="h-3.5 w-3.5" aria-hidden />}
           highlight={signals.managerConfirmations > 0}
           testId="trust-confirmations"
         />
@@ -95,24 +95,19 @@ function Stat({
     <div
       className={cn(
         "rounded-md border bg-ink-800/30 p-3",
-        // Quiet earned glow — only when the real count is non-zero.
-        highlight ? "border-state-success/30 bg-state-success/5" : "border-ink-600",
+        // Silent-trust rule: no green "verified" glow. A non-zero count gets a
+        // quiet neutral emphasis only — never a certification/trust badge.
+        highlight ? "border-ink-500 bg-ink-800/50" : "border-ink-600",
       )}
     >
       <dt
-        className={cn(
-          "flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label",
-          highlight ? "text-state-success" : "text-text-muted",
-        )}
+        className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted"
       >
         {icon}
         {label}
       </dt>
       <dd
-        className={cn(
-          "mt-1 font-mono text-2xl font-bold tracking-tightest",
-          highlight ? "text-state-success" : "text-text-primary",
-        )}
+        className="mt-1 font-mono text-2xl font-bold tracking-tightest text-text-primary"
         data-testid={testId}
       >
         <CountUp text={String(value)} />

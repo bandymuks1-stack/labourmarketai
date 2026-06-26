@@ -151,26 +151,25 @@ describe("Guard: cvExport copy is present + honest in all 10 locales", () => {
     // from the export sheet per the owner (quiet UI, no process note).
   }
 
-  it("LT: pinned honest tier labels (quiet status, no 'who confirmed')", () => {
+  it("LT: tier labels are neutral records language (silent-trust rule)", () => {
     const ns = cvNs("lt");
-    // Quiet-UI reframe (fix/cv): the confirmed tier shows STATUS only, never the
-    // confirmer ("vadovo"). Honesty kept: only the confirmed tier carries the
-    // confirmation stem; the other tiers never do.
-    expect(ns.tiers.confirmed).toBe("Patvirtinta");
-    expect(ns.tiers.confirmed).not.toMatch(/vadov/i);
-    // declared = quiet "awaiting confirmation" (honest: NOT affirmatively confirmed).
-    expect(ns.tiers.declared).toBe("Laukia patvirtinimo");
-    expect(ns.tiers.declared).not.toBe("Patvirtinta");
-    expect(ns.tiers.evidence).not.toMatch(/^Patvirtinta$/i);
+    // Silent-trust rule: the tiers describe the RECORD state, never a public
+    // certification. No "patvirtin*"/"verified" stem on ANY tier; the strongest
+    // tier reads as "with records", the baseline as "listed by self".
+    expect(ns.tiers.confirmed).toBe("Su įrašais");
+    expect(ns.tiers.declared).toBe("Nurodyta pačių");
+    expect(ns.tiers.confirmed).not.toMatch(/patvirtin|vadov/i);
+    expect(ns.tiers.declared).not.toMatch(/patvirtin/i);
+    expect(ns.tiers.evidence).not.toMatch(/patvirtin/i);
   });
 
-  it("EN: pinned honest tier labels (quiet status, no 'who confirmed')", () => {
+  it("EN: tier labels are neutral records language (silent-trust rule)", () => {
     const ns = cvNs("en");
-    expect(ns.tiers.confirmed).toBe("Confirmed");
-    expect(ns.tiers.confirmed).not.toMatch(/manager|by\b/i);
-    expect(ns.tiers.declared).toBe("Awaiting confirmation");
-    expect(ns.tiers.declared).not.toMatch(/verified|confirmed by/i);
-    expect(ns.tiers.evidence).not.toMatch(/verif|confirmed by/i);
+    expect(ns.tiers.confirmed).toBe("With records");
+    expect(ns.tiers.declared).toBe("Listed by you");
+    expect(ns.tiers.confirmed).not.toMatch(/verif|confirm/i);
+    expect(ns.tiers.declared).not.toMatch(/verif|confirm/i);
+    expect(ns.tiers.evidence).not.toMatch(/verif|confirm/i);
   });
 
   // The "PDF" is the browser's print of the CV sheet — rendering sanity for

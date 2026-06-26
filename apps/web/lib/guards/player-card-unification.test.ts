@@ -22,9 +22,11 @@ describe("Player Card reuses the shared premium scouting visual language", () =>
     expect(card).toMatch(/bg-card-glow/);
     expect(card).toMatch(/hover:shadow-card-hover/);
   });
-  it("keeps the reserved trust ring (gold = real confirmation only)", () => {
-    expect(card).toMatch(/trust-ring/);
-    // gold stays the reserved trust accent — never used for readiness levels
+  it("carries NO gold confirmation trust ring (silent-trust rule)", () => {
+    // The self-view card must not advertise confirmation as a public trust
+    // badge: no gold trust ring, no gold trust accent, no gold tier.
+    expect(card).not.toMatch(/trust-ring/);
+    expect(card).not.toMatch(/trust-accent/);
     expect(card).not.toMatch(/tier-gold/);
   });
   it("mounts the readiness status ring", () => {
@@ -56,15 +58,17 @@ describe("the readiness ring is HONEST — met/total signals, never a fake ratin
   });
 });
 
-describe("the three honest evidence levels stay visible + distinct", () => {
-  it("confirmed-by-manager (green) + journal-supported (cyan) + declared", () => {
-    // manager-verified glow
-    expect(card).toMatch(/state-success/);
-    // journal-supported middle rung
+describe("the evidence levels stay visible but NEUTRAL (silent-trust rule)", () => {
+  it("no green 'verified' glow; skills + journal-supported + declared still shown", () => {
+    // The strongest signal must NOT carry a green manager-verified glow.
+    expect(card).not.toMatch(/state-success/);
+    // journal-supported middle rung stays (neutral cyan signal, not a badge)
     expect(card).toMatch(/journalSupportedSkills/);
     expect(card).toMatch(/brand-cyan/);
-    // self-declared count
+    // self-declared count still shown
     expect(card).toMatch(/skillsDeclared/);
+    // skills are still listed as a neutral signal section
+    expect(card).toMatch(/player-card-skill-signals/);
   });
 });
 

@@ -80,12 +80,13 @@ describe("Guard: composer skill suggestions use friendly, not technical, copy", 
   });
 });
 
-describe("Guard: CV tier label is quiet status, not 'who confirmed'", () => {
-  it("cvExport.tiers.confirmed shows status only (no 'vadovo' / 'manager')", () => {
-    expect(base("lt").cvExport.tiers.confirmed).toBe("Patvirtinta");
-    expect(base("en").cvExport.tiers.confirmed).toBe("Confirmed");
-    expect(base("lt").cvExport.tiers.confirmed).not.toMatch(/vadov/i);
-    expect(base("en").cvExport.tiers.confirmed).not.toMatch(/manager|by\b/i);
+describe("Guard: CV tier label is neutral records language (silent-trust rule)", () => {
+  it("cvExport.tiers.confirmed reads as a record state, never a certification", () => {
+    // Silent-trust rule: no public "patvirtinta/confirmed/verified" certification.
+    expect(base("lt").cvExport.tiers.confirmed).toBe("Su įrašais");
+    expect(base("en").cvExport.tiers.confirmed).toBe("With records");
+    expect(base("lt").cvExport.tiers.confirmed).not.toMatch(/patvirtin|vadov/i);
+    expect(base("en").cvExport.tiers.confirmed).not.toMatch(/verif|confirm/i);
     // the process-explanation hints are removed entirely
     expect(base("lt").cvExport.tierHints).toBeUndefined();
   });

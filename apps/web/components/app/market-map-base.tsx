@@ -64,8 +64,6 @@ export type MapIdentity = {
   professionLabel?: string | null;
   /** Real localized availability label (omit when unknown). */
   availabilityLabel?: string | null;
-  /** Real count of confirmed skills (worker_skills.verified); 0 → no badge. */
-  verifiedSkillsCount?: number;
 };
 
 export function MarketMapBase({

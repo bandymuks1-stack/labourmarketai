@@ -26,8 +26,11 @@ import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
 
 const TIER_ORDER: CvSkillTier[] = ["confirmed", "evidence", "declared"];
 
+// Silent-trust rule: tiers stay visually distinct but carry NO certification
+// styling — no green "verified" tone, no checkmark. The strongest tier reads
+// as a neutral "with records" signal, not a public confirmation badge.
 const TIER_STYLES: Record<CvSkillTier, string> = {
-  confirmed: "border-emerald-600 bg-emerald-50 text-emerald-900",
+  confirmed: "border-slate-400 bg-slate-50 text-slate-800",
   evidence: "border-sky-500 bg-sky-50 text-sky-900",
   declared: "border-zinc-300 bg-zinc-50 text-zinc-600",
 };
@@ -174,7 +177,6 @@ export default async function VerifiedCvPage({
                       key={name}
                       className={`rounded-full border px-2.5 py-0.5 text-xs ${TIER_STYLES[tier]}`}
                     >
-                      {tier === "confirmed" ? "✓ " : ""}
                       {name}
                     </span>
                   ))}

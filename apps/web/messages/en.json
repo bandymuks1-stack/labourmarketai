@@ -385,11 +385,11 @@
     },
     "capabilities": {
       "title": "Capability signals",
-      "note": "Only your own capabilities. Confirmed is shown only when there is real platform verification.",
+      "note": "Only your own capabilities. Stronger signals build from your work records.",
       "addAction": "Add skills in your profile",
-      "legend": "Self-declared — what you listed; From work — backed by your journal entries; Confirmed — verified on the platform.",
+      "legend": "Self-declared — what you listed; From work — backed by your journal entries; With records — backed by your reviewed entries.",
       "status": {
-        "confirmed": "Confirmed",
+        "confirmed": "With records",
         "suggested": "From work",
         "self_declared": "Awaiting confirmation"
       }
@@ -489,13 +489,13 @@
     "note": "These are signals from existing data, not a rating or score. Workers are not ranked by who is \"best\".",
     "journalEntries": "Journal entries",
     "declaredSkills": "Declared skills",
-    "confirmedSkills": "Confirmed skills",
+    "confirmedSkills": "Linked skills",
     "openReview": "Awaiting review",
     "lastActivity": "Last activity"
   },
   "workerEvidence": {
     "title": "My CV",
-    "confirmed": "Confirmed",
+    "confirmed": "With records",
     "selfDeclared": "Awaiting confirmation",
     "systemEntries": "Work entries",
     "empty": "Start building your CV — create your first entry.",
@@ -513,8 +513,8 @@
       "hint": "Waiting for your manager, the business owner, or an external (client) manager to confirm it."
     },
     "confirmed": {
-      "label": "Confirmed",
-      "hint": "Confirmed."
+      "label": "With records",
+      "hint": "Backed by your reviewed work records."
     }
   },
   "profileHub": {
@@ -604,7 +604,7 @@
     "profileLink": "My capabilities",
     "source": {
       "recognized": "Recognized from text",
-      "confirmed": "Confirmed",
+      "confirmed": "With records",
       "manual": "Manually linked"
     },
     "reviewHeading": "Needs review",
@@ -4512,8 +4512,8 @@
     "attentionHint": "New instructions worth reviewing.",
     "attentionZero": "Nothing to do right now.",
     "workCardLabel": "Work card",
-    "workCardConfirmed": "Confirmed",
-    "workCardPending": "Not confirmed yet",
+    "workCardConfirmed": "Work card on file",
+    "workCardPending": "Work card not added",
     "namePlaceholder": "My profile",
     "candidateLabel": "Candidate skills",
     "candidateHint": "Skills you added in your own words (needs clarification, not confirmed).",
@@ -4564,8 +4564,8 @@
           "workCard": "Work card"
         }
       },
-    "verifiedTitle": "Confirmed skills",
-    "verifiedEmpty": "No confirmed skills yet. They appear when your journal entries are confirmed.",
+    "verifiedTitle": "Skill signals",
+    "verifiedEmpty": "No skill signals yet. They build from your work records.",
     "journalSupportedLabel": "Journal-supported",
     "journalSupportedHint": "Skills your work-journal entries back up — stronger than awaiting confirmation, awaiting confirmation.",
     "latestEvidenceLabel": "Latest records",
@@ -4670,10 +4670,10 @@
   "trust": {
     "title": "Trust signals",
     "caption": "Counts come straight from real records. Nothing here is weighted or invented.",
-    "verifiedSkills": "Confirmed skills",
-    "managerConfirmations": "Confirmations",
+    "verifiedSkills": "Linked skills",
+    "managerConfirmations": "Reviewed records",
     "journalEntries": "Journal entries",
-    "zeroHint": "Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
+    "zeroHint": "Trust signals grow from real work: log a journal entry and complete your profile."
   },
   "cvExport": {
     "nameNotProvided": "Name not added yet",
@@ -4685,20 +4685,20 @@
     "skills": "Skills",
     "skillsEmpty": "No skills saved yet.",
     "tiers": {
-      "confirmed": "Confirmed",
+      "confirmed": "With records",
       "evidence": "Backed by work entries",
-      "declared": "Awaiting confirmation"
+      "declared": "Listed by you"
     },
     "summary": {
-      "verifiedSkills": "Confirmed skills",
-      "managerConfirmations": "Confirmations",
+      "verifiedSkills": "Linked skills",
+      "managerConfirmations": "Reviewed records",
       "journalEntries": "Journal entries"
     },
     "proofTitle": "CV work records",
     "proofDate": "Date",
     "proofProject": "Project",
-    "proofRole": "Confirmed (role)",
-    "proofEmpty": "No confirmed entries yet.",
+    "proofRole": "Record link",
+    "proofEmpty": "No linked records yet.",
     "generatedAt": "Generated",
     "notWorker": "CV export is available for worker profiles.",
     "summaryTitle": "Professional summary"
@@ -4716,12 +4716,12 @@
     },
     "week": {
       "eyebrow": "This week",
-      "confirmedHeadline": "{n, plural, one {Your work was confirmed # time this week} other {Your work was confirmed # times this week}}",
+      "confirmedHeadline": "{n, plural, one {# of your work records was reviewed this week} other {# of your work records were reviewed this week}}",
       "writtenHeadline": "{n, plural, one {You recorded # work entry this week} other {You recorded # work entries this week}}",
       "emptyHeadline": "A new week — its first entry is still ahead of you.",
       "entries": "Entries",
-      "confirmed": "Confirmed",
-      "hours": "Confirmed hrs"
+      "confirmed": "Reviewed",
+      "hours": "Reviewed hours"
     },
     "path": {
       "eyebrow": "Path to more",

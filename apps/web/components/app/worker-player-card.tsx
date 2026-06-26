@@ -1,5 +1,4 @@
 import {
-  ShieldCheck,
   Shield,
   CalendarCheck2,
   Sparkle,
@@ -174,8 +173,8 @@ export function WorkerPlayerCard({
         // readiness level — never a fabricated rating.
         "card-border bg-card-glow glow-hover rise-in flex flex-col gap-5 border-t-2 p-5 transition-shadow hover:shadow-card-hover sm:p-6",
         LEVEL_ACCENT[readiness.level],
-        // Gold ONLY as the real-confirmation trust accent (DESIGN_SOUL §1).
-        confirmed && "trust-ring",
+        // Silent-trust rule: no gold confirmation trust ring on this self-view
+        // card — confirmation is an internal signal, never a visible accent.
       )}
       data-testid="worker-player-card"
     >
@@ -191,7 +190,7 @@ export function WorkerPlayerCard({
               loading="lazy"
               className={cn(
                 "h-14 w-14 shrink-0 rounded-2xl border object-cover",
-                confirmed ? "border-trust-accent/50" : "border-ink-500",
+                "border-ink-500",
               )}
             />
           ) : (
@@ -200,7 +199,7 @@ export function WorkerPlayerCard({
               data-testid="player-card-avatar-monogram"
               className={cn(
                 "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
-                confirmed ? "border-trust-accent/50" : "border-ink-500",
+                "border-ink-500",
               )}
             >
               {initialsOf(card.displayName)}
@@ -281,26 +280,19 @@ export function WorkerPlayerCard({
           </span>
         ) : null}
         <span
-          className={cn(
-            "inline-flex min-h-7 items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-label",
-            confirmed
-              ? "border-trust-accent/40 bg-trust-accent/10 text-trust-accent"
-              : "border-ink-500 bg-ink-800 text-text-secondary",
-          )}
+          className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
           data-testid="player-card-workcard"
         >
-          {confirmed ? (
-            <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-          ) : (
-            <Shield className="h-3.5 w-3.5" aria-hidden />
-          )}
+          <Shield className="h-3.5 w-3.5" aria-hidden />
           {confirmed ? labels.workCardConfirmed : labels.workCardPending}
           <span className="sr-only">{labels.workCardLabel}</span>
         </span>
       </div>
 
-      {/* ── Verified skills: green glow ONLY for manager-verified rows ── */}
-      <div className="flex flex-col gap-2" data-testid="player-card-verified-skills">
+      {/* ── Skill signals: neutral list (silent-trust rule). No green
+          "verified" glow, no certification badge — confirmation stays an
+          internal signal and is never advertised on this self-view card. ── */}
+      <div className="flex flex-col gap-2" data-testid="player-card-skill-signals">
         <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
           {labels.verifiedTitle}
         </span>
@@ -309,7 +301,7 @@ export function WorkerPlayerCard({
             {card.verifiedSkills.map((s, i) => (
               <li
                 key={s.slug}
-                className="verified-pop inline-flex min-h-8 items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/10 px-2.5 py-1.5 text-xs font-medium text-state-success"
+                className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-ink-500 bg-ink-800 px-2.5 py-1.5 text-xs font-medium text-text-secondary"
               >
                 <SkillIcon slug={s.iconSlug} className="h-3.5 w-3.5" />
                 {labels.verifiedSkillNames[i] ?? s.slug}

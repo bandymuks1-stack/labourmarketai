@@ -93,19 +93,21 @@ describe("issue 4 — the map own-marker is a real player card (real data only)"
   it("MapIdentity carries the real player-card signals", () => {
     expect(live).toMatch(/professionLabel\?: string \| null/);
     expect(live).toMatch(/availabilityLabel\?: string \| null/);
-    expect(live).toMatch(/verifiedSkillsCount\?: number/);
   });
 
-  it("the verified badge shows ONLY for a real confirmed count (never fabricated)", () => {
-    expect(live).toMatch(/const verified = identity\.verifiedSkillsCount \?\? 0/);
-    expect(live).toMatch(/verified > 0/);
+  it("the marker carries NO verified badge or gold ring (silent-trust rule)", () => {
+    // Silent-trust rule: the own marker never advertises a public verified
+    // count/badge or a gold certification ring. The ring is always neutral cyan.
+    expect(live).not.toMatch(/verifiedSkillsCount/);
+    expect(live).not.toMatch(/verifiedBadge/);
+    expect(live).toMatch(/const ringColor = "#22D3EE"/);
   });
 
-  it("availability + verified count come from real owner-scoped reads", () => {
-    // Availability only when really set (not 'unknown'); count straight from
-    // the confirmed capability tally (worker_skills.verified).
+  it("availability comes from a real owner-scoped read (no verified count)", () => {
+    // Availability only when really set (not 'unknown'); no verified-count
+    // computation feeds the marker any more.
     expect(page).toMatch(/availability\.state !== "unknown"/);
-    expect(page).toMatch(/verifiedSkillsCount = capabilities\.counts\.confirmed/);
+    expect(page).not.toMatch(/verifiedSkillsCount/);
   });
 
   it("the marker / map is enlarged for mobile (player-card scale)", () => {
