@@ -48,6 +48,28 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
   },
   Komunikacija: { en: "Communication", ru: "Коммуникация" },
   Vairavimas: { en: "Driving", ru: "Вождение" },
+  // Real-world recognition audit (journal-real-world-recognition-audit-p0):
+  // these capability/activity labels surfaced from the 50-entry blind pack and
+  // were leaking their LT string into EN/RU. Translating the labels that
+  // actually occur keeps the fix bounded and deterministic; the remaining
+  // LT-only labels stay a documented RED (full capability i18n).
+  Santechnika: { en: "Plumbing", ru: "Сантехника" },
+  "Apskaitos sistemos": { en: "Accounting systems", ru: "Системы учёта" },
+  "Stogų dengimas": { en: "Roofing", ru: "Кровельные работы" },
+  Pardavimai: { en: "Sales", ru: "Продажи" },
+  "Dokumentų tvarkymas": { en: "Document handling", ru: "Делопроизводство" },
+  "Maisto gaminimas / virtuvė": {
+    en: "Cooking / kitchen",
+    ru: "Готовка / кухня",
+  },
+  "Klientų aptarnavimas": {
+    en: "Customer service",
+    ru: "Обслуживание клиентов",
+  },
+  "Programavimas / kodo pataisymai": {
+    en: "Programming / code fixes",
+    ru: "Программирование / правки кода",
+  },
 };
 
 /**

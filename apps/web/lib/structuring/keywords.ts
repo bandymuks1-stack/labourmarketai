@@ -104,7 +104,11 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
 /** Higher-level work directions surfaced as a separate suggestion bucket. */
 export const WORK_DIRECTION_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "tiler", needles: ["vidaus apdail", "apdail", "отделочн", "отделк"] },
-  { slug: "concrete_worker", needles: ["betonav", "konstruk", "бетонные работ", "монолитн"] },
+  // Real-world audit: "konstruk" (konstrukcijas = generic structures/components)
+  // mislabels crane/steel/timber work as a concrete worker — e.g. "valdžiau
+  // kraną, kėliau konstrukcijas" → concrete_worker. Concrete work is named by
+  // explicit concreting words, not by "structures". Keep the unambiguous ones.
+  { slug: "concrete_worker", needles: ["betonav", "betonuot", "бетонные работ", "монолитн"] },
   { slug: "electrician", needles: ["elektros darb", "instaliac", "электромонтаж"] },
   { slug: "plumber", needles: ["santechnik darb", "сантехнические работ"] },
   { slug: "carpenter", needles: ["medienos darb", "stalystės", "столярные работ"] },
@@ -342,10 +346,20 @@ export const ACTIVITY_HINTS_LT: {
     label: "Maisto gaminimas / virtuvė",
     needles: [
       "gaminau maist",
+      "gaminau piet",
+      "gaminau vakar",
       "maisto gamin",
       "virėj",
       "virtuvėj",
       "virtuvej",
+      // Real-world audit: bare cooking verbs the dictionary missed (#21
+      // "Gaminau pietus, kepiau ir viriau sriubą"). Safe — these stems are
+      // cooking-specific (welding is "suvirinau", not "viriau").
+      "kepiau",
+      "viriau",
+      "išviriau",
+      "isviriau",
+      "sriub",
       "cooking",
       "kitchen",
       "chef", "готовил еду", "готовил обед", "на кухне", "повар",

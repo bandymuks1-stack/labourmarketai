@@ -137,6 +137,13 @@ export function recognizeSkills(
       for (const stem of stems) {
         // compare the token's leading stem-length slice to the stem
         const cand = tok.slice(0, stem.length);
+        // Leading-character guard (real-world audit): a real typo almost never
+        // changes the FIRST letter, but a 1-edit window on the first char turns
+        // common unrelated verbs into false matches ("rašiau" → "kasiau" =
+        // earthworks). Require the first character to match before accepting a
+        // fuzzy hit — kills the leading-swap hallucination, keeps real typos
+        // ("laminata" → "laminate").
+        if (cand.length === 0 || cand[0] !== stem[0]) continue;
         if (
           boundedEditDistance(cand, stem, FUZZY_MAX_DISTANCE) <= FUZZY_MAX_DISTANCE
         ) {
