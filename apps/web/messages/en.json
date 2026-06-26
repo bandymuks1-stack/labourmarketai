@@ -1544,6 +1544,10 @@
     }
   },
   "admin": {
+    "mode": {
+      "active": "Admin mode — you are managing the platform",
+      "exit": "Back to my space"
+    },
     "room": {
       "groups": {
         "overview": {
@@ -1862,8 +1866,8 @@
       "unknownCountry": "Not specified",
       "averages": {
         "title": "Admin market averages",
-        "help": "Component 2 of the thermometer formula: profession × country × average (EUR/month) + entry date + source note.",
-        "empty": "No market averages entered yet — the thermometer stays at 'insufficient market data' until real, sourced figures are entered."
+        "help": "Component 2 of the market-signal formula: profession × country × average (EUR/month) + entry date + source note.",
+        "empty": "No market averages entered yet — the market signal stays at 'insufficient market data' until real, sourced figures are entered."
       },
       "basis": {
         "monthly_eur": "month"
@@ -1917,16 +1921,16 @@
         "gapsTitle": "Country gaps (demand vs supply)",
         "gapsEmpty": "No demand recorded yet.",
         "gapLine": "{demand} requests / {supply} workers",
-        "thermoTitle": "Thermometers (only where both components exist)",
-        "thermoEmpty": "No thermometer values yet — they appear once a sourced market average is entered AND a cell has a declared-expectation sample of at least 2.",
+        "thermoTitle": "Market signals (only where both components exist)",
+        "thermoEmpty": "No market-signal values yet — they appear once a sourced market average is entered AND a cell has a declared-expectation sample of at least 2.",
         "smallSample": "n<{n}"
       }
     },
     "league": {
       "eyebrow": "Country league",
       "title": "Labour market league",
-      "subtitle": "Profession tables per country — real teams, availability and the market thermometer.",
-      "methodNote": "A thermometer value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
+      "subtitle": "Profession tables per country — real teams, availability and the market signal.",
+      "methodNote": "A market-signal value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
       "back": "Back to admin hub",
       "empty": "No league data yet — tables appear by themselves once workers set their professions.",
       "unknownCountry": "Country not set",
@@ -4467,7 +4471,7 @@
     "namePlaceholder": "My profile",
     "candidateLabel": "Candidate skills",
     "candidateHint": "Skills you added in your own words (needs clarification, not confirmed).",
-    "thermoLabel": "Thermometer",
+    "thermoLabel": "Market signal",
     "thermoHint": "(average of declared salary expectations in your project + admin-entered market average) / 2 — shown only when both components exist.",
     "thermoMissingPosition": "Insufficient project data",
     "thermoMissingMarket": "Insufficient market data",

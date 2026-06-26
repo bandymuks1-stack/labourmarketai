@@ -1,4 +1,6 @@
 {
+  "cvBridge": "{confirmed} of {total} entries confirmed — confirmed work shows on your CV.",
+  "cvBridgeLink": "Open CV",
   "noContext": {
     "none": "No active work context yet. When an organization invites you to its team and adds you, your work records opens here.",
     "pending": "You have a pending invitation. Open your dashboard to accept it — then the owner can add you to the organization.",

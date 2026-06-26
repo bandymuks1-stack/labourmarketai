@@ -72,11 +72,12 @@ describe("journal capability extraction — no invention", () => {
   });
 });
 
-describe("journal extraction — website-design entry exposes ambiguity (owner smoke)", () => {
-  // "Dirbau su svetainės dizainu 9 h" = "I worked on svetainė design for 9 h",
-  // where LT "svetainė" = website OR living room. Must read the time, must NOT
-  // guess construction, and must surface BOTH design readings as a clarification
-  // (never empty/unknown-only, never silently one).
+describe("journal extraction — website-design entry reads honestly (owner smoke)", () => {
+  // "Dirbau su svetainės dizainu 9 h" = "I worked on svetainė design for 9 h".
+  // LT "svetainė" = website OR living room, but the compound "svetainės
+  // dizainas" means WEBSITE design — it must read the time, must NOT guess
+  // construction, and must surface the honest website reading WITHOUT the
+  // interior/living-room false positive (production-trust-bugs-p0 issue B).
   const s = extractJournalSuggestions("Dirbau su svetainės dizainu 9 h");
 
   it("reads the 9-hour duration", () => {
@@ -86,10 +87,10 @@ describe("journal extraction — website-design entry exposes ambiguity (owner s
     expect(s.skillSlugs).toEqual([]);
     expect(s.skillSuggestions).toEqual([]);
   });
-  it("surfaces BOTH design readings as structured ambiguity (not empty)", () => {
+  it("surfaces the website reading, not the interior false positive (not empty)", () => {
     const labels = s.capabilitySuggestions.map((c) => c.label);
     expect(labels).toContain("Interneto svetainės dizainas");
-    expect(labels).toContain("Interjero dizainas");
+    expect(labels).not.toContain("Interjero dizainas");
     expect(s.capabilitySuggestions.length).toBeGreaterThan(0);
     expect(s.capabilitySuggestions.every((c) => c.reason && c.reason.length > 0)).toBe(true);
   });

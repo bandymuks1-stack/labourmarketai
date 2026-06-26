@@ -606,10 +606,14 @@ export function extractProfileSkillClaims(
     if (found.size >= MAX_SUGGESTIONS) break;
   }
 
-  // Structured ambiguity: LT "svetainė" means BOTH "website" AND "living room".
-  // "svetainės dizainas" with no disambiguator is genuinely ambiguous — surface
-  // BOTH readings as a clarification (the worker confirms one). Never guess one
-  // silently, and never drop meaningful design work to "unknown".
+  // LT "svetainė" can mean BOTH "website" AND "living room", but the compound
+  // "svetainės dizainas" overwhelmingly means WEBSITE design in modern use, so
+  // it defaults to that single honest IT/design suggestion. The interior /
+  // living-room reading is surfaced ONLY by its own explicit needles (interjero
+  // / kambario / patalpų dizainas) in the main loop above — so plain
+  // "svetainės dizainas" never yields an unrelated interior / construction
+  // skill (owner P0 false-positive fix: "Dirbau su svetainės dizainu" must not
+  // produce construction skills).
   if (haystack.includes("svetain") && haystack.includes("dizain")) {
     const webish =
       /interneto svetain|internetin\w* svetain|web ?dizain|web ?design|website|tinklap|tinklalap|ux dizain|ui dizain/.test(
@@ -617,8 +621,7 @@ export function extractProfileSkillClaims(
       );
     const interiorish = /interjer|kambar|patalp|interior/.test(haystack);
     if (!webish && !interiorish) {
-      add("Interneto svetainės dizainas", "svetainės dizain", true);
-      add("Interjero dizainas", "svetainės dizain", true);
+      add("Interneto svetainės dizainas", "svetainės dizain");
     }
   }
 

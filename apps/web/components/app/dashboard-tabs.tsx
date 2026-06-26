@@ -8,6 +8,7 @@ import {
 } from "@/lib/config/navigation";
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import { useAuth } from "@/lib/auth/context";
+import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { cn } from "@/lib/utils";
 
 /**
@@ -50,6 +51,7 @@ export function DashboardTabs({
             key={id}
             href={href as "/dashboard"}
             aria-current={active ? "page" : undefined}
+            data-testid={`dashboard-tab-${id}`}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
               active
@@ -58,6 +60,7 @@ export function DashboardTabs({
             )}
           >
             {t(tabLabelKey)}
+            <NavLinkPending />
             {badge > 0 && (
               <span
                 className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-[10px] font-bold leading-none text-white"

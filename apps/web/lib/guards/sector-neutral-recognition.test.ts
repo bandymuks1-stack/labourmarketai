@@ -5,9 +5,10 @@ import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-sug
 
 /**
  * Guard: Work Journal recognition is sector-neutral (owner cross-sector smoke,
- * PR #490). Construction must never be a default/fallback; the ambiguous
- * "svetainės dizainas" must surface a clarification, not empty/unknown-only;
- * and a non-construction entry must never produce a construction suggestion.
+ * PR #490). Construction must never be a default/fallback; "svetainės dizainas"
+ * must surface the honest website-design reading (NOT the interior/construction
+ * reading — production-trust-bugs-p0 issue B), not empty/unknown-only; and a
+ * non-construction entry must never produce a construction suggestion.
  */
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
@@ -33,14 +34,13 @@ describe("no construction default / fallback", () => {
   });
 });
 
-describe("ambiguous design entry is a clarification, not empty/unknown-only", () => {
-  it("'svetainės dizainas' surfaces BOTH website and interior readings", () => {
+describe("website-design entry surfaces the honest reading, not empty/unknown-only", () => {
+  it("'svetainės dizainas' surfaces the website reading and NOT the interior one", () => {
     const caps = extractJournalSuggestions("Dirbau su svetainės dizainu 9 h").capabilitySuggestions;
     const labels = caps.map((c) => c.label);
     expect(labels).toContain("Interneto svetainės dizainas");
-    expect(labels).toContain("Interjero dizainas");
+    expect(labels).not.toContain("Interjero dizainas");
     expect(caps.length).toBeGreaterThan(0);
-    expect(caps.every((c) => c.ambiguous === true)).toBe(true);
   });
 });
 

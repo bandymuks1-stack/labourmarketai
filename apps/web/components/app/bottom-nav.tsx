@@ -18,6 +18,7 @@ import {
   type NavIconKey,
 } from "@/lib/config/navigation";
 import type { FeatureKey } from "@/lib/config/feature-availability";
+import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { cn } from "@/lib/utils";
 
 // Tabs are sourced from `lib/config/navigation.ts`, which itself derives
@@ -73,6 +74,7 @@ export function BottomNav({
               <Link
                 href={href as "/dashboard"}
                 aria-current={active ? "page" : undefined}
+                data-testid={`bottom-nav-${id}`}
                 className={cn(
                   "relative flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-tight transition-colors",
                   active
@@ -82,6 +84,7 @@ export function BottomNav({
               >
                 <span className="relative">
                   <Icon aria-hidden className="h-5 w-5" strokeWidth={2} />
+                  <NavLinkPending className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2" />
                   {badge > 0 && (
                     <span
                       className="absolute -right-2 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-[9px] font-bold leading-none text-white"
