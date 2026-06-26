@@ -93,6 +93,25 @@ describe("Guard: edit flow does not show stale details as current", () => {
   });
 });
 
+describe("Guard: capability signals are localized for display (no LT leak)", () => {
+  it("composer imports + applies localizeCapabilityLabel", () => {
+    expect(composer).toMatch(
+      /import \{ localizeCapabilityLabel \} from "@\/lib\/structuring\/capability-labels"/,
+    );
+    // capability chips carry a localized displayName...
+    expect(composer).toMatch(/displayName: localizeCapabilityLabel\(c\.label, locale\)/);
+    // ...and the chip renders the localized name, falling back to canonical.
+    expect(composer).toMatch(/\{row\.displayName \?\? row\.name\}/);
+    // fragment label-only activities are localized too.
+    expect(composer).toMatch(/localizeCapabilityLabel\(f\.activityLabel, locale\)/);
+  });
+  it("the STORED claim + dedupe stay on the canonical LT label, not the display one", () => {
+    // Adding to profile uses the canonical name, never the localized displayName.
+    expect(composer).toMatch(/addNewSkill\(row\.slug, row\.name\)/);
+    expect(composer).not.toMatch(/addNewSkill\(row\.slug, row\.displayName/);
+  });
+});
+
 describe("Guard: new card copy is neutral (no certification wording)", () => {
   for (const loc of ["lt", "en", "ru"] as const) {
     it(`${loc}: textLabel / understoodLabel / signalsHeading present + neutral`, () => {

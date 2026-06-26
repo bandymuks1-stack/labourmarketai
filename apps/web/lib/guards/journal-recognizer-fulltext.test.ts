@@ -6,6 +6,7 @@ import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { dedupeSignalsByLabel } from "@/lib/structuring/signal-dedupe";
+import { localizeCapabilityLabel } from "@/lib/structuring/capability-labels";
 
 const SKILL_NAMES_LT = JSON.parse(
   readFileSync(join(__dirname, "..", "..", "messages/lt/skill-names.json"), "utf8"),
@@ -158,6 +159,18 @@ describe("Guard: mixed multi-task text yields multiple relevant signals", () => 
     expect(visible).toContain("Programavimas");
     expect(visible).toContain("Mūrijimas");
     expect(visible).toContain("Darbų pristatymas klientui");
+
+    // The handover signal renders localized per locale (canonical LT stays the
+    // dedupe key; display is locale-aware so EN/RU never see the LT label).
+    expect(localizeCapabilityLabel("Darbų pristatymas klientui", "lt")).toBe(
+      "Darbų pristatymas klientui",
+    );
+    expect(localizeCapabilityLabel("Darbų pristatymas klientui", "en")).toBe(
+      "Work handover to client",
+    );
+    expect(localizeCapabilityLabel("Darbų pristatymas klientui", "ru")).toBe(
+      "Передача работ клиенту",
+    );
   });
 
   it("client-facing work handover is recognised, never an unrelated skill", () => {

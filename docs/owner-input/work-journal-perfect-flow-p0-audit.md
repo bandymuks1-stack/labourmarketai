@@ -422,3 +422,55 @@ the mixed-example fragment + dedupe assertions, (2) a per-phrase handover test
 asserting the signal exists with no unrelated sales/management/construction, and
 (3) a negative "delivering goods ≠ handover" control. web/design + excavator
 tests unchanged and still pass.
+
+---
+
+## 12. Round 5 — locale-aware capability labels (no LT leak in EN/RU)
+
+**Gap:** the client-handover signal (and other capability/activity labels)
+rendered their canonical **LT** string in EN/RU UI.
+
+**Fix (exact implementation):** new `lib/structuring/capability-labels.ts` —
+`localizeCapabilityLabel(ltLabel, locale)` + a `CAPABILITY_LABEL_I18N` map keyed
+by the canonical LT label. Display is localized; the **canonical LT label stays
+the dedupe key and the stored profile-claim value** (no behaviour change to
+dedupe or to what is saved). Applied at the two composer render points:
+- capability/new-skill chips carry a `displayName = localizeCapabilityLabel(c.label,
+  locale)` and render `row.displayName ?? row.name`; `addNewSkill` still stores
+  `row.name` (LT canonical);
+- label-only fragment activities render `localizeCapabilityLabel(f.activityLabel,
+  locale)` (a matched profession slug keeps localizing via `tProf`).
+
+**Visible labels:**
+
+| Canonical LT | EN | RU |
+| --- | --- | --- |
+| Darbų pristatymas klientui | **Work handover to client** | **Передача работ клиенту** |
+| Programavimas | Programming | Программирование |
+| Interneto svetainės dizainas | Website design | Дизайн сайта |
+| Sunkiosios technikos operavimas | Heavy machinery operation | Управление тяжёлой техникой |
+| Sodininkystė / aplinkos tvarkymas | Gardening / grounds keeping | Садоводство / благоустройство |
+| Pavežėjimas / vairavimas | Driving / ride service | Перевозка / вождение |
+| Sandėlio / logistikos darbai | Warehouse / logistics | Склад / логистика |
+| Komunikacija | Communication | Коммуникация |
+| Vairavimas | Driving | Вождение |
+
+Anything not in the map falls back to its LT label (never a raw slug). Broader
+LT-only capability/activity i18n stays a **separate RED** (full capability
+localization) — listed in §6.
+
+**Mixed example final visible output** (`Dirbau su React svetaine, mūrijau sieną
+ir pristačiau darbą klientui`):
+- LT: **Programavimas · Mūrijimas · Darbų pristatymas klientui**
+- EN: **Programming · Mason · Work handover to client**
+- RU: **Программирование · Каменщик · Передача работ клиенту**
+
+(Masonry localizes via the `mason` profession slug through `tProf`; the other two
+via the capability resolver.) One concept each, deduped on the canonical LT
+label, no LT leak in EN/RU, no raw slug in LT.
+
+**Tests:** `lib/structuring/capability-labels.test.ts` (LT/EN/RU outputs, EN/RU ≠
+LT, RU is Cyrillic, untranslated → LT fallback); `journal-card-clarity.test.ts`
+gains a guard that the composer applies the resolver for display while keeping the
+canonical LT label for dedupe + stored claim; the mixed-example test asserts the
+localized handover output.

@@ -17,6 +17,7 @@ import {
   type JournalFragmentSuggestion,
 } from "@/lib/structuring/extract-journal-suggestions";
 import { dedupeSignalsByLabel } from "@/lib/structuring/signal-dedupe";
+import { localizeCapabilityLabel } from "@/lib/structuring/capability-labels";
 import type { SkillConfidence } from "@/lib/structuring/skill-recognition";
 import {
   recognizeNewSkillSuggestions,
@@ -64,7 +65,10 @@ export type ComposerSkillSuggestion = JournalSkill & {
  *  — never verified, never manager-confirmed, never journal evidence. */
 export type ComposerNewSkillSuggestion = {
   slug: string;
+  /** Canonical (LT) label — used for dedupe and as the stored profile claim. */
   name: string;
+  /** Locale-aware label for DISPLAY only; falls back to `name`. */
+  displayName?: string;
   matchedText: string;
   confidence: SkillConfidence;
 };
@@ -335,7 +339,10 @@ export function JournalEntryComposer({
     const capabilityNew: ComposerNewSkillSuggestion[] = s.capabilitySuggestions.map(
       (c) => ({
         slug: `claim:${c.normalizedLabel}`,
+        // Canonical LT label (dedupe + stored claim); localized for display only
+        // so EN/RU never see the LT-only capability label.
         name: c.label,
+        displayName: localizeCapabilityLabel(c.label, locale),
         // Reason from the text fragment (every suggestion explains WHY it shows).
         matchedText: c.reason ?? c.label,
         confidence: "medium" as SkillConfidence,
@@ -948,11 +955,17 @@ export function JournalEntryComposer({
                       locale === "en" || locale === "ru" ? locale : "lt",
                     )
                   : t("fragment.noTime");
+                // Label-only activity/capability labels are canonical LT — localize
+                // for display so EN/RU never see the LT label. (A matched profession
+                // slug already localizes via tProf; its LT fallback is localized too.)
+                const localizedFragmentLabel = f.activityLabel
+                  ? localizeCapabilityLabel(f.activityLabel, locale)
+                  : null;
                 const activityName = f.isUnknown
                   ? t("fragment.unknownTitle")
                   : f.activitySlug
-                    ? tProfSafe(tProf, f.activitySlug, f.activityLabel)
-                    : (f.activityLabel ?? t("fragment.noActivity"));
+                    ? tProfSafe(tProf, f.activitySlug, localizedFragmentLabel)
+                    : (localizedFragmentLabel ?? t("fragment.noActivity"));
                 return (
                   <DetectedSuggestionCard
                     key={`${idx}-${f.rawPhrase}`}
@@ -1220,7 +1233,7 @@ export function JournalEntryComposer({
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-text-primary">
-                        {row.name}
+                        {row.displayName ?? row.name}
                       </span>
                       {status === "added" ? (
                         <span
