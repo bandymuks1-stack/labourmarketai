@@ -30,7 +30,23 @@ This makes every primary door a thing you **do**: *see my space · see the marke
 
 ## B. Mano erdvė as the control room — before / after
 
-`/dashboard` is unchanged structurally in this slice (it is already action-led: `CurrentSpaceHeader` + `IdentityActions` (profile / find work / readiness) + `WorkCard` (one next action) + invitations + pending-bookings card, all on real data, no card wall). What changed is the **frame around it**: Darbo žurnalas is now a primary door (so recording work no longer needs to be hunted for), and profile/CV are positioned as part of Mano erdvė rather than competing tabs. A deeper "what can I do now / what's missing / how visible am I" rewrite of the home page is **not** in this low-risk slice (it borders on visual-WOW) and is flagged as the recommended next step.
+`/dashboard` (worker view) was **rewritten** into a simple action-first control room — this is product logic / IA, not visual-WOW.
+
+**Before (a wall of loosely related cards — 7 sections):**
+1. `CurrentSpaceHeader` (context) · 2. `IdentityActions` 3-link strip (profile / find work / readiness) · 3. `TodayScreen` (today + confirmed work) · 4. `WorkCard` (status + next action) · 5. `WorkerInvitationsCard` · 6. pending-bookings card · 7. `DashboardFirstUsePanel`.
+
+**After (action-first control room — the few things that matter):**
+1. `CurrentSpaceHeader` — **who I am here** (person/company context chip).
+2. `WorkCard` — **main status + the ONE next action** (what's clear / what's missing / why it helps). Real data.
+3. **`MyZone`** (new) — the control room itself:
+   - **Readiness status:** one honest line — "Jūsų informacija dar nepilna" (incomplete) or "Jūsų profilis paruoštas" (ready), derived from the real profession+entry state.
+   - **"Ką galite padaryti dabar"** — the fast actions: **Įrašyti darbą** (`/journal`) · **Papildyti profilį** (`/profile`) · **Būti matomam žemėlapyje** (`/market-map`) · **Patikrinti žinutes** (`/communication`) · **Įmonės veiksmai** (`/company`, **only** when a real company exists).
+   - **"Kas ką gerina"** — one short, honest explanation: journal → skills/profile/CV; profile/CV → visibility; map = where you're visible; messages = trusted contact only.
+4. `WorkerInvitationsCard` (real, conditional) · 5. pending-bookings card (real, only when pending > 0).
+
+**Removed from the worker home (de-cluttered):** the loose `IdentityActions` strip (replaced by the clearer labelled MyZone), `TodayScreen` (confirmed-work view now lives in **Darbo žurnalas**), and `DashboardFirstUsePanel` (first-use guidance is now the MyZone readiness status + fast actions — no duplicate panel). The components are kept in the codebase (not deleted); the company/agency/customer overview keeps its focused `IdentityActions` + next-action structure.
+
+A user now arrives, sees in one glance who they are, whether their info is complete, and the next useful action, and can do it in seconds; staying longer means adding more accurate info, not fighting the UI.
 
 ---
 
@@ -95,15 +111,16 @@ Short, human, action-led. (Only the served locales lt/en/ru carry this surface; 
 ## I. Guards / tests
 
 - **New:** `lib/guards/action-first-ia.test.ts` — primary nav = the four action doors; profile/cv/player-card/account/marketplace/inbox/instructions/talent/visual-os are NOT primary; preview surfaces call `requireSuperadmin`; journal label is human "Darbo žurnalas"; no admin/internal/preview/module words and no raw keys in the four primary tab labels.
-- **Updated to the action-first contract:** `compact-nav-marketplace-ia`, `no-duplicate-top-level-entries`, `product-readiness` (TAB_META set), `worker-nav-human-labels`, `cv-friendly-copy` (tab no longer must say "CV"; page H1 still does; no-"evidence" protection kept).
-- **Unchanged & still green:** `preview-surfaces-unlinked` (previews stay out of nav), the map/legend honesty guards, booking-visibility guard.
+- **New:** `lib/guards/my-zone-control-room.test.ts` — the worker home is the MyZone control room (status + fast actions + what-improves-what); the old clutter (TodayScreen / FirstUsePanel) is not re-stacked; the five fast actions point at the real routes; company action is conditional; only ONE profile door (no player-card/cv/evidence/talent/visual-os duplicates); no admin/preview/module wording; MyZone copy present + human in lt/en/ru with no raw keys.
+- **Updated to the action-first contract:** `compact-nav-marketplace-ia`, `no-duplicate-top-level-entries`, `product-readiness` (TAB_META set + first-use guidance), `worker-nav-human-labels`, `cv-friendly-copy` (tab no longer must say "CV"; page H1 still does; no-"evidence" protection kept), `dashboard-active-role-overview` (worker = MyZone, company = IdentityActions), `today-screen-honesty` (not stacked on home), `dashboard-next-action` (no separate first-use panel).
+- **Unchanged & still green:** `preview-surfaces-unlinked`, `command-center` + `identity-action-workspace` (company branch keeps IdentityActions), the map/legend honesty guards, booking-visibility guard.
 
 ---
 
 ## GREEN / YELLOW / RED
 
-- **GREEN (shipped here):** action-first 4-door primary nav; Darbo žurnalas promoted; account demoted to avatar menu; talent/visual-os/visual-os-agency admin-gated; journal label humanised; map-first & single-messages-door confirmed and guarded.
-- **YELLOW (follow-up, not in this low-risk slice):** a deeper Mano erdvė "what can I do now / what's missing / how visible am I" home rewrite; grouping the secondary surfaces (bookings/candidates/projects/scouting/instructions/inbox/opportunities/documents) into clearly-secondary placement; hiding the `/opportunities` empty list until matching is live; the public preview-form trio.
+- **GREEN (shipped here):** action-first 4-door primary nav; Darbo žurnalas promoted; account demoted to avatar menu; talent/visual-os/visual-os-agency admin-gated; journal label humanised; map-first & single-messages-door confirmed and guarded; **Mano erdvė rewritten into the action-first control room** (readiness status + fast actions + what-improves-what; worker-home clutter removed).
+- **YELLOW (follow-up, not in this low-risk slice):** grouping the secondary surfaces (bookings/candidates/projects/scouting/instructions/inbox/opportunities/documents) into clearly-secondary placement; hiding the `/opportunities` empty list until matching is live; applying the same control-room clarity pass to the company/agency overview; the public preview-form trio.
 - **RED (owner-gated, untouched):** contact-permission schema/RLS, counterpart-identity bridge, marketplace offers/billing, company-location schema, matching engine, visual-WOW redesign. A real primary **"Paslaugos / Užsakymai"** tab is **not** added — bookings are not a real-enough standalone surface yet; bookings stay visible only where real pending data exists (home card on pending). Documented RED/future.
 
 ---

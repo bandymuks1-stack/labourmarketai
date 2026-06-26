@@ -108,8 +108,12 @@ describe("the dashboard surfaces a single primary Next Action CTA", () => {
     expect(hits.length).toBe(1);
   });
 
-  it("the first-use panel no longer repeats the profile/journal CTA row", () => {
-    expect(page).toMatch(/showCtas=\{false\}/);
+  it("the worker home no longer stacks a separate first-use panel (control room owns first-use)", () => {
+    // Action-first IA v1: the standalone DashboardFirstUsePanel is gone from the
+    // home; first-use guidance lives in the MyZone control room (real readiness
+    // status + fast actions), so there is no duplicate first-use CTA row.
+    expect(page).not.toMatch(/<DashboardFirstUsePanel/);
+    expect(page).toMatch(/<MyZone\b/);
   });
 });
 

@@ -19,9 +19,13 @@ const page = read("app/[locale]/dashboard/page.tsx");
 const identity = read("components/app/identity-actions.tsx");
 
 describe("overview is focused to the active role", () => {
-  it("mounts IdentityActions with focusRole on the overview (both branches)", () => {
+  it("the company overview mounts IdentityActions (focusRole); the worker overview is the MyZone control room", () => {
+    // Action-first IA v1: the worker home is the MyZone control room (status +
+    // fast actions + what-improves-what), not the loose IdentityActions strip.
+    // The company/agency/customer branch keeps the focused IdentityActions.
     const hits = page.match(/<IdentityActions[^>]*focusRole=\{role\}/g) ?? [];
-    expect(hits.length).toBeGreaterThanOrEqual(2);
+    expect(hits.length, "company branch IdentityActions").toBeGreaterThanOrEqual(1);
+    expect(page, "worker branch mounts the MyZone control room").toMatch(/<MyZone\b/);
   });
   it("IdentityActions supports an active-role focus mode", () => {
     expect(identity).toMatch(/focusRole/);
