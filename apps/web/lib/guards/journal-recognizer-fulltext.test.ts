@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
+import { dedupeSignalsByLabel } from "@/lib/structuring/signal-dedupe";
+
+const SKILL_NAMES_LT = JSON.parse(
+  readFileSync(join(__dirname, "..", "..", "messages/lt/skill-names.json"), "utf8"),
+) as Record<string, string>;
 
 /**
  * Full-text recognition guard (work-journal-perfect-flow-p0).
@@ -112,6 +119,40 @@ describe("Guard: mixed multi-task text yields multiple relevant signals", () => 
     expect(labels).not.toContain("Dažymas");
     expect(labels).not.toContain("Interjero dizainas");
     expect(recognizedSlugs(text)).toContain("bricklaying");
+  });
+
+  it("mixed example: visible signals are deduped + localized (no slug, no twin)", () => {
+    // Reproduce the composer's display set: fragment labels (what you did) +
+    // the deduped new-skill/capability chips. The SAME concept must appear once
+    // and never as a raw English slug ("bricklaying" → "Mūrijimas").
+    const text =
+      "Dirbau su React svetaine, mūrijau sieną ir pristačiau darbą klientui";
+    const s = extractJournalSuggestions(text);
+    const fragmentLabels = s.fragments
+      .map((f) => f.activityLabel)
+      .filter((l): l is string => !!l);
+    // localized capability + undeclared-skill chips, as the composer builds them
+    const capability = extractProfileSkillClaims(text).map((c) => ({
+      slug: `claim:${c.normalizedLabel}`,
+      name: c.label,
+    }));
+    const undeclared = recognizeSkills(text, 8).map((r) => ({
+      slug: r.slug,
+      name: SKILL_NAMES_LT[r.slug] ?? r.slug, // always resolves (no-raw-slug guard)
+    }));
+    const newChips = dedupeSignalsByLabel([...capability, ...undeclared], fragmentLabels);
+
+    // The full visible signal set = fragments + deduped new chips.
+    const visible = [...fragmentLabels, ...newChips.map((c) => c.name)];
+    const norm = visible.map((v) => v.toLowerCase());
+    // No duplicate concept anywhere on screen.
+    expect(new Set(norm).size).toBe(norm.length);
+    // bricklaying surfaces ONLY as the localized "Mūrijimas", once.
+    expect(norm.filter((v) => v === "mūrijimas")).toHaveLength(1);
+    expect(visible).not.toContain("bricklaying");
+    // Relevant multiple signals are still present (IT + masonry).
+    expect(visible).toContain("Programavimas");
+    expect(visible).toContain("Mūrijimas");
   });
 
   it("long cross-sector entry understands every named task", () => {

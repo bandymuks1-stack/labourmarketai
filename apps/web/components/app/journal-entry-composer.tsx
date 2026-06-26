@@ -16,6 +16,7 @@ import {
   extractJournalSuggestions,
   type JournalFragmentSuggestion,
 } from "@/lib/structuring/extract-journal-suggestions";
+import { dedupeSignalsByLabel } from "@/lib/structuring/signal-dedupe";
 import type { SkillConfidence } from "@/lib/structuring/skill-recognition";
 import {
   recognizeNewSkillSuggestions,
@@ -340,28 +341,27 @@ export function JournalEntryComposer({
         confidence: "medium" as SkillConfidence,
       }),
     );
-    const mergedNew: ComposerNewSkillSuggestion[] = [];
-    const seenNew = new Set<string>();
-    // Dedupe by label too, so a capability never repeats a skill already shown
-    // as a declared/recognised chip above or another new-skill suggestion.
-    const seenName = new Set<string>(
-      [
-        ...workerSkills.map((w) => w.name),
-        ...matchedSkills.map((m) => m.name),
-      ].map((n) => n.trim().toLowerCase()),
+    // Concept dedupe (round 3): one concept = one visible signal. Seed the
+    // "already shown" labels with the worker's declared skills, the matched
+    // declared-skill chips AND the per-fragment activity labels, so a
+    // capability / new-skill chip never repeats a concept the worker already
+    // sees (e.g. no "Mūrijimas" new-skill chip when "Mūrijimas" is already a
+    // fragment card, and no localized-vs-slug twin). Labels are always
+    // localized (journal-no-raw-slug guard), so label dedupe is concept dedupe.
+    const fragmentLabels = s.fragments
+      .map((f) => f.activityLabel)
+      .filter((l): l is string => !!l);
+    const alreadyShown = [
+      ...workerSkills.map((w) => w.name),
+      ...matchedSkills.map((m) => m.name),
+      ...fragmentLabels,
+    ];
+    const mergedNew = dedupeSignalsByLabel(
+      [...capabilityNew, ...undeclaredFromEngine, ...crossSector].filter(
+        (item) => !declaredSlugSet.has(item.slug),
+      ),
+      alreadyShown,
     );
-    for (const item of [...capabilityNew, ...undeclaredFromEngine, ...crossSector]) {
-      const nameKey = item.name.trim().toLowerCase();
-      if (
-        declaredSlugSet.has(item.slug) ||
-        seenNew.has(item.slug) ||
-        seenName.has(nameKey)
-      )
-        continue;
-      seenNew.add(item.slug);
-      seenName.add(nameKey);
-      mergedNew.push(item);
-    }
     // Allow headroom beyond NEW_SKILL_LIMIT so explicitly-named capabilities
     // are not crowded out by engine guesses; still bounded for the review grid.
     const cappedNew = mergedNew.slice(0, Math.max(NEW_SKILL_LIMIT, 12));

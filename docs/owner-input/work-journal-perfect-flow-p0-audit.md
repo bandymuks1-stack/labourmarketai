@@ -322,3 +322,63 @@ The visual/edit restructure does not need a model. The deferred RED work is the
 same as §6: real NLP extraction, structured multi-clause parser, **background
 reprocessing/backfill** to correct stale links at the source (DB write →
 owner-gated), a first-class confirmation workflow, and language expansion.
+
+---
+
+## 10. Round 3 — visual-review proof + concept dedupe (owner review gaps)
+
+### 10.1 Rendered DOM-order proof (closing the "not visually reviewed" gap)
+
+The logged-in journal page is behind Vercel SSO + Supabase Google auth and
+cannot be driven autonomously. Instead of a screenshot, the real
+`JournalEntryRow` (and the real `JournalEntrySkillLinks` it contains) is
+rendered to static markup and the **actual final DOM order** is asserted —
+`lib/guards/journal-card-render-order.test.ts` (5 tests, no fake routes, no auth
+bypass, no production data). It proves the rendered HTML order:
+1. **Įrašo tekstas** → 2. **Sistema suprato** → 3. **Susieti įgūdžiai** →
+4. **Ankstesni ryšiai** (heading + summary present, stale chip NOT in the DOM —
+collapsed) → 5. status marker + **Redaguoti** (quiet, at the bottom); plus the
+manual **Susieti įgūdį** action present and the unlinked skill hidden, and no
+raw slug text node in the output. (vitest 4 transforms JSX via oxc; the config
+sets `oxc.jsx.runtime: automatic` for tests only — production uses Next's SWC.)
+
+### 10.2 Concept dedupe — one concept = one visible signal
+
+**Problem:** the prior report listed "Programavimas + Mūrijimas + bricklaying" —
+`bricklaying` is the raw English slug for the same concept as the localized
+"Mūrijimas", and a concept could appear both as a fragment AND a "new skill"
+chip.
+
+**Fix (exact logic):**
+- New pure module `lib/structuring/signal-dedupe.ts`: `dedupeSignalsByLabel(items,
+  alreadyShown)` drops any item whose **normalized localized label** (lowercase,
+  trim, collapse whitespace) duplicates another item or an already-shown label;
+  order preserved, first wins.
+- The composer seeds `alreadyShown` with the worker's declared-skill names, the
+  matched declared-skill chips **and the per-fragment activity labels**, then
+  runs the new-skill/capability suggestions through it. So a concept already
+  shown as a fragment never reappears as a "new skill" chip.
+- **No raw slug ever:** `lib/guards/journal-no-raw-slug.test.ts` pins that every
+  recogniser-emitted slug (skills, activities, work directions) resolves to an
+  LT name, so `tSkill`/`tProf` never fall back to a raw slug. Because labels are
+  therefore always localized, label-dedupe IS concept-dedupe.
+
+**Mixed example final visible output** (`Dirbau su React svetaine, mūrijau sieną
+ir pristačiau darbą klientui`):
+- Fragments: **Programavimas** (React) · **Mūrijimas** (mason).
+- Deduped new-skill chips: **none** (Programavimas + Mūrijimas already shown as
+  fragments → dropped; the raw `bricklaying` never surfaces — only "Mūrijimas").
+- Net visible signals: **Programavimas, Mūrijimas** — each once, localized, no
+  unrelated sector, no `bricklaying`, no duplicate. (Client-presentation stays
+  unrecognised → no fake chip; the worker can link by hand.)
+
+Matched **declared-skill** chips keep their own labelled section (they drive
+entry↔skill linking) and are deduped against the new-skill bucket; they are not
+collapsed into fragments, which are a distinct "what you did" view.
+
+### 10.3 Tests added this round
+`lib/structuring/signal-dedupe.test.ts` (dedupe + raw-slug-twin + order),
+`lib/guards/journal-no-raw-slug.test.ts` (every recogniser slug has an LT name),
+`lib/guards/journal-card-render-order.test.ts` (rendered DOM order + collapse),
+and a mixed-example dedupe assertion added to
+`lib/guards/journal-recognizer-fulltext.test.ts`.
