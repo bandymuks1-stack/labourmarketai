@@ -248,18 +248,18 @@ describe("confirmation-required copy is present", () => {
   it("profile textFirst + structuring keys carry the confirm rule", () => {
     const lt = JSON.parse(readWeb("messages/lt.json"));
     const en = JSON.parse(readWeb("messages/en.json"));
-    // Updated in fix/cc/profile-text-skills-production-wiring: the
-    // self-applied saved-status label MUST NOT use "Patvirtinta" /
-    // "Confirmed" — those words imply external verification and were the
-    // visible misleading copy reported by the owner. The new wording
-    // ("Paties nurodyta" / "Self-declared") makes the trust posture
-    // explicit. The accompanying needsExternalConfirmation key remains
-    // unchanged — it describes the FUTURE confirmation flow honestly.
-    expect(lt.skills.textFirst.confirmedByYou).toBe("Laukia patvirtinimo");
-    expect(en.skills.textFirst.confirmedByYou).toBe("Awaiting confirmation");
-    expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/išorinio/i);
+    // Silent-trust rule (fix/silent-trust-wording-cleanup-p0): the self-applied
+    // saved-status label MUST NOT use any certification wording
+    // ("Patvirtinta"/"Confirmed"/"Awaiting confirmation") — those imply a public
+    // certification path. The new wording uses neutral review language; the
+    // future external-review step is described honestly without "confirmation".
+    expect(lt.skills.textFirst.confirmedByYou).toBe("Laukia peržiūros");
+    expect(en.skills.textFirst.confirmedByYou).toBe("Not reviewed yet");
+    // Silent-trust rule: the future step is framed as work records, never as
+    // "external review" (which implies external approval as a public signal).
+    expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/darbo įraš/i);
     expect(en.skills.textFirst.needsExternalConfirmation).toMatch(
-      /external/i,
+      /work records/i,
     );
     // Quiet-UI reframe (fix/cv): the rule-based/AI disclaimer (ruleBasedNotice)
     // was REMOVED from normal user UI per the owner. Nothing replaces it.
@@ -269,8 +269,8 @@ describe("confirmation-required copy is present", () => {
     const en = JSON.parse(readWeb("messages/en/journal.json"));
     expect(lt.savedTitle).toBeTruthy();
     expect(en.savedTitle).toBeTruthy();
-    expect(lt.savedBody).toMatch(/patvirtint/i);
-    expect(en.savedBody).toMatch(/confirmed/i);
+    expect(lt.savedBody).toMatch(/išsaugot/i);
+    expect(en.savedBody).toMatch(/saved/i);
   });
 });
 
@@ -800,13 +800,14 @@ describe("pilot readiness clarity", () => {
     expect(txt).toMatch(/t\("pilotBackboneNote"\)/);
   });
 
-  it("LT + EN expose the pilotBackboneNote with an honest confirmation signal", () => {
+  it("LT + EN expose the pilotBackboneNote with an honest review signal", () => {
     const lt = JSON.parse(readWeb("messages/lt/journal.json"));
     const en = JSON.parse(readWeb("messages/en/journal.json"));
     expect(lt.pilotBackboneNote).toBeTruthy();
     expect(en.pilotBackboneNote).toBeTruthy();
-    expect(lt.pilotBackboneNote).toMatch(/patvirtinim/i);
-    expect(en.pilotBackboneNote).toMatch(/confirmation/i);
+    // Silent-trust rule: neutral review wording, not "confirmation".
+    expect(lt.pilotBackboneNote).toMatch(/peržiūr/i);
+    expect(en.pilotBackboneNote).toMatch(/review/i);
     // Honesty: must mention privacy / closed visibility today so the
     // worker isn't misled into thinking the legal backbone is live.
     expect(lt.pilotBackboneNote).toMatch(/privat/i);

@@ -48,14 +48,15 @@ export async function WorkerEvidenceCard({
 
       {confirmedSkills.length > 0 && (
         <div className="flex flex-col gap-1.5" data-testid="worker-evidence-confirmed">
-          <span className="font-mono text-[10px] uppercase tracking-label text-emerald-600">
+          {/* Silent-trust rule: neutral tone, no green "verified" chip. */}
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
             {t("confirmed")}
           </span>
           <div className="flex flex-wrap gap-1.5">
             {confirmedSkills.map((name) => (
               <span
                 key={name}
-                className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-700"
+                className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-[11px] text-text-secondary"
               >
                 {name}
               </span>

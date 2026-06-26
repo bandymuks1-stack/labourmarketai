@@ -238,17 +238,16 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
       it("has the expected updated wording on the apply CTA + saved status", () => {
         const apply = textFirst.applyAll.toLowerCase();
         const confirmed = textFirst.confirmedByYou.toLowerCase();
-        // Quiet-UI reframe (fix/cv): the saved status reads "Laukia patvirtinimo"
-        // / "Awaiting confirmation" — honest (NOT affirmatively confirmed), no
-        // "self-declared" jargon.
+        // Silent-trust rule: the saved status reads in neutral review language
+        // ("Laukia peržiūros" / "Not reviewed yet") — no certification wording.
         if (locale === "lt") {
           expect(apply).toContain("pasirinkt");
-          expect(confirmed).toContain("laukia");
-          expect(confirmed).not.toBe("patvirtinta");
+          expect(confirmed).toContain("peržiūr");
+          expect(confirmed).not.toMatch(/patvirtint/);
         } else {
           expect(apply).toContain("selected");
-          expect(confirmed).toContain("awaiting");
-          expect(confirmed).not.toBe("confirmed");
+          expect(confirmed).toContain("reviewed");
+          expect(confirmed).not.toMatch(/confirm|verif/);
         }
       });
 

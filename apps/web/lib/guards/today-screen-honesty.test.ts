@@ -95,9 +95,10 @@ describe("the today screen renders real states with one next step", () => {
   });
 });
 
-describe("scouting card: glow is the skin of real confirmation (DESIGN_SOUL §1)", () => {
-  it("gold trust ring is conditional on the REAL work-card confirmation", () => {
-    expect(card).toMatch(/confirmed && "trust-ring"/);
+describe("scouting card: confirmation stays a silent signal (no public badge)", () => {
+  it("carries NO gold confirmation trust ring on the self-view card", () => {
+    // Silent-trust rule: confirmation is never advertised as a visible badge.
+    expect(card).not.toMatch(/trust-ring/);
   });
   it("verified badges come only from manager-verified worker_skills rows", () => {
     expect(cardSvc).toMatch(/\.eq\("verified", true\)/);
@@ -113,13 +114,13 @@ describe("scouting card: glow is the skin of real confirmation (DESIGN_SOUL §1)
   });
 });
 
-describe("gold stays a single semantic trust accent — no gold palette", () => {
-  it("--c-trust-accent is defined for dark AND light themes", () => {
+describe("the player card uses no gold trust accent (silent-trust rule)", () => {
+  it("--c-trust-accent token still exists for dark AND light themes", () => {
     const matches = css.match(/--c-trust-accent:/g) ?? [];
     expect(matches.length).toBe(2);
   });
-  it("the trust ring + chips use the semantic token, not tier-gold directly", () => {
-    expect(card).toMatch(/trust-accent/);
+  it("the self-view card does NOT use the gold trust accent or tier-gold", () => {
+    expect(card).not.toMatch(/trust-accent/);
     expect(card).not.toMatch(/tier-gold/);
   });
 });
@@ -152,9 +153,12 @@ describe("copy passes the honesty + i18n bar", () => {
     expect(blob).not.toMatch(/€|eur|salary|atlyginim|top \d|%|guarant|garantuo/i);
     expect(blob).not.toMatch(/employer (viewed|is interested)|darbdavys (peržiūrėjo|domisi)/i);
   });
-  it("week headline speaks human, not system (no raw counter phrasing)", () => {
-    expect(lt.todayScreen.week.confirmedHeadline).toMatch(/tavo darbas patvirtintas/);
-    expect(en.todayScreen.week.confirmedHeadline).toMatch(/Your work was confirmed/);
+  it("week headline speaks human + neutral (reviewed records, no certification)", () => {
+    // Silent-trust rule: no "confirmed/patvirtinta" certification phrasing.
+    expect(lt.todayScreen.week.confirmedHeadline).toMatch(/peržiūrėt/i);
+    expect(lt.todayScreen.week.confirmedHeadline).not.toMatch(/patvirtin/i);
+    expect(en.todayScreen.week.confirmedHeadline).toMatch(/reviewed/i);
+    expect(en.todayScreen.week.confirmedHeadline).not.toMatch(/confirmed/i);
   });
 });
 

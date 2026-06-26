@@ -59,11 +59,11 @@ describe("UI frames candidates as self-declared, not verified; copy LT+EN", () =
     expect(profilePage).toMatch(/<SkillClarifySection\b/);
     expect(profilePage).toMatch(/id="candidate-skills"/);
   });
-  it("LT + EN say self-declared / not verified", () => {
+  it("LT + EN say self-declared / not reviewed (silent-trust rule)", () => {
     expect(lt.skillClarify.selfDeclaredNote).toMatch(/savideklaruot/i);
-    expect(lt.skillClarify.selfDeclaredNote).toMatch(/nepatvirtint/i);
+    expect(lt.skillClarify.selfDeclaredNote).toMatch(/neperžiūrėt/i);
     expect(en.skillClarify.selfDeclaredNote).toMatch(/self-declared/i);
-    expect(en.skillClarify.selfDeclaredNote).toMatch(/not verified/i);
+    expect(en.skillClarify.selfDeclaredNote).toMatch(/not reviewed/i);
   });
   it("the candidate badge never claims verified/AI", () => {
     const blob = lt.skillClarify.candidateBadge + en.skillClarify.candidateBadge;

@@ -122,11 +122,14 @@ describe("Guard: timeline copy is complete and honest", () => {
     });
   }
 
-  it("the confirmed/not-confirmed labels read truthfully; waiting is human", () => {
-    expect(/confirmed/i.test(timelineCopy("en").approved ?? "")).toBe(true);
-    expect(/patvirtin/i.test(timelineCopy("lt").approved ?? "")).toBe(true);
-    expect(/not confirmed/i.test(timelineCopy("en").rejected ?? "")).toBe(true);
-    expect(/nepatvirtin/i.test(timelineCopy("lt").rejected ?? "")).toBe(true);
+  it("the reviewed/returned labels read truthfully; waiting is human (silent-trust)", () => {
+    // Silent-trust rule: the worker timeline uses neutral review/record wording,
+    // never a certification ("confirmed"/"patvirtinta"). The waiting step still
+    // makes clear a human (not AI) is involved.
+    expect(/reviewed/i.test(timelineCopy("en").approved ?? "")).toBe(true);
+    expect(/peržiūrėt/i.test(timelineCopy("lt").approved ?? "")).toBe(true);
+    expect(/returned/i.test(timelineCopy("en").rejected ?? "")).toBe(true);
+    expect(/grąžint/i.test(timelineCopy("lt").rejected ?? "")).toBe(true);
     expect(/human/i.test(timelineCopy("en").waiting ?? "")).toBe(true);
     expect(/žmogaus/i.test(timelineCopy("lt").waiting ?? "")).toBe(true);
   });

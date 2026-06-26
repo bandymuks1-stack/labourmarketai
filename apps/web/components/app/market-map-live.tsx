@@ -68,9 +68,6 @@ export type MapIdentity = {
   professionLabel?: string | null;
   /** Localized availability label (real availability_status); omit when unknown. */
   availabilityLabel?: string | null;
-  /** Count of manager/client-confirmed skills (real worker_skills.verified). 0
-   *  or omitted → no trust badge (never a fabricated count). */
-  verifiedSkillsCount?: number;
 };
 
 /** Build the premium mini-player-card pin HTML for the Leaflet divIcon. Inline
@@ -95,22 +92,19 @@ function identityPinHtml(identity: MapIdentity): string {
   const availPill = identity.availabilityLabel
     ? `<span style="background:rgba(232,238,242,.10);color:#E8EEF2;font:600 8px/1.4 ui-sans-serif,system-ui,sans-serif;padding:1px 6px;border-radius:9999px;border:1px solid rgba(232,238,242,.25)">${escapeHtml(identity.availabilityLabel)}</span>`
     : "";
-  // Verified-skills — gold trust accent, shown ONLY for a real confirmed count.
-  const verified = identity.verifiedSkillsCount ?? 0;
-  const verifiedBadge =
-    verified > 0
-      ? `<span style="background:rgba(212,175,90,.14);color:#D4AF5A;font:700 8px/1.4 ui-sans-serif,system-ui,sans-serif;padding:1px 6px;border-radius:9999px;border:1px solid rgba(212,175,90,.5)">✓ ${verified}</span>`
-      : "";
+  // Silent-trust rule: the marker shows neutral profile signals only — no
+  // verified/confirmed badge, no certification checkmark, no gold trust ring.
+  // (Confirmation data stays an internal signal; it is never advertised here.)
   // Profession / lead-capability — real localized label (omitted when unset).
   const professionLine = identity.professionLabel
     ? `<div style="margin-top:2px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#A9B4BD;font:500 9px/1.3 ui-sans-serif,system-ui,sans-serif">${escapeHtml(identity.professionLabel)}</div>`
     : "";
-  const pills = [statusPill, availPill, verifiedBadge].filter(Boolean).join("");
+  const pills = [statusPill, availPill].filter(Boolean).join("");
   const pillRow = pills
     ? `<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;justify-content:center;max-width:160px">${pills}</div>`
     : "";
-  // Gold trust ring only when there is a real confirmed signal.
-  const ringColor = verified > 0 ? "#D4AF5A" : "#22D3EE";
+  // Neutral marker ring — never a trust/certification accent.
+  const ringColor = "#22D3EE";
   return (
     `<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer">` +
     `<div style="padding:3px;border-radius:${isCompany ? "15px" : "9999px"};background:#0B1014;border:2px solid ${ringColor};box-shadow:0 8px 22px rgba(0,0,0,.6)">${inner}</div>` +

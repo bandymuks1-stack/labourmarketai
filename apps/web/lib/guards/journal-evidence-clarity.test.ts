@@ -134,10 +134,12 @@ describe("Guard: journal clarity disclaimers present + honest (LT + EN)", () => 
       ).toLowerCase();
 
       if (locale === "en") {
-        expect(backbone).toMatch(/real\s+confirmation/);
+        // Silent-trust rule: the backbone note shows the review layer only on a
+        // real review (was "real confirmation").
+        expect(backbone).toMatch(/real\s+review/);
         expect(clarify).toMatch(/does\s+not\s+guess/);
       } else {
-        expect(backbone).toMatch(/realus\s+patvirtinimas/);
+        expect(backbone).toMatch(/reali\s+peržiūra/);
         expect(clarify).toMatch(/nespėlioja/);
       }
     });
