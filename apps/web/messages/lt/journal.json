@@ -92,7 +92,9 @@
     "deleting": "Šalinama...",
     "deleteConfirm": "Tikrai pašalinti šį įrašą? Veiksmas grąžinamas — soft-delete (įrašas nedingsta iš istorijos, tik nebematomas sąraše).",
     "deleteBlocked": "Įrašas peržiūrėtas — vietoje pašalinimo siųskite pataisymo prašymą.",
-    "edit": "Redaguoti"
+    "edit": "Redaguoti",
+    "textLabel": "Įrašo tekstas",
+    "understoodLabel": "Sistema suprato"
   },
   "editEntryTitle": "Redaguoti įrašą",
   "editEntryBanner": "Redaguojate jau išsaugotą įrašą. Pasiūlykite struktūrą iš naujo, pažymėkite ką taisote, ir paspaudus „Atnaujinti įrašą“ senas variantas bus pakeistas. Jei keisitės nuomonę —",

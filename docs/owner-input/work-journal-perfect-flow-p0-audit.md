@@ -219,3 +219,106 @@ the visible problems (§4).
   confidence; no fake AI claim.
 - No public confirmation/verification wording added.
 - Draft PR **held** — no merge, no deploy without owner approval.
+
+---
+
+## 9. Round 2 — entry card + edit flow restructure (owner core-clarity correction)
+
+The owner clarified that card/edit clarity is **core product, not visual-WOW**.
+This round restructures the entry card and edit flow into clearly separated,
+mobile-first sections. Still code + copy + tests only; no DB, no data mutation.
+
+### 9.1 Entry card — before / after structure
+
+**Before** (one undifferentiated stack):
+```
+[ entry text ]
+[ decision timeline — "Kas įvyko su šiuo įrašu" ]
+[ direction · site · quantity · date ]      ← unlabelled muted row
+[ skill chips + collapsed review bucket ]    ← only "helper" line, no heading
+[ edit · delete ]
+```
+Problem: no section boundaries; status timeline sat directly under the text and
+pushed the structured signals down; the "what the system understood" data had no
+label; on mobile it read as one chip/[]text wall.
+
+**After** (labelled, ordered sections, each separated by a hairline divider):
+```
+ĮRAŠO TEKSTAS            ← eyebrow
+  <the worker's text, prominent, wraps cleanly>
+──────────────
+SISTEMA SUPRATO          ← eyebrow (only if real signals exist)
+  direction · site · quantity      ← plain values, no badge wall
+──────────────
+SUSIETI ĮGŪDŽIAI         ← linked skill signals (separate from the text section)
+  ✓ chip  ✓ chip   ·  [ Susieti įgūdį ]   ← manual fallback stays visible
+  ┌ ANKSTESNI RYŠIAI (collapsed) ─────────┐  ← stale links, never "current"
+  └ "N earlier links … not shown as current signals"  [Rodyti] [Atsieti] ┘
+──────────────
+  <decision timeline + date>       ← status zone, quiet, at the bottom
+  Redaguoti · Pašalinti            ← actions, quiet, do not dominate
+```
+Files: `app/[locale]/dashboard/journal/page.tsx` (text + "Sistema suprato"
+sections, status moved to a `statusSlot`), `components/app/journal-entry-row.tsx`
+(`statusSlot` prop; explicit `children → linked skills → status → actions` order
+with dividers), `components/app/journal-entry-skill-links.tsx` ("Susieti
+įgūdžiai" heading; "Ankstesni ryšiai" already collapsed).
+
+3-second scan now answers: **what I wrote** (text, top) → **what the system
+understood** (Sistema suprato) → **what I can fix** (linked skills + manual link
++ quiet edit).
+
+### 9.2 Edit flow — before / after
+
+**Before:** editing preloaded the OLD structured details as confirmed; if the
+worker changed the text without re-running cleanup, those stale details stayed
+shown as current with no signal.
+
+**After:** a `textDirty` signal (current textarea ≠ saved text):
+- the carried-over details block is **muted** (opacity) — visibly "not current";
+- a neutral warning line appears: *"You changed the text. Press 'Organize text'
+  so the system re-evaluates the current text — the details below are still from
+  the earlier text."*;
+- **one clear re-run action** sits right under that line (`journal-edit-rerun`),
+  calling cleanup on the CURRENT full text;
+- nothing is deleted; after re-run the current text drives the current signals.
+
+### 9.3 Mobile clarity
+
+- Card is a single `flex flex-col gap-3` column; each section has a hairline
+  top divider, so text / understood / linked / earlier / status+actions are
+  visually separated rather than a continuous chip wall.
+- The "Sistema suprato" row uses plain spaced values (no pills) → no badge wall.
+- "Ankstesni ryšiai" stays collapsed to a one-line summary on small screens.
+- Eyebrow labels (mono, uppercase, small) give cheap, consistent section
+  anchors that survive narrow widths.
+
+### 9.4 Copy added (LT / EN / RU)
+
+| Key | LT | EN | RU |
+| --- | --- | --- | --- |
+| `journal.entry.textLabel` | Įrašo tekstas | Entry text | Текст записи |
+| `journal.entry.understoodLabel` | Sistema suprato | What the system understood | Что поняла система |
+| `journalSkillLinks.signalsHeading` | Susieti įgūdžiai | Linked skills | Связанные навыки |
+| `journal.editTextChangedHint` | Tekstą pakeitėte. … „Sutvarkyti tekstą“ … | You changed the text. … "Organize text" … | Вы изменили текст. … «Привести в порядок текст» … |
+| `journalSkillLinks.reviewHeading` | Ankstesni ryšiai | Earlier links | Прежние связи |
+
+No `patvirtinta / confirmed / verified`, no `badge / proof / trust`,
+no certification wording. Enforced by `journal-card-clarity.test.ts` +
+`silent-trust-wording.test.ts`.
+
+### 9.5 Tests added this round
+
+`lib/guards/journal-card-clarity.test.ts` (13 tests): card is text-first (source
+order text → understood), text keeps clean wrapping and is not buried, status is
+in the bottom slot, sections render in `children → linked → status → actions`
+order, earlier links are collapsed by default and split from clean chips, manual
+link stays available, edit-dirty mutes + prompts re-run with a real re-run
+action, and all new card copy is certification-free in LT/EN/RU.
+
+### 9.6 RED still remaining (unchanged)
+
+The visual/edit restructure does not need a model. The deferred RED work is the
+same as §6: real NLP extraction, structured multi-clause parser, **background
+reprocessing/backfill** to correct stale links at the source (DB write →
+owner-gated), a first-class confirmation workflow, and language expansion.

@@ -691,12 +691,27 @@ export function JournalEntryComposer({
               {t("editPreservedTitle")}
             </p>
             {textDirty && (
-              <p
-                className="text-[11px] leading-relaxed text-state-warning"
-                data-testid="journal-edit-text-changed"
-              >
-                {t("editTextChangedHint")}
-              </p>
+              <div className="flex flex-col gap-1.5">
+                <p
+                  className="text-[11px] leading-relaxed text-state-warning"
+                  data-testid="journal-edit-text-changed"
+                >
+                  {t("editTextChangedHint")}
+                </p>
+                {/* One clear action to re-run cleanup on the CURRENT text so
+                    current signals come from the current text, not the old one. */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSavedAt(null);
+                    analyse(text);
+                  }}
+                  data-testid="journal-edit-rerun"
+                  className="w-fit rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10"
+                >
+                  {t("organizeText")}
+                </button>
+              </div>
             )}
             <div className={cn("flex flex-wrap gap-1.5", textDirty && "opacity-50")}>
               {workDate && (

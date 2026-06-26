@@ -596,7 +596,7 @@
     }
   },
   "journalSkillLinks": {
-    "signalsHeading": "Skill signals",
+    "signalsHeading": "Linked skills",
     "helper": "Mark the skills this entry shows — it builds your CV. Not reviewed yet.",
     "saving": "Saving…",
     "saved": "Saved",
