@@ -596,6 +596,7 @@
     }
   },
   "journalSkillLinks": {
+    "signalsHeading": "Skill signals",
     "helper": "Mark the skills this entry shows — it builds your CV. Not reviewed yet.",
     "saving": "Saving…",
     "saved": "Saved",
@@ -607,9 +608,9 @@
       "confirmed": "With records",
       "manual": "Manually linked"
     },
-    "reviewHeading": "Needs review",
-    "reviewHelper": "These skills are linked, but this entry's text doesn't support them. Review or unlink the wrong ones.",
-    "reviewSummary": "{count} previously linked skills no longer match this entry's text. They are not shown as this entry's skills.",
+    "reviewHeading": "Earlier links",
+    "reviewHelper": "These skills were linked earlier, but the current entry text no longer mentions them. You can review or unlink them by hand.",
+    "reviewSummary": "{count} earlier links. They are not shown as this entry's current signals.",
     "reviewShow": "Show",
     "reviewHide": "Hide",
     "reviewAgain": "Review again",

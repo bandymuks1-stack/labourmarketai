@@ -62,8 +62,22 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "coding",
       "software",
       "frontend",
+      "front-end",
       "backend",
+      "back-end",
       "developer",
+      // Common journal phrasings for fixing/building a site or app feature —
+      // so "sutvarkiau React svetainės klaidą" / "taisiau kodą" is recognised
+      // as IT work (never construction). "klaid" stays anchored to the
+      // code/site context so it does not fire on a generic "klaida".
+      "react",
+      "javascript",
+      "typescript",
+      "svetainės klaid",
+      "svetaines klaid",
+      "kodo klaid",
+      "kodo pataisym",
+      "programos klaid",
     ],
   },
   {
@@ -490,6 +504,63 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "patalpų dizain",
       "patalpos dizain",
       "interior design",
+    ],
+  },
+  {
+    // Gardening / grounds keeping — real cross-sector day-work the journal
+    // must recognise (owner reality: "pjausčiau gyvatvorę sode"). Label-only,
+    // no fake taxonomy slug. Needles are specific stems so they do not collide
+    // with unrelated words (no bare "sode" — it can ride inside other words).
+    label: "Sodininkystė / aplinkos tvarkymas",
+    needles: [
+      "gyvatvor",
+      "vejos pjov",
+      "žolės pjov",
+      "zoles pjov",
+      "vejos pjaut",
+      "genėj",
+      "genej",
+      "ravėj",
+      "ravej",
+      "sodinim",
+      "sodininky",
+      "želdin",
+      "zeldin",
+      "aplinkos tvark",
+      "krūm geneji",
+      "gardening",
+      "mowing",
+      "hedge trim",
+      "pruning",
+      "landscaping",
+      "газон",
+      "садов",
+      "стрижк",
+    ],
+  },
+  {
+    // Heavy machinery / earthmoving equipment operation ("kasiau žemes su
+    // ekskavatoriumi"). Label-only — there is no fake verified operator skill
+    // behind it (§7). Earthworks itself stays a recognised SKILL via
+    // SKILL_HINTS_LT; this row names the MACHINE so the entry is understood
+    // rather than flagged "Nesuprasta".
+    label: "Sunkiosios technikos operavimas",
+    needles: [
+      "ekskavator",
+      "buldoz",
+      "greider",
+      "autokrautuv",
+      "ratinis krautuv",
+      "frontalinis krautuv",
+      "technikos operat",
+      "sunkiąja technik",
+      "sunkiaja technik",
+      "excavator",
+      "bulldozer",
+      "wheel loader",
+      "экскаватор",
+      "бульдозер",
+      "погрузчик",
     ],
   },
   {

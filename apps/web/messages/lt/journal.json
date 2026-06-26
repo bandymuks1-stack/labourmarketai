@@ -98,6 +98,7 @@
   "editEntryBanner": "Redaguojate jau išsaugotą įrašą. Pasiūlykite struktūrą iš naujo, pažymėkite ką taisote, ir paspaudus „Atnaujinti įrašą“ senas variantas bus pakeistas. Jei keisitės nuomonę —",
   "editEntryCancel": "atšaukti redagavimą",
   "editPreservedTitle": "Išsaugoma iš ankstesnio įrašo (galite keisti):",
+  "editTextChangedHint": "Tekstą pakeitėte. Paspauskite „Sutvarkyti tekstą“, kad sistema iš naujo įvertintų dabartinį tekstą — žemiau rodomos detalės dar iš ankstesnio teksto.",
   "updateEntry": "Atnaujinti įrašą",
   "field": {
     "work_direction": "Darbo kryptis",

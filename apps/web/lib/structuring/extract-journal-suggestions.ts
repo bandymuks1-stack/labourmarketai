@@ -582,7 +582,21 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   const rawParts = splitFragments(text);
   for (const raw of rawParts) {
     const localTime = detectFragmentTime(raw);
-    const { slug, label } = detectActivity(raw);
+    const activity = detectActivity(raw);
+    const slug = activity.slug;
+    let label = activity.label;
+    // Cross-sector fallback (full-text recognition, P0): when the per-fragment
+    // ACTIVITY lexicon has no match, consult the SAME capability dictionary the
+    // whole entry uses (extractProfileSkillClaims). This makes the fragment
+    // recogniser understand IT/web, driving, communication, gardening, heavy
+    // equipment, cooking, etc. — instead of falsely showing a recognised work
+    // item as "Nesuprasta / patikslinkite". Label-only (slug stays null) so no
+    // fake taxonomy is invented; if the dictionary is also silent the fragment
+    // legitimately stays unknown for the worker to clarify.
+    if (slug === null && label === null) {
+      const cap = extractProfileSkillClaims(raw)[0];
+      if (cap) label = cap.label;
+    }
     const isUnknown = localTime !== null && slug === null && label === null;
     if (localTime || slug || label) {
       initialFragments.push({

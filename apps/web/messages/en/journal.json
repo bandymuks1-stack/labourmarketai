@@ -98,6 +98,7 @@
   "editEntryBanner": "You're editing a saved entry. Suggest the structure again, mark what you're changing, then \"Update entry\" replaces the old version. To back out —",
   "editEntryCancel": "cancel editing",
   "editPreservedTitle": "Kept from the previous entry (you can change it):",
+  "editTextChangedHint": "You changed the text. Press “Organize text” so the system re-evaluates the current text — the details below are still from the earlier text.",
   "updateEntry": "Update entry",
   "field": {
     "work_direction": "Work direction",

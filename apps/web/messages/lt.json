@@ -596,6 +596,7 @@
     }
   },
   "journalSkillLinks": {
+    "signalsHeading": "Įgūdžių signalai",
     "helper": "Pažymėkite įgūdžius, kuriuos rodo šis įrašas — taip pildosi jūsų CV. Dar neperžiūrėta.",
     "saving": "Saugoma…",
     "saved": "Išsaugota",
@@ -607,9 +608,9 @@
       "confirmed": "Su įrašais",
       "manual": "Susieta rankiniu būdu"
     },
-    "reviewHeading": "Reikia peržiūrėti",
-    "reviewHelper": "Šie įgūdžiai susieti, bet šio įrašo tekstas jų nepagrindžia. Peržiūrėkite arba atsiekite netinkamus.",
-    "reviewSummary": "{count} anksčiau susietų įgūdžių nebeatitinka šio įrašo teksto. Jie nerodomi kaip šio įrašo įgūdžiai.",
+    "reviewHeading": "Ankstesni ryšiai",
+    "reviewHelper": "Šie įgūdžiai buvo susieti anksčiau, bet dabartinis įrašo tekstas jų nebemini. Galite peržiūrėti arba atsieti rankiniu būdu.",
+    "reviewSummary": "{count} ankstesni ryšiai. Jie nerodomi kaip dabartiniai šio įrašo signalai.",
     "reviewShow": "Rodyti",
     "reviewHide": "Slėpti",
     "reviewAgain": "Peržiūrėti iš naujo",

@@ -147,6 +147,13 @@ export function JournalEntryComposer({
 
   const [stage, setStage] = useState<Stage>("compose");
   const [text, setText] = useState(editingEntry?.originalText ?? "");
+  // Edit-flow honesty (P0): when the worker changes the text of an entry they
+  // are editing, the structured details carried over from the OLD text may no
+  // longer match. We never silently keep showing them as current — the
+  // preserved block is muted and a neutral prompt asks the worker to re-run
+  // "Sutvarkyti tekstą" so the system re-evaluates the CURRENT full text.
+  const textDirty =
+    !!editingEntry && text.trim() !== (editingEntry.originalText ?? "").trim();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -683,7 +690,15 @@ export function JournalEntryComposer({
             <p className="text-[11px] font-medium text-text-secondary">
               {t("editPreservedTitle")}
             </p>
-            <div className="flex flex-wrap gap-1.5">
+            {textDirty && (
+              <p
+                className="text-[11px] leading-relaxed text-state-warning"
+                data-testid="journal-edit-text-changed"
+              >
+                {t("editTextChangedHint")}
+              </p>
+            )}
+            <div className={cn("flex flex-wrap gap-1.5", textDirty && "opacity-50")}>
               {workDate && (
                 <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-date">
                   {workDate}
