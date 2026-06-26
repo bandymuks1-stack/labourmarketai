@@ -237,8 +237,8 @@
   "marketMap": {
     "backToActions": "Action center",
     "pageTitle": "Map",
-    "pageLead": "You and the market on one map: person or company identity and real market signals.",
-    "advanced": "Details",
+    "pageLead": "You and the market on one map.",
+    "advanced": "My locations & market layers",
     "companyContext": {
       "title": "Company context",
       "missingLocation": "Company location not added yet",

@@ -237,8 +237,8 @@
   "marketMap": {
     "backToActions": "Veiksmų centras",
     "pageTitle": "Žemėlapis",
-    "pageLead": "Tavo ir rinkos vaizdas viename žemėlapyje: asmens ar įmonės tapatybė ir tikri rinkos signalai.",
-    "advanced": "Išsamiau",
+    "pageLead": "Tavo ir rinkos vaizdas viename žemėlapyje.",
+    "advanced": "Mano vietos ir rinkos sluoksniai",
     "companyContext": {
       "title": "Įmonės kontekstas",
       "missingLocation": "Įmonės vieta dar nepridėta",
