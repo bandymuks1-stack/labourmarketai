@@ -296,14 +296,61 @@ workflow verb.
 
 ---
 
-## 8. Validation
+## 8. Worker-facing journal copy (fifth pass — found during ready-check)
 
-- `pnpm -F web exec vitest run` — **388 files / 5515 tests pass** (incl. the
-  silent-trust guard, 11 tests).
+The `journal` namespace is served from `messages/{locale}/journal.json` (a
+next-intl override), so the earlier base-file passes had not reached it (only
+`journal.cvBridge` was done in pass 1). The **worker** journal — composer, entry
+status/timeline, self-progress, save/empty notes — is a self-view surface and
+still carried certification wording. Neutralized (reviewer-only `inbox.*` kept
+verbatim as the allowed exception):
+
+| Path | Before (EN) | After (EN) |
+|---|---|---|
+| `entry.status.confirmed` / `entry.timeline.approved` | **Confirmed** | **Reviewed** |
+| `entry.timeline.waiting` | Waiting for human **confirmation** | Waiting for human **review** |
+| `entry.timeline.rejected` | **Not confirmed** | **Returned** |
+| `entry.deleteBlocked` | Entry already **confirmed**… | Entry already **reviewed**… |
+| `self_progress.confirmed` | **Confirmed**: {n} | **With records**: {n} |
+| `self_progress.strongly_confirmed` | **Strongly confirmed**: {n} | **Strongly backed**: {n} |
+| `self_progress.awaitingHint` | no **confirmed** journal entries… your **confirmations** will build… | no **reviewed** journal entries… your **reviewed entries** will build… |
+| `confirmEntry` *(worker composer)* | **Confirm entry** | **Save entry** |
+| `confirmAllSuggestions` | **Confirm all suggestions** | **Add all suggestions** |
+| `strengthensHint` | Once you **confirm** it… | Once you **save** it… |
+| `reasonWeak` | Weak signal — **confirm** if it fits. | Weak signal — **add** if it fits. |
+| `freeTextLead` | …fact only once you **confirm**. | …fact only once you **select it**. |
+| `savedBody` | Your **confirmed** details… | Your **saved** details… |
+| `pilotBackboneNote` | The **confirmation** layer… real **confirmation**. | The **review** layer… real **review**. |
+| `connectsLater` | …connect to skills and **confirmations** | …connect to skills and **records** |
+| `reviewMetaNote` | Manager / client **confirmation** comes later. | Manager / client **review** comes later. |
+| `reviewNotEnabledNote` | …for entries to be **confirmed**… | …for entries to be **reviewed**… |
+| `listEmptyNext` | …private until you **confirm** it. | …private until you **submit** it. |
+| `fragment.unknownHint` / `unknownClarifyPrompt` | …human **confirmation** step / can be **confirmed** | …human **review** step / can be **reviewed** |
+| `newSkillIntro` | …a awaiting **confirmation** skill. | …a not-yet-reviewed skill. |
+| `editEntryBanner` | **confirm** what you're changing | **mark** what you're changing |
+
+(64 worker-facing values across lt/en/ru; LT/RU equivalents in parallel —
+"Patvirtinta"→"Peržiūrėta", "Patvirtinti: {n}"→"Su įrašais: {n}", etc.)
+
+**Kept (allowed exception):** the entire reviewer-only `inbox.*` subtree (the
+manager's review queue) keeps its confirm/verify workflow wording (37/35/24
+strings in lt/en/ru) — it is admin/reviewer surface, not normal-user/self-view.
+
+**Guard extended:** `silent-trust-wording.test.ts` now also loads each
+`messages/{locale}/journal.json` and fails on certification/external-review
+wording in any key **outside `inbox.*`**.
+
+---
+
+## 9. Validation
+
+- `pnpm -F web exec vitest run` — **388 files / 5518 tests pass** (incl. the
+  silent-trust guard, 14 tests).
 - `pnpm -F web typecheck` / `lint` / `build` — all green.
-- Risky-path scan: **NONE** — `git status` = message JSON (copy) + guard tests
-  only. No DB/schema/RLS/RPC/Supabase/env/DNS/billing/auth-core/migration files;
-  no production data mutation; no ranking/matching change; no internal trust
-  logic or stored data removed; no DB field/function renamed.
+- Risky-path scan: **NONE** — diff vs `main` = message JSON (copy),
+  presentational components, and guard tests only. No DB/schema/RLS/RPC/Supabase/
+  env/DNS/billing/auth-core/migration files; no production data mutation; no
+  ranking/matching change; no internal trust logic or stored data removed; no DB
+  field/function renamed.
 
 **Held:** draft PR #512, unmerged, undeployed — awaiting owner review.

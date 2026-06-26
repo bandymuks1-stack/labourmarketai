@@ -269,8 +269,8 @@ describe("confirmation-required copy is present", () => {
     const en = JSON.parse(readWeb("messages/en/journal.json"));
     expect(lt.savedTitle).toBeTruthy();
     expect(en.savedTitle).toBeTruthy();
-    expect(lt.savedBody).toMatch(/patvirtint/i);
-    expect(en.savedBody).toMatch(/confirmed/i);
+    expect(lt.savedBody).toMatch(/išsaugot/i);
+    expect(en.savedBody).toMatch(/saved/i);
   });
 });
 
@@ -800,13 +800,14 @@ describe("pilot readiness clarity", () => {
     expect(txt).toMatch(/t\("pilotBackboneNote"\)/);
   });
 
-  it("LT + EN expose the pilotBackboneNote with an honest confirmation signal", () => {
+  it("LT + EN expose the pilotBackboneNote with an honest review signal", () => {
     const lt = JSON.parse(readWeb("messages/lt/journal.json"));
     const en = JSON.parse(readWeb("messages/en/journal.json"));
     expect(lt.pilotBackboneNote).toBeTruthy();
     expect(en.pilotBackboneNote).toBeTruthy();
-    expect(lt.pilotBackboneNote).toMatch(/patvirtinim/i);
-    expect(en.pilotBackboneNote).toMatch(/confirmation/i);
+    // Silent-trust rule: neutral review wording, not "confirmation".
+    expect(lt.pilotBackboneNote).toMatch(/peržiūr/i);
+    expect(en.pilotBackboneNote).toMatch(/review/i);
     // Honesty: must mention privacy / closed visibility today so the
     // worker isn't misled into thinking the legal backbone is live.
     expect(lt.pilotBackboneNote).toMatch(/privat/i);

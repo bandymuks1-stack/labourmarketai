@@ -142,6 +142,35 @@ describe("Silent-trust: no pending/affirmative certification wording in trust UI
   }
 });
 
+// The journal namespace is served from messages/{locale}/journal.json (a
+// next-intl override), so it is NOT in the base file scanned above. The WORKER
+// journal (composer, entry status/timeline, self-progress) is a self-view
+// surface and must be free of certification wording. The reviewer-only `inbox.*`
+// subtree is the allowed admin/reviewer exception and is excluded.
+describe("Silent-trust: worker-facing journal copy is neutral (inbox.* excluded)", () => {
+  for (const loc of SERVED) {
+    it(`${loc}: journal sub-file (minus inbox.*) has no certification wording`, () => {
+      const j = JSON.parse(read(join("messages", loc, "journal.json")));
+      const offenders: string[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const walk = (o: any, path: string) => {
+        for (const k in o) {
+          const v = o[k];
+          const p = path ? `${path}.${k}` : k;
+          if (p === "inbox" || p.startsWith("inbox.")) continue; // reviewer-only
+          if (typeof v === "string") {
+            const text = stripBraces(v);
+            if (CERT_STEM.test(text) || EXTERNAL_REVIEW.some((rx) => rx.test(text)))
+              offenders.push(`${p} = ${JSON.stringify(v)}`);
+          } else if (v && typeof v === "object") walk(v, p);
+        }
+      };
+      walk(j, "");
+      expect(offenders, `${loc} journal leaks:\n${offenders.join("\n")}`).toEqual([]);
+    });
+  }
+});
+
 describe("Silent-trust: self-view surfaces carry no certification visual token", () => {
   const card = read("components/app/worker-player-card.tsx");
   const map = read("components/app/market-map-live.tsx");
