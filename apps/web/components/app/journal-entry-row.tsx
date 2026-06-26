@@ -22,6 +22,7 @@ export function JournalEntryRow({
   canDelete,
   children,
   skillLinks,
+  statusSlot,
 }: {
   entryId: string;
   canDelete: boolean;
@@ -34,6 +35,10 @@ export function JournalEntryRow({
     /** Per-entry honest source for each linked skill id (stale-skill review). */
     skillSources?: Record<string, EntrySkillSource>;
   };
+  /** Status zone (decision timeline + date) shown at the BOTTOM of the card —
+   *  secondary to the entry text + understood signals, so the worker scans
+   *  "what I wrote → what the system understood → what I can fix" first. */
+  statusSlot?: React.ReactNode;
 }) {
   const t = useTranslations("journal");
   const locale = useLocale();
@@ -57,8 +62,10 @@ export function JournalEntryRow({
   }
 
   return (
-    <li className="card-border p-4">
+    <li className="card-border flex flex-col gap-3 p-4">
+      {/* Sections: entry text + "Sistema suprato" come from `children`. */}
       {children}
+      {/* Linked skill signals + collapsed "Ankstesni ryšiai" (its own block). */}
       {skillLinks && (
         <JournalEntrySkillLinks
           entryId={entryId}
@@ -67,7 +74,17 @@ export function JournalEntryRow({
           skillSources={skillLinks.skillSources}
         />
       )}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+      {/* Status zone — secondary, below the signals. */}
+      {statusSlot && (
+        <div
+          className="flex flex-col gap-1 border-t border-border/40 pt-2"
+          data-testid={`journal-entry-status-${entryId}`}
+        >
+          {statusSlot}
+        </div>
+      )}
+      {/* Actions — quiet, do not dominate the card. */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2">
         <div className="flex flex-wrap items-center gap-3">
           {canDelete ? (
             <>

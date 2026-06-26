@@ -145,6 +145,9 @@ export function JournalEntrySkillLinks({
 
   return (
     <div className="mt-2 flex flex-col gap-1.5 border-t border-border/40 pt-2">
+      <p className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+        {t("signalsHeading")}
+      </p>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[10px] leading-relaxed text-text-muted">{t("helper")}</p>
         {status === "error" ? (

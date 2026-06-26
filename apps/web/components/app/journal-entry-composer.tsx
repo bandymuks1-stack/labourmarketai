@@ -16,6 +16,8 @@ import {
   extractJournalSuggestions,
   type JournalFragmentSuggestion,
 } from "@/lib/structuring/extract-journal-suggestions";
+import { dedupeSignalsByLabel } from "@/lib/structuring/signal-dedupe";
+import { localizeCapabilityLabel } from "@/lib/structuring/capability-labels";
 import type { SkillConfidence } from "@/lib/structuring/skill-recognition";
 import {
   recognizeNewSkillSuggestions,
@@ -63,7 +65,10 @@ export type ComposerSkillSuggestion = JournalSkill & {
  *  — never verified, never manager-confirmed, never journal evidence. */
 export type ComposerNewSkillSuggestion = {
   slug: string;
+  /** Canonical (LT) label — used for dedupe and as the stored profile claim. */
   name: string;
+  /** Locale-aware label for DISPLAY only; falls back to `name`. */
+  displayName?: string;
   matchedText: string;
   confidence: SkillConfidence;
 };
@@ -147,6 +152,13 @@ export function JournalEntryComposer({
 
   const [stage, setStage] = useState<Stage>("compose");
   const [text, setText] = useState(editingEntry?.originalText ?? "");
+  // Edit-flow honesty (P0): when the worker changes the text of an entry they
+  // are editing, the structured details carried over from the OLD text may no
+  // longer match. We never silently keep showing them as current — the
+  // preserved block is muted and a neutral prompt asks the worker to re-run
+  // "Sutvarkyti tekstą" so the system re-evaluates the CURRENT full text.
+  const textDirty =
+    !!editingEntry && text.trim() !== (editingEntry.originalText ?? "").trim();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -327,34 +339,36 @@ export function JournalEntryComposer({
     const capabilityNew: ComposerNewSkillSuggestion[] = s.capabilitySuggestions.map(
       (c) => ({
         slug: `claim:${c.normalizedLabel}`,
+        // Canonical LT label (dedupe + stored claim); localized for display only
+        // so EN/RU never see the LT-only capability label.
         name: c.label,
+        displayName: localizeCapabilityLabel(c.label, locale),
         // Reason from the text fragment (every suggestion explains WHY it shows).
         matchedText: c.reason ?? c.label,
         confidence: "medium" as SkillConfidence,
       }),
     );
-    const mergedNew: ComposerNewSkillSuggestion[] = [];
-    const seenNew = new Set<string>();
-    // Dedupe by label too, so a capability never repeats a skill already shown
-    // as a declared/recognised chip above or another new-skill suggestion.
-    const seenName = new Set<string>(
-      [
-        ...workerSkills.map((w) => w.name),
-        ...matchedSkills.map((m) => m.name),
-      ].map((n) => n.trim().toLowerCase()),
+    // Concept dedupe (round 3): one concept = one visible signal. Seed the
+    // "already shown" labels with the worker's declared skills, the matched
+    // declared-skill chips AND the per-fragment activity labels, so a
+    // capability / new-skill chip never repeats a concept the worker already
+    // sees (e.g. no "Mūrijimas" new-skill chip when "Mūrijimas" is already a
+    // fragment card, and no localized-vs-slug twin). Labels are always
+    // localized (journal-no-raw-slug guard), so label dedupe is concept dedupe.
+    const fragmentLabels = s.fragments
+      .map((f) => f.activityLabel)
+      .filter((l): l is string => !!l);
+    const alreadyShown = [
+      ...workerSkills.map((w) => w.name),
+      ...matchedSkills.map((m) => m.name),
+      ...fragmentLabels,
+    ];
+    const mergedNew = dedupeSignalsByLabel(
+      [...capabilityNew, ...undeclaredFromEngine, ...crossSector].filter(
+        (item) => !declaredSlugSet.has(item.slug),
+      ),
+      alreadyShown,
     );
-    for (const item of [...capabilityNew, ...undeclaredFromEngine, ...crossSector]) {
-      const nameKey = item.name.trim().toLowerCase();
-      if (
-        declaredSlugSet.has(item.slug) ||
-        seenNew.has(item.slug) ||
-        seenName.has(nameKey)
-      )
-        continue;
-      seenNew.add(item.slug);
-      seenName.add(nameKey);
-      mergedNew.push(item);
-    }
     // Allow headroom beyond NEW_SKILL_LIMIT so explicitly-named capabilities
     // are not crowded out by engine guesses; still bounded for the review grid.
     const cappedNew = mergedNew.slice(0, Math.max(NEW_SKILL_LIMIT, 12));
@@ -683,7 +697,30 @@ export function JournalEntryComposer({
             <p className="text-[11px] font-medium text-text-secondary">
               {t("editPreservedTitle")}
             </p>
-            <div className="flex flex-wrap gap-1.5">
+            {textDirty && (
+              <div className="flex flex-col gap-1.5">
+                <p
+                  className="text-[11px] leading-relaxed text-state-warning"
+                  data-testid="journal-edit-text-changed"
+                >
+                  {t("editTextChangedHint")}
+                </p>
+                {/* One clear action to re-run cleanup on the CURRENT text so
+                    current signals come from the current text, not the old one. */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSavedAt(null);
+                    analyse(text);
+                  }}
+                  data-testid="journal-edit-rerun"
+                  className="w-fit rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10"
+                >
+                  {t("organizeText")}
+                </button>
+              </div>
+            )}
+            <div className={cn("flex flex-wrap gap-1.5", textDirty && "opacity-50")}>
               {workDate && (
                 <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-date">
                   {workDate}
@@ -918,11 +955,17 @@ export function JournalEntryComposer({
                       locale === "en" || locale === "ru" ? locale : "lt",
                     )
                   : t("fragment.noTime");
+                // Label-only activity/capability labels are canonical LT — localize
+                // for display so EN/RU never see the LT label. (A matched profession
+                // slug already localizes via tProf; its LT fallback is localized too.)
+                const localizedFragmentLabel = f.activityLabel
+                  ? localizeCapabilityLabel(f.activityLabel, locale)
+                  : null;
                 const activityName = f.isUnknown
                   ? t("fragment.unknownTitle")
                   : f.activitySlug
-                    ? tProfSafe(tProf, f.activitySlug, f.activityLabel)
-                    : (f.activityLabel ?? t("fragment.noActivity"));
+                    ? tProfSafe(tProf, f.activitySlug, localizedFragmentLabel)
+                    : (localizedFragmentLabel ?? t("fragment.noActivity"));
                 return (
                   <DetectedSuggestionCard
                     key={`${idx}-${f.rawPhrase}`}
@@ -1190,7 +1233,7 @@ export function JournalEntryComposer({
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-text-primary">
-                        {row.name}
+                        {row.displayName ?? row.name}
                       </span>
                       {status === "added" ? (
                         <span

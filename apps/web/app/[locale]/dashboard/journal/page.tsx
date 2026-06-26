@@ -610,61 +610,90 @@ export default async function JournalPage({
                 recognizedSlugs,
                 recognizableSlugs,
               });
+              // "Sistema suprato" — the structured signals the current text
+              // produced (direction / site / quantity). Shown only when there
+              // is something to show, so an empty entry is not padded.
+              const hasUnderstood =
+                !!dir?.value_text ||
+                !!site?.value_text ||
+                area?.value_numeric != null;
               return (
-                <JournalEntryRow
-                  key={e.id}
-                  entryId={e.id}
-                  canDelete={canDelete}
-                  skillLinks={
-                    skillLinksReady
-                      ? {
-                          availableSkills: availableSkillsForLinks,
-                          linkedSkillIds: linkedForEntry,
-                          skillSources,
-                        }
-                      : undefined
-                  }
-                >
-                  {/* Work-record text must wrap cleanly — long unbroken
-                      strings (URLs, long tokens) break to the next line instead
-                      of overflowing horizontally (owner overflow fix). */}
-                  <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
-                    {e.original_text}
-                  </p>
-                  <EvidenceDecisionTimeline
-                    createdAt={e.created_at}
-                    events={timeline}
-                  />
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 break-words text-[11px] text-text-muted">
-                    {dir?.value_text && <span className="min-w-0 break-words">{tProf(dir.value_text)}</span>}
-                    {site?.value_text && <span className="min-w-0 break-words">{site.value_text}</span>}
-                    {area?.value_numeric != null && (
-                      <span>
-                        {/* Time-class units (hours / minutes / days) get the
-                            human-readable formatter so a saved "195 min" row
-                            reads "3 val. 15 min." in the entries list, not
-                            an opaque minute count. Other quantity units
-                            (square_meters, pieces, kg, …) fall through to
-                            the legacy locale-aware unit label. */}
-                        {area.unit_slug === "hours" ||
-                        area.unit_slug === "minutes" ||
-                        area.unit_slug === "days"
-                          ? formatDuration(
-                              area.value_numeric,
-                              area.unit_slug,
-                              locale === "en" ? "en" : "lt",
-                            )
-                          : `${area.value_numeric} ${
-                              area.unit_slug ? tUnit(area.unit_slug) : ""
-                            }`}
-                      </span>
+                  <JournalEntryRow
+                    key={e.id}
+                    entryId={e.id}
+                    canDelete={canDelete}
+                    skillLinks={
+                      skillLinksReady
+                        ? {
+                            availableSkills: availableSkillsForLinks,
+                            linkedSkillIds: linkedForEntry,
+                            skillSources,
+                          }
+                        : undefined
+                    }
+                    statusSlot={
+                      <>
+                        <EvidenceDecisionTimeline
+                          createdAt={e.created_at}
+                          events={timeline}
+                        />
+                        <span className="text-[10px] text-text-muted">
+                          {new Date(e.created_at).toLocaleDateString(locale)}
+                        </span>
+                      </>
+                    }
+                  >
+                    {/* 1 · Entry text — first, so the worker immediately sees
+                        what they wrote. Long unbroken strings wrap cleanly. */}
+                    <div className="flex flex-col gap-1">
+                      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {t("entry.textLabel")}
+                      </p>
+                      <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
+                        {e.original_text}
+                      </p>
+                    </div>
+                    {/* 2 · Sistema suprato — current signals from the current
+                        text. Plain labelled values, never a badge wall. */}
+                    {hasUnderstood && (
+                      <div className="flex flex-col gap-1 border-t border-border/40 pt-2">
+                        <p
+                          className="font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                          data-testid={`journal-entry-understood-${e.id}`}
+                        >
+                          {t("entry.understoodLabel")}
+                        </p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 break-words text-[11px] text-text-muted">
+                          {dir?.value_text && (
+                            <span className="min-w-0 break-words">{tProf(dir.value_text)}</span>
+                          )}
+                          {site?.value_text && (
+                            <span className="min-w-0 break-words">{site.value_text}</span>
+                          )}
+                          {area?.value_numeric != null && (
+                            <span>
+                              {/* Time-class units (hours / minutes / days) get the
+                                  human-readable formatter so a saved "195 min" row
+                                  reads "3 val. 15 min." in the entries list. Other
+                                  quantity units fall through to the unit label. */}
+                              {area.unit_slug === "hours" ||
+                              area.unit_slug === "minutes" ||
+                              area.unit_slug === "days"
+                                ? formatDuration(
+                                    area.value_numeric,
+                                    area.unit_slug,
+                                    locale === "en" ? "en" : "lt",
+                                  )
+                                : `${area.value_numeric} ${
+                                    area.unit_slug ? tUnit(area.unit_slug) : ""
+                                  }`}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     )}
-                    <span>
-                      {new Date(e.created_at).toLocaleDateString(locale)}
-                    </span>
-                  </div>
-                </JournalEntryRow>
-              );
+                  </JournalEntryRow>
+                );
             })}
           </ul>
         )}
