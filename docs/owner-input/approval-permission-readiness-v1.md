@@ -1,92 +1,107 @@
-# Approval Permission Readiness — v1 (Product Reality Train · Wagon 2)
+# Approval Authority Model — Readiness v1 (Product Reality Train · Wagon 2)
 
 **Type:** read-only readiness/audit. **No migration, no DB/RLS/schema/Supabase/env/auth-core change, no production mutation, no merge, no deploy.**
 **Baseline:** production `main` = `d57233fbece1ea7140315f830baddf7d683c5b2a` (post-#509). Project `gorgitwvdzxbnaxhrsrw`.
 
-## Problem
-Production previously showed approve/reject actions next to **"Neturite teisės peržiūrėti šio įrašo."**; #509 *hid* the contradiction (buttons disappear on a permission denial) but did not resolve the real permission mismatch. Owner rule: a company leader/director responsible for a worker/company context must be able to approve relevant employee journal entries; if approval is not allowed, the UI must say why and show no approval actions.
-
-## TL;DR
-The list of reviewable entries has a standalone **`is_admin()` shortcut**; the approval action does **not** — it additionally requires the caller to hold an active *reviewer engagement* (`manager`/`owner`/`external_manager`) in the entry's org, with **no `is_admin()` bypass**. So the **single platform admin is shown entries the action then refuses** (`no_reviewer_engagement`). **Real company owners are never blocked.** Production data reproduces this exactly. Fix = make the list and the action use **one** reviewer rule (reversible `CREATE OR REPLACE FUNCTION` ×3, no schema/RLS change) — a separate, owner-gated RED PR. One open decision: should the platform admin be a universal cross-company approver (A: no / B: yes).
+> **Owner correction (this revision):** do not reduce this to "Option A vs narrow Option B". The product needs a **real reviewer-authority model**. The platform owner/operator must approve without switching accounts; multi-company owners must approve from one place with the context shown; clients / project / property owners must be able to confirm *observed* work without it pretending to be employer verification; agencies/coordinators must confirm their brigades. **No fake approval identity:** every confirmation must record **who** approved, **under what authority**, **for which company/project/client/property context**, and **what exactly** was confirmed.
 
 ---
 
-## 1. Current code flow
+## 0. Why the old "Option A" is rejected
+The first pass framed this as remove-`is_admin` (A) vs fake-admin-bypass (B). Both are wrong: **A blocks the legitimate platform-operator workflow**, and **B is dishonest + incomplete** (no multi-company, no client/project/property, no agency). The real fix is an **authority model** where the platform operator is a *first-class, honestly-recorded* authority — not removed, and not disguised as a company manager.
+
+## 1. The five authority types
+
+| | Authority | Who | Anchor (context) | Confirms | Proof tier |
+|---|---|---|---|---|---|
+| **A** | Org engagement reviewer | active `owner`/`manager`/`external_manager` in the **same org** | `engagement_contexts` (org) | employer review of an employee entry | **employer_verified** (may flip `worker_skills.verified`) |
+| **B** | Multi-company owner/operator | one user holding A in **several** orgs | the **specific** engagement used | same as A, across companies, from one inbox | **employer_verified**, per selected context |
+| **C** | Platform owner/operator | `is_admin()` platform authority | **platform** (no org engagement) | operator approval across managed contexts | recorded as **platform_operator/platform_owner** — never disguised as company manager |
+| **D** | Client / project / property | the person who **observed** the work (project client, property owner, project owner) | `project`/`booking`/`object` or a subject-granted link | observed work, quality, hours, completion, service performed, skill observed | **observed** — NOT employer verification; never flips `worker_skills.verified` |
+| **E** | Agency / coordinator | real agency/coordinator over the worker/brigade | agency `external_manager` engagement (or explicit `agency_coordinator`) | worker/brigade entries under a real agency relation | **employer_verified** (staffing triangle) |
+
+**Core rule (binding):** the approval UI + audit row must always show *who · under what authority · for which context · what was confirmed*. An **observed** confirmation must read as client/observed, never as employer verification.
+
+## 2. Current code flow + the mismatch (still true)
 - **List (inbox):** `app/[locale]/dashboard/inbox/page.tsx` → RPC `reviewable_journal_entry_ids()`.
-- **Actions (server):** `lib/journal/review-actions.ts` → `reviewJournalEntry` → RPC `review_journal_entry(entry_id, decision, note)`; `confirmEntrySkills` → RPC `confirm_entry_and_verify_skills(entry_id, skill_ids, note)`.
-- **Batch:** `review_journal_entries_batch(...)` (migration `20260611120000_batch_journal_review.sql`) **delegates per entry to `review_journal_entry`** ("the single source of review truth") → inherits the same gate.
-- **UI:** `components/app/journal-inbox-entry.tsx` maps RPC codes; #509 added `canAct = !done && !permissionBlocked` (codes `not_authorized` / `no_reviewer_engagement` / `review_not_enabled`) so action surfaces hide on a denial.
-- **Denial codes originate in the RPCs** (`supabase/migrations/20260530140000_membership_engagement_reroute.sql`):
-  - `not_authorized` — `is_admin() OR manages_organization(v_org)` fails (line 191 / 236).
-  - `review_not_enabled` — the entry's engagement `journal_review_enabled` is false (line 192 / 237).
-  - `no_reviewer_engagement` — caller lacks an active `('manager','owner','external_manager')` engagement in the org (line 198 / 250).
+- **Actions:** `lib/journal/review-actions.ts` → `review_journal_entry` / `confirm_entry_and_verify_skills`; batch `review_journal_entries_batch` **delegates** to `review_journal_entry`.
+- **Codes** (`20260530140000_membership_engagement_reroute.sql`): `not_authorized` (auth fails), `review_not_enabled` (`journal_review_enabled` false), `no_reviewer_engagement` (no active `manager/owner/external_manager` engagement in the org — **no `is_admin` bypass**).
+- **Mismatch:** the **list** has an `is_admin()` shortcut the **action** lacks → the platform admin is *shown* entries the action refuses. Under the authority model, this is resolved not by deleting `is_admin` but by making **C a real authority** (the operator approves as `platform_operator`, recorded honestly), and aligning the list so *listed ⇒ confirmable-under-some-authority*.
 
-## 2. DB/RPC contract (repo, side by side)
-Latest definitions: list + actions in `20260530140000_membership_engagement_reroute.sql`; `manages_organization` in `0013_work_journal_m1.sql`.
+## 3. What the current schema can represent (verified)
+`journal_entry_confirmations` (migration `0013`, append-only):
+```
+confirmer_id                    uuid NOT NULL → profiles(id)
+confirmer_engagement_context_id uuid NOT NULL → engagement_contexts(id)   ← HARD GATE
+confirmer_role                  text NOT NULL  CHECK in ('manager','owner','external_manager')
+confirmation_scope              jsonb NOT NULL                            ← flexible (good)
+created_at                      timestamptz
+```
+- The CHECK (`20260602130000`, applied as ledger `20260611091834`) hard-locks `confirmer_role` to the 3 engagement roles.
+- `confirmer_engagement_context_id` is **NOT NULL** → *every* confirmation must be anchored to an org engagement. **A confirmer with no engagement (platform operator, client, property owner) literally has no row they can insert.**
+- Anchors that already exist (applied): `engagement_contexts` (A/B/E), `organizations` ownership, `projects` + **`project_clients` / `project_members` (owner/manager/member/viewer) / `project_worker_assignments`** (`20260531215058`), `booking_requests` (`20260613184106`), agency engagement provisioning (`provision_agency_worker_engagement_context` → agency coordinators as `external_manager`).
+- Skill proof: `worker_skills.verified` is flipped to `manager_confirmed` **only** by the engagement-gated RPC. `journal_entry_skills` is evidence-only and can never set verified.
+- A prior design doc already scopes the broad-confirmer work, privacy + minor-safety: `docs/design/universal-confirmation-roles-v1.md`.
 
-| | Predicate |
-|---|---|
-| `manages_organization(org)` | `EXISTS engagement_contexts WHERE profile_id=auth.uid() AND organization_id=org AND status='active' AND relationship_slug IN ('manager','owner','external_manager')` |
-| **List** `reviewable_journal_entry_ids()` | org-scoped **AND** `journal_review_enabled` **AND `(is_admin() OR manages_organization(org))`** **AND** not already confirmed |
-| **Action** `review_journal_entry` / `confirm_entry_and_verify_skills` | authorize `is_admin() OR manages_organization(v_org)`; require `journal_review_enabled`; **then additionally** require `v_eng` = active `('manager','owner','external_manager')` engagement of the caller in the org — **NO `is_admin()` bypass** |
+**Read-only production verification (done, `gorgitwvdzxbnaxhrsrw`):**
+- All engagement migrations applied (not a missing-migration issue).
+- Active engagements: **15 employee · 7 owner · 0 manager · 0 external_manager** → the only reviewers today are the 7 org owners.
+- Entries: total 19; org-scoped 12; review-enabled 11; **reviewable now = 1**; reviewable-but-no-reviewer-engagement = 0; orgless = 7; orgs with review open = 3.
+- The one reviewable entry `cc5605b5-…` is in org `20b2c802-…` (1 owner-reviewer), but **admins_with_reviewer_eng_in_org = 0** (admin_count = 1) → the lone admin is shown an entry the action refuses. Confirmed cause.
 
-**Why they disagree:** the **list** has a standalone `is_admin()` branch; the **action's `v_eng`** requirement does not. An admin is therefore *listed* entries the action refuses with `no_reviewer_engagement`. For a **non-admin**, `manages_organization` and `v_eng` are the *same* predicate, so they cannot disagree → **the contradiction is admin-path only**. (The action is also internally inconsistent for admins: it *authorizes* via `is_admin()` at line 191, then *blocks* at the `v_eng` check.)
+## 4. Authority types: supported today vs needs additive work
+| Authority | Supported **today**? | Gap |
+|---|---|---|
+| **A** Org engagement | ✅ Yes | none |
+| **B** Multi-company | ✅ Schema yes (multiple engagements; the confirmation already records *which* engagement/org). | **UI only** — list already returns entries across every org the caller owns/manages; the inbox must **label each entry's company/context** and show the chosen context on confirm. **Code-only.** |
+| **C** Platform operator | ❌ No | NOT NULL engagement + role CHECK block it. Needs additive schema (below). |
+| **D** Client/project/property/observed | ❌ No | Needs authority + non-engagement anchor (project/booking/object or subject-granted link) + **observed proof tier** (must not flip `worker_skills.verified`) + scope vocabulary. Biggest privacy/anti-abuse surface. |
+| **E** Agency/coordinator | 🟡 Partial | Covered when the coordinator holds an `external_manager` engagement (agency provisioning exists). Explicit `agency_coordinator` authority label = additive. |
 
-## 3. Read-only production verification (done)
-**Migrations applied** (so the cause is *not* a missing migration): `0013 work_journal_m1`, `manager_review_evidence_result`, `org_owner_engagement_backfill`, `membership_engagement_reroute`, `batch_journal_review` are all in `list_migrations`.
+## 5. Required audit-trail fields (the honesty contract)
+Extend `journal_entry_confirmations` (additive) so every row carries **who · authority · context · what · when**:
+- **who:** `confirmer_id` — *exists*.
+- **authority:** `confirmer_authority` text, CHECK widened to `{org_owner, org_manager, external_manager, platform_operator, platform_owner, client, project_owner, property_owner, agency_coordinator, observer}` (replaces the 3-value lock). Keep recording the engagement `confirmer_role` where applicable.
+- **context (for which company/project/client/property):** make `confirmer_engagement_context_id` **nullable**, and add `confirmer_context_kind` (`organization|project|booking|object|platform|observation`) + `confirmer_context_id` (uuid, nullable). A new CHECK guarantees **never a confirmer with no basis** (must have an engagement, OR a context anchor, OR platform authority).
+- **what exactly:** `confirmation_scope` (jsonb, *exists*) standardized to include `scope ∈ {observed_work, quality_confirmation, hours_confirmation, project_completion, service_performed, skill_observed}` plus the existing action/decision/note.
+- **proof tier:** `confirmation_tier` (`employer_verified | observed`). **Only `employer_verified` (engagement authority) may flip `worker_skills.verified`.** `observed` is evidence only — this is the structural guarantee that client/property confirmation never masquerades as employer verification.
+- **when:** `created_at` — *exists*.
 
-Read-only SELECT aggregates (no mutation; ids/counts only):
-- **Active engagement distribution:** `employee` = **15**, `owner` = **7**, **`manager` = 0**, **`external_manager` = 0** → the only reviewers today are the 7 org **owners**.
-- **Entries:** total 19; org-scoped 12; review-enabled 11; **reviewable now = 1**; reviewable-but-no-reviewer-engagement-in-org = **0**; orgless = 7; orgs with review open = 3.
-- **The one reviewable entry** `cc5605b5-98ba-4bd9-9781-23bba7c623ab` is in org `20b2c802-c624-43c0-b368-8fa6c1fbeae3`, which has **1** owner-reviewer, but **admins_with_reviewer_eng_in_org = 0** (admin_count = **1**).
+## 6. UI states + labels
+- **A/B (employer):** "Patvirtinta — [Company] vadovas/savininkas" / "Confirmed — [Company] owner/manager". Multi-company: a context selector + visible "Approving as **[Company]**".
+- **C (platform):** "Patvirtinta — platformos operatorius" / "Confirmed — platform operator". Distinct styling; never the company-manager label.
+- **D (observed):** "Patvirtino užsakovas/objekto savininkas — *stebėtas darbas*" / "Confirmed by client/property owner — *observed work*", with the scope chip (observed/quality/hours/completion). Explicit *not employer verification* footnote.
+- **E (agency):** "Patvirtino agentūros koordinatorius" / "Confirmed by agency coordinator".
+- **Blocked:** keep #509 — no approve/reject/request-change buttons when the caller has no authority; one clear honest reason. Enforced by `lib/guards/production-reality-trust-p0.test.ts` + the existing `confirmation-honesty.test.ts`.
 
-**Conclusion:** the lone platform admin is *shown* the entry via the list's `is_admin()` branch but holds no engagement in that org → the action returns `no_reviewer_engagement` → "Neturite teisės". **Real company owners are not blocked** (they hold an `owner` engagement, so list == action). The reported symptom is the **admin-path mismatch**, exactly as the code predicts.
+## 7. MVP — the smallest honest model (layered)
+- **Layer 0 — code-only, now:** multi-company **context labels** in the inbox (the list already spans all owned/managed orgs; add the per-entry company label + "approving as [Company]" on confirm) + keep #509 honesty. **No schema. Safe now.** Delivers B's outcome.
+- **Layer 1 — RED migration #1 (authority generalization, A/B/C):** add `confirmer_authority` (+widened CHECK), make `confirmer_engagement_context_id` nullable with a basis-CHECK, add `confirmation_tier`; generalize `review_journal_entry`→`can_confirm()` to record honest authority + context, and let `is_admin()` confirm **as `platform_operator`** (tier `employer_verified` only for the operator's managed contexts; else `observed`). Aligns list⇒action. Reversible. Covers A, B, C honestly.
+- **Layer 2 — RED migration #2 (observed-work D + explicit agency E):** add `client/project_owner/property_owner/observer/agency_coordinator` authorities + the non-engagement anchor (project/booking/object or a subject-granted `confirmation_links` row) + the `scope` vocabulary, enforcing the **observed tier never flips `worker_skills.verified`**. Biggest privacy/anti-abuse design (lean on `universal-confirmation-roles-v1.md`).
 
-> Appendix has the exact re-runnable read-only queries.
+## 8. What can be done now safely / what stays RED
+- **Now (safe, ≤GREEN):** this audit; **Layer 0** code-only multi-company context labels; keep all confirmation-honesty guards green. No schema, no RPC, no prod mutation.
+- **RED, owner-gated (Supabase MCP `apply_migration`, never `db push`):** Layer 1 (authority columns + CHECK replacement + nullable engagement + `can_confirm` RPC + platform-operator authority) and Layer 2 (observed/client/agency + anchors + scope + tier enforcement + RLS). Every confirmer-set widening **replaces** the `confirmer_role` CHECK in a dedicated migration.
 
-## 4. Proposed fix (NOT applied here — separate owner-gated RED PR)
-Make the **list** and the **action** use **one** reviewer rule.
+## 9. Rollback plan
+Each layer reversible and additive:
+- **Layer 1:** restore the 3-value CHECK and `NOT NULL` on `confirmer_engagement_context_id` **after asserting** no row uses a new authority/null engagement; drop `confirmer_authority`/`confirmer_context_*`/`confirmation_tier`; `CREATE OR REPLACE` `can_confirm`/`review_journal_entry` back to current bodies (captured verbatim in the PR). `worker_skills` proof rows untouched.
+- **Layer 2:** drop the new authorities from the CHECK and the anchor/link table only after asserting zero rows use them; observed rows are evidence, not proof, so removing them is a data decision documented in that PR.
 
-**Recommended — Option A (reviewers = engagement holders only):**
-- `reviewable_journal_entry_ids()`: replace `(is_admin() OR manages_organization(ec.organization_id))` → `manages_organization(ec.organization_id)`.
-- `review_journal_entry` + `confirm_entry_and_verify_skills`: replace `if not (is_admin() OR manages_organization(v_org))` → `if not manages_organization(v_org)` so authorization == the `v_eng` requirement (removes the authorize-then-block inconsistency). `v_eng` check unchanged.
-- **Net:** *listed ⇒ actionable*; company owners/managers approve their own context; the platform admin is no longer a universal cross-company approver. Pure `CREATE OR REPLACE FUNCTION` ×3 — **no schema/RLS/column/grant change**; batch inherits via delegation.
-- **Trade-off:** the platform admin loses the global review queue / cross-company approval.
+## 10. GREEN / YELLOW / RED + next PR scope
+- UI contradiction: **GREEN** (#509).
+- A (org owner) approval: **GREEN today**.
+- B (multi-company) display: **GREEN, code-only** (Layer 0) — *next implementation PR*.
+- C (platform operator) honest approval: **RED** (Layer 1).
+- D (client/property/observed): **RED** (Layer 2, largest).
+- E (agency): **YELLOW** today via `external_manager`; explicit label **RED** (Layer 2).
+- Migration/RPC/CHECK/RLS risk: **RED**, owner-gated apply via MCP, reversible.
 
-**Alternative — Option B (admin is a real universal reviewer):** give the action's `v_eng` step an `is_admin()` bypass (record the confirmation with `confirmer_role='admin'`). Requires verifying `journal_entry_confirmations.confirmer_engagement_context_id` nullability + the `confirmation_role_check` constraint (migration `confirmation_role_check`) — touches the verified-proof spine → more risk. Keeps the list as-is.
-
-**Scope/class:** Option A is `CREATE OR REPLACE FUNCTION` only, no RLS/schema change. **RED-class** (proof-spine RPC) → draft PR + `needs-human-gate`; prod apply via Supabase MCP `apply_migration` after approval, never `db push`.
-
-**Before / after:**
-- *Before:* admin is shown the entry → click → `no_reviewer_engagement` ("Neturite teisės"); #509 hides the buttons after the denial. Owner: works.
-- *After (A):* admin no longer sees other companies' entries (not listed) → no buttons to begin with; owner/manager sees + approves their own. Contradiction impossible (list == action).
-
-**Related finding (separate wagon, NOT this PR):** there are **0** `manager`/`external_manager` engagements, and `grant_org_manager` appears to have no end-user UI (never used). So a **non-owner "director"** cannot become a reviewer even after the RPC alignment — enabling them needs a manager-grant path. **YELLOW follow-up.**
-
-## 5. UI rule (keep #509)
-No approve/reject/request-change when permission is false; one clear reason; no fake success. Enforced by `lib/guards/production-reality-trust-p0.test.ts` — must stay green through any change.
-
-## 6. Rollback plan
-`CREATE OR REPLACE` the three functions back to their current bodies (captured verbatim in the implementation PR). No data migrated → instant, lossless. Verified `worker_skills` proof rows are untouched.
-
-## 7. Tests / smoke (for the implementation PR)
-- **Contract/guard test:** assert the list RPC and the action RPC reference the **same** reviewer-engagement predicate (static SQL scan, like existing migration guards); assert no standalone `is_admin()` listing branch remains (Option A).
-- **Behavioral:** owner-with-engagement is listed AND approves end-to-end; admin-without-engagement is NOT listed and the action denies identically; `review_not_enabled` path unchanged.
-- **Smoke (preview/branch DB only, never prod):** seed org + owner engagement + review-enabled employee entry → owner approves; admin-without-engagement sees nothing to approve. Keep the #509 UI guard green.
-
-## 8. GREEN / YELLOW / RED
-- UI contradiction: **GREEN** (fixed by #509).
-- Real company-leader (org owner) approval: **GREEN today** (works via owner engagement; never the blocked party).
-- Admin-path listed-but-not-actionable: **YELLOW** — real, fixable with a reversible RPC alignment; needs owner choice A vs B.
-- Non-owner director as reviewer: **YELLOW/RED** — needs a manager-grant path (separate wagon).
-- Migration/RPC change risk: **RED** (proof-spine RPC; owner-gated apply; reversible).
-
-## 9. Final recommendation
-**Needs owner authorization first**, then **safe to implement as the next PR.** Recommended **Option A**: one reviewer rule (active `manager`/`owner`/`external_manager` engagement in the org) applied identically to the list and the action — remove the list's `is_admin()` shortcut and the action's `is_admin()` authorize-then-block. Reversible `CREATE OR REPLACE FUNCTION` ×3, no schema/RLS/grant change, RED-gated apply via MCP. Read-only verification is complete. **The one open decision is A vs B** — whether the platform admin should be a universal cross-company approver. The non-owner-director grant path is a separate follow-up wagon.
+**Recommended next implementation PR:** **Layer 0 — code-only multi-company context labels** in the inbox + confirm UI (no schema, safe now), landing B's "approve from one place, show which company" outcome. **Then** Layer 1 as the first RED migration PR (authority generalization for A/B/C, including the honest `platform_operator`), followed by Layer 2 (observed-work D + agency E). No migration is written in this readiness step.
 
 ---
 
-## Appendix — exact read-only checks (re-runnable, SELECT-only)
+## Appendix — exact read-only checks (SELECT-only, re-runnable)
 ```sql
 -- (1) active engagement distribution
 select relationship_slug, status, count(*)
@@ -126,4 +141,9 @@ select (select count(*) from admins) admin_count, r.entry_id, r.org,
      where m.organization_id=r.org and m.status='active'
        and m.relationship_slug in ('manager','owner','external_manager')) admins_with_reviewer_eng_in_org
 from reviewable r;
+
+-- (4) confirmation authority shape today (read-only)
+select column_name, is_nullable, data_type
+from information_schema.columns
+where table_schema='public' and table_name='journal_entry_confirmations' order by ordinal_position;
 ```
