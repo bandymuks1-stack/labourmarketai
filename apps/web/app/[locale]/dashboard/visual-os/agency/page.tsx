@@ -13,6 +13,7 @@ import {
 import { VISUAL_TOKENS } from "@/lib/visual/tokens";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireSuperadmin } from "@/lib/auth/superadmin";
 
 /**
  * Slice 4 — Agency / company operating surface.
@@ -56,6 +57,9 @@ export default async function VisualOsAgencyPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Owner-review visual-plan surface (sample data) — admin/owner-only
+  // (action-first IA v1). Non-admins are redirected to the dashboard.
+  await requireSuperadmin(locale);
 
   const supabase = await createClient();
   const {

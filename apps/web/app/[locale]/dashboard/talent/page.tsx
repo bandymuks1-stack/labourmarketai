@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { JobDemandCard, type JobDemandCardEntity } from "@/components/visual/job-demand-card";
 import { WorkerCard, type WorkerCardEntity } from "@/components/visual/worker-card";
 import { createClient } from "@/lib/supabase/server";
+import { requireSuperadmin } from "@/lib/auth/superadmin";
 
 /**
  * Talent surface preview — Sprint P0 of the Visual Information
@@ -100,6 +101,10 @@ export default async function TalentPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Owner-review sample/preview surface — admin/owner-only (action-first IA
+  // v1). requireSuperadmin redirects non-admins to the dashboard, so normal
+  // users never see sample data presented as product.
+  await requireSuperadmin(locale);
 
   // Server-side auth gate — mirrors the discover page pattern.
   const supabase = await createClient();

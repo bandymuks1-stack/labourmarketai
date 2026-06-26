@@ -58,14 +58,20 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
     tabLabelKey: "auth.dashboard.tabs.marketMap",
     iconKey: "map",
   },
+  // Darbo žurnalas — recording work is a primary action and feeds the
+  // profile / CV / player-card (action-first IA v1). The tab routes directly
+  // to the real journal at /dashboard/journal.
+  journal_text_first: {
+    tabLabelKey: "auth.dashboard.tabs.journal",
+    iconKey: "fileText",
+  },
   communication: {
     tabLabelKey: "auth.dashboard.tabs.communication",
     iconKey: "inbox",
   },
-  account_roles: {
-    tabLabelKey: "auth.dashboard.tabs.account",
-    iconKey: "user",
-  },
+  // Account / settings is intentionally NOT a primary tab — it lives in the
+  // avatar / account menu (action-first IA v1: settings is a utility, not a
+  // primary action).
 };
 
 export type NavItem = {

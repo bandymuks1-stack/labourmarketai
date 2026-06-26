@@ -599,19 +599,21 @@ describe("catalogue-driven primary nav", () => {
     // both this assertion and the TAB_META map have to change — keeps
     // visual changes obvious in code review. The market map is a required
     // first-class primary-nav surface (unified map handoff, P0).
-    // Map-first IA: the compact global nav is overview / market_map (Žemėlapis)
-    // / communication / account_roles. Profile, Mano CV and the marketplace hub
-    // are NOT primary-nav tabs (active sub-surfaces / redirect).
+    // Action-first IA v1: the compact global nav is overview (Mano erdvė) /
+    // market_map (Žemėlapis) / journal_text_first (Darbo žurnalas) /
+    // communication (Žinutės). Profile / CV, the marketplace hub and
+    // account/settings are NOT primary-nav tabs (sub-surfaces / avatar menu /
+    // redirect).
     const navTxt = readWeb("lib/config/navigation.ts");
-    const tabFeatures = [...navTxt.matchAll(/\b(overview|market_map|communication|account_roles):\s*\{\s*tabLabelKey/g)].map(
+    const tabFeatures = [...navTxt.matchAll(/\b(overview|market_map|journal_text_first|communication):\s*\{\s*tabLabelKey/g)].map(
       (m) => m[1],
     );
     expect(new Set(tabFeatures)).toEqual(
       new Set([
         "overview",
         "market_map",
+        "journal_text_first",
         "communication",
-        "account_roles",
       ]),
     );
   });

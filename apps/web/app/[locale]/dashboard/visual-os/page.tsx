@@ -8,6 +8,7 @@ import { VISUAL_TOKENS } from "@/lib/visual/tokens";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
+import { requireSuperadmin } from "@/lib/auth/superadmin";
 
 /**
  * Visual Dashboard OS — real route, not just a primitive demo.
@@ -151,6 +152,9 @@ export default async function VisualOsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Owner-review visual-plan surface (sample data) — admin/owner-only
+  // (action-first IA v1). Non-admins are redirected to the dashboard.
+  await requireSuperadmin(locale);
 
   const supabase = await createClient();
   const {

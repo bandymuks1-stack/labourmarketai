@@ -7,8 +7,10 @@ import { join } from "node:path";
  *
  * Normal users see simple CV-building language, not technical evidence /
  * provenance wording. Pins:
- *   - the worker's professional-record nav + page read as "Mano CV", never
- *     "Mano darbo įrodymai" / "Darbo įrodymai" (or EN/RU equivalents);
+ *   - the worker's professional-record page reads as "Mano CV", and the
+ *     primary tab is the human work-journal action ("Darbo žurnalas",
+ *     action-first IA v1) — never "Mano darbo įrodymai" / "Darbo įrodymai"
+ *     (or EN/RU evidence equivalents);
  *   - the composer skill-suggestion heading is friendly ("Siūlomi įgūdžiai"),
  *     with one honest friendly note, not a "self-declared" provenance triad;
  *   - the stale-skill unlink action is the simple "Atsieti";
@@ -27,10 +29,13 @@ describe("Guard: worker professional record reads as 'CV', not 'evidence'", () =
   const CV = /\bcv\b/i;
   const EVIDENCE = /įrodym|evidence|доказатель|свидетельств/i;
 
-  it("nav tab (tabs.journal) is CV, not evidence", () => {
+  it("nav tab (tabs.journal) is the human work-journal action, not evidence wording", () => {
+    // Action-first IA v1: the primary tab is "Darbo žurnalas" (the work-record
+    // ACTION), while the page H1 stays "Mano CV" (the result). Either way it must
+    // never read as technical "evidence/įrodymai".
     for (const loc of LOCS) {
       const v = base(loc).auth.dashboard.tabs.journal as string;
-      expect(v, `${loc}.tabs.journal`).toMatch(CV);
+      expect(v, `${loc}.tabs.journal non-empty`).toBeTruthy();
       expect(v, `${loc}.tabs.journal must not say evidence`).not.toMatch(EVIDENCE);
     }
   });
