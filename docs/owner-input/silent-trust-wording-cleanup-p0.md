@@ -122,13 +122,78 @@ None of these assert that the platform certifies the person/skill/record.
 
 ---
 
-## 5. Validation
+## 5. Owner correction — pending-confirmation wording removed (second pass)
 
-- `pnpm -F web exec vitest run` — **387 files / 5504 tests pass** (incl. the new
-  guard, 8 tests).
-- Typecheck / lint / build: see PR checks.
-- Risky-path scan: no DB/schema/RLS/RPC/Supabase/env/DNS/billing/auth-core/
-  migration files touched (`git status` = copy, presentational components, and
-  guards only). No production data mutation. No ranking/matching change.
+**Owner rule tightened:** even *pending* confirmation wording ("Laukia
+patvirtinimo" / "Awaiting confirmation" / "Ожидает подтверждения") implies a
+public certification path, so it must NOT appear in normal/public/self-view UI
+**at all** — not as a positive badge and not as an honest negative. Confirmation
+/ verification stays real and stored (internal silent signal); the surfaces now
+use **neutral review / record** language only.
 
-**Held:** draft PR, unmerged, undeployed — awaiting owner review.
+**Replacement vocabulary (review/record, never certification):**
+
+| state | LT | EN | RU |
+|---|---|---|---|
+| pending (awaiting) | Laukia peržiūros | Waiting for review | Ожидает просмотра |
+| pending (baseline) | Dar neperžiūrėta | Not reviewed yet | Ещё не просмотрено |
+| positive | Peržiūrėta / Su įrašais | Reviewed / With records | Просмотрено / С записями |
+| "confirmed by a person" | peržiūri žmogus | reviewed by a person | просматривает человек |
+
+**Surfaces changed (worker-self-view / public-in-app):** evidenceStatus,
+workerEvidence, evidenceReport, capabilityProfile, profileSkillClaims,
+profileHub, profileCvClarity, marketMap.capabilities.status, journalSkillLinks,
+featureNotes, skills (+ skills.textFirst), suggestionStatuses, features,
+structuring, playerCard (hints / readiness steps / journal-supported),
+skillClarify, todayScreen, worldMap, myWorkView, workEntryReview, and the
+worker dashboard / onboarding strings in `auth.dashboard.*` / `auth.onboarding.*`.
+Representative changes: `evidenceStatus.awaiting_confirmation.label` "Laukia
+patvirtinimo"→"Laukia peržiūros"; `skills.verified` "Patvirtinta"→"Peržiūrėta";
+`skills.textFirst.confirmedByYou` "Laukia patvirtinimo"→"Laukia peržiūros" /
+"Awaiting confirmation"→"Not reviewed yet"; `todayScreen.action.pending`
+"…laukia patvirtinimo"→"…laukia peržiūros"; `features.external_confirmation.*`
+"External confirmation / …confirm your work records"→"External review /
+…review your work records"; `auth.dashboard.nextAction.worker_waiting.title`
+"…waiting for confirmation"→"…waiting for review". **198 + 17 locale values**
+updated across lt/en/ru via a path-precise, format-preserving script.
+
+**Deliberately EXCLUDED (different sense / not the skill-work-record trust
+ladder), documented so they are not mistaken for misses:**
+- **marketMap location/coordinate confirmation** (`ownerScopeNote`,
+  `mySignals.exactHidden`, `demandSignalNote`, `signalLayer.noPoints`,
+  `atlas.signalOnlyNote`) — "exact location appears only once you confirm it" is
+  a privacy/geo feature, not certification of a person/skill. (The feature-note
+  `featureNotes.marketplaceMap` was reworded to drop the literal word anyway.)
+- **auth password / sign-in-link verification** (`confirm_password_label`,
+  `callback.verifying`) and the **reviewer** action `auth.dashboard.chainActions.
+  reviewEntriesDesc` ("Confirm, reject…") — auth + reviewer surfaces, not
+  worker self-view.
+- **ICU placeholder NAMES** (`{confirmations}`, `{needConfirmation}`) in
+  `evidenceReport.entrySummary` / `missingNote` — variable names, never rendered.
+- **PUBLIC marketing prose** on `/for-workers` & `/for-companies`
+  (`workers.*` / `companies.*`: "Verify your skills", "Confirmed skills") — in
+  scope under the public clause but a brand-messaging rewrite; **flagged for an
+  explicit owner go/no-go** before changing marketing copy. ~13 strings.
+
+**Guard extended:** `silent-trust-wording.test.ts` now also walks the 22
+worker-self-view / public trust namespaces and fails on ANY certification stem
+(`verif|confirm|tvirtin|подтверж|верифиц`) in a rendered value (ICU placeholder
+names stripped first). Five further guards that pinned the old "not
+confirmed / not verified" contract were flipped to the neutral "not reviewed"
+contract: `employer-preview-honesty`, `journal-entry-skill-links`,
+`product-readiness`, `profile-capability-clarity`, `profile-skill-claims`,
+`profile-text-flow-wiring`, `skill-clarify-capture`.
+
+---
+
+## 6. Validation
+
+- `pnpm -F web exec vitest run` — **388 files / 5515 tests pass** (incl. the
+  silent-trust guard, 11 tests).
+- `pnpm -F web typecheck` / `lint` / `build` — all green.
+- Risky-path scan: **NONE** — `git status` = message JSON (copy) + guard tests
+  only. No DB/schema/RLS/RPC/Supabase/env/DNS/billing/auth-core/migration files;
+  no production data mutation; no ranking/matching change; no internal trust
+  logic or stored data removed.
+
+**Held:** draft PR #512, unmerged, undeployed — awaiting owner review.

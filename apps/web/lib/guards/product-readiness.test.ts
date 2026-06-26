@@ -248,16 +248,14 @@ describe("confirmation-required copy is present", () => {
   it("profile textFirst + structuring keys carry the confirm rule", () => {
     const lt = JSON.parse(readWeb("messages/lt.json"));
     const en = JSON.parse(readWeb("messages/en.json"));
-    // Updated in fix/cc/profile-text-skills-production-wiring: the
-    // self-applied saved-status label MUST NOT use "Patvirtinta" /
-    // "Confirmed" — those words imply external verification and were the
-    // visible misleading copy reported by the owner. The new wording
-    // ("Paties nurodyta" / "Self-declared") makes the trust posture
-    // explicit. The accompanying needsExternalConfirmation key remains
-    // unchanged — it describes the FUTURE confirmation flow honestly.
-    expect(lt.skills.textFirst.confirmedByYou).toBe("Laukia patvirtinimo");
-    expect(en.skills.textFirst.confirmedByYou).toBe("Awaiting confirmation");
-    expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/išorinio/i);
+    // Silent-trust rule (fix/silent-trust-wording-cleanup-p0): the self-applied
+    // saved-status label MUST NOT use any certification wording
+    // ("Patvirtinta"/"Confirmed"/"Awaiting confirmation") — those imply a public
+    // certification path. The new wording uses neutral review language; the
+    // future external-review step is described honestly without "confirmation".
+    expect(lt.skills.textFirst.confirmedByYou).toBe("Laukia peržiūros");
+    expect(en.skills.textFirst.confirmedByYou).toBe("Not reviewed yet");
+    expect(lt.skills.textFirst.needsExternalConfirmation).toMatch(/išorin/i);
     expect(en.skills.textFirst.needsExternalConfirmation).toMatch(
       /external/i,
     );

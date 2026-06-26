@@ -102,15 +102,16 @@ describe("Guard: the link layer is evidence-support, never verification", () => 
       }
     });
 
-    it(`${loc}: the helper is honest — not yet confirmed (no verification claim)`, () => {
-      // CV-friendly reframe (fix/cv): the helper now reads as CV-building, but it
-      // MUST still say the link is not yet confirmed/verified (honesty preserved).
+    it(`${loc}: the helper is honest — not yet reviewed (no certification claim)`, () => {
+      // Silent-trust rule: the helper reads as CV-building and still honestly
+      // says the link is not yet reviewed — using neutral review wording, never
+      // a confirmation/verification claim.
       const ns = loadJson(`messages/${loc}.json`).journalSkillLinks as Record<string, string>;
       const helper = ns.helper ?? "";
       const honest = loc === "lt"
-        ? /nepatvirtin/i.test(helper)
-        : /not\s+(yet\s+)?(verif|confirm)/i.test(helper);
-      expect(honest, `${loc} helper must stay honest (not yet confirmed): "${helper}"`).toBe(true);
+        ? /neperžiūr/i.test(helper)
+        : /not\s+reviewed/i.test(helper);
+      expect(honest, `${loc} helper must stay honest (not yet reviewed): "${helper}"`).toBe(true);
     });
   }
 

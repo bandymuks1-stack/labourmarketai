@@ -94,14 +94,14 @@ describe("Guard: no fake verified/confirmed copy on self-declared claims", () =>
     });
   }
 
-  it("the disclaimer explicitly says NOT verified (LT)", () => {
+  it("the disclaimer explicitly says NOT reviewed (LT, silent-trust rule)", () => {
     const lt = read("messages/lt.json");
-    expect(lt).toMatch(/dar nėra patvirtinti/);
+    expect(lt).toMatch(/dar neperžiūrėti/);
   });
 
-  it("the disclaimer explicitly says NOT confirmed (EN)", () => {
+  it("the disclaimer explicitly says NOT reviewed (EN, silent-trust rule)", () => {
     const en = read("messages/en.json");
-    expect(en).toMatch(/not yet confirmed/);
+    expect(en).toMatch(/not yet reviewed/);
   });
 });
 

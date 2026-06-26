@@ -42,7 +42,7 @@ const get = (obj: any, path: string) =>
 // The affirmative-certification stems, per served locale. Pending/awaiting copy
 // (which states the absence of certification) is handled separately and is NOT
 // forbidden here.
-const CERT_STEM = /verif|confirm|patvirtin|tvirtinat|подтверж|верифиц/i;
+const CERT_STEM = /verif|confirm|tvirtin|подтверж|верифиц/i;
 
 // The positive-state labels: the rung that USED to read "Patvirtinta /
 // Confirmed / Verified". Each must now be neutral records language.
@@ -70,6 +70,49 @@ describe("Silent-trust: positive-state labels are neutral records language", () 
           CERT_STEM,
         );
       }
+    });
+  }
+});
+
+// Worker-self-view / public trust-ladder namespaces. The owner rule forbids ANY
+// confirmation/verification wording here — including honest pending negatives
+// ("awaiting confirmation" / "Laukia patvirtinimo" / "Ожидает подтверждения").
+// Excluded by design (different sense, documented in the audit):
+//   - marketMap.*       → location/COORDINATE confirmation (privacy feature)
+//   - auth.* password/email-link verification + reviewer chainActions
+//   - ICU placeholder NAMES like {confirmations} (not rendered text)
+const TRUST_NAMESPACES = [
+  "evidenceStatus", "workerEvidence", "playerCard", "trust", "cvExport",
+  "todayScreen", "capabilityProfile", "workerReadiness", "journalSkillLinks",
+  "skills", "profileHub", "profileSkillClaims", "profileCvClarity",
+  "evidenceReport", "featureNotes", "features", "structuring",
+  "suggestionStatuses", "skillClarify", "worldMap", "myWorkView", "workEntryReview",
+];
+// Strip ICU/placeholder braces so a variable NAME like {confirmations} is not
+// mistaken for rendered certification copy. Repeat to handle nested plurals.
+function stripBraces(s: string): string {
+  let prev: string;
+  do { prev = s; s = s.replace(/\{[^{}]*\}/g, " "); } while (s !== prev);
+  return s;
+}
+
+describe("Silent-trust: no pending/affirmative certification wording in trust UI", () => {
+  for (const loc of SERVED) {
+    it(`${loc}: trust-ladder namespaces are free of confirmation/verification wording`, () => {
+      const m = msgs(loc);
+      const offenders: string[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const walk = (o: any, path: string) => {
+        for (const k in o) {
+          const v = o[k];
+          const p = path ? `${path}.${k}` : k;
+          if (typeof v === "string") {
+            if (CERT_STEM.test(stripBraces(v))) offenders.push(`${p} = ${JSON.stringify(v)}`);
+          } else if (v && typeof v === "object") walk(v, p);
+        }
+      };
+      for (const ns of TRUST_NAMESPACES) if (m[ns]) walk(m[ns], ns);
+      expect(offenders, `${loc} trust-ladder leaks:\n${offenders.join("\n")}`).toEqual([]);
     });
   }
 });

@@ -64,9 +64,9 @@ describe("employer-preview copy is honest in LT + EN", () => {
     // LT: "niekas jūsų dar neieško" / EN: "nobody is looking for you yet".
     expect(ep(lt).intro).toMatch(/niekas .*neieško/i);
     expect(ep(en).intro).toMatch(/nobody is looking/i);
-    // Quiet-UI reframe (fix/cv): "verified" → "confirmed" wording; the note still
-    // honestly states the data is not (yet) confirmed.
-    expect(ep(lt).unverifiedNote).toMatch(/nėra patvirtinta|dar ne patvirtinta/i);
-    expect(ep(en).unverifiedNote).toMatch(/not (verified|confirmed)/i);
+    // Silent-trust rule: no certification wording. The note still honestly
+    // states the data is the worker's own and not (yet) reviewed by a person.
+    expect(ep(lt).unverifiedNote).toMatch(/nėra peržiūr|neperžiūr/i);
+    expect(ep(en).unverifiedNote).toMatch(/not reviewed/i);
   });
 });
