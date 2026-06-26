@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
+import { Lock } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { SupportConversationLauncher } from "@/components/app/support-conversation-launcher";
 import { AttentionInstructions } from "@/components/app/attention-instructions";
@@ -161,19 +162,28 @@ export default async function CommunicationListPage({
                       {t(card.typeKey)}
                     </span>
                   </div>
-                  {/* Who + which context. Honest-unknown states are muted/italic
-                      so the user reads them as "not specified", not as a name. */}
+                  {/* Who + which context. A restricted counterparty renders as a
+                      locked, system-limited chip (NOT a normal name and NOT a
+                      bland "unspecified recipient") so the user knows the
+                      details are simply not shown yet. */}
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
-                    <span
-                      className={
-                        card.counterpartyKnown
-                          ? "text-text-secondary"
-                          : "italic text-text-muted"
-                      }
-                      data-testid={`conversation-counterparty-${c.id}`}
-                    >
-                      {t(card.counterpartyKey)}
-                    </span>
+                    {card.counterpartyRestricted ? (
+                      <span
+                        className="inline-flex items-center gap-1 rounded border border-ink-600/60 bg-ink-800/40 px-1.5 py-0.5 text-text-muted"
+                        data-testid={`conversation-counterparty-${c.id}`}
+                        data-restricted="true"
+                      >
+                        <Lock className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+                        {t(card.counterpartyKey)}
+                      </span>
+                    ) : (
+                      <span
+                        className="text-text-secondary"
+                        data-testid={`conversation-counterparty-${c.id}`}
+                      >
+                        {t(card.counterpartyKey)}
+                      </span>
+                    )}
                     <span aria-hidden className="text-text-muted">
                       ·
                     </span>

@@ -4062,7 +4062,7 @@
     "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
     "counterparty": {
       "support": "Support team",
-      "unknown": "Recipient not specified"
+      "restricted": "Recipient details are not shown yet"
     },
     "scope": {
       "support": "Support channel",

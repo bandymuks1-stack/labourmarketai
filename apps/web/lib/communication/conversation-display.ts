@@ -10,10 +10,14 @@
  * So this helper derives an HONEST card model from the real `kind` enum:
  *   - support → counterparty + scope are honestly KNOWN (the support team /
  *     support channel).
- *   - direct / team → counterparty and scope are honest-UNKNOWN. We say so
- *     ("Pašnekovas nepatikslintas" / "Kontekstas nepatikslintas") instead of
- *     pretending. Wiring real per-name identity + a real workspace link is a
- *     documented MISSING BRIDGE for PR B (see the audit doc).
+ *   - direct / team → the counterparty is in a RESTRICTED / details-not-shown-yet
+ *     state, NOT a normal "unspecified recipient". The list/detail queries do
+ *     not read the co-participant's identity (that needs the owner-gated
+ *     counterpart-identity bridge), so we say the details are not shown yet and
+ *     style it as a system-limited state (lock chip) — never as a real name.
+ *     Scope stays honest-unknown ("Kontekstas nepatikslintas"). Wiring real
+ *     per-name identity + a real workspace link is a documented MISSING BRIDGE
+ *     (see the audit doc).
  *
  * Pure + deterministic. Returns i18n keys RELATIVE to the `communication`
  * namespace, so the page (whose `t` is scoped to "communication") can render
@@ -35,8 +39,17 @@ export interface ConversationCardModel {
   readonly typeKey: string;
   /** i18n key (under `communication`) for the counterparty line. */
   readonly counterpartyKey: string;
-  /** True when the counterparty is honestly known; false = honest-unknown fallback. */
+  /** True when the counterparty is honestly known (e.g. the support team). */
   readonly counterpartyKnown: boolean;
+  /**
+   * True when the counterparty is in a RESTRICTED / details-not-shown-yet
+   * state — the conversation is real but its co-participant identity is not
+   * read by the current query (owner-gated bridge). The UI must render this as
+   * a system-limited / locked state, never as a normal participant name and
+   * never as a bland "unspecified recipient". Mutually exclusive with
+   * `counterpartyKnown`.
+   */
+  readonly counterpartyRestricted: boolean;
   /** i18n key (under `communication`) for the workspace/context line. */
   readonly scopeKey: string;
   /** True when the scope is honestly known; false = honest-unknown fallback. */
@@ -81,18 +94,22 @@ export function describeConversationCard(input: {
       typeKey,
       counterpartyKey: "counterparty.support",
       counterpartyKnown: true,
+      counterpartyRestricted: false,
       scopeKey: "scope.support",
       scopeKnown: true,
       originKey,
     };
   }
 
-  // direct / team: no participant identity in the list query, no workspace link
-  // in the schema → say so honestly rather than inventing one.
+  // direct / team: the conversation is real but its co-participant identity is
+  // NOT read by this query (owner-gated bridge). Surface a RESTRICTED /
+  // details-not-shown-yet state — never a fake name, never a bland
+  // "unspecified recipient". Scope stays honest-unknown.
   return {
     typeKey,
-    counterpartyKey: "counterparty.unknown",
+    counterpartyKey: "counterparty.restricted",
     counterpartyKnown: false,
+    counterpartyRestricted: true,
     scopeKey: "scope.unknown",
     scopeKnown: false,
     originKey,

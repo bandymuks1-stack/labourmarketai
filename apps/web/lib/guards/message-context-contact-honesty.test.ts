@@ -42,10 +42,11 @@ describe("thread origin is the real creator-vs-viewer signal, never an invented 
     expect(JSON.stringify(m)).not.toContain("abc-123");
     expect(JSON.stringify(m)).not.toContain("xyz-789");
   });
-  it("direct/team counterparty stays honest-unknown even with an origin", () => {
+  it("direct/team counterparty is RESTRICTED (details-not-shown), never a name, even with an origin", () => {
     const m = describeConversationCard({ kind: "direct", createdBy: "a", viewerId: "b" });
     expect(m.counterpartyKnown).toBe(false);
-    expect(m.counterpartyKey).toBe("counterparty.unknown");
+    expect(m.counterpartyRestricted).toBe(true);
+    expect(m.counterpartyKey).toBe("counterparty.restricted");
   });
 });
 
