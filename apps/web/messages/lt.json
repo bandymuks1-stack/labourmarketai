@@ -1544,6 +1544,10 @@
     }
   },
   "admin": {
+    "mode": {
+      "active": "Admin režimas — valdote platformą",
+      "exit": "Grįžti į savo erdvę"
+    },
     "room": {
       "groups": {
         "overview": {
@@ -1862,8 +1866,8 @@
       "unknownCountry": "Nenurodyta",
       "averages": {
         "title": "Admin rinkos vidurkiai",
-        "help": "Antrasis termometro formulės dėmuo: profesija × šalis × vidurkis (EUR/mėn.) + įvedimo data + šaltinio pastaba.",
-        "empty": "Rinkos vidurkių dar neįvesta — termometras lieka būsenoje „nepakanka rinkos duomenų”, kol bus įvesti realūs, šaltiniu pagrįsti skaičiai."
+        "help": "Antrasis rinkos signalo formulės dėmuo: profesija × šalis × vidurkis (EUR/mėn.) + įvedimo data + šaltinio pastaba.",
+        "empty": "Rinkos vidurkių dar neįvesta — rinkos signalas lieka būsenoje „nepakanka rinkos duomenų”, kol bus įvesti realūs, šaltiniu pagrįsti skaičiai."
       },
       "basis": {
         "monthly_eur": "mėn."
@@ -1917,16 +1921,16 @@
         "gapsTitle": "Šalių spragos (paklausa vs pasiūla)",
         "gapsEmpty": "Paklausos įrašų dar nėra.",
         "gapLine": "{demand} užklausos / {supply} žmonės",
-        "thermoTitle": "Termometrai (tik kur yra abu dėmenys)",
-        "thermoEmpty": "Termometro reikšmių dar nėra — jos atsiras, kai bus įvestas pagrįstas rinkos vidurkis IR langelis turės bent 2 žmonių deklaruotų lūkesčių imtį.",
+        "thermoTitle": "Rinkos signalai (tik kur yra abu dėmenys)",
+        "thermoEmpty": "Rinkos signalo reikšmių dar nėra — jos atsiras, kai bus įvestas pagrįstas rinkos vidurkis IR langelis turės bent 2 žmonių deklaruotų lūkesčių imtį.",
         "smallSample": "n<{n}"
       }
     },
     "league": {
       "eyebrow": "Šalies lyga",
       "title": "Darbo rinkos lyga",
-      "subtitle": "Profesijų lentelės pagal šalį — realios komandos, prieinamumas ir rinkos termometras.",
-      "methodNote": "Termometro reikšmė rodoma TIK ten, kur admin įvedė pagrįstą rinkos vidurkį IR deklaruotų lūkesčių imtis yra bent 2 žmonės. Visur kitur langelis sako „nepakanka rinkos duomenų“ — lentelė niekada nevertina žmogaus.",
+      "subtitle": "Profesijų lentelės pagal šalį — realios komandos, prieinamumas ir rinkos signalas.",
+      "methodNote": "Rinkos signalo reikšmė rodoma TIK ten, kur admin įvedė pagrįstą rinkos vidurkį IR deklaruotų lūkesčių imtis yra bent 2 žmonės. Visur kitur langelis sako „nepakanka rinkos duomenų“ — lentelė niekada nevertina žmogaus.",
       "back": "Į admin centrą",
       "empty": "Lygai dar nėra duomenų — kai darbuotojai pasižymės profesijas, lentelės atsiras savaime.",
       "unknownCountry": "Šalis nenurodyta",
@@ -4467,7 +4471,7 @@
     "namePlaceholder": "Mano profilis",
     "candidateLabel": "Kandidatiniai įgūdžiai",
     "candidateHint": "Įgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, nepatvirtinta).",
-    "thermoLabel": "Termometras",
+    "thermoLabel": "Rinkos signalas",
     "thermoHint": "(deklaruotų atlygio lūkesčių vidurkis jūsų projekte + admin įvestas rinkos vidurkis) / 2 — rodoma tik kai yra abu dėmenys.",
     "thermoMissingPosition": "Nepakanka projekto duomenų",
     "thermoMissingMarket": "Nepakanka rinkos duomenų",

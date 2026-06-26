@@ -47,8 +47,12 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 783 at admin-control-room-v1 (+24: admin.room control-room group
   // titles, KPI labels + internal-diagnostics note land in all 11 locales;
   // en/lt/ru translated, da/de [EN] until human translation).
-  da: 783,
-  de: 783,
+  // MEASURED 785 at production-trust-bugs-p0 (+2: admin.mode banner active/exit
+  // labels land in all 11 locales; en/lt/ru translated, da/de [EN] until human
+  // translation. cvBridge journal-namespace backfill copied existing base
+  // values, adding no new debt).
+  da: 785,
+  de: 785,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,

@@ -12,8 +12,11 @@ import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
  *      so suggestions can be reviewed while editing;
  *   2. the skills bucket renders the friendly heading + one honest note, with
  *      NO per-card technical provenance triad;
- *   3. the owner example "Dirbau su svetainės dizainu 9 h" surfaces BOTH design
- *      readings (web + interior) and NO construction.
+ *   3. the owner example "Dirbau su svetainės dizainu 9 h" surfaces the honest
+ *      website-design reading and NO interior / construction skill
+ *      (production-trust-bugs-p0 issue B: the compound "svetainės dizainas"
+ *      means website design; the living-room/interior reading is surfaced only
+ *      by its own explicit needles, never by plain website-design text).
  */
 
 const web = join(__dirname, "..", "..");
@@ -36,7 +39,7 @@ describe("Guard: composer shows suggestions in edit mode (text prefilled)", () =
   });
 });
 
-describe("Guard: 'Dirbau su svetainės dizainu 9 h' → web + interior, no construction", () => {
+describe("Guard: 'Dirbau su svetainės dizainu 9 h' → web design, no interior/construction", () => {
   const CONSTRUCTION = new Set(SKILL_HINTS_LT.map((h) => h.slug));
   const r = extractJournalSuggestions("Dirbau su svetainės dizainu 9 h");
   // The composer renders the named-capability readings from `capabilitySuggestions`.
@@ -45,8 +48,8 @@ describe("Guard: 'Dirbau su svetainės dizainu 9 h' → web + interior, no const
   it("shows the web-design reading", () => {
     expect(caps.some((c) => /interneto svetainės dizainas/i.test(c)), `caps: ${caps.join(", ")}`).toBe(true);
   });
-  it("shows the interior reading", () => {
-    expect(caps.some((c) => /interjero dizainas/i.test(c)), `caps: ${caps.join(", ")}`).toBe(true);
+  it("does NOT show the interior reading (false positive)", () => {
+    expect(caps.some((c) => /interjero dizainas/i.test(c)), `caps: ${caps.join(", ")}`).toBe(false);
   });
   it("surfaces NO construction skill for this text", () => {
     const got = r.skillSlugs.filter((s) => CONSTRUCTION.has(s));

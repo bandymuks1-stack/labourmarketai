@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
+import { AdminContextBanner } from "@/components/app/admin-context-banner";
 
 /**
  * Admin subtree gate (systemic-ux-admin-v1).
@@ -28,5 +29,10 @@ export default async function AdminLayout({
   const { locale } = await params;
   setRequestLocale(locale);
   await requireSuperadmin(locale);
-  return <>{children}</>;
+  return (
+    <>
+      <AdminContextBanner />
+      {children}
+    </>
+  );
 }

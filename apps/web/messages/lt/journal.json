@@ -1,4 +1,6 @@
 {
+  "cvBridge": "{confirmed} iš {total} įrašų patvirtinta — patvirtintas darbas matomas jūsų CV.",
+  "cvBridgeLink": "Atidaryti CV",
   "noContext": {
     "none": "Kol kas nėra aktyvaus darbo konteksto. Kai organizacija pakvies jus į komandą ir pridės, jūsų darbo įrašai atsidarys čia.",
     "pending": "Turite laukiantį kvietimą. Atidarykite skydelį ir priimkite jį — tada savininkas galės pridėti jus prie organizacijos.",

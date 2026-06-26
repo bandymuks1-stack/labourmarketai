@@ -1122,6 +1122,10 @@
     "reviewDisabledBadge": "No review"
   },
   "admin": {
+    "mode": {
+      "active": "[EN] Admin mode — you are managing the platform",
+      "exit": "[EN] Back to my space"
+    },
     "room": {
       "groups": {
         "overview": {

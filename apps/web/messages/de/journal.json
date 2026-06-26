@@ -1,4 +1,6 @@
 {
+  "cvBridge": "{confirmed} von {total} Einträgen bestätigt — bestätigte Arbeit erscheint in deinem CV.",
+  "cvBridgeLink": "CV öffnen",
   "chooseWorkType": "[EN] Choose work type",
   "whatDidYouDo": "[EN] What did you do today?",
   "freeTextLead": "[EN] Describe everything freely: work done, quantities, units, time, location, and notes. Later the system can help turn this into structured work lines.",

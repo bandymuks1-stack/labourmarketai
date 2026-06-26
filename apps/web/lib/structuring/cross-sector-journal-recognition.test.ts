@@ -6,9 +6,10 @@ import { SKILL_HINTS_LT } from "./keywords";
  * Sector-neutral Work Journal recognition — the surface the journal composer
  * shows (`extractJournalSuggestions` → capability chips + skill slugs + frags).
  * Owner cross-sector smoke (PR #490): the 8 required entries must be recognised
- * across sectors, the ambiguous "svetainės dizainas" must expose BOTH readings
- * (never empty/unknown-only), construction must appear ONLY when the text says
- * so, and a vague entry must stay unknown — never a construction fallback.
+ * across sectors, "svetainės dizainas" must expose the honest website-design
+ * reading (NOT the interior/construction one — production-trust-bugs-p0 issue
+ * B; never empty/unknown-only), construction must appear ONLY when the text
+ * says so, and a vague entry must stay unknown — never a construction fallback.
  *
  * (The project's universal recogniser core is covered separately in
  * cross-sector-recognition.test.ts; this proves the journal-facing layer.)
@@ -29,12 +30,12 @@ function noConstruction(skills: string[]): void {
   for (const slug of skills) expect(CONSTRUCTION_SLUGS.has(slug)).toBe(false);
 }
 
-describe("1. 'Dirbau su svetainės dizainu 9 h' — structured ambiguity, no construction", () => {
+describe("1. 'Dirbau su svetainės dizainu 9 h' — website design, no interior/construction", () => {
   const r = out("Dirbau su svetainės dizainu 9 h");
   it("reads 9 hours", () => expect(r.hours).toEqual({ value: 9, unitSlug: "hours" }));
-  it("surfaces BOTH website AND interior design readings", () => {
+  it("surfaces the website reading, NOT the interior false positive", () => {
     expect(r.caps).toContain("Interneto svetainės dizainas");
-    expect(r.caps).toContain("Interjero dizainas");
+    expect(r.caps).not.toContain("Interjero dizainas");
   });
   it("is NOT empty / unknown-only", () => expect(r.caps.length).toBeGreaterThan(0));
   it("every suggestion has a text reason", () =>
