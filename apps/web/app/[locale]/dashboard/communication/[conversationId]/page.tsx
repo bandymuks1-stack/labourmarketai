@@ -8,6 +8,7 @@ import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerText } from "@/lib/communication/translation";
+import { describeConversationCard } from "@/lib/communication/conversation-display";
 
 type MessageRow = {
   id: string;
@@ -48,6 +49,15 @@ export default async function ConversationDetailPage({
     .maybeSingle();
   if (!convRes.data) notFound();
   const conversation = convRes.data;
+
+  // Same honest context model as the list — so the thread header tells the
+  // user WHO (counterparty or honest-unknown), WHAT type, and whether THEY
+  // started it. No co-participant profile read, no invented identity.
+  const card = describeConversationCard({
+    kind: conversation.kind,
+    createdBy: conversation.created_by,
+    viewerId: user.id,
+  });
 
   // Table is `conversation_messages`, NOT `messages` — see 0021's header
   // for why (legacy public.messages chain pre-exists in prod).
@@ -103,9 +113,47 @@ export default async function ConversationDetailPage({
           <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
             {conversation.subject ?? t("unnamedThread")}
           </h1>
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t(`kind.${conversation.kind}`)}
+          <span
+            className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+            data-testid="thread-type"
+          >
+            {t(card.typeKey)}
           </span>
+          {/* Who + which context — honest-unknown states are muted/italic so
+              they read as "not specified", never as a real name. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
+            <span
+              className={
+                card.counterpartyKnown
+                  ? "text-text-secondary"
+                  : "italic text-text-muted"
+              }
+              data-testid="thread-counterparty"
+            >
+              {t(card.counterpartyKey)}
+            </span>
+            <span aria-hidden className="text-text-muted">
+              ·
+            </span>
+            <span
+              className={
+                card.scopeKnown ? "text-text-secondary" : "italic text-text-muted"
+              }
+              data-testid="thread-scope"
+            >
+              {t(card.scopeKey)}
+            </span>
+            {card.originKey && (
+              <>
+                <span aria-hidden className="text-text-muted">
+                  ·
+                </span>
+                <span className="text-text-secondary" data-testid="thread-origin">
+                  {t(card.originKey)}
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </header>
 

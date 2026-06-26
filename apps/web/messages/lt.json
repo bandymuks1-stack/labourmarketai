@@ -4052,6 +4052,10 @@
     }
   },
   "communication": {
+    "origin": {
+      "you": "Šį pokalbį pradėjote jūs",
+      "other": "Pradėjo kitas asmuo"
+    },
     "title": "Mano pranešimai",
     "subtitle": "Kas dabar svarbu ir į ką verta atsakyti. Čia matysite žinutes ir svarbius prašymus.",
     "v1Notice": "Žinutės atnaujinamos perkrovus puslapį. Rodome tik sąžiningą „atidaryta“ laiką, be netikrų „pristatyta / perskaityta“ žymeklių.",

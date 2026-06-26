@@ -1448,6 +1448,10 @@
     }
   },
   "communication": {
+    "origin": {
+      "you": "[EN] You started this conversation",
+      "other": "[EN] Started by someone else"
+    },
     "originalLanguage": "[EN] Original ({lang})"
   },
   "trust": {

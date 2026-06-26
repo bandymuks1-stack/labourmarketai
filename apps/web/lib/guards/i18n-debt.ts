@@ -51,8 +51,12 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // labels land in all 11 locales; en/lt/ru translated, da/de [EN] until human
   // translation. cvBridge journal-namespace backfill copied existing base
   // values, adding no new debt).
-  da: 785,
-  de: 785,
+  // MEASURED 787 at message-context-contact-permissions-p0 (rebased onto
+  // main after #505; +2 on top of the 785 above: honest communication.origin
+  // "who started this thread" line lands in all 11 locales; en/lt/ru
+  // translated, da/de [EN] until human translation).
+  da: 787,
+  de: 787,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,

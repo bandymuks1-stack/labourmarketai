@@ -138,7 +138,11 @@ export default async function CommunicationListPage({
             // Clarity v1: never render a card where the user cannot tell WHO /
             // WHAT / WHICH CONTEXT. Derived honestly from the real `kind`; when
             // identity/workspace are not in the data model we say so, not fake it.
-            const card = describeConversationCard({ kind: c.kind });
+            const card = describeConversationCard({
+              kind: c.kind,
+              createdBy: c.created_by,
+              viewerId: user.id,
+            });
             return (
               <li key={c.id}>
                 <Link
@@ -183,6 +187,22 @@ export default async function CommunicationListPage({
                     >
                       {t(card.scopeKey)}
                     </span>
+                    {/* Honest origin: derived only from created_by vs the
+                        viewer — "did I start this, or did someone reach out to
+                        me?". Rendered only when created_by is known. */}
+                    {card.originKey && (
+                      <>
+                        <span aria-hidden className="text-text-muted">
+                          ·
+                        </span>
+                        <span
+                          className="text-text-secondary"
+                          data-testid={`conversation-origin-${c.id}`}
+                        >
+                          {t(card.originKey)}
+                        </span>
+                      </>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-[11px] text-text-muted">
                     <span>{new Date(c.updated_at).toLocaleString(locale)}</span>

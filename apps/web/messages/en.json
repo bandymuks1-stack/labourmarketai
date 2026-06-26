@@ -4052,6 +4052,10 @@
     }
   },
   "communication": {
+    "origin": {
+      "you": "You started this conversation",
+      "other": "Started by someone else"
+    },
     "title": "My messages",
     "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
     "v1Notice": "Messages update on page refresh. We show only an honest 'opened' timestamp — no fake delivered / read indicators.",
