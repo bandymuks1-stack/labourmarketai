@@ -1576,7 +1576,7 @@
         },
         "operations": {
           "title": "Operacijos",
-          "purpose": "Pagalba, atsiskaitymai ir artimiausi veiksmai."
+          "purpose": "Pagalba, mokėjimai ir artimiausi veiksmai."
         }
       },
       "kpi": {
@@ -1732,7 +1732,7 @@
       "subtitle": "Atviri poreikiai šalia darbuotojų pasiūlos — peržiūrėk, nuspręsk, užfiksuok.",
       "humanNote": "Kiekvienas match čia parinktas žmogaus, ne algoritmo. Sistema nereitinguoja ir nesiūlo — ji tik rodo realius duomenis ir užfiksuoja tavo sprendimą su grįžtamojo ryšio pastaba.",
       "back": "Grįžti į admin",
-      "migrationBlocker": "Demand intake konsolidacijos migracija šioje aplinkoje dar nepritaikyta — darbastalis užblokuotas, kol ji bus pritaikyta.",
+      "migrationBlocker": "Suvedimo darbastalis laikinai nepasiekiamas, kol ruošiami jo duomenys.",
       "demand": {
         "title": "Atviri poreikiai",
         "count": "{count} atvirų užklausų",
@@ -1799,7 +1799,7 @@
         "notAdmin": "Tavo sesija neturi admin teisių šiai užklausai.",
         "invalid": "Netinkamas sprendimas — pasirink darbuotoją ir veiksmą.",
         "notFound": "Užklausa arba darbuotojas nebeegzistuoja.",
-        "needsMigration": "Konsolidacijos migracija nepritaikyta — fiksavimas užblokuotas.",
+        "needsMigration": "Fiksavimas laikinai nepasiekiamas, kol ruošiami duomenys.",
         "error": "Nepavyko užfiksuoti sprendimo."
       },
       "suggestions": {
@@ -1857,7 +1857,7 @@
       "subtitle": "Pasiūla, paklausa, admin įvesti rinkos vidurkiai ir spragos — tik realūs platformos skaičiai.",
       "methodNote": "Kiekvienas skaičius šiame puslapyje — realus realių eilučių skaičius. Rinkos vidurkius admin įveda ranka iš įvardyto šaltinio — platforma jų niekada nespėja. Mažos imtys (n<5) pažymimos.",
       "back": "Admin skydelis",
-      "needsMigration": "Rinkos vidurkiai dar neparuošti — S4 migracija laukia savininko vartų.",
+      "needsMigration": "Rinkos vidurkiai dar neparuošti.",
       "smallSample": "⚠ n<5",
       "unknownCountry": "Nenurodyta",
       "averages": {
@@ -4950,7 +4950,7 @@
     },
     "docQueue": {
       "title": "Dokumentų patvirtinimo eilė",
-      "unavailable": "Patvirtinimo laukas dar neįjungtas (laukiama migracijos).",
+      "unavailable": "Patvirtinimo laukas dar neįjungtas.",
       "empty": "Nė vienas dokumentas nelaukia patvirtinimo.",
       "verify": "Patvirtinti",
       "reject": "Atmesti",
@@ -4964,12 +4964,12 @@
     },
     "bookings": {
       "title": "Rezervacijų aktyvumas",
-      "unavailable": "Rezervacija dar neįjungta (laukiama migracijos).",
+      "unavailable": "Rezervacija dar neįjungta.",
       "empty": "Rezervacijų dar nėra."
     },
     "payment": {
       "title": "Mokėjimų pasiruošimas",
-      "body": "Mokėjimai neįjungti. {count} mokami planai aprašyti, bet neapmokestinami. Atskiras Stripe sprintas išsprendžia kliūčių sąrašą prieš bet kokius pinigus."
+      "body": "Mokėjimai neįjungti. {count} mokami planai aprašyti, bet neapmokestinami. Jie bus įjungti atskirai, kai bus pašalintos likusios kliūtys."
     }
   },
   "companyReadiness": {
@@ -5111,7 +5111,7 @@
     "applying": "Saugoma…",
     "applied": "Pritaikyta",
     "applyError": "Nepavyko išsaugoti. Bandykite dar kartą.",
-    "applyNotAdmin": "Reikia administratoriaus teisių (active_role='admin')."
+    "applyNotAdmin": "Reikia administratoriaus teisių."
   },
   "opportunities": {
     "title": "Man tinkamos galimybės",

@@ -261,6 +261,7 @@ export default async function AdminDashboardPage({
         {
           href: "/dashboard/admin/telemetry",
           label: t("hub.telemetry"),
+          internal: true,
         },
         {
           href: "/dashboard/admin/language-feedback",
@@ -291,6 +292,7 @@ export default async function AdminDashboardPage({
         {
           href: "/dashboard/admin/agent-os",
           label: t("hub.agentOs"),
+          internal: true,
         },
         {
           href: "/dashboard/communication",
