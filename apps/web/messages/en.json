@@ -4107,6 +4107,10 @@
       "support": "Support team",
       "restricted": "Recipient details are not shown yet"
     },
+    "cannotOpen": {
+      "title": "Couldn't open that conversation",
+      "body": "You may not have permission to message this person, or they're no longer available. Nothing was sent."
+    },
     "scope": {
       "support": "Support channel",
       "unknown": "Context not specified"
