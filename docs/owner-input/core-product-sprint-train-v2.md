@@ -29,7 +29,7 @@ Core loop this train must strengthen (never add noise around):
 | # | Wagon | Status | Branch | PR |
 |---|---|---|---|---|
 | 1 | Finish PR #514 and deploy | ✅ **DONE — merged + deployed** | `audit/journal-real-world-recognition-p0` | [#514](https://github.com/bandymuks1-stack/labourmarketai/pull/514) (merged) |
-| 2 | **Player Card / CV identity surface** | ⏳ next — **not started** (awaiting owner go) | — | — |
+| 2 | **Player Card / CV identity surface** | 🔧 **in progress — PR open, awaiting owner review** | `fix/cc/player-card-identity` | [#517](https://github.com/bandymuks1-stack/labourmarketai/pull/517) |
 | 3 | Login branding | ⏳ not started | — | — |
 | 4 | Approval Authority Layer 0 | ⏳ not started | — | — |
 | 5 | Contact Permission + Counterpart Identity | ⏳ not started | — | — |
@@ -130,24 +130,32 @@ The 307s are normal unauthenticated→login redirects, not errors.
 
 ---
 
-## Wagon 2 — Player Card / CV identity surface ⏳ (NEXT — not started)
+## Wagon 2 — Player Card / CV identity surface 🔧 (IN PROGRESS — PR #517)
 
 **Goal:** make the Player Card the single, consistent person-identity surface across
 `Mano erdvė`, account/profile, CV/work-records, and the map own-marker/compact card —
 "one person = one clear player identity", using existing data only.
 
-- **Branch / PR:** none yet (awaiting owner go).
+- **Branch:** `fix/cc/player-card-identity` · **PR:** #517 (open, not merged).
+- **Deliverable:** `docs/owner-input/player-card-cv-identity-surface-v1.md`.
+- **Done in this PR (Layer 0):** single `personMonogram` source of person initials;
+  Player Card + map own-marker now show the SAME two-letter monogram and the SAME dark
+  avatar tile (map cyan blob → Player-Card dark tile; cyan ring preserved). No new
+  copy/i18n; no fake data; no forbidden wording; no raw slug/key/ID.
 - **Allowed (Layer 0):** UI composition from existing data, copy cleanup, route/card
   consistency, avatar/initials fallback, compact map-card consistency, empty-state
   clarity, mobile cleanup, label/concept dedupe, forbidden-wording/raw-slug guards, docs.
-- **Forbidden / RED (owner-gated):** DB/schema/RLS/RPC/Supabase migrations; avatar
-  storage/RLS changes; auth/profile ownership rules; public-search exposure; paid
-  visibility; ratings/reviews; verification/approval authority model; map service/
-  demand layers needing schema. No fake avatar/skill/location/CV/record/availability/
-  rating/badge/employer-proof. No `confirmed/verified/proof/trust/employer verified`.
-- **Deliverable:** `docs/owner-input/player-card-cv-identity-surface-v1.md`.
+- **Forbidden / RED (owner-gated, NOT started):** DB/schema/RLS/RPC/Supabase migrations;
+  avatar storage/RLS changes; auth/profile ownership rules; public-search exposure; paid
+  visibility; ratings/reviews; verification/approval authority model; map service/demand
+  layers needing schema. No fake avatar/skill/location/CV/record/availability/rating/
+  badge/employer-proof. No `confirmed/verified/proof/trust/employer verified` wording.
+- **Validation:** typecheck ✅ · lint ✅ · build ✅ · full vitest 399 files / 5713 tests ✅
+  · risky-path scan NONE · migration-safety GREEN.
+- **Noted follow-ups (Layer 0, separate):** marker `professionLabel` enrichment; migrate
+  4 admin/list `initialsOf` copies to `personMonogram`.
 
-> RED items not started for Wagon 2: all owner-gated items above.
+> Owner decision needed: review + merge PR #517; then go/no-go for Wagon 3 (Login branding).
 
 ---
 
