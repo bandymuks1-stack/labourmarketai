@@ -14,6 +14,11 @@ import type {
   OutgoingRequestRow,
   RequestStatus,
 } from "@/lib/marketplace/service-requests-shared";
+import {
+  playerInitials,
+  PLAYER_IDENTITY_AVATAR_BORDER,
+  PLAYER_IDENTITY_FALLBACK_SURFACE,
+} from "@/lib/identity/player-identity";
 
 /**
  * P0 Marketplace loop (Phase 1) — one compact surface: discover active offerings
@@ -45,6 +50,8 @@ export type MarketplaceLabels = {
   requesterMessage: string;
   providerNote: string;
   responded: string;
+  requestedBy: string;
+  requesterFallback: string;
   status: Record<RequestStatus, string>;
 };
 
@@ -177,7 +184,28 @@ export function MarketplaceLoopSection({
                 data-testid="marketplace-incoming-row"
                 className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
               >
-                <div className="min-w-0 space-y-1">
+                <div className="min-w-0 space-y-1.5">
+                  {/* Requester identity — compact request-provider variant of the
+                      Player Identity foundation. Display name + initials only;
+                      neutral "•"/fallback when the buyer set no name or the
+                      identity RPC is not applied yet. */}
+                  <div
+                    className="flex items-center gap-2"
+                    data-testid="marketplace-incoming-requester"
+                  >
+                    <span
+                      aria-hidden
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${PLAYER_IDENTITY_AVATAR_BORDER} ${PLAYER_IDENTITY_FALLBACK_SURFACE}`}
+                    >
+                      {playerInitials(r.requesterDisplayName)}
+                    </span>
+                    <span className="min-w-0 truncate text-xs">
+                      <span className="text-text-muted">{labels.requestedBy}: </span>
+                      <span className="text-text-secondary">
+                        {r.requesterDisplayName ?? labels.requesterFallback}
+                      </span>
+                    </span>
+                  </div>
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
                   <StatusChip status={r.status} label={labels.status[r.status]} />
                   {r.message && (

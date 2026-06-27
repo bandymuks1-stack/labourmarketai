@@ -195,6 +195,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // additive RED: discovery RLS (authenticated + active-only) + new 2-party
     // request table + 3 SECURITY DEFINER RPCs (request/respond/withdraw);
     // SELECT-only grant, no anon/public, no using(true), no payment; NOT applied).
-    expect(guard).toMatch(/SPRINT_BASELINE = 89/);
+    // then to 90 for requester identity on the provider inbox (20260627174500;
+    // additive RED: ONE SECURITY DEFINER read RPC requester_identities_for_provider
+    // returning ONLY buyer display name, provider-scoped; execute revoked from
+    // public + granted to authenticated; no table/policy change; NOT applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 90/);
   });
 });

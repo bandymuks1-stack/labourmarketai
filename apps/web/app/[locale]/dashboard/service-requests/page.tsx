@@ -72,6 +72,8 @@ export default async function ServiceRequestsPage({
     requesterMessage: t("requesterMessage"),
     providerNote: t("providerNote"),
     responded: t("responded"),
+    requestedBy: t("requestedBy"),
+    requesterFallback: t("requesterFallback"),
     status: {
       sent: t("status.sent"),
       accepted: t("status.accepted"),

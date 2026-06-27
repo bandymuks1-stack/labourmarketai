@@ -4139,6 +4139,8 @@
     "requesterMessage": "Their message",
     "providerNote": "Provider's note",
     "responded": "Responded",
+    "requestedBy": "Requested by",
+    "requesterFallback": "Member",
     "status": {
       "sent": "Sent",
       "accepted": "Accepted",

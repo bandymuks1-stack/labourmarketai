@@ -4139,6 +4139,8 @@
     "requesterMessage": "Jų žinutė",
     "providerNote": "Paslaugos teikėjo pastaba",
     "responded": "Atsakyta",
+    "requestedBy": "Užklausą pateikė",
+    "requesterFallback": "Narys",
     "status": {
       "sent": "Išsiųsta",
       "accepted": "Priimta",

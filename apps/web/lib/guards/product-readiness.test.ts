@@ -1508,7 +1508,17 @@ describe("no migration files added by this sprint", () => {
     // no using(true), no payment/rating. Reversible + guarded
     // (supabase/rollbacks/20260627145318_service_offering_requests.down.sql). NOT
     // applied — human-gated for owner.
-    const SPRINT_BASELINE = 89;
+    // Bumped 89 -> 90 for requester identity on the provider inbox
+    // (20260627174500_requester_identity_for_provider): ONE additive RED migration
+    // — a single SECURITY DEFINER *read* RPC requester_identities_for_provider that
+    // returns ONLY the buyer display name (profiles.full_name) and ONLY for
+    // requests where r.provider_id = auth.uid() (provider scope re-checked). No
+    // table/column/policy/table-grant change, no email/phone/contact/location/
+    // avatar/buyer_id exposure, execute revoked from public + granted to
+    // authenticated only, no anon/public, no using(true). Reversible + guarded
+    // (supabase/rollbacks/20260627174500_requester_identity_for_provider.down.sql).
+    // NOT applied — human-gated for owner.
+    const SPRINT_BASELINE = 90;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
