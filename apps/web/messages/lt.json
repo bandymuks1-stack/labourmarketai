@@ -4101,6 +4101,45 @@
       "archived": "Archyvuota"
     }
   },
+  "serviceOfferings": {
+    "pageTitle": "Paslaugos",
+    "pageLead": "Išvardykite realias paslaugas, kurias siūlote, ir tvarkykite savo pasiūlymus.",
+    "title": "Jūsų paslaugų pasiūlymai",
+    "intro": "Realios jūsų siūlomos paslaugos. Tik jūs jas matote ir tvarkote — kitiems jos dar nerodomos.",
+    "notAvailable": "Paslaugų pasiūlymai dar neprieinami. Ši sritis įsijungs, kai bus įjungtas duomenų modelis.",
+    "empty": "Paslaugų pasiūlymų dar nėra. Pridėkite pirmą realią paslaugą, kurią siūlote.",
+    "addButton": "Pridėti paslaugą",
+    "form": {
+      "titleLabel": "Paslaugos pavadinimas",
+      "titlePlaceholder": "pvz. Vidaus dažymas",
+      "descriptionLabel": "Aprašymas",
+      "descriptionPlaceholder": "Ką darote, apimtis ir kas įskaičiuota.",
+      "categoryLabel": "Kategorija",
+      "categoryPlaceholder": "pvz. apdaila",
+      "countryLabel": "Šalis",
+      "countryPlaceholder": "pvz. LT",
+      "remoteLabel": "Gali būti atliekama nuotoliniu būdu",
+      "rateLabel": "Įkainis (nebūtina)",
+      "ratePlaceholder": "pvz. apie 25 EUR/val., derinama",
+      "rateHint": "Tik laisvas tekstas — pavyzdžiui, orientacinis valandinis įkainis."
+    },
+    "save": "Išsaugoti",
+    "saving": "Saugoma...",
+    "cancel": "Atšaukti",
+    "edit": "Redaguoti",
+    "remove": "Pašalinti",
+    "activate": "Aktyvuoti",
+    "pause": "Pristabdyti",
+    "errorTitleRequired": "Įveskite paslaugos pavadinimą.",
+    "errorCountry": "Naudokite 2 raidžių šalies kodą (pvz. LT).",
+    "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą.",
+    "remoteBadge": "Nuotoliniu būdu",
+    "status": {
+      "draft": "Juodraštis",
+      "active": "Aktyvus",
+      "paused": "Pristabdytas"
+    }
+  },
   "communication": {
     "origin": {
       "you": "Šį pokalbį pradėjote jūs",

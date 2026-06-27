@@ -107,8 +107,9 @@ describe("NO new DB migration in this PR", () => {
     const count = existsSync(dir)
       ? readdirSync(dir).filter((f) => f.endsWith(".sql")).length
       : 0;
-    // 85 = baseline after profile-avatar-upload-v1 (20260623200000). The read
-    // layer itself adds no migration; the global baseline only grows deliberately.
-    expect(count).toBeLessThanOrEqual(85);
+    // 86 = baseline after W8 service_offerings (20260627121713) — ONE additive
+    // RED migration, human-gated, NOT applied. The read layer itself adds no
+    // migration; the global baseline only grows deliberately.
+    expect(count).toBeLessThanOrEqual(86);
   });
 });

@@ -1478,7 +1478,14 @@ describe("no migration files added by this sprint", () => {
     // (owner folder only; NO public/admin read). Reversible
     // (supabase/rollbacks/20260623200000_profile_avatar.down.sql). NOT applied —
     // human-gated for owner.
-    const SPRINT_BASELINE = 85;
+    // Bumped 85 -> 86 for W8 service_offerings (20260627121713_service_offerings):
+    // ONE additive RED migration — new owner-scoped public.service_offerings table
+    // (provider-owned supply listings). RLS enabled, every policy owner-scoped
+    // (provider_id = auth.uid()), grant to authenticated only, NO anon/public, NO
+    // using(true), NO SECURITY DEFINER, NO payment columns. Reversible + guarded
+    // (supabase/rollbacks/20260627121713_service_offerings.down.sql refuses to drop
+    // a non-empty table). NOT applied — human-gated for owner.
+    const SPRINT_BASELINE = 86;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
