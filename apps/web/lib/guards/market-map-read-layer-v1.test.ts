@@ -107,9 +107,10 @@ describe("NO new DB migration in this PR", () => {
     const count = existsSync(dir)
       ? readdirSync(dir).filter((f) => f.endsWith(".sql")).length
       : 0;
-    // 86 = baseline after W8 service_offerings (20260627121713) — ONE additive
-    // RED migration, human-gated, NOT applied. The read layer itself adds no
-    // migration; the global baseline only grows deliberately.
-    expect(count).toBeLessThanOrEqual(86);
+    // 87 = baseline after W6 human_in_loop_learning (20260627132759) — ONE
+    // additive RED migration, human-gated, NOT applied (previous: 86 for W8
+    // service_offerings). The read layer itself adds no migration; the global
+    // baseline only grows deliberately.
+    expect(count).toBeLessThanOrEqual(87);
   });
 });

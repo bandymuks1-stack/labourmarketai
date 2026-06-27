@@ -1,0 +1,233 @@
+"use server";
+
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import {
+  MANAGER_SETTABLE_STATUSES,
+  type LearningMutateResult,
+  type LearningPolicyListResult,
+  type LearningPolicyRow,
+  type ManagerSettableStatus,
+  type ReviewItemRow,
+  type ReviewQueueListResult,
+} from "@/lib/learning/learning-shared";
+
+/**
+ * W6 — Human-in-loop learning model (Phase 1) server actions.
+ *
+ * Honesty / authority invariants:
+ *   * These actions read/write learning SIGNALS and review-queue SUGGESTIONS via
+ *     the caller's RLS-scoped client. They NEVER write `verified`. The only
+ *     confirmation path is `apply_learning_auto_confirmation` (a SECURITY DEFINER
+ *     RPC), which reuses the existing confirmation spine and re-checks live
+ *     manager authority + the journal_review_enabled gate at fire time.
+ *   * Worker can SELECT their own rows (transparency); only an org manager/admin
+ *     can review items or set policy — enforced server-side by RLS, mirrored here
+ *     by tagged results.
+ *
+ * HONEST DEGRADATION: the migration is owner-applied (RED). Until applied, the
+ * tables/RPC are absent — every function returns `needs-migration` and the UI
+ * shows a calm "not available yet" state, never an error and never a fake row.
+ */
+
+// PostgREST: table absent → 42P01 (undefined_table) / PGRST205 (not in schema
+// cache); function absent → 42883 / PGRST202.
+const ABSENT = new Set(["42P01", "42883", "PGRST202", "PGRST204", "PGRST205"]);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+
+function isAbsent(error: { code?: string } | null): boolean {
+  return !!error?.code && ABSENT.has(error.code);
+}
+
+function mapReviewRow(r: Record<string, unknown>): ReviewItemRow {
+  return {
+    id: String(r.id),
+    subjectWorkerId: String(r.subject_worker_id ?? ""),
+    subjectSkillId: (r.subject_skill_id as string | null) ?? null,
+    organizationId: String(r.organization_id ?? ""),
+    journalEntryId: (r.journal_entry_id as string | null) ?? null,
+    suggestionKind: (r.suggestion_kind as ReviewItemRow["suggestionKind"]) ?? "review_skill",
+    status: (r.status as ReviewItemRow["status"]) ?? "pending",
+    reviewedBy: (r.reviewed_by as string | null) ?? null,
+    reviewedAt: (r.reviewed_at as string | null) ?? null,
+    reviewNote: (r.review_note as string | null) ?? null,
+    producedConfirmationId: (r.produced_confirmation_id as string | null) ?? null,
+    policyId: (r.policy_id as string | null) ?? null,
+    createdAt: String(r.created_at ?? ""),
+  };
+}
+
+/** Review-queue items the caller is allowed to see (RLS: own-worker, org-manager,
+ *  or admin). Newest first. */
+export async function listVisibleReviewItems(): Promise<ReviewQueueListResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+
+  const { data, error } = await asAny(supabase)
+    .from("learning_review_queue")
+    .select(
+      "id, subject_worker_id, subject_skill_id, organization_id, journal_entry_id, suggestion_kind, status, reviewed_by, reviewed_at, review_note, produced_confirmation_id, policy_id, created_at",
+    )
+    .order("created_at", { ascending: false });
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    // Any other read failure degrades to an empty list — never a fabricated row.
+    return { kind: "ok", rows: [] };
+  }
+  return { kind: "ok", rows: ((data ?? []) as Record<string, unknown>[]).map(mapReviewRow) };
+}
+
+/** Set a review item's status (manager review decision). RLS enforces that only
+ *  an org manager/admin can update; a worker's attempt fails server-side. Only
+ *  approved/rejected are settable here — auto_actioned is produced ONLY by the
+ *  audited RPC, never by a direct status write. */
+export async function setReviewItemStatus(
+  id: string,
+  status: ManagerSettableStatus,
+  note?: string | null,
+): Promise<LearningMutateResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  if (!id) return { kind: "invalid", field: "id" };
+  if (!MANAGER_SETTABLE_STATUSES.includes(status)) return { kind: "invalid", field: "status" };
+
+  const cleanNote = typeof note === "string" ? note.trim().slice(0, 2000) || null : null;
+  const { error } = await asAny(supabase)
+    .from("learning_review_queue")
+    .update({
+      status,
+      reviewed_by: user.id,
+      reviewed_at: new Date().toISOString(),
+      review_note: cleanNote,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message ?? "unknown" };
+  }
+  revalidatePath("/dashboard/learning");
+  return { kind: "ok", id };
+}
+
+function mapPolicyRow(r: Record<string, unknown>): LearningPolicyRow {
+  return {
+    id: String(r.id),
+    organizationId: String(r.organization_id ?? ""),
+    policyKind: (r.policy_kind as LearningPolicyRow["policyKind"]) ?? "auto_confirm_journal_skill",
+    enabled: r.enabled === true,
+    scope: (r.scope as Record<string, unknown>) ?? {},
+    rule: (r.rule as Record<string, unknown>) ?? {},
+    enabledBy: (r.enabled_by as string | null) ?? null,
+    enabledAt: (r.enabled_at as string | null) ?? null,
+    disabledBy: (r.disabled_by as string | null) ?? null,
+    disabledAt: (r.disabled_at as string | null) ?? null,
+  };
+}
+
+/** Policies the caller can see (RLS: org-manager or admin only). */
+export async function listManagedLearningPolicies(): Promise<LearningPolicyListResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+
+  const { data, error } = await asAny(supabase)
+    .from("learning_policy_settings")
+    .select(
+      "id, organization_id, policy_kind, enabled, scope, rule, enabled_by, enabled_at, disabled_by, disabled_at",
+    )
+    .order("created_at", { ascending: false });
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    return { kind: "ok", rows: [] };
+  }
+  return { kind: "ok", rows: ((data ?? []) as Record<string, unknown>[]).map(mapPolicyRow) };
+}
+
+/**
+ * Enable/disable the auto-confirmation policy for an organization the caller
+ * manages. DEFAULT OFF: a fresh row is created disabled; enabling records
+ * enabled_by/enabled_at, disabling records disabled_by/disabled_at. RLS enforces
+ * that only an org manager/admin can write. This sets POLICY only — it never
+ * confirms anything; confirmation happens later via the audited RPC.
+ */
+export async function setAutoConfirmPolicy(input: {
+  organizationId: string;
+  enabled: boolean;
+  scope?: Record<string, unknown>;
+  rule?: Record<string, unknown>;
+}): Promise<LearningMutateResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  if (!input.organizationId) return { kind: "invalid", field: "organizationId" };
+
+  const now = new Date().toISOString();
+  const row: Record<string, unknown> = {
+    organization_id: input.organizationId,
+    policy_kind: "auto_confirm_journal_skill",
+    enabled: input.enabled === true,
+    scope: input.scope ?? {},
+    rule: input.rule ?? {},
+    updated_at: now,
+    ...(input.enabled
+      ? { enabled_by: user.id, enabled_at: now }
+      : { disabled_by: user.id, disabled_at: now }),
+  };
+
+  const { data, error } = await asAny(supabase)
+    .from("learning_policy_settings")
+    .upsert(row, { onConflict: "organization_id,policy_kind" })
+    .select("id")
+    .single();
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message ?? "unknown" };
+  }
+  revalidatePath("/dashboard/learning");
+  return { kind: "ok", id: data?.id as string | undefined };
+}
+
+/**
+ * Apply the standing auto-confirmation policy to ONE eligible pending review
+ * item, via the SECURITY DEFINER RPC. The RPC re-checks live authority, policy
+ * enabled state, scope, threshold, and the journal_review_enabled gate, and only
+ * then produces a REAL confirmation + audit event (attributed to the live caller,
+ * recording the enabling manager + policy). Returns the RPC's tagged status.
+ */
+export async function applyAutoConfirmation(reviewItemId: string): Promise<LearningMutateResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  if (!reviewItemId) return { kind: "invalid", field: "reviewItemId" };
+
+  const { data, error } = await asAny(supabase).rpc("apply_learning_auto_confirmation", {
+    p_review_item_id: reviewItemId,
+  });
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message ?? "unknown" };
+  }
+  revalidatePath("/dashboard/learning");
+  // The RPC returns a tagged string (e.g. "auto_confirmed:1", "policy_disabled").
+  return { kind: "ok", detail: typeof data === "string" ? data : undefined };
+}

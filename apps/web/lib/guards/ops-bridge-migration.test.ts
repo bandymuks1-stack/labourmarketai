@@ -184,6 +184,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // additive RED: new owner-scoped provider service-offerings table; RLS
     // owner-scoped, grant authenticated only, no anon/public, no SECURITY
     // DEFINER, no payment columns; NOT applied, human-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 86/);
+    // then to 87 for W6 human_in_loop_learning (20260627132759; additive RED:
+    // 3 new owner/org-scoped learning tables + ONE SECURITY DEFINER RPC reusing
+    // the confirmation spine under live manager authority; default-OFF policy;
+    // no anon/public, no using(true), no payment; NOT applied, human-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 87/);
   });
 });

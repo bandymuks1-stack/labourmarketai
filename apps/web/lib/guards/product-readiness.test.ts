@@ -1485,7 +1485,16 @@ describe("no migration files added by this sprint", () => {
     // using(true), NO SECURITY DEFINER, NO payment columns. Reversible + guarded
     // (supabase/rollbacks/20260627121713_service_offerings.down.sql refuses to drop
     // a non-empty table). NOT applied — human-gated for owner.
-    const SPRINT_BASELINE = 86;
+    // Bumped 86 -> 87 for W6 human_in_loop_learning (20260627132759):
+    // ONE additive RED migration — 3 new owner/org-scoped tables (learning_signals
+    // append-only, learning_review_queue, learning_policy_settings default-OFF)
+    // plus ONE SECURITY DEFINER RPC (apply_learning_auto_confirmation) that reuses
+    // the existing confirmation spine under live manager authority. RLS owner/org-
+    // scoped via owns_worker/manages_organization/is_admin, grant authenticated
+    // only, NO anon/public, NO using(true), NO payment. Reversible + guarded
+    // (supabase/rollbacks/20260627132759_human_in_loop_learning.down.sql). NOT
+    // applied — human-gated for owner.
+    const SPRINT_BASELINE = 87;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

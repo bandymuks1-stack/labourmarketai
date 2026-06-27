@@ -4101,6 +4101,37 @@
       "archived": "Archyvuota"
     }
   },
+  "learning": {
+    "pageTitle": "Mokymasis ir peržiūra",
+    "pageLead": "Pasiūlymai iš tikros darbo veiklos, paliekami žmogui peržiūrėti. Niekas čia savaime nelaikomas įrodytu.",
+    "title": "Peržiūros eilė",
+    "lead": "Signalai virsta pasiūlymais, o sprendžia žmogus. Mokymasis pats nieko nenusprendžia.",
+    "notAvailable": "Kol kas neprieinama.",
+    "empty": "Kol kas nėra ką peržiūrėti.",
+    "worker": {
+      "heading": "Pasiūlymai apie tavo darbą",
+      "intro": "Tai juodraštiniai signalai iš tavo veiklos. Įgaliotas vadovas sprendžia, kas tampa įrašu — iki tol tai tik pasiūlymai."
+    },
+    "manager": {
+      "queueHeading": "Peržiūros eilė",
+      "approve": "Patvirtinti",
+      "reject": "Atmesti",
+      "applyPolicy": "Taikyti nuostatą",
+      "policyHeading": "Automatinio patvirtinimo nuostata",
+      "policyState": "Būsena",
+      "policyOff": "Išjungta",
+      "policyOn": "Įjungta",
+      "note": "Pagal numatymą išjungta. Įjungus, tinkami siūlymai pereina įprastą peržiūros kelią ir užfiksuojami kaip tavo nuolatinės nuostatos sprendimas — viskas registruojama ir atšaukiama.",
+      "status": {
+        "pending": "Laukia peržiūros",
+        "approved": "Patvirtinta",
+        "rejected": "Atmesta",
+        "superseded": "Pakeista",
+        "auto_actioned": "Patvirtinta pagal nuostatą"
+      }
+    },
+    "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą."
+  },
   "serviceOfferings": {
     "pageTitle": "Paslaugos",
     "pageLead": "Išvardykite realias paslaugas, kurias siūlote, ir tvarkykite savo pasiūlymus.",
