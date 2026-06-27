@@ -70,6 +70,11 @@ export default async function ServicesPage({
       active: t("status.active"),
       paused: t("status.paused"),
     },
+    discoverability: {
+      draft: t("discoverability.draft"),
+      active: t("discoverability.active"),
+      paused: t("discoverability.paused"),
+    },
   };
 
   return (

@@ -4181,7 +4181,7 @@
     "pageTitle": "Services",
     "pageLead": "List the real services you offer and manage your own offerings.",
     "title": "Your service offerings",
-    "intro": "Real services you offer. Only you see and manage these — they are not shown to others yet.",
+    "intro": "Real services you offer. Activate one to make it findable by signed-in members; drafts and paused services stay private to you.",
     "notAvailable": "Service offerings are not available yet. This area turns on once the data model is enabled.",
     "empty": "No service offerings yet. Add the first real service you offer.",
     "addButton": "Add a service",
@@ -4214,6 +4214,11 @@
       "draft": "Draft",
       "active": "Active",
       "paused": "Paused"
+    },
+    "discoverability": {
+      "draft": "Draft — not findable yet. Activate to publish it for signed-in members.",
+      "active": "Active — signed-in members can find and request this service.",
+      "paused": "Paused — hidden from members. Activate to make it findable again."
     }
   },
   "communication": {
