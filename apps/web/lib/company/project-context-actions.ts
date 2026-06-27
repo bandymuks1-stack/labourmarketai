@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnCompany } from "@/lib/company/company-workers";
+import { resolveOrganizationIdForCompany } from "@/lib/company/resolve-organization-id";
 
 /**
  * First safe company-side project/client CREATE flow (v1).
@@ -52,10 +53,20 @@ export async function createProjectContextAction(
 
   const supabase = await createClient();
 
+  // W10: bind the canonical organization at creation so the project is never
+  // left org-less (the stale state the W10 backfill corrected).
+  const organizationId = await resolveOrganizationIdForCompany(supabase, company.id);
+
   // Insert the project context (RLS double-enforces owns_company(company_id)).
   const { data: project, error } = await supabase
     .from("projects")
-    .insert({ company_id: company.id, title: name, city: location, status: "draft" })
+    .insert({
+      company_id: company.id,
+      organization_id: organizationId,
+      title: name,
+      city: location,
+      status: "draft",
+    })
     .select("id")
     .single();
   if (error || !project?.id) {
