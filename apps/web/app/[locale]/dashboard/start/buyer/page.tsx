@@ -147,7 +147,9 @@ export default async function BuyerStartPage({
             </div>
             <div>
               <dt className="text-xs text-text-muted">{t("reviewStatus")}</dt>
-              <dd className="text-text-primary">{customer.reviewStatus}</dd>
+              <dd className="text-text-primary">
+                {t(`reviewStatusOptions.${customer.reviewStatus}`)}
+              </dd>
             </div>
           </dl>
           <Link

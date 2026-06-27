@@ -1317,7 +1317,13 @@
         "statusError": "Что-то пошло не так. Пожалуйста, попробуйте ещё раз.",
         "migrationBlockerHeading": "Что-то пошло не так",
         "migrationBlockerBody": "Не удалось выполнить действие. Попробуйте ещё раз.",
-        "reviewStatus": "Статус проверки"
+        "reviewStatus": "Статус проверки",
+        "reviewStatusOptions": {
+          "pending": "Ожидает",
+          "in_review": "На рассмотрении",
+          "approved": "Одобрено",
+          "needs_followup": "Требуется уточнение"
+        }
       },
       "requests": {
         "heading": "Запросы заказчика",

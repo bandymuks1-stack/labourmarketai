@@ -1317,7 +1317,13 @@
         "statusError": "Something went wrong. Please try again.",
         "migrationBlockerHeading": "Something went wrong",
         "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
-        "reviewStatus": "Review status"
+        "reviewStatus": "Review status",
+        "reviewStatusOptions": {
+          "pending": "Pending",
+          "in_review": "In review",
+          "approved": "Approved",
+          "needs_followup": "Needs follow-up"
+        }
       },
       "requests": {
         "heading": "Buyer requests",
