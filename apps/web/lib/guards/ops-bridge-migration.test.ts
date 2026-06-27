@@ -191,6 +191,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 88 for W10 projects org backfill (20260627143433; owner-approved
     // data backfill of 4 legacy draft projects to the canonical org via the
     // legacy bridge, ambiguity-guarded, reversible; APPLIED via MCP).
-    expect(guard).toMatch(/SPRINT_BASELINE = 88/);
+    // then to 89 for P0 marketplace service_offering_requests (20260627145318;
+    // additive RED: discovery RLS (authenticated + active-only) + new 2-party
+    // request table + 3 SECURITY DEFINER RPCs (request/respond/withdraw);
+    // SELECT-only grant, no anon/public, no using(true), no payment; NOT applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 89/);
   });
 });
