@@ -13,6 +13,7 @@ import {
   type IncomingRequestRow,
   type OutgoingListResult,
   type OutgoingRequestRow,
+  type OutgoingRequestSummary,
   type RequestMutateResult,
   type RespondDecision,
 } from "@/lib/marketplace/service-requests-shared";
@@ -214,4 +215,22 @@ export async function getPendingIncomingRequestCount(): Promise<number> {
   const result = await listIncomingRequests();
   if (result.kind !== "ok") return 0;
   return result.rows.filter((r) => r.status === "sent").length;
+}
+
+/**
+ * Real status counts for the caller's OWN outgoing requests — the buyer's
+ * dashboard next-action signal. Returns all-zero on any non-ok state
+ * (not-authed / needs-migration / read failure), so the dashboard shows no card
+ * rather than an error or a fabricated count. 'withdrawn' is the buyer's own
+ * closed intent, so it is intentionally not surfaced as a next action.
+ */
+export async function getOutgoingRequestSummary(): Promise<OutgoingRequestSummary> {
+  const result = await listOutgoingRequests();
+  if (result.kind !== "ok") return { sent: 0, accepted: 0, declined: 0 };
+  const rows = result.rows;
+  return {
+    sent: rows.filter((r) => r.status === "sent").length,
+    accepted: rows.filter((r) => r.status === "accepted").length,
+    declined: rows.filter((r) => r.status === "declined").length,
+  };
 }

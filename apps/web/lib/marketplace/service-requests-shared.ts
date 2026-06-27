@@ -51,6 +51,13 @@ export interface IncomingRequestRow {
   readonly createdAt: string;
 }
 
+/** Real status counts for a buyer's own outgoing requests (dashboard summary). */
+export interface OutgoingRequestSummary {
+  readonly sent: number;
+  readonly accepted: number;
+  readonly declined: number;
+}
+
 export type DiscoveryListResult =
   | { kind: "ok"; rows: DiscoverableOfferingRow[] }
   | { kind: "needs-migration" }

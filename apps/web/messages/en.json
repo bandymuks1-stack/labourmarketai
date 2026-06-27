@@ -4117,6 +4117,20 @@
     "incomingEmpty": "No incoming requests yet.",
     "dashboardIncomingTitle": "Service requests waiting",
     "dashboardIncomingNote": "Respond to people who want your services",
+    "dashboardOutgoing": {
+      "accepted": {
+        "title": "Your request was accepted",
+        "note": "Open the service request to continue"
+      },
+      "waiting": {
+        "title": "Waiting on a reply",
+        "note": "Your request was sent — no reply yet"
+      },
+      "declined": {
+        "title": "Request answered",
+        "note": "See the status of your requests"
+      }
+    },
     "accept": "Accept",
     "decline": "Decline",
     "withdraw": "Withdraw",
