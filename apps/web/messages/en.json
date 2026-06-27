@@ -4115,6 +4115,8 @@
     "outgoingEmpty": "You haven't requested any service yet.",
     "incomingHeading": "Requests for your services",
     "incomingEmpty": "No incoming requests yet.",
+    "dashboardIncomingTitle": "Service requests waiting",
+    "dashboardIncomingNote": "Respond to people who want your services",
     "accept": "Accept",
     "decline": "Decline",
     "withdraw": "Withdraw",
