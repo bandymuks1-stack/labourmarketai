@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { ArrowRight } from "lucide-react";
 
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   listDiscoverableOfferings,
@@ -100,6 +102,16 @@ export default async function ServiceRequestsPage({
         needsMigration={needsMigration}
         labels={labels}
       />
+      {/* Cross-link to the other half of the loop — manage / activate the
+          services that make you discoverable here. Quiet, secondary affordance. */}
+      <Link
+        href={"/dashboard/services" as "/dashboard"}
+        data-testid="requests-to-services-link"
+        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
+      >
+        {t("linkToServices")}
+        <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+      </Link>
     </div>
   );
 }

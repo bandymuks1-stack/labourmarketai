@@ -4142,6 +4142,12 @@
     "requestedBy": "Requested by",
     "requesterFallback": "Member",
     "newBadge": "new",
+    "hubTitle": "Marketplace",
+    "hubOffer": "Services I offer",
+    "hubOfferNote": "Create and activate what you offer",
+    "hubFind": "Discover & request services",
+    "hubFindNote": "Browse active services and track requests",
+    "linkToServices": "Manage the services you offer",
     "status": {
       "sent": "Sent",
       "accepted": "Accepted",
@@ -4222,7 +4228,8 @@
       "draft": "Draft — not findable yet. Activate to publish it for signed-in members.",
       "active": "Active — signed-in members can find and request this service.",
       "paused": "Paused — hidden from members. Activate to make it findable again."
-    }
+    },
+    "linkToRequests": "See requests for your services"
   },
   "communication": {
     "origin": {

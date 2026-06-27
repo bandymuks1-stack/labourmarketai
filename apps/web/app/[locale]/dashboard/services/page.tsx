@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { ArrowRight } from "lucide-react";
 
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnServiceOfferings } from "@/lib/services/service-offerings";
 import {
@@ -90,6 +92,16 @@ export default async function ServicesPage({
         needsMigration={needsMigration}
         labels={labels}
       />
+      {/* Cross-link to the other half of the loop — where requests for these
+          services arrive and are answered. Quiet, secondary affordance. */}
+      <Link
+        href={"/dashboard/service-requests" as "/dashboard"}
+        data-testid="services-to-requests-link"
+        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
+      >
+        {t("linkToRequests")}
+        <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+      </Link>
     </div>
   );
 }
