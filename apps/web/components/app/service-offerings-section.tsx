@@ -54,6 +54,9 @@ export type ServiceOfferingsLabels = {
   errorGeneric: string;
   remoteBadge: string;
   status: Record<ServiceOfferingStatus, string>;
+  /** Per-status discoverability hint — explains the draft/paused → active funnel
+   *  (only an active offering is findable by signed-in members). */
+  discoverability: Record<ServiceOfferingStatus, string>;
 };
 
 type Draft = {
@@ -340,13 +343,27 @@ export function ServiceOfferingsSection({
                     {row.remote && <span>{labels.remoteBadge}</span>}
                     {row.rateText && <span>{row.rateText}</span>}
                   </div>
+                  {/* Discoverability funnel hint — only an ACTIVE offering is
+                      findable by signed-in members; draft/paused stay private. */}
+                  <p
+                    data-testid={`service-offering-discoverability-${row.id}`}
+                    className={`text-[11px] leading-relaxed ${
+                      row.status === "active" ? "text-state-success" : "text-text-muted"
+                    }`}
+                  >
+                    {labels.discoverability[row.status]}
+                  </p>
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       onClick={() => toggleStatus(row)}
                       disabled={pending}
                       data-testid={`service-offering-toggle-${row.id}`}
-                      className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-60"
+                      className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium disabled:opacity-60 ${
+                        row.status === "active"
+                          ? "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                          : "border-brand-blue/50 text-brand-blue hover:bg-brand-blue/10"
+                      }`}
                     >
                       {row.status === "active" ? (
                         <>
