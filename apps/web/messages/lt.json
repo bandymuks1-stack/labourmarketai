@@ -2522,7 +2522,7 @@
       "error_password_required": "Įveskite slaptažodį.",
       "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis.",
       "google_hint": "Registravotės su „Google“? Tuomet slaptažodžio nereikia — spauskite „Tęsti su Google“ viršuje.",
-      "preview_host_notice": "Esate Vercel peržiūros (preview) versijoje. Google prisijungimas šiame URL nekonfigūruotas — Supabase Site URL nukreipia tik produkcijos adresą. Prisijungti galite https://app.labourmarket.ai. El. paštu + slaptažodžiu prisijungimas dirba ir čia."
+      "preview_host_notice": "Esate peržiūros (preview) versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidarykite https://app.labourmarket.ai ir prisijunkite ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta."
     },
     "forgotPassword": {
       "headline": "Pamiršai slaptažodį?",
