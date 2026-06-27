@@ -37,7 +37,10 @@ and cleaning→flooring). **All four are now fixed.** The first three were simpl
 narrowings; the cleaning→flooring case (#23) is fixed with a deterministic
 cleaning-context blocker that suppresses the flooring trade for washed-floor
 phrases and maps the exact phrases to the existing cleaning signal (§4.6).
-**BAD is now 0.**
+**BAD is now 0.** A follow-up in this PR extends the *same* deterministic blocker
+to the sibling profile-narrative extractor (`extractProfileSuggestions`), which
+shared the ambiguous floor needle and still returned the `flooring` skill for
+"ploviau grindis" — the last unguarded surface, now SAFE EMPTY there (§4.6).
 
 ---
 
@@ -200,6 +203,20 @@ All are **narrowing or precise additions** — none widens fuzzy matching.
    - Also added LT material stems `"laminat"`/`"parket"` to the flooring needles
      so "klojau parketą" / "dėjau laminatą" recognise **deterministically**
      rather than relying on fuzzy.
+   - **Sibling surface closed (this PR follow-up):** the profile-narrative
+     extractor `extractProfileSuggestions` (`extract-profile-suggestions.ts`,
+     powering the profile text-first onboarding flow) shares the *same*
+     ambiguous `"grind"` flooring needle but ran an **unguarded** `pickSlug`, so
+     "ploviau grindis" in a career narrative still returned the `flooring`
+     **skill** — a real remaining BAD on a non-journal surface. Fix: export the
+     existing `isCleaningFloorContext` guard from `skill-recognition.ts` and
+     apply the **exact same** deterministic blocker in the profile extractor.
+     Both surfaces now agree: washing a floor → no flooring skill (**SAFE EMPTY**
+     in the profile extractor, which returns slugs only and has no label-only
+     cleaning channel — honest, not wrong); real installation ("dėjau grindis",
+     "klojau parketą", "dėjau laminatą", "montavau grindis") is untouched. The
+     journal surface (`page.tsx` → `extractJournalSuggestions` →
+     `recognizeSkills`) was already guarded and is re-confirmed.
 
 **Tests added** — `lib/guards/journal-realworld-recognition.test.ts` (33 tests,
 25-entry pack + a dedicated cleaning-floor block), covering: the four fixed false
@@ -209,6 +226,14 @@ floor-washing maps to the cleaning signal with no raw slug / no duplicate / no
 cert wording; web/design → no construction; generic/unknown stays safe-empty;
 RU + EN + safe-typo handling; **no LT leak in EN/RU across the whole pack**;
 cooking + forklift additions surface; ≥20 entries run without throwing.
+
+Plus `lib/structuring/extract-profile-suggestions.test.ts` (+8 tests) for the
+sibling profile surface: washing-floor narratives ("ploviau grindis",
+"išploviau/valiau grindis…", RU "мыл полы", EN "mopped the floor") return **no
+flooring skill**; real installation ("dėjau grindis", "klojau parketą", "dėjau
+laminatą", "montavau grindis") **still triggers flooring**; unknown cleaning text
+with no floor noun stays **safe-empty** (no invented slug). The pre-existing
+"dėjau grindis → flooring" assertion is unchanged (laying verb wins).
 
 ---
 
@@ -244,6 +269,8 @@ left out of this audit PR:
 - **No** DB/schema/RLS/RPC/Supabase/env/DNS/billing/payment/auth-core change; no
   production mutation; no fake skill; no public test route; no auth bypass.
 - **Validation:** `pnpm -F web typecheck` ✅ · `pnpm -F web lint` ✅ ·
-  `pnpm -F web build` ✅ · full `vitest` 395 files / 5666 tests ✅.
+  `pnpm -F web build` ✅ · full `vitest` 395 files / 5674 tests ✅ ·
+  `migration-safety` GREEN (no migration files changed) · risky-path scan clean
+  (no DB/schema/RLS/RPC/Supabase/env/auth/billing/payment/DNS strings in diff).
 - **Entries tested:** 50 · GOOD 32 · PARTIAL 3 · SAFE EMPTY 15 · **BAD 0** ·
   DUPLICATE/RAW 0.

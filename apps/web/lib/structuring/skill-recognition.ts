@@ -60,8 +60,12 @@ const FLOOR_INSTALL_RE =
 const FLOOR_CLEAN_RE =
   /plov|plau|valiau|valau|valyt|svei|siurb|sluost|sutvark|sluav|мыл|помыл|мою|вымыл|убра|пропылесос|wash|mopp|mop |vacuum|hoover|swept|sweep|\bclean/;
 
-/** True when a floor is named in an unmistakably cleaning (not laying) context. */
-function isCleaningFloorContext(foldedText: string): boolean {
+/** True when a floor is named in an unmistakably cleaning (not laying) context.
+ *  Exported so the profile-narrative extractor (`extract-profile-suggestions`)
+ *  applies the EXACT same deterministic blocker — the two recognisers must agree
+ *  that "ploviau grindis" is cleaning, never the flooring trade. Input must be
+ *  FOLDED text (see ./normalize). */
+export function isCleaningFloorContext(foldedText: string): boolean {
   return (
     FLOOR_NOUN_RE.test(foldedText) &&
     FLOOR_CLEAN_RE.test(foldedText) &&

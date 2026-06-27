@@ -3,6 +3,8 @@ import {
   SKILL_HINTS_LT,
   WORK_DIRECTION_HINTS_LT,
 } from "./keywords";
+import { foldText } from "./normalize";
+import { isCleaningFloorContext } from "./skill-recognition";
 
 /**
  * RULE-BASED suggestion extractor for free-text career narratives or pasted
@@ -57,7 +59,17 @@ export function extractProfileSuggestions(text: string): ProfileSuggestions {
   if (!text || text.trim().length === 0) return EMPTY;
   const lower = text.toLowerCase();
 
-  const skillSlugs = pickSlug(lower, SKILL_HINTS_LT);
+  let skillSlugs = pickSlug(lower, SKILL_HINTS_LT);
+  // Cleaning-context guard (real-world audit — owner rule "a wrong signal is
+  // worse than no signal"). The flooring needle "grind" is the one ambiguous
+  // floor noun, shared by LAYING and WASHING a floor. A narrative like "ploviau
+  // grindis" (I washed the floors) must NOT claim the floor-laying trade. We
+  // reuse the EXACT deterministic blocker the journal recogniser uses so both
+  // surfaces agree; real installation ("dėjau grindis", "klojau parketą") keeps
+  // a laying verb / material and is never suppressed.
+  if (skillSlugs.includes("flooring") && isCleaningFloorContext(foldText(lower))) {
+    skillSlugs = skillSlugs.filter((s) => s !== "flooring");
+  }
   const workDirectionSlugs = pickSlug(lower, WORK_DIRECTION_HINTS_LT);
   const professionSlugs = pickSlug(lower, PROFESSION_HINTS_LT);
 

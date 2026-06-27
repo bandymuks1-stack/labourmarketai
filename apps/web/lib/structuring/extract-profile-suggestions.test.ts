@@ -22,3 +22,40 @@ describe("extractProfileSuggestions (rule-based, LT)", () => {
     expect(s.hasAny).toBe(true);
   });
 });
+
+describe("extractProfileSuggestions: washing a floor is never floor-laying (#23 sibling path)", () => {
+  // Owner rule: a wrong signal is worse than no signal. The profile-narrative
+  // extractor shares the ambiguous "grind" / "floor" / "пол" needle with the
+  // journal recogniser, so the SAME deterministic cleaning-context guard
+  // (skill-recognition.isCleaningFloorContext) must suppress the flooring trade
+  // here too — otherwise a cleaner's narrative ("ploviau grindis") would falsely
+  // claim a floor-laying construction skill.
+  const CLEANING = [
+    "ploviau grindis",
+    "išploviau grindis biure",
+    "valiau grindis kabinete",
+    "siurbiau ir ploviau grindis",
+    "мыл полы в офисе",
+    "mopped the floor every morning",
+  ];
+  for (const text of CLEANING) {
+    it(`"${text}" → no flooring / floor-laying skill`, () => {
+      expect(extractProfileSuggestions(text).skillSlugs).not.toContain("flooring");
+    });
+  }
+
+  it("real floor INSTALLATION in a narrative still triggers flooring", () => {
+    for (const text of [
+      "dėjau grindis",
+      "klojau parketą",
+      "dėjau laminatą",
+      "montavau grindis",
+    ]) {
+      expect(extractProfileSuggestions(text).skillSlugs, text).toContain("flooring");
+    }
+  });
+
+  it("unknown cleaning text with no floor noun stays safe-empty (no invented skill)", () => {
+    expect(extractProfileSuggestions("tampiau šiukšles ir tvarkiau").skillSlugs).toEqual([]);
+  });
+});
