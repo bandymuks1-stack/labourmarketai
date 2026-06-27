@@ -14,7 +14,7 @@ import {
   missingReadinessPillars,
   type ReadinessLevel,
 } from "@/lib/player-card/readiness";
-import { personMonogram } from "@/lib/visual/avatar-monogram";
+import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
 import { cn } from "@/lib/utils";
 
 /**
@@ -159,6 +159,19 @@ export function WorkerPlayerCard({
         ? labels.readiness.levelBuilding
         : labels.readiness.levelStart;
   const missing = missingReadinessPillars(readiness);
+  // Identity tile (avatar + name + initials) sourced through the ONE minimum
+  // Player Card contract, so the fallback rules are identical to every other
+  // surface — no private monogram copy, no fabricated identity. Initials still
+  // resolve to the shared personMonogram (playerInitials), so the visual output
+  // is unchanged.
+  const identity = buildPlayerCardMinimum({
+    avatarUrl,
+    fullName: card.displayName,
+    headline: labels.professionName,
+    skillsDeclared: card.skillsDeclared,
+    skillsVerified: card.verifiedSkills.length,
+  });
+  const name = identity.displayName ?? labels.namePlaceholder;
   return (
     <section
       className={cn(
@@ -175,11 +188,11 @@ export function WorkerPlayerCard({
       {/* ── Identity: avatar + name + profession + readiness ring ── */}
       <header className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
-          {avatarUrl ? (
+          {identity.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={avatarUrl}
-              alt={card.displayName ?? labels.namePlaceholder}
+              src={identity.avatarUrl}
+              alt={name}
               data-testid="player-card-avatar-photo"
               loading="lazy"
               className={cn(
@@ -196,7 +209,7 @@ export function WorkerPlayerCard({
                 "border-ink-500",
               )}
             >
-              {personMonogram(card.displayName)}
+              {identity.initials}
             </span>
           )}
           <div className="min-w-0 flex-col">
@@ -204,7 +217,7 @@ export function WorkerPlayerCard({
               {labels.title}
             </span>
             <h2 className="truncate font-display text-xl font-bold tracking-tightest text-text-primary">
-              {card.displayName ?? labels.namePlaceholder}
+              {name}
             </h2>
             <p className="truncate text-xs leading-relaxed text-text-secondary">
               {labels.professionName ?? labels.subtitle}
