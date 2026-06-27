@@ -4101,6 +4101,37 @@
       "archived": "Archived"
     }
   },
+  "learning": {
+    "pageTitle": "Learning & review",
+    "pageLead": "Suggestions drawn from real work activity, kept for a person to review. Nothing here is treated as proven on its own.",
+    "title": "Review queue",
+    "lead": "Signals become suggestions, and a person decides. Learning never settles anything by itself.",
+    "notAvailable": "Not available yet.",
+    "empty": "Nothing to review yet.",
+    "worker": {
+      "heading": "Suggestions about your work",
+      "intro": "These are draft signals from your activity. A manager with real authority decides what becomes a record — they are only suggestions until then."
+    },
+    "manager": {
+      "queueHeading": "Review queue",
+      "approve": "Approve",
+      "reject": "Reject",
+      "applyPolicy": "Apply standing policy",
+      "policyHeading": "Auto-confirmation policy",
+      "policyState": "Status",
+      "policyOff": "Off",
+      "policyOn": "On",
+      "note": "Off by default. When you enable it, eligible items are confirmed through the normal review path and recorded as your standing-policy decision — fully logged and reversible.",
+      "status": {
+        "pending": "Pending review",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "superseded": "Superseded",
+        "auto_actioned": "Confirmed by policy"
+      }
+    },
+    "errorGeneric": "Something went wrong. Please try again."
+  },
   "serviceOfferings": {
     "pageTitle": "Services",
     "pageLead": "List the real services you offer and manage your own offerings.",

@@ -171,6 +171,35 @@ describe("Silent-trust: worker-facing journal copy is neutral (inbox.* excluded)
   }
 });
 
+// The W6 `learning` namespace is worker-facing for the transparency copy
+// (pageTitle/lead/worker.*) — those must be neutral records language. The
+// `manager.*` subtree is the reviewer/manager surface (auto-confirmation policy
+// controls, queue actions) where "confirm/auto-confirmation" is the real,
+// allowed workflow verb — it is excluded, exactly like journal `inbox.*`.
+describe("Silent-trust: worker-facing learning copy is neutral (manager.* excluded)", () => {
+  for (const loc of SERVED) {
+    it(`${loc}: learning namespace (minus manager.*) has no certification wording`, () => {
+      const block = msgs(loc).learning;
+      const offenders: string[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const walk = (o: any, path: string) => {
+        for (const k in o) {
+          const v = o[k];
+          const p = path ? `${path}.${k}` : k;
+          if (p === "manager" || p.startsWith("manager.")) continue; // reviewer-only
+          if (typeof v === "string") {
+            const text = stripBraces(v);
+            if (CERT_STEM.test(text) || EXTERNAL_REVIEW.some((rx) => rx.test(text)))
+              offenders.push(`${p} = ${JSON.stringify(v)}`);
+          } else if (v && typeof v === "object") walk(v, p);
+        }
+      };
+      if (block) walk(block, "");
+      expect(offenders, `${loc} learning leaks:\n${offenders.join("\n")}`).toEqual([]);
+    });
+  }
+});
+
 describe("Silent-trust: self-view surfaces carry no certification visual token", () => {
   const card = read("components/app/worker-player-card.tsx");
   const map = read("components/app/market-map-live.tsx");
