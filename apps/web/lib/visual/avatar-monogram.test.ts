@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { avatarMonogram } from "./avatar-monogram";
+import { avatarMonogram, personMonogram } from "./avatar-monogram";
 
 describe("avatarMonogram", () => {
   it("returns '?' when the input is blank", () => {
@@ -33,5 +33,20 @@ describe("avatarMonogram", () => {
     expect(avatarMonogram("Marija Vilkienė")).toBe(
       avatarMonogram("Marija Vilkienė"),
     );
+  });
+});
+
+describe("personMonogram (shared person-identity initials)", () => {
+  it("matches avatarMonogram's two-letter result for a real name", () => {
+    expect(personMonogram("Jonas Petraitis")).toBe("JP");
+    expect(personMonogram("Jonas Petraitis")).toBe(avatarMonogram("Jonas Petraitis"));
+    expect(personMonogram("Jonas")).toBe("J");
+  });
+
+  it("is null-safe and uses a neutral dot fallback (never '?')", () => {
+    expect(personMonogram(null)).toBe("•");
+    expect(personMonogram(undefined)).toBe("•");
+    expect(personMonogram("")).toBe("•");
+    expect(personMonogram("   ")).toBe("•");
   });
 });

@@ -20,6 +20,7 @@ import {
 import { FeatureNote } from "@/components/app/feature-note";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import { getOwnCompany } from "@/lib/company/company-setup";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 
 /**
  * Live market map — FOUNDATION route (v1). Authenticated (under /dashboard,
@@ -89,7 +90,9 @@ export default async function MarketMapPage({
     ? {
         kind: "person" as const,
         name: ownName,
-        initial: ownName.slice(0, 1).toUpperCase(),
+        // Same monogram logic as the Player Card header so the map own-marker
+        // shows the identical initials ("Jonas Petraitis" → "JP", not "J").
+        initial: personMonogram(ownName),
         avatarUrl: avatar.signedUrl,
         statusLabel: tMap("markerYou"),
         availabilityLabel,
