@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { callerCompanyId } from "./projects";
+import { resolveOrganizationIdForCompany } from "@/lib/company/resolve-organization-id";
 
 /**
  * Project + assignment server actions (slice f4-worker-project-assignment-v1).
@@ -56,9 +57,19 @@ export async function createProjectAction(
   const companyId = await callerCompanyId();
   if (!companyId) return { ok: false, code: "no_company" };
 
+  // W10: bind the canonical organization at creation so the project is never
+  // left org-less (the stale state the W10 backfill corrected).
+  const organizationId = await resolveOrganizationIdForCompany(supabase, companyId);
+
   const { data, error } = await asAny(supabase)
     .from("projects")
-    .insert({ company_id: companyId, title: title.slice(0, 200), city, status: "draft" })
+    .insert({
+      company_id: companyId,
+      organization_id: organizationId,
+      title: title.slice(0, 200),
+      city,
+      status: "draft",
+    })
     .select("id")
     .single();
   if (error) {

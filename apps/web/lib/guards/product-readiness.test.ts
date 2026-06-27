@@ -1494,7 +1494,13 @@ describe("no migration files added by this sprint", () => {
     // only, NO anon/public, NO using(true), NO payment. Reversible + guarded
     // (supabase/rollbacks/20260627132759_human_in_loop_learning.down.sql). NOT
     // applied — human-gated for owner.
-    const SPRINT_BASELINE = 87;
+    // Bumped 87 -> 88 for W10 projects org backfill (20260627143433):
+    // ONE owner-approved data backfill — reroutes 4 legacy draft projects to the
+    // canonical organization via the legacy bridge, ambiguity-guarded (=1 org),
+    // additive (sets a NULL column), non-destructive, reversible + scoped rollback
+    // (supabase/rollbacks/20260627143433_w10_projects_org_backfill.down.sql).
+    // APPLIED to prod via MCP on 2026-06-27 (idempotent re-run-safe).
+    const SPRINT_BASELINE = 88;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

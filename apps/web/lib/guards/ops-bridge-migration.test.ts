@@ -188,6 +188,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // 3 new owner/org-scoped learning tables + ONE SECURITY DEFINER RPC reusing
     // the confirmation spine under live manager authority; default-OFF policy;
     // no anon/public, no using(true), no payment; NOT applied, human-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 87/);
+    // then to 88 for W10 projects org backfill (20260627143433; owner-approved
+    // data backfill of 4 legacy draft projects to the canonical org via the
+    // legacy bridge, ambiguity-guarded, reversible; APPLIED via MCP).
+    expect(guard).toMatch(/SPRINT_BASELINE = 88/);
   });
 });
