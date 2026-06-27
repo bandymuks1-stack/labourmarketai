@@ -1452,6 +1452,10 @@
       "you": "[EN] You started this conversation",
       "other": "[EN] Started by someone else"
     },
+    "cannotOpen": {
+      "title": "Det gick inte att öppna konversationen",
+      "body": "Du kanske inte har behörighet att meddela den här personen, eller så är personen inte längre tillgänglig. Inget skickades."
+    },
     "originalLanguage": "[EN] Original ({lang})"
   },
   "trust": {

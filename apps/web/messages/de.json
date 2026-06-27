@@ -1452,6 +1452,10 @@
       "you": "[EN] You started this conversation",
       "other": "[EN] Started by someone else"
     },
+    "cannotOpen": {
+      "title": "Unterhaltung konnte nicht geöffnet werden",
+      "body": "Möglicherweise hast du keine Berechtigung, dieser Person zu schreiben, oder sie ist nicht mehr verfügbar. Es wurde nichts gesendet."
+    },
     "originalLanguage": "[EN] Original ({lang})"
   },
   "trust": {

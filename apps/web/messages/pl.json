@@ -1452,6 +1452,10 @@
       "you": "[EN] You started this conversation",
       "other": "[EN] Started by someone else"
     },
+    "cannotOpen": {
+      "title": "Nie udało się otworzyć rozmowy",
+      "body": "Możesz nie mieć uprawnień, aby napisać do tej osoby, lub jest ona już niedostępna. Nic nie zostało wysłane."
+    },
     "originalLanguage": "[EN] Original ({lang})"
   },
   "trust": {
