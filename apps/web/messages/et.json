@@ -1452,6 +1452,10 @@
       "you": "[EN] You started this conversation",
       "other": "[EN] Started by someone else"
     },
+    "cannotOpen": {
+      "title": "Vestlust ei õnnestunud avada",
+      "body": "Võimalik, et teil pole õigust sellele inimesele kirjutada või ta pole enam saadaval. Midagi ei saadetud."
+    },
     "originalLanguage": "[EN] Original ({lang})"
   },
   "trust": {

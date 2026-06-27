@@ -4107,6 +4107,10 @@
       "support": "Pagalbos komanda",
       "restricted": "Pašnekovo duomenys dar nerodomi"
     },
+    "cannotOpen": {
+      "title": "Nepavyko atidaryti pokalbio",
+      "body": "Galbūt neturite teisės rašyti šiam asmeniui arba jis nebepasiekiamas. Niekas neišsiųsta."
+    },
     "scope": {
       "support": "Pagalbos kanalas",
       "unknown": "Kontekstas nepatikslintas"

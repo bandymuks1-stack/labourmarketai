@@ -42,10 +42,18 @@ function asAny(supabase: SupabaseClient): any {
 
 export default async function CommunicationListPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ notice?: string }>;
 }) {
   const { locale } = await params;
+  // Honest failure surface for the "message worker / company" entry points:
+  // when openDirectConversationAction cannot open a conversation it lands here
+  // with ?notice=cannot_open so we can show a restricted state — never a silent
+  // bounce, never a fake "sent".
+  const { notice } = await searchParams;
+  const showCannotOpen = notice === "cannot_open";
   setRequestLocale(locale);
   const t = await getTranslations("communication");
   const supabase = await createClient();
@@ -87,6 +95,30 @@ export default async function CommunicationListPage({
         </h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
+
+      {/* Honest restricted state when a "message" entry point could not open a
+          conversation (no permission / target gone / RLS-blocked). A locked,
+          system-limited treatment — and it explicitly says nothing was sent, so
+          the user never mistakes a failed open for a delivered message. */}
+      {showCannotOpen && (
+        <div
+          role="status"
+          data-testid="communication-cannot-open"
+          className="flex items-start gap-2 rounded-md border border-ink-600/60 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+        >
+          <Lock
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-muted"
+            strokeWidth={2}
+            aria-hidden
+          />
+          <span className="flex flex-col gap-0.5">
+            <span className="font-medium text-text-primary">
+              {t("cannotOpen.title")}
+            </span>
+            <span className="text-text-muted">{t("cannotOpen.body")}</span>
+          </span>
+        </div>
+      )}
 
       <FeatureNote testId="feature-note-communication">
         {(await getTranslations("featureNotes"))("communicationInbox")}

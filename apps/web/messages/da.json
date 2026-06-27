@@ -1452,6 +1452,10 @@
       "you": "[EN] You started this conversation",
       "other": "[EN] Started by someone else"
     },
+    "cannotOpen": {
+      "title": "Kunne ikke åbne samtalen",
+      "body": "Du har muligvis ikke tilladelse til at skrive til denne person, eller personen er ikke længere tilgængelig. Der blev ikke sendt noget."
+    },
     "originalLanguage": "[EN] Original ({lang})"
   },
   "trust": {

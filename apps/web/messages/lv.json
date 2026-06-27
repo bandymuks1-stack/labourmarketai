@@ -1452,6 +1452,10 @@
       "you": "[EN] You started this conversation",
       "other": "[EN] Started by someone else"
     },
+    "cannotOpen": {
+      "title": "Neizdevās atvērt sarunu",
+      "body": "Iespējams, jums nav atļaujas rakstīt šai personai vai tā vairs nav pieejama. Nekas netika nosūtīts."
+    },
     "originalLanguage": "[EN] Original ({lang})"
   },
   "trust": {

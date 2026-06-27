@@ -1452,6 +1452,10 @@
       "you": "[EN] You started this conversation",
       "other": "[EN] Started by someone else"
     },
+    "cannotOpen": {
+      "title": "Kon dat gesprek niet openen",
+      "body": "Je hebt mogelijk geen toestemming om deze persoon te berichten, of deze is niet meer beschikbaar. Er is niets verzonden."
+    },
     "originalLanguage": "[EN] Original ({lang})"
   },
   "trust": {
