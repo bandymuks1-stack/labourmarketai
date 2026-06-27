@@ -66,6 +66,48 @@ export interface OutgoingRequestSummary {
   readonly declined: number;
 }
 
+/**
+ * "New since last seen" counts for the request loop — a real other-party update
+ * after the user last opened /dashboard/service-requests.
+ *   providerNew = incoming requests a buyer sent after my last visit.
+ *   buyerNew    = outgoing requests a provider responded to after my last visit.
+ * Both 0 when the user has never opened the loop (seen_at null) — never fabricated.
+ */
+export interface ServiceRequestsNewCounts {
+  readonly providerNew: number;
+  readonly buyerNew: number;
+}
+
+/**
+ * Pure "new since last seen" compute (no I/O — unit-testable).
+ *   providerNew = incoming requests a BUYER sent (status 'sent') AFTER seenAt —
+ *                 a real other-party action; never my own respond/withdraw
+ *                 (those are accepted/declined/withdrawn, not 'sent').
+ *   buyerNew    = outgoing requests a PROVIDER responded to (accepted/declined)
+ *                 AFTER seenAt — never my own request (that is 'sent').
+ * seenAt null (never opened the loop) → { 0, 0 }. Comparison is timestamp-based
+ * (NaN-safe), never fabricated.
+ */
+export function computeNewCounts(
+  seenAt: string | null,
+  incoming: ReadonlyArray<{ status: RequestStatus; createdAt: string }>,
+  outgoing: ReadonlyArray<{ status: RequestStatus; respondedAt: string | null }>,
+): ServiceRequestsNewCounts {
+  if (!seenAt) return { providerNew: 0, buyerNew: 0 };
+  const seen = Date.parse(seenAt);
+  const after = (ts: string | null): boolean => {
+    if (!ts) return false;
+    const t = Date.parse(ts);
+    return Number.isFinite(t) && Number.isFinite(seen) && t > seen;
+  };
+  return {
+    providerNew: incoming.filter((r) => r.status === "sent" && after(r.createdAt)).length,
+    buyerNew: outgoing.filter(
+      (r) => (r.status === "accepted" || r.status === "declined") && after(r.respondedAt),
+    ).length,
+  };
+}
+
 export type DiscoveryListResult =
   | { kind: "ok"; rows: DiscoverableOfferingRow[] }
   | { kind: "needs-migration" }

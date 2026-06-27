@@ -15,6 +15,7 @@ import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import {
   getPendingIncomingRequestCount,
   getOutgoingRequestSummary,
+  getServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -86,6 +87,10 @@ export default async function DashboardOverviewPage({
   // no card, no fake badge (honest degradation).
   const tMarket = await getTranslations("marketplace");
   const pendingServiceRequests = await getPendingIncomingRequestCount();
+  // "New since last seen" markers — a real OTHER-party update after this user last
+  // opened /dashboard/service-requests. 0 when never opened (seen_at null) or the
+  // seen RPC is not applied yet (rollout-safe). Never my own action, never faked.
+  const { providerNew, buyerNew } = await getServiceRequestsNewCounts();
   const serviceRequestsNextAction =
     pendingServiceRequests > 0 ? (
       <Link
@@ -97,8 +102,18 @@ export default async function DashboardOverviewPage({
           <span className="font-semibold">{tMarket("dashboardIncomingTitle")}</span>
           <span className="text-xs text-text-muted">{tMarket("dashboardIncomingNote")}</span>
         </span>
-        <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white">
-          {pendingServiceRequests}
+        <span className="flex shrink-0 items-center gap-2">
+          {providerNew > 0 && (
+            <span
+              data-testid="dashboard-service-requests-new"
+              className="inline-flex items-center rounded-full bg-brand-cyan/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-label text-brand-cyan tabular-nums"
+            >
+              {providerNew} {tMarket("newBadge")}
+            </span>
+          )}
+          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white">
+            {pendingServiceRequests}
+          </span>
         </span>
       </Link>
     ) : null;
@@ -143,14 +158,24 @@ export default async function DashboardOverviewPage({
           {tMarket(`dashboardOutgoing.${outgoingState}.note`)}
         </span>
       </span>
-      <span
-        className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-bold tabular-nums ${
-          outgoingState === "accepted"
-            ? "bg-state-success text-ink-900"
-            : "bg-ink-700 text-text-primary"
-        }`}
-      >
-        {outgoingCount}
+      <span className="flex shrink-0 items-center gap-2">
+        {buyerNew > 0 && (
+          <span
+            data-testid="dashboard-outgoing-requests-new"
+            className="inline-flex items-center rounded-full bg-brand-cyan/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-label text-brand-cyan tabular-nums"
+          >
+            {buyerNew} {tMarket("newBadge")}
+          </span>
+        )}
+        <span
+          className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-bold tabular-nums ${
+            outgoingState === "accepted"
+              ? "bg-state-success text-ink-900"
+              : "bg-ink-700 text-text-primary"
+          }`}
+        >
+          {outgoingCount}
+        </span>
       </span>
     </Link>
   ) : null;

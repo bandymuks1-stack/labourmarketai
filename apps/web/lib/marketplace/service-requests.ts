@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
   RESPOND_DECISIONS,
+  computeNewCounts,
   type DiscoverableOfferingRow,
   type DiscoveryListResult,
   type IncomingListResult,
@@ -16,6 +17,7 @@ import {
   type OutgoingRequestSummary,
   type RequestMutateResult,
   type RespondDecision,
+  type ServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests-shared";
 
 /**
@@ -273,4 +275,57 @@ export async function getOutgoingRequestSummary(): Promise<OutgoingRequestSummar
     accepted: rows.filter((r) => r.status === "accepted").length,
     declined: rows.filter((r) => r.status === "declined").length,
   };
+}
+
+/**
+ * The caller's own "last opened the request loop" timestamp, from the dedicated
+ * one-row-per-user seen table. Rollout-safe: returns null when the table is
+ * absent (not applied yet), the row does not exist (never opened), or on any
+ * read error — so "new" simply resolves to 0, never an error, never fabricated.
+ */
+export async function getServiceRequestsSeenAt(): Promise<string | null> {
+  const ctx = await uid();
+  if (!ctx) return null;
+  const { data, error } = await asAny(ctx.supabase)
+    .from("service_offering_requests_seen")
+    .select("seen_at")
+    .eq("user_id", ctx.userId)
+    .maybeSingle();
+  if (error || !data) return null;
+  return typeof data.seen_at === "string" ? data.seen_at : null;
+}
+
+/**
+ * "New since last seen" counts for the dashboard markers. Computed app-side from
+ * data already fetched by the loop:
+ *   providerNew = incoming 'sent' requests CREATED after my last visit (a buyer
+ *                 acted) — never my own respond/withdraw.
+ *   buyerNew    = outgoing requests a provider RESPONDED to (accepted/declined)
+ *                 after my last visit — never my own request.
+ * seen_at null (never opened) → { 0, 0 }. Rollout-safe end to end.
+ */
+export async function getServiceRequestsNewCounts(): Promise<ServiceRequestsNewCounts> {
+  const seenAt = await getServiceRequestsSeenAt();
+  if (!seenAt) return { providerNew: 0, buyerNew: 0 };
+  const [inc, out] = await Promise.all([listIncomingRequests(), listOutgoingRequests()]);
+  return computeNewCounts(
+    seenAt,
+    inc.kind === "ok" ? inc.rows : [],
+    out.kind === "ok" ? out.rows : [],
+  );
+}
+
+/**
+ * Mark the request loop as seen for the caller (upsert their single seen row via
+ * the SECURITY DEFINER RPC). Rollout-safe: no-op when unauthenticated or the RPC
+ * is absent/errors — never throws.
+ */
+export async function markServiceRequestsSeen(): Promise<void> {
+  const ctx = await uid();
+  if (!ctx) return;
+  try {
+    await asAny(ctx.supabase).rpc("mark_service_requests_seen");
+  } catch {
+    // rollout-safe: absent RPC / transient error → no-op
+  }
 }

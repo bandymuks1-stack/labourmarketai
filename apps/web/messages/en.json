@@ -4141,6 +4141,7 @@
     "responded": "Responded",
     "requestedBy": "Requested by",
     "requesterFallback": "Member",
+    "newBadge": "new",
     "status": {
       "sent": "Sent",
       "accepted": "Accepted",

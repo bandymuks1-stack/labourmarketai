@@ -1518,7 +1518,17 @@ describe("no migration files added by this sprint", () => {
     // authenticated only, no anon/public, no using(true). Reversible + guarded
     // (supabase/rollbacks/20260627174500_requester_identity_for_provider.down.sql).
     // NOT applied — human-gated for owner.
-    const SPRINT_BASELINE = 90;
+    // Bumped 90 -> 91 for "new since last seen" tracking (20260627181500_service_
+    // requests_seen): ONE tiny additive RED migration — a dedicated one-row-per-user
+    // service_offering_requests_seen table (user_id pk + seen_at) with own-row-only
+    // RLS + SELECT grant (writes RPC-only) + ONE SECURITY DEFINER upsert RPC
+    // mark_service_requests_seen() (auth.uid() scope, no-op when unauthenticated,
+    // execute revoked from public + granted authenticated). No profile change, no
+    // per-request rows, no event bus, no PII, no anon/public, no using(true).
+    // Reversible + guarded
+    // (supabase/rollbacks/20260627181500_service_requests_seen.down.sql). NOT
+    // applied — human-gated for owner.
+    const SPRINT_BASELINE = 91;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

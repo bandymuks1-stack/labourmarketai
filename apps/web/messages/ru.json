@@ -4141,6 +4141,7 @@
     "responded": "Дан ответ",
     "requestedBy": "Запросил",
     "requesterFallback": "Участник",
+    "newBadge": "новое",
     "status": {
       "sent": "Отправлено",
       "accepted": "Принято",

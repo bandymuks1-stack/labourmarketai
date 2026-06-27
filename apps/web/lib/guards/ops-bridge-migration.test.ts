@@ -199,6 +199,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // additive RED: ONE SECURITY DEFINER read RPC requester_identities_for_provider
     // returning ONLY buyer display name, provider-scoped; execute revoked from
     // public + granted to authenticated; no table/policy change; NOT applied).
-    expect(guard).toMatch(/SPRINT_BASELINE = 90/);
+    // then to 91 for "new since last seen" (20260627181500_service_requests_seen;
+    // additive RED: one-row-per-user seen table (user_id pk + seen_at) own-row-only
+    // RLS + SELECT grant, writes RPC-only, + ONE SECURITY DEFINER upsert RPC
+    // mark_service_requests_seen(); no profile change, no PII; NOT applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 91/);
   });
 });
