@@ -269,7 +269,11 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "apskait",
       "buhalter",
       "verslo administr",
-      "erp",
+      // Real-world audit: bare "erp" is a substring of unrelated LT words
+      // ("čerpėmis" = roof tiles → false "Apskaitos sistemos"). Require the
+      // ERP-system framing instead; "apskait"/"buhalter" cover the rest.
+      "erp sistem",
+      "erp program",
       "bookkeep",
       "accounting software",
     ],
@@ -598,6 +602,17 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "autokrautuv",
       "ratinis krautuv",
       "frontalinis krautuv",
+      // Real-world audit: bare forklift ("dirbau su krautuvu") and crane
+      // ("valdžiau kraną") were unrecognised. "krautuv" is forklift/loader
+      // specific. Crane needles stay operator-anchored ("kran" alone = water
+      // tap in RU), so only the explicit operate-a-crane phrasings.
+      "krautuv",
+      "valdžiau kran",
+      "valdziau kran",
+      "dirbau su kran",
+      "kraninink",
+      "bokštinis kran",
+      "bokstinis kran",
       "technikos operat",
       "sunkiąja technik",
       "sunkiaja technik",
