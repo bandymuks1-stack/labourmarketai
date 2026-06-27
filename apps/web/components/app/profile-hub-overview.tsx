@@ -2,6 +2,10 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { deriveProfileNextAction } from "@/lib/profile/profile-next-action";
 import { skillEvidenceStatus } from "@/lib/profile/skill-evidence";
+import {
+  buildPlayerCardMinimum,
+  type PlayerCardMinimumSource,
+} from "@/lib/identity/player-card-minimum";
 
 /**
  * Profile/CV/Evidence hub overview — the unifying "professional passport"
@@ -29,6 +33,7 @@ export async function ProfileHubOverview({
   hasWorker,
   journalCount,
   skillEvidence,
+  cardSource,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
@@ -37,8 +42,20 @@ export async function ProfileHubOverview({
   /** Evidence-support summary for workers (journal → skill linkage v1).
    *  Omitted for non-workers (no work-journal access yet). */
   skillEvidence?: { declared: number; supported: number; unsupported: number };
+  /** Already-fetched identity fields. When provided, the CV(about) + skills
+   *  pillar presence is sourced from the ONE minimum Player Card contract
+   *  (`buildPlayerCardMinimum().missing`) — the single source of "what's
+   *  missing", so this hub and the player card never disagree. No new
+   *  checklist, no percentage. Falls back to the raw booleans when omitted. */
+  cardSource?: PlayerCardMinimumSource;
 }) {
   const t = await getTranslations("profileHub");
+
+  // Consolidation (launch audit §7.3): identity-essential presence flows through
+  // the contract's `missing` list, not a parallel ad-hoc computation.
+  const card = cardSource ? buildPlayerCardMinimum(cardSource) : null;
+  const aboutOk = card ? !card.missing.includes("about") : cvProvided;
+  const skillsOk = card ? !card.missing.includes("skills") : selfDeclaredCount > 0;
 
   // ONE deterministic next action from real signals (no AI/network/random).
   const nextAction = deriveProfileNextAction({
@@ -53,7 +70,7 @@ export async function ProfileHubOverview({
     {
       label: t("pillars.cv.label"),
       value: cvProvided ? t("pillars.cv.yes") : t("pillars.cv.no"),
-      ok: cvProvided,
+      ok: aboutOk,
     },
     {
       label: t("pillars.skills.label"),
@@ -61,7 +78,7 @@ export async function ProfileHubOverview({
         selfDeclaredCount > 0
           ? t("pillars.skills.count", { n: selfDeclaredCount })
           : t("pillars.skills.none"),
-      ok: selfDeclaredCount > 0,
+      ok: skillsOk,
     },
     {
       label: t("pillars.journal.label"),
@@ -91,7 +108,13 @@ export async function ProfileHubOverview({
         </p>
       </header>
 
-      <ul className="grid gap-2 sm:grid-cols-3" data-testid="profile-hub-pillars">
+      <ul
+        className="grid gap-2 sm:grid-cols-3"
+        data-testid="profile-hub-pillars"
+        // Honest, machine-checkable view of the identity-card essentials still
+        // missing — sourced from the ONE contract, never a percentage/score.
+        data-card-missing={card ? card.missing.join(",") : undefined}
+      >
         {pillars.map((p) => (
           <li
             key={p.label}
