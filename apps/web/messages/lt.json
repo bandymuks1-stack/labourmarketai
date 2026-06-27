@@ -4142,6 +4142,12 @@
     "requestedBy": "Užklausą pateikė",
     "requesterFallback": "Narys",
     "newBadge": "nauja",
+    "hubTitle": "Prekyvietė",
+    "hubOffer": "Mano siūlomos paslaugos",
+    "hubOfferNote": "Sukurk ir aktyvuok tai, ką siūlai",
+    "hubFind": "Atrask ir užsisakyk paslaugas",
+    "hubFindNote": "Naršyk aktyvias paslaugas ir stebėk užklausas",
+    "linkToServices": "Tvarkyk savo siūlomas paslaugas",
     "status": {
       "sent": "Išsiųsta",
       "accepted": "Priimta",
@@ -4222,7 +4228,8 @@
       "draft": "Juodraštis — dar nerandama. Aktyvuokite, kad paskelbtumėte prisijungusiems nariams.",
       "active": "Aktyvi — prisijungę nariai gali rasti ir užsisakyti šią paslaugą.",
       "paused": "Pristabdyta — nariams nematoma. Aktyvuokite, kad vėl būtų randama."
-    }
+    },
+    "linkToRequests": "Peržiūrėk užklausas dėl savo paslaugų"
   },
   "communication": {
     "origin": {

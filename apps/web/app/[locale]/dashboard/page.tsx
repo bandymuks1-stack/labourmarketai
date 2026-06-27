@@ -180,6 +180,41 @@ export default async function DashboardOverviewPage({
     </Link>
   ) : null;
 
+  // Always-visible marketplace access. The two halves of the service loop are
+  // otherwise only reachable through the count-gated action cards above — and
+  // /dashboard/services (where a provider publishes an offering) had NO UI entry
+  // at all. This calm, low-emphasis block (never an urgent badge, never a fake
+  // count) gives a first-time provider a path to publish and a first-time buyer a
+  // path to discover, closing the loop's reachability gap. Real navigation only.
+  const marketplaceAccess = (
+    <section
+      data-testid="dashboard-marketplace-access"
+      className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+    >
+      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {tMarket("hubTitle")}
+      </span>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Link
+          href={"/dashboard/services" as "/dashboard"}
+          data-testid="dashboard-marketplace-offer"
+          className="flex flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+        >
+          <span className="font-semibold">{tMarket("hubOffer")}</span>
+          <span className="text-xs text-text-muted">{tMarket("hubOfferNote")}</span>
+        </Link>
+        <Link
+          href={"/dashboard/service-requests" as "/dashboard"}
+          data-testid="dashboard-marketplace-find"
+          className="flex flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+        >
+          <span className="font-semibold">{tMarket("hubFind")}</span>
+          <span className="text-xs text-text-muted">{tMarket("hubFindNote")}</span>
+        </Link>
+      </div>
+    </section>
+  );
+
   // Shared header (role chip + greeting). The chip names the CURRENT workspace,
   // never a permanent label.
   const Header = (
@@ -282,6 +317,9 @@ export default async function DashboardOverviewPage({
 
         {/* Real buyer next-action — status of the caller's own outgoing requests. */}
         {outgoingRequestsNextAction}
+
+        {/* Always-on access to both halves of the service loop (publish / discover). */}
+        {marketplaceAccess}
 
         {/* Company / agency: create a structured work need (hire / partner).
             A buyer/customer leads with their own request room (next action
@@ -431,6 +469,9 @@ export default async function DashboardOverviewPage({
 
       {/* Real buyer next-action — status of the caller's own outgoing requests. */}
       {outgoingRequestsNextAction}
+
+      {/* Always-on access to both halves of the service loop (publish / discover). */}
+      {marketplaceAccess}
     </div>
   );
 }
