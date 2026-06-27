@@ -4115,6 +4115,8 @@
     "outgoingEmpty": "Dar nepateikei nė vienos užklausos.",
     "incomingHeading": "Užklausos dėl tavo paslaugų",
     "incomingEmpty": "Kol kas gautų užklausų nėra.",
+    "dashboardIncomingTitle": "Laukiančios paslaugų užklausos",
+    "dashboardIncomingNote": "Atsakyk žmonėms, norintiems tavo paslaugų",
     "accept": "Priimti",
     "decline": "Atmesti",
     "withdraw": "Atšaukti",

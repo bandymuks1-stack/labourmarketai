@@ -12,6 +12,7 @@ import { getOwnCompany } from "@/lib/company/company-setup";
 import { WorkCard } from "@/components/app/work-card";
 import { getWorkerCard } from "@/lib/worker/work-card";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
+import { getPendingIncomingRequestCount } from "@/lib/marketplace/service-requests";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
@@ -74,6 +75,30 @@ export default async function DashboardOverviewPage({
   const hasCompany = companyRead.kind === "ok" && companyRead.row !== null;
   const name =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
+
+  // Provider next-action: surface ONLY when there are REAL open ('sent') incoming
+  // service requests (> 0). Role-agnostic — anyone who offers a service is a
+  // provider — so the same compact card appears in every role's overview, linking
+  // into the real request loop. 0 on any missing-data / needs-migration state →
+  // no card, no fake badge (honest degradation).
+  const tMarket = await getTranslations("marketplace");
+  const pendingServiceRequests = await getPendingIncomingRequestCount();
+  const serviceRequestsNextAction =
+    pendingServiceRequests > 0 ? (
+      <Link
+        href={"/dashboard/service-requests" as "/dashboard"}
+        data-testid="dashboard-service-requests-next-action"
+        className="flex items-center justify-between gap-3 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-4 py-3 text-sm text-text-primary hover:border-brand-blue"
+      >
+        <span className="flex flex-col">
+          <span className="font-semibold">{tMarket("dashboardIncomingTitle")}</span>
+          <span className="text-xs text-text-muted">{tMarket("dashboardIncomingNote")}</span>
+        </span>
+        <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white">
+          {pendingServiceRequests}
+        </span>
+      </Link>
+    ) : null;
 
   // Shared header (role chip + greeting). The chip names the CURRENT workspace,
   // never a permanent label.
@@ -171,6 +196,9 @@ export default async function DashboardOverviewPage({
         {/* Secondary — the role's chain entry points. */}
         <DashboardChainActions role={role} />
         <WorkerInvitationsCard />
+
+        {/* Real provider next-action — open incoming service requests (> 0). */}
+        {serviceRequestsNextAction}
 
         {/* Company / agency: create a structured work need (hire / partner).
             A buyer/customer leads with their own request room (next action
@@ -313,6 +341,10 @@ export default async function DashboardOverviewPage({
           </span>
         </Link>
       )}
+
+      {/* Real provider next-action — open incoming service requests (> 0). Same
+          honest, count-gated card as the org branch; links into the request loop. */}
+      {serviceRequestsNextAction}
     </div>
   );
 }

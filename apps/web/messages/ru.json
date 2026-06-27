@@ -4115,6 +4115,8 @@
     "outgoingEmpty": "Вы ещё не запрашивали ни одной услуги.",
     "incomingHeading": "Запросы по вашим услугам",
     "incomingEmpty": "Пока нет входящих запросов.",
+    "dashboardIncomingTitle": "Ожидающие запросы услуг",
+    "dashboardIncomingNote": "Ответьте людям, которым нужны ваши услуги",
     "accept": "Принять",
     "decline": "Отклонить",
     "withdraw": "Отозвать",

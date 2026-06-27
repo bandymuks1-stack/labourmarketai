@@ -203,3 +203,15 @@ export async function withdrawRequest(id: string): Promise<RequestMutateResult> 
   revalidatePath("/dashboard/service-requests");
   return { kind: "ok", detail: typeof data === "string" ? data : undefined };
 }
+
+/**
+ * Count of OPEN incoming requests ('sent') addressed to the caller's offerings —
+ * the dashboard's provider next-action signal. Returns 0 on any non-ok state
+ * (not-authed / needs-migration / read failure), so the dashboard simply shows
+ * no badge rather than an error or a fake count.
+ */
+export async function getPendingIncomingRequestCount(): Promise<number> {
+  const result = await listIncomingRequests();
+  if (result.kind !== "ok") return 0;
+  return result.rows.filter((r) => r.status === "sent").length;
+}
