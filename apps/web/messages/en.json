@@ -23,6 +23,7 @@
     "personSignal": "My person signal",
     "companyLayer": "Company layer",
     "companyIncomplete": "location not added yet",
+    "personIncomplete": "Add your location to appear on the market map",
     "needsLayer": "My needs",
     "notOnMapYet": "not on map yet",
     "items": {

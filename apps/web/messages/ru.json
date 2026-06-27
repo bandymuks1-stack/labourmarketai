@@ -23,6 +23,7 @@
     "personSignal": "Мой личный сигнал",
     "companyLayer": "Слой компании",
     "companyIncomplete": "местоположение ещё не добавлено",
+    "personIncomplete": "Добавьте своё местоположение, чтобы появиться на карте рынка",
     "needsLayer": "Мои потребности",
     "notOnMapYet": "ещё не на карте",
     "items": {

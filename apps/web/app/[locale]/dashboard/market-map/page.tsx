@@ -101,6 +101,12 @@ export default async function MarketMapPage({
   // Own needs/demands carry NO coordinates (capture stores country/region only),
   // so they are an honest "not on map yet" panel row, never fake points.
   const needsCount = Array.isArray(demand) ? demand.length : 0;
+  // The person signal is honestly "active" ONLY when the user has a real saved
+  // location (a preferred_locations row, RLS-scoped own data). With no saved
+  // location they are NOT actually on the market map yet, so the row shows an
+  // honest "incomplete — add your location" state instead of always claiming an
+  // active signal. Existing data only; no fake marker, no schema.
+  const hasPreferredLocation = Array.isArray(preferred) && preferred.length > 0;
   // Unified visible-now layer rows (real state only — no fake markers).
   const visibleRows: {
     label: string;
@@ -109,7 +115,8 @@ export default async function MarketMapPage({
   }[] = [
     {
       label: `${tLayers("personSignal")}${ownName ? `: ${ownName}` : ""}`,
-      state: "active",
+      state: hasPreferredLocation ? "active" : "incomplete",
+      hint: hasPreferredLocation ? undefined : tLayers("personIncomplete"),
     },
   ];
   if (isCompanyContext) {
