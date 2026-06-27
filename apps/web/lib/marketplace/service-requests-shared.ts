@@ -49,6 +49,14 @@ export interface IncomingRequestRow {
   readonly responseNote: string | null;
   readonly respondedAt: string | null;
   readonly createdAt: string;
+  /**
+   * Minimum-safe requester identity — the buyer's display name ONLY, supplied by
+   * the `requester_identities_for_provider` SECURITY DEFINER RPC and only for
+   * requests addressed to this provider. Null when the RPC is absent/errors
+   * (rollout-safe: the inbox still renders) or the buyer set no name. Never
+   * carries email/phone/contact/location/avatar or any other profile field.
+   */
+  readonly requesterDisplayName: string | null;
 }
 
 /** Real status counts for a buyer's own outgoing requests (dashboard summary). */

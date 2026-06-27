@@ -54,6 +54,32 @@ function offeringTitle(r: Record<string, unknown>): string | null {
   return o && typeof o.title === "string" ? o.title : null;
 }
 
+/**
+ * Minimum-safe requester identity for the provider inbox: maps request id →
+ * buyer display name, via the provider-scoped `requester_identities_for_provider`
+ * SECURITY DEFINER RPC. Rollout-safe by design — the RPC re-checks provider
+ * scope, and if it is absent (not applied yet) or errors, this returns an EMPTY
+ * map so the inbox still renders without names (never throws, never a fake name).
+ * Only `display_name` ever crosses this boundary.
+ */
+async function requesterDisplayNames(
+  ctx: { supabase: SupabaseClient; userId: string },
+  requestIds: string[],
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (requestIds.length === 0) return out;
+  const { data, error } = await asAny(ctx.supabase).rpc("requester_identities_for_provider", {
+    p_request_ids: requestIds,
+  });
+  if (error || !Array.isArray(data)) return out;
+  for (const row of data as Record<string, unknown>[]) {
+    const id = typeof row.request_id === "string" ? row.request_id : null;
+    const name = typeof row.display_name === "string" ? row.display_name.trim() : "";
+    if (id && name) out.set(id, name);
+  }
+  return out;
+}
+
 /** Active offerings the caller can DISCOVER — excludes the caller's own. */
 export async function listDiscoverableOfferings(): Promise<DiscoveryListResult> {
   const ctx = await uid();
@@ -127,7 +153,7 @@ export async function listIncomingRequests(): Promise<IncomingListResult> {
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "ok", rows: [] };
   }
-  const rows: IncomingRequestRow[] = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+  const baseRows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
     id: String(r.id),
     offeringId: String(r.offering_id ?? ""),
     offeringTitle: offeringTitle(r),
@@ -136,6 +162,20 @@ export async function listIncomingRequests(): Promise<IncomingListResult> {
     responseNote: (r.response_note as string | null) ?? null,
     respondedAt: (r.responded_at as string | null) ?? null,
     createdAt: String(r.created_at ?? ""),
+  }));
+
+  // Minimum-safe requester identity (display name only), via the provider-scoped
+  // SECURITY DEFINER RPC. Rollout-safe: if the RPC is absent or errors, we leave
+  // every name null and still return the inbox — never a regression, never an
+  // error. The RPC re-checks provider scope, so a caller only gets names for
+  // their OWN requests.
+  const names = await requesterDisplayNames(
+    ctx,
+    baseRows.map((r) => r.id),
+  );
+  const rows: IncomingRequestRow[] = baseRows.map((r) => ({
+    ...r,
+    requesterDisplayName: names.get(r.id) ?? null,
   }));
   return { kind: "ok", rows };
 }

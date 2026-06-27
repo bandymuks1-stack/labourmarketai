@@ -4139,6 +4139,8 @@
     "requesterMessage": "Их сообщение",
     "providerNote": "Примечание исполнителя",
     "responded": "Дан ответ",
+    "requestedBy": "Запросил",
+    "requesterFallback": "Участник",
     "status": {
       "sent": "Отправлено",
       "accepted": "Принято",
