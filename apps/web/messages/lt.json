@@ -4122,6 +4122,9 @@
     "withdraw": "Atšaukti",
     "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą.",
     "duplicate": "Jau turi neuždarytą užklausą šiai paslaugai.",
+    "requesterMessage": "Jų žinutė",
+    "providerNote": "Paslaugos teikėjo pastaba",
+    "responded": "Atsakyta",
     "status": {
       "sent": "Išsiųsta",
       "accepted": "Priimta",

@@ -69,6 +69,9 @@ export default async function ServiceRequestsPage({
     withdraw: t("withdraw"),
     errorGeneric: t("errorGeneric"),
     duplicate: t("duplicate"),
+    requesterMessage: t("requesterMessage"),
+    providerNote: t("providerNote"),
+    responded: t("responded"),
     status: {
       sent: t("status.sent"),
       accepted: t("status.accepted"),
