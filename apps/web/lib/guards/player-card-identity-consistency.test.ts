@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
+import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
 
 /**
  * Guard: one person = one Player Card identity logic (Core Product Sprint Train
@@ -21,13 +22,18 @@ const mapLive = read("components/app/market-map-live.tsx");
 const mapPage = read("app/[locale]/dashboard/market-map/page.tsx");
 
 describe("shared monogram is the single source of person initials", () => {
-  it("Player Card uses personMonogram, not a private initials copy", () => {
+  it("Player Card sources identity through the minimum contract, no private copy", () => {
+    // PR #538: the card now routes its identity tile (avatar/name/initials)
+    // through buildPlayerCardMinimum, whose initials are playerInitials ===
+    // personMonogram — same monogram, one contract, not a private slice.
     expect(playerCard).toMatch(
-      /import \{ personMonogram \} from "@\/lib\/visual\/avatar-monogram"/,
+      /import \{ buildPlayerCardMinimum \} from "@\/lib\/identity\/player-card-minimum"/,
     );
-    expect(playerCard).toMatch(/personMonogram\(card\.displayName\)/);
-    // The old local initialsOf duplicate is gone.
+    expect(playerCard).toMatch(/buildPlayerCardMinimum\(/);
+    expect(playerCard).toMatch(/identity\.initials/);
+    // The old local initialsOf duplicate AND a direct private monogram call are gone.
     expect(playerCard).not.toMatch(/function initialsOf/);
+    expect(playerCard).not.toMatch(/personMonogram\(/);
   });
 
   it("map own-marker initial uses the SAME monogram (two letters, not one)", () => {
@@ -37,8 +43,12 @@ describe("shared monogram is the single source of person initials", () => {
   });
 
   it("identical initials on card and marker for the same name", () => {
-    // Both surfaces now flow through personMonogram → same result.
+    // The marker calls personMonogram directly; the card flows through the
+    // minimum contract. Prove BOTH paths yield the same initials for one name.
     expect(personMonogram("Jonas Petraitis")).toBe("JP");
+    expect(buildPlayerCardMinimum({ fullName: "Jonas Petraitis" }).initials).toBe(
+      personMonogram("Jonas Petraitis"),
+    );
   });
 });
 
