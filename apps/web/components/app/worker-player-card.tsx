@@ -14,6 +14,7 @@ import {
   missingReadinessPillars,
   type ReadinessLevel,
 } from "@/lib/player-card/readiness";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { cn } from "@/lib/utils";
 
 /**
@@ -106,13 +107,6 @@ export type ThermometerView =
   | { kind: "score"; scoreEur: number; smallSample: boolean }
   | { kind: "insufficient_data"; missing: "position" | "market" | "both" };
 
-function initialsOf(name: string | null): string {
-  if (!name) return "•";
-  const parts = name.trim().split(/\s+/).slice(0, 2);
-  const letters = parts.map((p) => p[0]?.toUpperCase() ?? "").join("");
-  return letters || "•";
-}
-
 function Stat({
   value,
   label,
@@ -202,7 +196,7 @@ export function WorkerPlayerCard({
                 "border-ink-500",
               )}
             >
-              {initialsOf(card.displayName)}
+              {personMonogram(card.displayName)}
             </span>
           )}
           <div className="min-w-0 flex-col">

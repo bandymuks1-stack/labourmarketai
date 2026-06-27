@@ -84,7 +84,10 @@ function identityPinHtml(identity: MapIdentity): string {
   // the map, especially on mobile, not a tiny dot.
   const inner = identity.avatarUrl
     ? `<img src="${escapeHtml(identity.avatarUrl)}" alt="" style="width:52px;height:52px;border-radius:${radius};object-fit:cover;display:block" />`
-    : `<div style="width:52px;height:52px;border-radius:${radius};background:#22D3EE;color:#0B1014;display:flex;align-items:center;justify-content:center;font:700 20px/1 ui-sans-serif,system-ui,sans-serif">${safeInitial}</div>`;
+    : // Monogram fallback matches the Player Card avatar tile (dark ink-700 fill +
+      // light initials), so the map own-marker reads as the SAME player card, not
+      // a separate bright-cyan blob. The cyan stays as the ring accent below.
+      `<div style="width:52px;height:52px;border-radius:${radius};background:#10131F;color:#E8EEF2;display:flex;align-items:center;justify-content:center;font:700 18px/1 ui-sans-serif,system-ui,sans-serif">${safeInitial}</div>`;
   const statusPill = identity.statusLabel
     ? `<span style="background:rgba(34,211,238,.16);color:#22D3EE;font:700 8px/1.4 ui-sans-serif,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:9999px;border:1px solid rgba(34,211,238,.5)">${escapeHtml(identity.statusLabel)}</span>`
     : "";
