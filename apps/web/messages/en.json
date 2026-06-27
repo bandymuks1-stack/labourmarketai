@@ -526,6 +526,7 @@
     "primaryAction": "Add what's missing",
     "primaryActionJournal": "Add to CV",
     "journalLink": "My CV",
+    "cvImportLink": "Add your CV — paste or upload",
     "evidence": {
       "intro": "Skills are stronger when backed by real work, learning or activity entries.",
       "supported": "Supported by work entries: {supported} of {declared}",

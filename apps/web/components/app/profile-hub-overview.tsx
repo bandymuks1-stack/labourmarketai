@@ -211,6 +211,19 @@ export async function ProfileHubOverview({
             {t("journalLink")} →
           </Link>
         )}
+        {/* Make the EXISTING CV import path discoverable from the lead card —
+            shown only when no CV text is saved yet, so it is an honest next
+            step, not noise. Anchors to the in-page editor where the paste/
+            upload panel already lives (no new upload/parser/storage). */}
+        {!aboutOk && (
+          <a
+            href="#profile-edit"
+            className="inline-flex w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+            data-testid="profile-hub-cv-import-link"
+          >
+            {t("cvImportLink")} ↓
+          </a>
+        )}
       </div>
     </section>
   );

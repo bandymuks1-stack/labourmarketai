@@ -526,6 +526,7 @@
     "primaryAction": "Pridėti, ko trūksta",
     "primaryActionJournal": "Pridėti prie CV",
     "journalLink": "Mano CV",
+    "cvImportLink": "Pridėk savo CV — įklijuok arba įkelk",
     "evidence": {
       "intro": "Įgūdžiai stipresni, kai juos paremia tikri darbo, mokymosi ar veiklos įrašai.",
       "supported": "Paremta darbo įrašais: {supported} iš {declared}",
