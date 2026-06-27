@@ -31,8 +31,6 @@ import {
  */
 
 export type MarketplaceLabels = {
-  title: string;
-  lead: string;
   notAvailable: string;
   discoverHeading: string;
   discoverEmpty: string;
@@ -118,12 +116,11 @@ export function MarketplaceLoopSection({
 
   return (
     <div className="space-y-8">
-      <header className="space-y-1">
-        <h2 className="text-lg font-semibold text-text-primary">{labels.title}</h2>
-        <p className="text-sm text-text-muted">{labels.lead}</p>
-      </header>
+      {/* Single top-level title/intro lives on the page (pageTitle/pageLead) —
+          no duplicate section header here. Order follows the real-use journey:
+          find/request → see what I sent → respond to incoming. */}
 
-      {/* Discover active offerings */}
+      {/* 1 — Discover active offerings (find / request a service) */}
       <section className="space-y-2">
         <h3 className="text-sm font-medium text-text-secondary">{labels.discoverHeading}</h3>
         {discoverable.length === 0 ? (
@@ -166,7 +163,67 @@ export function MarketplaceLoopSection({
         )}
       </section>
 
-      {/* Provider inbox — incoming requests for my offerings */}
+      {/* 2 — My requests (see what I sent) — buyer-facing status of my own
+          outgoing requests, shown before the provider inbox per the real-use
+          journey order. */}
+      <section className="space-y-2">
+        <h3 className="text-sm font-medium text-text-secondary">{labels.outgoingHeading}</h3>
+        {outgoing.length === 0 ? (
+          <div
+            data-testid="marketplace-outgoing-empty"
+            className="rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
+          >
+            {labels.outgoingEmpty}
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {outgoing.map((r) => (
+              <li
+                key={r.id}
+                data-testid="marketplace-outgoing-row"
+                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+              >
+                <div className="min-w-0 space-y-1">
+                  <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <StatusChip status={r.status} label={labels.status[r.status]} />
+                    {isoDay(r.respondedAt) && (
+                      <span
+                        data-testid="marketplace-outgoing-responded"
+                        className="text-xs text-text-muted tabular-nums"
+                      >
+                        {labels.responded} {isoDay(r.respondedAt)}
+                      </span>
+                    )}
+                  </div>
+                  {r.responseNote && (
+                    <p
+                      data-testid="marketplace-outgoing-note"
+                      className="line-clamp-3 text-xs text-text-muted"
+                    >
+                      <span className="text-text-secondary">{labels.providerNote}:</span>{" "}
+                      {r.responseNote}
+                    </p>
+                  )}
+                </div>
+                {r.status === "sent" && (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => run(() => withdrawRequest(r.id))}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-ink-500 px-2 py-1 text-xs text-text-muted disabled:opacity-50"
+                  >
+                    <Undo2 className="h-3 w-3" /> {labels.withdraw}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* 3 — Provider inbox (respond to incoming) — incoming requests for my
+          own offerings. */}
       <section className="space-y-2">
         <h3 className="text-sm font-medium text-text-secondary">{labels.incomingHeading}</h3>
         {incoming.length === 0 ? (
@@ -237,63 +294,6 @@ export function MarketplaceLoopSection({
                       <X className="h-3 w-3" /> {labels.decline}
                     </button>
                   </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Buyer status — my outgoing requests */}
-      <section className="space-y-2">
-        <h3 className="text-sm font-medium text-text-secondary">{labels.outgoingHeading}</h3>
-        {outgoing.length === 0 ? (
-          <div
-            data-testid="marketplace-outgoing-empty"
-            className="rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
-          >
-            {labels.outgoingEmpty}
-          </div>
-        ) : (
-          <ul className="space-y-2">
-            {outgoing.map((r) => (
-              <li
-                key={r.id}
-                data-testid="marketplace-outgoing-row"
-                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
-              >
-                <div className="min-w-0 space-y-1">
-                  <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <StatusChip status={r.status} label={labels.status[r.status]} />
-                    {isoDay(r.respondedAt) && (
-                      <span
-                        data-testid="marketplace-outgoing-responded"
-                        className="text-xs text-text-muted tabular-nums"
-                      >
-                        {labels.responded} {isoDay(r.respondedAt)}
-                      </span>
-                    )}
-                  </div>
-                  {r.responseNote && (
-                    <p
-                      data-testid="marketplace-outgoing-note"
-                      className="line-clamp-3 text-xs text-text-muted"
-                    >
-                      <span className="text-text-secondary">{labels.providerNote}:</span>{" "}
-                      {r.responseNote}
-                    </p>
-                  )}
-                </div>
-                {r.status === "sent" && (
-                  <button
-                    type="button"
-                    disabled={pending}
-                    onClick={() => run(() => withdrawRequest(r.id))}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-ink-500 px-2 py-1 text-xs text-text-muted disabled:opacity-50"
-                  >
-                    <Undo2 className="h-3 w-3" /> {labels.withdraw}
-                  </button>
                 )}
               </li>
             ))}
