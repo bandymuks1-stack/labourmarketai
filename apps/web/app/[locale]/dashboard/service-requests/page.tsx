@@ -60,6 +60,7 @@ export default async function ServiceRequestsPage({
     discoverHeading: t("discoverHeading"),
     discoverEmpty: t("discoverEmpty"),
     request: t("request"),
+    requested: t("requested"),
     remoteBadge: t("remoteBadge"),
     outgoingHeading: t("outgoingHeading"),
     outgoingEmpty: t("outgoingEmpty"),

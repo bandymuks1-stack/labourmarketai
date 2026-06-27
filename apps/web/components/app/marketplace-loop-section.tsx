@@ -35,6 +35,7 @@ export type MarketplaceLabels = {
   discoverHeading: string;
   discoverEmpty: string;
   request: string;
+  requested: string;
   remoteBadge: string;
   outgoingHeading: string;
   outgoingEmpty: string;
@@ -93,6 +94,14 @@ export function MarketplaceLoopSection({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  // Offerings the caller already has an OPEN ('sent') request for — derived from
+  // the outgoing rows already fetched (no extra query, no new logic). Used to
+  // reflect an honest "Requested" state on the discover row so a buyer doesn't
+  // re-click and hit the duplicate error.
+  const openRequestOfferingIds = new Set(
+    outgoing.filter((r) => r.status === "sent").map((r) => r.offeringId),
+  );
+
   if (needsMigration) {
     return (
       <div
@@ -149,14 +158,23 @@ export function MarketplaceLoopSection({
                       .join(" · ")}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => run(() => requestServiceOffering(o.id))}
-                  className="inline-flex shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-2 py-1 text-xs text-brand-blue disabled:opacity-50"
-                >
-                  <Send className="h-3 w-3" /> {labels.request}
-                </button>
+                {openRequestOfferingIds.has(o.id) ? (
+                  <span
+                    data-testid="marketplace-offer-requested"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-ink-500 px-2 py-1 text-xs text-text-muted"
+                  >
+                    <Check className="h-3 w-3" /> {labels.requested}
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => run(() => requestServiceOffering(o.id))}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-2 py-1 text-xs text-brand-blue disabled:opacity-50"
+                  >
+                    <Send className="h-3 w-3" /> {labels.request}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
