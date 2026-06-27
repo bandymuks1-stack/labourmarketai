@@ -34,8 +34,12 @@ state-aware work card vs. premium identity card — not duplicates of the same c
   `personMonogram(ownName)` — the marker now shows the **same two-letter monogram** as
   the card.
 - **Map own-marker avatar fallback** (`market-map-live.tsx`): the solid-cyan tile →
-  the Player Card's **dark ink-700 tile + light initials** (`#10131F` / `#E8EEF2`). The
-  neutral cyan **ring** accent is preserved (silent-trust marker style unchanged).
+  the Player Card's tile using the **same theme tokens** (`rgb(var(--c-ink-700))` fill +
+  `rgb(var(--c-text-primary))` initials, matching the card's `bg-ink-700` /
+  `text-text-primary`) rather than fixed hex — so the marker matches the card across
+  light/dark themes. The CSS variables cascade into the Leaflet divIcon from
+  `:root` / `[data-theme]`. The neutral cyan **ring** accent is preserved (silent-trust
+  marker style unchanged).
 
 Result: the map compact card reads as the **same Player Card** — same initials, same
 avatar treatment — on desktop and mobile.

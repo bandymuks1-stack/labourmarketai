@@ -42,13 +42,20 @@ describe("shared monogram is the single source of person initials", () => {
   });
 });
 
-describe("map marker avatar fallback matches the Player Card tile", () => {
-  it("uses the dark ink tile + light initials, not a bright cyan avatar fill", () => {
-    // Dark monogram tile (ink-700) like the Player Card avatar.
-    expect(mapLive).toMatch(/background:#10131F;color:#E8EEF2/);
-    // The old solid-cyan avatar fill is gone…
+describe("map marker avatar fallback matches the Player Card tokens", () => {
+  it("uses theme CSS variables (not fixed hex), same tokens as the card tile", () => {
+    // Player Card monogram tile uses bg-ink-700 + text-text-primary; the marker
+    // fallback must reference the SAME tokens so it matches across themes.
+    expect(mapLive).toMatch(
+      /background:rgb\(var\(--c-ink-700\)\);color:rgb\(var\(--c-text-primary\)\)/,
+    );
+    expect(playerCard).toMatch(/bg-ink-700/);
+    expect(playerCard).toMatch(/text-text-primary/);
+    // No hard-coded hex for the fallback avatar fill (old cyan OR the interim
+    // dark-hex) — colours come from tokens now.
     expect(mapLive).not.toMatch(/background:#22D3EE;color:#0B1014/);
-    // …but the neutral cyan RING accent is preserved (silent-trust marker style).
+    expect(mapLive).not.toMatch(/background:#10131F;color:#E8EEF2/);
+    // The neutral cyan RING accent is preserved (silent-trust marker style).
     expect(mapLive).toMatch(/const ringColor = "#22D3EE"/);
   });
 });
