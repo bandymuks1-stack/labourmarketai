@@ -56,8 +56,6 @@ export default async function ServiceRequestsPage({
     inc.kind === "needs-migration";
 
   const labels: MarketplaceLabels = {
-    title: t("title"),
-    lead: t("lead"),
     notAvailable: t("notAvailable"),
     discoverHeading: t("discoverHeading"),
     discoverEmpty: t("discoverEmpty"),

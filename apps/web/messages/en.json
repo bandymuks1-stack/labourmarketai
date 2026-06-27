@@ -4104,8 +4104,6 @@
   "marketplace": {
     "pageTitle": "Discover & request services",
     "pageLead": "Find active services people offer, send a request, and track its status — one place for the whole exchange.",
-    "title": "Service requests",
-    "lead": "Discover an active service, request it, and respond to requests for your own — a real exchange, nothing automated.",
     "notAvailable": "Not available yet.",
     "discoverHeading": "Active services",
     "discoverEmpty": "No active services to show yet.",
