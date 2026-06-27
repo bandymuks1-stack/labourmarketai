@@ -1176,13 +1176,28 @@ export function JournalEntryComposer({
           >
             {skillSuggestions.length === 0 && (
               // Honest empty state: no clearly-related skill matched the entry —
-              // never a broad cloud of guesses. The worker links skills manually.
-              <p
-                className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
+              // never a broad cloud of guesses. Level 3 of the owner's model:
+              // when no confident signal AND no similar candidate exists, the
+              // worker links a skill manually (the system never guesses for them).
+              // Similar candidates, when they DO exist, render in the "Similar
+              // skills" group below — this note still offers the manual path.
+              <div
+                className="md:col-span-2 flex flex-col gap-1.5"
                 data-testid="skill-suggestions-empty-note"
               >
-                {t("skillNoMatch")}
-              </p>
+                <p className="text-[11px] leading-relaxed text-text-muted">
+                  {newSkillSuggestions.length === 0
+                    ? t("skillNoMatch")
+                    : t("addManuallyHint")}
+                </p>
+                <Link
+                  href="/dashboard/profile#capabilities"
+                  className="w-fit text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                  data-testid="skill-add-manually-link"
+                >
+                  {t("addManuallyCta")} →
+                </Link>
+              </div>
             )}
             {skillSuggestions.map((row) => (
               <DetectedSuggestionCard
@@ -1214,14 +1229,24 @@ export function JournalEntryComposer({
             // "already in your profile" bucket above.
             <DetectedSuggestionList
               className="md:col-span-2"
-              title={t("newSkillGroupTitle")}
+              // Level 2 of the owner's model: when nothing was confidently
+              // recognised, these undeclared matches are framed as "Similar
+              // skills / Panašūs įgūdžiai" (choose if it fits, never auto-linked).
+              // When a confident skill DID match, they stay "Possible new skill".
+              title={
+                skillSuggestions.length === 0
+                  ? t("similarSkillsTitle")
+                  : t("newSkillGroupTitle")
+              }
               count={newSkillSuggestions.length}
             >
               <p
                 className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
                 data-testid="new-skill-suggestions-intro"
               >
-                {t("newSkillIntro")}
+                {skillSuggestions.length === 0
+                  ? t("similarSkillsIntro")
+                  : t("newSkillIntro")}
               </p>
               {newSkillSuggestions.map((row) => {
                 const status = newSkillStatus[row.slug] ?? "idle";

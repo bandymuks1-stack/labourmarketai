@@ -44,6 +44,71 @@ shared the ambiguous floor needle and still returned the `flooring` skill for
 
 ---
 
+## 1b. Three-level recognition model + new scoring (owner product direction)
+
+**Owner correction:** BAD 0 and SAFE EMPTY are not the only goals. When the
+recogniser is *unsure* it must not stay silent by default — it should offer
+*similar* skills/capabilities for the worker to **choose**. The system does not
+have to know everything immediately; it must help the human decide, and repeated
+human choices become future learning signal (§7, RED).
+
+The recogniser now works in three honest levels (no DB, deterministic,
+`lib/structuring/recognition-tiers.ts` → `classifyEntryRecognition`):
+
+1. **AUTO SIGNAL** — confident match → show the current signal.
+2. **CANDIDATE SUGGESTION** — not confidently recognised, but similar matches
+   exist → show **"Panašūs įgūdžiai / Similar skills / Похожие навыки"**, the
+   worker *chooses*. **Never auto-linked, never presented as confirmed/verified,
+   no faked confidence.** Picking one only creates a self-declared profile claim
+   via the *existing* manual path (`saveProfileSkillClaimsAction`) — no new DB.
+3. **MANUAL ONLY** — truly unclear → manual fallback ("Susieti įgūdį / Add a
+   skill manually"). The system never guesses for the worker.
+
+**New scoring (same 50-entry pack):**
+
+| Tier | Count | Meaning |
+|---|---|---|
+| **AUTO SIGNAL** | 35 | Safe current signal (the old GOOD 32 + PARTIAL 3) |
+| **CANDIDATE SUGGESTION** | 8 | Was SAFE EMPTY → now offers a similar choice |
+| **MANUAL ONLY** | 7 | Truly vague — manual fallback only (honest) |
+| **BAD** | 0 | A wrong AUTO signal (still the hard rule: worse than nothing) |
+| **DUPLICATE / RAW** | 0 | No raw-slug leak, no duplicate concept |
+
+**8 of the 15 previously-SAFE-EMPTY entries now surface a useful candidate**
+(deterministically, all verified by `recognition-tiers.test.ts`):
+
+| # | Entry | New tier | Candidate offered |
+|---|---|---|---|
+| 10 | kuriau logotipą, maketavau bukletą | CANDIDATE | Grafinis dizainas |
+| 12 | Testavau aplikaciją, radau klaidas | CANDIDATE | Programinės įrangos testavimas |
+| 15 | Pristačiau siuntas po miestą | CANDIDATE | Pristatymas / kurjerio darbas |
+| 17 | rinkau uzsakymus, pakavau, etiketavau | CANDIDATE | Užsakymų rinkimas / komplektavimas |
+| 20 | valiau sniega nuo taku, bariau druska | CANDIDATE | Sniego valymas / žiemos priežiūra |
+| 24 | tvarkiau kambarius viesbuty, patalyne | CANDIDATE | Kambarių tvarkymas (viešbutis) |
+| 31 | Prižiūrėjau senelius, daviau vaistus | CANDIDATE | Senjorų priežiūra |
+| 32 | auklejau vaikus, vedziau i darzeli | CANDIDATE | Vaikų priežiūra |
+
+The remaining **7 stay MANUAL ONLY** because they are genuinely too vague to
+suggest anything honestly: #30 (bare power-tool nouns), #36/#37/#38 (generic
+filler), #39 (bare time "9h"), #40 (place only), #43 ("valiau" alone).
+
+**`ploviau grindis` is AUTO SIGNAL (cleaning "Valymo darbai"), not a candidate
+and never flooring** — it already has an exact, safe cleaning signal, so it is
+shown as the current capability, not offered as a guess.
+
+**Candidate-suggestion logic (exact):** when `extractJournalSuggestions` yields
+**no** confident skill slug, capability, or resolved fragment activity, we run
+the existing sector-neutral catalogue `recognizeNewSkillSuggestions` (folded
+stems + curated misspellings, strong vs weak needles → high/medium confidence,
+never construction-biased) and OFFER its hits as similar candidates. Coverage
+for the audit's SAFE-EMPTY sectors was broadened conservatively (courier,
+order-picking, housekeeping, winter service, graphic design, QA, elder care —
+specific multi-word / role-anchored stems, no overbroad needles). The flooring
+slug is structurally absent from this catalogue, so a washed floor can never be
+offered as floor-laying even at the candidate level.
+
+---
+
 ## 2. Per-entry results
 
 Legend: ✅ GOOD · 🟡 PARTIAL · ⚪ SAFE EMPTY · 🔴 BAD
@@ -237,6 +302,42 @@ with no floor noun stays **safe-empty** (no invented slug). The pre-existing
 
 ---
 
+## 4b. Human-in-the-loop learning model (design only — RED / owner-gated)
+
+This is the **future** model the candidate tier feeds. It is **described, not
+implemented** here: every part below needs DB/schema/RPC/migration, so it is
+**RED / owner-gated** and explicitly **NOT started** in this PR. The current PR
+ships only the *no-DB* half: candidates are offered and the worker chooses; a
+choice creates a self-declared profile claim through the existing path. Nothing
+about the worker's selection is stored as a *learning* signal yet.
+
+**Future owner-gated design:**
+
+- **Capture a selection event.** When a worker picks a candidate (or types a
+  manual label) for an entry, store `{ original_text_fragment, normalized_pattern,
+  chosen_label_or_slug, locale, timestamp }` in a dedicated, owner-only learning
+  table — **never** in the public taxonomy.
+- **Normalize the fragment pattern.** Fold + stem the triggering fragment to a
+  stable key (e.g. `ploviau grind…` → `plov+grind`) so equivalent phrasings
+  aggregate, kept **per language** (LT / EN / RU variants do not merge).
+- **Count repeated choices + conflict rate.** Aggregate how many distinct workers
+  mapped a pattern to the same label, and how often the *same* pattern was mapped
+  to *conflicting* labels.
+- **Promote conservatively.** Only after enough independent repeated selections
+  **and** a low conflict rate does a pattern graduate into a *recogniser*
+  suggestion (still a suggestion — tier 1/2, never an auto-fact). High-conflict
+  patterns never promote.
+- **Rollback / blacklist.** Any learned pattern can be demoted or blacklisted
+  (a wrong learned mapping is reversible), with the blacklist winning over counts.
+- **Never "verified".** Learned patterns improve *recognition* only; they are
+  never surfaced to anyone as confirmed/verified/trusted. Verification stays a
+  real-human decision through the existing review path (§7 doctrine).
+- **Internal only.** The loop is a recognition-quality improvement, not a public
+  signal; aggregates respect the platform's privacy sample floors.
+
+Because all of this is DB-touching, it ships **only** behind an owner-approved
+migration (additive table + RLS, reversible) in a later RED slice — not here.
+
 ## 5. RED — owner-gated, NOT started
 
 These need design decisions or non-deterministic/DB work and are deliberately
@@ -253,9 +354,15 @@ left out of this audit PR:
   activity label (this PR only translates the ones the pack exercised).
 - **EN "and" fragment splitting + EN driving verbs** — broaden the splitter and
   EN lexicon (low priority; LT/RU are the enforced locales).
-- **New sectors** (graphic design, QA, courier, order-picking, winter service,
-  hospitality housekeeping, power tools, care, childcare) — safe dictionary
-  growth, but each needs vetted non-overbroad needles; batch as a separate slice.
+- **New sectors as confident AUTO signals** — graphic design, QA, courier,
+  order-picking, winter service, hospitality housekeeping, care, childcare are
+  now offered as **CANDIDATE suggestions** (§1b), which is safe with no DB. Making
+  any of them a first-class *auto* signal (its own catalogue skill / taxonomy
+  row) is still owner-gated dictionary work. Power tools stay candidate-free for
+  now (bare tool nouns are too ambiguous to suggest honestly).
+- **Human-in-the-loop learning loop** (§4b) — storing worker selections,
+  normalising patterns, counting repeats, conservative promotion, rollback/
+  blacklist — is DB/schema/RPC work and **RED / owner-gated, not started**.
 - **Real NLP extraction / structured multi-clause parser / stale-link DB
   backfill / first-class approval workflow / language expansion** — unchanged
   from the PR #513 RED list.
@@ -272,5 +379,8 @@ left out of this audit PR:
   `pnpm -F web build` ✅ · full `vitest` 395 files / 5674 tests ✅ ·
   `migration-safety` GREEN (no migration files changed) · risky-path scan clean
   (no DB/schema/RLS/RPC/Supabase/env/auth/billing/payment/DNS strings in diff).
-- **Entries tested:** 50 · GOOD 32 · PARTIAL 3 · SAFE EMPTY 15 · **BAD 0** ·
-  DUPLICATE/RAW 0.
+- **Entries tested:** 50. Legacy scoring: GOOD 32 · PARTIAL 3 · SAFE EMPTY 15 ·
+  **BAD 0** · DUPLICATE/RAW 0. New three-level scoring (§1b): **AUTO SIGNAL 35 ·
+  CANDIDATE SUGGESTION 8 · MANUAL ONLY 7 · BAD 0 · DUPLICATE/RAW 0** — 8 of the
+  15 previously-silent SAFE-EMPTY entries now offer a useful candidate; the
+  remaining 7 are genuinely too vague to suggest anything honestly.

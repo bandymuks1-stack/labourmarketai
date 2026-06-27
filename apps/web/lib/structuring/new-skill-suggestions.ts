@@ -85,8 +85,32 @@ const CATALOG: readonly CatalogSkill[] = [
       en: "Delivery / courier driving",
       ru: "Доставка / курьер",
     },
-    needles: ["pristatym", "kurjer", "courier", "delivery driv", "доставк", "курьер"],
+    // Real-world audit: bare "pristatym" missed "pristačiau siuntas" (courier
+    // delivery). Courier-anchored phrasings + RU/EN added. Still candidate-only.
+    needles: [
+      "pristatym", "kurjer", "courier", "delivery driv", "доставк", "курьер",
+      "pristaciau siunt", "siuntas po miest", "siuntu pristat", "kurjeriu",
+      "posiuntini", "parcel deliver", "развозил посылк",
+    ],
     weakNeedles: ["vairav", "водител"],
+  },
+  {
+    // Order picking / packing line — SAFE-EMPTY sector in the audit (#17
+    // "rinkau uzsakymus, pakavau, etiketavau"). Candidate-only; needles are
+    // multi-word so they don't over-fire on a bare "rinkau"/"pakavau".
+    slug: "order-picking",
+    sector: "transport_logistics",
+    labels: {
+      lt: "Užsakymų rinkimas / komplektavimas",
+      en: "Order picking / packing",
+      ru: "Комплектация заказов",
+    },
+    needles: [
+      "rinkau uzsakym", "uzsakymu rink", "surinkau uzsakym", "prekiu surink",
+      "uzsakymu komplekt", "komplektav uzsakym", "order pick", "order-pick",
+      "pakavau ir etiket", "komplektovsc", "сборка заказ", "комплектац заказ",
+      "комплектовщик",
+    ],
   },
   // ── hospitality & food ───────────────────────────────────────────────────
   {
@@ -129,13 +153,21 @@ const CATALOG: readonly CatalogSkill[] = [
     slug: "elderly-care",
     sector: "care_health",
     labels: { lt: "Senjorų priežiūra", en: "Elderly care", ru: "Уход за пожилыми" },
-    needles: ["senjor", "slaugiau", "elderly care", "caregiver", "сиделк", "уход за пожил"],
+    // Real-world audit (#31 "Prižiūrėjau senelius, daviau vaistus") was SAFE
+    // EMPTY: "senel"/"slaug" stems added so the elder-care candidate surfaces.
+    needles: [
+      "senjor", "senel", "slaug", "slaugiau", "elderly care", "caregiver",
+      "сиделк", "уход за пожил", "ухаживал за пожил",
+    ],
   },
   {
     slug: "childcare",
     sector: "care_health",
     labels: { lt: "Vaikų priežiūra", en: "Childcare", ru: "Присмотр за детьми" },
-    needles: ["vaiku prieziur", "aukle", "childcare", "nanny", "няня", "уход за детьми"],
+    needles: [
+      "vaiku prieziur", "aukle", "auklejau", "darzel", "childcare", "nanny",
+      "няня", "уход за детьми", "присматривал за дет",
+    ],
   },
   // ── cleaning & facilities ────────────────────────────────────────────────
   {
@@ -145,6 +177,31 @@ const CATALOG: readonly CatalogSkill[] = [
     // Bare "valym" is deliberately excluded — it overlaps construction
     // site-cleaning; we match the cleaner-role stems instead.
     needles: ["valytoj", "patalp prieziur", "cleaner", "cleaning serv", "клинин", "уборщи"],
+  },
+  {
+    // Hotel / accommodation housekeeping — SAFE-EMPTY in the audit (#24
+    // "tvarkiau kambarius viesbuty, patalyne"). Candidate-only. Needles anchor
+    // to the hotel-room / bedding context so they don't fire on generic "tvark".
+    slug: "housekeeping",
+    sector: "cleaning_facility",
+    labels: { lt: "Kambarių tvarkymas (viešbutis)", en: "Housekeeping", ru: "Уборка номеров" },
+    needles: [
+      "kambari viesbut", "kambarius viesbut", "viesbut kambar", "kambarines",
+      "patalyne", "patalynes keit", "housekeep", "room attendant",
+      "горничн", "уборка номер", "смена белья",
+    ],
+  },
+  {
+    // Winter / snow & ice service — SAFE-EMPTY in the audit (#20 "valiau sniega
+    // nuo taku, bariau druska"). Candidate-only. "valiau snieg" / snow-anchored.
+    slug: "winter-service",
+    sector: "cleaning_facility",
+    labels: { lt: "Sniego valymas / žiemos priežiūra", en: "Snow & ice service", ru: "Уборка снега / зимняя служба" },
+    needles: [
+      "valiau snieg", "sniego valym", "snieg nuo tak", "kasiau snieg",
+      "barst drusk", "druska nuo led", "led barst", "snow remov", "snow clear",
+      "gritting", "уборка снег", "чистил снег", "посыпал реагент",
+    ],
   },
   // ── agriculture ──────────────────────────────────────────────────────────
   {
@@ -179,6 +236,32 @@ const CATALOG: readonly CatalogSkill[] = [
     sector: "it_software",
     labels: { lt: "IT pagalba", en: "IT support", ru: "ИТ-поддержка" },
     needles: ["it pagalb", "sistem administr", "it support", "helpdesk", "техподдержк"],
+  },
+  {
+    // Graphic / visual design — SAFE-EMPTY in the audit (#10 "kuriau logotipą,
+    // maketavau bukletą"). Candidate-only. "logotip"/"maketav" + tool names.
+    slug: "graphic-design",
+    sector: "it_software",
+    labels: { lt: "Grafinis dizainas", en: "Graphic design", ru: "Графический дизайн" },
+    needles: [
+      "logotip", "maketav", "grafik dizain", "grafin dizain", "bukleto dizain",
+      "plakato dizain", "graphic design", "logo design", "photoshop",
+      "illustrator", "логотип", "макет", "графическ дизайн",
+    ],
+  },
+  {
+    // Software testing / QA — SAFE-EMPTY in the audit (#12 "Testavau aplikaciją,
+    // radau klaidas"). Candidate-only. Strong needles are QA-anchored; bare
+    // "testav" is a weak (medium) signal so it never poses as a confident hit.
+    slug: "qa-testing",
+    sector: "it_software",
+    labels: { lt: "Programinės įrangos testavimas", en: "Software testing / QA", ru: "Тестирование ПО / QA" },
+    needles: [
+      "programos testav", "aplikacijos testav", "qa inzinier", "qa specialist",
+      "manual testing", "test case", "software testing", "тестировщик",
+      "тестирование приложен", "тестирование по",
+    ],
+    weakNeedles: ["testav", "тестировал"],
   },
   // ── sales / customer service ─────────────────────────────────────────────
   {
