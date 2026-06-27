@@ -1500,7 +1500,15 @@ describe("no migration files added by this sprint", () => {
     // additive (sets a NULL column), non-destructive, reversible + scoped rollback
     // (supabase/rollbacks/20260627143433_w10_projects_org_backfill.down.sql).
     // APPLIED to prod via MCP on 2026-06-27 (idempotent re-run-safe).
-    const SPRINT_BASELINE = 88;
+    // Bumped 88 -> 89 for P0 marketplace service_offering_requests (20260627145318):
+    // ONE additive RED migration — discovery RLS policy on service_offerings
+    // (authenticated + active-only) + new 2-party service_offering_requests table
+    // + THREE SECURITY DEFINER RPCs (request/respond/withdraw, each re-checking
+    // live identity + scope). Grant SELECT only (RPC-only writes), no anon/public,
+    // no using(true), no payment/rating. Reversible + guarded
+    // (supabase/rollbacks/20260627145318_service_offering_requests.down.sql). NOT
+    // applied — human-gated for owner.
+    const SPRINT_BASELINE = 89;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
