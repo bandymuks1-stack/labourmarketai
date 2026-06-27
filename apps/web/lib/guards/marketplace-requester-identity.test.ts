@@ -104,14 +104,18 @@ describe("provider inbox renders the compact request-provider identity tile", ()
 
   it("uses the Player Identity foundation (initials + canonical surface)", () => {
     expect(section).toMatch(/from "@\/lib\/identity\/player-identity"/);
-    expect(section).toMatch(/playerInitials\(r\.requesterDisplayName\)/);
+    // PR #539: identity routed through the ONE minimum Player Card contract,
+    // built from ONLY the #531-safe display name; initials come from it.
+    expect(section).toMatch(/from "@\/lib\/identity\/player-card-minimum"/);
+    expect(section).toMatch(/buildPlayerCardMinimum\(\{\s*fullName: r\.requesterDisplayName,?\s*\}\)/);
+    expect(section).toMatch(/requester\.initials/);
     expect(section).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
     expect(section).toMatch(/PLAYER_IDENTITY_AVATAR_BORDER/);
     expect(section).toMatch(/data-testid="marketplace-incoming-requester"/);
   });
 
   it("shows a neutral fallback label when there is no name (no fabrication)", () => {
-    expect(section).toMatch(/r\.requesterDisplayName \?\? labels\.requesterFallback/);
+    expect(section).toMatch(/requester\.displayName \?\? labels\.requesterFallback/);
   });
 });
 

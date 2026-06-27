@@ -15,10 +15,10 @@ import type {
   RequestStatus,
 } from "@/lib/marketplace/service-requests-shared";
 import {
-  playerInitials,
   PLAYER_IDENTITY_AVATAR_BORDER,
   PLAYER_IDENTITY_FALLBACK_SURFACE,
 } from "@/lib/identity/player-identity";
+import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
 
 /**
  * P0 Marketplace loop (Phase 1) — one compact surface: discover active offerings
@@ -253,7 +253,15 @@ export function MarketplaceLoopSection({
           </div>
         ) : (
           <ul className="space-y-2">
-            {incoming.map((r) => (
+            {incoming.map((r) => {
+              // Requester identity through the ONE minimum Player Card contract,
+              // using only the #531-safe display name. Same fallback rules
+              // (clean/trim, neutral "•" initials) as the player card — one
+              // identity everywhere, never a fabricated avatar/role.
+              const requester = buildPlayerCardMinimum({
+                fullName: r.requesterDisplayName,
+              });
+              return (
               <li
                 key={r.id}
                 data-testid="marketplace-incoming-row"
@@ -272,12 +280,12 @@ export function MarketplaceLoopSection({
                       aria-hidden
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${PLAYER_IDENTITY_AVATAR_BORDER} ${PLAYER_IDENTITY_FALLBACK_SURFACE}`}
                     >
-                      {playerInitials(r.requesterDisplayName)}
+                      {requester.initials}
                     </span>
                     <span className="min-w-0 truncate text-xs">
                       <span className="text-text-muted">{labels.requestedBy}: </span>
                       <span className="text-text-secondary">
-                        {r.requesterDisplayName ?? labels.requesterFallback}
+                        {requester.displayName ?? labels.requesterFallback}
                       </span>
                     </span>
                   </div>
@@ -314,7 +322,8 @@ export function MarketplaceLoopSection({
                   </div>
                 )}
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </section>
