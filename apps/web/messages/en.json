@@ -4101,6 +4101,45 @@
       "archived": "Archived"
     }
   },
+  "serviceOfferings": {
+    "pageTitle": "Services",
+    "pageLead": "List the real services you offer and manage your own offerings.",
+    "title": "Your service offerings",
+    "intro": "Real services you offer. Only you see and manage these — they are not shown to others yet.",
+    "notAvailable": "Service offerings are not available yet. This area turns on once the data model is enabled.",
+    "empty": "No service offerings yet. Add the first real service you offer.",
+    "addButton": "Add a service",
+    "form": {
+      "titleLabel": "Service title",
+      "titlePlaceholder": "e.g. Interior painting",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "What you do, scope, and what is included.",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "e.g. finishing",
+      "countryLabel": "Country",
+      "countryPlaceholder": "e.g. LT",
+      "remoteLabel": "Can be done remotely",
+      "rateLabel": "Rate (optional)",
+      "ratePlaceholder": "e.g. approx. 25 EUR/h, negotiable",
+      "rateHint": "Free text only — for example an indicative hourly rate."
+    },
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "remove": "Remove",
+    "activate": "Activate",
+    "pause": "Pause",
+    "errorTitleRequired": "Add a service title.",
+    "errorCountry": "Use a 2-letter country code (e.g. LT).",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "remoteBadge": "Remote",
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "paused": "Paused"
+    }
+  },
   "communication": {
     "origin": {
       "you": "You started this conversation",

@@ -180,6 +180,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 85 for profile-avatar-upload-v1 (20260623200000_profile_avatar;
     // additive RED: avatar_url column + private profile-avatars bucket +
     // owner-scoped storage policies; NOT applied, human-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 85/);
+    // then to 86 for W8 service_offerings (20260627121713_service_offerings;
+    // additive RED: new owner-scoped provider service-offerings table; RLS
+    // owner-scoped, grant authenticated only, no anon/public, no SECURITY
+    // DEFINER, no payment columns; NOT applied, human-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 86/);
   });
 });
