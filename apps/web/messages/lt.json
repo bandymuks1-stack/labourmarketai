@@ -1317,7 +1317,13 @@
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
         "migrationBlockerHeading": "Nepavyko",
         "migrationBlockerBody": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
-        "reviewStatus": "Peržiūros būsena"
+        "reviewStatus": "Peržiūros būsena",
+        "reviewStatusOptions": {
+          "pending": "Laukiama",
+          "in_review": "Peržiūrima",
+          "approved": "Patvirtinta",
+          "needs_followup": "Reikia tolesnių veiksmų"
+        }
       },
       "requests": {
         "heading": "Pirkėjo užklausos",

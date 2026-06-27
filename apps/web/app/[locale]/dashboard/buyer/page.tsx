@@ -310,7 +310,9 @@ export default async function BuyerDashboardPage({
             </div>
             <div>
               <dt className="text-xs text-text-muted">{tSetup("reviewStatus")}</dt>
-              <dd className="text-text-primary">{customer.reviewStatus}</dd>
+              <dd className="text-text-primary">
+                {tSetup(`reviewStatusOptions.${customer.reviewStatus}`)}
+              </dd>
             </div>
           </dl>
           <Link
