@@ -476,6 +476,15 @@ export default async function ProfilePage({
             ? deriveSkillEvidence(skillEvidenceInputs, savedSkillClaims.length)
             : undefined
         }
+        // Identity-essential presence sourced from the ONE minimum card contract
+        // (launch audit §7.3) — only data already fetched above, no new reads.
+        cardSource={{
+          fullName: profile?.full_name ?? null,
+          email: profile?.email ?? null,
+          avatarUrl: avatar.signedUrl,
+          about: savedProfileText,
+          skillsDeclared: savedSkillClaims.length + savedSkills.length,
+        }}
       />
 
       {/* Honest "needs review" banner — only when real data shows declared
