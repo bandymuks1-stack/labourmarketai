@@ -42,8 +42,19 @@ export type MarketplaceLabels = {
   withdraw: string;
   errorGeneric: string;
   duplicate: string;
+  requesterMessage: string;
+  providerNote: string;
+  responded: string;
   status: Record<RequestStatus, string>;
 };
+
+/** ISO timestamp → locale-independent YYYY-MM-DD (no hydration drift, no extra
+ *  i18n). Returns null for an empty/invalid value so the caller can omit it. */
+function isoDay(ts: string | null): string | null {
+  if (!ts) return null;
+  const day = ts.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
+}
 
 const STATUS_RING: Record<RequestStatus, string> = {
   sent: "border-ink-500 bg-ink-800/40 text-text-muted",
@@ -164,11 +175,20 @@ export function MarketplaceLoopSection({
               <li
                 key={r.id}
                 data-testid="marketplace-incoming-row"
-                className="flex items-center justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-1">
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
                   <StatusChip status={r.status} label={labels.status[r.status]} />
+                  {r.message && (
+                    <p
+                      data-testid="marketplace-incoming-message"
+                      className="line-clamp-3 text-xs text-text-muted"
+                    >
+                      <span className="text-text-secondary">{labels.requesterMessage}:</span>{" "}
+                      {r.message}
+                    </p>
+                  )}
                 </div>
                 {r.status === "sent" && (
                   <div className="flex shrink-0 items-center gap-2">
@@ -212,11 +232,30 @@ export function MarketplaceLoopSection({
               <li
                 key={r.id}
                 data-testid="marketplace-outgoing-row"
-                className="flex items-center justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-1">
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
-                  <StatusChip status={r.status} label={labels.status[r.status]} />
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <StatusChip status={r.status} label={labels.status[r.status]} />
+                    {isoDay(r.respondedAt) && (
+                      <span
+                        data-testid="marketplace-outgoing-responded"
+                        className="text-xs text-text-muted tabular-nums"
+                      >
+                        {labels.responded} {isoDay(r.respondedAt)}
+                      </span>
+                    )}
+                  </div>
+                  {r.responseNote && (
+                    <p
+                      data-testid="marketplace-outgoing-note"
+                      className="line-clamp-3 text-xs text-text-muted"
+                    >
+                      <span className="text-text-secondary">{labels.providerNote}:</span>{" "}
+                      {r.responseNote}
+                    </p>
+                  )}
                 </div>
                 {r.status === "sent" && (
                   <button

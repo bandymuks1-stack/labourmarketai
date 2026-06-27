@@ -4122,6 +4122,9 @@
     "withdraw": "Withdraw",
     "errorGeneric": "Something went wrong. Please try again.",
     "duplicate": "You already have an open request for this service.",
+    "requesterMessage": "Their message",
+    "providerNote": "Provider's note",
+    "responded": "Responded",
     "status": {
       "sent": "Sent",
       "accepted": "Accepted",
