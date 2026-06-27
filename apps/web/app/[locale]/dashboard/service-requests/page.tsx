@@ -11,6 +11,7 @@ import {
   MarketplaceLoopSection,
   type MarketplaceLabels,
 } from "@/components/app/marketplace-loop-section";
+import { MarkServiceRequestsSeen } from "@/components/app/mark-service-requests-seen";
 
 /**
  * Service requests — P0 marketplace request loop (Phase 1). Authenticated
@@ -84,6 +85,8 @@ export default async function ServiceRequestsPage({
 
   return (
     <div className="flex flex-col gap-4" data-testid="service-requests-page">
+      {/* Visiting the loop marks it seen → clears the dashboard "new" markers. */}
+      <MarkServiceRequestsSeen />
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("pageTitle")}
