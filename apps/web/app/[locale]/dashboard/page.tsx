@@ -12,7 +12,10 @@ import { getOwnCompany } from "@/lib/company/company-setup";
 import { WorkCard } from "@/components/app/work-card";
 import { getWorkerCard } from "@/lib/worker/work-card";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
-import { getPendingIncomingRequestCount } from "@/lib/marketplace/service-requests";
+import {
+  getPendingIncomingRequestCount,
+  getOutgoingRequestSummary,
+} from "@/lib/marketplace/service-requests";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
@@ -99,6 +102,58 @@ export default async function DashboardOverviewPage({
         </span>
       </Link>
     ) : null;
+
+  // Buyer next-action: a single compact card summarising the caller's OWN
+  // outgoing requests, from real statuses only. Priority is action-first —
+  // an accepted request is the strongest next step; otherwise a still-waiting
+  // ('sent') request; otherwise an answered ('declined') one shown calmly, no
+  // panic copy. No outgoing requests → no card (no fake urgency). All counts are
+  // 0 on any needs-migration / not-authed state (honest degradation).
+  const outgoingSummary = await getOutgoingRequestSummary();
+  const outgoingState: "accepted" | "waiting" | "declined" | null =
+    outgoingSummary.accepted > 0
+      ? "accepted"
+      : outgoingSummary.sent > 0
+        ? "waiting"
+        : outgoingSummary.declined > 0
+          ? "declined"
+          : null;
+  const outgoingCount =
+    outgoingState === "accepted"
+      ? outgoingSummary.accepted
+      : outgoingState === "waiting"
+        ? outgoingSummary.sent
+        : outgoingState === "declined"
+          ? outgoingSummary.declined
+          : 0;
+  const outgoingRequestsNextAction = outgoingState ? (
+    <Link
+      href={"/dashboard/service-requests" as "/dashboard"}
+      data-testid="dashboard-outgoing-requests-next-action"
+      data-state={outgoingState}
+      className={`flex items-center justify-between gap-3 rounded-md border px-4 py-3 text-sm text-text-primary ${
+        outgoingState === "accepted"
+          ? "border-state-success/40 bg-state-success/5 hover:border-state-success"
+          : "border-ink-500 bg-ink-800/30 hover:border-brand-blue"
+      }`}
+    >
+      <span className="flex flex-col">
+        <span className="font-semibold">{tMarket(`dashboardOutgoing.${outgoingState}.title`)}</span>
+        <span className="text-xs text-text-muted">
+          {tMarket(`dashboardOutgoing.${outgoingState}.note`)}
+        </span>
+      </span>
+      <span
+        className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-bold tabular-nums ${
+          outgoingState === "accepted"
+            ? "bg-state-success text-ink-900"
+            : "bg-ink-700 text-text-primary"
+        }`}
+      >
+        {outgoingCount}
+      </span>
+    </Link>
+  ) : null;
 
   // Shared header (role chip + greeting). The chip names the CURRENT workspace,
   // never a permanent label.
@@ -199,6 +254,9 @@ export default async function DashboardOverviewPage({
 
         {/* Real provider next-action — open incoming service requests (> 0). */}
         {serviceRequestsNextAction}
+
+        {/* Real buyer next-action — status of the caller's own outgoing requests. */}
+        {outgoingRequestsNextAction}
 
         {/* Company / agency: create a structured work need (hire / partner).
             A buyer/customer leads with their own request room (next action
@@ -345,6 +403,9 @@ export default async function DashboardOverviewPage({
       {/* Real provider next-action — open incoming service requests (> 0). Same
           honest, count-gated card as the org branch; links into the request loop. */}
       {serviceRequestsNextAction}
+
+      {/* Real buyer next-action — status of the caller's own outgoing requests. */}
+      {outgoingRequestsNextAction}
     </div>
   );
 }

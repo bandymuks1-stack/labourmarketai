@@ -4117,6 +4117,20 @@
     "incomingEmpty": "Kol kas gautų užklausų nėra.",
     "dashboardIncomingTitle": "Laukiančios paslaugų užklausos",
     "dashboardIncomingNote": "Atsakyk žmonėms, norintiems tavo paslaugų",
+    "dashboardOutgoing": {
+      "accepted": {
+        "title": "Jūsų užklausa priimta",
+        "note": "Atidaryk paslaugos užklausą ir tęsk"
+      },
+      "waiting": {
+        "title": "Laukiama atsakymo",
+        "note": "Jūsų užklausa išsiųsta — atsakymo dar nėra"
+      },
+      "declined": {
+        "title": "Į užklausą atsakyta",
+        "note": "Peržiūrėk savo užklausų būseną"
+      }
+    },
     "accept": "Priimti",
     "decline": "Atmesti",
     "withdraw": "Atšaukti",

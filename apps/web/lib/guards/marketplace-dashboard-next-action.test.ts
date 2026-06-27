@@ -35,7 +35,9 @@ describe("the dashboard surfaces the request loop as a count-gated next action",
   const page = read("app/[locale]/dashboard/page.tsx");
 
   it("computes the pending count via the marketplace helper", () => {
-    expect(page).toMatch(/import \{ getPendingIncomingRequestCount \} from "@\/lib\/marketplace\/service-requests"/);
+    // imported from the marketplace module (alone or alongside the buyer helper)
+    expect(page).toMatch(/getPendingIncomingRequestCount/);
+    expect(page).toMatch(/from "@\/lib\/marketplace\/service-requests"/);
     expect(page).toMatch(/const pendingServiceRequests = await getPendingIncomingRequestCount\(\);/);
   });
 
