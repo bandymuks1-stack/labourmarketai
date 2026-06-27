@@ -15,7 +15,14 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 const CERT = /confirm|verif|patvirtin|tvirtin|approved|certified|trusted|proof|подтверж|верифиц/i;
-const NEW_KEYS = ["similarSkillsTitle", "similarSkillsIntro", "addManuallyCta", "addManuallyHint"];
+const NEW_KEYS = [
+  "similarSkillsTitle",
+  "similarSkillsChoose",
+  "similarSkillChoose",
+  "similarSkillsIntro",
+  "addManuallyCta",
+  "addManuallyHint",
+];
 
 describe("candidate tier i18n is present + neutral in every active locale", () => {
   for (const loc of ["lt", "en", "ru"] as const) {
@@ -29,18 +36,39 @@ describe("candidate tier i18n is present + neutral in every active locale", () =
   }
 });
 
-describe("composer wires the 3-level model", () => {
+describe("composer wires the 3-level model into DISTINCT sections", () => {
   const composer = read("components/app/journal-entry-composer.tsx");
-  it("frames candidates as 'Similar skills' when nothing confident matched", () => {
-    expect(composer).toMatch(/t\("similarSkillsTitle"\)/);
-    expect(composer).toMatch(/t\("similarSkillsIntro"\)/);
+  it("routes the candidate tier to a SEPARATE Similar-skills section", () => {
+    // Tier is decided by the shared classifier (single source of truth)…
+    expect(composer).toMatch(/classifyEntryRecognition\(/);
+    expect(composer).toMatch(/inCandidateMode/);
+    // …and candidates render in their own component, not the new-skill group.
+    expect(composer).toMatch(/<SimilarSkillsSection/);
+    expect(composer).toMatch(/candidates=\{candidateSuggestions\}/);
   });
-  it("keeps a manual fallback action and the empty-state note", () => {
+  it("candidate state is separate from the 'Possible new skill' state", () => {
+    expect(composer).toMatch(/candidateSuggestions/);
+    // In candidate mode the new-skill group is emptied so they never blur.
+    expect(composer).toMatch(/const visibleNew = inCandidateMode \? \[\] : cappedNew/);
+    // The new-skill group keeps its own (non-similar) title.
+    expect(composer).toMatch(/title=\{t\("newSkillGroupTitle"\)\}/);
+  });
+  it("suppresses the confident 'what I understood' panel in candidate mode", () => {
+    // WorkEntrySkillReview (current-signal view) is gated off for unsure entries
+    // so a candidate is never presented as a current signal.
+    expect(composer).toMatch(
+      /candidateSuggestions\.length === 0 && \(\s*<WorkEntrySkillReview/,
+    );
+  });
+  it("keeps a clear MANUAL fallback + the empty-state note", () => {
+    expect(composer).toMatch(/data-testid="manual-fallback"/);
     expect(composer).toMatch(/data-testid="skill-add-manually-link"/);
     expect(composer).toMatch(/t\("addManuallyCta"\)/);
     expect(composer).toMatch(/t\("skillNoMatch"\)/);
   });
   it("a chosen candidate stores only the canonical claim (no fake link as fact)", () => {
+    // SimilarSkillsSection's onAdd is the SAME self-declared-claim path.
+    expect(composer).toMatch(/onAdd=\{addNewSkill\}/);
     expect(composer).toMatch(/addNewSkill\(row\.slug, row\.name\)/);
   });
 });

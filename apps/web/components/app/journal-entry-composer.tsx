@@ -24,6 +24,8 @@ import {
   labelForLocale,
   NEW_SKILL_LIMIT,
 } from "@/lib/structuring/new-skill-suggestions";
+import { classifyEntryRecognition } from "@/lib/structuring/recognition-tiers";
+import { SimilarSkillsSection } from "@/components/app/similar-skills-section";
 import {
   createJournalEntry,
   supersedeJournalEntry,
@@ -217,6 +219,14 @@ export function JournalEntryComposer({
   const [newSkillSuggestions, setNewSkillSuggestions] = useState<
     ComposerNewSkillSuggestion[]
   >([]);
+  // Owner 3-level model — tier 2 (CANDIDATE). When the entry was NOT confidently
+  // recognised but similar catalogue matches exist, they surface here, in their
+  // OWN "Panašūs įgūdžiai / Similar skills" section (never as current signals or
+  // facts). Mutually exclusive with `newSkillSuggestions`: a confident entry
+  // uses the "Possible new skill" group, an unsure one uses Similar skills.
+  const [candidateSuggestions, setCandidateSuggestions] = useState<
+    ComposerNewSkillSuggestion[]
+  >([]);
   const [newSkillStatus, setNewSkillStatus] = useState<
     Record<string, NewSkillAddStatus>
   >({});
@@ -372,9 +382,28 @@ export function JournalEntryComposer({
     // Allow headroom beyond NEW_SKILL_LIMIT so explicitly-named capabilities
     // are not crowded out by engine guesses; still bounded for the review grid.
     const cappedNew = mergedNew.slice(0, Math.max(NEW_SKILL_LIMIT, 12));
-    setNewSkillSuggestions(cappedNew);
+
+    // Owner 3-level routing. `classifyEntryRecognition` is the single source of
+    // truth for the tier (same classifier the audit scores against):
+    //   - candidate_suggestion → no confident signal, but similar matches exist
+    //     → route the cross-sector catalogue hits to the SEPARATE "Similar
+    //     skills" section; the "Possible new skill" group stays empty so the two
+    //     are never blurred.
+    //   - auto_signal / manual_only → keep the existing "Possible new skill"
+    //     group (undeclared mentions of an UNDERSTOOD entry); no Similar skills.
+    const tier = classifyEntryRecognition(raw, declaredSlugSet);
+    const inCandidateMode = tier.tier === "candidate_suggestion";
+    const visibleNew = inCandidateMode ? [] : cappedNew;
+    const candidates = inCandidateMode ? crossSector : [];
+    setNewSkillSuggestions(visibleNew);
+    setCandidateSuggestions(candidates);
     setNewSkillStatus(
-      Object.fromEntries(cappedNew.map((row) => [row.slug, "idle" as NewSkillAddStatus])),
+      Object.fromEntries(
+        [...visibleNew, ...candidates].map((row) => [
+          row.slug,
+          "idle" as NewSkillAddStatus,
+        ]),
+      ),
     );
     // Multi-fragment view is only meaningful when the worker logged more
     // than one work item — otherwise the single-bucket cards already cover
@@ -556,6 +585,7 @@ export function JournalEntryComposer({
       setSkillSuggestions([]);
       setSkillStatuses({});
       setNewSkillSuggestions([]);
+      setCandidateSuggestions([]);
       setNewSkillStatus({});
       setFragments([]);
       setInstitutionName("");
@@ -907,6 +937,7 @@ export function JournalEntryComposer({
     (topic ? 1 : 0) +
     skillSuggestions.length +
     newSkillSuggestions.length +
+    candidateSuggestions.length +
     fragments.length;
 
   return (
@@ -924,7 +955,13 @@ export function JournalEntryComposer({
         </button>
       </div>
 
-      <WorkEntrySkillReview text={text} existingSkills={existingSkillRefs} />
+      {/* The cross-sector "what I understood / did" panel is a CONFIDENT-signal
+          view. In candidate mode (unsure) we suppress it so a candidate is never
+          presented as a current signal — the "Similar skills" section is shown
+          instead (owner rule: candidates must not appear as current signals). */}
+      {candidateSuggestions.length === 0 && (
+        <WorkEntrySkillReview text={text} existingSkills={existingSkillRefs} />
+      )}
 
       {fragments.length > 0 && (
         // Multi-fragment summary — required by the supersprint goal so the
@@ -938,7 +975,24 @@ export function JournalEntryComposer({
       )}
 
       {totalDetected === 0 ? (
-        <p className="text-sm text-text-secondary">{tS("noMatches")}</p>
+        // Tier 3 — MANUAL ONLY: nothing confident, no similar candidate. The
+        // system never guesses; it offers an honest manual fallback instead.
+        <div
+          className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-4"
+          data-testid="manual-fallback"
+        >
+          <p className="text-sm text-text-secondary">{tS("noMatches")}</p>
+          <p className="text-[11px] leading-relaxed text-text-muted">
+            {t("addManuallyHint")}
+          </p>
+          <Link
+            href="/dashboard/profile#capabilities"
+            className="w-fit text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+            data-testid="manual-fallback-link"
+          >
+            {t("addManuallyCta")} →
+          </Link>
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {fragments.length > 0 && (
@@ -1175,28 +1229,28 @@ export function JournalEntryComposer({
             count={skillSuggestions.length}
           >
             {skillSuggestions.length === 0 && (
-              // Honest empty state: no clearly-related skill matched the entry —
-              // never a broad cloud of guesses. Level 3 of the owner's model:
-              // when no confident signal AND no similar candidate exists, the
-              // worker links a skill manually (the system never guesses for them).
-              // Similar candidates, when they DO exist, render in the "Similar
-              // skills" group below — this note still offers the manual path.
+              // Honest empty state for the "skills you already declared" bucket:
+              // none matched. The manual-link is offered only when there is also
+              // NO similar candidate and NO possible-new-skill — i.e. the genuine
+              // tier-3 MANUAL ONLY case — so it never competes with the "Similar
+              // skills" choice the worker should make first.
               <div
                 className="md:col-span-2 flex flex-col gap-1.5"
                 data-testid="skill-suggestions-empty-note"
               >
                 <p className="text-[11px] leading-relaxed text-text-muted">
-                  {newSkillSuggestions.length === 0
-                    ? t("skillNoMatch")
-                    : t("addManuallyHint")}
+                  {t("skillNoMatch")}
                 </p>
-                <Link
-                  href="/dashboard/profile#capabilities"
-                  className="w-fit text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
-                  data-testid="skill-add-manually-link"
-                >
-                  {t("addManuallyCta")} →
-                </Link>
+                {candidateSuggestions.length === 0 &&
+                  newSkillSuggestions.length === 0 && (
+                    <Link
+                      href="/dashboard/profile#capabilities"
+                      className="w-fit text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                      data-testid="skill-add-manually-link"
+                    >
+                      {t("addManuallyCta")} →
+                    </Link>
+                  )}
               </div>
             )}
             {skillSuggestions.map((row) => (
@@ -1229,24 +1283,17 @@ export function JournalEntryComposer({
             // "already in your profile" bucket above.
             <DetectedSuggestionList
               className="md:col-span-2"
-              // Level 2 of the owner's model: when nothing was confidently
-              // recognised, these undeclared matches are framed as "Similar
-              // skills / Panašūs įgūdžiai" (choose if it fits, never auto-linked).
-              // When a confident skill DID match, they stay "Possible new skill".
-              title={
-                skillSuggestions.length === 0
-                  ? t("similarSkillsTitle")
-                  : t("newSkillGroupTitle")
-              }
+              // "Possible new skill" — undeclared skills an UNDERSTOOD entry
+              // mentioned. The unsure CANDIDATE tier is a separate section
+              // ("Similar skills"), so this group keeps its own clear meaning.
+              title={t("newSkillGroupTitle")}
               count={newSkillSuggestions.length}
             >
               <p
                 className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
                 data-testid="new-skill-suggestions-intro"
               >
-                {skillSuggestions.length === 0
-                  ? t("similarSkillsIntro")
-                  : t("newSkillIntro")}
+                {t("newSkillIntro")}
               </p>
               {newSkillSuggestions.map((row) => {
                 const status = newSkillStatus[row.slug] ?? "idle";
@@ -1299,6 +1346,17 @@ export function JournalEntryComposer({
               })}
             </DetectedSuggestionList>
           )}
+
+          {/* Tier 2 — CANDIDATE: a distinct "Panašūs įgūdžiai / Similar skills"
+              section, separate from current signals, the "Possible new skill"
+              group, linked skills and the manual fallback. Renders ONLY for an
+              unsure entry; choosing one routes through addNewSkill (the existing
+              self-declared-claim path) — never a current signal, never a fact. */}
+          <SimilarSkillsSection
+            candidates={candidateSuggestions}
+            statusBySlug={newSkillStatus}
+            onAdd={addNewSkill}
+          />
         </div>
       )}
 

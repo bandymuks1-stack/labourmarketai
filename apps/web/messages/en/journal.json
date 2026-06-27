@@ -27,6 +27,8 @@
   "newSkillGroupTitle": "Possible new skill",
   "newSkillIntro": "These skills aren't in your profile yet. Your entry mentioned them — you can add one as a not-yet-reviewed skill.",
   "similarSkillsTitle": "Similar skills",
+  "similarSkillsChoose": "Choose if this fits",
+  "similarSkillChoose": "Choose",
   "similarSkillsIntro": "No exact match — but your words look close to these. Nothing is linked: pick one only if it fits, and it's added as a not-yet-reviewed skill you can remove anytime.",
   "addManuallyTitle": "Nothing fits?",
   "addManuallyHint": "If none of these match, add the skill yourself — the system won't guess for you.",

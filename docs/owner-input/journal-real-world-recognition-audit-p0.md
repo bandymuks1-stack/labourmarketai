@@ -109,6 +109,50 @@ offered as floor-laying even at the candidate level.
 
 ---
 
+## 1c. Three-tier UI — distinct sections (owner UI refinement)
+
+The owner's follow-up: the tiers must be **visible**, not hidden inside the old
+"Possible new skill" group. A worker must instantly tell apart (1) what the
+system understood, (2) what it only *suggests* as similar, and (3) what they must
+add manually. The composer review now renders each tier as its own clearly-named
+block.
+
+**Before** — one merged "Possible new skill" group carried both confident
+undeclared mentions AND unsure candidates; SAFE-EMPTY entries showed nothing.
+
+**After** — distinct, separately-labelled sections:
+
+| Tier | Section (LT / EN / RU) | What it holds | How a worker acts |
+|---|---|---|---|
+| 1 AUTO | "Sistema suprato / What the system understood" + detected buckets | confident current signals only | confirm / edit |
+| — | "Susieti įgūdžiai / Linked skills" (saved card) | already chosen / self-declared | — |
+| 2 CANDIDATE | **"Panašūs įgūdžiai / Similar skills / Похожие навыки"** — subtitle **"Pasirinkite, jei tinka / Choose if this fits / Выберите, если подходит"** | similar matches, **suggestions only** | tap **"Pasirinkti / Choose"** → self-declared claim |
+| 3 MANUAL | **"Susieti ranka / Add manually"** fallback | nothing fit | manual link to profile |
+
+Key separations enforced in code (`journal-entry-composer.tsx` +
+`components/app/similar-skills-section.tsx`):
+
+- The candidate tier renders in its **own** `SimilarSkillsSection`, never the
+  "Possible new skill" group (`inCandidateMode ? [] : cappedNew` routes them
+  apart; the tier is decided by the shared `classifyEntryRecognition`).
+- In candidate mode the confident **"what I understood"** panel
+  (`WorkEntrySkillReview`) is **suppressed**, so a candidate can never be shown
+  as a current signal.
+- Choosing a candidate calls the SAME `addNewSkill` self-declared-claim path —
+  no auto-link, no fact, no verification; until the tap, nothing happens.
+- Copy is neutral across LT/EN/RU (guard: no confirm/verify/proof/trust stem).
+
+**Component proof (auth-gated page → DOM proof instead of screenshots):** the
+journal composer is behind Vercel SSO + Supabase auth, so the
+`SimilarSkillsSection` is rendered to static markup with the real LT copy in
+`lib/guards/similar-skills-section.test.ts` — asserting the section heading +
+"Pasirinkite, jei tinka" subtitle, a per-candidate "Pasirinkti" choice button,
+the reason line, no certification wording, and an empty list rendering nothing.
+Composer wiring (distinct sections, suppressed confident panel, manual fallback)
+is pinned by static source proof in `lib/guards/recognition-candidate-tier.test.ts`.
+
+---
+
 ## 2. Per-entry results
 
 Legend: ✅ GOOD · 🟡 PARTIAL · ⚪ SAFE EMPTY · 🔴 BAD
