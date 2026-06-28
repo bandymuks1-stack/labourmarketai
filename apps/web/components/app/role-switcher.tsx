@@ -29,8 +29,15 @@ import { Settings } from "lucide-react";
 export function RoleSwitcher() {
   const tSwitcher = useTranslations("auth.roleSwitcher");
   const tAccount = useTranslations("auth.dashboard.account");
-  const { roles, activeRole, isAdmin, adminUiHidden, switchRole, addRole } =
-    useAuth();
+  const {
+    roles,
+    activeRole,
+    adminUiHidden,
+    activeOrgName,
+    switchRole,
+    addRole,
+    isAdmin,
+  } = useAuth();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
 
@@ -116,9 +123,22 @@ export function RoleSwitcher() {
         ) : (
           <span aria-hidden>•</span>
         )}
-        <span className="hidden font-mono text-[11px] uppercase tracking-label text-text-secondary sm:inline">
-          {activeIdentity ? tSwitcher(baseIdentityLabelKey(activeIdentity)) : tSwitcher("label")}
-        </span>
+        {activeIdentity === "company" && activeOrgName ? (
+          // Truthful active-company name (a proper noun → not the mono/uppercase
+          // identity-chip styling) so the user sees WHICH organization is live,
+          // visually distinct from the person identity. Falls back to the
+          // generic identity label when no real company name exists.
+          <span
+            className="hidden max-w-[12rem] truncate text-[13px] font-semibold text-text-primary sm:inline"
+            data-testid="role-switcher-active-org"
+          >
+            {activeOrgName}
+          </span>
+        ) : (
+          <span className="hidden font-mono text-[11px] uppercase tracking-label text-text-secondary sm:inline">
+            {activeIdentity ? tSwitcher(baseIdentityLabelKey(activeIdentity)) : tSwitcher("label")}
+          </span>
+        )}
         <span aria-hidden className="text-text-muted">
           ▾
         </span>

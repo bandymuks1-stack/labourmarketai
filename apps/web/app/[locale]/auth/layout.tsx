@@ -22,7 +22,7 @@ export default async function AuthLayout({
           href="/"
           className="font-display text-lg font-bold tracking-tightest text-text-primary"
         >
-          labourmarket<span className="text-gradient-accent">.ai</span>
+          LabourMarket<span className="text-gradient-accent">.ai</span>
         </Link>
       </header>
       <main className="relative z-10 mx-auto flex max-w-md flex-col px-6 pb-20">

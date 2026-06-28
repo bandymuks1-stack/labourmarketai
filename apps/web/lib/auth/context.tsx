@@ -43,6 +43,13 @@ type AuthState = {
   isAdmin: boolean;
   /** Display-only: admin chose to hide admin chrome on normal surfaces (Fix D). */
   adminUiHidden?: boolean;
+  /**
+   * Display-only: the active company/organization's name, resolved server-side
+   * ONLY when the active workspace is the company identity (else null). Lets the
+   * header truthfully show WHICH company is active so workspace switching is
+   * unambiguous. Never a fabricated name — null when no company row exists yet.
+   */
+  activeOrgName?: string | null;
   notifications: Notification[];
 };
 
@@ -104,6 +111,7 @@ export function AuthProvider({
       roles: initial.roles,
       isAdmin: initial.isAdmin,
       adminUiHidden: initial.adminUiHidden ?? false,
+      activeOrgName: initial.activeOrgName ?? null,
       notifications,
       switchRole,
       addRole,
@@ -117,6 +125,7 @@ export function AuthProvider({
       initial.roles,
       initial.isAdmin,
       initial.adminUiHidden,
+      initial.activeOrgName,
       notifications,
       switchRole,
       addRole,

@@ -44,7 +44,7 @@ export async function SiteNav() {
           href="/"
           className="font-display text-lg font-bold tracking-tightest text-text-primary"
         >
-          labourmarket<span className="text-gradient-accent">.ai</span>
+          LabourMarket<span className="text-gradient-accent">.ai</span>
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">
