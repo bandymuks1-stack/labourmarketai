@@ -226,7 +226,7 @@ export function LoginForm() {
       )}
 
       <div className="flex items-center justify-between">
-        <Button type="submit" disabled={disabled}>
+        <Button type="submit" loading={disabled}>
           {disabled ? t("signing") : t("submit_label")}
         </Button>
         <span className="text-xs text-text-muted">

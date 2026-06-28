@@ -65,7 +65,7 @@ export async function SiteFooter() {
         <div className="grid gap-10 border-t border-ink-600/60 py-12 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="font-display text-base font-bold text-text-primary">
-              labourmarket<span className="text-gradient-accent">.ai</span>
+              LabourMarket<span className="text-gradient-accent">.ai</span>
             </p>
             <p className="mt-3 max-w-xs text-sm text-text-secondary">
               {t("tagline")}
@@ -121,7 +121,7 @@ export async function SiteFooter() {
 
         <div className="flex flex-col gap-2 border-t border-ink-600/60 py-6 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
           <span>
-            © {new Date().getFullYear()} Labourmarket.ai. {t("rights")}
+            © {new Date().getFullYear()} LabourMarket.ai. {t("rights")}
           </span>
           {/* Created by Rexora — text only; no approved Rexora URL was found in
               the repo / brand config, so no link is fabricated (owner to confirm

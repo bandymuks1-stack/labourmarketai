@@ -12,6 +12,8 @@ import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
+import { baseIdentityForRole } from "@/lib/config/roles";
+import { getOwnCompany } from "@/lib/company/company-setup";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
@@ -87,6 +89,19 @@ export default async function DashboardLayout({
     ? (profile.active_role as Role)
     : (roles[0] ?? null);
 
+  // Company identity → surface WHICH organization is active in the header so
+  // switching person ↔ company is unambiguous. Read-only, RLS-scoped, reuses
+  // the existing company read; resolved ONLY for the company identity (the
+  // person identity skips the query). Null — never a fabricated name — when no
+  // company row exists yet, so the header only claims an org when one is real.
+  let activeOrgName: string | null = null;
+  if (activeRole && baseIdentityForRole(activeRole) === "company") {
+    const company = await getOwnCompany();
+    if (company.kind === "ok" && company.row) {
+      activeOrgName = company.row.displayName ?? company.row.legalName ?? null;
+    }
+  }
+
   return (
     <AuthProvider
       initial={{
@@ -99,6 +114,7 @@ export default async function DashboardLayout({
         roles,
         isAdmin,
         adminUiHidden,
+        activeOrgName,
         notifications: [],
       }}
     >
@@ -114,7 +130,7 @@ export default async function DashboardLayout({
               href="/dashboard"
               className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
             >
-              labourmarket<span className="text-gradient-accent">.ai</span>
+              LabourMarket<span className="text-gradient-accent">.ai</span>
             </Link>
             <DashboardTabs className="hidden md:flex" badges={navBadges} />
             <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">

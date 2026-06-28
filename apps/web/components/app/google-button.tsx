@@ -140,7 +140,13 @@ export function GoogleButton({
         type="button"
         onClick={onClick}
         disabled={disabled || loading}
-        className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition-opacity hover:bg-white/90 disabled:opacity-60"
+        aria-busy={loading || undefined}
+        // The button surface is ALWAYS the Google-white card (`bg-white`), so
+        // its label must use a FIXED dark ink — never `text-ink-900`, which
+        // inverts to near-white under `[data-theme="light"]` and makes the
+        // label invisible (white-on-white). `#1f1f1f` is Google's own button
+        // text colour and is theme-independent, matching the fixed `bg-white`.
+        className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-4 py-2.5 text-sm font-medium text-[#1f1f1f] transition-opacity hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <GoogleLogo />
         {loading ? redirectingLabel : label}
