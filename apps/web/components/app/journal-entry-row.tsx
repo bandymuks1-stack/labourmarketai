@@ -83,31 +83,35 @@ export function JournalEntryRow({
           {statusSlot}
         </div>
       )}
-      {/* Actions — quiet, do not dominate the card. */}
+      {/* Actions — the entry card holds interactive children (skill-link +
+          delete buttons), so the whole card can't be one link. Instead the
+          MAIN action (open/edit the entry) is a clear, mobile-safe (≥44px)
+          tappable control, with delete distinct beside it. Neither is hidden. */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {canDelete ? (
             <>
               <Link
                 href={`/${locale}/dashboard/journal?editing=${entryId}#journal-composer`}
                 onClick={() => recordEvent("journal_edit_clicked")}
-                className="font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue"
+                className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:border-brand-blue"
                 data-testid={`journal-entry-edit-${entryId}`}
               >
-                {t("entry.edit")}
+                {t("entry.edit")} →
               </Link>
               <button
                 type="button"
                 onClick={onDelete}
                 disabled={pending}
-                className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-state-danger disabled:opacity-50"
+                aria-busy={pending || undefined}
+                className="inline-flex min-h-[2.75rem] items-center rounded-md px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:text-state-danger disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid={`journal-entry-delete-${entryId}`}
               >
                 {pending ? t("entry.deleting") : t("entry.delete")}
               </button>
             </>
           ) : (
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="inline-flex min-h-[2.75rem] items-center font-mono text-[10px] uppercase tracking-label text-text-muted">
               {t("entry.deleteBlocked")}
             </span>
           )}

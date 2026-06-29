@@ -1318,9 +1318,13 @@ export function JournalEntryComposer({
                         <button
                           type="button"
                           disabled={status === "adding"}
+                          aria-busy={status === "adding" || undefined}
                           onClick={() => addNewSkill(row.slug, row.name)}
                           data-testid={`new-skill-add-${row.slug}`}
-                          className="rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                          // Mobile-safe target (≥44px, full-width on phones) so
+                          // adding a skill is no longer a tiny text tap. Clear
+                          // adding/added/disabled feedback via state above.
+                          className="inline-flex min-h-[2.75rem] w-full items-center justify-center gap-1.5 rounded-md border border-brand-blue/50 px-4 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                         >
                           {status === "adding"
                             ? t("newSkillAdding")

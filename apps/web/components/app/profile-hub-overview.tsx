@@ -66,21 +66,37 @@ export async function ProfileHubOverview({
   });
   const journalIsPrimary = nextAction.href === "/dashboard/journal";
 
-  const pillars: { label: string; value: string; ok: boolean }[] = [
+  // Each pillar is tappable to its EXISTING fill surface — so "X is missing"
+  // is an action, not a passive label. CV + skills live in the in-page editor
+  // (`#profile-edit`, same anchor the primary action/CV-import link already
+  // use); journal evidence lives on the canonical journal route. No new route,
+  // no new copy.
+  const pillars: {
+    key: "cv" | "skills" | "journal";
+    label: string;
+    value: string;
+    ok: boolean;
+    href: string;
+  }[] = [
     {
+      key: "cv",
       label: t("pillars.cv.label"),
       value: cvProvided ? t("pillars.cv.yes") : t("pillars.cv.no"),
       ok: aboutOk,
+      href: "#profile-edit",
     },
     {
+      key: "skills",
       label: t("pillars.skills.label"),
       value:
         selfDeclaredCount > 0
           ? t("pillars.skills.count", { n: selfDeclaredCount })
           : t("pillars.skills.none"),
       ok: skillsOk,
+      href: "#profile-edit",
     },
     {
+      key: "journal",
       label: t("pillars.journal.label"),
       value: !hasWorker
         ? t("pillars.journal.preparing")
@@ -88,6 +104,7 @@ export async function ProfileHubOverview({
           ? t("pillars.journal.available", { n: journalCount })
           : t("pillars.journal.none"),
       ok: hasWorker && journalCount > 0,
+      href: "/dashboard/journal",
     },
   ];
 
@@ -115,24 +132,51 @@ export async function ProfileHubOverview({
         // missing — sourced from the ONE contract, never a percentage/score.
         data-card-missing={card ? card.missing.join(",") : undefined}
       >
-        {pillars.map((p) => (
-          <li
-            key={p.label}
-            className="flex flex-col gap-1 rounded-md border border-border/40 p-3"
-          >
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {p.label}
-            </span>
-            <span
-              data-status={p.ok ? "ok" : "todo"}
-              className={`text-xs font-medium ${
-                p.ok ? "text-state-success" : "text-text-secondary"
-              }`}
-            >
-              {p.value}
-            </span>
-          </li>
-        ))}
+        {pillars.map((p) => {
+          // Whole card is the tap target (min 52px tall → mobile-safe), with a
+          // clear hover/active/focus affordance so it reads as pressable.
+          const cardCls =
+            "flex min-h-[3.25rem] flex-col gap-1 rounded-md border border-border/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:border-brand-blue";
+          const body = (
+            <>
+              <span className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                {p.label}
+                <span aria-hidden className="text-text-muted">
+                  {p.href.startsWith("#") ? "↓" : "→"}
+                </span>
+              </span>
+              <span
+                data-status={p.ok ? "ok" : "todo"}
+                className={`text-xs font-medium ${
+                  p.ok ? "text-state-success" : "text-text-secondary"
+                }`}
+              >
+                {p.value}
+              </span>
+            </>
+          );
+          return (
+            <li key={p.key}>
+              {p.href.startsWith("#") ? (
+                <a
+                  href={p.href}
+                  className={cardCls}
+                  data-testid={`profile-hub-pillar-${p.key}`}
+                >
+                  {body}
+                </a>
+              ) : (
+                <Link
+                  href={p.href}
+                  className={cardCls}
+                  data-testid={`profile-hub-pillar-${p.key}`}
+                >
+                  {body}
+                </Link>
+              )}
+            </li>
+          );
+        })}
       </ul>
 
       {/* Journal → skill evidence-support layer (v1). Derived from stored
