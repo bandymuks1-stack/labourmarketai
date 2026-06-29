@@ -9,6 +9,7 @@ import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
 import { MyZone } from "@/components/app/my-zone";
 import { getOwnCompany } from "@/lib/company/company-setup";
+import { getOwnAvatar } from "@/lib/profile/avatar";
 import { WorkCard } from "@/components/app/work-card";
 import { getWorkerCard } from "@/lib/worker/work-card";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
@@ -415,6 +416,9 @@ export default async function DashboardOverviewPage({
     skillsCount,
     evidenceCount: entriesCount,
   });
+  // Owner's consented avatar (existing RLS-scoped read) for the canonical Player
+  // Card identity header on the dashboard work card (PR-D1 variant adoption).
+  const workerAvatar = await getOwnAvatar();
 
   // Booking next-action: surface ONLY when there is a REAL pending incoming
   // booking count (> 0). 0 on any missing-data state → no card, no fake badge.
@@ -435,7 +439,7 @@ export default async function DashboardOverviewPage({
 
       {/* "Mano darbo kortelė" — the state-aware status: what's clear / what's
           missing + the ONE best next action (+ why it helps). Real data only. */}
-      <WorkCard data={cardData} />
+      <WorkCard data={cardData} avatarUrl={workerAvatar.signedUrl} />
 
       {/* The action-first control room: readiness + fast actions + what-improves
           -what. `incomplete` is the real first-use state (no profession or no

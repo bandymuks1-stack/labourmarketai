@@ -4,6 +4,7 @@ import type { WorkCardData } from "@/lib/worker/work-card";
 import { deriveWorkCardState, type WorkDim } from "@/lib/worker/work-card-state";
 import { WorkCardEditor, type WorkCardLabels } from "./work-card-editor";
 import { EmployerPreview } from "./employer-preview";
+import { AvatarDisplay } from "./avatar-display";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,7 +21,15 @@ import { cn } from "@/lib/utils";
  * no match, no fabricated value; the pure engine in lib/worker/work-card-state
  * decides the state and the single next action.
  */
-export async function WorkCard({ data }: { data: WorkCardData }) {
+export async function WorkCard({
+  data,
+  avatarUrl = null,
+}: {
+  data: WorkCardData;
+  /** Owner's consented avatar signed URL (existing getOwnAvatar read). When
+   *  absent, the canonical AvatarDisplay shows the honest initials monogram. */
+  avatarUrl?: string | null;
+}) {
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.workCard");
 
@@ -137,14 +146,36 @@ export async function WorkCard({ data }: { data: WorkCardData }) {
       data-testid="work-card"
       data-state={state}
     >
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-3">
         <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
           {tw("eyebrow")}
         </span>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
-          {t("greeting", { name: data.name })}
-        </h1>
-        <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
+        {/* Canonical Player Card identity header (PR-D1 variant adoption): the
+            shared AvatarDisplay tile + name + role, so the dashboard identity
+            reads as the SAME Player Card as the profile / CV / map — answering
+            "who am I here". Avatar/role use existing data only; no new model. */}
+        <div className="flex items-center gap-3" data-testid="work-card-identity">
+          <AvatarDisplay
+            signedUrl={avatarUrl}
+            displayName={data.name}
+            alt={data.name}
+            size="md"
+          />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <h1 className="truncate font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
+              {t("greeting", { name: data.name })}
+            </h1>
+            {data.professionName ? (
+              <span
+                className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+                data-testid="work-card-role"
+              >
+                {data.professionName}
+              </span>
+            ) : null}
+          </div>
+        </div>
+        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
           {intro}
         </p>
       </header>
