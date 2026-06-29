@@ -5377,6 +5377,14 @@
     "readinessTitle": "Jūsų pasirengimas",
       "matchTitle": "Atitikimo apžvalga",
     "marketMapLink": "Rinkos žemėlapis",
+    "nextStep": {
+      "title": "Paversk atitikimą veiksmu",
+      "intro": "Galimybė juda pirmyn per turgų ir tavo planą.",
+      "marketplace": "Turgus",
+      "marketplaceNote": "Paprašyk arba pasiūlyk paslaugą",
+      "bookings": "Planas ir rezervacijos",
+      "bookingsNote": "Patvirtintas atitikimas tampa rezervacija"
+    },
       "matchDim": {
         "workType": "Darbo kryptis",
         "skills": "Įgūdžiai",

@@ -5377,6 +5377,14 @@
     "readinessTitle": "Your readiness",
       "matchTitle": "Match breakdown",
     "marketMapLink": "Market map",
+    "nextStep": {
+      "title": "Turn a fit into action",
+      "intro": "An opportunity moves forward through the marketplace and your plan.",
+      "marketplace": "Marketplace",
+      "marketplaceNote": "Request or offer a service",
+      "bookings": "Plan & bookings",
+      "bookingsNote": "A confirmed match becomes a booking"
+    },
       "matchDim": {
         "workType": "Work direction",
         "skills": "Skills",
