@@ -79,6 +79,46 @@ export default async function OpportunitiesPage({
         {t("marketMapLink")} →
       </Link>
 
+      {/* Next-step bridge (§8.10 / §6 system loop): a fit doesn't dead-end — it
+          moves through the marketplace (request/offer) and the plan (a confirmed
+          match becomes a booking). Existing routes only; navigation, no fake
+          matching action, mobile-first tap targets. */}
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="opportunities-next-step"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("nextStep.title")}
+        </span>
+        <p className="text-xs text-text-secondary">{t("nextStep.intro")}</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {[
+            {
+              key: "marketplace",
+              href: `/${locale}/dashboard/service-requests`,
+              label: t("nextStep.marketplace"),
+              note: t("nextStep.marketplaceNote"),
+            },
+            {
+              key: "bookings",
+              href: `/${locale}/dashboard/bookings`,
+              label: t("nextStep.bookings"),
+              note: t("nextStep.bookingsNote"),
+            },
+          ].map((l) => (
+            <Link
+              key={l.key}
+              href={l.href}
+              data-testid={`opportunities-next-step-${l.key}`}
+              className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+            >
+              <span className="font-semibold">{l.label}</span>
+              <span className="text-xs text-text-muted">{l.note}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {result.kind === "no-worker" ? (
         <section className="rounded-lg border border-dashed border-ink-500 px-4 py-6">
           <p className="text-sm text-text-secondary">{t("noWorkerBody")}</p>
