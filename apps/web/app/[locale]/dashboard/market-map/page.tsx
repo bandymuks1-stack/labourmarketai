@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MarketMapShell } from "@/components/app/market-map-shell";
 import { MarketMapBase } from "@/components/app/market-map-base";
@@ -174,6 +175,52 @@ export default async function MarketMapPage({
           ],
         }}
       />
+      {/* Operating-layer bridge (§8.9): the map shows WHERE things are; the
+          real data is managed on these surfaces. Existing routes only, no fake
+          markers, mobile-safe tap targets. The legend (future layers) stays the
+          honest "not on map yet" signal; this strip is the actionable bridge. */}
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="market-map-connections"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {tMap("connections.title")}
+        </span>
+        <p className="text-xs text-text-secondary">{tMap("connections.intro")}</p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {[
+            {
+              key: "marketplace",
+              href: "/dashboard/service-requests",
+              label: tMap("connections.marketplace"),
+              note: tMap("connections.marketplaceNote"),
+            },
+            {
+              key: "opportunities",
+              href: "/dashboard/opportunities",
+              label: tMap("connections.opportunities"),
+              note: tMap("connections.opportunitiesNote"),
+            },
+            {
+              key: "bookings",
+              href: "/dashboard/bookings",
+              label: tMap("connections.bookings"),
+              note: tMap("connections.bookingsNote"),
+            },
+          ].map((l) => (
+            <Link
+              key={l.key}
+              href={l.href as "/dashboard"}
+              data-testid={`market-map-connection-${l.key}`}
+              className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+            >
+              <span className="font-semibold">{l.label}</span>
+              <span className="text-xs text-text-muted">{l.note}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* The map + legend above carry the signal visually. Everything below is
           a secondary "Manage my locations & market layers" panel, collapsed by
           default so the map dominates: it LEADS with the functional capture +

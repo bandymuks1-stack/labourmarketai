@@ -240,6 +240,16 @@
     "pageTitle": "Map",
     "pageLead": "You and the market on one map.",
     "advanced": "My locations & market layers",
+    "connections": {
+      "title": "The operating layer connects to",
+      "intro": "The map shows where things are — manage them on these surfaces.",
+      "marketplace": "Marketplace",
+      "marketplaceNote": "Services and orders",
+      "opportunities": "Opportunities",
+      "opportunitiesNote": "Work that fits",
+      "bookings": "Plan & bookings",
+      "bookingsNote": "Scheduled work and assignments"
+    },
     "companyContext": {
       "title": "Company context",
       "missingLocation": "Company location not added yet",
