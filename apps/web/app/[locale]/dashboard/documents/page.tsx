@@ -58,8 +58,11 @@ export default async function WorkerDocumentsPage({
 
   if (!DOCUMENTS_READINESS_ENABLED) {
     return (
-      <div className="flex flex-col gap-4" data-testid="documents-page">
+      <div className="flex flex-col gap-6" data-testid="documents-page">
         <Header t={t} />
+        {/* Reports/exports work independently of the document-storage layer —
+            keep them available even while readiness is preparing. */}
+        <ReportsExports t={t} />
         <p
           className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"
           data-testid="documents-preparing"
@@ -92,6 +95,8 @@ export default async function WorkerDocumentsPage({
       >
         {t("disclaimer")}
       </p>
+
+      <ReportsExports t={t} />
 
       <DocsConsentToggle current={docsConsent} />
 
@@ -269,6 +274,56 @@ export default async function WorkerDocumentsPage({
         </>
       )}
     </div>
+  );
+}
+
+/** Reports & exports (§8.8): the real, working print→PDF exports (Verified CV,
+ *  Evidence Report) plus an HONEST format-status line (PDF available; Excel/Word
+ *  preparing). No fake export buttons — unavailable formats are stated, not shown
+ *  as clickable. Existing routes only; no duplicate report system. */
+function ReportsExports({
+  t,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  const exports = [
+    { key: "cv", href: "/cv", label: t("reports.cv"), note: t("reports.cvNote") },
+    {
+      key: "evidence",
+      href: "/dashboard/reports/evidence",
+      label: t("reports.evidence"),
+      note: t("reports.evidenceNote"),
+    },
+  ];
+  return (
+    <section
+      className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+      data-testid="documents-reports-exports"
+    >
+      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("reports.title")}
+      </span>
+      <p className="text-xs text-text-secondary">{t("reports.intro")}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {exports.map((e) => (
+          <Link
+            key={e.key}
+            href={e.href as "/dashboard"}
+            data-testid={`documents-report-${e.key}`}
+            className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+          >
+            <span className="font-semibold">{e.label}</span>
+            <span className="text-xs text-text-muted">{e.note}</span>
+          </Link>
+        ))}
+      </div>
+      <p
+        className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+        data-testid="documents-export-format-status"
+      >
+        {t("reports.formatStatus")}
+      </p>
+    </section>
   );
 }
 

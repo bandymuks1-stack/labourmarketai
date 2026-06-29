@@ -4789,6 +4789,15 @@
     "title": "Mano dokumentai",
     "subtitle": "Ką turi, ko trūksta ir koks kitas žingsnis — pagal šalį.",
     "preparing": "Dokumentų parengtis ruošiama — funkcija įsijungs, kai dokumentų saugojimo sluoksnis bus peržiūrėtas ir įjungtas. Kol kas čia niekas neaktyvu.",
+    "reports": {
+      "title": "Ataskaitos ir eksportas",
+      "intro": "Sukurk spausdinimui paruoštą ataskaitą iš savo duomenų. PDF veikia per naršyklės spausdinimą / išsaugojimą; Excel ir Word dar negalimi.",
+      "cv": "Profesinis CV",
+      "cvNote": "Atidaryk ir spausdink / išsaugok kaip PDF",
+      "evidence": "Įrodymų ataskaita",
+      "evidenceNote": "Atidaryk ir spausdink / išsaugok kaip PDF",
+      "formatStatus": "PDF: galima · Excel / Word: ruošiama"
+    },
     "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
     "needsMigration": "Dokumentų saugojimo sluoksnis šioje aplinkoje dar neįjungtas.",
     "noWorker": "Pirmiausia susikurk darbuotojo profilį — dokumentai priklauso jam.",
