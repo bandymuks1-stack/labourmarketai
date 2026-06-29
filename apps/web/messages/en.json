@@ -5139,6 +5139,16 @@
       "declined": "You declined",
       "conflict": "You already have an accepted booking for these dates.",
       "error": "Something went wrong."
+    },
+    "connections": {
+      "title": "Planning connects to",
+      "intro": "A booking is part of your plan. These are the surfaces it links to.",
+      "marketplace": "Marketplace orders",
+      "marketplaceNote": "Requests and confirmed orders",
+      "map": "Map",
+      "mapNote": "Where work and bookings are",
+      "diary": "Work diary",
+      "diaryNote": "Record what actually happened"
     }
   },
   "adminReadiness": {

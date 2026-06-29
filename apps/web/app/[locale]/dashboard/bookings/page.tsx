@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { listMyBookings, type BookingRow } from "@/lib/booking/booking-actions";
 import { BookingRespondButtons } from "@/components/app/booking-respond-buttons";
 import type { BookingStatus } from "@/lib/booking/booking-state";
+import { Link } from "@/lib/i18n/navigation";
 
 /**
  * Bookings (Stage 6) — the worker's incoming proposals (accept/decline) and the
@@ -41,6 +42,12 @@ export default async function BookingsPage({
         </h1>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
+
+      {/* Planning hub connections (§8.3): a booking is one part of the plan —
+          surface the real, existing surfaces it links to (Marketplace orders,
+          Map, Diary) so this is the canonical planning surface, not an isolated
+          list. Navigation only; each destination renders its own honest state. */}
+      <PlanningConnections t={t} />
 
       {result.kind === "not-authed" ? (
         <p className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted">
@@ -90,6 +97,59 @@ export default async function BookingsPage({
         </>
       )}
     </div>
+  );
+}
+
+/** Compact, mobile-first bridge to the surfaces a plan connects to. Reuses
+ *  existing canonical routes — no duplicate planning page, no fake entries. */
+function PlanningConnections({
+  t,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  const links = [
+    {
+      key: "marketplace",
+      href: "/dashboard/service-requests",
+      label: t("connections.marketplace"),
+      note: t("connections.marketplaceNote"),
+    },
+    {
+      key: "map",
+      href: "/dashboard/market-map",
+      label: t("connections.map"),
+      note: t("connections.mapNote"),
+    },
+    {
+      key: "diary",
+      href: "/dashboard/journal",
+      label: t("connections.diary"),
+      note: t("connections.diaryNote"),
+    },
+  ];
+  return (
+    <section
+      className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+      data-testid="bookings-connections"
+    >
+      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("connections.title")}
+      </span>
+      <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {links.map((l) => (
+          <Link
+            key={l.key}
+            href={l.href as "/dashboard"}
+            data-testid={`bookings-connection-${l.key}`}
+            className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+          >
+            <span className="font-semibold">{l.label}</span>
+            <span className="text-xs text-text-muted">{l.note}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
