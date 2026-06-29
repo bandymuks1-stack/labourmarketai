@@ -15,6 +15,12 @@ videos, logs, or observed app behavior. Nothing is invented.
 
 ---
 
+## Capture defaults (owner-set)
+
+- **App URL:** https://app.labourmarket.ai (production)
+- **Tester identity:** aliases by default — `Tester-01`, `Tester-02`, `Tester-03`,
+  `Tester-04` — real names only if the owner explicitly provides them.
+
 ## Current state (pre-feedback baseline)
 
 - Integration train **PR3–PR12 merged** to `main` (see

@@ -5,9 +5,9 @@
 
 ## Batch
 - Date: _(pending first batch)_
-- Testers: _(none captured yet)_
-- Environment: production (Vercel) — exact app URL to be confirmed by owner
-- App URL: _(owner to confirm)_
+- Testers: aliases Tester-01 … Tester-04 (real names only if owner provides them)
+- Environment: production (Vercel)
+- App URL: https://app.labourmarket.ai
 
 ## Overall understanding
 - What testers understood: _(pending)_
@@ -48,6 +48,4 @@
   - PR F — Reports/Documents/export clarity
 
 ## Owner decisions needed
-- Confirm the exact production app URL given to testers.
-- Confirm tester aliases (or approve real names) for the ledger.
 - OAuth consent branding (external action — see External blockers).
