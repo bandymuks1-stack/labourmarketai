@@ -4855,7 +4855,9 @@
     "proofEmpty": "Susietų įrašų dar nėra.",
     "generatedAt": "Sugeneruota",
     "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
-    "summaryTitle": "Profesinis aprašymas"
+    "summaryTitle": "Profesinis aprašymas",
+    "workHistoryTitle": "Darbo istorija",
+    "present": "Dabar"
   },
   "todayScreen": {
     "eyebrow": "Šiandien",

@@ -46,6 +46,7 @@ export default async function VerifiedCvPage({
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
   const tRel = await getTranslations("relationshipTypes");
+  const tRole = await getTranslations("auth.signup.role");
 
   const result = await buildVerifiedCv();
   if (!result.ok && result.code === "not_authenticated") {
@@ -154,6 +155,66 @@ export default async function VerifiedCvPage({
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">
               {cv.professionalSummary}
             </p>
+          </section>
+        ) : null}
+
+        {/* Work history — real engagement_contexts (companies, role, dates),
+            the same source the profile renders. Self-stated history, never an
+            external verification; omitted entirely when empty so the print CV
+            stays clean. Org name falls back to an org-type/relationship label,
+            never an invented name. */}
+        {cv.workHistory.length > 0 ? (
+          <section
+            className="flex flex-col gap-3"
+            data-testid="cv-work-history"
+          >
+            <h2 className="font-display text-lg font-bold">
+              {t("workHistoryTitle")}
+            </h2>
+            <ul className="flex flex-col gap-2">
+              {cv.workHistory.map((e, i) => {
+                const orgDisplay =
+                  e.orgName ??
+                  (e.organizationType === "company"
+                    ? tRole("company")
+                    : e.organizationType === "agency"
+                      ? tRole("agency")
+                      : (e.title ??
+                        (tRel.has(e.relationship)
+                          ? tRel(e.relationship)
+                          : e.relationship)));
+                const roleLabel = tRel.has(e.relationship)
+                  ? tRel(e.relationship)
+                  : e.relationship;
+                const start = e.startedAt
+                  ? new Date(e.startedAt).toLocaleDateString(locale)
+                  : null;
+                const end = e.endedAt
+                  ? new Date(e.endedAt).toLocaleDateString(locale)
+                  : null;
+                const range =
+                  start && end
+                    ? `${start} – ${end}`
+                    : start
+                      ? `${start} – ${t("present")}`
+                      : (end ?? "");
+                return (
+                  <li
+                    key={`${e.relationship}-${i}`}
+                    className="flex flex-col border-l-2 border-zinc-300 pl-3"
+                  >
+                    <span className="text-sm font-semibold">{orgDisplay}</span>
+                    <span className="text-xs text-zinc-600">
+                      {roleLabel}
+                      {range ? ` · ${range}` : ""}
+                    </span>
+                    {e.title && e.title !== orgDisplay ? (
+                      <span className="text-xs text-zinc-500">{e.title}</span>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
           </section>
         ) : null}
 
