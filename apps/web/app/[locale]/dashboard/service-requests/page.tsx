@@ -111,6 +111,71 @@ export default async function ServiceRequestsPage({
         {t("linkToServices")}
         <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
       </Link>
+
+      {/* Marketplace connections (§8.4): a request/order is not a dead end — it
+          flows to matching (find the right people), calendar (a confirmed order
+          becomes a booking), map (where), and the diary (completed work as
+          fact). Reuses existing canonical routes; navigation only, no fake data. */}
+      <MarketplaceConnections t={t} />
     </div>
+  );
+}
+
+/** Compact, mobile-first bridge from the order loop to the rest of the system
+ *  (matching / calendar / map / diary). Existing routes only — no duplicates. */
+function MarketplaceConnections({
+  t,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  const links = [
+    {
+      key: "matching",
+      href: "/dashboard/opportunities",
+      label: t("connections.matching"),
+      note: t("connections.matchingNote"),
+    },
+    {
+      key: "calendar",
+      href: "/dashboard/bookings",
+      label: t("connections.calendar"),
+      note: t("connections.calendarNote"),
+    },
+    {
+      key: "map",
+      href: "/dashboard/market-map",
+      label: t("connections.map"),
+      note: t("connections.mapNote"),
+    },
+    {
+      key: "diary",
+      href: "/dashboard/journal",
+      label: t("connections.diary"),
+      note: t("connections.diaryNote"),
+    },
+  ];
+  return (
+    <section
+      className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+      data-testid="marketplace-connections"
+    >
+      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("connections.title")}
+      </span>
+      <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {links.map((l) => (
+          <Link
+            key={l.key}
+            href={l.href as "/dashboard"}
+            data-testid={`marketplace-connection-${l.key}`}
+            className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+          >
+            <span className="font-semibold">{l.label}</span>
+            <span className="text-xs text-text-muted">{l.note}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
