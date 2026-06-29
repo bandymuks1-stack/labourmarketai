@@ -2643,6 +2643,18 @@
             "title": "Būti matomam žemėlapyje",
             "desc": "Kur jus mato"
           },
+          "findOpportunities": {
+            "title": "Žiūrėti galimybes",
+            "desc": "Jums tinkantis darbas"
+          },
+          "planning": {
+            "title": "Planas ir rezervacijos",
+            "desc": "Kalendorius ir rezervacijos"
+          },
+          "documents": {
+            "title": "Ataskaitos ir dokumentai",
+            "desc": "Jūsų ataskaitos ir failai"
+          },
           "checkMessages": {
             "title": "Patikrinti žinutes",
             "desc": "Jūsų pokalbiai"
