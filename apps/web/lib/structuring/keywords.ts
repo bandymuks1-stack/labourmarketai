@@ -152,16 +152,20 @@ export const ACTIVITY_HINTS_LT: {
     needles: ["stogo karkas", "stog karkas", "karkas stog", "каркас крыши", "стропильн"],
   },
   {
-    // Door + window installation. Each LT form is listed explicitly to keep
-    // the needles long enough that they don't false-match unrelated words.
+    // Door + window INSTALLATION. Needles are VERB-ANCHORED on purpose: a bare
+    // "langus"/"durų" noun must NOT resolve to installation, because a window
+    // is just as often CLEANED ("valiau langus") or replaced in a non-trade
+    // context. Installation only fires when an install verb (statyti / dėti /
+    // montuoti) sits with the noun. This is the owner's door/window-default fix.
     slug: "carpenter",
     label: "Durų ir langų montavimas",
     needles: [
-      "duris", "durų", "durims", "durimis", "duryse",
-      "langus", "langų", "langams", "langais", "languose",
-      "stačiau duris", "stačiau langus",
-      "dėjau duris", "dėjau langus",
-      "montav duris", "montav langus", "ставил двери", "ставил окна", "монтаж дверей", "монтаж окон", "двери", "дверей", "оконн",
+      "stačiau duris", "stačiau langus", "staciau duris", "staciau langus",
+      "dėjau duris", "dėjau langus", "dejau duris", "dejau langus",
+      "montav duris", "montav langus", "montavau duris", "montavau langus",
+      "durų montav", "langų montav", "duru montav", "langu montav",
+      "duris ir langus montav", "duru ir langu montav",
+      "ставил двери", "ставил окна", "монтаж дверей", "монтаж окон",
     ],
   },
   {
@@ -422,9 +426,23 @@ export const ACTIVITY_HINTS_LT: {
       "šveičiau grind",
       "sveiciau grind",
       "siurbiau grind",
+      // Window WASHING is cleaning work (not window installation). Anchored on
+      // a cleaning verb + "lang…" so it never collides with the verb-anchored
+      // "Durų ir langų montavimas" install row above.
+      "valiau lang",
+      "valau lang",
+      "ploviau lang",
+      "išploviau lang",
+      "isploviau lang",
+      "nuploviau lang",
+      "langų valym",
+      "langu valym",
       "washed the floor",
       "mopped the floor",
       "cleaned the floor",
+      "washed the window",
+      "cleaned the window",
+      "cleaned windows",
       "cleaning",
       "cleaner", "убирал", "уборк", "уборщ", "мыл полы", "помыл пол", "вымыл пол",
     ],

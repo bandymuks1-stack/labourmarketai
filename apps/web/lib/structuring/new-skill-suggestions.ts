@@ -156,8 +156,8 @@ const CATALOG: readonly CatalogSkill[] = [
     // Real-world audit (#31 "Prižiūrėjau senelius, daviau vaistus") was SAFE
     // EMPTY: "senel"/"slaug" stems added so the elder-care candidate surfaces.
     needles: [
-      "senjor", "senel", "slaug", "slaugiau", "elderly care", "caregiver",
-      "сиделк", "уход за пожил", "ухаживал за пожил",
+      "senjor", "senel", "senol", "slaug", "slaugiau", "elderly care",
+      "caregiver", "сиделк", "уход за пожил", "ухаживал за пожил",
     ],
   },
   {
