@@ -138,6 +138,13 @@ const DICTIONARY: readonly DictionaryRow[] = [
     needles: [
       "gaminti patiekal",
       "gaminti maist",
+      // Real proof phrasing "Gaminau maistą virtuvėje" — past-tense + bare
+      // food/kitchen stems the earlier needle set missed.
+      "gaminau maist",
+      "gaminu maist",
+      "ruošiau maist",
+      "maist",
+      "virtuvėje",
       "virtuvės patiek",
       "virtuvės darb",
       "patiekal",
@@ -567,6 +574,15 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "vejos pjov",
       "žolės pjov",
       "zoles pjov",
+      // Real proof phrasing "pjoviau žolę" / "prižiūrėjau sodą" — verb-first
+      // and the bare garden stem the earlier needle set missed.
+      "pjoviau žol",
+      "pjoviau zol",
+      "pjoviau vej",
+      "prižiūrėjau sod",
+      "priziurejau sod",
+      "sodą",
+      "sodo prieži",
       "vejos pjaut",
       "genėj",
       "genej",
@@ -694,6 +710,107 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "c kategorij",
       "truck driv",
       "lorry",
+    ],
+  },
+  {
+    // Warehouse / order picking ("Dirbau sandėlyje su užsakymų surinkimu").
+    // Cross-sector logistics work the construction-era dictionary missed.
+    // Reuses the canonical localized label (capability-labels.ts) so it never
+    // leaks LT into EN/RU.
+    label: "Sandėlio / logistikos darbai",
+    needles: [
+      "sandėl",
+      "sandel",
+      "užsakymų surink",
+      "uzsakymu surink",
+      "užsakymų komplektav",
+      "uzsakymu komplektav",
+      "komplektav",
+      "prekių surink",
+      "preku surink",
+      "order pick",
+      "order-pick",
+      "warehouse",
+      "склад",
+      "комплектов",
+    ],
+  },
+  {
+    // Cleaning / premises upkeep ("Valiau patalpas po remonto"). Distinct from
+    // grounds upkeep above — interior/facility cleaning. Reuses the canonical
+    // localized label (capability-labels.ts) to avoid an LT leak.
+    label: "Valymo darbai",
+    needles: [
+      // Premises-specific stems only — a bare "valiau" would wrongly match
+      // "valiau sniegą" (snow clearing = winter service, a different signal).
+      "valiau patalp",
+      "valymo darb",
+      "valymas",
+      "patalpų valym",
+      "patalpu valym",
+      "patalpų priežiūr",
+      "patalpu prieziur",
+      "valytoj",
+      "cleaning",
+      "уборк",
+      "клининг",
+    ],
+  },
+  {
+    // Personal / elderly care ("Padėjau senyvo amžiaus žmogui"). Human care —
+    // deliberately separate from animal care; avoids the broad "priežiūr" stem
+    // so it never collides with gardening / pet rows.
+    label: "Asmens priežiūra / globa",
+    needles: [
+      "senyvo amžiaus",
+      "senyvo amziaus",
+      "senyvų žmoni",
+      "slaug",
+      "globojau žmog",
+      "globa žmog",
+      "asmens priežiūr",
+      "pagalba namuose",
+      "neįgali",
+      "neigali",
+      "elderly",
+      "caregiv",
+      "personal care",
+      "уход за пожил",
+    ],
+  },
+  {
+    // Customer service ("Tvarkiau klientų užklausas"). Retail / support sector.
+    label: "Klientų aptarnavimas",
+    needles: [
+      "klientų aptarnav",
+      "klientu aptarnav",
+      "klientų užklaus",
+      "klientu uzklaus",
+      "aptarnavau klient",
+      "klientų aptarnavim",
+      "customer service",
+      "customer support",
+      "обслуживание клиент",
+    ],
+  },
+  {
+    // Spoken languages ("Kalbu lietuviškai, angliškai ir rusiškai"). Multi-word
+    // needles keep this from colliding with "Lietuviškos virtuvės" (cooking).
+    label: "Kalbų mokėjimas",
+    needles: [
+      "kalbu lietuvišk",
+      "kalbu anglišk",
+      "kalbu rusišk",
+      "kalbu vokišk",
+      "kalbu lenkišk",
+      "anglų kalb",
+      "rusų kalb",
+      "vokiečių kalb",
+      "kalbų mokėjim",
+      "kalbu keli",
+      "speak english",
+      "languages spoken",
+      "владею язык",
     ],
   },
 ];

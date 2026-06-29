@@ -343,6 +343,32 @@ describe("extractProfileSkillClaims", () => {
     });
   });
 
+  // ── Cross-sector proof inputs (feat/cc/cross-sector-skills, mandate §8.7) ──
+  // The recognizer must fire across sectors, not just construction. Each line
+  // is a real worker proof sentence from the mandate; recognition must produce
+  // at least one honest self-declared claim chip (free-label fallback still
+  // saves anything unmatched, but these must be RECOGNISED, not dropped).
+  describe("Cross-sector recognition of the mandate proof inputs", () => {
+    const CASES: ReadonlyArray<readonly [string, string]> = [
+      ["Gaminau maistą virtuvėje 8 valandas", "Maisto gamyba"],
+      ["Dirbau sandėlyje su užsakymų surinkimu", "Sandėlio / logistikos darbai"],
+      ["Vairavau mikroautobusą į objektą", "Vairavimas"],
+      ["Valiau patalpas po remonto", "Valymo darbai"],
+      ["Prižiūrėjau sodą ir pjoviau žolę", "Sodininkystė / aplinkos tvarkymas"],
+      ["Padėjau senyvo amžiaus žmogui", "Asmens priežiūra / globa"],
+      ["Tvarkiau klientų užklausas", "Klientų aptarnavimas"],
+      ["Dirbau su Excel / kompiuteriu", "Excel / Skaičiuoklės"],
+      ["Kalbu lietuviškai, angliškai ir rusiškai", "Kalbų mokėjimas"],
+      ["Dirbau su krautuvu / įranga", "Sunkiosios technikos operavimas"],
+    ];
+    for (const [text, expected] of CASES) {
+      it(`recognises "${text}" → ${expected}`, () => {
+        const labels = extractProfileSkillClaims(text).map((r) => r.label);
+        expect(labels).toContain(expected);
+      });
+    }
+  });
+
   describe("Broad owner narrative — at least 15 capabilities from one paragraph", () => {
     // Anchor: the PR #49 follow-up production smoke text — narrower
     // than the goal's full sample, kept short enough to reason about

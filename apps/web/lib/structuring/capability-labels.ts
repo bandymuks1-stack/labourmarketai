@@ -71,6 +71,15 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
     en: "Programming / code fixes",
     ru: "Программирование / правки кода",
   },
+  // Cross-sector recognition (feat/cc/cross-sector-skills, mandate §8.7): the
+  // profile recognizer now fires for cooking / care / languages, so their
+  // canonical LT labels must localize too (no LT leak into EN/RU).
+  "Maisto gamyba": { en: "Cooking", ru: "Готовка" },
+  "Asmens priežiūra / globa": {
+    en: "Personal care / assistance",
+    ru: "Уход за людьми / помощь",
+  },
+  "Kalbų mokėjimas": { en: "Languages", ru: "Знание языков" },
 };
 
 /**
