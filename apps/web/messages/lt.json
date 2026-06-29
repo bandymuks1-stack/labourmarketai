@@ -5139,6 +5139,16 @@
       "declined": "Atmetei",
       "conflict": "Tu jau turi priimtą rezervaciją šioms datoms.",
       "error": "Kažkas nepavyko."
+    },
+    "connections": {
+      "title": "Planavimas susijęs su",
+      "intro": "Rezervacija yra tavo plano dalis. Štai sritys, su kuriomis ji susijusi.",
+      "marketplace": "Turgaus užsakymai",
+      "marketplaceNote": "Užklausos ir patvirtinti užsakymai",
+      "map": "Žemėlapis",
+      "mapNote": "Kur vyksta darbas ir rezervacijos",
+      "diary": "Darbo žurnalas",
+      "diaryNote": "Užfiksuok, kas iš tikrųjų įvyko"
     }
   },
   "adminReadiness": {
