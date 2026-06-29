@@ -4789,6 +4789,15 @@
     "title": "My documents",
     "subtitle": "What you have, what is missing, and the next step — per country.",
     "preparing": "Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "reports": {
+      "title": "Reports & exports",
+      "intro": "Build a print-ready report from your own data. PDF works through your browser's print/save; Excel and Word are not available yet.",
+      "cv": "Professional CV",
+      "cvNote": "Open and print / save as PDF",
+      "evidence": "Evidence report",
+      "evidenceNote": "Open and print / save as PDF",
+      "formatStatus": "PDF: available · Excel / Word: preparing"
+    },
     "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "The documents storage layer is not enabled in this environment yet.",
     "noWorker": "Create your worker profile first — documents attach to it.",
