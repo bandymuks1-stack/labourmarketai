@@ -240,6 +240,16 @@
     "pageTitle": "Žemėlapis",
     "pageLead": "Tavo ir rinkos vaizdas viename žemėlapyje.",
     "advanced": "Mano vietos ir rinkos sluoksniai",
+    "connections": {
+      "title": "Operacinis sluoksnis jungiasi su",
+      "intro": "Žemėlapis rodo, kur kas yra — tvarkyk tai šiose srityse.",
+      "marketplace": "Turgus",
+      "marketplaceNote": "Paslaugos ir užsakymai",
+      "opportunities": "Galimybės",
+      "opportunitiesNote": "Jums tinkantis darbas",
+      "bookings": "Planas ir rezervacijos",
+      "bookingsNote": "Suplanuotas darbas ir paskyrimai"
+    },
     "companyContext": {
       "title": "Įmonės kontekstas",
       "missingLocation": "Įmonės vieta dar nepridėta",
