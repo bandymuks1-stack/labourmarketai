@@ -47,6 +47,25 @@ describe("dashboard WorkCard adopts the canonical Player Card identity tile", ()
     expect(workCard).toMatch(/data-testid="work-card-actions"/);
   });
 
+  it("uses the landing-level scouting chrome + readiness ring (PR560 v3)", () => {
+    // Reuses the SAME premium frame + circular gauge as the landing Player Card,
+    // not a flat settings panel — this is what the owner hard-rejected before.
+    expect(workCard).toMatch(/<ReadinessRing\b/);
+    expect(workCard).toMatch(
+      /import\s*\{\s*ReadinessRing\s*\}\s*from\s*["']\.\/readiness-ring["']/,
+    );
+    expect(workCard).toMatch(/card-border/);
+    expect(workCard).toMatch(/bg-card-glow/);
+  });
+
+  it("shows real premium stat tiles (no fabricated metric)", () => {
+    expect(workCard).toMatch(/testid="work-card-stat-skills"/);
+    expect(workCard).toMatch(/testid="work-card-stat-records"/);
+    // The ring/stat are fed by the real engine count, never a 0–99 rating.
+    expect(workCard).toMatch(/met=\{clear\.length\}/);
+    expect(workCard).toMatch(/data\.signals\.skillsCount/);
+  });
+
   it("caps next actions at 3 (one primary editor + ≤2 page-target links)", () => {
     // Primary action stays the existing inline editor; secondaries are capped.
     expect(workCard).toMatch(/<WorkCardEditor\b/);

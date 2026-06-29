@@ -5,27 +5,31 @@ import { deriveWorkCardState, type WorkDim } from "@/lib/worker/work-card-state"
 import { WorkCardEditor, type WorkCardLabels } from "./work-card-editor";
 import { EmployerPreview } from "./employer-preview";
 import { AvatarDisplay } from "./avatar-display";
+import { ReadinessRing } from "./readiness-ring";
+import type { ReadinessLevel } from "@/lib/player-card/readiness";
 import { Link } from "@/lib/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 /**
- * "Mano darbo kortelė" — the dashboard worker entry, rebuilt as a compact PREMIUM
- * Player Card module (PR-D1R). It answers, in one control-room panel:
+ * "Mano darbo kortelė" — the first authenticated dashboard surface, rebuilt to the
+ * landing-level PREMIUM Player Card visual system (PR560 v3). It reuses the exact
+ * scouting chrome the public landing cards use — `card-border bg-card-glow`, tier
+ * corner accents, the circular readiness gauge (ReadinessRing, the honest twin of
+ * the landing OVRRing) and premium stat tiles — so the dashboard card reads as the
+ * same product family, not a settings panel.
  *
- *   1. Kas aš čia esu?        → identity band (avatar + name + profession/role)
- *   2. Ką sistema žino?       → "known" signal chips (real saved dimensions)
- *   3. Ko trūksta?            → "missing" chips (real unsaved dimensions)
- *   4. Kokie 1–3 veiksmai?    → best next steps (≤ 3 actions, existing targets)
+ * It answers, in one control-room module:
+ *   1. Kas aš čia esu?        → dominant avatar + name + profession/role
+ *   2. Ką sistema žino?       → readiness ring + real stat tiles + "known" chips
+ *   3. Ko trūksta?            → "missing" chips (honest gaps)
+ *   4. Kokie 1–3 veiksmai?    → best next steps (≤ 3, existing targets only)
  *   5. Kas įvyksta paspaudus? → each action opens an existing working surface
  *
  * Honest by construction: every value is the worker's REAL saved data; the pure
- * engine in lib/worker/work-card-state decides clear/missing/next. No score, no
- * match, no fabricated value, no fake action. The single best next action + the
- * inline editor (WorkCardEditor) and the employer preview are preserved.
- *
- * Page-target actions reuse the engine's own HREF map (work → profile, evidence →
- * journal); the inline dimensions (availability / location / pay) are edited in the
- * existing WorkCardEditor below. Nothing here changes the journal, routes, auth or
- * any data model.
+ * engine in lib/worker/work-card-state decides clear/missing/next, and the ring is
+ * a real signal COUNT (met/total), never a fabricated rating/match. The inline
+ * WorkCardEditor and the employer preview are preserved. Nothing here changes the
+ * journal, routes, auth or any data model.
  */
 
 /** Missing dimensions whose fill action lives on another page (the engine's HREF
@@ -34,6 +38,48 @@ const PAGE_TARGET: Partial<Record<WorkDim, string>> = {
   work: "/dashboard/profile",
   evidence: "/dashboard/journal",
 };
+
+/** Level → premium accent (NOT gold: gold stays the reserved trust accent). The
+ *  shape matches the landing card; the palette stays honest. */
+const LEVEL_TOP: Record<ReadinessLevel, string> = {
+  ready: "border-t-brand-cyan/50",
+  building: "border-t-brand-blue/40",
+  start: "border-t-ink-500",
+};
+const LEVEL_CORNER: Record<ReadinessLevel, string> = {
+  ready: "border-brand-cyan/50",
+  building: "border-brand-blue/40",
+  start: "border-ink-500",
+};
+const LEVEL_BADGE: Record<ReadinessLevel, string> = {
+  ready: "border-brand-cyan/40 text-brand-cyan",
+  building: "border-brand-blue/40 text-brand-blue",
+  start: "border-ink-500 text-text-muted",
+};
+
+function StatTile({
+  value,
+  label,
+  testid,
+}: {
+  value: string;
+  label: string;
+  testid: string;
+}) {
+  return (
+    <div
+      className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+      data-testid={testid}
+    >
+      <span className="font-mono text-2xl font-bold tracking-tightest text-text-primary tabular-nums">
+        {value}
+      </span>
+      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {label}
+      </span>
+    </div>
+  );
+}
 
 export async function WorkCard({
   data,
@@ -46,10 +92,23 @@ export async function WorkCard({
 }) {
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.workCard");
+  const tp = await getTranslations("playerCard");
 
   const derived = deriveWorkCardState(data.signals, Date.now());
   const { state, clear, missing, next } = derived;
   const total = clear.length + missing.length;
+
+  // Honest readiness: a real count of saved dimensions → the same 3-band level the
+  // Player Card readiness ring uses elsewhere. Never a rating, never a match.
+  const fraction = total > 0 ? clear.length / total : 0;
+  const level: ReadinessLevel =
+    fraction >= 0.8 ? "ready" : fraction >= 0.4 ? "building" : "start";
+  const levelLabel =
+    level === "ready"
+      ? tp("readiness.levelReady")
+      : level === "building"
+        ? tp("readiness.levelBuilding")
+        : tp("readiness.levelStart");
 
   // ── Human-readable value for each saved dimension (real data only) ──
   const v = data.values;
@@ -140,35 +199,71 @@ export async function WorkCard({
 
   return (
     <section
-      className="card-border relative flex flex-col gap-5 overflow-hidden bg-ink-900/40 p-6 sm:p-7"
+      className={cn(
+        // Premium scouting chrome shared with the landing Player Card: glow frame,
+        // hover lift, level-driven top border. Not a flat settings panel.
+        "card-border bg-card-glow glow-hover rise-in relative flex flex-col gap-5 overflow-hidden border-t-2 p-5 transition-shadow hover:shadow-card-hover sm:p-6",
+        LEVEL_TOP[level],
+      )}
       data-testid="work-card"
       data-state={state}
+      data-readiness-level={level}
     >
-      {/* Premium accent rail — design-language only (no random gradient). */}
+      {/* Tier corner accents — the landing card's signature scouting frame. */}
       <span
         aria-hidden
-        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand-blue via-brand-cyan to-brand-violet"
+        className={cn(
+          "pointer-events-none absolute left-2 top-2 h-5 w-5 rounded-tl-md border-l-2 border-t-2",
+          LEVEL_CORNER[level],
+        )}
+      />
+      <span
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute bottom-2 right-2 h-5 w-5 rounded-br-md border-b-2 border-r-2",
+          LEVEL_CORNER[level],
+        )}
       />
 
-      {/* 1 — IDENTITY BAND: who am I here (avatar + name + role) + readiness. */}
-      <header className="flex flex-col gap-3" data-testid="work-card-identity">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      {/* Top band: card identity eyebrow + honest readiness-level badge. */}
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-label text-text-secondary">
           {tw("eyebrow")}
         </span>
-        <div className="flex items-center gap-3 sm:gap-4">
-          <AvatarDisplay
-            signedUrl={avatarUrl}
-            displayName={data.name}
-            alt={data.name}
-            size="lg"
-          />
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <h1 className="truncate font-display text-xl font-bold tracking-tightest text-text-primary sm:text-2xl">
+        <span
+          className={cn(
+            "inline-flex items-center rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label",
+            LEVEL_BADGE[level],
+          )}
+          data-testid="work-card-level"
+        >
+          {levelLabel}
+        </span>
+      </div>
+
+      {/* 1 — IDENTITY HERO: dominant avatar + strong name/role + readiness ring. */}
+      <header
+        className="flex items-center justify-between gap-3 sm:gap-4"
+        data-testid="work-card-identity"
+      >
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+          {/* Dominant player portrait — canonical AvatarDisplay inside a premium
+              scouting ring frame. */}
+          <div className="shrink-0 rounded-full p-0.5 ring-2 ring-brand-blue/25">
+            <AvatarDisplay
+              signedUrl={avatarUrl}
+              displayName={data.name}
+              alt={data.name}
+              size="lg"
+            />
+          </div>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <h1 className="truncate font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
               {t("greeting", { name: data.name })}
             </h1>
             {data.professionName ? (
               <span
-                className="truncate font-mono text-[10px] uppercase tracking-label text-brand-cyan"
+                className="truncate font-mono text-[11px] uppercase tracking-label text-brand-cyan"
                 data-testid="work-card-role"
               >
                 {data.professionName}
@@ -178,22 +273,44 @@ export async function WorkCard({
               </span>
             ) : null}
           </div>
-          {/* Readiness — real count of saved dimensions, never a score/match. */}
-          <span
-            className="shrink-0 rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-[11px] font-semibold tabular-nums text-text-secondary"
-            data-testid="work-card-readiness"
-            aria-label={tw("clearTitle")}
-          >
-            <span className="text-state-success">{clear.length}</span>
-            <span className="text-text-muted">/{total}</span>
-          </span>
         </div>
-        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
-          {intro}
-        </p>
+        {/* Readiness ring — the SAME premium gauge as the landing card, honest
+            met/total signal count (never a score/match). */}
+        <div className="shrink-0" data-testid="work-card-readiness">
+          <ReadinessRing
+            met={clear.length}
+            total={total}
+            level={level}
+            levelLabel={levelLabel}
+            size="md"
+          />
+        </div>
       </header>
 
-      {/* 2 — KNOWN: what the system already knows (real saved dimensions). */}
+      <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
+        {intro}
+      </p>
+
+      {/* 2a — Real stat tiles (premium player-card stats, real counts only). */}
+      <div className="grid grid-cols-3 gap-3">
+        <StatTile
+          testid="work-card-stat-skills"
+          value={String(data.signals.skillsCount)}
+          label={tp("skillsLabel")}
+        />
+        <StatTile
+          testid="work-card-stat-records"
+          value={String(data.signals.evidenceCount)}
+          label={tp("evidenceLabel")}
+        />
+        <StatTile
+          testid="work-card-stat-readiness"
+          value={`${clear.length}/${total}`}
+          label={tp("readiness.label")}
+        />
+      </div>
+
+      {/* 2b — KNOWN: what the system already knows (real saved dimensions). */}
       {clear.length > 0 && (
         <div
           className="flex flex-col gap-2 border-t border-ink-600 pt-4"
@@ -207,7 +324,7 @@ export async function WorkCard({
               <span
                 key={d}
                 data-testid={`work-card-known-${d}`}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-state-success/30 bg-state-success/5 px-2.5 py-1 text-[11px] text-text-secondary"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/5 px-2.5 py-1 text-[11px] text-text-secondary"
               >
                 <span aria-hidden className="text-state-success">
                   ✓
@@ -237,7 +354,7 @@ export async function WorkCard({
                 // chip stays compact with the short dimension label.
                 title={tw(`dim.${dim}.missing`)}
                 aria-label={tw(`dim.${dim}.missing`)}
-                className="inline-flex items-center gap-1 rounded-full border border-brand-orange/30 bg-brand-orange/5 px-2.5 py-1 text-[11px] text-brand-orange"
+                className="inline-flex items-center gap-1 rounded-md border border-brand-orange/30 bg-brand-orange/5 px-2.5 py-1 text-[11px] text-brand-orange"
               >
                 <span aria-hidden>+</span>
                 {tw(`dim.${dim}.label`)}
