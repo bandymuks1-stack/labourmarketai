@@ -4165,6 +4165,18 @@
       "accepted": "Accepted",
       "declined": "Declined",
       "withdrawn": "Withdrawn"
+    },
+    "connections": {
+      "title": "How the marketplace connects",
+      "intro": "A request or order moves through the rest of the system.",
+      "matching": "Opportunities",
+      "matchingNote": "A request finds the right people",
+      "calendar": "Plan & bookings",
+      "calendarNote": "A confirmed order becomes a booking",
+      "map": "Map",
+      "mapNote": "Where the work and services are",
+      "diary": "Work diary",
+      "diaryNote": "Completed work is recorded as fact"
     }
   },
   "learning": {

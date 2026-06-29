@@ -4165,6 +4165,18 @@
       "accepted": "Priimta",
       "declined": "Atmesta",
       "withdrawn": "Atšaukta"
+    },
+    "connections": {
+      "title": "Kaip susijungia turgus",
+      "intro": "Užklausa ar užsakymas keliauja per likusią sistemą.",
+      "matching": "Galimybės",
+      "matchingNote": "Užklausa randa tinkamus žmones",
+      "calendar": "Planas ir rezervacijos",
+      "calendarNote": "Patvirtintas užsakymas tampa rezervacija",
+      "map": "Žemėlapis",
+      "mapNote": "Kur vyksta darbas ir paslaugos",
+      "diary": "Darbo žurnalas",
+      "diaryNote": "Atliktas darbas užfiksuojamas kaip faktas"
     }
   },
   "learning": {
