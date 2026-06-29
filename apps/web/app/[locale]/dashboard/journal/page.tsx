@@ -103,17 +103,17 @@ export default async function JournalPage({
   // the owner yet. Honest signal — they can log work, but it won't be
   // confirmable until review is enabled for them.
   const anyReviewEnabled = (ecRows ?? []).some(
-    (r) => (r as { journal_review_enabled?: boolean }).journal_review_enabled === true,
+    (r) =>
+      (r as { journal_review_enabled?: boolean }).journal_review_enabled ===
+      true,
   );
 
   const engagements: JournalEngagement[] = (ecRows ?? []).map((e) => {
-    const org = e.organizations as
-      | {
-          display_name: string | null;
-          legal_name: string | null;
-          organization_type: string | null;
-        }
-      | null;
+    const org = e.organizations as {
+      display_name: string | null;
+      legal_name: string | null;
+      organization_type: string | null;
+    } | null;
     // Disambiguate same-relationship engagements (e.g. owning a company AND an
     // agency both show "Owner") by falling back to the org TYPE label when the
     // org has no display/legal name — never a bare "—". Reuses existing role
@@ -146,12 +146,35 @@ export default async function JournalPage({
     let rosterOrgName: string | null = null;
     if (worker) {
       const [cw, aw] = await Promise.all([
-        supabase.from("company_workers").select("companies(display_name, legal_name)").eq("worker_id", worker.id).eq("status", "active").limit(1),
-        supabase.from("agency_workers").select("agencies(legal_name)").eq("worker_id", worker.id).eq("status", "active").limit(1),
+        supabase
+          .from("company_workers")
+          .select("companies(display_name, legal_name)")
+          .eq("worker_id", worker.id)
+          .eq("status", "active")
+          .limit(1),
+        supabase
+          .from("agency_workers")
+          .select("agencies(legal_name)")
+          .eq("worker_id", worker.id)
+          .eq("status", "active")
+          .limit(1),
       ]);
       hasRosterLink = (cw.data?.length ?? 0) > 0 || (aw.data?.length ?? 0) > 0;
-      const cwOrg = (cw.data?.[0] as { companies?: { display_name: string | null; legal_name: string | null } | null } | undefined)?.companies;
-      const awOrg = (aw.data?.[0] as { agencies?: { legal_name: string | null } | null } | undefined)?.agencies;
+      const cwOrg = (
+        cw.data?.[0] as
+          | {
+              companies?: {
+                display_name: string | null;
+                legal_name: string | null;
+              } | null;
+            }
+          | undefined
+      )?.companies;
+      const awOrg = (
+        aw.data?.[0] as
+          | { agencies?: { legal_name: string | null } | null }
+          | undefined
+      )?.agencies;
       rosterOrgName =
         cwOrg?.display_name ?? cwOrg?.legal_name ?? awOrg?.legal_name ?? null;
     }
@@ -353,6 +376,48 @@ export default async function JournalPage({
   const evidenceStatuses = (entries ?? []).map((e) =>
     deriveReviewResult(e.journal_entry_confirmations),
   );
+
+  // Diary day-grouping (CV/records feed cleanup): the feed reads as a dated
+  // diary — entries collapse under ONE day header instead of repeating the
+  // date on every card. The day key/label is exactly the per-entry date that
+  // was already shown (`toLocaleDateString(locale)`), so grouping never shifts
+  // a day boundary vs. what the worker saw. Entries arrive created_at-desc, so
+  // consecutive same-day rows group in order; no sort, no new data.
+  const entryDayGroups: {
+    key: string;
+    label: string;
+    totalMinutes: number;
+    entries: JournalEntryRow[];
+  }[] = [];
+  for (const e of entries ?? []) {
+    const label = new Date(e.created_at).toLocaleDateString(locale);
+    // Day total = sum of each entry's time metric (hours/minutes only). "days"
+    // and non-time quantities are never summed, so the figure is real, not
+    // invented; days with no time entry simply show no hours.
+    const timeMetric = (e.journal_entry_metrics ?? []).find(
+      (m) =>
+        (m.metric_slug === "quantity" || m.metric_slug === "area_done") &&
+        (m.unit_slug === "hours" || m.unit_slug === "minutes"),
+    );
+    const mins =
+      timeMetric?.value_numeric != null
+        ? timeMetric.unit_slug === "hours"
+          ? timeMetric.value_numeric * 60
+          : timeMetric.value_numeric
+        : 0;
+    const last = entryDayGroups[entryDayGroups.length - 1];
+    if (last && last.key === label) {
+      last.entries.push(e);
+      last.totalMinutes += mins;
+    } else {
+      entryDayGroups.push({
+        key: label,
+        label,
+        totalMinutes: mins,
+        entries: [e],
+      });
+    }
+  }
   const journalEvidenceActive: EvidenceStatus[] = ["self_declared"];
   if (
     evidenceStatuses.some((s) => s === "submitted" || s === "changes_requested")
@@ -365,7 +430,9 @@ export default async function JournalPage({
   // feeds). Honest counts only — confirmed entries are what surface as proof
   // on the Verified CV; the link makes that relationship visible instead of
   // leaving the worker to wonder where a logged entry "went".
-  const confirmedEntryCount = evidenceStatuses.filter((s) => s === "approved").length;
+  const confirmedEntryCount = evidenceStatuses.filter(
+    (s) => s === "approved",
+  ).length;
   const totalEntryCount = (entries ?? []).length;
 
   // Mano CV identity lead — the player-card/avatar identity that opens the Mano
@@ -373,7 +440,9 @@ export default async function JournalPage({
   // non-worker accounts, which never reach this branch). The same premium card
   // used elsewhere; `/dashboard/player-card` redirects here.
   const manoCard = await getWorkerPlayerCard();
-  const manoCardLabels = manoCard ? await buildPlayerCardLabels(manoCard) : null;
+  const manoCardLabels = manoCard
+    ? await buildPlayerCardLabels(manoCard)
+    : null;
   const manoThermometer = manoCard
     ? toThermometerView(await getOwnThermometer())
     : null;
@@ -394,7 +463,10 @@ export default async function JournalPage({
             {tSpaces("mySpaces")} →
           </Link>
         </div>
-        <p className="text-sm leading-relaxed text-text-secondary" data-testid="journal-nav-subtitle">
+        <p
+          className="text-sm leading-relaxed text-text-secondary"
+          data-testid="journal-nav-subtitle"
+        >
           {t("navSubtitle")}
         </p>
       </header>
@@ -433,7 +505,10 @@ export default async function JournalPage({
           <details className="group rounded-md border border-border-subtle bg-surface-1/50">
             <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
               <span className="inline-flex items-center gap-2">
-                <span aria-hidden className="transition-transform group-open:rotate-90">
+                <span
+                  aria-hidden
+                  className="transition-transform group-open:rotate-90"
+                >
                   ›
                 </span>
                 {tQuick("improve")}
@@ -472,37 +547,41 @@ export default async function JournalPage({
       )}
       <div id="journal-composer" className="order-2">
         <div className="flex flex-col gap-2">
-        {/* Benefit-first framing: an entry strengthens the work card. Quiet UI —
+          {/* Benefit-first framing: an entry strengthens the work card. Quiet UI —
             no confirmation/verification disclaimer paragraph. */}
-        <p
-          className="text-sm leading-relaxed text-text-secondary"
-          data-testid="journal-composer-benefit"
-        >
-          {t("composerBenefit")}
-        </p>
-        <JournalEntryComposer
-          // Remount the composer whenever the edit target changes. The
-          // composer derives its textarea state from `editingEntry` with
-          // useState (initial-value only). The Edit control is a client-side
-          // <Link> (no full reload), so without this key React keeps the same
-          // instance and the stale "" create-mode text — the entry's original
-          // text never loads (owner bug: "editing loses the text / blank
-          // editor"). Keying on the editing id forces a fresh mount so edit
-          // always shows the saved text, and cancel (back to no ?editing)
-          // resets cleanly to create mode.
-          key={editingId ?? "new"}
-          engagements={engagements}
-          directions={directions}
-          workerSkills={workerSkills}
-          editingEntry={editingEntry}
-        />
+          <p
+            className="text-sm leading-relaxed text-text-secondary"
+            data-testid="journal-composer-benefit"
+          >
+            {t("composerBenefit")}
+          </p>
+          <JournalEntryComposer
+            // Remount the composer whenever the edit target changes. The
+            // composer derives its textarea state from `editingEntry` with
+            // useState (initial-value only). The Edit control is a client-side
+            // <Link> (no full reload), so without this key React keeps the same
+            // instance and the stale "" create-mode text — the entry's original
+            // text never loads (owner bug: "editing loses the text / blank
+            // editor"). Keying on the editing id forces a fresh mount so edit
+            // always shows the saved text, and cancel (back to no ?editing)
+            // resets cleanly to create mode.
+            key={editingId ?? "new"}
+            engagements={engagements}
+            directions={directions}
+            workerSkills={workerSkills}
+            editingEntry={editingEntry}
+          />
         </div>
       </div>
 
       {/* Entry list — lifted to the top so a worker who just logged work sees
           their entries first (P0 UX rescue), not a wall of notices + the form.
           Visual order is set with `order-*` on these flex-column children. */}
-      <section id="journal-entries" className="order-1 flex flex-col gap-3 scroll-mt-4" data-testid="journal-entries">
+      <section
+        id="journal-entries"
+        className="order-1 flex flex-col gap-3 scroll-mt-4"
+        data-testid="journal-entries"
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-baseline gap-2 font-display text-lg font-semibold text-text-primary">
             {t("listTitle")}
@@ -557,7 +636,10 @@ export default async function JournalPage({
             className="text-[11px] leading-relaxed text-text-muted"
             data-testid="journal-cv-bridge"
           >
-            {t("cvBridge", { confirmed: confirmedEntryCount, total: totalEntryCount })}{" "}
+            {t("cvBridge", {
+              confirmed: confirmedEntryCount,
+              total: totalEntryCount,
+            })}{" "}
             <Link
               href="/cv"
               className="font-medium text-brand-blue hover:underline"
@@ -576,126 +658,192 @@ export default async function JournalPage({
             cta={{ label: t("listEmptyCta"), href: "#journal-composer" }}
           />
         ) : (
-          <ul className="flex flex-col gap-3">
-            {(entries ?? []).map((e) => {
-              // Evidence Decision Timeline v1 — the real, ordered human-decision
-              // history (append-only rows). Empty while still submitted → the
-              // timeline shows "created → waiting", never a fabricated step.
-              // This is the SINGLE status display per entry; the old top-right
-              // status chip was removed (polish v1) — it repeated the timeline's
-              // terminal step and used different words for the same state.
-              const timeline = deriveReviewTimeline(e.journal_entry_confirmations);
-              const metrics = e.journal_entry_metrics ?? [];
-              const area =
-                metrics.find((m) => m.metric_slug === "quantity") ??
-                metrics.find((m) => m.metric_slug === "area_done");
-              const site = metrics.find((m) => m.metric_slug === "site_name");
-              const dir = metrics.find((m) => m.metric_slug === "work_direction");
-              // v3 — Delete control is offered only when the entry has no
-              // external confirmations yet. The RPC re-enforces the same
-              // rule server-side, so a stale client can't escalate.
-              const canDelete = (e.journal_entry_confirmations ?? []).length === 0;
-              // Per-entry chip SOURCE (PR B). Recognize skills from THIS entry's
-              // real text, then classify each linked chip honestly. An unsupported
-              // old link (e.g. a construction chip on a dog-walking entry) becomes
-              // "stale_needs_review" instead of clean current evidence.
-              const linkedForEntry = linksByEntry.get(e.id) ?? [];
-              const recognizedSlugs = new Set<string>(
-                extractJournalSuggestions(e.original_text ?? "").skillSlugs,
-              );
-              const skillSources = buildEntrySkillSources({
-                linkedSkillIds: linkedForEntry,
-                idToSlug,
-                verifiedSkillIds,
-                recognizedSlugs,
-                recognizableSlugs,
-              });
-              // "Sistema suprato" — the structured signals the current text
-              // produced (direction / site / quantity). Shown only when there
-              // is something to show, so an empty entry is not padded.
-              const hasUnderstood =
-                !!dir?.value_text ||
-                !!site?.value_text ||
-                area?.value_numeric != null;
+          <div className="flex flex-col gap-4">
+            {entryDayGroups.map((group, idx) => {
+              // Compact day card: date + entry count + summed hours (only when
+              // the day has time entries). Newest day open, older days collapse
+              // so the records surface stays a tidy diary, not an endless raw
+              // feed — every entry is still kept under its exact day.
+              const totalLabel =
+                group.totalMinutes > 0
+                  ? formatDuration(
+                      group.totalMinutes,
+                      "minutes",
+                      locale === "en" ? "en" : "lt",
+                    )
+                  : null;
               return (
-                  <JournalEntryRow
-                    key={e.id}
-                    entryId={e.id}
-                    canDelete={canDelete}
-                    skillLinks={
-                      skillLinksReady
-                        ? {
-                            availableSkills: availableSkillsForLinks,
-                            linkedSkillIds: linkedForEntry,
-                            skillSources,
-                          }
-                        : undefined
-                    }
-                    statusSlot={
-                      <>
-                        <EvidenceDecisionTimeline
-                          createdAt={e.created_at}
-                          events={timeline}
-                        />
-                        <span className="text-[10px] text-text-muted">
-                          {new Date(e.created_at).toLocaleDateString(locale)}
+                <details
+                  key={group.key}
+                  open={idx === 0}
+                  className="group card-border"
+                  data-testid="journal-day-group"
+                  data-day={group.key}
+                >
+                  <summary className="flex min-h-[3rem] cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+                    <span className="flex items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="text-text-muted transition-transform group-open:rotate-90"
+                      >
+                        ▸
+                      </span>
+                      <span
+                        className="font-display text-sm font-semibold text-text-primary"
+                        data-testid="journal-day-header"
+                      >
+                        {group.label}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {totalLabel && (
+                        <span data-testid="journal-day-hours">
+                          {totalLabel}
                         </span>
-                      </>
-                    }
-                  >
-                    {/* 1 · Entry text — first, so the worker immediately sees
-                        what they wrote. Long unbroken strings wrap cleanly. */}
-                    <div className="flex flex-col gap-1">
-                      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                        {t("entry.textLabel")}
-                      </p>
-                      <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
-                        {e.original_text}
-                      </p>
-                    </div>
-                    {/* 2 · Sistema suprato — current signals from the current
-                        text. Plain labelled values, never a badge wall. */}
-                    {hasUnderstood && (
-                      <div className="flex flex-col gap-1 border-t border-border/40 pt-2">
-                        <p
-                          className="font-mono text-[10px] uppercase tracking-label text-text-secondary"
-                          data-testid={`journal-entry-understood-${e.id}`}
+                      )}
+                      <span
+                        className="rounded-full border border-ink-500 px-1.5 py-0.5"
+                        data-testid="journal-day-count"
+                      >
+                        {group.entries.length}
+                      </span>
+                    </span>
+                  </summary>
+                  <ul className="flex flex-col gap-3 px-4 pb-4">
+                    {group.entries.map((e) => {
+                      // Evidence Decision Timeline v1 — the real, ordered human-decision
+                      // history (append-only rows). Empty while still submitted → the
+                      // timeline shows "created → waiting", never a fabricated step.
+                      // This is the SINGLE status display per entry; the old top-right
+                      // status chip was removed (polish v1) — it repeated the timeline's
+                      // terminal step and used different words for the same state.
+                      const timeline = deriveReviewTimeline(
+                        e.journal_entry_confirmations,
+                      );
+                      const metrics = e.journal_entry_metrics ?? [];
+                      const area =
+                        metrics.find((m) => m.metric_slug === "quantity") ??
+                        metrics.find((m) => m.metric_slug === "area_done");
+                      const site = metrics.find(
+                        (m) => m.metric_slug === "site_name",
+                      );
+                      const dir = metrics.find(
+                        (m) => m.metric_slug === "work_direction",
+                      );
+                      // v3 — Delete control is offered only when the entry has no
+                      // external confirmations yet. The RPC re-enforces the same
+                      // rule server-side, so a stale client can't escalate.
+                      const canDelete =
+                        (e.journal_entry_confirmations ?? []).length === 0;
+                      // Per-entry chip SOURCE (PR B). Recognize skills from THIS entry's
+                      // real text, then classify each linked chip honestly. An unsupported
+                      // old link (e.g. a construction chip on a dog-walking entry) becomes
+                      // "stale_needs_review" instead of clean current evidence.
+                      const linkedForEntry = linksByEntry.get(e.id) ?? [];
+                      const recognizedSlugs = new Set<string>(
+                        extractJournalSuggestions(e.original_text ?? "")
+                          .skillSlugs,
+                      );
+                      const skillSources = buildEntrySkillSources({
+                        linkedSkillIds: linkedForEntry,
+                        idToSlug,
+                        verifiedSkillIds,
+                        recognizedSlugs,
+                        recognizableSlugs,
+                      });
+                      // "Sistema suprato" — the structured signals the current text
+                      // produced (direction / site / quantity). Shown only when there
+                      // is something to show, so an empty entry is not padded.
+                      const hasUnderstood =
+                        !!dir?.value_text ||
+                        !!site?.value_text ||
+                        area?.value_numeric != null;
+                      return (
+                        <JournalEntryRow
+                          key={e.id}
+                          entryId={e.id}
+                          canDelete={canDelete}
+                          skillLinks={
+                            skillLinksReady
+                              ? {
+                                  availableSkills: availableSkillsForLinks,
+                                  linkedSkillIds: linkedForEntry,
+                                  skillSources,
+                                }
+                              : undefined
+                          }
+                          statusSlot={
+                            <>
+                              <EvidenceDecisionTimeline
+                                createdAt={e.created_at}
+                                events={timeline}
+                              />
+                            </>
+                          }
                         >
-                          {t("entry.understoodLabel")}
-                        </p>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 break-words text-[11px] text-text-muted">
-                          {dir?.value_text && (
-                            <span className="min-w-0 break-words">{tProf(dir.value_text)}</span>
-                          )}
-                          {site?.value_text && (
-                            <span className="min-w-0 break-words">{site.value_text}</span>
-                          )}
-                          {area?.value_numeric != null && (
-                            <span>
-                              {/* Time-class units (hours / minutes / days) get the
+                          {/* 1 · Entry text — first, so the worker immediately sees
+                        what they wrote. Long unbroken strings wrap cleanly. */}
+                          <div className="flex flex-col gap-1">
+                            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                              {t("entry.textLabel")}
+                            </p>
+                            <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
+                              {e.original_text}
+                            </p>
+                          </div>
+                          {/* 2 · Sistema suprato — current signals from the current
+                        text. Plain labelled values, never a badge wall. */}
+                          {hasUnderstood && (
+                            <div className="flex flex-col gap-1 border-t border-border/40 pt-2">
+                              <p
+                                className="font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                                data-testid={`journal-entry-understood-${e.id}`}
+                              >
+                                {t("entry.understoodLabel")}
+                              </p>
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 break-words text-[11px] text-text-muted">
+                                {dir?.value_text && (
+                                  <span className="min-w-0 break-words">
+                                    {tProf(dir.value_text)}
+                                  </span>
+                                )}
+                                {site?.value_text && (
+                                  <span className="min-w-0 break-words">
+                                    {site.value_text}
+                                  </span>
+                                )}
+                                {area?.value_numeric != null && (
+                                  <span>
+                                    {/* Time-class units (hours / minutes / days) get the
                                   human-readable formatter so a saved "195 min" row
                                   reads "3 val. 15 min." in the entries list. Other
                                   quantity units fall through to the unit label. */}
-                              {area.unit_slug === "hours" ||
-                              area.unit_slug === "minutes" ||
-                              area.unit_slug === "days"
-                                ? formatDuration(
-                                    area.value_numeric,
-                                    area.unit_slug,
-                                    locale === "en" ? "en" : "lt",
-                                  )
-                                : `${area.value_numeric} ${
-                                    area.unit_slug ? tUnit(area.unit_slug) : ""
-                                  }`}
-                            </span>
+                                    {area.unit_slug === "hours" ||
+                                    area.unit_slug === "minutes" ||
+                                    area.unit_slug === "days"
+                                      ? formatDuration(
+                                          area.value_numeric,
+                                          area.unit_slug,
+                                          locale === "en" ? "en" : "lt",
+                                        )
+                                      : `${area.value_numeric} ${
+                                          area.unit_slug
+                                            ? tUnit(area.unit_slug)
+                                            : ""
+                                        }`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           )}
-                        </div>
-                      </div>
-                    )}
-                  </JournalEntryRow>
-                );
+                        </JournalEntryRow>
+                      );
+                    })}
+                  </ul>
+                </details>
+              );
             })}
-          </ul>
+          </div>
         )}
       </section>
     </div>
