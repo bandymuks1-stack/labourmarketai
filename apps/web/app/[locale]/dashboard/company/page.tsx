@@ -508,6 +508,52 @@ export default async function CompanyDashboardPage({
         </div>
       </section>
 
+      {/* Assignment connections (§8.5): the player-card roster/assignment links
+          into the plan (bookings), the map (where the team is) and the record
+          (evidence/reports). Existing routes only — the company control center
+          previously had no path to the calendar or the map. Navigation only. */}
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="company-assignment-connections"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {tOps("connections.title")}
+        </span>
+        <p className="text-xs text-text-secondary">{tOps("connections.intro")}</p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {[
+            {
+              key: "calendar",
+              href: "/dashboard/bookings",
+              label: tOps("connections.calendar"),
+              note: tOps("connections.calendarNote"),
+            },
+            {
+              key: "map",
+              href: "/dashboard/market-map",
+              label: tOps("connections.map"),
+              note: tOps("connections.mapNote"),
+            },
+            {
+              key: "evidence",
+              href: "/dashboard/reports/evidence",
+              label: tOps("connections.evidence"),
+              note: tOps("connections.evidenceNote"),
+            },
+          ].map((l) => (
+            <Link
+              key={l.key}
+              href={l.href as "/dashboard"}
+              data-testid={`company-assignment-connection-${l.key}`}
+              className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+            >
+              <span className="font-semibold">{l.label}</span>
+              <span className="text-xs text-text-muted">{l.note}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {managerEvidence && <ManagerEvidenceCard evidence={managerEvidence} />}
 
       <section

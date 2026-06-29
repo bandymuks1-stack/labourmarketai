@@ -688,7 +688,17 @@
     },
     "needsTitle": "Poreikiai",
     "needsBody": "Pateikite struktūruotą poreikį ir sekite jo būseną.",
-    "needsCta": "Atidaryti poreikius"
+    "needsCta": "Atidaryti poreikius",
+    "connections": {
+      "title": "Paskyrimas susijęs su",
+      "intro": "Žmonių paskyrimas jungiasi su planu, žemėlapiu ir įrašu.",
+      "calendar": "Planas ir rezervacijos",
+      "calendarNote": "Paskyrimo laikai ir patvirtinimai",
+      "map": "Žemėlapis",
+      "mapNote": "Kur yra tavo komanda ir darbas",
+      "evidence": "Įrodymai ir ataskaitos",
+      "evidenceNote": "Atliktas darbas tampa įrašu"
+    }
   },
   "demandReadback": {
     "heading": "Jūsų pateikti poreikiai",
