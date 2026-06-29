@@ -688,7 +688,17 @@
     },
     "needsTitle": "Needs",
     "needsBody": "Submit a structured demand and track its status.",
-    "needsCta": "Open needs"
+    "needsCta": "Open needs",
+    "connections": {
+      "title": "Assignment connects to",
+      "intro": "Assigning your people links into the plan, the map and the record.",
+      "calendar": "Plan & bookings",
+      "calendarNote": "Assignment slots and confirmations",
+      "map": "Map",
+      "mapNote": "Where your team and work are",
+      "evidence": "Evidence & reports",
+      "evidenceNote": "Completed work becomes record"
+    }
   },
   "demandReadback": {
     "heading": "Your submitted requests",
