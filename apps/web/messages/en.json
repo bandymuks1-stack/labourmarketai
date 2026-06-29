@@ -1,4 +1,105 @@
 {
+  "marketRecognition": {
+    "title": "What do you offer or need?",
+    "subtitle": "Describe it in your own words. We turn it into a clear card, show what is missing, and point to the next step.",
+    "prep": "This is a preparation step before you search or send a request. The more you answer, the better the result — and the fewer bad matches.",
+    "readinessLabel": {
+      "match_ready": "Ready",
+      "improving": "Getting clearer",
+      "needs_basics": "Needs the basics"
+    },
+    "entry": {
+      "title": "Tell us what you need or offer",
+      "body": "Answer a few questions first, so we show fewer but better options instead of a long list.",
+      "cta": "Start here"
+    },
+    "intent": {
+      "needWork": "I need work",
+      "offerServices": "I offer services",
+      "needWorkers": "I need workers",
+      "haveProject": "I have a project"
+    },
+    "pasteLabel": "Paste or type the details",
+    "pastePlaceholder": "e.g. Ship carpenter, Ålesund, Norway, rotation 4/2, accommodation, travel covered, 3 years shipyard experience, power tools",
+    "recognizeCta": "Recognize",
+    "recognizedTitle": "What we recognized",
+    "missingTitle": "What is missing",
+    "risksTitle": "Worth clarifying",
+    "readinessTitle": "Readiness",
+    "nextActionTitle": "Next step",
+    "emptyText": "Add a few details above and we will recognize them here.",
+    "confidence": {
+      "high": "Clear",
+      "medium": "Partly clear",
+      "low": "Needs detail"
+    },
+    "field": {
+      "role": "Role",
+      "location": "Location",
+      "sector": "Sector",
+      "rotation": "Rotation",
+      "experience": "Experience",
+      "scope": "Work scope",
+      "salary": "Salary",
+      "grossNet": "Gross or net",
+      "currency": "Currency",
+      "weeklyHours": "Weekly hours",
+      "overtime": "Overtime",
+      "contractType": "Contract type",
+      "legalEmployer": "Legal employer",
+      "language": "Language",
+      "drivingLicence": "Driving licence",
+      "toolsPpe": "Tools and PPE",
+      "accommodationType": "Accommodation type",
+      "accommodationDeductions": "Accommodation deductions",
+      "travelTiming": "Travel payment timing",
+      "requiredDocuments": "Required documents",
+      "startDate": "Start date"
+    },
+    "risk": {
+      "pay_unclear": "Pay is not clear yet",
+      "accommodation_terms_unclear": "Accommodation terms are not clear",
+      "legal_employer_unclear": "The legal employer is not stated",
+      "language_requirement_unclear": "Language requirement is not stated",
+      "documents_unclear": "Required documents are not listed",
+      "hours_overtime_unclear": "Working hours and overtime are not clear",
+      "low_recognition_confidence": "We could not read this clearly yet"
+    },
+    "action": {
+      "complete_missing_fields": "Add the missing details",
+      "submit_demand": "Continue to your request",
+      "improve_profile": "Continue on your profile",
+      "add_service_offer": "Continue to your services",
+      "create_project": "Continue to your project",
+      "request_more_info": "Ask for the missing details",
+      "review_matches": "Review the best options",
+      "complete_player_card": "Complete your Player Card",
+      "add_work_proof": "Add work proof",
+      "search_opportunities": "Continue to work search",
+      "continue_to_demand": "Continue to your hiring request",
+      "complete_service_profile": "Complete your service profile",
+      "continue_to_services": "Continue to your services",
+      "continue_to_project": "Continue to your project request"
+    },
+    "supply": {
+      "needWorkBody": "Your work profile and CV already hold this. Keep them up to date so you receive better options.",
+      "needWorkCta": "Open your profile",
+      "offerServicesBody": "Your services live in one place. Keep them current so the right projects find you.",
+      "offerServicesCta": "Open your services"
+    },
+    "progress": {
+      "worker": "Good update. Your profile is clearer now ({count} details added). This improves your chance of better options.",
+      "company": "Your request is stronger now ({count} details added). Clearer requests show fewer but better candidates.",
+      "buyer": "Your project is clearer now ({count} details added). This helps find the right people faster."
+    },
+    "digest": {
+      "title": "This week",
+      "workersReady": "{n} work profiles became ready for better options.",
+      "needsClear": "{n} requests became clear enough for better matching.",
+      "projectsClarified": "{n} projects were clarified into a top shortlist.",
+      "topTrades": "Most requested this week: {trades}."
+    }
+  },
   "quickNav": {
     "ariaLabel": "Quick page navigation",
     "top": "Top",

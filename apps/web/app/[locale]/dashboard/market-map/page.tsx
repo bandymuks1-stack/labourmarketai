@@ -46,6 +46,7 @@ export default async function MarketMapPage({
   const tNote = await getTranslations("featureNotes");
   const tMap = await getTranslations("marketMap");
   const tLayers = await getTranslations("mapLayers");
+  const tRec = await getTranslations("marketRecognition");
   // Owner-scoped current state for the capture forms (RLS — caller's own rows).
   const [preferred, login, demand, availability, capabilities, profileRes, avatar] =
     await Promise.all([
@@ -144,6 +145,27 @@ export default async function MarketMapPage({
           {tMap("pageLead")}
         </p>
       </header>
+      {/* Pre-search gate entry — answer the right questions BEFORE searching, so
+          the market shows fewer but better options. Opens the recognizer (PR
+          #561), which hands off to the existing real surfaces. */}
+      <Link
+        href={"/dashboard/market/recognize" as "/dashboard"}
+        data-testid="market-recognize-entry"
+        className="flex flex-col gap-1 card-border bg-ink-900/40 p-4 transition-colors hover:border-brand-blue"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+          {tRec("entry.title")}
+        </span>
+        <span className="text-sm leading-relaxed text-text-secondary">
+          {tRec("entry.body")}
+        </span>
+        <span className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-text-primary">
+          {tRec("entry.cta")}
+          <span aria-hidden className="text-text-muted">
+            →
+          </span>
+        </span>
+      </Link>
       {/* ONE unified map — the dominant, app-like surface (tall on mobile). The
           personal player-card marker is ALWAYS shown when a real location
           exists; the active context only changes the focused layer/panel below,

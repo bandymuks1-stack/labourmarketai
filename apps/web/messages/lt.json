@@ -1,4 +1,105 @@
 {
+  "marketRecognition": {
+    "title": "Ką siūlote ar ko ieškote?",
+    "subtitle": "Aprašykite savais žodžiais. Paversime tai aiškia kortele, parodysime, ko trūksta, ir nurodysime kitą žingsnį.",
+    "prep": "Tai pasiruošimo žingsnis prieš paiešką ar užklausą. Kuo daugiau atsakysite, tuo geresnis rezultatas ir mažiau netinkamų pasiūlymų.",
+    "readinessLabel": {
+      "match_ready": "Paruošta",
+      "improving": "Aiškėja",
+      "needs_basics": "Trūksta pagrindų"
+    },
+    "entry": {
+      "title": "Pasakykite, ko ieškote ar ką siūlote",
+      "body": "Pirmiausia atsakykite į kelis klausimus, kad parodytume mažiau, bet geresnių variantų, o ne ilgą sąrašą.",
+      "cta": "Pradėti čia"
+    },
+    "intent": {
+      "needWork": "Ieškau darbo",
+      "offerServices": "Siūlau paslaugas",
+      "needWorkers": "Ieškau darbuotojų",
+      "haveProject": "Turiu projektą"
+    },
+    "pasteLabel": "Įklijuokite arba įrašykite informaciją",
+    "pastePlaceholder": "pvz. Laivų stalius, Ålesund, Norvegija, rotacija 4/2, apgyvendinimas, kelionė apmokama, 3 metų patirtis laivų statykloje, elektriniai įrankiai",
+    "recognizeCta": "Atpažinti",
+    "recognizedTitle": "Ką atpažinome",
+    "missingTitle": "Ko trūksta",
+    "risksTitle": "Verta patikslinti",
+    "readinessTitle": "Pasiruošimas",
+    "nextActionTitle": "Kitas žingsnis",
+    "emptyText": "Įrašykite kelias detales viršuje ir jas čia atpažinsime.",
+    "confidence": {
+      "high": "Aišku",
+      "medium": "Iš dalies aišku",
+      "low": "Reikia detalių"
+    },
+    "field": {
+      "role": "Pareigybė",
+      "location": "Vieta",
+      "sector": "Sektorius",
+      "rotation": "Rotacija",
+      "experience": "Patirtis",
+      "scope": "Darbų apimtis",
+      "salary": "Atlyginimas",
+      "grossNet": "Bruto ar neto",
+      "currency": "Valiuta",
+      "weeklyHours": "Valandos per savaitę",
+      "overtime": "Viršvalandžiai",
+      "contractType": "Sutarties tipas",
+      "legalEmployer": "Teisinis darbdavys",
+      "language": "Kalba",
+      "drivingLicence": "Vairuotojo pažymėjimas",
+      "toolsPpe": "Įrankiai ir AAP",
+      "accommodationType": "Apgyvendinimo tipas",
+      "accommodationDeductions": "Apgyvendinimo išskaitymai",
+      "travelTiming": "Kelionės apmokėjimo laikas",
+      "requiredDocuments": "Reikalingi dokumentai",
+      "startDate": "Pradžios data"
+    },
+    "risk": {
+      "pay_unclear": "Atlygis dar neaiškus",
+      "accommodation_terms_unclear": "Apgyvendinimo sąlygos neaiškios",
+      "legal_employer_unclear": "Nenurodytas teisinis darbdavys",
+      "language_requirement_unclear": "Nenurodytas kalbos reikalavimas",
+      "documents_unclear": "Nesurašyti reikalingi dokumentai",
+      "hours_overtime_unclear": "Darbo laikas ir viršvalandžiai neaiškūs",
+      "low_recognition_confidence": "Kol kas nepavyko aiškiai perskaityti"
+    },
+    "action": {
+      "complete_missing_fields": "Pridėti trūkstamas detales",
+      "submit_demand": "Tęsti prie užklausos",
+      "improve_profile": "Tęsti profilyje",
+      "add_service_offer": "Tęsti prie paslaugų",
+      "create_project": "Tęsti prie projekto",
+      "request_more_info": "Paprašyti trūkstamų detalių",
+      "review_matches": "Peržiūrėti geriausius variantus",
+      "complete_player_card": "Užpildyti žaidėjo kortelę",
+      "add_work_proof": "Pridėti darbo įrodymų",
+      "search_opportunities": "Tęsti į darbo paiešką",
+      "continue_to_demand": "Tęsti į darbuotojų užklausą",
+      "complete_service_profile": "Užpildyti paslaugų profilį",
+      "continue_to_services": "Tęsti į paslaugas",
+      "continue_to_project": "Tęsti į projekto užklausą"
+    },
+    "supply": {
+      "needWorkBody": "Tai jau yra jūsų darbo profilyje ir CV. Atnaujinkite juos, kad gautumėte geresnius pasiūlymus.",
+      "needWorkCta": "Atverti profilį",
+      "offerServicesBody": "Jūsų paslaugos vienoje vietoje. Atnaujinkite jas, kad tinkami projektai jus rastų.",
+      "offerServicesCta": "Atverti paslaugas"
+    },
+    "progress": {
+      "worker": "Geras atnaujinimas. Jūsų profilis dabar aiškesnis (pridėta detalių: {count}). Tai padidina galimybę gauti geresnius pasiūlymus.",
+      "company": "Jūsų užklausa dabar stipresnė (pridėta detalių: {count}). Aiškesnės užklausos parodo mažiau, bet geresnių kandidatų.",
+      "buyer": "Jūsų projektas dabar aiškesnis (pridėta detalių: {count}). Tai padeda greičiau rasti tinkamus žmones."
+    },
+    "digest": {
+      "title": "Šią savaitę",
+      "workersReady": "{n} darbo profilių tapo paruošti geresniems pasiūlymams.",
+      "needsClear": "{n} užklausų tapo pakankamai aiškios geresniam sutapimui.",
+      "projectsClarified": "{n} projektų patikslinti iki geriausių variantų sąrašo.",
+      "topTrades": "Daugiausia ieškota šią savaitę: {trades}."
+    }
+  },
   "quickNav": {
     "ariaLabel": "Greita puslapio navigacija",
     "top": "Viršus",
