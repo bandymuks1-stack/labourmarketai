@@ -2643,6 +2643,18 @@
             "title": "Be visible on the map",
             "desc": "Where you are seen"
           },
+          "findOpportunities": {
+            "title": "See opportunities",
+            "desc": "Work that fits you"
+          },
+          "planning": {
+            "title": "Plan and bookings",
+            "desc": "Calendar and bookings"
+          },
+          "documents": {
+            "title": "Reports and documents",
+            "desc": "Your reports and files"
+          },
           "checkMessages": {
             "title": "Check messages",
             "desc": "Your conversations"

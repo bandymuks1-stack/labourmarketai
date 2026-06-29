@@ -5,6 +5,9 @@ import {
   MapPin,
   MessageSquare,
   Building2,
+  Compass,
+  CalendarDays,
+  FileText,
   CircleCheck,
   CircleAlert,
   type LucideIcon,
@@ -33,11 +36,19 @@ import { Link } from "@/lib/i18n/navigation";
 
 type ActionDef = { key: string; href: string; icon: LucideIcon };
 
+// One canonical control room — every fast action routes to an EXISTING surface
+// (no new/duplicate page). Opportunities, planning/bookings and reports/documents
+// were reachable only by direct URL or count-gated cards; surfacing them here
+// makes the canonical surfaces findable. Each destination renders its own honest
+// state (empty / preparing), so a link is never a fake "available" claim.
 const BASE_ACTIONS: readonly ActionDef[] = [
   { key: "recordWork", href: "/dashboard/journal", icon: NotebookPen },
   { key: "improveProfile", href: "/dashboard/profile", icon: IdCard },
+  { key: "findOpportunities", href: "/dashboard/opportunities", icon: Compass },
+  { key: "planning", href: "/dashboard/bookings", icon: CalendarDays },
   { key: "mapVisibility", href: "/dashboard/market-map", icon: MapPin },
   { key: "checkMessages", href: "/dashboard/communication", icon: MessageSquare },
+  { key: "documents", href: "/dashboard/documents", icon: FileText },
 ];
 
 const COMPANY_ACTION: ActionDef = {
