@@ -53,8 +53,8 @@ describe("localizeCapabilityLabel — owner-example capability signals", () => {
 describe("localizeCapabilityLabel — fallback for untranslated labels", () => {
   it("falls back to the LT label (never a slug, never empty) for unknown keys", () => {
     // A broader LT-only capability (documented RED) still renders its LT label.
-    expect(localizeCapabilityLabel("Maisto gamyba", "en")).toBe("Maisto gamyba");
-    expect(localizeCapabilityLabel("Maisto gamyba", "ru")).toBe("Maisto gamyba");
-    expect(localizeCapabilityLabel("Maisto gamyba", "lt")).toBe("Maisto gamyba");
+    expect(localizeCapabilityLabel("Mūrijimas", "en")).toBe("Mūrijimas");
+    expect(localizeCapabilityLabel("Mūrijimas", "ru")).toBe("Mūrijimas");
+    expect(localizeCapabilityLabel("Mūrijimas", "lt")).toBe("Mūrijimas");
   });
 });
