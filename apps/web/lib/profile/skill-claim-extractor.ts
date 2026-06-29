@@ -276,6 +276,15 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "apskait",
       "buhalter",
       "verslo administr",
+      // Maximal recognition: invoice handling/sorting ("rūšiavau sąskaitas",
+      // "tvarkiau sąskaitas") — invoice-anchored, not a bare verb.
+      "rūšiavau sąskait",
+      "rusiavau saskait",
+      "sąskaitų tvark",
+      "saskaitu tvark",
+      "tvarkiau sąskait",
+      "sąskaitas",
+      "saskaitas",
       // Real-world audit: bare "erp" is a substring of unrelated LT words
       // ("čerpėmis" = roof tiles → false "Apskaitos sistemos"). Require the
       // ERP-system framing instead; "apskait"/"buhalter" cover the rest.
@@ -593,6 +602,13 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "želdin",
       "zeldin",
       "aplinkos tvark",
+      // Maximal recognition: yard upkeep ("tvarkiau kiemą") the earlier set
+      // missed — anchored on the yard noun so it never matches bare "tvarkiau".
+      "tvarkiau kiem",
+      "kiemo tvark",
+      "kiemą tvark",
+      "kiem tvark",
+      "yard work",
       "krūm geneji",
       "gardening",
       "mowing",
@@ -654,7 +670,7 @@ const DICTIONARY: readonly DictionaryRow[] = [
     ],
   },
   {
-    // Pet care / dog walking.
+    // Pet / animal care — dog walking, feeding, cat/pet care.
     label: "Gyvūnų priežiūra",
     needles: [
       "vedžiojau šun",
@@ -665,8 +681,22 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "augintin",
       "gyvūnų priežiūr",
       "gyvunu prieziur",
+      // Maximal recognition: feeding + cat/pet care the earlier set missed
+      // ("šėriau gyvūnus", "prižiūrėjau katę"). Animal-domain stems, safe.
+      "šėriau gyvūn",
+      "seriau gyvun",
+      "gyvūn",
+      "gyvun",
+      "prižiūrėjau kat",
+      "priziurejau kat",
+      "katę",
+      "kate ",
+      "kačiu",
+      "kačių",
+      "katin",
       "dog walk",
       "pet care",
+      "fed the animal",
       "выгул собак",
       "уход за животн",
     ],
@@ -700,6 +730,49 @@ const DICTIONARY: readonly DictionaryRow[] = [
     ],
   },
   {
+    // Minor repair / assembly handyman work ("taisiau spyną", "montavau
+    // lentyną", "remontavau kraną" = repaired a TAP). Object-anchored so it
+    // stays a review-needed suggestion and — critically — "kraną" as a faucet
+    // never resolves to crane operation (no machinery/site context here).
+    label: "Smulkūs remonto darbai",
+    needles: [
+      "taisiau spyn",
+      "sutaisiau spyn",
+      "pataisiau spyn",
+      "spynos remont",
+      "spyną",
+      "montavau lentyn",
+      "pakabinau lentyn",
+      "surinkau lentyn",
+      "lentynų montav",
+      "baldų surink",
+      "baldus surink",
+      "surinkau bald",
+      "baldų montav",
+      "remontavau kran",
+      "krano remont",
+      "taisiau kran",
+      "taisiau čiaup",
+      "ciaup",
+      "minor repair",
+      "furniture assembly",
+    ],
+  },
+  {
+    // Surface sanding / preparation ("šlifavau paviršių") — painting/finishing
+    // prep. Sanding-specific stems; review-needed suggestion.
+    label: "Paviršių šlifavimas",
+    needles: [
+      "šlifav",
+      "slifav",
+      "paviršių paruoš",
+      "pavirsiu paruos",
+      "sanding",
+      "sanded",
+      "шлифов",
+    ],
+  },
+  {
     // SPECIALIZATION of Vairavimas — heavy goods / CE-category truck driving.
     label: "Sunkvežimio vairavimas",
     needles: [
@@ -728,9 +801,23 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "komplektav",
       "prekių surink",
       "preku surink",
+      // Maximal recognition: pallet loading + goods sorting ("kroviau paletes",
+      // "rūšiavau prekes") the earlier set missed. Logistics-domain, anchored.
+      "kroviau palet",
+      "paletes",
+      "palečių",
+      "paleciu",
+      "iškroviau",
+      "iskroviau",
+      "pakroviau",
+      "rūšiavau prek",
+      "rusiavau prek",
+      "prekių rūšiav",
+      "preku rusiav",
       "order pick",
       "order-pick",
       "warehouse",
+      "loaded pallet",
       "склад",
       "комплектов",
     ],
@@ -751,6 +838,15 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "patalpų priežiūr",
       "patalpu prieziur",
       "valytoj",
+      // Maximal recognition: tidying rooms + window washing ("tvarkiau
+      // kambarius", "valiau langus") — anchored so bare "tvarkiau" never fires.
+      "tvarkiau kambar",
+      "kambarių tvark",
+      "kambariu tvark",
+      "valiau lang",
+      "langų valym",
+      "langu valym",
+      "window clean",
       "cleaning",
       "уборк",
       "клининг",
@@ -772,6 +868,20 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "pagalba namuose",
       "neįgali",
       "neigali",
+      // Maximal recognition: elderly stems + dress/hygiene assistance the
+      // earlier set missed ("prižiūrėjau senolį", "padėjau žmogui apsirengti").
+      // Elder-specific stems only; no broad "priežiūr".
+      "prižiūrėjau senol",
+      "priziurejau senol",
+      "prižiūrėjau senel",
+      "priziurejau senel",
+      "senol",
+      "senel",
+      "senjor",
+      "padėjau žmogui",
+      "padejau zmogui",
+      "apsirengti",
+      "apreng žmog",
       "elderly",
       "caregiv",
       "personal care",
@@ -788,6 +898,16 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "klientu uzklaus",
       "aptarnavau klient",
       "klientų aptarnavim",
+      // Maximal recognition: answering / calling customers + taking orders
+      // ("atsakinėjau klientams", "skambinau klientams", "priėmiau užsakymus").
+      "atsakinėjau klient",
+      "atsakinejau klient",
+      "klientams",
+      "skambinau klient",
+      "priėmiau užsak",
+      "priemiau uzsak",
+      "užsakymus priėm",
+      "priėmiau užsakym",
       "customer service",
       "customer support",
       "обслуживание клиент",

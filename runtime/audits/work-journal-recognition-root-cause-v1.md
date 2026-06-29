@@ -123,3 +123,56 @@ but no elderly (`senel`/`senol`/`senjor`) stems.
 Net effect: window/door INSTALLATION still recognizes when an install verb is
 present; window CLEANING and bare window/door nouns no longer pull construction.
 Guarded by new positive (10 cross-sector) + negative tests.
+
+## Maximal recognition doctrine (PR #562, amend)
+
+Owner upgrade: the recognizer must not only avoid false positives — it must
+detect AS MANY real activity signals as possible, while keeping confidence and
+confirmation honest. "Missing a useful candidate is also bad."
+
+### 1. Multiple activities in one entry
+`extractJournalSuggestions` splits text on `, ; . ir/bei/and/и` (`splitClauses`)
+and runs `detectActivity` (ACTIVITY_HINTS_LT, keywords.ts) PER clause, so each
+clause yields its own activity fragment. Separately, `extractProfileSkillClaims`
+(skill-claim-extractor.ts) scans the WHOLE text and returns MULTIPLE capability
+labels. `classifyEntryRecognition` unions both into `autoCapabilityLabels`
+(deduped). Result — a 3-activity entry surfaces all three:
+`"valiau langus, tvarkiau kambarius ir prižiūrėjau senolį"` →
+Valymo darbai + Asmens priežiūra / globa;
+`"vairavau mikroautobusą, kroviau paletes ir pristačiau siuntas"` →
+Vairavimas + Sandėlio / logistikos darbai + Pavežėjimas.
+
+### 2. Activities previously dropped (now recognized)
+Before this amend, 15 everyday phrases returned `manual_only` (NOTHING): feeding
+animals, cat care, lock/shelf/faucet repair, surface sanding, tidying rooms/yard,
+pallet loading, goods sorting, dressing-assistance, answering/calling customers,
+taking orders, invoice sorting. Each now resolves to a SUGGESTED capability via
+object/verb-anchored needles added to the relevant `skill-claim-extractor.ts`
+rows (+ two new rows: "Smulkūs remonto darbai", "Paviršių šlifavimas"). None is
+a bare-noun needle — the root-cause discipline (verb/object anchoring) is kept.
+
+### 3. Strong / medium / weak separation
+- STRONG → `autoSignalSlugs` (recognizeSkills canonical slugs) + named
+  `autoCapabilityLabels` (capabilities + resolved activity fragments).
+- MEDIUM/WEAK → `candidates` (cross-sector `recognizeNewSkillSuggestions`) when
+  no confident signal exists — OFFERED, never auto-linked.
+- Nothing here is auto-confirmed: every output is `status:"suggested"`,
+  `confirmed:false`. Confirmation stays the existing claim/verify path.
+
+### 4. Where suggested / review-needed / confirmed render
+Composer: `WorkEntrySkillReview` (existing vs new), `DetectedSuggestionList`
+(matched vs possible-new), `SimilarSkillsSection` (candidates). Per saved entry:
+`JournalEntrySkillLinks` with `entry-skill-source.ts` (clean vs `stale_needs_review`).
+Confirmed CV/Player-Card skills read the verified path — untouched.
+
+### 5. Still under-recognized (intentional review-needed / candidate)
+`"pristačiau siuntas"` stays a candidate (delivery-driving) not a named
+capability; `"skaičiau brėžinius"` resolves to the `blueprint-reading` slug only
+on explicit drawings wording. Single-word ultra-terse entries and rare trades
+remain `manual_only` by design (no guessing).
+
+### 6. Future expansion (not in this PR)
+Confidence SCORE per candidate (beyond tier), clause-level multi-skill (two
+skills in one clause), a localized capability label for every LT-only label
+(documented RED), and persisting accepted suggestions through the confirmation
+path. All additive and out of scope here.
