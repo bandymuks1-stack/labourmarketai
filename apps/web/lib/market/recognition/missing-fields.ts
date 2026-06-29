@@ -234,6 +234,13 @@ const RULES: readonly FieldRule[] = [
   },
 ];
 
+/** Field → severity, derived from the rule table (used by readiness scoring). */
+export const JOB_DEMAND_FIELD_SEVERITY: Record<JobDemandFieldKey, FieldSeverity> =
+  Object.fromEntries(RULES.map((r) => [r.key, r.severity])) as Record<
+    JobDemandFieldKey,
+    FieldSeverity
+  >;
+
 export interface JobDemandFieldScan {
   readonly recognized: readonly RecognizedField[];
   readonly missing: readonly MissingField[];

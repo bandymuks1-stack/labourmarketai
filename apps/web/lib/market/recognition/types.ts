@@ -82,7 +82,15 @@ export type NextActionCode =
   | "add_service_offer"
   | "create_project"
   | "request_more_info"
-  | "review_matches";
+  | "review_matches"
+  // pre-search-gate v1 — intent-specific hand-offs to existing surfaces.
+  | "complete_player_card"
+  | "add_work_proof"
+  | "search_opportunities"
+  | "continue_to_demand"
+  | "complete_service_profile"
+  | "continue_to_services"
+  | "continue_to_project";
 
 export interface NextAction {
   readonly code: NextActionCode;
@@ -101,6 +109,22 @@ export interface RecognizedJobDemand {
   readonly risks: readonly RiskFlag[];
   readonly confidence: RecognitionConfidence;
   readonly nextAction: NextAction;
+}
+
+/**
+ * A recognized pre-search card for ANY intent: the intent-specific recognized /
+ * missing / risk view + readiness + up to 3 working next actions. The unified
+ * shape the pre-search gate UI renders (recognizeIntent → RecognizedCard).
+ */
+export interface RecognizedCard {
+  readonly intent: RecognitionIntent;
+  readonly recognized: readonly RecognizedField[];
+  readonly missing: readonly MissingField[];
+  readonly risks: readonly RiskFlag[];
+  readonly confidence: RecognitionConfidence;
+  readonly readiness: ReadinessState;
+  /** 1–3 next actions, each opening an EXISTING route. Never more than 3. */
+  readonly nextActions: readonly NextAction[];
 }
 
 /** Match readiness band for the top-N explanation (not a rating). */

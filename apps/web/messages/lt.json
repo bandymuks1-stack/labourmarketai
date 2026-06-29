@@ -2,6 +2,17 @@
   "marketRecognition": {
     "title": "Ką siūlote ar ko ieškote?",
     "subtitle": "Aprašykite savais žodžiais. Paversime tai aiškia kortele, parodysime, ko trūksta, ir nurodysime kitą žingsnį.",
+    "prep": "Tai pasiruošimo žingsnis prieš paiešką ar užklausą. Kuo daugiau atsakysite, tuo geresnis rezultatas ir mažiau netinkamų pasiūlymų.",
+    "readinessLabel": {
+      "match_ready": "Paruošta",
+      "improving": "Aiškėja",
+      "needs_basics": "Trūksta pagrindų"
+    },
+    "entry": {
+      "title": "Pasakykite, ko ieškote ar ką siūlote",
+      "body": "Pirmiausia atsakykite į kelis klausimus, kad parodytume mažiau, bet geresnių variantų, o ne ilgą sąrašą.",
+      "cta": "Pradėti čia"
+    },
     "intent": {
       "needWork": "Ieškau darbo",
       "offerServices": "Siūlau paslaugas",
@@ -61,7 +72,14 @@
       "add_service_offer": "Tęsti prie paslaugų",
       "create_project": "Tęsti prie projekto",
       "request_more_info": "Paprašyti trūkstamų detalių",
-      "review_matches": "Peržiūrėti geriausius variantus"
+      "review_matches": "Peržiūrėti geriausius variantus",
+      "complete_player_card": "Užpildyti žaidėjo kortelę",
+      "add_work_proof": "Pridėti darbo įrodymų",
+      "search_opportunities": "Tęsti į darbo paiešką",
+      "continue_to_demand": "Tęsti į darbuotojų užklausą",
+      "complete_service_profile": "Užpildyti paslaugų profilį",
+      "continue_to_services": "Tęsti į paslaugas",
+      "continue_to_project": "Tęsti į projekto užklausą"
     },
     "supply": {
       "needWorkBody": "Tai jau yra jūsų darbo profilyje ir CV. Atnaujinkite juos, kad gautumėte geresnius pasiūlymus.",

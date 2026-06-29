@@ -7,9 +7,18 @@
  * gated (see runtime/audits/offer-demand-operations-recognition-participation-v1.md).
  */
 export * from "./types";
-export { detectJobDemandFields, type JobDemandFieldScan } from "./missing-fields";
+export {
+  detectJobDemandFields,
+  JOB_DEMAND_FIELD_SEVERITY,
+  type JobDemandFieldScan,
+} from "./missing-fields";
 export { deriveJobDemandRiskFlags } from "./risk-flags";
 export { recognizeJobDemand, type JobDemandInput } from "./recognize-job-demand";
+export {
+  recognizeIntent,
+  INTENT_FIELDS,
+  type IntentRecognitionInput,
+} from "./recognize-intent";
 export { explainTopMatches, type MatchCandidate } from "./match-explanation";
 export {
   classifyParticipation,

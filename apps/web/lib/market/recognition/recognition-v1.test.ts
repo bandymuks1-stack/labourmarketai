@@ -4,6 +4,8 @@ import { join } from "node:path";
 
 import { detectJobDemandFields } from "./missing-fields";
 import { recognizeJobDemand } from "./recognize-job-demand";
+import { recognizeIntent } from "./recognize-intent";
+import type { RecognitionIntent } from "./types";
 import { explainTopMatches, type MatchCandidate } from "./match-explanation";
 import {
   classifyParticipation,
@@ -63,7 +65,7 @@ describe("recognition: a vague post is not treated as match-ready", () => {
     expect(risks).toContain("accommodation_terms_unclear");
     // Important details are missing → the card points at completing them.
     expect(card.nextAction.code).toBe("complete_missing_fields");
-    expect(card.nextAction.href).toBe("/dashboard");
+    expect(card.nextAction.href).toBe("/dashboard/company");
     // The structured identity still recognized work type + country.
     expect(card.structured.workType).toBe("carpenter");
     expect(card.structured.country).toBe("NO");
@@ -134,6 +136,80 @@ describe("matching: top 1–3 explanation with fit / missing / next", () => {
 
   it("never returns more than the requested max", () => {
     expect(explainTopMatches(need, candidates, 1)).toHaveLength(1);
+  });
+});
+
+describe("pre-search gate: intent-specific recognition + exact handoffs", () => {
+  const WORKER =
+    "Looking for carpenter work in Norway, 3 years experience, available, " +
+    "full time, B driving licence";
+  const SERVICE =
+    "We offer a welding team in Germany, own equipment, daily rate negotiable, " +
+    "technical drawings";
+  const PROJECT =
+    "Need a finishing crew for an apartment renovation in Vilnius, materials provided";
+
+  it("need_workers asks/detects the hiring-demand fields", () => {
+    const card = recognizeIntent("need_workers", { rawText: SHIP_CARPENTER });
+    const recognized = new Set(card.recognized.map((r) => r.key));
+    const missing = new Set(card.missing.map((m) => m.key));
+    expect(recognized).toContain("role");
+    expect(missing).toContain("salary");
+    // hiring-only fields ARE asked of a demand.
+    expect(missing).toContain("legalEmployer");
+  });
+
+  it("have_project asks project fields and excludes hiring-only ones", () => {
+    const card = recognizeIntent("have_project", { rawText: PROJECT });
+    const keys = new Set(
+      [...card.recognized, ...card.missing].map((f) => f.key),
+    );
+    expect(keys).toContain("scope");
+    expect(keys).toContain("startDate");
+    expect(keys.has("legalEmployer")).toBe(false);
+    expect(keys.has("overtime")).toBe(false);
+  });
+
+  it("need_work hands off to existing worker surfaces, no hiring-only fields", () => {
+    const card = recognizeIntent("need_work", { rawText: WORKER });
+    const hrefs = card.nextActions.map((a) => a.href);
+    expect(hrefs).toContain("/dashboard/profile");
+    expect(hrefs).toContain("/dashboard/opportunities");
+    const keys = new Set(
+      [...card.recognized, ...card.missing].map((f) => f.key),
+    );
+    expect(keys.has("legalEmployer")).toBe(false);
+  });
+
+  it("offer_services hands off to the existing services surface", () => {
+    const card = recognizeIntent("offer_services", { rawText: SERVICE });
+    expect(card.nextActions.map((a) => a.href)).toContain("/dashboard/services");
+  });
+
+  it("returns 1–3 next actions, each an EXISTING route, never a bare /dashboard", () => {
+    const intents: RecognitionIntent[] = [
+      "need_work",
+      "need_workers",
+      "offer_services",
+      "have_project",
+    ];
+    for (const intent of intents) {
+      const card = recognizeIntent(intent, { rawText: SHIP_CARPENTER });
+      expect(card.nextActions.length).toBeGreaterThan(0);
+      expect(card.nextActions.length).toBeLessThanOrEqual(3);
+      for (const a of card.nextActions) {
+        expect(a.href, `${intent}:${a.code}`).not.toBe("/dashboard");
+        expect(a.href).toMatch(/^\/dashboard\/.+/);
+      }
+    }
+  });
+
+  it("every card shows recognized / missing / risks / readiness", () => {
+    const card = recognizeIntent("need_workers", { rawText: SHIP_CARPENTER });
+    expect(card.readiness.label).toBeTruthy();
+    expect(card.readiness.total).toBeGreaterThan(0);
+    expect(Array.isArray(card.risks)).toBe(true);
+    expect(card.missing.length).toBeGreaterThan(0);
   });
 });
 
@@ -217,6 +293,27 @@ describe("copy: the recognition namespace leaks no forbidden public terms", () =
       const blob = JSON.stringify(json.marketRecognition ?? {});
       const m = blob.match(BANNED);
       expect(m, `forbidden term in ${loc}: ${m?.[0]}`).toBeNull();
+    });
+
+    it(`${loc}: pre-search wording + new handoff action keys exist`, () => {
+      const json = JSON.parse(
+        readFileSync(join(messagesDir, `${loc}.json`), "utf8"),
+      ) as { marketRecognition?: Record<string, Record<string, string>> };
+      const mr = json.marketRecognition ?? {};
+      expect(typeof mr.prep).toBe("string");
+      expect(mr.entry?.title).toBeTruthy();
+      expect(mr.entry?.cta).toBeTruthy();
+      expect(mr.readinessLabel?.match_ready).toBeTruthy();
+      for (const code of [
+        "complete_player_card",
+        "add_work_proof",
+        "search_opportunities",
+        "continue_to_demand",
+        "complete_service_profile",
+        "continue_to_project",
+      ]) {
+        expect(mr.action?.[code], `${loc} action.${code}`).toBeTruthy();
+      }
     });
   }
 });

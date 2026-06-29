@@ -2,6 +2,17 @@
   "marketRecognition": {
     "title": "What do you offer or need?",
     "subtitle": "Describe it in your own words. We turn it into a clear card, show what is missing, and point to the next step.",
+    "prep": "This is a preparation step before you search or send a request. The more you answer, the better the result — and the fewer bad matches.",
+    "readinessLabel": {
+      "match_ready": "Ready",
+      "improving": "Getting clearer",
+      "needs_basics": "Needs the basics"
+    },
+    "entry": {
+      "title": "Tell us what you need or offer",
+      "body": "Answer a few questions first, so we show fewer but better options instead of a long list.",
+      "cta": "Start here"
+    },
     "intent": {
       "needWork": "I need work",
       "offerServices": "I offer services",
@@ -61,7 +72,14 @@
       "add_service_offer": "Continue to your services",
       "create_project": "Continue to your project",
       "request_more_info": "Ask for the missing details",
-      "review_matches": "Review the best options"
+      "review_matches": "Review the best options",
+      "complete_player_card": "Complete your Player Card",
+      "add_work_proof": "Add work proof",
+      "search_opportunities": "Continue to work search",
+      "continue_to_demand": "Continue to your hiring request",
+      "complete_service_profile": "Complete your service profile",
+      "continue_to_services": "Continue to your services",
+      "continue_to_project": "Continue to your project request"
     },
     "supply": {
       "needWorkBody": "Your work profile and CV already hold this. Keep them up to date so you receive better options.",
