@@ -4855,7 +4855,9 @@
     "proofEmpty": "No linked records yet.",
     "generatedAt": "Generated",
     "notWorker": "CV export is available for worker profiles.",
-    "summaryTitle": "Professional summary"
+    "summaryTitle": "Professional summary",
+    "workHistoryTitle": "Work history",
+    "present": "Present"
   },
   "todayScreen": {
     "eyebrow": "Today",

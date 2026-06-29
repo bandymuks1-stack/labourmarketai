@@ -27,6 +27,31 @@ import { groupCvSkillTiers, type CvSkillTiers } from "./skill-tiers";
  * with no change here (slugs are returned, the page translates).
  */
 
+/** Worker engagement relationships — the person-as-worker history rows.
+ *  Mirrors the set the profile page renders, so the CV and profile agree. */
+const WORKER_RELATIONSHIPS = [
+  "employee",
+  "freelancer",
+  "consultant",
+  "owner",
+  "collaborator",
+];
+
+export type VerifiedCvEngagement = {
+  /** Best display name for the org (display → legal); null when none stored
+   *  (the page falls back to an org-type or relationship label). */
+  orgName: string | null;
+  /** organizations.organization_type (company / agency) — lets the page label
+   *  an unnamed org honestly instead of a bare "—". */
+  organizationType: string | null;
+  /** engagement relationship slug (employee / freelancer / …). */
+  relationship: string;
+  /** Free-text engagement title, if the worker gave one. */
+  title: string | null;
+  startedAt: string | null;
+  endedAt: string | null;
+};
+
 export type VerifiedCvProofRow = {
   /** Date of the confirmation (the legally meaningful act). */
   confirmedAt: string;
@@ -49,6 +74,9 @@ export type VerifiedCvData = {
   tiers: CvSkillTiers;
   /** Free-label self-declared claims — ALWAYS the declared tier. */
   declaredClaims: string[];
+  /** Real work history from engagement_contexts (companies, role, dates) —
+   *  the same source the profile renders; empty array when none. */
+  workHistory: VerifiedCvEngagement[];
   signals: OwnTrustSignals;
   proof: VerifiedCvProofRow[];
 };
@@ -72,8 +100,16 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   if (!worker?.id) return { ok: false, code: "no_worker" };
   const workerId = worker.id;
 
-  const [profileRes, wpRes, wsRes, linkRes, claims, signals, entriesRes] =
-    await Promise.all([
+  const [
+    profileRes,
+    wpRes,
+    wsRes,
+    linkRes,
+    claims,
+    signals,
+    entriesRes,
+    ecRes,
+  ] = await Promise.all([
       supabase
         .from("profiles")
         .select("full_name, email, profile_text")
@@ -100,7 +136,37 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         .from("journal_entries")
         .select("id, created_at, project_id")
         .eq("worker_id", workerId),
+      supabase
+        .from("engagement_contexts")
+        .select(
+          "relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+        )
+        .eq("profile_id", user.id)
+        .in("relationship_slug", WORKER_RELATIONSHIPS)
+        .order("is_primary", { ascending: false })
+        .order("started_at", { ascending: false, nullsFirst: false }),
     ]);
+
+  // Real work history (same source the profile renders). Primary first, then
+  // most-recent; org name prefers display → legal, else null so the page can
+  // fall back to an org-type/relationship label (never an invented name).
+  const workHistory: VerifiedCvEngagement[] = (ecRes.data ?? []).map((e) => {
+    const org = e.organizations as
+      | {
+          display_name: string | null;
+          legal_name: string | null;
+          organization_type: string | null;
+        }
+      | null;
+    return {
+      orgName: org?.display_name ?? org?.legal_name ?? null,
+      organizationType: org?.organization_type ?? null,
+      relationship: e.relationship_slug,
+      title: (e.title as string | null) ?? null,
+      startedAt: e.started_at,
+      endedAt: e.ended_at,
+    };
+  });
 
   const personName =
     profileRes.data?.full_name ??
@@ -219,6 +285,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       professionSlugs,
       tiers,
       declaredClaims,
+      workHistory,
       signals,
       proof,
     },
