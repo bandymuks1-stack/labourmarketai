@@ -41,11 +41,9 @@ describe("Tier 2 — CANDIDATE suggestions (not auto-linked)", () => {
   const CASES: { text: string; slug: string }[] = [
     { text: "Pristačiau siuntas po miestą", slug: "delivery-driving" },
     { text: "rinkau uzsakymus, pakavau, etiketavau", slug: "order-picking" },
-    { text: "tvarkiau kambarius viesbuty, patalyne", slug: "housekeeping" },
     { text: "valiau sniega nuo taku, bariau druska", slug: "winter-service" },
     { text: "kuriau logotipą, maketavau bukletą", slug: "graphic-design" },
     { text: "Testavau aplikaciją, radau klaidas", slug: "qa-testing" },
-    { text: "Prižiūrėjau senelius, daviau vaistus", slug: "elderly-care" },
     { text: "auklejau vaikus, vedziau i darzeli", slug: "childcare" },
   ];
   for (const { text, slug } of CASES) {
@@ -53,6 +51,22 @@ describe("Tier 2 — CANDIDATE suggestions (not auto-linked)", () => {
       const r = classifyEntryRecognition(text);
       expect(r.tier, text).toBe("candidate_suggestion");
       expect(r.candidates.map((c) => c.slug), text).toContain(slug);
+    });
+  }
+
+  // Maximal recognition (PR #562): housekeeping + elderly care were UPGRADED
+  // from candidate-only to a confident (but still suggested, never confirmed)
+  // capability — the recognizer now names the activity directly. Coverage is
+  // preserved and strengthened, not dropped.
+  const UPGRADED: { text: string; label: RegExp }[] = [
+    { text: "tvarkiau kambarius viesbuty, patalyne", label: /valym/i },
+    { text: "Prižiūrėjau senelius, daviau vaistus", label: /priežiūr|globa/i },
+  ];
+  for (const { text, label } of UPGRADED) {
+    it(`"${text}" → auto suggested capability (not auto-confirmed)`, () => {
+      const r = classifyEntryRecognition(text);
+      expect(r.tier, text).toBe("auto_signal");
+      expect(r.autoCapabilityLabels.join(" "), text).toMatch(label);
     });
   }
 

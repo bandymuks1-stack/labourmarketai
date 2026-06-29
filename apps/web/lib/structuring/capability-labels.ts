@@ -80,6 +80,23 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
     ru: "Уход за людьми / помощь",
   },
   "Kalbų mokėjimas": { en: "Languages", ru: "Знание языков" },
+  // Maximal activity recognition (PR #562): newly-reachable capability/activity
+  // labels — localized so they never leak LT into the EN/RU UI.
+  "Gyvūnų priežiūra": { en: "Animal / pet care", ru: "Уход за животными" },
+  "Skaitiklių keitimas / priežiūra": {
+    en: "Meter replacement / upkeep",
+    ru: "Замена / обслуживание счётчиков",
+  },
+  "Tvoros priežiūra / dažymas": {
+    en: "Fence upkeep / painting",
+    ru: "Уход за забором / покраска",
+  },
+  "Smulkūs remonto darbai": { en: "Minor repairs", ru: "Мелкий ремонт" },
+  "Paviršių šlifavimas": {
+    en: "Surface sanding / prep",
+    ru: "Шлифовка поверхностей",
+  },
+  Dažymas: { en: "Painting", ru: "Покраска" },
 };
 
 /**
