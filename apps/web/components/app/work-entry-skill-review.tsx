@@ -130,13 +130,16 @@ export function WorkEntrySkillReview({
           <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("existingTitle")}</p>
           <ul className="flex flex-col gap-1.5">
             {review.existingItems.map((it) => (
+              // Read-only evidence (already on the profile) — deliberately FLAT
+              // (no card border, muted text) so it does not mimic the bordered,
+              // actionable "new skill" rows below and never reads as tappable.
               <li
                 key={it.id}
                 data-testid={`work-entry-existing-${it.id}`}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 bg-ink-800/30 px-3 py-2"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-ink-800/20 px-3 py-2"
               >
                 <span className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-text-primary">{it.label}</span>
+                  <span className="text-sm font-medium text-text-secondary">{it.label}</span>
                   {domainBadge(it)}
                 </span>
                 <span className="rounded-sm border border-brand-blue/40 bg-brand-blue/5 px-1.5 py-0.5 text-[10px] font-semibold text-brand-blue">
