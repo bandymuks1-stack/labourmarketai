@@ -51,7 +51,10 @@ describe("the journal page surfaces the review origin (via the timeline)", () =>
     expect(page).toMatch(/confirmation_scope, created_at, confirmer_role/);
     // The single latest-wins origin line was superseded by the full Evidence
     // Decision Timeline v1, which is derived from the same append-only rows.
-    expect(page).toMatch(/deriveReviewTimeline\(e\.journal_entry_confirmations\)/);
+    // Whitespace/newline-tolerant so a prettier line-wrap can't break the guard.
+    expect(page).toMatch(
+      /deriveReviewTimeline\(\s*e\.journal_entry_confirmations\s*,?\s*\)/,
+    );
     expect(page).toMatch(/<EvidenceDecisionTimeline/);
   });
 

@@ -156,7 +156,11 @@ describe("Guard: the timeline component and page stay honest", () => {
   it("the page feeds the timeline real created_at + derived events", () => {
     expect(page).toMatch(/createdAt=\{e\.created_at\}/);
     expect(page).toMatch(/events=\{timeline\}/);
-    expect(page).toMatch(/deriveReviewTimeline\(e\.journal_entry_confirmations\)/);
+    // Whitespace/newline-tolerant: the call must pass the real append-only
+    // confirmations, but prettier may wrap the argument across lines.
+    expect(page).toMatch(
+      /deriveReviewTimeline\(\s*e\.journal_entry_confirmations\s*,?\s*\)/,
+    );
   });
 });
 
