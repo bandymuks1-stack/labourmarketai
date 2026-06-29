@@ -38,6 +38,27 @@ describe("dashboard WorkCard adopts the canonical Player Card identity tile", ()
     expect(workCard).toMatch(/data\.professionName/);
     expect(workCard).toMatch(/data-testid="work-card-identity"/);
   });
+
+  it("renders the premium Player Card module sections (PR-D1R)", () => {
+    // Identity band + readiness, known signals, missing signals, actions block.
+    expect(workCard).toMatch(/data-testid="work-card-readiness"/);
+    expect(workCard).toMatch(/data-testid="work-card-known"/);
+    expect(workCard).toMatch(/data-testid="work-card-missing"/);
+    expect(workCard).toMatch(/data-testid="work-card-actions"/);
+  });
+
+  it("caps next actions at 3 (one primary editor + ≤2 page-target links)", () => {
+    // Primary action stays the existing inline editor; secondaries are capped.
+    expect(workCard).toMatch(/<WorkCardEditor\b/);
+    expect(workCard).toMatch(/\.slice\(0,\s*2\)/);
+  });
+
+  it("secondary actions only target EXISTING working routes (no dead targets)", () => {
+    // PAGE_TARGET maps missing dims to real routes; no journal/route code change.
+    expect(workCard).toMatch(/PAGE_TARGET/);
+    expect(workCard).toMatch(/"\/dashboard\/profile"/);
+    expect(workCard).toMatch(/"\/dashboard\/journal"/);
+  });
 });
 
 describe("the AvatarDisplay tile stays wired to the player-identity contract", () => {
