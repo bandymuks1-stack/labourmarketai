@@ -19,6 +19,8 @@ import {
   PLAYER_IDENTITY_FALLBACK_SURFACE,
 } from "@/lib/identity/player-identity";
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * P0 Marketplace loop (Phase 1) — one compact surface: discover active offerings
@@ -113,12 +115,16 @@ export function MarketplaceLoopSection({
     );
   }
 
-  function run(action: () => Promise<{ kind: string }>) {
+  function run(
+    action: () => Promise<{ kind: string }>,
+    onOk?: () => void,
+  ) {
     setError(null);
     startTransition(async () => {
       const res = await action();
       if (res.kind === "duplicate") setError(labels.duplicate);
       else if (res.kind !== "ok") setError(labels.errorGeneric);
+      else onOk?.();
       router.refresh();
     });
   }
@@ -169,7 +175,19 @@ export function MarketplaceLoopSection({
                   <button
                     type="button"
                     disabled={pending}
-                    onClick={() => run(() => requestServiceOffering(o.id))}
+                    onClick={() => {
+                      trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, {
+                        surface: "marketplace",
+                      });
+                      run(
+                        () => requestServiceOffering(o.id),
+                        () =>
+                          trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+                            surface: "marketplace",
+                            success: true,
+                          }),
+                      );
+                    }}
                     className="inline-flex shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-2 py-1 text-xs text-brand-blue disabled:opacity-50"
                   >
                     <Send className="h-3 w-3" /> {labels.request}

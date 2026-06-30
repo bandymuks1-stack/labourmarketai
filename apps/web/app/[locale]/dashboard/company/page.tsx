@@ -1,4 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { FeatureNote } from "@/components/app/feature-note";
@@ -83,6 +85,10 @@ export default async function CompanyDashboardPage({
   if (companyProfile.kind === "ok" && companyProfile.row === null) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-dashboard">
+        <TelemetryView
+          event={FUNNEL_EVENTS.companyDashboardViewed}
+          metadata={{ surface: "company", step: "no_profile" }}
+        />
         <header className="flex flex-col gap-1">
           <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
             {t("eyebrow")}
@@ -325,6 +331,10 @@ export default async function CompanyDashboardPage({
 
   return (
     <div className="flex flex-col gap-6" data-testid="company-dashboard">
+      <TelemetryView
+        event={FUNNEL_EVENTS.companyDashboardViewed}
+        metadata={{ surface: "company", role_context: "company" }}
+      />
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Link

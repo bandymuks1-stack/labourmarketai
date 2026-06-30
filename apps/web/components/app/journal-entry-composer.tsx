@@ -45,7 +45,9 @@ import {
   errorTask,
   recordEvent,
   startTask,
+  trackFunnel,
 } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -154,6 +156,15 @@ export function JournalEntryComposer({
 
   const [stage, setStage] = useState<Stage>("compose");
   const [text, setText] = useState(editingEntry?.originalText ?? "");
+  // Activation funnel (P0-A): fire once when the worker first types into a
+  // NEW entry (skip edits of an existing entry, which start pre-filled).
+  const journalStartedRef = useRef(Boolean(editingEntry));
+  function noteJournalEntryStarted(next: string): void {
+    if (journalStartedRef.current) return;
+    if (next.trim().length === 0) return;
+    journalStartedRef.current = true;
+    trackFunnel(FUNNEL_EVENTS.journalEntryStarted, { surface: "journal" });
+  }
   // Edit-flow honesty (P0): when the worker changes the text of an entry they
   // are editing, the structured details carried over from the OLD text may no
   // longer match. We never silently keep showing them as current — the
@@ -557,6 +568,11 @@ export function JournalEntryComposer({
       recordEvent("journal_save_success", {
         fragment_count: confirmedFragments.length,
       });
+      // Activation funnel (P0-A) — canonical journal-artifact-created signal.
+      trackFunnel(FUNNEL_EVENTS.journalEntrySaved, {
+        surface: "journal",
+        success: true,
+      });
       completeTask(taskName, {
         fragment_count: confirmedFragments.length,
       });
@@ -799,7 +815,10 @@ export function JournalEntryComposer({
           <Label>{t("whatDidYouDo")}</Label>
           <textarea
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              noteJournalEntryStarted(e.target.value);
+              setText(e.target.value);
+            }}
             rows={4}
             required
             placeholder={t("textPlaceholder")}

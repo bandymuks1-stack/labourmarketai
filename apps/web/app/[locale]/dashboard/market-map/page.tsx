@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -137,6 +139,10 @@ export default async function MarketMapPage({
   }
   return (
     <div className="flex flex-col gap-4">
+      <TelemetryView
+        event={FUNNEL_EVENTS.preferredLocationViewed}
+        metadata={{ surface: "market_map" }}
+      />
       <header className="flex flex-col gap-1" data-testid="market-map-page-header">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {tMap("pageTitle")}

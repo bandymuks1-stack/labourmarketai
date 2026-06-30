@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   JournalEntryComposer,
   type JournalEngagement,
@@ -190,6 +192,10 @@ export default async function JournalPage({
           : null;
     return (
       <div className="flex flex-col gap-6">
+        <TelemetryView
+          event={FUNNEL_EVENTS.journalViewed}
+          metadata={{ surface: "journal", step: "no_context" }}
+        />
         <header className="flex flex-col gap-1">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {tCv("pageTitle")}
@@ -450,6 +456,10 @@ export default async function JournalPage({
 
   return (
     <div className="flex flex-col gap-6">
+      <TelemetryView
+        event={FUNNEL_EVENTS.journalViewed}
+        metadata={{ surface: "journal" }}
+      />
       <header id="mano-cv-top" className="flex flex-col gap-1 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

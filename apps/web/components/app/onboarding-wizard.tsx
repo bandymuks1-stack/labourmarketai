@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /** Role cards — the START is intentionally simple (owner directive,
  *  company-role-simplicity-v1): a person either WORKS THEMSELVES or
@@ -32,6 +34,14 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  // Activation funnel (P0-A): the wizard mounting = onboarding started.
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    trackFunnel(FUNNEL_EVENTS.onboardingStarted);
+  }, []);
+
   function toggleRole(r: Role) {
     setRoles((prev) => {
       const next = new Set(prev);
@@ -57,8 +67,19 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
     form.set("locale", locale);
     form.set("display_name", displayName.trim());
     form.set("country", country);
+    // Primary role = first selected in canonical order (mirrors the
+    // server-side primary derivation). Coarse, non-identifying.
+    const primaryRole = ROLE_CARDS.map((c) => c.key).find((k) =>
+      roles.has(k),
+    );
     start(async () => {
       try {
+        // Fire BEFORE the call: a successful onboarding ends in a
+        // server-side redirect (NEXT_REDIRECT throws), so code after the
+        // await never runs on the happy path.
+        trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
+          role_context: primaryRole,
+        });
         await completeOnboarding(form);
       } catch (e) {
         if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) throw e;

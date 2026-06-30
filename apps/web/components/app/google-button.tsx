@@ -9,7 +9,8 @@ import {
   rememberOauthTraceId,
   withOauthTraceId,
 } from "@/lib/auth/oauth-trace";
-import { recordEvent } from "@/lib/telemetry/task";
+import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /** Official Google "G" mark (multicolour). Inline so the white OAuth button
  *  needs no asset pipeline. */
@@ -114,6 +115,8 @@ export function GoogleButton({
           typeof window !== "undefined" ? window.location.host : null,
         ),
       });
+      // Activation funnel (P0-A) — canonical login-start signal.
+      trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "google" });
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: callbackWithTrace.toString() },

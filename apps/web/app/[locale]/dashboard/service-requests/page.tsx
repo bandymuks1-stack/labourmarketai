@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { ArrowRight } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -86,6 +88,10 @@ export default async function ServiceRequestsPage({
 
   return (
     <div className="flex flex-col gap-4" data-testid="service-requests-page">
+      <TelemetryView
+        event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
+        metadata={{ surface: "service_requests" }}
+      />
       {/* Visiting the loop marks it seen → clears the dashboard "new" markers. */}
       <MarkServiceRequestsSeen />
       <header className="flex flex-col gap-1">

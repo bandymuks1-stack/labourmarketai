@@ -1,4 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import Link from "next/link";
 
 import { FeatureNote } from "@/components/app/feature-note";
@@ -61,6 +63,10 @@ export default async function OpportunitiesPage({
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8">
+      <TelemetryView
+        event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
+        metadata={{ surface: "opportunities", role_context: "worker" }}
+      />
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("title")}

@@ -8,6 +8,8 @@ import { compressImageFile } from "@/lib/browser/image-compress";
 import { uploadProfileAvatar, isValidAvatar } from "@/lib/profile/avatar-upload";
 import { removeProfileAvatar } from "@/lib/profile/avatar-actions";
 import { AvatarDisplay } from "@/components/app/avatar-display";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Profile avatar control — upload / change / remove the signed-in user's own
@@ -40,6 +42,7 @@ export function ProfileAvatar({
       setError(t("invalidFile"));
       return;
     }
+    trackFunnel(FUNNEL_EVENTS.avatarUploadStarted, { surface: "profile" });
     setBusy("preparing");
     const { file: prepared } = await compressImageFile(f);
     if (!isValidAvatar(prepared)) {
@@ -51,6 +54,10 @@ export function ProfileAvatar({
     const r = await uploadProfileAvatar(prepared);
     setBusy("idle");
     if (r === "uploaded") {
+      trackFunnel(FUNNEL_EVENTS.avatarUploadSucceeded, {
+        surface: "profile",
+        success: true,
+      });
       setDone(true);
       router.refresh();
     } else if (r === "invalid") {

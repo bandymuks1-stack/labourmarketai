@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
@@ -328,6 +330,10 @@ export default async function ProfilePage({
 
   return (
     <div className="flex flex-col gap-6">
+      <TelemetryView
+        event={FUNNEL_EVENTS.profileViewed}
+        metadata={{ surface: "profile" }}
+      />
       <header id="profile-top" className="scroll-mt-20">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
