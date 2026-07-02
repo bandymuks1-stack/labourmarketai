@@ -97,6 +97,13 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
     ru: "Шлифовка поверхностей",
   },
   Dažymas: { en: "Painting", ru: "Покраска" },
+  // Owner smoke P0 (2026-07-02): generic event/inventory-preparation signal
+  // added to the activity + capability lexicons — localized so the new
+  // canonical LT label never leaks into the EN/RU UI.
+  "Renginių / inventoriaus paruošimas": {
+    en: "Event / inventory preparation",
+    ru: "Подготовка мероприятий / инвентаря",
+  },
 };
 
 /**

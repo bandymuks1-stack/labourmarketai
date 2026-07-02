@@ -729,7 +729,8 @@
     "reviewAgain": "Review again",
     "unlinkFlagged": "Unlink",
     "linkMore": "Link a skill",
-    "linkDone": "Done"
+    "linkDone": "Close list",
+    "pickerHint": "Your profile skills — link by hand if they fit this entry. These were not detected from this entry."
   },
   "reviewReport": {
     "title": "Review report",

@@ -24,7 +24,13 @@ describe("entry card shows only entry-linked skills by default", () => {
     expect(src).toMatch(/availableSkills\.filter\(\(s\)\s*=>\s*selected\.has\(s\.id\)\)/);
   });
   it("the full profile-skill picker is behind a disclosure toggle", () => {
-    expect(src).toMatch(/picker\s*\?\s*availableSkills\s*:/);
+    // The catalogue renders in its OWN gated section (never mixed into the
+    // detected-skill chip list), filtered to skills not yet linked.
+    expect(src).toMatch(/\{picker && \(/);
+    expect(src).toMatch(/availableSkills\s*\n?\s*\.filter\(\(s\)\s*=>\s*!selected\.has\(s\.id\)\)/);
     expect(src).toMatch(/data-testid={`entry-skill-picker-toggle-/);
+  });
+  it("the picker section explains these are the worker's own profile skills", () => {
+    expect(src).toMatch(/t\("pickerHint"\)/);
   });
 });

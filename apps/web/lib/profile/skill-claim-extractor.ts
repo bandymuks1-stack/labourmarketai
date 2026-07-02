@@ -846,10 +846,57 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "valiau lang",
       "langų valym",
       "langu valym",
+      // Office/bureau tidying ("tvarkiau ofisą / biurą") — same anchored
+      // shape as "tvarkiau kambar" above so bare "tvarkiau" still never fires.
+      "tvarkiau ofis",
+      "ofiso tvark",
+      "ofisą tvark",
+      "ofisa tvark",
+      "tvarkiau biur",
+      "biuro tvark",
+      "biurą tvark",
+      "biura tvark",
       "window clean",
       "cleaning",
       "уборк",
       "клининг",
+    ],
+  },
+  {
+    // Event / inventory preparation — GENERIC day-work (collecting/preparing
+    // inventory or a venue FOR an event), not tied to any one item or event.
+    // Dative event nouns ("renginiui" / "šventei" = working FOR an event) are
+    // strong anchors; bare "rinkome" is deliberately excluded (also means
+    // picking mushrooms, votes, …). Localized in capability-labels.ts.
+    label: "Renginių / inventoriaus paruošimas",
+    needles: [
+      "renginiui",
+      "šventei",
+      "sventei",
+      "renginio paruoš",
+      "renginio paruos",
+      "renginių paruoš",
+      "renginiu paruos",
+      "ruošiau rengin",
+      "ruosiau rengin",
+      "ruošėme rengin",
+      "ruoseme rengin",
+      "ruošėmės rengin",
+      "ruosemes rengin",
+      "šventės paruoš",
+      "sventes paruos",
+      "inventoriaus paruoš",
+      "inventoriaus paruos",
+      "rinkome inventori",
+      "rinkau inventori",
+      "inventorių rink",
+      "inventoriu rink",
+      "event prep",
+      "prepared for the event",
+      "подготовка мероприят",
+      "готовил к мероприят",
+      "к мероприятию",
+      "инвентарь для мероприят",
     ],
   },
   {

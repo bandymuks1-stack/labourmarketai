@@ -76,8 +76,12 @@ describe("Guard: entry card surfaces review state + safe actions, not a profile-
     expect(comp).toContain("unlinkFlagged");
   });
   it("does NOT render all profile skills by default (picker stays opt-in)", () => {
-    // Default list is the linked/clean chips; the full set only when `picker`.
-    expect(comp).toMatch(/picker \? availableSkills : cleanChips/);
+    // Default chip list is the linked/clean chips only; the profile catalogue
+    // renders in its own picker-gated section (owner P0 2026-07-02: never
+    // mixed into the detected-skill chip list), filtered to unlinked skills.
+    expect(comp).toMatch(/cleanChips\.map\(\(s\) => chip\(s, "on"\)\)/);
+    expect(comp).toMatch(/\{picker && \(/);
+    expect(comp).toMatch(/availableSkills\s*\n?\s*\.filter\(\(s\)\s*=>\s*!selected\.has\(s\.id\)\)/);
     expect(comp).toMatch(/setPicker/);
   });
   it("unlink is explicit (no silent overwrite of links)", () => {

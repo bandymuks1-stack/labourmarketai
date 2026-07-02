@@ -729,7 +729,8 @@
     "reviewAgain": "Peržiūrėti iš naujo",
     "unlinkFlagged": "Atsieti",
     "linkMore": "Susieti įgūdį",
-    "linkDone": "Baigta"
+    "linkDone": "Uždaryti sąrašą",
+    "pickerHint": "Jūsų profilio gebėjimai — susiekite ranka, jei tinka šiam įrašui. Tai nėra iš šio įrašo atpažinti įgūdžiai."
   },
   "reviewReport": {
     "title": "Peržiūros ataskaita",
