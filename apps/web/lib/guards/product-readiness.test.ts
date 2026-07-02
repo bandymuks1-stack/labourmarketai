@@ -1547,7 +1547,15 @@ describe("no migration files added by this sprint", () => {
     // already caps anon rows to profile_id IS NULL, SELECT stays
     // admin-only. Reversible (supabase/rollbacks/20260702150000_*.down.sql).
     // Owner-approved apply 2026-07-02.
-    const SPRINT_BASELINE = 94;
+    // Bumped 94 -> 95 for approved-route MODEL A
+    // (20260702170000_worker_demand_approved_route_model_a.sql): recreate
+    // list_open_demand_for_workers() joining companies on
+    // verification_status='verified' and projecting company_name +
+    // route_status='approved_direct_partner' — verified-company demand
+    // becomes worker-visible; unverified stays hidden. Reversible
+    // (supabase/rollbacks/20260702170000_*.down.sql restores the exact
+    // 20260614120000 definition). Owner-approved apply 2026-07-02.
+    const SPRINT_BASELINE = 95;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

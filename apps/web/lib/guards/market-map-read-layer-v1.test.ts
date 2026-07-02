@@ -117,6 +117,8 @@ describe("NO new DB migration in this PR", () => {
     // (20260702140000_worker_personal_engagement) — owner-approved apply.
     // Bumped 93 -> 94 for the pilot_events anon INSERT grant
     // (20260702150000) — owner-approved apply 2026-07-02.
-    expect(count).toBeLessThanOrEqual(94);
+    // Bumped 94 -> 95 for approved-route MODEL A (20260702170000) —
+    // owner-approved apply 2026-07-02.
+    expect(count).toBeLessThanOrEqual(95);
   });
 });
