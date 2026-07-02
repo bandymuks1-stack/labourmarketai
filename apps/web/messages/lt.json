@@ -4590,6 +4590,11 @@
     "title": "Operacijų telemetrija (v1)",
     "subtitle": "Saugūs testuotojų QA įvykiai. Read-only sąrašas. Tik administratoriai mato.",
     "loadError": "Nepavyko užkrauti įvykių: {msg}",
+    "filter": {
+      "excludeAdmins": "Slėpti administratorių įvykius",
+      "showAll": "Rodyti visus įvykius",
+      "hiddenNote": "Šiame lange paslėpta administratorių įvykių: {n}"
+    },
     "tasks": {
       "title": "Užduočių santrauka",
       "help": "Pagal task_name iš 200 paskutinių įvykių. avgMs — vidutinė trukmė tarp task_start ir task_complete (success).",
