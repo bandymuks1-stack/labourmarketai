@@ -17,7 +17,7 @@ import {
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
 import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
-import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
+import { buildEntryDetectedSignals } from "@/lib/journal/entry-detected-signals";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { buildEditingEntry } from "@/lib/journal/edit-entry";
 import {
@@ -268,15 +268,30 @@ export default async function JournalPage({
     .from("worker_skills")
     .select("skill_id, verified, skills(slug)")
     .eq("worker_id", worker.id);
+  // `slug` rides along for the render-time detected-signal computation (it is
+  // structurally invisible to the {id,name} link-UI props).
   const availableSkillsForLinks = (skillIdRows ?? [])
     .map((r) => {
       const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
       return slug && r.skill_id
-        ? { id: r.skill_id as string, name: tSkillName(slug) }
+        ? { id: r.skill_id as string, name: tSkillName(slug), slug }
         : null;
     })
-    .filter((x): x is { id: string; name: string } => x !== null)
+    .filter((x): x is { id: string; name: string; slug: string } => x !== null)
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Localized taxonomy name for a recognized slug the worker has NOT declared
+  // (render-time detected section). Missing name → null → the slug is skipped,
+  // never leaked raw into the UI (same guard shape as the composer's
+  // tSkillSafe).
+  const skillNameOf = (slug: string): string | null => {
+    try {
+      const v = tSkillName(slug);
+      return v && v !== slug && v !== `skillNames.${slug}` ? v : null;
+    } catch {
+      return null;
+    }
+  };
 
   // Real signals for the per-entry chip SOURCE (PR B): skill id → slug, and the
   // set of confirmed (verified) skill ids. The recognizable vocabulary is the
@@ -764,10 +779,19 @@ export default async function JournalPage({
                       // old link (e.g. a construction chip on a dog-walking entry) becomes
                       // "stale_needs_review" instead of clean current evidence.
                       const linkedForEntry = linksByEntry.get(e.id) ?? [];
-                      const recognizedSlugs = new Set<string>(
-                        extractJournalSuggestions(e.original_text ?? "")
-                          .skillSlugs,
-                      );
+                      // ONE render-time recognition pass per entry (pure, no DB
+                      // write): it yields the recognized slugs the stale-link
+                      // classifier consumes AND the detected section content
+                      // (owner smoke follow-up 2026-07-02 — old entries never
+                      // showed detected skills because recognition output was
+                      // compose-time only and discarded at render).
+                      const detectedForEntry = buildEntryDetectedSignals({
+                        text: e.original_text ?? "",
+                        locale,
+                        declaredSkills: availableSkillsForLinks,
+                        skillNameOf,
+                      });
+                      const recognizedSlugs = detectedForEntry.recognizedSlugs;
                       const skillSources = buildEntrySkillSources({
                         linkedSkillIds: linkedForEntry,
                         idToSlug,
@@ -793,6 +817,10 @@ export default async function JournalPage({
                                   availableSkills: availableSkillsForLinks,
                                   linkedSkillIds: linkedForEntry,
                                   skillSources,
+                                  detected: {
+                                    skills: detectedForEntry.skills,
+                                    labels: detectedForEntry.labels,
+                                  },
                                 }
                               : undefined
                           }

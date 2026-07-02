@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { classifyEntryRecognition } from "./recognition-tiers";
+import { buildEntryDetectedSignals } from "../journal/entry-detected-signals";
 
 /**
  * Work-Journal recognition guards — root-cause fix + maximal activity layer
@@ -296,6 +297,167 @@ describe("owner smoke P0 2026-07-02 — the exact owner entry is understood hone
     expect(signalsOf("rinkome grybus miške").all).not.toMatch(
       /rengin|inventori/i,
     );
+  });
+});
+
+describe("owner smoke follow-up 2026-07-02 — RENDER-TIME detected section for existing entries", () => {
+  // The entry card computes detected signals at render time from the saved
+  // text via `buildEntryDetectedSignals` (same pure pipeline as the composer —
+  // no DB write). These tests drive the EXACT helper the journal page calls,
+  // with the owner's real stale construction profile declared.
+  const ROOT = join(__dirname, "..", "..");
+  const skillNamesLT = JSON.parse(
+    readFileSync(join(ROOT, "messages/lt/skill-names.json"), "utf8"),
+  ) as Record<string, string>;
+
+  const OWNER_TEXT =
+    "Šiandien rinkome laikrodžius pasaulio lietuvių dainų šventei 5 h, " +
+    "Tvarkiau ofisą – 1 h, tęsiau programavimą projekto labour market ai – 3 h";
+
+  /** The owner's 8 stale construction profile skills, declared — exactly the
+   *  catalogue that must NEVER surface in the detected section for this text. */
+  const OWNER_PROFILE = [
+    ["s1", "blueprint-reading"],
+    ["s2", "door-window-install"],
+    ["s3", "flooring"],
+    ["s4", "formwork-carpentry"],
+    ["s5", "drainage"],
+    ["s6", "plumbing"],
+    ["s7", "timber-framing"],
+    ["s8", "ventilation"],
+  ].map(([id, slug]) => ({ id, slug, name: skillNamesLT[slug] ?? slug }));
+
+  function detectedOf(
+    text: string,
+    declared: { id: string; slug: string; name: string }[] = OWNER_PROFILE,
+  ) {
+    return buildEntryDetectedSignals({
+      text,
+      locale: "lt",
+      declaredSkills: declared,
+      skillNameOf: (slug) => skillNamesLT[slug] ?? null,
+    });
+  }
+
+  it("owner sentence → Section A yields programming + cleaning + event/inventory prep", () => {
+    const d = detectedOf(OWNER_TEXT);
+    const all = [...d.skills.map((s) => s.name), ...d.labels].join(" | ");
+    expect(all).toMatch(/programav/i); // "Programavimas"
+    expect(all).toMatch(/valym/i); // "Valymo darbai"
+    expect(all).toMatch(/rengin|inventori/i); // "Renginių / inventoriaus paruošimas"
+  });
+
+  it("owner sentence → NONE of the 8 declared construction skills in Section A", () => {
+    const d = detectedOf(OWNER_TEXT);
+    // No declared construction skill is offered as detected/linkable…
+    expect(d.skills).toHaveLength(0);
+    // …and no construction name/slug appears among the labels either.
+    const all = [...d.skills.map((s) => s.name), ...d.labels]
+      .join(" | ")
+      .toLowerCase();
+    for (const { name, slug } of OWNER_PROFILE) {
+      expect(all, `must not surface "${name}"`).not.toContain(name.toLowerCase());
+      expect(all, `must not surface slug "${slug}"`).not.toContain(slug);
+    }
+  });
+
+  it("nonsense text → EMPTY Section A (honest empty state, nothing invented)", () => {
+    for (const text of ["asdf qwerty", "xyzzy plugh 123", "aaa", "", "   "]) {
+      const d = detectedOf(text);
+      expect(d.skills, text).toHaveLength(0);
+      expect(d.labels, text).toHaveLength(0);
+    }
+  });
+
+  it("construction text still detects construction skills at render time", () => {
+    // Declared construction skill → offered as a LINKABLE detected skill.
+    const declared = detectedOf("mūrijau sieną", [
+      { id: "b1", slug: "bricklaying", name: skillNamesLT["bricklaying"] },
+    ]);
+    expect(declared.skills.map((s) => s.name)).toContain("Mūrijimas");
+    // Undeclared construction skill → surfaces as a display-only label
+    // (suggestion), never dropped and never auto-attached.
+    const undeclared = detectedOf("mūrijau sieną", []);
+    expect(undeclared.skills).toHaveLength(0);
+    expect(undeclared.labels.join(" | ")).toMatch(/mūrij/i);
+  });
+
+  it("recognizedSlugs still feed the stale-link classifier from the same pass", () => {
+    const d = detectedOf("Klijavau plyteles ir glaisčiau sienas 8 h");
+    expect([...d.recognizedSlugs]).toContain("tiling");
+  });
+});
+
+describe("owner smoke follow-up 2026-07-02 — profile catalogue collapsed, detected section first", () => {
+  const ROOT = join(__dirname, "..", "..");
+  const links = readFileSync(
+    join(ROOT, "components/app/journal-entry-skill-links.tsx"),
+    "utf8",
+  );
+
+  it("the manual profile-skill picker is COLLAPSED by default", () => {
+    expect(links).toContain("const [picker, setPicker] = useState(false)");
+  });
+
+  it("the profile catalogue renders ONLY inside the opened picker state", () => {
+    // The catalogue map over availableSkills lives inside the `{picker && (`
+    // gated section — with the #579 pickerHint — never unconditionally.
+    const gate = links.indexOf("{picker && (");
+    expect(gate).toBeGreaterThan(-1);
+    const catalogue = links.search(
+      /availableSkills\s*\n\s*\.filter\(\(s\) => !selected\.has\(s\.id\)\)/,
+    );
+    expect(catalogue).toBeGreaterThan(gate);
+    const hint = links.indexOf('t("pickerHint")');
+    expect(hint).toBeGreaterThan(gate);
+    expect(hint).toBeLessThan(catalogue);
+  });
+
+  it("the detected section renders BEFORE the picker section", () => {
+    // Main card layout: linked chips → detected (Section A) → picker toggle →
+    // picker (Section B). lastIndexOf skips the zero-profile-skills early
+    // return, which also renders the detected section.
+    const detectedAt = links.lastIndexOf("entry-skill-detected-${entryId}");
+    const toggleAt = links.indexOf("entry-skill-picker-toggle-${entryId}");
+    const pickerAt = links.indexOf("entry-skill-picker-${entryId}");
+    expect(detectedAt).toBeGreaterThan(-1);
+    expect(toggleAt).toBeGreaterThan(detectedAt);
+    expect(pickerAt).toBeGreaterThan(toggleAt);
+  });
+
+  it("Section A has an honest empty state and never substitutes the catalogue", () => {
+    expect(links).toMatch(/t\("detectedEmpty"\)/);
+    expect(links).toMatch(/t\("detectedHeading"\)/);
+    // Empty state is the ternary alternative of the detected chips — the
+    // catalogue (picker) is a separate, still-collapsed section.
+    expect(links).toMatch(/hasDetected \? \(/);
+  });
+
+  it("detected chips are never auto-attached (display-only labels + explicit toggle)", () => {
+    // Labels render as plain <span>, not buttons; linkable detected skills
+    // reuse the existing explicit chip toggle (worker click → persist).
+    expect(links).toMatch(/entry-skill-detected-label-\$\{entryId\}/);
+    const labelBlock = links.slice(
+      links.lastIndexOf("entry-skill-detected-label-${entryId}") - 400,
+      links.lastIndexOf("entry-skill-detected-label-${entryId}"),
+    );
+    expect(labelBlock).toContain("<span");
+    expect(labelBlock).not.toContain("onClick");
+  });
+
+  it("section i18n exists in lt/en/ru with the agreed collapse-button copy", () => {
+    for (const [loc, linkMore] of [
+      ["lt", "Pasirinkti iš mano profilio įgūdžių"],
+      ["en", "Choose from my profile skills"],
+      ["ru", "Выбрать из навыков моего профиля"],
+    ] as const) {
+      const messages = JSON.parse(
+        readFileSync(join(ROOT, `messages/${loc}.json`), "utf8"),
+      ) as { journalSkillLinks: Record<string, string> };
+      expect(messages.journalSkillLinks.linkMore).toBe(linkMore);
+      expect(messages.journalSkillLinks.detectedHeading).toBeTruthy();
+      expect(messages.journalSkillLinks.detectedEmpty).toBeTruthy();
+    }
   });
 });
 

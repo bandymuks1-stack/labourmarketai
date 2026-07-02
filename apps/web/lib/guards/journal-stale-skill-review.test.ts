@@ -55,7 +55,12 @@ describe("Guard: journal page computes a real per-entry chip source", () => {
     expect(page).toMatch(/select\(\s*["']skill_id,\s*verified,\s*skills\(slug\)["']/);
   });
   it("recognizes skills from THIS entry's real text", () => {
-    expect(page).toContain("extractJournalSuggestions(e.original_text");
+    // One render-time recognition pass per entry: buildEntryDetectedSignals
+    // wraps the same pure pipeline (classifyEntryRecognition →
+    // extractJournalSuggestions) and feeds BOTH the stale-link classifier and
+    // the detected section from the entry's saved text.
+    expect(page).toContain("buildEntryDetectedSignals({");
+    expect(page).toContain("text: e.original_text ?? \"\"");
     expect(page).toContain("buildEntrySkillSources");
   });
   it("passes the per-entry sources into the skill-link UI", () => {

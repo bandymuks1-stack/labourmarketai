@@ -34,6 +34,9 @@ export function JournalEntryRow({
     linkedSkillIds: string[];
     /** Per-entry honest source for each linked skill id (stale-skill review). */
     skillSources?: Record<string, EntrySkillSource>;
+    /** Render-time detected signals from THIS entry's text (display-only
+     *  suggestions computed by the server page — no DB write). */
+    detected?: { skills: { id: string; name: string }[]; labels: string[] };
   };
   /** Status zone (decision timeline + date) shown at the BOTTOM of the card —
    *  secondary to the entry text + understood signals, so the worker scans
@@ -72,6 +75,7 @@ export function JournalEntryRow({
           availableSkills={skillLinks.availableSkills}
           linkedSkillIds={skillLinks.linkedSkillIds}
           skillSources={skillLinks.skillSources}
+          detected={skillLinks.detected}
         />
       )}
       {/* Status zone — secondary, below the signals. */}

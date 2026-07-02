@@ -38,6 +38,7 @@ export function JournalEntrySkillLinks({
   availableSkills,
   linkedSkillIds,
   skillSources,
+  detected,
 }: {
   entryId: string;
   availableSkills: { id: string; name: string }[];
@@ -45,6 +46,13 @@ export function JournalEntrySkillLinks({
   /** Per-entry honest source for each linked skill id. Missing → treated as an
    *  honest manual link (never auto-flagged). */
   skillSources?: Record<string, EntrySkillSource>;
+  /** Render-time detected signals grounded in THIS entry's text (computed by
+   *  the server page from the same pure recognition pipeline the composer
+   *  uses — no DB write, no auto-attach). `skills` are detected skills the
+   *  worker has DECLARED (linkable in place via the existing chip toggle);
+   *  `labels` are display-only detected capability labels. Suggestions only,
+   *  never facts. Omitted → the detected section is not rendered. */
+  detected?: { skills: { id: string; name: string }[]; labels: string[] };
 }) {
   const t = useTranslations("journalSkillLinks");
   const [selected, setSelected] = useState<Set<string>>(
@@ -78,17 +86,63 @@ export function JournalEntrySkillLinks({
   const reviewChips = linkedSelected.filter((s) => needsReview(sourceOf(s.id)));
   const cleanChips = linkedSelected.filter((s) => !needsReview(sourceOf(s.id)));
 
+  // Section A (detected from THIS entry's text) — derived, display-only.
+  // Detected+declared skills already linked render in the linked list above
+  // (user-chosen facts), so they are filtered out here; detected labels that
+  // duplicate a visible chip name are dropped too. Never auto-attached.
+  const detectedLinkable = (detected?.skills ?? []).filter(
+    (s) => !selected.has(s.id),
+  );
+  const linkedNames = new Set(linkedSelected.map((s) => s.name));
+  const detectedLabels = (detected?.labels ?? []).filter(
+    (l) => !linkedNames.has(l) && !detectedLinkable.some((s) => s.name === l),
+  );
+  const hasDetected = detectedLinkable.length > 0 || detectedLabels.length > 0;
+
   if (availableSkills.length === 0) {
     return (
-      <p className="mt-2 text-[11px] text-text-muted">
-        {t("none")}{" "}
-        <Link
-          href="/dashboard/profile"
-          className="text-brand-blue hover:text-brand-cyan"
-        >
-          {t("profileLink")} →
-        </Link>
-      </p>
+      <div className="mt-2 flex flex-col gap-1.5 border-t border-border/40 pt-2">
+        {detected && (
+          <div
+            className="flex flex-col gap-1"
+            data-testid={`entry-skill-detected-${entryId}`}
+          >
+            <p className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+              {t("detectedHeading")}
+            </p>
+            {detectedLabels.length > 0 ? (
+              <ul className="flex flex-wrap gap-1">
+                {detectedLabels.map((label) => (
+                  <li key={label}>
+                    <span
+                      className="inline-block rounded-full border border-ink-500/70 px-2 py-0.5 text-[10px] text-text-secondary"
+                      data-testid={`entry-skill-detected-label-${entryId}`}
+                    >
+                      {label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p
+                className="text-[10px] leading-relaxed text-text-muted"
+                data-testid={`entry-skill-detected-empty-${entryId}`}
+              >
+                {t("detectedEmpty")}
+              </p>
+            )}
+          </div>
+        )}
+        <p className="text-[11px] text-text-muted">
+          {t("none")}{" "}
+          <Link
+            href="/dashboard/profile"
+            className="text-brand-blue hover:text-brand-cyan"
+          >
+            {t("profileLink")} →
+          </Link>
+        </p>
+      </div>
     );
   }
 
@@ -169,9 +223,51 @@ export function JournalEntrySkillLinks({
         {cleanChips.map((s) => chip(s, "on"))}
       </ul>
 
-      {/* Disclosure to open/close the full profile-skill picker. Rendered
-          OUTSIDE the chip list as a plain text action — a UI control must not
-          look like a skill chip (owner P0: the "Baigta" chip). */}
+      {/* SECTION A — skills detected from THIS entry's text at render time
+          (same pure recognition pipeline as the composer; no DB write, no
+          auto-attach). Detected skills the worker has DECLARED reuse the
+          existing link-toggle chip; other detected labels are display-only
+          suggestions. Honest empty state when nothing is confidently
+          detected — the profile catalogue must NEVER stand in for this. */}
+      {detected && (
+        <div
+          className="flex flex-col gap-1"
+          data-testid={`entry-skill-detected-${entryId}`}
+        >
+          <p className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            {t("detectedHeading")}
+          </p>
+          {hasDetected ? (
+            <ul className="flex flex-wrap gap-1">
+              {detectedLinkable.map((s) => chip(s, "off"))}
+              {detectedLabels.map((label) => (
+                <li key={label}>
+                  <span
+                    className="inline-block rounded-full border border-ink-500/70 px-2 py-0.5 text-[10px] text-text-secondary"
+                    data-testid={`entry-skill-detected-label-${entryId}`}
+                  >
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p
+              className="text-[10px] leading-relaxed text-text-muted"
+              data-testid={`entry-skill-detected-empty-${entryId}`}
+            >
+              {t("detectedEmpty")}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* SECTION B — manual profile-skill picker, COLLAPSED by default. The
+          disclosure button names the section honestly ("Pasirinkti iš mano
+          profilio įgūdžių"), rendered OUTSIDE the chip lists as a plain text
+          action — a UI control must not look like a skill chip (owner P0:
+          the "Baigta" chip). Historical profile skills render ONLY after the
+          worker opens this picker. */}
       {(availableSkills.some((s) => !selected.has(s.id)) || picker) && (
         <button
           type="button"
@@ -184,10 +280,11 @@ export function JournalEntrySkillLinks({
         </button>
       )}
 
-      {/* Manual-association picker: the worker's OWN profile skills (their
-          whole catalogue), for optional hand-linking to this entry. Explicitly
-          labelled so it is never mistaken for skills detected in this entry.
-          Chips already linked stay in the clean list above. */}
+      {/* Manual-association picker (open state): the worker's OWN profile
+          skills (their whole catalogue), for optional hand-linking to this
+          entry. Explicitly labelled so it is never mistaken for skills
+          detected in this entry. Chips already linked stay in the clean list
+          above. */}
       {picker && (
         <div
           className="flex flex-col gap-1"
