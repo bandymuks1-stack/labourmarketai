@@ -111,6 +111,8 @@ describe("NO new DB migration in this PR", () => {
     // additive RED migration, human-gated, NOT applied (previous: 86 for W8
     // service_offerings). The read layer itself adds no migration; the global
     // baseline only grows deliberately.
-    expect(count).toBeLessThanOrEqual(91);
+    // Bumped 91 -> 92 for the P0 admin self-promotion guard
+    // (20260702130000_admin_grant_guard) — human-gated, NOT applied.
+    expect(count).toBeLessThanOrEqual(92);
   });
 });

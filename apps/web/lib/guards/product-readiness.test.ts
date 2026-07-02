@@ -1528,7 +1528,14 @@ describe("no migration files added by this sprint", () => {
     // Reversible + guarded
     // (supabase/rollbacks/20260627181500_service_requests_seen.down.sql). NOT
     // applied — human-gated for owner.
-    const SPRINT_BASELINE = 91;
+    // Bumped 91 -> 92 for the P0 admin self-promotion guard
+    // (20260702130000_admin_grant_guard.sql): BEFORE triggers on
+    // profiles.active_role / profile_roles.role raising 42501 when a
+    // JWT-bearing non-admin sets the admin value (closes the self-promotion
+    // hole; service-role grant script unaffected). Reversible
+    // (supabase/rollbacks/20260702130000_admin_grant_guard.down.sql). NOT
+    // applied — human-gated for owner.
+    const SPRINT_BASELINE = 92;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
