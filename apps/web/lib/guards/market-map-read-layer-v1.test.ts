@@ -112,7 +112,9 @@ describe("NO new DB migration in this PR", () => {
     // service_offerings). The read layer itself adds no migration; the global
     // baseline only grows deliberately.
     // Bumped 91 -> 92 for the P0 admin self-promotion guard
-    // (20260702130000_admin_grant_guard) — human-gated, NOT applied.
-    expect(count).toBeLessThanOrEqual(92);
+    // (20260702130000_admin_grant_guard) — APPLIED to prod via MCP 2026-07-02.
+    // Bumped 92 -> 93 for the worker personal-engagement provisioning draft
+    // (20260702140000_worker_personal_engagement) — owner-approved apply.
+    expect(count).toBeLessThanOrEqual(93);
   });
 });

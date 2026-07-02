@@ -1533,9 +1533,15 @@ describe("no migration files added by this sprint", () => {
     // profiles.active_role / profile_roles.role raising 42501 when a
     // JWT-bearing non-admin sets the admin value (closes the self-promotion
     // hole; service-role grant script unaffected). Reversible
-    // (supabase/rollbacks/20260702130000_admin_grant_guard.down.sql). NOT
-    // applied — human-gated for owner.
-    const SPRINT_BASELINE = 92;
+    // (supabase/rollbacks/20260702130000_admin_grant_guard.down.sql).
+    // APPLIED to prod via MCP 2026-07-02 after owner approval.
+    // Bumped 92 -> 93 for the worker personal-engagement provisioning
+    // (20260702140000_worker_personal_engagement.sql): AFTER INSERT trigger
+    // on workers + idempotent 0013-shape backfill so every worker gets a
+    // personal 'employee' engagement and the journal opens on first session.
+    // Reversible (supabase/rollbacks/20260702140000_*.down.sql).
+    // Owner-approved apply 2026-07-02.
+    const SPRINT_BASELINE = 93;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
