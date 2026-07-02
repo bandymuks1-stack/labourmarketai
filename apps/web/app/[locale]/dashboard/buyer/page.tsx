@@ -238,7 +238,7 @@ export default async function BuyerDashboardPage({
             ← {t("backToActions")}
           </Link>
           <Link
-            href="/dashboard/account"
+            href="/dashboard"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
             data-testid="room-my-spaces-link"
           >

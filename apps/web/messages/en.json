@@ -199,6 +199,7 @@
   "spaces": {
     "current": "Current space",
     "mySpaces": "My spaces",
+    "openSpace": "Open space",
     "switchSpace": "Switch space",
     "addSpace": "Add space",
     "availableSpaces": "Available spaces",
