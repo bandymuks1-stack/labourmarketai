@@ -1830,7 +1830,7 @@
     "companyVerification": {
       "eyebrow": "COMPANY VERIFICATION",
       "title": "Company verification requests",
-      "subtitle": "Exception / escalation review. Companies are created and usable automatically — this is NOT an approval queue. Use it to verify on request, fix flagged checks, or override a suspicious company. Verification is a manual human decision; nothing is verified automatically.",
+      "subtitle": "Exception / escalation review. Companies are created and usable automatically — this is NOT an approval queue. Use it to verify on request, fix flagged checks, or override a suspicious company. Verification is a manual human decision; nothing becomes verified without a human.",
       "back": "Back to operations panel",
       "empty": "Nothing needs admin attention right now. Companies are usable without admin action.",
       "migrationBlocker": "Couldn’t complete the action. Please try again.",
@@ -1949,7 +1949,7 @@
       },
       "suggestions": {
         "title": "Rule-based shortlist",
-        "humanRule": "Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "humanRule": "Ordered by real evidence (filters matched, confirmed skills, manager confirmations) — no computed score; the human decides.",
         "start": "Start conversation",
         "reasons": {
           "country_match": "In country",

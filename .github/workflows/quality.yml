@@ -58,6 +58,19 @@ jobs:
       - name: Placeholder governance check
         run: pnpm placeholders:check
 
+      # Honesty-copy gates (audit F-Q3): these scripts existed but were wired
+      # into neither CI nor vitest — regressions shipped unless someone
+      # remembered to run them by hand. Secret-free, same class as
+      # placeholders:check.
+      - name: Fit-signal copy guard (SR-6)
+        run: pnpm -F web check:fit-signal-copy
+
+      - name: Pilot honesty copy guard (SR-2)
+        run: pnpm -F web check:pilot-honesty-copy
+
+      - name: Pricing honesty copy guard (SR-5)
+        run: pnpm -F web check:pricing-honesty-copy
+
       - name: Primary route smoke / dead-UI guard
         run: pnpm check:primary-route-smoke
 
