@@ -49,6 +49,10 @@ export async function reviewJournalEntry(
   const locale = String(formData.get("locale") ?? "lt");
 
   if (entryId === "") return { ok: false, code: "error", message: "entry_id required" };
+  // Bounded free text: the note is stored uncapped by the 0034 RPC.
+  if (note && note.length > 2000) {
+    return { ok: false, code: "error", message: "note too long (max 2000 chars)" };
+  }
   if (!(REVIEW_DECISIONS as readonly string[]).includes(decisionRaw)) {
     return { ok: false, code: "invalid_decision" };
   }

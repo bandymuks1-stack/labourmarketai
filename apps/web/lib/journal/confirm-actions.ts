@@ -193,6 +193,8 @@ export async function rejectEntry(formData: FormData): Promise<void> {
   const reason = String(formData.get("reason") ?? "").trim();
   const locale = String(formData.get("locale") ?? "lt");
   if (!entryId) throw new Error("entry_id required");
+  // Bounded free text: the reason lands in jsonb with no DB-side cap.
+  if (reason.length > 2000) throw new Error("reason too long (max 2000 chars)");
 
   const supabase = await createClient();
   const {

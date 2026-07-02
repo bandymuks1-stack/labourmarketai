@@ -37,6 +37,7 @@ export type CommunicationErrorCode =
 const SUBJECT_MAX = 240;
 const BODY_MIN = 1;
 const BODY_MAX = 10000;
+const MAX_PARTICIPANTS = 20;
 
 // The generated Supabase Database type doesn't include the v1 tables
 // until `pnpm db:types` is regenerated after 0021. Cast through `any`
@@ -76,6 +77,20 @@ export async function createConversation(input: {
     };
   }
 
+  // Bounded fan-out: creator-adds are RLS-permitted by design, so cap the
+  // participant count to keep the surface unusable for bulk spam. Checked
+  // BEFORE the conversation insert so a rejected request leaves no row.
+  const requestedParticipants = (input.participantProfileIds ?? []).filter(
+    (id) => id && id !== user.id,
+  );
+  if (requestedParticipants.length > MAX_PARTICIPANTS) {
+    return {
+      ok: false,
+      code: "invalid_input",
+      message: `Per daug dalyvių (daugiausia ${MAX_PARTICIPANTS}).`,
+    };
+  }
+
   // 1) Insert the conversation. created_by = auth.uid() is enforced by RLS.
   const insertConv = await asAny(supabase)
     .from("conversations")
@@ -96,13 +111,11 @@ export async function createConversation(input: {
   //    the conversation's `created_by`.
   const participantRows = [
     { conversation_id: conversationId, profile_id: user.id, added_by: user.id },
-    ...(input.participantProfileIds ?? [])
-      .filter((id) => id && id !== user.id)
-      .map((id) => ({
-        conversation_id: conversationId,
-        profile_id: id,
-        added_by: user.id,
-      })),
+    ...requestedParticipants.map((id) => ({
+      conversation_id: conversationId,
+      profile_id: id,
+      added_by: user.id,
+    })),
   ];
   const insertPart = await asAny(supabase)
     .from("conversation_participants")
