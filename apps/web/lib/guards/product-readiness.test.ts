@@ -1528,7 +1528,14 @@ describe("no migration files added by this sprint", () => {
     // Reversible + guarded
     // (supabase/rollbacks/20260627181500_service_requests_seen.down.sql). NOT
     // applied — human-gated for owner.
-    const SPRINT_BASELINE = 91;
+    // Bumped 91 -> 92 for the worker personal-engagement provisioning draft
+    // (20260702140000_worker_personal_engagement.sql): AFTER INSERT trigger
+    // on workers + idempotent 0013-shape backfill so every worker gets a
+    // personal 'employee' engagement and the journal opens on first session.
+    // Reversible (supabase/rollbacks/20260702140000_*.down.sql). NOT
+    // applied — human-gated for owner. NOTE: the parallel admin-grant-guard
+    // draft PR also bumps to 92; whichever merges second must set 93.
+    const SPRINT_BASELINE = 92;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

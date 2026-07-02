@@ -203,6 +203,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // additive RED: one-row-per-user seen table (user_id pk + seen_at) own-row-only
     // RLS + SELECT grant, writes RPC-only, + ONE SECURITY DEFINER upsert RPC
     // mark_service_requests_seen(); no profile change, no PII; NOT applied).
-    expect(guard).toMatch(/SPRINT_BASELINE = 91/);
+    // then to 92 for worker personal-engagement provisioning (20260702140000;
+    // additive RED: AFTER INSERT trigger on workers + idempotent 0013-shape
+    // backfill so the journal opens for every worker's first session; NOT
+    // applied, human-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 92/);
   });
 });

@@ -111,6 +111,10 @@ describe("NO new DB migration in this PR", () => {
     // additive RED migration, human-gated, NOT applied (previous: 86 for W8
     // service_offerings). The read layer itself adds no migration; the global
     // baseline only grows deliberately.
-    expect(count).toBeLessThanOrEqual(91);
+    // Bumped 91 -> 92 for the worker personal-engagement provisioning draft
+    // (20260702140000_worker_personal_engagement) — human-gated, NOT applied.
+    // NOTE: the parallel draft PR for 20260702130000_admin_grant_guard also
+    // bumps to 92; whichever merges second must set 93.
+    expect(count).toBeLessThanOrEqual(92);
   });
 });
