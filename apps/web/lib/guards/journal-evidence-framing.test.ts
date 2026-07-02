@@ -3,13 +3,15 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Journal → "Mano CV" framing guard (slice journal-evidence-v1, reframed in
- * fix/cv).
+ * Journal framing guard (slice journal-evidence-v1, reframed in fix/cv,
+ * re-titled in cv-workspace-ia).
  *
- * The worker-facing Work Journal must read as the worker's simple CV that
- * strengthens the work card — NOT as bureaucratic "evidence/įrodymai" and not a
- * technical journal/draft module. Pins:
- *   - the surface is framed as the worker's CV + connected to the work card,
+ * The worker-facing Work Journal must read as the worker's simple work records
+ * that strengthen the work card and feed the CV — NOT as bureaucratic
+ * "evidence/įrodymai", not a technical journal/draft module, and not a second
+ * surface titled "Mano CV" (only /cv carries that title). Pins:
+ *   - the surface is framed as the worker's work records + connected to the
+ *     work card,
  *   - worker-facing copy carries no heavy draft/module/pipeline wording,
  *   - the benefit line is honest (adding to the CV is NOT automatic verification),
  *   - one primary CTA on the journal entry surface.
@@ -35,15 +37,17 @@ const WORKER_KEYS = [
   "whatDidYouDo",
 ] as const;
 
-describe("journal is framed as the worker's CV connected to the work card", () => {
-  it("LT title reads as CV (not 'įrodymai'); subtitle + benefit name the work card", () => {
-    expect(ltJ.navTitle).toMatch(/cv/i);
+describe("journal is framed as the worker's work records connected to the work card", () => {
+  it("LT title reads as work records (not 'įrodymai', not a second 'Mano CV')", () => {
+    expect(ltJ.navTitle).toMatch(/darbo įraš/i);
+    expect(ltJ.navTitle).not.toMatch(/cv/i);
     expect(ltJ.navTitle).not.toMatch(/įrodym/i);
     expect(ltJ.navSubtitle).toMatch(/darbo kortel/i);
     expect(ltJ.composerBenefit).toMatch(/darbo kortel/i);
   });
-  it("EN title reads as CV (not 'evidence'); subtitle + benefit name the work card", () => {
-    expect(enJ.navTitle).toMatch(/cv/i);
+  it("EN title reads as work records (not 'evidence', not a second 'My CV')", () => {
+    expect(enJ.navTitle).toMatch(/work record/i);
+    expect(enJ.navTitle).not.toMatch(/cv/i);
     expect(enJ.navTitle).not.toMatch(/evidence/i);
     expect(enJ.navSubtitle).toMatch(/work card/i);
     expect(enJ.composerBenefit).toMatch(/work card/i);

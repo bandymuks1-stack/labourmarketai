@@ -7,9 +7,10 @@ import { join } from "node:path";
  *
  * Normal users see simple CV-building language, not technical evidence /
  * provenance wording. Pins:
- *   - the worker's professional-record page reads as "Mano CV", and the
- *     primary tab is the human work-journal action ("Darbo žurnalas",
- *     action-first IA v1) — never "Mano darbo įrodymai" / "Darbo įrodymai"
+ *   - the work-journal page reads as the worker's work records ("Darbo
+ *     įrašai", cv-workspace-ia: the /cv page is the ONLY surface titled
+ *     "Mano CV"), and the primary tab is the human work-journal action
+ *     ("Darbo žurnalas") — never "Mano darbo įrodymai" / "Darbo įrodymai"
  *     (or EN/RU evidence equivalents);
  *   - the composer skill-suggestion heading is friendly ("Siūlomi įgūdžiai"),
  *     with one honest friendly note, not a "self-declared" provenance triad;
@@ -31,8 +32,7 @@ describe("Guard: worker professional record reads as 'CV', not 'evidence'", () =
 
   it("nav tab (tabs.journal) is the human work-journal action, not evidence wording", () => {
     // Action-first IA v1: the primary tab is "Darbo žurnalas" (the work-record
-    // ACTION), while the page H1 stays "Mano CV" (the result). Either way it must
-    // never read as technical "evidence/įrodymai".
+    // ACTION). It must never read as technical "evidence/įrodymai".
     for (const loc of LOCS) {
       const v = base(loc).auth.dashboard.tabs.journal as string;
       expect(v, `${loc}.tabs.journal non-empty`).toBeTruthy();
@@ -40,10 +40,14 @@ describe("Guard: worker professional record reads as 'CV', not 'evidence'", () =
     }
   });
 
-  it("page H1 (journal.navTitle) is CV, not evidence", () => {
+  it("page H1 (journal.navTitle) is the work-records surface, not a second 'Mano CV'", () => {
+    // cv-workspace-ia: the journal is the source that FEEDS the CV; only the
+    // /cv page carries the "Mano CV" title. The journal H1 must not read as
+    // CV or as technical evidence wording.
     for (const loc of LOCS) {
       const v = journalNs(loc).navTitle;
-      expect(v, `${loc} journal.navTitle`).toMatch(CV);
+      expect(v, `${loc} journal.navTitle non-empty`).toBeTruthy();
+      expect(v, `${loc} journal.navTitle must not be CV-titled`).not.toMatch(CV);
       expect(v, `${loc} journal.navTitle must not say evidence`).not.toMatch(EVIDENCE);
     }
   });

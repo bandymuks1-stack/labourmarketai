@@ -146,6 +146,24 @@ export default async function VerifiedCvPage({
           </dl>
         </header>
 
+        {/* Built-from explainer (cv-workspace-ia): one short, honest block that
+            tells the worker what this CV is assembled from and who can see it.
+            Screen-only (print:hidden) so the exported/printed CV stays clean. */}
+        <section
+          className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 print:hidden"
+          data-testid="cv-built-from"
+        >
+          <p className="text-sm text-zinc-700">{t("builtFrom.lead")}</p>
+          <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-zinc-600">
+            <li>{t("builtFrom.profile")}</li>
+            <li>{t("builtFrom.skills")}</li>
+            <li>{t("builtFrom.records")}</li>
+          </ul>
+          <p className="mt-2 text-xs text-zinc-500" data-testid="cv-built-from-privacy">
+            {t("builtFrom.privacy")}
+          </p>
+        </section>
+
         {/* Professional summary — the worker's OWN self-written text
             (profiles.profile_text). Self-declared, never verified. Omitted
             entirely when empty so the print CV stays clean. */}

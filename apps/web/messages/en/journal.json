@@ -1,5 +1,6 @@
 {
   "cvBridge": "{confirmed} of {total} entries reviewed — reviewed work shows on your CV.",
+  "cvBridgeEmpty": "No entries yet — work records you create here will feed your CV.",
   "cvBridgeLink": "Open CV",
   "noContext": {
     "none": "No active work context yet. When an organization invites you to its team and adds you, your work records opens here.",
@@ -48,7 +49,7 @@
   "savedBody": "Your saved details were added to your work history.",
   "savedBodyWithDetails": "Saved to your work history with {count} structured detail(s).",
   "savedConfirmNote": "Entry is private.",
-  "whoCanConfirm": "Entries are visible only to you.",
+  "whoCanConfirm": "Entries are visible only to you until you choose otherwise. Skills you link to entries feed your CV.",
   "savedSeeEntries": "See your entries",
   "savedOpenProfile": "Open your profile",
   "pilotBackboneNote": "Your entries are private until you choose otherwise. The review layer is shown only when there is a real review.",
@@ -90,7 +91,7 @@
     "timeline": {
       "title": "What happened with this entry",
       "created": "Record created",
-      "waiting": "Waiting for human review",
+      "waiting": "Waiting for a human to review it — your organisation's manager or owner can review it; until then it stays the record you entered",
       "approved": "Reviewed",
       "changes_requested": "Changes requested",
       "rejected": "Returned",
@@ -217,7 +218,7 @@
   "listEmptyNext": "Create your first entry below — it stays private until you submit it.",
   "listEmptyCta": "Create your first entry",
   "listTitle": "Work entries",
-  "navTitle": "My CV",
+  "navTitle": "Work records",
   "navSubtitle": "Show what you did — it strengthens your work card.",
   "composerBenefit": "This entry strengthens your work card.",
   "newEntry": "New entry",

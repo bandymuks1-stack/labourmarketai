@@ -1,5 +1,6 @@
 {
   "cvBridge": "{confirmed} iš {total} įrašų peržiūrėta — peržiūrėti darbo įrašai matomi jūsų CV.",
+  "cvBridgeEmpty": "Įrašų dar nėra — čia sukurti darbo įrašai pildys jūsų CV.",
   "cvBridgeLink": "Atidaryti CV",
   "noContext": {
     "none": "Kol kas nėra aktyvaus darbo konteksto. Kai organizacija pakvies jus į komandą ir pridės, jūsų darbo įrašai atsidarys čia.",
@@ -48,7 +49,7 @@
   "savedBody": "Jūsų išsaugoti duomenys pridėti prie darbo istorijos.",
   "savedBodyWithDetails": "Išsaugota darbo istorijoje su {count} struktūruota (-omis) detale (-ėmis).",
   "savedConfirmNote": "Įrašas privatus.",
-  "whoCanConfirm": "Įrašai matomi tik tau.",
+  "whoCanConfirm": "Įrašai matomi tik jums, kol patys nepasirenkate kitaip. Su įrašais susieti įgūdžiai pildo jūsų CV.",
   "savedSeeEntries": "Žiūrėti įrašus",
   "savedOpenProfile": "Atidaryti profilį",
   "pilotBackboneNote": "Įrašai privatūs, kol nepasirinksite kitaip. Peržiūros sluoksnis rodomas tik kai yra reali peržiūra.",
@@ -90,7 +91,7 @@
     "timeline": {
       "title": "Kas įvyko su šiuo įrašu",
       "created": "Įrašas sukurtas",
-      "waiting": "Laukia žmogaus peržiūros",
+      "waiting": "Laukia žmogaus peržiūros — peržiūrėti gali jūsų organizacijos vadovas ar savininkas; iki tol tai lieka jūsų nurodytas įrašas",
       "approved": "Peržiūrėta",
       "changes_requested": "Paprašyta pataisymų",
       "rejected": "Grąžinta",
@@ -217,7 +218,7 @@
   "listEmptyNext": "Sukurkite pirmą įrašą žemiau — jis lieka privatus, kol jį pateiksite.",
   "listEmptyCta": "Sukurti pirmą įrašą",
   "listTitle": "Darbo įrašai",
-  "navTitle": "Mano CV",
+  "navTitle": "Darbo įrašai",
   "navSubtitle": "Parodykite, ką dirbote — taip stiprėja jūsų darbo kortelė.",
   "composerBenefit": "Šis įrašas sustiprina jūsų darbo kortelę.",
   "newEntry": "Naujas įrašas",
