@@ -274,6 +274,12 @@ export function MarketMapCapture({
                   setPCountry("");
                   setPPriority("secondary");
                   setPNote("");
+                } else {
+                  // Failed attempt ≠ abandoned attempt (audit F-T5).
+                  trackFunnel(FUNNEL_EVENTS.preferredLocationSaved, {
+                    surface: "market_map",
+                    success: false,
+                  });
                 }
                 return r;
               }, "preferred.added");

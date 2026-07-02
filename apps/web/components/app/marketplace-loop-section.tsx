@@ -122,13 +122,17 @@ export function MarketplaceLoopSection({
   function run(
     action: () => Promise<{ kind: string }>,
     onOk?: () => void,
+    onFail?: () => void,
   ) {
     setError(null);
     startTransition(async () => {
       const res = await action();
       if (res.kind === "duplicate") setError(labels.duplicate);
-      else if (res.kind !== "ok") setError(labels.errorGeneric);
-      else onOk?.();
+      else if (res.kind !== "ok") {
+        setError(labels.errorGeneric);
+        // Failed attempt ≠ abandoned attempt (audit F-T5).
+        onFail?.();
+      } else onOk?.();
       router.refresh();
     });
   }
@@ -196,6 +200,11 @@ export function MarketplaceLoopSection({
                           trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
                             surface: "marketplace",
                             success: true,
+                          }),
+                        () =>
+                          trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+                            surface: "marketplace",
+                            success: false,
                           }),
                       );
                     }}
