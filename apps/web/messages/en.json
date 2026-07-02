@@ -729,9 +729,11 @@
     "reviewHide": "Hide",
     "reviewAgain": "Review again",
     "unlinkFlagged": "Unlink",
-    "linkMore": "Link a skill",
+    "linkMore": "Choose from my profile skills",
     "linkDone": "Close list",
-    "pickerHint": "Your profile skills — link by hand if they fit this entry. These were not detected from this entry."
+    "pickerHint": "Your profile skills — link by hand if they fit this entry. These were not detected from this entry.",
+    "detectedHeading": "Skills recognized from this entry",
+    "detectedEmpty": "No skills were recognized from this entry's text. You can link a skill by hand."
   },
   "reviewReport": {
     "title": "Review report",

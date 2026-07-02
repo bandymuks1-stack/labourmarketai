@@ -729,9 +729,11 @@
     "reviewHide": "Slėpti",
     "reviewAgain": "Peržiūrėti iš naujo",
     "unlinkFlagged": "Atsieti",
-    "linkMore": "Susieti įgūdį",
+    "linkMore": "Pasirinkti iš mano profilio įgūdžių",
     "linkDone": "Uždaryti sąrašą",
-    "pickerHint": "Jūsų profilio gebėjimai — susiekite ranka, jei tinka šiam įrašui. Tai nėra iš šio įrašo atpažinti įgūdžiai."
+    "pickerHint": "Jūsų profilio gebėjimai — susiekite ranka, jei tinka šiam įrašui. Tai nėra iš šio įrašo atpažinti įgūdžiai.",
+    "detectedHeading": "Pagal šį įrašą atpažinti įgūdžiai",
+    "detectedEmpty": "Iš šio įrašo teksto įgūdžių atpažinti nepavyko. Galite susieti įgūdį ranka."
   },
   "reviewReport": {
     "title": "Peržiūros ataskaita",
