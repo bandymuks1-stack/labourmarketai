@@ -1528,7 +1528,15 @@ describe("no migration files added by this sprint", () => {
     // Reversible + guarded
     // (supabase/rollbacks/20260627181500_service_requests_seen.down.sql). NOT
     // applied — human-gated for owner.
-    const SPRINT_BASELINE = 91;
+    // Bumped 91 -> 92 for the pilot_events anon INSERT grant draft
+    // (20260702150000_pilot_events_anon_insert_grant.sql): ONE insert-only
+    // grant to anon so pre-auth login_started events land; RLS (0020)
+    // already caps anon rows to profile_id IS NULL, SELECT stays
+    // admin-only. Reversible (supabase/rollbacks/20260702150000_*.down.sql).
+    // NOT applied — human-gated for owner. NOTE: the parallel
+    // admin-grant-guard and worker-personal-engagement draft PRs each also
+    // bump to 92; after all three merge the ratchets must read 94.
+    const SPRINT_BASELINE = 92;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

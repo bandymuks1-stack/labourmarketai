@@ -111,6 +111,10 @@ describe("NO new DB migration in this PR", () => {
     // additive RED migration, human-gated, NOT applied (previous: 86 for W8
     // service_offerings). The read layer itself adds no migration; the global
     // baseline only grows deliberately.
-    expect(count).toBeLessThanOrEqual(91);
+    // Bumped 91 -> 92 for the pilot_events anon INSERT grant draft
+    // (20260702150000) — human-gated, NOT applied. NOTE: the parallel draft
+    // PRs (admin-grant-guard, worker-personal-engagement) each also bump to
+    // 92; after all three merge the ratchets must read 94.
+    expect(count).toBeLessThanOrEqual(92);
   });
 });
