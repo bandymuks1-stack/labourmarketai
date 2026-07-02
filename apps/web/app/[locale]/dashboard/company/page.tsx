@@ -494,13 +494,24 @@ export default async function CompanyDashboardPage({
             <p className="text-[11px] leading-relaxed text-text-muted" data-testid="company-ops-projects-linking">
               {tOps("projectsLinkingNote")}
             </p>
-            <Link
-              href="/dashboard/company/projects/new"
-              className="w-fit rounded-md border border-brand-blue/40 px-3 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
-              data-testid="company-ops-projects-create"
-            >
-              {tOps("createProject.entryCta")}
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/dashboard/company/projects/new"
+                className="w-fit rounded-md border border-brand-blue/40 px-3 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
+                data-testid="company-ops-projects-create"
+              >
+                {tOps("createProject.entryCta")}
+              </Link>
+              {/* The working assignments board exists at /dashboard/projects
+                  but was never reachable from here (audit finding F-D5). */}
+              <Link
+                href="/dashboard/projects"
+                className="w-fit rounded-md border border-ink-500 px-3 py-1 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                data-testid="company-ops-projects-manage"
+              >
+                {tOps("projectsManageCta")} →
+              </Link>
+            </div>
           </div>
           <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-4">
             <h3 className="font-display text-sm font-semibold text-text-primary">
@@ -616,12 +627,24 @@ export default async function CompanyDashboardPage({
             the company, on every visit, whether a private draft exists — and is
             careful to NEVER imply it was submitted, sent, matched, or reviewed. */}
         {existingDraft ? (
-          <p
-            className="rounded-md border border-state-success/30 bg-state-success/5 px-3 py-2 text-xs text-state-success"
-            data-testid="company-request-saved-state"
-          >
-            ✓ {t("firstAction.savedState")}
-          </p>
+          <div className="flex flex-col gap-2">
+            <p
+              className="rounded-md border border-state-success/30 bg-state-success/5 px-3 py-2 text-xs text-state-success"
+              data-testid="company-request-saved-state"
+            >
+              ✓ {t("firstAction.savedState")}
+            </p>
+            {/* The draft is a dead end without this: the REAL submit path
+                (customer_requests, status=submitted) is the wizard on the
+                root dashboard (audit finding F-D1). */}
+            <Link
+              href={"/dashboard#demand-intake" as "/dashboard"}
+              className="w-fit rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+              data-testid="company-request-submit-real-link"
+            >
+              {t("firstAction.submitRealCta")} →
+            </Link>
+          </div>
         ) : (
           <p
             className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"

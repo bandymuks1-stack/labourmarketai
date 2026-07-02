@@ -68,6 +68,9 @@ export default async function ServiceRequestsPage({
     outgoingEmpty: t("outgoingEmpty"),
     incomingHeading: t("incomingHeading"),
     incomingEmpty: t("incomingEmpty"),
+    // Reuses the existing linkToServices affordance inside the empty state
+    // (audit finding F-E2) — no new copy key needed.
+    discoverEmptyCta: t("linkToServices"),
     accept: t("accept"),
     decline: t("decline"),
     withdraw: t("withdraw"),

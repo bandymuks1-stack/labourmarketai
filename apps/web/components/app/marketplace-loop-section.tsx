@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Link } from "@/lib/i18n/navigation";
 import { Send, Check, X, Undo2 } from "lucide-react";
 import {
   requestServiceOffering,
@@ -43,6 +44,9 @@ export type MarketplaceLabels = {
   outgoingEmpty: string;
   incomingHeading: string;
   incomingEmpty: string;
+  /** Empty discover list is not a dead end — points to /dashboard/services
+   *  (activate your own services to join the loop). Audit finding F-E2. */
+  discoverEmptyCta: string;
   accept: string;
   decline: string;
   withdraw: string;
@@ -118,13 +122,17 @@ export function MarketplaceLoopSection({
   function run(
     action: () => Promise<{ kind: string }>,
     onOk?: () => void,
+    onFail?: () => void,
   ) {
     setError(null);
     startTransition(async () => {
       const res = await action();
       if (res.kind === "duplicate") setError(labels.duplicate);
-      else if (res.kind !== "ok") setError(labels.errorGeneric);
-      else onOk?.();
+      else if (res.kind !== "ok") {
+        setError(labels.errorGeneric);
+        // Failed attempt ≠ abandoned attempt (audit F-T5).
+        onFail?.();
+      } else onOk?.();
       router.refresh();
     });
   }
@@ -141,9 +149,16 @@ export function MarketplaceLoopSection({
         {discoverable.length === 0 ? (
           <div
             data-testid="marketplace-discover-empty"
-            className="rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
+            className="flex flex-col items-start gap-3 rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
           >
-            {labels.discoverEmpty}
+            <p>{labels.discoverEmpty}</p>
+            <Link
+              href={"/dashboard/services" as "/dashboard"}
+              data-testid="marketplace-discover-empty-cta"
+              className="text-xs font-medium text-brand-blue hover:underline"
+            >
+              {labels.discoverEmptyCta} →
+            </Link>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -185,6 +200,11 @@ export function MarketplaceLoopSection({
                           trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
                             surface: "marketplace",
                             success: true,
+                          }),
+                        () =>
+                          trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+                            surface: "marketplace",
+                            success: false,
                           }),
                       );
                     }}

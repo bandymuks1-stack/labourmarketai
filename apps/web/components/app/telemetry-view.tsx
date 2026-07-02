@@ -34,7 +34,13 @@ export function TelemetryView({
     fired.current = true;
     if (once && typeof window !== "undefined") {
       try {
-        const key = `lm.funnel.${event}`;
+        // Keyed per (event, surface): two surfaces sharing one event name
+        // (e.g. opportunities + service-requests both firing
+        // marketplace_or_opportunities_viewed) must dedupe independently,
+        // or the second surface's view is silently dropped (audit F-T7).
+        const surface =
+          typeof metadata?.surface === "string" ? `.${metadata.surface}` : "";
+        const key = `lm.funnel.${event}${surface}`;
         if (window.sessionStorage.getItem(key)) return;
         window.sessionStorage.setItem(key, "1");
       } catch {

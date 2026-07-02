@@ -779,6 +779,7 @@
     "projectsCount": "Projektai",
     "projectsEmpty": "dar nesukurta nė vieno projekto",
     "projectsLinkingNote": "Susiejimas su darbo žurnalu dar neįjungtas. Projekto kontekstą jau galite sukurti, bet niekas neužpildoma automatiškai.",
+    "projectsManageCta": "Atidaryti projektų lentą",
     "createProject": {
       "entryCta": "Sukurti projekto kontekstą",
       "title": "Sukurti projekto kontekstą",
@@ -814,6 +815,7 @@
   "demandReadback": {
     "heading": "Jūsų pateikti poreikiai",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
+    "workerVisibilityNote": "Sąžininga būsena: darbuotojai pateiktų poreikių dar nemato — kol ruošiamas matomumas darbuotojams, kiekvieną užklausą komanda peržiūri rankiniu būdu.",
     "empty": "Dar nepateikėte nė vieno poreikio. Pateikite poreikį viršuje ir jis atsiras čia su savo būsena.",
     "created": "Sukurta",
     "manageHelp": "Juodraščius galite ištrinti. Pateiktas užklausas šiuo metu peržiūrime rankiniu būdu — savarankiškas redagavimas ar uždarymas dar ruošiamas.",
@@ -877,7 +879,8 @@
         "title": "Sukurkite pirmą darbo / komandos paklausą",
         "body": "Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia. Tai privatus juodraštis — ne vieša reklama, matomas tik jums.",
         "emptyState": "Užklausos dar nėra. Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia — juodraštis lieka privatus, matomas tik jums.",
-        "savedState": "Išsaugota kaip privatus juodraštis. Matote tik jūs."
+        "savedState": "Išsaugota kaip privatus juodraštis. Matote tik jūs.",
+        "submitRealCta": "Pateikti kaip tikrą užklausą"
       },
       "draftForm": {
         "field": {
@@ -1370,8 +1373,8 @@
       "subtitle": "Pateikti užklausą — tai veiksmas; jį gali atlikti ir žmogus, ir įmonė. Įėjimo taškas, ne atskiras produktas. Galite vėliau pridėti ir kitus vaidmenis.",
       "pilotDisclaimer": "Nepateikiame netikrų pasiūlymų. Jūsų užklausa lieka privati, kol nenuspręsite kitaip.",
       "firstAction": {
-        "title": "Sukurti paslaugos / komandos / rangovo užklausą",
-        "body": "Pirmas naudingas veiksmas: aprašykite, ko jums reikia (paslauga, komanda, rangovas). Juodraštis bus privatus."
+        "title": "Papildoma: privatūs juodraščio užrašai",
+        "body": "Užsirašykite, ko jums reikia. Šis juodraštis privatus — komandą pasiekia užklausos forma aukščiau."
       },
       "draftForm": {
         "field": {
@@ -4587,6 +4590,11 @@
     "title": "Operacijų telemetrija (v1)",
     "subtitle": "Saugūs testuotojų QA įvykiai. Read-only sąrašas. Tik administratoriai mato.",
     "loadError": "Nepavyko užkrauti įvykių: {msg}",
+    "filter": {
+      "excludeAdmins": "Slėpti administratorių įvykius",
+      "showAll": "Rodyti visus įvykius",
+      "hiddenNote": "Šiame lange paslėpta administratorių įvykių: {n}"
+    },
     "tasks": {
       "title": "Užduočių santrauka",
       "help": "Pagal task_name iš 200 paskutinių įvykių. avgMs — vidutinė trukmė tarp task_start ir task_complete (success).",
@@ -5109,11 +5117,12 @@
     "intro": "Pasirink vieną iš savo struktūruotų poreikių, kad matytum tinkamus darbuotojus, kodėl jie tinka, ir įtrauktum į trumpąjį sąrašą.",
     "visibilityNote": "Matomumas remiasi pasiruošimu, patikimumu ir leidimais — ne mokėjimu. Mokama platesnė prieiga dar neaktyvi (mokėjimai ruošiami). Rodomos tik saugios, anonimizuotos peržiūros — jokių netikrų skelbimų.",
     "pickDemand": "Pasirink poreikį",
-    "noDemands": "Kol kas neturi poreikių. Pirma sukurk poreikį, tada struktūruok reikalingus įgūdžius.",
+    "noDemands": "Kol kas neturite poreikių. Sukurkite poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
+    "noDemandsCta": "Sukurti poreikį",
     "unstructuredTag": "nestruktūruotas",
-    "notStructured": "Šis poreikis dar neturi struktūruotų įgūdžių, todėl atitiktis neskaičiuojama. Pirma struktūruok reikalingus įgūdžius.",
+    "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
-    "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų.",
+    "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
     "namePlaceholder": "Darbuotojas",
     "skillFit": "{pct}% — {matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
     "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",

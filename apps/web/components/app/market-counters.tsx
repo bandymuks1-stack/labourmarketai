@@ -83,6 +83,16 @@ export function MarketCounters() {
         );
       })}
       </div>
+      {/* Honesty disclaimer (audit F-G1): the values above are governed
+          placeholder cycles, not live totals — the visitor must see that.
+          The key existed since the counters shipped but was rendered
+          nowhere; a guard now pins this render. */}
+      <p
+        className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+        data-testid="market-counters-preview-note"
+      >
+        {t("previewNote")}
+      </p>
     </div>
   );
 }

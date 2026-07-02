@@ -203,10 +203,14 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // additive RED: one-row-per-user seen table (user_id pk + seen_at) own-row-only
     // RLS + SELECT grant, writes RPC-only, + ONE SECURITY DEFINER upsert RPC
     // mark_service_requests_seen(); no profile change, no PII; NOT applied).
-    // then to 92 for worker personal-engagement provisioning (20260702140000;
+    // then to 92 for the P0 admin self-promotion guard (20260702130000;
+    // additive RED: BEFORE triggers on profiles.active_role /
+    // profile_roles.role raising 42501 for JWT-bearing non-admin grantors;
+    // closes the self-promotion hole; APPLIED to prod via MCP 2026-07-02).
+    // then to 93 for worker personal-engagement provisioning (20260702140000;
     // additive RED: AFTER INSERT trigger on workers + idempotent 0013-shape
-    // backfill so the journal opens for every worker's first session; NOT
-    // applied, human-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 92/);
+    // backfill so the journal opens for every worker's first session;
+    // owner-approved apply 2026-07-02).
+    expect(guard).toMatch(/SPRINT_BASELINE = 93/);
   });
 });

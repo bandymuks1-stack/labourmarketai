@@ -39,13 +39,16 @@ type EventRow = {
 
 export default async function AdminTelemetryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ excludeAdmins?: string }>;
 }) {
   const { locale } = await params;
   await requireSuperadmin(locale);
   setRequestLocale(locale);
   const t = await getTranslations("telemetry");
+  const excludeAdmins = (await searchParams)?.excludeAdmins === "1";
 
   const supabase = await createClient();
   // The generated `Database` type doesn't include `pilot_events` until
@@ -71,7 +74,28 @@ export default async function AdminTelemetryPage({
     .order("created_at", { ascending: false })
     .limit(200);
 
-  const rows: EventRow[] = error ? [] : ((data ?? []) as EventRow[]);
+  const allRows: EventRow[] = error ? [] : ((data ?? []) as EventRow[]);
+
+  // "Exclude admins" (audit F-T3): the owner's own navigation dominates the
+  // inbox and drowns real-user signal. Filtered in memory over the fetched
+  // window; anon rows (profile_id null) always stay.
+  let adminIds = new Set<string>();
+  if (excludeAdmins) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const [byRole, byActive] = await Promise.all([
+      sb.from("profile_roles").select("profile_id").eq("role", "admin"),
+      sb.from("profiles").select("id").eq("active_role", "admin"),
+    ]);
+    adminIds = new Set<string>([
+      ...(byRole.data ?? []).map((r: { profile_id: string }) => r.profile_id),
+      ...(byActive.data ?? []).map((r: { id: string }) => r.id),
+    ]);
+  }
+  const rows: EventRow[] = excludeAdmins
+    ? allRows.filter((r) => !r.profile_id || !adminIds.has(r.profile_id))
+    : allRows;
+  const hiddenCount = allRows.length - rows.length;
 
   // ── Derived: task completion summary ───────────────────────────────
   type TaskAggKey = string;
@@ -155,6 +179,27 @@ export default async function AdminTelemetryPage({
           {t("loadError", { msg: error.message ?? "unknown" })}
         </p>
       )}
+
+      <div
+        className="flex flex-wrap items-center gap-3"
+        data-testid="telemetry-admin-filter"
+      >
+        <Link
+          href={
+            (excludeAdmins
+              ? "/dashboard/admin/telemetry"
+              : "/dashboard/admin/telemetry?excludeAdmins=1") as "/dashboard"
+          }
+          className="rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        >
+          {excludeAdmins ? t("filter.showAll") : t("filter.excludeAdmins")}
+        </Link>
+        {excludeAdmins && (
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("filter.hiddenNote", { n: hiddenCount })}
+          </span>
+        )}
+      </div>
 
       <section className="card-border flex flex-col gap-2 p-4">
         <h2 className="font-display text-base font-semibold text-text-primary">

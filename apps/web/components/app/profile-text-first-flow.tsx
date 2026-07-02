@@ -254,6 +254,11 @@ export function ProfileTextFirstFlow({
     } catch (e) {
       console.error("[profile-text-first] apply failed:", e);
       setError(t("applyErrorLabel"));
+      // Failed attempt ≠ abandoned attempt (audit F-T5).
+      trackFunnel(FUNNEL_EVENTS.profileSaved, {
+        surface: "profile",
+        success: false,
+      });
     } finally {
       setApplying(false);
     }

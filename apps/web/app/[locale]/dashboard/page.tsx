@@ -269,6 +269,7 @@ export default async function DashboardOverviewPage({
     const readbackLabels = {
       heading: tReadback("heading"),
       note: tReadback("note"),
+      workerVisibilityNote: tReadback("workerVisibilityNote"),
       empty: tReadback("empty"),
       created: tReadback("created"),
       manageHelp: tReadback("manageHelp"),
@@ -340,7 +341,8 @@ export default async function DashboardOverviewPage({
               {tw("pilot.progressHelper")}
             </p>
             <section
-              className="card-border flex flex-col gap-5 p-6 sm:p-8"
+              id="demand-intake"
+              className="card-border flex flex-col gap-5 p-6 scroll-mt-20 sm:p-8"
               data-testid="demand-intake-section"
             >
               <div className="flex flex-col gap-1">
