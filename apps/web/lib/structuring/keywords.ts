@@ -437,6 +437,18 @@ export const ACTIVITY_HINTS_LT: {
       "nuploviau lang",
       "langų valym",
       "langu valym",
+      // Office/bureau TIDYING ("tvarkiau ofisą / biurą") is cleaning-side
+      // facility upkeep, not admin paperwork — anchored on the office noun so
+      // a bare "tvarkiau" never fires (same shape as "tvarkiau kambar" in the
+      // capability dictionary and "tvarkiau kiem" for grounds upkeep).
+      "tvarkiau ofis",
+      "ofiso tvark",
+      "ofisą tvark",
+      "ofisa tvark",
+      "tvarkiau biur",
+      "biuro tvark",
+      "biurą tvark",
+      "biura tvark",
       "washed the floor",
       "mopped the floor",
       "cleaned the floor",
@@ -481,6 +493,47 @@ export const ACTIVITY_HINTS_LT: {
       "производств",
       "завод",
       "цех",
+    ],
+  },
+  {
+    // Event / inventory preparation day-work — GENERIC, not tied to any one
+    // item or event. Label-only (§7): the taxonomy has no verified skill for
+    // it, so it surfaces as an honest review-only suggestion. Needles are
+    // either dative event nouns ("renginiui" / "šventei" = doing work FOR an
+    // event) or multi-word prep/inventory anchors — bare "rinkome" (picked/
+    // gathered) is deliberately NOT a needle because it also means picking
+    // mushrooms, votes, etc. Placed last so trade-specific rows keep winning.
+    slug: null,
+    sector: "other",
+    label: "Renginių / inventoriaus paruošimas",
+    needles: [
+      "renginiui",
+      "šventei",
+      "sventei",
+      "renginio paruoš",
+      "renginio paruos",
+      "renginių paruoš",
+      "renginiu paruos",
+      "ruošiau rengin",
+      "ruosiau rengin",
+      "ruošėme rengin",
+      "ruoseme rengin",
+      "ruošėmės rengin",
+      "ruosemes rengin",
+      "šventės paruoš",
+      "sventes paruos",
+      "inventoriaus paruoš",
+      "inventoriaus paruos",
+      "rinkome inventori",
+      "rinkau inventori",
+      "inventorių rink",
+      "inventoriu rink",
+      "event prep",
+      "prepared for the event",
+      "подготовка мероприят",
+      "готовил к мероприят",
+      "к мероприятию",
+      "инвентарь для мероприят",
     ],
   },
 ];

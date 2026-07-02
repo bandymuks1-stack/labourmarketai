@@ -127,9 +127,12 @@ describe("Guard: mixed multi-task text yields multiple relevant signals", () => 
   });
 
   it("mixed example: visible signals are deduped + localized (no slug, no twin)", () => {
-    // Reproduce the composer's display set: fragment labels (what you did) +
-    // the deduped new-skill/capability chips. The SAME concept must appear once
-    // and never as a raw English slug ("bricklaying" → "Mūrijimas").
+    // Reproduce the composer's chip set (owner P0 2026-07-02): the dedupe seed
+    // is declared/matched skills ONLY — fragment labels must NOT suppress the
+    // actionable add-to-profile chips (a fragment card carries no action, so
+    // seeding with it deleted the only actionable chip). True duplicates are
+    // still collapsed across the chip list itself, and no chip is ever a raw
+    // English slug ("bricklaying" → "Mūrijimas").
     const text =
       "Dirbau su React svetaine, mūrijau sieną ir pristačiau darbą klientui";
     const s = extractJournalSuggestions(text);
@@ -145,20 +148,23 @@ describe("Guard: mixed multi-task text yields multiple relevant signals", () => 
       slug: r.slug,
       name: SKILL_NAMES_LT[r.slug] ?? r.slug, // always resolves (no-raw-slug guard)
     }));
-    const newChips = dedupeSignalsByLabel([...capability, ...undeclared], fragmentLabels);
+    // No declared worker skills in this scenario → empty seed, as the composer
+    // now seeds only with declared + matched skill names.
+    const newChips = dedupeSignalsByLabel([...capability, ...undeclared], []);
 
-    // The full visible signal set = fragments + deduped new chips.
-    const visible = [...fragmentLabels, ...newChips.map((c) => c.name)];
-    const norm = visible.map((v) => v.toLowerCase());
-    // No duplicate concept anywhere on screen.
+    const chipNames = newChips.map((c) => c.name);
+    const norm = chipNames.map((v) => v.toLowerCase());
+    // No duplicate concept within the chip list (two chips for one skill).
     expect(new Set(norm).size).toBe(norm.length);
     // bricklaying surfaces ONLY as the localized "Mūrijimas", once.
     expect(norm.filter((v) => v === "mūrijimas")).toHaveLength(1);
-    expect(visible).not.toContain("bricklaying");
-    // Relevant multiple signals are present: IT + masonry + client handover.
-    expect(visible).toContain("Programavimas");
-    expect(visible).toContain("Mūrijimas");
-    expect(visible).toContain("Darbų pristatymas klientui");
+    expect(chipNames).not.toContain("bricklaying");
+    // The actionable chips survive even when a fragment card shows the same
+    // label (fragment labels are informational, not a substitute action).
+    expect(fragmentLabels).toContain("Programavimas");
+    expect(chipNames).toContain("Programavimas");
+    expect(chipNames).toContain("Mūrijimas");
+    expect(chipNames).toContain("Darbų pristatymas klientui");
 
     // The handover signal renders localized per locale (canonical LT stays the
     // dedupe key; display is locale-aware so EN/RU never see the LT label).

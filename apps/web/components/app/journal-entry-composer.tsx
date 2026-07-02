@@ -369,20 +369,20 @@ export function JournalEntryComposer({
         confidence: "medium" as SkillConfidence,
       }),
     );
-    // Concept dedupe (round 3): one concept = one visible signal. Seed the
-    // "already shown" labels with the worker's declared skills, the matched
-    // declared-skill chips AND the per-fragment activity labels, so a
-    // capability / new-skill chip never repeats a concept the worker already
-    // sees (e.g. no "Mūrijimas" new-skill chip when "Mūrijimas" is already a
-    // fragment card, and no localized-vs-slug twin). Labels are always
-    // localized (journal-no-raw-slug guard), so label dedupe is concept dedupe.
-    const fragmentLabels = s.fragments
-      .map((f) => f.activityLabel)
-      .filter((l): l is string => !!l);
+    // Concept dedupe (round 3, corrected owner P0 2026-07-02): one concept =
+    // one ACTIONABLE signal. Seed "already shown" with the worker's declared
+    // skills and the matched declared-skill chips only. Fragment activity
+    // labels must NOT seed it: a fragment card is informational (it has no
+    // add-to-profile action, and single-fragment entries render no card at
+    // all), so seeding with it deleted the only actionable chip — e.g. the
+    // "Programavimas" add-to-profile chip vanished because a fragment carried
+    // the same label. True duplicates (two chips for one skill) are still
+    // collapsed by dedupeSignalsByLabel across the merged list itself. Labels
+    // are always localized (journal-no-raw-slug guard), so label dedupe is
+    // concept dedupe.
     const alreadyShown = [
       ...workerSkills.map((w) => w.name),
       ...matchedSkills.map((m) => m.name),
-      ...fragmentLabels,
     ];
     const mergedNew = dedupeSignalsByLabel(
       [...capabilityNew, ...undeclaredFromEngine, ...crossSector].filter(

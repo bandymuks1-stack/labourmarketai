@@ -162,26 +162,47 @@ export function JournalEntrySkillLinks({
       </div>
 
       <ul className="flex flex-wrap gap-1" data-testid={`entry-skill-links-${entryId}`}>
-        {/* Clean current evidence: recognized-from-text / confirmed / honest
-            manual links. Plus the picker (all profile skills) when opened. */}
-        {(picker ? availableSkills : cleanChips).map((s) =>
-          chip(s, picker && !selected.has(s.id) ? "off" : "on"),
-        )}
-        {/* Disclosure to open/close the full profile-skill picker. */}
-        {(availableSkills.some((s) => !selected.has(s.id)) || picker) && (
-          <li>
-            <button
-              type="button"
-              onClick={() => setPicker((v) => !v)}
-              className="rounded-full border border-dashed border-ink-500 px-2 py-0.5 text-[10px] text-text-muted transition-colors hover:border-text-secondary hover:text-text-secondary"
-              data-testid={`entry-skill-picker-toggle-${entryId}`}
-              aria-expanded={picker}
-            >
-              {picker ? t("linkDone") : t("linkMore")}
-            </button>
-          </li>
-        )}
+        {/* Clean current evidence ONLY: recognized-from-text / confirmed /
+            honest manual links. The full profile-skill catalogue renders in
+            its own labelled section below — never inside this chip list, so a
+            profile skill can't read as detected from this entry. */}
+        {cleanChips.map((s) => chip(s, "on"))}
       </ul>
+
+      {/* Disclosure to open/close the full profile-skill picker. Rendered
+          OUTSIDE the chip list as a plain text action — a UI control must not
+          look like a skill chip (owner P0: the "Baigta" chip). */}
+      {(availableSkills.some((s) => !selected.has(s.id)) || picker) && (
+        <button
+          type="button"
+          onClick={() => setPicker((v) => !v)}
+          className="self-start font-mono text-[10px] uppercase tracking-label text-text-muted transition-colors hover:text-text-secondary"
+          data-testid={`entry-skill-picker-toggle-${entryId}`}
+          aria-expanded={picker}
+        >
+          {picker ? t("linkDone") : t("linkMore")}
+        </button>
+      )}
+
+      {/* Manual-association picker: the worker's OWN profile skills (their
+          whole catalogue), for optional hand-linking to this entry. Explicitly
+          labelled so it is never mistaken for skills detected in this entry.
+          Chips already linked stay in the clean list above. */}
+      {picker && (
+        <div
+          className="flex flex-col gap-1"
+          data-testid={`entry-skill-picker-${entryId}`}
+        >
+          <p className="text-[10px] leading-relaxed text-text-muted">
+            {t("pickerHint")}
+          </p>
+          <ul className="flex flex-wrap gap-1">
+            {availableSkills
+              .filter((s) => !selected.has(s.id))
+              .map((s) => chip(s, "off"))}
+          </ul>
+        </div>
+      )}
 
       {/* Review bucket: linked skills the entry text does not support. COLLAPSED
           by default — only an honest summary + clean-up action show, so stale

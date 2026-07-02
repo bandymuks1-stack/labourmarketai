@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { classifyEntryRecognition } from "./recognition-tiers";
 
 /**
@@ -205,6 +207,144 @@ describe("negative guards — no wrong defaults", () => {
       "dėjau duris bute",
     ]) {
       expect(signalsOf(text).all, text).toMatch(/montav/i);
+    }
+  });
+});
+
+describe("owner smoke P0 2026-07-02 — the exact owner entry is understood honestly", () => {
+  const OWNER_TEXT =
+    "Šiandien rinkome laikrodžius pasaulio lietuvių dainų šventei 5 h, " +
+    "Tvarkiau ofisą – 1 h, tęsiau programavimą projekto labour market ai – 3 h";
+
+  /** The stale construction catalogue skills the owner saw offered on this
+   *  entry. NONE of them may ever come out of recognition for this text —
+   *  neither as their LT display name nor as their taxonomy slug. */
+  const FORBIDDEN_NAMES = [
+    "Brėžinių skaitymas",
+    "Durų ir langų montavimas",
+    "Grindų dangos",
+    "Klojinių stalystė",
+    "Medinių karkasų statyba",
+    "Nuotekų sistemų montavimas",
+    "Santechnikos darbai",
+    "Vėdinimo sistemos",
+  ];
+  const FORBIDDEN_OWNER_SLUGS = [
+    "blueprint-reading",
+    "door-window-install",
+    "flooring",
+    "formwork",
+    "formwork-carpentry",
+    "drainage",
+    "plumbing",
+    "timber-framing",
+    "ventilation",
+  ];
+
+  it("yields programming + office-organizing + event/inventory-prep signals", () => {
+    const s = signalsOf(OWNER_TEXT);
+    expect(s.tier).toBe("auto_signal");
+    expect(s.all).toMatch(/programav/i); // "Programavimas"
+    expect(s.all).toMatch(/valym/i); // "Valymo darbai" (tvarkiau ofisą)
+    expect(s.all).toMatch(/rengin|inventori/i); // "Renginių / inventoriaus paruošimas"
+  });
+
+  it("yields ZERO of the stale construction catalogue skills", () => {
+    const s = signalsOf(OWNER_TEXT);
+    // No construction skill slug is recognised from this text at all.
+    expect(s.slugs).toHaveLength(0);
+    for (const name of FORBIDDEN_NAMES) {
+      expect(s.all, `must not surface "${name}"`).not.toContain(
+        name.toLowerCase(),
+      );
+    }
+    for (const slug of FORBIDDEN_OWNER_SLUGS) {
+      expect(s.all, `must not surface slug "${slug}"`).not.toContain(slug);
+    }
+  });
+
+  it("real construction text still detects construction skills", () => {
+    // Existing case from the explicit-construction matrix — the honesty fix
+    // must not weaken true construction recognition.
+    const s = signalsOf("mūrijau sieną");
+    expect(s.all).toMatch(/bricklaying|mūrij/i);
+  });
+
+  it("nonsense / unknown text yields no construction defaults", () => {
+    for (const text of ["asdf qwerty", "xyzzy plugh 123", "aaa"]) {
+      const s = signalsOf(text);
+      expect(s.slugs, text).toHaveLength(0);
+      expect(s.labels, text).toHaveLength(0);
+      for (const name of FORBIDDEN_NAMES) {
+        expect(s.all, `${text}: must not default to "${name}"`).not.toContain(
+          name.toLowerCase(),
+        );
+      }
+    }
+  });
+
+  it("the generic event-prep row is not hardcoded to the owner sentence", () => {
+    // Other event/inventory phrasings resolve to the same generic label…
+    for (const text of [
+      "ruošėme salę renginiui",
+      "rinkome inventorių šventei",
+      "vežiau įrangą renginiui",
+    ]) {
+      expect(signalsOf(text).all, text).toMatch(/rengin|inventori/i);
+    }
+    // …and bare "rinkome" (picking mushrooms, votes, …) does NOT fire it.
+    expect(signalsOf("rinkome grybus miške").all).not.toMatch(
+      /rengin|inventori/i,
+    );
+  });
+});
+
+describe("owner smoke P0 2026-07-02 — picker close control is not a skill chip", () => {
+  // Component-level guard (static source + copy check, same style as
+  // lib/guards/journal-card-clarity.test.ts): the "Susieti įgūdį" picker's
+  // close control must not render inside the skill-chip <ul>, and its label
+  // must never be the status word "Baigta" (the owner read it as a suggested
+  // skill chip).
+  const ROOT = join(__dirname, "..", "..");
+  const links = readFileSync(
+    join(ROOT, "components/app/journal-entry-skill-links.tsx"),
+    "utf8",
+  );
+
+  it("renders the picker toggle OUTSIDE the chips <ul>", () => {
+    // The clean-chips list block: from its testid to its closing </ul>.
+    const listStart = links.indexOf("entry-skill-links-${entryId}");
+    expect(listStart).toBeGreaterThan(-1);
+    const listEnd = links.indexOf("</ul>", listStart);
+    expect(listEnd).toBeGreaterThan(-1);
+    const chipList = links.slice(listStart, listEnd);
+    expect(chipList).not.toContain("entry-skill-picker-toggle");
+    // The toggle exists, after the chip list, and is not chip-styled.
+    const toggleAt = links.indexOf("entry-skill-picker-toggle");
+    expect(toggleAt).toBeGreaterThan(listEnd);
+    const toggleBlock = links.slice(
+      links.lastIndexOf("<button", toggleAt),
+      links.indexOf("</button>", toggleAt),
+    );
+    expect(toggleBlock).not.toContain("rounded-full");
+  });
+
+  it("the manual picker is labelled as the worker's own profile skills", () => {
+    expect(links).toMatch(/t\("pickerHint"\)/);
+  });
+
+  it("linkDone copy is a close action, never the status word 'Baigta'", () => {
+    for (const [loc, expected] of [
+      ["lt", "Uždaryti sąrašą"],
+      ["en", "Close list"],
+      ["ru", "Закрыть список"],
+    ] as const) {
+      const messages = JSON.parse(
+        readFileSync(join(ROOT, `messages/${loc}.json`), "utf8"),
+      ) as { journalSkillLinks: Record<string, string> };
+      expect(messages.journalSkillLinks.linkDone).toBe(expected);
+      expect(messages.journalSkillLinks.linkDone).not.toBe("Baigta");
+      expect(messages.journalSkillLinks.pickerHint).toBeTruthy();
     }
   });
 });
