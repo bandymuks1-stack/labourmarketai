@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { activeLocales } from "@/lib/i18n/config";
 import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
 import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
+import { isVisionPublic } from "@/lib/config/vision-publication";
 
 /**
  * /sitemap.xml — only public, indexable marketing pages, on the apex
@@ -26,11 +27,18 @@ const STATIC_PATHS: readonly string[] = [
   "/labour-market",
   "/match-preview",
   "/pricing",
-  "/vision",
   "/legal/privacy",
   "/legal/terms",
   "/legal/cookies",
+  // Footer-linked legal page was discoverable but unlisted (audit F-N4).
+  "/legal/marketplace-rules",
 ];
+
+/** `/vision` follows its publication flag: while the page emits
+ *  noindex,nofollow the sitemap must not advertise it (audit F-N3 —
+ *  contradictory crawler signals). The owner's one-line flag flip makes it
+ *  reappear here with no further edits. */
+const FLAGGED_PATHS: readonly string[] = isVisionPublic() ? ["/vision"] : [];
 
 /** Per-country labour-market evidence pages, e.g. /labour-market/lt. */
 const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.map(
@@ -58,7 +66,7 @@ function priorityFor(path: string): number {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = [...STATIC_PATHS, ...COUNTRY_PATHS];
+  const paths = [...STATIC_PATHS, ...FLAGGED_PATHS, ...COUNTRY_PATHS];
   const entries: MetadataRoute.Sitemap = [];
 
   for (const path of paths) {
