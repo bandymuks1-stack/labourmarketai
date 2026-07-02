@@ -269,6 +269,7 @@ export default async function DashboardOverviewPage({
     const readbackLabels = {
       heading: tReadback("heading"),
       note: tReadback("note"),
+      workerVisibilityNote: tReadback("workerVisibilityNote"),
       empty: tReadback("empty"),
       created: tReadback("created"),
       manageHelp: tReadback("manageHelp"),

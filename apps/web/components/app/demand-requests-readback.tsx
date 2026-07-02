@@ -27,6 +27,9 @@ import { DemandLocationCapture } from "@/components/app/demand-location-capture"
 export interface DemandRequestsReadbackLabels {
   readonly heading: string;
   readonly note: string;
+  /** Honest gap statement: workers cannot see submitted needs until the
+   *  approved-route migration is applied (audit finding F-E1). */
+  readonly workerVisibilityNote: string;
   readonly empty: string;
   readonly created: string;
   /** Honest "what you can do next" line — drafts are deletable; self-serve
@@ -90,6 +93,12 @@ export function DemandRequestsReadback({
         </h2>
         <p className="text-xs leading-relaxed text-text-secondary">
           {labels.note}
+        </p>
+        <p
+          className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-[11px] leading-relaxed text-text-secondary"
+          data-testid="demand-readback-worker-visibility-note"
+        >
+          {labels.workerVisibilityNote}
         </p>
       </div>
 
