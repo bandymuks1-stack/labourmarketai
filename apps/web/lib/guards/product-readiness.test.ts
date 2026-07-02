@@ -1555,7 +1555,12 @@ describe("no migration files added by this sprint", () => {
     // becomes worker-visible; unverified stays hidden. Reversible
     // (supabase/rollbacks/20260702170000_*.down.sql restores the exact
     // 20260614120000 definition). Owner-approved apply 2026-07-02.
-    const SPRINT_BASELINE = 95;
+    // Bumped 95 -> 96 for the service-role report read grant
+    // (20260702200000_pilot_events_service_role_report_read.sql): SELECT on
+    // pilot_events + column-scoped (id,active_role)/(profile_id,role) reads
+    // for the local owner activation report; no anon/authenticated change.
+    // Reversible (supabase/rollbacks/20260702200000_*.down.sql). Owner-gated.
+    const SPRINT_BASELINE = 96;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

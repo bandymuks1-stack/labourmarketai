@@ -218,6 +218,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 95 for approved-route MODEL A (20260702170000; recreate the
     // worker-demand RPC with a verified-company join + company_name +
     // route_status columns; owner-approved apply 2026-07-02).
-    expect(guard).toMatch(/SPRINT_BASELINE = 95/);
+    // then to 96 for the service-role report read grant (20260702200000;
+    // SELECT on pilot_events + column-scoped profiles/profile_roles reads
+    // for the local owner activation report; owner-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 96/);
   });
 });
