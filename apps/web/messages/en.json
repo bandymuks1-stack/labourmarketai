@@ -4590,6 +4590,11 @@
     "title": "Operations telemetry (v1)",
     "subtitle": "Safe tester QA events. Read-only. Admins only.",
     "loadError": "Could not load events: {msg}",
+    "filter": {
+      "excludeAdmins": "Exclude admin events",
+      "showAll": "Show all events",
+      "hiddenNote": "{n} admin event(s) hidden in this window"
+    },
     "tasks": {
       "title": "Task summary",
       "help": "By task_name across the last 200 events. avgMs = average ms between task_start and task_complete (success).",
