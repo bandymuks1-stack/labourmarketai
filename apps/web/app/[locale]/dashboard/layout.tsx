@@ -6,6 +6,7 @@ import { DashboardTabs } from "@/components/app/dashboard-tabs";
 import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { RoleSwitcher } from "@/components/app/role-switcher";
+import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { AuthProvider } from "@/lib/auth/context";
@@ -119,6 +120,7 @@ export default async function DashboardLayout({
       }}
     >
       <div className="relative min-h-screen">
+        <SessionTelemetry />
         <AmbientGlow />
         <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
           <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">

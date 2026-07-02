@@ -23,6 +23,10 @@ import {
   recordTelemetryEvent,
   type PilotEventResult,
 } from "@/lib/telemetry/actions";
+import type {
+  FunnelEventName,
+  FunnelMetadata,
+} from "@/lib/telemetry/funnel-events";
 
 const SESSION_KEY = "lm.pilot.session";
 const startTimes = new Map<string, number>();
@@ -188,4 +192,17 @@ export function recordEvent(
   metadata?: Record<string, unknown>,
 ): void {
   fire(eventName, "info", { metadata });
+}
+
+/** Record an activation-funnel event (P0-A). Thin, type-safe wrapper over
+ *  `recordEvent`: the event name is constrained to the funnel registry and
+ *  metadata to the bounded, non-PII `FunnelMetadata` shape. Same
+ *  fire-and-forget guarantees — never throws, never blocks the UI. */
+export function trackFunnel(
+  eventName: FunnelEventName,
+  metadata?: FunnelMetadata,
+): void {
+  fire(eventName, "info", {
+    metadata: metadata as Record<string, unknown> | undefined,
+  });
 }

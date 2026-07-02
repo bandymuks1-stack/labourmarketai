@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { TrackedLink } from "@/components/app/tracked-link";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import type { CompanyRow, CompanyVerificationStatus } from "@/lib/company/company-setup";
 import { runCompanyChecks, type CompanyCheckKey } from "@/lib/company/company-checks";
 
@@ -188,7 +190,20 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
                 ) : null}
               </h3>
               <p className="text-xs leading-relaxed text-text-secondary">{c.body}</p>
-              {c.external ? (
+              {c.key === "requests" ? (
+                // Activation funnel (P0-A): clicking the demand/requests CTA.
+                // Must be checked before `c.external` — the requests card is
+                // external (hash href), and the plain <a> branch would
+                // otherwise swallow the click untracked.
+                <TrackedLink
+                  event={FUNNEL_EVENTS.companyDemandActionClicked}
+                  eventMetadata={{ surface: "company", entity_type: "company_request" }}
+                  href={c.href as "/dashboard"}
+                  className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
+                >
+                  {c.cta} →
+                </TrackedLink>
+              ) : c.external ? (
                 <a
                   href={c.href}
                   className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"

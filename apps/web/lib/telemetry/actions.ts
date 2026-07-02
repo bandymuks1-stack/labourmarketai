@@ -71,6 +71,13 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "had_selection", // bool — language-feedback widget: was text highlighted?
   "comment_length", // language-feedback widget: chars typed (number only)
   "result_kind", // free-text-but-bounded summary, e.g. 'soft_delete' / 'supersede'
+  // ── Activation-funnel dims (P0-A) — bounded, non-identifying scalars.
+  //    See lib/telemetry/funnel-events.ts (FunnelMetadata). NEVER ids/PII.
+  "surface", // source surface, e.g. 'dashboard' | 'profile' | 'google'
+  "step", // coarse step label inside a multi-step flow, e.g. 'compose'
+  "role_context", // coarse role: 'worker' | 'company' | 'agency' | 'customer'
+  "entity_type", // anonymous entity type, e.g. 'company_request'
+  "success", // bool — coarse success/failure of an attempted action
 ]);
 
 const SCALAR_VALUE_MAX = 200;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { CvInputPanel } from "@/components/app/cv-input-panel";
@@ -11,7 +11,8 @@ import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
 import { withTimeout } from "@/lib/async/with-timeout";
-import { recordEvent } from "@/lib/telemetry/task";
+import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -106,6 +107,18 @@ export function ProfileTextFirstFlow({
   const router = useRouter();
 
   const [stage, setStage] = useState<"compose" | "review" | "manual">("compose");
+
+  // Activation funnel (P0-A): worker opened the profile edit/compose flow.
+  const editStartedRef = useRef(false);
+  useEffect(() => {
+    if (editStartedRef.current) return;
+    editStartedRef.current = true;
+    trackFunnel(FUNNEL_EVENTS.profileEditStarted, {
+      surface: "profile",
+      step: "compose",
+    });
+  }, []);
+
   const [text, setText] = useState(initialText);
   const [pasted, setPasted] = useState("");
   const [textSaveState, setTextSaveState] = useState<
@@ -232,6 +245,12 @@ export function ProfileTextFirstFlow({
       );
       setApplied(true);
       router.refresh();
+      // Activation funnel (P0-A) — canonical profile-saved signal. Fired
+      // after the save+refresh so the save→refresh path stays tight.
+      trackFunnel(FUNNEL_EVENTS.profileSaved, {
+        surface: "profile",
+        success: true,
+      });
     } catch (e) {
       console.error("[profile-text-first] apply failed:", e);
       setError(tS("actions.confirm"));

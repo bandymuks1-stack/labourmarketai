@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { DraftType, DemandDraftRow } from "@/lib/demand/demand-drafts";
-import { recordEvent } from "@/lib/telemetry/task";
+import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   saveDemandDraftAction,
   deleteDemandDraftAction,
@@ -79,6 +80,14 @@ export function DemandDraftForm({
   const [isSaving, startSave] = useTransition();
   const [isDeleting, startDelete] = useTransition();
 
+  // Activation funnel (P0-A): demand form became visible to the user.
+  const viewedRef = useRef(false);
+  useEffect(() => {
+    if (viewedRef.current) return;
+    viewedRef.current = true;
+    trackFunnel(FUNNEL_EVENTS.demandFormViewed, { entity_type: draftType });
+  }, [draftType]);
+
   function setValue(key: string, value: string): void {
     setValues((prev) => ({ ...prev, [key]: value }));
   }
@@ -99,6 +108,11 @@ export function DemandDraftForm({
           // dashboard can split funnels.
           recordEvent(`${draftType.replace("_request", "_draft").replace("_offer", "_draft")}_saved`, {
             draft_type: draftType,
+          });
+          // Activation funnel (P0-A) — canonical demand-created signal.
+          trackFunnel(FUNNEL_EVENTS.demandSaved, {
+            entity_type: draftType,
+            success: true,
           });
           router.refresh();
         })

@@ -11,6 +11,8 @@ import { MyZone } from "@/components/app/my-zone";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import { WorkCard } from "@/components/app/work-card";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { getWorkerCard } from "@/lib/worker/work-card";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import {
@@ -295,6 +297,10 @@ export default async function DashboardOverviewPage({
     };
     return (
       <div className="flex flex-col gap-6">
+        <TelemetryView
+          event={FUNNEL_EVENTS.dashboardViewed}
+          metadata={{ surface: "dashboard", role_context: role }}
+        />
         {Header}
         <CurrentSpaceHeader role={role} />
         {/* Active-role focus: only this role's identity actions on the first
@@ -435,6 +441,14 @@ export default async function DashboardOverviewPage({
           gerina" — how the actions feed each other. The old loose stack
           (8-tile identity strip + today screen + first-use panel) is gone: it
           was a wall of loosely related cards, not an action-first room. */}
+      <TelemetryView
+        event={FUNNEL_EVENTS.dashboardViewed}
+        metadata={{ surface: "dashboard", role_context: "worker" }}
+      />
+      <TelemetryView
+        event={FUNNEL_EVENTS.firstActionCardViewed}
+        metadata={{ surface: "work_card" }}
+      />
       <CurrentSpaceHeader role={role} />
 
       {/* "Mano darbo kortelė" — the state-aware status: what's clear / what's

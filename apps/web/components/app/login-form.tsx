@@ -10,6 +10,8 @@ import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { isVercelPreviewHost } from "@/lib/auth/oauth-trace";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /** Map of callback-route `?error=…` codes to a translation key under
  *  `auth.errors.oauth.*`. Any code not listed here falls through to the
@@ -81,6 +83,7 @@ export function LoginForm() {
       return;
     }
     setStatus("signing");
+    trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "password" });
     try {
       const supabase = createClient();
       const { error: err } = await supabase.auth.signInWithPassword({

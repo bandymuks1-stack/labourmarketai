@@ -7,6 +7,8 @@ import { Compass, ClipboardList, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Link } from "@/lib/i18n/navigation";
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   addPreferredLocationAction,
   setPreferredLocationActiveAction,
@@ -248,7 +250,10 @@ export function MarketMapCapture({
             size="sm"
             disabled={pending || !pCountry}
             data-testid="capture-preferred-add"
-            onClick={() =>
+            onClick={() => {
+              trackFunnel(FUNNEL_EVENTS.preferredLocationAddStarted, {
+                surface: "market_map",
+              });
               run(async () => {
                 const r = await addPreferredLocationAction({
                   countryCode: pCountry,
@@ -260,6 +265,10 @@ export function MarketMapCapture({
                   visibilityLevel: pVisibility,
                 });
                 if (r.kind === "ok") {
+                  trackFunnel(FUNNEL_EVENTS.preferredLocationSaved, {
+                    surface: "market_map",
+                    success: true,
+                  });
                   setPCity("");
                   setPIntents([]);
                   setPCountry("");
@@ -267,8 +276,8 @@ export function MarketMapCapture({
                   setPNote("");
                 }
                 return r;
-              }, "preferred.added")
-            }
+              }, "preferred.added");
+            }}
           >
             {t("preferred.add")}
           </Button>

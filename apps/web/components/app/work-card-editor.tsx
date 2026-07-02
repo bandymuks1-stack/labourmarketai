@@ -10,6 +10,8 @@ import {
 } from "@/lib/worker/work-card-actions";
 import type { WorkCardValues } from "@/lib/worker/work-card";
 import type { WorkCardState } from "@/lib/worker/work-card-state";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Interactive part of "Mano darbo kortelė" (slice work-card-state-aware-v1):
@@ -91,6 +93,11 @@ export function WorkCardEditor({
           href={nextHref as "/dashboard/profile"}
           className={primaryCta}
           data-testid="work-card-next"
+          onClick={() =>
+            trackFunnel(FUNNEL_EVENTS.firstActionCardClicked, {
+              surface: "work_card",
+            })
+          }
         >
           {labels.nextLabel} →
         </Link>
