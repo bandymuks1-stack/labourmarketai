@@ -147,6 +147,26 @@ export async function saveCustomerRequest(
       message: "Title must be 1-200 characters.",
     };
   }
+  // Bounded free text: these land in bare `text` columns (0028) with no
+  // DB-side cap. Mirrors the title cap above.
+  const FIELD_CAPS: Array<[string, string | null | undefined, number]> = [
+    ["need_summary", input.needSummary, 4000],
+    ["country", input.country, 100],
+    ["location", input.location, 200],
+    ["role_or_work_type", input.roleOrWorkType, 200],
+    ["start_period", input.startPeriod, 100],
+    ["duration", input.duration, 200],
+    ["language_requirement", input.languageRequirement, 200],
+    ["notes", input.notes, 4000],
+  ];
+  for (const [field, value, cap] of FIELD_CAPS) {
+    if (value && value.trim().length > cap) {
+      return {
+        kind: "invalid",
+        message: `${field} must be at most ${cap} characters.`,
+      };
+    }
+  }
   const supabase = await createClient();
   const { data, error } = await asAny(supabase).rpc("save_customer_request", {
     p_request_id: input.requestId ?? null,

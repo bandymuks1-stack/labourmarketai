@@ -31,8 +31,7 @@ export async function POST(req: Request) {
     );
   }
 
-  console.log("[waitlist] request body", raw);
-
+  // PRIVACY: never log the raw body — it carries the visitor's email (PII).
   const parsed = Schema.safeParse(raw);
   if (!parsed.success) {
     console.error("[waitlist] schema validation failed", parsed.error.flatten());
@@ -55,7 +54,7 @@ export async function POST(req: Request) {
 
   if (error) {
     if (error.code === PG_UNIQUE_VIOLATION) {
-      console.log("[waitlist] duplicate email", parsed.data.email);
+      console.log("[waitlist] duplicate email [redacted]");
       return NextResponse.json({ ok: true, duplicate: true });
     }
     console.error("[waitlist] insert failed", {
@@ -70,6 +69,6 @@ export async function POST(req: Request) {
     );
   }
 
-  console.log("[waitlist] inserted", parsed.data.email);
+  console.log("[waitlist] inserted (email redacted), source:", parsed.data.source);
   return NextResponse.json({ ok: true });
 }
