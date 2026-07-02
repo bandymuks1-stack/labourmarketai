@@ -78,15 +78,26 @@ async function main(): Promise<void> {
   // ── Exclusion sets: admins + seed accounts. Used ONLY in memory. ──
   const excluded = new Set<string>();
   {
-    const { data: byActive } = await supabase
+    const { data: byActive, error: activeErr } = await supabase
       .from("profiles")
       .select("id")
       .eq("active_role", "admin");
-    for (const r of byActive ?? []) excluded.add(r.id as string);
-    const { data: byRole } = await supabase
+    const { data: byRole, error: roleErr } = await supabase
       .from("profile_roles")
       .select("profile_id")
       .eq("role", "admin");
+    if (activeErr || roleErr) {
+      // FAIL CLOSED: without the admin exclusion the report would count
+      // owner/admin noise as real users — refusing to emit a report without
+      // exclusions is the only honest behavior. (Grant gap? See migration
+      // 20260702200000_pilot_events_service_role_report_read.)
+      console.error(
+        "admin-exclusion read failed — refusing to emit a report without exclusions:",
+        activeErr?.message ?? roleErr?.message,
+      );
+      process.exit(1);
+    }
+    for (const r of byActive ?? []) excluded.add(r.id as string);
     for (const r of byRole ?? []) excluded.add(r.profile_id as string);
     // Seed/example accounts: auth emails are not on profiles; use the admin
     // auth API page-by-page only if available. Fallback: profiles.full_name

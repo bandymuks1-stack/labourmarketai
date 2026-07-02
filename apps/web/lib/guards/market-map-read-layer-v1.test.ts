@@ -119,6 +119,8 @@ describe("NO new DB migration in this PR", () => {
     // (20260702150000) — owner-approved apply 2026-07-02.
     // Bumped 94 -> 95 for approved-route MODEL A (20260702170000) —
     // owner-approved apply 2026-07-02.
-    expect(count).toBeLessThanOrEqual(95);
+    // Bumped 95 -> 96 for the service-role report read grant
+    // (20260702200000) — owner-gated apply.
+    expect(count).toBeLessThanOrEqual(96);
   });
 });
