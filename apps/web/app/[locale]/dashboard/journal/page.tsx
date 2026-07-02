@@ -210,14 +210,28 @@ export default async function JournalPage({
               ? t(`noContext.${contextState}Named`, { org: noContextOrg })
               : t(`noContext.${contextState}`)}
           </p>
-          {contextState === "pending" && (
+          {/* Every no-context state gets a real next step — a primary-tab
+              page must never dead-end (audit finding F-W2). */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {contextState === "none" && (
+              <Link
+                href="/dashboard/profile"
+                className="inline-flex items-center gap-1.5 rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+              >
+                {t("noContextProfileCta")}
+              </Link>
+            )}
             <Link
               href="/dashboard"
-              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold text-text-primary ${
+                contextState === "none"
+                  ? "border-ink-500 hover:border-brand-blue"
+                  : "border-brand-blue hover:border-brand-blue/80"
+              }`}
             >
               {t("noContextCta")}
             </Link>
-          )}
+          </div>
         </div>
       </div>
     );

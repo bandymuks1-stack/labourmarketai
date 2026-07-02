@@ -253,7 +253,7 @@ export function ProfileTextFirstFlow({
       });
     } catch (e) {
       console.error("[profile-text-first] apply failed:", e);
-      setError(tS("actions.confirm"));
+      setError(t("applyErrorLabel"));
     } finally {
       setApplying(false);
     }

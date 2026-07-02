@@ -9,6 +9,7 @@
     "rosterNamed": "Esate {org} komandos sąraše. Organizacijos savininkas dar turi pridėti jus prie organizacijos, kad galėtumėte žymėti darbą."
   },
   "noContextCta": "Į skydelį",
+  "noContextProfileCta": "Kol kas sustiprinkite profilį",
   "personalEntry": "Asmeninis darbuotojo įrašas",
   "reviewNotEnabledNote": "Žurnalo peržiūra dar neįjungta. Galite žymėti darbą jau dabar — bet kad įrašai būtų peržiūrimi, organizacijos savininkas turi įjungti jūsų žurnalo peržiūrą.",
   "chooseWorkType": "Pasirinkite darbo tipą",

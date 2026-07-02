@@ -2194,6 +2194,7 @@
       "textSavingLabel": "Įrašoma…",
       "textSavedLabel": "Jūsų tekstas išsaugotas",
       "textSaveErrorLabel": "Nepavyko išsaugoti teksto. Bandykite dar kartą.",
+      "applyErrorLabel": "Nepavyko išsaugoti pasirinktų gebėjimų. Bandykite dar kartą.",
       "textClaimNotVerified": "Tai jūsų pačių teiginys — dar nepagrįsta darbo įrašais"
     }
   },
