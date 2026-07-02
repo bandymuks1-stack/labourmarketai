@@ -32,7 +32,15 @@ const NAV_SURFACES = [
   "app/[locale]/dashboard/admin/page.tsx",
 ];
 
-const PREVIEW_ROUTES = ["/dashboard/talent", "/dashboard/visual-os"];
+// `/dashboard/learning` added 2026-07-02 (route-truth-map): the human-in-loop
+// learning review surface works but is deliberately PARKED — zero inbound
+// links until the owner decides its entry point (audit finding F-N1). Listing
+// it here makes the parked state explicit and enforced instead of accidental.
+const PREVIEW_ROUTES = [
+  "/dashboard/talent",
+  "/dashboard/visual-os",
+  "/dashboard/learning",
+];
 
 describe("preview surfaces are not linked from any navigation entry point", () => {
   for (const rel of NAV_SURFACES) {
