@@ -60,12 +60,16 @@ export function ProfileAvatar({
       });
       setDone(true);
       router.refresh();
-    } else if (r === "invalid") {
-      setError(t("invalidFile"));
-    } else if (r === "not-ready") {
-      setError(t("notReady"));
     } else {
-      setError(t("uploadFailed"));
+      // Failed attempt ≠ abandoned attempt — without this, a broken upload
+      // path is indistinguishable from user disinterest (audit F-T5).
+      trackFunnel(FUNNEL_EVENTS.avatarUploadSucceeded, {
+        surface: "profile",
+        success: false,
+      });
+      if (r === "invalid") setError(t("invalidFile"));
+      else if (r === "not-ready") setError(t("notReady"));
+      else setError(t("uploadFailed"));
     }
   }
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { OnboardingWizard } from "@/components/app/onboarding-wizard";
+import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
@@ -49,6 +50,12 @@ export default async function OnboardingPage({
 
   return (
     <div className="relative min-h-screen">
+      {/* New users reach onboarding BEFORE any dashboard layout mounts —
+          without this, login_succeeded fires after onboarding_started
+          (funnel order inversion) and onboarding drop-offs count as
+          "never logged in" (audit F-T4). Dedup key prevents double-fire
+          once the user later reaches the dashboard in the same tab. */}
+      <SessionTelemetry />
       <AmbientGlow />
       <header className="relative z-10 mx-auto max-w-container px-6 py-6 sm:px-12">
         <Link

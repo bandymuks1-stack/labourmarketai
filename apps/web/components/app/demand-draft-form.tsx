@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { DraftType, DemandDraftRow } from "@/lib/demand/demand-drafts";
-import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
+import { errorTask, recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   saveDemandDraftAction,
@@ -119,9 +119,15 @@ export function DemandDraftForm({
         .catch((e: unknown) => {
           console.error("[demand-draft-form] save failed", e);
           setError(t("saveError"));
-          recordEvent("task_error", {
+          // errorTask writes result='error' (recordEvent hardcodes 'info',
+          // which the 0020 error filters never match — audit F-T6).
+          errorTask("demand_draft_save", e instanceof Error ? e.name : "unknown", {
             draft_type: draftType,
-            result_kind: e instanceof Error ? e.name : "unknown",
+          });
+          // Failed attempt ≠ abandoned attempt (audit F-T5).
+          trackFunnel(FUNNEL_EVENTS.demandSaved, {
+            entity_type: draftType,
+            success: false,
           });
         });
     });
