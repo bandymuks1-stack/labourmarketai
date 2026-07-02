@@ -815,7 +815,7 @@
   "demandReadback": {
     "heading": "Jūsų pateikti poreikiai",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
-    "workerVisibilityNote": "Sąžininga būsena: darbuotojai pateiktų poreikių dar nemato — kol ruošiamas matomumas darbuotojams, kiekvieną užklausą komanda peržiūri rankiniu būdu.",
+    "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių poreikius darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol jūsų įmonė neverifikuota, poreikiai matomi tik jums ir peržiūros komandai.",
     "empty": "Dar nepateikėte nė vieno poreikio. Pateikite poreikį viršuje ir jis atsiras čia su savo būsena.",
     "created": "Sukurta",
     "manageHelp": "Juodraščius galite ištrinti. Pateiktas užklausas šiuo metu peržiūrime rankiniu būdu — savarankiškas redagavimas ar uždarymas dar ruošiamas.",

@@ -815,7 +815,7 @@
   "demandReadback": {
     "heading": "Your submitted requests",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
-    "workerVisibilityNote": "Honest status: workers do not see submitted needs yet — the team reviews each request manually while worker visibility is being prepared.",
+    "workerVisibilityNote": "Honest status: needs from verified companies are shown to workers on their opportunities board. Verification is a manual review — until your company is verified, your needs stay private to you and the review team.",
     "empty": "No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "Created",
     "manageHelp": "Drafts can be deleted. Submitted requests are reviewed manually — self-serve editing or closing is still being prepared.",

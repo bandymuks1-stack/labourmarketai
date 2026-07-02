@@ -106,12 +106,13 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
       opportunities = (data as Record<string, unknown>[])
         // DEFAULT-CLOSED (Worker Opportunities v1): a worker only ever sees a
         // need that arrived through an APPROVED supply route — never a raw,
-        // unreviewed employer. The current RPC does not yet expose an approval
-        // signal, so this filter currently lets NOTHING through and the board
-        // shows the honest "no approved opportunities yet" state. The
-        // owner-gated migration (see docs/handoffs/worker-opportunities-
-        // approved-route.md) adds `approved_route` + a safe `company_name`,
-        // and this predicate then lights the board up.
+        // unreviewed employer. Approved-route MODEL A (owner decision
+        // 2026-07-02, migration 20260702170000): the RPC returns
+        // route_status='approved_direct_partner' + a safe company_name ONLY
+        // for demand owned by an admin-VERIFIED company
+        // (companies.verification_status='verified'); unverified demand never
+        // reaches this filter. If the migration is rolled back the RPC stops
+        // returning the columns and this predicate closes the board again.
         .filter(isApprovedRouteRow)
         .map((row) => {
           const need: OpportunityNeed = {

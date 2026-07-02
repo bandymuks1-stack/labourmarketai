@@ -28,7 +28,7 @@ describe("worker-visibility honesty note (F-E1)", () => {
     expect(page).toMatch(/workerVisibilityNote: tReadback\("workerVisibilityNote"\)/);
   });
 
-  it("the key exists in en/lt/ru and states workers cannot see needs yet", () => {
+  it("the key exists in en/lt/ru and states the verified-only visibility truth", () => {
     for (const locale of ["en", "lt", "ru"]) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       expect(
@@ -36,10 +36,14 @@ describe("worker-visibility honesty note (F-E1)", () => {
         `workerVisibilityNote ${locale}`,
       ).toBeTruthy();
     }
+    // Approved-route MODEL A (2026-07-02): the note now states that VERIFIED
+    // companies' needs reach workers — no fake "full visibility" claim, no
+    // stale "workers see nothing" claim.
     const en = JSON.parse(read("messages/en.json"));
     expect(en.demandReadback.workerVisibilityNote).toMatch(
-      /workers do not see submitted needs yet/i,
+      /verified companies are shown to workers/i,
     );
+    expect(en.demandReadback.workerVisibilityNote).toMatch(/manual review/i);
   });
 });
 

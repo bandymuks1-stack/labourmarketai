@@ -215,6 +215,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // ONE insert-only grant to anon so pre-auth login_started lands; RLS
     // already caps anon rows to profile_id IS NULL; owner-approved apply
     // 2026-07-02).
-    expect(guard).toMatch(/SPRINT_BASELINE = 94/);
+    // then to 95 for approved-route MODEL A (20260702170000; recreate the
+    // worker-demand RPC with a verified-company join + company_name +
+    // route_status columns; owner-approved apply 2026-07-02).
+    expect(guard).toMatch(/SPRINT_BASELINE = 95/);
   });
 });
