@@ -1250,7 +1250,7 @@
       },
       "suggestions": {
         "title": "[EN] Rule-based shortlist",
-        "humanRule": "[EN] Ordered by real evidence (filters matched, verified skills, confirmations) — no computed score; the human decides.",
+        "humanRule": "[EN] Ordered by real evidence (filters matched, confirmed skills, manager confirmations) — no computed score; the human decides.",
         "start": "[EN] Start conversation",
         "reasons": {
           "country_match": "[EN] In country",
