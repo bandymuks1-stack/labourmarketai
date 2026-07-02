@@ -134,9 +134,16 @@ export default async function CompanyScoutingPage({
 
       {/* Demand picker */}
       {demands.length === 0 ? (
-        <p className="rounded-md border border-dashed border-ink-500 px-4 py-6 text-sm text-text-secondary">
-          {t("noDemands")}
-        </p>
+        <div className="flex flex-col items-start gap-3 rounded-md border border-dashed border-ink-500 px-4 py-6">
+          <p className="text-sm text-text-secondary">{t("noDemands")}</p>
+          <Link
+            href={`/${locale}/dashboard#demand-intake`}
+            className="rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+            data-testid="scouting-no-demands-cta"
+          >
+            {t("noDemandsCta")} →
+          </Link>
+        </div>
       ) : (
         <nav className="flex flex-wrap gap-2" aria-label={t("pickDemand")}>
           {demands.map((d) => (
