@@ -74,15 +74,24 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
     );
     start(async () => {
       try {
-        // Fire BEFORE the call: a successful onboarding ends in a
-        // server-side redirect (NEXT_REDIRECT throws), so code after the
-        // await never runs on the happy path.
+        await completeOnboarding(form);
+        // Reached only if the runtime resolves the action instead of
+        // throwing NEXT_REDIRECT — exactly one of these two success
+        // paths runs, so the event never double-fires.
         trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
           role_context: primaryRole,
         });
-        await completeOnboarding(form);
       } catch (e) {
-        if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) throw e;
+        // A successful onboarding ends in a server-side redirect
+        // (NEXT_REDIRECT throws), so this branch — not code after the
+        // await — is the reliable success signal. trackFunnel is
+        // fire-and-forget, safe before the rethrow.
+        if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) {
+          trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
+            role_context: primaryRole,
+          });
+          throw e;
+        }
         console.error("[onboarding] completeOnboarding failed:", e);
         setError(t("error_generic"));
       }

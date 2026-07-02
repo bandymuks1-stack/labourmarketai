@@ -190,15 +190,11 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
                 ) : null}
               </h3>
               <p className="text-xs leading-relaxed text-text-secondary">{c.body}</p>
-              {c.external ? (
-                <a
-                  href={c.href}
-                  className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
-                >
-                  {c.cta} →
-                </a>
-              ) : c.key === "requests" ? (
+              {c.key === "requests" ? (
                 // Activation funnel (P0-A): clicking the demand/requests CTA.
+                // Must be checked before `c.external` — the requests card is
+                // external (hash href), and the plain <a> branch would
+                // otherwise swallow the click untracked.
                 <TrackedLink
                   event={FUNNEL_EVENTS.companyDemandActionClicked}
                   eventMetadata={{ surface: "company", entity_type: "company_request" }}
@@ -207,6 +203,13 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
                 >
                   {c.cta} →
                 </TrackedLink>
+              ) : c.external ? (
+                <a
+                  href={c.href}
+                  className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
+                >
+                  {c.cta} →
+                </a>
               ) : (
                 <Link
                   href={c.href as "/dashboard"}
