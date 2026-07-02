@@ -1541,7 +1541,13 @@ describe("no migration files added by this sprint", () => {
     // personal 'employee' engagement and the journal opens on first session.
     // Reversible (supabase/rollbacks/20260702140000_*.down.sql).
     // Owner-approved apply 2026-07-02.
-    const SPRINT_BASELINE = 93;
+    // Bumped 93 -> 94 for the pilot_events anon INSERT grant
+    // (20260702150000_pilot_events_anon_insert_grant.sql): ONE insert-only
+    // grant to anon so pre-auth login_started events land; RLS (0020)
+    // already caps anon rows to profile_id IS NULL, SELECT stays
+    // admin-only. Reversible (supabase/rollbacks/20260702150000_*.down.sql).
+    // Owner-approved apply 2026-07-02.
+    const SPRINT_BASELINE = 94;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

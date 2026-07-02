@@ -115,6 +115,8 @@ describe("NO new DB migration in this PR", () => {
     // (20260702130000_admin_grant_guard) — APPLIED to prod via MCP 2026-07-02.
     // Bumped 92 -> 93 for the worker personal-engagement provisioning draft
     // (20260702140000_worker_personal_engagement) — owner-approved apply.
-    expect(count).toBeLessThanOrEqual(93);
+    // Bumped 93 -> 94 for the pilot_events anon INSERT grant
+    // (20260702150000) — owner-approved apply 2026-07-02.
+    expect(count).toBeLessThanOrEqual(94);
   });
 });

@@ -211,6 +211,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // additive RED: AFTER INSERT trigger on workers + idempotent 0013-shape
     // backfill so the journal opens for every worker's first session;
     // owner-approved apply 2026-07-02).
-    expect(guard).toMatch(/SPRINT_BASELINE = 93/);
+    // then to 94 for the pilot_events anon INSERT grant (20260702150000;
+    // ONE insert-only grant to anon so pre-auth login_started lands; RLS
+    // already caps anon rows to profile_id IS NULL; owner-approved apply
+    // 2026-07-02).
+    expect(guard).toMatch(/SPRINT_BASELINE = 94/);
   });
 });
