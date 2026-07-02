@@ -113,7 +113,7 @@
     "details": "Personal details",
     "improve": "What to improve",
     "capabilities": "Skills & work history",
-    "fullRecordsInCv": "Full work records — Mano CV"
+    "fullRecordsInCv": "All work records"
   },
   "mapLayers": {
     "title": "Map layers",
@@ -607,7 +607,7 @@
     "lastActivity": "Last activity"
   },
   "workerEvidence": {
-    "title": "My CV",
+    "title": "Work records & skills",
     "confirmed": "With records",
     "selfDeclared": "Waiting for review",
     "systemEntries": "Work entries",
@@ -636,8 +636,8 @@
     "explainer": "This data feeds your work card. It helps an employer quickly understand what work you fit.",
     "notVerified": "This is information you provided yourself — not yet reviewed. Records build trust, but you can add it later.",
     "primaryAction": "Add what's missing",
-    "primaryActionJournal": "Add to CV",
-    "journalLink": "My CV",
+    "primaryActionJournal": "Add a work record",
+    "journalLink": "Work records",
     "cvImportLink": "Add your CV — paste or upload",
     "evidence": {
       "intro": "Skills are stronger when backed by real work, learning or activity entries.",
@@ -658,7 +658,7 @@
         "none": "None yet"
       },
       "journal": {
-        "label": "CV entries",
+        "label": "Work records",
         "available": "Journal entries: {n}",
         "none": "Not yet linked",
         "preparing": "Work-records connection is being prepared"
@@ -710,7 +710,7 @@
     }
   },
   "journalSkillLinks": {
-    "signalsHeading": "Linked skills",
+    "signalsHeading": "Skills linked to this entry",
     "helper": "Mark the skills this entry shows — it builds your CV. Not reviewed yet.",
     "saving": "Saving…",
     "saved": "Saved",
@@ -4985,6 +4985,13 @@
   "cvExport": {
     "nameNotProvided": "Name not added yet",
     "pageTitle": "My CV",
+    "builtFrom": {
+      "lead": "This CV is built only from your own account data — nothing is created for you.",
+      "profile": "Profile — your name, profession and description.",
+      "skills": "Skills — the skills you added; skills with work records are shown separately.",
+      "records": "Work records — entries from your work journal feed this CV; entries reviewed by a person appear under \"CV work records\".",
+      "privacy": "Only you see this page. Others see it only when you share it yourself — for example as a downloaded PDF."
+    },
     "exportButton": "Export CV (PDF)",
     "print": "Download PDF",
     "back": "← Back to profile",

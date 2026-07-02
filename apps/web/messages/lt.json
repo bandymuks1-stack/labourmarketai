@@ -113,7 +113,7 @@
     "details": "Asmens duomenys",
     "improve": "Ką dar pagerinti",
     "capabilities": "Įgūdžiai ir darbo istorija",
-    "fullRecordsInCv": "Visi darbo įrašai — Mano CV"
+    "fullRecordsInCv": "Visi darbo įrašai"
   },
   "mapLayers": {
     "title": "Žemėlapio sluoksniai",
@@ -607,7 +607,7 @@
     "lastActivity": "Paskutinė veikla"
   },
   "workerEvidence": {
-    "title": "Mano CV",
+    "title": "Darbo įrašai ir įgūdžiai",
     "confirmed": "Su įrašais",
     "selfDeclared": "Laukia peržiūros",
     "systemEntries": "Darbo įrašai",
@@ -636,8 +636,8 @@
     "explainer": "Šie duomenys maitina jūsų darbo kortelę. Tai padeda darbdaviui greičiau suprasti, kokiam darbui tinkate.",
     "notVerified": "Tai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.",
     "primaryAction": "Pridėti, ko trūksta",
-    "primaryActionJournal": "Pridėti prie CV",
-    "journalLink": "Mano CV",
+    "primaryActionJournal": "Pridėti darbo įrašą",
+    "journalLink": "Darbo įrašai",
     "cvImportLink": "Pridėk savo CV — įklijuok arba įkelk",
     "evidence": {
       "intro": "Įgūdžiai stipresni, kai juos paremia tikri darbo, mokymosi ar veiklos įrašai.",
@@ -658,7 +658,7 @@
         "none": "Dar nenurodyta"
       },
       "journal": {
-        "label": "CV įrašai",
+        "label": "Darbo įrašai",
         "available": "Žurnalo įrašai: {n}",
         "none": "Dar nesusieta",
         "preparing": "Darbo įrašų ryšys ruošiamas"
@@ -710,7 +710,7 @@
     }
   },
   "journalSkillLinks": {
-    "signalsHeading": "Susieti įgūdžiai",
+    "signalsHeading": "Su šiuo įrašu susieti įgūdžiai",
     "helper": "Pažymėkite įgūdžius, kuriuos rodo šis įrašas — taip pildosi jūsų CV. Dar neperžiūrėta.",
     "saving": "Saugoma…",
     "saved": "Išsaugota",
@@ -3065,7 +3065,7 @@
           "cta": "Atverti"
         },
         "proofCard": {
-          "title": "Mano CV",
+          "title": "Mano įrašai",
           "body": "Užfiksuotas darbas pamažu virsta jūsų įgūdžių įrašais.",
           "cta": "Atverti dienoraštį"
         },
@@ -3239,7 +3239,7 @@
           "title": "Ko ieškau"
         },
         "proofs": {
-          "title": "Mano CV"
+          "title": "Mano įrašai"
         }
       },
       "empty": {
@@ -4985,6 +4985,13 @@
   "cvExport": {
     "nameNotProvided": "Vardas dar nenurodytas",
     "pageTitle": "Mano CV",
+    "builtFrom": {
+      "lead": "Šis CV sudaromas tik iš jūsų paskyros duomenų — nieko nesukuriame už jus.",
+      "profile": "Profilis — vardas, profesija ir jūsų aprašymas.",
+      "skills": "Įgūdžiai — jūsų nurodyti įgūdžiai; įgūdžiai su darbo įrašais rodomi atskirai.",
+      "records": "Darbo įrašai — įrašai iš darbo žurnalo pildo šį CV; žmogaus peržiūrėti įrašai rodomi skiltyje „CV darbo įrašai“.",
+      "privacy": "Šį puslapį matote tik jūs. Kiti jį pamatys tik tada, kai patys pasidalinsite — pvz., atsisiųstu PDF."
+    },
     "exportButton": "Eksportuoti CV (PDF)",
     "print": "Atsisiųsti PDF",
     "back": "← Grįžti į profilį",

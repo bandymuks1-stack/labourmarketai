@@ -76,7 +76,6 @@ export default async function JournalPage({
   const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
-  const tCv = await getTranslations("cvExport");
   const tQuick = await getTranslations("quickNav");
 
   const supabase = await createClient();
@@ -198,7 +197,7 @@ export default async function JournalPage({
         />
         <header className="flex flex-col gap-1">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {tCv("pageTitle")}
+            {t("navTitle")}
           </h1>
           <p className="text-sm leading-relaxed text-text-secondary">
             {t("navSubtitle")}
@@ -477,7 +476,7 @@ export default async function JournalPage({
       <header id="mano-cv-top" className="flex flex-col gap-1 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {tCv("pageTitle")}
+            {t("navTitle")}
           </h1>
           <Link
             href="/dashboard"
@@ -653,26 +652,27 @@ export default async function JournalPage({
           />
         )}
         {/* Journal → CV bridge: make the one path between the work log and the
-            CV it feeds visible. Honest counts only; confirmed entries are what
-            surface as proof on the Verified CV. */}
-        {totalEntryCount > 0 && (
-          <p
-            className="text-[11px] leading-relaxed text-text-muted"
-            data-testid="journal-cv-bridge"
+            CV it feeds visible. Honest counts only when entries exist; with no
+            entries yet the line stays as a quiet zero-state so the direct CV
+            link is ALWAYS reachable from the journal (cv-workspace-ia). */}
+        <p
+          className="text-[11px] leading-relaxed text-text-muted"
+          data-testid="journal-cv-bridge"
+        >
+          {totalEntryCount > 0
+            ? t("cvBridge", {
+                confirmed: confirmedEntryCount,
+                total: totalEntryCount,
+              })
+            : t("cvBridgeEmpty")}{" "}
+          <Link
+            href="/cv"
+            className="font-medium text-brand-blue hover:underline"
+            data-testid="journal-cv-bridge-link"
           >
-            {t("cvBridge", {
-              confirmed: confirmedEntryCount,
-              total: totalEntryCount,
-            })}{" "}
-            <Link
-              href="/cv"
-              className="font-medium text-brand-blue hover:underline"
-              data-testid="journal-cv-bridge-link"
-            >
-              {t("cvBridgeLink")} →
-            </Link>
-          </p>
-        )}
+            {t("cvBridgeLink")} →
+          </Link>
+        </p>
         {(entries ?? []).length === 0 ? (
           <EmptyState
             testId="journal-empty-state"
