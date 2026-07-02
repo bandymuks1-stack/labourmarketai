@@ -17,6 +17,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { recordTelemetryEvent } from "@/lib/telemetry/actions";
 import {
   hasMeaningfulEstimate,
   validateEstimateInputs,
@@ -251,6 +252,18 @@ export async function submitDemandRequest(
       .eq("profile_id", user.id);
     if (upErr) {
       console.error("[demand-request] structured-field update failed:", upErr.message);
+      // Observable drift signal (audit F-E3): if RLS/columns ever drift, the
+      // worker board silently loses country/team/start metadata — surface it
+      // in pilot_events instead of console-only. Fire-and-forget.
+      void recordTelemetryEvent({
+        sessionId: "server:demand-request",
+        route: "/dashboard",
+        locale: "lt",
+        eventName: "task_error",
+        taskName: "demand_structured_fields",
+        result: "error",
+        errorCode: upErr.code ?? "update_failed",
+      }).catch(() => {});
     }
   }
 

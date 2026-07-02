@@ -815,6 +815,7 @@
   "demandReadback": {
     "heading": "Jūsų pateikti poreikiai",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
+    "workerVisibilityNote": "Sąžininga būsena: darbuotojai pateiktų poreikių dar nemato — kol ruošiamas matomumas darbuotojams, kiekvieną užklausą komanda peržiūri rankiniu būdu.",
     "empty": "Dar nepateikėte nė vieno poreikio. Pateikite poreikį viršuje ir jis atsiras čia su savo būsena.",
     "created": "Sukurta",
     "manageHelp": "Juodraščius galite ištrinti. Pateiktas užklausas šiuo metu peržiūrime rankiniu būdu — savarankiškas redagavimas ar uždarymas dar ruošiamas.",
@@ -5116,7 +5117,7 @@
     "unstructuredTag": "nestruktūruotas",
     "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
-    "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų.",
+    "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
     "namePlaceholder": "Darbuotojas",
     "skillFit": "{pct}% — {matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
     "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",

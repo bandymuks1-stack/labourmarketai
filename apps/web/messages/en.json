@@ -815,6 +815,7 @@
   "demandReadback": {
     "heading": "Your submitted requests",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
+    "workerVisibilityNote": "Honest status: workers do not see submitted needs yet — the team reviews each request manually while worker visibility is being prepared.",
     "empty": "No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "Created",
     "manageHelp": "Drafts can be deleted. Submitted requests are reviewed manually — self-serve editing or closing is still being prepared.",
@@ -5116,7 +5117,7 @@
     "unstructuredTag": "not structured",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
     "needsSetup": "Couldn’t load. Please try again.",
-    "noCandidates": "No matching workers yet for this need.",
+    "noCandidates": "No matching workers yet for this need. Matches appear as workers add journal-backed skills — check back later or broaden the need.",
     "namePlaceholder": "Worker",
     "skillFit": "{pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
