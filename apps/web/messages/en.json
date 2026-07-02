@@ -2194,6 +2194,7 @@
       "textSavingLabel": "Saving…",
       "textSavedLabel": "Your text is saved",
       "textSaveErrorLabel": "Could not save your text. Please try again.",
+      "applyErrorLabel": "Could not save the selected skills. Please try again.",
       "textClaimNotVerified": "This is your own claim — not yet backed by work records"
     }
   },

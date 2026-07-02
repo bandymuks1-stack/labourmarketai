@@ -9,6 +9,7 @@
     "rosterNamed": "You're on {org}'s team roster. The organization owner still needs to add you to the organization before you can log work here."
   },
   "noContextCta": "Go to dashboard",
+  "noContextProfileCta": "Strengthen your profile meanwhile",
   "personalEntry": "Personal worker entry",
   "reviewNotEnabledNote": "Review is not enabled yet. You can log your work now — but for entries to be reviewed, the organization owner needs to enable journal review for you.",
   "chooseWorkType": "Choose work type",
