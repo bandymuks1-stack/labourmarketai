@@ -24,11 +24,11 @@ describe("current-space header makes the active space obvious + focused", () => 
       expect(comp).toMatch(new RegExp(`${role}:\\s*"(profile|company|agency|buyer)"`));
     }
   });
-  it("renders space name + purpose + a compact My spaces link", () => {
+  it("renders space name + purpose + a compact open-space link", () => {
     expect(comp).toMatch(/t\(`\$\{key\}\.name`\)/);
     expect(comp).toMatch(/t\(`\$\{key\}\.purpose`\)/);
-    expect(comp).toMatch(/t\("mySpaces"\)/);
-    expect(comp).toMatch(/data-testid="my-spaces-link"/);
+    expect(comp).toMatch(/t\("openSpace"\)/);
+    expect(comp).toMatch(/data-testid="open-space-link"/);
   });
   it("is mounted on the dashboard (current space shown at the top)", () => {
     expect((page.match(/<CurrentSpaceHeader role=\{role\} \/>/g) ?? []).length).toBeGreaterThanOrEqual(2);
@@ -39,7 +39,7 @@ describe("spaces namespace exists in LT + EN with switcher labels", () => {
   for (const [name, json] of [["lt", lt], ["en", en]] as const) {
     const s = json.spaces;
     it(`${name} has switcher + 4 space blocks`, () => {
-      for (const k of ["current", "mySpaces", "switchSpace", "addSpace"]) {
+      for (const k of ["current", "mySpaces", "openSpace", "switchSpace", "addSpace"]) {
         expect(s?.[k], `${name} spaces.${k}`).toBeTruthy();
       }
       for (const sp of ["profile", "company", "agency", "buyer"]) {
@@ -51,8 +51,10 @@ describe("spaces namespace exists in LT + EN with switcher labels", () => {
   it("LT/EN switcher labels match the spec", () => {
     expect(lt.spaces.mySpaces).toBe("Mano erdvės");
     expect(lt.spaces.switchSpace).toBe("Keisti erdvę");
+    expect(lt.spaces.openSpace).toBe("Atidaryti erdvę");
     expect(en.spaces.mySpaces).toBe("My spaces");
     expect(en.spaces.switchSpace).toBe("Switch space");
+    expect(en.spaces.openSpace).toBe("Open space");
   });
 });
 
@@ -111,15 +113,19 @@ describe("active /dashboard room shows only the current space (no cross-space so
     expect(account).not.toMatch(/<FeatureAvailabilityGrid\b/);
     expect(account).not.toMatch(/<IdentityActions\b/);
   });
-  it("the active room reaches account via the current-space header (not a duplicate handle)", () => {
-    // Slice human-nav-cleanup-v1 (PR E) removed the dashboard's bottom
-    // "Kitos mano erdvės" handle — it duplicated the account doorway that the
-    // <CurrentSpaceHeader> ("Mano erdvės" link) + the primary "Nustatymai" nav
-    // tab + the AccountMenu already provide. The current-space header remains the
-    // in-room doorway to account/other spaces.
+  it("the current-space header opens the ACTIVE space's hub, never settings", () => {
+    // Owner P0 2026-07-02: account is settings-only, so the header chip must
+    // NOT route there. It opens the active space's own hub (worker → profile,
+    // company → company, agency → agency, customer → buyer). Settings stays
+    // reachable via the avatar AccountMenu ("Nustatymai").
     const comp = read("components/app/current-space-header.tsx");
     expect(dashboard).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
-    expect(comp).toMatch(/href="\/dashboard\/account"/);
+    // no account route as a VALUE (the constraint comment may name the path)
+    expect(comp).not.toMatch(/["'`]\/dashboard\/account["'`]/);
+    expect(comp).toMatch(/profile: "\/dashboard\/profile"/);
+    expect(comp).toMatch(/company: "\/dashboard\/company"/);
+    expect(comp).toMatch(/agency: "\/dashboard\/agency"/);
+    expect(comp).toMatch(/buyer: "\/dashboard\/buyer"/);
   });
 });
 

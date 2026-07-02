@@ -5,8 +5,15 @@ import type { Role } from "@/lib/auth/actions";
 /**
  * Current-space header (room-based IA). Makes the space the user is currently
  * inside obvious and focused: space name + one short purpose sentence + a
- * compact "My spaces" entry to reach other spaces — WITHOUT loading other
- * spaces' content into this page. Read-only, copy-driven; no DB, no fake data.
+ * compact chip that OPENS the active space's own hub. Read-only, copy-driven;
+ * no DB, no fake data.
+ *
+ * Owner P0 (2026-07-02): the chip must NOT route to /dashboard/account —
+ * account is SETTINGS-ONLY since the 2026-06-25 IA cleanup, so the old
+ * "Mano erdvės" → account link landed users on "Nustatymai" instead of their
+ * workspace. Space SWITCHING lives in the header <RoleSwitcher/>; settings
+ * stays reachable via the avatar <AccountMenu/> ("Nustatymai"). This chip
+ * opens the active space's hub (worker → profile/player-card/CV hub).
  *
  * Maps the account's active role to its space:
  *   worker → personal profile, company → company workspace,
@@ -20,6 +27,16 @@ const ROLE_SPACE: Record<Role, "profile" | "company" | "agency" | "buyer"> = {
   agency: "agency",
   customer: "buyer",
 };
+
+/** Each space's hub route — the workspace the chip opens. No new routes:
+ *  these are the four existing room pages. The worker hub (/dashboard/profile)
+ *  already links onward to the CV at /cv. */
+const SPACE_ROUTE = {
+  profile: "/dashboard/profile",
+  company: "/dashboard/company",
+  agency: "/dashboard/agency",
+  buyer: "/dashboard/buyer",
+} as const satisfies Record<(typeof ROLE_SPACE)[Role], string>;
 
 export async function CurrentSpaceHeader({ role }: { role: Role }) {
   const t = await getTranslations("spaces");
@@ -41,11 +58,12 @@ export async function CurrentSpaceHeader({ role }: { role: Role }) {
           </h2>
         </div>
         <Link
-          href="/dashboard/account"
+          href={SPACE_ROUTE[key]}
           className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
-          data-testid="my-spaces-link"
+          data-testid="open-space-link"
+          aria-label={`${t("openSpace")}: ${t(`${key}.name`)}`}
         >
-          {t("mySpaces")} →
+          {t("openSpace")} →
         </Link>
       </div>
       <p className="text-xs leading-relaxed text-text-secondary">
