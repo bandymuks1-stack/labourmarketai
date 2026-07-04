@@ -221,7 +221,9 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "plumber", needles: ["santechn", "сантехник"] },
   { slug: "electrician", needles: ["elektr", "электр"] },
   { slug: "carpenter", needles: ["stali", "medien", "плотник", "столяр"] },
-  { slug: "mason", needles: ["mūr", "mur ", "каменщик", "кладк", "кирпич"] },
+  // EN "bricklayer" maps to the CANONICAL mason slug (LT "Mūrininkas" IS the
+  // bricklayer trade) — deliberately not a second profession slug (§2).
+  { slug: "mason", needles: ["mūr", "mur ", "каменщик", "кладк", "кирпич", "bricklay"] },
   { slug: "concrete_worker", needles: ["beton", "бетон"] },
   { slug: "welder", needles: ["suvirin", "сварк", "сварщик", "сваривал"] },
   { slug: "rebar_worker", needles: ["armatūr", "armatur", "арматур"] },
@@ -245,6 +247,7 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "translator", needles: ["vertej", "vertėj", "переводчик", "translator"] },
   { slug: "teacher", needles: ["mokytoj", "destytoj", "dėstytoj", "преподавател", "учител", "teacher"] },
   { slug: "caregiver", needles: ["slaugytoj", "сиделк", "caregiver"] },
+  { slug: "furniture_assembler", needles: ["baldu montuotoj", "baldų montuotoj", "baldu surinkėj", "baldu surinkej", "сборщик мебел", "furniture assembler"] },
 ];
 
 /** Higher-level work directions surfaced as a separate suggestion bucket. */
@@ -618,6 +621,31 @@ export const ACTIVITY_HINTS_LT: {
       "pakrov",
       "warehouse",
       "logistics", "склад", "грузил", "погрузк", "разгру", "логистик",
+    ],
+  },
+  {
+    // Furniture assembly — the owner-named carpentry/manufacturing-adjacent
+    // case ("Montavau baldus"). Verb+noun anchored (same shape as the
+    // furniture-fitting skill needles) and placed ABOVE the generic
+    // production row so "surinkau baldus" resolves to the furniture
+    // profession, not the factory one.
+    slug: "furniture_assembler",
+    sector: "manufacturing",
+    label: "Baldų surinkimas / montavimas",
+    needles: [
+      "montavau bald",
+      "montav bald",
+      "bald montav",
+      "baldu montav",
+      "baldų montav",
+      "surinkau bald",
+      "surinkome bald",
+      "baldu surinkim",
+      "baldų surinkim",
+      "furniture assembl",
+      "assembled furniture",
+      "сборка мебел",
+      "собирал мебел",
     ],
   },
   {

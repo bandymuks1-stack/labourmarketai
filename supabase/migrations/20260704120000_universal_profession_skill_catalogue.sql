@@ -29,8 +29,13 @@
 -- Content: 37 skills across transport/logistics, manufacturing/assembly,
 -- cleaning/facilities, office/admin, IT, creative, sales/customer service,
 -- hospitality/food, agriculture/gardening, care, education/languages and
--- events + 17 professions + their profession_skills links. Construction rows
+-- events + 18 professions + their profession_skills links. Construction rows
 -- are untouched — construction remains one profession family among many.
+-- (furniture_assembler added 2026-07-04 owner-correction pass, before first
+-- apply — same never-in-ledger in-place rule as the column correction above.
+-- "bricklayer" is deliberately NOT a new slug: that trade is the canonical,
+-- already-applied profession `mason` (LT "Mūrininkas"); a second slug would
+-- duplicate the same trade — doctrine §2.)
 --
 -- Safety: strictly additive — INSERT … ON CONFLICT DO NOTHING only. No DDL,
 -- no grants, no RLS change, no updates/deletes of existing rows. Idempotent.
@@ -101,6 +106,7 @@ insert into public.professions (slug, sector) values
   ('driver',                      'transport_logistics'),
   ('event_organizer',             'other'),
   ('farm_worker',                 'agriculture'),
+  ('furniture_assembler',         'manufacturing'),
   ('gardener',                    'agriculture'),
   ('office_administrator',        'office_admin'),
   ('production_worker',           'manufacturing'),
@@ -122,6 +128,8 @@ with link(prof_slug, skill_slug, is_core, ord) as (
     ('warehouse_worker','forklift-operation',false,3),('warehouse_worker','packaging',false,4),
     ('production_worker','production-line',true,1),('production_worker','assembly-work',false,2),
     ('production_worker','packaging',false,3),('production_worker','equipment-operation',false,4),
+    ('furniture_assembler','furniture-fitting',true,1),('furniture_assembler','assembly-work',false,2),
+    ('furniture_assembler','hand-tools',false,3),
     ('cleaner','cleaning-services',true,1),('cleaner','window-cleaning',false,2),
     ('cleaner','housekeeping',false,3),('cleaner','winter-service',false,4),
     ('office_administrator','administration',true,1),('office_administrator','document-handling',false,2),

@@ -80,6 +80,7 @@ export const PROFESSION_DIRECTIONS = [
   "driver",
   "warehouse_worker",
   "production_worker",
+  "furniture_assembler",
   "cleaner",
   "office_administrator",
   "software_developer",
