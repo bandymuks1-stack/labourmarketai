@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { extractJournalSuggestions } from "./extract-journal-suggestions";
-import { SKILL_HINTS_LT } from "./keywords";
+import { CONSTRUCTION_SKILL_HINT_SLUGS } from "./keywords";
 
 /**
  * Sector-neutral Work Journal recognition — the surface the journal composer
@@ -14,7 +14,9 @@ import { SKILL_HINTS_LT } from "./keywords";
  * (The project's universal recogniser core is covered separately in
  * cross-sector-recognition.test.ts; this proves the journal-facing layer.)
  */
-const CONSTRUCTION_SLUGS = new Set(SKILL_HINTS_LT.map((r) => r.slug));
+// Sector-tagged construction subset (the universal promotion made
+// SKILL_HINTS_LT span all sectors — driving/cooking slugs are NOT construction).
+const CONSTRUCTION_SLUGS = CONSTRUCTION_SKILL_HINT_SLUGS;
 
 function out(text: string) {
   const s = extractJournalSuggestions(text);

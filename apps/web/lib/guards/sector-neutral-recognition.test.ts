@@ -15,9 +15,10 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const engine = read("lib/structuring/universal-recognition.ts");
 const sectors = read("lib/structuring/sectors.ts");
 
-const CONSTRUCTION_SLUGS = new Set(
-  [...read("lib/structuring/keywords.ts").matchAll(/slug:\s*"([a-z-]+)"/g)].map((m) => m[1]),
-);
+// Universal promotion (2026-07-04): SKILL_HINTS_LT now spans the whole labour
+// market, so "everything in keywords.ts" is no longer a construction proxy —
+// the explicit sector tags are the source of truth.
+import { CONSTRUCTION_SKILL_HINT_SLUGS as CONSTRUCTION_SLUGS } from "@/lib/structuring/keywords";
 
 describe("no construction default / fallback", () => {
   it("the default sector is 'other', never construction", () => {

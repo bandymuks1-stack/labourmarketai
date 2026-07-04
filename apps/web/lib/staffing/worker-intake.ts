@@ -74,6 +74,26 @@ export const PROFESSION_DIRECTIONS = [
   "hvac_ventilation",
   "mechanic_technician",
   "warehouse_logistics",
+  // Universal profession families (professions.json + catalogue migration
+  // 20260704120000) — the intake starter list spans the whole labour market;
+  // construction is one family among many:
+  "driver",
+  "warehouse_worker",
+  "production_worker",
+  "cleaner",
+  "office_administrator",
+  "software_developer",
+  "customer_service_specialist",
+  "sales_assistant",
+  "cook",
+  "waiter",
+  "gardener",
+  "farm_worker",
+  "caregiver",
+  "event_organizer",
+  "translator",
+  "teacher",
+  "safety_specialist",
 ] as const;
 export type ProfessionDirection = (typeof PROFESSION_DIRECTIONS)[number];
 

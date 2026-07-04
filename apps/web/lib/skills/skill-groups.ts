@@ -39,6 +39,12 @@ const PROFESSION_SLUGS = new Set<string>([
   "electrician", "foreman", "general_laborer", "heavy_equipment_operator",
   "mason", "painter", "plumber", "rebar_worker", "roofer", "site_engineer",
   "site_manager", "tiler", "welder",
+  // universal profession families (catalogue 20260704120000) — construction
+  // is one family among many:
+  "caregiver", "cleaner", "cook", "customer_service_specialist", "driver",
+  "event_organizer", "farm_worker", "gardener", "office_administrator",
+  "production_worker", "safety_specialist", "sales_assistant",
+  "software_developer", "teacher", "translator", "waiter", "warehouse_worker",
 ]);
 
 /** Coordination / business / paperwork abilities. */
@@ -50,6 +56,8 @@ const ADMINISTRATIVE_SLUGS = new Set<string>([
   // catalogue but appear via self-declared claims / future sectors):
   "recruiting", "accounting", "client-communication", "document-handling",
   "procurement", "logistics-planning",
+  // universal catalogue (20260704120000):
+  "administration", "bookkeeping",
 ]);
 
 /** Transferable, non-trade-specific abilities. */
@@ -59,6 +67,8 @@ const GENERAL_SLUGS = new Set<string>([
   // cross-sector general abilities:
   "driving", "public-speaking", "languages", "computer-literacy", "teamwork",
   "customer-service",
+  // universal catalogue (20260704120000):
+  "translation", "teaching", "first-aid",
 ]);
 
 /**

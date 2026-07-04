@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { classifyEntryRecognition } from "./recognition-tiers";
+import { CONSTRUCTION_SKILL_HINT_SLUGS } from "./keywords";
 import { buildEntryDetectedSignals } from "../journal/entry-detected-signals";
 
 /**
@@ -252,8 +253,15 @@ describe("owner smoke P0 2026-07-02 — the exact owner entry is understood hone
 
   it("yields ZERO of the stale construction catalogue skills", () => {
     const s = signalsOf(OWNER_TEXT);
-    // No construction skill slug is recognised from this text at all.
-    expect(s.slugs).toHaveLength(0);
+    // Universal promotion (2026-07-04): this text now yields FIRST-CLASS
+    // non-construction skills (event-setup / cleaning-services / programming)
+    // — but never a construction slug.
+    for (const slug of s.slugs) {
+      expect(
+        CONSTRUCTION_SKILL_HINT_SLUGS.has(slug),
+        `construction slug '${slug}' recognised from the owner's non-construction entry`,
+      ).toBe(false);
+    }
     for (const name of FORBIDDEN_NAMES) {
       expect(s.all, `must not surface "${name}"`).not.toContain(
         name.toLowerCase(),

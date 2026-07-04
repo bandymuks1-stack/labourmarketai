@@ -121,6 +121,8 @@ describe("NO new DB migration in this PR", () => {
     // owner-approved apply 2026-07-02.
     // Bumped 95 -> 96 for the service-role report read grant
     // (20260702200000) — owner-gated apply.
-    expect(count).toBeLessThanOrEqual(96);
+    // Bumped 96 -> 97 for the universal profession/skill catalogue seed
+    // (20260704120000) — strictly additive INSERT-only, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(97);
   });
 });

@@ -79,7 +79,11 @@ describe("extractJournalSuggestions — multi-fragment LT (owner sentence)", () 
     expect(s.fragments[2].rawPhrase).toContain("5 valandas");
   });
 
-  it("does not mark fragments as a verified slug for cashier/driver (no fake taxonomy)", () => {
+  it("marks cashier/driver fragments with their real universal professions (never construction)", () => {
+    // Universal promotion (2026-07-04): cashier/driver day-work resolves to the
+    // first-class sales_assistant / driver professions (professions.json +
+    // migration 20260704120000) — same mechanism as a construction trade, and
+    // still suggestion-only (§7: nothing is verified by recognition).
     const s = extractJournalSuggestions(ownerSentence);
     const cashier = s.fragments.find((f) =>
       f.rawPhrase.toLowerCase().includes("kasinink"),
@@ -87,9 +91,9 @@ describe("extractJournalSuggestions — multi-fragment LT (owner sentence)", () 
     const driver = s.fragments.find((f) =>
       f.rawPhrase.toLowerCase().includes("pavežėj"),
     );
-    expect(cashier?.activitySlug).toBeNull();
-    expect(driver?.activitySlug).toBeNull();
-    // But the human label is set so the worker sees the work direction.
+    expect(cashier?.activitySlug).toBe("sales_assistant");
+    expect(driver?.activitySlug).toBe("driver");
+    // The human label is set so the worker sees the work direction.
     expect(cashier?.activityLabel).not.toBeNull();
     expect(driver?.activityLabel).not.toBeNull();
   });

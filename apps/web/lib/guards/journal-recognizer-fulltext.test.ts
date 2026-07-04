@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
-import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
+import { CONSTRUCTION_SKILL_HINT_SLUGS } from "@/lib/structuring/keywords";
 import { dedupeSignalsByLabel } from "@/lib/structuring/signal-dedupe";
 import { localizeCapabilityLabel } from "@/lib/structuring/capability-labels";
 
@@ -30,9 +30,10 @@ const SKILL_NAMES_LT = JSON.parse(
  * are exact: a regression flips a value and the test fails.
  */
 
-/** Every construction SKILL slug the recogniser knows. None of these may be
- *  recognised from a website/web-design entry. */
-const CONSTRUCTION_SLUGS = new Set(SKILL_HINTS_LT.map((h) => h.slug));
+/** Every construction SKILL slug the recogniser knows (sector-tagged subset —
+ *  the universal promotion made SKILL_HINTS_LT span all sectors). None of
+ *  these may be recognised from a website/web-design entry. */
+const CONSTRUCTION_SLUGS = CONSTRUCTION_SKILL_HINT_SLUGS;
 
 /** Construction / interior labels that must never label a web-design entry. */
 const CONSTRUCTION_OR_INTERIOR_LABELS = [

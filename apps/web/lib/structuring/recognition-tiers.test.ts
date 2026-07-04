@@ -36,15 +36,31 @@ describe("Tier 1 — confident AUTO signal", () => {
   });
 });
 
-describe("Tier 2 — CANDIDATE suggestions (not auto-linked)", () => {
-  // Each was SAFE EMPTY before; now a similar candidate is OFFERED.
-  const CASES: { text: string; slug: string }[] = [
+describe("Tier 1b — universal first-class AUTO signals (2026-07-04 promotion)", () => {
+  // These sectors were candidate-only before the universal catalogue
+  // promotion. They are now first-class catalogue skills (skill-names.json +
+  // migration 20260704120000) recognised exactly like a construction trade —
+  // still suggested-only, never auto-verified (§7).
+  const PROMOTED: { text: string; slug: string }[] = [
     { text: "Pristačiau siuntas po miestą", slug: "delivery-driving" },
     { text: "rinkau uzsakymus, pakavau, etiketavau", slug: "order-picking" },
     { text: "valiau sniega nuo taku, bariau druska", slug: "winter-service" },
     { text: "kuriau logotipą, maketavau bukletą", slug: "graphic-design" },
-    { text: "Testavau aplikaciją, radau klaidas", slug: "qa-testing" },
     { text: "auklejau vaikus, vedziau i darzeli", slug: "childcare" },
+  ];
+  for (const { text, slug } of PROMOTED) {
+    it(`"${text}" → first-class AUTO ${slug}`, () => {
+      const r = classifyEntryRecognition(text);
+      expect(r.tier, text).toBe("auto_signal");
+      expect(r.autoSignalSlugs, text).toContain(slug);
+    });
+  }
+});
+
+describe("Tier 2 — CANDIDATE suggestions (not auto-linked)", () => {
+  // Wording too weak for a confident first-class signal still gets an OFFER.
+  const CASES: { text: string; slug: string }[] = [
+    { text: "Testavau aplikaciją, radau klaidas", slug: "qa-testing" },
   ];
   for (const { text, slug } of CASES) {
     it(`"${text}" → candidate ${slug}`, () => {
@@ -71,7 +87,7 @@ describe("Tier 2 — CANDIDATE suggestions (not auto-linked)", () => {
   }
 
   it("candidates are OFFERS, not current linked skills (no fact, no fake slug)", () => {
-    const r = classifyEntryRecognition("kuriau logotipą, maketavau bukletą");
+    const r = classifyEntryRecognition("Testavau aplikaciją, radau klaidas");
     expect(r.tier).toBe("candidate_suggestion");
     // No auto signal was asserted alongside the candidate.
     expect(r.autoSignalSlugs).toEqual([]);
@@ -88,17 +104,18 @@ describe("Tier 2 — CANDIDATE suggestions (not auto-linked)", () => {
   });
 
   it("no duplicate candidate concept (one slug, once)", () => {
-    const slugs = classifyEntryRecognition("Pristačiau siuntas po miestą").candidates.map((c) => c.slug);
+    const slugs = classifyEntryRecognition("Testavau aplikaciją, radau klaidas").candidates.map((c) => c.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 });
 
 describe("Tier 3 — MANUAL ONLY (truly unclear, never invent a skill)", () => {
+  // "valiau" (bare "I cleaned") left this list with the universal promotion:
+  // it is now the honest first-class cleaning-services signal, not silence.
   const VAGUE = [
     "dirbau visa diena, labai pavargau",
     "buvo daug darbo, padariau ka reikejo",
     "tvarkiau reikalus",
-    "valiau",
     "objektas Vilniuje, Kalvarijų g. 125",
     "9h",
   ];

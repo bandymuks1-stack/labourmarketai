@@ -132,9 +132,14 @@ const RULES: readonly SkillRule[] = [
   { domain: "web_design", slug: null, label: "Puslapio / svetainės dizainas", objects: ["puslapio dizain", "puslap", "web dizain", "web design", "interneto svetain", "internetin svetain", "tinklap"], confidence: "medium" },
   { domain: "admin", slug: null, label: "Sandėlio / atsargų administravimas", verbs: ["tvark", "skaiciav", "inventoriz", "tikrin"], objects: ["sandel", "likuc", "atsarg"], confidence: "medium" },
   { domain: "admin", slug: null, label: "Excel ataskaitų pildymas", objects: ["excel", "ataskait"], confidence: "medium" },
-  { domain: "admin", slug: null, label: "Sąskaitų rengimas", verbs: ["ruos", "reng", "isras", "dar", "pild"], objects: ["saskait"], confidence: "medium" },
-  { domain: "cleaning", slug: "site-cleaning", label: "Patalpų valymas", verbs: ["val", "tvark", "siurb"], objects: ["patalp", "biur", "kabinet", "grind"], confidence: "high" },
-  { domain: "cleaning", slug: null, label: "Langų valymas", verbs: ["plov", "val"], objects: ["lang"], confidence: "high" },
+  { domain: "admin", slug: "bookkeeping", label: "Sąskaitų rengimas", verbs: ["ruos", "reng", "isras", "dar", "pild"], objects: ["saskait"], confidence: "medium" },
+  // Document handling — "Pildžiau dokumentus" is office/admin work, first-class.
+  { domain: "admin", slug: "document-handling", label: "Dokumentų tvarkymas", verbs: ["pild", "tvark", "registrav", "ruos", "archyvav"], objects: ["dokument", "blank", "документ"], confidence: "high" },
+  // Generic premises cleaning used to resolve to the CONSTRUCTION slug
+  // site-cleaning — the construction-first leak. It is the universal
+  // cleaning_facility skill cleaning-services (catalogue 20260704120000).
+  { domain: "cleaning", slug: "cleaning-services", label: "Patalpų valymas", verbs: ["val", "tvark", "siurb"], objects: ["patalp", "biur", "kabinet", "grind", "ofis"], confidence: "high" },
+  { domain: "cleaning", slug: "window-cleaning", label: "Langų valymas", verbs: ["plov", "val"], objects: ["lang"], confidence: "high" },
   { domain: "cleaning", slug: null, label: "Paviršių dezinfekavimas", verbs: ["dezinfek"], objects: ["pavirs", "patalp", "dezinfek"], confidence: "high" },
   { domain: "electrical", slug: null, label: "Kabelių montavimas", verbs: ["montav", "ties", "klot", "trauk"], objects: ["kabel", "laid"], confidence: "high" },
   { domain: "electrical", slug: "electrical-install", label: "Elektros skydo darbai", verbs: ["jung", "montav", "instal"], objects: ["skyd", "elektros skyd"], confidence: "high" },
@@ -144,14 +149,14 @@ const RULES: readonly SkillRule[] = [
   //    worker who logs cooking / driving / cleaning gets those too, and a pure
   //    cooking entry NEVER yields a construction suggestion. EN + RU folded
   //    needles sit beside the LT ones (Cyrillic passes through foldText). ──
-  { domain: "cooking", slug: null, label: "Maisto gaminimas", objects: ["maist", "virtuv", "patiek", "pietus", "sriub", "salot", "kepin", "cook", "kitchen", "meal", "готов", "кухн", "блюд", "еда"], confidence: "high" },
-  { domain: "gardening", slug: null, label: "Sodininkystė / aplinkos priežiūra", objects: ["zole", "zoles", "vejos", "vejon", "krum", "geliu", "gelyn", "darzo", "medeli", "sodinim", "ravej", "garden", "lawn", "сад", "газон", "трав", "цвет"], confidence: "high" },
-  { domain: "driving_logistics", slug: null, label: "Vairavimas / transportas / logistika", objects: ["krovini", "marsrut", "logistik", "reisus", "reisai", "sunkvezim", "vilkik", "pristatym", "cargo", "delivery", "logistic", "груз", "маршрут", "достав", "рейс"], confidence: "high" },
-  { domain: "warehouse", slug: null, label: "Sandėlio darbai", objects: ["paletes", "palet", "komplektav", "iskrovim", "pakrovim", "stelaz", "sandelio darb", "prekiu surink", "pallet", "warehouse", "forklift", "склад", "палет", "комплект"], confidence: "high" },
-  { domain: "customer_service", slug: null, label: "Klientų aptarnavimas", objects: ["klient", "aptarnav", "konsultav", "kasos", "kasoje", "parduotuv", "customer", "cashier", "клиент", "касс", "продаж", "обслуж"], confidence: "high" },
+  { domain: "cooking", slug: "cooking", label: "Maisto gaminimas", objects: ["maist", "virtuv", "patiek", "pietus", "sriub", "salot", "kepin", "cook", "kitchen", "meal", "готов", "кухн", "блюд", "еда"], confidence: "high" },
+  { domain: "gardening", slug: "gardening", label: "Sodininkystė / aplinkos priežiūra", objects: ["zole", "zoles", "vejos", "vejon", "krum", "geliu", "gelyn", "darzo", "medeli", "sodinim", "ravej", "sodo", "priziurejau sod", "garden", "lawn", "сад", "газон", "трав", "цвет"], confidence: "high" },
+  { domain: "driving_logistics", slug: "cargo-transport", label: "Vairavimas / transportas / logistika", objects: ["krovini", "marsrut", "logistik", "reisus", "reisai", "sunkvezim", "vilkik", "pristatym", "cargo", "delivery", "logistic", "груз", "маршрут", "достав", "рейс"], confidence: "high" },
+  { domain: "warehouse", slug: "warehouse-operations", label: "Sandėlio darbai", objects: ["paletes", "palet", "komplektav", "iskrovim", "pakrovim", "stelaz", "sandelio darb", "prekiu surink", "pallet", "warehouse", "forklift", "склад", "палет", "комплект"], confidence: "high" },
+  { domain: "customer_service", slug: "customer-service", label: "Klientų aptarnavimas", objects: ["klient", "aptarnav", "konsultav", "kasos", "kasoje", "parduotuv", "customer", "cashier", "клиент", "касс", "продаж", "обслуж"], confidence: "high" },
   { domain: "it", slug: null, label: "IT / programavimas", objects: ["programav", "kodo", "kodas", "duomenu baz", "serveri", "sistem", "aplikacij", "testav", "diegim", "konfigurav", "software", "server", "database", "программ", "сервер", "систем"], confidence: "medium" },
-  { domain: "language", slug: null, label: "Vertimas / kalbos darbai", objects: ["vertim", "verciau", "vert tekst", "kalbos darb", "teksto redagav", "korektur", "subtitr", "translat", "перевод", "редактир", "коррект"], confidence: "high" },
-  { domain: "equipment", slug: null, label: "Įrangos / mechanizmų operavimas", objects: ["krautuv", "ekskavator", "stakl", "mechanizm", "iranga", "traktori", "forklift", "excavator", "погрузчик", "экскаватор", "станок", "оборудован"], confidence: "high" },
+  { domain: "language", slug: "translation", label: "Vertimas / kalbos darbai", objects: ["vertim", "verciau", "vert tekst", "kalbos darb", "teksto redagav", "korektur", "subtitr", "translat", "перевод", "редактир", "коррект"], confidence: "high" },
+  { domain: "equipment", slug: "equipment-operation", label: "Įrangos / mechanizmų operavimas", objects: ["krautuv", "ekskavator", "stakl", "mechanizm", "iranga", "traktori", "forklift", "excavator", "погрузчик", "экскаватор", "станок", "оборудован"], confidence: "high" },
   { domain: "care", slug: null, label: "Priežiūra / slauga", objects: ["pacient", "slaug", "vaiku prieziur", "seneli", "ligoni", "globos", "patient", "nursing", "пациент", "уход", "больн"], confidence: "high" },
 ];
 

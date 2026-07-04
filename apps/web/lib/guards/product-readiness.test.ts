@@ -1560,7 +1560,15 @@ describe("no migration files added by this sprint", () => {
     // pilot_events + column-scoped (id,active_role)/(profile_id,role) reads
     // for the local owner activation report; no anon/authenticated change.
     // Reversible (supabase/rollbacks/20260702200000_*.down.sql). Owner-gated.
-    const SPRINT_BASELINE = 96;
+    // Bumped 96 -> 97 for the universal profession/skill catalogue seed
+    // (20260704120000_universal_profession_skill_catalogue.sql): strictly
+    // additive INSERT … ON CONFLICT DO NOTHING of 37 non-construction skills,
+    // 17 professions + profession_skills links, making every profession
+    // family first-class (construction stays one family among many). No DDL,
+    // no grants, no RLS change. Reversible
+    // (supabase/rollbacks/20260704120000_*.down.sql, guarded deletes).
+    // Owner-gated apply.
+    const SPRINT_BASELINE = 97;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
