@@ -5332,7 +5332,19 @@
       "confirm_recognized_need": "Toliau: patvirtinkite atpažintus reikalavimus",
       "structure_demand": "Toliau: aprašykite poreikį, kad įgūdžius būtų galima struktūruoti"
     },
-    "interestBadge": "Išreiškė susidomėjimą"
+    "interestBadge": "Išreiškė susidomėjimą",
+    "ack": {
+      "status": {
+        "interested": "Naujas susidomėjimas",
+        "reviewed": "Peržiūrėta",
+        "contacted": "Pažymėta: susisiekta"
+      },
+      "markReviewed": "Žymėti kaip peržiūrėtą",
+      "markContacted": "Žymėti: susisiekta",
+      "internalNote": "Tik vidinis įrašas — darbuotojui ar už platformos ribų niekas nesiunčiama.",
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "notAvailable": "Patvirtinimas dar neįjungtas."
+    }
   },
   "planBoundary": {
     "title": "Ką apima mokami planai",
@@ -5706,7 +5718,9 @@
       "sent": "Susidomėjimas išsiųstas",
       "withdraw": "Atšaukti susidomėjimą",
       "internalNote": "Tai sukuria tik vidinį signalą. Jokia žinutė už platformos ribų nesiunčiama.",
-      "error": "Nepavyko išsaugoti. Bandykite dar kartą."
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
+      "contacted": "Įmonė pažymėjo: susisiekta"
     }
   },
   "workerIntake": {

@@ -1702,7 +1702,19 @@
       "confirm_recognized_need": "[EN] Next: confirm the recognized requirements",
       "structure_demand": "[EN] Next: describe the need so its skills can be structured"
     },
-    "interestBadge": "[EN] Expressed interest"
+    "interestBadge": "[EN] Expressed interest",
+    "ack": {
+      "status": {
+        "interested": "[EN] New interest",
+        "reviewed": "[EN] Reviewed",
+        "contacted": "[EN] Marked contacted"
+      },
+      "markReviewed": "[EN] Mark reviewed",
+      "markContacted": "[EN] Mark contacted",
+      "internalNote": "[EN] Internal record only — nothing is sent to the worker or outside the platform.",
+      "error": "[EN] Could not save. Try again.",
+      "notAvailable": "[EN] Acknowledgement is not enabled yet."
+    }
   },
   "waze": {
     "open": "Openen in Waze"

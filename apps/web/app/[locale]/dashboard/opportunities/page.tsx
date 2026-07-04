@@ -392,6 +392,8 @@ export default async function OpportunitiesPage({
                       labels={{
                         express: t("interest.express"),
                         sent: t("interest.sent"),
+                        reviewed: t("interest.reviewed"),
+                        contacted: t("interest.contacted"),
                         withdraw: t("interest.withdraw"),
                         internalNote: t("interest.internalNote"),
                         error: t("interest.error"),

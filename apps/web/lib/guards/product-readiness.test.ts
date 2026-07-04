@@ -1585,8 +1585,14 @@ describe("no migration files added by this sprint", () => {
     // interest table mirroring demand_shortlist (RLS default-closed, grant to
     // authenticated only, @human-gate-approved needs-human-gate DRAFT).
     // Reversible (supabase/rollbacks/20260704230000_*.down.sql, 0-row
-    // guarded). Owner-gated apply via Supabase MCP.
-    const SPRINT_BASELINE = 100;
+    // guarded). Owner-gated apply via Supabase MCP (APPLIED 2026-07-05).
+    // Bumped 100 -> 101 for company interest acknowledgement (PR7,
+    // 20260705120000_demand_interest_company_ack.sql): ONE gated SECURITY
+    // DEFINER RPC (ownership-checked, reviewed/contacted only, withdrawn
+    // immutable, status+updated_at only); execute revoked from public/anon,
+    // granted to authenticated; @human-gate-approved needs-human-gate DRAFT;
+    // rollback drops the function only.
+    const SPRINT_BASELINE = 101;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

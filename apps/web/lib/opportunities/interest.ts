@@ -156,6 +156,57 @@ export async function listMyInterestSignals(
   }
 }
 
+export type AcknowledgeResult =
+  | { kind: "ok"; status: InterestStatus }
+  | { kind: "invalid" }
+  | { kind: "not-owner" }
+  | { kind: "no-signal" }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * Company acknowledgement of a worker's interest signal (PR7): sets
+ * 'reviewed' or 'contacted' through the gated SECURITY DEFINER RPC
+ * `acknowledge_demand_interest` (ownership + status whitelist + withdrawn
+ * immutability are enforced INSIDE the function, never trusted to the
+ * client). INTERNAL state only — nothing is sent anywhere.
+ */
+export async function acknowledgeInterest(input: {
+  requestId: string;
+  workerId: string;
+  status: string;
+}): Promise<AcknowledgeResult> {
+  if (!input.requestId || !input.workerId) return { kind: "invalid" };
+  if (input.status !== "reviewed" && input.status !== "contacted") {
+    return { kind: "invalid" };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-owner" };
+
+  try {
+    const { data, error } = await asAny(supabase).rpc("acknowledge_demand_interest", {
+      p_request_id: input.requestId,
+      p_worker_id: input.workerId,
+      p_status: input.status,
+    });
+    if (error) {
+      const code = (error as { code?: string }).code;
+      if (code === "42501") return { kind: "not-owner" };
+      if (code === "42883" || code === RELATION_NOT_FOUND) {
+        return { kind: "needs-migration" }; // RPC not applied yet
+      }
+      return { kind: "error", message: error.message };
+    }
+    if (data !== true) return { kind: "no-signal" };
+    return { kind: "ok", status: input.status as InterestStatus };
+  } catch {
+    return { kind: "needs-migration" };
+  }
+}
+
 /** Interest signals on the company's OWN demand (RLS also enforces this;
  *  the explicit ownership check gives a clean signal, mirroring setShortlist). */
 export async function listDemandInterestForCompany(

@@ -5,6 +5,7 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
+import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { FeatureNote } from "@/components/app/feature-note";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
@@ -420,6 +421,27 @@ export default async function CompanyScoutingPage({
                     </div>
                   ) : null}
                 </div>
+
+                {/* Company acknowledgement of a REAL worker interest signal
+                    (PR7) — internal record only; never rendered without an
+                    actual signal, nothing is sent anywhere. */}
+                {result.interestByWorker[c.workerId] ? (
+                  <CompanyInterestAck
+                    locale={locale}
+                    requestId={result.demand.id}
+                    workerId={c.workerId}
+                    initialStatus={result.interestByWorker[c.workerId]}
+                    labels={{
+                      statusLabel: (s) =>
+                        t.has(`ack.status.${s}`) ? t(`ack.status.${s}` as never) : s,
+                      markReviewed: t("ack.markReviewed"),
+                      markContacted: t("ack.markContacted"),
+                      internalNote: t("ack.internalNote"),
+                      error: t("ack.error"),
+                      notAvailable: t("ack.notAvailable"),
+                    }}
+                  />
+                ) : null}
 
                 <ScoutingShortlistButtons
                   locale={locale}

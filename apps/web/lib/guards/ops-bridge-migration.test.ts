@@ -235,7 +235,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 100 for the worker express-interest signal (20260704230000
     // demand_interest_signals; additive RED: worker-owned interest table
     // mirroring demand_shortlist, default-closed RLS + demand-owner read,
-    // grant to authenticated only; needs-human-gate DRAFT, NOT applied).
-    expect(guard).toMatch(/SPRINT_BASELINE = 100/);
+    // grant to authenticated only; APPLIED to prod via MCP 2026-07-05).
+    // then to 101 for company interest acknowledgement (20260705120000;
+    // additive RED: ONE ownership-checked SECURITY DEFINER RPC setting
+    // reviewed/contacted only, withdrawn immutable; needs-human-gate
+    // DRAFT, NOT applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 101/);
   });
 });

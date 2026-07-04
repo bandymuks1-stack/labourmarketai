@@ -129,7 +129,9 @@ describe("NO new DB migration in this PR", () => {
     // class-E labour-market gaps) — INSERT-only, idempotent, owner-gated.
     // Bumped 99 -> 100 for the worker express-interest signal
     // (20260704230000 demand_interest_signals) — additive worker-owned
-    // table, needs-human-gate DRAFT, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(100);
+    // table, applied to prod via MCP 2026-07-05.
+    // Bumped 100 -> 101 for company interest acknowledgement
+    // (20260705120000) — one gated SECURITY DEFINER RPC, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(101);
   });
 });

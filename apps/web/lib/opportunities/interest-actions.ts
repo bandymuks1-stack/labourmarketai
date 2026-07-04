@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import {
   expressInterest,
   withdrawInterest,
+  acknowledgeInterest,
+  type AcknowledgeResult,
   type InterestWriteResult,
 } from "@/lib/opportunities/interest";
 
@@ -32,6 +34,19 @@ export async function withdrawInterestAction(
   const result = await withdrawInterest({ requestId });
   if (result.kind === "ok") {
     revalidatePath(`/${locale}/dashboard/opportunities`);
+  }
+  return result;
+}
+
+export async function acknowledgeInterestAction(
+  locale: string,
+  requestId: string,
+  workerId: string,
+  status: "reviewed" | "contacted",
+): Promise<AcknowledgeResult> {
+  const result = await acknowledgeInterest({ requestId, workerId, status });
+  if (result.kind === "ok") {
+    revalidatePath(`/${locale}/dashboard/company/scouting`);
   }
   return result;
 }
