@@ -126,9 +126,15 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             startPeriod: (row.start_period as string | null) ?? null,
             accommodation: (row.accommodation as string | null) ?? null,
             companyName: safeApprovedCompanyName(row),
+            // Present only after the PR8 location-label RPC is applied.
+            locationLabel: (row.location_label as string | null) ?? null,
           };
           const fit = computeOpportunityFit(readiness, need);
-          const { need: matchNeed } = needFromRoleText(need.roleText, need.country);
+          const { need: matchNeed } = needFromRoleText(
+            need.roleText,
+            need.country,
+            need.locationLabel ?? null,
+          );
           const match = matchWorkerToNeed(matchNeed, ctx.subject);
           const nextAction = workerOpportunityNextAction({
             profileFitStatus: fit.status,

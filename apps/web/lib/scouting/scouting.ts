@@ -195,7 +195,28 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
     // bridge unavailable → slugs-only (still fully functional)
   }
 
-  const { need, source } = buildNeed(req, escoUriToSlug);
+  // Structured market-map location for THIS demand (owner-scoped RLS read;
+  // city granularity) — beats the free-text location fallback when present.
+  let structuredCity: string | null = null;
+  try {
+    const { data: loc } = await asAny(supabase)
+      .from("company_demand_locations")
+      .select("city, location_label, active, updated_at")
+      .eq("request_id", requestId)
+      .eq("active", true)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const label = ((loc?.city ?? loc?.location_label ?? "") as string).trim();
+    structuredCity = label !== "" ? label : null;
+  } catch {
+    // table absent in this environment → free-text fallback below
+  }
+
+  const { need, source } = buildNeed(
+    structuredCity ? { ...req, location: structuredCity } : req,
+    escoUriToSlug,
+  );
   const demand: CompanyDemand = {
     id: req.id,
     title: req.title ?? "—",

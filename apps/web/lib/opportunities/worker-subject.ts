@@ -36,13 +36,15 @@ export async function buildOwnWorkerContext(
 ): Promise<OwnWorkerContext | null> {
   const { data: worker } = await asAny(supabase)
     .from("workers")
-    .select("id, availability_status, available_from, current_location_country")
+    .select(
+      "id, availability_status, available_from, current_location_country, preferred_countries",
+    )
     .eq("profile_id", profileId)
     .maybeSingle();
   if (!worker) return null;
   const workerId = worker.id as string;
 
-  const [{ data: skillRows }, { data: prof }] = await Promise.all([
+  const [{ data: skillRows }, { data: prof }, prefLocRes] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
       .select("id, source, verified, skills ( slug )")
@@ -53,6 +55,19 @@ export async function buildOwnWorkerContext(
       .eq("worker_id", workerId)
       .eq("is_primary", true)
       .maybeSingle(),
+    // OWN preferred locations (own-rows RLS, §20 — never readable by
+    // employers). City feeds the worker-side city tier of the match engine;
+    // the table may not exist in every environment → graceful null.
+    asAny(supabase)
+      .from("preferred_locations")
+      .select("city, country_code, priority, active")
+      .eq("profile_id", profileId)
+      .eq("active", true)
+      .order("priority", { ascending: true })
+      .then(
+        (r: { data: unknown }) => r,
+        () => ({ data: null }),
+      ),
   ]);
 
   const professionSlug: string | null =
@@ -80,6 +95,25 @@ export async function buildOwnWorkerContext(
     ? String(worker.current_location_country).toUpperCase()
     : null;
 
+  // Preferred locations (own rows): first active city by priority + the
+  // union of preferred country codes (workers column ∪ preferred rows).
+  const prefRows = ((prefLocRes?.data ?? []) as {
+    city: string | null;
+    country_code: string | null;
+  }[]);
+  const preferredCity =
+    prefRows.map((r) => (r.city ?? "").trim()).find((c) => c !== "") ?? null;
+  const preferredCountries = [
+    ...new Set(
+      [
+        ...(((worker.preferred_countries as string[] | null) ?? []) as string[]),
+        ...prefRows
+          .map((r) => (r.country_code ?? "").trim().toUpperCase())
+          .filter((c) => c !== ""),
+      ].map((c) => c.toUpperCase()),
+    ),
+  ];
+
   return {
     workerId,
     skillRowCount: (skillRows ?? []).length,
@@ -92,6 +126,8 @@ export async function buildOwnWorkerContext(
       skills: [...ownSkillTiers.entries()].map(([uri, evidence]) => ({ uri, evidence })),
       professionSlug,
       country,
+      city: preferredCity,
+      preferredCountries,
       availabilityStatus: (worker.availability_status as string | null) ?? null,
       availableFrom: (worker.available_from as string | null) ?? null,
     },

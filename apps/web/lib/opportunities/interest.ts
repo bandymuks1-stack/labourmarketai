@@ -79,6 +79,7 @@ export async function expressInterest(input: {
   const { need, source } = needFromRoleText(
     (visibleRow.role_text as string | null) ?? null,
     (visibleRow.country as string | null) ?? null,
+    (visibleRow.location_label as string | null) ?? null,
   );
   const match = matchWorkerToNeed(need, ctx.subject);
   const snapshot = buildMatchSnapshot(match, source);
