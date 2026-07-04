@@ -1573,7 +1573,14 @@ describe("no migration files added by this sprint", () => {
     // rebar_worker / site_manager were never migration-seeded (locale-JSON
     // only; their 0011 links silently no-opped). INSERT-only, idempotent,
     // reversible (supabase/rollbacks/20260704130000_*.down.sql). Owner-gated.
-    const SPRINT_BASELINE = 98;
+    // Bumped 98 -> 99 for the wave-2 catalogue expansion
+    // (20260704150000_universal_catalogue_expansion_wave2.sql): strictly
+    // additive INSERT … ON CONFLICT DO NOTHING of 21 skills + 13 professions
+    // + links filling the measured class-E labour-market gaps (audit
+    // 2026-07-04 §4E). No DDL, no grants, no RLS change. Reversible
+    // (supabase/rollbacks/20260704150000_*.down.sql, guarded deletes).
+    // Owner-gated apply.
+    const SPRINT_BASELINE = 99;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

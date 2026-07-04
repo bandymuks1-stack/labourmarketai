@@ -52,6 +52,9 @@ const SECTOR_LABEL: Record<SectorKey, L> = {
   education: { en: "Education & training", lt: "Švietimas ir mokymai", ru: "Образование и обучение" },
   cleaning_facility: { en: "Cleaning & facilities", lt: "Valymas ir patalpos", ru: "Уборка и помещения" },
   agriculture: { en: "Agriculture", lt: "Žemės ūkis", ru: "Сельское хозяйство" },
+  repair_maintenance: { en: "Repair & maintenance", lt: "Remontas ir priežiūra", ru: "Ремонт и обслуживание" },
+  beauty_services: { en: "Beauty & personal services", lt: "Grožio paslaugos", ru: "Красота и персональные услуги" },
+  hr_recruitment: { en: "HR & recruitment", lt: "Personalas ir atranka", ru: "HR и подбор персонала" },
   other: { en: "Other", lt: "Kita", ru: "Другое" },
 };
 
