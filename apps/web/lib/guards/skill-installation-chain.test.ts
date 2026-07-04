@@ -32,7 +32,10 @@ import {
 
 const APP_ROOT = join(__dirname, "..", "..");
 const MIGRATIONS_DIR = join(APP_ROOT, "..", "..", "supabase", "migrations");
-const LOCALES = ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"];
+// 12 taxonomy locales since 2026-07-04 (owner mandate): "fi" joined as a
+// taxonomy+recognition locale (doctrine §2.4 amendment flagged in PR3B).
+// Removing any file below — including messages/fi/ — fails this guard.
+const LOCALES = ["da", "de", "en", "et", "fi", "lt", "lv", "nl", "no", "pl", "ru", "sv"];
 
 const readJson = (rel: string): Record<string, string> =>
   JSON.parse(readFileSync(join(APP_ROOT, rel), "utf8")) as Record<string, string>;
@@ -121,7 +124,7 @@ describe("chain: locale registry and canonical seeds are the SAME catalogue", ()
     expect([...SEEDED_PROFESSIONS].sort()).toEqual(Object.keys(professionsLt).sort());
   });
 
-  it("all 11 locales carry identical taxonomy keys", () => {
+  it("all 12 taxonomy locales carry identical taxonomy keys", () => {
     const ltSkills = Object.keys(skillNamesLt).sort();
     const ltProfs = Object.keys(professionsLt).sort();
     for (const loc of LOCALES) {

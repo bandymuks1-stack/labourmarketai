@@ -1,0 +1,12 @@
+{
+  "minutes": "minuuttia",
+  "hours": "tuntia",
+  "days": "päivää",
+  "square_meters": "m²",
+  "meters": "m",
+  "pieces": "kpl",
+  "kilograms": "kg",
+  "packages": "pakkausta",
+  "box_per_day": "laatikkoa/päivä",
+  "square_meters_per_day": "m²/päivä"
+}

@@ -1,0 +1,12 @@
+{
+  "collaborator": "Yhteistyökumppani",
+  "consultant": "Konsultti",
+  "employee": "Työntekijä",
+  "freelancer": "Freelancer",
+  "manager": "Esihenkilö",
+  "owner": "Omistaja",
+  "student": "Opiskelija",
+  "unemployed": "Työtön",
+  "volunteer": "Vapaaehtoinen",
+  "external_manager": "Ulkoinen esihenkilö (asiakas)"
+}
