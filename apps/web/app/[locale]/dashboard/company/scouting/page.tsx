@@ -6,6 +6,7 @@ import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/sco
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
+import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
 import { FeatureNote } from "@/components/app/feature-note";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
@@ -173,7 +174,9 @@ export default async function CompanyScoutingPage({
       {/* Recognized-need honesty banner (PR4): the requirement set below was
           derived from the demand's own text by the offline recognizer — a
           labeled SUGGESTION, not a human-confirmed structure. Matches remain
-          previews until a human confirms the requirements (§19/§7). */}
+          previews until a human confirms the requirements (§19/§7). PR10
+          adds that human act right here: CONFIRM writes
+          payload.structured_need.skill_slugs on the company's own row. */}
       {result?.kind === "ok" &&
       (result.demand.needSource === "recognized_from_text" ||
         result.demand.needSource === "profession_expanded") ? (
@@ -183,6 +186,30 @@ export default async function CompanyScoutingPage({
         >
           {t("recognizedNote")}
         </p>
+      ) : null}
+
+      {/* Demand lifecycle (PR10): confirm recognized skills (§19 human act)
+          + close/reopen. Closing hides the demand from the worker board
+          instantly (its RPC serves submitted only) — honest visibility,
+          never a delete. Internal state only. */}
+      {result?.kind === "ok" ? (
+        <DemandLifecycleControls
+          locale={locale}
+          requestId={result.demand.id}
+          status={result.demand.status}
+          showConfirm={
+            result.demand.needSource === "recognized_from_text" ||
+            result.demand.needSource === "profession_expanded"
+          }
+          labels={{
+            confirm: t("lifecycle.confirm"),
+            confirmed: t("lifecycle.confirmed"),
+            close: t("lifecycle.close"),
+            reopen: t("lifecycle.reopen"),
+            closedNote: t("lifecycle.closedNote"),
+            error: t("lifecycle.error"),
+          }}
+        />
       ) : null}
 
       {/* Results */}

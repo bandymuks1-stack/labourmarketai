@@ -68,8 +68,12 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 806 at player-card-profile-green (+1: playercards.conceptNote
   // §18 honesty line lands in all 11 locales; en/lt/ru translated, da/de
   // [EN] until human translation).
-  da: 806,
-  de: 806,
+  // MEASURED 814 at company-demand-green (+8: scouting.lifecycle confirm/
+  // close/reopen set, demandReadback.scoutLink, and the corrected
+  // manageHelp copy land in all 11 locales; en/lt/ru translated, da/de
+  // [EN] until human translation).
+  da: 814,
+  de: 814,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,

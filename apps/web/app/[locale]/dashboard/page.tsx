@@ -273,6 +273,7 @@ export default async function DashboardOverviewPage({
       empty: tReadback("empty"),
       created: tReadback("created"),
       manageHelp: tReadback("manageHelp"),
+      scoutLink: tReadback("scoutLink"),
       status: {
         draft: tReqStatus("draft"),
         submitted: tReqStatus("submitted"),
@@ -367,7 +368,7 @@ export default async function DashboardOverviewPage({
         )}
 
         {demandReadback && (
-          <DemandRequestsReadback result={demandReadback} labels={readbackLabels} />
+          <DemandRequestsReadback result={demandReadback} labels={readbackLabels} locale={locale} />
         )}
       </div>
     );
