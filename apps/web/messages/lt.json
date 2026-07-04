@@ -191,7 +191,8 @@
     "notReady": "Nuotraukų įkėlimas šioje aplinkoje dar neparuoštas.",
     "alt": "Profilio nuotrauka",
     "hint": "JPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums."
-  },  "errorBoundary": {
+  },
+  "errorBoundary": {
     "reloading": "Kraunama iš naujo…",
     "body": "Įvyko klaida. Bandykite dar kartą.",
     "retry": "Bandyti dar kartą"
@@ -228,25 +229,64 @@
       "title": "Jūs kaip asmuo",
       "subtitle": "Jūsų asmeninė paskyra.",
       "actions": {
-        "profile": { "title": "Profilis ir CV", "desc": "Kurkite profilį, įgūdžius ir CV." },
-        "findWork": { "title": "Ieškoti darbo", "desc": "Peržiūrėkite darbo galimybes įvairiuose sektoriuose." },
-        "readiness": { "title": "Pasirengimas", "desc": "Tvarkykite dokumentus ir darbo statusą." },
-        "playerCard": { "title": "Mano kortelė", "desc": "Jūsų pasiruošimo ir įgūdžių kortelė." },
-        "communication": { "title": "Komunikacija", "desc": "Pokalbiai ir žinutės." },
-        "marketMap": { "title": "Rinkos žemėlapis", "desc": "Matykite rinkos signalus: poreikius, pasirengimą, dokumentų trūkumus ir rizikas. Jei duomenys dar preview, jie pažymimi kaip preview." }
+        "profile": {
+          "title": "Profilis ir CV",
+          "desc": "Kurkite profilį, įgūdžius ir CV."
+        },
+        "findWork": {
+          "title": "Ieškoti darbo",
+          "desc": "Peržiūrėkite darbo galimybes įvairiuose sektoriuose."
+        },
+        "readiness": {
+          "title": "Pasirengimas",
+          "desc": "Tvarkykite dokumentus ir darbo statusą."
+        },
+        "playerCard": {
+          "title": "Mano kortelė",
+          "desc": "Jūsų pasiruošimo ir įgūdžių kortelė."
+        },
+        "communication": {
+          "title": "Komunikacija",
+          "desc": "Pokalbiai ir žinutės."
+        },
+        "marketMap": {
+          "title": "Rinkos žemėlapis",
+          "desc": "Matykite rinkos signalus: poreikius, pasirengimą, dokumentų trūkumus ir rizikas. Jei duomenys dar preview, jie pažymimi kaip preview."
+        }
       }
     },
     "company": {
       "title": "Jūsų įmonė",
       "subtitle": "Jūsų organizacijos paskyra ir ką ji gali.",
       "actions": {
-        "need": { "title": "Pateikti poreikį", "desc": "Aprašykite reikalingus darbuotojus ar paslaugas." },
-        "hire": { "title": "Samdyti", "desc": "Peržiūrėkite kandidatus ir trumpuosius sąrašus." },
-        "buy": { "title": "Pirkti paslaugas", "desc": "Kurkite ir sekite užklausas." },
-        "offer": { "title": "Siūlyti darbuotojus / komandas", "desc": "Pristatykite kandidatus ar komandas kaip partneris." },
-        "projects": { "title": "Valdyti projektus", "desc": "Vykdykite projektus ir operacijas." },
-        "communication": { "title": "Komunikacija", "desc": "Pokalbiai su žmonėmis ir dėl projektų." },
-        "marketMap": { "title": "Rinkos žemėlapis", "desc": "Matykite rinkos signalus: poreikius, pasirengimą, dokumentų trūkumus ir rizikas. Jei duomenys dar preview, jie pažymimi kaip preview." }
+        "need": {
+          "title": "Pateikti poreikį",
+          "desc": "Aprašykite reikalingus darbuotojus ar paslaugas."
+        },
+        "hire": {
+          "title": "Samdyti",
+          "desc": "Peržiūrėkite kandidatus ir trumpuosius sąrašus."
+        },
+        "buy": {
+          "title": "Pirkti paslaugas",
+          "desc": "Kurkite ir sekite užklausas."
+        },
+        "offer": {
+          "title": "Siūlyti darbuotojus / komandas",
+          "desc": "Pristatykite kandidatus ar komandas kaip partneris."
+        },
+        "projects": {
+          "title": "Valdyti projektus",
+          "desc": "Vykdykite projektus ir operacijas."
+        },
+        "communication": {
+          "title": "Komunikacija",
+          "desc": "Pokalbiai su žmonėmis ir dėl projektų."
+        },
+        "marketMap": {
+          "title": "Rinkos žemėlapis",
+          "desc": "Matykite rinkos signalus: poreikius, pasirengimą, dokumentų trūkumus ir rizikas. Jei duomenys dar preview, jie pažymimi kaip preview."
+        }
       },
       "empty": {
         "cta": "Sukurti įmonę",
@@ -324,7 +364,13 @@
     "reason": "Laisvos žodžių paieškos pagal žmones dar nėra: sukurti ją anksčiau, nei atsiranda sutikimą davusių ir patikrintų darbuotojų, reikštų rodyti netikrus rezultatus. Žemiau — tikras kelias, kuris veikia jau dabar.",
     "paths": {
       "scouting": {
-    "statusNote": { "title": "Kaip veikia atitikimas šiandien", "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.", "stream": "Aktyvus kandidatų srautas dar priklauso nuo realiai užpildytų profilių ir poreikių.", "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.", "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo." },
+        "statusNote": {
+          "title": "Kaip veikia atitikimas šiandien",
+          "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.",
+          "stream": "Aktyvus kandidatų srautas dar priklauso nuo realiai užpildytų profilių ir poreikių.",
+          "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.",
+          "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo."
+        },
         "title": "Ieškoti pagal poreikį",
         "body": "Pasirinkite savo struktūruotą poreikį — atitikties variklis parodys tinkamus kandidatus su pagrindimu ir trūkumais. Be sugalvotų balų.",
         "cta": "Atidaryti paiešką pagal poreikį"
@@ -542,31 +588,58 @@
       }
     },
     "layers": {
-      "workers": { "label": "Darbuotojai — pageidaujamos vietos", "desc": "Kur žmonės nori dirbti, pagal realius darbuotojų profilius." },
-      "demand": { "label": "Įmonių poreikiai", "desc": "Kur darbdaviai pateikė realius darbo jėgos poreikius." },
-      "projects": { "label": "Projektai", "desc": "Kur vyksta realūs projektai ir operacijos." },
-      "accommodation": { "label": "Apgyvendinimas", "desc": "Kur yra būstas — būsimas duomenų sluoksnis." },
-      "teams": { "label": "Brigados / komandos", "desc": "Kur prieinamos paruoštos komandos." },
-      "readiness": { "label": "Pasirengimas / dokumentai / įgūdžiai", "desc": "Kur dokumentai ir įgūdžiai paruošti ar trūksta." },
-      "rates": { "label": "Darbo įkainiai", "desc": "Sąžiningi įkainių signalai pagal vietą — be sugalvotų kainų." },
-      "countryFit": { "label": "Šalies atitiktis", "desc": "Kur šalies reikalavimai atitinka darbuotojo pasirengimą." },
-      "nextActions": { "label": "Sekančio veiksmo signalai", "desc": "Kur galite veikti dabar — pagal realias spragas." }
+      "workers": {
+        "label": "Darbuotojai — pageidaujamos vietos",
+        "desc": "Kur žmonės nori dirbti, pagal realius darbuotojų profilius."
+      },
+      "demand": {
+        "label": "Įmonių poreikiai",
+        "desc": "Kur darbdaviai pateikė realius darbo jėgos poreikius."
+      },
+      "projects": {
+        "label": "Projektai",
+        "desc": "Kur vyksta realūs projektai ir operacijos."
+      },
+      "accommodation": {
+        "label": "Apgyvendinimas",
+        "desc": "Kur yra būstas — būsimas duomenų sluoksnis."
+      },
+      "teams": {
+        "label": "Brigados / komandos",
+        "desc": "Kur prieinamos paruoštos komandos."
+      },
+      "readiness": {
+        "label": "Pasirengimas / dokumentai / įgūdžiai",
+        "desc": "Kur dokumentai ir įgūdžiai paruošti ar trūksta."
+      },
+      "rates": {
+        "label": "Darbo įkainiai",
+        "desc": "Sąžiningi įkainių signalai pagal vietą — be sugalvotų kainų."
+      },
+      "countryFit": {
+        "label": "Šalies atitiktis",
+        "desc": "Kur šalies reikalavimai atitinka darbuotojo pasirengimą."
+      },
+      "nextActions": {
+        "label": "Sekančio veiksmo signalai",
+        "desc": "Kur galite veikti dabar — pagal realias spragas."
+      }
     },
     "nextActionsTitle": "Ką galite padaryti dabar",
-      "atlas": {
-        "title": "Rinkos atlasas",
-        "intro": "Žemėlapio sluoksniai ateina iš darbo rinkos atlaso: {categories} sričių iš {blocks} galimos žemėlapyje. Visi sluoksniai — tik signalai.",
-        "signalOnlyNote": "Signalai rodomi šalies / regiono lygiu; tikslesnė vieta — tik jums patvirtinus. Asmeninis adresas nerodomas.",
-        "kind": {
-          "demand": "Poreikis",
-          "worker_signal": "Žmonių signalai",
-          "offer": "Pasiūlymai",
-          "accommodation": "Apgyvendinimas",
-          "brigade": "Brigados",
-          "readiness_warning": "Pasiruošimo spragos",
-          "rate": "Kainos / įkainiai"
-        }
-      },
+    "atlas": {
+      "title": "Rinkos atlasas",
+      "intro": "Žemėlapio sluoksniai ateina iš darbo rinkos atlaso: {categories} sričių iš {blocks} galimos žemėlapyje. Visi sluoksniai — tik signalai.",
+      "signalOnlyNote": "Signalai rodomi šalies / regiono lygiu; tikslesnė vieta — tik jums patvirtinus. Asmeninis adresas nerodomas.",
+      "kind": {
+        "demand": "Poreikis",
+        "worker_signal": "Žmonių signalai",
+        "offer": "Pasiūlymai",
+        "accommodation": "Apgyvendinimas",
+        "brigade": "Brigados",
+        "readiness_warning": "Pasiruošimo spragos",
+        "rate": "Kainos / įkainiai"
+      }
+    },
     "nextActions": {
       "workerCountry": "Pridėti ar patikslinti pageidaujamą šalį",
       "companyNeed": "Pateikti įmonės poreikį",
@@ -3889,21 +3962,24 @@
     ]
   },
   "legal": {
-    "preparing": { "body": "Teisinė informacija ruošiama. Prieš pradedant mokamas paslaugas ar sutartinius santykius ši informacija bus pateikta ir atnaujinta.", "contact": "Iškilus klausimams susisiekite su mumis." },
-      "marketplaceRules": {
-        "title": "Prekyvietės taisyklės",
-        "intro": "Šios taisyklės užtikrina, kad prekyvietė liktų saugi ir sąžininga. Jos galioja visiems vartotojams ir pasiūlymams.",
-        "rules": [
-          "Sistema nepatvirtina teisės dirbti ar legalaus tinkamumo be reikiamų dokumentų.",
-          "Statusas „patvirtinta“ rodomas tik po realaus žmogaus patikrinimo — jokio automatinio patvirtinimo.",
-          "Kontaktai nerodomi be vartotojo leidimo.",
-          "Vieši pasiūlymai rodomi tik po moderavimo; nepatikimi ar įtartini pasiūlymai paslepiami.",
-          "Draudžiama prekiauti reguliuojamomis ar neteisėtomis prekėmis ir paslaugomis.",
-          "Žemėlapyje taškas atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
-          "Mokėjimai dar neaktyvūs; jokių mokėjimų per platformą šiame etape.",
-          "Apie netinkamą elgesį ar įtartiną veiklą galima pranešti — moderatoriai peržiūri."
-        ]
-      },
+    "preparing": {
+      "body": "Teisinė informacija ruošiama. Prieš pradedant mokamas paslaugas ar sutartinius santykius ši informacija bus pateikta ir atnaujinta.",
+      "contact": "Iškilus klausimams susisiekite su mumis."
+    },
+    "marketplaceRules": {
+      "title": "Prekyvietės taisyklės",
+      "intro": "Šios taisyklės užtikrina, kad prekyvietė liktų saugi ir sąžininga. Jos galioja visiems vartotojams ir pasiūlymams.",
+      "rules": [
+        "Sistema nepatvirtina teisės dirbti ar legalaus tinkamumo be reikiamų dokumentų.",
+        "Statusas „patvirtinta“ rodomas tik po realaus žmogaus patikrinimo — jokio automatinio patvirtinimo.",
+        "Kontaktai nerodomi be vartotojo leidimo.",
+        "Vieši pasiūlymai rodomi tik po moderavimo; nepatikimi ar įtartini pasiūlymai paslepiami.",
+        "Draudžiama prekiauti reguliuojamomis ar neteisėtomis prekėmis ir paslaugomis.",
+        "Žemėlapyje taškas atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
+        "Mokėjimai dar neaktyvūs; jokių mokėjimų per platformą šiame etape.",
+        "Apie netinkamą elgesį ar įtartiną veiklą galima pranešti — moderatoriai peržiūri."
+      ]
+    },
     "terms": {
       "title": "Naudojimo sąlygos"
     },
@@ -4823,47 +4899,47 @@
     "thermoMissingMarket": "Nepakanka rinkos duomenų",
     "thermoMissingBoth": "Nepakanka rinkos duomenų",
     "thermoSmallSample": "Maža imtis (n<5) — vertinkite atsargiai.",
-      "readinessPanel": {
-        "title": "Kaip pagerinti pasiruošimą",
-        "intro": "Štai ką dar verta sutvarkyti, kad jūsų kortelė būtų stipresnė.",
-        "allReady": "Visi pagrindiniai pasiruošimo signalai surinkti.",
-        "countryFit": "Darbui kitoje šalyje reikia atitinkamų dokumentų. Be jų nesate rodomi kaip pasiruošę dirbti užsienyje — matote tik teisėtus kelius (įmonė tvarko dokumentus, pagalba su dokumentais). Sistema nežada teisės dirbti be dokumentų."
+    "readinessPanel": {
+      "title": "Kaip pagerinti pasiruošimą",
+      "intro": "Štai ką dar verta sutvarkyti, kad jūsų kortelė būtų stipresnė.",
+      "allReady": "Visi pagrindiniai pasiruošimo signalai surinkti.",
+      "countryFit": "Darbui kitoje šalyje reikia atitinkamų dokumentų. Be jų nesate rodomi kaip pasiruošę dirbti užsienyje — matote tik teisėtus kelius (įmonė tvarko dokumentus, pagalba su dokumentais). Sistema nežada teisės dirbti be dokumentų."
+    },
+    "readinessSteps": {
+      "pillar": {
+        "profession": "Profesija nurodyta",
+        "availability": "Prieinamumas nurodytas",
+        "skills": "Pridėti įgūdžiai",
+        "journal": "Darbo žurnalo įrašai",
+        "evidence": "Įgūdžiai paremti darbu",
+        "workCard": "Darbo kortelė pateikta"
       },
-      "readinessSteps": {
-        "pillar": {
-          "profession": "Profesija nurodyta",
-          "availability": "Prieinamumas nurodytas",
-          "skills": "Pridėti įgūdžiai",
-          "journal": "Darbo žurnalo įrašai",
-          "evidence": "Įgūdžiai paremti darbu",
-          "workCard": "Darbo kortelė pateikta"
-        },
-        "action": {
-          "profession": "Nurodyti profesiją",
-          "availability": "Nurodyti prieinamumą",
-          "skills": "Pridėti įgūdžių",
-          "journal": "Rašyti įrašą",
-          "evidence": "Pridėti darbo įrašą",
-          "workCard": "Pateikti kortelę"
-        }
-      },
-      "readiness": {
-        "label": "Pasiruošimas",
-        "hint": "Visi pagrindiniai signalai surinkti.",
-        "levelReady": "Pasiruošęs",
-        "levelBuilding": "Renkasi",
-        "levelStart": "Pradžia",
-        "signalsTemplate": "signalų surinkta",
-        "nextLabel": "Toliau:",
-        "pillars": {
-          "profession": "Profesija",
-          "availability": "Prieinamumas",
-          "skills": "Įgūdžiai",
-          "journal": "Darbo žurnalas",
-          "evidence": "Įrašai",
-          "workCard": "Darbo kortelė"
-        }
-      },
+      "action": {
+        "profession": "Nurodyti profesiją",
+        "availability": "Nurodyti prieinamumą",
+        "skills": "Pridėti įgūdžių",
+        "journal": "Rašyti įrašą",
+        "evidence": "Pridėti darbo įrašą",
+        "workCard": "Pateikti kortelę"
+      }
+    },
+    "readiness": {
+      "label": "Pasiruošimas",
+      "hint": "Visi pagrindiniai signalai surinkti.",
+      "levelReady": "Pasiruošęs",
+      "levelBuilding": "Renkasi",
+      "levelStart": "Pradžia",
+      "signalsTemplate": "signalų surinkta",
+      "nextLabel": "Toliau:",
+      "pillars": {
+        "profession": "Profesija",
+        "availability": "Prieinamumas",
+        "skills": "Įgūdžiai",
+        "journal": "Darbo žurnalas",
+        "evidence": "Įrašai",
+        "workCard": "Darbo kortelė"
+      }
+    },
     "verifiedTitle": "Įgūdžių signalai",
     "verifiedEmpty": "Įgūdžių signalų dar nėra. Jie atsiranda iš tavo darbo įrašų.",
     "journalSupportedLabel": "Pagrįsta žurnalu",
@@ -5123,7 +5199,13 @@
     "cta": "Grįžti į pradžią"
   },
   "scouting": {
-    "statusNote": { "title": "Kaip veikia atitikimas šiandien", "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.", "stream": "Aktyvus kandidatų srautas dar priklauso nuo realiai užpildytų profilių ir poreikių.", "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.", "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo." },
+    "statusNote": {
+      "title": "Kaip veikia atitikimas šiandien",
+      "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.",
+      "stream": "Aktyvus kandidatų srautas dar priklauso nuo realiai užpildytų profilių ir poreikių.",
+      "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.",
+      "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo."
+    },
     "title": "Žvalgyba",
     "intro": "Pasirink vieną iš savo struktūruotų poreikių, kad matytum tinkamus darbuotojus, kodėl jie tinka, ir įtrauktum į trumpąjį sąrašą.",
     "visibilityNote": "Matomumas remiasi pasiruošimu, patikimumu ir leidimais — ne mokėjimu. Mokama platesnė prieiga dar neaktyvi (mokėjimai ruošiami). Rodomos tik saugios, anonimizuotos peržiūros — jokių netikrų skelbimų.",
@@ -5444,11 +5526,26 @@
     "subcopy": "Labourmarket.ai yra skaitmeninė tarptautinės darbo jėgos agentūra. Susikurkite vieną darbuotojo profilį, pamatykite, ko reikia kiekvienoje šalyje, ir leiskite darbdaviams jus rasti, kai būsite pasiruošę. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
     "stepsTitle": "Kaip tai veikia",
     "steps": [
-      { "title": "1. Nurodykite savo amatą", "body": "Pridėkite profesiją, patirtį ir laisvumą. Užtrunka kelias minutes." },
-      { "title": "2. DI paruošia juodraštį", "body": "Asistentas jūsų žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūrite ir redaguojate. Jis niekada neišgalvoja patirties." },
-      { "title": "3. Patikrinkite šalies pasiruošimą", "body": "Pamatykite, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija." },
-      { "title": "4. Būkite suderinti", "body": "Kai darbdavio poreikis atitinka jūsų amatą, laisvumą, apgyvendinimą, transportą ir kalbą, patenkate į trumpąjį sąrašą. Neatitikimai rodomi sąžiningai." },
-      { "title": "5. Rezervacija ir startas", "body": "Susitarkite dėl rezervacijos su aiškiu pasiruošimo patikrinimu. Sutarties ir mokėjimo žingsniai kol kas lieka rankiniai." }
+      {
+        "title": "1. Nurodykite savo amatą",
+        "body": "Pridėkite profesiją, patirtį ir laisvumą. Užtrunka kelias minutes."
+      },
+      {
+        "title": "2. DI paruošia juodraštį",
+        "body": "Asistentas jūsų žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūrite ir redaguojate. Jis niekada neišgalvoja patirties."
+      },
+      {
+        "title": "3. Patikrinkite šalies pasiruošimą",
+        "body": "Pamatykite, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija."
+      },
+      {
+        "title": "4. Būkite suderinti",
+        "body": "Kai darbdavio poreikis atitinka jūsų amatą, laisvumą, apgyvendinimą, transportą ir kalbą, patenkate į trumpąjį sąrašą. Neatitikimai rodomi sąžiningai."
+      },
+      {
+        "title": "5. Rezervacija ir startas",
+        "body": "Susitarkite dėl rezervacijos su aiškiu pasiruošimo patikrinimu. Sutarties ir mokėjimo žingsniai kol kas lieka rankiniai."
+      }
     ],
     "needTitle": "Ko gali prireikti",
     "needItems": [
@@ -5497,7 +5594,7 @@
     "intro": "Čia matysite darbdavių poreikius, kurie gali jums tikti, ir ką verta papildyti profilyje, kad būtumėte paruošti.",
     "noWorkerBody": "Pirmiausia užbaikite darbuotojo profilį, kad matytumėte jums tinkančias galimybes.",
     "readinessTitle": "Jūsų pasirengimas",
-      "matchTitle": "Atitikimo apžvalga",
+    "matchTitle": "Atitikimo apžvalga",
     "marketMapLink": "Rinkos žemėlapis",
     "nextStep": {
       "title": "Paversk atitikimą veiksmu",
@@ -5507,18 +5604,18 @@
       "bookings": "Planas ir rezervacijos",
       "bookingsNote": "Patvirtintas atitikimas tampa rezervacija"
     },
-      "matchDim": {
-        "workType": "Darbo kryptis",
-        "skills": "Įgūdžiai",
-        "country": "Šalis",
-        "availability": "Prieinamumas",
-        "documents": "Dokumentai"
-      },
-      "matchState": {
-        "fit": "tinka",
-        "check": "patikrinti",
-        "unknown": "nežinoma"
-      },
+    "matchDim": {
+      "workType": "Darbo kryptis",
+      "skills": "Įgūdžiai",
+      "country": "Šalis",
+      "availability": "Prieinamumas",
+      "documents": "Dokumentai"
+    },
+    "matchState": {
+      "fit": "tinka",
+      "check": "patikrinti",
+      "unknown": "nežinoma"
+    },
     "readinessIntro": "Kuo pilnesnis profilis, tuo lengviau darbdaviams jus rasti ir tuo tiksliau parodome tinkančius poreikius.",
     "ready": {
       "workType": "Sektorius ir darbo tipas",
@@ -5740,7 +5837,7 @@
     "aiNone": "Paaiškinimas nesukurtas.",
     "statusInvalid": "Užpildykite darbuotojo ir poreikio laukus."
   },
-      "marketMapBase": {
+  "marketMapBase": {
     "title": "Tavo vieta rinkos žemėlapyje",
     "subtitle": "Šią vietą ir spindulį naudojame tavo signalams žemėlapyje.",
     "panelTitle": "Vietos sritis",
@@ -5754,7 +5851,7 @@
     "radiusLabel": "Atstumas nuo pasirinktos vietos",
     "autoButton": "Naudoti mano buvimo vietą",
     "autoLocating": "Nustatoma vieta…",
-    "geoDenied": "Nepavyko gauti buvimo vietos. Pasirinkite miestą arba regioną rankiniu būdu.",
+    "geoDenied": "Nepavyko gauti jūsų vietos – naršyklė užblokavo prieigą prie vietos. Leiskite šiai svetainei naudoti vietą naršyklės nustatymuose arba pasirinkite miestą rankiniu būdu.",
     "geoUnavailable": "Naršyklė nepalaiko vietos nustatymo. Pasirinkite vietą rankiniu būdu.",
     "manualToggle": "Nurodyti vietą rankiniu būdu",
     "manualHint": "Jeigu nenorite leisti buvimo vietos, pasirinkite miestą arba regioną rankiniu būdu.",
@@ -5773,7 +5870,8 @@
     "updateButton": "Atnaujinti vietą",
     "editButton": "Keisti vietą",
     "resetButton": "Pašalinti vietą",
-    "emptyBody": "Dar nepasirinkote vietos. Naudokite mygtuką aukščiau arba nurodykite rankiniu būdu."
+    "emptyBody": "Dar nepasirinkote vietos. Naudokite mygtuką aukščiau arba nurodykite rankiniu būdu.",
+    "radiusHelp": "Spindulys – paieškos zona aplink pasirinktą tašką: {km} km reiškia darbus ir paklausą iki {km} km nuo to taško."
   },
   "waze": {
     "open": "Atidaryti Waze"
@@ -5798,16 +5896,78 @@
       "concept": "Koncepcija / per mažai duomenų",
       "blocker": "Realus blokatorius / rizika"
     },
-    "cta": { "fill": "Pildyti", "open": "Atidaryti" },
+    "cta": {
+      "fill": "Pildyti",
+      "open": "Atidaryti"
+    },
     "zone": {
-      "profileHub": { "name": "Profilio centras", "hint": "Jūsų realus profilis ir iš kur dirbate.", "state": { "started": "Profilis pradėtas", "none": "Profilio duomenų dar nėra" } },
-      "skillsEvidence": { "name": "Įgūdžiai ir įrašai", "hint": "Jūsų realūs įgūdžiai ir juos pagrindžiantys įrašai.", "state": { "confirmed": "{count} peržiūrėta", "suggested": "{count} su darbo įrašais", "selfDeclared": "{count} nurodyti pačių", "none": "Pridėkite įgūdžių, kad atsirastų signalai" } },
-      "availability": { "name": "Prieinamumas", "hint": "Kada ir kur galite dirbti — vietoje ir tarptautiniu mastu.", "state": { "available": "Šiuo metu laisvas", "busy": "Šiuo metu užimtas", "unavailable": "Pažymėta neprieinama", "none": "Nurodykite prieinamumą" } },
-      "workNeeds": { "name": "Darbo poreikiai", "hint": "Įmonių ir klientų poreikiai, kuriuos rengiate — juodraščiai peržiūrai.", "state": { "drafts": "{count} darbo poreikio signalų juodraštyje / peržiūroje", "none": "Parenkite darbo poreikį kaip juodraštį" } },
-      "teams": { "name": "Komandos ir brigados", "hint": "Komandų ir brigadų susieto darbo koncepcija.", "state": { "concept": "Per mažai duomenų" } },
-      "company": { "name": "Įmonė / organizacija", "hint": "Jūsų organizacijos, agentūros ar kliento kontekstas.", "state": { "linked": "Organizacija susieta", "none": "Pridėkite organizacijos kontekstą" } },
-      "marketPulse": { "name": "Rinkos pulsas", "hint": "Galimo atitikimo signalai tarp profilių ir poreikių — be garantijų.", "state": { "possibleFit": "Galimo atitikimo signalai — reikia daugiau duomenų", "needsData": "Parenkite profilį, kad matytumėte signalus" } },
-      "trust": { "name": "Pasitikėjimas ir įrašai", "hint": "Įrašai ir žmogaus peržiūra sustiprina teiginius.", "state": { "confirmedExists": "{count} peržiūrėta", "selfDeclaredOnly": "Nurodyta pačių — žmogaus peržiūra sustiprina" } }
+      "profileHub": {
+        "name": "Profilio centras",
+        "hint": "Jūsų realus profilis ir iš kur dirbate.",
+        "state": {
+          "started": "Profilis pradėtas",
+          "none": "Profilio duomenų dar nėra"
+        }
+      },
+      "skillsEvidence": {
+        "name": "Įgūdžiai ir įrašai",
+        "hint": "Jūsų realūs įgūdžiai ir juos pagrindžiantys įrašai.",
+        "state": {
+          "confirmed": "{count} peržiūrėta",
+          "suggested": "{count} su darbo įrašais",
+          "selfDeclared": "{count} nurodyti pačių",
+          "none": "Pridėkite įgūdžių, kad atsirastų signalai"
+        }
+      },
+      "availability": {
+        "name": "Prieinamumas",
+        "hint": "Kada ir kur galite dirbti — vietoje ir tarptautiniu mastu.",
+        "state": {
+          "available": "Šiuo metu laisvas",
+          "busy": "Šiuo metu užimtas",
+          "unavailable": "Pažymėta neprieinama",
+          "none": "Nurodykite prieinamumą"
+        }
+      },
+      "workNeeds": {
+        "name": "Darbo poreikiai",
+        "hint": "Įmonių ir klientų poreikiai, kuriuos rengiate — juodraščiai peržiūrai.",
+        "state": {
+          "drafts": "{count} darbo poreikio signalų juodraštyje / peržiūroje",
+          "none": "Parenkite darbo poreikį kaip juodraštį"
+        }
+      },
+      "teams": {
+        "name": "Komandos ir brigados",
+        "hint": "Komandų ir brigadų susieto darbo koncepcija.",
+        "state": {
+          "concept": "Per mažai duomenų"
+        }
+      },
+      "company": {
+        "name": "Įmonė / organizacija",
+        "hint": "Jūsų organizacijos, agentūros ar kliento kontekstas.",
+        "state": {
+          "linked": "Organizacija susieta",
+          "none": "Pridėkite organizacijos kontekstą"
+        }
+      },
+      "marketPulse": {
+        "name": "Rinkos pulsas",
+        "hint": "Galimo atitikimo signalai tarp profilių ir poreikių — be garantijų.",
+        "state": {
+          "possibleFit": "Galimo atitikimo signalai — reikia daugiau duomenų",
+          "needsData": "Parenkite profilį, kad matytumėte signalus"
+        }
+      },
+      "trust": {
+        "name": "Pasitikėjimas ir įrašai",
+        "hint": "Įrašai ir žmogaus peržiūra sustiprina teiginius.",
+        "state": {
+          "confirmedExists": "{count} peržiūrėta",
+          "selfDeclaredOnly": "Nurodyta pačių — žmogaus peržiūra sustiprina"
+        }
+      }
     }
   },
   "myWorkView": {
@@ -5816,14 +5976,66 @@
     "subtitle": "Jūsų realus profilis, įgūdžiai, įrašai, prieinamumas ir darbo poreikiai vienoje vietoje — ir kaip jie susijungia darbo rinkos žemėlapyje.",
     "actionsTitle": "Kiti veiksmai",
     "block": {
-      "profile": { "name": "Profilis", "state": { "started": "Profilis pradėtas", "missing": "Profilio dar nėra" } },
-      "cv": { "name": "CV", "state": { "summaryAdded": "Profilio santrauka pridėta", "import": "Importuokite CV arba pridėkite santrauką" } },
-      "skills": { "name": "Įgūdžiai", "state": { "added": "Pridėta įgūdžių: {count}", "none": "Įgūdžių dar nėra" } },
-      "evidence": { "name": "Įrašai", "state": { "supported": "{count} peržiūrėta", "hasEvidence": "{count} su darbo įrašais", "needsEvidence": "Pridėkite darbų, kad atsirastų įrašai", "noSkills": "Pirma pridėkite įgūdžių" } },
-      "availability": { "name": "Prieinamumas", "state": { "available": "Šiuo metu laisvas", "busy": "Šiuo metu užimtas", "unavailable": "Pažymėta neprieinama", "none": "Prieinamumas nenurodytas" } },
-      "journal": { "name": "Darbo žurnalas", "state": { "logged": "Darbo įrašų: {count}", "none": "Darbų dar neužfiksuota" } },
-      "workNeeds": { "name": "Darbo poreikiai", "state": { "drafts": "Darbo poreikių juodraščių: {count}", "none": "Darbo poreikis neparengtas" } },
-      "worldMap": { "name": "Pasaulio žemėlapis", "state": { "zones": "{count} zonų turi realių signalų", "noSignals": "Žemėlapio signalų dar nėra — pridėkite duomenų, kad zonos užsidegtų" } }
+      "profile": {
+        "name": "Profilis",
+        "state": {
+          "started": "Profilis pradėtas",
+          "missing": "Profilio dar nėra"
+        }
+      },
+      "cv": {
+        "name": "CV",
+        "state": {
+          "summaryAdded": "Profilio santrauka pridėta",
+          "import": "Importuokite CV arba pridėkite santrauką"
+        }
+      },
+      "skills": {
+        "name": "Įgūdžiai",
+        "state": {
+          "added": "Pridėta įgūdžių: {count}",
+          "none": "Įgūdžių dar nėra"
+        }
+      },
+      "evidence": {
+        "name": "Įrašai",
+        "state": {
+          "supported": "{count} peržiūrėta",
+          "hasEvidence": "{count} su darbo įrašais",
+          "needsEvidence": "Pridėkite darbų, kad atsirastų įrašai",
+          "noSkills": "Pirma pridėkite įgūdžių"
+        }
+      },
+      "availability": {
+        "name": "Prieinamumas",
+        "state": {
+          "available": "Šiuo metu laisvas",
+          "busy": "Šiuo metu užimtas",
+          "unavailable": "Pažymėta neprieinama",
+          "none": "Prieinamumas nenurodytas"
+        }
+      },
+      "journal": {
+        "name": "Darbo žurnalas",
+        "state": {
+          "logged": "Darbo įrašų: {count}",
+          "none": "Darbų dar neužfiksuota"
+        }
+      },
+      "workNeeds": {
+        "name": "Darbo poreikiai",
+        "state": {
+          "drafts": "Darbo poreikių juodraščių: {count}",
+          "none": "Darbo poreikis neparengtas"
+        }
+      },
+      "worldMap": {
+        "name": "Pasaulio žemėlapis",
+        "state": {
+          "zones": "{count} zonų turi realių signalų",
+          "noSignals": "Žemėlapio signalų dar nėra — pridėkite duomenų, kad zonos užsidegtų"
+        }
+      }
     },
     "action": {
       "completeProfile": "Užbaikite profilį",
@@ -5834,9 +6046,11 @@
       "strengthenEvidence": "Sustiprinkite įgūdžius įrašais",
       "openMarketMap": "Atverti rinkos žemėlapį"
     },
-    "reason": { "needsManager": "Galima, kai vadovas ar klientas peržiūrės jūsų darbą." }
+    "reason": {
+      "needsManager": "Galima, kai vadovas ar klientas peržiūrės jūsų darbą."
+    }
   },
-    "workEntryReview": {
+  "workEntryReview": {
     "title": "Siūlomi įgūdžiai iš šio įrašo",
     "intro": "Pasiūlymai iš jūsų teksto — reikia peržiūros. Priėmus įgūdis pridedamas profilyje kaip jūsų pačių nurodytas; jį peržiūri žmogus.",
     "accept": "Priimti",
@@ -5848,8 +6062,27 @@
     "reasonLabel": "Kodėl",
     "quantityLabel": "Kiekis",
     "durationLabel": "Laikas",
-    "unit": { "hours": "val", "days": "d", "minutes": "min" },
-    "domain": { "construction": "Statybos", "web_design": "Internetas / dizainas", "admin": "Administravimas", "cleaning": "Valymas", "electrical": "Elektra", "cooking": "Maitinimas", "gardening": "Aplinkos priežiūra", "driving_logistics": "Transportas / logistika", "warehouse": "Sandėlis", "customer_service": "Klientų aptarnavimas", "it": "IT", "language": "Kalbos / vertimai", "equipment": "Įrangos operavimas", "care": "Priežiūra / slauga" },
+    "unit": {
+      "hours": "val",
+      "days": "d",
+      "minutes": "min"
+    },
+    "domain": {
+      "construction": "Statybos",
+      "web_design": "Internetas / dizainas",
+      "admin": "Administravimas",
+      "cleaning": "Valymas",
+      "electrical": "Elektra",
+      "cooking": "Maitinimas",
+      "gardening": "Aplinkos priežiūra",
+      "driving_logistics": "Transportas / logistika",
+      "warehouse": "Sandėlis",
+      "customer_service": "Klientų aptarnavimas",
+      "it": "IT",
+      "language": "Kalbos / vertimai",
+      "equipment": "Įrangos operavimas",
+      "care": "Priežiūra / slauga"
+    },
     "existingTitle": "Jūsų profilio įgūdžiai, paminėti šiame įraše",
     "existingNote": "Šie įgūdžiai jau yra jūsų profilyje — įrašas juos paremia kaip darbo įrašą. Nepridedame jų antrą kartą.",
     "existingBadge": "Jau profilyje",
@@ -5872,8 +6105,19 @@
     "back": "Profilis",
     "notWorker": "Ši ataskaita sudaroma iš darbuotojo profilio žurnalo ir įgūdžių. Susikurkite darbuotojo profilį, kad ją sugeneruotumėte.",
     "ladderNote": "CV pakopos: jūsų nurodyta → pagrįsta darbo įrašu → peržiūrėta.",
-    "s": { "profileEvidence": "Profilio įrašai", "skillsSupported": "Įgūdžiai, pagrįsti darbo įrašais", "workEntrySummary": "Darbo įrašų santrauka", "missingEvidence": "Trūkstami įrašai / reikia peržiūros", "fitReadiness": "Atitikties darbo poreikiui parengtis" },
-    "metric": { "total": "Įgūdžiai", "selfDeclared": "Pačių nurodyti", "workSupported": "Pagrįsti", "confirmed": "Peržiūrėti" },
+    "s": {
+      "profileEvidence": "Profilio įrašai",
+      "skillsSupported": "Įgūdžiai, pagrįsti darbo įrašais",
+      "workEntrySummary": "Darbo įrašų santrauka",
+      "missingEvidence": "Trūkstami įrašai / reikia peržiūros",
+      "fitReadiness": "Atitikties darbo poreikiui parengtis"
+    },
+    "metric": {
+      "total": "Įgūdžiai",
+      "selfDeclared": "Pačių nurodyti",
+      "workSupported": "Pagrįsti",
+      "confirmed": "Peržiūrėti"
+    },
     "emptySupported": "Kol kas nė vienas įgūdis nepagrįstas darbo įrašu — fiksuokite darbą, kad atsirastų įrašų.",
     "entrySummary": "{entries} darbo įrašų · {confirmations} peržiūrėjo žmogus.",
     "missingNote": "{needEvidence} pačių nurodytų įgūdžių reikia darbo įrašo · {needConfirmation} pagrįstų įgūdžių laukia žmogaus peržiūros.",

@@ -382,6 +382,11 @@ export function MarketMapBase({
             </option>
           ))}
         </select>
+        {/* First-use UX (2026-07-04): "25 km" meant nothing to a first-time
+            mobile user — say plainly what the circle is. */}
+        <span className="text-[11px] leading-relaxed text-text-muted" data-testid="map-locator-radius-help">
+          {t("radiusHelp", { km: selected?.radiusKm ?? radiusKm })}
+        </span>
       </label>
 
       {/* Selected location readout + one-tap actions. */}
