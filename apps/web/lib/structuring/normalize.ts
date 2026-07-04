@@ -27,6 +27,23 @@ const LT_FOLD: Record<string, string> = {
   ž: "z",
 };
 
+/** Letters NFD can NOT fold because they are standalone code points, not
+ *  base+combining-mark compositions: German ß, Danish/Norwegian ø/æ, Polish ł,
+ *  plus the rarer œ/đ/ð/þ. Needed since the offline language packs (2026-07-04)
+ *  carry NL/DE/PL/LV/ET/FI/DA/NO/SV needles — workers type both "kørte" and
+ *  "korte", both must match the same folded needle. Purely additive: none of
+ *  these letters occur in the pre-existing LT/EN/RU needles or fixtures. */
+const NON_DECOMPOSABLE_FOLD: Record<string, string> = {
+  ß: "ss",
+  ø: "o",
+  æ: "ae",
+  œ: "oe",
+  đ: "d",
+  ð: "d",
+  þ: "th",
+  ł: "l",
+};
+
 /**
  * Fold a string for matching: lowercase, map Lithuanian diacritics to their
  * ASCII base, and strip any remaining Unicode combining marks. Cyrillic and
@@ -36,6 +53,7 @@ export function foldText(input: string): string {
   if (!input) return "";
   let out = input.toLowerCase();
   out = out.replace(/[ąčęėįšųūž]/g, (ch) => LT_FOLD[ch] ?? ch);
+  out = out.replace(/[ßøæœđðþł]/g, (ch) => NON_DECOMPOSABLE_FOLD[ch] ?? ch);
   // Strip leftover combining diacritics (NFD) for any other accented Latin.
   out = out.normalize("NFD").replace(/[̀-ͯ]/g, "");
   return out;

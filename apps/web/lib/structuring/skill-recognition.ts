@@ -15,6 +15,7 @@
  */
 import { SKILL_HINTS_LT } from "./keywords";
 import { SKILL_SYNONYMS } from "./synonyms";
+import { LANGUAGE_PACKS } from "./language-packs";
 import { foldText, boundedEditDistance } from "./normalize";
 
 export type SkillConfidence = "high" | "medium" | "low";
@@ -85,9 +86,17 @@ export function isCleaningFloorContext(foldedText: string): boolean {
  * ("keičiau rozetes", "монтаж проводки", "wiring") always carry an anchor from
  * the install regex, so they are never suppressed. Input must be FOLDED text.
  */
-const POWER_TOOL_RE = /elektrin[a-z]* irank|электроинструмент|power tool|power drill/;
+// Offline language packs (2026-07-04): the base "elektr" needle substring-
+// matches power-tool words in EVERY Germanic/Slavic/Baltic/Finnic language
+// ("elektrisch gereedschap", "Elektrowerkzeug", "elektronarzędzia", "elverktyg",
+// "elektriline tööriist", "sähkötyökalu"…), so the guard carries per-language
+// power-tool forms (folded) alongside LT/EN/RU. Genuine electrical WORK words
+// per language live in ELECTRICAL_WORK_RE so real electricians never lose the
+// suggestion.
+const POWER_TOOL_RE =
+  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektriline toorii|elektroinstrument|sahkotyokalu/;
 const ELECTRICAL_WORK_RE =
-  /instaliac|rozet|jungikl|kabel|elektros darb|elektros mont|elektrik|wiring|rewir|electrical install|electrical work|проводк|розетк|электромонтаж|выключател|кабел|электрик/;
+  /instaliac|rozet|jungikl|kabel|elektros darb|elektros mont|elektrik|wiring|rewir|electrical install|electrical work|проводк|розетк|электромонтаж|выключател|кабел|электрик|bedrading|stopcontact|groepenkast|elektra aangelegd|steckdose|verkabelt|verdrahtet|elektroinstallation|gniazdk|instalacje elektryczne|elektryk|ukladalem przewody|eluttag|stikkontakt|stopselkontakt|ledninger trukket|elinstallation|elarbete|elektriker|pistorasi|sahkoasennu|sahkotoi|rozete|elektroinstalac|vadus|elektrivarust|pistikup|elektritoo/;
 
 /** True when electricity is named ONLY through a power-tool mention. */
 export function isPowerToolOnlyElectricalContext(foldedText: string): boolean {
@@ -101,32 +110,57 @@ export function isPowerToolOnlyElectricalContext(foldedText: string): boolean {
  *  (general-labour). Exact/synonym tiers are unaffected. */
 const FUZZY_TOKEN_BLOCKLIST: ReadonlySet<string> = new Set(["filled", "helped"]);
 
-type Term = { slug: string; term: string; via: "exact" | "synonym"; len: number };
+type Term = {
+  slug: string;
+  term: string;
+  via: "exact" | "synonym";
+  len: number;
+  /** Eligible as a fuzzy-tier stem. Offline language-pack needles (2026-07-04)
+   *  are exact/synonym ONLY — 9 extra languages of stems in the fuzzy tier
+   *  would multiply cross-language 1-edit collisions ("packade"→"packag" was
+   *  the measured SV accident). Fuzzy stays base-lexicon (LT/EN/RU) only. */
+  fuzzySource: boolean;
+};
 
 /** Folded dictionary terms (built once). Exact terms come from the base
- *  needles; synonym terms from the curated synonym sets. */
+ *  needles and the offline language packs; synonym terms from the curated
+ *  synonym sets (base + packs). One recognizer, one term list — packs are
+ *  extra rows in the SAME dictionary, never a second matching system. */
 const TERMS: readonly Term[] = (() => {
   const out: Term[] = [];
   for (const row of SKILL_HINTS_LT) {
     for (const n of row.needles) {
       const t = foldText(n).trim();
-      if (t) out.push({ slug: row.slug, term: t, via: "exact", len: t.length });
+      if (t) out.push({ slug: row.slug, term: t, via: "exact", len: t.length, fuzzySource: true });
     }
   }
   for (const [slug, phrases] of Object.entries(SKILL_SYNONYMS)) {
     for (const p of phrases) {
       const t = foldText(p).trim();
-      if (t) out.push({ slug, term: t, via: "synonym", len: t.length });
+      if (t) out.push({ slug, term: t, via: "synonym", len: t.length, fuzzySource: true });
+    }
+  }
+  for (const pack of LANGUAGE_PACKS) {
+    for (const [slug, set] of Object.entries(pack.skills)) {
+      for (const n of set.exact) {
+        const t = foldText(n).trim();
+        if (t) out.push({ slug, term: t, via: "exact", len: t.length, fuzzySource: false });
+      }
+      for (const p of set.synonyms ?? []) {
+        const t = foldText(p).trim();
+        if (t) out.push({ slug, term: t, via: "synonym", len: t.length, fuzzySource: false });
+      }
     }
   }
   return out;
 })();
 
-/** Single-word folded stems (≥ FUZZY_MIN_STEM_LEN) per slug, for the fuzzy tier. */
+/** Single-word folded stems (≥ FUZZY_MIN_STEM_LEN) per slug, for the fuzzy
+ *  tier. Base-lexicon terms only (see Term.fuzzySource). */
 const FUZZY_STEMS: ReadonlyMap<string, readonly string[]> = (() => {
   const m = new Map<string, string[]>();
   for (const t of TERMS) {
-    if (t.term.includes(" ") || t.len < FUZZY_MIN_STEM_LEN) continue;
+    if (!t.fuzzySource || t.term.includes(" ") || t.len < FUZZY_MIN_STEM_LEN) continue;
     const arr = m.get(t.slug) ?? [];
     arr.push(t.term);
     m.set(t.slug, arr);
