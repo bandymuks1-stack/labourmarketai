@@ -5676,7 +5676,30 @@
       "urgent": "Urgent"
     },
     "possibleNote": "Once your profile is ready, employers can find you and reach out through your account.",
-    "footnote": "These are honest signals from your profile — not a rating or a promise. Final fit is always decided by people."
+    "footnote": "These are honest signals from your profile — not a rating or a promise. Final fit is always decided by people.",
+    "noSkills": {
+      "title": "Your skills aren't recorded yet",
+      "body": "Skill matching needs evidence. Add work entries to your Work Journal — recognized skills from real work make your matches meaningful.",
+      "cta": "Add a work entry"
+    },
+    "skillMatch": {
+      "title": "Skill match",
+      "band": {
+        "strong": "Strong fit",
+        "possible": "Possible fit",
+        "weak": "Weak fit",
+        "insufficient_data": "Not comparable yet"
+      },
+      "basis": "{matched} of {total} required skills match ({confirmed} manager-confirmed)",
+      "recognizedNote": "requirements recognized from the demand text — not confirmed yet",
+      "missingPrefix": "missing:"
+    },
+    "workerNext": {
+      "add_work_evidence": "Next: add work evidence in your journal",
+      "complete_profile": "Next: complete your profile",
+      "review_opportunity": "Next: review this opportunity",
+      "review_match": "Next: review this match"
+    }
   },
   "workerIntake": {
     "title": "Worker intake",

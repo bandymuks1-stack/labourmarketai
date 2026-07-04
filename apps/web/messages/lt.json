@@ -5676,7 +5676,30 @@
       "urgent": "Skubu"
     },
     "possibleNote": "Kai profilis paruoštas, darbdaviai gali jus rasti ir susisiekti per paskyrą.",
-    "footnote": "Tai sąžiningi signalai pagal jūsų profilį — ne įvertinimas ir ne pažadas. Galutinį tinkamumą visada nusprendžia žmonės."
+    "footnote": "Tai sąžiningi signalai pagal jūsų profilį — ne įvertinimas ir ne pažadas. Galutinį tinkamumą visada nusprendžia žmonės.",
+    "noSkills": {
+      "title": "Jūsų įgūdžiai dar neužfiksuoti",
+      "body": "Įgūdžių atitikimui reikia įrodymų. Pridėkite darbo įrašus į darbo žurnalą — iš tikro darbo atpažinti įgūdžiai daro atitikmenis prasmingus.",
+      "cta": "Pridėti darbo įrašą"
+    },
+    "skillMatch": {
+      "title": "Įgūdžių atitikimas",
+      "band": {
+        "strong": "Stiprus atitikimas",
+        "possible": "Galimas atitikimas",
+        "weak": "Silpnas atitikimas",
+        "insufficient_data": "Kol kas nepalyginama"
+      },
+      "basis": "Atitinka {matched} iš {total} reikalingų įgūdžių ({confirmed} patvirtinti vadovo)",
+      "recognizedNote": "reikalavimai atpažinti iš poreikio teksto — dar nepatvirtinti",
+      "missingPrefix": "trūksta:"
+    },
+    "workerNext": {
+      "add_work_evidence": "Toliau: pridėkite darbo įrodymų žurnale",
+      "complete_profile": "Toliau: užpildykite profilį",
+      "review_opportunity": "Toliau: peržiūrėkite šią galimybę",
+      "review_match": "Toliau: peržiūrėkite šį atitikimą"
+    }
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",

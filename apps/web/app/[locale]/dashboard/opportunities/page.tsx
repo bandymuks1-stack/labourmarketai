@@ -45,7 +45,9 @@ export default async function OpportunitiesPage({
 
   const t = await getTranslations("opportunities");
   const tlm = await getTranslations("labourMarket");
+  const tSkill = await getTranslations("skillNames");
   const result = await loadWorkerOpportunities();
+  const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
   const workLabels = buildWorkTypeLabelMap(locale);
   const profileHref = `/${locale}/dashboard/profile`;
@@ -181,6 +183,29 @@ export default async function OpportunitiesPage({
             </Link>
           </section>
 
+          {/* No-evidence improvement state (PR5): skill matching needs skill
+              evidence. Honest guidance to the Work Journal — never a fake fit. */}
+          {result.kind === "ready" && !result.readiness.hasSkills ? (
+            <section
+              className="flex flex-col items-start gap-2 rounded-md border border-state-amber/40 bg-state-amber/10 px-4 py-3"
+              data-testid="opportunities-no-skills"
+            >
+              <p className="text-sm font-semibold text-text-primary">
+                {t("noSkills.title")}
+              </p>
+              <p className="text-xs leading-relaxed text-text-secondary">
+                {t("noSkills.body")}
+              </p>
+              <Link
+                href={`/${locale}/dashboard/journal`}
+                className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80"
+                data-testid="opportunities-no-skills-cta"
+              >
+                {t("noSkills.cta")} →
+              </Link>
+            </section>
+          ) : null}
+
           {/* Trust note — workers first see only approved / safely-managed
               opportunities (Worker Opportunities v1). */}
           <p
@@ -217,7 +242,7 @@ export default async function OpportunitiesPage({
             </section>
           ) : (
             <ul className="flex flex-col gap-3" data-testid="opportunities-list">
-              {result.opportunities.map(({ need, fit }) => (
+              {result.opportunities.map(({ need, fit, match, nextAction }) => (
                 <li
                   key={need.id}
                   className="card-border flex flex-col gap-3 p-4"
@@ -292,6 +317,69 @@ export default async function OpportunitiesPage({
                       stateLabel={(s: MatchSignalState) => t(`matchState.${s}`)}
                     />
                   </div>
+
+                  {/* Canonical skill match (PR5) — the same PR4 engine company
+                      scouting uses, inverted: YOUR skills vs this demand's
+                      derived requirements. §19: the coverage line always
+                      carries its basis; band ≠ rating. */}
+                  {match.skillFit ? (
+                    <div
+                      className="flex flex-col gap-1.5"
+                      data-testid="opportunity-skill-match"
+                      data-band={match.status}
+                    >
+                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {t("skillMatch.title")} ·{" "}
+                        {t.has(`skillMatch.band.${match.status}`)
+                          ? t(`skillMatch.band.${match.status}` as never)
+                          : match.status}
+                      </span>
+                      <p className="text-xs text-text-secondary">
+                        {t("skillMatch.basis", {
+                          matched: match.skillFit.matchedTotal,
+                          total: match.skillFit.needTotal,
+                          confirmed: match.skillFit.matchedConfirmed,
+                        })}
+                        {match.missingData.includes("need_recognized_not_confirmed") ? (
+                          <span className="text-text-muted"> · {t("skillMatch.recognizedNote")}</span>
+                        ) : null}
+                      </p>
+                      {match.skillFit.matchedUris.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5" data-testid="opportunity-matched-skills">
+                          {match.skillFit.matchedUris.map((slug) => (
+                            <span
+                              key={slug}
+                              className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-[11px] text-state-success"
+                            >
+                              ✓ {skillLabel(slug)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      {match.skillFit.missingUris.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5" data-testid="opportunity-missing-skills">
+                          {match.skillFit.missingUris.map((slug) => (
+                            <span
+                              key={slug}
+                              className="rounded-md border border-state-amber/30 bg-state-amber/5 px-2 py-0.5 text-[11px] text-state-amber"
+                            >
+                              {t("skillMatch.missingPrefix")} {skillLabel(slug)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {/* The one clear next step for this card — never a fake
+                      apply/contact (no worker-initiated flow exists yet). */}
+                  <p
+                    className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+                    data-testid="opportunity-next-action"
+                    data-next-action={nextAction}
+                  >
+                    {t(`workerNext.${nextAction}` as never)}
+                  </p>
                   {fit.gaps.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {fit.gaps.map((g) => (
