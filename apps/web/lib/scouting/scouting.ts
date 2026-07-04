@@ -3,9 +3,10 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { parseStructuredNeed } from "@/lib/market/fit";
+import { deriveNeedSkills, type NeedSkillSource } from "@/lib/market/need-skills";
 import {
   matchWorkerToNeed,
-  matchStrengthOrder,
+  compareMatches,
   type MatchNeed,
 } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
@@ -52,23 +53,54 @@ export interface CompanyDemand {
   readonly title: string;
   readonly status: string;
   readonly structured: boolean;
+  /** How the requirement set was derived for matching (PR4): human
+   *  structuring, ESCO bridge, offline text recognition, or profession
+   *  expansion. Null ⇒ nothing derivable (honest unstructured). */
+  readonly needSource: NeedSkillSource | null;
   readonly createdAt: string;
 }
 
-function buildNeed(row: {
-  country: string | null;
-  language_requirement: string | null;
-  payload: unknown;
-}): MatchNeed {
-  const structured = parseStructuredNeed(row.payload);
+/** Canonical demand → MatchNeed (PR4). The requirement set comes from
+ *  deriveNeedSkills (human slugs > bridged ESCO > offline text recognition >
+ *  profession expansion) — one contract, no second matching input path. */
+function buildNeed(
+  row: {
+    title: string | null;
+    need_summary: string | null;
+    role_or_work_type: string | null;
+    notes: string | null;
+    country: string | null;
+    location: string | null;
+    language_requirement: string | null;
+    payload: unknown;
+  },
+  escoUriToSlug: ReadonlyMap<string, string>,
+): { need: MatchNeed; source: NeedSkillSource | null } {
+  const derived = deriveNeedSkills({
+    title: row.title,
+    needSummary: row.need_summary,
+    roleOrWorkType: row.role_or_work_type,
+    notes: row.notes,
+    payload: row.payload,
+    escoUriToSlug,
+  });
   const languages = (row.language_requirement ?? "")
     .split(/[,;/]+/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
   return {
-    escoSkillUris: structured?.escoSkillUris ?? [],
-    country: row.country,
-    languages: languages.length > 0 ? languages : undefined,
+    need: {
+      skillIds: derived.skillSlugs,
+      // Unbridged human-picked ESCO URIs stay in the need so a legacy
+      // URI-keyed subject skill can still match them (never dropped).
+      escoSkillUris: derived.escoUnmappedUris,
+      needSource: derived.source,
+      professionSlug: derived.professionSlug,
+      country: row.country,
+      city: row.location,
+      languages: languages.length > 0 ? languages : undefined,
+    },
+    source: derived.source,
   };
 }
 
@@ -97,6 +129,9 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
       title: r.title ?? "—",
       status: r.status ?? "draft",
       structured: parseStructuredNeed(r.payload) !== null,
+      // List view derives from title only (full derivation runs in
+      // runScouting with the whole row); null here just means "open it".
+      needSource: parseStructuredNeed(r.payload) !== null ? "human_structured" : null,
       createdAt: r.created_at,
     }));
   } catch {
@@ -123,7 +158,9 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
   // Own demand only (RLS also enforces profile_id = auth.uid()).
   const { data: req, error } = await asAny(supabase)
     .from("customer_requests")
-    .select("id, title, status, country, language_requirement, payload, created_at")
+    .select(
+      "id, title, status, need_summary, role_or_work_type, notes, country, location, language_requirement, payload, created_at",
+    )
     .eq("id", requestId)
     .eq("profile_id", user.id)
     .maybeSingle();
@@ -135,16 +172,34 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
   }
   if (!req) return { kind: "not-found" };
 
+  // Curated esco_uri → slug bridge (sparse until the owner curates links;
+  // matching works on slugs regardless — never blocked on ESCO).
+  const escoUriToSlug = new Map<string, string>();
+  try {
+    const { data: bridge } = await asAny(supabase)
+      .from("skills")
+      .select("slug, esco_uri")
+      .not("esco_uri", "is", null);
+    for (const b of (bridge ?? []) as { slug: string | null; esco_uri: string | null }[]) {
+      if (b.slug && b.esco_uri) escoUriToSlug.set(b.esco_uri, b.slug);
+    }
+  } catch {
+    // bridge unavailable → slugs-only (still fully functional)
+  }
+
+  const { need, source } = buildNeed(req, escoUriToSlug);
   const demand: CompanyDemand = {
     id: req.id,
     title: req.title ?? "—",
     status: req.status ?? "draft",
     structured: parseStructuredNeed(req.payload) !== null,
+    needSource: source,
     createdAt: req.created_at,
   };
-  if (!demand.structured) return { kind: "not-structured", demand };
+  // Nothing derivable at all (no human structure, nothing recognizable in
+  // the text, no detectable profession) → honest unstructured state.
+  if (source === null) return { kind: "not-structured", demand };
 
-  const need = buildNeed(req);
   const supply = await buildSupplyCandidates(supabase);
 
   // Existing shortlist statuses for this demand (owner-scoped).
@@ -173,19 +228,9 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
         shortlistStatus: shortlist.get(c.workerId) ?? null,
       }),
     )
-    // Rank by match strength, then by skill-fit coverage, then confirmed share
-    // — all need-context (§19), never a global person score.
-    .sort((a, b) => {
-      const s = matchStrengthOrder(b.match.status) - matchStrengthOrder(a.match.status);
-      if (s !== 0) return s;
-      const pa = a.match.skillFit?.pct ?? 0;
-      const pb = b.match.skillFit?.pct ?? 0;
-      if (pb !== pa) return pb - pa;
-      return (
-        (b.match.skillFit?.matchedConfirmed ?? 0) -
-        (a.match.skillFit?.matchedConfirmed ?? 0)
-      );
-    });
+    // Rank via the SHARED need-context comparator (§19 — strength, coverage,
+    // confirmed share, explicit availability; never a global person score).
+    .sort((a, b) => compareMatches(a.match, b.match));
 
   return { kind: "ok", demand, candidates };
 }

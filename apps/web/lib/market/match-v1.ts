@@ -28,6 +28,8 @@
  */
 
 import { computeContextFit, type FitBasis, type SubjectEscoSkill } from "./fit";
+import { professionRelatedness } from "@/lib/taxonomy/profession-skills";
+import type { NeedSkillSource } from "./need-skills";
 
 /** Real `worker_skills.source` tiers, strongest first. */
 export type EvidenceTier = "manager_confirmed" | "work_journal" | "self_declared";
@@ -52,7 +54,7 @@ const EVIDENCE_WEIGHT: Record<EvidenceTier, number> = {
 };
 
 export interface MatchSubjectSkill {
-  /** ESCO canonical URI. */
+  /** Canonical skill id — the catalogue slug (legacy: an ESCO URI). */
   readonly uri: string;
   /** Evidence tier from worker_skills.source (NEVER inferred). */
   readonly evidence: EvidenceTier;
@@ -62,11 +64,26 @@ export interface MatchSubjectSkill {
  *  All fields optional except the skill set — missing fields become honest
  *  "missing data" notes, never assumptions. */
 export interface MatchNeed {
-  /** ESCO skill URIs the need requires (from payload.structured_need). */
-  readonly escoSkillUris: readonly string[];
+  /** Canonical skill ids the need requires — catalogue SLUGS since PR4
+   *  (see lib/market/need-skills.ts). Merged with `escoSkillUris`. */
+  readonly skillIds?: readonly string[];
+  /** Legacy field: ESCO skill URIs (kept for back-compat; matching never
+   *  DEPENDS on ESCO — a NULL esco_uri must never make matching inert). */
+  readonly escoSkillUris?: readonly string[];
+  /** Where the requirement set came from (need-skills derivation). A
+   *  recognized/expanded need is labeled honest-suggestion, never silently
+   *  presented as human-structured. */
+  readonly needSource?: NeedSkillSource | null;
   readonly professionSlug?: string | null;
   /** ISO-3166 alpha-2 country the work is in. */
   readonly country?: string | null;
+  /** City/locality of the work (free-form; compared normalized). */
+  readonly city?: string | null;
+  /** Work-site coordinates + acceptable radius, when they exist. NEVER
+   *  invented — engine-ready, data-gated. */
+  readonly lat?: number | null;
+  readonly lng?: number | null;
+  readonly radiusKm?: number | null;
   /** Language codes/labels the need requires. */
   readonly languages?: readonly string[];
   /** Pay the company offers (ceiling, EUR). */
@@ -82,6 +99,11 @@ export interface MatchSubject {
   readonly professionSlug?: string | null;
   /** ISO-3166 alpha-2 of where the worker currently is. */
   readonly country?: string | null;
+  /** City/locality the worker is in or prefers (free-form). */
+  readonly city?: string | null;
+  /** Worker coordinates, when the worker has shared them. NEVER invented. */
+  readonly lat?: number | null;
+  readonly lng?: number | null;
   /** Countries the worker will relocate to / work in. */
   readonly preferredCountries?: readonly string[];
   readonly languages?: readonly string[];
@@ -91,6 +113,24 @@ export interface MatchSubject {
   /** Worker's expected minimum pay (EUR). */
   readonly salaryMinEur?: number | null;
   readonly accommodationNeeded?: boolean | null;
+}
+
+/** Great-circle distance in km (haversine). Pure; used only when BOTH sides
+ *  carry real coordinates. */
+export function distanceKm(
+  aLat: number,
+  aLng: number,
+  bLat: number,
+  bLng: number,
+): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(bLat - aLat);
+  const dLng = toRad(bLng - aLng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
 export type MatchStatus = "strong" | "possible" | "weak" | "insufficient_data";
@@ -113,10 +153,13 @@ export type MatchReason =
   | { readonly code: "skills_journal_supported"; readonly count: number }
   | { readonly code: "skills_manager_confirmed"; readonly count: number }
   | { readonly code: "country_match" }
+  | { readonly code: "city_match" }
+  | { readonly code: "location_within_radius"; readonly km: number; readonly radiusKm: number }
   | { readonly code: "mobility_match" }
   | { readonly code: "available_now" }
   | { readonly code: "language_match" }
   | { readonly code: "profession_match" }
+  | { readonly code: "profession_related"; readonly sharedSkillRatio: number }
   | { readonly code: "pay_within_offer" }
   | { readonly code: "accommodation_ok" };
 
@@ -125,6 +168,7 @@ export type MatchGap =
   | { readonly code: "skills_missing"; readonly count: number; readonly uris: readonly string[] }
   | { readonly code: "language_missing"; readonly required: readonly string[] }
   | { readonly code: "country_mismatch" }
+  | { readonly code: "location_outside_radius"; readonly km: number; readonly radiusKm: number }
   | { readonly code: "pay_above_offer"; readonly expected: number; readonly offered: number }
   | { readonly code: "accommodation_needed_not_provided" }
   | { readonly code: "profession_mismatch" };
@@ -132,10 +176,22 @@ export type MatchGap =
 /** Honest "we don't know" — drives missing-data reasons, never assumptions. */
 export type MatchMissingDataCode =
   | "need_not_structured"
+  | "need_recognized_not_confirmed"
   | "no_subject_skills"
   | "availability_unknown"
+  | "location_unknown"
   | "pay_unknown"
   | "language_unknown";
+
+/** The single clear next step for THIS result (owner mandate: matching must
+ *  produce a next action, not just a number). Codes only — the UI localizes. */
+export type MatchNextAction =
+  | "structure_demand" // nothing derivable — describe/structure the need
+  | "confirm_recognized_need" // requirements came from text recognition → human confirms
+  | "review_and_shortlist" // strong/possible — open the candidate, shortlist
+  | "review_gaps"; // weak — see missing skills / mismatches
+
+export type MatchAvailability = "available" | "busy" | "unavailable" | "unknown";
 
 export interface MatchResultV1 {
   readonly status: MatchStatus;
@@ -151,6 +207,29 @@ export interface MatchResultV1 {
   readonly reasons: readonly MatchReason[];
   readonly gaps: readonly MatchGap[];
   readonly missingData: readonly MatchMissingDataCode[];
+  /** Normalized availability (unknown is honest, never assumed). */
+  readonly availability: MatchAvailability;
+  /** The one clear next step for this result. */
+  readonly nextAction: MatchNextAction;
+}
+
+/**
+ * Deterministic need-context ranking (§19: order candidates FOR ONE need —
+ * never a global person score). Status, then coverage, then confirmed share,
+ * then explicit availability over unknown/unavailable, then stable.
+ * Shared by scouting and the fixtures so ranking cannot drift apart.
+ */
+export function compareMatches(a: MatchResultV1, b: MatchResultV1): number {
+  const s = matchStrengthOrder(b.status) - matchStrengthOrder(a.status);
+  if (s !== 0) return s;
+  const pa = a.skillFit?.pct ?? 0;
+  const pb = b.skillFit?.pct ?? 0;
+  if (pb !== pa) return pb - pa;
+  const ca = a.skillFit?.matchedConfirmed ?? 0;
+  const cb = b.skillFit?.matchedConfirmed ?? 0;
+  if (cb !== ca) return cb - ca;
+  const AV: Record<MatchAvailability, number> = { available: 3, busy: 2, unknown: 1, unavailable: 0 };
+  return AV[b.availability] - AV[a.availability];
 }
 
 const norm = (s: string | null | undefined): string => (s ?? "").trim().toLowerCase();
@@ -166,12 +245,23 @@ export function matchWorkerToNeed(
   const gaps: MatchGap[] = [];
   const missingData: MatchMissingDataCode[] = [];
 
+  const availability: MatchAvailability = (() => {
+    const s = norm(subject.availabilityStatus);
+    if (s === "available") return "available";
+    if (s === "busy") return "busy";
+    if (s === "unavailable") return "unavailable";
+    return "unknown";
+  })();
+
   // ── Skill fit via the canonical engine (manager_confirmed ⇒ verified). ──
+  // Canonical ids are SLUGS (skillIds); legacy escoSkillUris merge in for
+  // back-compat. Matching never depends on ESCO being curated.
+  const needSkillIds = [...(need.skillIds ?? []), ...(need.escoSkillUris ?? [])];
   const fitSubject: SubjectEscoSkill[] = subject.skills.map((s) => ({
     uri: s.uri,
     verified: s.evidence === "manager_confirmed",
   }));
-  const skillFit = computeContextFit(need.escoSkillUris, fitSubject);
+  const skillFit = computeContextFit(needSkillIds, fitSubject);
 
   // Unstructured need ⇒ no percentage exists, ever (§19). Cannot match.
   if (skillFit === null) {
@@ -183,7 +273,15 @@ export function matchWorkerToNeed(
       reasons,
       gaps,
       missingData,
+      availability,
+      nextAction: "structure_demand",
     };
+  }
+
+  // A requirement set derived by recognition/expansion is an honest
+  // SUGGESTION until the company confirms it (§19/§7) — flagged always.
+  if (need.needSource === "recognized_from_text" || need.needSource === "profession_expanded") {
+    missingData.push("need_recognized_not_confirmed");
   }
 
   // ── Evidence breakdown over the MATCHED skills + weighted coverage. ──
@@ -232,8 +330,25 @@ export function matchWorkerToNeed(
   let hardBlock = false; // a true incompatibility caps status at weak
   let softCap = false; // a soft mismatch caps status at possible
 
-  // Location / mobility.
-  if (need.country) {
+  // Location — strongest available evidence wins, nothing is invented:
+  //   coordinates+radius (both sides) > same city > country > mobility.
+  //   Unknown worker location is missing data, never a negative (unless the
+  //   worker's KNOWN location contradicts the need).
+  const haveNeedGeo =
+    need.lat != null && need.lng != null && need.radiusKm != null && need.radiusKm > 0;
+  const haveSubjectGeo = subject.lat != null && subject.lng != null;
+  if (haveNeedGeo && haveSubjectGeo) {
+    const km = distanceKm(need.lat!, need.lng!, subject.lat!, subject.lng!);
+    const kmRounded = Math.round(km);
+    if (km <= need.radiusKm!) {
+      reasons.push({ code: "location_within_radius", km: kmRounded, radiusKm: need.radiusKm! });
+    } else {
+      gaps.push({ code: "location_outside_radius", km: kmRounded, radiusKm: need.radiusKm! });
+      softCap = true;
+    }
+  } else if (need.city && subject.city && norm(need.city) === norm(subject.city)) {
+    reasons.push({ code: "city_match" });
+  } else if (need.country) {
     const nc = norm(need.country);
     if (norm(subject.country) === nc) {
       reasons.push({ code: "country_match" });
@@ -242,15 +357,29 @@ export function matchWorkerToNeed(
     } else if (subject.country || (subject.preferredCountries?.length ?? 0) > 0) {
       gaps.push({ code: "country_mismatch" });
       softCap = true;
+    } else {
+      missingData.push("location_unknown");
     }
-    // else: worker location unknown — neither reason nor hard gap.
+  } else if (!subject.country && !subject.city && !haveSubjectGeo) {
+    missingData.push("location_unknown");
   }
 
-  // Profession.
+  // Profession — direct match, or related via shared profession_skills links
+  // (Jaccard over the static 232-link mirror; deterministic).
   if (need.professionSlug && subject.professionSlug) {
-    if (norm(need.professionSlug) === norm(subject.professionSlug))
+    if (norm(need.professionSlug) === norm(subject.professionSlug)) {
       reasons.push({ code: "profession_match" });
-    else gaps.push({ code: "profession_mismatch" });
+    } else {
+      const rel = professionRelatedness(need.professionSlug, subject.professionSlug);
+      if (rel >= 0.2) {
+        reasons.push({
+          code: "profession_related",
+          sharedSkillRatio: Math.round(rel * 100) / 100,
+        });
+      } else {
+        gaps.push({ code: "profession_mismatch" });
+      }
+    }
   }
 
   // Availability.
@@ -313,6 +442,15 @@ export function matchWorkerToNeed(
   if (hardBlock && matchStrengthOrder(status) > matchStrengthOrder("weak")) status = "weak";
   if (softCap && matchStrengthOrder(status) > matchStrengthOrder("possible")) status = "possible";
 
+  // The one clear next step (owner mandate). Confirming a recognized need is
+  // the human act that upgrades the suggestion into a structured need.
+  const nextAction: MatchNextAction =
+    need.needSource === "recognized_from_text" || need.needSource === "profession_expanded"
+      ? "confirm_recognized_need"
+      : matchStrengthOrder(status) >= matchStrengthOrder("possible")
+        ? "review_and_shortlist"
+        : "review_gaps";
+
   return {
     status,
     skillFit,
@@ -320,5 +458,7 @@ export function matchWorkerToNeed(
     reasons,
     gaps,
     missingData,
+    availability,
+    nextAction,
   };
 }

@@ -44,7 +44,9 @@ export default async function CompanyScoutingPage({
 
   const t = await getTranslations("scouting");
   const demands = await listCompanyDemands();
-  const selected = request ?? demands.find((d) => d.structured)?.id ?? null;
+  // Human-structured demands first; since PR4 an unstructured demand can
+  // still match via offline text recognition (honestly labeled below).
+  const selected = request ?? demands.find((d) => d.structured)?.id ?? demands[0]?.id ?? null;
   const result = selected ? await runScouting(selected) : null;
 
   const statusLabels = {
@@ -166,6 +168,21 @@ export default async function CompanyScoutingPage({
           ))}
         </nav>
       )}
+
+      {/* Recognized-need honesty banner (PR4): the requirement set below was
+          derived from the demand's own text by the offline recognizer — a
+          labeled SUGGESTION, not a human-confirmed structure. Matches remain
+          previews until a human confirms the requirements (§19/§7). */}
+      {result?.kind === "ok" &&
+      (result.demand.needSource === "recognized_from_text" ||
+        result.demand.needSource === "profession_expanded") ? (
+        <p
+          className="rounded-md border border-state-amber/40 bg-state-amber/10 px-4 py-3 text-xs leading-relaxed text-text-secondary"
+          data-testid="scouting-recognized-note"
+        >
+          {t("recognizedNote")}
+        </p>
+      ) : null}
 
       {/* Results */}
       {result?.kind === "not-structured" ? (
@@ -331,6 +348,16 @@ export default async function CompanyScoutingPage({
                     ))}
                   </div>
                 ) : null}
+
+                {/* The one clear next step for this result (PR4). */}
+                <p
+                  className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+                  data-testid={`scout-next-${c.workerId}`}
+                >
+                  {t.has(`nextAction.${c.match.nextAction}`)
+                    ? t(`nextAction.${c.match.nextAction}` as never)
+                    : null}
+                </p>
 
                 {/* Communication — IN-APP only, contacts stay hidden. The
                     request action is gated by canStartCommunicationOrBooking

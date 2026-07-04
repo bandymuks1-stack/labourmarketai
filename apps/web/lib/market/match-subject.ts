@@ -55,7 +55,12 @@ export async function buildSupplyCandidates(
     .map((w) => w.profile_id as string | null)
     .filter((p): p is string => !!p);
 
-  // worker_skills.source → evidence tier, keyed on ESCO uri (best tier wins).
+  // worker_skills.source → evidence tier, keyed on the CANONICAL SKILL SLUG
+  // (best tier wins). PR4 repair: this used to key on skills.esco_uri and
+  // silently DROPPED every skill whose esco_uri was NULL — which in prod was
+  // ALL of them (0/152 curated), making the whole supply side skill-less.
+  // The slug exists for 100% of rows; esco_uri rides along only as a legacy
+  // alias for human-ESCO-structured needs.
   const tierRank: Record<EvidenceTier, number> = {
     self_declared: 0,
     work_journal: 1,
@@ -67,7 +72,7 @@ export async function buildSupplyCandidates(
   const [skillsRes, profsRes] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
-      .select("worker_id, source, verified, skills ( esco_uri )")
+      .select("worker_id, source, verified, skills ( slug, esco_uri )")
       .in("worker_id", workerIds),
     asAny(supabase)
       .from("worker_professions")
@@ -79,15 +84,15 @@ export async function buildSupplyCandidates(
     worker_id: string;
     source: string | null;
     verified: boolean | null;
-    skills: { esco_uri: string | null } | null;
+    skills: { slug: string | null; esco_uri: string | null } | null;
   }[]) {
-    const uri = s.skills?.esco_uri;
-    if (!uri) continue;
+    const id = s.skills?.slug ?? s.skills?.esco_uri;
+    if (!id) continue;
     // verified=true is the manager-confirmed truth even if source lags.
     const tier: EvidenceTier = s.verified ? "manager_confirmed" : sourceToEvidence(s.source);
     const m = skillsByWorker.get(s.worker_id) ?? new Map<string, EvidenceTier>();
-    const prev = m.get(uri);
-    if (!prev || tierRank[tier] > tierRank[prev]) m.set(uri, tier);
+    const prev = m.get(id);
+    if (!prev || tierRank[tier] > tierRank[prev]) m.set(id, tier);
     skillsByWorker.set(s.worker_id, m);
   }
 
