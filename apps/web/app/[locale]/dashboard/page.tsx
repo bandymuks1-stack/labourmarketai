@@ -454,8 +454,12 @@ export default async function DashboardOverviewPage({
       <CurrentSpaceHeader role={role} />
 
       {/* "Mano darbo kortelė" — the state-aware status: what's clear / what's
-          missing + the ONE best next action (+ why it helps). Real data only. */}
-      <WorkCard data={cardData} avatarUrl={workerAvatar.signedUrl} />
+          missing + the ONE best next action (+ why it helps). Real data only.
+          Anchored so the profile hub's availability pillar can deep-link the
+          ONE canonical editor (PR9) — no duplicate editing surface. */}
+      <div id="work-card">
+        <WorkCard data={cardData} avatarUrl={workerAvatar.signedUrl} />
+      </div>
 
       {/* The action-first control room: readiness + fast actions + what-improves
           -what. `incomplete` is the real first-use state (no profession or no

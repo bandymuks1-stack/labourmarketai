@@ -735,8 +735,14 @@
         "available": "Žurnalo įrašai: {n}",
         "none": "Dar nesusieta",
         "preparing": "Darbo įrašų ryšys ruošiamas"
+      },
+      "availability": {
+        "label": "Prieinamumas",
+        "yes": "Nustatyta",
+        "no": "Dar nenustatyta"
       }
-    }
+    },
+    "opportunitiesLink": "Peržiūrėti atitinkančias galimybes"
   },
   "processAssistant": {
     "title": "Vidinis proceso asistentas",
@@ -2660,7 +2666,8 @@
       "available": "Laisvas",
       "drafted": "Atrinktas",
       "busy": "Užimtas"
-    }
+    },
+    "conceptNote": "Koncepcijos peržiūra — išgalvoti profiliai, ne tikri žmonės. Tikras profilis kuriamas iš jūsų tikrų įrašų."
   },
   "auth": {
     "errors": {

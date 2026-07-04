@@ -735,8 +735,14 @@
         "available": "Journal entries: {n}",
         "none": "Not yet linked",
         "preparing": "Work-records connection is being prepared"
+      },
+      "availability": {
+        "label": "Availability",
+        "yes": "Set",
+        "no": "Not set yet"
       }
-    }
+    },
+    "opportunitiesLink": "Review matched opportunities"
   },
   "processAssistant": {
     "title": "Internal process assistant",
@@ -2660,7 +2666,8 @@
       "available": "Available",
       "drafted": "Drafted",
       "busy": "Busy"
-    }
+    },
+    "conceptNote": "Concept preview — fictional profiles, not real people. Your real profile is built from your real entries."
   },
   "auth": {
     "errors": {

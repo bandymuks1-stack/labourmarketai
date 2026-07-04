@@ -31,6 +31,16 @@ export async function PlayerCardShowcase() {
           <PlayerCard id="workers.featured.3" />
         </div>
 
+        {/* §18 honesty line (PR9): these three cards are a CONCEPT preview of
+            fictional profiles — said visibly, in words, not only via the
+            per-card marker. Real profiles are built by real entries. */}
+        <p
+          className="mt-4 text-center font-mono text-[11px] uppercase tracking-label text-text-muted"
+          data-testid="playercards-concept-note"
+        >
+          {t("conceptNote")}
+        </p>
+
       </div>
     </section>
   );
