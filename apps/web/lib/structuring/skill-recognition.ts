@@ -73,6 +73,34 @@ export function isCleaningFloorContext(foldedText: string): boolean {
   );
 }
 
+/**
+ * Power-tool context guard for the electrical-install slug (phrase-pack audit
+ * 2026-07-04). The "elektr"/"электр" stems are the electrician's main needles,
+ * but they also live inside "elektriniai įrankiai" / "электроинструмент" /
+ * EN "power tools" — USING a power tool is not electrical installation work
+ * ("Montavau baldus ir naudojau elektrinius įrankius" wrongly suggested
+ * electrical-install). Owner rule: a wrong signal is worse than none. When a
+ * power-tool noun is present and NO genuine electrical-work context is, the
+ * electrical-install suggestion is dropped. Real electrical phrasings
+ * ("keičiau rozetes", "монтаж проводки", "wiring") always carry an anchor from
+ * the install regex, so they are never suppressed. Input must be FOLDED text.
+ */
+const POWER_TOOL_RE = /elektrin[a-z]* irank|электроинструмент|power tool|power drill/;
+const ELECTRICAL_WORK_RE =
+  /instaliac|rozet|jungikl|kabel|elektros darb|elektros mont|elektrik|wiring|rewir|electrical install|electrical work|проводк|розетк|электромонтаж|выключател|кабел|электрик/;
+
+/** True when electricity is named ONLY through a power-tool mention. */
+export function isPowerToolOnlyElectricalContext(foldedText: string): boolean {
+  return POWER_TOOL_RE.test(foldedText) && !ELECTRICAL_WORK_RE.test(foldedText);
+}
+
+/** Fuzzy-tier token blocklist (phrase-pack audit 2026-07-04): common EN
+ *  past-tense verbs that sit 1 edit away from an unrelated dictionary stem and
+ *  hallucinated construction skills in ordinary sentences — "filled" (invoices)
+ *  → "filler" (skim-coating), "helped" (around the house) → "helper"
+ *  (general-labour). Exact/synonym tiers are unaffected. */
+const FUZZY_TOKEN_BLOCKLIST: ReadonlySet<string> = new Set(["filled", "helped"]);
+
 type Term = { slug: string; term: string; via: "exact" | "synonym"; len: number };
 
 /** Folded dictionary terms (built once). Exact terms come from the base
@@ -166,6 +194,7 @@ export function recognizeSkills(
   for (let i = 0; i < foldedTokens.length; i++) {
     const tok = foldedTokens[i];
     if (tok.length < FUZZY_MIN_TOKEN_LEN) continue;
+    if (FUZZY_TOKEN_BLOCKLIST.has(tok)) continue;
     for (const [slug, stems] of FUZZY_STEMS) {
       if (best.has(slug)) continue;
       for (const stem of stems) {
@@ -192,6 +221,12 @@ export function recognizeSkills(
   // a floor was named in a washing/cleaning context (e.g. "ploviau grindis").
   if (best.has("flooring") && isCleaningFloorContext(folded)) {
     best.delete("flooring");
+  }
+
+  // Power-tool guard: drop an electrical-install suggestion that exists only
+  // because a power tool was named (e.g. "naudojau elektrinius įrankius").
+  if (best.has("electrical-install") && isPowerToolOnlyElectricalContext(folded)) {
+    best.delete("electrical-install");
   }
 
   const list: RecognizedSkill[] = [...best.entries()].map(([slug, b]) => ({

@@ -120,7 +120,7 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ...asSector("transport_logistics", [
     { slug: "driving", needles: ["vairav", "vairuoj", "vairuotoj", "водител", "за рулем", "за рулём", "driver", "driving"] },
     { slug: "delivery-driving", needles: ["pristatym", "kurjer", "pristaciau siunt", "siuntu pristat", "courier", "delivery", "доставк", "курьер", "развозил"] },
-    { slug: "cargo-transport", needles: ["veziau krovin", "vežiau krovin", "krovinio pervez", "kroviniu pervez", "krovinių pervez", "перевозил груз", "вез груз", "cargo"] },
+    { slug: "cargo-transport", needles: ["veziau krovin", "vežiau krovin", "krovinio pervez", "kroviniu pervez", "krovinių pervez", "перевозил груз", "вез груз", "возил груз", "cargo"] },
     { slug: "forklift-operation", needles: ["krautuv", "autokrautuv", "forklift", "погрузчик", "штабел"] },
     { slug: "warehouse-operations", needles: ["sandėl", "sandel", "warehouse", "складск", "склад", "комплектовщик"] },
     { slug: "order-picking", needles: ["rinkau uzsakym", "rinkau užsakym", "uzsakymu rink", "užsakymų rink", "surinkau uzsakym", "surinkau užsakym", "prekiu surink", "prekių surink", "uzsakymu komplekt", "užsakymų komplekt", "komplektav", "order pick", "pakavau ir etiket", "сборка заказ", "комплектац заказ"] },
@@ -129,14 +129,14 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ...asSector("manufacturing", [
     { slug: "assembly-work", needles: ["surinkim", "surinkinėj", "surinkinej", "montavom detal", "detalių surink", "detaliu surink", "сборк", "assembly"] },
     { slug: "production-line", needles: ["konvejer", "gamybos linij", "gamykl", "fabrik", "конвейер", "производствен", "цех", "завод", "production line", "factory"] },
-    { slug: "packaging", needles: ["pakav", "pakuoj", "упаков", "фасов", "packag", "etiketav"] },
+    { slug: "packaging", needles: ["pakav", "pakuoj", "упаков", "фасов", "packag", "packed", "etiketav"] },
     { slug: "equipment-operation", needles: ["stakl", "станк", "станок", "mechanizm", "оборудован", "equipment operat"] },
   ]),
   // ── Cleaning & facilities ─────────────────────────────────────────────────
   ...asSector("cleaning_facility", [
     // Generic cleaning is a first-class cleaning_facility skill — it used to
     // be swallowed by the construction site-cleaning slug (see above).
-    { slug: "cleaning-services", needles: ["valym", "valiau", "valau", "valytoj", "siurbiau", "tvarkiau ofis", "tvarkiau biur", "ofiso tvark", "biuro tvark", "уборк", "убира", "убрал", "уборщ", "клинин", "мыл пол", "помыл пол", "cleaning", "cleaner", "mopped"] },
+    { slug: "cleaning-services", needles: ["valym", "valiau", "valau", "valytoj", "siurbiau", "tvarkiau ofis", "tvarkiau biur", "ofiso tvark", "biuro tvark", "уборк", "убира", "убрал", "уборщ", "клинин", "мыл пол", "помыл пол", "cleaning", "cleaned", "cleaner", "mopped"] },
     { slug: "window-cleaning", needles: ["valiau lang", "valau lang", "ploviau lang", "langu valym", "langų valym", "мыл окн", "мытье окон", "мытьё окон", "window clean", "cleaned windows"] },
     { slug: "housekeeping", needles: ["kambari viesbut", "kambarius viesbut", "viesbut kambar", "kambarines", "patalyne", "patalynes keit", "housekeep", "room attendant", "горничн", "уборка номер", "смена белья"] },
     { slug: "winter-service", needles: ["valiau snieg", "sniego valym", "snieg nuo tak", "kasiau snieg", "barst drusk", "druska nuo led", "led barst", "snow remov", "snow clear", "gritting", "уборка снег", "чистил снег", "посыпал реагент"] },
@@ -144,12 +144,16 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   // ── Office & administration ───────────────────────────────────────────────
   ...asSector("office_admin", [
     { slug: "administration", needles: ["administrav", "administrac", "rastved", "raštved", "делопроизвод", "администрир", "office admin"] },
-    { slug: "document-handling", needles: ["dokument", "документ", "paperwork"] },
-    { slug: "bookkeeping", needles: ["apskait", "buhalter", "saskait", "sąskait", "бухгалтер", "bookkeep", "accounting"] },
+    // EN "document(s)" only fuzzy-matched the LT "dokument" stem before —
+    // exact needle makes it high confidence (phrase-pack audit 2026-07-04).
+    { slug: "document-handling", needles: ["dokument", "document", "документ", "paperwork"] },
+    { slug: "bookkeeping", needles: ["apskait", "buhalter", "saskait", "sąskait", "бухгалтер", "bookkeep", "accounting", "invoice", "заполнял счета", "выставлял счета"] },
   ]),
   // ── IT & software / creative ──────────────────────────────────────────────
   ...asSector("it_software", [
-    { slug: "programming", needles: ["programav", "programuoj", "kodav", "kodo pataisym", "bug fix", "programming", "coding", "программир", "писал код", "разработчик"] },
+    // EN past-tense forms measured missing: "programmed a website and fixed
+    // bugs" recognised NOTHING (phrase-pack audit 2026-07-04).
+    { slug: "programming", needles: ["programav", "programuoj", "kodav", "kodo pataisym", "bug fix", "fixed bug", "wrote code", "programmed", "programming", "coding", "программир", "писал код", "разработчик"] },
     { slug: "qa-testing", needles: ["programos testav", "programeles testav", "programėlės testav", "aplikacijos testav", "qa test", "software testing", "test case", "тестировщик", "тестирование приложен", "тестирование по"] },
     { slug: "it-support", needles: ["it pagalb", "sistem administr", "it support", "helpdesk", "техподдержк"] },
     { slug: "web-design", needles: ["puslapio dizain", "web dizain", "web design", "interneto svetain", "internetin svetain", "tinklap", "веб-дизайн", "дизайн сайт"] },
@@ -157,8 +161,13 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ]),
   // ── Customer service & sales ──────────────────────────────────────────────
   ...asSector("retail_sales", [
-    { slug: "customer-service", needles: ["klient aptarnav", "klientų aptarnav", "aptarnavau klient", "kalbejau su klient", "kalbėjau su klient", "bendrav su klient", "konsultavau klient", "klientu konsult", "klientų konsult", "customer service", "обслуживал клиент", "общался с клиент", "консультировал клиент"] },
-    { slug: "cashier", needles: ["kasinink", "prie kasos", "kasoje", "cashier", "кассир", "за кассой"] },
+    // 2026-07-04 phrase-pack audit: inflected LT "bendravAU su klientais" and
+    // EN "served customers" / "communicated with clients" produced NO match —
+    // the old needles assumed truncated stems. Measured gaps, not guesses
+    // (runtime/audits/skill-recognition-language-coverage-audit-2026-07-04.md).
+    { slug: "customer-service", needles: ["klient aptarnav", "klientų aptarnav", "aptarnavau klient", "kalbejau su klient", "kalbėjau su klient", "bendrav su klient", "bendravau su klient", "konsultavau klient", "klientu konsult", "klientų konsult", "customer service", "served customer", "communicated with client", "обслуживал клиент", "общался с клиент", "консультировал клиент"] },
+    // RU "на кассе"/"в кассе" and EN "at the till" are the forms workers write.
+    { slug: "cashier", needles: ["kasinink", "prie kasos", "kasoje", "cashier", "at the till", "кассир", "за кассой", "на кассе", "в кассе"] },
     { slug: "sales-assistant", needles: ["pardavej", "pardavėj", "pardavimo konsult", "sales assistant", "shop assistant", "продавец"] },
   ]),
   // ── Hospitality & food ────────────────────────────────────────────────────
@@ -175,8 +184,11 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ]),
   // ── Care & assistance / safety ────────────────────────────────────────────
   ...asSector("care_health", [
-    { slug: "elderly-care", needles: ["senjor", "senel", "senol", "slaug", "slaugiau", "elderly care", "caregiver", "сиделк", "уход за пожил", "ухаживал за пожил"] },
-    { slug: "childcare", needles: ["vaiku prieziur", "vaikų priežiūr", "prizurejau vaik", "prižiūrėjau vaik", "aukle", "auklėjau", "darzel", "daržel", "childcare", "nanny", "няня", "уход за детьми", "присматривал за дет"] },
+    // Phrase-pack audit 2026-07-04: EN "looked after an elderly man" and RU
+    // "присматривал за ребёнком" (singular; the old needle only covered the
+    // plural "за детьми") recognised nothing. "elderly" alone is specific.
+    { slug: "elderly-care", needles: ["senjor", "senel", "senol", "slaug", "slaugiau", "elderly", "caregiver", "сиделк", "уход за пожил", "ухаживал за пожил", "за пожилым"] },
+    { slug: "childcare", needles: ["vaiku prieziur", "vaikų priežiūr", "prizurejau vaik", "prižiūrėjau vaik", "aukle", "auklėjau", "darzel", "daržel", "childcare", "child care", "looked after a child", "nanny", "няня", "уход за детьми", "присматривал за дет", "за ребенк", "за ребёнк"] },
     { slug: "first-aid", needles: ["pirmoji pagalb", "pirmaja pagalb", "pirmąja pagalb", "pirmosios pagalbos", "first aid", "первая помощь", "первой помощи"] },
   ]),
   // ── Education & languages ─────────────────────────────────────────────────
@@ -186,7 +198,10 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ]),
   // ── Events ────────────────────────────────────────────────────────────────
   ...asSector("other", [
-    { slug: "event-setup", needles: ["renginiui", "sventei", "šventei", "renginio paruos", "renginio paruoš", "renginiu paruos", "renginių paruoš", "ruosiau rengin", "ruošiau rengin", "ruoseme rengin", "ruošėme rengin", "inventoriaus paruos", "inventoriaus paruoš", "rinkome inventori", "rinkau inventori", "event prep", "event setup", "мероприят", "инвентарь для"] },
+    // Phrase-pack audit 2026-07-04: LT "Organizavau renginio pasiruošimą"
+    // (pasiruošimas, not paruošimas) and EN "organized the preparation of an
+    // event" recognised nothing — both are common real forms.
+    { slug: "event-setup", needles: ["renginiui", "sventei", "šventei", "renginio paruos", "renginio paruoš", "renginio pasiruoš", "renginio pasiruos", "organizavau rengin", "renginiu paruos", "renginių paruoš", "ruosiau rengin", "ruošiau rengin", "ruoseme rengin", "ruošėme rengin", "inventoriaus paruos", "inventoriaus paruoš", "rinkome inventori", "rinkau inventori", "event prep", "event setup", "event organis", "event organiz", "organized an event", "preparation of an event", "мероприят", "инвентарь для"] },
   ]),
 ];
 
