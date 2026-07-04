@@ -28,6 +28,9 @@ export type SectorKey =
   | "education"
   | "cleaning_facility"
   | "agriculture"
+  | "repair_maintenance"
+  | "beauty_services"
+  | "hr_recruitment"
   | "other";
 
 export interface SectorDef {
@@ -63,6 +66,18 @@ export const SECTORS: readonly SectorDef[] = [
     nameEn: "Cleaning & facilities",
   },
   { key: "agriculture", nameLt: "Žemės ūkis", nameEn: "Agriculture" },
+  // Wave-2 sectors (2026-07-04 catalogue expansion) — same one-row rule.
+  {
+    key: "repair_maintenance",
+    nameLt: "Remontas ir priežiūra",
+    nameEn: "Repair & maintenance",
+  },
+  {
+    key: "beauty_services",
+    nameLt: "Grožio paslaugos",
+    nameEn: "Beauty & personal services",
+  },
+  { key: "hr_recruitment", nameLt: "Personalas ir atranka", nameEn: "HR & recruitment" },
   { key: "other", nameLt: "Kita", nameEn: "Other" },
 ];
 

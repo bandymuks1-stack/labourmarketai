@@ -229,6 +229,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 98 for the truth-audit legacy-professions repair
     // (20260704130000; builder/rebar_worker/site_manager were never
     // migration-seeded — INSERT-only, idempotent, owner-gated apply).
-    expect(guard).toMatch(/SPRINT_BASELINE = 98/);
+    // then to 99 for the wave-2 catalogue expansion (20260704150000;
+    // class-E labour-market gaps — office/data-entry, warehouse scanning,
+    // kitchen help, repair, beauty, HR; INSERT-only, owner-gated apply).
+    expect(guard).toMatch(/SPRINT_BASELINE = 99/);
   });
 });

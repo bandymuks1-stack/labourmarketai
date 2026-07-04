@@ -203,6 +203,63 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     // event" recognised nothing — both are common real forms.
     { slug: "event-setup", needles: ["renginiui", "sventei", "šventei", "renginio paruos", "renginio paruoš", "renginio pasiruoš", "renginio pasiruos", "organizavau rengin", "renginiu paruos", "renginių paruoš", "ruosiau rengin", "ruošiau rengin", "ruoseme rengin", "ruošėme rengin", "inventoriaus paruos", "inventoriaus paruoš", "rinkome inventori", "rinkau inventori", "event prep", "event setup", "event organis", "event organiz", "organized an event", "preparation of an event", "мероприят", "инвентарь для"] },
   ]),
+  // ══ Wave-2 catalogue expansion (2026-07-04) — class-E gaps from the
+  //    language-coverage audit. Every slug below is seeded by migration
+  //    20260704150000 and named in all 11 locales (installation-chain guard
+  //    enforces the full chain). LT/EN/RU needles only — other languages stay
+  //    honestly RED until their own needle pass (audit §5 PR3). ═══════════════
+  // ── Office & administration (wave 2) ──────────────────────────────────────
+  ...asSector("office_admin", [
+    // The measured "Dirbau su Excel" gap: needles are preposition-anchored so
+    // "excel" never fires from EN "excellent".
+    { slug: "office-software", needles: ["su excel", "with excel", "с excel", "в excel", "excel lentel", "spreadsheet", "skaiciuokl", "skaičiuokl", "экселе", "эксель", "электронн таблиц"] },
+    { slug: "data-entry", needles: ["suvedziau duomen", "suvedžiau duomen", "duomenu suved", "duomenų suved", "vedziau duomen", "vedžiau duomen", "data entry", "entered data", "вводил данные", "ввод данных"] },
+    { slug: "reception", needles: ["registratur", "registratūr", "reception", "priemiau lankytoj", "priėmiau lankytoj", "ресепшн", "регистратур", "принимал посетител"] },
+  ]),
+  // ── Warehouse & logistics (wave 2) ─────────────────────────────────────────
+  ...asSector("transport_logistics", [
+    // Anchored on goods/codes so office document scanning never fires this.
+    { slug: "barcode-scanning", needles: ["skenavau prek", "prekiu skenav", "prekių skenav", "skenavau kod", "barcode", "scanned goods", "scanned items", "сканировал товар", "сканировал штрих", "штрихкод", "штрих-код"] },
+    { slug: "pallet-handling", needles: ["palet", "pallet", "паллет", "поддон"] },
+    { slug: "stock-taking", needles: ["inventoriz", "stock taking", "stocktak", "stock count", "инвентаризац"] },
+  ]),
+  // ── Hospitality & food (wave 2) ────────────────────────────────────────────
+  ...asSector("hospitality_food", [
+    { slug: "kitchen-help", needles: ["virtuves pagalb", "virtuvės pagalb", "padejau virtuv", "padėjau virtuv", "kitchen help", "kitchen porter", "kitchen assistant", "помогал на кухне", "помощник на кухне", "помощник повара"] },
+    { slug: "dishwashing", needles: ["ploviau ind", "indu plovim", "indų plovim", "indaplov", "washed dishes", "washing dishes", "dishwash", "мыл посуду", "мытье посуды", "мытьё посуды", "посудомой"] },
+    { slug: "baking", needles: ["kepykl", "kepiau duon", "kepiau pyrag", "kepiau band", "baked", "baking", "пекарн", "выпек", "пек хлеб", "пёк хлеб"] },
+    { slug: "barista-work", needles: ["barist", "ruosiau kav", "ruošiau kav", "dariau kav", "made coffee", "prepared coffee", "барист", "варил кофе", "готовил кофе"] },
+  ]),
+  // ── Customer service & retail (wave 2) ─────────────────────────────────────
+  ...asSector("retail_sales", [
+    { slug: "call-centre", needles: ["skambuciu centr", "skambučių centr", "call centr", "call center", "atsakinejau i skambu", "atsakinėjau į skambu", "priemiau skambu", "priėmiau skambu", "колл-центр", "call-центр", "отвечал на звонк", "принимал звонк"] },
+    { slug: "merchandising", needles: ["prekes i lentyn", "prekes į lentyn", "deliojau prek", "dėliojau prek", "isdeliojau prek", "išdėliojau prek", "merchandis", "stocked shelves", "shelf stocking", "выкладывал товар", "выкладк товар", "расставлял товар"] },
+  ]),
+  // ── Repair & maintenance (wave 2) ──────────────────────────────────────────
+  ...asSector("repair_maintenance", [
+    { slug: "auto-repair", needles: ["automobiliu remont", "automobilių remont", "remontavau automobil", "remontavau masin", "remontavau mašin", "taisiau automobil", "taisiau masin", "taisiau mašin", "autoserv", "car repair", "repaired cars", "repaired the car", "fixed cars", "auto repair", "ремонтировал автомобил", "ремонтировал машин", "ремонт автомобил", "чинил машин", "автосервис", "автослесар", "автомехан"] },
+    { slug: "appliance-repair", needles: ["buitine technik", "buitines technik", "technikos remont", "taisiau technik", "taisiau saldytuv", "taisiau šaldytuv", "skalbimo masin remont", "skalbimo mašin remont", "appliance repair", "repaired appliance", "бытовой техник", "бытовую техник", "чинил холодильник", "ремонт стиральн"] },
+    { slug: "handyman-work", needles: ["smulkus remont", "smulkūs remont", "smulkius remont", "smulkaus remont", "handyman", "odd jobs", "minor repairs", "мелкий ремонт", "мелкие ремонт", "мастер на час"] },
+  ]),
+  // ── Beauty & personal services (wave 2) ────────────────────────────────────
+  ...asSector("beauty_services", [
+    // RU: "стриг волос/клиент" is hair; bare "стриг" stays with gardening's
+    // anchored "стриг газон" — no cross-family bleed.
+    { slug: "hairdressing", needles: ["kirpau plauk", "kirpau klient", "kirpykl", "sukuosen", "šukuosen", "haircut", "hairdress", "cut hair", "стрижк", "стриг волос", "стриг клиент", "укладк волос", "парикмахер"] },
+    { slug: "barbering", needles: ["barzdaskut", "skutau barzd", "barzdos kirpim", "barber", "барбер", "брил бород", "стрижка бород"] },
+    { slug: "nail-care", needles: ["manikiur", "manikiūr", "pedikiur", "pedikiūr", "nagu prieziur", "nagų priežiūr", "manicure", "pedicure", "маникюр", "педикюр", "ногтев"] },
+  ]),
+  // ── HR & recruitment (wave 2) ──────────────────────────────────────────────
+  ...asSector("hr_recruitment", [
+    // Recruiter-side anchors only: a WORKER attending an interview ("buvau
+    // darbo pokalbyje") must never read as recruitment work.
+    { slug: "recruitment", needles: ["darbuotoju atrank", "darbuotojų atrank", "ieskojau darbuotoj", "ieškojau darbuotoj", "vedziau darbo pokalb", "vedžiau darbo pokalb", "kandidatu atrank", "kandidatų atrank", "recruit", "interviewed candidate", "hiring", "подбор персонал", "подбирал персонал", "проводил собеседован", "искал сотрудник", "рекрут"] },
+    { slug: "personnel-admin", needles: ["personalo dokument", "personalo administrav", "personalo apskait", "personnel", "кадров", "оформлял сотрудник"] },
+  ]),
+  // ── Cleaning & facilities (wave 2) ─────────────────────────────────────────
+  ...asSector("cleaning_facility", [
+    { slug: "laundry", needles: ["skalbiau", "skalbykl", "lyginau drabuz", "lyginau drabuž", "lyginau skalbin", "laundry", "ironed", "ironing", "washed clothes", "стирал", "стирк", "гладил бель", "гладил одежд", "прачечн"] },
+  ]),
 ];
 
 /** slug → sector for every first-class recognisable skill. When a slug appears
@@ -263,6 +320,20 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "teacher", needles: ["mokytoj", "destytoj", "dėstytoj", "преподавател", "учител", "teacher"] },
   { slug: "caregiver", needles: ["slaugytoj", "сиделк", "caregiver"] },
   { slug: "furniture_assembler", needles: ["baldu montuotoj", "baldų montuotoj", "baldu surinkėj", "baldu surinkej", "сборщик мебел", "furniture assembler"] },
+  // ── Wave-2 professions (2026-07-04 catalogue expansion) ──────────────────
+  { slug: "receptionist", needles: ["registrator", "receptionist", "ресепшн", "регистратор"] },
+  { slug: "kitchen_helper", needles: ["virtuves pagalbinink", "virtuvės pagalbinink", "kitchen helper", "kitchen porter", "помощник повара", "помощник на кухне"] },
+  { slug: "barista", needles: ["barist", "барист"] },
+  { slug: "baker", needles: ["kepej", "kepėj", "baker", "пекар"] },
+  { slug: "call_centre_agent", needles: ["skambuciu centro operator", "skambučių centro operator", "call centre agent", "call center agent", "оператор колл", "оператор call"] },
+  { slug: "merchandiser", needles: ["merchandiser", "мерчандайзер", "мерчендайзер"] },
+  { slug: "auto_mechanic", needles: ["automechanik", "autosaltkalv", "autošaltkalv", "auto mechanic", "car mechanic", "автомеханик", "автослесар"] },
+  { slug: "handyman", needles: ["handyman", "мастер на час", "smulkaus remonto meistr"] },
+  { slug: "hairdresser", needles: ["kirpej", "kirpėj", "hairdresser", "парикмахер"] },
+  { slug: "barber", needles: ["barzdaskut", "barber", "барбер"] },
+  { slug: "nail_technician", needles: ["manikiurinink", "manikiūrinink", "nail technician", "мастер маникюр"] },
+  { slug: "recruiter", needles: ["personalo atrankos specialist", "recruiter", "рекрутер"] },
+  { slug: "laundry_worker", needles: ["skalbej", "skalbėj", "skalbyklos darbuotoj", "laundry worker", "работник прачечн"] },
 ];
 
 /** Higher-level work directions surfaced as a separate suggestion bucket. */
@@ -345,6 +416,54 @@ export const ACTIVITY_HINTS_LT: {
       "rengiu projekt",
       "projekt parengim", "готовил проект", "разрабатывал проект", "разработка проекта",
     ],
+  },
+  // ── Wave-2 specific activities (2026-07-04) — placed in the specific-
+  //    before-generic zone so e.g. "padėjau virtuvėje" resolves to the
+  //    kitchen HELPER, not the cook, and car repair never falls into
+  //    construction "remont" ambiguity. ────────────────────────────────────
+  {
+    slug: "auto_mechanic",
+    sector: "repair_maintenance",
+    label: "Automobilių remontas",
+    needles: [
+      "remontavau automobil", "taisiau automobil", "automobiliu remont",
+      "automobilių remont", "autoserv", "car repair", "repaired cars",
+      "ремонтировал машин", "ремонтировал автомобил", "ремонт автомобил", "автосервис",
+    ],
+  },
+  {
+    slug: "hairdresser",
+    sector: "beauty_services",
+    label: "Kirpėjo darbas",
+    needles: [
+      "kirpau plauk", "kirpykl", "haircut", "hairdress",
+      "стрижк", "стриг волос", "парикмахер",
+    ],
+  },
+  {
+    slug: "kitchen_helper",
+    sector: "hospitality_food",
+    label: "Virtuvės pagalbininko darbas",
+    needles: [
+      "padejau virtuv", "padėjau virtuv", "ploviau ind", "indu plovim",
+      "indų plovim", "washed dishes", "kitchen help", "kitchen porter",
+      "мыл посуду", "помощник на кухне",
+    ],
+  },
+  {
+    slug: "laundry_worker",
+    sector: "cleaning_facility",
+    label: "Skalbimas ir lyginimas",
+    needles: [
+      "skalbiau", "skalbykl", "lyginau drabuz", "lyginau drabuž",
+      "laundry", "стирал", "гладил бель",
+    ],
+  },
+  {
+    slug: "receptionist",
+    sector: "office_admin",
+    label: "Registratūros darbas",
+    needles: ["registratur", "registratūr", "reception desk", "ресепшн", "регистратур"],
   },
   // ── Non-construction day-work (v3) ────────────────────────────────────
   // Each row uses explicit LT inflected forms — substring matches on short
