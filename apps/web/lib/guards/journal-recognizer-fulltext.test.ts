@@ -95,7 +95,10 @@ describe("Guard: excavator / earthworks stays in its own sector", () => {
   it("recognises earthworks only (no unrelated trade)", () => {
     const slugs = recognizedSlugs(text);
     expect(slugs).toContain("earthworks");
-    const allowed = new Set(["earthworks"]);
+    // excavator-operator joined the recognisable catalogue in the PR3D
+    // class-B needle wave — the sentence literally names the machine, so it
+    // is a RELATED skill, not the cross-trade bleed this guard forbids.
+    const allowed = new Set(["earthworks", "excavator-operator"]);
     for (const slug of slugs) {
       expect(allowed.has(slug), `unexpected skill ${slug}`).toBe(true);
     }

@@ -265,6 +265,77 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ...asSector("cleaning_facility", [
     { slug: "laundry", needles: ["skalbiau", "skalbykl", "lyginau drabuz", "lyginau drabuž", "lyginau skalbin", "laundry", "ironed", "ironing", "washed clothes", "стирал", "стирк", "гладил бель", "гладил одежд", "прачечн"] },
   ]),
+  // ══ Class-B needle wave (2026-07-04 PR3D, offline-recognition audit §11) —
+  //    installed catalogue skills that had NO needles in ANY language. Only
+  //    the low-risk, obvious ones get needles (LT/EN/RU base tier); the rest
+  //    stay classified "deferred" with notes in
+  //    language-packs/recognition-status.ts. Construction depth per PACK
+  //    language remains deferred — this wave makes the slugs recognisable at
+  //    all, it does not claim 12-language coverage for them. ════════════════
+  ...asSector("construction", [
+    // welding sub-processes (workers name the process, not the blueprint)
+    { slug: "arc-welding", needles: ["arc weld", "elektrodu suvirin", "elektrodais suvirin", "дуговая сварк", "дуговой сварк", "варил электрод"] },
+    { slug: "mig-mag-welding", needles: ["mig weld", "mig/mag", "suvirinimas pusautomat", "pusautomatinis suvirin", "сварка полуавтомат", "варил полуавтомат"] },
+    { slug: "tig-welding", needles: ["tig weld", "argonu suvirin", "argono suvirin", "аргонная сварк", "варил аргоном", "аргонодуговая"] },
+    { slug: "gas-cutting", needles: ["gas cutting", "dujinis pjov", "dujinis pjaust", "газорез"] },
+    // construction plant / machinery operation
+    { slug: "crane-operator", needles: ["crane operator", "kraninink", "valdziau kran", "valdžiau kran", "крановщик"] },
+    { slug: "tower-crane", needles: ["tower crane", "bokstin kran", "bokštin kran", "башенн кран"] },
+    { slug: "mobile-crane", needles: ["mobile crane", "autokran", "автокран"] },
+    { slug: "excavator-operator", needles: ["excavator", "ekskavator", "экскаватор"] },
+    { slug: "bulldozer-operator", needles: ["bulldozer", "buldozer", "бульдозер"] },
+    { slug: "grader-operator", needles: ["grader operat", "greider", "грейдер"] },
+    { slug: "loader-operator", needles: ["wheel loader", "frontalin krautuv", "ratin krautuv", "фронтальн погрузчик"] },
+    { slug: "compactor-operator", needles: ["plate compactor", "vibroplokst", "vibroplokšt", "виброплит"] },
+    // masonry & tiling depth
+    { slug: "blockwork", needles: ["blockwork", "block laying", "blokeli", "газоблок", "пеноблок", "клал блок"] },
+    { slug: "stone-masonry", needles: ["stone masonry", "akmens mur", "akmens mūr", "каменная кладк", "каменной кладк"] },
+    { slug: "grouting", needles: ["grouting", "fugav", "затирка швов", "затирал швы"] },
+    { slug: "mosaic-tiling", needles: ["mosaic", "mozaik", "мозаик"] },
+    { slug: "large-format-tiling", needles: ["large format til", "stambiaformat", "didziaformat", "didžiaformat", "крупноформат"] },
+    // plaster & paint depth
+    { slug: "decorative-plaster", needles: ["decorative plaster", "dekoratyvin tink", "декоративн штукатурк", "венецианк"] },
+    { slug: "facade-plaster", needles: ["facade plaster", "fasado tink", "фасадн штукатурк"] },
+    { slug: "spray-painting", needles: ["spray paint", "purškiam", "purskiam", "краскопульт", "покраска распылител"] },
+    // openings / envelope
+    { slug: "door-window-install", needles: ["door install", "window install", "fitted doors", "fitted windows", "duru montavim", "durų montavim", "langu montavim", "langų montavim", "установка дверей", "установка окон"] },
+    { slug: "glazing", needles: ["glazing", "stiklinim", "istiklin", "įstiklin", "остеклен"] },
+    { slug: "gutter-install", needles: ["gutter", "lietvamzd", "latak", "водосточн", "желоб"] },
+    { slug: "roof-tiling", needles: ["roof tile", "cerpi", "čerpi", "черепиц"] },
+    { slug: "flat-roofing", needles: ["flat roof", "ruberoid", "sutapdint stog", "рубероид", "наплавляем"] },
+    { slug: "roof-insulation", needles: ["roof insulation", "stogo siltinim", "stogo šiltinim", "утепление кровли", "утепление крыши"] },
+    // concrete & steel depth
+    { slug: "mortar-prep", needles: ["mixed mortar", "mortar mixing", "skiedinio ruos", "maisiau skiedin", "maišiau skiedin", "готовил раствор", "замешивал раствор", "мешал раствор"] },
+    { slug: "concrete-finishing", needles: ["concrete finishing", "betono lyginim", "затирка бетон", "затирал бетон"] },
+    { slug: "concrete-vibration", needles: ["concrete vibrat", "betono vibr", "вибрирование бетон", "вибрировал бетон", "уплотнение бетон"] },
+    { slug: "steel-fixing", needles: ["steel fixing", "risau armatur", "rišau armatūr", "вязал арматур", "вязка арматур"] },
+    { slug: "structural-steel", needles: ["structural steel", "metalo konstrukcij", "металлоконструкц"] },
+    { slug: "precast-install", needles: ["precast", "gelzbeton", "gelžbeton", "жби"] },
+    // electrical depth (all anchored — never a bare "elektr" stem)
+    { slug: "cable-pulling", needles: ["cable pulling", "cable laying", "kabeliu klojim", "kabelių klojim", "traukiau kabel", "прокладка кабел", "тянул кабел"] },
+    { slug: "lighting-install", needles: ["lighting install", "sviestuvu montav", "šviestuvų montav", "montavau sviestuv", "montavau šviestuv", "установка светильник", "монтаж освещен"] },
+    { slug: "panel-install", needles: ["distribution board", "elektros skyd", "электрощит", "распределительн щит"] },
+    { slug: "electrical-testing", needles: ["electrical test", "elektros matavim", "varzu matavim", "varžų matavim", "электроизмерен", "замеры сопротивлен"] },
+    { slug: "low-voltage", needles: ["low voltage", "low-voltage", "silpnu srov", "silpnų srov", "слаботочн"] },
+    { slug: "industrial-electric", needles: ["industrial electric", "pramonin elektr", "pramones elektr", "pramonės elektr", "электрик на производстве"] },
+    // site engineering & supervision
+    { slug: "rigging", needles: ["rigging", "stropav", "stropuotoj", "стропальщик", "строповк"] },
+    { slug: "setting-out", needles: ["setting out", "nuzymej", "nužymėj", "разметк", "разбивка осей"] },
+    { slug: "surveying", needles: ["site survey", "land survey", "geodez", "nivelyr", "геодез", "нивелир"] },
+    // NB: never the bare stem "sąmat"→"samat" — that is the common Finnish
+    // word "samat" (the same); only the fuller inflections are needles.
+    { slug: "quantity-takeoff", needles: ["quantity takeoff", "quantity take-off", "samata", "samatu", "sąmata", "sąmatų", "сметчик", "составлял сметы"] },
+    { slug: "site-supervision", needles: ["site supervision", "technine prieziur", "techninė priežiūr", "технадзор", "техническ надзор"] },
+  ]),
+  ...asSector("transport_logistics", [
+    { slug: "manual-handling", needles: ["manual handling", "krovos darb", "krovej", "iskroviau", "iškroviau", "pakroviau", "разгружал", "погрузочно-разгрузочн"] },
+    { slug: "material-transport", needles: ["material transport", "medziagu transport", "medžiagų transport", "medziagu nesiojim", "medžiagų nešiojim", "подноска материал", "разносил материал"] },
+  ]),
+  ...asSector("other", [
+    { slug: "hand-tools", needles: ["hand tools", "rankiniai irank", "rankiniais irank", "rankinius irank", "ручной инструмент", "ручным инструментом"] },
+    { slug: "materials-management", needles: ["materials management", "medziagu apskait", "medžiagų apskait", "учет материал", "учёт материал"] },
+    { slug: "safety-officer", needles: ["safety officer", "darbu saug", "darbų saug", "saugos ir sveikatos", "охрана труда", "охране труда"] },
+  ]),
 ];
 
 /** slug → sector for every first-class recognisable skill. When a slug appears
