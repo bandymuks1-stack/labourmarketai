@@ -8,7 +8,10 @@ import {
   sectorKeys,
   isKnownSector,
 } from "@/lib/structuring/sectors";
-import { ACTIVITY_HINTS_LT } from "@/lib/structuring/keywords";
+import {
+  ACTIVITY_HINTS_LT,
+  CONSTRUCTION_SKILL_HINT_SLUGS,
+} from "@/lib/structuring/keywords";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 
 /**
@@ -98,31 +101,38 @@ describe("Guard: the activity lexicon spans many sectors", () => {
   });
 });
 
-describe("Guard: non-construction entries produce honest label-only suggestions", () => {
-  // Each input is real day-work in a different sector. The parser must
-  // recognise the activity (a confirmable label) but attach NO catalogue
-  // skill slug — there is no verified construction skill behind cashier /
-  // driver / programmer / cook / cleaner work.
-  const NON_CONSTRUCTION_INPUTS: { text: string; label: RegExp }[] = [
-    { text: "Dirbau 3 valandas kasininku parduotuvėje", label: /kasinink|parduotuv/i },
-    { text: "2 valandas programavau ir taisiau kodą", label: /programav/i },
-    { text: "1 valandą vairavau ir vežiau klientus", label: /vairav|pavež/i },
-    { text: "gaminau maistą virtuvėje 4 valandas", label: /maist|virtuv/i },
-    { text: "tvarkiau buhalteriją biure 3 valandas", label: /biuro|administ/i },
+describe("Guard: non-construction entries produce FIRST-CLASS non-construction suggestions", () => {
+  // Universal promotion (2026-07-04, owner mandate): each input is real
+  // day-work in a different sector. The parser must recognise the activity AND
+  // attach the universal catalogue skill for it (skill-names.json + migration
+  // 20260704120000) — first-class, exactly like a construction trade — while
+  // NEVER leaking a construction slug. Suggestions stay reviewable (§7);
+  // first-class ≠ auto-verified.
+  const NON_CONSTRUCTION_INPUTS: { text: string; label: RegExp; skill: string }[] = [
+    { text: "Dirbau 3 valandas kasininku parduotuvėje", label: /kasinink|parduotuv/i, skill: "cashier" },
+    { text: "2 valandas programavau ir taisiau kodą", label: /programav/i, skill: "programming" },
+    { text: "1 valandą vairavau ir vežiau klientus", label: /vairav|pavež/i, skill: "driving" },
+    { text: "gaminau maistą virtuvėje 4 valandas", label: /maist|virtuv/i, skill: "cooking" },
+    { text: "tvarkiau buhalteriją biure 3 valandas", label: /biuro|administ/i, skill: "bookkeeping" },
   ];
 
-  for (const { text, label } of NON_CONSTRUCTION_INPUTS) {
-    it(`recognises "${text}" as a label-only fragment`, () => {
+  for (const { text, label, skill } of NON_CONSTRUCTION_INPUTS) {
+    it(`recognises "${text}" with the first-class ${skill} skill`, () => {
       const s = extractJournalSuggestions(text);
       expect(s.hasAny).toBe(true);
       const frag = s.fragments.find(
         (f) => f.activityLabel && label.test(f.activityLabel),
       );
       expect(frag, `expected a fragment matching ${label}`).toBeTruthy();
-      // Honest: a recognised label, but NO fake catalogue skill slug.
-      expect(frag!.activitySlug).toBeNull();
-      // And no construction skill slug leaks into the catalogue bucket.
-      expect(s.skillSlugs).toEqual([]);
+      // First-class: the universal catalogue skill is suggested…
+      expect(s.skillSlugs).toContain(skill);
+      // …and construction NEVER leaks in as a default.
+      for (const slug of s.skillSlugs) {
+        expect(
+          CONSTRUCTION_SKILL_HINT_SLUGS.has(slug),
+          `construction slug '${slug}' leaked into non-construction text`,
+        ).toBe(false);
+      }
     });
   }
 });

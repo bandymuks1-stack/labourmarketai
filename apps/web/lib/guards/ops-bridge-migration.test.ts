@@ -221,6 +221,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 96 for the service-role report read grant (20260702200000;
     // SELECT on pilot_events + column-scoped profiles/profile_roles reads
     // for the local owner activation report; owner-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 96/);
+    // then to 97 for the universal profession/skill catalogue seed
+    // (20260704120000; strictly additive INSERT-only seed of 37 universal
+    // skills + 17 professions + links so every profession family is
+    // first-class, not construction-only; guarded-delete rollback;
+    // owner-gated apply).
+    expect(guard).toMatch(/SPRINT_BASELINE = 97/);
   });
 });

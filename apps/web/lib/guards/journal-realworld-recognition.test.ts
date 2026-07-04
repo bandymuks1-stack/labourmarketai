@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
-import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
+import { CONSTRUCTION_SKILL_HINT_SLUGS } from "@/lib/structuring/keywords";
 import { localizeCapabilityLabel } from "@/lib/structuring/capability-labels";
 
 /**
@@ -24,7 +24,10 @@ import { localizeCapabilityLabel } from "@/lib/structuring/capability-labels";
  * exact: a regression flips a value and the test fails.
  */
 
-const CONSTRUCTION_SLUGS = new Set(SKILL_HINTS_LT.map((h) => h.slug));
+// Universal promotion (2026-07-04): SKILL_HINTS_LT spans the whole labour
+// market now, so "construction" is the explicitly sector-tagged subset — not
+// everything the recogniser knows.
+const CONSTRUCTION_SLUGS = CONSTRUCTION_SKILL_HINT_SLUGS;
 
 function suggest(text: string) {
   return extractJournalSuggestions(text);
@@ -39,6 +42,13 @@ function capLabels(text: string): string[] {
 function labelOnlyFragmentLabels(text: string): string[] {
   return suggest(text)
     .fragments.filter((f) => f.activitySlug === null && !!f.activityLabel)
+    .map((f) => f.activityLabel as string);
+}
+/** All fragment labels regardless of slug — since the universal promotion,
+ *  cleaning/cooking/driving fragments carry a first-class profession slug. */
+function fragmentLabels(text: string): string[] {
+  return suggest(text)
+    .fragments.filter((f) => !!f.activityLabel)
     .map((f) => f.activityLabel as string);
 }
 
@@ -135,17 +145,19 @@ describe("Guard: washing a floor is cleaning, never floor-laying (#23)", () => {
   }
 
   it("exact floor-washing phrases map to the cleaning signal (not empty)", () => {
-    // A safe, existing capability (Valymo darbai) — label-only, no fake slug.
-    expect(labelOnlyFragmentLabels("ploviau grindis")).toContain("Valymo darbai");
-    expect(labelOnlyFragmentLabels("Valiau biuro patalpas, siurbiau ir ploviau grindis"))
+    // The honest cleaning signal — now first-class (cleaner profession +
+    // cleaning-services skill), still suggested-only.
+    expect(fragmentLabels("ploviau grindis")).toContain("Valymo darbai");
+    expect(fragmentLabels("Valiau biuro patalpas, siurbiau ir ploviau grindis"))
       .toContain("Valymo darbai");
   });
 
   it("the cleaning signal localizes (no LT leak, no raw slug, no cert wording)", () => {
-    // Label-only signal carries a real localized label, never a raw slug.
+    // The cleaning fragment resolves to the real cleaner profession (universal
+    // promotion) — never to an invented or construction slug.
     for (const f of suggest("ploviau grindis").fragments) {
       if (f.activityLabel === "Valymo darbai") {
-        expect(f.activitySlug).toBeNull(); // no invented skill slug
+        expect(f.activitySlug === null || f.activitySlug === "cleaner").toBe(true);
       }
     }
     expect(localizeCapabilityLabel("Valymo darbai", "en")).toBe("Cleaning");
@@ -203,11 +215,12 @@ describe("Guard: web / design text never produces construction", () => {
 });
 
 describe("Guard: generic / unknown text stays SAFE-EMPTY (no hallucination)", () => {
+  // "valiau" (bare "I cleaned") left this list with the universal promotion:
+  // it is the honest first-class cleaning-services signal now, not silence.
   const GENERIC = [
     "dirbau visa diena, labai pavargau",
     "buvo daug darbo, padariau ka reikejo",
     "tvarkiau reikalus",
-    "valiau",
     "pjuklu pjoviau lentas, naudojau gręžtuvą ir šlifuoklį",
   ];
   for (const text of GENERIC) {
@@ -289,7 +302,7 @@ describe("Guard: no LT label leaks into EN/RU across the whole pack", () => {
 
 describe("Guard: safe recogniser additions surface the right signal", () => {
   it("#21 cooking verbs ('kepiau', 'viriau sriubą') → kitchen, not empty", () => {
-    expect(labelOnlyFragmentLabels("Gaminau pietus 50 žmonių, kepiau ir viriau sriubą")).toContain(
+    expect(fragmentLabels("Gaminau pietus 50 žmonių, kepiau ir viriau sriubą")).toContain(
       "Maisto gaminimas / virtuvė",
     );
   });

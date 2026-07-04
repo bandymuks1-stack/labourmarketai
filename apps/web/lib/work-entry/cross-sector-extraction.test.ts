@@ -26,10 +26,13 @@ describe("existing vs new skills (dedup an already-declared skill)", () => {
   });
 
   it("existing match also works by canonical slug", () => {
+    // Universal promotion (2026-07-04): generic premises cleaning resolves to
+    // the universal cleaning-services slug, no longer the construction
+    // site-cleaning slug.
     const r = buildEntrySkillReview("Valiau patalpas 6 val", [
-      { slug: "site-cleaning", label: "irrelevant label" },
+      { slug: "cleaning-services", label: "irrelevant label" },
     ]);
-    expect(r.existingItems.some((i) => i.canonicalSlug === "site-cleaning")).toBe(true);
+    expect(r.existingItems.some((i) => i.canonicalSlug === "cleaning-services")).toBe(true);
   });
 });
 

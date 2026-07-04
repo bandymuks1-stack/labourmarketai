@@ -42,13 +42,14 @@ describe("recognition now covers manufacturing day-work", () => {
     expect(sectorKeys()).toContain("manufacturing");
   });
 
-  it("recognises factory/assembly work as an honest label-only fragment", () => {
+  it("recognises factory/assembly work as a first-class manufacturing fragment", () => {
     const s = extractJournalSuggestions("Dirbau prie konvejerio ir surinkau detales 6 valandas");
     expect(s.hasAny).toBe(true);
     const frag = s.fragments.find((f) => f.activityLabel && /surink|gamyb/i.test(f.activityLabel));
     expect(frag, "expected a manufacturing label fragment").toBeTruthy();
-    // No fake catalogue skill behind it.
-    expect(frag!.activitySlug).toBeNull();
+    // Universal promotion (2026-07-04): manufacturing day-work resolves to the
+    // real production_worker profession — first-class, not construction.
+    expect(frag!.activitySlug).toBe("production_worker");
   });
 
   it("does not misclassify cooking as manufacturing", () => {
