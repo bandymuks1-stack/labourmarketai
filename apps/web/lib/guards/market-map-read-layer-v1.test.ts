@@ -127,6 +127,9 @@ describe("NO new DB migration in this PR", () => {
     // (20260704130000) — INSERT-only, idempotent, owner-gated apply.
     // Bumped 98 -> 99 for the wave-2 catalogue expansion (20260704150000,
     // class-E labour-market gaps) — INSERT-only, idempotent, owner-gated.
-    expect(count).toBeLessThanOrEqual(99);
+    // Bumped 99 -> 100 for the worker express-interest signal
+    // (20260704230000 demand_interest_signals) — additive worker-owned
+    // table, needs-human-gate DRAFT, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(100);
   });
 });

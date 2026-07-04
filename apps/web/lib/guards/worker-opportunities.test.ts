@@ -41,7 +41,11 @@ describe("worker opportunities loader is honest — no fabricated needs", () => 
   });
 
   it("reads own data only (no cross-worker reads here)", () => {
-    expect(loader).toMatch(/profile_id.*user\.id|eq\("profile_id", user\.id\)/);
+    // Since the worker-interest-signal slice the own-rows read lives in the
+    // shared subject builder (ONE pipeline for board + interest snapshot).
+    const subjectBuilder = read("lib/opportunities/worker-subject.ts");
+    expect(loader).toMatch(/buildOwnWorkerContext\(supabase, user\.id\)/);
+    expect(subjectBuilder).toMatch(/eq\("profile_id", profileId\)/);
   });
 });
 

@@ -1580,7 +1580,13 @@ describe("no migration files added by this sprint", () => {
     // 2026-07-04 §4E). No DDL, no grants, no RLS change. Reversible
     // (supabase/rollbacks/20260704150000_*.down.sql, guarded deletes).
     // Owner-gated apply.
-    const SPRINT_BASELINE = 99;
+    // Bumped 99 -> 100 for the worker express-interest slice
+    // (20260704230000_demand_interest_signals.sql): additive worker-owned
+    // interest table mirroring demand_shortlist (RLS default-closed, grant to
+    // authenticated only, @human-gate-approved needs-human-gate DRAFT).
+    // Reversible (supabase/rollbacks/20260704230000_*.down.sql, 0-row
+    // guarded). Owner-gated apply via Supabase MCP.
+    const SPRINT_BASELINE = 100;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

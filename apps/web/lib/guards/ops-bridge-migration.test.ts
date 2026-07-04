@@ -232,6 +232,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 99 for the wave-2 catalogue expansion (20260704150000;
     // class-E labour-market gaps — office/data-entry, warehouse scanning,
     // kitchen help, repair, beauty, HR; INSERT-only, owner-gated apply).
-    expect(guard).toMatch(/SPRINT_BASELINE = 99/);
+    // then to 100 for the worker express-interest signal (20260704230000
+    // demand_interest_signals; additive RED: worker-owned interest table
+    // mirroring demand_shortlist, default-closed RLS + demand-owner read,
+    // grant to authenticated only; needs-human-gate DRAFT, NOT applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 100/);
   });
 });

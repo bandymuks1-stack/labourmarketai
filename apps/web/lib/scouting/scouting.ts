@@ -140,7 +140,15 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
 }
 
 export type ScoutResult =
-  | { kind: "ok"; demand: CompanyDemand; candidates: ScoutSafeCandidate[] }
+  | {
+      kind: "ok";
+      demand: CompanyDemand;
+      candidates: ScoutSafeCandidate[];
+      /** worker_id → interest status for THIS demand (worker-initiated,
+       *  internal-only signals; empty until the owner-gated interest table
+       *  is applied). Withdrawn signals are never shown. */
+      interestByWorker: Record<string, string>;
+    }
   | { kind: "not-found" }
   | { kind: "not-structured"; demand: CompanyDemand }
   | { kind: "needs-migration" }
@@ -202,6 +210,21 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
 
   const supply = await buildSupplyCandidates(supabase);
 
+  // Worker-initiated interest signals on THIS demand (owner-scoped read via
+  // RLS; table absent pre-apply → empty, the view is simply unchanged).
+  const interestByWorker: Record<string, string> = {};
+  try {
+    const { data: ints } = await asAny(supabase)
+      .from("demand_interest_signals")
+      .select("worker_id, status")
+      .eq("request_id", requestId);
+    for (const r of (ints ?? []) as { worker_id: string; status: string }[]) {
+      if (r.status !== "withdrawn") interestByWorker[r.worker_id] = r.status;
+    }
+  } catch {
+    // owner-gated migration not applied yet → no interest signals
+  }
+
   // Existing shortlist statuses for this demand (owner-scoped).
   const shortlist = new Map<string, ShortlistStatus>();
   try {
@@ -232,7 +255,7 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
     // confirmed share, explicit availability; never a global person score).
     .sort((a, b) => compareMatches(a.match, b.match));
 
-  return { kind: "ok", demand, candidates };
+  return { kind: "ok", demand, candidates, interestByWorker };
 }
 
 export type ShortlistWriteResult =

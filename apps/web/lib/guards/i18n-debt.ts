@@ -59,8 +59,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // related-profession reason+gap labels, and the four nextAction lines land
   // in all 11 locales; en/lt/ru translated, da/de [EN] until human
   // translation).
-  da: 796,
-  de: 796,
+  // MEASURED 797 at worker-interest-signal (+1: scouting.interestBadge lands
+  // in all 11 locales; en/lt/ru translated, da/de [EN] until human
+  // translation).
+  da: 797,
+  de: 797,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,
