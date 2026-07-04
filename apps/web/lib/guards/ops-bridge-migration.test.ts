@@ -240,6 +240,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // additive RED: ONE ownership-checked SECURITY DEFINER RPC setting
     // reviewed/contacted only, withdrawn immutable; needs-human-gate
     // DRAFT, NOT applied).
-    expect(guard).toMatch(/SPRINT_BASELINE = 101/);
+    // then to 102 for the worker demand location label (20260705130000;
+    // RED recreate of the worker-demand RPC adding ONE coarse
+    // location_label column; needs-human-gate DRAFT, NOT applied).
+    expect(guard).toMatch(/SPRINT_BASELINE = 102/);
   });
 });

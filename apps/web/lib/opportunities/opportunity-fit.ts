@@ -57,6 +57,9 @@ export interface OpportunityNeed {
    *  to show (i.e. the need arrived through an approved route). Null otherwise —
    *  an unapproved employer's identity is never exposed to a worker. */
   readonly companyName?: string | null;
+  /** Coarse place label of the demand (city/region granularity — never an
+   *  address), from the location-label RPC column when applied (PR8). */
+  readonly locationLabel?: string | null;
 }
 
 export interface OpportunityFit {

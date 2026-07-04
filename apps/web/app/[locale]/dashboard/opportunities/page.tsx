@@ -273,7 +273,9 @@ export default async function OpportunitiesPage({
                         {t("fieldCountry")}
                       </dt>
                       <dd className="truncate text-xs text-text-primary">
-                        {countryLabel(need.country)}
+                        {need.locationLabel
+                          ? `${need.locationLabel} · ${countryLabel(need.country)}`
+                          : countryLabel(need.country)}
                       </dd>
                     </div>
                     <div className="min-w-0">

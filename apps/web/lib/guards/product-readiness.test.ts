@@ -1592,7 +1592,13 @@ describe("no migration files added by this sprint", () => {
     // immutable, status+updated_at only); execute revoked from public/anon,
     // granted to authenticated; @human-gate-approved needs-human-gate DRAFT;
     // rollback drops the function only.
-    const SPRINT_BASELINE = 101;
+    // Bumped 101 -> 102 for the worker demand location label (PR8,
+    // 20260705130000_worker_demand_location_label.sql): recreate of the
+    // gated worker-demand RPC adding ONE coarse city-granularity
+    // location_label column (never address/locality/contacts); rollback
+    // restores the exact Model-A definition. @human-gate-approved,
+    // needs-human-gate DRAFT, owner-gated apply.
+    const SPRINT_BASELINE = 102;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

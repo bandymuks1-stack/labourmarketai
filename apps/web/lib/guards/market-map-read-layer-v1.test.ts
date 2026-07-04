@@ -132,6 +132,8 @@ describe("NO new DB migration in this PR", () => {
     // table, applied to prod via MCP 2026-07-05.
     // Bumped 100 -> 101 for company interest acknowledgement
     // (20260705120000) — one gated SECURITY DEFINER RPC, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(101);
+    // Bumped 101 -> 102 for the worker demand location label
+    // (20260705130000) — gated RPC recreate, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(102);
   });
 });
