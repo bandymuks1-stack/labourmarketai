@@ -15,6 +15,9 @@ import { PL_FIXTURES } from "./pl";
 import { LV_FIXTURES } from "./lv";
 import { ET_FIXTURES } from "./et";
 import { FI_FIXTURES } from "./fi";
+import { DA_FIXTURES } from "./da";
+import { NO_FIXTURES } from "./no";
+import { SV_FIXTURES } from "./sv";
 
 export const LANGUAGE_FIXTURES: Readonly<
   Record<RecognitionLanguage, LanguageFixtures | null>
@@ -28,8 +31,7 @@ export const LANGUAGE_FIXTURES: Readonly<
   lv: LV_FIXTURES,
   et: ET_FIXTURES,
   fi: FI_FIXTURES,
-  // RED — no offline recognition yet (PR3C: da/no/sv).
-  da: null,
-  no: null,
-  sv: null,
+  da: DA_FIXTURES,
+  no: NO_FIXTURES,
+  sv: SV_FIXTURES,
 };

@@ -72,7 +72,12 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     { slug: "carpentry", needles: ["stali", "medien", "столярн", "плотник", "плотниц"] },
     { slug: "insulation", needles: ["šiltin", "siltin", "утепл", "теплоизоляц"] },
     { slug: "waterproofing", needles: ["hidroizoli", "гидроизоляц"] },
-    { slug: "bricklaying", needles: ["mūr", "mur ", "кладк", "кирпич"] },
+    // "mūr" used to be the bare folded stem "mur" — it substring-matched
+    // NL "muren" (walls), DA "muren" (the wall) and EN "murmur…" once the
+    // offline packs made those languages first-class (PR3C audit). The
+    // explicit LT stems below cover every real masonry form (mūrijau,
+    // mūryti, mūrininkas, mūro siena) without the cross-language bleed.
+    { slug: "bricklaying", needles: ["mūrij", "mūryt", "mūrinink", "mūro", "кладк", "кирпич"] },
     { slug: "concrete-pouring", needles: ["bet liej", "betonav", "бетонир", "заливал бетон", "заливка бетон"] },
     { slug: "rebar-cutting", needles: ["armatūr", "armatur", "арматур"] },
     { slug: "welding-blueprint", needles: ["suvirin", "сварк", "сварщик", "сваривал"] },
@@ -295,7 +300,7 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "carpenter", needles: ["stali", "medien", "плотник", "столяр"] },
   // EN "bricklayer" maps to the CANONICAL mason slug (LT "Mūrininkas" IS the
   // bricklayer trade) — deliberately not a second profession slug (§2).
-  { slug: "mason", needles: ["mūr", "mur ", "каменщик", "кладк", "кирпич", "bricklay"] },
+  { slug: "mason", needles: ["mūrij", "mūryt", "mūrinink", "mūro", "каменщик", "кладк", "кирпич", "bricklay"] },
   { slug: "concrete_worker", needles: ["beton", "бетон"] },
   { slug: "welder", needles: ["suvirin", "сварк", "сварщик", "сваривал"] },
   { slug: "rebar_worker", needles: ["armatūr", "armatur", "арматур"] },
@@ -581,7 +586,7 @@ export const ACTIVITY_HINTS_LT: {
     label: "Staliaus darbai",
     needles: ["stali", "medien", "столярн", "плотник", "плотниц"],
   },
-  { slug: "mason", label: "Mūrijimas", needles: ["mūr", "mur ", "кладк", "кирпич", "каменщик"] },
+  { slug: "mason", label: "Mūrijimas", needles: ["mūrij", "mūryt", "mūrinink", "mūro", "кладк", "кирпич", "каменщик"] },
   {
     slug: "concrete_worker",
     label: "Betonavimas",

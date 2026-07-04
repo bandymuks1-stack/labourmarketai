@@ -18,6 +18,9 @@ import { PL_PACK } from "./pl";
 import { LV_PACK } from "./lv";
 import { ET_PACK } from "./et";
 import { FI_PACK } from "./fi";
+import { DA_PACK } from "./da";
+import { NO_PACK } from "./no";
+import { SV_PACK } from "./sv";
 
 export const LANGUAGE_PACKS: readonly LanguagePack[] = [
   NL_PACK,
@@ -26,6 +29,9 @@ export const LANGUAGE_PACKS: readonly LanguagePack[] = [
   LV_PACK,
   ET_PACK,
   FI_PACK,
+  DA_PACK,
+  NO_PACK,
+  SV_PACK,
 ];
 
 /** Languages whose needles live in the base lexicon, not in a pack. */
