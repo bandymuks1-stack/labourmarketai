@@ -112,6 +112,28 @@ export const OPPORTUNITY_STATUSES: readonly OpportunityStatus[] = [
   "missing_profile_info",
 ];
 
+// ── Worker next action (Worker Opportunity Board, PR5) ──────────────────────
+
+/** The ONE next step shown on a worker's opportunity card. There is
+ *  deliberately NO apply/contact action — no worker-initiated contact flow
+ *  exists yet, and a fake CTA is worse than none (§18). */
+export type WorkerNextAction =
+  | "add_work_evidence" // no skills yet → the Work Journal is the evidence spine
+  | "complete_profile" // profile too thin to compare
+  | "review_opportunity" // the need itself is not derivable — read it, decide
+  | "review_match"; // everything comparable — review the match details
+
+export function workerOpportunityNextAction(input: {
+  readonly profileFitStatus: OpportunityStatus;
+  readonly hasAnySkill: boolean;
+  readonly matchStatus: "strong" | "possible" | "weak" | "insufficient_data";
+}): WorkerNextAction {
+  if (!input.hasAnySkill) return "add_work_evidence";
+  if (input.profileFitStatus === "missing_profile_info") return "complete_profile";
+  if (input.matchStatus === "insufficient_data") return "review_opportunity";
+  return "review_match";
+}
+
 // ── Worker Opportunities v1 — approved-route gate (default-closed) ───────────
 //
 // A worker only ever sees a need that arrived through an APPROVED supply route.

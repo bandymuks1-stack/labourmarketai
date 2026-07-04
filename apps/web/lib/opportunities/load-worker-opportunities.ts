@@ -6,10 +6,21 @@ import {
   computeOpportunityFit,
   isApprovedRouteRow,
   safeApprovedCompanyName,
+  workerOpportunityNextAction,
   type OpportunityFit,
   type OpportunityNeed,
+  type WorkerNextAction,
   type WorkerOpportunityProfile,
 } from "./opportunity-fit";
+import { deriveNeedSkills } from "@/lib/market/need-skills";
+import {
+  matchWorkerToNeed,
+  compareMatches,
+  sourceToEvidence,
+  type EvidenceTier,
+  type MatchResultV1,
+  type MatchSubject,
+} from "@/lib/market/match-v1";
 
 /**
  * Worker-facing opportunities loader. READ-ONLY, own-data only.
@@ -40,7 +51,13 @@ export interface WorkerReadiness extends WorkerOpportunityProfile {
 
 export interface OpportunityCard {
   readonly need: OpportunityNeed;
+  /** Profile-completeness layer (documents / country / availability). */
   readonly fit: OpportunityFit;
+  /** PR4 canonical match — the worker's OWN skills vs the demand's derived
+   *  requirement set (same engine as company scouting, inverted). */
+  readonly match: MatchResultV1;
+  /** The one clear next step for THIS card (never a fake apply/contact). */
+  readonly nextAction: WorkerNextAction;
 }
 
 export type WorkerOpportunitiesResult =
@@ -69,7 +86,12 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
   const workerId = worker.id as string;
 
   const [skills, docs, prof] = await Promise.all([
-    asAny(supabase).from("worker_skills").select("id").eq("worker_id", workerId),
+    // Canonical slugs + REAL evidence tiers for the worker's own skills —
+    // the same MatchSubject shape company scouting uses (PR4).
+    asAny(supabase)
+      .from("worker_skills")
+      .select("id, source, verified, skills ( slug )")
+      .eq("worker_id", workerId),
     asAny(supabase).from("worker_documents").select("id").eq("worker_id", workerId),
     asAny(supabase)
       .from("worker_professions")
@@ -94,6 +116,33 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
     documentsCount: docs?.data?.length ?? 0,
     availabilityStatus: worker.availability_status ?? null,
     professionSlug,
+  };
+
+  // The worker's own match subject (slug identity, real evidence tiers —
+  // verified=true is the manager-confirmed truth even if source lags).
+  const tierRank: Record<EvidenceTier, number> = {
+    self_declared: 0,
+    work_journal: 1,
+    manager_confirmed: 2,
+  };
+  const ownSkillTiers = new Map<string, EvidenceTier>();
+  for (const s of (skills?.data ?? []) as {
+    source: string | null;
+    verified: boolean | null;
+    skills: { slug: string | null } | null;
+  }[]) {
+    const slug = s.skills?.slug;
+    if (!slug) continue;
+    const tier: EvidenceTier = s.verified ? "manager_confirmed" : sourceToEvidence(s.source);
+    const prev = ownSkillTiers.get(slug);
+    if (!prev || tierRank[tier] > tierRank[prev]) ownSkillTiers.set(slug, tier);
+  }
+  const subject: MatchSubject = {
+    skills: [...ownSkillTiers.entries()].map(([uri, evidence]) => ({ uri, evidence })),
+    professionSlug,
+    country,
+    availabilityStatus: worker.availability_status ?? null,
+    availableFrom: (worker.available_from as string | null) ?? null,
   };
 
   // Gated worker-visibility RPC — honest fallback when not yet applied.
@@ -124,8 +173,32 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             accommodation: (row.accommodation as string | null) ?? null,
             companyName: safeApprovedCompanyName(row),
           };
-          return { need, fit: computeOpportunityFit(readiness, need) };
-        });
+          const fit = computeOpportunityFit(readiness, need);
+          // PR4 canonical matching, inverted for the worker side: derive the
+          // demand's requirement set from the role text the RPC already
+          // exposes (underscores → spaces so work-type slugs recognise), via
+          // the SAME offline derivation company scouting uses. No ESCO.
+          const derived = deriveNeedSkills({
+            roleOrWorkType: (need.roleText ?? "").replace(/[_-]+/g, " "),
+          });
+          const match = matchWorkerToNeed(
+            {
+              skillIds: derived.skillSlugs,
+              needSource: derived.source,
+              professionSlug: derived.professionSlug,
+              country: need.country,
+            },
+            subject,
+          );
+          const nextAction = workerOpportunityNextAction({
+            profileFitStatus: fit.status,
+            hasAnySkill: subject.skills.length > 0,
+            matchStatus: match.status,
+          });
+          return { need, fit, match, nextAction };
+        })
+        // Best matches first — the SHARED §19 need-context comparator.
+        .sort((a, b) => compareMatches(a.match, b.match));
     }
   } catch {
     // RPC absent (not yet applied) → needsDataAccess stays true. Never fake.
