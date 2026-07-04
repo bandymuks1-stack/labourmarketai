@@ -226,6 +226,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // skills + 17 professions + links so every profession family is
     // first-class, not construction-only; guarded-delete rollback;
     // owner-gated apply).
-    expect(guard).toMatch(/SPRINT_BASELINE = 97/);
+    // then to 98 for the truth-audit legacy-professions repair
+    // (20260704130000; builder/rebar_worker/site_manager were never
+    // migration-seeded — INSERT-only, idempotent, owner-gated apply).
+    expect(guard).toMatch(/SPRINT_BASELINE = 98/);
   });
 });

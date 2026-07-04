@@ -14,15 +14,23 @@
 -- tables (doctrine §2 canonical check: extend skills/professions/
 -- profession_skills — no parallel structure).
 --
+-- ⚠️ CORRECTED IN PLACE BEFORE FIRST APPLY (truth audit 2026-07-04,
+-- runtime/audits/skill-installation-truth-audit-2026-07-04.md): the original
+-- merged version inserted name_lt/name_en (+name_ru) columns copied from the
+-- 0008/0011 seed shape — but migration 0012 dropped ALL taxonomy name columns
+-- (doctrine §2: names live in messages/{locale}/*.json keyed by slug). The
+-- original file would have FAILED at apply time. This migration has NEVER
+-- been applied to any environment (blocked on the Supabase MCP connector), so
+-- correcting the file in place is safe — the version was never in the prod
+-- ledger. Display names for every slug below live in
+-- apps/web/messages/{locale}/skill-names.json and professions.json (all 11
+-- locales, shipped in PR #583).
+--
 -- Content: 37 skills across transport/logistics, manufacturing/assembly,
 -- cleaning/facilities, office/admin, IT, creative, sales/customer service,
 -- hospitality/food, agriculture/gardening, care, education/languages and
 -- events + 17 professions + their profession_skills links. Construction rows
 -- are untouched — construction remains one profession family among many.
---
--- Slugs mirror apps/web/messages/{locale}/skill-names.json and
--- professions.json (added in the same PR, all 11 locales) and the promoted
--- recognition lexicon rows in apps/web/lib/structuring/keywords.ts.
 --
 -- Safety: strictly additive — INSERT … ON CONFLICT DO NOTHING only. No DDL,
 -- no grants, no RLS change, no updates/deletes of existing rows. Idempotent.
@@ -31,77 +39,78 @@
 -- references).
 -- ════════════════════════════════════════════════════════════════════════
 
--- ── 1. Universal skills (LT + EN names; other locales via messages JSON) ──
-insert into public.skills (slug, category, name_lt, name_en) values
+-- ── 1. Universal skills (post-0012 shape: slug + category only; display
+--       names live in messages/{locale}/skill-names.json) ──────────────────
+insert into public.skills (slug, category) values
   -- transport & logistics
-  ('driving',             'logistics.driving',      'Vairavimas',                          'Driving'),
-  ('delivery-driving',    'logistics.driving',      'Pristatymas / kurjerio darbas',       'Delivery & courier driving'),
-  ('cargo-transport',     'logistics.driving',      'Krovinių pervežimas',                 'Cargo transport'),
-  ('forklift-operation',  'logistics.warehouse',    'Krautuvo vairavimas',                 'Forklift operation'),
-  ('warehouse-operations','logistics.warehouse',    'Sandėlio darbai',                     'Warehouse operations'),
-  ('order-picking',       'logistics.warehouse',    'Užsakymų rinkimas / komplektavimas',  'Order picking & packing'),
+  ('driving',             'logistics.driving'),
+  ('delivery-driving',    'logistics.driving'),
+  ('cargo-transport',     'logistics.driving'),
+  ('forklift-operation',  'logistics.warehouse'),
+  ('warehouse-operations','logistics.warehouse'),
+  ('order-picking',       'logistics.warehouse'),
   -- manufacturing & assembly
-  ('assembly-work',       'manufacturing.assembly', 'Surinkimo darbai',                    'Assembly work'),
-  ('production-line',     'manufacturing.production','Gamybos linijos darbas',             'Production line work'),
-  ('packaging',           'manufacturing.production','Pakavimas',                          'Packaging'),
-  ('equipment-operation', 'manufacturing.equipment','Įrangos ir mechanizmų valdymas',      'Equipment & machinery operation'),
+  ('assembly-work',       'manufacturing.assembly'),
+  ('production-line',     'manufacturing.production'),
+  ('packaging',           'manufacturing.production'),
+  ('equipment-operation', 'manufacturing.equipment'),
   -- cleaning & facilities
-  ('cleaning-services',   'cleaning.general',       'Patalpų valymas',                     'Premises cleaning'),
-  ('window-cleaning',     'cleaning.general',       'Langų valymas',                       'Window cleaning'),
-  ('housekeeping',        'cleaning.hospitality',   'Kambarių tvarkymas (viešbutis)',      'Housekeeping'),
-  ('winter-service',      'cleaning.outdoor',       'Sniego valymas / žiemos priežiūra',   'Snow & ice service'),
+  ('cleaning-services',   'cleaning.general'),
+  ('window-cleaning',     'cleaning.general'),
+  ('housekeeping',        'cleaning.hospitality'),
+  ('winter-service',      'cleaning.outdoor'),
   -- office & administration
-  ('administration',      'office.admin',           'Administravimas',                     'Administration'),
-  ('document-handling',   'office.admin',           'Dokumentų tvarkymas',                 'Document handling'),
-  ('bookkeeping',         'office.finance',         'Apskaita',                            'Bookkeeping'),
+  ('administration',      'office.admin'),
+  ('document-handling',   'office.admin'),
+  ('bookkeeping',         'office.finance'),
   -- IT & software / creative
-  ('programming',         'it.software',            'Programavimas',                       'Programming'),
-  ('qa-testing',          'it.software',            'Programinės įrangos testavimas',      'Software testing (QA)'),
-  ('it-support',          'it.support',             'IT pagalba',                          'IT support'),
-  ('web-design',          'it.design',              'Interneto svetainių dizainas',        'Web design'),
-  ('graphic-design',      'creative.design',        'Grafinis dizainas',                   'Graphic design'),
+  ('programming',         'it.software'),
+  ('qa-testing',          'it.software'),
+  ('it-support',          'it.support'),
+  ('web-design',          'it.design'),
+  ('graphic-design',      'creative.design'),
   -- customer service & sales
-  ('customer-service',    'sales.service',          'Klientų aptarnavimas',                'Customer service'),
-  ('cashier',             'sales.retail',           'Kasininko darbas',                    'Cashier work'),
-  ('sales-assistant',     'sales.retail',           'Pardavimas ir konsultavimas',         'Sales & customer advising'),
+  ('customer-service',    'sales.service'),
+  ('cashier',             'sales.retail'),
+  ('sales-assistant',     'sales.retail'),
   -- hospitality & food
-  ('cooking',             'hospitality.kitchen',    'Maisto gaminimas',                    'Cooking'),
-  ('waiting-tables',      'hospitality.service',    'Padavėjo darbas',                     'Waiting tables'),
-  ('bartending',          'hospitality.service',    'Barmeno darbas',                      'Bartending'),
+  ('cooking',             'hospitality.kitchen'),
+  ('waiting-tables',      'hospitality.service'),
+  ('bartending',          'hospitality.service'),
   -- agriculture & gardening
-  ('gardening',           'agriculture.gardening',  'Sodo ir aplinkos priežiūra',          'Gardening & grounds care'),
-  ('farm-work',           'agriculture.farming',    'Žemės ūkio darbai',                   'Farm work'),
-  ('animal-care',         'agriculture.animals',    'Gyvūnų priežiūra',                    'Animal care'),
+  ('gardening',           'agriculture.gardening'),
+  ('farm-work',           'agriculture.farming'),
+  ('animal-care',         'agriculture.animals'),
   -- care & assistance / safety
-  ('elderly-care',        'care.support',           'Senjorų priežiūra',                   'Elderly care'),
-  ('childcare',           'care.support',           'Vaikų priežiūra',                     'Childcare'),
-  ('first-aid',           'care.safety',            'Pirmoji pagalba',                     'First aid'),
+  ('elderly-care',        'care.support'),
+  ('childcare',           'care.support'),
+  ('first-aid',           'care.safety'),
   -- education & languages
-  ('teaching',            'education.teaching',     'Mokymas / paskaitos',                 'Teaching & training'),
-  ('translation',         'education.languages',    'Vertimas',                            'Translation'),
+  ('teaching',            'education.teaching'),
+  ('translation',         'education.languages'),
   -- events
-  ('event-setup',         'events.setup',           'Renginių paruošimas',                 'Event setup & support')
+  ('event-setup',         'events.setup')
 on conflict (slug) do nothing;
 
--- ── 2. Universal professions (sector = taxonomy SectorKey) ────────────────
-insert into public.professions (slug, name_lt, name_en, name_ru, sector) values
-  ('caregiver',                   'Priežiūros darbuotojas',            'Caregiver',                   'Работник по уходу',                      'care_health'),
-  ('cleaner',                     'Valytojas',                         'Cleaner',                     'Уборщик',                                'cleaning_facility'),
-  ('cook',                        'Virėjas',                           'Cook',                        'Повар',                                  'hospitality_food'),
-  ('customer_service_specialist', 'Klientų aptarnavimo specialistas',  'Customer service specialist', 'Специалист по обслуживанию клиентов',    'retail_sales'),
-  ('driver',                      'Vairuotojas',                       'Driver',                      'Водитель',                               'transport_logistics'),
-  ('event_organizer',             'Renginių organizatorius',           'Event organizer',             'Организатор мероприятий',                'other'),
-  ('farm_worker',                 'Žemės ūkio darbininkas',            'Farm worker',                 'Сельхозработник',                        'agriculture'),
-  ('gardener',                    'Sodininkas',                        'Gardener',                    'Садовник',                               'agriculture'),
-  ('office_administrator',        'Biuro administratorius',            'Office administrator',        'Офисный администратор',                  'office_admin'),
-  ('production_worker',           'Gamybos darbuotojas',               'Production worker',           'Работник производства',                  'manufacturing'),
-  ('safety_specialist',           'Darbų saugos specialistas',         'Safety specialist',           'Специалист по охране труда',             'other'),
-  ('sales_assistant',             'Pardavėjas konsultantas',           'Sales assistant',             'Продавец-консультант',                   'retail_sales'),
-  ('software_developer',          'Programuotojas',                    'Software developer',          'Программист',                            'it_software'),
-  ('teacher',                     'Mokytojas',                         'Teacher',                     'Преподаватель',                          'education'),
-  ('translator',                  'Vertėjas',                          'Translator',                  'Переводчик',                             'education'),
-  ('waiter',                      'Padavėjas',                         'Waiter',                      'Официант',                               'hospitality_food'),
-  ('warehouse_worker',            'Sandėlio darbuotojas',              'Warehouse worker',            'Складской работник',                     'transport_logistics')
+-- ── 2. Universal professions (post-0012 shape: slug + sector only) ─────────
+insert into public.professions (slug, sector) values
+  ('caregiver',                   'care_health'),
+  ('cleaner',                     'cleaning_facility'),
+  ('cook',                        'hospitality_food'),
+  ('customer_service_specialist', 'retail_sales'),
+  ('driver',                      'transport_logistics'),
+  ('event_organizer',             'other'),
+  ('farm_worker',                 'agriculture'),
+  ('gardener',                    'agriculture'),
+  ('office_administrator',        'office_admin'),
+  ('production_worker',           'manufacturing'),
+  ('safety_specialist',           'other'),
+  ('sales_assistant',             'retail_sales'),
+  ('software_developer',          'it_software'),
+  ('teacher',                     'education'),
+  ('translator',                  'education'),
+  ('waiter',                      'hospitality_food'),
+  ('warehouse_worker',            'transport_logistics')
 on conflict (slug) do nothing;
 
 -- ── 3. profession_skills links (is_core, display_order) ───────────────────
