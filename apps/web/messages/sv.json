@@ -1681,7 +1681,10 @@
       "language_match": "[EN] Language matches",
       "profession_match": "[EN] Profession matches",
       "pay_within_offer": "[EN] Pay within offer",
-      "accommodation_ok": "[EN] Accommodation works"
+      "accommodation_ok": "[EN] Accommodation works",
+      "city_match": "[EN] Same city",
+      "location_within_radius": "[EN] Within the work radius",
+      "profession_related": "[EN] Related profession (shared skills)"
     },
     "gap": {
       "skills_missing": "[EN] Some required skills missing",
@@ -1689,7 +1692,15 @@
       "country_mismatch": "[EN] Different country",
       "pay_above_offer": "[EN] Pay expectation above offer",
       "accommodation_needed_not_provided": "[EN] Needs accommodation, not provided",
-      "profession_mismatch": "[EN] Different profession"
+      "profession_mismatch": "[EN] Different profession",
+      "location_outside_radius": "[EN] Outside the work radius"
+    },
+    "recognizedNote": "[EN] The required skills below were recognized from your need's text by the offline system — they are a labeled suggestion, not a confirmed structure. Review the matches; an administrator confirms or adjusts the final requirements.",
+    "nextAction": {
+      "review_and_shortlist": "[EN] Next: review and shortlist",
+      "review_gaps": "[EN] Next: review the missing skills",
+      "confirm_recognized_need": "[EN] Next: confirm the recognized requirements",
+      "structure_demand": "[EN] Next: describe the need so its skills can be structured"
     }
   },
   "waze": {

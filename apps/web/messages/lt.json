@@ -5242,7 +5242,10 @@
       "language_match": "Kalba sutampa",
       "profession_match": "Profesija sutampa",
       "pay_within_offer": "Atlygis telpa į pasiūlymą",
-      "accommodation_ok": "Apgyvendinimas tinka"
+      "accommodation_ok": "Apgyvendinimas tinka",
+      "city_match": "Tas pats miestas",
+      "location_within_radius": "Darbo spinduliu",
+      "profession_related": "Susijusi profesija (bendri įgūdžiai)"
     },
     "gap": {
       "skills_missing": "Trūksta dalies reikalaujamų įgūdžių",
@@ -5250,7 +5253,8 @@
       "country_mismatch": "Kita šalis",
       "pay_above_offer": "Atlygio lūkestis viršija pasiūlymą",
       "accommodation_needed_not_provided": "Reikia apgyvendinimo, nesiūloma",
-      "profession_mismatch": "Kita profesija"
+      "profession_mismatch": "Kita profesija",
+      "location_outside_radius": "Už darbo spindulio ribų"
     },
     "candidate": "Kandidatas",
     "privacy": {
@@ -5320,6 +5324,13 @@
       "error": "Kažkas nepavyko.",
       "cancel": "Atšaukti",
       "notEntitled": "Tavo planas neapima rezervacijų — pradėk testinį apmokėjimą arba paprašyk piloto prieigos."
+    },
+    "recognizedNote": "Žemiau esantys reikalingi įgūdžiai atpažinti iš jūsų poreikio teksto neprisijungus prie išorinių sistemų — tai pažymėtas pasiūlymas, ne patvirtinta struktūra. Peržiūrėkite atitikmenis; galutinius reikalavimus patvirtina arba pakoreguoja administratorius.",
+    "nextAction": {
+      "review_and_shortlist": "Toliau: peržiūrėkite ir įtraukite į atranką",
+      "review_gaps": "Toliau: peržiūrėkite trūkstamus įgūdžius",
+      "confirm_recognized_need": "Toliau: patvirtinkite atpažintus reikalavimus",
+      "structure_demand": "Toliau: aprašykite poreikį, kad įgūdžius būtų galima struktūruoti"
     }
   },
   "planBoundary": {

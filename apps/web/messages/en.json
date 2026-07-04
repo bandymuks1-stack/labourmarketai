@@ -5242,7 +5242,10 @@
       "language_match": "Language matches",
       "profession_match": "Profession matches",
       "pay_within_offer": "Pay within offer",
-      "accommodation_ok": "Accommodation works"
+      "accommodation_ok": "Accommodation works",
+      "city_match": "Same city",
+      "location_within_radius": "Within the work radius",
+      "profession_related": "Related profession (shared skills)"
     },
     "gap": {
       "skills_missing": "Some required skills missing",
@@ -5250,7 +5253,8 @@
       "country_mismatch": "Different country",
       "pay_above_offer": "Pay expectation above offer",
       "accommodation_needed_not_provided": "Needs accommodation, not provided",
-      "profession_mismatch": "Different profession"
+      "profession_mismatch": "Different profession",
+      "location_outside_radius": "Outside the work radius"
     },
     "candidate": "Candidate",
     "privacy": {
@@ -5320,6 +5324,13 @@
       "error": "Something went wrong.",
       "cancel": "Cancel",
       "notEntitled": "Your plan does not include booking — start a test checkout or request pilot access."
+    },
+    "recognizedNote": "The required skills below were recognized from your need's text by the offline system — they are a labeled suggestion, not a confirmed structure. Review the matches; an administrator confirms or adjusts the final requirements.",
+    "nextAction": {
+      "review_and_shortlist": "Next: review and shortlist",
+      "review_gaps": "Next: review the missing skills",
+      "confirm_recognized_need": "Next: confirm the recognized requirements",
+      "structure_demand": "Next: describe the need so its skills can be structured"
     }
   },
   "planBoundary": {
