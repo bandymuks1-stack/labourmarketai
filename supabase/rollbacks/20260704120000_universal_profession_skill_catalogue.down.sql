@@ -12,9 +12,10 @@ delete from public.profession_skills ps
  where ps.profession_id = p.id
    and p.slug in (
      'caregiver','cleaner','cook','customer_service_specialist','driver',
-     'event_organizer','farm_worker','gardener','office_administrator',
-     'production_worker','safety_specialist','sales_assistant',
-     'software_developer','teacher','translator','waiter','warehouse_worker'
+     'event_organizer','farm_worker','furniture_assembler','gardener',
+     'office_administrator','production_worker','safety_specialist',
+     'sales_assistant','software_developer','teacher','translator','waiter',
+     'warehouse_worker'
    );
 
 -- 2. Drop the seeded professions — only if no worker references them.

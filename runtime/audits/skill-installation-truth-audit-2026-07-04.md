@@ -188,3 +188,47 @@ value — "not checked" is an acceptable value, "done" without verification is n
 
 The words "installed", "downloaded", "complete" may only be used when every
 row is verified. Otherwise the report must say exactly which links are missing.
+
+---
+
+## 8. Owner-correction addendum (2026-07-04, second pass)
+
+The owner mandated explicit verification lists. Status after this pass
+(branch `fix/cc/universal-chain-mandatory-professions`):
+
+**Mandatory skills — all 10 fully present in the chain** (seed migration +
+11 locales + recognition + sector + tests; DB apply still pending, §5):
+`cleaning-services`, `programming`, `driving`, `cooking`, `gardening`,
+`customer-service`, `document-handling`, `event-setup`, `furniture-fitting`,
+`bricklaying`.
+
+**Mandatory professions — status:**
+- Present before this pass: `cleaner`, `software_developer`, `driver`, `cook`,
+  `gardener`, `event_organizer`, `customer_service_specialist`,
+  `office_administrator`, `builder`, `rebar_worker`, `site_manager`.
+- **`furniture_assembler` — was MISSING. Added this pass** across the full
+  chain: seed row + links (`furniture-fitting` core, `assembly-work`,
+  `hand-tools`) in `20260704120000` (in-place, still never applied), rollback
+  list, all 11 professions.json, activity-fragment row ("Montavau baldus" →
+  `furniture_assembler`), profession hints, skill-groups classification,
+  worker-intake directions, guard assertions.
+- **`bricklayer` — deliberately NOT a new slug.** The bricklayer trade is the
+  canonical, already-applied-to-prod profession **`mason`** (LT "Mūrininkas",
+  seeded 0008, referenced by `worker_professions`). A second slug for the same
+  trade would be a duplicate taxonomy row (doctrine §2 anti-parallel). Instead
+  the EN alias is wired into recognition (`bricklay` needle → `mason`) and the
+  mapping is pinned by a guard test. Any future report may state:
+  bricklayer = `mason`, verified.
+
+**Fixture verification (this pass, full journal path):** all 11 owner
+sentences produce first-class skill + profession results with zero
+construction leakage; "Montavau baldus" → `furniture-fitting` +
+`furniture_assembler`; "Mūrijau sieną" → `bricklaying` + `mason`.
+
+**Exact migrations that must be applied to prod (in order, corrected
+versions on main only — never the PR #583 file shape):**
+1. `20260704120000_universal_profession_skill_catalogue.sql`
+2. `20260704130000_seed_missing_legacy_professions.sql`
+
+Until both are applied, §5 stands: universal skills/professions are
+recognized + locale-present + guard-verified, **NOT fully installed**.

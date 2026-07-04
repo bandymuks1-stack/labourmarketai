@@ -6,6 +6,7 @@ import {
   SKILL_HINTS_LT,
   SKILL_HINT_SECTORS,
   CONSTRUCTION_SKILL_HINT_SLUGS,
+  PROFESSION_HINTS_LT,
 } from "@/lib/structuring/keywords";
 import { isKnownSector } from "@/lib/structuring/sectors";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
@@ -73,12 +74,14 @@ describe("owner sentences: no construction catalogue by default", () => {
   }
 
   it('"Montavau baldus" → furniture-fitting (assembly/carpentry), no wall trade', () => {
-    const slugs = extractJournalSuggestions("Montavau baldus").skillSlugs;
-    expect(slugs).toContain("furniture-fitting");
-    for (const slug of slugs) {
+    const s = extractJournalSuggestions("Montavau baldus");
+    expect(s.skillSlugs).toContain("furniture-fitting");
+    for (const slug of s.skillSlugs) {
       if (slug === "furniture-fitting") continue;
       expect(CONSTRUCTION_SKILL_HINT_SLUGS.has(slug), slug).toBe(false);
     }
+    // Owner-correction pass: furniture assembly is a first-class profession.
+    expect(s.fragments.some((f) => f.activitySlug === "furniture_assembler")).toBe(true);
   });
 
   it('"Mūrijau sieną" still returns the masonry construction skill', () => {
@@ -148,6 +151,32 @@ describe("first-class recognition covers the universal profession families", () 
     ]) {
       expect(professionsLt[slug], `professions.json missing '${slug}'`).toBeTruthy();
     }
+  });
+
+  it("owner mandatory skill list (2026-07-04 correction) is installed in the registry", () => {
+    for (const slug of [
+      "cleaning-services", "programming", "driving", "cooking", "gardening",
+      "customer-service", "document-handling", "event-setup",
+      "furniture-fitting", "bricklaying",
+    ]) {
+      expect(skillNamesLt[slug], `mandatory skill '${slug}' missing`).toBeTruthy();
+    }
+  });
+
+  it("owner mandatory profession list (2026-07-04 correction) is installed in the registry", () => {
+    for (const slug of [
+      "cleaner", "software_developer", "driver", "cook", "gardener",
+      "event_organizer", "customer_service_specialist", "office_administrator",
+      "furniture_assembler", "builder", "rebar_worker", "site_manager",
+    ]) {
+      expect(professionsLt[slug], `mandatory profession '${slug}' missing`).toBeTruthy();
+    }
+    // "bricklayer" is deliberately the CANONICAL mason slug (LT Mūrininkas is
+    // the bricklayer trade; a second slug would duplicate it — doctrine §2).
+    // The EN alias is recognised by the profession lexicon instead.
+    expect(professionsLt["mason"], "canonical bricklayer trade (mason) missing").toBeTruthy();
+    const mason = PROFESSION_HINTS_LT.find((r) => r.slug === "mason");
+    expect(mason?.needles.some((n) => n.includes("bricklay"))).toBe(true);
   });
 });
 
