@@ -11,7 +11,9 @@ export const LV_FIXTURES: LanguageFixtures = {
     { text: "Strādāju noliktavā, iepakoju preces.", expects: ["warehouse-operations", "packaging"] },
     { text: "Komplektēju pasūtījumus un skenēju preces.", expects: ["order-picking", "barcode-scanning"] },
     { text: "Vadīju automašīnu un pārvadāju kravas.", expects: ["driving", "cargo-transport"] },
-    { text: "Strādāju pie kases un apkalpoju klientus.", expects: ["cashier", "customer-service"] },
+    // forbids pin the review-PR3D fixes: LV "kases" used to brush the LT
+    // "kasė" digging stem and "apkalpoju" the LT "apkal" cladding stem.
+    { text: "Strādāju pie kases un apkalpoju klientus.", expects: ["cashier", "customer-service"], forbids: ["earthworks", "timber-framing"] },
     { text: "Ievadīju datus un strādāju ar Excel.", expects: ["data-entry", "office-software"] },
     { text: "Izrakstīju rēķinus un kārtoju dokumentus.", expects: ["bookkeeping", "document-handling"] },
     { text: "Gatavoju ēdienu un mazgāju traukus.", expects: ["cooking", "dishwashing"] },
@@ -42,5 +44,8 @@ export const LV_FIXTURES: LanguageFixtures = {
     { text: "Nopirku jaunu automašīnu.", forbids: ["auto-repair", "driving"] },
     // Reading ABOUT gardening is not gardening work ("dārzkopību" ⊅ "dārzā").
     { text: "Lasīju grāmatu par dārzkopību.", forbids: ["gardening"] },
+    // LV "iekrāvēju" (with a loader) must never brush the LT weeding stem
+    // (review PR3D: bare "ravej" was replaced with fuller forms).
+    { text: "Strādāju noliktavā ar iekrāvēju.", forbids: ["gardening"] },
   ],
 };

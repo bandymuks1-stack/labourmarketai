@@ -195,7 +195,8 @@ export const NL_PACK: LanguagePack = {
       exact: ["vloeren gelegd", "vloer gelegd", "laminaat gelegd", "parket gelegd"],
     },
     "welding-blueprint": {
-      exact: ["gelast", "laswerk", "lasser"],
+      // "als lasser" not bare "lasser" — ⊂ NO "vareplassering" (review PR3D).
+      exact: ["gelast", "laswerk", "als lasser"],
     },
     roofing: {
       exact: ["dakdekker", "daken gelegd", "dakwerk", "dakbedekking"],

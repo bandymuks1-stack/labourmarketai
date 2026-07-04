@@ -45,5 +45,8 @@ export const SV_FIXTURES: LanguageFixtures = {
     { text: "Det gick som planerat.", forbids: ["gardening"] },
     // Eating marmalade is not painting (the "målade"→"malade" fold trap).
     { text: "Jag åt marmelad till frukost.", forbids: ["painting"] },
+    // SV "ladugården" folds over the EN "garden" needle — gardening must
+    // stay silent on barn work (review PR3D: EN needle is now anchored).
+    { text: "Jag utfodrade djur i ladugården.", forbids: ["gardening"] },
   ],
 };

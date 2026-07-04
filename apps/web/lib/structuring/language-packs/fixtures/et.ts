@@ -42,5 +42,13 @@ export const ET_FIXTURES: LanguageFixtures = {
     { text: "Vedasin sõpru autoga linna.", forbids: ["cargo-transport"] },
     // Power tools alone are not electrical installation (context guard).
     { text: "Elektrilised tööriistad olid katki.", forbids: ["electrical-install"] },
+    // Nominative singular power tool (review PR3D: POWER_TOOL_RE now
+    // matches "elektrili[a-z]* toorii", not just the plural forms).
+    { text: "Elektriline tööriist läks katki, kui panin mööbli kokku.", forbids: ["electrical-install"] },
+    // ET "nõudepesijana" (as a dishwasher) must never brush the LT beam
+    // stem (review PR3D: bare "sij" was replaced with anchored forms).
+    { text: "Töötasin nõudepesijana restoranis.", forbids: ["timber-framing"] },
+    // ET "juhiluba" (driving licence) must never brush the LT ceiling stem.
+    { text: "Sain juhiloa ja töötan autojuhina.", forbids: ["ceiling-systems"] },
   ],
 };

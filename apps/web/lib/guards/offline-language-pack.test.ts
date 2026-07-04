@@ -105,8 +105,13 @@ describe("packs extend the ONE canonical catalogue (no invented skills)", () => 
           set!.exact.length,
           `${pack.language} pack has EMPTY needles for core slug '${slug}'`,
         ).toBeGreaterThan(0);
-        for (const n of [...set!.exact, ...(set!.synonyms ?? [])]) {
-          expect(n.trim().length, `${pack.language}/${slug}: blank needle`).toBeGreaterThan(2);
+      }
+    });
+
+    it(`${pack.language}: every needle in EVERY slug is real (no blank/short stems)`, () => {
+      for (const [slug, set] of Object.entries(pack.skills)) {
+        for (const n of [...set.exact, ...(set.synonyms ?? [])]) {
+          expect(n.trim().length, `${pack.language}/${slug}: blank/short needle`).toBeGreaterThan(2);
         }
       }
     });
@@ -120,12 +125,23 @@ describe("packs extend the ONE canonical catalogue (no invented skills)", () => 
 });
 
 describe("every catalogue skill has an explicit recognition-status classification", () => {
-  it("every SKILL_HINTS_LT slug is classified (new skills fail until classified)", () => {
-    for (const slug of HINT_SLUGS) {
+  // The classification universe is the WHOLE canonical catalogue (every slug
+  // in the locale registry == every seeded skill, per the installation-chain
+  // guard) — not just the slugs that already have needles. This is what
+  // makes a silent class-B skill (installed + named, recognisable nowhere)
+  // impossible: adding a catalogue row without classifying it fails CI.
+  const CATALOGUE_SLUGS: string[] = Object.keys(
+    JSON.parse(
+      readFileSync(join(__dirname, "..", "..", "messages", "lt", "skill-names.json"), "utf8"),
+    ) as Record<string, string>,
+  );
+
+  it("every catalogue slug is classified (new skills fail until classified)", () => {
+    for (const slug of CATALOGUE_SLUGS) {
       const status = SKILL_RECOGNITION_STATUS[slug];
       expect(
         status,
-        `'${slug}' has recognition needles but NO status classification — add it to language-packs/recognition-status.ts (core / deferred+note / not-text-recognizable)`,
+        `catalogue skill '${slug}' has NO recognition-status classification — add it to language-packs/recognition-status.ts (core / deferred+note / not-text-recognizable)`,
       ).toBeTruthy();
       if (status && status.kind !== "core") {
         expect(
@@ -136,12 +152,24 @@ describe("every catalogue skill has an explicit recognition-status classificatio
     }
   });
 
-  it("no stale classification for slugs the recognizer no longer emits", () => {
+  it("no stale classification for slugs outside the catalogue", () => {
+    const catalogue = new Set(CATALOGUE_SLUGS);
     for (const slug of Object.keys(SKILL_RECOGNITION_STATUS)) {
       expect(
-        HINT_SLUGS.has(slug),
-        `recognition-status classifies '${slug}' which no longer exists in SKILL_HINTS_LT`,
+        catalogue.has(slug),
+        `recognition-status classifies '${slug}' which is not in the canonical catalogue`,
       ).toBe(true);
+    }
+  });
+
+  it("every classified-core or needle-bearing slug is honest about needles", () => {
+    // A slug classified "core" MUST have base needles; a deferred slug with
+    // no needles anywhere MUST say so via its note (spot-checked by review;
+    // structurally we pin that core ⇒ needles exist).
+    for (const [slug, status] of Object.entries(SKILL_RECOGNITION_STATUS)) {
+      if (status.kind === "core") {
+        expect(HINT_SLUGS.has(slug), `core slug '${slug}' has no base needles`).toBe(true);
+      }
     }
   });
 
