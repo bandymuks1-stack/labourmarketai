@@ -176,8 +176,10 @@ describe("migration is additive, reversible, and default-closed", () => {
     join(REPO_ROOT, "supabase", "rollbacks", "20260704230000_demand_interest_signals.down.sql"),
     "utf8",
   );
+  // CRLF-safe: checkouts on Windows may materialize \r\n; strip \r before
+  // the per-line comment removal or `$` never matches and comments survive.
   const code = migration
-    .split("\n")
+    .split(/\r?\n/)
     .map((l) => l.replace(/--.*$/, ""))
     .join("\n");
 
