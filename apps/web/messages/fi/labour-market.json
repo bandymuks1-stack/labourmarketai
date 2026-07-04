@@ -1,0 +1,188 @@
+{
+  "audienceEyebrow": "Koko työmarkkinoille",
+  "audienceTitle": "Liity markkinaan, jossa ihmiset, tiimit ja työ näkyvät",
+  "audienceSubcopy": "Työntekijät ja työnhakijat, freelancerit ja itsensätyöllistäjät, opiskelijat ja uudet tulokkaat, alanvaihtajat, työnantajat, toimistot ja projektien omistajat. Yksi tila työmarkkinoiden eri sektoreille — rakentamisesta ja teollisuudesta palveluihin, logistiikkaan ja hoivaan.",
+  "aWorkers": "Työntekijät",
+  "aJobseekers": "Työnhakijat",
+  "aFreelancers": "Freelancerit & itsensätyöllistäjät",
+  "aStudents": "Opiskelijat & uudet tulokkaat",
+  "aChangers": "Alanvaihtajat",
+  "aEmployers": "Työnantajat",
+  "aAgencies": "Toimistot & rekrytoijat",
+  "aClients": "Asiakkaat & projektien omistajat",
+  "pillarsEyebrow": "Miksi tällä on väliä juuri nyt",
+  "pillarsTitle": "Selkeämmät mahdollisuudet luovat suurempaa arvoa",
+  "p1Title": "Älä anna taitojesi jäädä näkymättömiin",
+  "p1Body": "Staattinen CV kätkee suurimman osan siitä, mitä osaat. Rakenna sen sijaan todellinen, kehittyvä profiili oikeasta päivittäisestä työstäsi.",
+  "p2Title": "Näyttöä, ei arvailua",
+  "p2Body": "Näytä osaaminen selkein tasoin — itse ilmoitettu, työpäiväkirjan tukema, dokumenttien tukema ja vahvistettu — jolloin se luetaan todisteena, ei väitteenä.",
+  "p3Title": "Rakennettu nopeasti muuttuvalle markkinalle",
+  "p3Body": "Työnantajien tarvitsemat taidot muuttuvat jatkuvasti. Työsi mukana kasvava profiili pitää sinut näkyvissä markkinan liikkuessa.",
+  "p4Title": "Työnantajien ei pidä arvailla heikon CV:n perusteella",
+  "p4Body": "Yritykset ja toimistot kuvaavat todellisen tarpeen ja vertailevat ihmisiä näytön, saatavuuden, kielen ja maan perusteella — eivät yhden sivun arvauksen.",
+  "workerPathTitle": "Etsin työmahdollisuuksia",
+  "workerPathBody": "Luo profiili ja näytä taitosi, kokemuksesi, valmiutesi, sijaintisi ja toivomasi ehdot.",
+  "workerPathCta": "Aloita profiilisi",
+  "employerPathTitle": "Etsin ihmisiä, tiimejä tai palveluita",
+  "employerPathBody": "Kerro, mitä taitoja, tiimiä tai palvelua tarvitset — missä, milloin ja millä ehdoilla.",
+  "employerPathCta": "Lähetä tarve",
+  "evidenceEyebrow": "Perustuu todelliseen työmarkkinanäyttöön",
+  "evidenceTitle": "Markkina muuttuu nopeammin kuin CV",
+  "evidenceSubcopy": "Julkisia tilastoja virallisista EU-lähteistä siitä, miksi näkyvät taidot, näyttö ja liikkuvuus ovat tärkeitä. Jokainen kortti linkittää lähteeseensä, jossa on luvun päivämäärä ja alue.",
+  "fieldSource": "Lähde",
+  "fieldFigureDate": "Luvun päivämäärä",
+  "fieldLastChecked": "Viimeksi tarkistettu",
+  "claimStatistic": "Tilasto",
+  "claimTrend": "Trendi",
+  "claimForecast": "Ennuste",
+  "claimShortage": "Pulasignaali",
+  "claimSkills": "Taitosignaali",
+  "illustrativeSample": "Yleiskuvavisualisointi — se täyttyy alustan kasvaessa.",
+  "evidenceDisclaimer": "Jokainen väite linkittää viralliseen julkiseen lähteeseensä, jossa on luvun päivämäärä ja alue. Luvut on poimittu julkaistuista raporteista (viimeksi varmennettu kunkin kortin päivämääränä), eivätkä ne ole reaaliaikainen tietosyöte — tarkista aina viimeisin virallinen luku linkitetystä lähteestä.",
+  "sourceLabel": {
+    "eurostat": "Eurostat-lähde",
+    "eures": "EURES / Euroopan työviranomaisen lähde",
+    "cedefop": "Cedefop-lähde",
+    "eurofound": "Eurofound-lähde",
+    "oecd": "OECD-lähde",
+    "ilo": "ILO-lähde",
+    "ec": "Euroopan komission lähde"
+  },
+  "evidence": {
+    "employment-participation": {
+      "title": "Työllisyys on ennätystasolla — kilpailu osaajista on kireää",
+      "summary": "Eurostatin mukaan EU:n 20–64-vuotiaiden työllisyysaste nousi 75,8 %:iin vuonna 2024 — korkeimmalle sitten sarjan alun vuonna 2009 (ja yli 76 %:n vuonna 2025). Kireä markkina tekee näkyvistä, näyttöön perustuvista taidoista arvokkaampia, ei vähemmän arvokkaita.",
+      "figureDate": "Vuositaso 2024",
+      "region": "EU",
+      "unit": "% työllisiä (20–64-v.), 2024",
+      "methodNote": "Eurostatin työvoimatutkimus, EU:n työllisyysaste 20–64-vuotiaat, vuositaso 2024 (julkaistu huhtikuussa 2025); korkein sitten sarjan alun vuonna 2009."
+    },
+    "shortage-occupations": {
+      "title": "Työvoimapula ulottuu koko työmarkkinaan",
+      "summary": "EURESin / Euroopan työviranomaisen raportti työvoimapulasta ja -ylijäämistä listaa pitkäaikaisen pulan terveydenhuollossa, rakentamisessa ja majoitus- ja ravintola-alalla sekä korkean osaamisen vajeet tekniikassa ja IT-alalla ja — vuoden 2024 painoksessa — kuljetuksessa ja varastoinnissa (kuljettajat, liikkuvien työkoneiden kuljettajat). Vaje koskee koko taloutta, ei vain yhtä sektoria.",
+      "figureDate": "Raportti 2024 (julkaistu kesäkuussa 2025)",
+      "region": "EU / ETA + Norja, Islanti, Sveitsi",
+      "methodNote": "EURESin raportti työvoimapulasta ja -ylijäämistä 2024; pula-ammatit on listattu maittain lähteessä."
+    },
+    "skills-mismatch": {
+      "title": "Lähes puolet työnantajista ei löydä oikeita taitoja",
+      "summary": "Euroopan komission Eurobarometri-kyselyn mukaan 46 % EU:n pk-yrityksistä koki vaikeaksi tai erittäin vaikeaksi löytää työntekijöitä, joilla on oikeat taidot, viimeisten kahden vuoden aikana — ja osuus nousee noin 70 %:iin niiden pk-yritysten joukossa, jotka todella rekrytoivat. Kyse on kohtaanto-ongelmasta, ei vain tarjontaongelmasta.",
+      "figureDate": "Eurobarometri 2024 (pk-yritysten taidot)",
+      "region": "EU",
+      "unit": "% pk-yrityksistä (≈70 % rekrytoineista)",
+      "methodNote": "Euroopan komission Eurobarometri pk-yrityksistä ja osaajapulasta, 2024: 46 % pk-yrityksistä koki (erittäin) vaikeaksi löytää oikein koulutettua henkilöstöä edellisten 24 kuukauden aikana; ~70 % rekrytoineista pk-yrityksistä."
+    },
+    "digital-skills-demand": {
+      "title": "Työtehtävien vaatimat taidot siirtyvät digitaalisiksi",
+      "summary": "Cedefopin analyysin mukaan lähes 9 työpaikkaa kymmenestä vaatii digitaitoja, kun vain noin 55,6 %:lla EU:n aikuisista on vähintään digitaaliset perustaidot. Monien töiden taitoprofiili muuttuu nopeammin kuin staattinen CV pystyy näyttämään.",
+      "figureDate": "Cedefopin taitoennuste / digitaitoanalyysi (2024)",
+      "region": "EU",
+      "unit": "% EU:n aikuisista, joilla on digitaaliset perustaidot",
+      "methodNote": "Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 työpaikasta vaatii digitaitoja; ~55,6 %:lla EU:n aikuisista on vähintään digitaaliset perustaidot."
+    },
+    "demographic-pressure": {
+      "title": "Työikäinen väestö supistuu",
+      "summary": "Eurostatin väestöennusteiden mukaan 22:ssa EU:n 27 maasta työikäisen (20–64-vuotiaan) väestön odotetaan supistuvan vuoteen 2050 mennessä, ja vanhushuoltosuhde nousee merkittävästi. Työntekijöiden pitämisestä, uudelleenkouluttamisesta ja tarpeeseen kohdentamisesta tulee rakenteellisesti entistä tärkeämpää.",
+      "figureDate": "Eurostatin väestöennusteet (perusvuosi 2024)",
+      "region": "EU",
+      "unit": "EU-maat, joissa työikäinen väestö vähenee vuoteen 2050 mennessä",
+      "methodNote": "Eurostatin väestöennusteet / 'Old-age dependency growing across EU regions' (lokakuu 2025): 22:n EU:n 27 maasta ennustetaan näkevän työikäisen (20–64) väestön vähenevän vuoteen 2050 mennessä."
+    },
+    "labour-mobility": {
+      "title": "Rajat ylittävä liikkuvuus auttaa tasapainottamaan työvoimapulaa",
+      "summary": "Euroopan komission vuosiraportti EU:n sisäisestä työvoiman liikkuvuudesta osoittaa, että noin 10,1 miljoonaa työikäistä EU-kansalaista työskentelee toisessa jäsenmaassa ja noin 1,83 miljoonaa on rajatyöntekijöitä — ja muuttajien työllisyysaste (78 %) ylittää maan omien kansalaisten (76 %). Merkityksellistä Baltian ja Pohjois-Euroopan markkinalle, jossa ihmiset työskentelevät yli rajojen.",
+      "figureDate": "Painos 2024 (julkaistu helmikuussa 2025)",
+      "region": "EU / ETA",
+      "unit": "rajatyöntekijät (10,1 milj. työskentelee ulkomailla)",
+      "methodNote": "Euroopan komission vuosiraportti EU:n sisäisestä työvoiman liikkuvuudesta 2024 (data 2022–2023): ~10,1 milj. työikäistä EU-kansalaista työskentelee ulkomailla; ~1,83 milj. rajatyöntekijää; muuttajien työllisyysaste 78 % vs. kansalaisten 76 %."
+    }
+  },
+  "countryNames": {
+    "LT": "Liettua",
+    "LV": "Latvia",
+    "EE": "Viro",
+    "PL": "Puola",
+    "DE": "Saksa",
+    "NL": "Alankomaat",
+    "DK": "Tanska",
+    "NO": "Norja",
+    "SE": "Ruotsi",
+    "FI": "Suomi"
+  },
+  "countryIndexEyebrow": "Työmarkkinat maittain",
+  "countryIndexTitle": "Lähteisiin perustuvaa näyttöä palvelemistamme markkinoista",
+  "countryIndexSubcopy": "Baltian ja Pohjois-Euroopan työmarkkinat. Live-sivut alkavat Baltian ytimestä; jokainen luku linkittää viralliseen lähteeseensä.",
+  "countryComingSoon": "Tulossa pian",
+  "countryView": "Näytä",
+  "countryBackToIndex": "Kaikki maat",
+  "countryWorkerFraming": "Työntekijöille: näkyvät, näyttöön perustuvat taidot ja liikkuvuus merkitsevät enemmän siellä, missä kysyntä on kireää.",
+  "countryEmployerFraming": "Työnantajille: kuvaa todellinen tarve ja vertaile ihmisiä näytön perusteella — älä heikon CV:n.",
+  "countryEvidence": {
+    "LT": {
+      "intro": "Liettua — kotimarkkina. Lähteisiin perustuvia signaaleja työntekijöille ja työnantajille.",
+      "shortages": {
+        "title": "Pula keskittyy ammattitöihin ja koneenkäyttäjiin",
+        "summary": "EURESin raportoinnin mukaan Liettuan pula-ammatit ovat kiinteiden laitosten ja koneiden käyttäjissä, rakennus- ja lähialojen ammattitöissä sekä elintarvike-, puu- ja käsityöammateissa — EU:n laajuisten terveydenhuollon, IT:n ja kuljetuksen vajeiden ohella."
+      },
+      "digital-skills": {
+        "title": "Digitaitojen kysyntä kasvaa",
+        "summary": "Cedefopin taitoennuste viittaa digitaalisten ja korkeamman tason taitojen kasvavaan kysyntään eri ammateissa, myös Liettuassa."
+      }
+    },
+    "LV": {
+      "intro": "Latvia — lähteisiin perustuvia signaaleja työntekijöille ja työnantajille.",
+      "surplus": {
+        "title": "Enemmän ylijäämään kallistuva markkina",
+        "summary": "EURESin 2024 raportoinnissa Latvia erottuu Baltian maista huomattavilla työntekijäylijäämillä useissa ammateissa — dynamiikka poikkeaa Liettuasta ja Virosta."
+      },
+      "digital-skills": {
+        "title": "Digitaitojen kysyntä kasvaa",
+        "summary": "Cedefopin taitoennuste viittaa digitaalisten ja korkeamman tason taitojen kasvavaan kysyntään eri ammateissa, myös Latviassa."
+      }
+    },
+    "EE": {
+      "intro": "Viro — lähteisiin perustuvia signaaleja työntekijöille ja työnantajille.",
+      "balanced": {
+        "title": "Suhteellisen tasapainoinen markkina",
+        "summary": "EURESin 2024 raportointi kuvaa Viron työmarkkinaa suhteellisesti tasapainoisemmaksi kuin monia EURES-maita, joskin EU:n laajuiset paineet terveydenhuollossa, IT:ssä ja kuljetuksessa ovat yhä läsnä."
+      },
+      "digital-skills": {
+        "title": "Digitaitojen kysyntä kasvaa",
+        "summary": "Cedefopin taitoennuste viittaa digitaalisten ja korkeamman tason taitojen kasvavaan kysyntään eri ammateissa, myös Virossa."
+      }
+    },
+    "PL": {
+      "intro": "Puola — prioriteettimarkkina. Lähteisiin perustuvia signaaleja työntekijöille ja työnantajille.",
+      "shortages": {
+        "title": "Pulaa rakennusammateissa, kuljettajista ja osaavassa valmistuksessa",
+        "summary": "EURESin raportoinnin mukaan Puolan pula-ammatit ovat rakennus- ja lähialojen ammattitöissä, raskaan kaluston kuljettajissa ja kuljetuksessa sekä osaavassa valmistuksessa ja hitsauksessa — EU:n laajuisten terveydenhuollon ja IT:n vajeiden ohella."
+      },
+      "digital-skills": {
+        "title": "Digitaitojen kysyntä kasvaa",
+        "summary": "Cedefopin taitoennuste viittaa digitaalisten ja korkeamman tason taitojen kasvavaan kysyntään eri ammateissa, myös Puolassa."
+      }
+    },
+    "DE": {
+      "intro": "Saksa — prioriteettimarkkina. Lähteisiin perustuvia signaaleja työntekijöille ja työnantajille.",
+      "shortages": {
+        "title": "Laajaa pulaa hoivassa, ammattitöissä, IT:ssä ja insinöörityössä",
+        "summary": "EURESin raportoinnin mukaan Saksalla on yksi EU:n laajimmista pulaprofiileista — terveys- ja hoiva-ammatit, osaava rakentaminen, sähkö- ja mekatroniikka-ammatit, IT ja insinöörityö."
+      },
+      "digital-skills": {
+        "title": "Digitaitojen kysyntä kasvaa",
+        "summary": "Cedefopin taitoennuste viittaa digitaalisten ja korkeamman tason taitojen kasvavaan kysyntään eri ammateissa, myös Saksassa."
+      }
+    },
+    "NL": {
+      "intro": "Alankomaat — prioriteettimarkkina. Lähteisiin perustuvia signaaleja työntekijöille ja työnantajille.",
+      "shortages": {
+        "title": "Kireä markkina, jossa pulaa teknisistä, hoiva- ja IT-osaajista",
+        "summary": "EURESin raportoinnin mukaan Alankomaat kuuluu EU:n kireimpiin työmarkkinoihin; pulaa on teknisissä ja insinööriammateissa, terveydessä ja hoivassa, koulutuksessa ja IT:ssä."
+      },
+      "digital-skills": {
+        "title": "Digitaitojen kysyntä kasvaa",
+        "summary": "Cedefopin taitoennuste viittaa digitaalisten ja korkeamman tason taitojen kasvavaan kysyntään eri ammateissa, myös Alankomaissa."
+      }
+    }
+  }
+}

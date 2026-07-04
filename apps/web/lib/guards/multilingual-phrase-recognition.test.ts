@@ -48,30 +48,28 @@ runPack("RU phrase pack (same families)", RU_FIXTURES.phrases);
 
 describe("KNOWN GAPS — pinned so coverage claims stay honest", () => {
   // (2026-07-04 wave 2: the former data-entry/Excel class-E gap is FILLED.
-  //  2026-07-04 PR3A: NL/DE/PL canaries REPLACED by real offline packs —
-  //  lib/structuring/language-packs/{nl,de,pl}.ts + fixtures. LV/ET/FI and
-  //  DA/NO/SV remain RED below until their packs land — audit
-  //  runtime/audits/offline-multilingual-skill-recognition-audit-2026-07-04.md.)
+  //  2026-07-04 PR3A: NL/DE/PL canaries REPLACED by real offline packs.
+  //  2026-07-04 PR3B: LV/ET canaries REPLACED by the lv/et packs — their
+  //  canary sentences are now POSITIVE fixtures; FI gained its first-ever
+  //  coverage (pack + minimum taxonomy locale). DA/NO/SV remain RED below —
+  //  audit runtime/audits/offline-multilingual-skill-recognition-audit-2026-07-04.md.)
 
-  // RED-language canaries: these ordinary work sentences in the still-
-  // uncovered locales recognise nothing — locale display names are NOT
-  // recognition. If a pin fails, real coverage for that language was added:
-  // update the audit and replace the canary with a full phrase pack.
+  // RED-language canaries: ordinary work sentences in the still-uncovered
+  // Scandinavian locales produce AT MOST accidental fuzzy brushes (measured:
+  // DA "pakkede"→"packed", NO "pakket"→"parket", SV "packade"→"packag" — all
+  // 1-edit spelling accidents, none of them coverage). Locale display names
+  // are NOT recognition. If a pin fails with an exact/synonym hit, real
+  // coverage was added: update the audit and replace the canary with a full
+  // phrase pack (the NL/DE/PL and LV/ET pins fell exactly this way).
   const RED_LANGUAGE_CANARIES: Array<[string, string]> = [
-    ["LV", "Strādāju noliktavā, iepakoju preces."],
-    ["ET", "Töötasin laos ja pakkisin kaupu."],
+    ["DA", "Jeg arbejdede på lageret og pakkede varer."],
+    ["NO", "Jeg jobbet på lageret og pakket varer."],
+    ["SV", "Jag arbetade på lagret och packade varor."],
   ];
   for (const [lang, text] of RED_LANGUAGE_CANARIES) {
-    it(`${lang} has no real recognition yet: ${text}`, () => {
-      expect(slugsOf(text)).toEqual([]);
+    it(`${lang} has no real recognition yet (fuzzy accidents at most): ${text}`, () => {
+      const got = recognizeSkills(text, 10);
+      expect(got.every((s) => s.via === "fuzzy")).toBe(true);
     });
   }
-
-  // SV canary: "packade" happens to fuzzy-brush the EN "packag" stem — an
-  // ACCIDENT of spelling proximity, not Swedish coverage. Pinned as-is so
-  // nobody mistakes one lucky fuzzy hit for a supported language.
-  it("SV has no real recognition (one accidental fuzzy brush only)", () => {
-    const got = recognizeSkills("Jag arbetade på lagret och packade varor.", 10);
-    expect(got.every((s) => s.via === "fuzzy")).toBe(true);
-  });
 });

@@ -15,8 +15,18 @@ import type { LanguagePack, RecognitionLanguage } from "./types";
 import { NL_PACK } from "./nl";
 import { DE_PACK } from "./de";
 import { PL_PACK } from "./pl";
+import { LV_PACK } from "./lv";
+import { ET_PACK } from "./et";
+import { FI_PACK } from "./fi";
 
-export const LANGUAGE_PACKS: readonly LanguagePack[] = [NL_PACK, DE_PACK, PL_PACK];
+export const LANGUAGE_PACKS: readonly LanguagePack[] = [
+  NL_PACK,
+  DE_PACK,
+  PL_PACK,
+  LV_PACK,
+  ET_PACK,
+  FI_PACK,
+];
 
 /** Languages whose needles live in the base lexicon, not in a pack. */
 export const BASE_LEXICON_LANGUAGES: readonly RecognitionLanguage[] = ["lt", "en", "ru"];

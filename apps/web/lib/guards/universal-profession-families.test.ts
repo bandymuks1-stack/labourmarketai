@@ -31,7 +31,8 @@ import { classifyEntrySkillSource } from "@/lib/journal/entry-skill-source";
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
-const LOCALES = ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"];
+// 12 taxonomy locales since 2026-07-04 — "fi" added (see PR3B doctrine note).
+const LOCALES = ["da", "de", "en", "et", "fi", "lt", "lv", "nl", "no", "pl", "ru", "sv"];
 const readJson = (rel: string): Record<string, string> =>
   JSON.parse(readFileSync(join(APP_ROOT, rel), "utf8")) as Record<string, string>;
 
@@ -181,7 +182,7 @@ describe("first-class recognition covers the universal profession families", () 
 });
 
 // ── 3. Locale parity: every locale ships the same taxonomy keys ───────────
-describe("all 11 locales carry the universal taxonomy (doctrine §2)", () => {
+describe("all 12 taxonomy locales carry the universal taxonomy (doctrine §2)", () => {
   const ltSkillKeys = Object.keys(skillNamesLt).sort();
   const ltProfKeys = Object.keys(professionsLt).sort();
   for (const loc of LOCALES) {
