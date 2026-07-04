@@ -162,7 +162,8 @@ export const LV_PACK: LanguagePack = {
     },
     // ── agriculture & gardening ────────────────────────────────────────────
     gardening: {
-      exact: ["dārzā", "pļāvu zāli", "ravēju", "dārznieks", "apgriezu dzīvžogu"],
+      // NB: no bare "ravēju" — it sits inside "iekrāvēju" (with a loader).
+      exact: ["dārzā", "pļāvu zāli", "ravēju dārz", "dārznieks", "apgriezu dzīvžogu"],
     },
     "farm-work": {
       exact: ["lauku darbi", "saimniecībā", "ražas novākšana"],

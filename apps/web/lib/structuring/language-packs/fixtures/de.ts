@@ -28,6 +28,13 @@ export const DE_FIXTURES: LanguageFixtures = {
     { text: "Ich habe die Bühne aufgebaut für das Stadtfest.", expects: ["event-setup"] },
     { text: "Ich habe auf Kinder aufgepasst und im Kindergarten geholfen.", expects: ["childcare"], forbids: ["gardening"] },
     { text: "Ich habe Brot gebacken in der Bäckerei.", expects: ["baking"] },
+    // "Elektroniker" is the official DE electrician title — it must count
+    // as electrical WORK, not be suppressed as consumer electronics
+    // (review PR3D: "elektroniker" added to ELECTRICAL_WORK_RE).
+    { text: "Ich arbeitete als Elektroniker auf der Baustelle.", expects: ["electrical-install"] },
+    // Manicure text must not fire the painting trade (review PR3D: bare
+    // "lackiert" was anchored — "Nägel lackiert" stays nail-care only).
+    { text: "Ich habe im Nagelstudio Nägel lackiert.", expects: ["nail-care"], forbids: ["painting"] },
   ],
   falsePositives: [
     // "gelernt"/"Erfahrung" must never brush harvest ("ernte") or driving.

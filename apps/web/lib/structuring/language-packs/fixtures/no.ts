@@ -29,6 +29,9 @@ export const NO_FIXTURES: LanguageFixtures = {
     { text: "Jeg rigget scenen til festivalen.", expects: ["event-setup"] },
     { text: "Jeg passet barn etter skolen.", expects: ["childcare"] },
     { text: "Jeg bakte brød i et bakeri.", expects: ["baking"] },
+    // "vareplassering" must never brush the NL welding needle (review PR3D:
+    // NL "lasser" was anchored to "als lasser").
+    { text: "Jeg jobbet med vareplassering i butikken.", expects: ["merchandising"], forbids: ["welding-blueprint"] },
   ],
   falsePositives: [
     // Being recruited is not recruiting.

@@ -105,8 +105,13 @@ describe("packs extend the ONE canonical catalogue (no invented skills)", () => 
           set!.exact.length,
           `${pack.language} pack has EMPTY needles for core slug '${slug}'`,
         ).toBeGreaterThan(0);
-        for (const n of [...set!.exact, ...(set!.synonyms ?? [])]) {
-          expect(n.trim().length, `${pack.language}/${slug}: blank needle`).toBeGreaterThan(2);
+      }
+    });
+
+    it(`${pack.language}: every needle in EVERY slug is real (no blank/short stems)`, () => {
+      for (const [slug, set] of Object.entries(pack.skills)) {
+        for (const n of [...set.exact, ...(set.synonyms ?? [])]) {
+          expect(n.trim().length, `${pack.language}/${slug}: blank/short needle`).toBeGreaterThan(2);
         }
       }
     });

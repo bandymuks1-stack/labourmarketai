@@ -55,7 +55,12 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     // general gluing as tiling. Tiling stays anchored on the unambiguous stems.
     { slug: "tiling", needles: ["plytel", "плитк", "плиточ"] },
     { slug: "drywall", needles: ["gipso", "gipskart", "гипсокартон", "гкл"] },
-    { slug: "ceiling-systems", needles: ["lub", "потолок", "потолк"] },
+    // Review 2026-07-04 (PR3D): the bare stem "lub" is one of the most
+    // frequent POLISH words ("lub" = or, "lubię" = I like) and sits inside
+    // ET "juhiluba" — anchored LT forms only (same fix class as "mūr").
+    // "lubos" (nom. pl.) is safe in every covered language; "lubas" is NOT
+    // (ET "lubas" = promised), so accusative rides multiword anchors.
+    { slug: "ceiling-systems", needles: ["lubos", "gipso lub", "kabinamos lub", "lubų montav", "lubu montav", "montavau lubas", "įtempiam", "itempiam", "потолок", "потолк"] },
     { slug: "partition-walls", needles: ["pertvar", "перегородк"] },
     { slug: "plastering", needles: ["tinkav", "tinkov", "штукатур"] },
     { slug: "skim-coating", needles: ["glaist", "шпаклев", "шпаклёв", "шпатлев"] },
@@ -77,7 +82,9 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     // offline packs made those languages first-class (PR3C audit). The
     // explicit LT stems below cover every real masonry form (mūrijau,
     // mūryti, mūrininkas, mūro siena) without the cross-language bleed.
-    { slug: "bricklaying", needles: ["mūrij", "mūryt", "mūrinink", "mūro", "кладк", "кирпич"] },
+    // …and RU "кладк" ⊂ "проКЛАДКа" (cable/pipe laying) plus "mūro" folds to
+    // "muro" ⊂ FI "muroja" (cereal) — anchored forms only (review PR3D).
+    { slug: "bricklaying", needles: ["mūrij", "mūryt", "mūrinink", "mūro darb", "mūro sien", "кладка стен", "кладку стен", "кладкой стен", "кирпич"] },
     { slug: "concrete-pouring", needles: ["bet liej", "betonav", "бетонир", "заливал бетон", "заливка бетон"] },
     { slug: "rebar-cutting", needles: ["armatūr", "armatur", "арматур"] },
     { slug: "welding-blueprint", needles: ["suvirin", "сварк", "сварщик", "сваривал"] },
@@ -91,9 +98,14 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     { slug: "site-management", needles: ["statyb vadov", "objekt vadov", "прораб"] },
     // v1 construction work recognition — additional real-journal phrases,
     // mapped to existing skill-names.json slugs (no new taxonomy).
-    { slug: "earthworks", needles: ["kasiau", "kasim", "iškas", "kasė", "smėl", "smel", "копал", "котлован", "транше", "землян"] },
+    // Review 2026-07-04 (PR3D): "kasė" folds to bare "kase" ⊂ LV "kasē/kases"
+    // (cash register) and "iškas" ⊂ FI "tiskasin" (washed dishes) — replaced
+    // with fuller LT inflections that cannot sit inside those words.
+    { slug: "earthworks", needles: ["kasiau", "kasim", "kasėme", "iškasiau", "iškasė", "iškasti", "smėl", "smel", "копал", "котлован", "транше", "землян"] },
     { slug: "wallpapering", needles: ["tapet", "обои", "обоев", "поклейк"] },
-    { slug: "timber-framing", needles: ["karkas", "sij", "gegn", "apkal", "каркас", "стропил"] },
+    // Review 2026-07-04 (PR3D): bare "sij" ⊂ ET "nõudepesija" / LV "taisīju",
+    // bare "apkal" ⊂ LV "apkalpoju" (I served) — verb/noun-anchored forms only.
+    { slug: "timber-framing", needles: ["karkas", "sijų montav", "siju montav", "montavau sij", "dėjau sij", "dejau sij", "medinės sij", "medines sij", "gegn", "apkaliau", "apkalim", "каркас", "стропил"] },
     { slug: "formwork", needles: ["klojin", "опалубк"] },
     { slug: "concrete-pouring", needles: ["sąram", "saram"] },
     { slug: "blueprint-reading", needles: ["brėžin", "brezin", "pagal projekt", "projekto skaitym", "чертеж", "чертёж", "по проекту"] },
@@ -183,7 +195,10 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ]),
   // ── Agriculture & gardening ───────────────────────────────────────────────
   ...asSector("agriculture", [
-    { slug: "gardening", needles: ["priziurejau sod", "prižiūrėjau sod", "sodo prieziur", "sodo priežiūr", "sodininkyst", "sodin", "ravej", "ravėj", "vejapjov", "vejos pjov", "pjoviau zol", "pjoviau žol", "geliu prieziur", "gyvatvor", "garden", "lawn", "сад", "газон", "саженц"] },
+    // Review 2026-07-04 (PR3D): bare "ravej" ⊂ LV "iekrāvēju" (with a
+    // loader) and bare "garden" ⊂ SV "ladugården"/"gården" (å→a fold) —
+    // fuller LT forms + space/suffix-anchored EN forms.
+    { slug: "gardening", needles: ["priziurejau sod", "prižiūrėjau sod", "sodo prieziur", "sodo priežiūr", "sodininkyst", "sodin", "ravėjau", "ravejau", "ravėjim", "vejapjov", "vejos pjov", "pjoviau zol", "pjoviau žol", "geliu prieziur", "gyvatvor", "the garden", "gardening", "garden work", "gardener", "lawn", "сад", "газон", "саженц"] },
     { slug: "farm-work", needles: ["zemes uki", "žemės ūki", "ukio darb", "ūkio darb", "derliaus", "farm work", "сельхоз", "ферм", "урожай"] },
     { slug: "animal-care", needles: ["gyvun prieziur", "gyvūnų priežiūr", "gyvuliu prieziur", "gyvulių priežiūr", "zirgu prieziur", "žirgų priežiūr", "priziurejau zirg", "prižiūrėjau žirg", "seriau zirg", "šėriau žirg", "arklid", "augintin", "animal care", "за животн", "лошад", "конюшн"] },
   ]),
@@ -312,7 +327,7 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     { slug: "structural-steel", needles: ["structural steel", "metalo konstrukcij", "металлоконструкц"] },
     { slug: "precast-install", needles: ["precast", "gelzbeton", "gelžbeton", "жби"] },
     // electrical depth (all anchored — never a bare "elektr" stem)
-    { slug: "cable-pulling", needles: ["cable pulling", "cable laying", "kabeliu klojim", "kabelių klojim", "traukiau kabel", "прокладка кабел", "тянул кабел"] },
+    { slug: "cable-pulling", needles: ["cable pulling", "cable laying", "kabeliu klojim", "kabelių klojim", "traukiau kabel", "прокладка кабел", "прокладывал кабел", "тянул кабел"] },
     { slug: "lighting-install", needles: ["lighting install", "sviestuvu montav", "šviestuvų montav", "montavau sviestuv", "montavau šviestuv", "установка светильник", "монтаж освещен"] },
     { slug: "panel-install", needles: ["distribution board", "elektros skyd", "электрощит", "распределительн щит"] },
     { slug: "electrical-testing", needles: ["electrical test", "elektros matavim", "varzu matavim", "varžų matavim", "электроизмерен", "замеры сопротивлен"] },
@@ -371,7 +386,7 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
   { slug: "carpenter", needles: ["stali", "medien", "плотник", "столяр"] },
   // EN "bricklayer" maps to the CANONICAL mason slug (LT "Mūrininkas" IS the
   // bricklayer trade) — deliberately not a second profession slug (§2).
-  { slug: "mason", needles: ["mūrij", "mūryt", "mūrinink", "mūro", "каменщик", "кладк", "кирпич", "bricklay"] },
+  { slug: "mason", needles: ["mūrij", "mūryt", "mūrinink", "mūro darb", "mūro sien", "каменщик", "кладка стен", "кладку стен", "кирпич", "bricklay"] },
   { slug: "concrete_worker", needles: ["beton", "бетон"] },
   { slug: "welder", needles: ["suvirin", "сварк", "сварщик", "сваривал"] },
   { slug: "rebar_worker", needles: ["armatūr", "armatur", "арматур"] },
@@ -657,7 +672,7 @@ export const ACTIVITY_HINTS_LT: {
     label: "Staliaus darbai",
     needles: ["stali", "medien", "столярн", "плотник", "плотниц"],
   },
-  { slug: "mason", label: "Mūrijimas", needles: ["mūrij", "mūryt", "mūrinink", "mūro", "кладк", "кирпич", "каменщик"] },
+  { slug: "mason", label: "Mūrijimas", needles: ["mūrij", "mūryt", "mūrinink", "mūro darb", "mūro sien", "кладка стен", "кладку стен", "кирпич", "каменщик"] },
   {
     slug: "concrete_worker",
     label: "Betonavimas",

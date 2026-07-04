@@ -180,7 +180,9 @@ export const DE_PACK: LanguagePack = {
       exact: ["gemauert", "maurer", "mauerwerk", "mortel angemischt", "mörtel angemischt"],
     },
     painting: {
-      exact: ["gestrichen", "wande gestrichen", "wände gestrichen", "malerarbeiten", "lackiert"],
+      // "lackierte"/anchored — bare "lackiert" ⊂ "Nägel lackiert" (nail
+      // care) and fired the painting trade on manicure text (review PR3D).
+      exact: ["gestrichen", "wande gestrichen", "wände gestrichen", "malerarbeiten", "lackierte", "lackierarbeit", "türen lackiert", "turen lackiert"],
     },
     tiling: {
       exact: ["fliesen", "gefliest", "fliesenleger", "verfliest"],

@@ -44,5 +44,8 @@ export const PL_FIXTURES: LanguageFixtures = {
     { text: "Demontaż starych regałów.", forbids: ["assembly-work"] },
     // Watching a cooking programme is neither cooking nor programming work.
     { text: "Oglądałem program o gotowaniu.", forbids: ["cooking", "programming"] },
+    // PL "lubię" (I like) must never brush the LT ceiling stem (review PR3D:
+    // the bare "lub" needle was replaced with anchored LT forms).
+    { text: "Lubię swoją pracę w biurze.", forbids: ["ceiling-systems"] },
   ],
 };

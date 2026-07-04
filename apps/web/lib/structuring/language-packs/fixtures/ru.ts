@@ -43,6 +43,9 @@ export const RU_FIXTURES: LanguageFixtures = {
     { text: "Выкладывал товар на полки.", expects: ["merchandising"] },
     { text: "Стирал и гладил бельё.", expects: ["laundry"] },
     { text: "Работал бариста, варил кофе.", expects: ["barista-work"] },
+    // "проКЛАДКа кабеля" must never fire masonry (review PR3D: the bare
+    // "кладк" needle was anchored to "кладка/кладку/кладкой стен").
+    { text: "Прокладка кабеля в офисе.", expects: ["cable-pulling"], forbids: ["bricklaying"] },
   ],
   falsePositives: [
     // Worker-side interview is NOT recruitment work.

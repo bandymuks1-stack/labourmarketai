@@ -42,5 +42,11 @@ export const FI_FIXTURES: LanguageFixtures = {
     { text: "Käytin sähkötyökaluja remontissa.", forbids: ["electrical-install"] },
     // Washing your face is neither dishwashing, laundry nor window cleaning.
     { text: "Pesin kasvoni aamulla.", forbids: ["dishwashing", "laundry", "window-cleaning"] },
+    // FI "tiskasin" (I washed dishes) must never brush the LT digging stem
+    // (review PR3D: bare "iškas" was replaced with fuller forms).
+    { text: "Tiskasin astioita ravintolassa.", forbids: ["earthworks"] },
+    // FI "muroja" (cereal) must never brush the masonry stem ("mūro" was
+    // anchored to "mūro darb"/"mūro sien" in the review pass).
+    { text: "Söin muroja aamulla.", forbids: ["bricklaying"] },
   ],
 };
