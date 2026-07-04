@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, LogOut, Shield, type LucideIcon } from "lucide-react";
+import { User, LogOut, Shield, Sun, Moon, type LucideIcon } from "lucide-react";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -26,6 +26,27 @@ export function AccountMenu() {
   const { user, profile, isAdmin, adminUiHidden } = useAuth();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  // First-use UX (2026-07-04): the light/dark toggle used to live ONLY deep in
+  // /dashboard/account, so new users never discovered it. This mirrors the
+  // exact storage contract of <ThemeToggle/> (dataset.theme + localStorage
+  // "theme"; the no-flash bootstrap in the root layout replays it) — same
+  // mechanism, one more surface, no redesign.
+  const [theme, setThemeState] = useState<"dark" | "light">("dark");
+  useEffect(() => {
+    const current = document.documentElement.dataset.theme;
+    setThemeState(current === "light" ? "light" : "dark");
+  }, []);
+  const nextTheme: "dark" | "light" = theme === "light" ? "dark" : "light";
+  function toggleTheme() {
+    document.documentElement.dataset.theme = nextTheme;
+    try {
+      localStorage.setItem("theme", nextTheme);
+    } catch {
+      /* private mode — toggle still works for the session */
+    }
+    setThemeState(nextTheme);
+  }
 
   // UTILITY-ONLY dropdown (IA cleanup): the name menu carries only account
   // utilities — Admin (gated) + Account + Logout. Product areas were REMOVED
@@ -102,6 +123,21 @@ export function AccountMenu() {
               {l.label}
             </Link>
           ))}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={toggleTheme}
+            data-testid="account-menu-theme-toggle"
+            aria-label={`${t("account.theme.appearance")}: ${nextTheme === "dark" ? t("account.theme.toDark") : t("account.theme.toLight")}`}
+            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+          >
+            {nextTheme === "dark" ? (
+              <Moon className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+            ) : (
+              <Sun className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+            )}
+            {nextTheme === "dark" ? t("account.theme.toDark") : t("account.theme.toLight")}
+          </button>
           <Link
             href="/dashboard/account"
             role="menuitem"

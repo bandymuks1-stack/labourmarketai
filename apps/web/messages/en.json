@@ -191,7 +191,8 @@
     "notReady": "Photo upload isn''t available in this environment yet.",
     "alt": "Profile photo",
     "hint": "JPG, PNG or WebP, up to 5 MB. The photo is shown only to you."
-  },  "errorBoundary": {
+  },
+  "errorBoundary": {
     "reloading": "Reloading…",
     "body": "Something went wrong. Please try again.",
     "retry": "Try again"
@@ -228,25 +229,64 @@
       "title": "You as a person",
       "subtitle": "Your individual account.",
       "actions": {
-        "profile": { "title": "Profile & CV", "desc": "Build your profile, skills and CV." },
-        "findWork": { "title": "Find work", "desc": "See work opportunities across sectors." },
-        "readiness": { "title": "Readiness", "desc": "Manage your documents and work status." },
-        "playerCard": { "title": "My card", "desc": "Your readiness and skills card." },
-        "communication": { "title": "Communication", "desc": "Conversations and messages." },
-        "marketMap": { "title": "Market map", "desc": "See market signals: demand, readiness, document gaps and risks. If data is still preview, it is marked as preview." }
+        "profile": {
+          "title": "Profile & CV",
+          "desc": "Build your profile, skills and CV."
+        },
+        "findWork": {
+          "title": "Find work",
+          "desc": "See work opportunities across sectors."
+        },
+        "readiness": {
+          "title": "Readiness",
+          "desc": "Manage your documents and work status."
+        },
+        "playerCard": {
+          "title": "My card",
+          "desc": "Your readiness and skills card."
+        },
+        "communication": {
+          "title": "Communication",
+          "desc": "Conversations and messages."
+        },
+        "marketMap": {
+          "title": "Market map",
+          "desc": "See market signals: demand, readiness, document gaps and risks. If data is still preview, it is marked as preview."
+        }
       }
     },
     "company": {
       "title": "Your company",
       "subtitle": "Your organization account and what it can do.",
       "actions": {
-        "need": { "title": "Submit a need", "desc": "Describe the workers or services you need." },
-        "hire": { "title": "Hire", "desc": "Browse candidates and shortlists." },
-        "buy": { "title": "Buy services", "desc": "Create and track requests." },
-        "offer": { "title": "Offer workers / teams", "desc": "Present candidates or teams as a partner." },
-        "projects": { "title": "Manage projects", "desc": "Run your projects and operations." },
-        "communication": { "title": "Communication", "desc": "Conversations with people and about projects." },
-        "marketMap": { "title": "Market map", "desc": "See market signals: demand, readiness, document gaps and risks. If data is still preview, it is marked as preview." }
+        "need": {
+          "title": "Submit a need",
+          "desc": "Describe the workers or services you need."
+        },
+        "hire": {
+          "title": "Hire",
+          "desc": "Browse candidates and shortlists."
+        },
+        "buy": {
+          "title": "Buy services",
+          "desc": "Create and track requests."
+        },
+        "offer": {
+          "title": "Offer workers / teams",
+          "desc": "Present candidates or teams as a partner."
+        },
+        "projects": {
+          "title": "Manage projects",
+          "desc": "Run your projects and operations."
+        },
+        "communication": {
+          "title": "Communication",
+          "desc": "Conversations with people and about projects."
+        },
+        "marketMap": {
+          "title": "Market map",
+          "desc": "See market signals: demand, readiness, document gaps and risks. If data is still preview, it is marked as preview."
+        }
       },
       "empty": {
         "cta": "Create a company",
@@ -324,7 +364,13 @@
     "reason": "There is no free-text people search yet: building one before there is consented, verified worker supply would mean showing fake results. Below is the real path that works today.",
     "paths": {
       "scouting": {
-    "statusNote": { "title": "How matching works today", "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.", "stream": "An active candidate stream still depends on real, filled-in profiles and needs.", "fill": "Fill in a need so the system can compare it against the available signals.", "disclaimer": "This does not mean employment or a confirmed match." },
+        "statusNote": {
+          "title": "How matching works today",
+          "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.",
+          "stream": "An active candidate stream still depends on real, filled-in profiles and needs.",
+          "fill": "Fill in a need so the system can compare it against the available signals.",
+          "disclaimer": "This does not mean employment or a confirmed match."
+        },
         "title": "Search by need",
         "body": "Pick your structured need — the match engine surfaces suitable candidates with the basis and the gaps. No invented scores.",
         "cta": "Open search by need"
@@ -542,31 +588,58 @@
       }
     },
     "layers": {
-      "workers": { "label": "Workers — preferred locations", "desc": "Where people want to work, from real worker profiles." },
-      "demand": { "label": "Company needs", "desc": "Where employers have submitted real workforce needs." },
-      "projects": { "label": "Projects", "desc": "Where real projects and operations run." },
-      "accommodation": { "label": "Accommodation", "desc": "Where housing is available — a future data layer." },
-      "teams": { "label": "Teams / brigades", "desc": "Where ready teams are available." },
-      "readiness": { "label": "Readiness / documents / skills", "desc": "Where documents and skills are ready or missing." },
-      "rates": { "label": "Work rates", "desc": "Honest rate signals by location — no invented prices." },
-      "countryFit": { "label": "Country fit", "desc": "Where country requirements match worker readiness." },
-      "nextActions": { "label": "Next-action signals", "desc": "Where you can act now — based on real gaps." }
+      "workers": {
+        "label": "Workers — preferred locations",
+        "desc": "Where people want to work, from real worker profiles."
+      },
+      "demand": {
+        "label": "Company needs",
+        "desc": "Where employers have submitted real workforce needs."
+      },
+      "projects": {
+        "label": "Projects",
+        "desc": "Where real projects and operations run."
+      },
+      "accommodation": {
+        "label": "Accommodation",
+        "desc": "Where housing is available — a future data layer."
+      },
+      "teams": {
+        "label": "Teams / brigades",
+        "desc": "Where ready teams are available."
+      },
+      "readiness": {
+        "label": "Readiness / documents / skills",
+        "desc": "Where documents and skills are ready or missing."
+      },
+      "rates": {
+        "label": "Work rates",
+        "desc": "Honest rate signals by location — no invented prices."
+      },
+      "countryFit": {
+        "label": "Country fit",
+        "desc": "Where country requirements match worker readiness."
+      },
+      "nextActions": {
+        "label": "Next-action signals",
+        "desc": "Where you can act now — based on real gaps."
+      }
     },
     "nextActionsTitle": "What you can do now",
-      "atlas": {
-        "title": "Market atlas",
-        "intro": "The map layers come from the work-market atlas: {categories} of {blocks} blocks can appear on the map. Every layer is signal-only.",
-        "signalOnlyNote": "Signals are shown at country / region level; a more precise location only after you confirm it. Personal address is not shown.",
-        "kind": {
-          "demand": "Demand",
-          "worker_signal": "Worker signals",
-          "offer": "Offers",
-          "accommodation": "Accommodation",
-          "brigade": "Brigades",
-          "readiness_warning": "Readiness gaps",
-          "rate": "Rates / prices"
-        }
-      },
+    "atlas": {
+      "title": "Market atlas",
+      "intro": "The map layers come from the work-market atlas: {categories} of {blocks} blocks can appear on the map. Every layer is signal-only.",
+      "signalOnlyNote": "Signals are shown at country / region level; a more precise location only after you confirm it. Personal address is not shown.",
+      "kind": {
+        "demand": "Demand",
+        "worker_signal": "Worker signals",
+        "offer": "Offers",
+        "accommodation": "Accommodation",
+        "brigade": "Brigades",
+        "readiness_warning": "Readiness gaps",
+        "rate": "Rates / prices"
+      }
+    },
     "nextActions": {
       "workerCountry": "Add or refine your preferred country",
       "companyNeed": "Submit a company need",
@@ -3889,21 +3962,24 @@
     ]
   },
   "legal": {
-    "preparing": { "body": "Legal information is being prepared. Before any paid services or contractual relationship begins, it will be provided and updated.", "contact": "If you have questions, get in touch with us." },
-      "marketplaceRules": {
-        "title": "Marketplace rules",
-        "intro": "These rules keep the marketplace safe and fair. They apply to all users and offers.",
-        "rules": [
-          "The system never confirms the right to work or legal eligibility without the required documents.",
-          "A verified status appears only after a real human check — never automatically.",
-          "Contacts are not shown without the user's permission.",
-          "Public offers appear only after moderation; untrusted or suspicious offers are hidden.",
-          "Trading regulated or illegal goods and services is prohibited.",
-          "A map point appears only with verified coordinates — no fake markers.",
-          "Payments are not active yet; no payments run through the platform at this stage.",
-          "Inappropriate behaviour or suspicious activity can be reported — moderators review it."
-        ]
-      },
+    "preparing": {
+      "body": "Legal information is being prepared. Before any paid services or contractual relationship begins, it will be provided and updated.",
+      "contact": "If you have questions, get in touch with us."
+    },
+    "marketplaceRules": {
+      "title": "Marketplace rules",
+      "intro": "These rules keep the marketplace safe and fair. They apply to all users and offers.",
+      "rules": [
+        "The system never confirms the right to work or legal eligibility without the required documents.",
+        "A verified status appears only after a real human check — never automatically.",
+        "Contacts are not shown without the user's permission.",
+        "Public offers appear only after moderation; untrusted or suspicious offers are hidden.",
+        "Trading regulated or illegal goods and services is prohibited.",
+        "A map point appears only with verified coordinates — no fake markers.",
+        "Payments are not active yet; no payments run through the platform at this stage.",
+        "Inappropriate behaviour or suspicious activity can be reported — moderators review it."
+      ]
+    },
     "terms": {
       "title": "Terms of Service"
     },
@@ -4823,47 +4899,47 @@
     "thermoMissingMarket": "Insufficient market data",
     "thermoMissingBoth": "Insufficient market data",
     "thermoSmallSample": "Small sample (n<5) — interpret with care.",
-      "readinessPanel": {
-        "title": "How to improve your readiness",
-        "intro": "Here is what to complete next to make your card stronger.",
-        "allReady": "All core readiness signals are in place.",
-        "countryFit": "Working in another country needs the right documents. Without them you are not shown as ready to work abroad — you only see legal routes (company handles paperwork, document support). The system never promises the right to work without documents."
+    "readinessPanel": {
+      "title": "How to improve your readiness",
+      "intro": "Here is what to complete next to make your card stronger.",
+      "allReady": "All core readiness signals are in place.",
+      "countryFit": "Working in another country needs the right documents. Without them you are not shown as ready to work abroad — you only see legal routes (company handles paperwork, document support). The system never promises the right to work without documents."
+    },
+    "readinessSteps": {
+      "pillar": {
+        "profession": "Profession set",
+        "availability": "Availability set",
+        "skills": "Skills added",
+        "journal": "Work journal entries",
+        "evidence": "Skills backed by work",
+        "workCard": "Work card submitted"
       },
-      "readinessSteps": {
-        "pillar": {
-          "profession": "Profession set",
-          "availability": "Availability set",
-          "skills": "Skills added",
-          "journal": "Work journal entries",
-          "evidence": "Skills backed by work",
-          "workCard": "Work card submitted"
-        },
-        "action": {
-          "profession": "Set profession",
-          "availability": "Set availability",
-          "skills": "Add skills",
-          "journal": "Write an entry",
-          "evidence": "Add a work entry",
-          "workCard": "Submit card"
-        }
-      },
-      "readiness": {
-        "label": "Readiness",
-        "hint": "All core signals are in place.",
-        "levelReady": "Ready",
-        "levelBuilding": "Building",
-        "levelStart": "Getting started",
-        "signalsTemplate": "signals met",
-        "nextLabel": "Next:",
-        "pillars": {
-          "profession": "Profession",
-          "availability": "Availability",
-          "skills": "Skills",
-          "journal": "Work journal",
-          "evidence": "Records",
-          "workCard": "Work card"
-        }
-      },
+      "action": {
+        "profession": "Set profession",
+        "availability": "Set availability",
+        "skills": "Add skills",
+        "journal": "Write an entry",
+        "evidence": "Add a work entry",
+        "workCard": "Submit card"
+      }
+    },
+    "readiness": {
+      "label": "Readiness",
+      "hint": "All core signals are in place.",
+      "levelReady": "Ready",
+      "levelBuilding": "Building",
+      "levelStart": "Getting started",
+      "signalsTemplate": "signals met",
+      "nextLabel": "Next:",
+      "pillars": {
+        "profession": "Profession",
+        "availability": "Availability",
+        "skills": "Skills",
+        "journal": "Work journal",
+        "evidence": "Records",
+        "workCard": "Work card"
+      }
+    },
     "verifiedTitle": "Skill signals",
     "verifiedEmpty": "No skill signals yet. They build from your work records.",
     "journalSupportedLabel": "Journal-supported",
@@ -5123,7 +5199,13 @@
     "cta": "Back to the start"
   },
   "scouting": {
-    "statusNote": { "title": "How matching works today", "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.", "stream": "An active candidate stream still depends on real, filled-in profiles and needs.", "fill": "Fill in a need so the system can compare it against the available signals.", "disclaimer": "This does not mean employment or a confirmed match." },
+    "statusNote": {
+      "title": "How matching works today",
+      "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.",
+      "stream": "An active candidate stream still depends on real, filled-in profiles and needs.",
+      "fill": "Fill in a need so the system can compare it against the available signals.",
+      "disclaimer": "This does not mean employment or a confirmed match."
+    },
     "title": "Scouting",
     "intro": "Pick one of your structured needs to see matching workers, why they fit, and shortlist them.",
     "visibilityNote": "Visibility is based on readiness, trust and permissions — not payment. Paid wider access is not active yet (payments are being prepared). Only safe, anonymized previews are shown — no fake listings.",
@@ -5444,11 +5526,26 @@
     "subcopy": "Labourmarket.ai is a digital international labour-force agency. Build one worker profile, see what each country needs, and let employers reach you when you are ready. We never promise a job or a wage — we help you get ready and get matched.",
     "stepsTitle": "How it works",
     "steps": [
-      { "title": "1. Tell us your trade", "body": "Add your profession, experience and availability. It takes a few minutes." },
-      { "title": "2. AI prepares a draft", "body": "The assistant turns your words into a structured profile and CV draft — a suggestion you review and edit. It never invents experience." },
-      { "title": "3. Check country readiness", "body": "See what documents and steps are likely required for the country you want — sourced, and not legal advice." },
-      { "title": "4. Get matched", "body": "When an employer's need fits your trade, availability, accommodation, transport and language, you are shortlisted. Mismatches are shown honestly." },
-      { "title": "5. Booking and start", "body": "Agree a booking with a clear readiness check. Contract and payment steps stay manual for now." }
+      {
+        "title": "1. Tell us your trade",
+        "body": "Add your profession, experience and availability. It takes a few minutes."
+      },
+      {
+        "title": "2. AI prepares a draft",
+        "body": "The assistant turns your words into a structured profile and CV draft — a suggestion you review and edit. It never invents experience."
+      },
+      {
+        "title": "3. Check country readiness",
+        "body": "See what documents and steps are likely required for the country you want — sourced, and not legal advice."
+      },
+      {
+        "title": "4. Get matched",
+        "body": "When an employer's need fits your trade, availability, accommodation, transport and language, you are shortlisted. Mismatches are shown honestly."
+      },
+      {
+        "title": "5. Booking and start",
+        "body": "Agree a booking with a clear readiness check. Contract and payment steps stay manual for now."
+      }
     ],
     "needTitle": "What you may need",
     "needItems": [
@@ -5497,7 +5594,7 @@
     "intro": "Here you'll see employer needs that could fit you, and what's worth adding to your profile to be ready.",
     "noWorkerBody": "Finish your worker profile first to see opportunities that fit you.",
     "readinessTitle": "Your readiness",
-      "matchTitle": "Match breakdown",
+    "matchTitle": "Match breakdown",
     "marketMapLink": "Market map",
     "nextStep": {
       "title": "Turn a fit into action",
@@ -5507,18 +5604,18 @@
       "bookings": "Plan & bookings",
       "bookingsNote": "A confirmed match becomes a booking"
     },
-      "matchDim": {
-        "workType": "Work direction",
-        "skills": "Skills",
-        "country": "Country",
-        "availability": "Availability",
-        "documents": "Documents"
-      },
-      "matchState": {
-        "fit": "fits",
-        "check": "check",
-        "unknown": "unknown"
-      },
+    "matchDim": {
+      "workType": "Work direction",
+      "skills": "Skills",
+      "country": "Country",
+      "availability": "Availability",
+      "documents": "Documents"
+    },
+    "matchState": {
+      "fit": "fits",
+      "check": "check",
+      "unknown": "unknown"
+    },
     "readinessIntro": "The fuller your profile, the easier it is for employers to find you — and the more precisely we can show fitting needs.",
     "ready": {
       "workType": "Sector & work type",
@@ -5740,7 +5837,7 @@
     "aiNone": "No explanation was produced.",
     "statusInvalid": "Please complete the worker and need fields."
   },
-      "marketMapBase": {
+  "marketMapBase": {
     "title": "Your place on the market map",
     "subtitle": "We use this location and radius for your signals on the map.",
     "panelTitle": "Location area",
@@ -5754,7 +5851,7 @@
     "radiusLabel": "Distance from the chosen location",
     "autoButton": "Use my location",
     "autoLocating": "Finding your location…",
-    "geoDenied": "We couldn''t get your location. Choose a city or region manually.",
+    "geoDenied": "We couldn''t get your location — the browser blocked location access. Allow location for this site in your browser settings, or choose a city manually.",
     "geoUnavailable": "Your browser doesn''t support location. Choose a location manually.",
     "manualToggle": "Set location manually",
     "manualHint": "If you don''t want to allow location access, choose a city or region manually.",
@@ -5773,7 +5870,8 @@
     "updateButton": "Update location",
     "editButton": "Change location",
     "resetButton": "Remove location",
-    "emptyBody": "You haven''t chosen a location yet. Use the button above or set one manually."
+    "emptyBody": "You haven''t chosen a location yet. Use the button above or set one manually.",
+    "radiusHelp": "The radius is the search area around your chosen point: {km} km means work and demand up to {km} km from that point."
   },
   "waze": {
     "open": "Open in Waze"
@@ -5798,16 +5896,78 @@
       "concept": "Concept / not enough data",
       "blocker": "Real blocker / risk"
     },
-    "cta": { "fill": "Complete", "open": "Open" },
+    "cta": {
+      "fill": "Complete",
+      "open": "Open"
+    },
     "zone": {
-      "profileHub": { "name": "Profile Hub", "hint": "Your real profile and where you work from.", "state": { "started": "Profile started", "none": "No profile data yet" } },
-      "skillsEvidence": { "name": "Skills & Records", "hint": "Your real skills and the records behind them.", "state": { "confirmed": "{count} reviewed", "suggested": "{count} with work records", "selfDeclared": "{count} not reviewed yet", "none": "Add skills to see skill signals" } },
-      "availability": { "name": "Availability", "hint": "When and where you can work — local and international.", "state": { "available": "Available now", "busy": "Currently busy", "unavailable": "Marked unavailable", "none": "Add availability to improve readiness" } },
-      "workNeeds": { "name": "Work Needs", "hint": "Company and customer needs you prepare — drafts you review.", "state": { "drafts": "{count} work-need signal(s) in draft / review", "none": "Prepare a work need as a draft" } },
-      "teams": { "name": "Teams & Brigades", "hint": "Teams and brigades — a connected-work concept.", "state": { "concept": "Not enough data yet" } },
-      "company": { "name": "Company / Organisation", "hint": "Your organisation, agency or client context.", "state": { "linked": "Organisation linked", "none": "Add your organisation context" } },
-      "marketPulse": { "name": "Market Pulse", "hint": "Possible fit signals between profiles and needs — no guarantees.", "state": { "possibleFit": "Possible fit signals — needs more data to grow", "needsData": "Prepare your profile to see market signals" } },
-      "trust": { "name": "Trust & Records", "hint": "Records and human review make claims stronger.", "state": { "confirmedExists": "{count} reviewed", "selfDeclaredOnly": "Not reviewed yet — human review makes it stronger" } }
+      "profileHub": {
+        "name": "Profile Hub",
+        "hint": "Your real profile and where you work from.",
+        "state": {
+          "started": "Profile started",
+          "none": "No profile data yet"
+        }
+      },
+      "skillsEvidence": {
+        "name": "Skills & Records",
+        "hint": "Your real skills and the records behind them.",
+        "state": {
+          "confirmed": "{count} reviewed",
+          "suggested": "{count} with work records",
+          "selfDeclared": "{count} not reviewed yet",
+          "none": "Add skills to see skill signals"
+        }
+      },
+      "availability": {
+        "name": "Availability",
+        "hint": "When and where you can work — local and international.",
+        "state": {
+          "available": "Available now",
+          "busy": "Currently busy",
+          "unavailable": "Marked unavailable",
+          "none": "Add availability to improve readiness"
+        }
+      },
+      "workNeeds": {
+        "name": "Work Needs",
+        "hint": "Company and customer needs you prepare — drafts you review.",
+        "state": {
+          "drafts": "{count} work-need signal(s) in draft / review",
+          "none": "Prepare a work need as a draft"
+        }
+      },
+      "teams": {
+        "name": "Teams & Brigades",
+        "hint": "Teams and brigades — a connected-work concept.",
+        "state": {
+          "concept": "Not enough data yet"
+        }
+      },
+      "company": {
+        "name": "Company / Organisation",
+        "hint": "Your organisation, agency or client context.",
+        "state": {
+          "linked": "Organisation linked",
+          "none": "Add your organisation context"
+        }
+      },
+      "marketPulse": {
+        "name": "Market Pulse",
+        "hint": "Possible fit signals between profiles and needs — no guarantees.",
+        "state": {
+          "possibleFit": "Possible fit signals — needs more data to grow",
+          "needsData": "Prepare your profile to see market signals"
+        }
+      },
+      "trust": {
+        "name": "Trust & Records",
+        "hint": "Records and human review make claims stronger.",
+        "state": {
+          "confirmedExists": "{count} reviewed",
+          "selfDeclaredOnly": "Not reviewed yet — human review makes it stronger"
+        }
+      }
     }
   },
   "myWorkView": {
@@ -5816,14 +5976,66 @@
     "subtitle": "Your real profile, skills, records, availability and work needs in one place — and where they connect on the labour-market map.",
     "actionsTitle": "Next actions",
     "block": {
-      "profile": { "name": "Profile", "state": { "started": "Profile started", "missing": "No profile yet" } },
-      "cv": { "name": "CV", "state": { "summaryAdded": "Profile summary added", "import": "Import your CV or add a summary" } },
-      "skills": { "name": "Skills", "state": { "added": "{count} skills added", "none": "No skills yet" } },
-      "evidence": { "name": "Records", "state": { "supported": "{count} reviewed", "hasEvidence": "{count} with work records", "needsEvidence": "Add work to build records", "noSkills": "Add skills first" } },
-      "availability": { "name": "Availability", "state": { "available": "Available now", "busy": "Currently busy", "unavailable": "Marked unavailable", "none": "Availability not set" } },
-      "journal": { "name": "Work journal", "state": { "logged": "{count} work entries", "none": "No work logged yet" } },
-      "workNeeds": { "name": "Work needs", "state": { "drafts": "{count} work-need draft(s)", "none": "No work need prepared" } },
-      "worldMap": { "name": "World map", "state": { "zones": "{count} zones have real signals", "noSignals": "No map signals yet — add data to light up zones" } }
+      "profile": {
+        "name": "Profile",
+        "state": {
+          "started": "Profile started",
+          "missing": "No profile yet"
+        }
+      },
+      "cv": {
+        "name": "CV",
+        "state": {
+          "summaryAdded": "Profile summary added",
+          "import": "Import your CV or add a summary"
+        }
+      },
+      "skills": {
+        "name": "Skills",
+        "state": {
+          "added": "{count} skills added",
+          "none": "No skills yet"
+        }
+      },
+      "evidence": {
+        "name": "Records",
+        "state": {
+          "supported": "{count} reviewed",
+          "hasEvidence": "{count} with work records",
+          "needsEvidence": "Add work to build records",
+          "noSkills": "Add skills first"
+        }
+      },
+      "availability": {
+        "name": "Availability",
+        "state": {
+          "available": "Available now",
+          "busy": "Currently busy",
+          "unavailable": "Marked unavailable",
+          "none": "Availability not set"
+        }
+      },
+      "journal": {
+        "name": "Work journal",
+        "state": {
+          "logged": "{count} work entries",
+          "none": "No work logged yet"
+        }
+      },
+      "workNeeds": {
+        "name": "Work needs",
+        "state": {
+          "drafts": "{count} work-need draft(s)",
+          "none": "No work need prepared"
+        }
+      },
+      "worldMap": {
+        "name": "World map",
+        "state": {
+          "zones": "{count} zones have real signals",
+          "noSignals": "No map signals yet — add data to light up zones"
+        }
+      }
     },
     "action": {
       "completeProfile": "Complete your profile",
@@ -5834,9 +6046,11 @@
       "strengthenEvidence": "Strengthen skills with records",
       "openMarketMap": "Open the market map"
     },
-    "reason": { "needsManager": "Available once a manager or client reviews your work." }
+    "reason": {
+      "needsManager": "Available once a manager or client reviews your work."
+    }
   },
-    "workEntryReview": {
+  "workEntryReview": {
     "title": "Suggested skills from this entry",
     "intro": "Suggestions from your text — needs review. Accepting adds a not-yet-reviewed skill to your profile; review comes from a person.",
     "accept": "Accept",
@@ -5848,8 +6062,27 @@
     "reasonLabel": "Why",
     "quantityLabel": "Quantity",
     "durationLabel": "Time",
-    "unit": { "hours": "h", "days": "d", "minutes": "min" },
-    "domain": { "construction": "Construction", "web_design": "Web / design", "admin": "Admin", "cleaning": "Cleaning", "electrical": "Electrical", "cooking": "Food / catering", "gardening": "Grounds & gardening", "driving_logistics": "Transport / logistics", "warehouse": "Warehouse", "customer_service": "Customer service", "it": "IT", "language": "Language / translation", "equipment": "Equipment operation", "care": "Care & nursing" },
+    "unit": {
+      "hours": "h",
+      "days": "d",
+      "minutes": "min"
+    },
+    "domain": {
+      "construction": "Construction",
+      "web_design": "Web / design",
+      "admin": "Admin",
+      "cleaning": "Cleaning",
+      "electrical": "Electrical",
+      "cooking": "Food / catering",
+      "gardening": "Grounds & gardening",
+      "driving_logistics": "Transport / logistics",
+      "warehouse": "Warehouse",
+      "customer_service": "Customer service",
+      "it": "IT",
+      "language": "Language / translation",
+      "equipment": "Equipment operation",
+      "care": "Care & nursing"
+    },
     "existingTitle": "Your profile skills mentioned in this entry",
     "existingNote": "These skills are already on your profile — this entry supports them as Work Journal records. We don't add them again.",
     "existingBadge": "Already on profile",
@@ -5872,8 +6105,19 @@
     "back": "Profile",
     "notWorker": "This report is built from a worker profile's journal and skills. Create your worker profile to generate it.",
     "ladderNote": "The records ladder: waiting for review → supported by a work entry → reviewed. This is not a score; review is a human decision.",
-    "s": { "profileEvidence": "Profile records", "skillsSupported": "Skills supported by work entries", "workEntrySummary": "Work-entry summary", "missingEvidence": "Missing records / review needed", "fitReadiness": "Work-need fit readiness" },
-    "metric": { "total": "Skills", "selfDeclared": "Waiting for review", "workSupported": "Supported", "confirmed": "Reviewed" },
+    "s": {
+      "profileEvidence": "Profile records",
+      "skillsSupported": "Skills supported by work entries",
+      "workEntrySummary": "Work-entry summary",
+      "missingEvidence": "Missing records / review needed",
+      "fitReadiness": "Work-need fit readiness"
+    },
+    "metric": {
+      "total": "Skills",
+      "selfDeclared": "Waiting for review",
+      "workSupported": "Supported",
+      "confirmed": "Reviewed"
+    },
     "emptySupported": "No skills are backed by a work entry yet — log work to build records.",
     "entrySummary": "{entries} work entries · {confirmations} reviewed.",
     "missingNote": "{needEvidence} waiting-for-review skills need a work entry · {needConfirmation} supported skills await a person's review.",
