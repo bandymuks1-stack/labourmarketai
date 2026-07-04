@@ -28,6 +28,10 @@ export function WorkerInterestButton({
   labels: {
     express: string;
     sent: string;
+    /** Honest company-side acknowledgement labels (PR7) — shown only when
+     *  the company ACTUALLY set the status on the real row. */
+    reviewed: string;
+    contacted: string;
     withdraw: string;
     internalNote: string;
     error: string;
@@ -38,6 +42,12 @@ export function WorkerInterestButton({
   const [pending, startTransition] = useTransition();
 
   const active = status === "interested" || status === "reviewed" || status === "contacted";
+  const activeLabel =
+    status === "reviewed"
+      ? labels.reviewed
+      : status === "contacted"
+        ? labels.contacted
+        : labels.sent;
 
   const onExpress = () =>
     startTransition(async () => {
@@ -63,8 +73,9 @@ export function WorkerInterestButton({
             <span
               className="rounded-md border border-state-success/40 bg-state-success/10 px-3 py-1.5 text-xs font-semibold text-state-success"
               data-testid="interest-sent"
+              data-interest-status={status}
             >
-              ✓ {labels.sent}
+              ✓ {activeLabel}
             </span>
             <button
               type="button"

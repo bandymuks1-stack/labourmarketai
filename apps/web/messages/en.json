@@ -5332,7 +5332,19 @@
       "confirm_recognized_need": "Next: confirm the recognized requirements",
       "structure_demand": "Next: describe the need so its skills can be structured"
     },
-    "interestBadge": "Expressed interest"
+    "interestBadge": "Expressed interest",
+    "ack": {
+      "status": {
+        "interested": "New interest",
+        "reviewed": "Reviewed",
+        "contacted": "Marked contacted"
+      },
+      "markReviewed": "Mark reviewed",
+      "markContacted": "Mark contacted",
+      "internalNote": "Internal record only — nothing is sent to the worker or outside the platform.",
+      "error": "Could not save. Try again.",
+      "notAvailable": "Acknowledgement is not enabled yet."
+    }
   },
   "planBoundary": {
     "title": "What paid plans include",
@@ -5706,7 +5718,9 @@
       "sent": "Interest sent",
       "withdraw": "Withdraw interest",
       "internalNote": "This only creates an internal signal. It does not send a message outside the platform.",
-      "error": "Could not save. Try again."
+      "error": "Could not save. Try again.",
+      "reviewed": "Company reviewed your interest",
+      "contacted": "Company marked: contacted"
     }
   },
   "workerIntake": {

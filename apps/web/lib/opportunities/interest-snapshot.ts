@@ -28,6 +28,18 @@ export function isWorkerWritableInterestStatus(s: string): s is InterestStatus {
   return (WORKER_WRITABLE_INTEREST_STATUSES as readonly string[]).includes(s);
 }
 
+/** Company acknowledgement set (PR7) — enforced again inside the gated RPC.
+ *  The company can NEVER set 'interested' (the worker's own act) or
+ *  'withdrawn' (the worker's withdrawal is immutable to the company). */
+export const COMPANY_ACK_STATUSES: readonly InterestStatus[] = [
+  "reviewed",
+  "contacted",
+];
+
+export function isCompanyAckStatus(s: string): s is InterestStatus {
+  return (COMPANY_ACK_STATUSES as readonly string[]).includes(s);
+}
+
 /** Max worker note length (mirrors the DB CHECK). Internal-only text. */
 export const INTEREST_NOTE_MAX = 500;
 
