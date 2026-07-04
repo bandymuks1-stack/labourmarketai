@@ -16,7 +16,8 @@ import { describe, expect, it } from "vitest";
  */
 
 const MESSAGES = join(__dirname, "..", "..", "messages");
-const LOCALES = ["en", "lt", "ru", "da", "de", "et", "lv", "nl", "no", "pl", "sv"];
+// "fi" joined the taxonomy-locale set 2026-07-04 (PR3B).
+const LOCALES = ["en", "lt", "ru", "da", "de", "et", "fi", "lv", "nl", "no", "pl", "sv"];
 const REQUIRED = ["cvBridge", "cvBridgeLink"] as const;
 
 describe("journal namespace exposes cvBridge keys in every locale", () => {
