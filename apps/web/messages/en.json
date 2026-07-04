@@ -5331,7 +5331,8 @@
       "review_gaps": "Next: review the missing skills",
       "confirm_recognized_need": "Next: confirm the recognized requirements",
       "structure_demand": "Next: describe the need so its skills can be structured"
-    }
+    },
+    "interestBadge": "Expressed interest"
   },
   "planBoundary": {
     "title": "What paid plans include",
@@ -5699,6 +5700,13 @@
       "complete_profile": "Next: complete your profile",
       "review_opportunity": "Next: review this opportunity",
       "review_match": "Next: review this match"
+    },
+    "interest": {
+      "express": "Express interest",
+      "sent": "Interest sent",
+      "withdraw": "Withdraw interest",
+      "internalNote": "This only creates an internal signal. It does not send a message outside the platform.",
+      "error": "Could not save. Try again."
     }
   },
   "workerIntake": {

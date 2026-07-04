@@ -144,14 +144,28 @@ describe("7. no ESCO dependency", () => {
   });
 
   it("the loader never keys on esco_uri (source pin)", () => {
-    const src = readFileSync(
+    // Since the worker-interest-signal slice the subject/need builders live
+    // in shared modules (ONE pipeline for the board AND interest snapshots).
+    const loader = readFileSync(
       join(APP_ROOT, "lib", "opportunities", "load-worker-opportunities.ts"),
       "utf8",
     );
-    expect(src).not.toMatch(/esco_uri/);
-    expect(src).toMatch(/skills \( slug \)/);
-    expect(src).toMatch(/deriveNeedSkills/);
-    expect(src).toMatch(/compareMatches/);
+    const workerSubject = readFileSync(
+      join(APP_ROOT, "lib", "opportunities", "worker-subject.ts"),
+      "utf8",
+    );
+    const needModule = readFileSync(
+      join(APP_ROOT, "lib", "opportunities", "opportunity-need.ts"),
+      "utf8",
+    );
+    for (const src of [loader, workerSubject, needModule]) {
+      expect(src).not.toMatch(/esco_uri/);
+    }
+    expect(workerSubject).toMatch(/skills \( slug \)/);
+    expect(needModule).toMatch(/deriveNeedSkills/);
+    expect(loader).toMatch(/needFromRoleText/);
+    expect(loader).toMatch(/buildOwnWorkerContext/);
+    expect(loader).toMatch(/compareMatches/);
   });
 });
 
@@ -178,15 +192,21 @@ describe("9. no fake verification / trust", () => {
     expect(isApprovedRouteRow({ route_status: "approved_direct_partner" })).toBe(true);
   });
 
-  it("no apply/contact CTA exists on the board (no fake flow)", () => {
+  it("no fake apply/contact CTA — the ONLY action is the real interest signal", () => {
     const page = readFileSync(
       join(APP_ROOT, "app", "[locale]", "dashboard", "opportunities", "page.tsx"),
       "utf8",
     );
-    // The worker-initiated contact flow does not exist yet — the board must
-    // not pretend it does. Next actions are the honest closed set.
-    expect(page).not.toMatch(/apply now|express interest|contactCompany|applyCta/i);
+    // Applications/direct contact still do not exist — the board must not
+    // pretend they do. The express-interest flow (worker-interest-signal
+    // slice) is REAL: a demand_interest_signals row behind an owner-gated
+    // migration, rendered ONLY when the table exists (interestAvailable),
+    // with the honest internal-signal copy. Anything beyond it stays banned.
+    expect(page).not.toMatch(/apply now|contactCompany|applyCta|mailto:/i);
     expect(page).toMatch(/data-next-action/);
+    expect(page).toMatch(/result\.interestAvailable\s*\?/);
+    expect(page).toMatch(/WorkerInterestButton/);
+    expect(page).toMatch(/internalNote/);
   });
 });
 

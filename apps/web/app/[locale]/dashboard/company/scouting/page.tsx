@@ -234,12 +234,24 @@ export default async function CompanyScoutingPage({
                       </span>
                     </p>
                   </div>
-                  <span
-                    className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
-                    data-testid={`scout-status-${c.workerId}`}
-                  >
-                    {statusLabels[c.match.status]}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {/* Worker-initiated interest — a REAL internal signal
+                        (demand_interest_signals row), never fabricated. */}
+                    {result.interestByWorker[c.workerId] ? (
+                      <span
+                        className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-success"
+                        data-testid={`scout-interest-${c.workerId}`}
+                      >
+                        {t("interestBadge")}
+                      </span>
+                    ) : null}
+                    <span
+                      className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                      data-testid={`scout-status-${c.workerId}`}
+                    >
+                      {statusLabels[c.match.status]}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Profile-safe facts (owner-approved fields only). */}

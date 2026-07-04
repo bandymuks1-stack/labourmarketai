@@ -1701,7 +1701,8 @@
       "review_gaps": "[EN] Next: review the missing skills",
       "confirm_recognized_need": "[EN] Next: confirm the recognized requirements",
       "structure_demand": "[EN] Next: describe the need so its skills can be structured"
-    }
+    },
+    "interestBadge": "[EN] Expressed interest"
   },
   "waze": {
     "open": "Åpne i Waze"

@@ -12,6 +12,7 @@ import {
 } from "@/lib/opportunities/match-card-view";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { loadWorkerOpportunities } from "@/lib/opportunities/load-worker-opportunities";
+import { WorkerInterestButton } from "@/components/app/worker-interest-button";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import type {
   OpportunityGap,
@@ -242,7 +243,7 @@ export default async function OpportunitiesPage({
             </section>
           ) : (
             <ul className="flex flex-col gap-3" data-testid="opportunities-list">
-              {result.opportunities.map(({ need, fit, match, nextAction }) => (
+              {result.opportunities.map(({ need, fit, match, nextAction, interestStatus }) => (
                 <li
                   key={need.id}
                   className="card-border flex flex-col gap-3 p-4"
@@ -371,8 +372,7 @@ export default async function OpportunitiesPage({
                     </div>
                   ) : null}
 
-                  {/* The one clear next step for this card — never a fake
-                      apply/contact (no worker-initiated flow exists yet). */}
+                  {/* The one clear next step for this card. */}
                   <p
                     className="font-mono text-[10px] uppercase tracking-label text-text-muted"
                     data-testid="opportunity-next-action"
@@ -380,6 +380,24 @@ export default async function OpportunitiesPage({
                   >
                     {t(`workerNext.${nextAction}` as never)}
                   </p>
+
+                  {/* Express interest — INTERNAL signal only (honest copy in
+                      labels.internalNote). Offered ONLY when the owner-gated
+                      interest table exists — never a dead button. */}
+                  {result.interestAvailable ? (
+                    <WorkerInterestButton
+                      locale={locale}
+                      requestId={need.id}
+                      initialStatus={interestStatus}
+                      labels={{
+                        express: t("interest.express"),
+                        sent: t("interest.sent"),
+                        withdraw: t("interest.withdraw"),
+                        internalNote: t("interest.internalNote"),
+                        error: t("interest.error"),
+                      }}
+                    />
+                  ) : null}
                   {fit.gaps.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {fit.gaps.map((g) => (

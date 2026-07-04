@@ -12,14 +12,14 @@ import {
   type WorkerNextAction,
   type WorkerOpportunityProfile,
 } from "./opportunity-fit";
-import { deriveNeedSkills } from "@/lib/market/need-skills";
+import { needFromRoleText } from "./opportunity-need";
+import { buildOwnWorkerContext } from "./worker-subject";
+import { listMyInterestSignals } from "./interest";
+import type { InterestStatus } from "./interest-snapshot";
 import {
   matchWorkerToNeed,
   compareMatches,
-  sourceToEvidence,
-  type EvidenceTier,
   type MatchResultV1,
-  type MatchSubject,
 } from "@/lib/market/match-v1";
 
 /**
@@ -27,16 +27,16 @@ import {
  *
  * Readiness is built from the worker's OWN rows (workers / worker_skills /
  * worker_documents / worker_professions — all self-readable under existing
- * RLS). The open-demand list is exposed through a gated, curated SECURITY
- * DEFINER RPC `list_open_demand_for_workers()` mirroring the agency one
- * (`list_open_demand_for_agencies`, migration 20260611150000): caller must be a
- * worker, only status='submitted' needs, only non-personal columns, no
- * profile_id / contacts / free-text notes.
+ * RLS). The open-demand list comes from the gated, curated SECURITY DEFINER
+ * RPC `list_open_demand_for_workers()` (applied; Model A approved routes).
  *
- * That RPC is an OWNER-GATED migration; until it is applied this loader returns
- * `needsDataAccess: true` and an empty list — an honest "opportunities will
- * appear here" state. It NEVER fabricates needs. The moment the RPC exists the
- * board lights up with real demand, with no further code change.
+ * PR5: each visible demand runs the SAME PR4 canonical engine (inverted) —
+ * the worker's own skills vs the demand's derived requirement set — via the
+ * SHARED builders in ./worker-subject + ./opportunity-need (one pipeline for
+ * the board AND the express-interest snapshot).
+ *
+ * It NEVER fabricates needs. Interest state is loaded own-rows-only and the
+ * action is offered ONLY when the (owner-gated) interest table exists.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,6 +58,8 @@ export interface OpportunityCard {
   readonly match: MatchResultV1;
   /** The one clear next step for THIS card (never a fake apply/contact). */
   readonly nextAction: WorkerNextAction;
+  /** The worker's own interest status for this demand (null = none). */
+  readonly interestStatus: InterestStatus | null;
 }
 
 export type WorkerOpportunitiesResult =
@@ -67,6 +69,9 @@ export type WorkerOpportunitiesResult =
       readonly readiness: WorkerReadiness;
       /** True until the owner-gated worker-visibility RPC is applied. */
       readonly needsDataAccess: boolean;
+      /** True only when the interest table exists (owner-gated migration) —
+       *  the UI offers the express-interest action only then. */
+      readonly interestAvailable: boolean;
       readonly opportunities: readonly OpportunityCard[];
     };
 
@@ -77,73 +82,30 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
   } = await supabase.auth.getUser();
   if (!user) return { kind: "no-worker" };
 
-  const { data: worker } = await asAny(supabase)
-    .from("workers")
-    .select("id, availability_status, available_from, current_location_country")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (!worker) return { kind: "no-worker" };
-  const workerId = worker.id as string;
+  const ctx = await buildOwnWorkerContext(supabase, user.id);
+  if (!ctx) return { kind: "no-worker" };
 
-  const [skills, docs, prof] = await Promise.all([
-    // Canonical slugs + REAL evidence tiers for the worker's own skills —
-    // the same MatchSubject shape company scouting uses (PR4).
-    asAny(supabase)
-      .from("worker_skills")
-      .select("id, source, verified, skills ( slug )")
-      .eq("worker_id", workerId),
-    asAny(supabase).from("worker_documents").select("id").eq("worker_id", workerId),
-    asAny(supabase)
-      .from("worker_professions")
-      .select("professions(slug)")
-      .eq("worker_id", workerId)
-      .eq("is_primary", true)
-      .maybeSingle(),
-  ]);
-
-  const professionSlug: string | null =
-    (prof?.data?.professions as { slug: string | null } | null)?.slug ?? null;
-  const country = worker.current_location_country
-    ? String(worker.current_location_country).toUpperCase()
-    : null;
+  const { data: docs } = await asAny(supabase)
+    .from("worker_documents")
+    .select("id")
+    .eq("worker_id", ctx.workerId);
 
   const readiness: WorkerReadiness = {
-    hasWorkType: Boolean(professionSlug),
-    hasSkills: (skills?.data?.length ?? 0) > 0,
-    countries: country ? [country] : [],
+    hasWorkType: Boolean(ctx.subject.professionSlug),
+    hasSkills: ctx.skillRowCount > 0,
+    countries: ctx.worker.current_location_country
+      ? [ctx.worker.current_location_country]
+      : [],
     availabilitySet:
-      worker.availability_status === "available" || Boolean(worker.available_from),
-    documentsCount: docs?.data?.length ?? 0,
-    availabilityStatus: worker.availability_status ?? null,
-    professionSlug,
+      ctx.worker.availability_status === "available" ||
+      Boolean(ctx.worker.available_from),
+    documentsCount: docs?.length ?? 0,
+    availabilityStatus: ctx.worker.availability_status,
+    professionSlug: ctx.subject.professionSlug ?? null,
   };
 
-  // The worker's own match subject (slug identity, real evidence tiers —
-  // verified=true is the manager-confirmed truth even if source lags).
-  const tierRank: Record<EvidenceTier, number> = {
-    self_declared: 0,
-    work_journal: 1,
-    manager_confirmed: 2,
-  };
-  const ownSkillTiers = new Map<string, EvidenceTier>();
-  for (const s of (skills?.data ?? []) as {
-    source: string | null;
-    verified: boolean | null;
-    skills: { slug: string | null } | null;
-  }[]) {
-    const slug = s.skills?.slug;
-    if (!slug) continue;
-    const tier: EvidenceTier = s.verified ? "manager_confirmed" : sourceToEvidence(s.source);
-    const prev = ownSkillTiers.get(slug);
-    if (!prev || tierRank[tier] > tierRank[prev]) ownSkillTiers.set(slug, tier);
-  }
-  const subject: MatchSubject = {
-    skills: [...ownSkillTiers.entries()].map(([uri, evidence]) => ({ uri, evidence })),
-    professionSlug,
-    country,
-    availabilityStatus: worker.availability_status ?? null,
-    availableFrom: (worker.available_from as string | null) ?? null,
-  };
+  // Own interest map (empty + unavailable until the owner-gated table exists).
+  const myInterest = await listMyInterestSignals(supabase, ctx.workerId);
 
   // Gated worker-visibility RPC — honest fallback when not yet applied.
   let needsDataAccess = true;
@@ -153,15 +115,7 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
     if (!error && Array.isArray(data)) {
       needsDataAccess = false;
       opportunities = (data as Record<string, unknown>[])
-        // DEFAULT-CLOSED (Worker Opportunities v1): a worker only ever sees a
-        // need that arrived through an APPROVED supply route — never a raw,
-        // unreviewed employer. Approved-route MODEL A (owner decision
-        // 2026-07-02, migration 20260702170000): the RPC returns
-        // route_status='approved_direct_partner' + a safe company_name ONLY
-        // for demand owned by an admin-VERIFIED company
-        // (companies.verification_status='verified'); unverified demand never
-        // reaches this filter. If the migration is rolled back the RPC stops
-        // returning the columns and this predicate closes the board again.
+        // DEFAULT-CLOSED: only approved supply routes (Model A) reach a worker.
         .filter(isApprovedRouteRow)
         .map((row) => {
           const need: OpportunityNeed = {
@@ -174,28 +128,20 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             companyName: safeApprovedCompanyName(row),
           };
           const fit = computeOpportunityFit(readiness, need);
-          // PR4 canonical matching, inverted for the worker side: derive the
-          // demand's requirement set from the role text the RPC already
-          // exposes (underscores → spaces so work-type slugs recognise), via
-          // the SAME offline derivation company scouting uses. No ESCO.
-          const derived = deriveNeedSkills({
-            roleOrWorkType: (need.roleText ?? "").replace(/[_-]+/g, " "),
-          });
-          const match = matchWorkerToNeed(
-            {
-              skillIds: derived.skillSlugs,
-              needSource: derived.source,
-              professionSlug: derived.professionSlug,
-              country: need.country,
-            },
-            subject,
-          );
+          const { need: matchNeed } = needFromRoleText(need.roleText, need.country);
+          const match = matchWorkerToNeed(matchNeed, ctx.subject);
           const nextAction = workerOpportunityNextAction({
             profileFitStatus: fit.status,
-            hasAnySkill: subject.skills.length > 0,
+            hasAnySkill: ctx.subject.skills.length > 0,
             matchStatus: match.status,
           });
-          return { need, fit, match, nextAction };
+          return {
+            need,
+            fit,
+            match,
+            nextAction,
+            interestStatus: myInterest.byRequest.get(need.id) ?? null,
+          };
         })
         // Best matches first — the SHARED §19 need-context comparator.
         .sort((a, b) => compareMatches(a.match, b.match));
@@ -204,5 +150,11 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
     // RPC absent (not yet applied) → needsDataAccess stays true. Never fake.
   }
 
-  return { kind: "ready", readiness, needsDataAccess, opportunities };
+  return {
+    kind: "ready",
+    readiness,
+    needsDataAccess,
+    interestAvailable: myInterest.available,
+    opportunities,
+  };
 }
