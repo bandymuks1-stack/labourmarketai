@@ -42,5 +42,8 @@ export const NL_FIXTURES: LanguageFixtures = {
     { text: "Hoogstwaarschijnlijk kom ik morgen weer.", forbids: ["farm-work"] },
     // ATTENDING an event is not event-setup work.
     { text: "Ik was op het evenement als bezoeker.", forbids: ["event-setup"] },
+    // NL "muren" (walls) must not brush masonry — the base needle used to be
+    // the bare folded stem "mur" (fixed in the PR3C needle surgery).
+    { text: "Ik verfde de muren in de woonkamer.", forbids: ["bricklaying"] },
   ],
 };

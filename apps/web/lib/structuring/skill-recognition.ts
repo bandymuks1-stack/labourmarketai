@@ -94,7 +94,7 @@ export function isCleaningFloorContext(foldedText: string): boolean {
 // per language live in ELECTRICAL_WORK_RE so real electricians never lose the
 // suggestion.
 const POWER_TOOL_RE =
-  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektrilis[a-z]* toorii|elektroinstrument|sahkotyokalu/;
+  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektrilis[a-z]* toorii|elektroinstrument|sahkotyokalu|elektronik|электроник/;
 const ELECTRICAL_WORK_RE =
   /instaliac|rozet|jungikl|kabel|elektros darb|elektros mont|elektrik|wiring|rewir|electrical install|electrical work|проводк|розетк|электромонтаж|выключател|кабел|электрик|bedrading|stopcontact|groepenkast|elektra aangelegd|steckdose|verkabelt|verdrahtet|elektroinstallation|gniazdk|instalacje elektryczne|elektryk|ukladalem przewody|eluttag|stikkontakt|stopselkontakt|ledninger trukket|elinstallation|elarbete|elektriker|pistorasi|sahkoasennu|sahkotoi|rozete|elektroinstalac|vadus|elektrivarust|pistikup|elektritoo/;
 
