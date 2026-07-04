@@ -123,6 +123,8 @@ describe("NO new DB migration in this PR", () => {
     // (20260702200000) — owner-gated apply.
     // Bumped 96 -> 97 for the universal profession/skill catalogue seed
     // (20260704120000) — strictly additive INSERT-only, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(97);
+    // Bumped 97 -> 98 for the truth-audit legacy-professions repair
+    // (20260704130000) — INSERT-only, idempotent, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(98);
   });
 });

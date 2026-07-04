@@ -1568,7 +1568,12 @@ describe("no migration files added by this sprint", () => {
     // no grants, no RLS change. Reversible
     // (supabase/rollbacks/20260704120000_*.down.sql, guarded deletes).
     // Owner-gated apply.
-    const SPRINT_BASELINE = 97;
+    // Bumped 97 -> 98 for the truth-audit legacy-professions repair
+    // (20260704130000_seed_missing_legacy_professions.sql): builder /
+    // rebar_worker / site_manager were never migration-seeded (locale-JSON
+    // only; their 0011 links silently no-opped). INSERT-only, idempotent,
+    // reversible (supabase/rollbacks/20260704130000_*.down.sql). Owner-gated.
+    const SPRINT_BASELINE = 98;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -177,7 +177,10 @@ describe("catalogue migration 20260704120000 mirrors the locale registry", () =>
     }
   });
   it("every seeded profession slug has a locale name", () => {
-    const inserted = [...migration.matchAll(/^\s*\('([a-z_]+)',\s*'[^']+',\s*'[^']+',\s*'[^']+',\s*'[a-z_]+'\)/gm)].map((m) => m[1]);
+    // Post-0012 shape: insert into public.professions (slug, sector) — names
+    // live only in the locale JSON (the truth audit's apply-bug fix).
+    const block = migration.match(/insert into public\.professions[\s\S]*?;/i)?.[0] ?? "";
+    const inserted = [...block.matchAll(/\(\s*'([a-z_]+)'/g)].map((m) => m[1]);
     expect(inserted.length).toBeGreaterThanOrEqual(15);
     for (const slug of inserted) {
       expect(professionsLt[slug], `migration seeds '${slug}' but professions.json lacks it`).toBeTruthy();
