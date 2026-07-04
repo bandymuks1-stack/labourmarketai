@@ -58,8 +58,12 @@ export function PlayerCard({ id }: { id: string }) {
   const name = lc(card.name);
   const role = lc(card.role);
   const tierLabel = t(`tier.${card.tier}`);
+  // §18 launch fix (PR9): the visible "Placeholder" marker on the fictional
+  // marketing concept cards is DEFAULT-ON — it disappears only when the env
+  // explicitly opts out. Previously it was default-off, which would have
+  // shown fictional workers on the public page without a visible marker.
   const showMarker =
-    env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true";
+    env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS !== "false";
 
   return (
     <motion.article

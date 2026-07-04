@@ -65,8 +65,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 805 at company-interest-acknowledgement (+8: scouting.ack
   // status labels + actions + internal-only note land in all 11 locales;
   // en/lt/ru translated, da/de [EN] until human translation).
-  da: 805,
-  de: 805,
+  // MEASURED 806 at player-card-profile-green (+1: playercards.conceptNote
+  // §18 honesty line lands in all 11 locales; en/lt/ru translated, da/de
+  // [EN] until human translation).
+  da: 806,
+  de: 806,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,

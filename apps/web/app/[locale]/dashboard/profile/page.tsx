@@ -96,7 +96,7 @@ export default async function ProfilePage({
         .eq("is_active", true),
       supabase
         .from("workers")
-        .select("id")
+        .select("id, availability_status, available_from, current_location_country")
         .eq("profile_id", user.id)
         .maybeSingle(),
       supabase.from("professions").select("id, slug").eq("is_active", true),
@@ -490,7 +490,21 @@ export default async function ProfilePage({
           avatarUrl: avatar.signedUrl,
           about: savedProfileText,
           skillsDeclared: savedSkillClaims.length + savedSkills.length,
+          // Real saved country signal (worker-owned) — lets the ONE minimum
+          // contract count "location" honestly instead of always-missing.
+          location: worker?.current_location_country ?? null,
         }}
+        // Availability presence (PR9): real workers columns; the pillar
+        // deep-links the canonical dashboard Work Card editor.
+        availability={
+          workerId
+            ? {
+                set:
+                  worker?.availability_status === "available" ||
+                  Boolean(worker?.available_from),
+              }
+            : undefined
+        }
       />
 
       {/* Honest "needs review" banner — only when real data shows declared
