@@ -278,7 +278,7 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // NO external transport) + NEW create_follow_up_task_v1 /
     // set_follow_up_task_status_v1; needs-human-gate DRAFT, owner-gated).
     // Then to 110 for the WAGON 8 project work gallery read scope
-    // (20260705240000; ADDITIVE ONLY: two SELECT policies mirroring the
+    // (20260705250000; ADDITIVE ONLY: two SELECT policies mirroring the
     // journal_entries manager boundary onto journal_entry_photos + the
     // private storage bucket — no new table/bucket/RPC, no writes widened;
     // owner-gated apply).

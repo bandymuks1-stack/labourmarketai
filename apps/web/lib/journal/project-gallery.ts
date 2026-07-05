@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/server";
  * read-only projection of what workers attached to their own journal entries.
  *
  * Access model: the rows a session can read are decided ENTIRELY by RLS —
- * owner, admin, or (after 20260705240000 is applied) a manager of the entry's
+ * owner, admin, or (after 20260705250000 is applied) a manager of the entry's
  * engagement organization, exactly the journal_entries manager boundary.
  * Until that migration is applied a manager simply sees an honest empty
  * gallery; nothing here bypasses or widens a policy.
