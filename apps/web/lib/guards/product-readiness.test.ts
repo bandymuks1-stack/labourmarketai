@@ -1630,7 +1630,16 @@ describe("no migration files added by this sprint", () => {
     // table/column change, no free text); @human-gate-approved,
     // needs-human-gate DRAFT, owner-gated apply; rollback restores the
     // prior repo-latest definition (20260705200000) verbatim.
-    const SPRINT_BASELINE = 106;
+    // Bumped 106 -> 107 for the §8.3 teams/brigades minimum
+    // (20260705220000_team_brigade_org_spine.sql): additive widening of
+    // organizations.organization_type ('team' joins the allowlist — the
+    // 20260612090000 company_type precedent) + TWO brand-new gated RPCs
+    // (create_team_v1, get_team_capability_summary_v1) on the existing org
+    // spine; membership reuses the existing add_org_member engagement path;
+    // NO existing RPC recreated (rollback restores the 0013 check verbatim
+    // and drops only the new functions); @human-gate-approved,
+    // needs-human-gate DRAFT, owner-gated apply.
+    const SPRINT_BASELINE = 107;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

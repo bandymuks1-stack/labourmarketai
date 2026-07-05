@@ -147,6 +147,11 @@ describe("NO new DB migration in this PR", () => {
     // — gated RPC recreate projecting payload.required_tools through a
     // strict EXISTING-taxonomy slug whitelist; @human-gate-approved,
     // owner-gated apply.
-    expect(count).toBeLessThanOrEqual(106);
+    // Bumped 106 -> 107 for the §8.3 teams/brigades minimum (20260705220000)
+    // — additive organization_type widening ('team') + two NEW gated RPCs
+    // (create_team_v1 / get_team_capability_summary_v1) on the existing org
+    // spine; no existing RPC recreated; @human-gate-approved, owner-gated
+    // apply.
+    expect(count).toBeLessThanOrEqual(107);
   });
 });
