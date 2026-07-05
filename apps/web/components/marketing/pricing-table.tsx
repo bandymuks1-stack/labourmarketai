@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { getPlans, PLAN_SLUGS } from "@/lib/marketing/plans";
+import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 
 export async function PricingTable() {
   const t = await getTranslations("pricing");
@@ -27,6 +28,16 @@ export async function PricingTable() {
             <div className="mt-5 font-display text-xl font-bold tracking-tightest text-text-primary">
               <Placeholder id={`pricing.plan.${slug}`} />
             </div>
+            {/* Honest price-readiness note exactly where a price would show
+                (CR WAGON 4): reuses the owner-editable readiness state from
+                lib/billing/readiness.ts — never a purchasable claim. */}
+            <p
+              className="mt-1 text-[11px] text-text-muted"
+              data-testid={`pricing-price-state-${slug}`}
+              data-state={PRICING_READINESS_STATE}
+            >
+              {t(`priceState.${PRICING_READINESS_STATE}` as never)}
+            </p>
 
             <p className="mt-6 font-mono text-[11px] uppercase tracking-label text-text-muted">
               {t("featuresLabel")}

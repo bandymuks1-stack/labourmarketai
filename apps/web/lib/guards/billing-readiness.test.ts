@@ -391,22 +391,6 @@ describe("readiness state model + claim ledger", () => {
   });
 
   it("readiness i18n exists in en/lt/ru and makes no live-payment claim", () => {
-    const BANNED = [
-      /\bbuy\s+now\b/i,
-      /\bpay\s+now\b/i,
-      /\bcheckout\s+now\b/i,
-      /\bsubscribe\s+now\b/i,
-      /\bsubscription\s+active\b/i,
-      /\bpayment\s+active\b/i,
-      /\bcheckout\s+active\b/i,
-      /\bpayments?\s+(?:are|is)\s+live\b/i,
-    ];
-    const flatten = (o: unknown, out: string[] = []): string[] => {
-      if (typeof o === "string") out.push(o);
-      else if (o && typeof o === "object")
-        for (const v of Object.values(o as Record<string, unknown>)) flatten(v, out);
-      return out;
-    };
     for (const loc of ["en", "lt", "ru"] as const) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const readiness = m.adminBilling?.readiness;
@@ -428,9 +412,165 @@ describe("readiness state model + claim ledger", () => {
       expect(boundary?.owner_confirmed, `${loc}: planBoundary.readiness`).toBeTruthy();
       const all = [...flatten(readiness), ...flatten(boundary)];
       for (const s of all) {
-        for (const rx of BANNED) {
+        for (const rx of BANNED_LIVE_CLAIMS) {
           expect(rx.test(s), `${loc}: live claim "${s}"`).toBe(false);
         }
+      }
+    }
+  });
+});
+
+// ─── 9. WAGON 4 — plan clarity surfaces (CR train, free vs prepared paid) ───
+//
+// User-facing plan boundaries are DERIVED FROM THE REGISTRY, never
+// hand-written; paid CTAs render the honest not-purchasable state; the
+// account page carries an honest billing-readiness status; and none of the
+// new copy can carry a live-payment/checkout claim. Extends the
+// capture-impossible net of sections 1–8 to the WAGON 4 surfaces.
+
+const BANNED_LIVE_CLAIMS = [
+  /\bbuy\s+now\b/i,
+  /\bpay\s+now\b/i,
+  /\bcheckout\s+now\b/i,
+  /\bsubscribe\s+now\b/i,
+  /\bsubscription\s+active\b/i,
+  /\bpayment\s+active\b/i,
+  /\bcheckout\s+active\b/i,
+  /\bpayments?\s+(?:are|is)\s+live\b/i,
+];
+
+const flatten = (o: unknown, out: string[] = []): string[] => {
+  if (typeof o === "string") out.push(o);
+  else if (o && typeof o === "object")
+    for (const v of Object.values(o as Record<string, unknown>)) flatten(v, out);
+  return out;
+};
+
+describe("WAGON 4 — plan boundary rendering derives from the registry", () => {
+  const boundarySrc = () =>
+    read("components/marketing/pre-payment-plan-boundary.tsx");
+
+  it("the boundary component maps plan.entitlements — no hand-written list", () => {
+    const src = boundarySrc();
+    // Feature list comes from the plan registry…
+    expect(src).toMatch(/Object\.keys\(plan\.entitlements\)/);
+    expect(src).toMatch(/planIncludes\(plan,\s*key\)/);
+    // …availability chips come from the enforcement registry…
+    expect(src).toMatch(/FEATURE_ENFORCEMENT\[key\]/);
+    // …numeric limits come from the registry too.
+    expect(src).toMatch(/limitFor\(plan,\s*key\)/);
+    expect(src).toMatch(/data-features-from="plans-registry"/);
+  });
+
+  it("paid plans render the honest not-purchasable access state", () => {
+    const src = boundarySrc();
+    // The access chip is keyed by the registry accessState, whose paid value
+    // is pinned to payment_not_enabled by section 6 — so a paid card can only
+    // ever render the honest state.
+    expect(src).toMatch(/access\.\$\{plan\.accessState\}/);
+    expect(src).toMatch(/payment_not_enabled/);
+    // The boundary is a pure information surface: no button, no form, no
+    // link — so no checkout/pay affordance can exist on it at all.
+    expect(src).not.toMatch(/<button|<form|href=/i);
+  });
+
+  it("free-today explainer exists (free vs prepared-paid vs meaning)", () => {
+    const src = boundarySrc();
+    expect(src).toMatch(/data-testid="plan-boundary-free-today"/);
+    expect(src).toMatch(/freeToday\.free/);
+    expect(src).toMatch(/freeToday\.paid/);
+    expect(src).toMatch(/freeToday\.prepared/);
+  });
+
+  it("en/lt/ru feature labels are SET-EQUAL to the enforcement registry", () => {
+    // i18n supplies labels only for real registry keys — a label without a
+    // registry entry is a phantom claim; a registry key without a label
+    // renders raw. Both directions fail here.
+    const registryKeys = [...Object.keys(FEATURE_ENFORCEMENT)].sort();
+    for (const loc of ["en", "lt", "ru"] as const) {
+      const m = JSON.parse(read(`messages/${loc}.json`));
+      const labels = m.planBoundary?.features ?? {};
+      expect(
+        Object.keys(labels).sort(),
+        `${loc}: planBoundary.features must mirror FEATURE_ENFORCEMENT`,
+      ).toEqual(registryKeys);
+      for (const kind of [
+        "free_surface",
+        "server_gate",
+        "declared_boundary_only",
+        "admin_rbac",
+      ]) {
+        expect(
+          typeof m.planBoundary?.enforcement?.[kind],
+          `${loc}: planBoundary.enforcement.${kind}`,
+        ).toBe("string");
+      }
+      expect(typeof m.planBoundary?.featuresLabel, `${loc}: featuresLabel`).toBe(
+        "string",
+      );
+      expect(m.planBoundary?.limitValue, `${loc}: limitValue`).toContain(
+        "{count}",
+      );
+    }
+  });
+
+  it("features a plan declares false are never claimed (planIncludes)", () => {
+    // worker_plus declares priority_visibility: false — the registry-derived
+    // renderer must filter it out via planIncludes.
+    const workerPlus = PRE_PAYMENT_PLANS.find((p) => p.slug === "worker_plus")!;
+    expect(workerPlus.entitlements.priority_visibility).toBe(false);
+    expect(planIncludes(workerPlus, "priority_visibility")).toBe(false);
+  });
+});
+
+describe("WAGON 4 — price slots and account page stay honest", () => {
+  it("the pricing table surfaces the owner-editable price-readiness state", () => {
+    const src = read("components/marketing/pricing-table.tsx");
+    expect(src).toMatch(/PRICING_READINESS_STATE/);
+    expect(src).toMatch(/priceState\.\$\{PRICING_READINESS_STATE\}/);
+    expect(src).toMatch(/data-testid=\{`pricing-price-state-/);
+  });
+
+  it("the account page renders the plan/billing readiness status section", () => {
+    const src = read("app/[locale]/dashboard/account/page.tsx");
+    expect(src).toMatch(/data-testid="account-plan-status"/);
+    expect(src).toMatch(/PRICING_READINESS_STATE/);
+    expect(src).toMatch(/accountPlan\.freePilot/);
+    expect(src).toMatch(/accountPlan\.prepared/);
+    // The readiness line REUSES the guarded planBoundary copy (no duplicate
+    // wording that could drift).
+    expect(src).toMatch(/planBoundary\.readiness\.\$\{PRICING_READINESS_STATE\}/);
+    // No checkout/subscribe affordance on the account surface.
+    expect(src).not.toMatch(/checkout/i);
+    expect(src).not.toMatch(/subscribe/i);
+  });
+
+  it("all WAGON 4 copy (en/lt/ru) carries no live-payment claim and no price figure", () => {
+    const PRICE_FIGURE = /\d+\s*(?:€|EUR|\$|USD)|(?:€|\$)\s*\d+/;
+    for (const loc of ["en", "lt", "ru"] as const) {
+      const m = JSON.parse(read(`messages/${loc}.json`));
+      const surfaces = [
+        m.planBoundary,
+        m.pricing?.priceState,
+        m.accountPlan,
+      ];
+      for (const surface of surfaces) {
+        expect(surface, `${loc}: WAGON 4 namespace missing`).toBeTruthy();
+      }
+      for (const s of surfaces.flatMap((x) => flatten(x))) {
+        for (const rx of BANNED_LIVE_CLAIMS) {
+          expect(rx.test(s), `${loc}: live claim "${s}"`).toBe(false);
+        }
+        expect(
+          PRICE_FIGURE.test(s),
+          `${loc}: price figure in draft-pricing copy "${s}"`,
+        ).toBe(false);
+      }
+      // accountPlan keys required (account billing-readiness status).
+      for (const k of ["title", "freePilot", "prepared", "pricingLink"]) {
+        expect(typeof m.accountPlan?.[k], `${loc}: accountPlan.${k}`).toBe(
+          "string",
+        );
       }
     }
   });

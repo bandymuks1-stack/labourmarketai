@@ -4030,7 +4030,11 @@
         "q": "Can I change tiers later?",
         "a": "Yes. Tiers are meant to follow your needs; you'll be able to move up or down."
       }
-    ]
+    ],
+    "priceState": {
+      "draft_pricing": "Prices are being prepared — nothing can be bought yet.",
+      "owner_confirmed": "Prices are confirmed, but nothing can be bought yet — payments are not enabled."
+    }
   },
   "legal": {
     "preparing": {
@@ -5795,6 +5799,43 @@
     "readiness": {
       "draft_pricing": "Plans are prepared, not purchasable. Pricing is still an owner draft — no price here is final and nothing can be bought.",
       "owner_confirmed": "Prices are owner-confirmed, but plans remain prepared only — nothing can be bought until payments are enabled."
+    },
+    "featuresLabel": "Included in this boundary",
+    "limitValue": "up to {count}",
+    "freeToday": {
+      "freeTitle": "Free today",
+      "free": "Everything you can currently use in the product is free — the pilot runs without payments and nothing asks for a card.",
+      "paidTitle": "Prepared paid plans",
+      "paid": "The paid plans below are prepared boundaries: they describe what will belong to the Worker Plus, Company and Agency plans once payments are switched on later.",
+      "preparedTitle": "Prepared, not purchasable",
+      "prepared": "There is no payment page and nothing can be bought. Pilot access to paid-plan scope is granted manually by the team."
+    },
+    "features": {
+      "worker_profile": "Worker profile",
+      "worker_journal": "Work journal",
+      "worker_basic_skills": "Basic skills card",
+      "readiness_checklist_countries": "Country readiness checklists",
+      "document_expiry_reminders": "Document expiry reminders",
+      "expanded_cv": "Expanded CV",
+      "priority_visibility": "Priority visibility",
+      "company_create_needs": "Open worker needs",
+      "candidate_readiness_summaries": "Candidate readiness summaries",
+      "booking_requests": "Booking requests",
+      "communication": "Messaging",
+      "team_matching": "Team matching",
+      "agency_multi_company": "Multi-company management",
+      "worker_pool": "Worker pool",
+      "doc_readiness_tracking": "Document readiness tracking",
+      "booking_pipeline": "Booking pipeline",
+      "verify_documents": "Document verification",
+      "manage_country_rules": "Country rules management",
+      "manage_pilots": "Pilot management"
+    },
+    "enforcement": {
+      "free_surface": "In the product today",
+      "server_gate": "In the product today, entitlement-checked",
+      "declared_boundary_only": "Prepared — starts only with billing",
+      "admin_rbac": "Internal, admin only"
     }
   },
   "bookings": {
@@ -6704,5 +6745,11 @@
       "workers": "For workers",
       "companies": "For companies"
     }
+  },
+  "accountPlan": {
+    "title": "Your plan",
+    "freePilot": "Free pilot — everything currently available in the product is free for you.",
+    "prepared": "Paid plans are prepared, not purchasable. Payments are not enabled and no payment method is needed.",
+    "pricingLink": "See what is free and what will be paid"
   }
 }

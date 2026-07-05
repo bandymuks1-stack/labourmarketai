@@ -4030,7 +4030,11 @@
         "q": "Ar galėsiu keisti planą vėliau?",
         "a": "Taip. Planai pritaikomi pagal poreikius — galėsite pereiti į aukštesnį ar žemesnį."
       }
-    ]
+    ],
+    "priceState": {
+      "draft_pricing": "Kainos ruošiamos — nieko įsigyti dar negalima.",
+      "owner_confirmed": "Kainos patvirtintos, bet įsigyti dar negalima — mokėjimai neįjungti."
+    }
   },
   "legal": {
     "preparing": {
@@ -5795,6 +5799,43 @@
     "readiness": {
       "draft_pricing": "Planai parengti, bet jų įsigyti negalima. Kainos — dar savininko juodraštis: nė viena kaina nėra galutinė ir nieko negalima nusipirkti.",
       "owner_confirmed": "Kainos patvirtintos savininko, tačiau planai lieka tik parengti — nieko negalima nusipirkti, kol mokėjimai neįjungti."
+    },
+    "featuresLabel": "Ką apima ši riba",
+    "limitValue": "iki {count}",
+    "freeToday": {
+      "freeTitle": "Nemokama šiandien",
+      "free": "Viskas, kuo šiuo metu galite naudotis produkte, yra nemokama — pilotas vyksta be mokėjimų ir kortelės niekas neprašo.",
+      "paidTitle": "Paruošti mokami planai",
+      "paid": "Žemiau esantys mokami planai yra paruoštos ribos: jos aprašo, kas priklausys „Worker Plus“, įmonės ir agentūros planams, kai mokėjimai vėliau bus įjungti.",
+      "preparedTitle": "Paruošta, bet neįsigyjama",
+      "prepared": "Mokėjimo puslapio nėra ir nieko negalima nusipirkti. Piloto prieigą prie mokamų planų apimties komanda suteikia rankiniu būdu."
+    },
+    "features": {
+      "worker_profile": "Darbuotojo profilis",
+      "worker_journal": "Darbo žurnalas",
+      "worker_basic_skills": "Bazinė įgūdžių kortelė",
+      "readiness_checklist_countries": "Pasirengimo sąrašai pagal šalis",
+      "document_expiry_reminders": "Priminimai apie dokumentų galiojimą",
+      "expanded_cv": "Išplėstas CV",
+      "priority_visibility": "Prioritetinis matomumas",
+      "company_create_needs": "Atviri darbuotojų poreikiai",
+      "candidate_readiness_summaries": "Kandidatų pasirengimo santraukos",
+      "booking_requests": "Rezervacijos užklausos",
+      "communication": "Susirašinėjimas",
+      "team_matching": "Komandų parinkimas",
+      "agency_multi_company": "Kelių įmonių valdymas",
+      "worker_pool": "Darbuotojų rezervas",
+      "doc_readiness_tracking": "Dokumentų pasirengimo sekimas",
+      "booking_pipeline": "Rezervacijų eiga",
+      "verify_documents": "Dokumentų tikrinimas",
+      "manage_country_rules": "Šalių taisyklių valdymas",
+      "manage_pilots": "Pilotų valdymas"
+    },
+    "enforcement": {
+      "free_surface": "Veikia produkte šiandien",
+      "server_gate": "Veikia produkte šiandien, su teisių patikra",
+      "declared_boundary_only": "Paruošta — įsijungs tik su apmokestinimu",
+      "admin_rbac": "Vidinė, tik administratoriui"
     }
   },
   "bookings": {
@@ -6704,5 +6745,11 @@
       "workers": "Darbuotojams",
       "companies": "Įmonėms"
     }
+  },
+  "accountPlan": {
+    "title": "Jūsų planas",
+    "freePilot": "Nemokamas pilotas — viskas, kas šiuo metu prieinama produkte, jums nemokama.",
+    "prepared": "Mokami planai paruošti, bet neįsigyjami. Mokėjimai neįjungti, mokėjimo būdo pridėti nereikia.",
+    "pricingLink": "Kas nemokama ir kas bus mokama"
   }
 }
