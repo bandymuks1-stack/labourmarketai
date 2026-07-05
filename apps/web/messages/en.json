@@ -5733,6 +5733,8 @@
     "fieldTeam": "People",
     "fieldAccommodation": "Accommodation",
     "fieldTransport": "Transport",
+    "fieldTools": "Tools & equipment",
+    "toolsNotStated": "Not specified",
     "accommodation": {
       "provided_free": "Provided, free",
       "provided_paid": "Provided, paid",
@@ -5863,6 +5865,8 @@
     "transCompensated": "Travel costs compensated",
     "transNone": "Not provided",
     "transUnknown": "Not decided yet",
+    "requiredTools": "Required tools & equipment",
+    "requiredToolsHelp": "Select the equipment skills this work requires. Leave empty if not decided — workers see it as not specified.",
     "languages": "Language requirements",
     "languagesHelp": "Comma separated (e.g. en, nl). Leave empty if none.",
     "engagement": "Engagement model",

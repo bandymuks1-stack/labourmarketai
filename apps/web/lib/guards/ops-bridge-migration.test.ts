@@ -254,6 +254,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // RED: gated recreate of the worker-demand RPC adding ONE
     // strict-whitelist transport column from payload.transport — the
     // accommodation enum path cloned; needs-human-gate DRAFT, owner-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 105/);
+    // Then to 106 for the §8.6 equipment/tools layer (20260705210000;
+    // RED: gated recreate of the worker-demand RPC adding ONE
+    // strict-whitelist required_tools slug-list column from
+    // payload.required_tools — EXISTING taxonomy slugs only, no new
+    // taxonomy; needs-human-gate DRAFT, owner-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 106/);
   });
 });

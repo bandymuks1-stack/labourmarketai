@@ -5733,6 +5733,8 @@
     "fieldTeam": "Žmonių",
     "fieldAccommodation": "Apgyvendinimas",
     "fieldTransport": "Transportas",
+    "fieldTools": "Įrankiai ir įranga",
+    "toolsNotStated": "Nenurodyta",
     "accommodation": {
       "provided_free": "Suteikiamas, nemokamai",
       "provided_paid": "Suteikiamas, mokamai",
@@ -5863,6 +5865,8 @@
     "transCompensated": "Kompensuojamos kelionės išlaidos",
     "transNone": "Nesuteikiamas",
     "transUnknown": "Dar nenuspręsta",
+    "requiredTools": "Reikalingi įrankiai ir įranga",
+    "requiredToolsHelp": "Pasirinkite, kokių įrangos įgūdžių reikia šiam darbui. Palikite tuščią, jei dar nenuspręsta — darbuotojai matys „nenurodyta“.",
     "languages": "Kalbų reikalavimai",
     "languagesHelp": "Atskirti kableliais (pvz. en, nl). Palikite tuščią, jei nėra.",
     "engagement": "Bendradarbiavimo modelis",

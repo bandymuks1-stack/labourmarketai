@@ -16,7 +16,9 @@ import { join } from "node:path";
  *     transport.
  *   - The RPC recreate stays a strict superset of the prior definition
  *     (Model A verified gate + location label untouched) and remains
- *     human-gated with a rollback restoring the applied Model-A definition.
+ *     human-gated with a rollback restoring the TRUE PREDECESSOR definition
+ *     (20260705130000 location-label body — wagon-3 rollback caveat closed
+ *     2026-07-05; the chain is pinned in equipment-tools-layer.test.ts).
  *   - The wizard field is optional and honest ("" = not stated → null).
  *   - The app degrades honestly while the migration is not applied (loader
  *     tolerates the missing field; board shows "—").
@@ -103,12 +105,16 @@ describe("transport migration — strict enum whitelist on the worker RPC", () =
     expect(migration).toMatch(/DO NOT APPLY automatically/i);
   });
 
-  it("ships a rollback restoring the applied Model-A definition", () => {
+  it("ships a rollback restoring the true predecessor (location-label body)", () => {
     expect(existsSync(join(REPO, ROLLBACK))).toBe(true);
     const down = stripSql(read(ROLLBACK));
-    // The restored body keeps the Model-A counterpart columns…
+    // The restored body keeps the Model-A counterpart columns AND the
+    // location_label column (20260705130000 — the immediately-previous
+    // definition, not the older Model-A-only body)…
     expect(down).toMatch(/company_name\s+text/i);
     expect(down).toMatch(/route_status\s+text/i);
+    expect(down).toMatch(/location_label\s+text/i);
+    expect(down).toMatch(/as location_label/);
     expect(down).toMatch(/'approved_direct_partner'::text as route_status/);
     expect(down).toMatch(/verification_status = 'verified'/);
     // …and carries NO transport artifacts (executable SQL, comments stripped).

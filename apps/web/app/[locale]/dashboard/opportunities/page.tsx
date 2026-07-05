@@ -337,6 +337,24 @@ export default async function OpportunitiesPage({
                           : "—"}
                       </dd>
                     </div>
+                    {/* Required tools/equipment (§8.6) — closed taxonomy slug
+                        list only, localized through the EXISTING skillNames
+                        catalogue (never a raw payload string); honest "not
+                        stated" until the company selects tools AND the
+                        required-tools RPC recreate is applied. */}
+                    <div className="col-span-2 min-w-0">
+                      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {t("fieldTools")}
+                      </dt>
+                      <dd
+                        className="text-xs text-text-primary"
+                        data-testid="opportunity-required-tools"
+                      >
+                        {need.requiredTools && need.requiredTools.length > 0
+                          ? need.requiredTools.map(skillLabel).join(", ")
+                          : t("toolsNotStated")}
+                      </dd>
+                    </div>
                   </dl>
                   {/* Match breakdown — honest per-dimension fit (why it fits /
                       what to check), reusing the deterministic fit engine. No

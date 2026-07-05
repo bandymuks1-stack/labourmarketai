@@ -26,6 +26,25 @@ import {
   EMPTY_ESTIMATE_INPUTS,
   type EstimateInputs,
 } from "@/lib/estimate/estimate";
+import { cn } from "@/lib/utils";
+
+/** Required tools / equipment options (§8.6) — a CLOSED set of EXISTING
+ *  canonical taxonomy skill slugs (lib/taxonomy/profession-skills.ts; labels
+ *  come from the existing skillNames catalogue — no new taxonomy, no free
+ *  text). Mirrors REQUIRED_TOOL_SLUGS in lib/demand/demand-request.ts and the
+ *  worker RPC whitelist (20260705210000) EXACTLY — guard-pinned. */
+const REQUIRED_TOOL_OPTIONS: readonly string[] = [
+  "bulldozer-operator",
+  "compactor-operator",
+  "crane-operator",
+  "equipment-operation",
+  "excavator-operator",
+  "forklift-operator",
+  "grader-operator",
+  "hand-tools",
+  "loader-operator",
+  "scaffolding",
+];
 
 /**
  * Demand-request FORM → the CANONICAL demand intake (§17). A real 3-step input
@@ -55,6 +74,9 @@ export function DemandRequestButton({
   // labourMarket for the country names.
   const tc = useTranslations("companyNeed");
   const tlm = useTranslations("labourMarket");
+  // Existing platform taxonomy names (slug → localized label) — reused for the
+  // required-tools chips exactly like the profile skill picker does.
+  const tSkill = useTranslations("skillNames");
   const locale = useLocale();
   const workCategories = buildWorkCategoryOptions(locale);
   // Intent-specific copy: company hiring is NOT a generic buyer "need".
@@ -87,6 +109,16 @@ export function DemandRequestButton({
     { value: "not_provided", label: tc("transNone") },
     { value: "unknown", label: tc("transUnknown") },
   ];
+  // Required tools/equipment (§8.6) — optional multi-select over the closed
+  // slug set; honest by default (nothing selected = "not stated", never a
+  // fabricated requirement).
+  const [requiredTools, setRequiredTools] = useState<string[]>([]);
+  function toggleRequiredTool(slug: string) {
+    setRequiredTools((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+  }
+  const toolLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
   const workTypeLabel =
     workCategories.flatMap((c) => c.options).find((o) => o.slug === workType)?.label ?? "";
   const accommodationLabel =
@@ -169,6 +201,7 @@ export function DemandRequestButton({
         teamSize: teamSize.trim() ? Number(teamSize) : undefined,
         accommodation: accommodation || undefined,
         transport: transport || undefined,
+        requiredTools: requiredTools.length > 0 ? requiredTools : undefined,
         estimate: estimateEngaged ? estimate : undefined,
       });
       setState(
@@ -244,6 +277,14 @@ export function DemandRequestButton({
         {tc("transportOffer")}
       </dt>
       <dd className="text-text-primary">{transportLabel || "—"}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {tc("requiredTools")}
+      </dt>
+      <dd className="text-text-primary" data-testid="demand-summary-required-tools">
+        {requiredTools.length > 0
+          ? [...requiredTools].sort().map(toolLabel).join(", ")
+          : "—"}
+      </dd>
       {notes.trim() && (
         <>
           <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
@@ -434,6 +475,46 @@ export function DemandRequestButton({
               testId="demand-transport"
             />
           </label>
+          {/* Required tools / equipment (§8.6) — optional toggle chips over the
+              CLOSED taxonomy slug set (same real-control pattern as the profile
+              skill picker; labels from the existing skillNames catalogue). No
+              free-text tool input exists — unselected stays an honest "not
+              stated" on the worker board. */}
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className="contents">
+              <Label>
+                {tc("requiredTools")}{" "}
+                <span className="text-text-muted">{t("form.optionalTag")}</span>
+              </Label>
+            </legend>
+            <p className="text-xs text-text-muted">{tc("requiredToolsHelp")}</p>
+            <ul
+              className="flex flex-wrap gap-2"
+              data-testid="demand-required-tools"
+            >
+              {REQUIRED_TOOL_OPTIONS.map((slug) => {
+                const isSelected = requiredTools.includes(slug);
+                return (
+                  <li key={slug}>
+                    <button
+                      type="button"
+                      onClick={() => toggleRequiredTool(slug)}
+                      aria-pressed={isSelected}
+                      data-slug={slug}
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-3 py-1.5 text-sm transition-colors",
+                        isSelected
+                          ? "border-brand-orange bg-brand-orange text-ink-900"
+                          : "border-ink-500 text-text-secondary hover:border-text-muted",
+                      )}
+                    >
+                      {toolLabel(slug)}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </fieldset>
 
           <label className="flex flex-col gap-1.5">
             <Label>

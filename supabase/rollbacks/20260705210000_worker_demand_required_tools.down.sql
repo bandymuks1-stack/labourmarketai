@@ -1,18 +1,17 @@
--- DOWN / rollback for 20260705200000_worker_demand_transport.sql
+-- DOWN / rollback for 20260705210000_worker_demand_required_tools.sql
 --
--- Restores the TRUE PREDECESSOR definition VERBATIM: the 20260705130000
--- location-label body (the applied Model-A body 20260702170000 + the ONE
--- coarse location_label column). The transport column disappears and the
--- app's loader degrades gracefully (need.transport becomes null; the board
--- shows "—"). No table, no data is touched. Apply via Supabase MCP
+-- Restores the EXACT prior repo-latest definition (20260705200000 — the
+-- transport recreate, which itself carries the applied Model-A body
+-- 20260702170000 + the location_label column 20260705130000 + the transport
+-- enum column) — the required_tools column disappears and the app's loader
+-- degrades gracefully (need.requiredTools becomes null; the board shows the
+-- honest "not stated"). No table, no data is touched. Apply via Supabase MCP
 -- apply_migration, never db push.
 --
--- HISTORY (wagon-3 rollback caveat, closed 2026-07-05): the first version of
--- this file restored the OLDER Model-A-only body (20260702170000), silently
--- dropping the location_label column on rollback. Corrected to restore the
--- immediately-previous definition (20260705130000) — rollback-file-only fix,
--- no migration semantics change. Guard-pinned in
--- apps/web/lib/guards/equipment-tools-layer.test.ts (rollback-chain block).
+-- NOTE: if 20260705200000 was NOT applied to prod before this migration
+-- (i.e. this one is rolled back on top of an older applied definition),
+-- restore the definition that was actually live instead — the loader
+-- tolerates the absence of the optional columns either way.
 
 begin;
 
@@ -29,7 +28,8 @@ returns table (
   created_at     timestamptz,
   company_name   text,
   route_status   text,
-  location_label text
+  location_label text,
+  transport      text
 )
 language plpgsql
 stable
@@ -81,7 +81,16 @@ begin
              order by cdl.updated_at desc
              limit 1),
            nullif(trim(cr.location), '')
-         ) as location_label
+         ) as location_label,
+         -- Transport condition — STRICT enum whitelist mirroring the
+         -- accommodation projection. Anything outside the closed set (incl.
+         -- any free text) projects as NULL, never reaches a worker.
+         case
+           when cr.payload ->> 'transport' in (
+             'provided', 'compensated', 'not_provided', 'unknown'
+           ) then cr.payload ->> 'transport'
+           else null
+         end as transport
     from public.customer_requests cr
     join public.companies c
       on c.profile_id = cr.profile_id

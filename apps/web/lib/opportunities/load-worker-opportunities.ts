@@ -128,6 +128,14 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             // Present only after the transport RPC recreate is applied —
             // the loader tolerates the missing field (honest degradation).
             transport: (row.transport as string | null) ?? null,
+            // Present only after the required-tools RPC recreate is applied —
+            // same honest degradation; only string elements pass (defence in
+            // depth on top of the RPC's slug whitelist).
+            requiredTools: Array.isArray(row.required_tools)
+              ? (row.required_tools as unknown[]).filter(
+                  (s): s is string => typeof s === "string",
+                )
+              : null,
             companyName: safeApprovedCompanyName(row),
             // Present only after the PR8 location-label RPC is applied.
             locationLabel: (row.location_label as string | null) ?? null,
