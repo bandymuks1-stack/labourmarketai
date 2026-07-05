@@ -4629,7 +4629,18 @@
       "emptyTeamCta": "Pradėti draftą",
       "positionsTitle": "Trūkstamos pozicijos",
       "positionsEmpty": "Pozicijų poreikių modulis dar ruošiamas — kai jis atsiras, čia matysi, kokių žmonių trūksta.",
-      "openOps": "Atidaryti projekto valdymą"
+      "openOps": "Atidaryti projekto valdymą",
+      "gallery": {
+        "title": "Darbų galerija",
+        "countLabel": "{n} nuotr.",
+        "context": "Nuotraukos iš šio objekto darbo žurnalo įrašų. Jas prie savo įrašų prideda patys darbuotojai — čia matote tik tas, kurias leidžia jūsų prieigos teisės.",
+        "empty": "Matomų nuotraukų šiame objekte kol kas nėra. Jos atsiras, kai priskirti darbuotojai pridės nuotraukas prie savo darbo žurnalo įrašų.",
+        "previewsUnavailable": "Nuotraukų peržiūra šioje aplinkoje dar neįjungta — sąrašas rodomas be vaizdų.",
+        "previewUnavailableOne": "Peržiūra nepasiekiama",
+        "photoAlt": "Darbo nuotrauka iš žurnalo įrašo",
+        "unknownWorker": "Darbuotojas",
+        "sourceNote": "Nuotraukos yra darbuotojų žurnalo įrašų dalis — jos niekada nekeičiamos ir nevertinamos automatiškai."
+      }
     }
   },
   "setupRoleChoice": {

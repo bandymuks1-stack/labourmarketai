@@ -91,6 +91,22 @@ const UNIT_OPTIONS = [
 
 type Stage = "compose" | "review";
 
+/** WAGON 8 (area 14) — entry-mode PRESETS over the ONE composer. A mode never
+ *  creates a second journal system or save path: all three write the same
+ *  spine via the same createJournalEntry / supersedeJournalEntry actions.
+ *    quick      — write + save in one step (the existing default);
+ *    structured — same text, but the primary action runs "Sutvarkyti tekstą"
+ *                 first so time/quantity/direction get reviewed before save;
+ *    photo      — photo-first work report: the photo field leads, the short
+ *                 text stays required (the photo uploads only AFTER the entry
+ *                 saves, exactly as before). */
+export type ComposerMode = "quick" | "structured" | "photo";
+const COMPOSER_MODES: readonly ComposerMode[] = [
+  "quick",
+  "structured",
+  "photo",
+];
+
 type FragmentReviewState = JournalFragmentSuggestion & {
   status: SuggestionStatus;
   /** When the parser flagged this fragment as `isUnknown`, the worker can
@@ -155,6 +171,10 @@ export function JournalEntryComposer({
     .filter((row): row is ComposerSkillSuggestion => !!row);
 
   const [stage, setStage] = useState<Stage>("compose");
+  // Entry-mode preset (WAGON 8, area 14). Presentation-only: it reorders and
+  // re-emphasises the SAME fields/actions; every mode saves through submit().
+  // Hidden while editing — an edit continues the entry's own flow.
+  const [mode, setMode] = useState<ComposerMode>("quick");
   const [text, setText] = useState(editingEntry?.originalText ?? "");
   // Activation funnel (P0-A): fire once when the worker first types into a
   // NEW entry (skip edits of an existing entry, which start pre-filled).
@@ -642,6 +662,89 @@ export function JournalEntryComposer({
   }
 
   if (stage === "compose") {
+    // ONE photo field, placed by the active mode preset: photo-first mode
+    // leads with it, the other modes keep it after the text (same field,
+    // same free-tier rules, same after-save upload either way).
+    const photoField = (
+      <div
+        className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+        data-testid="journal-photo-field"
+      >
+        <Label>{t("photo.label")}</Label>
+        {mode === "photo" && (
+          <p
+            className="text-[11px] leading-relaxed text-text-secondary"
+            data-testid="journal-photo-first-note"
+          >
+            {t("modes.photoFirstNote")}
+          </p>
+        )}
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          data-testid="journal-photo-input"
+          onChange={async (e) => {
+            const f = e.target.files?.[0] ?? null;
+            if (!f) {
+              setPhotoFile(null);
+              setPhotoError(null);
+              setPhotoPrep("idle");
+              return;
+            }
+            // Wrong format → honest error; size is handled by compression.
+            if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+              setPhotoFile(null);
+              setPhotoError(t("photo.invalidFile"));
+              setPhotoPrep("idle");
+              return;
+            }
+            setPhotoError(null);
+            setPhotoPrep("preparing");
+            // Auto-resize/compress normal phone photos before upload.
+            const { file: prepared } = await compressImageFile(f);
+            if (!isValidJournalPhoto(prepared)) {
+              setPhotoFile(null);
+              setPhotoPrep("idle");
+              setPhotoError(t("photo.tooLargeAfter"));
+              return;
+            }
+            setPhotoFile(prepared);
+            setPhotoPrep("ready");
+          }}
+          className="text-xs text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-xs file:text-text-primary"
+        />
+        {photoError ? (
+          <p className="text-xs text-state-danger" role="alert">
+            {photoError}
+          </p>
+        ) : null}
+        {photoPrep === "preparing" ? (
+          <p
+            className="text-xs text-text-secondary"
+            role="status"
+            data-testid="journal-photo-preparing"
+          >
+            {t("photo.preparing")}
+          </p>
+        ) : null}
+        {photoPrep === "ready" ? (
+          <p
+            className="text-xs text-state-success"
+            role="status"
+            data-testid="journal-photo-prepared"
+          >
+            {t("photo.prepared")}
+          </p>
+        ) : null}
+        <p
+          className="text-[11px] leading-relaxed text-text-muted"
+          data-testid="journal-photo-free-tier-note"
+        >
+          {t("photo.freeTierNote")}
+        </p>
+      </div>
+    );
+
     return (
       <form
         ref={formRef}
@@ -800,6 +903,43 @@ export function JournalEntryComposer({
           </div>
         )}
 
+        {!editingEntry && (
+          // WAGON 8 (area 14): entry-mode presets over the ONE composer.
+          // Selecting a mode only re-emphasises the same fields — no second
+          // journal system, no separate save path.
+          <div className="flex flex-col gap-2" data-testid="journal-mode-picker">
+            <Label>{t("modes.title")}</Label>
+            <div className="flex flex-wrap gap-2" role="group" aria-label={t("modes.title")}>
+              {COMPOSER_MODES.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={mode === m}
+                  data-testid={`journal-mode-${m}`}
+                  onClick={() => {
+                    setMode(m);
+                    recordEvent("journal_mode_selected", { mode: m });
+                  }}
+                  className={cn(
+                    "rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors",
+                    mode === m
+                      ? "border-brand-blue bg-brand-blue/10 text-brand-blue"
+                      : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary",
+                  )}
+                >
+                  {t(`modes.${m}`)}
+                </button>
+              ))}
+            </div>
+            <p
+              className="text-[11px] leading-relaxed text-text-muted"
+              data-testid="journal-mode-hint"
+            >
+              {t(`modes.${mode}Hint`)}
+            </p>
+          </div>
+        )}
+
         <label className="flex flex-col gap-1.5">
           <Label>{t("engagement")}</Label>
           <DarkListbox
@@ -810,6 +950,8 @@ export function JournalEntryComposer({
             testId="journal-engagement-switcher"
           />
         </label>
+
+        {mode === "photo" && !editingEntry && photoField}
 
         <label className="flex flex-col gap-1.5">
           <Label>{t("whatDidYouDo")}</Label>
@@ -828,75 +970,9 @@ export function JournalEntryComposer({
 
         {/* Photo evidence — free tier: ONE photo per entry, enforced
             server-side; more photos are an honestly-labelled future
-            VIP feature (no fake tier, no fake upload). */}
-        <div
-          className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
-          data-testid="journal-photo-field"
-        >
-          <Label>{t("photo.label")}</Label>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            data-testid="journal-photo-input"
-            onChange={async (e) => {
-              const f = e.target.files?.[0] ?? null;
-              if (!f) {
-                setPhotoFile(null);
-                setPhotoError(null);
-                setPhotoPrep("idle");
-                return;
-              }
-              // Wrong format → honest error; size is handled by compression.
-              if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
-                setPhotoFile(null);
-                setPhotoError(t("photo.invalidFile"));
-                setPhotoPrep("idle");
-                return;
-              }
-              setPhotoError(null);
-              setPhotoPrep("preparing");
-              // Auto-resize/compress normal phone photos before upload.
-              const { file: prepared } = await compressImageFile(f);
-              if (!isValidJournalPhoto(prepared)) {
-                setPhotoFile(null);
-                setPhotoPrep("idle");
-                setPhotoError(t("photo.tooLargeAfter"));
-                return;
-              }
-              setPhotoFile(prepared);
-              setPhotoPrep("ready");
-            }}
-            className="text-xs text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-xs file:text-text-primary"
-          />
-          {photoError ? (
-            <p className="text-xs text-state-danger" role="alert">
-              {photoError}
-            </p>
-          ) : null}          {photoPrep === "preparing" ? (
-            <p
-              className="text-xs text-text-secondary"
-              role="status"
-              data-testid="journal-photo-preparing"
-            >
-              {t("photo.preparing")}
-            </p>
-          ) : null}
-          {photoPrep === "ready" ? (
-            <p
-              className="text-xs text-state-success"
-              role="status"
-              data-testid="journal-photo-prepared"
-            >
-              {t("photo.prepared")}
-            </p>
-          ) : null}
-          <p
-            className="text-[11px] leading-relaxed text-text-muted"
-            data-testid="journal-photo-free-tier-note"
-          >
-            {t("photo.freeTierNote")}
-          </p>
-        </div>
+            VIP feature (no fake tier, no fake upload). In photo-first
+            mode this same field renders ABOVE the text instead. */}
+        {(mode !== "photo" || editingEntry) && photoField}
 
         <details className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-xs text-text-secondary">
           <summary className="cursor-pointer select-none font-mono text-[10px] uppercase tracking-label text-text-muted">
@@ -910,34 +986,61 @@ export function JournalEntryComposer({
           </ul>
         </details>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* PRIMARY: save the entry directly — one obvious step. */}
-          <Button
-            type="submit"
-            disabled={text.trim().length === 0 || submitting}
-            data-testid="journal-save-entry"
-          >
-            {submitting
-              ? t("saving")
-              : editingEntry
-                ? t("updateEntry")
-                : t("saveEntry")}
-          </Button>
-          {/* SECONDARY (optional): tidy the text into structured fields first.
-              Not a primary action and makes no AI/auto claim. */}
-          <button
-            type="button"
-            onClick={() => {
-              setSavedAt(null);
-              analyse(text);
-            }}
-            disabled={text.trim().length === 0 || submitting}
-            className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
-            data-testid="journal-organize-text"
-          >
-            {t("organizeText")}
-          </button>
-        </div>
+        {mode === "structured" && !editingEntry ? (
+          // STRUCTURED preset: the primary action tidies the text into
+          // reviewable fields first (same analyse → review → submit chain);
+          // direct save stays one tap away. Same spine, different emphasis.
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              onClick={() => {
+                setSavedAt(null);
+                analyse(text);
+              }}
+              disabled={text.trim().length === 0 || submitting}
+              data-testid="journal-organize-text"
+            >
+              {t("organizeText")}
+            </Button>
+            <button
+              type="submit"
+              disabled={text.trim().length === 0 || submitting}
+              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+              data-testid="journal-save-entry"
+            >
+              {submitting ? t("saving") : t("saveEntry")}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-3">
+            {/* PRIMARY: save the entry directly — one obvious step. */}
+            <Button
+              type="submit"
+              disabled={text.trim().length === 0 || submitting}
+              data-testid="journal-save-entry"
+            >
+              {submitting
+                ? t("saving")
+                : editingEntry
+                  ? t("updateEntry")
+                  : t("saveEntry")}
+            </Button>
+            {/* SECONDARY (optional): tidy the text into structured fields first.
+                Not a primary action and makes no AI/auto claim. */}
+            <button
+              type="button"
+              onClick={() => {
+                setSavedAt(null);
+                analyse(text);
+              }}
+              disabled={text.trim().length === 0 || submitting}
+              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+              data-testid="journal-organize-text"
+            >
+              {t("organizeText")}
+            </button>
+          </div>
+        )}
       </form>
     );
   }

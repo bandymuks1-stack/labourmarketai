@@ -21,6 +21,7 @@ import {
 } from "@/lib/projects/location";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { CountUp } from "@/components/app/today/count-up";
+import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -336,6 +337,16 @@ export default async function ProjectStadiumPage({
           </div>
         )}
       </section>
+
+      {/* ── Work gallery: photo evidence from this project's journal entries.
+            Read-only projection of what workers attached to their OWN entries;
+            visibility is exactly the session's RLS (WAGON 8, areas 15/16). ── */}
+      <ProjectWorkGallery
+        projectId={id}
+        workerNames={
+          new Map(ops.workers.map((w) => [w.workerId, w.name] as const))
+        }
+      />
 
       {/* ── Missing positions: the needs model does not exist yet — say so ── */}
       <section className="flex flex-col gap-2" data-testid="stadium-positions-note">
