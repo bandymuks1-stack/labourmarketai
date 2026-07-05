@@ -87,10 +87,9 @@ export const LAUNCH_BOARD: readonly LaunchBoardItem[] = [
   },
   {
     key: "localization",
-    status: "yellow",
-    proof: "runtime/audits/offline-multilingual-skill-recognition-audit-2026-07-04.md",
-    pending: "PR14 — launch language scope guard",
-    ownerDecision: "FI full UI locale promotion",
+    status: "green_scoped",
+    proof: "runtime/audits/localization-launch-scope-audit-2026-07-05.md",
+    ownerDecision: "FI full UI locale promotion (deferred — taxonomy/recognition only)",
   },
   {
     key: "sales_market_entry",
