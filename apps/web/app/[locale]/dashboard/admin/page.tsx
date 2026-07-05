@@ -5,8 +5,10 @@ import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import { getDemandDraftCounts } from "@/lib/demand/demand-drafts";
 import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
+import { getFollowUpQueue } from "@/lib/followup/follow-up-tasks";
 import { getLaunchSignals } from "@/lib/admin/launch-signals";
 import { AdminLaunchBoard } from "@/components/app/admin-launch-board";
+import { FollowUpQueuePanel } from "@/components/app/follow-up-queue-panel";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
 
@@ -109,6 +111,11 @@ export default async function AdminDashboardPage({
   const adminReview = await listRequestsForAdminReview();
   const reviewRows = adminReview.kind === "ok" ? adminReview.rows : [];
   const reviewMigrationNeeded = adminReview.kind === "needs-migration";
+
+  // Internal follow-up task queue (§8.13, branch 24). INTERNAL ONLY —
+  // nothing here sends anything; pre-apply it degrades to an honest
+  // "not yet available" state.
+  const followUpQueue = await getFollowUpQueue();
 
   // 10 most recent profile rows.
   const { data: recent } = await supabase
@@ -454,6 +461,10 @@ export default async function AdminDashboardPage({
           </ul>
         )}
       </section>
+
+      {/* BAND 2b — Internal follow-up task queue (§8.13, branch 24). The
+          platform's memory of next actions: internal only, contacts nobody. */}
+      <FollowUpQueuePanel data={followUpQueue} />
 
       <section className="flex flex-col gap-3" data-testid="admin-pilot-drafts">
         <div className="flex flex-col gap-0.5">

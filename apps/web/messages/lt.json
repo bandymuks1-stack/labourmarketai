@@ -4626,6 +4626,49 @@
       "footnote": "Rezervo valdymas, prieinamumo langai ir komandų rekomendacijos atsiras vėliau, palaipsniui."
     }
   },
+  "followUp": {
+    "title": "Tolimesnių veiksmų sąrašas",
+    "intro": "Vidiniai komandos veiksmai: ką reikia padaryti toliau, dėl ko ir kokia būsena. Rodomi tik realiai užfiksuoti įrašai.",
+    "honestNote": "Tik vidinis įrankis. Sukūrus ar užbaigus įrašą niekam nieko neišsiunčiama — nei el. laiško, nei SMS, nei žinutės. Tai komandos atmintis apie tolimesnius veiksmus.",
+    "preApply": "Tolimesnių veiksmų sąrašas šioje aplinkoje dar neįjungtas. Nieko nerodome, nes niekas neužfiksuota.",
+    "queueHeading": "Atviri",
+    "queueEmpty": "Atvirų tolimesnių veiksmų nėra. Kai komanda užfiksuos veiksmą, jis atsiras čia.",
+    "resolvedHeading": "Neseniai užbaigti",
+    "subjectPerson": "Asmuo:",
+    "subjectCompany": "Įmonė:",
+    "subjectNone": "Bendras",
+    "openSubject": "peržiūrėti",
+    "createdLabel": "Sukurta",
+    "statuses": {
+      "pending": "Laukia",
+      "done": "Atlikta",
+      "dismissed": "Atmesta"
+    },
+    "actions": {
+      "markDone": "Pažymėti atliktą",
+      "dismiss": "Atmesti",
+      "reopen": "Atidaryti iš naujo"
+    },
+    "form": {
+      "noteLabel": "Naujas tolimesnis veiksmas",
+      "notePlaceholder": "Ką reikia padaryti toliau ir kodėl?",
+      "subjectProfileLabel": "Asmens profilio ID (nebūtina)",
+      "subjectCompanyLabel": "Įmonės ID (nebūtina)",
+      "subjectHint": "Nebūtina: įklijuokite vieną ID (asmens arba įmonės, ne abu). Saugomas tik ID — kontaktiniai duomenys nekopijuojami.",
+      "saving": "Saugoma…",
+      "submit": "Pridėti"
+    },
+    "outcome": {
+      "created": "Įrašas užfiksuotas. Niekam nieko neišsiųsta.",
+      "updated": "Įrašas atnaujintas.",
+      "needsMigration": "Tolimesnių veiksmų saugykla šioje aplinkoje dar neįjungta.",
+      "notAuthorized": "Tolimesnius veiksmus gali tvarkyti tik operatoriai.",
+      "limitReached": "Pasiektas atvirų įrašų limitas — pirmiausia užbaikite esamus.",
+      "notFound": "Šio įrašo nebėra.",
+      "invalid": "Įrašo išsaugoti nepavyko — patikrinkite tekstą ir ID.",
+      "error": "Įvyko klaida. Niekas neišsaugota."
+    }
+  },
   "handoverPassport": {
     "title": "Perdavimo pasas",
     "intro": "Gyvas šio projekto realių perdavimo faktų įrašas: vadovo pastabos ir deklaruoti etapai. Įrašai tik pridedami — vėliau jų negalima nei redaguoti, nei ištrinti.",

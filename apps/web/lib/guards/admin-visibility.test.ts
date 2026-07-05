@@ -55,6 +55,11 @@ const ADMIN_GATED_FILES = new Set<string>([
   // `isAdmin && !adminUiHidden` (mobile admins reach admin here since it was
   // removed from the crowded bottom nav). Non-admins never see it.
   join(APP_ROOT, "components", "app", "account-menu.tsx"),
+  // Follow-up queue panel (§8.13) renders the /dashboard/admin/users/[id]
+  // subject-inspect link ONLY when `isAdmin` from the auth context is true
+  // (defense-in-depth: the panel itself only renders on the
+  // requireSuperadmin-gated admin control room page).
+  join(APP_ROOT, "components", "app", "follow-up-queue-panel.tsx"),
 ]);
 
 describe("admin visibility — non-admin UI never renders /dashboard/admin links", () => {

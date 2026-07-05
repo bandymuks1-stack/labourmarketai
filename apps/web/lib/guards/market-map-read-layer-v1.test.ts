@@ -157,6 +157,12 @@ describe("NO new DB migration in this PR", () => {
     // RLS) + ONE new gated write RPC (add_project_handover_entry_v1) on the
     // existing project spine; no existing RPC recreated;
     // @human-gate-approved, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(108);
+    // Bumped 108 -> 109 for the §8.13 internal follow-up task queue
+    // (20260705235000) — ONE new table (follow_up_tasks, admin-only RLS,
+    // honest pending/done/dismissed lifecycle, no external sending) + TWO
+    // new gated write RPCs (create_follow_up_task_v1 /
+    // set_follow_up_task_status_v1); no existing RPC recreated;
+    // @human-gate-approved, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(109);
   });
 });

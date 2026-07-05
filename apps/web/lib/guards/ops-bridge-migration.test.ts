@@ -271,6 +271,12 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // via can_manage_project, RPC-only writes) + NEW
     // add_project_handover_entry_v1 on the existing project spine;
     // needs-human-gate DRAFT, owner-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 108/);
+    // Then to 109 for the §8.13 internal follow-up task queue
+    // (20260705235000; RED-class definer functions but NO recreate of any
+    // existing RPC: ONE new follow_up_tasks table (admin-only select via
+    // is_admin, RPC-only writes, honest pending/done/dismissed lifecycle,
+    // NO external transport) + NEW create_follow_up_task_v1 /
+    // set_follow_up_task_status_v1; needs-human-gate DRAFT, owner-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 109/);
   });
 });
