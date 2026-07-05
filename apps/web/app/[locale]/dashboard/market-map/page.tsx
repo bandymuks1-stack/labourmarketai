@@ -116,11 +116,15 @@ export default async function MarketMapPage({
     label: string;
     state: "active" | "incomplete" | "off-map";
     hint?: string;
+    href?: string;
   }[] = [
     {
       label: `${tLayers("personSignal")}${ownName ? `: ${ownName}` : ""}`,
       state: hasPreferredLocation ? "active" : "incomplete",
       hint: hasPreferredLocation ? undefined : tLayers("personIncomplete"),
+      // Dead-UI rule C: an incomplete row must lead to its fix — the
+      // location picker further down this page.
+      href: hasPreferredLocation ? undefined : "#market-map-base",
     },
   ];
   if (isCompanyContext) {
@@ -128,6 +132,7 @@ export default async function MarketMapPage({
       label: `${tLayers("companyLayer")}${companyName ? `: ${companyName}` : ""}`,
       state: "incomplete",
       hint: tLayers("companyIncomplete"),
+      href: `/${locale}/dashboard/company`,
     });
   }
   if (needsCount > 0) {

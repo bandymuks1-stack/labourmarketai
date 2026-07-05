@@ -17,10 +17,13 @@ const card = read("components/app/worker-player-card.tsx");
 const ring = read("components/app/readiness-ring.tsx");
 
 describe("Player Card reuses the shared premium scouting visual language", () => {
-  it("uses the shared card chrome tokens (card-border + glow + hover lift)", () => {
+  it("uses the shared card chrome tokens (card-border + glow)", () => {
     expect(card).toMatch(/card-border/);
     expect(card).toMatch(/bg-card-glow/);
-    expect(card).toMatch(/hover:shadow-card-hover/);
+    // Dead-UI repair (owner smoke 2026-07-05): the SECTION is not clickable,
+    // so it must NOT carry a hover lift — hover affordance moved to the real
+    // links inside it (stat tiles). Pinned by clickability-actionability.
+    expect(card).not.toMatch(/hover:shadow-card-hover/);
   });
   it("carries NO gold confirmation trust ring (silent-trust rule)", () => {
     // The self-view card must not advertise confirmation as a public trust

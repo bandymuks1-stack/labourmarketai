@@ -903,6 +903,7 @@
     }
   },
   "demandReadback": {
+    "statusOther": "Peržiūrima",
     "heading": "Jūsų pateikti poreikiai",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
     "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių poreikius darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol jūsų įmonė neverifikuota, poreikiai matomi tik jums ir peržiūros komandai.",
@@ -1091,6 +1092,8 @@
       },
       "setup": {
         "formTitle": "Įmonės profilio užklausa",
+        "formTitleCreate": "Sukurti įmonės profilį",
+        "formTitleEdit": "Redaguoti įmonės profilį",
         "formSubtitle": "Sukurkite organizacijos profilį iš savo asmeninės paskyros. Jis iškart aktyvus ir naudojamas — nereikia laukti patvirtinimo. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis.",
         "existingHeading": "Įmonės profilis",
         "legalName": "Įmonės teisinis pavadinimas",
@@ -1836,6 +1839,7 @@
       },
       "kpi": {
         "people": "Aktyvūs žmonės",
+        "monitoringNote": "Skaičiai be nuorodos yra tik stebėsenai — jie niekur neveda ir nieko nekeičia.",
         "peopleIncomplete": "Nepilni profiliai",
         "companies": "Įmonės",
         "demand": "Atvira paklausa",
@@ -1894,6 +1898,7 @@
       "migrationBlocker": "Šis skyrius laikinai nepasiekiamas, kol ruošiami jo duomenys.",
       "filesLabel": "Failai",
       "created": "Sukurta",
+      "openRequester": "Atidaryti užklausos teikėją",
       "noDescription": "Aprašymas nenurodytas",
       "priorityHeading": "Pirmenybė",
       "priority": {
@@ -2196,6 +2201,7 @@
     "launch": {
       "title": "Paleidimo lenta",
       "intro": "Tikri produkto signalai ir 15 paleidimo medžio punktų. Kiekviena ne raudona būsena cituoja įrodymo artefaktą; nežinomi skaičiai rodomi kaip —, niekada neišgalvojami.",
+      "monitoringNote": "Šie skaičiai yra tik stebėsenai — jie niekur neveda.",
       "ownerDecision": "savininko sprendimas",
       "footnote": "Būsenos — tai teiginiai, paremti auditais/apsaugomis repozitorijoje; CI nepavyksta, jei cituojamas įrodymo failas dingsta. Galutinį GREEN skelbia tik paleidimo auditas (PR16).",
       "signals": {
@@ -3459,6 +3465,9 @@
       "onboarding_required": "Pirmiausia užpildykite profilį."
     },
     "notifications": {
+        "types": {
+          "generic": "Pranešimas"
+        },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
       "emptyBody": "Jei atsiras svarbus prašymas ar žinutė, matysite tai čia.",

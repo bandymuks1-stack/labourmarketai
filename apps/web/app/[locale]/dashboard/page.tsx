@@ -283,6 +283,7 @@ export default async function DashboardOverviewPage({
         approved: tReqStatus("approved"),
         closed: tReqStatus("closed"),
       },
+      statusOther: tReadback("statusOther"),
       detailsLabel: tReadback("detailsLabel"),
       fields: {
         description: tReadback("fields.description"),

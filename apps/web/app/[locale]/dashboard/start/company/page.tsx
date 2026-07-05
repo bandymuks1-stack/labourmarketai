@@ -63,7 +63,10 @@ export default async function CompanyStartPage({
   const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
   const formLabels: CompanySetupFormLabels = {
-    title: t("formTitle"),
+    // Dead-UI rule C (owner smoke 2026-07-05): one route serves create AND
+    // edit — the heading must say WHICH, so an existing company is never
+    // tricked into thinking it is creating a second one.
+    title: company ? t("formTitleEdit") : t("formTitleCreate"),
     subtitle: t("formSubtitle"),
     legalName: t("legalName"),
     legalNameHelp: t("legalNameHelp"),

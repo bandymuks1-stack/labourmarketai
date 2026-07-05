@@ -156,11 +156,15 @@ export default async function AdminDashboardPage({
     typeof n === "number" ? n.toLocaleString() : "—";
 
   type KpiTone = "neutral" | "risk";
+  // Dead-UI rule D (owner smoke, 2026-07-05): every numeric card either
+  // navigates to what it counts (href) or is covered by the explicit
+  // monitoring-only caption under the band.
   const kpis: {
     key: string;
     label: string;
     value: string;
     tone: KpiTone;
+    href?: string;
   }[] = [
     {
       key: "people",
@@ -185,12 +189,14 @@ export default async function AdminDashboardPage({
       label: t("room.kpi.demand"),
       value: num(draftsTotal),
       tone: "neutral",
+      href: "/dashboard/admin/need-structuring",
     },
     {
       key: "reviewQueue",
       label: t("room.kpi.reviewQueue"),
       value: reviewMigrationNeeded ? "—" : num(reviewRows.length),
       tone: reviewRows.length > 0 ? "risk" : "neutral",
+      href: "#request-review",
     },
     {
       key: "claims",
@@ -351,36 +357,64 @@ export default async function AdminDashboardPage({
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {kpis.map((k) => (
-            <div
-              key={k.key}
-              className={`card-border p-4 ${
-                k.tone === "risk" ? "border-state-warning/40" : ""
-              }`}
-              data-testid={`admin-kpi-${k.key}`}
-              data-tone={k.tone}
-            >
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                {k.label}
-              </p>
-              <p
-                className={`mt-1 font-display text-2xl font-bold ${
-                  k.tone === "risk"
-                    ? "text-state-warning"
-                    : "text-text-primary"
+          {kpis.map((k) => {
+            const body = (
+              <>
+                <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {k.label}
+                </p>
+                <p
+                  className={`mt-1 font-display text-2xl font-bold ${
+                    k.tone === "risk"
+                      ? "text-state-warning"
+                      : "text-text-primary"
+                  }`}
+                >
+                  {k.value}
+                </p>
+              </>
+            );
+            return k.href ? (
+              <a
+                key={k.key}
+                href={k.href.startsWith("#") ? k.href : `/${locale}${k.href}`}
+                className={`card-border block p-4 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                  k.tone === "risk" ? "border-state-warning/40" : ""
                 }`}
+                data-testid={`admin-kpi-${k.key}`}
+                data-tone={k.tone}
               >
-                {k.value}
-              </p>
-            </div>
-          ))}
+                {body}
+              </a>
+            ) : (
+              <div
+                key={k.key}
+                className={`rounded-md border border-ink-700 bg-ink-800/20 p-4 ${
+                  k.tone === "risk" ? "border-state-warning/40" : ""
+                }`}
+                data-testid={`admin-kpi-${k.key}`}
+                data-tone={k.tone}
+              >
+                {body}
+              </div>
+            );
+          })}
         </div>
+        {/* Rule D: counters without a queue page are explicitly
+            monitoring-only — no pretend clickability. */}
+        <p
+          className="text-[11px] leading-relaxed text-text-muted"
+          data-testid="admin-kpi-monitoring-note"
+        >
+          {t("room.kpi.monitoringNote")}
+        </p>
       </section>
 
       {/* BAND 2 — Action queues. The live operational signals that need a
           decision now (real rows; honest empty/unavailable states). */}
       <section
-        className="flex flex-col gap-3"
+        id="request-review"
+        className="flex flex-col gap-3 scroll-mt-20"
         data-testid="admin-request-review"
       >
         <div className="flex flex-col gap-0.5">
@@ -469,6 +503,17 @@ export default async function AdminDashboardPage({
                   <p className="text-[11px] font-medium text-text-primary">
                     {tReview(`action.${r.priority}`)}
                   </p>
+                  {/* Dead-UI P0 fix: the action queue must give a click
+                      path — id-only pointer to the existing inspect page. */}
+                  {r.profileId ? (
+                    <Link
+                      href={`/dashboard/admin/users/${r.profileId}`}
+                      className="inline-flex min-h-11 w-fit items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10"
+                      data-testid={`admin-request-review-open-${r.id}`}
+                    >
+                      {tReview("openRequester")} →
+                    </Link>
+                  ) : null}
                 </li>
               );
             })}
@@ -491,6 +536,14 @@ export default async function AdminDashboardPage({
             {t("drafts.title")}
           </h2>
           <p className="text-xs text-text-secondary">{t("drafts.help")}</p>
+          {/* Rule D: these are monitoring-only counts (drafts live on the
+              company/buyer dashboards; no admin drafts queue exists). */}
+          <p
+            className="text-[11px] leading-relaxed text-text-muted"
+            data-testid="admin-drafts-monitoring-note"
+          >
+            {t("room.kpi.monitoringNote")}
+          </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-4">
           <div className="card-border p-3">

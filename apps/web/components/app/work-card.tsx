@@ -57,26 +57,46 @@ const LEVEL_BADGE: Record<ReadinessLevel, string> = {
   start: "border-ink-500 text-text-muted",
 };
 
+/** Dead-UI rule D (owner smoke 2026-07-05): a numeric tile either NAVIGATES
+ *  to what it counts (href → real Link with hover/focus affordance) or looks
+ *  passive (no card border inviting a tap). */
 function StatTile({
   value,
   label,
   testid,
+  href,
 }: {
   value: string;
   label: string;
   testid: string;
+  href?: string;
 }) {
-  return (
-    <div
-      className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
-      data-testid={testid}
-    >
+  const body = (
+    <>
       <span className="font-mono text-2xl font-bold tracking-tightest text-text-primary tabular-nums">
         {value}
       </span>
       <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
         {label}
       </span>
+    </>
+  );
+  if (href) {
+    return (
+      <Link
+        // Anchors must keep the current page; typedRoutes accepts plain hrefs
+        // via the shared navigation Link.
+        href={href as "/dashboard"}
+        className="flex min-h-11 flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        data-testid={testid}
+      >
+        {body}
+      </Link>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-0.5 p-3" data-testid={testid}>
+      {body}
     </div>
   );
 }
@@ -200,11 +220,13 @@ export async function WorkCard({
   return (
     <section
       className={cn(
-        // Premium scouting chrome shared with the landing Player Card: glow frame,
-        // hover lift, level-driven top border. Not a flat settings panel.
-        "card-border bg-card-glow glow-hover rise-in relative flex flex-col gap-5 overflow-hidden border-t-2 p-5 transition-shadow hover:shadow-card-hover sm:p-6",
+        // Premium scouting chrome shared with the landing Player Card — but NO
+        // hover lift: the card itself is not clickable (dead-UI rule B), only
+        // the controls inside it are.
+        "card-border bg-card-glow rise-in relative flex flex-col gap-5 overflow-hidden border-t-2 p-5 sm:p-6",
         LEVEL_TOP[level],
       )}
+      id="work-card"
       data-testid="work-card"
       data-state={state}
       data-readiness-level={level}
@@ -297,11 +319,13 @@ export async function WorkCard({
           testid="work-card-stat-skills"
           value={String(data.signals.skillsCount)}
           label={tp("skillsLabel")}
+          href="/dashboard/profile#capabilities"
         />
         <StatTile
           testid="work-card-stat-records"
           value={String(data.signals.evidenceCount)}
           label={tp("evidenceLabel")}
+          href="/dashboard/journal#journal-entries"
         />
         <StatTile
           testid="work-card-stat-readiness"
@@ -347,18 +371,20 @@ export async function WorkCard({
           </span>
           <div className="flex flex-wrap gap-1.5">
             {missing.map((dim) => (
-              <span
+              // Dead-UI rule A: a "+" chip is a promise — it must act. Page
+              // dims link to their fill surface; inline dims (availability/
+              // location/pay) jump to the editor on this card (#work-card).
+              <Link
                 key={dim}
+                href={(PAGE_TARGET[dim] ?? "#work-card") as "/dashboard"}
                 data-testid={`work-card-missing-${dim}`}
-                // Honest "what's missing" copy on the chip (tooltip + a11y); the
-                // chip stays compact with the short dimension label.
                 title={tw(`dim.${dim}.missing`)}
                 aria-label={tw(`dim.${dim}.missing`)}
-                className="inline-flex items-center gap-1 rounded-md border border-brand-orange/30 bg-brand-orange/5 px-2.5 py-1 text-[11px] text-brand-orange"
+                className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-orange/30 bg-brand-orange/5 px-2.5 py-1 text-[11px] text-brand-orange transition-colors hover:border-brand-orange hover:bg-brand-orange/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               >
                 <span aria-hidden>+</span>
                 {tw(`dim.${dim}.label`)}
-              </span>
+              </Link>
             ))}
           </div>
         </div>

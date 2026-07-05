@@ -149,6 +149,8 @@ function NotificationsBody({
   placeholderMarker: boolean;
   chromeless?: boolean;
 }) {
+  // Localized notification-type labels (dead-UI repair: never the raw enum).
+  const tTypes = useTranslations("auth.notifications.types");
   return (
     <>
       {!chromeless && (
@@ -205,7 +207,11 @@ function NotificationsBody({
               >
                 <p className="flex items-center gap-2 text-xs text-text-secondary">
                   <RoleIcon role={n.role} className="h-4 w-4" />
-                  <span className="text-text-primary">{n.type}</span>
+                  {/* Dead-UI repair: never print the raw type enum — map to a
+                      localized label, neutral fallback for unknown types. */}
+                  <span className="text-text-primary">
+                    {tTypes.has(n.type) ? tTypes(n.type as never) : tTypes("generic")}
+                  </span>
                 </p>
                 {crossRole && (
                   <button

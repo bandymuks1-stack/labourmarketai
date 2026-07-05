@@ -53,6 +53,9 @@ export interface AdminReviewRequestRow {
   readonly id: string;
   readonly title: string;
   readonly status: string;
+  /** Id-only pointer to the requester — the row's click path to the
+   *  existing admin user-inspect page (dead-UI P0 fix, 2026-07-05). */
+  readonly profileId: string;
   readonly needSummary: string | null;
   readonly createdAt: string;
   readonly attachmentCount: number;
@@ -80,7 +83,7 @@ export async function listRequestsForAdminReview(
 
   const { data: requests, error } = await asAny(supabase)
     .from("customer_requests")
-    .select("id, title, need_summary, status, created_at")
+    .select("id, title, need_summary, status, created_at, profile_id")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) {
@@ -123,6 +126,7 @@ export async function listRequestsForAdminReview(
 
   const rows: AdminReviewRequestRow[] = reqRows.map((r) => {
     const attachmentCount = countByRequest.get(r.id as string) ?? 0;
+    const profileId = (r.profile_id as string | null) ?? "";
     const priority = computeAdminReviewPriority({
       description: (r.need_summary as string | null) ?? null,
       attachmentCount,
@@ -132,6 +136,7 @@ export async function listRequestsForAdminReview(
       id: r.id as string,
       title: r.title as string,
       status: r.status as string,
+      profileId,
       needSummary: (r.need_summary as string | null) ?? null,
       createdAt: r.created_at as string,
       attachmentCount,

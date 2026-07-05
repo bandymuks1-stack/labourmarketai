@@ -42,6 +42,9 @@ export interface DemandRequestsReadbackLabels {
    *  interest signals, acknowledgement, confirm/close controls). */
   readonly scoutLink: string;
   readonly status: Readonly<Record<CustomerRequestStatus, string>>;
+  /** Neutral label for an unrecognized stored status — never the raw enum
+   *  (dead-UI repair, 2026-07-05). */
+  readonly statusOther: string;
   /** "Submitted details" expander + the labels for each stored payload field. */
   readonly detailsLabel: string;
   readonly fields: Readonly<{
@@ -158,7 +161,7 @@ export function DemandRequestsReadback({
                     </span>
                   </div>
                   <span className="shrink-0 rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
-                    {labels.status[r.status] ?? r.status}
+                    {labels.status[r.status] ?? labels.statusOther}
                   </span>
                 </div>
                 {/* PR10: every demand row deep-links its OWN scouting view —

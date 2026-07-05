@@ -16,6 +16,7 @@ import {
 } from "@/lib/player-card/readiness";
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
 import { cn } from "@/lib/utils";
+import { Link } from "@/lib/i18n/navigation";
 
 /**
  * Worker player-card — the premium scouting card (TASK 07 slice
@@ -107,20 +108,25 @@ export type ThermometerView =
   | { kind: "score"; scoreEur: number; smallSample: boolean }
   | { kind: "insufficient_data"; missing: "position" | "market" | "both" };
 
+/** Dead-UI rule D (owner smoke 2026-07-05): every counter tile NAVIGATES to
+ *  the surface it counts — a real Link with hover/focus affordance. */
 function Stat({
   value,
   label,
   hint,
   testid,
+  href,
 }: {
   value: string;
   label: string;
   hint: string;
   testid: string;
+  href: string;
 }) {
   return (
-    <div
-      className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+    <Link
+      href={href as "/dashboard"}
+      className="flex min-h-11 flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
       data-testid={testid}
     >
       <CountUp
@@ -131,7 +137,7 @@ function Stat({
         {label}
       </span>
       <span className="text-[11px] leading-relaxed text-text-secondary">{hint}</span>
-    </div>
+    </Link>
   );
 }
 
@@ -175,10 +181,10 @@ export function WorkerPlayerCard({
   return (
     <section
       className={cn(
-        // Premium scouting chrome shared with the landing card (card-border +
-        // glow + hover lift), with a tier corner accent driven by REAL
-        // readiness level — never a fabricated rating.
-        "card-border bg-card-glow glow-hover rise-in flex flex-col gap-5 border-t-2 p-5 transition-shadow hover:shadow-card-hover sm:p-6",
+        // Premium scouting chrome shared with the landing card — but NO hover
+        // lift on the card itself (dead-UI rule B: the section is not
+        // clickable; the stat tiles inside now are).
+        "card-border bg-card-glow rise-in flex flex-col gap-5 border-t-2 p-5 sm:p-6",
         LEVEL_ACCENT[readiness.level],
         // Silent-trust rule: no gold confirmation trust ring on this self-view
         // card — confirmation is an internal signal, never a visible accent.
@@ -344,24 +350,28 @@ export function WorkerPlayerCard({
           value={String(card.skillsDeclared)}
           label={labels.skillsLabel}
           hint={labels.skillsHint}
+          href="/dashboard/profile#capabilities"
         />
         <Stat
           testid="player-card-candidate"
           value={String(card.candidateSkills)}
           label={labels.candidateLabel}
           hint={labels.candidateHint}
+          href="/dashboard/profile#candidate-skills"
         />
         <Stat
           testid="player-card-evidence"
           value={String(card.evidenceEntries)}
           label={labels.evidenceLabel}
           hint={labels.evidenceHint}
+          href="/dashboard/journal#journal-entries"
         />
         <Stat
           testid="player-card-attention"
           value={String(card.attentionInstructions)}
           label={labels.attentionLabel}
           hint={card.attentionInstructions === 0 ? labels.attentionZero : labels.attentionHint}
+          href="/dashboard/communication"
         />
       </div>
 

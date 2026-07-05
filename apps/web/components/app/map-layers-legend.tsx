@@ -25,6 +25,9 @@ export type MapVisibleRow = {
   state: MapLayerState;
   /** Optional already-localized one-line state caption. */
   hint?: string | null;
+  /** Where the user FIXES an incomplete layer (dead-UI rule C) —
+   *  same-page anchor or locale-prefixed route, already resolved. */
+  href?: string;
 };
 
 export type MapLayersLabels = {
@@ -69,25 +72,45 @@ export function MapLayersLegend({ labels }: { labels: MapLayersLabels }) {
           {labels.visibleNow}
         </span>
         <ul className="flex flex-col gap-1.5" data-testid="map-layers-visible">
-          {labels.visibleRows.map((row) => (
-            <li
-              key={row.label}
-              className={`flex items-start gap-2 rounded-md border px-3 py-2 ${STATE_RING[row.state]}`}
-            >
-              <span
-                aria-hidden
-                className={`mt-1 h-2 w-2 shrink-0 rounded-full ${STATE_DOT[row.state]}`}
-              />
-              <span className="min-w-0">
-                <span className="block text-sm text-text-primary">{row.label}</span>
-                {row.hint && (
-                  <span className="block text-[11px] leading-relaxed text-text-muted">
-                    {row.hint}
-                  </span>
-                )}
-              </span>
-            </li>
-          ))}
+          {labels.visibleRows.map((row) => {
+            const body = (
+              <>
+                <span
+                  aria-hidden
+                  className={`mt-1 h-2 w-2 shrink-0 rounded-full ${STATE_DOT[row.state]}`}
+                />
+                <span className="min-w-0">
+                  <span className="block text-sm text-text-primary">{row.label}</span>
+                  {row.hint && (
+                    <span className="block text-[11px] leading-relaxed text-text-muted">
+                      {row.hint}
+                    </span>
+                  )}
+                </span>
+              </>
+            );
+            // Dead-UI rule C (owner smoke 2026-07-05): an "incomplete — add
+            // your location" row must ACT, not only explain — rows may carry
+            // an href to the surface where the user fixes the gap.
+            return row.href ? (
+              <li key={row.label}>
+                <a
+                  href={row.href}
+                  className={`flex items-start gap-2 rounded-md border px-3 py-2 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${STATE_RING[row.state]}`}
+                  data-testid="map-layer-fix-link"
+                >
+                  {body}
+                </a>
+              </li>
+            ) : (
+              <li
+                key={row.label}
+                className={`flex items-start gap-2 rounded-md border px-3 py-2 ${STATE_RING[row.state]}`}
+              >
+                {body}
+              </li>
+            );
+          })}
         </ul>
       </div>
 
