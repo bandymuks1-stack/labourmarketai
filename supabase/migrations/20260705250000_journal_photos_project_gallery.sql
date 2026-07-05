@@ -1,4 +1,9 @@
--- 20260705240000_journal_photos_project_gallery.sql
+-- 20260705250000_journal_photos_project_gallery.sql
+--
+-- RENUMBERED from 20260705240000 (never applied anywhere): that prefix
+-- collides with the production ledger name 20260705240000_agency_legacy_retype
+-- (applied 2026-07-05 via MCP, ledger version 20260705111011). Content is
+-- byte-identical to the WAGON 8 merge (#627) apart from this rename.
 --
 -- Project work gallery read scope (CR train WAGON 8, areas 15/16).
 --

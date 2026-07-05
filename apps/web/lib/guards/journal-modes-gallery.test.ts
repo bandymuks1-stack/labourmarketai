@@ -30,7 +30,7 @@ const migration = readFileSync(
     REPO,
     "supabase",
     "migrations",
-    "20260705240000_journal_photos_project_gallery.sql",
+    "20260705250000_journal_photos_project_gallery.sql",
   ),
   "utf8",
 );

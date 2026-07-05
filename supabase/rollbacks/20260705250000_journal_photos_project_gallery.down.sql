@@ -1,5 +1,5 @@
 -- ============================================================================
--- DOWN — 20260705240000_journal_photos_project_gallery (owner-run manual
+-- DOWN — 20260705250000_journal_photos_project_gallery (owner-run manual
 -- rollback).
 --
 -- The up migration is ADDITIVE, POLICY-ONLY: two new SELECT policies that
@@ -8,7 +8,7 @@
 -- no table, no bucket, no function, no grant and wrote no rows — so the down
 -- is exactly the two policy drops and nothing else.
 --
--- ROLLBACK-CHAIN RULE: 20260705240000 recreated NO existing policy, RPC or
+-- ROLLBACK-CHAIN RULE: 20260705250000 recreated NO existing policy, RPC or
 -- trigger (both policy names are new). This down file therefore contains no
 -- `create policy` / `create function` — there is no prior body to restore.
 -- The owner-scoped worker policies and the admin read from 20260612091000
