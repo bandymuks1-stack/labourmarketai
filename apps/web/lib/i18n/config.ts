@@ -34,7 +34,7 @@ export type Locale = (typeof locales)[number];
 // any other code back to active is a one-row add here (no schema, no
 // migration), per §2.5. RU is ACTIVE from day 1 (owner goal 2026-06-12:
 // workers need it today) — its message files are FULL-parity with EN and
-// guarded by lib/guards/i18n-active-locale-parity.test.ts.
+// guarded by lib/guards/i18n-lt-en-parity.test.ts.
 export const activeLocales = ["lt", "en", "ru"] as const;
 export type ActiveLocale = (typeof activeLocales)[number];
 
