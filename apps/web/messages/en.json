@@ -4338,6 +4338,21 @@
             "surface": "Admin panels",
             "seeNote": "Restricted to platform administrators; the gate fails closed.",
             "editNote": "Only administrators act here."
+          },
+          "projectsRosters": {
+            "surface": "Projects, objects and rosters",
+            "seeNote": "Project managers see their own projects' rosters; workers see their own assignments.",
+            "editNote": "Assigning or ending a worker on a project goes only through the gated project actions, by that project's managers."
+          },
+          "serviceRequests": {
+            "surface": "Service requests",
+            "seeNote": "Requester and provider each see their own side of a request; administrators can review.",
+            "editNote": "Sending, answering or withdrawing a request is done by its own two parties only."
+          },
+          "companies": {
+            "surface": "Company profiles",
+            "seeNote": "Any signed-in user can see company rows; workers additionally see the identity of companies whose demand was approved for the board.",
+            "editNote": "A company profile is edited by its owner; the platform team can adjust status."
           }
         },
         "messaging": {
