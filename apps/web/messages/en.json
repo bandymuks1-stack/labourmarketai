@@ -4286,7 +4286,7 @@
       "workerPlaceholder": "Choose a worker",
       "bodyLabel": "Instruction",
       "bodyPlaceholder": "Write the instruction in your own language…",
-      "languageNote": "Write in your own language. The original is saved; a translation will be added later.",
+      "languageNote": "Write in your own language. The original is always preserved and workers see your original text — there is no automatic translation.",
       "send": "Send instruction",
       "sending": "Sending…",
       "sent": "Instruction sent",
@@ -4299,7 +4299,7 @@
       "teamLevelOption": "Team-level instruction (whole team)"
     },
     "card": {
-      "autoTranslation": "Automatic translation",
+      "autoTranslation": "Translation (draft — always check the original)",
       "translationUnavailable": "Translation not ready yet. Showing the original.",
       "showOriginal": "Show original",
       "hideOriginal": "Hide original",
@@ -4775,7 +4775,8 @@
       "send": "Send",
       "sending": "Sending...",
       "emptyError": "Message is empty.",
-      "charCount": "{n}/{max}"
+      "charCount": "{n}/{max}",
+      "languageHint": "Write in your own language — the other person sees your original text. There is no automatic translation."
     },
     "launcher": {
       "openLabel": "Contact support",

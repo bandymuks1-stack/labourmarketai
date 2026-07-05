@@ -4286,7 +4286,7 @@
       "workerPlaceholder": "Pasirinkite darbuotoją",
       "bodyLabel": "Nurodymas",
       "bodyPlaceholder": "Parašykite nurodymą savo kalba…",
-      "languageNote": "Rašykite savo kalba. Originalas išsaugomas; vertimas bus pridėtas vėliau.",
+      "languageNote": "Rašykite savo kalba. Originalas visada išsaugomas ir darbuotojai mato jūsų originalų tekstą — automatinio vertimo nėra.",
       "send": "Siųsti nurodymą",
       "sending": "Siunčiama…",
       "sent": "Nurodymas išsiųstas",
@@ -4299,7 +4299,7 @@
       "teamLevelOption": "Komandos lygio nurodymas (visa komanda)"
     },
     "card": {
-      "autoTranslation": "Automatinis vertimas",
+      "autoTranslation": "Vertimas (juodraštis — visada patikrinkite originalą)",
       "translationUnavailable": "Vertimas dar neparuoštas. Rodomas originalas.",
       "showOriginal": "Rodyti originalą",
       "hideOriginal": "Slėpti originalą",
@@ -4775,7 +4775,8 @@
       "send": "Siųsti",
       "sending": "Siunčiama...",
       "emptyError": "Žinutė tuščia.",
-      "charCount": "{n}/{max}"
+      "charCount": "{n}/{max}",
+      "languageHint": "Rašykite savo kalba — kitas žmogus mato jūsų originalų tekstą. Automatinio vertimo nėra."
     },
     "launcher": {
       "openLabel": "Susisiekti su pagalba",
