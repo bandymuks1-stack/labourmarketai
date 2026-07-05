@@ -5527,6 +5527,31 @@
     },
     "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "The documents storage layer is not enabled in this environment yet.",
+    "guidance": {
+        "title": "Document guidance by country (draft)",
+        "intro": "Informational guidance about documents that may be needed. Not legal advice.",
+        "pendingNotice": "Legal/document guidance is being prepared from the Lithuanian master version.",
+        "draftDisclaimer": "DRAFT: informational only, awaiting owner and legal review. Always check official sources.",
+        "statusSummary": "Items: {total} · awaiting legal review: {awaiting}",
+        "status": {
+          "LT_DRAFT_READY": "LT draft ready",
+          "OWNER_EDITING": "Owner editing",
+          "OWNER_APPROVED_LT": "LT approved by owner",
+          "TRANSLATION_READY": "Ready for translation",
+          "TRANSLATED": "Translated"
+        },
+        "needsLegalReview": "Awaiting legal review",
+        "whoProvides": "Who usually arranges it",
+        "groupAll": "General (all countries)",
+        "helpInfoNote": "For now this is informational guidance only. A way to request document, accounting or legal help through the platform is being prepared.",
+        "dimensions": {
+          "worker_country": "Worker country",
+          "company_country": "Company country",
+          "work_country": "Work country",
+          "role_service_type": "Type of work",
+          "engagement_context": "Engagement type"
+        }
+      },
     "noWorker": "Create your worker profile first — documents attach to it.",
     "error": "Could not load your documents.",
     "empty": "No documents recorded yet. Start with your CV and ID document.",
