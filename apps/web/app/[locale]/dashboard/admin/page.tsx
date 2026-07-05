@@ -5,6 +5,8 @@ import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import { getDemandDraftCounts } from "@/lib/demand/demand-drafts";
 import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
+import { getLaunchSignals } from "@/lib/admin/launch-signals";
+import { AdminLaunchBoard } from "@/components/app/admin-launch-board";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
 
@@ -93,6 +95,9 @@ export default async function AdminDashboardPage({
     count: "exact",
     head: true,
   });
+
+  // Launch band signals (PR12) — real counts, unknown → null → "—".
+  const launchSignals = await getLaunchSignals(supabase);
 
   const draftCounts = await getDemandDraftCounts();
   const draftsTotal =
@@ -545,6 +550,10 @@ export default async function AdminDashboardPage({
       {/* BAND 3 — Control areas. Grouped navigation by real purpose. Replaces
           the old flat tile grid: each area carries a one-line purpose and the
           real pages that belong to it. */}
+      {/* Launch band (PR12): real launch signals + the 15-item launch board
+          with proof-cited statuses (CI-guarded — no fake launch readiness). */}
+      <AdminLaunchBoard signals={launchSignals} />
+
       <section className="flex flex-col gap-3" data-testid="admin-control-areas">
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {groups.map((g) => (

@@ -2165,6 +2165,43 @@
       "insufficientData": "Insufficient market data",
       "smallSample": "Small sample (n<5)",
       "declaredSample": "Declared-expectation sample: {n}"
+    },
+    "launch": {
+      "title": "Launch board",
+      "intro": "Real product signals and the 15 launch-tree items. Every non-red status cites a proof artifact; unknown counts show as —, never invented.",
+      "ownerDecision": "owner decision",
+      "footnote": "Statuses are claims backed by audits/guards in the repo; CI fails if a cited proof file disappears. Final GREEN is only declared by the launch audit (PR16).",
+      "signals": {
+        "workers": "Workers",
+        "companies": "Companies",
+        "verifiedCompanies": "Verified companies",
+        "openDemands": "Open demands",
+        "interestActive": "Interest: new",
+        "interestReviewed": "Interest: reviewed",
+        "interestContacted": "Interest: contacted"
+      },
+      "status": {
+        "green_scoped": "green scoped",
+        "yellow": "yellow",
+        "red": "red"
+      },
+      "items": {
+        "public_market_entry": "Public market entry",
+        "user_identity": "User identity system",
+        "worker_profile_player_card": "Worker profile / player card",
+        "skill_intelligence": "Skill intelligence",
+        "work_journal": "Work journal / real work records",
+        "company_demand": "Company / demand system",
+        "market_map": "Market map",
+        "matching_scouting": "Matching / scouting",
+        "trust_connect": "Trust connect",
+        "control_room": "Internal AI / control room",
+        "first_use_ux": "First-use UX",
+        "localization": "Localization / languages",
+        "sales_market_entry": "Sales / market entry",
+        "technical_foundation": "Technical foundation",
+        "launch_readiness": "Launch readiness"
+      }
     }
   },
   "profileSkillClaims": {

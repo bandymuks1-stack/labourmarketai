@@ -72,8 +72,12 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // close/reopen set, demandReadback.scoutLink, and the corrected
   // manageHelp copy land in all 11 locales; en/lt/ru translated, da/de
   // [EN] until human translation).
-  da: 814,
-  de: 814,
+  // MEASURED 843 at owner-control-room-minimum (+29: admin.launch band —
+  // title/intro/footnote, 7 signal labels, 3 statuses, 15 tree items,
+  // ownerDecision — lands in all 11 locales; en/lt/ru translated, da/de
+  // [EN] until human translation).
+  da: 843,
+  de: 843,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,
