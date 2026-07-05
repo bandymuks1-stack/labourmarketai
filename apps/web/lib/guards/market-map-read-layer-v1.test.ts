@@ -152,6 +152,11 @@ describe("NO new DB migration in this PR", () => {
     // (create_team_v1 / get_team_capability_summary_v1) on the existing org
     // spine; no existing RPC recreated; @human-gate-approved, owner-gated
     // apply.
-    expect(count).toBeLessThanOrEqual(107);
+    // Bumped 107 -> 108 for the §8.8 handover passport shell (20260705230000)
+    // — ONE new append-only table (project_handover_entries, manager-only
+    // RLS) + ONE new gated write RPC (add_project_handover_entry_v1) on the
+    // existing project spine; no existing RPC recreated;
+    // @human-gate-approved, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(108);
   });
 });

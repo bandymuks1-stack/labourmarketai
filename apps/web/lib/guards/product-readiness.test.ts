@@ -1639,7 +1639,16 @@ describe("no migration files added by this sprint", () => {
     // NO existing RPC recreated (rollback restores the 0013 check verbatim
     // and drops only the new functions); @human-gate-approved,
     // needs-human-gate DRAFT, owner-gated apply.
-    const SPRINT_BASELINE = 107;
+    // Bumped 107 -> 108 for the §8.8 job/project handover passport shell
+    // (20260705230000_project_handover_passport.sql): ONE new append-only
+    // table (project_handover_entries — manager-only select via the EXISTING
+    // can_manage_project helper, writes RPC-only, honest declaration-shaped
+    // status enum, no defect/warranty fields) + ONE brand-new gated RPC
+    // (add_project_handover_entry_v1) on the existing project spine; NO
+    // existing RPC/table recreated (rollback drops only the new function and
+    // the new table — feature rows live only there); @human-gate-approved,
+    // needs-human-gate DRAFT, owner-gated apply.
+    const SPRINT_BASELINE = 108;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -15,6 +15,8 @@ import {
   type OperationsBoardLabels,
 } from "@/components/app/project-operations-board";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
+import { getHandoverPassport } from "@/lib/projects/handover-passport";
+import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
 import { type Role } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -61,7 +63,10 @@ export default async function ProjectOperationsPage({
     );
   }
 
-  const ops = await getProjectOperations(id);
+  const [ops, passport] = await Promise.all([
+    getProjectOperations(id),
+    getHandoverPassport(id),
+  ]);
   if (!ops) {
     return (
       <div className="flex max-w-2xl flex-col gap-4">
@@ -183,6 +188,14 @@ export default async function ProjectOperationsPage({
         locale={locale}
         projectId={id}
         csvHref={`/${locale}/dashboard/projects/${id}/operations/report`}
+      />
+      {/* §8.8 handover passport shell (branch 19) — append-only manager
+          record on the SAME project spine. Responsible parties are the real
+          active assignments already loaded above (names only). */}
+      <HandoverPassportPanel
+        projectId={id}
+        data={passport}
+        responsibleWorkers={ops.workers.map((w) => ({ name: w.name }))}
       />
     </div>
   );
