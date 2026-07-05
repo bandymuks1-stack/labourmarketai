@@ -13,6 +13,7 @@ import {
 } from "@/lib/documents/readiness";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
 import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
+import { LtDocumentGuidance } from "@/components/app/lt-document-guidance";
 import {
   workerReadinessFromChecklist,
   type WorkerCountryReadinessStatus,
@@ -69,6 +70,10 @@ export default async function WorkerDocumentsPage({
         >
           {t("preparing")}
         </p>
+        {/* WAGON 9 — LT-master guidance is static informational content,
+            independent of the document-storage layer, so it renders in the
+            preparing state too. */}
+        <LtDocumentGuidance locale={locale} />
       </div>
     );
   }
@@ -273,6 +278,12 @@ export default async function WorkerDocumentsPage({
           </section>
         </>
       )}
+
+      {/* WAGON 9 (area 17) — Lithuanian-master jurisdiction/document
+          guidance. LT locale renders the full draft registry; other locales
+          see only the "being prepared from the Lithuanian master" notice
+          (owner correction 2026-07-05). */}
+      <LtDocumentGuidance locale={locale} />
     </div>
   );
 }

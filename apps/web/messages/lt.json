@@ -5527,6 +5527,31 @@
     },
     "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
     "needsMigration": "Dokumentų saugojimo sluoksnis šioje aplinkoje dar neįjungtas.",
+    "guidance": {
+        "title": "Dokumentų gairės pagal šalį (juodraštis)",
+        "intro": "Informacinio pobūdžio gairės, kokių dokumentų gali reikėti pagal darbuotojo registracijos šalį, įmonės registracijos šalį, darbo šalį ir darbo pobūdį. Tai nėra teisinė konsultacija.",
+        "pendingNotice": "Teisinės / dokumentų gairės ruošiamos iš lietuviško pagrindinio teksto.",
+        "draftDisclaimer": "JUODRAŠTIS: visos šios gairės yra informacinio pobūdžio ir dar laukia savininko bei teisininko peržiūros. Jos nieko negarantuoja — kiekvienu atveju reikia pasitikrinti oficialiuose šaltiniuose.",
+        "statusSummary": "Įrašų: {total} · laukia teisininko peržiūros: {awaiting}",
+        "status": {
+          "LT_DRAFT_READY": "LT juodraštis paruoštas",
+          "OWNER_EDITING": "Savininkas redaguoja",
+          "OWNER_APPROVED_LT": "LT patvirtinta savininko",
+          "TRANSLATION_READY": "Paruošta vertimui",
+          "TRANSLATED": "Išversta"
+        },
+        "needsLegalReview": "Laukia teisininko peržiūros",
+        "whoProvides": "Kas dažniausiai pasirūpina",
+        "groupAll": "Bendra (visos šalys)",
+        "helpInfoNote": "Kol kas tai tik informacinės gairės. Galimybė per platformą paprašyti dokumentų, buhalterijos ar teisinės pagalbos dar ruošiama.",
+        "dimensions": {
+          "worker_country": "Darbuotojo šalis",
+          "company_country": "Įmonės šalis",
+          "work_country": "Darbo šalis",
+          "role_service_type": "Darbo pobūdis",
+          "engagement_context": "Santykio tipas"
+        }
+      },
     "noWorker": "Pirmiausia susikurk darbuotojo profilį — dokumentai priklauso jam.",
     "error": "Nepavyko įkelti tavo dokumentų.",
     "empty": "Dokumentų dar neužfiksuota. Pradėk nuo CV ir asmens dokumento.",
