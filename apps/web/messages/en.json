@@ -4626,6 +4626,49 @@
       "footnote": "Bench management, availability windows and team recommendations will land later, step by step."
     }
   },
+  "followUp": {
+    "title": "Follow-up queue",
+    "intro": "Internal next actions for the operator team: what to follow up on, for whom, and its current state. Real recorded tasks only.",
+    "honestNote": "Internal only. Creating or resolving a task sends nothing to anyone — no email, no SMS, no messages. This is the team's own memory of next actions.",
+    "preApply": "The follow-up queue is not available yet in this environment. Nothing is shown because nothing is recorded.",
+    "queueHeading": "Open",
+    "queueEmpty": "No open follow-up tasks. When the team records a next action, it appears here.",
+    "resolvedHeading": "Recently resolved",
+    "subjectPerson": "Person:",
+    "subjectCompany": "Company:",
+    "subjectNone": "General",
+    "openSubject": "inspect",
+    "createdLabel": "Created",
+    "statuses": {
+      "pending": "Pending",
+      "done": "Done",
+      "dismissed": "Dismissed"
+    },
+    "actions": {
+      "markDone": "Mark done",
+      "dismiss": "Dismiss",
+      "reopen": "Reopen"
+    },
+    "form": {
+      "noteLabel": "New follow-up task",
+      "notePlaceholder": "What should be followed up, and why?",
+      "subjectProfileLabel": "Person profile ID (optional)",
+      "subjectCompanyLabel": "Company ID (optional)",
+      "subjectHint": "Optional subject: paste one ID (a person or a company, not both). Only the ID is stored — the task copies no contact details.",
+      "saving": "Saving…",
+      "submit": "Add task"
+    },
+    "outcome": {
+      "created": "Task recorded. Nothing was sent to anyone.",
+      "updated": "Task updated.",
+      "needsMigration": "The follow-up storage is not available yet in this environment.",
+      "notAuthorized": "Only operators can manage follow-up tasks.",
+      "limitReached": "The open-task limit is reached — resolve existing tasks first.",
+      "notFound": "This task no longer exists.",
+      "invalid": "The task could not be saved — check the note and the subject ID.",
+      "error": "Something went wrong. Nothing was saved."
+    }
+  },
   "handoverPassport": {
     "title": "Handover passport",
     "intro": "A living record of this project's real handover facts: manager notes and declared stages. Entries are append-only — nothing can be edited or deleted afterwards.",

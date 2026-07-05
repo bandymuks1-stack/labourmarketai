@@ -1648,7 +1648,18 @@ describe("no migration files added by this sprint", () => {
     // existing RPC/table recreated (rollback drops only the new function and
     // the new table — feature rows live only there); @human-gate-approved,
     // needs-human-gate DRAFT, owner-gated apply.
-    const SPRINT_BASELINE = 108;
+    // Bumped 108 -> 109 for the §8.13 internal follow-up task queue
+    // (20260705235000_follow_up_tasks.sql): ONE new table (follow_up_tasks —
+    // admin-only select via is_admin, writes RPC-only, honest
+    // pending/done/dismissed lifecycle, id-only subject pointers, NO
+    // priority/urgency column, NO external transport of any kind) + TWO
+    // brand-new gated RPCs (create_follow_up_task_v1,
+    // set_follow_up_task_status_v1) surfacing an operator queue on the
+    // EXISTING admin control room; NO existing RPC/table recreated (rollback
+    // drops only the two new functions and the new table — feature rows live
+    // only there); @human-gate-approved, needs-human-gate DRAFT, owner-gated
+    // apply.
+    const SPRINT_BASELINE = 109;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
