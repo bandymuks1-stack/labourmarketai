@@ -3,6 +3,12 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { getAdminBillingOverview } from "@/lib/admin/billing-overview";
 import { PRE_PAYMENT_PLANS } from "@/lib/billing/plans";
+import {
+  BILLING_READINESS_ITEMS,
+  PRICING_READINESS_STATE,
+  summarizeEntitlementCoverage,
+  type BillingReadinessStatus,
+} from "@/lib/billing/readiness";
 import { AdminPilotGrantForm } from "@/components/app/admin-pilot-grant-form";
 
 /**
@@ -23,6 +29,7 @@ export default async function AdminBillingPage({
 
   const t = await getTranslations("adminBilling");
   const o = await getAdminBillingOverview();
+  const coverage = summarizeEntitlementCoverage();
   const paidPlanKeys = PRE_PAYMENT_PLANS.filter(
     (p) => p.accessState === "payment_not_enabled",
   ).map((p) => p.slug);
@@ -78,6 +85,65 @@ export default async function AdminBillingPage({
             ))}
           </ul>
         )}
+      </section>
+
+      {/* Billing readiness (Branch 29 closure — no provider). Claim-ledger
+          style: every claim cites a proof artifact whose existence is
+          CI-guarded by lib/guards/billing-readiness.test.ts. */}
+      <section className="flex flex-col gap-3" data-testid="billing-readiness">
+        <header className="flex flex-col gap-0.5">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("readiness.title")}
+          </h2>
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {t("readiness.intro")}
+          </p>
+        </header>
+
+        {/* Owner-editable pricing readiness state */}
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2">
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("readiness.pricingState")}
+          </span>
+          <span className="rounded-sm border border-state-amber/40 bg-state-amber/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-amber">
+            {t(`readiness.state.${PRICING_READINESS_STATE}` as never)}
+          </span>
+        </div>
+
+        {/* Entitlement coverage — deterministic from the guarded registry */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Tile label={t("readiness.coverage.server_gate")} value={String(coverage.serverGated)} />
+          <Tile label={t("readiness.coverage.admin_rbac")} value={String(coverage.adminRbac)} />
+          <Tile label={t("readiness.coverage.free_surface")} value={String(coverage.freeSurface)} />
+          <Tile label={t("readiness.coverage.declared_only")} value={String(coverage.declaredOnly)} />
+        </div>
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {t("readiness.coverage.note")}
+        </p>
+
+        {/* Claim ledger */}
+        <ul className="flex flex-col gap-1.5">
+          {BILLING_READINESS_ITEMS.map((item) => (
+            <li
+              key={item.key}
+              className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2"
+              data-readiness-item={item.key}
+              data-readiness-status={item.status}
+            >
+              <span
+                className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${READINESS_TONE[item.status]}`}
+              >
+                {t(`readiness.status.${item.status}` as never)}
+              </span>
+              <span className="text-sm text-text-primary">
+                {t(`readiness.items.${item.key}` as never)}
+              </span>
+              <span className="font-mono text-[10px] text-text-muted">
+                · {t("readiness.proofLabel")}: {item.proof}
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Subscriptions */}
@@ -148,6 +214,12 @@ export default async function AdminBillingPage({
     </div>
   );
 }
+
+const READINESS_TONE: Record<BillingReadinessStatus, string> = {
+  ready: "border-state-success/40 bg-state-success/10 text-state-success",
+  prepared: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  blocked_by_design: "border-state-amber/40 bg-state-amber/10 text-state-amber",
+};
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (

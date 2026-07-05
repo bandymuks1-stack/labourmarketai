@@ -5585,6 +5585,10 @@
       "use": "Available now",
       "request_pilot_access": "Pilot access — granted manually",
       "contact": "Arranged individually"
+    },
+    "readiness": {
+      "draft_pricing": "Plans are prepared, not purchasable. Pricing is still an owner draft — no price here is final and nothing can be bought.",
+      "owner_confirmed": "Prices are owner-confirmed, but plans remain prepared only — nothing can be bought until payments are enabled."
     }
   },
   "bookings": {
@@ -5741,6 +5745,37 @@
     "events": {
       "title": "Recent webhook events",
       "empty": "No webhook events yet."
+    },
+    "readiness": {
+      "title": "Billing readiness (no provider)",
+      "intro": "Readiness closure without a payment provider: plans, boundaries and guards are prepared, while live payment capture stays impossible until the owner connects a provider.",
+      "pricingState": "Pricing readiness",
+      "state": {
+        "draft_pricing": "Draft pricing — owner has not confirmed prices",
+        "owner_confirmed": "Owner-confirmed pricing — still nothing purchasable"
+      },
+      "coverage": {
+        "server_gate": "Server-gated features",
+        "admin_rbac": "Admin-gated features",
+        "free_surface": "Free surfaces",
+        "declared_only": "Declared boundary only",
+        "note": "Declared-only boundaries are enforced by the entitlement seam the moment billing enforcement activates. While payments are off, nothing is locked and nothing is charged."
+      },
+      "items": {
+        "payments_kill_switch": "Global kill-switch: payments disabled in code (PAYMENTS_ENABLED=false)",
+        "live_mode_hard_block": "Live mode and live keys hard-blocked at config validation",
+        "webhook_live_reject": "Webhook rejects live events (signature-verified, test-only)",
+        "plan_catalogue": "Plan catalogue and boundaries defined in code",
+        "entitlement_coverage": "Entitlement wiring: gates prepared, permissive while payments are off",
+        "pricing_copy": "Pricing copy: owner-editable drafts, no live claims",
+        "provider_connection": "Payment provider connection — blocked by design (owner gate)"
+      },
+      "status": {
+        "ready": "Ready",
+        "prepared": "Prepared",
+        "blocked_by_design": "Blocked by design"
+      },
+      "proofLabel": "proof"
     }
   },
   "billingStatus": {
