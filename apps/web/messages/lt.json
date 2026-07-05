@@ -4516,6 +4516,7 @@
     "empty": "Kol kas žinučių nėra. Jei kas nors parašys ar atsiras svarbus prašymas, matysite tai čia.",
     "counterparty": {
       "support": "Pagalbos komanda",
+      "permitted": "Pašnekovas",
       "restricted": "Pašnekovo duomenys dar nerodomi"
     },
     "cannotOpen": {

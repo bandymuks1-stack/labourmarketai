@@ -21,8 +21,12 @@ import { describeConversationCard } from "@/lib/communication/conversation-displ
  *   4. both pages render the restricted state with a locked, system-limited
  *      treatment (`data-restricted="true"` + a lock icon), keyed off the model
  *      flag — not a plain muted name;
- *   5. no fake counterpart name / participant read / contact button is wired
- *      into the communication pages by this hotfix.
+ *   5. counterpart identity in the communication pages comes ONLY from the
+ *      §8.1 safe identity reader (readCounterpartIdentities → the
+ *      permission-gated conversation_counterpart_identities RPC) — never a
+ *      direct co-participant profile read, never an invented name, never a
+ *      contact button. Without a permitted name the restricted state above
+ *      still renders (proven by the model tests: no name → restricted).
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -95,14 +99,18 @@ describe("render: restricted counterpart is a locked, system-limited treatment i
   }
 });
 
-describe("no fakery wired by this hotfix (names / participants / contact buttons)", () => {
+describe("no fakery (identity ONLY via the safe reader; no contact buttons)", () => {
   for (const rel of [LIST, DETAIL]) {
-    it(`${rel} adds no co-participant identity name or contact button`, () => {
+    it(`${rel} reads counterpart identity only through readCounterpartIdentities`, () => {
       const src = read(rel);
-      // No co-participant profile/name surfaced (identity stays the owner-gated
-      // bridge — documented RED). The existing conversation_participants read is
-      // last_read_at only (unread state), never an identity/name join.
-      expect(src).not.toMatch(/counterpartyName|participantName|otherProfile|displayName|profiles\([^)]*name/i);
+      // §8.1: identity comes ONLY from the permission-gated safe reader —
+      // never a direct co-participant profile/name join in the page. The
+      // existing conversation_participants read is last_read_at only.
+      expect(src).toMatch(/readCounterpartIdentities/);
+      expect(src).not.toMatch(/participantName|otherProfile|profiles\([^)]*name|full_name/i);
+      // The rendered name is the model's permitted field, with the honest
+      // i18n fallback — never a raw fabricated string.
+      expect(src).toMatch(/card\.counterpartyName \?\? t\(card\.counterpartyKey\)/);
       // No stranger-contact CTA wired into the thread surfaces.
       expect(src).not.toMatch(/MessageButton|RequestCommunicationButton/);
     });

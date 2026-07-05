@@ -246,6 +246,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Then to 103 for the customer_requests status-transition guard
     // (20260705150000; RED invoker trigger closing owner status latitude
     // to the app whitelist; needs-human-gate DRAFT, owner-gated apply).
-    expect(guard).toMatch(/SPRINT_BASELINE = 103/);
+    // Then to 104 for the §8.1 safe counterpart identity reader
+    // (20260705170000; RED: ONE SECURITY DEFINER read RPC returning ONLY
+    // the counterpart display name of a 2-person direct conversation the
+    // caller belongs to; needs-human-gate DRAFT, owner-gated apply).
+    expect(guard).toMatch(/SPRINT_BASELINE = 104/);
   });
 });

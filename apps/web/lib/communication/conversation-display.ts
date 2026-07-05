@@ -10,14 +10,17 @@
  * So this helper derives an HONEST card model from the real `kind` enum:
  *   - support → counterparty + scope are honestly KNOWN (the support team /
  *     support channel).
- *   - direct / team → the counterparty is in a RESTRICTED / details-not-shown-yet
- *     state, NOT a normal "unspecified recipient". The list/detail queries do
- *     not read the co-participant's identity (that needs the owner-gated
- *     counterpart-identity bridge), so we say the details are not shown yet and
- *     style it as a system-limited state (lock chip) — never as a real name.
- *     Scope stays honest-unknown ("Kontekstas nepatikslintas"). Wiring real
- *     per-name identity + a real workspace link is a documented MISSING BRIDGE
- *     (see the audit doc).
+ *   - direct → the counterparty is KNOWN only when the caller supplies a REAL
+ *     `counterpartName` obtained through the safe counterpart identity reader
+ *     (readCounterpartIdentities — the §8.1 permission-gated RPC that returns
+ *     only the other unrevoked participant's display name of a 2-person direct
+ *     thread the viewer participates in). Without a permitted name the
+ *     counterparty stays in the RESTRICTED / details-not-shown-yet state, NOT a
+ *     normal "unspecified recipient" — a system-limited lock chip, never an
+ *     invented name.
+ *   - team → always RESTRICTED (the identity reader is deliberately
+ *     direct-only; a multi-party roster is not a single counterpart).
+ *     Scope stays honest-unknown ("Kontekstas nepatikslintas").
  *
  * Pure + deterministic. Returns i18n keys RELATIVE to the `communication`
  * namespace, so the page (whose `t` is scoped to "communication") can render
@@ -39,6 +42,13 @@ export interface ConversationCardModel {
   readonly typeKey: string;
   /** i18n key (under `communication`) for the counterparty line. */
   readonly counterpartyKey: string;
+  /**
+   * The counterpart's REAL display name — present ONLY when the caller passed
+   * a permitted, non-empty `counterpartName` from the safe identity reader
+   * (§8.1). `null` otherwise; the UI must then fall back to the i18n key and
+   * never invent a name.
+   */
+  readonly counterpartyName: string | null;
   /** True when the counterparty is honestly known (e.g. the support team). */
   readonly counterpartyKnown: boolean;
   /**
@@ -79,11 +89,15 @@ export function deriveOriginKey(
   return createdBy === viewerId ? "origin.you" : "origin.other";
 }
 
-/** Build the honest card model from a conversation's real `kind` (+ creator). */
+/** Build the honest card model from a conversation's real `kind` (+ creator +
+ *  an optional PERMITTED counterpart name from the safe identity reader). */
 export function describeConversationCard(input: {
   kind: string;
   createdBy?: string | null;
   viewerId?: string | null;
+  /** Real display name from readCounterpartIdentities (§8.1) — direct only.
+   *  Absent/blank → the counterpart stays honestly restricted. */
+  counterpartName?: string | null;
 }): ConversationCardModel {
   const kind = normalizeKind(input.kind);
   const typeKey = `kind.${kind}`;
@@ -93,6 +107,7 @@ export function describeConversationCard(input: {
     return {
       typeKey,
       counterpartyKey: "counterparty.support",
+      counterpartyName: null,
       counterpartyKnown: true,
       counterpartyRestricted: false,
       scopeKey: "scope.support",
@@ -101,13 +116,34 @@ export function describeConversationCard(input: {
     };
   }
 
-  // direct / team: the conversation is real but its co-participant identity is
-  // NOT read by this query (owner-gated bridge). Surface a RESTRICTED /
-  // details-not-shown-yet state — never a fake name, never a bland
-  // "unspecified recipient". Scope stays honest-unknown.
+  // direct with a PERMITTED real name (safe identity reader, §8.1): the
+  // counterpart is honestly known. Only a non-empty trimmed name counts —
+  // nothing is ever fabricated. Team conversations never take a name here
+  // (the reader is direct-only), so they stay restricted below.
+  const permittedName =
+    kind === "direct" ? (input.counterpartName ?? "").trim() : "";
+  if (permittedName.length > 0) {
+    return {
+      typeKey,
+      counterpartyKey: "counterparty.permitted",
+      counterpartyName: permittedName,
+      counterpartyKnown: true,
+      counterpartyRestricted: false,
+      scopeKey: "scope.unknown",
+      scopeKnown: false,
+      originKey,
+    };
+  }
+
+  // direct / team without a permitted identity: the conversation is real but
+  // its co-participant identity is not readable by this viewer (permission
+  // model, §8.1). Surface a RESTRICTED / details-not-shown-yet state — never
+  // a fake name, never a bland "unspecified recipient". Scope stays
+  // honest-unknown.
   return {
     typeKey,
     counterpartyKey: "counterparty.restricted",
+    counterpartyName: null,
     counterpartyKnown: false,
     counterpartyRestricted: true,
     scopeKey: "scope.unknown",

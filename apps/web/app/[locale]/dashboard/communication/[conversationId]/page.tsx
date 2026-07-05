@@ -10,6 +10,7 @@ import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
+import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 
 type MessageRow = {
   id: string;
@@ -52,12 +53,16 @@ export default async function ConversationDetailPage({
   const conversation = convRes.data;
 
   // Same honest context model as the list — so the thread header tells the
-  // user WHO (counterparty or honest-unknown), WHAT type, and whether THEY
-  // started it. No co-participant profile read, no invented identity.
+  // user WHO (permitted real name via the §8.1 safe identity reader, or the
+  // honest restricted state), WHAT type, and whether THEY started it. The
+  // identity comes ONLY from the permission-gated RPC — no direct
+  // co-participant profile read, no invented identity, no contact channel.
+  const counterpartNames = await readCounterpartIdentities([conversationId]);
   const card = describeConversationCard({
     kind: conversation.kind,
     createdBy: conversation.created_by,
     viewerId: user.id,
+    counterpartName: counterpartNames.get(conversationId) ?? null,
   });
 
   // Table is `conversation_messages`, NOT `messages` — see 0021's header
@@ -138,7 +143,9 @@ export default async function ConversationDetailPage({
                 className="text-text-secondary"
                 data-testid="thread-counterparty"
               >
-                {t(card.counterpartyKey)}
+                {/* Permitted real name (safe reader) or the honest i18n
+                    label (e.g. support team) — never invented. */}
+                {card.counterpartyName ?? t(card.counterpartyKey)}
               </span>
             )}
             <span aria-hidden className="text-text-muted">

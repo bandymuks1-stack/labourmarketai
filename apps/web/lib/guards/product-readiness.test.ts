@@ -1605,7 +1605,15 @@ describe("no migration files added by this sprint", () => {
     // submitted->closed, closed->submitted); admins + no-JWT bypass;
     // @human-gate-approved, needs-human-gate DRAFT, owner-gated apply;
     // rollback drops trigger + function.
-    const SPRINT_BASELINE = 103;
+    // Bumped 103 -> 104 for the §8.1 safe counterpart identity reader
+    // (20260705170000_conversation_counterpart_identity.sql): ONE SECURITY
+    // DEFINER read RPC returning ONLY the display name of the other
+    // unrevoked participant of a 2-person direct conversation the caller
+    // belongs to (kind='direct', caller participant re-checked at fire
+    // time); execute revoked from public/anon, granted to authenticated;
+    // @human-gate-approved, needs-human-gate DRAFT, owner-gated apply;
+    // rollback drops the function only.
+    const SPRINT_BASELINE = 104;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -98,8 +98,15 @@ export async function requestWorkerConversationAction(input: {
   if (!workerProfileId) return { ok: false, reason: "worker_unavailable" };
 
   // Neutral subject from the demand title — no PII, no fabricated content.
+  // The §8.1 permission grant is the just-verified Step 4A gate (owner +
+  // shortlisted + contactable) — passed explicitly as the permission state.
   const subject = (demand?.title as string | null)?.slice(0, 120) ?? null;
-  const result = await getOrCreateDirectConversation(workerProfileId, locale, subject);
+  const result = await getOrCreateDirectConversation(
+    workerProfileId,
+    locale,
+    subject,
+    "allowed_scouting_shortlist",
+  );
   if (!result.ok) return { ok: false, reason: "error" };
   return { ok: true, conversationId: result.data.id };
 }

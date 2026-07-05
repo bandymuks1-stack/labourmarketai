@@ -32,7 +32,9 @@ export type CommunicationErrorCode =
   | "conversation_not_found"
   | "rpc_unavailable"
   | "insert_failed"
-  | "update_failed";
+  | "update_failed"
+  /** §8.1 contact-permission gate: no established relationship → no contact. */
+  | "no_permission";
 
 const SUBJECT_MAX = 240;
 const BODY_MIN = 1;
