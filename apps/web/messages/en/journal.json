@@ -254,7 +254,7 @@
   },
   "unit": "Unit",
   "photo": {
-    "label": "Work photo (optional)",
+    "label": "Add a photo / turn into a photo report (optional)",
     "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended records will be a VIP feature.",
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",
@@ -269,10 +269,10 @@
     "title": "Entry type",
     "quick": "Quick entry",
     "quickHint": "Briefly describe what you worked on and save in one step.",
-    "structured": "Detailed entry",
+    "structured": "Structured report",
     "structuredHint": "After describing the work you will first organize the text — time, quantities and direction become separate fields you check before saving.",
     "photo": "Photo report",
-    "photoHint": "Add a work photo first, then briefly describe what was done. All three types create the same journal entry.",
+    "photoHint": "A photo report is a work entry with photos. You fill it in here, in the Work journal. If the entry is linked to a project or object, the photos will appear in that project's work gallery.",
     "photoFirstNote": "Start with the photo. A short description is still required — the photo uploads only after the entry is saved."
   }
 }

@@ -119,6 +119,41 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["журнал", "дневник", "записать работу"],
     },
   },
+  // Photo report = a work JOURNAL entry mode (owner clarification 2026-07-05,
+  // browser-smoke finding) — NOT a separate system. The finder must answer
+  // "foto ataskaita / foto report" with the journal, where the mode lives.
+  {
+    id: "photo_report",
+    route: "/dashboard/journal",
+    audience: "worker",
+    labels: {
+      en: "Photo report (work journal)",
+      lt: "Foto ataskaita (darbo žurnale)",
+      ru: "Фотоотчёт (журнал работ)",
+    },
+    synonyms: {
+      en: ["photo report", "work photos", "photo entry"],
+      lt: ["foto ataskaita", "foto report", "darbų nuotraukos", "nuotraukų ataskaita"],
+      ru: ["фотоотчёт", "фото отчет", "рабочие фото"],
+    },
+  },
+  // Work gallery = the manager-side read of those SAME journal photos on the
+  // project pages (WAGON 8) — one photo system, two honest surfaces.
+  {
+    id: "work_gallery",
+    route: "/dashboard/projects",
+    audience: "company",
+    labels: {
+      en: "Work gallery (project photo reports)",
+      lt: "Darbų galerija (projekto foto ataskaitos)",
+      ru: "Галерея работ (фотоотчёты проекта)",
+    },
+    synonyms: {
+      en: ["gallery", "work gallery", "project photos"],
+      lt: ["galerija", "darbų galerija", "projekto nuotraukos"],
+      ru: ["галерея", "галерея работ", "фото проекта"],
+    },
+  },
   {
     id: "skills",
     // Skills live on the profile (journal feeds them) — no separate page.
