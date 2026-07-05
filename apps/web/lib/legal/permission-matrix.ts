@@ -173,6 +173,47 @@ export const PERMISSION_MATRIX: readonly PermissionMatrixRow[] = [
     edit: { worker: "no", company: "no", teamOwner: "no", admin: "yes" },
     sources: ["apps/web/lib/auth/superadmin.ts#requireSuperadmin"],
   },
+  // Owner CR-Wagon-7 lock rows (2026-07-05): projects/rosters + assign/end,
+  // service requests, and explicit companies visibility.
+  {
+    // project_worker_assignments: managers of THIS project see/staff its
+    // roster (can_manage_project); workers see their OWN assignments.
+    // Edit = assign/end ONLY through the gated RPCs — no direct table write.
+    key: "projectsRosters",
+    see: { worker: "own", company: "own", teamOwner: "limited", admin: "yes" },
+    edit: { worker: "no", company: "own", teamOwner: "limited", admin: "yes" },
+    sources: [
+      `${MIG}/20260609120000_project_worker_assignment_gate.sql#assign_worker_to_project`,
+      `${MIG}/20260609120000_project_worker_assignment_gate.sql#end_worker_project_assignment`,
+      `${MIG}/20260601091000_project_object_client_context.sql#project_worker_assignments`,
+    ],
+  },
+  {
+    // service_offering_requests: a two-party loop — requester and provider
+    // each see their OWN side; respond/withdraw via the gated RPCs; the
+    // provider learns the requester's display name only through the
+    // identity RPC (never contacts).
+    key: "serviceRequests",
+    see: { worker: "own", company: "own", teamOwner: "own", admin: "yes" },
+    edit: { worker: "own", company: "own", teamOwner: "own", admin: "no" },
+    sources: [
+      `${MIG}/20260627145318_service_offering_requests.sql#service_offering_requests`,
+      `${MIG}/20260627174500_requester_identity_for_provider.sql#requester_identities_for_provider`,
+    ],
+  },
+  {
+    // companies: any SIGNED-IN user can read company rows (companies_select
+    // requires only a session) — the honest broad boundary; editing stays
+    // owner-or-admin. Workers additionally see VERIFIED company identity on
+    // the opportunities board via the Model-A RPC.
+    key: "companies",
+    see: { worker: "yes", company: "yes", teamOwner: "yes", admin: "yes" },
+    edit: { worker: "no", company: "own", teamOwner: "no", admin: "yes" },
+    sources: [
+      `${MIG}/0001_initial_schema.sql#companies_select`,
+      `${MIG}/20260702170000_worker_demand_approved_route_model_a.sql#list_open_demand_for_workers`,
+    ],
+  },
 ];
 
 /**

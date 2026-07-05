@@ -4338,6 +4338,21 @@
             "surface": "Administratoriaus skydeliai",
             "seeNote": "Prieinami tik platformos administratoriams; apsauga užsidaro savaime.",
             "editNote": "Čia veikia tik administratoriai."
+          },
+          "projectsRosters": {
+            "surface": "Projektai, objektai ir sudėtys",
+            "seeNote": "Projektų vadovai mato savo projektų sudėtis; darbuotojai mato savo priskyrimus.",
+            "editNote": "Darbuotoją į projektą priskiria ar priskyrimą užbaigia tik to projekto vadovai per skirtus veiksmus."
+          },
+          "serviceRequests": {
+            "surface": "Paslaugų užklausos",
+            "seeNote": "Užklausos siuntėjas ir teikėjas mato tik savo pusę; administratoriai gali peržiūrėti.",
+            "editNote": "Užklausą siunčia, atsako ar atšaukia tik jos dvi pusės."
+          },
+          "companies": {
+            "surface": "Įmonių profiliai",
+            "seeNote": "Įmonių įrašus mato bet kuris prisijungęs naudotojas; darbuotojai papildomai mato įmonių, kurių poreikiai patvirtinti lentai, tapatybę.",
+            "editNote": "Įmonės profilį redaguoja jos savininkas; platformos komanda gali keisti būseną."
           }
         },
         "messaging": {
