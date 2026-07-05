@@ -4629,7 +4629,18 @@
       "emptyTeamCta": "Start the draft",
       "positionsTitle": "Missing positions",
       "positionsEmpty": "The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
-      "openOps": "Open project management"
+      "openOps": "Open project management",
+      "gallery": {
+        "title": "Work gallery",
+        "countLabel": "{n} photos",
+        "context": "Photos from this project's work journal entries. Workers attach them to their own entries — you only see the ones your access rights allow.",
+        "empty": "No visible photos on this project yet. They will appear when assigned workers attach photos to their work journal entries.",
+        "previewsUnavailable": "Photo previews are not enabled in this environment yet — the list is shown without images.",
+        "previewUnavailableOne": "Preview unavailable",
+        "photoAlt": "Work photo from a journal entry",
+        "unknownWorker": "Worker",
+        "sourceNote": "Photos are part of workers' journal entries — they are never altered or automatically assessed."
+      }
     }
   },
   "setupRoleChoice": {

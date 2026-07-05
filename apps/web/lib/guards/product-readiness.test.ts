@@ -1659,7 +1659,13 @@ describe("no migration files added by this sprint", () => {
     // drops only the two new functions and the new table — feature rows live
     // only there); @human-gate-approved, needs-human-gate DRAFT, owner-gated
     // apply.
-    const SPRINT_BASELINE = 109;
+    // Bumped 109 -> 110 for the WAGON 8 project work gallery read scope
+    // (20260705240000): two ADDITIVE SELECT policies only (journal photo
+    // metadata + private storage objects) mirroring the journal_entries
+    // manager boundary — no new table, no new bucket, no new RPC, nothing
+    // widened beyond what a manager can already read about the parent
+    // entry; owner-gated apply.
+    const SPRINT_BASELINE = 110;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

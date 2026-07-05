@@ -264,5 +264,15 @@
     "prepared": "Photo resized and ready to upload.",
     "tooLargeAfter": "The photo is still too large. Try a different photo.",
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later."
+  },
+  "modes": {
+    "title": "Entry type",
+    "quick": "Quick entry",
+    "quickHint": "Briefly describe what you worked on and save in one step.",
+    "structured": "Detailed entry",
+    "structuredHint": "After describing the work you will first organize the text — time, quantities and direction become separate fields you check before saving.",
+    "photo": "Photo report",
+    "photoHint": "Add a work photo first, then briefly describe what was done. All three types create the same journal entry.",
+    "photoFirstNote": "Start with the photo. A short description is still required — the photo uploads only after the entry is saved."
   }
 }

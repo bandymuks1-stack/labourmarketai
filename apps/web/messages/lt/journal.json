@@ -264,5 +264,15 @@
     "prepared": "Nuotrauka sumažinta ir paruošta įkėlimui.",
     "tooLargeAfter": "Nuotrauka vis dar per didelė. Pabandykite kitą nuotrauką.",
     "uploadFailed": "Nuotraukos įkelti nepavyko. Įrašas išsaugotas — pabandykite nuotrauką pridėti vėliau."
+  },
+  "modes": {
+    "title": "Įrašo tipas",
+    "quick": "Greitas įrašas",
+    "quickHint": "Trumpai aprašykite, ką dirbote, ir išsaugokite vienu žingsniu.",
+    "structured": "Išsamus įrašas",
+    "structuredHint": "Aprašę darbą pirmiausia sutvarkysite tekstą — laikas, kiekiai ir kryptis taps atskirais laukais, kuriuos peržiūrėsite prieš išsaugant.",
+    "photo": "Nuotraukos ataskaita",
+    "photoHint": "Pirmiausia pridėkite darbo nuotrauką, tada trumpai aprašykite, kas nuveikta. Visi trys tipai kuria tą patį žurnalo įrašą.",
+    "photoFirstNote": "Pradėkite nuo nuotraukos. Trumpas aprašymas vis tiek reikalingas — nuotrauka įkeliama tik išsaugojus įrašą."
   }
 }

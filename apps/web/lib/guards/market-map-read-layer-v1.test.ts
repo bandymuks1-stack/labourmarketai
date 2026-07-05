@@ -163,6 +163,12 @@ describe("NO new DB migration in this PR", () => {
     // new gated write RPCs (create_follow_up_task_v1 /
     // set_follow_up_task_status_v1); no existing RPC recreated;
     // @human-gate-approved, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(109);
+    // Bumped 109 -> 110 for the WAGON 8 project work gallery read scope
+    // (20260705240000) — ADDITIVE ONLY: two SELECT policies mirroring the
+    // existing journal_entries manager boundary (manages_organization via
+    // the entry's engagement context) onto journal_entry_photos + the
+    // private storage bucket; no new table/bucket/RPC, no write access;
+    // owner-gated apply.
+    expect(count).toBeLessThanOrEqual(110);
   });
 });
