@@ -5737,7 +5737,8 @@
       "error": "Could not save. Try again.",
       "reviewed": "Company reviewed your interest",
       "contacted": "Company marked: contacted"
-    }
+    },
+    "companyVerified": "Verified company"
   },
   "workerIntake": {
     "title": "Worker intake",

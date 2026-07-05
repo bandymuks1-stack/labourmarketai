@@ -265,6 +265,18 @@ export default async function OpportunitiesPage({
                         {t("fieldCompany")}:
                       </span>{" "}
                       {need.companyName}
+                      {/* Trust minimum (PR11): "verified" is shown ONLY when
+                          the row carries the real approved-route signal —
+                          admin-verified company via the Model-A gate. Never
+                          copy-driven, never default. */}
+                      {need.routeStatus === "approved_direct_partner" ? (
+                        <span
+                          className="ml-2 rounded-sm border border-state-success/40 bg-state-success/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-success"
+                          data-testid="opportunity-company-verified"
+                        >
+                          {t("companyVerified")}
+                        </span>
+                      ) : null}
                     </p>
                   ) : null}
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
