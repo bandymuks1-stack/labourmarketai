@@ -25,6 +25,7 @@ import {
   listCompanyWorkerInvitations,
 } from "@/lib/company/company-workers";
 import { getDemandDraft } from "@/lib/demand/demand-drafts";
+import { HelpRequestPanel } from "@/components/app/help-request-panel";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
 import { getOwnCompany as getOwnCompanyProfile } from "@/lib/company/company-setup";
@@ -741,6 +742,15 @@ export default async function CompanyDashboardPage({
           }}
         />
       </section>
+
+      {/* WAGON 10 (areas 18+19) — typed INTERNAL help requests: recruiter /
+          accounting / legal / document check / demand-filling help. Creates
+          an operator-visible customer_requests record; sends nothing. */}
+      {/* Demand-context select stays empty here by design: reading the
+          buyer request list from the company room would break the
+          room-separation guard; the RPC still accepts an optional demand
+          pointer for the surfaces that own that list. */}
+      <HelpRequestPanel demandOptions={[]} />
 
       <CompanyScoutingBridge />
 

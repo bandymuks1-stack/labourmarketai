@@ -43,6 +43,7 @@ import { isSuperadmin } from "@/lib/auth/superadmin";
  */
 
 import type {
+  IntakeHelpRequestRow,
   IntakeLeadRow,
   IntakeRequestRow,
   IntakeSection,
@@ -168,6 +169,9 @@ async function readRequests(
     .from("customer_requests")
     .select(REQUESTS_SELECT)
     .in("status", [...INTAKE_REQUEST_STATUSES])
+    // WAGON 10: typed help requests have their OWN queue section —
+    // keep the demand queue demand-only.
+    .is("payload->>help_type", null)
     .order("created_at", { ascending: false })
     .limit(ROW_LIMIT);
   if (res.error) {
@@ -203,6 +207,57 @@ async function readRequests(
   };
 }
 
+/** WAGON 10 — typed internal help requests (payload.help_type set). Read
+ *  under the same admin RLS as the demand queue; honest degradation via the
+ *  same not-readable states. The note (need_summary) renders only on the
+ *  requireSuperadmin-gated panel. */
+async function readHelpRequests(
+  supabase: SupabaseClient,
+): Promise<IntakeSection<IntakeHelpRequestRow>> {
+  const res = await asAny(supabase)
+    .from("customer_requests")
+    .select("id, status, profile_id, need_summary, payload, created_at")
+    .in("status", [...INTAKE_REQUEST_STATUSES])
+    .not("payload->>help_type", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(ROW_LIMIT);
+  if (res.error) {
+    return {
+      readable: false,
+      reason: isNotReadableCode(res.error.code) ? "needs_admin_read" : "error",
+    };
+  }
+  type Row = {
+    id: string;
+    status: string;
+    profile_id: string;
+    need_summary: string | null;
+    payload: Record<string, unknown> | null;
+    created_at: string;
+  };
+  return {
+    readable: true,
+    rows: ((res.data ?? []) as Row[])
+      .filter(
+        (r) =>
+          (INTAKE_REQUEST_STATUSES as readonly string[]).includes(r.status) &&
+          typeof r.payload?.help_type === "string",
+      )
+      .map((r) => ({
+        id: r.id,
+        helpType: String(r.payload?.help_type),
+        status: r.status as IntakeHelpRequestRow["status"],
+        profileId: r.profile_id,
+        note: r.need_summary,
+        demandRequestId:
+          typeof r.payload?.demand_request_id === "string"
+            ? r.payload.demand_request_id
+            : null,
+        createdAt: r.created_at,
+      })),
+  };
+}
+
 /**
  * Operator intake overview. Real rows only; each source carries its own
  * honest availability state — nothing is faked when a read path is missing.
@@ -217,13 +272,15 @@ export async function getLeadIntakeOverview(): Promise<LeadIntakeOverview> {
       leads: { readable: false, reason: "needs_admin_read" },
       waitlist: { readable: false, reason: "needs_admin_read" },
       requests: { readable: false, reason: "needs_admin_read" },
+      helpRequests: { readable: false, reason: "needs_admin_read" },
     };
   }
 
-  const [leads, waitlist, requests] = await Promise.all([
+  const [leads, waitlist, requests, helpRequests] = await Promise.all([
     readLeads(supabase),
     readWaitlist(),
     readRequests(supabase),
+    readHelpRequests(supabase),
   ]);
-  return { leads, waitlist, requests };
+  return { leads, waitlist, requests, helpRequests };
 }

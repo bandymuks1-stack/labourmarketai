@@ -297,38 +297,39 @@ describe("command finder — UI renders only from the registry", () => {
   });
 });
 
-// ── Owner lock (2026-07-05): NO FAKE FINDER RESULTS for WAGON-10-pending
-// help terms. Until Wagon 10 lands the real internal request flow, the
-// recruiter/accounting/legal help entries must read as INFORMATION/help
-// surfaces (never "request X" action phrasing) and route only to honest
-// existing surfaces. When Wagon 10 ships the real CTAs, update routes AND
-// this guard together — action phrasing becomes legal only then.
-describe("W10-pending help terms stay information-shaped (owner lock)", () => {
-  const PENDING_IDS = ["recruiter_help", "accounting_help", "legal_help"];
-  const ACTION_TOKENS = [
-    /request\s/i, // en action phrasing
-    /užsak/i, // lt "užsakyti"
-    /pateikti užklaus/i, // lt "submit a request"
-    /заказать/i, // ru order
-    /запросить/i, // ru request
-  ];
-  const INFO_ROUTE_ALLOWLIST = new Set([
-    "/dashboard/service-requests",
-    "/dashboard/documents",
-    "/about",
-  ]);
-  for (const id of PENDING_IDS) {
+// ── Owner lock (2026-07-05), FLIPPED by WAGON 10: the help terms now have
+// a REAL internal request flow (typed help-request panel on the company
+// workspace → submit_help_request_v1 → customer_requests row on the
+// operator intake queue). Action phrasing is therefore truthful and
+// REQUIRED — and the entries must route to the surface that actually
+// creates the record. Updated together with the registry, as the lock
+// demands. The action still assigns no specialist and sends nothing —
+// the panel guard (help-request-cta.test.ts) pins that honesty.
+describe("W10 help terms are REAL request actions (owner lock flipped)", () => {
+  const HELP_IDS = ["recruiter_help", "accounting_help", "legal_help"];
+  const ACTION_TOKENS: Record<"en" | "lt" | "ru", RegExp> = {
+    en: /^request\s/i,
+    lt: /^prašyti\s/i,
+    ru: /^запросить\s/i,
+  };
+  for (const id of HELP_IDS) {
     const entry = COMMAND_REGISTRY.find((e) => e.id === id);
-    it(`${id} exists and routes to an allowed info surface`, () => {
+    it(`${id} routes to the real help-request surface (company workspace)`, () => {
       expect(entry).toBeTruthy();
-      expect(INFO_ROUTE_ALLOWLIST.has(entry!.route)).toBe(true);
+      expect(entry!.route).toBe("/dashboard/company");
+      // The real panel is company-gated, so the finder entry must be too.
+      expect(entry!.audience).toBe("company");
     });
-    it(`${id} labels carry no request-action phrasing in any locale`, () => {
+    it(`${id} labels carry truthful request-action phrasing in every locale`, () => {
       for (const locale of ["en", "lt", "ru"] as const) {
         const label = entry!.labels[locale];
-        for (const rx of ACTION_TOKENS) {
-          expect(label, `${id}.${locale} label "${label}"`).not.toMatch(rx);
-        }
+        expect(label, `${id}.${locale} label "${label}"`).toMatch(
+          ACTION_TOKENS[locale],
+        );
+        // The old hedge is gone — a real action is not "(information)".
+        expect(label.toLowerCase()).not.toContain("(information");
+        expect(label.toLowerCase()).not.toContain("(informacija");
+        expect(label.toLowerCase()).not.toContain("(информация");
       }
     });
   }

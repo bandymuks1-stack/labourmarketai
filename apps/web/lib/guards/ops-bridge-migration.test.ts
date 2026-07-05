@@ -282,6 +282,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // journal_entries manager boundary onto journal_entry_photos + the
     // private storage bucket — no new table/bucket/RPC, no writes widened;
     // owner-gated apply).
-    expect(guard).toMatch(/SPRINT_BASELINE = 110/);
+    // Then to 111 for the WAGON 10 help-request intake (20260705260000;
+    // RED-class definer function but NO recreate of any existing object:
+    // ONE new-name RPC submit_help_request_v1 inserting typed help rows on
+    // the EXISTING customer_requests table at 'in_review';
+    // @human-gate-approved, owner-gated apply).
+    expect(guard).toMatch(/SPRINT_BASELINE = 111/);
   });
 });

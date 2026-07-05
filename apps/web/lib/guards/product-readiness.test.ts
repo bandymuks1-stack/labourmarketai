@@ -1665,7 +1665,13 @@ describe("no migration files added by this sprint", () => {
     // manager boundary — no new table, no new bucket, no new RPC, nothing
     // widened beyond what a manager can already read about the parent
     // entry; owner-gated apply.
-    const SPRINT_BASELINE = 110;
+    // Bumped 110 -> 111 for the WAGON 10 help-request intake
+    // (20260705260000): one NEW-name gated RPC (submit_help_request_v1) on
+    // the EXISTING customer_requests intake table — typed internal help
+    // requests at status 'in_review' (never on the submitted-only demand
+    // projections); no new table, no policy change, nothing recreated;
+    // @human-gate-approved, owner-gated apply.
+    const SPRINT_BASELINE = 111;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

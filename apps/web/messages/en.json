@@ -4977,11 +4977,45 @@
       "footnote": "Bench management, availability windows and team recommendations will land later, step by step."
     }
   },
+  "helpRequests": {
+      "title": "Internal help requests",
+      "intro": "Choose what you need help with — we register an internal request that a person will review. Nothing is sent outside the platform.",
+      "types": {
+        "recruiter": "Recruiter help",
+        "accounting": "Accounting help",
+        "legal": "Legal help",
+        "documents": "Document check",
+        "demand_filling": "Help filling the demand"
+      },
+      "noteLabel": "Briefly describe the situation (optional)",
+      "notePlaceholder": "E.g.: need 4 bricklayers in the Netherlands from August…",
+      "demandContextLabel": "Link to your demand (optional)",
+      "demandContextNone": "No specific demand",
+      "submit": "Register request",
+      "submitting": "Registering…",
+      "sentTitle": "Request registered",
+      "sentBody": "A person will review it and reach out through the platform. No specialist is assigned automatically — you will hear about next steps after the review.",
+      "errorGeneric": "Could not register. Please try again.",
+      "notReady": "Help requests are not enabled in this environment yet.",
+      "tooManyOpen": "You have too many open help requests — please wait until the existing ones are reviewed.",
+      "noteTooLong": "The description is too long (max 500 characters).",
+      "internalNote": "Internal record — no emails or messages are sent to anyone.",
+      "explanationPending": "The explanation is being prepared from the Lithuanian master version."
+    },
   "salesIntake": {
     "title": "Sales intake",
     "intro": "A view of who is coming in: submitted demand requests in review, waitlist signups, and stored leads. Viewing only — real recorded rows, nothing editable here.",
     "honestNote": "Viewing only. Nothing here contacts anyone — no email, no SMS, no messages. The only action records an internal follow-up task for the team.",
     "requestsHeading": "Demand requests in review",
+    "helpRequestsHeading": "Help requests",
+    "helpDemandRef": "Linked demand",
+    "helpTypes": {
+      "recruiter": "Recruiter help",
+      "accounting": "Accounting help",
+      "legal": "Legal help",
+      "documents": "Document check",
+      "demand_filling": "Demand filling help"
+    },
     "waitlistHeading": "Waitlist signups",
     "leadsHeading": "Stored leads",
     "sourceLabel": "Source",
