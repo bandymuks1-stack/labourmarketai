@@ -70,13 +70,28 @@ export type IntakeSection<Row> =
     }
   | { readonly readable: true; readonly rows: readonly Row[] };
 
+/** WAGON 10 — a typed internal help request (customer_requests row with
+ *  payload.help_type, created only by submit_help_request_v1). Id-only
+ *  subject pointer + the closed help type; the note is the row's own
+ *  need_summary (author-provided, shown only on the superadmin panel). */
+export type IntakeHelpRequestRow = {
+  readonly id: string;
+  readonly helpType: string;
+  readonly status: IntakeRequestStatus;
+  readonly profileId: string;
+  readonly note: string | null;
+  readonly demandRequestId: string | null;
+  readonly createdAt: string;
+};
+
 export type LeadIntakeOverview = {
   readonly leads: IntakeSection<IntakeLeadRow>;
   readonly waitlist: IntakeSection<IntakeWaitlistRow>;
   readonly requests: IntakeSection<IntakeRequestRow>;
+  readonly helpRequests: IntakeSection<IntakeHelpRequestRow>;
 };
 
-export type IntakeKind = "lead" | "waitlist" | "request";
+export type IntakeKind = "lead" | "waitlist" | "request" | "help_request";
 
 /**
  * Deterministic note for the EXISTING §8.13 follow-up queue (its existing

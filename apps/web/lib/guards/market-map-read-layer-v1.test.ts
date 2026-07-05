@@ -169,6 +169,11 @@ describe("NO new DB migration in this PR", () => {
     // the entry's engagement context) onto journal_entry_photos + the
     // private storage bucket; no new table/bucket/RPC, no write access;
     // owner-gated apply.
-    expect(count).toBeLessThanOrEqual(110);
+    // Bumped 110 -> 111 for the WAGON 10 help-request intake
+    // (20260705260000) — one NEW-name SECURITY DEFINER RPC
+    // (submit_help_request_v1) inserting a typed row on the EXISTING
+    // customer_requests table at status 'in_review'; no table/policy
+    // change, no recreate; @human-gate-approved, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(111);
   });
 });

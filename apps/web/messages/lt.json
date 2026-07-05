@@ -4977,11 +4977,45 @@
       "footnote": "Rezervo valdymas, prieinamumo langai ir komandų rekomendacijos atsiras vėliau, palaipsniui."
     }
   },
+  "helpRequests": {
+      "title": "Vidinės pagalbos užklausos",
+      "intro": "Pasirinkite, kokios pagalbos reikia — užregistruosime vidinę užklausą, kurią peržiūrės žmogus. Niekas neišsiunčiama už platformos ribų.",
+      "types": {
+        "recruiter": "Rekruterio pagalba",
+        "accounting": "Buhalterijos pagalba",
+        "legal": "Teisinė pagalba",
+        "documents": "Dokumentų patikra",
+        "demand_filling": "Pagalba pildant poreikį"
+      },
+      "noteLabel": "Trumpai aprašykite situaciją (neprivaloma)",
+      "notePlaceholder": "Pvz.: reikia 4 mūrininkų Nyderlanduose nuo rugpjūčio…",
+      "demandContextLabel": "Susieti su jūsų poreikiu (neprivaloma)",
+      "demandContextNone": "Be konkretaus poreikio",
+      "submit": "Registruoti užklausą",
+      "submitting": "Registruojama…",
+      "sentTitle": "Užklausa užregistruota",
+      "sentBody": "Ją peržiūrės žmogus ir susisieks per platformą. Specialistas nėra priskiriamas automatiškai — apie tolimesnius žingsnius sužinosite peržiūrėjus užklausą.",
+      "errorGeneric": "Nepavyko užregistruoti. Bandykite dar kartą.",
+      "notReady": "Pagalbos užklausos šioje aplinkoje dar neįjungtos.",
+      "tooManyOpen": "Turite per daug atvirų pagalbos užklausų — palaukite, kol bus peržiūrėtos esamos.",
+      "noteTooLong": "Aprašymas per ilgas (iki 500 ženklų).",
+      "internalNote": "Vidinis įrašas — jokie laiškai ar žinutės niekam nesiunčiami.",
+      "explanationPending": "Paaiškinimas ruošiamas iš lietuviško pagrindinio teksto."
+    },
   "salesIntake": {
     "title": "Pardavimų srautas",
     "intro": "Tik peržiūrai skirtas vaizdas, kas ateina: pateiktos poreikio užklausos peržiūroje, laukiančiųjų sąrašo registracijos ir įrašyti kontaktai. Tik realūs įrašai.",
     "honestNote": "Tik skaitymui. Niekas čia su niekuo nesusisiekia — jokių el. laiškų, SMS ar žinučių. Vienintelis veiksmas — vidinės tolesnio veiksmo užduoties įrašymas komandai.",
     "requestsHeading": "Poreikio užklausos peržiūroje",
+    "helpRequestsHeading": "Pagalbos užklausos",
+    "helpDemandRef": "Susijęs poreikis",
+    "helpTypes": {
+      "recruiter": "Rekruterio pagalba",
+      "accounting": "Buhalterijos pagalba",
+      "legal": "Teisinė pagalba",
+      "documents": "Dokumentų patikra",
+      "demand_filling": "Poreikio pildymo pagalba"
+    },
     "waitlistHeading": "Laukiančiųjų sąrašo registracijos",
     "leadsHeading": "Įrašyti kontaktai",
     "sourceLabel": "Šaltinis",

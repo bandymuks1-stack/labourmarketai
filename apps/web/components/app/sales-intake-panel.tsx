@@ -14,6 +14,7 @@ import {
 import {
   buildIntakeFollowUpNote,
   type IntakeKind,
+  type IntakeHelpRequestRow,
   type IntakeLeadRow,
   type IntakeRequestRow,
   type IntakeSection,
@@ -234,6 +235,48 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
     );
   }
 
+  /** WAGON 10 — typed internal help request row: closed type label,
+   *  author note (superadmin panel only), id-only subject pointer, and the
+   *  reused follow-up action. Status is recorded data, not a CRM claim. */
+  function helpRequestRow(r: IntakeHelpRequestRow) {
+    return (
+      <li key={r.id} className="card-border flex flex-col gap-2 p-3">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <span className="min-w-0 text-sm font-semibold text-text-primary">
+            {t(`helpTypes.${r.helpType}` as never)}
+          </span>
+          {mono(r.status)}
+        </div>
+        {r.note ? (
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {r.note}
+          </p>
+        ) : null}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
+          <span>
+            {t("createdLabel")}: {r.createdAt.slice(0, 10)}
+          </span>
+          {r.demandRequestId ? (
+            <span className="font-mono text-[10px] uppercase tracking-label">
+              {t("helpDemandRef")}: {r.demandRequestId.slice(0, 8)}…
+            </span>
+          ) : null}
+          {isAdmin && (
+            <Link
+              href={`/dashboard/admin/users/${r.profileId}`}
+              className="font-mono text-[10px] text-brand-blue hover:underline"
+            >
+              {r.profileId.slice(0, 8)}… → {t("openSubject")}
+            </Link>
+          )}
+        </div>
+        <div>
+          {followUpButton("help_request", r.id, r.helpType, r.profileId)}
+        </div>
+      </li>
+    );
+  }
+
   return (
     <section className="flex flex-col gap-3" data-testid="admin-sales-intake">
       <div className="flex flex-col gap-0.5">
@@ -254,6 +297,22 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
         ) : (
           <ul className="flex flex-col gap-2" data-testid="intake-requests">
             {data.requests.rows.map(requestRow)}
+          </ul>
+        )}
+      </div>
+
+      {/* WAGON 10 — typed internal help requests (recruiter / accounting /
+          legal / documents / demand filling). Real rows from the same
+          intake table; a human reviews them — nothing is auto-assigned. */}
+      <div className="flex flex-col gap-1.5">
+        {heading("helpRequestsHeading", data.helpRequests)}
+        {!data.helpRequests.readable ? (
+          notReadable(data.helpRequests, "intake-help-requests-unreadable")
+        ) : data.helpRequests.rows.length === 0 ? (
+          emptyState("intake-help-requests-empty")
+        ) : (
+          <ul className="flex flex-col gap-2" data-testid="intake-help-requests">
+            {data.helpRequests.rows.map(helpRequestRow)}
           </ul>
         )}
       </div>

@@ -21,14 +21,12 @@
  *    destination page keeps enforcing its own auth / role / superadmin
  *    gates server-side. "admin" entries surface only for admin viewers.
  *
- * WAGON-10 upgrade path: the train doc's "recruiter help", "accounting
- * help" and "legal help" terms have NO dedicated route yet — WAGON 10
- * lands the demand-support request surfaces. Until then those terms map
- * honestly to the CLOSEST real surface (service requests for staffing /
- * accounting help, the documents room for legal / document help). When
- * WAGON 10 ships, ONLY the `route` values of `recruiter_help`,
- * `accounting_help` and `legal_help` change — ids, labels and synonyms
- * stay stable.
+ * WAGON 10 (shipped): the "recruiter help", "accounting help" and
+ * "legal help" terms route to the REAL typed help-request panel on the
+ * company workspace, where submitting creates an internal
+ * customer_requests record reviewed by a human (owner lock #1 flipped
+ * together with command-finder.test.ts). Ids and synonyms stayed stable;
+ * labels moved from "(information)" to truthful request-action phrasing.
  */
 
 import type { ActiveLocale } from "@/lib/i18n/config";
@@ -327,18 +325,21 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["заявки на услуги", "найти услугу", "заказать услугу"],
     },
   },
-  // WAGON-10-PENDING: recruiter / accounting help have no dedicated route
-  // yet. Service requests is the closest REAL "ask for help" surface today.
-  // When WAGON 10 lands the demand-support request routes, update ONLY the
-  // `route` fields below.
+  // WAGON 10 SHIPPED (owner lock #1 flip, updated together with
+  // command-finder.test.ts): the help terms now route to the REAL typed
+  // help-request panel on the company workspace (#help), where submitting
+  // creates an internal customer_requests record a human reviews. Action
+  // phrasing is now truthful — a real internal request is created. The
+  // platform still gives no legal/accounting advice, and no specialist is
+  // auto-assigned; the panel says so.
   {
     id: "recruiter_help",
-    route: "/dashboard/service-requests",
+    route: "/dashboard/company",
     audience: "company",
     labels: {
-      en: "Recruiter / staffing help (information)",
-      lt: "Rekruterio / įdarbinimo pagalba (informacija)",
-      ru: "Помощь рекрутера / подбор персонала (информация)",
+      en: "Request recruiter / staffing help",
+      lt: "Prašyti rekruterio / įdarbinimo pagalbos",
+      ru: "Запросить помощь рекрутера / подбор персонала",
     },
     synonyms: {
       en: ["recruiter", "staffing help", "recruitment"],
@@ -348,12 +349,12 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "accounting_help",
-    route: "/dashboard/service-requests",
+    route: "/dashboard/company",
     audience: "company",
     labels: {
-      en: "Accounting help (information)",
-      lt: "Buhalterijos pagalba (informacija)",
-      ru: "Бухгалтерская помощь (информация)",
+      en: "Request accounting help",
+      lt: "Prašyti buhalterijos pagalbos",
+      ru: "Запросить бухгалтерскую помощь",
     },
     synonyms: {
       en: ["accounting", "accountant", "bookkeeping", "taxes"],
@@ -361,17 +362,17 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["бухгалтерия", "бухгалтер", "налоги"],
     },
   },
-  // WAGON-10-PENDING: legal / jurisdiction help routes to the real
-  // documents room until the WAGON 9/10 guidance + help-request surfaces
-  // exist. Informational routing only — the platform gives no legal advice.
+  // Company sessions get the REAL legal/document help request (the typed
+  // panel); the public "documents" entry below keeps the informational
+  // documents room reachable for everyone (incl. WAGON 9 LT guidance).
   {
     id: "legal_help",
-    route: "/dashboard/documents",
-    audience: "public",
+    route: "/dashboard/company",
+    audience: "company",
     labels: {
-      en: "Legal & document help (documents room)",
-      lt: "Teisinė ir dokumentų pagalba (dokumentų erdvė)",
-      ru: "Юридическая и документная помощь (раздел документов)",
+      en: "Request legal & document help",
+      lt: "Prašyti teisinės ir dokumentų pagalbos",
+      ru: "Запросить юридическую и документную помощь",
     },
     synonyms: {
       en: ["legal help", "lawyer", "jurisdiction"],
