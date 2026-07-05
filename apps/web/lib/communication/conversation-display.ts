@@ -21,6 +21,10 @@
  *   - team → always RESTRICTED (the identity reader is deliberately
  *     direct-only; a multi-party roster is not a single counterpart).
  *     Scope stays honest-unknown ("Kontekstas nepatikslintas").
+ *   - direct + non-empty subject → §8.2 demand context: the subject is the
+ *     demand title snapshotted by the gated scouting action (the only
+ *     direct-subject writer, guard-pinned), so the scope line honestly says
+ *     the thread is about a work request instead of "context unspecified".
  *
  * Pure + deterministic. Returns i18n keys RELATIVE to the `communication`
  * namespace, so the page (whose `t` is scoped to "communication") can render
@@ -65,6 +69,15 @@ export interface ConversationCardModel {
   /** True when the scope is honestly known; false = honest-unknown fallback. */
   readonly scopeKnown: boolean;
   /**
+   * True when this direct thread carries a REAL demand/request context
+   * (§8.2): its subject is the demand title snapshotted by the gated
+   * scouting action (request-worker-conversation — the ONLY writer of a
+   * direct-conversation subject, guard-pinned). The UI then labels the
+   * subject as a work-request context instead of an unspecified scope.
+   * Never true for support/team threads and never without a real subject.
+   */
+  readonly demandContext: boolean;
+  /**
    * i18n key (under `communication`) for who STARTED the thread — derived only
    * from the real `conversations.created_by` vs the viewer's id (RLS-safe: the
    * row is already readable by the viewer). `null` when `created_by` is missing
@@ -98,6 +111,12 @@ export function describeConversationCard(input: {
   /** Real display name from readCounterpartIdentities (§8.1) — direct only.
    *  Absent/blank → the counterpart stays honestly restricted. */
   counterpartName?: string | null;
+  /** The conversation's real `subject` column (§8.2 demand context). For a
+   *  DIRECT thread a non-empty subject is the demand title snapshotted by
+   *  the gated scouting action — the only direct-subject writer
+   *  (guard-pinned) — so the scope line can honestly label it as a
+   *  work-request context. Ignored for support/team. */
+  subject?: string | null;
 }): ConversationCardModel {
   const kind = normalizeKind(input.kind);
   const typeKey = `kind.${kind}`;
@@ -112,9 +131,17 @@ export function describeConversationCard(input: {
       counterpartyRestricted: false,
       scopeKey: "scope.support",
       scopeKnown: true,
+      demandContext: false,
       originKey,
     };
   }
+
+  // §8.2 demand context — REAL data only: a direct thread with a non-empty
+  // subject was opened about a demand (the subject IS the demand title,
+  // written only by the gated scouting action). Team threads never qualify.
+  const demandContext =
+    kind === "direct" && (input.subject ?? "").trim().length > 0;
+  const scopeKey = demandContext ? "scope.demand" : "scope.unknown";
 
   // direct with a PERMITTED real name (safe identity reader, §8.1): the
   // counterpart is honestly known. Only a non-empty trimmed name counts —
@@ -129,8 +156,9 @@ export function describeConversationCard(input: {
       counterpartyName: permittedName,
       counterpartyKnown: true,
       counterpartyRestricted: false,
-      scopeKey: "scope.unknown",
-      scopeKnown: false,
+      scopeKey,
+      scopeKnown: demandContext,
+      demandContext,
       originKey,
     };
   }
@@ -146,8 +174,9 @@ export function describeConversationCard(input: {
     counterpartyName: null,
     counterpartyKnown: false,
     counterpartyRestricted: true,
-    scopeKey: "scope.unknown",
-    scopeKnown: false,
+    scopeKey,
+    scopeKnown: demandContext,
+    demandContext,
     originKey,
   };
 }
