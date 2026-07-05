@@ -1,10 +1,16 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { LegalDisclaimer } from "@/components/marketing/legal-notes";
 
 /**
  * Marketplace rules (full-completion train PR 9). Honest, launch-ready rules:
  * no fake verification, no legal-eligibility promise, no contacts without
  * permission, moderation before public visibility, payments not active.
  * Rendered from real i18n content (not a placeholder).
+ *
+ * CR train WAGON 2 consistency pass: the rules keep their real content, and
+ * the page now carries the same honesty framing as the rest of the legal
+ * pack — a review note (final binding wording owner/lawyer-gated) and the
+ * informational-only disclaimer.
  */
 export default async function MarketplaceRulesPage({
   params,
@@ -35,6 +41,15 @@ export default async function MarketplaceRulesPage({
           </li>
         ))}
       </ul>
+      <p
+        className="mt-8 text-sm leading-relaxed text-text-secondary"
+        data-testid="marketplace-rules-review-note"
+      >
+        {t("reviewNote")}
+      </p>
+      <div className="mt-4">
+        <LegalDisclaimer />
+      </div>
     </article>
   );
 }

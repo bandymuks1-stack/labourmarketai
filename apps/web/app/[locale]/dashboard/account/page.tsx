@@ -111,6 +111,57 @@ export default async function AccountPage({
         </Link>
       </section>
 
+      {/* Privacy & data explanations (CR train WAGON 2): settings-appropriate
+          LINKS ONLY (no catalogue/launcher grid — account stays settings-only).
+          Points at the public explanation pack so a signed-in user can find
+          what the platform is, what data it uses and who can see it. */}
+      <section className="card-border p-5" data-testid="account-privacy-data">
+        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          {tRoot("legal.accountSection.title")}
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+          {tRoot("legal.accountSection.intro")}
+        </p>
+        <ul className="mt-3 flex flex-col gap-2">
+          <li>
+            <Link
+              href="/about"
+              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+            >
+              <span>{tRoot("about.navLabel")}</span>
+              <span aria-hidden className="text-text-muted">→</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/legal/privacy"
+              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+            >
+              <span>{tRoot("legal.privacy.title")}</span>
+              <span aria-hidden className="text-text-muted">→</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/legal/data-access"
+              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+            >
+              <span>{tRoot("legal.dataAccess.title")}</span>
+              <span aria-hidden className="text-text-muted">→</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/legal/data-protection"
+              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+            >
+              <span>{tRoot("legal.dataProtection.title")}</span>
+              <span aria-hidden className="text-text-muted">→</span>
+            </Link>
+          </li>
+        </ul>
+      </section>
+
       {isAdmin && (
         <AdminUiToggle
           hidden={adminUiHidden}

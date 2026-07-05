@@ -5,21 +5,24 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
   LegalDisclaimer,
   LegalSectionList,
-  PendingLegalItems,
   PendingLegalNotice,
   type LegalSection,
 } from "@/components/marketing/legal-notes";
 
 /**
- * Privacy / GDPR explanation page (CR train WAGON 2, audit area 2).
+ * "Your data and who can see it" — security / data-access explanation page
+ * (CR train WAGON 2, audit area 4: previously RED — the access rules were
+ * real and heavily audited, but there was ZERO user-facing explanation).
  *
- * Upgraded from the honest "being prepared" stub to a structured plain-language
- * explanation: what data is used, why, who can see it, consent, rights (the
- * REAL manual request process), and retention. Every fact is derived from the
- * shipped product (consents audit trail, closed-by-default access rules, no
- * trackers). The BINDING legal wording remains owner/lawyer-gated (train
- * stop-rule 5): the page renders the visible pending-legal notice plus an
- * explicit list of what still awaits final wording — no fake legal finality.
+ * Every statement is derived from audited source, claiming NOTHING broader:
+ *   - closed-by-default row ownership (RLS policies across migrations),
+ *   - scouting anonymization (scout-safe-view) + contacts only by permission,
+ *   - employers can never read a worker's saved locations (boundary pin),
+ *   - worker documents shared only with consent, counts-only aggregates,
+ *   - conversation visibility limited to participants, grant/revoke history
+ *     (docs/audits/CHAT_VISIBILITY_AUDIT.md),
+ *   - fail-closed superadmin gating of admin queues.
+ * Wording is deliberately non-technical ("your rows are yours").
  */
 export async function generateMetadata({
   params,
@@ -30,9 +33,9 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "legal" });
   return buildPageMetadata({
     locale,
-    path: "/legal/privacy",
-    title: t("privacy.title"),
-    description: t("privacy.intro"),
+    path: "/legal/data-access",
+    title: t("dataAccess.title"),
+    description: t("dataAccess.intro"),
   });
 }
 
@@ -44,42 +47,34 @@ export default async function LegalPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("legal");
-  const sections = t.raw("privacy.sections") as LegalSection[];
-  const pendingItems = t.raw("privacy.pendingItems") as string[];
+  const sections = t.raw("dataAccess.sections") as LegalSection[];
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-privacy">
+    <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-data-access">
       <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
-        {t("privacy.title")}
+        {t("dataAccess.title")}
       </h1>
       <div className="mt-6">
         <PendingLegalNotice />
       </div>
-      <p className="mt-6 text-sm leading-relaxed text-text-secondary">{t("privacy.intro")}</p>
+      <p className="mt-6 text-sm leading-relaxed text-text-secondary">{t("dataAccess.intro")}</p>
       <LegalSectionList sections={sections} />
-      <PendingLegalItems title={t("privacy.pendingTitle")} items={pendingItems} />
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-text-secondary">{t("requestContact")}</p>
         <LegalDisclaimer />
       </div>
       <nav aria-label={t("related")} className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
         <Link
-          href="/legal/data-access"
+          href="/legal/privacy"
           className="text-sm text-text-secondary hover:text-text-primary"
         >
-          {t("dataAccess.title")} →
+          {t("privacy.title")} →
         </Link>
         <Link
           href="/legal/data-protection"
           className="text-sm text-text-secondary hover:text-text-primary"
         >
           {t("dataProtection.title")} →
-        </Link>
-        <Link
-          href="/legal/cookies"
-          className="text-sm text-text-secondary hover:text-text-primary"
-        >
-          {t("cookies.title")} →
         </Link>
       </nav>
     </article>

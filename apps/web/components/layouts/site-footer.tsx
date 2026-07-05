@@ -82,6 +82,9 @@ export async function SiteFooter() {
             <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary">
               {nav("pricing")}
             </Link>
+            <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary">
+              {t("about")}
+            </Link>
             <Link href="/for-workers" className="text-sm text-text-secondary hover:text-text-primary">
               {nav("resources")}
             </Link>
@@ -102,6 +105,12 @@ export async function SiteFooter() {
             </Link>
             <Link href="/legal/marketplace-rules" className="text-sm text-text-secondary hover:text-text-primary">
               {legal("marketplaceRules.title")}
+            </Link>
+            <Link href="/legal/data-protection" className="text-sm text-text-secondary hover:text-text-primary">
+              {legal("dataProtection.title")}
+            </Link>
+            <Link href="/legal/data-access" className="text-sm text-text-secondary hover:text-text-primary">
+              {legal("dataAccess.title")}
             </Link>
           </div>
 

@@ -19,11 +19,12 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
 const LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
 
-/** Namespaces rendered on no-login routes (inventory 2026-06-11). */
+/** Namespaces rendered on no-login routes (inventory 2026-06-11;
+ *  "about" added 2026-07-05 with the CR WAGON 2 project-explanation page). */
 const PUBLIC_NAMESPACES = [
   "hero", "heroCards", "market", "marketPulse", "journey", "live", "pages",
   "pricing", "vision", "legal", "waitlist", "footer", "trusted", "stats",
-  "secondary", "features", "playercards", "services",
+  "secondary", "features", "playercards", "services", "about",
 ];
 
 /** Mechanism vocabulary banned from PUBLIC copy (the HOW). */

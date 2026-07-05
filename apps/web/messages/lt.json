@@ -4042,16 +4042,215 @@
         "Žemėlapyje taškas atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
         "Mokėjimai dar neaktyvūs; jokių mokėjimų per platformą šiame etape.",
         "Apie netinkamą elgesį ar įtartiną veiklą galima pranešti — moderatoriai peržiūri."
-      ]
+      ],
+      "reviewNote": "Šios taisyklės aprašo, kaip platforma iš tikrųjų veikia šiandien. Galutinis privalomųjų dokumentų teisinis tekstas dar ruošiamas ir prieš pradedant mokamas paslaugas jį peržiūrės savininkas ir teisininkas."
     },
     "terms": {
       "title": "Naudojimo sąlygos"
     },
     "privacy": {
-      "title": "Privatumo politika"
+      "title": "Privatumo politika",
+      "intro": "Šis puslapis paprastais žodžiais paaiškina, kokius asmens duomenis naudoja Labour Market AI, kodėl juos naudoja ir kokias teises turite. Jis aprašo platformą tokią, kokia ji veikia šiandien, kol mokėjimai neaktyvūs.",
+      "sections": [
+        {
+          "heading": "Kokius duomenis platforma naudoja",
+          "items": [
+            "Paskyros duomenys: jūsų el. pašto adresas ir su juo susietas prisijungimas.",
+            "Turinys, kurį įvedate patys: profilio ir CV informacija, įgūdžiai, darbo žurnalo įrašai, prie įrašų pridėtos nuotraukos ir jūsų dokumentų sąraše nurodyti dokumentai.",
+            "Įmonių naudotojų įvesta įmonės informacija: įmonės duomenys, poreikiai, projektai ir rezervacijos.",
+            "Žinutės, kurias siunčiate ir gaunate platformoje.",
+            "Sutikimų įrašai: kai duodate ar atšaukiate sutikimą, išsaugomas veiksmas ir jo laikas.",
+            "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką)."
+          ]
+        },
+        {
+          "heading": "Kam duomenys naudojami",
+          "items": [
+            "Kad veiktų jūsų naudojamos funkcijos: profilis ir CV, darbo žurnalas, jūsų patvirtinami įgūdžių pasiūlymai, rinkos žemėlapis, projektai, komandos, rezervacijos ir susirašinėjimas.",
+            "Kad jūsų informaciją matytų tik tie, kam tai leidžia aiški prieigos taisyklė — žr. puslapį „Jūsų duomenys ir kas juos mato“.",
+            "Kad būtų išsaugota sąžininga sutikimų ir svarbiausių prieigos pakeitimų istorija.",
+            "Platforma nenaudoja trečiųjų šalių reklamos ar analitikos sekimo įrankių ir nekuria elgsenos profilių."
+          ]
+        },
+        {
+          "heading": "Kas gali matyti jūsų duomenis",
+          "items": [
+            "Prieiga uždaryta pagal nutylėjimą: jūsų įvesti duomenys priklauso jūsų paskyrai, o kiti naudotojai nemato nieko, ko neleidžia konkreti taisyklė.",
+            "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo, o darbdaviai negali matyti darbuotojo išsaugotų vietovių.",
+            "Žinutes mato tik pokalbio dalyviai.",
+            "Išsamus paaiškinimas paprastais žodžiais — puslapyje „Jūsų duomenys ir kas juos mato“."
+          ]
+        },
+        {
+          "heading": "Sutikimas",
+          "items": [
+            "Kai funkcija dalijasi duomenimis toliau, ji pirmiausia paprašo jūsų aiškaus sutikimo.",
+            "Sutikimą galite bet kada atšaukti. Atšaukimas įrašomas: sutikimų istorija saugoma kaip audito seka, o ne ištrinama, todėl visada aišku, kas, kada ir su kuo sutiko."
+          ]
+        },
+        {
+          "heading": "Jūsų teisės",
+          "items": [
+            "Galite prašyti susipažinti su apie jus saugomais duomenimis, juos ištaisyti, gauti jų kopiją, apriboti jų naudojimą arba juos ištrinti.",
+            "Sąžininga dabartinė būsena: šie prašymai šiandien tvarkomi rankiniu būdu. Savitarnos eksporto ar ištrynimo mygtuko dar nėra — susisiekite su mumis, ir prašymą apdoros žmogus.",
+            "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti."
+          ]
+        },
+        {
+          "heading": "Kiek laiko duomenys saugomi",
+          "items": [
+            "Duomenys saugomi, kol jūsų paskyra aktyvi ir kol juos naudoja funkcija, kuriai jie priklauso.",
+            "Sutikimų ir audito įrašai saugomi kaip istorija: atšaukimas įrašomas, o ne ištrinamas.",
+            "Tikslūs saugojimo terminai yra dalis galutinio teisinio teksto, kuris dar ruošiamas."
+          ]
+        }
+      ],
+      "pendingTitle": "Dar laukia galutinio teisinio teksto:",
+      "pendingItems": [
+        "Duomenų valdytojo tapatybė ir kontaktiniai duomenys.",
+        "Įvardytas teisinis pagrindas kiekvienam tvarkymo tikslui.",
+        "Tikslūs kiekvienos duomenų kategorijos saugojimo terminai.",
+        "Privalomoji šios politikos versija."
+      ]
     },
     "cookies": {
-      "title": "Slapukų politika"
+      "title": "Slapukų politika",
+      "intro": "Šiame puslapyje išvardyta, ką platforma šiandien iš tikrųjų saugo jūsų naršyklėje. Sąmoningai — labai nedaug.",
+      "items": [
+        {
+          "name": "Prisijungimo slapukai",
+          "purpose": "Nustatomi prisijungus, kad liktumėte prisijungę naršydami tarp puslapių. Būtini — be jų paslauga negali išlaikyti jūsų prisijungimo."
+        },
+        {
+          "name": "Kalbos slapukas (NEXT_LOCALE)",
+          "purpose": "Gali būti nustatytas, kad įsimintų jūsų kalbos pasirinkimą ir puslapiai atsidarytų jūsų kalba."
+        },
+        {
+          "name": "Administratoriaus rodymo nuostata (lm_hide_admin_ui)",
+          "purpose": "Naudojama tik administratorių paskyrose. Įsimena, ar paslėpti administratoriaus valdikliai, ir nekeičia jokių teisių."
+        }
+      ],
+      "localStorageNote": "Jūsų šviesios ar tamsios temos pasirinkimas saugomas naršyklės vietinėje saugykloje, ne slapuke.",
+      "noTracking": "Platformoje šiandien nėra analitikos, reklamos ar trečiųjų šalių sekimo slapukų. Jei tai kada nors keistųsi, pirmiausia bus atnaujintas šis puslapis."
+    },
+    "pendingLegal": {
+      "badge": "Galutinis tekstas laukia savininko ir teisininko peržiūros",
+      "body": "Šis puslapis paprastais žodžiais paaiškina, kaip platforma veikia šiandien. Tai nėra galutinis teisinis dokumentas: privalomasis tekstas dar ruošiamas ir prieš pradedant mokamas paslaugas ar sutartinius santykius jį peržiūrės savininkas ir teisininkas."
+    },
+    "disclaimer": "Šis puslapis yra tik informacinio pobūdžio ir nėra teisinė konsultacija.",
+    "requestContact": "Norėdami užduoti klausimą ar pateikti prašymą dėl savo duomenų, susisiekite su mumis — jį peržiūrės žmogus.",
+    "related": "Susiję puslapiai",
+    "accountSection": {
+      "title": "Privatumas ir duomenys",
+      "intro": "Paprasti paaiškinimai, kas yra platforma, kokius duomenis ji naudoja ir kas juos gali matyti."
+    },
+    "dataProtection": {
+      "title": "Duomenų apsauga",
+      "intro": "Šis puslapis paprastais žodžiais paaiškina, kaip saugomi duomenys Labour Market AI platformoje. Aprašoma tik tai, kas šiandien iš tikrųjų įdiegta.",
+      "sections": [
+        {
+          "heading": "Uždaryta pagal nutylėjimą",
+          "items": [
+            "Naudotojų duomenų lentelės apsaugotos prieigos taisyklėmis pačioje duomenų bazėje. Jei jokia taisyklė aiškiai nesuteikia prieigos, duomenys nematomi — net kitiems prisijungusiems naudotojams.",
+            "Šios taisyklės veikia duomenų bazės lygmenyje, ne tik sąsajoje, ir yra dengiamos automatiniais testais."
+          ]
+        },
+        {
+          "heading": "Istorija vietoj tylių pakeitimų",
+          "items": [
+            "Prieigos suteikimai yra įrašai, o ne jungikliai: kai prieiga atimama, įrašas pažymimas kaip atšauktas, o ne ištrinamas, todėl istorija lieka atsekama.",
+            "Taip pat saugoma ir sutikimų istorija."
+          ]
+        },
+        {
+          "heading": "Jokių sekimo įrankių, jokio profiliavimo",
+          "items": [
+            "Platformoje nėra trečiųjų šalių reklamos ar analitikos sekimo įrankių, sesijų įrašinėjimo priemonių ar elgsenos vertinimo balų."
+          ]
+        },
+        {
+          "heading": "Statistika, sauganti asmenis",
+          "items": [
+            "Rinkos statistika yra apibendrinta. Vidurkiai nerodomi iš tokių mažų imčių, kad galėtų atskleisti vieną asmenį, o mažos imtys pažymimos.",
+            "Tyrimų tipo duomenų rinkiniai struktūriškai anonimiški: juose nėra vardų, el. pašto adresų ar asmens identifikatorių."
+          ]
+        },
+        {
+          "heading": "Failai ir nuotraukos",
+          "items": [
+            "Nuotraukos ir failai laikomi privačioje saugykloje ir atidaromi per trumpalaikes nuorodas, o ne viešais adresais."
+          ]
+        },
+        {
+          "heading": "Administratorių prieiga",
+          "items": [
+            "Administratorių ekranai prieinami tik mažam platformos administratorių ratui ir užsidaro saugiai: be administratoriaus rolės jie nepasiekiami."
+          ]
+        },
+        {
+          "heading": "Eksportas ir ištrynimas",
+          "items": [
+            "Eksporto ir ištrynimo prašymai šiandien tvarkomi rankiniu būdu: susisiekite su mumis, ir prašymą apdoros žmogus."
+          ]
+        },
+        {
+          "heading": "Sąžiningos ribos",
+          "items": [
+            "Jokia sistema negali pažadėti absoliutaus saugumo. Pastebėję problemą, susisiekite su mumis — ją peržiūrės žmogus."
+          ]
+        }
+      ],
+      "pendingTitle": "Dar laukia galutinio teisinio teksto:",
+      "pendingItems": [
+        "Oficialus techninių ir organizacinių priemonių aprašymas.",
+        "Tvarkytojų sąrašas ir duomenų tvarkymo sutartys.",
+        "Galutiniai saugojimo terminai."
+      ]
+    },
+    "dataAccess": {
+      "title": "Jūsų duomenys ir kas juos mato",
+      "intro": "Paprastas paaiškinimas, kokios prieigos taisyklės platformoje iš tikrųjų veikia šiandien. Čia neteigiama nieko daugiau, nei daro pačios taisyklės.",
+      "sections": [
+        {
+          "heading": "Atskaitos taškas",
+          "items": [
+            "Jūsų eilutės yra jūsų: įvesti duomenys priklauso jūsų paskyrai. Kiti naudotojai nemato nieko, ko neleidžia konkreti prieigos taisyklė."
+          ]
+        },
+        {
+          "heading": "Ką įmonės mato apie darbuotojus",
+          "items": [
+            "Paieškos vaizduose darbuotojo informacija rodoma anonimizuota, o kontaktai niekada nerodomi be darbuotojo leidimo.",
+            "Darbdaviai negali matyti darbuotojo išsaugotų vietovių.",
+            "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo — daugiausia tik skaičiai, kuriais darbuotojas sutiko dalytis."
+          ]
+        },
+        {
+          "heading": "Ką darbuotojai mato apie įmones",
+          "items": [
+            "Darbuotojai mato tai, ką įmonė nusprendžia skelbti: vieši poreikiai ir pasiūlymai rodomi tik po moderavimo."
+          ]
+        },
+        {
+          "heading": "Žinutės",
+          "items": [
+            "Pokalbį mato tik jo dalyviai. Tos pačios įmonės kolegos, kurie nėra dalyviai, nemato nieko — net to, kad pokalbis egzistuoja.",
+            "Jei prieiga suteikiama papildomam asmeniui (pavyzdžiui, objekto užsakovui), ji galioja tik kol suteikimas aktyvus. Jį atšaukus, prieiga baigiasi, o istorija lieka įrašyta."
+          ]
+        },
+        {
+          "heading": "Administratoriai",
+          "items": [
+            "Mažas platformos administratorių ratas mato veiklos eiles, reikalingas platformai veikti, pavyzdžiui, pagalbos ir peržiūros eiles. Administratorių puslapiai riboti ir užsidaro saugiai."
+          ]
+        },
+        {
+          "heading": "Jei kažkas atrodo ne taip",
+          "items": [
+            "Prieigos taisyklės duomenų bazėje yra tiesos šaltinis, o šis puslapis jas atspindi. Jei kas nors čia neatitinka to, ką matote, susisiekite su mumis — peržiūrės žmogus."
+          ]
+        }
+      ]
     }
   },
   "instructions": {
@@ -6445,5 +6644,58 @@
     "fitReal": "Pagrįsti įgūdžiai parengti palyginti su realiais darbo poreikiais.",
     "fitNotAvailable": "Atitikties parengtis atsiranda, kai yra realus darbo poreikio kontekstas ir pagrįsti įrašai. Atitikimas negarantuojamas.",
     "footer": "Ši ataskaita rodo tik realius signalus. Peržiūrą atlieka žmogus."
+  },
+  "about": {
+    "metaTitle": "Kas yra Labour Market AI",
+    "metaDescription": "Paprastas paaiškinimas, kas yra Labour Market AI: kaip darbuotojai kuria tikrą profilį iš tikro darbo, kaip įmonės aprašo poreikius ir randa komandas ir kaip platforma išlieka sąžininga.",
+    "navLabel": "Apie Labour Market AI",
+    "eyebrow": "Apie platformą",
+    "title": "Kas yra Labour Market AI ir kaip ji veikia",
+    "lede": "Labour Market AI — darbo rinkos platforma, kurioje darbuotojai, įmonės ir komandos parodo tikrus įgūdžius, mato tikrus poreikius ir organizuoja tikrą darbą — vietoje ir visoje Europoje.",
+    "honesty": "Viskas, kas aprašyta šiame puslapyje, produkte veikia jau šiandien. Dar ruošiamos funkcijos taip ir įvardijamos, o mokėjimai dar neaktyvūs.",
+    "loops": [
+      {
+        "heading": "Darbuotojams",
+        "points": [
+          "Susikuriate profilį — savo žaidėjo kortelę — su įgūdžiais ir patirtimi.",
+          "Pildote darbo žurnalą: trumpus įrašus apie iš tikrųjų atliktą darbą.",
+          "Platforma skaito jūsų žurnalo tekstą ir siūlo atpažintus įgūdžius. Atpažinimas grįstas taisyklėmis, jis gali ko nors nepastebėti, ir niekas nepridedama prie profilio be jūsų patvirtinimo.",
+          "Profilis sąžiningai rodo, kuo pagrįstas kiekvienas įgūdis: įvestas jūsų, paremtas žurnalo įrašais ar patvirtintas žmonių, su kuriais iš tikrųjų dirbote."
+        ]
+      },
+      {
+        "heading": "Įmonėms",
+        "points": [
+          "Aprašote savo poreikį: koks darbas, kur ir kada.",
+          "Matote rinkos žemėlapį ir sąžiningus rinkos signalus, o ne pažadus.",
+          "Galite ieškoti darbuotojų: profiliai rodomi anonimizuoti, o kontaktas užmezgamas tik gavus leidimą.",
+          "Projektai, komandos ir rezervacijos laiko darbą sutvarkytą vienoje vietoje."
+        ]
+      },
+      {
+        "heading": "Komandoms ir susirašinėjimui",
+        "points": [
+          "Komandos ir brigados valdomos įmonės darbo erdvėje.",
+          "Darbo instrukcijas galima rašyti sava kalba — originalus tekstas visada išsaugomas, ir niekas neapsimeta išversta, jei nėra išversta.",
+          "Susirašinėjimas uždarytas pagal nutylėjimą: pokalbį mato tik jo dalyviai."
+        ]
+      }
+    ],
+    "notYet": {
+      "heading": "Ko platforma nedaro",
+      "points": [
+        "Ji pati nieko nepažymi kaip patvirtinto — patvirtinta būsena visada ateina iš tikro žmogaus.",
+        "Mokėjimai per platformą dar nevyksta, atsiskaitymo nėra.",
+        "Ji neteikia teisinių konsultacijų. Dokumentų gairės yra tik informacinės."
+      ]
+    },
+    "data": {
+      "heading": "Jūsų duomenys",
+      "body": "Prieiga prie duomenų uždaryta pagal nutylėjimą ir paprastai paaiškinta žemiau esančiuose puslapiuose."
+    },
+    "links": {
+      "workers": "Darbuotojams",
+      "companies": "Įmonėms"
+    }
   }
 }
