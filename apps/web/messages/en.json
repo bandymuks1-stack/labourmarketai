@@ -4042,16 +4042,215 @@
         "A map point appears only with verified coordinates — no fake markers.",
         "Payments are not active yet; no payments run through the platform at this stage.",
         "Inappropriate behaviour or suspicious activity can be reported — moderators review it."
-      ]
+      ],
+      "reviewNote": "These rules describe how the platform actually behaves today. The final legal wording of the binding documents is still being prepared and will be reviewed by the owner and a lawyer before any paid services begin."
     },
     "terms": {
       "title": "Terms of Service"
     },
     "privacy": {
-      "title": "Privacy Policy"
+      "title": "Privacy Policy",
+      "intro": "This page explains in plain language what personal data Labour Market AI uses, why it uses it, and what rights you have. It describes the platform as it works today, before payments are active.",
+      "sections": [
+        {
+          "heading": "What data the platform uses",
+          "items": [
+            "Account data: your email address and the sign-in linked to it.",
+            "Content you enter yourself: profile and CV details, skills, work journal entries, photos you attach to entries, and the documents you list in your document inventory.",
+            "Company information entered by company users: company details, needs, projects and bookings.",
+            "Messages you send and receive on the platform.",
+            "Consent records: when you give or revoke a consent, the action and its time are stored.",
+            "Technical data needed to run the service, such as sign-in cookies (see the Cookie Policy)."
+          ]
+        },
+        {
+          "heading": "What the data is used for",
+          "items": [
+            "To run the features you use: profile and CV, work journal, skill suggestions you confirm, market map, projects, teams, bookings and messaging.",
+            "To show your information only to people an explicit access rule allows — see the page “Your data and who can see it”.",
+            "To keep an honest history of consents and key access changes.",
+            "The platform does not use third-party advertising or analytics trackers and does not build behavioural profiles."
+          ]
+        },
+        {
+          "heading": "Who can see your data",
+          "items": [
+            "Access is closed by default: data you enter belongs to your account, and other users see nothing unless a specific rule allows it.",
+            "Worker documents are not shown to employers or agencies without the worker's consent, and employers cannot read a worker's saved locations.",
+            "Messages are visible only to the participants of the conversation.",
+            "The full plain-language summary is on the page “Your data and who can see it”."
+          ]
+        },
+        {
+          "heading": "Consent",
+          "items": [
+            "Where a feature shares data further, it asks for your explicit consent first.",
+            "You can revoke a consent at any time. Revocation is recorded: the consent history is kept as an audit trail instead of being erased, so it stays clear who agreed to what and when."
+          ]
+        },
+        {
+          "heading": "Your rights",
+          "items": [
+            "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
+            "Honest current state: these requests are handled manually. There is no self-service export or deletion button yet — contact us and a person will process your request.",
+            "Where processing is based on consent, you can withdraw that consent at any time."
+          ]
+        },
+        {
+          "heading": "How long data is kept",
+          "items": [
+            "Data is kept while your account is active and the feature it belongs to still uses it.",
+            "Consent and audit records are kept as history: a revocation is recorded rather than the record being erased.",
+            "Exact retention periods are part of the final legal wording that is still being prepared."
+          ]
+        }
+      ],
+      "pendingTitle": "Still waiting for final legal wording:",
+      "pendingItems": [
+        "The identity and contact details of the data controller.",
+        "The named legal basis for each processing purpose.",
+        "Exact retention periods for each data category.",
+        "The binding version of this policy."
+      ]
     },
     "cookies": {
-      "title": "Cookie Policy"
+      "title": "Cookie Policy",
+      "intro": "This page lists what the platform actually stores in your browser today. There is deliberately little of it.",
+      "items": [
+        {
+          "name": "Sign-in cookies",
+          "purpose": "Set when you sign in, so you stay signed in as you move between pages. Essential — the service cannot keep you signed in without them."
+        },
+        {
+          "name": "Language cookie (NEXT_LOCALE)",
+          "purpose": "May be set to remember your language choice, so pages open in your language."
+        },
+        {
+          "name": "Administrator display preference (lm_hide_admin_ui)",
+          "purpose": "Used only on administrator accounts. Remembers whether administrator controls are hidden and changes nothing about permissions."
+        }
+      ],
+      "localStorageNote": "Your light or dark theme choice is stored in your browser's local storage, not in a cookie.",
+      "noTracking": "There are no analytics, advertising or third-party tracking cookies on the platform today. If this ever changes, this page will be updated first."
+    },
+    "pendingLegal": {
+      "badge": "Final wording pending owner and legal review",
+      "body": "This page explains in plain language how the platform works today. It is not the final legal document: the binding wording is still being prepared and will be reviewed by the owner and a lawyer before any paid services or contractual relationship begins."
+    },
+    "disclaimer": "This page is informational only and is not legal advice.",
+    "requestContact": "To ask a question or make a request about your data, get in touch with us — a person will review it.",
+    "related": "Related pages",
+    "accountSection": {
+      "title": "Privacy and data",
+      "intro": "Plain-language explanations of what the platform is, what data it uses and who can see it."
+    },
+    "dataProtection": {
+      "title": "Data protection",
+      "intro": "This page explains in plain words how data inside Labour Market AI is protected. It describes only what is actually built into the platform today.",
+      "sections": [
+        {
+          "heading": "Closed by default",
+          "items": [
+            "User data tables are protected by access rules inside the database itself. If no rule explicitly grants access, the data is not visible — even to other signed-in users.",
+            "These rules work at the database layer, not only in the interface, and are covered by automated tests."
+          ]
+        },
+        {
+          "heading": "History instead of silent changes",
+          "items": [
+            "Access grants are records, not switches: when access is withdrawn, the record is marked as revoked instead of being deleted, so history stays traceable.",
+            "Consent history is kept the same way."
+          ]
+        },
+        {
+          "heading": "No trackers, no profiling",
+          "items": [
+            "The platform contains no third-party advertising or analytics trackers, no session-recording tools and no behavioural scoring."
+          ]
+        },
+        {
+          "heading": "Statistics that protect individuals",
+          "items": [
+            "Market statistics are aggregated. Averages are not shown for samples so small that they could point to a single person, and small samples are flagged.",
+            "Research-type data sets are structurally anonymous: they contain no names, email addresses or personal identifiers."
+          ]
+        },
+        {
+          "heading": "Files and photos",
+          "items": [
+            "Photos and files are kept in private storage and opened through short-lived links, not public addresses."
+          ]
+        },
+        {
+          "heading": "Administrator access",
+          "items": [
+            "Administrator screens are limited to a small set of platform administrators and fail closed: without the administrator role they are not reachable."
+          ]
+        },
+        {
+          "heading": "Export and deletion",
+          "items": [
+            "Export and deletion requests are handled manually today: contact us and a person will process your request."
+          ]
+        },
+        {
+          "heading": "Honest limits",
+          "items": [
+            "No system can promise absolute security. If you notice a problem, contact us — a person will review it."
+          ]
+        }
+      ],
+      "pendingTitle": "Still waiting for final legal wording:",
+      "pendingItems": [
+        "The formal description of technical and organisational measures.",
+        "The list of processors and data-processing agreements.",
+        "Final retention periods."
+      ]
+    },
+    "dataAccess": {
+      "title": "Your data and who can see it",
+      "intro": "A plain-language summary of the access rules the platform actually enforces today. It claims nothing broader than what the rules do.",
+      "sections": [
+        {
+          "heading": "The starting point",
+          "items": [
+            "Your rows are yours: data you enter belongs to your account. Other users see nothing unless a specific access rule allows it."
+          ]
+        },
+        {
+          "heading": "What companies can see about workers",
+          "items": [
+            "In scouting views, worker information appears in an anonymised form, and contact details are never shown without the worker's permission.",
+            "Employers cannot read a worker's saved locations.",
+            "Worker documents are not shown to employers or agencies without the worker's consent — at most, counts that the worker agreed to share."
+          ]
+        },
+        {
+          "heading": "What workers can see about companies",
+          "items": [
+            "Workers see what a company chooses to publish: public needs and offers appear only after moderation."
+          ]
+        },
+        {
+          "heading": "Messages",
+          "items": [
+            "A conversation is visible only to its participants. Colleagues from the same company who are not participants see nothing — not even that the conversation exists.",
+            "If an extra person is granted access (for example the object owner), that access lasts only while the grant is active. When it is revoked, access ends, and the history stays recorded."
+          ]
+        },
+        {
+          "heading": "Administrators",
+          "items": [
+            "A small set of platform administrators can see the operational queues needed to run the platform, such as support and review queues. Administrator pages are restricted and fail closed."
+          ]
+        },
+        {
+          "heading": "If something looks wrong",
+          "items": [
+            "The access rules in the database are the source of truth, and this page follows them. If something here does not match what you see, contact us — a person will review it."
+          ]
+        }
+      ]
     }
   },
   "instructions": {
@@ -6445,5 +6644,58 @@
     "fitReal": "Supported skills are ready to compare against real work needs.",
     "fitNotAvailable": "Fit readiness appears when there is a real work-need context and supported records. No fit is guaranteed.",
     "footer": "This report shows real signals only. Review is a human decision."
+  },
+  "about": {
+    "metaTitle": "What is Labour Market AI",
+    "metaDescription": "A plain-language explanation of Labour Market AI: how workers build a real profile from real work, how companies describe needs and find teams, and how the platform stays honest.",
+    "navLabel": "About Labour Market AI",
+    "eyebrow": "About the platform",
+    "title": "What Labour Market AI is and how it works",
+    "lede": "Labour Market AI is a labour-market platform where workers, companies and teams show real skills, see real needs and organise real work — locally and across Europe.",
+    "honesty": "Everything described on this page exists in the product today. Features still being prepared are named as such, and payments are not active yet.",
+    "loops": [
+      {
+        "heading": "For workers",
+        "points": [
+          "You create your profile — your player card — with your skills and experience.",
+          "You keep a work journal: short entries about the work you actually did.",
+          "The platform reads your journal text and suggests skills it recognises. Recognition is rule-based, it can miss things, and nothing is added to your profile without your confirmation.",
+          "Your profile shows honestly how each skill is supported: entered by you, supported by journal entries, or confirmed by people you actually worked with."
+        ]
+      },
+      {
+        "heading": "For companies",
+        "points": [
+          "You describe your need: what work, where and when.",
+          "You see the market map and honest market signals instead of promises.",
+          "You can scout for workers: profiles appear anonymised, and contact happens only with permission.",
+          "Projects, teams and bookings keep the work organised in one place."
+        ]
+      },
+      {
+        "heading": "For teams and communication",
+        "points": [
+          "Teams and brigades are managed inside the company workspace.",
+          "Work instructions can be written in your own language — the original text is always kept, and nothing pretends to be translated when it is not.",
+          "Messaging is closed by default: only the participants of a conversation can see it."
+        ]
+      }
+    ],
+    "notYet": {
+      "heading": "What the platform does not do",
+      "points": [
+        "It does not mark anyone as confirmed by itself — a confirmed status always comes from a real person.",
+        "Payments do not run through the platform yet, and there is no checkout.",
+        "It does not give legal advice. Document guidance is informational only."
+      ]
+    },
+    "data": {
+      "heading": "Your data",
+      "body": "Access to data is closed by default and explained in plain language on the pages below."
+    },
+    "links": {
+      "workers": "For workers",
+      "companies": "For companies"
+    }
   }
 }

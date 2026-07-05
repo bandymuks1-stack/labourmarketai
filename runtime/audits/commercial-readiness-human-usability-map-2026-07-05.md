@@ -15,8 +15,10 @@ inspection (routes, components, lib, migrations, guards, i18n).
 (partial/gated — exact gap named) / RED (missing as a layer; honest fragments
 listed) / BLOCKED (owner/legal/payment/external gate).
 
-**Totals: 6 GREEN · 9 YELLOW · 4 RED · 1 BLOCKED (aspect-level owner/legal
-gates additionally marked inside YELLOW areas).**
+**Totals (corrected 2026-07-05, see “Count reconciliation” below): 4 GREEN ·
+10 YELLOW · 5 RED (+ area 20 RED by design, counted separately) · payments
+BLOCKED (standing gate; aspect-level owner/legal gates additionally marked
+inside YELLOW areas).**
 
 | # | Area | Status |
 |---|---|---|
@@ -550,3 +552,22 @@ link placeholder that WAGON 10 upgrades to the real CTA.
 | `pnpm test` (apps/web) | PASS — 488 files, 7413/7413 |
 
 No product code touched; the suite is the untouched #618 baseline.
+
+## Count reconciliation (owner lock, 2026-07-05)
+
+The originally merged summary header claimed **6 GREEN / 9 YELLOW / 4 RED /
+1 BLOCKED**. That header was a **summary arithmetic error**: it does not match
+this file's own 20 per-area `Status:` lines, which were and remain correct and
+unchanged. Tallying the per-area bodies gives the corrected counts:
+
+| Status | Areas | Count |
+|---|---|---|
+| GREEN | 5, 7, 8, 11 | **4** |
+| YELLOW | 1, 2, 3, 9, 10, 13, 14, 16, 17, 19 | **10** |
+| RED | 4, 6, 12, 15, 18 | **5** |
+| RED by design (WAGON 11 deliverable, counted separately) | 20 | 1 |
+| BLOCKED (standing payment-provider gate, not an area status) | payments | — |
+
+The header line above has been corrected to this tally. No per-area body was
+modified. WAGON 2 (compliance/GDPR/data-protection/explanation pack) targets
+areas 1–4 against this CORRECTED baseline: areas 1–3 YELLOW, area 4 RED.

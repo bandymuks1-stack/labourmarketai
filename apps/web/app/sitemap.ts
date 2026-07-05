@@ -27,11 +27,16 @@ const STATIC_PATHS: readonly string[] = [
   "/labour-market",
   "/match-preview",
   "/pricing",
+  // Project explanation page (CR train WAGON 2).
+  "/about",
   "/legal/privacy",
   "/legal/terms",
   "/legal/cookies",
   // Footer-linked legal page was discoverable but unlisted (audit F-N4).
   "/legal/marketplace-rules",
+  // Compliance explanation pack (CR train WAGON 2).
+  "/legal/data-protection",
+  "/legal/data-access",
 ];
 
 /** `/vision` follows its publication flag: while the page emits

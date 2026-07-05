@@ -11,15 +11,15 @@ import {
 } from "@/components/marketing/legal-notes";
 
 /**
- * Privacy / GDPR explanation page (CR train WAGON 2, audit area 2).
+ * Data protection explanation page (CR train WAGON 2, audit areas 2+4).
  *
- * Upgraded from the honest "being prepared" stub to a structured plain-language
- * explanation: what data is used, why, who can see it, consent, rights (the
- * REAL manual request process), and retention. Every fact is derived from the
- * shipped product (consents audit trail, closed-by-default access rules, no
- * trackers). The BINDING legal wording remains owner/lawyer-gated (train
- * stop-rule 5): the page renders the visible pending-legal notice plus an
- * explicit list of what still awaits final wording — no fake legal finality.
+ * Plain-language, source-derived description of how data is protected TODAY:
+ * closed-by-default database access rules, revocation-as-record history,
+ * no trackers/profiling (privacy-base guard), aggregate-only statistics with
+ * sample floors, private storage with short-lived links, fail-closed admin
+ * gating, and the honest MANUAL export/deletion process. Claims nothing
+ * broader than the audited guards/policies. Binding wording stays
+ * owner/lawyer-gated → pending notice + explicit pending-items list.
  */
 export async function generateMetadata({
   params,
@@ -30,9 +30,9 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "legal" });
   return buildPageMetadata({
     locale,
-    path: "/legal/privacy",
-    title: t("privacy.title"),
-    description: t("privacy.intro"),
+    path: "/legal/data-protection",
+    title: t("dataProtection.title"),
+    description: t("dataProtection.intro"),
   });
 }
 
@@ -44,42 +44,41 @@ export default async function LegalPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("legal");
-  const sections = t.raw("privacy.sections") as LegalSection[];
-  const pendingItems = t.raw("privacy.pendingItems") as string[];
+  const sections = t.raw("dataProtection.sections") as LegalSection[];
+  const pendingItems = t.raw("dataProtection.pendingItems") as string[];
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-privacy">
+    <article
+      className="mx-auto max-w-3xl px-6 py-16 sm:px-12"
+      data-testid="legal-data-protection"
+    >
       <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
-        {t("privacy.title")}
+        {t("dataProtection.title")}
       </h1>
       <div className="mt-6">
         <PendingLegalNotice />
       </div>
-      <p className="mt-6 text-sm leading-relaxed text-text-secondary">{t("privacy.intro")}</p>
+      <p className="mt-6 text-sm leading-relaxed text-text-secondary">
+        {t("dataProtection.intro")}
+      </p>
       <LegalSectionList sections={sections} />
-      <PendingLegalItems title={t("privacy.pendingTitle")} items={pendingItems} />
+      <PendingLegalItems title={t("dataProtection.pendingTitle")} items={pendingItems} />
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-text-secondary">{t("requestContact")}</p>
         <LegalDisclaimer />
       </div>
       <nav aria-label={t("related")} className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
         <Link
+          href="/legal/privacy"
+          className="text-sm text-text-secondary hover:text-text-primary"
+        >
+          {t("privacy.title")} →
+        </Link>
+        <Link
           href="/legal/data-access"
           className="text-sm text-text-secondary hover:text-text-primary"
         >
           {t("dataAccess.title")} →
-        </Link>
-        <Link
-          href="/legal/data-protection"
-          className="text-sm text-text-secondary hover:text-text-primary"
-        >
-          {t("dataProtection.title")} →
-        </Link>
-        <Link
-          href="/legal/cookies"
-          className="text-sm text-text-secondary hover:text-text-primary"
-        >
-          {t("cookies.title")} →
         </Link>
       </nav>
     </article>
