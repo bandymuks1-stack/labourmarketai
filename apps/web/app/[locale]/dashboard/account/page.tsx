@@ -17,6 +17,7 @@ import { IdCard } from "lucide-react";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
+import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -82,6 +83,37 @@ export default async function AccountPage({
       <FeatureNote testId="account-payment-readiness">
         {tRoot("featureNotes.paymentReadiness")}
       </FeatureNote>
+
+      {/* Your plan — billing readiness status (CR train WAGON 4). Settings-
+          appropriate honest section reusing the WAGON 2 pattern: free pilot,
+          paid plans prepared-not-purchasable, no payment method needed. The
+          readiness line reuses the guarded owner-editable state copy from
+          planBoundary (single source — no drifting duplicate). */}
+      <section
+        className="card-border p-5"
+        data-testid="account-plan-status"
+        data-state={PRICING_READINESS_STATE}
+      >
+        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          {tRoot("accountPlan.title")}
+        </p>
+        <p className="mt-2 text-sm text-text-primary">
+          {tRoot("accountPlan.freePilot")}
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+          {tRoot("accountPlan.prepared")}
+        </p>
+        <p className="mt-2 text-[11px] text-text-muted">
+          {tRoot(`planBoundary.readiness.${PRICING_READINESS_STATE}`)}
+        </p>
+        <Link
+          href="/pricing"
+          className="mt-3 flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+        >
+          <span>{tRoot("accountPlan.pricingLink")}</span>
+          <span aria-hidden className="text-text-muted">→</span>
+        </Link>
+      </section>
 
       <section className="card-border p-5">
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
