@@ -73,18 +73,21 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/learning": "GATED_PREVIEW", // parked pending owner entry-point decision (F-N1)
 
   // ── DUPLICATE_DRIFT (kept temporarily; consolidation in backlog) ──────
-  // Agency/buyer rooms overlap the canonical company workspace (F-D4);
-  // search is an unlinked router page; market/recognize overlaps journal
-  // recognition. This list must SHRINK, never grow.
-  "dashboard/agency": "DUPLICATE_DRIFT",
-  "dashboard/agency/pool": "DUPLICATE_DRIFT",
+  // Buyer rooms overlap the canonical company workspace (F-D4); search is
+  // an unlinked router page; market/recognize overlaps journal
+  // recognition. This list must SHRINK, never grow. The agency trio was
+  // consolidated 2026-07-05 (Direction A): agency = company_type
+  // 'staffing_agency' inside the canonical company workspace, and the
+  // legacy routes became redirect stubs below.
   "dashboard/buyer": "DUPLICATE_DRIFT",
-  "dashboard/start/agency": "DUPLICATE_DRIFT",
   "dashboard/start/buyer": "DUPLICATE_DRIFT",
   "dashboard/search": "DUPLICATE_DRIFT",
   "dashboard/market/recognize": "DUPLICATE_DRIFT",
   "dashboard/marketplace": "REDIRECT_STUB",
   "dashboard/player-card": "REDIRECT_STUB",
+  "dashboard/agency": "REDIRECT_STUB",
+  "dashboard/agency/pool": "REDIRECT_STUB",
+  "dashboard/start/agency": "REDIRECT_STUB",
 };
 
 const APP_DIR = join(process.cwd(), "app", "[locale]");
@@ -119,10 +122,12 @@ describe("route truth map — every dashboard route is deliberately classified",
   });
 
   it("DUPLICATE_DRIFT never grows past the audited set", () => {
+    // Ratchet history: 7 (2026-07-02 audit) → 4 (2026-07-05, agency trio
+    // reclassified REDIRECT_STUB under Direction A). The cap only shrinks.
     const drift = Object.values(CLASSIFICATION).filter(
       (v) => v === "DUPLICATE_DRIFT",
     ).length;
-    expect(drift).toBeLessThanOrEqual(7);
+    expect(drift).toBeLessThanOrEqual(4);
   });
 
   it("primary nav exposes only REAL_LAUNCH_SURFACE routes", () => {

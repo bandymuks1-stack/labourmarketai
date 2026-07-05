@@ -25,6 +25,10 @@ const FORBIDDEN = [
 ];
 
 describe("worker-management coordination note is capability-driven", () => {
+  // Direction A (2026-07-05): /dashboard/agency is a redirect stub into the
+  // canonical company workspace, so only the company PAGE assertion remains.
+  // The agency SECTION component stays pinned (legacy lib/agency continuity)
+  // until the owner-gated agencies→companies data task retires it.
   const cases = [
     {
       page: "app/[locale]/dashboard/company/page.tsx",
@@ -32,22 +36,24 @@ describe("worker-management coordination note is capability-driven", () => {
       note: "company-workers-coordination-note",
     },
     {
-      page: "app/[locale]/dashboard/agency/page.tsx",
+      page: null,
       section: "components/app/agency-workers-section.tsx",
       note: "agency-workers-coordination-note",
     },
-  ];
+  ] as const;
 
   for (const c of cases) {
-    it(`${c.page} drives roleCoordinationEnabled from the capability map`, () => {
-      const page = read(c.page);
-      expect(page).toMatch(
-        /from\s+["']@\/lib\/operations\/role-capabilities["']/,
-      );
-      expect(page).toMatch(
-        /roleCoordinationEnabled=\{isOperationsRoleEnabled\("foreman"\)\}/,
-      );
-    });
+    if (c.page) {
+      it(`${c.page} drives roleCoordinationEnabled from the capability map`, () => {
+        const page = read(c.page);
+        expect(page).toMatch(
+          /from\s+["']@\/lib\/operations\/role-capabilities["']/,
+        );
+        expect(page).toMatch(
+          /roleCoordinationEnabled=\{isOperationsRoleEnabled\("foreman"\)\}/,
+        );
+      });
+    }
 
     it(`${c.section} renders the not-enabled note gated on the flag`, () => {
       const src = read(c.section);

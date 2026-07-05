@@ -1063,6 +1063,25 @@
         "staffing_agency": "Personalo agentūra — tai veikimo modelis, ne atskiras pasaulis. Tas pats įmonės profilis.",
         "client_customer": "Užsakovo režimas — tai veikimo modelis, ne atskiras pasaulis. Tas pats įmonės profilis."
       },
+      "agencyMode": {
+        "title": "Personalo agentūros režimas",
+        "intro": "Jūsų įmonės profilis nustatytas kaip personalo agentūra. Tai tie patys įmonės įrankiai — čia rodomi veiksmai, kuriuos agentūra realiai naudoja.",
+        "actions": {
+          "roster": {
+            "label": "Darbuotojų sąrašas ir pakvietimai",
+            "note": "Pridėkite arba pakvieskite savo darbuotojus komandos skiltyje žemiau."
+          },
+          "offer": {
+            "label": "Pasiūlyti darbuotojus",
+            "note": "Pateikite darbo jėgos pasiūlymą per užklausos vedlį — jis išsaugomas kaip agentūros pasiūlymas."
+          },
+          "scouting": {
+            "label": "Darbuotojų žvalgyba",
+            "note": "Paleiskite žvalgybą pagal savo pateiktus poreikius ir sudarykite anoniminių kandidatų sąrašą."
+          }
+        },
+        "legacyNote": "Ankstesni atskiri agentūros puslapiai dabar atsidaro čia. Tas pats profilis, viena vieta — niekas neištrinta."
+      },
       "setup": {
         "formTitle": "Įmonės profilio užklausa",
         "formSubtitle": "Sukurkite organizacijos profilį iš savo asmeninės paskyros. Jis iškart aktyvus ir naudojamas — nereikia laukti patvirtinimo. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis.",

@@ -98,12 +98,18 @@ describe("company action rooms (buyer/agency) read as actions under Įmonė", ()
   const agency = read("app/[locale]/dashboard/agency/page.tsx");
   const COMPANY = /Įmonė|Company|Компани/i;
 
-  it("both pages show a company-context breadcrumb + a back-to-action-center link", () => {
-    for (const [name, src] of [["buyer", buyer], ["agency", agency]] as const) {
+  it("buyer page shows a company-context breadcrumb + a back-to-action-center link", () => {
+    for (const [name, src] of [["buyer", buyer]] as const) {
       expect(src, `${name} company-context`).toMatch(/data-testid="company-context"/);
       expect(src, `${name} back link`).toMatch(/data-testid="back-to-action-center"/);
       expect(src, `${name} backToActions copy`).toMatch(/companyContext|backToActions/);
     }
+  });
+
+  it("agency room is no silo at all — a redirect stub under the company (Direction A)", () => {
+    // The strongest anti-silo statement: the agency route renders nothing of
+    // its own; it folds into the canonical company workspace.
+    expect(agency).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/company`\)/);
   });
 
   for (const locale of ACTIVE) {

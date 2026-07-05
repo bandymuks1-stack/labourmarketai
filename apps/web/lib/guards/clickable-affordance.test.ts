@@ -11,7 +11,9 @@ import { join } from "node:path";
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
-const ROOMS = ["buyer", "company", "profile", "agency", "journal"] as const;
+// Direction A (2026-07-05): the agency room became a redirect stub into the
+// canonical company workspace — no chip renders there anymore.
+const ROOMS = ["buyer", "company", "profile", "journal"] as const;
 
 describe("room 'My spaces' switch is an unmistakable tappable chip", () => {
   for (const r of ROOMS) {

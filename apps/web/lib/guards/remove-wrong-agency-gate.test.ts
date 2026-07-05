@@ -22,19 +22,14 @@ const en = JSON.parse(read("messages/en.json")) as Record<string, unknown>;
 const lt = JSON.parse(read("messages/lt.json")) as Record<string, unknown>;
 
 describe("agency dashboard does not dead-end a user without an agency", () => {
-  it("returns the neutral guide + role choice when there is no agency entity", () => {
-    expect(agencyPage).toMatch(/if \(!ownAgency\)/);
-    expect(agencyPage).toMatch(/agency-no-entity-guide/);
-    expect(agencyPage).toMatch(/<SetupRoleChoice/);
-  });
-  it("renders the neutral choice BEFORE (instead of) the agency invite form", () => {
-    const guideIdx = agencyPage.indexOf("agency-no-entity-guide");
-    const inviteIdx = agencyPage.indexOf("<AgencyWorkersSection");
-    expect(guideIdx).toBeGreaterThan(-1);
-    expect(inviteIdx).toBeGreaterThan(-1);
-    // The no-entity early return (which `return`s) comes before the section that
-    // would otherwise render the dead-ending invite form.
-    expect(guideIdx).toBeLessThan(inviteIdx);
+  // Direction A (2026-07-05): the anti-dead-end concern is now solved one
+  // level earlier — /dashboard/agency is a redirect stub into the canonical
+  // company workspace, whose own no-profile path renders CompanyNoProfileGuide
+  // (asserted below). No agency-only gate can dead-end anyone anymore.
+  it("is a redirect stub to the canonical company workspace (no gate at all)", () => {
+    expect(agencyPage).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/company`\)/);
+    expect(agencyPage).not.toMatch(/<AgencyWorkersSection/);
+    expect(agencyPage).not.toMatch(/getOwnAgency/);
   });
 });
 
