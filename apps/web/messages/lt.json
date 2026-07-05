@@ -4344,7 +4344,12 @@
       "submit": "Priskirti",
       "assigned": "Priskirta",
       "notAuthorized": "Galite priskirti tik savo komandos darbuotojus savo projektams.",
-      "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje."
+      "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje.",
+      "fromRoster": "Priskirti darbuotoją šiam objektui"
+    },
+    "model": {
+      "note": "Ši lenta veikia pagal platformos veikimo modelį: darbuotojų žaidėjo kortelės priskiriamos objektams (projektams), o priskyrimus valdote jūs.",
+      "link": "Kaip veikia šis modelis"
     },
     "map": {
       "eyebrow": "Vadovo žemėlapis",
@@ -6737,6 +6742,33 @@
         "Mokėjimai per platformą dar nevyksta, atsiskaitymo nėra.",
         "Ji neteikia teisinių konsultacijų. Dokumentų gairės yra tik informacinės."
       ]
+    },
+    "sportsModel": {
+      "heading": "Veikimo modelis: žaidėjo kortelės, komandos ir objektai",
+      "intro": "Produktas naudoja sporto žodyną, nes taip darbo organizavimas tampa matomas. Tai veikimo modelis, o ne žaidimas — kiekvienas žemiau esantis sluoksnis yra tikra produkto dalis.",
+      "rows": [
+        {
+          "term": "Žaidėjo kortelė",
+          "meaning": "Darbuotojo gebėjimų kortelė: tikri įgūdžiai, tikri darbo įrodymai, o patvirtinimai visada ateina iš tikrų žmonių."
+        },
+        {
+          "term": "Komanda / brigada",
+          "meaning": "Tikras darbo vienetas įmonėje — kuriamas ir valdomas įmonės darbo erdvėje."
+        },
+        {
+          "term": "Objektas / projektas",
+          "meaning": "Žaidimo aikštė: vieta, kur realiai vyksta darbas ir į kurią priskiriami darbuotojai."
+        },
+        {
+          "term": "Savininkas / operatorius",
+          "meaning": "Žmogus, kuris valdo priskyrimus: kas dirba kuriame objekte ir kada priskyrimas baigiasi."
+        },
+        {
+          "term": "Divizionai / lygos",
+          "meaning": "Pasirenkami grupavimo ir būsenos sluoksniai rinkoms bei profesijoms — platforma juos naudoja grupavimui, niekada ne reitingavimui."
+        }
+      ],
+      "noRanking": "Jokių reitingų ir jokių taškų: šiame modelyje niekas nevertina žmonių ir nerikiuoja jų vieno prieš kitą. Matote tik grupavimą ir sąžiningus gebėjimų signalus."
     },
     "data": {
       "heading": "Jūsų duomenys",

@@ -18,6 +18,7 @@ import {
   upsertReadinessItemAction,
 } from "@/lib/projects/operations-actions";
 import { PrintButton } from "@/components/app/print-button";
+import { playerInitials } from "@/lib/identity/player-identity";
 
 /**
  * Project worker operations board (slices pilot-ops-launch-v1 +
@@ -410,13 +411,9 @@ function WorkerCard({
           ? labels.missingEvidence
           : code;
 
-  const initials =
-    worker.name
-      .trim()
-      .split(/s+/)
-      .slice(0, 2)
-      .map((p) => p[0]?.toUpperCase() ?? "")
-      .join("") || "•";
+  // WAGON 6: SAME identity monogram as the worker Player Card (one card
+  // system) — also fixes the broken local `split(/s+/)` initials copy.
+  const initials = playerInitials(worker.name);
 
   return (
     <article

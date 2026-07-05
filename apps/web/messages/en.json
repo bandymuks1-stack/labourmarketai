@@ -4344,7 +4344,12 @@
       "submit": "Assign",
       "assigned": "Assigned",
       "notAuthorized": "You can only assign workers from your team to your own projects.",
-      "noWorkers": "You don't have any assignable workers on your team yet."
+      "noWorkers": "You don't have any assignable workers on your team yet.",
+      "fromRoster": "Assign a worker to this object"
+    },
+    "model": {
+      "note": "This board follows the platform's operating model: worker player cards are assigned to objects (projects), and you manage the assignments.",
+      "link": "How this model works"
     },
     "map": {
       "eyebrow": "Manager map",
@@ -6737,6 +6742,33 @@
         "Payments do not run through the platform yet, and there is no checkout.",
         "It does not give legal advice. Document guidance is informational only."
       ]
+    },
+    "sportsModel": {
+      "heading": "The operating model: player cards, teams and objects",
+      "intro": "The product borrows sports vocabulary because it makes work organisation visible. It is an operating model, not a game — every layer below is a real product surface.",
+      "rows": [
+        {
+          "term": "Player card",
+          "meaning": "A worker's capability card: real skills, real work evidence, and confirmations that always come from real people."
+        },
+        {
+          "term": "Team / brigade",
+          "meaning": "A real work unit inside a company — created and managed in the company workspace."
+        },
+        {
+          "term": "Object / project",
+          "meaning": "The field of play: the place where work actually happens and where workers are assigned."
+        },
+        {
+          "term": "Owner / operator",
+          "meaning": "The person who manages assignments: who works on which object, and when an assignment ends."
+        },
+        {
+          "term": "Divisions / leagues",
+          "meaning": "Optional grouping and status layers for markets and professions — the platform uses them to group, never to rank."
+        }
+      ],
+      "noRanking": "No rankings and no scores: nothing in this model rates people or orders them against each other. You see grouping and honest capability signals only."
     },
     "data": {
       "heading": "Your data",

@@ -42,6 +42,7 @@ export default async function AboutPage({
   const legal = await getTranslations("legal");
   const loops = t.raw("loops") as { heading: string; points: string[] }[];
   const notYetPoints = t.raw("notYet.points") as string[];
+  const sportsRows = t.raw("sportsModel.rows") as { term: string; meaning: string }[];
 
   return (
     <article
@@ -84,6 +85,40 @@ export default async function AboutPage({
             </ul>
           </div>
         ))}
+      </section>
+
+      {/* WAGON 6 — the sports operating model, explained (audit area 10).
+          Every term maps to a REAL existing surface; divisions/leagues are
+          grouping/status layers, never a ranking (constitution §10). */}
+      <section
+        id="sports-model"
+        className="flex flex-col gap-4"
+        data-testid="about-sports-model"
+      >
+        <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+          {t("sportsModel.heading")}
+        </h2>
+        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
+          {t("sportsModel.intro")}
+        </p>
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {sportsRows.map((row) => (
+            <div
+              key={row.term}
+              className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1 p-4"
+            >
+              <dt className="font-mono text-xs uppercase tracking-label text-brand-orange">
+                {row.term}
+              </dt>
+              <dd className="text-sm leading-relaxed text-text-secondary">
+                {row.meaning}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary">
+          {t("sportsModel.noRanking")}
+        </p>
       </section>
 
       <section
