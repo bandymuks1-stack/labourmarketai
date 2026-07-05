@@ -31,6 +31,8 @@
 
 | `20260705250000_journal_photos_project_gallery.sql` | `20260705160046` | 2026-07-05 | DI + Claude Code (CR train) | **WAGON 8 gallery read scope.** Two ADDITIVE SELECT policies mirroring the 0013 `journal_entries` manager boundary (`manages_organization` via the entry's engagement context) onto `journal_entry_photos` + the private `journal-entry-photos` storage objects — org managers can now see the project work gallery. Renumbered from 20260705240000 by PR #628 (prefix collided with the `20260705240000_agency_legacy_retype` ledger name). Verified post-apply: both policies exist, SELECT-only, 5 total policies on the photo table. Rollback: paired down file (two policy drops). |
 
+| `20260705260000_help_request_intake.sql` | `20260705260000_help_request_intake` | 2026-07-05 | DI + Claude Code (CR train W10) | **WAGON 10 typed internal help requests.** ONE new-name SECURITY DEFINER RPC `submit_help_request_v1` inserting typed help rows (recruiter/accounting/legal/documents/demand_filling) on the EXISTING `customer_requests` table at status `in_review` — operator-queue-visible, never on the submitted-only agency/worker demand projections. Closed type set, 500-char note cap, demand-ownership check, 10-open abuse cap, grants postgres+authenticated only (no anon). Verified post-apply: RPC exists, SECURITY DEFINER, grants correct, 0 pre-existing help rows. Rollback: paired down file (drop function only). |
+
 ## Deferred (committed/known, NOT applied)
 - Append-only **trigger** guards on journal tables (defense-in-depth beyond RLS default-deny) — must respect the correction/supersede/soft-delete lifecycle; `TASKS.md`.
 - `feature_flags` / `proof_of_work` scaffolds (unshipped features) — `TASKS.md`.
