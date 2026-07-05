@@ -4633,8 +4633,8 @@
       "gallery": {
         "title": "Work gallery",
         "countLabel": "{n} photos",
-        "context": "Photos from this project's work journal entries. Workers attach them to their own entries — you only see the ones your access rights allow.",
-        "empty": "No visible photos on this project yet. They will appear when assigned workers attach photos to their work journal entries.",
+        "context": "Photo reports from work journal entries linked to this project. Workers attach them to their own entries — you only see the ones your access rights allow.",
+        "empty": "No photo reports yet. Create a work entry with a photo in the Work journal — if the entry is linked to this project, the photo will appear here.",
         "previewsUnavailable": "Photo previews are not enabled in this environment yet — the list is shown without images.",
         "previewUnavailableOne": "Preview unavailable",
         "photoAlt": "Work photo from a journal entry",

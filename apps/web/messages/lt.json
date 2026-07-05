@@ -4633,8 +4633,8 @@
       "gallery": {
         "title": "Darbų galerija",
         "countLabel": "{n} nuotr.",
-        "context": "Nuotraukos iš šio objekto darbo žurnalo įrašų. Jas prie savo įrašų prideda patys darbuotojai — čia matote tik tas, kurias leidžia jūsų prieigos teisės.",
-        "empty": "Matomų nuotraukų šiame objekte kol kas nėra. Jos atsiras, kai priskirti darbuotojai pridės nuotraukas prie savo darbo žurnalo įrašų.",
+        "context": "Čia rodomos foto ataskaitos iš darbo žurnalo įrašų, susietų su šiuo projektu. Jas prie įrašų prideda patys darbuotojai — matote tik tas, kurias leidžia jūsų prieigos teisės.",
+        "empty": "Foto ataskaitų dar nėra. Sukurkite darbo įrašą su nuotrauka Darbo žurnale — jei įrašas susietas su šiuo projektu, nuotrauka atsiras čia.",
         "previewsUnavailable": "Nuotraukų peržiūra šioje aplinkoje dar neįjungta — sąrašas rodomas be vaizdų.",
         "previewUnavailableOne": "Peržiūra nepasiekiama",
         "photoAlt": "Darbo nuotrauka iš žurnalo įrašo",

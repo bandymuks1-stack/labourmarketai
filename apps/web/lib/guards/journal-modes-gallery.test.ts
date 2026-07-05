@@ -111,6 +111,69 @@ describe("gallery migration mirrors the journal_entries manager boundary", () =>
   });
 });
 
+// ── Owner browser-smoke finding (2026-07-05): "nesuprantu kur yra foto
+// report" — the photo report must be DISCOVERABLE as a journal mode, its
+// helper copy must say where it lives and where the photos surface, and the
+// command finder must answer the natural terms. One photo system only.
+describe("photo report discoverability (owner smoke finding)", () => {
+  const lt = () => JSON.parse(read("messages/lt/journal.json"));
+  const ltBase = () => JSON.parse(read("messages/lt.json"));
+  it("LT mode labels are the owner-specified three", () => {
+    const modes = lt().modes;
+    expect(modes.quick).toBe("Greitas įrašas");
+    expect(modes.structured).toBe("Struktūruota ataskaita");
+    expect(modes.photo).toBe("Foto ataskaita");
+  });
+  it("LT photo-mode helper says it IS a journal entry and names the gallery", () => {
+    const hint = lt().modes.photoHint as string;
+    expect(hint).toContain("Foto ataskaita yra darbo įrašas su nuotraukomis");
+    expect(hint).toContain("Darbo žurnale");
+    expect(hint).toContain("darbų galerijoje");
+  });
+  it("photo field label offers 'paversti foto ataskaita' on any entry", () => {
+    expect(lt().photo.label).toContain("paversti foto ataskaita");
+  });
+  it("gallery context + empty state explain the journal source (LT)", () => {
+    const g = ltBase().projectOps.stadium.gallery;
+    expect(g.context).toContain("foto ataskaitos iš darbo žurnalo įrašų");
+    expect(g.context).toContain("susietų su šiuo projektu");
+    expect(g.empty).toContain("Foto ataskaitų dar nėra");
+    expect(g.empty).toContain("Darbo žurnale");
+  });
+  it("command finder routes the natural terms to the right surfaces", () => {
+    // Normalize line endings so the pin survives CRLF checkouts.
+    const registry = read("lib/navigation/command-registry.ts").replace(/\r/g, "");
+    // photo_report → journal (worker); work_gallery → projects (company)
+    expect(registry).toContain('id: "photo_report",\n    route: "/dashboard/journal"');
+    expect(registry).toContain('id: "work_gallery",\n    route: "/dashboard/projects"');
+    for (const term of [
+      '"foto ataskaita"',
+      '"foto report"',
+      '"darbų nuotraukos"',
+      '"galerija"',
+      '"darbų galerija"',
+    ]) {
+      expect(registry, `finder term ${term}`).toContain(term);
+    }
+  });
+  it("still ONE photo system: no separate photo-report route exists", () => {
+    for (const forbidden of [
+      "app/[locale]/dashboard/photo-report",
+      "app/[locale]/dashboard/photo-reports",
+      "app/[locale]/dashboard/foto-ataskaita",
+      "app/[locale]/dashboard/gallery",
+    ]) {
+      expect(existsSync(join(ROOT, forbidden)), forbidden).toBe(false);
+    }
+  });
+  it("no fake verification claim in the new copy (photos never auto-verify work)", () => {
+    const hint = (lt().modes.photoHint as string) + JSON.stringify(ltBase().projectOps.stadium.gallery);
+    expect(hint).not.toMatch(/automatiškai (?:patvirtina|įrodo)|patvirtina darbą/i);
+    // The gallery source note still states photos are never auto-assessed.
+    expect(ltBase().projectOps.stadium.gallery.sourceNote).toContain("nevertinamos automatiškai");
+  });
+});
+
 describe("i18n copy present (lt/en/ru)", () => {
   for (const loc of ["lt", "en", "ru"] as const) {
     it(`${loc}: journal.modes preset keys exist`, () => {

@@ -254,7 +254,7 @@
   },
   "unit": "Vienetas",
   "photo": {
-    "label": "Darbo nuotrauka (neprivaloma)",
+    "label": "Pridėti nuotrauką / paversti foto ataskaita (neprivaloma)",
     "freeTierNote": "Nemokamai galite pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrašai bus VIP funkcija.",
     "invalidFile": "Nuotrauka turi būti JPG, PNG arba WebP formato, iki 5 MB.",
     "uploaded": "Nuotrauka pridėta prie įrašo.",
@@ -269,10 +269,10 @@
     "title": "Įrašo tipas",
     "quick": "Greitas įrašas",
     "quickHint": "Trumpai aprašykite, ką dirbote, ir išsaugokite vienu žingsniu.",
-    "structured": "Išsamus įrašas",
+    "structured": "Struktūruota ataskaita",
     "structuredHint": "Aprašę darbą pirmiausia sutvarkysite tekstą — laikas, kiekiai ir kryptis taps atskirais laukais, kuriuos peržiūrėsite prieš išsaugant.",
-    "photo": "Nuotraukos ataskaita",
-    "photoHint": "Pirmiausia pridėkite darbo nuotrauką, tada trumpai aprašykite, kas nuveikta. Visi trys tipai kuria tą patį žurnalo įrašą.",
+    "photo": "Foto ataskaita",
+    "photoHint": "Foto ataskaita yra darbo įrašas su nuotraukomis. Ją pildote čia, Darbo žurnale. Jei įrašas susietas su projektu ar objektu, nuotraukos matysis to projekto darbų galerijoje.",
     "photoFirstNote": "Pradėkite nuo nuotraukos. Trumpas aprašymas vis tiek reikalingas — nuotrauka įkeliama tik išsaugojus įrašą."
   }
 }
