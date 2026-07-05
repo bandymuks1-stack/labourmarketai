@@ -296,3 +296,40 @@ describe("command finder — UI renders only from the registry", () => {
     expect(src).toContain("href={entry.route");
   });
 });
+
+// ── Owner lock (2026-07-05): NO FAKE FINDER RESULTS for WAGON-10-pending
+// help terms. Until Wagon 10 lands the real internal request flow, the
+// recruiter/accounting/legal help entries must read as INFORMATION/help
+// surfaces (never "request X" action phrasing) and route only to honest
+// existing surfaces. When Wagon 10 ships the real CTAs, update routes AND
+// this guard together — action phrasing becomes legal only then.
+describe("W10-pending help terms stay information-shaped (owner lock)", () => {
+  const PENDING_IDS = ["recruiter_help", "accounting_help", "legal_help"];
+  const ACTION_TOKENS = [
+    /request\s/i, // en action phrasing
+    /užsak/i, // lt "užsakyti"
+    /pateikti užklaus/i, // lt "submit a request"
+    /заказать/i, // ru order
+    /запросить/i, // ru request
+  ];
+  const INFO_ROUTE_ALLOWLIST = new Set([
+    "/dashboard/service-requests",
+    "/dashboard/documents",
+    "/about",
+  ]);
+  for (const id of PENDING_IDS) {
+    const entry = COMMAND_REGISTRY.find((e) => e.id === id);
+    it(`${id} exists and routes to an allowed info surface`, () => {
+      expect(entry).toBeTruthy();
+      expect(INFO_ROUTE_ALLOWLIST.has(entry!.route)).toBe(true);
+    });
+    it(`${id} labels carry no request-action phrasing in any locale`, () => {
+      for (const locale of ["en", "lt", "ru"] as const) {
+        const label = entry!.labels[locale];
+        for (const rx of ACTION_TOKENS) {
+          expect(label, `${id}.${locale} label "${label}"`).not.toMatch(rx);
+        }
+      }
+    });
+  }
+});

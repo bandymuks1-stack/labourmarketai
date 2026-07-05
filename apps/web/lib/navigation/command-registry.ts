@@ -336,9 +336,9 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     route: "/dashboard/service-requests",
     audience: "company",
     labels: {
-      en: "Recruiter / staffing help (via service requests)",
-      lt: "Rekruterio / įdarbinimo pagalba (per paslaugų užklausas)",
-      ru: "Помощь рекрутера / подбор персонала (через заявки на услуги)",
+      en: "Recruiter / staffing help (information)",
+      lt: "Rekruterio / įdarbinimo pagalba (informacija)",
+      ru: "Помощь рекрутера / подбор персонала (информация)",
     },
     synonyms: {
       en: ["recruiter", "staffing help", "recruitment"],
@@ -351,9 +351,9 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     route: "/dashboard/service-requests",
     audience: "company",
     labels: {
-      en: "Accounting help (via service requests)",
-      lt: "Buhalterijos pagalba (per paslaugų užklausas)",
-      ru: "Бухгалтерская помощь (через заявки на услуги)",
+      en: "Accounting help (information)",
+      lt: "Buhalterijos pagalba (informacija)",
+      ru: "Бухгалтерская помощь (информация)",
     },
     synonyms: {
       en: ["accounting", "accountant", "bookkeeping", "taxes"],
