@@ -4626,6 +4626,37 @@
       "footnote": "Bench management, availability windows and team recommendations will land later, step by step."
     }
   },
+  "teamBrigades": {
+    "title": "Teams / brigades",
+    "intro": "A brigade is a real work unit inside your company. Create one, add workers you already invited, and see what the group can do based on what its members have declared.",
+    "honestNote": "Skill counts are member-declared. “Confirmed” means a manager confirmed that skill through journal review. This is not a team certification and not a rating.",
+    "noTeams": "No brigades yet. Create the first one below — we never show made-up teams.",
+    "memberCount": "Members: {count}",
+    "noMembers": "No members yet. Add workers from your linked roster below.",
+    "capabilityHeading": "What this brigade declares",
+    "capabilityEmpty": "No declared skills among members yet — nothing is invented.",
+    "declaredShort": "declared by {count}",
+    "confirmedShort": "confirmed for {count}",
+    "noAddable": "No linked workers left to add. Invite workers in the roster section first.",
+    "addLabel": "Add a linked worker",
+    "addButton": "Add to brigade",
+    "createLabel": "New brigade name",
+    "createPlaceholder": "e.g. Facade brigade A",
+    "createButton": "Create brigade",
+    "creating": "Creating…",
+    "outcome": {
+      "created": "Brigade created.",
+      "invalidName": "Name must be 2–80 characters.",
+      "notAllowed": "Only an organization owner can create a brigade.",
+      "limitReached": "Brigade limit reached (20).",
+      "needsMigration": "The brigade model is not enabled in this environment yet.",
+      "error": "Could not create the brigade. Nothing was saved."
+    },
+    "memberOutcome": {
+      "added": "Worker added to the brigade.",
+      "error": "Could not add the worker. Nothing was changed."
+    }
+  },
   "agentOs": {
     "missionEyebrow": "Mission control",
     "title": "Agent OS (v1)",

@@ -8,6 +8,8 @@ import { CompanyActionNextActions } from "@/components/app/company-action-next-a
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
+import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
+import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { getOrgMembersData } from "@/lib/operations/org-members";
@@ -152,6 +154,11 @@ export default async function CompanyDashboardPage({
   // System-evidenced management activity (computed from the caller's own
   // recorded review actions — read-only, never an external verification).
   const managerEvidence = await getManagerEvidence();
+  // Teams/brigades minimum (§8.3): probe + read-only load. Reports
+  // { applied: false } until the owner applies 20260705220000.
+  const teamBrigades = ownCompany
+    ? await getTeamBrigadesData()
+    : ({ applied: false } as const);
   const orgMembersLabels = {
     title: tOrg("title"),
     intro: tOrg("intro"),
@@ -586,7 +593,17 @@ export default async function CompanyDashboardPage({
 
       <OrgTier1Warning />
 
-      <TeamRosterEmptyState variant="company" />
+      {/* Teams / brigades minimum (§8.3, branch 13): a brigade is an
+          organizations row (organization_type='team'); membership reuses the
+          canonical engagement_contexts spine; capability = honest read-only
+          counts from members' existing worker_skills. Until the owner applies
+          migration 20260705220000 the probe reports not-applied and the
+          existing honest roster empty state stays — nothing is faked. */}
+      {teamBrigades.applied ? (
+        <TeamBrigadesPanel teams={teamBrigades.teams} />
+      ) : (
+        <TeamRosterEmptyState variant="company" />
+      )}
 
       <div id="company-team" className="scroll-mt-20">
         <CompanyWorkersSection

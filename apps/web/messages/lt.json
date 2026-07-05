@@ -4626,6 +4626,37 @@
       "footnote": "Rezervo valdymas, prieinamumo langai ir komandų rekomendacijos atsiras vėliau, palaipsniui."
     }
   },
+  "teamBrigades": {
+    "title": "Komandos / brigados",
+    "intro": "Brigada — tai reali darbo grupė tavo įmonėje. Sukurk brigadą, pridėk jau pakviestus darbuotojus ir matyk, ką grupė deklaruoja mokanti.",
+    "honestNote": "Įgūdžių skaičiai — pačių narių deklaruoti. „Patvirtinta“ reiškia, kad vadovas patvirtino įgūdį per dienyno peržiūrą. Tai nėra komandos sertifikatas ir ne reitingas.",
+    "noTeams": "Brigadų dar nėra. Sukurk pirmąją žemiau — išgalvotų komandų nerodome.",
+    "memberCount": "Nariai: {count}",
+    "noMembers": "Narių dar nėra. Pridėk darbuotojus iš savo sąrašo žemiau.",
+    "capabilityHeading": "Ką ši brigada deklaruoja",
+    "capabilityEmpty": "Nariai dar nedeklaravo įgūdžių — nieko neišgalvojame.",
+    "declaredShort": "deklaravo {count}",
+    "confirmedShort": "patvirtinta {count}",
+    "noAddable": "Nebeliko susietų darbuotojų, kuriuos būtų galima pridėti. Pirmiausia pakviesk darbuotojus sąrašo skiltyje.",
+    "addLabel": "Pridėti susietą darbuotoją",
+    "addButton": "Į brigadą",
+    "createLabel": "Naujos brigados pavadinimas",
+    "createPlaceholder": "pvz., Fasado brigada A",
+    "createButton": "Sukurti brigadą",
+    "creating": "Kuriama…",
+    "outcome": {
+      "created": "Brigada sukurta.",
+      "invalidName": "Pavadinimas turi būti 2–80 ženklų.",
+      "notAllowed": "Brigadą gali sukurti tik organizacijos savininkas.",
+      "limitReached": "Pasiektas brigadų limitas (20).",
+      "needsMigration": "Brigadų modelis šioje aplinkoje dar neįjungtas.",
+      "error": "Brigados sukurti nepavyko. Niekas nebuvo išsaugota."
+    },
+    "memberOutcome": {
+      "added": "Darbuotojas pridėtas į brigadą.",
+      "error": "Darbuotojo pridėti nepavyko. Niekas nebuvo pakeista."
+    }
+  },
   "agentOs": {
     "missionEyebrow": "Misijos valdymas",
     "title": "Agentų OS (v1)",

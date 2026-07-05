@@ -259,6 +259,12 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // strict-whitelist required_tools slug-list column from
     // payload.required_tools — EXISTING taxonomy slugs only, no new
     // taxonomy; needs-human-gate DRAFT, owner-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 106/);
+    // Then to 107 for the §8.3 teams/brigades minimum (20260705220000;
+    // RED-class definer functions but NO recreate of any existing RPC:
+    // additive organization_type widening ('team') + NEW create_team_v1 /
+    // get_team_capability_summary_v1 on the existing org spine; membership
+    // stays the existing add_org_member engagement path; needs-human-gate
+    // DRAFT, owner-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 107/);
   });
 });
