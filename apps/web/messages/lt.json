@@ -901,7 +901,7 @@
     "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių poreikius darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol jūsų įmonė neverifikuota, poreikiai matomi tik jums ir peržiūros komandai.",
     "empty": "Dar nepateikėte nė vieno poreikio. Pateikite poreikį viršuje ir jis atsiras čia su savo būsena.",
     "created": "Sukurta",
-    "manageHelp": "Juodraščius galite ištrinti. Pateiktas užklausas šiuo metu peržiūrime rankiniu būdu — savarankiškas redagavimas ar uždarymas dar ruošiamas.",
+    "manageHelp": "Juodraščius galima ištrinti. Pateikto poreikio uždarymas ar atidarymas iš naujo — ir atpažintų įgūdžių patvirtinimas — atliekami jo atrankos (scouting) vaizde. Pateikto teksto redagavimas dar negalimas.",
     "detailsLabel": "Pateikti duomenys",
     "fields": {
       "description": "Aprašymas",
@@ -910,7 +910,8 @@
       "skills": "Įgūdžiai / kriterijai",
       "urgency": "Kada reikia",
       "notes": "Pastabos"
-    }
+    },
+    "scoutLink": "Šio poreikio atitikmenys ir susidomėjimas"
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",
@@ -5351,6 +5352,14 @@
       "internalNote": "Tik vidinis įrašas — darbuotojui ar už platformos ribų niekas nesiunčiama.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "notAvailable": "Patvirtinimas dar neįjungtas."
+    },
+    "lifecycle": {
+      "confirm": "Patvirtinti atpažintus įgūdžius",
+      "confirmed": "Įgūdžiai patvirtinti — poreikis dabar struktūruotas",
+      "close": "Uždaryti šį poreikį",
+      "reopen": "Atidaryti iš naujo",
+      "closedNote": "Uždaryta — darbuotojams nerodoma.",
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą."
     }
   },
   "planBoundary": {

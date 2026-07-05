@@ -3,7 +3,9 @@
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
-    "created": "[EN] Created"
+    "created": "[EN] Created",
+    "scoutLink": "[EN] Matched workers & interest for this need",
+    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet."
   },
   "journey": {
     "eyebrow": "Kā tas darbojas",
@@ -1715,6 +1717,14 @@
       "internalNote": "[EN] Internal record only — nothing is sent to the worker or outside the platform.",
       "error": "[EN] Could not save. Try again.",
       "notAvailable": "[EN] Acknowledgement is not enabled yet."
+    },
+    "lifecycle": {
+      "confirm": "[EN] Confirm recognized skills",
+      "confirmed": "[EN] Skills confirmed — the need is now structured",
+      "close": "[EN] Close this need",
+      "reopen": "[EN] Reopen this need",
+      "closedNote": "[EN] Closed — hidden from workers.",
+      "error": "[EN] Could not save. Try again."
     }
   },
   "waze": {

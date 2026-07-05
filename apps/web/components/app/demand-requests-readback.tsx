@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type {
   CustomerRequestStatus,
   CustomerRequestsListResult,
@@ -32,9 +34,13 @@ export interface DemandRequestsReadbackLabels {
   readonly workerVisibilityNote: string;
   readonly empty: string;
   readonly created: string;
-  /** Honest "what you can do next" line — drafts are deletable; self-serve
-   *  editing / closing of a SUBMITTED request is not available yet (RED gap). */
+  /** Honest "what you can do next" line — drafts are deletable; closing/
+   *  reopening a SUBMITTED request lives in scouting (PR10); self-serve
+   *  EDITING of submitted text is still not available (documented gap). */
   readonly manageHelp: string;
+  /** Per-row deep link into scouting for THIS demand (matched workers,
+   *  interest signals, acknowledgement, confirm/close controls). */
+  readonly scoutLink: string;
   readonly status: Readonly<Record<CustomerRequestStatus, string>>;
   /** "Submitted details" expander + the labels for each stored payload field. */
   readonly detailsLabel: string;
@@ -69,9 +75,11 @@ function str(v: unknown): string {
 export function DemandRequestsReadback({
   result,
   labels,
+  locale,
 }: {
   result: CustomerRequestsListResult;
   labels: DemandRequestsReadbackLabels;
+  locale: string;
 }) {
   // needs-migration / error → render nothing (graceful; on prod the
   // 0028 migration is applied so this resolves to a real list).
@@ -153,6 +161,16 @@ export function DemandRequestsReadback({
                     {labels.status[r.status] ?? r.status}
                   </span>
                 </div>
+                {/* PR10: every demand row deep-links its OWN scouting view —
+                    matched workers, interest signals, acknowledgement and the
+                    confirm/close lifecycle controls. Real route, no new page. */}
+                <Link
+                  href={`/${locale}/dashboard/company/scouting?request=${r.id}`}
+                  className="inline-flex w-fit items-center gap-1 text-xs font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+                  data-testid="demand-readback-scout-link"
+                >
+                  {labels.scoutLink} →
+                </Link>
                 {detailRows.length > 0 && (
                   <details className="group">
                     <summary className="cursor-pointer select-none font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-secondary">
