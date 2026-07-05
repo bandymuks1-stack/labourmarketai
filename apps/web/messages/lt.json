@@ -5737,7 +5737,8 @@
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
       "contacted": "Įmonė pažymėjo: susisiekta"
-    }
+    },
+    "companyVerified": "Patikrinta įmonė"
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",

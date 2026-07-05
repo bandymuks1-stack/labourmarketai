@@ -128,6 +128,7 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             companyName: safeApprovedCompanyName(row),
             // Present only after the PR8 location-label RPC is applied.
             locationLabel: (row.location_label as string | null) ?? null,
+            routeStatus: (row.route_status as string | null) ?? null,
           };
           const fit = computeOpportunityFit(readiness, need);
           const { need: matchNeed } = needFromRoleText(

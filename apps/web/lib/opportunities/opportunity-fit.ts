@@ -60,6 +60,10 @@ export interface OpportunityNeed {
   /** Coarse place label of the demand (city/region granularity — never an
    *  address), from the location-label RPC column when applied (PR8). */
   readonly locationLabel?: string | null;
+  /** The approved supply-route status from the RPC (Model A:
+   *  'approved_direct_partner' = admin-VERIFIED company). The worker-facing
+   *  "verified company" badge keys on THIS real signal — never on copy. */
+  readonly routeStatus?: string | null;
 }
 
 export interface OpportunityFit {
