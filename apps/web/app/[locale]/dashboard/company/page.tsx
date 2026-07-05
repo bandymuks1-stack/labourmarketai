@@ -500,15 +500,19 @@ export default async function CompanyDashboardPage({
           className="grid grid-cols-2 gap-2 sm:grid-cols-4"
           data-testid="company-ops-counts"
         >
+          {/* Dead-UI rule D (owner smoke 2026-07-05): each counter navigates
+              to the section/queue it counts — same card language as the
+              clickable cards around it, now honestly earned. */}
           {[
-            { key: "pending", value: pendingCount },
-            { key: "accepted", value: acceptedCount },
-            { key: "members", value: memberCount },
-            { key: "review", value: reviewCount },
+            { key: "pending", value: pendingCount, href: "#company-team" },
+            { key: "accepted", value: acceptedCount, href: "#company-team" },
+            { key: "members", value: memberCount, href: "#company-team" },
+            { key: "review", value: reviewCount, href: `/${locale}/dashboard/inbox` },
           ].map((c) => (
-            <div
+            <a
               key={c.key}
-              className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+              href={c.href}
+              className="flex min-h-11 flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
               data-testid={`company-ops-count-${c.key}`}
             >
               <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
@@ -517,15 +521,24 @@ export default async function CompanyDashboardPage({
               <dd className="font-display text-xl font-semibold text-text-primary">
                 {c.value}
               </dd>
-            </div>
+            </a>
           ))}
         </dl>
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-4">
+          <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-4">
             <h3 className="font-display text-sm font-semibold text-text-primary">
               {tOps("teamTitle")}
             </h3>
             <p className="text-xs leading-relaxed text-text-secondary">{tOps("teamBody")}</p>
+            {/* Dead-UI repair: the three sibling cards all carry a CTA — this
+                one now leads to the team section it describes. */}
+            <a
+              href="#company-team"
+              className="self-start text-xs font-semibold text-brand-blue hover:underline"
+              data-testid="company-ops-team-link"
+            >
+              {tOps("teamTitle")} →
+            </a>
           </div>
           <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-4">
             <h3 className="font-display text-sm font-semibold text-text-primary">

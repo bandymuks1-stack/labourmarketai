@@ -120,22 +120,20 @@ export async function MarketMapShell() {
         {t("ownerScopeNote")}
       </p>
 
-      {/* Filter bar over REAL dimensions (countries + sectors already in app) */}
+      {/* Scope note over REAL dimensions. Dead-UI rule B (owner smoke
+          2026-07-05): NOT pill chips — filtering does not exist here yet, so
+          this must read as plain information, never as tappable filters. */}
       <section
-        className="card-border flex flex-col gap-2 p-4"
+        className="card-border flex flex-col gap-1 p-4"
         data-testid="market-map-filters"
       >
         <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
           {t("scopeTitle")}
         </p>
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-border-subtle bg-surface-1 px-3 py-1 text-xs text-text-secondary">
-            {t("filterCountry")}: {t("filterAll")} ({SUPPORTED_COUNTRIES.length})
-          </span>
-          <span className="rounded-full border border-border-subtle bg-surface-1 px-3 py-1 text-xs text-text-secondary">
-            {t("filterSector")}: {t("filterAll")} ({SECTORS.length})
-          </span>
-        </div>
+        <p className="text-xs text-text-secondary">
+          {t("filterCountry")}: {t("filterAll")} ({SUPPORTED_COUNTRIES.length}) ·{" "}
+          {t("filterSector")}: {t("filterAll")} ({SECTORS.length})
+        </p>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr,320px]">

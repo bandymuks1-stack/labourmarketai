@@ -102,15 +102,14 @@ export function TeamBrigadesPanel({ teams }: { teams: readonly TeamBrigade[] }) 
                 </span>
               </div>
 
+              {/* Dead-UI rule B: member names are plain data, not the
+                  tappable-pill language used by real chips elsewhere. */}
               {team.members.length === 0 ? (
                 <p className="text-xs text-text-muted">{t("noMembers")}</p>
               ) : (
-                <ul className="flex flex-wrap gap-1.5">
+                <ul className="flex flex-wrap gap-x-2 gap-y-0.5">
                   {team.members.map((m) => (
-                    <li
-                      key={m.engagementId}
-                      className="rounded-full border border-ink-500 px-2 py-0.5 text-xs text-text-primary"
-                    >
+                    <li key={m.engagementId} className="text-xs text-text-primary">
                       {m.name}
                     </li>
                   ))}

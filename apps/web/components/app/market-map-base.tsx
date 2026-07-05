@@ -213,6 +213,7 @@ export function MarketMapBase({
   return (
     <section
       className="card-border flex flex-col gap-4 p-5 sm:p-6"
+      id="market-map-base"
       data-testid="market-map-base"
     >
       <header className="flex flex-col gap-1">

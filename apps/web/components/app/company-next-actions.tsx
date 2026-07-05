@@ -122,7 +122,15 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-display text-lg font-semibold text-text-primary">
-            {company.legalName ?? "—"}
+            {/* Dead-UI repair: the company NAME is the natural first tap —
+                it opens the full identity readback (create/edit surface). */}
+            <Link
+              href="/dashboard/start/company"
+              className="rounded-sm transition-colors hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+              data-testid="company-name-link"
+            >
+              {company.legalName ?? "—"}
+            </Link>
             {company.country ? (
               <span className="ml-2 font-mono text-xs font-normal uppercase tracking-label text-text-muted">
                 {company.country}

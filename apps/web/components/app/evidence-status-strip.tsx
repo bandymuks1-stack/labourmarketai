@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
 
 /**
  * Evidence Status Strip (v1). A small, honest legend that shows — visually —
@@ -71,26 +72,41 @@ export async function EvidenceStatusStrip({
     >
       {ORDER.map((status) => {
         const isActive = activeSet.has(status);
-        return (
-          <li key={status}>
+        const chip = (
+          <span
+            data-status={status}
+            data-active={isActive}
+            title={t(`${status}.hint`)}
+            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] leading-tight ${
+              isActive ? ACTIVE_STYLE[status].chip : MUTED_CHIP
+            }`}
+          >
             <span
-              data-status={status}
-              data-active={isActive}
-              title={t(`${status}.hint`)}
-              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] leading-tight ${
-                isActive ? ACTIVE_STYLE[status].chip : MUTED_CHIP
+              aria-hidden
+              className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                isActive ? ACTIVE_STYLE[status].dot : "bg-text-muted/40"
               }`}
-            >
-              <span
-                aria-hidden
-                className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                  isActive ? ACTIVE_STYLE[status].dot : "bg-text-muted/40"
-                }`}
-              />
-              {t(`${status}.label`)}
-            </span>
-          </li>
+            />
+            {t(`${status}.label`)}
+          </span>
         );
+        // Dead-UI rule F (owner smoke 2026-07-05): an ACTIVE "waiting"
+        // chip must lead to the explanation of WHO reviews and HOW — the
+        // Evidence Report prints exactly that ladder.
+        if (status === "awaiting_confirmation" && isActive) {
+          return (
+            <li key={status}>
+              <Link
+                href="/dashboard/reports/evidence"
+                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                data-testid="evidence-awaiting-review-link"
+              >
+                {chip}
+              </Link>
+            </li>
+          );
+        }
+        return <li key={status}>{chip}</li>;
       })}
     </ul>
   );

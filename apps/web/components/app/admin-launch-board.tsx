@@ -58,6 +58,14 @@ export async function AdminLaunchBoard({ signals }: { signals: LaunchSignals }) 
           </li>
         ))}
       </ul>
+      {/* Rule D (dead-UI repair): these tiles are monitoring-only counts —
+          said explicitly so nobody hunts for a click. */}
+      <p
+        className="text-[11px] leading-relaxed text-text-muted"
+        data-testid="admin-launch-signals-monitoring-note"
+      >
+        {t("monitoringNote")}
+      </p>
 
       {/* The 15-item launch board — statuses are CLAIMS; each non-RED claim
           cites a proof artifact whose existence is CI-guarded. */}

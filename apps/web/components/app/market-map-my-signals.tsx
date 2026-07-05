@@ -161,7 +161,9 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
                     {rows.map((s) => (
                       <li
                         key={s.signalId}
-                        className="inline-flex items-center gap-1 rounded-full border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 text-xs text-brand-blue"
+                        // Neutral tone (dead-UI rule B): these are data
+                        // chips, not the active-filter buttons above them.
+                        className="inline-flex items-center gap-1 rounded-full border border-ink-500 px-2 py-0.5 text-xs text-text-secondary"
                       >
                         <MapPin className="h-3 w-3" strokeWidth={1.75} aria-hidden />
                         {placeLabel(s)}
