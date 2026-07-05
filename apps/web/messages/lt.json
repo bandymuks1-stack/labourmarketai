@@ -2165,6 +2165,43 @@
       "insufficientData": "Nepakanka rinkos duomenų",
       "smallSample": "Maža imtis (n<5)",
       "declaredSample": "Deklaruotų lūkesčių imtis: {n}"
+    },
+    "launch": {
+      "title": "Paleidimo lenta",
+      "intro": "Tikri produkto signalai ir 15 paleidimo medžio punktų. Kiekviena ne raudona būsena cituoja įrodymo artefaktą; nežinomi skaičiai rodomi kaip —, niekada neišgalvojami.",
+      "ownerDecision": "savininko sprendimas",
+      "footnote": "Būsenos — tai teiginiai, paremti auditais/apsaugomis repozitorijoje; CI nepavyksta, jei cituojamas įrodymo failas dingsta. Galutinį GREEN skelbia tik paleidimo auditas (PR16).",
+      "signals": {
+        "workers": "Darbuotojai",
+        "companies": "Įmonės",
+        "verifiedCompanies": "Patikrintos įmonės",
+        "openDemands": "Atviri poreikiai",
+        "interestActive": "Susidomėjimas: nauji",
+        "interestReviewed": "Susidomėjimas: peržiūrėti",
+        "interestContacted": "Susidomėjimas: susisiekta"
+      },
+      "status": {
+        "green_scoped": "green scoped",
+        "yellow": "geltona",
+        "red": "raudona"
+      },
+      "items": {
+        "public_market_entry": "Vieša rinkos prieiga",
+        "user_identity": "Naudotojų tapatybės sistema",
+        "worker_profile_player_card": "Darbuotojo profilis / kortelė",
+        "skill_intelligence": "Įgūdžių intelektas",
+        "work_journal": "Darbo žurnalas / tikri įrašai",
+        "company_demand": "Įmonių / poreikių sistema",
+        "market_map": "Rinkos žemėlapis",
+        "matching_scouting": "Atitikimas / atranka",
+        "trust_connect": "Pasitikėjimo ryšys",
+        "control_room": "Vidinis AI / valdymo kambarys",
+        "first_use_ux": "Pirmo naudojimo patirtis",
+        "localization": "Lokalizacija / kalbos",
+        "sales_market_entry": "Pardavimai / įėjimas į rinką",
+        "technical_foundation": "Techninis pagrindas",
+        "launch_readiness": "Pasirengimas paleidimui"
+      }
     }
   },
   "profileSkillClaims": {

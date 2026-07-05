@@ -1390,6 +1390,43 @@
       "insufficientData": "[EN] Insufficient market data",
       "smallSample": "[EN] Small sample (n<5)",
       "declaredSample": "[EN] Declared-expectation sample: {n}"
+    },
+    "launch": {
+      "title": "[EN] Launch board",
+      "intro": "[EN] Real product signals and the 15 launch-tree items. Every non-red status cites a proof artifact; unknown counts show as —, never invented.",
+      "ownerDecision": "[EN] owner decision",
+      "footnote": "[EN] Statuses are claims backed by audits/guards in the repo; CI fails if a cited proof file disappears. Final GREEN is only declared by the launch audit (PR16).",
+      "signals": {
+        "workers": "[EN] Workers",
+        "companies": "[EN] Companies",
+        "verifiedCompanies": "[EN] Verified companies",
+        "openDemands": "[EN] Open demands",
+        "interestActive": "[EN] Interest: new",
+        "interestReviewed": "[EN] Interest: reviewed",
+        "interestContacted": "[EN] Interest: contacted"
+      },
+      "status": {
+        "green_scoped": "[EN] green scoped",
+        "yellow": "[EN] yellow",
+        "red": "[EN] red"
+      },
+      "items": {
+        "public_market_entry": "[EN] Public market entry",
+        "user_identity": "[EN] User identity system",
+        "worker_profile_player_card": "[EN] Worker profile / player card",
+        "skill_intelligence": "[EN] Skill intelligence",
+        "work_journal": "[EN] Work journal / real work records",
+        "company_demand": "[EN] Company / demand system",
+        "market_map": "[EN] Market map",
+        "matching_scouting": "[EN] Matching / scouting",
+        "trust_connect": "[EN] Trust connect",
+        "control_room": "[EN] Internal AI / control room",
+        "first_use_ux": "[EN] First-use UX",
+        "localization": "[EN] Localization / languages",
+        "sales_market_entry": "[EN] Sales / market entry",
+        "technical_foundation": "[EN] Technical foundation",
+        "launch_readiness": "[EN] Launch readiness"
+      }
     }
   },
   "documents": {
