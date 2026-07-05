@@ -264,6 +264,7 @@
     },
     "company": {
       "title": "Your company",
+      "workspaceSubtitle": "Company workspace",
       "subtitle": "Your organization account and what it can do.",
       "actions": {
         "need": {
