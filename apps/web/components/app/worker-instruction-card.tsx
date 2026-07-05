@@ -8,11 +8,13 @@ import type { WorkerInstruction } from "@/lib/instructions/instructions";
 /**
  * Worker view of a single work instruction (slice work-instructions-v1).
  *
- * The ORIGINAL is always preserved and viewable. When a real translation exists
- * it is shown first, clearly labelled "Automatinis vertimas"; otherwise we show
- * the original and an HONEST "translation not ready yet" state — never a fake
- * translation. The worker can always reveal the original and ask the manager to
- * clarify (a real reply in the same thread).
+ * The ORIGINAL is always preserved and viewable. When a real stored translation
+ * exists it is shown first, labelled honestly as a DRAFT translation that must
+ * be checked against the original (no "automatic translation" claim — no
+ * translation engine exists); otherwise we show the original and an HONEST
+ * "translation not ready yet" state — never a fake translation. The worker can
+ * always reveal the original and ask the manager to clarify (a real reply in
+ * the same thread).
  */
 
 export interface InstructionCardLabels {

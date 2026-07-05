@@ -280,9 +280,11 @@ export default async function AccountPage({
         </ul>
       </details>
 
-      {/* Language lives in the header on tablet/desktop; on mobile the top bar
-          is simplified, so the switcher is relocated here (md:hidden). */}
-      <section className="card-border p-6 md:hidden">
+      {/* UI language — visible on ALL viewports (WAGON 5): the account page is
+          where users expect a language setting, so the line is no longer
+          mobile-only. Reuses the existing locale architecture (lt/en/ru active,
+          RU preview-tagged) — no new locales, no new switcher system. */}
+      <section className="card-border p-6" data-testid="account-ui-language">
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
           {tCommon("localeSwitch")}
         </p>

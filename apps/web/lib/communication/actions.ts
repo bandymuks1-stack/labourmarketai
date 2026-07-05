@@ -273,7 +273,10 @@ export async function sendMessage(input: {
   // translation-on-read later. The column ships as a DRAFT migration
   // (20260610190000) — until the owner applies it, the insert degrades to
   // the legacy shape (42703 = undefined column) instead of failing sends.
-  const KNOWN_LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl"];
+  // 11-locale set — matches the CHECK constraint widened by applied migration
+  // 20260612130000 (added 'ru'). An unknown locale stamps NULL (honest
+  // "language unknown"), never a guessed code.
+  const KNOWN_LOCALES = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
   const originalLanguage = KNOWN_LOCALES.includes(input.locale) ? input.locale : null;
   let result = await asAny(supabase)
     .from("conversation_messages")

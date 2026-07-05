@@ -78,6 +78,15 @@ export function CommunicationComposer({
           data-testid="communication-composer-input"
         />
       </label>
+      {/* WAGON 5 honesty helper: users may write in their own language; the
+          counterpart sees the ORIGINAL text — there is no automatic
+          translation, and this line says so instead of hiding it. */}
+      <p
+        className="text-[11px] leading-relaxed text-text-muted"
+        data-testid="communication-language-hint"
+      >
+        {t("composer.languageHint")}
+      </p>
       {error && (
         <p
           role="alert"
