@@ -18,12 +18,12 @@
   },
   "agencies": {
     "cta": {
-      "button": "[EN] Join the partner waitlist",
+      "button": "[EN] Create an agency account",
       "headline": {
         "line1": "[EN] Turn your pool",
         "line2": "[EN] into a live desk."
       },
-      "subcopy": "[EN] Join the partner waitlist and get early-access terms for your agency."
+      "subcopy": "[EN] Create an agency account and manage your pool in one workspace."
     },
     "faq": {
       "eyebrow": "[EN] Agency FAQ",
@@ -434,12 +434,12 @@
   },
   "companies": {
     "cta": {
-      "button": "[EN] Join the company waitlist",
+      "button": "[EN] Create a company account",
       "headline": {
         "line1": "[EN] Stop waiting weeks",
         "line2": "[EN] to fill a role."
       },
-      "subcopy": "[EN] Join the waitlist and get early-access pricing for your projects."
+      "subcopy": "[EN] Create a company account, post a work need and see which available workers fit it."
     },
     "demand": {
       "bullets": [
@@ -728,7 +728,7 @@
           "title": "[EN] Visibility controls"
         }
       ],
-      "cta": "[EN] Join the partner waitlist",
+      "cta": "[EN] Create an agency account",
       "eyebrow": "[EN] For agencies",
       "screenshot": "[EN] Agency mode flow",
       "subcopy": "[EN] Manage your managed workers, post demand on behalf of clients, and broker introductions — all in one place.",
@@ -750,7 +750,7 @@
           "title": "[EN] Agencies, when you need them"
         }
       ],
-      "cta": "[EN] Join the company waitlist",
+      "cta": "[EN] Create a company account",
       "eyebrow": "[EN] For companies",
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
@@ -760,11 +760,11 @@
     "workers": {
       "benefits": [
         {
-          "body": "[EN] Maintain a single avatar with evidence-backed skills and availability — visible to vetted employers across nine countries.",
+          "body": "[EN] Maintain a single avatar with records-backed skills and availability — visible to registered employers across borders.",
           "title": "[EN] One profile, every market"
         },
         {
-          "body": "[EN] See live opportunities and find roles that fit your trade, rate and location.",
+          "body": "[EN] See open work needs matched to your trade, skills and city — and express interest in one click.",
           "title": "[EN] Real demand, real-time"
         },
         {
@@ -992,12 +992,12 @@
   },
   "workers": {
     "cta": {
-      "button": "[EN] Join the worker beta waitlist",
+      "button": "[EN] Create your profile",
       "headline": {
         "line1": "[EN] Your skills deserve",
         "line2": "[EN] a fair market."
       },
-      "subcopy": "[EN] Join the worker beta waitlist and we'll bring you on as access opens."
+      "subcopy": "[EN] Create your profile now — matched opportunities, express interest and honest company response status are live."
     },
     "faq": {
       "eyebrow": "[EN] Worker FAQ",

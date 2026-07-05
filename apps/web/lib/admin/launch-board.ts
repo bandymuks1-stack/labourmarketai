@@ -31,9 +31,8 @@ export interface LaunchBoardItem {
 export const LAUNCH_BOARD: readonly LaunchBoardItem[] = [
   {
     key: "public_market_entry",
-    status: "yellow",
-    proof: null,
-    pending: "PR13 — align public entry/CTAs with the live loop",
+    status: "green_scoped",
+    proof: "runtime/audits/public-market-entry-sales-launch-audit-2026-07-05.md",
   },
   {
     key: "user_identity",
@@ -95,9 +94,8 @@ export const LAUNCH_BOARD: readonly LaunchBoardItem[] = [
   },
   {
     key: "sales_market_entry",
-    status: "yellow",
-    proof: null,
-    pending: "PR13 — public funnel to real flows",
+    status: "green_scoped",
+    proof: "runtime/audits/public-market-entry-sales-launch-audit-2026-07-05.md",
   },
   {
     key: "technical_foundation",

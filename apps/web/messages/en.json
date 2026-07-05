@@ -3557,8 +3557,8 @@
         "line1": "Your skills deserve",
         "line2": "a fair market."
       },
-      "subcopy": "Join the worker beta waitlist and we'll bring you on as access opens.",
-      "button": "Join the worker beta waitlist"
+      "subcopy": "Create your profile now — matched opportunities, express interest and honest company response status are live.",
+      "button": "Create your profile"
     }
   },
   "companies": {
@@ -3655,8 +3655,8 @@
         "line1": "Stop waiting weeks",
         "line2": "to fill a role."
       },
-      "subcopy": "Join the waitlist and get early-access pricing for your projects.",
-      "button": "Join the company waitlist"
+      "subcopy": "Create a company account, post a work need and see which available workers fit it.",
+      "button": "Create a company account"
     }
   },
   "agencies": {
@@ -3753,8 +3753,8 @@
         "line1": "Turn your pool",
         "line2": "into a live desk."
       },
-      "subcopy": "Join the partner waitlist and get early-access terms for your agency.",
-      "button": "Join the partner waitlist"
+      "subcopy": "Create an agency account and manage your pool in one workspace.",
+      "button": "Create an agency account"
     }
   },
   "nav": {
@@ -3879,11 +3879,11 @@
       "benefits": [
         {
           "title": "One profile, every market",
-          "body": "Maintain a single avatar with records-backed skills and availability — visible to registered employers across nine countries."
+          "body": "Maintain a single avatar with records-backed skills and availability — visible to registered employers across borders."
         },
         {
           "title": "Real demand, real-time",
-          "body": "See live opportunities and find roles that fit your trade, rate and location."
+          "body": "See open work needs matched to your trade, skills and city — and express interest in one click."
         },
         {
           "title": "Honest signals",
@@ -3913,7 +3913,7 @@
         }
       ],
       "screenshot": "Company demand flow",
-      "cta": "Join the company waitlist"
+      "cta": "Create a company account"
     },
     "agencies": {
       "eyebrow": "For agencies",
@@ -3935,7 +3935,7 @@
         }
       ],
       "screenshot": "Agency mode flow",
-      "cta": "Join the partner waitlist"
+      "cta": "Create an agency account"
     }
   },
   "pricing": {
@@ -5423,8 +5423,8 @@
     },
     "cta": {
       "use": "Available now",
-      "request_pilot_access": "Request pilot access",
-      "contact": "Contact us"
+      "request_pilot_access": "Pilot access — granted manually",
+      "contact": "Arranged individually"
     }
   },
   "bookings": {
@@ -5617,11 +5617,11 @@
       },
       {
         "title": "4. Get matched",
-        "body": "When an employer's need fits your trade, availability, accommodation, transport and language, you are shortlisted. Mismatches are shown honestly."
+        "body": "When an employer's need fits your trade, availability, accommodation, transport and language, it appears on your opportunity board with an honest fit explanation."
       },
       {
-        "title": "5. Booking and start",
-        "body": "Agree a booking with a clear readiness check. Contract and payment steps stay manual for now."
+        "title": "5. Interest and contact",
+        "body": "Express interest on a need that fits. The company reviews it and you see the honest status — reviewed or contacted. Contracts and payment stay outside the platform for now."
       }
     ],
     "needTitle": "What you may need",
