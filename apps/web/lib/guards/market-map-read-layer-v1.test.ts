@@ -143,6 +143,10 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 104 -> 105 for the §8.5 transport demand enum (20260705200000)
     // — gated RPC recreate projecting payload.transport through a strict
     // enum whitelist; @human-gate-approved, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(105);
+    // Bumped 105 -> 106 for the §8.6 equipment/tools layer (20260705210000)
+    // — gated RPC recreate projecting payload.required_tools through a
+    // strict EXISTING-taxonomy slug whitelist; @human-gate-approved,
+    // owner-gated apply.
+    expect(count).toBeLessThanOrEqual(106);
   });
 });

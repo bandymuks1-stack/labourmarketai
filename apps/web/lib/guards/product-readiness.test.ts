@@ -1619,8 +1619,18 @@ describe("no migration files added by this sprint", () => {
     // (provided|compensated|not_provided|unknown from payload.transport —
     // the accommodation enum path cloned; no table/column change, no free
     // text); @human-gate-approved, needs-human-gate DRAFT, owner-gated
-    // apply; rollback restores the applied Model-A definition.
-    const SPRINT_BASELINE = 105;
+    // apply; rollback restores the prior definition (corrected 2026-07-05
+    // to the true predecessor 20260705130000 location-label body — the
+    // wagon-3 partial-rollback caveat, closed by the §8.6 PR).
+    // Bumped 105 -> 106 for the §8.6 equipment/tools layer
+    // (20260705210000_worker_demand_required_tools.sql): recreate of the
+    // gated worker-demand RPC adding ONE strict-whitelist required_tools
+    // text[] column (10 EXISTING canonical taxonomy skill slugs filtered
+    // element-by-element from payload.required_tools — no new taxonomy, no
+    // table/column change, no free text); @human-gate-approved,
+    // needs-human-gate DRAFT, owner-gated apply; rollback restores the
+    // prior repo-latest definition (20260705200000) verbatim.
+    const SPRINT_BASELINE = 106;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

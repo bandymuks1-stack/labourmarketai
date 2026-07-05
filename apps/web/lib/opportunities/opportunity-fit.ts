@@ -65,6 +65,12 @@ export interface OpportunityNeed {
    *  present only after the transport RPC recreate is applied; the board
    *  degrades honestly ("—") while it is absent. Never free text. */
   readonly transport?: string | null;
+  /** Required tools/equipment from the RPC's strict slug whitelist (§8.6) —
+   *  a closed list of EXISTING canonical taxonomy skill slugs (hand-tools,
+   *  excavator-operator, ...). Optional: present only after the
+   *  required-tools RPC recreate is applied; the board degrades honestly
+   *  ("not stated") while it is absent. Never free text. */
+  readonly requiredTools?: readonly string[] | null;
   /** The approved supply-route status from the RPC (Model A:
    *  'approved_direct_partner' = admin-VERIFIED company). The worker-facing
    *  "verified company" badge keys on THIS real signal — never on copy. */

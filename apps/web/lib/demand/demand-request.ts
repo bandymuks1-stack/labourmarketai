@@ -46,6 +46,25 @@ const TRANSPORT_OFFER_VALUES = new Set([
   "unknown",
 ]);
 
+/** Required tools / equipment capabilities that are safe to expose on the
+ *  worker board (closed slug set, no free text) — the §8.6 equipment/tools
+ *  layer. Every slug is an EXISTING canonical taxonomy skill slug
+ *  (lib/taxonomy/profession-skills.ts + messages/{locale}/skill-names.json)
+ *  — NO new taxonomy. Mirrors the worker RPC's required-tools whitelist
+ *  (20260705210000_worker_demand_required_tools.sql) EXACTLY. */
+const REQUIRED_TOOL_SLUGS = new Set([
+  "bulldozer-operator",
+  "compactor-operator",
+  "crane-operator",
+  "equipment-operation",
+  "excavator-operator",
+  "forklift-operator",
+  "grader-operator",
+  "hand-tools",
+  "loader-operator",
+  "scaffolding",
+]);
+
 export type DemandIntent = "hire_workers" | "partner";
 
 export type DemandUrgency = "flexible" | "this_week" | "urgent";
@@ -84,6 +103,9 @@ export type DemandFields = {
   accommodation?: string;
   /** Transport condition (enum) — optional; unset stays an honest unknown. */
   transport?: string;
+  /** Required tools/equipment — closed set of EXISTING taxonomy skill slugs
+   *  (§8.6). Optional; unset/empty stays an honest "not stated". */
+  requiredTools?: readonly string[];
 };
 
 export type DemandRequestResult =
@@ -199,6 +221,19 @@ export async function submitDemandRequest(
     TRANSPORT_OFFER_VALUES.has(fields.transport)
       ? fields.transport
       : null;
+  // Required tools (§8.6) — every element must be in the closed slug set;
+  // anything else is dropped (never clamped free text). De-duplicated and
+  // sorted so the stored list is deterministic; empty → null (honest unknown).
+  const requiredTools = Array.isArray(fields?.requiredTools)
+    ? [
+        ...new Set(
+          fields.requiredTools.filter(
+            (s): s is string =>
+              typeof s === "string" && REQUIRED_TOOL_SLUGS.has(s),
+          ),
+        ),
+      ].sort()
+    : [];
   // The urgency enum is a safe, structured timing signal → stored as start_period.
   const startPeriod = fields?.urgency ?? null;
 
@@ -210,10 +245,12 @@ export async function submitDemandRequest(
     skills: clamp(fields?.skills, MAX_TEXT) || null,
     urgency: fields?.urgency ?? null,
     notes: clamp(fields?.notes, MAX_TEXT) || null,
-    // The ONLY payload keys the worker RPC exposes — whitelisted enums, never
-    // free text. Stored here because there is no accommodation/transport COLUMN.
+    // The ONLY payload keys the worker RPC exposes — whitelisted enums /
+    // whitelisted slug lists, never free text. Stored here because there is
+    // no accommodation/transport/required-tools COLUMN.
     accommodation,
     transport,
+    required_tools: requiredTools.length > 0 ? requiredTools : null,
   };
 
   // Optional preliminary estimate. Only persisted when the user actually filled
