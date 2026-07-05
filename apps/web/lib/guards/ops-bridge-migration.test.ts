@@ -265,6 +265,12 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // get_team_capability_summary_v1 on the existing org spine; membership
     // stays the existing add_org_member engagement path; needs-human-gate
     // DRAFT, owner-gated).
-    expect(guard).toMatch(/SPRINT_BASELINE = 107/);
+    // Then to 108 for the §8.8 handover passport shell (20260705230000;
+    // RED-class definer function but NO recreate of any existing RPC: ONE
+    // new append-only project_handover_entries table (manager-only select
+    // via can_manage_project, RPC-only writes) + NEW
+    // add_project_handover_entry_v1 on the existing project spine;
+    // needs-human-gate DRAFT, owner-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 108/);
   });
 });

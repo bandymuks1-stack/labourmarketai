@@ -4626,6 +4626,47 @@
       "footnote": "Bench management, availability windows and team recommendations will land later, step by step."
     }
   },
+  "handoverPassport": {
+    "title": "Handover passport",
+    "intro": "A living record of this project's real handover facts: manager notes and declared stages. Entries are append-only — nothing can be edited or deleted afterwards.",
+    "honestNote": "Everything here is recorded by the project manager. A declared stage is the manager's statement, not a platform verification, certification, or completion proof.",
+    "responsibleHeading": "Responsible",
+    "responsibleEmpty": "No active worker assignments yet — assign workers above to record who is responsible.",
+    "checklistNote": "Documents and readiness are tracked in the per-worker checklist above — the passport does not duplicate it. Photo attachments are not supported yet.",
+    "preApply": "The handover record is not available yet in this environment. Nothing is shown because nothing is recorded.",
+    "statusHeading": "Declared stage",
+    "statusNone": "No stage declared yet.",
+    "statusDisclaimer": "Declared by the project manager. “Handover declared” means the manager stated the handover happened — the platform does not verify it.",
+    "historyHeading": "History",
+    "historyEmpty": "No passport entries yet. Add the first real note below.",
+    "entryStatusLabel": "Stage declared",
+    "entryNoteLabel": "Note",
+    "statuses": {
+      "preparation": "Preparation",
+      "in_progress": "In progress",
+      "handover_declared": "Handover declared",
+      "closed": "Closed"
+    },
+    "form": {
+      "typeLabel": "Entry type",
+      "typeNote": "Note",
+      "typeStatus": "Declare stage",
+      "statusLabel": "Stage",
+      "bodyLabel": "Entry text",
+      "bodyPlaceholder": "What actually happened? E.g. keys handed to the client, remaining work agreed…",
+      "bodyOptionalPlaceholder": "Optional note for this stage…",
+      "saving": "Saving…",
+      "submit": "Add entry"
+    },
+    "outcome": {
+      "added": "Entry recorded.",
+      "needsMigration": "The handover record is not available yet in this environment.",
+      "notAuthorized": "Only a manager of this project can add passport entries.",
+      "limitReached": "This project's passport reached its entry limit.",
+      "invalid": "The entry is invalid — check the type, stage and text.",
+      "error": "Could not record the entry. Try again."
+    }
+  },
   "teamBrigades": {
     "title": "Teams / brigades",
     "intro": "A brigade is a real work unit inside your company. Create one, add workers you already invited, and see what the group can do based on what its members have declared.",

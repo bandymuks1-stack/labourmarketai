@@ -4626,6 +4626,47 @@
       "footnote": "Rezervo valdymas, prieinamumo langai ir komandų rekomendacijos atsiras vėliau, palaipsniui."
     }
   },
+  "handoverPassport": {
+    "title": "Perdavimo pasas",
+    "intro": "Gyvas šio projekto realių perdavimo faktų įrašas: vadovo pastabos ir deklaruoti etapai. Įrašai tik pridedami — vėliau jų negalima nei redaguoti, nei ištrinti.",
+    "honestNote": "Viską čia įrašo projekto vadovas. Deklaruotas etapas yra vadovo pareiškimas, o ne platformos patikrinimas, sertifikatas ar užbaigimo įrodymas.",
+    "responsibleHeading": "Atsakingi",
+    "responsibleEmpty": "Aktyvių darbuotojų priskyrimų dar nėra — priskirkite darbuotojus aukščiau, kad būtų užfiksuota, kas atsakingas.",
+    "checklistNote": "Dokumentai ir pasirengimas sekami darbuotojų kontroliniame sąraše aukščiau — pasas jo nedubliuoja. Nuotraukų prisegti kol kas negalima.",
+    "preApply": "Perdavimo įrašai šioje aplinkoje dar nepasiekiami. Nieko nerodome, nes niekas neįrašyta.",
+    "statusHeading": "Deklaruotas etapas",
+    "statusNone": "Etapas dar nedeklaruotas.",
+    "statusDisclaimer": "Deklaravo projekto vadovas. „Perdavimas deklaruotas“ reiškia, kad vadovas pareiškė, jog perdavimas įvyko — platforma to netikrina.",
+    "historyHeading": "Istorija",
+    "historyEmpty": "Paso įrašų dar nėra. Pridėkite pirmą tikrą pastabą žemiau.",
+    "entryStatusLabel": "Deklaruotas etapas",
+    "entryNoteLabel": "Pastaba",
+    "statuses": {
+      "preparation": "Pasiruošimas",
+      "in_progress": "Vykdoma",
+      "handover_declared": "Perdavimas deklaruotas",
+      "closed": "Uždaryta"
+    },
+    "form": {
+      "typeLabel": "Įrašo tipas",
+      "typeNote": "Pastaba",
+      "typeStatus": "Deklaruoti etapą",
+      "statusLabel": "Etapas",
+      "bodyLabel": "Įrašo tekstas",
+      "bodyPlaceholder": "Kas iš tikrųjų įvyko? Pvz., raktai perduoti klientui, sutarti likę darbai…",
+      "bodyOptionalPlaceholder": "Neprivaloma pastaba šiam etapui…",
+      "saving": "Saugoma…",
+      "submit": "Pridėti įrašą"
+    },
+    "outcome": {
+      "added": "Įrašas užfiksuotas.",
+      "needsMigration": "Perdavimo įrašai šioje aplinkoje dar nepasiekiami.",
+      "notAuthorized": "Paso įrašus gali pridėti tik šio projekto vadovas.",
+      "limitReached": "Šio projekto pasas pasiekė įrašų limitą.",
+      "invalid": "Įrašas netinkamas — patikrinkite tipą, etapą ir tekstą.",
+      "error": "Nepavyko užfiksuoti įrašo. Bandykite dar kartą."
+    }
+  },
   "teamBrigades": {
     "title": "Komandos / brigados",
     "intro": "Brigada — tai reali darbo grupė tavo įmonėje. Sukurk brigadą, pridėk jau pakviestus darbuotojus ir matyk, ką grupė deklaruoja mokanti.",
