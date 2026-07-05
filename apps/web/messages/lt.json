@@ -5585,6 +5585,10 @@
       "use": "Galima dabar",
       "request_pilot_access": "Piloto prieiga — suteikiama rankiniu būdu",
       "contact": "Suderinama individualiai"
+    },
+    "readiness": {
+      "draft_pricing": "Planai parengti, bet jų įsigyti negalima. Kainos — dar savininko juodraštis: nė viena kaina nėra galutinė ir nieko negalima nusipirkti.",
+      "owner_confirmed": "Kainos patvirtintos savininko, tačiau planai lieka tik parengti — nieko negalima nusipirkti, kol mokėjimai neįjungti."
     }
   },
   "bookings": {
@@ -5741,6 +5745,37 @@
     "events": {
       "title": "Naujausi webhook įvykiai",
       "empty": "Webhook įvykių dar nėra."
+    },
+    "readiness": {
+      "title": "Mokėjimų parengtis (be teikėjo)",
+      "intro": "Parengties uždarymas be mokėjimų teikėjo: planai, ribos ir apsaugos paruoštos, o tiesioginis mokėjimų nurašymas lieka neįmanomas, kol savininkas neprijungs teikėjo.",
+      "pricingState": "Kainodaros parengtis",
+      "state": {
+        "draft_pricing": "Kainų juodraštis — savininkas kainų dar nepatvirtino",
+        "owner_confirmed": "Kainos patvirtintos savininko — vis tiek nieko negalima įsigyti"
+      },
+      "coverage": {
+        "server_gate": "Serverio saugomos funkcijos",
+        "admin_rbac": "Administratoriaus saugomos funkcijos",
+        "free_surface": "Nemokami paviršiai",
+        "declared_only": "Tik deklaruota riba",
+        "note": "Tik deklaruotos ribos bus taikomos per teisių sluoksnį, kai tik įsijungs mokėjimų vykdymas. Kol mokėjimai išjungti, niekas neužrakinta ir niekas neapmokestinama."
+      },
+      "items": {
+        "payments_kill_switch": "Bendras saugiklis: mokėjimai išjungti kode (PAYMENTS_ENABLED=false)",
+        "live_mode_hard_block": "Tiesioginis režimas ir tiesioginiai raktai griežtai blokuojami konfigūracijos patikroje",
+        "webhook_live_reject": "Webhook atmeta tiesioginius įvykius (tikrinamas parašas, tik testinis režimas)",
+        "plan_catalogue": "Planų katalogas ir ribos apibrėžtos kode",
+        "entitlement_coverage": "Teisių sujungimas: vartai paruošti, leidžiantys, kol mokėjimai išjungti",
+        "pricing_copy": "Kainodaros tekstai: savininko redaguojami juodraščiai, be tiesioginių teiginių",
+        "provider_connection": "Mokėjimų teikėjo prijungimas — užblokuotas pagal dizainą (savininko vartai)"
+      },
+      "status": {
+        "ready": "Paruošta",
+        "prepared": "Parengta",
+        "blocked_by_design": "Užblokuota pagal dizainą"
+      },
+      "proofLabel": "įrodymas"
     }
   },
   "billingStatus": {

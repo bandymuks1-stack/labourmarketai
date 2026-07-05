@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { PRE_PAYMENT_PLANS, type PlanAccessState, type PlanCta } from "@/lib/billing/plans";
+import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 
 /**
  * Honest, in-product plan boundary (Stage 8). Shows what each plan WILL include
@@ -52,6 +53,15 @@ export async function PrePaymentPlanBoundary() {
         ))}
       </div>
       <p className="mt-4 text-[11px] text-text-muted">{t("note")}</p>
+      {/* Owner-editable pricing readiness — plans stay prepared, not
+          purchasable, in BOTH states (payments are off by kill-switch). */}
+      <p
+        className="mt-1 text-[11px] text-text-muted"
+        data-testid="plan-boundary-readiness"
+        data-state={PRICING_READINESS_STATE}
+      >
+        {t(`readiness.${PRICING_READINESS_STATE}` as never)}
+      </p>
     </section>
   );
 }
