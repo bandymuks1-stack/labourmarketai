@@ -1,4 +1,11 @@
 {
+  "commandFinder": {
+    "title": "Greita paieška",
+    "placeholder": "Įveskite, ko ieškote: CV, žurnalas, komanda, kainos…",
+    "inputLabel": "Rasti puslapį ar veiksmą",
+    "resultsLabel": "Atitinkantys puslapiai",
+    "noResults": "Nieko nerasta. Pabandykite kitą žodį — pvz., CV, žurnalas, komanda, dokumentai, kainos."
+  },
   "marketRecognition": {
     "title": "Ką siūlote ar ko ieškote?",
     "subtitle": "Aprašykite savais žodžiais. Paversime tai aiškia kortele, parodysime, ko trūksta, ir nurodysime kitą žingsnį.",
