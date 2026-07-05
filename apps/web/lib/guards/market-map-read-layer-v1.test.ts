@@ -137,6 +137,9 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 102 -> 103 for the customer_requests status-transition guard
     // (20260705150000) — invoker trigger closing owner status latitude to
     // the app whitelist; @human-gate-approved, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(103);
+    // Bumped 103 -> 104 for the §8.1 safe counterpart identity reader
+    // (20260705170000) — one gated SECURITY DEFINER read RPC (display name
+    // only, direct 2-person threads); @human-gate-approved, owner-gated.
+    expect(count).toBeLessThanOrEqual(104);
   });
 });

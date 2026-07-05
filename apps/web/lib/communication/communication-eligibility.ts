@@ -43,3 +43,77 @@ export function evaluateCommunicationRequest(
 export function isShortlistedForContact(status: string | null | undefined): boolean {
   return !!status && status !== "not_fit";
 }
+
+/**
+ * Contact permission states (§8.1 — product-tree branch 20).
+ *
+ * EVERY direct (1:1) conversation open must map to exactly one of these
+ * states. Each `allowed_*` state names the REAL relationship that grants the
+ * permission — there is no generic "allowed", so the source of a permission
+ * is always traceable:
+ *
+ *   - allowed_existing_conversation — the two profiles already share an
+ *     unrevoked direct conversation (opened through a gated path earlier);
+ *     reopening it is always permitted.
+ *   - allowed_engagement — a real employment/engagement link exists
+ *     (company_workers row, or the worker's own accepted invitation
+ *     resolving this company owner as their employer).
+ *   - allowed_scouting_shortlist — the Step 4A scouting gate held: the
+ *     caller owns the demand, the worker is shortlisted (not `not_fit`),
+ *     and the worker is contactable (evaluateCommunicationRequest above).
+ *   - allowed_admin — the caller carries the real admin signal (support /
+ *     matching workbench paths; admin participation is already RLS-visible).
+ *   - no_permission — the default. No relationship → no contact.
+ *
+ * Default-closed and pure: unknown/missing facts always resolve to
+ * `no_permission`. No contact channel (phone/email) is EVER involved — a
+ * permission only ever opens an IN-APP conversation.
+ */
+export type ContactPermissionState =
+  | "allowed_existing_conversation"
+  | "allowed_engagement"
+  | "allowed_scouting_shortlist"
+  | "allowed_admin"
+  | "no_permission";
+
+/** The full enumeration — guard-pinned so no state appears or vanishes silently. */
+export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
+  "allowed_existing_conversation",
+  "allowed_engagement",
+  "allowed_scouting_shortlist",
+  "allowed_admin",
+  "no_permission",
+];
+
+export interface ContactPermissionFacts {
+  /** The two profiles already share an unrevoked direct conversation. */
+  readonly sharesConversation: boolean;
+  /** A real employment/engagement link exists between the two profiles. */
+  readonly hasEngagement: boolean;
+  /** The Step 4A scouting gate (owner + shortlisted + contactable) held. */
+  readonly scoutingAllowed: boolean;
+  /** The caller carries the real admin signal (deriveIsAdmin). */
+  readonly isAdmin: boolean;
+}
+
+/**
+ * Resolve the single contact-permission state from verified facts.
+ * Precedence is most-established-relationship first; any all-false input
+ * lands on `no_permission` (default-closed).
+ */
+export function evaluateContactPermission(
+  facts: ContactPermissionFacts,
+): ContactPermissionState {
+  if (facts.sharesConversation) return "allowed_existing_conversation";
+  if (facts.hasEngagement) return "allowed_engagement";
+  if (facts.scoutingAllowed) return "allowed_scouting_shortlist";
+  if (facts.isAdmin) return "allowed_admin";
+  return "no_permission";
+}
+
+/** True only for the explicit allowed_* states — never for anything else. */
+export function isContactPermitted(
+  state: ContactPermissionState | null | undefined,
+): boolean {
+  return !!state && state !== "no_permission";
+}

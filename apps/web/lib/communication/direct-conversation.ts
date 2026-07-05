@@ -1,6 +1,11 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { createConversation, type CommunicationResult } from "./actions";
+import { resolveContactPermission } from "./contact-permission";
+import {
+  isContactPermitted,
+  type ContactPermissionState,
+} from "./communication-eligibility";
 
 /**
  * Get-or-create a 1:1 ("direct") conversation between the current user and one
@@ -13,11 +18,20 @@ import { createConversation, type CommunicationResult } from "./actions";
  *   - createConversation pins created_by = auth.uid() and adds the creator +
  *     the other profile as participants (RLS-allowed for the creator).
  * No new table, no new policy, no fake messages.
+ *
+ * §8.1 contact-permission gate (default-closed): creating a NEW direct
+ * conversation requires an explicit ContactPermissionState. A dedupe hit IS
+ * the `allowed_existing_conversation` state (the thread was opened through a
+ * gated path before). Otherwise the caller either passes an already-verified
+ * grant (`allowed_scouting_shortlist` from the Step 4A action) or this
+ * function resolves the generic states (engagement / admin) server-side.
+ * `no_permission` → tagged failure; nothing is created, nothing is sent.
  */
 export async function getOrCreateDirectConversation(
   otherProfileId: string,
   locale: string,
   subject?: string | null,
+  grantedPermission?: ContactPermissionState,
 ): Promise<CommunicationResult<{ id: string }>> {
   const supabase = await createClient();
   const {
@@ -64,11 +78,28 @@ export async function getOrCreateDirectConversation(
         .order("created_at", { ascending: true })
         .limit(1);
       const existing = (direct ?? [])[0] as { id: string } | undefined;
+      // allowed_existing_conversation — reopening a shared thread is always
+      // permitted; the conversation was opened through a gated path before.
       if (existing?.id) return { ok: true, data: { id: existing.id } };
     }
   }
 
-  // 2) None found — create a fresh direct conversation with both participants.
+  // 2) §8.1 gate — a NEW direct conversation needs an explicit permission
+  //    state. Trust only an allowed_* grant from a caller that verified its
+  //    own facts server-side (Step 4A scouting); otherwise resolve the
+  //    generic states here. Default-closed.
+  const permission = isContactPermitted(grantedPermission)
+    ? (grantedPermission as ContactPermissionState)
+    : await resolveContactPermission(otherProfileId);
+  if (!isContactPermitted(permission)) {
+    return {
+      ok: false,
+      code: "no_permission",
+      message: "Nėra ryšio, leidžiančio pradėti pokalbį su šiuo asmeniu.",
+    };
+  }
+
+  // 3) Permitted — create a fresh direct conversation with both participants.
   return createConversation({
     subject: subject ?? null,
     kind: "direct",

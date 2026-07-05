@@ -21,6 +21,9 @@ export async function openDirectConversationAction(formData: FormData): Promise<
 
   if (!profileId) redirect(cannotOpen);
 
+  // No pre-verified grant here — getOrCreateDirectConversation resolves the
+  // §8.1 contact-permission states itself (engagement / admin / existing
+  // conversation) and returns `no_permission` when no relationship exists.
   const result = await getOrCreateDirectConversation(profileId, locale);
   if (!result.ok) redirect(cannotOpen);
 

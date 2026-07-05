@@ -8,6 +8,7 @@ import { AttentionInstructions } from "@/components/app/attention-instructions";
 import { FeatureNote } from "@/components/app/feature-note";
 import { createClient } from "@/lib/supabase/server";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
+import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
 /**
@@ -79,6 +80,14 @@ export default async function CommunicationListPage({
   const participants: ParticipantRow[] = (participantsRaw ?? []) as ParticipantRow[];
   const lastReadByConv = new Map<string, string | null>(
     participants.map((p) => [p.conversation_id, p.last_read_at]),
+  );
+
+  // §8.1 safe counterpart identity reader — display names for 2-person direct
+  // threads the viewer participates in, via the permission-gated RPC only.
+  // Empty map (→ honest restricted chips) until the owner applies the
+  // migration or when no identity is permitted. Never a contact channel.
+  const counterpartNames = await readCounterpartIdentities(
+    conversations.map((c) => c.id),
   );
 
   // Bookings / reservation requests are conversation/request objects → their
@@ -175,6 +184,7 @@ export default async function CommunicationListPage({
               kind: c.kind,
               createdBy: c.created_by,
               viewerId: user.id,
+              counterpartName: counterpartNames.get(c.id) ?? null,
             });
             return (
               <li key={c.id}>
@@ -213,7 +223,9 @@ export default async function CommunicationListPage({
                         className="text-text-secondary"
                         data-testid={`conversation-counterparty-${c.id}`}
                       >
-                        {t(card.counterpartyKey)}
+                        {/* Permitted real name (safe reader) or the honest
+                            i18n label (e.g. support team) — never invented. */}
+                        {card.counterpartyName ?? t(card.counterpartyKey)}
                       </span>
                     )}
                     <span aria-hidden className="text-text-muted">

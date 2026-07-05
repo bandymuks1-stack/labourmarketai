@@ -4516,6 +4516,7 @@
     "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
     "counterparty": {
       "support": "Support team",
+      "permitted": "Conversation partner",
       "restricted": "Recipient details are not shown yet"
     },
     "cannotOpen": {
