@@ -1598,7 +1598,14 @@ describe("no migration files added by this sprint", () => {
     // location_label column (never address/locality/contacts); rollback
     // restores the exact Model-A definition. @human-gate-approved,
     // needs-human-gate DRAFT, owner-gated apply.
-    const SPRINT_BASELINE = 102;
+    // Bumped 102 -> 103 for the customer_requests status-transition guard
+    // (20260705150000_customer_requests_status_transition_guard.sql): plain
+    // INVOKER trigger closing the owner's direct-PATCH status latitude to
+    // the app's closed whitelist (draft->submitted|closed,
+    // submitted->closed, closed->submitted); admins + no-JWT bypass;
+    // @human-gate-approved, needs-human-gate DRAFT, owner-gated apply;
+    // rollback drops trigger + function.
+    const SPRINT_BASELINE = 103;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

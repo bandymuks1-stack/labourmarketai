@@ -243,6 +243,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // then to 102 for the worker demand location label (20260705130000;
     // RED recreate of the worker-demand RPC adding ONE coarse
     // location_label column; needs-human-gate DRAFT, NOT applied).
-    expect(guard).toMatch(/SPRINT_BASELINE = 102/);
+    // Then to 103 for the customer_requests status-transition guard
+    // (20260705150000; RED invoker trigger closing owner status latitude
+    // to the app whitelist; needs-human-gate DRAFT, owner-gated apply).
+    expect(guard).toMatch(/SPRINT_BASELINE = 103/);
   });
 });

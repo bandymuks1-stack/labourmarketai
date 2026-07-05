@@ -4,13 +4,14 @@ import { TextFirstPreview } from "./preview";
 import { FeatureAvailabilityGrid } from "@/components/app/feature-availability-grid";
 import { RoleCatalogueGrid } from "@/components/app/role-catalogue-card";
 import { getVisibleRoleOptions } from "@/lib/config/roles";
-import { env } from "@/lib/env";
+import { designGalleryEnabled } from "@/lib/env";
 
 /**
  * Dev-only mobile preview for the text-first composers + suggestion list.
- * Gated by `NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS` (same gate as /[locale]/design).
- * Exists so the team can capture mobile screenshots of the new flow without
- * authenticating against the real Supabase project. NOT linked from nav.
+ * Gated by `designGalleryEnabled` (same gate as /[locale]/design) — never
+ * renders in a production build (PR15 hardening). Exists so the team can
+ * capture mobile screenshots of the new flow without authenticating
+ * against the real Supabase project. NOT linked from nav.
  */
 export default async function TextFirstDesignPreview({
   params,
@@ -19,7 +20,7 @@ export default async function TextFirstDesignPreview({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  if (env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS !== "true") {
+  if (!designGalleryEnabled) {
     notFound();
   }
   // The capture script targets this page; render the FeatureAvailabilityGrid

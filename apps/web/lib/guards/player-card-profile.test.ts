@@ -75,9 +75,11 @@ describe("3. journal-derived skills show their evidence basis", () => {
 
 describe("4. no fake verified labels", () => {
   it("marketing concept cards carry a DEFAULT-ON placeholder marker (§18)", () => {
+    // PR15 hardening: consumers read the shared prod-forced constant, never
+    // the raw env var (see lib/guards/placeholder-marker-prod.test.ts).
     const src = read("components/app/player-card.tsx");
-    expect(src).toMatch(/NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS\s*!==\s*"false"/);
-    expect(src).not.toMatch(/NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS\s*===\s*"true"/);
+    expect(src).toMatch(/showMarker = showPlaceholderMarkers/);
+    expect(src).not.toMatch(/NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS\s*===/);
   });
 
   it("the showcase carries a visible concept-preview line in active locales", () => {

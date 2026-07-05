@@ -85,6 +85,31 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 
+/**
+ * §18 hardening (PR15): placeholder markers can NEVER be disabled in a
+ * production build. The `NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS="false"`
+ * opt-out exists only for dev/test visual tinkering — in production every
+ * governed placeholder always renders its visible marker, so fabricated
+ * values can never pass as real platform data. ALL marker consumers must
+ * read this constant, never the raw env var (guarded by
+ * lib/guards/placeholder-marker-prod.test.ts).
+ */
+export const showPlaceholderMarkers =
+  process.env.NODE_ENV === "production"
+    ? true
+    : env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS !== "false";
+
+/**
+ * The internal design-system galleries (/design, /design/text-first) are a
+ * DEV TOOL, not a product surface ("Design system preview — dev only").
+ * PR15 hardening: they can never render in a production build — before
+ * this they were gated on the marker env var, whose default ("true") left
+ * them publicly reachable in production.
+ */
+export const designGalleryEnabled =
+  process.env.NODE_ENV !== "production" &&
+  env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true";
+
 /** Server-only: throws if a required production secret is missing. */
 export function requireServerSecrets() {
   const missing: string[] = [];

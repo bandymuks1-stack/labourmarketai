@@ -14,9 +14,11 @@ import { Sparkline } from "@/components/ui/Sparkline";
 import { Stat } from "@/components/ui/Stat";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { placeholders } from "@/content/placeholders";
-import { env } from "@/lib/env";
+import { designGalleryEnabled } from "@/lib/env";
 
-// Dev-gated (brief §10.3). Hidden in production (marker flag = false there).
+// Dev-gated (brief §10.3): designGalleryEnabled is hard-false in every
+// production build (PR15 hardening — the old marker-flag gate defaulted to
+// "true", which left this dev gallery publicly reachable in production).
 // NOTE: Next App Router treats _-prefixed folders as private/non-routable,
 // so the brief's /_design is implemented as /design (ADR 0005).
 export default async function DesignPreview({
@@ -26,7 +28,7 @@ export default async function DesignPreview({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  if (env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS !== "true") {
+  if (!designGalleryEnabled) {
     notFound();
   }
 
