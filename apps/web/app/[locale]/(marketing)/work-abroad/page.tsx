@@ -106,8 +106,10 @@ export default async function WorkAbroadPage({
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">
+        {/* Public visitors go to signup (a real entry), not straight into the
+            auth-walled /onboarding redirect bounce. */}
         <Link
-          href="/onboarding"
+          href="/auth/signup"
           className="rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
         >
           {t("ctaProfile")}

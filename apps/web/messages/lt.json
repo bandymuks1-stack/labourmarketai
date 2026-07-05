@@ -3557,8 +3557,8 @@
         "line1": "Jūsų įgūdžiai verti",
         "line2": "sąžiningos rinkos."
       },
-      "subcopy": "Užsirašykite į darbuotojų beta sąrašą ir pakviesime atsivėrus prieigai.",
-      "button": "Užsirašyti į beta laukiančiųjų sąrašą"
+      "subcopy": "Susikurkite profilį dabar — atrinktos galimybės, susidomėjimo pareiškimas ir sąžiningas įmonės atsako statusas jau veikia.",
+      "button": "Susikurti profilį"
     }
   },
   "companies": {
@@ -3655,8 +3655,8 @@
         "line1": "Nustokite laukti savaites",
         "line2": "kol užpildysite pareigybę."
       },
-      "subcopy": "Užsirašykite ir gaukite ankstyvos prieigos kainą savo projektams.",
-      "button": "Užsirašyti įmonės sąraše"
+      "subcopy": "Sukurkite įmonės paskyrą, paskelbkite darbo poreikį ir matykite, kurie prieinami darbuotojai jį atitinka.",
+      "button": "Sukurti įmonės paskyrą"
     }
   },
   "agencies": {
@@ -3753,8 +3753,8 @@
         "line1": "Paverskite rezervą",
         "line2": "gyvu biuru."
       },
-      "subcopy": "Užsirašykite į partnerių sąrašą ir gaukite ankstyvos prieigos sąlygas.",
-      "button": "Užsirašyti partnerių sąraše"
+      "subcopy": "Sukurkite agentūros paskyrą ir valdykite savo darbuotojų grupę vienoje darbo erdvėje.",
+      "button": "Sukurti agentūros paskyrą"
     }
   },
   "nav": {
@@ -3879,11 +3879,11 @@
       "benefits": [
         {
           "title": "Vienas profilis visoms rinkoms",
-          "body": "Vienas avataras su įrašais paremtais įgūdžiais ir prieinamumu — matomas registruotiems darbdaviams devyniose šalyse."
+          "body": "Vienas avataras su įrašais paremtais įgūdžiais ir prieinamumu — matomas registruotiems darbdaviams įvairiose šalyse."
         },
         {
           "title": "Reali paklausa realiu laiku",
-          "body": "Matykite aktyvias galimybes ir raskite jums tinkančias pozicijas pagal profesiją, įkainį ir vietą."
+          "body": "Matykite atvirus darbo poreikius, atitinkančius jūsų profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikškite susidomėjimą."
         },
         {
           "title": "Sąžiningi signalai",
@@ -3913,7 +3913,7 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Užsirašyti į įmonių sąrašą"
+      "cta": "Sukurti įmonės paskyrą"
     },
     "agencies": {
       "eyebrow": "Agentūroms",
@@ -3935,7 +3935,7 @@
         }
       ],
       "screenshot": "Agentūros režimo srautas",
-      "cta": "Užsirašyti į partnerių sąrašą"
+      "cta": "Sukurti agentūros paskyrą"
     }
   },
   "pricing": {
@@ -5423,8 +5423,8 @@
     },
     "cta": {
       "use": "Galima dabar",
-      "request_pilot_access": "Prašyti piloto prieigos",
-      "contact": "Susisiek su mumis"
+      "request_pilot_access": "Piloto prieiga — suteikiama rankiniu būdu",
+      "contact": "Suderinama individualiai"
     }
   },
   "bookings": {
@@ -5617,11 +5617,11 @@
       },
       {
         "title": "4. Būkite suderinti",
-        "body": "Kai darbdavio poreikis atitinka jūsų amatą, laisvumą, apgyvendinimą, transportą ir kalbą, patenkate į trumpąjį sąrašą. Neatitikimai rodomi sąžiningai."
+        "body": "Kai darbdavio poreikis atitinka jūsų profesiją, prieinamumą, apgyvendinimą, transportą ir kalbą, jis atsiranda jūsų galimybių lentoje su sąžiningu atitikimo paaiškinimu."
       },
       {
-        "title": "5. Rezervacija ir startas",
-        "body": "Susitarkite dėl rezervacijos su aiškiu pasiruošimo patikrinimu. Sutarties ir mokėjimo žingsniai kol kas lieka rankiniai."
+        "title": "5. Susidomėjimas ir kontaktas",
+        "body": "Pareikškite susidomėjimą tinkančiu poreikiu. Įmonė jį peržiūri, o jūs matote sąžiningą statusą — peržiūrėta arba susisiekta. Sutartys ir apmokėjimas kol kas lieka už platformos ribų."
       }
     ],
     "needTitle": "Ko gali prireikti",
