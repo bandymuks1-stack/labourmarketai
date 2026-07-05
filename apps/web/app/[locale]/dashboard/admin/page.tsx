@@ -317,6 +317,13 @@ export default async function AdminDashboardPage({
           href: "/dashboard/communication",
           label: t("hub.communication"),
         },
+        {
+          // WAGON 7 — source-backed role × surface permission matrix (public
+          // explanation page; the matrix section is anchored at #matrix).
+          href: "/legal/data-access#matrix",
+          label: t("hub.permissionMatrix"),
+          testId: "admin-tools-hub-permission-matrix",
+        },
       ],
     },
   ];

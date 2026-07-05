@@ -8,6 +8,7 @@ import {
   PendingLegalNotice,
   type LegalSection,
 } from "@/components/marketing/legal-notes";
+import { PermissionMatrixSection } from "@/components/marketing/permission-matrix-table";
 
 /**
  * "Your data and who can see it" — security / data-access explanation page
@@ -59,6 +60,9 @@ export default async function LegalPage({
       </div>
       <p className="mt-6 text-sm leading-relaxed text-text-secondary">{t("dataAccess.intro")}</p>
       <LegalSectionList sections={sections} />
+      {/* WAGON 7 — source-backed role × surface permission matrix. Rows render
+          ONLY from lib/legal/permission-matrix.ts (guard-pinned). */}
+      <PermissionMatrixSection />
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-text-secondary">{t("requestContact")}</p>
         <LegalDisclaimer />

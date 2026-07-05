@@ -1874,7 +1874,8 @@
       "market": "Market situation",
       "league": "Country league",
       "readiness": "Readiness center",
-      "billing": "Billing (test)"
+      "billing": "Billing (test)",
+      "permissionMatrix": "Permission matrix (who sees what)"
     },
     "drafts": {
       "title": "Operations drafts",
@@ -4261,7 +4262,96 @@
             "The access rules in the database are the source of truth, and this page follows them. If something here does not match what you see, contact us — a person will review it."
           ]
         }
-      ]
+      ],
+      "matrix": {
+        "title": "Permission matrix: who can see and change what",
+        "intro": "The table below lists the main product surfaces and, for each role, what that role can see and what it can change. It is written from the actual access rules in the database and in the route guards — each row points to the exact rule that enforces it. Where a rule is narrower than a short label can express, the row's note explains the boundary in plain words.",
+        "surfaceHeader": "Surface",
+        "seeLabel": "See",
+        "editLabel": "Change",
+        "sourceLabel": "Rule",
+        "sourceNote": "The \"Rule\" line under each row names the file in the codebase (a database policy, function or route guard) that enforces the row. These references are technical on purpose — they let anyone check that this page claims nothing broader than what the rules actually do.",
+        "roles": {
+          "worker": "Worker",
+          "company": "Company owner / manager",
+          "teamOwner": "Team owner",
+          "admin": "Administrator"
+        },
+        "levels": {
+          "yes": "yes",
+          "own": "own only",
+          "limited": "limited",
+          "no": "no"
+        },
+        "rows": {
+          "profileAccount": {
+            "surface": "Profile and account data",
+            "seeNote": "You see your own profile. Other users cannot open it directly.",
+            "editNote": "You change only your own profile. Administrators can correct records when needed."
+          },
+          "workerCard": {
+            "surface": "Worker card in scouting",
+            "seeNote": "Companies see an anonymised preview only — no name and no contact details without the worker's permission. The worker sees their own full card.",
+            "editNote": "Only the worker (and, when needed, an administrator) can change the card."
+          },
+          "workJournal": {
+            "surface": "Work journal entries",
+            "seeNote": "The worker sees their own entries. A manager of the organisation the entry belongs to can read it for review.",
+            "editNote": "Entries cannot be rewritten after saving. The worker adds their own entries; managers add review results, not edits."
+          },
+          "orgMembership": {
+            "surface": "Team and company membership",
+            "seeNote": "You see your own memberships; owners and managers see the memberships of their own organisation.",
+            "editNote": "You manage your own membership records; administrators handle corrections."
+          },
+          "teamCapability": {
+            "surface": "Team capability summary",
+            "seeNote": "Only the team's owner or manager sees the summary of their own team. It is derived from members' existing skill records — counts only.",
+            "editNote": "Nobody edits it directly — it is a summary for viewing only."
+          },
+          "demandPosting": {
+            "surface": "Posted needs (demand)",
+            "seeNote": "The company that posted a need sees its own needs. Administrators see the review queue.",
+            "editNote": "The poster updates their own need. Status changes follow a fixed, guarded review sequence — even for administrators."
+          },
+          "workerBoard": {
+            "surface": "Worker demand board",
+            "seeNote": "Workers see approved needs in a reduced, structured form: role, country, team size, start period and the company name — no free text and no contact details. This surface returns nothing to non-worker accounts, including administrators.",
+            "editNote": "For viewing only — nothing on the board can be changed from here."
+          },
+          "messages": {
+            "surface": "Conversations and messages",
+            "seeNote": "Only the participants of a conversation see it (plus platform administrators on support paths). Colleagues who are not participants see nothing.",
+            "editNote": "You send your own messages; sent messages cannot be edited or deleted."
+          },
+          "handover": {
+            "surface": "Project handover notes",
+            "seeNote": "Only people who manage the project (and administrators) see handover notes.",
+            "editNote": "Project managers add notes; existing notes are not rewritten."
+          },
+          "followUp": {
+            "surface": "Follow-up tasks (internal notes)",
+            "seeNote": "Internal operator notes — visible to administrators only.",
+            "editNote": "Written only through controlled admin actions."
+          },
+          "adminPanels": {
+            "surface": "Admin panels",
+            "seeNote": "Restricted to platform administrators; the gate fails closed.",
+            "editNote": "Only administrators act here."
+          }
+        },
+        "messaging": {
+          "heading": "Who can message whom",
+          "intro": "Every direct conversation must match exactly one of the rules below. There is no generic \"allowed\" — each permission names the real relationship behind it, and the default is closed.",
+          "rules": {
+            "existingConversation": "People who already share an active conversation can continue it.",
+            "engagement": "A company and a worker with a real employment or engagement link can message each other.",
+            "scoutingShortlist": "A company can open a conversation with a scouted worker only if the company owns the related need, the worker is on its shortlist, and the worker is currently contactable.",
+            "admin": "Platform administrators can open support conversations.",
+            "none": "In every other case there is no permission: no relationship means no contact. Phone numbers and email addresses are never part of this — messaging opens an in-app conversation only."
+          }
+        }
+      }
     }
   },
   "instructions": {
