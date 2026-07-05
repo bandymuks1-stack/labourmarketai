@@ -11,7 +11,10 @@
  *  - "green_scoped": launch scope closed; larger future scope documented.
  *  - "yellow": partial, pending PR, or owner decision pending.
  *  - "red": missing/fake/disconnected (nothing may ship RED silently).
- * "green" (unscoped) is intentionally NOT used until the PR16 final audit.
+ * "green" (unscoped) is intentionally NEVER used: the board closed at PR16
+ * (runtime/audits/full-launch-readiness-final-audit-2026-07-05.md) with all
+ * 15 items green_scoped — scoped remains the strongest honest claim, since
+ * every item documents deferred larger scope.
  */
 
 export type LaunchStatus = "green_scoped" | "yellow" | "red";
@@ -98,15 +101,14 @@ export const LAUNCH_BOARD: readonly LaunchBoardItem[] = [
   },
   {
     key: "technical_foundation",
-    status: "yellow",
-    proof: "runtime/audits/technical-foundation-launch-hardening-audit-2026-07-05.md",
-    pending:
-      "20260705150000 status-transition trigger — owner apply gate (PR16 closes after apply)",
+    status: "green_scoped",
+    // Production apply of 20260705150000 verified 2026-07-05 (Supabase MCP,
+    // read-only checks + rolled-back write probes) — see §2 of the proof.
+    proof: "runtime/audits/full-launch-readiness-final-audit-2026-07-05.md",
   },
   {
     key: "launch_readiness",
-    status: "yellow",
-    proof: null,
-    pending: "PR16 — final launch audit + smoke",
+    status: "green_scoped",
+    proof: "runtime/audits/full-launch-readiness-final-audit-2026-07-05.md",
   },
 ];
