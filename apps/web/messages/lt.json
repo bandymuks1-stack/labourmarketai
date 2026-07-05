@@ -1874,7 +1874,8 @@
       "market": "Rinkos situacija",
       "league": "Šalies lyga",
       "readiness": "Pasiruošimo centras",
-      "billing": "Mokėjimai (test)"
+      "billing": "Mokėjimai (test)",
+      "permissionMatrix": "Teisių matrica (kas ką mato)"
     },
     "drafts": {
       "title": "Operaciniai juodraščiai",
@@ -4261,7 +4262,96 @@
             "Prieigos taisyklės duomenų bazėje yra tiesos šaltinis, o šis puslapis jas atspindi. Jei kas nors čia neatitinka to, ką matote, susisiekite su mumis — peržiūrės žmogus."
           ]
         }
-      ]
+      ],
+      "matrix": {
+        "title": "Teisių matrica: kas ką mato ir gali keisti",
+        "intro": "Žemiau esanti lentelė išvardija pagrindines produkto sritis ir kiekvienai rolei nurodo, ką ji gali matyti ir ką keisti. Ji parašyta pagal faktines prieigos taisykles duomenų bazėje ir maršrutų apsaugose — kiekviena eilutė nurodo tikslią taisyklę, kuri ją užtikrina. Kur taisyklė siauresnė, nei telpa į trumpą žymą, eilutės paaiškinimas ribą apibūdina paprastais žodžiais.",
+        "surfaceHeader": "Sritis",
+        "seeLabel": "Mato",
+        "editLabel": "Keičia",
+        "sourceLabel": "Taisyklė",
+        "sourceNote": "„Taisyklė“ eilutė nurodo kodo failą (duomenų bazės politiką, funkciją ar maršruto apsaugą), kuris užtikrina eilutės teiginį. Šios nuorodos sąmoningai techninės — jos leidžia bet kam patikrinti, kad šis puslapis neteigia daugiau, nei taisyklės iš tikrųjų daro.",
+        "roles": {
+          "worker": "Darbuotojas",
+          "company": "Įmonės savininkas / vadovas",
+          "teamOwner": "Komandos savininkas",
+          "admin": "Administratorius"
+        },
+        "levels": {
+          "yes": "taip",
+          "own": "tik sava",
+          "limited": "ribotai",
+          "no": "ne"
+        },
+        "rows": {
+          "profileAccount": {
+            "surface": "Profilio ir paskyros duomenys",
+            "seeNote": "Matote tik savo profilį. Kiti naudotojai jo tiesiogiai atverti negali.",
+            "editNote": "Keičiate tik savo profilį. Administratoriai gali pataisyti įrašus, kai to reikia."
+          },
+          "workerCard": {
+            "surface": "Darbuotojo kortelė paieškoje",
+            "seeNote": "Įmonės mato tik nuasmenintą peržiūrą — be vardo ir be kontaktų be darbuotojo leidimo. Darbuotojas mato savo pilną kortelę.",
+            "editNote": "Kortelę keisti gali tik pats darbuotojas (ir, kai reikia, administratorius)."
+          },
+          "workJournal": {
+            "surface": "Darbo žurnalo įrašai",
+            "seeNote": "Darbuotojas mato savo įrašus. Organizacijos, kuriai priklauso įrašas, vadovas gali jį perskaityti peržiūrai.",
+            "editNote": "Išsaugotų įrašų perrašyti negalima. Darbuotojas prideda savo įrašus; vadovai prideda peržiūros rezultatus, o ne redagavimus."
+          },
+          "orgMembership": {
+            "surface": "Komandos ir įmonės narystė",
+            "seeNote": "Matote savo narystes; savininkai ir vadovai mato savo organizacijos narystes.",
+            "editNote": "Savo narystės įrašus tvarkote patys; pataisymus atlieka administratoriai."
+          },
+          "teamCapability": {
+            "surface": "Komandos gebėjimų suvestinė",
+            "seeNote": "Tik komandos savininkas ar vadovas mato savo komandos suvestinę. Ji išvedama iš narių esamų įgūdžių įrašų — tik skaičiai.",
+            "editNote": "Niekas jos tiesiogiai neredaguoja — tai tik skaitoma suvestinė."
+          },
+          "demandPosting": {
+            "surface": "Paskelbti poreikiai (paklausa)",
+            "seeNote": "Poreikį paskelbusi įmonė mato savo poreikius. Administratoriai mato peržiūros eilę.",
+            "editNote": "Skelbėjas atnaujina savo poreikį. Būsenos keičiasi pagal fiksuotą, saugomą peržiūros seką — net administratoriams."
+          },
+          "workerBoard": {
+            "surface": "Darbuotojų poreikių lenta",
+            "seeNote": "Darbuotojai mato patvirtintus poreikius sutrumpinta, struktūruota forma: rolė, šalis, komandos dydis, pradžios laikotarpis ir įmonės pavadinimas — be laisvo teksto ir be kontaktų. Ne darbuotojų paskyroms, įskaitant administratorius, ši sritis nieko negrąžina.",
+            "editNote": "Visiems tik skaitoma."
+          },
+          "messages": {
+            "surface": "Pokalbiai ir žinutės",
+            "seeNote": "Pokalbį mato tik jo dalyviai (ir platformos administratoriai pagalbos keliuose). Kolegos, kurie nėra dalyviai, nemato nieko.",
+            "editNote": "Siunčiate savo žinutes; išsiųstų žinučių keisti ar trinti negalima."
+          },
+          "handover": {
+            "surface": "Projekto perdavimo užrašai",
+            "seeNote": "Perdavimo užrašus mato tik projektą valdantys žmonės (ir administratoriai).",
+            "editNote": "Projekto vadovai prideda užrašus; esami užrašai neperrašomi."
+          },
+          "followUp": {
+            "surface": "Tolimesnių veiksmų užduotys (vidiniai užrašai)",
+            "seeNote": "Vidiniai operatoriaus užrašai — matomi tik administratoriams.",
+            "editNote": "Rašomi tik per kontroliuojamus administratoriaus veiksmus."
+          },
+          "adminPanels": {
+            "surface": "Administratoriaus skydeliai",
+            "seeNote": "Prieinami tik platformos administratoriams; apsauga užsidaro savaime.",
+            "editNote": "Čia veikia tik administratoriai."
+          }
+        },
+        "messaging": {
+          "heading": "Kas kam gali rašyti",
+          "intro": "Kiekvienas tiesioginis pokalbis turi atitikti lygiai vieną iš žemiau esančių taisyklių. Bendro „leidžiama“ nėra — kiekvienas leidimas įvardija realų ryšį, o numatytoji būsena yra uždaryta.",
+          "rules": {
+            "existingConversation": "Žmonės, kurie jau turi aktyvų pokalbį, gali jį tęsti.",
+            "engagement": "Įmonė ir darbuotojas, turintys realų darbo ar bendradarbiavimo ryšį, gali susirašinėti.",
+            "scoutingShortlist": "Įmonė gali pradėti pokalbį su surastu darbuotoju tik jei įmonei priklauso susijęs poreikis, darbuotojas yra jos atrinktųjų sąraše ir šiuo metu yra pasiekiamas.",
+            "admin": "Platformos administratoriai gali pradėti pagalbos pokalbius.",
+            "none": "Visais kitais atvejais leidimo nėra: nėra ryšio — nėra kontakto. Telefonų numeriai ir el. pašto adresai čia niekada nenaudojami — susirašinėjimas atveria tik pokalbį platformoje."
+          }
+        }
+      }
     }
   },
   "instructions": {
