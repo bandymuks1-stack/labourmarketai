@@ -10,6 +10,8 @@ import {
 } from "@/lib/projects/actions";
 import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects";
 import type { ManagedWorker } from "@/lib/instructions/instructions";
+import { playerInitials } from "@/lib/identity/player-identity";
+import { Link } from "@/lib/i18n/navigation";
 
 /**
  * Manager DRAFT surface for F4 (living-arena skin, TASK 07 slice 2): create a
@@ -18,12 +20,15 @@ import type { ManagedWorker } from "@/lib/instructions/instructions";
  * gate); an unrelated worker or project returns not_authorized. The pick is
  * ALWAYS a human decision — no ranking, no score, no auto-pick. No fake rows,
  * no destructive delete (assignments END).
+ *
+ * WAGON 6 (sports operating model): the per-object roster below renders each
+ * assigned worker as a compact PLAYER-CARD-style chip — the SAME identity
+ * monogram contract as the worker Player Card (playerInitials, one identity
+ * system, never a second card system). Rows come ONLY from real
+ * project_worker_assignments reads; the per-worker capability view stays the
+ * existing manager-gated operations board (there is NO cross-user card route,
+ * so no new one is invented here).
  */
-
-function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/).slice(0, 2);
-  return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "•";
-}
 
 export interface ProjectManagerLabels {
   createTitle: string;
@@ -49,6 +54,8 @@ export interface ProjectManagerLabels {
   noAssignments: string;
   end: string;
   sending: string;
+  assignFromRoster: string;
+  openBoard: string;
 }
 
 type ProjectWithAssignments = ManagedProject & {
@@ -128,7 +135,7 @@ export function ProjectAssignmentManager({
       ) : workers.length === 0 ? (
         <p className="card-border p-4 text-sm text-text-secondary">{labels.noWorkers}</p>
       ) : (
-        <form action={assignAction} className="card-border flex flex-col gap-3 p-5" data-testid="project-assign">
+        <form id="assign-worker" action={assignAction} className="card-border flex flex-col gap-3 p-5" data-testid="project-assign">
           <p className="font-display text-base font-semibold text-text-primary">
             {labels.assignTitle}
           </p>
@@ -162,7 +169,8 @@ export function ProjectAssignmentManager({
         </form>
       )}
 
-      {/* Per-project assignment lists */}
+      {/* Per-object roster (WAGON 6 staffing view): REAL assignment rows only,
+          rendered as player-card-style chips (shared identity monogram). */}
       {projects.map((p) => (
         <section key={p.id} className="card-border flex flex-col gap-2 p-5" data-testid="project-assignments">
           <p className="font-display text-sm font-semibold text-text-primary">
@@ -179,13 +187,13 @@ export function ProjectAssignmentManager({
                 const key = `${p.id}:${a.workerProfileId}`;
                 const isEnded = ended.has(key);
                 return (
-                  <li key={key} className="flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2">
+                  <li key={key} className="flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="roster-worker-chip">
                     <span className="flex min-w-0 items-center gap-2.5">
                       <span
                         aria-hidden
                         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-ink-500 bg-ink-700 font-display text-[11px] font-bold text-text-primary"
                       >
-                        {initialsOf(a.name)}
+                        {playerInitials(a.name)}
                       </span>
                       <span className={`truncate text-sm ${isEnded ? "text-text-muted line-through" : "text-text-primary"}`}>{a.name}</span>
                     </span>
@@ -209,6 +217,25 @@ export function ProjectAssignmentManager({
               })}
             </ul>
           )}
+          {/* Roster actions: the EXISTING gated writes/views only — jump to the
+              assign form above, open the existing manager-gated operations
+              board (the permitted per-worker capability view). */}
+          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <a
+              href="#assign-worker"
+              data-testid="roster-assign-link"
+              className="inline-flex min-h-8 items-center font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+            >
+              {labels.assignFromRoster} ↑
+            </a>
+            <Link
+              href={`/dashboard/projects/${p.id}/operations`}
+              data-testid="roster-operations-link"
+              className="inline-flex min-h-8 items-center font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
+            >
+              {labels.openBoard} →
+            </Link>
+          </div>
         </section>
       ))}
     </div>
