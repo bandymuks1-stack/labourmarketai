@@ -4626,6 +4626,30 @@
       "footnote": "Bench management, availability windows and team recommendations will land later, step by step."
     }
   },
+  "salesIntake": {
+    "title": "Sales intake",
+    "intro": "A view of who is coming in: submitted demand requests in review, waitlist signups, and stored leads. Viewing only — real recorded rows, nothing editable here.",
+    "honestNote": "Viewing only. Nothing here contacts anyone — no email, no SMS, no messages. The only action records an internal follow-up task for the team.",
+    "requestsHeading": "Demand requests in review",
+    "waitlistHeading": "Waitlist signups",
+    "leadsHeading": "Stored leads",
+    "sourceLabel": "Source",
+    "intentLabel": "Intent",
+    "roleLabel": "Role",
+    "createdLabel": "Created",
+    "openSubject": "inspect",
+    "noDetails": "No further details recorded",
+    "followUpRecorded": "Follow-up task recorded. Nothing was sent to anyone.",
+    "state": {
+      "empty": "No rows yet. When someone signs up or submits a request, it appears here.",
+      "needsAdminRead": "This source is not readable from the app yet — no admin read path exists in this environment. Nothing is shown rather than a false zero.",
+      "serviceKeyMissing": "This source needs the service connection, which is not configured in this environment.",
+      "error": "This source could not be read right now."
+    },
+    "actions": {
+      "addFollowUp": "Add follow-up task"
+    }
+  },
   "followUp": {
     "title": "Follow-up queue",
     "intro": "Internal next actions for the operator team: what to follow up on, for whom, and its current state. Real recorded tasks only.",

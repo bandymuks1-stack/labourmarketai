@@ -151,14 +151,19 @@ The service-role client (`lib/supabase/admin.ts`, `createAdminClient()`,
 |---|---|---|---|
 | `lib/supabase/admin.ts` | helper definition | — | the only factory; `server-only` |
 | `app/api/leads/route.ts` | **runtime** | **No** — writes `leads` only (anon funnel, §17.2) | ✅ legitimate; RLS-less by design for anonymous capture |
+| `lib/billing/subscription-store.ts` | **runtime** | **No** — billing tables only (Stripe TEST webhook; no user session exists) | ✅ legitimate; billing tables carry no authenticated write policy by design |
+| `lib/admin/billing-actions.ts` | **runtime** | **No** — billing tables only (admin manual pilot override, `isSuperadmin`-gated) | ✅ legitimate; same billing-table design |
+| `lib/sales/lead-intake.ts` | **runtime** | **No** — READ-ONLY `waitlist` SELECT (§8.14 intake panel, `isSuperadmin`-gated) | ✅ legitimate; `waitlist` has no authenticated read policy by design (0005: anon INSERT only, reads service-role only); writes nothing |
 | `lib/env.ts` | env plumbing (`requireSupabaseServiceEnv`) | No | ✅ |
 | `scripts/admin-promote.ts` | CLI (interactive) | No (`profiles`) | ✅ operator tool |
 | `scripts/admin-grant-superadmin.ts` | CLI (dry-run + double flag) | No (`profiles`/`profile_roles`) | ✅ operator tool |
 | `scripts/generate-pilot-owner-brief.ts` | CLI report | No | ✅ |
 | `scripts/e2e-*.ts`, `tests/e2e/*` | test harness (local only) | seeds only | ✅ never prod |
 
-**The ONLY runtime `createAdminClient()` caller is `app/api/leads/route.ts`,
-and it writes exclusively to `leads` — never a conversation table.** No
+**The audited runtime `createAdminClient()` callers are exactly the four
+rows above — `app/api/leads/route.ts` (writes `leads` only), the two
+billing paths (billing tables only), and the superadmin-gated read-only
+`waitlist` intake read — never a conversation table.** No
 user-facing chat read or write uses the service role. This inventory is pinned
 in CI: `chat-visibility-rls.test.ts` fails if a new runtime `createAdminClient()`
 caller appears or if any chat path imports the admin client, forcing this doc to
