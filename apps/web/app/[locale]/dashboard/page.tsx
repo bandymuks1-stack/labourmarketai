@@ -81,6 +81,9 @@ export default async function DashboardOverviewPage({
   // migration falls back to "no company" (CTA shown).
   const companyRead = await getOwnCompany();
   const hasCompany = companyRead.kind === "ok" && companyRead.row !== null;
+  // Owner smoke 2026-07-05: the home card must name the ACTIVE company.
+  const companyName =
+    companyRead.kind === "ok" ? (companyRead.row?.legalName ?? null) : null;
   const name =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
 
@@ -312,7 +315,12 @@ export default async function DashboardOverviewPage({
         <CommandFinder />
         {/* Active-role focus: only this role's identity actions on the first
             screen; the other identity stays reachable via Manage spaces. */}
-        <IdentityActions hasCompany={hasCompany} compact focusRole={role} />
+        <IdentityActions
+          hasCompany={hasCompany}
+          companyName={companyName}
+          compact
+          focusRole={role}
+        />
 
         {/* The single, clear primary action for this role/state (data-driven:
             entries waiting → review; nothing waiting → invite/open team; a

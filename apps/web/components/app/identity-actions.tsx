@@ -178,10 +178,15 @@ function ManageSpacesLink({ label }: { label: string }) {
 
 export async function IdentityActions({
   hasCompany,
+  companyName,
   compact = false,
   focusRole,
 }: {
   readonly hasCompany: boolean;
+  /** The ACTIVE company's real name (owner smoke 2026-07-05: the card must
+   *  say WHICH company it is — never a generic "Jūsų įmonė" when a real
+   *  company exists). Null/undefined = no company or name unreadable. */
+  readonly companyName?: string | null;
   /** Compact dashboard entry: tighter spacing, no subtitles/descriptions. */
   readonly compact?: boolean;
   /** When set (dashboard overview), render ONLY the active role's identity
@@ -190,8 +195,16 @@ export async function IdentityActions({
 }) {
   const t = await getTranslations("identityActions");
   const blockCls = `flex flex-col gap-3 rounded-2xl border border-border-subtle bg-ink-800/20 ${compact ? "p-4" : "p-5"}`;
-  const companyTitle = t("company.title");
-  const companySubtitle = compact ? null : t("company.subtitle");
+  // Real identity first: the card title IS the active company name; the
+  // generic label survives only for the honest no-company state. With a real
+  // name shown, the subtitle explains what the card is — even in compact
+  // mode (mobile home), so actions are unambiguous about WHICH company.
+  const companyTitle = companyName?.trim() || t("company.title");
+  const companySubtitle = companyName?.trim()
+    ? t("company.workspaceSubtitle")
+    : compact
+      ? null
+      : t("company.subtitle");
   const companyActionTitle = (key: string) => t(`company.actions.${key}.title`);
 
   // ── FOCUSED: active-role overview — only the active role's actions. ──

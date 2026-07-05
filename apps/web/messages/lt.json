@@ -264,6 +264,7 @@
     },
     "company": {
       "title": "Jūsų įmonė",
+      "workspaceSubtitle": "Įmonės darbo erdvė",
       "subtitle": "Jūsų organizacijos paskyra ir ką ji gali.",
       "actions": {
         "need": {

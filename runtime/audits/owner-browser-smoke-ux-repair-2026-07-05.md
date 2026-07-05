@@ -97,5 +97,33 @@ row actions, follow-up queue actions, manager review integrity (no edit/
 delete of worker text anywhere — verified).
 
 Counts: **P0 = 1 · P1 = 20 findings across 16 files.**
+
+## Issue 3 — Company name / multi-company clarity ("Jūsų įmonė" generic card)
+
+Owner mobile finding: the home company card says only "Jūsų įmonė" — it does
+not say WHICH company is active before actions like Pateikti poreikį /
+Samdyti / Valdyti projektus. Severity: P1 (NOT escalated to P0 — see model
+note). Repair PR: fix/cc/company-card-identity.
+
+Fixes:
+- home card title = the ACTIVE company's real legal name (RLS-scoped
+  getOwnCompany read); generic label survives only in the honest no-company
+  state; subtitle "Įmonės darbo erdvė" shown with a real name (mobile too);
+- no company → the create CTA ("Sukurti įmonę" → /dashboard/start/company,
+  which since #634 splits Sukurti vs Redaguoti headings) replaces the
+  actions — nothing pretends a company exists;
+- change-workspace: the existing Manage-spaces surface stays adjacent to
+  the named card (reused, not duplicated);
+- guard company-card-identity.test.ts pins all of the above + LT copy.
+
+Model note (source-verified, why no P0): the data model holds ONE company
+per profile (getOwnCompany / save_company_setup are profile-scoped) —
+"multiple companies" is not representable today, and every company action
+is auth-scoped to that one owned company, so an action can never hit a
+"wrong" company. If a true multi-company model ever ships, the switch
+action must become a real company selector and this guard must be extended.
+STATUS: awaiting owner retest (route: /lt/dashboard with company role
+active — the card should read e.g. "Labour market ai Sp. z o.o." with
+"Įmonės darbo erdvė" beneath).
 Repair PR: fix/cc/clickability-repair (see report for number/SHA).
 Owner retest required before this issue may be marked closed.
