@@ -125,6 +125,9 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             teamSize: (row.team_size as number | null) ?? null,
             startPeriod: (row.start_period as string | null) ?? null,
             accommodation: (row.accommodation as string | null) ?? null,
+            // Present only after the transport RPC recreate is applied —
+            // the loader tolerates the missing field (honest degradation).
+            transport: (row.transport as string | null) ?? null,
             companyName: safeApprovedCompanyName(row),
             // Present only after the PR8 location-label RPC is applied.
             locationLabel: (row.location_label as string | null) ?? null,

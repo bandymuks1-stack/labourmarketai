@@ -5732,11 +5732,18 @@
     "fieldStart": "Pradžia",
     "fieldTeam": "Žmonių",
     "fieldAccommodation": "Apgyvendinimas",
+    "fieldTransport": "Transportas",
     "accommodation": {
       "provided_free": "Suteikiamas, nemokamai",
       "provided_paid": "Suteikiamas, mokamai",
       "provided_deducted": "Išskaičiuojama iš atlyginimo",
       "not_provided": "Nesuteikiamas"
+    },
+    "transport": {
+      "provided": "Suteikiamas",
+      "compensated": "Kompensuojamos kelionės išlaidos",
+      "not_provided": "Nesuteikiamas",
+      "unknown": "Nenurodyta"
     },
     "urgency": {
       "flexible": "Lankstus laikas",
@@ -5851,6 +5858,11 @@
     "transport": "Suteikiamas transportas",
     "transportYes": "Taip",
     "transportNo": "Ne",
+    "transportOffer": "Transportas",
+    "transProvided": "Suteikiamas",
+    "transCompensated": "Kompensuojamos kelionės išlaidos",
+    "transNone": "Nesuteikiamas",
+    "transUnknown": "Dar nenuspręsta",
     "languages": "Kalbų reikalavimai",
     "languagesHelp": "Atskirti kableliais (pvz. en, nl). Palikite tuščią, jei nėra.",
     "engagement": "Bendradarbiavimo modelis",

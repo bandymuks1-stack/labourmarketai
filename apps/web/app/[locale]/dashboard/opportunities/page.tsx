@@ -318,6 +318,25 @@ export default async function OpportunitiesPage({
                           : "—"}
                       </dd>
                     </div>
+                    {/* Transport condition (§8.5) — enum-only value, same
+                        honest pattern as accommodation: whitelisted value or
+                        "—", never free text; stays "—" until the transport
+                        RPC recreate is applied. */}
+                    <div className="min-w-0">
+                      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {t("fieldTransport")}
+                      </dt>
+                      <dd
+                        className="truncate text-xs text-text-primary"
+                        data-testid="opportunity-transport"
+                      >
+                        {need.transport
+                          ? t.has(`transport.${need.transport}`)
+                            ? t(`transport.${need.transport}`)
+                            : need.transport
+                          : "—"}
+                      </dd>
+                    </div>
                   </dl>
                   {/* Match breakdown — honest per-dimension fit (why it fits /
                       what to check), reusing the deterministic fit engine. No

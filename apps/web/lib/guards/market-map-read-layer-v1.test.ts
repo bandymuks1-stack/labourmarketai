@@ -140,6 +140,9 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 103 -> 104 for the §8.1 safe counterpart identity reader
     // (20260705170000) — one gated SECURITY DEFINER read RPC (display name
     // only, direct 2-person threads); @human-gate-approved, owner-gated.
-    expect(count).toBeLessThanOrEqual(104);
+    // Bumped 104 -> 105 for the §8.5 transport demand enum (20260705200000)
+    // — gated RPC recreate projecting payload.transport through a strict
+    // enum whitelist; @human-gate-approved, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(105);
   });
 });
