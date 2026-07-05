@@ -185,6 +185,11 @@ export default async function CommunicationListPage({
               createdBy: c.created_by,
               viewerId: user.id,
               counterpartName: counterpartNames.get(c.id) ?? null,
+              // §8.2 demand context — the real subject column (for a direct
+              // thread it is the demand title written by the gated scouting
+              // action), so the scope line can honestly say which work
+              // request the thread is about.
+              subject: c.subject,
             });
             return (
               <li key={c.id}>
@@ -238,6 +243,7 @@ export default async function CommunicationListPage({
                           : "italic text-text-muted"
                       }
                       data-testid={`conversation-scope-${c.id}`}
+                      data-demand-context={card.demandContext ? "true" : undefined}
                     >
                       {t(card.scopeKey)}
                     </span>

@@ -4,6 +4,13 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import {
+  CONVERSATION_RATE_CAP,
+  MESSAGE_RATE_CAP,
+  evaluateRateCap,
+  rateCapWindowStartIso,
+  type RateCap,
+} from "@/lib/communication/rate-caps";
 
 /**
  * Communication v1 server actions. Read paths live in the page components
@@ -16,6 +23,8 @@ import { createClient } from "@/lib/supabase/server";
  *     better LT/EN errors than a bare 401.
  *   - Message bodies cap at 10 000 chars server-side. Empty bodies
  *     rejected.
+ *   - §8.2 abuse/spam minimum: windowed rate caps (rate-caps.ts) run BEFORE
+ *     every conversation/message insert — default-closed, no bypass path.
  *   - No service_role. No "delivered" / "read" flags beyond an honest
  *     per-participant `last_read_at` timestamp.
  *   - Conversation creation auto-adds the creator as a participant so the
@@ -34,7 +43,12 @@ export type CommunicationErrorCode =
   | "insert_failed"
   | "update_failed"
   /** §8.1 contact-permission gate: no established relationship → no contact. */
-  | "no_permission";
+  | "no_permission"
+  /** §8.2 abuse cap: the windowed rate limit is reached — wait and retry. */
+  | "rate_limited"
+  /** §8.2 abuse cap: the safety count could not be read — write refused
+   *  (default-closed; a failed check is never a bypass path). */
+  | "rate_check_unavailable";
 
 const SUBJECT_MAX = 240;
 const BODY_MIN = 1;
@@ -47,6 +61,32 @@ const MAX_PARTICIPANTS = 20;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(supabase: SupabaseClient): any {
   return supabase as unknown;
+}
+
+/**
+ * §8.2 abuse/spam minimum — windowed count of the CALLER'S OWN recent writes
+ * in one of the 0021 tables, via their RLS-scoped client (head-only count, no
+ * rows read, no other user's data). Returns null when the count cannot be
+ * read so the pure cap model resolves `unavailable` (default-closed).
+ */
+async function countRecentOwnRows(
+  supabase: SupabaseClient,
+  table: "conversations" | "conversation_messages",
+  authorColumn: "created_by" | "author_id",
+  userId: string,
+  cap: RateCap,
+): Promise<number | null> {
+  const { count, error } = await asAny(supabase)
+    .from(table)
+    .select("id", { count: "exact", head: true })
+    .eq(authorColumn, userId)
+    .gte("created_at", rateCapWindowStartIso(cap));
+  if (error) {
+    // No message body / no ids in the log — table name + code only.
+    console.error(`[communication] rate-cap count failed (${table}):`, error.code ?? "unknown");
+    return null;
+  }
+  return typeof count === "number" ? count : null;
 }
 
 export async function createConversation(input: {
@@ -90,6 +130,36 @@ export async function createConversation(input: {
       ok: false,
       code: "invalid_input",
       message: `Per daug dalyvių (daugiausia ${MAX_PARTICIPANTS}).`,
+    };
+  }
+
+  // §8.2 abuse cap — enforced BEFORE the insert. Windowed count of the
+  // caller's OWN recently created conversations (covers direct opens AND
+  // support threads — every creation path goes through here). Default-closed:
+  // an unreadable count refuses the write instead of bypassing the cap.
+  const recentConversations = await countRecentOwnRows(
+    supabase,
+    "conversations",
+    "created_by",
+    user.id,
+    CONVERSATION_RATE_CAP,
+  );
+  const conversationCapDecision = evaluateRateCap(
+    recentConversations,
+    CONVERSATION_RATE_CAP,
+  );
+  if (conversationCapDecision === "rate_limited") {
+    return {
+      ok: false,
+      code: "rate_limited",
+      message: `Saugumo riba: per parą galima pradėti iki ${CONVERSATION_RATE_CAP.max} pokalbių. Bandykite vėliau.`,
+    };
+  }
+  if (conversationCapDecision !== "allowed") {
+    return {
+      ok: false,
+      code: "rate_check_unavailable",
+      message: "Saugumo patikros atlikti nepavyko, todėl pokalbis nesukurtas. Bandykite dar kartą.",
     };
   }
 
@@ -166,6 +236,32 @@ export async function sendMessage(input: {
       ok: false,
       code: "invalid_input",
       message: `Žinutė per ilga (riba — ${BODY_MAX} simbolių).`,
+    };
+  }
+
+  // §8.2 abuse cap — enforced BEFORE the insert. Windowed count of the
+  // caller's OWN authored messages across all conversations. Default-closed:
+  // an unreadable count refuses the send instead of bypassing the cap.
+  const recentMessages = await countRecentOwnRows(
+    supabase,
+    "conversation_messages",
+    "author_id",
+    user.id,
+    MESSAGE_RATE_CAP,
+  );
+  const messageCapDecision = evaluateRateCap(recentMessages, MESSAGE_RATE_CAP);
+  if (messageCapDecision === "rate_limited") {
+    return {
+      ok: false,
+      code: "rate_limited",
+      message: `Saugumo riba: per valandą galima išsiųsti iki ${MESSAGE_RATE_CAP.max} žinučių. Palaukite ir bandykite vėliau.`,
+    };
+  }
+  if (messageCapDecision !== "allowed") {
+    return {
+      ok: false,
+      code: "rate_check_unavailable",
+      message: "Saugumo patikros atlikti nepavyko, todėl žinutė neišsiųsta. Bandykite dar kartą.",
     };
   }
 

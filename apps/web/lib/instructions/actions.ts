@@ -5,6 +5,11 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import {
+  MESSAGE_RATE_CAP,
+  evaluateRateCap,
+  rateCapWindowStartIso,
+} from "@/lib/communication/rate-caps";
 
 /**
  * Work-instructions server actions (slice work-instructions-v1).
@@ -28,7 +33,15 @@ export type InstructionActionResult =
   | { ok: true }
   | {
       ok: false;
-      code: "needs_migration" | "invalid" | "auth" | "not_authorized" | "error";
+      code:
+        | "needs_migration"
+        | "invalid"
+        | "auth"
+        | "not_authorized"
+        /** §8.2 abuse cap: windowed message rate limit reached, or the safety
+         *  count could not be read (default-closed — never a bypass path). */
+        | "rate_limited"
+        | "error";
       message?: string;
     };
 
@@ -113,6 +126,25 @@ export async function requestInstructionClarificationAction(
 
   const text = (body ?? "").trim();
   if (!conversationId || text.length === 0) return { ok: false, code: "invalid" };
+
+  // §8.2 abuse cap — same windowed message cap as the communication composer,
+  // enforced BEFORE the insert (this is the one other app-side message-insert
+  // path; no cap bypass). Default-closed: an unreadable count refuses the send.
+  const { count: recentCount, error: capError } = await asAny(supabase)
+    .from("conversation_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("author_id", user.id)
+    .gte("created_at", rateCapWindowStartIso(MESSAGE_RATE_CAP));
+  const capDecision = evaluateRateCap(
+    capError ? null : typeof recentCount === "number" ? recentCount : null,
+    MESSAGE_RATE_CAP,
+  );
+  if (capDecision !== "allowed") {
+    if (capError) {
+      console.error("[instructions] rate-cap count failed:", capError.code ?? "unknown");
+    }
+    return { ok: false, code: "rate_limited" };
+  }
 
   const { error } = await asAny(supabase)
     .from("conversation_messages")

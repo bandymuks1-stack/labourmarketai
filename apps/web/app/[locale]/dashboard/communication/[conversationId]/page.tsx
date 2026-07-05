@@ -63,6 +63,9 @@ export default async function ConversationDetailPage({
     createdBy: conversation.created_by,
     viewerId: user.id,
     counterpartName: counterpartNames.get(conversationId) ?? null,
+    // §8.2 demand context — the real subject column (for a direct thread it
+    // is the demand title written by the gated scouting action).
+    subject: conversation.subject,
   });
 
   // Table is `conversation_messages`, NOT `messages` — see 0021's header
@@ -156,6 +159,7 @@ export default async function ConversationDetailPage({
                 card.scopeKnown ? "text-text-secondary" : "italic text-text-muted"
               }
               data-testid="thread-scope"
+              data-demand-context={card.demandContext ? "true" : undefined}
             >
               {t(card.scopeKey)}
             </span>
