@@ -125,5 +125,46 @@ action must become a real company selector and this guard must be extended.
 STATUS: awaiting owner retest (route: /lt/dashboard with company role
 active — the card should read e.g. "Labour market ai Sp. z o.o." with
 "Įmonės darbo erdvė" beneath).
+
+## Issue 4 — Multi-company / multiple activity workspace selector not final
+
+Severity: **YELLOW / P1** (owner directive 2026-07-05). PR #635 fixed the
+VISIBLE identity problem for the current one-company-per-profile behavior —
+that fix is NOT final product truth. A person must eventually be able to
+manage multiple companies / activities / organization spaces.
+
+Classification verification (source, 2026-07-05): the schema TRULY enforces
+one owned company per profile today — `companies_profile_id_key UNIQUE
+(profile_id)` (migration 20260604120000) and `save_company_setup` updates
+the existing row when one exists (create-else-update, never a second row).
+Company actions therefore route unambiguously to that one company → NOT a
+P0. Nuance recorded honestly: a profile CAN already be a manager of
+multiple ORGANIZATIONS on the engagement spine (manages_organization —
+teams/brigades etc.); those are managed org contexts inside the one owned
+company workspace, not separately owned companies. That org spine is the
+natural substrate for a future multi-workspace selector.
+
+Required future behavior (owner spec, verbatim intent):
+1. User sees all companies / activities they own or manage.
+2. User chooses the active company/workspace.
+3. Every company action clearly uses the SELECTED company.
+4. "Add company" CREATES a new company/activity — never edits an existing
+   one (requires lifting the unique(profile_id) model: schema + RPC + RLS
+   work, owner-gated migration).
+5. Company card always shows the active company name (holds since #635).
+6. Multiple companies → visible "Keisti įmonę" / workspace selector.
+7. No blind edit screens.
+8. No action may run with an unclear company context.
+
+Guards that must be EXTENDED when multi-company ships:
+company-card-identity.test.ts (the model note names this trigger),
+identity-action-workspace.test.ts, room-separation, and every
+profile-scoped company action (demand submit, projects, team brigades,
+help requests) must re-verify context binding against the SELECTED
+company instead of "the one owned company".
+
+STATUS: **DEFERRED — multi-company is NOT supported today (schema-enforced
+single company per profile) and NO final multi-company readiness is
+claimed.** The final owner smoke pass must restate this deferral.
 Repair PR: fix/cc/clickability-repair (see report for number/SHA).
 Owner retest required before this issue may be marked closed.
