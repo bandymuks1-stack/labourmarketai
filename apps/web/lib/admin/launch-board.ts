@@ -99,8 +99,9 @@ export const LAUNCH_BOARD: readonly LaunchBoardItem[] = [
   {
     key: "technical_foundation",
     status: "yellow",
-    proof: null,
-    pending: "PR15 — final hardening sweep",
+    proof: "runtime/audits/technical-foundation-launch-hardening-audit-2026-07-05.md",
+    pending:
+      "20260705150000 status-transition trigger — owner apply gate (PR16 closes after apply)",
   },
   {
     key: "launch_readiness",

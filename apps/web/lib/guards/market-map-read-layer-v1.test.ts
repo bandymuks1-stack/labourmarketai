@@ -134,6 +134,9 @@ describe("NO new DB migration in this PR", () => {
     // (20260705120000) — one gated SECURITY DEFINER RPC, owner-gated apply.
     // Bumped 101 -> 102 for the worker demand location label
     // (20260705130000) — gated RPC recreate, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(102);
+    // Bumped 102 -> 103 for the customer_requests status-transition guard
+    // (20260705150000) — invoker trigger closing owner status latitude to
+    // the app whitelist; @human-gate-approved, owner-gated apply.
+    expect(count).toBeLessThanOrEqual(103);
   });
 });

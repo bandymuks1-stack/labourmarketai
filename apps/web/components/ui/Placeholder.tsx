@@ -1,13 +1,14 @@
 import Image from "next/image";
 import { getLocale } from "next-intl/server";
 import { getPlaceholder } from "@/content/placeholders";
-import { env } from "@/lib/env";
+import { showPlaceholderMarkers } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 /**
  * Renders a registered placeholder. Components must use this — never inline a
- * fake value. When NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === 'true' (dev +
- * preview) a louder dotted outline + corner chip marks it.
+ * fake value. `showPlaceholderMarkers` controls the louder dotted outline +
+ * corner chip — forced ON in production builds (§18, PR15); the env opt-out
+ * exists only for dev/test visual tinkering.
  *
  * Always-on Sample affordance (platform doctrine §7 — "no unlabeled fake
  * data"): in production, a fabricated value (status !== 'replaced') still
@@ -24,8 +25,7 @@ export async function Placeholder({
 }) {
   const entry = getPlaceholder(id);
   const locale = await getLocale();
-  const showMarker =
-    env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true";
+  const showMarker = showPlaceholderMarkers;
 
   const value = entry.value;
   let content: React.ReactNode;

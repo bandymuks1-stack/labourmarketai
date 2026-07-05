@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { showPlaceholderMarkers } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 /** Dashboard 3-sections card. The empty body is rendered with a visible
@@ -13,7 +13,7 @@ export function DashboardSection({
   emptyBody?: string;
   children?: React.ReactNode;
 }) {
-  const marker = env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true";
+  const marker = showPlaceholderMarkers;
   return (
     <section className="card-border p-6">
       <h2 className="font-mono text-[11px] uppercase tracking-label text-text-muted">

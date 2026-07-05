@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireSuperadmin } from "@/lib/auth/superadmin";
+import { showPlaceholderMarkers } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -171,8 +172,9 @@ export default async function ProjectTruthPage({
   })();
   const hasAnonKey = Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   const hasServiceRoleKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
-  const placeholderMarkersEnabled =
-    process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true";
+  // Report the EFFECTIVE marker state (PR15: forced true in production
+  // regardless of the env var — lib/env.ts showPlaceholderMarkers).
+  const placeholderMarkersEnabled = showPlaceholderMarkers;
 
   return (
     <div className="flex flex-col gap-8" data-testid="project-truth-page">
@@ -469,9 +471,13 @@ export default async function ProjectTruthPage({
             </tr>
             <tr>
               <td className="py-2">
-                <code>NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS</code>
+                <code>NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS</code> (effective)
               </td>
-              <td className="py-2">{placeholderMarkersEnabled ? "true" : "false"}</td>
+              <td className="py-2">
+                {placeholderMarkersEnabled
+                  ? "on (forced on in production)"
+                  : "off (dev/test only)"}
+              </td>
             </tr>
           </tbody>
         </table>

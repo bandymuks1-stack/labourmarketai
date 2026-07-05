@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { env } from "@/lib/env";
+import { showPlaceholderMarkers } from "@/lib/env";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { MobileSheet } from "@/components/ui/MobileSheet";
@@ -90,7 +90,7 @@ export function NotificationPanel() {
             activeRole={activeRole}
             switchRole={switchRole}
             markAllRead={markAllRead}
-            placeholderMarker={env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true"}
+            placeholderMarker={showPlaceholderMarkers}
           />
         </div>
       )}
@@ -106,7 +106,7 @@ export function NotificationPanel() {
           activeRole={activeRole}
           switchRole={switchRole}
           markAllRead={markAllRead}
-          placeholderMarker={env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true"}
+          placeholderMarker={showPlaceholderMarkers}
           chromeless
         />
       </MobileSheet>

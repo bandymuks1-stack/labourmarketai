@@ -13,7 +13,7 @@ import {
   type PlayerStatus,
   type PlayerTier,
 } from "@/content/placeholders";
-import { env } from "@/lib/env";
+import { showPlaceholderMarkers } from "@/lib/env";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { OVRRing } from "@/components/app/ovr-ring";
@@ -58,12 +58,10 @@ export function PlayerCard({ id }: { id: string }) {
   const name = lc(card.name);
   const role = lc(card.role);
   const tierLabel = t(`tier.${card.tier}`);
-  // §18 launch fix (PR9): the visible "Placeholder" marker on the fictional
-  // marketing concept cards is DEFAULT-ON — it disappears only when the env
-  // explicitly opts out. Previously it was default-off, which would have
-  // shown fictional workers on the public page without a visible marker.
-  const showMarker =
-    env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS !== "false";
+  // §18 (PR9 default-ON, PR15 prod-forced): the visible "Placeholder" marker
+  // on the fictional marketing concept cards can no longer be disabled in
+  // production at all — the env opt-out works only in dev/test.
+  const showMarker = showPlaceholderMarkers;
 
   return (
     <motion.article
