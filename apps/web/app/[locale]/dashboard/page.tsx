@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { CommandFinder } from "@/components/app/command-finder";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
@@ -305,6 +306,9 @@ export default async function DashboardOverviewPage({
         />
         {Header}
         <CurrentSpaceHeader role={role} />
+        {/* Universal command finder (WAGON 3) — type a normal term, get the
+            right EXISTING page. Registry-only results, audience-filtered. */}
+        <CommandFinder />
         {/* Active-role focus: only this role's identity actions on the first
             screen; the other identity stays reachable via Manage spaces. */}
         <IdentityActions hasCompany={hasCompany} compact focusRole={role} />
@@ -453,6 +457,11 @@ export default async function DashboardOverviewPage({
         metadata={{ surface: "work_card" }}
       />
       <CurrentSpaceHeader role={role} />
+
+      {/* Universal command finder (WAGON 3) — type a normal term ("cv",
+          "žurnalas", "kainos"), get the right EXISTING page. Registry-only
+          results, audience-filtered from server-derived signals. */}
+      <CommandFinder />
 
       {/* "Mano darbo kortelė" — the state-aware status: what's clear / what's
           missing + the ONE best next action (+ why it helps). Real data only.

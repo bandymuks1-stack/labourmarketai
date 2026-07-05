@@ -1,4 +1,11 @@
 {
+  "commandFinder": {
+    "title": "Quick find",
+    "placeholder": "Type what you need: CV, journal, team, pricing…",
+    "inputLabel": "Find a page or action",
+    "resultsLabel": "Matching pages",
+    "noResults": "Nothing found. Try another word — e.g. CV, journal, team, documents, pricing."
+  },
   "marketRecognition": {
     "title": "What do you offer or need?",
     "subtitle": "Describe it in your own words. We turn it into a clear card, show what is missing, and point to the next step.",
