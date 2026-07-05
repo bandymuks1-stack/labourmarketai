@@ -4626,6 +4626,30 @@
       "footnote": "Rezervo valdymas, prieinamumo langai ir komandų rekomendacijos atsiras vėliau, palaipsniui."
     }
   },
+  "salesIntake": {
+    "title": "Pardavimų srautas",
+    "intro": "Tik peržiūrai skirtas vaizdas, kas ateina: pateiktos poreikio užklausos peržiūroje, laukiančiųjų sąrašo registracijos ir įrašyti kontaktai. Tik realūs įrašai.",
+    "honestNote": "Tik skaitymui. Niekas čia su niekuo nesusisiekia — jokių el. laiškų, SMS ar žinučių. Vienintelis veiksmas — vidinės tolesnio veiksmo užduoties įrašymas komandai.",
+    "requestsHeading": "Poreikio užklausos peržiūroje",
+    "waitlistHeading": "Laukiančiųjų sąrašo registracijos",
+    "leadsHeading": "Įrašyti kontaktai",
+    "sourceLabel": "Šaltinis",
+    "intentLabel": "Ketinimas",
+    "roleLabel": "Rolė",
+    "createdLabel": "Sukurta",
+    "openSubject": "peržiūrėti",
+    "noDetails": "Daugiau duomenų neįrašyta",
+    "followUpRecorded": "Tolesnio veiksmo užduotis įrašyta. Niekam nieko neišsiųsta.",
+    "state": {
+      "empty": "Įrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.",
+      "needsAdminRead": "Šio šaltinio iš programos kol kas negalima perskaityti — šioje aplinkoje nėra administratoriaus skaitymo kelio. Rodome tai sąžiningai, o ne klaidingą nulį.",
+      "serviceKeyMissing": "Šiam šaltiniui reikia paslaugos sujungimo, kuris šioje aplinkoje nesukonfigūruotas.",
+      "error": "Šio šaltinio šiuo metu nepavyko perskaityti."
+    },
+    "actions": {
+      "addFollowUp": "Pridėti tolesnį veiksmą"
+    }
+  },
   "followUp": {
     "title": "Tolimesnių veiksmų sąrašas",
     "intro": "Vidiniai komandos veiksmai: ką reikia padaryti toliau, dėl ko ir kokia būsena. Rodomi tik realiai užfiksuoti įrašai.",

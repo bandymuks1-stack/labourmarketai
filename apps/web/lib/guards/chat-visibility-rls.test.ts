@@ -190,7 +190,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    authenticated write policy (owner/admin SELECT only).
     //  - lib/admin/billing-actions.ts — admin manual pilot-access override
     //    (admin-gated via isSuperadmin); same billing tables, no chat table.
-    // None touch a chat table; they write only billing_* / payment_webhook_events.
+    //  - lib/sales/lead-intake.ts — superadmin-gated READ-ONLY waitlist
+    //    read (§8.14): `waitlist` carries no authenticated read policy BY
+    //    DESIGN (0005 — anon INSERT only, reads restricted to service
+    //    role), the call is fenced behind an explicit isSuperadmin()
+    //    re-check, SELECTs only `waitlist`, and writes nothing.
+    // None touch a chat table; they write only billing_* /
+    // payment_webhook_events (the intake read writes nothing at all).
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
@@ -198,6 +204,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "app/api/leads/route.ts",
       "lib/admin/billing-actions.ts",
       "lib/billing/subscription-store.ts",
+      "lib/sales/lead-intake.ts",
     ]);
   });
 

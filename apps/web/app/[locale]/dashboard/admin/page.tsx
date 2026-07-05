@@ -6,9 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getDemandDraftCounts } from "@/lib/demand/demand-drafts";
 import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
 import { getFollowUpQueue } from "@/lib/followup/follow-up-tasks";
+import { getLeadIntakeOverview } from "@/lib/sales/lead-intake";
 import { getLaunchSignals } from "@/lib/admin/launch-signals";
 import { AdminLaunchBoard } from "@/components/app/admin-launch-board";
 import { FollowUpQueuePanel } from "@/components/app/follow-up-queue-panel";
+import { SalesIntakePanel } from "@/components/app/sales-intake-panel";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
 
@@ -116,6 +118,11 @@ export default async function AdminDashboardPage({
   // nothing here sends anything; pre-apply it degrades to an honest
   // "not yet available" state.
   const followUpQueue = await getFollowUpQueue();
+
+  // Read-only sales / lead-intake overview (§8.14, branch 23). Surfaces the
+  // EXISTING intake rows (leads / waitlist / customer_requests in review
+  // states) — read-only, honest per-source availability, no CRM writes.
+  const leadIntake = await getLeadIntakeOverview();
 
   // 10 most recent profile rows.
   const { data: recent } = await supabase
@@ -465,6 +472,11 @@ export default async function AdminDashboardPage({
       {/* BAND 2b — Internal follow-up task queue (§8.13, branch 24). The
           platform's memory of next actions: internal only, contacts nobody. */}
       <FollowUpQueuePanel data={followUpQueue} />
+
+      {/* BAND 2c — Read-only sales / lead-intake panel (§8.14, branch 23).
+          Existing intake rows only; the only action is the reused internal
+          follow-up task — nothing here contacts anyone. */}
+      <SalesIntakePanel data={leadIntake} />
 
       <section className="flex flex-col gap-3" data-testid="admin-pilot-drafts">
         <div className="flex flex-col gap-0.5">

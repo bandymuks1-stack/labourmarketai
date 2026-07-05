@@ -60,6 +60,11 @@ const ADMIN_GATED_FILES = new Set<string>([
   // (defense-in-depth: the panel itself only renders on the
   // requireSuperadmin-gated admin control room page).
   join(APP_ROOT, "components", "app", "follow-up-queue-panel.tsx"),
+  // Sales intake panel (§8.14) renders the /dashboard/admin/users/[id]
+  // request-subject inspect link ONLY when `isAdmin` from the auth context
+  // is true (defense-in-depth: the panel itself only renders on the
+  // requireSuperadmin-gated admin control room page).
+  join(APP_ROOT, "components", "app", "sales-intake-panel.tsx"),
 ]);
 
 describe("admin visibility — non-admin UI never renders /dashboard/admin links", () => {
