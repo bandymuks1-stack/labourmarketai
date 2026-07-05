@@ -1613,7 +1613,14 @@ describe("no migration files added by this sprint", () => {
     // time); execute revoked from public/anon, granted to authenticated;
     // @human-gate-approved, needs-human-gate DRAFT, owner-gated apply;
     // rollback drops the function only.
-    const SPRINT_BASELINE = 104;
+    // Bumped 104 -> 105 for the §8.5 transport demand enum
+    // (20260705200000_worker_demand_transport.sql): recreate of the gated
+    // worker-demand RPC adding ONE strict-whitelist transport column
+    // (provided|compensated|not_provided|unknown from payload.transport —
+    // the accommodation enum path cloned; no table/column change, no free
+    // text); @human-gate-approved, needs-human-gate DRAFT, owner-gated
+    // apply; rollback restores the applied Model-A definition.
+    const SPRINT_BASELINE = 105;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

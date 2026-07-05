@@ -250,6 +250,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260705170000; RED: ONE SECURITY DEFINER read RPC returning ONLY
     // the counterpart display name of a 2-person direct conversation the
     // caller belongs to; needs-human-gate DRAFT, owner-gated apply).
-    expect(guard).toMatch(/SPRINT_BASELINE = 104/);
+    // Then to 105 for the §8.5 transport demand enum (20260705200000;
+    // RED: gated recreate of the worker-demand RPC adding ONE
+    // strict-whitelist transport column from payload.transport — the
+    // accommodation enum path cloned; needs-human-gate DRAFT, owner-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 105/);
   });
 });

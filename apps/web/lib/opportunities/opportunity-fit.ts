@@ -60,6 +60,11 @@ export interface OpportunityNeed {
   /** Coarse place label of the demand (city/region granularity — never an
    *  address), from the location-label RPC column when applied (PR8). */
   readonly locationLabel?: string | null;
+  /** Transport condition enum from the RPC's strict whitelist (§8.5 —
+   *  'provided' | 'compensated' | 'not_provided' | 'unknown'). Optional:
+   *  present only after the transport RPC recreate is applied; the board
+   *  degrades honestly ("—") while it is absent. Never free text. */
+  readonly transport?: string | null;
   /** The approved supply-route status from the RPC (Model A:
    *  'approved_direct_partner' = admin-VERIFIED company). The worker-facing
    *  "verified company" badge keys on THIS real signal — never on copy. */

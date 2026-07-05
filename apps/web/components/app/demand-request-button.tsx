@@ -78,10 +78,21 @@ export function DemandRequestButton({
     { value: "provided_deducted", label: tc("accDeducted") },
     { value: "not_provided", label: tc("accNone") },
   ];
+  // Transport condition (§8.5) — same closed-set pattern as accommodation;
+  // optional and honest ("" = not stated, never a fabricated value).
+  const [transport, setTransport] = useState("");
+  const transportOptions: { value: string; label: string }[] = [
+    { value: "provided", label: tc("transProvided") },
+    { value: "compensated", label: tc("transCompensated") },
+    { value: "not_provided", label: tc("transNone") },
+    { value: "unknown", label: tc("transUnknown") },
+  ];
   const workTypeLabel =
     workCategories.flatMap((c) => c.options).find((o) => o.slug === workType)?.label ?? "";
   const accommodationLabel =
     accommodationOptions.find((o) => o.value === accommodation)?.label ?? "";
+  const transportLabel =
+    transportOptions.find((o) => o.value === transport)?.label ?? "";
   // systemic-ux-mobile-v1: dark-listbox option sets (replace the native white
   // dropdown on mobile). Profession options are flattened from the sector
   // groups, sector context kept in the label so nothing is lost.
@@ -157,6 +168,7 @@ export function DemandRequestButton({
         country: country || undefined,
         teamSize: teamSize.trim() ? Number(teamSize) : undefined,
         accommodation: accommodation || undefined,
+        transport: transport || undefined,
         estimate: estimateEngaged ? estimate : undefined,
       });
       setState(
@@ -228,6 +240,10 @@ export function DemandRequestButton({
         {tc("accommodation")}
       </dt>
       <dd className="text-text-primary">{accommodationLabel || "—"}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {tc("transportOffer")}
+      </dt>
+      <dd className="text-text-primary">{transportLabel || "—"}</dd>
       {notes.trim() && (
         <>
           <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
@@ -405,6 +421,17 @@ export function DemandRequestButton({
               ariaLabel={tc("accommodation")}
               placeholder="—"
               testId="demand-accommodation"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <Label>{tc("transportOffer")}</Label>
+            <DarkListbox
+              value={transport}
+              onChange={setTransport}
+              options={transportOptions}
+              ariaLabel={tc("transportOffer")}
+              placeholder="—"
+              testId="demand-transport"
             />
           </label>
 

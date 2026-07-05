@@ -5732,11 +5732,18 @@
     "fieldStart": "Start",
     "fieldTeam": "People",
     "fieldAccommodation": "Accommodation",
+    "fieldTransport": "Transport",
     "accommodation": {
       "provided_free": "Provided, free",
       "provided_paid": "Provided, paid",
       "provided_deducted": "Deducted from pay",
       "not_provided": "Not provided"
+    },
+    "transport": {
+      "provided": "Provided",
+      "compensated": "Travel costs compensated",
+      "not_provided": "Not provided",
+      "unknown": "Not specified"
     },
     "urgency": {
       "flexible": "Flexible timing",
@@ -5851,6 +5858,11 @@
     "transport": "Transport provided",
     "transportYes": "Yes",
     "transportNo": "No",
+    "transportOffer": "Transport",
+    "transProvided": "Provided",
+    "transCompensated": "Travel costs compensated",
+    "transNone": "Not provided",
+    "transUnknown": "Not decided yet",
     "languages": "Language requirements",
     "languagesHelp": "Comma separated (e.g. en, nl). Leave empty if none.",
     "engagement": "Engagement model",

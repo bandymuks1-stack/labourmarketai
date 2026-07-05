@@ -35,6 +35,17 @@ const ACCOMMODATION_OFFER_VALUES = new Set([
   "not_provided",
 ]);
 
+/** Transport conditions that are safe to expose on the worker board (enum, no
+ *  free text) — the §8.5 transport layer, cloned from the accommodation path.
+ *  Mirrors the worker RPC's transport whitelist
+ *  (20260705200000_worker_demand_transport.sql) EXACTLY. */
+const TRANSPORT_OFFER_VALUES = new Set([
+  "provided",
+  "compensated",
+  "not_provided",
+  "unknown",
+]);
+
 export type DemandIntent = "hire_workers" | "partner";
 
 export type DemandUrgency = "flexible" | "this_week" | "urgent";
@@ -71,6 +82,8 @@ export type DemandFields = {
   teamSize?: number;
   /** Accommodation offer (enum). */
   accommodation?: string;
+  /** Transport condition (enum) — optional; unset stays an honest unknown. */
+  transport?: string;
 };
 
 export type DemandRequestResult =
@@ -181,6 +194,11 @@ export async function submitDemandRequest(
     ACCOMMODATION_OFFER_VALUES.has(fields.accommodation)
       ? fields.accommodation
       : null;
+  const transport =
+    typeof fields?.transport === "string" &&
+    TRANSPORT_OFFER_VALUES.has(fields.transport)
+      ? fields.transport
+      : null;
   // The urgency enum is a safe, structured timing signal → stored as start_period.
   const startPeriod = fields?.urgency ?? null;
 
@@ -192,9 +210,10 @@ export async function submitDemandRequest(
     skills: clamp(fields?.skills, MAX_TEXT) || null,
     urgency: fields?.urgency ?? null,
     notes: clamp(fields?.notes, MAX_TEXT) || null,
-    // The ONLY payload key the worker RPC exposes — a whitelisted enum, never
-    // free text. Stored here because there is no accommodation COLUMN.
+    // The ONLY payload keys the worker RPC exposes — whitelisted enums, never
+    // free text. Stored here because there is no accommodation/transport COLUMN.
     accommodation,
+    transport,
   };
 
   // Optional preliminary estimate. Only persisted when the user actually filled

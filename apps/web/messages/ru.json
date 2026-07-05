@@ -5732,11 +5732,18 @@
     "fieldStart": "Начало",
     "fieldTeam": "Человек",
     "fieldAccommodation": "Жильё",
+    "fieldTransport": "Транспорт",
     "accommodation": {
       "provided_free": "Предоставляется, бесплатно",
       "provided_paid": "Предоставляется, платно",
       "provided_deducted": "Удерживается из оплаты",
       "not_provided": "Не предоставляется"
+    },
+    "transport": {
+      "provided": "Предоставляется",
+      "compensated": "Компенсируются дорожные расходы",
+      "not_provided": "Не предоставляется",
+      "unknown": "Не указано"
     },
     "urgency": {
       "flexible": "Гибкие сроки",
@@ -5851,6 +5858,11 @@
     "transport": "Транспорт предоставляется",
     "transportYes": "Да",
     "transportNo": "Нет",
+    "transportOffer": "Транспорт",
+    "transProvided": "Предоставляется",
+    "transCompensated": "Компенсируются дорожные расходы",
+    "transNone": "Не предоставляется",
+    "transUnknown": "Ещё не решено",
     "languages": "Требования к языкам",
     "languagesHelp": "Через запятую (например, en, nl). Оставьте пустым, если нет.",
     "engagement": "Модель сотрудничества",
