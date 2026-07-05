@@ -22,8 +22,8 @@
 --   -- drop policy if exists "journal-entry-photos org manager select" on storage.objects;
 
 -- ── 1. Metadata rows: mirror the journal_entries manager-read boundary ──
-drop policy if exists journal_entry_photos_select_org_manager
-  on public.journal_entry_photos;
+-- (CREATE POLICY only — no ALTER/DROP of any existing policy; the paired
+-- rollback file supabase/rollbacks/…down.sql carries the reverse drops.)
 create policy journal_entry_photos_select_org_manager
   on public.journal_entry_photos for select
   using (
@@ -41,8 +41,6 @@ create policy journal_entry_photos_select_org_manager
 --   <profile_id>/<entry_id>/<photo_id>/<original_filename>
 -- The SECOND folder segment is the entry id, so the object inherits exactly
 -- the parent entry's manager boundary.
-drop policy if exists "journal-entry-photos org manager select"
-  on storage.objects;
 create policy "journal-entry-photos org manager select"
   on storage.objects for select
   using (
