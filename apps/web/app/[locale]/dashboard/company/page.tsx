@@ -411,6 +411,66 @@ export default async function CompanyDashboardPage({
         primaryHref="/dashboard/company/projects/new"
       />
 
+      {/* Staffing-agency operating MODE (Direction A, owner decision
+          2026-07-05): an agency is this same company profile with
+          company_type='staffing_agency' — never a separate dashboard. The
+          mode surfaces ONLY the agency-relevant actions that are already
+          real on the canonical path: the worker roster/invitations below
+          (company_workers), the demand wizard's partner intent (writes
+          kind='agency_offer' to customer_requests), and scouting. Renders
+          strictly when companyRow.companyType === "staffing_agency". */}
+      {companyRow && companyRow.companyType === "staffing_agency" ? (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="company-agency-mode"
+        >
+          <header className="flex flex-col gap-1">
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              {t("agencyMode.title")}
+            </h2>
+            <p className="text-sm text-text-secondary">
+              {t("agencyMode.intro")}
+            </p>
+          </header>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {[
+              {
+                key: "roster",
+                href: "/dashboard/company#company-team" as const,
+              },
+              {
+                key: "offer",
+                href: "/dashboard#demand-intake" as const,
+              },
+              {
+                key: "scouting",
+                href: "/dashboard/company/scouting" as const,
+              },
+            ].map((a) => (
+              <Link
+                key={a.key}
+                href={a.href as "/dashboard"}
+                data-testid={`company-agency-mode-action-${a.key}`}
+                className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+              >
+                <span className="font-semibold">
+                  {t(`agencyMode.actions.${a.key}.label`)}
+                </span>
+                <span className="text-xs text-text-muted">
+                  {t(`agencyMode.actions.${a.key}.note`)}
+                </span>
+              </Link>
+            ))}
+          </div>
+          <p
+            className="text-[11px] leading-relaxed text-text-muted"
+            data-testid="company-agency-mode-legacy-note"
+          >
+            {t("agencyMode.legacyNote")}
+          </p>
+        </section>
+      ) : null}
+
       {companyRow ? <CompanyNextActions company={companyRow} /> : null}
       {companyRow ? (
         <CompanyReadinessSummary

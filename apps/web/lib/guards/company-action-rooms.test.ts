@@ -11,7 +11,12 @@ import { join } from "node:path";
  */
 const APP_ROOT = join(__dirname, "..", "..");
 const ACTIVE = ["lt", "en", "ru"] as const;
-const ROOMS = ["company", "candidates", "buyer", "agency", "projects"] as const;
+// Direction A (2026-07-05): the agency room is a redirect stub into the
+// canonical company workspace (agency = company_type 'staffing_agency'), so
+// it left the rendered-rooms set. Its companyActionRooms.* copy stays in the
+// catalogs until the owner-gated legacy cleanup, and stays pinned below.
+const ROOMS = ["company", "candidates", "buyer", "projects"] as const;
+const COPY_ROOMS = [...ROOMS, "agency"] as const;
 
 function read(rel: string): string {
   return readFileSync(join(APP_ROOT, rel), "utf8");
@@ -64,7 +69,7 @@ describe("company action room copy present + non-silo in every active locale", (
     it(`${locale}: backToActions exists`, () => {
       expect(str(m, "companyActionRooms.backToActions")).toBeTruthy();
     });
-    for (const room of ROOMS) {
+    for (const room of COPY_ROOMS) {
       it(`${locale}: ${room} has whatTitle/whatBody/primaryLabel/nextLine`, () => {
         for (const k of ["whatTitle", "whatBody", "primaryLabel", "nextLine"]) {
           expect(

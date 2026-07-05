@@ -1063,6 +1063,25 @@
         "staffing_agency": "Staffing agency is an operating mode, not a separate world — the same company profile.",
         "client_customer": "Client / requester is an operating mode, not a separate world — the same company profile."
       },
+      "agencyMode": {
+        "title": "Staffing agency mode",
+        "intro": "Your company profile is set as a staffing agency. These are the same company workspace tools — shown here with the actions an agency actually uses.",
+        "actions": {
+          "roster": {
+            "label": "Worker roster & invitations",
+            "note": "Add or invite your own workers in the team section below."
+          },
+          "offer": {
+            "label": "Offer workers",
+            "note": "Submit a workforce offer through the request wizard — it is saved as an agency offer."
+          },
+          "scouting": {
+            "label": "Worker scouting",
+            "note": "Run scouting over your submitted needs and shortlist anonymized candidates."
+          }
+        },
+        "legacyNote": "The earlier separate agency pages now open here. Same profile, one workspace — nothing was deleted."
+      },
       "setup": {
         "formTitle": "Company profile request",
         "formSubtitle": "Create your organisation profile from your personal account. It's active and usable straight away — no waiting for approval. Verification is a stronger, separate trust step.",

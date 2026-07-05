@@ -107,10 +107,9 @@ describe("company + agency sections mount the gated role-select control", () => 
       expect(src).toMatch(/canAssignRoles\s*\?\s*\(\s*<WorkerOperationsRoleForm/);
     });
   }
-  for (const p of [
-    "app/[locale]/dashboard/company/page.tsx",
-    "app/[locale]/dashboard/agency/page.tsx",
-  ]) {
+  // Direction A (2026-07-05): only the canonical company page mounts a
+  // workers section now — /dashboard/agency is a redirect stub into it.
+  for (const p of ["app/[locale]/dashboard/company/page.tsx"]) {
     it(`${p} passes canAssignRoles to the section`, () => {
       expect(read(p)).toMatch(/canAssignRoles/);
     });

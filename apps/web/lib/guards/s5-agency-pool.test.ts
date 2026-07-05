@@ -43,18 +43,21 @@ describe("pool visibility boundary — own agency only", () => {
     expect(lib).toMatch(/\.filter\(\(r\) => r\.engagementContextLinked\)/);
     expect(lib).toMatch(/journalEntries: entriesByWorker\.get\(r\.workerId\) \?\? null/);
   });
-  it("the page renders the locked state for unlinked evidence", () => {
-    expect(page).toMatch(/pool-evidence-locked/);
-    expect(page).toMatch(/w\.engagementContextLinked && w\.journalEntries !== null \?/);
+  // Direction A (2026-07-05): the pool PAGE became a redirect stub into the
+  // canonical company workspace (roster = company_workers, #company-team).
+  // The lib boundary assertions above stay — lib/agency is untouched until
+  // the owner-gated agencies→companies data task.
+  it("the pool route is a redirect stub to the canonical company roster", () => {
+    expect(page).toMatch(
+      /redirect\(`\/\$\{locale\}\/dashboard\/company#company-team`\)/,
+    );
+    expect(page).not.toMatch(/getAgencyPool|CanOfferButton/);
   });
 });
 
 describe("readiness is aggregates only", () => {
   it("the pool lib never reads worker_documents", () => {
     expect(lib).not.toMatch(/worker_documents/);
-  });
-  it("the page carries the honest documents-consent note", () => {
-    expect(page).toMatch(/readiness-docs-note/);
   });
 });
 
@@ -63,11 +66,7 @@ describe("'galim pasiūlyti' is a proposal, never a match", () => {
     expect(actions).toMatch(/markAgencyCanOffer/);
     expect(actions).not.toMatch(/match_log|status_set|recordHumanMatch/);
   });
-  it("the page states the human-match rule next to the demand list", () => {
-    expect(page).toMatch(/demand-human-note/);
-  });
-  it("the demand section degrades to an honest needs-gate state", () => {
-    expect(page).toMatch(/demand-needs-gate/);
+  it("the lib degrades to an honest needs-gate state", () => {
     expect(lib).toMatch(/kind: "needs-gate"/);
   });
 });
@@ -114,9 +113,10 @@ describe("pool copy exists in all 10 locales and the room is reachable", () => {
       ).toBeTruthy();
     }
   });
-  it("the agency dashboard links the pool room", () => {
+  it("the legacy agency dashboard route redirects into the company room", () => {
+    // Direction A: the pool is reached through the canonical company
+    // workspace; the legacy dashboard no longer links a separate pool room.
     const dash = read("app/[locale]/dashboard/agency/page.tsx");
-    expect(dash).toMatch(/agency-pool-link/);
-    expect(dash).toMatch(/dashboard\/agency\/pool/);
+    expect(dash).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/company`\)/);
   });
 });

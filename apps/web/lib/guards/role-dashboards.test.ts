@@ -59,18 +59,15 @@ describe("Guard: requireRoleOrRedirect helper is correct", () => {
 });
 
 describe("Guard: each role dashboard calls the gate FIRST", () => {
+  // Direction A (2026-07-05): the agency dashboard was folded into the
+  // canonical company workspace — /dashboard/agency is now a redirect stub
+  // (see agency-direction-a.test.ts), so only company + buyer remain here.
   const cases = [
     {
       route: "app/[locale]/dashboard/company/page.tsx",
       role: "company",
       i18nKey: "roleDashboards.company",
       testid: "company-dashboard",
-    },
-    {
-      route: "app/[locale]/dashboard/agency/page.tsx",
-      role: "agency",
-      i18nKey: "roleDashboards.agency",
-      testid: "agency-dashboard",
     },
     {
       route: "app/[locale]/dashboard/buyer/page.tsx",

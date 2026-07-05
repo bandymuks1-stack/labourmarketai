@@ -173,7 +173,10 @@ describe("Guard: server-action wrapper is a thin pass-through", () => {
 });
 
 describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
-  for (const role of ["company", "agency", "buyer"] as const) {
+  // Direction A (2026-07-05): /dashboard/agency is a redirect stub into the
+  // canonical company workspace; the agency_offer intake lives on the demand
+  // wizard (partner intent). Only company + buyer render draft forms now.
+  for (const role of ["company", "buyer"] as const) {
     it(`${role}/page.tsx calls requireRoleOrRedirect before getDemandDraft`, () => {
       const src = read(`app/[locale]/dashboard/${role}/page.tsx`);
       const requireAt = src.indexOf("requireRoleOrRedirect");
@@ -197,7 +200,6 @@ describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
   it("each page renders the DemandDraftForm for its own draft_type", () => {
     const cases = [
       { role: "company", draftType: "company_request" },
-      { role: "agency", draftType: "agency_offer" },
       { role: "buyer", draftType: "buyer_request" },
     ] as const;
     for (const { role, draftType } of cases) {

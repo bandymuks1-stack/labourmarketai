@@ -49,13 +49,12 @@ describe("/dashboard/account is settings only (marketplace IA cleanup)", () => {
   });
 });
 
-describe("agency room shows candidate/team supply only (+ compact switcher)", () => {
+describe("agency room folded into the company room (Direction A, 2026-07-05)", () => {
+  it("is a redirect stub to the canonical company workspace", () => {
+    expect(agency).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/company`\)/);
+  });
   it("imports no buyer / private-person / catalogue blocks", () => {
     expect(agency).not.toMatch(/BuyerRequestsSection|getOwnCustomer\b|listOwnCustomerRequests|RoleCatalogueGrid|FeatureAvailabilityGrid/);
-  });
-  it("offers a compact My-spaces switch link (to the overview, never settings)", () => {
-    expect(agency).toMatch(/href="\/dashboard"[\s\S]{0,220}data-testid="room-my-spaces-link"/);
-    expect(agency).not.toMatch(/href="\/dashboard\/account"[\s\S]{0,220}data-testid="room-my-spaces-link"/);
   });
 });
 
@@ -116,7 +115,7 @@ describe("my-space navigation truth (owner P0 2026-07-02)", () => {
 
   it("(a) no room 'Mano erdvės' chip points at settings", () => {
     for (const [name, src] of [
-      ["agency", agency],
+      // agency room removed 2026-07-05 — redirect stub, no chip at all.
       ["journal", journal],
       ["buyer", buyer],
       ["company", company],

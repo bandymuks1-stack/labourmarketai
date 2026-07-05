@@ -47,7 +47,8 @@ const NATIVE_NAV = new Set([
   "components/app/message-button.tsx", // open-conversation action → redirect
   "app/[locale]/dashboard/admin/matching/page.tsx", // start-conversation = same openDirectConversationAction → redirect; the review form on this page is the client MatchingWorkbenchReview (covered separately)
   "app/[locale]/dashboard/account/page.tsx", // logout POST
-  "app/[locale]/dashboard/start/agency/page.tsx", // startAgencyAction → reload to ✓ state
+  // /dashboard/start/agency became a redirect stub (Direction A, 2026-07-05)
+  // — no form remains there, so it left this allowlist.
   // company setup moved to the client <CompanySetupForm> (useActionState +
   // disabled pending + role="status" feedback) — it is now covered by the
   // general client-async rule like the buyer setup form, so it is no longer a
