@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  FileText,
   Home,
   IdCard,
-  Inbox,
-  Map as MapIcon,
+  MapPin,
+  MessageSquare,
+  NotebookPen,
   Shield,
   Store,
   User,
@@ -26,14 +26,17 @@ import { cn } from "@/lib/utils";
 // catalogue + meta change — never a component edit.
 //
 // Icons live here because lucide is a presentation concern; the config
-// only carries the icon ID.
+// only carries the icon ID. ONE icon per destination across the whole app
+// (audit PR8 icon rule): journal = NotebookPen, messages = MessageSquare,
+// map = MapPin — the same icons the MyZone action grid uses, so the nav and
+// the grid speak one visual language. FileText stays reserved for documents.
 const ICONS: Record<NavIconKey, LucideIcon> = {
   home: Home,
   store: Store,
-  map: MapIcon,
+  map: MapPin,
   idCard: IdCard,
-  fileText: FileText,
-  inbox: Inbox,
+  journal: NotebookPen,
+  messages: MessageSquare,
   user: User,
   shield: Shield,
 };
@@ -51,9 +54,10 @@ export function BottomNav({
 }) {
   const t = useTranslations();
   const pathname = usePathname();
-  // Mobile bottom nav stays the focused core: Mano erdvė / Žemėlapis / Žinutės /
-  // Nustatymai — no Admin tab here (it crowds the small bar). Admin remains
-  // reachable for admins via the header account dropdown + the desktop tabs.
+  // Mobile bottom nav stays the focused catalogue-driven core (currently
+  // Apžvalga / Žemėlapis / Žurnalas / Žinutės) — no Admin tab here (it crowds
+  // the small bar). Admin remains reachable for admins via the header account
+  // dropdown + the desktop tabs.
   const items = VISIBLE_PRIMARY_NAV_ITEMS;
 
   return (
@@ -82,6 +86,16 @@ export function BottomNav({
                     : "text-text-muted hover:text-text-secondary",
                 )}
               >
+                {/* Selected-state bar (audit PR8): the active tab gets a real
+                    indicator, not color alone — matches the desktop tab
+                    treatment and survives color-vision differences. */}
+                {active && (
+                  <span
+                    aria-hidden
+                    data-testid="bottom-nav-active-indicator"
+                    className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-brand-orange"
+                  />
+                )}
                 <span className="relative">
                   <Icon aria-hidden className="h-5 w-5" strokeWidth={2} />
                   <NavLinkPending className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2" />

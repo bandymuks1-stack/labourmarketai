@@ -42,9 +42,9 @@ describe("the page has a single top-level header (no duplicate)", () => {
 
 describe("loop sections follow the real-use journey order", () => {
   const section = read("components/app/marketplace-loop-section.tsx");
-  const discover = section.indexOf('data-testid="marketplace-discover-empty"');
-  const outgoing = section.indexOf('data-testid="marketplace-outgoing-empty"');
-  const incoming = section.indexOf('data-testid="marketplace-incoming-empty"');
+  const discover = section.indexOf('testId="marketplace-discover-empty"'); // EmptyState (audit PR8)
+  const outgoing = section.indexOf('testId="marketplace-outgoing-empty"');
+  const incoming = section.indexOf('testId="marketplace-incoming-empty"');
 
   it("renders discover → outgoing (my requests) → incoming (provider inbox)", () => {
     expect(discover).toBeGreaterThan(-1);

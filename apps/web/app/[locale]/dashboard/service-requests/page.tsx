@@ -5,6 +5,7 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { ArrowRight } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { ActionCard } from "@/components/app/action-card";
 import { createClient } from "@/lib/supabase/server";
 import {
   listDiscoverableOfferings,
@@ -175,17 +176,17 @@ function MarketplaceConnections({
         {t("connections.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
+      {/* Shared ActionCard pattern (audit PR8) — one visual grammar for
+          navigation cards across the app. */}
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {links.map((l) => (
-          <Link
+          <ActionCard
             key={l.key}
-            href={l.href as "/dashboard"}
-            data-testid={`marketplace-connection-${l.key}`}
-            className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-          >
-            <span className="font-semibold">{l.label}</span>
-            <span className="text-xs text-text-muted">{l.note}</span>
-          </Link>
+            href={l.href}
+            testid={`marketplace-connection-${l.key}`}
+            title={l.label}
+            description={l.note}
+          />
         ))}
       </div>
     </section>

@@ -39,7 +39,7 @@ describe("the worker home is the MyZone control room (no card wall)", () => {
 
 describe("MyZone carries status + fast actions + what-improves-what", () => {
   it("a single readiness status (information complete or not yet)", () => {
-    expect(COMP).toMatch(/data-testid="my-zone-status"/);
+    expect(COMP).toMatch(/testid="my-zone-status"/); // StatusChip (audit PR8)
     expect(COMP).toMatch(/incompleteStatus/);
     expect(COMP).toMatch(/readyStatus/);
   });

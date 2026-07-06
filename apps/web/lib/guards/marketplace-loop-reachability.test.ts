@@ -25,10 +25,12 @@ describe("dashboard exposes an always-on marketplace access block", () => {
   it("defines a single access block element linking to both halves", () => {
     expect(page).toMatch(/const marketplaceAccess = \(/);
     expect(page).toMatch(/data-testid="dashboard-marketplace-access"/);
-    expect(page).toMatch(/data-testid="dashboard-marketplace-offer"/);
-    expect(page).toMatch(/data-testid="dashboard-marketplace-find"/);
-    expect(page).toMatch(/"\/dashboard\/services" as "\/dashboard"/);
-    expect(page).toMatch(/"\/dashboard\/service-requests" as "\/dashboard"/);
+    expect(page).toMatch(/testid="dashboard-marketplace-offer"/); // ActionCard (audit PR8)
+    expect(page).toMatch(/testid="dashboard-marketplace-find"/); // ActionCard (audit PR8)
+    // ActionCard casts the href internally (audit PR8) — the page passes
+    // the plain routes.
+    expect(page).toMatch(/href="\/dashboard\/services"/);
+    expect(page).toMatch(/"\/dashboard\/service-requests"/);
   });
 
   it("renders the access block in BOTH the org and worker branches", () => {

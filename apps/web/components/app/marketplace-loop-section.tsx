@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { Link } from "@/lib/i18n/navigation";
 import { Send, Check, X, Undo2, MessageSquare } from "lucide-react";
 import {
   requestServiceOffering,
@@ -24,6 +23,7 @@ import {
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { EmptyState } from "./empty-state";
 
 /**
  * P0 Marketplace loop (Phase 1) — one compact surface: discover active offerings
@@ -169,19 +169,17 @@ export function MarketplaceLoopSection({
       <section className="space-y-2">
         <h3 className="text-sm font-medium text-text-secondary">{labels.discoverHeading}</h3>
         {discoverable.length === 0 ? (
-          <div
-            data-testid="marketplace-discover-empty"
-            className="flex flex-col items-start gap-3 rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
-          >
-            <p>{labels.discoverEmpty}</p>
-            <Link
-              href={"/dashboard/services" as "/dashboard"}
-              data-testid="marketplace-discover-empty-cta"
-              className="text-xs font-medium text-brand-blue hover:underline"
-            >
-              {labels.discoverEmptyCta} →
-            </Link>
-          </div>
+          // Shared EmptyState pattern (audit PR8) — renders the same
+          // data-testid="marketplace-discover-empty" (+ derived "-cta").
+          <EmptyState
+            testId="marketplace-discover-empty"
+            title={labels.discoverEmpty}
+            cta={{
+              label: labels.discoverEmptyCta,
+              href: "/dashboard/services",
+              variant: "secondary",
+            }}
+          />
         ) : (
           <ul className="space-y-2">
             {discoverable.map((o) => (
@@ -247,12 +245,10 @@ export function MarketplaceLoopSection({
       <section className="space-y-2">
         <h3 className="text-sm font-medium text-text-secondary">{labels.outgoingHeading}</h3>
         {outgoing.length === 0 ? (
-          <div
-            data-testid="marketplace-outgoing-empty"
-            className="rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
-          >
-            {labels.outgoingEmpty}
-          </div>
+          <EmptyState
+            testId="marketplace-outgoing-empty"
+            title={labels.outgoingEmpty}
+          />
         ) : (
           <ul className="space-y-2">
             {outgoing.map((r) => (
@@ -308,12 +304,10 @@ export function MarketplaceLoopSection({
       <section className="space-y-2">
         <h3 className="text-sm font-medium text-text-secondary">{labels.incomingHeading}</h3>
         {incoming.length === 0 ? (
-          <div
-            data-testid="marketplace-incoming-empty"
-            className="rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
-          >
-            {labels.incomingEmpty}
-          </div>
+          <EmptyState
+            testId="marketplace-incoming-empty"
+            title={labels.incomingEmpty}
+          />
         ) : (
           <ul className="space-y-2">
             {incoming.map((r) => {

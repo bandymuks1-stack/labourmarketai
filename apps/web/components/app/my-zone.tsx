@@ -12,7 +12,8 @@ import {
   CircleAlert,
   type LucideIcon,
 } from "lucide-react";
-import { Link } from "@/lib/i18n/navigation";
+import { ActionCard } from "./action-card";
+import { StatusChip } from "./status-chip";
 
 /**
  * Mano erdvė control room (action-first-product-logic-v1).
@@ -103,49 +104,33 @@ export async function MyZone({
 
   return (
     <section className="flex flex-col gap-5" data-testid="my-zone">
-      {/* 1. Readiness status — one honest line, never a scary state. */}
-      <div
-        data-testid="my-zone-status"
-        data-incomplete={incomplete ? "true" : "false"}
-        className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-          incomplete
-            ? "border-brand-orange/50 bg-brand-orange/10 text-brand-orange"
-            : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-        }`}
+      {/* 1. Readiness status — one honest line, never a scary state. Uses the
+          shared StatusChip (audit PR8): semantic tokens only, no raw emerald. */}
+      <StatusChip
+        variant={incomplete ? "attention" : "success"}
+        icon={incomplete ? CircleAlert : CircleCheck}
+        testid="my-zone-status"
       >
-        {incomplete ? (
-          <CircleAlert className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-        ) : (
-          <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-        )}
         {incomplete ? t("incompleteStatus") : t("readyStatus")}
-      </div>
+      </StatusChip>
 
-      {/* 2. Fast actions — the few real things you can do, in seconds. */}
+      {/* 2. Fast actions — the few real things you can do, in seconds. Each
+          tile is the shared ActionCard (this grid is the pattern's ORIGIN —
+          extracted verbatim in audit PR8 and re-adopted here). */}
       <div className="flex flex-col gap-3">
         <h2 className="font-display text-lg font-semibold tracking-tight text-text-primary">
           {t("actionsHeading")}
         </h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {actions.map((a) => (
-            <Link
+            <ActionCard
               key={a.key}
-              href={a.href as "/dashboard"}
-              data-testid={`my-zone-action-${a.key}`}
-              className="flex flex-col gap-1.5 rounded-xl border border-border-subtle bg-surface-1 p-4 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-            >
-              <a.icon
-                className="h-5 w-5 shrink-0 text-brand-blue"
-                strokeWidth={1.75}
-                aria-hidden
-              />
-              <span className="font-display text-sm font-semibold leading-snug text-text-primary">
-                {t(`actions.${a.key}.title`)}
-              </span>
-              <span className="text-[11px] leading-snug text-text-secondary">
-                {t(`actions.${a.key}.desc`)}
-              </span>
-            </Link>
+              href={a.href}
+              testid={`my-zone-action-${a.key}`}
+              icon={a.icon}
+              title={t(`actions.${a.key}.title`)}
+              description={t(`actions.${a.key}.desc`)}
+            />
           ))}
         </div>
       </div>
