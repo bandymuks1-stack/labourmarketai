@@ -4918,7 +4918,7 @@
     "scope": {
       "support": "Pagalbos kanalas",
       "unknown": "Kontekstas nepatikslintas",
-      "demand": "Dėl darbo užklausos — tema yra užklausos pavadinimas"
+      "demand": "Dėl darbo — tema yra susijusio darbo pavadinimas"
     },
     "unnamedThread": "(be temos)",
     "unread": "Naujas",
