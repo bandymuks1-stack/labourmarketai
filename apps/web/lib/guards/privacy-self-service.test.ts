@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -23,9 +23,15 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 const EXPORT_LIB = read("lib/privacy/export-data.ts");
 const ACTIONS = read("lib/privacy/actions.ts");
-const MIGRATION = read(
-  "../../supabase/migrations/20260706150000_privacy_request_intake.sql",
-);
+// The RED-class intake migration (SECURITY DEFINER + GRANT) lives in its own
+// needs-human-gate draft PR — until the owner approves and merges it, these
+// migration assertions are pending, and the app degrades honestly (the
+// deletion form shows "not accepted yet"; the export needs no migration).
+const MIGRATION_REL =
+  "../../supabase/migrations/20260706150000_privacy_request_intake.sql";
+const hasMigration = existsSync(join(ROOT, MIGRATION_REL));
+const MIGRATION = hasMigration ? read(MIGRATION_REL) : "";
+const migrationIt = hasMigration ? it : it.skip;
 
 describe("the data export reads ONLY the caller's own data", () => {
   it("every exported table is on the own-data allowlist", () => {
@@ -75,18 +81,23 @@ describe("deletion is a reviewed REQUEST — never a destructive action", () => 
     expect(ACTIONS).toMatch(/needs-migration/);
   });
 
-  it("the request-type set matches the RPC's closed set", () => {
+  it("the request-type set is closed", () => {
     expect([...PRIVACY_REQUEST_TYPES].sort()).toEqual(
       ["account_deletion", "data_export"].sort(),
     );
     for (const t of PRIVACY_REQUEST_TYPES) {
       expect(isPrivacyRequestType(t)).toBe(true);
-      expect(MIGRATION).toContain(`when '${t}'`);
     }
     expect(isPrivacyRequestType("drop_everything")).toBe(false);
   });
 
-  it("the DRAFT migration is human-gated, non-destructive, notification-free", () => {
+  migrationIt("the RPC's closed type set mirrors the code set", () => {
+    for (const t of PRIVACY_REQUEST_TYPES) {
+      expect(MIGRATION).toContain(`when '${t}'`);
+    }
+  });
+
+  migrationIt("the DRAFT migration is human-gated, non-destructive, notification-free", () => {
     expect(MIGRATION).toMatch(/DRAFT — needs-human-gate/);
     expect(MIGRATION).toMatch(/security definer/i);
     expect(MIGRATION).toMatch(/auth\.uid\(\)/);

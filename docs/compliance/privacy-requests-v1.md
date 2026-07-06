@@ -26,10 +26,12 @@ twin of the help-request intake 20260705260000):
 projections). Cap: 3 open per profile. The page states plainly that a
 person reviews the request and nothing is deleted immediately.
 
-**Migration status: DRAFT — needs-human-gate. NOT applied.** Until the
-owner applies it via Supabase MCP the form degrades honestly to "not
-being accepted yet" (42883 → needs-migration state), while the export
-keeps working (it needs no migration).
+**Migration status: DRAFT — needs-human-gate, in its OWN draft PR**
+(SECURITY DEFINER + GRANT are RED-class per the migration-safety gate, so
+the SQL is not bundled with app code). Until the owner reviews/merges
+that PR and applies it via Supabase MCP, the form degrades honestly to
+"not being accepted yet" (42883 → needs-migration state), while the
+export keeps working (it needs no migration).
 
 ## Operator fulfilment (manual, honest)
 
