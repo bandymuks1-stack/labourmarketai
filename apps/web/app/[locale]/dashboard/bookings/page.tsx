@@ -4,7 +4,7 @@ import { listMyBookings, type BookingRow } from "@/lib/booking/booking-actions";
 import { BookingRespondButtons } from "@/components/app/booking-respond-buttons";
 import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
 import type { BookingStatus } from "@/lib/booking/booking-state";
-import { Link } from "@/lib/i18n/navigation";
+import { ActionCard } from "@/components/app/action-card";
 
 /**
  * Bookings (Stage 6) — the worker's incoming proposals (accept/decline) and the
@@ -140,17 +140,16 @@ function PlanningConnections({
         {t("connections.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
+      {/* Shared ActionCard pattern (audit PR8). */}
       <div className="grid gap-2 sm:grid-cols-3">
         {links.map((l) => (
-          <Link
+          <ActionCard
             key={l.key}
-            href={l.href as "/dashboard"}
-            data-testid={`bookings-connection-${l.key}`}
-            className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-          >
-            <span className="font-semibold">{l.label}</span>
-            <span className="text-xs text-text-muted">{l.note}</span>
-          </Link>
+            href={l.href}
+            testid={`bookings-connection-${l.key}`}
+            title={l.label}
+            description={l.note}
+          />
         ))}
       </div>
     </section>

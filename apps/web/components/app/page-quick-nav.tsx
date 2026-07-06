@@ -38,10 +38,12 @@ export function PageQuickNav({
       )}
     >
       {items.map((it) => (
+        // min-h-11 = 44px touch target (audit PR8): these are decision chips
+        // on long mobile pages; visual size stays compact, tap area does not.
         <a
           key={it.href}
           href={it.href}
-          className="shrink-0 rounded px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary transition-colors hover:bg-ink-700 hover:text-text-primary"
+          className="inline-flex min-h-11 shrink-0 items-center rounded px-2.5 font-mono text-[10px] uppercase tracking-label text-text-secondary transition-colors hover:bg-ink-700 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           {it.label}
         </a>

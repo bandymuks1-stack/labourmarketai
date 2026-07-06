@@ -204,7 +204,7 @@ export default async function ActivitySetupHubPage({
               </p>
               <Link
                 href={"/dashboard/start/company" as "/dashboard"}
-                className="self-start rounded-md border border-brand-blue px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
+                className="inline-flex min-h-11 items-center self-start rounded-md border border-brand-blue px-3 text-sm text-brand-blue hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                 data-testid="activity-setup-lane-company-start"
               >
                 {label("Pradėti įmonės nustatymą →", "Start company setup →")}
@@ -273,7 +273,7 @@ export default async function ActivitySetupHubPage({
           )}
           <Link
             href={"/dashboard/start/buyer" as "/dashboard"}
-            className="self-start rounded-md border border-brand-blue px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
+            className="inline-flex min-h-11 items-center self-start rounded-md border border-brand-blue px-3 text-sm text-brand-blue hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
             data-testid="activity-setup-lane-buyer-start"
           >
             {customer

@@ -34,7 +34,7 @@ describe("market map is the primary 'Žemėlapis' nav surface", () => {
     const bottom = read("components/app/bottom-nav.tsx");
     expect(tabs).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
     expect(bottom).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
-    expect(bottom).toMatch(/map:\s*MapIcon/);
+    expect(bottom).toMatch(/map:\s*MapPin/); // audit PR8: one icon per destination
   });
 
   it("the feature catalogue keeps market_map ACTIVE with its canonical route", () => {

@@ -66,11 +66,13 @@ export function BookingRespondButtons({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex flex-wrap items-center gap-2">
+        {/* min-h-11 = 44px touch targets (audit PR8): accept/decline are
+            decision-critical buttons and were ~24px tall on mobile. */}
         <button
           type="button"
           disabled={pending}
           onClick={() => respond("accepted")}
-          className="rounded-md border border-state-success/50 px-2.5 py-1 text-[11px] font-medium text-state-success hover:bg-state-success/10 disabled:opacity-50"
+          className="inline-flex min-h-11 items-center rounded-md border border-state-success/50 px-3 text-xs font-medium text-state-success hover:bg-state-success/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50"
         >
           {labels.accept}
         </button>
@@ -78,7 +80,7 @@ export function BookingRespondButtons({
           type="button"
           disabled={pending}
           onClick={() => respond("declined")}
-          className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50"
+          className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50"
         >
           {labels.decline}
         </button>

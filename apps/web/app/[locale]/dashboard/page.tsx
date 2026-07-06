@@ -8,6 +8,7 @@ import { DashboardChainActions } from "@/components/app/dashboard-chain-actions"
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
+import { ActionCard } from "@/components/app/action-card";
 import { MyZone, MyZoneImproves } from "@/components/app/my-zone";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { getOwnAvatar } from "@/lib/profile/avatar";
@@ -266,23 +267,21 @@ export default async function DashboardOverviewPage({
       <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
         {tMarket("hubTitle")}
       </span>
+      {/* Shared ActionCard pattern (audit PR8) — same visual grammar as the
+          MyZone grid, so "tap to go do" reads identically everywhere. */}
       <div className="grid gap-2 sm:grid-cols-2">
-        <Link
-          href={"/dashboard/services" as "/dashboard"}
-          data-testid="dashboard-marketplace-offer"
-          className="flex flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-        >
-          <span className="font-semibold">{tMarket("hubOffer")}</span>
-          <span className="text-xs text-text-muted">{tMarket("hubOfferNote")}</span>
-        </Link>
-        <Link
-          href={"/dashboard/service-requests" as "/dashboard"}
-          data-testid="dashboard-marketplace-find"
-          className="flex flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-        >
-          <span className="font-semibold">{tMarket("hubFind")}</span>
-          <span className="text-xs text-text-muted">{tMarket("hubFindNote")}</span>
-        </Link>
+        <ActionCard
+          href="/dashboard/services"
+          testid="dashboard-marketplace-offer"
+          title={tMarket("hubOffer")}
+          description={tMarket("hubOfferNote")}
+        />
+        <ActionCard
+          href="/dashboard/service-requests"
+          testid="dashboard-marketplace-find"
+          title={tMarket("hubFind")}
+          description={tMarket("hubFindNote")}
+        />
       </div>
     </section>
   );

@@ -50,7 +50,7 @@ describe("worker-visibility honesty note (F-E1)", () => {
 describe("marketplace discover empty state links out (F-E2)", () => {
   it("empty state carries the services CTA", () => {
     const section = read("components/app/marketplace-loop-section.tsx");
-    expect(section).toMatch(/marketplace-discover-empty-cta/);
+    expect(section).toMatch(/testId="marketplace-discover-empty"/); // EmptyState derives "-cta" (audit PR8)
     expect(section).toMatch(/\/dashboard\/services/);
     const page = read("app/[locale]/dashboard/service-requests/page.tsx");
     expect(page).toMatch(/discoverEmptyCta: t\("linkToServices"\)/);

@@ -22,15 +22,18 @@ export function EmptyState({
   testId = "empty-state",
 }: {
   title: string;
-  why: string;
+  /** Optional since audit PR8: a single-sentence empty state passes just the
+   *  title — the component still gives it the shared visual treatment. */
+  why?: string;
   next?: string;
   cta?: { label: string; href: string; variant?: "primary" | "secondary" };
   testId?: string;
 }) {
+  // min-h-11 = 44px touch targets (audit PR8).
   const PRIMARY =
-    "mt-1 inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5";
+    "mt-1 inline-flex min-h-11 w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
   const SECONDARY =
-    "mt-1 inline-flex w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
+    "mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
   const cls = cta?.variant === "secondary" ? SECONDARY : PRIMARY;
   const isInternalRoute = !!cta && cta.href.startsWith("/");
 
@@ -42,9 +45,11 @@ export function EmptyState({
       <h3 className="font-display text-base font-semibold text-text-primary">
         {title}
       </h3>
-      <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
-        {why}
-      </p>
+      {why ? (
+        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
+          {why}
+        </p>
+      ) : null}
       {next ? (
         <p className="max-w-prose text-[13px] leading-relaxed text-text-muted">
           {next}

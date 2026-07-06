@@ -28,8 +28,8 @@ export type NavIconKey =
   | "store"
   | "map"
   | "idCard"
-  | "fileText"
-  | "inbox"
+  | "journal"
+  | "messages"
   | "user"
   | "shield";
 
@@ -63,11 +63,11 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
   // to the real journal at /dashboard/journal.
   journal_text_first: {
     tabLabelKey: "auth.dashboard.tabs.journal",
-    iconKey: "fileText",
+    iconKey: "journal",
   },
   communication: {
     tabLabelKey: "auth.dashboard.tabs.communication",
-    iconKey: "inbox",
+    iconKey: "messages",
   },
   // Account / settings is intentionally NOT a primary tab — it lives in the
   // avatar / account menu (action-first IA v1: settings is a utility, not a
