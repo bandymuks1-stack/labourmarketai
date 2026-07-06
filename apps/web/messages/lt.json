@@ -3072,7 +3072,8 @@
             "urgencyUrgent": "Skubu",
             "notesLabel": "Papildomos pastabos",
             "notesPlaceholder": "Bet kas, ką dar svarbu žinoti",
-            "submittedHeading": "Ką pateikėte:"
+            "submittedHeading": "Ką pateikėte:",
+            "doneScoutingLink": "Peržiūrėti užklausą ir atitikmenis"
           },
           "hire": {
             "title": "Ieškoti darbuotojo ar komandos",
@@ -3330,6 +3331,13 @@
         "search": "Ieškoti",
         "account": "Nustatymai",
         "admin": "Administravimas"
+      },
+      "roleNotice": {
+        "needs_worker_role": "Ta nuoroda veda į darbuotojo erdvę, kurios jūsų paskyra dar neturi. Pridėkite darbuotojo vaidmenį erdvių centre.",
+        "needs_company_role": "Ta nuoroda veda į įmonės erdvę, kurios jūsų paskyra dar neturi. Sukurkite arba atidarykite įmonės erdvę erdvių centre.",
+        "needs_agency_role": "Ta nuoroda veda į agentūros erdvę, kurios jūsų paskyra dar neturi. Atidarykite erdvių centrą ir pasirinkite agentūros kelią.",
+        "needs_customer_role": "Ta nuoroda veda į užsakovo erdvę, kurios jūsų paskyra dar neturi. Pradėkite užsakovo kelią erdvių centre.",
+        "cta": "Atidaryti erdvių centrą"
       },
       "chainActions": {
         "buyerTitle": "Pirkėjo užklausos",
@@ -4424,6 +4432,8 @@
       "clarifyBody": "Nesupratau nurodymo, prašau patikslinti.",
       "clarifySent": "Prašymas išsiųstas",
       "clarifySending": "Siunčiama…",
+      "clarifyError": "Nepavyko išsiųsti prašymo patikslinti. Pabandykite dar kartą.",
+      "clarifyViewThread": "Peržiūrėti pokalbį",
       "safetyNote": "Svarbius saugos nurodymus patvirtinkite aiškiai.",
       "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas."
     }
@@ -4756,6 +4766,7 @@
     "accept": "Priimti",
     "decline": "Atmesti",
     "withdraw": "Atšaukti",
+    "messageCta": "Parašyti žinutę",
     "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą.",
     "duplicate": "Jau turi neuždarytą užklausą šiai paslaugai.",
     "requesterMessage": "Jų žinutė",
@@ -4796,6 +4807,16 @@
     "lead": "Signalai virsta pasiūlymais, o sprendžia žmogus. Mokymasis pats nieko nenusprendžia.",
     "notAvailable": "Kol kas neprieinama.",
     "empty": "Kol kas nėra ką peržiūrėti.",
+    "kind": {
+      "confirm_skill": "Įgūdžio pripažinimo siūlymas",
+      "review_skill": "Įgūdžio peržiūros siūlymas",
+      "dismiss": "Siūlymas atmesti signalą"
+    },
+    "skillFallback": "Įgūdis nenurodytas",
+    "workerFallback": "Darbuotojas",
+    "noteLabel": "Pastaba",
+    "managerContextLink": "Peržiūrėti žurnalo įrašus →",
+    "ownContextLink": "Atidaryti savo žurnalą →",
     "worker": {
       "heading": "Pasiūlymai apie tavo darbą",
       "intro": "Tai juodraštiniai signalai iš tavo veiklos. Įgaliotas vadovas sprendžia, kas tampa įrašu — iki tol tai tik pasiūlymai."

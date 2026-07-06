@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
+
+import { WORK_CARD_OPEN_EDITOR_EVENT } from "./work-card-missing-chip";
 
 import { Link } from "@/lib/i18n/navigation";
 import {
@@ -71,6 +73,23 @@ export function WorkCardEditor({
   labels: WorkCardLabels;
 }) {
   const [open, setOpen] = useState(false);
+
+  // Inline-dim "+" chips (availability/location/pay) open this editor via a
+  // window event — they used to self-anchor to #work-card and do nothing
+  // (audit PR4). Scroll after open so the expanded form is in view.
+  useEffect(() => {
+    const openEditor = () => {
+      setOpen(true);
+      requestAnimationFrame(() =>
+        document
+          .getElementById("work-card-editor-section")
+          ?.scrollIntoView({ block: "nearest" }),
+      );
+    };
+    window.addEventListener(WORK_CARD_OPEN_EDITOR_EVENT, openEditor);
+    return () => window.removeEventListener(WORK_CARD_OPEN_EDITOR_EVENT, openEditor);
+  }, []);
+
   const [saveState, saveAction, savePending] = useActionState<
     WorkCardActionResult | null,
     FormData
@@ -161,7 +180,7 @@ export function WorkCardEditor({
       )}
 
       {/* ── Secondary/collapsed editor (always available, never primary) ── */}
-      <div>
+      <div id="work-card-editor-section">
         <button
           type="button"
           className={secondaryBtn}

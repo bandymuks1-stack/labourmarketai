@@ -47,6 +47,10 @@ const NATIVE_NAV = new Set([
   "components/app/message-button.tsx", // open-conversation action → redirect
   "app/[locale]/dashboard/admin/matching/page.tsx", // start-conversation = same openDirectConversationAction → redirect; the review form on this page is the client MatchingWorkbenchReview (covered separately)
   "app/[locale]/dashboard/account/page.tsx", // logout POST
+  // "submit draft for real" + agency-mode "offer" (audit PR4) — the
+  // openDemandIntakeAsCompanyAction forms switch workspace then redirect to
+  // /dashboard#demand-intake; feedback is the navigation itself.
+  "app/[locale]/dashboard/company/page.tsx",
   // /dashboard/start/agency became a redirect stub (Direction A, 2026-07-05)
   // — no form remains there, so it left this allowlist.
   // company setup moved to the client <CompanySetupForm> (useActionState +

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 
+import { Link } from "@/lib/i18n/navigation";
 import { requestInstructionClarificationAction } from "@/lib/instructions/actions";
 import type { WorkerInstruction } from "@/lib/instructions/instructions";
 
@@ -28,6 +29,8 @@ export interface InstructionCardLabels {
   clarifyBody: string;
   clarifySent: string;
   clarifySending: string;
+  clarifyError: string;
+  clarifyViewThread: string;
   safetyNote: string;
   helpLine: string;
 }
@@ -45,6 +48,7 @@ export function WorkerInstructionCard({
   const [showOriginal, setShowOriginal] = useState(!hasTranslation);
   const [pending, start] = useTransition();
   const [clarified, setClarified] = useState(false);
+  const [clarifyFailed, setClarifyFailed] = useState(false);
 
   return (
     <section
@@ -117,11 +121,15 @@ export function WorkerInstructionCard({
           disabled={pending || clarified}
           onClick={() =>
             start(async () => {
+              setClarifyFailed(false);
               const r = await requestInstructionClarificationAction(
                 instruction.conversationId,
                 labels.clarifyBody,
               );
+              // Never a silent no-op (audit PR4): failure states its outcome;
+              // success links the thread where the manager's reply will land.
               if (r.ok) setClarified(true);
+              else setClarifyFailed(true);
             })
           }
           className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-orange/40 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-orange"
@@ -133,8 +141,26 @@ export function WorkerInstructionCard({
               ? labels.clarifySending
               : labels.clarify}
         </button>
+        {clarified && (
+          <Link
+            href={`/dashboard/communication/${instruction.conversationId}` as "/dashboard"}
+            className="text-xs font-medium text-brand-blue hover:underline"
+            data-testid="instruction-clarify-thread-link"
+          >
+            {labels.clarifyViewThread} →
+          </Link>
+        )}
         <span className="text-[11px] text-text-muted">{labels.helpLine}</span>
       </div>
+      {clarifyFailed && (
+        <p
+          role="alert"
+          className="text-xs text-state-warning"
+          data-testid="instruction-clarify-error"
+        >
+          {labels.clarifyError}
+        </p>
+      )}
     </section>
   );
 }

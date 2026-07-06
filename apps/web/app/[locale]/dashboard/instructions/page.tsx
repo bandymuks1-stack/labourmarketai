@@ -120,6 +120,8 @@ export default async function InstructionsPage({
     clarifyBody: t("card.clarifyBody"),
     clarifySent: t("card.clarifySent"),
     clarifySending: t("card.clarifySending"),
+    clarifyError: t("card.clarifyError"),
+    clarifyViewThread: t("card.clarifyViewThread"),
     safetyNote: t("card.safetyNote"),
     helpLine: t("card.helpLine"),
   };

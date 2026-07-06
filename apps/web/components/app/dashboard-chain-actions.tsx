@@ -19,16 +19,20 @@ export async function DashboardChainActions({ role }: { role: Role }) {
   let actions: Action[] = [];
 
   if (role === "company" || role === "agency") {
-    const ws = role === "company" ? "/dashboard/company" : "/dashboard/agency";
+    // Both actions live in the team section of the canonical company workspace
+    // (the agency room is a redirect stub, which would drop an anchor), so link
+    // the exact control, not the top of the longest page in the app
+    // (root-cause audit PR4 — "chain actions land on the page top").
+    const teamSection = "/dashboard/company#company-team";
     actions = [
       {
-        href: ws,
+        href: teamSection,
         label: t("inviteWorker"),
         desc: t("inviteWorkerDesc"),
         testId: "chain-action-invite",
       },
       {
-        href: ws,
+        href: teamSection,
         label: t("enableReview"),
         desc: t("enableReviewDesc"),
         testId: "chain-action-enable-review",

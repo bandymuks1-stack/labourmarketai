@@ -173,13 +173,18 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     expect(team.scopeKey).toBe("scope.unknown");
   });
 
-  it("the ONLY direct-subject writer is the gated scouting action (demand title)", () => {
+  it("direct-subject writers are ONLY the gated fact-verified actions (demand / offering title)", () => {
     // The generic entry point passes no subject…
     const open = read("lib/communication/open-conversation-action.ts");
     expect(open).toMatch(/getOrCreateDirectConversation\(profileId, locale\)/);
     // …the scouting action derives it from the REAL demand row it verified…
     const scout = read("lib/communication/request-worker-conversation.ts");
     expect(scout).toMatch(/demand\?\.title/);
+    // …the marketplace action (audit PR4) derives it from the REAL accepted
+    // request's offering row it verified server-side…
+    const market = read("lib/marketplace/service-request-conversation.ts");
+    expect(market).toMatch(/service_offerings\?\.title/);
+    expect(market).toMatch(/status !== "accepted"/);
     // …and nobody else calls getOrCreateDirectConversation.
     const callers = walkSources().filter(
       (rel) =>
@@ -187,7 +192,11 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
         read(rel).includes("getOrCreateDirectConversation("),
     );
     expect(callers.sort()).toEqual(
-      ["lib/communication/open-conversation-action.ts", "lib/communication/request-worker-conversation.ts"].sort(),
+      [
+        "lib/communication/open-conversation-action.ts",
+        "lib/communication/request-worker-conversation.ts",
+        "lib/marketplace/service-request-conversation.ts",
+      ].sort(),
     );
   });
 
