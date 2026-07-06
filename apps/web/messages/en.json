@@ -4918,7 +4918,7 @@
     "scope": {
       "support": "Support channel",
       "unknown": "Context not specified",
-      "demand": "About a work request — the subject is the request title"
+      "demand": "About work — the subject is the related work's title"
     },
     "unnamedThread": "(no subject)",
     "unread": "New",
