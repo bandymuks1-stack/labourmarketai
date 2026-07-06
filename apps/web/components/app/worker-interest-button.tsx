@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Link } from "@/lib/i18n/navigation";
 import {
   expressInterestAction,
   withdrawInterestAction,
@@ -35,6 +36,9 @@ export function WorkerInterestButton({
     withdraw: string;
     internalNote: string;
     error: string;
+    /** "contacted" is real (audit PR5): the company opened an in-app thread —
+     *  this label links the worker to their messages, never a dead status. */
+    contactedLink: string;
   };
 }) {
   const [status, setStatus] = useState<InterestStatus | null>(initialStatus);
@@ -98,8 +102,24 @@ export function WorkerInterestButton({
             {labels.express}
           </button>
         )}
-        {failed ? <span className="text-[11px] text-state-warning">{labels.error}</span> : null}
+        {failed ? (
+          <span role="alert" className="text-[11px] text-state-warning">
+            {labels.error}
+          </span>
+        ) : null}
       </div>
+      {/* "Contacted" means a REAL in-app thread exists (opened by the gated
+          contact action) — link the worker straight to it (audit PR5: status
+          changes must be meaningful, never silent flags). */}
+      {status === "contacted" ? (
+        <Link
+          href={"/dashboard/communication" as "/dashboard"}
+          className="w-fit text-xs font-medium text-brand-blue hover:underline"
+          data-testid="interest-contacted-link"
+        >
+          {labels.contactedLink} →
+        </Link>
+      ) : null}
       {/* Honest scope line — REQUIRED copy: internal signal only. */}
       <p className="text-[10px] leading-relaxed text-text-muted">{labels.internalNote}</p>
     </div>

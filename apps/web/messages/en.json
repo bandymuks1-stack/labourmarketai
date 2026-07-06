@@ -3475,7 +3475,12 @@
     },
     "notifications": {
         "types": {
-          "generic": "Notification"
+          "generic": "Notification",
+          "unread_messages": "Unread messages",
+          "incoming_service_requests": "Service requests awaiting response",
+          "service_request_responses": "Answers to your requests",
+          "pending_bookings": "Booking proposals awaiting response",
+          "booking_responses": "Answers to your booking proposals"
         },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -5967,8 +5972,8 @@
         "contacted": "Marked contacted"
       },
       "markReviewed": "Mark reviewed",
-      "markContacted": "Mark contacted",
-      "internalNote": "Internal record only — nothing is sent to the worker or outside the platform.",
+      "markContacted": "Contact in the platform",
+      "internalNote": "“Reviewed” is an internal record. “Contact” opens an in-platform conversation; nothing is sent outside the platform.",
       "error": "Could not save. Try again.",
       "notAvailable": "Acknowledgement is not enabled yet."
     },
@@ -6051,6 +6056,10 @@
     }
   },
   "bookings": {
+    "dashboardResponses": {
+      "title": "New answers to your booking proposals",
+      "note": "Workers responded to your proposals — review the statuses."
+    },
     "eyebrow": "BOOKINGS",
     "title": "Bookings",
     "pendingLink": "Booking proposals",
@@ -6434,6 +6443,7 @@
       "sent": "Interest sent",
       "withdraw": "Withdraw interest",
       "internalNote": "This only creates an internal signal. It does not send a message outside the platform.",
+      "contactedLink": "The company opened a conversation — view your messages",
       "error": "Could not save. Try again.",
       "reviewed": "Company reviewed your interest",
       "contacted": "Company marked: contacted"

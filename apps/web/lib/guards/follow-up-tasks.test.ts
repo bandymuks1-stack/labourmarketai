@@ -282,12 +282,12 @@ describe("app surface — operator queue on the EXISTING admin control room only
     expect(panel).toMatch(/t\("preApply"\)/);
   });
 
-  it("does NOT fake a user-facing notification feed — the header panel keeps its honest empty feed", () => {
-    // The header NotificationPanel has no real data feed today; the follow-up
-    // layer must not inject one. The dashboard layout still hands the
-    // provider an empty list, and no follow-up file touches the panel.
+  it("does NOT fake a user-facing notification feed — the follow-up layer never touches the bell", () => {
+    // The header bell carries ONLY real derived signals since audit PR5
+    // (count-gated, each linking the surface that clears it) — the follow-up
+    // layer must not inject its admin-only queue into it.
     const layout = readWeb("app/[locale]/dashboard/layout.tsx");
-    expect(layout).toMatch(/notifications: \[\]/);
+    expect(layout).toMatch(/count > 0/); // signals are count-gated, never fabricated
     expect(layout).not.toMatch(/follow_up|followUp/);
     const notificationPanel = readWeb("components/app/notification-panel.tsx");
     expect(notificationPanel).not.toMatch(/follow_up|followUp|FollowUp/);

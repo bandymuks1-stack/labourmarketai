@@ -66,6 +66,11 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *     service_offering_request whose status is `accepted` (verified
  *     server-side by the marketplace action, passed as a grant — audit PR4:
  *     accepted rows must open the next step).
+ *   - allowed_demand_interest — the worker themselves signalled interest on
+ *     the caller's demand (demand_interest_signals row, not withdrawn; demand
+ *     ownership verified server-side by the contact-interested-worker action
+ *     — audit PR5: "contacted" must open a real thread, never claim contact
+ *     that no surface mediated).
  *   - allowed_admin — the caller carries the real admin signal (support /
  *     matching workbench paths; admin participation is already RLS-visible).
  *   - no_permission — the default. No relationship → no contact.
@@ -79,6 +84,7 @@ export type ContactPermissionState =
   | "allowed_engagement"
   | "allowed_scouting_shortlist"
   | "allowed_accepted_service_request"
+  | "allowed_demand_interest"
   | "allowed_admin"
   | "no_permission";
 
@@ -88,6 +94,7 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_engagement",
   "allowed_scouting_shortlist",
   "allowed_accepted_service_request",
+  "allowed_demand_interest",
   "allowed_admin",
   "no_permission",
 ];

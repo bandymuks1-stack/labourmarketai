@@ -22,6 +22,12 @@ export type Notification = {
   payload: Record<string, unknown>;
   read_at: string | null;
   created_at: string;
+  /** Derived-signal notifications (audit PR5): a REAL count from an existing
+   *  per-surface model (unread threads, pending requests/bookings, responses
+   *  since last seen). They clear by VISITING the surface (`href`), never by
+   *  a local "mark read" — the bell only ever states what is actually true. */
+  count?: number;
+  href?: string;
 };
 
 type AuthState = {

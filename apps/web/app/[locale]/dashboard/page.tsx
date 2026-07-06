@@ -15,7 +15,10 @@ import { WorkCard } from "@/components/app/work-card";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { getWorkerCard } from "@/lib/worker/work-card";
-import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
+import {
+  getBookingResponsesNewCount,
+  getPendingIncomingBookingCount,
+} from "@/lib/booking/booking-actions";
 import {
   getPendingIncomingRequestCount,
   getOutgoingRequestSummary,
@@ -217,6 +220,33 @@ export default async function DashboardOverviewPage({
     </Link>
   ) : null;
 
+  // Booking-responses next-action (audit PR5): a worker's accept/decline on
+  // the caller's OWN proposal was previously visible only if the proposer
+  // happened to reopen /dashboard/bookings. Real "responses since last seen"
+  // count (seen model mirrors the marketplace loop; 0 while the owner-gated
+  // seen migration is unapplied — never a fake badge). Opens the exact
+  // surface that shows the response.
+  const tBookingsShared = await getTranslations("bookings");
+  const bookingResponsesNew = await getBookingResponsesNewCount();
+  const bookingResponsesNextAction =
+    bookingResponsesNew > 0 ? (
+      <Link
+        href={"/dashboard/bookings" as "/dashboard"}
+        data-testid="dashboard-booking-responses-next-action"
+        className="flex items-center justify-between gap-3 rounded-md border border-state-success/40 bg-state-success/5 px-4 py-3 text-sm text-text-primary hover:border-state-success"
+      >
+        <span className="flex flex-col">
+          <span className="font-semibold">{tBookingsShared("dashboardResponses.title")}</span>
+          <span className="text-xs text-text-muted">
+            {tBookingsShared("dashboardResponses.note")}
+          </span>
+        </span>
+        <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-state-success px-1.5 text-xs font-bold text-ink-900 tabular-nums">
+          {bookingResponsesNew}
+        </span>
+      </Link>
+    ) : null;
+
   // Always-visible marketplace access. The two halves of the service loop are
   // otherwise only reachable through the count-gated action cards above — and
   // /dashboard/services (where a provider publishes an offering) had NO UI entry
@@ -370,6 +400,7 @@ export default async function DashboardOverviewPage({
 
         {/* Real buyer next-action — status of the caller's own outgoing requests. */}
         {outgoingRequestsNextAction}
+        {bookingResponsesNextAction}
 
         {/* Always-on access to both halves of the service loop (publish / discover). */}
         {marketplaceAccess}
@@ -544,6 +575,7 @@ export default async function DashboardOverviewPage({
 
       {/* Real buyer next-action — status of the caller's own outgoing requests. */}
       {outgoingRequestsNextAction}
+      {bookingResponsesNextAction}
 
       {/* Always-on access to both halves of the service loop (publish / discover). */}
       {marketplaceAccess}

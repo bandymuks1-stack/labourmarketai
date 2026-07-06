@@ -5,7 +5,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { BookingStatus } from "@/lib/booking/booking-state";
+import { countOwnerResponsesSince, type BookingStatus } from "@/lib/booking/booking-state";
 import { hasFeature } from "@/lib/billing/effective-entitlements";
 
 /**
@@ -132,6 +132,8 @@ export interface BookingRow {
   isOwner: boolean;
   readinessSnapshot: Record<string, unknown> | null;
   createdAt: string;
+  /** Set by the respond/withdraw RPCs — backs "responses since last seen". */
+  updatedAt: string;
 }
 
 export type BookingsListResult =
@@ -153,7 +155,7 @@ export async function listMyBookings(): Promise<BookingsListResult> {
   const { data, error } = await asAny(supabase)
     .from("booking_requests")
     .select(
-      "id, owner_id, status, start_date, expected_end_date, location_country, role_text, note, readiness_snapshot, created_at",
+      "id, owner_id, status, start_date, expected_end_date, location_country, role_text, note, readiness_snapshot, created_at, updated_at",
     )
     .order("created_at", { ascending: false });
   if (error) {
@@ -176,6 +178,7 @@ export async function listMyBookings(): Promise<BookingsListResult> {
       isOwner: r.owner_id === user.id,
       readinessSnapshot: (r.readiness_snapshot as Record<string, unknown> | null) ?? null,
       createdAt: r.created_at,
+      updatedAt: r.updated_at ?? r.created_at,
     };
     if (row.isOwner) outgoing.push(row);
     else incoming.push(row);
@@ -194,4 +197,58 @@ export async function getPendingIncomingBookingCount(): Promise<number> {
   const result = await listMyBookings();
   if (result.kind !== "ok") return 0;
   return result.incoming.filter((b) => b.status === "proposed").length;
+}
+
+/**
+ * The caller's booking-loop seen timestamp (audit PR5 — mirrors the
+ * marketplace seen model). Null when never opened or while the owner-gated
+ * booking_requests_seen migration is not applied — both degrade to 0 "new".
+ */
+export async function getBookingRequestsSeenAt(): Promise<string | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await asAny(supabase)
+    .from("booking_requests_seen")
+    .select("seen_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return typeof data.seen_at === "string" ? data.seen_at : null;
+}
+
+/**
+ * Real count of the OTHER party's booking responses since the caller last
+ * opened the bookings surface: OWN (proposed-by-me) rows a worker moved to
+ * accepted/declined after seen_at (the respond RPC stamps updated_at). The
+ * caller's own propose/withdraw never counts. 0 when never seen / migration
+ * absent — never a fabricated badge (audit PR5: booking responses were
+ * silent for the proposing company).
+ */
+export async function getBookingResponsesNewCount(): Promise<number> {
+  const seenAt = await getBookingRequestsSeenAt();
+  if (!seenAt) return 0;
+  const result = await listMyBookings();
+  if (result.kind !== "ok") return 0;
+  return countOwnerResponsesSince(result.outgoing, seenAt);
+}
+
+/**
+ * Mark the caller's bookings surface as seen (single-row upsert via the
+ * SECURITY DEFINER RPC). Rollout-safe: no-op when unauthenticated or the RPC
+ * is absent — never throws.
+ */
+export async function markBookingRequestsSeen(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  try {
+    await asAny(supabase).rpc("mark_booking_requests_seen");
+  } catch {
+    // rollout-safe: absent RPC / transient error → no-op
+  }
 }

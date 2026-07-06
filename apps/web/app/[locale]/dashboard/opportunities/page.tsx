@@ -448,6 +448,7 @@ export default async function OpportunitiesPage({
                         withdraw: t("interest.withdraw"),
                         internalNote: t("interest.internalNote"),
                         error: t("interest.error"),
+                        contactedLink: t("interest.contactedLink"),
                       }}
                     />
                   ) : null}

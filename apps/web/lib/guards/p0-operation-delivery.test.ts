@@ -58,11 +58,14 @@ describe("P0.1 request delivery: communication is a reachable primary-nav surfac
     expect(layout).toMatch(/badges=\{navBadges\}/);
   });
 
-  it("the unread count is a real query (count over the user's unread participant rows)", () => {
+  it("the unread count is a real query (counterpart messages vs last_read — audit PR5)", () => {
     const src = read("lib/communication/unread.ts");
     expect(src).toMatch(/conversation_participants/);
     expect(src).toMatch(/last_read_at/);
-    expect(src).toMatch(/count:\s*"exact"/);
+    // Real semantics: someone ELSE's message newer than the caller's
+    // last_read_at — not just never-opened threads.
+    expect(src).toMatch(/neq\("author_id", user\.id\)/);
+    expect(src).toMatch(/Date\.parse\(m\.created_at\) > Date\.parse\(lastRead\)/);
   });
 });
 

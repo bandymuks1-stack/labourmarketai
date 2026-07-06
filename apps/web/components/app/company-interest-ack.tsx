@@ -1,16 +1,24 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { MessageSquare } from "lucide-react";
+
 import { acknowledgeInterestAction } from "@/lib/opportunities/interest-actions";
+import { contactInterestedWorkerAction } from "@/lib/communication/contact-interested-worker";
 import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
 
 /**
- * Company acknowledgement control for one worker interest signal (PR7).
+ * Company acknowledgement control for one worker interest signal.
  *
- * INTERNAL state only — marking "reviewed" / "contacted" records the
- * company's own decision on its own demand. Nothing is sent to the worker
- * or anywhere else; the worker sees the honest status through their own row
- * (RLS). Rendered only for candidates who ACTUALLY expressed interest.
+ * "Reviewed" stays an INTERNAL record on the company's own demand. "Contact"
+ * (audit PR5) is no longer a bare flag: it opens/reopens the REAL in-app
+ * conversation with the interested worker first (server-verified: demand
+ * ownership + the worker's own standing interest signal) and only then marks
+ * the signal `contacted` — so the status never claims contact that no
+ * surface mediated. Nothing external is ever sent; the worker notices the
+ * thread through the real unread badge/bell. Rendered only for candidates
+ * who ACTUALLY expressed interest.
  */
 export function CompanyInterestAck({
   locale,
@@ -32,16 +40,30 @@ export function CompanyInterestAck({
     notAvailable: string;
   };
 }) {
+  const router = useRouter();
   const [status, setStatus] = useState<string>(initialStatus);
   const [failure, setFailure] = useState<"none" | "error" | "not-available">("none");
   const [pending, startTransition] = useTransition();
 
-  const ack = (next: "reviewed" | "contacted") =>
+  const markReviewed = () =>
     startTransition(async () => {
       setFailure("none");
-      const r = await acknowledgeInterestAction(locale, requestId, workerId, next);
+      const r = await acknowledgeInterestAction(locale, requestId, workerId, "reviewed");
       if (r.kind === "ok") setStatus(r.status as InterestStatus);
       else if (r.kind === "needs-migration") setFailure("not-available");
+      else setFailure("error");
+    });
+
+  const contact = () =>
+    startTransition(async () => {
+      setFailure("none");
+      const r = await contactInterestedWorkerAction({ locale, requestId, workerId });
+      if (r.ok) {
+        setStatus("contacted");
+        router.push(`/${locale}/dashboard/communication/${r.conversationId}`);
+        return;
+      }
+      if (r.reason === "needs_migration") setFailure("not-available");
       else setFailure("error");
     });
 
@@ -55,36 +77,38 @@ export function CompanyInterestAck({
         <span className="font-mono text-[10px] uppercase tracking-label text-state-success">
           {labels.statusLabel(status)}
         </span>
-        {status !== "reviewed" ? (
+        {status !== "reviewed" && status !== "contacted" ? (
           <button
             type="button"
-            onClick={() => ack("reviewed")}
+            onClick={markReviewed}
             disabled={pending}
-            className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-primary hover:border-brand-blue disabled:opacity-50"
+            className="min-h-11 rounded-md border border-ink-500 px-3 py-1.5 text-[11px] text-text-primary hover:border-brand-blue disabled:opacity-50"
             data-testid="interest-ack-reviewed"
           >
             {labels.markReviewed}
           </button>
         ) : null}
-        {status !== "contacted" ? (
-          <button
-            type="button"
-            onClick={() => ack("contacted")}
-            disabled={pending}
-            className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-primary hover:border-brand-blue disabled:opacity-50"
-            data-testid="interest-ack-contacted"
-          >
-            {labels.markContacted}
-          </button>
-        ) : null}
+        {/* The contact affordance stays available even at status=contacted —
+            it REOPENS the same deduped thread (never a duplicate). */}
+        <button
+          type="button"
+          onClick={contact}
+          disabled={pending}
+          className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-[11px] text-brand-blue hover:border-brand-blue disabled:opacity-50"
+          data-testid="interest-ack-contacted"
+        >
+          <MessageSquare className="h-3 w-3" /> {labels.markContacted}
+        </button>
         {failure === "error" ? (
-          <span className="text-[11px] text-state-warning">{labels.error}</span>
+          <span role="alert" className="text-[11px] text-state-warning">
+            {labels.error}
+          </span>
         ) : null}
         {failure === "not-available" ? (
           <span className="text-[11px] text-text-muted">{labels.notAvailable}</span>
         ) : null}
       </div>
-      {/* Honest scope line — internal record only, nothing is sent. */}
+      {/* Honest scope line — in-app thread only, no external send. */}
       <p className="text-[10px] leading-relaxed text-text-muted">{labels.internalNote}</p>
     </div>
   );
