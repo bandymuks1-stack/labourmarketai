@@ -120,8 +120,13 @@ describe("4. booking responses are visible, never silent", () => {
 
 describe("5. the bell states only real derived signals", () => {
   it("the layout builds signals from the same real per-surface counts", () => {
+    // The per-surface fetches moved into the notification spine (quality-
+    // train PR B): layout → getSpineCounts() → the same real helpers.
     const layout = read("app/[locale]/dashboard/layout.tsx");
     expect(layout).not.toMatch(/notifications:\s*\[\]/);
+    expect(layout).toMatch(/getSpineCounts\(\)/);
+    expect(layout).toMatch(/buildSpineNotifications\(/);
+    const spine = read("lib/notifications/spine.ts");
     for (const fn of [
       "getUnreadConversationCount",
       "getPendingIncomingRequestCount",
@@ -129,10 +134,11 @@ describe("5. the bell states only real derived signals", () => {
       "getPendingIncomingBookingCount",
       "getBookingResponsesNewCount",
     ]) {
-      expect(layout).toMatch(new RegExp(fn));
+      expect(spine).toMatch(new RegExp(fn));
     }
     // Zero-count signals are dropped — never a fabricated row.
-    expect(layout).toMatch(/count > 0/);
+    const spineSignals = read("lib/notifications/spine-signals.ts");
+    expect(spineSignals).toMatch(/if \(count <= 0\) return \[\];/);
   });
   it("every signal row navigates to the surface that clears it", () => {
     const panel = read("components/app/notification-panel.tsx");

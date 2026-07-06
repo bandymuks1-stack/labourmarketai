@@ -53,9 +53,15 @@ describe("P0.1 request delivery: communication is a reachable primary-nav surfac
   });
 
   it("the dashboard layout feeds a REAL unread count into the badges", () => {
+    // The unread fetch moved into the notification spine (quality-train
+    // PR B) — the layout consumes the spine, the spine reads the one real
+    // unread helper, and the badge chain stays unbroken.
     const layout = read("app/[locale]/dashboard/layout.tsx");
-    expect(layout).toMatch(/getUnreadConversationCount/);
+    expect(layout).toMatch(/getSpineCounts\(\)/);
     expect(layout).toMatch(/badges=\{navBadges\}/);
+    const spine = read("lib/notifications/spine.ts");
+    expect(spine).toMatch(/getUnreadConversationCount/);
+    expect(spine).toMatch(/communication: counts\.unreadConversations/);
   });
 
   it("the unread count is a real query (counterpart messages vs last_read — audit PR5)", () => {

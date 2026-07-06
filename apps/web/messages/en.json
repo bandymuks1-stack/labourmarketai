@@ -3479,6 +3479,7 @@
     "notifications": {
         "types": {
           "generic": "Notification",
+          "pending_invitations": "Invitations awaiting your response",
           "unread_messages": "Unread messages",
           "incoming_service_requests": "Service requests awaiting response",
           "service_request_responses": "Answers to your requests",
