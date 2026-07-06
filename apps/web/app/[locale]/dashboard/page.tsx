@@ -282,6 +282,20 @@ export default async function DashboardOverviewPage({
           title={tMarket("hubFind")}
           description={tMarket("hubFindNote")}
         />
+        {/* Bridge v1 (§17.2 first bridge): the demand entry point joins the
+            hub so both halves of the ONE supply/demand system are reachable
+            from one place. Worker-only — opportunities is the worker's
+            demand-consumption surface; org roles post demand through the
+            demand-intake section on their own dashboard. Labels stay
+            distinct per concept-map-v1 (no naming merge — owner decision). */}
+        {role === "worker" && (
+          <ActionCard
+            href="/dashboard/opportunities"
+            testid="dashboard-marketplace-opportunities"
+            title={tMarket("hubOpportunities")}
+            description={tMarket("hubOpportunitiesNote")}
+          />
+        )}
       </div>
     </section>
   );
