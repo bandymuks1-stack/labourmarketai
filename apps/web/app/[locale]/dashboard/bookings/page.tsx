@@ -1,8 +1,12 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { MessageSquare } from "lucide-react";
 
 import { listMyBookings, type BookingRow } from "@/lib/booking/booking-actions";
+import { openBookingConversationAction } from "@/lib/booking/booking-conversation";
 import { BookingRespondButtons } from "@/components/app/booking-respond-buttons";
+import { BookingWithdrawButton } from "@/components/app/booking-withdraw-button";
 import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
+import { Link } from "@/lib/i18n/navigation";
 import type { BookingStatus } from "@/lib/booking/booking-state";
 import { ActionCard } from "@/components/app/action-card";
 
@@ -87,6 +91,16 @@ export default async function BookingsPage({
                     unavailable: t("unavailable"),
                   }}
                 />
+              ) : row.status === "accepted" ? (
+                // Accepted is a beginning, not a terminal status (lifecycle
+                // v1): the worker's next step is the conversation with the
+                // proposing company — grant re-verified server-side.
+                <BookingMessageCta
+                  bookingId={row.id}
+                  locale={locale}
+                  label={t("actions.message")}
+                  testid="booking-incoming-message-cta"
+                />
               ) : null
             }
           />
@@ -96,11 +110,72 @@ export default async function BookingsPage({
             empty={t("outgoing.empty")}
             rows={result.outgoing}
             t={t}
-            renderActions={() => null}
+            renderActions={(row) =>
+              row.status === "proposed" ? (
+                // The withdraw RPC existed with no UI — a proposer had no way
+                // out of a wrong proposal (lifecycle v1).
+                <BookingWithdrawButton
+                  locale={locale}
+                  bookingId={row.id}
+                  labels={{
+                    withdraw: t("actions.withdraw"),
+                    withdrawn: t("status.withdrawn"),
+                    error: t("actions.error"),
+                    unavailable: t("unavailable"),
+                  }}
+                />
+              ) : row.status === "accepted" ? (
+                <BookingMessageCta
+                  bookingId={row.id}
+                  locale={locale}
+                  label={t("actions.message")}
+                  testid="booking-outgoing-message-cta"
+                />
+              ) : row.status === "declined" ? (
+                // A declined proposal ends THIS booking, not the company's
+                // search — the honest next action is finding another worker.
+                <Link
+                  href="/dashboard/company/scouting"
+                  data-testid="booking-declined-next-action"
+                  className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700"
+                >
+                  {t("actions.findAnother")}
+                </Link>
+              ) : null
+            }
           />
         </>
       )}
     </div>
+  );
+}
+
+/** Next step for an ACCEPTED booking — opens (or reopens) the company↔worker
+ *  conversation. The granting fact (accepted + participant) is re-verified
+ *  server-side by the action; the row exposes no counterpart profile id. */
+function BookingMessageCta({
+  bookingId,
+  locale,
+  label,
+  testid,
+}: {
+  bookingId: string;
+  locale: string;
+  label: string;
+  testid: string;
+}) {
+  return (
+    <form action={openBookingConversationAction}>
+      <input type="hidden" name="bookingId" value={bookingId} />
+      <input type="hidden" name="locale" value={locale} />
+      <button
+        type="submit"
+        data-testid={testid}
+        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue"
+      >
+        <MessageSquare className="h-3 w-3" /> {label}
+      </button>
+    </form>
   );
 }
 

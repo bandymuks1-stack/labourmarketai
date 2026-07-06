@@ -6096,7 +6096,10 @@
       "accepted": "Priėmei",
       "declined": "Atmetei",
       "conflict": "Tu jau turi priimtą rezervaciją šioms datoms.",
-      "error": "Kažkas nepavyko."
+      "error": "Kažkas nepavyko.",
+      "message": "Parašyti žinutę",
+      "withdraw": "Atšaukti pasiūlymą",
+      "findAnother": "Ieškoti kito darbuotojo"
     },
     "connections": {
       "title": "Planavimas susijęs su",

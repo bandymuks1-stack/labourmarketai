@@ -48,13 +48,15 @@ const ROLLBACK =
 // ── 1. Permission states are enumerated + default-closed ────────────────
 
 describe("§8.1 permission states — enumerated, no silent drift", () => {
-  it("the enumeration is EXACTLY the seven agreed states", () => {
+  it("the enumeration is EXACTLY the eight agreed states", () => {
     // allowed_accepted_service_request added in audit PR4 (accepted
     // marketplace rows open a conversation); allowed_demand_interest added
     // in audit PR5 ("contacted" opens a real thread on the worker's OWN
-    // interest signal) — deliberate, reviewed extensions, each verified
-    // server-side by its gated action (service-request-conversation.ts /
-    // contact-interested-worker.ts).
+    // interest signal); allowed_accepted_booking added in booking lifecycle
+    // v1 (an accepted booking opens the company↔worker conversation) —
+    // deliberate, reviewed extensions, each verified server-side by its
+    // gated action (service-request-conversation.ts /
+    // contact-interested-worker.ts / booking-conversation.ts).
     expect([...CONTACT_PERMISSION_STATES].sort()).toEqual(
       [
         "allowed_admin",
@@ -63,6 +65,7 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
         "allowed_scouting_shortlist",
         "allowed_accepted_service_request",
         "allowed_demand_interest",
+        "allowed_accepted_booking",
         "no_permission",
       ].sort(),
     );
@@ -149,6 +152,9 @@ describe("no contact without permission — the create path is gated", () => {
     };
     for (const r of ["app", "components", "lib"]) walk(join(APP, r), `/${r}`);
     expect(callers.sort()).toEqual([
+      // Booking lifecycle v1 — accepted-booking grant (participant + status
+      // verified server-side before the conversation opens).
+      "lib/booking/booking-conversation.ts",
       // Audit PR5 — demand-interest grant ("contacted" opens the real
       // thread), verified server-side before the conversation opens.
       "lib/communication/contact-interested-worker.ts",

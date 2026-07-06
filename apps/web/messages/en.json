@@ -6096,7 +6096,10 @@
       "accepted": "You accepted",
       "declined": "You declined",
       "conflict": "You already have an accepted booking for these dates.",
-      "error": "Something went wrong."
+      "error": "Something went wrong.",
+      "message": "Send a message",
+      "withdraw": "Withdraw proposal",
+      "findAnother": "Find another worker"
     },
     "connections": {
       "title": "Planning connects to",

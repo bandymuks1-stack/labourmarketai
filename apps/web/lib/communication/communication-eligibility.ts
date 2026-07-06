@@ -71,6 +71,11 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *     ownership verified server-side by the contact-interested-worker action
  *     — audit PR5: "contacted" must open a real thread, never claim contact
  *     that no surface mediated).
+ *   - allowed_accepted_booking — the booking loop's real mutual commitment:
+ *     the caller is the proposing company or the booked worker of a
+ *     booking_request whose status is `accepted` (verified server-side by
+ *     the booking action, passed as a grant — booking lifecycle v1:
+ *     an accepted booking must open the conversation, never dead-end).
  *   - allowed_admin — the caller carries the real admin signal (support /
  *     matching workbench paths; admin participation is already RLS-visible).
  *   - no_permission — the default. No relationship → no contact.
@@ -85,6 +90,7 @@ export type ContactPermissionState =
   | "allowed_scouting_shortlist"
   | "allowed_accepted_service_request"
   | "allowed_demand_interest"
+  | "allowed_accepted_booking"
   | "allowed_admin"
   | "no_permission";
 
@@ -95,6 +101,7 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_scouting_shortlist",
   "allowed_accepted_service_request",
   "allowed_demand_interest",
+  "allowed_accepted_booking",
   "allowed_admin",
   "no_permission",
 ];
