@@ -3456,6 +3456,28 @@
           "help": "Theme",
           "toDark": "Dark",
           "toLight": "Light"
+        },
+        "security": {
+          "title": "Security & access",
+          "intro": "Control how you sign in and protect your account.",
+          "signin": {
+            "label": "How you sign in",
+            "password": "Email and password",
+            "google": "Google account",
+            "changePassword": "Change password"
+          },
+          "mfa": {
+            "title": "Extra account protection",
+            "active": "Active",
+            "notActive": "Not yet active",
+            "benefit": "Protect your profile, work history, documents and messages with a second check only you can pass.",
+            "setupComing": "Setup will appear here soon — it takes about 30 seconds and you can turn it off anytime."
+          },
+          "recovery": {
+            "label": "Account recovery",
+            "note": "Your recovery email: {email}. Keep access to it safe."
+          },
+          "comingLater": "Later you'll see where you're signed in, be able to end sessions and get backup codes."
         }
       },
       "comingSoon": {
