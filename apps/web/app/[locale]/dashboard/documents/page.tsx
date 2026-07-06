@@ -63,7 +63,7 @@ export default async function WorkerDocumentsPage({
         <Header t={t} />
         {/* Reports/exports work independently of the document-storage layer —
             keep them available even while readiness is preparing. */}
-        <ReportsExports t={t} />
+        <ReportsExports t={t} locale={locale} />
         <p
           className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"
           data-testid="documents-preparing"
@@ -101,7 +101,7 @@ export default async function WorkerDocumentsPage({
         {t("disclaimer")}
       </p>
 
-      <ReportsExports t={t} />
+      <ReportsExports t={t} locale={locale} />
 
       <DocsConsentToggle current={docsConsent} />
 
@@ -289,13 +289,16 @@ export default async function WorkerDocumentsPage({
 }
 
 /** Reports & exports (§8.8): the real, working print→PDF exports (Verified CV,
- *  Evidence Report) plus an HONEST format-status line (PDF available; Excel/Word
- *  preparing). No fake export buttons — unavailable formats are stated, not shown
- *  as clickable. Existing routes only; no duplicate report system. */
+ *  Evidence Report), the journal CSV download (quality-train PR I), plus an
+ *  HONEST format-status line. No fake export buttons — unavailable formats are
+ *  stated, not shown as clickable. Existing routes only; no duplicate report
+ *  system. The CSV entry is a plain anchor (a file download, not a page). */
 function ReportsExports({
   t,
+  locale,
 }: {
   t: Awaited<ReturnType<typeof getTranslations>>;
+  locale: string;
 }) {
   const exports = [
     { key: "cv", href: "/cv", label: t("reports.cv"), note: t("reports.cvNote") },
@@ -305,7 +308,16 @@ function ReportsExports({
       label: t("reports.evidence"),
       note: t("reports.evidenceNote"),
     },
+    {
+      key: "journal",
+      href: `/${locale}/dashboard/journal/export`,
+      label: t("reports.journal"),
+      note: t("reports.journalNote"),
+      download: true,
+    },
   ];
+  const cardClass =
+    "flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue";
   return (
     <section
       className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
@@ -316,17 +328,29 @@ function ReportsExports({
       </span>
       <p className="text-xs text-text-secondary">{t("reports.intro")}</p>
       <div className="grid gap-2 sm:grid-cols-2">
-        {exports.map((e) => (
-          <Link
-            key={e.key}
-            href={e.href as "/dashboard"}
-            data-testid={`documents-report-${e.key}`}
-            className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-          >
-            <span className="font-semibold">{e.label}</span>
-            <span className="text-xs text-text-muted">{e.note}</span>
-          </Link>
-        ))}
+        {exports.map((e) =>
+          e.download ? (
+            <a
+              key={e.key}
+              href={e.href}
+              data-testid={`documents-report-${e.key}`}
+              className={cardClass}
+            >
+              <span className="font-semibold">{e.label}</span>
+              <span className="text-xs text-text-muted">{e.note}</span>
+            </a>
+          ) : (
+            <Link
+              key={e.key}
+              href={e.href as "/dashboard"}
+              data-testid={`documents-report-${e.key}`}
+              className={cardClass}
+            >
+              <span className="font-semibold">{e.label}</span>
+              <span className="text-xs text-text-muted">{e.note}</span>
+            </Link>
+          ),
+        )}
       </div>
       <p
         className="font-mono text-[10px] uppercase tracking-label text-text-muted"

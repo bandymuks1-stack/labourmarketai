@@ -258,6 +258,18 @@ export default async function AccountPage({
           {tRoot("legal.accountSection.intro")}
         </p>
         <ul className="mt-3 flex flex-col gap-2">
+          {/* Privacy self-service (PR G): real export download + reviewed
+              deletion request live on /dashboard/privacy. */}
+          <li>
+            <Link
+              href="/dashboard/privacy"
+              data-testid="account-privacy-self-service-link"
+              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+            >
+              <span>{tRoot("privacySelfService.accountLink")}</span>
+              <span aria-hidden className="text-text-muted">→</span>
+            </Link>
+          </li>
           <li>
             <Link
               href="/about"

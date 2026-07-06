@@ -71,3 +71,16 @@ declined renders the scouting link, the conversation action requires
 `accepted` + passes the explicit grant, the eligibility enumeration
 carries `allowed_accepted_booking`, no expiry promise appears in booking
 copy, and the three locales stay in parity for the new keys.
+
+Expanded (booking lifecycle smoke guards, 2026-07-06): withdraw mounts
+exactly once and only in the outgoing `proposed` branch (the worker's
+incoming list has no withdraw affordance); accept/decline stays
+worker-list-only; the full 75-combination from×to×actor transition
+matrix is swept against exactly the documented table (default-closed);
+no server action can write `expired` (literal absent + the respond
+decision is type-narrowed to `accepted | declined`); booking migrations
+install no pg_cron/scheduler; every status renders a translated chip in
+all three locales; the lt/en/ru `bookings` namespaces expose an
+identical key set; and `countOwnerResponsesSince` gets behavioural edge
+cases (withdrawn/expired never count, NaN timestamps ignored, seenAt tie
+is not "new") in `lib/booking/booking-state.test.ts`.

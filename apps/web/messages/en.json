@@ -4086,6 +4086,43 @@
       "owner_confirmed": "Prices are confirmed, but nothing can be bought yet — payments are not enabled."
     }
   },
+  "privacySelfService": {
+    "title": "Privacy and your data",
+    "intro": "Download a copy of your data or file an account-deletion request.",
+    "accountLink": "My data: copy and deletion",
+    "backToAccount": "Back to account",
+    "export": {
+      "title": "A copy of my data",
+      "body": "Download your profile, work journal, skills and consent data as one JSON file.",
+      "includes": "The file contains only your own data: profile, consent history, worker card, journal entries, skills and your document list (no file contents, no other people's messages).",
+      "download": "Download my data (JSON)"
+    },
+    "deletion": {
+      "title": "Account deletion request",
+      "body": "This is a request a person reviews — this page deletes nothing immediately. After review you will be contacted at your account email.",
+      "confirmLabel": "I understand I am filing an account-deletion request and a person will review it.",
+      "noteLabel": "Note (optional)",
+      "submit": "File deletion request",
+      "submitted": "Request filed",
+      "submittedBody": "A person will review it and contact you at your account email.",
+      "unavailable": "Deletion requests are not being accepted yet — this feature is not switched on. You can download your data copy right now.",
+      "tooManyOpen": "You have too many open requests — wait until they are reviewed.",
+      "error": "Something went wrong. Try again."
+    },
+    "requests": {
+      "title": "Your filed requests",
+      "type": {
+        "data_export": "Data copy request",
+        "account_deletion": "Account deletion request"
+      },
+      "status": {
+        "in_review": "In review",
+        "needs_followup": "Needs follow-up",
+        "approved": "Approved",
+        "closed": "Closed"
+      }
+    }
+  },
   "legal": {
     "preparing": {
       "body": "Legal information is being prepared. Before any paid services or contractual relationship begins, it will be provided and updated.",
@@ -4153,7 +4190,7 @@
           "heading": "Your rights",
           "items": [
             "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
-            "Honest current state: these requests are handled manually. There is no self-service export or deletion button yet — contact us and a person will process your request.",
+            "Honest current state: you can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. Deletion is still a request a person reviews — there is no instant deletion button; contact us or file the request, and a person will process it.",
             "Where processing is based on consent, you can withdraw that consent at any time."
           ]
         },
@@ -4251,7 +4288,7 @@
         {
           "heading": "Export and deletion",
           "items": [
-            "Export and deletion requests are handled manually today: contact us and a person will process your request."
+            "You can download your own data as a JSON file and your work journal as a CSV file from your account. Deletion is handled as a reviewed request: nothing is deleted instantly — contact us and a person will process it."
           ]
         },
         {
@@ -5621,7 +5658,9 @@
       "cvNote": "Open and print / save as PDF",
       "evidence": "Evidence report",
       "evidenceNote": "Open and print / save as PDF",
-      "formatStatus": "PDF: available · Excel / Word: preparing"
+      "journal": "Work journal export",
+      "journalNote": "Download as CSV (opens in Excel)",
+      "formatStatus": "PDF: available · CSV: available · Excel / Word: preparing"
     },
     "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "The documents storage layer is not enabled in this environment yet.",

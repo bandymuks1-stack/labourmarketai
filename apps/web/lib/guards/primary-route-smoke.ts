@@ -78,7 +78,47 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   { id: "profile", urlPattern: "/dashboard/profile", sourceFile: "app/[locale]/dashboard/profile/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "journal", urlPattern: "/dashboard/journal", sourceFile: "app/[locale]/dashboard/journal/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "inbox", urlPattern: "/dashboard/inbox", sourceFile: "app/[locale]/dashboard/inbox/page.tsx", requiresAuth: true, kind: "role-flow" },
+
+  // Authenticated in-app surface expansion (route-smoke expansion v1).
+  // Same source-level smoke as the routes above: the guard asserts each page
+  // file exists (rename/delete regression) and the repo-wide dead-link /
+  // copy-leak scans already cover their component trees. No live session, no
+  // network, no DB — safe in secret-free CI.
+  { id: "bookings", urlPattern: "/dashboard/bookings", sourceFile: "app/[locale]/dashboard/bookings/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "communication", urlPattern: "/dashboard/communication", sourceFile: "app/[locale]/dashboard/communication/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Thread entry: dynamic segment. Source-level existence check is smoke-safe
+  // (no conversation id / data needed); a live render smoke of a real thread is
+  // deliberately out of scope (would require a DB-backed conversation).
+  { id: "communication-thread", urlPattern: "/dashboard/communication/[conversationId]", sourceFile: "app/[locale]/dashboard/communication/[conversationId]/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "marketplace", urlPattern: "/dashboard/marketplace", sourceFile: "app/[locale]/dashboard/marketplace/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "services", urlPattern: "/dashboard/services", sourceFile: "app/[locale]/dashboard/services/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "company-scouting", urlPattern: "/dashboard/company/scouting", sourceFile: "app/[locale]/dashboard/company/scouting/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "account", urlPattern: "/dashboard/account", sourceFile: "app/[locale]/dashboard/account/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "privacy", urlPattern: "/dashboard/privacy", sourceFile: "app/[locale]/dashboard/privacy/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "documents", urlPattern: "/dashboard/documents", sourceFile: "app/[locale]/dashboard/documents/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "reports-evidence", urlPattern: "/dashboard/reports/evidence", sourceFile: "app/[locale]/dashboard/reports/evidence/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "player-card", urlPattern: "/dashboard/player-card", sourceFile: "app/[locale]/dashboard/player-card/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "market-map", urlPattern: "/dashboard/market-map", sourceFile: "app/[locale]/dashboard/market-map/page.tsx", requiresAuth: true, kind: "role-flow" },
 ];
+
+/*
+ * Deliberately NOT added to PRIMARY_ROUTES (route-smoke expansion v1):
+ *
+ * - Live-render / HTTP smoke of any auth route: CI is secret-free (no DB, no
+ *   Supabase env, no session), so a fetch-based smoke would only ever see the
+ *   login redirect. The static source-level scan is the reliable mechanism.
+ * - `/dashboard/admin/*` pages: admin-only operator surfaces, not part of the
+ *   primary worker/company/agency/buyer product flow this guard protects.
+ * - `/dashboard/inbox/quick` and `/dashboard/inbox/report`: sub-entry points of
+ *   the already-covered inbox surface; covered transitively by the dead-link /
+ *   copy-leak scans of the whole app/ tree.
+ * - `/dashboard/projects/[id]` (+ `/operations`): requires a real project id to
+ *   mean anything beyond file existence; the list page can be added when
+ *   projects become a primary flow surface.
+ * - Landing / public marketing pages beyond the existing six: explicitly out of
+ *   scope for this expansion (owner directive — do not touch marketing pages).
+ */
 
 /** A single guard finding. `severity: "block"` fails the test + CI gate. */
 export interface Finding {

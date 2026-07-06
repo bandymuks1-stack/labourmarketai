@@ -27,6 +27,9 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
+    // Store taxonomy (readiness v2) — helps install-prompt + Play listing
+    // classification; purely descriptive, no capability claim.
+    categories: ["business", "productivity"],
     background_color: "#06070D",
     theme_color: "#06070D",
     icons: [

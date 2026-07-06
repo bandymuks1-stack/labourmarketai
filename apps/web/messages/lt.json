@@ -4086,6 +4086,43 @@
       "owner_confirmed": "Kainos patvirtintos, bet įsigyti dar negalima — mokėjimai neįjungti."
     }
   },
+  "privacySelfService": {
+    "title": "Privatumas ir tavo duomenys",
+    "intro": "Atsisiųsk savo duomenų kopiją arba pateik paskyros šalinimo užklausą.",
+    "accountLink": "Mano duomenys: kopija ir šalinimas",
+    "backToAccount": "Grįžti į paskyrą",
+    "export": {
+      "title": "Mano duomenų kopija",
+      "body": "Atsisiųsk savo profilio, darbo žurnalo, įgūdžių ir sutikimų duomenis vienu JSON failu.",
+      "includes": "Faile — tik tavo paties duomenys: profilis, sutikimų istorija, darbuotojo kortelė, žurnalo įrašai, įgūdžiai ir dokumentų sąrašas (be failų turinio, be kitų žmonių žinučių).",
+      "download": "Atsisiųsti mano duomenis (JSON)"
+    },
+    "deletion": {
+      "title": "Paskyros šalinimo užklausa",
+      "body": "Tai užklausa, kurią peržiūri žmogus — šis puslapis nieko neištrina iš karto. Peržiūrėjus užklausą su tavimi bus susisiekta šiuo paskyros el. paštu.",
+      "confirmLabel": "Suprantu, kad pateikiu paskyros šalinimo užklausą ir ją peržiūrės žmogus.",
+      "noteLabel": "Pastaba (nebūtina)",
+      "submit": "Pateikti šalinimo užklausą",
+      "submitted": "Užklausa pateikta",
+      "submittedBody": "Žmogus ją peržiūrės ir susisieks su tavimi paskyros el. paštu.",
+      "unavailable": "Šalinimo užklausos kol kas nepriimamos — funkcija dar neįjungta. Duomenų kopiją gali atsisiųsti jau dabar.",
+      "tooManyOpen": "Turi per daug atvirų užklausų — palauk, kol bus peržiūrėtos.",
+      "error": "Kažkas nepavyko. Pabandyk dar kartą."
+    },
+    "requests": {
+      "title": "Tavo pateiktos užklausos",
+      "type": {
+        "data_export": "Duomenų kopijos užklausa",
+        "account_deletion": "Paskyros šalinimo užklausa"
+      },
+      "status": {
+        "in_review": "Peržiūrima",
+        "needs_followup": "Reikia patikslinti",
+        "approved": "Patvirtinta",
+        "closed": "Užbaigta"
+      }
+    }
+  },
   "legal": {
     "preparing": {
       "body": "Teisinė informacija ruošiama. Prieš pradedant mokamas paslaugas ar sutartinius santykius ši informacija bus pateikta ir atnaujinta.",
@@ -4153,7 +4190,7 @@
           "heading": "Jūsų teisės",
           "items": [
             "Galite prašyti susipažinti su apie jus saugomais duomenimis, juos ištaisyti, gauti jų kopiją, apriboti jų naudojimą arba juos ištrinti.",
-            "Sąžininga dabartinė būsena: šie prašymai šiandien tvarkomi rankiniu būdu. Savitarnos eksporto ar ištrynimo mygtuko dar nėra — susisiekite su mumis, ir prašymą apdoros žmogus.",
+            "Sąžininga dabartinė būsena: savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Ištrynimas lieka žmogaus peržiūrimas prašymas — momentinio ištrynimo mygtuko nėra; susisiekite su mumis arba pateikite prašymą, ir jį apdoros žmogus.",
             "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti."
           ]
         },
@@ -4251,7 +4288,7 @@
         {
           "heading": "Eksportas ir ištrynimas",
           "items": [
-            "Eksporto ir ištrynimo prašymai šiandien tvarkomi rankiniu būdu: susisiekite su mumis, ir prašymą apdoros žmogus."
+            "Savo duomenis JSON failu ir darbo žurnalą CSV failu galite atsisiųsti iš savo paskyros. Ištrynimas tvarkomas kaip peržiūrimas prašymas: niekas neištrinama akimirksniu — susisiekite su mumis, ir prašymą apdoros žmogus."
           ]
         },
         {
@@ -5621,7 +5658,9 @@
       "cvNote": "Atidaryk ir spausdink / išsaugok kaip PDF",
       "evidence": "Įrodymų ataskaita",
       "evidenceNote": "Atidaryk ir spausdink / išsaugok kaip PDF",
-      "formatStatus": "PDF: galima · Excel / Word: ruošiama"
+      "journal": "Darbo žurnalo eksportas",
+      "journalNote": "Atsisiųsk kaip CSV (atsidaro su Excel)",
+      "formatStatus": "PDF: galima · CSV: galima · Excel / Word: ruošiama"
     },
     "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
     "needsMigration": "Dokumentų saugojimo sluoksnis šioje aplinkoje dar neįjungtas.",
