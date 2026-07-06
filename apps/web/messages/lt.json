@@ -5658,7 +5658,9 @@
       "cvNote": "Atidaryk ir spausdink / išsaugok kaip PDF",
       "evidence": "Įrodymų ataskaita",
       "evidenceNote": "Atidaryk ir spausdink / išsaugok kaip PDF",
-      "formatStatus": "PDF: galima · Excel / Word: ruošiama"
+      "journal": "Darbo žurnalo eksportas",
+      "journalNote": "Atsisiųsk kaip CSV (atsidaro su Excel)",
+      "formatStatus": "PDF: galima · CSV: galima · Excel / Word: ruošiama"
     },
     "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
     "needsMigration": "Dokumentų saugojimo sluoksnis šioje aplinkoje dar neįjungtas.",
