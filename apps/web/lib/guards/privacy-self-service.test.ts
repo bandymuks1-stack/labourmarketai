@@ -148,3 +148,44 @@ describe("deletion is a reviewed REQUEST — never a destructive action", () => 
     );
   });
 });
+
+describe("stale 'no export' claims cannot reappear in served catalogs", () => {
+  // Real self-service exports shipped (own-data JSON download + journal CSV),
+  // so privacy/legal/account copy may no longer claim that no export exists.
+  // Deletion honesty is separate (covered above): deletion stays a reviewed
+  // REQUEST and copy may truthfully say there is no INSTANT deletion.
+  const STALE_NO_EXPORT_CLAIMS: RegExp[] = [
+    /no self-service export/i,
+    /no data export/i,
+    /export unavailable/i,
+    /export or deletion button yet/i,
+    /savitarnos eksporto/i,
+    /eksporto .{0,30}mygtuko dar nėra/i,
+    /nėra eksporto/i,
+    /кнопки самостоятельного экспорта/i,
+    /экспорт недоступен/i,
+    /нет экспорта/i,
+  ];
+
+  it("lt/en/ru catalogs contain none of the stale claims", () => {
+    for (const loc of ["lt", "en", "ru"] as const) {
+      const blob = read(`messages/${loc}.json`);
+      for (const pattern of STALE_NO_EXPORT_CLAIMS) {
+        expect(
+          pattern.test(blob),
+          `${loc}.json: stale no-export claim /${pattern.source}/ found — real JSON + journal-CSV exports exist`,
+        ).toBe(false);
+      }
+    }
+  });
+
+  it("sanity: the guarded catalogs still exist and parse", () => {
+    for (const loc of ["lt", "en", "ru"] as const) {
+      const parsed = JSON.parse(read(`messages/${loc}.json`)) as Record<
+        string,
+        unknown
+      >;
+      expect(parsed.legal, `${loc}: legal namespace missing`).toBeTruthy();
+    }
+  });
+});
