@@ -68,11 +68,15 @@ export async function openBookingConversationAction(
   if (!counterpart) redirect(cannotOpen);
 
   const subject = booking!.role_text?.slice(0, 120) ?? null;
+  // Source relation v1: stamp the just-verified ACCEPTED booking row as this
+  // thread's typed source (type 'accepted_booking' — this caller's own exact
+  // type, no other). Passed only AFTER the gate above held.
   const result = await getOrCreateDirectConversation(
     counterpart,
     locale,
     subject,
     "allowed_accepted_booking",
+    { type: "accepted_booking", id: bookingId },
   );
   if (!result.ok) redirect(cannotOpen);
   redirect(`/${locale}/dashboard/communication/${result.data.id}`);

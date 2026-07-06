@@ -5028,7 +5028,13 @@
       "joinLabel": "Prisijungti prie pokalbio",
       "joinPending": "Jungiamasi..."
     },
-    "originalLanguage": "Originalas ({lang})"
+    "originalLanguage": "Originalas ({lang})",
+    "source": {
+      "scouting": "Dėl jūsų darbo užklausos (atranka)",
+      "demand_interest": "Dėl darbo užklausos (darbuotojo susidomėjimas)",
+      "accepted_service_request": "Dėl priimtos paslaugų užklausos",
+      "accepted_booking": "Dėl priimtos rezervacijos"
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Jūsų organizacija",

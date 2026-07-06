@@ -26,10 +26,20 @@
  *     direct-subject writer, guard-pinned), so the scope line honestly says
  *     the thread is about a work request instead of "context unspecified".
  *
+ *   - direct + a RESOLVED source context (conversation source relation v1):
+ *     the caller passed the RPC-verified `sourceContext` from
+ *     readConversationSourceContexts — the participant-scoped SECURITY
+ *     DEFINER reader that resolves the thread's typed source row LIVE (title
+ *     + route hint only, never a raw source id). Only then does the card get
+ *     a typed source label + optional link-back. NO guessing from subject
+ *     text — absent context renders exactly the neutral state above.
+ *
  * Pure + deterministic. Returns i18n keys RELATIVE to the `communication`
  * namespace, so the page (whose `t` is scoped to "communication") can render
  * them directly. No DB, no fake data.
  */
+
+import { isConversationSourceType } from "./conversation-source-model";
 
 export type ConversationKind = "direct" | "support" | "team";
 
@@ -86,6 +96,20 @@ export interface ConversationCardModel {
    * "did I reach out, or did someone reach out to me?"
    */
   readonly originKey: string | null;
+  /**
+   * Conversation source relation v1 — i18n key (under `communication`) for
+   * the typed source label (`source.scouting` etc.). Non-null ONLY when the
+   * caller passed an RPC-resolved `sourceContext` with a closed-set type and
+   * a non-empty live title for a DIRECT thread. `null` → render exactly
+   * today's card (no source line, no guessing).
+   */
+  readonly sourceKey: string | null;
+  /** The source row's display title, resolved LIVE by the reader RPC. `null`
+   *  whenever `sourceKey` is null. Never a raw id. */
+  readonly sourceTitle: string | null;
+  /** In-app link-back route for the source, or `null` when no route applies
+   *  for this viewer (then render the label without a link — no dead ends). */
+  readonly sourceHref: string | null;
 }
 
 /**
@@ -117,6 +141,17 @@ export function describeConversationCard(input: {
    *  (guard-pinned) — so the scope line can honestly label it as a
    *  work-request context. Ignored for support/team. */
   subject?: string | null;
+  /** Conversation source relation v1 — the RPC-RESOLVED source context from
+   *  readConversationSourceContexts (participant-scoped SECURITY DEFINER
+   *  reader; title + route only, never a raw source id). Absent/null →
+   *  render exactly today's neutral card. The display model NEVER derives a
+   *  source from subject text or any other guess — this input is the ONLY
+   *  way a card gains a typed source label. Ignored for support/team. */
+  sourceContext?: {
+    sourceType: string;
+    title: string;
+    href: string | null;
+  } | null;
 }): ConversationCardModel {
   const kind = normalizeKind(input.kind);
   const typeKey = `kind.${kind}`;
@@ -133,8 +168,27 @@ export function describeConversationCard(input: {
       scopeKnown: true,
       demandContext: false,
       originKey,
+      sourceKey: null,
+      sourceTitle: null,
+      sourceHref: null,
     };
   }
+
+  // Conversation source relation v1 — typed source label ONLY from the
+  // RPC-resolved context (closed-set type + non-empty live title), and only
+  // for DIRECT threads (the four gated stampers are all direct openers).
+  // A stale/missing source row never reaches here (the RPC omits it), and a
+  // malformed context degrades to null → exactly today's neutral card.
+  const src =
+    kind === "direct" &&
+    input.sourceContext &&
+    isConversationSourceType(input.sourceContext.sourceType) &&
+    input.sourceContext.title.trim().length > 0
+      ? input.sourceContext
+      : null;
+  const sourceKey = src ? `source.${src.sourceType}` : null;
+  const sourceTitle = src ? src.title.trim() : null;
+  const sourceHref = src ? (src.href ?? null) : null;
 
   // §8.2 demand context — REAL data only: a direct thread with a non-empty
   // subject was opened about a demand (the subject IS the demand title,
@@ -160,6 +214,9 @@ export function describeConversationCard(input: {
       scopeKnown: demandContext,
       demandContext,
       originKey,
+      sourceKey,
+      sourceTitle,
+      sourceHref,
     };
   }
 
@@ -178,5 +235,8 @@ export function describeConversationCard(input: {
     scopeKnown: demandContext,
     demandContext,
     originKey,
+    sourceKey,
+    sourceTitle,
+    sourceHref,
   };
 }

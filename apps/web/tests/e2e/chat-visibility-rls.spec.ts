@@ -357,6 +357,39 @@ test.describe("CHAT VISIBILITY — hostile negative tests (§4 default-closed)",
     }
   });
 
+  // ── 7. Source-context reader RPC (conversation source relation v1) ──────
+  test("non-participant probing conversation_source_context gets zero rows", async () => {
+    // The participant-scoped SECURITY DEFINER reader (migration
+    // 20260706210000 — DRAFT, owner-gated apply) must return NOTHING to a
+    // non-participant, even when they guess a real conversation id. While
+    // the migration is not applied locally the RPC is absent (42883) — the
+    // probe then errors with no data, which is the same zero-leak outcome
+    // the app's reader degrades to (empty map).
+    for (const [who, client] of [
+      ["colleague", s.colleague],
+      ["outsider", s.outsider],
+    ] as const) {
+      const probe = await client.rpc("conversation_source_context", {
+        p_conversation_ids: [s.conversationId],
+      });
+      expect(
+        (probe.data as unknown[] | null) ?? [],
+        `${who} must receive zero source-context rows`,
+      ).toHaveLength(0);
+    }
+  });
+
+  test("anon probing conversation_source_context gets zero rows", async () => {
+    // Execute is revoked from anon; and even if reached, auth.uid() is null
+    // → is_conversation_participant is false for every row. Either way:
+    // an error and/or zero rows — never data.
+    const anon = createClient(URL_, ANON, { auth: { persistSession: false } });
+    const probe = await anon.rpc("conversation_source_context", {
+      p_conversation_ids: [s.conversationId],
+    });
+    expect((probe.data as unknown[] | null) ?? []).toHaveLength(0);
+  });
+
   // ── 4. anon: zero access ────────────────────────────────────────────────
   test("anon role has zero access to all three tables", async () => {
     const anon = createClient(URL_, ANON, { auth: { persistSession: false } });

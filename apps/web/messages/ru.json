@@ -5028,7 +5028,13 @@
       "joinLabel": "Присоединиться к беседе",
       "joinPending": "Присоединяемся..."
     },
-    "originalLanguage": "Оригинал ({lang})"
+    "originalLanguage": "Оригинал ({lang})",
+    "source": {
+      "scouting": "По рабочему запросу (подбор)",
+      "demand_interest": "По рабочему запросу (интерес работника)",
+      "accepted_service_request": "По принятой заявке на услугу",
+      "accepted_booking": "По принятому бронированию"
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Ваша организация",

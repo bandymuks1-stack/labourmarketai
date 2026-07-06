@@ -11,6 +11,10 @@ import {
   rateCapWindowStartIso,
   type RateCap,
 } from "@/lib/communication/rate-caps";
+import {
+  normalizeConversationSourceHint,
+  type ConversationSourceHint,
+} from "@/lib/communication/conversation-source-model";
 
 /**
  * Communication v1 server actions. Read paths live in the page components
@@ -94,6 +98,16 @@ export async function createConversation(input: {
   kind?: "direct" | "support" | "team";
   participantProfileIds?: string[];
   locale: string;
+  /**
+   * Conversation source relation v1 (owner-approved): the OPTIONAL typed
+   * source stamp — which sanctioned context caller opened this thread and
+   * which row it came from. Passed ONLY by the four gated context callers
+   * AFTER their own server-side gate held (stamping cannot mint permission);
+   * the generic open action and the support launcher pass nothing.
+   * Default-closed: an off-set type or non-uuid id is dropped and the thread
+   * is created WITHOUT a stamp. Forward-only; existing rows stay NULL.
+   */
+  sourceHint?: ConversationSourceHint | null;
 }): Promise<CommunicationResult<{ id: string }>> {
   const supabase = await createClient();
   const {
@@ -164,11 +178,42 @@ export async function createConversation(input: {
   }
 
   // 1) Insert the conversation. created_by = auth.uid() is enforced by RLS.
-  const insertConv = await asAny(supabase)
+  //    The optional source stamp (source_type/source_id, migration
+  //    20260706210000 — DRAFT, owner-gated apply) rides the same INSERT
+  //    policy; normalizeConversationSourceHint is default-closed (off-set
+  //    type / non-uuid id → no stamp, never a bad row).
+  const sourceHint = normalizeConversationSourceHint(input.sourceHint);
+  let insertConv = await asAny(supabase)
     .from("conversations")
-    .insert({ subject, kind, created_by: user.id })
+    .insert(
+      sourceHint
+        ? {
+            subject,
+            kind,
+            created_by: user.id,
+            source_type: sourceHint.type,
+            source_id: sourceHint.id,
+          }
+        : { subject, kind, created_by: user.id },
+    )
     .select("id")
     .single();
+  // Honest degradation: the migration may be merged but NOT applied in
+  // production yet — the columns are then absent (42703 = undefined column).
+  // Fall back to the current no-source insert instead of breaking
+  // conversation creation; the thread simply stays unstamped (NULL), which
+  // is exactly the pre-migration behaviour.
+  if (
+    sourceHint &&
+    (insertConv.error?.code === "42703" ||
+      /source_type|source_id/.test(insertConv.error?.message ?? ""))
+  ) {
+    insertConv = await asAny(supabase)
+      .from("conversations")
+      .insert({ subject, kind, created_by: user.id })
+      .select("id")
+      .single();
+  }
   if (insertConv.error || !insertConv.data?.id) {
     console.error("[communication] create conversation failed:", insertConv.error?.message);
     return {

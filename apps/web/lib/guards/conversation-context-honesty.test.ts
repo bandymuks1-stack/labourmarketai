@@ -3,16 +3,20 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Conversation context honesty guard (quality-train PR E).
+ * Conversation context honesty guard (quality-train PR E; updated for the
+ * owner-approved conversation source relation v1).
  *
- * The conversations table has NO source relation (subject text only), so
- * the UI must never claim more context than the schema can prove:
+ * The neutral-label baseline must stay honest:
  * - the scope label must stay source-neutral (a subject may be a demand
  *   title, an offering title OR a booking role — "request title" was an
  *   overclaim);
- * - no heuristic source-type labelling (a guessed label can be wrong);
- * - the durable relation is a documented owner-gated migration proposal,
- *   not an improvisation.
+ * - no HEURISTIC source-type labelling (a guessed label can be wrong):
+ *   the ONLY way a card gains a typed source label is the RPC-resolved
+ *   sourceContext input (participant-scoped SECURITY DEFINER reader) —
+ *   never subject-text guessing;
+ * - the durable relation shipped as the documented owner-gated migration
+ *   (20260706210000, DRAFT needs-human-gate) — 0021 itself is untouched.
+ *   Deep pins for the relation live in conversation-source-relation.test.ts.
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -36,15 +40,19 @@ describe("scope copy claims only what the schema can prove", () => {
 });
 
 describe("no heuristic source labelling sneaks into the display model", () => {
-  it("conversation-display derives scope ONLY from kind + subject presence", () => {
+  it("conversation-display takes a source ONLY from the RPC-resolved input", () => {
     const display = read("lib/communication/conversation-display.ts");
     expect(display).toMatch(/scope\.demand/);
-    // No text-pattern guessing of where a thread came from.
-    expect(display).not.toMatch(/source_type|sourceType|guessSource|heuristic/i);
+    // The typed source label derives ONLY from input.sourceContext (the
+    // participant-scoped reader RPC's output) — never from raw columns and
+    // never from text-pattern guessing of where a thread came from.
+    expect(display).toMatch(/input\.sourceContext/);
+    expect(display).not.toMatch(/source_type|guessSource|heuristic/i);
+    expect(display).not.toMatch(/subject[^\n]*\.(match|test|includes)\(/);
   });
 });
 
-describe("the durable source relation stays an owner-gated proposal", () => {
+describe("the durable source relation stays owner-gated", () => {
   it("the proposal doc exists with the migration design + owner question", () => {
     const doc = read(
       "../../docs/launch/conversation-source-relation-proposal-v1.md",
@@ -55,9 +63,10 @@ describe("the durable source relation stays an owner-gated proposal", () => {
     expect(doc).toMatch(/Owner decision needed/);
   });
 
-  it("no conversations source columns exist in migrations yet (nothing improvised)", () => {
-    // The conversations table gains source columns only through the
-    // owner-gated PR the proposal describes.
+  it("0021 stays untouched — the columns arrive only via the gated migration", () => {
+    // The conversations table gains source columns ONLY through the
+    // dedicated owner-gated migration (20260706210000, needs-human-gate) —
+    // never by editing the applied 0021 baseline.
     const mig = read("../../supabase/migrations/0021_communication.sql");
     expect(mig).not.toMatch(/source_type/);
   });

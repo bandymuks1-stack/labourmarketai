@@ -101,11 +101,15 @@ export async function requestWorkerConversationAction(input: {
   // The §8.1 permission grant is the just-verified Step 4A gate (owner +
   // shortlisted + contactable) — passed explicitly as the permission state.
   const subject = (demand?.title as string | null)?.slice(0, 120) ?? null;
+  // Source relation v1: stamp the just-verified demand row as this thread's
+  // typed source (type 'scouting' — this caller's own exact type, no other).
+  // Passed only AFTER the Step 4A gate held above.
   const result = await getOrCreateDirectConversation(
     workerProfileId,
     locale,
     subject,
     "allowed_scouting_shortlist",
+    { type: "scouting", id: requestId },
   );
   if (!result.ok) return { ok: false, reason: "error" };
   return { ok: true, conversationId: result.data.id };

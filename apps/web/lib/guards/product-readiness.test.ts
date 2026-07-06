@@ -1677,7 +1677,14 @@ describe("no migration files added by this sprint", () => {
     // Bumped 112 -> 113 for the privacy-request intake (20260706150000,
     // quality-train PR G) — one NEW-name gated RPC on the EXISTING
     // customer_requests intake, help-request twin; DRAFT needs-human-gate.
-    const SPRINT_BASELINE = 113;
+    // Bumped 113 -> 114 for the owner-approved conversation source relation
+    // (20260706210000) — two NULLABLE columns on conversations (closed
+    // CHECK set, no FK, no backfill, existing rows stay NULL) + ONE
+    // participant-scoped SECURITY DEFINER reader RPC
+    // (conversation_source_context: title + route hint only, raw source_id
+    // never returned); DRAFT needs-human-gate, owner-gated apply; rollback
+    // drops only the function and the two columns.
+    const SPRINT_BASELINE = 114;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

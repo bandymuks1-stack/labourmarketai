@@ -9,6 +9,7 @@ import { FeatureNote } from "@/components/app/feature-note";
 import { createClient } from "@/lib/supabase/server";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
+import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
 import { getUnreadConversationIds } from "@/lib/communication/unread";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
@@ -76,6 +77,15 @@ export default async function CommunicationListPage({
   // Empty map (→ honest restricted chips) until the owner applies the
   // migration or when no identity is permitted. Never a contact channel.
   const counterpartNames = await readCounterpartIdentities(
+    conversations.map((c) => c.id),
+  );
+
+  // Conversation source relation v1 — typed source context (which booking /
+  // service request / demand a thread came from), via the participant-scoped
+  // reader RPC only. Empty map (→ exactly today's neutral labels) until the
+  // owner applies the migration or when a thread carries no relation. The
+  // raw source id never reaches this page.
+  const sourceContexts = await readConversationSourceContexts(
     conversations.map((c) => c.id),
   );
 
@@ -178,12 +188,18 @@ export default async function CommunicationListPage({
               // action), so the scope line can honestly say which work
               // request the thread is about.
               subject: c.subject,
+              // Source relation v1 — RPC-resolved typed source (or null →
+              // the card renders exactly as before).
+              sourceContext: sourceContexts.get(c.id) ?? null,
             });
             return (
-              <li key={c.id}>
+              <li
+                key={c.id}
+                className="card-border flex flex-col gap-1 p-4 transition-colors hover:border-brand-blue"
+              >
                 <Link
                   href={`/dashboard/communication/${c.id}`}
-                  className="card-border flex flex-col gap-1 p-4 transition-colors hover:border-brand-blue"
+                  className="flex flex-col gap-1"
                   data-testid={`conversation-row-${c.id}`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -264,6 +280,33 @@ export default async function CommunicationListPage({
                     )}
                   </div>
                 </Link>
+                {/* Source relation v1 — typed source line, rendered ONLY when
+                    the participant-scoped RPC resolved a live source row
+                    (never guessed from the subject). A SIBLING of the card
+                    link (nested anchors are invalid HTML). With a route for
+                    this viewer it is a real link-back; without one it is a
+                    plain label — no dead ends, no fake state. */}
+                {card.sourceKey && (
+                  <div className="flex flex-wrap items-center gap-x-1.5 text-[11px]">
+                    {card.sourceHref ? (
+                      <Link
+                        href={card.sourceHref as "/dashboard"}
+                        className="text-brand-blue hover:underline"
+                        data-testid={`conversation-source-${c.id}`}
+                        data-source-linked="true"
+                      >
+                        {t(card.sourceKey)}: {card.sourceTitle}
+                      </Link>
+                    ) : (
+                      <span
+                        className="text-text-secondary"
+                        data-testid={`conversation-source-${c.id}`}
+                      >
+                        {t(card.sourceKey)}: {card.sourceTitle}
+                      </span>
+                    )}
+                  </div>
+                )}
               </li>
             );
           })}

@@ -5028,7 +5028,13 @@
       "joinLabel": "Join conversation",
       "joinPending": "Joining..."
     },
-    "originalLanguage": "Original ({lang})"
+    "originalLanguage": "Original ({lang})",
+    "source": {
+      "scouting": "About a work request (scouting)",
+      "demand_interest": "About a work request (worker interest)",
+      "accepted_service_request": "About an accepted service request",
+      "accepted_booking": "About an accepted booking"
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
