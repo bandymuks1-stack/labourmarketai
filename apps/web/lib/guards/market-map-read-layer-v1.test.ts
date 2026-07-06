@@ -179,6 +179,11 @@ describe("NO new DB migration in this PR", () => {
     // per-user seen table + gated upsert RPC, mirrors the marketplace seen
     // twin exactly; DRAFT, @human-gate-approved, owner-gated apply
     // (audit PR5: booking responses were silent for the proposer).
-    expect(count).toBeLessThanOrEqual(112);
+    // Bumped 112 -> 113 for the privacy-request intake (20260706150000,
+    // quality-train PR G) — one NEW-name gated RPC
+    // (submit_privacy_request_v1) on the EXISTING customer_requests intake,
+    // exact twin of the help-request RPC; DRAFT, needs-human-gate,
+    // owner-gated apply; nothing destructive, no notification machinery.
+    expect(count).toBeLessThanOrEqual(113);
   });
 });
