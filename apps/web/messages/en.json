@@ -4190,7 +4190,7 @@
           "heading": "Your rights",
           "items": [
             "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
-            "Honest current state: these requests are handled manually. There is no self-service export or deletion button yet — contact us and a person will process your request.",
+            "Honest current state: you can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. Deletion is still a request a person reviews — there is no instant deletion button; contact us or file the request, and a person will process it.",
             "Where processing is based on consent, you can withdraw that consent at any time."
           ]
         },
@@ -4288,7 +4288,7 @@
         {
           "heading": "Export and deletion",
           "items": [
-            "Export and deletion requests are handled manually today: contact us and a person will process your request."
+            "You can download your own data as a JSON file and your work journal as a CSV file from your account. Deletion is handled as a reviewed request: nothing is deleted instantly — contact us and a person will process it."
           ]
         },
         {
