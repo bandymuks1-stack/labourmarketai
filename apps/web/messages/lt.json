@@ -222,7 +222,7 @@
     },
     "agency": {
       "name": "Partnerio paslaugos",
-      "purpose": "Siūlykite kandidatus ar komandas ir ieškokite užsakymų."
+      "purpose": "Siūlykite kandidatus ar komandas ir ieškokite darbo užklausų."
     },
     "buyer": {
       "name": "Mano užklausos",
@@ -400,7 +400,7 @@
       "title": "Operacinis sluoksnis jungiasi su",
       "intro": "Žemėlapis rodo, kur kas yra — tvarkyk tai šiose srityse.",
       "marketplace": "Turgus",
-      "marketplaceNote": "Paslaugos ir užsakymai",
+      "marketplaceNote": "Paslaugos ir užklausos",
       "opportunities": "Galimybės",
       "opportunitiesNote": "Jums tinkantis darbas",
       "bookings": "Planas ir rezervacijos",
@@ -1312,7 +1312,7 @@
       "pilotDisclaimer": "Kandidatų tikrinimas nedaromas automatiškai. Niekas netampa viešu be jūsų sprendimo. Galite ramiai paruošti pasiūlymą — jis iškart išsaugomas ir lieka privatus.",
       "firstAction": {
         "title": "Sukurti kandidatų / paslaugų pasiūlymo juodraštį",
-        "body": "Pirmas naudingas veiksmas: aprašykite, kokius darbuotojus galite pasiūlyti arba kokių užsakymų ieškote. Juodraštis bus privatus, prieinamas tik jums."
+        "body": "Pirmas naudingas veiksmas: aprašykite, kokius darbuotojus galite pasiūlyti arba kokių darbo užklausų ieškote. Juodraštis bus privatus, prieinamas tik jums."
       },
       "draftForm": {
         "field": {
@@ -2380,7 +2380,7 @@
       "description": "Jūsų įmonė: komandų, projektų ir poreikių valdymas. Bus įjungta vėliau."
     },
     "agency": {
-      "description": "Įmonės veikla — siūlyti kandidatus ar komandas ir ieškoti užsakymų. Bus įjungta vėliau."
+      "description": "Įmonės veikla — siūlyti kandidatus ar komandas ir ieškoti darbo užklausų. Bus įjungta vėliau."
     },
     "customer": {
       "description": "Veiksmas — pateikti ir valdyti užklausas dėl paslaugų, specialistų ar komandų. Bus įjungta vėliau."
@@ -2521,7 +2521,7 @@
     },
     "customer_workspace": {
       "label": "Pirkėjo erdvė",
-      "description": "Paslaugų užsakymo ir ataskaitų erdvė klientams."
+      "description": "Paslaugų užklausų ir ataskaitų erdvė klientams."
     },
     "document_records": {
       "label": "Dokumentų įrašai",
@@ -3424,8 +3424,8 @@
           "proofs": "Tuščia. Veiklos istorija ir klientų atsiliepimai bus įjungti vėliau."
         },
         "customer": {
-          "seek": "Tuščia. Paslaugų užsakymo paieška bus įjungta vėliau.",
-          "proofs": "Tuščia. Užsakymų istorija ir atsiliepimai bus įjungti vėliau."
+          "seek": "Tuščia. Paslaugų užklausų paieška bus įjungta vėliau.",
+          "proofs": "Tuščia. Užklausų istorija ir atsiliepimai bus įjungti vėliau."
         },
         "discover": "Atrasimo srautas bus įjungtas vėliau.",
         "search": "Detali paieška bus įjungta vėliau.",
@@ -4797,11 +4797,11 @@
     },
     "connections": {
       "title": "Kaip susijungia turgus",
-      "intro": "Užklausa ar užsakymas keliauja per likusią sistemą.",
+      "intro": "Užklausa keliauja per likusią sistemą.",
       "matching": "Galimybės",
       "matchingNote": "Užklausa randa tinkamus žmones",
       "calendar": "Planas ir rezervacijos",
-      "calendarNote": "Patvirtintas užsakymas tampa rezervacija",
+      "calendarNote": "Planuokite darbus ir rezervacijas",
       "map": "Žemėlapis",
       "mapNote": "Kur vyksta darbas ir paslaugos",
       "diary": "Darbo žurnalas",
@@ -6100,8 +6100,8 @@
     "connections": {
       "title": "Planavimas susijęs su",
       "intro": "Rezervacija yra tavo plano dalis. Štai sritys, su kuriomis ji susijusi.",
-      "marketplace": "Turgaus užsakymai",
-      "marketplaceNote": "Užklausos ir patvirtinti užsakymai",
+      "marketplace": "Turgaus užklausos",
+      "marketplaceNote": "Paslaugų užklausos ir jų būsenos",
       "map": "Žemėlapis",
       "mapNote": "Kur vyksta darbas ir rezervacijos",
       "diary": "Darbo žurnalas",
