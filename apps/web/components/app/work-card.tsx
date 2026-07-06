@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { WorkCardData } from "@/lib/worker/work-card";
 import { deriveWorkCardState, type WorkDim } from "@/lib/worker/work-card-state";
 import { WorkCardEditor, type WorkCardLabels } from "./work-card-editor";
+import { WorkCardMissingChip } from "./work-card-missing-chip";
 import { EmployerPreview } from "./employer-preview";
 import { AvatarDisplay } from "./avatar-display";
 import { ReadinessRing } from "./readiness-ring";
@@ -373,18 +374,15 @@ export async function WorkCard({
             {missing.map((dim) => (
               // Dead-UI rule A: a "+" chip is a promise — it must act. Page
               // dims link to their fill surface; inline dims (availability/
-              // location/pay) jump to the editor on this card (#work-card).
-              <Link
+              // location/pay) OPEN the WorkCardEditor on this card (they used
+              // to self-anchor to #work-card and do nothing — audit PR4).
+              <WorkCardMissingChip
                 key={dim}
-                href={(PAGE_TARGET[dim] ?? "#work-card") as "/dashboard"}
-                data-testid={`work-card-missing-${dim}`}
+                href={PAGE_TARGET[dim] ?? null}
+                testid={`work-card-missing-${dim}`}
                 title={tw(`dim.${dim}.missing`)}
-                aria-label={tw(`dim.${dim}.missing`)}
-                className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-orange/30 bg-brand-orange/5 px-2.5 py-1 text-[11px] text-brand-orange transition-colors hover:border-brand-orange hover:bg-brand-orange/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-              >
-                <span aria-hidden>+</span>
-                {tw(`dim.${dim}.label`)}
-              </Link>
+                label={tw(`dim.${dim}.label`)}
+              />
             ))}
           </div>
         </div>

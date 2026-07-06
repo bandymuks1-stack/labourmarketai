@@ -68,8 +68,12 @@ describe("3. readiness incomplete rows act", () => {
   it("worker readiness panel unmet rows are Links (pre-existing model, pinned)", () => {
     expect(readinessPanel).toMatch(/<Link[\s\S]{0,400}ArrowRight/);
   });
-  it("work-card '+ missing' chips are Links to their fill surface", () => {
-    expect(workCard).toMatch(/PAGE_TARGET\[dim\] \?\? "#work-card"/);
+  it("work-card '+ missing' chips act: page dims link, inline dims open the editor", () => {
+    // Audit PR4: the "#work-card" self-anchor fallback (a no-op scroll) is
+    // gone — inline dims dispatch the editor-open event via the shared chip.
+    expect(workCard).toMatch(/PAGE_TARGET\[dim\] \?\? null/);
+    expect(workCard).toMatch(/WorkCardMissingChip/);
+    expect(workCard).not.toMatch(/"#work-card"/);
     expect(workCard).toMatch(/id="work-card"/);
   });
 });
@@ -162,7 +166,9 @@ describe("10+11. tap targets and no payment work", () => {
   it("new interactive tiles/chips carry mobile-safe min-height", () => {
     expect(playerCard).toMatch(/min-h-11 flex-col gap-0\.5 rounded-md/);
     expect(workCard).toMatch(/min-h-11 flex-col gap-0\.5 rounded-md/);
-    expect(workCard).toMatch(/min-h-11 items-center gap-1 rounded-md border border-brand-orange/);
+    // The missing-dim chip moved into its own shared component (audit PR4).
+    const missingChip = read("components/app/work-card-missing-chip.tsx");
+    expect(missingChip).toMatch(/min-h-11 items-center gap-1 rounded-md border border-brand-orange/);
   });
   it("no payment strings entered any touched file", () => {
     for (const src of [workCard, playerCard, adminPage, companyPage, mapShell, notifPanel]) {

@@ -48,13 +48,18 @@ const ROLLBACK =
 // ── 1. Permission states are enumerated + default-closed ────────────────
 
 describe("§8.1 permission states — enumerated, no silent drift", () => {
-  it("the enumeration is EXACTLY the five agreed states", () => {
+  it("the enumeration is EXACTLY the six agreed states", () => {
+    // allowed_accepted_service_request added in audit PR4 (accepted
+    // marketplace rows open a conversation) — a deliberate, reviewed
+    // extension of the §8.1 enumeration, verified server-side by
+    // lib/marketplace/service-request-conversation.ts.
     expect([...CONTACT_PERMISSION_STATES].sort()).toEqual(
       [
         "allowed_admin",
         "allowed_engagement",
         "allowed_existing_conversation",
         "allowed_scouting_shortlist",
+        "allowed_accepted_service_request",
         "no_permission",
       ].sort(),
     );
@@ -143,6 +148,9 @@ describe("no contact without permission — the create path is gated", () => {
     expect(callers.sort()).toEqual([
       "lib/communication/open-conversation-action.ts",
       "lib/communication/request-worker-conversation.ts",
+      // Audit PR4 — accepted-service-request grant, verified server-side in
+      // the action before the conversation opens.
+      "lib/marketplace/service-request-conversation.ts",
     ]);
   });
 });

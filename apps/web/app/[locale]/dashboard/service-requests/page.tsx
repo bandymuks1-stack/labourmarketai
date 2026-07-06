@@ -74,6 +74,7 @@ export default async function ServiceRequestsPage({
     accept: t("accept"),
     decline: t("decline"),
     withdraw: t("withdraw"),
+    messageCta: t("messageCta"),
     errorGeneric: t("errorGeneric"),
     duplicate: t("duplicate"),
     requesterMessage: t("requesterMessage"),

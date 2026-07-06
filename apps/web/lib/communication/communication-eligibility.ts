@@ -61,6 +61,11 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *   - allowed_scouting_shortlist — the Step 4A scouting gate held: the
  *     caller owns the demand, the worker is shortlisted (not `not_fit`),
  *     and the worker is contactable (evaluateCommunicationRequest above).
+ *   - allowed_accepted_service_request — the marketplace loop's one real
+ *     mutual commitment: the caller is buyer or provider of a
+ *     service_offering_request whose status is `accepted` (verified
+ *     server-side by the marketplace action, passed as a grant — audit PR4:
+ *     accepted rows must open the next step).
  *   - allowed_admin — the caller carries the real admin signal (support /
  *     matching workbench paths; admin participation is already RLS-visible).
  *   - no_permission — the default. No relationship → no contact.
@@ -73,6 +78,7 @@ export type ContactPermissionState =
   | "allowed_existing_conversation"
   | "allowed_engagement"
   | "allowed_scouting_shortlist"
+  | "allowed_accepted_service_request"
   | "allowed_admin"
   | "no_permission";
 
@@ -81,6 +87,7 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_existing_conversation",
   "allowed_engagement",
   "allowed_scouting_shortlist",
+  "allowed_accepted_service_request",
   "allowed_admin",
   "no_permission",
 ];

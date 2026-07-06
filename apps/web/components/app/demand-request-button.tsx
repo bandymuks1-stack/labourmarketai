@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -69,6 +71,7 @@ export function DemandRequestButton({
   stepTitles: [string, string, string];
 }) {
   const t = useTranslations("auth.dashboard.wow.demand");
+  const router = useRouter();
   // Structured field labels reuse the existing 3-locale catalogues (no new
   // 11-locale keys): companyNeed for the field labels + accommodation options,
   // labourMarket for the country names.
@@ -211,6 +214,10 @@ export function DemandRequestButton({
             ? "needsMigration"
             : "error",
       );
+      // Refresh server components so the read-back list below shows the new
+      // request immediately — it used to stay stale until a manual reload
+      // (audit PR4: "demand submit success is a dead end").
+      if (res.ok) router.refresh();
     } catch {
       setState("error");
     }
@@ -319,6 +326,15 @@ export function DemandRequestButton({
           ✓ {t(`${key}.done`)}
         </p>
         <p className="text-xs text-text-secondary">{t("form.submittedHeading")}</p>
+        {/* The exact next step — the scouting room where matches + interest for
+            this need appear (audit PR4: success used to be a dead-end panel). */}
+        <Link
+          href={"/dashboard/company/scouting" as "/dashboard"}
+          className="w-fit text-sm font-medium text-brand-blue hover:underline"
+          data-testid="demand-done-scouting-link"
+        >
+          {t("form.doneScoutingLink")} →
+        </Link>
         {summaryList}
         {estimateSummary}
       </div>

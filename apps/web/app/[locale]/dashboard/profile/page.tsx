@@ -20,6 +20,7 @@ import {
 import { MessageButton } from "@/components/app/message-button";
 import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { SkillClarifySection } from "@/components/app/skill-clarify-section";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
@@ -602,6 +603,10 @@ export default async function ProfilePage({
           work-history warehouse; the FULL work records live in Mano CV (linked
           here), not duplicated open on the profile. The canonical
           CapabilityProfileSection mount + order is preserved. */}
+      {/* Deep links (#capabilities) must land on an OPEN disclosure — six
+          senders across work-card, journal composer, player card and readiness
+          steps link this anchor (audit PR4). */}
+      <DetailsHashOpener targetId="capabilities" />
       <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
         <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">

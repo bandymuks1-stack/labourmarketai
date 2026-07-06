@@ -36,14 +36,17 @@ describe("Guard: requireRoleOrRedirect helper is correct", () => {
     expect(src).toMatch(/redirect\(`\/\$\{locale\}\/auth\/login`\)/);
   });
 
-  it("redirects users WITHOUT the expected role to /dashboard (not 403)", () => {
+  it("redirects users WITHOUT the expected role to /dashboard with an explanation (not 403, never silent)", () => {
     // Role choice is not a prison — users without the role should be
     // sent to the overview where the role switcher can help, not get
-    // a hard error page.
+    // a hard error page. Audit PR4: the bounce carries ?notice= so the
+    // overview can render an honest banner instead of a silent teleport.
     expect(src).toMatch(
       /heldRoles\.has\(expectedRole\)/,
     );
-    expect(src).toMatch(/redirect\(`\/\$\{locale\}\/dashboard`\)/);
+    expect(src).toMatch(
+      /redirect\(`\/\$\{locale\}\/dashboard\?notice=needs_\$\{expectedRole\}_role`\)/,
+    );
   });
 
   it("reads role from profile_roles, NOT profiles.active_role", () => {

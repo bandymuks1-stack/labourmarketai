@@ -6,6 +6,7 @@ import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { FeatureNote } from "@/components/app/feature-note";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
+import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
@@ -437,31 +438,53 @@ export default async function CompanyDashboardPage({
             {[
               {
                 key: "roster",
-                href: "/dashboard/company#company-team" as const,
+                href: "/dashboard/company#company-team" as string | null,
               },
               {
+                // The demand wizard renders only in the ORG dashboard branch;
+                // the action switches the active workspace first so the
+                // anchor target always exists (audit PR4).
                 key: "offer",
-                href: "/dashboard#demand-intake" as const,
+                href: null as string | null,
               },
               {
                 key: "scouting",
-                href: "/dashboard/company/scouting" as const,
+                href: "/dashboard/company/scouting" as string | null,
               },
-            ].map((a) => (
-              <Link
-                key={a.key}
-                href={a.href as "/dashboard"}
-                data-testid={`company-agency-mode-action-${a.key}`}
-                className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-              >
-                <span className="font-semibold">
-                  {t(`agencyMode.actions.${a.key}.label`)}
-                </span>
-                <span className="text-xs text-text-muted">
-                  {t(`agencyMode.actions.${a.key}.note`)}
-                </span>
-              </Link>
-            ))}
+            ].map((a) => {
+              const body = (
+                <>
+                  <span className="font-semibold">
+                    {t(`agencyMode.actions.${a.key}.label`)}
+                  </span>
+                  <span className="text-xs text-text-muted">
+                    {t(`agencyMode.actions.${a.key}.note`)}
+                  </span>
+                </>
+              );
+              const className =
+                "flex min-h-[3.25rem] w-full flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-left text-sm text-text-primary transition-colors hover:border-brand-blue";
+              return a.href ? (
+                <Link
+                  key={a.key}
+                  href={a.href as "/dashboard"}
+                  data-testid={`company-agency-mode-action-${a.key}`}
+                  className={className}
+                >
+                  {body}
+                </Link>
+              ) : (
+                <form key={a.key} action={openDemandIntakeAsCompanyAction.bind(null, locale)}>
+                  <button
+                    type="submit"
+                    data-testid={`company-agency-mode-action-${a.key}`}
+                    className={className}
+                  >
+                    {body}
+                  </button>
+                </form>
+              );
+            })}
           </div>
           <p
             className="text-[11px] leading-relaxed text-text-muted"
@@ -727,14 +750,19 @@ export default async function CompanyDashboardPage({
             </p>
             {/* The draft is a dead end without this: the REAL submit path
                 (customer_requests, status=submitted) is the wizard on the
-                root dashboard (audit finding F-D1). */}
-            <Link
-              href={"/dashboard#demand-intake" as "/dashboard"}
-              className="w-fit rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
-              data-testid="company-request-submit-real-link"
-            >
-              {t("firstAction.submitRealCta")} →
-            </Link>
+                root dashboard (audit finding F-D1). The wizard renders only
+                in the ORG branch, so the action switches the active
+                workspace to company first — a plain link dead-ended for
+                held-company users whose active role was worker (audit PR4). */}
+            <form action={openDemandIntakeAsCompanyAction.bind(null, locale)}>
+              <button
+                type="submit"
+                className="w-fit rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+                data-testid="company-request-submit-real-link"
+              >
+                {t("firstAction.submitRealCta")} →
+              </button>
+            </form>
           </div>
         ) : (
           <p

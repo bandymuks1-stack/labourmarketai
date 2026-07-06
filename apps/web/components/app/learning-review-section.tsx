@@ -2,12 +2,19 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Check, X, Sparkles } from "lucide-react";
+import { Link } from "@/lib/i18n/navigation";
 import {
   applyAutoConfirmation,
   setReviewItemStatus,
 } from "@/lib/learning/learning";
-import type { LearningPolicyRow, ReviewItemRow, ReviewStatus } from "@/lib/learning/learning-shared";
+import type {
+  LearningPolicyRow,
+  ReviewItemRow,
+  ReviewStatus,
+  SuggestionKind,
+} from "@/lib/learning/learning-shared";
 
 /**
  * W6 — Human-in-loop learning review surface (Phase 1). Real data only — every
@@ -29,6 +36,12 @@ export type LearningLabels = {
   empty: string;
   workerHeading: string;
   workerIntro: string;
+  kind: Record<SuggestionKind, string>;
+  skillFallback: string;
+  workerFallback: string;
+  noteLabel: string;
+  managerContextLink: string;
+  ownContextLink: string;
   manager: {
     queueHeading: string;
     approve: string;
@@ -57,15 +70,30 @@ export function LearningReviewSection({
   policies,
   needsMigration,
   labels,
+  viewerWorkerId,
 }: {
   initialItems: ReviewItemRow[];
   policies: LearningPolicyRow[];
   needsMigration: boolean;
   labels: LearningLabels;
+  /** The caller's own workers.id (null when the viewer has no worker profile).
+   *  Rows about the viewer are transparency rows — never reviewable by them. */
+  viewerWorkerId: string | null;
 }) {
   const router = useRouter();
+  const tSkillNames = useTranslations("skillNames");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const skillName = (slug: string | null) =>
+    slug ? (tSkillNames.has(slug) ? tSkillNames(slug) : slug) : labels.skillFallback;
+
+  const ownItems = initialItems.filter(
+    (i) => viewerWorkerId !== null && i.subjectWorkerId === viewerWorkerId,
+  );
+  const orgItems = initialItems.filter(
+    (i) => viewerWorkerId === null || i.subjectWorkerId !== viewerWorkerId,
+  );
 
   if (needsMigration) {
     return (
@@ -120,10 +148,41 @@ export function LearningReviewSection({
         <p className="mt-2 text-xs text-text-muted">{labels.manager.note}</p>
       </section>
 
-      {/* Review queue */}
+      {/* Worker transparency list — the viewer's OWN rows. Read-only by design:
+          a subject never reviews suggestions about themselves; the confirmation
+          authority lives with the org manager. */}
+      {ownItems.length > 0 && (
+        <section className="space-y-2" data-testid="learning-own-section">
+          <h3 className="text-sm font-medium text-text-secondary">{labels.workerHeading}</h3>
+          <p className="text-xs text-text-muted">{labels.workerIntro}</p>
+          <ul className="space-y-2">
+            {ownItems.map((item) => (
+              <li
+                key={item.id}
+                data-testid="learning-own-row"
+                className="flex flex-col gap-1.5 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+              >
+                <ItemSummary item={item} labels={labels} skillName={skillName} />
+                {item.journalEntryId && (
+                  <Link
+                    href={"/dashboard/journal" as "/dashboard"}
+                    className="text-xs text-brand-blue hover:underline"
+                  >
+                    {labels.ownContextLink}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Manager review queue — rows about OTHER workers in the caller's org.
+          Every row states WHAT is suggested, ABOUT WHOM, and links the journal
+          review context before offering a decision (never a blind approve). */}
       <section className="space-y-2">
         <h3 className="text-sm font-medium text-text-secondary">{labels.manager.queueHeading}</h3>
-        {initialItems.length === 0 ? (
+        {orgItems.length === 0 ? (
           <div
             data-testid="learning-empty"
             className="rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
@@ -132,26 +191,29 @@ export function LearningReviewSection({
           </div>
         ) : (
           <ul className="space-y-2">
-            {initialItems.map((item) => (
+            {orgItems.map((item) => (
               <li
                 key={item.id}
                 data-testid="learning-review-row"
-                className="flex items-center justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+                className="flex flex-col gap-2 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
               >
-                <div className="min-w-0">
-                  <span
-                    className={`inline-block rounded-full border px-2 py-0.5 text-xs ${STATUS_RING[item.status]}`}
+                <ItemSummary item={item} labels={labels} skillName={skillName} />
+                {item.journalEntryId && (
+                  <Link
+                    href={"/dashboard/inbox" as "/dashboard"}
+                    className="text-xs text-brand-blue hover:underline"
+                    data-testid="learning-review-context-link"
                   >
-                    {labels.manager.statusLabel[item.status]}
-                  </span>
-                </div>
+                    {labels.managerContextLink}
+                  </Link>
+                )}
                 {item.status === "pending" && (
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       disabled={pending}
                       onClick={() => review(item.id, "approved")}
-                      className="inline-flex items-center gap-1 rounded-md border border-brand-blue/40 px-2 py-1 text-xs text-brand-blue disabled:opacity-50"
+                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue disabled:opacity-50"
                     >
                       <Check className="h-3 w-3" /> {labels.manager.approve}
                     </button>
@@ -159,7 +221,7 @@ export function LearningReviewSection({
                       type="button"
                       disabled={pending}
                       onClick={() => review(item.id, "rejected")}
-                      className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2 py-1 text-xs text-text-muted disabled:opacity-50"
+                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
                     >
                       <X className="h-3 w-3" /> {labels.manager.reject}
                     </button>
@@ -167,7 +229,7 @@ export function LearningReviewSection({
                       type="button"
                       disabled={pending}
                       onClick={() => applyPolicy(item.id)}
-                      className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2 py-1 text-xs text-text-secondary disabled:opacity-50"
+                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary disabled:opacity-50"
                     >
                       <Sparkles className="h-3 w-3" /> {labels.manager.applyPolicy}
                     </button>
@@ -180,6 +242,42 @@ export function LearningReviewSection({
       </section>
 
       {error && <p className="text-sm text-state-warning">{error}</p>}
+    </div>
+  );
+}
+
+/** WHAT is suggested, ABOUT WHOM, on which skill — the facts a reviewer needs
+ *  before any decision button. Shared by the worker-transparency and manager
+ *  queue rows. */
+function ItemSummary({
+  item,
+  labels,
+  skillName,
+}: {
+  item: ReviewItemRow;
+  labels: LearningLabels;
+  skillName: (slug: string | null) => string;
+}) {
+  return (
+    <div className="min-w-0 space-y-1">
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={`inline-block shrink-0 rounded-full border px-2 py-0.5 text-xs ${STATUS_RING[item.status]}`}
+        >
+          {labels.manager.statusLabel[item.status]}
+        </span>
+        <span className="text-sm font-medium text-text-primary" data-testid="learning-item-kind">
+          {labels.kind[item.suggestionKind]}
+        </span>
+      </div>
+      <p className="text-sm text-text-secondary" data-testid="learning-item-subject">
+        {skillName(item.subjectSkillSlug)} · {item.subjectWorkerName ?? labels.workerFallback}
+      </p>
+      {item.reviewNote && (
+        <p className="text-xs text-text-muted">
+          {labels.noteLabel}: {item.reviewNote}
+        </p>
+      )}
     </div>
   );
 }

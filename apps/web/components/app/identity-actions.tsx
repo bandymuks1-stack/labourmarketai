@@ -164,9 +164,14 @@ function CompanyChannel({
 }
 
 function ManageSpacesLink({ label }: { label: string }) {
+  // Audit PR4: this promised "switch role / manage spaces" but landed on
+  // /dashboard/account, where roles are a read-only list. /dashboard/start is
+  // the actual spaces hub (per-space status + entry lanes), so the label and
+  // the destination now agree. Role SWITCHING itself stays in the header
+  // RoleSwitcher, which the start hub explains.
   return (
     <Link
-      href={"/dashboard/account" as "/dashboard"}
+      href={"/dashboard/start" as "/dashboard"}
       data-testid="identity-manage-spaces"
       className="inline-flex w-fit items-center gap-2 rounded-lg border border-border-subtle bg-surface-1 px-3 py-2 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
     >

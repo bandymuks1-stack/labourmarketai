@@ -37,7 +37,11 @@ export type PolicyKind = (typeof POLICY_KINDS)[number];
 export interface ReviewItemRow {
   readonly id: string;
   readonly subjectWorkerId: string;
+  /** Display name of the subject worker (joined via RLS; null when not readable). */
+  readonly subjectWorkerName: string | null;
   readonly subjectSkillId: string | null;
+  /** Canonical skill slug (joined from skills.slug) — rendered via the skillNames catalogue. */
+  readonly subjectSkillSlug: string | null;
   readonly organizationId: string;
   readonly journalEntryId: string | null;
   readonly suggestionKind: SuggestionKind;

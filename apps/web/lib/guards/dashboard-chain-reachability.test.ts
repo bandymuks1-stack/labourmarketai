@@ -41,8 +41,10 @@ describe("dashboard surfaces the chain entry points", () => {
   it("the chain-actions card links to all real chain surfaces (real Links, no placeholder)", () => {
     const src = read("components/app/dashboard-chain-actions.tsx");
     for (const href of [
-      "/dashboard/company",
-      "/dashboard/agency",
+      // Audit PR4: invite + enable-review deep-link the exact team control
+      // (#company-team) instead of the top of the longest page in the app;
+      // the agency room is a redirect stub that would drop the anchor.
+      "/dashboard/company#company-team",
       "/dashboard/inbox",
       "/dashboard/journal",
       "/dashboard/buyer",

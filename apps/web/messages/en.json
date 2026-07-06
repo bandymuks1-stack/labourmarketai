@@ -3072,7 +3072,8 @@
             "urgencyUrgent": "Urgent",
             "notesLabel": "Extra notes",
             "notesPlaceholder": "Anything else worth knowing",
-            "submittedHeading": "What you submitted:"
+            "submittedHeading": "What you submitted:",
+            "doneScoutingLink": "View the request and its matches"
           },
           "hire": {
             "title": "Find a worker or team",
@@ -3330,6 +3331,13 @@
         "search": "Search",
         "account": "Settings",
         "admin": "Admin"
+      },
+      "roleNotice": {
+        "needs_worker_role": "That link opens the worker space, which your account does not have yet. Add the worker role in the spaces hub.",
+        "needs_company_role": "That link opens the company space, which your account does not have yet. Create or open your company space in the spaces hub.",
+        "needs_agency_role": "That link opens the agency space, which your account does not have yet. Open the spaces hub and pick the agency path.",
+        "needs_customer_role": "That link opens the customer space, which your account does not have yet. Start the customer path in the spaces hub.",
+        "cta": "Open the spaces hub"
       },
       "chainActions": {
         "buyerTitle": "Buyer requests",
@@ -4424,6 +4432,8 @@
       "clarifyBody": "I didn't understand the instruction, please clarify.",
       "clarifySent": "Request sent",
       "clarifySending": "Sending…",
+      "clarifyError": "Could not send the clarification request. Please try again.",
+      "clarifyViewThread": "View the conversation",
       "safetyNote": "Confirm important safety instructions clearly.",
       "helpLine": "A translation helps you understand the instruction, but the original stays preserved."
     }
@@ -4756,6 +4766,7 @@
     "accept": "Accept",
     "decline": "Decline",
     "withdraw": "Withdraw",
+    "messageCta": "Send a message",
     "errorGeneric": "Something went wrong. Please try again.",
     "duplicate": "You already have an open request for this service.",
     "requesterMessage": "Their message",
@@ -4796,6 +4807,16 @@
     "lead": "Signals become suggestions, and a person decides. Learning never settles anything by itself.",
     "notAvailable": "Not available yet.",
     "empty": "Nothing to review yet.",
+    "kind": {
+      "confirm_skill": "Skill recognition suggestion",
+      "review_skill": "Skill review suggestion",
+      "dismiss": "Dismissal suggestion"
+    },
+    "skillFallback": "Skill not specified",
+    "workerFallback": "Worker",
+    "noteLabel": "Note",
+    "managerContextLink": "Open journal review →",
+    "ownContextLink": "Open your journal →",
     "worker": {
       "heading": "Suggestions about your work",
       "intro": "These are draft signals from your activity. A manager with real authority decides what becomes a record — they are only suggestions until then."

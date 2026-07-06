@@ -24,11 +24,17 @@ const APP = join(process.cwd());
 const read = (rel: string) => readFileSync(join(APP, rel), "utf-8");
 
 describe("company draft → real request bridge (F-D1)", () => {
-  it("saved-draft state links to the root-dashboard wizard", () => {
+  it("saved-draft state opens the root-dashboard wizard via the workspace-switching action", () => {
+    // Audit PR4: a raw /dashboard#demand-intake link dead-ended for
+    // held-company users whose active role was worker (the wizard renders
+    // only in the org branch); the action switches the workspace first.
     const page = read("app/[locale]/dashboard/company/page.tsx");
     expect(page).toMatch(/company-request-submit-real-link/);
-    expect(page).toMatch(/\/dashboard#demand-intake/);
+    expect(page).toMatch(/openDemandIntakeAsCompanyAction/);
     expect(page).toMatch(/firstAction\.submitRealCta/);
+    const action = read("lib/company/demand-intake-navigation.ts");
+    expect(action).toMatch(/\/dashboard#demand-intake/);
+    expect(action).toMatch(/switchActiveRole\("company"\)/);
   });
 
   it("the wizard section carries the demand-intake anchor", () => {

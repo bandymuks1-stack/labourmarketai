@@ -40,6 +40,15 @@ export default async function LearningPage({
   const t = await getTranslations("learning");
   const itemsResult = await listVisibleReviewItems();
   const policiesResult = await listManagedLearningPolicies();
+
+  // The caller's own workers.id — rows about the viewer render as read-only
+  // transparency rows (a subject never reviews suggestions about themselves).
+  const { data: ownWorker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  const viewerWorkerId = ownWorker?.id ?? null;
   const needsMigration =
     itemsResult.kind === "needs-migration" || policiesResult.kind === "needs-migration";
   const items = itemsResult.kind === "ok" ? itemsResult.rows : [];
@@ -52,6 +61,16 @@ export default async function LearningPage({
     empty: t("empty"),
     workerHeading: t("worker.heading"),
     workerIntro: t("worker.intro"),
+    kind: {
+      confirm_skill: t("kind.confirm_skill"),
+      review_skill: t("kind.review_skill"),
+      dismiss: t("kind.dismiss"),
+    },
+    skillFallback: t("skillFallback"),
+    workerFallback: t("workerFallback"),
+    noteLabel: t("noteLabel"),
+    managerContextLink: t("managerContextLink"),
+    ownContextLink: t("ownContextLink"),
     manager: {
       queueHeading: t("manager.queueHeading"),
       approve: t("manager.approve"),
@@ -86,6 +105,7 @@ export default async function LearningPage({
         policies={policies}
         needsMigration={needsMigration}
         labels={labels}
+        viewerWorkerId={viewerWorkerId}
       />
     </div>
   );

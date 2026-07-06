@@ -2,13 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
-import { Send, Check, X, Undo2 } from "lucide-react";
+import { Send, Check, X, Undo2, MessageSquare } from "lucide-react";
 import {
   requestServiceOffering,
   respondToRequest,
   withdrawRequest,
 } from "@/lib/marketplace/service-requests";
+import { openServiceRequestConversationAction } from "@/lib/marketplace/service-request-conversation";
 import type {
   DiscoverableOfferingRow,
   IncomingRequestRow,
@@ -50,6 +52,9 @@ export type MarketplaceLabels = {
   accept: string;
   decline: string;
   withdraw: string;
+  /** Accepted rows are never a dead end — the next step is the conversation
+   *  (audit PR4: "the loop dies at acceptance"). */
+  messageCta: string;
   errorGeneric: string;
   duplicate: string;
   requesterMessage: string;
@@ -97,8 +102,25 @@ export function MarketplaceLoopSection({
   labels: MarketplaceLabels;
 }) {
   const router = useRouter();
+  const locale = useLocale();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  // Next step for an ACCEPTED request — opens (or reopens) the buyer↔provider
+  // conversation; the granting fact is re-verified server-side by the action.
+  const MessageCta = ({ requestId, testid }: { requestId: string; testid: string }) => (
+    <form action={openServiceRequestConversationAction}>
+      <input type="hidden" name="requestId" value={requestId} />
+      <input type="hidden" name="locale" value={locale} />
+      <button
+        type="submit"
+        data-testid={testid}
+        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-50"
+      >
+        <MessageSquare className="h-3 w-3" /> {labels.messageCta}
+      </button>
+    </form>
+  );
 
   // Offerings the caller already has an OPEN ('sent') request for — derived from
   // the outgoing rows already fetched (no extra query, no new logic). Used to
@@ -267,10 +289,13 @@ export function MarketplaceLoopSection({
                     type="button"
                     disabled={pending}
                     onClick={() => run(() => withdrawRequest(r.id))}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-ink-500 px-2 py-1 text-xs text-text-muted disabled:opacity-50"
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
                   >
                     <Undo2 className="h-3 w-3" /> {labels.withdraw}
                   </button>
+                )}
+                {r.status === "accepted" && (
+                  <MessageCta requestId={r.id} testid="marketplace-outgoing-message-cta" />
                 )}
               </li>
             ))}
@@ -345,7 +370,7 @@ export function MarketplaceLoopSection({
                       type="button"
                       disabled={pending}
                       onClick={() => run(() => respondToRequest(r.id, "accepted"))}
-                      className="inline-flex items-center gap-1 rounded-md border border-state-success/40 px-2 py-1 text-xs text-state-success disabled:opacity-50"
+                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-state-success/40 px-3 py-1.5 text-xs text-state-success disabled:opacity-50"
                     >
                       <Check className="h-3 w-3" /> {labels.accept}
                     </button>
@@ -353,11 +378,14 @@ export function MarketplaceLoopSection({
                       type="button"
                       disabled={pending}
                       onClick={() => run(() => respondToRequest(r.id, "declined"))}
-                      className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2 py-1 text-xs text-text-muted disabled:opacity-50"
+                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
                     >
                       <X className="h-3 w-3" /> {labels.decline}
                     </button>
                   </div>
+                )}
+                {r.status === "accepted" && (
+                  <MessageCta requestId={r.id} testid="marketplace-incoming-message-cta" />
                 )}
               </li>
               );
@@ -366,7 +394,11 @@ export function MarketplaceLoopSection({
         )}
       </section>
 
-      {error && <p className="text-sm text-state-warning">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-state-warning">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

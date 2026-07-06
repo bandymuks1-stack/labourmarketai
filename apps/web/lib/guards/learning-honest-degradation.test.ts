@@ -62,7 +62,10 @@ describe("the learning UI surfaces an honest not-available state, never a fake s
     expect(s).toMatch(/needsMigration/);
     expect(s).toMatch(/data-testid="learning-not-available"/);
     // Rows come only from props (real RLS-scoped data), never hardcoded.
-    expect(s).toMatch(/initialItems\.map/);
+    // Audit PR4 split the prop into own (transparency) vs org (review) rows —
+    // both derive from initialItems.
+    expect(s).toMatch(/initialItems\.filter/);
+    expect(s).toMatch(/(ownItems|orgItems)\.map/);
     expect(stripComments(s)).not.toMatch(/sample|seed|demo|fixture/i);
   });
 

@@ -42,7 +42,10 @@ export async function requireRoleOrRedirect(
     (rolesRows ?? []).map((r) => r.role as string),
   );
   if (!heldRoles.has(expectedRole)) {
-    redirect(`/${locale}/dashboard`);
+    // Never a silent bounce (audit PR4): the overview renders a banner
+    // explaining WHICH space the link needed and where to add that role,
+    // instead of teleporting the user home with zero explanation.
+    redirect(`/${locale}/dashboard?notice=needs_${expectedRole}_role`);
   }
   return user.id;
 }

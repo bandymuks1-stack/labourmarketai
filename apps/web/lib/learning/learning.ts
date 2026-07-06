@@ -47,10 +47,19 @@ function isAbsent(error: { code?: string } | null): boolean {
 }
 
 function mapReviewRow(r: Record<string, unknown>): ReviewItemRow {
+  // Joined display fields (left joins — null when the relation is not readable
+  // under the caller's RLS; the UI degrades to a neutral fallback, never blank
+  // approve buttons).
+  const workerRel = r.workers as { profiles?: { full_name?: string | null; email?: string | null } | null } | null;
+  const prof = workerRel?.profiles ?? null;
+  const skillRel = r.skills as { slug?: string | null } | null;
   return {
     id: String(r.id),
     subjectWorkerId: String(r.subject_worker_id ?? ""),
+    subjectWorkerName:
+      prof?.full_name ?? (prof?.email ? String(prof.email).split("@")[0] : null),
     subjectSkillId: (r.subject_skill_id as string | null) ?? null,
+    subjectSkillSlug: skillRel?.slug ?? null,
     organizationId: String(r.organization_id ?? ""),
     journalEntryId: (r.journal_entry_id as string | null) ?? null,
     suggestionKind: (r.suggestion_kind as ReviewItemRow["suggestionKind"]) ?? "review_skill",
@@ -76,7 +85,7 @@ export async function listVisibleReviewItems(): Promise<ReviewQueueListResult> {
   const { data, error } = await asAny(supabase)
     .from("learning_review_queue")
     .select(
-      "id, subject_worker_id, subject_skill_id, organization_id, journal_entry_id, suggestion_kind, status, reviewed_by, reviewed_at, review_note, produced_confirmation_id, policy_id, created_at",
+      "id, subject_worker_id, subject_skill_id, organization_id, journal_entry_id, suggestion_kind, status, reviewed_by, reviewed_at, review_note, produced_confirmation_id, policy_id, created_at, workers(profiles(full_name, email)), skills(slug)",
     )
     .order("created_at", { ascending: false });
   if (error) {

@@ -49,11 +49,24 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  *  overview leads with one clear next action, not a product explainer. */
 export default async function DashboardOverviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ notice?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Honest landing surface for the role gate (audit PR4): a cross-role link
+  // (e.g. "Opportunities" from a company-only account) redirects here with
+  // ?notice=needs_<role>_role instead of bouncing silently.
+  const { notice } = await searchParams;
+  const ROLE_NOTICES = new Set([
+    "needs_worker_role",
+    "needs_company_role",
+    "needs_agency_role",
+    "needs_customer_role",
+  ]);
+  const roleNotice = notice && ROLE_NOTICES.has(notice) ? notice : null;
 
   const supabase = await createClient();
   const {
@@ -76,6 +89,23 @@ export default async function DashboardOverviewPage({
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : "worker";
+
+  // Role-gate landing banner (audit PR4) — explains the bounce + one connected
+  // next action (the spaces hub), shown in BOTH branch layouts.
+  const RoleNoticeBanner = roleNotice ? (
+    <div
+      data-testid="dashboard-role-notice"
+      className="flex flex-col gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/5 p-4"
+    >
+      <p className="text-sm text-text-primary">{t(`roleNotice.${roleNotice}`)}</p>
+      <Link
+        href={"/dashboard/start" as "/dashboard"}
+        className="w-fit text-sm font-medium text-brand-blue hover:underline"
+      >
+        {t("roleNotice.cta")} →
+      </Link>
+    </div>
+  ) : null;
   // Real company existence (RLS-scoped) → drives the focused identity entry:
   // company actions vs an honest "create a company" CTA. Read failure / missing
   // migration falls back to "no company" (CTA shown).
@@ -308,6 +338,7 @@ export default async function DashboardOverviewPage({
           event={FUNNEL_EVENTS.dashboardViewed}
           metadata={{ surface: "dashboard", role_context: role }}
         />
+        {RoleNoticeBanner}
         {Header}
         <CurrentSpaceHeader role={role} />
         {/* Universal command finder (WAGON 3) — type a normal term, get the
@@ -465,6 +496,7 @@ export default async function DashboardOverviewPage({
         event={FUNNEL_EVENTS.firstActionCardViewed}
         metadata={{ surface: "work_card" }}
       />
+      {RoleNoticeBanner}
       <CurrentSpaceHeader role={role} />
 
       {/* Universal command finder (WAGON 3) — type a normal term ("cv",
