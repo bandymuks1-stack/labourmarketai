@@ -61,11 +61,16 @@
 --   * NO backfill / data migration of existing rows (permanently NULL);
 --   * NO table grants, NO trigger, NO destructive statement of any kind.
 --
--- DRAFT — needs-human-gate. TIER: owner-gated (SECURITY DEFINER + GRANT +
--- ALTER TABLE are RED-class by the migration-safety rules), so this PR ships
--- as a needs-human-gate DRAFT with the exact SQL; the owner reviews it, adds
--- the approval marker, merges, and applies manually via Supabase MCP —
--- never db push. Until applied the app degrades honestly: the stamped insert
+-- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER + GRANT +
+-- ALTER TABLE are RED-class by the migration-safety rules). Owner said YES
+-- 2026-07-06 (combined owner decision command; decision sheet
+-- docs/launch/conversation-source-relation-owner-decision-v1.md). Direct
+-- review 2026-07-06: additive nullable columns + closed CHECK set verified;
+-- reader RPC verified SECURITY DEFINER + search_path=public + participant
+-- re-check via public.is_conversation_participant (20260612170000 hardened
+-- definition) + no raw source_id in the projection + revoke public/anon +
+-- grant authenticated; rollback verified additive-only. Apply stays manual
+-- via Supabase MCP — never db push. Until applied the app degrades honestly: the stamped insert
 -- sees 42703 (undefined column) and falls back to the current no-source
 -- insert; the reader sees 42883 (undefined function) and returns an empty
 -- map, so the UI keeps today's neutral label. No errors, no fake state.

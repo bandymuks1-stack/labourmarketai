@@ -231,17 +231,18 @@ describe("§8-2 exact stamping — each caller passes its own type, no other", (
   });
 });
 
-// ── 3. Migration shape — bounded, human-gated DRAFT ──────────────────────
+// ── 3. Migration shape — bounded, human-gated ─────────────────────────────
 
-describe("§8-3 migration — needs-human-gate DRAFT, bounded SECURITY DEFINER", () => {
+describe("§8-3 migration — human-gated, bounded SECURITY DEFINER", () => {
   const raw = read(MIGRATION);
   const sql = stripSql(raw).toLowerCase();
 
-  it("is marked needs-human-gate (DRAFT, manual apply — marker added by owner)", () => {
-    expect(raw).toMatch(/needs-human-gate/);
+  it("carries the owner's human-gate approval marker (manual MCP apply only)", () => {
+    // Owner approved 2026-07-06 — the RED-class human gate must stay
+    // explicitly recorded in the migration header (mirror of the
+    // privacy-request intake flow, PR #653).
+    expect(raw).toMatch(/@human-gate-approved/);
     expect(raw).toMatch(/DO NOT APPLY automatically/i);
-    // The approval marker is the OWNER's move at review time — the guard only
-    // requires the draft state here (mirror of the identity-migration flow).
   });
 
   it("adds EXACTLY one SECURITY DEFINER function, search_path-pinned, stable", () => {
