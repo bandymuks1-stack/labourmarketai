@@ -3456,6 +3456,28 @@
           "help": "Tema",
           "toDark": "Tamsi",
           "toLight": "Šviesi"
+        },
+        "security": {
+          "title": "Sauga ir prieiga",
+          "intro": "Valdyk, kaip prisijungi, ir apsaugok savo paskyrą.",
+          "signin": {
+            "label": "Kaip prisijungi",
+            "password": "El. paštas ir slaptažodis",
+            "google": "Google paskyra",
+            "changePassword": "Pakeisti slaptažodį"
+          },
+          "mfa": {
+            "title": "Papildoma paskyros apsauga",
+            "active": "Aktyvuota",
+            "notActive": "Kol kas neaktyvuota",
+            "benefit": "Apsaugok savo profilį, darbo istoriją, dokumentus ir žinutes antru patikrinimu, kurį gali įveikti tik tu.",
+            "setupComing": "Nustatymas čia atsiras netrukus — jis užtrunka apie 30 sekundžių ir bet kada galėsi jį išjungti."
+          },
+          "recovery": {
+            "label": "Paskyros atkūrimas",
+            "note": "Tavo atkūrimo el. paštas: {email}. Saugok prieigą prie jo."
+          },
+          "comingLater": "Vėliau čia matysi, kur esi prisijungęs, galėsi užbaigti sesijas ir gauti atsarginius kodus."
         }
       },
       "comingSoon": {

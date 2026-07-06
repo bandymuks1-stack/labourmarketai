@@ -67,6 +67,30 @@ export default async function AccountPage({
   });
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
 
+  // Security & access (security docs step 1 — benefit-based, never coercive).
+  // Everything shown is REAL: sign-in methods come from the user's identity
+  // providers; the extra-protection status comes from a live listFactors()
+  // read (null on any error → no status claim rather than a guessed one).
+  // Enrollment itself is the next PR in the docs' sequence — the setup line
+  // says so honestly instead of rendering a button that pretends to work.
+  const identityProviders = new Set(
+    (user.identities ?? []).map((i) => i.provider),
+  );
+  const hasPasswordSignIn = identityProviders.has("email");
+  const hasGoogleSignIn = identityProviders.has("google");
+  let mfaFactorCount: number | null = null;
+  try {
+    const { data: factorData, error: factorError } =
+      await supabase.auth.mfa.listFactors();
+    if (!factorError && factorData) {
+      mfaFactorCount = factorData.all.filter(
+        (f) => f.status === "verified",
+      ).length;
+    }
+  } catch {
+    // Honest degradation: unknown status → show no status line at all.
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <header>
@@ -122,6 +146,85 @@ export default async function AccountPage({
         <p className="mt-2 break-words text-sm text-text-primary">
           {profile?.email ?? user.email}
         </p>
+      </section>
+
+      {/* Security & access (quality-train PR F / security docs step 1).
+          Benefit-based framing only — protection is offered, never demanded.
+          Real data only: providers from identities, protection status from
+          listFactors(), the change-password link is the existing real reset
+          flow. Enrollment UI ships in its own PR (docs §3 step 2) — until
+          then the copy says setup is coming; no fake button, no fake state. */}
+      <section className="card-border p-5" data-testid="account-security">
+        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          {t("account.security.title")}
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+          {t("account.security.intro")}
+        </p>
+
+        <div className="mt-4 flex flex-col gap-1">
+          <p className="text-xs text-text-muted">
+            {t("account.security.signin.label")}
+          </p>
+          <p className="text-sm text-text-primary" data-testid="account-signin-methods">
+            {[
+              hasPasswordSignIn ? t("account.security.signin.password") : null,
+              hasGoogleSignIn ? t("account.security.signin.google") : null,
+            ]
+              .filter(Boolean)
+              .join(" · ") || "—"}
+          </p>
+          {hasPasswordSignIn && (
+            <Link
+              href="/auth/forgot-password"
+              data-testid="account-change-password"
+              className="mt-1 flex w-fit items-center gap-2 text-sm text-text-primary hover:text-brand-blue"
+            >
+              <span>{t("account.security.signin.changePassword")}</span>
+              <span aria-hidden className="text-text-muted">→</span>
+            </Link>
+          )}
+        </div>
+
+        <div className="mt-4 flex flex-col gap-1 border-t border-ink-600 pt-4">
+          <p className="flex items-center gap-2 text-xs text-text-muted">
+            {t("account.security.mfa.title")}
+            {mfaFactorCount !== null && (
+              <span
+                data-testid="account-mfa-status"
+                className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+                  mfaFactorCount > 0
+                    ? "border-state-success/40 bg-state-success/5 text-state-success"
+                    : "border-ink-500 bg-ink-800/40 text-text-muted"
+                }`}
+              >
+                {mfaFactorCount > 0
+                  ? t("account.security.mfa.active")
+                  : t("account.security.mfa.notActive")}
+              </span>
+            )}
+          </p>
+          <p className="text-sm leading-relaxed text-text-primary">
+            {t("account.security.mfa.benefit")}
+          </p>
+          <p className="text-xs leading-relaxed text-text-muted">
+            {t("account.security.mfa.setupComing")}
+          </p>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-1 border-t border-ink-600 pt-4">
+          <p className="text-xs text-text-muted">
+            {t("account.security.recovery.label")}
+          </p>
+          <p className="text-sm text-text-primary">
+            {t("account.security.recovery.note", {
+              email: profile?.email ?? user.email ?? "—",
+            })}
+          </p>
+          <p className="text-xs leading-relaxed text-text-muted">
+            {t("account.security.comingLater")}
+          </p>
+        </div>
       </section>
 
       {/* Identity is edited on the Profilis surface; a single settings link
