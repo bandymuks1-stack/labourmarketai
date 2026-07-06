@@ -100,7 +100,7 @@ export async function MyZone({
               key={a.key}
               href={a.href as "/dashboard"}
               data-testid={`my-zone-action-${a.key}`}
-              className="flex flex-col gap-1.5 rounded-xl border border-border-subtle bg-surface-1 p-4 transition-colors hover:border-brand-blue"
+              className="flex flex-col gap-1.5 rounded-xl border border-border-subtle bg-surface-1 p-4 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
             >
               <a.icon
                 className="h-5 w-5 shrink-0 text-brand-blue"

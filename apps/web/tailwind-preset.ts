@@ -15,6 +15,8 @@ const preset = {
         text: colors.text,
         tier: colors.tier,
         trust: colors.trust,
+        surface: colors.surface,
+        border: colors.border,
       },
       borderRadius: { ...radii },
       boxShadow: {

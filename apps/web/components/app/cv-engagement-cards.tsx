@@ -27,7 +27,7 @@ export type SkillDot = {
 
 // Confidence bin → dot colour (§15). Literal bin name maps to literal colour.
 const BIN_DOT: Record<string, string> = {
-  red: "bg-state-error",
+  red: "bg-state-danger",
   green: "bg-state-success",
   yellow: "bg-state-warning",
 };

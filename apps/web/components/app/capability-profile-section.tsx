@@ -334,7 +334,7 @@ export function CapabilityProfileSection({
 // self-contained without an extra import cycle. Source of truth still
 // lives next to the worker CV component.
 const BIN_DOT: Record<string, string> = {
-  red: "bg-state-error",
+  red: "bg-state-danger",
   green: "bg-state-success",
   yellow: "bg-state-warning",
 };
