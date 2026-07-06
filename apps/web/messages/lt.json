@@ -4086,6 +4086,43 @@
       "owner_confirmed": "Kainos patvirtintos, bet įsigyti dar negalima — mokėjimai neįjungti."
     }
   },
+  "privacySelfService": {
+    "title": "Privatumas ir tavo duomenys",
+    "intro": "Atsisiųsk savo duomenų kopiją arba pateik paskyros šalinimo užklausą.",
+    "accountLink": "Mano duomenys: kopija ir šalinimas",
+    "backToAccount": "Grįžti į paskyrą",
+    "export": {
+      "title": "Mano duomenų kopija",
+      "body": "Atsisiųsk savo profilio, darbo žurnalo, įgūdžių ir sutikimų duomenis vienu JSON failu.",
+      "includes": "Faile — tik tavo paties duomenys: profilis, sutikimų istorija, darbuotojo kortelė, žurnalo įrašai, įgūdžiai ir dokumentų sąrašas (be failų turinio, be kitų žmonių žinučių).",
+      "download": "Atsisiųsti mano duomenis (JSON)"
+    },
+    "deletion": {
+      "title": "Paskyros šalinimo užklausa",
+      "body": "Tai užklausa, kurią peržiūri žmogus — šis puslapis nieko neištrina iš karto. Peržiūrėjus užklausą su tavimi bus susisiekta šiuo paskyros el. paštu.",
+      "confirmLabel": "Suprantu, kad pateikiu paskyros šalinimo užklausą ir ją peržiūrės žmogus.",
+      "noteLabel": "Pastaba (nebūtina)",
+      "submit": "Pateikti šalinimo užklausą",
+      "submitted": "Užklausa pateikta",
+      "submittedBody": "Žmogus ją peržiūrės ir susisieks su tavimi paskyros el. paštu.",
+      "unavailable": "Šalinimo užklausos kol kas nepriimamos — funkcija dar neįjungta. Duomenų kopiją gali atsisiųsti jau dabar.",
+      "tooManyOpen": "Turi per daug atvirų užklausų — palauk, kol bus peržiūrėtos.",
+      "error": "Kažkas nepavyko. Pabandyk dar kartą."
+    },
+    "requests": {
+      "title": "Tavo pateiktos užklausos",
+      "type": {
+        "data_export": "Duomenų kopijos užklausa",
+        "account_deletion": "Paskyros šalinimo užklausa"
+      },
+      "status": {
+        "in_review": "Peržiūrima",
+        "needs_followup": "Reikia patikslinti",
+        "approved": "Patvirtinta",
+        "closed": "Užbaigta"
+      }
+    }
+  },
   "legal": {
     "preparing": {
       "body": "Teisinė informacija ruošiama. Prieš pradedant mokamas paslaugas ar sutartinius santykius ši informacija bus pateikta ir atnaujinta.",

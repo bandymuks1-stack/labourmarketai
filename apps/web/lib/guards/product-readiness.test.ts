@@ -1674,7 +1674,10 @@ describe("no migration files added by this sprint", () => {
     // Bumped 111 -> 112 for the booking-responses seen model
     // (20260706120000 booking_requests_seen, audit PR5) — additive,
     // draft-gated, owner-applied; mirrors the marketplace seen twin.
-    const SPRINT_BASELINE = 112;
+    // Bumped 112 -> 113 for the privacy-request intake (20260706150000,
+    // quality-train PR G) — one NEW-name gated RPC on the EXISTING
+    // customer_requests intake, help-request twin; DRAFT needs-human-gate.
+    const SPRINT_BASELINE = 113;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

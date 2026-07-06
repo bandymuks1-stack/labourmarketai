@@ -38,6 +38,9 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/journal": "REAL_LAUNCH_SURFACE",
   "dashboard/market-map": "REAL_LAUNCH_SURFACE",
   "dashboard/opportunities": "REAL_LAUNCH_SURFACE",
+  // Privacy self-service (quality-train PR G): real export download +
+  // reviewed deletion-request intake.
+  "dashboard/privacy": "REAL_LAUNCH_SURFACE",
   "dashboard/profile": "REAL_LAUNCH_SURFACE",
   "dashboard/projects": "REAL_LAUNCH_SURFACE",
   "dashboard/projects/[id]": "REAL_LAUNCH_SURFACE",
