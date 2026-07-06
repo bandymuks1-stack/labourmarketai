@@ -20,8 +20,11 @@
 --   - NO destructive statement of any kind;
 --   - NO automated fulfilment or notification machinery.
 --
--- DRAFT — needs-human-gate. TIER: owner-gated (SECURITY DEFINER + GRANT
--- are RED-class). Prod apply stays manual via Supabase MCP — never
+-- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER + GRANT
+-- are RED-class). Owner approved 2026-07-06 (direct review: exact twin of
+-- approved 20260705260000 help-request RPC; SECURITY DEFINER +
+-- search_path=public + auth guard + closed type set + revoke/grant tail
+-- verified). Prod apply stays manual via Supabase MCP — never
 -- db push. Until applied, the app degrades honestly: the submit action
 -- sees 42883 (undefined function) and shows the truthful "not available
 -- yet" state; the self-service JSON export works WITHOUT this migration
