@@ -1671,7 +1671,10 @@ describe("no migration files added by this sprint", () => {
     // requests at status 'in_review' (never on the submitted-only demand
     // projections); no new table, no policy change, nothing recreated;
     // @human-gate-approved, owner-gated apply.
-    const SPRINT_BASELINE = 111;
+    // Bumped 111 -> 112 for the booking-responses seen model
+    // (20260706120000 booking_requests_seen, audit PR5) — additive,
+    // draft-gated, owner-applied; mirrors the marketplace seen twin.
+    const SPRINT_BASELINE = 112;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

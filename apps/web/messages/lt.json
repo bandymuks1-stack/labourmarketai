@@ -3475,7 +3475,12 @@
     },
     "notifications": {
         "types": {
-          "generic": "Pranešimas"
+          "generic": "Pranešimas",
+          "unread_messages": "Neperskaitytos žinutės",
+          "incoming_service_requests": "Laukiančios paslaugų užklausos",
+          "service_request_responses": "Atsakymai į jūsų užklausas",
+          "pending_bookings": "Laukiantys rezervacijų pasiūlymai",
+          "booking_responses": "Atsakymai į rezervacijų pasiūlymus"
         },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -5967,8 +5972,8 @@
         "contacted": "Pažymėta: susisiekta"
       },
       "markReviewed": "Žymėti kaip peržiūrėtą",
-      "markContacted": "Žymėti: susisiekta",
-      "internalNote": "Tik vidinis įrašas — darbuotojui ar už platformos ribų niekas nesiunčiama.",
+      "markContacted": "Susisiekti platformoje",
+      "internalNote": "„Peržiūrėta“ — vidinis įrašas. „Susisiekti“ atidaro pokalbį platformoje; už platformos ribų niekas nesiunčiama.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "notAvailable": "Patvirtinimas dar neįjungtas."
     },
@@ -6051,6 +6056,10 @@
     }
   },
   "bookings": {
+    "dashboardResponses": {
+      "title": "Yra atsakymų į rezervacijų pasiūlymus",
+      "note": "Darbuotojai atsakė į jūsų pasiūlymus — peržiūrėkite būsenas."
+    },
     "eyebrow": "REZERVACIJOS",
     "title": "Rezervacijos",
     "pendingLink": "Rezervacijų pasiūlymai",
@@ -6434,6 +6443,7 @@
       "sent": "Susidomėjimas išsiųstas",
       "withdraw": "Atšaukti susidomėjimą",
       "internalNote": "Tai sukuria tik vidinį signalą. Jokia žinutė už platformos ribų nesiunčiama.",
+      "contactedLink": "Įmonė atidarė pokalbį — peržiūrėkite žinutes",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
       "contacted": "Įmonė pažymėjo: susisiekta"

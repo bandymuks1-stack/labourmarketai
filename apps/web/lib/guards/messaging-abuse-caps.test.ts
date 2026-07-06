@@ -185,6 +185,11 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     const market = read("lib/marketplace/service-request-conversation.ts");
     expect(market).toMatch(/service_offerings\?\.title/);
     expect(market).toMatch(/status !== "accepted"/);
+    // …the interest-contact action (audit PR5) derives it from the REAL
+    // demand row whose ownership + worker interest it verified…
+    const interest = read("lib/communication/contact-interested-worker.ts");
+    expect(interest).toMatch(/demand\.title/);
+    expect(interest).toMatch(/interestStatus === "withdrawn"/);
     // …and nobody else calls getOrCreateDirectConversation.
     const callers = walkSources().filter(
       (rel) =>
@@ -193,6 +198,7 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     );
     expect(callers.sort()).toEqual(
       [
+        "lib/communication/contact-interested-worker.ts",
         "lib/communication/open-conversation-action.ts",
         "lib/communication/request-worker-conversation.ts",
         "lib/marketplace/service-request-conversation.ts",

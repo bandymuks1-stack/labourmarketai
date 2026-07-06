@@ -48,11 +48,13 @@ const ROLLBACK =
 // ── 1. Permission states are enumerated + default-closed ────────────────
 
 describe("§8.1 permission states — enumerated, no silent drift", () => {
-  it("the enumeration is EXACTLY the six agreed states", () => {
+  it("the enumeration is EXACTLY the seven agreed states", () => {
     // allowed_accepted_service_request added in audit PR4 (accepted
-    // marketplace rows open a conversation) — a deliberate, reviewed
-    // extension of the §8.1 enumeration, verified server-side by
-    // lib/marketplace/service-request-conversation.ts.
+    // marketplace rows open a conversation); allowed_demand_interest added
+    // in audit PR5 ("contacted" opens a real thread on the worker's OWN
+    // interest signal) — deliberate, reviewed extensions, each verified
+    // server-side by its gated action (service-request-conversation.ts /
+    // contact-interested-worker.ts).
     expect([...CONTACT_PERMISSION_STATES].sort()).toEqual(
       [
         "allowed_admin",
@@ -60,6 +62,7 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
         "allowed_existing_conversation",
         "allowed_scouting_shortlist",
         "allowed_accepted_service_request",
+        "allowed_demand_interest",
         "no_permission",
       ].sort(),
     );
@@ -146,6 +149,9 @@ describe("no contact without permission — the create path is gated", () => {
     };
     for (const r of ["app", "components", "lib"]) walk(join(APP, r), `/${r}`);
     expect(callers.sort()).toEqual([
+      // Audit PR5 — demand-interest grant ("contacted" opens the real
+      // thread), verified server-side before the conversation opens.
+      "lib/communication/contact-interested-worker.ts",
       "lib/communication/open-conversation-action.ts",
       "lib/communication/request-worker-conversation.ts",
       // Audit PR4 — accepted-service-request grant, verified server-side in

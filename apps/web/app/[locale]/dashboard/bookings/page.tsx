@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { listMyBookings, type BookingRow } from "@/lib/booking/booking-actions";
 import { BookingRespondButtons } from "@/components/app/booking-respond-buttons";
+import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
 import type { BookingStatus } from "@/lib/booking/booking-state";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -33,6 +34,9 @@ export default async function BookingsPage({
 
   return (
     <div className="flex flex-col gap-6" data-testid="bookings-page">
+      {/* Opening this page IS the read event for booking responses — clears
+          the "new responses" dashboard/bell markers (audit PR5). */}
+      <MarkBookingsSeen />
       <header className="flex flex-col gap-1">
         <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
           {t("eyebrow")}

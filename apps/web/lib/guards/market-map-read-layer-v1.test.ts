@@ -174,6 +174,11 @@ describe("NO new DB migration in this PR", () => {
     // (submit_help_request_v1) inserting a typed row on the EXISTING
     // customer_requests table at status 'in_review'; no table/policy
     // change, no recreate; @human-gate-approved, owner-gated apply.
-    expect(count).toBeLessThanOrEqual(111);
+    // Bumped 111 -> 112 for the booking-responses seen model
+    // (20260706120000 booking_requests_seen) — additive single-purpose
+    // per-user seen table + gated upsert RPC, mirrors the marketplace seen
+    // twin exactly; DRAFT, @human-gate-approved, owner-gated apply
+    // (audit PR5: booking responses were silent for the proposer).
+    expect(count).toBeLessThanOrEqual(112);
   });
 });

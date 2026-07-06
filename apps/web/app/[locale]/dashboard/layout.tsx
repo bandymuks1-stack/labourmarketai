@@ -18,6 +18,15 @@ import { getOwnCompany } from "@/lib/company/company-setup";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
+import {
+  getBookingResponsesNewCount,
+  getPendingIncomingBookingCount,
+} from "@/lib/booking/booking-actions";
+import {
+  getPendingIncomingRequestCount,
+  getServiceRequestsNewCounts,
+} from "@/lib/marketplace/service-requests";
+import type { Notification } from "@/lib/auth/context";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
@@ -47,7 +56,15 @@ export default async function DashboardLayout({
   // comment: the project's source-level guards run a comment-stripping
   // regex that treats it as a block comment opener and would consume
   // past this Promise.all into the JSX below.)
-  const [profileRes, rolesRes, unreadConversations] = await Promise.all([
+  const [
+    profileRes,
+    rolesRes,
+    unreadConversations,
+    pendingIncomingRequests,
+    requestNewCounts,
+    pendingIncomingBookings,
+    bookingResponsesNew,
+  ] = await Promise.all([
     supabase
       .from("profiles")
       .select("full_name, email, active_role, onboarded_at")
@@ -58,10 +75,17 @@ export default async function DashboardLayout({
       .select("role")
       .eq("profile_id", user.id)
       .eq("is_active", true),
-    // Unread inbox count → Messages nav badge, so an incoming request is
-    // actually noticed. Defensive (returns 0 on any error) so it never
+    // Unread inbox count → Messages nav badge + bell, so an incoming message
+    // is actually noticed. Defensive (returns 0 on any error) so it never
     // breaks the auth shell.
     getUnreadConversationCount(),
+    // Bell signals (audit PR5) — the same real per-surface counts the
+    // dashboard cards use; every one returns 0 on any missing-data state,
+    // so the bell never fabricates attention.
+    getPendingIncomingRequestCount(),
+    getServiceRequestsNewCounts(),
+    getPendingIncomingBookingCount(),
+    getBookingResponsesNewCount(),
   ]);
   const profile = profileRes.data;
   const rolesRows = rolesRes.data;
@@ -103,6 +127,47 @@ export default async function DashboardLayout({
     }
   }
 
+  // Derived-signal notifications (audit PR5): the bell states only what is
+  // REALLY true right now, from the same per-surface models the dashboard
+  // cards use. Each item links the exact surface that clears it (visiting IS
+  // the read event) — no notifications table, no fake "mark read".
+  const signalRole: Role = activeRole ?? "worker";
+  const signal = (
+    id: string,
+    type: string,
+    count: number,
+    href: string,
+  ): Notification | null =>
+    count > 0
+      ? {
+          id,
+          role: signalRole,
+          type,
+          payload: {},
+          read_at: null,
+          created_at: "",
+          count,
+          href,
+        }
+      : null;
+  const notifications: Notification[] = [
+    signal("unread-messages", "unread_messages", unreadConversations, "/dashboard/communication"),
+    signal(
+      "incoming-service-requests",
+      "incoming_service_requests",
+      pendingIncomingRequests,
+      "/dashboard/service-requests",
+    ),
+    signal(
+      "service-request-responses",
+      "service_request_responses",
+      requestNewCounts.buyerNew,
+      "/dashboard/service-requests",
+    ),
+    signal("pending-bookings", "pending_bookings", pendingIncomingBookings, "/dashboard/bookings"),
+    signal("booking-responses", "booking_responses", bookingResponsesNew, "/dashboard/bookings"),
+  ].filter((n): n is Notification => n !== null);
+
   return (
     <AuthProvider
       initial={{
@@ -116,7 +181,7 @@ export default async function DashboardLayout({
         isAdmin,
         adminUiHidden,
         activeOrgName,
-        notifications: [],
+        notifications,
       }}
     >
       <div className="relative min-h-screen">

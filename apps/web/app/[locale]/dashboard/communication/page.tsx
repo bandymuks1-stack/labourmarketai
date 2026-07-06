@@ -9,6 +9,7 @@ import { FeatureNote } from "@/components/app/feature-note";
 import { createClient } from "@/lib/supabase/server";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
+import { getUnreadConversationIds } from "@/lib/communication/unread";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
 /**
@@ -29,11 +30,6 @@ type ConversationRow = {
   kind: "direct" | "support" | "team";
   created_by: string | null;
   updated_at: string;
-};
-
-type ParticipantRow = {
-  conversation_id: string;
-  last_read_at: string | null;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,17 +66,10 @@ export default async function CommunicationListPage({
     .limit(100);
   const conversations: ConversationRow[] = (conversationsRaw ?? []) as ConversationRow[];
 
-  // Compute unread state by comparing each conversation's latest message
-  // created_at to the participant's last_read_at. v1 keeps this simple —
-  // we just label a row "unread" if the participant has never opened it.
-  const { data: participantsRaw } = await asAny(supabase)
-    .from("conversation_participants")
-    .select("conversation_id, last_read_at")
-    .eq("profile_id", user.id);
-  const participants: ParticipantRow[] = (participantsRaw ?? []) as ParticipantRow[];
-  const lastReadByConv = new Map<string, string | null>(
-    participants.map((p) => [p.conversation_id, p.last_read_at]),
-  );
+  // REAL unread state (audit PR5): a counterpart message newer than the
+  // caller's last_read_at — shared with the nav badge and the bell, so the
+  // list, badge and panel can never drift apart.
+  const unreadIds = await getUnreadConversationIds();
 
   // §8.1 safe counterpart identity reader — display names for 2-person direct
   // threads the viewer participates in, via the permission-gated RPC only.
@@ -175,8 +164,7 @@ export default async function CommunicationListPage({
       ) : (
         <ul className="flex flex-col gap-2">
           {conversations.map((c) => {
-            const lastRead = lastReadByConv.get(c.id);
-            const unread = !lastRead;
+            const unread = unreadIds.has(c.id);
             // Clarity v1: never render a card where the user cannot tell WHO /
             // WHAT / WHICH CONTEXT. Derived honestly from the real `kind`; when
             // identity/workspace are not in the data model we say so, not fake it.

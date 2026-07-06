@@ -5,16 +5,22 @@ import { useTranslations } from "next-intl";
 import { showPlaceholderMarkers } from "@/lib/env";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
+import { Link } from "@/lib/i18n/navigation";
 import { MobileSheet } from "@/components/ui/MobileSheet";
 import { usePopoverDismiss } from "@/lib/hooks/use-popover-dismiss";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
 
-/** Authenticated-header notifications dropdown. Empty state today (no
- *  notifications table yet — schema sketched in DATA_MODEL.md as M2). The
- *  cross-role architecture is wired: a notification tagged for role Y while
- *  the user is in role X renders a "Switch to Y to view" CTA that calls
- *  the same switchRole as the RoleSwitcher. */
+/** Authenticated-header notifications dropdown.
+ *
+ *  REAL derived signals (audit PR5) — the layout feeds the bell the same
+ *  per-surface truths the dashboard cards use (unread threads, pending
+ *  requests/bookings, responses since last seen). Each signal row LINKS the
+ *  exact surface that clears it; visiting is the read event, so there is no
+ *  local "mark read" for signals and the bell never claims attention that
+ *  isn't real. The cross-role architecture stays wired for future stored
+ *  notifications: a notification tagged for role Y while the user is in
+ *  role X renders a "Switch to Y to view" CTA. */
 export function NotificationPanel() {
   const t = useTranslations("auth.notifications");
   const tRole = useTranslations("auth.signup.role");
@@ -119,6 +125,9 @@ type Notif = {
   role: Role;
   type: string;
   read_at: string | null;
+  /** Derived signals carry a real count + the surface that clears them. */
+  count?: number;
+  href?: string;
 };
 
 /** Body shared between the desktop popover and the mobile sheet. `chromeless`
@@ -158,7 +167,10 @@ function NotificationsBody({
           <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
             {label}
           </p>
-          {notifications.length > 0 && (
+          {/* "Mark all read" applies only to stored notifications — derived
+              signals clear by visiting their surface; faking them read would
+              just be a lie the next page-load reverts. */}
+          {notifications.some((n) => !n.href) && (
             <button
               type="button"
               onClick={markAllRead}
@@ -197,27 +209,47 @@ function NotificationsBody({
         <ul className="flex flex-col">
           {notifications.map((n) => {
             const crossRole = activeRole !== n.role;
+            const rowBody = (
+              <p className="flex items-center gap-2 text-xs text-text-secondary">
+                <RoleIcon role={n.role} className="h-4 w-4" />
+                {/* Dead-UI repair: never print the raw type enum — map to a
+                    localized label, neutral fallback for unknown types. */}
+                <span className="text-text-primary">
+                  {tTypes.has(n.type) ? tTypes(n.type as never) : tTypes("generic")}
+                </span>
+                {typeof n.count === "number" && (
+                  <span className="ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-[10px] font-bold text-white tabular-nums">
+                    {n.count}
+                  </span>
+                )}
+              </p>
+            );
             return (
               <li
                 key={n.id}
                 className={cn(
-                  "border-b border-ink-600 px-3 py-3 last:border-b-0",
+                  "border-b border-ink-600 last:border-b-0",
                   !n.read_at && "bg-ink-800/40",
                 )}
               >
-                <p className="flex items-center gap-2 text-xs text-text-secondary">
-                  <RoleIcon role={n.role} className="h-4 w-4" />
-                  {/* Dead-UI repair: never print the raw type enum — map to a
-                      localized label, neutral fallback for unknown types. */}
-                  <span className="text-text-primary">
-                    {tTypes.has(n.type) ? tTypes(n.type as never) : tTypes("generic")}
-                  </span>
-                </p>
+                {n.href ? (
+                  // A derived signal IS a next action — the row navigates to
+                  // the exact surface that clears it (audit PR5).
+                  <Link
+                    href={n.href as "/dashboard"}
+                    data-testid={`notification-signal-${n.id}`}
+                    className="block px-3 py-3 transition-colors hover:bg-ink-800/70"
+                  >
+                    {rowBody}
+                  </Link>
+                ) : (
+                  <div className="px-3 py-3">{rowBody}</div>
+                )}
                 {crossRole && (
                   <button
                     type="button"
                     onClick={() => switchRole(n.role)}
-                    className="mt-2 inline-flex items-center rounded-sm border border-brand-blue/40 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-brand-blue hover:border-brand-blue"
+                    className="mx-3 mb-3 inline-flex items-center rounded-sm border border-brand-blue/40 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-brand-blue hover:border-brand-blue"
                   >
                     {switchRoleLabel(n.role)}
                   </button>

@@ -287,6 +287,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // ONE new-name RPC submit_help_request_v1 inserting typed help rows on
     // the EXISTING customer_requests table at 'in_review';
     // @human-gate-approved, owner-gated apply).
-    expect(guard).toMatch(/SPRINT_BASELINE = 111/);
+    // Then to 112 for the booking-responses seen model (20260706120000
+    // booking_requests_seen, audit PR5) — additive per-user seen table +
+    // gated upsert RPC mirroring the marketplace seen twin; DRAFT,
+    // @human-gate-approved, owner-gated apply.
+    expect(guard).toMatch(/SPRINT_BASELINE = 112/);
   });
 });

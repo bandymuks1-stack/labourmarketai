@@ -72,3 +72,24 @@ export interface BookingRequestRecord {
   readonly createdAt: string;
   readonly updatedAt: string;
 }
+
+/**
+ * Pure "responses since last seen" compute (no I/O — unit-testable), audit
+ * PR5. Counts the caller's OWN proposals that the WORKER moved to a response
+ * status (accepted/declined) after `seenAt` — the respond RPC stamps
+ * updated_at on exactly that transition. The caller's own actions (propose /
+ * withdraw) never count; NaN-safe timestamp comparison, never fabricated.
+ */
+export function countOwnerResponsesSince(
+  rows: readonly { status: BookingStatus; isOwner: boolean; updatedAt: string }[],
+  seenAt: string,
+): number {
+  const seen = Date.parse(seenAt);
+  if (Number.isNaN(seen)) return 0;
+  return rows.filter((r) => {
+    if (!r.isOwner) return false;
+    if (r.status !== "accepted" && r.status !== "declined") return false;
+    const ts = Date.parse(r.updatedAt);
+    return !Number.isNaN(ts) && ts > seen;
+  }).length;
+}
