@@ -285,10 +285,13 @@ describe("app surface — operator queue on the EXISTING admin control room only
   it("does NOT fake a user-facing notification feed — the follow-up layer never touches the bell", () => {
     // The header bell carries ONLY real derived signals since audit PR5
     // (count-gated, each linking the surface that clears it) — the follow-up
-    // layer must not inject its admin-only queue into it.
+    // layer must not inject its admin-only queue into it. The signal
+    // catalogue lives in the notification spine (quality-train PR B).
     const layout = readWeb("app/[locale]/dashboard/layout.tsx");
-    expect(layout).toMatch(/count > 0/); // signals are count-gated, never fabricated
+    const spineSignals = readWeb("lib/notifications/spine-signals.ts");
+    expect(spineSignals).toMatch(/count <= 0/); // count-gated, never fabricated
     expect(layout).not.toMatch(/follow_up|followUp/);
+    expect(spineSignals).not.toMatch(/follow_up|followUp/);
     const notificationPanel = readWeb("components/app/notification-panel.tsx");
     expect(notificationPanel).not.toMatch(/follow_up|followUp|FollowUp/);
     for (const src of [lib, actions, panel]) {

@@ -3479,6 +3479,7 @@
     "notifications": {
         "types": {
           "generic": "Уведомление",
+          "pending_invitations": "Приглашения ждут вашего ответа",
           "unread_messages": "Непрочитанные сообщения",
           "incoming_service_requests": "Заявки на услуги ждут ответа",
           "service_request_responses": "Ответы на ваши заявки",

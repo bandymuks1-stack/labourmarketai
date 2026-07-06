@@ -3479,6 +3479,7 @@
     "notifications": {
         "types": {
           "generic": "Pranešimas",
+          "pending_invitations": "Laukiantys pakvietimai prisijungti",
           "unread_messages": "Neperskaitytos žinutės",
           "incoming_service_requests": "Laukiančios paslaugų užklausos",
           "service_request_responses": "Atsakymai į jūsų užklausas",
