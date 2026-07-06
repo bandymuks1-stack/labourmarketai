@@ -65,11 +65,15 @@ export async function openServiceRequestConversationAction(
   if (!counterpart) redirect(cannotOpen);
 
   const subject = req!.service_offerings?.title?.slice(0, 120) ?? null;
+  // Source relation v1: stamp the just-verified ACCEPTED request row as this
+  // thread's typed source (type 'accepted_service_request' — this caller's
+  // own exact type, no other). Passed only AFTER the gate above held.
   const result = await getOrCreateDirectConversation(
     counterpart,
     locale,
     subject,
     "allowed_accepted_service_request",
+    { type: "accepted_service_request", id: requestId },
   );
   if (!result.ok) redirect(cannotOpen);
   redirect(`/${locale}/dashboard/communication/${result.data.id}`);

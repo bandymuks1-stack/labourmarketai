@@ -6,6 +6,7 @@ import {
   isContactPermitted,
   type ContactPermissionState,
 } from "./communication-eligibility";
+import type { ConversationSourceHint } from "./conversation-source-model";
 
 /**
  * Get-or-create a 1:1 ("direct") conversation between the current user and one
@@ -32,6 +33,14 @@ export async function getOrCreateDirectConversation(
   locale: string,
   subject?: string | null,
   grantedPermission?: ContactPermissionState,
+  /**
+   * Conversation source relation v1: the typed source stamp of the gated
+   * context caller (scouting / accepted service request / demand interest /
+   * accepted booking). Applied ONLY when a NEW conversation is created —
+   * a dedupe hit reuses the existing thread untouched (forward-only, no
+   * retroactive relabelling). The generic open action passes nothing.
+   */
+  sourceHint?: ConversationSourceHint | null,
 ): Promise<CommunicationResult<{ id: string }>> {
   const supabase = await createClient();
   const {
@@ -100,10 +109,13 @@ export async function getOrCreateDirectConversation(
   }
 
   // 3) Permitted — create a fresh direct conversation with both participants.
+  //    The sourceHint (when the gated caller supplied one) is stamped only
+  //    HERE, after the §8.1 gate held — stamping cannot mint permission.
   return createConversation({
     subject: subject ?? null,
     kind: "direct",
     participantProfileIds: [otherProfileId],
     locale,
+    sourceHint: sourceHint ?? null,
   });
 }

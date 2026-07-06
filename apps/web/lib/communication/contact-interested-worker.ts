@@ -101,12 +101,16 @@ export async function contactInterestedWorkerAction(input: {
   if (!workerProfileId) return { ok: false, reason: "worker_unavailable" };
 
   // 4) Open/reopen the in-app thread with the just-verified grant.
+  //    Source relation v1: stamp the just-verified demand row as this
+  //    thread's typed source (type 'demand_interest' — this caller's own
+  //    exact type, no other). Passed only AFTER steps 1-2 held above.
   const subject = (demand.title as string | null)?.slice(0, 120) ?? null;
   const conversation = await getOrCreateDirectConversation(
     workerProfileId,
     locale,
     subject,
     "allowed_demand_interest",
+    { type: "demand_interest", id: requestId },
   );
   if (!conversation.ok) return { ok: false, reason: "error" };
 

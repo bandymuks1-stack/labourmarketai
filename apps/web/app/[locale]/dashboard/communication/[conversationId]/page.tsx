@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
+import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
 
 type MessageRow = {
   id: string;
@@ -58,6 +59,11 @@ export default async function ConversationDetailPage({
   // identity comes ONLY from the permission-gated RPC — no direct
   // co-participant profile read, no invented identity, no contact channel.
   const counterpartNames = await readCounterpartIdentities([conversationId]);
+  // Conversation source relation v1 — typed source context via the
+  // participant-scoped reader RPC only. Empty map (→ exactly today's neutral
+  // header) until the owner applies the migration or when the thread carries
+  // no relation. The raw source id never reaches this page.
+  const sourceContexts = await readConversationSourceContexts([conversationId]);
   const card = describeConversationCard({
     kind: conversation.kind,
     createdBy: conversation.created_by,
@@ -66,6 +72,9 @@ export default async function ConversationDetailPage({
     // §8.2 demand context — the real subject column (for a direct thread it
     // is the demand title written by the gated scouting action).
     subject: conversation.subject,
+    // Source relation v1 — RPC-resolved typed source (or null → the header
+    // renders exactly as before).
+    sourceContext: sourceContexts.get(conversationId) ?? null,
   });
 
   // Table is `conversation_messages`, NOT `messages` — see 0021's header
@@ -174,6 +183,28 @@ export default async function ConversationDetailPage({
               </>
             )}
           </div>
+          {/* Source relation v1 — typed source line, rendered ONLY when the
+              participant-scoped RPC resolved a live source row (never guessed
+              from the subject). With a route for this viewer it is a real
+              link-back; without one it is a plain label — no dead ends. */}
+          {card.sourceKey && (
+            <div className="flex flex-wrap items-center gap-x-1.5 text-[11px]">
+              {card.sourceHref ? (
+                <Link
+                  href={card.sourceHref as "/dashboard"}
+                  className="text-brand-blue hover:underline"
+                  data-testid="thread-source"
+                  data-source-linked="true"
+                >
+                  {t(card.sourceKey)}: {card.sourceTitle}
+                </Link>
+              ) : (
+                <span className="text-text-secondary" data-testid="thread-source">
+                  {t(card.sourceKey)}: {card.sourceTitle}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </header>
 

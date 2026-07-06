@@ -184,6 +184,10 @@ describe("NO new DB migration in this PR", () => {
     // (submit_privacy_request_v1) on the EXISTING customer_requests intake,
     // exact twin of the help-request RPC; DRAFT, needs-human-gate,
     // owner-gated apply; nothing destructive, no notification machinery.
-    expect(count).toBeLessThanOrEqual(113);
+    // Bumped 113 -> 114 for the owner-approved conversation source relation
+    // (20260706210000) — two nullable columns + one participant-scoped
+    // SECURITY DEFINER reader RPC; DRAFT needs-human-gate, owner-gated
+    // apply (NOT part of the market-map read layer, which stays pure TS).
+    expect(count).toBeLessThanOrEqual(114);
   });
 });

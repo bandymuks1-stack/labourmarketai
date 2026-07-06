@@ -294,6 +294,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Then to 113 for the privacy-request intake (20260706150000, quality-
     // train PR G) — one NEW-name gated RPC on the EXISTING customer_requests
     // intake, help-request twin; DRAFT, needs-human-gate.
-    expect(guard).toMatch(/SPRINT_BASELINE = 113/);
+    // Then to 114 for the owner-approved conversation source relation
+    // (20260706210000) — two nullable columns on conversations + one
+    // participant-scoped SECURITY DEFINER reader RPC; DRAFT,
+    // needs-human-gate, owner-gated apply.
+    expect(guard).toMatch(/SPRINT_BASELINE = 114/);
   });
 });
