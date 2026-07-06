@@ -1,6 +1,9 @@
 import { getTranslations } from "next-intl/server";
 
-import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import {
+  listMyPendingWorkerInvitations,
+  type PendingWorkerInvitation,
+} from "@/lib/worker/invitations";
 import { WorkerInvitations } from "./worker-invitations";
 
 /**
@@ -8,9 +11,16 @@ import { WorkerInvitations } from "./worker-invitations";
  * pending company/agency invitations (RLS-scoped to their email) and renders
  * the acceptance UI. Renders nothing when there are none — so it is safe to
  * mount unconditionally on the dashboard (no empty placeholder).
+ *
+ * `preloaded` lets the dashboard fetch the list ONCE (it also needs the count
+ * for the state-driven top slot) and pass it down — no duplicate read.
  */
-export async function WorkerInvitationsCard() {
-  const invitations = await listMyPendingWorkerInvitations();
+export async function WorkerInvitationsCard({
+  preloaded,
+}: {
+  preloaded?: readonly PendingWorkerInvitation[];
+} = {}) {
+  const invitations = preloaded ?? (await listMyPendingWorkerInvitations());
   if (invitations.length === 0) return null;
 
   const t = await getTranslations("workerInvitations");

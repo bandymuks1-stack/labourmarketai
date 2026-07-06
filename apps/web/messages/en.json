@@ -2907,6 +2907,9 @@
       "clarityNote": "One account, two identities — you as a person and your company. Switching only changes which actions you see (find work, offer services, hire, submit a need); agency and buying are actions, not separate systems. Some company actions may need an organization profile later."
     },
     "dashboard": {
+      "topSlot": {
+        "eyebrow": "Most important now"
+      },
       "myZone": {
         "actionsHeading": "What you can do now",
         "incompleteStatus": "Your information is not complete yet",

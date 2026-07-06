@@ -105,11 +105,18 @@ function StatTile({
 export async function WorkCard({
   data,
   avatarUrl = null,
+  compact = false,
 }: {
   data: WorkCardData;
   /** Owner's consented avatar signed URL (existing getOwnAvatar read). When
    *  absent, the canonical AvatarDisplay shows the honest initials monogram. */
   avatarUrl?: string | null;
+  /** Collapsed hero (audit PR6): when the dashboard's state-driven top slot is
+   *  occupied by a stronger card, the work card yields the fold — identity
+   *  hero + readiness ring + the ONE primary next action, nothing else. The
+   *  full card (stats, known/missing chips, employer preview) stays the
+   *  default everywhere else. */
+  compact?: boolean;
 }) {
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.workCard");
@@ -231,6 +238,7 @@ export async function WorkCard({
       data-testid="work-card"
       data-state={state}
       data-readiness-level={level}
+      data-compact={compact ? "true" : "false"}
     >
       {/* Tier corner accents — the landing card's signature scouting frame. */}
       <span
@@ -310,11 +318,14 @@ export async function WorkCard({
         </div>
       </header>
 
-      <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
-        {intro}
-      </p>
+      {!compact && (
+        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
+          {intro}
+        </p>
+      )}
 
       {/* 2a — Real stat tiles (premium player-card stats, real counts only). */}
+      {!compact && (
       <div className="grid grid-cols-3 gap-3">
         <StatTile
           testid="work-card-stat-skills"
@@ -334,9 +345,10 @@ export async function WorkCard({
           label={tp("readiness.label")}
         />
       </div>
+      )}
 
       {/* 2b — KNOWN: what the system already knows (real saved dimensions). */}
-      {clear.length > 0 && (
+      {!compact && clear.length > 0 && (
         <div
           className="flex flex-col gap-2 border-t border-ink-600 pt-4"
           data-testid="work-card-known"
@@ -362,7 +374,7 @@ export async function WorkCard({
       )}
 
       {/* 3 — MISSING: what blocks a stronger Player Card (real gaps). */}
-      {missing.length > 0 && (
+      {!compact && missing.length > 0 && (
         <div
           className="flex flex-col gap-2 border-t border-ink-600 pt-4"
           data-testid="work-card-missing"
@@ -402,7 +414,8 @@ export async function WorkCard({
           values={data.values}
           labels={editorLabels}
         />
-        {secondary.map((d) => (
+        {!compact &&
+        secondary.map((d) => (
           <Link
             key={d}
             href={PAGE_TARGET[d] as "/dashboard"}
@@ -420,7 +433,7 @@ export async function WorkCard({
       {/* "Taip jus galėtų matyti darbdavys" — read-only mirror of the worker's OWN
           saved data; the value of completing the card made tangible. Secondary
           (collapsed). Not a match/score/claim that anyone is looking. */}
-      {clear.length > 0 && (
+      {!compact && clear.length > 0 && (
         <div className="border-t border-ink-600 pt-4">
           <EmployerPreview
             rows={(["work", "availability", "location", "pay", "evidence"] as WorkDim[]).map(

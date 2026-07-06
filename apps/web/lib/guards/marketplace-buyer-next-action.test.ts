@@ -60,7 +60,14 @@ describe("the dashboard renders the buyer status card honestly", () => {
   });
 
   it("is rendered in BOTH the org and worker overview branches", () => {
-    expect((page.match(/\{outgoingRequestsNextAction\}/g) ?? []).length).toBe(2);
+    // Org branch: mounted directly. Worker branch (audit PR6): either promoted
+    // into the state-driven top slot (an ACCEPTED request is the strongest
+    // state after an invitation) or rendered in the remaining-states list.
+    expect(page).toMatch(/\{outgoingRequestsNextAction\}/);
+    expect(page).toMatch(
+      /topSlot !== "accepted_request" && outgoingRequestsNextAction/,
+    );
+    expect(page).toMatch(/"accepted_request" \? \(\s*outgoingRequestsNextAction/);
   });
 });
 

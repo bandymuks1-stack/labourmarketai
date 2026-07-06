@@ -59,12 +59,44 @@ const COMPANY_ACTION: ActionDef = {
 
 const IMPROVES = ["journal", "profile", "map", "messages"] as const;
 
+/** "Kas ką gerina" — the explanation half of the control room, mountable on
+ *  its own so the dashboard can keep the ACTION grid above the fold and demote
+ *  this help block below the active-work surfaces (audit PR6: help must never
+ *  render before action). Same copy, same honesty rules. */
+export async function MyZoneImproves() {
+  const t = await getTranslations("auth.dashboard.myZone");
+  return (
+    <div
+      data-testid="my-zone-improves"
+      className="flex flex-col gap-1.5 rounded-xl border border-border-subtle bg-ink-800/20 p-4"
+    >
+      <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        {t("improvesHeading")}
+      </h3>
+      <ul className="flex flex-col gap-1 text-xs leading-relaxed text-text-secondary">
+        {IMPROVES.map((k) => (
+          <li key={k} className="flex items-start gap-2">
+            <span aria-hidden className="mt-1 text-brand-blue">
+              ·
+            </span>
+            {t(`improves.${k}`)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export async function MyZone({
   hasCompany,
   incomplete,
+  improves = true,
 }: {
   hasCompany: boolean;
   incomplete: boolean;
+  /** Render the "Kas ką gerina" block inline (default). The dashboard passes
+   *  false and mounts <MyZoneImproves/> below the fold instead. */
+  improves?: boolean;
 }) {
   const t = await getTranslations("auth.dashboard.myZone");
   const actions = hasCompany ? [...BASE_ACTIONS, COMPANY_ACTION] : BASE_ACTIONS;
@@ -118,25 +150,9 @@ export async function MyZone({
         </div>
       </div>
 
-      {/* 3. What improves what — one short, honest explanation. */}
-      <div
-        data-testid="my-zone-improves"
-        className="flex flex-col gap-1.5 rounded-xl border border-border-subtle bg-ink-800/20 p-4"
-      >
-        <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-          {t("improvesHeading")}
-        </h3>
-        <ul className="flex flex-col gap-1 text-xs leading-relaxed text-text-secondary">
-          {IMPROVES.map((k) => (
-            <li key={k} className="flex items-start gap-2">
-              <span aria-hidden className="mt-1 text-brand-blue">
-                ·
-              </span>
-              {t(`improves.${k}`)}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* 3. What improves what — one short, honest explanation. The dashboard
+          demotes it below active work via improves={false} + <MyZoneImproves/>. */}
+      {improves && <MyZoneImproves />}
     </section>
   );
 }
