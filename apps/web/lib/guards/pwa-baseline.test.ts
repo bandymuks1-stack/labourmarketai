@@ -27,6 +27,13 @@ describe("web app manifest", () => {
     expect(manifest).toMatch(/theme_color: "#06070D"/);
   });
 
+  it("carries the store taxonomy (readiness v2) — descriptive only", () => {
+    expect(manifest).toMatch(/categories: \["business", "productivity"\]/);
+    // Taxonomy is not a capability claim: still no screenshots field until
+    // real product screenshots exist (a placeholder array would be a lie).
+    expect(manifest).not.toMatch(/screenshots/);
+  });
+
   it("references only icons that exist at stable URLs", () => {
     expect(manifest).toMatch(/\/app-icon\.svg/);
     expect(existsSync(join(ROOT, "public/app-icon.svg"))).toBe(true);
