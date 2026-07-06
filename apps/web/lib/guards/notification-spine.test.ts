@@ -7,6 +7,7 @@ import {
   buildSpineNotifications,
   type SpineCounts,
 } from "@/lib/notifications/spine-signals";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Notification spine guard (quality-train PR B).
@@ -71,6 +72,38 @@ describe("spine assembly is count-gated (never fabricates attention)", () => {
   });
 });
 
+describe("signal catalogue integrity", () => {
+  it("signal ids are unique (each row is one addressable testid)", () => {
+    const ids = SPINE_SIGNALS.map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("signal types are unique (each row maps to its own i18n leaf)", () => {
+    const types = SPINE_SIGNALS.map((s) => s.type);
+    expect(new Set(types).size).toBe(types.length);
+  });
+
+  it("every spine count feeds at least one visible signal — no orphan loads", () => {
+    // getSpineCounts() pays a query for every field; a count that no signal
+    // consumes is silent dead weight (or a signal someone forgot to wire).
+    for (const key of Object.keys(ZERO) as (keyof SpineCounts)[]) {
+      const rows = buildSpineNotifications({ ...ZERO, [key]: 1 }, "worker");
+      expect(
+        rows.length,
+        `SpineCounts.${key} is loaded but no catalogue signal renders it`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it("every signal routes inside the authenticated dashboard shell", () => {
+    // A bell row that lands on a public/marketing page could never clear —
+    // the seen/read models all live behind auth.
+    for (const s of SPINE_SIGNALS) {
+      expect(s.href, s.id).toMatch(/^\/dashboard(\/|$)/);
+    }
+  });
+});
+
 describe("every spine row routes to a page that really exists", () => {
   for (const s of SPINE_SIGNALS) {
     it(`${s.id} → ${s.href}`, () => {
@@ -109,6 +142,48 @@ describe("visiting the destination IS the read event", () => {
     expect(spine).toMatch(
       /import \{ getUnreadConversationCount \} from "@\/lib\/communication\/unread"/,
     );
+    // ...and that helper computes from the participant read model, not a
+    // hardcoded or approximated value.
+    const unread = read("lib/communication/unread.ts");
+    expect(unread).toMatch(/getUnreadConversationCount/);
+    expect(unread).toMatch(/last_read_at/);
+  });
+
+  it("MarkBookingsSeen actually stamps the booking_requests_seen writer", () => {
+    // The page-level guard above proves the component MOUNTS; this proves the
+    // component still CALLS the seen action (a gutted no-op component would
+    // leave the bell count permanently stuck).
+    const cmp = read("components/app/mark-bookings-seen.tsx");
+    expect(cmp).toMatch(
+      /import \{ markBookingRequestsSeen \} from "@\/lib\/booking\/booking-actions"/,
+    );
+    expect(cmp).toMatch(/markBookingRequestsSeen\(\)/);
+    expect(read("lib/booking/booking-actions.ts")).toMatch(
+      /markBookingRequestsSeen/,
+    );
+  });
+
+  it("MarkServiceRequestsSeen actually stamps the request-loop seen model", () => {
+    const cmp = read("components/app/mark-service-requests-seen.tsx");
+    expect(cmp).toMatch(
+      /import \{ markServiceRequestsSeen \} from "@\/lib\/marketplace\/service-requests"/,
+    );
+    expect(cmp).toMatch(/markServiceRequestsSeen\(\)/);
+  });
+
+  it("pending invitations clear on the SAME helper the spine counts", () => {
+    // Signal href is /dashboard: the overview must load the identical
+    // invitations helper and render the accept/decline card, otherwise the
+    // bell would point at a page that neither shows nor resolves the signal.
+    const spine = read("lib/notifications/spine.ts");
+    expect(spine).toMatch(
+      /import \{ listMyPendingWorkerInvitations \} from "@\/lib\/worker\/invitations"/,
+    );
+    const overview = read("app/[locale]/dashboard/page.tsx");
+    expect(overview).toMatch(
+      /import \{ listMyPendingWorkerInvitations \} from "@\/lib\/worker\/invitations"/,
+    );
+    expect(overview).toMatch(/<WorkerInvitationsCard/);
   });
 });
 
@@ -126,6 +201,34 @@ describe("bell, badges and layout consume the one spine source", () => {
     expect(LAYOUT).toMatch(/const navBadges = buildNavBadges\(spineCounts\)/);
   });
 
+  it("the header actually renders the bell", () => {
+    expect(LAYOUT).toMatch(/<NotificationPanel \/>/);
+  });
+
+  it("BOTH nav surfaces (desktop tabs + mobile bottom nav) receive the badges", () => {
+    expect(LAYOUT).toMatch(/<DashboardTabs[^>]*badges=\{navBadges\}/);
+    expect(LAYOUT).toMatch(/<BottomNav badges=\{navBadges\}/);
+  });
+
+  it("nav badges carry ONLY tabs whose surface clears on visit", () => {
+    // Doctrine (spine.ts): a badge that cannot clear is permanent noise.
+    // Today only Messages has a read model — adding another badge is a
+    // conscious catalogue change, so this pin must be updated with it.
+    const spine = read("lib/notifications/spine.ts");
+    expect(spine).toMatch(
+      /return \{ communication: counts\.unreadConversations \};/,
+    );
+  });
+
+  it("panel empty state renders localized copy, never a hardcoded string", () => {
+    const panel = read("components/app/notification-panel.tsx");
+    expect(panel).toMatch(/t\("emptyTitle"\)/);
+    expect(panel).toMatch(/t\("emptyBody"\)/);
+    // Unknown signal types fall back to the localized generic label — the
+    // raw enum must never reach the user.
+    expect(panel).toMatch(/tTypes\("generic"\)/);
+  });
+
   it("the bell panel renders each signal as a LINK to its clearing surface", () => {
     const panel = read("components/app/notification-panel.tsx");
     expect(panel).toMatch(/n\.href \? \(/);
@@ -138,16 +241,35 @@ describe("bell, badges and layout consume the one spine source", () => {
 });
 
 describe("every spine signal type has copy in every served locale", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  // Driven by the routing source of truth: promoting a locale to active
+  // automatically extends this guard — no manual list to forget.
+  for (const loc of activeLocales) {
     it(`${loc}: auth.notifications.types covers the whole catalogue`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
-        auth: { notifications: { types: Record<string, string> } };
+        auth: {
+          notifications: {
+            emptyTitle?: string;
+            emptyBody?: string;
+            types: Record<string, string>;
+          };
+        };
       };
       const types = msgs.auth.notifications.types;
       for (const s of SPINE_SIGNALS) {
         expect(
           types[s.type]?.trim().length,
           `${loc}: missing auth.notifications.types.${s.type}`,
+        ).toBeGreaterThan(0);
+      }
+      // The panel's unknown-type fallback and empty state are copy too.
+      expect(
+        types.generic?.trim().length,
+        `${loc}: missing auth.notifications.types.generic`,
+      ).toBeGreaterThan(0);
+      for (const key of ["emptyTitle", "emptyBody"] as const) {
+        expect(
+          msgs.auth.notifications[key]?.trim().length,
+          `${loc}: missing auth.notifications.${key}`,
         ).toBeGreaterThan(0);
       }
     });
