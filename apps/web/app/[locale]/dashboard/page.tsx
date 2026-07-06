@@ -8,7 +8,7 @@ import { DashboardChainActions } from "@/components/app/dashboard-chain-actions"
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
-import { MyZone } from "@/components/app/my-zone";
+import { MyZone, MyZoneImproves } from "@/components/app/my-zone";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import { WorkCard } from "@/components/app/work-card";
@@ -32,6 +32,8 @@ import {
   customerNextAction,
   type NextAction,
 } from "@/lib/dashboard/next-action";
+import { decideTopSlot } from "@/lib/dashboard/top-slot";
+import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { type Role } from "@/lib/auth/actions";
 
 // Authenticated cockpit — must never be served from a stale cache, or a logged-in
@@ -126,6 +128,9 @@ export default async function DashboardOverviewPage({
   // into the real request loop. 0 on any missing-data / needs-migration state →
   // no card, no fake badge (honest degradation).
   const tMarket = await getTranslations("marketplace");
+  // Fetched ONCE here: the state-driven top slot needs the count and the
+  // invitations card needs the rows (passed down as `preloaded`).
+  const invitations = await listMyPendingWorkerInvitations();
   const pendingServiceRequests = await getPendingIncomingRequestCount();
   // "New since last seen" markers — a real OTHER-party update after this user last
   // opened /dashboard/service-requests. 0 when never opened (seen_at null) or the
@@ -370,10 +375,25 @@ export default async function DashboardOverviewPage({
         />
         {RoleNoticeBanner}
         {Header}
-        <CurrentSpaceHeader role={role} />
-        {/* Universal command finder (WAGON 3) — type a normal term, get the
-            right EXISTING page. Registry-only results, audience-filtered. */}
-        <CommandFinder />
+
+        {/* Audit PR6 org-branch order: the single data-driven primary action
+            FIRST (entries waiting → review; nothing waiting → invite/open
+            team; a buyer → their requests room), then real pending-state
+            alerts, then chain actions / identity, then the demand intake
+            (previously position 11), explainers last. */}
+        <DashboardNextAction
+          action={nextAction}
+          counts={{ pending: pendingReview }}
+        />
+
+        {/* Real pending states — provider inbox, own outgoing requests,
+            booking responses. Count-gated, never fake. */}
+        {serviceRequestsNextAction}
+        {outgoingRequestsNextAction}
+        {bookingResponsesNextAction}
+
+        {/* Secondary — the role's chain entry points. */}
+        <DashboardChainActions role={role} />
         {/* Active-role focus: only this role's identity actions on the first
             screen; the other identity stays reachable via Manage spaces. */}
         <IdentityActions
@@ -383,39 +403,11 @@ export default async function DashboardOverviewPage({
           focusRole={role}
         />
 
-        {/* The single, clear primary action for this role/state (data-driven:
-            entries waiting → review; nothing waiting → invite/open team; a
-            buyer → their requests room). */}
-        <DashboardNextAction
-          action={nextAction}
-          counts={{ pending: pendingReview }}
-        />
-
-        {/* Secondary — the role's chain entry points. */}
-        <DashboardChainActions role={role} />
-        <WorkerInvitationsCard />
-
-        {/* Real provider next-action — open incoming service requests (> 0). */}
-        {serviceRequestsNextAction}
-
-        {/* Real buyer next-action — status of the caller's own outgoing requests. */}
-        {outgoingRequestsNextAction}
-        {bookingResponsesNextAction}
-
-        {/* Always-on access to both halves of the service loop (publish / discover). */}
-        {marketplaceAccess}
-
         {/* Company / agency: create a structured work need (hire / partner).
             A buyer/customer leads with their own request room (next action
             above → /dashboard/buyer), so no hiring intake is shown to them. */}
         {role !== "customer" && (
           <>
-            <p
-              className="text-[11px] leading-relaxed text-text-muted"
-              data-testid="journey-progress-helper"
-            >
-              {tw("pilot.progressHelper")}
-            </p>
             <section
               id="demand-intake"
               className="card-border flex flex-col gap-5 p-6 scroll-mt-20 sm:p-8"
@@ -439,12 +431,29 @@ export default async function DashboardOverviewPage({
                 stepTitles={[tf("company.c1"), tf("company.c2"), tf("company.c3")]}
               />
             </section>
+            <p
+              className="text-[11px] leading-relaxed text-text-muted"
+              data-testid="journey-progress-helper"
+            >
+              {tw("pilot.progressHelper")}
+            </p>
           </>
         )}
 
         {demandReadback && (
           <DemandRequestsReadback result={demandReadback} labels={readbackLabels} locale={locale} />
         )}
+
+        <WorkerInvitationsCard preloaded={invitations} />
+
+        {/* Always-on access to both halves of the service loop (publish / discover). */}
+        {marketplaceAccess}
+
+        {/* Explainers last (audit PR6): help must never render above action. */}
+        <CurrentSpaceHeader role={role} />
+        {/* Universal command finder (WAGON 3) — type a normal term, get the
+            right EXISTING page. Registry-only results, audience-filtered. */}
+        <CommandFinder />
       </div>
     );
   }
@@ -511,14 +520,60 @@ export default async function DashboardOverviewPage({
   const tBookings = await getTranslations("bookings");
   const pendingBookings = await getPendingIncomingBookingCount();
 
+  // Real booking next-action — only when there are pending incoming
+  // proposals (> 0). Not a generic nav tile; a true action-needed card
+  // that links to the bookings detail (home = Žinutės). No fake count.
+  const bookingsPendingNextAction =
+    pendingBookings > 0 ? (
+      <Link
+        href={"/dashboard/bookings" as "/dashboard"}
+        data-testid="dashboard-bookings-next-action"
+        className="flex items-center justify-between gap-3 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-4 py-3 text-sm text-text-primary hover:border-brand-blue"
+      >
+        <span className="flex flex-col">
+          <span className="font-semibold">{tBookings("pendingLink")}</span>
+          <span className="text-xs text-text-muted">{tBookings("pendingNote")}</span>
+        </span>
+        <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white">
+          {pendingBookings}
+        </span>
+      </Link>
+    ) : null;
+
+  // ── State-driven top slot (audit PR6): exactly ONE card above the fold,
+  // chosen by the pure priority ladder from REAL loaded counts. `new_user`
+  // and `null` render no separate card — the full work card IS the next
+  // action then. When a stronger card claims the slot, the work card
+  // collapses to its hero so the action grid stays within one swipe. ──
+  const topSlot = decideTopSlot({
+    pendingInvitations: invitations.length,
+    acceptedOutgoing: outgoingSummary.accepted,
+    pendingIncomingServiceRequests: pendingServiceRequests,
+    pendingIncomingBookings: pendingBookings,
+    bookingResponsesNew,
+    isFirstUse,
+  });
+  const topSlotCard =
+    topSlot === "invitation" ? (
+      <WorkerInvitationsCard preloaded={invitations} />
+    ) : topSlot === "accepted_request" ? (
+      outgoingRequestsNextAction
+    ) : topSlot === "incoming_service_request" ? (
+      serviceRequestsNextAction
+    ) : topSlot === "incoming_booking" ? (
+      bookingsPendingNextAction
+    ) : topSlot === "booking_response" ? (
+      bookingResponsesNextAction
+    ) : null;
+
   return (
     <div className="flex flex-col gap-6">
-      {/* Action-first control room (Mano erdvė). Three things, nothing else:
-          (1) who I am here + the ONE next action (CurrentSpaceHeader + WorkCard
-          status), (2) "Ką galite padaryti dabar" fast actions, (3) "Kas ką
-          gerina" — how the actions feed each other. The old loose stack
-          (8-tile identity strip + today screen + first-use panel) is gone: it
-          was a wall of loosely related cards, not an action-first room. */}
+      {/* Action-first control room (Mano erdvė), audit-PR6 hierarchy:
+          (1) the state-driven top slot — the ONE most important real next
+          action; (2) "Mano darbo kortelė" (collapsed when the slot is
+          occupied); (3) "Ką galite padaryti dabar" fast actions within one
+          swipe; (4) remaining real pending states; (5) marketplace access;
+          (6) explainers LAST — help never renders above action. */}
       <TelemetryView
         event={FUNNEL_EVENTS.dashboardViewed}
         metadata={{ surface: "dashboard", role_context: "worker" }}
@@ -528,57 +583,59 @@ export default async function DashboardOverviewPage({
         metadata={{ surface: "work_card" }}
       />
       {RoleNoticeBanner}
+
+      {/* The single most important next action for THIS user state. */}
+      {topSlotCard && (
+        <section
+          data-testid="dashboard-top-slot"
+          data-top-slot={topSlot}
+          className="flex flex-col gap-2"
+        >
+          <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+            {t("topSlot.eyebrow")}
+          </span>
+          {topSlotCard}
+        </section>
+      )}
+
+      {/* "Mano darbo kortelė" — the state-aware status: what's clear / what's
+          missing + the ONE best next action (+ why it helps). Real data only.
+          Collapses to its hero when the top slot carries a stronger card.
+          Anchored so the profile hub's availability pillar can deep-link the
+          ONE canonical editor (PR9) — no duplicate editing surface. */}
+      <div id="work-card">
+        <WorkCard
+          data={cardData}
+          avatarUrl={workerAvatar.signedUrl}
+          compact={topSlotCard !== null}
+        />
+      </div>
+
+      {/* The action-first control room: readiness + fast actions. The
+          "what improves what" explainer is demoted below (help ≠ action).
+          `incomplete` is the real first-use state (no profession or no
+          entries yet); company actions appear only when a real company exists. */}
+      <MyZone hasCompany={hasCompany} incomplete={isFirstUse} improves={false} />
+
+      {/* Remaining real pending states — everything the top slot did NOT
+          promote, same honest count-gated cards as before. */}
+      {topSlot !== "invitation" && <WorkerInvitationsCard preloaded={invitations} />}
+      {topSlot !== "incoming_booking" && bookingsPendingNextAction}
+      {topSlot !== "incoming_service_request" && serviceRequestsNextAction}
+      {topSlot !== "accepted_request" && outgoingRequestsNextAction}
+      {topSlot !== "booking_response" && bookingResponsesNextAction}
+
+      {/* Always-on access to both halves of the service loop (publish / discover). */}
+      {marketplaceAccess}
+
+      {/* ── Explainers last (audit PR6): help must never render above action. ── */}
+      <MyZoneImproves />
       <CurrentSpaceHeader role={role} />
 
       {/* Universal command finder (WAGON 3) — type a normal term ("cv",
           "žurnalas", "kainos"), get the right EXISTING page. Registry-only
           results, audience-filtered from server-derived signals. */}
       <CommandFinder />
-
-      {/* "Mano darbo kortelė" — the state-aware status: what's clear / what's
-          missing + the ONE best next action (+ why it helps). Real data only.
-          Anchored so the profile hub's availability pillar can deep-link the
-          ONE canonical editor (PR9) — no duplicate editing surface. */}
-      <div id="work-card">
-        <WorkCard data={cardData} avatarUrl={workerAvatar.signedUrl} />
-      </div>
-
-      {/* The action-first control room: readiness + fast actions + what-improves
-          -what. `incomplete` is the real first-use state (no profession or no
-          entries yet); company actions appear only when a real company exists. */}
-      <MyZone hasCompany={hasCompany} incomplete={isFirstUse} />
-
-      <WorkerInvitationsCard />
-
-      {/* Real booking next-action — only when there are pending incoming
-          proposals (> 0). Not a generic nav tile; a true action-needed card
-          that links to the bookings detail (home = Žinutės). No fake count. */}
-      {pendingBookings > 0 && (
-        <Link
-          href={"/dashboard/bookings" as "/dashboard"}
-          data-testid="dashboard-bookings-next-action"
-          className="flex items-center justify-between gap-3 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-4 py-3 text-sm text-text-primary hover:border-brand-blue"
-        >
-          <span className="flex flex-col">
-            <span className="font-semibold">{tBookings("pendingLink")}</span>
-            <span className="text-xs text-text-muted">{tBookings("pendingNote")}</span>
-          </span>
-          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white">
-            {pendingBookings}
-          </span>
-        </Link>
-      )}
-
-      {/* Real provider next-action — open incoming service requests (> 0). Same
-          honest, count-gated card as the org branch; links into the request loop. */}
-      {serviceRequestsNextAction}
-
-      {/* Real buyer next-action — status of the caller's own outgoing requests. */}
-      {outgoingRequestsNextAction}
-      {bookingResponsesNextAction}
-
-      {/* Always-on access to both halves of the service loop (publish / discover). */}
-      {marketplaceAccess}
     </div>
   );
 }

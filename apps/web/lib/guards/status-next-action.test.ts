@@ -94,8 +94,11 @@ describe("4. booking responses are visible, never silent", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(/data-testid="dashboard-booking-responses-next-action"/);
     expect(page).toMatch(/"\/dashboard\/bookings"/);
-    const renders = page.match(/\{bookingResponsesNextAction\}/g) ?? [];
-    expect(renders.length).toBe(2);
+    // Org branch: mounted directly. Worker branch (audit PR6): either promoted
+    // into the state-driven top slot or rendered in the remaining-states list.
+    expect(page).toMatch(/\{bookingResponsesNextAction\}/);
+    expect(page).toMatch(/topSlot !== "booking_response" && bookingResponsesNextAction/);
+    expect(page).toMatch(/"booking_response" \? \(\s*bookingResponsesNextAction/);
   });
   it("opening the bookings page IS the read event", () => {
     const bookings = read("app/[locale]/dashboard/bookings/page.tsx");

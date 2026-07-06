@@ -2907,6 +2907,9 @@
       "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
+      "topSlot": {
+        "eyebrow": "Svarbiausia dabar"
+      },
       "myZone": {
         "actionsHeading": "Ką galite padaryti dabar",
         "incompleteStatus": "Jūsų informacija dar nepilna",

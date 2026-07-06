@@ -52,7 +52,13 @@ describe("the dashboard surfaces the request loop as a count-gated next action",
   });
 
   it("is rendered in BOTH the org and worker overview branches", () => {
-    expect((page.match(/\{serviceRequestsNextAction\}/g) ?? []).length).toBe(2);
+    // Org branch: mounted directly. Worker branch (audit PR6): either promoted
+    // into the state-driven top slot or rendered in the remaining-states list.
+    expect(page).toMatch(/\{serviceRequestsNextAction\}/);
+    expect(page).toMatch(
+      /topSlot !== "incoming_service_request" && serviceRequestsNextAction/,
+    );
+    expect(page).toMatch(/"incoming_service_request" \? \(\s*serviceRequestsNextAction/);
   });
 
   it("uses the real count in the badge (no hardcoded number)", () => {
