@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -40,6 +40,19 @@ const mono = JetBrains_Mono({
 // buildPageMetadata() so a subpage never inherits the homepage's canonical
 // (which would deindex it). The apex (labourmarket.ai) is the metadataBase
 // so every relative/OG URL resolves to the public marketing surface.
+// PWA baseline (audit PR9): browser-chrome theme color follows the ink-900
+// page token in both schemes (app/globals.css); viewport-fit=cover lets the
+// bottom nav honour iOS safe-area insets it already pads for.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#06070D" },
+    { media: "(prefers-color-scheme: light)", color: "#F4F6FB" },
+  ],
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -53,6 +66,13 @@ export async function generateMetadata({
     title: brand.title,
     description: brand.description,
     applicationName: BRAND_NAME,
+    // iOS add-to-home-screen metadata (audit PR9). No offline claim — just
+    // honest install chrome matching the manifest.
+    appleWebApp: {
+      capable: true,
+      title: BRAND_NAME,
+      statusBarStyle: "black-translucent",
+    },
     robots: { index: true, follow: true },
     openGraph: {
       type: "website",
