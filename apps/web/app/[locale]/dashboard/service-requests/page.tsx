@@ -122,17 +122,19 @@ export default async function ServiceRequestsPage({
         <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
       </Link>
 
-      {/* Marketplace connections (§8.4): a request/order is not a dead end — it
-          flows to matching (find the right people), calendar (a confirmed order
-          becomes a booking), map (where), and the diary (completed work as
-          fact). Reuses existing canonical routes; navigation only, no fake data. */}
+      {/* Marketplace connections (§8.4): a request is not a dead end — it links
+          onward to matching (find the right people), planning (bookings live
+          there; NO automatic accepted-request → booking bridge exists, so the
+          copy must never claim one — concept cleanup PR7), map (where), and
+          the diary (completed work as fact). Reuses existing canonical routes;
+          navigation only, no fake data. */}
       <MarketplaceConnections t={t} />
     </div>
   );
 }
 
-/** Compact, mobile-first bridge from the order loop to the rest of the system
- *  (matching / calendar / map / diary). Existing routes only — no duplicates. */
+/** Compact, mobile-first bridge from the request loop to the rest of the system
+ *  (matching / planning / map / diary). Existing routes only — no duplicates. */
 function MarketplaceConnections({
   t,
 }: {

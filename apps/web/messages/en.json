@@ -222,7 +222,7 @@
     },
     "agency": {
       "name": "Partner services",
-      "purpose": "Offer candidates or teams and find assignments."
+      "purpose": "Offer candidates or teams and find work requests."
     },
     "buyer": {
       "name": "My requests",
@@ -400,7 +400,7 @@
       "title": "The operating layer connects to",
       "intro": "The map shows where things are — manage them on these surfaces.",
       "marketplace": "Marketplace",
-      "marketplaceNote": "Services and orders",
+      "marketplaceNote": "Services and requests",
       "opportunities": "Opportunities",
       "opportunitiesNote": "Work that fits",
       "bookings": "Plan & bookings",
@@ -1312,7 +1312,7 @@
       "pilotDisclaimer": "We don't auto-verify candidates. Nothing becomes public without your decision. You can prepare an offer calmly — it's saved right away and stays private to you.",
       "firstAction": {
         "title": "Create a candidates / services offer draft",
-        "body": "First useful action: describe the workers you can supply or the assignments you're looking for. The draft stays private to you."
+        "body": "First useful action: describe the workers you can supply or the work requests you're looking for. The draft stays private to you."
       },
       "draftForm": {
         "field": {
@@ -2380,7 +2380,7 @@
       "description": "Your company: team, project and need management. Will be enabled later."
     },
     "agency": {
-      "description": "A company capability — offer candidates or teams and find assignments. Will be enabled later."
+      "description": "A company capability — offer candidates or teams and find work requests. Will be enabled later."
     },
     "customer": {
       "description": "An action — submit and manage requests for services, specialists or teams. Will be enabled later."
@@ -2521,7 +2521,7 @@
     },
     "customer_workspace": {
       "label": "Customer space",
-      "description": "Service ordering and reports for customers."
+      "description": "Service requests and reports for customers."
     },
     "document_records": {
       "label": "Document records",
@@ -2864,7 +2864,7 @@
         },
         "customer": {
           "title": "Customer",
-          "desc": "Order services, get work reports."
+          "desc": "Request services, get work reports."
         },
         "infoBox": "Whatever you pick is only a starting point — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "continue": "Continue",
@@ -3424,8 +3424,8 @@
           "proofs": "Empty. Track record and client testimonials will be enabled later."
         },
         "customer": {
-          "seek": "Empty. Service ordering and search will be enabled later.",
-          "proofs": "Empty. Order history and reviews given will be enabled later."
+          "seek": "Empty. Service request search will be enabled later.",
+          "proofs": "Empty. Request history and reviews given will be enabled later."
         },
         "discover": "The discovery feed will be enabled later.",
         "search": "Detailed search will be enabled later.",
@@ -4797,11 +4797,11 @@
     },
     "connections": {
       "title": "How the marketplace connects",
-      "intro": "A request or order moves through the rest of the system.",
+      "intro": "A request moves through the rest of the system.",
       "matching": "Opportunities",
       "matchingNote": "A request finds the right people",
       "calendar": "Plan & bookings",
-      "calendarNote": "A confirmed order becomes a booking",
+      "calendarNote": "Plan work and bookings",
       "map": "Map",
       "mapNote": "Where the work and services are",
       "diary": "Work diary",
@@ -6100,8 +6100,8 @@
     "connections": {
       "title": "Planning connects to",
       "intro": "A booking is part of your plan. These are the surfaces it links to.",
-      "marketplace": "Marketplace orders",
-      "marketplaceNote": "Requests and confirmed orders",
+      "marketplace": "Marketplace requests",
+      "marketplaceNote": "Service requests and their statuses",
       "map": "Map",
       "mapNote": "Where work and bookings are",
       "diary": "Work diary",
