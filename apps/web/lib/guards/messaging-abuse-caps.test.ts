@@ -190,6 +190,11 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     const interest = read("lib/communication/contact-interested-worker.ts");
     expect(interest).toMatch(/demand\.title/);
     expect(interest).toMatch(/interestStatus === "withdrawn"/);
+    // …the booking action (lifecycle v1) derives it from the REAL accepted
+    // booking row's role_text it verified server-side…
+    const booking = read("lib/booking/booking-conversation.ts");
+    expect(booking).toMatch(/role_text\?\.slice/);
+    expect(booking).toMatch(/status !== "accepted"/);
     // …and nobody else calls getOrCreateDirectConversation.
     const callers = walkSources().filter(
       (rel) =>
@@ -198,6 +203,7 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     );
     expect(callers.sort()).toEqual(
       [
+        "lib/booking/booking-conversation.ts",
         "lib/communication/contact-interested-worker.ts",
         "lib/communication/open-conversation-action.ts",
         "lib/communication/request-worker-conversation.ts",

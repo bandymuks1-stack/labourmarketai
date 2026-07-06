@@ -45,6 +45,10 @@ const SUBMIT = /type=\s*["']submit["']/;
 const NATIVE_NAV = new Set([
   "components/app/account-menu.tsx", // logout POST → redirect
   "components/app/message-button.tsx", // open-conversation action → redirect
+  // Accepted-booking message CTA (lifecycle v1) — openBookingConversationAction
+  // form → redirect to the conversation; feedback is the navigation itself
+  // (failure lands on the honest ?notice=cannot_open messages state).
+  "app/[locale]/dashboard/bookings/page.tsx",
   "app/[locale]/dashboard/admin/matching/page.tsx", // start-conversation = same openDirectConversationAction → redirect; the review form on this page is the client MatchingWorkbenchReview (covered separately)
   "app/[locale]/dashboard/account/page.tsx", // logout POST
   // "submit draft for real" + agency-mode "offer" (audit PR4) — the
