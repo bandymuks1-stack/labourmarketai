@@ -24,13 +24,13 @@ const DOT: Record<ReviewTimelineEvent["result"] | "created" | "waiting", string>
   waiting: "bg-amber-500",
   approved: "bg-emerald-500",
   changes_requested: "bg-amber-500",
-  rejected: "bg-state-error",
+  rejected: "bg-state-danger",
 };
 
 const TEXT: Record<ReviewTimelineEvent["result"], string> = {
   approved: "text-emerald-700",
   changes_requested: "text-amber-700",
-  rejected: "text-state-error",
+  rejected: "text-state-danger",
 };
 
 const SUPPORTED_ROLES = ["manager", "owner", "external_manager"] as const;

@@ -49,4 +49,23 @@ export const colors = {
   trust: {
     accent: c("trust-accent"),
   },
+  // Semantic surface/border aliases (root-cause audit PR3). A long tail of
+  // components (213 usages / 47 files) was written against `bg-surface-*` /
+  // `border-border-*` classes that never existed in this map, so Tailwind
+  // emitted no CSS for them: those cards rendered with transparent
+  // backgrounds and the preflight fallback border. The aliases resolve to the
+  // SAME ink channels the hand-tokenized cards already use (e.g. work-card's
+  // `border-ink-600 bg-ink-800/40`), so dark↔light stays a pure token swap
+  // and no component needed editing. Guarded by
+  // lib/guards/design-token-classes.test.ts.
+  surface: {
+    1: c("ink-800"), // primary raised card/panel on the ink-900 page (light: white card)
+    2: c("ink-700"), // second-level raised layer / nested panel
+    muted: c("ink-700"), // subdued inset strip
+  },
+  border: {
+    DEFAULT: c("ink-500"), // `border-border(/40|/60)` hairlines
+    subtle: c("ink-600"), // quiet card outline — dimmer than default
+    default: c("ink-500"), // emphasized outline — `border-border-default`
+  },
 } as const;
