@@ -14,8 +14,9 @@ import {
  * - the EXPORT is a real RLS-scoped read of the caller's OWN data — no
  *   service role, no other-user tables, nothing destructive;
  * - the DELETION path files a reviewed REQUEST — nothing in the privacy
- *   layer ever deletes, and the DRAFT intake migration stays needs-human-
- *   gate with a rollback and no notification machinery.
+ *   layer ever deletes, and the intake migration carries the owner's
+ *   @human-gate-approved marker with a rollback and no notification
+ *   machinery.
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -23,9 +24,9 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 const EXPORT_LIB = read("lib/privacy/export-data.ts");
 const ACTIONS = read("lib/privacy/actions.ts");
-// The RED-class intake migration (SECURITY DEFINER + GRANT) lives in its own
-// needs-human-gate draft PR — until the owner approves and merges it, these
-// migration assertions are pending, and the app degrades honestly (the
+// The RED-class intake migration (SECURITY DEFINER + GRANT) was owner-
+// approved 2026-07-06 (@human-gate-approved). Until it exists in the tree
+// these migration assertions are pending, and the app degrades honestly (the
 // deletion form shows "not accepted yet"; the export needs no migration).
 const MIGRATION_REL =
   "../../supabase/migrations/20260706150000_privacy_request_intake.sql";
@@ -97,8 +98,10 @@ describe("deletion is a reviewed REQUEST — never a destructive action", () => 
     }
   });
 
-  migrationIt("the DRAFT migration is human-gated, non-destructive, notification-free", () => {
-    expect(MIGRATION).toMatch(/DRAFT — needs-human-gate/);
+  migrationIt("the migration is human-gated, non-destructive, notification-free", () => {
+    // Owner approved 2026-07-06 — the RED-class human gate must stay
+    // explicitly recorded in the migration header.
+    expect(MIGRATION).toMatch(/@human-gate-approved/);
     expect(MIGRATION).toMatch(/security definer/i);
     expect(MIGRATION).toMatch(/auth\.uid\(\)/);
     // Scan the executable SQL only — the header comments legitimately SAY
