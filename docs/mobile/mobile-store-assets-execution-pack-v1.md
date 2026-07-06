@@ -7,6 +7,33 @@ with what tool, and **who** performs each step — `OWNER` (only the owner
 can do it) or `AGENT` (an autonomous PR can do it once its preconditions
 are met).
 
+## Owner decisions locked 2026-07-06
+
+The owner reviewed this pack and locked the following direction. Every
+step below is aligned to these decisions; where the original draft
+disagreed it has been corrected in place.
+
+1. **PWA-first.** The installable PWA is the product's mobile form. No
+   native rewrite.
+2. **Android TWA first.** The first store presence is the Trusted Web
+   Activity path on Google Play (§7).
+3. **Capacitor / iOS later — explicitly DEFERRED, not never.** iOS ships
+   as add-to-home-screen for now; the Capacitor/native-shell route is
+   revisited only on explicit commercial need. §6 metadata stays
+   prepared-only.
+4. **No service worker until the offline strategy is approved.** The
+   earlier draft treated the service-worker PR as immediately
+   AGENT-executable ("policy already decided"). That is superseded: the
+   SW PR is **owner-gated on offline-strategy approval**. Until the owner
+   approves the offline strategy, SW absence stays guard-enforced
+   (`apps/web/lib/guards/pwa-baseline.test.ts`) and no SW PR may open.
+5. **No fake screenshots or staged assets.** Real product screens with
+   real states only (honest empty states are fine) — §3 rule is
+   owner-confirmed, non-negotiable.
+6. **No store submission yet.** Everything here is preparation. Actual
+   Play Console upload/submission happens only after the OWNER checklist
+   in §8 is complete and the owner performs the upload steps personally.
+
 Nothing in this document generates assets, adds a native wrapper, touches
 landing/public marketing pages, changes product code, or submits anything
 to any store. It is the runbook those follow-up PRs will execute.
@@ -23,18 +50,20 @@ stay `self-declared / journal-supported / manager-confirmed` (never
 |---|---|---|---|
 | 1 | Icon source approval | OWNER | nothing — one-line decision |
 | 2 | PNG icon export + manifest wiring PR | AGENT | step 1 |
-| 3 | Maskable verification (maskable.app) | AGENT (evidence) + OWNER (eyeball) | step 2 |
-| 4 | Service-worker PR (Play quality bar) | AGENT | nothing (policy already decided) |
-| 5 | Screenshot capture (LT minimum set first) | AGENT captures, OWNER approves | step 2 recommended; real account state approved by owner |
-| 6 | Play metadata final wording | OWNER | nothing — drafts below are ready |
-| 7 | Support contact decision | OWNER | nothing |
-| 8 | Play developer account ($25) | OWNER | steps 1–7 |
-| 9 | Bubblewrap init/build + signing key | OWNER (key is owner-held) | steps 2, 4, 8 |
-| 10 | `assetlinks.json` PR | AGENT | step 9 (fingerprint) |
-| 11 | Internal-testing upload → production | OWNER | steps 9–10 |
+| 3 | Maskable verification (maskable.app) | AGENT (evidence) + OWNER (approval) | step 2 |
+| 4 | Offline-strategy approval | OWNER | nothing — decision gate for step 5 |
+| 5 | Service-worker PR (Play quality bar) | AGENT | step 4 (**owner-gated** — no SW until offline strategy approved) |
+| 6 | Screenshot capture (LT minimum set first) | AGENT captures, OWNER approves flow + reviews images | step 2 recommended; real account state approved by owner |
+| 7 | Play metadata final wording | OWNER | nothing — drafts below are ready |
+| 8 | Support contact decision | OWNER | nothing |
+| 9 | Play developer account ($25) | OWNER | steps 1–8 |
+| 10 | Bubblewrap init/build + signing key | OWNER (key is owner-held) | steps 2, 5, 9 |
+| 11 | `assetlinks.json` PR | AGENT | step 10 (fingerprint) |
+| 12 | Internal-testing upload → production | OWNER | steps 10–11 |
 
-Steps 1, 4 and 6–7 can start **today** in parallel. Apple/iOS remains
-DEFERRED throughout (§6).
+Steps 1, 4 and 7–8 can start **today** in parallel — all four are owner
+decisions, no agent work is unblocked before step 1 or step 4 lands.
+Capacitor/iOS remains DEFERRED throughout (§6) — deferred, not never.
 
 ---
 
@@ -271,9 +300,11 @@ its own owner-approved PR; NOT part of any autonomous slice.
 
 ## 6. Apple App Store metadata (DEFERRED — prepared only)
 
-Standing decision unchanged (readiness v1 §4 / v2): **no native wrapper**;
-iOS ships as add-to-home-screen. Metadata below exists only so nothing has
-to be invented if the owner ever green-lights iOS. **Do not act on it.**
+Owner-locked 2026-07-06 (decision lock item 3): **Capacitor/iOS comes
+later — explicitly deferred, not never.** For now there is no native
+wrapper; iOS ships as add-to-home-screen. Metadata below exists only so
+nothing has to be invented when the owner green-lights the Capacitor/iOS
+phase. **Do not act on it until then.**
 
 | Field | Draft |
 |---|---|
@@ -298,10 +329,12 @@ thin-wrapper rejection risk.
 Preconditions (must be true, in this order — none are done yet):
 
 1. **Icon PR merged** (§1 items 1–5 + manifest/layout/guard wiring).
-2. **Service-worker PR merged** — Play quality bar. Policy already
-   decided (readiness v1 §5): cache static assets + honest offline
-   fallback page, NEVER cache authed HTML. SW absence stays
-   guard-enforced until that PR lands. AGENT-executable now.
+2. **Offline strategy approved by OWNER, then service-worker PR merged**
+   — Play quality bar. The candidate policy (readiness v1 §5: cache
+   static assets + honest offline fallback page, NEVER cache authed HTML)
+   is a proposal, **not yet owner-approved** (decision lock 2026-07-06,
+   item 4). SW absence stays guard-enforced until the owner approves the
+   offline strategy; only then does the SW PR become AGENT-executable.
 3. **Play developer account created** — $25 one-time, OWNER-held secret.
 
 Then, on the OWNER's machine (needs JDK + Android SDK; Bubblewrap offers
@@ -353,31 +386,41 @@ OWNER approves → promote to production.
 
 Until these exist, store submission is `BLOCKED_EXTERNAL_INPUT_REQUIRED`:
 
-- [ ] **Icon source decision** — supply ≥1024×1024 source art OR one-line
-      approval: "generate all rasters from `app-icon.svg` as-is". (§1)
+- [ ] **Icon source decision (final icon source art)** — supply
+      ≥1024×1024 source art OR one-line approval: "generate all rasters
+      from `app-icon.svg` as-is". (§1)
+- [ ] **Maskable icon approval** — eyeball both maskable PNGs in
+      <https://maskable.app/editor> across every mask shape and approve.
+      (§2 / run-order step 3)
+- [ ] **Offline-strategy approval** — approve (or amend) the readiness
+      v1 §5 cache policy before any service-worker PR opens. (decision
+      lock item 4; run-order step 4)
+- [ ] **Real screenshots — flow approval + image review** — approve the
+      §3 flow + the demo-account state used for capture; review all 12
+      final images before upload.
 - [ ] **Play metadata approval** — title, LT/EN/RU short descriptions, EN
       full description; LT/RU full translations personally reviewed. (§4)
-- [ ] **Support contact decision** — email only, or approve a public
-      support page. (§5)
-- [ ] **Screenshot approval** — approve the §3 flow + the demo-account
-      state used for capture; review all 12 final images before upload.
+- [ ] **Support email / contact decision** — email only, or approve a
+      public support page. (§5)
 - [ ] **Feature graphic sign-off** — 1024×500 banner (§1 item 7).
-- [ ] **Play developer account** — create, pay $25, hold credentials
-      (never enters the repo). (§7)
+- [ ] **Store account access — Play developer account** — create, pay
+      $25, hold credentials (never enters the repo). (§7)
 - [ ] **TWA signing key** — created during `bubblewrap init`; owner-held;
       only the SHA-256 fingerprint comes back. (§7)
 - [ ] **Data-safety / content-rating answers** — confirm §4 declarations
       against the live privacy policy.
-- [ ] *(only if iOS ever)* Apple Developer Program + review demo account
-      + support URL.
+- [ ] *(only if Capacitor/iOS is ever green-lit — deferred, not never)*
+      Apple Developer Program + review demo account + support URL.
 
 ### AGENT-executable (each is one autonomous PR, in this order)
 
-1. **Service-worker PR** — no preconditions; policy already decided.
-   (readiness v1 §5 / v2 TWA step 3)
-2. **PNG icon PR** — blocked only on the owner's icon-source decision;
+1. **PNG icon PR** — blocked only on the owner's icon-source decision;
    contents fixed in §1 (5 PNGs + export script + manifest + apple-touch
    link + guard update).
+2. **Service-worker PR** — **owner-gated**: blocked on the owner's
+   offline-strategy approval (decision lock item 4). The readiness v1 §5
+   policy is the candidate proposal, not pre-approval. Do NOT open this
+   PR before the gate clears.
 3. **Screenshot capture run** — Playwright-scripted against production,
    owner-approved account state; output goes to owner review, not to the
    repo.
