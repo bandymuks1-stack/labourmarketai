@@ -6602,6 +6602,16 @@
       "SE": "Švedija",
       "FI": "Suomija"
     },
+    "contactPerson": "Kontaktinis asmuo",
+    "contactPersonHelp": "Neprivaloma. Su kuo susisiekti dėl šio poreikio.",
+    "cityRegion": "Miestas ar regionas",
+    "cityRegionHelp": "Neprivaloma. Kur numatytas darbas.",
+    "expectedDuration": "Numatoma trukmė",
+    "expectedDurationHelp": "Neprivaloma. Pvz. „3 mėnesiai“ arba „nuolatinis“.",
+    "urgency": "Kada reikia",
+    "urgencyAsap": "Kuo greičiau",
+    "urgencyWeeks": "Artimiausiomis savaitėmis",
+    "urgencyFlexible": "Terminas lankstus",
     "numberOfWorkers": "Darbuotojų skaičius",
     "startDate": "Pradžios data",
     "accommodation": "Apgyvendinimas",
@@ -6639,10 +6649,12 @@
     "aiNone": "Pasiūlymas nesukurtas — peržiūrėkite savo duomenis.",
     "statusInvalid": "Kai kuriuos duomenis reikia pataisyti. Patikrinkite formą.",
     "statusError": "Kažkas nepavyko. Bandykite dar kartą.",
-    "bridgeNote": "Tai peržiūra. Kad pateiktumėte realų poreikį ir matytumėte galimus atitikimus, susikurkite paskyrą.",
+    "bridgeNote": "Kad pateiktumėte šį poreikį tolesniam kontaktui, susikurkite nemokamą paskyrą. Jau turite? Prisijunkite.",
     "bridgeSignup": "Susikurti paskyrą ir pateikti poreikį",
     "bridgeLogin": "Jau turite paskyrą? Prisijungti",
-    "autoSuggested": "Pasiūlyta pagal jūsų aprašymą — patikrinkite ir, jei reikia, pataisykite. Nieko nepateikiame automatiškai."
+    "autoSuggested": "Pasiūlyta pagal jūsų aprašymą — patikrinkite ir, jei reikia, pataisykite. Nieko nepateikiame automatiškai.",
+    "preparedTitle": "Poreikis paruoštas",
+    "preparedBody": "Tvarkingai sudėliojome jūsų poreikį. Kad jį pateiktumėte tolesniam kontaktui, susikurkite nemokamą paskyrą arba prisijunkite žemiau — tada poreikis atkeliauja komandai."
   },
   "candidatePool": {
     "title": "Kandidatų telkinys",

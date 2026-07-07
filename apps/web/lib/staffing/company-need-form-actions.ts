@@ -45,12 +45,21 @@ export async function submitCompanyNeedAction(
   formData: FormData,
 ): Promise<CompanyNeedFormState> {
   const workers = Number(formData.get("number_of_workers"));
+  const urgencyRaw = str(formData.get("urgency"));
+  const urgency =
+    urgencyRaw === "asap" || urgencyRaw === "weeks" || urgencyRaw === "flexible"
+      ? urgencyRaw
+      : "flexible";
   const raw = {
     companyName: str(formData.get("company_name")) ?? "",
+    contactPerson: str(formData.get("contact_person")),
     country: str(formData.get("country")) ?? "",
+    cityRegion: str(formData.get("city_region")),
     profession: str(formData.get("profession")) ?? "",
     numberOfWorkers: Number.isFinite(workers) && workers > 0 ? Math.trunc(workers) : 1,
     startDate: str(formData.get("start_date")),
+    expectedDuration: str(formData.get("expected_duration")),
+    urgency,
     accommodationOffer: str(formData.get("accommodation")) ?? "not_provided",
     transportProvided: formData.get("transport_provided") === "yes",
     languageRequirements: csv(formData.get("languages")),

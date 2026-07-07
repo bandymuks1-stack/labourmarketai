@@ -17,11 +17,23 @@ export interface CompanyNeedFormLabels {
   readonly title: string;
   readonly subtitle: string;
   readonly companyName: string;
+  readonly contactPerson: string;
+  readonly contactPersonHelp: string;
   readonly profession: string;
   readonly country: string;
   readonly countryHelp: string;
+  readonly cityRegion: string;
+  readonly cityRegionHelp: string;
   readonly numberOfWorkers: string;
   readonly startDate: string;
+  readonly expectedDuration: string;
+  readonly expectedDurationHelp: string;
+  readonly urgency: string;
+  readonly urgencyAsap: string;
+  readonly urgencyWeeks: string;
+  readonly urgencyFlexible: string;
+  readonly preparedTitle: string;
+  readonly preparedBody: string;
   readonly accommodation: string;
   readonly accFree: string;
   readonly accPaid: string;
@@ -86,6 +98,12 @@ export function CompanyNeedForm({
         </label>
 
         <label className={LABEL}>
+          <span className="text-text-secondary">{labels.contactPerson}</span>
+          <input type="text" name="contact_person" maxLength={160} className={FIELD} />
+          <span className={HELP}>{labels.contactPersonHelp}</span>
+        </label>
+
+        <label className={LABEL}>
           <span className="text-text-secondary">{labels.profession}</span>
           <select name="profession" required defaultValue="" className={FIELD}>
             <option value="" disabled>—</option>
@@ -117,8 +135,30 @@ export function CompanyNeedForm({
         </div>
 
         <label className={LABEL}>
-          <span className="text-text-secondary">{labels.startDate}</span>
-          <input type="date" name="start_date" className={FIELD} />
+          <span className="text-text-secondary">{labels.cityRegion}</span>
+          <input type="text" name="city_region" maxLength={160} className={FIELD} />
+          <span className={HELP}>{labels.cityRegionHelp}</span>
+        </label>
+
+        <div className="grid grid-cols-2 gap-4">
+          <label className={LABEL}>
+            <span className="text-text-secondary">{labels.startDate}</span>
+            <input type="date" name="start_date" className={FIELD} />
+          </label>
+          <label className={LABEL}>
+            <span className="text-text-secondary">{labels.urgency}</span>
+            <select name="urgency" defaultValue="flexible" className={FIELD}>
+              <option value="asap">{labels.urgencyAsap}</option>
+              <option value="weeks">{labels.urgencyWeeks}</option>
+              <option value="flexible">{labels.urgencyFlexible}</option>
+            </select>
+          </label>
+        </div>
+
+        <label className={LABEL}>
+          <span className="text-text-secondary">{labels.expectedDuration}</span>
+          <input type="text" name="expected_duration" maxLength={120} className={FIELD} />
+          <span className={HELP}>{labels.expectedDurationHelp}</span>
         </label>
 
         <label className={LABEL}>
@@ -180,47 +220,60 @@ export function CompanyNeedForm({
             <p className="text-xs text-state-warning">
               {state.code === "invalid" ? labels.statusInvalid : labels.statusError}
             </p>
-          ) : state.draftStatus === "disabled" ? (
-            <p className="text-xs text-text-secondary">{labels.aiDisabled}</p>
-          ) : state.draftStatus === "needs_review" ? (
-            <p className="text-xs text-text-secondary">{labels.aiNone}</p>
           ) : (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-label text-brand-blue">
-                  {labels.aiBadge}
-                </span>
-                <span className="text-[11px] text-text-muted">{labels.aiNotVerified}</span>
-              </div>
-              {state.role ? (
-                <p className="text-sm text-text-primary">
-                  <span className="text-text-muted">{labels.aiRole}: </span>
-                  {state.role}
-                </p>
-              ) : null}
-              {state.skills && state.skills.length ? (
-                <p className="text-sm text-text-secondary">
-                  <span className="text-text-muted">{labels.aiSkills}: </span>
-                  {state.skills.join(", ")}
-                </p>
-              ) : null}
-              {state.documents && state.documents.length ? (
-                <p className="text-sm text-text-secondary">
-                  <span className="text-text-muted">{labels.aiDocs}: </span>
-                  {state.documents.join(", ")}
-                </p>
-              ) : null}
-              {state.missing && state.missing.length ? (
-                <p className="text-sm text-text-secondary">
-                  <span className="text-text-muted">{labels.aiMissing}: </span>
-                  {state.missing.join(", ")}
-                </p>
-              ) : null}
-              {state.blockers && state.blockers.length ? (
-                <p className="text-sm text-text-secondary">
-                  <span className="text-text-muted">{labels.aiBlockers}: </span>
-                  {state.blockers.join(", ")}
-                </p>
+            // Every successful parse leads with the same operational
+            // confirmation: the need is structured, and the next step (submit
+            // via account, below) is spelled out — no "AI not enabled" dead-end.
+            // When a provider IS configured the AI suggestion is shown as
+            // enrichment underneath; when it is not, the confirmation stands
+            // alone (honest: nothing is auto-saved/published — see the note
+            // above the form).
+            <div className="flex flex-col gap-3" data-testid="company-need-prepared">
+              <p className="font-display text-sm font-semibold text-text-primary">
+                {labels.preparedTitle}
+              </p>
+              <p className="text-sm leading-relaxed text-text-secondary">
+                {labels.preparedBody}
+              </p>
+              {state.draftStatus === "suggestion" ? (
+                <div className="mt-1 flex flex-col gap-3 border-t border-border-default pt-3">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-label text-brand-blue">
+                      {labels.aiBadge}
+                    </span>
+                    <span className="text-[11px] text-text-muted">{labels.aiNotVerified}</span>
+                  </div>
+                  {state.role ? (
+                    <p className="text-sm text-text-primary">
+                      <span className="text-text-muted">{labels.aiRole}: </span>
+                      {state.role}
+                    </p>
+                  ) : null}
+                  {state.skills && state.skills.length ? (
+                    <p className="text-sm text-text-secondary">
+                      <span className="text-text-muted">{labels.aiSkills}: </span>
+                      {state.skills.join(", ")}
+                    </p>
+                  ) : null}
+                  {state.documents && state.documents.length ? (
+                    <p className="text-sm text-text-secondary">
+                      <span className="text-text-muted">{labels.aiDocs}: </span>
+                      {state.documents.join(", ")}
+                    </p>
+                  ) : null}
+                  {state.missing && state.missing.length ? (
+                    <p className="text-sm text-text-secondary">
+                      <span className="text-text-muted">{labels.aiMissing}: </span>
+                      {state.missing.join(", ")}
+                    </p>
+                  ) : null}
+                  {state.blockers && state.blockers.length ? (
+                    <p className="text-sm text-text-secondary">
+                      <span className="text-text-muted">{labels.aiBlockers}: </span>
+                      {state.blockers.join(", ")}
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           )}
