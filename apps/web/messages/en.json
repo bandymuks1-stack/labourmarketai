@@ -6658,7 +6658,9 @@
     "preparedTitle": "Your need is prepared",
     "preparedBody": "We've organised your need. To submit it for follow-up, create a free account or sign in below — then it reaches the team.",
     "receivedTitle": "Request received",
-    "receivedBody": "We've received your need and are keeping it for follow-up with you. To view and manage it, create an account or sign in below."
+    "receivedBody": "We've received your need and are keeping it for follow-up with you. To view and manage it, create an account or sign in below.",
+    "partnerRouteTitle": "For construction needs — a partner-company route",
+    "partnerRouteBody": "If a suitable direct worker match isn't available yet, for construction needs we may first recommend contacting our LT/PL partner companies. This can help coordinate documents, responsibilities and onboarding faster, and find workers sooner through companies already working with construction teams. It's a human-coordinated route, and partner companies are just one of the options."
   },
   "candidatePool": {
     "title": "Candidate pool",

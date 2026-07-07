@@ -11,6 +11,7 @@
 import { getLocale } from "next-intl/server";
 import { draftVacancyFromNeed } from "./company-need-actions";
 import { persistPublicCompanyNeed } from "./company-need-public-intake";
+import { isConstructionWorkType } from "../taxonomy/work-categories";
 import type { AiLocale } from "../ai/runtime/types";
 
 export interface CompanyNeedFormState {
@@ -24,6 +25,12 @@ export interface CompanyNeedFormState {
    * dead-end, never a false success.
    */
   readonly persisted?: boolean;
+  /**
+   * Whether the submitted need is for construction workers. When true, the
+   * response shows the honest LT/PL partner-company fallback route (copy-only;
+   * a human-coordinated launch-stage option, not automatic matching).
+   */
+  readonly isConstruction?: boolean;
   readonly draftStatus?: "suggestion" | "disabled" | "needs_review";
   readonly role?: string | null;
   readonly skills?: readonly string[];
@@ -103,13 +110,14 @@ export async function submitCompanyNeedAction(
     sourcePath: `/${rawLocale}/company-need`,
   });
   const persisted = persist.ok;
+  const isConstruction = isConstructionWorkType(raw.profession);
 
   const result = await draftVacancyFromNeed(raw, locale);
 
   if (!result.ok) {
     // The AI-draft parse failed, but if the row was persisted the submission
     // still succeeded for the employer — show the success state.
-    if (persisted) return { ok: true, persisted: true };
+    if (persisted) return { ok: true, persisted: true, isConstruction };
     return { ok: false, code: "invalid", message: result.error };
   }
 
@@ -127,6 +135,7 @@ export async function submitCompanyNeedAction(
     return {
       ok: true,
       persisted,
+      isConstruction,
       draftStatus: "suggestion",
       role: value.data.normalized_role,
       skills: value.data.required_skills,
@@ -139,6 +148,7 @@ export async function submitCompanyNeedAction(
   return {
     ok: true,
     persisted,
+    isConstruction,
     draftStatus: draft.status === "disabled" ? "disabled" : "needs_review",
   };
 }

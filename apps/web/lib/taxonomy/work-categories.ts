@@ -204,6 +204,17 @@ export function isWorkTypeSlug(slug: string): boolean {
   return ALL_WORK_TYPE_SLUGS.includes(slug);
 }
 
+/** The construction-sector work-type slugs (config-derived, single source). */
+export const CONSTRUCTION_WORK_TYPE_SLUGS: readonly string[] =
+  WORK_CATEGORIES.find((c) => c.key === "construction")?.types.map((t) => t.slug) ?? [];
+
+/** Whether a submitted `profession` slug is a construction-sector work type.
+ *  Used only to decide whether the public /company-need response shows the
+ *  honest LT/PL partner-company fallback route (copy-only; no behavior change). */
+export function isConstructionWorkType(slug: string | undefined | null): boolean {
+  return !!slug && CONSTRUCTION_WORK_TYPE_SLUGS.includes(slug);
+}
+
 /** The ISO-3166 alpha-2 markets the platform serves (Baltic + Northern Europe).
  *  Used as the allowed country set for structured demand intake; display names
  *  come from the `labourMarket.countryNames` i18n catalogue. */
