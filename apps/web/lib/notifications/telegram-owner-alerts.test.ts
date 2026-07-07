@@ -23,6 +23,12 @@ const configureEnv = () => {
   vi.stubEnv("OWNER_TELEGRAM_CHAT_ID", "999");
 };
 
+const configureBridge = () => {
+  vi.stubEnv("AGENTAI_OS_ALERTS_ENABLED", "true");
+  vi.stubEnv("AGENTAI_OS_ALERT_ENDPOINT", "https://bridge.example.com/alert");
+  vi.stubEnv("AGENTAI_OS_ALERT_TOKEN", "test-bridge-secret");
+};
+
 // env.ts parses process.env at module load, so reset + dynamic-import after
 // stubbing so the helper sees the intended configuration.
 async function loadHelper() {
@@ -64,10 +70,97 @@ describe("static safety shape", () => {
       "OWNER_TELEGRAM_ALERTS_ENABLED",
       "OWNER_TELEGRAM_BOT_TOKEN",
       "OWNER_TELEGRAM_CHAT_ID",
+      "AGENTAI_OS_ALERTS_ENABLED",
+      "AGENTAI_OS_ALERT_ENDPOINT",
+      "AGENTAI_OS_ALERT_TOKEN",
     ]) {
       expect(envSrc).toContain(v);
       expect(envSrc).not.toContain(`NEXT_PUBLIC_${v}`);
     }
+  });
+});
+
+describe("Agentai OS bridge is the preferred path (fetch mocked)", () => {
+  it("POSTs the JSON event to the bridge with a bearer token when configured", async () => {
+    configureBridge();
+    const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+    vi.stubGlobal("fetch", fetchMock);
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    const ok = await sendCompanyNeedOwnerAlert({
+      companyName: "Acme Statyba",
+      country: "LT",
+      sector: "construction",
+    });
+    expect(ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [
+      string,
+      RequestInit,
+    ];
+    expect(url).toBe("https://bridge.example.com/alert");
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe("Bearer test-bridge-secret");
+    const body = JSON.parse(String(init.body));
+    expect(body.source).toBe("labourmarketai");
+    expect(body.event).toBe("company_need_submitted");
+    expect(body.payload.company_name).toBe("Acme Statyba");
+    expect(body.payload.admin_route).toBe(
+      "/dashboard/admin/company-need-intakes",
+    );
+    // the bridge path never hits the Telegram API directly
+    expect(url).not.toContain("api.telegram.org");
+  });
+
+  it("prefers the bridge over standalone Telegram when both are configured", async () => {
+    configureBridge();
+    configureEnv();
+    const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+    vi.stubGlobal("fetch", fetchMock);
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    await sendCompanyNeedOwnerAlert({ companyName: "Acme" });
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url] = fetchMock.mock.calls[0] as unknown as [string];
+    expect(url).toBe("https://bridge.example.com/alert");
+  });
+
+  it("returns false and never throws when the bridge send fails", async () => {
+    configureBridge();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("bridge down");
+      }),
+    );
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    await expect(
+      sendCompanyNeedOwnerAlert({ companyName: "Acme" }),
+    ).resolves.toBe(false);
+  });
+
+  it("builds a stable, clipped JSON event", async () => {
+    const { buildCompanyNeedEvent } = await loadHelper();
+    const long = "y".repeat(400);
+    const ev = buildCompanyNeedEvent(
+      { companyName: long, sector: "construction", country: "LT" },
+      "2026-07-07T15:00:00Z",
+    ) as {
+      source: string;
+      event: string;
+      severity: string;
+      created_at: string;
+      payload: Record<string, string>;
+    };
+    expect(ev.source).toBe("labourmarketai");
+    expect(ev.event).toBe("company_need_submitted");
+    expect(ev.severity).toBe("info");
+    expect(ev.created_at).toBe("2026-07-07T15:00:00Z");
+    expect(ev.payload.sector).toBe("construction");
+    expect(ev.payload.admin_route).toBe(
+      "/dashboard/admin/company-need-intakes",
+    );
+    // long field clipped, not the raw 400 chars
+    expect(ev.payload.company_name).toContain("…");
+    expect(ev.payload.company_name.length).toBeLessThan(200);
   });
 });
 
