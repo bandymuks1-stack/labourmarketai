@@ -56,6 +56,19 @@ const schema = z.object({
   OWNER_TELEGRAM_ALERTS_ENABLED: z.enum(["true", "false"]).default("false"),
   OWNER_TELEGRAM_BOT_TOKEN: z.string().optional(),
   OWNER_TELEGRAM_CHAT_ID: z.string().optional(),
+
+  // ── Agentai OS owner-alert bridge (PREFERRED over standalone Telegram) ─────
+  // When enabled, a persisted /company-need intake POSTs a JSON event to the
+  // owner's Agentai OS alert endpoint (shared-secret bearer token) and Agentai
+  // OS sends it through its existing owner Telegram channel — so LabourMarket.ai
+  // needs NO Telegram bot of its own. All server-only, never NEXT_PUBLIC. OFF by
+  // default; the alert is a no-op unless the endpoint + token are set and
+  // enabled. Requires the owner to deploy a public HTTPS Agentai OS bridge
+  // (Vercel cannot reach a local machine) — see
+  // docs/launch/owner-alert-agentai-os-bridge-plan-v1.md.
+  AGENTAI_OS_ALERTS_ENABLED: z.enum(["true", "false"]).default("false"),
+  AGENTAI_OS_ALERT_ENDPOINT: z.string().url().optional(),
+  AGENTAI_OS_ALERT_TOKEN: z.string().optional(),
 });
 
 const parsed = schema.safeParse({
@@ -86,6 +99,9 @@ const parsed = schema.safeParse({
   OWNER_TELEGRAM_ALERTS_ENABLED: process.env.OWNER_TELEGRAM_ALERTS_ENABLED,
   OWNER_TELEGRAM_BOT_TOKEN: process.env.OWNER_TELEGRAM_BOT_TOKEN,
   OWNER_TELEGRAM_CHAT_ID: process.env.OWNER_TELEGRAM_CHAT_ID,
+  AGENTAI_OS_ALERTS_ENABLED: process.env.AGENTAI_OS_ALERTS_ENABLED,
+  AGENTAI_OS_ALERT_ENDPOINT: process.env.AGENTAI_OS_ALERT_ENDPOINT,
+  AGENTAI_OS_ALERT_TOKEN: process.env.AGENTAI_OS_ALERT_TOKEN,
 });
 
 if (!parsed.success) {

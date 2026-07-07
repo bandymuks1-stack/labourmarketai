@@ -3,34 +3,40 @@ import "server-only";
 import { env } from "@/lib/env";
 
 /**
- * Owner Telegram demand-signal alerts (v1).
+ * Owner demand-signal alerts (v2 — Agentai OS bridge preferred).
  *
- * Best-effort, server-only, env-gated owner notification. When a public
- * /company-need anonymous intake is successfully PERSISTED, the caller fires a
- * plain-text alert to the owner Telegram chat. When the channel is not
- * configured, every entry point is a silent no-op — nothing is faked and no
- * network call is made.
+ * When a public /company-need anonymous intake is successfully PERSISTED, the
+ * caller fires a best-effort owner alert. Dispatch priority:
+ *
+ *   1. Agentai OS bridge (PREFERRED): POST a stable JSON event to the owner's
+ *      Agentai OS alert endpoint with a shared-secret bearer token. Agentai OS
+ *      owns the Telegram sending through its existing owner control channel, so
+ *      LabourMarket.ai needs NO Telegram bot token / chat id of its own.
+ *   2. Standalone Telegram (FALLBACK, PR #685): direct Telegram sendMessage,
+ *      only when the OWNER_TELEGRAM_* env is configured.
+ *   3. No-op: nothing configured → silent, no network call, nothing faked.
  *
  * HARD RULES (enforced by telegram-owner-alerts.test.ts):
  *   - server-only: the `server-only` import makes any client import a build error;
- *   - the bot token + chat id come ONLY from server env (env.OWNER_TELEGRAM_*),
- *     never a NEXT_PUBLIC var, never a literal — so they never reach the client
- *     bundle (Next.js only inlines NEXT_PUBLIC_* into client code);
+ *   - every secret (bridge token, Telegram bot token, chat id) comes ONLY from
+ *     server env, never a NEXT_PUBLIC var, never a literal → never in the client
+ *     bundle;
  *   - NEVER throws to the caller: a send failure must not affect the
  *     /company-need submission, its persistence, or the owner queue;
- *   - PLAIN TEXT only (no Telegram markup mode is set) so user-supplied fields
- *     cannot inject Telegram Markdown/HTML markup; every field is
- *     whitespace-collapsed and length-capped;
- *   - only the events that actually exist are supported: today that is exactly
- *     `company_need_submitted`. No worker-search / company-search senders exist
- *     because those flows do not exist in the product yet.
+ *   - PLAIN TEXT for the standalone path (no Telegram markup mode is set) so
+ *     user fields cannot inject markup; every field is whitespace-collapsed and
+ *     length-capped in BOTH the JSON event and the text message;
+ *   - only the event that actually exists is supported: `company_need_submitted`.
  */
 
-/** The owner queue route; used as a text pointer (repo has no base-URL env). */
+/** Stable event identity for the Agentai OS bridge payload. */
+const EVENT_SOURCE = "labourmarketai";
+const EVENT_NAME = "company_need_submitted";
+/** Owner queue route; a text pointer (the repo has no base-URL env). */
 const ADMIN_QUEUE_ROUTE = "/dashboard/admin/company-need-intakes";
-/** Per-field character cap — keeps the message bounded + injection-inert. */
+/** Per-field character cap — keeps payloads bounded + injection-inert. */
 const FIELD_CAP = 120;
-/** Hard timeout so a hung Telegram API can never stall the caller. */
+/** Hard timeout so a hung endpoint can never stall the caller. */
 const SEND_TIMEOUT_MS = 4000;
 
 export interface CompanyNeedAlert {
@@ -47,7 +53,7 @@ export interface CompanyNeedAlert {
   readonly sourcePath?: string;
 }
 
-/** Collapse whitespace, trim, cap length; empty → em dash. Plain text only. */
+/** Collapse whitespace, trim, cap length; empty → em dash. */
 function clip(value: string | number | undefined | null): string {
   const s = String(value ?? "")
     .replace(/\s+/g, " ")
@@ -56,7 +62,35 @@ function clip(value: string | number | undefined | null): string {
   return s.length > FIELD_CAP ? `${s.slice(0, FIELD_CAP)}…` : s;
 }
 
-/** Build the plain-text owner alert for a persisted company need. */
+/** Stable, minimal JSON event for the Agentai OS bridge. No secrets, no raw
+ *  unbounded description; every field is clipped. */
+export function buildCompanyNeedEvent(
+  a: CompanyNeedAlert,
+  createdAtIso: string,
+): Record<string, unknown> {
+  return {
+    source: EVENT_SOURCE,
+    event: EVENT_NAME,
+    severity: "info",
+    created_at: createdAtIso,
+    payload: {
+      company_name: clip(a.companyName),
+      contact: clip(a.contact),
+      sector: clip(a.sector),
+      country: clip(a.country),
+      city_or_region: clip(a.cityRegion),
+      headcount: clip(a.headcount),
+      urgency: clip(a.urgency),
+      start_or_date: clip(a.startOrDate),
+      duration: clip(a.duration),
+      languages: clip(a.languages),
+      source_path: clip(a.sourcePath),
+      admin_route: ADMIN_QUEUE_ROUTE,
+    },
+  };
+}
+
+/** Plain-text owner alert for the standalone Telegram fallback path. */
 export function buildCompanyNeedAlertText(a: CompanyNeedAlert): string {
   return [
     "Naujas LabourMarket.ai įmonės poreikis",
@@ -75,7 +109,16 @@ export function buildCompanyNeedAlertText(a: CompanyNeedAlert): string {
   ].join("\n");
 }
 
-/** True only when the owner Telegram alert channel is fully configured. */
+/** True when the Agentai OS bridge (preferred path) is fully configured. */
+export function agentaiBridgeConfigured(): boolean {
+  return (
+    env.AGENTAI_OS_ALERTS_ENABLED === "true" &&
+    !!env.AGENTAI_OS_ALERT_ENDPOINT &&
+    !!env.AGENTAI_OS_ALERT_TOKEN
+  );
+}
+
+/** True when the standalone Telegram fallback (PR #685) is fully configured. */
 export function ownerTelegramConfigured(): boolean {
   return (
     env.OWNER_TELEGRAM_ALERTS_ENABLED === "true" &&
@@ -84,42 +127,84 @@ export function ownerTelegramConfigured(): boolean {
   );
 }
 
+async function postWithTimeout(
+  url: string,
+  init: RequestInit,
+  label: string,
+): Promise<boolean> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SEND_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { ...init, signal: controller.signal });
+    return res.ok;
+  } catch {
+    // Best-effort: swallow. No secret, no stack, no provider wording leaked.
+    console.warn(`[owner-alert] ${label} send failed`);
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Preferred path: hand the event to Agentai OS to format + send to Telegram. */
+async function sendViaAgentaiBridge(
+  event: Record<string, unknown>,
+): Promise<boolean> {
+  const endpoint = env.AGENTAI_OS_ALERT_ENDPOINT as string;
+  const token = env.AGENTAI_OS_ALERT_TOKEN as string;
+  return postWithTimeout(
+    endpoint,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(event),
+    },
+    "agentai bridge",
+  );
+}
+
+/** Fallback path: direct Telegram sendMessage (plain text). */
+async function sendViaStandaloneTelegram(
+  alert: CompanyNeedAlert,
+): Promise<boolean> {
+  const token = env.OWNER_TELEGRAM_BOT_TOKEN as string;
+  const chatId = env.OWNER_TELEGRAM_CHAT_ID as string;
+  return postWithTimeout(
+    `https://api.telegram.org/bot${token}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: buildCompanyNeedAlertText(alert),
+        disable_web_page_preview: true,
+      }),
+    },
+    "telegram",
+  );
+}
+
 /**
- * Best-effort owner alert for a persisted company need. Resolves `true` when
- * Telegram accepts the message, `false` on no-op (channel not configured) or
- * any failure. NEVER rejects — safe to call (awaited or not) from the intake
+ * Best-effort owner alert for a persisted company need. Resolves `true` when a
+ * configured channel accepted the message, `false` on no-op (nothing
+ * configured) or any failure. NEVER rejects — safe to call from the intake
  * server action.
  */
 export async function sendCompanyNeedOwnerAlert(
   alert: CompanyNeedAlert,
 ): Promise<boolean> {
-  if (!ownerTelegramConfigured()) return false; // not configured → honest no-op
-
-  const token = env.OWNER_TELEGRAM_BOT_TOKEN as string;
-  const chatId = env.OWNER_TELEGRAM_CHAT_ID as string;
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), SEND_TIMEOUT_MS);
-  try {
-    const res = await fetch(
-      `https://api.telegram.org/bot${token}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: buildCompanyNeedAlertText(alert),
-          disable_web_page_preview: true,
-        }),
-        signal: controller.signal,
-      },
-    );
-    return res.ok;
-  } catch {
-    // Best-effort: swallow. No secret, no stack, no provider wording leaked.
-    console.warn("[owner-alert] telegram send failed");
-    return false;
-  } finally {
-    clearTimeout(timer);
+  // 1) Preferred: Agentai OS bridge (no Telegram token needed here).
+  if (agentaiBridgeConfigured()) {
+    const event = buildCompanyNeedEvent(alert, new Date().toISOString());
+    return sendViaAgentaiBridge(event);
   }
+  // 2) Fallback: standalone Telegram (PR #685).
+  if (ownerTelegramConfigured()) {
+    return sendViaStandaloneTelegram(alert);
+  }
+  // 3) Nothing configured → honest no-op.
+  return false;
 }
