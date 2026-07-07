@@ -59,6 +59,8 @@ export default async function CompanyNeedPage({
     preparedBody: t("preparedBody"),
     receivedTitle: t("receivedTitle"),
     receivedBody: t("receivedBody"),
+    partnerRouteTitle: t("partnerRouteTitle"),
+    partnerRouteBody: t("partnerRouteBody"),
     accommodation: t("accommodation"),
     accFree: t("accFree"),
     accPaid: t("accPaid"),

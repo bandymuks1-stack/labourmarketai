@@ -38,6 +38,8 @@ export interface CompanyNeedFormLabels {
   readonly preparedBody: string;
   readonly receivedTitle: string;
   readonly receivedBody: string;
+  readonly partnerRouteTitle: string;
+  readonly partnerRouteBody: string;
   readonly accommodation: string;
   readonly accFree: string;
   readonly accPaid: string;
@@ -288,6 +290,24 @@ export function CompanyNeedForm({
                       {state.blockers.join(", ")}
                     </p>
                   ) : null}
+                </div>
+              ) : null}
+
+              {/* Construction-only honest fallback: if there is no suitable
+                  direct platform match yet, we may first recommend the LT/PL
+                  partner-company route. Human-coordinated, one option among
+                  several — no guarantees, no automatic matching. */}
+              {state.isConstruction ? (
+                <div
+                  className="mt-1 flex flex-col gap-2 rounded-lg border border-brand-blue/30 bg-brand-blue/5 p-3"
+                  data-testid="company-need-partner-route"
+                >
+                  <p className="font-display text-sm font-semibold text-text-primary">
+                    {labels.partnerRouteTitle}
+                  </p>
+                  <p className="text-sm leading-relaxed text-text-secondary">
+                    {labels.partnerRouteBody}
+                  </p>
                 </div>
               ) : null}
             </div>
