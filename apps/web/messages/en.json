@@ -2789,6 +2789,7 @@
       "line2": "the more opportunities open up."
     },
     "subcopy": "Labourmarket.ai turns your skills, experience, documents and described work into clear profile signals. The more precisely your profile is filled in, the easier it is to gauge readiness, reliability and the right opportunities.",
+    "statLegendIntro": "What the codes mean:",
     "stat": {
       "SKL": "Skill",
       "REL": "Reliability",

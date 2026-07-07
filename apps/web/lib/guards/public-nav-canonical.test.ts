@@ -121,6 +121,33 @@ describe("player-card acronyms carry a visible legend", () => {
     expect(showcase).toContain("playercards-stat-legend");
     expect(showcase).toContain("STAT_KEYS");
   });
+
+  it("the legend appears ABOVE the cards so it isn't scrolled past on mobile", () => {
+    const showcase = read("components/marketing/player-card-showcase.tsx");
+    const legendAt = showcase.indexOf("playercards-stat-legend");
+    const firstCardAt = showcase.indexOf("<PlayerCard");
+    expect(legendAt).toBeGreaterThan(-1);
+    expect(firstCardAt).toBeGreaterThan(-1);
+    expect(legendAt).toBeLessThan(firstCardAt);
+    // and it carries a localized "what the codes mean" intro
+    expect(showcase).toContain("statLegendIntro");
+  });
+
+  it("each on-card acronym exposes its meaning as a native title tooltip", () => {
+    const card = read("components/app/player-card.tsx");
+    expect(card).toMatch(/title=\{t\(`stat\.\$\{k\}`\)\}/);
+  });
+
+  it("every active locale defines the legend intro + all six stat names", () => {
+    for (const loc of ACTIVE) {
+      const pc = (catalog(loc) as { playercards: { statLegendIntro: string; stat: Record<string, string> } })
+        .playercards;
+      expect(typeof pc.statLegendIntro).toBe("string");
+      for (const k of ["SKL", "REL", "SPD", "SAF", "ADP", "TRS"]) {
+        expect(typeof pc.stat[k]).toBe("string");
+      }
+    }
+  });
 });
 
 describe("public positioning is consistent (Europe, no Baltic-only footer claim)", () => {
