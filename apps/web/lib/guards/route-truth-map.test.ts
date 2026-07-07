@@ -57,6 +57,7 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/admin/agent-os": "INTERNAL_ADMIN",
   "dashboard/admin/billing": "INTERNAL_ADMIN",
   "dashboard/admin/candidate-pool": "INTERNAL_ADMIN",
+  "dashboard/admin/company-need-intakes": "INTERNAL_ADMIN",
   "dashboard/admin/company-verification": "INTERNAL_ADMIN",
   "dashboard/admin/language-feedback": "INTERNAL_ADMIN",
   "dashboard/admin/league": "INTERNAL_ADMIN",

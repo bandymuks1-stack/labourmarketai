@@ -190,6 +190,12 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    authenticated write policy (owner/admin SELECT only).
     //  - lib/admin/billing-actions.ts — admin manual pilot-access override
     //    (admin-gated via isSuperadmin); same billing tables, no chat table.
+    //  - lib/admin/company-need-intakes.ts — Public Intake Owner Queue v1.
+    //    Reads/updates ONLY company_need_public_intakes, which by design
+    //    carries NO anon/authenticated RLS policy (PR #678: write-only via
+    //    the anon RPC, read-only via service role). Every entry point is
+    //    fenced behind an explicit isSuperadmin() re-check; it touches no
+    //    chat table and sends nothing outbound.
     //  - lib/sales/lead-intake.ts — superadmin-gated READ-ONLY waitlist
     //    read (§8.14): `waitlist` carries no authenticated read policy BY
     //    DESIGN (0005 — anon INSERT only, reads restricted to service
@@ -203,6 +209,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     ).toEqual([
       "app/api/leads/route.ts",
       "lib/admin/billing-actions.ts",
+      "lib/admin/company-need-intakes.ts",
       "lib/billing/subscription-store.ts",
       "lib/sales/lead-intake.ts",
     ]);

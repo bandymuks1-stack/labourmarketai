@@ -153,6 +153,7 @@ The service-role client (`lib/supabase/admin.ts`, `createAdminClient()`,
 | `app/api/leads/route.ts` | **runtime** | **No** — writes `leads` only (anon funnel, §17.2) | ✅ legitimate; RLS-less by design for anonymous capture |
 | `lib/billing/subscription-store.ts` | **runtime** | **No** — billing tables only (Stripe TEST webhook; no user session exists) | ✅ legitimate; billing tables carry no authenticated write policy by design |
 | `lib/admin/billing-actions.ts` | **runtime** | **No** — billing tables only (admin manual pilot override, `isSuperadmin`-gated) | ✅ legitimate; same billing-table design |
+| `lib/admin/company-need-intakes.ts` | **runtime** | **No** — reads/updates `company_need_public_intakes` only (Public Intake Owner Queue v1, `isSuperadmin`-gated) | ✅ legitimate; the table has no anon/authenticated RLS policy by design (PR #678: write-only via anon RPC, read-only via service role); status update only, writes nothing outbound |
 | `lib/sales/lead-intake.ts` | **runtime** | **No** — READ-ONLY `waitlist` SELECT (§8.14 intake panel, `isSuperadmin`-gated) | ✅ legitimate; `waitlist` has no authenticated read policy by design (0005: anon INSERT only, reads service-role only); writes nothing |
 | `lib/env.ts` | env plumbing (`requireSupabaseServiceEnv`) | No | ✅ |
 | `scripts/admin-promote.ts` | CLI (interactive) | No (`profiles`) | ✅ operator tool |
@@ -160,10 +161,11 @@ The service-role client (`lib/supabase/admin.ts`, `createAdminClient()`,
 | `scripts/generate-pilot-owner-brief.ts` | CLI report | No | ✅ |
 | `scripts/e2e-*.ts`, `tests/e2e/*` | test harness (local only) | seeds only | ✅ never prod |
 
-**The audited runtime `createAdminClient()` callers are exactly the four
+**The audited runtime `createAdminClient()` callers are exactly the five
 rows above — `app/api/leads/route.ts` (writes `leads` only), the two
-billing paths (billing tables only), and the superadmin-gated read-only
-`waitlist` intake read — never a conversation table.** No
+billing paths (billing tables only), the superadmin-gated read-only
+`waitlist` intake read, and the superadmin-gated
+`company_need_public_intakes` owner queue — never a conversation table.** No
 user-facing chat read or write uses the service role. This inventory is pinned
 in CI: `chat-visibility-rls.test.ts` fails if a new runtime `createAdminClient()`
 caller appears or if any chat path imports the admin client, forcing this doc to

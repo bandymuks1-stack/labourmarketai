@@ -237,6 +237,11 @@ export default async function AdminDashboardPage({
           label: tNeed("pageTitle"),
           testId: "admin-tools-hub-need-structuring",
         },
+        {
+          href: "/dashboard/admin/company-need-intakes",
+          label: t("companyNeedIntakes.title"),
+          testId: "admin-tools-hub-company-need-intakes",
+        },
       ],
     },
     {
