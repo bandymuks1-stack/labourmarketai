@@ -158,7 +158,14 @@ export function PlayerCard({ id }: { id: string }) {
           const v = card.stats[k];
           return (
             <div key={k} className="flex items-center gap-2">
-              <span className="w-7 shrink-0 font-mono text-[11px] text-text-muted">
+              {/* The bare stat code carries its localized meaning as a native
+                  hover/long-press tooltip, so the acronym is explained right
+                  where it appears (the showcase also prints a visible legend
+                  directly above the cards). */}
+              <span
+                className="w-7 shrink-0 cursor-help font-mono text-[11px] text-text-muted"
+                title={t(`stat.${k}`)}
+              >
                 {k}
               </span>
               <div

@@ -26,21 +26,25 @@ export async function PlayerCardShowcase() {
           {t("subcopy")}
         </p>
 
-        <div className="mt-10 flex flex-col items-center gap-6 md:flex-row md:items-stretch md:justify-center lg:gap-8">
+        {/* Visible acronym legend — placed directly ABOVE the cards so a new
+            visitor reads what SKL/REL/SPD/SAF/ADP/TRS mean before meeting the
+            bare codes on the cards. Previously this legend sat AFTER all three
+            cards, which on mobile (cards stack vertically) pushed it far below
+            the first card's codes. The same localized names double as the
+            per-bar aria-labels + on-code title tooltips inside PlayerCard. */}
+        <p
+          className="mt-6 max-w-2xl font-mono text-[11px] uppercase leading-relaxed tracking-label text-text-muted"
+          data-testid="playercards-stat-legend"
+        >
+          <span className="text-text-secondary">{t("statLegendIntro")}</span>{" "}
+          {STAT_KEYS.map((k) => `${k} — ${t(`stat.${k}`)}`).join(" · ")}
+        </p>
+
+        <div className="mt-8 flex flex-col items-center gap-6 md:flex-row md:items-stretch md:justify-center lg:gap-8">
           <PlayerCard id="workers.featured.1" />
           <PlayerCard id="workers.featured.2" />
           <PlayerCard id="workers.featured.3" />
         </div>
-
-        {/* Visible acronym legend — the six stat codes (SKL/REL/…) must be
-            readable without hovering; the same localized names double as the
-            per-bar aria-labels inside PlayerCard. */}
-        <p
-          className="mt-6 text-center font-mono text-[11px] uppercase tracking-label text-text-muted"
-          data-testid="playercards-stat-legend"
-        >
-          {STAT_KEYS.map((k) => `${k} — ${t(`stat.${k}`)}`).join(" · ")}
-        </p>
 
         {/* §18 honesty line (PR9): these three cards are a CONCEPT preview of
             fictional profiles — said visibly, in words, not only via the
