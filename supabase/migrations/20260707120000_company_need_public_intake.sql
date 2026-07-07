@@ -38,14 +38,19 @@
 --     table (write-only-via-RPC by construction);
 --   * NO destructive statement, NO data DML, NO payment machinery.
 --
--- HUMAN GATE: this migration is RED-class by the migration-safety gate
--- (SECURITY DEFINER + GRANT to anon). It is intentionally NOT annotated
--- `@human-gate-approved` here because owner review has not happened yet —
--- the PR is opened as a DRAFT for explicit owner human-gate approval and
--- manual Supabase-MCP apply (never db push). Until applied, the app
--- degrades honestly: the submit action sees 42883 (undefined function) /
--- 42P01 (undefined table) and falls back to the honest "prepared — create
--- an account to submit" state (no dead-end, no false success).
+-- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER + GRANT to
+-- anon are RED-class). Owner reviewed and approved 2026-07-07 (direct
+-- review of this migration + rollback for PR #678): dedicated write-only
+-- table with RLS ENABLED and NO anon/authenticated policy; the single
+-- SECURITY DEFINER function (search_path=public) is the only anon write
+-- path, validates closed enum sets + length caps + the 10-market country
+-- list and inserts status='new'; customer_requests untouched; the
+-- revoke-all-from-public / grant-execute-to-anon tail matches the function
+-- signature; rollback drops only the new function + table. Prod apply stays
+-- manual via Supabase MCP — never db push. Until applied, the app degrades
+-- honestly: the submit action sees 42883 (undefined function) / 42P01
+-- (undefined table) and falls back to the honest "prepared — create an
+-- account to submit" state (no dead-end, no false success).
 --
 -- ROLLBACK: supabase/rollbacks/20260707120000_company_need_public_intake.down.sql
 -- (drops ONLY the one NEW function and the one NEW table; there is no
