@@ -581,7 +581,7 @@
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
     "rights": "[EN] All rights reserved.",
-    "tagline": "[EN] The active labour market across every sector — Baltic & Northern Europe."
+    "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
   "hero": {
     "chip": "Üldine tööturu platvorm",
@@ -704,12 +704,12 @@
     }
   },
   "nav": {
-    "company": "[EN] Company",
-    "login": "[EN] Sign in",
-    "platform": "[EN] Platform",
+    "workers": "Töötajatele",
+    "companies": "Ettevõtetele",
+    "agencies": "Agentuuridele",
     "pricing": "[EN] Pricing",
-    "resources": "[EN] Resources",
-    "solutions": "[EN] Solutions",
+    "about": "Meist",
+    "login": "[EN] Sign in",
     "startNow": "[EN] Start now"
   },
   "pages": {
@@ -750,7 +750,7 @@
           "title": "[EN] Agencies, when you need them"
         }
       ],
-      "cta": "[EN] Create a company account",
+      "cta": "[EN] Start a work need",
       "eyebrow": "[EN] For companies",
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",

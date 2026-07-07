@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/Button";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 
 /** Shared sub-page hero: small-caps chip → two-line headline with the accent
- *  word in the brand gradient → honest sub-copy → one CTA. CTA is either a
- *  real signup (workers) or the company/agency waitlist modal (everyone else)
- *  per the M1 honest-positioning brief. */
+ *  word in the brand gradient → honest sub-copy → one CTA. CTA is a real
+ *  signup (workers), the canonical company-demand entry (/company-need),
+ *  or the waitlist modal — per the M1 honest-positioning brief and the
+ *  canonical demand-funnel rule (all start/submit-need CTAs → /company-need). */
 export function PageHero({
   eyebrow,
   title,
@@ -19,7 +20,7 @@ export function PageHero({
   title: string;
   accent: string;
   subcopy: string;
-  ctaKind: "signup" | "waitlist";
+  ctaKind: "signup" | "companyNeed" | "waitlist";
   ctaLabel: string;
   ctaSource: string;
 }) {
@@ -38,6 +39,10 @@ export function PageHero({
       <div className="mt-8">
         {ctaKind === "signup" ? (
           <Link href="/auth/signup">
+            <Button>{ctaLabel} →</Button>
+          </Link>
+        ) : ctaKind === "companyNeed" ? (
+          <Link href="/company-need">
             <Button>{ctaLabel} →</Button>
           </Link>
         ) : (

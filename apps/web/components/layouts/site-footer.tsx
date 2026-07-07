@@ -72,21 +72,24 @@ export async function SiteFooter() {
             </p>
           </div>
 
+          {/* Product column mirrors the canonical public nav IA: the three
+              audience pages + pricing. No template labels, no duplicate
+              "about" destinations (about lives in the company column only). */}
           <div className="flex flex-col gap-3">
             <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
               {t("product")}
             </p>
-            <Link href="/" className="text-sm text-text-secondary hover:text-text-primary">
-              {nav("platform")}
+            <Link href="/for-workers" className="text-sm text-text-secondary hover:text-text-primary">
+              {nav("workers")}
+            </Link>
+            <Link href="/for-companies" className="text-sm text-text-secondary hover:text-text-primary">
+              {nav("companies")}
+            </Link>
+            <Link href="/for-agencies" className="text-sm text-text-secondary hover:text-text-primary">
+              {nav("agencies")}
             </Link>
             <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary">
               {nav("pricing")}
-            </Link>
-            <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary">
-              {t("about")}
-            </Link>
-            <Link href="/for-workers" className="text-sm text-text-secondary hover:text-text-primary">
-              {nav("resources")}
             </Link>
           </div>
 
@@ -118,11 +121,8 @@ export async function SiteFooter() {
             <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
               {t("company")}
             </p>
-            <Link href="/for-companies" className="text-sm text-text-secondary hover:text-text-primary">
-              {nav("solutions")}
-            </Link>
-            <Link href="/for-agencies" className="text-sm text-text-secondary hover:text-text-primary">
-              {nav("company")}
+            <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary">
+              {nav("about")}
             </Link>
             <LocaleSwitcher className="mt-2" />
           </div>

@@ -183,17 +183,17 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "Company Need — Describe the workforce you need",
       description:
-        "Tell LabourMarket.ai what your project needs: professions, skills, team size, location and start. We structure the need so it can be matched with available workers and teams.",
+        "Tell LabourMarket.ai what your project needs: professions, skills, team size, location and start. We prepare a structured draft you review — nothing is published automatically.",
     },
     lt: {
       title: "Įmonės poreikis — aprašyk reikalingą darbo jėgą",
       description:
-        "Pasakyk LabourMarket.ai, ko reikia projektui: profesijos, įgūdžiai, komandos dydis, vieta ir pradžia. Mes struktūruojame poreikį, kad jį būtų galima sugretinti su prieinamais darbuotojais ir brigadomis.",
+        "Pasakyk LabourMarket.ai, ko reikia projektui: profesijos, įgūdžiai, komandos dydis, vieta ir pradžia. Paruošiame struktūruotą juodraštį, kurį peržiūri — niekas nepublikuojama automatiškai.",
     },
     ru: {
       title: "Потребность компании — опишите нужную рабочую силу",
       description:
-        "Расскажите LabourMarket.ai, что нужно проекту: профессии, навыки, размер бригады, локация и старт. Мы структурируем потребность, чтобы сопоставить её с доступными работниками и бригадами.",
+        "Расскажите LabourMarket.ai, что нужно проекту: профессии, навыки, размер бригады, локация и старт. Мы готовим структурированный черновик, который вы проверяете — ничего не публикуется автоматически.",
     },
   },
   workerIntake: {

@@ -65,8 +65,8 @@ export function DemandPreviewCard({
 
       <div className="mt-4 flex flex-wrap gap-2">
         {d.skills.map((s) => (
-          <Badge key={s} tone="muted">
-            {s}
+          <Badge key={s.en} tone="muted">
+            {lc(s)}
           </Badge>
         ))}
       </div>

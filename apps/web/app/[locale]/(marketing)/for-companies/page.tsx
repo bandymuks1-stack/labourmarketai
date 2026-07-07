@@ -27,12 +27,14 @@ export default async function ForCompaniesPage({
 
   return (
     <>
+      {/* Educational page; the action CTA routes into the canonical demand
+          entry (/company-need), not a second competing intake path. */}
       <PageHero
         eyebrow={t("eyebrow")}
         title={t("title")}
         accent={t("titleAccent")}
         subcopy={t("subcopy")}
-        ctaKind="signup"
+        ctaKind="companyNeed"
         ctaLabel={t("cta")}
         ctaSource="companies_hero"
       />

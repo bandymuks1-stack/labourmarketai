@@ -110,10 +110,13 @@ describe("taxonomy + recognition tier truth (12 languages incl. FI)", () => {
 
 describe("no unsupported Finnish-UI claim anywhere user-facing", () => {
   it("active flat catalogs never name Finnish as an interface language", () => {
+    // \b on "suomi" so the COUNTRY name Finland (LT "Suomija" in the
+    // company-need target-market list) doesn't trip the LANGUAGE-claim ban;
+    // "suomi"/"suomeksi" as a standalone language word stays forbidden.
     for (const loc of activeLocales) {
       const raw = read(`messages/${loc}.json`);
       expect(raw, `messages/${loc}.json mentions a Finnish UI`).not.toMatch(
-        /suomi|suomeksi|finnish (ui|interface|version)/i,
+        /\bsuomi\b|suomeksi|finnish (ui|interface|version)/i,
       );
     }
   });

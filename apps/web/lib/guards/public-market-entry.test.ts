@@ -73,8 +73,10 @@ describe("no dead public links — every marketing CTA target route exists", () 
 
 describe("signup CTAs never call themselves a waitlist (the loop is live)", () => {
   // These i18n keys label CTAs whose ctaKind is "signup" (PageHero /
-  // CtaBand route them to /auth/signup). Calling a live signup a
-  // "waitlist" is a false funnel in both directions.
+  // CtaBand route them to /auth/signup) — except pages.companies.cta,
+  // which now routes to the canonical /company-need demand entry (nav/
+  // funnel consistency PR) and must equally never read as a waitlist.
+  // Calling a live entry a "waitlist" is a false funnel in both directions.
   const SIGNUP_CTA_KEYS: (string | number)[][] = [
     ["pages", "workers", "cta"],
     ["pages", "companies", "cta"],

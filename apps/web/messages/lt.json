@@ -3755,7 +3755,7 @@
       "headline": "Valdykite rezervą kaip biuras",
       "steps": [
         {
-          "title": "Onboard'inkit savo darbuotojus",
+          "title": "Įtraukite savo darbuotojus",
           "desc": "Suveskite kuruojamą rezervą į vieną erdvę."
         },
         {
@@ -3834,11 +3834,11 @@
     }
   },
   "nav": {
-    "platform": "Platforma",
-    "solutions": "Sprendimai",
-    "resources": "Ištekliai",
+    "workers": "Darbuotojams",
+    "companies": "Įmonėms",
+    "agencies": "Agentūroms",
     "pricing": "Kainos",
-    "company": "Apie mus",
+    "about": "Apie",
     "vision": "Vizija",
     "login": "Prisijungti",
     "startNow": "Pradėti dabar"
@@ -3936,10 +3936,10 @@
     "cta": "Visa analitika"
   },
   "footer": {
-    "tagline": "Visų sektorių darbo rinka — Baltijos ir Šiaurės Europa.",
+    "tagline": "Visų sektorių darbo rinka — vietoje ir tarptautiniu mastu Europoje.",
     "activity": "Rinkos apžvalga",
     "product": "Produktas",
-    "company": "Apie mus",
+    "company": "Įmonė",
     "legalGroup": "Teisinė informacija",
     "about": "Apie",
     "contact": "Kontaktai",
@@ -3989,7 +3989,7 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Sukurti įmonės paskyrą"
+      "cta": "Pradėti darbo poreikį"
     },
     "agencies": {
       "eyebrow": "Agentūroms",
@@ -5028,7 +5028,8 @@
       "joinLabel": "Prisijungti prie pokalbio",
       "joinPending": "Jungiamasi..."
     },
-    "originalLanguage": "Originalas ({lang})",
+    "originalLanguage": "Originalas ({lang})"
+,
     "source": {
       "scouting": "Dėl jūsų darbo užklausos (atranka)",
       "demand_interest": "Dėl darbo užklausos (darbuotojo susidomėjimas)",
@@ -6587,7 +6588,20 @@
     "companyName": "Įmonės pavadinimas",
     "profession": "Reikalingas sektorius ir darbo tipas",
     "country": "Šalis",
-    "countryHelp": "Dviraidis kodas (pvz. NL).",
+    "countryHelp": "Pasirinkite šalį, kurioje reikia darbuotojų.",
+    "honestNote": "Šis puslapis paruošia struktūruotą poreikio juodraštį peržiūrai — čia niekas neišsaugoma ir nepublikuojama. Realų poreikį pateiksite susikūrę paskyrą.",
+    "countries": {
+      "LT": "Lietuva",
+      "LV": "Latvija",
+      "EE": "Estija",
+      "PL": "Lenkija",
+      "DE": "Vokietija",
+      "NL": "Nyderlandai",
+      "DK": "Danija",
+      "NO": "Norvegija",
+      "SE": "Švedija",
+      "FI": "Suomija"
+    },
     "numberOfWorkers": "Darbuotojų skaičius",
     "startDate": "Pradžios data",
     "accommodation": "Apgyvendinimas",

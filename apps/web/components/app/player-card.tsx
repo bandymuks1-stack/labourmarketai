@@ -9,7 +9,7 @@ import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import {
   getCard,
-  type PlayerStatKey,
+  STAT_KEYS,
   type PlayerStatus,
   type PlayerTier,
 } from "@/content/placeholders";
@@ -17,8 +17,6 @@ import { showPlaceholderMarkers } from "@/lib/env";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { OVRRing } from "@/components/app/ovr-ring";
-
-const STAT_KEYS: PlayerStatKey[] = ["SKL", "REL", "SPD", "SAF", "ADP", "TRS"];
 
 const TIER_BAR: Record<PlayerTier, string> = {
   gold: "bg-tier-gold",
@@ -196,10 +194,10 @@ export function PlayerCard({ id }: { id: string }) {
       <div className="mt-3 flex h-8 items-center gap-2 overflow-hidden">
         {card.skills.map((s) => (
           <span
-            key={s}
+            key={s.en}
             className="inline-flex items-center gap-1 truncate rounded-sm border border-ink-500 px-2 py-1 text-[10px] text-text-secondary"
           >
-            {s}
+            {lc(s)}
           </span>
         ))}
       </div>
