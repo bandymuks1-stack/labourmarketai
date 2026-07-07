@@ -1988,6 +1988,75 @@
         "error": "Something went wrong. Please try again."
       }
     },
+    "companyNeedIntakes": {
+      "eyebrow": "COMPANY NEEDS",
+      "title": "Public company-need queue",
+      "subtitle": "Anonymous needs submitted through the public /company-need form. Review each one and mark the next step by hand. Nothing is sent automatically — a human handles all contact.",
+      "back": "Back to the operations room",
+      "empty": "No public company needs submitted yet.",
+      "notAdmin": "Access rejected: admin only.",
+      "migrationBlocker": "This section is temporarily unavailable while its data is being prepared.",
+      "newCount": "{count, plural, =0 {No new needs} one {# new need} other {# new needs}}",
+      "status": {
+        "new": "New",
+        "contacted": "Contacted",
+        "qualified": "Qualified",
+        "rejected": "Rejected"
+      },
+      "actions": {
+        "new": "New",
+        "contacted": "Contacted",
+        "qualified": "Qualified",
+        "rejected": "Rejected"
+      },
+      "fields": {
+        "created": "Submitted",
+        "contactName": "Contact person",
+        "email": "Email",
+        "phone": "Phone",
+        "country": "Country",
+        "cityRegion": "City / region",
+        "sector": "Sector",
+        "headcount": "Headcount",
+        "startWindow": "Start",
+        "duration": "Expected duration",
+        "urgency": "Urgency",
+        "accommodation": "Accommodation",
+        "transport": "Transport",
+        "languages": "Languages",
+        "engagement": "Engagement type",
+        "description": "Description",
+        "sourcePath": "Source page"
+      },
+      "urgencyValue": {
+        "asap": "As soon as possible",
+        "weeks": "Within a few weeks",
+        "flexible": "Flexible"
+      },
+      "accommodationValue": {
+        "provided_free": "Provided free",
+        "provided_paid": "Provided (paid)",
+        "provided_deducted": "Provided (deducted)",
+        "not_provided": "Not provided"
+      },
+      "engagementValue": {
+        "employment": "Employment",
+        "subcontracting": "Subcontracting",
+        "agency_supply": "Agency supply"
+      },
+      "transportValue": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "result": {
+        "saved": "Status updated.",
+        "notAdmin": "Action rejected: admin only.",
+        "invalid": "Invalid request.",
+        "notFound": "Record not found.",
+        "needsMigration": "Couldn’t complete the action. Please try again.",
+        "error": "Something went wrong. Please try again."
+      }
+    },
     "matching": {
       "eyebrow": "ADMIN · PHASE 3",
       "title": "Matching workbench",
