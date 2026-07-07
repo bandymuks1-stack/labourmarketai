@@ -6602,6 +6602,16 @@
       "SE": "Sweden",
       "FI": "Finland"
     },
+    "contactPerson": "Contact person",
+    "contactPersonHelp": "Optional. Who to reach about this need.",
+    "cityRegion": "City or region",
+    "cityRegionHelp": "Optional. Where the work will be.",
+    "expectedDuration": "Expected duration",
+    "expectedDurationHelp": "Optional. E.g. “3 months” or “ongoing”.",
+    "urgency": "When you need it",
+    "urgencyAsap": "As soon as possible",
+    "urgencyWeeks": "In the coming weeks",
+    "urgencyFlexible": "Timing is flexible",
     "numberOfWorkers": "Number of workers",
     "startDate": "Start date",
     "accommodation": "Accommodation",
@@ -6639,10 +6649,12 @@
     "aiNone": "No suggestion was produced — please review your details.",
     "statusInvalid": "Some details need fixing. Please check the form.",
     "statusError": "Something went wrong. Please try again.",
-    "bridgeNote": "This is a preview. To post a real need and see possible matches, create your account.",
+    "bridgeNote": "To submit this need for follow-up, create a free account. Already have one? Sign in.",
     "bridgeSignup": "Create an account and post your need",
     "bridgeLogin": "Already have an account? Sign in",
-    "autoSuggested": "Suggested from your description — please check and adjust if needed. Nothing is submitted automatically."
+    "autoSuggested": "Suggested from your description — please check and adjust if needed. Nothing is submitted automatically.",
+    "preparedTitle": "Your need is prepared",
+    "preparedBody": "We've organised your need. To submit it for follow-up, create a free account or sign in below — then it reaches the team."
   },
   "candidatePool": {
     "title": "Candidate pool",
