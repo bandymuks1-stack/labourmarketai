@@ -77,9 +77,18 @@ describe("partner-route copy is present and honest in lt/en/ru", () => {
     expect(cn.partnerRouteTitle, `${loc} partnerRouteTitle`).not.toMatch(BANNED);
   });
 
-  it.each(ACTIVE)("%s body names the LT/PL partner-company route + human coordination + conditional framing", (loc) => {
+  it.each(ACTIVE)("%s body names the owner-approved LT + PL partner companies", (loc) => {
     const body = catalog(loc).companyNeed.partnerRouteBody;
-    expect(body).toMatch(/LT\/PL/);
+    // The two owner-approved partners (approved 2026-07-07) — named verbatim.
+    expect(body, `${loc} LT partner`).toMatch(/Nonstop Group/);
+    expect(body, `${loc} PL partner`).toMatch(/Labour Market AI Sp\. z o\.o\./);
+    // each carries its market marker
+    expect(body, `${loc} LT marker`).toMatch(/\(LT\)/);
+    expect(body, `${loc} PL marker`).toMatch(/\(PL\)/);
+  });
+
+  it.each(ACTIVE)("%s body keeps partner-company + human-coordinated + conditional framing", (loc) => {
+    const body = catalog(loc).companyNeed.partnerRouteBody;
     expect(body, `${loc} partner`).toMatch(/partner|partneri|партн/i);
     // conditional ("if ... not yet") framing
     expect(body, `${loc} conditional`).toMatch(/if |jei |если/i);
