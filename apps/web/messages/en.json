@@ -6589,7 +6589,7 @@
     "profession": "Sector & work type needed",
     "country": "Country",
     "countryHelp": "Select the country where the workers are needed.",
-    "honestNote": "This page prepares a structured draft of your need for review — nothing is saved or published here. You submit the real need after creating an account.",
+    "honestNote": "Fill in your need — we'll structure it cleanly and prepare it for follow-up. Nothing is published automatically.",
     "countries": {
       "LT": "Lithuania",
       "LV": "Latvia",
@@ -6604,6 +6604,8 @@
     },
     "contactPerson": "Contact person",
     "contactPersonHelp": "Optional. Who to reach about this need.",
+    "contactEmail": "Contact email",
+    "contactEmailHelp": "Optional, but it helps us follow up faster about your need.",
     "cityRegion": "City or region",
     "cityRegionHelp": "Optional. Where the work will be.",
     "expectedDuration": "Expected duration",
@@ -6654,7 +6656,9 @@
     "bridgeLogin": "Already have an account? Sign in",
     "autoSuggested": "Suggested from your description — please check and adjust if needed. Nothing is submitted automatically.",
     "preparedTitle": "Your need is prepared",
-    "preparedBody": "We've organised your need. To submit it for follow-up, create a free account or sign in below — then it reaches the team."
+    "preparedBody": "We've organised your need. To submit it for follow-up, create a free account or sign in below — then it reaches the team.",
+    "receivedTitle": "Request received",
+    "receivedBody": "We've received your need and are keeping it for follow-up with you. To view and manage it, create an account or sign in below."
   },
   "candidatePool": {
     "title": "Candidate pool",

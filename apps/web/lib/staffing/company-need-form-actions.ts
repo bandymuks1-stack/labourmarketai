@@ -10,11 +10,20 @@
  */
 import { getLocale } from "next-intl/server";
 import { draftVacancyFromNeed } from "./company-need-actions";
+import { persistPublicCompanyNeed } from "./company-need-public-intake";
 import type { AiLocale } from "../ai/runtime/types";
 
 export interface CompanyNeedFormState {
   readonly ok: boolean;
   readonly code?: "invalid" | "error";
+  /**
+   * Whether the anonymous structured need was actually PERSISTED for
+   * follow-up (v1). true → show the "request received" success state; false
+   * → the honest "prepared — create an account to submit" fallback (the
+   * backend is not applied yet or a transient error occurred). Never a
+   * dead-end, never a false success.
+   */
+  readonly persisted?: boolean;
   readonly draftStatus?: "suggestion" | "disabled" | "needs_review";
   readonly role?: string | null;
   readonly skills?: readonly string[];
@@ -67,10 +76,40 @@ export async function submitCompanyNeedAction(
     description: str(formData.get("description")) ?? "",
   };
 
-  const locale = toAiLocale(await getLocale());
+  const rawLocale = await getLocale();
+  const locale = toAiLocale(rawLocale);
+
+  // Persist the structured need for follow-up (anonymous path, v1). This is
+  // the real backend now: a success means a row was stored for the operator.
+  // On failure the helper returns a code and we fall back to the honest
+  // "prepared" state — never a false success, never a dead-end.
+  const persist = await persistPublicCompanyNeed({
+    locale: rawLocale,
+    companyName: raw.companyName,
+    contactName: raw.contactPerson,
+    contactEmail: str(formData.get("contact_email")),
+    country: raw.country,
+    cityRegion: raw.cityRegion,
+    sector: raw.profession,
+    headcount: raw.numberOfWorkers,
+    startWindow: raw.startDate,
+    expectedDuration: raw.expectedDuration,
+    urgency: raw.urgency,
+    accommodation: raw.accommodationOffer,
+    transportNeeded: raw.transportProvided,
+    languages: raw.languageRequirements.join(", ") || undefined,
+    engagementType: raw.engagementModel,
+    description: raw.description,
+    sourcePath: `/${rawLocale}/company-need`,
+  });
+  const persisted = persist.ok;
+
   const result = await draftVacancyFromNeed(raw, locale);
 
   if (!result.ok) {
+    // The AI-draft parse failed, but if the row was persisted the submission
+    // still succeeded for the employer — show the success state.
+    if (persisted) return { ok: true, persisted: true };
     return { ok: false, code: "invalid", message: result.error };
   }
 
@@ -87,6 +126,7 @@ export async function submitCompanyNeedAction(
     };
     return {
       ok: true,
+      persisted,
       draftStatus: "suggestion",
       role: value.data.normalized_role,
       skills: value.data.required_skills,
@@ -98,6 +138,7 @@ export async function submitCompanyNeedAction(
 
   return {
     ok: true,
+    persisted,
     draftStatus: draft.status === "disabled" ? "disabled" : "needs_review",
   };
 }

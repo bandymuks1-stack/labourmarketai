@@ -6589,7 +6589,7 @@
     "profession": "Reikalingas sektorius ir darbo tipas",
     "country": "Šalis",
     "countryHelp": "Pasirinkite šalį, kurioje reikia darbuotojų.",
-    "honestNote": "Šis puslapis paruošia struktūruotą poreikio juodraštį peržiūrai — čia niekas neišsaugoma ir nepublikuojama. Realų poreikį pateiksite susikūrę paskyrą.",
+    "honestNote": "Užpildykite poreikį — jį tvarkingai struktūruosime ir paruošime tolesniam kontaktui. Nieko nepublikuojame automatiškai.",
     "countries": {
       "LT": "Lietuva",
       "LV": "Latvija",
@@ -6604,6 +6604,8 @@
     },
     "contactPerson": "Kontaktinis asmuo",
     "contactPersonHelp": "Neprivaloma. Su kuo susisiekti dėl šio poreikio.",
+    "contactEmail": "El. paštas susisiekimui",
+    "contactEmailHelp": "Neprivaloma, bet padeda greičiau susisiekti dėl jūsų poreikio.",
     "cityRegion": "Miestas ar regionas",
     "cityRegionHelp": "Neprivaloma. Kur numatytas darbas.",
     "expectedDuration": "Numatoma trukmė",
@@ -6654,7 +6656,9 @@
     "bridgeLogin": "Jau turite paskyrą? Prisijungti",
     "autoSuggested": "Pasiūlyta pagal jūsų aprašymą — patikrinkite ir, jei reikia, pataisykite. Nieko nepateikiame automatiškai.",
     "preparedTitle": "Poreikis paruoštas",
-    "preparedBody": "Tvarkingai sudėliojome jūsų poreikį. Kad jį pateiktumėte tolesniam kontaktui, susikurkite nemokamą paskyrą arba prisijunkite žemiau — tada poreikis atkeliauja komandai."
+    "preparedBody": "Tvarkingai sudėliojome jūsų poreikį. Kad jį pateiktumėte tolesniam kontaktui, susikurkite nemokamą paskyrą arba prisijunkite žemiau — tada poreikis atkeliauja komandai.",
+    "receivedTitle": "Poreikis gautas",
+    "receivedBody": "Gavome jūsų poreikį ir laikome jį tolesniam kontaktui su jumis. Kad matytumėte ir tvarkytumėte jį, susikurkite paskyrą arba prisijunkite žemiau."
   },
   "candidatePool": {
     "title": "Kandidatų telkinys",

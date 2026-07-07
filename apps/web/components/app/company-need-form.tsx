@@ -19,6 +19,8 @@ export interface CompanyNeedFormLabels {
   readonly companyName: string;
   readonly contactPerson: string;
   readonly contactPersonHelp: string;
+  readonly contactEmail: string;
+  readonly contactEmailHelp: string;
   readonly profession: string;
   readonly country: string;
   readonly countryHelp: string;
@@ -34,6 +36,8 @@ export interface CompanyNeedFormLabels {
   readonly urgencyFlexible: string;
   readonly preparedTitle: string;
   readonly preparedBody: string;
+  readonly receivedTitle: string;
+  readonly receivedBody: string;
   readonly accommodation: string;
   readonly accFree: string;
   readonly accPaid: string;
@@ -97,11 +101,18 @@ export function CompanyNeedForm({
           <input type="text" name="company_name" required minLength={1} maxLength={200} className={FIELD} />
         </label>
 
-        <label className={LABEL}>
-          <span className="text-text-secondary">{labels.contactPerson}</span>
-          <input type="text" name="contact_person" maxLength={160} className={FIELD} />
-          <span className={HELP}>{labels.contactPersonHelp}</span>
-        </label>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <label className={LABEL}>
+            <span className="text-text-secondary">{labels.contactPerson}</span>
+            <input type="text" name="contact_person" maxLength={160} className={FIELD} />
+            <span className={HELP}>{labels.contactPersonHelp}</span>
+          </label>
+          <label className={LABEL}>
+            <span className="text-text-secondary">{labels.contactEmail}</span>
+            <input type="email" name="contact_email" maxLength={254} className={FIELD} />
+            <span className={HELP}>{labels.contactEmailHelp}</span>
+          </label>
+        </div>
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.profession}</span>
@@ -221,19 +232,23 @@ export function CompanyNeedForm({
               {state.code === "invalid" ? labels.statusInvalid : labels.statusError}
             </p>
           ) : (
-            // Every successful parse leads with the same operational
-            // confirmation: the need is structured, and the next step (submit
-            // via account, below) is spelled out — no "AI not enabled" dead-end.
-            // When a provider IS configured the AI suggestion is shown as
-            // enrichment underneath; when it is not, the confirmation stands
-            // alone (honest: nothing is auto-saved/published — see the note
-            // above the form).
-            <div className="flex flex-col gap-3" data-testid="company-need-prepared">
+            // Two honest success shapes, never a dead-end:
+            //  · persisted  → the structured need was really stored for
+            //    follow-up ("request received" + account is useful to manage it);
+            //  · !persisted → the anon backend is not applied yet / a transient
+            //    error occurred, so we degrade to the operational "prepared —
+            //    create an account to submit" state (form data is kept).
+            // The AI vacancy suggestion is shown as enrichment only when a
+            // provider is configured.
+            <div
+              className="flex flex-col gap-3"
+              data-testid={state.persisted ? "company-need-received" : "company-need-prepared"}
+            >
               <p className="font-display text-sm font-semibold text-text-primary">
-                {labels.preparedTitle}
+                {state.persisted ? labels.receivedTitle : labels.preparedTitle}
               </p>
               <p className="text-sm leading-relaxed text-text-secondary">
-                {labels.preparedBody}
+                {state.persisted ? labels.receivedBody : labels.preparedBody}
               </p>
               {state.draftStatus === "suggestion" ? (
                 <div className="mt-1 flex flex-col gap-3 border-t border-border-default pt-3">

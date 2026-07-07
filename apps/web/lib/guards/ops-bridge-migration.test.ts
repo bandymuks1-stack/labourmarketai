@@ -298,6 +298,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260706210000) — two nullable columns on conversations + one
     // participant-scoped SECURITY DEFINER reader RPC; DRAFT,
     // needs-human-gate, owner-gated apply.
-    expect(guard).toMatch(/SPRINT_BASELINE = 114/);
+    // Then to 115 for the anonymous company-need public intake
+    // (20260707120000 company_need_public_intake) — ONE new dedicated
+    // write-only table (RLS on, NO anon/authenticated policy) + ONE new
+    // SECURITY DEFINER RPC (submit_company_need_public_v1) granted to anon;
+    // customer_requests untouched; DRAFT, needs-human-gate, owner-gated apply.
+    expect(guard).toMatch(/SPRINT_BASELINE = 115/);
   });
 });
