@@ -287,8 +287,11 @@ export default async function LandingPage({
           <p className="text-sm leading-relaxed text-text-secondary">
             {tlm("employerPathBody")}
           </p>
+          {/* Canonical demand funnel: every "submit/start a need" CTA routes
+              to /company-need (the single company demand entry). The
+              educational /for-companies page stays reachable from the nav. */}
           <Link
-            href="/for-companies"
+            href="/company-need"
             className="mt-auto w-full pt-2 sm:w-auto"
           >
             <Button variant="secondary" className="w-full rounded-xl sm:w-auto">

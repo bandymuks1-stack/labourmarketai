@@ -60,6 +60,9 @@ export type GeoPayload =
 
 /** Player-card (FUT-style worker profile) payload (5b.3). */
 export type PlayerStatKey = "SKL" | "REL" | "SPD" | "SAF" | "ADP" | "TRS";
+/** Render order of the six stat codes — shared by the card (client) and
+ *  the marketing showcase legend (server), so it lives in this plain module. */
+export const STAT_KEYS: readonly PlayerStatKey[] = ["SKL", "REL", "SPD", "SAF", "ADP", "TRS"];
 export type PlayerTier = "gold" | "silver" | "bronze";
 export type PlayerStatus = "LIVE" | "AVAILABLE" | "DRAFTED" | "BUSY";
 export type PlayerCardData = {
@@ -72,7 +75,7 @@ export type PlayerCardData = {
   status: PlayerStatus;
   photo: { src: string; alt: { lt: string; en: string } };
   stats: Record<PlayerStatKey, number>;
-  skills: string[];
+  skills: { lt: string; en: string }[];
 };
 
 /** Companies-page demand preview payload (5b.3.5). */
@@ -81,7 +84,7 @@ export type DemandData = {
   project: { lt: string; en: string };
   location: { lt: string; en: string };
   headcount: number;
-  skills: string[];
+  skills: { lt: string; en: string }[];
   intensity: DemandIntensity;
   rankedMatches: number;
 };
@@ -145,7 +148,7 @@ export type CompanyScoreData = {
 /** Agencies-page pool preview payload (5b.3.5). */
 export type AgencyPoolData = {
   poolSize: number;
-  breakdown: { trade: string; count: number }[];
+  breakdown: { trade: { lt: string; en: string }; count: number }[];
   status: { active: number; pending: number; available: number };
   avatars: number;
   extraCount: number;
@@ -390,7 +393,7 @@ export const placeholders: readonly Placeholder[] = [
         },
       },
       stats: { SKL: 92, REL: 93, SPD: 86, SAF: 95, ADP: 85, TRS: 91 },
-      skills: ["Site supervision", "Steel fixing", "Safety+"],
+      skills: [{ lt: "Statybvietės priežiūra", en: "Site supervision" }, { lt: "Armavimas", en: "Steel fixing" }, { lt: "Sauga+", en: "Safety+" }],
     },
   },
   {
@@ -423,7 +426,7 @@ export const placeholders: readonly Placeholder[] = [
         },
       },
       stats: { SKL: 95, REL: 94, SPD: 88, SAF: 96, ADP: 87, TRS: 93 },
-      skills: ["Forklift operation", "Inventory control", "Safety+"],
+      skills: [{ lt: "Krautuvo valdymas", en: "Forklift operation" }, { lt: "Atsargų apskaita", en: "Inventory control" }, { lt: "Sauga+", en: "Safety+" }],
     },
   },
   {
@@ -456,7 +459,7 @@ export const placeholders: readonly Placeholder[] = [
         },
       },
       stats: { SKL: 84, REL: 95, SPD: 80, SAF: 90, ADP: 83, TRS: 94 },
-      skills: ["Elderly care", "Scheduling", "First aid"],
+      skills: [{ lt: "Pagyvenusių priežiūra", en: "Elderly care" }, { lt: "Grafikų planavimas", en: "Scheduling" }, { lt: "Pirmoji pagalba", en: "First aid" }],
     },
   },
   {
@@ -489,7 +492,7 @@ export const placeholders: readonly Placeholder[] = [
         },
       },
       stats: { SKL: 80, REL: 78, SPD: 79, SAF: 81, ADP: 77, TRS: 80 },
-      skills: ["Cooking", "Food safety", "Teamwork"],
+      skills: [{ lt: "Maisto gaminimas", en: "Cooking" }, { lt: "Maisto sauga", en: "Food safety" }, { lt: "Darbas komandoje", en: "Teamwork" }],
     },
   },
   {
@@ -940,7 +943,7 @@ export const placeholders: readonly Placeholder[] = [
       },
       location: { lt: "Roterdamas, NL", en: "Rotterdam, NL" },
       headcount: 8,
-      skills: ["Forklift operation", "Inventory control", "Order picking", "Safety+"],
+      skills: [{ lt: "Krautuvo valdymas", en: "Forklift operation" }, { lt: "Atsargų apskaita", en: "Inventory control" }, { lt: "Užsakymų rinkimas", en: "Order picking" }, { lt: "Sauga+", en: "Safety+" }],
       intensity: "HOT",
       rankedMatches: 47,
     },
@@ -962,11 +965,11 @@ export const placeholders: readonly Placeholder[] = [
     pool: {
       poolSize: 86,
       breakdown: [
-        { trade: "Logistics", count: 22 },
-        { trade: "Care", count: 18 },
-        { trade: "Hospitality", count: 15 },
-        { trade: "Retail", count: 17 },
-        { trade: "General", count: 14 },
+        { trade: { lt: "Logistika", en: "Logistics" }, count: 22 },
+        { trade: { lt: "Priežiūra", en: "Care" }, count: 18 },
+        { trade: { lt: "Apgyvendinimas ir maitinimas", en: "Hospitality" }, count: 15 },
+        { trade: { lt: "Prekyba", en: "Retail" }, count: 17 },
+        { trade: { lt: "Bendri darbai", en: "General" }, count: 14 },
       ],
       status: { active: 31, pending: 9, available: 46 },
       avatars: 4,

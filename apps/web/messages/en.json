@@ -3834,11 +3834,11 @@
     }
   },
   "nav": {
-    "platform": "Platform",
-    "solutions": "Solutions",
-    "resources": "Resources",
+    "workers": "For workers",
+    "companies": "For companies",
+    "agencies": "For agencies",
     "pricing": "Pricing",
-    "company": "Company",
+    "about": "About",
     "vision": "Vision",
     "login": "Sign in",
     "startNow": "Start now"
@@ -3936,7 +3936,7 @@
     "cta": "View full insights"
   },
   "footer": {
-    "tagline": "A labour market across every sector — Baltic & Northern Europe.",
+    "tagline": "A labour market across every sector — locally and internationally across Europe.",
     "activity": "Market overview",
     "product": "Product",
     "company": "Company",
@@ -3989,7 +3989,7 @@
         }
       ],
       "screenshot": "Company demand flow",
-      "cta": "Create a company account"
+      "cta": "Start a work need"
     },
     "agencies": {
       "eyebrow": "For agencies",
@@ -5028,7 +5028,8 @@
       "joinLabel": "Join conversation",
       "joinPending": "Joining..."
     },
-    "originalLanguage": "Original ({lang})",
+    "originalLanguage": "Original ({lang})"
+,
     "source": {
       "scouting": "About a work request (scouting)",
       "demand_interest": "About a work request (worker interest)",
@@ -6587,7 +6588,20 @@
     "companyName": "Company name",
     "profession": "Sector & work type needed",
     "country": "Country",
-    "countryHelp": "Two-letter code (e.g. NL).",
+    "countryHelp": "Select the country where the workers are needed.",
+    "honestNote": "This page prepares a structured draft of your need for review — nothing is saved or published here. You submit the real need after creating an account.",
+    "countries": {
+      "LT": "Lithuania",
+      "LV": "Latvia",
+      "EE": "Estonia",
+      "PL": "Poland",
+      "DE": "Germany",
+      "NL": "Netherlands",
+      "DK": "Denmark",
+      "NO": "Norway",
+      "SE": "Sweden",
+      "FI": "Finland"
+    },
     "numberOfWorkers": "Number of workers",
     "startDate": "Start date",
     "accommodation": "Accommodation",

@@ -60,9 +60,12 @@ const HELP = "text-[11px] text-text-muted";
 export function CompanyNeedForm({
   labels,
   categories,
+  countryOptions,
 }: {
   readonly labels: CompanyNeedFormLabels;
   readonly categories: readonly WorkCategoryOptionGroup[];
+  /** Constrained target-market list (code + localized name) — no free-text codes. */
+  readonly countryOptions: ReadonlyArray<{ code: string; label: string }>;
 }) {
   const [state, formAction, isPending] = useActionState<
     CompanyNeedFormState | null,
@@ -99,7 +102,12 @@ export function CompanyNeedForm({
         <div className="grid grid-cols-2 gap-4">
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.country}</span>
-            <input type="text" name="country" required maxLength={2} placeholder="NL" className={FIELD} />
+            <select name="country" required defaultValue="" className={FIELD} data-testid="company-need-country">
+              <option value="" disabled>—</option>
+              {countryOptions.map((c) => (
+                <option key={c.code} value={c.code}>{c.label}</option>
+              ))}
+            </select>
             <span className={HELP}>{labels.countryHelp}</span>
           </label>
           <label className={LABEL}>

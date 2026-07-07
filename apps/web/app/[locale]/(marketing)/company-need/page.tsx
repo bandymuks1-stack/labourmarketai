@@ -17,6 +17,7 @@ import {
   type CompanyNeedFormLabels,
 } from "@/components/app/company-need-form";
 import { buildWorkCategoryOptions } from "@/lib/taxonomy/work-categories";
+import { READINESS_COUNTRIES } from "@/lib/country-readiness/types";
 
 /**
  * Company need / vacancy page (Staffing Operating Model v1, PR4 UI / PR10).
@@ -74,12 +75,35 @@ export default async function CompanyNeedPage({
 
   const categories = buildWorkCategoryOptions(locale);
 
+  // Constrained country choice — the current target markets (same set as
+  // lib/country-readiness), localized display names from the catalog. No
+  // free-text ISO-code guessing, no big country-database dependency.
+  const countryOptions = READINESS_COUNTRIES.map((code) => ({
+    code,
+    label: t(`countries.${code}`),
+  }));
+
   return (
     <div
       className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-14 sm:px-12"
       id="main-content"
     >
-      <CompanyNeedForm labels={labels} categories={categories} />
+      {/* Honest-capability note ABOVE the form (nav/funnel consistency PR):
+          this public step prepares a reviewable draft; nothing is saved or
+          published here. The real submission happens after signup (bridge
+          below). */}
+      <p
+        className="card-border p-4 text-sm leading-relaxed text-text-secondary"
+        data-testid="company-need-honest-note"
+      >
+        {t("honestNote")}
+      </p>
+
+      <CompanyNeedForm
+        labels={labels}
+        categories={categories}
+        countryOptions={countryOptions}
+      />
 
       {/* Funnel bridge: this public form only previews/drafts (no persistence).
           To post a real need and run scouting/matching, the employer continues

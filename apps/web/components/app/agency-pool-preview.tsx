@@ -1,12 +1,15 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Card } from "@/components/ui/Card";
 import { getPool } from "@/content/placeholders";
 
 export function AgencyPoolPreview({ id }: { id: string }) {
   const p = getPool(id);
+  const locale = useLocale();
   const t = useTranslations("shared.preview");
+  const lc = (v: { lt: string; en: string }) =>
+    locale === "lt" ? v.lt : v.en;
   const max = Math.max(...p.breakdown.map((b) => b.count), 1);
 
   const STATUS = [
@@ -31,9 +34,9 @@ export function AgencyPoolPreview({ id }: { id: string }) {
       </p>
       <div className="mt-2 flex flex-col gap-2">
         {p.breakdown.map((b) => (
-          <div key={b.trade} className="flex items-center gap-3">
+          <div key={b.trade.en} className="flex items-center gap-3">
             <span className="w-20 shrink-0 text-xs text-text-secondary">
-              {b.trade}
+              {lc(b.trade)}
             </span>
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-600">
               <div

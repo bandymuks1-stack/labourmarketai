@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { ConstellationBg } from "@/components/decor/constellation-bg";
 import { PlayerCard } from "@/components/app/player-card";
+import { STAT_KEYS } from "@/content/placeholders";
 
 /** "Workers as work profiles" — three FUT-style cards. Sits directly
  *  after the hero; carries the same constellation ambient so it reads as
@@ -30,6 +31,16 @@ export async function PlayerCardShowcase() {
           <PlayerCard id="workers.featured.2" />
           <PlayerCard id="workers.featured.3" />
         </div>
+
+        {/* Visible acronym legend — the six stat codes (SKL/REL/…) must be
+            readable without hovering; the same localized names double as the
+            per-bar aria-labels inside PlayerCard. */}
+        <p
+          className="mt-6 text-center font-mono text-[11px] uppercase tracking-label text-text-muted"
+          data-testid="playercards-stat-legend"
+        >
+          {STAT_KEYS.map((k) => `${k} — ${t(`stat.${k}`)}`).join(" · ")}
+        </p>
 
         {/* §18 honesty line (PR9): these three cards are a CONCEPT preview of
             fictional profiles — said visibly, in words, not only via the
