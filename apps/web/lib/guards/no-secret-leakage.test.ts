@@ -38,6 +38,9 @@ const PATTERNS: { name: string; rx: RegExp }[] = [
   { name: "stripe test secret key (real)", rx: /\bsk_test_[A-Za-z0-9]{20,}/ },
   { name: "stripe webhook secret (real)", rx: /\bwhsec_[A-Za-z0-9]{20,}/ },
   { name: "supabase service-role JWT", rx: /\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/ },
+  // Telegram bot token: <bot-id digits>:<35-char secret>. Placeholders like
+  // `123456:test-token` (<30 trailing chars) are not flagged.
+  { name: "telegram bot token", rx: /\b\d{6,}:[A-Za-z0-9_-]{30,}\b/ },
 ];
 
 describe("no secret leakage in the repo", () => {
