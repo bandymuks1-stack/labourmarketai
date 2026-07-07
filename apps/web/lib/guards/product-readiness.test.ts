@@ -1684,7 +1684,13 @@ describe("no migration files added by this sprint", () => {
     // (conversation_source_context: title + route hint only, raw source_id
     // never returned); DRAFT needs-human-gate, owner-gated apply; rollback
     // drops only the function and the two columns.
-    const SPRINT_BASELINE = 114;
+    // Bumped 114 -> 115 for the anonymous company-need public intake
+    // (20260707120000 company_need_public_intake) — ONE new dedicated
+    // write-only table (RLS on, NO anon/authenticated policy) + ONE new
+    // SECURITY DEFINER RPC (submit_company_need_public_v1) granted to anon;
+    // customer_requests untouched; DRAFT needs-human-gate, owner-gated apply;
+    // rollback drops only the function and the table.
+    const SPRINT_BASELINE = 115;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
