@@ -11,6 +11,7 @@
 import { getLocale } from "next-intl/server";
 import { draftVacancyFromNeed } from "./company-need-actions";
 import { persistPublicCompanyNeed } from "./company-need-public-intake";
+import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
 import type { AiLocale } from "../ai/runtime/types";
 
@@ -110,6 +111,33 @@ export async function submitCompanyNeedAction(
     sourcePath: `/${rawLocale}/company-need`,
   });
   const persisted = persist.ok;
+
+  // Best-effort owner demand-signal alert (Telegram, server-only + env-gated).
+  // Fires ONLY on a persisted intake. The helper never throws and no-ops when
+  // the channel is unconfigured; the extra try/catch is defense-in-depth so a
+  // Telegram failure can never affect the submission, persistence, or queue.
+  if (persisted) {
+    try {
+      await sendCompanyNeedOwnerAlert({
+        companyName: raw.companyName,
+        contact: [raw.contactPerson, str(formData.get("contact_email"))]
+          .filter(Boolean)
+          .join(" "),
+        sector: raw.profession,
+        country: raw.country,
+        cityRegion: raw.cityRegion,
+        headcount: raw.numberOfWorkers,
+        urgency: raw.urgency,
+        startOrDate: raw.startDate,
+        duration: raw.expectedDuration,
+        languages: raw.languageRequirements.join(", ") || undefined,
+        sourcePath: `/${rawLocale}/company-need`,
+      });
+    } catch {
+      // never surfaced to the user
+    }
+  }
+
   const isConstruction = isConstructionWorkType(raw.profession);
 
   const result = await draftVacancyFromNeed(raw, locale);

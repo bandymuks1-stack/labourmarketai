@@ -46,6 +46,16 @@ const schema = z.object({
   AI_MAX_RETRIES: z.string().optional(),
   AI_MAX_OUTPUT_TOKENS: z.string().optional(),
   AI_DAILY_RUN_BUDGET: z.string().optional(),
+
+  // ── Owner Telegram alerts (server-only; demand-signal notifications) ───────
+  // Best-effort owner alert on a PERSISTED /company-need intake. OFF by default:
+  // the alert is a no-op unless the owner sets the bot token + chat id (Vercel
+  // env / .env.local — NEVER committed, NEVER NEXT_PUBLIC) AND flips
+  // OWNER_TELEGRAM_ALERTS_ENABLED=true. Helper:
+  // lib/notifications/telegram-owner-alerts.ts. Never breaks the public submit.
+  OWNER_TELEGRAM_ALERTS_ENABLED: z.enum(["true", "false"]).default("false"),
+  OWNER_TELEGRAM_BOT_TOKEN: z.string().optional(),
+  OWNER_TELEGRAM_CHAT_ID: z.string().optional(),
 });
 
 const parsed = schema.safeParse({
@@ -73,6 +83,9 @@ const parsed = schema.safeParse({
   AI_MAX_RETRIES: process.env.AI_MAX_RETRIES,
   AI_MAX_OUTPUT_TOKENS: process.env.AI_MAX_OUTPUT_TOKENS,
   AI_DAILY_RUN_BUDGET: process.env.AI_DAILY_RUN_BUDGET,
+  OWNER_TELEGRAM_ALERTS_ENABLED: process.env.OWNER_TELEGRAM_ALERTS_ENABLED,
+  OWNER_TELEGRAM_BOT_TOKEN: process.env.OWNER_TELEGRAM_BOT_TOKEN,
+  OWNER_TELEGRAM_CHAT_ID: process.env.OWNER_TELEGRAM_CHAT_ID,
 });
 
 if (!parsed.success) {
