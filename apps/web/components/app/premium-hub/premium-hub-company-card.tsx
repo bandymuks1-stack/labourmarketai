@@ -1,17 +1,48 @@
 import { getTranslations } from "next-intl/server";
 import { Building2, MapPin } from "lucide-react";
 
-import type { HubCompany } from "./premium-hub-fixtures";
-import { HubPanel, HubStat } from "./premium-hub-primitives";
+import type { CompanyVM } from "./premium-hub-data";
+import {
+  HubEmptyState,
+  HubPanel,
+  HubStat,
+  HubUnavailable,
+} from "./premium-hub-primitives";
 
-/** Block B — Įmonės kortelė. Company/team identity + compact operational stats. */
-export async function PremiumHubCompanyCard({ company }: { company: HubCompany }) {
+/** Block B — Įmonės kortelė. Real company identity + real RLS-scoped counts
+ *  (active members, projects, pending invitations). Honest empty state when the
+ *  caller has no company yet. */
+export async function PremiumHubCompanyCard({ company }: { company: CompanyVM }) {
   const t = await getTranslations("premiumHub");
+
+  if (company.status === "unavailable") {
+    return (
+      <HubPanel eyebrow={t("company.title")} icon={Building2} testid="premium-hub-company">
+        <HubUnavailable message={t("unavailable")} />
+      </HubPanel>
+    );
+  }
+
+  if (company.status === "empty") {
+    return (
+      <HubPanel eyebrow={t("company.title")} icon={Building2} testid="premium-hub-company">
+        <HubEmptyState
+          icon={Building2}
+          title={t("company.empty.title")}
+          body={t("company.empty.body")}
+          ctaLabel={t("company.empty.cta")}
+          href="/dashboard/company"
+        />
+      </HubPanel>
+    );
+  }
+
   const stats = [
-    { label: t("company.stats.team"), value: company.team },
+    { label: t("company.stats.team"), value: company.members },
     { label: t("company.stats.projects"), value: company.projects },
-    { label: t("company.stats.active"), value: company.active },
+    { label: t("company.stats.invites"), value: company.invitations },
   ];
+
   return (
     <HubPanel eyebrow={t("company.title")} icon={Building2} testid="premium-hub-company">
       <div className="flex items-center gap-4">
@@ -23,15 +54,18 @@ export async function PremiumHubCompanyCard({ company }: { company: HubCompany }
         </div>
         <div className="flex min-w-0 flex-col gap-1">
           <h2 className="truncate font-display text-lg font-bold tracking-tightest text-text-primary">
-            {company.companyName}
+            {company.name ?? t("company.unnamed")}
           </h2>
-          <p className="flex items-center gap-1.5 truncate text-sm text-text-secondary">
-            <MapPin className="h-3.5 w-3.5 shrink-0 text-text-muted" strokeWidth={1.75} aria-hidden />
-            {company.location}
-          </p>
-          <p className="truncate font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {company.sector}
-          </p>
+          {company.country ? (
+            <p className="flex items-center gap-1.5 truncate text-sm text-text-secondary">
+              <MapPin
+                className="h-3.5 w-3.5 shrink-0 text-text-muted"
+                strokeWidth={1.75}
+                aria-hidden
+              />
+              {company.country}
+            </p>
+          ) : null}
         </div>
       </div>
 

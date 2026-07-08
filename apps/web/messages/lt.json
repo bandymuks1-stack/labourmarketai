@@ -7181,38 +7181,81 @@
   },
   "premiumHub": {
     "brand": "LabourMarket.ai",
-    "conceptBadge": "Koncepcinė peržiūra · dar ne gyvi duomenys",
+    "liveBadge": "Gyvi duomenys",
+    "partialBadge": "Gyvi duomenys · kai kurie blokai dar neužpildyti",
     "pageTitle": "Valdymo centras",
     "pageLead": "Viena vieta apžvelgti savo profesinę tapatybę, komandą, rinką ir projektą.",
+    "unavailable": "Duomenys šiuo metu neprieinami.",
+    "yes": "Taip",
+    "no": "Ne",
     "person": {
       "title": "Asmens kortelė",
-      "status": "Aktyvus",
-      "skillsHeading": "Įgūdžiai"
+      "completeness": "Profilio pilnumas",
+      "availability": {
+        "available": "Laisvas darbui",
+        "busy": "Užimtas",
+        "unavailable": "Neprieinamas"
+      },
+      "stats": {
+        "skills": "Įgūdžiai",
+        "supported": "Pagrįsti įrašais",
+        "entries": "Darbo įrašai"
+      },
+      "empty": {
+        "title": "Profilis dar neužpildytas",
+        "body": "Įkelkite CV arba papildykite profilį, kad kortelė taptų matoma.",
+        "cta": "Papildyti profilį"
+      }
     },
     "company": {
       "title": "Įmonės kortelė",
+      "unnamed": "Įmonė",
       "stats": {
         "team": "Komanda",
         "projects": "Projektai",
-        "active": "Aktyvūs"
+        "invites": "Kvietimai"
+      },
+      "empty": {
+        "title": "Įmonė dar nesukurta",
+        "body": "Sukurkite įmonės kortelę, kai norite samdyti, valdyti komandą ar objektus.",
+        "cta": "Sukurti įmonę"
       }
     },
     "map": {
       "title": "Rinkos žemėlapis",
-      "lead": "Rinkos aktyvumo apžvalga.",
+      "lead": "Jūsų rinkos signalų apžvalga.",
       "activePoint": "Aktyvus taškas",
-      "points": "Rinkos taškai"
+      "points": "Rinkos taškai",
+      "signals": {
+        "preferred": "Pageidaujamos vietos",
+        "needs": "Poreikiai",
+        "login": "Prisijungimo signalas"
+      },
+      "empty": {
+        "title": "Rinkos signalų dar nėra",
+        "body": "Pridėkite pageidaujamas vietas arba poreikius, kad žemėlapis pradėtų rodyti galimybes.",
+        "cta": "Pridėti signalų"
+      }
     },
     "project": {
       "title": "Projekto kortelė",
-      "imageAlt": "Koncepcinis projekto objekto vaizdas",
-      "photosPresent": "Yra",
-      "photosAbsent": "Nėra",
+      "unnamed": "Projektas",
+      "imageAlt": "Projekto objekto vaizdas",
+      "handover": {
+        "preparation": "Ruošiamasi",
+        "in_progress": "Vykdoma",
+        "handover_declared": "Perdavimas deklaruotas",
+        "closed": "Uždaryta"
+      },
       "stats": {
-        "works": "Darbai",
-        "photos": "Nuotraukos",
-        "defects": "Defektai",
-        "handover": "Perdavimas"
+        "ready": "Pasiruošę",
+        "team": "Komanda",
+        "photos": "Nuotraukos"
+      },
+      "empty": {
+        "title": "Projekto darbo pasas dar nepradėtas",
+        "body": "Kai atsiras objektas, darbų įrašai ar perdavimo veiksmai, jie bus matomi čia.",
+        "cta": "Peržiūrėti projektus"
       }
     }
   }
