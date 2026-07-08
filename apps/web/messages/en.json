@@ -7181,38 +7181,81 @@
   },
   "premiumHub": {
     "brand": "LabourMarket.ai",
-    "conceptBadge": "Concept preview · not live data yet",
+    "liveBadge": "Live data",
+    "partialBadge": "Live data · some blocks not filled yet",
     "pageTitle": "Control hub",
     "pageLead": "One place to review your professional identity, team, market and project.",
+    "unavailable": "This data is not available right now.",
+    "yes": "Yes",
+    "no": "No",
     "person": {
       "title": "Personal card",
-      "status": "Active",
-      "skillsHeading": "Skills"
+      "completeness": "Profile completeness",
+      "availability": {
+        "available": "Available for work",
+        "busy": "Busy",
+        "unavailable": "Unavailable"
+      },
+      "stats": {
+        "skills": "Skills",
+        "supported": "Backed by entries",
+        "entries": "Work entries"
+      },
+      "empty": {
+        "title": "Profile not filled in yet",
+        "body": "Upload a CV or complete your profile to make this card visible.",
+        "cta": "Complete profile"
+      }
     },
     "company": {
       "title": "Company card",
+      "unnamed": "Company",
       "stats": {
         "team": "Team",
         "projects": "Projects",
-        "active": "Active"
+        "invites": "Invites"
+      },
+      "empty": {
+        "title": "No company yet",
+        "body": "Create a company card when you want to hire, manage a team or run sites.",
+        "cta": "Create company"
       }
     },
     "map": {
       "title": "Market map",
-      "lead": "An overview of market activity.",
+      "lead": "An overview of your market signals.",
       "activePoint": "Active point",
-      "points": "Market points"
+      "points": "Market points",
+      "signals": {
+        "preferred": "Preferred locations",
+        "needs": "Needs",
+        "login": "Login signal"
+      },
+      "empty": {
+        "title": "No market signals yet",
+        "body": "Add preferred locations or needs so the map starts showing opportunities.",
+        "cta": "Add signals"
+      }
     },
     "project": {
       "title": "Project card",
-      "imageAlt": "Concept view of the project site",
-      "photosPresent": "Yes",
-      "photosAbsent": "No",
+      "unnamed": "Project",
+      "imageAlt": "View of the project site",
+      "handover": {
+        "preparation": "Preparing",
+        "in_progress": "In progress",
+        "handover_declared": "Handover declared",
+        "closed": "Closed"
+      },
       "stats": {
-        "works": "Tasks",
-        "photos": "Photos",
-        "defects": "Defects",
-        "handover": "Handover"
+        "ready": "Ready",
+        "team": "Team",
+        "photos": "Photos"
+      },
+      "empty": {
+        "title": "Work passport not started yet",
+        "body": "When a site, work entries or handover actions appear, they will show here.",
+        "cta": "View projects"
       }
     }
   }

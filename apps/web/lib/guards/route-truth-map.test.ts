@@ -75,9 +75,11 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/visual-os": "GATED_PREVIEW",
   "dashboard/visual-os/agency": "GATED_PREVIEW",
   "dashboard/learning": "GATED_PREVIEW", // parked pending owner entry-point decision (F-N1)
-  // Premium Hub — concept-preview control room (premium-hub-screen-v1). Renders
-  // marked stand-in data only; deliberately unlinked until real data + a nav
-  // entry point land (see docs/launch/premium-hub-screen-data-bindings.md).
+  // Premium Hub control room — now backed by REAL RLS-scoped data (no fixtures;
+  // premium-hub real-data wiring v1). Kept GATED_PREVIEW = working but
+  // deliberately PARKED (zero inbound links) until the owner validates it in
+  // production and adds a nav entry. Fixture-free state enforced by
+  // hub-real-data-only.test.ts (see docs/launch/premium-hub-screen-data-bindings.md).
   "dashboard/hub": "GATED_PREVIEW",
 
   // ── DUPLICATE_DRIFT (kept temporarily; consolidation in backlog) ──────

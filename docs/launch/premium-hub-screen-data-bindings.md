@@ -1,50 +1,64 @@
 # Premium Hub screen — data bindings
 
 Route: `/[locale]/dashboard/hub` (authenticated, under the dashboard layout).
-Status: **concept preview** — route-truth-map class `GATED_PREVIEW`, deliberately
-unlinked (no nav entry) and enforced by `preview-surfaces-unlinked.test.ts`.
+Status: **real-data-backed** — route-truth-map class `GATED_PREVIEW` = working but
+deliberately **parked/unlinked** until the owner validates it in production and
+picks a nav entry. No concept fixtures remain in the product route (enforced by
+`lib/guards/hub-real-data-only.test.ts`); the fixture module was deleted.
 
-The screen currently renders **marked stand-in data** from
-`apps/web/components/app/premium-hub/premium-hub-fixtures.ts`
-(`PREMIUM_HUB_PREVIEW`). Every visible value is fixture content, flagged in the
-header by `premiumHub.conceptBadge` ("Koncepcinė peržiūra · dar ne gyvi
-duomenys"). Structural/chrome labels are real i18n (`premiumHub.*` in
-`messages/{lt,en,ru}.json`); the fixture holds only the sample *content*.
+The screen renders from one RLS-scoped read model,
+`apps/web/components/app/premium-hub/premium-hub-data.ts`
+(`getPremiumHubViewModel()`), fetched server-side in `page.tsx`. Every value is
+the caller's own data (or a real `0`) via existing helpers — no service-role, no
+new tables, **no migration**, no external/paid map provider. Each block reports
+`status: "ready" | "empty" | "unavailable"`. The header badge says **"Gyvi
+duomenys"** when every block is `ready`, otherwise **"Gyvi duomenys · kai kurie
+blokai dar neužpildyti"** — it never claims live over a fabricated value.
 
-## What each block binds to (next PR)
+## Real sources wired (per block)
 
-| Block (component) | Fixture field | Real source when wired |
+| Block | Real source(s) | Notes |
 |---|---|---|
-| **Asmens kortelė** (`premium-hub-person-card.tsx`) | `person.name`, `person.role`, `person.skills[]` | `profiles.full_name` + avatar (`lib/profile/avatar.ts`, `getOwnAvatar`); role/profession from `profiles.active_role` / `professions`; skills from the worker's real skill rows (`lib/worker/*`, work-journal-derived) — self-declared levels only, never a verified/certified score |
-| **Įmonės kortelė** (`premium-hub-company-card.tsx`) | `company.companyName`, `company.location`, `company.sector`, `company.team/projects/active` | `getOwnCompany()` (`lib/company/company-setup.ts`, RLS-scoped); counts from company members + company projects. Show an honest "create a company" CTA when the caller has none (mirror the overview page) |
-| **Rinkos žemėlapis** (`premium-hub-market-map.tsx`) | `mapNodes[]` (abstract positions) | Stays a stylized CSS/SVG panel. Nodes → preferred locations / login-location signals / demand signals (`lib/market-map/capture.ts`). Only render points that reflect real signals; keep the honest "not on map yet" state — no fake markers, **no external/paid map provider, no geocoding** |
-| **Projekto / darbo paso kortelė** (`premium-hub-project-card.tsx`) | `project.name`, `workDone/workTotal`, `photosPresent`, `defects`, `handoverPercent` | `projects` + `dashboard/projects/[id]/operations` data: work journal / work-passport entries, evidence photos, defect records, handover/progress. Percentages must be real counts (met/total), never a fabricated rating |
+| **Asmens kortelė** | `getWorkerPlayerCard()` (skillsDeclared, journalSupportedSkills, evidenceEntries, professionSlug) · `getOwnAvatar()` · `getOwnAvailability()` (availability state) · `profiles` (full_name, active_role, country) | Skills shown as real **counts** + a transparent **profile-completeness ratio** (met/total of real fields). There is **no 0–100 skill level** in the data model, so none is invented. Avatar via `AvatarDisplay` (real photo or initials monogram). |
+| **Įmonės kortelė** | `getOwnCompany()` (company-setup) · `listActiveCompanyWorkers()` (team) · `getCompanyProjectContext()` (projects) · `listCompanyWorkerInvitations()` (pending invites) | Stats are real RLS-scoped counts: Komanda / Projektai / Kvietimai. Verification badge intentionally not shown (avoids any trust-claim wording). |
+| **Rinkos žemėlapis** | `listOwnPreferredLocations()` · `listOwnDemandLocations()` · `getOwnLoginConsent()` | Real counts: preferred locations, needs, consented login signal. The panel stays **CSS/SVG, provider-free**; the number of points reflects the real signal total, positions are decorative (no coordinates, no geocoding). |
+| **Projekto / darbo paso kortelė** | `listManagedProjects()` (most recent) · `getProjectOperations()` (assigned + ready → readiness ratio) · `getProjectGallery()` (photo count) · `getHandoverPassport()` (declared handover stage) | Real: project name/location, handover **stage** (an enum, not a percent), team-readiness ratio (ready/assigned), assigned + photo counts. |
 
-Cross-cutting (future): `pokalbiai` / next actions → `conversations` + source
-relation + next-action engine (`lib/dashboard/next-action.ts`), as a follow-up
-panel — not part of this screen yet.
+## Intentionally left as empty / not shown (no real source → never invented)
 
-## Wiring steps (next PR)
+- **Handover percentage** — the model stores a declaration **stage**
+  (`preparation | in_progress | handover_declared | closed`), not a percent, so a
+  stage chip is shown, never a fabricated `72%`.
+- **Defect count** — no defect model exists anywhere in `lib`, so the project
+  card shows **no** defect stat (never an invented count).
+- **Company "active" stat** — replaced by pending **invitations** (a real count);
+  there is no generic "active" figure to show truthfully.
+- **Verification badge** — `verificationStatus` is available but not surfaced
+  (kept out to avoid any public trust-claim wording).
 
-1. Make `dashboard/hub/page.tsx` fetch the caller's real data server-side
-   (Supabase server client, RLS-scoped) exactly like `dashboard/market-map` and
-   the overview page do; pass real props into `PremiumHubScreen`.
-2. Replace `PREMIUM_HUB_PREVIEW` usage with the fetched props; **delete**
-   `premium-hub-fixtures.ts` and the `conceptBadge` header once every block is
-   backed by real, RLS-scoped data.
-3. Add honest empty/incomplete states per block (no company yet, no skills yet,
-   no project yet) instead of fabricated values — mirror the overview page's
-   `Placeholder` / incomplete-row conventions.
-4. Graduate the route: reclassify `dashboard/hub` from `GATED_PREVIEW` to
-   `REAL_LAUNCH_SURFACE` in `route-truth-map.test.ts`, remove it from
-   `PREVIEW_ROUTES` in `preview-surfaces-unlinked.test.ts`, and add a nav entry
-   via the feature-availability catalogue (`lib/config/navigation.ts` /
-   `lib/config/feature-availability.ts`).
+## Empty / unavailable states (honest, with a next action)
 
-## What remains mock/local fixture after THIS PR
+- **empty** → the block shows a marked empty state + one direct CTA to the
+  existing surface that fills it: person → `/dashboard/profile`, company →
+  `/dashboard/company`, market → `/dashboard/market-map`, project →
+  `/dashboard/projects`.
+- **unavailable** → a neutral "Duomenys šiuo metu neprieinami" note (e.g. company
+  read returns `needs-migration`/`error`). Never a fake number, never an error
+  dump.
 
-Everything the hub shows: person identity + skills, company identity + stats,
-market-map nodes, and project stats all come from `PREMIUM_HUB_PREVIEW`. No DB
-reads, no writes, no migration, no map provider. The screen is a visual/layout
-deliverable marked as a concept preview; real data binding is the follow-up
-described above.
+## Route classification & nav
+
+Kept `GATED_PREVIEW` and still listed in `preview-surfaces-unlinked.test.ts`
+`PREVIEW_ROUTES` (zero inbound links enforced). It is no longer in that guard's
+"preview-marker" check because it is real-data-backed, not a preview. **No nav
+entry is added** — per the goal, the owner validates the authenticated real-data
+render in production first, then a conservative single nav entry (e.g. "Centras")
+can be added, at which point the route graduates to `REAL_LAUNCH_SURFACE`.
+
+## Still not wired (future, out of scope here)
+
+- A dedicated CV / work-history summary tile (no ready-made summary helper).
+- Conversations / next-action panel (cross-cutting; separate surface).
+- Defect tracking (no model yet).
+- Worker (non-manager) project view when the user only has assignments, not
+  managed projects — currently shows the honest project empty state for them.

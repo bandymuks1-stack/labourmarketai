@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
+import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 /**
@@ -78,6 +79,54 @@ export function HubProgress({
       >
         <div className={cn("h-full rounded-full", fill)} style={{ width: `${pct}%` }} />
       </div>
+    </div>
+  );
+}
+
+/** Honest empty state for a block that has no real data yet: a calm icon +
+ *  explanation + one direct next action to the existing surface that fills it.
+ *  Never a fake number, never a dead CTA. */
+export function HubEmptyState({
+  icon: Icon,
+  title,
+  body,
+  ctaLabel,
+  href,
+}: {
+  icon: LucideIcon;
+  title: string;
+  body: string;
+  ctaLabel: string;
+  href: string;
+}) {
+  return (
+    <div className="flex flex-1 flex-col items-start justify-center gap-3 rounded-xl border border-dashed border-ink-600 bg-ink-800/30 p-5">
+      <span className="flex h-10 w-10 items-center justify-center rounded-full border border-ink-600 bg-ink-800/60">
+        <Icon className="h-5 w-5 text-text-muted" strokeWidth={1.75} aria-hidden />
+      </span>
+      <div className="flex flex-col gap-1">
+        <p className="font-display text-sm font-semibold text-text-primary">{title}</p>
+        <p className="text-xs leading-relaxed text-text-secondary">{body}</p>
+      </div>
+      <Link
+        href={href as "/dashboard"}
+        className="inline-flex min-h-9 w-fit items-center gap-1.5 rounded-md border border-border-subtle bg-surface-1 px-3 py-1.5 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+      >
+        {ctaLabel}
+        <span aria-hidden className="text-text-muted">
+          →
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+/** Neutral "can't read this right now" state (migration/feature not available).
+ *  Honest — never a fake value, never an error dump. */
+export function HubUnavailable({ message }: { message: string }) {
+  return (
+    <div className="flex flex-1 flex-col items-start justify-center gap-2 rounded-xl border border-ink-600 bg-ink-800/30 p-5">
+      <p className="text-xs leading-relaxed text-text-muted">{message}</p>
     </div>
   );
 }

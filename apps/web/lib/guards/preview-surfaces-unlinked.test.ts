@@ -36,10 +36,11 @@ const NAV_SURFACES = [
 // learning review surface works but is deliberately PARKED — zero inbound
 // links until the owner decides its entry point (audit finding F-N1). Listing
 // it here makes the parked state explicit and enforced instead of accidental.
-// `/dashboard/hub` added 2026-07-08 (premium-hub-screen-v1): the Premium Hub
-// concept-preview control room renders marked stand-in data and is deliberately
-// PARKED — zero inbound links until real data + a nav entry point land. Listing
-// it here enforces that parked state instead of leaving it accidental.
+// `/dashboard/hub` (premium-hub-screen-v1 → real-data wiring v1, 2026-07-08):
+// the Premium Hub control room is now backed by REAL RLS-scoped data (no
+// fixtures), but stays deliberately PARKED — zero inbound links until the owner
+// validates it in production and decides its nav entry point. Same treatment as
+// `/dashboard/learning`: a working surface kept unlinked on purpose.
 const PREVIEW_ROUTES = [
   "/dashboard/talent",
   "/dashboard/visual-os",
@@ -76,10 +77,12 @@ describe("preview surfaces remain honestly marked as not-live", () => {
   // never mistaken for a shipped feature (doctrine §18: "preview"/"concept"/
   // "not live yet"/"PRE-ALPHA" are the allowed honest markers).
   const HONEST = /preview|concept|not live yet|PRE-ALPHA|Sample|Pavyzd|Ruošiam|Концепт|превью/i;
+  // Note: /dashboard/hub is intentionally NOT here — it is now real-data-backed
+  // (no fixtures) and must NOT claim a "preview/concept" marker. Its honest,
+  // fixture-free state is enforced by hub-real-data-only.test.ts instead.
   for (const rel of [
     "app/[locale]/dashboard/talent/page.tsx",
     "app/[locale]/dashboard/visual-os/page.tsx",
-    "app/[locale]/dashboard/hub/page.tsx",
   ]) {
     if (!existsSync(join(ROOT, rel))) continue;
     it(`${rel} carries an honest preview marker`, () => {
