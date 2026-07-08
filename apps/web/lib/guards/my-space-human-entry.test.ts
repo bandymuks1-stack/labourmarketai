@@ -34,17 +34,18 @@ const en = JSON.parse(read("messages/en.json"));
 const DASH_PAGE = "app/[locale]/dashboard/page.tsx";
 const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 
-describe("worker entry opens with the state-aware work card", () => {
+describe("worker entry opens with the state-aware work card (folded into the hub)", () => {
   const page = read(DASH_PAGE);
-  it("mounts <WorkCard> on the dashboard (the calm 'Mano darbo kortelė')", () => {
-    expect(page).toMatch(/<WorkCard\b/);
+  it("surfaces the worker's folded next action + inline editor in the hub person block", () => {
+    // WorkCard was removed (dedup v1); the state-aware next action + inline
+    // availability/location/pay editor now live in the hub Asmens kortelė via
+    // the workEditor prop.
+    expect(page).toMatch(/workEditor=\{workEditor\}/);
   });
-  it("the work card surfaces honest missing states, never a fabricated value", () => {
-    const card = read("components/app/work-card.tsx");
-    // Missing dimensions show a "dar nenurodyta" hint, not a fake 0/score.
-    expect(card).toContain("dim.${dim}.missing");
+  it("the folded editor surfaces only honest state, never a fabricated value", () => {
+    const editor = read("components/app/work-card-editor.tsx");
     // No system/score field is ever surfaced to the user.
-    expect(card).not.toMatch(/trust_score|profile_completeness/);
+    expect(editor).not.toMatch(/trust_score|profile_completeness/);
   });
   it("the worker entry no longer renders the role/module activity-setup link", () => {
     // The "start a company/agency/buyer" card is not a person's next natural

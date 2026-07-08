@@ -14,7 +14,9 @@ import { join } from "node:path";
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
-const workCard = read("components/app/work-card.tsx");
+// NOTE (dedup v1): components/app/work-card.tsx was removed; its worker
+// stat-tile / hover / tap-target assertions below were dropped with it. The
+// shared worker-player-card + missing-chip still carry the same contract.
 const playerCard = read("components/app/worker-player-card.tsx");
 const adminPage = read("app/[locale]/dashboard/admin/page.tsx");
 const adminReviewLib = read("lib/buyer/admin-request-review.ts");
@@ -41,12 +43,6 @@ describe("1+2. counters navigate or are covered by monitoring-only notes", () =>
     // The Stat renderer itself is a Link (rule A: real element + focus state).
     expect(playerCard).toMatch(/function Stat\([\s\S]{0,700}<Link/);
   });
-  it("work-card skill/record tiles navigate; passive tile has no card border", () => {
-    expect(workCard).toMatch(/href="\/dashboard\/profile#capabilities"/);
-    expect(workCard).toMatch(/href="\/dashboard\/journal#journal-entries"/);
-    // Passive StatTile branch renders WITHOUT the bordered-card look.
-    expect(workCard).toMatch(/<div className="flex flex-col gap-0\.5 p-3" data-testid=\{testid\}>/);
-  });
   it("admin KPI band: queue counters link, the rest sit under the monitoring note", () => {
     expect(adminPage).toMatch(/href: "#request-review"/);
     expect(adminPage).toMatch(/href: "\/dashboard\/admin\/need-structuring"/);
@@ -68,13 +64,12 @@ describe("3. readiness incomplete rows act", () => {
   it("worker readiness panel unmet rows are Links (pre-existing model, pinned)", () => {
     expect(readinessPanel).toMatch(/<Link[\s\S]{0,400}ArrowRight/);
   });
-  it("work-card '+ missing' chips act: page dims link, inline dims open the editor", () => {
-    // Audit PR4: the "#work-card" self-anchor fallback (a no-op scroll) is
-    // gone — inline dims dispatch the editor-open event via the shared chip.
-    expect(workCard).toMatch(/PAGE_TARGET\[dim\] \?\? null/);
-    expect(workCard).toMatch(/WorkCardMissingChip/);
-    expect(workCard).not.toMatch(/"#work-card"/);
-    expect(workCard).toMatch(/id="work-card"/);
+  it("the canonical work-card editor anchor lives on the dashboard page", () => {
+    // WorkCard was removed (dedup v1); the `id="work-card"` anchor (the profile
+    // hub's availability-pillar deep-link target) now wraps the hub person block
+    // that carries the folded state-aware editor.
+    const dashPage = read("app/[locale]/dashboard/page.tsx");
+    expect(dashPage).toMatch(/id="work-card"/);
   });
 });
 
@@ -143,9 +138,7 @@ describe("9. notifications honest", () => {
 });
 
 describe("B. passive elements look passive (no hover-glow on dead cards)", () => {
-  it("work-card and player-card sections dropped the hover lift", () => {
-    expect(workCard).not.toMatch(/glow-hover/);
-    expect(workCard).not.toMatch(/hover:shadow-card-hover/);
+  it("player-card sections dropped the hover lift", () => {
     expect(playerCard).not.toMatch(/glow-hover/);
     expect(playerCard).not.toMatch(/hover:shadow-card-hover/);
   });
@@ -165,13 +158,12 @@ describe("B. passive elements look passive (no hover-glow on dead cards)", () =>
 describe("10+11. tap targets and no payment work", () => {
   it("new interactive tiles/chips carry mobile-safe min-height", () => {
     expect(playerCard).toMatch(/min-h-11 flex-col gap-0\.5 rounded-md/);
-    expect(workCard).toMatch(/min-h-11 flex-col gap-0\.5 rounded-md/);
     // The missing-dim chip moved into its own shared component (audit PR4).
     const missingChip = read("components/app/work-card-missing-chip.tsx");
     expect(missingChip).toMatch(/min-h-11 items-center gap-1 rounded-md border border-brand-orange/);
   });
   it("no payment strings entered any touched file", () => {
-    for (const src of [workCard, playerCard, adminPage, companyPage, mapShell, notifPanel]) {
+    for (const src of [playerCard, adminPage, companyPage, mapShell, notifPanel]) {
       expect(src).not.toMatch(/stripe|checkout|payment_intent/i);
     }
   });

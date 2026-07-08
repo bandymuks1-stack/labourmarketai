@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import type { PremiumHubViewModel } from "./premium-hub-data";
+import type { PremiumHubViewModel, WorkEditorVM } from "./premium-hub-data";
 import { PremiumHubPersonCard } from "./premium-hub-person-card";
 import { PremiumHubCompanyCard } from "./premium-hub-company-card";
 import { PremiumHubMarketMap } from "./premium-hub-market-map";
@@ -27,9 +27,13 @@ import { PremiumHubProjectCard } from "./premium-hub-project-card";
 export async function PremiumHubScreen({
   vm,
   embedded = false,
+  workEditor,
 }: {
   vm: PremiumHubViewModel;
   embedded?: boolean;
+  /** Worker-only: the state-aware next action + inline editor folded into the
+   *  person block (dashboard worker branch). Absent for org roles. */
+  workEditor?: WorkEditorVM;
 }) {
   const t = await getTranslations("premiumHub");
 
@@ -49,7 +53,7 @@ export async function PremiumHubScreen({
 
   const grid = (
     <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
-      <PremiumHubPersonCard person={vm.person} />
+      <PremiumHubPersonCard person={vm.person} workEditor={workEditor} />
       <div className="flex flex-col gap-4">
         <PremiumHubCompanyCard company={vm.company} />
         <PremiumHubMarketMap market={vm.market} />

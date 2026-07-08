@@ -62,12 +62,12 @@ describe("worker branch: state-driven top slot leads", () => {
     }
   });
 
-  it("top slot → work card → action grid → pending states → hub → explainers", () => {
+  it("premium hub → top slot → action grid → pending states → hub → explainers", () => {
     expectOrder(
       WORKER,
       [
+        "<PremiumHubScreen",
         'data-testid="dashboard-top-slot"',
-        "<WorkCard",
         "<MyZone hasCompany",
         "{marketplaceAccess}",
         "<MyZoneImproves",
@@ -78,8 +78,10 @@ describe("worker branch: state-driven top slot leads", () => {
     );
   });
 
-  it("the work card yields the fold when a stronger card owns the slot", () => {
-    expect(WORKER).toContain("compact={topSlotCard !== null}");
+  it("the hub person block carries the worker's folded next action + inline editor", () => {
+    // WorkCard was removed (dedup); its state-aware next action + inline editor
+    // now live in the hub Asmens kortelė via the workEditor prop.
+    expect(WORKER).toContain("workEditor={workEditor}");
   });
 
   it("the action grid keeps its explainer demoted (help ≠ action)", () => {

@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { WorkCardValues } from "@/lib/worker/work-card";
+import type { WorkCardNext, WorkCardState } from "@/lib/worker/work-card-state";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import { getOwnAvatar } from "@/lib/profile/avatar";
@@ -46,6 +48,18 @@ export type HandoverStage =
   | "in_progress"
   | "handover_declared"
   | "closed";
+
+/** The worker's state-aware next action + inline availability editor, folded
+ *  from the former WorkCard into the hub person block. Derived on the dashboard
+ *  page from the real `getWorkerCard` read (worker branch only); undefined for
+ *  non-worker roles. `WorkCardEditor` renders it (real save/confirm RPCs). */
+export interface WorkEditorVM {
+  state: WorkCardState;
+  /** The single best next action ({ dim, href, whyKey }) from
+   *  deriveWorkCardState — href is null when the action is an inline card edit. */
+  next: WorkCardNext;
+  values: WorkCardValues;
+}
 
 export interface PersonVM {
   status: BlockStatus;

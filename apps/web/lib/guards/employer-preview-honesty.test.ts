@@ -38,11 +38,10 @@ describe("employer preview renders only real passed-in data", () => {
     expect(comp).toMatch(/labels\.notSet/); // empty values say "not set", not faked
     expect(comp).toMatch(/labels\.unverifiedNote/);
   });
-  it("is mounted by the work card, gated on real data being present", () => {
-    const card = read("components/app/work-card.tsx");
-    expect(card).toMatch(/<EmployerPreview\b/);
-    expect(card).toMatch(/clear\.length > 0 &&[\s\S]{0,200}<EmployerPreview/);
-  });
+  // NOTE (dedup v1): WorkCard was removed, so EmployerPreview is no longer
+  // mounted on the dashboard. The component itself stays honest-by-construction
+  // (asserted above) for any future mount; its previous WorkCard-mount gating
+  // assertion is dropped with the component.
 });
 
 describe("employer-preview copy is honest in LT + EN", () => {
