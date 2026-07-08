@@ -36,6 +36,8 @@ import {
 import { decideTopSlot } from "@/lib/dashboard/top-slot";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { type Role } from "@/lib/auth/actions";
+import { PremiumHubScreen } from "@/components/app/premium-hub/premium-hub-screen";
+import { getPremiumHubViewModel } from "@/components/app/premium-hub/premium-hub-data";
 
 // Authenticated cockpit — must never be served from a stale cache, or a logged-in
 // owner can see a pre-deploy render (e.g. missing the chain action CTAs).
@@ -79,6 +81,12 @@ export default async function DashboardOverviewPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
+
+  // Consolidation v1: /dashboard now LEADS with the premium hub (the canonical
+  // visual surface — the former /dashboard/hub is removed). Kick the hub's own
+  // RLS-scoped reads off in parallel with the overview's reads so it adds no
+  // serial latency; it is awaited once, just before the role branch.
+  const hubVmPromise = getPremiumHubViewModel();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -314,6 +322,10 @@ export default async function DashboardOverviewPage({
     </header>
   );
 
+  // The premium hub view model (real RLS-scoped snapshot) — awaited once; its
+  // reads already overlapped the overview reads above.
+  const hubVm = await hubVmPromise;
+
   // ── Company / agency / customer: active-role overview (one clear next move) ──
   if (role !== "worker") {
     // Role-based single Next Action. For an org reviewer we read the SAME gated
@@ -388,6 +400,12 @@ export default async function DashboardOverviewPage({
         />
         {RoleNoticeBanner}
         {Header}
+
+        {/* Canonical premium hub — the real-data snapshot leads the one
+            dashboard (consolidation v1). Embedded = no competing page title;
+            the greeting Header above is the page heading. The action-first
+            content below keeps its audited order. */}
+        <PremiumHubScreen vm={hubVm} embedded />
 
         {/* Audit PR6 org-branch order: the single data-driven primary action
             FIRST (entries waiting → review; nothing waiting → invite/open
@@ -596,6 +614,11 @@ export default async function DashboardOverviewPage({
         metadata={{ surface: "work_card" }}
       />
       {RoleNoticeBanner}
+
+      {/* Canonical premium hub — the real-data snapshot leads the one
+          dashboard (consolidation v1). Embedded = no competing page title.
+          The action-first control room below keeps its audited order. */}
+      <PremiumHubScreen vm={hubVm} embedded />
 
       {/* The single most important next action for THIS user state. */}
       {topSlotCard && (

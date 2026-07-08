@@ -75,12 +75,10 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/visual-os": "GATED_PREVIEW",
   "dashboard/visual-os/agency": "GATED_PREVIEW",
   "dashboard/learning": "GATED_PREVIEW", // parked pending owner entry-point decision (F-N1)
-  // Premium Hub control room — now backed by REAL RLS-scoped data (no fixtures;
-  // premium-hub real-data wiring v1). Kept GATED_PREVIEW = working but
-  // deliberately PARKED (zero inbound links) until the owner validates it in
-  // production and adds a nav entry. Fixture-free state enforced by
-  // hub-real-data-only.test.ts (see docs/launch/premium-hub-screen-data-bindings.md).
-  "dashboard/hub": "GATED_PREVIEW",
+  // NOTE (dashboard consolidation v1): the former GATED_PREVIEW `dashboard/hub`
+  // route was REMOVED. The premium hub is now the canonical /dashboard lead
+  // surface (REAL_LAUNCH_SURFACE, classified above) — there is no separate hub
+  // route to classify. Fixture-free state enforced by hub-real-data-only.test.ts.
 
   // ── DUPLICATE_DRIFT (kept temporarily; consolidation in backlog) ──────
   // Buyer rooms overlap the canonical company workspace (F-D4); search is
