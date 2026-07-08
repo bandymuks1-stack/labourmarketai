@@ -7178,5 +7178,42 @@
     "freePilot": "Nemokamas pilotas — viskas, kas šiuo metu prieinama produkte, jums nemokama.",
     "prepared": "Mokami planai paruošti, bet neįsigyjami. Mokėjimai neįjungti, mokėjimo būdo pridėti nereikia.",
     "pricingLink": "Kas nemokama ir kas bus mokama"
+  },
+  "premiumHub": {
+    "brand": "LabourMarket.ai",
+    "conceptBadge": "Koncepcinė peržiūra · dar ne gyvi duomenys",
+    "pageTitle": "Valdymo centras",
+    "pageLead": "Viena vieta apžvelgti savo profesinę tapatybę, komandą, rinką ir projektą.",
+    "person": {
+      "title": "Asmens kortelė",
+      "status": "Aktyvus",
+      "skillsHeading": "Įgūdžiai"
+    },
+    "company": {
+      "title": "Įmonės kortelė",
+      "stats": {
+        "team": "Komanda",
+        "projects": "Projektai",
+        "active": "Aktyvūs"
+      }
+    },
+    "map": {
+      "title": "Rinkos žemėlapis",
+      "lead": "Rinkos aktyvumo apžvalga.",
+      "activePoint": "Aktyvus taškas",
+      "points": "Rinkos taškai"
+    },
+    "project": {
+      "title": "Projekto kortelė",
+      "imageAlt": "Koncepcinis projekto objekto vaizdas",
+      "photosPresent": "Yra",
+      "photosAbsent": "Nėra",
+      "stats": {
+        "works": "Darbai",
+        "photos": "Nuotraukos",
+        "defects": "Defektai",
+        "handover": "Perdavimas"
+      }
+    }
   }
 }

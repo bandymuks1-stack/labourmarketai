@@ -7178,5 +7178,42 @@
     "freePilot": "Free pilot — everything currently available in the product is free for you.",
     "prepared": "Paid plans are prepared, not purchasable. Payments are not enabled and no payment method is needed.",
     "pricingLink": "See what is free and what will be paid"
+  },
+  "premiumHub": {
+    "brand": "LabourMarket.ai",
+    "conceptBadge": "Concept preview · not live data yet",
+    "pageTitle": "Control hub",
+    "pageLead": "One place to review your professional identity, team, market and project.",
+    "person": {
+      "title": "Personal card",
+      "status": "Active",
+      "skillsHeading": "Skills"
+    },
+    "company": {
+      "title": "Company card",
+      "stats": {
+        "team": "Team",
+        "projects": "Projects",
+        "active": "Active"
+      }
+    },
+    "map": {
+      "title": "Market map",
+      "lead": "An overview of market activity.",
+      "activePoint": "Active point",
+      "points": "Market points"
+    },
+    "project": {
+      "title": "Project card",
+      "imageAlt": "Concept view of the project site",
+      "photosPresent": "Yes",
+      "photosAbsent": "No",
+      "stats": {
+        "works": "Tasks",
+        "photos": "Photos",
+        "defects": "Defects",
+        "handover": "Handover"
+      }
+    }
   }
 }

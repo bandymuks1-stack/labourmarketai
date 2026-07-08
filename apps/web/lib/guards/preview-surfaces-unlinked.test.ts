@@ -36,10 +36,15 @@ const NAV_SURFACES = [
 // learning review surface works but is deliberately PARKED — zero inbound
 // links until the owner decides its entry point (audit finding F-N1). Listing
 // it here makes the parked state explicit and enforced instead of accidental.
+// `/dashboard/hub` added 2026-07-08 (premium-hub-screen-v1): the Premium Hub
+// concept-preview control room renders marked stand-in data and is deliberately
+// PARKED — zero inbound links until real data + a nav entry point land. Listing
+// it here enforces that parked state instead of leaving it accidental.
 const PREVIEW_ROUTES = [
   "/dashboard/talent",
   "/dashboard/visual-os",
   "/dashboard/learning",
+  "/dashboard/hub",
 ];
 
 describe("preview surfaces are not linked from any navigation entry point", () => {
@@ -74,6 +79,7 @@ describe("preview surfaces remain honestly marked as not-live", () => {
   for (const rel of [
     "app/[locale]/dashboard/talent/page.tsx",
     "app/[locale]/dashboard/visual-os/page.tsx",
+    "app/[locale]/dashboard/hub/page.tsx",
   ]) {
     if (!existsSync(join(ROOT, rel))) continue;
     it(`${rel} carries an honest preview marker`, () => {
