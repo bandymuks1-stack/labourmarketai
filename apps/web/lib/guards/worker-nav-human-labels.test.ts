@@ -94,8 +94,10 @@ describe("worker dashboard has no duplicate doors / card wall", () => {
   it("removed the profile/journal duplicate cards (the nav tabs own those doors)", () => {
     expect(page).not.toMatch(/tMy\("activities|tMy\("proofCard|mySpace\.activities/);
   });
-  it("still mounts the work card + current-space header (identity preserved)", () => {
-    expect(page).toMatch(/<WorkCard\b/);
+  it("still surfaces the worker's folded next action + current-space header (identity preserved)", () => {
+    // WorkCard was removed (dedup v1); the worker identity/card area is the hub
+    // person block, which carries the folded next action + inline editor.
+    expect(page).toMatch(/workEditor=\{workEditor\}/);
     expect(page).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
   });
   it("keeps the page free of inline primary gradient CTAs (the one CTA is the work card's)", () => {

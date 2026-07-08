@@ -33,9 +33,11 @@ describe("room primary action is a full-width tap target on mobile", () => {
 });
 
 describe("no broad redesign / no logic change", () => {
-  it("the worker entry keeps its work card and the org entry its next action", () => {
+  it("the worker entry keeps its folded next action and the org entry its next action", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    expect(page).toMatch(/<WorkCard\b/);
+    // WorkCard was removed (dedup v1); the worker's state-aware next action +
+    // inline editor now live in the hub person block via workEditor.
+    expect(page).toMatch(/workEditor=\{workEditor\}/);
     expect(page).toMatch(/<DashboardNextAction\b/);
   });
 });

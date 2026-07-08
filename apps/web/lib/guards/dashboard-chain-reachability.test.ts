@@ -30,11 +30,11 @@ describe("dashboard surfaces the chain entry points", () => {
     expect((page.match(/<DashboardChainActions\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
     // Neither user lands without a clear next move + the accept-invitation card.
     // The ORG branch surfaces the role-based <DashboardNextAction>; the WORKER
-    // branch surfaces the state-aware <WorkCard>, which owns the worker's single
-    // best next action (slice work-card-state-aware-v1 replaced the worker's
-    // <DashboardNextAction> with the work card).
+    // branch surfaces its single best next action via the hub person block's
+    // folded editor (workEditor) — the WorkCard was removed (dedup v1) and its
+    // state-aware next action + inline editor moved into the hub Asmens kortelė.
     expect((page.match(/<DashboardNextAction\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
-    expect((page.match(/<WorkCard\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
+    expect(page).toMatch(/workEditor=\{workEditor\}/);
     expect((page.match(/<WorkerInvitationsCard\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 

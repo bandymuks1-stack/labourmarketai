@@ -76,11 +76,9 @@ describe("3. #capabilities deep links land on an open disclosure", () => {
 });
 
 describe("4. work-card inline '+' chips open the editor, never self-anchor", () => {
-  it("the card no longer emits the #work-card self-anchor fallback", () => {
-    const card = read("components/app/work-card.tsx");
-    expect(card).not.toMatch(/"#work-card"/);
-    expect(card).toMatch(/WorkCardMissingChip/);
-  });
+  // NOTE (dedup v1): WorkCard was removed; the missing-dim "+" chips are no
+  // longer rendered on the dashboard. The chip→editor open-event wiring still
+  // exists (the editor keeps its own toggle), so the event contract is pinned.
   it("inline chips dispatch the open event; the editor listens", () => {
     const chip = read("components/app/work-card-missing-chip.tsx");
     const editor = read("components/app/work-card-editor.tsx");

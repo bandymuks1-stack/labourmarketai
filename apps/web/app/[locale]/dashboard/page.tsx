@@ -11,11 +11,10 @@ import { IdentityActions } from "@/components/app/identity-actions";
 import { ActionCard } from "@/components/app/action-card";
 import { MyZone, MyZoneImproves } from "@/components/app/my-zone";
 import { getOwnCompany } from "@/lib/company/company-setup";
-import { getOwnAvatar } from "@/lib/profile/avatar";
-import { WorkCard } from "@/components/app/work-card";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { getWorkerCard } from "@/lib/worker/work-card";
+import { deriveWorkCardState } from "@/lib/worker/work-card-state";
 import {
   getBookingResponsesNewCount,
   getPendingIncomingBookingCount,
@@ -540,9 +539,17 @@ export default async function DashboardOverviewPage({
     skillsCount,
     evidenceCount: entriesCount,
   });
-  // Owner's consented avatar (existing RLS-scoped read) for the canonical Player
-  // Card identity header on the dashboard work card (PR-D1 variant adoption).
-  const workerAvatar = await getOwnAvatar();
+  // Folded into the hub person block (no separate WorkCard): the state-aware
+  // next action + the inline availability/location/pay editor. Derived from the
+  // worker's REAL saved card data; the client WorkCardEditor still writes via the
+  // real save/confirm RPCs. The worker's consented avatar is read by the hub
+  // adapter (getOwnAvatar) for the person block — no separate read here.
+  const workDerived = deriveWorkCardState(cardData.signals, Date.now());
+  const workEditor = {
+    state: workDerived.state,
+    next: workDerived.next,
+    values: cardData.values,
+  };
 
   // Booking next-action: surface ONLY when there is a REAL pending incoming
   // booking count (> 0). 0 on any missing-data state → no card, no fake badge.
@@ -615,10 +622,15 @@ export default async function DashboardOverviewPage({
       />
       {RoleNoticeBanner}
 
-      {/* Canonical premium hub — the real-data snapshot leads the one
-          dashboard (consolidation v1). Embedded = no competing page title.
-          The action-first control room below keeps its audited order. */}
-      <PremiumHubScreen vm={hubVm} embedded />
+      {/* Canonical premium hub — the real-data snapshot leads the one dashboard.
+          Its person block ("Asmens kortelė") now carries the worker's ONE
+          state-aware next action + inline availability/location/pay editor
+          (folded from the former WorkCard — no duplicate identity card).
+          Anchored id="work-card" so the profile hub's availability pillar
+          deep-links the ONE canonical editor. Embedded = no competing title. */}
+      <div id="work-card">
+        <PremiumHubScreen vm={hubVm} embedded workEditor={workEditor} />
+      </div>
 
       {/* The single most important next action for THIS user state. */}
       {topSlotCard && (
@@ -633,19 +645,6 @@ export default async function DashboardOverviewPage({
           {topSlotCard}
         </section>
       )}
-
-      {/* "Mano darbo kortelė" — the state-aware status: what's clear / what's
-          missing + the ONE best next action (+ why it helps). Real data only.
-          Collapses to its hero when the top slot carries a stronger card.
-          Anchored so the profile hub's availability pillar can deep-link the
-          ONE canonical editor (PR9) — no duplicate editing surface. */}
-      <div id="work-card">
-        <WorkCard
-          data={cardData}
-          avatarUrl={workerAvatar.signedUrl}
-          compact={topSlotCard !== null}
-        />
-      </div>
 
       {/* The action-first control room: readiness + fast actions. The
           "what improves what" explainer is demoted below (help ≠ action).
