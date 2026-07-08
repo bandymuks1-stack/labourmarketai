@@ -75,6 +75,10 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/visual-os": "GATED_PREVIEW",
   "dashboard/visual-os/agency": "GATED_PREVIEW",
   "dashboard/learning": "GATED_PREVIEW", // parked pending owner entry-point decision (F-N1)
+  // Premium Hub — concept-preview control room (premium-hub-screen-v1). Renders
+  // marked stand-in data only; deliberately unlinked until real data + a nav
+  // entry point land (see docs/launch/premium-hub-screen-data-bindings.md).
+  "dashboard/hub": "GATED_PREVIEW",
 
   // ── DUPLICATE_DRIFT (kept temporarily; consolidation in backlog) ──────
   // Buyer rooms overlap the canonical company workspace (F-D4); search is
