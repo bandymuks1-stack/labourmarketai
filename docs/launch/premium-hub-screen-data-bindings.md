@@ -1,14 +1,16 @@
 # Premium Hub screen — data bindings
 
-Route: `/[locale]/dashboard/hub` (authenticated, under the dashboard layout).
-Status: **real-data-backed** — route-truth-map class `GATED_PREVIEW` = working but
-deliberately **parked/unlinked** until the owner validates it in production and
-picks a nav entry. No concept fixtures remain in the product route (enforced by
-`lib/guards/hub-real-data-only.test.ts`); the fixture module was deleted.
+Route: **`/[locale]/dashboard`** (canonical dashboard). Updated by dashboard
+consolidation v1: the premium hub is now the LEAD visual of `/dashboard`
+(embedded, via `<PremiumHubScreen … embedded />`); the former separate
+`/dashboard/hub` route was **removed**. See `dashboard-consolidation-v1.md`.
+Status: **real-data-backed**, `REAL_LAUNCH_SURFACE`. No concept fixtures remain
+(enforced by `lib/guards/hub-real-data-only.test.ts`, which now checks
+`/dashboard/page.tsx`); the fixture module was deleted.
 
 The screen renders from one RLS-scoped read model,
 `apps/web/components/app/premium-hub/premium-hub-data.ts`
-(`getPremiumHubViewModel()`), fetched server-side in `page.tsx`. Every value is
+(`getPremiumHubViewModel()`), fetched server-side in `dashboard/page.tsx`. Every value is
 the caller's own data (or a real `0`) via existing helpers — no service-role, no
 new tables, **no migration**, no external/paid map provider. Each block reports
 `status: "ready" | "empty" | "unavailable"`. The header badge says **"Gyvi

@@ -36,16 +36,14 @@ const NAV_SURFACES = [
 // learning review surface works but is deliberately PARKED — zero inbound
 // links until the owner decides its entry point (audit finding F-N1). Listing
 // it here makes the parked state explicit and enforced instead of accidental.
-// `/dashboard/hub` (premium-hub-screen-v1 → real-data wiring v1, 2026-07-08):
-// the Premium Hub control room is now backed by REAL RLS-scoped data (no
-// fixtures), but stays deliberately PARKED — zero inbound links until the owner
-// validates it in production and decides its nav entry point. Same treatment as
-// `/dashboard/learning`: a working surface kept unlinked on purpose.
+// NOTE (dashboard consolidation v1): `/dashboard/hub` was REMOVED. The premium
+// hub is now the canonical /dashboard lead surface (a real launch route, in
+// nav via the existing "overview" tab) — it is no longer a parked preview, so
+// it is intentionally not in this list.
 const PREVIEW_ROUTES = [
   "/dashboard/talent",
   "/dashboard/visual-os",
   "/dashboard/learning",
-  "/dashboard/hub",
 ];
 
 describe("preview surfaces are not linked from any navigation entry point", () => {

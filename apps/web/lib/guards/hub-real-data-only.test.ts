@@ -5,19 +5,21 @@ import { join } from "node:path";
 /**
  * Premium Hub — real-data-only guard (premium-hub real-data wiring v1).
  *
- * The authenticated `/dashboard/hub` product route must be backed by real
- * RLS-scoped data, never by concept fixtures. This pins that contract so it
- * cannot silently regress back into a "pretty preview":
+ * The premium hub — now the canonical `/dashboard` lead surface (dashboard
+ * consolidation v1; the former `/dashboard/hub` route was removed) — must be
+ * backed by real RLS-scoped data, never by concept fixtures. This pins that
+ * contract so it cannot silently regress back into a "pretty preview":
  *
  *  A. The concept fixture module is gone (deleted, not merely unused).
  *  B. No hub product file references `PREMIUM_HUB_PREVIEW` or the fixtures module.
- *  C. The route fetches the real view model (`getPremiumHubViewModel`).
+ *  C. The canonical /dashboard page fetches the real view model
+ *     (`getPremiumHubViewModel`).
  *  D. The screen renders from a `PremiumHubViewModel`, not a hardcoded payload.
  */
 
 const ROOT = join(__dirname, "..", "..");
 const HUB_DIR = join(ROOT, "components", "app", "premium-hub");
-const PAGE = join(ROOT, "app", "[locale]", "dashboard", "hub", "page.tsx");
+const PAGE = join(ROOT, "app", "[locale]", "dashboard", "page.tsx");
 const read = (p: string) => readFileSync(p, "utf8");
 
 describe("premium hub is backed by real data, never concept fixtures", () => {
@@ -39,7 +41,7 @@ describe("premium hub is backed by real data, never concept fixtures", () => {
       pageSrc.includes("PREMIUM_HUB_PREVIEW") ||
       pageSrc.includes("premium-hub-fixtures")
     ) {
-      offenders.push("app/[locale]/dashboard/hub/page.tsx");
+      offenders.push("app/[locale]/dashboard/page.tsx");
     }
     expect(offenders, `fixture references found in: ${offenders.join(", ")}`).toEqual(
       [],
