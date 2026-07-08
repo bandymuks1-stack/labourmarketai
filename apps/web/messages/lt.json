@@ -3353,13 +3353,6 @@
           "change": "Pakeisti",
           "saved": "Ačiū, išsaugota"
         },
-        "employerPreview": {
-          "toggle": "Kaip mane matytų darbdavys",
-          "title": "Taip jūsų kortelę matytų darbdavys",
-          "intro": "Rodoma tik tai, ką jūs nurodėte. Tai nėra pasiūlymas ir niekas jūsų dar neieško — tiesiog matote, kaip atrodo jūsų kortelė.",
-          "notSet": "dar nenurodyta",
-          "unverifiedNote": "Tai jūsų pačių pateikta informacija. Ji nėra peržiūrėta, nebent kortelėje aiškiai nurodyta kitaip."
-        },
         "value": {
           "from": "nuo {date}",
           "payRange": "{min}–{max} €",
