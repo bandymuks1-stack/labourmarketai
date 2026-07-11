@@ -1982,5 +1982,38 @@
     "saved": "Præferencer gemt.",
     "error": "Kunne ikke gemme. Prøv igen.",
     "needsMigration": "Denne sektion er ikke aktiveret endnu — intet blev gemt."
+  },
+  "bookings": {
+    "endsOn": "Indtil {date}",
+    "noRole": "Arbejdsaftale",
+    "displayState": {
+      "awaiting_response": "Afventer svar",
+      "no_response_stale": "Intet svar endnu"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Du bestemmer — acceptér eller afvis. Intet er bekræftet, før du accepterer.",
+        "no_response_stale": "Ubesvaret i 14+ dage, men stadig åbent — du kan stadig acceptere eller afvise.",
+        "accepted": "Bekræftet. Næste skridt: Skriv til virksomheden og planlæg arbejdet sammen.",
+        "declined": "Du afviste, så dette forslag er lukket. Virksomheden kan sende et nyt.",
+        "withdrawn": "Virksomheden har trukket dette forslag tilbage, så det er lukket.",
+        "expired": "Dette forslag er bortfaldet, så det er lukket."
+      },
+      "outgoing": {
+        "awaiting_response": "Arbejdstageren bestemmer. Du kan trække forslaget tilbage, indtil de svarer.",
+        "no_response_stale": "Intet svar i 14+ dage. Stadig åbent — du kan trække det tilbage eller vente.",
+        "accepted": "Arbejdstageren accepterede. Næste skridt: Send en besked og planlæg arbejdet sammen.",
+        "declined": "Arbejdstageren afviste, så dette forslag er lukket. Du kan foreslå en anden arbejdstager.",
+        "withdrawn": "Du trak dette forslag tilbage, så det er lukket. Send et nyt, hvis det er nødvendigt.",
+        "expired": "Dette forslag er bortfaldet, så det er lukket."
+      }
+    },
+    "actions": {
+      "planning": "Se i planlægning"
+    },
+    "propose": {
+      "modeNote": "Dette er et bookingforslag med datoer — arbejdstageren bekræfter eller afviser det. Intet er booket, før arbejdstageren accepterer.",
+      "afterSent": "Arbejdstageren har modtaget dit forslag og vil acceptere eller afvise det. Du ser svaret under Bookinger; indtil da kan du trække forslaget tilbage."
+    }
   }
 }

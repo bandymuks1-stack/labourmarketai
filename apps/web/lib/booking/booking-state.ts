@@ -74,6 +74,42 @@ export interface BookingRequestRecord {
 }
 
 /**
+ * Derived DISPLAY states (booking clarity, PR 5) — DISPLAY-ONLY, never a
+ * status write. The canonical contract (§4) reserves `expired` with NO
+ * writer; this helper never fakes one. A proposal that sat unanswered for
+ * STALE_AFTER_DAYS+ days stays `proposed` in the DB (that is the truth) —
+ * the UI merely labels it honestly as "no response yet", NOT "expired".
+ * Terminal statuses pass through unchanged.
+ */
+export const STALE_AFTER_DAYS = 14;
+
+export type BookingDisplayState =
+  | "awaiting_response" // proposed, younger than STALE_AFTER_DAYS
+  | "no_response_stale" // proposed, unanswered for STALE_AFTER_DAYS+ days
+  | Exclude<BookingStatus, "proposed">; // terminal DB truth, passed through
+
+/**
+ * Pure derived display state for one booking row (no I/O, no writes).
+ * `createdAt` is the row's `created_at` (listMyBookings returns it as
+ * `createdAt`); `updated_at` is stamped by respond/withdraw so it moves on
+ * terminal transitions — proposal age must be measured from creation.
+ * Unparseable timestamps degrade to `awaiting_response` (never claim
+ * staleness without a provable age). Boundary: exactly STALE_AFTER_DAYS
+ * days old is already stale (age >= threshold).
+ */
+export function deriveBookingDisplayState(
+  booking: { readonly status: BookingStatus; readonly createdAt: string },
+  nowIso: string,
+): BookingDisplayState {
+  if (booking.status !== "proposed") return booking.status;
+  const created = Date.parse(booking.createdAt);
+  const now = Date.parse(nowIso);
+  if (Number.isNaN(created) || Number.isNaN(now)) return "awaiting_response";
+  const staleMs = STALE_AFTER_DAYS * 24 * 60 * 60 * 1000;
+  return now - created >= staleMs ? "no_response_stale" : "awaiting_response";
+}
+
+/**
  * Pure "responses since last seen" compute (no I/O — unit-testable), audit
  * PR5. Counts the caller's OWN proposals that the WORKER moved to a response
  * status (accepted/declined) after `seenAt` — the respond RPC stamps

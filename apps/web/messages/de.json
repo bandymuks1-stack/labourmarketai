@@ -6540,7 +6540,9 @@
     "notAuthed": "Bitte melden Sie sich an, um Ihre Buchungen zu sehen.",
     "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
     "noDate": "Kein Startdatum festgelegt",
+    "noRole": "Arbeitsvereinbarung",
     "startsOn": "Beginnt am {date}",
+    "endsOn": "Bis {date}",
     "incoming": {
       "title": "Vorschläge für Sie",
       "help": "Ein Unternehmen hat Ihnen eine Zusammenarbeit vorgeschlagen. Sie entscheiden.",
@@ -6558,6 +6560,28 @@
       "withdrawn": "Zurückgezogen",
       "expired": "Abgelaufen"
     },
+    "displayState": {
+      "awaiting_response": "Antwort ausstehend",
+      "no_response_stale": "Noch keine Antwort"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Sie entscheiden — annehmen oder ablehnen. Nichts ist bestätigt, bis Sie annehmen.",
+        "no_response_stale": "Seit 14+ Tagen unbeantwortet, aber noch offen — Sie können weiterhin annehmen oder ablehnen.",
+        "accepted": "Bestätigt. Nächster Schritt: Schreiben Sie dem Unternehmen und planen Sie die Arbeit gemeinsam.",
+        "declined": "Sie haben abgelehnt, daher ist dieser Vorschlag geschlossen. Das Unternehmen kann einen neuen senden.",
+        "withdrawn": "Das Unternehmen hat diesen Vorschlag zurückgezogen, daher ist er geschlossen.",
+        "expired": "Dieser Vorschlag ist verfallen, daher ist er geschlossen."
+      },
+      "outgoing": {
+        "awaiting_response": "Die Arbeitskraft entscheidet. Bis zur Antwort können Sie den Vorschlag zurückziehen.",
+        "no_response_stale": "Seit 14+ Tagen keine Antwort. Noch offen — Sie können ihn zurückziehen oder warten.",
+        "accepted": "Die Arbeitskraft hat angenommen. Nächster Schritt: Senden Sie eine Nachricht und planen Sie die Arbeit gemeinsam.",
+        "declined": "Die Arbeitskraft hat abgelehnt, daher ist dieser Vorschlag geschlossen. Sie können einer anderen Arbeitskraft einen Vorschlag machen.",
+        "withdrawn": "Sie haben diesen Vorschlag zurückgezogen, daher ist er geschlossen. Senden Sie bei Bedarf einen neuen.",
+        "expired": "Dieser Vorschlag ist verfallen, daher ist er geschlossen."
+      }
+    },
     "actions": {
       "accept": "Annehmen",
       "decline": "Ablehnen",
@@ -6567,7 +6591,8 @@
       "error": "Etwas ist schiefgelaufen.",
       "message": "Nachricht senden",
       "withdraw": "Vorschlag zurückziehen",
-      "findAnother": "Andere Arbeitskraft finden"
+      "findAnother": "Andere Arbeitskraft finden",
+      "planning": "In der Planung ansehen"
     },
     "connections": {
       "title": "Die Planung ist verknüpft mit",
@@ -6580,6 +6605,10 @@
       "mapNote": "Wo Arbeit und Buchungen sind",
       "diary": "Arbeitstagebuch",
       "diaryNote": "Halten Sie fest, was tatsächlich passiert ist"
+    },
+    "propose": {
+      "modeNote": "Dies ist ein Buchungsvorschlag mit Terminen — die Arbeitskraft bestätigt ihn oder lehnt ihn ab. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
+      "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen."
     }
   },
   "adminReadiness": {

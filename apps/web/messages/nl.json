@@ -6540,7 +6540,9 @@
     "notAuthed": "Log in om je boekingen te zien.",
     "unavailable": "Kon de actie niet voltooien. Probeer het opnieuw.",
     "noDate": "Geen startdatum ingesteld",
+    "noRole": "Werkafspraak",
     "startsOn": "Start {date}",
+    "endsOn": "Tot {date}",
     "incoming": {
       "title": "Voorstellen voor jou",
       "help": "Een bedrijf heeft voorgesteld om met je samen te werken. Jij beslist.",
@@ -6558,6 +6560,28 @@
       "withdrawn": "Ingetrokken",
       "expired": "Verlopen"
     },
+    "displayState": {
+      "awaiting_response": "Wacht op antwoord",
+      "no_response_stale": "Nog geen antwoord"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Jij beslist — accepteer of weiger. Niets is bevestigd totdat je accepteert.",
+        "no_response_stale": "Al 14+ dagen onbeantwoord, maar nog open — je kunt nog steeds accepteren of weigeren.",
+        "accepted": "Bevestigd. Volgende stap: stuur het bedrijf een bericht en plan het werk samen.",
+        "declined": "Je hebt geweigerd, dus dit voorstel is gesloten. Het bedrijf kan een nieuw voorstel sturen.",
+        "withdrawn": "Het bedrijf heeft dit voorstel ingetrokken, dus het is gesloten.",
+        "expired": "Dit voorstel is vervallen, dus het is gesloten."
+      },
+      "outgoing": {
+        "awaiting_response": "De werknemer beslist. Je kunt het voorstel intrekken totdat die antwoordt.",
+        "no_response_stale": "Al 14+ dagen geen antwoord. Nog open — je kunt het intrekken of wachten.",
+        "accepted": "De werknemer heeft geaccepteerd. Volgende stap: stuur een bericht en plan het werk samen.",
+        "declined": "De werknemer heeft geweigerd, dus dit voorstel is gesloten. Je kunt een andere werknemer een voorstel doen.",
+        "withdrawn": "Je hebt dit voorstel ingetrokken, dus het is gesloten. Stuur zo nodig een nieuw voorstel.",
+        "expired": "Dit voorstel is vervallen, dus het is gesloten."
+      }
+    },
     "actions": {
       "accept": "Accepteren",
       "decline": "Weigeren",
@@ -6567,7 +6591,8 @@
       "error": "Er is iets misgegaan.",
       "message": "Bericht sturen",
       "withdraw": "Voorstel intrekken",
-      "findAnother": "Andere werknemer zoeken"
+      "findAnother": "Andere werknemer zoeken",
+      "planning": "Bekijken in planning"
     },
     "connections": {
       "title": "Planning is verbonden met",
@@ -6580,6 +6605,10 @@
       "mapNote": "Waar werk en boekingen zijn",
       "diary": "Werkjournaal",
       "diaryNote": "Leg vast wat er echt is gebeurd"
+    },
+    "propose": {
+      "modeNote": "Dit is een boekingsvoorstel met datums — de werknemer bevestigt of weigert het. Er is niets geboekt totdat de werknemer accepteert.",
+      "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken."
     }
   },
   "adminReadiness": {
