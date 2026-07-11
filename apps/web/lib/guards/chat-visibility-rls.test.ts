@@ -196,6 +196,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    the anon RPC, read-only via service role). Every entry point is
     //    fenced behind an explicit isSuperadmin() re-check; it touches no
     //    chat table and sends nothing outbound.
+    //  - lib/admin/launch-readiness.ts — operator launch-readiness view
+    //    (launch repair Scope E). READ-ONLY head-counts over workers /
+    //    profiles / companies / company_need_public_intakes /
+    //    customer_requests / organizations (the intake table has no
+    //    anon/authenticated read policy by design, so service role is the
+    //    only read path). Fenced behind an explicit isSuperadmin() re-check,
+    //    touches no chat table, writes nothing, sends nothing outbound.
     //  - lib/sales/lead-intake.ts — superadmin-gated READ-ONLY waitlist
     //    read (§8.14): `waitlist` carries no authenticated read policy BY
     //    DESIGN (0005 — anon INSERT only, reads restricted to service
@@ -210,6 +217,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "app/api/leads/route.ts",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",
+      "lib/admin/launch-readiness.ts",
       "lib/billing/subscription-store.ts",
       "lib/sales/lead-intake.ts",
     ]);

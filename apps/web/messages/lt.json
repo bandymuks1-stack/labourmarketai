@@ -6415,6 +6415,39 @@
     "note": "Čia dar nėra automatinės darbo biržos ir automatinio parinkimo — ankstyvos prieigos metu atranką koordinuoja žmogus. Ką matai, tas realiai ir veikia.",
     "ctaLabel": "Pateikti darbuotojų poreikį →"
   },
+  "adminLaunchReadiness": {
+    "eyebrow": "Pasirengimas paleidimui",
+    "title": "Reali pasiūla ir paklausa prieš rinkodarą",
+    "intro": "Gyvi skaičiai iš realių produkcijos duomenų. „—“ reiškia, kad nuskaityti nepavyko — niekada ne spėjamas skaičius. Čia nėra procentų ir „parengta“ ženklų: sąžininga spragų analizė — docs/launch/real-supply-readiness-gap-v1.md.",
+    "consent": {
+      "label": "Sutikimą davę darbuotojų profiliai (tikslas: {min}–{max} prieš rinkodarą)",
+      "met": "Minimalus tikslas pasiektas. Toliau rink aiškų sutikimą kiekvienam naujam profiliui.",
+      "notMet": "Žemiau prieš-rinkodaros tikslo. Pirmiausia surink realius, aiškų sutikimą davusius darbuotojus."
+    },
+    "supply": {
+      "title": "Pasiūla — darbuotojai",
+      "total": "Darbuotojų profiliai",
+      "withProfession": "Su profesija",
+      "withLocation": "Su vieta",
+      "available": "Pažymėti laisvi",
+      "withSalary": "Su atlygio lūkesčiu",
+      "withJournal": "Su žurnalo įrašais",
+      "withReadyDocs": "Su parengtais dokumentais",
+      "teams": "Komandos (organizacijos)",
+      "note": "Skaičiuojama tik iš egzistuojančių stulpelių: worker_professions, current_location_country, availability_status, atlygio lūkesčiai, žurnalo įrašai, operatoriaus patikrinta dokumentų būsena, team tipo organizacijos."
+    },
+    "demand": {
+      "title": "Paklausa — įmonės ir poreikiai",
+      "companies": "Įmonės",
+      "intakesNew": "Vieši poreikiai — nauji",
+      "intakesContacted": "Vieši poreikiai — susisiekta",
+      "intakesQualified": "Vieši poreikiai — kvalifikuoti",
+      "intakesRejected": "Vieši poreikiai — atmesti",
+      "requestsSubmitted": "Pateiktos klientų užklausos",
+      "queueLink": "Atidaryti įmonių poreikių eilę"
+    },
+    "gapNote": "Ko duomenų modelis šiandien negali įrodyti (sutikimo kilmė, prieinamumo šviežumas, brigados sudėtis, profilio šaltinis), sąmoningai NErodoma kaip skaičius — žr. docs/launch/real-supply-readiness-gap-v1.md."
+  },
   "billingStatus": {
     "badge": {
       "disabled": "MOKĖJIMAI IŠJUNGTI",

@@ -60,6 +60,7 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/admin/company-need-intakes": "INTERNAL_ADMIN",
   "dashboard/admin/company-verification": "INTERNAL_ADMIN",
   "dashboard/admin/language-feedback": "INTERNAL_ADMIN",
+  "dashboard/admin/launch-readiness": "INTERNAL_ADMIN",
   "dashboard/admin/league": "INTERNAL_ADMIN",
   "dashboard/admin/market": "INTERNAL_ADMIN",
   "dashboard/admin/matching": "INTERNAL_ADMIN",
