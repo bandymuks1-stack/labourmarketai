@@ -6961,6 +6961,42 @@
     "applyNotAdmin": "Beheerdersrechten vereist."
   },
   "opportunities": {
+    "saved": {
+      "save": "Opslaan",
+      "saved": "Opgeslagen",
+      "unsave": "Verwijderen uit opgeslagen",
+      "privateHint": "Opslaan is privé binnen je account — het bedrijf ziet nooit wie zijn vacature heeft opgeslagen.",
+      "sectionTitle": "Opgeslagen kansen",
+      "noLongerOpen": "Eerder opgeslagen, maar niet meer open op het bord: {count}",
+      "error": "Kon je opgeslagen lijst niet bijwerken. Probeer het opnieuw."
+    },
+    "recent": {
+      "title": "Onlangs bekeken",
+      "deviceOnly": "Alleen op dit apparaat opgeslagen — deze lijst verlaat je browser nooit en wordt niet naar de server gestuurd.",
+      "clear": "Wissen"
+    },
+    "compare": {
+      "toggle": "Vergelijken",
+      "selectedLabel": "Geselecteerd",
+      "open": "Geselecteerde vergelijken",
+      "title": "Kansen vergelijken",
+      "close": "Sluiten",
+      "clear": "Selectie wissen",
+      "limitNote": "Kies 2–3 kansen om te vergelijken.",
+      "notStated": "Niet vermeld",
+      "fact": {
+        "pay": "Loon",
+        "hours": "Uren per week",
+        "start": "Start",
+        "engagement": "Contractvorm",
+        "accommodation": "Huisvesting",
+        "transport": "Vervoer",
+        "tools": "Gereedschap",
+        "languages": "Talen",
+        "location": "Locatie",
+        "company": "Bedrijf"
+      }
+    },
     "discovery": {
       "filters": {
         "title": "Kansen filteren",

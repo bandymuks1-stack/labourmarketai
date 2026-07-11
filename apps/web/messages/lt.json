@@ -6961,6 +6961,42 @@
     "applyNotAdmin": "Reikia administratoriaus teisių."
   },
   "opportunities": {
+    "saved": {
+      "save": "Išsaugoti",
+      "saved": "Išsaugota",
+      "unsave": "Pašalinti iš išsaugotų",
+      "privateHint": "Išsaugojimas privatus jūsų paskyroje — įmonė niekada nemato, kas išsaugojo jos skelbimą.",
+      "sectionTitle": "Išsaugotos galimybės",
+      "noLongerOpen": "Išsaugota anksčiau, bet lentoje nebeatvira: {count}",
+      "error": "Nepavyko atnaujinti išsaugotų sąrašo. Bandykite dar kartą."
+    },
+    "recent": {
+      "title": "Neseniai peržiūrėtos",
+      "deviceOnly": "Saugoma tik šiame įrenginyje — šis sąrašas niekada nepalieka jūsų naršyklės ir nesiunčiamas į serverį.",
+      "clear": "Išvalyti"
+    },
+    "compare": {
+      "toggle": "Palyginti",
+      "selectedLabel": "Pasirinkta",
+      "open": "Palyginti pasirinktas",
+      "title": "Palyginti galimybes",
+      "close": "Uždaryti",
+      "clear": "Išvalyti pasirinkimą",
+      "limitNote": "Palyginimui pasirinkite 2–3 galimybes.",
+      "notStated": "Nenurodyta",
+      "fact": {
+        "pay": "Atlygis",
+        "hours": "Valandos per savaitę",
+        "start": "Pradžia",
+        "engagement": "Įdarbinimo forma",
+        "accommodation": "Apgyvendinimas",
+        "transport": "Transportas",
+        "tools": "Įrankiai",
+        "languages": "Kalbos",
+        "location": "Vieta",
+        "company": "Įmonė"
+      }
+    },
     "discovery": {
       "filters": {
         "title": "Filtruoti galimybes",

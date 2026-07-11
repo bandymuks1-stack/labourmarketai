@@ -6961,6 +6961,42 @@
     "applyNotAdmin": "Admin rights required."
   },
   "opportunities": {
+    "saved": {
+      "save": "Save",
+      "saved": "Saved",
+      "unsave": "Remove from saved",
+      "privateHint": "Saving is private to your account — the company never sees who saved its listing.",
+      "sectionTitle": "Saved opportunities",
+      "noLongerOpen": "Saved earlier but no longer open on the board: {count}",
+      "error": "Could not update your saved list. Please try again."
+    },
+    "recent": {
+      "title": "Recently viewed",
+      "deviceOnly": "Stored only on this device — this list never leaves your browser and is not sent to the server.",
+      "clear": "Clear"
+    },
+    "compare": {
+      "toggle": "Compare",
+      "selectedLabel": "Selected",
+      "open": "Compare selected",
+      "title": "Compare opportunities",
+      "close": "Close",
+      "clear": "Clear selection",
+      "limitNote": "Choose 2–3 opportunities to compare.",
+      "notStated": "Not stated",
+      "fact": {
+        "pay": "Pay",
+        "hours": "Hours per week",
+        "start": "Start",
+        "engagement": "Engagement form",
+        "accommodation": "Accommodation",
+        "transport": "Transport",
+        "tools": "Tools",
+        "languages": "Languages",
+        "location": "Location",
+        "company": "Company"
+      }
+    },
     "discovery": {
       "filters": {
         "title": "Filter opportunities",
