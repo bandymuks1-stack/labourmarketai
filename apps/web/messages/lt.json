@@ -6540,7 +6540,9 @@
     "notAuthed": "Prisijunk, kad matytum savo rezervacijas.",
     "unavailable": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "noDate": "Pradžios data nenurodyta",
+    "noRole": "Darbo susitarimas",
     "startsOn": "Pradžia {date}",
+    "endsOn": "Iki {date}",
     "incoming": {
       "title": "Pasiūlymai tau",
       "help": "Įmonė pasiūlė dirbti su tavimi. Tu sprendi.",
@@ -6558,6 +6560,28 @@
       "withdrawn": "Atšaukta",
       "expired": "Nebegalioja"
     },
+    "displayState": {
+      "awaiting_response": "Laukiama atsakymo",
+      "no_response_stale": "Kol kas be atsakymo"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Sprendi tu — priimk arba atmesk. Niekas nepatvirtinta, kol nepriimsi.",
+        "no_response_stale": "Be atsakymo jau 14+ dienų, bet pasiūlymas vis dar atviras — vis dar gali priimti arba atmesti.",
+        "accepted": "Patvirtinta. Toliau: parašyk įmonei žinutę ir kartu suplanuokite darbus.",
+        "declined": "Atmetei, todėl šis pasiūlymas uždarytas. Įmonė gali atsiųsti naują.",
+        "withdrawn": "Įmonė atšaukė šį pasiūlymą, todėl jis uždarytas.",
+        "expired": "Šis pasiūlymas nebegalioja, todėl jis uždarytas."
+      },
+      "outgoing": {
+        "awaiting_response": "Sprendžia darbuotojas. Kol jis neatsakė, pasiūlymą gali atšaukti.",
+        "no_response_stale": "Atsakymo nėra jau 14+ dienų. Pasiūlymas vis dar atviras — gali jį atšaukti arba palaukti.",
+        "accepted": "Darbuotojas priėmė. Toliau: parašyk žinutę ir kartu suplanuokite darbus.",
+        "declined": "Darbuotojas atmetė, todėl šis pasiūlymas uždarytas. Gali pasiūlyti kitam darbuotojui.",
+        "withdrawn": "Atšaukei šį pasiūlymą, todėl jis uždarytas. Jei reikia, išsiųsk naują.",
+        "expired": "Šis pasiūlymas nebegalioja, todėl jis uždarytas."
+      }
+    },
     "actions": {
       "accept": "Priimti",
       "decline": "Atmesti",
@@ -6567,7 +6591,8 @@
       "error": "Kažkas nepavyko.",
       "message": "Parašyti žinutę",
       "withdraw": "Atšaukti pasiūlymą",
-      "findAnother": "Ieškoti kito darbuotojo"
+      "findAnother": "Ieškoti kito darbuotojo",
+      "planning": "Peržiūrėti planavime"
     },
     "connections": {
       "title": "Planavimas susijęs su",
@@ -6580,6 +6605,10 @@
       "mapNote": "Kur vyksta darbas ir rezervacijos",
       "diary": "Darbo žurnalas",
       "diaryNote": "Užfiksuok, kas iš tikrųjų įvyko"
+    },
+    "propose": {
+      "modeNote": "Tai rezervacijos pasiūlymas su datomis — darbuotojas jį patvirtina arba atmeta. Niekas nerezervuota, kol darbuotojas nepriima.",
+      "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti."
     }
   },
   "adminReadiness": {

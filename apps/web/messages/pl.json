@@ -1982,5 +1982,38 @@
     "saved": "[EN] Preferences saved.",
     "error": "[EN] Saving failed. Please try again.",
     "needsMigration": "[EN] This section is not enabled yet — nothing was saved."
+  },
+  "bookings": {
+    "endsOn": "[EN] Until {date}",
+    "noRole": "[EN] Work engagement",
+    "displayState": {
+      "awaiting_response": "[EN] Awaiting response",
+      "no_response_stale": "[EN] No response yet"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "[EN] You decide — accept or decline. Nothing is confirmed until you accept.",
+        "no_response_stale": "[EN] Unanswered for 14+ days but still open — you can still accept or decline.",
+        "accepted": "[EN] Confirmed. Next: message the company and plan the work together.",
+        "declined": "[EN] You declined, so this proposal is closed. The company can send a new one.",
+        "withdrawn": "[EN] The company withdrew this proposal, so it is closed.",
+        "expired": "[EN] This proposal has lapsed, so it is closed."
+      },
+      "outgoing": {
+        "awaiting_response": "[EN] The worker decides. You can withdraw the proposal until they answer.",
+        "no_response_stale": "[EN] No answer for 14+ days. Still open — you can withdraw it or keep waiting.",
+        "accepted": "[EN] The worker accepted. Next: send a message and plan the work together.",
+        "declined": "[EN] The worker declined, so this proposal is closed. You can propose to another worker.",
+        "withdrawn": "[EN] You withdrew this proposal, so it is closed. Send a new one if needed.",
+        "expired": "[EN] This proposal has lapsed, so it is closed."
+      }
+    },
+    "actions": {
+      "planning": "[EN] View in planning"
+    },
+    "propose": {
+      "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
+      "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+    }
   }
 }

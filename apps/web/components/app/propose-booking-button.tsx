@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
 
 /**
@@ -8,6 +9,13 @@ import { proposeBookingAction } from "@/lib/booking/booking-actions";
  * Sends only the safe requestId + workerId + a start date/note; the worker's
  * identity/contact never reaches the client. The worker alone accepts later.
  * Honest states only; degrades to "unavailable" until the migration is applied.
+ *
+ * Mode clarity (PR 5, contract §4): this surface is explicitly the
+ * request_booking / propose_dates mode — a booking PROPOSAL with dates that
+ * the worker confirms or declines. The dialog says so before submit, and
+ * after submit it says what happens next (worker decides; answer lands in
+ * Bookings; withdrawable until answered). Data contract unchanged — the new
+ * copy comes from the shared `bookings.propose` namespace, not new props.
  */
 export function ProposeBookingButton({
   locale,
@@ -33,6 +41,7 @@ export function ProposeBookingButton({
     cancel: string;
   };
 }) {
+  const tPropose = useTranslations("bookings.propose");
   const [open, setOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [note, setNote] = useState("");
@@ -59,7 +68,14 @@ export function ProposeBookingButton({
   }
 
   if (state === "sent") {
-    return <span className="text-[11px] font-medium text-state-success">{labels.sent}</span>;
+    return (
+      <div className="flex flex-col gap-1" data-testid="propose-booking-sent">
+        <span className="text-[11px] font-medium text-state-success">{labels.sent}</span>
+        {/* What happens next: the worker decides; the answer lands under
+            Bookings; the proposal stays withdrawable until answered. */}
+        <span className="text-[11px] text-text-muted">{tPropose("afterSent")}</span>
+      </div>
+    );
   }
 
   if (!open) {
@@ -77,6 +93,11 @@ export function ProposeBookingButton({
 
   return (
     <div className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5" data-testid="propose-booking-form">
+      {/* Mode: request_booking / propose_dates — a proposal, never a booking
+          until the WORKER accepts. Stated up front, honestly. */}
+      <p className="text-[11px] text-text-secondary" data-testid="propose-booking-mode-note">
+        {tPropose("modeNote")}
+      </p>
       <label className="flex flex-col gap-1 text-[11px] text-text-muted">
         {labels.startDate}
         <input

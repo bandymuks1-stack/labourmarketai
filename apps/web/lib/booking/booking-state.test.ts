@@ -7,7 +7,9 @@ import {
   nextBookingStatuses,
   isTerminalBooking,
   countOwnerResponsesSince,
+  deriveBookingDisplayState,
   BOOKING_TERMINAL,
+  STALE_AFTER_DAYS,
 } from "./booking-state";
 
 describe("booking transitions — only a worker may accept", () => {
@@ -82,5 +84,81 @@ describe("countOwnerResponsesSince — only real worker responses count (no fake
         seen,
       ),
     ).toBe(1);
+  });
+});
+
+describe("deriveBookingDisplayState — display-only, never a fake 'expired'", () => {
+  const now = "2026-07-11T12:00:00Z";
+  const daysBefore = (iso: string, days: number): string =>
+    new Date(Date.parse(iso) - days * 24 * 60 * 60 * 1000).toISOString();
+
+  it("a fresh proposed row awaits a response", () => {
+    expect(
+      deriveBookingDisplayState(
+        { status: "proposed", createdAt: daysBefore(now, 1) },
+        now,
+      ),
+    ).toBe("awaiting_response");
+    // Just under the threshold is still "awaiting".
+    expect(
+      deriveBookingDisplayState(
+        { status: "proposed", createdAt: daysBefore(now, STALE_AFTER_DAYS - 1) },
+        now,
+      ),
+    ).toBe("awaiting_response");
+  });
+
+  it("a proposed row unanswered for STALE_AFTER_DAYS+ days is stale — NOT 'expired'", () => {
+    const state = deriveBookingDisplayState(
+      { status: "proposed", createdAt: daysBefore(now, STALE_AFTER_DAYS + 7) },
+      now,
+    );
+    expect(state).toBe("no_response_stale");
+    // The DB truth stays 'proposed'; the display state never invents the
+    // reserved (writer-less) 'expired' status.
+    expect(state).not.toBe("expired");
+  });
+
+  it("boundary: exactly STALE_AFTER_DAYS days old is already stale (age >= threshold)", () => {
+    expect(
+      deriveBookingDisplayState(
+        { status: "proposed", createdAt: daysBefore(now, STALE_AFTER_DAYS) },
+        now,
+      ),
+    ).toBe("no_response_stale");
+    // One millisecond younger than the threshold is still awaiting.
+    const justUnder = new Date(
+      Date.parse(now) - (STALE_AFTER_DAYS * 24 * 60 * 60 * 1000 - 1),
+    ).toISOString();
+    expect(
+      deriveBookingDisplayState({ status: "proposed", createdAt: justUnder }, now),
+    ).toBe("awaiting_response");
+  });
+
+  it("terminal statuses pass through unchanged (age is irrelevant)", () => {
+    for (const s of BOOKING_TERMINAL) {
+      expect(
+        deriveBookingDisplayState(
+          { status: s, createdAt: daysBefore(now, STALE_AFTER_DAYS + 30) },
+          now,
+        ),
+      ).toBe(s);
+    }
+  });
+
+  it("unparseable timestamps degrade to awaiting_response — staleness is never claimed without proof", () => {
+    expect(
+      deriveBookingDisplayState({ status: "proposed", createdAt: "not-a-date" }, now),
+    ).toBe("awaiting_response");
+    expect(
+      deriveBookingDisplayState(
+        { status: "proposed", createdAt: daysBefore(now, 30) },
+        "not-a-date",
+      ),
+    ).toBe("awaiting_response");
+  });
+
+  it("the exported threshold is the contract's 14 days", () => {
+    expect(STALE_AFTER_DAYS).toBe(14);
   });
 });
