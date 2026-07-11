@@ -21,6 +21,10 @@ import {
   compareMatches,
   type MatchResultV1,
 } from "@/lib/market/match-v1";
+import {
+  readStructuredDemandPublic,
+  type StructuredDemandPublic,
+} from "./structured-public";
 
 /**
  * Worker-facing opportunities loader. READ-ONLY, own-data only.
@@ -60,6 +64,12 @@ export interface OpportunityCard {
   readonly nextAction: WorkerNextAction;
   /** The worker's own interest status for this demand (null = none). */
   readonly interestStatus: InterestStatus | null;
+  /** Worker-safe structured demand detail (P2-PR2). Present only after the
+   *  human-gated MP-3 RPC widening is applied AND the row carries a valid
+   *  projection — otherwise null and the card degrades honestly ("detailed
+   *  conditions not provided"). Parsed through the tolerant public reader;
+   *  never the raw payload, never free text. */
+  readonly structured: StructuredDemandPublic | null;
 }
 
 export type WorkerOpportunitiesResult =
@@ -161,6 +171,10 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             match,
             nextAction,
             interestStatus: myInterest.byRequest.get(need.id) ?? null,
+            // Present only after the MP-3 structured-exposure RPC recreate is
+            // applied — the tolerant reader turns an absent/invalid field into
+            // an honest null (same degradation pattern as transport/tools).
+            structured: readStructuredDemandPublic(row),
           };
         })
         // Best matches first — the SHARED §19 need-context comparator.

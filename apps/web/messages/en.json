@@ -7102,7 +7102,50 @@
       "reviewed": "Company reviewed your interest",
       "contacted": "Company marked: contacted"
     },
-    "companyVerified": "Verified company"
+    "companyVerified": "Verified company",
+    "structured": {
+      "detailTitle": "Stated working conditions",
+      "notProvided": "The company has not provided detailed working conditions for this listing yet — only the facts above are stated.",
+      "gapsTitle": "Not stated by the company",
+      "yes": "Yes",
+      "no": "No",
+      "payLabel": "Pay",
+      "amountFrom": "from {amount}",
+      "amountUpTo": "up to {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} h/week",
+      "chipMinHours": "at least {hours} h/week",
+      "chipStartFrom": "start from {from}",
+      "chipStartWindow": "start {from} – {to}",
+      "chipDeadline": "apply by {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} yr.",
+      "km": "{km} km",
+      "minutes": "{min} min",
+      "probationLabel": "Probation period",
+      "extensionPossibleLabel": "Extension possible",
+      "scheduleNoticeLabel": "Schedule notice in advance",
+      "expectedResponseLabel": "Response within",
+      "firstPaymentLabel": "First payment within",
+      "travelMinutesLabel": "Travel time to site",
+      "registrationPossibleLabel": "Address registration possible",
+      "availableFromLabel": "Available from",
+      "similarProjectLabel": "Similar project experience",
+      "driverSupplementLabel": "Driver supplement",
+      "siteModeLabel": "Work sites",
+      "siteMode": {
+        "single": "One site",
+        "multiple": "Several sites",
+        "mobile": "Mobile / changing sites"
+      },
+      "workModeLabel": "Work mode",
+      "workMode": {
+        "onsite": "On-site",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      }
+    }
   },
   "workerIntake": {
     "title": "Worker intake",

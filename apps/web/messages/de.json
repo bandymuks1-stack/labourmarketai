@@ -7102,7 +7102,50 @@
       "reviewed": "Das Unternehmen hat Ihr Interesse geprüft",
       "contacted": "Vom Unternehmen markiert: kontaktiert"
     },
-    "companyVerified": "Verifiziertes Unternehmen"
+    "companyVerified": "Verifiziertes Unternehmen",
+    "structured": {
+      "detailTitle": "Angegebene Arbeitsbedingungen",
+      "notProvided": "Das Unternehmen hat für dieses Angebot noch keine detaillierten Arbeitsbedingungen angegeben — nur die oben genannten Fakten sind angegeben.",
+      "gapsTitle": "Vom Unternehmen nicht angegeben",
+      "yes": "Ja",
+      "no": "Nein",
+      "payLabel": "Vergütung",
+      "amountFrom": "ab {amount}",
+      "amountUpTo": "bis {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} Std./Woche",
+      "chipMinHours": "mindestens {hours} Std./Woche",
+      "chipStartFrom": "Beginn ab {from}",
+      "chipStartWindow": "Beginn {from} – {to}",
+      "chipDeadline": "Bewerbung bis {date}",
+      "days": "{count} T.",
+      "yearsExperience": "{count} J.",
+      "km": "{km} km",
+      "minutes": "{min} Min.",
+      "probationLabel": "Probezeit",
+      "extensionPossibleLabel": "Verlängerung möglich",
+      "scheduleNoticeLabel": "Dienstplan-Vorlauf",
+      "expectedResponseLabel": "Antwort innerhalb von",
+      "firstPaymentLabel": "Erste Zahlung innerhalb von",
+      "travelMinutesLabel": "Fahrzeit zur Baustelle",
+      "registrationPossibleLabel": "Anmeldung einer Meldeadresse möglich",
+      "availableFromLabel": "Verfügbar ab",
+      "similarProjectLabel": "Erfahrung mit ähnlichen Projekten",
+      "driverSupplementLabel": "Fahrerzulage",
+      "siteModeLabel": "Einsatzorte",
+      "siteMode": {
+        "single": "Ein Einsatzort",
+        "multiple": "Mehrere Einsatzorte",
+        "mobile": "Mobil / wechselnde Einsatzorte"
+      },
+      "workModeLabel": "Arbeitsform",
+      "workMode": {
+        "onsite": "Vor Ort",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      }
+    }
   },
   "workerIntake": {
     "title": "Arbeitskraft-Aufnahme",

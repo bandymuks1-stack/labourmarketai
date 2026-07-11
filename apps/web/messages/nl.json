@@ -7102,7 +7102,50 @@
       "reviewed": "Het bedrijf heeft je interesse bekeken",
       "contacted": "Bedrijf markeerde: contact opgenomen"
     },
-    "companyVerified": "Geverifieerd bedrijf"
+    "companyVerified": "Geverifieerd bedrijf",
+    "structured": {
+      "detailTitle": "Opgegeven arbeidsvoorwaarden",
+      "notProvided": "Het bedrijf heeft nog geen gedetailleerde arbeidsvoorwaarden voor deze vermelding opgegeven — alleen de bovenstaande feiten zijn vermeld.",
+      "gapsTitle": "Niet opgegeven door het bedrijf",
+      "yes": "Ja",
+      "no": "Nee",
+      "payLabel": "Loon",
+      "amountFrom": "vanaf {amount}",
+      "amountUpTo": "tot {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} u/week",
+      "chipMinHours": "minimaal {hours} u/week",
+      "chipStartFrom": "start vanaf {from}",
+      "chipStartWindow": "start {from} – {to}",
+      "chipDeadline": "solliciteren vóór {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} jr.",
+      "km": "{km} km",
+      "minutes": "{min} min.",
+      "probationLabel": "Proeftijd",
+      "extensionPossibleLabel": "Verlenging mogelijk",
+      "scheduleNoticeLabel": "Rooster vooraf bekend",
+      "expectedResponseLabel": "Reactie binnen",
+      "firstPaymentLabel": "Eerste betaling binnen",
+      "travelMinutesLabel": "Reistijd naar de locatie",
+      "registrationPossibleLabel": "Adresregistratie mogelijk",
+      "availableFromLabel": "Beschikbaar vanaf",
+      "similarProjectLabel": "Ervaring met vergelijkbare projecten",
+      "driverSupplementLabel": "Chauffeurstoeslag",
+      "siteModeLabel": "Locaties",
+      "siteMode": {
+        "single": "Eén locatie",
+        "multiple": "Meerdere locaties",
+        "mobile": "Mobiel / wisselende locaties"
+      },
+      "workModeLabel": "Werkvorm",
+      "workMode": {
+        "onsite": "Op locatie",
+        "remote": "Op afstand",
+        "hybrid": "Hybride"
+      }
+    }
   },
   "workerIntake": {
     "title": "Werknemersintake",

@@ -8,6 +8,10 @@ import { MatchSignals } from "@/components/app/match-signals";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import { OpportunityDetailsDisclosure } from "@/components/app/opportunity-details-disclosure";
 import {
+  OpportunityStructuredChips,
+  OpportunityStructuredSections,
+} from "@/components/app/opportunity-structured-detail";
+import {
   buildMatchCardView,
   type MatchSignal,
   type MatchSignalState,
@@ -69,6 +73,7 @@ export default async function OpportunitiesPage({
   const t = await getTranslations("opportunities");
   const tlm = await getTranslations("labourMarket");
   const tSkill = await getTranslations("skillNames");
+  const tsd = await getTranslations("structuredDemand");
   const result = await loadWorkerOpportunities();
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
@@ -90,6 +95,13 @@ export default async function OpportunitiesPage({
     val ? (t.has(`accommodation.${val}`) ? t(`accommodation.${val}`) : val) : "—";
   const transportLabel = (val: string | null) =>
     val ? (t.has(`transport.${val}`) ? t(`transport.${val}`) : val) : "—";
+  // Translator closures for the structured-detail components (P2-PR2): `ts`
+  // covers opportunities.structured.*, `sd` the existing structuredDemand
+  // option catalog — enum labels are reused, never duplicated.
+  const ts = (key: string, values?: Record<string, string | number>) =>
+    t(`structured.${key}` as never, values as never) as string;
+  const sd = (key: string, values?: Record<string, string | number>) =>
+    tsd(key as never, values as never) as string;
 
   // ── Discovery filters + sort (PR 4) — URL params over authorized rows. ────
   const { filters, sort } = parseDiscoveryParams(sp);
@@ -449,7 +461,7 @@ export default async function OpportunitiesPage({
                     </section>
                   ) : (
                     <ul className="flex flex-col gap-3" data-testid="opportunities-list">
-                      {filtered.map(({ need, fit, match, nextAction, interestStatus }) => (
+                      {filtered.map(({ need, fit, match, nextAction, interestStatus, structured }) => (
                         <li
                           key={need.id}
                           className="card-border flex flex-col gap-3 p-4"
@@ -495,6 +507,18 @@ export default async function OpportunitiesPage({
                               ) : null}
                             </p>
                           ) : null}
+
+                          {/* Structured-condition scan chips (P2-PR2): pay with
+                              explicit currency + basis, hours, engagement form,
+                              start window, deadline — plus the MANDATORY
+                              talent-pool disclosure chip. Renders nothing until
+                              the MP-3 RPC widening delivers a valid projection. */}
+                          <OpportunityStructuredChips
+                            structured={structured}
+                            locale={locale}
+                            ts={ts}
+                            sd={sd}
+                          />
 
                           {/* Match breakdown — honest per-dimension fit (why it fits /
                               what to check), reusing the deterministic fit engine. No
@@ -624,6 +648,18 @@ export default async function OpportunitiesPage({
                                 </dd>
                               </div>
                             </dl>
+
+                            {/* Structured demand detail (P2-PR2): organized
+                                sections with visible amber honesty gaps when
+                                the projection exists; ONE honest "not provided"
+                                line when it does not (never fake emptiness). */}
+                            <OpportunityStructuredSections
+                              structured={structured}
+                              locale={locale}
+                              ts={ts}
+                              sd={sd}
+                              countryLabel={countryLabel}
+                            />
 
                             {match.skillFit && match.skillFit.matchedUris.length > 0 ? (
                               <div className="flex flex-wrap gap-1.5" data-testid="opportunity-matched-skills">
