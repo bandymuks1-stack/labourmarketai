@@ -7770,6 +7770,74 @@
       "link": "Tasks for this project"
     }
   },
+  "assist": {
+    "eyebrow": "Assistance centre",
+    "title": "Assistance centre",
+    "intro": "What needs your attention, summaries computed from your own data, and the honest state of the AI provider.",
+    "attention": {
+      "title": "What needs my attention",
+      "note": "Computed from your own records by fixed rules — the same numbers the bell and each module already show. Every row names its data source and links the page that resolves it.",
+      "empty": "Nothing needs your attention right now — there are no pending signals in your data.",
+      "open": "Open",
+      "docExpiring": "Documents expiring within 30 days",
+      "docMissing": "Documents missing or expired",
+      "docReview": "Documents in review or returned",
+      "financeOverdue": "Overdue finance records"
+    },
+    "sources": {
+      "label": "Sources",
+      "notificationSpine": "Notification signals",
+      "workerDocuments": "Your document records",
+      "financeRecords": "Your finance records",
+      "workerSkills": "Your catalogued skills",
+      "workJournal": "Your work journal",
+      "managerConfirmations": "Manager confirmations",
+      "projects": "Your projects",
+      "assignments": "Active worker assignments"
+    },
+    "summaries": {
+      "title": "Summaries from your data",
+      "note": "Assembled from real fields by fixed rules, with the sources listed. No text in this section was produced by a language model.",
+      "none": "No summary exists for this role yet — summaries are added only where truthful data exists.",
+      "worker": {
+        "title": "Profile & evidence summary",
+        "totalSkills": "Skills",
+        "workSupported": "Backed by work entries",
+        "confirmed": "Confirmed",
+        "journalEntries": "Journal entries",
+        "confirmations": "Confirmations",
+        "link": "Open the full evidence report"
+      },
+      "org": {
+        "title": "Project status summary",
+        "teamSize": "Active workers: {count}",
+        "empty": "No active projects yet — projects appear here as soon as they exist.",
+        "error": "Projects could not be loaded right now. The rest of the page is unaffected.",
+        "link": "Operations"
+      }
+    },
+    "provider": {
+      "title": "AI provider",
+      "stateLabel": "Runtime state",
+      "state": {
+        "disabled": "Off",
+        "mock": "Mock (deterministic test mode)",
+        "live": "Live"
+      },
+      "reason": {
+        "ok": "The runtime is configured.",
+        "mode_disabled": "No provider mode is set — the runtime is switched off by default.",
+        "unknown_provider": "The configured provider is not recognised, so the runtime stays off.",
+        "missing_api_key": "No provider key is configured, so the runtime stays off."
+      },
+      "disabledBody": "No external AI provider is connected in this environment. Everything on this page is computed from your own records by fixed rules — no text here was produced by a language model.",
+      "whenEnabled": "Once the owner connects a provider and the suggestion audit storage is applied, reviewable drafting suggestions become available — always as suggestions a person confirms, never as automatic changes.",
+      "gates": "Two gates are open on purpose: (1) no provider key is configured in production, and (2) the suggestion audit store (ai_runs / ai_suggestions) is an owner-gated migration. Generation stays off until both close — producing suggestions without the audit trail would break the programme's own rules.",
+      "providerLabel": "Provider",
+      "modelLabel": "Model",
+      "notWired": "Generation surfaces are deliberately not wired in this slice — outputs would have no audit trail yet. The runtime state above is shown for transparency only."
+    }
+  },
   "finance": {
     "eyebrow": "Operational finance",
     "title": "Finance records",

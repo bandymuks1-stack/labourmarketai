@@ -120,6 +120,11 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // centre), so it joins the smoke inventory like the other module surfaces.
   // The id-parameterized project routes stay excluded (see the note below).
   { id: "projects", urlPattern: "/dashboard/projects", sourceFile: "app/[locale]/dashboard/projects/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR J: the AI assistance centre is a dashboard module
+  // (registry-driven grid card + command entry), so it joins the smoke
+  // inventory like the other module surfaces. Deterministic-only surface —
+  // the provider state card is honest copy, never a generation claim.
+  { id: "assist", urlPattern: "/dashboard/assist", sourceFile: "app/[locale]/dashboard/assist/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "company-scouting", urlPattern: "/dashboard/company/scouting", sourceFile: "app/[locale]/dashboard/company/scouting/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "account", urlPattern: "/dashboard/account", sourceFile: "app/[locale]/dashboard/account/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "privacy", urlPattern: "/dashboard/privacy", sourceFile: "app/[locale]/dashboard/privacy/page.tsx", requiresAuth: true, kind: "role-flow" },

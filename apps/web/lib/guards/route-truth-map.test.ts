@@ -26,6 +26,10 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/account": "REAL_LAUNCH_SURFACE",
   // Unified activity centre (control room PR C) — spine-only aggregation.
   "dashboard/activity": "REAL_LAUNCH_SURFACE",
+  // AI assistance centre (control room PR J) — deterministic attention +
+  // summaries over existing RLS reads, plus the HONEST provider state card.
+  // No generation is wired (provider unconfigured + audit store gated).
+  "dashboard/assist": "REAL_LAUNCH_SURFACE",
   "dashboard/bookings": "REAL_LAUNCH_SURFACE",
   "dashboard/candidates": "REAL_LAUNCH_SURFACE",
   "dashboard/communication": "REAL_LAUNCH_SURFACE",

@@ -7770,6 +7770,74 @@
       "link": "Taken voor dit project"
     }
   },
+  "assist": {
+    "eyebrow": "Assistentiecentrum",
+    "title": "Assistentiecentrum",
+    "intro": "Wat uw aandacht nodig heeft, samenvattingen berekend uit uw eigen gegevens en de eerlijke status van de AI-provider.",
+    "attention": {
+      "title": "Wat heeft mijn aandacht nodig",
+      "note": "Berekend uit uw eigen gegevens volgens vaste regels — dezelfde aantallen die de bel en elke module al tonen. Elke rij noemt zijn gegevensbron en linkt naar de pagina waar het wordt opgelost.",
+      "empty": "Er is nu niets dat uw aandacht nodig heeft — er zijn geen openstaande signalen in uw gegevens.",
+      "open": "Openen",
+      "docExpiring": "Documenten die binnen 30 dagen verlopen",
+      "docMissing": "Ontbrekende of verlopen documenten",
+      "docReview": "Documenten in beoordeling of teruggestuurd",
+      "financeOverdue": "Achterstallige financiële registraties"
+    },
+    "sources": {
+      "label": "Bronnen",
+      "notificationSpine": "Meldingssignalen",
+      "workerDocuments": "Uw documentregistraties",
+      "financeRecords": "Uw financiële registraties",
+      "workerSkills": "Uw gecatalogiseerde vaardigheden",
+      "workJournal": "Uw werkdagboek",
+      "managerConfirmations": "Bevestigingen van leidinggevenden",
+      "projects": "Uw projecten",
+      "assignments": "Actieve werknemerstoewijzingen"
+    },
+    "summaries": {
+      "title": "Samenvattingen uit uw gegevens",
+      "note": "Samengesteld uit echte velden volgens vaste regels, met vermelding van de bronnen. Geen enkele tekst in dit onderdeel is door een taalmodel gemaakt.",
+      "none": "Voor deze rol bestaat nog geen samenvatting — samenvattingen worden alleen toegevoegd waar waarheidsgetrouwe gegevens bestaan.",
+      "worker": {
+        "title": "Profiel- en bewijssamenvatting",
+        "totalSkills": "Vaardigheden",
+        "workSupported": "Onderbouwd met werkregistraties",
+        "confirmed": "Bevestigd",
+        "journalEntries": "Dagboekregistraties",
+        "confirmations": "Bevestigingen",
+        "link": "Open het volledige bewijsrapport"
+      },
+      "org": {
+        "title": "Projectstatussamenvatting",
+        "teamSize": "Actieve werknemers: {count}",
+        "empty": "Nog geen actieve projecten — projecten verschijnen hier zodra ze bestaan.",
+        "error": "Projecten konden nu niet worden geladen. De rest van de pagina werkt gewoon.",
+        "link": "Operaties"
+      }
+    },
+    "provider": {
+      "title": "AI-provider",
+      "stateLabel": "Runtimestatus",
+      "state": {
+        "disabled": "Uit",
+        "mock": "Mock (deterministische testmodus)",
+        "live": "Actief"
+      },
+      "reason": {
+        "ok": "De runtime is geconfigureerd.",
+        "mode_disabled": "Er is geen providermodus ingesteld — de runtime staat standaard uit.",
+        "unknown_provider": "De geconfigureerde provider wordt niet herkend, dus de runtime blijft uit.",
+        "missing_api_key": "Er is geen providersleutel geconfigureerd, dus de runtime blijft uit."
+      },
+      "disabledBody": "In deze omgeving is geen externe AI-provider gekoppeld. Alles op deze pagina is volgens vaste regels berekend uit uw eigen gegevens — geen enkele tekst hier is door een taalmodel gemaakt.",
+      "whenEnabled": "Zodra de eigenaar een provider koppelt en de auditopslag voor suggesties is toegepast, komen controleerbare conceptsuggesties beschikbaar — altijd als suggesties die een persoon bevestigt, nooit als automatische wijzigingen.",
+      "gates": "Twee poorten staan bewust open: (1) er is geen providersleutel geconfigureerd in productie en (2) de auditopslag voor suggesties (ai_runs / ai_suggestions) is een door de eigenaar goed te keuren migratie. Generatie blijft uit totdat beide gesloten zijn — suggesties zonder auditspoor zouden de eigen regels van het programma schenden.",
+      "providerLabel": "Provider",
+      "modelLabel": "Model",
+      "notWired": "Generatiefuncties zijn in deze fase bewust niet aangesloten — resultaten zouden nog geen auditspoor hebben. De status hierboven wordt alleen voor transparantie getoond."
+    }
+  },
   "finance": {
     "eyebrow": "Operationele financiën",
     "title": "Financiële registraties",

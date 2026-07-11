@@ -722,6 +722,30 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // AI assistance centre (control room PR J) — the deterministic "what
+    // needs my attention" answer, deterministic role summaries and the
+    // HONEST AI-provider state (disabled in production; nothing generated).
+    // Route resolves through the module registry so it can never drift from
+    // the grid card. Truthful label: assistance centre, not an active AI.
+    id: "assist",
+    route: getModuleRoute("assist"),
+    audience: "public",
+    labels: {
+      en: "Assistance centre (what needs my attention)",
+      lt: "Pagalbos centras (kam reikia mano dėmesio)",
+      ru: "Центр помощи (что требует моего внимания)",
+      nl: "Assistentiecentrum (wat heeft mijn aandacht nodig)",
+      de: "Assistenzzentrum (was braucht meine Aufmerksamkeit)",
+    },
+    synonyms: {
+      en: ["assist", "assistance", "ai", "attention", "summary", "overview of my data"],
+      lt: ["pagalba", "asistentas", "ai", "dėmesio", "santrauka", "kas laukia manęs"],
+      ru: ["помощь", "ассистент", "ai", "внимание", "сводка"],
+      nl: ["assistentie", "assistent", "ai", "aandacht", "samenvatting"],
+      de: ["assistenz", "assistent", "ki", "aufmerksamkeit", "zusammenfassung"],
+    },
+  },
+  {
     id: "account_settings",
     route: "/dashboard/account",
     audience: "public",

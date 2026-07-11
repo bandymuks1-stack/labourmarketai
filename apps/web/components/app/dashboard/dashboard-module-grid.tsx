@@ -16,6 +16,7 @@ import {
   NotebookPen,
   Search,
   Shield,
+  Sparkles,
   Store,
   User,
   type LucideIcon,
@@ -61,6 +62,7 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   handshake: Handshake,
   briefcase: Briefcase,
   coins: Coins,
+  sparkles: Sparkles,
 };
 
 export async function DashboardModuleGrid({
