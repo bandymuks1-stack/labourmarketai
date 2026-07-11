@@ -115,17 +115,17 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "For Workers — Build your profile and CV",
       description:
-        "Workers across sectors — from logistics and manufacturing to hospitality, care, construction and more: create a profile and CV on LabourMarket.ai, show your skills and availability, and get matched with work opportunities and employer needs across Europe.",
+        "Workers across sectors — from logistics and manufacturing to hospitality, care, construction and more: create a profile and CV on LabourMarket.ai, show your skills and availability, and be visible for work opportunities and employer needs across Europe.",
     },
     lt: {
       title: "Darbuotojams — susikurk profilį ir CV",
       description:
-        "Įvairių sektorių darbuotojai — nuo logistikos ir gamybos iki apgyvendinimo, priežiūros, statybos ir kt.: susikurk profilį ir CV LabourMarket.ai, parodyk įgūdžius ir prieinamumą, ir gauk atitikimą su darbo galimybėmis bei darbdavių poreikiais Europoje.",
+        "Įvairių sektorių darbuotojai — nuo logistikos ir gamybos iki apgyvendinimo, priežiūros, statybos ir kt.: susikurk profilį ir CV LabourMarket.ai, parodyk įgūdžius ir prieinamumą ir būk matomas darbo galimybėms bei darbdavių poreikiams Europoje.",
     },
     ru: {
       title: "Работникам — создайте профиль и CV",
       description:
-        "Работники разных секторов — от логистики и производства до гостеприимства, ухода, строительства и других: создайте профиль и CV на LabourMarket.ai, покажите навыки и доступность и получайте подбор под рабочие возможности и потребности работодателей в Европе.",
+        "Работники разных секторов — от логистики и производства до гостеприимства, ухода, строительства и других: создайте профиль и CV на LabourMarket.ai, покажите навыки и доступность и будьте видимы для рабочих возможностей и потребностей работодателей в Европе.",
     },
   },
   companies: {
@@ -166,7 +166,7 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "Work Abroad — Jobs across sectors in Europe",
       description:
-        "Considering work abroad in any sector? See how LabourMarket.ai structures skills, matching, documents and accommodation so workers and employers can plan the next steps across Europe.",
+        "Considering work abroad in any sector? See how LabourMarket.ai structures skills, selection, documents and accommodation so workers and employers can plan the next steps across Europe.",
     },
     lt: {
       title: "Darbas užsienyje — darbai įvairiuose sektoriuose Europoje",
@@ -200,17 +200,17 @@ export const PAGE_SEO: Readonly<
     en: {
       title: "Worker Intake — Create your profile and CV",
       description:
-        "Start your LabourMarket.ai worker profile: professions, skills, experience and availability. A structured intake builds your CV and prepares you for employer matching.",
+        "Start your LabourMarket.ai worker profile: professions, skills, experience and availability. A structured intake builds your CV and prepares you for employer review and selection.",
     },
     lt: {
       title: "Darbuotojo anketa — susikurk profilį ir CV",
       description:
-        "Pradėk LabourMarket.ai darbuotojo profilį: profesijos, įgūdžiai, patirtis ir prieinamumas. Struktūruota anketa sukuria CV ir paruošia tave atitikimui su darbdaviais.",
+        "Pradėk LabourMarket.ai darbuotojo profilį: profesijos, įgūdžiai, patirtis ir prieinamumas. Struktūruota anketa sukuria CV ir paruošia tave darbdavių atrankai.",
     },
     ru: {
       title: "Анкета работника — создайте профиль и CV",
       description:
-        "Начните профиль работника LabourMarket.ai: профессии, навыки, опыт и доступность. Структурированная анкета формирует CV и готовит вас к подбору работодателями.",
+        "Начните профиль работника LabourMarket.ai: профессии, навыки, опыт и доступность. Структурированная анкета формирует CV и готовит вас к отбору работодателями.",
     },
   },
   labourMarket: {

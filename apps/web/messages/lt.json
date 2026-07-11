@@ -3585,6 +3585,7 @@
     },
     "preview": {
       "conceptChip": "Pavyzdys",
+      "conceptNote": "Iliustracinis pavyzdys, kaip atrodys įrašas — ne realus asmuo ir ne tikri duomenys.",
       "rankedMatches": "atitikimo kryptis",
       "headcount": "Žmonių skaičius",
       "intensity": {
@@ -3758,8 +3759,8 @@
           "desc": "Samdykite pagal įrašus, ne pažadus."
         },
         {
-          "title": "Realaus laiko pasiūlos signalai",
-          "desc": "Matykite prieinamumo pokyčius iškart."
+          "title": "Pasiūlos signalai",
+          "desc": "Matykite deklaruotą darbuotojų prieinamumą, kai profiliai atnaujinami."
         },
         {
           "title": "Tiesioginis kontaktas",
@@ -3784,7 +3785,7 @@
           "a": "Taip — pagal šalį ir regioną, atsižvelgiant į darbuotojo vietą ir pasirengimą keltis."
         },
         {
-          "q": "Kas garantuoja darbuotojo patirtį?",
+          "q": "Kaip parodoma darbuotojo patirtis?",
           "a": "Pagal darbuotojų įgūdžių įrašus, struktūruotą darbo istoriją ir kontekstinius atitikimo signalus — ne savadarbiai CV."
         }
       ]
@@ -4021,7 +4022,7 @@
           "body": "Vienas avataras su įrašais paremtais įgūdžiais ir prieinamumu — matomas registruotiems darbdaviams įvairiose šalyse."
         },
         {
-          "title": "Reali paklausa realiu laiku",
+          "title": "Reali paklausa",
           "body": "Matykite atvirus darbo poreikius, atitinkančius jūsų profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikškite susidomėjimą."
         },
         {
