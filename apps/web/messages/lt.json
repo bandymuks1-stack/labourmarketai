@@ -8023,6 +8023,193 @@
       "error": "Išsaugoti nepavyko. Pabandykite dar kartą."
     }
   },
+  "structuredDemand": {
+    "advancedTitle": "Išsamūs duomenys (nebūtina)",
+    "advancedHint": "Struktūruoti faktai, pagal kuriuos darbuotojai filtruoja ir lygina. Viskas neprivaloma — ką praleisite, bus rodoma kaip „nenurodyta“, niekada neišgalvojama.",
+    "notStated": "Nenurodyta",
+    "sections": {
+      "engagement": "Įdarbinimo forma ir apimtis",
+      "time": "Laikas ir grafikas",
+      "compensation": "Atlygis ir išskaitymai",
+      "accommodation": "Apgyvendinimas",
+      "transport": "Transportas",
+      "requirements": "Reikalavimai kandidatams",
+      "process": "Atrankos eiga"
+    },
+    "opportunityTypeLabel": "Pasiūlymo tipas",
+    "opportunityType": {
+      "employment": "Darbo vieta",
+      "temporary_assignment": "Laikinas darbas",
+      "project_work": "Projektinis darbas",
+      "subcontract": "Subranga",
+      "service_request": "Paslaugos užsakymas"
+    },
+    "targetSupplyLabel": "Ko ieškote",
+    "targetSupply": {
+      "individual": "Vieno darbuotojo",
+      "multiple_workers": "Kelių darbuotojų",
+      "team": "Komandos / brigados",
+      "company": "Įmonės / subrangovo"
+    },
+    "engagementFormLabel": "Įdarbinimo forma",
+    "engagementForm": {
+      "direct_employment": "Tiesioginis įdarbinimas",
+      "agency_employment": "Įdarbinimas per agentūrą",
+      "temporary_employment": "Laikinasis įdarbinimas",
+      "posted_worker": "Komandiruotas darbuotojas",
+      "self_employed_contractor": "Savarankiškai dirbantis",
+      "company_subcontract": "Įmonės subranga"
+    },
+    "contractCountryLabel": "Sutarties šalis",
+    "startEarliestLabel": "Anksčiausia pradžia",
+    "startLatestLabel": "Vėliausia pradžia",
+    "endDateLabel": "Pabaigos data (jei žinoma)",
+    "applicationDeadlineLabel": "Paraiškų terminas",
+    "hoursPerWeekLabel": "Valandų per savaitę",
+    "minGuaranteedHoursLabel": "Garantuotos valandos per savaitę",
+    "shiftsLabel": "Pamainos",
+    "shift": {
+      "day": "Dieninė",
+      "night": "Naktinė",
+      "weekend": "Savaitgaliai"
+    },
+    "overtimeExpectedLabel": "Numatomi viršvalandžiai",
+    "compMinLabel": "Atlygis nuo",
+    "compMaxLabel": "Atlygis iki",
+    "currencyLabel": "Valiuta",
+    "payUnitLabel": "Mokama už",
+    "payUnit": {
+      "hour": "Valandą",
+      "day": "Dieną",
+      "week": "Savaitę",
+      "month": "Mėnesį",
+      "project": "Projektą"
+    },
+    "payBasisLabel": "Ant popieriaus ar į rankas",
+    "payBasis": {
+      "gross": "Ant popieriaus (bruto)",
+      "net": "Į rankas (neto)",
+      "unspecified": "Nenurodyta"
+    },
+    "paymentFrequencyLabel": "Mokėjimo dažnumas",
+    "paymentFrequency": {
+      "weekly": "Kas savaitę",
+      "biweekly": "Kas dvi savaites",
+      "monthly": "Kas mėnesį"
+    },
+    "guaranteedBaseLabel": "Garantuota bazinė alga",
+    "perDiemLabel": "Dienpinigiai / priedas",
+    "deductionsLabel": "Išskaitymai",
+    "deductionsHelp": "Nurodykite visus žinomus išskaitymus (apgyvendinimas, transportas, draudimas). Nenurodyti išskaitymai darbuotojams rodomi kaip spraga.",
+    "deductionKindLabel": "Išskaitymas",
+    "deductionKind": {
+      "accommodation": "Apgyvendinimas",
+      "transport": "Transportas",
+      "insurance": "Draudimas",
+      "other": "Kita"
+    },
+    "deductionAmountLabel": "Suma",
+    "deductionPeriodLabel": "Laikotarpis",
+    "period": {
+      "day": "Per dieną",
+      "week": "Per savaitę",
+      "month": "Per mėnesį",
+      "once": "Vienkartinis"
+    },
+    "addDeductionLabel": "Pridėti išskaitymą",
+    "noDeductionsLabel": "Išskaitymų nėra — patvirtinu",
+    "removeLabel": "Pašalinti",
+    "accommodationStateLabel": "Apgyvendinimas",
+    "accommodationState": {
+      "offered": "Suteikiamas",
+      "not_offered": "Nesuteikiamas",
+      "not_needed": "Nereikalingas"
+    },
+    "accommodationPayerLabel": "Kas moka",
+    "accommodationPayer": {
+      "employer": "Moka darbdavys",
+      "shared": "Dalinamasi",
+      "worker": "Moka darbuotojas"
+    },
+    "roomLabel": "Kambarys",
+    "room": {
+      "single": "Vienvietis",
+      "shared": "Dalinamas"
+    },
+    "accommodationPriceLabel": "Kaina",
+    "accommodationPricePeriodLabel": "Kainos laikotarpis",
+    "occupancyLabel": "Žmonių kambaryje",
+    "distanceKmLabel": "Atstumas iki objekto (km)",
+    "depositLabel": "Užstatas",
+    "amenitiesLabel": "Patogumai",
+    "amenity": {
+      "kitchen": "Virtuvė",
+      "laundry": "Skalbykla",
+      "internet": "Internetas"
+    },
+    "familyPossibleLabel": "Galima su partneriu / šeima",
+    "internationalTravelLabel": "Kelionė į šalį",
+    "dailyTransportLabel": "Kasdienis transportas į objektą",
+    "betweenSitesLabel": "Kelionės tarp objektų",
+    "transportLevel": {
+      "provided": "Suteikiamas",
+      "compensated": "Kompensuojamas",
+      "not_provided": "Nesuteikiamas",
+      "unknown": "Nenurodyta"
+    },
+    "arrivalPickupLabel": "Pasitikimas oro uoste / stotyje",
+    "companyVehicleLabel": "Įmonės automobilis",
+    "fuelCardLabel": "Kuro kortelė / kompensacija",
+    "ownVehicleRequiredLabel": "Reikalingas nuosavas automobilis",
+    "returnTravelLabel": "Prisidedama prie kelionės namo",
+    "licenceCategoriesLabel": "Vairuotojo pažymėjimo kategorijos",
+    "minExperienceYearsLabel": "Minimali patirtis (metais)",
+    "languagesLabel": "Kalbų reikalavimai",
+    "languageLabel": "Kalba",
+    "languageLevelLabel": "Lygis",
+    "onePerTeamLabel": "Užtenka vieno kalbančio komandoje",
+    "addLanguageLabel": "Pridėti kalbą",
+    "certificatesLabel": "Pažymėjimai ir leidimai",
+    "certificatesHelp": "Reikalaujami pažymėjimai (pvz., saugos kortelė, technikos leidimas) — nurodomi kaip faktai, rodomi kaip reikalavimai.",
+    "addCertificateLabel": "Pridėti pažymėjimą",
+    "ownToolsLabel": "Nuosavi įrankiai",
+    "ownVehicleLabel": "Nuosavas automobilis",
+    "ownWorkwearLabel": "Nuosavi darbo drabužiai",
+    "drawingsReadingLabel": "Skaito brėžinius / schemas",
+    "independentWorkLabel": "Dirba savarankiškai",
+    "leadershipLabel": "Vadovauja kitiems",
+    "applicationMethodLabel": "Kaip kandidatuoti",
+    "applicationMethod": {
+      "interest_signal": "Pareikšti susidomėjimą platformoje",
+      "conversation": "Aptarti susirašinėjant"
+    },
+    "interviewStagesLabel": "Pokalbių etapai",
+    "responseDeadlineDaysLabel": "Atsakymas per (dienas)",
+    "listingKindLabel": "Skelbimo tipas",
+    "listingKind": {
+      "active_vacancy": "Aktyvi darbo vieta",
+      "talent_pool": "Kandidatų rezervas (ateities poreikiams)"
+    },
+    "practicalTestLabel": "Praktinė užduotis",
+    "documentVerificationLabel": "Dokumentų patikra",
+    "talentPoolDisclosure": "Tai kandidatų rezervo skelbimas: kandidatai renkami ateities poreikiams, o ne aktyviai patvirtintai darbo vietai. Darbuotojai tai visada mato.",
+    "honesty": {
+      "title": "Trūkstami atlygio faktai — darbuotojams rodomi kaip spragos",
+      "missing_minimum": "Nenurodytas minimalus atlygis",
+      "missing_basis": "Nenurodyta, ar suma „ant popieriaus“, ar „į rankas“",
+      "missing_guaranteed_hours": "Nenurodytos garantuotos valandos",
+      "missing_deductions": "Neišvardyti išskaitymai (arba nepatvirtinta, kad jų nėra)",
+      "max_without_min": "Nurodyta tik suma „iki“ — be minimumo"
+    },
+    "preview": {
+      "title": "Kaip darbuotojai tai mato šiandien",
+      "v2NotVisibleNote": "Išsamūs duomenys išsaugoti kartu su užklausa. Darbuotojai juos pamatys po artimiausio platformos duomenų atnaujinimo — iki tol matomi tik aukščiau esantys faktai."
+    },
+    "prefillButton": "Užpildyti pagal paskutinę užklausą",
+    "prefillLoading": "Kraunama…",
+    "prefillEmpty": "Ankstesnės užklausos nerasta",
+    "prefillDone": "Užpildyta pagal paskutinę užklausą — peržiūrėkite ir redaguokite"
+  },
   "workerPrefs": {
     "title": "Darbo pageidavimai",
     "hint": "Nurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.",

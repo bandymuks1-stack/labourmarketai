@@ -8023,6 +8023,193 @@
       "error": "Сохранить не удалось. Попробуйте ещё раз."
     }
   },
+  "structuredDemand": {
+    "advancedTitle": "Подробные данные (необязательно)",
+    "advancedHint": "Структурированные факты, по которым работники фильтруют и сравнивают. Всё необязательно — пропущенное отображается как «не указано», ничего не выдумывается.",
+    "notStated": "Не указано",
+    "sections": {
+      "engagement": "Форма занятости и объём",
+      "time": "Время и график",
+      "compensation": "Оплата и удержания",
+      "accommodation": "Проживание",
+      "transport": "Транспорт",
+      "requirements": "Требования к кандидатам",
+      "process": "Процесс отбора"
+    },
+    "opportunityTypeLabel": "Тип предложения",
+    "opportunityType": {
+      "employment": "Постоянная работа",
+      "temporary_assignment": "Временная работа",
+      "project_work": "Проектная работа",
+      "subcontract": "Субподряд",
+      "service_request": "Заказ услуги"
+    },
+    "targetSupplyLabel": "Кто нужен",
+    "targetSupply": {
+      "individual": "Один работник",
+      "multiple_workers": "Несколько работников",
+      "team": "Бригада / команда",
+      "company": "Компания / субподрядчик"
+    },
+    "engagementFormLabel": "Форма трудоустройства",
+    "engagementForm": {
+      "direct_employment": "Прямое трудоустройство",
+      "agency_employment": "Через агентство",
+      "temporary_employment": "Временное трудоустройство",
+      "posted_worker": "Командированный работник",
+      "self_employed_contractor": "Самозанятый / подрядчик",
+      "company_subcontract": "Субподряд компании"
+    },
+    "contractCountryLabel": "Страна договора",
+    "startEarliestLabel": "Самое раннее начало",
+    "startLatestLabel": "Самое позднее начало",
+    "endDateLabel": "Дата окончания (если известна)",
+    "applicationDeadlineLabel": "Срок подачи заявок",
+    "hoursPerWeekLabel": "Часов в неделю",
+    "minGuaranteedHoursLabel": "Гарантированные часы в неделю",
+    "shiftsLabel": "Смены",
+    "shift": {
+      "day": "Дневная",
+      "night": "Ночная",
+      "weekend": "Выходные"
+    },
+    "overtimeExpectedLabel": "Ожидаются сверхурочные",
+    "compMinLabel": "Оплата от",
+    "compMaxLabel": "Оплата до",
+    "currencyLabel": "Валюта",
+    "payUnitLabel": "Оплата за",
+    "payUnit": {
+      "hour": "Час",
+      "day": "День",
+      "week": "Неделю",
+      "month": "Месяц",
+      "project": "Проект"
+    },
+    "payBasisLabel": "Брутто или нетто",
+    "payBasis": {
+      "gross": "Брутто (до налогов)",
+      "net": "Нетто (на руки)",
+      "unspecified": "Не указано"
+    },
+    "paymentFrequencyLabel": "Периодичность выплат",
+    "paymentFrequency": {
+      "weekly": "Еженедельно",
+      "biweekly": "Раз в две недели",
+      "monthly": "Ежемесячно"
+    },
+    "guaranteedBaseLabel": "Гарантированная базовая оплата",
+    "perDiemLabel": "Суточные / надбавка",
+    "deductionsLabel": "Удержания",
+    "deductionsHelp": "Укажите все известные удержания (проживание, транспорт, страховка). Отсутствие данных об удержаниях показывается работникам как пробел.",
+    "deductionKindLabel": "Удержание",
+    "deductionKind": {
+      "accommodation": "Проживание",
+      "transport": "Транспорт",
+      "insurance": "Страховка",
+      "other": "Другое"
+    },
+    "deductionAmountLabel": "Сумма",
+    "deductionPeriodLabel": "Период",
+    "period": {
+      "day": "В день",
+      "week": "В неделю",
+      "month": "В месяц",
+      "once": "Разово"
+    },
+    "addDeductionLabel": "Добавить удержание",
+    "noDeductionsLabel": "Удержаний нет — подтверждаю",
+    "removeLabel": "Удалить",
+    "accommodationStateLabel": "Проживание",
+    "accommodationState": {
+      "offered": "Предоставляется",
+      "not_offered": "Не предоставляется",
+      "not_needed": "Не требуется"
+    },
+    "accommodationPayerLabel": "Кто платит",
+    "accommodationPayer": {
+      "employer": "Платит работодатель",
+      "shared": "Расходы делятся",
+      "worker": "Платит работник"
+    },
+    "roomLabel": "Комната",
+    "room": {
+      "single": "Одноместная",
+      "shared": "Совместная"
+    },
+    "accommodationPriceLabel": "Цена",
+    "accommodationPricePeriodLabel": "Период цены",
+    "occupancyLabel": "Человек в комнате",
+    "distanceKmLabel": "Расстояние до объекта (км)",
+    "depositLabel": "Залог",
+    "amenitiesLabel": "Удобства",
+    "amenity": {
+      "kitchen": "Кухня",
+      "laundry": "Прачечная",
+      "internet": "Интернет"
+    },
+    "familyPossibleLabel": "Можно с партнёром / семьёй",
+    "internationalTravelLabel": "Дорога в страну",
+    "dailyTransportLabel": "Ежедневный транспорт до объекта",
+    "betweenSitesLabel": "Переезды между объектами",
+    "transportLevel": {
+      "provided": "Предоставляется",
+      "compensated": "Компенсируется",
+      "not_provided": "Не предоставляется",
+      "unknown": "Не указано"
+    },
+    "arrivalPickupLabel": "Встреча в аэропорту / на вокзале",
+    "companyVehicleLabel": "Служебный автомобиль",
+    "fuelCardLabel": "Топливная карта / компенсация",
+    "ownVehicleRequiredLabel": "Нужен собственный автомобиль",
+    "returnTravelLabel": "Вклад в дорогу домой",
+    "licenceCategoriesLabel": "Категории водительских прав",
+    "minExperienceYearsLabel": "Минимальный опыт (лет)",
+    "languagesLabel": "Требования к языкам",
+    "languageLabel": "Язык",
+    "languageLevelLabel": "Уровень",
+    "onePerTeamLabel": "Достаточно одного говорящего в бригаде",
+    "addLanguageLabel": "Добавить язык",
+    "certificatesLabel": "Сертификаты и допуски",
+    "certificatesHelp": "Требуемые сертификаты (например, карта безопасности, допуск к технике) — указываются как факты, показываются как требования.",
+    "addCertificateLabel": "Добавить сертификат",
+    "ownToolsLabel": "Свои инструменты",
+    "ownVehicleLabel": "Свой автомобиль",
+    "ownWorkwearLabel": "Своя спецодежда",
+    "drawingsReadingLabel": "Читает чертежи / схемы",
+    "independentWorkLabel": "Работает самостоятельно",
+    "leadershipLabel": "Руководит другими",
+    "applicationMethodLabel": "Как откликнуться",
+    "applicationMethod": {
+      "interest_signal": "Выразить интерес на платформе",
+      "conversation": "Обсудить в переписке"
+    },
+    "interviewStagesLabel": "Этапы собеседования",
+    "responseDeadlineDaysLabel": "Ответ в течение (дней)",
+    "listingKindLabel": "Тип объявления",
+    "listingKind": {
+      "active_vacancy": "Активная вакансия",
+      "talent_pool": "Кадровый резерв (на будущее)"
+    },
+    "practicalTestLabel": "Практическое задание",
+    "documentVerificationLabel": "Проверка документов",
+    "talentPoolDisclosure": "Это объявление кадрового резерва: кандидаты собираются для будущих потребностей, а не для активной подтверждённой вакансии. Работники всегда это видят.",
+    "honesty": {
+      "title": "Недостающие факты об оплате — показываются работникам как пробелы",
+      "missing_minimum": "Не указана минимальная оплата",
+      "missing_basis": "Не указано, брутто это или нетто",
+      "missing_guaranteed_hours": "Не указаны гарантированные часы",
+      "missing_deductions": "Удержания не перечислены (и не подтверждено их отсутствие)",
+      "max_without_min": "Указана только сумма «до» — без минимума"
+    },
+    "preview": {
+      "title": "Как работники видят это сегодня",
+      "v2NotVisibleNote": "Подробные данные сохранены вместе с запросом. Работники увидят их после ближайшего обновления данных платформы — до этого видны только факты выше."
+    },
+    "prefillButton": "Заполнить по последнему запросу",
+    "prefillLoading": "Загрузка…",
+    "prefillEmpty": "Предыдущий запрос не найден",
+    "prefillDone": "Заполнено по последнему запросу — проверьте и отредактируйте"
+  },
   "workerPrefs": {
     "title": "Предпочтения по работе",
     "hint": "Указывайте только то, что действительно к вам относится — всё, что оставлено как «Не указано», остаётся неуказанным. Эти предпочтения передаются только согласно вашим согласиям о конфиденциальности.",

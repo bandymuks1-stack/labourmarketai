@@ -1767,6 +1767,193 @@
   "waze": {
     "open": "Atvērt Waze"
   },
+  "structuredDemand": {
+    "advancedTitle": "[EN] Advanced details (optional)",
+    "advancedHint": "[EN] Structured facts workers can filter and compare. Everything is optional — anything you skip is shown as “not stated”, never invented.",
+    "notStated": "[EN] Not stated",
+    "sections": {
+      "engagement": "[EN] Engagement & scope",
+      "time": "[EN] Time & schedule",
+      "compensation": "[EN] Pay & deductions",
+      "accommodation": "[EN] Accommodation",
+      "transport": "[EN] Transport",
+      "requirements": "[EN] Candidate requirements",
+      "process": "[EN] Application process"
+    },
+    "opportunityTypeLabel": "[EN] Opportunity type",
+    "opportunityType": {
+      "employment": "[EN] Employment",
+      "temporary_assignment": "[EN] Temporary assignment",
+      "project_work": "[EN] Project work",
+      "subcontract": "[EN] Subcontract",
+      "service_request": "[EN] Service request"
+    },
+    "targetSupplyLabel": "[EN] Who is needed",
+    "targetSupply": {
+      "individual": "[EN] One worker",
+      "multiple_workers": "[EN] Several workers",
+      "team": "[EN] Team / brigade",
+      "company": "[EN] Company / subcontractor"
+    },
+    "engagementFormLabel": "[EN] Employment form",
+    "engagementForm": {
+      "direct_employment": "[EN] Direct employment",
+      "agency_employment": "[EN] Agency employment",
+      "temporary_employment": "[EN] Temporary employment",
+      "posted_worker": "[EN] Posted worker",
+      "self_employed_contractor": "[EN] Self-employed contractor",
+      "company_subcontract": "[EN] Company subcontract"
+    },
+    "contractCountryLabel": "[EN] Contract country",
+    "startEarliestLabel": "[EN] Earliest start",
+    "startLatestLabel": "[EN] Latest start",
+    "endDateLabel": "[EN] End date (if known)",
+    "applicationDeadlineLabel": "[EN] Application deadline",
+    "hoursPerWeekLabel": "[EN] Hours per week",
+    "minGuaranteedHoursLabel": "[EN] Guaranteed hours per week",
+    "shiftsLabel": "[EN] Shifts",
+    "shift": {
+      "day": "[EN] Day",
+      "night": "[EN] Night",
+      "weekend": "[EN] Weekends"
+    },
+    "overtimeExpectedLabel": "[EN] Overtime expected",
+    "compMinLabel": "[EN] Pay from",
+    "compMaxLabel": "[EN] Pay up to",
+    "currencyLabel": "[EN] Currency",
+    "payUnitLabel": "[EN] Pay per",
+    "payUnit": {
+      "hour": "[EN] Hour",
+      "day": "[EN] Day",
+      "week": "[EN] Week",
+      "month": "[EN] Month",
+      "project": "[EN] Project"
+    },
+    "payBasisLabel": "[EN] Gross or net",
+    "payBasis": {
+      "gross": "[EN] Gross",
+      "net": "[EN] Net",
+      "unspecified": "[EN] Not specified"
+    },
+    "paymentFrequencyLabel": "[EN] Payment frequency",
+    "paymentFrequency": {
+      "weekly": "[EN] Weekly",
+      "biweekly": "[EN] Every two weeks",
+      "monthly": "[EN] Monthly"
+    },
+    "guaranteedBaseLabel": "[EN] Guaranteed base pay",
+    "perDiemLabel": "[EN] Per diem / allowance",
+    "deductionsLabel": "[EN] Deductions",
+    "deductionsHelp": "[EN] List every known deduction (accommodation, transport, insurance). Missing deduction info is shown to workers as a gap.",
+    "deductionKindLabel": "[EN] Deduction",
+    "deductionKind": {
+      "accommodation": "[EN] Accommodation",
+      "transport": "[EN] Transport",
+      "insurance": "[EN] Insurance",
+      "other": "[EN] Other"
+    },
+    "deductionAmountLabel": "[EN] Amount",
+    "deductionPeriodLabel": "[EN] Period",
+    "period": {
+      "day": "[EN] Per day",
+      "week": "[EN] Per week",
+      "month": "[EN] Per month",
+      "once": "[EN] One-time"
+    },
+    "addDeductionLabel": "[EN] Add deduction",
+    "noDeductionsLabel": "[EN] No deductions — confirmed",
+    "removeLabel": "[EN] Remove",
+    "accommodationStateLabel": "[EN] Accommodation",
+    "accommodationState": {
+      "offered": "[EN] Offered",
+      "not_offered": "[EN] Not offered",
+      "not_needed": "[EN] Not needed"
+    },
+    "accommodationPayerLabel": "[EN] Who pays",
+    "accommodationPayer": {
+      "employer": "[EN] Employer pays",
+      "shared": "[EN] Cost shared",
+      "worker": "[EN] Worker pays"
+    },
+    "roomLabel": "[EN] Room",
+    "room": {
+      "single": "[EN] Single room",
+      "shared": "[EN] Shared room"
+    },
+    "accommodationPriceLabel": "[EN] Price",
+    "accommodationPricePeriodLabel": "[EN] Price period",
+    "occupancyLabel": "[EN] People per room",
+    "distanceKmLabel": "[EN] Distance to site (km)",
+    "depositLabel": "[EN] Deposit",
+    "amenitiesLabel": "[EN] Amenities",
+    "amenity": {
+      "kitchen": "[EN] Kitchen",
+      "laundry": "[EN] Laundry",
+      "internet": "[EN] Internet"
+    },
+    "familyPossibleLabel": "[EN] Partner / family possible",
+    "internationalTravelLabel": "[EN] Travel to the country",
+    "dailyTransportLabel": "[EN] Daily transport to site",
+    "betweenSitesLabel": "[EN] Travel between sites",
+    "transportLevel": {
+      "provided": "[EN] Provided",
+      "compensated": "[EN] Compensated",
+      "not_provided": "[EN] Not provided",
+      "unknown": "[EN] Not stated"
+    },
+    "arrivalPickupLabel": "[EN] Airport / station pickup",
+    "companyVehicleLabel": "[EN] Company vehicle",
+    "fuelCardLabel": "[EN] Fuel card / reimbursement",
+    "ownVehicleRequiredLabel": "[EN] Own vehicle required",
+    "returnTravelLabel": "[EN] Return-home travel contribution",
+    "licenceCategoriesLabel": "[EN] Driving licence categories",
+    "minExperienceYearsLabel": "[EN] Minimum experience (years)",
+    "languagesLabel": "[EN] Language requirements",
+    "languageLabel": "[EN] Language",
+    "languageLevelLabel": "[EN] Level",
+    "onePerTeamLabel": "[EN] One speaker per team is enough",
+    "addLanguageLabel": "[EN] Add language",
+    "certificatesLabel": "[EN] Certificates & licences",
+    "certificatesHelp": "[EN] Required certificates (e.g. safety card, equipment licence) — stated as facts, shown as requirements.",
+    "addCertificateLabel": "[EN] Add certificate",
+    "ownToolsLabel": "[EN] Own tools",
+    "ownVehicleLabel": "[EN] Own vehicle",
+    "ownWorkwearLabel": "[EN] Own workwear",
+    "drawingsReadingLabel": "[EN] Reads drawings / schematics",
+    "independentWorkLabel": "[EN] Works independently",
+    "leadershipLabel": "[EN] Leads others",
+    "applicationMethodLabel": "[EN] How to apply",
+    "applicationMethod": {
+      "interest_signal": "[EN] Express interest on the platform",
+      "conversation": "[EN] Discuss in a conversation"
+    },
+    "interviewStagesLabel": "[EN] Interview stages",
+    "responseDeadlineDaysLabel": "[EN] Response within (days)",
+    "listingKindLabel": "[EN] Listing type",
+    "listingKind": {
+      "active_vacancy": "[EN] Active vacancy",
+      "talent_pool": "[EN] Talent pool (future needs)"
+    },
+    "practicalTestLabel": "[EN] Practical test",
+    "documentVerificationLabel": "[EN] Document verification",
+    "talentPoolDisclosure": "[EN] This is a talent-pool listing: candidates are collected for future needs, not for an active confirmed vacancy. Workers always see this disclosed.",
+    "honesty": {
+      "title": "[EN] Missing pay facts — shown to workers as gaps",
+      "missing_minimum": "[EN] Minimum pay is not stated",
+      "missing_basis": "[EN] Gross/net basis is not stated",
+      "missing_guaranteed_hours": "[EN] Guaranteed hours are not stated",
+      "missing_deductions": "[EN] Deductions are not itemized (or confirmed as none)",
+      "max_without_min": "[EN] Only an “up to” amount is stated — no minimum"
+    },
+    "preview": {
+      "title": "[EN] How workers see this today",
+      "v2NotVisibleNote": "[EN] Advanced details are saved with your request. Workers will see them after the next platform data update — until then only the facts above are visible."
+    },
+    "prefillButton": "[EN] Fill from my last request",
+    "prefillLoading": "[EN] Loading…",
+    "prefillEmpty": "[EN] No previous request found",
+    "prefillDone": "[EN] Filled from your last request — review and edit"
+  },
   "workerPrefs": {
     "title": "[EN] Work preferences",
     "hint": "[EN] State only what actually applies to you — anything left as “Not stated” stays not stated. These preferences are shared only under your privacy consents.",

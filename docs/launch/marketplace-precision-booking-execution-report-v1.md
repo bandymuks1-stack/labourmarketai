@@ -7,8 +7,8 @@ Base: `origin/main` = `29e45fa3` (verified 2026-07-11; matches expected closeout
 
 | Slice | PR | Branch | State | Validation |
 |---|---|---|---|---|
-| PR 1 — Gap map + canonical contracts | (this PR) | `feat/cc/marketplace-precision-booking-v1` | open | docs-only; CI |
-| PR 2 — Structured demand capture (`structured_v2`) | — | — | planned | — |
+| PR 1 — Gap map + canonical contracts | #718 | `feat/cc/marketplace-precision-booking-v1` | MERGED (squash → main `7f37cef9`) | CI green |
+| PR 2 — Structured demand capture (`structured_v2`) | (this PR) | `feat/cc/structured-demand-v2-capture` | open | local: typecheck, lint, 8695 vitest, build, placeholders, i18n-debt (da=839 ≤ baseline, de=0), route-smoke (43), SEO — all green |
 | PR 3 — Mirrored worker preferences (wire orphaned columns) | — | — | planned | — |
 | PR 4 — Matching contract v2 + discovery | — | — | planned | — |
 | PR 5 — Booking clarity + derived states | — | — | planned | — |

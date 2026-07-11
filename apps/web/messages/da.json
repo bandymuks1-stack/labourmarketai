@@ -1767,6 +1767,193 @@
   "waze": {
     "open": "Åbn i Waze"
   },
+  "structuredDemand": {
+    "advancedTitle": "Udvidede oplysninger (valgfrit)",
+    "advancedHint": "Strukturerede fakta, som arbejdstagere kan filtrere og sammenligne efter. Alt er valgfrit — det, du springer over, vises som ”ikke oplyst”, aldrig opdigtet.",
+    "notStated": "Ikke oplyst",
+    "sections": {
+      "engagement": "Ansættelsesform og omfang",
+      "time": "Tid og arbejdsplan",
+      "compensation": "Løn og fradrag",
+      "accommodation": "Indkvartering",
+      "transport": "Transport",
+      "requirements": "Krav til kandidater",
+      "process": "Ansøgningsproces"
+    },
+    "opportunityTypeLabel": "Type af tilbud",
+    "opportunityType": {
+      "employment": "Fast arbejde",
+      "temporary_assignment": "Midlertidig opgave",
+      "project_work": "Projektarbejde",
+      "subcontract": "Underentreprise",
+      "service_request": "Serviceopgave"
+    },
+    "targetSupplyLabel": "Hvem søges",
+    "targetSupply": {
+      "individual": "Én arbejdstager",
+      "multiple_workers": "Flere arbejdstagere",
+      "team": "Hold / sjak",
+      "company": "Virksomhed / underentreprenør"
+    },
+    "engagementFormLabel": "Ansættelsesform",
+    "engagementForm": {
+      "direct_employment": "Direkte ansættelse",
+      "agency_employment": "Via vikarbureau",
+      "temporary_employment": "Midlertidig ansættelse",
+      "posted_worker": "Udstationeret arbejdstager",
+      "self_employed_contractor": "Selvstændig entreprenør",
+      "company_subcontract": "Underentreprise via virksomhed"
+    },
+    "contractCountryLabel": "Kontraktland",
+    "startEarliestLabel": "Tidligste start",
+    "startLatestLabel": "Seneste start",
+    "endDateLabel": "Slutdato (hvis kendt)",
+    "applicationDeadlineLabel": "Ansøgningsfrist",
+    "hoursPerWeekLabel": "Timer pr. uge",
+    "minGuaranteedHoursLabel": "Garanterede timer pr. uge",
+    "shiftsLabel": "Vagter",
+    "shift": {
+      "day": "Dagvagt",
+      "night": "Nattevagt",
+      "weekend": "Weekender"
+    },
+    "overtimeExpectedLabel": "Overarbejde forventes",
+    "compMinLabel": "Løn fra",
+    "compMaxLabel": "Løn op til",
+    "currencyLabel": "Valuta",
+    "payUnitLabel": "Betaling pr.",
+    "payUnit": {
+      "hour": "Time",
+      "day": "Dag",
+      "week": "Uge",
+      "month": "Måned",
+      "project": "Projekt"
+    },
+    "payBasisLabel": "Brutto eller netto",
+    "payBasis": {
+      "gross": "Brutto",
+      "net": "Netto",
+      "unspecified": "Ikke oplyst"
+    },
+    "paymentFrequencyLabel": "Udbetalingsfrekvens",
+    "paymentFrequency": {
+      "weekly": "Ugentligt",
+      "biweekly": "Hver anden uge",
+      "monthly": "Månedligt"
+    },
+    "guaranteedBaseLabel": "Garanteret grundløn",
+    "perDiemLabel": "Diæter / tillæg",
+    "deductionsLabel": "Fradrag",
+    "deductionsHelp": "Angiv alle kendte fradrag (indkvartering, transport, forsikring). Manglende fradragsoplysninger vises for arbejdstagere som et hul.",
+    "deductionKindLabel": "Fradrag",
+    "deductionKind": {
+      "accommodation": "Indkvartering",
+      "transport": "Transport",
+      "insurance": "Forsikring",
+      "other": "Andet"
+    },
+    "deductionAmountLabel": "Beløb",
+    "deductionPeriodLabel": "Periode",
+    "period": {
+      "day": "Pr. dag",
+      "week": "Pr. uge",
+      "month": "Pr. måned",
+      "once": "Engangs"
+    },
+    "addDeductionLabel": "Tilføj fradrag",
+    "noDeductionsLabel": "Ingen fradrag — bekræftet",
+    "removeLabel": "Fjern",
+    "accommodationStateLabel": "Indkvartering",
+    "accommodationState": {
+      "offered": "Tilbydes",
+      "not_offered": "Tilbydes ikke",
+      "not_needed": "Ikke nødvendig"
+    },
+    "accommodationPayerLabel": "Hvem betaler",
+    "accommodationPayer": {
+      "employer": "Arbejdsgiver betaler",
+      "shared": "Udgifter deles",
+      "worker": "Arbejdstager betaler"
+    },
+    "roomLabel": "Værelse",
+    "room": {
+      "single": "Enkeltværelse",
+      "shared": "Delt værelse"
+    },
+    "accommodationPriceLabel": "Pris",
+    "accommodationPricePeriodLabel": "Prisperiode",
+    "occupancyLabel": "Personer pr. værelse",
+    "distanceKmLabel": "Afstand til pladsen (km)",
+    "depositLabel": "Depositum",
+    "amenitiesLabel": "Faciliteter",
+    "amenity": {
+      "kitchen": "Køkken",
+      "laundry": "Vaskeri",
+      "internet": "Internet"
+    },
+    "familyPossibleLabel": "Partner / familie muligt",
+    "internationalTravelLabel": "Rejse til landet",
+    "dailyTransportLabel": "Daglig transport til pladsen",
+    "betweenSitesLabel": "Kørsel mellem pladser",
+    "transportLevel": {
+      "provided": "Stilles til rådighed",
+      "compensated": "Kompenseres",
+      "not_provided": "Stilles ikke til rådighed",
+      "unknown": "Ikke oplyst"
+    },
+    "arrivalPickupLabel": "Afhentning i lufthavn / på station",
+    "companyVehicleLabel": "Firmabil",
+    "fuelCardLabel": "Brændstofkort / godtgørelse",
+    "ownVehicleRequiredLabel": "Egen bil påkrævet",
+    "returnTravelLabel": "Bidrag til hjemrejse",
+    "licenceCategoriesLabel": "Kørekortkategorier",
+    "minExperienceYearsLabel": "Minimumserfaring (år)",
+    "languagesLabel": "Sprogkrav",
+    "languageLabel": "Sprog",
+    "languageLevelLabel": "Niveau",
+    "onePerTeamLabel": "Én taler pr. sjak er nok",
+    "addLanguageLabel": "Tilføj sprog",
+    "certificatesLabel": "Certifikater og tilladelser",
+    "certificatesHelp": "Påkrævede certifikater (f.eks. sikkerhedskort, maskintilladelse) — angives som fakta, vises som krav.",
+    "addCertificateLabel": "Tilføj certifikat",
+    "ownToolsLabel": "Eget værktøj",
+    "ownVehicleLabel": "Egen bil",
+    "ownWorkwearLabel": "Eget arbejdstøj",
+    "drawingsReadingLabel": "Læser tegninger / diagrammer",
+    "independentWorkLabel": "Arbejder selvstændigt",
+    "leadershipLabel": "Leder andre",
+    "applicationMethodLabel": "Sådan ansøger man",
+    "applicationMethod": {
+      "interest_signal": "Vis interesse på platformen",
+      "conversation": "Aftal i en samtale"
+    },
+    "interviewStagesLabel": "Samtalerunder",
+    "responseDeadlineDaysLabel": "Svar inden for (dage)",
+    "listingKindLabel": "Opslagstype",
+    "listingKind": {
+      "active_vacancy": "Aktiv stilling",
+      "talent_pool": "Talentpulje (fremtidige behov)"
+    },
+    "practicalTestLabel": "Praktisk prøve",
+    "documentVerificationLabel": "Dokumentkontrol",
+    "talentPoolDisclosure": "Dette er et talentpulje-opslag: kandidater indsamles til fremtidige behov, ikke til en aktiv bekræftet stilling. Arbejdstagere ser altid dette.",
+    "honesty": {
+      "title": "Manglende lønfakta — vises for arbejdstagere som huller",
+      "missing_minimum": "Mindsteløn er ikke oplyst",
+      "missing_basis": "Brutto/netto er ikke oplyst",
+      "missing_guaranteed_hours": "Garanterede timer er ikke oplyst",
+      "missing_deductions": "Fradrag er ikke specificeret (eller ikke bekræftet som ingen)",
+      "max_without_min": "Kun et ”op til”-beløb er oplyst — intet minimum"
+    },
+    "preview": {
+      "title": "Sådan ser arbejdstagere det i dag",
+      "v2NotVisibleNote": "Udvidede oplysninger er gemt med din forespørgsel. Arbejdstagere ser dem efter næste platformsopdatering — indtil da er kun ovenstående fakta synlige."
+    },
+    "prefillButton": "Udfyld fra min seneste forespørgsel",
+    "prefillLoading": "Indlæser…",
+    "prefillEmpty": "Ingen tidligere forespørgsel fundet",
+    "prefillDone": "Udfyldt fra din seneste forespørgsel — gennemgå og redigér"
+  },
   "workerPrefs": {
     "title": "Arbejdspræferencer",
     "hint": "Angiv kun det, der faktisk gælder for dig — alt, der står som ”Ikke angivet”, forbliver ikke angivet. Disse præferencer deles kun i henhold til dine privatlivssamtykker.",

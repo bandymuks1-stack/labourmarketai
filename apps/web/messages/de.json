@@ -8023,6 +8023,193 @@
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
     }
   },
+  "structuredDemand": {
+    "advancedTitle": "Erweiterte Angaben (optional)",
+    "advancedHint": "Strukturierte Fakten, nach denen Arbeitskräfte filtern und vergleichen. Alles ist optional — Ausgelassenes wird als „nicht angegeben“ angezeigt, nie erfunden.",
+    "notStated": "Nicht angegeben",
+    "sections": {
+      "engagement": "Beschäftigungsform und Umfang",
+      "time": "Zeit und Arbeitsplan",
+      "compensation": "Vergütung und Abzüge",
+      "accommodation": "Unterkunft",
+      "transport": "Transport",
+      "requirements": "Anforderungen an Bewerber",
+      "process": "Bewerbungsprozess"
+    },
+    "opportunityTypeLabel": "Art des Angebots",
+    "opportunityType": {
+      "employment": "Festanstellung",
+      "temporary_assignment": "Zeitarbeit",
+      "project_work": "Projektarbeit",
+      "subcontract": "Nachunternehmerauftrag",
+      "service_request": "Dienstleistungsauftrag"
+    },
+    "targetSupplyLabel": "Wer wird gesucht",
+    "targetSupply": {
+      "individual": "Eine Arbeitskraft",
+      "multiple_workers": "Mehrere Arbeitskräfte",
+      "team": "Team / Kolonne",
+      "company": "Firma / Nachunternehmer"
+    },
+    "engagementFormLabel": "Beschäftigungsform",
+    "engagementForm": {
+      "direct_employment": "Direktanstellung",
+      "agency_employment": "Über Zeitarbeitsfirma",
+      "temporary_employment": "Befristete Anstellung",
+      "posted_worker": "Entsandte Arbeitskraft",
+      "self_employed_contractor": "Selbstständiger Auftragnehmer",
+      "company_subcontract": "Nachunternehmervertrag"
+    },
+    "contractCountryLabel": "Vertragsland",
+    "startEarliestLabel": "Frühester Beginn",
+    "startLatestLabel": "Spätester Beginn",
+    "endDateLabel": "Enddatum (falls bekannt)",
+    "applicationDeadlineLabel": "Bewerbungsfrist",
+    "hoursPerWeekLabel": "Stunden pro Woche",
+    "minGuaranteedHoursLabel": "Garantierte Stunden pro Woche",
+    "shiftsLabel": "Schichten",
+    "shift": {
+      "day": "Tagschicht",
+      "night": "Nachtschicht",
+      "weekend": "Wochenenden"
+    },
+    "overtimeExpectedLabel": "Überstunden zu erwarten",
+    "compMinLabel": "Vergütung ab",
+    "compMaxLabel": "Vergütung bis",
+    "currencyLabel": "Währung",
+    "payUnitLabel": "Bezahlung pro",
+    "payUnit": {
+      "hour": "Stunde",
+      "day": "Tag",
+      "week": "Woche",
+      "month": "Monat",
+      "project": "Projekt"
+    },
+    "payBasisLabel": "Brutto oder netto",
+    "payBasis": {
+      "gross": "Brutto",
+      "net": "Netto",
+      "unspecified": "Nicht angegeben"
+    },
+    "paymentFrequencyLabel": "Zahlungsrhythmus",
+    "paymentFrequency": {
+      "weekly": "Wöchentlich",
+      "biweekly": "Alle zwei Wochen",
+      "monthly": "Monatlich"
+    },
+    "guaranteedBaseLabel": "Garantierter Grundlohn",
+    "perDiemLabel": "Tagegeld / Zulage",
+    "deductionsLabel": "Abzüge",
+    "deductionsHelp": "Geben Sie jeden bekannten Abzug an (Unterkunft, Transport, Versicherung). Fehlende Abzugsangaben werden Arbeitskräften als Lücke angezeigt.",
+    "deductionKindLabel": "Abzug",
+    "deductionKind": {
+      "accommodation": "Unterkunft",
+      "transport": "Transport",
+      "insurance": "Versicherung",
+      "other": "Sonstiges"
+    },
+    "deductionAmountLabel": "Betrag",
+    "deductionPeriodLabel": "Zeitraum",
+    "period": {
+      "day": "Pro Tag",
+      "week": "Pro Woche",
+      "month": "Pro Monat",
+      "once": "Einmalig"
+    },
+    "addDeductionLabel": "Abzug hinzufügen",
+    "noDeductionsLabel": "Keine Abzüge — bestätigt",
+    "removeLabel": "Entfernen",
+    "accommodationStateLabel": "Unterkunft",
+    "accommodationState": {
+      "offered": "Wird gestellt",
+      "not_offered": "Wird nicht gestellt",
+      "not_needed": "Nicht erforderlich"
+    },
+    "accommodationPayerLabel": "Wer zahlt",
+    "accommodationPayer": {
+      "employer": "Arbeitgeber zahlt",
+      "shared": "Kosten geteilt",
+      "worker": "Arbeitskraft zahlt"
+    },
+    "roomLabel": "Zimmer",
+    "room": {
+      "single": "Einzelzimmer",
+      "shared": "Geteiltes Zimmer"
+    },
+    "accommodationPriceLabel": "Preis",
+    "accommodationPricePeriodLabel": "Preiszeitraum",
+    "occupancyLabel": "Personen pro Zimmer",
+    "distanceKmLabel": "Entfernung zur Baustelle (km)",
+    "depositLabel": "Kaution",
+    "amenitiesLabel": "Ausstattung",
+    "amenity": {
+      "kitchen": "Küche",
+      "laundry": "Waschküche",
+      "internet": "Internet"
+    },
+    "familyPossibleLabel": "Partner / Familie möglich",
+    "internationalTravelLabel": "Anreise ins Land",
+    "dailyTransportLabel": "Täglicher Transport zur Baustelle",
+    "betweenSitesLabel": "Fahrten zwischen Baustellen",
+    "transportLevel": {
+      "provided": "Wird gestellt",
+      "compensated": "Wird erstattet",
+      "not_provided": "Wird nicht gestellt",
+      "unknown": "Nicht angegeben"
+    },
+    "arrivalPickupLabel": "Abholung vom Flughafen / Bahnhof",
+    "companyVehicleLabel": "Firmenfahrzeug",
+    "fuelCardLabel": "Tankkarte / Erstattung",
+    "ownVehicleRequiredLabel": "Eigenes Fahrzeug erforderlich",
+    "returnTravelLabel": "Zuschuss zur Heimreise",
+    "licenceCategoriesLabel": "Führerscheinklassen",
+    "minExperienceYearsLabel": "Mindesterfahrung (Jahre)",
+    "languagesLabel": "Sprachanforderungen",
+    "languageLabel": "Sprache",
+    "languageLevelLabel": "Niveau",
+    "onePerTeamLabel": "Ein Sprecher pro Kolonne genügt",
+    "addLanguageLabel": "Sprache hinzufügen",
+    "certificatesLabel": "Zertifikate und Berechtigungen",
+    "certificatesHelp": "Erforderliche Zertifikate (z. B. Sicherheitsausweis, Maschinenberechtigung) — als Fakten angegeben, als Anforderungen angezeigt.",
+    "addCertificateLabel": "Zertifikat hinzufügen",
+    "ownToolsLabel": "Eigenes Werkzeug",
+    "ownVehicleLabel": "Eigenes Fahrzeug",
+    "ownWorkwearLabel": "Eigene Arbeitskleidung",
+    "drawingsReadingLabel": "Liest Zeichnungen / Pläne",
+    "independentWorkLabel": "Arbeitet selbstständig",
+    "leadershipLabel": "Führt andere an",
+    "applicationMethodLabel": "Wie bewerben",
+    "applicationMethod": {
+      "interest_signal": "Interesse auf der Plattform zeigen",
+      "conversation": "Im Gespräch klären"
+    },
+    "interviewStagesLabel": "Gesprächsrunden",
+    "responseDeadlineDaysLabel": "Antwort innerhalb von (Tagen)",
+    "listingKindLabel": "Art der Anzeige",
+    "listingKind": {
+      "active_vacancy": "Aktive Stelle",
+      "talent_pool": "Talentpool (künftiger Bedarf)"
+    },
+    "practicalTestLabel": "Praktische Probe",
+    "documentVerificationLabel": "Dokumentenprüfung",
+    "talentPoolDisclosure": "Dies ist eine Talentpool-Anzeige: Bewerber werden für künftigen Bedarf gesammelt, nicht für eine aktive bestätigte Stelle. Arbeitskräfte sehen das immer.",
+    "honesty": {
+      "title": "Fehlende Vergütungsfakten — werden Arbeitskräften als Lücken angezeigt",
+      "missing_minimum": "Mindestvergütung ist nicht angegeben",
+      "missing_basis": "Brutto/Netto ist nicht angegeben",
+      "missing_guaranteed_hours": "Garantierte Stunden sind nicht angegeben",
+      "missing_deductions": "Abzüge sind nicht aufgeschlüsselt (oder nicht als „keine“ bestätigt)",
+      "max_without_min": "Nur ein „bis“-Betrag ist angegeben — kein Minimum"
+    },
+    "preview": {
+      "title": "So sehen Arbeitskräfte das heute",
+      "v2NotVisibleNote": "Erweiterte Angaben sind mit Ihrer Anfrage gespeichert. Arbeitskräfte sehen sie nach dem nächsten Plattform-Datenupdate — bis dahin sind nur die obigen Fakten sichtbar."
+    },
+    "prefillButton": "Aus meiner letzten Anfrage übernehmen",
+    "prefillLoading": "Wird geladen…",
+    "prefillEmpty": "Keine frühere Anfrage gefunden",
+    "prefillDone": "Aus Ihrer letzten Anfrage übernommen — prüfen und bearbeiten"
+  },
   "workerPrefs": {
     "title": "Arbeitspräferenzen",
     "hint": "Geben Sie nur an, was wirklich auf Sie zutrifft — alles, was auf „Keine Angabe“ steht, bleibt ohne Angabe. Diese Präferenzen werden nur gemäß Ihren Datenschutz-Einwilligungen geteilt.",
