@@ -8022,5 +8022,34 @@
       "limit_reached": "Registratielimiet bereikt — deze handmatige lijst is begrensd.",
       "error": "Opslaan mislukt. Probeer het opnieuw."
     }
+  },
+  "workerPrefs": {
+    "title": "Werkvoorkeuren",
+    "hint": "Geef alleen op wat echt voor u geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven. Deze voorkeuren worden alleen gedeeld volgens uw privacytoestemmingen.",
+    "willingToRelocate": "Bereid te verhuizen voor werk",
+    "needsAccommodation": "Heeft huisvesting nodig",
+    "hasTransport": "Heeft eigen vervoer",
+    "teamAvailable": "Kan in teamverband werken",
+    "soloAvailable": "Kan zelfstandig werken",
+    "maxTripDays": "Langste werkreis (dagen)",
+    "contractType": "Gewenste contractvorm",
+    "note": "Opmerking over beschikbaarheid",
+    "triState": {
+      "notStated": "Niet opgegeven",
+      "yes": "Ja",
+      "no": "Nee"
+    },
+    "contract": {
+      "employment": "Arbeidsovereenkomst",
+      "subcontract": "Onderaanneming",
+      "temporary": "Tijdelijk werk",
+      "any": "Elke contractvorm"
+    },
+    "notePlaceholder": "Bijv. beschikbaar vanaf augustus, voorkeur voor rotaties van 2 weken…",
+    "save": "Voorkeuren opslaan",
+    "saving": "Opslaan…",
+    "saved": "Voorkeuren opgeslagen.",
+    "error": "Opslaan mislukt. Probeer het opnieuw.",
+    "needsMigration": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen."
   }
 }

@@ -1766,5 +1766,34 @@
   },
   "waze": {
     "open": "Otwórz w Waze"
+  },
+  "workerPrefs": {
+    "title": "[EN] Work preferences",
+    "hint": "[EN] State only what actually applies to you — anything left as “Not stated” stays not stated. These preferences are shared only under your privacy consents.",
+    "willingToRelocate": "[EN] Willing to relocate for work",
+    "needsAccommodation": "[EN] Needs accommodation provided",
+    "hasTransport": "[EN] Has own transport",
+    "teamAvailable": "[EN] Can work in a team",
+    "soloAvailable": "[EN] Can work solo",
+    "maxTripDays": "[EN] Longest work trip (days)",
+    "contractType": "[EN] Preferred contract type",
+    "note": "[EN] Availability note",
+    "triState": {
+      "notStated": "[EN] Not stated",
+      "yes": "[EN] Yes",
+      "no": "[EN] No"
+    },
+    "contract": {
+      "employment": "[EN] Employment contract",
+      "subcontract": "[EN] Subcontract",
+      "temporary": "[EN] Temporary work",
+      "any": "[EN] Any contract type"
+    },
+    "notePlaceholder": "[EN] E.g. available from August, prefer 2-week rotations…",
+    "save": "[EN] Save preferences",
+    "saving": "[EN] Saving…",
+    "saved": "[EN] Preferences saved.",
+    "error": "[EN] Saving failed. Please try again.",
+    "needsMigration": "[EN] This section is not enabled yet — nothing was saved."
   }
 }

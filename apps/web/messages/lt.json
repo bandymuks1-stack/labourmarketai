@@ -8022,5 +8022,34 @@
       "limit_reached": "Pasiektas įrašų limitas — šis rankinis sąrašas yra ribojamas.",
       "error": "Išsaugoti nepavyko. Pabandykite dar kartą."
     }
+  },
+  "workerPrefs": {
+    "title": "Darbo pageidavimai",
+    "hint": "Nurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.",
+    "willingToRelocate": "Galiu persikelti dėl darbo",
+    "needsAccommodation": "Reikalingas apgyvendinimas",
+    "hasTransport": "Turiu nuosavą transportą",
+    "teamAvailable": "Galiu dirbti komandoje",
+    "soloAvailable": "Galiu dirbti vienas",
+    "maxTripDays": "Ilgiausia komandiruotė (dienomis)",
+    "contractType": "Pageidaujama sutarties forma",
+    "note": "Pastaba apie užimtumą",
+    "triState": {
+      "notStated": "Nenurodyta",
+      "yes": "Taip",
+      "no": "Ne"
+    },
+    "contract": {
+      "employment": "Darbo sutartis",
+      "subcontract": "Subranga",
+      "temporary": "Laikinas darbas",
+      "any": "Bet kokia forma"
+    },
+    "notePlaceholder": "Pvz., galiu nuo rugpjūčio, pageidauju 2 savaičių pamainų…",
+    "save": "Išsaugoti pageidavimus",
+    "saving": "Saugoma…",
+    "saved": "Pageidavimai išsaugoti.",
+    "error": "Išsaugoti nepavyko. Pabandykite dar kartą.",
+    "needsMigration": "Ši dalis dar neįjungta — niekas nebuvo išsaugota."
   }
 }
