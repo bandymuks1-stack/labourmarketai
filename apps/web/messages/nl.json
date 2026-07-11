@@ -6303,6 +6303,14 @@
     "cta": "Terug naar het begin"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Bespreekpunten",
+      "missing": "Ontbrekende informatie"
+    },
+    "missingSide": {
+      "worker": "De kandidaat heeft niet opgegeven: {criterion}",
+      "demand": "Je aanvraag vermeldt niet: {criterion}"
+    },
     "statusNote": {
       "title": "Hoe matching vandaag werkt",
       "signals": "Op basis van de nu beschikbare signalen uit het profiel en het werkjournaal toont het systeem gereedheid en een mogelijke fit.",
@@ -6907,6 +6915,63 @@
     "applyNotAdmin": "Beheerdersrechten vereist."
   },
   "opportunities": {
+    "discovery": {
+      "filters": {
+        "title": "Kansen filteren",
+        "profession": "Soort werk",
+        "country": "Land",
+        "start": "Start",
+        "accommodation": "Huisvesting",
+        "transport": "Vervoer",
+        "tool": "Benodigd gereedschap",
+        "activeCount": "Actieve filters: {count}",
+        "reset": "Filters wissen"
+      },
+      "sort": {
+        "label": "Sorteren",
+        "relevance": "Beste match eerst",
+        "newest": "Nieuwste eerst"
+      },
+      "emptyFiltered": {
+        "title": "Geen kansen voldoen aan deze filters",
+        "body": "Actieve filters: {filters}. Verwijder enkele filters of wis ze om meer te zien.",
+        "reset": "Filters wissen"
+      },
+      "details": {
+        "show": "Meer details",
+        "hide": "Details verbergen"
+      },
+      "tiers": {
+        "blocking": "Past niet",
+        "strengths": "Past",
+        "negotiables": "Bespreekpunten",
+        "missing": "Ontbrekende informatie"
+      },
+      "missing": {
+        "worker": "Je hebt niet opgegeven: {criterion}",
+        "demand": "Het bedrijf heeft niet opgegeven: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Vereiste vaardigheden",
+        "evidence_tiers": "Bewijs van vaardigheden",
+        "profession": "Beroep",
+        "language": "Taal",
+        "country_location": "Land en locatie",
+        "availability": "Beschikbaarheid",
+        "pay_ceiling": "Loonverwachting",
+        "accommodation": "Huisvesting",
+        "compensation": "Loon",
+        "start_date": "Startdatum",
+        "shifts_hours": "Diensten en uren",
+        "engagement_form": "Contractvorm",
+        "licence_categories": "Rijbewijs"
+      },
+      "how": {
+        "title": "Hoe matching werkt",
+        "body": "Matching volgt vaste, deterministische regels over de feiten die beide kanten hebben opgegeven - vereiste vaardigheden, taal, locatie, beschikbaarheid, loon en contractvorm. Een ontbrekend feit wordt als ontbrekend getoond en nooit geraden. Geen kunstmatige intelligentie beslist en er is geen algemene persoonsscore - alleen de match binnen deze ene kans.",
+        "version": "Berekeningsversie: {version} - deterministische regels"
+      }
+    },
     "title": "Kansen voor jou",
     "intro": "Hier zie je personeelsbehoeften van werkgevers die bij je kunnen passen, en wat je aan je profiel kunt toevoegen om er klaar voor te zijn.",
     "noWorkerBody": "Maak eerst je werknemersprofiel af om kansen te zien die bij je passen.",

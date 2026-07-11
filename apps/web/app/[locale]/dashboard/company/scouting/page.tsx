@@ -45,6 +45,10 @@ export default async function CompanyScoutingPage({
   await requireRoleOrRedirect(locale, "company");
 
   const t = await getTranslations("scouting");
+  // Contract-v2 criterion vocabulary is localized ONCE, in the shared
+  // opportunities.discovery namespace (same tier explanation both sides see).
+  const tCrit = await getTranslations("opportunities.discovery.criterion");
+  const criterionLabel = (c: string) => (tCrit.has(c) ? tCrit(c as never) : c);
   const demands = await listCompanyDemands();
   // Human-structured demands first; since PR4 an unstructured demand can
   // still match via offline text recognition (honestly labeled below).
@@ -386,6 +390,64 @@ export default async function CompanyScoutingPage({
                         {gap(g.code)}
                       </span>
                     ))}
+                  </div>
+                ) : null}
+
+                {/* Contract v2 (PR 4): discussion points — never a block,
+                    never a silent boost. Same deterministic engine fields the
+                    worker board renders. */}
+                {c.match.negotiables.length > 0 ? (
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`scout-negotiables-${c.workerId}`}
+                  >
+                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {t("tiers.negotiables")}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.match.negotiables.map((n) => (
+                        <span
+                          key={n.criterion}
+                          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2 py-0.5 text-[11px] text-brand-blue"
+                          data-criterion={n.criterion}
+                          title={n.source}
+                        >
+                          {criterionLabel(n.criterion)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Contract v2 (PR 4): missing facts — which side has not
+                    stated what. Honest absence, never an assumed outcome. */}
+                {c.match.missingFacts.length > 0 ? (
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`scout-missing-${c.workerId}`}
+                  >
+                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {t("tiers.missing")}
+                    </span>
+                    <ul className="flex flex-col gap-0.5">
+                      {c.match.missingFacts.map((m) => (
+                        <li
+                          key={`${m.criterion}-${m.side}`}
+                          className="text-[11px] text-text-muted"
+                          data-criterion={m.criterion}
+                          data-side={m.side}
+                          title={m.source}
+                        >
+                          {m.side === "worker"
+                            ? t("missingSide.worker", {
+                                criterion: criterionLabel(m.criterion),
+                              })
+                            : t("missingSide.demand", {
+                                criterion: criterionLabel(m.criterion),
+                              })}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 ) : null}
 

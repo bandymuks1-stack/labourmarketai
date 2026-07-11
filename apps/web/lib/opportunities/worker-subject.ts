@@ -37,7 +37,7 @@ export async function buildOwnWorkerContext(
   const { data: worker } = await asAny(supabase)
     .from("workers")
     .select(
-      "id, availability_status, available_from, current_location_country, preferred_countries",
+      "id, availability_status, available_from, current_location_country, preferred_countries, preferred_contract_type",
     )
     .eq("profile_id", profileId)
     .maybeSingle();
@@ -130,6 +130,9 @@ export async function buildOwnWorkerContext(
       preferredCountries,
       availabilityStatus: (worker.availability_status as string | null) ?? null,
       availableFrom: (worker.available_from as string | null) ?? null,
+      // Contract v2 — engagement-form criterion (fires only when the demand
+      // also states its engagement form via structured_v2).
+      preferredContractType: (worker.preferred_contract_type as string | null) ?? null,
     },
   };
 }

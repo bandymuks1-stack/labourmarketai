@@ -1686,7 +1686,74 @@
     "body": "Taki adres nie istnieje — być może został błędnie wpisany albo strona została przeniesiona.",
     "cta": "Wróć na początek"
   },
+  "opportunities": {
+    "discovery": {
+      "filters": {
+        "title": "[EN] Filter opportunities",
+        "profession": "[EN] Work type",
+        "country": "[EN] Country",
+        "start": "[EN] Start",
+        "accommodation": "[EN] Accommodation",
+        "transport": "[EN] Transport",
+        "tool": "[EN] Required tools",
+        "activeCount": "[EN] Active filters: {count}",
+        "reset": "[EN] Reset filters"
+      },
+      "sort": {
+        "label": "[EN] Sort",
+        "relevance": "[EN] Best match first",
+        "newest": "[EN] Newest first"
+      },
+      "emptyFiltered": {
+        "title": "[EN] No opportunities match these filters",
+        "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
+        "reset": "[EN] Reset filters"
+      },
+      "details": {
+        "show": "[EN] More details",
+        "hide": "[EN] Hide details"
+      },
+      "tiers": {
+        "blocking": "[EN] Does not fit",
+        "strengths": "[EN] Fits",
+        "negotiables": "[EN] Discussion points",
+        "missing": "[EN] Missing information"
+      },
+      "missing": {
+        "worker": "[EN] You have not stated: {criterion}",
+        "demand": "[EN] The company has not stated: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "[EN] Required skills",
+        "evidence_tiers": "[EN] Skill evidence",
+        "profession": "[EN] Profession",
+        "language": "[EN] Language",
+        "country_location": "[EN] Country and location",
+        "availability": "[EN] Availability",
+        "pay_ceiling": "[EN] Pay expectation",
+        "accommodation": "[EN] Accommodation",
+        "compensation": "[EN] Pay",
+        "start_date": "[EN] Start date",
+        "shifts_hours": "[EN] Shifts and hours",
+        "engagement_form": "[EN] Contract type",
+        "licence_categories": "[EN] Driving licence"
+      },
+      "how": {
+        "title": "[EN] How matching works",
+        "body": "[EN] Matching follows fixed, deterministic rules over the facts both sides have stated - required skills, language, location, availability, pay and contract type. A missing fact is shown as missing, never guessed. No artificial intelligence makes the decision and there is no global person score - only the fit within this one opportunity.",
+        "version": "[EN] Calculation version: {version} - deterministic rules"
+      }
+    }
+  },
   "scouting": {
+    "tiers": {
+      "negotiables": "[EN] Discussion points",
+      "missing": "[EN] Missing information"
+    },
+    "missingSide": {
+      "worker": "[EN] The candidate has not stated: {criterion}",
+      "demand": "[EN] Your request does not state: {criterion}"
+    },
     "title": "[EN] Scouting",
     "intro": "[EN] Pick one of your structured needs to see matching workers, why they fit, and shortlist them.",
     "pickDemand": "[EN] Pick a need",

@@ -42,7 +42,7 @@ export async function buildSupplyCandidates(
   const { data: workers, error } = await asAny(supabase)
     .from("workers")
     .select(
-      "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur",
+      "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, preferred_contract_type",
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -153,6 +153,10 @@ export async function buildSupplyCandidates(
         availabilityStatus: (w.availability_status as string | null) ?? null,
         availableFrom: (w.available_from as string | null) ?? null,
         salaryMinEur: (w.salary_min_eur as number | null) ?? null,
+        // Contract v2: engagement-form hard check fires only when BOTH sides
+        // stated their form (workers.preferred_contract_type is applied prod
+        // schema — see gap map Capability B).
+        preferredContractType: (w.preferred_contract_type as string | null) ?? null,
       } satisfies MatchSubject,
     };
   });

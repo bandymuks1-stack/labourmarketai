@@ -6303,6 +6303,14 @@
     "cta": "Grįžti į pradžią"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Aptartini klausimai",
+      "missing": "Trūkstama informacija"
+    },
+    "missingSide": {
+      "worker": "Kandidatas nenurodė: {criterion}",
+      "demand": "Jūsų užklausoje nenurodyta: {criterion}"
+    },
     "statusNote": {
       "title": "Kaip veikia atitikimas šiandien",
       "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.",
@@ -6907,6 +6915,63 @@
     "applyNotAdmin": "Reikia administratoriaus teisių."
   },
   "opportunities": {
+    "discovery": {
+      "filters": {
+        "title": "Filtruoti galimybes",
+        "profession": "Darbo tipas",
+        "country": "Šalis",
+        "start": "Pradžia",
+        "accommodation": "Apgyvendinimas",
+        "transport": "Transportas",
+        "tool": "Reikalingi įrankiai",
+        "activeCount": "Aktyvūs filtrai: {count}",
+        "reset": "Išvalyti filtrus"
+      },
+      "sort": {
+        "label": "Rikiavimas",
+        "relevance": "Tinkamiausios pirmiausia",
+        "newest": "Naujausios pirmiausia"
+      },
+      "emptyFiltered": {
+        "title": "Nė viena galimybė neatitinka šių filtrų",
+        "body": "Aktyvūs filtrai: {filters}. Pašalinkite dalį filtrų arba išvalykite juos.",
+        "reset": "Išvalyti filtrus"
+      },
+      "details": {
+        "show": "Daugiau informacijos",
+        "hide": "Slėpti informaciją"
+      },
+      "tiers": {
+        "blocking": "Netinka",
+        "strengths": "Tinka",
+        "negotiables": "Aptartini klausimai",
+        "missing": "Trūkstama informacija"
+      },
+      "missing": {
+        "worker": "Jūs nenurodėte: {criterion}",
+        "demand": "Įmonė nenurodė: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Reikalingi įgūdžiai",
+        "evidence_tiers": "Įgūdžių įrodymai",
+        "profession": "Profesija",
+        "language": "Kalba",
+        "country_location": "Šalis ir vieta",
+        "availability": "Prieinamumas",
+        "pay_ceiling": "Atlygio lūkestis",
+        "accommodation": "Apgyvendinimas",
+        "compensation": "Atlygis",
+        "start_date": "Pradžios data",
+        "shifts_hours": "Pamainos ir valandos",
+        "engagement_form": "Sutarties forma",
+        "licence_categories": "Vairuotojo pažymėjimas"
+      },
+      "how": {
+        "title": "Kaip veikia atitikimas",
+        "body": "Atitikimas skaičiuojamas pagal fiksuotas, determinuotas taisykles iš abiejų pusių nurodytų faktų - reikalingų įgūdžių, kalbos, vietos, prieinamumo, atlygio ir sutarties formos. Trūkstamas faktas rodomas kaip trūkstamas ir niekada nespėjamas. Sprendimo nepriima joks dirbtinis intelektas ir nėra jokio bendro asmens balo - tik atitiktis šiai konkrečiai galimybei.",
+        "version": "Skaičiavimo versija: {version} - determinuotos taisyklės"
+      }
+    },
     "title": "Man tinkamos galimybės",
     "intro": "Čia matysite darbdavių poreikius, kurie gali jums tikti, ir ką verta papildyti profilyje, kad būtumėte paruošti.",
     "noWorkerBody": "Pirmiausia užbaikite darbuotojo profilį, kad matytumėte jums tinkančias galimybes.",
