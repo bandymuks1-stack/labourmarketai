@@ -5,6 +5,7 @@ import {
   sourceToEvidence,
   type EvidenceTier,
   type MatchSubject,
+  type WorkerLanguageFact,
 } from "@/lib/market/match-v1";
 
 /**
@@ -37,14 +38,14 @@ export async function buildOwnWorkerContext(
   const { data: worker } = await asAny(supabase)
     .from("workers")
     .select(
-      "id, availability_status, available_from, current_location_country, preferred_countries",
+      "id, availability_status, available_from, current_location_country, preferred_countries, preferred_contract_type",
     )
     .eq("profile_id", profileId)
     .maybeSingle();
   if (!worker) return null;
   const workerId = worker.id as string;
 
-  const [{ data: skillRows }, { data: prof }, prefLocRes] = await Promise.all([
+  const [{ data: skillRows }, { data: prof }, prefLocRes, prefsRes, langsRes] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
       .select("id, source, verified, skills ( slug )")
@@ -66,6 +67,30 @@ export async function buildOwnWorkerContext(
       .order("priority", { ascending: true })
       .then(
         (r: { data: unknown }) => r,
+        () => ({ data: null }),
+      ),
+    // Contract v2.1 mirrored facts — FEATURE-DETECTED second reads (the MP-2
+    // workers columns / MP-1 worker_languages table are human-gated and may
+    // be unapplied). Any error (42703 / 42P01) → undefined facts (honest
+    // missingFacts in the engine); the primary workers query above stays
+    // untouched so nothing regresses while the stores are pending.
+    asAny(supabase)
+      .from("workers")
+      .select(
+        "pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, driving_licence_categories, own_vehicle, own_tools",
+      )
+      .eq("profile_id", profileId)
+      .maybeSingle()
+      .then(
+        (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
+        () => ({ data: null }),
+      ),
+    asAny(supabase)
+      .from("worker_languages")
+      .select("lang, level")
+      .eq("worker_id", workerId)
+      .then(
+        (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
         () => ({ data: null }),
       ),
   ]);
@@ -114,6 +139,23 @@ export async function buildOwnWorkerContext(
     ),
   ];
 
+  // Contract v2.1 mirrored facts (human-gated MP-1/MP-2 stores; pre-apply
+  // both read back null → honest "not stated", never an invented outcome).
+  const prefs = (prefsRes?.data ?? null) as {
+    pay_basis_preference: string | null;
+    night_shifts_ok: boolean | null;
+    weekend_shifts_ok: boolean | null;
+    overtime_ok: boolean | null;
+    driving_licence_categories: string[] | null;
+    own_vehicle: boolean | null;
+    own_tools: boolean | null;
+  } | null;
+  const languageLevels: WorkerLanguageFact[] = (
+    (langsRes?.data ?? []) as { lang: string | null; level: string | null }[]
+  )
+    .filter((l): l is { lang: string; level: string } => !!l.lang && !!l.level)
+    .map((l) => ({ lang: l.lang, level: l.level }));
+
   return {
     workerId,
     skillRowCount: (skillRows ?? []).length,
@@ -130,6 +172,18 @@ export async function buildOwnWorkerContext(
       preferredCountries,
       availabilityStatus: (worker.availability_status as string | null) ?? null,
       availableFrom: (worker.available_from as string | null) ?? null,
+      // Contract v2 — engagement-form criterion (fires only when the demand
+      // also states its engagement form via structured_v2).
+      preferredContractType: (worker.preferred_contract_type as string | null) ?? null,
+      // Contract v2.1 mirrored facts.
+      languageLevels: languageLevels.length > 0 ? languageLevels : null,
+      drivingLicenceCategories: prefs?.driving_licence_categories ?? null,
+      ownVehicle: prefs?.own_vehicle ?? null,
+      ownTools: prefs?.own_tools ?? null,
+      payBasisPreference: prefs?.pay_basis_preference ?? null,
+      nightShiftsOk: prefs?.night_shifts_ok ?? null,
+      weekendShiftsOk: prefs?.weekend_shifts_ok ?? null,
+      overtimeOk: prefs?.overtime_ok ?? null,
     },
   };
 }

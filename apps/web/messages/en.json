@@ -5145,6 +5145,10 @@
     "messageCta": "Send a message",
     "errorGeneric": "Something went wrong. Please try again.",
     "duplicate": "You already have an open request for this service.",
+    "requestAgain": "Request again",
+    "requestAgainNote": "This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
+    "cancel": "Cancel",
+    "offeringInactive": "This service is no longer active, so a new request can't be sent.",
     "requesterMessage": "Their message",
     "providerNote": "Provider's note",
     "responded": "Responded",
@@ -6303,6 +6307,14 @@
     "cta": "Back to the start"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Discussion points",
+      "missing": "Missing information"
+    },
+    "missingSide": {
+      "worker": "The candidate has not stated: {criterion}",
+      "demand": "Your request does not state: {criterion}"
+    },
     "statusNote": {
       "title": "How matching works today",
       "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.",
@@ -6540,7 +6552,9 @@
     "notAuthed": "Please sign in to see your bookings.",
     "unavailable": "Couldn’t complete the action. Please try again.",
     "noDate": "No start date set",
+    "noRole": "Work engagement",
     "startsOn": "Starts {date}",
+    "endsOn": "Until {date}",
     "incoming": {
       "title": "Proposals for you",
       "help": "A company proposed working with you. You decide.",
@@ -6558,6 +6572,28 @@
       "withdrawn": "Withdrawn",
       "expired": "Expired"
     },
+    "displayState": {
+      "awaiting_response": "Awaiting response",
+      "no_response_stale": "No response yet"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "You decide — accept or decline. Nothing is confirmed until you accept.",
+        "no_response_stale": "Unanswered for 14+ days but still open — you can still accept or decline.",
+        "accepted": "Confirmed. Next: message the company and plan the work together.",
+        "declined": "You declined, so this proposal is closed. The company can send a new one.",
+        "withdrawn": "The company withdrew this proposal, so it is closed.",
+        "expired": "This proposal has lapsed, so it is closed."
+      },
+      "outgoing": {
+        "awaiting_response": "The worker decides. You can withdraw the proposal until they answer.",
+        "no_response_stale": "No answer for 14+ days. Still open — you can withdraw it or keep waiting.",
+        "accepted": "The worker accepted. Next: send a message and plan the work together.",
+        "declined": "The worker declined, so this proposal is closed. You can propose to another worker.",
+        "withdrawn": "You withdrew this proposal, so it is closed. Send a new one if needed.",
+        "expired": "This proposal has lapsed, so it is closed."
+      }
+    },
     "actions": {
       "accept": "Accept",
       "decline": "Decline",
@@ -6567,7 +6603,9 @@
       "error": "Something went wrong.",
       "message": "Send a message",
       "withdraw": "Withdraw proposal",
-      "findAnother": "Find another worker"
+      "findAnother": "Find another worker",
+      "proposeAgain": "Propose again with new dates",
+      "planning": "View in planning"
     },
     "connections": {
       "title": "Planning connects to",
@@ -6580,6 +6618,51 @@
       "mapNote": "Where work and bookings are",
       "diary": "Work diary",
       "diaryNote": "Record what actually happened"
+    },
+    "propose": {
+      "modeNote": "This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
+      "againModeNote": "This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
+      "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+    },
+    "reason": {
+      "optionalTitle": "Reason (optional)",
+      "noteLabel": "Note (optional)",
+      "none": "No reason",
+      "notStored": "Your answer was saved. The reason couldn't be saved this time.",
+      "decline": {
+        "dates_unsuitable": "The dates don't suit me",
+        "conditions_unsuitable": "The conditions don't suit me",
+        "already_booked": "I'm already booked for that time",
+        "other": "Other"
+      },
+      "withdraw": {
+        "position_filled": "The position is already filled",
+        "need_changed": "Our need changed",
+        "dates_changed": "The dates changed",
+        "other": "Other"
+      },
+      "confirmDecline": "Confirm decline",
+      "confirmWithdraw": "Confirm withdrawal",
+      "cancel": "Cancel"
+    },
+    "reschedule": {
+      "open": "Change dates",
+      "startDate": "New start date",
+      "endDate": "New end date (optional)",
+      "note": "Note (optional)",
+      "save": "Save new dates",
+      "saved": "Dates updated. The worker sees the new dates.",
+      "notChanged": "The dates weren't changed. Please try again later.",
+      "cancel": "Cancel"
+    },
+    "deadline": {
+      "open": "Set a respond-by date",
+      "label": "Respond-by date",
+      "save": "Save date",
+      "saved": "Respond-by date saved.",
+      "notSet": "The respond-by date wasn't saved. Please try again later.",
+      "respondBy": "Respond by {date}",
+      "cancel": "Cancel"
     }
   },
   "adminReadiness": {
@@ -6878,6 +6961,105 @@
     "applyNotAdmin": "Admin rights required."
   },
   "opportunities": {
+    "saved": {
+      "save": "Save",
+      "saved": "Saved",
+      "unsave": "Remove from saved",
+      "privateHint": "Saving is private to your account — the company never sees who saved its listing.",
+      "sectionTitle": "Saved opportunities",
+      "noLongerOpen": "Saved earlier but no longer open on the board: {count}",
+      "error": "Could not update your saved list. Please try again."
+    },
+    "recent": {
+      "title": "Recently viewed",
+      "deviceOnly": "Stored only on this device — this list never leaves your browser and is not sent to the server.",
+      "clear": "Clear"
+    },
+    "compare": {
+      "toggle": "Compare",
+      "selectedLabel": "Selected",
+      "open": "Compare selected",
+      "title": "Compare opportunities",
+      "close": "Close",
+      "clear": "Clear selection",
+      "limitNote": "Choose 2–3 opportunities to compare.",
+      "notStated": "Not stated",
+      "fact": {
+        "pay": "Pay",
+        "hours": "Hours per week",
+        "start": "Start",
+        "engagement": "Engagement form",
+        "accommodation": "Accommodation",
+        "transport": "Transport",
+        "tools": "Tools",
+        "languages": "Languages",
+        "location": "Location",
+        "company": "Company"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "Filter opportunities",
+        "profession": "Work type",
+        "country": "Country",
+        "start": "Start",
+        "accommodation": "Accommodation",
+        "transport": "Transport",
+        "tool": "Required tools",
+        "activeCount": "Active filters: {count}",
+        "reset": "Reset filters"
+      },
+      "sort": {
+        "label": "Sort",
+        "relevance": "Best match first",
+        "newest": "Newest first"
+      },
+      "emptyFiltered": {
+        "title": "No opportunities match these filters",
+        "body": "Active filters: {filters}. Remove some filters or reset them to see more.",
+        "reset": "Reset filters"
+      },
+      "details": {
+        "show": "More details",
+        "hide": "Hide details"
+      },
+      "tiers": {
+        "blocking": "Does not fit",
+        "strengths": "Fits",
+        "negotiables": "Discussion points",
+        "missing": "Missing information"
+      },
+      "missing": {
+        "worker": "You have not stated: {criterion}",
+        "demand": "The company has not stated: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Required skills",
+        "evidence_tiers": "Skill evidence",
+        "profession": "Profession",
+        "language": "Language",
+        "country_location": "Country and location",
+        "availability": "Availability",
+        "pay_ceiling": "Pay expectation",
+        "accommodation": "Accommodation",
+        "compensation": "Pay",
+        "start_date": "Start date",
+        "shifts_hours": "Shifts and hours",
+        "engagement_form": "Contract type",
+        "licence_categories": "Driving licence",
+        "own_vehicle": "Own vehicle",
+        "own_tools": "Own tools",
+        "pay_basis": "Pay basis (gross/net)",
+        "night_shifts": "Night shifts",
+        "weekend_shifts": "Weekend shifts",
+        "overtime": "Overtime"
+      },
+      "how": {
+        "title": "How matching works",
+        "body": "Matching follows fixed, deterministic rules over the facts both sides have stated - required skills, language, location, availability, pay and contract type. A missing fact is shown as missing, never guessed. No artificial intelligence makes the decision and there is no global person score - only the fit within this one opportunity.",
+        "version": "Calculation version: {version} - deterministic rules"
+      }
+    },
     "title": "Opportunities for you",
     "intro": "Here you'll see employer needs that could fit you, and what's worth adding to your profile to be ready.",
     "noWorkerBody": "Finish your worker profile first to see opportunities that fit you.",
@@ -6996,7 +7178,50 @@
       "reviewed": "Company reviewed your interest",
       "contacted": "Company marked: contacted"
     },
-    "companyVerified": "Verified company"
+    "companyVerified": "Verified company",
+    "structured": {
+      "detailTitle": "Stated working conditions",
+      "notProvided": "The company has not provided detailed working conditions for this listing yet — only the facts above are stated.",
+      "gapsTitle": "Not stated by the company",
+      "yes": "Yes",
+      "no": "No",
+      "payLabel": "Pay",
+      "amountFrom": "from {amount}",
+      "amountUpTo": "up to {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} h/week",
+      "chipMinHours": "at least {hours} h/week",
+      "chipStartFrom": "start from {from}",
+      "chipStartWindow": "start {from} – {to}",
+      "chipDeadline": "apply by {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} yr.",
+      "km": "{km} km",
+      "minutes": "{min} min",
+      "probationLabel": "Probation period",
+      "extensionPossibleLabel": "Extension possible",
+      "scheduleNoticeLabel": "Schedule notice in advance",
+      "expectedResponseLabel": "Response within",
+      "firstPaymentLabel": "First payment within",
+      "travelMinutesLabel": "Travel time to site",
+      "registrationPossibleLabel": "Address registration possible",
+      "availableFromLabel": "Available from",
+      "similarProjectLabel": "Similar project experience",
+      "driverSupplementLabel": "Driver supplement",
+      "siteModeLabel": "Work sites",
+      "siteMode": {
+        "single": "One site",
+        "multiple": "Several sites",
+        "mobile": "Mobile / changing sites"
+      },
+      "workModeLabel": "Work mode",
+      "workMode": {
+        "onsite": "On-site",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      }
+    }
   },
   "workerIntake": {
     "title": "Worker intake",
@@ -8209,5 +8434,66 @@
     "prefillLoading": "Loading…",
     "prefillEmpty": "No previous request found",
     "prefillDone": "Filled from your last request — review and edit"
+  },
+  "workerPrefs": {
+    "title": "Work preferences",
+    "hint": "State only what actually applies to you — anything left as “Not stated” stays not stated. These preferences are shared only under your privacy consents.",
+    "willingToRelocate": "Willing to relocate for work",
+    "needsAccommodation": "Needs accommodation provided",
+    "hasTransport": "Has own transport",
+    "teamAvailable": "Can work in a team",
+    "soloAvailable": "Can work solo",
+    "maxTripDays": "Longest work trip (days)",
+    "contractType": "Preferred contract type",
+    "note": "Availability note",
+    "triState": {
+      "notStated": "Not stated",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "contract": {
+      "employment": "Employment contract",
+      "subcontract": "Subcontract",
+      "temporary": "Temporary work",
+      "any": "Any contract type"
+    },
+    "notePlaceholder": "E.g. available from August, prefer 2-week rotations…",
+    "save": "Save preferences",
+    "saving": "Saving…",
+    "saved": "Preferences saved.",
+    "error": "Saving failed. Please try again.",
+    "needsMigration": "This section is not enabled yet — nothing was saved.",
+    "v2": {
+      "title": "More work preferences",
+      "hint": "Same rule as above — anything left as “Not stated” stays not stated.",
+      "payBasis": "Pay expectation basis",
+      "payBasisOptions": {
+        "gross": "Gross (before taxes)",
+        "net": "Net (take-home)"
+      },
+      "nightShifts": "Willing to work night shifts",
+      "weekendShifts": "Willing to work weekends",
+      "overtime": "Willing to work overtime",
+      "licenceCategories": "Driving licence categories",
+      "ownVehicle": "Has own vehicle",
+      "ownTools": "Has own tools",
+      "notEnabled": "These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notSaved": "Saved, except the extra preferences — that part is not enabled yet."
+    }
+  },
+  "workerLanguages": {
+    "title": "Languages",
+    "hint": "Add the languages you can work in and your level.",
+    "selfStated": "You add these languages yourself — they are not checked by anyone.",
+    "language": "Language",
+    "level": "Level",
+    "levelNative": "Native",
+    "add": "Add language",
+    "adding": "Adding…",
+    "remove": "Remove",
+    "empty": "No languages added yet.",
+    "notEnabled": "This section is not enabled yet — nothing was saved.",
+    "error": "Saving failed. Please try again.",
+    "invalid": "Choose a language and a level."
   }
 }

@@ -5145,6 +5145,10 @@
     "messageCta": "Stuur een bericht",
     "errorGeneric": "Er is iets misgegaan. Probeer het opnieuw.",
     "duplicate": "Je hebt al een openstaande aanvraag voor deze dienst.",
+    "requestAgain": "Opnieuw aanvragen",
+    "requestAgainNote": "Dit verstuurt een nieuwe aanvraag voor dezelfde dienst. Je eerdere bericht is al ingevuld — pas het aan als je wilt. De aanbieder beslist opnieuw.",
+    "cancel": "Annuleren",
+    "offeringInactive": "Deze dienst is niet meer actief, dus een nieuwe aanvraag kan niet worden verstuurd.",
     "requesterMessage": "Hun bericht",
     "providerNote": "Notitie van de aanbieder",
     "responded": "Beantwoord",
@@ -6303,6 +6307,14 @@
     "cta": "Terug naar het begin"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Bespreekpunten",
+      "missing": "Ontbrekende informatie"
+    },
+    "missingSide": {
+      "worker": "De kandidaat heeft niet opgegeven: {criterion}",
+      "demand": "Je aanvraag vermeldt niet: {criterion}"
+    },
     "statusNote": {
       "title": "Hoe matching vandaag werkt",
       "signals": "Op basis van de nu beschikbare signalen uit het profiel en het werkjournaal toont het systeem gereedheid en een mogelijke fit.",
@@ -6540,7 +6552,9 @@
     "notAuthed": "Log in om je boekingen te zien.",
     "unavailable": "Kon de actie niet voltooien. Probeer het opnieuw.",
     "noDate": "Geen startdatum ingesteld",
+    "noRole": "Werkafspraak",
     "startsOn": "Start {date}",
+    "endsOn": "Tot {date}",
     "incoming": {
       "title": "Voorstellen voor jou",
       "help": "Een bedrijf heeft voorgesteld om met je samen te werken. Jij beslist.",
@@ -6558,6 +6572,28 @@
       "withdrawn": "Ingetrokken",
       "expired": "Verlopen"
     },
+    "displayState": {
+      "awaiting_response": "Wacht op antwoord",
+      "no_response_stale": "Nog geen antwoord"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Jij beslist — accepteer of weiger. Niets is bevestigd totdat je accepteert.",
+        "no_response_stale": "Al 14+ dagen onbeantwoord, maar nog open — je kunt nog steeds accepteren of weigeren.",
+        "accepted": "Bevestigd. Volgende stap: stuur het bedrijf een bericht en plan het werk samen.",
+        "declined": "Je hebt geweigerd, dus dit voorstel is gesloten. Het bedrijf kan een nieuw voorstel sturen.",
+        "withdrawn": "Het bedrijf heeft dit voorstel ingetrokken, dus het is gesloten.",
+        "expired": "Dit voorstel is vervallen, dus het is gesloten."
+      },
+      "outgoing": {
+        "awaiting_response": "De werknemer beslist. Je kunt het voorstel intrekken totdat die antwoordt.",
+        "no_response_stale": "Al 14+ dagen geen antwoord. Nog open — je kunt het intrekken of wachten.",
+        "accepted": "De werknemer heeft geaccepteerd. Volgende stap: stuur een bericht en plan het werk samen.",
+        "declined": "De werknemer heeft geweigerd, dus dit voorstel is gesloten. Je kunt een andere werknemer een voorstel doen.",
+        "withdrawn": "Je hebt dit voorstel ingetrokken, dus het is gesloten. Stuur zo nodig een nieuw voorstel.",
+        "expired": "Dit voorstel is vervallen, dus het is gesloten."
+      }
+    },
     "actions": {
       "accept": "Accepteren",
       "decline": "Weigeren",
@@ -6567,7 +6603,9 @@
       "error": "Er is iets misgegaan.",
       "message": "Bericht sturen",
       "withdraw": "Voorstel intrekken",
-      "findAnother": "Andere werknemer zoeken"
+      "findAnother": "Andere werknemer zoeken",
+      "proposeAgain": "Opnieuw voorstellen met nieuwe datums",
+      "planning": "Bekijken in planning"
     },
     "connections": {
       "title": "Planning is verbonden met",
@@ -6580,6 +6618,51 @@
       "mapNote": "Waar werk en boekingen zijn",
       "diary": "Werkjournaal",
       "diaryNote": "Leg vast wat er echt is gebeurd"
+    },
+    "propose": {
+      "modeNote": "Dit is een boekingsvoorstel met datums — de werknemer bevestigt of weigert het. Er is niets geboekt totdat de werknemer accepteert.",
+      "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
+      "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken."
+    },
+    "reason": {
+      "optionalTitle": "Reden (optioneel)",
+      "noteLabel": "Notitie (optioneel)",
+      "none": "Geen reden",
+      "notStored": "Je antwoord is opgeslagen. De reden kon deze keer niet worden opgeslagen.",
+      "decline": {
+        "dates_unsuitable": "De datums passen niet",
+        "conditions_unsuitable": "De voorwaarden passen niet",
+        "already_booked": "Ik ben in die periode al geboekt",
+        "other": "Anders"
+      },
+      "withdraw": {
+        "position_filled": "De plek is al ingevuld",
+        "need_changed": "De behoefte is veranderd",
+        "dates_changed": "De datums zijn veranderd",
+        "other": "Anders"
+      },
+      "confirmDecline": "Afwijzing bevestigen",
+      "confirmWithdraw": "Intrekken bevestigen",
+      "cancel": "Annuleren"
+    },
+    "reschedule": {
+      "open": "Datums wijzigen",
+      "startDate": "Nieuwe startdatum",
+      "endDate": "Nieuwe einddatum (optioneel)",
+      "note": "Notitie (optioneel)",
+      "save": "Nieuwe datums opslaan",
+      "saved": "Datums bijgewerkt. De werknemer ziet de nieuwe datums.",
+      "notChanged": "De datums zijn niet gewijzigd. Probeer het later opnieuw.",
+      "cancel": "Annuleren"
+    },
+    "deadline": {
+      "open": "Reactiedatum instellen",
+      "label": "Reageren vóór",
+      "save": "Datum opslaan",
+      "saved": "Reactiedatum opgeslagen.",
+      "notSet": "De reactiedatum is niet opgeslagen. Probeer het later opnieuw.",
+      "respondBy": "Reageer vóór {date}",
+      "cancel": "Annuleren"
     }
   },
   "adminReadiness": {
@@ -6878,6 +6961,105 @@
     "applyNotAdmin": "Beheerdersrechten vereist."
   },
   "opportunities": {
+    "saved": {
+      "save": "Opslaan",
+      "saved": "Opgeslagen",
+      "unsave": "Verwijderen uit opgeslagen",
+      "privateHint": "Opslaan is privé binnen je account — het bedrijf ziet nooit wie zijn vacature heeft opgeslagen.",
+      "sectionTitle": "Opgeslagen kansen",
+      "noLongerOpen": "Eerder opgeslagen, maar niet meer open op het bord: {count}",
+      "error": "Kon je opgeslagen lijst niet bijwerken. Probeer het opnieuw."
+    },
+    "recent": {
+      "title": "Onlangs bekeken",
+      "deviceOnly": "Alleen op dit apparaat opgeslagen — deze lijst verlaat je browser nooit en wordt niet naar de server gestuurd.",
+      "clear": "Wissen"
+    },
+    "compare": {
+      "toggle": "Vergelijken",
+      "selectedLabel": "Geselecteerd",
+      "open": "Geselecteerde vergelijken",
+      "title": "Kansen vergelijken",
+      "close": "Sluiten",
+      "clear": "Selectie wissen",
+      "limitNote": "Kies 2–3 kansen om te vergelijken.",
+      "notStated": "Niet vermeld",
+      "fact": {
+        "pay": "Loon",
+        "hours": "Uren per week",
+        "start": "Start",
+        "engagement": "Contractvorm",
+        "accommodation": "Huisvesting",
+        "transport": "Vervoer",
+        "tools": "Gereedschap",
+        "languages": "Talen",
+        "location": "Locatie",
+        "company": "Bedrijf"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "Kansen filteren",
+        "profession": "Soort werk",
+        "country": "Land",
+        "start": "Start",
+        "accommodation": "Huisvesting",
+        "transport": "Vervoer",
+        "tool": "Benodigd gereedschap",
+        "activeCount": "Actieve filters: {count}",
+        "reset": "Filters wissen"
+      },
+      "sort": {
+        "label": "Sorteren",
+        "relevance": "Beste match eerst",
+        "newest": "Nieuwste eerst"
+      },
+      "emptyFiltered": {
+        "title": "Geen kansen voldoen aan deze filters",
+        "body": "Actieve filters: {filters}. Verwijder enkele filters of wis ze om meer te zien.",
+        "reset": "Filters wissen"
+      },
+      "details": {
+        "show": "Meer details",
+        "hide": "Details verbergen"
+      },
+      "tiers": {
+        "blocking": "Past niet",
+        "strengths": "Past",
+        "negotiables": "Bespreekpunten",
+        "missing": "Ontbrekende informatie"
+      },
+      "missing": {
+        "worker": "Je hebt niet opgegeven: {criterion}",
+        "demand": "Het bedrijf heeft niet opgegeven: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Vereiste vaardigheden",
+        "evidence_tiers": "Bewijs van vaardigheden",
+        "profession": "Beroep",
+        "language": "Taal",
+        "country_location": "Land en locatie",
+        "availability": "Beschikbaarheid",
+        "pay_ceiling": "Loonverwachting",
+        "accommodation": "Huisvesting",
+        "compensation": "Loon",
+        "start_date": "Startdatum",
+        "shifts_hours": "Diensten en uren",
+        "engagement_form": "Contractvorm",
+        "licence_categories": "Rijbewijs",
+        "own_vehicle": "Eigen voertuig",
+        "own_tools": "Eigen gereedschap",
+        "pay_basis": "Loonbasis (bruto/netto)",
+        "night_shifts": "Nachtdiensten",
+        "weekend_shifts": "Weekenddiensten",
+        "overtime": "Overuren"
+      },
+      "how": {
+        "title": "Hoe matching werkt",
+        "body": "Matching volgt vaste, deterministische regels over de feiten die beide kanten hebben opgegeven - vereiste vaardigheden, taal, locatie, beschikbaarheid, loon en contractvorm. Een ontbrekend feit wordt als ontbrekend getoond en nooit geraden. Geen kunstmatige intelligentie beslist en er is geen algemene persoonsscore - alleen de match binnen deze ene kans.",
+        "version": "Berekeningsversie: {version} - deterministische regels"
+      }
+    },
     "title": "Kansen voor jou",
     "intro": "Hier zie je personeelsbehoeften van werkgevers die bij je kunnen passen, en wat je aan je profiel kunt toevoegen om er klaar voor te zijn.",
     "noWorkerBody": "Maak eerst je werknemersprofiel af om kansen te zien die bij je passen.",
@@ -6996,7 +7178,50 @@
       "reviewed": "Het bedrijf heeft je interesse bekeken",
       "contacted": "Bedrijf markeerde: contact opgenomen"
     },
-    "companyVerified": "Geverifieerd bedrijf"
+    "companyVerified": "Geverifieerd bedrijf",
+    "structured": {
+      "detailTitle": "Opgegeven arbeidsvoorwaarden",
+      "notProvided": "Het bedrijf heeft nog geen gedetailleerde arbeidsvoorwaarden voor deze vermelding opgegeven — alleen de bovenstaande feiten zijn vermeld.",
+      "gapsTitle": "Niet opgegeven door het bedrijf",
+      "yes": "Ja",
+      "no": "Nee",
+      "payLabel": "Loon",
+      "amountFrom": "vanaf {amount}",
+      "amountUpTo": "tot {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} u/week",
+      "chipMinHours": "minimaal {hours} u/week",
+      "chipStartFrom": "start vanaf {from}",
+      "chipStartWindow": "start {from} – {to}",
+      "chipDeadline": "solliciteren vóór {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} jr.",
+      "km": "{km} km",
+      "minutes": "{min} min.",
+      "probationLabel": "Proeftijd",
+      "extensionPossibleLabel": "Verlenging mogelijk",
+      "scheduleNoticeLabel": "Rooster vooraf bekend",
+      "expectedResponseLabel": "Reactie binnen",
+      "firstPaymentLabel": "Eerste betaling binnen",
+      "travelMinutesLabel": "Reistijd naar de locatie",
+      "registrationPossibleLabel": "Adresregistratie mogelijk",
+      "availableFromLabel": "Beschikbaar vanaf",
+      "similarProjectLabel": "Ervaring met vergelijkbare projecten",
+      "driverSupplementLabel": "Chauffeurstoeslag",
+      "siteModeLabel": "Locaties",
+      "siteMode": {
+        "single": "Eén locatie",
+        "multiple": "Meerdere locaties",
+        "mobile": "Mobiel / wisselende locaties"
+      },
+      "workModeLabel": "Werkvorm",
+      "workMode": {
+        "onsite": "Op locatie",
+        "remote": "Op afstand",
+        "hybrid": "Hybride"
+      }
+    }
   },
   "workerIntake": {
     "title": "Werknemersintake",
@@ -8209,5 +8434,66 @@
     "prefillLoading": "Laden…",
     "prefillEmpty": "Geen eerdere aanvraag gevonden",
     "prefillDone": "Ingevuld op basis van uw laatste aanvraag — controleer en bewerk"
+  },
+  "workerPrefs": {
+    "title": "Werkvoorkeuren",
+    "hint": "Geef alleen op wat echt voor u geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven. Deze voorkeuren worden alleen gedeeld volgens uw privacytoestemmingen.",
+    "willingToRelocate": "Bereid te verhuizen voor werk",
+    "needsAccommodation": "Heeft huisvesting nodig",
+    "hasTransport": "Heeft eigen vervoer",
+    "teamAvailable": "Kan in teamverband werken",
+    "soloAvailable": "Kan zelfstandig werken",
+    "maxTripDays": "Langste werkreis (dagen)",
+    "contractType": "Gewenste contractvorm",
+    "note": "Opmerking over beschikbaarheid",
+    "triState": {
+      "notStated": "Niet opgegeven",
+      "yes": "Ja",
+      "no": "Nee"
+    },
+    "contract": {
+      "employment": "Arbeidsovereenkomst",
+      "subcontract": "Onderaanneming",
+      "temporary": "Tijdelijk werk",
+      "any": "Elke contractvorm"
+    },
+    "notePlaceholder": "Bijv. beschikbaar vanaf augustus, voorkeur voor rotaties van 2 weken…",
+    "save": "Voorkeuren opslaan",
+    "saving": "Opslaan…",
+    "saved": "Voorkeuren opgeslagen.",
+    "error": "Opslaan mislukt. Probeer het opnieuw.",
+    "needsMigration": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "v2": {
+      "title": "Extra werkvoorkeuren",
+      "hint": "Dezelfde regel geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven.",
+      "payBasis": "Basis van loonverwachting",
+      "payBasisOptions": {
+        "gross": "Bruto (voor belastingen)",
+        "net": "Netto (op de hand)"
+      },
+      "nightShifts": "Bereid om nachtdiensten te werken",
+      "weekendShifts": "Bereid om in het weekend te werken",
+      "overtime": "Bereid om overuren te werken",
+      "licenceCategories": "Rijbewijscategorieën",
+      "ownVehicle": "Heeft eigen voertuig",
+      "ownTools": "Heeft eigen gereedschap",
+      "notEnabled": "Deze extra voorkeuren zijn nog niet ingeschakeld — hier wordt voorlopig niets opgeslagen.",
+      "notSaved": "Opgeslagen, behalve de extra voorkeuren — dat onderdeel is nog niet ingeschakeld."
+    }
+  },
+  "workerLanguages": {
+    "title": "Talen",
+    "hint": "Voeg de talen toe waarin u kunt werken en uw niveau.",
+    "selfStated": "Deze talen voegt u zelf toe — ze worden door niemand gecontroleerd.",
+    "language": "Taal",
+    "level": "Niveau",
+    "levelNative": "Moedertaal",
+    "add": "Taal toevoegen",
+    "adding": "Toevoegen…",
+    "remove": "Verwijderen",
+    "empty": "Nog geen talen toegevoegd.",
+    "notEnabled": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "error": "Opslaan is mislukt. Probeer het opnieuw.",
+    "invalid": "Kies een taal en een niveau."
   }
 }

@@ -308,6 +308,15 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // goal command: append-only consent + disclosure ledgers, fail-closed
     // employer RLS swap, narrow SECURITY DEFINER RPCs (authenticated only);
     // @human-gate-approved; paired rollback; applied via Supabase MCP.
-    expect(guard).toMatch(/SPRINT_BASELINE = 118/);
+    // Then to 119 for worker demand structured_v2 exposure (20260711330000,
+    // PR #730) — owner-authorized migration-activation programme; APPLIED to
+    // production 2026-07-11 (ledger 20260711203058); paired rollback.
+    // Bumped 119 -> 120 for worker_languages_v1 (20260711250000, PR #720; ledger 20260711203623) — owner-authorized
+    // migration-activation programme; APPLIED to production 2026-07-11;
+    // paired rollback in the PR.
+    // Bumped 120 -> 121 for worker_preference_columns_v2 (20260711270000, PR #721; ledger 20260711204006) — owner-authorized
+    // migration-activation programme; APPLIED to production 2026-07-11;
+    // paired rollback in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 121/);
   });
 });

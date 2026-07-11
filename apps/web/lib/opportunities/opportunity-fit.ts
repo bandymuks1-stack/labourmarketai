@@ -75,6 +75,9 @@ export interface OpportunityNeed {
    *  'approved_direct_partner' = admin-VERIFIED company). The worker-facing
    *  "verified company" badge keys on THIS real signal — never on copy. */
   readonly routeStatus?: string | null;
+  /** Row creation timestamp from the RPC whitelist (already exposed) — feeds
+   *  the "newest first" board sort ONLY. Never rendered as fake urgency. */
+  readonly createdAt?: string | null;
 }
 
 export interface OpportunityFit {
