@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative, sep } from "node:path";
 import { preferAppHostHref } from "@/lib/domain/canonical";
 
 /**
@@ -66,5 +66,38 @@ describe("the marketing nav routes login + signup through the app-host CTA", () 
   it("AuthCtaLink SSR-defaults to the relative path and upgrades via preferAppHostHref", () => {
     expect(cta).toMatch(/useState\(relPath\)/);
     expect(cta).toMatch(/preferAppHostHref\(window\.location\.host, relPath\)/);
+  });
+});
+
+describe("marketing page bodies never link auth via the bare locale Link", () => {
+  // The landing page is under an explicit content freeze (see
+  // docs/launch/domain-production-truth-v1.md): its CTAs stay byte-identical
+  // until the real-data replacement plan runs, so it is exempted here and its
+  // same-host /auth links are a documented, owner-visible exception.
+  const FROZEN = new Set(["page.tsx"]);
+
+  const marketingDir = join(ROOT, "app", "[locale]", "(marketing)");
+
+  const collectPages = (dir: string): string[] => {
+    const out: string[] = [];
+    for (const entry of readdirSync(dir)) {
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) out.push(...collectPages(full));
+      else if (entry.endsWith(".tsx")) out.push(full);
+    }
+    return out;
+  };
+
+  it("every non-landing marketing .tsx routes /auth/* through AuthCtaLink", () => {
+    const offenders: string[] = [];
+    for (const file of collectPages(marketingDir)) {
+      const rel = relative(marketingDir, file);
+      if (FROZEN.has(rel.split(sep).join("/"))) continue;
+      const src = readFileSync(file, "utf8");
+      // A bare locale <Link> to /auth/* keeps OAuth on the marketing origin
+      // and breaks the PKCE verifier round-trip — use AuthCtaLink instead.
+      if (/<Link[^>]*href=\{?["'`]\/auth\//.test(src)) offenders.push(rel);
+    }
+    expect(offenders).toEqual([]);
   });
 });

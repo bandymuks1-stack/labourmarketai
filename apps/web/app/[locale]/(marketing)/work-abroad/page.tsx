@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { Link } from "@/lib/i18n/navigation";
+import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 
 export async function generateMetadata({
   params,
@@ -107,13 +108,14 @@ export default async function WorkAbroadPage({
 
       <div className="mt-8 flex flex-wrap gap-3">
         {/* Public visitors go to signup (a real entry), not straight into the
-            auth-walled /onboarding redirect bounce. */}
-        <Link
-          href="/auth/signup"
+            auth-walled /onboarding redirect bounce. AuthCtaLink so the CTA
+            crosses to the app host from apex (PKCE-safe OAuth origin). */}
+        <AuthCtaLink
+          relPath={`/${locale}/auth/signup`}
           className="rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
         >
           {t("ctaProfile")}
-        </Link>
+        </AuthCtaLink>
         <Link
           href="/labour-market"
           className="rounded-full border border-border-subtle px-5 py-2.5 text-sm font-semibold text-text-primary hover:bg-surface-1"
