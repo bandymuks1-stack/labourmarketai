@@ -8022,5 +8022,192 @@
       "limit_reached": "Registratielimiet bereikt — deze handmatige lijst is begrensd.",
       "error": "Opslaan mislukt. Probeer het opnieuw."
     }
+  },
+  "structuredDemand": {
+    "advancedTitle": "Uitgebreide gegevens (optioneel)",
+    "advancedHint": "Gestructureerde feiten waarop werknemers filteren en vergelijken. Alles is optioneel — wat u overslaat wordt getoond als “niet vermeld”, nooit verzonnen.",
+    "notStated": "Niet vermeld",
+    "sections": {
+      "engagement": "Arbeidsvorm en omvang",
+      "time": "Tijd en rooster",
+      "compensation": "Loon en inhoudingen",
+      "accommodation": "Huisvesting",
+      "transport": "Vervoer",
+      "requirements": "Eisen aan kandidaten",
+      "process": "Sollicitatieproces"
+    },
+    "opportunityTypeLabel": "Type aanbod",
+    "opportunityType": {
+      "employment": "Vast werk",
+      "temporary_assignment": "Tijdelijke opdracht",
+      "project_work": "Projectwerk",
+      "subcontract": "Onderaanneming",
+      "service_request": "Dienstaanvraag"
+    },
+    "targetSupplyLabel": "Wie is er nodig",
+    "targetSupply": {
+      "individual": "Eén werknemer",
+      "multiple_workers": "Meerdere werknemers",
+      "team": "Team / ploeg",
+      "company": "Bedrijf / onderaannemer"
+    },
+    "engagementFormLabel": "Arbeidsvorm",
+    "engagementForm": {
+      "direct_employment": "Direct dienstverband",
+      "agency_employment": "Via uitzendbureau",
+      "temporary_employment": "Tijdelijk dienstverband",
+      "posted_worker": "Gedetacheerde werknemer",
+      "self_employed_contractor": "Zzp'er / zelfstandige",
+      "company_subcontract": "Onderaanneming door bedrijf"
+    },
+    "contractCountryLabel": "Land van het contract",
+    "startEarliestLabel": "Vroegste start",
+    "startLatestLabel": "Uiterste start",
+    "endDateLabel": "Einddatum (indien bekend)",
+    "applicationDeadlineLabel": "Sollicitatiedeadline",
+    "hoursPerWeekLabel": "Uren per week",
+    "minGuaranteedHoursLabel": "Gegarandeerde uren per week",
+    "shiftsLabel": "Diensten",
+    "shift": {
+      "day": "Dagdienst",
+      "night": "Nachtdienst",
+      "weekend": "Weekenden"
+    },
+    "overtimeExpectedLabel": "Overwerk verwacht",
+    "compMinLabel": "Loon vanaf",
+    "compMaxLabel": "Loon tot",
+    "currencyLabel": "Valuta",
+    "payUnitLabel": "Betaald per",
+    "payUnit": {
+      "hour": "Uur",
+      "day": "Dag",
+      "week": "Week",
+      "month": "Maand",
+      "project": "Project"
+    },
+    "payBasisLabel": "Bruto of netto",
+    "payBasis": {
+      "gross": "Bruto",
+      "net": "Netto",
+      "unspecified": "Niet vermeld"
+    },
+    "paymentFrequencyLabel": "Betaalfrequentie",
+    "paymentFrequency": {
+      "weekly": "Wekelijks",
+      "biweekly": "Tweewekelijks",
+      "monthly": "Maandelijks"
+    },
+    "guaranteedBaseLabel": "Gegarandeerd basisloon",
+    "perDiemLabel": "Dagvergoeding / toeslag",
+    "deductionsLabel": "Inhoudingen",
+    "deductionsHelp": "Vermeld elke bekende inhouding (huisvesting, vervoer, verzekering). Ontbrekende inhoudingsinformatie wordt werknemers als leemte getoond.",
+    "deductionKindLabel": "Inhouding",
+    "deductionKind": {
+      "accommodation": "Huisvesting",
+      "transport": "Vervoer",
+      "insurance": "Verzekering",
+      "other": "Overig"
+    },
+    "deductionAmountLabel": "Bedrag",
+    "deductionPeriodLabel": "Periode",
+    "period": {
+      "day": "Per dag",
+      "week": "Per week",
+      "month": "Per maand",
+      "once": "Eenmalig"
+    },
+    "addDeductionLabel": "Inhouding toevoegen",
+    "noDeductionsLabel": "Geen inhoudingen — bevestigd",
+    "removeLabel": "Verwijderen",
+    "accommodationStateLabel": "Huisvesting",
+    "accommodationState": {
+      "offered": "Aangeboden",
+      "not_offered": "Niet aangeboden",
+      "not_needed": "Niet nodig"
+    },
+    "accommodationPayerLabel": "Wie betaalt",
+    "accommodationPayer": {
+      "employer": "Werkgever betaalt",
+      "shared": "Kosten gedeeld",
+      "worker": "Werknemer betaalt"
+    },
+    "roomLabel": "Kamer",
+    "room": {
+      "single": "Eenpersoonskamer",
+      "shared": "Gedeelde kamer"
+    },
+    "accommodationPriceLabel": "Prijs",
+    "accommodationPricePeriodLabel": "Prijsperiode",
+    "occupancyLabel": "Personen per kamer",
+    "distanceKmLabel": "Afstand tot de locatie (km)",
+    "depositLabel": "Borg",
+    "amenitiesLabel": "Voorzieningen",
+    "amenity": {
+      "kitchen": "Keuken",
+      "laundry": "Wasruimte",
+      "internet": "Internet"
+    },
+    "familyPossibleLabel": "Partner / gezin mogelijk",
+    "internationalTravelLabel": "Reis naar het land",
+    "dailyTransportLabel": "Dagelijks vervoer naar de locatie",
+    "betweenSitesLabel": "Reizen tussen locaties",
+    "transportLevel": {
+      "provided": "Geregeld",
+      "compensated": "Vergoed",
+      "not_provided": "Niet geregeld",
+      "unknown": "Niet vermeld"
+    },
+    "arrivalPickupLabel": "Ophalen van luchthaven / station",
+    "companyVehicleLabel": "Bedrijfsauto",
+    "fuelCardLabel": "Tankpas / vergoeding",
+    "ownVehicleRequiredLabel": "Eigen auto vereist",
+    "returnTravelLabel": "Bijdrage aan terugreis naar huis",
+    "licenceCategoriesLabel": "Rijbewijscategorieën",
+    "minExperienceYearsLabel": "Minimale ervaring (jaren)",
+    "languagesLabel": "Taaleisen",
+    "languageLabel": "Taal",
+    "languageLevelLabel": "Niveau",
+    "onePerTeamLabel": "Eén spreker per ploeg is voldoende",
+    "addLanguageLabel": "Taal toevoegen",
+    "certificatesLabel": "Certificaten en vergunningen",
+    "certificatesHelp": "Vereiste certificaten (bijv. VCA, machinevergunning) — als feiten vermeld, als eisen getoond.",
+    "addCertificateLabel": "Certificaat toevoegen",
+    "ownToolsLabel": "Eigen gereedschap",
+    "ownVehicleLabel": "Eigen auto",
+    "ownWorkwearLabel": "Eigen werkkleding",
+    "drawingsReadingLabel": "Leest tekeningen / schema's",
+    "independentWorkLabel": "Werkt zelfstandig",
+    "leadershipLabel": "Geeft leiding",
+    "applicationMethodLabel": "Hoe solliciteren",
+    "applicationMethod": {
+      "interest_signal": "Interesse tonen op het platform",
+      "conversation": "Bespreken in een gesprek"
+    },
+    "interviewStagesLabel": "Gespreksrondes",
+    "responseDeadlineDaysLabel": "Antwoord binnen (dagen)",
+    "listingKindLabel": "Type vermelding",
+    "listingKind": {
+      "active_vacancy": "Actieve vacature",
+      "talent_pool": "Talentenpool (toekomstige behoeften)"
+    },
+    "practicalTestLabel": "Praktijktest",
+    "documentVerificationLabel": "Documentcontrole",
+    "talentPoolDisclosure": "Dit is een talentenpool-vermelding: kandidaten worden verzameld voor toekomstige behoeften, niet voor een actieve bevestigde vacature. Werknemers zien dit altijd.",
+    "honesty": {
+      "title": "Ontbrekende loonfeiten — aan werknemers getoond als leemtes",
+      "missing_minimum": "Minimumloon is niet vermeld",
+      "missing_basis": "Bruto/netto is niet vermeld",
+      "missing_guaranteed_hours": "Gegarandeerde uren zijn niet vermeld",
+      "missing_deductions": "Inhoudingen zijn niet gespecificeerd (of niet bevestigd als afwezig)",
+      "max_without_min": "Alleen een “tot”-bedrag is vermeld — geen minimum"
+    },
+    "preview": {
+      "title": "Hoe werknemers dit vandaag zien",
+      "v2NotVisibleNote": "Uitgebreide gegevens zijn bij uw aanvraag opgeslagen. Werknemers zien ze na de volgende platform-update — tot dan zijn alleen de bovenstaande feiten zichtbaar."
+    },
+    "prefillButton": "Invullen op basis van mijn laatste aanvraag",
+    "prefillLoading": "Laden…",
+    "prefillEmpty": "Geen eerdere aanvraag gevonden",
+    "prefillDone": "Ingevuld op basis van uw laatste aanvraag — controleer en bewerk"
   }
 }
