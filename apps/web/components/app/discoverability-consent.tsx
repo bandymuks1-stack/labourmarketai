@@ -32,6 +32,7 @@ export interface ConsentLegalTexts {
   invisibleData: string;
   freedom: string;
   withdrawal: string;
+  controller: string;
 }
 
 export interface PreviewField {
@@ -104,6 +105,10 @@ export function DiscoverabilityConsent({
       <p>{legal.invisibleData}</p>
       <p className="text-text-secondary">{legal.freedom}</p>
       <p className="text-text-secondary">{legal.withdrawal}</p>
+      {/* GDPR Art. 13(1)(a): controller identity shown WITH the consent text. */}
+      <p className="text-text-secondary" data-testid="consent-controller">
+        {legal.controller}
+      </p>
     </div>
   );
 

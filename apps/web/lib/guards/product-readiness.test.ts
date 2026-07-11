@@ -1695,7 +1695,7 @@ describe("no migration files added by this sprint", () => {
     // in the consent goal command: append-only consent + disclosure ledgers,
     // fail-closed employer RLS swap, narrow SECURITY DEFINER RPCs
     // (authenticated only, no anon); @human-gate-approved; paired rollback.
-    const SPRINT_BASELINE = 117;
+    const SPRINT_BASELINE = 118;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

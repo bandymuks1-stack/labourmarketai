@@ -157,7 +157,10 @@ describe("7 · pack i18n keys exist and are non-empty in every active locale", (
       expect(legal.disclaimer.length).toBeGreaterThan(0);
       expect(legal.requestContact.length).toBeGreaterThan(0);
       expect(Array.isArray(legal.privacy.sections) && legal.privacy.sections.length >= 5).toBe(true);
-      expect(Array.isArray(legal.privacy.pendingItems) && legal.privacy.pendingItems.length >= 3).toBe(true);
+      // Floor lowered 3 -> 2 (2026-07-11 legal-entity truth): the data-controller
+      // identity item was RESOLVED (UAB „Nonstop Group“ named in the policy),
+      // so it honestly left the pending list. Retention + binding version remain.
+      expect(Array.isArray(legal.privacy.pendingItems) && legal.privacy.pendingItems.length >= 2).toBe(true);
       expect(Array.isArray(legal.dataProtection.sections) && legal.dataProtection.sections.length >= 5).toBe(true);
       expect(Array.isArray(legal.dataAccess.sections) && legal.dataAccess.sections.length >= 4).toBe(true);
       expect(Array.isArray(legal.cookies.items) && legal.cookies.items.length >= 3).toBe(true);
