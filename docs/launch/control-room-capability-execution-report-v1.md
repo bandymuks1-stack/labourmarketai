@@ -13,8 +13,8 @@ owner/provider action named in the gate register) · `NOT_STARTED`.
 | A | Gap map + architecture | DONE | #704 / `36a18ff` | — (docs) | source audit | — | none | n/a | none | — |
 | B | Control room foundation | DONE | #705 / `3e568d2` | `/dashboard` (module registry + status strip + role grid; nav/command wired) | feature-availability registry, spine counts (request-cached single read), roles | RLS as today; badges spine-only | none | CI green; deployed via Vercel on merge | none | — |
 | C | Unified activity centre | DONE | #706 / `2b0742a` | `/dashboard/activity` + status-strip/bell "view all" links | notification spine (6 signals, one request-cached read) | RLS + existing seen RPCs; links-only, no fake mark-read | none (persistent feed + demand signals stay migration-gated) | CI green; deployed on merge | events-table apply (optional, for feed/demand events) | — |
-| D | Work/task management | GATED (UI merged path; table unapplied) | D1 this PR; D2 migration PR follows | `/dashboard/tasks` (my-tasks, board, create/edit/status); ops-page bridge | `work_tasks` table via 3 SECURITY DEFINER RPCs (unapplied); honest "preparing" state until applied; spine signal `open-task-attention` (0 pre-apply) | RLS SELECT creator/assignee/admin/`can_manage_project`; writes RPC-only (guard-pinned) | D2: RED, human-gated, rollback sibling | CI + guard suite | owner applies D2 via MCP + ledger entry | author D2 draft PR; then PR E |
-| E | Planning/calendar | NOT_STARTED | — | `/dashboard/planning` (planned) | bookings, projects, assignments | caller-scoped reads | none | — | none | agenda aggregation |
+| D | Work/task management | GATED (UI merged; table unapplied) | D1 #707 / `832680e`; D2 draft #708 (needs-human-gate) | `/dashboard/tasks` (my-tasks, board, create/edit/status); ops-page bridge | `work_tasks` via 3 SECURITY DEFINER RPCs (unapplied); honest "preparing" state; spine signal `open-task-attention` (0 pre-apply) | RLS SELECT creator/assignee/admin/`can_manage_project`; writes RPC-only (guard-pinned) | D2 RED, human-gated, rollback sibling, classifier green (4 patterns acknowledged) | D1 CI green, merged | owner applies #708 via MCP + ledger entry | — (gate visible on #708) |
+| E | Planning/calendar | IN_PROGRESS | this PR | `/dashboard/planning` (agenda + 7-day strip, filters, conflicts) | bookings (both directions), company project bands, due-dated tasks (degrading); worker-side assigned-project read skipped honestly (no RLS-scoped helper exists) | caller-scoped reads only; read-only; no admin client (guard-pinned) | none | CI + guard suite | none | merge, start PR F |
 | F | CRM/demand pipeline | NOT_STARTED | — | admin pipeline queue | lead-intake-model + public intakes | service-role + superadmin (unchanged) | none (contacts/ledger gated) | — | contacts/ledger apply (optional) | extend lead-intake-model |
 | G | Project ops + resources | NOT_STARTED | — | `/dashboard/projects/[id]/operations` | getProjectOperations + journal + gallery | RLS as today | issues/milestones gated | — | drafts apply | compose surface |
 | H | Document centre | NOT_STARTED | — | `/dashboard/documents` | worker_documents + photos + CV/evidence + handover | RLS + consent aggregates | bucket gated | — | worker-docs bucket | consolidation hub |
@@ -39,7 +39,15 @@ Results recorded here per PR as they run.
 | A (docs-only) | migration-safety + quality (CI) | PASS — merged #704 |
 | B (control room) | typecheck, lint, vitest (530 files / 8353 tests), placeholders:check, check:i18n-debt, check:primary-route-smoke, check:public-seo-indexing, build | ALL PASS locally; CI green; merged #705 |
 | C (activity centre) | same suite — vitest 531 files / 8379 tests, primary-route-smoke 37 routes | ALL PASS; CI green; merged #706 |
-| D1 (tasks repo-safe layer) | same suite — vitest 532 files / 8412 tests, primary-route-smoke 38 routes | ALL PASS locally; CI on PR |
+| D1 (tasks repo-safe layer) | same suite — vitest 532 files / 8412 tests, primary-route-smoke 38 routes | ALL PASS; CI green; merged #707 |
+| D2 (work_tasks migration) | migration-safety self-test 26/26; classifier on diff GREEN (4 RED patterns human-gate-acknowledged); work-tasks guard 30/30 | draft #708, needs-human-gate — awaiting owner apply |
+| E (planning) | same suite — vitest 533 files / 8451 tests, primary-route-smoke 39 routes | ALL PASS locally; CI on PR |
+
+PR E notes: pure agenda model + conflict detection mirroring the booking accept guard's
+inclusive daterange && semantics (accepted incoming bookings + own assignments only —
+overlaps that prove nothing are excluded); per-source honest degradation notes; planning
+module added to registry (bookings module re-pointed to its own label keys); no calendar
+dependency; worker-side assigned-project bands deferred until an RLS-scoped read exists.
 
 PR D contract (the D2 migration must match exactly): table `public.work_tasks`
 (id, project_id→projects, source_type/source_id pair check 'project|booking|demand|company',

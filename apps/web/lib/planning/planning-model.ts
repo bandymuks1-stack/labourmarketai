@@ -1,0 +1,345 @@
+/**
+ * Pure planning model (control room PR E, capability gap map §4) — shared by
+ * the server composition (lib/planning/planning.ts), the planning page and
+ * the guard test. No server-only imports, no IO, no date library.
+ *
+ * ONE planning surface combines, WITHOUT duplicating source records, the
+ * three dated sources that really exist today:
+ *
+ *   - bookings        (booking_requests.start_date / expected_end_date)
+ *   - projects        (projects.start_date / end_date — manager date bands)
+ *   - tasks           (work_tasks.due_at — the PR D layer; degrades
+ *                      honestly while the owner-gated migration is unapplied)
+ *
+ * Sources that do NOT exist yet (availability windows, milestones, CRM
+ * follow-up dates, external calendars) are deliberately ABSENT — nothing
+ * here fakes a schedule and nothing claims a calendar sync.
+ *
+ * Conflict semantics mirror the ONLY real conflict logic in the product —
+ * the booking accept guard (respond_booking_request, errcode 23P01):
+ * INCLUSIVE calendar-day ranges (`daterange(start, coalesce(end, start),
+ * '[]')`) compared with `&&` — touching edges (one ends the day the other
+ * starts) IS an overlap. Only the caller's own commitments are compared:
+ * accepted INCOMING bookings (the caller is the worker on the row) and the
+ * caller's own project assignments. Proposed/declined bookings, the
+ * company's outgoing proposals (different workers — no shared axis in the
+ * row) and managed project date bands are never flagged.
+ */
+
+export const PLANNING_SOURCE_TYPES = ["booking", "project", "task"] as const;
+export type PlanningSourceType = (typeof PLANNING_SOURCE_TYPES)[number];
+
+/** Compact agenda window: today + the next N-1 calendar days (UTC). */
+export const PLANNING_WINDOW_DAYS = 14;
+/** The week strip covers today + 6 days — plain date math, no library. */
+export const PLANNING_WEEK_STRIP_DAYS = 7;
+/** Bounded reads everywhere — planning never streams unbounded rows. */
+export const PLANNING_PROJECT_READ_LIMIT = 100;
+
+/** Whose plan-line an item is — display context, never a security signal. */
+export type PlanningRoleContext =
+  | "incoming" /* booking proposed TO the caller (caller = worker) */
+  | "outgoing" /* booking proposed BY the caller's company */
+  | "managed" /* project date band of a project the caller manages */
+  | "assigned" /* project the caller is assigned to as a worker */
+  | "mine"; /* the caller's own task */
+
+export interface PlanningItem {
+  /** Stable list id: `${sourceType}:${sourceId}` (React keys, testids). */
+  readonly id: string;
+  readonly sourceType: PlanningSourceType;
+  readonly sourceId: string;
+  /** Real title-ish data from the source record (booking role text, project
+   *  title, task title). Null → the page renders an i18n fallback noun,
+   *  never invented copy. */
+  readonly label: string | null;
+  /** Secondary real detail (booking country, project city). */
+  readonly detail: string | null;
+  /** Calendar day "YYYY-MM-DD" (UTC). Null → the "no date yet" section. */
+  readonly startDate: string | null;
+  readonly endDate: string | null;
+  /** Source-native status value (booking/project/task lifecycle). */
+  readonly status: string;
+  /** Full i18n path for the status label — reuses each source's own copy. */
+  readonly statusKey: string;
+  /** Route of the REAL source object — never a planning-local detail page. */
+  readonly href: string;
+  readonly roleContext: PlanningRoleContext;
+}
+
+/* ------------------------------------------------------------------ */
+/* Source routes — every item links back to its real object            */
+/* ------------------------------------------------------------------ */
+
+/** The real route the source record lives on. Bookings and tasks are
+ *  list-anchored surfaces; a project has its own real detail route. */
+export function hrefForSource(
+  sourceType: PlanningSourceType,
+  sourceId: string,
+): string {
+  switch (sourceType) {
+    case "booking":
+      return "/dashboard/bookings";
+    case "project":
+      return `/dashboard/projects/${sourceId}`;
+    case "task":
+      return "/dashboard/tasks";
+  }
+}
+
+/** One naming source per lifecycle — booking and task statuses reuse the
+ *  copy their own surfaces already ship; project statuses get the small
+ *  planning-local set (draft/live/paused). */
+export function statusKeyForSource(
+  sourceType: PlanningSourceType,
+  status: string,
+): string {
+  switch (sourceType) {
+    case "booking":
+      return `bookings.status.${status}`;
+    case "project":
+      return `planning.projectStatus.${status}`;
+    case "task":
+      return `tasks.status.${status}`;
+  }
+}
+
+export function isPlanningSourceType(
+  value: string | undefined,
+): value is PlanningSourceType {
+  return (PLANNING_SOURCE_TYPES as readonly string[]).includes(value ?? "");
+}
+
+/* ------------------------------------------------------------------ */
+/* Pure date helpers (UTC calendar days, string math on "YYYY-MM-DD")  */
+/* ------------------------------------------------------------------ */
+
+const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
+
+/** UTC calendar day of an ISO date/timestamp — "YYYY-MM-DD", null when
+ *  unparseable (an unparseable date degrades to "no date yet", never NaN). */
+export function toIsoDay(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  if (DAY_RX.test(iso)) return iso;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+/** dayIso + n calendar days (UTC-safe plain date math). */
+export function addDays(dayIso: string, n: number): string {
+  const d = new Date(`${dayIso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** The effective (inclusive) end day — a missing end collapses to the start
+ *  day, exactly like the accept guard's `coalesce(end, start)`. */
+export function effectiveEndDay(item: Pick<PlanningItem, "startDate" | "endDate">): string | null {
+  if (!item.startDate) return null;
+  return item.endDate && item.endDate >= item.startDate
+    ? item.endDate
+    : item.startDate;
+}
+
+/**
+ * Inclusive day-range overlap — the `daterange(a, coalesce(aEnd, a), '[]')
+ * && daterange(b, coalesce(bEnd, b), '[]')` semantics of the booking accept
+ * guard. Touching edges (aEnd === bStart) IS an overlap. Lexicographic
+ * comparison is correct for "YYYY-MM-DD".
+ */
+export function rangesOverlapInclusive(
+  aStart: string,
+  aEnd: string,
+  bStart: string,
+  bEnd: string,
+): boolean {
+  return aStart <= bEnd && bStart <= aEnd;
+}
+
+/** True when the item covers the given day (inclusive band). */
+export function itemCoversDay(item: PlanningItem, dayIso: string): boolean {
+  const end = effectiveEndDay(item);
+  if (!item.startDate || !end) return false;
+  return item.startDate <= dayIso && dayIso <= end;
+}
+
+/* ------------------------------------------------------------------ */
+/* Conflicts — only REAL overlapping personal commitments              */
+/* ------------------------------------------------------------------ */
+
+export interface PlanningConflict {
+  readonly aId: string;
+  readonly bId: string;
+  /** First shared day of the two inclusive ranges (display hint). */
+  readonly overlapStart: string;
+}
+
+/**
+ * A record participates in conflict detection only when it is a dated
+ * personal commitment of the caller:
+ *  - an ACCEPTED booking where the caller is the worker (incoming) — the
+ *    exact rows the accept guard compares server-side, or
+ *  - a project the caller is personally assigned to.
+ * Proposals, declined/withdrawn/expired bookings, the company's outgoing
+ * rows (different workers) and managed project bands never conflict here —
+ * flagging them would invent a problem no real record proves.
+ */
+export function isConflictEligible(item: PlanningItem): boolean {
+  if (!item.startDate) return false;
+  if (item.sourceType === "booking") {
+    return item.status === "accepted" && item.roleContext === "incoming";
+  }
+  if (item.sourceType === "project") {
+    return item.roleContext === "assigned";
+  }
+  return false;
+}
+
+/** Pairwise overlap among the eligible items — deterministic order, each
+ *  pair reported once. Pure; bounded by the already-bounded source reads. */
+export function detectConflicts(
+  items: readonly PlanningItem[],
+): readonly PlanningConflict[] {
+  const eligible = items.filter(isConflictEligible);
+  const conflicts: PlanningConflict[] = [];
+  for (let i = 0; i < eligible.length; i++) {
+    for (let j = i + 1; j < eligible.length; j++) {
+      const a = eligible[i];
+      const b = eligible[j];
+      const aEnd = effectiveEndDay(a);
+      const bEnd = effectiveEndDay(b);
+      if (!a.startDate || !b.startDate || !aEnd || !bEnd) continue;
+      if (rangesOverlapInclusive(a.startDate, aEnd, b.startDate, bEnd)) {
+        conflicts.push({
+          aId: a.id,
+          bId: b.id,
+          overlapStart: a.startDate >= b.startDate ? a.startDate : b.startDate,
+        });
+      }
+    }
+  }
+  return conflicts;
+}
+
+export function conflictItemIds(
+  conflicts: readonly PlanningConflict[],
+): ReadonlySet<string> {
+  const ids = new Set<string>();
+  for (const c of conflicts) {
+    ids.add(c.aId);
+    ids.add(c.bId);
+  }
+  return ids;
+}
+
+/* ------------------------------------------------------------------ */
+/* Agenda — compact, mobile-safe day grouping (no calendar library)    */
+/* ------------------------------------------------------------------ */
+
+export interface AgendaDayGroup {
+  /** "YYYY-MM-DD" (UTC). */
+  readonly day: string;
+  readonly isToday: boolean;
+  readonly items: readonly PlanningItem[];
+}
+
+export interface WeekStripDay {
+  readonly day: string;
+  readonly isToday: boolean;
+  /** Real count of items whose inclusive band covers this day. */
+  readonly count: number;
+  /** A conflicting item covers this day. */
+  readonly hasConflict: boolean;
+}
+
+export interface PlanningAgenda {
+  /** Non-empty day groups inside the window, ascending. An item that is
+   *  already running (started before today, not finished) anchors to TODAY;
+   *  a future item anchors to its start day. */
+  readonly days: readonly AgendaDayGroup[];
+  /** Dated items starting after the window — honest "later", not hidden. */
+  readonly later: readonly PlanningItem[];
+  /** Items with no date recorded (a proposal without dates, a task without
+   *  a due date is excluded upstream — bookings mainly). */
+  readonly undated: readonly PlanningItem[];
+  /** Items whose band ended before today — dropped from the forward-looking
+   *  agenda, reported as an honest count (history lives on each source). */
+  readonly pastCount: number;
+  readonly conflicts: readonly PlanningConflict[];
+  readonly conflictIds: ReadonlySet<string>;
+  readonly weekStrip: readonly WeekStripDay[];
+}
+
+function sortItems(a: PlanningItem, b: PlanningItem): number {
+  const aKey = `${a.startDate ?? "9999-99-99"}|${a.sourceType}|${a.sourceId}`;
+  const bKey = `${b.startDate ?? "9999-99-99"}|${b.sourceType}|${b.sourceId}`;
+  return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
+}
+
+/**
+ * Build the compact agenda for a reference date (pure, deterministic).
+ * Grouping rule: ongoing → today; future within the window → its start day;
+ * beyond the window → "later"; no start date → "undated"; already finished →
+ * counted, not listed (planning looks forward; history stays on the source).
+ */
+export function buildAgenda(
+  items: readonly PlanningItem[],
+  referenceDate: Date,
+  windowDays: number = PLANNING_WINDOW_DAYS,
+): PlanningAgenda {
+  const today = referenceDate.toISOString().slice(0, 10);
+  const windowEnd = addDays(today, Math.max(windowDays, 1) - 1);
+
+  const byDay = new Map<string, PlanningItem[]>();
+  const later: PlanningItem[] = [];
+  const undated: PlanningItem[] = [];
+  const active: PlanningItem[] = [];
+  let pastCount = 0;
+
+  for (const item of [...items].sort(sortItems)) {
+    if (!item.startDate) {
+      undated.push(item);
+      continue;
+    }
+    const end = effectiveEndDay(item);
+    if (end && end < today) {
+      pastCount++;
+      continue;
+    }
+    active.push(item);
+    const anchor = item.startDate > today ? item.startDate : today;
+    if (anchor > windowEnd) {
+      later.push(item);
+      continue;
+    }
+    const group = byDay.get(anchor);
+    if (group) group.push(item);
+    else byDay.set(anchor, [item]);
+  }
+
+  const days: AgendaDayGroup[] = [...byDay.keys()].sort().map((day) => ({
+    day,
+    isToday: day === today,
+    items: byDay.get(day) ?? [],
+  }));
+
+  // Conflicts run over every non-past dated item (`active` includes the
+  // "later" ones) so an overlap is never hidden by the window size.
+  const conflicts = detectConflicts(active);
+  const conflictIds = conflictItemIds(conflicts);
+
+  const weekStrip: WeekStripDay[] = [];
+  for (let i = 0; i < PLANNING_WEEK_STRIP_DAYS; i++) {
+    const day = addDays(today, i);
+    const covering = active.filter((it) => itemCoversDay(it, day));
+    weekStrip.push({
+      day,
+      isToday: i === 0,
+      count: covering.length,
+      hasConflict: covering.some((it) => conflictIds.has(it.id)),
+    });
+  }
+
+  return { days, later, undated, pastCount, conflicts, conflictIds, weekStrip };
+}

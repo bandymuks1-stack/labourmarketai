@@ -574,22 +574,47 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // Control room PR E: bookings speaks its own name; the generic
+    // planning/calendar terms moved to the unified planning entry below.
     id: "bookings",
     route: getModuleRoute("bookings"),
     audience: "public",
     labels: {
-      en: "Bookings & planning",
-      lt: "Rezervacijos ir planavimas",
-      ru: "Бронирования и планирование",
-      nl: "Boekingen en planning",
-      de: "Buchungen und Planung",
+      en: "Bookings",
+      lt: "Rezervacijos",
+      ru: "Бронирования",
+      nl: "Boekingen",
+      de: "Buchungen",
     },
     synonyms: {
-      en: ["bookings", "planning", "calendar"],
-      lt: ["rezervacijos", "planavimas", "kalendorius"],
-      ru: ["бронирования", "планирование", "календарь"],
-      nl: ["boekingen", "planning", "agenda", "kalender"],
-      de: ["buchungen", "planung", "kalender", "terminplanung"],
+      en: ["bookings", "booking", "proposals", "engagements"],
+      lt: ["rezervacijos", "rezervacija", "pasiūlymai dirbti"],
+      ru: ["бронирования", "бронирование", "предложения работы"],
+      nl: ["boekingen", "boeking", "voorstellen"],
+      de: ["buchungen", "buchung", "arbeitsangebote"],
+    },
+  },
+  {
+    // Unified planning agenda (control room PR E) — bookings + managed
+    // project date bands + task due dates in one compact agenda. Route
+    // resolves through the module registry so it can never drift from the
+    // grid card.
+    id: "planning",
+    route: getModuleRoute("planning"),
+    audience: "public",
+    labels: {
+      en: "Planning (agenda)",
+      lt: "Planavimas (dienotvarkė)",
+      ru: "Планирование (расписание)",
+      nl: "Planning (agenda)",
+      de: "Planung (Agenda)",
+    },
+    synonyms: {
+      en: ["planning", "calendar", "agenda", "schedule", "plan"],
+      lt: ["planavimas", "kalendorius", "dienotvarkė", "planas", "grafikas"],
+      ru: ["планирование", "календарь", "расписание", "план", "график"],
+      nl: ["planning", "agenda", "kalender", "schema", "plan"],
+      de: ["planung", "kalender", "terminplanung", "zeitplan", "plan"],
     },
   },
   {

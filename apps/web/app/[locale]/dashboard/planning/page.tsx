@@ -1,0 +1,397 @@
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { Link } from "@/lib/i18n/navigation";
+import {
+  buildAgenda,
+  isPlanningSourceType,
+  PLANNING_SOURCE_TYPES,
+  type PlanningItem,
+  type PlanningSourceType,
+} from "@/lib/planning/planning-model";
+import {
+  getPlanning,
+  type PlanningSources,
+} from "@/lib/planning/planning";
+
+/**
+ * Unified planning (control room PR E, capability gap map §4) — ONE
+ * calendar-style agenda over the records that really exist: bookings (the
+ * dated backbone), the caller's managed project date bands and open task
+ * due dates. No source record is duplicated — every row links back to its
+ * real object (bookings page, project page, tasks page).
+ *
+ * Honest by construction (guard: lib/guards/planning.test.ts):
+ *  - composes ONLY the existing RLS-scoped reads (lib/planning/planning.ts);
+ *    each source degrades independently into a calm per-source note — a
+ *    missing tasks migration or a failed project read never crashes the
+ *    plan and never fakes rows;
+ *  - sources that do not exist yet (availability windows, milestones, CRM
+ *    follow-ups, external calendars) are ABSENT, not simulated;
+ *  - conflict flags mirror the booking accept guard's inclusive date-range
+ *    overlap (daterange '[]' &&) and mark only REAL overlapping personal
+ *    commitments;
+ *  - the agenda + week strip are plain date math (server component, plain
+ *    searchParams filter links — no calendar library, no client state).
+ */
+
+export const dynamic = "force-dynamic";
+
+const CHIP_BASE =
+  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
+const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
+
+const SOURCE_TONE: Record<PlanningSourceType, string> = {
+  booking: "border-brand-blue/40 text-brand-blue",
+  project: "border-brand-orange/40 text-brand-orange",
+  task: "border-state-success/40 text-state-success",
+};
+
+/** Filter-chip href — omits the default so the canonical URL stays clean. */
+function planningHref(source: PlanningSourceType | null): string {
+  return source
+    ? `/dashboard/planning?source=${source}`
+    : "/dashboard/planning";
+}
+
+export default async function PlanningPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ source?: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const { source: rawSource } = await searchParams;
+  const sourceFilter = isPlanningSourceType(rawSource) ? rawSource : null;
+
+  const t = await getTranslations("planning");
+  // Un-namespaced translator for the source-native status keys the items
+  // carry (bookings.status.*, tasks.status.*, planning.projectStatus.*).
+  const tAll = await getTranslations();
+
+  const result = await getPlanning();
+
+  const header = (
+    <header className="flex flex-col gap-1">
+      <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        {t("eyebrow")}
+      </p>
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+        {t("title")}
+      </h1>
+      <p className="text-sm text-text-secondary">{t("intro")}</p>
+    </header>
+  );
+
+  if (result.status === "not-authed") {
+    return (
+      <div className="flex flex-col gap-6" data-testid="planning-page">
+        {header}
+        <p className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted">
+          {t("notAuthed")}
+        </p>
+      </div>
+    );
+  }
+
+  const visibleItems = sourceFilter
+    ? result.items.filter((i) => i.sourceType === sourceFilter)
+    : result.items;
+  const agenda = buildAgenda(visibleItems, new Date());
+
+  const dayFmt = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  const shortFmt = new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+  });
+  const stripFmt = new Intl.DateTimeFormat(locale, { weekday: "narrow" });
+  const fmtDay = (dayIso: string) => dayFmt.format(new Date(`${dayIso}T00:00:00Z`));
+  const fmtShort = (dayIso: string) =>
+    shortFmt.format(new Date(`${dayIso}T00:00:00Z`));
+
+  function ItemRow({ item }: { item: PlanningItem }) {
+    const conflict = agenda.conflictIds.has(item.id);
+    const contextKey =
+      item.sourceType === "booking" ? `context.${item.roleContext}` : null;
+    return (
+      <li>
+        {/* The whole row links the REAL source object — planning duplicates
+            no record and owns no detail page. */}
+        <Link
+          href={item.href as "/dashboard"}
+          data-testid={`planning-item-${item.id}`}
+          className="flex flex-col gap-1 rounded-md border border-ink-500 bg-ink-800/30 px-4 py-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        >
+          <span className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${SOURCE_TONE[item.sourceType]}`}
+            >
+              {t(`source.${item.sourceType}`)}
+            </span>
+            <span className="min-w-0 break-words text-sm font-semibold text-text-primary">
+              {item.label ?? t(`fallback.${item.sourceType}`)}
+            </span>
+            {conflict ? (
+              <span
+                className="inline-flex items-center rounded-full border border-state-danger/50 bg-state-danger/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-danger"
+                data-testid={`planning-conflict-${item.id}`}
+              >
+                {t("conflict.flag")}
+              </span>
+            ) : null}
+          </span>
+          <span className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {item.startDate ? (
+              <span>
+                {fmtShort(item.startDate)}
+                {item.endDate && item.endDate !== item.startDate
+                  ? ` – ${fmtShort(item.endDate)}`
+                  : ""}
+              </span>
+            ) : (
+              <span>{t("undated.title")}</span>
+            )}
+            <span>{tAll(item.statusKey)}</span>
+            {item.detail ? <span>{item.detail}</span> : null}
+            {contextKey ? <span>{t(contextKey)}</span> : null}
+          </span>
+        </Link>
+      </li>
+    );
+  }
+
+  function ItemList({
+    items,
+    testid,
+  }: {
+    items: readonly PlanningItem[];
+    testid: string;
+  }) {
+    return (
+      <ul className="flex flex-col gap-2" data-testid={testid}>
+        {items.map((item) => (
+          <ItemRow key={item.id} item={item} />
+        ))}
+      </ul>
+    );
+  }
+
+  const hasAnything =
+    agenda.days.length > 0 ||
+    agenda.later.length > 0 ||
+    agenda.undated.length > 0;
+
+  return (
+    <div className="flex flex-col gap-6" data-testid="planning-page">
+      {header}
+
+      {/* Honest scope, stated up front: only real records, no external
+          calendar, nothing invented. */}
+      <p
+        className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs text-text-muted"
+        data-testid="planning-honest-note"
+      >
+        {t("honestNote")}
+      </p>
+
+      <SourceNotes sources={result.sources} t={t} />
+
+      {/* Source filter — plain searchParams links (the activity-centre
+          pattern; keyboard accessible, no client state). */}
+      <nav
+        className="flex flex-wrap items-center gap-2"
+        aria-label={t("filters.label")}
+        data-testid="planning-filters"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("filters.label")}
+        </span>
+        <Link
+          href={planningHref(null) as "/dashboard"}
+          aria-current={sourceFilter === null ? "true" : undefined}
+          data-testid="planning-filter-all"
+          className={`${CHIP_BASE} ${sourceFilter === null ? CHIP_ACTIVE : CHIP_IDLE}`}
+        >
+          {t("filters.all")}
+        </Link>
+        {PLANNING_SOURCE_TYPES.map((s) => (
+          <Link
+            key={s}
+            href={planningHref(s) as "/dashboard"}
+            aria-current={sourceFilter === s ? "true" : undefined}
+            data-testid={`planning-filter-${s}`}
+            className={`${CHIP_BASE} ${sourceFilter === s ? CHIP_ACTIVE : CHIP_IDLE}`}
+          >
+            {t(`source.${s}`)}
+          </Link>
+        ))}
+      </nav>
+
+      {/* Week strip — seven cells of plain date math over the same real
+          items (informational; the agenda below is the primary view). */}
+      <section
+        className="flex flex-col gap-2"
+        aria-label={t("week.label")}
+        data-testid="planning-week-strip"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("week.label")}
+        </span>
+        <div className="grid grid-cols-7 gap-1">
+          {agenda.weekStrip.map((d) => (
+            <div
+              key={d.day}
+              data-testid={`planning-strip-${d.day}`}
+              className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md border px-1 py-2 ${
+                d.isToday
+                  ? "border-brand-blue/60 bg-brand-blue/5"
+                  : "border-ink-600 bg-ink-800/20"
+              }`}
+            >
+              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                {stripFmt.format(new Date(`${d.day}T00:00:00Z`))}
+              </span>
+              <span className="text-sm font-semibold tabular-nums text-text-primary">
+                {d.day.slice(8, 10)}
+              </span>
+              {d.count > 0 ? (
+                <span
+                  className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none tabular-nums ${
+                    d.hasConflict
+                      ? "bg-state-danger/15 text-state-danger"
+                      : "bg-brand-blue/15 text-brand-blue"
+                  }`}
+                >
+                  {d.count}
+                </span>
+              ) : (
+                <span className="h-5 text-[10px] text-text-muted">·</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {!hasAnything ? (
+        /* Calm empty state — an empty plan is a state, not an error. */
+        <p
+          className="rounded-md border border-dashed border-ink-500 p-5 text-sm text-text-secondary"
+          data-testid="planning-empty"
+        >
+          {t("empty")}
+        </p>
+      ) : (
+        <section className="flex flex-col gap-4" data-testid="planning-agenda">
+          {agenda.days.map((group) => (
+            <div key={group.day} className="flex flex-col gap-2">
+              <h2 className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                {fmtDay(group.day)}
+                {group.isToday ? (
+                  <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[10px] text-brand-blue">
+                    {t("today")}
+                  </span>
+                ) : null}
+              </h2>
+              <ItemList
+                items={group.items}
+                testid={`planning-day-${group.day}`}
+              />
+            </div>
+          ))}
+
+          {agenda.later.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                {t("later.title")}
+              </h2>
+              <ItemList items={agenda.later} testid="planning-later" />
+            </div>
+          ) : null}
+
+          {agenda.undated.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                {t("undated.title")}
+              </h2>
+              <p className="text-xs text-text-muted">{t("undated.hint")}</p>
+              <ItemList items={agenda.undated} testid="planning-undated" />
+            </div>
+          ) : null}
+        </section>
+      )}
+
+      {agenda.pastCount > 0 ? (
+        /* Honest history note: finished items are not hidden silently. */
+        <p
+          className="text-xs text-text-muted"
+          data-testid="planning-past-note"
+        >
+          {t("pastHidden", { count: agenda.pastCount })}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Per-source honest degradation notes — a source that cannot contribute
+ *  says so calmly; it never crashes the plan and never fakes rows. */
+function SourceNotes({
+  sources,
+  t,
+}: {
+  sources: PlanningSources;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  const notes: { key: string; testid: string }[] = [];
+  if (sources.booking.status === "unavailable") {
+    notes.push({
+      key: "sourceNotes.bookingUnavailable",
+      testid: "planning-source-note-booking",
+    });
+  }
+  if (sources.task.status === "unavailable") {
+    notes.push({
+      key: "sourceNotes.taskUnavailable",
+      testid: "planning-source-note-task",
+    });
+  }
+  if (sources.task.status === "error") {
+    notes.push({
+      key: "sourceNotes.taskError",
+      testid: "planning-source-note-task-error",
+    });
+  }
+  if (sources.project.status === "managers-only") {
+    notes.push({
+      key: "sourceNotes.projectManagersOnly",
+      testid: "planning-source-note-project",
+    });
+  }
+  if (sources.project.status === "error") {
+    notes.push({
+      key: "sourceNotes.projectError",
+      testid: "planning-source-note-project-error",
+    });
+  }
+  if (notes.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-2" data-testid="planning-source-notes">
+      {notes.map((n) => (
+        <p
+          key={n.key}
+          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs text-text-secondary"
+          data-testid={n.testid}
+        >
+          {t(n.key)}
+        </p>
+      ))}
+    </div>
+  );
+}

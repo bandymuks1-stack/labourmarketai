@@ -3032,8 +3032,12 @@
             "desc": "Jums tinkantis darbas"
           },
           "planning": {
-            "title": "Planas ir rezervacijos",
-            "desc": "Kalendorius ir rezervacijos"
+            "title": "Planavimas",
+            "desc": "Rezervacijos, projektai ir terminai vienoje dienotvarkėje"
+          },
+          "bookings": {
+            "title": "Rezervacijos",
+            "desc": "Pasiūlymai ir sutikimai"
           },
           "documents": {
             "title": "Ataskaitos ir dokumentai",
@@ -6331,6 +6335,8 @@
     "connections": {
       "title": "Planavimas susijęs su",
       "intro": "Rezervacija yra tavo plano dalis. Štai sritys, su kuriomis ji susijusi.",
+      "planning": "Planavimo dienotvarkė",
+      "planningNote": "Ši rezervacija datų kontekste su projektais ir užduotimis",
       "marketplace": "Turgaus užklausos",
       "marketplaceNote": "Paslaugų užklausos ir jų būsenos",
       "map": "Žemėlapis",
@@ -7489,6 +7495,62 @@
     "rights": {
       "notice": "Daugiau apie jūsų teises ir duomenų tvarkymą:",
       "noticeLink": "privatumo pranešimas"
+    }
+  },
+  "planning": {
+    "eyebrow": "PLANAVIMAS",
+    "title": "Planavimas",
+    "intro": "Rezervacijos, projektų datos ir užduočių terminai vienoje dienotvarkėje. Kiekviena eilutė veda į tikrąjį šaltinį.",
+    "honestNote": "Rodomi tik realiai egzistuojantys įrašai: rezervacijos, tavo valdomų projektų datos ir atvirų užduočių terminai. Joks išorinis kalendorius neprijungtas, nieko nesugalvota.",
+    "notAuthed": "Prisijunk, kad matytum savo planą.",
+    "filters": {
+      "label": "Šaltinis",
+      "all": "Visi"
+    },
+    "source": {
+      "booking": "Rezervacija",
+      "project": "Projektas",
+      "task": "Užduotis"
+    },
+    "sourceNotes": {
+      "bookingUnavailable": "Rezervacijos dar neįjungtos — jos prisijungs prie plano, kai bus įjungtas rezervacijų sluoksnis.",
+      "taskUnavailable": "Užduotys dar neįjungtos — užduočių terminai prisijungs prie plano, kai bus įjungtas užduočių sluoksnis.",
+      "taskError": "Užduočių šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
+      "projectManagersOnly": "Projektų datų juostos rodomos projektų vadovams. Darbuotojo projektų grafikas atsiras, kai toks vaizdas bus sukurtas.",
+      "projectError": "Projektų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai."
+    },
+    "week": {
+      "label": "Artimiausios 7 dienos"
+    },
+    "today": "Šiandien",
+    "later": {
+      "title": "Vėliau"
+    },
+    "undated": {
+      "title": "Dar be datos",
+      "hint": "Šie įrašai egzistuoja, bet datos dar neįrašytos."
+    },
+    "empty": "Kol kas nieko nesuplanuota. Čia atsiras priimtos rezervacijos, projektų datos ir užduočių terminai.",
+    "pastHidden": "Pasibaigę įrašai čia nerodomi: {count}. Istorija lieka kiekvieno šaltinio puslapyje.",
+    "conflict": {
+      "flag": "Datos persidengia"
+    },
+    "context": {
+      "incoming": "Pasiūlyta man",
+      "outgoing": "Mūsų pasiūlyta",
+      "managed": "Valdomas projektas",
+      "assigned": "Priskirta man",
+      "mine": "Mano užduotis"
+    },
+    "fallback": {
+      "booking": "Rezervacija",
+      "project": "Projektas",
+      "task": "Užduotis"
+    },
+    "projectStatus": {
+      "draft": "Juodraštis",
+      "live": "Vykdomas",
+      "paused": "Pristabdytas"
     }
   },
   "tasks": {

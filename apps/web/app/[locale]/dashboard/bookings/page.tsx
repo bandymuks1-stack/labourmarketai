@@ -188,6 +188,14 @@ function PlanningConnections({
 }) {
   const links = [
     {
+      // Control room PR E: the unified planning agenda shows this booking
+      // in date context together with project bands and task deadlines.
+      key: "planning",
+      href: "/dashboard/planning",
+      label: t("connections.planning"),
+      note: t("connections.planningNote"),
+    },
+    {
       key: "marketplace",
       href: "/dashboard/service-requests",
       label: t("connections.marketplace"),
@@ -216,7 +224,7 @@ function PlanningConnections({
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
       {/* Shared ActionCard pattern (audit PR8). */}
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {links.map((l) => (
           <ActionCard
             key={l.key}

@@ -3032,8 +3032,12 @@
             "desc": "Werk dat bij je past"
           },
           "planning": {
-            "title": "Planning en boekingen",
-            "desc": "Kalender en boekingen"
+            "title": "Planning",
+            "desc": "Boekingen, projecten en deadlines in één agenda"
+          },
+          "bookings": {
+            "title": "Boekingen",
+            "desc": "Voorstellen en acceptaties"
           },
           "documents": {
             "title": "Rapporten en documenten",
@@ -6331,6 +6335,8 @@
     "connections": {
       "title": "Planning is verbonden met",
       "intro": "Een boeking is onderdeel van je plan. Dit zijn de onderdelen waaraan die gekoppeld is.",
+      "planning": "Planningsagenda",
+      "planningNote": "Deze boeking in datumcontext met projecten en taken",
       "marketplace": "Marktplaatsverzoeken",
       "marketplaceNote": "Serviceverzoeken en hun statussen",
       "map": "Kaart",
@@ -7489,6 +7495,62 @@
     "rights": {
       "notice": "Meer over uw rechten en gegevensverwerking:",
       "noticeLink": "privacyverklaring"
+    }
+  },
+  "planning": {
+    "eyebrow": "PLANNING",
+    "title": "Planning",
+    "intro": "Boekingen, projectdata en taakdeadlines in één agenda. Elke regel linkt naar de echte bron.",
+    "honestNote": "Alleen records die echt bestaan worden getoond: boekingen, de data van je beheerde projecten en deadlines van open taken. Er is geen externe kalender gekoppeld en niets is verzonnen.",
+    "notAuthed": "Log in om je planning te zien.",
+    "filters": {
+      "label": "Bron",
+      "all": "Alle"
+    },
+    "source": {
+      "booking": "Boeking",
+      "project": "Project",
+      "task": "Taak"
+    },
+    "sourceNotes": {
+      "bookingUnavailable": "Boekingen zijn nog niet beschikbaar — ze sluiten aan op de planning zodra de boekingslaag is ingeschakeld.",
+      "taskUnavailable": "Taken zijn nog niet beschikbaar — taakdeadlines sluiten aan op de planning zodra de takenlaag is ingeschakeld.",
+      "taskError": "Taken konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
+      "projectManagersOnly": "Projectdatabanden zijn zichtbaar voor projectmanagers. Een projectplanning voor werknemers volgt zodra die weergave bestaat.",
+      "projectError": "Projecten konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar."
+    },
+    "week": {
+      "label": "Komende 7 dagen"
+    },
+    "today": "Vandaag",
+    "later": {
+      "title": "Later"
+    },
+    "undated": {
+      "title": "Nog zonder datum",
+      "hint": "Deze records bestaan, maar er zijn nog geen data vastgelegd."
+    },
+    "empty": "Nog niets gepland. Geaccepteerde boekingen, projectdata en taakdeadlines verschijnen hier.",
+    "pastHidden": "Afgeronde items worden hier niet getoond: {count}. De geschiedenis blijft op elke bronpagina.",
+    "conflict": {
+      "flag": "Data overlappen"
+    },
+    "context": {
+      "incoming": "Aan mij voorgesteld",
+      "outgoing": "Door ons voorgesteld",
+      "managed": "Beheerd project",
+      "assigned": "Aan mij toegewezen",
+      "mine": "Mijn taak"
+    },
+    "fallback": {
+      "booking": "Boeking",
+      "project": "Project",
+      "task": "Taak"
+    },
+    "projectStatus": {
+      "draft": "Concept",
+      "live": "Actief",
+      "paused": "Gepauzeerd"
     }
   },
   "tasks": {

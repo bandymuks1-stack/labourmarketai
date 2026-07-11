@@ -3032,8 +3032,12 @@
             "desc": "Arbeit, die zu Ihnen passt"
           },
           "planning": {
-            "title": "Planung und Buchungen",
-            "desc": "Kalender und Buchungen"
+            "title": "Planung",
+            "desc": "Buchungen, Projekte und Fristen in einer Agenda"
+          },
+          "bookings": {
+            "title": "Buchungen",
+            "desc": "Vorschläge und Zusagen"
           },
           "documents": {
             "title": "Berichte und Dokumente",
@@ -6331,6 +6335,8 @@
     "connections": {
       "title": "Die Planung ist verknüpft mit",
       "intro": "Eine Buchung ist Teil Ihres Plans. Dies sind die Bereiche, mit denen sie verknüpft ist.",
+      "planning": "Planungs-Agenda",
+      "planningNote": "Diese Buchung im Datumskontext mit Projekten und Aufgaben",
       "marketplace": "Marktplatz-Anfragen",
       "marketplaceNote": "Serviceanfragen und deren Status",
       "map": "Karte",
@@ -7489,6 +7495,62 @@
     "rights": {
       "notice": "Mehr über Ihre Rechte und die Datenverarbeitung:",
       "noticeLink": "Datenschutzhinweis"
+    }
+  },
+  "planning": {
+    "eyebrow": "PLANUNG",
+    "title": "Planung",
+    "intro": "Buchungen, Projekttermine und Aufgabenfristen in einer Agenda. Jede Zeile führt zur echten Quelle.",
+    "honestNote": "Angezeigt werden nur real existierende Einträge: Buchungen, die Termine Ihrer verwalteten Projekte und Fristen offener Aufgaben. Es ist kein externer Kalender verbunden, nichts ist erfunden.",
+    "notAuthed": "Melden Sie sich an, um Ihren Plan zu sehen.",
+    "filters": {
+      "label": "Quelle",
+      "all": "Alle"
+    },
+    "source": {
+      "booking": "Buchung",
+      "project": "Projekt",
+      "task": "Aufgabe"
+    },
+    "sourceNotes": {
+      "bookingUnavailable": "Buchungen sind noch nicht verfügbar — sie erscheinen im Plan, sobald die Buchungsebene aktiviert ist.",
+      "taskUnavailable": "Aufgaben sind noch nicht verfügbar — Aufgabenfristen erscheinen im Plan, sobald die Aufgabenebene aktiviert ist.",
+      "taskError": "Aufgaben konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
+      "projectManagersOnly": "Projekt-Zeiträume sehen Projektverantwortliche. Ein Projektplan für Arbeitskräfte folgt, sobald diese Ansicht existiert.",
+      "projectError": "Projekte konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt."
+    },
+    "week": {
+      "label": "Nächste 7 Tage"
+    },
+    "today": "Heute",
+    "later": {
+      "title": "Später"
+    },
+    "undated": {
+      "title": "Noch ohne Datum",
+      "hint": "Diese Einträge existieren, aber es sind noch keine Termine erfasst."
+    },
+    "empty": "Noch nichts geplant. Angenommene Buchungen, Projekttermine und Aufgabenfristen erscheinen hier.",
+    "pastHidden": "Abgeschlossene Einträge werden hier nicht angezeigt: {count}. Die Historie bleibt auf der jeweiligen Quellseite.",
+    "conflict": {
+      "flag": "Termine überschneiden sich"
+    },
+    "context": {
+      "incoming": "Mir vorgeschlagen",
+      "outgoing": "Von uns vorgeschlagen",
+      "managed": "Verwaltetes Projekt",
+      "assigned": "Mir zugewiesen",
+      "mine": "Meine Aufgabe"
+    },
+    "fallback": {
+      "booking": "Buchung",
+      "project": "Projekt",
+      "task": "Aufgabe"
+    },
+    "projectStatus": {
+      "draft": "Entwurf",
+      "live": "Aktiv",
+      "paused": "Pausiert"
     }
   },
   "tasks": {

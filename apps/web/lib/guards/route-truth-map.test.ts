@@ -40,6 +40,10 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/journal": "REAL_LAUNCH_SURFACE",
   "dashboard/market-map": "REAL_LAUNCH_SURFACE",
   "dashboard/opportunities": "REAL_LAUNCH_SURFACE",
+  // Unified planning agenda (control room PR E) — composes existing
+  // RLS-scoped reads (bookings / managed projects / tasks); degrades
+  // per-source, duplicates no record.
+  "dashboard/planning": "REAL_LAUNCH_SURFACE",
   // Privacy self-service (quality-train PR G): real export download +
   // reviewed deletion-request intake.
   "dashboard/privacy": "REAL_LAUNCH_SURFACE",
