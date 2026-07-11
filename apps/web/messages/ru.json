@@ -7102,7 +7102,50 @@
       "reviewed": "Компания просмотрела ваш интерес",
       "contacted": "Компания отметила: связались"
     },
-    "companyVerified": "Проверенная компания"
+    "companyVerified": "Проверенная компания",
+    "structured": {
+      "detailTitle": "Указанные условия работы",
+      "notProvided": "Компания ещё не предоставила подробных условий работы для этого объявления — указаны только факты выше.",
+      "gapsTitle": "Компания не указала",
+      "yes": "Да",
+      "no": "Нет",
+      "payLabel": "Оплата",
+      "amountFrom": "от {amount}",
+      "amountUpTo": "до {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} ч/нед.",
+      "chipMinHours": "не менее {hours} ч/нед.",
+      "chipStartFrom": "начало с {from}",
+      "chipStartWindow": "начало {from} – {to}",
+      "chipDeadline": "подать до {date}",
+      "days": "{count} дн.",
+      "yearsExperience": "{count} л.",
+      "km": "{km} км",
+      "minutes": "{min} мин.",
+      "probationLabel": "Испытательный срок",
+      "extensionPossibleLabel": "Возможно продление",
+      "scheduleNoticeLabel": "График сообщается за",
+      "expectedResponseLabel": "Ответ в течение",
+      "firstPaymentLabel": "Первая выплата в течение",
+      "travelMinutesLabel": "Время в пути до объекта",
+      "registrationPossibleLabel": "Возможна регистрация по адресу",
+      "availableFromLabel": "Доступно с",
+      "similarProjectLabel": "Опыт похожих проектов",
+      "driverSupplementLabel": "Надбавка водителю",
+      "siteModeLabel": "Объекты",
+      "siteMode": {
+        "single": "Один объект",
+        "multiple": "Несколько объектов",
+        "mobile": "Мобильная работа / меняющиеся объекты"
+      },
+      "workModeLabel": "Формат работы",
+      "workMode": {
+        "onsite": "На объекте",
+        "remote": "Удалённо",
+        "hybrid": "Смешанный"
+      }
+    }
   },
   "workerIntake": {
     "title": "Анкета работника",

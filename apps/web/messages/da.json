@@ -1749,6 +1749,49 @@
         "body": "Matching følger faste, deterministiske regler over de fakta, begge sider har angivet - nødvendige færdigheder, sprog, sted, tilgængelighed, løn og kontraktform. En manglende oplysning vises som manglende og gættes aldrig. Ingen kunstig intelligens træffer beslutningen, og der findes ingen samlet personscore - kun match inden for denne ene mulighed.",
         "version": "Beregningsversion: {version} - deterministiske regler"
       }
+    },
+    "structured": {
+      "detailTitle": "Angivne arbejdsvilkår",
+      "notProvided": "Virksomheden har endnu ikke angivet detaljerede arbejdsvilkår for dette opslag — kun fakta ovenfor er angivet.",
+      "gapsTitle": "Ikke angivet af virksomheden",
+      "yes": "Ja",
+      "no": "Nej",
+      "payLabel": "Løn",
+      "amountFrom": "fra {amount}",
+      "amountUpTo": "op til {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} t/uge",
+      "chipMinHours": "mindst {hours} t/uge",
+      "chipStartFrom": "start fra {from}",
+      "chipStartWindow": "start {from} – {to}",
+      "chipDeadline": "ansøg senest {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} år",
+      "km": "{km} km",
+      "minutes": "{min} min.",
+      "probationLabel": "Prøvetid",
+      "extensionPossibleLabel": "Forlængelse mulig",
+      "scheduleNoticeLabel": "Vagtplan varsles",
+      "expectedResponseLabel": "Svar inden for",
+      "firstPaymentLabel": "Første udbetaling inden for",
+      "travelMinutesLabel": "Rejsetid til arbejdsstedet",
+      "registrationPossibleLabel": "Adresseregistrering mulig",
+      "availableFromLabel": "Tilgængelig fra",
+      "similarProjectLabel": "Erfaring med lignende projekter",
+      "driverSupplementLabel": "Chaufførtillæg",
+      "siteModeLabel": "Arbejdssteder",
+      "siteMode": {
+        "single": "Ét arbejdssted",
+        "multiple": "Flere arbejdssteder",
+        "mobile": "Mobil / skiftende arbejdssteder"
+      },
+      "workModeLabel": "Arbejdsform",
+      "workMode": {
+        "onsite": "På stedet",
+        "remote": "Fjernarbejde",
+        "hybrid": "Hybrid"
+      }
     }
   },
   "scouting": {

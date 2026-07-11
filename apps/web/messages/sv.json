@@ -1749,6 +1749,49 @@
         "body": "[EN] Matching follows fixed, deterministic rules over the facts both sides have stated - required skills, language, location, availability, pay and contract type. A missing fact is shown as missing, never guessed. No artificial intelligence makes the decision and there is no global person score - only the fit within this one opportunity.",
         "version": "[EN] Calculation version: {version} - deterministic rules"
       }
+    },
+    "structured": {
+      "detailTitle": "[EN] Stated working conditions",
+      "notProvided": "[EN] The company has not provided detailed working conditions for this listing yet — only the facts above are stated.",
+      "gapsTitle": "[EN] Not stated by the company",
+      "yes": "[EN] Yes",
+      "no": "[EN] No",
+      "payLabel": "[EN] Pay",
+      "amountFrom": "[EN] from {amount}",
+      "amountUpTo": "[EN] up to {amount}",
+      "chipPay": "[EN] {amount} {currency}/{unit}",
+      "chipPayBasis": "[EN] {amount} {currency}/{unit} ({basis})",
+      "chipHours": "[EN] {hours} h/week",
+      "chipMinHours": "[EN] at least {hours} h/week",
+      "chipStartFrom": "[EN] start from {from}",
+      "chipStartWindow": "[EN] start {from} – {to}",
+      "chipDeadline": "[EN] apply by {date}",
+      "days": "[EN] {count} d.",
+      "yearsExperience": "[EN] {count} yr.",
+      "km": "[EN] {km} km",
+      "minutes": "[EN] {min} min",
+      "probationLabel": "[EN] Probation period",
+      "extensionPossibleLabel": "[EN] Extension possible",
+      "scheduleNoticeLabel": "[EN] Schedule notice in advance",
+      "expectedResponseLabel": "[EN] Response within",
+      "firstPaymentLabel": "[EN] First payment within",
+      "travelMinutesLabel": "[EN] Travel time to site",
+      "registrationPossibleLabel": "[EN] Address registration possible",
+      "availableFromLabel": "[EN] Available from",
+      "similarProjectLabel": "[EN] Similar project experience",
+      "driverSupplementLabel": "[EN] Driver supplement",
+      "siteModeLabel": "[EN] Work sites",
+      "siteMode": {
+        "single": "[EN] One site",
+        "multiple": "[EN] Several sites",
+        "mobile": "[EN] Mobile / changing sites"
+      },
+      "workModeLabel": "[EN] Work mode",
+      "workMode": {
+        "onsite": "[EN] On-site",
+        "remote": "[EN] Remote",
+        "hybrid": "[EN] Hybrid"
+      }
     }
   },
   "scouting": {

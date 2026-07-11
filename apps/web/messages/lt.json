@@ -7102,7 +7102,50 @@
       "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
       "contacted": "Įmonė pažymėjo: susisiekta"
     },
-    "companyVerified": "Patikrinta įmonė"
+    "companyVerified": "Patikrinta įmonė",
+    "structured": {
+      "detailTitle": "Nurodytos darbo sąlygos",
+      "notProvided": "Įmonė dar nepateikė detalių darbo sąlygų šiam skelbimui — nurodyti tik aukščiau matomi faktai.",
+      "gapsTitle": "Įmonė nenurodė",
+      "yes": "Taip",
+      "no": "Ne",
+      "payLabel": "Atlygis",
+      "amountFrom": "nuo {amount}",
+      "amountUpTo": "iki {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} val./sav.",
+      "chipMinHours": "ne mažiau {hours} val./sav.",
+      "chipStartFrom": "pradžia nuo {from}",
+      "chipStartWindow": "pradžia {from} – {to}",
+      "chipDeadline": "kandidatuoti iki {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} m.",
+      "km": "{km} km",
+      "minutes": "{min} min.",
+      "probationLabel": "Bandomasis laikotarpis",
+      "extensionPossibleLabel": "Galimas pratęsimas",
+      "scheduleNoticeLabel": "Grafikas pranešamas prieš",
+      "expectedResponseLabel": "Atsakymas per",
+      "firstPaymentLabel": "Pirmas mokėjimas per",
+      "travelMinutesLabel": "Kelionės laikas iki objekto",
+      "registrationPossibleLabel": "Galima deklaruoti gyvenamąją vietą",
+      "availableFromLabel": "Prieinama nuo",
+      "similarProjectLabel": "Panašių projektų patirtis",
+      "driverSupplementLabel": "Priedas vairuotojui",
+      "siteModeLabel": "Objektai",
+      "siteMode": {
+        "single": "Vienas objektas",
+        "multiple": "Keli objektai",
+        "mobile": "Mobilus darbas / kintantys objektai"
+      },
+      "workModeLabel": "Darbo pobūdis",
+      "workMode": {
+        "onsite": "Objekte",
+        "remote": "Nuotolinis",
+        "hybrid": "Mišrus"
+      }
+    }
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",
