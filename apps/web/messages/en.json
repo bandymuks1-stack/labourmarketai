@@ -8426,6 +8426,38 @@
     "saving": "Saving…",
     "saved": "Preferences saved.",
     "error": "Saving failed. Please try again.",
-    "needsMigration": "This section is not enabled yet — nothing was saved."
+    "needsMigration": "This section is not enabled yet — nothing was saved.",
+    "v2": {
+      "title": "More work preferences",
+      "hint": "Same rule as above — anything left as “Not stated” stays not stated.",
+      "payBasis": "Pay expectation basis",
+      "payBasisOptions": {
+        "gross": "Gross (before taxes)",
+        "net": "Net (take-home)"
+      },
+      "nightShifts": "Willing to work night shifts",
+      "weekendShifts": "Willing to work weekends",
+      "overtime": "Willing to work overtime",
+      "licenceCategories": "Driving licence categories",
+      "ownVehicle": "Has own vehicle",
+      "ownTools": "Has own tools",
+      "notEnabled": "These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notSaved": "Saved, except the extra preferences — that part is not enabled yet."
+    }
+  },
+  "workerLanguages": {
+    "title": "Languages",
+    "hint": "Add the languages you can work in and your level.",
+    "selfStated": "You add these languages yourself — they are not checked by anyone.",
+    "language": "Language",
+    "level": "Level",
+    "levelNative": "Native",
+    "add": "Add language",
+    "adding": "Adding…",
+    "remove": "Remove",
+    "empty": "No languages added yet.",
+    "notEnabled": "This section is not enabled yet — nothing was saved.",
+    "error": "Saving failed. Please try again.",
+    "invalid": "Choose a language and a level."
   }
 }

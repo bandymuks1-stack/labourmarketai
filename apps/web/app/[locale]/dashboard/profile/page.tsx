@@ -41,7 +41,15 @@ import {
   getOwnAvailabilityPrefs,
   type AvailabilityPrefsRead,
 } from "@/lib/worker/availability-prefs";
-import { EMPTY_PREFS } from "@/lib/worker/availability-prefs-model";
+import { EMPTY_PREFS, EMPTY_PREFS_V2 } from "@/lib/worker/availability-prefs-model";
+import {
+  WorkerLanguagesSection,
+  type WorkerLanguagesLabels,
+} from "@/components/app/worker-languages-section";
+import {
+  getOwnWorkerLanguages,
+  type WorkerLanguagesRead,
+} from "@/lib/worker/worker-languages";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
 import { Building2 } from "lucide-react";
@@ -81,6 +89,7 @@ export default async function ProfilePage({
   const tQuick = await getTranslations("quickNav");
   const tHub = await getTranslations("marketplaceHub");
   const tPrefs = await getTranslations("workerPrefs");
+  const tLangs = await getTranslations("workerLanguages");
 
   const supabase = await createClient();
   const {
@@ -170,8 +179,15 @@ export default async function ProfilePage({
   // here (server component) so the form gets real saved values, null = "not
   // stated" (never rendered as a fabricated "no").
   let availabilityPrefs: AvailabilityPrefsRead | null = null;
+  // Self-stated languages (P2-PR3) — worker_languages from DRAFT migration
+  // 20260711250000 (PR #720). Until the owner applies it the read reports
+  // needs-migration and the section renders its honest explanation state.
+  let workerLanguages: WorkerLanguagesRead | null = null;
   if (workerId) {
-    availabilityPrefs = await getOwnAvailabilityPrefs();
+    [availabilityPrefs, workerLanguages] = await Promise.all([
+      getOwnAvailabilityPrefs(),
+      getOwnWorkerLanguages(),
+    ]);
     const { data: wpAll } = await supabase
       .from("worker_professions")
       .select("profession_id, is_primary")
@@ -571,6 +587,16 @@ export default async function ProfilePage({
             availabilityPrefs.kind === "ok" ? availabilityPrefs.values : EMPTY_PREFS
           }
           needsMigration={availabilityPrefs.kind === "needs-migration"}
+          // v2 pack (draft PR #721): editable only when the read path saw the
+          // 7 draft columns; otherwise the fieldset explains itself honestly.
+          v2Enabled={
+            availabilityPrefs.kind === "ok" && availabilityPrefs.v2.kind === "ok"
+          }
+          initialV2={
+            availabilityPrefs.kind === "ok" && availabilityPrefs.v2.kind === "ok"
+              ? availabilityPrefs.v2.values
+              : EMPTY_PREFS_V2
+          }
           labels={
             {
               title: tPrefs("title"),
@@ -600,7 +626,52 @@ export default async function ProfilePage({
               saved: tPrefs("saved"),
               error: tPrefs("error"),
               needsMigration: tPrefs("needsMigration"),
+              v2: {
+                title: tPrefs("v2.title"),
+                hint: tPrefs("v2.hint"),
+                payBasis: tPrefs("v2.payBasis"),
+                payBasisOptions: {
+                  gross: tPrefs("v2.payBasisOptions.gross"),
+                  net: tPrefs("v2.payBasisOptions.net"),
+                },
+                nightShifts: tPrefs("v2.nightShifts"),
+                weekendShifts: tPrefs("v2.weekendShifts"),
+                overtime: tPrefs("v2.overtime"),
+                licenceCategories: tPrefs("v2.licenceCategories"),
+                ownVehicle: tPrefs("v2.ownVehicle"),
+                ownTools: tPrefs("v2.ownTools"),
+                notEnabled: tPrefs("v2.notEnabled"),
+                notSaved: tPrefs("v2.notSaved"),
+              },
             } satisfies WorkerAvailabilityPrefsLabels
+          }
+        />
+      ) : null}
+
+      {/* Self-stated languages (P2-PR3) — worker_languages (draft PR #720),
+          right next to the preferences card on the same identity surface.
+          Renders its honest not-enabled state until the owner applies the
+          draft migration; writes only via the two owner-scoped RPCs. */}
+      {workerId && workerLanguages && workerLanguages.kind !== "no-worker" ? (
+        <WorkerLanguagesSection
+          initial={workerLanguages.kind === "ok" ? workerLanguages.languages : []}
+          needsMigration={workerLanguages.kind === "needs-migration"}
+          labels={
+            {
+              title: tLangs("title"),
+              hint: tLangs("hint"),
+              selfStated: tLangs("selfStated"),
+              language: tLangs("language"),
+              level: tLangs("level"),
+              levelNative: tLangs("levelNative"),
+              add: tLangs("add"),
+              adding: tLangs("adding"),
+              remove: tLangs("remove"),
+              empty: tLangs("empty"),
+              notEnabled: tLangs("notEnabled"),
+              error: tLangs("error"),
+              invalid: tLangs("invalid"),
+            } satisfies WorkerLanguagesLabels
           }
         />
       ) : null}

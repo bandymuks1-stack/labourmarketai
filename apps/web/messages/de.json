@@ -8426,6 +8426,38 @@
     "saving": "Wird gespeichert…",
     "saved": "Präferenzen gespeichert.",
     "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
-    "needsMigration": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert."
+    "needsMigration": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "v2": {
+      "title": "Weitere Arbeitspräferenzen",
+      "hint": "Es gilt dieselbe Regel — alles, was auf „Nicht angegeben“ bleibt, bleibt nicht angegeben.",
+      "payBasis": "Basis der Lohnerwartung",
+      "payBasisOptions": {
+        "gross": "Brutto (vor Steuern)",
+        "net": "Netto (ausgezahlt)"
+      },
+      "nightShifts": "Bereit, Nachtschichten zu arbeiten",
+      "weekendShifts": "Bereit, am Wochenende zu arbeiten",
+      "overtime": "Bereit, Überstunden zu machen",
+      "licenceCategories": "Führerscheinklassen",
+      "ownVehicle": "Hat eigenes Fahrzeug",
+      "ownTools": "Hat eigenes Werkzeug",
+      "notEnabled": "Diese zusätzlichen Präferenzen sind noch nicht freigeschaltet — hier wird vorerst nichts gespeichert.",
+      "notSaved": "Gespeichert, außer den zusätzlichen Präferenzen — dieser Teil ist noch nicht freigeschaltet."
+    }
+  },
+  "workerLanguages": {
+    "title": "Sprachen",
+    "hint": "Fügen Sie die Sprachen hinzu, in denen Sie arbeiten können, und Ihr Niveau.",
+    "selfStated": "Diese Sprachen fügen Sie selbst hinzu — niemand überprüft sie.",
+    "language": "Sprache",
+    "level": "Niveau",
+    "levelNative": "Muttersprache",
+    "add": "Sprache hinzufügen",
+    "adding": "Wird hinzugefügt…",
+    "remove": "Entfernen",
+    "empty": "Noch keine Sprachen hinzugefügt.",
+    "notEnabled": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "invalid": "Wählen Sie eine Sprache und ein Niveau."
   }
 }

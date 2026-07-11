@@ -109,6 +109,72 @@ export function classifyPrefsError(
   return "error";
 }
 
+// ── v2 preference pack (draft migration 20260711270000, PR #721) ────────────
+// The 7 additive nullable columns + save_worker_availability_prefs_v2 RPC are
+// DRAFT and human-gated — NOT applied yet. These literals mirror the draft
+// SQL's CHECK constraints EXACTLY so the UI ships repo-safe today and lights
+// up unchanged once the owner applies the migration. Until then the read path
+// answers 42703 (undefined_column) and the RPC 42883/PGRST202 — both degrade
+// to an honest "not enabled" state, never a crash or a fake save.
+
+/** Mirrors the draft CHECK on workers.pay_basis_preference (PR #721). */
+export const PAY_BASIS_PREFERENCES = ["gross", "net"] as const;
+
+export type PayBasisPreference = (typeof PAY_BASIS_PREFERENCES)[number];
+
+/** Mirrors the draft CHECK on workers.driving_licence_categories (PR #721) —
+ *  the same closed set structured_v2 transport.licence_categories uses. */
+export const DRIVING_LICENCE_CATEGORIES = ["B", "BE", "C", "CE", "D"] as const;
+
+export type DrivingLicenceCategory = (typeof DRIVING_LICENCE_CATEGORIES)[number];
+
+/** Raw form value → pay basis or null (not stated). Values outside the draft
+ *  CHECK's closed set are rejected to null, never coerced. */
+export function parsePayBasis(raw: string | null | undefined): PayBasisPreference | null {
+  const s = (raw ?? "").trim();
+  if (s === "") return null;
+  return (PAY_BASIS_PREFERENCES as readonly string[]).includes(s)
+    ? (s as PayBasisPreference)
+    : null;
+}
+
+/** Raw multi-value form input → licence categories or null (not stated).
+ *  Unknown values are dropped (never coerced into a different category);
+ *  an empty result is null — the draft RPC treats [] the same way. */
+export function parseLicenceCategories(
+  raw: readonly string[] | null | undefined,
+): DrivingLicenceCategory[] | null {
+  const cats = (raw ?? [])
+    .map((v) => v.trim())
+    .filter((v): v is DrivingLicenceCategory =>
+      (DRIVING_LICENCE_CATEGORIES as readonly string[]).includes(v),
+    );
+  // De-duplicate while preserving the canonical B..D order.
+  const unique = DRIVING_LICENCE_CATEGORIES.filter((c) => cats.includes(c));
+  return unique.length > 0 ? [...unique] : null;
+}
+
+/** The 7 v2 prefs, as read from the workers row (null = not stated). */
+export interface WorkerAvailabilityPrefsV2 {
+  payBasisPreference: PayBasisPreference | null;
+  nightShiftsOk: boolean | null;
+  weekendShiftsOk: boolean | null;
+  overtimeOk: boolean | null;
+  drivingLicenceCategories: DrivingLicenceCategory[] | null;
+  ownVehicle: boolean | null;
+  ownTools: boolean | null;
+}
+
+export const EMPTY_PREFS_V2: WorkerAvailabilityPrefsV2 = {
+  payBasisPreference: null,
+  nightShiftsOk: null,
+  weekendShiftsOk: null,
+  overtimeOk: null,
+  drivingLicenceCategories: null,
+  ownVehicle: null,
+  ownTools: null,
+};
+
 /** The 8 saved prefs, as read from the workers row (null = not stated). */
 export interface WorkerAvailabilityPrefs {
   willingToRelocate: boolean | null;

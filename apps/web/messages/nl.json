@@ -8426,6 +8426,38 @@
     "saving": "Opslaan…",
     "saved": "Voorkeuren opgeslagen.",
     "error": "Opslaan mislukt. Probeer het opnieuw.",
-    "needsMigration": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen."
+    "needsMigration": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "v2": {
+      "title": "Extra werkvoorkeuren",
+      "hint": "Dezelfde regel geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven.",
+      "payBasis": "Basis van loonverwachting",
+      "payBasisOptions": {
+        "gross": "Bruto (voor belastingen)",
+        "net": "Netto (op de hand)"
+      },
+      "nightShifts": "Bereid om nachtdiensten te werken",
+      "weekendShifts": "Bereid om in het weekend te werken",
+      "overtime": "Bereid om overuren te werken",
+      "licenceCategories": "Rijbewijscategorieën",
+      "ownVehicle": "Heeft eigen voertuig",
+      "ownTools": "Heeft eigen gereedschap",
+      "notEnabled": "Deze extra voorkeuren zijn nog niet ingeschakeld — hier wordt voorlopig niets opgeslagen.",
+      "notSaved": "Opgeslagen, behalve de extra voorkeuren — dat onderdeel is nog niet ingeschakeld."
+    }
+  },
+  "workerLanguages": {
+    "title": "Talen",
+    "hint": "Voeg de talen toe waarin u kunt werken en uw niveau.",
+    "selfStated": "Deze talen voegt u zelf toe — ze worden door niemand gecontroleerd.",
+    "language": "Taal",
+    "level": "Niveau",
+    "levelNative": "Moedertaal",
+    "add": "Taal toevoegen",
+    "adding": "Toevoegen…",
+    "remove": "Verwijderen",
+    "empty": "Nog geen talen toegevoegd.",
+    "notEnabled": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "error": "Opslaan is mislukt. Probeer het opnieuw.",
+    "invalid": "Kies een taal en een niveau."
   }
 }
