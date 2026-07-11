@@ -1687,6 +1687,42 @@
     "cta": "Tilbage til start"
   },
   "opportunities": {
+    "saved": {
+      "save": "Gem",
+      "saved": "Gemt",
+      "unsave": "Fjern fra gemte",
+      "privateHint": "At gemme er privat på din konto — virksomheden ser aldrig, hvem der har gemt dens opslag.",
+      "sectionTitle": "Gemte muligheder",
+      "noLongerOpen": "Tidligere gemt, men ikke længere åben på tavlen: {count}",
+      "error": "Kunne ikke opdatere din gemte liste. Prøv igen."
+    },
+    "recent": {
+      "title": "Senest viste",
+      "deviceOnly": "Gemmes kun på denne enhed — listen forlader aldrig din browser og sendes ikke til serveren.",
+      "clear": "Ryd"
+    },
+    "compare": {
+      "toggle": "Sammenlign",
+      "selectedLabel": "Valgt",
+      "open": "Sammenlign valgte",
+      "title": "Sammenlign muligheder",
+      "close": "Luk",
+      "clear": "Ryd valg",
+      "limitNote": "Vælg 2–3 muligheder at sammenligne.",
+      "notStated": "Ikke oplyst",
+      "fact": {
+        "pay": "Løn",
+        "hours": "Timer om ugen",
+        "start": "Start",
+        "engagement": "Ansættelsesform",
+        "accommodation": "Indkvartering",
+        "transport": "Transport",
+        "tools": "Værktøj",
+        "languages": "Sprog",
+        "location": "Sted",
+        "company": "Virksomhed"
+      }
+    },
     "discovery": {
       "filters": {
         "title": "Filtrer muligheder",

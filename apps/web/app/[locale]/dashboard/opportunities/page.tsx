@@ -10,7 +10,26 @@ import { OpportunityDetailsDisclosure } from "@/components/app/opportunity-detai
 import {
   OpportunityStructuredChips,
   OpportunityStructuredSections,
+  payText,
 } from "@/components/app/opportunity-structured-detail";
+import { RecentlyViewedStrip } from "@/components/app/recently-viewed-strip";
+import { WorkerSaveOpportunityButton } from "@/components/app/worker-save-opportunity-button";
+import {
+  CompareBar,
+  CompareToggleChip,
+  OpportunityCompareProvider,
+} from "@/components/app/opportunity-compare";
+import {
+  COMPARE_FACT_KEYS,
+  completeCompareFacts,
+  type CompareEntry,
+  type CompareFactKey,
+} from "@/lib/opportunities/compare-facts";
+import {
+  formatPublicIsoDate,
+  publicLanguageName,
+  type StructuredDemandPublic,
+} from "@/lib/opportunities/structured-public";
 import {
   buildMatchCardView,
   type MatchSignal,
@@ -33,6 +52,7 @@ import { WorkerInterestButton } from "@/components/app/worker-interest-button";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import type {
   OpportunityGap,
+  OpportunityNeed,
   OpportunityStatus,
 } from "@/lib/opportunities/opportunity-fit";
 
@@ -145,6 +165,95 @@ export default async function OpportunitiesPage({
         return skillLabel(value);
     }
   };
+
+  // ── P2-PR5: saved bookmarks (#723-compat) / recently viewed / compare ─────
+  const scanLine = (need: OpportunityNeed) =>
+    `${
+      need.locationLabel
+        ? `${need.locationLabel} · ${countryLabel(need.country)}`
+        : countryLabel(need.country)
+    } · ${startLabel(need.startPeriod)}`;
+  const savedLabels = {
+    save: t("saved.save"),
+    saved: t("saved.saved"),
+    unsave: t("saved.unsave"),
+    error: t("saved.error"),
+  };
+  const recentLabels = {
+    title: t("recent.title"),
+    deviceOnly: t("recent.deviceOnly"),
+    clear: t("recent.clear"),
+  };
+  const compareLabels = {
+    selectedLabel: t("compare.selectedLabel"),
+    open: t("compare.open"),
+    close: t("compare.close"),
+    clear: t("compare.clear"),
+    limitNote: t("compare.limitNote"),
+    title: t("compare.title"),
+  };
+  const compareFactLabels = Object.fromEntries(
+    COMPARE_FACT_KEYS.map((k) => [k, t(`compare.fact.${k}` as never) as string]),
+  ) as Record<CompareFactKey, string>;
+  const compareNotStated = t("compare.notStated");
+  // One compare column per card — ONLY whitelisted facts, every value the
+  // stated (already-localized) fact or the honest "not stated". Reuses the
+  // card's own rendering rules (payText, enum catalogs) — never a second
+  // formatting truth.
+  const buildCompareEntry = (
+    need: OpportunityNeed,
+    structured: StructuredDemandPublic | null,
+  ): CompareEntry => ({
+    id: need.id,
+    title: roleLabel(need.roleText),
+    facts: completeCompareFacts(
+      {
+        pay: payText(structured?.compensation, ts, sd),
+        hours:
+          structured?.time?.hours_per_week != null
+            ? ts("chipHours", { hours: structured.time.hours_per_week })
+            : null,
+        start:
+          structured?.time?.start_earliest && structured?.time?.start_latest
+            ? ts("chipStartWindow", {
+                from: formatPublicIsoDate(structured.time.start_earliest, locale),
+                to: formatPublicIsoDate(structured.time.start_latest, locale),
+              })
+            : structured?.time?.start_earliest
+              ? ts("chipStartFrom", {
+                  from: formatPublicIsoDate(structured.time.start_earliest, locale),
+                })
+              : need.startPeriod
+                ? startLabel(need.startPeriod)
+                : null,
+        engagement: structured?.engagement_form
+          ? sd(`engagementForm.${structured.engagement_form}`)
+          : null,
+        accommodation: structured?.accommodation?.state
+          ? sd(`accommodationState.${structured.accommodation.state}`)
+          : accommodationLabel(need.accommodation ?? null),
+        transport: structured?.transport?.daily
+          ? sd(`transportLevel.${structured.transport.daily}`)
+          : transportLabel(need.transport ?? null),
+        tools:
+          need.requiredTools && need.requiredTools.length > 0
+            ? need.requiredTools.map(skillLabel).join(", ")
+            : null,
+        languages:
+          structured?.requirements?.languages &&
+          structured.requirements.languages.length > 0
+            ? structured.requirements.languages
+                .map((l) => `${publicLanguageName(l.lang)} ${l.level}`)
+                .join(", ")
+            : null,
+        location: need.locationLabel
+          ? `${need.locationLabel} · ${countryLabel(need.country)}`
+          : countryLabel(need.country),
+        company: need.companyName,
+      },
+      compareNotStated,
+    ),
+  });
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8">
@@ -315,6 +424,21 @@ export default async function OpportunitiesPage({
             </div>
           </details>
 
+          {/* Recently viewed (P2-PR5) — DEVICE-LOCAL list of detail
+              disclosures opened on THIS device, re-joined against the live,
+              already-authorized rows (ids + timestamps only in storage; the
+              strip itself discloses that nothing leaves this browser). */}
+          {result.opportunities.length > 0 ? (
+            <RecentlyViewedStrip
+              liveRows={result.opportunities.map(({ need }) => ({
+                id: need.id,
+                title: roleLabel(need.roleText),
+                scanLine: scanLine(need),
+              }))}
+              labels={recentLabels}
+            />
+          ) : null}
+
           {/* ── Opportunities (approved supply routes only) ────────────── */}
           {result.needsDataAccess ? (
             <section
@@ -361,8 +485,66 @@ export default async function OpportunitiesPage({
                 { dim: "transport", values: facets.transports },
                 { dim: "tool", values: facets.tools },
               ];
+              // Saved bookmarks joined against the LIVE rows (facts are never
+              // copied into a save — a saved id with no live row is honestly
+              // reported as "no longer open", never rendered from stale data).
+              const liveIds = new Set(result.opportunities.map((o) => o.need.id));
+              const savedLive = result.opportunities.filter((o) => o.saved);
+              const savedStaleCount = result.savedRequestIds.filter(
+                (id) => !liveIds.has(id),
+              ).length;
               return (
-                <>
+                <OpportunityCompareProvider>
+                  {/* ── Saved opportunities (P2-PR5, #723-compat) — rendered
+                      ONLY when the owner-gated store exists. Private
+                      bookmark: the hint says the company never sees it. */}
+                  {result.savedAvailable &&
+                  (savedLive.length > 0 || savedStaleCount > 0) ? (
+                    <section
+                      className="flex flex-col gap-2 rounded-lg border border-ink-600 bg-ink-800/30 p-4"
+                      data-testid="opportunities-saved"
+                      aria-label={t("saved.sectionTitle")}
+                    >
+                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {t("saved.sectionTitle")} · {savedLive.length}
+                      </span>
+                      {savedLive.length > 0 ? (
+                        <ul className="flex flex-wrap gap-1.5">
+                          {savedLive.map(({ need }) => (
+                            <li key={need.id}>
+                              {/* In-page anchor to the live card below. */}
+                              <a
+                                href={`#opp-${need.id}`}
+                                className="inline-flex min-h-[2.75rem] flex-col justify-center rounded-md border border-ink-500 px-3 py-1.5 transition-colors hover:border-brand-blue"
+                                data-testid="opportunities-saved-item"
+                              >
+                                <span className="text-xs font-semibold text-text-primary">
+                                  {roleLabel(need.roleText)}
+                                </span>
+                                <span className="text-[11px] text-text-muted">
+                                  {scanLine(need)}
+                                </span>
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {savedStaleCount > 0 ? (
+                        /* One honest line — the demand behind these saves is
+                           no longer on the board (closed or unpublished). */
+                        <p
+                          className="text-xs text-text-muted"
+                          data-testid="opportunities-saved-stale"
+                        >
+                          {t("saved.noLongerOpen", { count: savedStaleCount })}
+                        </p>
+                      ) : null}
+                      <p className="text-[10px] leading-relaxed text-text-muted">
+                        {t("saved.privateHint")}
+                      </p>
+                    </section>
+                  ) : null}
+
                   {/* ── Filter chips (URL-param links, server-rendered) ── */}
                   <section
                     className="flex flex-col gap-3 rounded-lg border border-ink-600 bg-ink-800/30 p-4"
@@ -461,10 +643,11 @@ export default async function OpportunitiesPage({
                     </section>
                   ) : (
                     <ul className="flex flex-col gap-3" data-testid="opportunities-list">
-                      {filtered.map(({ need, fit, match, nextAction, interestStatus, structured }) => (
+                      {filtered.map(({ need, fit, match, nextAction, interestStatus, structured, saved }) => (
                         <li
                           key={need.id}
-                          className="card-border flex flex-col gap-3 p-4"
+                          id={`opp-${need.id}`}
+                          className="card-border flex scroll-mt-24 flex-col gap-3 p-4"
                           data-status={fit.status}
                         >
                           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -481,11 +664,24 @@ export default async function OpportunitiesPage({
                                 {startLabel(need.startPeriod)}
                               </p>
                             </div>
-                            <span
-                              className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[fit.status]}`}
-                            >
-                              {statusLabel(fit.status)}
-                            </span>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[fit.status]}`}
+                              >
+                                {statusLabel(fit.status)}
+                              </span>
+                              {/* Save toggle (#723-compat) — offered ONLY when
+                                  the owner-gated store exists; absence means
+                                  the control is simply not rendered. */}
+                              {result.savedAvailable ? (
+                                <WorkerSaveOpportunityButton
+                                  locale={locale}
+                                  requestId={need.id}
+                                  initialSaved={saved}
+                                  labels={savedLabels}
+                                />
+                              ) : null}
+                            </div>
                           </div>
                           {need.companyName ? (
                             <p className="text-xs text-text-secondary" data-testid="opportunity-company">
@@ -570,6 +766,7 @@ export default async function OpportunitiesPage({
                             showLabel={t("discovery.details.show")}
                             hideLabel={t("discovery.details.hide")}
                             testId="opportunity-details"
+                            recentlyViewedId={need.id}
                           >
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
                               <div className="min-w-0">
@@ -740,9 +937,16 @@ export default async function OpportunitiesPage({
                             </div>
                           ) : null}
                           <div className="flex flex-wrap items-center gap-3">
+                            {/* Compare selector — pure client selection of
+                                this already-loaded card (whitelisted facts
+                                only, precomputed server-side). */}
+                            <CompareToggleChip
+                              entry={buildCompareEntry(need, structured)}
+                              label={t("compare.toggle")}
+                            />
                             <Link
                               href={profileHref}
-                              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-primary hover:border-brand-blue"
+                              className="inline-flex min-h-[2.75rem] items-center rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-primary hover:border-brand-blue"
                             >
                               {t("ctaProfile")} →
                             </Link>
@@ -754,7 +958,12 @@ export default async function OpportunitiesPage({
                       ))}
                     </ul>
                   )}
-                </>
+
+                  {/* Compare (P2-PR5) — pure client state over the loaded
+                      cards; the sticky bar + whitelisted-facts table render
+                      only once something is selected. Nothing persists. */}
+                  <CompareBar labels={compareLabels} factLabels={compareFactLabels} />
+                </OpportunityCompareProvider>
               );
             })()
           )}

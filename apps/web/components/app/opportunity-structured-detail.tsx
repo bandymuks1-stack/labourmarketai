@@ -40,7 +40,9 @@ const CHIP =
 const CHIP_AMBER =
   "rounded-md border border-state-amber/40 bg-state-amber/10 px-2 py-0.5 text-[11px] text-state-amber";
 
-function payText(
+/** Pay display text (amount + explicit currency + unit, basis when stated).
+ *  Exported for reuse by the P2-PR5 compare facts — ONE pay rendering rule. */
+export function payText(
   compensation: PublicCompensation | undefined,
   ts: Translate,
   sd: Translate,

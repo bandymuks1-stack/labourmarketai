@@ -1687,6 +1687,42 @@
     "cta": "Tillbaka till start"
   },
   "opportunities": {
+    "saved": {
+      "save": "[EN] Save",
+      "saved": "[EN] Saved",
+      "unsave": "[EN] Remove from saved",
+      "privateHint": "[EN] Saving is private to your account — the company never sees who saved its listing.",
+      "sectionTitle": "[EN] Saved opportunities",
+      "noLongerOpen": "[EN] Saved earlier but no longer open on the board: {count}",
+      "error": "[EN] Could not update your saved list. Please try again."
+    },
+    "recent": {
+      "title": "[EN] Recently viewed",
+      "deviceOnly": "[EN] Stored only on this device — this list never leaves your browser and is not sent to the server.",
+      "clear": "[EN] Clear"
+    },
+    "compare": {
+      "toggle": "[EN] Compare",
+      "selectedLabel": "[EN] Selected",
+      "open": "[EN] Compare selected",
+      "title": "[EN] Compare opportunities",
+      "close": "[EN] Close",
+      "clear": "[EN] Clear selection",
+      "limitNote": "[EN] Choose 2–3 opportunities to compare.",
+      "notStated": "[EN] Not stated",
+      "fact": {
+        "pay": "[EN] Pay",
+        "hours": "[EN] Hours per week",
+        "start": "[EN] Start",
+        "engagement": "[EN] Engagement form",
+        "accommodation": "[EN] Accommodation",
+        "transport": "[EN] Transport",
+        "tools": "[EN] Tools",
+        "languages": "[EN] Languages",
+        "location": "[EN] Location",
+        "company": "[EN] Company"
+      }
+    },
     "discovery": {
       "filters": {
         "title": "[EN] Filter opportunities",

@@ -15,6 +15,7 @@ import {
 import { needFromRoleText } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
 import { listMyInterestSignals } from "./interest";
+import { listMySavedOpportunities } from "./saved-opportunities";
 import type { InterestStatus } from "./interest-snapshot";
 import {
   matchWorkerToNeed,
@@ -64,6 +65,9 @@ export interface OpportunityCard {
   readonly nextAction: WorkerNextAction;
   /** The worker's own interest status for this demand (null = none). */
   readonly interestStatus: InterestStatus | null;
+  /** True when the worker saved this demand as a PRIVATE bookmark (P2-PR5,
+   *  #723-compat). Always false while the owner-gated store is absent. */
+  readonly saved: boolean;
   /** Worker-safe structured demand detail (P2-PR2). Present only after the
    *  human-gated MP-3 RPC widening is applied AND the row carries a valid
    *  projection — otherwise null and the card degrades honestly ("detailed
@@ -82,6 +86,13 @@ export type WorkerOpportunitiesResult =
       /** True only when the interest table exists (owner-gated migration) —
        *  the UI offers the express-interest action only then. */
       readonly interestAvailable: boolean;
+      /** True only when the #723 saved-opportunities store exists — the save
+       *  toggle is rendered only then (feature-detected once per load). */
+      readonly savedAvailable: boolean;
+      /** The worker's own saved request ids (private bookmarks). The page
+       *  joins these against live rows; a saved id with no live row renders
+       *  one honest "no longer open" line — facts are never copied. */
+      readonly savedRequestIds: readonly string[];
       readonly opportunities: readonly OpportunityCard[];
     };
 
@@ -116,6 +127,10 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
 
   // Own interest map (empty + unavailable until the owner-gated table exists).
   const myInterest = await listMyInterestSignals(supabase, ctx.workerId);
+
+  // Own PRIVATE bookmarks (P2-PR5) — same honest feature detection: absent
+  // store → unavailable, and the board never renders the save toggle.
+  const mySaved = await listMySavedOpportunities(supabase, ctx.workerId);
 
   // Gated worker-visibility RPC — honest fallback when not yet applied.
   let needsDataAccess = true;
@@ -171,6 +186,7 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             match,
             nextAction,
             interestStatus: myInterest.byRequest.get(need.id) ?? null,
+            saved: mySaved.requestIds.has(need.id),
             // Present only after the MP-3 structured-exposure RPC recreate is
             // applied — the tolerant reader turns an absent/invalid field into
             // an honest null (same degradation pattern as transport/tools).
@@ -189,6 +205,8 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
     readiness,
     needsDataAccess,
     interestAvailable: myInterest.available,
+    savedAvailable: mySaved.available,
+    savedRequestIds: [...mySaved.requestIds],
     opportunities,
   };
 }
