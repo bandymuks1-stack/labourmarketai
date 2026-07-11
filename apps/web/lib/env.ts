@@ -69,6 +69,15 @@ const schema = z.object({
   AGENTAI_OS_ALERTS_ENABLED: z.enum(["true", "false"]).default("false"),
   AGENTAI_OS_ALERT_ENDPOINT: z.string().url().optional(),
   AGENTAI_OS_ALERT_TOKEN: z.string().optional(),
+
+  // ── Voice Work Journal transcription (server-only, never NEXT_PUBLIC) ──────
+  // Points at the LabourMarket.ai-controlled self-hosted whisper.cpp service
+  // (services/transcribe). OFF unless BOTH are set — the journal voice surface
+  // then shows its honest "transcription server not configured" state.
+  // The browser NEVER talks to the service and never sees the token: audio is
+  // proxied through a server action. See services/transcribe/README.md.
+  VOICE_TRANSCRIBE_URL: z.string().url().optional(),
+  VOICE_TRANSCRIBE_TOKEN: z.string().min(32).optional(),
 });
 
 const parsed = schema.safeParse({
@@ -102,6 +111,8 @@ const parsed = schema.safeParse({
   AGENTAI_OS_ALERTS_ENABLED: process.env.AGENTAI_OS_ALERTS_ENABLED,
   AGENTAI_OS_ALERT_ENDPOINT: process.env.AGENTAI_OS_ALERT_ENDPOINT,
   AGENTAI_OS_ALERT_TOKEN: process.env.AGENTAI_OS_ALERT_TOKEN,
+  VOICE_TRANSCRIBE_URL: process.env.VOICE_TRANSCRIBE_URL,
+  VOICE_TRANSCRIBE_TOKEN: process.env.VOICE_TRANSCRIBE_TOKEN,
 });
 
 if (!parsed.success) {

@@ -46,6 +46,10 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/inbox/quick": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/report": "REAL_LAUNCH_SURFACE",
   "dashboard/journal": "REAL_LAUNCH_SURFACE",
+  // Voice input method for the ONE journal (PR J): real recording +
+  // transcript review; degrades honestly until the owner deploys the
+  // self-hosted transcription service.
+  "dashboard/journal/voice": "REAL_LAUNCH_SURFACE",
   "dashboard/market-map": "REAL_LAUNCH_SURFACE",
   "dashboard/opportunities": "REAL_LAUNCH_SURFACE",
   // Unified planning agenda (control room PR E) — composes existing

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
@@ -17,6 +17,7 @@ import {
   type JournalFragmentSuggestion,
 } from "@/lib/structuring/extract-journal-suggestions";
 import { dedupeSignalsByLabel } from "@/lib/structuring/signal-dedupe";
+import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { localizeCapabilityLabel } from "@/lib/structuring/capability-labels";
 import type { SkillConfidence } from "@/lib/structuring/skill-recognition";
 import {
@@ -179,6 +180,30 @@ export function JournalEntryComposer({
   // Activation funnel (P0-A): fire once when the worker first types into a
   // NEW entry (skip edits of an existing entry, which start pre-filled).
   const journalStartedRef = useRef(Boolean(editingEntry));
+  // Voice hand-off: the voice surface (dashboard/journal/voice) stores the
+  // worker-REVIEWED transcript under a read-once sessionStorage key. It only
+  // ever seeds a NEW empty entry — never an edit, never a non-empty draft —
+  // and the composer's normal suggestion review + createJournalEntry stay the
+  // ONLY write path (voice adds no second journal system).
+  useEffect(() => {
+    if (editingEntry) return;
+    let draft: string | null = null;
+    try {
+      draft = window.sessionStorage.getItem(VOICE_TRANSCRIPT_DRAFT_KEY);
+      if (draft !== null) {
+        window.sessionStorage.removeItem(VOICE_TRANSCRIPT_DRAFT_KEY);
+      }
+    } catch {
+      draft = null;
+    }
+    const trimmed = (draft ?? "").trim();
+    if (trimmed) {
+      setText((prev) => (prev.trim() ? prev : trimmed));
+      journalStartedRef.current = true;
+    }
+    // Run once on mount only — the key is consumed above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   function noteJournalEntryStarted(next: string): void {
     if (journalStartedRef.current) return;
     if (next.trim().length === 0) return;

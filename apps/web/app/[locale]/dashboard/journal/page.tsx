@@ -593,6 +593,15 @@ export default async function JournalPage({
           >
             {t("composerBenefit")}
           </p>
+          {/* Voice input method — same ONE composer/save path; the nested
+              voice surface only produces reviewed text (gap map §3/§4). */}
+          <Link
+            href="/dashboard/journal/voice"
+            className="inline-flex min-h-[2.75rem] w-fit items-center rounded-lg border border-border bg-surface-1 px-4 text-sm font-medium text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
+            data-testid="voice-entry-link"
+          >
+            {t("voice.entryCta")}
+          </Link>
           <JournalEntryComposer
             // Remount the composer whenever the edit target changes. The
             // composer derives its textarea state from `editingEntry` with
