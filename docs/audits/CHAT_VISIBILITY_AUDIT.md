@@ -196,3 +196,16 @@ audit.
   existence/serial-wiring of the e2e. Runs in plain CI (`pnpm -F web test`),
   with no database, so the negative-visibility guarantees survive every future
   refactor.
+
+---
+
+## 7. Service-role caller inventory — additions after the audit
+
+- **2026-07-11 — `lib/admin/launch-readiness.ts`** (launch repair Scope E,
+  operator launch-readiness view). READ-ONLY aggregate head-counts over
+  `workers`, `profiles`, `companies`, `company_need_public_intakes`,
+  `customer_requests`, `organizations`. The intake table deliberately has no
+  anon/authenticated read policy (PR #678), so the service role is the only
+  read path. Every entry point re-checks `isSuperadmin()` first; the module
+  touches no chat table, writes nothing, and sends nothing outbound. Pinned in
+  the `chat-visibility-rls.test.ts` caller inventory.

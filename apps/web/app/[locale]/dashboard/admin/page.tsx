@@ -77,6 +77,7 @@ export default async function AdminDashboardPage({
   const tReview = await getTranslations("admin.requestReview");
   const tNeed = await getTranslations("needStructuring");
   const tPool = await getTranslations("candidatePool");
+  const tLaunchReadiness = await getTranslations("adminLaunchReadiness");
   const supabase = await createClient();
 
   // Aggregate counts. Single head queries; admin RLS allows broad SELECT.
@@ -283,6 +284,11 @@ export default async function AdminDashboardPage({
       title: t("room.groups.quality.title"),
       purpose: t("room.groups.quality.purpose"),
       links: [
+        {
+          href: "/dashboard/admin/launch-readiness",
+          label: tLaunchReadiness("title"),
+          testId: "admin-tools-hub-launch-readiness",
+        },
         {
           href: "/dashboard/admin/readiness",
           label: t("hub.readiness"),

@@ -6415,6 +6415,39 @@
     "note": "There is no automatic job board and no automatic matching here yet — during early access, selection is coordinated by a person. What you see is what really runs.",
     "ctaLabel": "Submit a worker need →"
   },
+  "adminLaunchReadiness": {
+    "eyebrow": "Launch readiness",
+    "title": "Real supply and demand before marketing",
+    "intro": "Live counts over real production data. “—” means the read was unavailable — never a guessed number. There are no percentages and no readiness badges here: the honest gap analysis lives in docs/launch/real-supply-readiness-gap-v1.md.",
+    "consent": {
+      "label": "Consented worker profiles (target: {min}–{max} before marketing)",
+      "met": "Minimum target reached. Keep collecting explicit consent for every new profile.",
+      "notMet": "Below the pre-marketing target. Collect real, explicitly consenting workers before spending on reach."
+    },
+    "supply": {
+      "title": "Supply — workers",
+      "total": "Worker profiles",
+      "withProfession": "With a profession",
+      "withLocation": "With a location",
+      "available": "Marked available",
+      "withSalary": "With a pay expectation",
+      "withJournal": "With journal evidence",
+      "withReadyDocs": "With ready documents",
+      "teams": "Teams (organizations)",
+      "note": "Counts use existing columns only: worker_professions, current_location_country, availability_status, salary expectations, journal entries, operator-checked document status, organizations of type team."
+    },
+    "demand": {
+      "title": "Demand — companies and needs",
+      "companies": "Companies",
+      "intakesNew": "Public needs — new",
+      "intakesContacted": "Public needs — contacted",
+      "intakesQualified": "Public needs — qualified",
+      "intakesRejected": "Public needs — rejected",
+      "requestsSubmitted": "Submitted customer requests",
+      "queueLink": "Open the company-need intake queue"
+    },
+    "gapNote": "What the data model cannot prove today (consent provenance, availability freshness, brigade composition, profile source) is deliberately NOT shown as a number — see docs/launch/real-supply-readiness-gap-v1.md."
+  },
   "billingStatus": {
     "badge": {
       "disabled": "PAYMENTS OFF",

@@ -6414,6 +6414,39 @@
     "note": "Er is hier nog geen automatische vacaturebank en geen automatische matching — tijdens de vroege toegang wordt de selectie door een mens gecoördineerd. Wat je ziet is wat er echt draait.",
     "ctaLabel": "Dien een personeelsbehoefte in →"
   },
+  "adminLaunchReadiness": {
+    "eyebrow": "Lanceringsgereedheid",
+    "title": "Echt aanbod en echte vraag vóór marketing",
+    "intro": "Live tellingen op echte productiedata. “—” betekent dat de meting niet beschikbaar was — nooit een geschat getal. Geen percentages en geen gereedheidsbadges: de eerlijke gap-analyse staat in docs/launch/real-supply-readiness-gap-v1.md.",
+    "consent": {
+      "label": "Werknemersprofielen met toestemming (doel: {min}–{max} vóór marketing)",
+      "met": "Minimumdoel bereikt. Blijf expliciete toestemming verzamelen voor elk nieuw profiel.",
+      "notMet": "Onder het pre-marketingdoel. Verzamel eerst echte werknemers met expliciete toestemming."
+    },
+    "supply": {
+      "title": "Aanbod — werknemers",
+      "total": "Werknemersprofielen",
+      "withProfession": "Met een beroep",
+      "withLocation": "Met een locatie",
+      "available": "Gemarkeerd als beschikbaar",
+      "withSalary": "Met een loonverwachting",
+      "withJournal": "Met werkjournaal-items",
+      "withReadyDocs": "Met gereede documenten",
+      "teams": "Ploegen (organisaties)",
+      "note": "Tellingen gebruiken alleen bestaande kolommen: worker_professions, current_location_country, availability_status, loonverwachtingen, journaalitems, door de operator gecontroleerde documentstatus, organisaties van het type team."
+    },
+    "demand": {
+      "title": "Vraag — bedrijven en behoeften",
+      "companies": "Bedrijven",
+      "intakesNew": "Publieke behoeften — nieuw",
+      "intakesContacted": "Publieke behoeften — gecontacteerd",
+      "intakesQualified": "Publieke behoeften — gekwalificeerd",
+      "intakesRejected": "Publieke behoeften — afgewezen",
+      "requestsSubmitted": "Ingediende klantaanvragen",
+      "queueLink": "Open de wachtrij met personeelsbehoeften"
+    },
+    "gapNote": "Wat het datamodel vandaag niet kan bewijzen (herkomst van toestemming, actualiteit van beschikbaarheid, ploegsamenstelling, profielbron) wordt bewust NIET als getal getoond — zie docs/launch/real-supply-readiness-gap-v1.md."
+  },
   "billingStatus": {
     "badge": {
       "disabled": "BETALINGEN UIT",

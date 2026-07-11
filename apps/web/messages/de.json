@@ -6414,6 +6414,39 @@
     "note": "Es gibt hier noch keine automatische Jobbörse und kein automatisches Matching — während des Early Access wird die Auswahl von einem Menschen koordiniert. Was Sie sehen, ist das, was wirklich läuft.",
     "ctaLabel": "Personalbedarf einreichen →"
   },
+  "adminLaunchReadiness": {
+    "eyebrow": "Startbereitschaft",
+    "title": "Echtes Angebot und echte Nachfrage vor dem Marketing",
+    "intro": "Live-Zählungen auf echten Produktionsdaten. „—“ bedeutet, dass die Abfrage nicht verfügbar war — niemals eine geschätzte Zahl. Keine Prozentwerte und keine Bereitschafts-Badges: die ehrliche Lückenanalyse steht in docs/launch/real-supply-readiness-gap-v1.md.",
+    "consent": {
+      "label": "Arbeitskräfte-Profile mit Einwilligung (Ziel: {min}–{max} vor dem Marketing)",
+      "met": "Mindestziel erreicht. Sammeln Sie weiterhin eine ausdrückliche Einwilligung für jedes neue Profil.",
+      "notMet": "Unter dem Vor-Marketing-Ziel. Gewinnen Sie zuerst echte Arbeitskräfte mit ausdrücklicher Einwilligung."
+    },
+    "supply": {
+      "title": "Angebot — Arbeitskräfte",
+      "total": "Arbeitskräfte-Profile",
+      "withProfession": "Mit Beruf",
+      "withLocation": "Mit Standort",
+      "available": "Als verfügbar markiert",
+      "withSalary": "Mit Lohnerwartung",
+      "withJournal": "Mit Arbeitsjournal-Einträgen",
+      "withReadyDocs": "Mit bereiten Dokumenten",
+      "teams": "Teams (Organisationen)",
+      "note": "Gezählt wird nur über bestehende Spalten: worker_professions, current_location_country, availability_status, Lohnerwartungen, Journaleinträge, vom Operator geprüfter Dokumentstatus, Organisationen vom Typ team."
+    },
+    "demand": {
+      "title": "Nachfrage — Unternehmen und Bedarfe",
+      "companies": "Unternehmen",
+      "intakesNew": "Öffentliche Bedarfe — neu",
+      "intakesContacted": "Öffentliche Bedarfe — kontaktiert",
+      "intakesQualified": "Öffentliche Bedarfe — qualifiziert",
+      "intakesRejected": "Öffentliche Bedarfe — abgelehnt",
+      "requestsSubmitted": "Eingereichte Kundenanfragen",
+      "queueLink": "Warteschlange der Personalbedarfe öffnen"
+    },
+    "gapNote": "Was das Datenmodell heute nicht beweisen kann (Herkunft der Einwilligung, Aktualität der Verfügbarkeit, Kolonnen-Zusammensetzung, Profilquelle), wird bewusst NICHT als Zahl angezeigt — siehe docs/launch/real-supply-readiness-gap-v1.md."
+  },
   "billingStatus": {
     "badge": {
       "disabled": "ZAHLUNGEN AUS",
