@@ -778,6 +778,29 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: ["admin", "verwaltung", "administrator"],
     },
   },
+  {
+    // CRM / demand pipeline (control room PR F) — ONE read queue over every
+    // existing demand source (requests, public intakes, leads, waitlist).
+    // Read-only consolidation; statuses stay verbatim, changes stay on each
+    // row's own surface.
+    id: "admin_pipeline",
+    route: "/dashboard/admin/pipeline",
+    audience: "admin",
+    labels: {
+      en: "Demand pipeline (operator queue)",
+      lt: "Paklausos eiga (operatoriaus eilė)",
+      ru: "Воронка спроса (очередь оператора)",
+      nl: "Vraagpijplijn (operatorwachtrij)",
+      de: "Nachfrage-Pipeline (Operator-Warteschlange)",
+    },
+    synonyms: {
+      en: ["pipeline", "crm", "demand pipeline", "sales queue"],
+      lt: ["eiga", "crm", "paklausos eiga", "pardavimų eilė"],
+      ru: ["воронка", "crm", "очередь спроса"],
+      nl: ["pijplijn", "crm", "verkooppijplijn"],
+      de: ["pipeline", "crm", "vertriebspipeline"],
+    },
+  },
 ] as const;
 
 /** Max results the finder shows — keeps the list scannable on mobile. */

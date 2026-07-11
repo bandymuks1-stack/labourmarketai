@@ -74,6 +74,9 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/admin/market": "INTERNAL_ADMIN",
   "dashboard/admin/matching": "INTERNAL_ADMIN",
   "dashboard/admin/need-structuring": "INTERNAL_ADMIN",
+  // CRM / demand pipeline (control room PR F) — read consolidation over the
+  // existing demand sources; no second funnel, no mutation.
+  "dashboard/admin/pipeline": "INTERNAL_ADMIN",
   "dashboard/admin/project-truth": "INTERNAL_ADMIN",
   "dashboard/admin/readiness": "INTERNAL_ADMIN",
   "dashboard/admin/support": "INTERNAL_ADMIN",

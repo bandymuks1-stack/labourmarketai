@@ -14,8 +14,8 @@ owner/provider action named in the gate register) · `NOT_STARTED`.
 | B | Control room foundation | DONE | #705 / `3e568d2` | `/dashboard` (module registry + status strip + role grid; nav/command wired) | feature-availability registry, spine counts (request-cached single read), roles | RLS as today; badges spine-only | none | CI green; deployed via Vercel on merge | none | — |
 | C | Unified activity centre | DONE | #706 / `2b0742a` | `/dashboard/activity` + status-strip/bell "view all" links | notification spine (6 signals, one request-cached read) | RLS + existing seen RPCs; links-only, no fake mark-read | none (persistent feed + demand signals stay migration-gated) | CI green; deployed on merge | events-table apply (optional, for feed/demand events) | — |
 | D | Work/task management | GATED (UI merged; table unapplied) | D1 #707 / `832680e`; D2 draft #708 (needs-human-gate) | `/dashboard/tasks` (my-tasks, board, create/edit/status); ops-page bridge | `work_tasks` via 3 SECURITY DEFINER RPCs (unapplied); honest "preparing" state; spine signal `open-task-attention` (0 pre-apply) | RLS SELECT creator/assignee/admin/`can_manage_project`; writes RPC-only (guard-pinned) | D2 RED, human-gated, rollback sibling, classifier green (4 patterns acknowledged) | D1 CI green, merged | owner applies #708 via MCP + ledger entry | — (gate visible on #708) |
-| E | Planning/calendar | IN_PROGRESS | this PR | `/dashboard/planning` (agenda + 7-day strip, filters, conflicts) | bookings (both directions), company project bands, due-dated tasks (degrading); worker-side assigned-project read skipped honestly (no RLS-scoped helper exists) | caller-scoped reads only; read-only; no admin client (guard-pinned) | none | CI + guard suite | none | merge, start PR F |
-| F | CRM/demand pipeline | NOT_STARTED | — | admin pipeline queue | lead-intake-model + public intakes | service-role + superadmin (unchanged) | none (contacts/ledger gated) | — | contacts/ledger apply (optional) | extend lead-intake-model |
+| E | Planning/calendar | DONE | #709 / `71cf03a6` | `/dashboard/planning` (agenda + 7-day strip, filters, conflicts) | bookings (both directions), company project bands, due-dated tasks (degrading); worker-side assigned-project read skipped honestly (no RLS-scoped helper exists) | caller-scoped reads only; read-only; no admin client (guard-pinned) | none | CI green; deployed on merge | none | — |
+| F | CRM/demand pipeline | IN_PROGRESS | this PR | `/dashboard/admin/pipeline` (stage summary, filters, search, dedup chips); links from admin hub, sales panel, intake queue | leads + waitlist + operator-state customer_requests (sales seed) + company_need_public_intakes (admin seed) — composition only, no new call sites | superadmin gating unchanged; read-only, no mutation, no outbound (guard-pinned) | none (contacts/stage-ledger/dedup-index stay migration-gated) | CI + guard suite | contacts/ledger apply (optional) | merge, start PR G |
 | G | Project ops + resources | NOT_STARTED | — | `/dashboard/projects/[id]/operations` | getProjectOperations + journal + gallery | RLS as today | issues/milestones gated | — | drafts apply | compose surface |
 | H | Document centre | NOT_STARTED | — | `/dashboard/documents` | worker_documents + photos + CV/evidence + handover | RLS + consent aggregates | bucket gated | — | worker-docs bucket | consolidation hub |
 | I | Finance foundation | NOT_STARTED | — | `/dashboard/finance` (planned) | new invoice/expense tables (gated) | owner-scoped RLS, RPC writes | RED, human-gated | — | owner apply | shell + migration PR |
@@ -41,7 +41,17 @@ Results recorded here per PR as they run.
 | C (activity centre) | same suite — vitest 531 files / 8379 tests, primary-route-smoke 37 routes | ALL PASS; CI green; merged #706 |
 | D1 (tasks repo-safe layer) | same suite — vitest 532 files / 8412 tests, primary-route-smoke 38 routes | ALL PASS; CI green; merged #707 |
 | D2 (work_tasks migration) | migration-safety self-test 26/26; classifier on diff GREEN (4 RED patterns human-gate-acknowledged); work-tasks guard 30/30 | draft #708, needs-human-gate — awaiting owner apply |
-| E (planning) | same suite — vitest 533 files / 8451 tests, primary-route-smoke 39 routes | ALL PASS locally; CI on PR |
+| E (planning) | same suite — vitest 533 files / 8451 tests, primary-route-smoke 39 routes | ALL PASS; CI green; merged #709 |
+| F (CRM pipeline) | same suite — vitest 534 files / 8485 tests | ALL PASS locally; CI on PR |
+
+PR F stage mapping (presentation-only; stored statuses always shown verbatim):
+customer_requests draft→excluded, submitted→new, in_review→qualifying,
+needs_followup→follow_up, approved→active, closed→closed · public intakes new→new,
+contacted→contacted, qualified→qualifying, rejected→closed · leads new→new,
+contacted→contacted, qualified→qualifying, won→active, lost→closed · waitlist→new
+(storedStatus null rendered as "—"). Dedup: display-only chips on normalized
+company-name/email key collisions; no merge action. conversation_source_context
+read-only history noted as a possible follow-up.
 
 PR E notes: pure agenda model + conflict detection mirroring the booking accept guard's
 inclusive daterange && semantics (accepted incoming bookings + own assignments only —

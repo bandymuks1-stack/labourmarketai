@@ -5271,7 +5271,54 @@
     "internalNote": "Interner Eintrag — es werden keine E-Mails oder Nachrichten an irgendjemanden gesendet.",
     "explanationPending": "Die Erläuterung wird aus der litauischen Originalversion vorbereitet."
   },
+  "crmPipeline": {
+    "eyebrow": "Operator-Warteschlange",
+    "title": "Nachfrage-Pipeline",
+    "subtitle": "Alle Nachfragequellen in einer Leseansicht: eingereichte Anfragen, öffentliche Bedarfsformulare von Firmen, gespeicherte Leads und die Warteliste.",
+    "back": "Zurück zum Kontrollraum",
+    "honestNote": "Nur Leseansicht. Die Pipeline-Phase ist eine Darstellungslinse — jede Zeile zeigt zusätzlich ihren gespeicherten Status wörtlich, und Statusänderungen bleiben auf der eigenen Seite der Zeile. Nichts hier kontaktiert jemanden oder ändert etwas.",
+    "summaryHeading": "Phasenübersicht",
+    "windowNote": "Zahlen werden über die tatsächlich geladenen Zeilen berechnet (die Vertriebsquellen laden je die 50 neuesten) — nie geschätzt.",
+    "duplicateChip": "Mögliches Duplikat",
+    "storedStatusLabel": "Gespeicherter Status",
+    "createdLabel": "Erstellt",
+    "openSurface": "Eigene Seite öffnen",
+    "empty": "Noch keine Nachfragezeilen geladen. Sobald eine Anfrage, ein Formular, ein Lead oder eine Anmeldung existiert, erscheint sie hier.",
+    "noMatches": "Keine Zeilen entsprechen den aktuellen Filtern.",
+    "viewPipeline": "Nachfrage-Pipeline ansehen",
+    "stages": {
+      "new": "Neu",
+      "contacted": "Kontaktiert",
+      "qualifying": "In Prüfung",
+      "follow_up": "Wartet auf Folgeschritt",
+      "active": "Aktiv",
+      "closed": "Geschlossen"
+    },
+    "sources": {
+      "customer_request": "Nachfrageanfrage",
+      "public_intake": "Öffentliches Formular",
+      "lead": "Lead",
+      "waitlist": "Warteliste"
+    },
+    "sourceStates": {
+      "needs_admin_read": "in dieser Umgebung nicht lesbar",
+      "service_key_missing": "Serviceverbindung nicht konfiguriert",
+      "needs_migration": "wartet auf die Migration",
+      "not_admin": "Admin-Prüfung nicht bestanden",
+      "error": "konnte gerade nicht gelesen werden"
+    },
+    "filters": {
+      "sourceLabel": "Quelle",
+      "stageLabel": "Phase",
+      "all": "Alle",
+      "searchLabel": "Suche",
+      "searchPlaceholder": "Nach Titel, Firma oder Status filtern",
+      "searchSubmit": "Anwenden",
+      "reset": "Zurücksetzen"
+    }
+  },
   "salesIntake": {
+    "viewPipeline": "Nachfrage-Pipeline ansehen",
     "title": "Vertriebseingang",
     "intro": "Ein Überblick darüber, wer hereinkommt: eingereichte Bedarfsanfragen in Prüfung, Warteliste-Anmeldungen und gespeicherte Leads. Nur Ansicht — echte erfasste Zeilen, hier nichts bearbeitbar.",
     "honestNote": "Nur Ansicht. Nichts hier kontaktiert irgendjemanden — keine E-Mail, keine SMS, keine Nachrichten. Die einzige Aktion erfasst eine interne Folgeaufgabe für das Team.",

@@ -5271,7 +5271,54 @@
     "internalNote": "Vidinis įrašas — jokie laiškai ar žinutės niekam nesiunčiami.",
     "explanationPending": "Paaiškinimas ruošiamas iš lietuviško pagrindinio teksto."
   },
+  "crmPipeline": {
+    "eyebrow": "Operatoriaus eilė",
+    "title": "Paklausos eiga",
+    "subtitle": "Visi paklausos šaltiniai viename peržiūros lange: pateiktos užklausos, viešos įmonių poreikio anketos, išsaugoti potencialūs klientai ir laukiančiųjų sąrašas.",
+    "back": "Grįžti į valdymo pultą",
+    "honestNote": "Tik peržiūra. Eigos etapas yra pateikimo pjūvis — kiekviena eilutė kartu rodo tikrą įrašytą būseną, o būsenos keičiamos tik jos pačios puslapyje. Niekas čia su niekuo nesusisiekia ir nieko nekeičia.",
+    "summaryHeading": "Etapų suvestinė",
+    "windowNote": "Skaičiai skaičiuojami tik iš realiai užkrautų eilučių (pardavimų šaltiniai užkrauna po 50 naujausių) — niekada nespėjami.",
+    "duplicateChip": "Galimas dublikatas",
+    "storedStatusLabel": "Įrašyta būsena",
+    "createdLabel": "Sukurta",
+    "openSurface": "Atidaryti jos puslapį",
+    "empty": "Paklausos eilučių dar nėra. Kai atsiras užklausa, anketa, potencialus klientas ar registracija, ji bus rodoma čia.",
+    "noMatches": "Nė viena eilutė neatitinka pasirinktų filtrų.",
+    "viewPipeline": "Peržiūrėti paklausos eigą",
+    "stages": {
+      "new": "Nauja",
+      "contacted": "Susisiekta",
+      "qualifying": "Vertinama",
+      "follow_up": "Laukia tęsinio",
+      "active": "Aktyvi",
+      "closed": "Uždaryta"
+    },
+    "sources": {
+      "customer_request": "Paklausos užklausa",
+      "public_intake": "Vieša anketa",
+      "lead": "Potencialus klientas",
+      "waitlist": "Laukiančiųjų sąrašas"
+    },
+    "sourceStates": {
+      "needs_admin_read": "šioje aplinkoje neperskaitoma",
+      "service_key_missing": "nesukonfigūruotas serviso ryšys",
+      "needs_migration": "laukia migracijos",
+      "not_admin": "nepraeitas administratoriaus patikrinimas",
+      "error": "šiuo metu nepavyko perskaityti"
+    },
+    "filters": {
+      "sourceLabel": "Šaltinis",
+      "stageLabel": "Etapas",
+      "all": "Visi",
+      "searchLabel": "Paieška",
+      "searchPlaceholder": "Filtruoti pagal pavadinimą, įmonę ar būseną",
+      "searchSubmit": "Taikyti",
+      "reset": "Atstatyti"
+    }
+  },
   "salesIntake": {
+    "viewPipeline": "Peržiūrėti paklausos eigą",
     "title": "Pardavimų srautas",
     "intro": "Tik peržiūrai skirtas vaizdas, kas ateina: pateiktos poreikio užklausos peržiūroje, laukiančiųjų sąrašo registracijos ir įrašyti kontaktai. Tik realūs įrašai.",
     "honestNote": "Tik skaitymui. Niekas čia su niekuo nesusisiekia — jokių el. laiškų, SMS ar žinučių. Vienintelis veiksmas — vidinės tolesnio veiksmo užduoties įrašymas komandai.",

@@ -44,6 +44,7 @@ export default async function AdminCompanyNeedIntakesPage({
   await requireSuperadmin(locale);
 
   const t = await getTranslations("admin.companyNeedIntakes");
+  const tPipeline = await getTranslations("crmPipeline");
   const result = await listCompanyNeedIntakes();
   const rows = result.kind === "ok" ? result.rows : [];
   const newCount = rows.filter((r) => r.status === "new").length;
@@ -94,6 +95,15 @@ export default async function AdminCompanyNeedIntakesPage({
           className="mt-1 self-start text-xs text-text-secondary hover:underline"
         >
           ← {t("back")}
+        </Link>
+        {/* Control room PR F — these rows also appear in the consolidated
+            demand pipeline read view (read-only; statuses change here). */}
+        <Link
+          href={"/dashboard/admin/pipeline" as "/dashboard"}
+          className="self-start text-xs text-brand-blue hover:underline"
+          data-testid="company-need-intakes-view-pipeline"
+        >
+          {tPipeline("viewPipeline")} →
         </Link>
       </header>
 

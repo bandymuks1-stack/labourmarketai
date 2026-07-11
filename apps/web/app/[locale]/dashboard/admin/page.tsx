@@ -78,6 +78,7 @@ export default async function AdminDashboardPage({
   const tNeed = await getTranslations("needStructuring");
   const tPool = await getTranslations("candidatePool");
   const tLaunchReadiness = await getTranslations("adminLaunchReadiness");
+  const tPipeline = await getTranslations("crmPipeline");
   const supabase = await createClient();
 
   // Aggregate counts. Single head queries; admin RLS allows broad SELECT.
@@ -242,6 +243,13 @@ export default async function AdminDashboardPage({
           href: "/dashboard/admin/company-need-intakes",
           label: t("companyNeedIntakes.title"),
           testId: "admin-tools-hub-company-need-intakes",
+        },
+        {
+          // CRM / demand pipeline (control room PR F) — one read queue over
+          // every existing demand source; statuses verbatim, no mutation.
+          href: "/dashboard/admin/pipeline",
+          label: tPipeline("title"),
+          testId: "admin-tools-hub-pipeline",
         },
       ],
     },
