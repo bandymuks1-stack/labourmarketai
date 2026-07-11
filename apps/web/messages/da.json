@@ -1686,7 +1686,159 @@
     "body": "Denne adresse findes ikke — den kan være tastet forkert, eller siden er flyttet.",
     "cta": "Tilbage til start"
   },
+  "opportunities": {
+    "saved": {
+      "save": "Gem",
+      "saved": "Gemt",
+      "unsave": "Fjern fra gemte",
+      "privateHint": "At gemme er privat på din konto — virksomheden ser aldrig, hvem der har gemt dens opslag.",
+      "sectionTitle": "Gemte muligheder",
+      "noLongerOpen": "Tidligere gemt, men ikke længere åben på tavlen: {count}",
+      "error": "Kunne ikke opdatere din gemte liste. Prøv igen."
+    },
+    "recent": {
+      "title": "Senest viste",
+      "deviceOnly": "Gemmes kun på denne enhed — listen forlader aldrig din browser og sendes ikke til serveren.",
+      "clear": "Ryd"
+    },
+    "compare": {
+      "toggle": "Sammenlign",
+      "selectedLabel": "Valgt",
+      "open": "Sammenlign valgte",
+      "title": "Sammenlign muligheder",
+      "close": "Luk",
+      "clear": "Ryd valg",
+      "limitNote": "Vælg 2–3 muligheder at sammenligne.",
+      "notStated": "Ikke oplyst",
+      "fact": {
+        "pay": "Løn",
+        "hours": "Timer om ugen",
+        "start": "Start",
+        "engagement": "Ansættelsesform",
+        "accommodation": "Indkvartering",
+        "transport": "Transport",
+        "tools": "Værktøj",
+        "languages": "Sprog",
+        "location": "Sted",
+        "company": "Virksomhed"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "Filtrer muligheder",
+        "profession": "Arbejdstype",
+        "country": "Land",
+        "start": "Start",
+        "accommodation": "Indkvartering",
+        "transport": "Transport",
+        "tool": "Nødvendigt værktøj",
+        "activeCount": "Aktive filtre: {count}",
+        "reset": "Nulstil filtre"
+      },
+      "sort": {
+        "label": "Sortering",
+        "relevance": "Bedste match først",
+        "newest": "Nyeste først"
+      },
+      "emptyFiltered": {
+        "title": "Ingen muligheder matcher disse filtre",
+        "body": "Aktive filtre: {filters}. Fjern nogle filtre, eller nulstil dem for at se mere.",
+        "reset": "Nulstil filtre"
+      },
+      "details": {
+        "show": "Flere detaljer",
+        "hide": "Skjul detaljer"
+      },
+      "tiers": {
+        "blocking": "Passer ikke",
+        "strengths": "Passer",
+        "negotiables": "Punkter til drøftelse",
+        "missing": "Manglende oplysninger"
+      },
+      "missing": {
+        "worker": "Du har ikke angivet: {criterion}",
+        "demand": "Virksomheden har ikke angivet: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Nødvendige færdigheder",
+        "evidence_tiers": "Dokumentation for færdigheder",
+        "profession": "Erhverv",
+        "language": "Sprog",
+        "country_location": "Land og sted",
+        "availability": "Tilgængelighed",
+        "pay_ceiling": "Lønforventning",
+        "accommodation": "Indkvartering",
+        "compensation": "Løn",
+        "start_date": "Startdato",
+        "shifts_hours": "Vagter og timer",
+        "engagement_form": "Kontraktform",
+        "licence_categories": "Kørekort",
+        "own_vehicle": "Egen bil",
+        "own_tools": "Eget værktøj",
+        "pay_basis": "Lønbasis (brutto/netto)",
+        "night_shifts": "Nattevagter",
+        "weekend_shifts": "Weekendvagter",
+        "overtime": "Overarbejde"
+      },
+      "how": {
+        "title": "Sådan fungerer matching",
+        "body": "Matching følger faste, deterministiske regler over de fakta, begge sider har angivet - nødvendige færdigheder, sprog, sted, tilgængelighed, løn og kontraktform. En manglende oplysning vises som manglende og gættes aldrig. Ingen kunstig intelligens træffer beslutningen, og der findes ingen samlet personscore - kun match inden for denne ene mulighed.",
+        "version": "Beregningsversion: {version} - deterministiske regler"
+      }
+    },
+    "structured": {
+      "detailTitle": "Angivne arbejdsvilkår",
+      "notProvided": "Virksomheden har endnu ikke angivet detaljerede arbejdsvilkår for dette opslag — kun fakta ovenfor er angivet.",
+      "gapsTitle": "Ikke angivet af virksomheden",
+      "yes": "Ja",
+      "no": "Nej",
+      "payLabel": "Løn",
+      "amountFrom": "fra {amount}",
+      "amountUpTo": "op til {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} t/uge",
+      "chipMinHours": "mindst {hours} t/uge",
+      "chipStartFrom": "start fra {from}",
+      "chipStartWindow": "start {from} – {to}",
+      "chipDeadline": "ansøg senest {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} år",
+      "km": "{km} km",
+      "minutes": "{min} min.",
+      "probationLabel": "Prøvetid",
+      "extensionPossibleLabel": "Forlængelse mulig",
+      "scheduleNoticeLabel": "Vagtplan varsles",
+      "expectedResponseLabel": "Svar inden for",
+      "firstPaymentLabel": "Første udbetaling inden for",
+      "travelMinutesLabel": "Rejsetid til arbejdsstedet",
+      "registrationPossibleLabel": "Adresseregistrering mulig",
+      "availableFromLabel": "Tilgængelig fra",
+      "similarProjectLabel": "Erfaring med lignende projekter",
+      "driverSupplementLabel": "Chaufførtillæg",
+      "siteModeLabel": "Arbejdssteder",
+      "siteMode": {
+        "single": "Ét arbejdssted",
+        "multiple": "Flere arbejdssteder",
+        "mobile": "Mobil / skiftende arbejdssteder"
+      },
+      "workModeLabel": "Arbejdsform",
+      "workMode": {
+        "onsite": "På stedet",
+        "remote": "Fjernarbejde",
+        "hybrid": "Hybrid"
+      }
+    }
+  },
   "scouting": {
+    "tiers": {
+      "negotiables": "Punkter til drøftelse",
+      "missing": "Manglende oplysninger"
+    },
+    "missingSide": {
+      "worker": "Kandidaten har ikke angivet: {criterion}",
+      "demand": "Din anmodning angiver ikke: {criterion}"
+    },
     "title": "Scouting",
     "intro": "Vælg et af dine strukturerede behov for at se matchende arbejdere, hvorfor de passer, og tilføj dem til en shortlist.",
     "pickDemand": "Vælg et behov",
@@ -1953,5 +2105,147 @@
     "prefillLoading": "Indlæser…",
     "prefillEmpty": "Ingen tidligere forespørgsel fundet",
     "prefillDone": "Udfyldt fra din seneste forespørgsel — gennemgå og redigér"
+  },
+  "workerPrefs": {
+    "title": "Arbejdspræferencer",
+    "hint": "Angiv kun det, der faktisk gælder for dig — alt, der står som ”Ikke angivet”, forbliver ikke angivet. Disse præferencer deles kun i henhold til dine privatlivssamtykker.",
+    "willingToRelocate": "Villig til at flytte for arbejde",
+    "needsAccommodation": "Har brug for indkvartering",
+    "hasTransport": "Har egen transport",
+    "teamAvailable": "Kan arbejde i sjak",
+    "soloAvailable": "Kan arbejde alene",
+    "maxTripDays": "Længste udstationering (dage)",
+    "contractType": "Foretrukken kontraktform",
+    "note": "Bemærkning om rådighed",
+    "triState": {
+      "notStated": "Ikke angivet",
+      "yes": "Ja",
+      "no": "Nej"
+    },
+    "contract": {
+      "employment": "Ansættelseskontrakt",
+      "subcontract": "Underentreprise",
+      "temporary": "Midlertidigt arbejde",
+      "any": "Enhver kontraktform"
+    },
+    "notePlaceholder": "F.eks. ledig fra august, foretrækker rotationer på 2 uger…",
+    "save": "Gem præferencer",
+    "saving": "Gemmer…",
+    "saved": "Præferencer gemt.",
+    "error": "Kunne ikke gemme. Prøv igen.",
+    "needsMigration": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "v2": {
+      "title": "Flere arbejdspræferencer",
+      "hint": "Samme regel gælder — alt, der står som “Ikke angivet”, forbliver ikke angivet.",
+      "payBasis": "Grundlag for lønforventning",
+      "payBasisOptions": {
+        "gross": "Brutto (før skat)",
+        "net": "Netto (udbetalt)"
+      },
+      "nightShifts": "Villig til at arbejde nattevagter",
+      "weekendShifts": "Villig til at arbejde i weekender",
+      "overtime": "Villig til at arbejde over",
+      "licenceCategories": "Kørekortkategorier",
+      "ownVehicle": "Har eget køretøj",
+      "ownTools": "Har eget værktøj",
+      "notEnabled": "Disse ekstra præferencer er ikke aktiveret endnu — intet gemmes her indtil videre.",
+      "notSaved": "Gemt, undtagen de ekstra præferencer — den del er ikke aktiveret endnu."
+    }
+  },
+  "workerLanguages": {
+    "title": "Sprog",
+    "hint": "Tilføj de sprog, du kan arbejde på, og dit niveau.",
+    "selfStated": "Disse sprog tilføjer du selv — ingen kontrollerer dem.",
+    "language": "Sprog",
+    "level": "Niveau",
+    "levelNative": "Modersmål",
+    "add": "Tilføj sprog",
+    "adding": "Tilføjer…",
+    "remove": "Fjern",
+    "empty": "Ingen sprog tilføjet endnu.",
+    "notEnabled": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "error": "Kunne ikke gemme. Prøv igen.",
+    "invalid": "Vælg et sprog og et niveau."
+  },
+  "bookings": {
+    "endsOn": "Indtil {date}",
+    "noRole": "Arbejdsaftale",
+    "displayState": {
+      "awaiting_response": "Afventer svar",
+      "no_response_stale": "Intet svar endnu"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Du bestemmer — acceptér eller afvis. Intet er bekræftet, før du accepterer.",
+        "no_response_stale": "Ubesvaret i 14+ dage, men stadig åbent — du kan stadig acceptere eller afvise.",
+        "accepted": "Bekræftet. Næste skridt: Skriv til virksomheden og planlæg arbejdet sammen.",
+        "declined": "Du afviste, så dette forslag er lukket. Virksomheden kan sende et nyt.",
+        "withdrawn": "Virksomheden har trukket dette forslag tilbage, så det er lukket.",
+        "expired": "Dette forslag er bortfaldet, så det er lukket."
+      },
+      "outgoing": {
+        "awaiting_response": "Arbejdstageren bestemmer. Du kan trække forslaget tilbage, indtil de svarer.",
+        "no_response_stale": "Intet svar i 14+ dage. Stadig åbent — du kan trække det tilbage eller vente.",
+        "accepted": "Arbejdstageren accepterede. Næste skridt: Send en besked og planlæg arbejdet sammen.",
+        "declined": "Arbejdstageren afviste, så dette forslag er lukket. Du kan foreslå en anden arbejdstager.",
+        "withdrawn": "Du trak dette forslag tilbage, så det er lukket. Send et nyt, hvis det er nødvendigt.",
+        "expired": "Dette forslag er bortfaldet, så det er lukket."
+      }
+    },
+    "actions": {
+      "planning": "Se i planlægning",
+      "proposeAgain": "Foreslå igen med nye datoer"
+    },
+    "propose": {
+      "modeNote": "Dette er et bookingforslag med datoer — arbejdstageren bekræfter eller afviser det. Intet er booket, før arbejdstageren accepterer.",
+      "againModeNote": "Dette genåbner det samme forslag til den samme arbejdstager med nye datoer — arbejdstageren beslutter igen. Intet er booket, før arbejdstageren accepterer.",
+      "afterSent": "Arbejdstageren har modtaget dit forslag og vil acceptere eller afvise det. Du ser svaret under Bookinger; indtil da kan du trække forslaget tilbage."
+    },
+    "reason": {
+      "optionalTitle": "Årsag (valgfrit)",
+      "noteLabel": "Note (valgfrit)",
+      "none": "Ingen årsag",
+      "notStored": "Dit svar er gemt. Årsagen kunne ikke gemmes denne gang.",
+      "decline": {
+        "dates_unsuitable": "Datoerne passer ikke",
+        "conditions_unsuitable": "Vilkårene passer ikke",
+        "already_booked": "Jeg er allerede booket i perioden",
+        "other": "Andet"
+      },
+      "withdraw": {
+        "position_filled": "Stillingen er allerede besat",
+        "need_changed": "Behovet har ændret sig",
+        "dates_changed": "Datoerne er ændret",
+        "other": "Andet"
+      },
+      "confirmDecline": "Bekræft afslag",
+      "confirmWithdraw": "Bekræft tilbagetrækning",
+      "cancel": "Annuller"
+    },
+    "reschedule": {
+      "open": "Skift datoer",
+      "startDate": "Ny startdato",
+      "endDate": "Ny slutdato (valgfrit)",
+      "note": "Note (valgfrit)",
+      "save": "Gem nye datoer",
+      "saved": "Datoerne er opdateret. Arbejderen ser de nye datoer.",
+      "notChanged": "Datoerne blev ikke ændret. Prøv igen senere.",
+      "cancel": "Annuller"
+    },
+    "deadline": {
+      "open": "Sæt en svardato",
+      "label": "Svar senest",
+      "save": "Gem dato",
+      "saved": "Svardatoen er gemt.",
+      "notSet": "Svardatoen blev ikke gemt. Prøv igen senere.",
+      "respondBy": "Svar senest {date}",
+      "cancel": "Annuller"
+    }
+  },
+  "marketplace": {
+    "requestAgain": "Anmod igen",
+    "requestAgainNote": "Dette sender en ny anmodning om den samme ydelse. Din tidligere besked er udfyldt på forhånd — ret den, hvis du vil. Udbyderen beslutter igen.",
+    "cancel": "Annuller",
+    "offeringInactive": "Denne ydelse er ikke længere aktiv, så der kan ikke sendes en ny anmodning."
   }
 }

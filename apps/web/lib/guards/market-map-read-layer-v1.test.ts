@@ -194,6 +194,21 @@ describe("NO new DB migration in this PR", () => {
     // SECURITY DEFINER RPC (submit_company_need_public_v1) granted to anon;
     // customer_requests untouched; DRAFT needs-human-gate, owner-gated apply
     // (NOT part of the market-map read layer, which stays pure TS).
-    expect(count).toBeLessThanOrEqual(118);
+    // Bumped 118 -> 119 for worker demand structured_v2 exposure
+    // (20260711330000 worker_demand_structured_v2_exposure, PR #730) —
+    // owner-authorized in the migration-activation goal command and APPLIED
+    // to production 2026-07-11 (ledger 20260711203058): one IMMUTABLE
+    // whitelist projection helper + the worker board RPC recreated with one
+    // structured jsonb column; paired rollback restores the prior RPC verbatim.
+    // Bumped 119 -> 120 for worker_languages_v1 (20260711250000, PR #720; ledger 20260711203623) — owner-authorized
+    // migration-activation programme; APPLIED to production 2026-07-11;
+    // paired rollback in the PR.
+    // Bumped 120 -> 121 for worker_preference_columns_v2 (20260711270000, PR #721; ledger 20260711204006) — owner-authorized
+    // migration-activation programme; APPLIED to production 2026-07-11;
+    // paired rollback in the PR.
+    // Bumped 121 -> 122 for worker_saved_opportunities_v1 (20260711310000, PR #723; ledger 20260711204106) — owner-authorized
+    // migration-activation programme; APPLIED to production 2026-07-11;
+    // paired rollback in the PR.
+    expect(count).toBeLessThanOrEqual(122);
   });
 });

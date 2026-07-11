@@ -14,6 +14,20 @@ export type RequestStatus = (typeof REQUEST_STATUSES)[number];
 export const RESPOND_DECISIONS = ["accepted", "declined"] as const;
 export type RespondDecision = (typeof RESPOND_DECISIONS)[number];
 
+/**
+ * Repeat action (Capability G, PR 6b): whether the BUYER may send a NEW
+ * request for the same offering after this outgoing request concluded
+ * ("request again"). Pure and default-closed: only `declined` (provider said
+ * no) and `withdrawn` (buyer took it back). Never `sent` (still open —
+ * withdraw instead) and never `accepted` (the next step is the conversation,
+ * not a duplicate request). The one-open-request unique index is PARTIAL
+ * (status='sent' only), so the DB allows a fresh request after a concluded
+ * one; an already-open request still surfaces the honest `duplicate` result.
+ */
+export function canRequestAgain(status: RequestStatus): boolean {
+  return status === "declined" || status === "withdrawn";
+}
+
 /** A discoverable (active) offering — only the fields the provider published. */
 export interface DiscoverableOfferingRow {
   readonly id: string;
@@ -129,4 +143,7 @@ export type RequestMutateResult =
   | { kind: "not-authed" }
   | { kind: "invalid"; field: string }
   | { kind: "duplicate" }
+  /** The offering is no longer active (RPC `offering_not_active`) — surfaced
+   *  honestly instead of a generic "try again" (repeat actions, PR 6b). */
+  | { kind: "inactive" }
   | { kind: "error"; message: string };

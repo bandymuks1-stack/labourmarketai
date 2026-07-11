@@ -1686,7 +1686,159 @@
     "body": "Sellist aadressi pole olemas — võib-olla on see valesti sisestatud või leht on liikunud.",
     "cta": "Tagasi algusesse"
   },
+  "opportunities": {
+    "saved": {
+      "save": "[EN] Save",
+      "saved": "[EN] Saved",
+      "unsave": "[EN] Remove from saved",
+      "privateHint": "[EN] Saving is private to your account — the company never sees who saved its listing.",
+      "sectionTitle": "[EN] Saved opportunities",
+      "noLongerOpen": "[EN] Saved earlier but no longer open on the board: {count}",
+      "error": "[EN] Could not update your saved list. Please try again."
+    },
+    "recent": {
+      "title": "[EN] Recently viewed",
+      "deviceOnly": "[EN] Stored only on this device — this list never leaves your browser and is not sent to the server.",
+      "clear": "[EN] Clear"
+    },
+    "compare": {
+      "toggle": "[EN] Compare",
+      "selectedLabel": "[EN] Selected",
+      "open": "[EN] Compare selected",
+      "title": "[EN] Compare opportunities",
+      "close": "[EN] Close",
+      "clear": "[EN] Clear selection",
+      "limitNote": "[EN] Choose 2–3 opportunities to compare.",
+      "notStated": "[EN] Not stated",
+      "fact": {
+        "pay": "[EN] Pay",
+        "hours": "[EN] Hours per week",
+        "start": "[EN] Start",
+        "engagement": "[EN] Engagement form",
+        "accommodation": "[EN] Accommodation",
+        "transport": "[EN] Transport",
+        "tools": "[EN] Tools",
+        "languages": "[EN] Languages",
+        "location": "[EN] Location",
+        "company": "[EN] Company"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "[EN] Filter opportunities",
+        "profession": "[EN] Work type",
+        "country": "[EN] Country",
+        "start": "[EN] Start",
+        "accommodation": "[EN] Accommodation",
+        "transport": "[EN] Transport",
+        "tool": "[EN] Required tools",
+        "activeCount": "[EN] Active filters: {count}",
+        "reset": "[EN] Reset filters"
+      },
+      "sort": {
+        "label": "[EN] Sort",
+        "relevance": "[EN] Best match first",
+        "newest": "[EN] Newest first"
+      },
+      "emptyFiltered": {
+        "title": "[EN] No opportunities match these filters",
+        "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
+        "reset": "[EN] Reset filters"
+      },
+      "details": {
+        "show": "[EN] More details",
+        "hide": "[EN] Hide details"
+      },
+      "tiers": {
+        "blocking": "[EN] Does not fit",
+        "strengths": "[EN] Fits",
+        "negotiables": "[EN] Discussion points",
+        "missing": "[EN] Missing information"
+      },
+      "missing": {
+        "worker": "[EN] You have not stated: {criterion}",
+        "demand": "[EN] The company has not stated: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "[EN] Required skills",
+        "evidence_tiers": "[EN] Skill evidence",
+        "profession": "[EN] Profession",
+        "language": "[EN] Language",
+        "country_location": "[EN] Country and location",
+        "availability": "[EN] Availability",
+        "pay_ceiling": "[EN] Pay expectation",
+        "accommodation": "[EN] Accommodation",
+        "compensation": "[EN] Pay",
+        "start_date": "[EN] Start date",
+        "shifts_hours": "[EN] Shifts and hours",
+        "engagement_form": "[EN] Contract type",
+        "licence_categories": "[EN] Driving licence",
+        "own_vehicle": "Isiklik sõiduk",
+        "own_tools": "Isiklikud tööriistad",
+        "pay_basis": "Palga alus (bruto/neto)",
+        "night_shifts": "Öövahetused",
+        "weekend_shifts": "Nädalavahetuse vahetused",
+        "overtime": "Ületunnitöö"
+      },
+      "how": {
+        "title": "[EN] How matching works",
+        "body": "[EN] Matching follows fixed, deterministic rules over the facts both sides have stated - required skills, language, location, availability, pay and contract type. A missing fact is shown as missing, never guessed. No artificial intelligence makes the decision and there is no global person score - only the fit within this one opportunity.",
+        "version": "[EN] Calculation version: {version} - deterministic rules"
+      }
+    },
+    "structured": {
+      "detailTitle": "[EN] Stated working conditions",
+      "notProvided": "[EN] The company has not provided detailed working conditions for this listing yet — only the facts above are stated.",
+      "gapsTitle": "[EN] Not stated by the company",
+      "yes": "[EN] Yes",
+      "no": "[EN] No",
+      "payLabel": "[EN] Pay",
+      "amountFrom": "[EN] from {amount}",
+      "amountUpTo": "[EN] up to {amount}",
+      "chipPay": "[EN] {amount} {currency}/{unit}",
+      "chipPayBasis": "[EN] {amount} {currency}/{unit} ({basis})",
+      "chipHours": "[EN] {hours} h/week",
+      "chipMinHours": "[EN] at least {hours} h/week",
+      "chipStartFrom": "[EN] start from {from}",
+      "chipStartWindow": "[EN] start {from} – {to}",
+      "chipDeadline": "[EN] apply by {date}",
+      "days": "[EN] {count} d.",
+      "yearsExperience": "[EN] {count} yr.",
+      "km": "[EN] {km} km",
+      "minutes": "[EN] {min} min",
+      "probationLabel": "[EN] Probation period",
+      "extensionPossibleLabel": "[EN] Extension possible",
+      "scheduleNoticeLabel": "[EN] Schedule notice in advance",
+      "expectedResponseLabel": "[EN] Response within",
+      "firstPaymentLabel": "[EN] First payment within",
+      "travelMinutesLabel": "[EN] Travel time to site",
+      "registrationPossibleLabel": "[EN] Address registration possible",
+      "availableFromLabel": "[EN] Available from",
+      "similarProjectLabel": "[EN] Similar project experience",
+      "driverSupplementLabel": "[EN] Driver supplement",
+      "siteModeLabel": "[EN] Work sites",
+      "siteMode": {
+        "single": "[EN] One site",
+        "multiple": "[EN] Several sites",
+        "mobile": "[EN] Mobile / changing sites"
+      },
+      "workModeLabel": "[EN] Work mode",
+      "workMode": {
+        "onsite": "[EN] On-site",
+        "remote": "[EN] Remote",
+        "hybrid": "[EN] Hybrid"
+      }
+    }
+  },
   "scouting": {
+    "tiers": {
+      "negotiables": "[EN] Discussion points",
+      "missing": "[EN] Missing information"
+    },
+    "missingSide": {
+      "worker": "[EN] The candidate has not stated: {criterion}",
+      "demand": "[EN] Your request does not state: {criterion}"
+    },
     "title": "[EN] Scouting",
     "intro": "[EN] Pick one of your structured needs to see matching workers, why they fit, and shortlist them.",
     "pickDemand": "[EN] Pick a need",
@@ -1953,5 +2105,147 @@
     "prefillLoading": "[EN] Loading…",
     "prefillEmpty": "[EN] No previous request found",
     "prefillDone": "[EN] Filled from your last request — review and edit"
+  },
+  "workerPrefs": {
+    "title": "[EN] Work preferences",
+    "hint": "[EN] State only what actually applies to you — anything left as “Not stated” stays not stated. These preferences are shared only under your privacy consents.",
+    "willingToRelocate": "[EN] Willing to relocate for work",
+    "needsAccommodation": "[EN] Needs accommodation provided",
+    "hasTransport": "[EN] Has own transport",
+    "teamAvailable": "[EN] Can work in a team",
+    "soloAvailable": "[EN] Can work solo",
+    "maxTripDays": "[EN] Longest work trip (days)",
+    "contractType": "[EN] Preferred contract type",
+    "note": "[EN] Availability note",
+    "triState": {
+      "notStated": "[EN] Not stated",
+      "yes": "[EN] Yes",
+      "no": "[EN] No"
+    },
+    "contract": {
+      "employment": "[EN] Employment contract",
+      "subcontract": "[EN] Subcontract",
+      "temporary": "[EN] Temporary work",
+      "any": "[EN] Any contract type"
+    },
+    "notePlaceholder": "[EN] E.g. available from August, prefer 2-week rotations…",
+    "save": "[EN] Save preferences",
+    "saving": "[EN] Saving…",
+    "saved": "[EN] Preferences saved.",
+    "error": "[EN] Saving failed. Please try again.",
+    "needsMigration": "[EN] This section is not enabled yet — nothing was saved.",
+    "v2": {
+      "title": "[EN] More work preferences",
+      "hint": "[EN] Same rule as above — anything left as “Not stated” stays not stated.",
+      "payBasis": "[EN] Pay expectation basis",
+      "payBasisOptions": {
+        "gross": "[EN] Gross (before taxes)",
+        "net": "[EN] Net (take-home)"
+      },
+      "nightShifts": "[EN] Willing to work night shifts",
+      "weekendShifts": "[EN] Willing to work weekends",
+      "overtime": "[EN] Willing to work overtime",
+      "licenceCategories": "[EN] Driving licence categories",
+      "ownVehicle": "[EN] Has own vehicle",
+      "ownTools": "[EN] Has own tools",
+      "notEnabled": "[EN] These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notSaved": "[EN] Saved, except the extra preferences — that part is not enabled yet."
+    }
+  },
+  "workerLanguages": {
+    "title": "[EN] Languages",
+    "hint": "[EN] Add the languages you can work in and your level.",
+    "selfStated": "[EN] You add these languages yourself — they are not checked by anyone.",
+    "language": "[EN] Language",
+    "level": "[EN] Level",
+    "levelNative": "[EN] Native",
+    "add": "[EN] Add language",
+    "adding": "[EN] Adding…",
+    "remove": "[EN] Remove",
+    "empty": "[EN] No languages added yet.",
+    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "error": "[EN] Saving failed. Please try again.",
+    "invalid": "[EN] Choose a language and a level."
+  },
+  "bookings": {
+    "endsOn": "[EN] Until {date}",
+    "noRole": "[EN] Work engagement",
+    "displayState": {
+      "awaiting_response": "[EN] Awaiting response",
+      "no_response_stale": "[EN] No response yet"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "[EN] You decide — accept or decline. Nothing is confirmed until you accept.",
+        "no_response_stale": "[EN] Unanswered for 14+ days but still open — you can still accept or decline.",
+        "accepted": "[EN] Confirmed. Next: message the company and plan the work together.",
+        "declined": "[EN] You declined, so this proposal is closed. The company can send a new one.",
+        "withdrawn": "[EN] The company withdrew this proposal, so it is closed.",
+        "expired": "[EN] This proposal has lapsed, so it is closed."
+      },
+      "outgoing": {
+        "awaiting_response": "[EN] The worker decides. You can withdraw the proposal until they answer.",
+        "no_response_stale": "[EN] No answer for 14+ days. Still open — you can withdraw it or keep waiting.",
+        "accepted": "[EN] The worker accepted. Next: send a message and plan the work together.",
+        "declined": "[EN] The worker declined, so this proposal is closed. You can propose to another worker.",
+        "withdrawn": "[EN] You withdrew this proposal, so it is closed. Send a new one if needed.",
+        "expired": "[EN] This proposal has lapsed, so it is closed."
+      }
+    },
+    "actions": {
+      "planning": "[EN] View in planning",
+      "proposeAgain": "[EN] Propose again with new dates"
+    },
+    "propose": {
+      "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
+      "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
+      "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+    },
+    "reason": {
+      "optionalTitle": "[EN] Reason (optional)",
+      "noteLabel": "[EN] Note (optional)",
+      "none": "[EN] No reason",
+      "notStored": "[EN] Your answer was saved. The reason couldn't be saved this time.",
+      "decline": {
+        "dates_unsuitable": "[EN] The dates don't suit me",
+        "conditions_unsuitable": "[EN] The conditions don't suit me",
+        "already_booked": "[EN] I'm already booked for that time",
+        "other": "[EN] Other"
+      },
+      "withdraw": {
+        "position_filled": "[EN] The position is already filled",
+        "need_changed": "[EN] Our need changed",
+        "dates_changed": "[EN] The dates changed",
+        "other": "[EN] Other"
+      },
+      "confirmDecline": "[EN] Confirm decline",
+      "confirmWithdraw": "[EN] Confirm withdrawal",
+      "cancel": "[EN] Cancel"
+    },
+    "reschedule": {
+      "open": "[EN] Change dates",
+      "startDate": "[EN] New start date",
+      "endDate": "[EN] New end date (optional)",
+      "note": "[EN] Note (optional)",
+      "save": "[EN] Save new dates",
+      "saved": "[EN] Dates updated. The worker sees the new dates.",
+      "notChanged": "[EN] The dates weren't changed. Please try again later.",
+      "cancel": "[EN] Cancel"
+    },
+    "deadline": {
+      "open": "[EN] Set a respond-by date",
+      "label": "[EN] Respond-by date",
+      "save": "[EN] Save date",
+      "saved": "[EN] Respond-by date saved.",
+      "notSet": "[EN] The respond-by date wasn't saved. Please try again later.",
+      "respondBy": "[EN] Respond by {date}",
+      "cancel": "[EN] Cancel"
+    }
+  },
+  "marketplace": {
+    "requestAgain": "[EN] Request again",
+    "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
+    "cancel": "[EN] Cancel",
+    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
   }
 }
