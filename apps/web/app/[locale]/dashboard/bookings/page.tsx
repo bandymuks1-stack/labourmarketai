@@ -5,9 +5,17 @@ import { listMyBookings, type BookingRow } from "@/lib/booking/booking-actions";
 import { openBookingConversationAction } from "@/lib/booking/booking-conversation";
 import { BookingRespondButtons } from "@/components/app/booking-respond-buttons";
 import { BookingWithdrawButton } from "@/components/app/booking-withdraw-button";
+import { BookingManageControls } from "@/components/app/booking-manage-controls";
+import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
 import { Link } from "@/lib/i18n/navigation";
-import type { BookingStatus } from "@/lib/booking/booking-state";
+import {
+  canProposeAgain,
+  canRescheduleProposal,
+  withDeadlineDisplayState,
+  type BookingDisplayState,
+  type BookingStatus,
+} from "@/lib/booking/booking-state";
 import { ActionCard } from "@/components/app/action-card";
 
 /**
@@ -26,6 +34,20 @@ const STATUS_TONE: Record<BookingStatus, string> = {
   expired: "border-ink-500 bg-ink-800/40 text-text-muted",
 };
 
+// Derived DISPLAY states (PR 5): a `proposed` row is shown as awaiting or —
+// after 14+ unanswered days — honestly stale ("no response yet"). The DB
+// truth stays `proposed`; nothing here writes or fakes `expired`.
+const DERIVED_TONE: Record<"awaiting_response" | "no_response_stale", string> = {
+  awaiting_response: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  no_response_stale: "border-state-amber/40 bg-state-amber/10 text-state-amber",
+};
+
+function isDerivedProposedState(
+  state: BookingDisplayState,
+): state is "awaiting_response" | "no_response_stale" {
+  return state === "awaiting_response" || state === "no_response_stale";
+}
+
 export default async function BookingsPage({
   params,
 }: {
@@ -34,7 +56,14 @@ export default async function BookingsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("bookings");
+  // The rebook form is the SAME propose form the scouting surface renders —
+  // its field/submit labels are reused verbatim from `scouting.booking` (one
+  // flow, one wording) instead of duplicating seven keys per locale.
+  const tProposeForm = await getTranslations("scouting.booking");
   const result = await listMyBookings();
+  // One consistent "now" for the whole render — the derived display states
+  // (awaiting / stale) are computed against it, read-only.
+  const nowIso = new Date().toISOString();
 
   return (
     <div className="flex flex-col gap-6" data-testid="bookings-page">
@@ -76,6 +105,8 @@ export default async function BookingsPage({
             empty={t("incoming.empty")}
             rows={result.incoming}
             t={t}
+            direction="incoming"
+            nowIso={nowIso}
             renderActions={(row) =>
               row.status === "proposed" ? (
                 <BookingRespondButtons
@@ -94,13 +125,17 @@ export default async function BookingsPage({
               ) : row.status === "accepted" ? (
                 // Accepted is a beginning, not a terminal status (lifecycle
                 // v1): the worker's next step is the conversation with the
-                // proposing company — grant re-verified server-side.
-                <BookingMessageCta
-                  bookingId={row.id}
-                  locale={locale}
-                  label={t("actions.message")}
-                  testid="booking-incoming-message-cta"
-                />
+                // proposing company (grant re-verified server-side) plus the
+                // planning agenda where the booked dates live.
+                <div className="flex flex-wrap items-center gap-2">
+                  <BookingMessageCta
+                    bookingId={row.id}
+                    locale={locale}
+                    label={t("actions.message")}
+                    testid="booking-incoming-message-cta"
+                  />
+                  <PlanningLink label={t("actions.planning")} />
+                </div>
               ) : null
             }
           />
@@ -110,6 +145,23 @@ export default async function BookingsPage({
             empty={t("outgoing.empty")}
             rows={result.outgoing}
             t={t}
+            direction="outgoing"
+            nowIso={nowIso}
+            renderManage={(row) =>
+              canRescheduleProposal(row.status) ? (
+                // Owner lifecycle controls (P2-PR6): change dates / set a
+                // respond-by date on an OPEN proposal only. An ACCEPTED
+                // booking is never mutated in place — accepted (and every
+                // other non-proposed) row renders NO reschedule control.
+                <BookingManageControls
+                  locale={locale}
+                  bookingId={row.id}
+                  startDate={row.startDate}
+                  expectedEndDate={row.expectedEndDate}
+                  responseDeadlineDate={row.responseDeadlineDate}
+                />
+              ) : null
+            }
             renderActions={(row) =>
               row.status === "proposed" ? (
                 // The withdraw RPC existed with no UI — a proposer had no way
@@ -125,22 +177,55 @@ export default async function BookingsPage({
                   }}
                 />
               ) : row.status === "accepted" ? (
-                <BookingMessageCta
-                  bookingId={row.id}
-                  locale={locale}
-                  label={t("actions.message")}
-                  testid="booking-outgoing-message-cta"
-                />
-              ) : row.status === "declined" ? (
-                // A declined proposal ends THIS booking, not the company's
-                // search — the honest next action is finding another worker.
-                <Link
-                  href="/dashboard/company/scouting"
-                  data-testid="booking-declined-next-action"
-                  className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700"
-                >
-                  {t("actions.findAnother")}
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                  <BookingMessageCta
+                    bookingId={row.id}
+                    locale={locale}
+                    label={t("actions.message")}
+                    testid="booking-outgoing-message-cta"
+                  />
+                  <PlanningLink label={t("actions.planning")} />
+                </div>
+              ) : canProposeAgain(row.status) ? (
+                // Terminal declined/withdrawn (repeat actions, PR 6b): the
+                // company may RE-OPEN the same proposal with new dates — the
+                // existing propose flow pre-scoped to the same request +
+                // worker (the applied RPC upserts on that key). The worker
+                // decides again; nothing is booked until they accept.
+                <div className="flex flex-wrap items-center gap-2">
+                  {row.requestId && row.workerId ? (
+                    <ProposeBookingButton
+                      locale={locale}
+                      requestId={row.requestId}
+                      workerId={row.workerId}
+                      countryCode={row.locationCountry}
+                      variant="rebook"
+                      labels={{
+                        open: t("actions.proposeAgain"),
+                        startDate: tProposeForm("startDate"),
+                        note: tProposeForm("note"),
+                        send: tProposeForm("send"),
+                        sending: tProposeForm("sending"),
+                        sent: tProposeForm("sent"),
+                        unavailable: tProposeForm("unavailable"),
+                        notEntitled: tProposeForm("notEntitled"),
+                        error: tProposeForm("error"),
+                        cancel: tProposeForm("cancel"),
+                      }}
+                    />
+                  ) : null}
+                  {row.status === "declined" ? (
+                    // A declined proposal ends THIS booking, not the company's
+                    // search — the honest next action is finding another worker.
+                    <Link
+                      href="/dashboard/company/scouting"
+                      data-testid="booking-declined-next-action"
+                      className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700"
+                    >
+                      {t("actions.findAnother")}
+                    </Link>
+                  ) : null}
+                </div>
               ) : null
             }
           />
@@ -179,6 +264,20 @@ function BookingMessageCta({
   );
 }
 
+/** Accepted booking → the planning agenda where its dates actually render
+ *  (control room PR E). Navigation only — no fake calendar entry is created. */
+function PlanningLink({ label }: { label: string }) {
+  return (
+    <Link
+      href="/dashboard/planning"
+      data-testid="booking-accepted-planning-link"
+      className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700"
+    >
+      {label}
+    </Link>
+  );
+}
+
 /** Compact, mobile-first bridge to the surfaces a plan connects to. Reuses
  *  existing canonical routes — no duplicate planning page, no fake entries. */
 function PlanningConnections({
@@ -187,6 +286,14 @@ function PlanningConnections({
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   const links = [
+    {
+      // Control room PR E: the unified planning agenda shows this booking
+      // in date context together with project bands and task deadlines.
+      key: "planning",
+      href: "/dashboard/planning",
+      label: t("connections.planning"),
+      note: t("connections.planningNote"),
+    },
     {
       key: "marketplace",
       href: "/dashboard/service-requests",
@@ -216,7 +323,7 @@ function PlanningConnections({
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
       {/* Shared ActionCard pattern (audit PR8). */}
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {links.map((l) => (
           <ActionCard
             key={l.key}
@@ -237,14 +344,23 @@ function Section({
   empty,
   rows,
   t,
+  direction,
+  nowIso,
   renderActions,
+  renderManage,
 }: {
   title: string;
   help: string;
   empty: string;
   rows: BookingRow[];
   t: Awaited<ReturnType<typeof getTranslations>>;
+  /** incoming = the worker decides; outgoing = the company proposed. */
+  direction: "incoming" | "outgoing";
+  nowIso: string;
   renderActions: (row: BookingRow) => React.ReactNode;
+  /** Optional secondary lifecycle controls rendered full-width under the
+   *  row (owner-side reschedule/deadline, P2-PR6 — outgoing list only). */
+  renderManage?: (row: BookingRow) => React.ReactNode;
 }) {
   return (
     <section className="flex flex-col gap-3">
@@ -258,32 +374,86 @@ function Section({
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {rows.map((row) => (
-            <li
-              key={row.id}
-              className="card-border flex flex-wrap items-center justify-between gap-3 p-3"
-              data-testid={`booking-${row.id}`}
-              data-status={row.status}
-            >
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-sm text-text-primary">
-                  {row.startDate ? t("startsOn", { date: row.startDate }) : t("noDate")}
-                  {row.locationCountry ? ` · ${row.locationCountry}` : ""}
-                </span>
-                {row.note ? (
-                  <span className="truncate text-xs text-text-muted">{row.note}</span>
-                ) : null}
-              </div>
-              <div className="flex items-center gap-3">
-                <span
-                  className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[row.status]}`}
-                >
-                  {t(`status.${row.status}` as never)}
-                </span>
-                {renderActions(row)}
-              </div>
-            </li>
-          ))}
+          {rows.map((row) => {
+            // Display-only derivation: `proposed` renders as awaiting or —
+            // after 14+ unanswered days OR past an owner-set respond-by date
+            // — honestly stale. Actions stay keyed off the DB status (a
+            // stale proposal is still open to act on).
+            const display = withDeadlineDisplayState(
+              {
+                status: row.status,
+                createdAt: row.createdAt,
+                responseDeadlineDate: row.responseDeadlineDate,
+              },
+              nowIso,
+            );
+            const manage = renderManage?.(row);
+            return (
+              <li
+                key={row.id}
+                className="card-border flex flex-col gap-3 overflow-hidden p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+                data-testid={`booking-${row.id}`}
+                data-status={row.status}
+                data-display-state={display}
+              >
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  {/* WHAT: the proposed role; WHEN: start (+ expected end) and
+                      country. WHO is the section itself (a company proposed to
+                      you / a worker you proposed to — no identity leaks). */}
+                  <span className="text-sm font-medium text-text-primary">
+                    {row.roleText?.trim() ? row.roleText : t("noRole")}
+                  </span>
+                  <span className="text-xs text-text-secondary">
+                    {row.startDate ? t("startsOn", { date: row.startDate }) : t("noDate")}
+                    {row.expectedEndDate
+                      ? ` · ${t("endsOn", { date: row.expectedEndDate })}`
+                      : ""}
+                    {row.locationCountry ? ` · ${row.locationCountry}` : ""}
+                  </span>
+                  {row.note ? (
+                    <span className="truncate text-xs text-text-muted">{row.note}</span>
+                  ) : null}
+                  {/* Respond-by date (lifecycle v2, read-tolerant): rendered
+                      ONLY when the column is applied AND set — never a fake
+                      countdown, never an auto-close promise. */}
+                  {row.responseDeadlineDate ? (
+                    <span
+                      className="inline-flex w-fit items-center rounded-sm border border-ink-500 bg-ink-800/40 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                      data-testid="booking-deadline-chip"
+                    >
+                      {t("deadline.respondBy", { date: row.responseDeadlineDate })}
+                    </span>
+                  ) : null}
+                  {/* WHAT HAPPENS NEXT: one honest line per direction × state. */}
+                  <span
+                    className="text-xs text-text-muted"
+                    data-testid="booking-next-step"
+                  >
+                    {t(`next.${direction}.${display}` as never)}
+                  </span>
+                </div>
+                {/* Mobile-first actions (P2-PR6): the decision buttons stack
+                    full-width on phones (unmissable 44px targets, no sideways
+                    scrolling) and sit inline on wider screens. */}
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+                  <span
+                    className={`self-start rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label sm:self-center ${
+                      isDerivedProposedState(display)
+                        ? DERIVED_TONE[display]
+                        : STATUS_TONE[row.status]
+                    }`}
+                    data-testid="booking-display-chip"
+                  >
+                    {isDerivedProposedState(display)
+                      ? t(`displayState.${display}` as never)
+                      : t(`status.${row.status}` as never)}
+                  </span>
+                  {renderActions(row)}
+                </div>
+                {manage ? <div className="w-full">{manage}</div> : null}
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

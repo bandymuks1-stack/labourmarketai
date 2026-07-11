@@ -169,7 +169,10 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // project pages (WAGON 8) — one photo system, two honest surfaces.
   {
     id: "work_gallery",
-    route: "/dashboard/projects",
+    // Control room PR G: projects is now a dashboard module — every entry
+    // whose destination is the projects surface resolves through the one
+    // module registry (route-drift killer).
+    route: getModuleRoute("projects"),
     audience: "company",
     labels: {
       en: "Work gallery (project photo reports)",
@@ -308,7 +311,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "objects_projects",
-    route: "/dashboard/projects",
+    route: getModuleRoute("projects"),
     audience: "company",
     labels: {
       en: "Objects & projects",
@@ -327,8 +330,9 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "follow_up",
-    // Follow-up chips / counters live in project operations under /dashboard/projects.
-    route: "/dashboard/projects",
+    // Follow-up chips / counters live in project operations under the
+    // projects module surface.
+    route: getModuleRoute("projects"),
     audience: "company",
     labels: {
       en: "Follow-up (project operations)",
@@ -523,11 +527,46 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: "Dokumente",
     },
     synonyms: {
-      en: ["documents", "document records", "certificates"],
-      lt: ["dokumentai", "pažymos", "sertifikatai"],
-      ru: ["документы", "справки", "сертификаты"],
-      nl: ["documenten", "attesten", "certificaten"],
-      de: ["dokumente", "bescheinigungen", "zertifikate"],
+      // PR H: the page is the document & work-proof centre — work-proof
+      // language must land here too.
+      en: [
+        "documents",
+        "document records",
+        "certificates",
+        "work proof",
+        "proof of work",
+        "document centre",
+        "expiring documents",
+      ],
+      lt: [
+        "dokumentai",
+        "pažymos",
+        "sertifikatai",
+        "darbo įrodymai",
+        "dokumentų centras",
+        "besibaigiantys dokumentai",
+      ],
+      ru: [
+        "документы",
+        "справки",
+        "сертификаты",
+        "подтверждение работы",
+        "центр документов",
+      ],
+      nl: [
+        "documenten",
+        "attesten",
+        "certificaten",
+        "werkbewijs",
+        "documentencentrum",
+      ],
+      de: [
+        "dokumente",
+        "bescheinigungen",
+        "zertifikate",
+        "arbeitsnachweis",
+        "dokumentenzentrum",
+      ],
     },
   },
 
@@ -574,22 +613,71 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // Operational finance records (control room PR I) — manual invoices
+    // issued/received + expenses. Route resolves through the module registry
+    // so it can never drift from the grid card. Degrades honestly until the
+    // I2 migration is applied. NOT a payment/checkout action — the guard's
+    // payment-term ban stays satisfied (records only, nothing moves money).
+    id: "finance",
+    route: getModuleRoute("finance"),
+    audience: "public",
+    labels: {
+      en: "Finance records (invoices & expenses)",
+      lt: "Finansų įrašai (sąskaitos ir išlaidos)",
+      ru: "Финансовые записи (счета и расходы)",
+      nl: "Financiële registraties (facturen & uitgaven)",
+      de: "Finanzeinträge (Rechnungen & Ausgaben)",
+    },
+    synonyms: {
+      en: ["finance", "invoices", "invoice", "expenses", "expense", "overdue"],
+      lt: ["finansai", "sąskaitos", "sąskaita faktūra", "išlaidos", "vėluojančios sąskaitos"],
+      ru: ["финансы", "счета", "счёт", "расходы", "просроченные счета"],
+      nl: ["financiën", "facturen", "factuur", "uitgaven", "kosten"],
+      de: ["finanzen", "rechnungen", "rechnung", "ausgaben", "kosten"],
+    },
+  },
+  {
+    // Control room PR E: bookings speaks its own name; the generic
+    // planning/calendar terms moved to the unified planning entry below.
     id: "bookings",
     route: getModuleRoute("bookings"),
     audience: "public",
     labels: {
-      en: "Bookings & planning",
-      lt: "Rezervacijos ir planavimas",
-      ru: "Бронирования и планирование",
-      nl: "Boekingen en planning",
-      de: "Buchungen und Planung",
+      en: "Bookings",
+      lt: "Rezervacijos",
+      ru: "Бронирования",
+      nl: "Boekingen",
+      de: "Buchungen",
     },
     synonyms: {
-      en: ["bookings", "planning", "calendar"],
-      lt: ["rezervacijos", "planavimas", "kalendorius"],
-      ru: ["бронирования", "планирование", "календарь"],
-      nl: ["boekingen", "planning", "agenda", "kalender"],
-      de: ["buchungen", "planung", "kalender", "terminplanung"],
+      en: ["bookings", "booking", "proposals", "engagements"],
+      lt: ["rezervacijos", "rezervacija", "pasiūlymai dirbti"],
+      ru: ["бронирования", "бронирование", "предложения работы"],
+      nl: ["boekingen", "boeking", "voorstellen"],
+      de: ["buchungen", "buchung", "arbeitsangebote"],
+    },
+  },
+  {
+    // Unified planning agenda (control room PR E) — bookings + managed
+    // project date bands + task due dates in one compact agenda. Route
+    // resolves through the module registry so it can never drift from the
+    // grid card.
+    id: "planning",
+    route: getModuleRoute("planning"),
+    audience: "public",
+    labels: {
+      en: "Planning (agenda)",
+      lt: "Planavimas (dienotvarkė)",
+      ru: "Планирование (расписание)",
+      nl: "Planning (agenda)",
+      de: "Planung (Agenda)",
+    },
+    synonyms: {
+      en: ["planning", "calendar", "agenda", "schedule", "plan"],
+      lt: ["planavimas", "kalendorius", "dienotvarkė", "planas", "grafikas"],
+      ru: ["планирование", "календарь", "расписание", "план", "график"],
+      nl: ["planning", "agenda", "kalender", "schema", "plan"],
+      de: ["planung", "kalender", "terminplanung", "zeitplan", "plan"],
     },
   },
   {
@@ -631,6 +719,54 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["активность", "уведомления", "сигналы", "что ждёт"],
       nl: ["activiteit", "meldingen", "signalen", "wat wacht"],
       de: ["aktivität", "benachrichtigungen", "signale", "was wartet"],
+    },
+  },
+  {
+    // AI assistance centre (control room PR J) — the deterministic "what
+    // needs my attention" answer, deterministic role summaries and the
+    // HONEST AI-provider state (disabled in production; nothing generated).
+    // Route resolves through the module registry so it can never drift from
+    // the grid card. Truthful label: assistance centre, not an active AI.
+    id: "assist",
+    route: getModuleRoute("assist"),
+    audience: "public",
+    labels: {
+      en: "Assistance centre (what needs my attention)",
+      lt: "Pagalbos centras (kam reikia mano dėmesio)",
+      ru: "Центр помощи (что требует моего внимания)",
+      nl: "Assistentiecentrum (wat heeft mijn aandacht nodig)",
+      de: "Assistenzzentrum (was braucht meine Aufmerksamkeit)",
+    },
+    synonyms: {
+      en: ["assist", "assistance", "ai", "attention", "summary", "overview of my data"],
+      lt: ["pagalba", "asistentas", "ai", "dėmesio", "santrauka", "kas laukia manęs"],
+      ru: ["помощь", "ассистент", "ai", "внимание", "сводка"],
+      nl: ["assistentie", "assistent", "ai", "aandacht", "samenvatting"],
+      de: ["assistenz", "assistent", "ki", "aufmerksamkeit", "zusammenfassung"],
+    },
+  },
+  {
+    // Reports hub (control room PR K) — the role-specific reports index:
+    // real, basis-labelled counts over the caller's own records plus the
+    // existing exports (evidence report, CV, journal CSV, finance CSV).
+    // Route resolves through the module registry so it can never drift from
+    // the grid card.
+    id: "reports",
+    route: getModuleRoute("reports"),
+    audience: "public",
+    labels: {
+      en: "Reports (my data figures & exports)",
+      lt: "Ataskaitos (mano duomenų rodikliai ir eksportai)",
+      ru: "Отчёты (показатели моих данных и экспорт)",
+      nl: "Rapporten (cijfers uit mijn gegevens & exports)",
+      de: "Berichte (Kennzahlen aus meinen Daten & Exporte)",
+    },
+    synonyms: {
+      en: ["reports", "report", "statistics", "figures", "export data"],
+      lt: ["ataskaitos", "ataskaita", "statistika", "rodikliai", "eksportas"],
+      ru: ["отчёты", "отчет", "статистика", "показатели", "экспорт"],
+      nl: ["rapporten", "rapport", "statistieken", "cijfers", "exporteren"],
+      de: ["berichte", "bericht", "statistiken", "kennzahlen", "export"],
     },
   },
   {
@@ -751,6 +887,29 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["админ", "администрирование"],
       nl: ["admin", "beheer", "beheerder"],
       de: ["admin", "verwaltung", "administrator"],
+    },
+  },
+  {
+    // CRM / demand pipeline (control room PR F) — ONE read queue over every
+    // existing demand source (requests, public intakes, leads, waitlist).
+    // Read-only consolidation; statuses stay verbatim, changes stay on each
+    // row's own surface.
+    id: "admin_pipeline",
+    route: "/dashboard/admin/pipeline",
+    audience: "admin",
+    labels: {
+      en: "Demand pipeline (operator queue)",
+      lt: "Paklausos eiga (operatoriaus eilė)",
+      ru: "Воронка спроса (очередь оператора)",
+      nl: "Vraagpijplijn (operatorwachtrij)",
+      de: "Nachfrage-Pipeline (Operator-Warteschlange)",
+    },
+    synonyms: {
+      en: ["pipeline", "crm", "demand pipeline", "sales queue"],
+      lt: ["eiga", "crm", "paklausos eiga", "pardavimų eilė"],
+      ru: ["воронка", "crm", "очередь спроса"],
+      nl: ["pijplijn", "crm", "verkooppijplijn"],
+      de: ["pipeline", "crm", "vertriebspipeline"],
     },
   },
 ] as const;

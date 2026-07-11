@@ -29,7 +29,109 @@
     "inputLabel": "Seite oder Aktion finden",
     "resultsLabel": "Passende Seiten",
     "noResults": "Nichts gefunden. Versuchen Sie ein anderes Wort — z. B. Lebenslauf, Journal, Team, Dokumente, Preise.",
-    "shortcutHint": "Ctrl / ⌘ K"
+    "shortcutHint": "Ctrl / ⌘ K",
+    "recentLabel": "Zuletzt geöffnet",
+    "objectsLabel": "Ihre eigenen Einträge",
+    "objectsLoading": "Ihre eigenen Einträge werden durchsucht…",
+    "objectsError": "Ihre Einträge konnten gerade nicht durchsucht werden. Die Seitenlinks oben funktionieren weiterhin.",
+    "groups": {
+      "projects": "Ihre Projekte",
+      "tasks": "Ihre Aufgaben",
+      "finance": "Ihre Finanzeinträge",
+      "conversations": "Ihre Unterhaltungen",
+      "bookings": "Ihre Buchungen",
+      "documents": "Ihre Dokumenteinträge"
+    }
+  },
+  "reports": {
+    "eyebrow": "Berichte",
+    "title": "Berichte",
+    "intro": "Kennzahlen, gezählt aus Ihren eigenen Einträgen, mit der Berechnungsgrundlage unter jedem Abschnitt, und die bereits vorhandenen Exporte.",
+    "honestyNote": "Nur Zählungen über Ihre eigenen Daten — keine Benchmarks, keine Scores, keine Prognosen.",
+    "state": {
+      "needsMigration": "Dieses Datenmodell ist in dieser Umgebung noch nicht verfügbar, es gibt also nichts zu zählen. Anstelle echter Daten wird keine Zahl angezeigt.",
+      "unavailable": "Diese Kennzahlen können gerade nicht gelesen werden. An ihrer Stelle wird nichts geschätzt."
+    },
+    "basis": {
+      "label": "Grundlage",
+      "workerEvidence": "Gezählt nach den Regeln des Nachweisberichts aus Ihren eigenen katalogisierten Fähigkeiten, Arbeitsjournal-Einträgen und Bestätigungen von Verantwortlichen. Kein Score, keine Schätzung.",
+      "workerActivity": "Direkte Zählungen Ihrer eigenen Arbeitsjournal-Einträge und Ihrer eigenen hochgeladenen Journalfotos.",
+      "orgDemand": "Zählungen über die von Ihnen selbst erstellten Bedarfsanfragen. Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig.",
+      "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
+      "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
+      "orgDocuments": "Summen des zustimmungsgebundenen Pool-Aggregats — gezählt werden nur Arbeitskräfte, die der aggregierten Dokumentsichtbarkeit zugestimmt haben.",
+      "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten."
+    },
+    "worker": {
+      "evidence": {
+        "title": "Profil- und Nachweiskennzahlen",
+        "totalSkills": "Fähigkeiten",
+        "workSupported": "Durch Arbeitseinträge belegt",
+        "confirmed": "Bestätigt",
+        "journalEntries": "Journaleinträge",
+        "confirmations": "Bestätigungen",
+        "empty": "Noch keine Nachweisdaten — Kennzahlen erscheinen, sobald Profil und Arbeitsjournal echte Einträge enthalten.",
+        "link": "Vollständigen Nachweisbericht öffnen"
+      },
+      "activity": {
+        "title": "Journalaktivität",
+        "entries": "Journaleinträge",
+        "photos": "Hochgeladene Fotos",
+        "unavailable": "Ihre Journalzählungen können gerade nicht gelesen werden. Anstelle echter Zahlen wird nichts angezeigt.",
+        "link": "Arbeitsjournal öffnen"
+      }
+    },
+    "exports": {
+      "title": "Exporte",
+      "note": "Aufgeführt sind nur die Exporte, die bereits funktionieren — nichts hier ist eine Vorschau.",
+      "evidence": "Nachweisbericht (Drucken / PDF)",
+      "cv": "Lebenslauf (Drucken / PDF)",
+      "journalCsv": "Journal-Export (CSV)",
+      "financeCsv": "Export der Finanzeinträge (CSV)"
+    },
+    "org": {
+      "demand": {
+        "title": "Bedarfsanfragen",
+        "open": "Offen",
+        "total": "Gesamt",
+        "link": "Bedarfserfassung öffnen"
+      },
+      "projects": {
+        "title": "Projekte nach Status",
+        "status": {
+          "draft": "Entwurf",
+          "live": "Laufend",
+          "paused": "Pausiert"
+        },
+        "total": "Gesamt",
+        "empty": "Noch keine Projekte — Kennzahlen erscheinen, sobald Ihr Unternehmen Projektzeilen hat.",
+        "link": "Projekte öffnen"
+      },
+      "tasks": {
+        "title": "Aufgaben nach Status",
+        "open": "Offen",
+        "status": {
+          "todo": "Zu erledigen",
+          "in_progress": "In Arbeit",
+          "blocked": "Blockiert"
+        },
+        "link": "Aufgaben öffnen"
+      },
+      "documents": {
+        "title": "Dokumentbereitschaft des Pools",
+        "workers": "Arbeitskräfte mit Zustimmung",
+        "expiring": "Ablaufende Dokumente",
+        "attention": "Aufmerksamkeit nötig",
+        "empty": "Noch keine Pool-Arbeitskräfte mit Zustimmung — dieses Aggregat zählt nur Arbeitskräfte, die zugestimmt haben.",
+        "link": "Dokumentenzentrum öffnen"
+      },
+      "finance": {
+        "title": "Finanzeinträge",
+        "overdue": "Überfällig",
+        "total": "Einträge gesamt",
+        "link": "Finanzeinträge öffnen"
+      }
+    }
   },
   "marketRecognition": {
     "title": "Was bieten Sie an oder was brauchen Sie?",
@@ -3032,8 +3134,12 @@
             "desc": "Arbeit, die zu Ihnen passt"
           },
           "planning": {
-            "title": "Planung und Buchungen",
-            "desc": "Kalender und Buchungen"
+            "title": "Planung",
+            "desc": "Buchungen, Projekte und Fristen in einer Agenda"
+          },
+          "bookings": {
+            "title": "Buchungen",
+            "desc": "Vorschläge und Zusagen"
           },
           "documents": {
             "title": "Berichte und Dokumente",
@@ -4722,6 +4828,50 @@
     }
   },
   "projectOps": {
+    "centre": {
+      "summaryTitle": "Projektübersicht",
+      "datesLabel": "Zeitraum",
+      "openTasksLabel": "Offene Aufgaben",
+      "tasksPreparingShort": "noch nicht verfügbar",
+      "readinessLabel": "Checkliste geprüft",
+      "readinessNone": "noch nichts erfasst",
+      "housingLabel": "Unterkunft gestellt",
+      "housingYes": "Ja",
+      "housingNo": "Nein",
+      "housingUnknown": "Nicht erfasst",
+      "attention": {
+        "title": "Braucht Aufmerksamkeit",
+        "empty": "Im Moment braucht nichts Aufmerksamkeit — die hier verfolgten Status, Checklisten und Aufgaben sind ruhig.",
+        "note": "Nur aus echten Datensätzen abgeleitet: vom Manager gesetzte operative Status, offene Checklistenpunkte und offene Projektaufgaben. Nichts weiter wird bewertet oder vorhergesagt.",
+        "kind": {
+          "worker_documents_needed": "Dokumente erforderlich",
+          "readiness_item_open": "Offener Checklistenpunkt",
+          "task_overdue": "Aufgabe überfällig",
+          "task_blocked": "Aufgabe blockiert"
+        }
+      },
+      "resources": {
+        "title": "Ressourcen und Einsatzbereitschaft",
+        "checklistLabel": "Checkliste",
+        "availabilityLabel": "Verfügbarkeit",
+        "availableFromLabel": "Verfügbar ab",
+        "notRecorded": "nicht erfasst",
+        "noWindow": "Projekt ohne Zeitraum — Buchungsüberschneidungen nicht geprüft",
+        "bookingConflict": "{n, plural, one {# überschneidende angenommene Buchung} other {# überschneidende angenommene Buchungen}}",
+        "noConflict": "Keine überschneidenden angenommenen Buchungen",
+        "note": "Die Verfügbarkeit zeigt die vom Arbeiter selbst erfassten Felder. Überschneidungen vergleichen die für Sie sichtbaren angenommenen Buchungen mit dem Zeitraum dieses Projekts. Unterkunfts- und Transportbedarf wird noch nicht erfasst; dafür wird nichts angezeigt."
+      },
+      "tasksTitle": "Projektaufgaben",
+      "tasksEmpty": "Mit diesem Projekt sind keine offenen Aufgaben verknüpft.",
+      "evidence": {
+        "title": "Arbeitsnachweis",
+        "entriesLabel": "Journaleinträge",
+        "photosLabel": "Hochgeladene Fotos",
+        "note": "Echte Anzahl der mit diesem Projekt verknüpften Journaleinträge und der Fotos, die Arbeiter an ihre eigenen Einträge angehängt haben.",
+        "link": "Projektgalerie öffnen"
+      },
+      "honestNote": "Dieses Zentrum setzt nur bereits vorhandene Datensätze zusammen. Meilensteine, Problemregister und Ressourcentabellen existieren noch nicht und werden hier nicht simuliert."
+    },
     "eyebrow": "Projekteinsatz",
     "managerOnly": "Dieses Board ist für Manager eines Unternehmens oder einer Personalagentur.",
     "notAuthorized": "Sie können das Einsatz-Board nur für ein Projekt öffnen, das Sie verwalten.",
@@ -4995,6 +5145,10 @@
     "messageCta": "Nachricht senden",
     "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "duplicate": "Sie haben bereits eine offene Anfrage für diese Dienstleistung.",
+    "requestAgain": "Erneut anfragen",
+    "requestAgainNote": "Dies sendet eine neue Anfrage für dieselbe Dienstleistung. Ihre vorherige Nachricht ist bereits eingetragen — passen Sie sie bei Bedarf an. Der Anbieter entscheidet erneut.",
+    "cancel": "Abbrechen",
+    "offeringInactive": "Diese Dienstleistung ist nicht mehr aktiv, daher kann keine neue Anfrage gesendet werden.",
     "requesterMessage": "Nachricht der anfragenden Person",
     "providerNote": "Notiz des Anbieters",
     "responded": "Beantwortet",
@@ -5267,7 +5421,54 @@
     "internalNote": "Interner Eintrag — es werden keine E-Mails oder Nachrichten an irgendjemanden gesendet.",
     "explanationPending": "Die Erläuterung wird aus der litauischen Originalversion vorbereitet."
   },
+  "crmPipeline": {
+    "eyebrow": "Operator-Warteschlange",
+    "title": "Nachfrage-Pipeline",
+    "subtitle": "Alle Nachfragequellen in einer Leseansicht: eingereichte Anfragen, öffentliche Bedarfsformulare von Firmen, gespeicherte Leads und die Warteliste.",
+    "back": "Zurück zum Kontrollraum",
+    "honestNote": "Nur Leseansicht. Die Pipeline-Phase ist eine Darstellungslinse — jede Zeile zeigt zusätzlich ihren gespeicherten Status wörtlich, und Statusänderungen bleiben auf der eigenen Seite der Zeile. Nichts hier kontaktiert jemanden oder ändert etwas.",
+    "summaryHeading": "Phasenübersicht",
+    "windowNote": "Zahlen werden über die tatsächlich geladenen Zeilen berechnet (die Vertriebsquellen laden je die 50 neuesten) — nie geschätzt.",
+    "duplicateChip": "Mögliches Duplikat",
+    "storedStatusLabel": "Gespeicherter Status",
+    "createdLabel": "Erstellt",
+    "openSurface": "Eigene Seite öffnen",
+    "empty": "Noch keine Nachfragezeilen geladen. Sobald eine Anfrage, ein Formular, ein Lead oder eine Anmeldung existiert, erscheint sie hier.",
+    "noMatches": "Keine Zeilen entsprechen den aktuellen Filtern.",
+    "viewPipeline": "Nachfrage-Pipeline ansehen",
+    "stages": {
+      "new": "Neu",
+      "contacted": "Kontaktiert",
+      "qualifying": "In Prüfung",
+      "follow_up": "Wartet auf Folgeschritt",
+      "active": "Aktiv",
+      "closed": "Geschlossen"
+    },
+    "sources": {
+      "customer_request": "Nachfrageanfrage",
+      "public_intake": "Öffentliches Formular",
+      "lead": "Lead",
+      "waitlist": "Warteliste"
+    },
+    "sourceStates": {
+      "needs_admin_read": "in dieser Umgebung nicht lesbar",
+      "service_key_missing": "Serviceverbindung nicht konfiguriert",
+      "needs_migration": "wartet auf die Migration",
+      "not_admin": "Admin-Prüfung nicht bestanden",
+      "error": "konnte gerade nicht gelesen werden"
+    },
+    "filters": {
+      "sourceLabel": "Quelle",
+      "stageLabel": "Phase",
+      "all": "Alle",
+      "searchLabel": "Suche",
+      "searchPlaceholder": "Nach Titel, Firma oder Status filtern",
+      "searchSubmit": "Anwenden",
+      "reset": "Zurücksetzen"
+    }
+  },
   "salesIntake": {
+    "viewPipeline": "Nachfrage-Pipeline ansehen",
     "title": "Vertriebseingang",
     "intro": "Ein Überblick darüber, wer hereinkommt: eingereichte Bedarfsanfragen in Prüfung, Warteliste-Anmeldungen und gespeicherte Leads. Nur Ansicht — echte erfasste Zeilen, hier nichts bearbeitbar.",
     "honestNote": "Nur Ansicht. Nichts hier kontaktiert irgendjemanden — keine E-Mail, keine SMS, keine Nachrichten. Die einzige Aktion erfasst eine interne Folgeaufgabe für das Team.",
@@ -5915,6 +6116,50 @@
     "sourceLink": "Quelle",
     "scopeNote": "Basierend auf offiziellen EU-Quellen zu entsandten Arbeitskräften — bestätigen Sie die nationalen Besonderheiten bei der zuständigen Behörde. Dies ist eine Information, keine Rechtsberatung."
   },
+  "documentCentre": {
+    "attention": {
+      "title": "Braucht Aufmerksamkeit",
+      "empty": "Derzeit braucht kein Dokument Aufmerksamkeit.",
+      "note": "Die Zahlen stammen ausschließlich aus Ihren eigenen Gültigkeitsdaten und Prüfstatus.",
+      "expiring": "Läuft bald ab: {n}",
+      "missing": "Fehlt: {n}",
+      "reviewNeeded": "Wartet auf Prüfung: {n}"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "typeLabel": "Typ",
+      "all": "Alle",
+      "noMatches": "Keine Dokumente für die gewählten Filter."
+    },
+    "verification": {
+      "unverified": "Nicht geprüft",
+      "pending": "Prüfung ausstehend",
+      "verified": "Geprüft",
+      "rejected": "Abgelehnt"
+    },
+    "workProof": {
+      "title": "Arbeitsnachweis & Exporte",
+      "journalTitle": "Nachweise aus dem Arbeitsjournal",
+      "journalCounts": "Einträge: {entries} · Fotos: {photos}",
+      "countsUnavailable": "Zahlen sind in dieser Umgebung nicht verfügbar.",
+      "galleryNote": "Fotos liegen in Ihren Journaleinträgen; Projektgalerien finden Sie auf der Seite jedes Projekts."
+    },
+    "uploadNote": "Dies ist ein Metadaten-Inventar — Datei-Upload ist noch nicht verfügbar. Sie erfassen, was Sie haben und wie lange es gültig ist; die Dateien selbst bleiben bei Ihnen.",
+    "org": {
+      "title": "Dokumentbereitschaft des Pools (einwilligungsbasiert)",
+      "intro": "Dokumente gehören den Arbeitskräften. Sie sehen nur Kategorien-Zahlen der Pool-Arbeitskräfte, die das Teilen von Summen aktiviert haben.",
+      "workersLabel": "Arbeitskräfte mit Einwilligung",
+      "totalLabel": "Dokumente",
+      "validLabel": "Gültig",
+      "expiringLabel": "Läuft bald ab",
+      "attentionLabel": "Braucht Aufmerksamkeit",
+      "consentNote": "Nur Zahlen — niemals Dokumentinhalte. Eine Arbeitskraft ohne Einwilligung erscheint schlicht nicht.",
+      "noConsented": "Keine einwilligungsbasierten Summen — keine Pool-Arbeitskraft hat das Teilen aktiviert, oder Ihre Organisation verwaltet keinen Agenturpool.",
+      "unavailable": "Einwilligungsbasierte Dokumentsummen sind in dieser Umgebung nicht verfügbar. Dokumente gehören den Arbeitskräften.",
+      "projectAxisLink": "Bereitschafts-Checklisten je Projekt",
+      "projectAxisNote": "Die Bereitschaft der Arbeitskräfte je Projekt steht auf der Betriebsseite jedes Projekts."
+    }
+  },
   "trust": {
     "title": "Vertrauenssignale",
     "caption": "Die Zahlen stammen direkt aus echten Einträgen. Nichts hier ist gewichtet oder erfunden.",
@@ -6062,6 +6307,14 @@
     "cta": "Zurück zum Start"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Gesprächspunkte",
+      "missing": "Fehlende Informationen"
+    },
+    "missingSide": {
+      "worker": "Der Kandidat hat nicht angegeben: {criterion}",
+      "demand": "Ihre Anfrage enthält nicht: {criterion}"
+    },
     "statusNote": {
       "title": "So funktioniert das Matching heute",
       "signals": "Auf Basis der aktuell verfügbaren Profil- und Arbeitsjournal-Signale zeigt das System Bereitschaft und eine mögliche Eignung an.",
@@ -6299,7 +6552,9 @@
     "notAuthed": "Bitte melden Sie sich an, um Ihre Buchungen zu sehen.",
     "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
     "noDate": "Kein Startdatum festgelegt",
+    "noRole": "Arbeitsvereinbarung",
     "startsOn": "Beginnt am {date}",
+    "endsOn": "Bis {date}",
     "incoming": {
       "title": "Vorschläge für Sie",
       "help": "Ein Unternehmen hat Ihnen eine Zusammenarbeit vorgeschlagen. Sie entscheiden.",
@@ -6317,6 +6572,28 @@
       "withdrawn": "Zurückgezogen",
       "expired": "Abgelaufen"
     },
+    "displayState": {
+      "awaiting_response": "Antwort ausstehend",
+      "no_response_stale": "Noch keine Antwort"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Sie entscheiden — annehmen oder ablehnen. Nichts ist bestätigt, bis Sie annehmen.",
+        "no_response_stale": "Seit 14+ Tagen unbeantwortet, aber noch offen — Sie können weiterhin annehmen oder ablehnen.",
+        "accepted": "Bestätigt. Nächster Schritt: Schreiben Sie dem Unternehmen und planen Sie die Arbeit gemeinsam.",
+        "declined": "Sie haben abgelehnt, daher ist dieser Vorschlag geschlossen. Das Unternehmen kann einen neuen senden.",
+        "withdrawn": "Das Unternehmen hat diesen Vorschlag zurückgezogen, daher ist er geschlossen.",
+        "expired": "Dieser Vorschlag ist verfallen, daher ist er geschlossen."
+      },
+      "outgoing": {
+        "awaiting_response": "Die Arbeitskraft entscheidet. Bis zur Antwort können Sie den Vorschlag zurückziehen.",
+        "no_response_stale": "Seit 14+ Tagen keine Antwort. Noch offen — Sie können ihn zurückziehen oder warten.",
+        "accepted": "Die Arbeitskraft hat angenommen. Nächster Schritt: Senden Sie eine Nachricht und planen Sie die Arbeit gemeinsam.",
+        "declined": "Die Arbeitskraft hat abgelehnt, daher ist dieser Vorschlag geschlossen. Sie können einer anderen Arbeitskraft einen Vorschlag machen.",
+        "withdrawn": "Sie haben diesen Vorschlag zurückgezogen, daher ist er geschlossen. Senden Sie bei Bedarf einen neuen.",
+        "expired": "Dieser Vorschlag ist verfallen, daher ist er geschlossen."
+      }
+    },
     "actions": {
       "accept": "Annehmen",
       "decline": "Ablehnen",
@@ -6326,17 +6603,66 @@
       "error": "Etwas ist schiefgelaufen.",
       "message": "Nachricht senden",
       "withdraw": "Vorschlag zurückziehen",
-      "findAnother": "Andere Arbeitskraft finden"
+      "findAnother": "Andere Arbeitskraft finden",
+      "proposeAgain": "Erneut mit neuen Terminen vorschlagen",
+      "planning": "In der Planung ansehen"
     },
     "connections": {
       "title": "Die Planung ist verknüpft mit",
       "intro": "Eine Buchung ist Teil Ihres Plans. Dies sind die Bereiche, mit denen sie verknüpft ist.",
+      "planning": "Planungs-Agenda",
+      "planningNote": "Diese Buchung im Datumskontext mit Projekten und Aufgaben",
       "marketplace": "Marktplatz-Anfragen",
       "marketplaceNote": "Serviceanfragen und deren Status",
       "map": "Karte",
       "mapNote": "Wo Arbeit und Buchungen sind",
       "diary": "Arbeitstagebuch",
       "diaryNote": "Halten Sie fest, was tatsächlich passiert ist"
+    },
+    "propose": {
+      "modeNote": "Dies ist ein Buchungsvorschlag mit Terminen — die Arbeitskraft bestätigt ihn oder lehnt ihn ab. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
+      "againModeNote": "Dies öffnet denselben Vorschlag an dieselbe Arbeitskraft mit neuen Terminen erneut — die Arbeitskraft entscheidet erneut. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
+      "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen."
+    },
+    "reason": {
+      "optionalTitle": "Grund (optional)",
+      "noteLabel": "Notiz (optional)",
+      "none": "Kein Grund",
+      "notStored": "Ihre Antwort wurde gespeichert. Der Grund konnte diesmal nicht gespeichert werden.",
+      "decline": {
+        "dates_unsuitable": "Die Termine passen nicht",
+        "conditions_unsuitable": "Die Bedingungen passen nicht",
+        "already_booked": "Ich bin in dem Zeitraum bereits gebucht",
+        "other": "Sonstiges"
+      },
+      "withdraw": {
+        "position_filled": "Die Stelle ist bereits besetzt",
+        "need_changed": "Der Bedarf hat sich geändert",
+        "dates_changed": "Die Termine haben sich geändert",
+        "other": "Sonstiges"
+      },
+      "confirmDecline": "Ablehnung bestätigen",
+      "confirmWithdraw": "Zurückziehen bestätigen",
+      "cancel": "Abbrechen"
+    },
+    "reschedule": {
+      "open": "Termine ändern",
+      "startDate": "Neues Startdatum",
+      "endDate": "Neues Enddatum (optional)",
+      "note": "Notiz (optional)",
+      "save": "Neue Termine speichern",
+      "saved": "Termine aktualisiert. Die Arbeitskraft sieht die neuen Termine.",
+      "notChanged": "Die Termine wurden nicht geändert. Bitte versuchen Sie es später erneut.",
+      "cancel": "Abbrechen"
+    },
+    "deadline": {
+      "open": "Antwortdatum festlegen",
+      "label": "Antworten bis",
+      "save": "Datum speichern",
+      "saved": "Antwortdatum gespeichert.",
+      "notSet": "Das Antwortdatum wurde nicht gespeichert. Bitte versuchen Sie es später erneut.",
+      "respondBy": "Antwort bis {date}",
+      "cancel": "Abbrechen"
     }
   },
   "adminReadiness": {
@@ -6635,6 +6961,105 @@
     "applyNotAdmin": "Admin-Rechte erforderlich."
   },
   "opportunities": {
+    "saved": {
+      "save": "Speichern",
+      "saved": "Gespeichert",
+      "unsave": "Aus Gespeicherten entfernen",
+      "privateHint": "Das Speichern ist privat in deinem Konto — das Unternehmen sieht nie, wer seine Anzeige gespeichert hat.",
+      "sectionTitle": "Gespeicherte Chancen",
+      "noLongerOpen": "Früher gespeichert, aber auf dem Board nicht mehr offen: {count}",
+      "error": "Deine gespeicherte Liste konnte nicht aktualisiert werden. Bitte erneut versuchen."
+    },
+    "recent": {
+      "title": "Zuletzt angesehen",
+      "deviceOnly": "Nur auf diesem Gerät gespeichert — diese Liste verlässt deinen Browser nie und wird nicht an den Server gesendet.",
+      "clear": "Leeren"
+    },
+    "compare": {
+      "toggle": "Vergleichen",
+      "selectedLabel": "Ausgewählt",
+      "open": "Auswahl vergleichen",
+      "title": "Chancen vergleichen",
+      "close": "Schließen",
+      "clear": "Auswahl löschen",
+      "limitNote": "Wähle 2–3 Chancen zum Vergleichen.",
+      "notStated": "Nicht angegeben",
+      "fact": {
+        "pay": "Lohn",
+        "hours": "Stunden pro Woche",
+        "start": "Beginn",
+        "engagement": "Beschäftigungsform",
+        "accommodation": "Unterkunft",
+        "transport": "Transport",
+        "tools": "Werkzeuge",
+        "languages": "Sprachen",
+        "location": "Ort",
+        "company": "Unternehmen"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "Chancen filtern",
+        "profession": "Arbeitsart",
+        "country": "Land",
+        "start": "Beginn",
+        "accommodation": "Unterkunft",
+        "transport": "Transport",
+        "tool": "Benötigte Werkzeuge",
+        "activeCount": "Aktive Filter: {count}",
+        "reset": "Filter zurücksetzen"
+      },
+      "sort": {
+        "label": "Sortierung",
+        "relevance": "Beste Übereinstimmung zuerst",
+        "newest": "Neueste zuerst"
+      },
+      "emptyFiltered": {
+        "title": "Keine Chancen entsprechen diesen Filtern",
+        "body": "Aktive Filter: {filters}. Entfernen Sie einige Filter oder setzen Sie sie zurück.",
+        "reset": "Filter zurücksetzen"
+      },
+      "details": {
+        "show": "Mehr Details",
+        "hide": "Details ausblenden"
+      },
+      "tiers": {
+        "blocking": "Passt nicht",
+        "strengths": "Passt",
+        "negotiables": "Gesprächspunkte",
+        "missing": "Fehlende Informationen"
+      },
+      "missing": {
+        "worker": "Sie haben nicht angegeben: {criterion}",
+        "demand": "Das Unternehmen hat nicht angegeben: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Erforderliche Fähigkeiten",
+        "evidence_tiers": "Nachweis der Fähigkeiten",
+        "profession": "Beruf",
+        "language": "Sprache",
+        "country_location": "Land und Ort",
+        "availability": "Verfügbarkeit",
+        "pay_ceiling": "Lohnerwartung",
+        "accommodation": "Unterkunft",
+        "compensation": "Lohn",
+        "start_date": "Startdatum",
+        "shifts_hours": "Schichten und Stunden",
+        "engagement_form": "Vertragsform",
+        "licence_categories": "Führerschein",
+        "own_vehicle": "Eigenes Fahrzeug",
+        "own_tools": "Eigenes Werkzeug",
+        "pay_basis": "Lohnbasis (brutto/netto)",
+        "night_shifts": "Nachtschichten",
+        "weekend_shifts": "Wochenendschichten",
+        "overtime": "Überstunden"
+      },
+      "how": {
+        "title": "So funktioniert das Matching",
+        "body": "Das Matching folgt festen, deterministischen Regeln über die Fakten, die beide Seiten angegeben haben - erforderliche Fähigkeiten, Sprache, Ort, Verfügbarkeit, Lohn und Vertragsform. Ein fehlender Fakt wird als fehlend angezeigt und nie geraten. Keine künstliche Intelligenz entscheidet, und es gibt keinen globalen Personenwert - nur die Passung innerhalb dieser einen Chance.",
+        "version": "Berechnungsversion: {version} - deterministische Regeln"
+      }
+    },
     "title": "Chancen für Sie",
     "intro": "Hier sehen Sie Arbeitgeber-Bedarfe, die zu Ihnen passen könnten, und was Sie Ihrem Profil hinzufügen sollten, um bereit zu sein.",
     "noWorkerBody": "Vervollständigen Sie zuerst Ihr Arbeitskraft-Profil, um Chancen zu sehen, die zu Ihnen passen.",
@@ -6753,7 +7178,50 @@
       "reviewed": "Das Unternehmen hat Ihr Interesse geprüft",
       "contacted": "Vom Unternehmen markiert: kontaktiert"
     },
-    "companyVerified": "Verifiziertes Unternehmen"
+    "companyVerified": "Verifiziertes Unternehmen",
+    "structured": {
+      "detailTitle": "Angegebene Arbeitsbedingungen",
+      "notProvided": "Das Unternehmen hat für dieses Angebot noch keine detaillierten Arbeitsbedingungen angegeben — nur die oben genannten Fakten sind angegeben.",
+      "gapsTitle": "Vom Unternehmen nicht angegeben",
+      "yes": "Ja",
+      "no": "Nein",
+      "payLabel": "Vergütung",
+      "amountFrom": "ab {amount}",
+      "amountUpTo": "bis {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} Std./Woche",
+      "chipMinHours": "mindestens {hours} Std./Woche",
+      "chipStartFrom": "Beginn ab {from}",
+      "chipStartWindow": "Beginn {from} – {to}",
+      "chipDeadline": "Bewerbung bis {date}",
+      "days": "{count} T.",
+      "yearsExperience": "{count} J.",
+      "km": "{km} km",
+      "minutes": "{min} Min.",
+      "probationLabel": "Probezeit",
+      "extensionPossibleLabel": "Verlängerung möglich",
+      "scheduleNoticeLabel": "Dienstplan-Vorlauf",
+      "expectedResponseLabel": "Antwort innerhalb von",
+      "firstPaymentLabel": "Erste Zahlung innerhalb von",
+      "travelMinutesLabel": "Fahrzeit zur Baustelle",
+      "registrationPossibleLabel": "Anmeldung einer Meldeadresse möglich",
+      "availableFromLabel": "Verfügbar ab",
+      "similarProjectLabel": "Erfahrung mit ähnlichen Projekten",
+      "driverSupplementLabel": "Fahrerzulage",
+      "siteModeLabel": "Einsatzorte",
+      "siteMode": {
+        "single": "Ein Einsatzort",
+        "multiple": "Mehrere Einsatzorte",
+        "mobile": "Mobil / wechselnde Einsatzorte"
+      },
+      "workModeLabel": "Arbeitsform",
+      "workMode": {
+        "onsite": "Vor Ort",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      }
+    }
   },
   "workerIntake": {
     "title": "Arbeitskraft-Aufnahme",
@@ -7491,6 +7959,62 @@
       "noticeLink": "Datenschutzhinweis"
     }
   },
+  "planning": {
+    "eyebrow": "PLANUNG",
+    "title": "Planung",
+    "intro": "Buchungen, Projekttermine und Aufgabenfristen in einer Agenda. Jede Zeile führt zur echten Quelle.",
+    "honestNote": "Angezeigt werden nur real existierende Einträge: Buchungen, die Termine Ihrer verwalteten Projekte und Fristen offener Aufgaben. Es ist kein externer Kalender verbunden, nichts ist erfunden.",
+    "notAuthed": "Melden Sie sich an, um Ihren Plan zu sehen.",
+    "filters": {
+      "label": "Quelle",
+      "all": "Alle"
+    },
+    "source": {
+      "booking": "Buchung",
+      "project": "Projekt",
+      "task": "Aufgabe"
+    },
+    "sourceNotes": {
+      "bookingUnavailable": "Buchungen sind noch nicht verfügbar — sie erscheinen im Plan, sobald die Buchungsebene aktiviert ist.",
+      "taskUnavailable": "Aufgaben sind noch nicht verfügbar — Aufgabenfristen erscheinen im Plan, sobald die Aufgabenebene aktiviert ist.",
+      "taskError": "Aufgaben konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
+      "projectManagersOnly": "Projekt-Zeiträume sehen Projektverantwortliche. Ein Projektplan für Arbeitskräfte folgt, sobald diese Ansicht existiert.",
+      "projectError": "Projekte konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt."
+    },
+    "week": {
+      "label": "Nächste 7 Tage"
+    },
+    "today": "Heute",
+    "later": {
+      "title": "Später"
+    },
+    "undated": {
+      "title": "Noch ohne Datum",
+      "hint": "Diese Einträge existieren, aber es sind noch keine Termine erfasst."
+    },
+    "empty": "Noch nichts geplant. Angenommene Buchungen, Projekttermine und Aufgabenfristen erscheinen hier.",
+    "pastHidden": "Abgeschlossene Einträge werden hier nicht angezeigt: {count}. Die Historie bleibt auf der jeweiligen Quellseite.",
+    "conflict": {
+      "flag": "Termine überschneiden sich"
+    },
+    "context": {
+      "incoming": "Mir vorgeschlagen",
+      "outgoing": "Von uns vorgeschlagen",
+      "managed": "Verwaltetes Projekt",
+      "assigned": "Mir zugewiesen",
+      "mine": "Meine Aufgabe"
+    },
+    "fallback": {
+      "booking": "Buchung",
+      "project": "Projekt",
+      "task": "Aufgabe"
+    },
+    "projectStatus": {
+      "draft": "Entwurf",
+      "live": "Aktiv",
+      "paused": "Pausiert"
+    }
+  },
   "tasks": {
     "eyebrow": "Arbeitsaufgaben",
     "title": "Aufgaben",
@@ -7572,5 +8096,404 @@
     "projectSection": {
       "link": "Aufgaben zu diesem Projekt"
     }
+  },
+  "assist": {
+    "eyebrow": "Assistenzzentrum",
+    "title": "Assistenzzentrum",
+    "intro": "Was Ihre Aufmerksamkeit braucht, Zusammenfassungen aus Ihren eigenen Daten und der ehrliche Zustand des KI-Anbieters.",
+    "attention": {
+      "title": "Was braucht meine Aufmerksamkeit",
+      "note": "Aus Ihren eigenen Daten nach festen Regeln berechnet — dieselben Zahlen, die die Glocke und jedes Modul bereits zeigen. Jede Zeile nennt ihre Datenquelle und verlinkt die Seite, auf der sie sich klären lässt.",
+      "empty": "Im Moment braucht nichts Ihre Aufmerksamkeit — es gibt keine offenen Signale in Ihren Daten.",
+      "open": "Öffnen",
+      "docExpiring": "Dokumente, die innerhalb von 30 Tagen ablaufen",
+      "docMissing": "Fehlende oder abgelaufene Dokumente",
+      "docReview": "Dokumente in Prüfung oder zurückgegeben",
+      "financeOverdue": "Überfällige Finanzeinträge"
+    },
+    "sources": {
+      "label": "Quellen",
+      "notificationSpine": "Benachrichtigungssignale",
+      "workerDocuments": "Ihre Dokumenteinträge",
+      "financeRecords": "Ihre Finanzeinträge",
+      "workerSkills": "Ihre katalogisierten Fähigkeiten",
+      "workJournal": "Ihr Arbeitsjournal",
+      "managerConfirmations": "Bestätigungen von Verantwortlichen",
+      "projects": "Ihre Projekte",
+      "assignments": "Aktive Zuweisungen von Arbeitskräften"
+    },
+    "summaries": {
+      "title": "Zusammenfassungen aus Ihren Daten",
+      "note": "Aus echten Feldern nach festen Regeln zusammengesetzt, mit sichtbaren Quellen. Kein Text in diesem Abschnitt wurde von einem Sprachmodell erzeugt.",
+      "none": "Für diese Rolle gibt es noch keine Zusammenfassung — Zusammenfassungen entstehen nur dort, wo wahrheitsgemäße Daten existieren.",
+      "worker": {
+        "title": "Profil- und Nachweiszusammenfassung",
+        "totalSkills": "Fähigkeiten",
+        "workSupported": "Durch Arbeitseinträge belegt",
+        "confirmed": "Bestätigt",
+        "journalEntries": "Journaleinträge",
+        "confirmations": "Bestätigungen",
+        "link": "Vollständigen Nachweisbericht öffnen"
+      },
+      "org": {
+        "title": "Projektstatus-Zusammenfassung",
+        "teamSize": "Aktive Arbeitskräfte: {count}",
+        "empty": "Noch keine aktiven Projekte — Projekte erscheinen hier, sobald sie existieren.",
+        "error": "Projekte konnten gerade nicht geladen werden. Der Rest der Seite funktioniert.",
+        "link": "Betrieb"
+      }
+    },
+    "provider": {
+      "title": "KI-Anbieter",
+      "stateLabel": "Laufzeitzustand",
+      "state": {
+        "disabled": "Aus",
+        "mock": "Mock (deterministischer Testmodus)",
+        "live": "Aktiv"
+      },
+      "reason": {
+        "ok": "Die Laufzeitumgebung ist konfiguriert.",
+        "mode_disabled": "Kein Anbietermodus gesetzt — die Laufzeitumgebung ist standardmäßig aus.",
+        "unknown_provider": "Der konfigurierte Anbieter wird nicht erkannt, daher bleibt die Laufzeitumgebung aus.",
+        "missing_api_key": "Kein Anbieterschlüssel konfiguriert, daher bleibt die Laufzeitumgebung aus."
+      },
+      "disabledBody": "In dieser Umgebung ist kein externer KI-Anbieter angebunden. Alles auf dieser Seite wird nach festen Regeln aus Ihren eigenen Daten berechnet — kein Text hier wurde von einem Sprachmodell erzeugt.",
+      "whenEnabled": "Sobald der Eigentümer einen Anbieter anbindet und der Audit-Speicher für Vorschläge angewendet ist, werden prüfbare Entwurfsvorschläge verfügbar — immer als Vorschläge, die ein Mensch bestätigt, nie als automatische Änderungen.",
+      "gates": "Zwei Tore sind bewusst offen: (1) in der Produktionsumgebung ist kein Anbieterschlüssel konfiguriert und (2) der Audit-Speicher für Vorschläge (ai_runs / ai_suggestions) ist eine vom Eigentümer freizugebende Migration. Die Generierung bleibt aus, bis beide geschlossen sind — Vorschläge ohne Audit-Spur würden die eigenen Regeln des Programms verletzen.",
+      "providerLabel": "Anbieter",
+      "modelLabel": "Modell",
+      "notWired": "Generierungsfunktionen sind in diesem Schritt bewusst nicht angeschlossen — Ergebnisse hätten noch keine Audit-Spur. Der Zustand oben dient nur der Transparenz."
+    }
+  },
+  "finance": {
+    "eyebrow": "Operative Finanzen",
+    "title": "Finanzeinträge",
+    "intro": "Manuelle Erfassung ausgestellter Rechnungen, erhaltener Rechnungen und Ausgaben — mit echten Summen und abgeleiteten Überfälligkeits-Markierungen.",
+    "scopeNote": "Nur manuelle Einträge — dies ist keine Buchhaltungs-, Steuer-, Lohn-, Banksynchronisations- oder Zahlungsabwicklungssoftware. Ein Eintrag bewegt kein Geld und kontaktiert niemanden.",
+    "notAuthed": "Melden Sie sich an, um Ihre Finanzeinträge zu sehen.",
+    "unavailable": "Das Finanzmodul wird vorbereitet — noch nicht verfügbar. Sobald es aktiviert ist, erscheinen Ihre Einträge hier.",
+    "loadError": "Einträge konnten nicht geladen werden. Aktualisieren Sie die Seite.",
+    "empty": "Noch keine Finanzeinträge — fügen Sie oben den ersten hinzu.",
+    "emptyFiltered": "Keine Einträge entsprechen den gewählten Filtern.",
+    "exportCsv": "CSV herunterladen",
+    "exportNote": "Exportiert nur Ihre eigenen Einträge (dieselben Zeilen, die diese Seite zeigt).",
+    "summary": {
+      "issued": "Ausgestellte Rechnungen",
+      "received": "Erhaltene Rechnungen",
+      "expenses": "Ausgaben",
+      "paid": "Bezahlt",
+      "overdue": "Überfällig"
+    },
+    "filters": {
+      "label": "Typ",
+      "statusLabel": "Status",
+      "allTypes": "Alle Typen",
+      "allStatuses": "Alle Status",
+      "overdue": "Überfällig"
+    },
+    "type": {
+      "invoice_issued": "Ausgestellte Rechnung",
+      "invoice_received": "Erhaltene Rechnung",
+      "expense": "Ausgabe"
+    },
+    "status": {
+      "draft": "Entwurf",
+      "issued": "Ausgestellt",
+      "partially_paid": "Teilweise bezahlt",
+      "paid": "Bezahlt",
+      "cancelled": "Storniert"
+    },
+    "flags": {
+      "overdue": "Überfällig"
+    },
+    "dueLabel": "Fällig",
+    "paidLabel": "Bezahlt",
+    "projectLinked": "Projektbezogen",
+    "companyLinked": "Firmeneintrag",
+    "actions": {
+      "issue": "Als ausgestellt markieren",
+      "markPartial": "Als teilweise bezahlt markieren",
+      "markPaid": "Als bezahlt markieren",
+      "markUnpaid": "Als unbezahlt markieren",
+      "cancel": "Stornieren",
+      "reopen": "Wieder öffnen",
+      "details": "Daten bearbeiten",
+      "save": "Speichern"
+    },
+    "form": {
+      "title": "Neuer Eintrag",
+      "typeLabel": "Eintragstyp",
+      "statusLabel": "Anfangsstatus",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "z. B. Gerüstmiete — Juni",
+      "counterpartyLabel": "Gegenpartei",
+      "counterpartyPlaceholder": "z. B. Firmen- oder Personenname",
+      "amountLabel": "Betrag (EUR)",
+      "amountHint": "Betrag in Euro mit höchstens zwei Nachkommastellen, z. B. 123.45. Vorerst nur EUR.",
+      "dueLabel": "Fälligkeitsdatum (optional)",
+      "projectLabel": "Projekt (optional)",
+      "projectNone": "Kein Projekt",
+      "companyLinkLabel": "Mit meiner Firma verknüpfen (deren Inhaber sieht diesen Eintrag)",
+      "noteLabel": "Notiz (optional)",
+      "submit": "Eintrag hinzufügen"
+    },
+    "notice": {
+      "created": "Eintrag hinzugefügt.",
+      "updated": "Eintrag aktualisiert.",
+      "invalid": "Prüfen Sie die Felder — Titel 3–160 Zeichen, Gegenpartei 2–160, Betrag wie 123.45.",
+      "needs_migration": "Das Finanzmodul ist noch nicht aktiviert — die Änderung wurde nicht gespeichert.",
+      "not_authorized": "Das dürfen Sie nicht.",
+      "not_found": "Eintrag nicht gefunden.",
+      "limit_reached": "Eintragslimit erreicht — diese manuelle Liste ist begrenzt.",
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    }
+  },
+  "structuredDemand": {
+    "advancedTitle": "Erweiterte Angaben (optional)",
+    "advancedHint": "Strukturierte Fakten, nach denen Arbeitskräfte filtern und vergleichen. Alles ist optional — Ausgelassenes wird als „nicht angegeben“ angezeigt, nie erfunden.",
+    "notStated": "Nicht angegeben",
+    "sections": {
+      "engagement": "Beschäftigungsform und Umfang",
+      "time": "Zeit und Arbeitsplan",
+      "compensation": "Vergütung und Abzüge",
+      "accommodation": "Unterkunft",
+      "transport": "Transport",
+      "requirements": "Anforderungen an Bewerber",
+      "process": "Bewerbungsprozess"
+    },
+    "opportunityTypeLabel": "Art des Angebots",
+    "opportunityType": {
+      "employment": "Festanstellung",
+      "temporary_assignment": "Zeitarbeit",
+      "project_work": "Projektarbeit",
+      "subcontract": "Nachunternehmerauftrag",
+      "service_request": "Dienstleistungsauftrag"
+    },
+    "targetSupplyLabel": "Wer wird gesucht",
+    "targetSupply": {
+      "individual": "Eine Arbeitskraft",
+      "multiple_workers": "Mehrere Arbeitskräfte",
+      "team": "Team / Kolonne",
+      "company": "Firma / Nachunternehmer"
+    },
+    "engagementFormLabel": "Beschäftigungsform",
+    "engagementForm": {
+      "direct_employment": "Direktanstellung",
+      "agency_employment": "Über Zeitarbeitsfirma",
+      "temporary_employment": "Befristete Anstellung",
+      "posted_worker": "Entsandte Arbeitskraft",
+      "self_employed_contractor": "Selbstständiger Auftragnehmer",
+      "company_subcontract": "Nachunternehmervertrag"
+    },
+    "contractCountryLabel": "Vertragsland",
+    "startEarliestLabel": "Frühester Beginn",
+    "startLatestLabel": "Spätester Beginn",
+    "endDateLabel": "Enddatum (falls bekannt)",
+    "applicationDeadlineLabel": "Bewerbungsfrist",
+    "hoursPerWeekLabel": "Stunden pro Woche",
+    "minGuaranteedHoursLabel": "Garantierte Stunden pro Woche",
+    "shiftsLabel": "Schichten",
+    "shift": {
+      "day": "Tagschicht",
+      "night": "Nachtschicht",
+      "weekend": "Wochenenden"
+    },
+    "overtimeExpectedLabel": "Überstunden zu erwarten",
+    "compMinLabel": "Vergütung ab",
+    "compMaxLabel": "Vergütung bis",
+    "currencyLabel": "Währung",
+    "payUnitLabel": "Bezahlung pro",
+    "payUnit": {
+      "hour": "Stunde",
+      "day": "Tag",
+      "week": "Woche",
+      "month": "Monat",
+      "project": "Projekt"
+    },
+    "payBasisLabel": "Brutto oder netto",
+    "payBasis": {
+      "gross": "Brutto",
+      "net": "Netto",
+      "unspecified": "Nicht angegeben"
+    },
+    "paymentFrequencyLabel": "Zahlungsrhythmus",
+    "paymentFrequency": {
+      "weekly": "Wöchentlich",
+      "biweekly": "Alle zwei Wochen",
+      "monthly": "Monatlich"
+    },
+    "guaranteedBaseLabel": "Garantierter Grundlohn",
+    "perDiemLabel": "Tagegeld / Zulage",
+    "deductionsLabel": "Abzüge",
+    "deductionsHelp": "Geben Sie jeden bekannten Abzug an (Unterkunft, Transport, Versicherung). Fehlende Abzugsangaben werden Arbeitskräften als Lücke angezeigt.",
+    "deductionKindLabel": "Abzug",
+    "deductionKind": {
+      "accommodation": "Unterkunft",
+      "transport": "Transport",
+      "insurance": "Versicherung",
+      "other": "Sonstiges"
+    },
+    "deductionAmountLabel": "Betrag",
+    "deductionPeriodLabel": "Zeitraum",
+    "period": {
+      "day": "Pro Tag",
+      "week": "Pro Woche",
+      "month": "Pro Monat",
+      "once": "Einmalig"
+    },
+    "addDeductionLabel": "Abzug hinzufügen",
+    "noDeductionsLabel": "Keine Abzüge — bestätigt",
+    "removeLabel": "Entfernen",
+    "accommodationStateLabel": "Unterkunft",
+    "accommodationState": {
+      "offered": "Wird gestellt",
+      "not_offered": "Wird nicht gestellt",
+      "not_needed": "Nicht erforderlich"
+    },
+    "accommodationPayerLabel": "Wer zahlt",
+    "accommodationPayer": {
+      "employer": "Arbeitgeber zahlt",
+      "shared": "Kosten geteilt",
+      "worker": "Arbeitskraft zahlt"
+    },
+    "roomLabel": "Zimmer",
+    "room": {
+      "single": "Einzelzimmer",
+      "shared": "Geteiltes Zimmer"
+    },
+    "accommodationPriceLabel": "Preis",
+    "accommodationPricePeriodLabel": "Preiszeitraum",
+    "occupancyLabel": "Personen pro Zimmer",
+    "distanceKmLabel": "Entfernung zur Baustelle (km)",
+    "depositLabel": "Kaution",
+    "amenitiesLabel": "Ausstattung",
+    "amenity": {
+      "kitchen": "Küche",
+      "laundry": "Waschküche",
+      "internet": "Internet"
+    },
+    "familyPossibleLabel": "Partner / Familie möglich",
+    "internationalTravelLabel": "Anreise ins Land",
+    "dailyTransportLabel": "Täglicher Transport zur Baustelle",
+    "betweenSitesLabel": "Fahrten zwischen Baustellen",
+    "transportLevel": {
+      "provided": "Wird gestellt",
+      "compensated": "Wird erstattet",
+      "not_provided": "Wird nicht gestellt",
+      "unknown": "Nicht angegeben"
+    },
+    "arrivalPickupLabel": "Abholung vom Flughafen / Bahnhof",
+    "companyVehicleLabel": "Firmenfahrzeug",
+    "fuelCardLabel": "Tankkarte / Erstattung",
+    "ownVehicleRequiredLabel": "Eigenes Fahrzeug erforderlich",
+    "returnTravelLabel": "Zuschuss zur Heimreise",
+    "licenceCategoriesLabel": "Führerscheinklassen",
+    "minExperienceYearsLabel": "Mindesterfahrung (Jahre)",
+    "languagesLabel": "Sprachanforderungen",
+    "languageLabel": "Sprache",
+    "languageLevelLabel": "Niveau",
+    "onePerTeamLabel": "Ein Sprecher pro Kolonne genügt",
+    "addLanguageLabel": "Sprache hinzufügen",
+    "certificatesLabel": "Zertifikate und Berechtigungen",
+    "certificatesHelp": "Erforderliche Zertifikate (z. B. Sicherheitsausweis, Maschinenberechtigung) — als Fakten angegeben, als Anforderungen angezeigt.",
+    "addCertificateLabel": "Zertifikat hinzufügen",
+    "ownToolsLabel": "Eigenes Werkzeug",
+    "ownVehicleLabel": "Eigenes Fahrzeug",
+    "ownWorkwearLabel": "Eigene Arbeitskleidung",
+    "drawingsReadingLabel": "Liest Zeichnungen / Pläne",
+    "independentWorkLabel": "Arbeitet selbstständig",
+    "leadershipLabel": "Führt andere an",
+    "applicationMethodLabel": "Wie bewerben",
+    "applicationMethod": {
+      "interest_signal": "Interesse auf der Plattform zeigen",
+      "conversation": "Im Gespräch klären"
+    },
+    "interviewStagesLabel": "Gesprächsrunden",
+    "responseDeadlineDaysLabel": "Antwort innerhalb von (Tagen)",
+    "listingKindLabel": "Art der Anzeige",
+    "listingKind": {
+      "active_vacancy": "Aktive Stelle",
+      "talent_pool": "Talentpool (künftiger Bedarf)"
+    },
+    "practicalTestLabel": "Praktische Probe",
+    "documentVerificationLabel": "Dokumentenprüfung",
+    "talentPoolDisclosure": "Dies ist eine Talentpool-Anzeige: Bewerber werden für künftigen Bedarf gesammelt, nicht für eine aktive bestätigte Stelle. Arbeitskräfte sehen das immer.",
+    "honesty": {
+      "title": "Fehlende Vergütungsfakten — werden Arbeitskräften als Lücken angezeigt",
+      "missing_minimum": "Mindestvergütung ist nicht angegeben",
+      "missing_basis": "Brutto/Netto ist nicht angegeben",
+      "missing_guaranteed_hours": "Garantierte Stunden sind nicht angegeben",
+      "missing_deductions": "Abzüge sind nicht aufgeschlüsselt (oder nicht als „keine“ bestätigt)",
+      "max_without_min": "Nur ein „bis“-Betrag ist angegeben — kein Minimum"
+    },
+    "preview": {
+      "title": "So sehen Arbeitskräfte das heute",
+      "v2NotVisibleNote": "Erweiterte Angaben sind mit Ihrer Anfrage gespeichert. Arbeitskräfte sehen sie nach dem nächsten Plattform-Datenupdate — bis dahin sind nur die obigen Fakten sichtbar."
+    },
+    "prefillButton": "Aus meiner letzten Anfrage übernehmen",
+    "prefillLoading": "Wird geladen…",
+    "prefillEmpty": "Keine frühere Anfrage gefunden",
+    "prefillDone": "Aus Ihrer letzten Anfrage übernommen — prüfen und bearbeiten"
+  },
+  "workerPrefs": {
+    "title": "Arbeitspräferenzen",
+    "hint": "Geben Sie nur an, was wirklich auf Sie zutrifft — alles, was auf „Keine Angabe“ steht, bleibt ohne Angabe. Diese Präferenzen werden nur gemäß Ihren Datenschutz-Einwilligungen geteilt.",
+    "willingToRelocate": "Bereit, für die Arbeit umzuziehen",
+    "needsAccommodation": "Benötigt gestellte Unterkunft",
+    "hasTransport": "Eigenes Fahrzeug vorhanden",
+    "teamAvailable": "Kann im Team arbeiten",
+    "soloAvailable": "Kann allein arbeiten",
+    "maxTripDays": "Längste Montagereise (Tage)",
+    "contractType": "Bevorzugte Vertragsform",
+    "note": "Hinweis zur Verfügbarkeit",
+    "triState": {
+      "notStated": "Keine Angabe",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "contract": {
+      "employment": "Arbeitsvertrag",
+      "subcontract": "Subunternehmervertrag",
+      "temporary": "Zeitarbeit",
+      "any": "Beliebige Vertragsform"
+    },
+    "notePlaceholder": "Z. B. verfügbar ab August, bevorzugt 2-Wochen-Rotationen…",
+    "save": "Präferenzen speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Präferenzen gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "needsMigration": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "v2": {
+      "title": "Weitere Arbeitspräferenzen",
+      "hint": "Es gilt dieselbe Regel — alles, was auf „Nicht angegeben“ bleibt, bleibt nicht angegeben.",
+      "payBasis": "Basis der Lohnerwartung",
+      "payBasisOptions": {
+        "gross": "Brutto (vor Steuern)",
+        "net": "Netto (ausgezahlt)"
+      },
+      "nightShifts": "Bereit, Nachtschichten zu arbeiten",
+      "weekendShifts": "Bereit, am Wochenende zu arbeiten",
+      "overtime": "Bereit, Überstunden zu machen",
+      "licenceCategories": "Führerscheinklassen",
+      "ownVehicle": "Hat eigenes Fahrzeug",
+      "ownTools": "Hat eigenes Werkzeug",
+      "notEnabled": "Diese zusätzlichen Präferenzen sind noch nicht freigeschaltet — hier wird vorerst nichts gespeichert.",
+      "notSaved": "Gespeichert, außer den zusätzlichen Präferenzen — dieser Teil ist noch nicht freigeschaltet."
+    }
+  },
+  "workerLanguages": {
+    "title": "Sprachen",
+    "hint": "Fügen Sie die Sprachen hinzu, in denen Sie arbeiten können, und Ihr Niveau.",
+    "selfStated": "Diese Sprachen fügen Sie selbst hinzu — niemand überprüft sie.",
+    "language": "Sprache",
+    "level": "Niveau",
+    "levelNative": "Muttersprache",
+    "add": "Sprache hinzufügen",
+    "adding": "Wird hinzugefügt…",
+    "remove": "Entfernen",
+    "empty": "Noch keine Sprachen hinzugefügt.",
+    "notEnabled": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "invalid": "Wählen Sie eine Sprache und ein Niveau."
   }
 }

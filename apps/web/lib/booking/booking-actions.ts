@@ -2,10 +2,17 @@
 
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { countOwnerResponsesSince, type BookingStatus } from "@/lib/booking/booking-state";
+import {
+  countOwnerResponsesSince,
+  normalizeBookingReason,
+  DECLINE_REASON_KINDS,
+  WITHDRAW_REASON_KINDS,
+  type BookingStatus,
+} from "@/lib/booking/booking-state";
 import { hasFeature } from "@/lib/billing/effective-entitlements";
 
 /**
@@ -23,6 +30,14 @@ import { hasFeature } from "@/lib/billing/effective-entitlements";
 // (undefined_table), or PGRST202 (no function in schema cache).
 const ABSENT = new Set(["42883", "42P01", "PGRST202", "PGRST204"]);
 const CONFLICT = "23P01";
+// Column absent (the owner-gated lifecycle-v2 column is not applied yet).
+const ABSENT_COLUMN = "42703";
+
+/** True exactly when the lifecycle-v2 FUNCTION is not installed yet — the
+ *  compat wrapper falls back to the v1 RPC on these two codes only. */
+function isAbsentFunction(error: { code?: string }): boolean {
+  return error.code === "42883" || error.code === "PGRST202";
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -30,7 +45,16 @@ function asAny(c: SupabaseClient): any {
 }
 
 export type BookingActionResult =
-  | { kind: "ok"; status?: string }
+  | {
+      kind: "ok";
+      status?: string;
+      /** Reason-capture outcome tag (P2-PR6). Present ONLY when the caller
+       *  chose a reason: true = the v2 RPC stored it; false = the v2 RPC is
+       *  not installed yet, the v1 RPC completed the action WITHOUT the
+       *  reason (honest partial — the UI says the reason was not saved).
+       *  Undefined = no reason was chosen (plain v1 path, unchanged). */
+      reasonStored?: boolean;
+    }
   | { kind: "needs-migration" }
   | { kind: "conflict" }
   | { kind: "not-authed" }
@@ -87,12 +111,47 @@ export async function respondBookingAction(input: {
   locale: string;
   bookingId: string;
   decision: Extract<BookingStatus, "accepted" | "declined">;
+  /** OPTIONAL decline reason (P2-PR6) — closed DECLINE_REASON_KINDS member.
+   *  Ignored unless the decision is "declined"; invalid input degrades to
+   *  "no reason chosen" (the v1 path), never an error. */
+  reasonKind?: string | null;
+  reasonNote?: string | null;
 }): Promise<BookingActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
+
+  // Reason capture rides ONLY on a decline and ONLY with a valid closed kind.
+  const reason =
+    input.decision === "declined"
+      ? normalizeBookingReason(input.reasonKind, input.reasonNote, DECLINE_REASON_KINDS)
+      : null;
+
+  if (reason) {
+    // v2 first (stores the reason). If the owner-gated function is not
+    // installed yet, fall back to the v1 RPC — the RESPONSE is never lost,
+    // and the result is tagged so the UI can say the reason was not saved.
+    const v2 = await asAny(supabase).rpc("respond_booking_request_v2", {
+      p_booking_id: input.bookingId,
+      p_decision: input.decision,
+      p_reason_kind: reason.kind,
+      p_reason_note: reason.note ?? "",
+    });
+    if (!v2.error) {
+      revalidatePath(`/${input.locale}/dashboard/bookings`);
+      return { kind: "ok", status: input.decision, reasonStored: true };
+    }
+    if (!isAbsentFunction(v2.error)) return classify(v2.error);
+    const v1 = await asAny(supabase).rpc("respond_booking_request", {
+      p_booking_id: input.bookingId,
+      p_decision: input.decision,
+    });
+    if (v1.error) return classify(v1.error);
+    revalidatePath(`/${input.locale}/dashboard/bookings`);
+    return { kind: "ok", status: input.decision, reasonStored: false };
+  }
 
   const { error } = await asAny(supabase).rpc("respond_booking_request", {
     p_booking_id: input.bookingId,
@@ -106,12 +165,41 @@ export async function respondBookingAction(input: {
 export async function withdrawBookingAction(input: {
   locale: string;
   bookingId: string;
+  /** OPTIONAL withdraw reason (P2-PR6) — closed WITHDRAW_REASON_KINDS member.
+   *  Invalid input degrades to "no reason chosen" (the v1 path). */
+  reasonKind?: string | null;
+  reasonNote?: string | null;
 }): Promise<BookingActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
+
+  const reason = normalizeBookingReason(
+    input.reasonKind,
+    input.reasonNote,
+    WITHDRAW_REASON_KINDS,
+  );
+
+  if (reason) {
+    const v2 = await asAny(supabase).rpc("withdraw_booking_request_v2", {
+      p_booking_id: input.bookingId,
+      p_reason_kind: reason.kind,
+      p_reason_note: reason.note ?? "",
+    });
+    if (!v2.error) {
+      revalidatePath(`/${input.locale}/dashboard/bookings`);
+      return { kind: "ok", status: "withdrawn", reasonStored: true };
+    }
+    if (!isAbsentFunction(v2.error)) return classify(v2.error);
+    const v1 = await asAny(supabase).rpc("withdraw_booking_request", {
+      p_booking_id: input.bookingId,
+    });
+    if (v1.error) return classify(v1.error);
+    revalidatePath(`/${input.locale}/dashboard/bookings`);
+    return { kind: "ok", status: "withdrawn", reasonStored: false };
+  }
 
   const { error } = await asAny(supabase).rpc("withdraw_booking_request", {
     p_booking_id: input.bookingId,
@@ -121,8 +209,79 @@ export async function withdrawBookingAction(input: {
   return { kind: "ok", status: "withdrawn" };
 }
 
+/**
+ * Change the dates of an OPEN outgoing proposal (P2-PR6). Owner-only and
+ * proposed-only — both enforced server-side by the owner-gated
+ * reschedule_booking_proposal_v1 RPC; an ACCEPTED booking is NEVER mutated in
+ * place. Until the owner applies the function, the call classifies as
+ * `needs-migration` and the UI says honestly that the dates were not changed.
+ */
+export async function rescheduleBookingAction(input: {
+  locale: string;
+  bookingId: string;
+  startDate: string;
+  endDate?: string | null;
+  note?: string | null;
+}): Promise<BookingActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  if (!input.startDate?.trim()) {
+    return { kind: "error", message: "start date required" };
+  }
+
+  const note = (input.note ?? "").trim().slice(0, 500);
+  const { error } = await asAny(supabase).rpc("reschedule_booking_proposal_v1", {
+    p_booking_id: input.bookingId,
+    p_start_date: input.startDate,
+    p_end_date: input.endDate?.trim() ? input.endDate : null,
+    p_note: note.length > 0 ? note : null,
+  });
+  if (error) return classify(error);
+  revalidatePath(`/${input.locale}/dashboard/bookings`);
+  return { kind: "ok", status: "proposed" };
+}
+
+/**
+ * Set (or clear) the respond-by date on an OPEN outgoing proposal (P2-PR6).
+ * Owner-only + proposed-only, enforced by the owner-gated
+ * set_booking_response_deadline_v1 RPC. Absent function → `needs-migration`
+ * and the UI says honestly that the deadline was not saved.
+ */
+export async function setBookingDeadlineAction(input: {
+  locale: string;
+  bookingId: string;
+  deadline: string;
+}): Promise<BookingActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  if (!input.deadline?.trim()) {
+    return { kind: "error", message: "deadline required" };
+  }
+
+  const { error } = await asAny(supabase).rpc("set_booking_response_deadline_v1", {
+    p_booking_id: input.bookingId,
+    p_deadline: input.deadline,
+  });
+  if (error) return classify(error);
+  revalidatePath(`/${input.locale}/dashboard/bookings`);
+  return { kind: "ok", status: "proposed" };
+}
+
 export interface BookingRow {
   id: string;
+  /** customer_requests.id — with workerId, the upsert key the propose RPC
+   *  re-opens on; lets "propose again" reuse the EXISTING propose flow
+   *  pre-scoped to the same request + worker (repeat actions, PR 6b).
+   *  Opaque ids only — no profile/contact data crosses this boundary. */
+  requestId: string;
+  /** workers.id (already client-visible on the scouting propose surface). */
+  workerId: string;
   status: BookingStatus;
   startDate: string | null;
   expectedEndDate: string | null;
@@ -134,12 +293,28 @@ export interface BookingRow {
   createdAt: string;
   /** Set by the respond/withdraw RPCs — backs "responses since last seen". */
   updatedAt: string;
+  /** Owner-set respond-by date (lifecycle v2). Null while the owner-gated
+   *  column is not applied yet OR simply unset — both render nothing. */
+  responseDeadlineDate: string | null;
 }
 
 export type BookingsListResult =
   | { kind: "ok"; incoming: BookingRow[]; outgoing: BookingRow[] }
   | { kind: "needs-migration" }
   | { kind: "not-authed" };
+
+// Column lists for the tolerant read: the extended list ALSO asks for the
+// owner-gated lifecycle-v2 deadline column; while it is not applied the
+// select fails with 42703 (undefined column) and we retry with the base list.
+const BASE_BOOKING_COLUMNS =
+  "id, owner_id, request_id, worker_id, status, start_date, expected_end_date, location_country, role_text, note, readiness_snapshot, created_at, updated_at";
+const EXTENDED_BOOKING_COLUMNS = `${BASE_BOOKING_COLUMNS}, response_deadline_date`;
+
+/** Per-REQUEST downgrade memo (React request cache): once the extended
+ *  column list 42703s, every later listMyBookings call in the SAME request
+ *  (badge counts, page render) skips the doomed extended attempt. A new
+ *  request probes again, so the column lights up as soon as it is applied. */
+const deadlineColumnDowngrade = cache((): { absent: boolean } => ({ absent: false }));
 
 /**
  * The caller's bookings, split into incoming (worker = subject) and outgoing
@@ -152,12 +327,27 @@ export async function listMyBookings(): Promise<BookingsListResult> {
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
 
-  const { data, error } = await asAny(supabase)
-    .from("booking_requests")
-    .select(
-      "id, owner_id, status, start_date, expected_end_date, location_country, role_text, note, readiness_snapshot, created_at, updated_at",
-    )
-    .order("created_at", { ascending: false });
+  const downgrade = deadlineColumnDowngrade();
+  let res:
+    | { data: unknown[] | null; error: { code?: string; message?: string } | null }
+    | null = null;
+  if (!downgrade.absent) {
+    res = await asAny(supabase)
+      .from("booking_requests")
+      .select(EXTENDED_BOOKING_COLUMNS)
+      .order("created_at", { ascending: false });
+    if (res?.error?.code === ABSENT_COLUMN) {
+      downgrade.absent = true; // cache the downgrade for this request
+      res = null;
+    }
+  }
+  if (res === null) {
+    res = await asAny(supabase)
+      .from("booking_requests")
+      .select(BASE_BOOKING_COLUMNS)
+      .order("created_at", { ascending: false });
+  }
+  const { data, error } = res!;
   if (error) {
     if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
     return { kind: "ok", incoming: [], outgoing: [] };
@@ -169,6 +359,8 @@ export async function listMyBookings(): Promise<BookingsListResult> {
   for (const r of (data ?? []) as any[]) {
     const row: BookingRow = {
       id: r.id,
+      requestId: String(r.request_id ?? ""),
+      workerId: String(r.worker_id ?? ""),
       status: r.status,
       startDate: r.start_date ?? null,
       expectedEndDate: r.expected_end_date ?? null,
@@ -179,6 +371,8 @@ export async function listMyBookings(): Promise<BookingsListResult> {
       readinessSnapshot: (r.readiness_snapshot as Record<string, unknown> | null) ?? null,
       createdAt: r.created_at,
       updatedAt: r.updated_at ?? r.created_at,
+      responseDeadlineDate:
+        typeof r.response_deadline_date === "string" ? r.response_deadline_date : null,
     };
     if (row.isOwner) outgoing.push(row);
     else incoming.push(row);

@@ -29,7 +29,109 @@
     "inputLabel": "Find a page or action",
     "resultsLabel": "Matching pages",
     "noResults": "Nothing found. Try another word — e.g. CV, journal, team, documents, pricing.",
-    "shortcutHint": "Ctrl / ⌘ K"
+    "shortcutHint": "Ctrl / ⌘ K",
+    "recentLabel": "Recently opened",
+    "objectsLabel": "Your own records",
+    "objectsLoading": "Searching your own records…",
+    "objectsError": "Your records could not be searched right now. The page links above still work.",
+    "groups": {
+      "projects": "Your projects",
+      "tasks": "Your tasks",
+      "finance": "Your finance records",
+      "conversations": "Your conversations",
+      "bookings": "Your bookings",
+      "documents": "Your document records"
+    }
+  },
+  "reports": {
+    "eyebrow": "Reports",
+    "title": "Reports",
+    "intro": "Figures counted from your own records, with the calculation basis stated under each section, and the exports that already exist.",
+    "honestyNote": "Counts over your own data only — no benchmarks, no scores, no projections.",
+    "state": {
+      "needsMigration": "This data model is not available in this environment yet, so there is nothing to count. No number is shown instead of real data.",
+      "unavailable": "These figures cannot be read right now. Nothing is estimated in their place."
+    },
+    "basis": {
+      "label": "Basis",
+      "workerEvidence": "Counted by the evidence-report rules from your own catalogued skills, work-journal entries and manager confirmations. No score, no estimate.",
+      "workerActivity": "Direct row counts over your own work-journal entries and your own uploaded journal photos.",
+      "orgDemand": "Counts over the demand requests you created yourself. Open = draft, submitted, in review or needs follow-up.",
+      "orgProjects": "Counts of your own company's project rows, grouped by each row's recorded status.",
+      "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
+      "orgDocuments": "Sums of the consent-gated pool aggregate — only workers who consented to aggregate document visibility are counted.",
+      "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data."
+    },
+    "worker": {
+      "evidence": {
+        "title": "Profile & evidence figures",
+        "totalSkills": "Skills",
+        "workSupported": "Backed by work entries",
+        "confirmed": "Confirmed",
+        "journalEntries": "Journal entries",
+        "confirmations": "Confirmations",
+        "empty": "No evidence data yet — figures appear once your profile and work journal carry real records.",
+        "link": "Open the full evidence report"
+      },
+      "activity": {
+        "title": "Journal activity",
+        "entries": "Journal entries",
+        "photos": "Uploaded photos",
+        "unavailable": "Your journal counts cannot be read right now. Nothing is shown instead of real counts.",
+        "link": "Open the work journal"
+      }
+    },
+    "exports": {
+      "title": "Exports",
+      "note": "Only the exports that already work are listed — nothing here is a preview.",
+      "evidence": "Evidence report (print / PDF)",
+      "cv": "CV (print / PDF)",
+      "journalCsv": "Journal export (CSV)",
+      "financeCsv": "Finance records export (CSV)"
+    },
+    "org": {
+      "demand": {
+        "title": "Demand requests",
+        "open": "Open",
+        "total": "Total",
+        "link": "Open the demand intake"
+      },
+      "projects": {
+        "title": "Projects by status",
+        "status": {
+          "draft": "Draft",
+          "live": "Live",
+          "paused": "Paused"
+        },
+        "total": "Total",
+        "empty": "No projects yet — figures appear as soon as your company has project rows.",
+        "link": "Open projects"
+      },
+      "tasks": {
+        "title": "Tasks by status",
+        "open": "Open",
+        "status": {
+          "todo": "To do",
+          "in_progress": "In progress",
+          "blocked": "Blocked"
+        },
+        "link": "Open tasks"
+      },
+      "documents": {
+        "title": "Pool document readiness",
+        "workers": "Consented workers",
+        "expiring": "Expiring documents",
+        "attention": "Needing attention",
+        "empty": "No consented pool workers yet — this aggregate counts only workers who gave consent.",
+        "link": "Open the document centre"
+      },
+      "finance": {
+        "title": "Finance records",
+        "overdue": "Overdue",
+        "total": "Total records",
+        "link": "Open finance records"
+      }
+    }
   },
   "marketRecognition": {
     "title": "What do you offer or need?",
@@ -3032,8 +3134,12 @@
             "desc": "Work that fits you"
           },
           "planning": {
-            "title": "Plan and bookings",
-            "desc": "Calendar and bookings"
+            "title": "Planning",
+            "desc": "Bookings, projects and deadlines in one agenda"
+          },
+          "bookings": {
+            "title": "Bookings",
+            "desc": "Proposals and acceptances"
           },
           "documents": {
             "title": "Reports and documents",
@@ -4722,6 +4828,50 @@
     }
   },
   "projectOps": {
+    "centre": {
+      "summaryTitle": "Project overview",
+      "datesLabel": "Dates",
+      "openTasksLabel": "Open tasks",
+      "tasksPreparingShort": "not available yet",
+      "readinessLabel": "Checklist checked",
+      "readinessNone": "nothing tracked yet",
+      "housingLabel": "Housing provided",
+      "housingYes": "Yes",
+      "housingNo": "No",
+      "housingUnknown": "Not recorded",
+      "attention": {
+        "title": "Needs attention",
+        "empty": "Nothing needs attention right now — the statuses, checklists and tasks tracked here are calm.",
+        "note": "Derived only from real records: manager-set operational statuses, open checklist items and open project tasks. Nothing else is scored or predicted.",
+        "kind": {
+          "worker_documents_needed": "Documents needed",
+          "readiness_item_open": "Checklist item open",
+          "task_overdue": "Task overdue",
+          "task_blocked": "Task blocked"
+        }
+      },
+      "resources": {
+        "title": "Resources and assignment readiness",
+        "checklistLabel": "Checklist",
+        "availabilityLabel": "Availability",
+        "availableFromLabel": "Available from",
+        "notRecorded": "not recorded",
+        "noWindow": "No project dates — booking overlaps not checked",
+        "bookingConflict": "{n, plural, one {# overlapping accepted booking} other {# overlapping accepted bookings}}",
+        "noConflict": "No overlapping accepted bookings",
+        "note": "Availability shows the worker's own recorded fields. Overlaps compare the accepted bookings visible to you with this project's date band. Accommodation and transport needs are not tracked yet, so nothing is shown for them."
+      },
+      "tasksTitle": "Project tasks",
+      "tasksEmpty": "No open tasks are linked to this project.",
+      "evidence": {
+        "title": "Work evidence",
+        "entriesLabel": "Journal entries",
+        "photosLabel": "Uploaded photos",
+        "note": "Real counts of journal entries linked to this project and the photos workers attached to their own entries.",
+        "link": "Open the project gallery"
+      },
+      "honestNote": "This centre composes records that already exist. Milestones, issue registers and resource tables are not built yet and are not simulated here."
+    },
     "eyebrow": "Project operations",
     "managerOnly": "This board is for a company or agency manager.",
     "notAuthorized": "You can only open the operations board for a project you manage.",
@@ -4995,6 +5145,10 @@
     "messageCta": "Send a message",
     "errorGeneric": "Something went wrong. Please try again.",
     "duplicate": "You already have an open request for this service.",
+    "requestAgain": "Request again",
+    "requestAgainNote": "This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
+    "cancel": "Cancel",
+    "offeringInactive": "This service is no longer active, so a new request can't be sent.",
     "requesterMessage": "Their message",
     "providerNote": "Provider's note",
     "responded": "Responded",
@@ -5267,7 +5421,54 @@
     "internalNote": "Internal record — no emails or messages are sent to anyone.",
     "explanationPending": "The explanation is being prepared from the Lithuanian master version."
   },
+  "crmPipeline": {
+    "eyebrow": "Operator queue",
+    "title": "Demand pipeline",
+    "subtitle": "Every demand source in one read view: submitted requests, public company-need intakes, stored leads and waitlist signups.",
+    "back": "Back to control room",
+    "honestNote": "Read view only. The pipeline stage is a presentation lens — every row also shows its stored status verbatim, and status changes stay on each row's own surface. Nothing here contacts anyone or edits anything.",
+    "summaryHeading": "Stage summary",
+    "windowNote": "Counts are computed over the rows actually loaded (the sales sources load the 50 most recent rows each) — never estimated.",
+    "duplicateChip": "Possible duplicate",
+    "storedStatusLabel": "Stored status",
+    "createdLabel": "Created",
+    "openSurface": "Open its surface",
+    "empty": "No demand rows loaded yet. When a request, intake, lead or signup exists, it appears here.",
+    "noMatches": "No rows match the current filters.",
+    "viewPipeline": "View demand pipeline",
+    "stages": {
+      "new": "New",
+      "contacted": "Contacted",
+      "qualifying": "Qualifying",
+      "follow_up": "Follow-up",
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "sources": {
+      "customer_request": "Demand request",
+      "public_intake": "Public intake",
+      "lead": "Lead",
+      "waitlist": "Waitlist"
+    },
+    "sourceStates": {
+      "needs_admin_read": "not readable in this environment",
+      "service_key_missing": "service connection not configured",
+      "needs_migration": "waiting for its migration",
+      "not_admin": "admin check failed",
+      "error": "could not be read right now"
+    },
+    "filters": {
+      "sourceLabel": "Source",
+      "stageLabel": "Stage",
+      "all": "All",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Filter by title, company or status",
+      "searchSubmit": "Apply",
+      "reset": "Reset"
+    }
+  },
   "salesIntake": {
+    "viewPipeline": "View demand pipeline",
     "title": "Sales intake",
     "intro": "A view of who is coming in: submitted demand requests in review, waitlist signups, and stored leads. Viewing only — real recorded rows, nothing editable here.",
     "honestNote": "Viewing only. Nothing here contacts anyone — no email, no SMS, no messages. The only action records an internal follow-up task for the team.",
@@ -5915,6 +6116,50 @@
     "sourceLink": "source",
     "scopeNote": "Based on official EU posted-worker sources — confirm the national specifics with the competent authority. This is information, not legal advice."
   },
+  "documentCentre": {
+    "attention": {
+      "title": "Needs attention",
+      "empty": "No document needs attention right now.",
+      "note": "Counts come only from your own recorded validity dates and verification states.",
+      "expiring": "Expiring soon: {n}",
+      "missing": "Missing: {n}",
+      "reviewNeeded": "Awaiting review: {n}"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "typeLabel": "Type",
+      "all": "All",
+      "noMatches": "No documents match the selected filters."
+    },
+    "verification": {
+      "unverified": "Not verified",
+      "pending": "Verification pending",
+      "verified": "Verified",
+      "rejected": "Rejected"
+    },
+    "workProof": {
+      "title": "Work proof & exports",
+      "journalTitle": "Work journal evidence",
+      "journalCounts": "Entries: {entries} · Photos: {photos}",
+      "countsUnavailable": "Counts are not available in this environment.",
+      "galleryNote": "Photos live inside your journal entries; project photo galleries are on each project's page."
+    },
+    "uploadNote": "This is a metadata inventory — file upload is not available yet. You record what you have and until when it is valid; the files themselves stay with you.",
+    "org": {
+      "title": "Pool document readiness (consent-based)",
+      "intro": "Workers own their documents. You see only category counts for pool workers who switched on aggregate sharing.",
+      "workersLabel": "Consented workers",
+      "totalLabel": "Documents",
+      "validLabel": "Valid",
+      "expiringLabel": "Expiring soon",
+      "attentionLabel": "Needs attention",
+      "consentNote": "Counts only — never document contents. A worker who has not consented simply does not appear.",
+      "noConsented": "No consent-based document aggregates to show — no pool worker has switched on sharing, or your organisation does not manage an agency pool.",
+      "unavailable": "Consent-based document aggregates are not available in this environment. Workers own their documents.",
+      "projectAxisLink": "Project readiness checklists",
+      "projectAxisNote": "Per-project worker readiness lives on each project's operations page."
+    }
+  },
   "trust": {
     "title": "Trust signals",
     "caption": "Counts come straight from real records. Nothing here is weighted or invented.",
@@ -6062,6 +6307,14 @@
     "cta": "Back to the start"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Discussion points",
+      "missing": "Missing information"
+    },
+    "missingSide": {
+      "worker": "The candidate has not stated: {criterion}",
+      "demand": "Your request does not state: {criterion}"
+    },
     "statusNote": {
       "title": "How matching works today",
       "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.",
@@ -6299,7 +6552,9 @@
     "notAuthed": "Please sign in to see your bookings.",
     "unavailable": "Couldn’t complete the action. Please try again.",
     "noDate": "No start date set",
+    "noRole": "Work engagement",
     "startsOn": "Starts {date}",
+    "endsOn": "Until {date}",
     "incoming": {
       "title": "Proposals for you",
       "help": "A company proposed working with you. You decide.",
@@ -6317,6 +6572,28 @@
       "withdrawn": "Withdrawn",
       "expired": "Expired"
     },
+    "displayState": {
+      "awaiting_response": "Awaiting response",
+      "no_response_stale": "No response yet"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "You decide — accept or decline. Nothing is confirmed until you accept.",
+        "no_response_stale": "Unanswered for 14+ days but still open — you can still accept or decline.",
+        "accepted": "Confirmed. Next: message the company and plan the work together.",
+        "declined": "You declined, so this proposal is closed. The company can send a new one.",
+        "withdrawn": "The company withdrew this proposal, so it is closed.",
+        "expired": "This proposal has lapsed, so it is closed."
+      },
+      "outgoing": {
+        "awaiting_response": "The worker decides. You can withdraw the proposal until they answer.",
+        "no_response_stale": "No answer for 14+ days. Still open — you can withdraw it or keep waiting.",
+        "accepted": "The worker accepted. Next: send a message and plan the work together.",
+        "declined": "The worker declined, so this proposal is closed. You can propose to another worker.",
+        "withdrawn": "You withdrew this proposal, so it is closed. Send a new one if needed.",
+        "expired": "This proposal has lapsed, so it is closed."
+      }
+    },
     "actions": {
       "accept": "Accept",
       "decline": "Decline",
@@ -6326,17 +6603,66 @@
       "error": "Something went wrong.",
       "message": "Send a message",
       "withdraw": "Withdraw proposal",
-      "findAnother": "Find another worker"
+      "findAnother": "Find another worker",
+      "proposeAgain": "Propose again with new dates",
+      "planning": "View in planning"
     },
     "connections": {
       "title": "Planning connects to",
       "intro": "A booking is part of your plan. These are the surfaces it links to.",
+      "planning": "Planning agenda",
+      "planningNote": "This booking in date context with projects and tasks",
       "marketplace": "Marketplace requests",
       "marketplaceNote": "Service requests and their statuses",
       "map": "Map",
       "mapNote": "Where work and bookings are",
       "diary": "Work diary",
       "diaryNote": "Record what actually happened"
+    },
+    "propose": {
+      "modeNote": "This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
+      "againModeNote": "This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
+      "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+    },
+    "reason": {
+      "optionalTitle": "Reason (optional)",
+      "noteLabel": "Note (optional)",
+      "none": "No reason",
+      "notStored": "Your answer was saved. The reason couldn't be saved this time.",
+      "decline": {
+        "dates_unsuitable": "The dates don't suit me",
+        "conditions_unsuitable": "The conditions don't suit me",
+        "already_booked": "I'm already booked for that time",
+        "other": "Other"
+      },
+      "withdraw": {
+        "position_filled": "The position is already filled",
+        "need_changed": "Our need changed",
+        "dates_changed": "The dates changed",
+        "other": "Other"
+      },
+      "confirmDecline": "Confirm decline",
+      "confirmWithdraw": "Confirm withdrawal",
+      "cancel": "Cancel"
+    },
+    "reschedule": {
+      "open": "Change dates",
+      "startDate": "New start date",
+      "endDate": "New end date (optional)",
+      "note": "Note (optional)",
+      "save": "Save new dates",
+      "saved": "Dates updated. The worker sees the new dates.",
+      "notChanged": "The dates weren't changed. Please try again later.",
+      "cancel": "Cancel"
+    },
+    "deadline": {
+      "open": "Set a respond-by date",
+      "label": "Respond-by date",
+      "save": "Save date",
+      "saved": "Respond-by date saved.",
+      "notSet": "The respond-by date wasn't saved. Please try again later.",
+      "respondBy": "Respond by {date}",
+      "cancel": "Cancel"
     }
   },
   "adminReadiness": {
@@ -6635,6 +6961,105 @@
     "applyNotAdmin": "Admin rights required."
   },
   "opportunities": {
+    "saved": {
+      "save": "Save",
+      "saved": "Saved",
+      "unsave": "Remove from saved",
+      "privateHint": "Saving is private to your account — the company never sees who saved its listing.",
+      "sectionTitle": "Saved opportunities",
+      "noLongerOpen": "Saved earlier but no longer open on the board: {count}",
+      "error": "Could not update your saved list. Please try again."
+    },
+    "recent": {
+      "title": "Recently viewed",
+      "deviceOnly": "Stored only on this device — this list never leaves your browser and is not sent to the server.",
+      "clear": "Clear"
+    },
+    "compare": {
+      "toggle": "Compare",
+      "selectedLabel": "Selected",
+      "open": "Compare selected",
+      "title": "Compare opportunities",
+      "close": "Close",
+      "clear": "Clear selection",
+      "limitNote": "Choose 2–3 opportunities to compare.",
+      "notStated": "Not stated",
+      "fact": {
+        "pay": "Pay",
+        "hours": "Hours per week",
+        "start": "Start",
+        "engagement": "Engagement form",
+        "accommodation": "Accommodation",
+        "transport": "Transport",
+        "tools": "Tools",
+        "languages": "Languages",
+        "location": "Location",
+        "company": "Company"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "Filter opportunities",
+        "profession": "Work type",
+        "country": "Country",
+        "start": "Start",
+        "accommodation": "Accommodation",
+        "transport": "Transport",
+        "tool": "Required tools",
+        "activeCount": "Active filters: {count}",
+        "reset": "Reset filters"
+      },
+      "sort": {
+        "label": "Sort",
+        "relevance": "Best match first",
+        "newest": "Newest first"
+      },
+      "emptyFiltered": {
+        "title": "No opportunities match these filters",
+        "body": "Active filters: {filters}. Remove some filters or reset them to see more.",
+        "reset": "Reset filters"
+      },
+      "details": {
+        "show": "More details",
+        "hide": "Hide details"
+      },
+      "tiers": {
+        "blocking": "Does not fit",
+        "strengths": "Fits",
+        "negotiables": "Discussion points",
+        "missing": "Missing information"
+      },
+      "missing": {
+        "worker": "You have not stated: {criterion}",
+        "demand": "The company has not stated: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Required skills",
+        "evidence_tiers": "Skill evidence",
+        "profession": "Profession",
+        "language": "Language",
+        "country_location": "Country and location",
+        "availability": "Availability",
+        "pay_ceiling": "Pay expectation",
+        "accommodation": "Accommodation",
+        "compensation": "Pay",
+        "start_date": "Start date",
+        "shifts_hours": "Shifts and hours",
+        "engagement_form": "Contract type",
+        "licence_categories": "Driving licence",
+        "own_vehicle": "Own vehicle",
+        "own_tools": "Own tools",
+        "pay_basis": "Pay basis (gross/net)",
+        "night_shifts": "Night shifts",
+        "weekend_shifts": "Weekend shifts",
+        "overtime": "Overtime"
+      },
+      "how": {
+        "title": "How matching works",
+        "body": "Matching follows fixed, deterministic rules over the facts both sides have stated - required skills, language, location, availability, pay and contract type. A missing fact is shown as missing, never guessed. No artificial intelligence makes the decision and there is no global person score - only the fit within this one opportunity.",
+        "version": "Calculation version: {version} - deterministic rules"
+      }
+    },
     "title": "Opportunities for you",
     "intro": "Here you'll see employer needs that could fit you, and what's worth adding to your profile to be ready.",
     "noWorkerBody": "Finish your worker profile first to see opportunities that fit you.",
@@ -6753,7 +7178,50 @@
       "reviewed": "Company reviewed your interest",
       "contacted": "Company marked: contacted"
     },
-    "companyVerified": "Verified company"
+    "companyVerified": "Verified company",
+    "structured": {
+      "detailTitle": "Stated working conditions",
+      "notProvided": "The company has not provided detailed working conditions for this listing yet — only the facts above are stated.",
+      "gapsTitle": "Not stated by the company",
+      "yes": "Yes",
+      "no": "No",
+      "payLabel": "Pay",
+      "amountFrom": "from {amount}",
+      "amountUpTo": "up to {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} h/week",
+      "chipMinHours": "at least {hours} h/week",
+      "chipStartFrom": "start from {from}",
+      "chipStartWindow": "start {from} – {to}",
+      "chipDeadline": "apply by {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} yr.",
+      "km": "{km} km",
+      "minutes": "{min} min",
+      "probationLabel": "Probation period",
+      "extensionPossibleLabel": "Extension possible",
+      "scheduleNoticeLabel": "Schedule notice in advance",
+      "expectedResponseLabel": "Response within",
+      "firstPaymentLabel": "First payment within",
+      "travelMinutesLabel": "Travel time to site",
+      "registrationPossibleLabel": "Address registration possible",
+      "availableFromLabel": "Available from",
+      "similarProjectLabel": "Similar project experience",
+      "driverSupplementLabel": "Driver supplement",
+      "siteModeLabel": "Work sites",
+      "siteMode": {
+        "single": "One site",
+        "multiple": "Several sites",
+        "mobile": "Mobile / changing sites"
+      },
+      "workModeLabel": "Work mode",
+      "workMode": {
+        "onsite": "On-site",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      }
+    }
   },
   "workerIntake": {
     "title": "Worker intake",
@@ -7491,6 +7959,62 @@
       "noticeLink": "privacy notice"
     }
   },
+  "planning": {
+    "eyebrow": "PLANNING",
+    "title": "Planning",
+    "intro": "Bookings, project dates and task deadlines in one agenda. Every row links to its real source.",
+    "honestNote": "Only records that really exist are shown: bookings, your managed projects' dates and open task due dates. No external calendar is connected and nothing is invented.",
+    "notAuthed": "Sign in to see your plan.",
+    "filters": {
+      "label": "Source",
+      "all": "All"
+    },
+    "source": {
+      "booking": "Booking",
+      "project": "Project",
+      "task": "Task"
+    },
+    "sourceNotes": {
+      "bookingUnavailable": "Bookings are not available yet — they join the plan once the booking layer is switched on.",
+      "taskUnavailable": "Tasks are not available yet — task deadlines join the plan once the tasks layer is switched on.",
+      "taskError": "Tasks could not be loaded right now. The rest of the plan is unaffected.",
+      "projectManagersOnly": "Project date bands are shown to project managers. A worker-side project schedule joins once that view exists.",
+      "projectError": "Projects could not be loaded right now. The rest of the plan is unaffected."
+    },
+    "week": {
+      "label": "Next 7 days"
+    },
+    "today": "Today",
+    "later": {
+      "title": "Later"
+    },
+    "undated": {
+      "title": "No date yet",
+      "hint": "These records exist, but no dates are recorded yet."
+    },
+    "empty": "Nothing planned yet. Accepted bookings, project dates and task deadlines appear here.",
+    "pastHidden": "Finished items not shown here: {count}. History stays on each source page.",
+    "conflict": {
+      "flag": "Dates overlap"
+    },
+    "context": {
+      "incoming": "Proposed to me",
+      "outgoing": "Proposed by us",
+      "managed": "Managed project",
+      "assigned": "Assigned to me",
+      "mine": "My task"
+    },
+    "fallback": {
+      "booking": "Booking",
+      "project": "Project",
+      "task": "Task"
+    },
+    "projectStatus": {
+      "draft": "Draft",
+      "live": "Live",
+      "paused": "Paused"
+    }
+  },
   "tasks": {
     "eyebrow": "Work tasks",
     "title": "Tasks",
@@ -7572,5 +8096,404 @@
     "projectSection": {
       "link": "Tasks for this project"
     }
+  },
+  "assist": {
+    "eyebrow": "Assistance centre",
+    "title": "Assistance centre",
+    "intro": "What needs your attention, summaries computed from your own data, and the honest state of the AI provider.",
+    "attention": {
+      "title": "What needs my attention",
+      "note": "Computed from your own records by fixed rules — the same numbers the bell and each module already show. Every row names its data source and links the page that resolves it.",
+      "empty": "Nothing needs your attention right now — there are no pending signals in your data.",
+      "open": "Open",
+      "docExpiring": "Documents expiring within 30 days",
+      "docMissing": "Documents missing or expired",
+      "docReview": "Documents in review or returned",
+      "financeOverdue": "Overdue finance records"
+    },
+    "sources": {
+      "label": "Sources",
+      "notificationSpine": "Notification signals",
+      "workerDocuments": "Your document records",
+      "financeRecords": "Your finance records",
+      "workerSkills": "Your catalogued skills",
+      "workJournal": "Your work journal",
+      "managerConfirmations": "Manager confirmations",
+      "projects": "Your projects",
+      "assignments": "Active worker assignments"
+    },
+    "summaries": {
+      "title": "Summaries from your data",
+      "note": "Assembled from real fields by fixed rules, with the sources listed. No text in this section was produced by a language model.",
+      "none": "No summary exists for this role yet — summaries are added only where truthful data exists.",
+      "worker": {
+        "title": "Profile & evidence summary",
+        "totalSkills": "Skills",
+        "workSupported": "Backed by work entries",
+        "confirmed": "Confirmed",
+        "journalEntries": "Journal entries",
+        "confirmations": "Confirmations",
+        "link": "Open the full evidence report"
+      },
+      "org": {
+        "title": "Project status summary",
+        "teamSize": "Active workers: {count}",
+        "empty": "No active projects yet — projects appear here as soon as they exist.",
+        "error": "Projects could not be loaded right now. The rest of the page is unaffected.",
+        "link": "Operations"
+      }
+    },
+    "provider": {
+      "title": "AI provider",
+      "stateLabel": "Runtime state",
+      "state": {
+        "disabled": "Off",
+        "mock": "Mock (deterministic test mode)",
+        "live": "Live"
+      },
+      "reason": {
+        "ok": "The runtime is configured.",
+        "mode_disabled": "No provider mode is set — the runtime is switched off by default.",
+        "unknown_provider": "The configured provider is not recognised, so the runtime stays off.",
+        "missing_api_key": "No provider key is configured, so the runtime stays off."
+      },
+      "disabledBody": "No external AI provider is connected in this environment. Everything on this page is computed from your own records by fixed rules — no text here was produced by a language model.",
+      "whenEnabled": "Once the owner connects a provider and the suggestion audit storage is applied, reviewable drafting suggestions become available — always as suggestions a person confirms, never as automatic changes.",
+      "gates": "Two gates are open on purpose: (1) no provider key is configured in production, and (2) the suggestion audit store (ai_runs / ai_suggestions) is an owner-gated migration. Generation stays off until both close — producing suggestions without the audit trail would break the programme's own rules.",
+      "providerLabel": "Provider",
+      "modelLabel": "Model",
+      "notWired": "Generation surfaces are deliberately not wired in this slice — outputs would have no audit trail yet. The runtime state above is shown for transparency only."
+    }
+  },
+  "finance": {
+    "eyebrow": "Operational finance",
+    "title": "Finance records",
+    "intro": "Manual record of invoices issued, invoices received and expenses — with real totals and derived overdue flags.",
+    "scopeNote": "Manual records only — this is not bookkeeping, tax, payroll, bank sync or payment processing software. Recording an entry moves no money and contacts nobody.",
+    "notAuthed": "Sign in to see your finance records.",
+    "unavailable": "The finance module is being prepared — not available yet. Once enabled, your records will appear here.",
+    "loadError": "Records could not be loaded. Try refreshing the page.",
+    "empty": "No finance records yet — add the first one above.",
+    "emptyFiltered": "No records match the selected filters.",
+    "exportCsv": "Download CSV",
+    "exportNote": "Exports only your own records (the same rows this page shows).",
+    "summary": {
+      "issued": "Invoices issued",
+      "received": "Invoices received",
+      "expenses": "Expenses",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    },
+    "filters": {
+      "label": "Type",
+      "statusLabel": "Status",
+      "allTypes": "All types",
+      "allStatuses": "All statuses",
+      "overdue": "Overdue"
+    },
+    "type": {
+      "invoice_issued": "Invoice issued",
+      "invoice_received": "Invoice received",
+      "expense": "Expense"
+    },
+    "status": {
+      "draft": "Draft",
+      "issued": "Issued",
+      "partially_paid": "Partially paid",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
+    },
+    "flags": {
+      "overdue": "Overdue"
+    },
+    "dueLabel": "Due",
+    "paidLabel": "Paid",
+    "projectLinked": "Project-linked",
+    "companyLinked": "Company record",
+    "actions": {
+      "issue": "Mark issued",
+      "markPartial": "Mark partially paid",
+      "markPaid": "Mark paid",
+      "markUnpaid": "Mark unpaid",
+      "cancel": "Cancel",
+      "reopen": "Reopen",
+      "details": "Edit details",
+      "save": "Save"
+    },
+    "form": {
+      "title": "New record",
+      "typeLabel": "Record type",
+      "statusLabel": "Initial status",
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g. scaffolding rental — June",
+      "counterpartyLabel": "Counterparty",
+      "counterpartyPlaceholder": "e.g. company or person name",
+      "amountLabel": "Amount (EUR)",
+      "amountHint": "Amount in euros with up to two decimals, e.g. 123.45. EUR only for now.",
+      "dueLabel": "Due date (optional)",
+      "projectLabel": "Project (optional)",
+      "projectNone": "No project",
+      "companyLinkLabel": "Link to my company (its owner sees this record)",
+      "noteLabel": "Note (optional)",
+      "submit": "Add record"
+    },
+    "notice": {
+      "created": "Record added.",
+      "updated": "Record updated.",
+      "invalid": "Check the fields — title 3–160 characters, counterparty 2–160, amount like 123.45.",
+      "needs_migration": "The finance module is not enabled yet — the change was not saved.",
+      "not_authorized": "You are not allowed to do that.",
+      "not_found": "Record not found.",
+      "limit_reached": "Record limit reached — this manual list is capped.",
+      "error": "Saving failed. Please try again."
+    }
+  },
+  "structuredDemand": {
+    "advancedTitle": "Advanced details (optional)",
+    "advancedHint": "Structured facts workers can filter and compare. Everything is optional — anything you skip is shown as “not stated”, never invented.",
+    "notStated": "Not stated",
+    "sections": {
+      "engagement": "Engagement & scope",
+      "time": "Time & schedule",
+      "compensation": "Pay & deductions",
+      "accommodation": "Accommodation",
+      "transport": "Transport",
+      "requirements": "Candidate requirements",
+      "process": "Application process"
+    },
+    "opportunityTypeLabel": "Opportunity type",
+    "opportunityType": {
+      "employment": "Employment",
+      "temporary_assignment": "Temporary assignment",
+      "project_work": "Project work",
+      "subcontract": "Subcontract",
+      "service_request": "Service request"
+    },
+    "targetSupplyLabel": "Who is needed",
+    "targetSupply": {
+      "individual": "One worker",
+      "multiple_workers": "Several workers",
+      "team": "Team / brigade",
+      "company": "Company / subcontractor"
+    },
+    "engagementFormLabel": "Employment form",
+    "engagementForm": {
+      "direct_employment": "Direct employment",
+      "agency_employment": "Agency employment",
+      "temporary_employment": "Temporary employment",
+      "posted_worker": "Posted worker",
+      "self_employed_contractor": "Self-employed contractor",
+      "company_subcontract": "Company subcontract"
+    },
+    "contractCountryLabel": "Contract country",
+    "startEarliestLabel": "Earliest start",
+    "startLatestLabel": "Latest start",
+    "endDateLabel": "End date (if known)",
+    "applicationDeadlineLabel": "Application deadline",
+    "hoursPerWeekLabel": "Hours per week",
+    "minGuaranteedHoursLabel": "Guaranteed hours per week",
+    "shiftsLabel": "Shifts",
+    "shift": {
+      "day": "Day",
+      "night": "Night",
+      "weekend": "Weekends"
+    },
+    "overtimeExpectedLabel": "Overtime expected",
+    "compMinLabel": "Pay from",
+    "compMaxLabel": "Pay up to",
+    "currencyLabel": "Currency",
+    "payUnitLabel": "Pay per",
+    "payUnit": {
+      "hour": "Hour",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "project": "Project"
+    },
+    "payBasisLabel": "Gross or net",
+    "payBasis": {
+      "gross": "Gross",
+      "net": "Net",
+      "unspecified": "Not specified"
+    },
+    "paymentFrequencyLabel": "Payment frequency",
+    "paymentFrequency": {
+      "weekly": "Weekly",
+      "biweekly": "Every two weeks",
+      "monthly": "Monthly"
+    },
+    "guaranteedBaseLabel": "Guaranteed base pay",
+    "perDiemLabel": "Per diem / allowance",
+    "deductionsLabel": "Deductions",
+    "deductionsHelp": "List every known deduction (accommodation, transport, insurance). Missing deduction info is shown to workers as a gap.",
+    "deductionKindLabel": "Deduction",
+    "deductionKind": {
+      "accommodation": "Accommodation",
+      "transport": "Transport",
+      "insurance": "Insurance",
+      "other": "Other"
+    },
+    "deductionAmountLabel": "Amount",
+    "deductionPeriodLabel": "Period",
+    "period": {
+      "day": "Per day",
+      "week": "Per week",
+      "month": "Per month",
+      "once": "One-time"
+    },
+    "addDeductionLabel": "Add deduction",
+    "noDeductionsLabel": "No deductions — confirmed",
+    "removeLabel": "Remove",
+    "accommodationStateLabel": "Accommodation",
+    "accommodationState": {
+      "offered": "Offered",
+      "not_offered": "Not offered",
+      "not_needed": "Not needed"
+    },
+    "accommodationPayerLabel": "Who pays",
+    "accommodationPayer": {
+      "employer": "Employer pays",
+      "shared": "Cost shared",
+      "worker": "Worker pays"
+    },
+    "roomLabel": "Room",
+    "room": {
+      "single": "Single room",
+      "shared": "Shared room"
+    },
+    "accommodationPriceLabel": "Price",
+    "accommodationPricePeriodLabel": "Price period",
+    "occupancyLabel": "People per room",
+    "distanceKmLabel": "Distance to site (km)",
+    "depositLabel": "Deposit",
+    "amenitiesLabel": "Amenities",
+    "amenity": {
+      "kitchen": "Kitchen",
+      "laundry": "Laundry",
+      "internet": "Internet"
+    },
+    "familyPossibleLabel": "Partner / family possible",
+    "internationalTravelLabel": "Travel to the country",
+    "dailyTransportLabel": "Daily transport to site",
+    "betweenSitesLabel": "Travel between sites",
+    "transportLevel": {
+      "provided": "Provided",
+      "compensated": "Compensated",
+      "not_provided": "Not provided",
+      "unknown": "Not stated"
+    },
+    "arrivalPickupLabel": "Airport / station pickup",
+    "companyVehicleLabel": "Company vehicle",
+    "fuelCardLabel": "Fuel card / reimbursement",
+    "ownVehicleRequiredLabel": "Own vehicle required",
+    "returnTravelLabel": "Return-home travel contribution",
+    "licenceCategoriesLabel": "Driving licence categories",
+    "minExperienceYearsLabel": "Minimum experience (years)",
+    "languagesLabel": "Language requirements",
+    "languageLabel": "Language",
+    "languageLevelLabel": "Level",
+    "onePerTeamLabel": "One speaker per team is enough",
+    "addLanguageLabel": "Add language",
+    "certificatesLabel": "Certificates & licences",
+    "certificatesHelp": "Required certificates (e.g. safety card, equipment licence) — stated as facts, shown as requirements.",
+    "addCertificateLabel": "Add certificate",
+    "ownToolsLabel": "Own tools",
+    "ownVehicleLabel": "Own vehicle",
+    "ownWorkwearLabel": "Own workwear",
+    "drawingsReadingLabel": "Reads drawings / schematics",
+    "independentWorkLabel": "Works independently",
+    "leadershipLabel": "Leads others",
+    "applicationMethodLabel": "How to apply",
+    "applicationMethod": {
+      "interest_signal": "Express interest on the platform",
+      "conversation": "Discuss in a conversation"
+    },
+    "interviewStagesLabel": "Interview stages",
+    "responseDeadlineDaysLabel": "Response within (days)",
+    "listingKindLabel": "Listing type",
+    "listingKind": {
+      "active_vacancy": "Active vacancy",
+      "talent_pool": "Talent pool (future needs)"
+    },
+    "practicalTestLabel": "Practical test",
+    "documentVerificationLabel": "Document verification",
+    "talentPoolDisclosure": "This is a talent-pool listing: candidates are collected for future needs, not for an active confirmed vacancy. Workers always see this disclosed.",
+    "honesty": {
+      "title": "Missing pay facts — shown to workers as gaps",
+      "missing_minimum": "Minimum pay is not stated",
+      "missing_basis": "Gross/net basis is not stated",
+      "missing_guaranteed_hours": "Guaranteed hours are not stated",
+      "missing_deductions": "Deductions are not itemized (or confirmed as none)",
+      "max_without_min": "Only an “up to” amount is stated — no minimum"
+    },
+    "preview": {
+      "title": "How workers see this today",
+      "v2NotVisibleNote": "Advanced details are saved with your request. Workers will see them after the next platform data update — until then only the facts above are visible."
+    },
+    "prefillButton": "Fill from my last request",
+    "prefillLoading": "Loading…",
+    "prefillEmpty": "No previous request found",
+    "prefillDone": "Filled from your last request — review and edit"
+  },
+  "workerPrefs": {
+    "title": "Work preferences",
+    "hint": "State only what actually applies to you — anything left as “Not stated” stays not stated. These preferences are shared only under your privacy consents.",
+    "willingToRelocate": "Willing to relocate for work",
+    "needsAccommodation": "Needs accommodation provided",
+    "hasTransport": "Has own transport",
+    "teamAvailable": "Can work in a team",
+    "soloAvailable": "Can work solo",
+    "maxTripDays": "Longest work trip (days)",
+    "contractType": "Preferred contract type",
+    "note": "Availability note",
+    "triState": {
+      "notStated": "Not stated",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "contract": {
+      "employment": "Employment contract",
+      "subcontract": "Subcontract",
+      "temporary": "Temporary work",
+      "any": "Any contract type"
+    },
+    "notePlaceholder": "E.g. available from August, prefer 2-week rotations…",
+    "save": "Save preferences",
+    "saving": "Saving…",
+    "saved": "Preferences saved.",
+    "error": "Saving failed. Please try again.",
+    "needsMigration": "This section is not enabled yet — nothing was saved.",
+    "v2": {
+      "title": "More work preferences",
+      "hint": "Same rule as above — anything left as “Not stated” stays not stated.",
+      "payBasis": "Pay expectation basis",
+      "payBasisOptions": {
+        "gross": "Gross (before taxes)",
+        "net": "Net (take-home)"
+      },
+      "nightShifts": "Willing to work night shifts",
+      "weekendShifts": "Willing to work weekends",
+      "overtime": "Willing to work overtime",
+      "licenceCategories": "Driving licence categories",
+      "ownVehicle": "Has own vehicle",
+      "ownTools": "Has own tools",
+      "notEnabled": "These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notSaved": "Saved, except the extra preferences — that part is not enabled yet."
+    }
+  },
+  "workerLanguages": {
+    "title": "Languages",
+    "hint": "Add the languages you can work in and your level.",
+    "selfStated": "You add these languages yourself — they are not checked by anyone.",
+    "language": "Language",
+    "level": "Level",
+    "levelNative": "Native",
+    "add": "Add language",
+    "adding": "Adding…",
+    "remove": "Remove",
+    "empty": "No languages added yet.",
+    "notEnabled": "This section is not enabled yet — nothing was saved.",
+    "error": "Saving failed. Please try again.",
+    "invalid": "Choose a language and a level."
   }
 }

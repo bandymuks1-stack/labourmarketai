@@ -104,11 +104,36 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // grid card + the open-task-attention spine signal links here), so it
   // joins the smoke inventory like the other module surfaces.
   { id: "tasks", urlPattern: "/dashboard/tasks", sourceFile: "app/[locale]/dashboard/tasks/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR E: unified planning is a dashboard module (registry-
+  // driven grid card + command entry), so it joins the smoke inventory
+  // like the other module surfaces.
+  { id: "planning", urlPattern: "/dashboard/planning", sourceFile: "app/[locale]/dashboard/planning/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR I: operational finance records is a dashboard module
+  // (registry-driven grid card + command entry), so it joins the smoke
+  // inventory like the other module surfaces. The CSV export route handler
+  // (finance/export/route.ts) is a file download, not a page — routes here
+  // list pages only (the journal-export precedent).
+  { id: "finance", urlPattern: "/dashboard/finance", sourceFile: "app/[locale]/dashboard/finance/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR G: the projects list (manager map) is a dashboard module
+  // (registry-driven grid card + command entry into each project's operating
+  // centre), so it joins the smoke inventory like the other module surfaces.
+  // The id-parameterized project routes stay excluded (see the note below).
+  { id: "projects", urlPattern: "/dashboard/projects", sourceFile: "app/[locale]/dashboard/projects/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR J: the AI assistance centre is a dashboard module
+  // (registry-driven grid card + command entry), so it joins the smoke
+  // inventory like the other module surfaces. Deterministic-only surface —
+  // the provider state card is honest copy, never a generation claim.
+  { id: "assist", urlPattern: "/dashboard/assist", sourceFile: "app/[locale]/dashboard/assist/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "company-scouting", urlPattern: "/dashboard/company/scouting", sourceFile: "app/[locale]/dashboard/company/scouting/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "account", urlPattern: "/dashboard/account", sourceFile: "app/[locale]/dashboard/account/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "privacy", urlPattern: "/dashboard/privacy", sourceFile: "app/[locale]/dashboard/privacy/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "documents", urlPattern: "/dashboard/documents", sourceFile: "app/[locale]/dashboard/documents/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR K: the reports hub is a dashboard module (registry-driven
+  // grid card + command entry), so it joins the smoke inventory like the
+  // other module surfaces. Role-specific real-data index; the evidence
+  // report below stays its own inventoried surface (linked, unchanged).
+  { id: "reports", urlPattern: "/dashboard/reports", sourceFile: "app/[locale]/dashboard/reports/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "reports-evidence", urlPattern: "/dashboard/reports/evidence", sourceFile: "app/[locale]/dashboard/reports/evidence/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "player-card", urlPattern: "/dashboard/player-card", sourceFile: "app/[locale]/dashboard/player-card/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "market-map", urlPattern: "/dashboard/market-map", sourceFile: "app/[locale]/dashboard/market-map/page.tsx", requiresAuth: true, kind: "role-flow" },
@@ -126,8 +151,9 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
  *   the already-covered inbox surface; covered transitively by the dead-link /
  *   copy-leak scans of the whole app/ tree.
  * - `/dashboard/projects/[id]` (+ `/operations`): requires a real project id to
- *   mean anything beyond file existence; the list page can be added when
- *   projects become a primary flow surface.
+ *   mean anything beyond file existence. The base list page joined the
+ *   inventory with control room PR G (projects became a dashboard module);
+ *   the id-parameterized routes stay excluded.
  * - Landing / public marketing pages beyond the existing six: explicitly out of
  *   scope for this expansion (owner directive — do not touch marketing pages).
  */

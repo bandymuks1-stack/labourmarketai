@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
 
 /**
@@ -8,6 +9,20 @@ import { proposeBookingAction } from "@/lib/booking/booking-actions";
  * Sends only the safe requestId + workerId + a start date/note; the worker's
  * identity/contact never reaches the client. The worker alone accepts later.
  * Honest states only; degrades to "unavailable" until the migration is applied.
+ *
+ * Mode clarity (PR 5, contract §4): this surface is explicitly the
+ * request_booking / propose_dates mode — a booking PROPOSAL with dates that
+ * the worker confirms or declines. The dialog says so before submit, and
+ * after submit it says what happens next (worker decides; answer lands in
+ * Bookings; withdrawable until answered). Data contract unchanged — the new
+ * copy comes from the shared `bookings.propose` namespace, not new props.
+ *
+ * Repeat actions (Capability G, PR 6b): `variant="rebook"` renders the SAME
+ * flow pre-scoped to the same request + worker from a terminal
+ * (declined/withdrawn) outgoing booking. The applied propose RPC upserts on
+ * (owner_id, request_id, worker_id) and re-opens that row back to `proposed`
+ * with the new dates — no new RPC, no new data path. The mode note states
+ * clearly that it re-opens the same proposal and the worker decides again.
  */
 export function ProposeBookingButton({
   locale,
@@ -15,11 +30,13 @@ export function ProposeBookingButton({
   workerId,
   countryCode,
   labels,
+  variant = "propose",
 }: {
   locale: string;
   requestId: string;
   workerId: string;
   countryCode: string | null;
+  variant?: "propose" | "rebook";
   labels: {
     open: string;
     startDate: string;
@@ -33,6 +50,7 @@ export function ProposeBookingButton({
     cancel: string;
   };
 }) {
+  const tPropose = useTranslations("bookings.propose");
   const [open, setOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [note, setNote] = useState("");
@@ -59,7 +77,14 @@ export function ProposeBookingButton({
   }
 
   if (state === "sent") {
-    return <span className="text-[11px] font-medium text-state-success">{labels.sent}</span>;
+    return (
+      <div className="flex flex-col gap-1" data-testid="propose-booking-sent">
+        <span className="text-[11px] font-medium text-state-success">{labels.sent}</span>
+        {/* What happens next: the worker decides; the answer lands under
+            Bookings; the proposal stays withdrawable until answered. */}
+        <span className="text-[11px] text-text-muted">{tPropose("afterSent")}</span>
+      </div>
+    );
   }
 
   if (!open) {
@@ -68,7 +93,7 @@ export function ProposeBookingButton({
         type="button"
         onClick={() => setOpen(true)}
         className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-[11px] font-medium text-brand-blue hover:bg-brand-blue/10"
-        data-testid="propose-booking-open"
+        data-testid={variant === "rebook" ? "propose-again-open" : "propose-booking-open"}
       >
         {labels.open}
       </button>
@@ -77,6 +102,13 @@ export function ProposeBookingButton({
 
   return (
     <div className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5" data-testid="propose-booking-form">
+      {/* Mode: request_booking / propose_dates — a proposal, never a booking
+          until the WORKER accepts. Stated up front, honestly. The rebook
+          variant says instead that this RE-OPENS the same proposal with new
+          dates and the worker decides again. */}
+      <p className="text-[11px] text-text-secondary" data-testid="propose-booking-mode-note">
+        {variant === "rebook" ? tPropose("againModeNote") : tPropose("modeNote")}
+      </p>
       <label className="flex flex-col gap-1 text-[11px] text-text-muted">
         {labels.startDate}
         <input

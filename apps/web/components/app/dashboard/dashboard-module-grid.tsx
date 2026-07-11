@@ -1,10 +1,14 @@
 import { getTranslations } from "next-intl/server";
 import {
+  BarChart3,
   Bell,
+  Briefcase,
   Building2,
   CalendarDays,
+  Coins,
   Compass,
   FileText,
+  Handshake,
   Home,
   IdCard,
   ListChecks,
@@ -13,6 +17,7 @@ import {
   NotebookPen,
   Search,
   Shield,
+  Sparkles,
   Store,
   User,
   type LucideIcon,
@@ -55,6 +60,11 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   search: Search,
   bell: Bell,
   checklist: ListChecks,
+  handshake: Handshake,
+  briefcase: Briefcase,
+  coins: Coins,
+  sparkles: Sparkles,
+  chart: BarChart3,
 };
 
 export async function DashboardModuleGrid({

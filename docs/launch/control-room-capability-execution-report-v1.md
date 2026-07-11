@@ -13,14 +13,14 @@ owner/provider action named in the gate register) · `NOT_STARTED`.
 | A | Gap map + architecture | DONE | #704 / `36a18ff` | — (docs) | source audit | — | none | n/a | none | — |
 | B | Control room foundation | DONE | #705 / `3e568d2` | `/dashboard` (module registry + status strip + role grid; nav/command wired) | feature-availability registry, spine counts (request-cached single read), roles | RLS as today; badges spine-only | none | CI green; deployed via Vercel on merge | none | — |
 | C | Unified activity centre | DONE | #706 / `2b0742a` | `/dashboard/activity` + status-strip/bell "view all" links | notification spine (6 signals, one request-cached read) | RLS + existing seen RPCs; links-only, no fake mark-read | none (persistent feed + demand signals stay migration-gated) | CI green; deployed on merge | events-table apply (optional, for feed/demand events) | — |
-| D | Work/task management | GATED (UI merged path; table unapplied) | D1 this PR; D2 migration PR follows | `/dashboard/tasks` (my-tasks, board, create/edit/status); ops-page bridge | `work_tasks` table via 3 SECURITY DEFINER RPCs (unapplied); honest "preparing" state until applied; spine signal `open-task-attention` (0 pre-apply) | RLS SELECT creator/assignee/admin/`can_manage_project`; writes RPC-only (guard-pinned) | D2: RED, human-gated, rollback sibling | CI + guard suite | owner applies D2 via MCP + ledger entry | author D2 draft PR; then PR E |
-| E | Planning/calendar | NOT_STARTED | — | `/dashboard/planning` (planned) | bookings, projects, assignments | caller-scoped reads | none | — | none | agenda aggregation |
-| F | CRM/demand pipeline | NOT_STARTED | — | admin pipeline queue | lead-intake-model + public intakes | service-role + superadmin (unchanged) | none (contacts/ledger gated) | — | contacts/ledger apply (optional) | extend lead-intake-model |
-| G | Project ops + resources | NOT_STARTED | — | `/dashboard/projects/[id]/operations` | getProjectOperations + journal + gallery | RLS as today | issues/milestones gated | — | drafts apply | compose surface |
-| H | Document centre | NOT_STARTED | — | `/dashboard/documents` | worker_documents + photos + CV/evidence + handover | RLS + consent aggregates | bucket gated | — | worker-docs bucket | consolidation hub |
-| I | Finance foundation | NOT_STARTED | — | `/dashboard/finance` (planned) | new invoice/expense tables (gated) | owner-scoped RLS, RPC writes | RED, human-gated | — | owner apply | shell + migration PR |
-| J | AI assistance centre | NOT_STARTED | — | `/dashboard/assist` (planned) | lib/ai runtime + learning_review_queue | server-only provider boundary | ai_runs gated | — | provider key + apply | honest-disabled surface |
-| K | Search + reports | NOT_STARTED | — | search API + reports hub | RLS-scoped server queries | permission-scoped, no leakage | none | — | none | server search |
+| D | Work/task management | GATED (UI merged; table unapplied) | D1 #707 / `832680e`; D2 draft #708 (needs-human-gate) | `/dashboard/tasks` (my-tasks, board, create/edit/status); ops-page bridge | `work_tasks` via 3 SECURITY DEFINER RPCs (unapplied); honest "preparing" state; spine signal `open-task-attention` (0 pre-apply) | RLS SELECT creator/assignee/admin/`can_manage_project`; writes RPC-only (guard-pinned) | D2 RED, human-gated, rollback sibling, classifier green (4 patterns acknowledged) | D1 CI green, merged | owner applies #708 via MCP + ledger entry | — (gate visible on #708) |
+| E | Planning/calendar | DONE | #709 / `71cf03a6` | `/dashboard/planning` (agenda + 7-day strip, filters, conflicts) | bookings (both directions), company project bands, due-dated tasks (degrading); worker-side assigned-project read skipped honestly (no RLS-scoped helper exists) | caller-scoped reads only; read-only; no admin client (guard-pinned) | none | CI green; deployed on merge | none | — |
+| F | CRM/demand pipeline | DONE | #710 / `020ebd96` | `/dashboard/admin/pipeline` (stage summary, filters, search, dedup chips); links from admin hub, sales panel, intake queue | leads + waitlist + operator-state customer_requests (sales seed) + company_need_public_intakes (admin seed) — composition only, no new call sites | superadmin gating unchanged; read-only, no mutation, no outbound (guard-pinned) | none (contacts/stage-ledger/dedup-index stay migration-gated) | CI green; deployed on merge | contacts/ledger apply (optional) | — |
+| G | Project ops + resources | DONE | #711 / `18006128` | `/dashboard/projects/[id]/operations` upgraded (header strip, attention, resources, tasks, evidence, handover); `projects` module added for org roles | getOperationsCentre composing getProjectOperations + handover + project tasks (degrading) + gallery counts + housing_provided + availability basics + accepted booking ranges | RLS as today; composition-only, `.from` set guard-pinned; unapplied draft columns never read | none (milestones/issues/resource tables stay gated) | CI green; deployed on merge | drafts apply (handover, availability prefs, team spine) | — |
+| H | Document centre | DONE | #712 / `88ce0ee7` | `/dashboard/documents` consolidated (attention strip, filtered inventory, work-proof exports, org aggregate view) | worker_documents readiness (applied; verification axis read degradably), journal HEAD counts, CV/evidence/journal exports, `agency_pool_docs_readiness` RPC for orgs | RLS + consent-gated aggregate RPC only; read-only, no storage, no upload UI (guard-pinned) | none (worker-docs bucket stays gated) | CI green; deployed on merge | worker-docs bucket apply for real file upload | — |
+| I | Finance foundation | GATED (UI merged; table unapplied) | I1 #713 / `6a50b729`; I2 draft #714 (needs-human-gate) | `/dashboard/finance` (records list, filters, forms, summary strip, CSV export route); honest "preparing" pre-apply | `finance_records` via 3 SECURITY DEFINER RPCs (unapplied); overdue DERIVED app-side; cents-only math | RLS SELECT creator/admin/`owns_company`; writes RPC-only; no payment-provider code (guard-pinned) | I2 RED, human-gated, rollback sibling, classifier green | I1 CI green, merged | owner applies #714 via MCP + ledger | — (gate visible on #714) |
+| J | AI assistance centre | DONE | #715 / `f725cb30` | `/dashboard/assist` (attention, deterministic summaries, honest provider-state card) | spine counts, document/finance attention derivations, evidence report, project reads — deterministic only; provider state via existing config resolver (never the key) | read-only, RLS client only; no runAiAgent call, no prompt UI (guard-pinned) | none (ai_runs store stays gated) | CI green; deployed on merge | provider key (EXTERNAL_PROVIDER_GATED) + ai_runs migration for live generation | — |
+| K | Search + reports + final audit | DONE | #716 / `4d158338` | `/api/dashboard-search` (GET, authenticated) + CommandFinder object results + `/dashboard/search` embeds the one finder; `/dashboard/reports` role-specific hub; final audit `docs/launch/control-room-final-route-truth-audit-v1.md` | search: listMyTasks / listMyFinanceRecords / listMyBookings / listMyDocuments / listManagedProjects + the communication-page conversations read (bounded, own rows only); reports: evidence-report derivation, journal head counts, listOwnCustomerRequests, own-company projects, task/finance summaries, consent-gated org docs aggregate — every figure basis-labelled | authenticated + RLS-scoped reads only; NO admin client, NO profiles/workers read, NO people search (scouting flow untouched); bounded queries (2–80 chars, 5/source, 30 total); recent commands = localStorage ids only (guard-pinned: `universal-search-reports.test.ts`) | none | CI + guard suite | none new (all remaining gates listed in the final audit §4) | — (programme complete) |
 
 ## Gate register (owner/provider actions)
 
@@ -39,7 +39,59 @@ Results recorded here per PR as they run.
 | A (docs-only) | migration-safety + quality (CI) | PASS — merged #704 |
 | B (control room) | typecheck, lint, vitest (530 files / 8353 tests), placeholders:check, check:i18n-debt, check:primary-route-smoke, check:public-seo-indexing, build | ALL PASS locally; CI green; merged #705 |
 | C (activity centre) | same suite — vitest 531 files / 8379 tests, primary-route-smoke 37 routes | ALL PASS; CI green; merged #706 |
-| D1 (tasks repo-safe layer) | same suite — vitest 532 files / 8412 tests, primary-route-smoke 38 routes | ALL PASS locally; CI on PR |
+| D1 (tasks repo-safe layer) | same suite — vitest 532 files / 8412 tests, primary-route-smoke 38 routes | ALL PASS; CI green; merged #707 |
+| D2 (work_tasks migration) | migration-safety self-test 26/26; classifier on diff GREEN (4 RED patterns human-gate-acknowledged); work-tasks guard 30/30 | draft #708, needs-human-gate — awaiting owner apply |
+| E (planning) | same suite — vitest 533 files / 8451 tests, primary-route-smoke 39 routes | ALL PASS; CI green; merged #709 |
+| F (CRM pipeline) | same suite — vitest 534 files / 8485 tests | ALL PASS; CI green; merged #710 |
+| G (project ops centre) | same suite — vitest 535 files / 8523 tests, primary-route-smoke 40 routes | ALL PASS; CI green; merged #711 |
+| H (document centre) | same suite — vitest 536 files / 8562 tests | ALL PASS; CI green; merged #712 |
+| I1 (finance repo-safe layer) | same suite — vitest 537 files / 8597 tests, primary-route-smoke 41 routes | ALL PASS; CI green; merged #713 |
+| I2 (finance_records migration) | migration-safety classifier GREEN (RED patterns human-gate-acknowledged); finance guard 33/33 | draft #714, needs-human-gate — awaiting owner apply |
+| J (AI assistance centre) | same suite — vitest 538 files / 8633 tests, primary-route-smoke 42 routes | ALL PASS locally; CI green; merged #715 |
+| K (search + reports + final audit) | same suite + new guard universal-search-reports (35 tests) | recorded in the PR K report |
+
+PR J notes: deterministic-only slice — attention composed from the spine + document/finance
+derivations, summaries from the evidence report and the caller company's project reads,
+every row/summary shows its sources; the AI provider card reads only state+reason from the
+existing config resolver (disabled in production — stated honestly with both gates named:
+provider key EXTERNAL_PROVIDER_GATED and the ai_runs/ai_suggestions audit-store migration).
+runAiAgent is never called; no prompt UI; guard-pinned. AI_* env docs deferred to the
+live-enable slice.
+
+PR I decisions: statuses stored are draft|issued|partially_paid|paid|cancelled — overdue is
+DERIVED app-side from due_date + unpaid (no cron, no stale stored state). Module for
+company/agency/worker (customers excluded). finance-overdue-attention spine signal is a
+recorded follow-up after I2 applies. CSV export via route handler over the caller's own
+RLS rows (503 pre-migration, never a fabricated file). EUR-only, integer-cents math.
+
+PR H notes: DOCUMENTS_READINESS_ENABLED left true (apply evidenced via the flag-flip MCP
+record + the s6 ledger row building agency_pool_docs_readiness on worker_documents);
+verification axis (20260613100200) has no ledger row → read degradably (absent column →
+no claim rendered). LEDGER GAP recorded: no explicit APPLIED_LEDGER rows for
+20260610170000_worker_documents_readiness / 20260613100200 — owner may want to backfill.
+Org view calls the applied consent-gated RPC directly (counts only); file upload stays
+gated on the worker-documents bucket.
+
+PR G notes: demand references skipped honestly (no repo lib reads job_demands);
+project→conversation linkage limited to the instruction counts the board already carries;
+attention rows trace only to real data (documents_needed workers, needed checklist items,
+overdue/blocked tasks) each with a resolve link; booking-overlap chips reuse the planning
+model's inclusive daterange semantics on accepted rows the caller can already read.
+
+PR F stage mapping (presentation-only; stored statuses always shown verbatim):
+customer_requests draft→excluded, submitted→new, in_review→qualifying,
+needs_followup→follow_up, approved→active, closed→closed · public intakes new→new,
+contacted→contacted, qualified→qualifying, rejected→closed · leads new→new,
+contacted→contacted, qualified→qualifying, won→active, lost→closed · waitlist→new
+(storedStatus null rendered as "—"). Dedup: display-only chips on normalized
+company-name/email key collisions; no merge action. conversation_source_context
+read-only history noted as a possible follow-up.
+
+PR E notes: pure agenda model + conflict detection mirroring the booking accept guard's
+inclusive daterange && semantics (accepted incoming bookings + own assignments only —
+overlaps that prove nothing are excluded); per-source honest degradation notes; planning
+module added to registry (bookings module re-pointed to its own label keys); no calendar
+dependency; worker-side assigned-project bands deferred until an RLS-scoped read exists.
 
 PR D contract (the D2 migration must match exactly): table `public.work_tasks`
 (id, project_id→projects, source_type/source_id pair check 'project|booking|demand|company',
@@ -71,3 +123,37 @@ inventory; `getSpineCounts` request-cached (no second query set). New i18n keys
 (`auth.dashboard.statusStrip.title/allClear`, `commandFinder.shortcutHint`) in lt/en/ru/nl/de —
 non-active locale files follow the repo's frozen-subset convention (verified against recent
 PRs). `DashboardChainActions` intentionally untouched (task deep-links, not module doors).
+
+## Programme closeout (2026-07-11)
+
+All eleven capability slices delivered through nine merged runtime/docs PRs plus two
+human-gated draft migration PRs:
+
+Merged: #704 (A gap map) · #705 (B foundation) · #706 (C activity) · #707 (D1 tasks layer) ·
+#709 (E planning) · #710 (F pipeline) · #711 (G project ops) · #712 (H documents) ·
+#713 (I1 finance layer) · #715 (J assist) · #716 (K search/reports/final audit).
+Awaiting owner: #708 (work_tasks migration) · #714 (finance_records migration).
+
+Owner actions outstanding (the complete gate register):
+1. Review + apply #708 (`work_tasks`) via Supabase MCP, record in APPLIED_LEDGER — activates
+   /dashboard/tasks and the open-task-attention signal.
+2. Review + apply #714 (`finance_records`) likewise — activates /dashboard/finance records
+   and CSV export.
+3. Optional gates (prepare on request): worker-documents storage bucket (file upload),
+   activity events table (persistent feed + demand/verification signals), contacts +
+   stage-transition ledger (CRM persistence), AI provider key + ai_runs/ai_suggestions
+   store (live generation), finance-overdue spine signal (after #714).
+4. Ledger backfill suggestion: explicit APPLIED_LEDGER rows for
+   20260610170000_worker_documents_readiness / 20260613100200 (application evidenced but
+   unrecorded — see PR H notes).
+
+Not completed (honest statement): live AI generation (provider + audit store gated); task
+and finance persistence until #708/#714 apply; worker document file upload (bucket gated);
+worker-side assigned-project planning bands (needs an RLS-scoped read — safe follow-up);
+authenticated 390px browser smoke was not run against production (guard suite + build +
+Vercel previews stand in; the repo's gate matrix requires no authenticated e2e without
+SUPABASE_TEST_URL).
+
+Recommended next PR: after the owner applies #708, a small follow-up wiring
+finance-overdue-attention into the spine and adding worker-side assigned-project bands to
+planning via a new RLS-scoped read.

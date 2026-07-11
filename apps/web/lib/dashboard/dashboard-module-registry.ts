@@ -45,13 +45,18 @@ export type DashboardModuleId =
   | "opportunities"
   | "tasks"
   | "bookings"
+  | "planning"
   | "market_map"
   | "communication"
   | "documents"
   | "services"
   | "service_requests"
+  | "projects"
+  | "finance"
   | "company"
   | "activity"
+  | "assist"
+  | "reports"
   | "overview";
 
 /** Icon ids for module cards. A superset of the nav's NavIconKey so the nav
@@ -67,7 +72,12 @@ export type ModuleIconKey =
   | "building"
   | "search"
   | "bell"
-  | "checklist";
+  | "checklist"
+  | "handshake"
+  | "briefcase"
+  | "coins"
+  | "sparkles"
+  | "chart";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -161,13 +171,30 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
   },
   {
     id: "bookings",
+    // Control room PR E: bookings hands the generic planning label to the
+    // unified planning surface and speaks its own name — the card is the
+    // proposal/accept loop, not the whole plan.
     surfaceRoute: "/dashboard/bookings",
+    labelKey: "auth.dashboard.myZone.actions.bookings.title",
+    descriptionKey: "auth.dashboard.myZone.actions.bookings.desc",
+    iconKey: "handshake",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+    attentionSignalIds: ["pending-bookings", "booking-responses"],
+  },
+  {
+    id: "planning",
+    // Unified planning agenda (control room PR E): bookings + managed
+    // project date bands + open task due dates in one compact agenda, each
+    // row linking back to its real source object. Declares NO
+    // attentionSignalIds — the booking/task signals already badge their own
+    // modules; a badge here would double-count the same numbers.
+    surfaceRoute: "/dashboard/planning",
     labelKey: "auth.dashboard.myZone.actions.planning.title",
     descriptionKey: "auth.dashboard.myZone.actions.planning.desc",
     iconKey: "calendar",
     roles: ALL_ROLES,
     surfaces: ["grid", "command"],
-    attentionSignalIds: ["pending-bookings", "booking-responses"],
   },
   {
     id: "market_map",
@@ -222,6 +249,40 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     ],
   },
 
+  // ── Manager operations (control room PR G) ───────────────────────────
+  {
+    id: "projects",
+    // Projects / objects — the manager map into each project's operating
+    // centre. Until PR G, managers reached /dashboard/projects only via
+    // nav links and the command finder's literal route; the module makes
+    // it a first-class grid card for org roles. Labels reuse the projects
+    // page's own copy (no parallel copy source).
+    surfaceRoute: "/dashboard/projects",
+    labelKey: "projects.title",
+    descriptionKey: "projects.intro",
+    iconKey: "briefcase",
+    roles: ORG_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  {
+    id: "finance",
+    // Operational finance records (control room PR I): manual invoices
+    // issued/received + expenses with derived overdue flags and real
+    // cent-exact sums. Org-role-first, and workers record expenses too;
+    // customers have no operational-finance need. Repo-safe layer — the
+    // page degrades honestly until the owner-gated finance_records
+    // migration (I2) is applied. NO attentionSignalIds: a finance-overdue
+    // spine signal is a recorded follow-up (joins the spine after the
+    // migration is applied), so no badge can appear before real data can.
+    surfaceRoute: "/dashboard/finance",
+    labelKey: "finance.title",
+    descriptionKey: "finance.intro",
+    iconKey: "coins",
+    roles: ["company", "agency", "worker"],
+    surfaces: ["grid", "command"],
+  },
+
   // ── Organisation workspace door ──────────────────────────────────────
   {
     id: "company",
@@ -247,6 +308,40 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     labelKey: "activityCentre.title",
     descriptionKey: "activityCentre.intro",
     iconKey: "bell",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  // ── AI assistance centre (control room PR J) ─────────────────────────
+  {
+    id: "assist",
+    // One controlled assistance surface: the deterministic "what needs my
+    // attention" composition, the deterministic role summaries and the
+    // HONEST AI-provider state card (disabled in production — the page says
+    // so; no generation is wired in this slice, gap map §10). Declares NO
+    // attentionSignalIds — the surface aggregates the spine itself, so a
+    // badge here would double-count the numbers the bell already carries.
+    surfaceRoute: "/dashboard/assist",
+    labelKey: "assist.title",
+    descriptionKey: "assist.intro",
+    iconKey: "sparkles",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  // ── Reports hub (control room PR K) ──────────────────────────────────
+  {
+    id: "reports",
+    // Role-specific reports INDEX (gap map §12): worker sees evidence +
+    // journal-activity figures and the real exports; org roles see own
+    // demand / project / task / document / finance counts. Real data only,
+    // every figure basis-labelled; degrades honestly per source. Declares NO
+    // attentionSignalIds — the hub reports, it does not notify (the spine
+    // and the per-module cards already carry the attention numbers).
+    surfaceRoute: "/dashboard/reports",
+    labelKey: "reports.title",
+    descriptionKey: "reports.intro",
+    iconKey: "chart",
     roles: ALL_ROLES,
     surfaces: ["grid", "command"],
   },

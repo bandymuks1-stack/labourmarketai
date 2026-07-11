@@ -29,7 +29,109 @@
     "inputLabel": "Zoek een pagina of actie",
     "resultsLabel": "Overeenkomende pagina’s",
     "noResults": "Niets gevonden. Probeer een ander woord — bijv. CV, werkjournaal, ploeg, documenten, prijzen.",
-    "shortcutHint": "Ctrl / ⌘ K"
+    "shortcutHint": "Ctrl / ⌘ K",
+    "recentLabel": "Onlangs geopend",
+    "objectsLabel": "Je eigen records",
+    "objectsLoading": "Zoeken in je eigen records…",
+    "objectsError": "Je records konden nu niet doorzocht worden. De paginalinks hierboven blijven werken.",
+    "groups": {
+      "projects": "Je projecten",
+      "tasks": "Je taken",
+      "finance": "Je financiële registraties",
+      "conversations": "Je gesprekken",
+      "bookings": "Je boekingen",
+      "documents": "Je documentregistraties"
+    }
+  },
+  "reports": {
+    "eyebrow": "Rapporten",
+    "title": "Rapporten",
+    "intro": "Cijfers geteld uit je eigen records, met de rekenbasis vermeld onder elke sectie, en de exports die al bestaan.",
+    "honestyNote": "Alleen tellingen over je eigen gegevens — geen benchmarks, geen scores, geen prognoses.",
+    "state": {
+      "needsMigration": "Dit datamodel is in deze omgeving nog niet beschikbaar, dus er valt niets te tellen. Er wordt geen getal getoond in plaats van echte gegevens.",
+      "unavailable": "Deze cijfers kunnen nu niet gelezen worden. Er wordt niets geschat in hun plaats."
+    },
+    "basis": {
+      "label": "Basis",
+      "workerEvidence": "Geteld volgens de regels van het bewijsrapport uit je eigen gecatalogiseerde vaardigheden, werkjournaalregels en bevestigingen van leidinggevenden. Geen score, geen schatting.",
+      "workerActivity": "Directe tellingen van je eigen werkjournaalregels en je eigen geüploade journaalfoto's.",
+      "orgDemand": "Tellingen over de vraagaanvragen die je zelf hebt aangemaakt. Open = concept, ingediend, in beoordeling of vervolg nodig.",
+      "orgProjects": "Tellingen van de projectregels van je eigen bedrijf, gegroepeerd per vastgelegde status.",
+      "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
+      "orgDocuments": "Sommen van het toestemmingsgebonden poolaggregaat — alleen werknemers die toestemming gaven voor geaggregeerde documentzichtbaarheid worden geteld.",
+      "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens."
+    },
+    "worker": {
+      "evidence": {
+        "title": "Profiel- en bewijscijfers",
+        "totalSkills": "Vaardigheden",
+        "workSupported": "Onderbouwd met werkregels",
+        "confirmed": "Bevestigd",
+        "journalEntries": "Journaalregels",
+        "confirmations": "Bevestigingen",
+        "empty": "Nog geen bewijsgegevens — cijfers verschijnen zodra je profiel en werkjournaal echte records bevatten.",
+        "link": "Open het volledige bewijsrapport"
+      },
+      "activity": {
+        "title": "Journaalactiviteit",
+        "entries": "Journaalregels",
+        "photos": "Geüploade foto's",
+        "unavailable": "Je journaaltellingen kunnen nu niet gelezen worden. Er wordt niets getoond in plaats van echte tellingen.",
+        "link": "Open het werkjournaal"
+      }
+    },
+    "exports": {
+      "title": "Exports",
+      "note": "Alleen de exports die al werken staan hier — niets hiervan is een voorproefje.",
+      "evidence": "Bewijsrapport (afdrukken / PDF)",
+      "cv": "CV (afdrukken / PDF)",
+      "journalCsv": "Journaalexport (CSV)",
+      "financeCsv": "Export financiële registraties (CSV)"
+    },
+    "org": {
+      "demand": {
+        "title": "Vraagaanvragen",
+        "open": "Open",
+        "total": "Totaal",
+        "link": "Open de vraagintake"
+      },
+      "projects": {
+        "title": "Projecten per status",
+        "status": {
+          "draft": "Concept",
+          "live": "Lopend",
+          "paused": "Gepauzeerd"
+        },
+        "total": "Totaal",
+        "empty": "Nog geen projecten — cijfers verschijnen zodra je bedrijf projectregels heeft.",
+        "link": "Open projecten"
+      },
+      "tasks": {
+        "title": "Taken per status",
+        "open": "Open",
+        "status": {
+          "todo": "Te doen",
+          "in_progress": "In uitvoering",
+          "blocked": "Geblokkeerd"
+        },
+        "link": "Open taken"
+      },
+      "documents": {
+        "title": "Documentgereedheid van de pool",
+        "workers": "Werknemers met toestemming",
+        "expiring": "Verlopende documenten",
+        "attention": "Aandacht nodig",
+        "empty": "Nog geen poolwerknemers met toestemming — dit aggregaat telt alleen werknemers die toestemming gaven.",
+        "link": "Open het documentencentrum"
+      },
+      "finance": {
+        "title": "Financiële registraties",
+        "overdue": "Achterstallig",
+        "total": "Totaal registraties",
+        "link": "Open financiële registraties"
+      }
+    }
   },
   "marketRecognition": {
     "title": "Wat bied je aan of wat heb je nodig?",
@@ -3032,8 +3134,12 @@
             "desc": "Werk dat bij je past"
           },
           "planning": {
-            "title": "Planning en boekingen",
-            "desc": "Kalender en boekingen"
+            "title": "Planning",
+            "desc": "Boekingen, projecten en deadlines in één agenda"
+          },
+          "bookings": {
+            "title": "Boekingen",
+            "desc": "Voorstellen en acceptaties"
           },
           "documents": {
             "title": "Rapporten en documenten",
@@ -4722,6 +4828,50 @@
     }
   },
   "projectOps": {
+    "centre": {
+      "summaryTitle": "Projectoverzicht",
+      "datesLabel": "Data",
+      "openTasksLabel": "Open taken",
+      "tasksPreparingShort": "nog niet beschikbaar",
+      "readinessLabel": "Checklist afgevinkt",
+      "readinessNone": "nog niets bijgehouden",
+      "housingLabel": "Huisvesting geregeld",
+      "housingYes": "Ja",
+      "housingNo": "Nee",
+      "housingUnknown": "Niet vastgelegd",
+      "attention": {
+        "title": "Vraagt aandacht",
+        "empty": "Er vraagt nu niets om aandacht — de hier bijgehouden statussen, checklists en taken zijn rustig.",
+        "note": "Alleen afgeleid uit echte records: door de manager ingestelde operationele statussen, open checklistpunten en open projecttaken. Verder wordt niets gescoord of voorspeld.",
+        "kind": {
+          "worker_documents_needed": "Documenten nodig",
+          "readiness_item_open": "Open checklistpunt",
+          "task_overdue": "Taak over tijd",
+          "task_blocked": "Taak geblokkeerd"
+        }
+      },
+      "resources": {
+        "title": "Middelen en toewijzingsgereedheid",
+        "checklistLabel": "Checklist",
+        "availabilityLabel": "Beschikbaarheid",
+        "availableFromLabel": "Beschikbaar vanaf",
+        "notRecorded": "niet vastgelegd",
+        "noWindow": "Project zonder data — boekingsoverlap niet gecontroleerd",
+        "bookingConflict": "{n, plural, one {# overlappende geaccepteerde boeking} other {# overlappende geaccepteerde boekingen}}",
+        "noConflict": "Geen overlappende geaccepteerde boekingen",
+        "note": "Beschikbaarheid toont de door de werknemer zelf vastgelegde velden. Overlap vergelijkt de voor u zichtbare geaccepteerde boekingen met de datumband van dit project. Huisvestings- en vervoersbehoeften worden nog niet bijgehouden, dus daarvoor wordt niets getoond."
+      },
+      "tasksTitle": "Projecttaken",
+      "tasksEmpty": "Er zijn geen open taken aan dit project gekoppeld.",
+      "evidence": {
+        "title": "Werkbewijs",
+        "entriesLabel": "Dagboekvermeldingen",
+        "photosLabel": "Geüploade foto's",
+        "note": "Echte aantallen dagboekvermeldingen die aan dit project zijn gekoppeld en de foto's die werknemers aan hun eigen vermeldingen hebben toegevoegd.",
+        "link": "Projectgalerij openen"
+      },
+      "honestNote": "Dit centrum bundelt alleen records die al bestaan. Mijlpalen, issue-registers en middelentabellen zijn nog niet gebouwd en worden hier niet gesimuleerd."
+    },
     "eyebrow": "Projectoperaties",
     "managerOnly": "Dit bord is voor een manager van een bedrijf of uitzendbureau.",
     "notAuthorized": "Je kunt het operationele bord alleen openen voor een project dat je beheert.",
@@ -4995,6 +5145,10 @@
     "messageCta": "Stuur een bericht",
     "errorGeneric": "Er is iets misgegaan. Probeer het opnieuw.",
     "duplicate": "Je hebt al een openstaande aanvraag voor deze dienst.",
+    "requestAgain": "Opnieuw aanvragen",
+    "requestAgainNote": "Dit verstuurt een nieuwe aanvraag voor dezelfde dienst. Je eerdere bericht is al ingevuld — pas het aan als je wilt. De aanbieder beslist opnieuw.",
+    "cancel": "Annuleren",
+    "offeringInactive": "Deze dienst is niet meer actief, dus een nieuwe aanvraag kan niet worden verstuurd.",
     "requesterMessage": "Hun bericht",
     "providerNote": "Notitie van de aanbieder",
     "responded": "Beantwoord",
@@ -5267,7 +5421,54 @@
     "internalNote": "Interne registratie — er worden geen e-mails of berichten naar wie dan ook verzonden.",
     "explanationPending": "De uitleg wordt voorbereid op basis van de Litouwse masterversie."
   },
+  "crmPipeline": {
+    "eyebrow": "Operatorwachtrij",
+    "title": "Vraagpijplijn",
+    "subtitle": "Alle vraagbronnen in één leesweergave: ingediende aanvragen, publieke bedrijfsbehoefte-formulieren, opgeslagen leads en wachtlijstinschrijvingen.",
+    "back": "Terug naar het beheerderspaneel",
+    "honestNote": "Alleen lezen. De pijplijnfase is een presentatielens — elke rij toont ook letterlijk de opgeslagen status, en statuswijzigingen blijven op de eigen pagina van de rij. Niets hier neemt contact op of wijzigt iets.",
+    "summaryHeading": "Fasesamenvatting",
+    "windowNote": "Aantallen worden berekend over de werkelijk geladen rijen (de verkoopbronnen laden elk de 50 meest recente) — nooit geschat.",
+    "duplicateChip": "Mogelijk duplicaat",
+    "storedStatusLabel": "Opgeslagen status",
+    "createdLabel": "Aangemaakt",
+    "openSurface": "Open de eigen pagina",
+    "empty": "Nog geen vraagrijen geladen. Zodra er een aanvraag, formulier, lead of inschrijving bestaat, verschijnt die hier.",
+    "noMatches": "Geen rijen voldoen aan de huidige filters.",
+    "viewPipeline": "Vraagpijplijn bekijken",
+    "stages": {
+      "new": "Nieuw",
+      "contacted": "Gecontacteerd",
+      "qualifying": "In beoordeling",
+      "follow_up": "Wacht op opvolging",
+      "active": "Actief",
+      "closed": "Gesloten"
+    },
+    "sources": {
+      "customer_request": "Vraagaanvraag",
+      "public_intake": "Publiek formulier",
+      "lead": "Lead",
+      "waitlist": "Wachtlijst"
+    },
+    "sourceStates": {
+      "needs_admin_read": "niet leesbaar in deze omgeving",
+      "service_key_missing": "serviceverbinding niet geconfigureerd",
+      "needs_migration": "wacht op de migratie",
+      "not_admin": "beheerderscontrole niet geslaagd",
+      "error": "kon nu niet worden gelezen"
+    },
+    "filters": {
+      "sourceLabel": "Bron",
+      "stageLabel": "Fase",
+      "all": "Alle",
+      "searchLabel": "Zoeken",
+      "searchPlaceholder": "Filter op titel, bedrijf of status",
+      "searchSubmit": "Toepassen",
+      "reset": "Herstellen"
+    }
+  },
   "salesIntake": {
+    "viewPipeline": "Vraagpijplijn bekijken",
     "title": "Sales-intake",
     "intro": "Een overzicht van wie er binnenkomt: ingediende personeelsbehoefte-aanvragen in beoordeling, wachtlijstaanmeldingen en opgeslagen leads. Alleen inzien — echte vastgelegde rijen, hier is niets te bewerken.",
     "honestNote": "Alleen inzien. Niets hier neemt contact op met wie dan ook — geen e-mail, geen sms, geen berichten. De enige actie legt een interne opvolgtaak voor het team vast.",
@@ -5915,6 +6116,50 @@
     "sourceLink": "bron",
     "scopeNote": "Gebaseerd op officiële EU-bronnen over gedetacheerde werknemers — controleer de nationale details bij de bevoegde autoriteit. Dit is informatie, geen juridisch advies."
   },
+  "documentCentre": {
+    "attention": {
+      "title": "Aandacht nodig",
+      "empty": "Op dit moment vraagt geen enkel document om aandacht.",
+      "note": "De aantallen komen uitsluitend uit uw eigen geldigheidsdatums en verificatiestatussen.",
+      "expiring": "Verloopt binnenkort: {n}",
+      "missing": "Ontbreekt: {n}",
+      "reviewNeeded": "Wacht op beoordeling: {n}"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "typeLabel": "Type",
+      "all": "Alle",
+      "noMatches": "Geen documenten voor de gekozen filters."
+    },
+    "verification": {
+      "unverified": "Niet geverifieerd",
+      "pending": "Verificatie in behandeling",
+      "verified": "Geverifieerd",
+      "rejected": "Afgewezen"
+    },
+    "workProof": {
+      "title": "Werkbewijs & exports",
+      "journalTitle": "Bewijs uit het werkdagboek",
+      "journalCounts": "Notities: {entries} · Foto's: {photos}",
+      "countsUnavailable": "Aantallen zijn in deze omgeving niet beschikbaar.",
+      "galleryNote": "Foto's staan in uw dagboeknotities; projectgalerijen vindt u op de pagina van elk project."
+    },
+    "uploadNote": "Dit is een metadata-inventaris — bestanden uploaden is nog niet mogelijk. U registreert wat u hebt en tot wanneer het geldig is; de bestanden zelf blijven bij u.",
+    "org": {
+      "title": "Documentgereedheid van de pool (op basis van toestemming)",
+      "intro": "Documenten zijn van de werknemers. U ziet alleen categorie-aantallen van poolwerknemers die het delen van totalen hebben ingeschakeld.",
+      "workersLabel": "Werknemers met toestemming",
+      "totalLabel": "Documenten",
+      "validLabel": "Geldig",
+      "expiringLabel": "Verloopt binnenkort",
+      "attentionLabel": "Aandacht nodig",
+      "consentNote": "Alleen aantallen — nooit documentinhoud. Een werknemer zonder toestemming verschijnt simpelweg niet.",
+      "noConsented": "Geen totalen op basis van toestemming — geen poolwerknemer heeft delen ingeschakeld, of uw organisatie beheert geen uitzendpool.",
+      "unavailable": "Totalen op basis van toestemming zijn in deze omgeving niet beschikbaar. Documenten zijn van de werknemers.",
+      "projectAxisLink": "Gereedheidschecklists per project",
+      "projectAxisNote": "De gereedheid van werknemers per project staat op de operationele pagina van elk project."
+    }
+  },
   "trust": {
     "title": "Vertrouwenssignalen",
     "caption": "De aantallen komen rechtstreeks uit echte registraties. Niets hier is gewogen of verzonnen.",
@@ -6062,6 +6307,14 @@
     "cta": "Terug naar het begin"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Bespreekpunten",
+      "missing": "Ontbrekende informatie"
+    },
+    "missingSide": {
+      "worker": "De kandidaat heeft niet opgegeven: {criterion}",
+      "demand": "Je aanvraag vermeldt niet: {criterion}"
+    },
     "statusNote": {
       "title": "Hoe matching vandaag werkt",
       "signals": "Op basis van de nu beschikbare signalen uit het profiel en het werkjournaal toont het systeem gereedheid en een mogelijke fit.",
@@ -6299,7 +6552,9 @@
     "notAuthed": "Log in om je boekingen te zien.",
     "unavailable": "Kon de actie niet voltooien. Probeer het opnieuw.",
     "noDate": "Geen startdatum ingesteld",
+    "noRole": "Werkafspraak",
     "startsOn": "Start {date}",
+    "endsOn": "Tot {date}",
     "incoming": {
       "title": "Voorstellen voor jou",
       "help": "Een bedrijf heeft voorgesteld om met je samen te werken. Jij beslist.",
@@ -6317,6 +6572,28 @@
       "withdrawn": "Ingetrokken",
       "expired": "Verlopen"
     },
+    "displayState": {
+      "awaiting_response": "Wacht op antwoord",
+      "no_response_stale": "Nog geen antwoord"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Jij beslist — accepteer of weiger. Niets is bevestigd totdat je accepteert.",
+        "no_response_stale": "Al 14+ dagen onbeantwoord, maar nog open — je kunt nog steeds accepteren of weigeren.",
+        "accepted": "Bevestigd. Volgende stap: stuur het bedrijf een bericht en plan het werk samen.",
+        "declined": "Je hebt geweigerd, dus dit voorstel is gesloten. Het bedrijf kan een nieuw voorstel sturen.",
+        "withdrawn": "Het bedrijf heeft dit voorstel ingetrokken, dus het is gesloten.",
+        "expired": "Dit voorstel is vervallen, dus het is gesloten."
+      },
+      "outgoing": {
+        "awaiting_response": "De werknemer beslist. Je kunt het voorstel intrekken totdat die antwoordt.",
+        "no_response_stale": "Al 14+ dagen geen antwoord. Nog open — je kunt het intrekken of wachten.",
+        "accepted": "De werknemer heeft geaccepteerd. Volgende stap: stuur een bericht en plan het werk samen.",
+        "declined": "De werknemer heeft geweigerd, dus dit voorstel is gesloten. Je kunt een andere werknemer een voorstel doen.",
+        "withdrawn": "Je hebt dit voorstel ingetrokken, dus het is gesloten. Stuur zo nodig een nieuw voorstel.",
+        "expired": "Dit voorstel is vervallen, dus het is gesloten."
+      }
+    },
     "actions": {
       "accept": "Accepteren",
       "decline": "Weigeren",
@@ -6326,17 +6603,66 @@
       "error": "Er is iets misgegaan.",
       "message": "Bericht sturen",
       "withdraw": "Voorstel intrekken",
-      "findAnother": "Andere werknemer zoeken"
+      "findAnother": "Andere werknemer zoeken",
+      "proposeAgain": "Opnieuw voorstellen met nieuwe datums",
+      "planning": "Bekijken in planning"
     },
     "connections": {
       "title": "Planning is verbonden met",
       "intro": "Een boeking is onderdeel van je plan. Dit zijn de onderdelen waaraan die gekoppeld is.",
+      "planning": "Planningsagenda",
+      "planningNote": "Deze boeking in datumcontext met projecten en taken",
       "marketplace": "Marktplaatsverzoeken",
       "marketplaceNote": "Serviceverzoeken en hun statussen",
       "map": "Kaart",
       "mapNote": "Waar werk en boekingen zijn",
       "diary": "Werkjournaal",
       "diaryNote": "Leg vast wat er echt is gebeurd"
+    },
+    "propose": {
+      "modeNote": "Dit is een boekingsvoorstel met datums — de werknemer bevestigt of weigert het. Er is niets geboekt totdat de werknemer accepteert.",
+      "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
+      "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken."
+    },
+    "reason": {
+      "optionalTitle": "Reden (optioneel)",
+      "noteLabel": "Notitie (optioneel)",
+      "none": "Geen reden",
+      "notStored": "Je antwoord is opgeslagen. De reden kon deze keer niet worden opgeslagen.",
+      "decline": {
+        "dates_unsuitable": "De datums passen niet",
+        "conditions_unsuitable": "De voorwaarden passen niet",
+        "already_booked": "Ik ben in die periode al geboekt",
+        "other": "Anders"
+      },
+      "withdraw": {
+        "position_filled": "De plek is al ingevuld",
+        "need_changed": "De behoefte is veranderd",
+        "dates_changed": "De datums zijn veranderd",
+        "other": "Anders"
+      },
+      "confirmDecline": "Afwijzing bevestigen",
+      "confirmWithdraw": "Intrekken bevestigen",
+      "cancel": "Annuleren"
+    },
+    "reschedule": {
+      "open": "Datums wijzigen",
+      "startDate": "Nieuwe startdatum",
+      "endDate": "Nieuwe einddatum (optioneel)",
+      "note": "Notitie (optioneel)",
+      "save": "Nieuwe datums opslaan",
+      "saved": "Datums bijgewerkt. De werknemer ziet de nieuwe datums.",
+      "notChanged": "De datums zijn niet gewijzigd. Probeer het later opnieuw.",
+      "cancel": "Annuleren"
+    },
+    "deadline": {
+      "open": "Reactiedatum instellen",
+      "label": "Reageren vóór",
+      "save": "Datum opslaan",
+      "saved": "Reactiedatum opgeslagen.",
+      "notSet": "De reactiedatum is niet opgeslagen. Probeer het later opnieuw.",
+      "respondBy": "Reageer vóór {date}",
+      "cancel": "Annuleren"
     }
   },
   "adminReadiness": {
@@ -6635,6 +6961,105 @@
     "applyNotAdmin": "Beheerdersrechten vereist."
   },
   "opportunities": {
+    "saved": {
+      "save": "Opslaan",
+      "saved": "Opgeslagen",
+      "unsave": "Verwijderen uit opgeslagen",
+      "privateHint": "Opslaan is privé binnen je account — het bedrijf ziet nooit wie zijn vacature heeft opgeslagen.",
+      "sectionTitle": "Opgeslagen kansen",
+      "noLongerOpen": "Eerder opgeslagen, maar niet meer open op het bord: {count}",
+      "error": "Kon je opgeslagen lijst niet bijwerken. Probeer het opnieuw."
+    },
+    "recent": {
+      "title": "Onlangs bekeken",
+      "deviceOnly": "Alleen op dit apparaat opgeslagen — deze lijst verlaat je browser nooit en wordt niet naar de server gestuurd.",
+      "clear": "Wissen"
+    },
+    "compare": {
+      "toggle": "Vergelijken",
+      "selectedLabel": "Geselecteerd",
+      "open": "Geselecteerde vergelijken",
+      "title": "Kansen vergelijken",
+      "close": "Sluiten",
+      "clear": "Selectie wissen",
+      "limitNote": "Kies 2–3 kansen om te vergelijken.",
+      "notStated": "Niet vermeld",
+      "fact": {
+        "pay": "Loon",
+        "hours": "Uren per week",
+        "start": "Start",
+        "engagement": "Contractvorm",
+        "accommodation": "Huisvesting",
+        "transport": "Vervoer",
+        "tools": "Gereedschap",
+        "languages": "Talen",
+        "location": "Locatie",
+        "company": "Bedrijf"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "Kansen filteren",
+        "profession": "Soort werk",
+        "country": "Land",
+        "start": "Start",
+        "accommodation": "Huisvesting",
+        "transport": "Vervoer",
+        "tool": "Benodigd gereedschap",
+        "activeCount": "Actieve filters: {count}",
+        "reset": "Filters wissen"
+      },
+      "sort": {
+        "label": "Sorteren",
+        "relevance": "Beste match eerst",
+        "newest": "Nieuwste eerst"
+      },
+      "emptyFiltered": {
+        "title": "Geen kansen voldoen aan deze filters",
+        "body": "Actieve filters: {filters}. Verwijder enkele filters of wis ze om meer te zien.",
+        "reset": "Filters wissen"
+      },
+      "details": {
+        "show": "Meer details",
+        "hide": "Details verbergen"
+      },
+      "tiers": {
+        "blocking": "Past niet",
+        "strengths": "Past",
+        "negotiables": "Bespreekpunten",
+        "missing": "Ontbrekende informatie"
+      },
+      "missing": {
+        "worker": "Je hebt niet opgegeven: {criterion}",
+        "demand": "Het bedrijf heeft niet opgegeven: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Vereiste vaardigheden",
+        "evidence_tiers": "Bewijs van vaardigheden",
+        "profession": "Beroep",
+        "language": "Taal",
+        "country_location": "Land en locatie",
+        "availability": "Beschikbaarheid",
+        "pay_ceiling": "Loonverwachting",
+        "accommodation": "Huisvesting",
+        "compensation": "Loon",
+        "start_date": "Startdatum",
+        "shifts_hours": "Diensten en uren",
+        "engagement_form": "Contractvorm",
+        "licence_categories": "Rijbewijs",
+        "own_vehicle": "Eigen voertuig",
+        "own_tools": "Eigen gereedschap",
+        "pay_basis": "Loonbasis (bruto/netto)",
+        "night_shifts": "Nachtdiensten",
+        "weekend_shifts": "Weekenddiensten",
+        "overtime": "Overuren"
+      },
+      "how": {
+        "title": "Hoe matching werkt",
+        "body": "Matching volgt vaste, deterministische regels over de feiten die beide kanten hebben opgegeven - vereiste vaardigheden, taal, locatie, beschikbaarheid, loon en contractvorm. Een ontbrekend feit wordt als ontbrekend getoond en nooit geraden. Geen kunstmatige intelligentie beslist en er is geen algemene persoonsscore - alleen de match binnen deze ene kans.",
+        "version": "Berekeningsversie: {version} - deterministische regels"
+      }
+    },
     "title": "Kansen voor jou",
     "intro": "Hier zie je personeelsbehoeften van werkgevers die bij je kunnen passen, en wat je aan je profiel kunt toevoegen om er klaar voor te zijn.",
     "noWorkerBody": "Maak eerst je werknemersprofiel af om kansen te zien die bij je passen.",
@@ -6753,7 +7178,50 @@
       "reviewed": "Het bedrijf heeft je interesse bekeken",
       "contacted": "Bedrijf markeerde: contact opgenomen"
     },
-    "companyVerified": "Geverifieerd bedrijf"
+    "companyVerified": "Geverifieerd bedrijf",
+    "structured": {
+      "detailTitle": "Opgegeven arbeidsvoorwaarden",
+      "notProvided": "Het bedrijf heeft nog geen gedetailleerde arbeidsvoorwaarden voor deze vermelding opgegeven — alleen de bovenstaande feiten zijn vermeld.",
+      "gapsTitle": "Niet opgegeven door het bedrijf",
+      "yes": "Ja",
+      "no": "Nee",
+      "payLabel": "Loon",
+      "amountFrom": "vanaf {amount}",
+      "amountUpTo": "tot {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} u/week",
+      "chipMinHours": "minimaal {hours} u/week",
+      "chipStartFrom": "start vanaf {from}",
+      "chipStartWindow": "start {from} – {to}",
+      "chipDeadline": "solliciteren vóór {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} jr.",
+      "km": "{km} km",
+      "minutes": "{min} min.",
+      "probationLabel": "Proeftijd",
+      "extensionPossibleLabel": "Verlenging mogelijk",
+      "scheduleNoticeLabel": "Rooster vooraf bekend",
+      "expectedResponseLabel": "Reactie binnen",
+      "firstPaymentLabel": "Eerste betaling binnen",
+      "travelMinutesLabel": "Reistijd naar de locatie",
+      "registrationPossibleLabel": "Adresregistratie mogelijk",
+      "availableFromLabel": "Beschikbaar vanaf",
+      "similarProjectLabel": "Ervaring met vergelijkbare projecten",
+      "driverSupplementLabel": "Chauffeurstoeslag",
+      "siteModeLabel": "Locaties",
+      "siteMode": {
+        "single": "Eén locatie",
+        "multiple": "Meerdere locaties",
+        "mobile": "Mobiel / wisselende locaties"
+      },
+      "workModeLabel": "Werkvorm",
+      "workMode": {
+        "onsite": "Op locatie",
+        "remote": "Op afstand",
+        "hybrid": "Hybride"
+      }
+    }
   },
   "workerIntake": {
     "title": "Werknemersintake",
@@ -7491,6 +7959,62 @@
       "noticeLink": "privacyverklaring"
     }
   },
+  "planning": {
+    "eyebrow": "PLANNING",
+    "title": "Planning",
+    "intro": "Boekingen, projectdata en taakdeadlines in één agenda. Elke regel linkt naar de echte bron.",
+    "honestNote": "Alleen records die echt bestaan worden getoond: boekingen, de data van je beheerde projecten en deadlines van open taken. Er is geen externe kalender gekoppeld en niets is verzonnen.",
+    "notAuthed": "Log in om je planning te zien.",
+    "filters": {
+      "label": "Bron",
+      "all": "Alle"
+    },
+    "source": {
+      "booking": "Boeking",
+      "project": "Project",
+      "task": "Taak"
+    },
+    "sourceNotes": {
+      "bookingUnavailable": "Boekingen zijn nog niet beschikbaar — ze sluiten aan op de planning zodra de boekingslaag is ingeschakeld.",
+      "taskUnavailable": "Taken zijn nog niet beschikbaar — taakdeadlines sluiten aan op de planning zodra de takenlaag is ingeschakeld.",
+      "taskError": "Taken konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
+      "projectManagersOnly": "Projectdatabanden zijn zichtbaar voor projectmanagers. Een projectplanning voor werknemers volgt zodra die weergave bestaat.",
+      "projectError": "Projecten konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar."
+    },
+    "week": {
+      "label": "Komende 7 dagen"
+    },
+    "today": "Vandaag",
+    "later": {
+      "title": "Later"
+    },
+    "undated": {
+      "title": "Nog zonder datum",
+      "hint": "Deze records bestaan, maar er zijn nog geen data vastgelegd."
+    },
+    "empty": "Nog niets gepland. Geaccepteerde boekingen, projectdata en taakdeadlines verschijnen hier.",
+    "pastHidden": "Afgeronde items worden hier niet getoond: {count}. De geschiedenis blijft op elke bronpagina.",
+    "conflict": {
+      "flag": "Data overlappen"
+    },
+    "context": {
+      "incoming": "Aan mij voorgesteld",
+      "outgoing": "Door ons voorgesteld",
+      "managed": "Beheerd project",
+      "assigned": "Aan mij toegewezen",
+      "mine": "Mijn taak"
+    },
+    "fallback": {
+      "booking": "Boeking",
+      "project": "Project",
+      "task": "Taak"
+    },
+    "projectStatus": {
+      "draft": "Concept",
+      "live": "Actief",
+      "paused": "Gepauzeerd"
+    }
+  },
   "tasks": {
     "eyebrow": "Werktaken",
     "title": "Taken",
@@ -7572,5 +8096,404 @@
     "projectSection": {
       "link": "Taken voor dit project"
     }
+  },
+  "assist": {
+    "eyebrow": "Assistentiecentrum",
+    "title": "Assistentiecentrum",
+    "intro": "Wat uw aandacht nodig heeft, samenvattingen berekend uit uw eigen gegevens en de eerlijke status van de AI-provider.",
+    "attention": {
+      "title": "Wat heeft mijn aandacht nodig",
+      "note": "Berekend uit uw eigen gegevens volgens vaste regels — dezelfde aantallen die de bel en elke module al tonen. Elke rij noemt zijn gegevensbron en linkt naar de pagina waar het wordt opgelost.",
+      "empty": "Er is nu niets dat uw aandacht nodig heeft — er zijn geen openstaande signalen in uw gegevens.",
+      "open": "Openen",
+      "docExpiring": "Documenten die binnen 30 dagen verlopen",
+      "docMissing": "Ontbrekende of verlopen documenten",
+      "docReview": "Documenten in beoordeling of teruggestuurd",
+      "financeOverdue": "Achterstallige financiële registraties"
+    },
+    "sources": {
+      "label": "Bronnen",
+      "notificationSpine": "Meldingssignalen",
+      "workerDocuments": "Uw documentregistraties",
+      "financeRecords": "Uw financiële registraties",
+      "workerSkills": "Uw gecatalogiseerde vaardigheden",
+      "workJournal": "Uw werkdagboek",
+      "managerConfirmations": "Bevestigingen van leidinggevenden",
+      "projects": "Uw projecten",
+      "assignments": "Actieve werknemerstoewijzingen"
+    },
+    "summaries": {
+      "title": "Samenvattingen uit uw gegevens",
+      "note": "Samengesteld uit echte velden volgens vaste regels, met vermelding van de bronnen. Geen enkele tekst in dit onderdeel is door een taalmodel gemaakt.",
+      "none": "Voor deze rol bestaat nog geen samenvatting — samenvattingen worden alleen toegevoegd waar waarheidsgetrouwe gegevens bestaan.",
+      "worker": {
+        "title": "Profiel- en bewijssamenvatting",
+        "totalSkills": "Vaardigheden",
+        "workSupported": "Onderbouwd met werkregistraties",
+        "confirmed": "Bevestigd",
+        "journalEntries": "Dagboekregistraties",
+        "confirmations": "Bevestigingen",
+        "link": "Open het volledige bewijsrapport"
+      },
+      "org": {
+        "title": "Projectstatussamenvatting",
+        "teamSize": "Actieve werknemers: {count}",
+        "empty": "Nog geen actieve projecten — projecten verschijnen hier zodra ze bestaan.",
+        "error": "Projecten konden nu niet worden geladen. De rest van de pagina werkt gewoon.",
+        "link": "Operaties"
+      }
+    },
+    "provider": {
+      "title": "AI-provider",
+      "stateLabel": "Runtimestatus",
+      "state": {
+        "disabled": "Uit",
+        "mock": "Mock (deterministische testmodus)",
+        "live": "Actief"
+      },
+      "reason": {
+        "ok": "De runtime is geconfigureerd.",
+        "mode_disabled": "Er is geen providermodus ingesteld — de runtime staat standaard uit.",
+        "unknown_provider": "De geconfigureerde provider wordt niet herkend, dus de runtime blijft uit.",
+        "missing_api_key": "Er is geen providersleutel geconfigureerd, dus de runtime blijft uit."
+      },
+      "disabledBody": "In deze omgeving is geen externe AI-provider gekoppeld. Alles op deze pagina is volgens vaste regels berekend uit uw eigen gegevens — geen enkele tekst hier is door een taalmodel gemaakt.",
+      "whenEnabled": "Zodra de eigenaar een provider koppelt en de auditopslag voor suggesties is toegepast, komen controleerbare conceptsuggesties beschikbaar — altijd als suggesties die een persoon bevestigt, nooit als automatische wijzigingen.",
+      "gates": "Twee poorten staan bewust open: (1) er is geen providersleutel geconfigureerd in productie en (2) de auditopslag voor suggesties (ai_runs / ai_suggestions) is een door de eigenaar goed te keuren migratie. Generatie blijft uit totdat beide gesloten zijn — suggesties zonder auditspoor zouden de eigen regels van het programma schenden.",
+      "providerLabel": "Provider",
+      "modelLabel": "Model",
+      "notWired": "Generatiefuncties zijn in deze fase bewust niet aangesloten — resultaten zouden nog geen auditspoor hebben. De status hierboven wordt alleen voor transparantie getoond."
+    }
+  },
+  "finance": {
+    "eyebrow": "Operationele financiën",
+    "title": "Financiële registraties",
+    "intro": "Handmatige registratie van verstuurde facturen, ontvangen facturen en uitgaven — met echte totalen en afgeleide vervallen-markeringen.",
+    "scopeNote": "Alleen handmatige registraties — dit is geen boekhoud-, belasting-, loon-, banksynchronisatie- of betalingsverwerkingssoftware. Een registratie verplaatst geen geld en neemt met niemand contact op.",
+    "notAuthed": "Log in om je financiële registraties te zien.",
+    "unavailable": "De financiënmodule wordt voorbereid — nog niet beschikbaar. Zodra deze is ingeschakeld, verschijnen je registraties hier.",
+    "loadError": "Registraties konden niet worden geladen. Vernieuw de pagina.",
+    "empty": "Nog geen financiële registraties — voeg hierboven de eerste toe.",
+    "emptyFiltered": "Geen registraties voldoen aan de gekozen filters.",
+    "exportCsv": "CSV downloaden",
+    "exportNote": "Exporteert alleen je eigen registraties (dezelfde rijen als deze pagina toont).",
+    "summary": {
+      "issued": "Verstuurde facturen",
+      "received": "Ontvangen facturen",
+      "expenses": "Uitgaven",
+      "paid": "Betaald",
+      "overdue": "Vervallen"
+    },
+    "filters": {
+      "label": "Type",
+      "statusLabel": "Status",
+      "allTypes": "Alle types",
+      "allStatuses": "Alle statussen",
+      "overdue": "Vervallen"
+    },
+    "type": {
+      "invoice_issued": "Verstuurde factuur",
+      "invoice_received": "Ontvangen factuur",
+      "expense": "Uitgave"
+    },
+    "status": {
+      "draft": "Concept",
+      "issued": "Verstuurd",
+      "partially_paid": "Deels betaald",
+      "paid": "Betaald",
+      "cancelled": "Geannuleerd"
+    },
+    "flags": {
+      "overdue": "Vervallen"
+    },
+    "dueLabel": "Vervaldatum",
+    "paidLabel": "Betaald",
+    "projectLinked": "Aan project gekoppeld",
+    "companyLinked": "Bedrijfsregistratie",
+    "actions": {
+      "issue": "Markeren als verstuurd",
+      "markPartial": "Markeren als deels betaald",
+      "markPaid": "Markeren als betaald",
+      "markUnpaid": "Markeren als onbetaald",
+      "cancel": "Annuleren",
+      "reopen": "Heropenen",
+      "details": "Gegevens bewerken",
+      "save": "Opslaan"
+    },
+    "form": {
+      "title": "Nieuwe registratie",
+      "typeLabel": "Type registratie",
+      "statusLabel": "Beginstatus",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "bijv. steigerhuur — juni",
+      "counterpartyLabel": "Tegenpartij",
+      "counterpartyPlaceholder": "bijv. bedrijfs- of persoonsnaam",
+      "amountLabel": "Bedrag (EUR)",
+      "amountHint": "Bedrag in euro's met maximaal twee decimalen, bijv. 123.45. Voorlopig alleen EUR.",
+      "dueLabel": "Vervaldatum (optioneel)",
+      "projectLabel": "Project (optioneel)",
+      "projectNone": "Geen project",
+      "companyLinkLabel": "Koppelen aan mijn bedrijf (de eigenaar ziet deze registratie)",
+      "noteLabel": "Notitie (optioneel)",
+      "submit": "Registratie toevoegen"
+    },
+    "notice": {
+      "created": "Registratie toegevoegd.",
+      "updated": "Registratie bijgewerkt.",
+      "invalid": "Controleer de velden — titel 3–160 tekens, tegenpartij 2–160, bedrag zoals 123.45.",
+      "needs_migration": "De financiënmodule is nog niet ingeschakeld — de wijziging is niet opgeslagen.",
+      "not_authorized": "Dat mag je niet doen.",
+      "not_found": "Registratie niet gevonden.",
+      "limit_reached": "Registratielimiet bereikt — deze handmatige lijst is begrensd.",
+      "error": "Opslaan mislukt. Probeer het opnieuw."
+    }
+  },
+  "structuredDemand": {
+    "advancedTitle": "Uitgebreide gegevens (optioneel)",
+    "advancedHint": "Gestructureerde feiten waarop werknemers filteren en vergelijken. Alles is optioneel — wat u overslaat wordt getoond als “niet vermeld”, nooit verzonnen.",
+    "notStated": "Niet vermeld",
+    "sections": {
+      "engagement": "Arbeidsvorm en omvang",
+      "time": "Tijd en rooster",
+      "compensation": "Loon en inhoudingen",
+      "accommodation": "Huisvesting",
+      "transport": "Vervoer",
+      "requirements": "Eisen aan kandidaten",
+      "process": "Sollicitatieproces"
+    },
+    "opportunityTypeLabel": "Type aanbod",
+    "opportunityType": {
+      "employment": "Vast werk",
+      "temporary_assignment": "Tijdelijke opdracht",
+      "project_work": "Projectwerk",
+      "subcontract": "Onderaanneming",
+      "service_request": "Dienstaanvraag"
+    },
+    "targetSupplyLabel": "Wie is er nodig",
+    "targetSupply": {
+      "individual": "Eén werknemer",
+      "multiple_workers": "Meerdere werknemers",
+      "team": "Team / ploeg",
+      "company": "Bedrijf / onderaannemer"
+    },
+    "engagementFormLabel": "Arbeidsvorm",
+    "engagementForm": {
+      "direct_employment": "Direct dienstverband",
+      "agency_employment": "Via uitzendbureau",
+      "temporary_employment": "Tijdelijk dienstverband",
+      "posted_worker": "Gedetacheerde werknemer",
+      "self_employed_contractor": "Zzp'er / zelfstandige",
+      "company_subcontract": "Onderaanneming door bedrijf"
+    },
+    "contractCountryLabel": "Land van het contract",
+    "startEarliestLabel": "Vroegste start",
+    "startLatestLabel": "Uiterste start",
+    "endDateLabel": "Einddatum (indien bekend)",
+    "applicationDeadlineLabel": "Sollicitatiedeadline",
+    "hoursPerWeekLabel": "Uren per week",
+    "minGuaranteedHoursLabel": "Gegarandeerde uren per week",
+    "shiftsLabel": "Diensten",
+    "shift": {
+      "day": "Dagdienst",
+      "night": "Nachtdienst",
+      "weekend": "Weekenden"
+    },
+    "overtimeExpectedLabel": "Overwerk verwacht",
+    "compMinLabel": "Loon vanaf",
+    "compMaxLabel": "Loon tot",
+    "currencyLabel": "Valuta",
+    "payUnitLabel": "Betaald per",
+    "payUnit": {
+      "hour": "Uur",
+      "day": "Dag",
+      "week": "Week",
+      "month": "Maand",
+      "project": "Project"
+    },
+    "payBasisLabel": "Bruto of netto",
+    "payBasis": {
+      "gross": "Bruto",
+      "net": "Netto",
+      "unspecified": "Niet vermeld"
+    },
+    "paymentFrequencyLabel": "Betaalfrequentie",
+    "paymentFrequency": {
+      "weekly": "Wekelijks",
+      "biweekly": "Tweewekelijks",
+      "monthly": "Maandelijks"
+    },
+    "guaranteedBaseLabel": "Gegarandeerd basisloon",
+    "perDiemLabel": "Dagvergoeding / toeslag",
+    "deductionsLabel": "Inhoudingen",
+    "deductionsHelp": "Vermeld elke bekende inhouding (huisvesting, vervoer, verzekering). Ontbrekende inhoudingsinformatie wordt werknemers als leemte getoond.",
+    "deductionKindLabel": "Inhouding",
+    "deductionKind": {
+      "accommodation": "Huisvesting",
+      "transport": "Vervoer",
+      "insurance": "Verzekering",
+      "other": "Overig"
+    },
+    "deductionAmountLabel": "Bedrag",
+    "deductionPeriodLabel": "Periode",
+    "period": {
+      "day": "Per dag",
+      "week": "Per week",
+      "month": "Per maand",
+      "once": "Eenmalig"
+    },
+    "addDeductionLabel": "Inhouding toevoegen",
+    "noDeductionsLabel": "Geen inhoudingen — bevestigd",
+    "removeLabel": "Verwijderen",
+    "accommodationStateLabel": "Huisvesting",
+    "accommodationState": {
+      "offered": "Aangeboden",
+      "not_offered": "Niet aangeboden",
+      "not_needed": "Niet nodig"
+    },
+    "accommodationPayerLabel": "Wie betaalt",
+    "accommodationPayer": {
+      "employer": "Werkgever betaalt",
+      "shared": "Kosten gedeeld",
+      "worker": "Werknemer betaalt"
+    },
+    "roomLabel": "Kamer",
+    "room": {
+      "single": "Eenpersoonskamer",
+      "shared": "Gedeelde kamer"
+    },
+    "accommodationPriceLabel": "Prijs",
+    "accommodationPricePeriodLabel": "Prijsperiode",
+    "occupancyLabel": "Personen per kamer",
+    "distanceKmLabel": "Afstand tot de locatie (km)",
+    "depositLabel": "Borg",
+    "amenitiesLabel": "Voorzieningen",
+    "amenity": {
+      "kitchen": "Keuken",
+      "laundry": "Wasruimte",
+      "internet": "Internet"
+    },
+    "familyPossibleLabel": "Partner / gezin mogelijk",
+    "internationalTravelLabel": "Reis naar het land",
+    "dailyTransportLabel": "Dagelijks vervoer naar de locatie",
+    "betweenSitesLabel": "Reizen tussen locaties",
+    "transportLevel": {
+      "provided": "Geregeld",
+      "compensated": "Vergoed",
+      "not_provided": "Niet geregeld",
+      "unknown": "Niet vermeld"
+    },
+    "arrivalPickupLabel": "Ophalen van luchthaven / station",
+    "companyVehicleLabel": "Bedrijfsauto",
+    "fuelCardLabel": "Tankpas / vergoeding",
+    "ownVehicleRequiredLabel": "Eigen auto vereist",
+    "returnTravelLabel": "Bijdrage aan terugreis naar huis",
+    "licenceCategoriesLabel": "Rijbewijscategorieën",
+    "minExperienceYearsLabel": "Minimale ervaring (jaren)",
+    "languagesLabel": "Taaleisen",
+    "languageLabel": "Taal",
+    "languageLevelLabel": "Niveau",
+    "onePerTeamLabel": "Eén spreker per ploeg is voldoende",
+    "addLanguageLabel": "Taal toevoegen",
+    "certificatesLabel": "Certificaten en vergunningen",
+    "certificatesHelp": "Vereiste certificaten (bijv. VCA, machinevergunning) — als feiten vermeld, als eisen getoond.",
+    "addCertificateLabel": "Certificaat toevoegen",
+    "ownToolsLabel": "Eigen gereedschap",
+    "ownVehicleLabel": "Eigen auto",
+    "ownWorkwearLabel": "Eigen werkkleding",
+    "drawingsReadingLabel": "Leest tekeningen / schema's",
+    "independentWorkLabel": "Werkt zelfstandig",
+    "leadershipLabel": "Geeft leiding",
+    "applicationMethodLabel": "Hoe solliciteren",
+    "applicationMethod": {
+      "interest_signal": "Interesse tonen op het platform",
+      "conversation": "Bespreken in een gesprek"
+    },
+    "interviewStagesLabel": "Gespreksrondes",
+    "responseDeadlineDaysLabel": "Antwoord binnen (dagen)",
+    "listingKindLabel": "Type vermelding",
+    "listingKind": {
+      "active_vacancy": "Actieve vacature",
+      "talent_pool": "Talentenpool (toekomstige behoeften)"
+    },
+    "practicalTestLabel": "Praktijktest",
+    "documentVerificationLabel": "Documentcontrole",
+    "talentPoolDisclosure": "Dit is een talentenpool-vermelding: kandidaten worden verzameld voor toekomstige behoeften, niet voor een actieve bevestigde vacature. Werknemers zien dit altijd.",
+    "honesty": {
+      "title": "Ontbrekende loonfeiten — aan werknemers getoond als leemtes",
+      "missing_minimum": "Minimumloon is niet vermeld",
+      "missing_basis": "Bruto/netto is niet vermeld",
+      "missing_guaranteed_hours": "Gegarandeerde uren zijn niet vermeld",
+      "missing_deductions": "Inhoudingen zijn niet gespecificeerd (of niet bevestigd als afwezig)",
+      "max_without_min": "Alleen een “tot”-bedrag is vermeld — geen minimum"
+    },
+    "preview": {
+      "title": "Hoe werknemers dit vandaag zien",
+      "v2NotVisibleNote": "Uitgebreide gegevens zijn bij uw aanvraag opgeslagen. Werknemers zien ze na de volgende platform-update — tot dan zijn alleen de bovenstaande feiten zichtbaar."
+    },
+    "prefillButton": "Invullen op basis van mijn laatste aanvraag",
+    "prefillLoading": "Laden…",
+    "prefillEmpty": "Geen eerdere aanvraag gevonden",
+    "prefillDone": "Ingevuld op basis van uw laatste aanvraag — controleer en bewerk"
+  },
+  "workerPrefs": {
+    "title": "Werkvoorkeuren",
+    "hint": "Geef alleen op wat echt voor u geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven. Deze voorkeuren worden alleen gedeeld volgens uw privacytoestemmingen.",
+    "willingToRelocate": "Bereid te verhuizen voor werk",
+    "needsAccommodation": "Heeft huisvesting nodig",
+    "hasTransport": "Heeft eigen vervoer",
+    "teamAvailable": "Kan in teamverband werken",
+    "soloAvailable": "Kan zelfstandig werken",
+    "maxTripDays": "Langste werkreis (dagen)",
+    "contractType": "Gewenste contractvorm",
+    "note": "Opmerking over beschikbaarheid",
+    "triState": {
+      "notStated": "Niet opgegeven",
+      "yes": "Ja",
+      "no": "Nee"
+    },
+    "contract": {
+      "employment": "Arbeidsovereenkomst",
+      "subcontract": "Onderaanneming",
+      "temporary": "Tijdelijk werk",
+      "any": "Elke contractvorm"
+    },
+    "notePlaceholder": "Bijv. beschikbaar vanaf augustus, voorkeur voor rotaties van 2 weken…",
+    "save": "Voorkeuren opslaan",
+    "saving": "Opslaan…",
+    "saved": "Voorkeuren opgeslagen.",
+    "error": "Opslaan mislukt. Probeer het opnieuw.",
+    "needsMigration": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "v2": {
+      "title": "Extra werkvoorkeuren",
+      "hint": "Dezelfde regel geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven.",
+      "payBasis": "Basis van loonverwachting",
+      "payBasisOptions": {
+        "gross": "Bruto (voor belastingen)",
+        "net": "Netto (op de hand)"
+      },
+      "nightShifts": "Bereid om nachtdiensten te werken",
+      "weekendShifts": "Bereid om in het weekend te werken",
+      "overtime": "Bereid om overuren te werken",
+      "licenceCategories": "Rijbewijscategorieën",
+      "ownVehicle": "Heeft eigen voertuig",
+      "ownTools": "Heeft eigen gereedschap",
+      "notEnabled": "Deze extra voorkeuren zijn nog niet ingeschakeld — hier wordt voorlopig niets opgeslagen.",
+      "notSaved": "Opgeslagen, behalve de extra voorkeuren — dat onderdeel is nog niet ingeschakeld."
+    }
+  },
+  "workerLanguages": {
+    "title": "Talen",
+    "hint": "Voeg de talen toe waarin u kunt werken en uw niveau.",
+    "selfStated": "Deze talen voegt u zelf toe — ze worden door niemand gecontroleerd.",
+    "language": "Taal",
+    "level": "Niveau",
+    "levelNative": "Moedertaal",
+    "add": "Taal toevoegen",
+    "adding": "Toevoegen…",
+    "remove": "Verwijderen",
+    "empty": "Nog geen talen toegevoegd.",
+    "notEnabled": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "error": "Opslaan is mislukt. Probeer het opnieuw.",
+    "invalid": "Kies een taal en een niveau."
   }
 }

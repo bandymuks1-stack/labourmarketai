@@ -2,14 +2,19 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Search, Target, ClipboardList, ArrowRight } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { CommandFinder } from "@/components/app/command-finder";
 
 /**
- * Worker search room.
+ * Search room (control room PR K).
  *
- * There is no free-text "type a keyword, get a list of people" search yet —
+ * ONE search truth: the page embeds the SAME universal CommandFinder the
+ * dashboard uses (registry commands + the caller's own objects through the
+ * authenticated, RLS-scoped /api/dashboard-search) — no second search system.
+ *
+ * There is still no free-text "type a keyword, get a list of people" search —
  * building one before there is honest, consented, verified worker supply would
- * mean faking results. So instead of a dead "coming later" placeholder, this
- * page is honest about what IS the working way to reach workers today:
+ * mean faking results. The page stays honest about what IS the working way to
+ * reach workers today:
  *   1. pick a structured need and let the deterministic match engine surface
  *      candidates (/dashboard/company/scouting), or
  *   2. post a need and let it be structured first (/dashboard/company).
@@ -59,7 +64,12 @@ export default async function SearchPage({
         </p>
       </header>
 
-      {/* Honest reason — why there is no free-text people search yet. */}
+      {/* The ONE universal finder (PR K) — the same component the dashboard
+          renders: registry commands first, then the caller's own objects
+          (RLS-scoped, authenticated API). Primary element of this page. */}
+      <CommandFinder />
+
+      {/* Honest reason — why there is no free-text PEOPLE search. */}
       <p
         className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
         data-testid="search-honest-reason"

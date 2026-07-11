@@ -29,7 +29,109 @@
     "inputLabel": "Rasti puslapį ar veiksmą",
     "resultsLabel": "Atitinkantys puslapiai",
     "noResults": "Nieko nerasta. Pabandykite kitą žodį — pvz., CV, žurnalas, komanda, dokumentai, kainos.",
-    "shortcutHint": "Ctrl / ⌘ K"
+    "shortcutHint": "Ctrl / ⌘ K",
+    "recentLabel": "Neseniai atidaryta",
+    "objectsLabel": "Jūsų įrašai",
+    "objectsLoading": "Ieškoma jūsų įrašuose…",
+    "objectsError": "Šiuo metu jūsų įrašų paieška nepavyko. Puslapių nuorodos viršuje veikia toliau.",
+    "groups": {
+      "projects": "Jūsų projektai",
+      "tasks": "Jūsų užduotys",
+      "finance": "Jūsų finansų įrašai",
+      "conversations": "Jūsų pokalbiai",
+      "bookings": "Jūsų rezervacijos",
+      "documents": "Jūsų dokumentų įrašai"
+    }
+  },
+  "reports": {
+    "eyebrow": "Ataskaitos",
+    "title": "Ataskaitos",
+    "intro": "Rodikliai, suskaičiuoti iš jūsų pačių įrašų, su nurodytu skaičiavimo pagrindu po kiekviena sekcija, ir jau veikiantys eksportai.",
+    "honestyNote": "Skaičiuojama tik iš jūsų duomenų — jokių palyginimų su kitais, jokių balų, jokių prognozių.",
+    "state": {
+      "needsMigration": "Šis duomenų modelis šioje aplinkoje dar neįjungtas, todėl nėra ko skaičiuoti. Vietoje tikrų duomenų joks skaičius nerodomas.",
+      "unavailable": "Šių rodiklių šiuo metu perskaityti nepavyksta. Vietoje jų niekas nespėjama."
+    },
+    "basis": {
+      "label": "Pagrindas",
+      "workerEvidence": "Suskaičiuota pagal įrodymų ataskaitos taisykles iš jūsų pačių kataloguotų įgūdžių, darbo žurnalo įrašų ir vadovų patvirtinimų. Jokio balo, jokio spėjimo.",
+      "workerActivity": "Tiesioginiai jūsų pačių darbo žurnalo įrašų ir jūsų įkeltų žurnalo nuotraukų skaičiai.",
+      "orgDemand": "Skaičiuojamos jūsų pačių sukurtos paklausos užklausos. Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio.",
+      "orgProjects": "Jūsų įmonės projektų eilučių skaičiai, sugrupuoti pagal kiekvienos eilutės įrašytą būseną.",
+      "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
+      "orgDocuments": "Sutikimu apsaugoto telkinio suvestinės sumos — skaičiuojami tik darbuotojai, davę sutikimą dėl suvestinio dokumentų matomumo.",
+      "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų."
+    },
+    "worker": {
+      "evidence": {
+        "title": "Profilio ir įrodymų rodikliai",
+        "totalSkills": "Įgūdžiai",
+        "workSupported": "Pagrįsti darbo įrašais",
+        "confirmed": "Patvirtinti",
+        "journalEntries": "Žurnalo įrašai",
+        "confirmations": "Patvirtinimai",
+        "empty": "Įrodymų duomenų dar nėra — rodikliai atsiras, kai profilyje ir darbo žurnale bus tikrų įrašų.",
+        "link": "Atidaryti visą įrodymų ataskaitą"
+      },
+      "activity": {
+        "title": "Žurnalo aktyvumas",
+        "entries": "Žurnalo įrašai",
+        "photos": "Įkeltos nuotraukos",
+        "unavailable": "Jūsų žurnalo skaičių šiuo metu perskaityti nepavyksta. Vietoje tikrų skaičių niekas nerodoma.",
+        "link": "Atidaryti darbo žurnalą"
+      }
+    },
+    "exports": {
+      "title": "Eksportai",
+      "note": "Rodomi tik jau veikiantys eksportai — čia nieko nėra „paruošiamo“.",
+      "evidence": "Įrodymų ataskaita (spausdinti / PDF)",
+      "cv": "CV (spausdinti / PDF)",
+      "journalCsv": "Žurnalo eksportas (CSV)",
+      "financeCsv": "Finansų įrašų eksportas (CSV)"
+    },
+    "org": {
+      "demand": {
+        "title": "Paklausos užklausos",
+        "open": "Atviros",
+        "total": "Iš viso",
+        "link": "Atidaryti paklausos pateikimą"
+      },
+      "projects": {
+        "title": "Projektai pagal būseną",
+        "status": {
+          "draft": "Juodraštis",
+          "live": "Vykdomi",
+          "paused": "Pristabdyti"
+        },
+        "total": "Iš viso",
+        "empty": "Projektų dar nėra — rodikliai atsiras, kai įmonė turės projektų eilučių.",
+        "link": "Atidaryti projektus"
+      },
+      "tasks": {
+        "title": "Užduotys pagal būseną",
+        "open": "Atviros",
+        "status": {
+          "todo": "Laukia",
+          "in_progress": "Vykdomos",
+          "blocked": "Užstrigusios"
+        },
+        "link": "Atidaryti užduotis"
+      },
+      "documents": {
+        "title": "Telkinio dokumentų parengtis",
+        "workers": "Sutikę darbuotojai",
+        "expiring": "Besibaigiantys dokumentai",
+        "attention": "Reikia dėmesio",
+        "empty": "Sutikusių telkinio darbuotojų dar nėra — ši suvestinė skaičiuoja tik sutikimą davusius darbuotojus.",
+        "link": "Atidaryti dokumentų centrą"
+      },
+      "finance": {
+        "title": "Finansų įrašai",
+        "overdue": "Vėluojantys",
+        "total": "Iš viso įrašų",
+        "link": "Atidaryti finansų įrašus"
+      }
+    }
   },
   "marketRecognition": {
     "title": "Ką siūlote ar ko ieškote?",
@@ -3032,8 +3134,12 @@
             "desc": "Jums tinkantis darbas"
           },
           "planning": {
-            "title": "Planas ir rezervacijos",
-            "desc": "Kalendorius ir rezervacijos"
+            "title": "Planavimas",
+            "desc": "Rezervacijos, projektai ir terminai vienoje dienotvarkėje"
+          },
+          "bookings": {
+            "title": "Rezervacijos",
+            "desc": "Pasiūlymai ir sutikimai"
           },
           "documents": {
             "title": "Ataskaitos ir dokumentai",
@@ -4722,6 +4828,50 @@
     }
   },
   "projectOps": {
+    "centre": {
+      "summaryTitle": "Projekto apžvalga",
+      "datesLabel": "Datos",
+      "openTasksLabel": "Atviros užduotys",
+      "tasksPreparingShort": "dar neprieinama",
+      "readinessLabel": "Sąrašo patikrinta",
+      "readinessNone": "dar nieko nesekama",
+      "housingLabel": "Apgyvendinimas suteikiamas",
+      "housingYes": "Taip",
+      "housingNo": "Ne",
+      "housingUnknown": "Neužfiksuota",
+      "attention": {
+        "title": "Reikia dėmesio",
+        "empty": "Šiuo metu dėmesio nieko nereikia — čia sekami statusai, sąrašai ir užduotys ramūs.",
+        "note": "Išvesta tik iš tikrų įrašų: vadovo nustatytų operacinių statusų, atvirų sąrašo punktų ir atvirų projekto užduočių. Niekas daugiau nevertinama ir neprognozuojama.",
+        "kind": {
+          "worker_documents_needed": "Reikia dokumentų",
+          "readiness_item_open": "Atviras sąrašo punktas",
+          "task_overdue": "Užduotis vėluoja",
+          "task_blocked": "Užduotis užblokuota"
+        }
+      },
+      "resources": {
+        "title": "Ištekliai ir priskyrimo parengtis",
+        "checklistLabel": "Sąrašas",
+        "availabilityLabel": "Prieinamumas",
+        "availableFromLabel": "Prieinamas nuo",
+        "notRecorded": "neužfiksuota",
+        "noWindow": "Projektas be datų — rezervacijų persidengimai netikrinami",
+        "bookingConflict": "{n, plural, one {# persidengianti priimta rezervacija} few {# persidengiančios priimtos rezervacijos} other {# persidengiančių priimtų rezervacijų}}",
+        "noConflict": "Persidengiančių priimtų rezervacijų nėra",
+        "note": "Prieinamumas rodo paties darbuotojo užfiksuotus laukus. Persidengimai lygina jums matomas priimtas rezervacijas su šio projekto datų juosta. Apgyvendinimo ir transporto poreikiai dar nesekami, todėl apie juos nieko nerodoma."
+      },
+      "tasksTitle": "Projekto užduotys",
+      "tasksEmpty": "Su šiuo projektu susietų atvirų užduočių nėra.",
+      "evidence": {
+        "title": "Darbo įrodymai",
+        "entriesLabel": "Žurnalo įrašai",
+        "photosLabel": "Įkeltos nuotraukos",
+        "note": "Tikri su šiuo projektu susietų žurnalo įrašų ir darbuotojų prie savo įrašų pridėtų nuotraukų skaičiai.",
+        "link": "Atidaryti projekto galeriją"
+      },
+      "honestNote": "Šis centras sudėlioja tik jau egzistuojančius įrašus. Etapai, problemų registrai ir išteklių lentelės dar nesukurtos ir čia nėra imituojamos."
+    },
     "eyebrow": "Projekto operacijos",
     "managerOnly": "Ši lenta skirta įmonės arba agentūros vadovui.",
     "notAuthorized": "Operacijų lentą galite atidaryti tik savo valdomam projektui.",
@@ -4995,6 +5145,10 @@
     "messageCta": "Parašyti žinutę",
     "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą.",
     "duplicate": "Jau turi neuždarytą užklausą šiai paslaugai.",
+    "requestAgain": "Pateikti užklausą iš naujo",
+    "requestAgainNote": "Bus išsiųsta nauja užklausa dėl tos pačios paslaugos. Ankstesnė žinutė jau įrašyta — galite ją pakeisti. Paslaugos teikėjas sprendžia iš naujo.",
+    "cancel": "Atšaukti",
+    "offeringInactive": "Ši paslauga nebėra aktyvi, todėl naujos užklausos išsiųsti negalima.",
     "requesterMessage": "Jų žinutė",
     "providerNote": "Paslaugos teikėjo pastaba",
     "responded": "Atsakyta",
@@ -5267,7 +5421,54 @@
     "internalNote": "Vidinis įrašas — jokie laiškai ar žinutės niekam nesiunčiami.",
     "explanationPending": "Paaiškinimas ruošiamas iš lietuviško pagrindinio teksto."
   },
+  "crmPipeline": {
+    "eyebrow": "Operatoriaus eilė",
+    "title": "Paklausos eiga",
+    "subtitle": "Visi paklausos šaltiniai viename peržiūros lange: pateiktos užklausos, viešos įmonių poreikio anketos, išsaugoti potencialūs klientai ir laukiančiųjų sąrašas.",
+    "back": "Grįžti į valdymo pultą",
+    "honestNote": "Tik peržiūra. Eigos etapas yra pateikimo pjūvis — kiekviena eilutė kartu rodo tikrą įrašytą būseną, o būsenos keičiamos tik jos pačios puslapyje. Niekas čia su niekuo nesusisiekia ir nieko nekeičia.",
+    "summaryHeading": "Etapų suvestinė",
+    "windowNote": "Skaičiai skaičiuojami tik iš realiai užkrautų eilučių (pardavimų šaltiniai užkrauna po 50 naujausių) — niekada nespėjami.",
+    "duplicateChip": "Galimas dublikatas",
+    "storedStatusLabel": "Įrašyta būsena",
+    "createdLabel": "Sukurta",
+    "openSurface": "Atidaryti jos puslapį",
+    "empty": "Paklausos eilučių dar nėra. Kai atsiras užklausa, anketa, potencialus klientas ar registracija, ji bus rodoma čia.",
+    "noMatches": "Nė viena eilutė neatitinka pasirinktų filtrų.",
+    "viewPipeline": "Peržiūrėti paklausos eigą",
+    "stages": {
+      "new": "Nauja",
+      "contacted": "Susisiekta",
+      "qualifying": "Vertinama",
+      "follow_up": "Laukia tęsinio",
+      "active": "Aktyvi",
+      "closed": "Uždaryta"
+    },
+    "sources": {
+      "customer_request": "Paklausos užklausa",
+      "public_intake": "Vieša anketa",
+      "lead": "Potencialus klientas",
+      "waitlist": "Laukiančiųjų sąrašas"
+    },
+    "sourceStates": {
+      "needs_admin_read": "šioje aplinkoje neperskaitoma",
+      "service_key_missing": "nesukonfigūruotas serviso ryšys",
+      "needs_migration": "laukia migracijos",
+      "not_admin": "nepraeitas administratoriaus patikrinimas",
+      "error": "šiuo metu nepavyko perskaityti"
+    },
+    "filters": {
+      "sourceLabel": "Šaltinis",
+      "stageLabel": "Etapas",
+      "all": "Visi",
+      "searchLabel": "Paieška",
+      "searchPlaceholder": "Filtruoti pagal pavadinimą, įmonę ar būseną",
+      "searchSubmit": "Taikyti",
+      "reset": "Atstatyti"
+    }
+  },
   "salesIntake": {
+    "viewPipeline": "Peržiūrėti paklausos eigą",
     "title": "Pardavimų srautas",
     "intro": "Tik peržiūrai skirtas vaizdas, kas ateina: pateiktos poreikio užklausos peržiūroje, laukiančiųjų sąrašo registracijos ir įrašyti kontaktai. Tik realūs įrašai.",
     "honestNote": "Tik skaitymui. Niekas čia su niekuo nesusisiekia — jokių el. laiškų, SMS ar žinučių. Vienintelis veiksmas — vidinės tolesnio veiksmo užduoties įrašymas komandai.",
@@ -5915,6 +6116,50 @@
     "sourceLink": "šaltinis",
     "scopeNote": "Remiamasi oficialiais ES komandiruojamų darbuotojų šaltiniais — nacionalines detales pasitikslink kompetentingoje institucijoje. Tai informacija, ne teisinė konsultacija."
   },
+  "documentCentre": {
+    "attention": {
+      "title": "Reikia dėmesio",
+      "empty": "Šiuo metu nė vienam dokumentui nereikia dėmesio.",
+      "note": "Skaičiai kyla tik iš jūsų pačių įrašytų galiojimo datų ir patikros būsenų.",
+      "expiring": "Baigia galioti: {n}",
+      "missing": "Trūksta: {n}",
+      "reviewNeeded": "Laukia patikros: {n}"
+    },
+    "filters": {
+      "statusLabel": "Būsena",
+      "typeLabel": "Tipas",
+      "all": "Visi",
+      "noMatches": "Pagal pasirinktus filtrus dokumentų nėra."
+    },
+    "verification": {
+      "unverified": "Nepatikrinta",
+      "pending": "Laukia patikros",
+      "verified": "Patikrinta",
+      "rejected": "Atmesta"
+    },
+    "workProof": {
+      "title": "Darbo įrodymai ir eksportai",
+      "journalTitle": "Darbo žurnalo įrodymai",
+      "journalCounts": "Įrašai: {entries} · Nuotraukos: {photos}",
+      "countsUnavailable": "Skaičiai šioje aplinkoje nepasiekiami.",
+      "galleryNote": "Nuotraukos saugomos jūsų žurnalo įrašuose; projektų nuotraukų galerijos — kiekvieno projekto puslapyje."
+    },
+    "uploadNote": "Tai — metaduomenų inventorius: failų įkėlimas dar negalimas. Įrašote, ką turite ir iki kada galioja; patys failai lieka pas jus.",
+    "org": {
+      "title": "Komandos dokumentų parengtis (pagal sutikimą)",
+      "intro": "Dokumentai priklauso darbuotojams. Matote tik kategorijų skaičius tų komandos darbuotojų, kurie įjungė suvestinės dalijimąsi.",
+      "workersLabel": "Sutikę darbuotojai",
+      "totalLabel": "Dokumentai",
+      "validLabel": "Galiojantys",
+      "expiringLabel": "Baigia galioti",
+      "attentionLabel": "Reikia dėmesio",
+      "consentNote": "Tik skaičiai — niekada dokumentų turinys. Nesutikęs darbuotojas tiesiog nerodomas.",
+      "noConsented": "Sutikimu pagrįstų dokumentų suvestinių nėra — nė vienas komandos darbuotojas neįjungė dalijimosi arba jūsų organizacija nevaldo agentūros komandos.",
+      "unavailable": "Sutikimu pagrįstos dokumentų suvestinės šioje aplinkoje nepasiekiamos. Dokumentai priklauso darbuotojams.",
+      "projectAxisLink": "Projektų parengties sąrašai",
+      "projectAxisNote": "Darbuotojų parengtis pagal projektą rodoma kiekvieno projekto operacijų puslapyje."
+    }
+  },
   "trust": {
     "title": "Pasitikėjimo signalai",
     "caption": "Skaičiai imami tiesiai iš realių įrašų. Niekas čia nesveriama ir neišgalvojama.",
@@ -6062,6 +6307,14 @@
     "cta": "Grįžti į pradžią"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Aptartini klausimai",
+      "missing": "Trūkstama informacija"
+    },
+    "missingSide": {
+      "worker": "Kandidatas nenurodė: {criterion}",
+      "demand": "Jūsų užklausoje nenurodyta: {criterion}"
+    },
     "statusNote": {
       "title": "Kaip veikia atitikimas šiandien",
       "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.",
@@ -6299,7 +6552,9 @@
     "notAuthed": "Prisijunk, kad matytum savo rezervacijas.",
     "unavailable": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "noDate": "Pradžios data nenurodyta",
+    "noRole": "Darbo susitarimas",
     "startsOn": "Pradžia {date}",
+    "endsOn": "Iki {date}",
     "incoming": {
       "title": "Pasiūlymai tau",
       "help": "Įmonė pasiūlė dirbti su tavimi. Tu sprendi.",
@@ -6317,6 +6572,28 @@
       "withdrawn": "Atšaukta",
       "expired": "Nebegalioja"
     },
+    "displayState": {
+      "awaiting_response": "Laukiama atsakymo",
+      "no_response_stale": "Kol kas be atsakymo"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Sprendi tu — priimk arba atmesk. Niekas nepatvirtinta, kol nepriimsi.",
+        "no_response_stale": "Be atsakymo jau 14+ dienų, bet pasiūlymas vis dar atviras — vis dar gali priimti arba atmesti.",
+        "accepted": "Patvirtinta. Toliau: parašyk įmonei žinutę ir kartu suplanuokite darbus.",
+        "declined": "Atmetei, todėl šis pasiūlymas uždarytas. Įmonė gali atsiųsti naują.",
+        "withdrawn": "Įmonė atšaukė šį pasiūlymą, todėl jis uždarytas.",
+        "expired": "Šis pasiūlymas nebegalioja, todėl jis uždarytas."
+      },
+      "outgoing": {
+        "awaiting_response": "Sprendžia darbuotojas. Kol jis neatsakė, pasiūlymą gali atšaukti.",
+        "no_response_stale": "Atsakymo nėra jau 14+ dienų. Pasiūlymas vis dar atviras — gali jį atšaukti arba palaukti.",
+        "accepted": "Darbuotojas priėmė. Toliau: parašyk žinutę ir kartu suplanuokite darbus.",
+        "declined": "Darbuotojas atmetė, todėl šis pasiūlymas uždarytas. Gali pasiūlyti kitam darbuotojui.",
+        "withdrawn": "Atšaukei šį pasiūlymą, todėl jis uždarytas. Jei reikia, išsiųsk naują.",
+        "expired": "Šis pasiūlymas nebegalioja, todėl jis uždarytas."
+      }
+    },
     "actions": {
       "accept": "Priimti",
       "decline": "Atmesti",
@@ -6326,17 +6603,66 @@
       "error": "Kažkas nepavyko.",
       "message": "Parašyti žinutę",
       "withdraw": "Atšaukti pasiūlymą",
-      "findAnother": "Ieškoti kito darbuotojo"
+      "findAnother": "Ieškoti kito darbuotojo",
+      "proposeAgain": "Siūlyti iš naujo su naujomis datomis",
+      "planning": "Peržiūrėti planavime"
     },
     "connections": {
       "title": "Planavimas susijęs su",
       "intro": "Rezervacija yra tavo plano dalis. Štai sritys, su kuriomis ji susijusi.",
+      "planning": "Planavimo dienotvarkė",
+      "planningNote": "Ši rezervacija datų kontekste su projektais ir užduotimis",
       "marketplace": "Turgaus užklausos",
       "marketplaceNote": "Paslaugų užklausos ir jų būsenos",
       "map": "Žemėlapis",
       "mapNote": "Kur vyksta darbas ir rezervacijos",
       "diary": "Darbo žurnalas",
       "diaryNote": "Užfiksuok, kas iš tikrųjų įvyko"
+    },
+    "propose": {
+      "modeNote": "Tai rezervacijos pasiūlymas su datomis — darbuotojas jį patvirtina arba atmeta. Niekas nerezervuota, kol darbuotojas nepriima.",
+      "againModeNote": "Tai iš naujo atveria tą patį pasiūlymą tam pačiam darbuotojui su naujomis datomis — darbuotojas sprendžia iš naujo. Niekas nerezervuota, kol darbuotojas nepriima.",
+      "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti."
+    },
+    "reason": {
+      "optionalTitle": "Priežastis (nebūtina)",
+      "noteLabel": "Pastaba (nebūtina)",
+      "none": "Be priežasties",
+      "notStored": "Jūsų atsakymas išsaugotas. Priežasties šį kartą išsaugoti nepavyko.",
+      "decline": {
+        "dates_unsuitable": "Netinka datos",
+        "conditions_unsuitable": "Netinka sąlygos",
+        "already_booked": "Tuo metu jau esu užimtas",
+        "other": "Kita"
+      },
+      "withdraw": {
+        "position_filled": "Vieta jau užimta",
+        "need_changed": "Pasikeitė poreikis",
+        "dates_changed": "Pasikeitė datos",
+        "other": "Kita"
+      },
+      "confirmDecline": "Patvirtinti atsisakymą",
+      "confirmWithdraw": "Patvirtinti atšaukimą",
+      "cancel": "Atšaukti"
+    },
+    "reschedule": {
+      "open": "Keisti datas",
+      "startDate": "Nauja pradžios data",
+      "endDate": "Nauja pabaigos data (nebūtina)",
+      "note": "Pastaba (nebūtina)",
+      "save": "Išsaugoti naujas datas",
+      "saved": "Datos atnaujintos. Darbuotojas matys naujas datas.",
+      "notChanged": "Datos nepakeistos. Pabandykite vėliau.",
+      "cancel": "Atšaukti"
+    },
+    "deadline": {
+      "open": "Nustatyti atsakymo datą",
+      "label": "Atsakyti iki",
+      "save": "Išsaugoti datą",
+      "saved": "Atsakymo data išsaugota.",
+      "notSet": "Atsakymo datos išsaugoti nepavyko. Pabandykite vėliau.",
+      "respondBy": "Atsakyti iki {date}",
+      "cancel": "Atšaukti"
     }
   },
   "adminReadiness": {
@@ -6635,6 +6961,105 @@
     "applyNotAdmin": "Reikia administratoriaus teisių."
   },
   "opportunities": {
+    "saved": {
+      "save": "Išsaugoti",
+      "saved": "Išsaugota",
+      "unsave": "Pašalinti iš išsaugotų",
+      "privateHint": "Išsaugojimas privatus jūsų paskyroje — įmonė niekada nemato, kas išsaugojo jos skelbimą.",
+      "sectionTitle": "Išsaugotos galimybės",
+      "noLongerOpen": "Išsaugota anksčiau, bet lentoje nebeatvira: {count}",
+      "error": "Nepavyko atnaujinti išsaugotų sąrašo. Bandykite dar kartą."
+    },
+    "recent": {
+      "title": "Neseniai peržiūrėtos",
+      "deviceOnly": "Saugoma tik šiame įrenginyje — šis sąrašas niekada nepalieka jūsų naršyklės ir nesiunčiamas į serverį.",
+      "clear": "Išvalyti"
+    },
+    "compare": {
+      "toggle": "Palyginti",
+      "selectedLabel": "Pasirinkta",
+      "open": "Palyginti pasirinktas",
+      "title": "Palyginti galimybes",
+      "close": "Uždaryti",
+      "clear": "Išvalyti pasirinkimą",
+      "limitNote": "Palyginimui pasirinkite 2–3 galimybes.",
+      "notStated": "Nenurodyta",
+      "fact": {
+        "pay": "Atlygis",
+        "hours": "Valandos per savaitę",
+        "start": "Pradžia",
+        "engagement": "Įdarbinimo forma",
+        "accommodation": "Apgyvendinimas",
+        "transport": "Transportas",
+        "tools": "Įrankiai",
+        "languages": "Kalbos",
+        "location": "Vieta",
+        "company": "Įmonė"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "Filtruoti galimybes",
+        "profession": "Darbo tipas",
+        "country": "Šalis",
+        "start": "Pradžia",
+        "accommodation": "Apgyvendinimas",
+        "transport": "Transportas",
+        "tool": "Reikalingi įrankiai",
+        "activeCount": "Aktyvūs filtrai: {count}",
+        "reset": "Išvalyti filtrus"
+      },
+      "sort": {
+        "label": "Rikiavimas",
+        "relevance": "Tinkamiausios pirmiausia",
+        "newest": "Naujausios pirmiausia"
+      },
+      "emptyFiltered": {
+        "title": "Nė viena galimybė neatitinka šių filtrų",
+        "body": "Aktyvūs filtrai: {filters}. Pašalinkite dalį filtrų arba išvalykite juos.",
+        "reset": "Išvalyti filtrus"
+      },
+      "details": {
+        "show": "Daugiau informacijos",
+        "hide": "Slėpti informaciją"
+      },
+      "tiers": {
+        "blocking": "Netinka",
+        "strengths": "Tinka",
+        "negotiables": "Aptartini klausimai",
+        "missing": "Trūkstama informacija"
+      },
+      "missing": {
+        "worker": "Jūs nenurodėte: {criterion}",
+        "demand": "Įmonė nenurodė: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Reikalingi įgūdžiai",
+        "evidence_tiers": "Įgūdžių įrodymai",
+        "profession": "Profesija",
+        "language": "Kalba",
+        "country_location": "Šalis ir vieta",
+        "availability": "Prieinamumas",
+        "pay_ceiling": "Atlygio lūkestis",
+        "accommodation": "Apgyvendinimas",
+        "compensation": "Atlygis",
+        "start_date": "Pradžios data",
+        "shifts_hours": "Pamainos ir valandos",
+        "engagement_form": "Sutarties forma",
+        "licence_categories": "Vairuotojo pažymėjimas",
+        "own_vehicle": "Nuosavas automobilis",
+        "own_tools": "Nuosavi įrankiai",
+        "pay_basis": "Atlyginimo pagrindas (bruto/neto)",
+        "night_shifts": "Naktinės pamainos",
+        "weekend_shifts": "Savaitgalio pamainos",
+        "overtime": "Viršvalandžiai"
+      },
+      "how": {
+        "title": "Kaip veikia atitikimas",
+        "body": "Atitikimas skaičiuojamas pagal fiksuotas, determinuotas taisykles iš abiejų pusių nurodytų faktų - reikalingų įgūdžių, kalbos, vietos, prieinamumo, atlygio ir sutarties formos. Trūkstamas faktas rodomas kaip trūkstamas ir niekada nespėjamas. Sprendimo nepriima joks dirbtinis intelektas ir nėra jokio bendro asmens balo - tik atitiktis šiai konkrečiai galimybei.",
+        "version": "Skaičiavimo versija: {version} - determinuotos taisyklės"
+      }
+    },
     "title": "Man tinkamos galimybės",
     "intro": "Čia matysite darbdavių poreikius, kurie gali jums tikti, ir ką verta papildyti profilyje, kad būtumėte paruošti.",
     "noWorkerBody": "Pirmiausia užbaikite darbuotojo profilį, kad matytumėte jums tinkančias galimybes.",
@@ -6753,7 +7178,50 @@
       "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
       "contacted": "Įmonė pažymėjo: susisiekta"
     },
-    "companyVerified": "Patikrinta įmonė"
+    "companyVerified": "Patikrinta įmonė",
+    "structured": {
+      "detailTitle": "Nurodytos darbo sąlygos",
+      "notProvided": "Įmonė dar nepateikė detalių darbo sąlygų šiam skelbimui — nurodyti tik aukščiau matomi faktai.",
+      "gapsTitle": "Įmonė nenurodė",
+      "yes": "Taip",
+      "no": "Ne",
+      "payLabel": "Atlygis",
+      "amountFrom": "nuo {amount}",
+      "amountUpTo": "iki {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} val./sav.",
+      "chipMinHours": "ne mažiau {hours} val./sav.",
+      "chipStartFrom": "pradžia nuo {from}",
+      "chipStartWindow": "pradžia {from} – {to}",
+      "chipDeadline": "kandidatuoti iki {date}",
+      "days": "{count} d.",
+      "yearsExperience": "{count} m.",
+      "km": "{km} km",
+      "minutes": "{min} min.",
+      "probationLabel": "Bandomasis laikotarpis",
+      "extensionPossibleLabel": "Galimas pratęsimas",
+      "scheduleNoticeLabel": "Grafikas pranešamas prieš",
+      "expectedResponseLabel": "Atsakymas per",
+      "firstPaymentLabel": "Pirmas mokėjimas per",
+      "travelMinutesLabel": "Kelionės laikas iki objekto",
+      "registrationPossibleLabel": "Galima deklaruoti gyvenamąją vietą",
+      "availableFromLabel": "Prieinama nuo",
+      "similarProjectLabel": "Panašių projektų patirtis",
+      "driverSupplementLabel": "Priedas vairuotojui",
+      "siteModeLabel": "Objektai",
+      "siteMode": {
+        "single": "Vienas objektas",
+        "multiple": "Keli objektai",
+        "mobile": "Mobilus darbas / kintantys objektai"
+      },
+      "workModeLabel": "Darbo pobūdis",
+      "workMode": {
+        "onsite": "Objekte",
+        "remote": "Nuotolinis",
+        "hybrid": "Mišrus"
+      }
+    }
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",
@@ -7491,6 +7959,62 @@
       "noticeLink": "privatumo pranešimas"
     }
   },
+  "planning": {
+    "eyebrow": "PLANAVIMAS",
+    "title": "Planavimas",
+    "intro": "Rezervacijos, projektų datos ir užduočių terminai vienoje dienotvarkėje. Kiekviena eilutė veda į tikrąjį šaltinį.",
+    "honestNote": "Rodomi tik realiai egzistuojantys įrašai: rezervacijos, tavo valdomų projektų datos ir atvirų užduočių terminai. Joks išorinis kalendorius neprijungtas, nieko nesugalvota.",
+    "notAuthed": "Prisijunk, kad matytum savo planą.",
+    "filters": {
+      "label": "Šaltinis",
+      "all": "Visi"
+    },
+    "source": {
+      "booking": "Rezervacija",
+      "project": "Projektas",
+      "task": "Užduotis"
+    },
+    "sourceNotes": {
+      "bookingUnavailable": "Rezervacijos dar neįjungtos — jos prisijungs prie plano, kai bus įjungtas rezervacijų sluoksnis.",
+      "taskUnavailable": "Užduotys dar neįjungtos — užduočių terminai prisijungs prie plano, kai bus įjungtas užduočių sluoksnis.",
+      "taskError": "Užduočių šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
+      "projectManagersOnly": "Projektų datų juostos rodomos projektų vadovams. Darbuotojo projektų grafikas atsiras, kai toks vaizdas bus sukurtas.",
+      "projectError": "Projektų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai."
+    },
+    "week": {
+      "label": "Artimiausios 7 dienos"
+    },
+    "today": "Šiandien",
+    "later": {
+      "title": "Vėliau"
+    },
+    "undated": {
+      "title": "Dar be datos",
+      "hint": "Šie įrašai egzistuoja, bet datos dar neįrašytos."
+    },
+    "empty": "Kol kas nieko nesuplanuota. Čia atsiras priimtos rezervacijos, projektų datos ir užduočių terminai.",
+    "pastHidden": "Pasibaigę įrašai čia nerodomi: {count}. Istorija lieka kiekvieno šaltinio puslapyje.",
+    "conflict": {
+      "flag": "Datos persidengia"
+    },
+    "context": {
+      "incoming": "Pasiūlyta man",
+      "outgoing": "Mūsų pasiūlyta",
+      "managed": "Valdomas projektas",
+      "assigned": "Priskirta man",
+      "mine": "Mano užduotis"
+    },
+    "fallback": {
+      "booking": "Rezervacija",
+      "project": "Projektas",
+      "task": "Užduotis"
+    },
+    "projectStatus": {
+      "draft": "Juodraštis",
+      "live": "Vykdomas",
+      "paused": "Pristabdytas"
+    }
+  },
   "tasks": {
     "eyebrow": "Darbo užduotys",
     "title": "Užduotys",
@@ -7572,5 +8096,404 @@
     "projectSection": {
       "link": "Šio projekto užduotys"
     }
+  },
+  "assist": {
+    "eyebrow": "Pagalbos centras",
+    "title": "Pagalbos centras",
+    "intro": "Kas laukia jūsų dėmesio, iš jūsų pačių duomenų apskaičiuotos santraukos ir sąžininga AI tiekėjo būsena.",
+    "attention": {
+      "title": "Kam reikia mano dėmesio",
+      "note": "Apskaičiuota iš jūsų pačių įrašų pagal fiksuotas taisykles — tie patys skaičiai, kuriuos jau rodo varpelis ir kiekvienas modulis. Kiekviena eilutė nurodo savo duomenų šaltinį ir veda į puslapį, kuriame tai išsprendžiama.",
+      "empty": "Šiuo metu niekas nelaukia jūsų dėmesio — jūsų duomenyse nėra laukiančių signalų.",
+      "open": "Atidaryti",
+      "docExpiring": "Dokumentai, kurių galiojimas baigsis per 30 dienų",
+      "docMissing": "Trūkstami arba nebegaliojantys dokumentai",
+      "docReview": "Dokumentai peržiūroje arba grąžinti",
+      "financeOverdue": "Vėluojantys finansų įrašai"
+    },
+    "sources": {
+      "label": "Šaltiniai",
+      "notificationSpine": "Pranešimų signalai",
+      "workerDocuments": "Jūsų dokumentų įrašai",
+      "financeRecords": "Jūsų finansų įrašai",
+      "workerSkills": "Jūsų įgūdžių katalogas",
+      "workJournal": "Jūsų darbo žurnalas",
+      "managerConfirmations": "Vadovų patvirtinimai",
+      "projects": "Jūsų projektai",
+      "assignments": "Aktyvūs darbuotojų priskyrimai"
+    },
+    "summaries": {
+      "title": "Santraukos iš jūsų duomenų",
+      "note": "Sudaryta iš tikrų laukų pagal fiksuotas taisykles, nurodant šaltinius. Joks šios dalies tekstas nebuvo sukurtas kalbos modelio.",
+      "none": "Šiai rolei santraukos dar nėra — santraukos pridedamos tik ten, kur yra teisingų duomenų.",
+      "worker": {
+        "title": "Profilio ir įrodymų santrauka",
+        "totalSkills": "Įgūdžiai",
+        "workSupported": "Pagrįsti darbo įrašais",
+        "confirmed": "Patvirtinti",
+        "journalEntries": "Žurnalo įrašai",
+        "confirmations": "Patvirtinimai",
+        "link": "Atidaryti visą įrodymų ataskaitą"
+      },
+      "org": {
+        "title": "Projektų būsenos santrauka",
+        "teamSize": "Aktyvūs darbuotojai: {count}",
+        "empty": "Aktyvių projektų dar nėra — projektai čia atsiras, kai tik jų bus.",
+        "error": "Projektų šiuo metu nepavyko įkelti. Likusi puslapio dalis veikia.",
+        "link": "Eiga"
+      }
+    },
+    "provider": {
+      "title": "AI tiekėjas",
+      "stateLabel": "Vykdymo būsena",
+      "state": {
+        "disabled": "Išjungta",
+        "mock": "Testinė (deterministinė) veiksena",
+        "live": "Aktyvi"
+      },
+      "reason": {
+        "ok": "Vykdymo aplinka sukonfigūruota.",
+        "mode_disabled": "Tiekėjo veiksena nenustatyta — vykdymo aplinka pagal numatytuosius nustatymus išjungta.",
+        "unknown_provider": "Nurodytas tiekėjas neatpažintas, todėl vykdymo aplinka lieka išjungta.",
+        "missing_api_key": "Tiekėjo raktas nesukonfigūruotas, todėl vykdymo aplinka lieka išjungta."
+      },
+      "disabledBody": "Šioje aplinkoje neprijungtas joks išorinis AI tiekėjas. Viskas šiame puslapyje apskaičiuota iš jūsų pačių įrašų pagal fiksuotas taisykles — joks tekstas čia nebuvo sukurtas kalbos modelio.",
+      "whenEnabled": "Kai savininkas prijungs tiekėją ir bus pritaikyta pasiūlymų audito saugykla, atsiras peržiūrimi juodraščių pasiūlymai — visada kaip pasiūlymai, kuriuos patvirtina žmogus, niekada kaip automatiniai pakeitimai.",
+      "gates": "Du vartai atviri sąmoningai: (1) gamybinėje aplinkoje nesukonfigūruotas tiekėjo raktas ir (2) pasiūlymų audito saugykla (ai_runs / ai_suggestions) yra savininko tvirtinama migracija. Generavimas lieka išjungtas, kol abu užsidarys — pasiūlymai be audito pėdsako pažeistų pačios programos taisykles.",
+      "providerLabel": "Tiekėjas",
+      "modelLabel": "Modelis",
+      "notWired": "Generavimo funkcijos šiame etape sąmoningai neprijungtos — rezultatai dar neturėtų audito pėdsako. Aukščiau rodoma būsena skirta tik skaidrumui."
+    }
+  },
+  "finance": {
+    "eyebrow": "Veiklos finansai",
+    "title": "Finansų įrašai",
+    "intro": "Rankiniu būdu vedami išrašytų sąskaitų, gautų sąskaitų ir išlaidų įrašai — su tikromis sumomis ir išvestiniais vėlavimo žymenimis.",
+    "scopeNote": "Tik rankiniai įrašai — tai nėra buhalterijos, mokesčių, darbo užmokesčio, banko sinchronizacijos ar mokėjimų apdorojimo programa. Įrašo sukūrimas neperveda pinigų ir su niekuo nesusisiekia.",
+    "notAuthed": "Prisijunkite, kad matytumėte savo finansų įrašus.",
+    "unavailable": "Finansų modulis ruošiamas — dar neprieinamas. Kai bus įjungtas, jūsų įrašai atsiras čia.",
+    "loadError": "Nepavyko įkelti įrašų. Pabandykite atnaujinti puslapį.",
+    "empty": "Finansų įrašų dar nėra — pridėkite pirmą aukščiau.",
+    "emptyFiltered": "Nė vienas įrašas neatitinka pasirinktų filtrų.",
+    "exportCsv": "Atsisiųsti CSV",
+    "exportNote": "Eksportuojami tik jūsų pačių įrašai (tos pačios eilutės, kurias rodo šis puslapis).",
+    "summary": {
+      "issued": "Išrašytos sąskaitos",
+      "received": "Gautos sąskaitos",
+      "expenses": "Išlaidos",
+      "paid": "Apmokėta",
+      "overdue": "Vėluojama"
+    },
+    "filters": {
+      "label": "Tipas",
+      "statusLabel": "Būsena",
+      "allTypes": "Visi tipai",
+      "allStatuses": "Visos būsenos",
+      "overdue": "Vėluojantys"
+    },
+    "type": {
+      "invoice_issued": "Išrašyta sąskaita",
+      "invoice_received": "Gauta sąskaita",
+      "expense": "Išlaidos"
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "issued": "Išrašyta",
+      "partially_paid": "Iš dalies apmokėta",
+      "paid": "Apmokėta",
+      "cancelled": "Atšaukta"
+    },
+    "flags": {
+      "overdue": "Vėluojama"
+    },
+    "dueLabel": "Terminas",
+    "paidLabel": "Apmokėta",
+    "projectLinked": "Susieta su projektu",
+    "companyLinked": "Įmonės įrašas",
+    "actions": {
+      "issue": "Pažymėti kaip išrašytą",
+      "markPartial": "Pažymėti iš dalies apmokėta",
+      "markPaid": "Pažymėti apmokėta",
+      "markUnpaid": "Pažymėti neapmokėta",
+      "cancel": "Atšaukti",
+      "reopen": "Atidaryti iš naujo",
+      "details": "Redaguoti duomenis",
+      "save": "Išsaugoti"
+    },
+    "form": {
+      "title": "Naujas įrašas",
+      "typeLabel": "Įrašo tipas",
+      "statusLabel": "Pradinė būsena",
+      "titleLabel": "Pavadinimas",
+      "titlePlaceholder": "pvz., pastolių nuoma — birželis",
+      "counterpartyLabel": "Kita šalis",
+      "counterpartyPlaceholder": "pvz., įmonės ar asmens pavadinimas",
+      "amountLabel": "Suma (EUR)",
+      "amountHint": "Suma eurais su daugiausiai dviem skaitmenimis po kablelio, pvz., 123.45. Kol kas tik EUR.",
+      "dueLabel": "Apmokėjimo terminas (nebūtina)",
+      "projectLabel": "Projektas (nebūtina)",
+      "projectNone": "Be projekto",
+      "companyLinkLabel": "Susieti su mano įmone (jos savininkas matys šį įrašą)",
+      "noteLabel": "Pastaba (nebūtina)",
+      "submit": "Pridėti įrašą"
+    },
+    "notice": {
+      "created": "Įrašas pridėtas.",
+      "updated": "Įrašas atnaujintas.",
+      "invalid": "Patikrinkite laukus — pavadinimas 3–160 simbolių, kita šalis 2–160, suma pvz. 123.45.",
+      "needs_migration": "Finansų modulis dar neįjungtas — pakeitimas nebuvo išsaugotas.",
+      "not_authorized": "Jums neleidžiama to daryti.",
+      "not_found": "Įrašas nerastas.",
+      "limit_reached": "Pasiektas įrašų limitas — šis rankinis sąrašas yra ribojamas.",
+      "error": "Išsaugoti nepavyko. Pabandykite dar kartą."
+    }
+  },
+  "structuredDemand": {
+    "advancedTitle": "Išsamūs duomenys (nebūtina)",
+    "advancedHint": "Struktūruoti faktai, pagal kuriuos darbuotojai filtruoja ir lygina. Viskas neprivaloma — ką praleisite, bus rodoma kaip „nenurodyta“, niekada neišgalvojama.",
+    "notStated": "Nenurodyta",
+    "sections": {
+      "engagement": "Įdarbinimo forma ir apimtis",
+      "time": "Laikas ir grafikas",
+      "compensation": "Atlygis ir išskaitymai",
+      "accommodation": "Apgyvendinimas",
+      "transport": "Transportas",
+      "requirements": "Reikalavimai kandidatams",
+      "process": "Atrankos eiga"
+    },
+    "opportunityTypeLabel": "Pasiūlymo tipas",
+    "opportunityType": {
+      "employment": "Darbo vieta",
+      "temporary_assignment": "Laikinas darbas",
+      "project_work": "Projektinis darbas",
+      "subcontract": "Subranga",
+      "service_request": "Paslaugos užsakymas"
+    },
+    "targetSupplyLabel": "Ko ieškote",
+    "targetSupply": {
+      "individual": "Vieno darbuotojo",
+      "multiple_workers": "Kelių darbuotojų",
+      "team": "Komandos / brigados",
+      "company": "Įmonės / subrangovo"
+    },
+    "engagementFormLabel": "Įdarbinimo forma",
+    "engagementForm": {
+      "direct_employment": "Tiesioginis įdarbinimas",
+      "agency_employment": "Įdarbinimas per agentūrą",
+      "temporary_employment": "Laikinasis įdarbinimas",
+      "posted_worker": "Komandiruotas darbuotojas",
+      "self_employed_contractor": "Savarankiškai dirbantis",
+      "company_subcontract": "Įmonės subranga"
+    },
+    "contractCountryLabel": "Sutarties šalis",
+    "startEarliestLabel": "Anksčiausia pradžia",
+    "startLatestLabel": "Vėliausia pradžia",
+    "endDateLabel": "Pabaigos data (jei žinoma)",
+    "applicationDeadlineLabel": "Paraiškų terminas",
+    "hoursPerWeekLabel": "Valandų per savaitę",
+    "minGuaranteedHoursLabel": "Garantuotos valandos per savaitę",
+    "shiftsLabel": "Pamainos",
+    "shift": {
+      "day": "Dieninė",
+      "night": "Naktinė",
+      "weekend": "Savaitgaliai"
+    },
+    "overtimeExpectedLabel": "Numatomi viršvalandžiai",
+    "compMinLabel": "Atlygis nuo",
+    "compMaxLabel": "Atlygis iki",
+    "currencyLabel": "Valiuta",
+    "payUnitLabel": "Mokama už",
+    "payUnit": {
+      "hour": "Valandą",
+      "day": "Dieną",
+      "week": "Savaitę",
+      "month": "Mėnesį",
+      "project": "Projektą"
+    },
+    "payBasisLabel": "Ant popieriaus ar į rankas",
+    "payBasis": {
+      "gross": "Ant popieriaus (bruto)",
+      "net": "Į rankas (neto)",
+      "unspecified": "Nenurodyta"
+    },
+    "paymentFrequencyLabel": "Mokėjimo dažnumas",
+    "paymentFrequency": {
+      "weekly": "Kas savaitę",
+      "biweekly": "Kas dvi savaites",
+      "monthly": "Kas mėnesį"
+    },
+    "guaranteedBaseLabel": "Garantuota bazinė alga",
+    "perDiemLabel": "Dienpinigiai / priedas",
+    "deductionsLabel": "Išskaitymai",
+    "deductionsHelp": "Nurodykite visus žinomus išskaitymus (apgyvendinimas, transportas, draudimas). Nenurodyti išskaitymai darbuotojams rodomi kaip spraga.",
+    "deductionKindLabel": "Išskaitymas",
+    "deductionKind": {
+      "accommodation": "Apgyvendinimas",
+      "transport": "Transportas",
+      "insurance": "Draudimas",
+      "other": "Kita"
+    },
+    "deductionAmountLabel": "Suma",
+    "deductionPeriodLabel": "Laikotarpis",
+    "period": {
+      "day": "Per dieną",
+      "week": "Per savaitę",
+      "month": "Per mėnesį",
+      "once": "Vienkartinis"
+    },
+    "addDeductionLabel": "Pridėti išskaitymą",
+    "noDeductionsLabel": "Išskaitymų nėra — patvirtinu",
+    "removeLabel": "Pašalinti",
+    "accommodationStateLabel": "Apgyvendinimas",
+    "accommodationState": {
+      "offered": "Suteikiamas",
+      "not_offered": "Nesuteikiamas",
+      "not_needed": "Nereikalingas"
+    },
+    "accommodationPayerLabel": "Kas moka",
+    "accommodationPayer": {
+      "employer": "Moka darbdavys",
+      "shared": "Dalinamasi",
+      "worker": "Moka darbuotojas"
+    },
+    "roomLabel": "Kambarys",
+    "room": {
+      "single": "Vienvietis",
+      "shared": "Dalinamas"
+    },
+    "accommodationPriceLabel": "Kaina",
+    "accommodationPricePeriodLabel": "Kainos laikotarpis",
+    "occupancyLabel": "Žmonių kambaryje",
+    "distanceKmLabel": "Atstumas iki objekto (km)",
+    "depositLabel": "Užstatas",
+    "amenitiesLabel": "Patogumai",
+    "amenity": {
+      "kitchen": "Virtuvė",
+      "laundry": "Skalbykla",
+      "internet": "Internetas"
+    },
+    "familyPossibleLabel": "Galima su partneriu / šeima",
+    "internationalTravelLabel": "Kelionė į šalį",
+    "dailyTransportLabel": "Kasdienis transportas į objektą",
+    "betweenSitesLabel": "Kelionės tarp objektų",
+    "transportLevel": {
+      "provided": "Suteikiamas",
+      "compensated": "Kompensuojamas",
+      "not_provided": "Nesuteikiamas",
+      "unknown": "Nenurodyta"
+    },
+    "arrivalPickupLabel": "Pasitikimas oro uoste / stotyje",
+    "companyVehicleLabel": "Įmonės automobilis",
+    "fuelCardLabel": "Kuro kortelė / kompensacija",
+    "ownVehicleRequiredLabel": "Reikalingas nuosavas automobilis",
+    "returnTravelLabel": "Prisidedama prie kelionės namo",
+    "licenceCategoriesLabel": "Vairuotojo pažymėjimo kategorijos",
+    "minExperienceYearsLabel": "Minimali patirtis (metais)",
+    "languagesLabel": "Kalbų reikalavimai",
+    "languageLabel": "Kalba",
+    "languageLevelLabel": "Lygis",
+    "onePerTeamLabel": "Užtenka vieno kalbančio komandoje",
+    "addLanguageLabel": "Pridėti kalbą",
+    "certificatesLabel": "Pažymėjimai ir leidimai",
+    "certificatesHelp": "Reikalaujami pažymėjimai (pvz., saugos kortelė, technikos leidimas) — nurodomi kaip faktai, rodomi kaip reikalavimai.",
+    "addCertificateLabel": "Pridėti pažymėjimą",
+    "ownToolsLabel": "Nuosavi įrankiai",
+    "ownVehicleLabel": "Nuosavas automobilis",
+    "ownWorkwearLabel": "Nuosavi darbo drabužiai",
+    "drawingsReadingLabel": "Skaito brėžinius / schemas",
+    "independentWorkLabel": "Dirba savarankiškai",
+    "leadershipLabel": "Vadovauja kitiems",
+    "applicationMethodLabel": "Kaip kandidatuoti",
+    "applicationMethod": {
+      "interest_signal": "Pareikšti susidomėjimą platformoje",
+      "conversation": "Aptarti susirašinėjant"
+    },
+    "interviewStagesLabel": "Pokalbių etapai",
+    "responseDeadlineDaysLabel": "Atsakymas per (dienas)",
+    "listingKindLabel": "Skelbimo tipas",
+    "listingKind": {
+      "active_vacancy": "Aktyvi darbo vieta",
+      "talent_pool": "Kandidatų rezervas (ateities poreikiams)"
+    },
+    "practicalTestLabel": "Praktinė užduotis",
+    "documentVerificationLabel": "Dokumentų patikra",
+    "talentPoolDisclosure": "Tai kandidatų rezervo skelbimas: kandidatai renkami ateities poreikiams, o ne aktyviai patvirtintai darbo vietai. Darbuotojai tai visada mato.",
+    "honesty": {
+      "title": "Trūkstami atlygio faktai — darbuotojams rodomi kaip spragos",
+      "missing_minimum": "Nenurodytas minimalus atlygis",
+      "missing_basis": "Nenurodyta, ar suma „ant popieriaus“, ar „į rankas“",
+      "missing_guaranteed_hours": "Nenurodytos garantuotos valandos",
+      "missing_deductions": "Neišvardyti išskaitymai (arba nepatvirtinta, kad jų nėra)",
+      "max_without_min": "Nurodyta tik suma „iki“ — be minimumo"
+    },
+    "preview": {
+      "title": "Kaip darbuotojai tai mato šiandien",
+      "v2NotVisibleNote": "Išsamūs duomenys išsaugoti kartu su užklausa. Darbuotojai juos pamatys po artimiausio platformos duomenų atnaujinimo — iki tol matomi tik aukščiau esantys faktai."
+    },
+    "prefillButton": "Užpildyti pagal paskutinę užklausą",
+    "prefillLoading": "Kraunama…",
+    "prefillEmpty": "Ankstesnės užklausos nerasta",
+    "prefillDone": "Užpildyta pagal paskutinę užklausą — peržiūrėkite ir redaguokite"
+  },
+  "workerPrefs": {
+    "title": "Darbo pageidavimai",
+    "hint": "Nurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.",
+    "willingToRelocate": "Galiu persikelti dėl darbo",
+    "needsAccommodation": "Reikalingas apgyvendinimas",
+    "hasTransport": "Turiu nuosavą transportą",
+    "teamAvailable": "Galiu dirbti komandoje",
+    "soloAvailable": "Galiu dirbti vienas",
+    "maxTripDays": "Ilgiausia komandiruotė (dienomis)",
+    "contractType": "Pageidaujama sutarties forma",
+    "note": "Pastaba apie užimtumą",
+    "triState": {
+      "notStated": "Nenurodyta",
+      "yes": "Taip",
+      "no": "Ne"
+    },
+    "contract": {
+      "employment": "Darbo sutartis",
+      "subcontract": "Subranga",
+      "temporary": "Laikinas darbas",
+      "any": "Bet kokia forma"
+    },
+    "notePlaceholder": "Pvz., galiu nuo rugpjūčio, pageidauju 2 savaičių pamainų…",
+    "save": "Išsaugoti pageidavimus",
+    "saving": "Saugoma…",
+    "saved": "Pageidavimai išsaugoti.",
+    "error": "Išsaugoti nepavyko. Pabandykite dar kartą.",
+    "needsMigration": "Ši dalis dar neįjungta — niekas nebuvo išsaugota.",
+    "v2": {
+      "title": "Papildomi darbo pageidavimai",
+      "hint": "Galioja ta pati taisyklė — kas palikta „Nenurodyta“, lieka nenurodyta.",
+      "payBasis": "Atlygio lūkesčio pagrindas",
+      "payBasisOptions": {
+        "gross": "Bruto (prieš mokesčius)",
+        "net": "Neto (į rankas)"
+      },
+      "nightShifts": "Gali dirbti naktinėmis pamainomis",
+      "weekendShifts": "Gali dirbti savaitgaliais",
+      "overtime": "Gali dirbti viršvalandžius",
+      "licenceCategories": "Vairuotojo pažymėjimo kategorijos",
+      "ownVehicle": "Turi nuosavą automobilį",
+      "ownTools": "Turi nuosavus įrankius",
+      "notEnabled": "Šie papildomi pageidavimai dar neįjungti — čia kol kas niekas nesaugoma.",
+      "notSaved": "Išsaugota, išskyrus papildomus pageidavimus — ta dalis dar neįjungta."
+    }
+  },
+  "workerLanguages": {
+    "title": "Kalbos",
+    "hint": "Pridėkite kalbas, kuriomis galite dirbti, ir savo lygį.",
+    "selfStated": "Šias kalbas įrašote patys — jų niekas netikrina.",
+    "language": "Kalba",
+    "level": "Lygis",
+    "levelNative": "Gimtoji",
+    "add": "Pridėti kalbą",
+    "adding": "Pridedama…",
+    "remove": "Pašalinti",
+    "empty": "Kalbų dar nepridėta.",
+    "notEnabled": "Ši dalis dar neįjungta — niekas nebuvo išsaugota.",
+    "error": "Išsaugoti nepavyko. Bandykite dar kartą.",
+    "invalid": "Pasirinkite kalbą ir lygį."
   }
 }

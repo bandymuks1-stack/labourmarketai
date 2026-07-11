@@ -285,6 +285,15 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
         </h2>
         <p className="text-xs text-text-secondary">{t("intro")}</p>
         <p className="text-[11px] text-text-muted">{t("honestNote")}</p>
+        {/* Control room PR F — the same rows also appear in the consolidated
+            demand pipeline read view (read-only; statuses stay here). */}
+        <Link
+          href={"/dashboard/admin/pipeline" as "/dashboard"}
+          className="self-start text-xs text-brand-blue hover:underline"
+          data-testid="intake-view-pipeline"
+        >
+          {t("viewPipeline")} →
+        </Link>
       </div>
 
       {/* Demand requests in operator-review states — the live sales queue. */}
