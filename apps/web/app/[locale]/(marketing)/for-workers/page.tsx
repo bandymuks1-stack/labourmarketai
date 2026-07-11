@@ -13,6 +13,7 @@ export async function generateMetadata({
 }
 import { PageHero } from "@/components/marketing/page-hero";
 import { RoleEnrichment } from "@/components/marketing/role-enrichment";
+import { ExamplePreviewFrame } from "@/components/marketing/example-preview-frame";
 import { PlayerCard } from "@/components/app/player-card";
 
 export default async function ForWorkersPage({
@@ -40,7 +41,11 @@ export default async function ForWorkersPage({
       <RoleEnrichment
         root="workers"
         previewKey="profile"
-        preview={<PlayerCard id="workers.featured.1" />}
+        preview={
+          <ExamplePreviewFrame>
+            <PlayerCard id="workers.featured.1" />
+          </ExamplePreviewFrame>
+        }
         ctaSource="workers_cta"
         ctaKind="signup"
       />

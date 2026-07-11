@@ -53,7 +53,7 @@ const STEPS: { title: L; body: L }[] = [
   {
     title: { en: "3. Reach real needs", lt: "3. Pasiek realius poreikius", ru: "3. Выходите на реальные потребности" },
     body: {
-      en: "Your profile is matched against employer and agency needs across countries — no fake job promises.",
+      en: "Your profile is reviewed against employer and agency needs across countries — no fake job promises.",
       lt: "Tavo profilis gretinamas su darbdavių ir agentūrų poreikiais skirtingose šalyse — be tuščių darbo pažadų.",
       ru: "Ваш профиль сопоставляется с потребностями работодателей и агентств в разных странах — без пустых обещаний.",
     },

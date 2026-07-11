@@ -3585,6 +3585,7 @@
     },
     "preview": {
       "conceptChip": "Example",
+      "conceptNote": "Illustrative example of how a record will look — not a real person and not real data.",
       "rankedMatches": "fit direction",
       "headcount": "Headcount",
       "intensity": {
@@ -3758,8 +3759,8 @@
           "desc": "Hire on records, not on claims."
         },
         {
-          "title": "Real-time supply signals",
-          "desc": "See availability shift as it happens."
+          "title": "Supply signals",
+          "desc": "See workers' declared availability as profiles are updated."
         },
         {
           "title": "Direct contact",
@@ -3784,7 +3785,7 @@
           "a": "Yes — by country and region, matched to worker location and willingness to relocate."
         },
         {
-          "q": "How is worker experience guaranteed?",
+          "q": "How is worker experience shown?",
           "a": "Through workers' skill records, structured work history and contextual fit signals — not self-reported CVs."
         }
       ]
@@ -3808,7 +3809,7 @@
       "subcopy": "Manage your workers, connect them to client needs and broker introductions — without losing visibility or control.",
       "bullets": [
         "Pool size — every managed worker at a glance.",
-        "Trade breakdown — capacity by skill, live.",
+        "Trade breakdown — capacity by skill, as declared in profiles.",
         "Assignment status — Active, Pending, Available.",
         "Multi-client — place the right people across clients."
       ]
@@ -4021,8 +4022,8 @@
           "body": "Maintain a single avatar with records-backed skills and availability — visible to registered employers across borders."
         },
         {
-          "title": "Real demand, real-time",
-          "body": "See open work needs matched to your trade, skills and city — and express interest in one click."
+          "title": "Real demand",
+          "body": "See open work needs relevant to your trade, skills and city — and express interest in one click."
         },
         {
           "title": "Honest signals",
