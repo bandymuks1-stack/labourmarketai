@@ -6010,6 +6010,50 @@
     "sourceLink": "šaltinis",
     "scopeNote": "Remiamasi oficialiais ES komandiruojamų darbuotojų šaltiniais — nacionalines detales pasitikslink kompetentingoje institucijoje. Tai informacija, ne teisinė konsultacija."
   },
+  "documentCentre": {
+    "attention": {
+      "title": "Reikia dėmesio",
+      "empty": "Šiuo metu nė vienam dokumentui nereikia dėmesio.",
+      "note": "Skaičiai kyla tik iš jūsų pačių įrašytų galiojimo datų ir patikros būsenų.",
+      "expiring": "Baigia galioti: {n}",
+      "missing": "Trūksta: {n}",
+      "reviewNeeded": "Laukia patikros: {n}"
+    },
+    "filters": {
+      "statusLabel": "Būsena",
+      "typeLabel": "Tipas",
+      "all": "Visi",
+      "noMatches": "Pagal pasirinktus filtrus dokumentų nėra."
+    },
+    "verification": {
+      "unverified": "Nepatikrinta",
+      "pending": "Laukia patikros",
+      "verified": "Patikrinta",
+      "rejected": "Atmesta"
+    },
+    "workProof": {
+      "title": "Darbo įrodymai ir eksportai",
+      "journalTitle": "Darbo žurnalo įrodymai",
+      "journalCounts": "Įrašai: {entries} · Nuotraukos: {photos}",
+      "countsUnavailable": "Skaičiai šioje aplinkoje nepasiekiami.",
+      "galleryNote": "Nuotraukos saugomos jūsų žurnalo įrašuose; projektų nuotraukų galerijos — kiekvieno projekto puslapyje."
+    },
+    "uploadNote": "Tai — metaduomenų inventorius: failų įkėlimas dar negalimas. Įrašote, ką turite ir iki kada galioja; patys failai lieka pas jus.",
+    "org": {
+      "title": "Komandos dokumentų parengtis (pagal sutikimą)",
+      "intro": "Dokumentai priklauso darbuotojams. Matote tik kategorijų skaičius tų komandos darbuotojų, kurie įjungė suvestinės dalijimąsi.",
+      "workersLabel": "Sutikę darbuotojai",
+      "totalLabel": "Dokumentai",
+      "validLabel": "Galiojantys",
+      "expiringLabel": "Baigia galioti",
+      "attentionLabel": "Reikia dėmesio",
+      "consentNote": "Tik skaičiai — niekada dokumentų turinys. Nesutikęs darbuotojas tiesiog nerodomas.",
+      "noConsented": "Sutikimu pagrįstų dokumentų suvestinių nėra — nė vienas komandos darbuotojas neįjungė dalijimosi arba jūsų organizacija nevaldo agentūros komandos.",
+      "unavailable": "Sutikimu pagrįstos dokumentų suvestinės šioje aplinkoje nepasiekiamos. Dokumentai priklauso darbuotojams.",
+      "projectAxisLink": "Projektų parengties sąrašai",
+      "projectAxisNote": "Darbuotojų parengtis pagal projektą rodoma kiekvieno projekto operacijų puslapyje."
+    }
+  },
   "trust": {
     "title": "Pasitikėjimo signalai",
     "caption": "Skaičiai imami tiesiai iš realių įrašų. Niekas čia nesveriama ir neišgalvojama.",

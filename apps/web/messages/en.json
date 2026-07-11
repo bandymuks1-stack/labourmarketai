@@ -6010,6 +6010,50 @@
     "sourceLink": "source",
     "scopeNote": "Based on official EU posted-worker sources — confirm the national specifics with the competent authority. This is information, not legal advice."
   },
+  "documentCentre": {
+    "attention": {
+      "title": "Needs attention",
+      "empty": "No document needs attention right now.",
+      "note": "Counts come only from your own recorded validity dates and verification states.",
+      "expiring": "Expiring soon: {n}",
+      "missing": "Missing: {n}",
+      "reviewNeeded": "Awaiting review: {n}"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "typeLabel": "Type",
+      "all": "All",
+      "noMatches": "No documents match the selected filters."
+    },
+    "verification": {
+      "unverified": "Not verified",
+      "pending": "Verification pending",
+      "verified": "Verified",
+      "rejected": "Rejected"
+    },
+    "workProof": {
+      "title": "Work proof & exports",
+      "journalTitle": "Work journal evidence",
+      "journalCounts": "Entries: {entries} · Photos: {photos}",
+      "countsUnavailable": "Counts are not available in this environment.",
+      "galleryNote": "Photos live inside your journal entries; project photo galleries are on each project's page."
+    },
+    "uploadNote": "This is a metadata inventory — file upload is not available yet. You record what you have and until when it is valid; the files themselves stay with you.",
+    "org": {
+      "title": "Pool document readiness (consent-based)",
+      "intro": "Workers own their documents. You see only category counts for pool workers who switched on aggregate sharing.",
+      "workersLabel": "Consented workers",
+      "totalLabel": "Documents",
+      "validLabel": "Valid",
+      "expiringLabel": "Expiring soon",
+      "attentionLabel": "Needs attention",
+      "consentNote": "Counts only — never document contents. A worker who has not consented simply does not appear.",
+      "noConsented": "No consent-based document aggregates to show — no pool worker has switched on sharing, or your organisation does not manage an agency pool.",
+      "unavailable": "Consent-based document aggregates are not available in this environment. Workers own their documents.",
+      "projectAxisLink": "Project readiness checklists",
+      "projectAxisNote": "Per-project worker readiness lives on each project's operations page."
+    }
+  },
   "trust": {
     "title": "Trust signals",
     "caption": "Counts come straight from real records. Nothing here is weighted or invented.",

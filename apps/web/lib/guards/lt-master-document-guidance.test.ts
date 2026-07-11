@@ -116,9 +116,11 @@ describe("LT-only master — no translated guidance anywhere", () => {
 });
 
 describe("information-only, no duplicate system, no payments", () => {
-  it("renders on the documents page (both readiness branches)", () => {
+  it("renders on the documents page (preparing + live + PR H org branches)", () => {
+    // Control room PR H added the role-branched org view — the informational
+    // guidance stays visible there too (3 render sites, one per branch).
     const matches = page.match(/<LtDocumentGuidance locale=\{locale\} \/>/g);
-    expect(matches?.length).toBe(2);
+    expect(matches?.length).toBe(3);
   });
   it("no help-request CTA, form or send action (WAGON 10 scope)", () => {
     expect(surface).toMatch(/data-testid="documents-guidance-help-info"/);
