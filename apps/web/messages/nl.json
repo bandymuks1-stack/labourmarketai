@@ -7769,5 +7769,88 @@
     "projectSection": {
       "link": "Taken voor dit project"
     }
+  },
+  "finance": {
+    "eyebrow": "Operationele financiën",
+    "title": "Financiële registraties",
+    "intro": "Handmatige registratie van verstuurde facturen, ontvangen facturen en uitgaven — met echte totalen en afgeleide vervallen-markeringen.",
+    "scopeNote": "Alleen handmatige registraties — dit is geen boekhoud-, belasting-, loon-, banksynchronisatie- of betalingsverwerkingssoftware. Een registratie verplaatst geen geld en neemt met niemand contact op.",
+    "notAuthed": "Log in om je financiële registraties te zien.",
+    "unavailable": "De financiënmodule wordt voorbereid — nog niet beschikbaar. Zodra deze is ingeschakeld, verschijnen je registraties hier.",
+    "loadError": "Registraties konden niet worden geladen. Vernieuw de pagina.",
+    "empty": "Nog geen financiële registraties — voeg hierboven de eerste toe.",
+    "emptyFiltered": "Geen registraties voldoen aan de gekozen filters.",
+    "exportCsv": "CSV downloaden",
+    "exportNote": "Exporteert alleen je eigen registraties (dezelfde rijen als deze pagina toont).",
+    "summary": {
+      "issued": "Verstuurde facturen",
+      "received": "Ontvangen facturen",
+      "expenses": "Uitgaven",
+      "paid": "Betaald",
+      "overdue": "Vervallen"
+    },
+    "filters": {
+      "label": "Type",
+      "statusLabel": "Status",
+      "allTypes": "Alle types",
+      "allStatuses": "Alle statussen",
+      "overdue": "Vervallen"
+    },
+    "type": {
+      "invoice_issued": "Verstuurde factuur",
+      "invoice_received": "Ontvangen factuur",
+      "expense": "Uitgave"
+    },
+    "status": {
+      "draft": "Concept",
+      "issued": "Verstuurd",
+      "partially_paid": "Deels betaald",
+      "paid": "Betaald",
+      "cancelled": "Geannuleerd"
+    },
+    "flags": {
+      "overdue": "Vervallen"
+    },
+    "dueLabel": "Vervaldatum",
+    "paidLabel": "Betaald",
+    "projectLinked": "Aan project gekoppeld",
+    "companyLinked": "Bedrijfsregistratie",
+    "actions": {
+      "issue": "Markeren als verstuurd",
+      "markPartial": "Markeren als deels betaald",
+      "markPaid": "Markeren als betaald",
+      "markUnpaid": "Markeren als onbetaald",
+      "cancel": "Annuleren",
+      "reopen": "Heropenen",
+      "details": "Gegevens bewerken",
+      "save": "Opslaan"
+    },
+    "form": {
+      "title": "Nieuwe registratie",
+      "typeLabel": "Type registratie",
+      "statusLabel": "Beginstatus",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "bijv. steigerhuur — juni",
+      "counterpartyLabel": "Tegenpartij",
+      "counterpartyPlaceholder": "bijv. bedrijfs- of persoonsnaam",
+      "amountLabel": "Bedrag (EUR)",
+      "amountHint": "Bedrag in euro's met maximaal twee decimalen, bijv. 123.45. Voorlopig alleen EUR.",
+      "dueLabel": "Vervaldatum (optioneel)",
+      "projectLabel": "Project (optioneel)",
+      "projectNone": "Geen project",
+      "companyLinkLabel": "Koppelen aan mijn bedrijf (de eigenaar ziet deze registratie)",
+      "noteLabel": "Notitie (optioneel)",
+      "submit": "Registratie toevoegen"
+    },
+    "notice": {
+      "created": "Registratie toegevoegd.",
+      "updated": "Registratie bijgewerkt.",
+      "invalid": "Controleer de velden — titel 3–160 tekens, tegenpartij 2–160, bedrag zoals 123.45.",
+      "needs_migration": "De financiënmodule is nog niet ingeschakeld — de wijziging is niet opgeslagen.",
+      "not_authorized": "Dat mag je niet doen.",
+      "not_found": "Registratie niet gevonden.",
+      "limit_reached": "Registratielimiet bereikt — deze handmatige lijst is begrensd.",
+      "error": "Opslaan mislukt. Probeer het opnieuw."
+    }
   }
 }

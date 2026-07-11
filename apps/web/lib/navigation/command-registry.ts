@@ -613,6 +613,30 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // Operational finance records (control room PR I) — manual invoices
+    // issued/received + expenses. Route resolves through the module registry
+    // so it can never drift from the grid card. Degrades honestly until the
+    // I2 migration is applied. NOT a payment/checkout action — the guard's
+    // payment-term ban stays satisfied (records only, nothing moves money).
+    id: "finance",
+    route: getModuleRoute("finance"),
+    audience: "public",
+    labels: {
+      en: "Finance records (invoices & expenses)",
+      lt: "Finansų įrašai (sąskaitos ir išlaidos)",
+      ru: "Финансовые записи (счета и расходы)",
+      nl: "Financiële registraties (facturen & uitgaven)",
+      de: "Finanzeinträge (Rechnungen & Ausgaben)",
+    },
+    synonyms: {
+      en: ["finance", "invoices", "invoice", "expenses", "expense", "overdue"],
+      lt: ["finansai", "sąskaitos", "sąskaita faktūra", "išlaidos", "vėluojančios sąskaitos"],
+      ru: ["финансы", "счета", "счёт", "расходы", "просроченные счета"],
+      nl: ["financiën", "facturen", "factuur", "uitgaven", "kosten"],
+      de: ["finanzen", "rechnungen", "rechnung", "ausgaben", "kosten"],
+    },
+  },
+  {
     // Control room PR E: bookings speaks its own name; the generic
     // planning/calendar terms moved to the unified planning entry below.
     id: "bookings",

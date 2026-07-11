@@ -4,6 +4,7 @@ import {
   Briefcase,
   Building2,
   CalendarDays,
+  Coins,
   Compass,
   FileText,
   Handshake,
@@ -59,6 +60,7 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   checklist: ListChecks,
   handshake: Handshake,
   briefcase: Briefcase,
+  coins: Coins,
 };
 
 export async function DashboardModuleGrid({

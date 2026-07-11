@@ -7769,5 +7769,88 @@
     "projectSection": {
       "link": "Tasks for this project"
     }
+  },
+  "finance": {
+    "eyebrow": "Operational finance",
+    "title": "Finance records",
+    "intro": "Manual record of invoices issued, invoices received and expenses — with real totals and derived overdue flags.",
+    "scopeNote": "Manual records only — this is not bookkeeping, tax, payroll, bank sync or payment processing software. Recording an entry moves no money and contacts nobody.",
+    "notAuthed": "Sign in to see your finance records.",
+    "unavailable": "The finance module is being prepared — not available yet. Once enabled, your records will appear here.",
+    "loadError": "Records could not be loaded. Try refreshing the page.",
+    "empty": "No finance records yet — add the first one above.",
+    "emptyFiltered": "No records match the selected filters.",
+    "exportCsv": "Download CSV",
+    "exportNote": "Exports only your own records (the same rows this page shows).",
+    "summary": {
+      "issued": "Invoices issued",
+      "received": "Invoices received",
+      "expenses": "Expenses",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    },
+    "filters": {
+      "label": "Type",
+      "statusLabel": "Status",
+      "allTypes": "All types",
+      "allStatuses": "All statuses",
+      "overdue": "Overdue"
+    },
+    "type": {
+      "invoice_issued": "Invoice issued",
+      "invoice_received": "Invoice received",
+      "expense": "Expense"
+    },
+    "status": {
+      "draft": "Draft",
+      "issued": "Issued",
+      "partially_paid": "Partially paid",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
+    },
+    "flags": {
+      "overdue": "Overdue"
+    },
+    "dueLabel": "Due",
+    "paidLabel": "Paid",
+    "projectLinked": "Project-linked",
+    "companyLinked": "Company record",
+    "actions": {
+      "issue": "Mark issued",
+      "markPartial": "Mark partially paid",
+      "markPaid": "Mark paid",
+      "markUnpaid": "Mark unpaid",
+      "cancel": "Cancel",
+      "reopen": "Reopen",
+      "details": "Edit details",
+      "save": "Save"
+    },
+    "form": {
+      "title": "New record",
+      "typeLabel": "Record type",
+      "statusLabel": "Initial status",
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g. scaffolding rental — June",
+      "counterpartyLabel": "Counterparty",
+      "counterpartyPlaceholder": "e.g. company or person name",
+      "amountLabel": "Amount (EUR)",
+      "amountHint": "Amount in euros with up to two decimals, e.g. 123.45. EUR only for now.",
+      "dueLabel": "Due date (optional)",
+      "projectLabel": "Project (optional)",
+      "projectNone": "No project",
+      "companyLinkLabel": "Link to my company (its owner sees this record)",
+      "noteLabel": "Note (optional)",
+      "submit": "Add record"
+    },
+    "notice": {
+      "created": "Record added.",
+      "updated": "Record updated.",
+      "invalid": "Check the fields — title 3–160 characters, counterparty 2–160, amount like 123.45.",
+      "needs_migration": "The finance module is not enabled yet — the change was not saved.",
+      "not_authorized": "You are not allowed to do that.",
+      "not_found": "Record not found.",
+      "limit_reached": "Record limit reached — this manual list is capped.",
+      "error": "Saving failed. Please try again."
+    }
   }
 }

@@ -54,6 +54,12 @@ const NATIVE_NAV = new Set([
   // with an honest ?notice= outcome (rendered as a role="status" banner);
   // feedback is the navigation itself, exactly like the bookings page.
   "app/[locale]/dashboard/tasks/page.tsx",
+  // Operational finance records (control room PR I) — create/status/edit
+  // forms are NATIVE-NAV server actions that ALWAYS redirect back to the
+  // finance page with an honest ?notice= outcome (rendered as a
+  // role="status" banner); feedback is the navigation itself, exactly like
+  // the tasks page.
+  "app/[locale]/dashboard/finance/page.tsx",
   "app/[locale]/dashboard/admin/matching/page.tsx", // start-conversation = same openDirectConversationAction → redirect; the review form on this page is the client MatchingWorkbenchReview (covered separately)
   // CRM / demand pipeline (control room PR F) — the ONLY form is a plain GET
   // search/filter form on a pure server component: submitting navigates to

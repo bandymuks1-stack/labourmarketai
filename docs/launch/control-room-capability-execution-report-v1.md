@@ -17,8 +17,8 @@ owner/provider action named in the gate register) · `NOT_STARTED`.
 | E | Planning/calendar | DONE | #709 / `71cf03a6` | `/dashboard/planning` (agenda + 7-day strip, filters, conflicts) | bookings (both directions), company project bands, due-dated tasks (degrading); worker-side assigned-project read skipped honestly (no RLS-scoped helper exists) | caller-scoped reads only; read-only; no admin client (guard-pinned) | none | CI green; deployed on merge | none | — |
 | F | CRM/demand pipeline | DONE | #710 / `020ebd96` | `/dashboard/admin/pipeline` (stage summary, filters, search, dedup chips); links from admin hub, sales panel, intake queue | leads + waitlist + operator-state customer_requests (sales seed) + company_need_public_intakes (admin seed) — composition only, no new call sites | superadmin gating unchanged; read-only, no mutation, no outbound (guard-pinned) | none (contacts/stage-ledger/dedup-index stay migration-gated) | CI green; deployed on merge | contacts/ledger apply (optional) | — |
 | G | Project ops + resources | DONE | #711 / `18006128` | `/dashboard/projects/[id]/operations` upgraded (header strip, attention, resources, tasks, evidence, handover); `projects` module added for org roles | getOperationsCentre composing getProjectOperations + handover + project tasks (degrading) + gallery counts + housing_provided + availability basics + accepted booking ranges | RLS as today; composition-only, `.from` set guard-pinned; unapplied draft columns never read | none (milestones/issues/resource tables stay gated) | CI green; deployed on merge | drafts apply (handover, availability prefs, team spine) | — |
-| H | Document centre | IN_PROGRESS | this PR | `/dashboard/documents` consolidated (attention strip, filtered inventory, work-proof exports, org aggregate view) | worker_documents readiness (applied; verification axis read degradably), journal HEAD counts, CV/evidence/journal exports, `agency_pool_docs_readiness` RPC for orgs | RLS + consent-gated aggregate RPC only; read-only, no storage, no upload UI (guard-pinned) | none (worker-docs bucket stays gated) | CI + guard suite | worker-docs bucket apply for real file upload | merge, start PR I |
-| I | Finance foundation | NOT_STARTED | — | `/dashboard/finance` (planned) | new invoice/expense tables (gated) | owner-scoped RLS, RPC writes | RED, human-gated | — | owner apply | shell + migration PR |
+| H | Document centre | DONE | #712 / `88ce0ee7` | `/dashboard/documents` consolidated (attention strip, filtered inventory, work-proof exports, org aggregate view) | worker_documents readiness (applied; verification axis read degradably), journal HEAD counts, CV/evidence/journal exports, `agency_pool_docs_readiness` RPC for orgs | RLS + consent-gated aggregate RPC only; read-only, no storage, no upload UI (guard-pinned) | none (worker-docs bucket stays gated) | CI green; deployed on merge | worker-docs bucket apply for real file upload | — |
+| I | Finance foundation | GATED (UI path; table unapplied) | I1 this PR; I2 migration PR follows | `/dashboard/finance` (records list, filters, forms, summary strip, CSV export route); honest "preparing" pre-apply | `finance_records` via 3 SECURITY DEFINER RPCs (unapplied); overdue DERIVED app-side (no stored overdue status); cents-only math | RLS SELECT creator/admin/`owns_company`; writes RPC-only; no payment-provider code in the layer (guard-pinned) | I2 RED, human-gated, rollback sibling | CI + guard suite | owner applies I2 via MCP + ledger | author I2 draft PR; then PR J |
 | J | AI assistance centre | NOT_STARTED | — | `/dashboard/assist` (planned) | lib/ai runtime + learning_review_queue | server-only provider boundary | ai_runs gated | — | provider key + apply | honest-disabled surface |
 | K | Search + reports | NOT_STARTED | — | search API + reports hub | RLS-scoped server queries | permission-scoped, no leakage | none | — | none | server search |
 
@@ -44,7 +44,14 @@ Results recorded here per PR as they run.
 | E (planning) | same suite — vitest 533 files / 8451 tests, primary-route-smoke 39 routes | ALL PASS; CI green; merged #709 |
 | F (CRM pipeline) | same suite — vitest 534 files / 8485 tests | ALL PASS; CI green; merged #710 |
 | G (project ops centre) | same suite — vitest 535 files / 8523 tests, primary-route-smoke 40 routes | ALL PASS; CI green; merged #711 |
-| H (document centre) | same suite — vitest 536 files / 8562 tests | ALL PASS locally; CI on PR |
+| H (document centre) | same suite — vitest 536 files / 8562 tests | ALL PASS; CI green; merged #712 |
+| I1 (finance repo-safe layer) | same suite — vitest 537 files / 8597 tests, primary-route-smoke 41 routes | ALL PASS locally; CI on PR |
+
+PR I decisions: statuses stored are draft|issued|partially_paid|paid|cancelled — overdue is
+DERIVED app-side from due_date + unpaid (no cron, no stale stored state). Module for
+company/agency/worker (customers excluded). finance-overdue-attention spine signal is a
+recorded follow-up after I2 applies. CSV export via route handler over the caller's own
+RLS rows (503 pre-migration, never a fabricated file). EUR-only, integer-cents math.
 
 PR H notes: DOCUMENTS_READINESS_ENABLED left true (apply evidenced via the flag-flip MCP
 record + the s6 ledger row building agency_pool_docs_readiness on worker_documents);
