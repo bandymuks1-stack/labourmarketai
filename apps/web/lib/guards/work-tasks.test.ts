@@ -94,12 +94,18 @@ function walkSource(absDir: string, acc: string[] = []): string[] {
   return acc;
 }
 
-describe("1. no migration in this PR — D2 claims clean names", () => {
-  it("no repo migration or rollback mentions work_tasks or the three RPCs", () => {
+describe("1. exactly one migration owns work_tasks — the human-gated D2 pair", () => {
+  // D1 shipped the consumer layer with NO migration; D2 added the single
+  // human-gated draft (20260711210000_work_tasks_v1.sql) plus its rollback
+  // sibling. Nothing else in the repo may (re)define the table or the RPCs.
+  const D2 = "20260711210000_work_tasks_v1";
+
+  it("only the D2 migration and its rollback sibling mention work_tasks or the three RPCs", () => {
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
+        if (f.startsWith(D2)) continue;
         const src = readFileSync(join(abs, f), "utf8");
         expect(src, `${dir}/${f} must not define work_tasks`).not.toMatch(
           /\bwork_tasks\b/,
@@ -109,6 +115,34 @@ describe("1. no migration in this PR — D2 claims clean names", () => {
         }
       }
     }
+  });
+
+  it("the D2 pair exists, stays human-gated, and defines the exact contract", () => {
+    const up = readFileSync(
+      join(REPO, "supabase", "migrations", `${D2}.sql`),
+      "utf8",
+    );
+    const down = readFileSync(
+      join(REPO, "supabase", "rollbacks", `${D2}.down.sql`),
+      "utf8",
+    );
+    // Human gate + no-auto-apply doctrine stays visible in the file itself.
+    expect(up).toContain("needs-human-gate");
+    expect(up).toContain("@human-gate-approved");
+    expect(up).toMatch(/create table if not exists public\.work_tasks/);
+    for (const fn of RPC_NAMES) {
+      expect(up).toContain(`create or replace function public.${fn}`);
+      expect(down).toContain(`drop function if exists public.${fn}`);
+    }
+    expect(down).toMatch(/drop table if exists public\.work_tasks/);
+    // Writes stay RPC-only at the SQL layer too.
+    expect(up).toMatch(
+      /revoke insert, update, delete on public\.work_tasks from authenticated/,
+    );
+    // The five honest statuses, verbatim.
+    expect(up).toContain(
+      "check (status in ('todo','in_progress','blocked','done','cancelled'))",
+    );
   });
 });
 
