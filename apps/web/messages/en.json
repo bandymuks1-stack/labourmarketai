@@ -8022,5 +8022,192 @@
       "limit_reached": "Record limit reached — this manual list is capped.",
       "error": "Saving failed. Please try again."
     }
+  },
+  "structuredDemand": {
+    "advancedTitle": "Advanced details (optional)",
+    "advancedHint": "Structured facts workers can filter and compare. Everything is optional — anything you skip is shown as “not stated”, never invented.",
+    "notStated": "Not stated",
+    "sections": {
+      "engagement": "Engagement & scope",
+      "time": "Time & schedule",
+      "compensation": "Pay & deductions",
+      "accommodation": "Accommodation",
+      "transport": "Transport",
+      "requirements": "Candidate requirements",
+      "process": "Application process"
+    },
+    "opportunityTypeLabel": "Opportunity type",
+    "opportunityType": {
+      "employment": "Employment",
+      "temporary_assignment": "Temporary assignment",
+      "project_work": "Project work",
+      "subcontract": "Subcontract",
+      "service_request": "Service request"
+    },
+    "targetSupplyLabel": "Who is needed",
+    "targetSupply": {
+      "individual": "One worker",
+      "multiple_workers": "Several workers",
+      "team": "Team / brigade",
+      "company": "Company / subcontractor"
+    },
+    "engagementFormLabel": "Employment form",
+    "engagementForm": {
+      "direct_employment": "Direct employment",
+      "agency_employment": "Agency employment",
+      "temporary_employment": "Temporary employment",
+      "posted_worker": "Posted worker",
+      "self_employed_contractor": "Self-employed contractor",
+      "company_subcontract": "Company subcontract"
+    },
+    "contractCountryLabel": "Contract country",
+    "startEarliestLabel": "Earliest start",
+    "startLatestLabel": "Latest start",
+    "endDateLabel": "End date (if known)",
+    "applicationDeadlineLabel": "Application deadline",
+    "hoursPerWeekLabel": "Hours per week",
+    "minGuaranteedHoursLabel": "Guaranteed hours per week",
+    "shiftsLabel": "Shifts",
+    "shift": {
+      "day": "Day",
+      "night": "Night",
+      "weekend": "Weekends"
+    },
+    "overtimeExpectedLabel": "Overtime expected",
+    "compMinLabel": "Pay from",
+    "compMaxLabel": "Pay up to",
+    "currencyLabel": "Currency",
+    "payUnitLabel": "Pay per",
+    "payUnit": {
+      "hour": "Hour",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "project": "Project"
+    },
+    "payBasisLabel": "Gross or net",
+    "payBasis": {
+      "gross": "Gross",
+      "net": "Net",
+      "unspecified": "Not specified"
+    },
+    "paymentFrequencyLabel": "Payment frequency",
+    "paymentFrequency": {
+      "weekly": "Weekly",
+      "biweekly": "Every two weeks",
+      "monthly": "Monthly"
+    },
+    "guaranteedBaseLabel": "Guaranteed base pay",
+    "perDiemLabel": "Per diem / allowance",
+    "deductionsLabel": "Deductions",
+    "deductionsHelp": "List every known deduction (accommodation, transport, insurance). Missing deduction info is shown to workers as a gap.",
+    "deductionKindLabel": "Deduction",
+    "deductionKind": {
+      "accommodation": "Accommodation",
+      "transport": "Transport",
+      "insurance": "Insurance",
+      "other": "Other"
+    },
+    "deductionAmountLabel": "Amount",
+    "deductionPeriodLabel": "Period",
+    "period": {
+      "day": "Per day",
+      "week": "Per week",
+      "month": "Per month",
+      "once": "One-time"
+    },
+    "addDeductionLabel": "Add deduction",
+    "noDeductionsLabel": "No deductions — confirmed",
+    "removeLabel": "Remove",
+    "accommodationStateLabel": "Accommodation",
+    "accommodationState": {
+      "offered": "Offered",
+      "not_offered": "Not offered",
+      "not_needed": "Not needed"
+    },
+    "accommodationPayerLabel": "Who pays",
+    "accommodationPayer": {
+      "employer": "Employer pays",
+      "shared": "Cost shared",
+      "worker": "Worker pays"
+    },
+    "roomLabel": "Room",
+    "room": {
+      "single": "Single room",
+      "shared": "Shared room"
+    },
+    "accommodationPriceLabel": "Price",
+    "accommodationPricePeriodLabel": "Price period",
+    "occupancyLabel": "People per room",
+    "distanceKmLabel": "Distance to site (km)",
+    "depositLabel": "Deposit",
+    "amenitiesLabel": "Amenities",
+    "amenity": {
+      "kitchen": "Kitchen",
+      "laundry": "Laundry",
+      "internet": "Internet"
+    },
+    "familyPossibleLabel": "Partner / family possible",
+    "internationalTravelLabel": "Travel to the country",
+    "dailyTransportLabel": "Daily transport to site",
+    "betweenSitesLabel": "Travel between sites",
+    "transportLevel": {
+      "provided": "Provided",
+      "compensated": "Compensated",
+      "not_provided": "Not provided",
+      "unknown": "Not stated"
+    },
+    "arrivalPickupLabel": "Airport / station pickup",
+    "companyVehicleLabel": "Company vehicle",
+    "fuelCardLabel": "Fuel card / reimbursement",
+    "ownVehicleRequiredLabel": "Own vehicle required",
+    "returnTravelLabel": "Return-home travel contribution",
+    "licenceCategoriesLabel": "Driving licence categories",
+    "minExperienceYearsLabel": "Minimum experience (years)",
+    "languagesLabel": "Language requirements",
+    "languageLabel": "Language",
+    "languageLevelLabel": "Level",
+    "onePerTeamLabel": "One speaker per team is enough",
+    "addLanguageLabel": "Add language",
+    "certificatesLabel": "Certificates & licences",
+    "certificatesHelp": "Required certificates (e.g. safety card, equipment licence) — stated as facts, shown as requirements.",
+    "addCertificateLabel": "Add certificate",
+    "ownToolsLabel": "Own tools",
+    "ownVehicleLabel": "Own vehicle",
+    "ownWorkwearLabel": "Own workwear",
+    "drawingsReadingLabel": "Reads drawings / schematics",
+    "independentWorkLabel": "Works independently",
+    "leadershipLabel": "Leads others",
+    "applicationMethodLabel": "How to apply",
+    "applicationMethod": {
+      "interest_signal": "Express interest on the platform",
+      "conversation": "Discuss in a conversation"
+    },
+    "interviewStagesLabel": "Interview stages",
+    "responseDeadlineDaysLabel": "Response within (days)",
+    "listingKindLabel": "Listing type",
+    "listingKind": {
+      "active_vacancy": "Active vacancy",
+      "talent_pool": "Talent pool (future needs)"
+    },
+    "practicalTestLabel": "Practical test",
+    "documentVerificationLabel": "Document verification",
+    "talentPoolDisclosure": "This is a talent-pool listing: candidates are collected for future needs, not for an active confirmed vacancy. Workers always see this disclosed.",
+    "honesty": {
+      "title": "Missing pay facts — shown to workers as gaps",
+      "missing_minimum": "Minimum pay is not stated",
+      "missing_basis": "Gross/net basis is not stated",
+      "missing_guaranteed_hours": "Guaranteed hours are not stated",
+      "missing_deductions": "Deductions are not itemized (or confirmed as none)",
+      "max_without_min": "Only an “up to” amount is stated — no minimum"
+    },
+    "preview": {
+      "title": "How workers see this today",
+      "v2NotVisibleNote": "Advanced details are saved with your request. Workers will see them after the next platform data update — until then only the facts above are visible."
+    },
+    "prefillButton": "Fill from my last request",
+    "prefillLoading": "Loading…",
+    "prefillEmpty": "No previous request found",
+    "prefillDone": "Filled from your last request — review and edit"
   }
 }
