@@ -56,6 +56,7 @@ export type DashboardModuleId =
   | "company"
   | "activity"
   | "assist"
+  | "reports"
   | "overview";
 
 /** Icon ids for module cards. A superset of the nav's NavIconKey so the nav
@@ -75,7 +76,8 @@ export type ModuleIconKey =
   | "handshake"
   | "briefcase"
   | "coins"
-  | "sparkles";
+  | "sparkles"
+  | "chart";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -323,6 +325,23 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     labelKey: "assist.title",
     descriptionKey: "assist.intro",
     iconKey: "sparkles",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  // ── Reports hub (control room PR K) ──────────────────────────────────
+  {
+    id: "reports",
+    // Role-specific reports INDEX (gap map §12): worker sees evidence +
+    // journal-activity figures and the real exports; org roles see own
+    // demand / project / task / document / finance counts. Real data only,
+    // every figure basis-labelled; degrades honestly per source. Declares NO
+    // attentionSignalIds — the hub reports, it does not notify (the spine
+    // and the per-module cards already carry the attention numbers).
+    surfaceRoute: "/dashboard/reports",
+    labelKey: "reports.title",
+    descriptionKey: "reports.intro",
+    iconKey: "chart",
     roles: ALL_ROLES,
     surfaces: ["grid", "command"],
   },

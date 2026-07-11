@@ -29,7 +29,109 @@
     "inputLabel": "Find a page or action",
     "resultsLabel": "Matching pages",
     "noResults": "Nothing found. Try another word — e.g. CV, journal, team, documents, pricing.",
-    "shortcutHint": "Ctrl / ⌘ K"
+    "shortcutHint": "Ctrl / ⌘ K",
+    "recentLabel": "Recently opened",
+    "objectsLabel": "Your own records",
+    "objectsLoading": "Searching your own records…",
+    "objectsError": "Your records could not be searched right now. The page links above still work.",
+    "groups": {
+      "projects": "Your projects",
+      "tasks": "Your tasks",
+      "finance": "Your finance records",
+      "conversations": "Your conversations",
+      "bookings": "Your bookings",
+      "documents": "Your document records"
+    }
+  },
+  "reports": {
+    "eyebrow": "Reports",
+    "title": "Reports",
+    "intro": "Figures counted from your own records, with the calculation basis stated under each section, and the exports that already exist.",
+    "honestyNote": "Counts over your own data only — no benchmarks, no scores, no projections.",
+    "state": {
+      "needsMigration": "This data model is not available in this environment yet, so there is nothing to count. No number is shown instead of real data.",
+      "unavailable": "These figures cannot be read right now. Nothing is estimated in their place."
+    },
+    "basis": {
+      "label": "Basis",
+      "workerEvidence": "Counted by the evidence-report rules from your own catalogued skills, work-journal entries and manager confirmations. No score, no estimate.",
+      "workerActivity": "Direct row counts over your own work-journal entries and your own uploaded journal photos.",
+      "orgDemand": "Counts over the demand requests you created yourself. Open = draft, submitted, in review or needs follow-up.",
+      "orgProjects": "Counts of your own company's project rows, grouped by each row's recorded status.",
+      "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
+      "orgDocuments": "Sums of the consent-gated pool aggregate — only workers who consented to aggregate document visibility are counted.",
+      "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data."
+    },
+    "worker": {
+      "evidence": {
+        "title": "Profile & evidence figures",
+        "totalSkills": "Skills",
+        "workSupported": "Backed by work entries",
+        "confirmed": "Confirmed",
+        "journalEntries": "Journal entries",
+        "confirmations": "Confirmations",
+        "empty": "No evidence data yet — figures appear once your profile and work journal carry real records.",
+        "link": "Open the full evidence report"
+      },
+      "activity": {
+        "title": "Journal activity",
+        "entries": "Journal entries",
+        "photos": "Uploaded photos",
+        "unavailable": "Your journal counts cannot be read right now. Nothing is shown instead of real counts.",
+        "link": "Open the work journal"
+      }
+    },
+    "exports": {
+      "title": "Exports",
+      "note": "Only the exports that already work are listed — nothing here is a preview.",
+      "evidence": "Evidence report (print / PDF)",
+      "cv": "CV (print / PDF)",
+      "journalCsv": "Journal export (CSV)",
+      "financeCsv": "Finance records export (CSV)"
+    },
+    "org": {
+      "demand": {
+        "title": "Demand requests",
+        "open": "Open",
+        "total": "Total",
+        "link": "Open the demand intake"
+      },
+      "projects": {
+        "title": "Projects by status",
+        "status": {
+          "draft": "Draft",
+          "live": "Live",
+          "paused": "Paused"
+        },
+        "total": "Total",
+        "empty": "No projects yet — figures appear as soon as your company has project rows.",
+        "link": "Open projects"
+      },
+      "tasks": {
+        "title": "Tasks by status",
+        "open": "Open",
+        "status": {
+          "todo": "To do",
+          "in_progress": "In progress",
+          "blocked": "Blocked"
+        },
+        "link": "Open tasks"
+      },
+      "documents": {
+        "title": "Pool document readiness",
+        "workers": "Consented workers",
+        "expiring": "Expiring documents",
+        "attention": "Needing attention",
+        "empty": "No consented pool workers yet — this aggregate counts only workers who gave consent.",
+        "link": "Open the document centre"
+      },
+      "finance": {
+        "title": "Finance records",
+        "overdue": "Overdue",
+        "total": "Total records",
+        "link": "Open finance records"
+      }
+    }
   },
   "marketRecognition": {
     "title": "What do you offer or need?",

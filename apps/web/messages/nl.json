@@ -29,7 +29,109 @@
     "inputLabel": "Zoek een pagina of actie",
     "resultsLabel": "Overeenkomende pagina’s",
     "noResults": "Niets gevonden. Probeer een ander woord — bijv. CV, werkjournaal, ploeg, documenten, prijzen.",
-    "shortcutHint": "Ctrl / ⌘ K"
+    "shortcutHint": "Ctrl / ⌘ K",
+    "recentLabel": "Onlangs geopend",
+    "objectsLabel": "Je eigen records",
+    "objectsLoading": "Zoeken in je eigen records…",
+    "objectsError": "Je records konden nu niet doorzocht worden. De paginalinks hierboven blijven werken.",
+    "groups": {
+      "projects": "Je projecten",
+      "tasks": "Je taken",
+      "finance": "Je financiële registraties",
+      "conversations": "Je gesprekken",
+      "bookings": "Je boekingen",
+      "documents": "Je documentregistraties"
+    }
+  },
+  "reports": {
+    "eyebrow": "Rapporten",
+    "title": "Rapporten",
+    "intro": "Cijfers geteld uit je eigen records, met de rekenbasis vermeld onder elke sectie, en de exports die al bestaan.",
+    "honestyNote": "Alleen tellingen over je eigen gegevens — geen benchmarks, geen scores, geen prognoses.",
+    "state": {
+      "needsMigration": "Dit datamodel is in deze omgeving nog niet beschikbaar, dus er valt niets te tellen. Er wordt geen getal getoond in plaats van echte gegevens.",
+      "unavailable": "Deze cijfers kunnen nu niet gelezen worden. Er wordt niets geschat in hun plaats."
+    },
+    "basis": {
+      "label": "Basis",
+      "workerEvidence": "Geteld volgens de regels van het bewijsrapport uit je eigen gecatalogiseerde vaardigheden, werkjournaalregels en bevestigingen van leidinggevenden. Geen score, geen schatting.",
+      "workerActivity": "Directe tellingen van je eigen werkjournaalregels en je eigen geüploade journaalfoto's.",
+      "orgDemand": "Tellingen over de vraagaanvragen die je zelf hebt aangemaakt. Open = concept, ingediend, in beoordeling of vervolg nodig.",
+      "orgProjects": "Tellingen van de projectregels van je eigen bedrijf, gegroepeerd per vastgelegde status.",
+      "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
+      "orgDocuments": "Sommen van het toestemmingsgebonden poolaggregaat — alleen werknemers die toestemming gaven voor geaggregeerde documentzichtbaarheid worden geteld.",
+      "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens."
+    },
+    "worker": {
+      "evidence": {
+        "title": "Profiel- en bewijscijfers",
+        "totalSkills": "Vaardigheden",
+        "workSupported": "Onderbouwd met werkregels",
+        "confirmed": "Bevestigd",
+        "journalEntries": "Journaalregels",
+        "confirmations": "Bevestigingen",
+        "empty": "Nog geen bewijsgegevens — cijfers verschijnen zodra je profiel en werkjournaal echte records bevatten.",
+        "link": "Open het volledige bewijsrapport"
+      },
+      "activity": {
+        "title": "Journaalactiviteit",
+        "entries": "Journaalregels",
+        "photos": "Geüploade foto's",
+        "unavailable": "Je journaaltellingen kunnen nu niet gelezen worden. Er wordt niets getoond in plaats van echte tellingen.",
+        "link": "Open het werkjournaal"
+      }
+    },
+    "exports": {
+      "title": "Exports",
+      "note": "Alleen de exports die al werken staan hier — niets hiervan is een voorproefje.",
+      "evidence": "Bewijsrapport (afdrukken / PDF)",
+      "cv": "CV (afdrukken / PDF)",
+      "journalCsv": "Journaalexport (CSV)",
+      "financeCsv": "Export financiële registraties (CSV)"
+    },
+    "org": {
+      "demand": {
+        "title": "Vraagaanvragen",
+        "open": "Open",
+        "total": "Totaal",
+        "link": "Open de vraagintake"
+      },
+      "projects": {
+        "title": "Projecten per status",
+        "status": {
+          "draft": "Concept",
+          "live": "Lopend",
+          "paused": "Gepauzeerd"
+        },
+        "total": "Totaal",
+        "empty": "Nog geen projecten — cijfers verschijnen zodra je bedrijf projectregels heeft.",
+        "link": "Open projecten"
+      },
+      "tasks": {
+        "title": "Taken per status",
+        "open": "Open",
+        "status": {
+          "todo": "Te doen",
+          "in_progress": "In uitvoering",
+          "blocked": "Geblokkeerd"
+        },
+        "link": "Open taken"
+      },
+      "documents": {
+        "title": "Documentgereedheid van de pool",
+        "workers": "Werknemers met toestemming",
+        "expiring": "Verlopende documenten",
+        "attention": "Aandacht nodig",
+        "empty": "Nog geen poolwerknemers met toestemming — dit aggregaat telt alleen werknemers die toestemming gaven.",
+        "link": "Open het documentencentrum"
+      },
+      "finance": {
+        "title": "Financiële registraties",
+        "overdue": "Achterstallig",
+        "total": "Totaal registraties",
+        "link": "Open financiële registraties"
+      }
+    }
   },
   "marketRecognition": {
     "title": "Wat bied je aan of wat heb je nodig?",
