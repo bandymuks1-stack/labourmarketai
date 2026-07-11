@@ -1,4 +1,27 @@
 {
+  "activityCentre": {
+    "eyebrow": "Aktivitätszentrum",
+    "title": "Aktivität",
+    "intro": "Alles, was auf Ihre Aufmerksamkeit wartet — an einem Ort.",
+    "readModel": "Hier muss nichts als gelesen markiert werden — ein Signal verschwindet, sobald Sie es auf seiner eigenen Seite erledigen.",
+    "filters": {
+      "stateLabel": "Anzeigen",
+      "attention": "Braucht Aufmerksamkeit",
+      "all": "Alle Signale",
+      "moduleLabel": "Quelle",
+      "allModules": "Alle Quellen"
+    },
+    "allClear": "Im Moment wartet nichts auf Ihre Aufmerksamkeit. Sobald etwas Neues eintrifft, sehen Sie es hier.",
+    "rowClear": "Nichts offen",
+    "readSemantics": {
+      "pending_invitations": "Verschwindet, wenn Sie die Einladung in der Übersicht annehmen oder ablehnen.",
+      "unread_messages": "Verschwindet, wenn Sie die Unterhaltung lesen.",
+      "incoming_service_requests": "Verschwindet, wenn Sie die Anfrage beantworten.",
+      "service_request_responses": "Verschwindet, wenn Sie die Seite mit den Serviceanfragen öffnen.",
+      "pending_bookings": "Verschwindet, wenn Sie auf den Buchungsvorschlag reagieren.",
+      "booking_responses": "Verschwindet, wenn Sie die Buchungsseite öffnen."
+    }
+  },
   "commandFinder": {
     "title": "Schnellsuche",
     "placeholder": "Geben Sie ein, was Sie brauchen: Lebenslauf, Journal, Team, Preise…",
@@ -2983,7 +3006,8 @@
       },
       "statusStrip": {
         "title": "Was jetzt auf Sie wartet",
-        "allClear": "Im Moment wartet nichts auf Ihre Aufmerksamkeit."
+        "allClear": "Im Moment wartet nichts auf Ihre Aufmerksamkeit.",
+        "viewAll": "Alle Aktivitäten"
       },
       "myZone": {
         "actionsHeading": "Was Sie jetzt tun können",
@@ -3581,7 +3605,8 @@
       "emptyBody": "Wenn etwas Wichtiges anfällt, sehen Sie es hier.",
       "switchRoleCta": "Zu {role} wechseln, um es anzusehen",
       "markAllRead": "Alle als gelesen markieren",
-      "close": "Schließen"
+      "close": "Schließen",
+      "viewAll": "Alle Aktivitäten ansehen"
     }
   },
   "shared": {

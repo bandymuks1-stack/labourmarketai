@@ -50,6 +50,7 @@ export type DashboardModuleId =
   | "services"
   | "service_requests"
   | "company"
+  | "activity"
   | "overview";
 
 /** Icon ids for module cards. A superset of the nav's NavIconKey so the nav
@@ -63,7 +64,8 @@ export type ModuleIconKey =
   | "calendar"
   | "documents"
   | "building"
-  | "search";
+  | "search"
+  | "bell";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -216,6 +218,20 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "auth.dashboard.myZone.actions.companyActions.desc",
     iconKey: "building",
     roles: ORG_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  // ── Cross-module activity centre (control room PR C) ─────────────────
+  {
+    id: "activity",
+    // The unified activity surface aggregates EVERY spine signal itself, so
+    // it declares no attentionSignalIds — a badge here would double-count
+    // the same numbers the bell and the per-module cards already carry.
+    surfaceRoute: "/dashboard/activity",
+    labelKey: "activityCentre.title",
+    descriptionKey: "activityCentre.intro",
+    iconKey: "bell",
+    roles: ALL_ROLES,
     surfaces: ["grid", "command"],
   },
 

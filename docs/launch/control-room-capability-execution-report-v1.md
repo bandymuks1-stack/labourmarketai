@@ -11,8 +11,8 @@ owner/provider action named in the gate register) · `NOT_STARTED`.
 | # | Capability | Status | PR / commit | Routes | Data sources | Security model | Migration | Deploy/smoke | Remaining gate | Next non-blocked action |
 |---|---|---|---|---|---|---|---|---|---|---|
 | A | Gap map + architecture | DONE | #704 / `36a18ff` | — (docs) | source audit | — | none | n/a | none | — |
-| B | Control room foundation | IN_PROGRESS | this PR | `/dashboard` (module registry + status strip + role grid; nav/command wired) | feature-availability registry, spine counts (request-cached single read), roles | RLS as today; badges spine-only | none | CI + guard suite; visual smoke recorded below | none | merge, start PR C |
-| C | Unified activity centre | NOT_STARTED | — | `/dashboard/activity` (planned) | notification spine (6 signals) | RLS + seen RPCs | none (feed table gated) | — | events-table apply (optional) | spine-based surface |
+| B | Control room foundation | DONE | #705 / `3e568d2` | `/dashboard` (module registry + status strip + role grid; nav/command wired) | feature-availability registry, spine counts (request-cached single read), roles | RLS as today; badges spine-only | none | CI green; deployed via Vercel on merge | none | — |
+| C | Unified activity centre | IN_PROGRESS | this PR | `/dashboard/activity` + status-strip/bell "view all" links | notification spine (6 signals, one request-cached read) | RLS + existing seen RPCs; links-only, no fake mark-read | none (persistent feed + demand signals stay migration-gated) | CI + guard suite | events-table apply (optional, for feed/demand events) | merge, start PR E (planning) |
 | D | Work/task management | NOT_STARTED | — | `/dashboard/tasks` (planned) | new `tasks` table (gated) | `can_manage_project()` + assignee RLS | RED, human-gated | — | owner apply | degrading UI + migration PR |
 | E | Planning/calendar | NOT_STARTED | — | `/dashboard/planning` (planned) | bookings, projects, assignments | caller-scoped reads | none | — | none | agenda aggregation |
 | F | CRM/demand pipeline | NOT_STARTED | — | admin pipeline queue | lead-intake-model + public intakes | service-role + superadmin (unchanged) | none (contacts/ledger gated) | — | contacts/ledger apply (optional) | extend lead-intake-model |
@@ -37,7 +37,16 @@ Results recorded here per PR as they run.
 | PR | Commands run | Result |
 |---|---|---|
 | A (docs-only) | migration-safety + quality (CI) | PASS — merged #704 |
-| B (control room) | typecheck, lint, vitest (530 files / 8353 tests), placeholders:check, check:i18n-debt, check:primary-route-smoke, check:public-seo-indexing, build | ALL PASS locally; CI on PR |
+| B (control room) | typecheck, lint, vitest (530 files / 8353 tests), placeholders:check, check:i18n-debt, check:primary-route-smoke, check:public-seo-indexing, build | ALL PASS locally; CI green; merged #705 |
+| C (activity centre) | same suite — vitest 531 files / 8379 tests, primary-route-smoke 37 routes | ALL PASS locally; CI on PR |
+
+PR C notes: `lib/dashboard/activity-centre.ts` pure view model inverts the registry's
+`attentionSignalIds` linkage (no duplicated labels/routes); `/dashboard/activity` renders one
+row per spine signal with real count, clearing-surface link and honest per-signal read
+semantics; searchParams-driven filters (attention state + source module); no buttons — links
+only, no fake mark-read; demand/verification events intentionally absent (no seen-model —
+migration-gated). Guard `activity-centre.test.ts` pins spine-only sourcing and 1:1 catalogue
+coverage. New namespace `activityCentre.*` in lt/en/ru/nl/de.
 
 PR B notes: registry `lib/dashboard/dashboard-module-registry.ts` (11 modules) + pure view
 model + grid/status-strip components; removed hard-coded `marketplaceAccess` block and

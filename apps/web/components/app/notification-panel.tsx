@@ -160,6 +160,7 @@ function NotificationsBody({
 }) {
   // Localized notification-type labels (dead-UI repair: never the raw enum).
   const tTypes = useTranslations("auth.notifications.types");
+  const tPanel = useTranslations("auth.notifications");
   return (
     <>
       {!chromeless && (
@@ -259,6 +260,20 @@ function NotificationsBody({
           })}
         </ul>
       )}
+
+      {/* Control room PR C: one footer link to the unified activity centre —
+          the full cross-module view of the SAME spine signals (with filters
+          and per-signal read semantics). Panel behaviour is otherwise
+          unchanged; the popover already closes on route change. */}
+      <footer className="border-t border-ink-600 px-3 py-2">
+        <Link
+          href={"/dashboard/activity" as "/dashboard"}
+          data-testid="notification-panel-view-all"
+          className="rounded-sm font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        >
+          {tPanel("viewAll")} →
+        </Link>
+      </footer>
     </>
   );
 }

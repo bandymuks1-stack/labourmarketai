@@ -590,6 +590,28 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // Unified activity centre (control room PR C) — every spine signal in
+    // one place, with filters and honest read semantics. Route resolves
+    // through the module registry so it can never drift from the grid card.
+    id: "activity",
+    route: getModuleRoute("activity"),
+    audience: "public",
+    labels: {
+      en: "Activity centre",
+      lt: "Veiklos centras",
+      ru: "Центр активности",
+      nl: "Activiteitencentrum",
+      de: "Aktivitätszentrum",
+    },
+    synonyms: {
+      en: ["activity", "notifications", "signals", "what's waiting"],
+      lt: ["veikla", "pranešimai", "signalai", "kas laukia"],
+      ru: ["активность", "уведомления", "сигналы", "что ждёт"],
+      nl: ["activiteit", "meldingen", "signalen", "wat wacht"],
+      de: ["aktivität", "benachrichtigungen", "signale", "was wartet"],
+    },
+  },
+  {
     id: "account_settings",
     route: "/dashboard/account",
     audience: "public",

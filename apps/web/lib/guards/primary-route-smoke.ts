@@ -96,6 +96,10 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // module (registry-driven grid card + spine signals link here), so it joins
   // the smoke inventory like its sibling /dashboard/services.
   { id: "service-requests", urlPattern: "/dashboard/service-requests", sourceFile: "app/[locale]/dashboard/service-requests/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR C: the unified activity centre is a dashboard module
+  // (registry-driven grid card + the bell/status-strip "view all" target),
+  // so it joins the smoke inventory like the other module surfaces.
+  { id: "activity", urlPattern: "/dashboard/activity", sourceFile: "app/[locale]/dashboard/activity/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "company-scouting", urlPattern: "/dashboard/company/scouting", sourceFile: "app/[locale]/dashboard/company/scouting/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "account", urlPattern: "/dashboard/account", sourceFile: "app/[locale]/dashboard/account/page.tsx", requiresAuth: true, kind: "role-flow" },
