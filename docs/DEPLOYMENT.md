@@ -1,7 +1,11 @@
 # Deployment
 
-> Status: M0. The Supabase section below is complete and founder-actionable.
-> The Vercel preview-deploy section is completed in slice 8 (§10.7).
+> Status (2026-07-11): PRODUCTION LIVE. Vercel auto-deploys `main` to
+> `labourmarket.ai` (public canonical) and `app.labourmarket.ai`
+> (auth/dashboard) — see `docs/policies/domain-truth-v1.md` (v2). The
+> Supabase section below remains the founder-actionable source of truth
+> for secrets and migrations; migrations are applied only through the
+> human-gated process (reviewed PR + manual apply, never automatic).
 
 ## Secrets — where they come from
 
@@ -100,8 +104,10 @@ via `psql` (override the target with `SUPABASE_DB_URL`; default
 `postgresql://postgres:postgres@127.0.0.1:54322/postgres`). `dev-fixtures.sql`
 must never reach the cloud project.
 
-## Vercel preview deploy
+## Vercel deploys
 
-> Completed in slice 8 (§10.7): GitHub → Vercel project setup → environment
-> variables → first preview deploy → finding the `.vercel.app` URL →
-> optional preview password protection.
+> SUPERSEDED NOTE (was "Vercel preview deploy", M0 era): the project is no
+> longer preview-only. Vercel builds every PR as a preview deployment and
+> auto-deploys `main` to production on the real domains. The historical M0
+> setup steps (project creation, env vars, first preview) remain valid as
+> onboarding reference.
