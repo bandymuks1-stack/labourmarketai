@@ -203,6 +203,9 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 119 -> 120 for worker_languages_v1 (20260711250000, PR #720; ledger 20260711203623) — owner-authorized
     // migration-activation programme; APPLIED to production 2026-07-11;
     // paired rollback in the PR.
-    expect(count).toBeLessThanOrEqual(120);
+    // Bumped 120 -> 121 for worker_preference_columns_v2 (20260711270000, PR #721; ledger 20260711204006) — owner-authorized
+    // migration-activation programme; APPLIED to production 2026-07-11;
+    // paired rollback in the PR.
+    expect(count).toBeLessThanOrEqual(121);
   });
 });
