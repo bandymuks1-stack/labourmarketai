@@ -52,6 +52,7 @@ export type DashboardModuleId =
   | "services"
   | "service_requests"
   | "projects"
+  | "finance"
   | "company"
   | "activity"
   | "overview";
@@ -71,7 +72,8 @@ export type ModuleIconKey =
   | "bell"
   | "checklist"
   | "handshake"
-  | "briefcase";
+  | "briefcase"
+  | "coins";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -256,6 +258,24 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "projects.intro",
     iconKey: "briefcase",
     roles: ORG_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  {
+    id: "finance",
+    // Operational finance records (control room PR I): manual invoices
+    // issued/received + expenses with derived overdue flags and real
+    // cent-exact sums. Org-role-first, and workers record expenses too;
+    // customers have no operational-finance need. Repo-safe layer — the
+    // page degrades honestly until the owner-gated finance_records
+    // migration (I2) is applied. NO attentionSignalIds: a finance-overdue
+    // spine signal is a recorded follow-up (joins the spine after the
+    // migration is applied), so no badge can appear before real data can.
+    surfaceRoute: "/dashboard/finance",
+    labelKey: "finance.title",
+    descriptionKey: "finance.intro",
+    iconKey: "coins",
+    roles: ["company", "agency", "worker"],
     surfaces: ["grid", "command"],
   },
 

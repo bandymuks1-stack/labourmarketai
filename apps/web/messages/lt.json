@@ -7769,5 +7769,88 @@
     "projectSection": {
       "link": "Šio projekto užduotys"
     }
+  },
+  "finance": {
+    "eyebrow": "Veiklos finansai",
+    "title": "Finansų įrašai",
+    "intro": "Rankiniu būdu vedami išrašytų sąskaitų, gautų sąskaitų ir išlaidų įrašai — su tikromis sumomis ir išvestiniais vėlavimo žymenimis.",
+    "scopeNote": "Tik rankiniai įrašai — tai nėra buhalterijos, mokesčių, darbo užmokesčio, banko sinchronizacijos ar mokėjimų apdorojimo programa. Įrašo sukūrimas neperveda pinigų ir su niekuo nesusisiekia.",
+    "notAuthed": "Prisijunkite, kad matytumėte savo finansų įrašus.",
+    "unavailable": "Finansų modulis ruošiamas — dar neprieinamas. Kai bus įjungtas, jūsų įrašai atsiras čia.",
+    "loadError": "Nepavyko įkelti įrašų. Pabandykite atnaujinti puslapį.",
+    "empty": "Finansų įrašų dar nėra — pridėkite pirmą aukščiau.",
+    "emptyFiltered": "Nė vienas įrašas neatitinka pasirinktų filtrų.",
+    "exportCsv": "Atsisiųsti CSV",
+    "exportNote": "Eksportuojami tik jūsų pačių įrašai (tos pačios eilutės, kurias rodo šis puslapis).",
+    "summary": {
+      "issued": "Išrašytos sąskaitos",
+      "received": "Gautos sąskaitos",
+      "expenses": "Išlaidos",
+      "paid": "Apmokėta",
+      "overdue": "Vėluojama"
+    },
+    "filters": {
+      "label": "Tipas",
+      "statusLabel": "Būsena",
+      "allTypes": "Visi tipai",
+      "allStatuses": "Visos būsenos",
+      "overdue": "Vėluojantys"
+    },
+    "type": {
+      "invoice_issued": "Išrašyta sąskaita",
+      "invoice_received": "Gauta sąskaita",
+      "expense": "Išlaidos"
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "issued": "Išrašyta",
+      "partially_paid": "Iš dalies apmokėta",
+      "paid": "Apmokėta",
+      "cancelled": "Atšaukta"
+    },
+    "flags": {
+      "overdue": "Vėluojama"
+    },
+    "dueLabel": "Terminas",
+    "paidLabel": "Apmokėta",
+    "projectLinked": "Susieta su projektu",
+    "companyLinked": "Įmonės įrašas",
+    "actions": {
+      "issue": "Pažymėti kaip išrašytą",
+      "markPartial": "Pažymėti iš dalies apmokėta",
+      "markPaid": "Pažymėti apmokėta",
+      "markUnpaid": "Pažymėti neapmokėta",
+      "cancel": "Atšaukti",
+      "reopen": "Atidaryti iš naujo",
+      "details": "Redaguoti duomenis",
+      "save": "Išsaugoti"
+    },
+    "form": {
+      "title": "Naujas įrašas",
+      "typeLabel": "Įrašo tipas",
+      "statusLabel": "Pradinė būsena",
+      "titleLabel": "Pavadinimas",
+      "titlePlaceholder": "pvz., pastolių nuoma — birželis",
+      "counterpartyLabel": "Kita šalis",
+      "counterpartyPlaceholder": "pvz., įmonės ar asmens pavadinimas",
+      "amountLabel": "Suma (EUR)",
+      "amountHint": "Suma eurais su daugiausiai dviem skaitmenimis po kablelio, pvz., 123.45. Kol kas tik EUR.",
+      "dueLabel": "Apmokėjimo terminas (nebūtina)",
+      "projectLabel": "Projektas (nebūtina)",
+      "projectNone": "Be projekto",
+      "companyLinkLabel": "Susieti su mano įmone (jos savininkas matys šį įrašą)",
+      "noteLabel": "Pastaba (nebūtina)",
+      "submit": "Pridėti įrašą"
+    },
+    "notice": {
+      "created": "Įrašas pridėtas.",
+      "updated": "Įrašas atnaujintas.",
+      "invalid": "Patikrinkite laukus — pavadinimas 3–160 simbolių, kita šalis 2–160, suma pvz. 123.45.",
+      "needs_migration": "Finansų modulis dar neįjungtas — pakeitimas nebuvo išsaugotas.",
+      "not_authorized": "Jums neleidžiama to daryti.",
+      "not_found": "Įrašas nerastas.",
+      "limit_reached": "Pasiektas įrašų limitas — šis rankinis sąrašas yra ribojamas.",
+      "error": "Išsaugoti nepavyko. Pabandykite dar kartą."
+    }
   }
 }

@@ -109,6 +109,12 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // like the other module surfaces.
   { id: "planning", urlPattern: "/dashboard/planning", sourceFile: "app/[locale]/dashboard/planning/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR I: operational finance records is a dashboard module
+  // (registry-driven grid card + command entry), so it joins the smoke
+  // inventory like the other module surfaces. The CSV export route handler
+  // (finance/export/route.ts) is a file download, not a page — routes here
+  // list pages only (the journal-export precedent).
+  { id: "finance", urlPattern: "/dashboard/finance", sourceFile: "app/[locale]/dashboard/finance/page.tsx", requiresAuth: true, kind: "role-flow" },
   // Control room PR G: the projects list (manager map) is a dashboard module
   // (registry-driven grid card + command entry into each project's operating
   // centre), so it joins the smoke inventory like the other module surfaces.

@@ -34,6 +34,10 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/company/projects/new": "REAL_LAUNCH_SURFACE",
   "dashboard/company/scouting": "REAL_LAUNCH_SURFACE",
   "dashboard/documents": "REAL_LAUNCH_SURFACE",
+  // Operational finance records (control room PR I) — repo-safe layer over
+  // the human-gated finance_records migration (I2); degrades honestly until
+  // applied. Manual records only — no payment processing.
+  "dashboard/finance": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/quick": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/report": "REAL_LAUNCH_SURFACE",

@@ -7769,5 +7769,88 @@
     "projectSection": {
       "link": "Aufgaben zu diesem Projekt"
     }
+  },
+  "finance": {
+    "eyebrow": "Operative Finanzen",
+    "title": "Finanzeinträge",
+    "intro": "Manuelle Erfassung ausgestellter Rechnungen, erhaltener Rechnungen und Ausgaben — mit echten Summen und abgeleiteten Überfälligkeits-Markierungen.",
+    "scopeNote": "Nur manuelle Einträge — dies ist keine Buchhaltungs-, Steuer-, Lohn-, Banksynchronisations- oder Zahlungsabwicklungssoftware. Ein Eintrag bewegt kein Geld und kontaktiert niemanden.",
+    "notAuthed": "Melden Sie sich an, um Ihre Finanzeinträge zu sehen.",
+    "unavailable": "Das Finanzmodul wird vorbereitet — noch nicht verfügbar. Sobald es aktiviert ist, erscheinen Ihre Einträge hier.",
+    "loadError": "Einträge konnten nicht geladen werden. Aktualisieren Sie die Seite.",
+    "empty": "Noch keine Finanzeinträge — fügen Sie oben den ersten hinzu.",
+    "emptyFiltered": "Keine Einträge entsprechen den gewählten Filtern.",
+    "exportCsv": "CSV herunterladen",
+    "exportNote": "Exportiert nur Ihre eigenen Einträge (dieselben Zeilen, die diese Seite zeigt).",
+    "summary": {
+      "issued": "Ausgestellte Rechnungen",
+      "received": "Erhaltene Rechnungen",
+      "expenses": "Ausgaben",
+      "paid": "Bezahlt",
+      "overdue": "Überfällig"
+    },
+    "filters": {
+      "label": "Typ",
+      "statusLabel": "Status",
+      "allTypes": "Alle Typen",
+      "allStatuses": "Alle Status",
+      "overdue": "Überfällig"
+    },
+    "type": {
+      "invoice_issued": "Ausgestellte Rechnung",
+      "invoice_received": "Erhaltene Rechnung",
+      "expense": "Ausgabe"
+    },
+    "status": {
+      "draft": "Entwurf",
+      "issued": "Ausgestellt",
+      "partially_paid": "Teilweise bezahlt",
+      "paid": "Bezahlt",
+      "cancelled": "Storniert"
+    },
+    "flags": {
+      "overdue": "Überfällig"
+    },
+    "dueLabel": "Fällig",
+    "paidLabel": "Bezahlt",
+    "projectLinked": "Projektbezogen",
+    "companyLinked": "Firmeneintrag",
+    "actions": {
+      "issue": "Als ausgestellt markieren",
+      "markPartial": "Als teilweise bezahlt markieren",
+      "markPaid": "Als bezahlt markieren",
+      "markUnpaid": "Als unbezahlt markieren",
+      "cancel": "Stornieren",
+      "reopen": "Wieder öffnen",
+      "details": "Daten bearbeiten",
+      "save": "Speichern"
+    },
+    "form": {
+      "title": "Neuer Eintrag",
+      "typeLabel": "Eintragstyp",
+      "statusLabel": "Anfangsstatus",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "z. B. Gerüstmiete — Juni",
+      "counterpartyLabel": "Gegenpartei",
+      "counterpartyPlaceholder": "z. B. Firmen- oder Personenname",
+      "amountLabel": "Betrag (EUR)",
+      "amountHint": "Betrag in Euro mit höchstens zwei Nachkommastellen, z. B. 123.45. Vorerst nur EUR.",
+      "dueLabel": "Fälligkeitsdatum (optional)",
+      "projectLabel": "Projekt (optional)",
+      "projectNone": "Kein Projekt",
+      "companyLinkLabel": "Mit meiner Firma verknüpfen (deren Inhaber sieht diesen Eintrag)",
+      "noteLabel": "Notiz (optional)",
+      "submit": "Eintrag hinzufügen"
+    },
+    "notice": {
+      "created": "Eintrag hinzugefügt.",
+      "updated": "Eintrag aktualisiert.",
+      "invalid": "Prüfen Sie die Felder — Titel 3–160 Zeichen, Gegenpartei 2–160, Betrag wie 123.45.",
+      "needs_migration": "Das Finanzmodul ist noch nicht aktiviert — die Änderung wurde nicht gespeichert.",
+      "not_authorized": "Das dürfen Sie nicht.",
+      "not_found": "Eintrag nicht gefunden.",
+      "limit_reached": "Eintragslimit erreicht — diese manuelle Liste ist begrenzt.",
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    }
   }
 }
