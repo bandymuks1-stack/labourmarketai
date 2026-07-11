@@ -6623,6 +6623,46 @@
       "modeNote": "Dies ist ein Buchungsvorschlag mit Terminen — die Arbeitskraft bestätigt ihn oder lehnt ihn ab. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
       "againModeNote": "Dies öffnet denselben Vorschlag an dieselbe Arbeitskraft mit neuen Terminen erneut — die Arbeitskraft entscheidet erneut. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
       "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen."
+    },
+    "reason": {
+      "optionalTitle": "Grund (optional)",
+      "noteLabel": "Notiz (optional)",
+      "none": "Kein Grund",
+      "notStored": "Ihre Antwort wurde gespeichert. Der Grund konnte diesmal nicht gespeichert werden.",
+      "decline": {
+        "dates_unsuitable": "Die Termine passen nicht",
+        "conditions_unsuitable": "Die Bedingungen passen nicht",
+        "already_booked": "Ich bin in dem Zeitraum bereits gebucht",
+        "other": "Sonstiges"
+      },
+      "withdraw": {
+        "position_filled": "Die Stelle ist bereits besetzt",
+        "need_changed": "Der Bedarf hat sich geändert",
+        "dates_changed": "Die Termine haben sich geändert",
+        "other": "Sonstiges"
+      },
+      "confirmDecline": "Ablehnung bestätigen",
+      "confirmWithdraw": "Zurückziehen bestätigen",
+      "cancel": "Abbrechen"
+    },
+    "reschedule": {
+      "open": "Termine ändern",
+      "startDate": "Neues Startdatum",
+      "endDate": "Neues Enddatum (optional)",
+      "note": "Notiz (optional)",
+      "save": "Neue Termine speichern",
+      "saved": "Termine aktualisiert. Die Arbeitskraft sieht die neuen Termine.",
+      "notChanged": "Die Termine wurden nicht geändert. Bitte versuchen Sie es später erneut.",
+      "cancel": "Abbrechen"
+    },
+    "deadline": {
+      "open": "Antwortdatum festlegen",
+      "label": "Antworten bis",
+      "save": "Datum speichern",
+      "saved": "Antwortdatum gespeichert.",
+      "notSet": "Das Antwortdatum wurde nicht gespeichert. Bitte versuchen Sie es später erneut.",
+      "respondBy": "Antwort bis {date}",
+      "cancel": "Abbrechen"
     }
   },
   "adminReadiness": {

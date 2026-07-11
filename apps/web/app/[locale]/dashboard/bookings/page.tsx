@@ -5,12 +5,14 @@ import { listMyBookings, type BookingRow } from "@/lib/booking/booking-actions";
 import { openBookingConversationAction } from "@/lib/booking/booking-conversation";
 import { BookingRespondButtons } from "@/components/app/booking-respond-buttons";
 import { BookingWithdrawButton } from "@/components/app/booking-withdraw-button";
+import { BookingManageControls } from "@/components/app/booking-manage-controls";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
 import { Link } from "@/lib/i18n/navigation";
 import {
   canProposeAgain,
-  deriveBookingDisplayState,
+  canRescheduleProposal,
+  withDeadlineDisplayState,
   type BookingDisplayState,
   type BookingStatus,
 } from "@/lib/booking/booking-state";
@@ -145,6 +147,21 @@ export default async function BookingsPage({
             t={t}
             direction="outgoing"
             nowIso={nowIso}
+            renderManage={(row) =>
+              canRescheduleProposal(row.status) ? (
+                // Owner lifecycle controls (P2-PR6): change dates / set a
+                // respond-by date on an OPEN proposal only. An ACCEPTED
+                // booking is never mutated in place — accepted (and every
+                // other non-proposed) row renders NO reschedule control.
+                <BookingManageControls
+                  locale={locale}
+                  bookingId={row.id}
+                  startDate={row.startDate}
+                  expectedEndDate={row.expectedEndDate}
+                  responseDeadlineDate={row.responseDeadlineDate}
+                />
+              ) : null
+            }
             renderActions={(row) =>
               row.status === "proposed" ? (
                 // The withdraw RPC existed with no UI — a proposer had no way
@@ -330,6 +347,7 @@ function Section({
   direction,
   nowIso,
   renderActions,
+  renderManage,
 }: {
   title: string;
   help: string;
@@ -340,6 +358,9 @@ function Section({
   direction: "incoming" | "outgoing";
   nowIso: string;
   renderActions: (row: BookingRow) => React.ReactNode;
+  /** Optional secondary lifecycle controls rendered full-width under the
+   *  row (owner-side reschedule/deadline, P2-PR6 — outgoing list only). */
+  renderManage?: (row: BookingRow) => React.ReactNode;
 }) {
   return (
     <section className="flex flex-col gap-3">
@@ -355,16 +376,22 @@ function Section({
         <ul className="flex flex-col gap-2">
           {rows.map((row) => {
             // Display-only derivation: `proposed` renders as awaiting or —
-            // after 14+ unanswered days — honestly stale. Actions stay keyed
-            // off the DB status (a stale proposal is still open to act on).
-            const display = deriveBookingDisplayState(
-              { status: row.status, createdAt: row.createdAt },
+            // after 14+ unanswered days OR past an owner-set respond-by date
+            // — honestly stale. Actions stay keyed off the DB status (a
+            // stale proposal is still open to act on).
+            const display = withDeadlineDisplayState(
+              {
+                status: row.status,
+                createdAt: row.createdAt,
+                responseDeadlineDate: row.responseDeadlineDate,
+              },
               nowIso,
             );
+            const manage = renderManage?.(row);
             return (
               <li
                 key={row.id}
-                className="card-border flex flex-wrap items-center justify-between gap-3 p-3"
+                className="card-border flex flex-col gap-3 overflow-hidden p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
                 data-testid={`booking-${row.id}`}
                 data-status={row.status}
                 data-display-state={display}
@@ -386,6 +413,17 @@ function Section({
                   {row.note ? (
                     <span className="truncate text-xs text-text-muted">{row.note}</span>
                   ) : null}
+                  {/* Respond-by date (lifecycle v2, read-tolerant): rendered
+                      ONLY when the column is applied AND set — never a fake
+                      countdown, never an auto-close promise. */}
+                  {row.responseDeadlineDate ? (
+                    <span
+                      className="inline-flex w-fit items-center rounded-sm border border-ink-500 bg-ink-800/40 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                      data-testid="booking-deadline-chip"
+                    >
+                      {t("deadline.respondBy", { date: row.responseDeadlineDate })}
+                    </span>
+                  ) : null}
                   {/* WHAT HAPPENS NEXT: one honest line per direction × state. */}
                   <span
                     className="text-xs text-text-muted"
@@ -394,9 +432,12 @@ function Section({
                     {t(`next.${direction}.${display}` as never)}
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
+                {/* Mobile-first actions (P2-PR6): the decision buttons stack
+                    full-width on phones (unmissable 44px targets, no sideways
+                    scrolling) and sit inline on wider screens. */}
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                   <span
-                    className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+                    className={`self-start rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label sm:self-center ${
                       isDerivedProposedState(display)
                         ? DERIVED_TONE[display]
                         : STATUS_TONE[row.status]
@@ -409,6 +450,7 @@ function Section({
                   </span>
                   {renderActions(row)}
                 </div>
+                {manage ? <div className="w-full">{manage}</div> : null}
               </li>
             );
           })}
