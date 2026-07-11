@@ -527,11 +527,46 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: "Dokumente",
     },
     synonyms: {
-      en: ["documents", "document records", "certificates"],
-      lt: ["dokumentai", "pažymos", "sertifikatai"],
-      ru: ["документы", "справки", "сертификаты"],
-      nl: ["documenten", "attesten", "certificaten"],
-      de: ["dokumente", "bescheinigungen", "zertifikate"],
+      // PR H: the page is the document & work-proof centre — work-proof
+      // language must land here too.
+      en: [
+        "documents",
+        "document records",
+        "certificates",
+        "work proof",
+        "proof of work",
+        "document centre",
+        "expiring documents",
+      ],
+      lt: [
+        "dokumentai",
+        "pažymos",
+        "sertifikatai",
+        "darbo įrodymai",
+        "dokumentų centras",
+        "besibaigiantys dokumentai",
+      ],
+      ru: [
+        "документы",
+        "справки",
+        "сертификаты",
+        "подтверждение работы",
+        "центр документов",
+      ],
+      nl: [
+        "documenten",
+        "attesten",
+        "certificaten",
+        "werkbewijs",
+        "documentencentrum",
+      ],
+      de: [
+        "dokumente",
+        "bescheinigungen",
+        "zertifikate",
+        "arbeitsnachweis",
+        "dokumentenzentrum",
+      ],
     },
   },
 

@@ -6010,6 +6010,50 @@
     "sourceLink": "bron",
     "scopeNote": "Gebaseerd op officiële EU-bronnen over gedetacheerde werknemers — controleer de nationale details bij de bevoegde autoriteit. Dit is informatie, geen juridisch advies."
   },
+  "documentCentre": {
+    "attention": {
+      "title": "Aandacht nodig",
+      "empty": "Op dit moment vraagt geen enkel document om aandacht.",
+      "note": "De aantallen komen uitsluitend uit uw eigen geldigheidsdatums en verificatiestatussen.",
+      "expiring": "Verloopt binnenkort: {n}",
+      "missing": "Ontbreekt: {n}",
+      "reviewNeeded": "Wacht op beoordeling: {n}"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "typeLabel": "Type",
+      "all": "Alle",
+      "noMatches": "Geen documenten voor de gekozen filters."
+    },
+    "verification": {
+      "unverified": "Niet geverifieerd",
+      "pending": "Verificatie in behandeling",
+      "verified": "Geverifieerd",
+      "rejected": "Afgewezen"
+    },
+    "workProof": {
+      "title": "Werkbewijs & exports",
+      "journalTitle": "Bewijs uit het werkdagboek",
+      "journalCounts": "Notities: {entries} · Foto's: {photos}",
+      "countsUnavailable": "Aantallen zijn in deze omgeving niet beschikbaar.",
+      "galleryNote": "Foto's staan in uw dagboeknotities; projectgalerijen vindt u op de pagina van elk project."
+    },
+    "uploadNote": "Dit is een metadata-inventaris — bestanden uploaden is nog niet mogelijk. U registreert wat u hebt en tot wanneer het geldig is; de bestanden zelf blijven bij u.",
+    "org": {
+      "title": "Documentgereedheid van de pool (op basis van toestemming)",
+      "intro": "Documenten zijn van de werknemers. U ziet alleen categorie-aantallen van poolwerknemers die het delen van totalen hebben ingeschakeld.",
+      "workersLabel": "Werknemers met toestemming",
+      "totalLabel": "Documenten",
+      "validLabel": "Geldig",
+      "expiringLabel": "Verloopt binnenkort",
+      "attentionLabel": "Aandacht nodig",
+      "consentNote": "Alleen aantallen — nooit documentinhoud. Een werknemer zonder toestemming verschijnt simpelweg niet.",
+      "noConsented": "Geen totalen op basis van toestemming — geen poolwerknemer heeft delen ingeschakeld, of uw organisatie beheert geen uitzendpool.",
+      "unavailable": "Totalen op basis van toestemming zijn in deze omgeving niet beschikbaar. Documenten zijn van de werknemers.",
+      "projectAxisLink": "Gereedheidschecklists per project",
+      "projectAxisNote": "De gereedheid van werknemers per project staat op de operationele pagina van elk project."
+    }
+  },
   "trust": {
     "title": "Vertrouwenssignalen",
     "caption": "De aantallen komen rechtstreeks uit echte registraties. Niets hier is gewogen of verzonnen.",

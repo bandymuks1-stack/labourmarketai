@@ -1,16 +1,28 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { createClient } from "@/lib/supabase/server";
 import {
   DOCUMENT_COUNTRIES,
   DOCUMENTS_READINESS_ENABLED,
 } from "@/lib/config/documents";
 import {
   computeCountryReadiness,
-  deriveDocumentStatus,
-  listMyDocuments,
   type DerivedDocumentStatus,
 } from "@/lib/documents/readiness";
+import {
+  getOrgDocumentCentre,
+  getWorkerDocumentCentre,
+  type WorkProofSummary,
+} from "@/lib/documents/document-centre";
+import {
+  DOC_CENTRE_INVENTORY_ANCHOR,
+  DOCUMENT_STATUS_FILTERS,
+  filterCentreDocuments,
+  inventoryHref,
+  parseInventoryFilters,
+  type DocumentVerificationState,
+} from "@/lib/documents/document-centre-model";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
 import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
 import { LtDocumentGuidance } from "@/components/app/lt-document-guidance";
@@ -18,17 +30,29 @@ import {
   workerReadinessFromChecklist,
   type WorkerCountryReadinessStatus,
 } from "@/lib/readiness/worker-readiness";
+import type { Role } from "@/lib/auth/actions";
 
 /**
- * "Mano dokumentai" — worker document inventory + country readiness (S3).
+ * "Mano dokumentai" — the document & work-proof centre (control room PR H,
+ * gap map §8) on top of the S3 inventory + country readiness surface.
  * UI: TASK 07 final skin (living-arena tokens — arena eyebrow, card glow,
  * rise-in; logic unchanged).
  *
+ * Composition only — the page consolidates the EXISTING axes (worker
+ * document readiness + verification, CV / evidence / journal exports,
+ * journal photo evidence) into one discoverable centre. No second store,
+ * no new table, no bucket: file upload does NOT exist yet and the page says
+ * so instead of pretending (metadata inventory only).
+ *
  * Honest by construction: while DOCUMENTS_READINESS_ENABLED is false the
- * page is an open RUOŠIAMA roadmap note (doctrine §18) — no fake content.
- * When live: statuses are the worker's own input + date arithmetic, the
- * legal disclaimer is always visible, and an uncurated country says so
- * instead of pretending readiness.
+ * inventory is an open RUOŠIAMA roadmap note (doctrine §18) — no fake
+ * content — while the work-proof exports (real today) stay reachable.
+ * When live: statuses are the worker's own input + date arithmetic shown
+ * VERBATIM, verification is the stored admin decision shown VERBATIM (and
+ * hidden entirely where the axis is not readable), the legal disclaimer is
+ * always visible, and an uncurated country says so instead of pretending
+ * readiness. Org sessions see ONLY the s6 consent-gated aggregates (counts)
+ * or an honest note — never another worker's document rows.
  */
 
 const STATUS_TONE: Record<DerivedDocumentStatus, string> = {
@@ -36,6 +60,13 @@ const STATUS_TONE: Record<DerivedDocumentStatus, string> = {
   ready: "border-state-success/40 bg-state-success/5 text-state-success",
   expiring: "border-state-warning/40 bg-state-warning/5 text-state-warning",
   blocked: "border-state-warning/60 bg-state-warning/10 text-state-warning",
+};
+
+const VERIFICATION_TONE: Record<DocumentVerificationState, string> = {
+  unverified: "border-ink-500 bg-ink-800/40 text-text-muted",
+  pending: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  verified: "border-state-success/40 bg-state-success/5 text-state-success",
+  rejected: "border-state-warning/60 bg-state-warning/10 text-state-warning",
 };
 
 const OVERALL_TONE: Record<WorkerCountryReadinessStatus, string> = {
@@ -46,24 +77,128 @@ const OVERALL_TONE: Record<WorkerCountryReadinessStatus, string> = {
   ready_for_country: "border-state-success/50 bg-state-success/10 text-state-success",
 };
 
+const CHIP_BASE =
+  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
+const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
+
+const ORG_ROLES = new Set<Role>(["company", "agency"]);
+
 export default async function WorkerDocumentsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ country?: string }>;
+  searchParams: Promise<{ country?: string; type?: string; status?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("documents");
+  const tc = await getTranslations("documentCentre");
+
+  // Role branch (page-level active_role read, the overview's pattern): org
+  // sessions get the consent-gated aggregate view — a worker document row
+  // is owner-only by RLS and is never rendered to an org session.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let activeRole: Role | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("active_role")
+      .eq("id", user.id)
+      .single();
+    activeRole = (profile?.active_role as Role | null) ?? null;
+  }
+
+  if (activeRole && ORG_ROLES.has(activeRole)) {
+    const org = await getOrgDocumentCentre();
+    return (
+      <div className="flex flex-col gap-6" data-testid="documents-page">
+        <Header t={t} />
+        <section
+          className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+          data-testid="doc-centre-org"
+        >
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {tc("org.title")}
+          </h2>
+          <p className="text-xs text-text-secondary">{tc("org.intro")}</p>
+          {org.kind === "unavailable" ? (
+            <p
+              className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted"
+              data-testid="doc-centre-org-unavailable"
+            >
+              {tc("org.unavailable")}
+            </p>
+          ) : org.summary.workers === 0 ? (
+            <p
+              className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted"
+              data-testid="doc-centre-org-empty"
+            >
+              {tc("org.noConsented")}
+            </p>
+          ) : (
+            <>
+              <dl
+                className="grid grid-cols-2 gap-2 sm:grid-cols-5"
+                data-testid="doc-centre-org-summary"
+              >
+                {(
+                  [
+                    ["workersLabel", org.summary.workers],
+                    ["totalLabel", org.summary.total],
+                    ["validLabel", org.summary.valid],
+                    ["expiringLabel", org.summary.expiring],
+                    ["attentionLabel", org.summary.attention],
+                  ] as const
+                ).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="flex flex-col gap-0.5 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2"
+                  >
+                    <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {tc(`org.${key}`)}
+                    </dt>
+                    <dd className="font-display text-lg font-semibold text-text-primary">
+                      {value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="text-[11px] text-text-muted">
+                {tc("org.consentNote")}
+              </p>
+            </>
+          )}
+          <Link
+            href={"/dashboard/projects" as "/dashboard"}
+            className="text-sm font-semibold text-brand-blue underline-offset-2 hover:underline"
+            data-testid="doc-centre-org-project-link"
+          >
+            {tc("org.projectAxisLink")}
+          </Link>
+          <p className="text-[11px] text-text-muted">
+            {tc("org.projectAxisNote")}
+          </p>
+        </section>
+        {/* WAGON 9 — LT-master guidance stays informational for every role. */}
+        <LtDocumentGuidance locale={locale} />
+      </div>
+    );
+  }
+
+  const centre = await getWorkerDocumentCentre();
 
   if (!DOCUMENTS_READINESS_ENABLED) {
     return (
       <div className="flex flex-col gap-6" data-testid="documents-page">
         <Header t={t} />
-        {/* Reports/exports work independently of the document-storage layer —
-            keep them available even while readiness is preparing. */}
-        <ReportsExports t={t} locale={locale} />
+        {/* Work-proof exports work independently of the document-storage
+            layer — keep them available even while readiness is preparing. */}
+        <WorkProofExports t={t} tc={tc} locale={locale} workProof={centre.workProof} />
         <p
           className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"
           data-testid="documents-preparing"
@@ -78,22 +213,93 @@ export default async function WorkerDocumentsPage({
     );
   }
 
-  const { country: rawCountry } = await searchParams;
+  const sp = await searchParams;
   const country = (DOCUMENT_COUNTRIES as readonly string[]).includes(
-    rawCountry ?? "",
+    sp.country ?? "",
   )
-    ? (rawCountry as string)
+    ? (sp.country as string)
     : null;
 
-  const result = await listMyDocuments();
   const now = new Date();
   // S6 — the worker's documents-aggregate consent (null until the gated
   // draft is applied → honest needs-gate state inside the toggle).
   const docsConsent = await getDocsConsent();
 
+  const inv = centre.inventory;
+  const filters =
+    inv.kind === "ok"
+      ? parseInventoryFilters(sp, inv.typeSlugs)
+      : { type: null, status: null };
+  const visibleDocuments =
+    inv.kind === "ok" ? filterCentreDocuments(inv.documents, filters) : [];
+  const ownedTypeSlugs =
+    inv.kind === "ok"
+      ? [...new Set(inv.documents.map((d) => d.documentTypeSlug))]
+      : [];
+
   return (
     <div className="flex flex-col gap-6" data-testid="documents-page">
       <Header t={t} />
+
+      {/* (a) Attention strip — counts of REAL field states only (derived
+          valid_until status; stored verification), each resolving into the
+          inventory below. Zero everywhere → one calm line, no fake urgency. */}
+      {inv.kind === "ok" ? (
+        <section
+          className="flex flex-col gap-2"
+          data-testid="doc-centre-attention"
+          aria-label={tc("attention.title")}
+        >
+          {inv.attention.expiring === 0 &&
+          inv.attention.missing === 0 &&
+          inv.attention.reviewNeeded === 0 ? (
+            <p
+              className="rounded-md border border-state-success/30 bg-state-success/5 px-3 py-2 text-sm text-text-secondary"
+              data-testid="doc-centre-attention-empty"
+            >
+              {tc("attention.empty")}
+            </p>
+          ) : (
+            <>
+              <div className="flex flex-wrap gap-2">
+                {inv.attention.expiring > 0 ? (
+                  <Link
+                    href={inventoryHref({ status: "expiring", country }) as "/dashboard"}
+                    className={`${CHIP_BASE} border-state-warning/50 bg-state-warning/5 text-state-warning`}
+                    data-testid="doc-centre-attention-expiring"
+                  >
+                    {tc("attention.expiring", { n: inv.attention.expiring })}
+                  </Link>
+                ) : null}
+                {inv.attention.missing > 0 ? (
+                  <Link
+                    href={inventoryHref({ status: "missing", country }) as "/dashboard"}
+                    className={`${CHIP_BASE} border-state-warning/50 bg-state-warning/5 text-state-warning`}
+                    data-testid="doc-centre-attention-missing"
+                  >
+                    {tc("attention.missing", { n: inv.attention.missing })}
+                  </Link>
+                ) : null}
+                {inv.attention.reviewNeeded > 0 ? (
+                  <Link
+                    href={inventoryHref({ country }) as "/dashboard"}
+                    className={`${CHIP_BASE} border-brand-blue/40 bg-brand-blue/5 text-brand-blue`}
+                    data-testid="doc-centre-attention-review"
+                  >
+                    {tc("attention.reviewNeeded", {
+                      n: inv.attention.reviewNeeded,
+                    })}
+                  </Link>
+                ) : null}
+              </div>
+              <p className="text-[11px] text-text-muted">
+                {tc("attention.note")}
+              </p>
+            </>
+          )}
+        </section>
+      ) : null}
+
       <p
         className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs text-text-muted"
         data-testid="documents-disclaimer"
@@ -101,63 +307,150 @@ export default async function WorkerDocumentsPage({
         {t("disclaimer")}
       </p>
 
-      <ReportsExports t={t} locale={locale} />
+      {/* (c) Work-proof section — the real exports + own journal evidence
+          counts, all linking to the existing surfaces (nothing duplicated). */}
+      <WorkProofExports t={t} tc={tc} locale={locale} workProof={centre.workProof} />
 
       <DocsConsentToggle current={docsConsent} />
 
-      {result.kind === "needs-migration" ? (
+      {inv.kind === "needs-migration" ? (
         <p className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning">
           {t("needsMigration")}
         </p>
-      ) : result.kind === "no-worker" ? (
+      ) : inv.kind === "no-worker" ? (
         <p className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted">
           {t("noWorker")}
         </p>
-      ) : result.kind !== "ok" ? (
+      ) : inv.kind !== "ok" ? (
         <p className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning">
           {t("error")}
         </p>
       ) : (
         <>
-          <section className="flex flex-col gap-3" data-testid="documents-list">
+          {/* (b) Worker document inventory — statuses + verification VERBATIM,
+              filterable by type/status via searchParams. Metadata only. */}
+          <section
+            className="flex flex-col gap-3"
+            data-testid="documents-list"
+            id={DOC_CENTRE_INVENTORY_ANCHOR.slice(1)}
+          >
             <h2 className="font-display text-lg font-semibold text-text-primary">
               {t("list.title")}
             </h2>
-            {result.documents.length === 0 ? (
+            {inv.documents.length > 0 ? (
+              <div className="flex flex-col gap-2" data-testid="doc-centre-filters">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    {tc("filters.statusLabel")}
+                  </span>
+                  <Link
+                    href={inventoryHref({ type: filters.type, country }) as "/dashboard"}
+                    className={`${CHIP_BASE} ${filters.status === null ? CHIP_ACTIVE : CHIP_IDLE}`}
+                  >
+                    {tc("filters.all")}
+                  </Link>
+                  {DOCUMENT_STATUS_FILTERS.map((s) => (
+                    <Link
+                      key={s}
+                      href={
+                        inventoryHref({ type: filters.type, status: s, country }) as "/dashboard"
+                      }
+                      className={`${CHIP_BASE} ${filters.status === s ? CHIP_ACTIVE : CHIP_IDLE}`}
+                      data-testid={`doc-centre-filter-status-${s}`}
+                    >
+                      {t(`status.${s}` as never)}
+                    </Link>
+                  ))}
+                </div>
+                {ownedTypeSlugs.length > 1 ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      {tc("filters.typeLabel")}
+                    </span>
+                    <Link
+                      href={
+                        inventoryHref({ status: filters.status, country }) as "/dashboard"
+                      }
+                      className={`${CHIP_BASE} ${filters.type === null ? CHIP_ACTIVE : CHIP_IDLE}`}
+                    >
+                      {tc("filters.all")}
+                    </Link>
+                    {ownedTypeSlugs.map((slug) => (
+                      <Link
+                        key={slug}
+                        href={
+                          inventoryHref({ type: slug, status: filters.status, country }) as "/dashboard"
+                        }
+                        className={`${CHIP_BASE} ${filters.type === slug ? CHIP_ACTIVE : CHIP_IDLE}`}
+                        data-testid={`doc-centre-filter-type-${slug}`}
+                      >
+                        {t(`types.${slug}` as never)}
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+            {inv.documents.length === 0 ? (
               <p className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted">
                 {t("empty")}
               </p>
+            ) : visibleDocuments.length === 0 ? (
+              <p
+                className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted"
+                data-testid="doc-centre-no-matches"
+              >
+                {tc("filters.noMatches")}
+              </p>
             ) : (
               <ul className="flex flex-col gap-2">
-                {result.documents.map((d) => {
-                  const status = deriveDocumentStatus(d, now);
-                  return (
-                    <li
-                      key={d.id}
-                      className="card-border glow-hover rise-in flex flex-wrap items-center justify-between gap-2 p-3"
-                      data-status={status}
-                    >
-                      <div className="flex min-w-0 flex-col gap-0.5">
-                        <span className="text-sm font-semibold text-text-primary">
-                          {t(`types.${d.documentTypeSlug}` as never)}
-                          {d.country ? ` · ${d.country}` : ""}
-                        </span>
-                        {d.validUntil ? (
-                          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                            {t("fields.validUntil")}: {d.validUntil}
-                          </span>
-                        ) : null}
-                      </div>
-                      <span
-                        className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[status]}`}
-                      >
-                        {t(`status.${status}` as never)}
+                {visibleDocuments.map((d) => (
+                  <li
+                    key={d.id}
+                    className="card-border glow-hover rise-in flex flex-wrap items-center justify-between gap-2 p-3"
+                    data-status={d.derivedStatus}
+                  >
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-sm font-semibold text-text-primary">
+                        {t(`types.${d.documentTypeSlug}` as never)}
+                        {d.country ? ` · ${d.country}` : ""}
                       </span>
-                    </li>
-                  );
-                })}
+                      {d.validUntil ? (
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          {t("fields.validUntil")}: {d.validUntil}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {/* Verification VERBATIM — rendered only when the axis
+                          is really readable; no claim otherwise. */}
+                      {inv.verificationAvailable && d.verification ? (
+                        <span
+                          className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${VERIFICATION_TONE[d.verification]}`}
+                          data-testid="doc-centre-verification"
+                          data-verification={d.verification}
+                        >
+                          {tc(`verification.${d.verification}`)}
+                        </span>
+                      ) : null}
+                      <span
+                        className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[d.derivedStatus]}`}
+                      >
+                        {t(`status.${d.derivedStatus}` as never)}
+                      </span>
+                    </div>
+                  </li>
+                ))}
               </ul>
             )}
+            {/* (d) Honest storage note — metadata inventory only; file upload
+                does not exist yet (no bucket) and is not pretended. */}
+            <p
+              className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs text-text-muted"
+              data-testid="doc-centre-upload-note"
+            >
+              {tc("uploadNote")}
+            </p>
           </section>
 
           <section className="flex flex-col gap-3" data-testid="documents-country">
@@ -184,8 +477,8 @@ export default async function WorkerDocumentsPage({
               (() => {
                 const readiness = computeCountryReadiness(
                   country,
-                  result.documents,
-                  result.requirements,
+                  inv.readiness.documents,
+                  inv.readiness.requirements,
                   now,
                 );
                 if (!readiness.requirementsKnown) {
@@ -200,7 +493,7 @@ export default async function WorkerDocumentsPage({
                 }
                 const overall = workerReadinessFromChecklist(
                   readiness.items,
-                  result.availabilitySet,
+                  inv.readiness.availabilitySet,
                 );
                 return (
                   <div className="flex flex-col gap-2">
@@ -212,7 +505,7 @@ export default async function WorkerDocumentsPage({
                       <span className="font-mono text-[11px] uppercase tracking-label">
                         {t(`overall.${overall.status}` as never)}
                       </span>
-                      {!result.availabilitySet ? (
+                      {!inv.readiness.availabilitySet ? (
                         <span className="text-[11px] text-text-muted">
                           {t("overall.availabilityHint")}
                         </span>
@@ -288,17 +581,23 @@ export default async function WorkerDocumentsPage({
   );
 }
 
-/** Reports & exports (§8.8): the real, working print→PDF exports (Verified CV,
- *  Evidence Report), the journal CSV download (quality-train PR I), plus an
- *  HONEST format-status line. No fake export buttons — unavailable formats are
- *  stated, not shown as clickable. Existing routes only; no duplicate report
- *  system. The CSV entry is a plain anchor (a file download, not a page). */
-function ReportsExports({
+/** Work proof & exports (§8.8 + PR H (c)): the real, working print→PDF
+ *  exports (Verified CV, Evidence Report), the journal CSV download
+ *  (quality-train PR I), the worker's OWN journal evidence counts linking the
+ *  real journal surface, plus an HONEST format-status line. No fake export
+ *  buttons — unavailable formats are stated, not shown as clickable. Existing
+ *  routes only; no duplicate report system. The CSV entry is a plain anchor
+ *  (a file download, not a page). */
+function WorkProofExports({
   t,
+  tc,
   locale,
+  workProof,
 }: {
   t: Awaited<ReturnType<typeof getTranslations>>;
+  tc: Awaited<ReturnType<typeof getTranslations>>;
   locale: string;
+  workProof: WorkProofSummary;
 }) {
   const exports = [
     { key: "cv", href: "/cv", label: t("reports.cv"), note: t("reports.cvNote") },
@@ -318,16 +617,36 @@ function ReportsExports({
   ];
   const cardClass =
     "flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue";
+  const countsKnown =
+    workProof.journalEntryCount !== null && workProof.journalPhotoCount !== null;
   return (
     <section
       className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
       data-testid="documents-reports-exports"
     >
       <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-        {t("reports.title")}
+        {tc("workProof.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("reports.intro")}</p>
       <div className="grid gap-2 sm:grid-cols-2">
+        {/* Own journal evidence — REAL counts (head counts over the worker's
+            own rows) linking the real journal surface; unreadable counts say
+            so instead of showing a fake zero. */}
+        <Link
+          href={"/dashboard/journal" as "/dashboard"}
+          data-testid="doc-centre-journal-proof"
+          className={cardClass}
+        >
+          <span className="font-semibold">{tc("workProof.journalTitle")}</span>
+          <span className="text-xs text-text-muted">
+            {countsKnown
+              ? tc("workProof.journalCounts", {
+                  entries: workProof.journalEntryCount ?? 0,
+                  photos: workProof.journalPhotoCount ?? 0,
+                })
+              : tc("workProof.countsUnavailable")}
+          </span>
+        </Link>
         {exports.map((e) =>
           e.download ? (
             <a
@@ -352,6 +671,11 @@ function ReportsExports({
           ),
         )}
       </div>
+      {/* Photo evidence lives inside journal entries; project galleries render
+          on each project page — linked, never duplicated here. */}
+      <p className="text-[11px] text-text-muted" data-testid="doc-centre-gallery-note">
+        {tc("workProof.galleryNote")}
+      </p>
       <p
         className="font-mono text-[10px] uppercase tracking-label text-text-muted"
         data-testid="documents-export-format-status"

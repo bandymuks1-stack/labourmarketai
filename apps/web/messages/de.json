@@ -6010,6 +6010,50 @@
     "sourceLink": "Quelle",
     "scopeNote": "Basierend auf offiziellen EU-Quellen zu entsandten Arbeitskräften — bestätigen Sie die nationalen Besonderheiten bei der zuständigen Behörde. Dies ist eine Information, keine Rechtsberatung."
   },
+  "documentCentre": {
+    "attention": {
+      "title": "Braucht Aufmerksamkeit",
+      "empty": "Derzeit braucht kein Dokument Aufmerksamkeit.",
+      "note": "Die Zahlen stammen ausschließlich aus Ihren eigenen Gültigkeitsdaten und Prüfstatus.",
+      "expiring": "Läuft bald ab: {n}",
+      "missing": "Fehlt: {n}",
+      "reviewNeeded": "Wartet auf Prüfung: {n}"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "typeLabel": "Typ",
+      "all": "Alle",
+      "noMatches": "Keine Dokumente für die gewählten Filter."
+    },
+    "verification": {
+      "unverified": "Nicht geprüft",
+      "pending": "Prüfung ausstehend",
+      "verified": "Geprüft",
+      "rejected": "Abgelehnt"
+    },
+    "workProof": {
+      "title": "Arbeitsnachweis & Exporte",
+      "journalTitle": "Nachweise aus dem Arbeitsjournal",
+      "journalCounts": "Einträge: {entries} · Fotos: {photos}",
+      "countsUnavailable": "Zahlen sind in dieser Umgebung nicht verfügbar.",
+      "galleryNote": "Fotos liegen in Ihren Journaleinträgen; Projektgalerien finden Sie auf der Seite jedes Projekts."
+    },
+    "uploadNote": "Dies ist ein Metadaten-Inventar — Datei-Upload ist noch nicht verfügbar. Sie erfassen, was Sie haben und wie lange es gültig ist; die Dateien selbst bleiben bei Ihnen.",
+    "org": {
+      "title": "Dokumentbereitschaft des Pools (einwilligungsbasiert)",
+      "intro": "Dokumente gehören den Arbeitskräften. Sie sehen nur Kategorien-Zahlen der Pool-Arbeitskräfte, die das Teilen von Summen aktiviert haben.",
+      "workersLabel": "Arbeitskräfte mit Einwilligung",
+      "totalLabel": "Dokumente",
+      "validLabel": "Gültig",
+      "expiringLabel": "Läuft bald ab",
+      "attentionLabel": "Braucht Aufmerksamkeit",
+      "consentNote": "Nur Zahlen — niemals Dokumentinhalte. Eine Arbeitskraft ohne Einwilligung erscheint schlicht nicht.",
+      "noConsented": "Keine einwilligungsbasierten Summen — keine Pool-Arbeitskraft hat das Teilen aktiviert, oder Ihre Organisation verwaltet keinen Agenturpool.",
+      "unavailable": "Einwilligungsbasierte Dokumentsummen sind in dieser Umgebung nicht verfügbar. Dokumente gehören den Arbeitskräften.",
+      "projectAxisLink": "Bereitschafts-Checklisten je Projekt",
+      "projectAxisNote": "Die Bereitschaft der Arbeitskräfte je Projekt steht auf der Betriebsseite jedes Projekts."
+    }
+  },
   "trust": {
     "title": "Vertrauenssignale",
     "caption": "Die Zahlen stammen direkt aus echten Einträgen. Nichts hier ist gewichtet oder erfunden.",
