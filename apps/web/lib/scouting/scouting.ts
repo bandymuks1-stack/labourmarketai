@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { parseStructuredNeed } from "@/lib/market/fit";
+import { readStructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
 import { deriveNeedSkills, type NeedSkillSource } from "@/lib/market/need-skills";
 import {
   matchWorkerToNeed,
@@ -99,6 +100,10 @@ function buildNeed(
       country: row.country,
       city: row.location,
       languages: languages.length > 0 ? languages : undefined,
+      // Contract v2 (PR 4): the demand's typed structured_v2 cluster feeds the
+      // compensation / start-date / engagement-form / licence criteria. Old
+      // records without it stay on the exact pre-v2 checks (honest null).
+      structuredV2: readStructuredDemandV2(row.payload),
     },
     source: derived.source,
   };

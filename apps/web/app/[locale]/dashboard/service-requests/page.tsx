@@ -83,6 +83,12 @@ export default async function ServiceRequestsPage({
     responded: t("responded"),
     requestedBy: t("requestedBy"),
     requesterFallback: t("requesterFallback"),
+    // Repeat action (Capability G, PR 6b): re-request a concluded outgoing
+    // request — a NEW request via the same RPC, previous message prefilled.
+    requestAgain: t("requestAgain"),
+    requestAgainNote: t("requestAgainNote"),
+    cancel: t("cancel"),
+    offeringInactive: t("offeringInactive"),
     status: {
       sent: t("status.sent"),
       accepted: t("status.accepted"),

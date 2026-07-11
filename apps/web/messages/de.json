@@ -5145,6 +5145,10 @@
     "messageCta": "Nachricht senden",
     "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "duplicate": "Sie haben bereits eine offene Anfrage für diese Dienstleistung.",
+    "requestAgain": "Erneut anfragen",
+    "requestAgainNote": "Dies sendet eine neue Anfrage für dieselbe Dienstleistung. Ihre vorherige Nachricht ist bereits eingetragen — passen Sie sie bei Bedarf an. Der Anbieter entscheidet erneut.",
+    "cancel": "Abbrechen",
+    "offeringInactive": "Diese Dienstleistung ist nicht mehr aktiv, daher kann keine neue Anfrage gesendet werden.",
     "requesterMessage": "Nachricht der anfragenden Person",
     "providerNote": "Notiz des Anbieters",
     "responded": "Beantwortet",
@@ -6303,6 +6307,14 @@
     "cta": "Zurück zum Start"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Gesprächspunkte",
+      "missing": "Fehlende Informationen"
+    },
+    "missingSide": {
+      "worker": "Der Kandidat hat nicht angegeben: {criterion}",
+      "demand": "Ihre Anfrage enthält nicht: {criterion}"
+    },
     "statusNote": {
       "title": "So funktioniert das Matching heute",
       "signals": "Auf Basis der aktuell verfügbaren Profil- und Arbeitsjournal-Signale zeigt das System Bereitschaft und eine mögliche Eignung an.",
@@ -6540,7 +6552,9 @@
     "notAuthed": "Bitte melden Sie sich an, um Ihre Buchungen zu sehen.",
     "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
     "noDate": "Kein Startdatum festgelegt",
+    "noRole": "Arbeitsvereinbarung",
     "startsOn": "Beginnt am {date}",
+    "endsOn": "Bis {date}",
     "incoming": {
       "title": "Vorschläge für Sie",
       "help": "Ein Unternehmen hat Ihnen eine Zusammenarbeit vorgeschlagen. Sie entscheiden.",
@@ -6558,6 +6572,28 @@
       "withdrawn": "Zurückgezogen",
       "expired": "Abgelaufen"
     },
+    "displayState": {
+      "awaiting_response": "Antwort ausstehend",
+      "no_response_stale": "Noch keine Antwort"
+    },
+    "next": {
+      "incoming": {
+        "awaiting_response": "Sie entscheiden — annehmen oder ablehnen. Nichts ist bestätigt, bis Sie annehmen.",
+        "no_response_stale": "Seit 14+ Tagen unbeantwortet, aber noch offen — Sie können weiterhin annehmen oder ablehnen.",
+        "accepted": "Bestätigt. Nächster Schritt: Schreiben Sie dem Unternehmen und planen Sie die Arbeit gemeinsam.",
+        "declined": "Sie haben abgelehnt, daher ist dieser Vorschlag geschlossen. Das Unternehmen kann einen neuen senden.",
+        "withdrawn": "Das Unternehmen hat diesen Vorschlag zurückgezogen, daher ist er geschlossen.",
+        "expired": "Dieser Vorschlag ist verfallen, daher ist er geschlossen."
+      },
+      "outgoing": {
+        "awaiting_response": "Die Arbeitskraft entscheidet. Bis zur Antwort können Sie den Vorschlag zurückziehen.",
+        "no_response_stale": "Seit 14+ Tagen keine Antwort. Noch offen — Sie können ihn zurückziehen oder warten.",
+        "accepted": "Die Arbeitskraft hat angenommen. Nächster Schritt: Senden Sie eine Nachricht und planen Sie die Arbeit gemeinsam.",
+        "declined": "Die Arbeitskraft hat abgelehnt, daher ist dieser Vorschlag geschlossen. Sie können einer anderen Arbeitskraft einen Vorschlag machen.",
+        "withdrawn": "Sie haben diesen Vorschlag zurückgezogen, daher ist er geschlossen. Senden Sie bei Bedarf einen neuen.",
+        "expired": "Dieser Vorschlag ist verfallen, daher ist er geschlossen."
+      }
+    },
     "actions": {
       "accept": "Annehmen",
       "decline": "Ablehnen",
@@ -6567,7 +6603,9 @@
       "error": "Etwas ist schiefgelaufen.",
       "message": "Nachricht senden",
       "withdraw": "Vorschlag zurückziehen",
-      "findAnother": "Andere Arbeitskraft finden"
+      "findAnother": "Andere Arbeitskraft finden",
+      "proposeAgain": "Erneut mit neuen Terminen vorschlagen",
+      "planning": "In der Planung ansehen"
     },
     "connections": {
       "title": "Die Planung ist verknüpft mit",
@@ -6580,6 +6618,51 @@
       "mapNote": "Wo Arbeit und Buchungen sind",
       "diary": "Arbeitstagebuch",
       "diaryNote": "Halten Sie fest, was tatsächlich passiert ist"
+    },
+    "propose": {
+      "modeNote": "Dies ist ein Buchungsvorschlag mit Terminen — die Arbeitskraft bestätigt ihn oder lehnt ihn ab. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
+      "againModeNote": "Dies öffnet denselben Vorschlag an dieselbe Arbeitskraft mit neuen Terminen erneut — die Arbeitskraft entscheidet erneut. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
+      "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen."
+    },
+    "reason": {
+      "optionalTitle": "Grund (optional)",
+      "noteLabel": "Notiz (optional)",
+      "none": "Kein Grund",
+      "notStored": "Ihre Antwort wurde gespeichert. Der Grund konnte diesmal nicht gespeichert werden.",
+      "decline": {
+        "dates_unsuitable": "Die Termine passen nicht",
+        "conditions_unsuitable": "Die Bedingungen passen nicht",
+        "already_booked": "Ich bin in dem Zeitraum bereits gebucht",
+        "other": "Sonstiges"
+      },
+      "withdraw": {
+        "position_filled": "Die Stelle ist bereits besetzt",
+        "need_changed": "Der Bedarf hat sich geändert",
+        "dates_changed": "Die Termine haben sich geändert",
+        "other": "Sonstiges"
+      },
+      "confirmDecline": "Ablehnung bestätigen",
+      "confirmWithdraw": "Zurückziehen bestätigen",
+      "cancel": "Abbrechen"
+    },
+    "reschedule": {
+      "open": "Termine ändern",
+      "startDate": "Neues Startdatum",
+      "endDate": "Neues Enddatum (optional)",
+      "note": "Notiz (optional)",
+      "save": "Neue Termine speichern",
+      "saved": "Termine aktualisiert. Die Arbeitskraft sieht die neuen Termine.",
+      "notChanged": "Die Termine wurden nicht geändert. Bitte versuchen Sie es später erneut.",
+      "cancel": "Abbrechen"
+    },
+    "deadline": {
+      "open": "Antwortdatum festlegen",
+      "label": "Antworten bis",
+      "save": "Datum speichern",
+      "saved": "Antwortdatum gespeichert.",
+      "notSet": "Das Antwortdatum wurde nicht gespeichert. Bitte versuchen Sie es später erneut.",
+      "respondBy": "Antwort bis {date}",
+      "cancel": "Abbrechen"
     }
   },
   "adminReadiness": {
@@ -6878,6 +6961,105 @@
     "applyNotAdmin": "Admin-Rechte erforderlich."
   },
   "opportunities": {
+    "saved": {
+      "save": "Speichern",
+      "saved": "Gespeichert",
+      "unsave": "Aus Gespeicherten entfernen",
+      "privateHint": "Das Speichern ist privat in deinem Konto — das Unternehmen sieht nie, wer seine Anzeige gespeichert hat.",
+      "sectionTitle": "Gespeicherte Chancen",
+      "noLongerOpen": "Früher gespeichert, aber auf dem Board nicht mehr offen: {count}",
+      "error": "Deine gespeicherte Liste konnte nicht aktualisiert werden. Bitte erneut versuchen."
+    },
+    "recent": {
+      "title": "Zuletzt angesehen",
+      "deviceOnly": "Nur auf diesem Gerät gespeichert — diese Liste verlässt deinen Browser nie und wird nicht an den Server gesendet.",
+      "clear": "Leeren"
+    },
+    "compare": {
+      "toggle": "Vergleichen",
+      "selectedLabel": "Ausgewählt",
+      "open": "Auswahl vergleichen",
+      "title": "Chancen vergleichen",
+      "close": "Schließen",
+      "clear": "Auswahl löschen",
+      "limitNote": "Wähle 2–3 Chancen zum Vergleichen.",
+      "notStated": "Nicht angegeben",
+      "fact": {
+        "pay": "Lohn",
+        "hours": "Stunden pro Woche",
+        "start": "Beginn",
+        "engagement": "Beschäftigungsform",
+        "accommodation": "Unterkunft",
+        "transport": "Transport",
+        "tools": "Werkzeuge",
+        "languages": "Sprachen",
+        "location": "Ort",
+        "company": "Unternehmen"
+      }
+    },
+    "discovery": {
+      "filters": {
+        "title": "Chancen filtern",
+        "profession": "Arbeitsart",
+        "country": "Land",
+        "start": "Beginn",
+        "accommodation": "Unterkunft",
+        "transport": "Transport",
+        "tool": "Benötigte Werkzeuge",
+        "activeCount": "Aktive Filter: {count}",
+        "reset": "Filter zurücksetzen"
+      },
+      "sort": {
+        "label": "Sortierung",
+        "relevance": "Beste Übereinstimmung zuerst",
+        "newest": "Neueste zuerst"
+      },
+      "emptyFiltered": {
+        "title": "Keine Chancen entsprechen diesen Filtern",
+        "body": "Aktive Filter: {filters}. Entfernen Sie einige Filter oder setzen Sie sie zurück.",
+        "reset": "Filter zurücksetzen"
+      },
+      "details": {
+        "show": "Mehr Details",
+        "hide": "Details ausblenden"
+      },
+      "tiers": {
+        "blocking": "Passt nicht",
+        "strengths": "Passt",
+        "negotiables": "Gesprächspunkte",
+        "missing": "Fehlende Informationen"
+      },
+      "missing": {
+        "worker": "Sie haben nicht angegeben: {criterion}",
+        "demand": "Das Unternehmen hat nicht angegeben: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Erforderliche Fähigkeiten",
+        "evidence_tiers": "Nachweis der Fähigkeiten",
+        "profession": "Beruf",
+        "language": "Sprache",
+        "country_location": "Land und Ort",
+        "availability": "Verfügbarkeit",
+        "pay_ceiling": "Lohnerwartung",
+        "accommodation": "Unterkunft",
+        "compensation": "Lohn",
+        "start_date": "Startdatum",
+        "shifts_hours": "Schichten und Stunden",
+        "engagement_form": "Vertragsform",
+        "licence_categories": "Führerschein",
+        "own_vehicle": "Eigenes Fahrzeug",
+        "own_tools": "Eigenes Werkzeug",
+        "pay_basis": "Lohnbasis (brutto/netto)",
+        "night_shifts": "Nachtschichten",
+        "weekend_shifts": "Wochenendschichten",
+        "overtime": "Überstunden"
+      },
+      "how": {
+        "title": "So funktioniert das Matching",
+        "body": "Das Matching folgt festen, deterministischen Regeln über die Fakten, die beide Seiten angegeben haben - erforderliche Fähigkeiten, Sprache, Ort, Verfügbarkeit, Lohn und Vertragsform. Ein fehlender Fakt wird als fehlend angezeigt und nie geraten. Keine künstliche Intelligenz entscheidet, und es gibt keinen globalen Personenwert - nur die Passung innerhalb dieser einen Chance.",
+        "version": "Berechnungsversion: {version} - deterministische Regeln"
+      }
+    },
     "title": "Chancen für Sie",
     "intro": "Hier sehen Sie Arbeitgeber-Bedarfe, die zu Ihnen passen könnten, und was Sie Ihrem Profil hinzufügen sollten, um bereit zu sein.",
     "noWorkerBody": "Vervollständigen Sie zuerst Ihr Arbeitskraft-Profil, um Chancen zu sehen, die zu Ihnen passen.",
@@ -6996,7 +7178,50 @@
       "reviewed": "Das Unternehmen hat Ihr Interesse geprüft",
       "contacted": "Vom Unternehmen markiert: kontaktiert"
     },
-    "companyVerified": "Verifiziertes Unternehmen"
+    "companyVerified": "Verifiziertes Unternehmen",
+    "structured": {
+      "detailTitle": "Angegebene Arbeitsbedingungen",
+      "notProvided": "Das Unternehmen hat für dieses Angebot noch keine detaillierten Arbeitsbedingungen angegeben — nur die oben genannten Fakten sind angegeben.",
+      "gapsTitle": "Vom Unternehmen nicht angegeben",
+      "yes": "Ja",
+      "no": "Nein",
+      "payLabel": "Vergütung",
+      "amountFrom": "ab {amount}",
+      "amountUpTo": "bis {amount}",
+      "chipPay": "{amount} {currency}/{unit}",
+      "chipPayBasis": "{amount} {currency}/{unit} ({basis})",
+      "chipHours": "{hours} Std./Woche",
+      "chipMinHours": "mindestens {hours} Std./Woche",
+      "chipStartFrom": "Beginn ab {from}",
+      "chipStartWindow": "Beginn {from} – {to}",
+      "chipDeadline": "Bewerbung bis {date}",
+      "days": "{count} T.",
+      "yearsExperience": "{count} J.",
+      "km": "{km} km",
+      "minutes": "{min} Min.",
+      "probationLabel": "Probezeit",
+      "extensionPossibleLabel": "Verlängerung möglich",
+      "scheduleNoticeLabel": "Dienstplan-Vorlauf",
+      "expectedResponseLabel": "Antwort innerhalb von",
+      "firstPaymentLabel": "Erste Zahlung innerhalb von",
+      "travelMinutesLabel": "Fahrzeit zur Baustelle",
+      "registrationPossibleLabel": "Anmeldung einer Meldeadresse möglich",
+      "availableFromLabel": "Verfügbar ab",
+      "similarProjectLabel": "Erfahrung mit ähnlichen Projekten",
+      "driverSupplementLabel": "Fahrerzulage",
+      "siteModeLabel": "Einsatzorte",
+      "siteMode": {
+        "single": "Ein Einsatzort",
+        "multiple": "Mehrere Einsatzorte",
+        "mobile": "Mobil / wechselnde Einsatzorte"
+      },
+      "workModeLabel": "Arbeitsform",
+      "workMode": {
+        "onsite": "Vor Ort",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      }
+    }
   },
   "workerIntake": {
     "title": "Arbeitskraft-Aufnahme",
@@ -8022,5 +8247,253 @@
       "limit_reached": "Eintragslimit erreicht — diese manuelle Liste ist begrenzt.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
     }
+  },
+  "structuredDemand": {
+    "advancedTitle": "Erweiterte Angaben (optional)",
+    "advancedHint": "Strukturierte Fakten, nach denen Arbeitskräfte filtern und vergleichen. Alles ist optional — Ausgelassenes wird als „nicht angegeben“ angezeigt, nie erfunden.",
+    "notStated": "Nicht angegeben",
+    "sections": {
+      "engagement": "Beschäftigungsform und Umfang",
+      "time": "Zeit und Arbeitsplan",
+      "compensation": "Vergütung und Abzüge",
+      "accommodation": "Unterkunft",
+      "transport": "Transport",
+      "requirements": "Anforderungen an Bewerber",
+      "process": "Bewerbungsprozess"
+    },
+    "opportunityTypeLabel": "Art des Angebots",
+    "opportunityType": {
+      "employment": "Festanstellung",
+      "temporary_assignment": "Zeitarbeit",
+      "project_work": "Projektarbeit",
+      "subcontract": "Nachunternehmerauftrag",
+      "service_request": "Dienstleistungsauftrag"
+    },
+    "targetSupplyLabel": "Wer wird gesucht",
+    "targetSupply": {
+      "individual": "Eine Arbeitskraft",
+      "multiple_workers": "Mehrere Arbeitskräfte",
+      "team": "Team / Kolonne",
+      "company": "Firma / Nachunternehmer"
+    },
+    "engagementFormLabel": "Beschäftigungsform",
+    "engagementForm": {
+      "direct_employment": "Direktanstellung",
+      "agency_employment": "Über Zeitarbeitsfirma",
+      "temporary_employment": "Befristete Anstellung",
+      "posted_worker": "Entsandte Arbeitskraft",
+      "self_employed_contractor": "Selbstständiger Auftragnehmer",
+      "company_subcontract": "Nachunternehmervertrag"
+    },
+    "contractCountryLabel": "Vertragsland",
+    "startEarliestLabel": "Frühester Beginn",
+    "startLatestLabel": "Spätester Beginn",
+    "endDateLabel": "Enddatum (falls bekannt)",
+    "applicationDeadlineLabel": "Bewerbungsfrist",
+    "hoursPerWeekLabel": "Stunden pro Woche",
+    "minGuaranteedHoursLabel": "Garantierte Stunden pro Woche",
+    "shiftsLabel": "Schichten",
+    "shift": {
+      "day": "Tagschicht",
+      "night": "Nachtschicht",
+      "weekend": "Wochenenden"
+    },
+    "overtimeExpectedLabel": "Überstunden zu erwarten",
+    "compMinLabel": "Vergütung ab",
+    "compMaxLabel": "Vergütung bis",
+    "currencyLabel": "Währung",
+    "payUnitLabel": "Bezahlung pro",
+    "payUnit": {
+      "hour": "Stunde",
+      "day": "Tag",
+      "week": "Woche",
+      "month": "Monat",
+      "project": "Projekt"
+    },
+    "payBasisLabel": "Brutto oder netto",
+    "payBasis": {
+      "gross": "Brutto",
+      "net": "Netto",
+      "unspecified": "Nicht angegeben"
+    },
+    "paymentFrequencyLabel": "Zahlungsrhythmus",
+    "paymentFrequency": {
+      "weekly": "Wöchentlich",
+      "biweekly": "Alle zwei Wochen",
+      "monthly": "Monatlich"
+    },
+    "guaranteedBaseLabel": "Garantierter Grundlohn",
+    "perDiemLabel": "Tagegeld / Zulage",
+    "deductionsLabel": "Abzüge",
+    "deductionsHelp": "Geben Sie jeden bekannten Abzug an (Unterkunft, Transport, Versicherung). Fehlende Abzugsangaben werden Arbeitskräften als Lücke angezeigt.",
+    "deductionKindLabel": "Abzug",
+    "deductionKind": {
+      "accommodation": "Unterkunft",
+      "transport": "Transport",
+      "insurance": "Versicherung",
+      "other": "Sonstiges"
+    },
+    "deductionAmountLabel": "Betrag",
+    "deductionPeriodLabel": "Zeitraum",
+    "period": {
+      "day": "Pro Tag",
+      "week": "Pro Woche",
+      "month": "Pro Monat",
+      "once": "Einmalig"
+    },
+    "addDeductionLabel": "Abzug hinzufügen",
+    "noDeductionsLabel": "Keine Abzüge — bestätigt",
+    "removeLabel": "Entfernen",
+    "accommodationStateLabel": "Unterkunft",
+    "accommodationState": {
+      "offered": "Wird gestellt",
+      "not_offered": "Wird nicht gestellt",
+      "not_needed": "Nicht erforderlich"
+    },
+    "accommodationPayerLabel": "Wer zahlt",
+    "accommodationPayer": {
+      "employer": "Arbeitgeber zahlt",
+      "shared": "Kosten geteilt",
+      "worker": "Arbeitskraft zahlt"
+    },
+    "roomLabel": "Zimmer",
+    "room": {
+      "single": "Einzelzimmer",
+      "shared": "Geteiltes Zimmer"
+    },
+    "accommodationPriceLabel": "Preis",
+    "accommodationPricePeriodLabel": "Preiszeitraum",
+    "occupancyLabel": "Personen pro Zimmer",
+    "distanceKmLabel": "Entfernung zur Baustelle (km)",
+    "depositLabel": "Kaution",
+    "amenitiesLabel": "Ausstattung",
+    "amenity": {
+      "kitchen": "Küche",
+      "laundry": "Waschküche",
+      "internet": "Internet"
+    },
+    "familyPossibleLabel": "Partner / Familie möglich",
+    "internationalTravelLabel": "Anreise ins Land",
+    "dailyTransportLabel": "Täglicher Transport zur Baustelle",
+    "betweenSitesLabel": "Fahrten zwischen Baustellen",
+    "transportLevel": {
+      "provided": "Wird gestellt",
+      "compensated": "Wird erstattet",
+      "not_provided": "Wird nicht gestellt",
+      "unknown": "Nicht angegeben"
+    },
+    "arrivalPickupLabel": "Abholung vom Flughafen / Bahnhof",
+    "companyVehicleLabel": "Firmenfahrzeug",
+    "fuelCardLabel": "Tankkarte / Erstattung",
+    "ownVehicleRequiredLabel": "Eigenes Fahrzeug erforderlich",
+    "returnTravelLabel": "Zuschuss zur Heimreise",
+    "licenceCategoriesLabel": "Führerscheinklassen",
+    "minExperienceYearsLabel": "Mindesterfahrung (Jahre)",
+    "languagesLabel": "Sprachanforderungen",
+    "languageLabel": "Sprache",
+    "languageLevelLabel": "Niveau",
+    "onePerTeamLabel": "Ein Sprecher pro Kolonne genügt",
+    "addLanguageLabel": "Sprache hinzufügen",
+    "certificatesLabel": "Zertifikate und Berechtigungen",
+    "certificatesHelp": "Erforderliche Zertifikate (z. B. Sicherheitsausweis, Maschinenberechtigung) — als Fakten angegeben, als Anforderungen angezeigt.",
+    "addCertificateLabel": "Zertifikat hinzufügen",
+    "ownToolsLabel": "Eigenes Werkzeug",
+    "ownVehicleLabel": "Eigenes Fahrzeug",
+    "ownWorkwearLabel": "Eigene Arbeitskleidung",
+    "drawingsReadingLabel": "Liest Zeichnungen / Pläne",
+    "independentWorkLabel": "Arbeitet selbstständig",
+    "leadershipLabel": "Führt andere an",
+    "applicationMethodLabel": "Wie bewerben",
+    "applicationMethod": {
+      "interest_signal": "Interesse auf der Plattform zeigen",
+      "conversation": "Im Gespräch klären"
+    },
+    "interviewStagesLabel": "Gesprächsrunden",
+    "responseDeadlineDaysLabel": "Antwort innerhalb von (Tagen)",
+    "listingKindLabel": "Art der Anzeige",
+    "listingKind": {
+      "active_vacancy": "Aktive Stelle",
+      "talent_pool": "Talentpool (künftiger Bedarf)"
+    },
+    "practicalTestLabel": "Praktische Probe",
+    "documentVerificationLabel": "Dokumentenprüfung",
+    "talentPoolDisclosure": "Dies ist eine Talentpool-Anzeige: Bewerber werden für künftigen Bedarf gesammelt, nicht für eine aktive bestätigte Stelle. Arbeitskräfte sehen das immer.",
+    "honesty": {
+      "title": "Fehlende Vergütungsfakten — werden Arbeitskräften als Lücken angezeigt",
+      "missing_minimum": "Mindestvergütung ist nicht angegeben",
+      "missing_basis": "Brutto/Netto ist nicht angegeben",
+      "missing_guaranteed_hours": "Garantierte Stunden sind nicht angegeben",
+      "missing_deductions": "Abzüge sind nicht aufgeschlüsselt (oder nicht als „keine“ bestätigt)",
+      "max_without_min": "Nur ein „bis“-Betrag ist angegeben — kein Minimum"
+    },
+    "preview": {
+      "title": "So sehen Arbeitskräfte das heute",
+      "v2NotVisibleNote": "Erweiterte Angaben sind mit Ihrer Anfrage gespeichert. Arbeitskräfte sehen sie nach dem nächsten Plattform-Datenupdate — bis dahin sind nur die obigen Fakten sichtbar."
+    },
+    "prefillButton": "Aus meiner letzten Anfrage übernehmen",
+    "prefillLoading": "Wird geladen…",
+    "prefillEmpty": "Keine frühere Anfrage gefunden",
+    "prefillDone": "Aus Ihrer letzten Anfrage übernommen — prüfen und bearbeiten"
+  },
+  "workerPrefs": {
+    "title": "Arbeitspräferenzen",
+    "hint": "Geben Sie nur an, was wirklich auf Sie zutrifft — alles, was auf „Keine Angabe“ steht, bleibt ohne Angabe. Diese Präferenzen werden nur gemäß Ihren Datenschutz-Einwilligungen geteilt.",
+    "willingToRelocate": "Bereit, für die Arbeit umzuziehen",
+    "needsAccommodation": "Benötigt gestellte Unterkunft",
+    "hasTransport": "Eigenes Fahrzeug vorhanden",
+    "teamAvailable": "Kann im Team arbeiten",
+    "soloAvailable": "Kann allein arbeiten",
+    "maxTripDays": "Längste Montagereise (Tage)",
+    "contractType": "Bevorzugte Vertragsform",
+    "note": "Hinweis zur Verfügbarkeit",
+    "triState": {
+      "notStated": "Keine Angabe",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "contract": {
+      "employment": "Arbeitsvertrag",
+      "subcontract": "Subunternehmervertrag",
+      "temporary": "Zeitarbeit",
+      "any": "Beliebige Vertragsform"
+    },
+    "notePlaceholder": "Z. B. verfügbar ab August, bevorzugt 2-Wochen-Rotationen…",
+    "save": "Präferenzen speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Präferenzen gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "needsMigration": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "v2": {
+      "title": "Weitere Arbeitspräferenzen",
+      "hint": "Es gilt dieselbe Regel — alles, was auf „Nicht angegeben“ bleibt, bleibt nicht angegeben.",
+      "payBasis": "Basis der Lohnerwartung",
+      "payBasisOptions": {
+        "gross": "Brutto (vor Steuern)",
+        "net": "Netto (ausgezahlt)"
+      },
+      "nightShifts": "Bereit, Nachtschichten zu arbeiten",
+      "weekendShifts": "Bereit, am Wochenende zu arbeiten",
+      "overtime": "Bereit, Überstunden zu machen",
+      "licenceCategories": "Führerscheinklassen",
+      "ownVehicle": "Hat eigenes Fahrzeug",
+      "ownTools": "Hat eigenes Werkzeug",
+      "notEnabled": "Diese zusätzlichen Präferenzen sind noch nicht freigeschaltet — hier wird vorerst nichts gespeichert.",
+      "notSaved": "Gespeichert, außer den zusätzlichen Präferenzen — dieser Teil ist noch nicht freigeschaltet."
+    }
+  },
+  "workerLanguages": {
+    "title": "Sprachen",
+    "hint": "Fügen Sie die Sprachen hinzu, in denen Sie arbeiten können, und Ihr Niveau.",
+    "selfStated": "Diese Sprachen fügen Sie selbst hinzu — niemand überprüft sie.",
+    "language": "Sprache",
+    "level": "Niveau",
+    "levelNative": "Muttersprache",
+    "add": "Sprache hinzufügen",
+    "adding": "Wird hinzugefügt…",
+    "remove": "Entfernen",
+    "empty": "Noch keine Sprachen hinzugefügt.",
+    "notEnabled": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "invalid": "Wählen Sie eine Sprache und ein Niveau."
   }
 }
