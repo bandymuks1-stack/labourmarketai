@@ -10,6 +10,7 @@ import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
 import { ActionCard } from "@/components/app/action-card";
 import { MyZone, MyZoneImproves } from "@/components/app/my-zone";
+import { PrivacyStatusCard } from "@/components/app/privacy-status-card";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -651,6 +652,11 @@ export default async function DashboardOverviewPage({
           `incomplete` is the real first-use state (no profession or no
           entries yet); company actions appear only when a real company exists. */}
       <MyZone hasCompany={hasCompany} incomplete={isFirstUse} improves={false} />
+
+      {/* Privacy status — always visible, never blocking (consent v1):
+          shows whether employers can find this profile + the one link to
+          the canonical privacy screen. Default state = not visible. */}
+      <PrivacyStatusCard />
 
       {/* Remaining real pending states — everything the top slot did NOT
           promote, same honest count-gated cards as before. */}

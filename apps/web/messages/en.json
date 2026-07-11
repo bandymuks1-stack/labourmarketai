@@ -3562,15 +3562,15 @@
       "onboarding_required": "Please finish setting up your profile first."
     },
     "notifications": {
-        "types": {
-          "generic": "Notification",
-          "pending_invitations": "Invitations awaiting your response",
-          "unread_messages": "Unread messages",
-          "incoming_service_requests": "Service requests awaiting response",
-          "service_request_responses": "Answers to your requests",
-          "pending_bookings": "Booking proposals awaiting response",
-          "booking_responses": "Answers to your booking proposals"
-        },
+      "types": {
+        "generic": "Notification",
+        "pending_invitations": "Invitations awaiting your response",
+        "unread_messages": "Unread messages",
+        "incoming_service_requests": "Service requests awaiting response",
+        "service_request_responses": "Answers to your requests",
+        "pending_bookings": "Booking proposals awaiting response",
+        "booking_responses": "Answers to your booking proposals"
+      },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
       "emptyBody": "If something important comes up, you'll see it here.",
@@ -4238,16 +4238,20 @@
           "heading": "Who can see your data",
           "items": [
             "Access is closed by default: data you enter belongs to your account, and other users see nothing unless a specific rule allows it.",
+            "Your professional profile is NOT visible to companies or agencies by default. It can appear in company searches only after you yourself switch on employer visibility in your privacy settings — registration, accepting the terms or filling in your profile never makes it visible.",
+            "Even with visibility on, companies see only a limited professional summary (profession, experience, skills, approximate region, availability, languages, pay expectation if you entered it). Your surname, phone, email, exact address, CV file and documents are never part of it.",
+            "Your CV, contact details or documents reach a specific company only after your separate confirmation for that company and that need. Every completed transfer is recorded in a disclosure log you can see.",
             "Worker documents are not shown to employers or agencies without the worker's consent, and employers cannot read a worker's saved locations.",
-            "Messages are visible only to the participants of the conversation.",
-            "The full plain-language summary is on the page “Your data and who can see it”."
+            "Messages are visible only to the participants of the conversation."
           ]
         },
         {
           "heading": "Consent",
           "items": [
-            "Where a feature shares data further, it asks for your explicit consent first.",
-            "You can revoke a consent at any time. Revocation is recorded: the consent history is kept as an audit trail instead of being erased, so it stays clear who agreed to what and when."
+            "Consent purposes are separate: employer visibility of your professional profile and a data transfer to a specific company are two different choices — neither is bundled with the Terms, pre-ticked, or required to use your account, CV or work journal.",
+            "Every consent screen shows the exact versioned text, what becomes visible, what stays private, and both choices side by side (enable / not now). Declining changes nothing about your account.",
+            "You can withdraw any consent at any time in your privacy settings, in one step. After withdrawal your profile stops appearing in new company searches immediately; data a company already lawfully received while the permission was valid may still be held by that company — we say this honestly.",
+            "The consent history is permanent: every grant and every withdrawal is kept as a separate unchangeable record with its text version, language, time and purpose. Nobody — including administrators — can edit or delete it, and no administrator can give consent on your behalf."
           ]
         },
         {
@@ -5092,8 +5096,7 @@
       "joinLabel": "Join conversation",
       "joinPending": "Joining..."
     },
-    "originalLanguage": "Original ({lang})"
-,
+    "originalLanguage": "Original ({lang})",
     "source": {
       "scouting": "About a work request (scouting)",
       "demand_interest": "About a work request (worker interest)",
@@ -5150,30 +5153,30 @@
     }
   },
   "helpRequests": {
-      "title": "Internal help requests",
-      "intro": "Choose what you need help with — we register an internal request that a person will review. Nothing is sent outside the platform.",
-      "types": {
-        "recruiter": "Recruiter help",
-        "accounting": "Accounting help",
-        "legal": "Legal help",
-        "documents": "Document check",
-        "demand_filling": "Help filling the demand"
-      },
-      "noteLabel": "Briefly describe the situation (optional)",
-      "notePlaceholder": "E.g.: need 4 bricklayers in the Netherlands from August…",
-      "demandContextLabel": "Link to your demand (optional)",
-      "demandContextNone": "No specific demand",
-      "submit": "Register request",
-      "submitting": "Registering…",
-      "sentTitle": "Request registered",
-      "sentBody": "A person will review it and reach out through the platform. No specialist is assigned automatically — you will hear about next steps after the review.",
-      "errorGeneric": "Could not register. Please try again.",
-      "notReady": "Help requests are not enabled in this environment yet.",
-      "tooManyOpen": "You have too many open help requests — please wait until the existing ones are reviewed.",
-      "noteTooLong": "The description is too long (max 500 characters).",
-      "internalNote": "Internal record — no emails or messages are sent to anyone.",
-      "explanationPending": "The explanation is being prepared from the Lithuanian master version."
+    "title": "Internal help requests",
+    "intro": "Choose what you need help with — we register an internal request that a person will review. Nothing is sent outside the platform.",
+    "types": {
+      "recruiter": "Recruiter help",
+      "accounting": "Accounting help",
+      "legal": "Legal help",
+      "documents": "Document check",
+      "demand_filling": "Help filling the demand"
     },
+    "noteLabel": "Briefly describe the situation (optional)",
+    "notePlaceholder": "E.g.: need 4 bricklayers in the Netherlands from August…",
+    "demandContextLabel": "Link to your demand (optional)",
+    "demandContextNone": "No specific demand",
+    "submit": "Register request",
+    "submitting": "Registering…",
+    "sentTitle": "Request registered",
+    "sentBody": "A person will review it and reach out through the platform. No specialist is assigned automatically — you will hear about next steps after the review.",
+    "errorGeneric": "Could not register. Please try again.",
+    "notReady": "Help requests are not enabled in this environment yet.",
+    "tooManyOpen": "You have too many open help requests — please wait until the existing ones are reviewed.",
+    "noteTooLong": "The description is too long (max 500 characters).",
+    "internalNote": "Internal record — no emails or messages are sent to anyone.",
+    "explanationPending": "The explanation is being prepared from the Lithuanian master version."
+  },
   "salesIntake": {
     "title": "Sales intake",
     "intro": "A view of who is coming in: submitted demand requests in review, waitlist signups, and stored leads. Viewing only — real recorded rows, nothing editable here.",
@@ -5736,30 +5739,30 @@
     "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "The documents storage layer is not enabled in this environment yet.",
     "guidance": {
-        "title": "Document guidance by country (draft)",
-        "intro": "Informational guidance about documents that may be needed. Not legal advice.",
-        "pendingNotice": "Legal/document guidance is being prepared from the Lithuanian master version.",
-        "draftDisclaimer": "DRAFT: informational only, awaiting owner and legal review. Always check official sources.",
-        "statusSummary": "Items: {total} · awaiting legal review: {awaiting}",
-        "status": {
-          "LT_DRAFT_READY": "LT draft ready",
-          "OWNER_EDITING": "Owner editing",
-          "OWNER_APPROVED_LT": "LT approved by owner",
-          "TRANSLATION_READY": "Ready for translation",
-          "TRANSLATED": "Translated"
-        },
-        "needsLegalReview": "Awaiting legal review",
-        "whoProvides": "Who usually arranges it",
-        "groupAll": "General (all countries)",
-        "helpInfoNote": "For now this is informational guidance only. A way to request document, accounting or legal help through the platform is being prepared.",
-        "dimensions": {
-          "worker_country": "Worker country",
-          "company_country": "Company country",
-          "work_country": "Work country",
-          "role_service_type": "Type of work",
-          "engagement_context": "Engagement type"
-        }
+      "title": "Document guidance by country (draft)",
+      "intro": "Informational guidance about documents that may be needed. Not legal advice.",
+      "pendingNotice": "Legal/document guidance is being prepared from the Lithuanian master version.",
+      "draftDisclaimer": "DRAFT: informational only, awaiting owner and legal review. Always check official sources.",
+      "statusSummary": "Items: {total} · awaiting legal review: {awaiting}",
+      "status": {
+        "LT_DRAFT_READY": "LT draft ready",
+        "OWNER_EDITING": "Owner editing",
+        "OWNER_APPROVED_LT": "LT approved by owner",
+        "TRANSLATION_READY": "Ready for translation",
+        "TRANSLATED": "Translated"
       },
+      "needsLegalReview": "Awaiting legal review",
+      "whoProvides": "Who usually arranges it",
+      "groupAll": "General (all countries)",
+      "helpInfoNote": "For now this is informational guidance only. A way to request document, accounting or legal help through the platform is being prepared.",
+      "dimensions": {
+        "worker_country": "Worker country",
+        "company_country": "Company country",
+        "work_country": "Work country",
+        "role_service_type": "Type of work",
+        "engagement_context": "Engagement type"
+      }
+    },
     "noWorker": "Create your worker profile first — documents attach to it.",
     "error": "Could not load your documents.",
     "empty": "No documents recorded yet. Start with your CV and ID document.",
@@ -6446,7 +6449,17 @@
       "requestsSubmitted": "Submitted customer requests",
       "queueLink": "Open the company-need intake queue"
     },
-    "gapNote": "What the data model cannot prove today (consent provenance, availability freshness, brigade composition, profile source) is deliberately NOT shown as a number — see docs/launch/real-supply-readiness-gap-v1.md."
+    "gapNote": "What the data model cannot prove today (consent provenance, availability freshness, brigade composition, profile source) is deliberately NOT shown as a number — see docs/launch/real-supply-readiness-gap-v1.md.",
+    "privacy": {
+      "title": "Privacy and consents",
+      "discoverable": "Visible to companies (granted)",
+      "awaiting": "Awaiting choice",
+      "withdrawn": "Withdrew visibility",
+      "stale": "Stale text version",
+      "activePermissions": "Active transfer permissions",
+      "completedDisclosures": "Completed disclosures",
+      "note": "Counts come only from real consent-ledger rows. An admin cannot grant consent on a user's behalf — state is view-only."
+    }
   },
   "billingStatus": {
     "badge": {
@@ -6812,7 +6825,12 @@
     "none": "—",
     "empty": "No candidates match these filters.",
     "needsMigration": "The worker supply tables are not available yet.",
-    "error": "Could not load the candidate pool."
+    "error": "Could not load the candidate pool.",
+    "colPermission": "Worker permission",
+    "permissionGranted": "Visibility granted",
+    "permissionAwaiting": "Awaiting worker permission",
+    "permissionWithdrawn": "Permission withdrawn",
+    "permissionNote": "Without the worker's individual confirmation a candidate cannot be introduced to a company."
   },
   "matchPreview": {
     "title": "Match preview",
@@ -7312,6 +7330,75 @@
         "body": "When a site, work entries or handover actions appear, they will show here.",
         "cta": "View projects"
       }
+    }
+  },
+  "privacyConsent": {
+    "sections": {
+      "visibility": "Employer visibility",
+      "disclosures": "Data transfers to companies",
+      "history": "Consent history",
+      "rights": "Privacy rights and contact"
+    },
+    "status": {
+      "hidden": "Profile not visible to employers",
+      "hiddenBody": "Only you can see your profile, CV and contact details. Choose whether companies may find you.",
+      "visible": "Professional profile visible to companies",
+      "visibleBody": "Companies can find a limited professional profile. Contacts and CV are shared only with your separate confirmation.",
+      "withdrawn": "Visibility switched off",
+      "stale": "The consent text was updated — a new choice is needed"
+    },
+    "actions": {
+      "grant": "I agree — enable visibility",
+      "decline": "Not now",
+      "manage": "Review or switch off",
+      "withdraw": "Switch visibility off",
+      "review": "Review visibility settings"
+    },
+    "preview": {
+      "title": "This is how companies would see your profile",
+      "empty": "Your profile is still empty — companies would only see a blank card.",
+      "displayName": "Name",
+      "professions": "Profession",
+      "experienceYears": "Experience (yrs)",
+      "preferredCountries": "Preferred region",
+      "availability": "Availability",
+      "salaryExpectation": "Pay expectation",
+      "skillsCount": "Skills"
+    },
+    "labels": {
+      "decidedAt": "Chosen",
+      "version": "Version",
+      "needsMigration": "This feature is not yet enabled on the server. Your profile stays private.",
+      "error": "Could not save. Please try again.",
+      "declinedNote": "Okay — your profile stays private. You can find this choice here at any time."
+    },
+    "disclosures": {
+      "intro": "Every transfer of your CV, contacts or other data to a specific company happens only after your separate confirmation.",
+      "empty": "No transfers yet. Nothing is passed to companies without your confirmation."
+    },
+    "history": {
+      "empty": "No records yet. Every consent and withdrawal will be listed here.",
+      "action": {
+        "granted": "Granted",
+        "withdrawn": "Withdrawn"
+      },
+      "purpose": {
+        "profile_discoverability": "Employer visibility",
+        "employer_data_disclosure": "Data transfer to a company"
+      }
+    },
+    "fields": {
+      "full_name": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "cv_document": "CV file",
+      "preferred_locations": "Preferred locations",
+      "availability_details": "Availability details",
+      "salary_expectation": "Pay expectation"
+    },
+    "rights": {
+      "notice": "More about your rights and how data is handled:",
+      "noticeLink": "privacy notice"
     }
   }
 }

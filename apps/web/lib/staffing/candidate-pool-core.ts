@@ -84,10 +84,10 @@ function availableByOk(c: CandidateInput, byDate: string): boolean {
   return from <= byDate;
 }
 
-export function filterCandidates(
-  views: readonly CandidateView[],
+export function filterCandidates<T extends CandidateView>(
+  views: readonly T[],
   filters: CandidateFilters,
-): CandidateView[] {
+): T[] {
   const country = filters.country?.toUpperCase();
   const search = filters.search?.trim().toLowerCase();
   return views.filter((c) => {

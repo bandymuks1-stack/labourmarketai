@@ -79,6 +79,11 @@ export default async function CandidatePoolPage({
     expYears: t("expYears"),
     none: t("none"),
     empty: t("empty"),
+    colPermission: t("colPermission"),
+    permissionGranted: t("permissionGranted"),
+    permissionAwaiting: t("permissionAwaiting"),
+    permissionWithdrawn: t("permissionWithdrawn"),
+    permissionNote: t("permissionNote"),
   };
 
   const professionLabels: Record<string, string> = {

@@ -303,6 +303,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // write-only table (RLS on, NO anon/authenticated policy) + ONE new
     // SECURITY DEFINER RPC (submit_company_need_public_v1) granted to anon;
     // customer_requests untouched; DRAFT, needs-human-gate, owner-gated apply.
-    expect(guard).toMatch(/SPRINT_BASELINE = 115/);
+    // Then to 116 for consent-and-disclosure v1 (20260711130000
+    // privacy_consent_and_disclosure_v1) — owner-authorized in the consent
+    // goal command: append-only consent + disclosure ledgers, fail-closed
+    // employer RLS swap, narrow SECURITY DEFINER RPCs (authenticated only);
+    // @human-gate-approved; paired rollback; applied via Supabase MCP.
+    expect(guard).toMatch(/SPRINT_BASELINE = 116/);
   });
 });

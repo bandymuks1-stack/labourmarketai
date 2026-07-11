@@ -3562,15 +3562,15 @@
       "onboarding_required": "Pirmiausia užpildykite profilį."
     },
     "notifications": {
-        "types": {
-          "generic": "Pranešimas",
-          "pending_invitations": "Laukiantys pakvietimai prisijungti",
-          "unread_messages": "Neperskaitytos žinutės",
-          "incoming_service_requests": "Laukiančios paslaugų užklausos",
-          "service_request_responses": "Atsakymai į jūsų užklausas",
-          "pending_bookings": "Laukiantys rezervacijų pasiūlymai",
-          "booking_responses": "Atsakymai į rezervacijų pasiūlymus"
-        },
+      "types": {
+        "generic": "Pranešimas",
+        "pending_invitations": "Laukiantys pakvietimai prisijungti",
+        "unread_messages": "Neperskaitytos žinutės",
+        "incoming_service_requests": "Laukiančios paslaugų užklausos",
+        "service_request_responses": "Atsakymai į jūsų užklausas",
+        "pending_bookings": "Laukiantys rezervacijų pasiūlymai",
+        "booking_responses": "Atsakymai į rezervacijų pasiūlymus"
+      },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
       "emptyBody": "Jei atsiras svarbus prašymas ar žinutė, matysite tai čia.",
@@ -4237,17 +4237,21 @@
         {
           "heading": "Kas gali matyti jūsų duomenis",
           "items": [
-            "Prieiga uždaryta pagal nutylėjimą: jūsų įvesti duomenys priklauso jūsų paskyrai, o kiti naudotojai nemato nieko, ko neleidžia konkreti taisyklė.",
-            "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo, o darbdaviai negali matyti darbuotojo išsaugotų vietovių.",
-            "Žinutes mato tik pokalbio dalyviai.",
-            "Išsamus paaiškinimas paprastais žodžiais — puslapyje „Jūsų duomenys ir kas juos mato“."
+            "Prieiga uždara pagal nutylėjimą: jūsų įvesti duomenys priklauso jūsų paskyrai, kiti vartotojai nemato nieko, nebent tai leidžia konkreti taisyklė.",
+            "Jūsų profesinis profilis pagal nutylėjimą NĖRA matomas įmonėms ar agentūroms. Įmonių paieškoje jis gali atsirasti tik jums patiems įjungus darbdavių matomumą privatumo nustatymuose — registracija, taisyklių priėmimas ar profilio užpildymas matomumo nesuteikia.",
+            "Net įjungus matomumą, įmonės mato tik ribotą profesinę santrauką (profesiją, patirtį, įgūdžius, apytikslį regioną, prieinamumą, kalbas, atlygio lūkestį, jei jį įvedėte). Pavardė, telefonas, el. paštas, tikslus adresas, CV failas ir dokumentai niekada į ją nepatenka.",
+            "Jūsų CV, kontaktai ar dokumentai konkrečiai įmonei perduodami tik po atskiro jūsų patvirtinimo tai įmonei ir tam poreikiui. Kiekvienas įvykdytas perdavimas fiksuojamas jums matomame perdavimų žurnale.",
+            "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo, o darbdaviai negali matyti darbuotojo išsaugotų vietų.",
+            "Žinutės matomos tik pokalbio dalyviams."
           ]
         },
         {
           "heading": "Sutikimas",
           "items": [
-            "Kai funkcija dalijasi duomenimis toliau, ji pirmiausia paprašo jūsų aiškaus sutikimo.",
-            "Sutikimą galite bet kada atšaukti. Atšaukimas įrašomas: sutikimų istorija saugoma kaip audito seka, o ne ištrinama, todėl visada aišku, kas, kada ir su kuo sutiko."
+            "Sutikimų tikslai atskirti: profesinio profilio matomumas darbdaviams ir duomenų perdavimas konkrečiai įmonei yra du skirtingi pasirinkimai — nė vienas nesujungtas su taisyklėmis, nepažymėtas iš anksto ir nebūtinas paskyrai, CV ar darbo žurnalui naudoti.",
+            "Kiekviename sutikimo ekrane rodomas tikslus versijuotas tekstas, kas taps matoma, kas liks privatu, ir abu pasirinkimai greta (įjungti / dabar neįjungti). Atsisakymas nieko nekeičia jūsų paskyroje.",
+            "Bet kurį sutikimą galite atšaukti bet kada privatumo nustatymuose vienu žingsniu. Po atšaukimo profilis iškart nustoja rodytis naujose įmonių paieškose; duomenys, kuriuos įmonė teisėtai gavo leidimo galiojimo metu, gali likti pas tą įmonę — apie tai sakome sąžiningai.",
+            "Sutikimų istorija yra tik pildoma: kiekvienas suteikimas ir atšaukimas — atskiras nekintamas įrašas su teksto versija, kalba, laiku ir tikslu. Niekas — įskaitant administratorius — negali jo redaguoti ar ištrinti, o administratorius negali duoti sutikimo jūsų vardu."
           ]
         },
         {
@@ -5092,8 +5096,7 @@
       "joinLabel": "Prisijungti prie pokalbio",
       "joinPending": "Jungiamasi..."
     },
-    "originalLanguage": "Originalas ({lang})"
-,
+    "originalLanguage": "Originalas ({lang})",
     "source": {
       "scouting": "Dėl jūsų darbo užklausos (atranka)",
       "demand_interest": "Dėl darbo užklausos (darbuotojo susidomėjimas)",
@@ -5150,30 +5153,30 @@
     }
   },
   "helpRequests": {
-      "title": "Vidinės pagalbos užklausos",
-      "intro": "Pasirinkite, kokios pagalbos reikia — užregistruosime vidinę užklausą, kurią peržiūrės žmogus. Niekas neišsiunčiama už platformos ribų.",
-      "types": {
-        "recruiter": "Rekruterio pagalba",
-        "accounting": "Buhalterijos pagalba",
-        "legal": "Teisinė pagalba",
-        "documents": "Dokumentų patikra",
-        "demand_filling": "Pagalba pildant poreikį"
-      },
-      "noteLabel": "Trumpai aprašykite situaciją (neprivaloma)",
-      "notePlaceholder": "Pvz.: reikia 4 mūrininkų Nyderlanduose nuo rugpjūčio…",
-      "demandContextLabel": "Susieti su jūsų poreikiu (neprivaloma)",
-      "demandContextNone": "Be konkretaus poreikio",
-      "submit": "Registruoti užklausą",
-      "submitting": "Registruojama…",
-      "sentTitle": "Užklausa užregistruota",
-      "sentBody": "Ją peržiūrės žmogus ir susisieks per platformą. Specialistas nėra priskiriamas automatiškai — apie tolimesnius žingsnius sužinosite peržiūrėjus užklausą.",
-      "errorGeneric": "Nepavyko užregistruoti. Bandykite dar kartą.",
-      "notReady": "Pagalbos užklausos šioje aplinkoje dar neįjungtos.",
-      "tooManyOpen": "Turite per daug atvirų pagalbos užklausų — palaukite, kol bus peržiūrėtos esamos.",
-      "noteTooLong": "Aprašymas per ilgas (iki 500 ženklų).",
-      "internalNote": "Vidinis įrašas — jokie laiškai ar žinutės niekam nesiunčiami.",
-      "explanationPending": "Paaiškinimas ruošiamas iš lietuviško pagrindinio teksto."
+    "title": "Vidinės pagalbos užklausos",
+    "intro": "Pasirinkite, kokios pagalbos reikia — užregistruosime vidinę užklausą, kurią peržiūrės žmogus. Niekas neišsiunčiama už platformos ribų.",
+    "types": {
+      "recruiter": "Rekruterio pagalba",
+      "accounting": "Buhalterijos pagalba",
+      "legal": "Teisinė pagalba",
+      "documents": "Dokumentų patikra",
+      "demand_filling": "Pagalba pildant poreikį"
     },
+    "noteLabel": "Trumpai aprašykite situaciją (neprivaloma)",
+    "notePlaceholder": "Pvz.: reikia 4 mūrininkų Nyderlanduose nuo rugpjūčio…",
+    "demandContextLabel": "Susieti su jūsų poreikiu (neprivaloma)",
+    "demandContextNone": "Be konkretaus poreikio",
+    "submit": "Registruoti užklausą",
+    "submitting": "Registruojama…",
+    "sentTitle": "Užklausa užregistruota",
+    "sentBody": "Ją peržiūrės žmogus ir susisieks per platformą. Specialistas nėra priskiriamas automatiškai — apie tolimesnius žingsnius sužinosite peržiūrėjus užklausą.",
+    "errorGeneric": "Nepavyko užregistruoti. Bandykite dar kartą.",
+    "notReady": "Pagalbos užklausos šioje aplinkoje dar neįjungtos.",
+    "tooManyOpen": "Turite per daug atvirų pagalbos užklausų — palaukite, kol bus peržiūrėtos esamos.",
+    "noteTooLong": "Aprašymas per ilgas (iki 500 ženklų).",
+    "internalNote": "Vidinis įrašas — jokie laiškai ar žinutės niekam nesiunčiami.",
+    "explanationPending": "Paaiškinimas ruošiamas iš lietuviško pagrindinio teksto."
+  },
   "salesIntake": {
     "title": "Pardavimų srautas",
     "intro": "Tik peržiūrai skirtas vaizdas, kas ateina: pateiktos poreikio užklausos peržiūroje, laukiančiųjų sąrašo registracijos ir įrašyti kontaktai. Tik realūs įrašai.",
@@ -5736,30 +5739,30 @@
     "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
     "needsMigration": "Dokumentų saugojimo sluoksnis šioje aplinkoje dar neįjungtas.",
     "guidance": {
-        "title": "Dokumentų gairės pagal šalį (juodraštis)",
-        "intro": "Informacinio pobūdžio gairės, kokių dokumentų gali reikėti pagal darbuotojo registracijos šalį, įmonės registracijos šalį, darbo šalį ir darbo pobūdį. Tai nėra teisinė konsultacija.",
-        "pendingNotice": "Teisinės / dokumentų gairės ruošiamos iš lietuviško pagrindinio teksto.",
-        "draftDisclaimer": "JUODRAŠTIS: visos šios gairės yra informacinio pobūdžio ir dar laukia savininko bei teisininko peržiūros. Jos nieko negarantuoja — kiekvienu atveju reikia pasitikrinti oficialiuose šaltiniuose.",
-        "statusSummary": "Įrašų: {total} · laukia teisininko peržiūros: {awaiting}",
-        "status": {
-          "LT_DRAFT_READY": "LT juodraštis paruoštas",
-          "OWNER_EDITING": "Savininkas redaguoja",
-          "OWNER_APPROVED_LT": "LT patvirtinta savininko",
-          "TRANSLATION_READY": "Paruošta vertimui",
-          "TRANSLATED": "Išversta"
-        },
-        "needsLegalReview": "Laukia teisininko peržiūros",
-        "whoProvides": "Kas dažniausiai pasirūpina",
-        "groupAll": "Bendra (visos šalys)",
-        "helpInfoNote": "Kol kas tai tik informacinės gairės. Galimybė per platformą paprašyti dokumentų, buhalterijos ar teisinės pagalbos dar ruošiama.",
-        "dimensions": {
-          "worker_country": "Darbuotojo šalis",
-          "company_country": "Įmonės šalis",
-          "work_country": "Darbo šalis",
-          "role_service_type": "Darbo pobūdis",
-          "engagement_context": "Santykio tipas"
-        }
+      "title": "Dokumentų gairės pagal šalį (juodraštis)",
+      "intro": "Informacinio pobūdžio gairės, kokių dokumentų gali reikėti pagal darbuotojo registracijos šalį, įmonės registracijos šalį, darbo šalį ir darbo pobūdį. Tai nėra teisinė konsultacija.",
+      "pendingNotice": "Teisinės / dokumentų gairės ruošiamos iš lietuviško pagrindinio teksto.",
+      "draftDisclaimer": "JUODRAŠTIS: visos šios gairės yra informacinio pobūdžio ir dar laukia savininko bei teisininko peržiūros. Jos nieko negarantuoja — kiekvienu atveju reikia pasitikrinti oficialiuose šaltiniuose.",
+      "statusSummary": "Įrašų: {total} · laukia teisininko peržiūros: {awaiting}",
+      "status": {
+        "LT_DRAFT_READY": "LT juodraštis paruoštas",
+        "OWNER_EDITING": "Savininkas redaguoja",
+        "OWNER_APPROVED_LT": "LT patvirtinta savininko",
+        "TRANSLATION_READY": "Paruošta vertimui",
+        "TRANSLATED": "Išversta"
       },
+      "needsLegalReview": "Laukia teisininko peržiūros",
+      "whoProvides": "Kas dažniausiai pasirūpina",
+      "groupAll": "Bendra (visos šalys)",
+      "helpInfoNote": "Kol kas tai tik informacinės gairės. Galimybė per platformą paprašyti dokumentų, buhalterijos ar teisinės pagalbos dar ruošiama.",
+      "dimensions": {
+        "worker_country": "Darbuotojo šalis",
+        "company_country": "Įmonės šalis",
+        "work_country": "Darbo šalis",
+        "role_service_type": "Darbo pobūdis",
+        "engagement_context": "Santykio tipas"
+      }
+    },
     "noWorker": "Pirmiausia susikurk darbuotojo profilį — dokumentai priklauso jam.",
     "error": "Nepavyko įkelti tavo dokumentų.",
     "empty": "Dokumentų dar neužfiksuota. Pradėk nuo CV ir asmens dokumento.",
@@ -6446,7 +6449,17 @@
       "requestsSubmitted": "Pateiktos klientų užklausos",
       "queueLink": "Atidaryti įmonių poreikių eilę"
     },
-    "gapNote": "Ko duomenų modelis šiandien negali įrodyti (sutikimo kilmė, prieinamumo šviežumas, brigados sudėtis, profilio šaltinis), sąmoningai NErodoma kaip skaičius — žr. docs/launch/real-supply-readiness-gap-v1.md."
+    "gapNote": "Ko duomenų modelis šiandien negali įrodyti (sutikimo kilmė, prieinamumo šviežumas, brigados sudėtis, profilio šaltinis), sąmoningai NErodoma kaip skaičius — žr. docs/launch/real-supply-readiness-gap-v1.md.",
+    "privacy": {
+      "title": "Privatumas ir sutikimai",
+      "discoverable": "Matomi įmonėms (granted)",
+      "awaiting": "Laukia pasirinkimo",
+      "withdrawn": "Atšaukė matomumą",
+      "stale": "Pasenusi teksto versija",
+      "activePermissions": "Aktyvūs perdavimo leidimai",
+      "completedDisclosures": "Įvykdyti perdavimai",
+      "note": "Skaičiai tik iš realių sutikimų žurnalo įrašų. Administratorius negali suteikti sutikimo vartotojo vardu — galima tik matyti būseną."
+    }
   },
   "billingStatus": {
     "badge": {
@@ -6812,7 +6825,12 @@
     "none": "—",
     "empty": "Pagal šiuos filtrus kandidatų nėra.",
     "needsMigration": "Darbo jėgos pasiūlos lentelės dar neprieinamos.",
-    "error": "Nepavyko įkelti kandidatų telkinio."
+    "error": "Nepavyko įkelti kandidatų telkinio.",
+    "colPermission": "Darbuotojo leidimas",
+    "permissionGranted": "Matomumas leistas",
+    "permissionAwaiting": "Laukiama darbuotojo leidimo",
+    "permissionWithdrawn": "Leidimas atšauktas",
+    "permissionNote": "Be darbuotojo individualaus patvirtinimo kandidatas negali būti pristatytas įmonei."
   },
   "matchPreview": {
     "title": "Atitikimo peržiūra",
@@ -7312,6 +7330,75 @@
         "body": "Kai atsiras objektas, darbų įrašai ar perdavimo veiksmai, jie bus matomi čia.",
         "cta": "Peržiūrėti projektus"
       }
+    }
+  },
+  "privacyConsent": {
+    "sections": {
+      "visibility": "Darbdavių matomumas",
+      "disclosures": "Duomenų perdavimai įmonėms",
+      "history": "Sutikimų istorija",
+      "rights": "Privatumo teisės ir kontaktas"
+    },
+    "status": {
+      "hidden": "Profilis darbdaviams nematomas",
+      "hiddenBody": "Jūsų profilį, CV ir kontaktus matote tik jūs. Pasirinkite, ar norite būti randamas įmonių.",
+      "visible": "Profesinis profilis matomas įmonėms",
+      "visibleBody": "Įmonės gali rasti ribotą jūsų profesinį profilį. Kontaktai ir CV perduodami tik su atskiru jūsų patvirtinimu.",
+      "withdrawn": "Matomumas išjungtas",
+      "stale": "Sutikimo tekstas atnaujintas — reikalingas naujas pasirinkimas"
+    },
+    "actions": {
+      "grant": "Sutinku ir įjungiu matomumą",
+      "decline": "Dabar neįjungti",
+      "manage": "Peržiūrėti arba išjungti",
+      "withdraw": "Išjungti matomumą",
+      "review": "Peržiūrėti matomumo nustatymus"
+    },
+    "preview": {
+      "title": "Taip jūsų profilį matys įmonės",
+      "empty": "Profilis dar neužpildytas — įmonės matytų tik tuščią kortelę.",
+      "displayName": "Vardas",
+      "professions": "Profesija",
+      "experienceYears": "Patirtis (m.)",
+      "preferredCountries": "Pageidaujamas regionas",
+      "availability": "Prieinamumas",
+      "salaryExpectation": "Atlygio lūkestis",
+      "skillsCount": "Įgūdžių"
+    },
+    "labels": {
+      "decidedAt": "Pasirinkta",
+      "version": "Versija",
+      "needsMigration": "Ši funkcija dar neįjungta serveryje. Jūsų profilis lieka privatus.",
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "declinedNote": "Gerai — profilis lieka privatus. Šį pasirinkimą rasite čia bet kada."
+    },
+    "disclosures": {
+      "intro": "Kiekvienas CV, kontaktų ar kitų duomenų perdavimas konkrečiai įmonei vyksta tik po atskiro jūsų patvirtinimo.",
+      "empty": "Kol kas jokių perdavimų nėra. Be jūsų patvirtinimo įmonėms neperduodama nieko."
+    },
+    "history": {
+      "empty": "Įrašų dar nėra. Čia matysite kiekvieną savo sutikimą ir atšaukimą.",
+      "action": {
+        "granted": "Suteikta",
+        "withdrawn": "Atšaukta"
+      },
+      "purpose": {
+        "profile_discoverability": "Darbdavių matomumas",
+        "employer_data_disclosure": "Duomenų perdavimas įmonei"
+      }
+    },
+    "fields": {
+      "full_name": "Vardas ir pavardė",
+      "phone": "Telefonas",
+      "email": "El. paštas",
+      "cv_document": "CV failas",
+      "preferred_locations": "Pageidaujamos vietos",
+      "availability_details": "Prieinamumo detalės",
+      "salary_expectation": "Atlygio lūkestis"
+    },
+    "rights": {
+      "notice": "Daugiau apie jūsų teises ir duomenų tvarkymą:",
+      "noticeLink": "privatumo pranešimas"
     }
   }
 }
