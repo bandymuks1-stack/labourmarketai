@@ -4237,17 +4237,21 @@
         {
           "heading": "Wie je gegevens kan zien",
           "items": [
-            "Toegang is standaard gesloten: gegevens die je invoert horen bij je account, en andere gebruikers zien niets tenzij een specifieke regel het toestaat.",
-            "Documenten van werknemers worden niet getoond aan werkgevers of uitzendbureaus zonder toestemming van de werknemer, en werkgevers kunnen de opgeslagen locaties van een werknemer niet inzien.",
-            "Berichten zijn alleen zichtbaar voor de deelnemers aan het gesprek.",
-            "De volledige samenvatting in gewone taal staat op de pagina “Je gegevens en wie ze kan zien”."
+            "Toegang is standaard gesloten: gegevens die u invoert horen bij uw account; andere gebruikers zien niets tenzij een specifieke regel dat toestaat.",
+            "Uw professionele profiel is standaard NIET zichtbaar voor bedrijven of bureaus. Het kan alleen in bedrijfszoekopdrachten verschijnen nadat u zelf de werkgeverszichtbaarheid inschakelt in uw privacy-instellingen — registratie, het accepteren van de voorwaarden of het invullen van uw profiel maakt het nooit zichtbaar.",
+            "Ook met zichtbaarheid aan zien bedrijven alleen een beperkte professionele samenvatting (beroep, ervaring, vaardigheden, globale regio, beschikbaarheid, talen, loonverwachting als u die invulde). Uw achternaam, telefoon, e-mail, exacte adres, cv-bestand en documenten horen daar nooit bij.",
+            "Uw cv, contactgegevens of documenten bereiken een specifiek bedrijf pas na uw afzonderlijke bevestiging voor dat bedrijf en die aanvraag. Elke uitgevoerde overdracht wordt vastgelegd in een voor u zichtbaar overdrachtenlogboek.",
+            "Werknemersdocumenten worden niet aan werkgevers of bureaus getoond zonder toestemming van de werknemer, en werkgevers kunnen de opgeslagen locaties van een werknemer niet inzien.",
+            "Berichten zijn alleen zichtbaar voor de deelnemers aan het gesprek."
           ]
         },
         {
           "heading": "Toestemming",
           "items": [
-            "Wanneer een functie gegevens verder deelt, vraagt die eerst om je uitdrukkelijke toestemming.",
-            "Je kunt een toestemming op elk moment intrekken. De intrekking wordt vastgelegd: de toestemmingsgeschiedenis wordt bewaard als audittrail in plaats van gewist, zodat duidelijk blijft wie waarmee en wanneer heeft ingestemd."
+            "Toestemmingsdoelen zijn gescheiden: werkgeverszichtbaarheid van uw professionele profiel en een gegevensoverdracht aan een specifiek bedrijf zijn twee verschillende keuzes — geen van beide is gebundeld met de voorwaarden, vooraf aangevinkt of vereist om uw account, cv of werkdagboek te gebruiken.",
+            "Elk toestemmingsscherm toont de exacte geversioneerde tekst, wat zichtbaar wordt, wat privé blijft, en beide keuzes naast elkaar (inschakelen / niet nu). Weigeren verandert niets aan uw account.",
+            "U kunt elke toestemming op elk moment in één stap intrekken in uw privacy-instellingen. Na intrekking verschijnt uw profiel direct niet meer in nieuwe bedrijfszoekopdrachten; gegevens die een bedrijf rechtmatig ontving terwijl de toestemming geldig was, kunnen bij dat bedrijf blijven — dat zeggen wij eerlijk.",
+            "De toestemmingsgeschiedenis is alleen-toevoegen: elke verlening en elke intrekking is een afzonderlijke permanente registratie met tekstversie, taal, tijd en doel. Niemand — ook beheerders niet — kan haar bewerken of verwijderen, en een beheerder kan geen toestemming namens u geven."
           ]
         },
         {
@@ -6445,7 +6449,17 @@
       "requestsSubmitted": "Ingediende klantaanvragen",
       "queueLink": "Open de wachtrij met personeelsbehoeften"
     },
-    "gapNote": "Wat het datamodel vandaag niet kan bewijzen (herkomst van toestemming, actualiteit van beschikbaarheid, ploegsamenstelling, profielbron) wordt bewust NIET als getal getoond — zie docs/launch/real-supply-readiness-gap-v1.md."
+    "gapNote": "Wat het datamodel vandaag niet kan bewijzen (herkomst van toestemming, actualiteit van beschikbaarheid, ploegsamenstelling, profielbron) wordt bewust NIET als getal getoond — zie docs/launch/real-supply-readiness-gap-v1.md.",
+    "privacy": {
+      "title": "Privacy en toestemmingen",
+      "discoverable": "Zichtbaar voor bedrijven (granted)",
+      "awaiting": "Wachten op keuze",
+      "withdrawn": "Zichtbaarheid ingetrokken",
+      "stale": "Verouderde tekstversie",
+      "activePermissions": "Actieve overdrachtstoestemmingen",
+      "completedDisclosures": "Uitgevoerde overdrachten",
+      "note": "Aantallen komen alleen uit echte grootboekregels. Een beheerder kan geen toestemming namens een gebruiker geven — alleen inzien."
+    }
   },
   "billingStatus": {
     "badge": {
@@ -6811,7 +6825,12 @@
     "none": "—",
     "empty": "Geen kandidaten voldoen aan deze filters.",
     "needsMigration": "De tabellen met het werknemersaanbod zijn nog niet beschikbaar.",
-    "error": "Kon de kandidatenpool niet laden."
+    "error": "Kon de kandidatenpool niet laden.",
+    "colPermission": "Toestemming werknemer",
+    "permissionGranted": "Zichtbaarheid verleend",
+    "permissionAwaiting": "Wacht op toestemming werknemer",
+    "permissionWithdrawn": "Toestemming ingetrokken",
+    "permissionNote": "Zonder de individuele bevestiging van de werknemer kan een kandidaat niet aan een bedrijf worden voorgesteld."
   },
   "matchPreview": {
     "title": "Matchvoorbeeld",
@@ -7311,6 +7330,75 @@
         "body": "Wanneer een locatie, werkvermeldingen of opleveringsacties verschijnen, worden ze hier getoond.",
         "cta": "Projecten bekijken"
       }
+    }
+  },
+  "privacyConsent": {
+    "sections": {
+      "visibility": "Zichtbaarheid voor werkgevers",
+      "disclosures": "Gegevensoverdrachten aan bedrijven",
+      "history": "Toestemmingsgeschiedenis",
+      "rights": "Privacyrechten en contact"
+    },
+    "status": {
+      "hidden": "Profiel niet zichtbaar voor werkgevers",
+      "hiddenBody": "Alleen u ziet uw profiel, cv en contactgegevens. Kies of bedrijven u mogen vinden.",
+      "visible": "Professioneel profiel zichtbaar voor bedrijven",
+      "visibleBody": "Bedrijven kunnen een beperkt professioneel profiel vinden. Contactgegevens en cv worden alleen gedeeld met uw afzonderlijke bevestiging.",
+      "withdrawn": "Zichtbaarheid uitgeschakeld",
+      "stale": "De toestemmingstekst is bijgewerkt — een nieuwe keuze is nodig"
+    },
+    "actions": {
+      "grant": "Ik ga akkoord — zichtbaarheid inschakelen",
+      "decline": "Niet nu",
+      "manage": "Bekijken of uitschakelen",
+      "withdraw": "Zichtbaarheid uitschakelen",
+      "review": "Zichtbaarheidsinstellingen bekijken"
+    },
+    "preview": {
+      "title": "Zo zien bedrijven uw profiel",
+      "empty": "Uw profiel is nog leeg — bedrijven zouden alleen een lege kaart zien.",
+      "displayName": "Naam",
+      "professions": "Beroep",
+      "experienceYears": "Ervaring (jr)",
+      "preferredCountries": "Gewenste regio",
+      "availability": "Beschikbaarheid",
+      "salaryExpectation": "Loonverwachting",
+      "skillsCount": "Vaardigheden"
+    },
+    "labels": {
+      "decidedAt": "Gekozen",
+      "version": "Versie",
+      "needsMigration": "Deze functie is nog niet ingeschakeld op de server. Uw profiel blijft privé.",
+      "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
+      "declinedNote": "Prima — uw profiel blijft privé. U vindt deze keuze hier op elk moment."
+    },
+    "disclosures": {
+      "intro": "Elke overdracht van uw cv, contactgegevens of andere gegevens aan een specifiek bedrijf gebeurt pas na uw afzonderlijke bevestiging.",
+      "empty": "Nog geen overdrachten. Zonder uw bevestiging wordt niets aan bedrijven doorgegeven."
+    },
+    "history": {
+      "empty": "Nog geen registraties. Elke toestemming en intrekking verschijnt hier.",
+      "action": {
+        "granted": "Verleend",
+        "withdrawn": "Ingetrokken"
+      },
+      "purpose": {
+        "profile_discoverability": "Zichtbaarheid voor werkgevers",
+        "employer_data_disclosure": "Gegevensoverdracht aan een bedrijf"
+      }
+    },
+    "fields": {
+      "full_name": "Volledige naam",
+      "phone": "Telefoon",
+      "email": "E-mail",
+      "cv_document": "Cv-bestand",
+      "preferred_locations": "Gewenste locaties",
+      "availability_details": "Beschikbaarheidsdetails",
+      "salary_expectation": "Loonverwachting"
+    },
+    "rights": {
+      "notice": "Meer over uw rechten en gegevensverwerking:",
+      "noticeLink": "privacyverklaring"
     }
   }
 }

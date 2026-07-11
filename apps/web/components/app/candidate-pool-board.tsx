@@ -40,7 +40,23 @@ export interface CandidatePoolLabels {
   readonly expYears: string;
   readonly none: string;
   readonly empty: string;
+  /** Consent-and-disclosure v1: worker-permission column. */
+  readonly colPermission: string;
+  readonly permissionGranted: string;
+  readonly permissionAwaiting: string;
+  readonly permissionWithdrawn: string;
+  readonly permissionNote: string;
 }
+
+/** CURRENT worker discoverability/permission state (consent ledger). Anything
+ *  that is not an active grant renders as "Awaiting worker permission" —
+ *  the operator can look internally but may NOT send this candidate outward. */
+export type WorkerPermissionBadge =
+  | "granted"
+  | "withdrawn"
+  | "granted_stale_version"
+  | "not_set"
+  | "unknown";
 
 const EVIDENCE_LABEL: Record<EvidenceStatus, keyof CandidatePoolLabels> = {
   confirmed_evidence: "evidenceConfirmed",
@@ -59,7 +75,9 @@ export function CandidatePoolBoard({
   labels,
   professionLabels,
 }: {
-  readonly candidates: readonly CandidateView[];
+  readonly candidates: readonly (CandidateView & {
+    readonly workerPermission?: WorkerPermissionBadge;
+  })[];
   readonly labels: CandidatePoolLabels;
   readonly professionLabels: Readonly<Record<string, string>>;
 }) {
@@ -137,6 +155,7 @@ export function CandidatePoolBoard({
                 <th className="py-2 pr-3">{labels.colAvailable}</th>
                 <th className="py-2 pr-3">{labels.colExperience}</th>
                 <th className="py-2 pr-3">{labels.colEvidence}</th>
+                <th className="py-2 pr-3">{labels.colPermission}</th>
                 <th className="py-2 pr-3">{labels.colMissing}</th>
               </tr>
             </thead>
@@ -157,6 +176,21 @@ export function CandidatePoolBoard({
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${BADGE[c.evidenceStatus]}`}>
                       {labels[EVIDENCE_LABEL[c.evidenceStatus]]}
                     </span>
+                  </td>
+                  <td className="py-2 pr-3">
+                    {c.workerPermission === "granted" ? (
+                      <span className="rounded-full bg-state-success/15 px-2 py-0.5 text-[10px] font-semibold text-state-success">
+                        {labels.permissionGranted}
+                      </span>
+                    ) : c.workerPermission === "withdrawn" ? (
+                      <span className="rounded-full bg-surface-1 px-2 py-0.5 text-[10px] font-semibold text-text-muted">
+                        {labels.permissionWithdrawn}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-state-warning/15 px-2 py-0.5 text-[10px] font-semibold text-state-warning">
+                        {labels.permissionAwaiting}
+                      </span>
+                    )}
                   </td>
                   <td className="py-2 pr-3">{c.missingFields.length ? c.missingFields.join(", ") : labels.none}</td>
                 </tr>

@@ -4237,17 +4237,21 @@
         {
           "heading": "Wer Ihre Daten sehen kann",
           "items": [
-            "Der Zugriff ist standardmäßig geschlossen: Von Ihnen eingegebene Daten gehören zu Ihrem Konto, und andere Benutzer sehen nichts, sofern keine bestimmte Regel es erlaubt.",
-            "Dokumente von Arbeitskräften werden Arbeitgebern oder Personalagenturen nicht ohne die Einwilligung der Arbeitskraft angezeigt, und Arbeitgeber können die gespeicherten Standorte einer Arbeitskraft nicht einsehen.",
-            "Nachrichten sind nur für die Teilnehmer der Unterhaltung sichtbar.",
-            "Die vollständige Zusammenfassung in einfacher Sprache finden Sie auf der Seite „Ihre Daten und wer sie sehen kann“."
+            "Der Zugriff ist standardmäßig geschlossen: Von Ihnen eingegebene Daten gehören zu Ihrem Konto; andere Nutzer sehen nichts, sofern keine konkrete Regel es erlaubt.",
+            "Ihr berufliches Profil ist standardmäßig NICHT für Unternehmen oder Agenturen sichtbar. Es kann in Unternehmenssuchen nur erscheinen, nachdem Sie selbst die Arbeitgeber-Sichtbarkeit in den Datenschutzeinstellungen eingeschaltet haben — Registrierung, das Akzeptieren der Bedingungen oder das Ausfüllen des Profils machen es niemals sichtbar.",
+            "Auch bei eingeschalteter Sichtbarkeit sehen Unternehmen nur eine begrenzte berufliche Zusammenfassung (Beruf, Erfahrung, Fähigkeiten, ungefähre Region, Verfügbarkeit, Sprachen, Gehaltsvorstellung, falls angegeben). Nachname, Telefon, E-Mail, genaue Adresse, Lebenslauf-Datei und Dokumente gehören nie dazu.",
+            "Ihr Lebenslauf, Ihre Kontaktdaten oder Dokumente erreichen ein bestimmtes Unternehmen erst nach Ihrer gesonderten Bestätigung für dieses Unternehmen und diese Anfrage. Jede durchgeführte Übermittlung wird in einem für Sie sichtbaren Übermittlungsprotokoll festgehalten.",
+            "Dokumente von Arbeitskräften werden Arbeitgebern oder Agenturen ohne Einwilligung nicht gezeigt, und Arbeitgeber können die gespeicherten Orte einer Arbeitskraft nicht einsehen.",
+            "Nachrichten sind nur für die Gesprächsteilnehmer sichtbar."
           ]
         },
         {
           "heading": "Einwilligung",
           "items": [
-            "Wo eine Funktion Daten weitergibt, bittet sie zuerst um Ihre ausdrückliche Einwilligung.",
-            "Sie können eine Einwilligung jederzeit widerrufen. Der Widerruf wird aufgezeichnet: Die Einwilligungshistorie wird als Prüfpfad aufbewahrt statt gelöscht, damit klar bleibt, wer wann wozu zugestimmt hat."
+            "Einwilligungszwecke sind getrennt: die Arbeitgeber-Sichtbarkeit Ihres beruflichen Profils und eine Datenübermittlung an ein bestimmtes Unternehmen sind zwei verschiedene Entscheidungen — keine ist mit den Bedingungen gebündelt, vorangekreuzt oder für die Nutzung von Konto, Lebenslauf oder Arbeitstagebuch erforderlich.",
+            "Jeder Einwilligungsbildschirm zeigt den exakten versionierten Text, was sichtbar wird, was privat bleibt, und beide Optionen nebeneinander (einschalten / jetzt nicht). Eine Ablehnung ändert nichts an Ihrem Konto.",
+            "Sie können jede Einwilligung jederzeit in den Datenschutzeinstellungen in einem Schritt widerrufen. Nach dem Widerruf erscheint Ihr Profil sofort nicht mehr in neuen Unternehmenssuchen; Daten, die ein Unternehmen rechtmäßig erhielt, solange die Erlaubnis galt, können dort verbleiben — das sagen wir ehrlich.",
+            "Der Einwilligungsverlauf ist nur-anfügend: jede Erteilung und jeder Widerruf ist ein eigener unveränderlicher Eintrag mit Textversion, Sprache, Zeitpunkt und Zweck. Niemand — auch Administratoren nicht — kann ihn bearbeiten oder löschen, und kein Administrator kann in Ihrem Namen einwilligen."
           ]
         },
         {
@@ -6445,7 +6449,17 @@
       "requestsSubmitted": "Eingereichte Kundenanfragen",
       "queueLink": "Warteschlange der Personalbedarfe öffnen"
     },
-    "gapNote": "Was das Datenmodell heute nicht beweisen kann (Herkunft der Einwilligung, Aktualität der Verfügbarkeit, Kolonnen-Zusammensetzung, Profilquelle), wird bewusst NICHT als Zahl angezeigt — siehe docs/launch/real-supply-readiness-gap-v1.md."
+    "gapNote": "Was das Datenmodell heute nicht beweisen kann (Herkunft der Einwilligung, Aktualität der Verfügbarkeit, Kolonnen-Zusammensetzung, Profilquelle), wird bewusst NICHT als Zahl angezeigt — siehe docs/launch/real-supply-readiness-gap-v1.md.",
+    "privacy": {
+      "title": "Datenschutz und Einwilligungen",
+      "discoverable": "Für Unternehmen sichtbar (granted)",
+      "awaiting": "Warten auf Entscheidung",
+      "withdrawn": "Sichtbarkeit widerrufen",
+      "stale": "Veraltete Textversion",
+      "activePermissions": "Aktive Übermittlungserlaubnisse",
+      "completedDisclosures": "Durchgeführte Übermittlungen",
+      "note": "Zahlen stammen nur aus echten Einträgen des Einwilligungsregisters. Ein Admin kann keine Einwilligung im Namen eines Nutzers erteilen — nur Ansicht."
+    }
   },
   "billingStatus": {
     "badge": {
@@ -6811,7 +6825,12 @@
     "none": "—",
     "empty": "Keine Kandidaten entsprechen diesen Filtern.",
     "needsMigration": "Die Tabellen zum Arbeitskraft-Angebot sind noch nicht verfügbar.",
-    "error": "Der Kandidatenpool konnte nicht geladen werden."
+    "error": "Der Kandidatenpool konnte nicht geladen werden.",
+    "colPermission": "Erlaubnis der Arbeitskraft",
+    "permissionGranted": "Sichtbarkeit erteilt",
+    "permissionAwaiting": "Wartet auf Erlaubnis der Arbeitskraft",
+    "permissionWithdrawn": "Erlaubnis widerrufen",
+    "permissionNote": "Ohne die individuelle Bestätigung der Arbeitskraft kann ein Kandidat keinem Unternehmen vorgestellt werden."
   },
   "matchPreview": {
     "title": "Match-Vorschau",
@@ -7311,6 +7330,75 @@
         "body": "Sobald eine Baustelle, Arbeitseinträge oder Übergabeaktionen erscheinen, werden sie hier angezeigt.",
         "cta": "Projekte ansehen"
       }
+    }
+  },
+  "privacyConsent": {
+    "sections": {
+      "visibility": "Sichtbarkeit für Arbeitgeber",
+      "disclosures": "Datenübermittlungen an Unternehmen",
+      "history": "Einwilligungsverlauf",
+      "rights": "Datenschutzrechte und Kontakt"
+    },
+    "status": {
+      "hidden": "Profil für Arbeitgeber nicht sichtbar",
+      "hiddenBody": "Nur Sie sehen Ihr Profil, Ihren Lebenslauf und Ihre Kontaktdaten. Entscheiden Sie, ob Unternehmen Sie finden dürfen.",
+      "visible": "Berufliches Profil für Unternehmen sichtbar",
+      "visibleBody": "Unternehmen können ein begrenztes berufliches Profil finden. Kontaktdaten und Lebenslauf werden nur mit Ihrer gesonderten Bestätigung weitergegeben.",
+      "withdrawn": "Sichtbarkeit deaktiviert",
+      "stale": "Der Einwilligungstext wurde aktualisiert — eine neue Entscheidung ist nötig"
+    },
+    "actions": {
+      "grant": "Ich stimme zu — Sichtbarkeit einschalten",
+      "decline": "Jetzt nicht",
+      "manage": "Ansehen oder deaktivieren",
+      "withdraw": "Sichtbarkeit deaktivieren",
+      "review": "Sichtbarkeitseinstellungen ansehen"
+    },
+    "preview": {
+      "title": "So sehen Unternehmen Ihr Profil",
+      "empty": "Ihr Profil ist noch leer — Unternehmen sähen nur eine leere Karte.",
+      "displayName": "Name",
+      "professions": "Beruf",
+      "experienceYears": "Erfahrung (J.)",
+      "preferredCountries": "Bevorzugte Region",
+      "availability": "Verfügbarkeit",
+      "salaryExpectation": "Gehaltsvorstellung",
+      "skillsCount": "Fähigkeiten"
+    },
+    "labels": {
+      "decidedAt": "Gewählt",
+      "version": "Version",
+      "needsMigration": "Diese Funktion ist auf dem Server noch nicht aktiviert. Ihr Profil bleibt privat.",
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "declinedNote": "In Ordnung — Ihr Profil bleibt privat. Diese Wahl finden Sie hier jederzeit."
+    },
+    "disclosures": {
+      "intro": "Jede Übermittlung Ihres Lebenslaufs, Ihrer Kontaktdaten oder anderer Daten an ein bestimmtes Unternehmen erfolgt erst nach Ihrer gesonderten Bestätigung.",
+      "empty": "Noch keine Übermittlungen. Ohne Ihre Bestätigung wird nichts an Unternehmen weitergegeben."
+    },
+    "history": {
+      "empty": "Noch keine Einträge. Jede Einwilligung und jeder Widerruf erscheint hier.",
+      "action": {
+        "granted": "Erteilt",
+        "withdrawn": "Widerrufen"
+      },
+      "purpose": {
+        "profile_discoverability": "Sichtbarkeit für Arbeitgeber",
+        "employer_data_disclosure": "Datenübermittlung an ein Unternehmen"
+      }
+    },
+    "fields": {
+      "full_name": "Vollständiger Name",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "cv_document": "Lebenslauf-Datei",
+      "preferred_locations": "Bevorzugte Orte",
+      "availability_details": "Verfügbarkeitsdetails",
+      "salary_expectation": "Gehaltsvorstellung"
+    },
+    "rights": {
+      "notice": "Mehr über Ihre Rechte und die Datenverarbeitung:",
+      "noticeLink": "Datenschutzhinweis"
     }
   }
 }

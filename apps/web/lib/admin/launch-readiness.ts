@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { isSuperadmin } from "@/lib/auth/superadmin";
 
 /**
@@ -16,8 +17,13 @@ import { isSuperadmin } from "@/lib/auth/superadmin";
  * Every metric is a count over EXISTING production columns:
  *   - workers + how many have a profession / location / availability /
  *     salary expectation / journal evidence / operator-verified ready docs;
- *   - consented profiles (profiles.consent_data_processing = true) vs the
- *     owner's pre-marketing target of 15–25 consented real profiles;
+ *   - consented profiles = CURRENT granted profile_discoverability consent
+ *     from the append-only privacy_consent_events ledger (via the
+ *     admin_privacy_readiness_counts RPC — consent-and-disclosure v1), with
+ *     the honest breakdown private/awaiting/withdrawn/stale. The legacy
+ *     profiles.consent_data_processing boolean is DEPRECATED here: it never
+ *     had a write path and is not a real consent record. NO backfill —
+ *     every count stays 0 until real users choose;
  *   - real companies, public company-need intakes by operator status,
  *     submitted authenticated customer requests;
  *   - teams (organizations rows with organization_type = 'team').
@@ -42,6 +48,11 @@ export interface LaunchReadiness {
   readonly workersWithJournalEvidence: number | null;
   readonly workersWithReadyDocs: number | null;
   readonly profilesConsented: number | null;
+  readonly privacyAwaitingChoice: number | null;
+  readonly privacyWithdrawn: number | null;
+  readonly privacyStaleVersion: number | null;
+  readonly privacyActiveDisclosurePermissions: number | null;
+  readonly privacyCompletedDisclosures: number | null;
   readonly companiesTotal: number | null;
   readonly intakesNew: number | null;
   readonly intakesContacted: number | null;
@@ -77,9 +88,53 @@ async function count(
   }
 }
 
+interface PrivacyCounts {
+  consented: number | null;
+  awaiting: number | null;
+  withdrawn: number | null;
+  stale: number | null;
+  activePermissions: number | null;
+  completedDisclosures: number | null;
+}
+
+/** Consent counts come from the append-only ledger via the is_admin()-gated
+ *  SECURITY DEFINER RPC, called with the CALLER's RLS client (auth context —
+ *  the service-role client has no auth.uid() and would be refused). Honest
+ *  degradation: RPC absent (pre-migration) or any error → all null. */
+async function readPrivacyCounts(): Promise<PrivacyCounts> {
+  const empty: PrivacyCounts = {
+    consented: null,
+    awaiting: null,
+    withdrawn: null,
+    stale: null,
+    activePermissions: null,
+    completedDisclosures: null,
+  };
+  try {
+    const supabase = await createClient();
+    const { data, error } = await asAny(supabase).rpc(
+      "admin_privacy_readiness_counts",
+    );
+    if (error || !data?.ok) return empty;
+    const n = (v: unknown) => (typeof v === "number" ? v : null);
+    return {
+      consented: n(data.discoverable),
+      awaiting: n(data.awaitingChoice),
+      withdrawn: n(data.withdrawn),
+      stale: n(data.staleVersion),
+      activePermissions: n(data.activeDisclosurePermissions),
+      completedDisclosures: n(data.completedDisclosures),
+    };
+  } catch {
+    return empty;
+  }
+}
+
 export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
   if (!(await isSuperadmin())) return { kind: "not-admin" };
   const sb = createAdminClient();
+
+  const privacy = await readPrivacyCounts();
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const [
@@ -90,7 +145,6 @@ export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
     workersWithSalary,
     workersWithJournalEvidence,
     workersWithReadyDocs,
-    profilesConsented,
     companiesTotal,
     intakesNew,
     intakesContacted,
@@ -113,9 +167,6 @@ export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
     count(sb, "workers", "id, journal_entries!inner(id)"),
     count(sb, "workers", "id, worker_documents!inner(id)", (q) =>
       (q as any).eq("worker_documents.status", "ready"),
-    ),
-    count(sb, "profiles", "id", (q) =>
-      (q as any).eq("consent_data_processing", true),
     ),
     count(sb, "companies", "id"),
     count(sb, "company_need_public_intakes", "id", (q) =>
@@ -149,7 +200,12 @@ export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
       workersWithSalary,
       workersWithJournalEvidence,
       workersWithReadyDocs,
-      profilesConsented,
+      profilesConsented: privacy.consented,
+      privacyAwaitingChoice: privacy.awaiting,
+      privacyWithdrawn: privacy.withdrawn,
+      privacyStaleVersion: privacy.stale,
+      privacyActiveDisclosurePermissions: privacy.activePermissions,
+      privacyCompletedDisclosures: privacy.completedDisclosures,
       companiesTotal,
       intakesNew,
       intakesContacted,

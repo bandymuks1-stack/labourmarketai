@@ -1690,7 +1690,12 @@ describe("no migration files added by this sprint", () => {
     // SECURITY DEFINER RPC (submit_company_need_public_v1) granted to anon;
     // customer_requests untouched; DRAFT needs-human-gate, owner-gated apply;
     // rollback drops only the function and the table.
-    const SPRINT_BASELINE = 115;
+    // Bumped 115 -> 116 for consent-and-disclosure v1
+    // (20260711130000 privacy_consent_and_disclosure_v1) — owner-authorized
+    // in the consent goal command: append-only consent + disclosure ledgers,
+    // fail-closed employer RLS swap, narrow SECURITY DEFINER RPCs
+    // (authenticated only, no anon); @human-gate-approved; paired rollback.
+    const SPRINT_BASELINE = 116;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

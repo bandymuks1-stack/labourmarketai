@@ -50,6 +50,18 @@ export default async function AdminLaunchReadinessPage({
     [t("supply.teams"), r.teamsTotal],
   ];
 
+  // Consent breakdown (consent-and-disclosure v1) — CURRENT ledger states
+  // only. "Consented" above = active granted discoverability; here the
+  // operator sees the honest split. No percentages.
+  const privacyTiles: Array<[string, number | null]> = [
+    [t("privacy.discoverable"), r.profilesConsented],
+    [t("privacy.awaiting"), r.privacyAwaitingChoice],
+    [t("privacy.withdrawn"), r.privacyWithdrawn],
+    [t("privacy.stale"), r.privacyStaleVersion],
+    [t("privacy.activePermissions"), r.privacyActiveDisclosurePermissions],
+    [t("privacy.completedDisclosures"), r.privacyCompletedDisclosures],
+  ];
+
   const demandTiles: Array<[string, number | null]> = [
     [t("demand.companies"), r.companiesTotal],
     [t("demand.intakesNew"), r.intakesNew],
@@ -108,6 +120,22 @@ export default async function AdminLaunchReadinessPage({
         </div>
         <p className="text-[11px] leading-relaxed text-text-muted">
           {t("supply.note")}
+        </p>
+      </section>
+
+      {/* Privacy / consent breakdown — real ledger states, operator can only
+          LOOK: no control here (or anywhere) grants consent for a user. */}
+      <section className="flex flex-col gap-3" data-testid="privacy-breakdown">
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {t("privacy.title")}
+        </h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {privacyTiles.map(([label, value]) => (
+            <Tile key={label} label={label} value={show(value)} />
+          ))}
+        </div>
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {t("privacy.note")}
         </p>
       </section>
 
