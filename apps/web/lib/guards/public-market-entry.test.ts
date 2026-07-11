@@ -67,7 +67,11 @@ describe("no dead public links — every marketing CTA target route exists", () 
   it("work-abroad profile CTA goes to public signup, not an auth-walled bounce", () => {
     const page = read("app/[locale]/(marketing)/work-abroad/page.tsx");
     expect(page).not.toContain('href="/onboarding"');
-    expect(page).toContain('href="/auth/signup"');
+    // Signup CTA rides AuthCtaLink (app-host aware on apex; PKCE-safe OAuth
+    // origin) instead of the bare locale Link — see auth-cta-app-host guard.
+    expect(page).toMatch(
+      /AuthCtaLink[\s\S]*?relPath=\{`\/\$\{locale\}\/auth\/signup`\}/,
+    );
   });
 });
 

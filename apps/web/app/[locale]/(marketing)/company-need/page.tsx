@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
-import { Link } from "@/lib/i18n/navigation";
+import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 
 export async function generateMetadata({
   params,
@@ -129,12 +129,15 @@ export default async function CompanyNeedPage({
       <div className="card-border flex flex-col gap-3 p-5" data-testid="need-bridge">
         <p className="text-sm leading-relaxed text-text-secondary">{t("bridgeNote")}</p>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Link href="/auth/signup">
+          {/* AuthCtaLink (not the SPA Link): on the apex/marketing host these
+              must cross to app.labourmarket.ai so the OAuth PKCE round-trip
+              starts and finishes on the app origin. */}
+          <AuthCtaLink relPath={`/${locale}/auth/signup`}>
             <Button>{t("bridgeSignup")} →</Button>
-          </Link>
-          <Link href="/auth/login">
+          </AuthCtaLink>
+          <AuthCtaLink relPath={`/${locale}/auth/login`}>
             <Button variant="secondary">{t("bridgeLogin")}</Button>
-          </Link>
+          </AuthCtaLink>
         </div>
       </div>
     </div>

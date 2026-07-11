@@ -1,107 +1,67 @@
-# Domain Truth — labourmarket.ai (v1, 2026-05-28)
+# Domain Truth — labourmarket.ai (v2, 2026-07-11)
 
-This is the canonical, permanent domain policy for the
-labourmarket.ai product. The middleware + metadata + tests are
-all derived from `apps/web/lib/domain/canonical.ts`. If a change
-to the domain surface is ever needed, update that module first;
-this doc, the middleware, and the guard tests all follow it.
+This is the canonical domain policy for the labourmarket.ai product.
+The middleware + metadata + tests are all derived from
+`apps/web/lib/domain/canonical.ts`. If a change to the domain surface is
+ever needed, update that module first; this doc, the middleware, and the
+guard tests all follow it.
 
-## Canonical surface
+> **v2 supersedes v1 (2026-05-28).** v1 made `app.labourmarket.ai` the
+> canonical host and 308-redirected apex + www to it — an emergency
+> measure while old LABMA content still squatted the apex. On 2026-06-15
+> the owner flipped the policy: the apex is the public canonical host and
+> serves the marketing product; only www redirects. The code
+> (`canonical.ts`, `middleware.ts`) was updated then, but this document
+> was not — it stayed on v1 and contradicted both code and production
+> until this v2 rewrite (non-landing launch repair v1). The v1 text is
+> preserved below under "Version history" as the historical record.
+
+## Canonical surface (current)
 
 | Role | Host | Behaviour |
 |---|---|---|
-| **Canonical app** | `app.labourmarket.ai` | Serves the new labourmarket.ai product (this repo). All public links, SEO `canonical`, OAuth callbacks, and shareable URLs point here. |
-| Alias (Vercel-managed) | `labourmarket-ai.vercel.app` | Internal production alias used by Vercel + monitoring. Not advertised. Treated as a production host (no redirect) so OAuth `request_id` traces stay intact, but it's not the canonical URL. |
-| Apex (legacy) | `labourmarket.ai` | **308-redirects** to `https://app.labourmarket.ai/<path>?<query>`. Was previously serving old LABMA content; this redirect is what made that drift stop. |
-| WWW (legacy) | `www.labourmarket.ai` | **308-redirects** to `https://app.labourmarket.ai/<path>?<query>`. Same reason as apex. |
-| Preview deploys | `*.vercel.app` (other) | Gated by Vercel preview SSO (401). Owner-only. Never redirect to production; previews need to stand alone for inspection. |
+| **Public canonical** | `labourmarket.ai` (apex) | Serves the public marketing product. All SEO `canonical`, `hreflang`, OpenGraph URLs, sitemap entries and shareable URLs point here. Never redirected. |
+| **App host** | `app.labourmarket.ai` | Auth + dashboard host. OAuth starts and finishes here (PKCE verifier stays same-origin). Auth CTAs on marketing hosts cross to this host via `AuthCtaLink` / `preferAppHostHref`. Serves the same Next.js deployment; `robots.txt` + per-page canonicals keep it out of the index. |
+| WWW | `www.labourmarket.ai` | **308-redirects** to the apex, path + query preserved (`middleware.ts`). |
+| Alias (Vercel-managed) | `labourmarket-ai.vercel.app` | Internal alias only. Never canonical, never advertised. **Known issue:** as of 2026-07-11 this alias still serves a separate, sign-in-gated legacy "Labour Market Operating System" build — see `docs/launch/domain-production-truth-v1.md` for the owner action. |
+| Preview deploys | `*.vercel.app` (other) | Gated by Vercel preview SSO. Owner-only. Never redirect to production. |
+
+Key invariants (enforced by `apps/web/lib/seo/seo-indexing-audit.ts` +
+guard tests, wired into CI via `pnpm check:public-seo-indexing`):
+
+- The apex is the only origin in canonicals, hreflang, OG URLs, sitemap and robots `Host`.
+- www→apex 308 exists; there is **no** apex→app redirect.
+- robots disallows `/api/`, `/*/dashboard`, `/*/onboarding`, `/*/auth`, `/*/cv`, `/*/design`.
+- No "Labma" / "Construction OS" branding anywhere in the new system.
+- Auth CTAs on marketing pages route through `AuthCtaLink` (app-host aware); the frozen landing page is the sole documented exception until its real-data replacement plan runs.
 
 ## What is legacy
 
-- **Old LABMA** — a separate, pre-existing project that, until
-  2026-05-28, was the surface served at `labourmarket.ai` (apex)
-  and possibly `www.labourmarket.ai`. **It is not this repo.**
-  Old LABMA content must not be used as a reference for any new
-  labourmarket.ai work, must not be imported into this repo, and
-  must not be re-mapped to any host in the table above without
-  an explicit owner decision recorded in this document.
-
-- **Pre-canonical metadata** — any code path that hard-coded
-  `https://labourmarket.ai` as the canonical URL was making
-  the LABMA-content-on-apex problem worse by signalling SEO and
-  share-links to a host that didn't serve our product. Every
-  such reference is migrated to `CANONICAL_ORIGIN` from
-  `@/lib/domain/canonical`.
-
-## What must NEVER be used as source
-
-The following must NOT be used as a starting point, reference,
-or template for new labourmarket.ai work:
-
-1. The old LABMA repo and any of its files.
-2. Snapshots, exports, or screenshots of the content that was
-   previously served at `labourmarket.ai` apex (those represent
-   the old LABMA, not this product).
-3. Any DNS, Vercel project, or hosting-config that points
-   `labourmarket.ai` apex (or `www`) at anywhere other than this
-   project. Re-attaching the legacy LABMA project to the
-   labourmarket.ai apex is forbidden.
-
-## Owner action — DNS + Vercel attachment (one-time)
-
-The middleware + metadata changes in this repo ensure the
-canonical policy is honoured **as soon as the legacy hosts
-point at this Vercel project**. If the legacy hosts still serve
-old LABMA, the redirect won't fire because the request never
-reaches this app. The owner-side steps are:
-
-1. Vercel dashboard → labourmarket.ai project → Settings →
-   Domains:
-   - Add `labourmarket.ai` (apex) to this project.
-   - Add `www.labourmarket.ai` to this project.
-   - `app.labourmarket.ai` should already be attached as the
-     canonical app domain.
-2. Detach `labourmarket.ai` apex and `www.labourmarket.ai`
-   from the legacy LABMA Vercel project (Vercel rejects the
-   add in step 1 until the previous owner releases the domain).
-3. DNS (Cloudflare or current provider):
-   - `labourmarket.ai` apex → ALIAS/ANAME → `cname.vercel-dns.com`
-     (or the apex record Vercel suggests when you add the domain).
-   - `www.labourmarket.ai` → CNAME → `cname.vercel-dns.com`.
-   - `app.labourmarket.ai` → CNAME → `cname.vercel-dns.com` (no change if already set).
-4. Once Vercel issues the SSL certificate (usually <5 min),
-   the middleware in this repo immediately handles the redirect:
-   `https://labourmarket.ai/x` and `https://www.labourmarket.ai/x`
-   both 308 to `https://app.labourmarket.ai/x`.
-
-## Verification (post-attachment)
-
-```sh
-curl -I https://labourmarket.ai/lt
-# Expect: HTTP/2 308, location: https://app.labourmarket.ai/lt
-
-curl -I https://www.labourmarket.ai/lt
-# Expect: HTTP/2 308, location: https://app.labourmarket.ai/lt
-
-curl -I https://app.labourmarket.ai/lt
-# Expect: HTTP/2 200 (or 307 from the locale stripper)
-```
+- **Old LABMA** — a separate, pre-existing project that, until 2026-05-28,
+  was served at the apex. It is not this repo, must not be used as a
+  reference, and must never be re-mapped to any host above without an
+  explicit owner decision recorded here.
+- **The v1 "app is canonical" policy** — superseded 2026-06-15. Any doc,
+  test or code comment still claiming apex 308→app describes v1 and is stale.
 
 ## Module + guard tests
 
-The policy is locked by these source-tree artefacts:
+- `apps/web/lib/domain/canonical.ts` — pure module, single source of truth
+  (`MARKETING_ORIGIN` = apex, `APP_ORIGIN`, `preferAppHostHref`).
+- `apps/web/lib/domain/canonical.test.ts`, `middleware-redirect.test.ts`
+- `apps/web/lib/guards/auth-cta-app-host.test.ts` — helper + nav + page-body coverage.
+- `apps/web/lib/seo/seo-indexing-audit.ts` + `lib/guards/public-seo-indexing.test.ts`
+- `apps/web/middleware.ts` — www→apex ahead of locale + auth.
 
-- `apps/web/lib/domain/canonical.ts` — pure module, single source of truth.
-- `apps/web/lib/domain/canonical.test.ts` — value + anti-regression tests (apex must NEVER be canonical).
-- `apps/web/lib/domain/middleware-redirect.test.ts` — behavioural contract for the redirect.
-- `apps/web/middleware.ts` — host-normalization wired ahead of locale + auth.
-- `apps/web/app/[locale]/layout.tsx` — `metadataBase` + `alternates.canonical` resolve from the canonical origin.
-
-Any future change to canonical / legacy hosts MUST update this
-document in the same PR.
+Any future change to canonical / legacy hosts MUST update this document
+in the same PR.
 
 ## Version history
 
-- **v1 — 2026-05-28** — owner decision: `app.labourmarket.ai` is
-  canonical; apex + www 308 to it. Old LABMA content must stop
-  being visible under the labourmarket.ai brand.
+- **v2 — 2026-07-11** — doc realigned with the 2026-06-15 owner decision
+  already live in code and production: apex is the public canonical host
+  serving marketing; app.labourmarket.ai is the auth/dashboard host; only
+  www redirects. Recorded the stale-alias owner action.
+- **v1 — 2026-05-28** — owner decision at the time: `app.labourmarket.ai`
+  canonical; apex + www 308 to it. Purpose: stop old LABMA content being
+  visible under the labourmarket.ai brand. Superseded 2026-06-15.

@@ -74,5 +74,16 @@ jobs:
       - name: Primary route smoke / dead-UI guard
         run: pnpm check:primary-route-smoke
 
+      # Domain / SEO indexing guard (launch repair v1): existed as a script but
+      # was never wired into CI, so a canonical/robots/banned-brand regression
+      # could ship. Secret-free static audit.
+      - name: Public SEO indexing guard
+        run: pnpm check:public-seo-indexing
+
+      # i18n debt ratchet: fails only when untranslated-key debt REGRESSES
+      # above the committed baseline (never on existing debt).
+      - name: i18n debt ratchet
+        run: pnpm check:i18n-debt
+
       - name: Build (env-independent; Vercel remains deploy authority)
         run: pnpm -F web build
