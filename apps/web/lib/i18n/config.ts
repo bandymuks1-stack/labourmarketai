@@ -23,19 +23,20 @@ export const locales = [
 ] as const;
 export type Locale = (typeof locales)[number];
 
-// ── ACTIVE LOCALES (owner P0 override 2026-05-28; RU added 2026-06-12) ──
+// ── ACTIVE LOCALES (owner P0 override 2026-05-28; RU added 2026-06-12;
+//    NL + DE activated 2026-07-11, non-landing launch repair Scope D) ──
 // Owner-mandated subset: routing / build / static-params / UI selector
-// only emit lt + en + ru. The other 8 JSON files stay in the repo per §2.4
-// (file-presence) but no /lv/... /et/... /nl/... etc. routes prerender,
-// the URL ↔ locale resolver rejects non-active codes, and the language
-// selector hides them. The doctrine §2.4 line "the locale set never
-// shrinks" was overridden in this single P0 sprint to stop user-visible
-// `MISSING_MESSAGE` errors leaking through non-Tier-1 locales. Promoting
-// any other code back to active is a one-row add here (no schema, no
-// migration), per §2.5. RU is ACTIVE from day 1 (owner goal 2026-06-12:
-// workers need it today) — its message files are FULL-parity with EN and
-// guarded by lib/guards/i18n-lt-en-parity.test.ts.
-export const activeLocales = ["lt", "en", "ru"] as const;
+// only emit these codes. The other 6 JSON files stay in the repo per §2.4
+// (file-presence) but no /lv/... /et/... etc. routes prerender, the
+// URL ↔ locale resolver rejects non-active codes, and the language
+// selector hides them. Promoting another code to active is a one-row add
+// here (no schema, no migration), per §2.5 — PLUS full catalog parity
+// first: NL and DE were activated only after their message catalogs (base
+// + 6 taxonomy files) reached full parity with EN — zero `[EN]` markers,
+// guarded by lib/guards/i18n-lt-en-parity.test.ts and the i18n-debt
+// zero baselines. RU/NL/DE are AI-seeded full translations pending human
+// review (§7.4) — the language selector preview-tags non-Tier-1 locales.
+export const activeLocales = ["lt", "en", "ru", "nl", "de"] as const;
 export type ActiveLocale = (typeof activeLocales)[number];
 
 export const defaultLocale: ActiveLocale = "lt";

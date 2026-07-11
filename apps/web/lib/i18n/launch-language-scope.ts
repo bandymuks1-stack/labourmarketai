@@ -10,13 +10,14 @@ import { activeLocales, locales, tier1Locales } from "./config";
  *
  * The three tiers, from narrowest to widest:
  *
- * 1. UI ACTIVE (lt / en / ru) — routed, prerendered, selectable in the
- *    locale switcher, full message parity enforced (i18n-lt-en-parity).
- *    EN + LT are human-verified Tier 1; RU is active but preview-tagged
- *    until DI promotes it (doctrine §7.4).
+ * 1. UI ACTIVE (lt / en / ru / nl / de) — routed, prerendered, selectable
+ *    in the locale switcher, full message parity enforced
+ *    (i18n-lt-en-parity). EN + LT are human-verified Tier 1; RU (2026-06-12)
+ *    and NL + DE (2026-07-11, launch repair Scope D) are active AI-seeded
+ *    full translations, preview-tagged until DI promotes them (§7.4).
  *
  * 2. UI CATALOG (the 11 §2.4 locales) — message files exist in the repo
- *    and never shrink, but the 8 non-active ones are "[EN] "-prefixed
+ *    and never shrink, but the 6 non-active ones are "[EN] "-prefixed
  *    shells (i18n-debt ratchet), are NOT routed and NOT selectable.
  *    Promoting one to active is a one-row change in config.ts plus real
  *    translation of the critical flows.

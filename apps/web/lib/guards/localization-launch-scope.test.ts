@@ -33,8 +33,10 @@ const APP_ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP_ROOT, rel), "utf8");
 
 describe("UI tier truth (routing + selector + sitemap)", () => {
-  it("active UI locales are exactly lt/en/ru, default lt, tier1 en/lt", () => {
-    expect([...activeLocales].sort()).toEqual(["en", "lt", "ru"]);
+  it("active UI locales are exactly lt/en/ru/nl/de, default lt, tier1 en/lt", () => {
+    // NL + DE activated 2026-07-11 (non-landing launch repair Scope D) after
+    // their catalogs reached full parity — see i18n-lt-en-parity + i18n-debt.
+    expect([...activeLocales].sort()).toEqual(["de", "en", "lt", "nl", "ru"]);
     expect(defaultLocale).toBe("lt");
     expect([...tier1Locales].sort()).toEqual(["en", "lt"]);
     expect(UI_ACTIVE_LOCALES).toBe(activeLocales);

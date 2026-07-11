@@ -24,37 +24,91 @@ const SKILL_PROBLEM_KEYS = new Set([
   "show-skills",
 ]);
 
+const CTA_PROFILE: L = {
+  en: "Build your profile / CV →",
+  lt: "Susikurti profilį / CV →",
+  ru: "Создать профиль / CV →",
+  nl: "Maak je profiel / CV →",
+  de: "Profil / Lebenslauf erstellen →",
+};
+
+const CTA_EMPLOYERS: L = {
+  en: "For employers",
+  lt: "Darbdaviams",
+  ru: "Работодателям",
+  nl: "Voor werkgevers",
+  de: "Für Arbeitgeber",
+};
+
 const INTRO: Record<string, L> = {
-  eyebrow: { en: "Skills", lt: "Įgūdžiai", ru: "Навыки" },
+  eyebrow: {
+    en: "Skills",
+    lt: "Įgūdžiai",
+    ru: "Навыки",
+    nl: "Vaardigheden",
+    de: "Fähigkeiten",
+  },
   title: {
     en: "Prove and check real skills",
     lt: "Įrodyk ir patikrink realius įgūdžius",
     ru: "Докажите и проверьте реальные навыки",
+    nl: "Bewijs en controleer echte vaardigheden",
+    de: "Echte Fähigkeiten nachweisen und prüfen",
   },
   subcopy: {
     en: "The hardest part of the labour market is knowing what someone can really do. LabourMarket.ai keeps skills honest: every skill is shown as verified or self-declared — never silently mixed.",
     lt: "Sunkiausia darbo rinkoje — žinoti, ką žmogus iš tikrųjų moka. LabourMarket.ai laiko įgūdžius sąžiningus: kiekvienas įgūdis rodomas kaip patvirtintas arba savideklaruotas — niekada tyliai nesumaišomas.",
     ru: "Самое сложное на рынке труда — понять, что человек действительно умеет. LabourMarket.ai держит навыки честными: каждый навык показан как подтверждённый или самозаявленный — без тихого смешивания.",
+    nl: "Het moeilijkste aan de arbeidsmarkt is weten wat iemand echt kan. LabourMarket.ai houdt vaardigheden eerlijk: elke vaardigheid wordt getoond als bevestigd of zelf opgegeven — nooit stilzwijgend vermengd.",
+    de: "Das Schwierigste am Arbeitsmarkt ist zu wissen, was jemand wirklich kann. LabourMarket.ai hält Fähigkeiten ehrlich: Jede Fähigkeit wird als bestätigt oder selbst angegeben angezeigt — niemals stillschweigend vermischt.",
   },
-  cardsTitle: { en: "Two honest skill states", lt: "Du sąžiningi įgūdžių būsenos", ru: "Два честных состояния навыка" },
-  problemsTitle: { en: "Skill questions people search for", lt: "Klausimai apie įgūdžius, kurių ieško žmonės", ru: "Что ищут про навыки" },
+  cardsTitle: {
+    en: "Two honest skill states",
+    lt: "Du sąžiningi įgūdžių būsenos",
+    ru: "Два честных состояния навыка",
+    nl: "Twee eerlijke statussen van een vaardigheid",
+    de: "Zwei ehrliche Zustände einer Fähigkeit",
+  },
+  problemsTitle: {
+    en: "Skill questions people search for",
+    lt: "Klausimai apie įgūdžius, kurių ieško žmonės",
+    ru: "Что ищут про навыки",
+    nl: "Vragen over vaardigheden waar mensen naar zoeken",
+    de: "Fragen zu Fähigkeiten, nach denen Menschen suchen",
+  },
 };
 
 const CARDS: { title: L; body: L }[] = [
   {
-    title: { en: "Verified", lt: "Patvirtinta", ru: "Подтверждено" },
+    title: {
+      en: "Verified",
+      lt: "Patvirtinta",
+      ru: "Подтверждено",
+      nl: "Bevestigd",
+      de: "Bestätigt",
+    },
     body: {
       en: "Backed by evidence in the system — a manager confirmation, a work-journal link, or a checked document. Not a claim.",
       lt: "Pagrįsta įrodymais sistemoje — vadovo patvirtinimu, darbo žurnalo nuoroda arba patikrintu dokumentu. Ne deklaracija.",
       ru: "Подкреплено доказательством в системе — подтверждением руководителя, ссылкой в журнале работ или проверенным документом. Не заявление.",
+      nl: "Onderbouwd met bewijs in het systeem — een bevestiging van een leidinggevende, een link naar het werkjournaal of een gecontroleerd document. Geen bewering.",
+      de: "Durch Nachweise im System belegt — eine Bestätigung durch eine Führungskraft, ein Verweis im Arbeitsjournal oder ein geprüftes Dokument. Keine Behauptung.",
     },
   },
   {
-    title: { en: "Self-declared", lt: "Savideklaruota", ru: "Самозаявлено" },
+    title: {
+      en: "Self-declared",
+      lt: "Savideklaruota",
+      ru: "Самозаявлено",
+      nl: "Zelf opgegeven",
+      de: "Selbst angegeben",
+    },
     body: {
       en: "The worker's own statement of a skill. Useful and visible — but clearly marked as not yet verified, so no one is misled.",
       lt: "Paties darbuotojo nurodytas įgūdis. Naudingas ir matomas — bet aiškiai pažymėtas kaip dar nepatvirtintas, kad niekas nebūtų suklaidintas.",
       ru: "Заявление самого работника о навыке. Полезно и видно — но чётко помечено как непроверенное, чтобы никого не вводить в заблуждение.",
+      nl: "De eigen verklaring van de werknemer over een vaardigheid. Nuttig en zichtbaar — maar duidelijk gemarkeerd als nog niet bevestigd, zodat niemand wordt misleid.",
+      de: "Die eigene Angabe der Arbeitskraft zu einer Fähigkeit. Nützlich und sichtbar — aber klar als noch nicht bestätigt gekennzeichnet, damit niemand in die Irre geführt wird.",
     },
   },
 ];
@@ -130,22 +184,10 @@ export default async function SkillsPage({
 
       <section className="mt-12 flex flex-wrap gap-3">
         <Link href="/worker-intake">
-          <Button>
-            {l === "lt"
-              ? "Susikurti profilį / CV →"
-              : l === "ru"
-                ? "Создать профиль / CV →"
-                : "Build your profile / CV →"}
-          </Button>
+          <Button>{pick(CTA_PROFILE, l)}</Button>
         </Link>
         <Link href="/company-need">
-          <Button variant="secondary">
-            {l === "lt"
-              ? "Darbdaviams"
-              : l === "ru"
-                ? "Работодателям"
-                : "For employers"}
-          </Button>
+          <Button variant="secondary">{pick(CTA_EMPLOYERS, l)}</Button>
         </Link>
       </section>
     </div>

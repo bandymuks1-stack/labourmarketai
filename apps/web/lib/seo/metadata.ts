@@ -13,8 +13,8 @@
  * host (see lib/domain/canonical.ts); every public canonical URL, hreflang
  * alternate and OpenGraph URL points there.
  *
- * Copy lives here as a pure per-locale map (lt / en / ru — the active
- * locales) rather than in messages/*.json so the SEO layer has no
+ * Copy lives here as a pure per-locale map (lt / en / ru / nl / de — the
+ * active locales) rather than in messages/*.json so the SEO layer has no
  * i18n-debt / 11-file-parity coupling. RU is included because the
  * worker audience operates in Russian.
  *
@@ -50,6 +50,18 @@ export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
     description:
       "LabourMarket.ai — общая платформа рынка труда, где люди и компании видят потребности, готовность, навыки, рабочие возможности и рыночные сигналы — локально и на международном уровне, в разных секторах.",
   },
+  nl: {
+    title:
+      "LabourMarket.ai — Werknemers, werkgevers, vaardigheden en werkkansen in Europa",
+    description:
+      "LabourMarket.ai is een algemeen arbeidsmarktplatform waar mensen en bedrijven behoeften, gereedheid, vaardigheden, werkkansen en marktsignalen zien — lokaal en internationaal, in verschillende sectoren.",
+  },
+  de: {
+    title:
+      "LabourMarket.ai — Arbeitskräfte, Arbeitgeber, Fähigkeiten und Arbeitsmöglichkeiten in Europa",
+    description:
+      "LabourMarket.ai ist eine allgemeine Arbeitsmarktplattform, auf der Menschen und Unternehmen Bedarfe, Bereitschaft, Fähigkeiten, Arbeitsmöglichkeiten und Marktsignale sehen — lokal und international, über viele Branchen hinweg.",
+  },
 };
 
 /** OpenGraph locale tag per active locale (BCP-47-ish region form). */
@@ -57,6 +69,8 @@ const OG_LOCALE: Readonly<Record<ActiveLocale, string>> = {
   en: "en_GB",
   lt: "lt_LT",
   ru: "ru_RU",
+  nl: "nl_NL",
+  de: "de_DE",
 };
 
 function isActiveLocale(locale: string): locale is ActiveLocale {
@@ -127,6 +141,16 @@ export const PAGE_SEO: Readonly<
       description:
         "Работники разных секторов — от логистики и производства до гостеприимства, ухода, строительства и других: создайте профиль и CV на LabourMarket.ai, покажите навыки и доступность и будьте видимы для рабочих возможностей и потребностей работодателей в Европе.",
     },
+    nl: {
+      title: "Voor werknemers — Bouw je profiel en cv",
+      description:
+        "Werknemers uit allerlei sectoren — van logistiek en productie tot horeca, zorg, bouw en meer: maak een profiel en cv op LabourMarket.ai, laat je vaardigheden en beschikbaarheid zien en wees zichtbaar voor werkkansen en personeelsbehoeften van werkgevers in heel Europa.",
+    },
+    de: {
+      title: "Für Arbeitskräfte — Erstellen Sie Ihr Profil und Ihren Lebenslauf",
+      description:
+        "Arbeitskräfte aus vielen Branchen — von Logistik und Produktion bis Gastgewerbe, Pflege, Bau und mehr: Erstellen Sie ein Profil und einen Lebenslauf auf LabourMarket.ai, zeigen Sie Ihre Fähigkeiten und Verfügbarkeit und werden Sie sichtbar für Arbeitsmöglichkeiten und Arbeitgeberbedarfe in ganz Europa.",
+    },
   },
   companies: {
     en: {
@@ -143,6 +167,16 @@ export const PAGE_SEO: Readonly<
       title: "Работодателям — подайте кадровую потребность",
       description:
         "Работодатели и подрядчики: опишите нужных работников, бригады и навыки. LabourMarket.ai структурирует потребность и помогает организовать подбор и дальнейшие шаги в Европе.",
+    },
+    nl: {
+      title: "Voor werkgevers — Dien je personeelsbehoefte in",
+      description:
+        "Werkgevers en aannemers: beschrijf de werknemers, ploegen en vaardigheden die je nodig hebt. LabourMarket.ai structureert je personeelsbehoefte en helpt de selectie en vervolgstappen in Europa te organiseren.",
+    },
+    de: {
+      title: "Für Arbeitgeber — Melden Sie Ihren Personalbedarf",
+      description:
+        "Arbeitgeber und Auftragnehmer: Beschreiben Sie die Arbeitskräfte, Kolonnen und Fähigkeiten, die Sie benötigen. LabourMarket.ai strukturiert Ihren Personalbedarf und hilft, Auswahl und nächste Schritte in Europa zu organisieren.",
     },
   },
   agencies: {
@@ -161,6 +195,16 @@ export const PAGE_SEO: Readonly<
       description:
         "Кадровые агентства: координируйте работников, бригады и потребности работодателей в одном месте. LabourMarket.ai помогает структурировать приём, подбор и проживание на рынках Европы.",
     },
+    nl: {
+      title: "Voor uitzendbureaus — Coördineer werknemers en ploegen",
+      description:
+        "Uitzendbureaus: coördineer werknemers, ploegen en personeelsbehoeften van werkgevers op één plek. LabourMarket.ai helpt intake, selectie en huisvesting op Europese markten te structureren.",
+    },
+    de: {
+      title: "Für Personalagenturen — Koordinieren Sie Arbeitskräfte und Kolonnen",
+      description:
+        "Personalagenturen: Koordinieren Sie Arbeitskräfte, Kolonnen und Arbeitgeberbedarfe an einem Ort. LabourMarket.ai hilft, Aufnahme, Auswahl und Unterkunft auf europäischen Märkten zu strukturieren.",
+    },
   },
   workAbroad: {
     en: {
@@ -177,6 +221,16 @@ export const PAGE_SEO: Readonly<
       title: "Работа за границей — вакансии в разных секторах Европы",
       description:
         "Думаете о работе за границей в любом секторе? Узнайте, как LabourMarket.ai структурирует навыки, подбор, документы и проживание, чтобы работники и работодатели планировали дальнейшие шаги в Европе.",
+    },
+    nl: {
+      title: "Werken in het buitenland — Banen in verschillende sectoren in Europa",
+      description:
+        "Denk je aan werken in het buitenland, in welke sector dan ook? Ontdek hoe LabourMarket.ai vaardigheden, selectie, documenten en huisvesting structureert, zodat werknemers en werkgevers de volgende stappen in Europa kunnen plannen.",
+    },
+    de: {
+      title: "Arbeiten im Ausland — Jobs in verschiedenen Branchen in Europa",
+      description:
+        "Sie überlegen, im Ausland zu arbeiten — in welcher Branche auch immer? Erfahren Sie, wie LabourMarket.ai Fähigkeiten, Auswahl, Dokumente und Unterkunft strukturiert, damit Arbeitskräfte und Arbeitgeber die nächsten Schritte in Europa planen können.",
     },
   },
   companyNeed: {
@@ -195,6 +249,16 @@ export const PAGE_SEO: Readonly<
       description:
         "Расскажите LabourMarket.ai, что нужно проекту: профессии, навыки, размер бригады, локация и старт. Мы готовим структурированный черновик, который вы проверяете — ничего не публикуется автоматически.",
     },
+    nl: {
+      title: "Personeelsbehoefte — Beschrijf de werknemers die je nodig hebt",
+      description:
+        "Vertel LabourMarket.ai wat je project nodig heeft: beroepen, vaardigheden, teamgrootte, locatie en startdatum. Wij bereiden een gestructureerd concept voor dat jij beoordeelt — niets wordt automatisch gepubliceerd.",
+    },
+    de: {
+      title: "Personalbedarf — Beschreiben Sie die Arbeitskräfte, die Sie benötigen",
+      description:
+        "Sagen Sie LabourMarket.ai, was Ihr Projekt braucht: Berufe, Fähigkeiten, Teamgröße, Standort und Start. Wir erstellen einen strukturierten Entwurf, den Sie prüfen — nichts wird automatisch veröffentlicht.",
+    },
   },
   workerIntake: {
     en: {
@@ -211,6 +275,16 @@ export const PAGE_SEO: Readonly<
       title: "Анкета работника — создайте профиль и CV",
       description:
         "Начните профиль работника LabourMarket.ai: профессии, навыки, опыт и доступность. Структурированная анкета формирует CV и готовит вас к отбору работодателями.",
+    },
+    nl: {
+      title: "Werknemersintake — Maak je profiel en cv",
+      description:
+        "Start je LabourMarket.ai-werknemersprofiel: beroepen, vaardigheden, ervaring en beschikbaarheid. Een gestructureerde intake bouwt je cv op en bereidt je voor op beoordeling en selectie door werkgevers.",
+    },
+    de: {
+      title: "Anmeldung für Arbeitskräfte — Erstellen Sie Ihr Profil und Ihren Lebenslauf",
+      description:
+        "Starten Sie Ihr Profil als Arbeitskraft auf LabourMarket.ai: Berufe, Fähigkeiten, Erfahrung und Verfügbarkeit. Eine strukturierte Aufnahme erstellt Ihren Lebenslauf und bereitet Sie auf Prüfung und Auswahl durch Arbeitgeber vor.",
     },
   },
   labourMarket: {
@@ -229,6 +303,16 @@ export const PAGE_SEO: Readonly<
       description:
         "Подтверждённые источниками сигналы рынка труда по рынкам Европы: спрос на рабочую силу, навыки и мобильность. LabourMarket.ai использует честные качественные данные — без выдуманных цифр.",
     },
+    nl: {
+      title: "Arbeidsmarkt — Onderbouwde gegevens en landensignalen in Europa",
+      description:
+        "Op bronnen gebaseerde arbeidsmarktsignalen voor Europese markten: vraag naar arbeidskrachten, vaardigheden en mobiliteit. LabourMarket.ai gebruikt eerlijke, kwalitatieve gegevens — zonder verzonnen cijfers.",
+    },
+    de: {
+      title: "Arbeitsmarkt — Belege und Ländersignale in Europa",
+      description:
+        "Quellengestützte Arbeitsmarktsignale für europäische Märkte: Nachfrage nach Arbeitskräften, Fähigkeiten und Mobilität. LabourMarket.ai nutzt ehrliche, qualitative Belege — keine erfundenen Zahlen.",
+    },
   },
   pricing: {
     en: {
@@ -245,6 +329,16 @@ export const PAGE_SEO: Readonly<
       title: "Цены — честная модель раннего доступа",
       description:
         "Как работают цены LabourMarket.ai в период раннего доступа. Понятные и честные цены для работников, работодателей и агентств — без скрытых платежей и пустых обещаний.",
+    },
+    nl: {
+      title: "Prijzen — Eerlijk early-access-model",
+      description:
+        "Zo werken de prijzen van LabourMarket.ai tijdens early access. Duidelijke, eerlijke prijzen voor werknemers, werkgevers en uitzendbureaus — geen verborgen kosten, geen valse beloften.",
+    },
+    de: {
+      title: "Preise — Ehrliches Early-Access-Modell",
+      description:
+        "So funktionieren die Preise von LabourMarket.ai während des Early Access. Klare, ehrliche Preise für Arbeitskräfte, Arbeitgeber und Personalagenturen — keine versteckten Gebühren, keine falschen Versprechen.",
     },
   },
   workOpportunities: {
@@ -263,6 +357,16 @@ export const PAGE_SEO: Readonly<
       description:
         "Ищете работу в Европе? LabourMarket.ai помогает работникам разных секторов — строительство, логистика, производство, гостеприимство, уход и др. — создать профиль и CV и выйти на реальные потребности работодателей.",
     },
+    nl: {
+      title: "Werkkansen — Vind werk in verschillende sectoren",
+      description:
+        "Op zoek naar werk in Europa? LabourMarket.ai helpt werknemers in allerlei sectoren — bouw, logistiek, productie, horeca, zorg en meer — een profiel en cv op te bouwen en echte personeelsbehoeften van werkgevers te bereiken.",
+    },
+    de: {
+      title: "Arbeitsmöglichkeiten — Arbeit in verschiedenen Branchen finden",
+      description:
+        "Sie suchen Arbeit in Europa? LabourMarket.ai hilft Arbeitskräften in vielen Branchen — Bau, Logistik, Produktion, Gastgewerbe, Pflege und mehr — ein Profil und einen Lebenslauf zu erstellen und echte Arbeitgeberbedarfe zu erreichen.",
+    },
   },
   skills: {
     en: {
@@ -280,6 +384,16 @@ export const PAGE_SEO: Readonly<
       description:
         "Показывайте и проверяйте реальные навыки на LabourMarket.ai. Навыки помечены как подтверждённые или самозаявленные, чтобы работники доказали умения, а работодатели видели реальный опыт.",
     },
+    nl: {
+      title: "Vaardigheden — Geverifieerd en zelf opgegeven, nooit vermengd",
+      description:
+        "Laat echte vaardigheden zien en controleer ze op LabourMarket.ai. Vaardigheden worden gemarkeerd als geverifieerd of zelf opgegeven, zodat werknemers kunnen aantonen wat ze kunnen en werkgevers echte ervaring zien.",
+    },
+    de: {
+      title: "Fähigkeiten — Verifiziert und selbst angegeben, nie vermischt",
+      description:
+        "Zeigen und prüfen Sie echte Fähigkeiten auf LabourMarket.ai. Fähigkeiten werden als verifiziert oder selbst angegeben gekennzeichnet, damit Arbeitskräfte belegen, was sie können, und Arbeitgeber echte Erfahrung sehen.",
+    },
   },
   professions: {
     en: {
@@ -296,6 +410,16 @@ export const PAGE_SEO: Readonly<
       title: "Профессии и секторы — для кого LabourMarket.ai",
       description:
         "От строителей, сварщиков и водителей до склада, производства, уборки, гостеприимства, ухода и администрации — LabourMarket.ai охватывает профессии и секторы Европы, а также бригады, агентства и работодателей.",
+    },
+    nl: {
+      title: "Beroepen en sectoren — Voor wie LabourMarket.ai is",
+      description:
+        "Van bouwvakkers, lassers en chauffeurs tot magazijn-, productie-, schoonmaak-, horeca-, zorg- en administratieve functies — LabourMarket.ai dekt beroepen en sectoren in heel Europa, plus ploegen, uitzendbureaus en werkgevers.",
+    },
+    de: {
+      title: "Berufe und Branchen — Für wen LabourMarket.ai gedacht ist",
+      description:
+        "Von Bauarbeitern, Schweißern und Fahrern bis zu Lager-, Produktions-, Reinigungs-, Gastgewerbe-, Pflege- und Verwaltungsrollen — LabourMarket.ai deckt Berufe und Branchen in ganz Europa ab, dazu Kolonnen, Personalagenturen und Arbeitgeber.",
     },
   },
 };

@@ -192,8 +192,10 @@ describe("message language chip — data-backed only, never guessed", () => {
 });
 
 describe("UI language status stays honest and discoverable", () => {
-  it("active locales are exactly lt/en/ru and RU stays non-Tier-1 (preview)", () => {
-    expect([...activeLocales]).toEqual(["lt", "en", "ru"]);
+  it("active locales are exactly lt/en/ru/nl/de; RU/NL/DE stay non-Tier-1 (preview)", () => {
+    // NL + DE activated 2026-07-11 (launch repair Scope D) with full-parity
+    // AI-seeded catalogs pending §7.4 human review — preview-tagged like RU.
+    expect([...activeLocales]).toEqual(["lt", "en", "ru", "nl", "de"]);
     expect([...tier1Locales]).toEqual(["en", "lt"]);
   });
 

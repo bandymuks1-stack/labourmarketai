@@ -38,63 +38,63 @@
   "claimShortage": "Shortage signal",
   "claimSkills": "Skills signal",
   "illustrativeSample": "Illustrative sample — concept data, not live platform figures yet.",
-  "evidenceDisclaimer": "[EN] Each claim links to its official public source with the figure date and region. Figures are transcribed from published reports (last verified on the date shown on each card), not a live data feed — always verify against the linked source for the authoritative, latest number.",
+  "evidenceDisclaimer": "Elke claim linkt naar de officiële openbare bron met de datum en regio van het cijfer. Cijfers zijn overgenomen uit gepubliceerde rapporten (laatst geverifieerd op de datum op elke kaart), niet uit een live datafeed — controleer altijd de gelinkte bron voor het gezaghebbende, meest recente cijfer.",
   "sourceLabel": {
-    "eurostat": "[EN] Eurostat source",
-    "eures": "[EN] EURES / European Labour Authority source",
-    "cedefop": "[EN] Cedefop source",
-    "eurofound": "[EN] Eurofound source",
-    "oecd": "[EN] OECD source",
-    "ilo": "[EN] ILO source",
-    "ec": "[EN] European Commission source"
+    "eurostat": "Eurostat-bron",
+    "eures": "Bron: EURES / Europese Arbeidsautoriteit",
+    "cedefop": "Cedefop-bron",
+    "eurofound": "Eurofound-bron",
+    "oecd": "OESO-bron",
+    "ilo": "ILO-bron",
+    "ec": "Bron: Europese Commissie"
   },
   "evidence": {
     "employment-participation": {
-      "title": "[EN] Employment is at a record high — competition for skills is tight",
-      "summary": "[EN] Eurostat reports the EU employment rate for people aged 20–64 reached 75.8% in 2024 — the highest since the series began in 2009 (and rising above 76% in 2025). A tight market makes visible, evidenced skills more valuable, not less.",
-      "figureDate": "[EN] 2024 annual",
-      "region": "[EN] EU",
-      "unit": "[EN] % employed (age 20–64), 2024",
-      "methodNote": "[EN] Eurostat Labour Force Survey, EU employment rate age 20–64, 2024 annual (published Apr 2025); highest since the 2009 series start."
+      "title": "De werkgelegenheid staat op een recordhoogte — de concurrentie om vaardigheden is hevig",
+      "summary": "Eurostat meldt dat de arbeidsparticipatie in de EU voor mensen van 20–64 jaar in 2024 75,8% bereikte — het hoogste niveau sinds de start van de reeks in 2009 (en in 2025 stijgend tot boven de 76%). In een krappe markt worden zichtbare, onderbouwde vaardigheden waardevoller, niet minder waardevol.",
+      "figureDate": "Jaarcijfer 2024",
+      "region": "EU",
+      "unit": "% werkenden (leeftijd 20–64), 2024",
+      "methodNote": "Eurostat Labour Force Survey, EU-arbeidsparticipatie leeftijd 20–64, jaarcijfer 2024 (gepubliceerd apr 2025); hoogste sinds de start van de reeks in 2009."
     },
     "shortage-occupations": {
-      "title": "[EN] Shortages span the whole labour market",
-      "summary": "[EN] The EURES / European Labour Authority report on labour shortages & surpluses lists long-standing shortages in healthcare, construction and hospitality, plus highly-skilled gaps in engineering and IT, and — in the 2024 edition — transport and storage (drivers, mobile-plant operators). The gap is economy-wide, not one sector.",
-      "figureDate": "[EN] 2024 report (published Jun 2025)",
-      "region": "[EN] EU / EEA + Norway, Iceland, Switzerland",
-      "methodNote": "[EN] EURES Report on labour shortages and surpluses 2024; shortage occupations are listed per country at the source."
+      "title": "Tekorten strekken zich uit over de hele arbeidsmarkt",
+      "summary": "Het rapport van EURES / de Europese Arbeidsautoriteit over arbeidstekorten en -overschotten noemt langdurige tekorten in de zorg, de bouw en de horeca, plus hooggekwalificeerde tekorten in engineering en IT, en — in de editie van 2024 — vervoer en opslag (chauffeurs, bedieners van mobiele machines). Het tekort is economiebreed, niet beperkt tot één sector.",
+      "figureDate": "Rapport 2024 (gepubliceerd jun 2025)",
+      "region": "EU / EER + Noorwegen, IJsland, Zwitserland",
+      "methodNote": "EURES Report on labour shortages and surpluses 2024; knelpuntberoepen staan per land vermeld bij de bron."
     },
     "skills-mismatch": {
-      "title": "[EN] Almost half of employers can't find the right skills",
-      "summary": "[EN] A European Commission Eurobarometer survey found 46% of EU SMEs found it difficult or very difficult to find staff with the right skills over the past two years — rising to about 70% among SMEs that actually hired. It is a matching problem, not only a supply problem.",
-      "figureDate": "[EN] 2024 Eurobarometer (SME skills)",
-      "region": "[EN] EU",
-      "unit": "[EN] % of SMEs (≈70% of those hiring)",
-      "methodNote": "[EN] European Commission Eurobarometer on SMEs and skill shortages, 2024: 46% of SMEs found it (very) difficult to find rightly-skilled staff in the prior 24 months; ~70% among SMEs that hired."
+      "title": "Bijna de helft van de werkgevers vindt de juiste vaardigheden niet",
+      "summary": "Een Eurobarometer-onderzoek van de Europese Commissie stelde vast dat 46% van de EU-mkb-bedrijven het de afgelopen twee jaar moeilijk of zeer moeilijk vond om personeel met de juiste vaardigheden te vinden — oplopend tot ongeveer 70% onder mkb-bedrijven die daadwerkelijk hebben aangenomen. Het is een matchingprobleem, niet alleen een aanbodprobleem.",
+      "figureDate": "Eurobarometer 2024 (mkb-vaardigheden)",
+      "region": "EU",
+      "unit": "% van mkb-bedrijven (≈70% van de aannemende bedrijven)",
+      "methodNote": "Eurobarometer van de Europese Commissie over mkb en vaardigheidstekorten, 2024: 46% van de mkb-bedrijven vond het (zeer) moeilijk om personeel met de juiste vaardigheden te vinden in de voorgaande 24 maanden; ~70% onder mkb-bedrijven die aannamen."
     },
     "digital-skills-demand": {
-      "title": "[EN] The skills jobs need are shifting to digital",
-      "summary": "[EN] Cedefop's analysis points to nearly 9 in 10 jobs requiring digital skills, while only about 55.6% of EU adults have at least basic digital skills. The skills profile of many jobs is changing faster than a static CV can show.",
-      "figureDate": "[EN] Cedefop Skills Forecast / digital-skills analysis (2024)",
-      "region": "[EN] EU",
-      "unit": "[EN] % of EU adults with basic digital skills",
-      "methodNote": "[EN] Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 jobs will require digital skills; ~55.6% of EU adults have at least basic digital skills."
+      "title": "De vaardigheden die banen vereisen verschuiven naar digitaal",
+      "summary": "De analyse van Cedefop wijst erop dat bijna 9 op de 10 banen digitale vaardigheden vereisen, terwijl slechts ongeveer 55,6% van de volwassenen in de EU ten minste digitale basisvaardigheden heeft. Het vaardigheidsprofiel van veel banen verandert sneller dan een statisch CV kan laten zien.",
+      "figureDate": "Cedefop Skills Forecast / analyse digitale vaardigheden (2024)",
+      "region": "EU",
+      "unit": "% volwassenen in de EU met digitale basisvaardigheden",
+      "methodNote": "Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 banen zullen digitale vaardigheden vereisen; ~55,6% van de volwassenen in de EU heeft ten minste digitale basisvaardigheden."
     },
     "demographic-pressure": {
-      "title": "[EN] The working-age population is shrinking",
-      "summary": "[EN] Eurostat population projections show 22 of the 27 EU countries are expected to see their working-age (20–64) population decline by 2050, with the old-age dependency ratio rising substantially. Retaining, re-skilling and matching workers to need becomes structurally more important.",
-      "figureDate": "[EN] Eurostat population projections (2024 base)",
-      "region": "[EN] EU",
-      "unit": "[EN] EU countries with working-age decline by 2050",
-      "methodNote": "[EN] Eurostat population projections / 'Old-age dependency growing across EU regions' (Oct 2025): 22 of 27 EU countries projected to see working-age (20–64) population decline by 2050."
+      "title": "De beroepsbevolking krimpt",
+      "summary": "Bevolkingsprognoses van Eurostat laten zien dat in 22 van de 27 EU-landen de bevolking in de werkzame leeftijd (20–64) naar verwachting tot 2050 zal afnemen, terwijl de grijze druk aanzienlijk stijgt. Werknemers behouden, omscholen en matchen aan de behoefte wordt structureel belangrijker.",
+      "figureDate": "Bevolkingsprognoses Eurostat (basisjaar 2024)",
+      "region": "EU",
+      "unit": "EU-landen met krimp van de beroepsbevolking tot 2050",
+      "methodNote": "Eurostat-bevolkingsprognoses / 'Old-age dependency growing across EU regions' (okt 2025): in 22 van de 27 EU-landen zal de bevolking in de werkzame leeftijd (20–64) naar verwachting tot 2050 afnemen."
     },
     "labour-mobility": {
-      "title": "[EN] Cross-border mobility helps balance shortages",
-      "summary": "[EN] The European Commission's Annual Report on Intra-EU Labour Mobility shows about 10.1 million EU citizens of working age work in another member state and roughly 1.83 million are cross-border workers — and movers' employment rate (78%) exceeds nationals' (76%). Relevant for a Baltic & Northern European market where people work across borders.",
-      "figureDate": "[EN] 2024 edition (published Feb 2025)",
-      "region": "[EN] EU / EEA",
-      "unit": "[EN] cross-border workers (10.1M work abroad)",
-      "methodNote": "[EN] EC Annual Report on Intra-EU Labour Mobility 2024 (data 2022–2023): ~10.1M working-age EU citizens work abroad; ~1.83M cross-border workers; movers' employment rate 78% vs 76% for nationals."
+      "title": "Grensoverschrijdende mobiliteit helpt tekorten in balans te brengen",
+      "summary": "Het jaarverslag van de Europese Commissie over arbeidsmobiliteit binnen de EU laat zien dat ongeveer 10,1 miljoen EU-burgers in de werkzame leeftijd in een andere lidstaat werken en dat er circa 1,83 miljoen grensarbeiders zijn — en de arbeidsparticipatie van verhuizers (78%) is hoger dan die van eigen onderdanen (76%). Relevant voor een Baltische en Noord-Europese markt waar mensen over de grens werken.",
+      "figureDate": "Editie 2024 (gepubliceerd feb 2025)",
+      "region": "EU / EER",
+      "unit": "grensarbeiders (10,1 mln werkt in het buitenland)",
+      "methodNote": "EC Annual Report on Intra-EU Labour Mobility 2024 (gegevens 2022–2023): ~10,1 mln EU-burgers in de werkzame leeftijd werkt in het buitenland; ~1,83 mln grensarbeiders; arbeidsparticipatie van verhuizers 78% versus 76% voor eigen onderdanen."
     }
   },
   "countryNames": {
@@ -149,6 +149,39 @@
       "digital-skills": {
         "title": "Digital skills demand is rising",
         "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Estonia."
+      }
+    },
+    "PL": {
+      "intro": "Polen — een prioriteitsmarkt. Brongebaseerde signalen voor werknemers en werkgevers.",
+      "shortages": {
+        "title": "Tekorten in bouwberoepen, chauffeurs en geschoolde industrie",
+        "summary": "EURES-rapportages plaatsen de Poolse knelpuntberoepen in de bouw en aanverwante vakken, chauffeurs van zware voertuigen en transport, en geschoolde industrie en lassen — naast de EU-brede tekorten in de zorg en IT."
+      },
+      "digital-skills": {
+        "title": "De vraag naar digitale vaardigheden stijgt",
+        "summary": "De Skills Forecast van Cedefop wijst op een groeiende vraag naar digitale en hogere vaardigheden in alle beroepen, ook in Polen."
+      }
+    },
+    "DE": {
+      "intro": "Duitsland — een prioriteitsmarkt. Brongebaseerde signalen voor werknemers en werkgevers.",
+      "shortages": {
+        "title": "Brede tekorten in zorg, ambachten, IT en engineering",
+        "summary": "EURES-rapportages plaatsen Duitsland bij de breedste tekortprofielen van de EU — zorgberoepen, geschoolde bouw, elektro- en mechatronicavakken, IT en engineering."
+      },
+      "digital-skills": {
+        "title": "De vraag naar digitale vaardigheden stijgt",
+        "summary": "De Skills Forecast van Cedefop wijst op een groeiende vraag naar digitale en hogere vaardigheden in alle beroepen, ook in Duitsland."
+      }
+    },
+    "NL": {
+      "intro": "Nederland — een prioriteitsmarkt. Brongebaseerde signalen voor werknemers en werkgevers.",
+      "shortages": {
+        "title": "Een krappe markt met tekorten in techniek, zorg en IT",
+        "summary": "EURES-rapportages plaatsen Nederland bij de krapste arbeidsmarkten van de EU, met tekorten in technische en engineeringberoepen, zorg, onderwijs en IT."
+      },
+      "digital-skills": {
+        "title": "De vraag naar digitale vaardigheden stijgt",
+        "summary": "De Skills Forecast van Cedefop wijst op een groeiende vraag naar digitale en hogere vaardigheden in alle beroepen, ook in Nederland."
       }
     }
   }
