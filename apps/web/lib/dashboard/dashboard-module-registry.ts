@@ -51,6 +51,7 @@ export type DashboardModuleId =
   | "documents"
   | "services"
   | "service_requests"
+  | "projects"
   | "company"
   | "activity"
   | "overview";
@@ -69,7 +70,8 @@ export type ModuleIconKey =
   | "search"
   | "bell"
   | "checklist"
-  | "handshake";
+  | "handshake"
+  | "briefcase";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -239,6 +241,22 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
       "incoming-service-requests",
       "service-request-responses",
     ],
+  },
+
+  // ── Manager operations (control room PR G) ───────────────────────────
+  {
+    id: "projects",
+    // Projects / objects — the manager map into each project's operating
+    // centre. Until PR G, managers reached /dashboard/projects only via
+    // nav links and the command finder's literal route; the module makes
+    // it a first-class grid card for org roles. Labels reuse the projects
+    // page's own copy (no parallel copy source).
+    surfaceRoute: "/dashboard/projects",
+    labelKey: "projects.title",
+    descriptionKey: "projects.intro",
+    iconKey: "briefcase",
+    roles: ORG_ROLES,
+    surfaces: ["grid", "command"],
   },
 
   // ── Organisation workspace door ──────────────────────────────────────

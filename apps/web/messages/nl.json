@@ -4726,6 +4726,50 @@
     }
   },
   "projectOps": {
+    "centre": {
+      "summaryTitle": "Projectoverzicht",
+      "datesLabel": "Data",
+      "openTasksLabel": "Open taken",
+      "tasksPreparingShort": "nog niet beschikbaar",
+      "readinessLabel": "Checklist afgevinkt",
+      "readinessNone": "nog niets bijgehouden",
+      "housingLabel": "Huisvesting geregeld",
+      "housingYes": "Ja",
+      "housingNo": "Nee",
+      "housingUnknown": "Niet vastgelegd",
+      "attention": {
+        "title": "Vraagt aandacht",
+        "empty": "Er vraagt nu niets om aandacht — de hier bijgehouden statussen, checklists en taken zijn rustig.",
+        "note": "Alleen afgeleid uit echte records: door de manager ingestelde operationele statussen, open checklistpunten en open projecttaken. Verder wordt niets gescoord of voorspeld.",
+        "kind": {
+          "worker_documents_needed": "Documenten nodig",
+          "readiness_item_open": "Open checklistpunt",
+          "task_overdue": "Taak over tijd",
+          "task_blocked": "Taak geblokkeerd"
+        }
+      },
+      "resources": {
+        "title": "Middelen en toewijzingsgereedheid",
+        "checklistLabel": "Checklist",
+        "availabilityLabel": "Beschikbaarheid",
+        "availableFromLabel": "Beschikbaar vanaf",
+        "notRecorded": "niet vastgelegd",
+        "noWindow": "Project zonder data — boekingsoverlap niet gecontroleerd",
+        "bookingConflict": "{n, plural, one {# overlappende geaccepteerde boeking} other {# overlappende geaccepteerde boekingen}}",
+        "noConflict": "Geen overlappende geaccepteerde boekingen",
+        "note": "Beschikbaarheid toont de door de werknemer zelf vastgelegde velden. Overlap vergelijkt de voor u zichtbare geaccepteerde boekingen met de datumband van dit project. Huisvestings- en vervoersbehoeften worden nog niet bijgehouden, dus daarvoor wordt niets getoond."
+      },
+      "tasksTitle": "Projecttaken",
+      "tasksEmpty": "Er zijn geen open taken aan dit project gekoppeld.",
+      "evidence": {
+        "title": "Werkbewijs",
+        "entriesLabel": "Dagboekvermeldingen",
+        "photosLabel": "Geüploade foto's",
+        "note": "Echte aantallen dagboekvermeldingen die aan dit project zijn gekoppeld en de foto's die werknemers aan hun eigen vermeldingen hebben toegevoegd.",
+        "link": "Projectgalerij openen"
+      },
+      "honestNote": "Dit centrum bundelt alleen records die al bestaan. Mijlpalen, issue-registers en middelentabellen zijn nog niet gebouwd en worden hier niet gesimuleerd."
+    },
     "eyebrow": "Projectoperaties",
     "managerOnly": "Dit bord is voor een manager van een bedrijf of uitzendbureau.",
     "notAuthorized": "Je kunt het operationele bord alleen openen voor een project dat je beheert.",

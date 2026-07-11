@@ -68,6 +68,53 @@ function snippet(text: string): string {
     : clean;
 }
 
+/** Real counts behind the gallery (control room PR G): how many journal
+ *  entries are linked to the project and how many uploaded photos those
+ *  entries carry. SAME tables, SAME RLS as getProjectGallery — head counts
+ *  only, so the operations centre can summarize without loading a second
+ *  gallery. Any error degrades to 0/0 (honest, never fabricated). */
+export type ProjectGallerySummary = {
+  entryCount: number;
+  photoCount: number;
+};
+
+export async function getProjectGallerySummary(
+  projectId: string,
+): Promise<ProjectGallerySummary> {
+  const supabase = await createClient();
+  let entryCount = 0;
+  let photoCount = 0;
+  try {
+    const [entriesRes, photosRes] = await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from("journal_entries")
+        .select("*", { count: "exact", head: true })
+        .eq("project_id", projectId)
+        .is("deleted_at", null),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from("journal_entry_photos")
+        .select("id, journal_entries!inner(project_id, deleted_at)", {
+          count: "exact",
+          head: true,
+        })
+        .eq("journal_entries.project_id", projectId)
+        .is("journal_entries.deleted_at", null)
+        .eq("upload_status", "uploaded"),
+    ]);
+    if (!entriesRes.error && typeof entriesRes.count === "number") {
+      entryCount = entriesRes.count;
+    }
+    if (!photosRes.error && typeof photosRes.count === "number") {
+      photoCount = photosRes.count;
+    }
+  } catch {
+    // keep 0/0 — honest degradation
+  }
+  return { entryCount, photoCount };
+}
+
 export async function getProjectGallery(
   projectId: string,
 ): Promise<ProjectGallery> {

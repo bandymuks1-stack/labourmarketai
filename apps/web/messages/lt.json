@@ -4726,6 +4726,50 @@
     }
   },
   "projectOps": {
+    "centre": {
+      "summaryTitle": "Projekto apžvalga",
+      "datesLabel": "Datos",
+      "openTasksLabel": "Atviros užduotys",
+      "tasksPreparingShort": "dar neprieinama",
+      "readinessLabel": "Sąrašo patikrinta",
+      "readinessNone": "dar nieko nesekama",
+      "housingLabel": "Apgyvendinimas suteikiamas",
+      "housingYes": "Taip",
+      "housingNo": "Ne",
+      "housingUnknown": "Neužfiksuota",
+      "attention": {
+        "title": "Reikia dėmesio",
+        "empty": "Šiuo metu dėmesio nieko nereikia — čia sekami statusai, sąrašai ir užduotys ramūs.",
+        "note": "Išvesta tik iš tikrų įrašų: vadovo nustatytų operacinių statusų, atvirų sąrašo punktų ir atvirų projekto užduočių. Niekas daugiau nevertinama ir neprognozuojama.",
+        "kind": {
+          "worker_documents_needed": "Reikia dokumentų",
+          "readiness_item_open": "Atviras sąrašo punktas",
+          "task_overdue": "Užduotis vėluoja",
+          "task_blocked": "Užduotis užblokuota"
+        }
+      },
+      "resources": {
+        "title": "Ištekliai ir priskyrimo parengtis",
+        "checklistLabel": "Sąrašas",
+        "availabilityLabel": "Prieinamumas",
+        "availableFromLabel": "Prieinamas nuo",
+        "notRecorded": "neužfiksuota",
+        "noWindow": "Projektas be datų — rezervacijų persidengimai netikrinami",
+        "bookingConflict": "{n, plural, one {# persidengianti priimta rezervacija} few {# persidengiančios priimtos rezervacijos} other {# persidengiančių priimtų rezervacijų}}",
+        "noConflict": "Persidengiančių priimtų rezervacijų nėra",
+        "note": "Prieinamumas rodo paties darbuotojo užfiksuotus laukus. Persidengimai lygina jums matomas priimtas rezervacijas su šio projekto datų juosta. Apgyvendinimo ir transporto poreikiai dar nesekami, todėl apie juos nieko nerodoma."
+      },
+      "tasksTitle": "Projekto užduotys",
+      "tasksEmpty": "Su šiuo projektu susietų atvirų užduočių nėra.",
+      "evidence": {
+        "title": "Darbo įrodymai",
+        "entriesLabel": "Žurnalo įrašai",
+        "photosLabel": "Įkeltos nuotraukos",
+        "note": "Tikri su šiuo projektu susietų žurnalo įrašų ir darbuotojų prie savo įrašų pridėtų nuotraukų skaičiai.",
+        "link": "Atidaryti projekto galeriją"
+      },
+      "honestNote": "Šis centras sudėlioja tik jau egzistuojančius įrašus. Etapai, problemų registrai ir išteklių lentelės dar nesukurtos ir čia nėra imituojamos."
+    },
     "eyebrow": "Projekto operacijos",
     "managerOnly": "Ši lenta skirta įmonės arba agentūros vadovui.",
     "notAuthorized": "Operacijų lentą galite atidaryti tik savo valdomam projektui.",

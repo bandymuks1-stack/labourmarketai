@@ -229,7 +229,12 @@ describe("app surface — passport shell reuses the EXISTING operations spine", 
   });
 
   it("renders on the EXISTING operations page, responsible parties from the real assignments already loaded", () => {
-    expect(page).toMatch(/getHandoverPassport\(id\)/);
+    // Control room PR G: the passport read moved into the operations-centre
+    // composition the page consumes — the SAME degrading getHandoverPassport
+    // read, called once per project.
+    const centre = readWeb("lib/projects/operations-centre.ts");
+    expect(centre).toMatch(/getHandoverPassport\(projectId\)/);
+    expect(page).toMatch(/data=\{passport\}/);
     expect(page).toMatch(/<HandoverPassportPanel/);
     expect(page).toMatch(/ops\.workers\.map\(\(w\) => \(\{ name: w\.name \}\)\)/);
   });
