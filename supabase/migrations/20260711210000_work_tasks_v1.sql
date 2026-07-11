@@ -9,7 +9,7 @@
 -- applied).
 --
 -- PROBLEM: the platform has an admin-only follow-up queue
--- (follow_up_tasks) and a project-worker readiness checklist, but NO
+-- (the admin follow-up queue) and a project-worker readiness checklist, but NO
 -- assignable, due-dated task primitive connected to real projects and
 -- people. The merged /dashboard/tasks surface, the open-task-attention
 -- spine signal and the activity centre all read the contract below and
