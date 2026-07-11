@@ -6970,7 +6970,13 @@
         "start_date": "Start date",
         "shifts_hours": "Shifts and hours",
         "engagement_form": "Contract type",
-        "licence_categories": "Driving licence"
+        "licence_categories": "Driving licence",
+        "own_vehicle": "Own vehicle",
+        "own_tools": "Own tools",
+        "pay_basis": "Pay basis (gross/net)",
+        "night_shifts": "Night shifts",
+        "weekend_shifts": "Weekend shifts",
+        "overtime": "Overtime"
       },
       "how": {
         "title": "How matching works",

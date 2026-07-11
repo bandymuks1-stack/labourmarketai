@@ -21,8 +21,11 @@
 import type { StructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
 import { ENGAGEMENT_FORMS } from "@/lib/demand/structured-demand-v2";
 
-/** Deterministic-rules calculation version exposed on every match result. */
-export const MATCH_CALC_VERSION = "2" as const;
+/** Deterministic-rules calculation version exposed on every match result.
+ *  "2.1" = P2-PR4 eight mirrored dimensions (languages incl. CEFR levels,
+ *  licence categories, own vehicle, own tools, pay basis, night/weekend
+ *  shifts, overtime). */
+export const MATCH_CALC_VERSION = "2.1" as const;
 export type MatchCalcVersion = typeof MATCH_CALC_VERSION;
 
 export type MatchCriterionClass = "hard" | "weighted" | "negotiable";
@@ -43,7 +46,13 @@ export type MatchCriterionId =
   | "start_date"
   | "shifts_hours"
   | "engagement_form"
-  | "licence_categories";
+  | "licence_categories"
+  | "own_vehicle"
+  | "own_tools"
+  | "pay_basis"
+  | "night_shifts"
+  | "weekend_shifts"
+  | "overtime";
 
 export interface MatchCriterionResult {
   readonly criterion: MatchCriterionId;
@@ -174,4 +183,172 @@ export function compareStartDateV2(
   if (from == null) return { kind: "worker_unstated" };
   // ISO yyyy-mm-dd strings compare lexicographically.
   return from.slice(0, 10) <= latest ? { kind: "met" } : { kind: "negotiable_window" };
+}
+
+// ── Languages with CEFR levels (structured_v2.requirements.languages) ────────
+//
+// Worker facts come from the HUMAN-GATED worker_languages store (MP-1, PR
+// #720): rows { lang, level } with level in A1..C2 | native. Until the store
+// is applied every subject reads back with no language facts → the criterion
+// is a worker-side missing fact, never a fabricated outcome.
+
+/** Closed worker-side level set (worker_languages.level check constraint). */
+export const WORKER_LANGUAGE_LEVELS = [
+  "A1",
+  "A2",
+  "B1",
+  "B2",
+  "C1",
+  "C2",
+  "native",
+] as const;
+
+/** One self-declared worker language fact (worker_languages row). */
+export interface WorkerLanguageFact {
+  readonly lang: string;
+  /** CEFR level or "native" — the DB check constraint enforces the closed
+   *  set; an out-of-set value ranks null (unknown, never guessed). */
+  readonly level: string;
+}
+
+/** Deterministic level ordering: A1 < A2 < B1 < B2 < C1 < C2 ≤ native.
+ *  Unknown level strings rank null — never coerced up or down. */
+const LANGUAGE_LEVEL_RANK: Readonly<Record<string, number>> = {
+  A1: 1,
+  A2: 2,
+  B1: 3,
+  B2: 4,
+  C1: 5,
+  C2: 6,
+  native: 7,
+};
+
+export function languageLevelRank(level: string): number | null {
+  return LANGUAGE_LEVEL_RANK[level.trim()] ?? null;
+}
+
+/** true = the worker's level satisfies the required level; false = below;
+ *  null = either level string is outside the closed set (unknown). */
+export function languageLevelSatisfies(
+  workerLevel: string,
+  requiredLevel: string,
+): boolean | null {
+  const w = languageLevelRank(workerLevel);
+  const r = languageLevelRank(requiredLevel);
+  if (w == null || r == null) return null;
+  return w >= r;
+}
+
+export type LanguagesComparisonV2 =
+  /** Every required language is held at (or above) the required level.
+   *  `extraCount` = worker languages beyond the required set (a weighted
+   *  strength, never a gate). */
+  | { readonly kind: "met"; readonly extraCount: number }
+  /** At least one required language fails AND cannot be team-demoted →
+   *  both-sides-stated hard conflict. */
+  | { readonly kind: "hard_not_met"; readonly failedLangs: readonly string[] }
+  /** Every failed requirement is one_per_team_sufficient on a team-target
+   *  demand → a staffing conversation, not a block. */
+  | { readonly kind: "negotiable_team_gap"; readonly failedLangs: readonly string[] }
+  /** The worker has no stated language facts (store unapplied or empty). */
+  | { readonly kind: "worker_unstated" };
+
+/**
+ * Compare structured_v2 requirements.languages (lang + CEFR level +
+ * one_per_team_sufficient) against the worker's worker_languages facts.
+ * Returns null when the demand states no language requirements (absence =
+ * no requirement, nothing recorded).
+ *
+ * one_per_team_sufficient demotes a FAILED language to negotiable ONLY for
+ * team-target demands (target_supply team | multiple_workers) — one team
+ * member covering the language is a plausible arrangement there. For an
+ * individual target the requirement stays hard.
+ */
+export function compareLanguagesV2(
+  v2: StructuredDemandV2 | null | undefined,
+  workerLanguages: readonly WorkerLanguageFact[] | null | undefined,
+): LanguagesComparisonV2 | null {
+  const required = v2?.requirements?.languages ?? [];
+  if (required.length === 0) return null;
+  if (workerLanguages == null || workerLanguages.length === 0) {
+    return { kind: "worker_unstated" };
+  }
+  // Best stated level per language (defensive: keep the highest known rank).
+  const levelByLang = new Map<string, string>();
+  for (const w of workerLanguages) {
+    const lang = w.lang.trim().toLowerCase();
+    if (lang === "") continue;
+    const prev = levelByLang.get(lang);
+    if (
+      prev == null ||
+      (languageLevelRank(w.level) ?? 0) > (languageLevelRank(prev) ?? 0)
+    ) {
+      levelByLang.set(lang, w.level);
+    }
+  }
+  const teamTarget =
+    v2?.target_supply === "team" || v2?.target_supply === "multiple_workers";
+  const hardFailed: string[] = [];
+  const teamDemoted: string[] = [];
+  for (const req of required) {
+    const held = levelByLang.get(req.lang.trim().toLowerCase());
+    // Not held at all, level below required, or level unknowable → failed.
+    // (An unknowable stated level cannot PROVE the requirement — the
+    // requirement is unmet on the stated facts; nothing is guessed.)
+    const ok = held != null && languageLevelSatisfies(held, req.level) === true;
+    if (ok) continue;
+    if (req.one_per_team_sufficient === true && teamTarget) teamDemoted.push(req.lang);
+    else hardFailed.push(req.lang);
+  }
+  if (hardFailed.length > 0) return { kind: "hard_not_met", failedLangs: hardFailed };
+  if (teamDemoted.length > 0) {
+    return { kind: "negotiable_team_gap", failedLangs: teamDemoted };
+  }
+  const requiredLangs = new Set(required.map((r) => r.lang.trim().toLowerCase()));
+  const extraCount = [...levelByLang.keys()].filter((l) => !requiredLangs.has(l)).length;
+  return { kind: "met", extraCount };
+}
+
+// ── Pay basis (gross/net) — structured_v2.compensation.basis vs
+//    workers.pay_basis_preference (MP-2, PR #721) ─────────────────────────────
+
+export type PayBasisComparisonV2 =
+  /** Both stated and equal (or the worker accepts either). */
+  | { readonly kind: "met" }
+  /** Both stated, different basis — a conversion CONVERSATION, never a block. */
+  | { readonly kind: "negotiable_mismatch" }
+  /** The worker stated a basis preference; the demand's basis is absent or
+   *  "unspecified". */
+  | { readonly kind: "demand_unstated" }
+  /** The demand states a basis; the worker has no stated preference (or the
+   *  stored value is outside the closed gross|net set — unknown, never
+   *  guessed). */
+  | { readonly kind: "worker_unstated" };
+
+/** Normalize a stored basis value to the closed set, else null (unknown). */
+function normalizeBasis(value: string | null | undefined): "gross" | "net" | null {
+  const v = (value ?? "").trim().toLowerCase();
+  return v === "gross" || v === "net" ? v : null;
+}
+
+/**
+ * Compare the demand's stated pay basis against the worker's preference.
+ * Returns null when NEITHER side has stated a basis (nothing to mirror).
+ * "unspecified" on the demand side counts as unstated (the publish-honesty
+ * flags already surface it to the owner).
+ */
+export function comparePayBasisV2(
+  v2: StructuredDemandV2 | null | undefined,
+  workerPayBasisPreference: string | null | undefined,
+): PayBasisComparisonV2 | null {
+  const demandBasis = normalizeBasis(
+    v2?.compensation?.basis === "unspecified" ? null : v2?.compensation?.basis,
+  );
+  const workerBasis = normalizeBasis(workerPayBasisPreference);
+  if (demandBasis == null && workerBasis == null) return null;
+  if (demandBasis == null) return { kind: "demand_unstated" };
+  if (workerBasis == null) return { kind: "worker_unstated" };
+  return demandBasis === workerBasis
+    ? { kind: "met" }
+    : { kind: "negotiable_mismatch" };
 }

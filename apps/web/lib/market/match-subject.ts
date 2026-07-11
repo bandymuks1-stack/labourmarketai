@@ -1,7 +1,12 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { sourceToEvidence, type EvidenceTier, type MatchSubject } from "@/lib/market/match-v1";
+import {
+  sourceToEvidence,
+  type EvidenceTier,
+  type MatchSubject,
+  type WorkerLanguageFact,
+} from "@/lib/market/match-v1";
 
 /**
  * Read layer for matching v1 — assembles a `MatchSubject` for each
@@ -69,7 +74,12 @@ export async function buildSupplyCandidates(
   const skillsByWorker = new Map<string, Map<string, EvidenceTier>>();
   const professionByWorker = new Map<string, string>();
 
-  const [skillsRes, profsRes] = await Promise.all([
+  // Contract v2.1 mirrored facts — FEATURE-DETECTED second reads. The MP-2
+  // workers columns (PR #721) and the worker_languages table (PR #720) are
+  // HUMAN-GATED and may not be applied: a 42703 / 42P01 response leaves the
+  // facts undefined (→ honest missingFacts in the engine), never an error,
+  // and the primary workers query above stays untouched so nothing regresses.
+  const [skillsRes, profsRes, prefsRes, langsRes] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
       .select("worker_id, source, verified, skills ( slug, esco_uri )")
@@ -78,6 +88,24 @@ export async function buildSupplyCandidates(
       .from("worker_professions")
       .select("worker_id, is_primary, professions ( slug )")
       .in("worker_id", workerIds),
+    asAny(supabase)
+      .from("workers")
+      .select(
+        "id, pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, driving_licence_categories, own_vehicle, own_tools",
+      )
+      .in("id", workerIds)
+      .then(
+        (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
+        () => ({ data: null }),
+      ),
+    asAny(supabase)
+      .from("worker_languages")
+      .select("worker_id, lang, level")
+      .in("worker_id", workerIds)
+      .then(
+        (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
+        () => ({ data: null }),
+      ),
   ]);
 
   for (const s of (skillsRes.data ?? []) as {
@@ -106,6 +134,35 @@ export async function buildSupplyCandidates(
     if (p.is_primary || !professionByWorker.has(p.worker_id)) {
       professionByWorker.set(p.worker_id, slug);
     }
+  }
+
+  // MP-2 preference columns keyed by worker (absent pre-apply → empty map).
+  interface WorkerPrefsRow {
+    id: string;
+    pay_basis_preference: string | null;
+    night_shifts_ok: boolean | null;
+    weekend_shifts_ok: boolean | null;
+    overtime_ok: boolean | null;
+    driving_licence_categories: string[] | null;
+    own_vehicle: boolean | null;
+    own_tools: boolean | null;
+  }
+  const prefsByWorker = new Map<string, WorkerPrefsRow>();
+  for (const p of ((prefsRes.data ?? []) as WorkerPrefsRow[])) {
+    prefsByWorker.set(p.id, p);
+  }
+
+  // MP-1 worker_languages keyed by worker (absent pre-apply → empty map).
+  const languagesByWorker = new Map<string, WorkerLanguageFact[]>();
+  for (const l of ((langsRes.data ?? []) as {
+    worker_id: string;
+    lang: string | null;
+    level: string | null;
+  }[])) {
+    if (!l.lang || !l.level) continue;
+    const list = languagesByWorker.get(l.worker_id) ?? [];
+    list.push({ lang: l.lang, level: l.level });
+    languagesByWorker.set(l.worker_id, list);
   }
 
   // Approved candidate-skill ESCO mappings join as self_declared (the mapping
@@ -157,6 +214,18 @@ export async function buildSupplyCandidates(
         // stated their form (workers.preferred_contract_type is applied prod
         // schema — see gap map Capability B).
         preferredContractType: (w.preferred_contract_type as string | null) ?? null,
+        // Contract v2.1 mirrored facts (human-gated MP-1/MP-2 stores;
+        // pre-apply they read back undefined/null = honest "not stated").
+        languageLevels: languagesByWorker.get(w.id as string) ?? null,
+        drivingLicenceCategories:
+          prefsByWorker.get(w.id as string)?.driving_licence_categories ?? null,
+        ownVehicle: prefsByWorker.get(w.id as string)?.own_vehicle ?? null,
+        ownTools: prefsByWorker.get(w.id as string)?.own_tools ?? null,
+        payBasisPreference:
+          prefsByWorker.get(w.id as string)?.pay_basis_preference ?? null,
+        nightShiftsOk: prefsByWorker.get(w.id as string)?.night_shifts_ok ?? null,
+        weekendShiftsOk: prefsByWorker.get(w.id as string)?.weekend_shifts_ok ?? null,
+        overtimeOk: prefsByWorker.get(w.id as string)?.overtime_ok ?? null,
       } satisfies MatchSubject,
     };
   });

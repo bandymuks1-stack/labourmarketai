@@ -1736,7 +1736,13 @@
         "start_date": "[EN] Start date",
         "shifts_hours": "[EN] Shifts and hours",
         "engagement_form": "[EN] Contract type",
-        "licence_categories": "[EN] Driving licence"
+        "licence_categories": "[EN] Driving licence",
+        "own_vehicle": "Isiklik sõiduk",
+        "own_tools": "Isiklikud tööriistad",
+        "pay_basis": "Palga alus (bruto/neto)",
+        "night_shifts": "Öövahetused",
+        "weekend_shifts": "Nädalavahetuse vahetused",
+        "overtime": "Ületunnitöö"
       },
       "how": {
         "title": "[EN] How matching works",

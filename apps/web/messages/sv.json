@@ -1736,7 +1736,13 @@
         "start_date": "[EN] Start date",
         "shifts_hours": "[EN] Shifts and hours",
         "engagement_form": "[EN] Contract type",
-        "licence_categories": "[EN] Driving licence"
+        "licence_categories": "[EN] Driving licence",
+        "own_vehicle": "Egen bil",
+        "own_tools": "Egna verktyg",
+        "pay_basis": "Lönebas (brutto/netto)",
+        "night_shifts": "Nattskift",
+        "weekend_shifts": "Helgskift",
+        "overtime": "Övertid"
       },
       "how": {
         "title": "[EN] How matching works",

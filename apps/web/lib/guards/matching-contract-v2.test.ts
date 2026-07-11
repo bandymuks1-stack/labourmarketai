@@ -260,10 +260,10 @@ describe("4. negotiable close-salary detection (≤15%)", () => {
 });
 
 describe("5.–6. calc version + per-criterion sources", () => {
-  it("MATCH_CALC_VERSION is '2' and present on every result", () => {
-    expect(MATCH_CALC_VERSION).toBe("2");
-    expect(matchWorkerToNeed(baseNeed, strongSubject).calcVersion).toBe("2");
-    expect(matchWorkerToNeed({}, strongSubject).calcVersion).toBe("2");
+  it("MATCH_CALC_VERSION is '2.1' (P2-PR4 mirrored dimensions) and present on every result", () => {
+    expect(MATCH_CALC_VERSION).toBe("2.1");
+    expect(matchWorkerToNeed(baseNeed, strongSubject).calcVersion).toBe("2.1");
+    expect(matchWorkerToNeed({}, strongSubject).calcVersion).toBe("2.1");
   });
 
   it("every criterion result and missing fact carries a non-empty table/field source", () => {
