@@ -55,6 +55,7 @@ export type DashboardModuleId =
   | "finance"
   | "company"
   | "activity"
+  | "assist"
   | "overview";
 
 /** Icon ids for module cards. A superset of the nav's NavIconKey so the nav
@@ -73,7 +74,8 @@ export type ModuleIconKey =
   | "checklist"
   | "handshake"
   | "briefcase"
-  | "coins";
+  | "coins"
+  | "sparkles";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -304,6 +306,23 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     labelKey: "activityCentre.title",
     descriptionKey: "activityCentre.intro",
     iconKey: "bell",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  // ── AI assistance centre (control room PR J) ─────────────────────────
+  {
+    id: "assist",
+    // One controlled assistance surface: the deterministic "what needs my
+    // attention" composition, the deterministic role summaries and the
+    // HONEST AI-provider state card (disabled in production — the page says
+    // so; no generation is wired in this slice, gap map §10). Declares NO
+    // attentionSignalIds — the surface aggregates the spine itself, so a
+    // badge here would double-count the numbers the bell already carries.
+    surfaceRoute: "/dashboard/assist",
+    labelKey: "assist.title",
+    descriptionKey: "assist.intro",
+    iconKey: "sparkles",
     roles: ALL_ROLES,
     surfaces: ["grid", "command"],
   },

@@ -7770,6 +7770,74 @@
       "link": "Aufgaben zu diesem Projekt"
     }
   },
+  "assist": {
+    "eyebrow": "Assistenzzentrum",
+    "title": "Assistenzzentrum",
+    "intro": "Was Ihre Aufmerksamkeit braucht, Zusammenfassungen aus Ihren eigenen Daten und der ehrliche Zustand des KI-Anbieters.",
+    "attention": {
+      "title": "Was braucht meine Aufmerksamkeit",
+      "note": "Aus Ihren eigenen Daten nach festen Regeln berechnet — dieselben Zahlen, die die Glocke und jedes Modul bereits zeigen. Jede Zeile nennt ihre Datenquelle und verlinkt die Seite, auf der sie sich klären lässt.",
+      "empty": "Im Moment braucht nichts Ihre Aufmerksamkeit — es gibt keine offenen Signale in Ihren Daten.",
+      "open": "Öffnen",
+      "docExpiring": "Dokumente, die innerhalb von 30 Tagen ablaufen",
+      "docMissing": "Fehlende oder abgelaufene Dokumente",
+      "docReview": "Dokumente in Prüfung oder zurückgegeben",
+      "financeOverdue": "Überfällige Finanzeinträge"
+    },
+    "sources": {
+      "label": "Quellen",
+      "notificationSpine": "Benachrichtigungssignale",
+      "workerDocuments": "Ihre Dokumenteinträge",
+      "financeRecords": "Ihre Finanzeinträge",
+      "workerSkills": "Ihre katalogisierten Fähigkeiten",
+      "workJournal": "Ihr Arbeitsjournal",
+      "managerConfirmations": "Bestätigungen von Verantwortlichen",
+      "projects": "Ihre Projekte",
+      "assignments": "Aktive Zuweisungen von Arbeitskräften"
+    },
+    "summaries": {
+      "title": "Zusammenfassungen aus Ihren Daten",
+      "note": "Aus echten Feldern nach festen Regeln zusammengesetzt, mit sichtbaren Quellen. Kein Text in diesem Abschnitt wurde von einem Sprachmodell erzeugt.",
+      "none": "Für diese Rolle gibt es noch keine Zusammenfassung — Zusammenfassungen entstehen nur dort, wo wahrheitsgemäße Daten existieren.",
+      "worker": {
+        "title": "Profil- und Nachweiszusammenfassung",
+        "totalSkills": "Fähigkeiten",
+        "workSupported": "Durch Arbeitseinträge belegt",
+        "confirmed": "Bestätigt",
+        "journalEntries": "Journaleinträge",
+        "confirmations": "Bestätigungen",
+        "link": "Vollständigen Nachweisbericht öffnen"
+      },
+      "org": {
+        "title": "Projektstatus-Zusammenfassung",
+        "teamSize": "Aktive Arbeitskräfte: {count}",
+        "empty": "Noch keine aktiven Projekte — Projekte erscheinen hier, sobald sie existieren.",
+        "error": "Projekte konnten gerade nicht geladen werden. Der Rest der Seite funktioniert.",
+        "link": "Betrieb"
+      }
+    },
+    "provider": {
+      "title": "KI-Anbieter",
+      "stateLabel": "Laufzeitzustand",
+      "state": {
+        "disabled": "Aus",
+        "mock": "Mock (deterministischer Testmodus)",
+        "live": "Aktiv"
+      },
+      "reason": {
+        "ok": "Die Laufzeitumgebung ist konfiguriert.",
+        "mode_disabled": "Kein Anbietermodus gesetzt — die Laufzeitumgebung ist standardmäßig aus.",
+        "unknown_provider": "Der konfigurierte Anbieter wird nicht erkannt, daher bleibt die Laufzeitumgebung aus.",
+        "missing_api_key": "Kein Anbieterschlüssel konfiguriert, daher bleibt die Laufzeitumgebung aus."
+      },
+      "disabledBody": "In dieser Umgebung ist kein externer KI-Anbieter angebunden. Alles auf dieser Seite wird nach festen Regeln aus Ihren eigenen Daten berechnet — kein Text hier wurde von einem Sprachmodell erzeugt.",
+      "whenEnabled": "Sobald der Eigentümer einen Anbieter anbindet und der Audit-Speicher für Vorschläge angewendet ist, werden prüfbare Entwurfsvorschläge verfügbar — immer als Vorschläge, die ein Mensch bestätigt, nie als automatische Änderungen.",
+      "gates": "Zwei Tore sind bewusst offen: (1) in der Produktionsumgebung ist kein Anbieterschlüssel konfiguriert und (2) der Audit-Speicher für Vorschläge (ai_runs / ai_suggestions) ist eine vom Eigentümer freizugebende Migration. Die Generierung bleibt aus, bis beide geschlossen sind — Vorschläge ohne Audit-Spur würden die eigenen Regeln des Programms verletzen.",
+      "providerLabel": "Anbieter",
+      "modelLabel": "Modell",
+      "notWired": "Generierungsfunktionen sind in diesem Schritt bewusst nicht angeschlossen — Ergebnisse hätten noch keine Audit-Spur. Der Zustand oben dient nur der Transparenz."
+    }
+  },
   "finance": {
     "eyebrow": "Operative Finanzen",
     "title": "Finanzeinträge",

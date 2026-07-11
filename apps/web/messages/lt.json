@@ -7770,6 +7770,74 @@
       "link": "Šio projekto užduotys"
     }
   },
+  "assist": {
+    "eyebrow": "Pagalbos centras",
+    "title": "Pagalbos centras",
+    "intro": "Kas laukia jūsų dėmesio, iš jūsų pačių duomenų apskaičiuotos santraukos ir sąžininga AI tiekėjo būsena.",
+    "attention": {
+      "title": "Kam reikia mano dėmesio",
+      "note": "Apskaičiuota iš jūsų pačių įrašų pagal fiksuotas taisykles — tie patys skaičiai, kuriuos jau rodo varpelis ir kiekvienas modulis. Kiekviena eilutė nurodo savo duomenų šaltinį ir veda į puslapį, kuriame tai išsprendžiama.",
+      "empty": "Šiuo metu niekas nelaukia jūsų dėmesio — jūsų duomenyse nėra laukiančių signalų.",
+      "open": "Atidaryti",
+      "docExpiring": "Dokumentai, kurių galiojimas baigsis per 30 dienų",
+      "docMissing": "Trūkstami arba nebegaliojantys dokumentai",
+      "docReview": "Dokumentai peržiūroje arba grąžinti",
+      "financeOverdue": "Vėluojantys finansų įrašai"
+    },
+    "sources": {
+      "label": "Šaltiniai",
+      "notificationSpine": "Pranešimų signalai",
+      "workerDocuments": "Jūsų dokumentų įrašai",
+      "financeRecords": "Jūsų finansų įrašai",
+      "workerSkills": "Jūsų įgūdžių katalogas",
+      "workJournal": "Jūsų darbo žurnalas",
+      "managerConfirmations": "Vadovų patvirtinimai",
+      "projects": "Jūsų projektai",
+      "assignments": "Aktyvūs darbuotojų priskyrimai"
+    },
+    "summaries": {
+      "title": "Santraukos iš jūsų duomenų",
+      "note": "Sudaryta iš tikrų laukų pagal fiksuotas taisykles, nurodant šaltinius. Joks šios dalies tekstas nebuvo sukurtas kalbos modelio.",
+      "none": "Šiai rolei santraukos dar nėra — santraukos pridedamos tik ten, kur yra teisingų duomenų.",
+      "worker": {
+        "title": "Profilio ir įrodymų santrauka",
+        "totalSkills": "Įgūdžiai",
+        "workSupported": "Pagrįsti darbo įrašais",
+        "confirmed": "Patvirtinti",
+        "journalEntries": "Žurnalo įrašai",
+        "confirmations": "Patvirtinimai",
+        "link": "Atidaryti visą įrodymų ataskaitą"
+      },
+      "org": {
+        "title": "Projektų būsenos santrauka",
+        "teamSize": "Aktyvūs darbuotojai: {count}",
+        "empty": "Aktyvių projektų dar nėra — projektai čia atsiras, kai tik jų bus.",
+        "error": "Projektų šiuo metu nepavyko įkelti. Likusi puslapio dalis veikia.",
+        "link": "Eiga"
+      }
+    },
+    "provider": {
+      "title": "AI tiekėjas",
+      "stateLabel": "Vykdymo būsena",
+      "state": {
+        "disabled": "Išjungta",
+        "mock": "Testinė (deterministinė) veiksena",
+        "live": "Aktyvi"
+      },
+      "reason": {
+        "ok": "Vykdymo aplinka sukonfigūruota.",
+        "mode_disabled": "Tiekėjo veiksena nenustatyta — vykdymo aplinka pagal numatytuosius nustatymus išjungta.",
+        "unknown_provider": "Nurodytas tiekėjas neatpažintas, todėl vykdymo aplinka lieka išjungta.",
+        "missing_api_key": "Tiekėjo raktas nesukonfigūruotas, todėl vykdymo aplinka lieka išjungta."
+      },
+      "disabledBody": "Šioje aplinkoje neprijungtas joks išorinis AI tiekėjas. Viskas šiame puslapyje apskaičiuota iš jūsų pačių įrašų pagal fiksuotas taisykles — joks tekstas čia nebuvo sukurtas kalbos modelio.",
+      "whenEnabled": "Kai savininkas prijungs tiekėją ir bus pritaikyta pasiūlymų audito saugykla, atsiras peržiūrimi juodraščių pasiūlymai — visada kaip pasiūlymai, kuriuos patvirtina žmogus, niekada kaip automatiniai pakeitimai.",
+      "gates": "Du vartai atviri sąmoningai: (1) gamybinėje aplinkoje nesukonfigūruotas tiekėjo raktas ir (2) pasiūlymų audito saugykla (ai_runs / ai_suggestions) yra savininko tvirtinama migracija. Generavimas lieka išjungtas, kol abu užsidarys — pasiūlymai be audito pėdsako pažeistų pačios programos taisykles.",
+      "providerLabel": "Tiekėjas",
+      "modelLabel": "Modelis",
+      "notWired": "Generavimo funkcijos šiame etape sąmoningai neprijungtos — rezultatai dar neturėtų audito pėdsako. Aukščiau rodoma būsena skirta tik skaidrumui."
+    }
+  },
   "finance": {
     "eyebrow": "Veiklos finansai",
     "title": "Finansų įrašai",
