@@ -1953,5 +1953,34 @@
     "prefillLoading": "Indlæser…",
     "prefillEmpty": "Ingen tidligere forespørgsel fundet",
     "prefillDone": "Udfyldt fra din seneste forespørgsel — gennemgå og redigér"
+  },
+  "workerPrefs": {
+    "title": "Arbejdspræferencer",
+    "hint": "Angiv kun det, der faktisk gælder for dig — alt, der står som ”Ikke angivet”, forbliver ikke angivet. Disse præferencer deles kun i henhold til dine privatlivssamtykker.",
+    "willingToRelocate": "Villig til at flytte for arbejde",
+    "needsAccommodation": "Har brug for indkvartering",
+    "hasTransport": "Har egen transport",
+    "teamAvailable": "Kan arbejde i sjak",
+    "soloAvailable": "Kan arbejde alene",
+    "maxTripDays": "Længste udstationering (dage)",
+    "contractType": "Foretrukken kontraktform",
+    "note": "Bemærkning om rådighed",
+    "triState": {
+      "notStated": "Ikke angivet",
+      "yes": "Ja",
+      "no": "Nej"
+    },
+    "contract": {
+      "employment": "Ansættelseskontrakt",
+      "subcontract": "Underentreprise",
+      "temporary": "Midlertidigt arbejde",
+      "any": "Enhver kontraktform"
+    },
+    "notePlaceholder": "F.eks. ledig fra august, foretrækker rotationer på 2 uger…",
+    "save": "Gem præferencer",
+    "saving": "Gemmer…",
+    "saved": "Præferencer gemt.",
+    "error": "Kunne ikke gemme. Prøv igen.",
+    "needsMigration": "Denne sektion er ikke aktiveret endnu — intet blev gemt."
   }
 }

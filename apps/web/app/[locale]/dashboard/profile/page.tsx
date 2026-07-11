@@ -33,6 +33,15 @@ import { DOCUMENTS_READINESS_ENABLED } from "@/lib/config/documents";
 import { createClient } from "@/lib/supabase/server";
 import { TrustBlock } from "@/components/app/trust-block";
 import { getOwnTrustSignals } from "@/lib/profile/trust-signals";
+import {
+  WorkerAvailabilityPrefsForm,
+  type WorkerAvailabilityPrefsLabels,
+} from "@/components/app/worker-availability-prefs-form";
+import {
+  getOwnAvailabilityPrefs,
+  type AvailabilityPrefsRead,
+} from "@/lib/worker/availability-prefs";
+import { EMPTY_PREFS } from "@/lib/worker/availability-prefs-model";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
 import { Building2 } from "lucide-react";
@@ -71,6 +80,7 @@ export default async function ProfilePage({
   const tOpp = await getTranslations("opportunities");
   const tQuick = await getTranslations("quickNav");
   const tHub = await getTranslations("marketplaceHub");
+  const tPrefs = await getTranslations("workerPrefs");
 
   const supabase = await createClient();
   const {
@@ -155,7 +165,13 @@ export default async function ProfilePage({
   // The text-first flow needs this catalogue (id + slug + localized name) so
   // confirmed parser matches can be mapped back to a real skill_id.
   const allowedSkills: { id: string; slug: string; name: string }[] = [];
+  // Structured work preferences (PR 3) — the 8 applied-but-orphaned
+  // availability-pref columns from migration 20260613100000. Read owner-scoped
+  // here (server component) so the form gets real saved values, null = "not
+  // stated" (never rendered as a fabricated "no").
+  let availabilityPrefs: AvailabilityPrefsRead | null = null;
   if (workerId) {
+    availabilityPrefs = await getOwnAvailabilityPrefs();
     const { data: wpAll } = await supabase
       .from("worker_professions")
       .select("profession_id, is_primary")
@@ -542,6 +558,50 @@ export default async function ProfilePage({
             journalEntries: tTrust("journalEntries"),
             zeroHint: tTrust("zeroHint"),
           }}
+        />
+      ) : null}
+
+      {/* Structured work preferences (PR 3) — after the trust/availability
+          area, worker-only (needs a workers row: the RPC targets it). Saves go
+          through the owner-scoped save_worker_availability_prefs RPC; every
+          boolean pref is tri-state so "not stated" stays an honest null. */}
+      {workerId && availabilityPrefs ? (
+        <WorkerAvailabilityPrefsForm
+          initial={
+            availabilityPrefs.kind === "ok" ? availabilityPrefs.values : EMPTY_PREFS
+          }
+          needsMigration={availabilityPrefs.kind === "needs-migration"}
+          labels={
+            {
+              title: tPrefs("title"),
+              hint: tPrefs("hint"),
+              willingToRelocate: tPrefs("willingToRelocate"),
+              needsAccommodation: tPrefs("needsAccommodation"),
+              hasTransport: tPrefs("hasTransport"),
+              teamAvailable: tPrefs("teamAvailable"),
+              soloAvailable: tPrefs("soloAvailable"),
+              maxTripDays: tPrefs("maxTripDays"),
+              contractType: tPrefs("contractType"),
+              note: tPrefs("note"),
+              triState: {
+                not_stated: tPrefs("triState.notStated"),
+                yes: tPrefs("triState.yes"),
+                no: tPrefs("triState.no"),
+              },
+              contract: {
+                employment: tPrefs("contract.employment"),
+                subcontract: tPrefs("contract.subcontract"),
+                temporary: tPrefs("contract.temporary"),
+                any: tPrefs("contract.any"),
+              },
+              notePlaceholder: tPrefs("notePlaceholder"),
+              save: tPrefs("save"),
+              saving: tPrefs("saving"),
+              saved: tPrefs("saved"),
+              error: tPrefs("error"),
+              needsMigration: tPrefs("needsMigration"),
+            } satisfies WorkerAvailabilityPrefsLabels
+          }
         />
       ) : null}
 

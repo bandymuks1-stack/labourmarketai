@@ -8209,5 +8209,34 @@
     "prefillLoading": "Loading…",
     "prefillEmpty": "No previous request found",
     "prefillDone": "Filled from your last request — review and edit"
+  },
+  "workerPrefs": {
+    "title": "Work preferences",
+    "hint": "State only what actually applies to you — anything left as “Not stated” stays not stated. These preferences are shared only under your privacy consents.",
+    "willingToRelocate": "Willing to relocate for work",
+    "needsAccommodation": "Needs accommodation provided",
+    "hasTransport": "Has own transport",
+    "teamAvailable": "Can work in a team",
+    "soloAvailable": "Can work solo",
+    "maxTripDays": "Longest work trip (days)",
+    "contractType": "Preferred contract type",
+    "note": "Availability note",
+    "triState": {
+      "notStated": "Not stated",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "contract": {
+      "employment": "Employment contract",
+      "subcontract": "Subcontract",
+      "temporary": "Temporary work",
+      "any": "Any contract type"
+    },
+    "notePlaceholder": "E.g. available from August, prefer 2-week rotations…",
+    "save": "Save preferences",
+    "saving": "Saving…",
+    "saved": "Preferences saved.",
+    "error": "Saving failed. Please try again.",
+    "needsMigration": "This section is not enabled yet — nothing was saved."
   }
 }

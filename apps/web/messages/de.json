@@ -8209,5 +8209,34 @@
     "prefillLoading": "Wird geladen…",
     "prefillEmpty": "Keine frühere Anfrage gefunden",
     "prefillDone": "Aus Ihrer letzten Anfrage übernommen — prüfen und bearbeiten"
+  },
+  "workerPrefs": {
+    "title": "Arbeitspräferenzen",
+    "hint": "Geben Sie nur an, was wirklich auf Sie zutrifft — alles, was auf „Keine Angabe“ steht, bleibt ohne Angabe. Diese Präferenzen werden nur gemäß Ihren Datenschutz-Einwilligungen geteilt.",
+    "willingToRelocate": "Bereit, für die Arbeit umzuziehen",
+    "needsAccommodation": "Benötigt gestellte Unterkunft",
+    "hasTransport": "Eigenes Fahrzeug vorhanden",
+    "teamAvailable": "Kann im Team arbeiten",
+    "soloAvailable": "Kann allein arbeiten",
+    "maxTripDays": "Längste Montagereise (Tage)",
+    "contractType": "Bevorzugte Vertragsform",
+    "note": "Hinweis zur Verfügbarkeit",
+    "triState": {
+      "notStated": "Keine Angabe",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "contract": {
+      "employment": "Arbeitsvertrag",
+      "subcontract": "Subunternehmervertrag",
+      "temporary": "Zeitarbeit",
+      "any": "Beliebige Vertragsform"
+    },
+    "notePlaceholder": "Z. B. verfügbar ab August, bevorzugt 2-Wochen-Rotationen…",
+    "save": "Präferenzen speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Präferenzen gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "needsMigration": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert."
   }
 }
