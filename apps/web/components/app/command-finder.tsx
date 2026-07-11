@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -25,7 +25,10 @@ import {
  * destination page keeps its own server-side auth / role / superadmin gate.
  *
  * Keyboard accessible by construction: a labelled search input followed by
- * a plain list of links (native tab order, no custom key handling needed).
+ * a plain list of links (native tab order). Progressive enhancement
+ * (control room PR B): Ctrl/Cmd+K focuses the inline input from anywhere on
+ * the page — no modal palette, the existing finder just becomes reachable
+ * without the mouse. Everything works identically without the shortcut.
  */
 export function CommandFinder() {
   const t = useTranslations("commandFinder");
@@ -37,6 +40,20 @@ export function CommandFinder() {
     : "lt";
   const { isAdmin, roles } = useAuth();
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Ctrl/Cmd+K focuses the finder input (progressive enhancement — the
+  // finder stays a plain labelled input either way, no modal).
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const allowedAudiences = useMemo(() => {
     const a = new Set<CommandAudience>(["public"]);
@@ -64,18 +81,30 @@ export function CommandFinder() {
       data-testid="command-finder"
       className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
     >
-      <label
-        htmlFor="command-finder-input"
-        className="font-mono text-[10px] uppercase tracking-label text-text-muted"
-      >
-        {t("title")}
-      </label>
+      <div className="flex items-center justify-between gap-2">
+        <label
+          htmlFor="command-finder-input"
+          className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+        >
+          {t("title")}
+        </label>
+        {/* Shortcut hint — decorative for pointer users, so hidden from AT
+            (the input itself stays fully labelled + focusable). */}
+        <span
+          aria-hidden
+          data-testid="command-finder-shortcut-hint"
+          className="hidden rounded border border-ink-500 bg-ink-800/60 px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:inline-flex"
+        >
+          {t("shortcutHint")}
+        </span>
+      </div>
       <div className="relative">
         <Search
           aria-hidden
           className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted"
         />
         <input
+          ref={inputRef}
           id="command-finder-input"
           type="search"
           autoComplete="off"

@@ -4,7 +4,8 @@
     "placeholder": "Įveskite, ko ieškote: CV, žurnalas, komanda, kainos…",
     "inputLabel": "Rasti puslapį ar veiksmą",
     "resultsLabel": "Atitinkantys puslapiai",
-    "noResults": "Nieko nerasta. Pabandykite kitą žodį — pvz., CV, žurnalas, komanda, dokumentai, kainos."
+    "noResults": "Nieko nerasta. Pabandykite kitą žodį — pvz., CV, žurnalas, komanda, dokumentai, kainos.",
+    "shortcutHint": "Ctrl / ⌘ K"
   },
   "marketRecognition": {
     "title": "Ką siūlote ar ko ieškote?",
@@ -2979,6 +2980,10 @@
     "dashboard": {
       "topSlot": {
         "eyebrow": "Svarbiausia dabar"
+      },
+      "statusStrip": {
+        "title": "Kas laukia dabar",
+        "allClear": "Šiuo metu niekas nelaukia jūsų dėmesio."
       },
       "myZone": {
         "actionsHeading": "Ką galite padaryti dabar",

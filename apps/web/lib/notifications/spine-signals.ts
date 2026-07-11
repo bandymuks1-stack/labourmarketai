@@ -15,6 +15,7 @@
 
 import type { Role } from "@/lib/auth/actions";
 import type { Notification } from "@/lib/auth/context";
+import type { FeatureKey } from "@/lib/config/feature-availability";
 
 /** Counts the spine consumes — each one loaded by a per-surface helper that
  *  returns 0 on any missing-data state (rollout-safe, never fabricates). */
@@ -43,6 +44,11 @@ export interface SpineSignalDef {
   readonly type: string;
   /** The real route that clears or resolves the signal. */
   readonly href: string;
+  /** Optional feature this signal badges (control room PR B). Set ONLY when
+   *  the feature's primary surface is the signal's own clearing surface —
+   *  the nav tab and the module card then carry the same real count the
+   *  bell shows. A signal without a featureKey badges no tab. */
+  readonly featureKey?: FeatureKey;
   readonly count: (c: SpineCounts) => number;
 }
 
@@ -57,14 +63,18 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
   {
     id: "pending-invitations",
     type: "pending_invitations",
-    // The invitations card (accept/decline) lives on the dashboard overview.
+    // The invitations card (accept/decline) lives on the dashboard overview —
+    // accepting or declining there IS what clears the signal, so the overview
+    // tab may carry this count as a badge.
     href: "/dashboard",
+    featureKey: "overview",
     count: (c) => c.pendingInvitations,
   },
   {
     id: "unread-messages",
     type: "unread_messages",
     href: "/dashboard/communication",
+    featureKey: "communication",
     count: (c) => c.unreadConversations,
   },
   {

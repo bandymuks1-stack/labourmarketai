@@ -15,20 +15,27 @@ import { join } from "node:path";
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
+// Control room PR B: the hub cards moved from hard-coded page markup into
+// the ONE dashboard module registry, rendered by the registry-driven grid
+// in both branches. The bridge is now pinned at the registry level.
+const REGISTRY = read("lib/dashboard/dashboard-module-registry.ts");
 const DASH = read("app/[locale]/dashboard/page.tsx");
 
 describe("the hub carries BOTH halves of the one supply/demand system", () => {
-  it("supply half: offer + discover cards", () => {
-    expect(DASH).toMatch(/dashboard-marketplace-offer/);
-    expect(DASH).toMatch(/dashboard-marketplace-find/);
+  it("supply half: offer + discover modules", () => {
+    expect(REGISTRY).toMatch(/id: "services",\s*\n\s*surfaceRoute: "\/dashboard\/services"/);
+    expect(REGISTRY).toMatch(
+      /id: "service_requests",\s*\n\s*surfaceRoute: "\/dashboard\/service-requests"/,
+    );
+    // ...rendered by the one grid in both branch layouts.
+    expect((DASH.match(/<DashboardModuleGrid\b/g) ?? []).length).toBe(2);
   });
 
-  it("demand half: worker-gated opportunities card", () => {
-    expect(DASH).toMatch(/dashboard-marketplace-opportunities/);
+  it("demand half: worker-gated opportunities module", () => {
     // Worker-only: org roles post demand via their demand-intake section —
     // showing them a worker consumption surface would be a fake bridge.
-    expect(DASH).toMatch(
-      /\{role === "worker" && \(\s*<ActionCard\s*href="\/dashboard\/opportunities"/,
+    expect(REGISTRY).toMatch(
+      /id: "opportunities",[\s\S]{0,600}surfaceRoute: "\/dashboard\/opportunities",[\s\S]{0,600}roles: \["worker"\]/,
     );
   });
 

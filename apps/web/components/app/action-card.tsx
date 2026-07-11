@@ -23,6 +23,7 @@ export function ActionCard({
   title,
   description,
   icon: Icon,
+  badgeCount = 0,
   testid,
   className,
 }: {
@@ -31,6 +32,9 @@ export function ActionCard({
   title: string;
   description?: string;
   icon?: LucideIcon;
+  /** REAL attention count (notification spine). 0 = no badge — the pattern
+   *  never renders a fake or empty badge (control room PR B). */
+  badgeCount?: number;
   testid?: string;
   className?: string;
 }) {
@@ -43,12 +47,26 @@ export function ActionCard({
         className,
       )}
     >
-      {Icon ? (
-        <Icon
-          className="h-5 w-5 shrink-0 text-brand-blue"
-          strokeWidth={1.75}
-          aria-hidden
-        />
+      {Icon || badgeCount > 0 ? (
+        <span className="flex items-start justify-between gap-2">
+          {Icon ? (
+            <Icon
+              className="h-5 w-5 shrink-0 text-brand-blue"
+              strokeWidth={1.75}
+              aria-hidden
+            />
+          ) : (
+            <span aria-hidden />
+          )}
+          {badgeCount > 0 ? (
+            <span
+              data-testid={testid ? `${testid}-badge` : undefined}
+              className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-[10px] font-bold leading-none text-white tabular-nums"
+            >
+              {badgeCount > 9 ? "9+" : badgeCount}
+            </span>
+          ) : null}
+        </span>
       ) : null}
       <span className="font-display text-sm font-semibold leading-snug text-text-primary">
         {title}

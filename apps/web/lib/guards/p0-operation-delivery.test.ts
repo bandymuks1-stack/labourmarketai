@@ -61,7 +61,13 @@ describe("P0.1 request delivery: communication is a reachable primary-nav surfac
     expect(layout).toMatch(/badges=\{navBadges\}/);
     const spine = read("lib/notifications/spine.ts");
     expect(spine).toMatch(/getUnreadConversationCount/);
-    expect(spine).toMatch(/communication: counts\.unreadConversations/);
+    // Control room PR B: badges derive from the signal catalogue — the
+    // unread-messages signal declares featureKey "communication", so the
+    // Messages tab still carries the REAL unread count (same chain, one
+    // derivation for every badged tab).
+    const signals = read("lib/notifications/spine-signals.ts");
+    expect(signals).toMatch(/featureKey: "communication"/);
+    expect(signals).toMatch(/count: \(c\) => c\.unreadConversations/);
   });
 
   it("the unread count is a real query (counterpart messages vs last_read — audit PR5)", () => {

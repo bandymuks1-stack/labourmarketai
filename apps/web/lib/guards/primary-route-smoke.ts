@@ -92,6 +92,10 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   { id: "communication-thread", urlPattern: "/dashboard/communication/[conversationId]", sourceFile: "app/[locale]/dashboard/communication/[conversationId]/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "marketplace", urlPattern: "/dashboard/marketplace", sourceFile: "app/[locale]/dashboard/marketplace/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "services", urlPattern: "/dashboard/services", sourceFile: "app/[locale]/dashboard/services/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR B: the request half of the service loop is a dashboard
+  // module (registry-driven grid card + spine signals link here), so it joins
+  // the smoke inventory like its sibling /dashboard/services.
+  { id: "service-requests", urlPattern: "/dashboard/service-requests", sourceFile: "app/[locale]/dashboard/service-requests/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "company-scouting", urlPattern: "/dashboard/company/scouting", sourceFile: "app/[locale]/dashboard/company/scouting/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "account", urlPattern: "/dashboard/account", sourceFile: "app/[locale]/dashboard/account/page.tsx", requiresAuth: true, kind: "role-flow" },

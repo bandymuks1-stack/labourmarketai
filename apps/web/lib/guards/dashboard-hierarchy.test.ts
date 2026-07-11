@@ -3,15 +3,17 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Mobile dashboard hierarchy guard (audit PR6).
+ * Mobile dashboard hierarchy guard (audit PR6, updated by the control-room
+ * foundation PR B).
  *
  * The dashboard must be understandable visually, not through explanatory
  * text: exactly one state-driven primary next action above the fold, the
- * owner-approved action grid within one swipe, real pending-state cards
- * always above the marketplace hub, and every help/explainer block BELOW
- * everything actionable. This guard freezes that source order in BOTH
- * branch layouts so a refactor cannot quietly push an accepted request or
- * a booking response back under help text.
+ * compact spine-driven status strip right under it, the registry-driven
+ * control-room grid within one swipe, real pending-state cards always
+ * above the explainers, and every help/explainer block BELOW everything
+ * actionable. This guard freezes that source order in BOTH branch layouts
+ * so a refactor cannot quietly push an accepted request or a booking
+ * response back under help text.
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -62,14 +64,15 @@ describe("worker branch: state-driven top slot leads", () => {
     }
   });
 
-  it("premium hub → top slot → action grid → pending states → hub → explainers", () => {
+  it("premium hub → top slot → status strip → readiness → control-room grid → pending states → explainers", () => {
     expectOrder(
       WORKER,
       [
         "<PremiumHubScreen",
         'data-testid="dashboard-top-slot"',
-        "<MyZone hasCompany",
-        "{marketplaceAccess}",
+        "<DashboardStatusStrip",
+        "<MyZone",
+        "<DashboardModuleGrid",
         "<MyZoneImproves",
         "<CurrentSpaceHeader",
         "<CommandFinder",
@@ -88,9 +91,9 @@ describe("worker branch: state-driven top slot leads", () => {
     expect(WORKER).toContain("improves={false}");
   });
 
-  it("every real pending-state card renders above the marketplace hub — and all help", () => {
-    const hub = WORKER.indexOf("{marketplaceAccess}");
-    expect(hub).toBeGreaterThan(0);
+  it("every real pending-state card renders above all help/explainer blocks", () => {
+    const help = WORKER.indexOf("<MyZoneImproves");
+    expect(help).toBeGreaterThan(0);
     for (const card of [
       "<WorkerInvitationsCard",
       "bookingsPendingNextAction}",
@@ -100,19 +103,20 @@ describe("worker branch: state-driven top slot leads", () => {
     ]) {
       const last = WORKER.lastIndexOf(card);
       expect(last, `${card} present`).toBeGreaterThan(0);
-      expect(last, `${card} must render above the marketplace hub`).toBeLessThan(
-        hub,
+      expect(last, `${card} must render above the explainers`).toBeLessThan(
+        help,
       );
     }
   });
 });
 
 describe("org branch: primary action first, demand intake promoted, explainers last", () => {
-  it("next action → pending states → chain actions → identity → intake → explainers", () => {
+  it("next action → status strip → pending states → chain actions → identity → intake → grid → explainers", () => {
     expectOrder(
       ORG,
       [
         "<DashboardNextAction",
+        "<DashboardStatusStrip",
         "{serviceRequestsNextAction}",
         "{outgoingRequestsNextAction}",
         "{bookingResponsesNextAction}",
@@ -120,7 +124,7 @@ describe("org branch: primary action first, demand intake promoted, explainers l
         "<IdentityActions",
         'data-testid="demand-intake-section"',
         "<WorkerInvitationsCard",
-        "{marketplaceAccess}",
+        "<DashboardModuleGrid",
         "<CurrentSpaceHeader",
         "<CommandFinder",
       ],

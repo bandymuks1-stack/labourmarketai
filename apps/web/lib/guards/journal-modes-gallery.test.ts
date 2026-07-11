@@ -143,8 +143,10 @@ describe("photo report discoverability (owner smoke finding)", () => {
   it("command finder routes the natural terms to the right surfaces", () => {
     // Normalize line endings so the pin survives CRLF checkouts.
     const registry = read("lib/navigation/command-registry.ts").replace(/\r/g, "");
-    // photo_report → journal (worker); work_gallery → projects (company)
-    expect(registry).toContain('id: "photo_report",\n    route: "/dashboard/journal"');
+    // photo_report → journal (worker); work_gallery → projects (company).
+    // Control room PR B: module-backed entries resolve through the ONE
+    // module registry (getModuleRoute), so the journal route cannot drift.
+    expect(registry).toContain('id: "photo_report",\n    route: getModuleRoute("journal")');
     expect(registry).toContain('id: "work_gallery",\n    route: "/dashboard/projects"');
     for (const term of [
       '"foto ataskaita"',

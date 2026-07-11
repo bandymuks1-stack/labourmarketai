@@ -4,7 +4,8 @@
     "placeholder": "Type what you need: CV, journal, team, pricing…",
     "inputLabel": "Find a page or action",
     "resultsLabel": "Matching pages",
-    "noResults": "Nothing found. Try another word — e.g. CV, journal, team, documents, pricing."
+    "noResults": "Nothing found. Try another word — e.g. CV, journal, team, documents, pricing.",
+    "shortcutHint": "Ctrl / ⌘ K"
   },
   "marketRecognition": {
     "title": "What do you offer or need?",
@@ -2979,6 +2980,10 @@
     "dashboard": {
       "topSlot": {
         "eyebrow": "Most important now"
+      },
+      "statusStrip": {
+        "title": "Waiting for you now",
+        "allClear": "Nothing is waiting for your attention right now."
       },
       "myZone": {
         "actionsHeading": "What you can do now",

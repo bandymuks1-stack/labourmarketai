@@ -3,13 +3,21 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Mano erdvė control-room guard (action-first-product-logic-v1).
+ * Mano erdvė control-room guard (action-first-product-logic-v1, updated by
+ * the control-room foundation PR B).
  *
- * The worker home (`/dashboard`) must be the simple action-first control room:
- * a readiness status, the few real fast actions ("Ką galite padaryti dabar"),
- * and one "Kas ką gerina" explanation — NOT a wall of loosely related cards and
- * NOT a pile of duplicate profile/CV/player-card/evidence doors. This guard
- * freezes that so the home cannot regress into clutter or fakery.
+ * The worker home (`/dashboard`) must stay the simple action-first control
+ * room: a readiness status, the few real fast actions ("Ką galite padaryti
+ * dabar") and one "Kas ką gerina" explanation — NOT a wall of loosely
+ * related cards and NOT a pile of duplicate profile/CV/player-card doors.
+ *
+ * PR B moved the fast-action grid from a hard-coded list inside MyZone to
+ * the ONE registry-driven grid (lib/dashboard/dashboard-module-registry.ts →
+ * DashboardModuleGrid), rendered with the SAME human labels
+ * (auth.dashboard.myZone.actions.*). MyZone keeps the readiness status +
+ * the what-improves-what explanation. This guard pins the new shape so the
+ * home can neither regress into clutter nor grow a second hard-coded
+ * action list.
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -23,11 +31,15 @@ const stripComments = (src: string): string =>
 const COMP_CODE = stripComments(COMP);
 const SERVED = ["lt", "en", "ru"] as const;
 
-describe("the worker home is the MyZone control room (no card wall)", () => {
-  it("mounts MyZone with the real readiness + company state", () => {
+describe("the worker home is the action-first control room (no card wall)", () => {
+  it("mounts MyZone with the real readiness state + the registry-driven grid", () => {
     expect(PAGE).toMatch(/<MyZone\b/);
     expect(PAGE).toMatch(/incomplete=\{isFirstUse\}/);
-    expect(PAGE).toMatch(/hasCompany=\{hasCompany\}/);
+    // The fast actions render from the ONE module registry, fed by the pure
+    // view model (role + hasCompany + spine counts) — never a second list.
+    expect(PAGE).toMatch(/<DashboardModuleGrid\b/);
+    expect(PAGE).toMatch(/buildControlRoomViewModel\(\{/);
+    expect(PAGE).toMatch(/hasCompany,?\s*\n/);
   });
   it("dropped the old loose stack (identity strip / today screen / first-use panel)", () => {
     // The company branch may still use IdentityActions; the WORKER home must not
@@ -37,27 +49,36 @@ describe("the worker home is the MyZone control room (no card wall)", () => {
   });
 });
 
-describe("MyZone carries status + fast actions + what-improves-what", () => {
+describe("MyZone carries status + what-improves-what; the grid carries the actions", () => {
   it("a single readiness status (information complete or not yet)", () => {
     expect(COMP).toMatch(/testid="my-zone-status"/); // StatusChip (audit PR8)
     expect(COMP).toMatch(/incompleteStatus/);
     expect(COMP).toMatch(/readyStatus/);
   });
-  it("the human fast actions point at the real routes", () => {
+  it("MyZone no longer hard-codes any action route (registry is the single source)", () => {
+    expect(COMP_CODE).not.toMatch(/\/dashboard\//);
+    expect(COMP_CODE).not.toMatch(/BASE_ACTIONS|COMPANY_ACTION/);
+  });
+  it("the registry's worker fast actions keep the real routes + human keys", () => {
+    const registry = read("lib/dashboard/dashboard-module-registry.ts");
     const expectations: Array<[string, string]> = [
-      ["recordWork", "/dashboard/journal"],
-      ["improveProfile", "/dashboard/profile"],
-      ["mapVisibility", "/dashboard/market-map"],
-      ["checkMessages", "/dashboard/communication"],
+      ["recordWork", "journal_text_first"],
+      ["improveProfile", "profile_text_first"],
+      ["findOpportunities", "/dashboard/opportunities"],
+      ["planning", "/dashboard/bookings"],
+      ["documents", "/dashboard/documents"],
       ["companyActions", "/dashboard/company"],
     ];
-    for (const [key, href] of expectations) {
-      expect(COMP, `${key} action`).toContain(`"${key}"`);
-      expect(COMP, `${key} -> ${href}`).toContain(`"${href}"`);
+    for (const [key, target] of expectations) {
+      expect(registry, `${key} action`).toContain(
+        `auth.dashboard.myZone.actions.${key}.title`,
+      );
+      expect(registry, `${key} -> ${target}`).toContain(`"${target}"`);
     }
   });
-  it("company actions are conditional on a real company", () => {
-    expect(COMP).toMatch(/hasCompany\s*\?\s*\[\.\.\.BASE_ACTIONS,\s*COMPANY_ACTION\]/);
+  it("the company door stays conditional on a real company (view model)", () => {
+    const vm = read("lib/dashboard/control-room-view-model.ts");
+    expect(vm).toMatch(/role === "worker" && hasCompany/);
   });
   it("renders the 'what improves what' explanation", () => {
     expect(COMP).toMatch(/data-testid="my-zone-improves"/);
@@ -66,16 +87,23 @@ describe("MyZone carries status + fast actions + what-improves-what", () => {
 });
 
 describe("no duplicate / fake / preview / admin surfaces in the control room", () => {
+  const REGISTRY_CODE = stripComments(
+    read("lib/dashboard/dashboard-module-registry.ts"),
+  );
   it("only ONE profile door — no separate player-card / cv / evidence cards", () => {
-    expect(COMP).not.toContain("/dashboard/player-card");
-    expect(COMP).not.toContain("/dashboard/cv");
-    expect(COMP).not.toContain("/dashboard/reports/evidence");
+    for (const src of [COMP, REGISTRY_CODE]) {
+      expect(src).not.toContain("/dashboard/player-card");
+      expect(src).not.toContain("/dashboard/cv");
+      expect(src).not.toContain("/dashboard/reports/evidence");
+    }
   });
   it("no sample/preview destinations", () => {
-    expect(COMP).not.toMatch(/\/dashboard\/(talent|visual-os|design)/);
-    expect(COMP_CODE).not.toMatch(/sample|preview|concept/i);
+    for (const src of [COMP_CODE, REGISTRY_CODE]) {
+      expect(src).not.toMatch(/\/dashboard\/(talent|visual-os|design)/);
+      expect(src).not.toMatch(/sample|preview|concept/i);
+    }
   });
-  it("no admin/internal/module wording in the component", () => {
+  it("no admin/internal wording in the MyZone component", () => {
     expect(COMP_CODE).not.toMatch(/\badmin\b|cockpit|module|\bmodul/i);
   });
 });
