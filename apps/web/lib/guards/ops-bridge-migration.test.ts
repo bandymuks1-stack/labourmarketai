@@ -308,6 +308,6 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // goal command: append-only consent + disclosure ledgers, fail-closed
     // employer RLS swap, narrow SECURITY DEFINER RPCs (authenticated only);
     // @human-gate-approved; paired rollback; applied via Supabase MCP.
-    expect(guard).toMatch(/SPRINT_BASELINE = 116/);
+    expect(guard).toMatch(/SPRINT_BASELINE = 117/);
   });
 });
