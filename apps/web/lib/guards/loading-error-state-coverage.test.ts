@@ -104,6 +104,16 @@ const READ_SURFACES: ReadSurface[] = [
     error: /\bt\(["']loadError["']\)/,
     empty: /\bt\(["']empty["']\)/,
   },
+  {
+    // Universal finder object search (control room PR K): debounced,
+    // timeout-bounded GET to /api/dashboard-search. Loading + error are
+    // dedicated aria-live states; "noResults" is the separate empty state
+    // (shown only when neither registry commands nor objects match).
+    file: "components/app/command-finder.tsx",
+    loading: /\bt\(["']objectsLoading["']\)/,
+    error: /\bt\(["']objectsError["']\)/,
+    empty: /\bt\(["']noResults["']\)/,
+  },
 ];
 
 // Discover every client component that reads data over the network.

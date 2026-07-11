@@ -55,6 +55,8 @@ export type DashboardModuleId =
   | "finance"
   | "company"
   | "activity"
+  | "assist"
+  | "reports"
   | "overview";
 
 /** Icon ids for module cards. A superset of the nav's NavIconKey so the nav
@@ -73,7 +75,9 @@ export type ModuleIconKey =
   | "checklist"
   | "handshake"
   | "briefcase"
-  | "coins";
+  | "coins"
+  | "sparkles"
+  | "chart";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -304,6 +308,40 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     labelKey: "activityCentre.title",
     descriptionKey: "activityCentre.intro",
     iconKey: "bell",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  // ── AI assistance centre (control room PR J) ─────────────────────────
+  {
+    id: "assist",
+    // One controlled assistance surface: the deterministic "what needs my
+    // attention" composition, the deterministic role summaries and the
+    // HONEST AI-provider state card (disabled in production — the page says
+    // so; no generation is wired in this slice, gap map §10). Declares NO
+    // attentionSignalIds — the surface aggregates the spine itself, so a
+    // badge here would double-count the numbers the bell already carries.
+    surfaceRoute: "/dashboard/assist",
+    labelKey: "assist.title",
+    descriptionKey: "assist.intro",
+    iconKey: "sparkles",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  // ── Reports hub (control room PR K) ──────────────────────────────────
+  {
+    id: "reports",
+    // Role-specific reports INDEX (gap map §12): worker sees evidence +
+    // journal-activity figures and the real exports; org roles see own
+    // demand / project / task / document / finance counts. Real data only,
+    // every figure basis-labelled; degrades honestly per source. Declares NO
+    // attentionSignalIds — the hub reports, it does not notify (the spine
+    // and the per-module cards already carry the attention numbers).
+    surfaceRoute: "/dashboard/reports",
+    labelKey: "reports.title",
+    descriptionKey: "reports.intro",
+    iconKey: "chart",
     roles: ALL_ROLES,
     surfaces: ["grid", "command"],
   },

@@ -8,8 +8,10 @@
 import "server-only";
 import {
   submitDemandRequest as _submitDemandRequest,
+  getOwnLastDemandPrefill as _getOwnLastDemandPrefill,
   type DemandIntent,
   type DemandFields,
+  type DemandPrefill,
   type DemandRequestResult,
 } from "./demand-request";
 
@@ -18,4 +20,11 @@ export async function submitDemandRequestAction(
   fields: DemandFields,
 ): Promise<DemandRequestResult> {
   return _submitDemandRequest(intent, fields);
+}
+
+/** Duplicate-and-edit: fetch the owner's own last request as prefill values. */
+export async function getOwnLastDemandPrefillAction(
+  intent: DemandIntent,
+): Promise<DemandPrefill> {
+  return _getOwnLastDemandPrefill(intent);
 }

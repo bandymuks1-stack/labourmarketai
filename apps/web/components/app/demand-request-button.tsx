@@ -9,9 +9,22 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
+  getOwnLastDemandPrefillAction,
   submitDemandRequestAction,
 } from "@/lib/demand/demand-request-actions";
 import type { DemandUrgency } from "@/lib/demand/demand-request";
+import { DemandAdvancedSections } from "@/components/app/demand-advanced-sections";
+import {
+  buildStructuredV2Input,
+  storedV2ToFormState,
+  EMPTY_ADVANCED_DEMAND_STATE,
+  type AdvancedDemandFormState,
+} from "@/lib/demand/structured-demand-form";
+import {
+  deriveCompensationHonestyFlags,
+  requiresTalentPoolDisclosure,
+  sanitizeStructuredDemandV2,
+} from "@/lib/demand/structured-demand-v2";
 import {
   buildWorkCategoryOptions,
   MARKET_COUNTRIES,
@@ -146,6 +159,53 @@ export function DemandRequestButton({
   const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration">(
     "idle",
   );
+  // Advanced structured clusters (structured_v2, PR 2) — optional; empty
+  // stays an honest "not stated" and the request submits exactly as before.
+  const tsd = useTranslations("structuredDemand");
+  const [adv, setAdv] = useState<AdvancedDemandFormState>({
+    ...EMPTY_ADVANCED_DEMAND_STATE,
+  });
+  const patchAdv = (patch: Partial<AdvancedDemandFormState>) =>
+    setAdv((prev) => ({ ...prev, ...patch }));
+  // Duplicate-and-edit: prefill the whole wizard from the owner's OWN last
+  // request (repeat action, Capability E/G). Own data only; nothing invented.
+  const [prefillState, setPrefillState] = useState<"idle" | "loading" | "empty" | "done">(
+    "idle",
+  );
+  async function prefillFromLast() {
+    setPrefillState("loading");
+    try {
+      const res = await getOwnLastDemandPrefillAction(intent);
+      if (!res.found) {
+        setPrefillState("empty");
+        return;
+      }
+      const f = res.fields;
+      setRole(f.role);
+      setDescription(f.description);
+      setLocation(f.location);
+      setSkills(f.skills);
+      if (f.urgency) setUrgency(f.urgency);
+      setNotes(f.notes);
+      setWorkType(f.workType ?? "");
+      setCountry(f.country ?? "");
+      setTeamSize(f.teamSize != null ? String(f.teamSize) : "");
+      setAccommodation(f.accommodation ?? "");
+      setTransport(f.transport ?? "");
+      setRequiredTools(f.requiredTools);
+      setAdv(storedV2ToFormState(res.structuredV2));
+      setShowDescError(false);
+      setPrefillState("done");
+    } catch {
+      setPrefillState("empty");
+    }
+  }
+  // Review-step honesty derivations — computed from the SAME sanitizer the
+  // server uses, so the preview never disagrees with what will be stored.
+  const advWire = buildStructuredV2Input(adv);
+  const advV2 = sanitizeStructuredDemandV2(advWire);
+  const honestyFlags = deriveCompensationHonestyFlags(advV2);
+  const talentPoolDisclosure = requiresTalentPoolDisclosure(advV2);
 
   const descOk = description.trim().length > 0;
   // The estimate is OPTIONAL. It only blocks submit when the user actually
@@ -206,6 +266,7 @@ export function DemandRequestButton({
         transport: transport || undefined,
         requiredTools: requiredTools.length > 0 ? requiredTools : undefined,
         estimate: estimateEngaged ? estimate : undefined,
+        structuredV2: advWire,
       });
       setState(
         res.ok
@@ -380,6 +441,34 @@ export function DemandRequestButton({
       {/* STEP 1 — describe the need */}
       {step === 1 && (
         <div className="flex flex-col gap-4">
+          {/* Duplicate-and-edit — repeat action: copy the own last request
+              into the form, then edit. Own data echoed back; nothing invented. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={prefillFromLast}
+              disabled={prefillState === "loading"}
+              data-testid="demand-prefill-last"
+            >
+              {prefillState === "loading" ? tsd("prefillLoading") : tsd("prefillButton")}
+            </Button>
+            {prefillState === "empty" && (
+              <span className="text-xs text-text-muted" data-testid="demand-prefill-empty">
+                {tsd("prefillEmpty")}
+              </span>
+            )}
+            {prefillState === "done" && (
+              <span
+                className="text-xs text-state-success"
+                role="status"
+                data-testid="demand-prefill-done"
+              >
+                {tsd("prefillDone")}
+              </span>
+            )}
+          </div>
           <label className="flex flex-col gap-1.5">
             <Label>{t(`${key}.roleLabel`)}</Label>
             <Input
@@ -587,6 +676,11 @@ export function DemandRequestButton({
 
           {/* Optional preliminary Estimate Builder (deterministic, no AI). */}
           <EstimateBuilder inputs={estimate} onChange={setEstimate} />
+
+          {/* Advanced structured clusters (structured_v2) — optional
+              progressive disclosure; quick entry above stays the minimum
+              publishable path. */}
+          <DemandAdvancedSections state={adv} onChange={patchAdv} />
         </div>
       )}
 
@@ -598,6 +692,76 @@ export function DemandRequestButton({
           {estimateSummary && (
             <div data-testid="demand-review-estimate">{estimateSummary}</div>
           )}
+
+          {/* Publish-honesty flags — visible gaps, not blockers (goal spec:
+              no unexplained "up to" amount; missing minimum / gross-net basis
+              / guaranteed hours / deductions are always shown). */}
+          {honestyFlags.length > 0 && (
+            <div
+              className="rounded-md border border-state-warning/40 bg-state-warning/10 p-3"
+              data-testid="demand-honesty-flags"
+            >
+              <p className="text-xs font-semibold text-text-primary">
+                {tsd("honesty.title")}
+              </p>
+              <ul className="mt-1 list-inside list-disc text-xs text-text-secondary">
+                {honestyFlags.map((flag) => (
+                  <li key={flag} data-flag={flag}>
+                    {tsd(`honesty.${flag}`)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {talentPoolDisclosure && (
+            <p
+              className="rounded-md border border-state-warning/40 bg-state-warning/10 px-3 py-2 text-xs text-text-secondary"
+              role="note"
+              data-testid="demand-review-talent-pool"
+            >
+              {tsd("talentPoolDisclosure")}
+            </p>
+          )}
+
+          {/* Preview as the worker board shows it TODAY — exactly the current
+              whitelist (role, country, team size, start, accommodation,
+              transport, tools). Honest note when richer v2 details were
+              captured but are not yet worker-visible (human-gated MP-3). */}
+          <div
+            className="rounded-md border border-brand-blue/30 bg-brand-blue/5 p-3"
+            data-testid="demand-worker-preview"
+          >
+            <p className="text-xs font-semibold text-text-primary">
+              {tsd("preview.title")}
+            </p>
+            <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
+              <dt className="text-text-muted">{tc("profession")}</dt>
+              <dd className="text-text-primary">{workTypeLabel || "—"}</dd>
+              <dt className="text-text-muted">{tc("country")}</dt>
+              <dd className="text-text-primary">
+                {country ? tlm(`countryNames.${country}`) : "—"}
+              </dd>
+              <dt className="text-text-muted">{tc("numberOfWorkers")}</dt>
+              <dd className="text-text-primary">{teamSize.trim() || "—"}</dd>
+              <dt className="text-text-muted">{t("form.urgencyLabel")}</dt>
+              <dd className="text-text-primary">{urgencyLabel}</dd>
+              <dt className="text-text-muted">{tc("accommodation")}</dt>
+              <dd className="text-text-primary">{accommodationLabel || "—"}</dd>
+              <dt className="text-text-muted">{tc("transportOffer")}</dt>
+              <dd className="text-text-primary">{transportLabel || "—"}</dd>
+              <dt className="text-text-muted">{tc("requiredTools")}</dt>
+              <dd className="text-text-primary">
+                {requiredTools.length > 0
+                  ? [...requiredTools].sort().map(toolLabel).join(", ")
+                  : "—"}
+              </dd>
+            </dl>
+            {advV2 != null && (
+              <p className="mt-2 text-xs text-text-muted" data-testid="demand-preview-v2-note">
+                {tsd("preview.v2NotVisibleNote")}
+              </p>
+            )}
+          </div>
         </div>
       )}
 

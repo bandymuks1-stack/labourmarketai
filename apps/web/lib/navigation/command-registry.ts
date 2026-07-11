@@ -722,6 +722,54 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // AI assistance centre (control room PR J) — the deterministic "what
+    // needs my attention" answer, deterministic role summaries and the
+    // HONEST AI-provider state (disabled in production; nothing generated).
+    // Route resolves through the module registry so it can never drift from
+    // the grid card. Truthful label: assistance centre, not an active AI.
+    id: "assist",
+    route: getModuleRoute("assist"),
+    audience: "public",
+    labels: {
+      en: "Assistance centre (what needs my attention)",
+      lt: "Pagalbos centras (kam reikia mano dėmesio)",
+      ru: "Центр помощи (что требует моего внимания)",
+      nl: "Assistentiecentrum (wat heeft mijn aandacht nodig)",
+      de: "Assistenzzentrum (was braucht meine Aufmerksamkeit)",
+    },
+    synonyms: {
+      en: ["assist", "assistance", "ai", "attention", "summary", "overview of my data"],
+      lt: ["pagalba", "asistentas", "ai", "dėmesio", "santrauka", "kas laukia manęs"],
+      ru: ["помощь", "ассистент", "ai", "внимание", "сводка"],
+      nl: ["assistentie", "assistent", "ai", "aandacht", "samenvatting"],
+      de: ["assistenz", "assistent", "ki", "aufmerksamkeit", "zusammenfassung"],
+    },
+  },
+  {
+    // Reports hub (control room PR K) — the role-specific reports index:
+    // real, basis-labelled counts over the caller's own records plus the
+    // existing exports (evidence report, CV, journal CSV, finance CSV).
+    // Route resolves through the module registry so it can never drift from
+    // the grid card.
+    id: "reports",
+    route: getModuleRoute("reports"),
+    audience: "public",
+    labels: {
+      en: "Reports (my data figures & exports)",
+      lt: "Ataskaitos (mano duomenų rodikliai ir eksportai)",
+      ru: "Отчёты (показатели моих данных и экспорт)",
+      nl: "Rapporten (cijfers uit mijn gegevens & exports)",
+      de: "Berichte (Kennzahlen aus meinen Daten & Exporte)",
+    },
+    synonyms: {
+      en: ["reports", "report", "statistics", "figures", "export data"],
+      lt: ["ataskaitos", "ataskaita", "statistika", "rodikliai", "eksportas"],
+      ru: ["отчёты", "отчет", "статистика", "показатели", "экспорт"],
+      nl: ["rapporten", "rapport", "statistieken", "cijfers", "exporteren"],
+      de: ["berichte", "bericht", "statistiken", "kennzahlen", "export"],
+    },
+  },
+  {
     id: "account_settings",
     route: "/dashboard/account",
     audience: "public",

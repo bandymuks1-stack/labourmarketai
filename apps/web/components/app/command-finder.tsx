@@ -8,28 +8,66 @@ import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { activeLocales, type ActiveLocale } from "@/lib/i18n/config";
 import {
+  COMMAND_REGISTRY,
   matchCommands,
   type CommandAudience,
+  type CommandEntry,
 } from "@/lib/navigation/command-registry";
+import {
+  DASHBOARD_SEARCH_MAX_QUERY_CHARS,
+  DASHBOARD_SEARCH_MIN_QUERY_CHARS,
+  type DashboardSearchGroup,
+} from "@/lib/search/dashboard-search-model";
 
 /**
- * Command finder (WAGON 3) — type a normal term ("cv", "kortelė",
- * "žurnalas", "brigada", "kainos", "gdpr" …) and get links to the right
- * EXISTING page. Renders results ONLY from the curated registry
- * (lib/navigation/command-registry.ts) — no free navigation invention, no
- * AI, no external search, plain normalized substring matching.
+ * Universal finder (WAGON 3 → control room PR K) — type a normal term
+ * ("cv", "kortelė", "žurnalas", "brigada", "kainos", "gdpr" …) and get:
+ *
+ *  1. REGISTRY-FIRST command results — links to the right EXISTING page from
+ *     the one curated registry (lib/navigation/command-registry.ts). No free
+ *     navigation invention, no AI, plain normalized substring matching.
+ *  2. The caller's OWN objects (control room PR K) — grouped results fetched
+ *     from /api/dashboard-search (authenticated; the SAME RLS-scoped reads
+ *     the pages use; bounded; exact existing destinations). Rendered AFTER
+ *     the command results — commands first, objects second, always.
+ *     NO people search — finding people stays the deterministic scouting flow.
+ *  3. Recent commands — the last few chosen command IDS (ids only, no query
+ *     text, no PII) from localStorage, shown while the input is empty.
  *
  * Audience filtering uses ONLY server-derived signals passed through the
  * dashboard layout's AuthProvider (isAdmin + roles resolved server-side in
  * app/[locale]/dashboard/layout.tsx). Display convenience only — every
- * destination page keeps its own server-side auth / role / superadmin gate.
+ * destination page keeps its own server-side auth / role / superadmin gate,
+ * and the object search API authenticates + RLS-scopes on the server.
  *
  * Keyboard accessible by construction: a labelled search input followed by
- * a plain list of links (native tab order). Progressive enhancement
- * (control room PR B): Ctrl/Cmd+K focuses the inline input from anywhere on
- * the page — no modal palette, the existing finder just becomes reachable
- * without the mouse. Everything works identically without the shortcut.
+ * plain lists of links (native tab order). Ctrl/Cmd+K focuses the inline
+ * input from anywhere on the page — no modal palette. The object fetch is
+ * debounced (hand-rolled, no dependency) and timeout-bounded (AbortController)
+ * so a dead network can never hang the pending state.
  */
+
+const RECENT_COMMANDS_STORAGE_KEY = "lm.commandFinder.recentCommandIds";
+const RECENT_COMMANDS_MAX = 5;
+const OBJECT_SEARCH_DEBOUNCE_MS = 300;
+const OBJECT_SEARCH_TIMEOUT_MS = 8000;
+
+type ObjectSearchState = "idle" | "loading" | "ok" | "error";
+
+/** Parse the stored recent-command ids — ids only, anything else discarded. */
+function parseRecentIds(rawJson: string | null): string[] {
+  if (!rawJson) return [];
+  try {
+    const parsed: unknown = JSON.parse(rawJson);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((v): v is string => typeof v === "string")
+      .slice(0, RECENT_COMMANDS_MAX);
+  } catch {
+    return [];
+  }
+}
+
 export function CommandFinder() {
   const t = useTranslations("commandFinder");
   const rawLocale = useLocale();
@@ -40,6 +78,11 @@ export function CommandFinder() {
     : "lt";
   const { isAdmin, roles } = useAuth();
   const [query, setQuery] = useState("");
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [objectGroups, setObjectGroups] = useState<
+    readonly DashboardSearchGroup[]
+  >([]);
+  const [objectState, setObjectState] = useState<ObjectSearchState>("idle");
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Ctrl/Cmd+K focuses the finder input (progressive enhancement — the
@@ -54,6 +97,35 @@ export function CommandFinder() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  // Recent command ids (client-only; localStorage; ids only — no query text).
+  useEffect(() => {
+    try {
+      setRecentIds(
+        parseRecentIds(window.localStorage.getItem(RECENT_COMMANDS_STORAGE_KEY)),
+      );
+    } catch {
+      // storage unavailable (private mode) — the finder works without recents
+    }
+  }, []);
+
+  const rememberCommand = (id: string) => {
+    setRecentIds((prev) => {
+      const next = [id, ...prev.filter((x) => x !== id)].slice(
+        0,
+        RECENT_COMMANDS_MAX,
+      );
+      try {
+        window.localStorage.setItem(
+          RECENT_COMMANDS_STORAGE_KEY,
+          JSON.stringify(next),
+        );
+      } catch {
+        // storage unavailable — display-only feature, nothing breaks
+      }
+      return next;
+    });
+  };
 
   const allowedAudiences = useMemo(() => {
     const a = new Set<CommandAudience>(["public"]);
@@ -73,7 +145,78 @@ export function CommandFinder() {
     () => matchCommands(query, locale, allowedAudiences),
     [query, locale, allowedAudiences],
   );
-  const showNoResults = query.trim().length > 0 && results.length === 0;
+
+  // Object search (PR K): debounced, timeout-bounded fetch of the caller's
+  // own objects. Runs alongside the registry match — never instead of it.
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < DASHBOARD_SEARCH_MIN_QUERY_CHARS) {
+      setObjectGroups([]);
+      setObjectState("idle");
+      return;
+    }
+    setObjectState("loading");
+    setObjectGroups([]);
+    let cancelled = false;
+    const controller = new AbortController();
+    const debounce = setTimeout(() => {
+      const timeout = setTimeout(
+        () => controller.abort(),
+        OBJECT_SEARCH_TIMEOUT_MS,
+      );
+      fetch(
+        `/api/dashboard-search?q=${encodeURIComponent(
+          q.slice(0, DASHBOARD_SEARCH_MAX_QUERY_CHARS),
+        )}`,
+        { signal: controller.signal },
+      )
+        .then(async (res) => {
+          if (!res.ok) throw new Error("search-failed");
+          const data = (await res.json()) as {
+            ok: boolean;
+            groups?: readonly DashboardSearchGroup[];
+          };
+          if (cancelled) return;
+          setObjectGroups(data.ok && data.groups ? data.groups : []);
+          setObjectState("ok");
+        })
+        .catch(() => {
+          // Dedicated ERROR state — a failed read is never folded into the
+          // empty state (groups were already cleared when loading began).
+          if (cancelled) return;
+          setObjectState("error");
+        })
+        .finally(() => clearTimeout(timeout));
+    }, OBJECT_SEARCH_DEBOUNCE_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(debounce);
+      controller.abort();
+    };
+  }, [query]);
+
+  const recentEntries = useMemo(() => {
+    if (query.trim().length > 0) return [];
+    return recentIds
+      .map((id) => COMMAND_REGISTRY.find((e) => e.id === id))
+      .filter(
+        (e): e is CommandEntry =>
+          e !== undefined && allowedAudiences.has(e.audience),
+      );
+  }, [recentIds, query, allowedAudiences]);
+
+  const objectResultCount = objectGroups.reduce(
+    (n, g) => n + g.results.length,
+    0,
+  );
+  const showNoResults =
+    query.trim().length > 0 &&
+    results.length === 0 &&
+    objectState !== "loading" &&
+    objectResultCount === 0;
+
+  const rowClass =
+    "flex items-center justify-between gap-3 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue";
 
   return (
     <section
@@ -117,6 +260,38 @@ export function CommandFinder() {
         />
       </div>
 
+      {/* Recent commands — shown only while the input is empty. Ids only. */}
+      {recentEntries.length > 0 && (
+        <nav aria-label={t("recentLabel")}>
+          <p className="mb-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("recentLabel")}
+          </p>
+          <ul
+            data-testid="command-finder-recent"
+            className="flex flex-col gap-1"
+          >
+            {recentEntries.map((entry) => (
+              <li key={entry.id}>
+                <Link
+                  href={entry.route as "/dashboard"}
+                  onClick={() => rememberCommand(entry.id)}
+                  data-testid={`command-finder-recent-${entry.id}`}
+                  className={rowClass}
+                >
+                  <span className="min-w-0 truncate font-medium">
+                    {entry.labels[locale]}
+                  </span>
+                  <span className="shrink-0 font-mono text-[10px] text-text-muted">
+                    {entry.route}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      {/* 1 — registry commands FIRST (the curated navigation truth). */}
       {results.length > 0 && (
         <nav aria-label={t("resultsLabel")}>
           <ul
@@ -127,8 +302,9 @@ export function CommandFinder() {
               <li key={entry.id}>
                 <Link
                   href={entry.route as "/dashboard"}
+                  onClick={() => rememberCommand(entry.id)}
                   data-testid={`command-finder-result-${entry.id}`}
-                  className="flex items-center justify-between gap-3 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+                  className={rowClass}
                 >
                   <span className="min-w-0 truncate font-medium">
                     {entry.labels[locale]}
@@ -137,6 +313,57 @@ export function CommandFinder() {
                     {entry.route}
                   </span>
                 </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      {/* 2 — the caller's own objects, AFTER the commands (PR K). */}
+      {objectState === "loading" && (
+        <p
+          data-testid="command-finder-objects-loading"
+          className="text-xs leading-relaxed text-text-muted"
+          aria-live="polite"
+        >
+          {t("objectsLoading")}
+        </p>
+      )}
+      {objectState === "error" && (
+        <p
+          data-testid="command-finder-objects-error"
+          className="text-xs leading-relaxed text-text-muted"
+          aria-live="polite"
+        >
+          {t("objectsError")}
+        </p>
+      )}
+      {objectState === "ok" && objectResultCount > 0 && (
+        <nav aria-label={t("objectsLabel")} data-testid="command-finder-objects">
+          <ul className="flex flex-col gap-2">
+            {objectGroups.map((group) => (
+              <li key={group.source} className="flex flex-col gap-1">
+                <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {t(`groups.${group.source}`)}
+                </p>
+                <ul className="flex flex-col gap-1">
+                  {group.results.map((r) => (
+                    <li key={r.id}>
+                      <Link
+                        href={r.href as "/dashboard"}
+                        data-testid={`command-finder-object-${group.source}-${r.id}`}
+                        className={rowClass}
+                      >
+                        <span className="min-w-0 truncate font-medium">
+                          {r.label}
+                        </span>
+                        <span className="shrink-0 font-mono text-[10px] text-text-muted">
+                          {t(`groups.${group.source}`)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>
