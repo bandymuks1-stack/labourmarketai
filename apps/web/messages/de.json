@@ -6303,6 +6303,14 @@
     "cta": "Zurück zum Start"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Gesprächspunkte",
+      "missing": "Fehlende Informationen"
+    },
+    "missingSide": {
+      "worker": "Der Kandidat hat nicht angegeben: {criterion}",
+      "demand": "Ihre Anfrage enthält nicht: {criterion}"
+    },
     "statusNote": {
       "title": "So funktioniert das Matching heute",
       "signals": "Auf Basis der aktuell verfügbaren Profil- und Arbeitsjournal-Signale zeigt das System Bereitschaft und eine mögliche Eignung an.",
@@ -6907,6 +6915,63 @@
     "applyNotAdmin": "Admin-Rechte erforderlich."
   },
   "opportunities": {
+    "discovery": {
+      "filters": {
+        "title": "Chancen filtern",
+        "profession": "Arbeitsart",
+        "country": "Land",
+        "start": "Beginn",
+        "accommodation": "Unterkunft",
+        "transport": "Transport",
+        "tool": "Benötigte Werkzeuge",
+        "activeCount": "Aktive Filter: {count}",
+        "reset": "Filter zurücksetzen"
+      },
+      "sort": {
+        "label": "Sortierung",
+        "relevance": "Beste Übereinstimmung zuerst",
+        "newest": "Neueste zuerst"
+      },
+      "emptyFiltered": {
+        "title": "Keine Chancen entsprechen diesen Filtern",
+        "body": "Aktive Filter: {filters}. Entfernen Sie einige Filter oder setzen Sie sie zurück.",
+        "reset": "Filter zurücksetzen"
+      },
+      "details": {
+        "show": "Mehr Details",
+        "hide": "Details ausblenden"
+      },
+      "tiers": {
+        "blocking": "Passt nicht",
+        "strengths": "Passt",
+        "negotiables": "Gesprächspunkte",
+        "missing": "Fehlende Informationen"
+      },
+      "missing": {
+        "worker": "Sie haben nicht angegeben: {criterion}",
+        "demand": "Das Unternehmen hat nicht angegeben: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Erforderliche Fähigkeiten",
+        "evidence_tiers": "Nachweis der Fähigkeiten",
+        "profession": "Beruf",
+        "language": "Sprache",
+        "country_location": "Land und Ort",
+        "availability": "Verfügbarkeit",
+        "pay_ceiling": "Lohnerwartung",
+        "accommodation": "Unterkunft",
+        "compensation": "Lohn",
+        "start_date": "Startdatum",
+        "shifts_hours": "Schichten und Stunden",
+        "engagement_form": "Vertragsform",
+        "licence_categories": "Führerschein"
+      },
+      "how": {
+        "title": "So funktioniert das Matching",
+        "body": "Das Matching folgt festen, deterministischen Regeln über die Fakten, die beide Seiten angegeben haben - erforderliche Fähigkeiten, Sprache, Ort, Verfügbarkeit, Lohn und Vertragsform. Ein fehlender Fakt wird als fehlend angezeigt und nie geraten. Keine künstliche Intelligenz entscheidet, und es gibt keinen globalen Personenwert - nur die Passung innerhalb dieser einen Chance.",
+        "version": "Berechnungsversion: {version} - deterministische Regeln"
+      }
+    },
     "title": "Chancen für Sie",
     "intro": "Hier sehen Sie Arbeitgeber-Bedarfe, die zu Ihnen passen könnten, und was Sie Ihrem Profil hinzufügen sollten, um bereit zu sein.",
     "noWorkerBody": "Vervollständigen Sie zuerst Ihr Arbeitskraft-Profil, um Chancen zu sehen, die zu Ihnen passen.",

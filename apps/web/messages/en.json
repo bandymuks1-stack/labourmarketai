@@ -6303,6 +6303,14 @@
     "cta": "Back to the start"
   },
   "scouting": {
+    "tiers": {
+      "negotiables": "Discussion points",
+      "missing": "Missing information"
+    },
+    "missingSide": {
+      "worker": "The candidate has not stated: {criterion}",
+      "demand": "Your request does not state: {criterion}"
+    },
     "statusNote": {
       "title": "How matching works today",
       "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.",
@@ -6907,6 +6915,63 @@
     "applyNotAdmin": "Admin rights required."
   },
   "opportunities": {
+    "discovery": {
+      "filters": {
+        "title": "Filter opportunities",
+        "profession": "Work type",
+        "country": "Country",
+        "start": "Start",
+        "accommodation": "Accommodation",
+        "transport": "Transport",
+        "tool": "Required tools",
+        "activeCount": "Active filters: {count}",
+        "reset": "Reset filters"
+      },
+      "sort": {
+        "label": "Sort",
+        "relevance": "Best match first",
+        "newest": "Newest first"
+      },
+      "emptyFiltered": {
+        "title": "No opportunities match these filters",
+        "body": "Active filters: {filters}. Remove some filters or reset them to see more.",
+        "reset": "Reset filters"
+      },
+      "details": {
+        "show": "More details",
+        "hide": "Hide details"
+      },
+      "tiers": {
+        "blocking": "Does not fit",
+        "strengths": "Fits",
+        "negotiables": "Discussion points",
+        "missing": "Missing information"
+      },
+      "missing": {
+        "worker": "You have not stated: {criterion}",
+        "demand": "The company has not stated: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Required skills",
+        "evidence_tiers": "Skill evidence",
+        "profession": "Profession",
+        "language": "Language",
+        "country_location": "Country and location",
+        "availability": "Availability",
+        "pay_ceiling": "Pay expectation",
+        "accommodation": "Accommodation",
+        "compensation": "Pay",
+        "start_date": "Start date",
+        "shifts_hours": "Shifts and hours",
+        "engagement_form": "Contract type",
+        "licence_categories": "Driving licence"
+      },
+      "how": {
+        "title": "How matching works",
+        "body": "Matching follows fixed, deterministic rules over the facts both sides have stated - required skills, language, location, availability, pay and contract type. A missing fact is shown as missing, never guessed. No artificial intelligence makes the decision and there is no global person score - only the fit within this one opportunity.",
+        "version": "Calculation version: {version} - deterministic rules"
+      }
+    },
     "title": "Opportunities for you",
     "intro": "Here you'll see employer needs that could fit you, and what's worth adding to your profile to be ready.",
     "noWorkerBody": "Finish your worker profile first to see opportunities that fit you.",

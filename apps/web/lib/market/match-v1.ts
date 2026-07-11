@@ -30,6 +30,36 @@
 import { computeContextFit, type FitBasis, type SubjectEscoSkill } from "./fit";
 import { professionRelatedness } from "@/lib/taxonomy/profession-skills";
 import type { NeedSkillSource } from "./need-skills";
+import type { StructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
+import {
+  MATCH_CALC_VERSION,
+  compareCompensationV2,
+  compareStartDateV2,
+  engagementFormAccepted,
+  type MatchCalcVersion,
+  type MatchCriterionResult,
+  type MatchMissingFact,
+} from "./match-criteria-v2";
+
+// Matching contract v2 (PR 4) — ONE engine, ONE import surface: the criterion
+// vocabulary + pure comparators live in ./match-criteria-v2 and are re-exported
+// here so no caller ever grows a second matching entry point.
+export {
+  MATCH_CALC_VERSION,
+  NEGOTIABLE_SALARY_GAP_RATIO,
+  WORKER_CONTRACT_TYPE_ACCEPTS,
+  compareCompensationV2,
+  compareStartDateV2,
+  engagementFormAccepted,
+} from "./match-criteria-v2";
+export type {
+  MatchCalcVersion,
+  MatchCriterionClass,
+  MatchCriterionId,
+  MatchCriterionOutcome,
+  MatchCriterionResult,
+  MatchMissingFact,
+} from "./match-criteria-v2";
 
 /** Real `worker_skills.source` tiers, strongest first. */
 export type EvidenceTier = "manager_confirmed" | "work_journal" | "self_declared";
@@ -92,6 +122,10 @@ export interface MatchNeed {
   readonly accommodationProvided?: boolean | null;
   /** ISO date the need starts. */
   readonly startDate?: string | null;
+  /** The demand's typed structured_v2 cluster when the payload carries one
+   *  (read via readStructuredDemandV2 — canonical contract §2). Optional and
+   *  additive: absence keeps every existing check EXACTLY as before. */
+  readonly structuredV2?: StructuredDemandV2 | null;
 }
 
 export interface MatchSubject {
@@ -113,6 +147,10 @@ export interface MatchSubject {
   /** Worker's expected minimum pay (EUR). */
   readonly salaryMinEur?: number | null;
   readonly accommodationNeeded?: boolean | null;
+  /** workers.preferred_contract_type ('employment' | 'subcontract' |
+   *  'temporary' | 'any') — engagement-form hard check fires ONLY when both
+   *  sides stated their form (contract v2). Never inferred. */
+  readonly preferredContractType?: string | null;
 }
 
 /** Great-circle distance in km (haversine). Pure; used only when BOTH sides
@@ -211,6 +249,26 @@ export interface MatchResultV1 {
   readonly availability: MatchAvailability;
   /** The one clear next step for this result. */
   readonly nextAction: MatchNextAction;
+
+  // ── Matching contract v2 (PR 4) — additive per-criterion tiers ────────────
+  /** Deterministic-rules calculation version ("2"). */
+  readonly calcVersion: MatchCalcVersion;
+  /** false the moment ANY hard criterion fails (or a hard criterion is
+   *  unknowable → insufficient_data). A weighted score can never restore it. */
+  readonly eligible: boolean;
+  /** Hard criteria that were checked and MET. */
+  readonly matchedHard: readonly MatchCriterionResult[];
+  /** Hard criteria that FAILED — each one forces eligible=false and caps the
+   *  status below "possible" (structural invariant, guard-tested). */
+  readonly blocking: readonly MatchCriterionResult[];
+  /** Weighted criteria that were met — ordering signals, never gates. */
+  readonly strengths: readonly MatchCriterionResult[];
+  /** Discussion points — never block, never silently boost. */
+  readonly negotiables: readonly MatchCriterionResult[];
+  /** Facts a side has not provided (criterion + which side must provide).
+   *  Missing data NEVER fabricates an outcome. (Sits beside the legacy
+   *  `missingData` code list, which stays untouched for compatibility.) */
+  readonly missingFacts: readonly MatchMissingFact[];
 }
 
 /**
@@ -245,6 +303,13 @@ export function matchWorkerToNeed(
   const gaps: MatchGap[] = [];
   const missingData: MatchMissingDataCode[] = [];
 
+  // Contract v2 per-criterion tiers (additive; derived from the SAME checks).
+  const matchedHard: MatchCriterionResult[] = [];
+  const blocking: MatchCriterionResult[] = [];
+  const strengths: MatchCriterionResult[] = [];
+  const negotiables: MatchCriterionResult[] = [];
+  const missingFacts: MatchMissingFact[] = [];
+
   const availability: MatchAvailability = (() => {
     const s = norm(subject.availabilityStatus);
     if (s === "available") return "available";
@@ -264,8 +329,16 @@ export function matchWorkerToNeed(
   const skillFit = computeContextFit(needSkillIds, fitSubject);
 
   // Unstructured need ⇒ no percentage exists, ever (§19). Cannot match.
+  // Contract v2: the required-skills HARD criterion is unknowable on the
+  // demand side → insufficient_data + a missing-fact record. Eligibility is
+  // NEVER fabricated from missing data.
   if (skillFit === null) {
     missingData.push("need_not_structured");
+    missingFacts.push({
+      criterion: "skills_coverage",
+      side: "demand",
+      source: "customer_requests.payload.structured_need",
+    });
     return {
       status: "insufficient_data",
       skillFit: null,
@@ -275,6 +348,13 @@ export function matchWorkerToNeed(
       missingData,
       availability,
       nextAction: "structure_demand",
+      calcVersion: MATCH_CALC_VERSION,
+      eligible: false,
+      matchedHard,
+      blocking,
+      strengths,
+      negotiables,
+      missingFacts,
     };
   }
 
@@ -304,7 +384,14 @@ export function matchWorkerToNeed(
   const evidenceWeightedCoverage =
     skillFit.needTotal > 0 ? weightedMatched / skillFit.needTotal : 0;
 
-  if (subject.skills.length === 0) missingData.push("no_subject_skills");
+  if (subject.skills.length === 0) {
+    missingData.push("no_subject_skills");
+    missingFacts.push({
+      criterion: "skills_coverage",
+      side: "worker",
+      source: "worker_skills",
+    });
+  }
 
   // Positive skill reasons.
   reasons.push({
@@ -313,10 +400,26 @@ export function matchWorkerToNeed(
     total: skillFit.needTotal,
     confirmed: skillFit.matchedConfirmed,
   });
+  if (skillFit.matchedTotal > 0) {
+    strengths.push({
+      criterion: "skills_coverage",
+      class: "weighted",
+      outcome: "met",
+      source: "worker_skills",
+    });
+  }
   if (matchedManagerConfirmed > 0)
     reasons.push({ code: "skills_manager_confirmed", count: matchedManagerConfirmed });
   if (matchedJournalSupported > 0)
     reasons.push({ code: "skills_journal_supported", count: matchedJournalSupported });
+  if (matchedManagerConfirmed + matchedJournalSupported > 0) {
+    strengths.push({
+      criterion: "evidence_tiers",
+      class: "weighted",
+      outcome: "met",
+      source: "worker_skills.source",
+    });
+  }
 
   // Skill gap.
   if (skillFit.missingUris.length > 0)
@@ -342,26 +445,60 @@ export function matchWorkerToNeed(
     const kmRounded = Math.round(km);
     if (km <= need.radiusKm!) {
       reasons.push({ code: "location_within_radius", km: kmRounded, radiusKm: need.radiusKm! });
+      strengths.push({
+        criterion: "country_location",
+        class: "weighted",
+        outcome: "met",
+        source: "company_demand_locations",
+      });
     } else {
       gaps.push({ code: "location_outside_radius", km: kmRounded, radiusKm: need.radiusKm! });
       softCap = true;
     }
   } else if (need.city && subject.city && norm(need.city) === norm(subject.city)) {
     reasons.push({ code: "city_match" });
+    strengths.push({
+      criterion: "country_location",
+      class: "weighted",
+      outcome: "met",
+      source: "preferred_locations.city",
+    });
   } else if (need.country) {
     const nc = norm(need.country);
     if (norm(subject.country) === nc) {
       reasons.push({ code: "country_match" });
+      strengths.push({
+        criterion: "country_location",
+        class: "weighted",
+        outcome: "met",
+        source: "workers.current_location_country",
+      });
     } else if (subject.preferredCountries?.some((c) => norm(c) === nc)) {
       reasons.push({ code: "mobility_match" });
+      strengths.push({
+        criterion: "country_location",
+        class: "weighted",
+        outcome: "met",
+        source: "workers.preferred_countries",
+      });
     } else if (subject.country || (subject.preferredCountries?.length ?? 0) > 0) {
       gaps.push({ code: "country_mismatch" });
       softCap = true;
     } else {
       missingData.push("location_unknown");
+      missingFacts.push({
+        criterion: "country_location",
+        side: "worker",
+        source: "workers.current_location_country",
+      });
     }
   } else if (!subject.country && !subject.city && !haveSubjectGeo) {
     missingData.push("location_unknown");
+    missingFacts.push({
+      criterion: "country_location",
+      side: "worker",
+      source: "workers.current_location_country",
+    });
   }
 
   // Profession — direct match, or related via shared profession_skills links
@@ -369,12 +506,24 @@ export function matchWorkerToNeed(
   if (need.professionSlug && subject.professionSlug) {
     if (norm(need.professionSlug) === norm(subject.professionSlug)) {
       reasons.push({ code: "profession_match" });
+      strengths.push({
+        criterion: "profession",
+        class: "weighted",
+        outcome: "met",
+        source: "worker_professions",
+      });
     } else {
       const rel = professionRelatedness(need.professionSlug, subject.professionSlug);
       if (rel >= 0.2) {
         reasons.push({
           code: "profession_related",
           sharedSkillRatio: Math.round(rel * 100) / 100,
+        });
+        strengths.push({
+          criterion: "profession",
+          class: "weighted",
+          outcome: "met",
+          source: "worker_professions",
         });
       } else {
         gaps.push({ code: "profession_mismatch" });
@@ -385,8 +534,19 @@ export function matchWorkerToNeed(
   // Availability.
   if (subject.availabilityStatus == null && subject.availableFrom == null) {
     missingData.push("availability_unknown");
+    missingFacts.push({
+      criterion: "availability",
+      side: "worker",
+      source: "workers.availability_status",
+    });
   } else if (norm(subject.availabilityStatus) === "available") {
     reasons.push({ code: "available_now" });
+    strengths.push({
+      criterion: "availability",
+      class: "weighted",
+      outcome: "met",
+      source: "workers.availability_status",
+    });
   } else if (norm(subject.availabilityStatus) === "unavailable") {
     softCap = true; // explicitly unavailable is a soft mismatch
   }
@@ -395,13 +555,31 @@ export function matchWorkerToNeed(
   if (need.languages && need.languages.length > 0) {
     if (subject.languages == null) {
       missingData.push("language_unknown");
+      missingFacts.push({
+        criterion: "language",
+        side: "worker",
+        source: "worker_languages",
+      });
     } else {
       const have = new Set(subject.languages.map(norm));
       const missing = need.languages.filter((l) => !have.has(norm(l)));
-      if (missing.length === 0) reasons.push({ code: "language_match" });
-      else {
+      if (missing.length === 0) {
+        reasons.push({ code: "language_match" });
+        matchedHard.push({
+          criterion: "language",
+          class: "hard",
+          outcome: "met",
+          source: "customer_requests.language_requirement",
+        });
+      } else {
         gaps.push({ code: "language_missing", required: missing });
         hardBlock = true;
+        blocking.push({
+          criterion: "language",
+          class: "hard",
+          outcome: "not_met",
+          source: "customer_requests.language_requirement",
+        });
       }
     }
   }
@@ -410,8 +588,19 @@ export function matchWorkerToNeed(
   if (need.payOfferedEurMax != null) {
     if (subject.salaryMinEur == null) {
       missingData.push("pay_unknown");
+      missingFacts.push({
+        criterion: "pay_ceiling",
+        side: "worker",
+        source: "workers.salary_min_eur",
+      });
     } else if (subject.salaryMinEur <= need.payOfferedEurMax) {
       reasons.push({ code: "pay_within_offer" });
+      strengths.push({
+        criterion: "pay_ceiling",
+        class: "weighted",
+        outcome: "met",
+        source: "workers.salary_min_eur",
+      });
     } else {
       gaps.push({
         code: "pay_above_offer",
@@ -424,11 +613,151 @@ export function matchWorkerToNeed(
 
   // Accommodation — worker needs it but the need does not provide it.
   if (subject.accommodationNeeded === true) {
-    if (need.accommodationProvided === true) reasons.push({ code: "accommodation_ok" });
-    else if (need.accommodationProvided === false) {
+    if (need.accommodationProvided === true) {
+      reasons.push({ code: "accommodation_ok" });
+      strengths.push({
+        criterion: "accommodation",
+        class: "weighted",
+        outcome: "met",
+        source: "customer_requests.accommodation",
+      });
+    } else if (need.accommodationProvided === false) {
       gaps.push({ code: "accommodation_needed_not_provided" });
       softCap = true;
     }
+  }
+
+  // ── Structured demand v2 criteria (contract v2 — fire ONLY on real facts;
+  //    absence stays lenient: unknown, never a block). ──────────────────────
+  const v2 = need.structuredV2 ?? null;
+
+  // Compensation vs the worker's stated minimum. Hard block ONLY when both
+  // sides state comparable numbers and the gap exceeds the 15% window.
+  const comp = compareCompensationV2(v2, subject.salaryMinEur);
+  if (comp !== null) {
+    const compSource = "customer_requests.payload.structured_v2.compensation";
+    if (comp.kind === "met") {
+      matchedHard.push({
+        criterion: "compensation",
+        class: "hard",
+        outcome: "met",
+        source: compSource,
+      });
+    } else if (comp.kind === "negotiable_gap" || comp.kind === "not_comparable") {
+      negotiables.push({
+        criterion: "compensation",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: compSource,
+      });
+    } else if (comp.kind === "hard_below_minimum") {
+      hardBlock = true;
+      blocking.push({
+        criterion: "compensation",
+        class: "hard",
+        outcome: "not_met",
+        source: compSource,
+      });
+    } else if (comp.kind === "demand_unstated") {
+      missingFacts.push({ criterion: "compensation", side: "demand", source: compSource });
+    } else {
+      missingFacts.push({
+        criterion: "compensation",
+        side: "worker",
+        source: "workers.salary_min_eur",
+      });
+    }
+  } else if (need.payOfferedEurMax == null) {
+    // No structured_v2 AND no legacy offer ceiling — the demand side has not
+    // stated pay at all (honest missing fact, common on the worker board).
+    missingFacts.push({
+      criterion: "compensation",
+      side: "demand",
+      source: "customer_requests.payload.structured_v2.compensation",
+    });
+  }
+
+  // Start date — flexibility is a discussion point, never a silent block.
+  const start = compareStartDateV2(v2, subject);
+  if (start !== null) {
+    const timeSource = "customer_requests.payload.structured_v2.time";
+    if (start.kind === "met") {
+      strengths.push({
+        criterion: "start_date",
+        class: "weighted",
+        outcome: "met",
+        source: timeSource,
+      });
+    } else if (start.kind === "negotiable_window") {
+      negotiables.push({
+        criterion: "start_date",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: timeSource,
+      });
+    }
+    // worker_unstated is already covered by the availability criterion;
+    // demand_unstated means no stated window — lenient, nothing recorded.
+  }
+
+  // Shifts / hours — the worker side has no stated shift/hours preference
+  // store yet, so a stated demand schedule is an honest discussion point.
+  if ((v2?.time?.shifts?.length ?? 0) > 0 || v2?.time?.hours_per_week != null) {
+    negotiables.push({
+      criterion: "shifts_hours",
+      class: "negotiable",
+      outcome: "negotiable",
+      source: "customer_requests.payload.structured_v2.time",
+    });
+  }
+
+  // Engagement form vs workers.preferred_contract_type — hard ONLY when both
+  // sides stated their form.
+  if (v2?.engagement_form != null) {
+    const formSource = "customer_requests.payload.structured_v2.engagement_form";
+    const pref = (subject.preferredContractType ?? "").trim();
+    if (pref === "") {
+      missingFacts.push({
+        criterion: "engagement_form",
+        side: "worker",
+        source: "workers.preferred_contract_type",
+      });
+    } else {
+      const accepted = engagementFormAccepted(pref, v2.engagement_form);
+      if (accepted === true) {
+        matchedHard.push({
+          criterion: "engagement_form",
+          class: "hard",
+          outcome: "met",
+          source: formSource,
+        });
+      } else if (accepted === false) {
+        hardBlock = true;
+        blocking.push({
+          criterion: "engagement_form",
+          class: "hard",
+          outcome: "not_met",
+          source: formSource,
+        });
+      } else {
+        // Stored worker value outside the closed map — unknown, never guessed.
+        missingFacts.push({
+          criterion: "engagement_form",
+          side: "worker",
+          source: "workers.preferred_contract_type",
+        });
+      }
+    }
+  }
+
+  // Licence categories — no worker-side licence store exists, so a stated
+  // requirement is ALWAYS a worker-side missing fact, never a block.
+  if ((v2?.transport?.licence_categories?.length ?? 0) > 0) {
+    missingFacts.push({
+      criterion: "licence_categories",
+      side: "worker",
+      source: "worker_documents",
+    });
   }
 
   // ── Deterministic status from evidence-weighted coverage, then caps. ──
@@ -438,9 +767,14 @@ export function matchWorkerToNeed(
   else if (evidenceWeightedCoverage >= 0.5) status = "possible";
   else status = "weak";
 
-  // Apply compatibility caps (never upgrade, only cap downward).
+  // Apply compatibility caps (never upgrade, only cap downward). STRUCTURAL
+  // INVARIANT (contract v2, guard-tested): a failed hard criterion caps the
+  // status at "weak" BEFORE any ordering — no weighted sum can outscore it,
+  // and eligible is false for the same reason.
   if (hardBlock && matchStrengthOrder(status) > matchStrengthOrder("weak")) status = "weak";
   if (softCap && matchStrengthOrder(status) > matchStrengthOrder("possible")) status = "possible";
+
+  const eligible = !hardBlock && blocking.length === 0;
 
   // The one clear next step (owner mandate). Confirming a recognized need is
   // the human act that upgrades the suggestion into a structured need.
@@ -460,5 +794,12 @@ export function matchWorkerToNeed(
     missingData,
     availability,
     nextAction,
+    calcVersion: MATCH_CALC_VERSION,
+    eligible,
+    matchedHard,
+    blocking,
+    strengths,
+    negotiables,
+    missingFacts,
   };
 }

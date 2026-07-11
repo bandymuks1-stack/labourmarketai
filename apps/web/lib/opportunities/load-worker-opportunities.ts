@@ -140,6 +140,8 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             // Present only after the PR8 location-label RPC is applied.
             locationLabel: (row.location_label as string | null) ?? null,
             routeStatus: (row.route_status as string | null) ?? null,
+            // Whitelisted RPC column — powers the "newest" sort only.
+            createdAt: (row.created_at as string | null) ?? null,
           };
           const fit = computeOpportunityFit(readiness, need);
           const { need: matchNeed } = needFromRoleText(

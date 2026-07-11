@@ -1686,7 +1686,74 @@
     "body": "Denne adresse findes ikke — den kan være tastet forkert, eller siden er flyttet.",
     "cta": "Tilbage til start"
   },
+  "opportunities": {
+    "discovery": {
+      "filters": {
+        "title": "Filtrer muligheder",
+        "profession": "Arbejdstype",
+        "country": "Land",
+        "start": "Start",
+        "accommodation": "Indkvartering",
+        "transport": "Transport",
+        "tool": "Nødvendigt værktøj",
+        "activeCount": "Aktive filtre: {count}",
+        "reset": "Nulstil filtre"
+      },
+      "sort": {
+        "label": "Sortering",
+        "relevance": "Bedste match først",
+        "newest": "Nyeste først"
+      },
+      "emptyFiltered": {
+        "title": "Ingen muligheder matcher disse filtre",
+        "body": "Aktive filtre: {filters}. Fjern nogle filtre, eller nulstil dem for at se mere.",
+        "reset": "Nulstil filtre"
+      },
+      "details": {
+        "show": "Flere detaljer",
+        "hide": "Skjul detaljer"
+      },
+      "tiers": {
+        "blocking": "Passer ikke",
+        "strengths": "Passer",
+        "negotiables": "Punkter til drøftelse",
+        "missing": "Manglende oplysninger"
+      },
+      "missing": {
+        "worker": "Du har ikke angivet: {criterion}",
+        "demand": "Virksomheden har ikke angivet: {criterion}"
+      },
+      "criterion": {
+        "skills_coverage": "Nødvendige færdigheder",
+        "evidence_tiers": "Dokumentation for færdigheder",
+        "profession": "Erhverv",
+        "language": "Sprog",
+        "country_location": "Land og sted",
+        "availability": "Tilgængelighed",
+        "pay_ceiling": "Lønforventning",
+        "accommodation": "Indkvartering",
+        "compensation": "Løn",
+        "start_date": "Startdato",
+        "shifts_hours": "Vagter og timer",
+        "engagement_form": "Kontraktform",
+        "licence_categories": "Kørekort"
+      },
+      "how": {
+        "title": "Sådan fungerer matching",
+        "body": "Matching følger faste, deterministiske regler over de fakta, begge sider har angivet - nødvendige færdigheder, sprog, sted, tilgængelighed, løn og kontraktform. En manglende oplysning vises som manglende og gættes aldrig. Ingen kunstig intelligens træffer beslutningen, og der findes ingen samlet personscore - kun match inden for denne ene mulighed.",
+        "version": "Beregningsversion: {version} - deterministiske regler"
+      }
+    }
+  },
   "scouting": {
+    "tiers": {
+      "negotiables": "Punkter til drøftelse",
+      "missing": "Manglende oplysninger"
+    },
+    "missingSide": {
+      "worker": "Kandidaten har ikke angivet: {criterion}",
+      "demand": "Din anmodning angiver ikke: {criterion}"
+    },
     "title": "Scouting",
     "intro": "Vælg et af dine strukturerede behov for at se matchende arbejdere, hvorfor de passer, og tilføj dem til en shortlist.",
     "pickDemand": "Vælg et behov",
