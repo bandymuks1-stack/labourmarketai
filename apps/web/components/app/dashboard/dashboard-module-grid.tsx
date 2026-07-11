@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Compass,
   FileText,
+  Handshake,
   Home,
   IdCard,
   ListChecks,
@@ -55,6 +56,7 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   search: Search,
   bell: Bell,
   checklist: ListChecks,
+  handshake: Handshake,
 };
 
 export async function DashboardModuleGrid({

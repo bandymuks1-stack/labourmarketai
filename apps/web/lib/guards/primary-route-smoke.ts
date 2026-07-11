@@ -104,6 +104,10 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // grid card + the open-task-attention spine signal links here), so it
   // joins the smoke inventory like the other module surfaces.
   { id: "tasks", urlPattern: "/dashboard/tasks", sourceFile: "app/[locale]/dashboard/tasks/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR E: unified planning is a dashboard module (registry-
+  // driven grid card + command entry), so it joins the smoke inventory
+  // like the other module surfaces.
+  { id: "planning", urlPattern: "/dashboard/planning", sourceFile: "app/[locale]/dashboard/planning/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "company-scouting", urlPattern: "/dashboard/company/scouting", sourceFile: "app/[locale]/dashboard/company/scouting/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "account", urlPattern: "/dashboard/account", sourceFile: "app/[locale]/dashboard/account/page.tsx", requiresAuth: true, kind: "role-flow" },

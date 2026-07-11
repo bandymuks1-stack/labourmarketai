@@ -3032,8 +3032,12 @@
             "desc": "Work that fits you"
           },
           "planning": {
-            "title": "Plan and bookings",
-            "desc": "Calendar and bookings"
+            "title": "Planning",
+            "desc": "Bookings, projects and deadlines in one agenda"
+          },
+          "bookings": {
+            "title": "Bookings",
+            "desc": "Proposals and acceptances"
           },
           "documents": {
             "title": "Reports and documents",
@@ -6331,6 +6335,8 @@
     "connections": {
       "title": "Planning connects to",
       "intro": "A booking is part of your plan. These are the surfaces it links to.",
+      "planning": "Planning agenda",
+      "planningNote": "This booking in date context with projects and tasks",
       "marketplace": "Marketplace requests",
       "marketplaceNote": "Service requests and their statuses",
       "map": "Map",
@@ -7489,6 +7495,62 @@
     "rights": {
       "notice": "More about your rights and how data is handled:",
       "noticeLink": "privacy notice"
+    }
+  },
+  "planning": {
+    "eyebrow": "PLANNING",
+    "title": "Planning",
+    "intro": "Bookings, project dates and task deadlines in one agenda. Every row links to its real source.",
+    "honestNote": "Only records that really exist are shown: bookings, your managed projects' dates and open task due dates. No external calendar is connected and nothing is invented.",
+    "notAuthed": "Sign in to see your plan.",
+    "filters": {
+      "label": "Source",
+      "all": "All"
+    },
+    "source": {
+      "booking": "Booking",
+      "project": "Project",
+      "task": "Task"
+    },
+    "sourceNotes": {
+      "bookingUnavailable": "Bookings are not available yet — they join the plan once the booking layer is switched on.",
+      "taskUnavailable": "Tasks are not available yet — task deadlines join the plan once the tasks layer is switched on.",
+      "taskError": "Tasks could not be loaded right now. The rest of the plan is unaffected.",
+      "projectManagersOnly": "Project date bands are shown to project managers. A worker-side project schedule joins once that view exists.",
+      "projectError": "Projects could not be loaded right now. The rest of the plan is unaffected."
+    },
+    "week": {
+      "label": "Next 7 days"
+    },
+    "today": "Today",
+    "later": {
+      "title": "Later"
+    },
+    "undated": {
+      "title": "No date yet",
+      "hint": "These records exist, but no dates are recorded yet."
+    },
+    "empty": "Nothing planned yet. Accepted bookings, project dates and task deadlines appear here.",
+    "pastHidden": "Finished items not shown here: {count}. History stays on each source page.",
+    "conflict": {
+      "flag": "Dates overlap"
+    },
+    "context": {
+      "incoming": "Proposed to me",
+      "outgoing": "Proposed by us",
+      "managed": "Managed project",
+      "assigned": "Assigned to me",
+      "mine": "My task"
+    },
+    "fallback": {
+      "booking": "Booking",
+      "project": "Project",
+      "task": "Task"
+    },
+    "projectStatus": {
+      "draft": "Draft",
+      "live": "Live",
+      "paused": "Paused"
     }
   },
   "tasks": {

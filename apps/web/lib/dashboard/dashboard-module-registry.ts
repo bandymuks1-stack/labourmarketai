@@ -45,6 +45,7 @@ export type DashboardModuleId =
   | "opportunities"
   | "tasks"
   | "bookings"
+  | "planning"
   | "market_map"
   | "communication"
   | "documents"
@@ -67,7 +68,8 @@ export type ModuleIconKey =
   | "building"
   | "search"
   | "bell"
-  | "checklist";
+  | "checklist"
+  | "handshake";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -161,13 +163,30 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
   },
   {
     id: "bookings",
+    // Control room PR E: bookings hands the generic planning label to the
+    // unified planning surface and speaks its own name — the card is the
+    // proposal/accept loop, not the whole plan.
     surfaceRoute: "/dashboard/bookings",
+    labelKey: "auth.dashboard.myZone.actions.bookings.title",
+    descriptionKey: "auth.dashboard.myZone.actions.bookings.desc",
+    iconKey: "handshake",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+    attentionSignalIds: ["pending-bookings", "booking-responses"],
+  },
+  {
+    id: "planning",
+    // Unified planning agenda (control room PR E): bookings + managed
+    // project date bands + open task due dates in one compact agenda, each
+    // row linking back to its real source object. Declares NO
+    // attentionSignalIds — the booking/task signals already badge their own
+    // modules; a badge here would double-count the same numbers.
+    surfaceRoute: "/dashboard/planning",
     labelKey: "auth.dashboard.myZone.actions.planning.title",
     descriptionKey: "auth.dashboard.myZone.actions.planning.desc",
     iconKey: "calendar",
     roles: ALL_ROLES,
     surfaces: ["grid", "command"],
-    attentionSignalIds: ["pending-bookings", "booking-responses"],
   },
   {
     id: "market_map",
