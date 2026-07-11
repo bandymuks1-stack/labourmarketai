@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { copyrightLine } from "@/lib/legal/entity-identity";
 
 /** Decorative live-market activity map (brief §10.4): glowing dot grid.
  *  NOT placeholder data — purely ornamental, deterministic coordinates. */
@@ -115,6 +116,9 @@ export async function SiteFooter() {
             <Link href="/legal/data-access" className="text-sm text-text-secondary hover:text-text-primary">
               {legal("dataAccess.title")}
             </Link>
+            <Link href="/legal/legal-notice" className="text-sm text-text-secondary hover:text-text-primary">
+              {legal("legalNotice.title")}
+            </Link>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -128,14 +132,22 @@ export async function SiteFooter() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-ink-600/60 py-6 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            © {new Date().getFullYear()} LabourMarket.ai. {t("rights")}
-          </span>
-          {/* Created by Rexora — text only; no approved Rexora URL was found in
-              the repo / brand config, so no link is fabricated (owner to confirm
-              the URL, then it can become a link). */}
-          <span>{t("rexora")}</span>
+        {/* Legal-entity truth (corporate-identity-source-of-truth-v1): the
+            copyright owner is the IP owner (Labour Market AI Sp. z o.o.),
+            never the brand name alone; the operator/licence disclosure is
+            the owner-mandated public wording. Guarded by
+            legal-entity-truth.test.ts. */}
+        <div className="flex flex-col gap-2 border-t border-ink-600/60 py-6 text-xs text-text-muted">
+          <p data-testid="footer-entity-disclosure">{t("operatedBy")}</p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span data-testid="footer-copyright">
+              {copyrightLine(new Date().getFullYear())}. {t("ipNotice")}
+            </span>
+            {/* Created by Rexora — text only; no approved Rexora URL was found in
+                the repo / brand config, so no link is fabricated (owner to confirm
+                the URL, then it can become a link). */}
+            <span>{t("rexora")}</span>
+          </div>
         </div>
       </div>
     </footer>

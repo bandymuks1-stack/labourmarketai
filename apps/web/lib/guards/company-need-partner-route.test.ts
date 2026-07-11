@@ -77,21 +77,21 @@ describe("partner-route copy is present and honest in lt/en/ru", () => {
     expect(cn.partnerRouteTitle, `${loc} partnerRouteTitle`).not.toMatch(BANNED);
   });
 
-  it.each(ACTIVE)("%s body names the owner-approved LT + PL partner companies", (loc) => {
+  it.each(ACTIVE)("%s body names ONLY the operator partner (legal-entity truth v1)", (loc) => {
     const body = catalog(loc).companyNeed.partnerRouteBody;
-    // The two owner-approved partners (approved 2026-07-07) — named verbatim.
+    // 2026-07-11 legal-entity truth: Labour Market AI Sp. z o.o. is the IP
+    // owner/licensor ONLY — it is not a staffing partner, seller or operator,
+    // so the partner route may name ONLY UAB „Nonstop Group“ (the operator).
     expect(body, `${loc} LT partner`).toMatch(/Nonstop Group/);
-    expect(body, `${loc} PL partner`).toMatch(/Labour Market AI Sp\. z o\.o\./);
-    // each carries its market marker
+    expect(body, `${loc} PL company must NOT appear`).not.toMatch(/Sp\. z o\.o/);
     expect(body, `${loc} LT marker`).toMatch(/\(LT\)/);
-    expect(body, `${loc} PL marker`).toMatch(/\(PL\)/);
   });
 
   it.each(ACTIVE)("%s body keeps partner-company + human-coordinated + conditional framing", (loc) => {
     const body = catalog(loc).companyNeed.partnerRouteBody;
     expect(body, `${loc} partner`).toMatch(/partner|partneri|партн/i);
     // conditional ("if ... not yet") framing
-    expect(body, `${loc} conditional`).toMatch(/if |jei |если/i);
+    expect(body, `${loc} conditional`).toMatch(/if |jei|если/i);
     // human-coordinated (not automatic)
     expect(body, `${loc} human`).toMatch(/human|žmog|человек/i);
   });

@@ -17,7 +17,7 @@ import {
  * consent event provably records which wording was in force.
  */
 
-const MIGRATION = join(
+const CURRENT_PIN_MIGRATION = join(
   __dirname,
   "..",
   "..",
@@ -25,7 +25,7 @@ const MIGRATION = join(
   "..",
   "supabase",
   "migrations",
-  "20260711130000_privacy_consent_and_disclosure_v1.sql",
+  "20260711170000_privacy_consent_text_v2_controller_identity.sql",
 );
 
 describe("all five active locales have complete consent texts (test 23)", () => {
@@ -65,13 +65,31 @@ describe("hash pinning (registry ⇄ DB, tests 19 + Phase 3)", () => {
     );
   });
 
-  it("the migration seeds EXACTLY the registry's current (version, hash) pairs", () => {
-    const sql = readFileSync(MIGRATION, "utf8");
+  it("the pin migration carries EXACTLY the registry's current (version, hash) pairs", () => {
+    const sql = readFileSync(CURRENT_PIN_MIGRATION, "utf8");
     for (const def of CONSENT_DEFINITIONS) {
-      const line = new RegExp(
-        `\\('${def.purpose}', '${def.version.replace(/\./g, "\\.")}', '${consentTextHash(def)}'\\)`,
+      expect(sql, `${def.purpose} version`).toContain(
+        `current_version = '${def.version}'`,
       );
-      expect(sql, `${def.purpose} seed`).toMatch(line);
+      expect(sql, `${def.purpose} hash`).toContain(
+        `current_text_hash = '${consentTextHash(def)}'`,
+      );
+      expect(sql, `${def.purpose} where`).toContain(
+        `where purpose = '${def.purpose}'`,
+      );
+    }
+  });
+
+  it("v2 names the data controller in every locale (GDPR Art. 13(1)(a))", () => {
+    for (const def of CONSENT_DEFINITIONS) {
+      expect(def.version).toBe("2026-07-11.v2");
+      for (const locale of CONSENT_LOCALES) {
+        const c = def.texts[locale].controller;
+        expect(c, `${def.purpose}/${locale}`).toContain("Nonstop Group");
+        expect(c, `${def.purpose}/${locale}`).toContain("302676973");
+        expect(c, `${def.purpose}/${locale}`).toContain("info@labourmarket.ai");
+        expect(c, `${def.purpose}/${locale}`).toContain("Labour Market AI Sp. z o.o.");
+      }
     }
   });
 

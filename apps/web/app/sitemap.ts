@@ -37,6 +37,8 @@ const STATIC_PATHS: readonly string[] = [
   // Compliance explanation pack (CR train WAGON 2).
   "/legal/data-protection",
   "/legal/data-access",
+  // Canonical legal notice / imprint (legal-entity truth v1).
+  "/legal/legal-notice",
 ];
 
 /** `/vision` follows its publication flag: while the page emits

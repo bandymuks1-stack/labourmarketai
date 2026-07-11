@@ -4008,7 +4008,10 @@
     "about": "Über uns",
     "contact": "Kontakt",
     "rights": "Alle Rechte vorbehalten.",
-    "rexora": "Erstellt von Rexora"
+    "rexora": "Erstellt von Rexora",
+    "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörige geistige Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
+    "ipNotice": "Rechte des geistigen Eigentums. Die Plattform wird in Lizenz von der UAB „Nonstop Group“ betrieben.",
+    "legalNotice": "Impressum"
   },
   "pages": {
     "workers": {
@@ -4208,12 +4211,46 @@
       "reviewNote": "Diese Regeln beschreiben, wie sich die Plattform heute tatsächlich verhält. Die endgültige rechtliche Fassung der verbindlichen Dokumente wird noch vorbereitet und vor Beginn kostenpflichtiger Dienste vom Eigentümer und einem Anwalt geprüft."
     },
     "terms": {
-      "title": "Nutzungsbedingungen"
+      "title": "Nutzungsbedingungen",
+      "sections": [
+        {
+          "heading": "Mit wem Sie den Vertrag schließen",
+          "items": [
+            "Alle Plattformleistungen werden kommerziell erbracht und verkauft von der UAB „Nonstop Group“, Unternehmenscode 302676973, USt LT100010790613, eingetragener Sitz Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litauen.",
+            "Ihr Vertrag über jede Plattformleistung kommt mit der UAB „Nonstop Group“ zustande. Rechnungen stellt die UAB „Nonstop Group“ aus; Zahlungen empfängt die UAB „Nonstop Group“.",
+            "Der Labour Market AI Sp. z o.o. (Warschau, Polen; KRS 0001218752) gehören die LabourMarket.ai-Software, die Marke und zugehöriges geistiges Eigentum; sie lizenziert diese an die UAB „Nonstop Group“. Sie ist nicht Partei Ihres Vertrags."
+          ]
+        },
+        {
+          "heading": "Anwendbares Recht und Streitigkeiten",
+          "items": [
+            "Für diese Bedingungen und jeden Kundenvertrag gilt das Recht der Republik Litauen; Streitigkeiten entscheiden die zuständigen litauischen Gerichte, soweit nicht zwingendes Verbraucher-, Arbeits-, Datenschutz- oder sonstiges anwendbares Recht Ihnen unentziehbare Rechte oder einen anderen Gerichtsstand gewährt.",
+            "Als Verbraucher behalten Sie stets die zwingenden Rechte des Landes, in dem Sie wohnen."
+          ]
+        },
+        {
+          "heading": "Was die Plattform ist und was nicht",
+          "items": [
+            "Die Plattform unterstützt das Finden, Präsentieren und Koordinieren von Arbeitsmarktchancen unter Mitwirkung eines menschlichen Operators.",
+            "Die Nutzung der Plattform begründet für sich genommen kein Arbeitsverhältnis und ist keine Garantie für Arbeit oder Arbeitskräfte.",
+            "Profile, Lebensläufe und Kontaktdaten von Arbeitskräften werden nur nach den Einwilligungsregeln der Plattform weitergegeben — siehe Datenschutzerklärung."
+          ]
+        }
+      ]
     },
     "privacy": {
       "title": "Datenschutzerklärung",
       "intro": "Diese Seite erklärt in einfacher Sprache, welche personenbezogenen Daten Labour Market AI verwendet, warum sie verwendet werden und welche Rechte Sie haben. Sie beschreibt die Plattform, wie sie heute funktioniert, bevor Zahlungen aktiv sind.",
       "sections": [
+        {
+          "heading": "Wer für Ihre Daten verantwortlich ist",
+          "items": [
+            "Verantwortliche für die Datenverarbeitung der LabourMarket.ai-Plattform ist die UAB „Nonstop Group“, Unternehmenscode 302676973, eingetragener Sitz Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Litauen.",
+            "Datenschutzkontakt: info@labourmarket.ai. Ein Datenschutzbeauftragter ist nicht bestellt.",
+            "Der Labour Market AI Sp. z o.o. (Warschau, Polen) gehören die Plattformsoftware und die Marke; sie lizenziert diese an die UAB „Nonstop Group“. Das IP-Eigentum verschafft ihr keinen Zugriff auf Ihre personenbezogenen Daten: sie hat keinen routinemäßigen Zugriff auf die Produktionsdatenbank, Profile, Lebensläufe, Kontaktdaten oder Dokumente.",
+            "Sie haben das Recht, sich bei Ihrer Aufsichtsbehörde zu beschweren; für die Niederlassung der Verantwortlichen ist dies die litauische Datenschutzbehörde (VDAI)."
+          ]
+        },
         {
           "heading": "Welche Daten die Plattform verwendet",
           "items": [
@@ -4273,10 +4310,8 @@
       ],
       "pendingTitle": "Noch ausstehend bis zur endgültigen rechtlichen Fassung:",
       "pendingItems": [
-        "Die Identität und Kontaktdaten des Verantwortlichen.",
-        "Die benannte Rechtsgrundlage für jeden Verarbeitungszweck.",
-        "Genaue Aufbewahrungsfristen für jede Datenkategorie.",
-        "Die verbindliche Fassung dieser Erklärung."
+        "Genaue Aufbewahrungsfristen je Datenkategorie.",
+        "Die verbindliche, anwaltlich geprüfte Fassung dieser Erklärung und der genannten Rechtsgrundlagen."
       ]
     },
     "cookies": {
@@ -4521,6 +4556,29 @@
           }
         }
       }
+    },
+    "legalNotice": {
+      "title": "Impressum",
+      "intro": "Die juristischen Personen hinter der LabourMarket.ai-Plattform. LabourMarket.ai ist ein Plattform- und Markenname, keine juristische Person.",
+      "operatorHeading": "Plattformbetreiber und Verkäufer",
+      "operatorRole": "Betreibt die Plattform, erbringt und verkauft alle kommerziellen Leistungen, schließt Kundenverträge, stellt Rechnungen aus, empfängt Zahlungen, leistet Kundensupport und ist der primäre Verantwortliche für die Datenverarbeitung.",
+      "ipOwnerHeading": "Inhaberin des geistigen Eigentums und Lizenzgeberin",
+      "ipOwnerRole": "Ihr gehören die LabourMarket.ai-Software, die Marke und zugehöriges geistiges Eigentum, die sie an den Plattformbetreiber lizenziert. Sie ist nicht Verkäuferin, nicht Partei der Kundenverträge und hat keinen routinemäßigen Zugriff auf personenbezogene Daten der Plattformnutzer.",
+      "companyCode": "Unternehmenscode",
+      "vatCode": "USt-Nummer",
+      "registeredOffice": "Eingetragener Sitz",
+      "email": "E-Mail",
+      "businessEmail": "Geschäftliche E-Mail",
+      "representedBy": "Vertreten durch",
+      "director": "Direktor",
+      "krs": "KRS",
+      "nip": "NIP",
+      "regon": "REGON",
+      "euVat": "EU-USt",
+      "representation": "Vertretung",
+      "privacyContact": "Datenschutzkontakt",
+      "dpoLine": "Ein Datenschutzbeauftragter ist nicht bestellt. Datenschutzfragen: info@labourmarket.ai.",
+      "openSourceNote": "Die Plattform enthält Open-Source-Komponenten, die unter ihren eigenen Lizenzen verbleiben und keinem der beiden Unternehmen gehören."
     }
   },
   "instructions": {
@@ -6798,7 +6856,7 @@
     "receivedTitle": "Anfrage erhalten",
     "receivedBody": "Wir haben Ihren Bedarf erhalten und bewahren ihn für die Nachverfolgung mit Ihnen auf. Um ihn anzusehen und zu verwalten, erstellen Sie unten ein Konto oder melden Sie sich an.",
     "partnerRouteTitle": "Für Baubedarfe — ein Weg über Partnerunternehmen",
-    "partnerRouteBody": "Wenn noch kein passendes direktes Arbeitskraft-Match verfügbar ist, empfehlen wir bei Baubedarfen möglicherweise zuerst den Kontakt zu unseren Partnerunternehmen — UAB Nonstop Group (LT) und Labour Market AI Sp. z o.o. (PL). Das kann helfen, Dokumente, Verantwortlichkeiten und Onboarding schneller zu koordinieren und über Unternehmen, die bereits mit Bauteams arbeiten, früher Arbeitskräfte zu finden. Es ist ein von Menschen koordinierter Weg, und Partnerunternehmen sind nur eine der Optionen."
+    "partnerRouteBody": "Wenn noch keine passende direkte Arbeitskraft verfügbar ist, können wir für Bauanfragen zunächst empfehlen, unsere Partnerin UAB „Nonstop Group“ (LT) — die Betreiberin der Plattform — zu kontaktieren. Das hilft, Dokumente, Zuständigkeiten und Onboarding schneller abzustimmen, wobei ein Mensch jeden Schritt koordiniert."
   },
   "candidatePool": {
     "title": "Kandidatenpool",

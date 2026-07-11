@@ -4008,7 +4008,10 @@
     "about": "Apie",
     "contact": "Kontaktai",
     "rights": "Visos teisės saugomos.",
-    "rexora": "Sukurta Rexora"
+    "rexora": "Sukurta Rexora",
+    "operatedBy": "LabourMarket.ai platformą valdo ir jos komercines paslaugas teikia UAB „Nonstop Group“. LabourMarket.ai programinė įranga ir susijusi intelektinė nuosavybė priklauso Labour Market AI Sp. z o.o. ir yra naudojama UAB „Nonstop Group“ pagal licenciją.",
+    "ipNotice": "Intelektinės nuosavybės teisės. Platformą pagal licenciją valdo UAB „Nonstop Group“.",
+    "legalNotice": "Teisinė informacija"
   },
   "pages": {
     "workers": {
@@ -4208,12 +4211,46 @@
       "reviewNote": "Šios taisyklės aprašo, kaip platforma iš tikrųjų veikia šiandien. Galutinis privalomųjų dokumentų teisinis tekstas dar ruošiamas ir prieš pradedant mokamas paslaugas jį peržiūrės savininkas ir teisininkas."
     },
     "terms": {
-      "title": "Naudojimo sąlygos"
+      "title": "Naudojimo sąlygos",
+      "sections": [
+        {
+          "heading": "Su kuo sudarote sutartį",
+          "items": [
+            "Visas platformos paslaugas komerciškai teikia ir parduoda UAB „Nonstop Group“, įmonės kodas 302676973, PVM kodas LT100010790613, registruota buveinė Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lietuva.",
+            "Jūsų sutartis dėl bet kurios platformos paslaugos sudaroma su UAB „Nonstop Group“. Sąskaitas išrašo ir mokėjimus gauna UAB „Nonstop Group“.",
+            "Labour Market AI Sp. z o.o. (Varšuva, Lenkija; KRS 0001218752) priklauso LabourMarket.ai programinė įranga, prekės ženklas ir susijusi intelektinė nuosavybė, kurią ji licencijuoja UAB „Nonstop Group“. Ji nėra jūsų sutarties šalis."
+          ]
+        },
+        {
+          "heading": "Taikoma teisė ir ginčai",
+          "items": [
+            "Šioms sąlygoms ir kiekvienai klientų sutarčiai taikoma Lietuvos Respublikos teisė, o ginčus sprendžia kompetentingi Lietuvos teismai, išskyrus atvejus, kai privalomos vartotojų, darbo, duomenų apsaugos ar kitos taikytinos teisės normos suteikia jums neatimamų teisių ar kitą teismą.",
+            "Jeigu esate vartotojas, visada išsaugote savo gyvenamosios valstybės privalomas teises."
+          ]
+        },
+        {
+          "heading": "Kas platforma yra ir kuo ji nėra",
+          "items": [
+            "Platforma padeda rasti, pristatyti ir koordinuoti darbo rinkos galimybes dalyvaujant žmogui operatoriui.",
+            "Naudojimasis platforma savaime nesukuria darbo santykių ir nėra darbo ar darbuotojų garantija.",
+            "Darbuotojų profiliai, CV ir kontaktai perduodami tik pagal platformos sutikimų taisykles — žr. Privatumo politiką."
+          ]
+        }
+      ]
     },
     "privacy": {
       "title": "Privatumo politika",
       "intro": "Šis puslapis paprastais žodžiais paaiškina, kokius asmens duomenis naudoja Labour Market AI, kodėl juos naudoja ir kokias teises turite. Jis aprašo platformą tokią, kokia ji veikia šiandien, kol mokėjimai neaktyvūs.",
       "sections": [
+        {
+          "heading": "Kas atsako už jūsų duomenis",
+          "items": [
+            "LabourMarket.ai platformos duomenų valdytoja yra UAB „Nonstop Group“, įmonės kodas 302676973, registruota buveinė Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lietuva.",
+            "Privatumo kontaktas: info@labourmarket.ai. Duomenų apsaugos pareigūnas nepaskirtas.",
+            "Labour Market AI Sp. z o.o. (Varšuva, Lenkija) priklauso platformos programinė įranga ir prekės ženklas, kuriuos ji licencijuoja UAB „Nonstop Group“. IP nuosavybė nesuteikia jai prieigos prie jūsų asmens duomenų: ji neturi įprastinės prieigos prie produkcijos duomenų bazės, profilių, CV, kontaktų ar dokumentų.",
+            "Turite teisę pateikti skundą priežiūros institucijai; pagal valdytojos buveinę tai — Valstybinė duomenų apsaugos inspekcija (VDAI)."
+          ]
+        },
         {
           "heading": "Kokius duomenis platforma naudoja",
           "items": [
@@ -4273,10 +4310,8 @@
       ],
       "pendingTitle": "Dar laukia galutinio teisinio teksto:",
       "pendingItems": [
-        "Duomenų valdytojo tapatybė ir kontaktiniai duomenys.",
-        "Įvardytas teisinis pagrindas kiekvienam tvarkymo tikslui.",
         "Tikslūs kiekvienos duomenų kategorijos saugojimo terminai.",
-        "Privalomoji šios politikos versija."
+        "Privaloma, teisininko peržiūrėta šios politikos ir įvardytų teisinių pagrindų versija."
       ]
     },
     "cookies": {
@@ -4521,6 +4556,29 @@
           }
         }
       }
+    },
+    "legalNotice": {
+      "title": "Teisinė informacija",
+      "intro": "Juridiniai asmenys, stovintys už LabourMarket.ai platformos. LabourMarket.ai yra platformos ir prekės ženklo pavadinimas, ne juridinis asmuo.",
+      "operatorHeading": "Platformos operatorė ir pardavėja",
+      "operatorRole": "Valdo platformą, teikia ir parduoda visas komercines paslaugas, sudaro sutartis su klientais, išrašo sąskaitas, gauna mokėjimus, teikia klientų aptarnavimą ir yra pagrindinė duomenų valdytoja.",
+      "ipOwnerHeading": "Intelektinės nuosavybės savininkė ir licencijos davėja",
+      "ipOwnerRole": "Jai priklauso LabourMarket.ai programinė įranga, prekės ženklas ir susijusi intelektinė nuosavybė, kurią ji licencijuoja platformos operatorei. Ji nėra pardavėja, nėra klientų sutarčių šalis ir neturi įprastinės prieigos prie platformos vartotojų asmens duomenų.",
+      "companyCode": "Įmonės kodas",
+      "vatCode": "PVM kodas",
+      "registeredOffice": "Registruota buveinė",
+      "email": "El. paštas",
+      "businessEmail": "Verslo el. paštas",
+      "representedBy": "Atstovauja",
+      "director": "Direktorius",
+      "krs": "KRS",
+      "nip": "NIP",
+      "regon": "REGON",
+      "euVat": "ES PVM",
+      "representation": "Atstovavimas",
+      "privacyContact": "Privatumo kontaktas",
+      "dpoLine": "Duomenų apsaugos pareigūnas nepaskirtas. Privatumo klausimai: info@labourmarket.ai.",
+      "openSourceNote": "Platformoje naudojami atvirojo kodo komponentai lieka galioti pagal jų pačių licencijas ir nepriklauso nė vienai iš įmonių."
     }
   },
   "instructions": {
@@ -6798,7 +6856,7 @@
     "receivedTitle": "Poreikis gautas",
     "receivedBody": "Gavome jūsų poreikį ir laikome jį tolesniam kontaktui su jumis. Kad matytumėte ir tvarkytumėte jį, susikurkite paskyrą arba prisijunkite žemiau.",
     "partnerRouteTitle": "Statybų poreikiams — partnerių įmonių kelias",
-    "partnerRouteBody": "Jei tinkamo tiesioginio darbuotojų atitikimo platformoje dar nėra, statybų poreikiams pirmiausia galime rekomenduoti susisiekti su mūsų partnerių įmonėmis — UAB „Nonstop Group“ (LT) ir „Labour Market AI Sp. z o.o.“ (PL). Taip galime padėti greičiau suderinti dokumentus, atsakomybes ir įvedimą bei greičiau rasti komandą per įmones, kurios jau dirba su statybų komandomis. Tai — žmogaus koordinuojamas kelias, o partnerių įmonės — tik vienas iš galimų variantų."
+    "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų poreikiams pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui."
   },
   "candidatePool": {
     "title": "Kandidatų telkinys",

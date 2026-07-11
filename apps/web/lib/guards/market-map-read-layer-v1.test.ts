@@ -194,6 +194,6 @@ describe("NO new DB migration in this PR", () => {
     // SECURITY DEFINER RPC (submit_company_need_public_v1) granted to anon;
     // customer_requests untouched; DRAFT needs-human-gate, owner-gated apply
     // (NOT part of the market-map read layer, which stays pure TS).
-    expect(count).toBeLessThanOrEqual(117);
+    expect(count).toBeLessThanOrEqual(118);
   });
 });

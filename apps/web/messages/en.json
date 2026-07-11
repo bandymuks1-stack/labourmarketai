@@ -4008,7 +4008,10 @@
     "about": "About",
     "contact": "Contact",
     "rights": "All rights reserved.",
-    "rexora": "Created by Rexora"
+    "rexora": "Created by Rexora",
+    "operatedBy": "LabourMarket.ai is operated and commercially provided by UAB “Nonstop Group”. The LabourMarket.ai software and related intellectual property are owned by Labour Market AI Sp. z o.o. and used by UAB “Nonstop Group” under licence.",
+    "ipNotice": "Intellectual property rights. The platform is operated under licence by UAB “Nonstop Group”.",
+    "legalNotice": "Legal notice"
   },
   "pages": {
     "workers": {
@@ -4208,12 +4211,46 @@
       "reviewNote": "These rules describe how the platform actually behaves today. The final legal wording of the binding documents is still being prepared and will be reviewed by the owner and a lawyer before any paid services begin."
     },
     "terms": {
-      "title": "Terms of Service"
+      "title": "Terms of Service",
+      "sections": [
+        {
+          "heading": "Who you contract with",
+          "items": [
+            "All platform services are provided commercially and sold by UAB “Nonstop Group”, company code 302676973, VAT LT100010790613, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania.",
+            "Your contract for any platform service is concluded with UAB “Nonstop Group”. Invoices are issued by and payments are received by UAB “Nonstop Group”.",
+            "Labour Market AI Sp. z o.o. (Warsaw, Poland; KRS 0001218752) owns the LabourMarket.ai software, brand and related intellectual property and licenses it to UAB “Nonstop Group”. It is not a party to your contract."
+          ]
+        },
+        {
+          "heading": "Governing law and disputes",
+          "items": [
+            "These terms and every customer contract are governed by the law of the Republic of Lithuania, and disputes are resolved by the competent Lithuanian courts, except where mandatory consumer, employment, data-protection or other applicable law gives you rights or a forum that cannot be taken away.",
+            "If you are a consumer, you always keep the mandatory rights of the country where you live."
+          ]
+        },
+        {
+          "heading": "What the platform is and is not",
+          "items": [
+            "The platform supports finding, presenting and coordinating labour-market opportunities with a human operator involved.",
+            "Using the platform does not by itself create an employment relationship and does not promise work or workers.",
+            "Worker profiles, CVs and contact details are shared only under the platform's consent rules — see the Privacy Policy."
+          ]
+        }
+      ]
     },
     "privacy": {
       "title": "Privacy Policy",
       "intro": "This page explains in plain language what personal data Labour Market AI uses, why it uses it, and what rights you have. It describes the platform as it works today, before payments are active.",
       "sections": [
+        {
+          "heading": "Who is responsible for your data",
+          "items": [
+            "The data controller of the LabourMarket.ai platform is UAB “Nonstop Group”, company code 302676973, registered office Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania.",
+            "Privacy contact: info@labourmarket.ai. A data protection officer is not appointed.",
+            "Labour Market AI Sp. z o.o. (Warsaw, Poland) owns the platform software and brand and licenses them to UAB “Nonstop Group”. IP ownership gives it no access to your personal data: it has no routine access to the production database, profiles, CVs, contacts or documents.",
+            "You have the right to lodge a complaint with your supervisory authority; for the controller's establishment this is the Lithuanian State Data Protection Inspectorate (VDAI)."
+          ]
+        },
         {
           "heading": "What data the platform uses",
           "items": [
@@ -4273,10 +4310,8 @@
       ],
       "pendingTitle": "Still waiting for final legal wording:",
       "pendingItems": [
-        "The identity and contact details of the data controller.",
-        "The named legal basis for each processing purpose.",
         "Exact retention periods for each data category.",
-        "The binding version of this policy."
+        "The binding, lawyer-reviewed version of this policy and of the named legal bases."
       ]
     },
     "cookies": {
@@ -4521,6 +4556,29 @@
           }
         }
       }
+    },
+    "legalNotice": {
+      "title": "Legal Notice",
+      "intro": "The legal entities behind the LabourMarket.ai platform. LabourMarket.ai is a platform and brand name, not a legal entity.",
+      "operatorHeading": "Platform operator and seller",
+      "operatorRole": "Operates the platform, provides and sells all commercial services, concludes customer contracts, issues invoices, receives payments, provides customer support and acts as the primary data controller.",
+      "ipOwnerHeading": "IP owner and licensor",
+      "ipOwnerRole": "Owns the LabourMarket.ai software, brand and related intellectual property and licenses it to the platform operator. Is not the seller, not a party to customer contracts and has no routine access to platform users' personal data.",
+      "companyCode": "Company code",
+      "vatCode": "VAT code",
+      "registeredOffice": "Registered office",
+      "email": "Email",
+      "businessEmail": "Business email",
+      "representedBy": "Represented by",
+      "director": "Director",
+      "krs": "KRS",
+      "nip": "NIP",
+      "regon": "REGON",
+      "euVat": "EU VAT",
+      "representation": "Representation",
+      "privacyContact": "Privacy contact",
+      "dpoLine": "A data protection officer is not appointed. Privacy questions: info@labourmarket.ai.",
+      "openSourceNote": "The platform includes open-source components that remain under their respective licences and are not owned by either company."
     }
   },
   "instructions": {
@@ -6798,7 +6856,7 @@
     "receivedTitle": "Request received",
     "receivedBody": "We've received your need and are keeping it for follow-up with you. To view and manage it, create an account or sign in below.",
     "partnerRouteTitle": "For construction needs — a partner-company route",
-    "partnerRouteBody": "If a suitable direct worker match isn't available yet, for construction needs we may first recommend contacting our partner companies — UAB Nonstop Group (LT) and Labour Market AI Sp. z o.o. (PL). This can help coordinate documents, responsibilities and onboarding faster, and find workers sooner through companies already working with construction teams. It's a human-coordinated route, and partner companies are just one of the options."
+    "partnerRouteBody": "If a suitable direct worker match isn't available yet, for construction needs we may first recommend contacting our partner company UAB “Nonstop Group” (LT) — the platform's operator. This can help coordinate documents, responsibilities and onboarding faster, with a human coordinating each step."
   },
   "candidatePool": {
     "title": "Candidate pool",

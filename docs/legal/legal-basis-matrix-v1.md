@@ -21,22 +21,21 @@ Special-category data (Art. 9): not requested anywhere; free-text fields
 (bio, journal) may incidentally contain what a user writes — mitigations:
 default-private, no indexing, disclosure whitelist has no free-text field.
 
-## Controller identity (UNRESOLVED — owner action)
+## Controller identity (RESOLVED 2026-07-11 — owner directive, pending lawyer confirmation)
 
-The repo/product names no data controller. The privacy pages honestly list
-"identity and contact details of the data controller" as pending. The only
-named legal entities anywhere are partner-route references: "UAB Nonstop
-Group (LT)" and "Labour Market AI Sp. z o.o. (PL)". Which entity (if
-either) is the controller is NOT decided in code and is NOT invented here.
+The owner designated **UAB „Nonstop Group“** (company code 302676973,
+Mūšos g. 2C, Aukštikalnių k., LT-39103 Pasvalio r. sav., Lithuania) as the
+PRIMARY DATA CONTROLLER of the LabourMarket.ai platform, and
+**Labour Market AI Sp. z o.o.** (KRS 0001218752, Warsaw) as IP owner and
+licensor WITHOUT any routine access to platform personal data (see
+corporate-identity-source-of-truth-v1.md and
+entity-role-and-data-access-matrix-v1.md). The Privacy Policy, the consent
+text registry (version 2026-07-11.v2) and the public legal notice now name
+the controller. Remaining for the lawyer: confirm the wording and the
+final legal-basis mapping; retention periods still open.
 
-Consequence applied in this build (fail closed): no outward disclosure
-execution surface ships; `record_personal_data_disclosure` exists as the
-mandatory gate but no UI calls it, so no real transfer to a third party can
-occur before the owner fixes the controller identity and the privacy texts
-get final legal review.
-
-**One concrete decision for the owner:** designate the controller entity
-(recommended: the entity that operates the Vercel/Supabase accounts and
-will sign company contracts — if that is "Labour Market AI Sp. z o.o.",
-say so), add its name, registered address and a privacy contact email to
-`legal.privacy` texts, and remove those items from `pendingItems`.
+Historical note: until 2026-07-11 the controller identity was undeclared
+and this document blocked outward disclosure execution. The technical
+fail-closed gate (record_personal_data_disclosure with no UI caller)
+REMAINS until the lawyer review completes — naming the controller does not
+by itself switch on data transfers.

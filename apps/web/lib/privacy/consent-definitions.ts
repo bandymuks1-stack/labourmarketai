@@ -50,6 +50,8 @@ export interface ConsentTextBlocks {
   readonly freedom: string;
   /** How to withdraw and what withdrawal does / does not do. */
   readonly withdrawal: string;
+  /** Who the data controller is (GDPR Art. 13(1)(a)) and who is NOT. */
+  readonly controller: string;
 }
 
 export interface ConsentDefinition {
@@ -79,7 +81,7 @@ export type DisclosableField = (typeof DISCLOSABLE_FIELDS)[number];
 
 export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
   purpose: "profile_discoverability",
-  version: "2026-07-11.v1",
+  version: "2026-07-11.v2",
   recipientCategory:
     "Registered and signed-in companies and staffing agencies on LabourMarket.ai",
   dataCategories: [
@@ -106,6 +108,8 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
         "Šis pasirinkimas nėra būtinas paskyrai, CV ar darbo žurnalui naudoti. Jo neįjungus profilis liks privatus.",
       withdrawal:
         "Sutikimą galite bet kada išjungti privatumo nustatymuose. Išjungus, profilis nebebus rodomas naujose įmonių paieškose.",
+      controller:
+        "Duomenų valdytoja — UAB „Nonstop Group“ (įmonės kodas 302676973, Lietuva). Privatumo kontaktas: info@labourmarket.ai. Programinės įrangos savininkė Labour Market AI Sp. z o.o. jūsų asmens duomenų negauna.",
     },
     en: {
       title: "Allow companies to find my professional profile",
@@ -119,6 +123,8 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
         "This choice is not required to use your account, CV or work journal. If you do not enable it, your profile stays private.",
       withdrawal:
         "You can switch this off at any time in your privacy settings. Once switched off, your profile no longer appears in new company searches.",
+      controller:
+        "The data controller is UAB “Nonstop Group” (company code 302676973, Lithuania). Privacy contact: info@labourmarket.ai. The software owner Labour Market AI Sp. z o.o. does not receive your personal data.",
     },
     ru: {
       title: "Разрешить компаниям находить мой профессиональный профиль",
@@ -132,6 +138,8 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
         "Эта настройка не обязательна для использования аккаунта, CV или рабочего журнала. Если вы её не включите, профиль останется приватным.",
       withdrawal:
         "Вы можете отключить согласие в любой момент в настройках приватности. После отключения профиль больше не показывается в новых поисках компаний.",
+      controller:
+        "Контролёр данных — UAB «Nonstop Group» (код компании 302676973, Литва). Контакт по приватности: info@labourmarket.ai. Владелец программного обеспечения Labour Market AI Sp. z o.o. ваши персональные данные не получает.",
     },
     nl: {
       title: "Bedrijven toestaan mijn professionele profiel te vinden",
@@ -145,6 +153,8 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
         "Deze keuze is niet vereist om uw account, cv of werkdagboek te gebruiken. Als u haar niet inschakelt, blijft uw profiel privé.",
       withdrawal:
         "U kunt dit op elk moment uitzetten in uw privacy-instellingen. Daarna verschijnt uw profiel niet meer in nieuwe zoekopdrachten van bedrijven.",
+      controller:
+        "De verwerkingsverantwoordelijke is UAB “Nonstop Group” (bedrijfscode 302676973, Litouwen). Privacycontact: info@labourmarket.ai. De software-eigenaar Labour Market AI Sp. z o.o. ontvangt uw persoonsgegevens niet.",
     },
     de: {
       title: "Unternehmen erlauben, mein berufliches Profil zu finden",
@@ -158,13 +168,15 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
         "Diese Auswahl ist für die Nutzung Ihres Kontos, Lebenslaufs oder Arbeitstagebuchs nicht erforderlich. Ohne sie bleibt Ihr Profil privat.",
       withdrawal:
         "Sie können die Einwilligung jederzeit in den Datenschutzeinstellungen deaktivieren. Danach erscheint Ihr Profil nicht mehr in neuen Unternehmenssuchen.",
+      controller:
+        "Verantwortliche für die Datenverarbeitung ist die UAB „Nonstop Group“ (Unternehmenscode 302676973, Litauen). Datenschutzkontakt: info@labourmarket.ai. Die Softwareeigentümerin Labour Market AI Sp. z o.o. erhält Ihre personenbezogenen Daten nicht.",
     },
   },
 };
 
 export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
   purpose: "employer_data_disclosure",
-  version: "2026-07-11.v1",
+  version: "2026-07-11.v2",
   recipientCategory:
     "One specific company or agency named in the confirmation, for one specific need, offer, booking or application",
   dataCategories: [
@@ -185,6 +197,8 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
         "Perdavimas įvyksta tik po jūsų aktyvaus patvirtinimo. Nepatvirtinus, duomenys įmonei neperduodami, o jūsų paskyra veikia toliau.",
       withdrawal:
         "Leidimą galite atšaukti privatumo nustatymuose. Atšaukus, nauji perdavimai sustabdomi ir platformos sugeneruotos prieigos nuorodos panaikinamos, tačiau įmonė galėjo matyti duomenis, kol leidimas galiojo — apie tai informuojame sąžiningai.",
+      controller:
+        "Perdavimą vykdo duomenų valdytoja UAB „Nonstop Group“ (įmonės kodas 302676973, Lietuva). Privatumo kontaktas: info@labourmarket.ai. Duomenys perduodami tik patvirtinime nurodytai įmonei — ne Labour Market AI Sp. z o.o.",
     },
     en: {
       title: "Confirm data transfer to a company",
@@ -198,6 +212,8 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
         "The transfer happens only after your active confirmation. Without it, no data is passed to the company and your account keeps working.",
       withdrawal:
         "You can revoke this permission in your privacy settings. New transfers stop and platform-generated access links are cancelled, but the company may have seen the data while the permission was valid — we state this honestly.",
+      controller:
+        "The transfer is performed by the data controller UAB “Nonstop Group” (company code 302676973, Lithuania). Privacy contact: info@labourmarket.ai. Data goes only to the company named in the confirmation — not to Labour Market AI Sp. z o.o.",
     },
     ru: {
       title: "Подтвердить передачу данных компании",
@@ -211,6 +227,8 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
         "Передача происходит только после вашего активного подтверждения. Без него данные компании не передаются, а ваш аккаунт продолжает работать.",
       withdrawal:
         "Вы можете отозвать разрешение в настройках приватности. Новые передачи прекращаются, а созданные платформой ссылки доступа аннулируются, однако компания могла видеть данные, пока разрешение действовало — мы честно об этом сообщаем.",
+      controller:
+        "Передачу выполняет контролёр данных UAB «Nonstop Group» (код компании 302676973, Литва). Контакт по приватности: info@labourmarket.ai. Данные передаются только компании, названной в подтверждении, — не Labour Market AI Sp. z o.o.",
     },
     nl: {
       title: "Gegevensoverdracht aan een bedrijf bevestigen",
@@ -224,6 +242,8 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
         "De overdracht vindt alleen plaats na uw actieve bevestiging. Zonder bevestiging worden geen gegevens aan het bedrijf doorgegeven en blijft uw account gewoon werken.",
       withdrawal:
         "U kunt deze toestemming intrekken in uw privacy-instellingen. Nieuwe overdrachten stoppen en door het platform gegenereerde toegangslinks worden ingetrokken, maar het bedrijf kan de gegevens hebben gezien zolang de toestemming geldig was — dat vermelden wij eerlijk.",
+      controller:
+        "De overdracht wordt uitgevoerd door de verwerkingsverantwoordelijke UAB “Nonstop Group” (bedrijfscode 302676973, Litouwen). Privacycontact: info@labourmarket.ai. Gegevens gaan alleen naar het in de bevestiging genoemde bedrijf — niet naar Labour Market AI Sp. z o.o.",
     },
     de: {
       title: "Datenübermittlung an ein Unternehmen bestätigen",
@@ -237,6 +257,8 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
         "Die Übermittlung erfolgt nur nach Ihrer aktiven Bestätigung. Ohne sie werden keine Daten an das Unternehmen weitergegeben, und Ihr Konto funktioniert weiter.",
       withdrawal:
         "Sie können diese Erlaubnis in den Datenschutzeinstellungen widerrufen. Neue Übermittlungen stoppen und vom System erzeugte Zugriffslinks werden zurückgezogen; das Unternehmen kann die Daten jedoch gesehen haben, solange die Erlaubnis galt — das sagen wir ehrlich.",
+      controller:
+        "Die Übermittlung führt die Verantwortliche UAB „Nonstop Group“ (Unternehmenscode 302676973, Litauen) durch. Datenschutzkontakt: info@labourmarket.ai. Daten gehen nur an das in der Bestätigung genannte Unternehmen — nicht an die Labour Market AI Sp. z o.o.",
     },
   },
 };
