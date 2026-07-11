@@ -49,6 +49,7 @@ const ZERO: SpineCounts = {
   pendingIncomingBookings: 0,
   bookingResponsesNew: 0,
   pendingInvitations: 0,
+  openTaskAttention: 0,
 };
 
 /** Removed / preview / stub surfaces a module may never target (mirror of
@@ -225,6 +226,7 @@ describe("4. attention is spine-only (real counts, never a parallel number)", ()
       pendingIncomingBookings: 5,
       bookingResponsesNew: 6,
       pendingInvitations: 7,
+      openTaskAttention: 8,
     };
     const vm = buildControlRoomViewModel({
       role: "worker",

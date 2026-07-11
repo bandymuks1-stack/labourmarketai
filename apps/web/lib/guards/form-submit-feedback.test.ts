@@ -49,6 +49,11 @@ const NATIVE_NAV = new Set([
   // form → redirect to the conversation; feedback is the navigation itself
   // (failure lands on the honest ?notice=cannot_open messages state).
   "app/[locale]/dashboard/bookings/page.tsx",
+  // Work tasks (control room PR D) — create/status/edit forms are
+  // NATIVE-NAV server actions that ALWAYS redirect back to the tasks page
+  // with an honest ?notice= outcome (rendered as a role="status" banner);
+  // feedback is the navigation itself, exactly like the bookings page.
+  "app/[locale]/dashboard/tasks/page.tsx",
   "app/[locale]/dashboard/admin/matching/page.tsx", // start-conversation = same openDirectConversationAction → redirect; the review form on this page is the client MatchingWorkbenchReview (covered separately)
   "app/[locale]/dashboard/account/page.tsx", // logout POST
   // "submit draft for real" + agency-mode "offer" (audit PR4) — the

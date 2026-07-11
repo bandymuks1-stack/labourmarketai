@@ -51,6 +51,7 @@ const ZERO: SpineCounts = {
   pendingIncomingBookings: 0,
   bookingResponsesNew: 0,
   pendingInvitations: 0,
+  openTaskAttention: 0,
 };
 
 describe("1. the spine is the page's ONLY data source", () => {
@@ -105,6 +106,7 @@ describe("2. every rendered signal links its real clearing surface", () => {
       pendingIncomingBookings: 4,
       bookingResponsesNew: 5,
       pendingInvitations: 6,
+      openTaskAttention: 7,
     };
     const rows = buildActivityRows(counts);
     for (const row of rows) {

@@ -38,6 +38,7 @@ export default async function ProjectOperationsPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("projectOps");
+  const tTasks = await getTranslations("tasks");
 
   const supabase = await createClient();
   const {
@@ -197,6 +198,17 @@ export default async function ProjectOperationsPage({
         data={passport}
         responsibleWorkers={ops.workers.map((w) => ({ name: w.name }))}
       />
+      {/* Work tasks bridge (control room PR D) — navigation only: the tasks
+          page owns the project-scoped read (RLS) and degrades honestly until
+          the owner-gated work_tasks migration is applied. */}
+      <p className="text-sm" data-testid="ops-project-tasks-link">
+        <a
+          href={`/${locale}/dashboard/tasks?project=${id}`}
+          className="text-brand-blue hover:underline"
+        >
+          {tTasks("projectSection.link")} →
+        </a>
+      </p>
     </div>
   );
 }

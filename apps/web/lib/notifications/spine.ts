@@ -12,6 +12,7 @@ import {
   getServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { getTaskAttentionCounts } from "@/lib/tasks/tasks";
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import {
   SPINE_SIGNALS,
@@ -38,6 +39,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     pendingIncomingBookings,
     bookingResponsesNew,
     invitations,
+    taskAttention,
   ] = await Promise.all([
     getUnreadConversationCount(),
     getPendingIncomingRequestCount(),
@@ -45,6 +47,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     getPendingIncomingBookingCount(),
     getBookingResponsesNewCount(),
     listMyPendingWorkerInvitations(),
+    getTaskAttentionCounts(),
   ]);
   return {
     unreadConversations,
@@ -53,6 +56,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     pendingIncomingBookings,
     bookingResponsesNew,
     pendingInvitations: invitations.length,
+    openTaskAttention: taskAttention.total,
   };
 });
 

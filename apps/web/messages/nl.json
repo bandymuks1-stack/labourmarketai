@@ -19,7 +19,8 @@
       "incoming_service_requests": "Verdwijnt wanneer je de aanvraag beantwoordt.",
       "service_request_responses": "Verdwijnt wanneer je de pagina met dienstaanvragen opent.",
       "pending_bookings": "Verdwijnt wanneer je op het boekingsvoorstel reageert.",
-      "booking_responses": "Verdwijnt wanneer je de boekingenpagina opent."
+      "booking_responses": "Verdwijnt wanneer je de boekingenpagina opent.",
+      "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina."
     }
   },
   "commandFinder": {
@@ -3598,7 +3599,8 @@
         "incoming_service_requests": "Dienstaanvragen die op een reactie wachten",
         "service_request_responses": "Antwoorden op je aanvragen",
         "pending_bookings": "Boekingsvoorstellen die op een reactie wachten",
-        "booking_responses": "Antwoorden op je boekingsvoorstellen"
+        "booking_responses": "Antwoorden op je boekingsvoorstellen",
+        "open_task_attention": "Taken die aandacht vragen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -7487,6 +7489,88 @@
     "rights": {
       "notice": "Meer over uw rechten en gegevensverwerking:",
       "noticeLink": "privacyverklaring"
+    }
+  },
+  "tasks": {
+    "eyebrow": "Werktaken",
+    "title": "Taken",
+    "intro": "Uw werklijst: wat wacht, wat loopt en wat vastzit.",
+    "honestNote": "Alleen een interne lijst — een taak aanmaken verstuurt niets naar wie dan ook.",
+    "notAuthed": "Log in om uw taken te zien.",
+    "unavailable": "De takenmodule wordt voorbereid — nog niet beschikbaar. Zodra deze actief is, verschijnen uw taken hier.",
+    "loadError": "Taken konden niet worden geladen. Probeer de pagina te vernieuwen.",
+    "myEmpty": "Geen open taken — maak er hierboven een aan.",
+    "views": {
+      "label": "Weergave",
+      "my": "Mijn taken",
+      "board": "Bord"
+    },
+    "status": {
+      "todo": "Te doen",
+      "in_progress": "In uitvoering",
+      "blocked": "Geblokkeerd",
+      "done": "Klaar",
+      "cancelled": "Geannuleerd"
+    },
+    "priority": {
+      "low": "Laag",
+      "normal": "Normaal",
+      "high": "Hoog"
+    },
+    "flags": {
+      "overdue": "Verlopen",
+      "blocked": "Geblokkeerd"
+    },
+    "dueLabel": "Deadline",
+    "projectLinked": "Projecttaak",
+    "closed": {
+      "show": "Toon afgeronde",
+      "hide": "Verberg afgeronde",
+      "empty": "Nog geen afgeronde taken."
+    },
+    "board": {
+      "columnEmpty": "Geen taken in deze kolom."
+    },
+    "actions": {
+      "start": "Starten",
+      "complete": "Afronden",
+      "block": "Markeer als geblokkeerd",
+      "unblock": "Deblokkeren",
+      "cancel": "Annuleren",
+      "reopen": "Heropenen",
+      "details": "Details bewerken",
+      "save": "Opslaan"
+    },
+    "form": {
+      "title": "Nieuwe taak",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "Bijv. steigers bestellen voor de bouwplaats",
+      "descriptionLabel": "Omschrijving (optioneel)",
+      "priorityLabel": "Prioriteit",
+      "dueLabel": "Deadline (optioneel)",
+      "projectLabel": "Project (optioneel)",
+      "projectNone": "Geen project",
+      "assignSelfLabel": "Aan mij toewijzen",
+      "assignSelfHint": "Vink uit om de taak niet toe te wijzen — zichtbaar voor u en de projectmanagers.",
+      "submit": "Taak aanmaken"
+    },
+    "notice": {
+      "created": "Taak aangemaakt.",
+      "updated": "Taak bijgewerkt.",
+      "invalid": "Controleer de velden — de titel moet 3–160 tekens zijn.",
+      "needs_migration": "De takenmodule is nog niet actief — de wijziging is niet opgeslagen.",
+      "not_authorized": "U mag deze actie niet uitvoeren.",
+      "not_found": "Taak niet gevonden.",
+      "limit_reached": "Limiet voor open taken bereikt — rond eerst oudere taken af of annuleer ze.",
+      "error": "Opslaan mislukt. Probeer het opnieuw."
+    },
+    "projectTasks": {
+      "title": "Projecttaken",
+      "empty": "Dit project heeft nog geen taken.",
+      "back": "Alle taken"
+    },
+    "projectSection": {
+      "link": "Taken voor dit project"
     }
   }
 }

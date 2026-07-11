@@ -12,8 +12,8 @@ owner/provider action named in the gate register) · `NOT_STARTED`.
 |---|---|---|---|---|---|---|---|---|---|---|
 | A | Gap map + architecture | DONE | #704 / `36a18ff` | — (docs) | source audit | — | none | n/a | none | — |
 | B | Control room foundation | DONE | #705 / `3e568d2` | `/dashboard` (module registry + status strip + role grid; nav/command wired) | feature-availability registry, spine counts (request-cached single read), roles | RLS as today; badges spine-only | none | CI green; deployed via Vercel on merge | none | — |
-| C | Unified activity centre | IN_PROGRESS | this PR | `/dashboard/activity` + status-strip/bell "view all" links | notification spine (6 signals, one request-cached read) | RLS + existing seen RPCs; links-only, no fake mark-read | none (persistent feed + demand signals stay migration-gated) | CI + guard suite | events-table apply (optional, for feed/demand events) | merge, start PR E (planning) |
-| D | Work/task management | NOT_STARTED | — | `/dashboard/tasks` (planned) | new `tasks` table (gated) | `can_manage_project()` + assignee RLS | RED, human-gated | — | owner apply | degrading UI + migration PR |
+| C | Unified activity centre | DONE | #706 / `2b0742a` | `/dashboard/activity` + status-strip/bell "view all" links | notification spine (6 signals, one request-cached read) | RLS + existing seen RPCs; links-only, no fake mark-read | none (persistent feed + demand signals stay migration-gated) | CI green; deployed on merge | events-table apply (optional, for feed/demand events) | — |
+| D | Work/task management | GATED (UI merged path; table unapplied) | D1 this PR; D2 migration PR follows | `/dashboard/tasks` (my-tasks, board, create/edit/status); ops-page bridge | `work_tasks` table via 3 SECURITY DEFINER RPCs (unapplied); honest "preparing" state until applied; spine signal `open-task-attention` (0 pre-apply) | RLS SELECT creator/assignee/admin/`can_manage_project`; writes RPC-only (guard-pinned) | D2: RED, human-gated, rollback sibling | CI + guard suite | owner applies D2 via MCP + ledger entry | author D2 draft PR; then PR E |
 | E | Planning/calendar | NOT_STARTED | — | `/dashboard/planning` (planned) | bookings, projects, assignments | caller-scoped reads | none | — | none | agenda aggregation |
 | F | CRM/demand pipeline | NOT_STARTED | — | admin pipeline queue | lead-intake-model + public intakes | service-role + superadmin (unchanged) | none (contacts/ledger gated) | — | contacts/ledger apply (optional) | extend lead-intake-model |
 | G | Project ops + resources | NOT_STARTED | — | `/dashboard/projects/[id]/operations` | getProjectOperations + journal + gallery | RLS as today | issues/milestones gated | — | drafts apply | compose surface |
@@ -38,7 +38,21 @@ Results recorded here per PR as they run.
 |---|---|---|
 | A (docs-only) | migration-safety + quality (CI) | PASS — merged #704 |
 | B (control room) | typecheck, lint, vitest (530 files / 8353 tests), placeholders:check, check:i18n-debt, check:primary-route-smoke, check:public-seo-indexing, build | ALL PASS locally; CI green; merged #705 |
-| C (activity centre) | same suite — vitest 531 files / 8379 tests, primary-route-smoke 37 routes | ALL PASS locally; CI on PR |
+| C (activity centre) | same suite — vitest 531 files / 8379 tests, primary-route-smoke 37 routes | ALL PASS; CI green; merged #706 |
+| D1 (tasks repo-safe layer) | same suite — vitest 532 files / 8412 tests, primary-route-smoke 38 routes | ALL PASS locally; CI on PR |
+
+PR D contract (the D2 migration must match exactly): table `public.work_tasks`
+(id, project_id→projects, source_type/source_id pair check 'project|booking|demand|company',
+title 3..160, description ≤2000, status todo|in_progress|blocked|done|cancelled,
+priority low|normal|high, assignee_profile_id→profiles, created_by→profiles, due_at,
+created_at/updated_at, resolved_at). RLS SELECT creator/assignee/is_admin()/
+can_manage_project(project_id); INSERT/UPDATE/DELETE revoked. RPCs (SECURITY DEFINER,
+set search_path=public, revoke-then-grant-execute, outcome strings):
+`create_work_task_v1(p_title,p_description,p_priority,p_due_date,p_project_id,p_assign_to_self)`,
+`set_work_task_status_v1(p_task_id,p_status)` (resolved_at on done/cancelled),
+`update_work_task_v1(p_task_id,p_title,p_description,p_priority,p_due_date)`.
+v1 UI decisions: self-assign or unassigned only (no people-picker); comments → conversation
+spine and attachments → document axes in later slices; overdue = UTC calendar-day.
 
 PR C notes: `lib/dashboard/activity-centre.ts` pure view model inverts the registry's
 `attentionSignalIds` linkage (no duplicated labels/routes); `/dashboard/activity` renders one

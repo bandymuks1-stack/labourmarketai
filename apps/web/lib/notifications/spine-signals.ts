@@ -35,6 +35,11 @@ export interface SpineCounts {
   readonly bookingResponsesNew: number;
   /** Pending company/agency invitations addressed to this user's email. */
   readonly pendingInvitations: number;
+  /** Open work tasks needing attention (overdue or blocked) for the caller
+   *  (assignee or creator). State-derived like pending bookings — resolving
+   *  or rescheduling the task IS what clears it; 0 while the work_tasks
+   *  migration is unapplied (control room PR D). */
+  readonly openTaskAttention: number;
 }
 
 export interface SpineSignalDef {
@@ -100,6 +105,16 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
     type: "booking_responses",
     href: "/dashboard/bookings",
     count: (c) => c.bookingResponsesNew,
+  },
+  {
+    id: "open-task-attention",
+    type: "open_task_attention",
+    // Resolving / unblocking / rescheduling the task on the tasks page IS
+    // what clears this signal — the count is derived from current task state
+    // (like pending-bookings), never from a fake read marker. No featureKey:
+    // tasks is a module card, not a primary-nav tab (badge stays card-level).
+    href: "/dashboard/tasks",
+    count: (c) => c.openTaskAttention,
   },
 ];
 

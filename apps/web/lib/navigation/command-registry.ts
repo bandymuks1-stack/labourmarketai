@@ -552,6 +552,28 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // Work tasks (control room PR D) — the "my tasks" list + simple board.
+    // Route resolves through the module registry so it can never drift from
+    // the grid card. Degrades honestly until the D2 migration is applied.
+    id: "tasks",
+    route: getModuleRoute("tasks"),
+    audience: "public",
+    labels: {
+      en: "Tasks (my work list)",
+      lt: "Užduotys (mano darbų sąrašas)",
+      ru: "Задачи (мой список дел)",
+      nl: "Taken (mijn werklijst)",
+      de: "Aufgaben (meine Arbeitsliste)",
+    },
+    synonyms: {
+      en: ["tasks", "task", "todo", "to-do", "my tasks", "task board"],
+      lt: ["užduotys", "užduotis", "darbų sąrašas", "mano užduotys", "lenta"],
+      ru: ["задачи", "задача", "список дел", "мои задачи", "доска задач"],
+      nl: ["taken", "taak", "takenlijst", "mijn taken", "takenbord"],
+      de: ["aufgaben", "aufgabe", "aufgabenliste", "meine aufgaben", "aufgabenboard"],
+    },
+  },
+  {
     id: "bookings",
     route: getModuleRoute("bookings"),
     audience: "public",

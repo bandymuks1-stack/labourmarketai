@@ -43,6 +43,7 @@ export type DashboardModuleId =
   | "journal"
   | "profile"
   | "opportunities"
+  | "tasks"
   | "bookings"
   | "market_map"
   | "communication"
@@ -65,7 +66,8 @@ export type ModuleIconKey =
   | "documents"
   | "building"
   | "search"
-  | "bell";
+  | "bell"
+  | "checklist";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -143,6 +145,20 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
   },
 
   // ── Shared operational surfaces ──────────────────────────────────────
+  {
+    id: "tasks",
+    // Work tasks (control room PR D): every role gets the "my tasks" view;
+    // org roles additionally reach project-linked tasks through the same
+    // surface. Repo-safe layer — the page degrades honestly until the
+    // owner-gated work_tasks migration (D2) is applied.
+    surfaceRoute: "/dashboard/tasks",
+    labelKey: "tasks.title",
+    descriptionKey: "tasks.intro",
+    iconKey: "checklist",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+    attentionSignalIds: ["open-task-attention"],
+  },
   {
     id: "bookings",
     surfaceRoute: "/dashboard/bookings",
