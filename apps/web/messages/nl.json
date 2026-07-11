@@ -4,7 +4,8 @@
     "placeholder": "Typ wat je nodig hebt: CV, werkjournaal, ploeg, prijzen…",
     "inputLabel": "Zoek een pagina of actie",
     "resultsLabel": "Overeenkomende pagina’s",
-    "noResults": "Niets gevonden. Probeer een ander woord — bijv. CV, werkjournaal, ploeg, documenten, prijzen."
+    "noResults": "Niets gevonden. Probeer een ander woord — bijv. CV, werkjournaal, ploeg, documenten, prijzen.",
+    "shortcutHint": "Ctrl / ⌘ K"
   },
   "marketRecognition": {
     "title": "Wat bied je aan of wat heb je nodig?",
@@ -2979,6 +2980,10 @@
     "dashboard": {
       "topSlot": {
         "eyebrow": "Nu het belangrijkst"
+      },
+      "statusStrip": {
+        "title": "Wat nu op u wacht",
+        "allClear": "Er wacht op dit moment niets op uw aandacht."
       },
       "myZone": {
         "actionsHeading": "Wat je nu kunt doen",

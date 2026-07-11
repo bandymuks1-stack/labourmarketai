@@ -27,9 +27,17 @@
  * customer_requests record reviewed by a human (owner lock #1 flipped
  * together with command-finder.test.ts). Ids and synonyms stayed stable;
  * labels moved from "(information)" to truthful request-action phrasing.
+ *
+ * Control room PR B: entries whose destination is a dashboard MODULE now
+ * resolve their route through the one module registry
+ * (lib/dashboard/dashboard-module-registry.ts → getModuleRoute), so the
+ * finder can never drift to a different route than the control-room grid
+ * and the nav. Non-module destinations (marketing/legal pages, admin,
+ * anchors like the demand intake) keep their literal routes.
  */
 
 import type { ActiveLocale } from "@/lib/i18n/config";
+import { getModuleRoute } from "@/lib/dashboard/dashboard-module-registry";
 
 export type CommandAudience = "public" | "worker" | "company" | "admin";
 
@@ -59,7 +67,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // ── Person / worker surfaces ──────────────────────────────────────────
   {
     id: "profile",
-    route: "/dashboard/profile",
+    route: getModuleRoute("profile"),
     audience: "public",
     labels: {
       en: "My profile",
@@ -118,7 +126,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "work_journal",
-    route: "/dashboard/journal",
+    route: getModuleRoute("journal"),
     audience: "worker",
     labels: {
       en: "Work journal",
@@ -140,7 +148,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // "foto ataskaita / foto report" with the journal, where the mode lives.
   {
     id: "photo_report",
-    route: "/dashboard/journal",
+    route: getModuleRoute("journal"),
     audience: "worker",
     labels: {
       en: "Photo report (work journal)",
@@ -181,7 +189,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   {
     id: "skills",
     // Skills live on the profile (journal feeds them) — no separate page.
-    route: "/dashboard/profile",
+    route: getModuleRoute("profile"),
     audience: "worker",
     labels: {
       en: "Skills",
@@ -200,7 +208,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "find_work",
-    route: "/dashboard/opportunities",
+    route: getModuleRoute("opportunities"),
     audience: "worker",
     labels: {
       en: "Find work (opportunities)",
@@ -222,7 +230,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // is the closest real answer to what the user is asking about.
   {
     id: "transport",
-    route: "/dashboard/opportunities",
+    route: getModuleRoute("opportunities"),
     audience: "worker",
     labels: {
       en: "Transport (work conditions)",
@@ -241,7 +249,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "tools",
-    route: "/dashboard/opportunities",
+    route: getModuleRoute("opportunities"),
     audience: "worker",
     labels: {
       en: "Tools & equipment (work conditions)",
@@ -260,7 +268,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "accommodation",
-    route: "/dashboard/opportunities",
+    route: getModuleRoute("opportunities"),
     audience: "worker",
     labels: {
       en: "Accommodation (work conditions)",
@@ -281,7 +289,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // ── Company / organisation surfaces ───────────────────────────────────
   {
     id: "team_brigade",
-    route: "/dashboard/company",
+    route: getModuleRoute("company"),
     audience: "company",
     labels: {
       en: "Team & brigades (company workspace)",
@@ -400,7 +408,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // ── Services / marketplace loop ───────────────────────────────────────
   {
     id: "services",
-    route: "/dashboard/services",
+    route: getModuleRoute("services"),
     audience: "public",
     labels: {
       en: "Offer services",
@@ -419,7 +427,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "service_requests",
-    route: "/dashboard/service-requests",
+    route: getModuleRoute("service_requests"),
     audience: "public",
     labels: {
       en: "Find services & service requests",
@@ -445,7 +453,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // auto-assigned; the panel says so.
   {
     id: "recruiter_help",
-    route: "/dashboard/company",
+    route: getModuleRoute("company"),
     audience: "company",
     labels: {
       en: "Request recruiter / staffing help",
@@ -464,7 +472,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "accounting_help",
-    route: "/dashboard/company",
+    route: getModuleRoute("company"),
     audience: "company",
     labels: {
       en: "Request accounting help",
@@ -486,7 +494,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // documents room reachable for everyone (incl. WAGON 9 LT guidance).
   {
     id: "legal_help",
-    route: "/dashboard/company",
+    route: getModuleRoute("company"),
     audience: "company",
     labels: {
       en: "Request legal & document help",
@@ -505,7 +513,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "documents",
-    route: "/dashboard/documents",
+    route: getModuleRoute("documents"),
     audience: "public",
     labels: {
       en: "Documents",
@@ -526,7 +534,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // ── Communication / planning / map / account ──────────────────────────
   {
     id: "messages",
-    route: "/dashboard/communication",
+    route: getModuleRoute("communication"),
     audience: "public",
     labels: {
       en: "Messages",
@@ -545,7 +553,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "bookings",
-    route: "/dashboard/bookings",
+    route: getModuleRoute("bookings"),
     audience: "public",
     labels: {
       en: "Bookings & planning",
@@ -564,7 +572,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "market_map",
-    route: "/dashboard/market-map",
+    route: getModuleRoute("market_map"),
     audience: "public",
     labels: {
       en: "Market map",

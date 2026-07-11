@@ -4,7 +4,8 @@
     "placeholder": "Geben Sie ein, was Sie brauchen: Lebenslauf, Journal, Team, Preise…",
     "inputLabel": "Seite oder Aktion finden",
     "resultsLabel": "Passende Seiten",
-    "noResults": "Nichts gefunden. Versuchen Sie ein anderes Wort — z. B. Lebenslauf, Journal, Team, Dokumente, Preise."
+    "noResults": "Nichts gefunden. Versuchen Sie ein anderes Wort — z. B. Lebenslauf, Journal, Team, Dokumente, Preise.",
+    "shortcutHint": "Ctrl / ⌘ K"
   },
   "marketRecognition": {
     "title": "Was bieten Sie an oder was brauchen Sie?",
@@ -2979,6 +2980,10 @@
     "dashboard": {
       "topSlot": {
         "eyebrow": "Jetzt am wichtigsten"
+      },
+      "statusStrip": {
+        "title": "Was jetzt auf Sie wartet",
+        "allClear": "Im Moment wartet nichts auf Ihre Aufmerksamkeit."
       },
       "myZone": {
         "actionsHeading": "Was Sie jetzt tun können",

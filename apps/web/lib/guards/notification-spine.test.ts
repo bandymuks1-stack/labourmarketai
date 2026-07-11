@@ -210,14 +210,23 @@ describe("bell, badges and layout consume the one spine source", () => {
     expect(LAYOUT).toMatch(/<BottomNav badges=\{navBadges\}/);
   });
 
-  it("nav badges carry ONLY tabs whose surface clears on visit", () => {
+  it("nav badges carry ONLY tabs whose surface clears the signal", () => {
     // Doctrine (spine.ts): a badge that cannot clear is permanent noise.
-    // Today only Messages has a read model — adding another badge is a
-    // conscious catalogue change, so this pin must be updated with it.
+    // Control room PR B generalized the derivation: a tab is badged ONLY
+    // when a spine signal declares that tab's featureKey. Today exactly two
+    // signals do — unread messages (clears by reading the thread) and
+    // pending invitations (clears via the overview accept/decline card).
+    // Adding another featureKey is a conscious catalogue change, so this
+    // pin must be updated with it.
     const spine = read("lib/notifications/spine.ts");
-    expect(spine).toMatch(
-      /return \{ communication: counts\.unreadConversations \};/,
-    );
+    expect(spine).toMatch(/if \(!s\.featureKey\) continue;/);
+    const badged = SPINE_SIGNALS.filter((s) => s.featureKey)
+      .map((s) => `${s.id}→${s.featureKey}`)
+      .sort();
+    expect(badged).toEqual([
+      "pending-invitations→overview",
+      "unread-messages→communication",
+    ]);
   });
 
   it("panel empty state renders localized copy, never a hardcoded string", () => {

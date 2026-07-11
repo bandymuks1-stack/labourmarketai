@@ -36,9 +36,11 @@ describe("ActionCard is the single navigation-card pattern", () => {
   });
 
   it("is adopted by the reference grid and the navigation-card call sites", () => {
+    // Control room PR B: the reference grid is the registry-driven
+    // DashboardModuleGrid (the former MyZone grid + page-level marketplace
+    // cards folded into it) — the pattern's origin moved with the grid.
     for (const rel of [
-      "components/app/my-zone.tsx",
-      "app/[locale]/dashboard/page.tsx",
+      "components/app/dashboard/dashboard-module-grid.tsx",
       "app/[locale]/dashboard/service-requests/page.tsx",
       "app/[locale]/dashboard/bookings/page.tsx",
     ]) {

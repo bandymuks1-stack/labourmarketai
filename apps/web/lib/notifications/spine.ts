@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import {
   getBookingResponsesNewCount,
@@ -11,7 +13,10 @@ import {
 } from "@/lib/marketplace/service-requests";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import type { FeatureKey } from "@/lib/config/feature-availability";
-import type { SpineCounts } from "@/lib/notifications/spine-signals";
+import {
+  SPINE_SIGNALS,
+  type SpineCounts,
+} from "@/lib/notifications/spine-signals";
 
 /**
  * Notification spine v1 — IO half. Loads every spine count in one parallel
@@ -19,8 +24,13 @@ import type { SpineCounts } from "@/lib/notifications/spine-signals";
  * slot use, so the bell, the badges and the pages can never disagree about
  * what needs attention. Every helper is defensive (returns 0 / empty on any
  * missing-data state), so the auth shell never breaks on a signal read.
+ *
+ * Request-cached (React `cache`): the dashboard layout (bell + nav badges)
+ * and the overview page (status strip + module-card badges, control room
+ * PR B) share ONE read per request instead of issuing the count queries
+ * twice.
  */
-export async function getSpineCounts(): Promise<SpineCounts> {
+export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
   const [
     unreadConversations,
     pendingIncomingServiceRequests,
@@ -44,14 +54,24 @@ export async function getSpineCounts(): Promise<SpineCounts> {
     bookingResponsesNew,
     pendingInvitations: invitations.length,
   };
-}
+});
 
-/** Nav badges from the same spine counts. Only the Messages tab carries a
- *  badge today: its unread model clears by reading the thread. Other tabs
- *  stay badge-free until their surface has a seen-model that clears on
- *  visit — a badge that cannot clear is permanent noise, not a signal. */
+/** Nav badges from the same spine counts, derived from the signal catalogue:
+ *  a tab is badged ONLY when a spine signal declares that tab's featureKey,
+ *  and only signals whose own clearing surface is that tab may do so
+ *  (Messages: unread clears by reading the thread; Overview: a pending
+ *  invitation clears via the accept/decline card on the overview). A badge
+ *  that cannot clear is permanent noise, not a signal — adding a featureKey
+ *  to a signal is a conscious catalogue change, guard-pinned. */
 export function buildNavBadges(
   counts: SpineCounts,
 ): Partial<Record<FeatureKey, number>> {
-  return { communication: counts.unreadConversations };
+  const badges: Partial<Record<FeatureKey, number>> = {};
+  for (const s of SPINE_SIGNALS) {
+    if (!s.featureKey) continue;
+    const count = s.count(counts);
+    if (count <= 0) continue;
+    badges[s.featureKey] = (badges[s.featureKey] ?? 0) + count;
+  }
+  return badges;
 }

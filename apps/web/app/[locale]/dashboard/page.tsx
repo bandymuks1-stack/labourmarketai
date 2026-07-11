@@ -8,7 +8,8 @@ import { DashboardChainActions } from "@/components/app/dashboard-chain-actions"
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
-import { ActionCard } from "@/components/app/action-card";
+import { DashboardModuleGrid } from "@/components/app/dashboard/dashboard-module-grid";
+import { DashboardStatusStrip } from "@/components/app/dashboard/dashboard-status-strip";
 import { MyZone, MyZoneImproves } from "@/components/app/my-zone";
 import { PrivacyStatusCard } from "@/components/app/privacy-status-card";
 import { getOwnCompany } from "@/lib/company/company-setup";
@@ -34,6 +35,8 @@ import {
   type NextAction,
 } from "@/lib/dashboard/next-action";
 import { decideTopSlot } from "@/lib/dashboard/top-slot";
+import { buildControlRoomViewModel } from "@/lib/dashboard/control-room-view-model";
+import { getSpineCounts } from "@/lib/notifications/spine";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { type Role } from "@/lib/auth/actions";
 import { PremiumHubScreen } from "@/components/app/premium-hub/premium-hub-screen";
@@ -261,52 +264,19 @@ export default async function DashboardOverviewPage({
       </Link>
     ) : null;
 
-  // Always-visible marketplace access. The two halves of the service loop are
-  // otherwise only reachable through the count-gated action cards above — and
-  // /dashboard/services (where a provider publishes an offering) had NO UI entry
-  // at all. This calm, low-emphasis block (never an urgent badge, never a fake
-  // count) gives a first-time provider a path to publish and a first-time buyer a
-  // path to discover, closing the loop's reachability gap. Real navigation only.
-  const marketplaceAccess = (
-    <section
-      data-testid="dashboard-marketplace-access"
-      className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
-    >
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-        {tMarket("hubTitle")}
-      </span>
-      {/* Shared ActionCard pattern (audit PR8) — same visual grammar as the
-          MyZone grid, so "tap to go do" reads identically everywhere. */}
-      <div className="grid gap-2 sm:grid-cols-2">
-        <ActionCard
-          href="/dashboard/services"
-          testid="dashboard-marketplace-offer"
-          title={tMarket("hubOffer")}
-          description={tMarket("hubOfferNote")}
-        />
-        <ActionCard
-          href="/dashboard/service-requests"
-          testid="dashboard-marketplace-find"
-          title={tMarket("hubFind")}
-          description={tMarket("hubFindNote")}
-        />
-        {/* Bridge v1 (§17.2 first bridge): the demand entry point joins the
-            hub so both halves of the ONE supply/demand system are reachable
-            from one place. Worker-only — opportunities is the worker's
-            demand-consumption surface; org roles post demand through the
-            demand-intake section on their own dashboard. Labels stay
-            distinct per concept-map-v1 (no naming merge — owner decision). */}
-        {role === "worker" && (
-          <ActionCard
-            href="/dashboard/opportunities"
-            testid="dashboard-marketplace-opportunities"
-            title={tMarket("hubOpportunities")}
-            description={tMarket("hubOpportunitiesNote")}
-          />
-        )}
-      </div>
-    </section>
-  );
+  // Control room v1 (PR B): ONE registry-driven view model feeds the status
+  // strip + the role-specific grid. The former hard-coded marketplaceAccess
+  // cards (services / service-requests / worker-gated opportunities) are now
+  // registry entries rendered by the grid — same real destinations, one
+  // source of truth. getSpineCounts() is request-cached, so this REUSES the
+  // layout's bell/badge read instead of issuing a second set of count
+  // queries; every badge and strip count traces to those spine counts.
+  const spineCounts = await getSpineCounts();
+  const controlRoom = buildControlRoomViewModel({
+    role,
+    counts: spineCounts,
+    hasCompany,
+  });
 
   // Shared header (role chip + greeting). The chip names the CURRENT workspace,
   // never a permanent label.
@@ -417,6 +387,10 @@ export default async function DashboardOverviewPage({
           counts={{ pending: pendingReview }}
         />
 
+        {/* Control room v1: compact spine-driven status strip — the same
+            counts as the bell, each chip linking its clearing surface. */}
+        <DashboardStatusStrip entries={controlRoom.statusEntries} />
+
         {/* Real pending states — provider inbox, own outgoing requests,
             booking responses. Count-gated, never fake. */}
         {serviceRequestsNextAction}
@@ -477,8 +451,10 @@ export default async function DashboardOverviewPage({
 
         <WorkerInvitationsCard preloaded={invitations} />
 
-        {/* Always-on access to both halves of the service loop (publish / discover). */}
-        {marketplaceAccess}
+        {/* The role's control-room grid (registry-driven): always-on access
+            to the service loop, planning, map, messages, documents and the
+            company workspace — real destinations only, badges from the spine. */}
+        <DashboardModuleGrid modules={controlRoom.modules} />
 
         {/* Explainers last (audit PR6): help must never render above action. */}
         <CurrentSpaceHeader role={role} />
@@ -647,11 +623,19 @@ export default async function DashboardOverviewPage({
         </section>
       )}
 
-      {/* The action-first control room: readiness + fast actions. The
-          "what improves what" explainer is demoted below (help ≠ action).
-          `incomplete` is the real first-use state (no profession or no
-          entries yet); company actions appear only when a real company exists. */}
-      <MyZone hasCompany={hasCompany} incomplete={isFirstUse} improves={false} />
+      {/* Control room v1: compact spine-driven status strip — the same
+          counts as the bell, each chip linking its clearing surface. */}
+      <DashboardStatusStrip entries={controlRoom.statusEntries} />
+
+      {/* The action-first control room: readiness status, then the ONE
+          registry-driven grid ("Ką galite padaryti dabar" — journal,
+          profile, opportunities, planning, map, messages, documents, the
+          service loop; the company door only when a real company exists via
+          the view model's hasCompany flag). The "what improves what"
+          explainer is demoted below (help ≠ action). `incomplete` is the
+          real first-use state (no profession or no entries yet). */}
+      <MyZone incomplete={isFirstUse} improves={false} />
+      <DashboardModuleGrid modules={controlRoom.modules} />
 
       {/* Privacy status — always visible, never blocking (consent v1):
           shows whether employers can find this profile + the one link to
@@ -665,9 +649,6 @@ export default async function DashboardOverviewPage({
       {topSlot !== "incoming_service_request" && serviceRequestsNextAction}
       {topSlot !== "accepted_request" && outgoingRequestsNextAction}
       {topSlot !== "booking_response" && bookingResponsesNextAction}
-
-      {/* Always-on access to both halves of the service loop (publish / discover). */}
-      {marketplaceAccess}
 
       {/* ── Explainers last (audit PR6): help must never render above action. ── */}
       <MyZoneImproves />
