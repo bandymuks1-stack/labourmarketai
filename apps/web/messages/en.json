@@ -6387,6 +6387,34 @@
       "proofLabel": "proof"
     }
   },
+  "conciergeOffer": {
+    "banner": {
+      "badge": "Early access",
+      "body": "Public payments are not enabled yet. First clients are served directly: submitting a worker need is free, and the final price is always confirmed with you before any paid work starts.",
+      "cta": "Submit a worker need"
+    },
+    "title": "How the first paid service works",
+    "steps": [
+      {
+        "title": "Submit your need for free",
+        "body": "Describe the workers or crew you need in the need form. No fee, no card, nothing is published automatically."
+      },
+      {
+        "title": "A person reviews it",
+        "body": "An operator reads every request, contacts you and clarifies scope, timing and conditions before anything moves."
+      },
+      {
+        "title": "You get a manually checked shortlist",
+        "body": "Real candidates or crews, checked by a person against your need. If we cannot put together a suitable shortlist, there is no fee — and we never promise that a candidate will always be found."
+      },
+      {
+        "title": "You pay only for delivered service",
+        "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
+      }
+    ],
+    "note": "There is no automatic job board and no automatic matching here yet — during early access, selection is coordinated by a person. What you see is what really runs.",
+    "ctaLabel": "Submit a worker need →"
+  },
   "billingStatus": {
     "badge": {
       "disabled": "PAYMENTS OFF",

@@ -14,8 +14,10 @@ export async function generateMetadata({
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { ServiceOffers } from "@/components/marketing/service-offers";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
-import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
-import { BillingStatusBanner } from "@/components/marketing/billing-status-banner";
+import {
+  ConciergeAccessBanner,
+  ConciergeOfferSection,
+} from "@/components/marketing/concierge-offer";
 
 // getPlans() reads the live `plans` table; keep this page request-time so
 // the build never needs Supabase. It degrades gracefully if unreachable.
@@ -42,10 +44,13 @@ export default async function PricingPage({
         ctaLabel={t("planCta")}
         ctaSource="pricing_hero"
       />
-      <BillingStatusBanner />
+      {/* Public commercial surface only: the technical billing state banner
+          and the Stripe TEST checkout moved to the superadmin-gated
+          /dashboard/admin/billing (launch repair Scope C). */}
+      <ConciergeAccessBanner />
+      <ConciergeOfferSection />
       <PricingTable />
       <PrePaymentPlanBoundary />
-      <BillingTestCheckout />
       <ServiceOffers />
 
       <section className="mx-auto max-w-container px-6 pb-20 sm:px-12">

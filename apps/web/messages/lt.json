@@ -6387,6 +6387,34 @@
       "proofLabel": "įrodymas"
     }
   },
+  "conciergeOffer": {
+    "banner": {
+      "badge": "Ankstyvoji prieiga",
+      "body": "Vieši mokėjimai dar neįjungti. Pirmuosius klientus aptarnaujame tiesiogiai: darbuotojų poreikio pateikimas nemokamas, o galutinė kaina visada patvirtinama su jumis prieš pradedant bet kokį mokamą darbą.",
+      "cta": "Pateikti darbuotojų poreikį"
+    },
+    "title": "Kaip veikia pirmoji mokama paslauga",
+    "steps": [
+      {
+        "title": "Pateik poreikį nemokamai",
+        "body": "Aprašyk reikalingus darbuotojus ar brigadą poreikio formoje. Jokio mokesčio, jokios kortelės, niekas nepublikuojama automatiškai."
+      },
+      {
+        "title": "Poreikį peržiūri žmogus",
+        "body": "Operatorius perskaito kiekvieną užklausą, susisiekia ir patikslina apimtį, terminus ir sąlygas prieš bet kokį tolimesnį žingsnį."
+      },
+      {
+        "title": "Gauni rankiniu būdu patikrintą trumpąjį sąrašą",
+        "body": "Realūs kandidatai ar brigados, žmogaus patikrinti pagal tavo poreikį. Jei tinkamo trumpojo sąrašo sudaryti nepavyksta — mokesčio nėra, o mes niekada nežadame, kad kandidatas tikrai bus rastas."
+      },
+      {
+        "title": "Moki tik už suteiktą paslaugą",
+        "body": "Fiksuotas sėkmės mokestis taikomas už įdarbintą darbuotoją, brigadą ar įmonę. Atskiras koordinavimo mokestis taikomas tik tada, kai realiai atliekamas dokumentų ar įvedimo koordinavimas. Galutinė kaina patvirtinama prieš pradedant mokamą darbą."
+      }
+    ],
+    "note": "Čia dar nėra automatinės darbo biržos ir automatinio parinkimo — ankstyvos prieigos metu atranką koordinuoja žmogus. Ką matai, tas realiai ir veikia.",
+    "ctaLabel": "Pateikti darbuotojų poreikį →"
+  },
   "billingStatus": {
     "badge": {
       "disabled": "MOKĖJIMAI IŠJUNGTI",

@@ -10,6 +10,7 @@ import {
   type BillingReadinessStatus,
 } from "@/lib/billing/readiness";
 import { AdminPilotGrantForm } from "@/components/app/admin-pilot-grant-form";
+import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
 
 /**
  * Admin billing center (Stripe sprint PR6). Shows the billing config state
@@ -176,6 +177,12 @@ export default async function AdminBillingPage({
           </ul>
         )}
       </section>
+
+      {/* Stripe TEST checkout — moved here from the public /pricing page
+          (launch repair Scope C): test checkout is internal-only, behind
+          requireSuperadmin. Renders nothing unless billing config is a valid
+          Stripe TEST setup. */}
+      <BillingTestCheckout />
 
       {/* Manual pilot override */}
       <section className="flex flex-col gap-2">
