@@ -76,10 +76,8 @@ describe("worker_languages migration pair", () => {
   });
 
   it("self-declared only — no verified column exists or may be added here", () => {
-    const tableBlock = up.slice(
-      up.indexOf("create table if not exists public.worker_languages"),
-      up.indexOf(");") + 2,
-    );
+    const start = up.indexOf("create table if not exists public.worker_languages");
+    const tableBlock = up.slice(start, up.indexOf(");", start) + 2);
     expect(tableBlock.length).toBeGreaterThan(0);
     expect(tableBlock).not.toMatch(/verified/i);
     // And no later ALTER sneaks one in.
