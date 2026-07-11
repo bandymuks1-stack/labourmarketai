@@ -1,19 +1,40 @@
 # labourmarket-platform
 
-The living labour market — a real-time, two-sided platform connecting
-**workers**, **companies** and **agencies** with proprietary matching.
-
-Industry-agnostic; launches in **construction** across the Baltic & Northern
-European market. This repository is at milestone **M0 (Foundation)**.
+LabourMarket.ai — a two-sided European labour-market platform connecting
+**workers**, **companies** and **agencies**: structured profiles, CVs and
+work journals on the supply side; structured worker needs on the demand
+side. Cross-sector (logistics, manufacturing, hospitality, care,
+construction and more). First-stage candidate selection is
+**operator-coordinated** — the platform structures information and
+organises selection; it does not claim automatic matching.
 
 > Stack: Next.js 15 · TypeScript (strict) · Supabase · Tailwind v3 + brand
-> preset · next-intl (LT/EN) · pnpm workspace. Hosting: Vercel **preview only**
-> in M0 (no custom domain — `labourmarket.ai` DNS untouched).
+> preset · next-intl · pnpm workspace. Hosting: Vercel, production on the
+> real domain (see Domains).
+
+## Domains (production)
+
+| Role | Host |
+|---|---|
+| Public canonical (marketing) | `https://labourmarket.ai` |
+| App (auth + dashboard) | `https://app.labourmarket.ai` |
+| WWW | 308-redirects to the apex |
+
+Policy source of truth: `docs/policies/domain-truth-v1.md` (v2) and
+`apps/web/lib/domain/canonical.ts`. Live audit:
+`docs/launch/domain-production-truth-v1.md`.
+
+## Locales
+
+Active UI locales: **lt (default) · en · ru · nl · de** — full message
+parity enforced by guards. EN + LT are human-verified; RU/NL/DE are
+AI-seeded full translations pending human review (preview-tagged in the
+locale switcher). Six more catalog locales exist as non-routed shells.
+See `apps/web/lib/i18n/config.ts` and `lib/i18n/launch-language-scope.ts`.
 
 ## Prerequisites (Windows)
 
-- Node 20 LTS (`.nvmrc` pins 20; CI/Vercel use 20). Dev was bootstrapped on
-  Node 24 — see `docs/DECISIONS/0001-lean-mvp-stack.md`.
+- Node 20 LTS (`.nvmrc` pins 20; CI/Vercel use 20).
 - `pnpm` (`corepack enable` then `corepack prepare pnpm@latest --activate`).
 - Git Bash or PowerShell. Paths use `C:\Users\Mano\Documents\labourmarketai`.
 
@@ -31,33 +52,57 @@ copy .env.example apps\web\.env.local
 #  SUPABASE_DB_PASSWORD            → Supabase → Settings → Database
 ```
 
-## Develop
+## Develop & validate
 
 ```powershell
-pnpm dev        # http://localhost:3000  → redirects to /lt
-pnpm build      # production build (Linux-safe; Vercel runs this)
-pnpm lint       # eslint
-pnpm typecheck  # tsc --noEmit
+pnpm dev                        # http://localhost:3000 → redirects to /lt
+pnpm build                      # production build (Vercel runs this)
+pnpm lint                       # eslint
+pnpm typecheck                  # tsc --noEmit
+pnpm -C apps/web test           # vitest (unit + ~520 guard files)
+pnpm placeholders:check         # placeholder governance
+pnpm check:primary-route-smoke  # dead-UI / dead-link guard
+pnpm check:public-seo-indexing  # domain/SEO invariants
+pnpm check:i18n-debt            # untranslated-key ratchet
 ```
 
-Locales: `/lt` (default) and `/en`. The locale switcher is in the page.
+CI (`.github/workflows/quality.yml`) runs typecheck, lint, vitest, the
+placeholder + honesty-copy + SEO + i18n gates and the build on every PR;
+`migration-safety.yml` statically gates every migration change.
 
-## Database (Supabase) — applied by the founder
+## Database (Supabase)
 
-The Supabase project already exists at
-`https://gorgitwvdzxbnaxhrsrw.supabase.co`. Migrations and reference data
-(`supabase/migrations/`, `supabase/reference-data.sql`) are **not** applied
-automatically — see `docs/DEPLOYMENT.md`. Keys never live in the repo.
+Production project: `https://gorgitwvdzxbnaxhrsrw.supabase.co` (keys never
+live in the repo). **Migrations are applied only through the approved
+human-gated process** — reviewed PR + owner-approved manual apply; never
+`supabase db push` from a work session, never automatic. See
+`docs/DEPLOYMENT.md` and `.github/scripts/migration-safety.mjs`.
 
-## Deploy (Vercel preview only — M0)
+## Deploy
 
-Connect the GitHub repo in Vercel, set env vars in the Vercel dashboard,
-production branch = `main`. Full steps: `docs/DEPLOYMENT.md`. Going live on
-the real domain is a separate, **not-yet-executed** `docs/LAUNCH_CHECKLIST.md`.
+Vercel auto-builds and deploys `main` to production (`labourmarket.ai`,
+`app.labourmarket.ai`). Secrets live only in Vercel project env vars.
+**Public payments are NOT active**: billing config is hard-blocked from
+live mode (`apps/web/lib/billing/config-core.ts`); the pricing page shows
+the concierge early-access offer, never a live checkout.
+
+## Branch & PR flow
+
+`main` is the production branch. Work lands as `feat/*` / `fix/*` / `docs/*`
+branches → PR → green CI → squash-merge to `main` (see `AGENTS.md`,
+"Branch strategy"). There is no separate integration branch.
+
+## Landing page freeze
+
+The landing page (`apps/web/app/[locale]/(marketing)/page.tsx`), its
+component tree, its placeholder feed and its lt/en/ru i18n namespaces are
+**frozen** until the separate real-data replacement plan runs — enforced
+by `apps/web/lib/guards/landing-freeze.test.ts` (SHA-256 baseline;
+regeneration is owner-gated).
 
 ## Repository map
 
 `apps/web` — the Next.js app · `supabase/` — schema & reference data ·
-`docs/` — architecture, roadmap, brand, data model, roles, decisions.
-Branches: `main` (stable preview) · `dev` (integration) ·
-`feat/<name>` → PR → `dev`.
+`docs/` — architecture, policies, launch docs, audits, decisions ·
+`docs/launch/` — launch truth docs (domain production truth, real-supply
+readiness gap, search-index owner actions, final launch-repair report).
