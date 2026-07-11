@@ -27,7 +27,9 @@ export function EstimateSummary({
 }) {
   const t = useTranslations("auth.dashboard.wow.demand.estimate");
   const locale = useLocale();
-  const nf = new Intl.NumberFormat(locale === "ru" ? "ru" : locale === "lt" ? "lt" : "en", {
+  // Use the active locale directly (lt/en/ru/nl/de are all valid BCP 47
+  // tags) so nl/de get their own number formatting instead of the en style.
+  const nf = new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

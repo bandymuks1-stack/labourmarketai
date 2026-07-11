@@ -3,12 +3,13 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * LT ↔ EN ↔ RU i18n parity. LT and EN are the two fully-served locales and
- * RU is ACTIVE from 2026-06-12 (workers on the first real sites operate
- * primarily in Russian — doctrine §2.4 amendment); every user-facing change
- * must land in all three with the SAME key structure and no empty /
- * placeholder values, so no active locale drifts weaker than another.
- * (The other locale files are intentionally partial and are not checked here.)
+ * Active-locale i18n parity (LT ↔ EN ↔ RU ↔ NL ↔ DE). LT and EN are the two
+ * human-verified locales; RU is ACTIVE from 2026-06-12 and NL + DE from
+ * 2026-07-11 (non-landing launch repair Scope D, AI-seeded full catalogs
+ * pending §7.4 human review). Every user-facing change must land in all
+ * active locales with the SAME key structure and no empty / placeholder
+ * values, so no active locale drifts weaker than another.
+ * (The non-active locale files are intentionally partial and not checked here.)
  */
 
 const messages = join(__dirname, "..", "..", "messages");
@@ -40,19 +41,18 @@ function emptyValues(obj: Json, prefix = "", out: string[] = []): string[] {
 }
 
 // Base files + every per-namespace file present under messages/lt/, paired
-// against every other ACTIVE locale (en + ru) — active locales must be
+// against every other ACTIVE locale (en/ru/nl/de) — active locales must be
 // full-parity or routed pages leak MISSING_MESSAGE (the 2026-05-28 P0).
+const OTHER_ACTIVE = ["en", "ru", "nl", "de"] as const;
 const NAMESPACE_FILES = readdirSync(join(messages, "lt")).filter((f) => f.endsWith(".json"));
 const PAIRS: ReadonlyArray<readonly [string, string]> = [
-  ["lt.json", "en.json"],
-  ["lt.json", "ru.json"],
-  ...NAMESPACE_FILES.flatMap((f) => [
-    [`lt/${f}`, `en/${f}`] as const,
-    [`lt/${f}`, `ru/${f}`] as const,
-  ]),
+  ...OTHER_ACTIVE.map((loc) => [`lt.json`, `${loc}.json`] as const),
+  ...NAMESPACE_FILES.flatMap((f) =>
+    OTHER_ACTIVE.map((loc) => [`lt/${f}`, `${loc}/${f}`] as const),
+  ),
 ];
 
-describe("active-locale message files (LT/EN/RU) have identical key structure", () => {
+describe("active-locale message files (LT/EN/RU/NL/DE) have identical key structure", () => {
   for (const [ltFile, otherFile] of PAIRS) {
     it(`${ltFile} ↔ ${otherFile}: same keys`, () => {
       const lt = new Set(keyPaths(load(ltFile)));
@@ -68,9 +68,11 @@ describe("active-locale message files (LT/EN/RU) have identical key structure", 
 describe("active locales have no empty/placeholder string values", () => {
   const FILES = [
     "lt.json",
-    "en.json",
-    "ru.json",
-    ...NAMESPACE_FILES.flatMap((f) => [`lt/${f}`, `en/${f}`, `ru/${f}`]),
+    ...OTHER_ACTIVE.map((loc) => `${loc}.json`),
+    ...NAMESPACE_FILES.flatMap((f) => [
+      `lt/${f}`,
+      ...OTHER_ACTIVE.map((loc) => `${loc}/${f}`),
+    ]),
   ];
   for (const file of FILES) {
     it(`${file}: no empty string values`, () => {

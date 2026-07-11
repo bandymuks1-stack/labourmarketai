@@ -25,8 +25,10 @@ export const UNTRANSLATED_MARKER = "[EN]";
 
 /** Locales whose debt is inventoried + ratcheted (owner scope: DA/DE; RU
  *  added 2026-06-12 with a ZERO baseline — RU is an ACTIVE worker locale,
- *  so any future `[EN]` marker in ru.json fails the gate immediately). */
-export const TRACKED_LOCALES = ["da", "de", "ru"] as const;
+ *  so any future `[EN]` marker in ru.json fails the gate immediately.
+ *  NL added 2026-07-11 together with the NL/DE activation: both went to
+ *  ZERO baselines — an active locale may never carry an `[EN]` marker). */
+export const TRACKED_LOCALES = ["da", "de", "nl", "ru"] as const;
 
 /** Locales that must stay fully translated (0 markers) — regression guard. */
 export const PRIMARY_LOCALES = ["en", "lt"] as const;
@@ -77,7 +79,12 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // ownerDecision — lands in all 11 locales; en/lt/ru translated, da/de
   // [EN] until human translation).
   da: 843,
-  de: 843,
+  // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
+  // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
+  // ratchet drops to zero and stays there: any future `[EN]` marker in an
+  // active locale fails the gate immediately.
+  de: 0,
+  nl: 0,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,
