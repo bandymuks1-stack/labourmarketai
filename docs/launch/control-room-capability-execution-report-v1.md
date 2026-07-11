@@ -20,7 +20,7 @@ owner/provider action named in the gate register) · `NOT_STARTED`.
 | H | Document centre | DONE | #712 / `88ce0ee7` | `/dashboard/documents` consolidated (attention strip, filtered inventory, work-proof exports, org aggregate view) | worker_documents readiness (applied; verification axis read degradably), journal HEAD counts, CV/evidence/journal exports, `agency_pool_docs_readiness` RPC for orgs | RLS + consent-gated aggregate RPC only; read-only, no storage, no upload UI (guard-pinned) | none (worker-docs bucket stays gated) | CI green; deployed on merge | worker-docs bucket apply for real file upload | — |
 | I | Finance foundation | GATED (UI merged; table unapplied) | I1 #713 / `6a50b729`; I2 draft #714 (needs-human-gate) | `/dashboard/finance` (records list, filters, forms, summary strip, CSV export route); honest "preparing" pre-apply | `finance_records` via 3 SECURITY DEFINER RPCs (unapplied); overdue DERIVED app-side; cents-only math | RLS SELECT creator/admin/`owns_company`; writes RPC-only; no payment-provider code (guard-pinned) | I2 RED, human-gated, rollback sibling, classifier green | I1 CI green, merged | owner applies #714 via MCP + ledger | — (gate visible on #714) |
 | J | AI assistance centre | DONE | #715 / `f725cb30` | `/dashboard/assist` (attention, deterministic summaries, honest provider-state card) | spine counts, document/finance attention derivations, evidence report, project reads — deterministic only; provider state via existing config resolver (never the key) | read-only, RLS client only; no runAiAgent call, no prompt UI (guard-pinned) | none (ai_runs store stays gated) | CI green; deployed on merge | provider key (EXTERNAL_PROVIDER_GATED) + ai_runs migration for live generation | — |
-| K | Search + reports + final audit | IN_PROGRESS | this PR | `/api/dashboard-search` (GET, authenticated) + CommandFinder object results + `/dashboard/search` embeds the one finder; `/dashboard/reports` role-specific hub; final audit `docs/launch/control-room-final-route-truth-audit-v1.md` | search: listMyTasks / listMyFinanceRecords / listMyBookings / listMyDocuments / listManagedProjects + the communication-page conversations read (bounded, own rows only); reports: evidence-report derivation, journal head counts, listOwnCustomerRequests, own-company projects, task/finance summaries, consent-gated org docs aggregate — every figure basis-labelled | authenticated + RLS-scoped reads only; NO admin client, NO profiles/workers read, NO people search (scouting flow untouched); bounded queries (2–80 chars, 5/source, 30 total); recent commands = localStorage ids only (guard-pinned: `universal-search-reports.test.ts`) | none | CI + guard suite | none new (all remaining gates listed in the final audit §4) | merge — programme complete |
+| K | Search + reports + final audit | DONE | #716 / `4d158338` | `/api/dashboard-search` (GET, authenticated) + CommandFinder object results + `/dashboard/search` embeds the one finder; `/dashboard/reports` role-specific hub; final audit `docs/launch/control-room-final-route-truth-audit-v1.md` | search: listMyTasks / listMyFinanceRecords / listMyBookings / listMyDocuments / listManagedProjects + the communication-page conversations read (bounded, own rows only); reports: evidence-report derivation, journal head counts, listOwnCustomerRequests, own-company projects, task/finance summaries, consent-gated org docs aggregate — every figure basis-labelled | authenticated + RLS-scoped reads only; NO admin client, NO profiles/workers read, NO people search (scouting flow untouched); bounded queries (2–80 chars, 5/source, 30 total); recent commands = localStorage ids only (guard-pinned: `universal-search-reports.test.ts`) | none | CI + guard suite | none new (all remaining gates listed in the final audit §4) | — (programme complete) |
 
 ## Gate register (owner/provider actions)
 
@@ -123,3 +123,37 @@ inventory; `getSpineCounts` request-cached (no second query set). New i18n keys
 (`auth.dashboard.statusStrip.title/allClear`, `commandFinder.shortcutHint`) in lt/en/ru/nl/de —
 non-active locale files follow the repo's frozen-subset convention (verified against recent
 PRs). `DashboardChainActions` intentionally untouched (task deep-links, not module doors).
+
+## Programme closeout (2026-07-11)
+
+All eleven capability slices delivered through nine merged runtime/docs PRs plus two
+human-gated draft migration PRs:
+
+Merged: #704 (A gap map) · #705 (B foundation) · #706 (C activity) · #707 (D1 tasks layer) ·
+#709 (E planning) · #710 (F pipeline) · #711 (G project ops) · #712 (H documents) ·
+#713 (I1 finance layer) · #715 (J assist) · #716 (K search/reports/final audit).
+Awaiting owner: #708 (work_tasks migration) · #714 (finance_records migration).
+
+Owner actions outstanding (the complete gate register):
+1. Review + apply #708 (`work_tasks`) via Supabase MCP, record in APPLIED_LEDGER — activates
+   /dashboard/tasks and the open-task-attention signal.
+2. Review + apply #714 (`finance_records`) likewise — activates /dashboard/finance records
+   and CSV export.
+3. Optional gates (prepare on request): worker-documents storage bucket (file upload),
+   activity events table (persistent feed + demand/verification signals), contacts +
+   stage-transition ledger (CRM persistence), AI provider key + ai_runs/ai_suggestions
+   store (live generation), finance-overdue spine signal (after #714).
+4. Ledger backfill suggestion: explicit APPLIED_LEDGER rows for
+   20260610170000_worker_documents_readiness / 20260613100200 (application evidenced but
+   unrecorded — see PR H notes).
+
+Not completed (honest statement): live AI generation (provider + audit store gated); task
+and finance persistence until #708/#714 apply; worker document file upload (bucket gated);
+worker-side assigned-project planning bands (needs an RLS-scoped read — safe follow-up);
+authenticated 390px browser smoke was not run against production (guard suite + build +
+Vercel previews stand in; the repo's gate matrix requires no authenticated e2e without
+SUPABASE_TEST_URL).
+
+Recommended next PR: after the owner applies #708, a small follow-up wiring
+finance-overdue-attention into the spine and adding worker-side assigned-project bands to
+planning via a new RLS-scoped read.
