@@ -5,9 +5,11 @@ file). Executed autonomously as a 6-PR train, each PR from the latest
 `origin/main`, all squash-merged green, branches deleted.
 
 ```text
-STATUS: GREEN (with documented owner actions — none of them GREEN-blockers)
+STATUS: GREEN (updated 2026-07-11 closeout: legacy Vercel retired ✔,
+  owner alert live ✔; Search Console remains owner-blocked — submission
+  not yet possible, index state UNKNOWN)
 BASE: main @ c616306 (before the train)
-FINAL MAIN COMMIT: da2e523 (PR #697 merge) + PR #698 (this docs PR) on top
+FINAL MAIN COMMIT: 1a1d4db (PR #698 squash-merge on main)
 PRS:
   #693 fix(domain): production truth v1 — app-host auth CTAs, landing freeze guard, CI wiring
   #694 fix(public): non-landing product truth v1 — honest copy, labelled example previews
@@ -19,7 +21,9 @@ PRODUCTION URLS CHECKED:
   https://labourmarket.ai (+ /lt /en /ru /nl /de and public paths)
   https://www.labourmarket.ai   → 308 → apex (verified)
   https://app.labourmarket.ai   → serves deployment; canonicals point to apex
-  https://labourmarket-ai.vercel.app → LEGACY gated build (owner action)
+  https://labourmarket-ai.vercel.app → RETIRED 2026-07-11: legacy Vercel
+    project deleted, URL now returns 404 DEPLOYMENT_NOT_FOUND
+    (docs/launch/legacy-vercel-project-retirement-v1.md)
 DOMAIN RESULT: apex = public canonical ✅ · www→apex 308 ✅ · app = auth/dashboard
   host ✅ (also serves marketing by deployment topology — SEO-safe, documented)
   · robots/sitemap/canonical/og all apex ✅ · hreflang lt/en/ru/nl/de/x-default
@@ -48,8 +52,11 @@ COMPANY-NEED RESULT: chain verified — anonymous submit persists via
   real persistence (honest error/prepared fallbacks); contact data
   operator-only (service-role + isSuperadmin, triple-gated); admin queue
   shows all fields with closed status set new/contacted/qualified/rejected;
-  owner alert is best-effort and cannot break the insert ✅ · alert env NOT
-  configured in production (owner action below) — documented, not called active
+  owner alert is best-effort and cannot break the insert ✅ · alert ACTIVE
+  since 2026-07-11: OWNER_TELEGRAM fallback env set in production,
+  deployment dpl_BoBwMgnKKZUa6Kn9drbg7ZDaXx9Q READY, real delivery test
+  confirmed (message_id 936, 05:15:13Z) —
+  docs/launch/company-need-owner-alert-activation-v1.md
 OPERATOR READINESS RESULT: /dashboard/admin/launch-readiness live —
   real counts only (measured 2026-07-11: 20 workers, 2 with profession,
   2 with location, 2 available, 3 with pay expectation, 4 with journal
@@ -86,32 +93,38 @@ PRODUCTION SMOKE (2026-07-11, after #697 deploy): nl/de pages 200 without
   (note: the full i18n catalog is serialized into the page payload, so
   admin/billing STRINGS exist in the HTML source as data — no test-checkout
   UI renders; optimizing message-payload scoping is a future nicety)
+OWNER ACTIONS COMPLETED 2026-07-11 (previously items 1–2):
+  ✔ Vercel legacy project retired — labourmarket-ai.vercel.app now 404
+    DEPLOYMENT_NOT_FOUND, production domains verified intact
+    (docs/launch/legacy-vercel-project-retirement-v1.md).
+  ✔ Company-need owner alert ACTIVE — OWNER_TELEGRAM fallback configured
+    in production, redeployed READY, real test message DELIVERED to the
+    owner chat 2026-07-11T05:15:13Z (message_id 936); Agentai OS bridge
+    stays disabled (no public endpoint exists)
+    (docs/launch/company-need-owner-alert-activation-v1.md).
 OWNER ACTIONS STILL REQUIRED:
-  1. Vercel: retire/detach the legacy project serving
-     labourmarket-ai.vercel.app (old "Labour Market Operating System" build).
-  2. Vercel env (production) to activate the company-need owner alert —
-     EITHER Agentai OS bridge: AGENTAI_OS_ALERTS_ENABLED=true,
-     AGENTAI_OS_ALERT_ENDPOINT=<https endpoint>, AGENTAI_OS_ALERT_TOKEN=<token>
-     OR Telegram: OWNER_TELEGRAM_ALERTS_ENABLED=true,
-     OWNER_TELEGRAM_BOT_TOKEN=<token>, OWNER_TELEGRAM_CHAT_ID=<id>.
-     Until set, new public intakes appear ONLY in the admin queue.
-  3. Search Console: verify domain property, submit sitemap, request
-     removal of stale URLs (docs/launch/search-index-owner-actions-v1.md).
-  4. Real data: collect 15–25 consented worker profiles + fresh
+  1. Search Console: BLOCKED — no authenticated Google session/API is
+     available to the agent (see
+     docs/launch/search-console-execution-result-v1.md). Sitemap is
+     live-verified and ready but NOT YET SUBMITTED; nothing is confirmed
+     indexed or removed. Owner: connect the Chrome extension with a
+     Google session (or provide GSC API credentials), then property
+     verify → submit sitemap → inspect 11 canonical URLs → file eligible
+     removals. Submission ≠ indexing; Google processing takes days–weeks.
+  2. Real data: collect 15–25 consented worker profiles + fresh
      availability confirmations + first real company needs
      (docs/launch/real-supply-readiness-gap-v1.md).
-  5. Human review (§7.4) of the AI-seeded NL/DE (and RU) catalogs when
+  3. Human review (§7.4) of the AI-seeded NL/DE (and RU) catalogs when
      native speakers are available — locales are live and preview-tagged.
 BLOCKED ITEMS (cannot be fixed from the repo):
-  - Legacy Vercel alias content (external project) — action 1.
-  - Owner alert delivery (secrets) — action 2.
-  - Google index refresh (Search Console) — action 3.
-  - Supply-side real data + consent (real humans) — action 4.
+  - Google index refresh (Search Console) — action 1: needs owner's
+    Google session or API credentials.
+  - Supply-side real data + consent (real humans) — action 2.
 ROLLBACK: each PR is an independent squash commit on main — revert in
   reverse order (git revert <sha>); no migrations, no env, no external
   state was changed by any PR.
-NEXT RECOMMENDED ACTION: owner performs actions 1–3 (≈15 min total), then
-  starts real-data collection (action 4) while the operator uses
+NEXT RECOMMENDED ACTION: owner unblocks Search Console (action 1), then
+  starts real-data collection (action 2) while the operator uses
   /dashboard/admin/launch-readiness to track the 15–25 consent target.
 ```
 
@@ -123,7 +136,10 @@ NEXT RECOMMENDED ACTION: owner performs actions 1–3 (≈15 min total), then
   company-need chain honesty, CI guard wiring.
 - **Fixed in code, no deploy dependency left**: none outstanding — PR #697
   deploy was verified live; PR #698 is docs-only.
-- **Needs Vercel action**: legacy alias retirement; alert env variables.
-- **Needs Search Console action**: sitemap submit + stale URL removal.
+- **Vercel actions — DONE 2026-07-11**: legacy project deleted (URL now
+  404); owner-alert env set + redeployed + delivery-tested (see the two
+  activation/retirement docs in this directory).
+- **Needs Search Console action (still owner-blocked)**: sitemap submit +
+  stale URL removal — no Google session/API available to the agent.
 - **Needs real people / consent**: supply readiness target (15–25).
-- **Cannot be fixed programmatically**: all four above by definition.
+- **Cannot be fixed programmatically**: the two items above by definition.
