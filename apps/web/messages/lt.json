@@ -19,7 +19,8 @@
       "incoming_service_requests": "Išnyksta, kai atsakote į užklausą.",
       "service_request_responses": "Išnyksta, kai atidarote paslaugų užklausų puslapį.",
       "pending_bookings": "Išnyksta, kai atsakote į rezervacijos pasiūlymą.",
-      "booking_responses": "Išnyksta, kai atidarote rezervacijų puslapį."
+      "booking_responses": "Išnyksta, kai atidarote rezervacijų puslapį.",
+      "open_task_attention": "Išnyksta, kai užduotis užbaigiama, atblokuojama arba pakeičiamas jos terminas užduočių puslapyje."
     }
   },
   "commandFinder": {
@@ -3598,7 +3599,8 @@
         "incoming_service_requests": "Laukiančios paslaugų užklausos",
         "service_request_responses": "Atsakymai į jūsų užklausas",
         "pending_bookings": "Laukiantys rezervacijų pasiūlymai",
-        "booking_responses": "Atsakymai į rezervacijų pasiūlymus"
+        "booking_responses": "Atsakymai į rezervacijų pasiūlymus",
+        "open_task_attention": "Užduotys, kurioms reikia dėmesio"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -7487,6 +7489,88 @@
     "rights": {
       "notice": "Daugiau apie jūsų teises ir duomenų tvarkymą:",
       "noticeLink": "privatumo pranešimas"
+    }
+  },
+  "tasks": {
+    "eyebrow": "Darbo užduotys",
+    "title": "Užduotys",
+    "intro": "Jūsų darbų sąrašas: kas laukia, kas vyksta ir kas užstrigę.",
+    "honestNote": "Vidinis sąrašas — užduoties sukūrimas niekam nieko nesiunčia.",
+    "notAuthed": "Prisijunkite, kad matytumėte savo užduotis.",
+    "unavailable": "Užduočių modulis ruošiamas — dar neįjungtas. Kai tik bus įjungtas, čia matysite savo užduotis.",
+    "loadError": "Nepavyko įkelti užduočių. Pabandykite atnaujinti puslapį.",
+    "myEmpty": "Atvirų užduočių nėra — sukurkite naują viršuje.",
+    "views": {
+      "label": "Rodinys",
+      "my": "Mano užduotys",
+      "board": "Lenta"
+    },
+    "status": {
+      "todo": "Laukia",
+      "in_progress": "Vykdoma",
+      "blocked": "Užstrigusi",
+      "done": "Atlikta",
+      "cancelled": "Atšaukta"
+    },
+    "priority": {
+      "low": "Žemas",
+      "normal": "Įprastas",
+      "high": "Aukštas"
+    },
+    "flags": {
+      "overdue": "Vėluoja",
+      "blocked": "Užstrigusi"
+    },
+    "dueLabel": "Terminas",
+    "projectLinked": "Projekto užduotis",
+    "closed": {
+      "show": "Rodyti baigtas",
+      "hide": "Slėpti baigtas",
+      "empty": "Baigtų užduočių dar nėra."
+    },
+    "board": {
+      "columnEmpty": "Šiame stulpelyje užduočių nėra."
+    },
+    "actions": {
+      "start": "Pradėti",
+      "complete": "Užbaigti",
+      "block": "Pažymėti užstrigusią",
+      "unblock": "Atblokuoti",
+      "cancel": "Atšaukti",
+      "reopen": "Atnaujinti",
+      "details": "Redaguoti detales",
+      "save": "Išsaugoti"
+    },
+    "form": {
+      "title": "Nauja užduotis",
+      "titleLabel": "Pavadinimas",
+      "titlePlaceholder": "Pvz., užsakyti pastolius objektui",
+      "descriptionLabel": "Aprašymas (nebūtina)",
+      "priorityLabel": "Prioritetas",
+      "dueLabel": "Terminas (nebūtina)",
+      "projectLabel": "Projektas (nebūtina)",
+      "projectNone": "Be projekto",
+      "assignSelfLabel": "Priskirti man",
+      "assignSelfHint": "Jei nuimsite žymę, užduotis liks nepriskirta — ją matysite jūs ir projekto vadovai.",
+      "submit": "Sukurti užduotį"
+    },
+    "notice": {
+      "created": "Užduotis sukurta.",
+      "updated": "Užduotis atnaujinta.",
+      "invalid": "Patikrinkite laukus — pavadinimas turi būti 3–160 ženklų.",
+      "needs_migration": "Užduočių modulis dar neįjungtas — pakeitimas neišsaugotas.",
+      "not_authorized": "Neturite teisės atlikti šio veiksmo.",
+      "not_found": "Užduotis nerasta.",
+      "limit_reached": "Pasiektas atvirų užduočių limitas — pirmiausia užbaikite ar atšaukite senesnes.",
+      "error": "Nepavyko išsaugoti. Pabandykite dar kartą."
+    },
+    "projectTasks": {
+      "title": "Projekto užduotys",
+      "empty": "Šis projektas dar neturi užduočių.",
+      "back": "Visos užduotys"
+    },
+    "projectSection": {
+      "link": "Šio projekto užduotys"
     }
   }
 }

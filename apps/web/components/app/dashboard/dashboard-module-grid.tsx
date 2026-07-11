@@ -7,6 +7,7 @@ import {
   FileText,
   Home,
   IdCard,
+  ListChecks,
   MapPin,
   MessageSquare,
   NotebookPen,
@@ -53,6 +54,7 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   building: Building2,
   search: Search,
   bell: Bell,
+  checklist: ListChecks,
 };
 
 export async function DashboardModuleGrid({

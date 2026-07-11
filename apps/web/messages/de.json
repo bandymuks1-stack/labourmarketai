@@ -19,7 +19,8 @@
       "incoming_service_requests": "Verschwindet, wenn Sie die Anfrage beantworten.",
       "service_request_responses": "Verschwindet, wenn Sie die Seite mit den Serviceanfragen öffnen.",
       "pending_bookings": "Verschwindet, wenn Sie auf den Buchungsvorschlag reagieren.",
-      "booking_responses": "Verschwindet, wenn Sie die Buchungsseite öffnen."
+      "booking_responses": "Verschwindet, wenn Sie die Buchungsseite öffnen.",
+      "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde."
     }
   },
   "commandFinder": {
@@ -3598,7 +3599,8 @@
         "incoming_service_requests": "Serviceanfragen, die auf eine Antwort warten",
         "service_request_responses": "Antworten auf Ihre Anfragen",
         "pending_bookings": "Buchungsvorschläge, die auf eine Antwort warten",
-        "booking_responses": "Antworten auf Ihre Buchungsvorschläge"
+        "booking_responses": "Antworten auf Ihre Buchungsvorschläge",
+        "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -7487,6 +7489,88 @@
     "rights": {
       "notice": "Mehr über Ihre Rechte und die Datenverarbeitung:",
       "noticeLink": "Datenschutzhinweis"
+    }
+  },
+  "tasks": {
+    "eyebrow": "Arbeitsaufgaben",
+    "title": "Aufgaben",
+    "intro": "Ihre Arbeitsliste: was wartet, was läuft und was feststeckt.",
+    "honestNote": "Nur eine interne Liste — das Anlegen einer Aufgabe versendet keine Nachricht an irgendjemanden.",
+    "notAuthed": "Melden Sie sich an, um Ihre Aufgaben zu sehen.",
+    "unavailable": "Das Aufgabenmodul wird vorbereitet — noch nicht verfügbar. Sobald es aktiviert ist, erscheinen Ihre Aufgaben hier.",
+    "loadError": "Aufgaben konnten nicht geladen werden. Bitte laden Sie die Seite neu.",
+    "myEmpty": "Keine offenen Aufgaben — legen Sie oben eine an.",
+    "views": {
+      "label": "Ansicht",
+      "my": "Meine Aufgaben",
+      "board": "Board"
+    },
+    "status": {
+      "todo": "Offen",
+      "in_progress": "In Arbeit",
+      "blocked": "Blockiert",
+      "done": "Erledigt",
+      "cancelled": "Abgebrochen"
+    },
+    "priority": {
+      "low": "Niedrig",
+      "normal": "Normal",
+      "high": "Hoch"
+    },
+    "flags": {
+      "overdue": "Überfällig",
+      "blocked": "Blockiert"
+    },
+    "dueLabel": "Fällig",
+    "projectLinked": "Projektaufgabe",
+    "closed": {
+      "show": "Erledigte anzeigen",
+      "hide": "Erledigte ausblenden",
+      "empty": "Noch keine erledigten Aufgaben."
+    },
+    "board": {
+      "columnEmpty": "Keine Aufgaben in dieser Spalte."
+    },
+    "actions": {
+      "start": "Starten",
+      "complete": "Abschließen",
+      "block": "Als blockiert markieren",
+      "unblock": "Entsperren",
+      "cancel": "Abbrechen",
+      "reopen": "Wieder öffnen",
+      "details": "Details bearbeiten",
+      "save": "Speichern"
+    },
+    "form": {
+      "title": "Neue Aufgabe",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "z. B. Gerüst für die Baustelle bestellen",
+      "descriptionLabel": "Beschreibung (optional)",
+      "priorityLabel": "Priorität",
+      "dueLabel": "Fälligkeitsdatum (optional)",
+      "projectLabel": "Projekt (optional)",
+      "projectNone": "Kein Projekt",
+      "assignSelfLabel": "Mir zuweisen",
+      "assignSelfHint": "Abwählen, um die Aufgabe unzugewiesen zu lassen — sichtbar für Sie und die Projektverantwortlichen.",
+      "submit": "Aufgabe anlegen"
+    },
+    "notice": {
+      "created": "Aufgabe angelegt.",
+      "updated": "Aufgabe aktualisiert.",
+      "invalid": "Bitte prüfen Sie die Felder — der Titel muss 3–160 Zeichen lang sein.",
+      "needs_migration": "Das Aufgabenmodul ist noch nicht aktiviert — die Änderung wurde nicht gespeichert.",
+      "not_authorized": "Sie dürfen diese Aktion nicht ausführen.",
+      "not_found": "Aufgabe nicht gefunden.",
+      "limit_reached": "Limit offener Aufgaben erreicht — schließen Sie zuerst ältere Aufgaben ab oder brechen Sie sie ab.",
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "projectTasks": {
+      "title": "Projektaufgaben",
+      "empty": "Dieses Projekt hat noch keine Aufgaben.",
+      "back": "Alle Aufgaben"
+    },
+    "projectSection": {
+      "link": "Aufgaben zu diesem Projekt"
     }
   }
 }

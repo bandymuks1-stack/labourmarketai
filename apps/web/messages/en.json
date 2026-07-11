@@ -19,7 +19,8 @@
       "incoming_service_requests": "Clears when you answer the request.",
       "service_request_responses": "Clears when you open the service requests page.",
       "pending_bookings": "Clears when you respond to the booking proposal.",
-      "booking_responses": "Clears when you open the bookings page."
+      "booking_responses": "Clears when you open the bookings page.",
+      "open_task_attention": "Clears when the task is completed, unblocked or rescheduled on the tasks page."
     }
   },
   "commandFinder": {
@@ -3598,7 +3599,8 @@
         "incoming_service_requests": "Service requests awaiting response",
         "service_request_responses": "Answers to your requests",
         "pending_bookings": "Booking proposals awaiting response",
-        "booking_responses": "Answers to your booking proposals"
+        "booking_responses": "Answers to your booking proposals",
+        "open_task_attention": "Tasks needing attention"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -7487,6 +7489,88 @@
     "rights": {
       "notice": "More about your rights and how data is handled:",
       "noticeLink": "privacy notice"
+    }
+  },
+  "tasks": {
+    "eyebrow": "Work tasks",
+    "title": "Tasks",
+    "intro": "Your work list: what's waiting, in progress and stuck.",
+    "honestNote": "Internal list only — creating a task sends nothing to anyone.",
+    "notAuthed": "Sign in to see your tasks.",
+    "unavailable": "The tasks module is being prepared — not available yet. Once enabled, your tasks will appear here.",
+    "loadError": "Tasks could not be loaded. Try refreshing the page.",
+    "myEmpty": "No open tasks — create one above.",
+    "views": {
+      "label": "View",
+      "my": "My tasks",
+      "board": "Board"
+    },
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "blocked": "Blocked",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
+    },
+    "flags": {
+      "overdue": "Overdue",
+      "blocked": "Blocked"
+    },
+    "dueLabel": "Due",
+    "projectLinked": "Project task",
+    "closed": {
+      "show": "Show finished",
+      "hide": "Hide finished",
+      "empty": "No finished tasks yet."
+    },
+    "board": {
+      "columnEmpty": "No tasks in this column."
+    },
+    "actions": {
+      "start": "Start",
+      "complete": "Complete",
+      "block": "Mark blocked",
+      "unblock": "Unblock",
+      "cancel": "Cancel",
+      "reopen": "Reopen",
+      "details": "Edit details",
+      "save": "Save"
+    },
+    "form": {
+      "title": "New task",
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g. order scaffolding for the site",
+      "descriptionLabel": "Description (optional)",
+      "priorityLabel": "Priority",
+      "dueLabel": "Due date (optional)",
+      "projectLabel": "Project (optional)",
+      "projectNone": "No project",
+      "assignSelfLabel": "Assign to me",
+      "assignSelfHint": "Untick to leave the task unassigned — visible to you and the project's managers.",
+      "submit": "Create task"
+    },
+    "notice": {
+      "created": "Task created.",
+      "updated": "Task updated.",
+      "invalid": "Check the fields — the title must be 3–160 characters.",
+      "needs_migration": "The tasks module is not enabled yet — the change was not saved.",
+      "not_authorized": "You are not allowed to do that.",
+      "not_found": "Task not found.",
+      "limit_reached": "Open-task limit reached — finish or cancel older tasks first.",
+      "error": "Saving failed. Please try again."
+    },
+    "projectTasks": {
+      "title": "Project tasks",
+      "empty": "This project has no tasks yet.",
+      "back": "All tasks"
+    },
+    "projectSection": {
+      "link": "Tasks for this project"
     }
   }
 }
