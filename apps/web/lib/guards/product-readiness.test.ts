@@ -1714,7 +1714,10 @@ describe("no migration files added by this sprint", () => {
     // Bumped 123 -> 124 for work_tasks_v1 (20260711210000, PR #708; ledger 20260711204521) — owner-authorized
     // migration-activation programme; APPLIED to production 2026-07-11;
     // paired rollback in the PR.
-    const SPRINT_BASELINE = 124;
+    // Bumped 124 -> 125 for finance_records_v1 (20260711230000, PR #714; ledger 20260711204634) — owner-authorized
+    // migration-activation programme; APPLIED to production 2026-07-11;
+    // paired rollback in the PR.
+    const SPRINT_BASELINE = 125;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
