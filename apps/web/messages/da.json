@@ -2054,7 +2054,39 @@
     "saving": "Gemmer…",
     "saved": "Præferencer gemt.",
     "error": "Kunne ikke gemme. Prøv igen.",
-    "needsMigration": "Denne sektion er ikke aktiveret endnu — intet blev gemt."
+    "needsMigration": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "v2": {
+      "title": "Flere arbejdspræferencer",
+      "hint": "Samme regel gælder — alt, der står som “Ikke angivet”, forbliver ikke angivet.",
+      "payBasis": "Grundlag for lønforventning",
+      "payBasisOptions": {
+        "gross": "Brutto (før skat)",
+        "net": "Netto (udbetalt)"
+      },
+      "nightShifts": "Villig til at arbejde nattevagter",
+      "weekendShifts": "Villig til at arbejde i weekender",
+      "overtime": "Villig til at arbejde over",
+      "licenceCategories": "Kørekortkategorier",
+      "ownVehicle": "Har eget køretøj",
+      "ownTools": "Har eget værktøj",
+      "notEnabled": "Disse ekstra præferencer er ikke aktiveret endnu — intet gemmes her indtil videre.",
+      "notSaved": "Gemt, undtagen de ekstra præferencer — den del er ikke aktiveret endnu."
+    }
+  },
+  "workerLanguages": {
+    "title": "Sprog",
+    "hint": "Tilføj de sprog, du kan arbejde på, og dit niveau.",
+    "selfStated": "Disse sprog tilføjer du selv — ingen kontrollerer dem.",
+    "language": "Sprog",
+    "level": "Niveau",
+    "levelNative": "Modersmål",
+    "add": "Tilføj sprog",
+    "adding": "Tilføjer…",
+    "remove": "Fjern",
+    "empty": "Ingen sprog tilføjet endnu.",
+    "notEnabled": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "error": "Kunne ikke gemme. Prøv igen.",
+    "invalid": "Vælg et sprog og et niveau."
   },
   "bookings": {
     "endsOn": "Indtil {date}",

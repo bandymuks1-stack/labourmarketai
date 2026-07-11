@@ -2054,7 +2054,39 @@
     "saving": "[EN] Saving…",
     "saved": "[EN] Preferences saved.",
     "error": "[EN] Saving failed. Please try again.",
-    "needsMigration": "[EN] This section is not enabled yet — nothing was saved."
+    "needsMigration": "[EN] This section is not enabled yet — nothing was saved.",
+    "v2": {
+      "title": "[EN] More work preferences",
+      "hint": "[EN] Same rule as above — anything left as “Not stated” stays not stated.",
+      "payBasis": "[EN] Pay expectation basis",
+      "payBasisOptions": {
+        "gross": "[EN] Gross (before taxes)",
+        "net": "[EN] Net (take-home)"
+      },
+      "nightShifts": "[EN] Willing to work night shifts",
+      "weekendShifts": "[EN] Willing to work weekends",
+      "overtime": "[EN] Willing to work overtime",
+      "licenceCategories": "[EN] Driving licence categories",
+      "ownVehicle": "[EN] Has own vehicle",
+      "ownTools": "[EN] Has own tools",
+      "notEnabled": "[EN] These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notSaved": "[EN] Saved, except the extra preferences — that part is not enabled yet."
+    }
+  },
+  "workerLanguages": {
+    "title": "[EN] Languages",
+    "hint": "[EN] Add the languages you can work in and your level.",
+    "selfStated": "[EN] You add these languages yourself — they are not checked by anyone.",
+    "language": "[EN] Language",
+    "level": "[EN] Level",
+    "levelNative": "[EN] Native",
+    "add": "[EN] Add language",
+    "adding": "[EN] Adding…",
+    "remove": "[EN] Remove",
+    "empty": "[EN] No languages added yet.",
+    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "error": "[EN] Saving failed. Please try again.",
+    "invalid": "[EN] Choose a language and a level."
   },
   "bookings": {
     "endsOn": "[EN] Until {date}",

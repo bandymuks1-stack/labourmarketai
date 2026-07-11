@@ -8343,6 +8343,38 @@
     "saving": "Saugoma…",
     "saved": "Pageidavimai išsaugoti.",
     "error": "Išsaugoti nepavyko. Pabandykite dar kartą.",
-    "needsMigration": "Ši dalis dar neįjungta — niekas nebuvo išsaugota."
+    "needsMigration": "Ši dalis dar neįjungta — niekas nebuvo išsaugota.",
+    "v2": {
+      "title": "Papildomi darbo pageidavimai",
+      "hint": "Galioja ta pati taisyklė — kas palikta „Nenurodyta“, lieka nenurodyta.",
+      "payBasis": "Atlygio lūkesčio pagrindas",
+      "payBasisOptions": {
+        "gross": "Bruto (prieš mokesčius)",
+        "net": "Neto (į rankas)"
+      },
+      "nightShifts": "Gali dirbti naktinėmis pamainomis",
+      "weekendShifts": "Gali dirbti savaitgaliais",
+      "overtime": "Gali dirbti viršvalandžius",
+      "licenceCategories": "Vairuotojo pažymėjimo kategorijos",
+      "ownVehicle": "Turi nuosavą automobilį",
+      "ownTools": "Turi nuosavus įrankius",
+      "notEnabled": "Šie papildomi pageidavimai dar neįjungti — čia kol kas niekas nesaugoma.",
+      "notSaved": "Išsaugota, išskyrus papildomus pageidavimus — ta dalis dar neįjungta."
+    }
+  },
+  "workerLanguages": {
+    "title": "Kalbos",
+    "hint": "Pridėkite kalbas, kuriomis galite dirbti, ir savo lygį.",
+    "selfStated": "Šias kalbas įrašote patys — jų niekas netikrina.",
+    "language": "Kalba",
+    "level": "Lygis",
+    "levelNative": "Gimtoji",
+    "add": "Pridėti kalbą",
+    "adding": "Pridedama…",
+    "remove": "Pašalinti",
+    "empty": "Kalbų dar nepridėta.",
+    "notEnabled": "Ši dalis dar neįjungta — niekas nebuvo išsaugota.",
+    "error": "Išsaugoti nepavyko. Bandykite dar kartą.",
+    "invalid": "Pasirinkite kalbą ir lygį."
   }
 }
