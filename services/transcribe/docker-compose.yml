@@ -1,0 +1,25 @@
+services:
+  transcribe:
+    build:
+      context: .
+      args:
+        WHISPER_MODEL: ${WHISPER_MODEL:-small}
+    image: lmai-transcribe:latest
+    restart: unless-stopped
+    ports:
+      # Bind to localhost only — expose publicly ONLY behind a TLS reverse
+      # proxy (Caddy/nginx). Never expose :8085 raw to the internet.
+      - "127.0.0.1:8085:8085"
+    environment:
+      TRANSCRIBE_TOKEN: ${TRANSCRIBE_TOKEN:?set a 32+ char secret in .env}
+      MAX_BODY_BYTES: ${MAX_BODY_BYTES:-26214400}
+      MAX_DURATION_SECONDS: ${MAX_DURATION_SECONDS:-600}
+      WHISPER_THREADS: ${WHISPER_THREADS:-4}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-10}
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+    read_only: true
+    tmpfs:
+      - /tmp
