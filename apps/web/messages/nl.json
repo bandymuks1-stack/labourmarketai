@@ -1,4 +1,27 @@
 {
+  "activityCentre": {
+    "eyebrow": "Activiteitencentrum",
+    "title": "Activiteit",
+    "intro": "Alles wat op je aandacht wacht, op één plek.",
+    "readModel": "Hier hoef je niets als gelezen te markeren — een signaal verdwijnt zodra je het op de eigen pagina afhandelt.",
+    "filters": {
+      "stateLabel": "Tonen",
+      "attention": "Vraagt aandacht",
+      "all": "Alle signalen",
+      "moduleLabel": "Bron",
+      "allModules": "Alle bronnen"
+    },
+    "allClear": "Er wacht nu niets op je aandacht. Zodra er iets nieuws is, zie je het hier.",
+    "rowClear": "Niets in behandeling",
+    "readSemantics": {
+      "pending_invitations": "Verdwijnt wanneer je de uitnodiging op het overzicht accepteert of afwijst.",
+      "unread_messages": "Verdwijnt wanneer je het gesprek leest.",
+      "incoming_service_requests": "Verdwijnt wanneer je de aanvraag beantwoordt.",
+      "service_request_responses": "Verdwijnt wanneer je de pagina met dienstaanvragen opent.",
+      "pending_bookings": "Verdwijnt wanneer je op het boekingsvoorstel reageert.",
+      "booking_responses": "Verdwijnt wanneer je de boekingenpagina opent."
+    }
+  },
   "commandFinder": {
     "title": "Snel zoeken",
     "placeholder": "Typ wat je nodig hebt: CV, werkjournaal, ploeg, prijzen…",
@@ -2983,7 +3006,8 @@
       },
       "statusStrip": {
         "title": "Wat nu op u wacht",
-        "allClear": "Er wacht op dit moment niets op uw aandacht."
+        "allClear": "Er wacht op dit moment niets op uw aandacht.",
+        "viewAll": "Alle activiteit"
       },
       "myZone": {
         "actionsHeading": "Wat je nu kunt doen",
@@ -3581,7 +3605,8 @@
       "emptyBody": "Als er iets belangrijks gebeurt, zie je het hier.",
       "switchRoleCta": "Schakel over naar {role} om te bekijken",
       "markAllRead": "Markeer alles als gelezen",
-      "close": "Sluiten"
+      "close": "Sluiten",
+      "viewAll": "Alle activiteit bekijken"
     }
   },
   "shared": {

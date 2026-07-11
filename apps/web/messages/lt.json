@@ -1,4 +1,27 @@
 {
+  "activityCentre": {
+    "eyebrow": "Veiklos centras",
+    "title": "Veikla",
+    "intro": "Viskas, kas laukia jūsų dėmesio — vienoje vietoje.",
+    "readModel": "Čia nieko nereikia žymėti kaip perskaityto — signalas išnyksta, kai jį išsprendžiate jo puslapyje.",
+    "filters": {
+      "stateLabel": "Rodyti",
+      "attention": "Laukia dėmesio",
+      "all": "Visi signalai",
+      "moduleLabel": "Šaltinis",
+      "allModules": "Visi šaltiniai"
+    },
+    "allClear": "Šiuo metu niekas nelaukia jūsų dėmesio. Kai atsiras kas nors naujo, pamatysite tai čia.",
+    "rowClear": "Nieko nelaukia",
+    "readSemantics": {
+      "pending_invitations": "Išnyksta, kai apžvalgoje priimate arba atmetate pakvietimą.",
+      "unread_messages": "Išnyksta, kai perskaitote pokalbį.",
+      "incoming_service_requests": "Išnyksta, kai atsakote į užklausą.",
+      "service_request_responses": "Išnyksta, kai atidarote paslaugų užklausų puslapį.",
+      "pending_bookings": "Išnyksta, kai atsakote į rezervacijos pasiūlymą.",
+      "booking_responses": "Išnyksta, kai atidarote rezervacijų puslapį."
+    }
+  },
   "commandFinder": {
     "title": "Greita paieška",
     "placeholder": "Įveskite, ko ieškote: CV, žurnalas, komanda, kainos…",
@@ -2983,7 +3006,8 @@
       },
       "statusStrip": {
         "title": "Kas laukia dabar",
-        "allClear": "Šiuo metu niekas nelaukia jūsų dėmesio."
+        "allClear": "Šiuo metu niekas nelaukia jūsų dėmesio.",
+        "viewAll": "Visa veikla"
       },
       "myZone": {
         "actionsHeading": "Ką galite padaryti dabar",
@@ -3581,7 +3605,8 @@
       "emptyBody": "Jei atsiras svarbus prašymas ar žinutė, matysite tai čia.",
       "switchRoleCta": "Persijungti į {role} norėdami pamatyti",
       "markAllRead": "Pažymėti visus skaitytais",
-      "close": "Uždaryti"
+      "close": "Uždaryti",
+      "viewAll": "Visa veikla"
     }
   },
   "shared": {

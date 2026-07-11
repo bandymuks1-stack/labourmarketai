@@ -1,4 +1,27 @@
 {
+  "activityCentre": {
+    "eyebrow": "Activity centre",
+    "title": "Activity",
+    "intro": "Everything waiting for your attention, in one place.",
+    "readModel": "There is nothing to mark as read here — each signal clears itself when you resolve it on its own page.",
+    "filters": {
+      "stateLabel": "Show",
+      "attention": "Needs attention",
+      "all": "All signals",
+      "moduleLabel": "Source",
+      "allModules": "All sources"
+    },
+    "allClear": "Nothing needs your attention right now. When something new arrives, it will appear here.",
+    "rowClear": "Nothing pending",
+    "readSemantics": {
+      "pending_invitations": "Clears when you accept or decline the invitation on the overview.",
+      "unread_messages": "Clears when you read the conversation.",
+      "incoming_service_requests": "Clears when you answer the request.",
+      "service_request_responses": "Clears when you open the service requests page.",
+      "pending_bookings": "Clears when you respond to the booking proposal.",
+      "booking_responses": "Clears when you open the bookings page."
+    }
+  },
   "commandFinder": {
     "title": "Quick find",
     "placeholder": "Type what you need: CV, journal, team, pricing…",
@@ -2983,7 +3006,8 @@
       },
       "statusStrip": {
         "title": "Waiting for you now",
-        "allClear": "Nothing is waiting for your attention right now."
+        "allClear": "Nothing is waiting for your attention right now.",
+        "viewAll": "All activity"
       },
       "myZone": {
         "actionsHeading": "What you can do now",
@@ -3581,7 +3605,8 @@
       "emptyBody": "If something important comes up, you'll see it here.",
       "switchRoleCta": "Switch to {role} to view",
       "markAllRead": "Mark all as read",
-      "close": "Close"
+      "close": "Close",
+      "viewAll": "View all activity"
     }
   },
   "shared": {

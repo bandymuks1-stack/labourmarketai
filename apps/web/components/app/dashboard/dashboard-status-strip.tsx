@@ -25,9 +25,20 @@ export async function DashboardStatusStrip({
       data-testid="dashboard-status-strip"
       className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
     >
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-        {t("title")}
-      </span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("title")}
+        </span>
+        {/* Control room PR C: the strip's full view — the unified activity
+            centre, same spine, per-signal read semantics + filters. */}
+        <Link
+          href={"/dashboard/activity" as "/dashboard"}
+          data-testid="status-strip-view-all"
+          className="rounded-sm font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        >
+          {t("viewAll")} →
+        </Link>
+      </div>
       {entries.length === 0 ? (
         <p
           data-testid="status-strip-all-clear"

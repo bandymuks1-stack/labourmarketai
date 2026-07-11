@@ -24,6 +24,8 @@ const CLASSIFICATION: Record<string, string> = {
   // ── REAL_LAUNCH_SURFACE ────────────────────────────────────────────────
   "dashboard": "REAL_LAUNCH_SURFACE",
   "dashboard/account": "REAL_LAUNCH_SURFACE",
+  // Unified activity centre (control room PR C) — spine-only aggregation.
+  "dashboard/activity": "REAL_LAUNCH_SURFACE",
   "dashboard/bookings": "REAL_LAUNCH_SURFACE",
   "dashboard/candidates": "REAL_LAUNCH_SURFACE",
   "dashboard/communication": "REAL_LAUNCH_SURFACE",
