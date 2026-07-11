@@ -25,6 +25,11 @@ import {
 } from "@/lib/estimate/estimate";
 import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
 import { isWorkTypeSlug, isMarketCountry } from "@/lib/taxonomy/work-categories";
+import {
+  readStructuredDemandV2,
+  sanitizeStructuredDemandV2,
+  type StructuredDemandV2,
+} from "@/lib/demand/structured-demand-v2";
 
 /** Accommodation offers that are safe to expose on the worker board (enum, no
  *  free text). Mirrors the worker RPC's accommodation whitelist. */
@@ -106,6 +111,13 @@ export type DemandFields = {
   /** Required tools/equipment — closed set of EXISTING taxonomy skill slugs
    *  (§8.6). Optional; unset/empty stays an honest "not stated". */
   requiredTools?: readonly string[];
+  /** Structured demand v2 clusters (marketplace precision PR 2) — untrusted
+   *  wire input, validated server-side by `sanitizeStructuredDemandV2`
+   *  (closed sets, integer cents, cross-field sanity). Stored under
+   *  `payload.structured_v2`; owner-side only until the human-gated MP-3
+   *  worker-RPC widening. Invalid input is dropped (the request still
+   *  submits) — nothing near-valid is salvaged into the canonical payload. */
+  structuredV2?: unknown;
 };
 
 export type DemandRequestResult =
@@ -253,6 +265,12 @@ export async function submitDemandRequest(
     required_tools: requiredTools.length > 0 ? requiredTools : null,
   };
 
+  // Structured demand v2 (PR 2) — validated into the canonical closed-set
+  // shape or dropped entirely. NOT worker-exposed (the worker RPC whitelist
+  // does not read structured_v2 until MP-3 is owner-approved and applied).
+  const structuredV2 = sanitizeStructuredDemandV2(fields?.structuredV2);
+  if (structuredV2) payload.structured_v2 = structuredV2;
+
   // Optional preliminary estimate. Only persisted when the user actually filled
   // it in; if engaged but invalid (negatives / impossible %), block — an invalid
   // estimate is never stored. The result is RECOMPUTED here (deterministic), so
@@ -325,4 +343,104 @@ export async function submitDemandRequest(
 
   revalidatePath("/", "layout");
   return { ok: true, requestId };
+}
+
+/** Duplicate-and-edit prefill (Capability E/G repeat action): the owner's own
+ *  most recent request of the intent's kind, echoed back as form values. Own
+ *  data only (customer_requests RLS: profile_id = auth.uid()); nothing here
+ *  reads anyone else's demand. Absent/none → `found: false` (the form stays
+ *  empty — no fabricated prefill). */
+export type DemandPrefill =
+  | { found: false }
+  | {
+      found: true;
+      fields: {
+        role: string;
+        description: string;
+        location: string;
+        skills: string;
+        urgency: DemandUrgency | null;
+        notes: string;
+        workType: string | null;
+        country: string | null;
+        teamSize: number | null;
+        accommodation: string | null;
+        transport: string | null;
+        requiredTools: string[];
+      };
+      structuredV2: StructuredDemandV2 | null;
+    };
+
+export async function getOwnLastDemandPrefill(
+  intent: DemandIntent,
+): Promise<DemandPrefill> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { found: false };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = supabase as any;
+  const { data, error } = await sb
+    .from("customer_requests")
+    .select(
+      "title, need_summary, country, role_or_work_type, team_size, start_period, payload",
+    )
+    .eq("profile_id", user.id)
+    .eq("kind", INTENT_KIND[intent])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return { found: false };
+
+  const payload =
+    data.payload && typeof data.payload === "object"
+      ? (data.payload as Record<string, unknown>)
+      : {};
+  const asText = (v: unknown, max: number) =>
+    typeof v === "string" ? v.slice(0, max) : "";
+  const urgency = ["flexible", "this_week", "urgent"].includes(
+    String(payload.urgency ?? data.start_period ?? ""),
+  )
+    ? ((payload.urgency ?? data.start_period) as DemandUrgency)
+    : null;
+  const requiredTools = Array.isArray(payload.required_tools)
+    ? payload.required_tools.filter(
+        (s): s is string => typeof s === "string" && REQUIRED_TOOL_SLUGS.has(s),
+      )
+    : [];
+
+  return {
+    found: true,
+    fields: {
+      role: asText(payload.role, MAX_TITLE) || asText(data.title, MAX_TITLE),
+      description: asText(data.need_summary, MAX_TEXT),
+      location: asText(payload.location, MAX_TITLE),
+      skills: asText(payload.skills, MAX_TEXT),
+      urgency,
+      notes: asText(payload.notes, MAX_TEXT),
+      workType:
+        typeof data.role_or_work_type === "string" && isWorkTypeSlug(data.role_or_work_type)
+          ? data.role_or_work_type
+          : null,
+      country:
+        typeof data.country === "string" && isMarketCountry(data.country)
+          ? data.country
+          : null,
+      teamSize: typeof data.team_size === "number" ? data.team_size : null,
+      accommodation:
+        typeof payload.accommodation === "string" &&
+        ACCOMMODATION_OFFER_VALUES.has(payload.accommodation)
+          ? payload.accommodation
+          : null,
+      transport:
+        typeof payload.transport === "string" &&
+        TRANSPORT_OFFER_VALUES.has(payload.transport)
+          ? payload.transport
+          : null,
+      requiredTools,
+    },
+    structuredV2: readStructuredDemandV2(payload),
+  };
 }

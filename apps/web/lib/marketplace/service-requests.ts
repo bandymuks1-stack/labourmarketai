@@ -199,6 +199,9 @@ export async function requestServiceOffering(
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
     if (error.code === UNIQUE_VIOLATION) return { kind: "duplicate" };
+    // The RPC raises 'offering_not_active' when the offering was deactivated —
+    // an honest, permanent "no", not a transient failure (repeat actions, PR 6b).
+    if (/offering_not_active/.test(error.message ?? "")) return { kind: "inactive" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
   revalidatePath("/dashboard/service-requests");
