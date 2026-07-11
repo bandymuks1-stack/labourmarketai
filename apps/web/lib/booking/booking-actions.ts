@@ -123,6 +123,13 @@ export async function withdrawBookingAction(input: {
 
 export interface BookingRow {
   id: string;
+  /** customer_requests.id — with workerId, the upsert key the propose RPC
+   *  re-opens on; lets "propose again" reuse the EXISTING propose flow
+   *  pre-scoped to the same request + worker (repeat actions, PR 6b).
+   *  Opaque ids only — no profile/contact data crosses this boundary. */
+  requestId: string;
+  /** workers.id (already client-visible on the scouting propose surface). */
+  workerId: string;
   status: BookingStatus;
   startDate: string | null;
   expectedEndDate: string | null;
@@ -155,7 +162,7 @@ export async function listMyBookings(): Promise<BookingsListResult> {
   const { data, error } = await asAny(supabase)
     .from("booking_requests")
     .select(
-      "id, owner_id, status, start_date, expected_end_date, location_country, role_text, note, readiness_snapshot, created_at, updated_at",
+      "id, owner_id, request_id, worker_id, status, start_date, expected_end_date, location_country, role_text, note, readiness_snapshot, created_at, updated_at",
     )
     .order("created_at", { ascending: false });
   if (error) {
@@ -169,6 +176,8 @@ export async function listMyBookings(): Promise<BookingsListResult> {
   for (const r of (data ?? []) as any[]) {
     const row: BookingRow = {
       id: r.id,
+      requestId: String(r.request_id ?? ""),
+      workerId: String(r.worker_id ?? ""),
       status: r.status,
       startDate: r.start_date ?? null,
       expectedEndDate: r.expected_end_date ?? null,

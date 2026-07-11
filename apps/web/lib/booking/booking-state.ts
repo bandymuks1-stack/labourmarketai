@@ -110,6 +110,23 @@ export function deriveBookingDisplayState(
 }
 
 /**
+ * Repeat action (Capability G, PR 6b): whether the PROPOSING company may
+ * re-open this booking with new dates ("propose again"). Pure and
+ * default-closed: ONLY the two closed-by-the-other-side-or-self terminal
+ * statuses the UI actually reaches — `declined` (worker said no) and
+ * `withdrawn` (company took it back). Never `proposed` (still open — withdraw
+ * instead), never `accepted` (a real engagement — message/plan instead), and
+ * never `expired` (unreachable, no scheduler writes it — see the lifecycle
+ * guard). The applied propose RPC upserts on (owner_id, request_id,
+ * worker_id) and re-opens such a row back to `proposed` with the new dates —
+ * so "propose again" is the EXISTING propose flow pre-scoped to the same
+ * request + worker; the worker decides again.
+ */
+export function canProposeAgain(status: BookingStatus): boolean {
+  return status === "declined" || status === "withdrawn";
+}
+
+/**
  * Pure "responses since last seen" compute (no I/O — unit-testable), audit
  * PR5. Counts the caller's OWN proposals that the WORKER moved to a response
  * status (accepted/declined) after `seenAt` — the respond RPC stamps

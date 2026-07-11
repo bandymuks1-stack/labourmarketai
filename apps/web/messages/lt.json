@@ -5145,6 +5145,10 @@
     "messageCta": "Parašyti žinutę",
     "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą.",
     "duplicate": "Jau turi neuždarytą užklausą šiai paslaugai.",
+    "requestAgain": "Pateikti užklausą iš naujo",
+    "requestAgainNote": "Bus išsiųsta nauja užklausa dėl tos pačios paslaugos. Ankstesnė žinutė jau įrašyta — galite ją pakeisti. Paslaugos teikėjas sprendžia iš naujo.",
+    "cancel": "Atšaukti",
+    "offeringInactive": "Ši paslauga nebėra aktyvi, todėl naujos užklausos išsiųsti negalima.",
     "requesterMessage": "Jų žinutė",
     "providerNote": "Paslaugos teikėjo pastaba",
     "responded": "Atsakyta",
@@ -6600,6 +6604,7 @@
       "message": "Parašyti žinutę",
       "withdraw": "Atšaukti pasiūlymą",
       "findAnother": "Ieškoti kito darbuotojo",
+      "proposeAgain": "Siūlyti iš naujo su naujomis datomis",
       "planning": "Peržiūrėti planavime"
     },
     "connections": {
@@ -6616,6 +6621,7 @@
     },
     "propose": {
       "modeNote": "Tai rezervacijos pasiūlymas su datomis — darbuotojas jį patvirtina arba atmeta. Niekas nerezervuota, kol darbuotojas nepriima.",
+      "againModeNote": "Tai iš naujo atveria tą patį pasiūlymą tam pačiam darbuotojui su naujomis datomis — darbuotojas sprendžia iš naujo. Niekas nerezervuota, kol darbuotojas nepriima.",
       "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti."
     }
   },
