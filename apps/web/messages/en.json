@@ -5271,7 +5271,54 @@
     "internalNote": "Internal record — no emails or messages are sent to anyone.",
     "explanationPending": "The explanation is being prepared from the Lithuanian master version."
   },
+  "crmPipeline": {
+    "eyebrow": "Operator queue",
+    "title": "Demand pipeline",
+    "subtitle": "Every demand source in one read view: submitted requests, public company-need intakes, stored leads and waitlist signups.",
+    "back": "Back to control room",
+    "honestNote": "Read view only. The pipeline stage is a presentation lens — every row also shows its stored status verbatim, and status changes stay on each row's own surface. Nothing here contacts anyone or edits anything.",
+    "summaryHeading": "Stage summary",
+    "windowNote": "Counts are computed over the rows actually loaded (the sales sources load the 50 most recent rows each) — never estimated.",
+    "duplicateChip": "Possible duplicate",
+    "storedStatusLabel": "Stored status",
+    "createdLabel": "Created",
+    "openSurface": "Open its surface",
+    "empty": "No demand rows loaded yet. When a request, intake, lead or signup exists, it appears here.",
+    "noMatches": "No rows match the current filters.",
+    "viewPipeline": "View demand pipeline",
+    "stages": {
+      "new": "New",
+      "contacted": "Contacted",
+      "qualifying": "Qualifying",
+      "follow_up": "Follow-up",
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "sources": {
+      "customer_request": "Demand request",
+      "public_intake": "Public intake",
+      "lead": "Lead",
+      "waitlist": "Waitlist"
+    },
+    "sourceStates": {
+      "needs_admin_read": "not readable in this environment",
+      "service_key_missing": "service connection not configured",
+      "needs_migration": "waiting for its migration",
+      "not_admin": "admin check failed",
+      "error": "could not be read right now"
+    },
+    "filters": {
+      "sourceLabel": "Source",
+      "stageLabel": "Stage",
+      "all": "All",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Filter by title, company or status",
+      "searchSubmit": "Apply",
+      "reset": "Reset"
+    }
+  },
   "salesIntake": {
+    "viewPipeline": "View demand pipeline",
     "title": "Sales intake",
     "intro": "A view of who is coming in: submitted demand requests in review, waitlist signups, and stored leads. Viewing only — real recorded rows, nothing editable here.",
     "honestNote": "Viewing only. Nothing here contacts anyone — no email, no SMS, no messages. The only action records an internal follow-up task for the team.",

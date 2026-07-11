@@ -5271,7 +5271,54 @@
     "internalNote": "Interne registratie — er worden geen e-mails of berichten naar wie dan ook verzonden.",
     "explanationPending": "De uitleg wordt voorbereid op basis van de Litouwse masterversie."
   },
+  "crmPipeline": {
+    "eyebrow": "Operatorwachtrij",
+    "title": "Vraagpijplijn",
+    "subtitle": "Alle vraagbronnen in één leesweergave: ingediende aanvragen, publieke bedrijfsbehoefte-formulieren, opgeslagen leads en wachtlijstinschrijvingen.",
+    "back": "Terug naar het beheerderspaneel",
+    "honestNote": "Alleen lezen. De pijplijnfase is een presentatielens — elke rij toont ook letterlijk de opgeslagen status, en statuswijzigingen blijven op de eigen pagina van de rij. Niets hier neemt contact op of wijzigt iets.",
+    "summaryHeading": "Fasesamenvatting",
+    "windowNote": "Aantallen worden berekend over de werkelijk geladen rijen (de verkoopbronnen laden elk de 50 meest recente) — nooit geschat.",
+    "duplicateChip": "Mogelijk duplicaat",
+    "storedStatusLabel": "Opgeslagen status",
+    "createdLabel": "Aangemaakt",
+    "openSurface": "Open de eigen pagina",
+    "empty": "Nog geen vraagrijen geladen. Zodra er een aanvraag, formulier, lead of inschrijving bestaat, verschijnt die hier.",
+    "noMatches": "Geen rijen voldoen aan de huidige filters.",
+    "viewPipeline": "Vraagpijplijn bekijken",
+    "stages": {
+      "new": "Nieuw",
+      "contacted": "Gecontacteerd",
+      "qualifying": "In beoordeling",
+      "follow_up": "Wacht op opvolging",
+      "active": "Actief",
+      "closed": "Gesloten"
+    },
+    "sources": {
+      "customer_request": "Vraagaanvraag",
+      "public_intake": "Publiek formulier",
+      "lead": "Lead",
+      "waitlist": "Wachtlijst"
+    },
+    "sourceStates": {
+      "needs_admin_read": "niet leesbaar in deze omgeving",
+      "service_key_missing": "serviceverbinding niet geconfigureerd",
+      "needs_migration": "wacht op de migratie",
+      "not_admin": "beheerderscontrole niet geslaagd",
+      "error": "kon nu niet worden gelezen"
+    },
+    "filters": {
+      "sourceLabel": "Bron",
+      "stageLabel": "Fase",
+      "all": "Alle",
+      "searchLabel": "Zoeken",
+      "searchPlaceholder": "Filter op titel, bedrijf of status",
+      "searchSubmit": "Toepassen",
+      "reset": "Herstellen"
+    }
+  },
   "salesIntake": {
+    "viewPipeline": "Vraagpijplijn bekijken",
     "title": "Sales-intake",
     "intro": "Een overzicht van wie er binnenkomt: ingediende personeelsbehoefte-aanvragen in beoordeling, wachtlijstaanmeldingen en opgeslagen leads. Alleen inzien — echte vastgelegde rijen, hier is niets te bewerken.",
     "honestNote": "Alleen inzien. Niets hier neemt contact op met wie dan ook — geen e-mail, geen sms, geen berichten. De enige actie legt een interne opvolgtaak voor het team vast.",
