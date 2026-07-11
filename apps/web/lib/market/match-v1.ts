@@ -34,11 +34,14 @@ import type { StructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
 import {
   MATCH_CALC_VERSION,
   compareCompensationV2,
+  compareLanguagesV2,
+  comparePayBasisV2,
   compareStartDateV2,
   engagementFormAccepted,
   type MatchCalcVersion,
   type MatchCriterionResult,
   type MatchMissingFact,
+  type WorkerLanguageFact,
 } from "./match-criteria-v2";
 
 // Matching contract v2 (PR 4) — ONE engine, ONE import surface: the criterion
@@ -48,9 +51,14 @@ export {
   MATCH_CALC_VERSION,
   NEGOTIABLE_SALARY_GAP_RATIO,
   WORKER_CONTRACT_TYPE_ACCEPTS,
+  WORKER_LANGUAGE_LEVELS,
   compareCompensationV2,
+  compareLanguagesV2,
+  comparePayBasisV2,
   compareStartDateV2,
   engagementFormAccepted,
+  languageLevelRank,
+  languageLevelSatisfies,
 } from "./match-criteria-v2";
 export type {
   MatchCalcVersion,
@@ -59,6 +67,7 @@ export type {
   MatchCriterionOutcome,
   MatchCriterionResult,
   MatchMissingFact,
+  WorkerLanguageFact,
 } from "./match-criteria-v2";
 
 /** Real `worker_skills.source` tiers, strongest first. */
@@ -151,6 +160,30 @@ export interface MatchSubject {
    *  'temporary' | 'any') — engagement-form hard check fires ONLY when both
    *  sides stated their form (contract v2). Never inferred. */
   readonly preferredContractType?: string | null;
+
+  // ── Mirrored worker facts (contract v2.1, P2-PR4). ALL come from
+  //    HUMAN-GATED stores that may not be applied yet: worker_languages
+  //    (MP-1 / PR #720) and the MP-2 / PR #721 workers columns. The read
+  //    layers feature-detect; absence here (undefined/null) is ALWAYS an
+  //    honest "not stated" → missingFacts, NEVER a fabricated outcome. ──────
+  /** worker_languages rows { lang, level A1..C2|native }. Empty array is
+   *  treated as unstated (the gated store starts empty for every worker). */
+  readonly languageLevels?: readonly WorkerLanguageFact[] | null;
+  /** workers.driving_licence_categories (⊆ B,BE,C,CE,D). Empty array is
+   *  treated as unstated — never as "holds no licence". */
+  readonly drivingLicenceCategories?: readonly string[] | null;
+  /** workers.own_vehicle — tri-state; null = not stated. */
+  readonly ownVehicle?: boolean | null;
+  /** workers.own_tools — tri-state; null = not stated. */
+  readonly ownTools?: boolean | null;
+  /** workers.pay_basis_preference ('gross' | 'net'); null = not stated. */
+  readonly payBasisPreference?: string | null;
+  /** workers.night_shifts_ok — tri-state; null = not stated. */
+  readonly nightShiftsOk?: boolean | null;
+  /** workers.weekend_shifts_ok — tri-state; null = not stated. */
+  readonly weekendShiftsOk?: boolean | null;
+  /** workers.overtime_ok — tri-state; null = not stated. */
+  readonly overtimeOk?: boolean | null;
 }
 
 /** Great-circle distance in km (haversine). Pure; used only when BOTH sides
@@ -700,9 +733,11 @@ export function matchWorkerToNeed(
     // demand_unstated means no stated window — lenient, nothing recorded.
   }
 
-  // Shifts / hours — the worker side has no stated shift/hours preference
-  // store yet, so a stated demand schedule is an honest discussion point.
-  if ((v2?.time?.shifts?.length ?? 0) > 0 || v2?.time?.hours_per_week != null) {
+  // Shifts / hours — stated weekly hours have no worker-side preference
+  // store, so they stay an honest discussion point. Night/weekend shift
+  // KINDS are owned by the dedicated mirrored dimensions below (v2.1) —
+  // they are no longer double-reported here.
+  if (v2?.time?.hours_per_week != null) {
     negotiables.push({
       criterion: "shifts_hours",
       class: "negotiable",
@@ -750,13 +785,300 @@ export function matchWorkerToNeed(
     }
   }
 
-  // Licence categories — no worker-side licence store exists, so a stated
-  // requirement is ALWAYS a worker-side missing fact, never a block.
-  if ((v2?.transport?.licence_categories?.length ?? 0) > 0) {
+  // ── Eight mirrored dimensions (contract v2.1, P2-PR4). Worker facts come
+  //    from the human-gated MP-1/MP-2 stores; while those are unapplied every
+  //    subject reads back unstated → worker-side missingFacts (never a block,
+  //    never a fabricated outcome). Requirement absence on the demand side is
+  //    "no requirement" (nothing recorded); JOB-FACT absence (shifts /
+  //    overtime expectation / pay basis) is a demand-side missing fact when
+  //    the worker HAS stated the mirror. ────────────────────────────────────
+
+  // 1) Languages with CEFR levels (requirements.languages). A required
+  //    language above the worker's stated level is a hard conflict;
+  //    one_per_team_sufficient demotes a failed language to negotiable ONLY
+  //    for team-target demands (target_supply team | multiple_workers).
+  const langCmp = compareLanguagesV2(v2, subject.languageLevels);
+  if (langCmp !== null) {
+    const langDemandSource = "customer_requests.payload.structured_v2.requirements.languages";
+    if (langCmp.kind === "met") {
+      matchedHard.push({
+        criterion: "language",
+        class: "hard",
+        outcome: "met",
+        source: langDemandSource,
+      });
+      // Extra stated languages beyond the requirement — a weighted strength.
+      if (langCmp.extraCount > 0) {
+        strengths.push({
+          criterion: "language",
+          class: "weighted",
+          outcome: "met",
+          source: "worker_languages",
+        });
+      }
+    } else if (langCmp.kind === "negotiable_team_gap") {
+      negotiables.push({
+        criterion: "language",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: langDemandSource,
+      });
+    } else if (langCmp.kind === "hard_not_met") {
+      hardBlock = true;
+      blocking.push({
+        criterion: "language",
+        class: "hard",
+        outcome: "not_met",
+        source: langDemandSource,
+      });
+    } else {
+      missingFacts.push({
+        criterion: "language",
+        side: "worker",
+        source: "worker_languages",
+      });
+    }
+  }
+
+  // 2) Driving-licence categories — hard when both sides stated: every
+  //    required category must be held. Unstated worker licences (store
+  //    unapplied, or an empty array) stay a worker-side missing fact.
+  const requiredLicences = v2?.transport?.licence_categories ?? [];
+  if (requiredLicences.length > 0) {
+    const licenceSource = "customer_requests.payload.structured_v2.transport.licence_categories";
+    const held = subject.drivingLicenceCategories;
+    if (held == null || held.length === 0) {
+      missingFacts.push({
+        criterion: "licence_categories",
+        side: "worker",
+        source: "workers.driving_licence_categories",
+      });
+    } else {
+      const heldSet = new Set(held.map((c) => c.trim().toUpperCase()));
+      const missingCats = requiredLicences.filter((c) => !heldSet.has(c));
+      if (missingCats.length === 0) {
+        matchedHard.push({
+          criterion: "licence_categories",
+          class: "hard",
+          outcome: "met",
+          source: licenceSource,
+        });
+      } else {
+        hardBlock = true;
+        blocking.push({
+          criterion: "licence_categories",
+          class: "hard",
+          outcome: "not_met",
+          source: licenceSource,
+        });
+      }
+    }
+  }
+
+  // 3) Own vehicle — transport.own_vehicle_required is the HARD form;
+  //    requirements.own_vehicle is "merely preferred" (strength when held,
+  //    discussion point when not).
+  const vehicleRequired = v2?.transport?.own_vehicle_required === true;
+  const vehiclePreferred = v2?.requirements?.own_vehicle === true;
+  if (vehicleRequired || vehiclePreferred) {
+    const vehicleSource = vehicleRequired
+      ? "customer_requests.payload.structured_v2.transport.own_vehicle_required"
+      : "customer_requests.payload.structured_v2.requirements.own_vehicle";
+    if (subject.ownVehicle == null) {
+      missingFacts.push({
+        criterion: "own_vehicle",
+        side: "worker",
+        source: "workers.own_vehicle",
+      });
+    } else if (vehicleRequired) {
+      if (subject.ownVehicle === true) {
+        matchedHard.push({
+          criterion: "own_vehicle",
+          class: "hard",
+          outcome: "met",
+          source: vehicleSource,
+        });
+      } else {
+        hardBlock = true;
+        blocking.push({
+          criterion: "own_vehicle",
+          class: "hard",
+          outcome: "not_met",
+          source: vehicleSource,
+        });
+      }
+    } else if (subject.ownVehicle === true) {
+      strengths.push({
+        criterion: "own_vehicle",
+        class: "weighted",
+        outcome: "met",
+        source: vehicleSource,
+      });
+    } else {
+      negotiables.push({
+        criterion: "own_vehicle",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: vehicleSource,
+      });
+    }
+  }
+
+  // 4) Own tools — requirements.own_tools with a stated worker "no" is a
+  //    hard conflict (the demand REQUIRES them).
+  if (v2?.requirements?.own_tools === true) {
+    const toolsSource = "customer_requests.payload.structured_v2.requirements.own_tools";
+    if (subject.ownTools == null) {
+      missingFacts.push({
+        criterion: "own_tools",
+        side: "worker",
+        source: "workers.own_tools",
+      });
+    } else if (subject.ownTools === true) {
+      matchedHard.push({
+        criterion: "own_tools",
+        class: "hard",
+        outcome: "met",
+        source: toolsSource,
+      });
+    } else {
+      hardBlock = true;
+      blocking.push({
+        criterion: "own_tools",
+        class: "hard",
+        outcome: "not_met",
+        source: toolsSource,
+      });
+    }
+  }
+
+  // 5) Pay basis (gross/net) — a mismatch is a CONVERSION CONVERSATION,
+  //    never a block. Fires when either side stated a basis.
+  const basisCmp = comparePayBasisV2(v2, subject.payBasisPreference);
+  if (basisCmp !== null) {
+    const basisDemandSource = "customer_requests.payload.structured_v2.compensation.basis";
+    if (basisCmp.kind === "met") {
+      strengths.push({
+        criterion: "pay_basis",
+        class: "weighted",
+        outcome: "met",
+        source: basisDemandSource,
+      });
+    } else if (basisCmp.kind === "negotiable_mismatch") {
+      negotiables.push({
+        criterion: "pay_basis",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: basisDemandSource,
+      });
+    } else if (basisCmp.kind === "demand_unstated") {
+      missingFacts.push({
+        criterion: "pay_basis",
+        side: "demand",
+        source: basisDemandSource,
+      });
+    } else {
+      missingFacts.push({
+        criterion: "pay_basis",
+        side: "worker",
+        source: "workers.pay_basis_preference",
+      });
+    }
+  }
+
+  // 6) + 7) Night / weekend shifts — a stated demand shift the worker has
+  //    stated they will NOT work is a hard conflict. When the demand has not
+  //    stated its shifts but the worker HAS stated a shift preference, the
+  //    demand side owes the fact.
+  const demandShifts = v2?.time?.shifts ?? null;
+  const shiftsStated = demandShifts != null && demandShifts.length > 0;
+  const shiftsSource = "customer_requests.payload.structured_v2.time.shifts";
+  const shiftDims: ReadonlyArray<{
+    criterion: "night_shifts" | "weekend_shifts";
+    shift: "night" | "weekend";
+    workerOk: boolean | null | undefined;
+    workerSource: string;
+  }> = [
+    {
+      criterion: "night_shifts",
+      shift: "night",
+      workerOk: subject.nightShiftsOk,
+      workerSource: "workers.night_shifts_ok",
+    },
+    {
+      criterion: "weekend_shifts",
+      shift: "weekend",
+      workerOk: subject.weekendShiftsOk,
+      workerSource: "workers.weekend_shifts_ok",
+    },
+  ];
+  for (const dim of shiftDims) {
+    if (shiftsStated && demandShifts.includes(dim.shift)) {
+      if (dim.workerOk == null) {
+        missingFacts.push({
+          criterion: dim.criterion,
+          side: "worker",
+          source: dim.workerSource,
+        });
+      } else if (dim.workerOk === false) {
+        hardBlock = true;
+        blocking.push({
+          criterion: dim.criterion,
+          class: "hard",
+          outcome: "not_met",
+          source: shiftsSource,
+        });
+      } else {
+        matchedHard.push({
+          criterion: dim.criterion,
+          class: "hard",
+          outcome: "met",
+          source: shiftsSource,
+        });
+      }
+    } else if (!shiftsStated && dim.workerOk != null) {
+      missingFacts.push({
+        criterion: dim.criterion,
+        side: "demand",
+        source: shiftsSource,
+      });
+    }
+    // Shifts stated WITHOUT this kind → the demand does not run this shift;
+    // nothing to check.
+  }
+
+  // 8) Overtime — commonly negotiated: expected + worker "no" is a
+  //    discussion point, never a block. overtime_expected === false is a
+  //    stated "no overtime" (nothing to check).
+  const overtimeExpected = v2?.time?.overtime_expected ?? null;
+  const overtimeSource = "customer_requests.payload.structured_v2.time.overtime_expected";
+  if (overtimeExpected === true) {
+    if (subject.overtimeOk == null) {
+      missingFacts.push({
+        criterion: "overtime",
+        side: "worker",
+        source: "workers.overtime_ok",
+      });
+    } else if (subject.overtimeOk === true) {
+      strengths.push({
+        criterion: "overtime",
+        class: "weighted",
+        outcome: "met",
+        source: overtimeSource,
+      });
+    } else {
+      negotiables.push({
+        criterion: "overtime",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: overtimeSource,
+      });
+    }
+  } else if (overtimeExpected === null && subject.overtimeOk != null) {
     missingFacts.push({
-      criterion: "licence_categories",
-      side: "worker",
-      source: "worker_documents",
+      criterion: "overtime",
+      side: "demand",
+      source: overtimeSource,
     });
   }
 
@@ -775,6 +1097,16 @@ export function matchWorkerToNeed(
   if (softCap && matchStrengthOrder(status) > matchStrengthOrder("possible")) status = "possible";
 
   const eligible = !hardBlock && blocking.length === 0;
+
+  // The legacy language check (need.languages) and the v2 CEFR check can both
+  // conclude the same worker-side fact is missing — report it once. Stable
+  // (first occurrence wins), so determinism holds.
+  const missingFactsDeduped = missingFacts.filter(
+    (m, i) =>
+      missingFacts.findIndex(
+        (x) => x.criterion === m.criterion && x.side === m.side && x.source === m.source,
+      ) === i,
+  );
 
   // The one clear next step (owner mandate). Confirming a recognized need is
   // the human act that upgrades the suggestion into a structured need.
@@ -800,6 +1132,6 @@ export function matchWorkerToNeed(
     blocking,
     strengths,
     negotiables,
-    missingFacts,
+    missingFacts: missingFactsDeduped,
   };
 }

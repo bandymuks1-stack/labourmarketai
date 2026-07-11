@@ -1736,7 +1736,13 @@
         "start_date": "[EN] Start date",
         "shifts_hours": "[EN] Shifts and hours",
         "engagement_form": "[EN] Contract type",
-        "licence_categories": "[EN] Driving licence"
+        "licence_categories": "[EN] Driving licence",
+        "own_vehicle": "Savs transportlīdzeklis",
+        "own_tools": "Savi darbarīki",
+        "pay_basis": "Algas bāze (bruto/neto)",
+        "night_shifts": "Nakts maiņas",
+        "weekend_shifts": "Nedēļas nogales maiņas",
+        "overtime": "Virsstundas"
       },
       "how": {
         "title": "[EN] How matching works",

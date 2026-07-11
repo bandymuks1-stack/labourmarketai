@@ -6970,7 +6970,13 @@
         "start_date": "Startdatum",
         "shifts_hours": "Schichten und Stunden",
         "engagement_form": "Vertragsform",
-        "licence_categories": "Führerschein"
+        "licence_categories": "Führerschein",
+        "own_vehicle": "Eigenes Fahrzeug",
+        "own_tools": "Eigenes Werkzeug",
+        "pay_basis": "Lohnbasis (brutto/netto)",
+        "night_shifts": "Nachtschichten",
+        "weekend_shifts": "Wochenendschichten",
+        "overtime": "Überstunden"
       },
       "how": {
         "title": "So funktioniert das Matching",

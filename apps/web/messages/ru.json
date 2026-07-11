@@ -6970,7 +6970,13 @@
         "start_date": "Дата начала",
         "shifts_hours": "Смены и часы",
         "engagement_form": "Форма договора",
-        "licence_categories": "Водительские права"
+        "licence_categories": "Водительские права",
+        "own_vehicle": "Собственный автомобиль",
+        "own_tools": "Собственные инструменты",
+        "pay_basis": "База оплаты (брутто/нетто)",
+        "night_shifts": "Ночные смены",
+        "weekend_shifts": "Смены в выходные",
+        "overtime": "Сверхурочные"
       },
       "how": {
         "title": "Как работает подбор",

@@ -1736,7 +1736,13 @@
         "start_date": "Startdato",
         "shifts_hours": "Vagter og timer",
         "engagement_form": "Kontraktform",
-        "licence_categories": "Kørekort"
+        "licence_categories": "Kørekort",
+        "own_vehicle": "Egen bil",
+        "own_tools": "Eget værktøj",
+        "pay_basis": "Lønbasis (brutto/netto)",
+        "night_shifts": "Nattevagter",
+        "weekend_shifts": "Weekendvagter",
+        "overtime": "Overarbejde"
       },
       "how": {
         "title": "Sådan fungerer matching",

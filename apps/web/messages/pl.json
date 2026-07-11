@@ -1736,7 +1736,13 @@
         "start_date": "[EN] Start date",
         "shifts_hours": "[EN] Shifts and hours",
         "engagement_form": "[EN] Contract type",
-        "licence_categories": "[EN] Driving licence"
+        "licence_categories": "[EN] Driving licence",
+        "own_vehicle": "Własny pojazd",
+        "own_tools": "Własne narzędzia",
+        "pay_basis": "Podstawa wynagrodzenia (brutto/netto)",
+        "night_shifts": "Zmiany nocne",
+        "weekend_shifts": "Zmiany weekendowe",
+        "overtime": "Nadgodziny"
       },
       "how": {
         "title": "[EN] How matching works",

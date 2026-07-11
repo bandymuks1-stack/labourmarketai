@@ -6970,7 +6970,13 @@
         "start_date": "Startdatum",
         "shifts_hours": "Diensten en uren",
         "engagement_form": "Contractvorm",
-        "licence_categories": "Rijbewijs"
+        "licence_categories": "Rijbewijs",
+        "own_vehicle": "Eigen voertuig",
+        "own_tools": "Eigen gereedschap",
+        "pay_basis": "Loonbasis (bruto/netto)",
+        "night_shifts": "Nachtdiensten",
+        "weekend_shifts": "Weekenddiensten",
+        "overtime": "Overuren"
       },
       "how": {
         "title": "Hoe matching werkt",

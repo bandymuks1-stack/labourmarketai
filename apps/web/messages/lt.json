@@ -6970,7 +6970,13 @@
         "start_date": "Pradžios data",
         "shifts_hours": "Pamainos ir valandos",
         "engagement_form": "Sutarties forma",
-        "licence_categories": "Vairuotojo pažymėjimas"
+        "licence_categories": "Vairuotojo pažymėjimas",
+        "own_vehicle": "Nuosavas automobilis",
+        "own_tools": "Nuosavi įrankiai",
+        "pay_basis": "Atlyginimo pagrindas (bruto/neto)",
+        "night_shifts": "Naktinės pamainos",
+        "weekend_shifts": "Savaitgalio pamainos",
+        "overtime": "Viršvalandžiai"
       },
       "how": {
         "title": "Kaip veikia atitikimas",
