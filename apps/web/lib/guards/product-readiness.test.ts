@@ -1695,7 +1695,11 @@ describe("no migration files added by this sprint", () => {
     // in the consent goal command: append-only consent + disclosure ledgers,
     // fail-closed employer RLS swap, narrow SECURITY DEFINER RPCs
     // (authenticated only, no anon); @human-gate-approved; paired rollback.
-    const SPRINT_BASELINE = 118;
+    // Bumped 118 -> 119 for worker demand structured_v2 exposure
+    // (20260711330000 worker_demand_structured_v2_exposure, PR #730) —
+    // owner-authorized migration-activation programme; APPLIED to production
+    // 2026-07-11 (ledger 20260711203058); paired rollback in the PR.
+    const SPRINT_BASELINE = 119;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
