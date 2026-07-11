@@ -2076,11 +2076,19 @@
       }
     },
     "actions": {
-      "planning": "Se i planlægning"
+      "planning": "Se i planlægning",
+      "proposeAgain": "Foreslå igen med nye datoer"
     },
     "propose": {
       "modeNote": "Dette er et bookingforslag med datoer — arbejdstageren bekræfter eller afviser det. Intet er booket, før arbejdstageren accepterer.",
+      "againModeNote": "Dette genåbner det samme forslag til den samme arbejdstager med nye datoer — arbejdstageren beslutter igen. Intet er booket, før arbejdstageren accepterer.",
       "afterSent": "Arbejdstageren har modtaget dit forslag og vil acceptere eller afvise det. Du ser svaret under Bookinger; indtil da kan du trække forslaget tilbage."
     }
+  },
+  "marketplace": {
+    "requestAgain": "Anmod igen",
+    "requestAgainNote": "Dette sender en ny anmodning om den samme ydelse. Din tidligere besked er udfyldt på forhånd — ret den, hvis du vil. Udbyderen beslutter igen.",
+    "cancel": "Annuller",
+    "offeringInactive": "Denne ydelse er ikke længere aktiv, så der kan ikke sendes en ny anmodning."
   }
 }

@@ -2076,11 +2076,19 @@
       }
     },
     "actions": {
-      "planning": "[EN] View in planning"
+      "planning": "[EN] View in planning",
+      "proposeAgain": "[EN] Propose again with new dates"
     },
     "propose": {
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
+      "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
     }
+  },
+  "marketplace": {
+    "requestAgain": "[EN] Request again",
+    "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
+    "cancel": "[EN] Cancel",
+    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
   }
 }

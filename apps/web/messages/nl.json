@@ -5145,6 +5145,10 @@
     "messageCta": "Stuur een bericht",
     "errorGeneric": "Er is iets misgegaan. Probeer het opnieuw.",
     "duplicate": "Je hebt al een openstaande aanvraag voor deze dienst.",
+    "requestAgain": "Opnieuw aanvragen",
+    "requestAgainNote": "Dit verstuurt een nieuwe aanvraag voor dezelfde dienst. Je eerdere bericht is al ingevuld — pas het aan als je wilt. De aanbieder beslist opnieuw.",
+    "cancel": "Annuleren",
+    "offeringInactive": "Deze dienst is niet meer actief, dus een nieuwe aanvraag kan niet worden verstuurd.",
     "requesterMessage": "Hun bericht",
     "providerNote": "Notitie van de aanbieder",
     "responded": "Beantwoord",
@@ -6600,6 +6604,7 @@
       "message": "Bericht sturen",
       "withdraw": "Voorstel intrekken",
       "findAnother": "Andere werknemer zoeken",
+      "proposeAgain": "Opnieuw voorstellen met nieuwe datums",
       "planning": "Bekijken in planning"
     },
     "connections": {
@@ -6616,6 +6621,7 @@
     },
     "propose": {
       "modeNote": "Dit is een boekingsvoorstel met datums — de werknemer bevestigt of weigert het. Er is niets geboekt totdat de werknemer accepteert.",
+      "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
       "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken."
     }
   },

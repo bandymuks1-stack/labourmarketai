@@ -10,11 +10,12 @@ import {
   withdrawRequest,
 } from "@/lib/marketplace/service-requests";
 import { openServiceRequestConversationAction } from "@/lib/marketplace/service-request-conversation";
-import type {
-  DiscoverableOfferingRow,
-  IncomingRequestRow,
-  OutgoingRequestRow,
-  RequestStatus,
+import {
+  canRequestAgain,
+  type DiscoverableOfferingRow,
+  type IncomingRequestRow,
+  type OutgoingRequestRow,
+  type RequestStatus,
 } from "@/lib/marketplace/service-requests-shared";
 import {
   PLAYER_IDENTITY_AVATAR_BORDER,
@@ -62,6 +63,14 @@ export type MarketplaceLabels = {
   responded: string;
   requestedBy: string;
   requesterFallback: string;
+  /** Repeat action (Capability G, PR 6b): a concluded (declined/withdrawn)
+   *  outgoing request can be sent AGAIN for the same offering — a NEW request
+   *  via the same RPC, previous message prefilled, provider decides again. */
+  requestAgain: string;
+  requestAgainNote: string;
+  cancel: string;
+  /** Honest permanent "no" when the offering was deactivated meanwhile. */
+  offeringInactive: string;
   status: Record<RequestStatus, string>;
 };
 
@@ -85,6 +94,130 @@ function StatusChip({ status, label }: { status: RequestStatus; label: string })
     <span className={`inline-block rounded-full border px-2 py-0.5 text-xs ${STATUS_RING[status]}`}>
       {label}
     </span>
+  );
+}
+
+/**
+ * Repeat action (Capability G, PR 6b) — "Request again" on a CONCLUDED
+ * (declined/withdrawn) outgoing request. Sends a NEW request for the same
+ * offering through the EXISTING `requestServiceOffering` action (the
+ * one-open-request unique index is partial on status='sent', so the DB allows
+ * it); the previous message is prefilled and editable. Honest results only:
+ * `duplicate` (a request is already open) and `inactive` (the offering was
+ * deactivated) surface the server's answer — never a fake success, never a
+ * generic "try again" for a permanent no. Top-level component so its local
+ * state survives parent re-renders.
+ */
+function RequestAgainButton({
+  offeringId,
+  previousMessage,
+  labels,
+  onRequested,
+}: {
+  offeringId: string;
+  previousMessage: string | null;
+  labels: MarketplaceLabels;
+  onRequested: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState(previousMessage ?? "");
+  const [pending, startTransition] = useTransition();
+  const [state, setState] = useState<
+    "idle" | "sent" | "duplicate" | "inactive" | "error"
+  >("idle");
+
+  function send() {
+    trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, { surface: "marketplace_repeat" });
+    startTransition(async () => {
+      const res = await requestServiceOffering(offeringId, message);
+      if (res.kind === "ok") {
+        setState("sent");
+        trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+          surface: "marketplace_repeat",
+          success: true,
+        });
+        onRequested();
+        return;
+      }
+      trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+        surface: "marketplace_repeat",
+        success: false,
+      });
+      if (res.kind === "duplicate") setState("duplicate");
+      else if (res.kind === "inactive") setState("inactive");
+      else setState("error");
+    });
+  }
+
+  if (state === "sent") {
+    return (
+      <span
+        data-testid="marketplace-request-again-sent"
+        className="inline-flex shrink-0 items-center gap-1 rounded-md border border-state-success/40 px-2 py-1 text-xs text-state-success"
+      >
+        <Check className="h-3 w-3" /> {labels.requested}
+      </span>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        data-testid="marketplace-request-again-open"
+        className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue"
+      >
+        <Send className="h-3 w-3" /> {labels.requestAgain}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      data-testid="marketplace-request-again-form"
+      className="flex w-full max-w-sm flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
+    >
+      {/* What this does, up front: a NEW request for the same service — the
+          provider decides again. No re-opening of the concluded row. */}
+      <p className="text-[11px] text-text-secondary">{labels.requestAgainNote}</p>
+      <textarea
+        value={message}
+        maxLength={2000}
+        rows={3}
+        onChange={(e) => setMessage(e.target.value)}
+        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+      />
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={pending}
+          onClick={send}
+          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+        >
+          {labels.request}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-[11px] text-text-muted hover:text-text-secondary"
+        >
+          {labels.cancel}
+        </button>
+      </div>
+      {state === "duplicate" ? (
+        <span className="text-[11px] text-state-warning">{labels.duplicate}</span>
+      ) : state === "inactive" ? (
+        <span
+          data-testid="marketplace-request-again-inactive"
+          className="text-[11px] text-state-warning"
+        >
+          {labels.offeringInactive}
+        </span>
+      ) : state === "error" ? (
+        <span className="text-[11px] text-state-warning">{labels.errorGeneric}</span>
+      ) : null}
+    </div>
   );
 }
 
@@ -292,6 +425,19 @@ export function MarketplaceLoopSection({
                 )}
                 {r.status === "accepted" && (
                   <MessageCta requestId={r.id} testid="marketplace-outgoing-message-cta" />
+                )}
+                {/* Repeat action (PR 6b): a concluded request is not a dead
+                    end — send a NEW request for the same offering (previous
+                    message prefilled). Hidden while another request for this
+                    offering is already open, so the honest "Requested" state
+                    on the discover row stays the single truth. */}
+                {canRequestAgain(r.status) && !openRequestOfferingIds.has(r.offeringId) && (
+                  <RequestAgainButton
+                    offeringId={r.offeringId}
+                    previousMessage={r.message}
+                    labels={labels}
+                    onRequested={() => router.refresh()}
+                  />
                 )}
               </li>
             ))}

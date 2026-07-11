@@ -5145,6 +5145,10 @@
     "messageCta": "Nachricht senden",
     "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "duplicate": "Sie haben bereits eine offene Anfrage für diese Dienstleistung.",
+    "requestAgain": "Erneut anfragen",
+    "requestAgainNote": "Dies sendet eine neue Anfrage für dieselbe Dienstleistung. Ihre vorherige Nachricht ist bereits eingetragen — passen Sie sie bei Bedarf an. Der Anbieter entscheidet erneut.",
+    "cancel": "Abbrechen",
+    "offeringInactive": "Diese Dienstleistung ist nicht mehr aktiv, daher kann keine neue Anfrage gesendet werden.",
     "requesterMessage": "Nachricht der anfragenden Person",
     "providerNote": "Notiz des Anbieters",
     "responded": "Beantwortet",
@@ -6600,6 +6604,7 @@
       "message": "Nachricht senden",
       "withdraw": "Vorschlag zurückziehen",
       "findAnother": "Andere Arbeitskraft finden",
+      "proposeAgain": "Erneut mit neuen Terminen vorschlagen",
       "planning": "In der Planung ansehen"
     },
     "connections": {
@@ -6616,6 +6621,7 @@
     },
     "propose": {
       "modeNote": "Dies ist ein Buchungsvorschlag mit Terminen — die Arbeitskraft bestätigt ihn oder lehnt ihn ab. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
+      "againModeNote": "Dies öffnet denselben Vorschlag an dieselbe Arbeitskraft mit neuen Terminen erneut — die Arbeitskraft entscheidet erneut. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
       "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen."
     }
   },

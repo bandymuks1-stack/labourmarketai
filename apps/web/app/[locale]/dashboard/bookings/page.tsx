@@ -5,9 +5,11 @@ import { listMyBookings, type BookingRow } from "@/lib/booking/booking-actions";
 import { openBookingConversationAction } from "@/lib/booking/booking-conversation";
 import { BookingRespondButtons } from "@/components/app/booking-respond-buttons";
 import { BookingWithdrawButton } from "@/components/app/booking-withdraw-button";
+import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
 import { Link } from "@/lib/i18n/navigation";
 import {
+  canProposeAgain,
   deriveBookingDisplayState,
   type BookingDisplayState,
   type BookingStatus,
@@ -52,6 +54,10 @@ export default async function BookingsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("bookings");
+  // The rebook form is the SAME propose form the scouting surface renders —
+  // its field/submit labels are reused verbatim from `scouting.booking` (one
+  // flow, one wording) instead of duplicating seven keys per locale.
+  const tProposeForm = await getTranslations("scouting.booking");
   const result = await listMyBookings();
   // One consistent "now" for the whole render — the derived display states
   // (awaiting / stale) are computed against it, read-only.
@@ -163,16 +169,46 @@ export default async function BookingsPage({
                   />
                   <PlanningLink label={t("actions.planning")} />
                 </div>
-              ) : row.status === "declined" ? (
-                // A declined proposal ends THIS booking, not the company's
-                // search — the honest next action is finding another worker.
-                <Link
-                  href="/dashboard/company/scouting"
-                  data-testid="booking-declined-next-action"
-                  className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700"
-                >
-                  {t("actions.findAnother")}
-                </Link>
+              ) : canProposeAgain(row.status) ? (
+                // Terminal declined/withdrawn (repeat actions, PR 6b): the
+                // company may RE-OPEN the same proposal with new dates — the
+                // existing propose flow pre-scoped to the same request +
+                // worker (the applied RPC upserts on that key). The worker
+                // decides again; nothing is booked until they accept.
+                <div className="flex flex-wrap items-center gap-2">
+                  {row.requestId && row.workerId ? (
+                    <ProposeBookingButton
+                      locale={locale}
+                      requestId={row.requestId}
+                      workerId={row.workerId}
+                      countryCode={row.locationCountry}
+                      variant="rebook"
+                      labels={{
+                        open: t("actions.proposeAgain"),
+                        startDate: tProposeForm("startDate"),
+                        note: tProposeForm("note"),
+                        send: tProposeForm("send"),
+                        sending: tProposeForm("sending"),
+                        sent: tProposeForm("sent"),
+                        unavailable: tProposeForm("unavailable"),
+                        notEntitled: tProposeForm("notEntitled"),
+                        error: tProposeForm("error"),
+                        cancel: tProposeForm("cancel"),
+                      }}
+                    />
+                  ) : null}
+                  {row.status === "declined" ? (
+                    // A declined proposal ends THIS booking, not the company's
+                    // search — the honest next action is finding another worker.
+                    <Link
+                      href="/dashboard/company/scouting"
+                      data-testid="booking-declined-next-action"
+                      className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700"
+                    >
+                      {t("actions.findAnother")}
+                    </Link>
+                  ) : null}
+                </div>
               ) : null
             }
           />

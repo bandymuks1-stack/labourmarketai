@@ -5145,6 +5145,10 @@
     "messageCta": "Send a message",
     "errorGeneric": "Something went wrong. Please try again.",
     "duplicate": "You already have an open request for this service.",
+    "requestAgain": "Request again",
+    "requestAgainNote": "This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
+    "cancel": "Cancel",
+    "offeringInactive": "This service is no longer active, so a new request can't be sent.",
     "requesterMessage": "Their message",
     "providerNote": "Provider's note",
     "responded": "Responded",
@@ -6600,6 +6604,7 @@
       "message": "Send a message",
       "withdraw": "Withdraw proposal",
       "findAnother": "Find another worker",
+      "proposeAgain": "Propose again with new dates",
       "planning": "View in planning"
     },
     "connections": {
@@ -6616,6 +6621,7 @@
     },
     "propose": {
       "modeNote": "This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
+      "againModeNote": "This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
     }
   },
