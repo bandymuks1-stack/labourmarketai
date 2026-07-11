@@ -209,6 +209,9 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 121 -> 122 for worker_saved_opportunities_v1 (20260711310000, PR #723; ledger 20260711204106) — owner-authorized
     // migration-activation programme; APPLIED to production 2026-07-11;
     // paired rollback in the PR.
-    expect(count).toBeLessThanOrEqual(122);
+    // Bumped 122 -> 123 for booking_lifecycle_v2 (20260711290000, PR #722; ledger 20260711204354) — owner-authorized
+    // migration-activation programme; APPLIED to production 2026-07-11;
+    // paired rollback in the PR.
+    expect(count).toBeLessThanOrEqual(123);
   });
 });
