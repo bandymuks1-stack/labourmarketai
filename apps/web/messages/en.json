@@ -6623,6 +6623,46 @@
       "modeNote": "This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+    },
+    "reason": {
+      "optionalTitle": "Reason (optional)",
+      "noteLabel": "Note (optional)",
+      "none": "No reason",
+      "notStored": "Your answer was saved. The reason couldn't be saved this time.",
+      "decline": {
+        "dates_unsuitable": "The dates don't suit me",
+        "conditions_unsuitable": "The conditions don't suit me",
+        "already_booked": "I'm already booked for that time",
+        "other": "Other"
+      },
+      "withdraw": {
+        "position_filled": "The position is already filled",
+        "need_changed": "Our need changed",
+        "dates_changed": "The dates changed",
+        "other": "Other"
+      },
+      "confirmDecline": "Confirm decline",
+      "confirmWithdraw": "Confirm withdrawal",
+      "cancel": "Cancel"
+    },
+    "reschedule": {
+      "open": "Change dates",
+      "startDate": "New start date",
+      "endDate": "New end date (optional)",
+      "note": "Note (optional)",
+      "save": "Save new dates",
+      "saved": "Dates updated. The worker sees the new dates.",
+      "notChanged": "The dates weren't changed. Please try again later.",
+      "cancel": "Cancel"
+    },
+    "deadline": {
+      "open": "Set a respond-by date",
+      "label": "Respond-by date",
+      "save": "Save date",
+      "saved": "Respond-by date saved.",
+      "notSet": "The respond-by date wasn't saved. Please try again later.",
+      "respondBy": "Respond by {date}",
+      "cancel": "Cancel"
     }
   },
   "adminReadiness": {

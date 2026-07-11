@@ -2132,6 +2132,46 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+    },
+    "reason": {
+      "optionalTitle": "[EN] Reason (optional)",
+      "noteLabel": "[EN] Note (optional)",
+      "none": "[EN] No reason",
+      "notStored": "[EN] Your answer was saved. The reason couldn't be saved this time.",
+      "decline": {
+        "dates_unsuitable": "[EN] The dates don't suit me",
+        "conditions_unsuitable": "[EN] The conditions don't suit me",
+        "already_booked": "[EN] I'm already booked for that time",
+        "other": "[EN] Other"
+      },
+      "withdraw": {
+        "position_filled": "[EN] The position is already filled",
+        "need_changed": "[EN] Our need changed",
+        "dates_changed": "[EN] The dates changed",
+        "other": "[EN] Other"
+      },
+      "confirmDecline": "[EN] Confirm decline",
+      "confirmWithdraw": "[EN] Confirm withdrawal",
+      "cancel": "[EN] Cancel"
+    },
+    "reschedule": {
+      "open": "[EN] Change dates",
+      "startDate": "[EN] New start date",
+      "endDate": "[EN] New end date (optional)",
+      "note": "[EN] Note (optional)",
+      "save": "[EN] Save new dates",
+      "saved": "[EN] Dates updated. The worker sees the new dates.",
+      "notChanged": "[EN] The dates weren't changed. Please try again later.",
+      "cancel": "[EN] Cancel"
+    },
+    "deadline": {
+      "open": "[EN] Set a respond-by date",
+      "label": "[EN] Respond-by date",
+      "save": "[EN] Save date",
+      "saved": "[EN] Respond-by date saved.",
+      "notSet": "[EN] The respond-by date wasn't saved. Please try again later.",
+      "respondBy": "[EN] Respond by {date}",
+      "cancel": "[EN] Cancel"
     }
   },
   "marketplace": {

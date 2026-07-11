@@ -2132,6 +2132,46 @@
       "modeNote": "Dette er et bookingforslag med datoer — arbejdstageren bekræfter eller afviser det. Intet er booket, før arbejdstageren accepterer.",
       "againModeNote": "Dette genåbner det samme forslag til den samme arbejdstager med nye datoer — arbejdstageren beslutter igen. Intet er booket, før arbejdstageren accepterer.",
       "afterSent": "Arbejdstageren har modtaget dit forslag og vil acceptere eller afvise det. Du ser svaret under Bookinger; indtil da kan du trække forslaget tilbage."
+    },
+    "reason": {
+      "optionalTitle": "Årsag (valgfrit)",
+      "noteLabel": "Note (valgfrit)",
+      "none": "Ingen årsag",
+      "notStored": "Dit svar er gemt. Årsagen kunne ikke gemmes denne gang.",
+      "decline": {
+        "dates_unsuitable": "Datoerne passer ikke",
+        "conditions_unsuitable": "Vilkårene passer ikke",
+        "already_booked": "Jeg er allerede booket i perioden",
+        "other": "Andet"
+      },
+      "withdraw": {
+        "position_filled": "Stillingen er allerede besat",
+        "need_changed": "Behovet har ændret sig",
+        "dates_changed": "Datoerne er ændret",
+        "other": "Andet"
+      },
+      "confirmDecline": "Bekræft afslag",
+      "confirmWithdraw": "Bekræft tilbagetrækning",
+      "cancel": "Annuller"
+    },
+    "reschedule": {
+      "open": "Skift datoer",
+      "startDate": "Ny startdato",
+      "endDate": "Ny slutdato (valgfrit)",
+      "note": "Note (valgfrit)",
+      "save": "Gem nye datoer",
+      "saved": "Datoerne er opdateret. Arbejderen ser de nye datoer.",
+      "notChanged": "Datoerne blev ikke ændret. Prøv igen senere.",
+      "cancel": "Annuller"
+    },
+    "deadline": {
+      "open": "Sæt en svardato",
+      "label": "Svar senest",
+      "save": "Gem dato",
+      "saved": "Svardatoen er gemt.",
+      "notSet": "Svardatoen blev ikke gemt. Prøv igen senere.",
+      "respondBy": "Svar senest {date}",
+      "cancel": "Annuller"
     }
   },
   "marketplace": {

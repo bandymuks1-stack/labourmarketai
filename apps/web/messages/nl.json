@@ -6623,6 +6623,46 @@
       "modeNote": "Dit is een boekingsvoorstel met datums — de werknemer bevestigt of weigert het. Er is niets geboekt totdat de werknemer accepteert.",
       "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
       "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken."
+    },
+    "reason": {
+      "optionalTitle": "Reden (optioneel)",
+      "noteLabel": "Notitie (optioneel)",
+      "none": "Geen reden",
+      "notStored": "Je antwoord is opgeslagen. De reden kon deze keer niet worden opgeslagen.",
+      "decline": {
+        "dates_unsuitable": "De datums passen niet",
+        "conditions_unsuitable": "De voorwaarden passen niet",
+        "already_booked": "Ik ben in die periode al geboekt",
+        "other": "Anders"
+      },
+      "withdraw": {
+        "position_filled": "De plek is al ingevuld",
+        "need_changed": "De behoefte is veranderd",
+        "dates_changed": "De datums zijn veranderd",
+        "other": "Anders"
+      },
+      "confirmDecline": "Afwijzing bevestigen",
+      "confirmWithdraw": "Intrekken bevestigen",
+      "cancel": "Annuleren"
+    },
+    "reschedule": {
+      "open": "Datums wijzigen",
+      "startDate": "Nieuwe startdatum",
+      "endDate": "Nieuwe einddatum (optioneel)",
+      "note": "Notitie (optioneel)",
+      "save": "Nieuwe datums opslaan",
+      "saved": "Datums bijgewerkt. De werknemer ziet de nieuwe datums.",
+      "notChanged": "De datums zijn niet gewijzigd. Probeer het later opnieuw.",
+      "cancel": "Annuleren"
+    },
+    "deadline": {
+      "open": "Reactiedatum instellen",
+      "label": "Reageren vóór",
+      "save": "Datum opslaan",
+      "saved": "Reactiedatum opgeslagen.",
+      "notSet": "De reactiedatum is niet opgeslagen. Probeer het later opnieuw.",
+      "respondBy": "Reageer vóór {date}",
+      "cancel": "Annuleren"
     }
   },
   "adminReadiness": {

@@ -6623,6 +6623,46 @@
       "modeNote": "Tai rezervacijos pasiūlymas su datomis — darbuotojas jį patvirtina arba atmeta. Niekas nerezervuota, kol darbuotojas nepriima.",
       "againModeNote": "Tai iš naujo atveria tą patį pasiūlymą tam pačiam darbuotojui su naujomis datomis — darbuotojas sprendžia iš naujo. Niekas nerezervuota, kol darbuotojas nepriima.",
       "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti."
+    },
+    "reason": {
+      "optionalTitle": "Priežastis (nebūtina)",
+      "noteLabel": "Pastaba (nebūtina)",
+      "none": "Be priežasties",
+      "notStored": "Jūsų atsakymas išsaugotas. Priežasties šį kartą išsaugoti nepavyko.",
+      "decline": {
+        "dates_unsuitable": "Netinka datos",
+        "conditions_unsuitable": "Netinka sąlygos",
+        "already_booked": "Tuo metu jau esu užimtas",
+        "other": "Kita"
+      },
+      "withdraw": {
+        "position_filled": "Vieta jau užimta",
+        "need_changed": "Pasikeitė poreikis",
+        "dates_changed": "Pasikeitė datos",
+        "other": "Kita"
+      },
+      "confirmDecline": "Patvirtinti atsisakymą",
+      "confirmWithdraw": "Patvirtinti atšaukimą",
+      "cancel": "Atšaukti"
+    },
+    "reschedule": {
+      "open": "Keisti datas",
+      "startDate": "Nauja pradžios data",
+      "endDate": "Nauja pabaigos data (nebūtina)",
+      "note": "Pastaba (nebūtina)",
+      "save": "Išsaugoti naujas datas",
+      "saved": "Datos atnaujintos. Darbuotojas matys naujas datas.",
+      "notChanged": "Datos nepakeistos. Pabandykite vėliau.",
+      "cancel": "Atšaukti"
+    },
+    "deadline": {
+      "open": "Nustatyti atsakymo datą",
+      "label": "Atsakyti iki",
+      "save": "Išsaugoti datą",
+      "saved": "Atsakymo data išsaugota.",
+      "notSet": "Atsakymo datos išsaugoti nepavyko. Pabandykite vėliau.",
+      "respondBy": "Atsakyti iki {date}",
+      "cancel": "Atšaukti"
     }
   },
   "adminReadiness": {
