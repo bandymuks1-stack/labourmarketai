@@ -29,7 +29,109 @@
     "inputLabel": "Rasti puslapį ar veiksmą",
     "resultsLabel": "Atitinkantys puslapiai",
     "noResults": "Nieko nerasta. Pabandykite kitą žodį — pvz., CV, žurnalas, komanda, dokumentai, kainos.",
-    "shortcutHint": "Ctrl / ⌘ K"
+    "shortcutHint": "Ctrl / ⌘ K",
+    "recentLabel": "Neseniai atidaryta",
+    "objectsLabel": "Jūsų įrašai",
+    "objectsLoading": "Ieškoma jūsų įrašuose…",
+    "objectsError": "Šiuo metu jūsų įrašų paieška nepavyko. Puslapių nuorodos viršuje veikia toliau.",
+    "groups": {
+      "projects": "Jūsų projektai",
+      "tasks": "Jūsų užduotys",
+      "finance": "Jūsų finansų įrašai",
+      "conversations": "Jūsų pokalbiai",
+      "bookings": "Jūsų rezervacijos",
+      "documents": "Jūsų dokumentų įrašai"
+    }
+  },
+  "reports": {
+    "eyebrow": "Ataskaitos",
+    "title": "Ataskaitos",
+    "intro": "Rodikliai, suskaičiuoti iš jūsų pačių įrašų, su nurodytu skaičiavimo pagrindu po kiekviena sekcija, ir jau veikiantys eksportai.",
+    "honestyNote": "Skaičiuojama tik iš jūsų duomenų — jokių palyginimų su kitais, jokių balų, jokių prognozių.",
+    "state": {
+      "needsMigration": "Šis duomenų modelis šioje aplinkoje dar neįjungtas, todėl nėra ko skaičiuoti. Vietoje tikrų duomenų joks skaičius nerodomas.",
+      "unavailable": "Šių rodiklių šiuo metu perskaityti nepavyksta. Vietoje jų niekas nespėjama."
+    },
+    "basis": {
+      "label": "Pagrindas",
+      "workerEvidence": "Suskaičiuota pagal įrodymų ataskaitos taisykles iš jūsų pačių kataloguotų įgūdžių, darbo žurnalo įrašų ir vadovų patvirtinimų. Jokio balo, jokio spėjimo.",
+      "workerActivity": "Tiesioginiai jūsų pačių darbo žurnalo įrašų ir jūsų įkeltų žurnalo nuotraukų skaičiai.",
+      "orgDemand": "Skaičiuojamos jūsų pačių sukurtos paklausos užklausos. Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio.",
+      "orgProjects": "Jūsų įmonės projektų eilučių skaičiai, sugrupuoti pagal kiekvienos eilutės įrašytą būseną.",
+      "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
+      "orgDocuments": "Sutikimu apsaugoto telkinio suvestinės sumos — skaičiuojami tik darbuotojai, davę sutikimą dėl suvestinio dokumentų matomumo.",
+      "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų."
+    },
+    "worker": {
+      "evidence": {
+        "title": "Profilio ir įrodymų rodikliai",
+        "totalSkills": "Įgūdžiai",
+        "workSupported": "Pagrįsti darbo įrašais",
+        "confirmed": "Patvirtinti",
+        "journalEntries": "Žurnalo įrašai",
+        "confirmations": "Patvirtinimai",
+        "empty": "Įrodymų duomenų dar nėra — rodikliai atsiras, kai profilyje ir darbo žurnale bus tikrų įrašų.",
+        "link": "Atidaryti visą įrodymų ataskaitą"
+      },
+      "activity": {
+        "title": "Žurnalo aktyvumas",
+        "entries": "Žurnalo įrašai",
+        "photos": "Įkeltos nuotraukos",
+        "unavailable": "Jūsų žurnalo skaičių šiuo metu perskaityti nepavyksta. Vietoje tikrų skaičių niekas nerodoma.",
+        "link": "Atidaryti darbo žurnalą"
+      }
+    },
+    "exports": {
+      "title": "Eksportai",
+      "note": "Rodomi tik jau veikiantys eksportai — čia nieko nėra „paruošiamo“.",
+      "evidence": "Įrodymų ataskaita (spausdinti / PDF)",
+      "cv": "CV (spausdinti / PDF)",
+      "journalCsv": "Žurnalo eksportas (CSV)",
+      "financeCsv": "Finansų įrašų eksportas (CSV)"
+    },
+    "org": {
+      "demand": {
+        "title": "Paklausos užklausos",
+        "open": "Atviros",
+        "total": "Iš viso",
+        "link": "Atidaryti paklausos pateikimą"
+      },
+      "projects": {
+        "title": "Projektai pagal būseną",
+        "status": {
+          "draft": "Juodraštis",
+          "live": "Vykdomi",
+          "paused": "Pristabdyti"
+        },
+        "total": "Iš viso",
+        "empty": "Projektų dar nėra — rodikliai atsiras, kai įmonė turės projektų eilučių.",
+        "link": "Atidaryti projektus"
+      },
+      "tasks": {
+        "title": "Užduotys pagal būseną",
+        "open": "Atviros",
+        "status": {
+          "todo": "Laukia",
+          "in_progress": "Vykdomos",
+          "blocked": "Užstrigusios"
+        },
+        "link": "Atidaryti užduotis"
+      },
+      "documents": {
+        "title": "Telkinio dokumentų parengtis",
+        "workers": "Sutikę darbuotojai",
+        "expiring": "Besibaigiantys dokumentai",
+        "attention": "Reikia dėmesio",
+        "empty": "Sutikusių telkinio darbuotojų dar nėra — ši suvestinė skaičiuoja tik sutikimą davusius darbuotojus.",
+        "link": "Atidaryti dokumentų centrą"
+      },
+      "finance": {
+        "title": "Finansų įrašai",
+        "overdue": "Vėluojantys",
+        "total": "Iš viso įrašų",
+        "link": "Atidaryti finansų įrašus"
+      }
+    }
   },
   "marketRecognition": {
     "title": "Ką siūlote ar ko ieškote?",

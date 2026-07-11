@@ -67,6 +67,9 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/start": "REAL_LAUNCH_SURFACE",
   "dashboard/start/company": "REAL_LAUNCH_SURFACE",
   "dashboard/instructions": "REAL_LAUNCH_SURFACE",
+  // Reports hub (control room PR K) — role-specific real-data reports index
+  // over the caller's own RLS reads; every figure basis-labelled.
+  "dashboard/reports": "REAL_LAUNCH_SURFACE",
   "dashboard/reports/evidence": "REAL_LAUNCH_SURFACE",
 
   // ── INTERNAL_ADMIN (all under requireSuperadmin, fail-closed) ─────────
@@ -103,11 +106,13 @@ const CLASSIFICATION: Record<string, string> = {
 
   // ── DUPLICATE_DRIFT (kept temporarily; consolidation in backlog) ──────
   // Buyer rooms overlap the canonical company workspace (F-D4); search is
-  // an unlinked router page; market/recognize overlaps journal
-  // recognition. This list must SHRINK, never grow. The agency trio was
-  // consolidated 2026-07-05 (Direction A): agency = company_type
-  // 'staffing_agency' inside the canonical company workspace, and the
-  // legacy routes became redirect stubs below.
+  // an unlinked router page — since control room PR K it EMBEDS the one
+  // canonical CommandFinder (no second search system; classification kept
+  // until the owner decides whether the page gets an entry point);
+  // market/recognize overlaps journal recognition. This list must SHRINK,
+  // never grow. The agency trio was consolidated 2026-07-05 (Direction A):
+  // agency = company_type 'staffing_agency' inside the canonical company
+  // workspace, and the legacy routes became redirect stubs below.
   "dashboard/buyer": "DUPLICATE_DRIFT",
   "dashboard/start/buyer": "DUPLICATE_DRIFT",
   "dashboard/search": "DUPLICATE_DRIFT",

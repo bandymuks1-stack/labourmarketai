@@ -746,6 +746,30 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // Reports hub (control room PR K) — the role-specific reports index:
+    // real, basis-labelled counts over the caller's own records plus the
+    // existing exports (evidence report, CV, journal CSV, finance CSV).
+    // Route resolves through the module registry so it can never drift from
+    // the grid card.
+    id: "reports",
+    route: getModuleRoute("reports"),
+    audience: "public",
+    labels: {
+      en: "Reports (my data figures & exports)",
+      lt: "Ataskaitos (mano duomenų rodikliai ir eksportai)",
+      ru: "Отчёты (показатели моих данных и экспорт)",
+      nl: "Rapporten (cijfers uit mijn gegevens & exports)",
+      de: "Berichte (Kennzahlen aus meinen Daten & Exporte)",
+    },
+    synonyms: {
+      en: ["reports", "report", "statistics", "figures", "export data"],
+      lt: ["ataskaitos", "ataskaita", "statistika", "rodikliai", "eksportas"],
+      ru: ["отчёты", "отчет", "статистика", "показатели", "экспорт"],
+      nl: ["rapporten", "rapport", "statistieken", "cijfers", "exporteren"],
+      de: ["berichte", "bericht", "statistiken", "kennzahlen", "export"],
+    },
+  },
+  {
     id: "account_settings",
     route: "/dashboard/account",
     audience: "public",

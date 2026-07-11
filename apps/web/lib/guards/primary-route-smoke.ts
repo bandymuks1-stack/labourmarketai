@@ -129,6 +129,11 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   { id: "account", urlPattern: "/dashboard/account", sourceFile: "app/[locale]/dashboard/account/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "privacy", urlPattern: "/dashboard/privacy", sourceFile: "app/[locale]/dashboard/privacy/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "documents", urlPattern: "/dashboard/documents", sourceFile: "app/[locale]/dashboard/documents/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR K: the reports hub is a dashboard module (registry-driven
+  // grid card + command entry), so it joins the smoke inventory like the
+  // other module surfaces. Role-specific real-data index; the evidence
+  // report below stays its own inventoried surface (linked, unchanged).
+  { id: "reports", urlPattern: "/dashboard/reports", sourceFile: "app/[locale]/dashboard/reports/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "reports-evidence", urlPattern: "/dashboard/reports/evidence", sourceFile: "app/[locale]/dashboard/reports/evidence/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "player-card", urlPattern: "/dashboard/player-card", sourceFile: "app/[locale]/dashboard/player-card/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "market-map", urlPattern: "/dashboard/market-map", sourceFile: "app/[locale]/dashboard/market-map/page.tsx", requiresAuth: true, kind: "role-flow" },

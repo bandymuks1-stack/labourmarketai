@@ -29,7 +29,109 @@
     "inputLabel": "Seite oder Aktion finden",
     "resultsLabel": "Passende Seiten",
     "noResults": "Nichts gefunden. Versuchen Sie ein anderes Wort — z. B. Lebenslauf, Journal, Team, Dokumente, Preise.",
-    "shortcutHint": "Ctrl / ⌘ K"
+    "shortcutHint": "Ctrl / ⌘ K",
+    "recentLabel": "Zuletzt geöffnet",
+    "objectsLabel": "Ihre eigenen Einträge",
+    "objectsLoading": "Ihre eigenen Einträge werden durchsucht…",
+    "objectsError": "Ihre Einträge konnten gerade nicht durchsucht werden. Die Seitenlinks oben funktionieren weiterhin.",
+    "groups": {
+      "projects": "Ihre Projekte",
+      "tasks": "Ihre Aufgaben",
+      "finance": "Ihre Finanzeinträge",
+      "conversations": "Ihre Unterhaltungen",
+      "bookings": "Ihre Buchungen",
+      "documents": "Ihre Dokumenteinträge"
+    }
+  },
+  "reports": {
+    "eyebrow": "Berichte",
+    "title": "Berichte",
+    "intro": "Kennzahlen, gezählt aus Ihren eigenen Einträgen, mit der Berechnungsgrundlage unter jedem Abschnitt, und die bereits vorhandenen Exporte.",
+    "honestyNote": "Nur Zählungen über Ihre eigenen Daten — keine Benchmarks, keine Scores, keine Prognosen.",
+    "state": {
+      "needsMigration": "Dieses Datenmodell ist in dieser Umgebung noch nicht verfügbar, es gibt also nichts zu zählen. Anstelle echter Daten wird keine Zahl angezeigt.",
+      "unavailable": "Diese Kennzahlen können gerade nicht gelesen werden. An ihrer Stelle wird nichts geschätzt."
+    },
+    "basis": {
+      "label": "Grundlage",
+      "workerEvidence": "Gezählt nach den Regeln des Nachweisberichts aus Ihren eigenen katalogisierten Fähigkeiten, Arbeitsjournal-Einträgen und Bestätigungen von Verantwortlichen. Kein Score, keine Schätzung.",
+      "workerActivity": "Direkte Zählungen Ihrer eigenen Arbeitsjournal-Einträge und Ihrer eigenen hochgeladenen Journalfotos.",
+      "orgDemand": "Zählungen über die von Ihnen selbst erstellten Bedarfsanfragen. Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig.",
+      "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
+      "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
+      "orgDocuments": "Summen des zustimmungsgebundenen Pool-Aggregats — gezählt werden nur Arbeitskräfte, die der aggregierten Dokumentsichtbarkeit zugestimmt haben.",
+      "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten."
+    },
+    "worker": {
+      "evidence": {
+        "title": "Profil- und Nachweiskennzahlen",
+        "totalSkills": "Fähigkeiten",
+        "workSupported": "Durch Arbeitseinträge belegt",
+        "confirmed": "Bestätigt",
+        "journalEntries": "Journaleinträge",
+        "confirmations": "Bestätigungen",
+        "empty": "Noch keine Nachweisdaten — Kennzahlen erscheinen, sobald Profil und Arbeitsjournal echte Einträge enthalten.",
+        "link": "Vollständigen Nachweisbericht öffnen"
+      },
+      "activity": {
+        "title": "Journalaktivität",
+        "entries": "Journaleinträge",
+        "photos": "Hochgeladene Fotos",
+        "unavailable": "Ihre Journalzählungen können gerade nicht gelesen werden. Anstelle echter Zahlen wird nichts angezeigt.",
+        "link": "Arbeitsjournal öffnen"
+      }
+    },
+    "exports": {
+      "title": "Exporte",
+      "note": "Aufgeführt sind nur die Exporte, die bereits funktionieren — nichts hier ist eine Vorschau.",
+      "evidence": "Nachweisbericht (Drucken / PDF)",
+      "cv": "Lebenslauf (Drucken / PDF)",
+      "journalCsv": "Journal-Export (CSV)",
+      "financeCsv": "Export der Finanzeinträge (CSV)"
+    },
+    "org": {
+      "demand": {
+        "title": "Bedarfsanfragen",
+        "open": "Offen",
+        "total": "Gesamt",
+        "link": "Bedarfserfassung öffnen"
+      },
+      "projects": {
+        "title": "Projekte nach Status",
+        "status": {
+          "draft": "Entwurf",
+          "live": "Laufend",
+          "paused": "Pausiert"
+        },
+        "total": "Gesamt",
+        "empty": "Noch keine Projekte — Kennzahlen erscheinen, sobald Ihr Unternehmen Projektzeilen hat.",
+        "link": "Projekte öffnen"
+      },
+      "tasks": {
+        "title": "Aufgaben nach Status",
+        "open": "Offen",
+        "status": {
+          "todo": "Zu erledigen",
+          "in_progress": "In Arbeit",
+          "blocked": "Blockiert"
+        },
+        "link": "Aufgaben öffnen"
+      },
+      "documents": {
+        "title": "Dokumentbereitschaft des Pools",
+        "workers": "Arbeitskräfte mit Zustimmung",
+        "expiring": "Ablaufende Dokumente",
+        "attention": "Aufmerksamkeit nötig",
+        "empty": "Noch keine Pool-Arbeitskräfte mit Zustimmung — dieses Aggregat zählt nur Arbeitskräfte, die zugestimmt haben.",
+        "link": "Dokumentenzentrum öffnen"
+      },
+      "finance": {
+        "title": "Finanzeinträge",
+        "overdue": "Überfällig",
+        "total": "Einträge gesamt",
+        "link": "Finanzeinträge öffnen"
+      }
+    }
   },
   "marketRecognition": {
     "title": "Was bieten Sie an oder was brauchen Sie?",
