@@ -109,6 +109,11 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // like the other module surfaces.
   { id: "planning", urlPattern: "/dashboard/planning", sourceFile: "app/[locale]/dashboard/planning/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Control room PR G: the projects list (manager map) is a dashboard module
+  // (registry-driven grid card + command entry into each project's operating
+  // centre), so it joins the smoke inventory like the other module surfaces.
+  // The id-parameterized project routes stay excluded (see the note below).
+  { id: "projects", urlPattern: "/dashboard/projects", sourceFile: "app/[locale]/dashboard/projects/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "company-scouting", urlPattern: "/dashboard/company/scouting", sourceFile: "app/[locale]/dashboard/company/scouting/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "account", urlPattern: "/dashboard/account", sourceFile: "app/[locale]/dashboard/account/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "privacy", urlPattern: "/dashboard/privacy", sourceFile: "app/[locale]/dashboard/privacy/page.tsx", requiresAuth: true, kind: "role-flow" },
@@ -130,8 +135,9 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
  *   the already-covered inbox surface; covered transitively by the dead-link /
  *   copy-leak scans of the whole app/ tree.
  * - `/dashboard/projects/[id]` (+ `/operations`): requires a real project id to
- *   mean anything beyond file existence; the list page can be added when
- *   projects become a primary flow surface.
+ *   mean anything beyond file existence. The base list page joined the
+ *   inventory with control room PR G (projects became a dashboard module);
+ *   the id-parameterized routes stay excluded.
  * - Landing / public marketing pages beyond the existing six: explicitly out of
  *   scope for this expansion (owner directive — do not touch marketing pages).
  */

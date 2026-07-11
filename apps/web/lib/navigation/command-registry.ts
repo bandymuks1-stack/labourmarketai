@@ -169,7 +169,10 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // project pages (WAGON 8) — one photo system, two honest surfaces.
   {
     id: "work_gallery",
-    route: "/dashboard/projects",
+    // Control room PR G: projects is now a dashboard module — every entry
+    // whose destination is the projects surface resolves through the one
+    // module registry (route-drift killer).
+    route: getModuleRoute("projects"),
     audience: "company",
     labels: {
       en: "Work gallery (project photo reports)",
@@ -308,7 +311,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "objects_projects",
-    route: "/dashboard/projects",
+    route: getModuleRoute("projects"),
     audience: "company",
     labels: {
       en: "Objects & projects",
@@ -327,8 +330,9 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "follow_up",
-    // Follow-up chips / counters live in project operations under /dashboard/projects.
-    route: "/dashboard/projects",
+    // Follow-up chips / counters live in project operations under the
+    // projects module surface.
+    route: getModuleRoute("projects"),
     audience: "company",
     labels: {
       en: "Follow-up (project operations)",

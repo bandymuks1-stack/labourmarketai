@@ -4726,6 +4726,50 @@
     }
   },
   "projectOps": {
+    "centre": {
+      "summaryTitle": "Project overview",
+      "datesLabel": "Dates",
+      "openTasksLabel": "Open tasks",
+      "tasksPreparingShort": "not available yet",
+      "readinessLabel": "Checklist checked",
+      "readinessNone": "nothing tracked yet",
+      "housingLabel": "Housing provided",
+      "housingYes": "Yes",
+      "housingNo": "No",
+      "housingUnknown": "Not recorded",
+      "attention": {
+        "title": "Needs attention",
+        "empty": "Nothing needs attention right now — the statuses, checklists and tasks tracked here are calm.",
+        "note": "Derived only from real records: manager-set operational statuses, open checklist items and open project tasks. Nothing else is scored or predicted.",
+        "kind": {
+          "worker_documents_needed": "Documents needed",
+          "readiness_item_open": "Checklist item open",
+          "task_overdue": "Task overdue",
+          "task_blocked": "Task blocked"
+        }
+      },
+      "resources": {
+        "title": "Resources and assignment readiness",
+        "checklistLabel": "Checklist",
+        "availabilityLabel": "Availability",
+        "availableFromLabel": "Available from",
+        "notRecorded": "not recorded",
+        "noWindow": "No project dates — booking overlaps not checked",
+        "bookingConflict": "{n, plural, one {# overlapping accepted booking} other {# overlapping accepted bookings}}",
+        "noConflict": "No overlapping accepted bookings",
+        "note": "Availability shows the worker's own recorded fields. Overlaps compare the accepted bookings visible to you with this project's date band. Accommodation and transport needs are not tracked yet, so nothing is shown for them."
+      },
+      "tasksTitle": "Project tasks",
+      "tasksEmpty": "No open tasks are linked to this project.",
+      "evidence": {
+        "title": "Work evidence",
+        "entriesLabel": "Journal entries",
+        "photosLabel": "Uploaded photos",
+        "note": "Real counts of journal entries linked to this project and the photos workers attached to their own entries.",
+        "link": "Open the project gallery"
+      },
+      "honestNote": "This centre composes records that already exist. Milestones, issue registers and resource tables are not built yet and are not simulated here."
+    },
     "eyebrow": "Project operations",
     "managerOnly": "This board is for a company or agency manager.",
     "notAuthorized": "You can only open the operations board for a project you manage.",

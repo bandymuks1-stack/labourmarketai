@@ -46,7 +46,14 @@ describe("access control — manager-gated, project-scoped", () => {
     expect(route).toMatch(/MANAGER_ROLES/);
     expect(route).toMatch(/"company"/);
     expect(route).toMatch(/"agency"/);
-    expect(route).toMatch(/getProjectOperations/);
+    // Control room PR G: the page reads through the operations-centre
+    // composition, whose authorisation gate IS getProjectOperations
+    // (null = not the caller's project) — guarded in
+    // project-operations-centre.test.ts.
+    expect(route).toMatch(/getOperationsCentre/);
+    expect(read("lib/projects/operations-centre.ts")).toMatch(
+      /getProjectOperations/,
+    );
     expect(route).toMatch(/notAuthorized/);
   });
   it("the CSV route rejects anon (401) and non-managers (403)", () => {

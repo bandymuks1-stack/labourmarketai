@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import {
   Bell,
+  Briefcase,
   Building2,
   CalendarDays,
   Compass,
@@ -57,6 +58,7 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   bell: Bell,
   checklist: ListChecks,
   handshake: Handshake,
+  briefcase: Briefcase,
 };
 
 export async function DashboardModuleGrid({

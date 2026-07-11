@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { getModuleRoute } from "@/lib/dashboard/dashboard-module-registry";
+
 /**
  * WAGON 8 guard (CR train areas 14/15/16) — journal entry modes + project
  * work gallery + photo-first reports.
@@ -144,10 +146,14 @@ describe("photo report discoverability (owner smoke finding)", () => {
     // Normalize line endings so the pin survives CRLF checkouts.
     const registry = read("lib/navigation/command-registry.ts").replace(/\r/g, "");
     // photo_report → journal (worker); work_gallery → projects (company).
-    // Control room PR B: module-backed entries resolve through the ONE
-    // module registry (getModuleRoute), so the journal route cannot drift.
+    // Control room PR B/PR G: module-backed entries resolve through the ONE
+    // module registry (getModuleRoute), so neither route can drift — the
+    // projects surface became a dashboard module in PR G.
     expect(registry).toContain('id: "photo_report",\n    route: getModuleRoute("journal")');
-    expect(registry).toContain('id: "work_gallery",\n    route: "/dashboard/projects"');
+    expect(registry).toMatch(
+      /id: "work_gallery",[\s\S]{0,400}?route: getModuleRoute\("projects"\)/,
+    );
+    expect(getModuleRoute("projects")).toBe("/dashboard/projects");
     for (const term of [
       '"foto ataskaita"',
       '"foto report"',

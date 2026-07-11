@@ -4726,6 +4726,50 @@
     }
   },
   "projectOps": {
+    "centre": {
+      "summaryTitle": "Projektübersicht",
+      "datesLabel": "Zeitraum",
+      "openTasksLabel": "Offene Aufgaben",
+      "tasksPreparingShort": "noch nicht verfügbar",
+      "readinessLabel": "Checkliste geprüft",
+      "readinessNone": "noch nichts erfasst",
+      "housingLabel": "Unterkunft gestellt",
+      "housingYes": "Ja",
+      "housingNo": "Nein",
+      "housingUnknown": "Nicht erfasst",
+      "attention": {
+        "title": "Braucht Aufmerksamkeit",
+        "empty": "Im Moment braucht nichts Aufmerksamkeit — die hier verfolgten Status, Checklisten und Aufgaben sind ruhig.",
+        "note": "Nur aus echten Datensätzen abgeleitet: vom Manager gesetzte operative Status, offene Checklistenpunkte und offene Projektaufgaben. Nichts weiter wird bewertet oder vorhergesagt.",
+        "kind": {
+          "worker_documents_needed": "Dokumente erforderlich",
+          "readiness_item_open": "Offener Checklistenpunkt",
+          "task_overdue": "Aufgabe überfällig",
+          "task_blocked": "Aufgabe blockiert"
+        }
+      },
+      "resources": {
+        "title": "Ressourcen und Einsatzbereitschaft",
+        "checklistLabel": "Checkliste",
+        "availabilityLabel": "Verfügbarkeit",
+        "availableFromLabel": "Verfügbar ab",
+        "notRecorded": "nicht erfasst",
+        "noWindow": "Projekt ohne Zeitraum — Buchungsüberschneidungen nicht geprüft",
+        "bookingConflict": "{n, plural, one {# überschneidende angenommene Buchung} other {# überschneidende angenommene Buchungen}}",
+        "noConflict": "Keine überschneidenden angenommenen Buchungen",
+        "note": "Die Verfügbarkeit zeigt die vom Arbeiter selbst erfassten Felder. Überschneidungen vergleichen die für Sie sichtbaren angenommenen Buchungen mit dem Zeitraum dieses Projekts. Unterkunfts- und Transportbedarf wird noch nicht erfasst; dafür wird nichts angezeigt."
+      },
+      "tasksTitle": "Projektaufgaben",
+      "tasksEmpty": "Mit diesem Projekt sind keine offenen Aufgaben verknüpft.",
+      "evidence": {
+        "title": "Arbeitsnachweis",
+        "entriesLabel": "Journaleinträge",
+        "photosLabel": "Hochgeladene Fotos",
+        "note": "Echte Anzahl der mit diesem Projekt verknüpften Journaleinträge und der Fotos, die Arbeiter an ihre eigenen Einträge angehängt haben.",
+        "link": "Projektgalerie öffnen"
+      },
+      "honestNote": "Dieses Zentrum setzt nur bereits vorhandene Datensätze zusammen. Meilensteine, Problemregister und Ressourcentabellen existieren noch nicht und werden hier nicht simuliert."
+    },
     "eyebrow": "Projekteinsatz",
     "managerOnly": "Dieses Board ist für Manager eines Unternehmens oder einer Personalagentur.",
     "notAuthorized": "Sie können das Einsatz-Board nur für ein Projekt öffnen, das Sie verwalten.",
