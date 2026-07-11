@@ -92,12 +92,19 @@ function walkSource(absDir: string, acc: string[] = []): string[] {
   return acc;
 }
 
-describe("1. no migration in this PR — I2 claims clean names", () => {
-  it("no repo migration or rollback mentions finance_records or the three RPCs", () => {
+describe("1. exactly one migration owns finance_records — the human-gated I2 pair", () => {
+  // I1 shipped the consumer layer with NO migration; I2 added the single
+  // human-gated draft (20260711230000_finance_records_v1.sql) plus its
+  // rollback sibling. Nothing else in the repo may (re)define the table or
+  // the RPCs.
+  const I2 = "20260711230000_finance_records_v1";
+
+  it("only the I2 migration and its rollback sibling mention finance_records or the three RPCs", () => {
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
+        if (f.startsWith(I2)) continue;
         const src = readFileSync(join(abs, f), "utf8");
         expect(src, `${dir}/${f} must not define finance_records`).not.toMatch(
           /\bfinance_records\b/,
@@ -107,6 +114,34 @@ describe("1. no migration in this PR — I2 claims clean names", () => {
         }
       }
     }
+  });
+
+  it("the I2 pair exists, stays human-gated, and defines the exact contract", () => {
+    const up = readFileSync(
+      join(REPO, "supabase", "migrations", `${I2}.sql`),
+      "utf8",
+    );
+    const down = readFileSync(
+      join(REPO, "supabase", "rollbacks", `${I2}.down.sql`),
+      "utf8",
+    );
+    expect(up).toContain("needs-human-gate");
+    expect(up).toContain("@human-gate-approved");
+    expect(up).toMatch(/create table if not exists public\.finance_records/);
+    for (const fn of RPC_NAMES) {
+      expect(up).toContain(`create or replace function public.${fn}`);
+      expect(down).toContain(`drop function if exists public.${fn}`);
+    }
+    expect(down).toMatch(/drop table if exists public\.finance_records/);
+    expect(up).toMatch(
+      /revoke insert, update, delete on public\.finance_records from authenticated/,
+    );
+    // The five honest stored statuses — 'overdue' is DERIVED app-side and
+    // must never become a stored state.
+    expect(up).toContain(
+      "check (status in ('draft','issued','partially_paid','paid','cancelled'))",
+    );
+    expect(up).not.toMatch(/'overdue'/);
   });
 });
 
