@@ -148,10 +148,18 @@ describe("communication v1 — no service_role, no file upload, no fake indicato
     expect(code).not.toMatch(/createAdminClient/i);
   });
 
-  it("composer never uploads files", () => {
+  it("composer uploads files ONLY to the private participant-scoped bucket (v2 attachments)", () => {
+    // The v1 "no file upload" pin evolved with migration 20260712130000:
+    // attachments are now a real product flow, but the upload path must stay
+    // the ONE private conversation bucket through the user's own client —
+    // never a public URL, never service_role, never a decorative control.
     const code = stripComments(composer);
-    expect(code).not.toMatch(/<input[\s\S]{0,200}type=["']file["']/);
-    expect(code).not.toMatch(/FormData[\s\S]*append\(["']file["']/);
+    expect(code).toMatch(/type="file"/);
+    expect(code).toMatch(/CONVERSATION_ATTACHMENT_BUCKET/);
+    expect(code).not.toMatch(/getPublicUrl/i);
+    expect(code).not.toMatch(/service[_-]?role/i);
+    // No hard-coded bucket strings — the model constant is the single source.
+    expect(code).not.toMatch(/from\(\s*["']conversation-attachments["']\s*\)/);
   });
 
   it("UI code never RENDERS fake 'delivered' / 'seen' / 'read receipt' / 'typing' indicators", () => {

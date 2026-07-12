@@ -12,6 +12,11 @@ import { resolveViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
+import {
+  listConversationAttachments,
+  type ConversationMessageAttachment,
+} from "@/lib/communication/attachments";
+import { isImageAttachmentMime } from "@/lib/communication/attachment-model";
 
 type MessageRow = {
   id: string;
@@ -89,6 +94,16 @@ export default async function ConversationDetailPage({
     .order("created_at", { ascending: true })
     .limit(500);
   const messages: MessageRow[] = (messagesRes.data ?? []) as MessageRow[];
+
+  // Message attachments (user-journey repair v1) — participant-scoped
+  // metadata + short-lived signed URLs from the PRIVATE bucket. Degrades to
+  // an empty map while the owner-gated migration 20260712130000 is not
+  // applied, so the thread renders exactly as before.
+  const attachmentsRead = await listConversationAttachments(conversationId);
+  const attachmentsByMessage =
+    attachmentsRead.status === "ok"
+      ? attachmentsRead.byMessage
+      : new Map<string, ConversationMessageAttachment[]>();
 
   // v2 — surface the admin-only "Join thread" affordance when the
   // viewer is admin but not yet a participant. Admins arriving from
@@ -265,10 +280,65 @@ export default async function ConversationDetailPage({
                           {t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
                         </span>
                       ) : null}
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">
-                        {vt.text}
-                      </p>
+                      {vt.text.length > 0 ? (
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">
+                          {vt.text}
+                        </p>
+                      ) : null}
                     </>
+                  );
+                })()}
+                {(() => {
+                  const atts = attachmentsByMessage.get(m.id) ?? [];
+                  if (atts.length === 0) return null;
+                  return (
+                    <ul
+                      className="mt-1 flex flex-wrap gap-2"
+                      data-testid={`message-attachments-${m.id}`}
+                    >
+                      {atts.map((a) =>
+                        a.signedUrl && isImageAttachmentMime(a.mimeType) ? (
+                          <li key={a.id}>
+                            {/* Image opens full-size in a new tab via the same
+                                short-lived signed URL — no public URL exists. */}
+                            <a
+                              href={a.signedUrl}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={a.signedUrl}
+                                alt={a.fileName}
+                                loading="lazy"
+                                className="max-h-48 max-w-full rounded-md border border-ink-600 object-contain"
+                              />
+                            </a>
+                          </li>
+                        ) : (
+                          <li key={a.id}>
+                            {a.signedUrl ? (
+                              <a
+                                href={a.signedUrl}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-xs font-medium text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                              >
+                                {a.fileName}
+                                <span className="text-[10px] text-text-muted">
+                                  ({Math.max(1, Math.round(a.fileSizeBytes / 1024))} KB)
+                                </span>
+                              </a>
+                            ) : (
+                              <span className="inline-flex items-center rounded-md border border-ink-600 px-3 py-2 text-xs text-text-muted">
+                                {t("attachmentUnavailable")}
+                              </span>
+                            )}
+                          </li>
+                        ),
+                      )}
+                    </ul>
                   );
                 })()}
               </li>

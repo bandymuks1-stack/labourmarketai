@@ -3116,6 +3116,17 @@
         "actionsHeading": "Was Sie jetzt tun können",
         "incompleteStatus": "Ihre Angaben sind noch nicht vollständig",
         "readyStatus": "Ihr Profil ist bereit",
+        "missing": {
+          "progress": "{n, plural, one {Noch # Schritt} other {Noch # Schritte}} — tippen Sie auf einen Punkt und füllen Sie ihn direkt aus.",
+          "profession": {
+            "title": "Geben Sie Ihren Beruf an",
+            "hint": "Öffnet die Profilbearbeitung — wählen Sie Ihren Hauptberuf."
+          },
+          "firstEntry": {
+            "title": "Erfassen Sie Ihren ersten Arbeitseintrag",
+            "hint": "Öffnet das Arbeitsjournal — beschreiben Sie kurz, woran Sie gearbeitet haben."
+          }
+        },
         "actions": {
           "recordWork": {
             "title": "Arbeit erfassen",
@@ -4890,7 +4901,8 @@
       "needsEvidence": "Keine Arbeitsnachweise",
       "needsFollowUp": "Nachfassen nötig",
       "openReviewItems": "Offene Prüfpunkte",
-      "instructionsSent": "Gesendete Anweisungen"
+      "instructionsSent": "Gesendete Anweisungen",
+      "openHint": "Liste anzeigen"
     },
     "actionsTitle": "Aktionen",
     "actions": {
@@ -4986,8 +4998,19 @@
       "missingDocs": "Fehlende Dokumente/Infos",
       "ready": "Bereit (geprüfte Felder)",
       "needsSkillInfo": "Fähigkeitsinfo nötig",
+      "needsEvidence": "Keine Arbeitsnachweise",
+      "docsChecked": "Dokumente geprüft",
       "followUp": "Nachfassen nötig",
-      "none": "Keine Arbeitskräfte entsprechen diesem Filter."
+      "none": "Keine Arbeitskräfte entsprechen diesem Filter.",
+      "showAll": "Alle anzeigen",
+      "empty": {
+        "missingDocs": "Derzeit fehlen bei keinem Arbeiter Dokumente oder Informationen.",
+        "ready": "Noch kein Arbeiter erfüllt alle hier geprüften Felder. Wählen Sie „Alle“, um zu sehen, was jeweils fehlt.",
+        "needsSkillInfo": "Alle zugewiesenen Arbeiter haben ihre Fähigkeiten angegeben.",
+        "needsEvidence": "Alle zugewiesenen Arbeiter haben mindestens einen Arbeitsnachweis.",
+        "docsChecked": "Es gibt noch keine geprüften Dokumente. Markieren Sie Dokumentstatus in der Checkliste des Arbeiters.",
+        "followUp": "Derzeit ist keine Kontaktaufnahme nötig — alle Arbeiter haben aktuelle Aktivität."
+      }
     },
     "counters2": {
       "withMissingDocs": "Fehlende Dokumente/Infos",
@@ -5308,9 +5331,24 @@
       "placeholder": "Nachricht schreiben…",
       "send": "Senden",
       "sending": "Wird gesendet...",
-      "emptyError": "Die Nachricht ist leer.",
+      "emptyError": "Schreiben Sie eine Nachricht oder fügen Sie einen Anhang hinzu.",
       "charCount": "{n}/{max}",
-      "languageHint": "Schreiben Sie in Ihrer eigenen Sprache — die andere Person sieht Ihren Originaltext. Es gibt keine automatische Übersetzung."
+      "languageHint": "Schreiben Sie in Ihrer eigenen Sprache — die andere Person sieht Ihren Originaltext. Es gibt keine automatische Übersetzung.",
+      "attachments": {
+        "addButton": "Foto oder Datei hinzufügen",
+        "help": "Fotos (JPG, PNG, WebP), PDF oder eine Textdatei, bis 10 MB. Höchstens 5 Anhänge pro Nachricht. Anhänge sehen nur Gesprächsteilnehmer.",
+        "uploading": "Wird hochgeladen…",
+        "retry": "Erneut hochladen",
+        "remove": "Anhang entfernen",
+        "errorUpload": "Hochladen fehlgeschlagen. Versuchen Sie es erneut.",
+        "errorTooLarge": "Datei ist zu groß (bis 10 MB).",
+        "errorBadType": "Dieser Dateityp wird nicht unterstützt. Erlaubt: JPG, PNG, WebP, PDF, TXT.",
+        "errorTooMany": "Höchstens 5 Anhänge pro Nachricht.",
+        "errorNeedsSetup": "Anhänge sind in dieser Umgebung noch nicht aktiviert.",
+        "blockedWhileUploading": "Warten Sie, bis die Anhänge hochgeladen sind.",
+        "blockedFailed": "Entfernen Sie den fehlgeschlagenen Anhang oder laden Sie ihn erneut hoch.",
+        "partialFailure": "Die Nachricht wurde gesendet, aber einige Anhänge konnten nicht angehängt werden. Versuchen Sie, sie erneut zu senden."
+      }
     },
     "launcher": {
       "openLabel": "Support kontaktieren",
@@ -5346,7 +5384,8 @@
       "demand_interest": "Zu einer Arbeitsanfrage (Interesse einer Arbeitskraft)",
       "accepted_service_request": "Zu einer angenommenen Dienstleistungsanfrage",
       "accepted_booking": "Zu einer angenommenen Buchung"
-    }
+    },
+    "attachmentUnavailable": "Dieser Anhang kann gerade nicht geöffnet werden. Aktualisieren Sie die Seite."
   },
   "orgTier1Warning": {
     "eyebrow": "Ihre Organisation",
@@ -7452,6 +7491,12 @@
     "autoLocating": "Standort wird ermittelt…",
     "geoDenied": "Wir konnten Ihren Standort nicht ermitteln — der Browser hat den Standortzugriff blockiert. Erlauben Sie den Standortzugriff für diese Website in Ihren Browsereinstellungen oder wählen Sie eine Stadt manuell.",
     "geoUnavailable": "Ihr Browser unterstützt keine Standortermittlung. Wählen Sie einen Standort manuell.",
+    "geoDeniedInApp": "Diese Seite scheint im integrierten Browser einer App (z. B. Facebook oder Instagram) geöffnet zu sein, der die Standortbestimmung blockiert. Öffnen Sie die Seite in Ihrem üblichen Browser oder wählen Sie unten manuell eine Stadt.",
+    "geoOpenInBrowser": "So öffnen Sie im Browser: Tippen Sie auf die Menütaste (⋯ oder ⋮) in der Bildschirmecke und wählen Sie „Im Browser öffnen“.",
+    "geoNoFix": "Der Gerätestandort konnte nicht ermittelt werden. Versuchen Sie es erneut oder wählen Sie manuell eine Stadt.",
+    "geoTimeout": "Die Standortbestimmung hat zu lange gedauert. Versuchen Sie es erneut oder wählen Sie manuell eine Stadt.",
+    "geoInsecure": "Auf dieser Seite ist keine Standortbestimmung möglich. Wählen Sie manuell eine Stadt.",
+    "geoRetry": "Erneut versuchen",
     "manualToggle": "Standort manuell festlegen",
     "manualHint": "Wenn Sie den Standortzugriff nicht erlauben möchten, wählen Sie eine Stadt oder Region manuell.",
     "countryLabel": "Land",

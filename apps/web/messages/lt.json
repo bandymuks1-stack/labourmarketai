@@ -3116,6 +3116,17 @@
         "actionsHeading": "Ką galite padaryti dabar",
         "incompleteStatus": "Jūsų informacija dar nepilna",
         "readyStatus": "Jūsų profilis paruoštas",
+        "missing": {
+          "progress": "{n, plural, one {Liko # žingsnis} few {Liko # žingsniai} other {Liko # žingsnių}} — paspauskite ir užpildykite tiesiogiai.",
+          "profession": {
+            "title": "Nurodykite savo profesiją",
+            "hint": "Atsidarys profilio redagavimas — pasirinkite pagrindinę profesiją."
+          },
+          "firstEntry": {
+            "title": "Įrašykite pirmą darbo įrašą",
+            "hint": "Atsidarys darbo žurnalas — trumpai aprašykite, ką dirbote."
+          }
+        },
         "actions": {
           "recordWork": {
             "title": "Įrašyti darbą",
@@ -4890,7 +4901,8 @@
       "needsEvidence": "Nėra darbo įrodymų",
       "needsFollowUp": "Reikia susisiekti",
       "openReviewItems": "Laukia peržiūros",
-      "instructionsSent": "Išsiųsti nurodymai"
+      "instructionsSent": "Išsiųsti nurodymai",
+      "openHint": "Rodyti sąrašą"
     },
     "actionsTitle": "Veiksmai",
     "actions": {
@@ -4986,8 +4998,19 @@
       "missingDocs": "Trūksta dokumentų/info",
       "ready": "Paruošta (patikrinti laukai)",
       "needsSkillInfo": "Reikia įgūdžių info",
+      "needsEvidence": "Nėra darbo įrodymų",
+      "docsChecked": "Patikrinta dokumentų",
       "followUp": "Reikia susisiekti",
-      "none": "Nėra darbuotojų pagal šį filtrą."
+      "none": "Nėra darbuotojų pagal šį filtrą.",
+      "showAll": "Rodyti visus",
+      "empty": {
+        "missingDocs": "Šiuo metu nė vienam darbuotojui netrūksta dokumentų ar informacijos.",
+        "ready": "Nė vienas darbuotojas dar neatitinka visų čia tikrinamų laukų. Pasirinkite „Visi“ ir pažiūrėkite, ko kiekvienam trūksta.",
+        "needsSkillInfo": "Visi priskirti darbuotojai yra nurodę savo įgūdžius.",
+        "needsEvidence": "Visi priskirti darbuotojai turi bent vieną darbo įrodymą.",
+        "docsChecked": "Patikrintų dokumentų dar nėra. Dokumentų būsenas žymėkite darbuotojo kortelės sąraše.",
+        "followUp": "Šiuo metu susisiekti nereikia — visi darbuotojai turi naujausios veiklos."
+      }
     },
     "counters2": {
       "withMissingDocs": "Trūksta dokumentų/info",
@@ -5308,9 +5331,24 @@
       "placeholder": "Parašykite žinutę…",
       "send": "Siųsti",
       "sending": "Siunčiama...",
-      "emptyError": "Žinutė tuščia.",
+      "emptyError": "Įrašykite žinutę arba pridėkite priedą.",
       "charCount": "{n}/{max}",
-      "languageHint": "Rašykite savo kalba — kitas žmogus mato jūsų originalų tekstą. Automatinio vertimo nėra."
+      "languageHint": "Rašykite savo kalba — kitas žmogus mato jūsų originalų tekstą. Automatinio vertimo nėra.",
+      "attachments": {
+        "addButton": "Pridėti nuotrauką ar failą",
+        "help": "Nuotraukos (JPG, PNG, WebP), PDF arba tekstinis failas, iki 10 MB. Daugiausia 5 priedai vienoje žinutėje. Priedus mato tik pokalbio dalyviai.",
+        "uploading": "Įkeliama…",
+        "retry": "Įkelti iš naujo",
+        "remove": "Pašalinti priedą",
+        "errorUpload": "Įkelti nepavyko. Pabandykite dar kartą.",
+        "errorTooLarge": "Failas per didelis (iki 10 MB).",
+        "errorBadType": "Šio tipo failas nepalaikomas. Tinka: JPG, PNG, WebP, PDF, TXT.",
+        "errorTooMany": "Daugiausia 5 priedai vienoje žinutėje.",
+        "errorNeedsSetup": "Priedų siuntimas dar neįjungtas šioje aplinkoje.",
+        "blockedWhileUploading": "Palaukite, kol priedai bus įkelti.",
+        "blockedFailed": "Pašalinkite arba iš naujo įkelkite nepavykusį priedą.",
+        "partialFailure": "Žinutė išsiųsta, bet dalies priedų prisegti nepavyko. Pabandykite juos išsiųsti dar kartą."
+      }
     },
     "launcher": {
       "openLabel": "Susisiekti su pagalba",
@@ -5346,7 +5384,8 @@
       "demand_interest": "Dėl darbo užklausos (darbuotojo susidomėjimas)",
       "accepted_service_request": "Dėl priimtos paslaugų užklausos",
       "accepted_booking": "Dėl priimtos rezervacijos"
-    }
+    },
+    "attachmentUnavailable": "Priedo šiuo metu atidaryti nepavyko. Atnaujinkite puslapį."
   },
   "orgTier1Warning": {
     "eyebrow": "Jūsų organizacija",
@@ -7452,6 +7491,12 @@
     "autoLocating": "Nustatoma vieta…",
     "geoDenied": "Nepavyko gauti jūsų vietos – naršyklė užblokavo prieigą prie vietos. Leiskite šiai svetainei naudoti vietą naršyklės nustatymuose arba pasirinkite miestą rankiniu būdu.",
     "geoUnavailable": "Naršyklė nepalaiko vietos nustatymo. Pasirinkite vietą rankiniu būdu.",
+    "geoDeniedInApp": "Atrodo, kad puslapis atidarytas programėlės naršyklėje (pvz., Facebook ar Instagram), kuri neleidžia nustatyti vietos. Atidarykite puslapį įprastoje naršyklėje arba pasirinkite miestą rankiniu būdu žemiau.",
+    "geoOpenInBrowser": "Kaip atidaryti naršyklėje: paspauskite meniu mygtuką (⋯ arba ⋮) ekrano kampe ir pasirinkite „Atidaryti naršyklėje“.",
+    "geoNoFix": "Nepavyko nustatyti įrenginio vietos. Pabandykite dar kartą arba pasirinkite miestą rankiniu būdu.",
+    "geoTimeout": "Vietos nustatymas užtruko per ilgai. Pabandykite dar kartą arba pasirinkite miestą rankiniu būdu.",
+    "geoInsecure": "Šiame puslapyje vietos nustatymas negalimas. Pasirinkite miestą rankiniu būdu.",
+    "geoRetry": "Bandyti dar kartą",
     "manualToggle": "Nurodyti vietą rankiniu būdu",
     "manualHint": "Jeigu nenorite leisti buvimo vietos, pasirinkite miestą arba regioną rankiniu būdu.",
     "countryLabel": "Šalis",

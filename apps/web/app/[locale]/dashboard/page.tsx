@@ -634,7 +634,21 @@ export default async function DashboardOverviewPage({
           the view model's hasCompany flag). The "what improves what"
           explainer is demoted below (help ≠ action). `incomplete` is the
           real first-use state (no profession or no entries yet). */}
-      <MyZone incomplete={isFirstUse} improves={false} />
+      <MyZone
+        incomplete={isFirstUse}
+        improves={false}
+        // The exact missing items behind the first-use state, each deep-linking
+        // to the precise section that completes it (user-journey repair v1):
+        // profession → the profile edit block; first entry → the journal composer.
+        missingItems={[
+          ...(!professionName
+            ? [{ key: "profession" as const, href: "/dashboard/profile#profile-edit" }]
+            : []),
+          ...(entriesCount === 0
+            ? [{ key: "firstEntry" as const, href: "/dashboard/journal#journal-composer" }]
+            : []),
+        ]}
+      />
       <DashboardModuleGrid modules={controlRoom.modules} />
 
       {/* Privacy status — always visible, never blocking (consent v1):

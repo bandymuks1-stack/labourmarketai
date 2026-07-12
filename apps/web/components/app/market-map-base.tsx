@@ -27,12 +27,32 @@ import {
 } from "@/lib/location/location-store";
 import { MarketMapLive } from "@/components/app/market-map-live";
 import { resolveLocation, type LocationPrecision } from "@/lib/location/city-coordinates";
+import {
+  canRetrySucceed,
+  classifyGeoFailure,
+  detectInAppBrowser,
+  needsOpenInBrowserGuidance,
+  type GeoEnvironment,
+  type GeoFailure,
+} from "@/lib/browser/geo-capability";
 
 const PRECISION_KEY: Record<LocationPrecision, string> = {
   device: "precisionDevice",
   city: "precisionCity",
   country: "precisionCountry",
   unset: "precisionUnset",
+};
+
+/** One honest, plain-language message per distinguishable failure state —
+ *  never a technical error code, never advice that cannot work in the
+ *  user's actual context. */
+const GEO_HINT_KEY: Record<GeoFailure, string> = {
+  denied: "geoDenied",
+  "denied-in-app": "geoDeniedInApp",
+  unsupported: "geoUnavailable",
+  unavailable: "geoNoFix",
+  timeout: "geoTimeout",
+  "insecure-context": "geoInsecure",
 };
 
 /**
@@ -79,7 +99,7 @@ export function MarketMapBase({
 
   const [selected, setSelected] = useState<SelectedLocation | null>(null);
   const [geoBusy, setGeoBusy] = useState(false);
-  const [geoHint, setGeoHint] = useState<"denied" | "unavailable" | null>(null);
+  const [geoHint, setGeoHint] = useState<GeoFailure | null>(null);
   const [manualOpen, setManualOpen] = useState(false);
   const [country, setCountry] = useState("");
   const [region, setRegion] = useState("");
@@ -102,11 +122,26 @@ export function MarketMapBase({
   }, []);
 
   // ── Automatic mode: browser geolocation (no provider, no typing) ──
+  // Capability-based failure handling (user-journey repair v1): the real
+  // environment (secure context, API presence, in-app browser) + the real
+  // error code decide WHICH state the user is in — each state gets copy that
+  // is true for it and a recovery that can actually work. The manual form
+  // always opens on failure, so there is never a dead end.
+  const geoEnvironment = useCallback((): GeoEnvironment => {
+    const nav = typeof navigator === "undefined" ? null : navigator;
+    return {
+      secureContext: typeof window === "undefined" ? true : window.isSecureContext !== false,
+      apiAvailable: Boolean(nav && "geolocation" in nav),
+      inApp: detectInAppBrowser(nav?.userAgent ?? null),
+    };
+  }, []);
+
   const useMyLocation = useCallback(() => {
     setGeoHint(null);
     setManualError(null);
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setGeoHint("unavailable");
+    const env = geoEnvironment();
+    if (!env.secureContext || !env.apiAvailable) {
+      setGeoHint(classifyGeoFailure(env, null));
       setManualOpen(true);
       return;
     }
@@ -125,14 +160,14 @@ export function MarketMapBase({
         });
         setGeoBusy(false);
       },
-      () => {
+      (err) => {
         setGeoBusy(false);
-        setGeoHint("denied");
+        setGeoHint(classifyGeoFailure(env, err?.code ?? null));
         setManualOpen(true); // immediately offer the manual form
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
-  }, [persist, radiusKm]);
+  }, [persist, radiusKm, geoEnvironment]);
 
   // ── Manual mode: structured location, no geocoding/provider ──
   const saveManual = useCallback(() => {
@@ -226,51 +261,9 @@ export function MarketMapBase({
         </p>
       </header>
 
-      {/* REAL interactive map — OpenStreetMap tiles via Leaflet (free, no API
-          key, no secret, no paid/proprietary provider). The worker sees real
-          geography / streets / regions, pans/zooms, taps to set a coordinate. The
-          location + radius controls below act ON this map. The only marker is
-          the worker's OWN location (privacy: no other users, no fake market
-          points); honest empty state = the real map with no markers yet. */}
-      <div
-        className="flex flex-col gap-2 rounded-xl border border-ink-500 bg-ink-900/60 p-3"
-        data-testid="location-panel"
-        aria-label={t("panelTitle")}
-      >
-        <MarketMapLive
-          selected={selected}
-          radiusKm={selected?.radiusKm ?? radiusKm}
-          onPick={pickFromMap}
-          ariaLabel={t("panelTitle")}
-          identity={identity}
-          suppressOwnMarker={suppressOwnMarker}
-        />
-        <p className="text-center text-[11px] text-text-muted" data-testid="location-map-tap-hint">
-          {t("mapTapHint")}
-        </p>
-        {selected ? (
-          <div className="flex flex-col items-center gap-1">
-            <p className="text-center text-sm font-medium text-text-primary" data-testid="location-panel-where">
-              {whereText(selected) || t(selected.source === "auto" ? "sourceAuto" : "sourceManual")}
-            </p>
-            {/* Honest precision: device / selected city / approximate country /
-                not pinpointed — so a marker never looks more precise than it is. */}
-            <span
-              className="rounded-full border border-ink-500 px-2 py-0.5 text-[10px] font-medium text-text-muted"
-              data-testid="location-precision"
-            >
-              {t(PRECISION_KEY[resolveLocation(selected).precision])}
-            </span>
-          </div>
-        ) : (
-          <p className="text-center text-xs text-text-muted">{t("panelEmpty")}</p>
-        )}
-        <p className="text-center text-[11px] text-text-muted">
-          {t("radiusValue", { km: selected?.radiusKm ?? radiusKm })}
-        </p>
-      </div>
-
-      {/* Primary action: automatic location first. */}
+      {/* Primary action: automatic location first. Rendered ABOVE the map
+          (user-journey repair v1): a blocked user must reach the recovery
+          controls without scrolling past a large map. */}
       <button
         type="button"
         onClick={useMyLocation}
@@ -287,13 +280,38 @@ export function MarketMapBase({
       </button>
 
       {geoHint && (
-        <p
-          className="text-xs leading-relaxed text-state-warning"
+        <div
+          className="flex flex-col items-start gap-2 rounded-xl border border-state-warning/30 bg-state-warning/5 p-3"
           data-testid="map-locator-geo-hint"
           role="status"
         >
-          {geoHint === "denied" ? t("geoDenied") : t("geoUnavailable")}
-        </p>
+          <p className="text-xs leading-relaxed text-state-warning">
+            {t(GEO_HINT_KEY[geoHint])}
+          </p>
+          {/* In-app browser: the only advice that can unblock is "open in a
+              real browser" — settings advice would be a dead end there. */}
+          {needsOpenInBrowserGuidance(geoHint, geoEnvironment()) && (
+            <p
+              className="text-xs leading-relaxed text-text-secondary"
+              data-testid="map-locator-open-in-browser"
+            >
+              {t("geoOpenInBrowser")}
+            </p>
+          )}
+          {/* Retry only when a retry can actually succeed (timeout / no fix). */}
+          {canRetrySucceed(geoHint) && (
+            <button
+              type="button"
+              onClick={useMyLocation}
+              disabled={geoBusy}
+              data-testid="map-locator-retry"
+              className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-60"
+            >
+              <RotateCw className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              {t("geoRetry")}
+            </button>
+          )}
+        </div>
       )}
 
       {/* Manual fallback — minimal typing: country + city/region + radius. */}
@@ -367,6 +385,51 @@ export function MarketMapBase({
           </button>
         </div>
       )}
+
+      {/* REAL interactive map — OpenStreetMap tiles via Leaflet (free, no API
+          key, no secret, no paid/proprietary provider). The worker sees real
+          geography / streets / regions, pans/zooms, taps to set a coordinate.
+          Rendered BELOW the location actions so failure recovery never hides
+          behind a screenful of map. The only marker is the worker's OWN
+          location (privacy: no other users, no fake market points); honest
+          empty state = the real map with no markers yet. */}
+      <div
+        className="flex flex-col gap-2 rounded-xl border border-ink-500 bg-ink-900/60 p-3"
+        data-testid="location-panel"
+        aria-label={t("panelTitle")}
+      >
+        <MarketMapLive
+          selected={selected}
+          radiusKm={selected?.radiusKm ?? radiusKm}
+          onPick={pickFromMap}
+          ariaLabel={t("panelTitle")}
+          identity={identity}
+          suppressOwnMarker={suppressOwnMarker}
+        />
+        <p className="text-center text-[11px] text-text-muted" data-testid="location-map-tap-hint">
+          {t("mapTapHint")}
+        </p>
+        {selected ? (
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-center text-sm font-medium text-text-primary" data-testid="location-panel-where">
+              {whereText(selected) || t(selected.source === "auto" ? "sourceAuto" : "sourceManual")}
+            </p>
+            {/* Honest precision: device / selected city / approximate country /
+                not pinpointed — so a marker never looks more precise than it is. */}
+            <span
+              className="rounded-full border border-ink-500 px-2 py-0.5 text-[10px] font-medium text-text-muted"
+              data-testid="location-precision"
+            >
+              {t(PRECISION_KEY[resolveLocation(selected).precision])}
+            </span>
+          </div>
+        ) : (
+          <p className="text-center text-xs text-text-muted">{t("panelEmpty")}</p>
+        )}
+        <p className="text-center text-[11px] text-text-muted">
+          {t("radiusValue", { km: selected?.radiusKm ?? radiusKm })}
+        </p>
+      </div>
 
       {/* Radius selector — sensible defaults, applies to the chosen location. */}
       <label className="flex flex-col gap-1">

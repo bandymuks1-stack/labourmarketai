@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { softDeleteJournalEntry } from "@/lib/journal/actions";
+import { restoreJournalEntry, softDeleteJournalEntry } from "@/lib/journal/actions";
 import { JournalEntrySkillLinks } from "@/components/app/journal-entry-skill-links";
 import type { EntrySkillSource } from "@/lib/journal/entry-skill-source";
 import { recordEvent } from "@/lib/telemetry/task";
@@ -47,6 +47,10 @@ export function JournalEntryRow({
   const locale = useLocale();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Local "removed" state: the row swaps to an inline placeholder with a real
+  // undo, instead of silently vanishing (destructive-action contract v1:
+  // immediate visible result + working restore path).
+  const [deleted, setDeleted] = useState(false);
 
   function onDelete() {
     recordEvent("journal_delete_clicked");
@@ -59,9 +63,54 @@ export function JournalEntryRow({
         setError(result.message);
         recordEvent("journal_save_error_code", { result_kind: result.code });
       } else {
+        setDeleted(true);
         recordEvent("journal_save_success", { result_kind: "soft_delete" });
       }
     });
+  }
+
+  function onRestore() {
+    setError(null);
+    startTransition(async () => {
+      const result = await restoreJournalEntry(entryId, locale);
+      if (!result.ok) {
+        setError(result.message);
+        recordEvent("journal_save_error_code", { result_kind: result.code });
+      } else {
+        setDeleted(false);
+        recordEvent("journal_save_success", { result_kind: "restore" });
+      }
+    });
+  }
+
+  if (deleted) {
+    return (
+      <li
+        className="card-border flex flex-wrap items-center justify-between gap-2 p-4"
+        data-testid={`journal-entry-deleted-${entryId}`}
+      >
+        <span className="text-sm text-text-secondary">{t("entry.deletedNotice")}</span>
+        <button
+          type="button"
+          onClick={onRestore}
+          disabled={pending}
+          aria-busy={pending || undefined}
+          className="inline-flex min-h-[2.75rem] items-center rounded-md border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50"
+          data-testid={`journal-entry-restore-${entryId}`}
+        >
+          {pending ? t("entry.restoring") : t("entry.restore")}
+        </button>
+        {error && (
+          <span
+            role="alert"
+            className="w-full text-[11px] text-state-danger"
+            data-testid={`journal-entry-restore-error-${entryId}`}
+          >
+            {error}
+          </span>
+        )}
+      </li>
+    );
   }
 
   return (

@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { CircleCheck, CircleAlert } from "lucide-react";
+import { CircleCheck, CircleAlert, ArrowRight } from "lucide-react";
+import { Link } from "@/lib/i18n/navigation";
 import { StatusChip } from "./status-chip";
 
 /**
@@ -54,28 +55,83 @@ export async function MyZoneImproves() {
   );
 }
 
+/** One exact missing piece of the readiness checklist. The href arrives from
+ *  the page (real deep link into the exact section that fixes it) — this
+ *  component never hard-codes a route (control-room guard: the registry and
+ *  the page own routes, MyZone owns presentation). */
+export type MyZoneMissingItem = {
+  key: "profession" | "firstEntry";
+  href: string;
+};
+
 export async function MyZone({
   incomplete,
   improves = true,
+  missingItems = [],
 }: {
   incomplete: boolean;
   /** Render the "Kas ką gerina" block inline (default). The dashboard passes
    *  false and mounts <MyZoneImproves/> below the fold instead. */
   improves?: boolean;
+  /** The exact missing items behind `incomplete`, each deep-linking to the
+   *  precise section where the user completes it (user-journey repair v1:
+   *  a warning is only allowed to look actionable if it IS actionable). */
+  missingItems?: MyZoneMissingItem[];
 }) {
   const t = await getTranslations("auth.dashboard.myZone");
 
   return (
     <section className="flex flex-col gap-5" data-testid="my-zone">
-      {/* Readiness status — one honest line, never a scary state. Uses the
-          shared StatusChip (audit PR8): semantic tokens only, no raw emerald. */}
-      <StatusChip
-        variant={incomplete ? "attention" : "success"}
-        icon={incomplete ? CircleAlert : CircleCheck}
-        testid="my-zone-status"
-      >
-        {incomplete ? t("incompleteStatus") : t("readyStatus")}
-      </StatusChip>
+      {/* Readiness status — one honest line, never a scary state. When the
+          information is incomplete the SAME surface carries the exact missing
+          items as real links — the user is never told "incomplete" without a
+          working way to fix it right there. */}
+      {incomplete ? (
+        <div
+          className="flex flex-col gap-3 rounded-xl border border-border-subtle bg-ink-800/20 p-4"
+          data-testid="my-zone-missing"
+        >
+          <StatusChip variant="attention" icon={CircleAlert} testid="my-zone-status">
+            {t("incompleteStatus")}
+          </StatusChip>
+          {missingItems.length > 0 ? (
+            <>
+              <p className="text-xs leading-relaxed text-text-secondary">
+                {t("missing.progress", { n: missingItems.length })}
+              </p>
+              <ul className="flex flex-col gap-2">
+                {missingItems.map((m) => (
+                  <li key={m.key}>
+                    <Link
+                      href={m.href as "/dashboard"}
+                      data-testid={`my-zone-missing-${m.key}`}
+                      className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-border-subtle bg-surface-1 px-3 py-2 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                    >
+                      <span className="flex min-w-0 flex-col">
+                        <span className="text-sm font-medium text-text-primary">
+                          {t(`missing.${m.key}.title`)}
+                        </span>
+                        <span className="text-[11px] leading-snug text-text-secondary">
+                          {t(`missing.${m.key}.hint`)}
+                        </span>
+                      </span>
+                      <ArrowRight
+                        className="h-4 w-4 shrink-0 text-brand-blue"
+                        strokeWidth={2}
+                        aria-hidden
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+        </div>
+      ) : (
+        <StatusChip variant="success" icon={CircleCheck} testid="my-zone-status">
+          {t("readyStatus")}
+        </StatusChip>
+      )}
 
       {/* What improves what — one short, honest explanation. The dashboard
           demotes it below active work via improves={false} + <MyZoneImproves/>. */}

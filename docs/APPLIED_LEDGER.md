@@ -57,3 +57,5 @@
 ## Deferred (committed/known, NOT applied)
 - Append-only **trigger** guards on journal tables (defense-in-depth beyond RLS default-deny) — must respect the correction/supersede/soft-delete lifecycle; `TASKS.md`.
 - `feature_flags` / `proof_of_work` scaffolds (unshipped features) — `TASKS.md`.
+- `20260712120000_journal_entry_restore.sql` (user-journey repair v1) — restore RPC, the undo half of the honest delete contract; DRAFT / needs-human-gate; apply via MCP before deploying the branch. Paired rollback committed.
+- `20260712130000_conversation_message_attachments.sql` (user-journey repair v1) — private participant-scoped message-attachment bucket + metadata table + register RPC + body CHECK 0..10000; RED tier (storage.objects policies); DRAFT / needs-human-gate; apply via MCP before deploying the branch. Paired rollback committed.

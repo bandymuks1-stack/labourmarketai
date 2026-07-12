@@ -34,7 +34,10 @@ export function WorkerCard({ worker }: { readonly worker: WorkerCardEntity }) {
   const monogram = avatarMonogram(worker.displayName);
   return (
     <article
-      className="group relative flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950"
+      // Interaction contract (user-journey repair v1): this card is
+      // presentational — no link/handler — so it must not advertise
+      // interactivity via hover elevation that impersonates a button.
+      className="group relative flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
       data-testid={`worker-card-${worker.id}`}
     >
       <header className="flex items-center gap-3">

@@ -3116,6 +3116,17 @@
         "actionsHeading": "What you can do now",
         "incompleteStatus": "Your information is not complete yet",
         "readyStatus": "Your profile is ready",
+        "missing": {
+          "progress": "{n, plural, one {# step left} other {# steps left}} — tap an item to complete it directly.",
+          "profession": {
+            "title": "Set your profession",
+            "hint": "Opens profile editing — choose your main profession."
+          },
+          "firstEntry": {
+            "title": "Record your first work entry",
+            "hint": "Opens the work journal — briefly describe what you worked on."
+          }
+        },
         "actions": {
           "recordWork": {
             "title": "Record work",
@@ -4890,7 +4901,8 @@
       "needsEvidence": "No work evidence",
       "needsFollowUp": "Needs follow-up",
       "openReviewItems": "Open review items",
-      "instructionsSent": "Instructions sent"
+      "instructionsSent": "Instructions sent",
+      "openHint": "Show list"
     },
     "actionsTitle": "Actions",
     "actions": {
@@ -4986,8 +4998,19 @@
       "missingDocs": "Missing docs/info",
       "ready": "Ready (checked fields)",
       "needsSkillInfo": "Needs skill info",
+      "needsEvidence": "No work evidence",
+      "docsChecked": "Docs checked",
       "followUp": "Follow-up needed",
-      "none": "No workers match this filter."
+      "none": "No workers match this filter.",
+      "showAll": "Show all",
+      "empty": {
+        "missingDocs": "No assigned worker is currently missing documents or info.",
+        "ready": "No worker meets all the fields checked here yet. Choose \"All\" to see what each one is missing.",
+        "needsSkillInfo": "Every assigned worker has declared their skills.",
+        "needsEvidence": "Every assigned worker has at least one piece of work evidence.",
+        "docsChecked": "No documents have been checked yet. Mark document statuses in each worker's checklist.",
+        "followUp": "No follow-up needed right now — every worker has recent activity."
+      }
     },
     "counters2": {
       "withMissingDocs": "Missing docs/info",
@@ -5308,9 +5331,24 @@
       "placeholder": "Write a message…",
       "send": "Send",
       "sending": "Sending...",
-      "emptyError": "Message is empty.",
+      "emptyError": "Write a message or add an attachment.",
       "charCount": "{n}/{max}",
-      "languageHint": "Write in your own language — the other person sees your original text. There is no automatic translation."
+      "languageHint": "Write in your own language — the other person sees your original text. There is no automatic translation.",
+      "attachments": {
+        "addButton": "Add a photo or file",
+        "help": "Photos (JPG, PNG, WebP), PDF or a text file, up to 10 MB. At most 5 attachments per message. Only conversation participants can see attachments.",
+        "uploading": "Uploading…",
+        "retry": "Upload again",
+        "remove": "Remove attachment",
+        "errorUpload": "Upload failed. Try again.",
+        "errorTooLarge": "File is too large (up to 10 MB).",
+        "errorBadType": "This file type isn't supported. Allowed: JPG, PNG, WebP, PDF, TXT.",
+        "errorTooMany": "At most 5 attachments per message.",
+        "errorNeedsSetup": "Attachments aren't enabled in this environment yet.",
+        "blockedWhileUploading": "Wait until the attachments finish uploading.",
+        "blockedFailed": "Remove or re-upload the failed attachment.",
+        "partialFailure": "The message was sent, but some attachments couldn't be attached. Try sending them again."
+      }
     },
     "launcher": {
       "openLabel": "Contact support",
@@ -5346,7 +5384,8 @@
       "demand_interest": "About a work request (worker interest)",
       "accepted_service_request": "About an accepted service request",
       "accepted_booking": "About an accepted booking"
-    }
+    },
+    "attachmentUnavailable": "This attachment can't be opened right now. Refresh the page."
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
@@ -7452,6 +7491,12 @@
     "autoLocating": "Finding your location…",
     "geoDenied": "We couldn''t get your location — the browser blocked location access. Allow location for this site in your browser settings, or choose a city manually.",
     "geoUnavailable": "Your browser doesn''t support location. Choose a location manually.",
+    "geoDeniedInApp": "It looks like this page is open inside an app's built-in browser (e.g. Facebook or Instagram), which blocks location. Open the page in your usual browser, or choose a city manually below.",
+    "geoOpenInBrowser": "How to open in a browser: tap the menu button (⋯ or ⋮) in the corner of the screen and choose \"Open in browser\".",
+    "geoNoFix": "We couldn''t determine your device location. Try again, or choose a city manually.",
+    "geoTimeout": "Getting your location took too long. Try again, or choose a city manually.",
+    "geoInsecure": "Location detection isn''t possible on this page. Choose a city manually.",
+    "geoRetry": "Try again",
     "manualToggle": "Set location manually",
     "manualHint": "If you don''t want to allow location access, choose a city or region manually.",
     "countryLabel": "Country",

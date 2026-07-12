@@ -3116,6 +3116,17 @@
         "actionsHeading": "Wat je nu kunt doen",
         "incompleteStatus": "Je gegevens zijn nog niet compleet",
         "readyStatus": "Je profiel is klaar",
+        "missing": {
+          "progress": "{n, plural, one {Nog # stap} other {Nog # stappen}} — tik op een item om het direct in te vullen.",
+          "profession": {
+            "title": "Geef uw beroep op",
+            "hint": "Opent profielbewerking — kies uw hoofdberoep."
+          },
+          "firstEntry": {
+            "title": "Maak uw eerste werkregistratie",
+            "hint": "Opent het werklogboek — beschrijf kort wat u heeft gedaan."
+          }
+        },
         "actions": {
           "recordWork": {
             "title": "Werk vastleggen",
@@ -4890,7 +4901,8 @@
       "needsEvidence": "Geen werkbewijs",
       "needsFollowUp": "Opvolging nodig",
       "openReviewItems": "Open beoordelingsitems",
-      "instructionsSent": "Instructies verstuurd"
+      "instructionsSent": "Instructies verstuurd",
+      "openHint": "Lijst tonen"
     },
     "actionsTitle": "Acties",
     "actions": {
@@ -4986,8 +4998,19 @@
       "missingDocs": "Ontbrekende documenten/info",
       "ready": "Klaar (gecontroleerde velden)",
       "needsSkillInfo": "Vaardigheidsinfo nodig",
+      "needsEvidence": "Geen werkbewijs",
+      "docsChecked": "Documenten gecontroleerd",
       "followUp": "Opvolging nodig",
-      "none": "Geen werknemers voldoen aan dit filter."
+      "none": "Geen werknemers voldoen aan dit filter.",
+      "showAll": "Alles tonen",
+      "empty": {
+        "missingDocs": "Op dit moment ontbreken er bij geen enkele werknemer documenten of informatie.",
+        "ready": "Nog geen werknemer voldoet aan alle hier gecontroleerde velden. Kies „Alle” om te zien wat er per persoon ontbreekt.",
+        "needsSkillInfo": "Alle toegewezen werknemers hebben hun vaardigheden opgegeven.",
+        "needsEvidence": "Alle toegewezen werknemers hebben minstens één werkbewijs.",
+        "docsChecked": "Er zijn nog geen gecontroleerde documenten. Markeer documentstatussen in de checklist van de werknemer.",
+        "followUp": "Contact opnemen is nu niet nodig — alle werknemers hebben recente activiteit."
+      }
     },
     "counters2": {
       "withMissingDocs": "Ontbrekende documenten/info",
@@ -5308,9 +5331,24 @@
       "placeholder": "Schrijf een bericht…",
       "send": "Versturen",
       "sending": "Versturen...",
-      "emptyError": "Bericht is leeg.",
+      "emptyError": "Schrijf een bericht of voeg een bijlage toe.",
       "charCount": "{n}/{max}",
-      "languageHint": "Schrijf in je eigen taal — de ander ziet je originele tekst. Er is geen automatische vertaling."
+      "languageHint": "Schrijf in je eigen taal — de ander ziet je originele tekst. Er is geen automatische vertaling.",
+      "attachments": {
+        "addButton": "Foto of bestand toevoegen",
+        "help": "Foto's (JPG, PNG, WebP), PDF of een tekstbestand, tot 10 MB. Maximaal 5 bijlagen per bericht. Alleen gespreksdeelnemers zien bijlagen.",
+        "uploading": "Uploaden…",
+        "retry": "Opnieuw uploaden",
+        "remove": "Bijlage verwijderen",
+        "errorUpload": "Uploaden mislukt. Probeer het opnieuw.",
+        "errorTooLarge": "Bestand is te groot (tot 10 MB).",
+        "errorBadType": "Dit bestandstype wordt niet ondersteund. Toegestaan: JPG, PNG, WebP, PDF, TXT.",
+        "errorTooMany": "Maximaal 5 bijlagen per bericht.",
+        "errorNeedsSetup": "Bijlagen zijn in deze omgeving nog niet ingeschakeld.",
+        "blockedWhileUploading": "Wacht tot de bijlagen zijn geüpload.",
+        "blockedFailed": "Verwijder de mislukte bijlage of upload deze opnieuw.",
+        "partialFailure": "Het bericht is verzonden, maar sommige bijlagen konden niet worden toegevoegd. Probeer ze opnieuw te verzenden."
+      }
     },
     "launcher": {
       "openLabel": "Neem contact op met support",
@@ -5346,7 +5384,8 @@
       "demand_interest": "Over een werkaanvraag (interesse van werknemer)",
       "accepted_service_request": "Over een geaccepteerde dienstaanvraag",
       "accepted_booking": "Over een geaccepteerde boeking"
-    }
+    },
+    "attachmentUnavailable": "Deze bijlage kan nu niet worden geopend. Vernieuw de pagina."
   },
   "orgTier1Warning": {
     "eyebrow": "Jouw organisatie",
@@ -7452,6 +7491,12 @@
     "autoLocating": "Je locatie zoeken…",
     "geoDenied": "We konden je locatie niet ophalen — de browser heeft locatietoegang geblokkeerd. Sta locatie toe voor deze site in je browserinstellingen, of kies handmatig een stad.",
     "geoUnavailable": "Je browser ondersteunt geen locatie. Kies handmatig een locatie.",
+    "geoDeniedInApp": "Deze pagina lijkt geopend in de ingebouwde browser van een app (bijv. Facebook of Instagram), die locatiebepaling blokkeert. Open de pagina in uw gewone browser of kies hieronder handmatig een stad.",
+    "geoOpenInBrowser": "Zo opent u in een browser: tik op de menuknop (⋯ of ⋮) in de hoek van het scherm en kies „Openen in browser”.",
+    "geoNoFix": "De locatie van uw apparaat kon niet worden bepaald. Probeer het opnieuw of kies handmatig een stad.",
+    "geoTimeout": "Locatiebepaling duurde te lang. Probeer het opnieuw of kies handmatig een stad.",
+    "geoInsecure": "Locatiebepaling is op deze pagina niet mogelijk. Kies handmatig een stad.",
+    "geoRetry": "Opnieuw proberen",
     "manualToggle": "Stel locatie handmatig in",
     "manualHint": "Als je geen locatietoegang wilt toestaan, kies dan handmatig een stad of regio.",
     "countryLabel": "Land",

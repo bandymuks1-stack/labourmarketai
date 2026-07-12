@@ -58,7 +58,9 @@ export function JobDemandCard({
   const skills = job.requiredSkills.slice(0, 4);
   return (
     <article
-      className={`group relative flex flex-col gap-3 rounded-2xl ${VISUAL_TOKENS.cardBorder} border ${VISUAL_TOKENS.cardSurface} p-4 shadow-sm transition hover:shadow-md`}
+      // Interaction contract (user-journey repair v1): presentational card,
+      // no link/handler — no hover elevation that impersonates a button.
+      className={`group relative flex flex-col gap-3 rounded-2xl ${VISUAL_TOKENS.cardBorder} border ${VISUAL_TOKENS.cardSurface} p-4 shadow-sm`}
       data-testid={`job-demand-card-${job.id}`}
     >
       <header className="flex items-start gap-3">

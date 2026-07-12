@@ -406,6 +406,7 @@ export type JournalLifecycleErrorCode =
   | "not_owner"
   | "already_confirmed"
   | "cannot_supersede_deleted"
+  | "entry_superseded"
   | "rpc_unavailable"
   | "unknown_error";
 
@@ -709,7 +710,9 @@ function buildMetricsForSave(args: {
  *  Returns a tagged result so the UI can render a precise reason. */
 export async function softDeleteJournalEntry(
   entryId: string,
-  locale: string,
+  // Kept for call-site stability; revalidation moved to restore (see below).
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _locale: string,
 ): Promise<JournalLifecycleResult> {
   if (!entryId) {
     return {
@@ -744,6 +747,58 @@ export async function softDeleteJournalEntry(
       ok: false,
       code: "unknown_error",
       message: `Įrašo pašalinti nepavyko: ${error.message ?? "nežinoma klaida"}`,
+    };
+  }
+
+  // Deliberately NO revalidatePath here (user-journey repair v1): the row
+  // component swaps to an inline "removed — restore?" placeholder, and a
+  // revalidate would unmount that undo affordance mid-interaction. The list
+  // query filters deleted entries server-side on the next real navigation.
+  return { ok: true };
+}
+
+/** Restore a soft-deleted journal entry the caller owns (undo of
+ *  softDeleteJournalEntry). Calls the `journal_entry_restore` RPC
+ *  (20260712120000). Idempotent server-side; refuses superseded entries.
+ *  Returns a tagged result so the UI can render a precise, honest reason —
+ *  including the environment where the RPC is not applied yet. */
+export async function restoreJournalEntry(
+  entryId: string,
+  locale: string,
+): Promise<JournalLifecycleResult> {
+  if (!entryId) {
+    return {
+      ok: false,
+      code: "entry_not_found",
+      message: "Įrašas nerastas.",
+    };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      code: "not_authenticated",
+      message: "Sesija nutrūko. Prisijunkite iš naujo.",
+    };
+  }
+
+  const { error } = await (
+    supabase.rpc as unknown as (
+      fn: string,
+      params: { p_entry_id: string },
+    ) => Promise<{ data: unknown; error: { code?: string; message?: string } | null }>
+  )("journal_entry_restore", { p_entry_id: entryId });
+
+  if (error) {
+    const mapped = mapJournalRpcError(error);
+    if (mapped) return mapped;
+    return {
+      ok: false,
+      code: "unknown_error",
+      message: `Įrašo atkurti nepavyko: ${error.message ?? "nežinoma klaida"}`,
     };
   }
 
@@ -797,6 +852,14 @@ function mapJournalRpcError(err: {
       ok: false,
       code: "cannot_supersede_deleted",
       message: "Negalima keisti pašalinto įrašo.",
+    };
+  }
+  if (text.includes("entry_superseded_cannot_restore")) {
+    return {
+      ok: false,
+      code: "entry_superseded",
+      message:
+        "Šio įrašo atkurti negalima — jį jau pakeitė naujesnė versija.",
     };
   }
   return null;
