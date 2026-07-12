@@ -7862,10 +7862,12 @@
     "pageTitle": "Valdymo centras",
     "pageLead": "Viena vieta apžvelgti savo profesinę tapatybę, komandą, rinką ir projektą.",
     "unavailable": "Duomenys šiuo metu neprieinami.",
+    "openHint": "Atidaryti",
     "yes": "Taip",
     "no": "Ne",
     "person": {
       "title": "Asmens kortelė",
+      "openProfile": "Atidaryti profilį",
       "completeness": "Profilio pilnumas",
       "availability": {
         "available": "Laisvas darbui",
@@ -7885,6 +7887,7 @@
     },
     "company": {
       "title": "Įmonės kortelė",
+      "openSpace": "Atidaryti įmonės erdvę",
       "unnamed": "Įmonė",
       "stats": {
         "team": "Komanda",
@@ -7899,6 +7902,7 @@
     },
     "map": {
       "title": "Rinkos žemėlapis",
+      "open": "Atidaryti rinkos žemėlapį",
       "lead": "Jūsų rinkos signalų apžvalga.",
       "activePoint": "Aktyvus taškas",
       "points": "Rinkos taškai",
@@ -7915,6 +7919,8 @@
     },
     "project": {
       "title": "Projekto kortelė",
+      "open": "Atidaryti projektą",
+      "openGallery": "Atidaryti projekto nuotraukas ir darbo įrodymus",
       "unnamed": "Projektas",
       "imageAlt": "Projekto objekto vaizdas",
       "handover": {

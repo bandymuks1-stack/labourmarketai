@@ -7862,10 +7862,12 @@
     "pageTitle": "Controlecentrum",
     "pageLead": "Eén plek om je professionele identiteit, team, markt en project te bekijken.",
     "unavailable": "Deze gegevens zijn momenteel niet beschikbaar.",
+    "openHint": "Openen",
     "yes": "Ja",
     "no": "Nee",
     "person": {
       "title": "Persoonlijke kaart",
+      "openProfile": "Profiel openen",
       "completeness": "Profielvolledigheid",
       "availability": {
         "available": "Beschikbaar voor werk",
@@ -7885,6 +7887,7 @@
     },
     "company": {
       "title": "Bedrijfskaart",
+      "openSpace": "Bedrijfsruimte openen",
       "unnamed": "Bedrijf",
       "stats": {
         "team": "Team",
@@ -7899,6 +7902,7 @@
     },
     "map": {
       "title": "Marktkaart",
+      "open": "Marktkaart openen",
       "lead": "Een overzicht van je marktsignalen.",
       "activePoint": "Actief punt",
       "points": "Marktpunten",
@@ -7915,6 +7919,8 @@
     },
     "project": {
       "title": "Projectkaart",
+      "open": "Project openen",
+      "openGallery": "Projectfoto's en werkbewijzen openen",
       "unnamed": "Project",
       "imageAlt": "Zicht op de projectlocatie",
       "handover": {

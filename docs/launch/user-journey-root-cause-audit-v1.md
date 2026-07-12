@@ -171,6 +171,52 @@ concrete reason.
   from navigation. Pages themselves stay parked by explicit owner rule.
 - **Proof**: `user-journey-interaction-contract.test.ts` (RC3 block).
 
+### RC8 — Main dashboard hub blocks rendered identity/stat/preview zones as
+      passive `<div>`s (owner re-test finding, follow-up commit)
+
+- **Affected**: `/dashboard` premium hub — `components/app/premium-hub/*`:
+  person card (header, "Įgūdžiai" / "Pagrįsti įrašais" / "Darbo įrašai"
+  tiles), company card (header, "Komanda" / "Projektai" / "Kvietimai"),
+  project card (title zone, large image block, "Komanda" / "Nuotraukos"),
+  market-map card (SVG preview + signal tiles).
+- **Root cause**: the hub primitives (`HubStat`, panels) were built
+  presentational-only; ONLY empty-state CTAs and the folded WorkCardEditor
+  were interactive — so the moment a user had real data, the most
+  clickable-looking tiles went dead. Same class as RC1, different surface.
+- **User impact**: high — the main screen most users see first is full of
+  dead "buttons" (the exact owner re-test complaint).
+- **Repair**:
+  - `HubStat` now takes an optional `href` + `openHint`: with a destination
+    the WHOLE tile is a link (hover border, focus ring, accessible name);
+    without one it stays deliberately affordance-free. New `HubZoneLink`
+    primitive for identity headers / preview zones.
+  - Person: header → `/dashboard/profile`; skills → `#profile-edit`;
+    supported entries → `#capabilities`; work entries →
+    `/dashboard/journal#journal-entries`. Completeness stays an
+    informational progressbar (the actionable checklist is MyZone on the
+    same page).
+  - Company: header → `/dashboard/company`; team →
+    `/dashboard/company#company-team` (existing anchor); projects →
+    `/dashboard/projects`; invitations →
+    `/dashboard/company#company-invitations` (anchor added to
+    `company-workers-section.tsx`).
+  - Project: `ProjectVM` now carries the real project `id`; title zone →
+    `/dashboard/projects/[id]`; image block + photos tile →
+    `/dashboard/projects/[id]#project-gallery` (anchor added around
+    `ProjectWorkGallery`); team tile →
+    `/dashboard/projects/[id]/operations` (the board repaired in RC1).
+    Readiness stays an informational meter.
+  - Market map: the whole preview + signal zone is ONE link to the
+    canonical `/dashboard/market-map` (verified: `/dashboard/market` has no
+    page and must never be linked).
+  - Zero values keep their links — every destination owns an honest empty
+    state with the matching next action (invite form, assign workers from
+    RC1's repaired empty state, "photos appear from workers' entries", …).
+- **Proof**: `lib/guards/premium-hub-interactivity.test.ts` (primitives
+  contract, per-card exact hrefs, anchor existence, canonical map route,
+  locale copy); `hub-real-data-only` + `dashboard-hierarchy` guards stay
+  green.
+
 ---
 
 ## Migrations in this branch (both DRAFT / needs-human-gate)
@@ -208,7 +254,7 @@ uploads fail with "not enabled yet"; thread renders as before).
 
 - `pnpm typecheck` — PASS
 - `pnpm lint` — PASS
-- `pnpm test` — PASS (9,000+ tests; new: 85 across 6 files)
+- `pnpm test` — PASS (9,071 tests / 561 files; new guard+unit files: 7)
 - `pnpm build` — PASS
 - Guards: `check:i18n-debt` (ru/nl/de zero-marker ratchet) — PASS
 

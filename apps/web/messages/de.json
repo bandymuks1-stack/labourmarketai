@@ -7862,10 +7862,12 @@
     "pageTitle": "Kontrollzentrum",
     "pageLead": "Ein Ort, um Ihre berufliche Identität, Ihr Team, Ihren Markt und Ihr Projekt zu überblicken.",
     "unavailable": "Diese Daten sind derzeit nicht verfügbar.",
+    "openHint": "Öffnen",
     "yes": "Ja",
     "no": "Nein",
     "person": {
       "title": "Persönliche Karte",
+      "openProfile": "Profil öffnen",
       "completeness": "Profilvollständigkeit",
       "availability": {
         "available": "Verfügbar für Arbeit",
@@ -7885,6 +7887,7 @@
     },
     "company": {
       "title": "Unternehmenskarte",
+      "openSpace": "Unternehmensbereich öffnen",
       "unnamed": "Unternehmen",
       "stats": {
         "team": "Team",
@@ -7899,6 +7902,7 @@
     },
     "map": {
       "title": "Marktkarte",
+      "open": "Marktkarte öffnen",
       "lead": "Ein Überblick über Ihre Marktsignale.",
       "activePoint": "Aktiver Punkt",
       "points": "Marktpunkte",
@@ -7915,6 +7919,8 @@
     },
     "project": {
       "title": "Projektkarte",
+      "open": "Projekt öffnen",
+      "openGallery": "Projektfotos und Arbeitsnachweise öffnen",
       "unnamed": "Projekt",
       "imageAlt": "Ansicht der Baustelle des Projekts",
       "handover": {

@@ -10,6 +10,13 @@ Companion to `user-journey-root-cause-audit-v1.md` (branch
 | Surface | File | Contract | Status |
 |---|---|---|---|
 | ActionCard primitive (all dashboard module grids) | `components/app/action-card.tsx` | always a real link, min-h-11, focus ring | OK (reference pattern) |
+| Hub person card: header + skills/supported/entries tiles | `premium-hub/premium-hub-person-card.tsx` | header → profile; tiles deep-link `#profile-edit` / `#capabilities` / `journal#journal-entries` | REPAIRED (RC8) |
+| Hub person completeness bar | same | informational progressbar (checklist lives in MyZone) | OK (deliberately passive) |
+| Hub company card: header + team/projects/invitations tiles | `premium-hub/premium-hub-company-card.tsx` | header → company space; tiles → `#company-team` / `/dashboard/projects` / `#company-invitations` | REPAIRED (RC8) |
+| Hub project card: title, image block, team/photos tiles | `premium-hub/premium-hub-project-card.tsx` | title/image → project (+`#project-gallery`); team → operations; photos → gallery anchor | REPAIRED (RC8) |
+| Hub project readiness bar | same | informational progressbar | OK (deliberately passive) |
+| Hub market-map preview + signal tiles | `premium-hub/premium-hub-market-map.tsx` | ONE full-zone link → `/dashboard/market-map` | REPAIRED (RC8) |
+| HubStat primitive | `premium-hub/premium-hub-primitives.tsx` | href → full-surface link; no href → affordance-free statistic | REPAIRED (RC8, shared primitive) |
 | Operation counter cards ×8 | `components/app/project-operations-board.tsx` | full-surface button/link, aria-pressed, filter or navigate, scroll-to-list | REPAIRED (RC1) |
 | Worker filter chips | same | aria-pressed buttons | OK |
 | Worker ops card footer links (Kortelė / Nurodymai / Įgūdžiai) | same | real links | OK |

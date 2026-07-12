@@ -7862,10 +7862,12 @@
     "pageTitle": "Control hub",
     "pageLead": "One place to review your professional identity, team, market and project.",
     "unavailable": "This data is not available right now.",
+    "openHint": "Open",
     "yes": "Yes",
     "no": "No",
     "person": {
       "title": "Personal card",
+      "openProfile": "Open profile",
       "completeness": "Profile completeness",
       "availability": {
         "available": "Available for work",
@@ -7885,6 +7887,7 @@
     },
     "company": {
       "title": "Company card",
+      "openSpace": "Open company space",
       "unnamed": "Company",
       "stats": {
         "team": "Team",
@@ -7899,6 +7902,7 @@
     },
     "map": {
       "title": "Market map",
+      "open": "Open the market map",
       "lead": "An overview of your market signals.",
       "activePoint": "Active point",
       "points": "Market points",
@@ -7915,6 +7919,8 @@
     },
     "project": {
       "title": "Project card",
+      "open": "Open project",
+      "openGallery": "Open project photos and work evidence",
       "unnamed": "Project",
       "imageAlt": "View of the project site",
       "handover": {
