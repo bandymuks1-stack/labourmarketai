@@ -30,13 +30,24 @@ const NATIVE: Record<string, string> = {
  * language NAMES. `usePathname` returns the path without the locale prefix, so
  * each entry re-links the same page in another language. Non-Tier-1 locales are
  * tagged as preview ([EN] placeholders until translated).
+ *
+ * Changing language must change ONLY the locale: the same page, the same
+ * query string (?next=, ?editing=, ?view=…) and the same #hash travel with
+ * the switch. `usePathname` strips both, so the live search+hash is read
+ * from `window.location` at the moment the menu opens (client-only —
+ * avoids a useSearchParams Suspense boundary on statically rendered pages).
  */
 export function LocaleSwitcher({ className }: { className?: string }) {
   const pathname = usePathname();
   const active = useLocale();
   const t = useTranslations("common");
   const [open, setOpen] = useState(false);
+  const [suffix, setSuffix] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) setSuffix(window.location.search + window.location.hash);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -87,7 +98,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
             return (
               <Link
                 key={l}
-                href={pathname}
+                href={`${pathname}${suffix}`}
                 locale={l}
                 role="menuitem"
                 aria-current={isActive ? "true" : undefined}

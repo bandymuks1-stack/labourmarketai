@@ -11,7 +11,9 @@ type Theme = "dark" | "light";
  * `document.documentElement.dataset.theme`; every component re-themes because
  * they all consume the CSS-variable colour tokens (tokens/colors.ts →
  * rgb(var(--c-*) / …), defined per theme in globals.css). The no-flash bootstrap
- * in the root layout applies the saved choice before paint.
+ * in app/[locale]/layout.tsx (the app has no root layout) applies the saved
+ * choice before paint. Storage key is the shared "theme" — never locale-keyed,
+ * so switching language can never change the chosen theme.
  */
 export function ThemeToggle({
   labels,

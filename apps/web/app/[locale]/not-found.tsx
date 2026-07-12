@@ -19,7 +19,16 @@ export default async function NotFound() {
       data-testid="branded-not-found"
     >
       {/* 404 hydration re-mounts <html> and strips the bootstrap's
-          data-theme — re-apply it so light-theme users get a light 404. */}
+          data-theme. The inline script re-applies the saved theme
+          synchronously (before paint on a full document load) so a
+          light-theme user never sees a dark flash; <ThemeReapply/> stays
+          as the post-hydration belt for the client-remount path. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;}}catch(e){}})();",
+        }}
+      />
       <ThemeReapply />
       <p className="font-mono text-xs uppercase tracking-label text-text-muted">
         {t("code")}
