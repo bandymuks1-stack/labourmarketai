@@ -2463,8 +2463,6 @@
     "companyNeeds": "Bedarfe: Beschreiben Sie, was Sie benötigen (Beruf, Land, Team). Die Anfrage wird wirklich gespeichert — keine gefälschten Matches.",
     "opportunities": "Chancen: Sehen Sie Arbeit, die zu Ihnen passt. Die Sichtbarkeit hängt von der Netzwerkgröße und Ihrer Bereitschaft ab.",
     "marketplaceMap": "Marktkarte: echte Arbeitsmarktsignale nach Land und Region. Ein genauerer Punkt erscheint, sobald ein Standort festgelegt ist.",
-    "communicationInbox": "Kommunikation: ein echter Gesprächseingang. Ein Projektgespräch öffnet sich mit dem Projektkontext.",
-    "feedbackLoop": "Nach der Arbeit: Halten Sie sie in Ihrem Arbeitsjournal fest, und ein Vorgesetzter oder Kunde kann den Eintrag prüfen. Die Prüfung wird zu Nachweisen und erhöht ein Vertrauenssignal auf Ihrer Karte. Keine Sterne, keine gefälschte Reputation — nur echte menschliche Bewertungen.",
     "adminReview": "Systemwartung: nur für den Administrator. Normale Benutzer sehen diese Ansichten nie.",
     "paymentReadiness": "Zahlungen werden vorbereitet: Der kostenpflichtige Zugang ist noch nicht aktiv. Vorerst werden die ersten Benutzer manuell / über Owner-Prüfung aufgenommen. Stripe wird in der nächsten Phase angebunden.",
     "identityModel": "Zwei Basisidentitäten: eine Person und ein Unternehmen. Kaufen, Verkaufen, Einstellen und Agenturtätigkeit sind Aktionen, keine separaten Identitäten."
@@ -4740,7 +4738,7 @@
     "attention": {
       "eyebrow": "Was jetzt wichtig ist",
       "title": "Benötigt Ihre Aufmerksamkeit",
-      "subtitle": "Neue Anweisungen, die einen Blick wert sind. Das Original bleibt erhalten.",
+      "subtitle": "Neue Anweisungen, die einen Blick wert sind.",
       "from": "von {name}",
       "viewCta": "Anweisung ansehen"
     },
@@ -5298,7 +5296,6 @@
     },
     "title": "Meine Nachrichten",
     "subtitle": "Was jetzt wichtig ist und worauf sich eine Antwort lohnt. Hier sehen Sie Nachrichten und wichtige Anfragen.",
-    "v1Notice": "Nachrichten werden beim Neuladen der Seite aktualisiert. Wir zeigen nur einen ehrlichen 'geöffnet'-Zeitstempel — keine falschen Zugestellt-/Gelesen-Anzeigen.",
     "empty": "Noch keine Nachrichten. Wenn Ihnen jemand schreibt oder eine wichtige Anfrage eingeht, sehen Sie sie hier.",
     "counterparty": {
       "support": "Support-Team",
@@ -5314,7 +5311,6 @@
       "unknown": "Kontext nicht angegeben",
       "demand": "Zur Arbeit — der Betreff ist der Titel der zugehörigen Arbeit"
     },
-    "unnamedThread": "(kein Betreff)",
     "unread": "Neu",
     "kind": {
       "direct": "Direkt",
@@ -5371,7 +5367,7 @@
       "subtitle": "Von Testern gestartete Support-Threads. Nur-Ansicht-Liste — der Admin tritt über die Thread-Detailseite bei.",
       "empty": "Noch keine Support-Unterhaltungen.",
       "loadError": "Unterhaltungen konnten nicht geladen werden: {msg}",
-      "unnamed": "(kein Betreff)",
+      "unnamed": "Unterhaltung",
       "createdBy": "Erstellt von: {id}…",
       "footnote": "Nur für Admins.",
       "joinHint": "Sie sind Admin, aber noch kein Teilnehmer dieses Threads. Treten Sie bei, um zu antworten.",
@@ -5385,7 +5381,11 @@
       "accepted_service_request": "Zu einer angenommenen Dienstleistungsanfrage",
       "accepted_booking": "Zu einer angenommenen Buchung"
     },
-    "attachmentUnavailable": "Dieser Anhang kann gerade nicht geöffnet werden. Aktualisieren Sie die Seite."
+    "attachmentUnavailable": "Dieser Anhang kann gerade nicht geöffnet werden. Aktualisieren Sie die Seite.",
+    "conversationFallback": "Unterhaltung",
+    "preview": {
+      "attachmentOnly": "Anhang"
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Ihre Organisation",

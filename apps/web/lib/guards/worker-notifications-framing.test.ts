@@ -55,7 +55,6 @@ describe("no fake urgency / matches / employer interest / 'viewed you'", () => {
         JSON.stringify(notif(j)),
         comm(j).title,
         comm(j).subtitle,
-        comm(j).v1Notice,
         comm(j).empty,
         comm(j).footnote,
       ].join(" • ");
@@ -72,8 +71,12 @@ describe("no fake urgency / matches / employer interest / 'viewed you'", () => {
 
 describe("the messages page reads calm, not an alert; routes stay reachable", () => {
   const page = read("app/[locale]/dashboard/communication/page.tsx");
-  it("the honest note is a muted line, not a warning banner", () => {
-    expect(page).toMatch(/data-testid="communication-honest-note"/);
+  it("no warning banners and no refresh-mechanism explainer on the inbox", () => {
+    // The old v1Notice ("messages update on reload…") explained the refresh
+    // mechanism to the user — removed by the inbox contract; the surface now
+    // refreshes itself on focus instead of explaining itself.
+    expect(page).not.toMatch(/v1Notice/);
+    expect(page).toMatch(/RefreshOnFocus/);
     expect(page).not.toMatch(/bg-state-warning/);
   });
   it("the messages list route still renders (reachable)", () => {

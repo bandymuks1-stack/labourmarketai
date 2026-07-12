@@ -2463,8 +2463,6 @@
     "companyNeeds": "Poreikiai: aprašykite, ko reikia (profesija, šalis, komanda). Užklausa išsaugoma realiai — be netikrų atitikčių.",
     "opportunities": "Galimybės: matote jums tinkančius darbus. Matomumas priklauso nuo tinklo dydžio ir jūsų pasiruošimo.",
     "marketplaceMap": "Rinkos žemėlapis: realūs darbo rinkos signalai pagal šalį ir regioną. Tikslesnė vieta atsiranda, kai ją nustatote.",
-    "communicationInbox": "Komunikacija: tikras pokalbių aplankas. Pokalbis dėl projekto atveriamas su projekto kontekstu.",
-    "feedbackLoop": "Po darbo užfiksuokite jį darbo žurnale. Jūsų įrašai pildo CV ir stiprina darbo kortelę.",
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
     "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi. Kol kas pirmi vartotojai jungiami rankiniu / owner-review būdu. Stripe bus prijungtas kitame etape.",
     "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."
@@ -4740,7 +4738,7 @@
     "attention": {
       "eyebrow": "Kas dabar svarbu",
       "title": "Reikia jūsų dėmesio",
-      "subtitle": "Nauji nurodymai, kuriuos verta peržiūrėti. Originalas išsaugotas.",
+      "subtitle": "Nauji nurodymai, kuriuos verta peržiūrėti.",
       "from": "nuo {name}",
       "viewCta": "Peržiūrėti nurodymą"
     },
@@ -5298,7 +5296,6 @@
     },
     "title": "Mano pranešimai",
     "subtitle": "Kas dabar svarbu ir į ką verta atsakyti. Čia matysite žinutes ir svarbius prašymus.",
-    "v1Notice": "Žinutės atnaujinamos perkrovus puslapį. Rodome tik sąžiningą „atidaryta“ laiką, be netikrų „pristatyta / perskaityta“ žymeklių.",
     "empty": "Kol kas žinučių nėra. Jei kas nors parašys ar atsiras svarbus prašymas, matysite tai čia.",
     "counterparty": {
       "support": "Pagalbos komanda",
@@ -5314,7 +5311,6 @@
       "unknown": "Kontekstas nepatikslintas",
       "demand": "Dėl darbo — tema yra susijusio darbo pavadinimas"
     },
-    "unnamedThread": "(be temos)",
     "unread": "Naujas",
     "kind": {
       "direct": "Asmeninis",
@@ -5371,7 +5367,7 @@
       "subtitle": "Testuotojų pradėti pagalbos pokalbiai. Sąrašas tik peržiūrai — administratorius gali prisijungti prie pokalbio detalės puslapyje.",
       "empty": "Pagalbos pokalbių dar nėra.",
       "loadError": "Nepavyko užkrauti pokalbių: {msg}",
-      "unnamed": "(be temos)",
+      "unnamed": "Pokalbis",
       "createdBy": "Sukūrė: {id}…",
       "footnote": "Šį sąrašą mato tik administratoriai.",
       "joinHint": "Esate administratorius, bet dar ne šio pokalbio dalyvis. Prisijunkite, kad galėtumėte atsakyti.",
@@ -5385,7 +5381,11 @@
       "accepted_service_request": "Dėl priimtos paslaugų užklausos",
       "accepted_booking": "Dėl priimtos rezervacijos"
     },
-    "attachmentUnavailable": "Priedo šiuo metu atidaryti nepavyko. Atnaujinkite puslapį."
+    "attachmentUnavailable": "Priedo šiuo metu atidaryti nepavyko. Atnaujinkite puslapį.",
+    "conversationFallback": "Pokalbis",
+    "preview": {
+      "attachmentOnly": "Priedas"
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Jūsų organizacija",

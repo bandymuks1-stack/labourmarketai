@@ -2463,8 +2463,6 @@
     "companyNeeds": "Behoeften: beschrijf wat je nodig hebt (beroep, land, ploeg). De aanvraag wordt echt opgeslagen — geen nepmatches.",
     "opportunities": "Kansen: zie werk dat bij je past. Zichtbaarheid hangt af van de netwerkgrootte en je gereedheid.",
     "marketplaceMap": "Marktkaart: echte arbeidsmarktsignalen per land en regio. Een nauwkeuriger punt verschijnt zodra een locatie is ingesteld.",
-    "communicationInbox": "Communicatie: een echte gesprekkeninbox. Een projectgesprek opent met de projectcontext.",
-    "feedbackLoop": "Na het werk: leg het vast in je werkjournaal, en een manager of klant kan de vermelding beoordelen. De beoordeling wordt een registratie en versterkt een vertrouwenssignaal op je kaart. Geen sterren, geen nepreputatie — alleen echte menselijke beoordelingen.",
     "adminReview": "Systeemonderhoud: alleen voor de beheerder. Gewone gebruikers zien deze schermen nooit.",
     "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief. Voorlopig worden de eerste gebruikers handmatig / via eigenaarsbeoordeling onboard gebracht. Stripe wordt in de volgende fase aangesloten.",
     "identityModel": "Twee basisidentiteiten: een persoon en een bedrijf. Kopen, verkopen, aannemen en uitzendactiviteit zijn handelingen, geen aparte identiteiten."
@@ -4740,7 +4738,7 @@
     "attention": {
       "eyebrow": "Wat nu belangrijk is",
       "title": "Vraagt je aandacht",
-      "subtitle": "Nieuwe instructies die het bekijken waard zijn. Het origineel is bewaard.",
+      "subtitle": "Nieuwe instructies die het bekijken waard zijn.",
       "from": "van {name}",
       "viewCta": "Instructie bekijken"
     },
@@ -5298,7 +5296,6 @@
     },
     "title": "Mijn berichten",
     "subtitle": "Wat er nu toe doet en waar het de moeite waard is op te reageren. Hier zie je berichten en belangrijke aanvragen.",
-    "v1Notice": "Berichten worden bijgewerkt bij het vernieuwen van de pagina. We tonen alleen een eerlijke 'geopend'-tijdstempel — geen valse indicatoren voor bezorgd/gelezen.",
     "empty": "Nog geen berichten. Als iemand je schrijft of er een belangrijke aanvraag binnenkomt, zie je die hier.",
     "counterparty": {
       "support": "Supportteam",
@@ -5314,7 +5311,6 @@
       "unknown": "Context niet gespecificeerd",
       "demand": "Over werk — het onderwerp is de titel van het gerelateerde werk"
     },
-    "unnamedThread": "(geen onderwerp)",
     "unread": "Nieuw",
     "kind": {
       "direct": "Direct",
@@ -5371,7 +5367,7 @@
       "subtitle": "Supportthreads gestart door testers. Alleen-lezen lijst — de admin neemt deel via de detailpagina van de thread.",
       "empty": "Nog geen supportgesprekken.",
       "loadError": "Kon gesprekken niet laden: {msg}",
-      "unnamed": "(geen onderwerp)",
+      "unnamed": "Gesprek",
       "createdBy": "Aangemaakt door: {id}…",
       "footnote": "Alleen admins.",
       "joinHint": "Je bent admin maar nog geen deelnemer van deze thread. Neem deel om te antwoorden.",
@@ -5385,7 +5381,11 @@
       "accepted_service_request": "Over een geaccepteerde dienstaanvraag",
       "accepted_booking": "Over een geaccepteerde boeking"
     },
-    "attachmentUnavailable": "Deze bijlage kan nu niet worden geopend. Vernieuw de pagina."
+    "attachmentUnavailable": "Deze bijlage kan nu niet worden geopend. Vernieuw de pagina.",
+    "conversationFallback": "Gesprek",
+    "preview": {
+      "attachmentOnly": "Bijlage"
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Jouw organisatie",

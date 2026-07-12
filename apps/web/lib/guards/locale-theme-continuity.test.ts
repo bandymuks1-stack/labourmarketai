@@ -65,7 +65,7 @@ describe("theme storage is locale-independent", () => {
 
 describe("pre-paint theme bootstrap", () => {
   const BOOTSTRAP =
-    /localStorage\.getItem\('theme'\).*document\.documentElement\.dataset\.theme=t/s;
+    /localStorage\.getItem\('theme'\)[\s\S]*document\.documentElement\.dataset\.theme=t/;
 
   it("the [locale] layout applies the saved theme before paint", () => {
     expect(read("app/[locale]/layout.tsx")).toMatch(BOOTSTRAP);

@@ -27,7 +27,9 @@ const FEATURE_KEYS = [
   "companyNeeds",
   "opportunities",
   "marketplaceMap",
-  "communicationInbox",
+  // communicationInbox was retired by the core-network inbox contract:
+  // the messages list carries real conversations, not product explainers
+  // (docs/launch/communication-inbox-contract-v1.md).
   "adminReview",
   "paymentReadiness",
   "identityModel",
@@ -69,7 +71,6 @@ describe("FeatureNote component exists and is placed on key surfaces", () => {
 
   const SURFACES: [string, string][] = [
     ["app/[locale]/dashboard/market-map/page.tsx", "marketplaceMap"],
-    ["app/[locale]/dashboard/communication/page.tsx", "communicationInbox"],
     ["app/[locale]/dashboard/opportunities/page.tsx", "opportunities"],
     ["app/[locale]/dashboard/profile/page.tsx", "workerProfile"],
     ["app/[locale]/dashboard/company/page.tsx", "companySpace"],

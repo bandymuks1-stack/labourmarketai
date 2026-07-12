@@ -2463,8 +2463,6 @@
     "companyNeeds": "Needs: describe what you need (profession, country, team). The request is saved for real — no fake matches.",
     "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
     "marketplaceMap": "Market map: real labour-market signals by country and region. A more precise point appears once a location is set.",
-    "communicationInbox": "Communication: a real conversation inbox. A project conversation opens with the project context.",
-    "feedbackLoop": "After work: log it in your work journal, and a manager or client can review the entry. The review becomes records and raises a trust signal on your card. No stars, no fake reputation — only real human reviews.",
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
     "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
@@ -4740,7 +4738,7 @@
     "attention": {
       "eyebrow": "What matters now",
       "title": "Needs your attention",
-      "subtitle": "New instructions worth reviewing. The original is preserved.",
+      "subtitle": "New instructions worth reviewing.",
       "from": "from {name}",
       "viewCta": "View instruction"
     },
@@ -5298,7 +5296,6 @@
     },
     "title": "My messages",
     "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
-    "v1Notice": "Messages update on page refresh. We show only an honest 'opened' timestamp — no fake delivered / read indicators.",
     "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
     "counterparty": {
       "support": "Support team",
@@ -5314,7 +5311,6 @@
       "unknown": "Context not specified",
       "demand": "About work — the subject is the related work's title"
     },
-    "unnamedThread": "(no subject)",
     "unread": "New",
     "kind": {
       "direct": "Direct",
@@ -5371,7 +5367,7 @@
       "subtitle": "Support threads started by testers. View-only list — admin joins from the thread detail page.",
       "empty": "No support conversations yet.",
       "loadError": "Could not load conversations: {msg}",
-      "unnamed": "(no subject)",
+      "unnamed": "Conversation",
       "createdBy": "Created by: {id}…",
       "footnote": "Admins only.",
       "joinHint": "You're an admin but not yet a participant of this thread. Join to reply.",
@@ -5385,7 +5381,11 @@
       "accepted_service_request": "About an accepted service request",
       "accepted_booking": "About an accepted booking"
     },
-    "attachmentUnavailable": "This attachment can't be opened right now. Refresh the page."
+    "attachmentUnavailable": "This attachment can't be opened right now. Refresh the page.",
+    "conversationFallback": "Conversation",
+    "preview": {
+      "attachmentOnly": "Attachment"
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
