@@ -8581,5 +8581,180 @@
     "notEnabled": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
     "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "invalid": "Wählen Sie eine Sprache und ein Niveau."
+  },
+  "network": {
+    "module": {
+      "label": "Mein Netzwerk",
+      "desc": "Ihre Unternehmen, Personen, Partner und Einladungen an einem Ort."
+    },
+    "eyebrow": "NETZWERK",
+    "title": "Mein Netzwerk",
+    "intro": "Ihre Unternehmen, Teams, Partner und Einladungen. Laden Sie eine Person oder ein Unternehmen direkt von hier ein.",
+    "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+    "incoming": {
+      "title": "Einladungen für Sie",
+      "from": "Eingeladen von {name}",
+      "accepting": "Wird angenommen…",
+      "accept": "Annehmen",
+      "expires": "Gültig bis {date}",
+      "notices": {
+        "accepted": "Einladung angenommen.",
+        "already_accepted": "Diese Einladung wurde bereits angenommen.",
+        "expired": "Diese Einladung ist abgelaufen.",
+        "revoked": "Diese Einladung wurde widerrufen.",
+        "declined": "Einladung abgelehnt.",
+        "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
+        "not_found": "Einladung nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
+    },
+    "search": {
+      "title": "Personen und Unternehmen",
+      "label": "Suche",
+      "placeholder": "Name, Unternehmen, Stadt…",
+      "submit": "Suchen",
+      "empty": "Für diese Suche wurde nichts gefunden.",
+      "orgType": {
+        "company": "Unternehmen",
+        "agency": "Agentur",
+        "team": "Team",
+        "other": "Organisation"
+      }
+    },
+    "sent": {
+      "title": "Meine gesendeten Einladungen",
+      "empty": "Sie haben noch keine Einladungen gesendet.",
+      "error": "Einladungen konnten gerade nicht geladen werden.",
+      "resend": "Erneut senden",
+      "revoke": "Widerrufen",
+      "copied": "Kopiert",
+      "copyNewLink": "Neuen Link kopieren",
+      "status": {
+        "pending": "Ausstehend",
+        "accepted": "Angenommen",
+        "declined": "Abgelehnt",
+        "expired": "Abgelaufen",
+        "revoked": "Widerrufen"
+      },
+      "delivery": {
+        "not_sent": "E-Mail nicht gesendet",
+        "sent": "E-Mail gesendet",
+        "delivery_failed": "E-Mail-Zustellung fehlgeschlagen"
+      },
+      "notices": {
+        "revoked": "Einladung widerrufen.",
+        "not_pending": "Diese Einladung ist bereits abgeschlossen.",
+        "not_found": "Einladung nicht gefunden.",
+        "not_authorized": "Dazu sind Sie nicht berechtigt.",
+        "sent": "Einladung erneut gesendet.",
+        "delivery_failed": "E-Mail-Zustellung fehlgeschlagen — bitte erneut versuchen.",
+        "created": "Ein neuer Einladungslink wurde erstellt — unten kopieren.",
+        "resend_limit": "Limit für erneutes Senden erreicht.",
+        "invalid_token_hash": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
+    },
+    "organizations": {
+      "title": "Meine Unternehmen"
+    },
+    "relationships": {
+      "title": "Meine Beziehungen",
+      "empty": "Noch keine aktiven Beziehungen.",
+      "noOrg": "Ohne Organisation",
+      "slug": {
+        "employee": "Mitarbeiter",
+        "manager": "Manager",
+        "owner": "Inhaber",
+        "external_manager": "Externer Manager",
+        "collaboration": "Partnerschaft",
+        "employment": "Beschäftigung",
+        "advisory": "Beratung",
+        "other": "Sonstiges"
+      }
+    },
+    "invite": {
+      "title": "Einladen",
+      "intro": "Laden Sie eine Person oder ein Unternehmen per E-Mail ein oder teilen Sie einen Einladungslink.",
+      "typeLabel": "Einladungstyp",
+      "types": {
+        "join_platform": "LabourMarket.ai beitreten",
+        "join_organization": "Meinem Unternehmen beitreten",
+        "join_team": "Einem Team beitreten",
+        "join_as_employee": "Als Mitarbeiter beitreten",
+        "collaborate_partner": "Als Partner zusammenarbeiten",
+        "join_project": "Einem Projekt beitreten",
+        "invite_company": "Ein Unternehmen einladen"
+      },
+      "organizationLabel": "Unternehmen",
+      "projectLabel": "Projekt",
+      "untitledProject": "Projekt ohne Titel",
+      "emailsLabel": "E-Mail-Adressen (bis zu {max})",
+      "emailsPlaceholder": "name@beispiel.de, andere@beispiel.de",
+      "nameLabel": "Name (falls bekannt)",
+      "roleLabel": "Vorgeschlagene Rolle",
+      "messageLabel": "Persönliche Nachricht",
+      "send": "Einladung senden",
+      "sending": "Wird gesendet…",
+      "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "notAuthed": "Melden Sie sich an, um Einladungen zu senden.",
+      "linkModeNote": "E-Mail-Versand ist noch nicht aktiviert — teilen Sie den Einladungslink direkt.",
+      "invalidEmails": "Ungültige Adressen",
+      "overflowEmails": "Über dem Limit ({max}) — diese wurden nicht aufgenommen",
+      "copied": "Kopiert",
+      "copyLink": "Link kopieren",
+      "share": "Teilen",
+      "shareTitle": "Einladung — LabourMarket.ai",
+      "outcomes": {
+        "created": "Link bereit",
+        "sent": "Gesendet",
+        "delivery_failed": "Zustellung fehlgeschlagen",
+        "duplicate_pending": "Bereits eingeladen",
+        "invalid_email": "Ungültige Adresse",
+        "limit_reached": "Einladungslimit erreicht",
+        "rate_limited": "Zu viele Einladungen heute",
+        "not_authorized": "Nicht erlaubt",
+        "error": "Fehlgeschlagen"
+      }
+    },
+    "invitePage": {
+      "eyebrow": "EINLADUNG",
+      "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "loadError": "Die Einladung konnte gerade nicht geladen werden. Bitte erneut versuchen.",
+      "invalidTitle": "Einladung nicht gefunden",
+      "invalidBody": "Der Link ist ungültig oder funktioniert nicht mehr. Bitten Sie um eine neue Einladung.",
+      "toDashboard": "Zum Dashboard",
+      "titles": {
+        "join_platform": "Einladung zu LabourMarket.ai",
+        "join_organization": "Einladung in ein Unternehmen",
+        "join_team": "Einladung in ein Team",
+        "join_as_employee": "Einladung als Mitarbeiter",
+        "collaborate_partner": "Einladung zur Zusammenarbeit",
+        "join_project": "Einladung in ein Projekt",
+        "invite_company": "Einladung für ein Unternehmen"
+      },
+      "from": "Eingeladen von {name}",
+      "organization": "Unternehmen: {name}",
+      "project": "Projekt: {name}",
+      "role": "Vorgeschlagene Rolle: {role}",
+      "accept": "Einladung annehmen",
+      "decline": "Ablehnen",
+      "expiresNote": "Die Einladung ist gültig bis {date}.",
+      "closed": {
+        "accepted": "Diese Einladung wurde bereits angenommen.",
+        "declined": "Diese Einladung wurde abgelehnt.",
+        "expired": "Diese Einladung ist abgelaufen. Bitten Sie um eine neue.",
+        "revoked": "Diese Einladung wurde widerrufen."
+      },
+      "notices": {
+        "not_enabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+        "already_accepted": "Bereits angenommen.",
+        "expired": "Diese Einladung ist abgelaufen.",
+        "revoked": "Diese Einladung wurde widerrufen.",
+        "declined": "Einladung abgelehnt.",
+        "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
+        "not_found": "Einladung nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
+    }
   }
 }

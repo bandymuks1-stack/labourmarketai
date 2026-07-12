@@ -8581,5 +8581,180 @@
     "notEnabled": "Ši dalis dar neįjungta — niekas nebuvo išsaugota.",
     "error": "Išsaugoti nepavyko. Bandykite dar kartą.",
     "invalid": "Pasirinkite kalbą ir lygį."
+  },
+  "network": {
+    "module": {
+      "label": "Mano tinklas",
+      "desc": "Jūsų įmonės, žmonės, partneriai ir kvietimai vienoje vietoje."
+    },
+    "eyebrow": "TINKLAS",
+    "title": "Mano tinklas",
+    "intro": "Jūsų įmonės, komandos, partneriai ir kvietimai. Pakvieskite žmogų ar įmonę tiesiai iš čia.",
+    "notEnabled": "Kvietimai šioje aplinkoje dar neįjungti.",
+    "incoming": {
+      "title": "Kvietimai jums",
+      "from": "Kvietė: {name}",
+      "accepting": "Priimama…",
+      "accept": "Priimti",
+      "expires": "Galioja iki {date}",
+      "notices": {
+        "accepted": "Kvietimas priimtas.",
+        "already_accepted": "Šis kvietimas jau priimtas.",
+        "expired": "Kvietimo galiojimas baigėsi.",
+        "revoked": "Kvietimas atšauktas.",
+        "declined": "Kvietimas atmestas.",
+        "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
+        "not_found": "Kvietimas nerastas.",
+        "error": "Nepavyko. Bandykite dar kartą."
+      }
+    },
+    "search": {
+      "title": "Žmonės ir įmonės",
+      "label": "Paieška",
+      "placeholder": "Vardas, įmonė, miestas…",
+      "submit": "Ieškoti",
+      "empty": "Pagal šią užklausą nieko nerasta.",
+      "orgType": {
+        "company": "Įmonė",
+        "agency": "Agentūra",
+        "team": "Komanda",
+        "other": "Organizacija"
+      }
+    },
+    "sent": {
+      "title": "Mano išsiųsti kvietimai",
+      "empty": "Kol kas kvietimų neišsiuntėte.",
+      "error": "Kvietimų šiuo metu nepavyko įkelti.",
+      "resend": "Siųsti dar kartą",
+      "revoke": "Atšaukti",
+      "copied": "Nukopijuota",
+      "copyNewLink": "Kopijuoti naują nuorodą",
+      "status": {
+        "pending": "Laukiama",
+        "accepted": "Priimtas",
+        "declined": "Atmestas",
+        "expired": "Nebegalioja",
+        "revoked": "Atšauktas"
+      },
+      "delivery": {
+        "not_sent": "Laiškas neišsiųstas",
+        "sent": "Laiškas išsiųstas",
+        "delivery_failed": "Laiško išsiųsti nepavyko"
+      },
+      "notices": {
+        "revoked": "Kvietimas atšauktas.",
+        "not_pending": "Šis kvietimas jau užbaigtas.",
+        "not_found": "Kvietimas nerastas.",
+        "not_authorized": "Neturite teisės.",
+        "sent": "Kvietimas išsiųstas iš naujo.",
+        "delivery_failed": "Laiško išsiųsti nepavyko — pabandykite dar kartą.",
+        "created": "Sukurta nauja kvietimo nuoroda — nusikopijuokite ją žemiau.",
+        "resend_limit": "Pasiektas pakartotinio siuntimo limitas.",
+        "invalid_token_hash": "Nepavyko. Bandykite dar kartą.",
+        "error": "Nepavyko. Bandykite dar kartą."
+      }
+    },
+    "organizations": {
+      "title": "Mano įmonės"
+    },
+    "relationships": {
+      "title": "Mano ryšiai",
+      "empty": "Aktyvių ryšių kol kas nėra.",
+      "noOrg": "Be organizacijos",
+      "slug": {
+        "employee": "Darbuotojas",
+        "manager": "Vadovas",
+        "owner": "Savininkas",
+        "external_manager": "Išorinis vadovas",
+        "collaboration": "Partnerystė",
+        "employment": "Darbo santykiai",
+        "advisory": "Konsultacijos",
+        "other": "Kita"
+      }
+    },
+    "invite": {
+      "title": "Pakviesti",
+      "intro": "Pakvieskite žmogų ar įmonę el. paštu arba pasidalinkite kvietimo nuoroda.",
+      "typeLabel": "Kvietimo tipas",
+      "types": {
+        "join_platform": "Prisijungti prie LabourMarket.ai",
+        "join_organization": "Prisijungti prie mano įmonės",
+        "join_team": "Prisijungti prie komandos",
+        "join_as_employee": "Prisijungti kaip darbuotojui",
+        "collaborate_partner": "Bendradarbiauti kaip partneriui",
+        "join_project": "Prisijungti prie projekto",
+        "invite_company": "Pakviesti įmonę"
+      },
+      "organizationLabel": "Įmonė",
+      "projectLabel": "Projektas",
+      "untitledProject": "Projektas be pavadinimo",
+      "emailsLabel": "El. pašto adresai (iki {max})",
+      "emailsPlaceholder": "vardas@pavyzdys.lt, kitas@pavyzdys.lt",
+      "nameLabel": "Vardas (jei žinomas)",
+      "roleLabel": "Siūloma rolė",
+      "messageLabel": "Asmeninė žinutė",
+      "send": "Siųsti kvietimą",
+      "sending": "Siunčiama…",
+      "notEnabled": "Kvietimai šioje aplinkoje dar neįjungti.",
+      "notAuthed": "Prisijunkite, kad galėtumėte pakviesti.",
+      "linkModeNote": "El. laiškų siuntimas dar neaktyvuotas — pasidalinkite kvietimo nuoroda tiesiogiai.",
+      "invalidEmails": "Neteisingi adresai",
+      "overflowEmails": "Viršytas limitas ({max}) — šie adresai neįtraukti",
+      "copied": "Nukopijuota",
+      "copyLink": "Kopijuoti nuorodą",
+      "share": "Dalintis",
+      "shareTitle": "Kvietimas — LabourMarket.ai",
+      "outcomes": {
+        "created": "Nuoroda paruošta",
+        "sent": "Išsiųsta",
+        "delivery_failed": "Nepavyko išsiųsti",
+        "duplicate_pending": "Kvietimas jau laukia",
+        "invalid_email": "Neteisingas adresas",
+        "limit_reached": "Pasiektas kvietimų limitas",
+        "rate_limited": "Per daug kvietimų šiandien",
+        "not_authorized": "Neturite teisės",
+        "error": "Nepavyko"
+      }
+    },
+    "invitePage": {
+      "eyebrow": "KVIETIMAS",
+      "notEnabled": "Kvietimai šioje aplinkoje dar neįjungti.",
+      "loadError": "Kvietimo šiuo metu nepavyko įkelti. Bandykite dar kartą.",
+      "invalidTitle": "Kvietimas nerastas",
+      "invalidBody": "Nuoroda neteisinga arba nebegalioja. Paprašykite naujo kvietimo.",
+      "toDashboard": "Į pagrindinį",
+      "titles": {
+        "join_platform": "Kvietimas prisijungti prie LabourMarket.ai",
+        "join_organization": "Kvietimas prisijungti prie įmonės",
+        "join_team": "Kvietimas prisijungti prie komandos",
+        "join_as_employee": "Kvietimas prisijungti kaip darbuotojui",
+        "collaborate_partner": "Kvietimas bendradarbiauti",
+        "join_project": "Kvietimas prisijungti prie projekto",
+        "invite_company": "Kvietimas įmonei"
+      },
+      "from": "Kvietė: {name}",
+      "organization": "Įmonė: {name}",
+      "project": "Projektas: {name}",
+      "role": "Siūloma rolė: {role}",
+      "accept": "Priimti kvietimą",
+      "decline": "Atmesti",
+      "expiresNote": "Kvietimas galioja iki {date}.",
+      "closed": {
+        "accepted": "Šis kvietimas jau priimtas.",
+        "declined": "Šis kvietimas atmestas.",
+        "expired": "Kvietimo galiojimas baigėsi. Paprašykite naujo kvietimo.",
+        "revoked": "Kvietimas atšauktas."
+      },
+      "notices": {
+        "not_enabled": "Kvietimai šioje aplinkoje dar neįjungti.",
+        "already_accepted": "Kvietimas jau priimtas.",
+        "expired": "Kvietimo galiojimas baigėsi.",
+        "revoked": "Kvietimas atšauktas.",
+        "declined": "Kvietimas atmestas.",
+        "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
+        "not_found": "Kvietimas nerastas.",
+        "error": "Nepavyko. Bandykite dar kartą."
+      }
+    }
   }
 }

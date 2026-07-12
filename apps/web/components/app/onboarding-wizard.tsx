@@ -24,7 +24,15 @@ const COUNTRIES = ["LT", "LV", "EE", "NL", "DE", "DK", "NO", "SE", "PL"] as cons
  *  person can be a worker, run an agency, and buy services), (2) basic profile
  *  (display name + country). Submits the full role set via completeOnboarding;
  *  the first selected (canonical order) becomes the active workspace. */
-export function OnboardingWizard({ defaultName }: { defaultName: string }) {
+export function OnboardingWizard({
+  defaultName,
+  returnTo,
+}: {
+  defaultName: string;
+  /** Safe internal path (e.g. an invite deep link) that onboarding
+   *  completion returns to instead of the role dashboard. */
+  returnTo?: string | null;
+}) {
   const t = useTranslations("auth.onboarding");
   const locale = useLocale();
   const [step, setStep] = useState<1 | 2>(1);
@@ -67,6 +75,7 @@ export function OnboardingWizard({ defaultName }: { defaultName: string }) {
     form.set("locale", locale);
     form.set("display_name", displayName.trim());
     form.set("country", country);
+    if (returnTo) form.set("next", returnTo);
     // Primary role = first selected in canonical order (mirrors the
     // server-side primary derivation). Coarse, non-identifying.
     const primaryRole = ROLE_CARDS.map((c) => c.key).find((k) =>

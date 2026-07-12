@@ -8581,5 +8581,180 @@
     "notEnabled": "This section is not enabled yet — nothing was saved.",
     "error": "Saving failed. Please try again.",
     "invalid": "Choose a language and a level."
+  },
+  "network": {
+    "module": {
+      "label": "My network",
+      "desc": "Your companies, people, partners and invitations in one place."
+    },
+    "eyebrow": "NETWORK",
+    "title": "My network",
+    "intro": "Your companies, teams, partners and invitations. Invite a person or a company right from here.",
+    "notEnabled": "Invitations are not enabled in this environment yet.",
+    "incoming": {
+      "title": "Invitations for you",
+      "from": "Invited by {name}",
+      "accepting": "Accepting…",
+      "accept": "Accept",
+      "expires": "Valid until {date}",
+      "notices": {
+        "accepted": "Invitation accepted.",
+        "already_accepted": "This invitation was already accepted.",
+        "expired": "This invitation has expired.",
+        "revoked": "This invitation was revoked.",
+        "declined": "Invitation declined.",
+        "no_worker_profile": "Create your worker profile first, then accept the invitation.",
+        "not_found": "Invitation not found.",
+        "error": "Something went wrong. Please try again."
+      }
+    },
+    "search": {
+      "title": "People and companies",
+      "label": "Search",
+      "placeholder": "Name, company, city…",
+      "submit": "Search",
+      "empty": "Nothing found for this query.",
+      "orgType": {
+        "company": "Company",
+        "agency": "Agency",
+        "team": "Team",
+        "other": "Organization"
+      }
+    },
+    "sent": {
+      "title": "My sent invitations",
+      "empty": "You have not sent any invitations yet.",
+      "error": "Invitations could not be loaded right now.",
+      "resend": "Send again",
+      "revoke": "Revoke",
+      "copied": "Copied",
+      "copyNewLink": "Copy new link",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "declined": "Declined",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      },
+      "delivery": {
+        "not_sent": "Email not sent",
+        "sent": "Email sent",
+        "delivery_failed": "Email delivery failed"
+      },
+      "notices": {
+        "revoked": "Invitation revoked.",
+        "not_pending": "This invitation is already closed.",
+        "not_found": "Invitation not found.",
+        "not_authorized": "You are not allowed to do that.",
+        "sent": "Invitation re-sent.",
+        "delivery_failed": "Email delivery failed — please try again.",
+        "created": "A new invite link was created — copy it below.",
+        "resend_limit": "Resend limit reached.",
+        "invalid_token_hash": "Something went wrong. Please try again.",
+        "error": "Something went wrong. Please try again."
+      }
+    },
+    "organizations": {
+      "title": "My companies"
+    },
+    "relationships": {
+      "title": "My relationships",
+      "empty": "No active relationships yet.",
+      "noOrg": "No organization",
+      "slug": {
+        "employee": "Employee",
+        "manager": "Manager",
+        "owner": "Owner",
+        "external_manager": "External manager",
+        "collaboration": "Partnership",
+        "employment": "Employment",
+        "advisory": "Advisory",
+        "other": "Other"
+      }
+    },
+    "invite": {
+      "title": "Invite",
+      "intro": "Invite a person or a company by email, or share an invite link.",
+      "typeLabel": "Invitation type",
+      "types": {
+        "join_platform": "Join LabourMarket.ai",
+        "join_organization": "Join my company",
+        "join_team": "Join a team",
+        "join_as_employee": "Join as an employee",
+        "collaborate_partner": "Collaborate as a partner",
+        "join_project": "Join a project",
+        "invite_company": "Invite a company"
+      },
+      "organizationLabel": "Company",
+      "projectLabel": "Project",
+      "untitledProject": "Untitled project",
+      "emailsLabel": "Email addresses (up to {max})",
+      "emailsPlaceholder": "name@example.com, other@example.com",
+      "nameLabel": "Name (if known)",
+      "roleLabel": "Proposed role",
+      "messageLabel": "Personal message",
+      "send": "Send invitation",
+      "sending": "Sending…",
+      "notEnabled": "Invitations are not enabled in this environment yet.",
+      "notAuthed": "Sign in to send invitations.",
+      "linkModeNote": "Email sending is not activated yet — share the invite link directly.",
+      "invalidEmails": "Invalid addresses",
+      "overflowEmails": "Over the limit ({max}) — these were not included",
+      "copied": "Copied",
+      "copyLink": "Copy link",
+      "share": "Share",
+      "shareTitle": "Invitation — LabourMarket.ai",
+      "outcomes": {
+        "created": "Link ready",
+        "sent": "Sent",
+        "delivery_failed": "Delivery failed",
+        "duplicate_pending": "Already invited",
+        "invalid_email": "Invalid address",
+        "limit_reached": "Invitation limit reached",
+        "rate_limited": "Too many invitations today",
+        "not_authorized": "Not allowed",
+        "error": "Failed"
+      }
+    },
+    "invitePage": {
+      "eyebrow": "INVITATION",
+      "notEnabled": "Invitations are not enabled in this environment yet.",
+      "loadError": "The invitation could not be loaded right now. Please try again.",
+      "invalidTitle": "Invitation not found",
+      "invalidBody": "The link is invalid or no longer works. Ask for a new invitation.",
+      "toDashboard": "Go to dashboard",
+      "titles": {
+        "join_platform": "Invitation to join LabourMarket.ai",
+        "join_organization": "Invitation to join a company",
+        "join_team": "Invitation to join a team",
+        "join_as_employee": "Invitation to join as an employee",
+        "collaborate_partner": "Invitation to collaborate",
+        "join_project": "Invitation to join a project",
+        "invite_company": "Invitation for a company"
+      },
+      "from": "Invited by {name}",
+      "organization": "Company: {name}",
+      "project": "Project: {name}",
+      "role": "Proposed role: {role}",
+      "accept": "Accept invitation",
+      "decline": "Decline",
+      "expiresNote": "The invitation is valid until {date}.",
+      "closed": {
+        "accepted": "This invitation was already accepted.",
+        "declined": "This invitation was declined.",
+        "expired": "This invitation has expired. Ask for a new one.",
+        "revoked": "This invitation was revoked."
+      },
+      "notices": {
+        "not_enabled": "Invitations are not enabled in this environment yet.",
+        "already_accepted": "Already accepted.",
+        "expired": "This invitation has expired.",
+        "revoked": "This invitation was revoked.",
+        "declined": "Invitation declined.",
+        "no_worker_profile": "Create your worker profile first, then accept the invitation.",
+        "not_found": "Invitation not found.",
+        "error": "Something went wrong. Please try again."
+      }
+    }
   }
 }

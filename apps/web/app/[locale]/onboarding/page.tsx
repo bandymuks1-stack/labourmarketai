@@ -5,6 +5,7 @@ import { OnboardingWizard } from "@/components/app/onboarding-wizard";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 
 /** Unified onboarding shell. Role is picked here (Step 1), so we no longer
@@ -12,11 +13,18 @@ import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
  *  Google's full_name > name > the email's local part. */
 export default async function OnboardingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ next?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Deep-link continuity (core-network area B): the auth callback forwards
+  // ?next= here so an invite link (or any protected destination) survives
+  // first-time registration — onboarding completion returns to it.
+  const { next } = await searchParams;
+  const safeNext = isSafeReturnPath(next) ? (next as string) : null;
 
   const supabase = await createClient();
   const {
@@ -30,8 +38,11 @@ export default async function OnboardingPage({
     .eq("id", user.id)
     .single();
 
-  // Already onboarded — a direct visit shouldn't show the form again.
-  if (profile?.onboarded_at) redirect(`/${locale}/dashboard`);
+  // Already onboarded — a direct visit shouldn't show the form again; an
+  // attached safe ?next= still wins over the generic dashboard.
+  if (profile?.onboarded_at) {
+    redirect(getSafeReturnPath(safeNext, locale));
+  }
 
   // Slice 10 — an invited-but-not-yet-onboarded user lands here; surface the
   // real pending invitation so they aren't confused by a bare role-start screen.
@@ -76,7 +87,7 @@ export default async function OnboardingPage({
             </p>
           </div>
         )}
-        <OnboardingWizard defaultName={defaultName} />
+        <OnboardingWizard defaultName={defaultName} returnTo={safeNext} />
       </main>
     </div>
   );

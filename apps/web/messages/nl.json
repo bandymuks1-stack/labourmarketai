@@ -8581,5 +8581,180 @@
     "notEnabled": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
     "error": "Opslaan is mislukt. Probeer het opnieuw.",
     "invalid": "Kies een taal en een niveau."
+  },
+  "network": {
+    "module": {
+      "label": "Mijn netwerk",
+      "desc": "Uw bedrijven, mensen, partners en uitnodigingen op één plek."
+    },
+    "eyebrow": "NETWERK",
+    "title": "Mijn netwerk",
+    "intro": "Uw bedrijven, teams, partners en uitnodigingen. Nodig een persoon of bedrijf direct vanaf hier uit.",
+    "notEnabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+    "incoming": {
+      "title": "Uitnodigingen voor u",
+      "from": "Uitgenodigd door {name}",
+      "accepting": "Accepteren…",
+      "accept": "Accepteren",
+      "expires": "Geldig tot {date}",
+      "notices": {
+        "accepted": "Uitnodiging geaccepteerd.",
+        "already_accepted": "Deze uitnodiging is al geaccepteerd.",
+        "expired": "Deze uitnodiging is verlopen.",
+        "revoked": "Deze uitnodiging is ingetrokken.",
+        "declined": "Uitnodiging afgewezen.",
+        "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
+        "not_found": "Uitnodiging niet gevonden.",
+        "error": "Er ging iets mis. Probeer het opnieuw."
+      }
+    },
+    "search": {
+      "title": "Mensen en bedrijven",
+      "label": "Zoeken",
+      "placeholder": "Naam, bedrijf, stad…",
+      "submit": "Zoeken",
+      "empty": "Niets gevonden voor deze zoekopdracht.",
+      "orgType": {
+        "company": "Bedrijf",
+        "agency": "Bureau",
+        "team": "Team",
+        "other": "Organisatie"
+      }
+    },
+    "sent": {
+      "title": "Mijn verzonden uitnodigingen",
+      "empty": "U heeft nog geen uitnodigingen verzonden.",
+      "error": "Uitnodigingen konden nu niet worden geladen.",
+      "resend": "Opnieuw versturen",
+      "revoke": "Intrekken",
+      "copied": "Gekopieerd",
+      "copyNewLink": "Nieuwe link kopiëren",
+      "status": {
+        "pending": "In afwachting",
+        "accepted": "Geaccepteerd",
+        "declined": "Afgewezen",
+        "expired": "Verlopen",
+        "revoked": "Ingetrokken"
+      },
+      "delivery": {
+        "not_sent": "E-mail niet verzonden",
+        "sent": "E-mail verzonden",
+        "delivery_failed": "E-mailbezorging mislukt"
+      },
+      "notices": {
+        "revoked": "Uitnodiging ingetrokken.",
+        "not_pending": "Deze uitnodiging is al afgesloten.",
+        "not_found": "Uitnodiging niet gevonden.",
+        "not_authorized": "U mag dit niet doen.",
+        "sent": "Uitnodiging opnieuw verzonden.",
+        "delivery_failed": "E-mailbezorging mislukt — probeer het opnieuw.",
+        "created": "Een nieuwe uitnodigingslink is aangemaakt — kopieer deze hieronder.",
+        "resend_limit": "Limiet voor opnieuw versturen bereikt.",
+        "invalid_token_hash": "Er ging iets mis. Probeer het opnieuw.",
+        "error": "Er ging iets mis. Probeer het opnieuw."
+      }
+    },
+    "organizations": {
+      "title": "Mijn bedrijven"
+    },
+    "relationships": {
+      "title": "Mijn relaties",
+      "empty": "Nog geen actieve relaties.",
+      "noOrg": "Geen organisatie",
+      "slug": {
+        "employee": "Medewerker",
+        "manager": "Manager",
+        "owner": "Eigenaar",
+        "external_manager": "Externe manager",
+        "collaboration": "Partnerschap",
+        "employment": "Dienstverband",
+        "advisory": "Advies",
+        "other": "Overig"
+      }
+    },
+    "invite": {
+      "title": "Uitnodigen",
+      "intro": "Nodig een persoon of bedrijf uit per e-mail, of deel een uitnodigingslink.",
+      "typeLabel": "Type uitnodiging",
+      "types": {
+        "join_platform": "Word lid van LabourMarket.ai",
+        "join_organization": "Word lid van mijn bedrijf",
+        "join_team": "Word lid van een team",
+        "join_as_employee": "Word lid als medewerker",
+        "collaborate_partner": "Samenwerken als partner",
+        "join_project": "Word lid van een project",
+        "invite_company": "Een bedrijf uitnodigen"
+      },
+      "organizationLabel": "Bedrijf",
+      "projectLabel": "Project",
+      "untitledProject": "Project zonder titel",
+      "emailsLabel": "E-mailadressen (maximaal {max})",
+      "emailsPlaceholder": "naam@voorbeeld.nl, ander@voorbeeld.nl",
+      "nameLabel": "Naam (indien bekend)",
+      "roleLabel": "Voorgestelde rol",
+      "messageLabel": "Persoonlijk bericht",
+      "send": "Uitnodiging versturen",
+      "sending": "Wordt verzonden…",
+      "notEnabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+      "notAuthed": "Log in om uitnodigingen te versturen.",
+      "linkModeNote": "E-mailverzending is nog niet geactiveerd — deel de uitnodigingslink direct.",
+      "invalidEmails": "Ongeldige adressen",
+      "overflowEmails": "Boven het limiet ({max}) — deze zijn niet opgenomen",
+      "copied": "Gekopieerd",
+      "copyLink": "Link kopiëren",
+      "share": "Delen",
+      "shareTitle": "Uitnodiging — LabourMarket.ai",
+      "outcomes": {
+        "created": "Link klaar",
+        "sent": "Verzonden",
+        "delivery_failed": "Bezorging mislukt",
+        "duplicate_pending": "Al uitgenodigd",
+        "invalid_email": "Ongeldig adres",
+        "limit_reached": "Uitnodigingslimiet bereikt",
+        "rate_limited": "Te veel uitnodigingen vandaag",
+        "not_authorized": "Niet toegestaan",
+        "error": "Mislukt"
+      }
+    },
+    "invitePage": {
+      "eyebrow": "UITNODIGING",
+      "notEnabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+      "loadError": "De uitnodiging kon nu niet worden geladen. Probeer het opnieuw.",
+      "invalidTitle": "Uitnodiging niet gevonden",
+      "invalidBody": "De link is ongeldig of werkt niet meer. Vraag om een nieuwe uitnodiging.",
+      "toDashboard": "Naar dashboard",
+      "titles": {
+        "join_platform": "Uitnodiging voor LabourMarket.ai",
+        "join_organization": "Uitnodiging voor een bedrijf",
+        "join_team": "Uitnodiging voor een team",
+        "join_as_employee": "Uitnodiging als medewerker",
+        "collaborate_partner": "Uitnodiging om samen te werken",
+        "join_project": "Uitnodiging voor een project",
+        "invite_company": "Uitnodiging voor een bedrijf"
+      },
+      "from": "Uitgenodigd door {name}",
+      "organization": "Bedrijf: {name}",
+      "project": "Project: {name}",
+      "role": "Voorgestelde rol: {role}",
+      "accept": "Uitnodiging accepteren",
+      "decline": "Afwijzen",
+      "expiresNote": "De uitnodiging is geldig tot {date}.",
+      "closed": {
+        "accepted": "Deze uitnodiging is al geaccepteerd.",
+        "declined": "Deze uitnodiging is afgewezen.",
+        "expired": "Deze uitnodiging is verlopen. Vraag om een nieuwe.",
+        "revoked": "Deze uitnodiging is ingetrokken."
+      },
+      "notices": {
+        "not_enabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+        "already_accepted": "Al geaccepteerd.",
+        "expired": "Deze uitnodiging is verlopen.",
+        "revoked": "Deze uitnodiging is ingetrokken.",
+        "declined": "Uitnodiging afgewezen.",
+        "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
+        "not_found": "Uitnodiging niet gevonden.",
+        "error": "Er ging iets mis. Probeer het opnieuw."
+      }
+    }
   }
 }

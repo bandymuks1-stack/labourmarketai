@@ -681,6 +681,28 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // "Mano tinklas" (core-network area B) - organizations, relationships,
+    // people/company search and the canonical invite action. Route resolves
+    // through the module registry so it can never drift from the grid card.
+    id: "network",
+    route: getModuleRoute("network"),
+    audience: "public",
+    labels: {
+      en: "My network (invite)",
+      lt: "Mano tinklas (pakviesti)",
+      ru: "Моя сеть (пригласить)",
+      nl: "Mijn netwerk (uitnodigen)",
+      de: "Mein Netzwerk (einladen)",
+    },
+    synonyms: {
+      en: ["network", "invite", "invitation", "team members", "partners", "people search"],
+      lt: ["tinklas", "pakviesti", "kvietimas", "komandos nariai", "partneriai", "žmonių paieška"],
+      ru: ["сеть", "пригласить", "приглашение", "команда", "партнеры", "поиск людей"],
+      nl: ["netwerk", "uitnodigen", "uitnodiging", "teamleden", "partners", "mensen zoeken"],
+      de: ["netzwerk", "einladen", "einladung", "teammitglieder", "partner", "personensuche"],
+    },
+  },
+  {
     id: "market_map",
     route: getModuleRoute("market_map"),
     audience: "public",

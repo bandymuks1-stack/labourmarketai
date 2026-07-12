@@ -46,6 +46,7 @@ export type DashboardModuleId =
   | "tasks"
   | "bookings"
   | "planning"
+  | "network"
   | "market_map"
   | "communication"
   | "documents"
@@ -193,6 +194,19 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     labelKey: "auth.dashboard.myZone.actions.planning.title",
     descriptionKey: "auth.dashboard.myZone.actions.planning.desc",
     iconKey: "calendar",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+  },
+  {
+    id: "network",
+    // "Mano tinklas" (core-network area B): my organizations, my active
+    // relationships, people & company search, and the canonical Pakviesti
+    // action with the real invitation lifecycle. A sub-surface of the
+    // person/company context - never a second dashboard.
+    surfaceRoute: "/dashboard/network",
+    labelKey: "network.module.label",
+    descriptionKey: "network.module.desc",
+    iconKey: "handshake",
     roles: ALL_ROLES,
     surfaces: ["grid", "command"],
   },

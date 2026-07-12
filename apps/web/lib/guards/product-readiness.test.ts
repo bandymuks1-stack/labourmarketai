@@ -1722,7 +1722,10 @@ describe("no migration files added by this sprint", () => {
     // contract) + 20260712130000_conversation_message_attachments (private
     // participant-scoped message attachments). Both DRAFT / needs-human-gate,
     // NOT applied; paired rollbacks in the PR.
-    const SPRINT_BASELINE = 127;
+    // Bumped 127 -> 128 for the canonical invitations draft
+    // (20260712200000_canonical_invitations_v1) — core-network area B;
+    // DRAFT / needs-human-gate, NOT applied; paired rollback in the PR.
+    const SPRINT_BASELINE = 128;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
