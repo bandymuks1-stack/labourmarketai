@@ -5,12 +5,13 @@ import { Lock } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { SupportConversationLauncher } from "@/components/app/support-conversation-launcher";
 import { AttentionInstructions } from "@/components/app/attention-instructions";
-import { FeatureNote } from "@/components/app/feature-note";
+import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { createClient } from "@/lib/supabase/server";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
 import { getUnreadConversationIds } from "@/lib/communication/unread";
+import { getConversationPreviews } from "@/lib/communication/inbox-preview";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
 /**
@@ -65,12 +66,28 @@ export default async function CommunicationListPage({
     .select("id, subject, kind, created_by, updated_at")
     .order("updated_at", { ascending: false })
     .limit(100);
-  const conversations: ConversationRow[] = (conversationsRaw ?? []) as ConversationRow[];
+  const fetched: ConversationRow[] = (conversationsRaw ?? []) as ConversationRow[];
 
   // REAL unread state (audit PR5): a counterpart message newer than the
   // caller's last_read_at — shared with the nav badge and the bell, so the
   // list, badge and panel can never drift apart.
   const unreadIds = await getUnreadConversationIds();
+
+  // Inbox contract: unread first, then latest activity. Both groups keep
+  // the query's updated_at desc order (stable partition), so on mobile the
+  // first unread thread is above the fold instead of buried by older-but-
+  // recently-bumped read threads.
+  const conversations = [
+    ...fetched.filter((c) => unreadIds.has(c.id)),
+    ...fetched.filter((c) => !unreadIds.has(c.id)),
+  ];
+
+  // Newest-message preview per thread (sender + first line) — WHAT is new,
+  // visible without opening every thread.
+  const previews = await getConversationPreviews(
+    fetched.map((c) => c.id),
+    user.id,
+  );
 
   // §8.1 safe counterpart identity reader — display names for 2-person direct
   // threads the viewer participates in, via the permission-gated RPC only.
@@ -128,12 +145,10 @@ export default async function CommunicationListPage({
         </div>
       )}
 
-      <FeatureNote testId="feature-note-communication">
-        {(await getTranslations("featureNotes"))("communicationInbox")}
-      </FeatureNote>
-      <FeatureNote testId="feature-note-feedback-loop">
-        {(await getTranslations("featureNotes"))("feedbackLoop")}
-      </FeatureNote>
+      {/* Real server-state refresh on focus + gentle interval — returning to
+          this tab reflects new messages and cleared unread without a manual
+          reload. No simulated realtime. */}
+      <RefreshOnFocus />
 
       {/* "Reikia jūsų dėmesio" — real new work instructions surfaced here so an
           urgent instruction is not hidden on a separate page. Renders nothing
@@ -157,15 +172,6 @@ export default async function CommunicationListPage({
           </span>
         </Link>
       )}
-
-      {/* Honest framing — messages are poll-on-page, not real-time. Calm muted
-          note (not an alert), so it reads as reassurance, not a warning. */}
-      <p className="text-xs leading-relaxed text-text-muted" data-testid="communication-honest-note">
-        {t("v1Notice")}
-      </p>
-
-      {/* v2 launcher — open a new support thread. */}
-      <SupportConversationLauncher locale={locale} />
 
       {conversations.length === 0 ? (
         <p className="card-border p-4 text-sm text-text-secondary">
@@ -192,6 +198,17 @@ export default async function CommunicationListPage({
               // the card renders exactly as before).
               sourceContext: sourceContexts.get(c.id) ?? null,
             });
+            // Real title fallback — never a technical "(be temos)": the
+            // permitted counterpart name, then the live source title (project /
+            // order / request), then the support-team label, then a neutral
+            // "Pokalbis". Only data that actually exists; nothing invented.
+            const title =
+              c.subject ??
+
+              (card.counterpartyRestricted ? null : (card.counterpartyName ?? null)) ??
+              card.sourceTitle ??
+              (c.kind === "support" ? t("counterparty.support") : t("conversationFallback"));
+            const preview = previews.get(c.id);
             return (
               <li
                 key={c.id}
@@ -203,8 +220,18 @@ export default async function CommunicationListPage({
                   data-testid={`conversation-row-${c.id}`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <span className="text-sm font-semibold text-text-primary">
-                      {c.subject ?? t("unnamedThread")}
+                    <span className="flex min-w-0 items-center gap-2">
+                      {unread && (
+                        <span
+                          className="shrink-0 rounded-full bg-brand-blue/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-label text-brand-blue"
+                          data-testid={`conversation-unread-${c.id}`}
+                        >
+                          {t("unread")}
+                        </span>
+                      )}
+                      <span className="truncate text-sm font-semibold text-text-primary">
+                        {title}
+                      </span>
                     </span>
                     <span
                       className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted"
@@ -213,6 +240,27 @@ export default async function CommunicationListPage({
                       {t(card.typeKey)}
                     </span>
                   </div>
+                  {/* Newest-message preview: who wrote it + the first line —
+                      WHAT is new without opening the thread. Attachment-only
+                      messages say so honestly. */}
+                  {preview && (
+                    <p
+                      className="truncate text-xs text-text-secondary"
+                      data-testid={`conversation-preview-${c.id}`}
+                    >
+                      <span className="text-text-muted">
+                        {preview.byViewer
+                          ? t("byYou")
+                          : (card.counterpartyRestricted
+                              ? t("byOther")
+                              : (card.counterpartyName ?? t("byOther")))}
+                        {": "}
+                      </span>
+                      {preview.text.length > 0
+                        ? preview.text
+                        : t("preview.attachmentOnly")}
+                    </p>
+                  )}
                   {/* Who + which context. A restricted counterparty renders as a
                       locked, system-limited chip (NOT a normal name and NOT a
                       bland "unspecified recipient") so the user knows the
@@ -270,14 +318,6 @@ export default async function CommunicationListPage({
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-[11px] text-text-muted">
                     <span>{new Date(c.updated_at).toLocaleString(locale)}</span>
-                    {unread && (
-                      <span
-                        className="font-mono text-[10px] uppercase tracking-label text-brand-blue"
-                        data-testid={`conversation-unread-${c.id}`}
-                      >
-                        {t("unread")}
-                      </span>
-                    )}
                   </div>
                 </Link>
                 {/* Source relation v1 — typed source line, rendered ONLY when
@@ -312,6 +352,10 @@ export default async function CommunicationListPage({
           })}
         </ul>
       )}
+
+      {/* Support entry — secondary by design: real conversations own the top
+          of this page; help lives below the list, still one tap away. */}
+      <SupportConversationLauncher locale={locale} />
 
       <p className="text-[11px] text-text-muted">{t("footnote")}</p>
     </div>

@@ -206,6 +206,7 @@ export default async function ProjectOperationsPage({
 
   // ── PR G derivations: pure functions over the composed real reads ──
   const tCentre = await getTranslations("projectOps.centre");
+  const tNetwork = await getTranslations("network");
   const tasksHref = `/dashboard/tasks?project=${id}`;
   const taskList = tasks.status === "ok" ? tasks.tasks : [];
   const openTasks = openProjectTasks(taskList);
@@ -348,6 +349,16 @@ export default async function ProjectOperationsPage({
 
       {/* The board keeps everything it rendered before — the attention rows
           above anchor into it (OPS_BOARD_ANCHOR). */}
+      {/* Canonical Pakviesti (core-network area B): invite a person into
+          THIS project via the one invitation surface, project preselected. */}
+      <Link
+        href={`/dashboard/network?type=join_project&project=${id}` as "/dashboard"}
+        data-testid="project-invite-link"
+        className="flex w-fit items-center gap-2 rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:border-brand-blue"
+      >
+        {tNetwork("invite.title")}
+      </Link>
+
       <div id={OPS_BOARD_ANCHOR.slice(1)} className="flex flex-col gap-6">
         <ProjectOperationsBoard
           ops={ops}

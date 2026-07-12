@@ -49,7 +49,7 @@
     "intro": "Kennzahlen, gezählt aus Ihren eigenen Einträgen, mit der Berechnungsgrundlage unter jedem Abschnitt, und die bereits vorhandenen Exporte.",
     "honestyNote": "Nur Zählungen über Ihre eigenen Daten — keine Benchmarks, keine Scores, keine Prognosen.",
     "state": {
-      "needsMigration": "Dieses Datenmodell ist in dieser Umgebung noch nicht verfügbar, es gibt also nichts zu zählen. Anstelle echter Daten wird keine Zahl angezeigt.",
+      "needsMigration": "Diese Kennzahlen sind in dieser Umgebung noch nicht aktiviert. Anstelle echter Daten wird keine Zahl angezeigt.",
       "unavailable": "Diese Kennzahlen können gerade nicht gelesen werden. An ihrer Stelle wird nichts geschätzt."
     },
     "basis": {
@@ -251,7 +251,7 @@
   },
   "mapLayers": {
     "title": "Kartenebenen",
-    "intro": "Die Karte wird zur wichtigsten visuellen Marktebene. Unten sehen Sie, was jetzt sichtbar ist und welche Ebenen in Vorbereitung sind. Keine gefälschten Daten.",
+    "intro": "Die Karte wird zur wichtigsten visuellen Marktebene. Unten sehen Sie, was jetzt sichtbar ist und welche Ebenen in Vorbereitung sind.",
     "visibleNow": "Jetzt sichtbar",
     "futureLayers": "Zukünftige Ebenen",
     "futureBadge": "In Vorbereitung",
@@ -278,7 +278,7 @@
   "marketplaceHub": {
     "title": "Marktplatz",
     "subtitle": "Ein kompakter Ort, der Sie, Ihre Unternehmen, die Karte und Nachrichten verbindet.",
-    "notFakeNote": "Keine gefälschten Einträge, Unternehmen, Kalenderslots oder Produkte. Wo noch kein Datenmodell existiert, wird ein ehrlicher Status „In Vorbereitung“ angezeigt.",
+    "notFakeNote": "Es werden nur echte Einträge, Unternehmen und Produkte angezeigt. Was noch vorbereitet wird, ist als „In Vorbereitung“ markiert.",
     "map": {
       "title": "Karte",
       "desc": "Ihre echten Signale und Marktsignale auf der Karte.",
@@ -291,11 +291,11 @@
     },
     "offers": {
       "title": "Unternehmens- & persönliche Angebote",
-      "desc": "Die Angebotsebene der Anbieterseite existiert noch nicht. Sie wird ehrlich vorbereitet, ohne gefälschte Einträge."
+      "desc": "Der Angebotsbereich wird noch vorbereitet."
     },
     "shop": {
       "title": "Shop, Dienstleistungen, Vermietungen, Immobilien",
-      "desc": "Noch kein Datenmodell für Produkte, Dienstleistungen, Vermietungen oder Immobilien. Keine gefälschten Einträge."
+      "desc": "Produkte, Dienstleistungen, Vermietungen und Immobilien werden noch vorbereitet."
     },
     "individual": {
       "title": "Individuelle Tätigkeit",
@@ -956,7 +956,7 @@
     "empty": "Noch keine Einträge warten auf Prüfung.",
     "noWorks": "Aus diesem Eintrag wurden keine Arbeiten erkannt.",
     "uncertaintyNote": "Ein Teil dieses Eintrags ist unklar — Klärung erforderlich.",
-    "projectNote": "Einträge können mit einem Projekt verknüpft werden — das Datenmodell ist bereit, aber noch ist kein Eintrag verknüpft und nichts wird automatisch ausgefüllt. Die Ebene Projekt / Objekt / Kunde wird in einem separaten Arbeitsschritt befüllt.",
+    "projectNote": "Die Verknüpfung ist bereit — Einträge können mit einem Projekt verknüpft werden, aber noch ist kein Eintrag verknüpft. Nichts wird automatisch ausgefüllt.",
     "totals": {
       "pending": "Wartet auf Prüfung",
       "workers": "Arbeitskräfte",
@@ -993,7 +993,7 @@
     "reviewCta": "Einträge prüfen",
     "projectsTitle": "Projekte, Objekte und Kunden",
     "projectsReadyBadge": "Struktur bereit",
-    "projectsBody": "Das Datenmodell für diese Ebene ist jetzt live: Projekte, Kunden, Projekt-Arbeitskräfte, Arbeitspositionen und die Verknüpfung eines Journaleintrags mit einem Projekt. Nichts wird automatisch befüllt — Projekte und Kunden können Sie in einem späteren, schreibfähigen Abschnitt anlegen. Journaleinträge lassen sich dann mit einem Projekt verknüpfen.",
+    "projectsBody": "Hier sehen Sie Projekte, Kunden, Projekt-Arbeitskräfte und Arbeitspositionen. Nichts wird automatisch befüllt — neue Projekte und Kunden können noch nicht angelegt werden; diese Möglichkeit wird vorbereitet.",
     "projectsCount": "Projekte",
     "projectsEmpty": "noch keine Projekte angelegt",
     "projectsLinkingNote": "Die Journal-Verknüpfung ist noch nicht aktiviert. Sie können jetzt einen Projektkontext anlegen, aber nichts wird automatisch befüllt.",
@@ -1310,7 +1310,7 @@
         "noWorkersHeading": "Noch keine verknüpften Arbeitskräfte",
         "noWorkersBody": "Laden Sie per E-Mail ein oder warten Sie, bis sich eine Arbeitskraft selbst registriert und verknüpft wird.",
         "inviteHeading": "Arbeitskraft per E-Mail einladen",
-        "inviteDescription": "Die Einladung wird als eigene DB-Zeile gespeichert. Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich oder meldet sich selbst an. Der echte E-Mail-Versand ist noch nicht aktiviert — das ist bewusst zurückgestellt, bis der Inhaber dies mit echten Personen vereinbart.",
+        "inviteDescription": "Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich selbst oder meldet sich an. Echter E-Mail-Versand ist noch nicht aktiviert.",
         "operations": {
           "columnHeading": "Betriebsrolle / Prüfung",
           "setupNote": "Betriebsrollen sind noch nicht zugewiesen. Die Arbeitsjournal-Prüfung wird erst nach sicherer Einrichtung aktiviert.",
@@ -1495,7 +1495,7 @@
         "noWorkersHeading": "Noch keine verknüpften Arbeitskräfte",
         "noWorkersBody": "Laden Sie per E-Mail ein, oder warten Sie, bis sich eine Arbeitskraft selbst registriert und verknüpft wird.",
         "inviteHeading": "Arbeitskraft per E-Mail einladen",
-        "inviteDescription": "Die Einladung wird als eigene DB-Zeile gespeichert. Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich oder meldet sich selbst an.",
+        "inviteDescription": "Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich selbst oder meldet sich an. Echter E-Mail-Versand ist noch nicht aktiviert.",
         "operations": {
           "columnHeading": "Betriebsrolle / Prüfung",
           "setupNote": "Betriebsrollen sind noch nicht zugewiesen. Die Prüfung des Arbeitsjournals wird erst nach sicherer Einrichtung aktiviert.",
@@ -2460,11 +2460,9 @@
     "skillRecognition": "Fähigkeitserkennung: Wenn Sie Ihre Arbeit beschreiben, schlägt das System Fähigkeiten vor. Es ist ein Vorschlag, den Sie auswählen — keine endgültige Tatsache.",
     "workJournal": "Arbeitsjournal: Schreiben Sie auf, was Sie getan haben. Beim Speichern werden Fähigkeiten erkannt und als unterstützende Nachweise mit dem Eintrag verknüpft.",
     "evidenceTrust": "Nachweise und Vertrauenssignale: Wir zeigen, wodurch Ihr Profil belegt ist. Dies sind Signale, keine endgültige Prüfung.",
-    "companyNeeds": "Bedarfe: Beschreiben Sie, was Sie benötigen (Beruf, Land, Team). Die Anfrage wird wirklich gespeichert — keine gefälschten Matches.",
+    "companyNeeds": "Bedarfe: Beschreiben Sie, was Sie benötigen (Beruf, Land, Team) — das Team prüft Ihre Anfrage.",
     "opportunities": "Chancen: Sehen Sie Arbeit, die zu Ihnen passt. Die Sichtbarkeit hängt von der Netzwerkgröße und Ihrer Bereitschaft ab.",
-    "marketplaceMap": "Marktkarte: echte Arbeitsmarktsignale nach Land und Region. Ein genauerer Punkt erscheint, sobald ein Standort festgelegt ist.",
-    "communicationInbox": "Kommunikation: ein echter Gesprächseingang. Ein Projektgespräch öffnet sich mit dem Projektkontext.",
-    "feedbackLoop": "Nach der Arbeit: Halten Sie sie in Ihrem Arbeitsjournal fest, und ein Vorgesetzter oder Kunde kann den Eintrag prüfen. Die Prüfung wird zu Nachweisen und erhöht ein Vertrauenssignal auf Ihrer Karte. Keine Sterne, keine gefälschte Reputation — nur echte menschliche Bewertungen.",
+    "marketplaceMap": "Marktkarte: Arbeitsmarktsignale nach Land und Region. Ein genauerer Punkt erscheint, sobald ein Standort festgelegt ist.",
     "adminReview": "Systemwartung: nur für den Administrator. Normale Benutzer sehen diese Ansichten nie.",
     "paymentReadiness": "Zahlungen werden vorbereitet: Der kostenpflichtige Zugang ist noch nicht aktiv. Vorerst werden die ersten Benutzer manuell / über Owner-Prüfung aufgenommen. Stripe wird in der nächsten Phase angebunden.",
     "identityModel": "Zwei Basisidentitäten: eine Person und ein Unternehmen. Kaufen, Verkaufen, Einstellen und Agenturtätigkeit sind Aktionen, keine separaten Identitäten."
@@ -2566,7 +2564,7 @@
     },
     "preparingReason": {
       "default": "Diese Rolle wird noch vorbereitet. Wir schalten sie frei, sobald sie ehrlich ausgeliefert werden kann.",
-      "startAvailable": "Der Einrichtungspfad funktioniert bereits: ein Feld, der rechtliche Name, und Ihr Datensatz wird wirklich in der DB gespeichert. Die vollständige Arbeitsbereichsoberfläche wird noch ausgefüllt.",
+      "startAvailable": "Der Einrichtungspfad funktioniert bereits: ein Feld, der rechtliche Name, und Ihr Konto wird angelegt. Der vollständige Arbeitsbereich wird noch ausgebaut.",
       "customerPartial": "Der Käuferbereich wird noch vorbereitet. Sie können die Käuferrolle hinzufügen und eine Anfrage ausfüllen."
     },
     "worker": {
@@ -4740,7 +4738,7 @@
     "attention": {
       "eyebrow": "Was jetzt wichtig ist",
       "title": "Benötigt Ihre Aufmerksamkeit",
-      "subtitle": "Neue Anweisungen, die einen Blick wert sind. Das Original bleibt erhalten.",
+      "subtitle": "Neue Anweisungen, die einen Blick wert sind.",
       "from": "von {name}",
       "viewCta": "Anweisung ansehen"
     },
@@ -5251,7 +5249,7 @@
     "pageLead": "Listen Sie die echten Dienstleistungen auf, die Sie anbieten, und verwalten Sie Ihre eigenen Angebote.",
     "title": "Ihre Dienstleistungsangebote",
     "intro": "Echte Dienstleistungen, die Sie anbieten. Aktivieren Sie eine, damit angemeldete Mitglieder sie finden können; Entwürfe und pausierte Dienstleistungen bleiben nur für Sie sichtbar.",
-    "notAvailable": "Dienstleistungsangebote sind noch nicht verfügbar. Dieser Bereich wird aktiviert, sobald das Datenmodell freigeschaltet ist.",
+    "notAvailable": "Dienstleistungsangebote sind in dieser Umgebung noch nicht aktiviert.",
     "empty": "Noch keine Dienstleistungsangebote. Fügen Sie die erste echte Dienstleistung hinzu, die Sie anbieten.",
     "addButton": "Dienstleistung hinzufügen",
     "form": {
@@ -5298,7 +5296,6 @@
     },
     "title": "Meine Nachrichten",
     "subtitle": "Was jetzt wichtig ist und worauf sich eine Antwort lohnt. Hier sehen Sie Nachrichten und wichtige Anfragen.",
-    "v1Notice": "Nachrichten werden beim Neuladen der Seite aktualisiert. Wir zeigen nur einen ehrlichen 'geöffnet'-Zeitstempel — keine falschen Zugestellt-/Gelesen-Anzeigen.",
     "empty": "Noch keine Nachrichten. Wenn Ihnen jemand schreibt oder eine wichtige Anfrage eingeht, sehen Sie sie hier.",
     "counterparty": {
       "support": "Support-Team",
@@ -5314,7 +5311,6 @@
       "unknown": "Kontext nicht angegeben",
       "demand": "Zur Arbeit — der Betreff ist der Titel der zugehörigen Arbeit"
     },
-    "unnamedThread": "(kein Betreff)",
     "unread": "Neu",
     "kind": {
       "direct": "Direkt",
@@ -5371,7 +5367,7 @@
       "subtitle": "Von Testern gestartete Support-Threads. Nur-Ansicht-Liste — der Admin tritt über die Thread-Detailseite bei.",
       "empty": "Noch keine Support-Unterhaltungen.",
       "loadError": "Unterhaltungen konnten nicht geladen werden: {msg}",
-      "unnamed": "(kein Betreff)",
+      "unnamed": "Unterhaltung",
       "createdBy": "Erstellt von: {id}…",
       "footnote": "Nur für Admins.",
       "joinHint": "Sie sind Admin, aber noch kein Teilnehmer dieses Threads. Treten Sie bei, um zu antworten.",
@@ -5385,7 +5381,11 @@
       "accepted_service_request": "Zu einer angenommenen Dienstleistungsanfrage",
       "accepted_booking": "Zu einer angenommenen Buchung"
     },
-    "attachmentUnavailable": "Dieser Anhang kann gerade nicht geöffnet werden. Aktualisieren Sie die Seite."
+    "attachmentUnavailable": "Dieser Anhang kann gerade nicht geöffnet werden. Aktualisieren Sie die Seite.",
+    "conversationFallback": "Unterhaltung",
+    "preview": {
+      "attachmentOnly": "Anhang"
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Ihre Organisation",
@@ -5465,7 +5465,7 @@
     "title": "Nachfrage-Pipeline",
     "subtitle": "Alle Nachfragequellen in einer Leseansicht: eingereichte Anfragen, öffentliche Bedarfsformulare von Firmen, gespeicherte Leads und die Warteliste.",
     "back": "Zurück zum Kontrollraum",
-    "honestNote": "Nur Leseansicht. Die Pipeline-Phase ist eine Darstellungslinse — jede Zeile zeigt zusätzlich ihren gespeicherten Status wörtlich, und Statusänderungen bleiben auf der eigenen Seite der Zeile. Nichts hier kontaktiert jemanden oder ändert etwas.",
+    "honestNote": "Nur Leseansicht. Jede Zeile zeigt ihren gespeicherten Status wörtlich, und Statusänderungen bleiben auf der eigenen Seite der Zeile. Nichts hier kontaktiert jemanden oder ändert etwas.",
     "summaryHeading": "Phasenübersicht",
     "windowNote": "Zahlen werden über die tatsächlich geladenen Zeilen berechnet (die Vertriebsquellen laden je die 50 neuesten) — nie geschätzt.",
     "duplicateChip": "Mögliches Duplikat",
@@ -5492,7 +5492,7 @@
     "sourceStates": {
       "needs_admin_read": "in dieser Umgebung nicht lesbar",
       "service_key_missing": "Serviceverbindung nicht konfiguriert",
-      "needs_migration": "wartet auf die Migration",
+      "needs_migration": "noch nicht aktiviert",
       "not_admin": "Admin-Prüfung nicht bestanden",
       "error": "konnte gerade nicht gelesen werden"
     },
@@ -8014,7 +8014,6 @@
     "eyebrow": "PLANUNG",
     "title": "Planung",
     "intro": "Buchungen, Projekttermine und Aufgabenfristen in einer Agenda. Jede Zeile führt zur echten Quelle.",
-    "honestNote": "Angezeigt werden nur real existierende Einträge: Buchungen, die Termine Ihrer verwalteten Projekte und Fristen offener Aufgaben. Es ist kein externer Kalender verbunden, nichts ist erfunden.",
     "notAuthed": "Melden Sie sich an, um Ihren Plan zu sehen.",
     "filters": {
       "label": "Quelle",
@@ -8023,14 +8022,16 @@
     "source": {
       "booking": "Buchung",
       "project": "Projekt",
-      "task": "Aufgabe"
+      "task": "Aufgabe",
+      "journal": "Journal"
     },
     "sourceNotes": {
       "bookingUnavailable": "Buchungen sind noch nicht verfügbar — sie erscheinen im Plan, sobald die Buchungsebene aktiviert ist.",
       "taskUnavailable": "Aufgaben sind noch nicht verfügbar — Aufgabenfristen erscheinen im Plan, sobald die Aufgabenebene aktiviert ist.",
       "taskError": "Aufgaben konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
       "projectManagersOnly": "Projekt-Zeiträume sehen Projektverantwortliche. Ein Projektplan für Arbeitskräfte folgt, sobald diese Ansicht existiert.",
-      "projectError": "Projekte konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt."
+      "projectError": "Projekte konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
+      "journalError": "Journaleinträge konnten gerade nicht geladen werden. Der restliche Plan wird normal angezeigt."
     },
     "week": {
       "label": "Nächste 7 Tage"
@@ -8058,12 +8059,46 @@
     "fallback": {
       "booking": "Buchung",
       "project": "Projekt",
-      "task": "Aufgabe"
+      "task": "Aufgabe",
+      "journal": "Arbeitseintrag"
     },
     "projectStatus": {
       "draft": "Entwurf",
       "live": "Aktiv",
       "paused": "Pausiert"
+    },
+    "views": {
+      "label": "Ansicht",
+      "agenda": "Agenda",
+      "day": "Tag",
+      "week": "Woche",
+      "month": "Monat",
+      "year": "Jahr"
+    },
+    "nav": {
+      "today": "Heute",
+      "prev": "Vorheriger Zeitraum",
+      "next": "Nächster Zeitraum",
+      "dateLabel": "Datum wählen",
+      "go": "Los"
+    },
+    "journalStatus": {
+      "recorded": "Erfasst"
+    },
+    "month": {
+      "hint": "Tippen Sie auf einen Tag, um die Einträge dieses Tages zu sehen."
+    },
+    "day": {
+      "empty": "An diesem Tag gibt es keine Einträge."
+    },
+    "year": {
+      "count": "{count, plural, =0 {keine Einträge} one {# Eintrag} other {# Einträge}}"
+    },
+    "emptyFiltered": "Keine Einträge für diese Quelle.",
+    "emptyActions": {
+      "bookings": "Buchung vorschlagen",
+      "tasks": "Aufgabe erstellen",
+      "journal": "Erledigte Arbeit erfassen"
     }
   },
   "tasks": {
@@ -8546,5 +8581,186 @@
     "notEnabled": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
     "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "invalid": "Wählen Sie eine Sprache und ein Niveau."
+  },
+  "network": {
+    "module": {
+      "label": "Mein Netzwerk",
+      "desc": "Ihre Unternehmen, Personen, Partner und Einladungen an einem Ort."
+    },
+    "eyebrow": "NETZWERK",
+    "title": "Mein Netzwerk",
+    "intro": "Ihre Unternehmen, Teams, Partner und Einladungen. Laden Sie eine Person oder ein Unternehmen direkt von hier ein.",
+    "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+    "incoming": {
+      "title": "Einladungen für Sie",
+      "from": "Eingeladen von {name}",
+      "accepting": "Wird angenommen…",
+      "accept": "Annehmen",
+      "expires": "Gültig bis {date}",
+      "notices": {
+        "accepted": "Einladung angenommen.",
+        "already_accepted": "Diese Einladung wurde bereits angenommen.",
+        "expired": "Diese Einladung ist abgelaufen.",
+        "revoked": "Diese Einladung wurde widerrufen.",
+        "declined": "Einladung abgelehnt.",
+        "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
+        "not_found": "Einladung nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
+    },
+    "search": {
+      "title": "Personen und Unternehmen",
+      "label": "Suche",
+      "placeholder": "Name, Unternehmen, Stadt…",
+      "submit": "Suchen",
+      "empty": "Für diese Suche wurde nichts gefunden.",
+      "orgType": {
+        "company": "Unternehmen",
+        "agency": "Agentur",
+        "team": "Team",
+        "other": "Organisation"
+      }
+    },
+    "sent": {
+      "title": "Meine gesendeten Einladungen",
+      "empty": "Sie haben noch keine Einladungen gesendet.",
+      "error": "Einladungen konnten gerade nicht geladen werden.",
+      "resend": "Erneut senden",
+      "revoke": "Widerrufen",
+      "copied": "Kopiert",
+      "copyNewLink": "Neuen Link kopieren",
+      "status": {
+        "pending": "Ausstehend",
+        "accepted": "Angenommen",
+        "declined": "Abgelehnt",
+        "expired": "Abgelaufen",
+        "revoked": "Widerrufen"
+      },
+      "delivery": {
+        "not_sent": "E-Mail nicht gesendet",
+        "sent": "E-Mail gesendet",
+        "delivery_failed": "E-Mail-Zustellung fehlgeschlagen"
+      },
+      "notices": {
+        "revoked": "Einladung widerrufen.",
+        "not_pending": "Diese Einladung ist bereits abgeschlossen.",
+        "not_found": "Einladung nicht gefunden.",
+        "not_authorized": "Dazu sind Sie nicht berechtigt.",
+        "sent": "Einladung erneut gesendet.",
+        "delivery_failed": "E-Mail-Zustellung fehlgeschlagen — bitte erneut versuchen.",
+        "created": "Ein neuer Einladungslink wurde erstellt — unten kopieren.",
+        "resend_limit": "Limit für erneutes Senden erreicht.",
+        "invalid_token_hash": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
+    },
+    "organizations": {
+      "title": "Meine Unternehmen"
+    },
+    "relationships": {
+      "title": "Meine Beziehungen",
+      "empty": "Noch keine aktiven Beziehungen.",
+      "noOrg": "Ohne Organisation",
+      "slug": {
+        "employee": "Mitarbeiter",
+        "manager": "Manager",
+        "owner": "Inhaber",
+        "external_manager": "Externer Manager",
+        "collaboration": "Partnerschaft",
+        "employment": "Beschäftigung",
+        "advisory": "Beratung",
+        "other": "Sonstiges",
+        "collaborator": "Partner",
+        "consultant": "Berater",
+        "freelancer": "Freiberufler",
+        "student": "Student",
+        "unemployed": "Arbeitssuchend",
+        "volunteer": "Freiwilliger"
+      }
+    },
+    "invite": {
+      "title": "Einladen",
+      "intro": "Laden Sie eine Person oder ein Unternehmen per E-Mail ein oder teilen Sie einen Einladungslink.",
+      "typeLabel": "Einladungstyp",
+      "types": {
+        "join_platform": "LabourMarket.ai beitreten",
+        "join_organization": "Meinem Unternehmen beitreten",
+        "join_team": "Einem Team beitreten",
+        "join_as_employee": "Als Mitarbeiter beitreten",
+        "collaborate_partner": "Als Partner zusammenarbeiten",
+        "join_project": "Einem Projekt beitreten",
+        "invite_company": "Ein Unternehmen einladen"
+      },
+      "organizationLabel": "Unternehmen",
+      "projectLabel": "Projekt",
+      "untitledProject": "Projekt ohne Titel",
+      "emailsLabel": "E-Mail-Adressen (bis zu {max})",
+      "emailsPlaceholder": "name@beispiel.de, andere@beispiel.de",
+      "nameLabel": "Name (falls bekannt)",
+      "roleLabel": "Vorgeschlagene Rolle",
+      "messageLabel": "Persönliche Nachricht",
+      "send": "Einladung senden",
+      "sending": "Wird gesendet…",
+      "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "notAuthed": "Melden Sie sich an, um Einladungen zu senden.",
+      "linkModeNote": "E-Mail-Versand ist noch nicht aktiviert — teilen Sie den Einladungslink direkt.",
+      "invalidEmails": "Ungültige Adressen",
+      "overflowEmails": "Über dem Limit ({max}) — diese wurden nicht aufgenommen",
+      "copied": "Kopiert",
+      "copyLink": "Link kopieren",
+      "share": "Teilen",
+      "shareTitle": "Einladung — LabourMarket.ai",
+      "outcomes": {
+        "created": "Link bereit",
+        "sent": "Gesendet",
+        "delivery_failed": "Zustellung fehlgeschlagen",
+        "duplicate_pending": "Bereits eingeladen",
+        "invalid_email": "Ungültige Adresse",
+        "limit_reached": "Einladungslimit erreicht",
+        "rate_limited": "Zu viele Einladungen heute",
+        "not_authorized": "Nicht erlaubt",
+        "error": "Fehlgeschlagen"
+      }
+    },
+    "invitePage": {
+      "eyebrow": "EINLADUNG",
+      "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "loadError": "Die Einladung konnte gerade nicht geladen werden. Bitte erneut versuchen.",
+      "invalidTitle": "Einladung nicht gefunden",
+      "invalidBody": "Der Link ist ungültig oder funktioniert nicht mehr. Bitten Sie um eine neue Einladung.",
+      "toDashboard": "Zum Dashboard",
+      "titles": {
+        "join_platform": "Einladung zu LabourMarket.ai",
+        "join_organization": "Einladung in ein Unternehmen",
+        "join_team": "Einladung in ein Team",
+        "join_as_employee": "Einladung als Mitarbeiter",
+        "collaborate_partner": "Einladung zur Zusammenarbeit",
+        "join_project": "Einladung in ein Projekt",
+        "invite_company": "Einladung für ein Unternehmen"
+      },
+      "from": "Eingeladen von {name}",
+      "organization": "Unternehmen: {name}",
+      "project": "Projekt: {name}",
+      "role": "Vorgeschlagene Rolle: {role}",
+      "accept": "Einladung annehmen",
+      "decline": "Ablehnen",
+      "expiresNote": "Die Einladung ist gültig bis {date}.",
+      "closed": {
+        "accepted": "Diese Einladung wurde bereits angenommen.",
+        "declined": "Diese Einladung wurde abgelehnt.",
+        "expired": "Diese Einladung ist abgelaufen. Bitten Sie um eine neue.",
+        "revoked": "Diese Einladung wurde widerrufen."
+      },
+      "notices": {
+        "not_enabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+        "already_accepted": "Bereits angenommen.",
+        "expired": "Diese Einladung ist abgelaufen.",
+        "revoked": "Diese Einladung wurde widerrufen.",
+        "declined": "Einladung abgelehnt.",
+        "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
+        "not_found": "Einladung nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
+    }
   }
 }

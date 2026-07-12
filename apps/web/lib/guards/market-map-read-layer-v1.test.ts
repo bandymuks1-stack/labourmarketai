@@ -223,6 +223,11 @@ describe("NO new DB migration in this PR", () => {
     // contract) + 20260712130000_conversation_message_attachments (private
     // participant-scoped message attachments). Both DRAFT / needs-human-gate,
     // NOT applied; paired rollbacks in the PR.
-    expect(count).toBeLessThanOrEqual(127);
+    // Bumped 127 -> 128 for the canonical invitations draft
+    // (20260712200000_canonical_invitations_v1): typed invitations with
+    // hashed tokens whose acceptance creates the CANONICAL relationship
+    // (engagement_contexts / project_worker_assignments). DRAFT /
+    // needs-human-gate, NOT applied; paired rollback in the PR.
+    expect(count).toBeLessThanOrEqual(128);
   });
 });

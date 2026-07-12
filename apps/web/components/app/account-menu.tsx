@@ -30,8 +30,8 @@ export function AccountMenu() {
   // First-use UX (2026-07-04): the light/dark toggle used to live ONLY deep in
   // /dashboard/account, so new users never discovered it. This mirrors the
   // exact storage contract of <ThemeToggle/> (dataset.theme + localStorage
-  // "theme"; the no-flash bootstrap in the root layout replays it) — same
-  // mechanism, one more surface, no redesign.
+  // "theme" — a shared, never locale-keyed key; the no-flash bootstrap in
+  // app/[locale]/layout.tsx replays it) — same mechanism, one more surface.
   const [theme, setThemeState] = useState<"dark" | "light">("dark");
   useEffect(() => {
     const current = document.documentElement.dataset.theme;

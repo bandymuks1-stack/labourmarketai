@@ -13,15 +13,24 @@ import {
   PLANNING_SOURCE_TYPES,
   PLANNING_WEEK_STRIP_DAYS,
   addDays,
+  addMonths,
   buildAgenda,
+  buildMonthGrid,
+  buildWeekView,
+  buildYearOverview,
   conflictItemIds,
   detectConflicts,
   effectiveEndDay,
   hrefForSource,
   isConflictEligible,
+  itemsForDay,
+  navAnchors,
+  parseIsoDay,
   rangesOverlapInclusive,
+  startOfWeekMonday,
   statusKeyForSource,
   toIsoDay,
+  visibleRange,
   type PlanningItem,
 } from "@/lib/planning/planning-model";
 import { PRIMARY_ROUTES } from "./primary-route-smoke";
@@ -100,13 +109,23 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
     expect(COMPOSE).toMatch(/import \{ listMyTasks \} from "@\/lib\/tasks\/tasks"/);
   });
 
-  it("the ONLY direct table read is `projects` (a table the project libs already read), bounded", () => {
+  it("direct table reads are the known bounded set (projects/orgs/workers/journal)", () => {
     const froms = [...COMPOSE.matchAll(/\.from\("([a-z0-9_]+)"\)/g)].map(
       (m) => m[1],
     );
-    expect(new Set(froms)).toEqual(new Set(["projects"]));
+    // projects (the table the project libs already read), organizations
+    // (owned-org scope), workers (own worker id) and journal_entries (own
+    // dated facts) — every read RLS-scoped and bounded.
+    expect(new Set(froms)).toEqual(
+      new Set(["projects", "organizations", "workers", "journal_entries"]),
+    );
     expect(COMPOSE).toMatch(/\.limit\(PLANNING_PROJECT_READ_LIMIT\)/);
+    expect(COMPOSE).toMatch(/\.limit\(PLANNING_JOURNAL_READ_LIMIT\)/);
     expect(PLANNING_PROJECT_READ_LIMIT).toBeLessThanOrEqual(200);
+    // Journal facts: own worker only, soft-deleted and superseded excluded.
+    expect(COMPOSE).toMatch(/\.is\("deleted_at", null\)/);
+    expect(COMPOSE).toMatch(/\.is\("superseded_by", null\)/);
+    expect(COMPOSE).toMatch(/\.eq\("worker_id", workerRes\.data\.id\)/);
     // The model and the page touch no table at all.
     expect(MODEL).not.toMatch(/\.from\(/);
     expect(PAGE).not.toMatch(/\.from\(/);
@@ -303,8 +322,13 @@ describe("4. the agenda is pure, forward-looking date math", () => {
 });
 
 describe("5. real sources only — nothing that does not exist is simulated", () => {
-  it("exactly booking / project / task", () => {
-    expect([...PLANNING_SOURCE_TYPES]).toEqual(["booking", "project", "task"]);
+  it("exactly booking / project / task / journal (plan sources + the fact source)", () => {
+    expect([...PLANNING_SOURCE_TYPES]).toEqual([
+      "booking",
+      "project",
+      "task",
+      "journal",
+    ]);
   });
 
   it("no availability/milestone/CRM source is faked in the planning layer", () => {
@@ -315,7 +339,6 @@ describe("5. real sources only — nothing that does not exist is simulated", ()
 
   it("the copy claims no external calendar or sync", () => {
     const en = JSON.parse(read("messages/en.json")).planning;
-    expect(en.honestNote).toMatch(/no external calendar/i);
     const blob = JSON.stringify(en).toLowerCase();
     expect(blob).not.toMatch(/\bsynced\b|\bsyncs\b|google|outlook|\bical\b/);
     expect(blob).not.toMatch(/milestone|availability window/);
@@ -422,18 +445,150 @@ describe("7. the page is an honest server-rendered agenda", () => {
     expect(COMPOSE).toMatch(/"error"/);
   });
 
-  it("renders the calm empty state, the conflict flag and the honest-scope note", () => {
+  it("renders the calm empty state with REAL next actions and the conflict flag", () => {
     expect(PAGE).toMatch(/planning-empty/);
     expect(PAGE).toMatch(/t\("empty"\)/);
     expect(PAGE).toMatch(/planning-conflict-/);
     expect(PAGE).toMatch(/conflict\.flag/);
-    expect(PAGE).toMatch(/planning-honest-note/);
-    expect(PAGE).toMatch(/t\("honestNote"\)/);
+    // Empty-state CTAs are live routes, not dead ends.
+    expect(PAGE).toMatch(/planning-empty-cta-bookings/);
+    expect(PAGE).toMatch(/planning-empty-cta-tasks/);
+    expect(PAGE).toMatch(/planning-empty-cta-journal/);
+    // The technical honest-scope explainer was removed (area E): the page
+    // shows records, not a paragraph about what the page is built from.
+    expect(PAGE).not.toMatch(/honestNote/);
   });
 
   it("every row links its real source object through the shared Link", () => {
     expect(PAGE).toMatch(/href=\{item\.href as "\/dashboard"\}/);
     expect(PAGE).toMatch(/from "@\/lib\/i18n\/navigation"/);
+  });
+});
+
+describe("9. calendar views are pure UTC date math (area C)", () => {
+  it("parseIsoDay accepts only real calendar days", () => {
+    expect(parseIsoDay("2026-07-12")).toBe("2026-07-12");
+    expect(parseIsoDay("2026-02-31")).toBeNull(); // impossible date
+    expect(parseIsoDay("2026-7-1")).toBeNull();
+    expect(parseIsoDay("junk")).toBeNull();
+    expect(parseIsoDay(undefined)).toBeNull();
+  });
+
+  it("weeks start Monday; month math clamps to real month ends", () => {
+    expect(startOfWeekMonday("2026-07-12")).toBe("2026-07-06"); // Sunday → its Monday
+    expect(startOfWeekMonday("2026-07-06")).toBe("2026-07-06"); // Monday stays
+    expect(addMonths("2026-01-31", 1)).toBe("2026-02-28"); // clamped
+    expect(addMonths("2026-03-15", -1)).toBe("2026-02-15");
+    expect(addMonths("2026-12-05", 1)).toBe("2027-01-05"); // year rollover
+  });
+
+  it("the month grid covers the whole month in full Mon–Sun rows", () => {
+    const grid = buildMonthGrid("2026-07-12", [], "2026-07-12");
+    expect(grid.month).toBe("2026-07");
+    expect(grid.weeks.length).toBeGreaterThanOrEqual(4);
+    expect(grid.weeks.length).toBeLessThanOrEqual(6);
+    for (const week of grid.weeks) expect(week).toHaveLength(7);
+    const days = grid.weeks.flat();
+    // Every July day is present exactly once and marked inMonth.
+    const july = days.filter((c) => c.inMonth);
+    expect(july).toHaveLength(31);
+    expect(days[0].day <= "2026-07-01").toBe(true);
+    expect(days[days.length - 1].day >= "2026-07-31").toBe(true);
+    // Today flag lands on the anchor's real day only.
+    expect(days.filter((c) => c.isToday).map((c) => c.day)).toEqual(["2026-07-12"]);
+  });
+
+  it("month cells carry real coverage counts (bands span days)", () => {
+    const band = item({ id: "booking:band", startDate: "2026-07-10", endDate: "2026-07-12" });
+    const grid = buildMonthGrid("2026-07-01", [band], "2026-07-01");
+    const byDay = new Map(grid.weeks.flat().map((c) => [c.day, c.count]));
+    expect(byDay.get("2026-07-09")).toBe(0);
+    expect(byDay.get("2026-07-10")).toBe(1);
+    expect(byDay.get("2026-07-11")).toBe(1);
+    expect(byDay.get("2026-07-12")).toBe(1);
+    expect(byDay.get("2026-07-13")).toBe(0);
+  });
+
+  it("week view = 7 Monday-started days; day items are deterministic", () => {
+    const single = item({ id: "booking:one", startDate: "2026-07-08" });
+    const week = buildWeekView("2026-07-12", [single], "2026-07-12");
+    expect(week).toHaveLength(7);
+    expect(week[0].day).toBe("2026-07-06");
+    expect(week[6].day).toBe("2026-07-12");
+    expect(week.find((d) => d.day === "2026-07-08")?.items.map((i) => i.id)).toEqual([
+      "booking:one",
+    ]);
+    expect(itemsForDay([single], "2026-07-08").map((i) => i.id)).toEqual(["booking:one"]);
+    expect(itemsForDay([single], "2026-07-09")).toEqual([]);
+  });
+
+  it("year overview counts month intersections once per item", () => {
+    const spanning = item({
+      id: "project:span",
+      sourceType: "project",
+      startDate: "2026-06-20",
+      endDate: "2026-08-05",
+      status: "live",
+      roleContext: "managed",
+    });
+    const year = buildYearOverview(2026, [spanning], "2026-07-12");
+    expect(year).toHaveLength(12);
+    const counts = new Map(year.map((m) => [m.month, m.count]));
+    expect(counts.get("2026-05")).toBe(0);
+    expect(counts.get("2026-06")).toBe(1);
+    expect(counts.get("2026-07")).toBe(1);
+    expect(counts.get("2026-08")).toBe(1);
+    expect(counts.get("2026-09")).toBe(0);
+    expect(year.find((m) => m.isCurrent)?.month).toBe("2026-07");
+  });
+
+  it("prev/next anchors move by the view's own period", () => {
+    expect(navAnchors("day", "2026-07-12")).toEqual({ prev: "2026-07-11", next: "2026-07-13" });
+    expect(navAnchors("week", "2026-07-12")).toEqual({ prev: "2026-07-05", next: "2026-07-19" });
+    expect(navAnchors("month", "2026-07-12")).toEqual({ prev: "2026-06-12", next: "2026-08-12" });
+    expect(navAnchors("year", "2026-07-12")).toEqual({ prev: "2025-07-12", next: "2027-07-12" });
+  });
+
+  it("visibleRange drives the bounded fact read per view", () => {
+    expect(visibleRange("day", "2026-07-12")).toEqual({ start: "2026-07-12", end: "2026-07-12" });
+    expect(visibleRange("week", "2026-07-12")).toEqual({ start: "2026-07-06", end: "2026-07-12" });
+    expect(visibleRange("year", "2026-07-12")).toEqual({ start: "2026-01-01", end: "2026-12-31" });
+    const month = visibleRange("month", "2026-07-12");
+    expect(month.start).toBe("2026-06-29"); // Monday before July 1
+    expect(month.end >= "2026-07-31").toBe(true);
+  });
+
+  it("journal events deep-link to the entry's own editor (source stays canonical)", () => {
+    expect(hrefForSource("journal", "e1")).toBe(
+      "/dashboard/journal?editing=e1#journal-composer",
+    );
+    expect(statusKeyForSource("journal", "recorded")).toBe(
+      "planning.journalStatus.recorded",
+    );
+    // Journal facts never join conflict detection (facts don't conflict).
+    expect(
+      isConflictEligible(
+        item({ id: "journal:x", sourceType: "journal", startDate: "2026-07-10", status: "recorded", roleContext: "mine" }),
+      ),
+    ).toBe(false);
+  });
+
+  it("the page renders every view shell + the date navigation", () => {
+    for (const marker of [
+      "planning-views",
+      "planning-view-${v}", // per-view switcher chips (template literal)
+      "planning-date-nav",
+      "planning-nav-today",
+      "planning-date-picker",
+      "planning-month",
+      "planning-week-view",
+      "planning-day-view",
+      "planning-year-view",
+      "planning-period-label",
+    ]) {
+      expect(PAGE).toContain(marker);
+    }
+    expect(PAGE).toMatch(/type="date"/);
   });
 });
 
@@ -451,24 +606,29 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.eyebrow",
     "planning.title",
     "planning.intro",
-    "planning.honestNote",
     "planning.notAuthed",
     "planning.filters.label",
     "planning.filters.all",
     "planning.source.booking",
     "planning.source.project",
     "planning.source.task",
+    "planning.source.journal",
     "planning.sourceNotes.bookingUnavailable",
     "planning.sourceNotes.taskUnavailable",
     "planning.sourceNotes.taskError",
     "planning.sourceNotes.projectManagersOnly",
     "planning.sourceNotes.projectError",
+    "planning.sourceNotes.journalError",
     "planning.week.label",
     "planning.today",
     "planning.later.title",
     "planning.undated.title",
     "planning.undated.hint",
     "planning.empty",
+    "planning.emptyFiltered",
+    "planning.emptyActions.bookings",
+    "planning.emptyActions.tasks",
+    "planning.emptyActions.journal",
     "planning.pastHidden",
     "planning.conflict.flag",
     "planning.context.incoming",
@@ -479,9 +639,25 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.fallback.booking",
     "planning.fallback.project",
     "planning.fallback.task",
+    "planning.fallback.journal",
     "planning.projectStatus.draft",
     "planning.projectStatus.live",
     "planning.projectStatus.paused",
+    "planning.journalStatus.recorded",
+    "planning.views.label",
+    "planning.views.agenda",
+    "planning.views.day",
+    "planning.views.week",
+    "planning.views.month",
+    "planning.views.year",
+    "planning.nav.today",
+    "planning.nav.prev",
+    "planning.nav.next",
+    "planning.nav.dateLabel",
+    "planning.nav.go",
+    "planning.month.hint",
+    "planning.day.empty",
+    "planning.year.count",
     // The re-pointed module labels.
     "auth.dashboard.myZone.actions.planning.title",
     "auth.dashboard.myZone.actions.planning.desc",

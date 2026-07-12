@@ -333,6 +333,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260712120000_journal_entry_restore +
     // 20260712130000_conversation_message_attachments) — both DRAFT /
     // needs-human-gate, NOT applied; paired rollbacks in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 127/);
+    // Bumped 127 -> 128 for the canonical invitations draft
+    // (20260712200000_canonical_invitations_v1) - core-network area B;
+    // DRAFT / needs-human-gate, NOT applied; paired rollback in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 128/);
   });
 });

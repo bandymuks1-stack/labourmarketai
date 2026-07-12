@@ -108,6 +108,10 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // driven grid card + command entry), so it joins the smoke inventory
   // like the other module surfaces.
   { id: "planning", urlPattern: "/dashboard/planning", sourceFile: "app/[locale]/dashboard/planning/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Core-network area B: "Mano tinklas" is a dashboard module (grid card +
+  // command entry) - my organizations, relationships, people/company search
+  // and the canonical invite action.
+  { id: "network", urlPattern: "/dashboard/network", sourceFile: "app/[locale]/dashboard/network/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
   // Control room PR I: operational finance records is a dashboard module
   // (registry-driven grid card + command entry), so it joins the smoke

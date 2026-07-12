@@ -23,22 +23,14 @@ describe("feedback loop model is honest", () => {
   });
 });
 
-describe("the feedback loop is explained on the communication surface", () => {
+describe("the communication surface carries conversations, not product explainers", () => {
+  // Core-network inbox contract: the messages list leads with real
+  // conversations. Product-promo / architecture feature notes were removed
+  // from the main hierarchy (docs/launch/communication-inbox-contract-v1.md).
   const page = read("app/[locale]/dashboard/communication/page.tsx");
-  it("renders the feedback-loop note", () => {
-    expect(page).toMatch(/feature-note-feedback-loop/);
-    expect(page).toMatch(/feedbackLoop/);
+  it("renders no FeatureNote explainers on the inbox", () => {
+    expect(page).not.toMatch(/FeatureNote/);
+    expect(page).not.toMatch(/feedbackLoop/);
+    expect(page).not.toMatch(/communicationInbox/);
   });
-  for (const loc of ["lt", "en", "ru"] as const) {
-    it(`${loc}: feedbackLoop is quiet CV/work-card copy with no fake AI claim`, () => {
-      // Quiet-UI reframe (fix/cv): the confirmer/process + "no fake reputation"
-      // explanation was removed; the note now states the CV/work-card benefit.
-      const raw = JSON.parse(read(`messages/${loc}.json`)).featureNotes.feedbackLoop as string;
-      const txt = raw.toLowerCase();
-      expect(/cv|kortel|карточ|card/.test(txt), `${loc} names the CV / work card benefit`).toBe(true);
-      // No fake-AI claim. (Match "AI" case-sensitively to avoid the LT non-ASCII
-      // word-boundary false positive on words like "įrašai".)
-      expect(/\bAI\b/.test(raw) || /dirbtin\w* intelekt|искусственн\w* интеллект/i.test(raw), `${loc} no fake AI claim`).toBe(false);
-    });
-  }
 });

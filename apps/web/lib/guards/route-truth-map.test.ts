@@ -56,6 +56,11 @@ const CLASSIFICATION: Record<string, string> = {
   // RLS-scoped reads (bookings / managed projects / tasks); degrades
   // per-source, duplicates no record.
   "dashboard/planning": "REAL_LAUNCH_SURFACE",
+  // "Mano tinklas" (core-network area B) — organizations, relationships,
+  // people/company search + the canonical invitation lifecycle. Real reads
+  // (RLS-scoped), real actions (definer RPCs), honest not-enabled state
+  // while the owner-gated invitations migration is unapplied.
+  "dashboard/network": "REAL_LAUNCH_SURFACE",
   // Privacy self-service (quality-train PR G): real export download +
   // reviewed deletion-request intake.
   "dashboard/privacy": "REAL_LAUNCH_SURFACE",

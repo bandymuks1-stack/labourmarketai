@@ -6,6 +6,7 @@ import { Lock } from "lucide-react";
 import { AdminJoinConversation } from "@/components/app/admin-join-conversation";
 import { CommunicationComposer } from "@/components/app/communication-composer";
 import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
+import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerText } from "@/lib/communication/translation";
@@ -144,7 +145,15 @@ export default async function ConversationDetailPage({
             ← {t("backToList")}
           </Link>
           <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-            {conversation.subject ?? t("unnamedThread")}
+            {/* Real title fallback — never "(be temos)": subject, then the
+                permitted counterpart name, then the live source title, then
+                the support label / a neutral "Pokalbis". */}
+            {conversation.subject ??
+              (card.counterpartyRestricted ? null : (card.counterpartyName ?? null)) ??
+              card.sourceTitle ??
+              (conversation.kind === "support"
+                ? t("counterparty.support")
+                : t("conversationFallback"))}
           </h1>
           <span
             className="font-mono text-[10px] uppercase tracking-label text-text-muted"
@@ -227,6 +236,10 @@ export default async function ConversationDetailPage({
           page first mounts — honest "I opened this thread" signal, not a
           fake "delivered" indicator. */}
       <MarkReadOnMount conversationId={conversationId} locale={locale} />
+
+      {/* New replies appear when the tab regains focus / on a gentle
+          interval — no manual reload needed, no simulated realtime. */}
+      <RefreshOnFocus />
 
       <AdminJoinConversation
         conversationId={conversationId}

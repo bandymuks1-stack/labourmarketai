@@ -79,6 +79,7 @@ export default async function CompanyDashboardPage({
   await requireRoleOrRedirect(locale, "company");
 
   const t = await getTranslations("roleDashboards.company");
+  const tNetwork = await getTranslations("network");
   const tSpaces = await getTranslations("spaces");
   const tRooms = await getTranslations("companyActionRooms");
 
@@ -701,6 +702,16 @@ export default async function CompanyDashboardPage({
       ) : (
         <TeamRosterEmptyState variant="company" />
       )}
+
+      {/* Canonical Pakviesti (core-network area B): every invite context
+          funnels into the ONE invitation surface on /dashboard/network. */}
+      <Link
+        href={"/dashboard/network?type=join_as_employee" as "/dashboard"}
+        data-testid="company-invite-link"
+        className="flex w-fit items-center gap-2 rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:border-brand-blue"
+      >
+        {tNetwork("invite.title")}
+      </Link>
 
       <div id="company-team" className="scroll-mt-20">
         <CompanyWorkersSection

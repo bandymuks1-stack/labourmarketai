@@ -66,6 +66,20 @@ const NATIVE_NAV = new Set([
   // the same page with new searchParams, so feedback IS the navigation
   // (filtered list re-render). No mutation, no client state.
   "app/[locale]/dashboard/admin/pipeline/page.tsx",
+  // Canonical calendar (core-network area C) — the ONLY form is the plain
+  // GET date-picker on a pure server component: submitting navigates to the
+  // picked ?date; feedback IS the navigation. No mutation, no client state.
+  "app/[locale]/dashboard/planning/page.tsx",
+  // "Mano tinklas" (core-network area B) — the ONLY server-component form is
+  // the plain GET people/company search: submitting navigates to ?q= and the
+  // result list re-render IS the feedback. (The invite panel and invitation
+  // lists are client components covered by the general client-async rule.)
+  "app/[locale]/dashboard/network/page.tsx",
+  // Invitation landing page (core-network area B) — accept/decline are
+  // NATIVE-NAV server actions that ALWAYS redirect: success lands in the
+  // exact accepted context; failure lands back here with an honest
+  // ?notice= outcome banner.
+  "app/[locale]/invite/[token]/page.tsx",
   "app/[locale]/dashboard/account/page.tsx", // logout POST
   // "submit draft for real" + agency-mode "offer" (audit PR4) — the
   // openDemandIntakeAsCompanyAction forms switch workspace then redirect to

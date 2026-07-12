@@ -4,6 +4,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 
 export type Role = "worker" | "company" | "agency" | "customer";
 
@@ -112,6 +113,13 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   }
 
   revalidatePath(`/${locale}/dashboard`);
+  // Deep-link continuity (core-network area B): a safe ?next= carried
+  // through login -> onboarding (e.g. an invitation link) wins over the
+  // role dashboard, so an invited new user lands back on the invitation.
+  const nextRaw = formData.get("next");
+  if (typeof nextRaw === "string" && isSafeReturnPath(nextRaw)) {
+    redirect(getSafeReturnPath(nextRaw, locale));
+  }
   // Role-aware first-login destination. A company/agency/customer who
   // just picked their primary role should land on THEIR workspace, not
   // the generic /dashboard cockpit (which surfaces worker-shaped

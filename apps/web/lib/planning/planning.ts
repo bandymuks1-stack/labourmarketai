@@ -44,11 +44,13 @@ import {
  */
 
 /** Per-source honest state. `managers-only` = the source exists but only a
- *  manager-side read exists today (workers get the note, not fake data). */
+ *  manager-side read exists today (workers get the note, not fake data);
+ *  `workers-only` mirrors it for the journal (fact source of a worker). */
 export type PlanningSourceStatus =
   | "ok"
   | "unavailable" /* owner-gated migration not applied yet */
   | "managers-only"
+  | "workers-only"
   | "error";
 
 export interface PlanningSourceState {
@@ -60,6 +62,7 @@ export interface PlanningSources {
   readonly booking: PlanningSourceState;
   readonly project: PlanningSourceState;
   readonly task: PlanningSourceState;
+  readonly journal: PlanningSourceState;
 }
 
 export type PlanningReadResult =
@@ -122,19 +125,42 @@ async function readProjectItems(): Promise<{
   state: PlanningSourceState;
   items: PlanningItem[];
 }> {
-  // Managers only, honestly: the manager-side `projects` read (owns_company
-  // RLS) is the only project read that exists. No company → the source is
-  // not available for this caller (workers get the note, never fake bands).
+  // Managers only, honestly: no worker-side "my assigned projects" dated
+  // read exists yet (documented blocker in the canonical-calendar contract).
+  // Scope = the caller's legacy company channel PLUS the organizations the
+  // caller owns — both reads stay under the projects RLS (fail-closed).
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const companyId = await callerCompanyId();
-  if (!companyId) {
+
+  const ownedOrgsRes = user
+    ? await asAny(supabase)
+        .from("organizations")
+        .select("id")
+        .eq("owner_profile_id", user.id)
+        .limit(50)
+    : { data: null, error: null };
+  const ownedOrgIds: string[] = ((ownedOrgsRes.data ?? []) as { id: string }[]).map(
+    (o) => o.id,
+  );
+
+  if (!companyId && ownedOrgIds.length === 0) {
     return { state: { status: "managers-only", count: 0 }, items: [] };
   }
 
-  const supabase = await createClient();
+  const orFilter = [
+    ...(companyId ? [`company_id.eq.${companyId}`] : []),
+    ...(ownedOrgIds.length > 0
+      ? [`organization_id.in.(${ownedOrgIds.join(",")})`]
+      : []),
+  ].join(",");
+
   const res = await asAny(supabase)
     .from("projects")
     .select("id, title, city, start_date, end_date, status")
-    .eq("company_id", companyId)
+    .or(orFilter)
     .in("status", [...PLANNED_PROJECT_STATUSES])
     .order("start_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
@@ -151,10 +177,13 @@ async function readProjectItems(): Promise<{
     end_date: string | null;
     status: string;
   };
+  const seen = new Set<string>();
   const items: PlanningItem[] = ((res.data ?? []) as Row[])
-    .filter((p) =>
-      (PLANNED_PROJECT_STATUSES as readonly string[]).includes(p.status),
-    )
+    .filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return (PLANNED_PROJECT_STATUSES as readonly string[]).includes(p.status);
+    })
     .map((p) => ({
       id: `project:${p.id}`,
       sourceType: "project" as const,
@@ -209,30 +238,105 @@ async function readTaskItems(): Promise<{
   return { state, items };
 }
 
+/** Bounded read cap for journal facts inside the visible range. */
+const PLANNING_JOURNAL_READ_LIMIT = 200;
+
+async function readJournalItems(
+  userId: string,
+  rangeStart: string,
+  rangeEnd: string,
+): Promise<{ state: PlanningSourceState; items: PlanningItem[] }> {
+  // The journal is FACT (calendar = plan; journal = what really happened):
+  // the caller's OWN entries only, shown at their real recorded day and
+  // deep-linked to the entry itself. Managers keep reading team journals on
+  // the journal/review surfaces — the personal calendar never widens reads.
+  const supabase = await createClient();
+  const workerRes = await asAny(supabase)
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (workerRes.error) {
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+  if (!workerRes.data) {
+    return { state: { status: "workers-only", count: 0 }, items: [] };
+  }
+
+  const res = await asAny(supabase)
+    .from("journal_entries")
+    .select("id, original_text, created_at, deleted_at, superseded_by")
+    .eq("worker_id", workerRes.data.id)
+    .is("deleted_at", null)
+    .is("superseded_by", null)
+    .gte("created_at", `${rangeStart}T00:00:00Z`)
+    .lte("created_at", `${rangeEnd}T23:59:59.999Z`)
+    .order("created_at", { ascending: true })
+    .limit(PLANNING_JOURNAL_READ_LIMIT);
+  if (res.error) {
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+
+  type Row = { id: string; original_text: string | null; created_at: string };
+  const items: PlanningItem[] = ((res.data ?? []) as Row[]).map((e) => {
+    const firstLine = (e.original_text ?? "").trim().split(/\r?\n/, 1)[0] ?? "";
+    return {
+      id: `journal:${e.id}`,
+      sourceType: "journal" as const,
+      sourceId: e.id,
+      label: firstLine ? (firstLine.length > 80 ? `${firstLine.slice(0, 79)}…` : firstLine) : null,
+      detail: null,
+      startDate: toIsoDay(e.created_at),
+      endDate: null,
+      status: "recorded",
+      statusKey: statusKeyForSource("journal", "recorded"),
+      href: hrefForSource("journal", e.id),
+      roleContext: "mine" as const,
+    };
+  });
+  return { state: { status: "ok", count: items.length }, items };
+}
+
+export interface PlanningRange {
+  /** Inclusive "YYYY-MM-DD" bounds of the visible view — drives the
+   *  bounded journal-fact read (plan sources stay bounded on their own). */
+  readonly rangeStart: string;
+  readonly rangeEnd: string;
+}
+
 /**
- * The caller's combined planning read — one auth check, three independent
+ * The caller's combined planning read — one auth check, four independent
  * RLS-scoped sources in parallel, each degrading on its own.
  */
-export async function getPlanning(): Promise<PlanningReadResult> {
+export async function getPlanning(
+  range?: PlanningRange,
+): Promise<PlanningReadResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
 
-  const [booking, project, task] = await Promise.all([
+  const today = new Date().toISOString().slice(0, 10);
+  const rangeStart = range?.rangeStart ?? today;
+  const rangeEnd =
+    range && range.rangeEnd >= rangeStart ? range.rangeEnd : rangeStart;
+
+  const [booking, project, task, journal] = await Promise.all([
     readBookingItems(),
     readProjectItems(),
     readTaskItems(),
+    readJournalItems(user.id, rangeStart, rangeEnd),
   ]);
 
   return {
     status: "ok",
-    items: [...booking.items, ...project.items, ...task.items],
+    items: [...booking.items, ...project.items, ...task.items, ...journal.items],
     sources: {
       booking: booking.state,
       project: project.state,
       task: task.state,
+      journal: journal.state,
     },
   };
 }
