@@ -49,7 +49,7 @@
     "intro": "Rodikliai, suskaičiuoti iš jūsų pačių įrašų, su nurodytu skaičiavimo pagrindu po kiekviena sekcija, ir jau veikiantys eksportai.",
     "honestyNote": "Skaičiuojama tik iš jūsų duomenų — jokių palyginimų su kitais, jokių balų, jokių prognozių.",
     "state": {
-      "needsMigration": "Šis duomenų modelis šioje aplinkoje dar neįjungtas, todėl nėra ko skaičiuoti. Vietoje tikrų duomenų joks skaičius nerodomas.",
+      "needsMigration": "Šie rodikliai šioje aplinkoje dar neįjungti. Vietoje tikrų duomenų joks skaičius nerodomas.",
       "unavailable": "Šių rodiklių šiuo metu perskaityti nepavyksta. Vietoje jų niekas nespėjama."
     },
     "basis": {
@@ -251,7 +251,7 @@
   },
   "mapLayers": {
     "title": "Žemėlapio sluoksniai",
-    "intro": "Žemėlapis pamažu taps pagrindiniu vizualiu rinkos sluoksniu. Žemiau – kas matoma dabar ir kokie sluoksniai ruošiami. Be netikrų duomenų.",
+    "intro": "Žemėlapis pamažu taps pagrindiniu vizualiu rinkos sluoksniu. Žemiau – kas matoma dabar ir kokie sluoksniai ruošiami.",
     "visibleNow": "Matoma dabar",
     "futureLayers": "Būsimi sluoksniai",
     "futureBadge": "Ruošiama",
@@ -278,7 +278,7 @@
   "marketplaceHub": {
     "title": "Prekyvietė",
     "subtitle": "Viena kompaktiška vieta, jungianti tave, tavo įmones, žemėlapį ir žinutes.",
-    "notFakeNote": "Be netikrų skelbimų, įmonių, kalendoriaus laikų ar prekių. Kur duomenų modelio dar nėra — rodoma sąžininga „ruošiama“ būsena.",
+    "notFakeNote": "Rodomi tik tikri skelbimai, įmonės ir prekės. Kas dar ruošiama — pažymėta „ruošiama“ būsena.",
     "map": {
       "title": "Žemėlapis",
       "desc": "Tikri tavo ir rinkos signalai žemėlapyje.",
@@ -291,11 +291,11 @@
     },
     "offers": {
       "title": "Įmonių ir asmenų pasiūlymai",
-      "desc": "Pasiūlymų (tiekimo pusės) sluoksnio dar nėra. Ruošiama sąžiningai, be netikrų skelbimų."
+      "desc": "Pasiūlymų skiltis dar ruošiama."
     },
     "shop": {
       "title": "Parduotuvė, paslaugos, nuoma, NT",
-      "desc": "Prekių, paslaugų, nuomos ir NT skelbimų duomenų modelio dar nėra. Jokių netikrų prekių."
+      "desc": "Prekių, paslaugų, nuomos ir NT skelbimai dar ruošiami."
     },
     "individual": {
       "title": "Individuali veikla",
@@ -956,7 +956,7 @@
     "empty": "Kol kas nėra peržiūrai laukiančių įrašų.",
     "noWorks": "Darbų pagal įrašą neatpažinta.",
     "uncertaintyNote": "Dalis įrašo neaiški — reikia patikslinti.",
-    "projectNote": "Įrašai gali būti susieti su projektu — duomenų modelis paruoštas, bet kol kas nė vienas įrašas nesusietas ir niekas neužpildoma automatiškai. Projektų, objektų ir užsakovų sluoksnis pildomas atskirame pjūvyje.",
+    "projectNote": "Įrašai su projektu kol kas nesusieti. Niekas neužpildoma automatiškai.",
     "totals": {
       "pending": "Laukia peržiūros",
       "workers": "Darbuotojai",
@@ -993,7 +993,7 @@
     "reviewCta": "Peržiūrėti įrašus",
     "projectsTitle": "Projektai, objektai ir užsakovai",
     "projectsReadyBadge": "Struktūra paruošta",
-    "projectsBody": "Šio sluoksnio duomenų modelis jau veikia: projektai, užsakovai, projekto darbuotojai, darbo elementai ir žurnalo įrašo susiejimas su projektu. Niekas neužpildoma automatiškai — projektus ir užsakovus galėsite sukurti kitame, rašymą įgalinančiame pjūvyje. Tada žurnalo įrašus bus galima susieti su projektu.",
+    "projectsBody": "Čia matote projektus, užsakovus, projekto darbuotojus ir darbo elementus. Niekas neužpildoma automatiškai — naujus projektus ir užsakovus kurti kol kas negalima; ši galimybė ruošiama.",
     "projectsCount": "Projektai",
     "projectsEmpty": "dar nesukurta nė vieno projekto",
     "projectsLinkingNote": "Susiejimas su darbo žurnalu dar neįjungtas. Projekto kontekstą jau galite sukurti, bet niekas neužpildoma automatiškai.",
@@ -1310,7 +1310,7 @@
         "noWorkersHeading": "Dar nėra susietų darbuotojų",
         "noWorkersBody": "Pakvieskite el. paštu arba palaukite, kol darbuotojas užsiregistruos savaime ir bus susietas.",
         "inviteHeading": "Pakviesti darbuotoją el. paštu",
-        "inviteDescription": "Pakvietimas išsaugomas DB kaip atskira eilutė. Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia. Realių laiškų siuntimas dar neaktyvuotas — tai sąmoningai laukia savininko patvirtinimo su realiais žmonėmis.",
+        "inviteDescription": "Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia. Realių laiškų siuntimas dar neaktyvuotas.",
         "operations": {
           "columnHeading": "Operacinė rolė / peržiūra",
           "setupNote": "Operacinės rolės dar nepriskirtos. Darbo žurnalo peržiūros ryšys bus įjungiamas tik po saugaus nustatymo.",
@@ -1495,7 +1495,7 @@
         "noWorkersHeading": "Dar nėra susietų darbuotojų",
         "noWorkersBody": "Pakvieskite el. paštu arba palaukite, kol darbuotojas užsiregistruos savaime ir bus susietas.",
         "inviteHeading": "Pakviesti darbuotoją el. paštu",
-        "inviteDescription": "Pakvietimas išsaugomas DB kaip atskira eilutė. Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia.",
+        "inviteDescription": "Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia. Realių laiškų siuntimas dar neaktyvuotas.",
         "operations": {
           "columnHeading": "Operacinė rolė / peržiūra",
           "setupNote": "Operacinės rolės dar nepriskirtos. Darbo žurnalo peržiūros ryšys bus įjungiamas tik po saugaus nustatymo.",
@@ -2460,9 +2460,9 @@
     "skillRecognition": "Įgūdžių atpažinimas: parašius darbo aprašymą, sistema pasiūlo įgūdžius. Tai pasiūlymas, kurį pasirenkate jūs — ne galutinis faktas.",
     "workJournal": "Darbo žurnalas: užrašykite, ką nuveikėte. Išsaugojus, įgūdžiai atpažįstami ir susiejami su įrašu kaip pagrindimas.",
     "evidenceTrust": "Jūsų įrašai ir signalai: rodome, kuo paremtas profilis.",
-    "companyNeeds": "Poreikiai: aprašykite, ko reikia (profesija, šalis, komanda). Užklausa išsaugoma realiai — be netikrų atitikčių.",
+    "companyNeeds": "Poreikiai: aprašykite, ko reikia (profesija, šalis, komanda) — užklausą peržiūrės komanda.",
     "opportunities": "Galimybės: matote jums tinkančius darbus. Matomumas priklauso nuo tinklo dydžio ir jūsų pasiruošimo.",
-    "marketplaceMap": "Rinkos žemėlapis: realūs darbo rinkos signalai pagal šalį ir regioną. Tikslesnė vieta atsiranda, kai ją nustatote.",
+    "marketplaceMap": "Rinkos žemėlapis: darbo rinkos signalai pagal šalį ir regioną. Tikslesnė vieta atsiranda, kai ją nustatote.",
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
     "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi. Kol kas pirmi vartotojai jungiami rankiniu / owner-review būdu. Stripe bus prijungtas kitame etape.",
     "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."
@@ -2564,7 +2564,7 @@
     },
     "preparingReason": {
       "default": "Šis vaidmuo dar ruošiamas. Įjungsime jį, kai bus paruoštas saugiai.",
-      "startAvailable": "Nustatymo kelias jau veikia: vienu lauku įrašai pavadinimą, ir paskyra realiai išsaugoma DB. Pilnas darbo erdvės sluoksnis vis dar pildomas.",
+      "startAvailable": "Nustatymo kelias jau veikia: vienu lauku įrašote pavadinimą, ir paskyra sukuriama. Pilna darbo erdvė dar pildoma.",
       "customerPartial": "Pirkėjo erdvė dar ruošiama. Galite pridėti pirkėjo vaidmenį ir pildyti užklausą."
     },
     "worker": {
@@ -5249,7 +5249,7 @@
     "pageLead": "Išvardykite realias paslaugas, kurias siūlote, ir tvarkykite savo pasiūlymus.",
     "title": "Jūsų paslaugų pasiūlymai",
     "intro": "Realios jūsų siūlomos paslaugos. Aktyvuokite paslaugą, kad ją rastų prisijungę nariai; juodraščiai ir pristabdytos paslaugos lieka matomos tik jums.",
-    "notAvailable": "Paslaugų pasiūlymai dar neprieinami. Ši sritis įsijungs, kai bus įjungtas duomenų modelis.",
+    "notAvailable": "Paslaugų pasiūlymai šioje aplinkoje dar neįjungti.",
     "empty": "Paslaugų pasiūlymų dar nėra. Pridėkite pirmą realią paslaugą, kurią siūlote.",
     "addButton": "Pridėti paslaugą",
     "form": {
@@ -5465,7 +5465,7 @@
     "title": "Paklausos eiga",
     "subtitle": "Visi paklausos šaltiniai viename peržiūros lange: pateiktos užklausos, viešos įmonių poreikio anketos, išsaugoti potencialūs klientai ir laukiančiųjų sąrašas.",
     "back": "Grįžti į valdymo pultą",
-    "honestNote": "Tik peržiūra. Eigos etapas yra pateikimo pjūvis — kiekviena eilutė kartu rodo tikrą įrašytą būseną, o būsenos keičiamos tik jos pačios puslapyje. Niekas čia su niekuo nesusisiekia ir nieko nekeičia.",
+    "honestNote": "Tik peržiūra. Kiekviena eilutė rodo tikrą įrašytą būseną, o būsenos keičiamos tik jos pačios puslapyje. Niekas čia su niekuo nesusisiekia ir nieko nekeičia.",
     "summaryHeading": "Etapų suvestinė",
     "windowNote": "Skaičiai skaičiuojami tik iš realiai užkrautų eilučių (pardavimų šaltiniai užkrauna po 50 naujausių) — niekada nespėjami.",
     "duplicateChip": "Galimas dublikatas",
@@ -5492,7 +5492,7 @@
     "sourceStates": {
       "needs_admin_read": "šioje aplinkoje neperskaitoma",
       "service_key_missing": "nesukonfigūruotas serviso ryšys",
-      "needs_migration": "laukia migracijos",
+      "needs_migration": "dar neįjungta",
       "not_admin": "nepraeitas administratoriaus patikrinimas",
       "error": "šiuo metu nepavyko perskaityti"
     },

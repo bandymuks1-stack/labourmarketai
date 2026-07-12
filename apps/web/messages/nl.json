@@ -49,7 +49,7 @@
     "intro": "Cijfers geteld uit je eigen records, met de rekenbasis vermeld onder elke sectie, en de exports die al bestaan.",
     "honestyNote": "Alleen tellingen over je eigen gegevens — geen benchmarks, geen scores, geen prognoses.",
     "state": {
-      "needsMigration": "Dit datamodel is in deze omgeving nog niet beschikbaar, dus er valt niets te tellen. Er wordt geen getal getoond in plaats van echte gegevens.",
+      "needsMigration": "Deze cijfers zijn in deze omgeving nog niet ingeschakeld. Er wordt geen getal getoond in plaats van echte gegevens.",
       "unavailable": "Deze cijfers kunnen nu niet gelezen worden. Er wordt niets geschat in hun plaats."
     },
     "basis": {
@@ -251,7 +251,7 @@
   },
   "mapLayers": {
     "title": "Kaartlagen",
-    "intro": "De kaart wordt de belangrijkste visuele marktlaag. Hieronder zie je wat nu zichtbaar is en welke lagen in voorbereiding zijn. Geen nepdata.",
+    "intro": "De kaart wordt de belangrijkste visuele marktlaag. Hieronder zie je wat nu zichtbaar is en welke lagen in voorbereiding zijn.",
     "visibleNow": "Nu zichtbaar",
     "futureLayers": "Toekomstige lagen",
     "futureBadge": "In voorbereiding",
@@ -278,7 +278,7 @@
   "marketplaceHub": {
     "title": "Marktplaats",
     "subtitle": "Eén compacte plek die jou, je bedrijven, de kaart en berichten verbindt.",
-    "notFakeNote": "Geen nepvermeldingen, nepbedrijven, nepkalenderslots of nepproducten. Waar nog geen datamodel bestaat, wordt een eerlijke “in voorbereiding”-status getoond.",
+    "notFakeNote": "Alleen echte vermeldingen, bedrijven en producten worden getoond. Wat nog wordt voorbereid, is gemarkeerd als “in voorbereiding”.",
     "map": {
       "title": "Kaart",
       "desc": "Je echte signalen en marktsignalen op de kaart.",
@@ -291,11 +291,11 @@
     },
     "offers": {
       "title": "Bedrijfs- en persoonlijke aanbiedingen",
-      "desc": "De aanbodlaag met aanbiedingen bestaat nog niet. Wordt eerlijk voorbereid, zonder nepvermeldingen."
+      "desc": "Het aanbiedingenonderdeel wordt nog voorbereid."
     },
     "shop": {
       "title": "Winkel, diensten, verhuur, vastgoed",
-      "desc": "Nog geen datamodel voor producten, diensten, verhuur of vastgoed. Geen nepitems."
+      "desc": "Producten, diensten, verhuur en vastgoed worden nog voorbereid."
     },
     "individual": {
       "title": "Individuele activiteit",
@@ -956,7 +956,7 @@
     "empty": "Er wachten nog geen vermeldingen op beoordeling.",
     "noWorks": "Geen werkzaamheden herkend uit deze vermelding.",
     "uncertaintyNote": "Een deel van deze vermelding is onduidelijk — verduidelijking nodig.",
-    "projectNote": "Vermeldingen kunnen aan een project worden gekoppeld — het datamodel is klaar, maar er is nog geen vermelding gekoppeld en niets wordt automatisch ingevuld. De laag project / object / klant wordt in een aparte slice ingevuld.",
+    "projectNote": "Vermeldingen zijn nog niet aan projecten gekoppeld. Niets wordt automatisch ingevuld.",
     "totals": {
       "pending": "Wacht op beoordeling",
       "workers": "Werknemers",
@@ -993,7 +993,7 @@
     "reviewCta": "Vermeldingen beoordelen",
     "projectsTitle": "Projecten, objecten en klanten",
     "projectsReadyBadge": "Structuur gereed",
-    "projectsBody": "Het datamodel voor deze laag is nu live: projecten, klanten, projectwerknemers, werkitems en het koppelen van een journaalvermelding aan een project. Niets wordt automatisch ingevuld — je kunt projecten en klanten aanmaken in een latere, schrijfbare versie. Journaalvermeldingen kunnen dan aan een project worden gekoppeld.",
+    "projectsBody": "Hier ziet u projecten, klanten, projectwerknemers en werkitems. Niets wordt automatisch ingevuld — nieuwe projecten en klanten aanmaken kan nog niet; die mogelijkheid wordt voorbereid.",
     "projectsCount": "Projecten",
     "projectsEmpty": "nog geen projecten aangemaakt",
     "projectsLinkingNote": "Journaalkoppeling is nog niet ingeschakeld. Je kunt nu een projectcontext aanmaken, maar niets wordt automatisch ingevuld.",
@@ -1310,7 +1310,7 @@
         "noWorkersHeading": "Nog geen gekoppelde werknemers",
         "noWorkersBody": "Nodig uit per e-mail, of wacht tot een werknemer zich zelf aanmeldt en wordt gekoppeld.",
         "inviteHeading": "Nodig een werknemer uit per e-mail",
-        "inviteDescription": "De uitnodiging wordt opgeslagen als een eigen DB-rij. Er wordt niet automatisch een account aangemaakt — de uitgenodigde persoon meldt zich zelf aan of logt zelf in. Echt versturen van e-mails is nog niet geactiveerd — dat is bewust uitgesteld totdat de eigenaar dit met echte mensen afstemt.",
+        "inviteDescription": "Er wordt geen account automatisch aangemaakt — de uitgenodigde persoon registreert zich zelf of logt in. Echt e-mails versturen is nog niet geactiveerd.",
         "operations": {
           "columnHeading": "Operationele rol / beoordeling",
           "setupNote": "Operationele rollen zijn nog niet toegewezen. Werkjournaalbeoordeling wordt pas ingeschakeld na veilige configuratie.",
@@ -1495,7 +1495,7 @@
         "noWorkersHeading": "Nog geen gekoppelde werknemers",
         "noWorkersBody": "Nodig uit per e-mail, of wacht tot een werknemer zich zelf aanmeldt en gekoppeld wordt.",
         "inviteHeading": "Nodig een werknemer uit per e-mail",
-        "inviteDescription": "De uitnodiging wordt opgeslagen als een eigen databaserij. Er wordt niet automatisch een account aangemaakt — de uitgenodigde persoon meldt zich zelf aan of logt zelf in.",
+        "inviteDescription": "Er wordt geen account automatisch aangemaakt — de uitgenodigde persoon registreert zich zelf of logt in. Echt e-mails versturen is nog niet geactiveerd.",
         "operations": {
           "columnHeading": "Operationele rol / beoordeling",
           "setupNote": "Operationele rollen zijn nog niet toegewezen. Beoordeling van het werkjournaal wordt pas ingeschakeld na een veilige installatie.",
@@ -2460,9 +2460,9 @@
     "skillRecognition": "Vaardigheidsherkenning: wanneer je je werk beschrijft, stelt het systeem vaardigheden voor. Het is een suggestie die jij selecteert — geen definitief feit.",
     "workJournal": "Werkjournaal: schrijf op wat je hebt gedaan. Bij het opslaan worden vaardigheden herkend en als ondersteunende registraties aan de vermelding gekoppeld.",
     "evidenceTrust": "Registraties en vertrouwenssignalen: we tonen waardoor je profiel onderbouwd is. Dit zijn signalen, geen definitieve beoordeling.",
-    "companyNeeds": "Behoeften: beschrijf wat je nodig hebt (beroep, land, ploeg). De aanvraag wordt echt opgeslagen — geen nepmatches.",
+    "companyNeeds": "Behoeften: beschrijf wat je nodig hebt (beroep, land, ploeg) — het team beoordeelt je aanvraag.",
     "opportunities": "Kansen: zie werk dat bij je past. Zichtbaarheid hangt af van de netwerkgrootte en je gereedheid.",
-    "marketplaceMap": "Marktkaart: echte arbeidsmarktsignalen per land en regio. Een nauwkeuriger punt verschijnt zodra een locatie is ingesteld.",
+    "marketplaceMap": "Marktkaart: arbeidsmarktsignalen per land en regio. Een nauwkeuriger punt verschijnt zodra een locatie is ingesteld.",
     "adminReview": "Systeemonderhoud: alleen voor de beheerder. Gewone gebruikers zien deze schermen nooit.",
     "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief. Voorlopig worden de eerste gebruikers handmatig / via eigenaarsbeoordeling onboard gebracht. Stripe wordt in de volgende fase aangesloten.",
     "identityModel": "Twee basisidentiteiten: een persoon en een bedrijf. Kopen, verkopen, aannemen en uitzendactiviteit zijn handelingen, geen aparte identiteiten."
@@ -2564,7 +2564,7 @@
     },
     "preparingReason": {
       "default": "Deze rol wordt nog voorbereid. We schakelen hem in zodra hij eerlijk kan worden geleverd.",
-      "startAvailable": "Het setup-pad werkt al: één veld, de juridische naam, en je rij wordt echt opgeslagen in de database. Het volledige werkruimteoppervlak wordt nog ingevuld.",
+      "startAvailable": "Het setup-pad werkt al: één veld, de juridische naam, en je account wordt aangemaakt. De volledige werkruimte wordt nog ingevuld.",
       "customerPartial": "De kopersruimte wordt nog voorbereid. Je kunt de kopersrol toevoegen en een aanvraag invullen."
     },
     "worker": {
@@ -5249,7 +5249,7 @@
     "pageLead": "Zet de echte diensten die je aanbiedt op een rij en beheer je eigen aanbod.",
     "title": "Jouw dienstenaanbod",
     "intro": "Echte diensten die je aanbiedt. Activeer er een om die vindbaar te maken voor ingelogde leden; concepten en gepauzeerde diensten blijven privé voor jou.",
-    "notAvailable": "Dienstenaanbod is nog niet beschikbaar. Dit onderdeel gaat aan zodra het datamodel is ingeschakeld.",
+    "notAvailable": "Dienstenaanbod is in deze omgeving nog niet ingeschakeld.",
     "empty": "Nog geen dienstenaanbod. Voeg de eerste echte dienst toe die je aanbiedt.",
     "addButton": "Dienst toevoegen",
     "form": {
@@ -5465,7 +5465,7 @@
     "title": "Vraagpijplijn",
     "subtitle": "Alle vraagbronnen in één leesweergave: ingediende aanvragen, publieke bedrijfsbehoefte-formulieren, opgeslagen leads en wachtlijstinschrijvingen.",
     "back": "Terug naar het beheerderspaneel",
-    "honestNote": "Alleen lezen. De pijplijnfase is een presentatielens — elke rij toont ook letterlijk de opgeslagen status, en statuswijzigingen blijven op de eigen pagina van de rij. Niets hier neemt contact op of wijzigt iets.",
+    "honestNote": "Alleen lezen. Elke rij toont letterlijk de opgeslagen status, en statuswijzigingen blijven op de eigen pagina van de rij. Niets hier neemt contact op of wijzigt iets.",
     "summaryHeading": "Fasesamenvatting",
     "windowNote": "Aantallen worden berekend over de werkelijk geladen rijen (de verkoopbronnen laden elk de 50 meest recente) — nooit geschat.",
     "duplicateChip": "Mogelijk duplicaat",
@@ -5492,7 +5492,7 @@
     "sourceStates": {
       "needs_admin_read": "niet leesbaar in deze omgeving",
       "service_key_missing": "serviceverbinding niet geconfigureerd",
-      "needs_migration": "wacht op de migratie",
+      "needs_migration": "nog niet ingeschakeld",
       "not_admin": "beheerderscontrole niet geslaagd",
       "error": "kon nu niet worden gelezen"
     },

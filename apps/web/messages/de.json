@@ -49,7 +49,7 @@
     "intro": "Kennzahlen, gezählt aus Ihren eigenen Einträgen, mit der Berechnungsgrundlage unter jedem Abschnitt, und die bereits vorhandenen Exporte.",
     "honestyNote": "Nur Zählungen über Ihre eigenen Daten — keine Benchmarks, keine Scores, keine Prognosen.",
     "state": {
-      "needsMigration": "Dieses Datenmodell ist in dieser Umgebung noch nicht verfügbar, es gibt also nichts zu zählen. Anstelle echter Daten wird keine Zahl angezeigt.",
+      "needsMigration": "Diese Kennzahlen sind in dieser Umgebung noch nicht aktiviert. Anstelle echter Daten wird keine Zahl angezeigt.",
       "unavailable": "Diese Kennzahlen können gerade nicht gelesen werden. An ihrer Stelle wird nichts geschätzt."
     },
     "basis": {
@@ -251,7 +251,7 @@
   },
   "mapLayers": {
     "title": "Kartenebenen",
-    "intro": "Die Karte wird zur wichtigsten visuellen Marktebene. Unten sehen Sie, was jetzt sichtbar ist und welche Ebenen in Vorbereitung sind. Keine gefälschten Daten.",
+    "intro": "Die Karte wird zur wichtigsten visuellen Marktebene. Unten sehen Sie, was jetzt sichtbar ist und welche Ebenen in Vorbereitung sind.",
     "visibleNow": "Jetzt sichtbar",
     "futureLayers": "Zukünftige Ebenen",
     "futureBadge": "In Vorbereitung",
@@ -278,7 +278,7 @@
   "marketplaceHub": {
     "title": "Marktplatz",
     "subtitle": "Ein kompakter Ort, der Sie, Ihre Unternehmen, die Karte und Nachrichten verbindet.",
-    "notFakeNote": "Keine gefälschten Einträge, Unternehmen, Kalenderslots oder Produkte. Wo noch kein Datenmodell existiert, wird ein ehrlicher Status „In Vorbereitung“ angezeigt.",
+    "notFakeNote": "Es werden nur echte Einträge, Unternehmen und Produkte angezeigt. Was noch vorbereitet wird, ist als „In Vorbereitung“ markiert.",
     "map": {
       "title": "Karte",
       "desc": "Ihre echten Signale und Marktsignale auf der Karte.",
@@ -291,11 +291,11 @@
     },
     "offers": {
       "title": "Unternehmens- & persönliche Angebote",
-      "desc": "Die Angebotsebene der Anbieterseite existiert noch nicht. Sie wird ehrlich vorbereitet, ohne gefälschte Einträge."
+      "desc": "Der Angebotsbereich wird noch vorbereitet."
     },
     "shop": {
       "title": "Shop, Dienstleistungen, Vermietungen, Immobilien",
-      "desc": "Noch kein Datenmodell für Produkte, Dienstleistungen, Vermietungen oder Immobilien. Keine gefälschten Einträge."
+      "desc": "Produkte, Dienstleistungen, Vermietungen und Immobilien werden noch vorbereitet."
     },
     "individual": {
       "title": "Individuelle Tätigkeit",
@@ -956,7 +956,7 @@
     "empty": "Noch keine Einträge warten auf Prüfung.",
     "noWorks": "Aus diesem Eintrag wurden keine Arbeiten erkannt.",
     "uncertaintyNote": "Ein Teil dieses Eintrags ist unklar — Klärung erforderlich.",
-    "projectNote": "Einträge können mit einem Projekt verknüpft werden — das Datenmodell ist bereit, aber noch ist kein Eintrag verknüpft und nichts wird automatisch ausgefüllt. Die Ebene Projekt / Objekt / Kunde wird in einem separaten Arbeitsschritt befüllt.",
+    "projectNote": "Einträge sind noch nicht mit Projekten verknüpft. Nichts wird automatisch ausgefüllt.",
     "totals": {
       "pending": "Wartet auf Prüfung",
       "workers": "Arbeitskräfte",
@@ -993,7 +993,7 @@
     "reviewCta": "Einträge prüfen",
     "projectsTitle": "Projekte, Objekte und Kunden",
     "projectsReadyBadge": "Struktur bereit",
-    "projectsBody": "Das Datenmodell für diese Ebene ist jetzt live: Projekte, Kunden, Projekt-Arbeitskräfte, Arbeitspositionen und die Verknüpfung eines Journaleintrags mit einem Projekt. Nichts wird automatisch befüllt — Projekte und Kunden können Sie in einem späteren, schreibfähigen Abschnitt anlegen. Journaleinträge lassen sich dann mit einem Projekt verknüpfen.",
+    "projectsBody": "Hier sehen Sie Projekte, Kunden, Projekt-Arbeitskräfte und Arbeitspositionen. Nichts wird automatisch befüllt — neue Projekte und Kunden können noch nicht angelegt werden; diese Möglichkeit wird vorbereitet.",
     "projectsCount": "Projekte",
     "projectsEmpty": "noch keine Projekte angelegt",
     "projectsLinkingNote": "Die Journal-Verknüpfung ist noch nicht aktiviert. Sie können jetzt einen Projektkontext anlegen, aber nichts wird automatisch befüllt.",
@@ -1310,7 +1310,7 @@
         "noWorkersHeading": "Noch keine verknüpften Arbeitskräfte",
         "noWorkersBody": "Laden Sie per E-Mail ein oder warten Sie, bis sich eine Arbeitskraft selbst registriert und verknüpft wird.",
         "inviteHeading": "Arbeitskraft per E-Mail einladen",
-        "inviteDescription": "Die Einladung wird als eigene DB-Zeile gespeichert. Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich oder meldet sich selbst an. Der echte E-Mail-Versand ist noch nicht aktiviert — das ist bewusst zurückgestellt, bis der Inhaber dies mit echten Personen vereinbart.",
+        "inviteDescription": "Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich selbst oder meldet sich an. Echter E-Mail-Versand ist noch nicht aktiviert.",
         "operations": {
           "columnHeading": "Betriebsrolle / Prüfung",
           "setupNote": "Betriebsrollen sind noch nicht zugewiesen. Die Arbeitsjournal-Prüfung wird erst nach sicherer Einrichtung aktiviert.",
@@ -1495,7 +1495,7 @@
         "noWorkersHeading": "Noch keine verknüpften Arbeitskräfte",
         "noWorkersBody": "Laden Sie per E-Mail ein, oder warten Sie, bis sich eine Arbeitskraft selbst registriert und verknüpft wird.",
         "inviteHeading": "Arbeitskraft per E-Mail einladen",
-        "inviteDescription": "Die Einladung wird als eigene DB-Zeile gespeichert. Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich oder meldet sich selbst an.",
+        "inviteDescription": "Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich selbst oder meldet sich an. Echter E-Mail-Versand ist noch nicht aktiviert.",
         "operations": {
           "columnHeading": "Betriebsrolle / Prüfung",
           "setupNote": "Betriebsrollen sind noch nicht zugewiesen. Die Prüfung des Arbeitsjournals wird erst nach sicherer Einrichtung aktiviert.",
@@ -2460,9 +2460,9 @@
     "skillRecognition": "Fähigkeitserkennung: Wenn Sie Ihre Arbeit beschreiben, schlägt das System Fähigkeiten vor. Es ist ein Vorschlag, den Sie auswählen — keine endgültige Tatsache.",
     "workJournal": "Arbeitsjournal: Schreiben Sie auf, was Sie getan haben. Beim Speichern werden Fähigkeiten erkannt und als unterstützende Nachweise mit dem Eintrag verknüpft.",
     "evidenceTrust": "Nachweise und Vertrauenssignale: Wir zeigen, wodurch Ihr Profil belegt ist. Dies sind Signale, keine endgültige Prüfung.",
-    "companyNeeds": "Bedarfe: Beschreiben Sie, was Sie benötigen (Beruf, Land, Team). Die Anfrage wird wirklich gespeichert — keine gefälschten Matches.",
+    "companyNeeds": "Bedarfe: Beschreiben Sie, was Sie benötigen (Beruf, Land, Team) — das Team prüft Ihre Anfrage.",
     "opportunities": "Chancen: Sehen Sie Arbeit, die zu Ihnen passt. Die Sichtbarkeit hängt von der Netzwerkgröße und Ihrer Bereitschaft ab.",
-    "marketplaceMap": "Marktkarte: echte Arbeitsmarktsignale nach Land und Region. Ein genauerer Punkt erscheint, sobald ein Standort festgelegt ist.",
+    "marketplaceMap": "Marktkarte: Arbeitsmarktsignale nach Land und Region. Ein genauerer Punkt erscheint, sobald ein Standort festgelegt ist.",
     "adminReview": "Systemwartung: nur für den Administrator. Normale Benutzer sehen diese Ansichten nie.",
     "paymentReadiness": "Zahlungen werden vorbereitet: Der kostenpflichtige Zugang ist noch nicht aktiv. Vorerst werden die ersten Benutzer manuell / über Owner-Prüfung aufgenommen. Stripe wird in der nächsten Phase angebunden.",
     "identityModel": "Zwei Basisidentitäten: eine Person und ein Unternehmen. Kaufen, Verkaufen, Einstellen und Agenturtätigkeit sind Aktionen, keine separaten Identitäten."
@@ -2564,7 +2564,7 @@
     },
     "preparingReason": {
       "default": "Diese Rolle wird noch vorbereitet. Wir schalten sie frei, sobald sie ehrlich ausgeliefert werden kann.",
-      "startAvailable": "Der Einrichtungspfad funktioniert bereits: ein Feld, der rechtliche Name, und Ihr Datensatz wird wirklich in der DB gespeichert. Die vollständige Arbeitsbereichsoberfläche wird noch ausgefüllt.",
+      "startAvailable": "Der Einrichtungspfad funktioniert bereits: ein Feld, der rechtliche Name, und Ihr Konto wird angelegt. Der vollständige Arbeitsbereich wird noch ausgebaut.",
       "customerPartial": "Der Käuferbereich wird noch vorbereitet. Sie können die Käuferrolle hinzufügen und eine Anfrage ausfüllen."
     },
     "worker": {
@@ -5249,7 +5249,7 @@
     "pageLead": "Listen Sie die echten Dienstleistungen auf, die Sie anbieten, und verwalten Sie Ihre eigenen Angebote.",
     "title": "Ihre Dienstleistungsangebote",
     "intro": "Echte Dienstleistungen, die Sie anbieten. Aktivieren Sie eine, damit angemeldete Mitglieder sie finden können; Entwürfe und pausierte Dienstleistungen bleiben nur für Sie sichtbar.",
-    "notAvailable": "Dienstleistungsangebote sind noch nicht verfügbar. Dieser Bereich wird aktiviert, sobald das Datenmodell freigeschaltet ist.",
+    "notAvailable": "Dienstleistungsangebote sind in dieser Umgebung noch nicht aktiviert.",
     "empty": "Noch keine Dienstleistungsangebote. Fügen Sie die erste echte Dienstleistung hinzu, die Sie anbieten.",
     "addButton": "Dienstleistung hinzufügen",
     "form": {
@@ -5465,7 +5465,7 @@
     "title": "Nachfrage-Pipeline",
     "subtitle": "Alle Nachfragequellen in einer Leseansicht: eingereichte Anfragen, öffentliche Bedarfsformulare von Firmen, gespeicherte Leads und die Warteliste.",
     "back": "Zurück zum Kontrollraum",
-    "honestNote": "Nur Leseansicht. Die Pipeline-Phase ist eine Darstellungslinse — jede Zeile zeigt zusätzlich ihren gespeicherten Status wörtlich, und Statusänderungen bleiben auf der eigenen Seite der Zeile. Nichts hier kontaktiert jemanden oder ändert etwas.",
+    "honestNote": "Nur Leseansicht. Jede Zeile zeigt ihren gespeicherten Status wörtlich, und Statusänderungen bleiben auf der eigenen Seite der Zeile. Nichts hier kontaktiert jemanden oder ändert etwas.",
     "summaryHeading": "Phasenübersicht",
     "windowNote": "Zahlen werden über die tatsächlich geladenen Zeilen berechnet (die Vertriebsquellen laden je die 50 neuesten) — nie geschätzt.",
     "duplicateChip": "Mögliches Duplikat",
@@ -5492,7 +5492,7 @@
     "sourceStates": {
       "needs_admin_read": "in dieser Umgebung nicht lesbar",
       "service_key_missing": "Serviceverbindung nicht konfiguriert",
-      "needs_migration": "wartet auf die Migration",
+      "needs_migration": "noch nicht aktiviert",
       "not_admin": "Admin-Prüfung nicht bestanden",
       "error": "konnte gerade nicht gelesen werden"
     },

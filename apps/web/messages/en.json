@@ -49,7 +49,7 @@
     "intro": "Figures counted from your own records, with the calculation basis stated under each section, and the exports that already exist.",
     "honestyNote": "Counts over your own data only — no benchmarks, no scores, no projections.",
     "state": {
-      "needsMigration": "This data model is not available in this environment yet, so there is nothing to count. No number is shown instead of real data.",
+      "needsMigration": "These figures are not enabled in this environment yet. No number is shown instead of real data.",
       "unavailable": "These figures cannot be read right now. Nothing is estimated in their place."
     },
     "basis": {
@@ -251,7 +251,7 @@
   },
   "mapLayers": {
     "title": "Map layers",
-    "intro": "The map is becoming the main visual market layer. Below is what's visible now and which layers are preparing. No fake data.",
+    "intro": "The map is becoming the main visual market layer. Below is what's visible now and which layers are preparing.",
     "visibleNow": "Visible now",
     "futureLayers": "Future layers",
     "futureBadge": "Preparing",
@@ -278,7 +278,7 @@
   "marketplaceHub": {
     "title": "Marketplace",
     "subtitle": "One compact place that connects you, your companies, the map and messages.",
-    "notFakeNote": "No fake listings, companies, calendar slots or products. Where no data model exists yet, an honest “preparing” state is shown.",
+    "notFakeNote": "Only real listings, companies and products are shown. Anything still being prepared is marked as “preparing”.",
     "map": {
       "title": "Map",
       "desc": "Your real signals and market signals on the map.",
@@ -291,11 +291,11 @@
     },
     "offers": {
       "title": "Company & personal offers",
-      "desc": "The supply-side offers layer does not exist yet. Preparing honestly, with no fake listings."
+      "desc": "The offers section is still being prepared."
     },
     "shop": {
       "title": "Shop, services, rentals, real estate",
-      "desc": "No data model yet for products, services, rentals or real estate. No fake items."
+      "desc": "Products, services, rentals and real-estate listings are still being prepared."
     },
     "individual": {
       "title": "Individual activity",
@@ -956,7 +956,7 @@
     "empty": "No entries are awaiting review yet.",
     "noWorks": "No works recognized from this entry.",
     "uncertaintyNote": "Part of this entry is unclear — needs clarification.",
-    "projectNote": "Entries can be linked to a project — the data model is ready, but no entry is linked yet and nothing is filled automatically. The project / object / client layer is filled in a separate slice.",
+    "projectNote": "Entries are not linked to projects yet. Nothing is filled automatically.",
     "totals": {
       "pending": "Awaiting review",
       "workers": "Workers",
@@ -993,7 +993,7 @@
     "reviewCta": "Review entries",
     "projectsTitle": "Projects, objects and clients",
     "projectsReadyBadge": "Structure ready",
-    "projectsBody": "The data model for this layer is now live: projects, clients, project workers, work items, and linking a journal entry to a project. Nothing is filled automatically — you'll be able to create projects and clients in a later, write-enabled slice. Journal entries will then be linkable to a project.",
+    "projectsBody": "Here you see projects, clients, project workers and work items. Nothing is filled automatically — creating new projects and clients is not possible yet; that ability is being prepared.",
     "projectsCount": "Projects",
     "projectsEmpty": "no projects created yet",
     "projectsLinkingNote": "Journal linking is not enabled yet. You can now create a project context, but nothing is filled automatically.",
@@ -1310,7 +1310,7 @@
         "noWorkersHeading": "No linked workers yet",
         "noWorkersBody": "Invite by email, or wait for a worker to sign up on their own and be linked.",
         "inviteHeading": "Invite a worker by email",
-        "inviteDescription": "The invitation is saved as its own DB row. No account is created automatically — the invited person signs up or signs in themselves. Real email sending is not yet activated — that is deliberately deferred until the owner agrees with real people.",
+        "inviteDescription": "No account is created automatically — the invited person registers or signs in themselves. Real email sending is not activated yet.",
         "operations": {
           "columnHeading": "Operations role / review",
           "setupNote": "Operational roles are not assigned yet. Work journal review will be enabled only after safe setup.",
@@ -1495,7 +1495,7 @@
         "noWorkersHeading": "No linked workers yet",
         "noWorkersBody": "Invite by email, or wait for a worker to sign up on their own and be linked.",
         "inviteHeading": "Invite a worker by email",
-        "inviteDescription": "The invitation is saved as its own DB row. No account is created automatically — the invited person signs up or signs in themselves.",
+        "inviteDescription": "No account is created automatically — the invited person registers or signs in themselves. Real email sending is not activated yet.",
         "operations": {
           "columnHeading": "Operations role / review",
           "setupNote": "Operational roles are not assigned yet. Work journal review will be enabled only after safe setup.",
@@ -2460,9 +2460,9 @@
     "skillRecognition": "Skill recognition: when you describe your work, the system suggests skills. It is a suggestion you select — not a final fact.",
     "workJournal": "Work journal: write what you did. On save, skills are recognised and linked to the entry as supporting records.",
     "evidenceTrust": "Records and trust signals: we show what your profile is backed by. These are signals, not a final review.",
-    "companyNeeds": "Needs: describe what you need (profession, country, team). The request is saved for real — no fake matches.",
+    "companyNeeds": "Needs: describe what you need (profession, country, team) — the team reviews your request.",
     "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
-    "marketplaceMap": "Market map: real labour-market signals by country and region. A more precise point appears once a location is set.",
+    "marketplaceMap": "Market map: labour-market signals by country and region. A more precise point appears once a location is set.",
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
     "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
@@ -2564,7 +2564,7 @@
     },
     "preparingReason": {
       "default": "This role is still being prepared. We'll enable it once it can ship honestly.",
-      "startAvailable": "The setup path already works: one field, the legal name, and your row is saved in the DB for real. The full workspace surface is still being filled out.",
+      "startAvailable": "The setup path already works: one field, the legal name, and your account is created. The full workspace is still being filled out.",
       "customerPartial": "The buyer space is still being prepared. You can add the buyer role and fill in a request."
     },
     "worker": {
@@ -5249,7 +5249,7 @@
     "pageLead": "List the real services you offer and manage your own offerings.",
     "title": "Your service offerings",
     "intro": "Real services you offer. Activate one to make it findable by signed-in members; drafts and paused services stay private to you.",
-    "notAvailable": "Service offerings are not available yet. This area turns on once the data model is enabled.",
+    "notAvailable": "Service offerings are not enabled in this environment yet.",
     "empty": "No service offerings yet. Add the first real service you offer.",
     "addButton": "Add a service",
     "form": {
@@ -5465,7 +5465,7 @@
     "title": "Demand pipeline",
     "subtitle": "Every demand source in one read view: submitted requests, public company-need intakes, stored leads and waitlist signups.",
     "back": "Back to control room",
-    "honestNote": "Read view only. The pipeline stage is a presentation lens — every row also shows its stored status verbatim, and status changes stay on each row's own surface. Nothing here contacts anyone or edits anything.",
+    "honestNote": "Read view only. Every row shows its stored status verbatim, and status changes stay on each row's own surface. Nothing here contacts anyone or edits anything.",
     "summaryHeading": "Stage summary",
     "windowNote": "Counts are computed over the rows actually loaded (the sales sources load the 50 most recent rows each) — never estimated.",
     "duplicateChip": "Possible duplicate",
@@ -5492,7 +5492,7 @@
     "sourceStates": {
       "needs_admin_read": "not readable in this environment",
       "service_key_missing": "service connection not configured",
-      "needs_migration": "waiting for its migration",
+      "needs_migration": "not enabled yet",
       "not_admin": "admin check failed",
       "error": "could not be read right now"
     },
