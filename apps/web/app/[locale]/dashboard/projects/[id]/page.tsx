@@ -341,12 +341,14 @@ export default async function ProjectStadiumPage({
       {/* ── Work gallery: photo evidence from this project's journal entries.
             Read-only projection of what workers attached to their OWN entries;
             visibility is exactly the session's RLS (WAGON 8, areas 15/16). ── */}
-      <ProjectWorkGallery
-        projectId={id}
-        workerNames={
-          new Map(ops.workers.map((w) => [w.workerId, w.name] as const))
-        }
-      />
+      <div id="project-gallery" className="scroll-mt-20">
+        <ProjectWorkGallery
+          projectId={id}
+          workerNames={
+            new Map(ops.workers.map((w) => [w.workerId, w.name] as const))
+          }
+        />
+      </div>
 
       {/* ── Missing positions: the needs model does not exist yet — say so ── */}
       <section className="flex flex-col gap-2" data-testid="stadium-positions-note">

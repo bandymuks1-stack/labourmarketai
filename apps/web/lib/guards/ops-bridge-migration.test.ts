@@ -329,6 +329,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 124 -> 125 for finance_records_v1 (20260711230000, PR #714; ledger 20260711204634) — owner-authorized
     // migration-activation programme; APPLIED to production 2026-07-11;
     // paired rollback in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 125/);
+    // Bumped 125 -> 127 for the user-journey root-cause repair v1 drafts
+    // (20260712120000_journal_entry_restore +
+    // 20260712130000_conversation_message_attachments) — both DRAFT /
+    // needs-human-gate, NOT applied; paired rollbacks in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 127/);
   });
 });

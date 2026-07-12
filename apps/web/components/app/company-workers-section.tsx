@@ -354,7 +354,8 @@ export function CompanyWorkersSection({
       </form>
 
       <section
-        className="flex flex-col gap-2"
+        id="company-invitations"
+        className="flex flex-col gap-2 scroll-mt-20"
         data-testid="company-workers-pending-list"
       >
         <h3 className="font-display text-sm font-semibold text-text-primary">

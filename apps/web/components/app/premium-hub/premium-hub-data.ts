@@ -95,6 +95,9 @@ export interface MarketVM {
 
 export interface ProjectVM {
   status: BlockStatus;
+  /** Real project id — the card's stat tiles deep-link into this project
+   *  (detail / operations / gallery). Null only in the empty state. */
+  id: string | null;
   name: string | null;
   city: string | null;
   country: string | null;
@@ -276,6 +279,7 @@ const HANDOVER_STAGES: readonly HandoverStage[] = [
 async function loadProject(): Promise<ProjectVM> {
   const base: ProjectVM = {
     status: "empty",
+    id: null,
     name: null,
     city: null,
     country: null,
@@ -304,6 +308,7 @@ async function loadProject(): Promise<ProjectVM> {
 
   return {
     status: "ready",
+    id: p.id,
     name: p.title ?? null,
     city: p.city ?? ops?.project.city ?? null,
     country: ops?.project.country ?? null,

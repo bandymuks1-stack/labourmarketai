@@ -809,12 +809,13 @@ export default async function JournalPage({
                         recognizableSlugs,
                       });
                       // "Sistema suprato" — the structured signals the current text
-                      // produced (direction / site / quantity). Shown only when there
-                      // is something to show, so an empty entry is not padded.
+                      // produced (direction / quantity). The entry's LOCATION gets its
+                      // own always-present line below the text (user-journey repair v1):
+                      // the location is the entry's OWN saved snapshot (site_name metric)
+                      // and an entry without one honestly says "Vieta nenurodyta" —
+                      // it is never inherited from the worker's current/profile location.
                       const hasUnderstood =
-                        !!dir?.value_text ||
-                        !!site?.value_text ||
-                        area?.value_numeric != null;
+                        !!dir?.value_text || area?.value_numeric != null;
                       return (
                         <JournalEntryRow
                           key={e.id}
@@ -851,6 +852,16 @@ export default async function JournalPage({
                             <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
                               {e.original_text}
                             </p>
+                            {/* Entry location — the entry's own saved snapshot only.
+                                No snapshot → honest "Vieta nenurodyta" (never the
+                                worker's current or profile location). */}
+                            <p
+                              className="text-[11px] text-text-muted"
+                              data-testid={`journal-entry-location-${e.id}`}
+                            >
+                              {t("entry.locationLabel")}:{" "}
+                              {site?.value_text ?? t("entry.locationUnset")}
+                            </p>
                           </div>
                           {/* 2 · Sistema suprato — current signals from the current
                         text. Plain labelled values, never a badge wall. */}
@@ -866,11 +877,6 @@ export default async function JournalPage({
                                 {dir?.value_text && (
                                   <span className="min-w-0 break-words">
                                     {tProf(dir.value_text)}
-                                  </span>
-                                )}
-                                {site?.value_text && (
-                                  <span className="min-w-0 break-words">
-                                    {site.value_text}
                                   </span>
                                 )}
                                 {area?.value_numeric != null && (

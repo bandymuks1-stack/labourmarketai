@@ -15,6 +15,10 @@ import {
   normalizeConversationSourceHint,
   type ConversationSourceHint,
 } from "@/lib/communication/conversation-source-model";
+import {
+  validateConversationAttachments,
+  type ConversationAttachmentInput,
+} from "@/lib/communication/attachment-model";
 
 /**
  * Communication v1 server actions. Read paths live in the page components
@@ -256,7 +260,11 @@ export async function sendMessage(input: {
   conversationId: string;
   body: string;
   locale: string;
-}): Promise<CommunicationResult<{ id: string }>> {
+  /** Already-uploaded attachment descriptors (blobs live in the private
+   *  bucket under `<conversationId>/<uid>/…`). Registered via the
+   *  SECURITY DEFINER RPC after the message insert. */
+  attachments?: ConversationAttachmentInput[];
+}): Promise<CommunicationResult<{ id: string; attachmentsFailed: number }>> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -269,11 +277,14 @@ export async function sendMessage(input: {
     };
   }
   const body = (input.body ?? "").trim();
-  if (body.length < BODY_MIN) {
+  const attachments = input.attachments ?? [];
+  // Text OR at least one attachment — attachment-only messages are a real
+  // product case (work photos). The DB CHECK allows '' after 20260712130000.
+  if (body.length < BODY_MIN && attachments.length === 0) {
     return {
       ok: false,
       code: "invalid_input",
-      message: "Žinutė tuščia — įveskite tekstą.",
+      message: "Žinutė tuščia — įveskite tekstą arba pridėkite priedą.",
     };
   }
   if (body.length > BODY_MAX) {
@@ -281,6 +292,22 @@ export async function sendMessage(input: {
       ok: false,
       code: "invalid_input",
       message: `Žinutė per ilga (riba — ${BODY_MAX} simbolių).`,
+    };
+  }
+  const attachmentError = validateConversationAttachments(attachments, {
+    conversationId: input.conversationId,
+    uploaderId: user.id,
+  });
+  if (attachmentError) {
+    return {
+      ok: false,
+      code: "invalid_input",
+      message:
+        attachmentError === "too_many"
+          ? "Per daug priedų — daugiausia 5 vienoje žinutėje."
+          : attachmentError === "too_large"
+            ? "Priedas per didelis (iki 10 MB)."
+            : "Priedo pridėti nepavyko — nepalaikomas failas.",
     };
   }
 
@@ -356,11 +383,49 @@ export async function sendMessage(input: {
         message: "Negalima rašyti šiame pokalbyje — neturite prieigos.",
       };
     }
+    // Attachment-only send against a DB where the body CHECK still requires
+    // text (draft migration 20260712130000 not applied yet) — honest state,
+    // with a working fallback the user can act on immediately.
+    if (body.length === 0 && /body_check|check constraint/i.test(msg)) {
+      return {
+        ok: false,
+        code: "rpc_unavailable",
+        message:
+          "Priedų siuntimas dar neįjungtas šioje aplinkoje — įrašykite ir tekstą.",
+      };
+    }
     return {
       ok: false,
       code: "insert_failed",
       message: `Žinutės išsiųsti nepavyko: ${msg || "nežinoma klaida"}`,
     };
+  }
+
+  // Register the pre-uploaded attachments against the new message via the
+  // SECURITY DEFINER RPC (validates author/participant/path/MIME/size and
+  // the 5-per-message cap inside Postgres). A failed registration never
+  // un-sends the message — the count is reported honestly so the composer
+  // can tell the user which part worked.
+  let attachmentsFailed = 0;
+  for (const a of attachments) {
+    const { error: regError } = await asAny(supabase).rpc(
+      "register_conversation_message_attachment",
+      {
+        p_attachment_id: a.id,
+        p_message_id: result.data.id,
+        p_file_name: a.fileName,
+        p_mime_type: a.mimeType,
+        p_file_size: a.sizeBytes,
+        p_storage_path: a.storagePath,
+      },
+    );
+    if (regError) {
+      attachmentsFailed += 1;
+      console.error(
+        "[communication] attachment register failed:",
+        regError.code ?? "unknown",
+      );
+    }
   }
 
   // Bump conversation.updated_at so the thread list sorts correctly.
@@ -373,7 +438,7 @@ export async function sendMessage(input: {
 
   revalidatePath(`/${input.locale}/dashboard/communication/${input.conversationId}`);
   revalidatePath(`/${input.locale}/dashboard/communication`);
-  return { ok: true, data: { id: result.data.id as string } };
+  return { ok: true, data: { id: result.data.id as string, attachmentsFailed } };
 }
 
 /** Admin joins an existing support / team conversation as a participant.

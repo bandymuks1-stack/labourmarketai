@@ -131,18 +131,33 @@ export function HubUnavailable({ message }: { message: string }) {
   );
 }
 
-/** Compact stat box used in the company + project blocks. */
+/** Compact stat box used in the hub blocks.
+ *
+ *  Interaction contract (user-journey repair v1, dashboard sweep): when the
+ *  stat has a real destination, pass `href` (+ `openHint` for the accessible
+ *  name) and the WHOLE tile becomes a link — full surface, keyboard, visible
+ *  focus ring, hover affordance. Without `href` the tile is a plain,
+ *  deliberately affordance-free statistic (no hover, no cursor) so it can
+ *  never be mistaken for a button. A zero value keeps its link — the
+ *  destination owns the honest empty state + next action. */
 export function HubStat({
   value,
   label,
   tone = "default",
+  href,
+  openHint,
+  testid,
 }: {
   value: React.ReactNode;
   label: string;
   tone?: "default" | "warning";
+  href?: string;
+  /** Action affordance appended to the accessible name when `href` is set. */
+  openHint?: string;
+  testid?: string;
 }) {
-  return (
-    <div className="flex flex-col gap-1 rounded-xl border border-ink-600 bg-ink-800/40 p-3">
+  const body = (
+    <>
       <span
         className={cn(
           "font-display text-2xl font-bold tracking-tightest tabular-nums",
@@ -154,6 +169,54 @@ export function HubStat({
       <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
         {label}
       </span>
+    </>
+  );
+  if (href) {
+    return (
+      <Link
+        href={href as "/dashboard"}
+        data-testid={testid}
+        aria-label={openHint ? `${label} — ${openHint}` : label}
+        className="flex flex-col gap-1 rounded-xl border border-ink-600 bg-ink-800/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+      >
+        {body}
+      </Link>
+    );
+  }
+  return (
+    <div data-testid={testid} className="flex flex-col gap-1 rounded-xl border border-ink-600 bg-ink-800/40 p-3">
+      {body}
     </div>
+  );
+}
+
+/** Full-surface link wrapper for a hub block's identity header (avatar/name)
+ *  or preview zone — the header/preview LOOKS like the door to its space, so
+ *  it must BE the door (dashboard interactivity sweep). */
+export function HubZoneLink({
+  href,
+  ariaLabel,
+  testid,
+  className,
+  children,
+}: {
+  href: string;
+  ariaLabel: string;
+  testid?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href as "/dashboard"}
+      aria-label={ariaLabel}
+      data-testid={testid}
+      className={cn(
+        "-m-2 rounded-xl p-2 transition-colors hover:bg-ink-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
+        className,
+      )}
+    >
+      {children}
+    </Link>
   );
 }

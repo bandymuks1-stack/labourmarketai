@@ -119,9 +119,18 @@ export interface OperationsBoardLabels {
     missingDocs: string;
     ready: string;
     needsSkillInfo: string;
+    needsEvidence: string;
+    docsChecked: string;
     followUp: string;
     none: string;
+    showAll: string;
+    /** Per-filter honest zero-state explanation (what "0 here" means + where
+     *  the real next step lives). Keyed by every non-"all" filter. */
+    empty: Record<Exclude<FilterKey, "all">, string>;
   };
+  /** Action affordance appended to every counter card's accessible name —
+   *  the cards are real controls (filter/open), never decorative stats. */
+  counterOpenHint: string;
   counters2: {
     withMissingDocs: string;
     docsReceived: string;
@@ -130,26 +139,51 @@ export interface OperationsBoardLabels {
   };
 }
 
-type FilterKey = "all" | "missingDocs" | "ready" | "needsSkillInfo" | "followUp";
+export type FilterKey =
+  | "all"
+  | "missingDocs"
+  | "ready"
+  | "needsSkillInfo"
+  | "needsEvidence"
+  | "docsChecked"
+  | "followUp";
 
+/**
+ * Interaction contract (user-journey root-cause repair v1): every counter
+ * card IS a real control — a full-surface button that applies the matching
+ * worker filter (or a link where the destination is another page). Keyboard
+ * activation, visible focus ring, pressed state and an accessible name that
+ * says what activation does. A zero value stays activatable and lands on an
+ * honest, explained empty state — never a dead tile.
+ */
 function Counter({
   value,
   label,
   hint,
   testid,
   emphasis,
+  openHint,
+  active,
+  onActivate,
+  href,
 }: {
   value: number;
   label: string;
   hint?: string;
   testid: string;
   emphasis?: boolean;
+  openHint: string;
+  active?: boolean;
+  onActivate?: () => void;
+  href?: string;
 }) {
-  return (
-    <div
-      className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
-      data-testid={testid}
-    >
+  const surface = `flex flex-col gap-0.5 rounded-md border p-3 text-left transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${
+    active
+      ? "border-brand-cyan bg-ink-800/70"
+      : "border-ink-600 bg-ink-800/40 hover:border-brand-cyan"
+  }`;
+  const body = (
+    <>
       <span
         className={`font-display text-2xl font-bold tracking-tightest ${
           emphasis ? "text-state-success" : "text-text-primary"
@@ -163,7 +197,27 @@ function Counter({
       {hint ? (
         <span className="text-[11px] leading-relaxed text-text-secondary">{hint}</span>
       ) : null}
-    </div>
+    </>
+  );
+  const accessibleName = `${label} (${value}) — ${openHint}`;
+  if (href) {
+    return (
+      <Link href={href} data-testid={testid} aria-label={accessibleName} className={surface}>
+        {body}
+      </Link>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onActivate}
+      aria-pressed={active === true}
+      aria-label={accessibleName}
+      data-testid={testid}
+      className={`${surface} active:translate-y-px`}
+    >
+      {body}
+    </button>
   );
 }
 
@@ -550,6 +604,10 @@ export function ProjectOperationsBoard({
           return w.ready;
         case "needsSkillInfo":
           return w.declaredSkills <= 0;
+        case "needsEvidence":
+          return w.missing.includes("work_evidence");
+        case "docsChecked":
+          return w.docsChecked > 0;
         case "followUp":
           return w.needsFollowUp;
         default:
@@ -557,6 +615,18 @@ export function ProjectOperationsBoard({
       }
     });
   }, [workers, filter, statusFilter]);
+
+  // Counter-card activation: apply the matching filter AND bring the worker
+  // list into view — on mobile the list is below the fold, so a silent state
+  // change would look like the tap did nothing.
+  const applyCounterFilter = (key: FilterKey) => {
+    setFilter(key);
+    if (typeof document !== "undefined") {
+      document
+        .getElementById("ops-workers-section")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const filterBtn = (key: FilterKey, label: string) => (
     <button
@@ -602,43 +672,70 @@ export function ProjectOperationsBoard({
           {labels.countersTitle}
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          <Counter testid="ops-total" value={counters.totalAssigned} label={labels.totalAssigned} />
+          <Counter
+            testid="ops-total"
+            value={counters.totalAssigned}
+            label={labels.totalAssigned}
+            openHint={labels.counterOpenHint}
+            active={filter === "all"}
+            onActivate={() => applyCounterFilter("all")}
+          />
           <Counter
             testid="ops-ready"
             value={counters.ready}
             label={labels.ready}
             hint={labels.readyBasis}
             emphasis
+            openHint={labels.counterOpenHint}
+            active={filter === "ready"}
+            onActivate={() => applyCounterFilter("ready")}
           />
           <Counter
             testid="ops-needs-skills"
             value={counters.needsDeclaredSkills}
             label={labels.needsDeclaredSkills}
+            openHint={labels.counterOpenHint}
+            active={filter === "needsSkillInfo"}
+            onActivate={() => applyCounterFilter("needsSkillInfo")}
           />
           <Counter
             testid="ops-needs-evidence"
             value={counters.needsEvidence}
             label={labels.needsEvidence}
+            openHint={labels.counterOpenHint}
+            active={filter === "needsEvidence"}
+            onActivate={() => applyCounterFilter("needsEvidence")}
           />
           <Counter
             testid="ops-needs-followup"
             value={counters.needsFollowUp}
             label={labels.needsFollowUp}
+            openHint={labels.counterOpenHint}
+            active={filter === "followUp"}
+            onActivate={() => applyCounterFilter("followUp")}
           />
           <Counter
             testid="ops-missing-docs"
             value={counters.withMissingDocs}
             label={labels.counters2.withMissingDocs}
+            openHint={labels.counterOpenHint}
+            active={filter === "missingDocs"}
+            onActivate={() => applyCounterFilter("missingDocs")}
           />
           <Counter
             testid="ops-docs-checked"
             value={counters.docsChecked}
             label={labels.counters2.docsChecked}
+            openHint={labels.counterOpenHint}
+            active={filter === "docsChecked"}
+            onActivate={() => applyCounterFilter("docsChecked")}
           />
           <Counter
             testid="ops-instructions"
             value={counters.instructionsSent}
             label={labels.instructionsSent}
+            openHint={labels.counterOpenHint}
+            href={`/${locale}/dashboard/instructions`}
           />
         </div>
       </section>
@@ -689,6 +786,8 @@ export function ProjectOperationsBoard({
           {filterBtn("missingDocs", labels.filters.missingDocs)}
           {filterBtn("ready", labels.filters.ready)}
           {filterBtn("needsSkillInfo", labels.filters.needsSkillInfo)}
+          {filterBtn("needsEvidence", labels.filters.needsEvidence)}
+          {filterBtn("docsChecked", labels.filters.docsChecked)}
           {filterBtn("followUp", labels.filters.followUp)}
           <select
             aria-label={labels.filters.byStatus}
@@ -707,18 +806,41 @@ export function ProjectOperationsBoard({
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section id="ops-workers-section" className="flex flex-col gap-3 scroll-mt-4">
         <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
           {labels.workersTitle}
         </h2>
         {workers.length === 0 ? (
-          <p className="card-border p-4 text-sm text-text-secondary" data-testid="ops-no-workers">
-            {labels.noWorkers}
-          </p>
+          <div className="card-border flex flex-col items-start gap-3 p-4" data-testid="ops-no-workers">
+            <p className="text-sm text-text-secondary">{labels.noWorkers}</p>
+            <Link
+              href={`/${locale}/dashboard/projects`}
+              className="rounded-md border border-ink-600 px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary"
+              data-testid="ops-no-workers-assign"
+            >
+              {labels.assignAction}
+            </Link>
+          </div>
         ) : filtered.length === 0 ? (
-          <p className="card-border p-4 text-sm text-text-secondary" data-testid="ops-filter-none">
-            {labels.filters.none}
-          </p>
+          <div className="card-border flex flex-col items-start gap-2 p-4" data-testid="ops-filter-none">
+            <p className="text-sm text-text-secondary">{labels.filters.none}</p>
+            {filter !== "all" ? (
+              <p className="text-xs leading-relaxed text-text-muted" data-testid="ops-filter-none-hint">
+                {labels.filters.empty[filter]}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                setFilter("all");
+                setStatusFilter("");
+              }}
+              className="rounded-md border border-ink-600 px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary"
+              data-testid="ops-filter-show-all"
+            >
+              {labels.filters.showAll}
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {filtered.map((w) => (

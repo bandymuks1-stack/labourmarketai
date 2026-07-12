@@ -10,6 +10,7 @@ import {
   HubProgress,
   HubStat,
   HubUnavailable,
+  HubZoneLink,
 } from "./premium-hub-primitives";
 
 /** Block A — Asmens kortelė. Real identity + availability + a transparent
@@ -123,46 +124,73 @@ export async function PremiumHubPersonCard({
 
   return (
     <HubPanel eyebrow={t("person.title")} icon={UserRound} testid="premium-hub-person">
-      <div className="flex items-center gap-4">
-        <AvatarDisplay signedUrl={person.avatarUrl} displayName={name} alt={name} />
-        <div className="flex min-w-0 flex-col gap-1">
-          <h2 className="truncate font-display text-lg font-bold tracking-tightest text-text-primary">
-            {name}
-          </h2>
-          {subtitle ? (
-            <p className="truncate text-sm text-text-secondary">{subtitle}</p>
-          ) : null}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {person.locationCountry ? (
-              <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
-                <MapPin className="h-3 w-3" strokeWidth={1.75} aria-hidden />
-                {person.locationCountry}
-              </span>
+      {/* Identity header = the door to the profile/CV space (interaction
+          contract: a header that looks like the entrance IS the entrance). */}
+      <HubZoneLink
+        href="/dashboard/profile"
+        ariaLabel={t("person.openProfile")}
+        testid="hub-person-profile-link"
+      >
+        <div className="flex items-center gap-4">
+          <AvatarDisplay signedUrl={person.avatarUrl} displayName={name} alt={name} />
+          <div className="flex min-w-0 flex-col gap-1">
+            <h2 className="truncate font-display text-lg font-bold tracking-tightest text-text-primary">
+              {name}
+            </h2>
+            {subtitle ? (
+              <p className="truncate text-sm text-text-secondary">{subtitle}</p>
             ) : null}
-            {person.availability ? (
-              <span
-                className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label ${AVAIL_TONE[person.availability]}`}
-              >
-                {person.availability === "available" ? (
-                  <span className="live-dot" aria-hidden />
-                ) : null}
-                {t(`person.availability.${person.availability}`)}
-              </span>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {person.locationCountry ? (
+                <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <MapPin className="h-3 w-3" strokeWidth={1.75} aria-hidden />
+                  {person.locationCountry}
+                </span>
+              ) : null}
+              {person.availability ? (
+                <span
+                  className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label ${AVAIL_TONE[person.availability]}`}
+                >
+                  {person.availability === "available" ? (
+                    <span className="live-dot" aria-hidden />
+                  ) : null}
+                  {t(`person.availability.${person.availability}`)}
+                </span>
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
+      </HubZoneLink>
 
       {showDetails ? (
         <>
+          {/* Completeness stays an informational meter (role="progressbar",
+              no button affordance) — the actionable missing-items checklist
+              lives in MyZone right on this page (user-journey repair v1). */}
           <HubProgress label={t("person.completeness")} value={person.completenessPct} />
+          {/* Every stat tile is a real door to the exact section it counts. */}
           <div className="grid grid-cols-3 gap-3">
-            <HubStat value={person.skillsDeclared} label={t("person.stats.skills")} />
+            <HubStat
+              value={person.skillsDeclared}
+              label={t("person.stats.skills")}
+              href="/dashboard/profile#profile-edit"
+              openHint={t("openHint")}
+              testid="hub-person-stat-skills"
+            />
             <HubStat
               value={person.journalSupportedSkills}
               label={t("person.stats.supported")}
+              href="/dashboard/profile#capabilities"
+              openHint={t("openHint")}
+              testid="hub-person-stat-supported"
             />
-            <HubStat value={person.evidenceEntries} label={t("person.stats.entries")} />
+            <HubStat
+              value={person.evidenceEntries}
+              label={t("person.stats.entries")}
+              href="/dashboard/journal#journal-entries"
+              openHint={t("openHint")}
+              testid="hub-person-stat-entries"
+            />
           </div>
         </>
       ) : null}

@@ -1717,7 +1717,12 @@ describe("no migration files added by this sprint", () => {
     // Bumped 124 -> 125 for finance_records_v1 (20260711230000, PR #714; ledger 20260711204634) — owner-authorized
     // migration-activation programme; APPLIED to production 2026-07-11;
     // paired rollback in the PR.
-    const SPRINT_BASELINE = 125;
+    // Bumped 125 -> 127 for the user-journey root-cause repair v1 drafts:
+    // 20260712120000_journal_entry_restore (undo half of the honest delete
+    // contract) + 20260712130000_conversation_message_attachments (private
+    // participant-scoped message attachments). Both DRAFT / needs-human-gate,
+    // NOT applied; paired rollbacks in the PR.
+    const SPRINT_BASELINE = 127;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

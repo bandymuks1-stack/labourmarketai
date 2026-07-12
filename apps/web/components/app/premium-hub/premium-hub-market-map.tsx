@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Radar } from "lucide-react";
 
 import type { MarketVM } from "./premium-hub-data";
-import { HubEmptyState, HubPanel } from "./premium-hub-primitives";
+import { HubEmptyState, HubPanel, HubZoneLink } from "./premium-hub-primitives";
 
 /** Abstract node layout (viewBox 0–400 x, 0–260 y). These are DECORATIVE
  *  positions, not geographic coordinates — the panel stays a stylized CSS/SVG
@@ -64,6 +64,15 @@ export async function PremiumHubMarketMap({ market }: { market: MarketVM }) {
     <HubPanel eyebrow={t("map.title")} icon={Radar} testid="premium-hub-map" className="flex-1">
       <p className="text-sm text-text-secondary">{t("map.lead")}</p>
 
+      {/* The whole preview + signal zone is ONE door to the canonical map —
+          a mini-map that looks active but ignores taps reads as broken
+          (dashboard interactivity sweep). No nested interactive elements. */}
+      <HubZoneLink
+        href="/dashboard/market-map"
+        ariaLabel={t("map.open")}
+        testid="hub-map-open-link"
+        className="-m-2 flex flex-col gap-4 p-2"
+      >
       <div className="relative overflow-hidden rounded-xl border border-ink-600 bg-ink-900">
         <svg
           viewBox="0 0 400 260"
@@ -144,6 +153,7 @@ export async function PremiumHubMarketMap({ market }: { market: MarketVM }) {
           </div>
         ))}
       </dl>
+      </HubZoneLink>
     </HubPanel>
   );
 }
