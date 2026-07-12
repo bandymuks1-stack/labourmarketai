@@ -956,7 +956,7 @@
     "empty": "Kol kas nėra peržiūrai laukiančių įrašų.",
     "noWorks": "Darbų pagal įrašą neatpažinta.",
     "uncertaintyNote": "Dalis įrašo neaiški — reikia patikslinti.",
-    "projectNote": "Įrašai su projektu kol kas nesusieti. Niekas neužpildoma automatiškai.",
+    "projectNote": "Susiejimas jau paruoštas — įrašai gali būti susieti su projektu, bet kol kas nė vienas įrašas nesusietas. Niekas neužpildoma automatiškai.",
     "totals": {
       "pending": "Laukia peržiūros",
       "workers": "Darbuotojai",

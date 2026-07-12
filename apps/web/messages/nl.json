@@ -956,7 +956,7 @@
     "empty": "Er wachten nog geen vermeldingen op beoordeling.",
     "noWorks": "Geen werkzaamheden herkend uit deze vermelding.",
     "uncertaintyNote": "Een deel van deze vermelding is onduidelijk — verduidelijking nodig.",
-    "projectNote": "Vermeldingen zijn nog niet aan projecten gekoppeld. Niets wordt automatisch ingevuld.",
+    "projectNote": "Koppelen is klaar — vermeldingen kunnen aan een project worden gekoppeld, maar er is nog geen vermelding gekoppeld. Niets wordt automatisch ingevuld.",
     "totals": {
       "pending": "Wacht op beoordeling",
       "workers": "Werknemers",

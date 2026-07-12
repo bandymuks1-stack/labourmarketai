@@ -956,7 +956,7 @@
     "empty": "Noch keine Einträge warten auf Prüfung.",
     "noWorks": "Aus diesem Eintrag wurden keine Arbeiten erkannt.",
     "uncertaintyNote": "Ein Teil dieses Eintrags ist unklar — Klärung erforderlich.",
-    "projectNote": "Einträge sind noch nicht mit Projekten verknüpft. Nichts wird automatisch ausgefüllt.",
+    "projectNote": "Die Verknüpfung ist bereit — Einträge können mit einem Projekt verknüpft werden, aber noch ist kein Eintrag verknüpft. Nichts wird automatisch ausgefüllt.",
     "totals": {
       "pending": "Wartet auf Prüfung",
       "workers": "Arbeitskräfte",

@@ -956,7 +956,7 @@
     "empty": "No entries are awaiting review yet.",
     "noWorks": "No works recognized from this entry.",
     "uncertaintyNote": "Part of this entry is unclear — needs clarification.",
-    "projectNote": "Entries are not linked to projects yet. Nothing is filled automatically.",
+    "projectNote": "Linking is ready — entries can be linked to a project, but no entry is linked yet. Nothing is filled automatically.",
     "totals": {
       "pending": "Awaiting review",
       "workers": "Workers",
