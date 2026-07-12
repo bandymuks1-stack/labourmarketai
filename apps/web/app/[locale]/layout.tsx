@@ -4,6 +4,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
+import { ThemeReapply } from "@/components/app/theme-reapply";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
 import "../globals.css";
@@ -122,6 +123,10 @@ export default async function LocaleLayout({
         />
       </head>
       <body>
+        {/* Locale-theme continuity (area D): a locale switch re-renders
+            <html lang> and React strips the bootstrap's data-theme — this
+            watcher restores the saved theme before the next paint. */}
+        <ThemeReapply />
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>

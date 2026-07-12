@@ -3,23 +3,53 @@
 import { useEffect } from "react";
 
 /**
- * Re-applies the saved theme after hydration. Needed ONLY on documents that
- * React re-mounts from the root — the 404/not-found flow re-renders <html>
- * itself, which strips the data-theme attribute the no-flash head bootstrap
- * set before paint (normal pages hydrate without touching <html>, so they
- * never need this). Same storage contract as ThemeToggle: localStorage.theme,
- * dark default.
+ * Keeps the user's saved theme applied for the whole client session.
+ *
+ * Two real strip paths exist (locale-theme continuity contract, area D):
+ *  1. the 404/not-found flow re-renders <html> itself;
+ *  2. a LOCALE SWITCH re-renders the [locale] layout's <html lang=…> and
+ *     React reconciliation drops the data-theme attribute the no-flash
+ *     head bootstrap set before paint (caught by the PR #744 production
+ *     smoke: a light-theme user flipped to dark by changing language).
+ *
+ * So this component (rendered once in the [locale] layout body) both
+ * re-applies the saved theme after hydration AND installs a
+ * MutationObserver that restores it the moment anything removes the
+ * attribute — observer callbacks run before the next paint, so the user
+ * never sees the wrong theme. Same storage contract as ThemeToggle:
+ * the single shared localStorage "theme" key, dark default. Deliberate
+ * theme CHANGES keep working: the observer only reacts when the attribute
+ * is missing — a user toggle sets the attribute, never removes it.
  */
 export function ThemeReapply() {
   useEffect(() => {
-    try {
-      const t = localStorage.getItem("theme");
-      if (t === "light" || t === "dark") {
+    const saved = (): string | null => {
+      try {
+        const t = localStorage.getItem("theme");
+        return t === "light" || t === "dark" ? t : null;
+      } catch {
+        return null; /* no storage → stay on the dark default */
+      }
+    };
+
+    const apply = () => {
+      const t = saved();
+      if (t && document.documentElement.dataset.theme !== t) {
         document.documentElement.dataset.theme = t;
       }
-    } catch {
-      /* no storage → stay on the dark default */
-    }
+    };
+    apply();
+
+    const observer = new MutationObserver(() => {
+      // Only restore when the attribute was STRIPPED — a user toggle sets
+      // the attribute (and localStorage first), it never removes it.
+      if (!document.documentElement.hasAttribute("data-theme")) apply();
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
   }, []);
   return null;
 }
