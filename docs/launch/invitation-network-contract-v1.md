@@ -22,7 +22,7 @@ DRAFT / needs-human-gate — **NOT applied**; rollback paired):
   - join_organization / join_team / join_as_employee → active `employee`
     engagement in `engagement_contexts` (same insert shape + hash as
     `add_org_member`);
-  - collaborate_partner → active `collaboration` engagement;
+  - collaborate_partner → active `collaborator` engagement;
   - join_project → `project_worker_assignments` row (reactivates an ended
     one instead of duplicating; `no_worker_profile` returned WITHOUT
     consuming the token when the caller has no worker profile);

@@ -8669,7 +8669,13 @@
         "collaboration": "Партнёрство",
         "employment": "Трудовые отношения",
         "advisory": "Консультации",
-        "other": "Другое"
+        "other": "Другое",
+        "collaborator": "Партнёр",
+        "consultant": "Консультант",
+        "freelancer": "Фрилансер",
+        "student": "Студент",
+        "unemployed": "В поиске работы",
+        "volunteer": "Волонтёр"
       }
     },
     "invite": {

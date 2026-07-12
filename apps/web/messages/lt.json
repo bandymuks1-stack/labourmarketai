@@ -8669,7 +8669,13 @@
         "collaboration": "Partnerystė",
         "employment": "Darbo santykiai",
         "advisory": "Konsultacijos",
-        "other": "Kita"
+        "other": "Kita",
+        "collaborator": "Partneris",
+        "consultant": "Konsultantas",
+        "freelancer": "Laisvai samdomas",
+        "student": "Studentas",
+        "unemployed": "Ieško darbo",
+        "volunteer": "Savanoris"
       }
     },
     "invite": {

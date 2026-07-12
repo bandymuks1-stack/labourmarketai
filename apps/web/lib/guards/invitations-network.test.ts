@@ -67,7 +67,9 @@ describe("invitations migration — token security + canonical acceptance", () =
     expect(executable).toMatch(/insert into public\.engagement_contexts/);
     expect(executable).toMatch(/insert into public\.project_worker_assignments/);
     expect(executable).toMatch(/relationship_slug/);
-    expect(executable).toMatch(/'collaboration'/);
+    // production relationship_types registry slug is 'collaborator'
+    expect(executable).toMatch(/'collaborator'/);
+    expect(executable).not.toMatch(/'collaboration'/);
     // The legacy tables are never written by the canonical accept path.
     expect(executable).not.toMatch(/insert into public\.company_workers/);
     expect(executable).not.toMatch(/insert into public\.agency_workers/);

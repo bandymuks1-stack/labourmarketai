@@ -8669,7 +8669,13 @@
         "collaboration": "Partnerschaft",
         "employment": "Beschäftigung",
         "advisory": "Beratung",
-        "other": "Sonstiges"
+        "other": "Sonstiges",
+        "collaborator": "Partner",
+        "consultant": "Berater",
+        "freelancer": "Freiberufler",
+        "student": "Student",
+        "unemployed": "Arbeitssuchend",
+        "volunteer": "Freiwilliger"
       }
     },
     "invite": {

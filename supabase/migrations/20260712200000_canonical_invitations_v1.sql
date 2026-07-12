@@ -428,7 +428,7 @@ begin
   -- Canonical relationship per type.
   if v_row.invitation_type in ('join_organization','join_team','join_as_employee','collaborate_partner') then
     v_slug := case when v_row.invitation_type = 'collaborate_partner'
-                   then 'collaboration' else 'employee' end;
+                   then 'collaborator' else 'employee' end;
     select id into v_existing from public.engagement_contexts
      where profile_id = uid and organization_id = v_row.organization_id
        and relationship_slug = v_slug and status = 'active' limit 1;
@@ -542,7 +542,7 @@ begin
   begin
     if v_token_row.invitation_type in ('join_organization','join_team','join_as_employee','collaborate_partner') then
       v_slug := case when v_token_row.invitation_type = 'collaborate_partner'
-                     then 'collaboration' else 'employee' end;
+                     then 'collaborator' else 'employee' end;
       select id into v_existing from public.engagement_contexts
        where profile_id = uid and organization_id = v_token_row.organization_id
          and relationship_slug = v_slug and status = 'active' limit 1;
