@@ -1,7 +1,12 @@
 -- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
--- Never `db push`.
+-- @human-gate-approved
+-- Owner-approved 2026-07-12 (explicit owner authorization in-session):
+-- reviewed — private bucket only (no public URLs), participant-scoped
+-- storage RLS via safe path helper (malformed path = no access), append-only
+-- metadata (RPC-only inserts), MIME allowlist + 10MB cap enforced in RPC and
+-- bucket, own-uid write folder, active-participant read, minimal grants,
+-- guarded rollback. Apply ONLY via Supabase MCP apply_migration. Never `db push`.
 --
 -- 20260712130000 — conversation message attachments (user-journey root-cause
 -- repair v1, finding #6: real work communication needs photos/files).

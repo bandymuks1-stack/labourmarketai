@@ -1,7 +1,11 @@
 -- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
--- Never `db push`.
+-- @human-gate-approved
+-- Owner-approved 2026-07-12 (explicit owner authorization in-session):
+-- SECURITY DEFINER reviewed — pinned search_path, schema-qualified refs,
+-- ownership gate via public.owns_worker, idempotent, refuses superseded
+-- entries, clears deleted_at only. Grants minimal (execute → authenticated).
+-- Apply ONLY via Supabase MCP apply_migration. Never `db push`.
 --
 -- 20260712120000 — journal entry restore RPC (user-journey root-cause
 -- repair v1, finding #1: destructive-action honesty).
