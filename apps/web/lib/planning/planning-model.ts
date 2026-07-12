@@ -26,8 +26,25 @@
  * row) and managed project date bands are never flagged.
  */
 
-export const PLANNING_SOURCE_TYPES = ["booking", "project", "task"] as const;
+export const PLANNING_SOURCE_TYPES = [
+  "booking",
+  "project",
+  "task",
+  "journal",
+] as const;
 export type PlanningSourceType = (typeof PLANNING_SOURCE_TYPES)[number];
+
+/**
+ * Canonical calendar views (core-network area C). The calendar is a PLAN
+ * over real records; the work journal is FACT — journal entries join the
+ * projection at their real recorded day and deep-link back to the entry.
+ */
+export const PLANNING_VIEWS = ["agenda", "day", "week", "month", "year"] as const;
+export type PlanningView = (typeof PLANNING_VIEWS)[number];
+
+export function isPlanningView(value: string | undefined): value is PlanningView {
+  return (PLANNING_VIEWS as readonly string[]).includes(value ?? "");
+}
 
 /** Compact agenda window: today + the next N-1 calendar days (UTC). */
 export const PLANNING_WINDOW_DAYS = 14;
@@ -84,6 +101,10 @@ export function hrefForSource(
       return `/dashboard/projects/${sourceId}`;
     case "task":
       return "/dashboard/tasks";
+    case "journal":
+      // The entry's own editor — the calendar never grows a duplicate
+      // journal detail page; the source record stays canonical.
+      return `/dashboard/journal?editing=${sourceId}#journal-composer`;
   }
 }
 
@@ -101,6 +122,8 @@ export function statusKeyForSource(
       return `planning.projectStatus.${status}`;
     case "task":
       return `tasks.status.${status}`;
+    case "journal":
+      return `planning.journalStatus.${status}`;
   }
 }
 
@@ -342,4 +365,200 @@ export function buildAgenda(
   }
 
   return { days, later, undated, pastCount, conflicts, conflictIds, weekStrip };
+}
+
+/* ------------------------------------------------------------------ */
+/* Calendar views — month / week / day / year (pure UTC date math)     */
+/* ------------------------------------------------------------------ */
+
+/** Strict "YYYY-MM-DD" parse that rejects impossible dates (2026-02-31). */
+export function parseIsoDay(value: string | undefined | null): string | null {
+  if (!value || !DAY_RX.test(value)) return null;
+  const d = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10) === value ? value : null;
+}
+
+/** Monday of the ISO week containing the day (European work week). */
+export function startOfWeekMonday(dayIso: string): string {
+  const d = new Date(`${dayIso}T00:00:00Z`);
+  const shift = (d.getUTCDay() + 6) % 7; // Mon=0 … Sun=6
+  return addDays(dayIso, -shift);
+}
+
+/** First calendar day of the month containing the day. */
+export function firstDayOfMonth(dayIso: string): string {
+  return `${dayIso.slice(0, 7)}-01`;
+}
+
+/** dayIso + n months, clamped to the target month's last day (UTC). */
+export function addMonths(dayIso: string, n: number): string {
+  const d = new Date(`${firstDayOfMonth(dayIso)}T00:00:00Z`);
+  d.setUTCMonth(d.getUTCMonth() + n);
+  const first = d.toISOString().slice(0, 10);
+  const wanted = Number(dayIso.slice(8, 10));
+  const last = new Date(`${first}T00:00:00Z`);
+  last.setUTCMonth(last.getUTCMonth() + 1);
+  last.setUTCDate(0);
+  const lastDay = Number(last.toISOString().slice(8, 10));
+  const day = Math.min(wanted, lastDay);
+  return `${first.slice(0, 8)}${String(day).padStart(2, "0")}`;
+}
+
+export interface CalendarDayCell {
+  readonly day: string;
+  /** False for the leading/trailing days that pad the month grid. */
+  readonly inMonth: boolean;
+  readonly isToday: boolean;
+  readonly count: number;
+  readonly hasConflict: boolean;
+}
+
+export interface MonthGrid {
+  /** "YYYY-MM" of the anchored month. */
+  readonly month: string;
+  /** Full weeks (Mon–Sun rows) covering the month — 4..6 rows. */
+  readonly weeks: readonly (readonly CalendarDayCell[])[];
+}
+
+/** Items covering a day, deterministic order (start day, type, id). */
+export function itemsForDay(
+  items: readonly PlanningItem[],
+  dayIso: string,
+): readonly PlanningItem[] {
+  return [...items].sort(sortItems).filter((it) => itemCoversDay(it, dayIso));
+}
+
+/**
+ * Month grid over the anchored day's month: full Monday-started weeks with
+ * real per-day counts + conflict flags. Pure projection — cells carry only
+ * counts; each cell links to the day view, and the day view links every
+ * item back to its real source record.
+ */
+export function buildMonthGrid(
+  anchorDay: string,
+  items: readonly PlanningItem[],
+  todayIso: string,
+): MonthGrid {
+  const month = anchorDay.slice(0, 7);
+  const gridStart = startOfWeekMonday(firstDayOfMonth(anchorDay));
+  const lastOfMonth = addDays(addMonths(firstDayOfMonth(anchorDay), 1), -1);
+  const gridEnd = addDays(startOfWeekMonday(lastOfMonth), 6);
+  const conflictIds = conflictItemIds(detectConflicts(items));
+
+  const weeks: CalendarDayCell[][] = [];
+  for (let cursor = gridStart; cursor <= gridEnd; cursor = addDays(cursor, 7)) {
+    const row: CalendarDayCell[] = [];
+    for (let i = 0; i < 7; i++) {
+      const day = addDays(cursor, i);
+      const covering = itemsForDay(items, day);
+      row.push({
+        day,
+        inMonth: day.slice(0, 7) === month,
+        isToday: day === todayIso,
+        count: covering.length,
+        hasConflict: covering.some((it) => conflictIds.has(it.id)),
+      });
+    }
+    weeks.push(row);
+  }
+  return { month, weeks };
+}
+
+export interface WeekViewDay {
+  readonly day: string;
+  readonly isToday: boolean;
+  readonly items: readonly PlanningItem[];
+}
+
+/** The 7 Monday-started days of the anchored week with covering items. */
+export function buildWeekView(
+  anchorDay: string,
+  items: readonly PlanningItem[],
+  todayIso: string,
+): readonly WeekViewDay[] {
+  const start = startOfWeekMonday(anchorDay);
+  const days: WeekViewDay[] = [];
+  for (let i = 0; i < 7; i++) {
+    const day = addDays(start, i);
+    days.push({ day, isToday: day === todayIso, items: itemsForDay(items, day) });
+  }
+  return days;
+}
+
+export interface YearMonthCell {
+  /** "YYYY-MM". */
+  readonly month: string;
+  readonly isCurrent: boolean;
+  /** Items whose inclusive band intersects the month. */
+  readonly count: number;
+}
+
+/** 12 month cells with real intersect counts — the year overview. */
+export function buildYearOverview(
+  year: number,
+  items: readonly PlanningItem[],
+  todayIso: string,
+): readonly YearMonthCell[] {
+  const cells: YearMonthCell[] = [];
+  for (let m = 1; m <= 12; m++) {
+    const month = `${year}-${String(m).padStart(2, "0")}`;
+    const first = `${month}-01`;
+    const last = addDays(addMonths(first, 1), -1);
+    const count = items.filter((it) => {
+      const end = effectiveEndDay(it);
+      return it.startDate && end && rangesOverlapInclusive(it.startDate, end, first, last);
+    }).length;
+    cells.push({ month, isCurrent: todayIso.slice(0, 7) === month, count });
+  }
+  return cells;
+}
+
+/** Prev/next anchor days for a view (day±1, week±7, month±1, year±12, agenda±14). */
+export function navAnchors(
+  view: PlanningView,
+  anchorDay: string,
+): { prev: string; next: string } {
+  switch (view) {
+    case "day":
+      return { prev: addDays(anchorDay, -1), next: addDays(anchorDay, 1) };
+    case "week":
+      return { prev: addDays(anchorDay, -7), next: addDays(anchorDay, 7) };
+    case "month":
+      return { prev: addMonths(anchorDay, -1), next: addMonths(anchorDay, 1) };
+    case "year":
+      return { prev: addMonths(anchorDay, -12), next: addMonths(anchorDay, 12) };
+    case "agenda":
+      return {
+        prev: addDays(anchorDay, -PLANNING_WINDOW_DAYS),
+        next: addDays(anchorDay, PLANNING_WINDOW_DAYS),
+      };
+  }
+}
+
+/** The [rangeStart, rangeEnd] a view makes visible — drives the bounded
+ *  journal read so facts appear exactly where the user is looking. */
+export function visibleRange(
+  view: PlanningView,
+  anchorDay: string,
+): { start: string; end: string } {
+  switch (view) {
+    case "day":
+      return { start: anchorDay, end: anchorDay };
+    case "week": {
+      const start = startOfWeekMonday(anchorDay);
+      return { start, end: addDays(start, 6) };
+    }
+    case "month": {
+      const start = startOfWeekMonday(firstDayOfMonth(anchorDay));
+      return { start, end: addDays(start, 41) };
+    }
+    case "year":
+      return {
+        start: `${anchorDay.slice(0, 4)}-01-01`,
+        end: `${anchorDay.slice(0, 4)}-12-31`,
+      };
+    case "agenda":
+      return { start: anchorDay, end: addDays(anchorDay, PLANNING_WINDOW_DAYS - 1) };
+  }
 }

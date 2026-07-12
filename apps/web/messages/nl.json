@@ -8014,7 +8014,6 @@
     "eyebrow": "PLANNING",
     "title": "Planning",
     "intro": "Boekingen, projectdata en taakdeadlines in één agenda. Elke regel linkt naar de echte bron.",
-    "honestNote": "Alleen records die echt bestaan worden getoond: boekingen, de data van je beheerde projecten en deadlines van open taken. Er is geen externe kalender gekoppeld en niets is verzonnen.",
     "notAuthed": "Log in om je planning te zien.",
     "filters": {
       "label": "Bron",
@@ -8023,14 +8022,16 @@
     "source": {
       "booking": "Boeking",
       "project": "Project",
-      "task": "Taak"
+      "task": "Taak",
+      "journal": "Journaal"
     },
     "sourceNotes": {
       "bookingUnavailable": "Boekingen zijn nog niet beschikbaar — ze sluiten aan op de planning zodra de boekingslaag is ingeschakeld.",
       "taskUnavailable": "Taken zijn nog niet beschikbaar — taakdeadlines sluiten aan op de planning zodra de takenlaag is ingeschakeld.",
       "taskError": "Taken konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
       "projectManagersOnly": "Projectdatabanden zijn zichtbaar voor projectmanagers. Een projectplanning voor werknemers volgt zodra die weergave bestaat.",
-      "projectError": "Projecten konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar."
+      "projectError": "Projecten konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
+      "journalError": "Journaalregistraties konden nu niet worden geladen. De rest van de planning wordt normaal getoond."
     },
     "week": {
       "label": "Komende 7 dagen"
@@ -8058,12 +8059,46 @@
     "fallback": {
       "booking": "Boeking",
       "project": "Project",
-      "task": "Taak"
+      "task": "Taak",
+      "journal": "Werkregistratie"
     },
     "projectStatus": {
       "draft": "Concept",
       "live": "Actief",
       "paused": "Gepauzeerd"
+    },
+    "views": {
+      "label": "Weergave",
+      "agenda": "Agenda",
+      "day": "Dag",
+      "week": "Week",
+      "month": "Maand",
+      "year": "Jaar"
+    },
+    "nav": {
+      "today": "Vandaag",
+      "prev": "Vorige periode",
+      "next": "Volgende periode",
+      "dateLabel": "Kies een datum",
+      "go": "Ga"
+    },
+    "journalStatus": {
+      "recorded": "Vastgelegd"
+    },
+    "month": {
+      "hint": "Tik op een dag om de items van die dag te zien."
+    },
+    "day": {
+      "empty": "Niets op deze dag."
+    },
+    "year": {
+      "count": "{count, plural, =0 {geen items} one {# item} other {# items}}"
+    },
+    "emptyFiltered": "Geen items voor deze bron.",
+    "emptyActions": {
+      "bookings": "Boeking voorstellen",
+      "tasks": "Taak aanmaken",
+      "journal": "Uitgevoerd werk vastleggen"
     }
   },
   "tasks": {

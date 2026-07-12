@@ -8014,7 +8014,6 @@
     "eyebrow": "PLANAVIMAS",
     "title": "Planavimas",
     "intro": "Rezervacijos, projektų datos ir užduočių terminai vienoje dienotvarkėje. Kiekviena eilutė veda į tikrąjį šaltinį.",
-    "honestNote": "Rodomi tik realiai egzistuojantys įrašai: rezervacijos, tavo valdomų projektų datos ir atvirų užduočių terminai. Joks išorinis kalendorius neprijungtas, nieko nesugalvota.",
     "notAuthed": "Prisijunk, kad matytum savo planą.",
     "filters": {
       "label": "Šaltinis",
@@ -8023,14 +8022,16 @@
     "source": {
       "booking": "Rezervacija",
       "project": "Projektas",
-      "task": "Užduotis"
+      "task": "Užduotis",
+      "journal": "Žurnalas"
     },
     "sourceNotes": {
       "bookingUnavailable": "Rezervacijos dar neįjungtos — jos prisijungs prie plano, kai bus įjungtas rezervacijų sluoksnis.",
       "taskUnavailable": "Užduotys dar neįjungtos — užduočių terminai prisijungs prie plano, kai bus įjungtas užduočių sluoksnis.",
       "taskError": "Užduočių šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
       "projectManagersOnly": "Projektų datų juostos rodomos projektų vadovams. Darbuotojo projektų grafikas atsiras, kai toks vaizdas bus sukurtas.",
-      "projectError": "Projektų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai."
+      "projectError": "Projektų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
+      "journalError": "Žurnalo įrašų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai."
     },
     "week": {
       "label": "Artimiausios 7 dienos"
@@ -8058,12 +8059,46 @@
     "fallback": {
       "booking": "Rezervacija",
       "project": "Projektas",
-      "task": "Užduotis"
+      "task": "Užduotis",
+      "journal": "Darbo įrašas"
     },
     "projectStatus": {
       "draft": "Juodraštis",
       "live": "Vykdomas",
       "paused": "Pristabdytas"
+    },
+    "views": {
+      "label": "Rodinys",
+      "agenda": "Darbotvarkė",
+      "day": "Diena",
+      "week": "Savaitė",
+      "month": "Mėnuo",
+      "year": "Metai"
+    },
+    "nav": {
+      "today": "Šiandien",
+      "prev": "Ankstesnis laikotarpis",
+      "next": "Kitas laikotarpis",
+      "dateLabel": "Pasirinkti datą",
+      "go": "Eiti"
+    },
+    "journalStatus": {
+      "recorded": "Užfiksuota"
+    },
+    "month": {
+      "hint": "Paspauskite dieną, kad pamatytumėte tos dienos įrašus."
+    },
+    "day": {
+      "empty": "Šią dieną įrašų nėra."
+    },
+    "year": {
+      "count": "{count, plural, =0 {nėra įrašų} one {# įrašas} few {# įrašai} other {# įrašų}}"
+    },
+    "emptyFiltered": "Pagal šį šaltinį įrašų nėra.",
+    "emptyActions": {
+      "bookings": "Pasiūlyti rezervaciją",
+      "tasks": "Sukurti užduotį",
+      "journal": "Įrašyti atliktą darbą"
     }
   },
   "tasks": {

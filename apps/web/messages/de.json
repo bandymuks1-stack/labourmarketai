@@ -8014,7 +8014,6 @@
     "eyebrow": "PLANUNG",
     "title": "Planung",
     "intro": "Buchungen, Projekttermine und Aufgabenfristen in einer Agenda. Jede Zeile führt zur echten Quelle.",
-    "honestNote": "Angezeigt werden nur real existierende Einträge: Buchungen, die Termine Ihrer verwalteten Projekte und Fristen offener Aufgaben. Es ist kein externer Kalender verbunden, nichts ist erfunden.",
     "notAuthed": "Melden Sie sich an, um Ihren Plan zu sehen.",
     "filters": {
       "label": "Quelle",
@@ -8023,14 +8022,16 @@
     "source": {
       "booking": "Buchung",
       "project": "Projekt",
-      "task": "Aufgabe"
+      "task": "Aufgabe",
+      "journal": "Journal"
     },
     "sourceNotes": {
       "bookingUnavailable": "Buchungen sind noch nicht verfügbar — sie erscheinen im Plan, sobald die Buchungsebene aktiviert ist.",
       "taskUnavailable": "Aufgaben sind noch nicht verfügbar — Aufgabenfristen erscheinen im Plan, sobald die Aufgabenebene aktiviert ist.",
       "taskError": "Aufgaben konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
       "projectManagersOnly": "Projekt-Zeiträume sehen Projektverantwortliche. Ein Projektplan für Arbeitskräfte folgt, sobald diese Ansicht existiert.",
-      "projectError": "Projekte konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt."
+      "projectError": "Projekte konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
+      "journalError": "Journaleinträge konnten gerade nicht geladen werden. Der restliche Plan wird normal angezeigt."
     },
     "week": {
       "label": "Nächste 7 Tage"
@@ -8058,12 +8059,46 @@
     "fallback": {
       "booking": "Buchung",
       "project": "Projekt",
-      "task": "Aufgabe"
+      "task": "Aufgabe",
+      "journal": "Arbeitseintrag"
     },
     "projectStatus": {
       "draft": "Entwurf",
       "live": "Aktiv",
       "paused": "Pausiert"
+    },
+    "views": {
+      "label": "Ansicht",
+      "agenda": "Agenda",
+      "day": "Tag",
+      "week": "Woche",
+      "month": "Monat",
+      "year": "Jahr"
+    },
+    "nav": {
+      "today": "Heute",
+      "prev": "Vorheriger Zeitraum",
+      "next": "Nächster Zeitraum",
+      "dateLabel": "Datum wählen",
+      "go": "Los"
+    },
+    "journalStatus": {
+      "recorded": "Erfasst"
+    },
+    "month": {
+      "hint": "Tippen Sie auf einen Tag, um die Einträge dieses Tages zu sehen."
+    },
+    "day": {
+      "empty": "An diesem Tag gibt es keine Einträge."
+    },
+    "year": {
+      "count": "{count, plural, =0 {keine Einträge} one {# Eintrag} other {# Einträge}}"
+    },
+    "emptyFiltered": "Keine Einträge für diese Quelle.",
+    "emptyActions": {
+      "bookings": "Buchung vorschlagen",
+      "tasks": "Aufgabe erstellen",
+      "journal": "Erledigte Arbeit erfassen"
     }
   },
   "tasks": {

@@ -66,6 +66,10 @@ const NATIVE_NAV = new Set([
   // the same page with new searchParams, so feedback IS the navigation
   // (filtered list re-render). No mutation, no client state.
   "app/[locale]/dashboard/admin/pipeline/page.tsx",
+  // Canonical calendar (core-network area C) — the ONLY form is the plain
+  // GET date-picker on a pure server component: submitting navigates to the
+  // picked ?date; feedback IS the navigation. No mutation, no client state.
+  "app/[locale]/dashboard/planning/page.tsx",
   "app/[locale]/dashboard/account/page.tsx", // logout POST
   // "submit draft for real" + agency-mode "offer" (audit PR4) — the
   // openDemandIntakeAsCompanyAction forms switch workspace then redirect to

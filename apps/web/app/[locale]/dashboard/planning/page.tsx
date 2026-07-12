@@ -3,10 +3,22 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import {
   buildAgenda,
+  buildMonthGrid,
+  buildWeekView,
+  buildYearOverview,
+  conflictItemIds,
+  detectConflicts,
   isPlanningSourceType,
+  isPlanningView,
+  itemsForDay,
+  navAnchors,
+  parseIsoDay,
+  visibleRange,
   PLANNING_SOURCE_TYPES,
+  PLANNING_VIEWS,
   type PlanningItem,
   type PlanningSourceType,
+  type PlanningView,
 } from "@/lib/planning/planning-model";
 import {
   getPlanning,
@@ -14,24 +26,26 @@ import {
 } from "@/lib/planning/planning";
 
 /**
- * Unified planning (control room PR E, capability gap map §4) — ONE
- * calendar-style agenda over the records that really exist: bookings (the
- * dated backbone), the caller's managed project date bands and open task
- * due dates. No source record is duplicated — every row links back to its
- * real object (bookings page, project page, tasks page).
+ * THE canonical calendar (core-network area C) — one planning surface over
+ * the records that really exist. The calendar is a PLAN (bookings, project
+ * date bands, task due dates); the work journal is FACT (dated entries at
+ * their real recorded day). No source record is duplicated — every event
+ * links back to its real object, and editing happens on the source.
+ *
+ * Views: year / month / week / day / agenda, driven by plain searchParams
+ * (?view, ?date, ?source) — server component, no calendar library, no
+ * client state, UTC calendar-day math (locale switching can never move an
+ * event to another day).
  *
  * Honest by construction (guard: lib/guards/planning.test.ts):
- *  - composes ONLY the existing RLS-scoped reads (lib/planning/planning.ts);
- *    each source degrades independently into a calm per-source note — a
- *    missing tasks migration or a failed project read never crashes the
- *    plan and never fakes rows;
- *  - sources that do not exist yet (availability windows, milestones, CRM
- *    follow-ups, external calendars) are ABSENT, not simulated;
+ *  - composes ONLY the existing RLS-scoped reads; each source degrades
+ *    independently into a calm per-source note — never fake rows;
+ *  - sources with no real model yet (leave/sickness, meetings, holidays,
+ *    availability windows, service-order dates, instruction due dates) are
+ *    ABSENT and documented as blockers in
+ *    docs/launch/canonical-calendar-contract-v1.md — not simulated;
  *  - conflict flags mirror the booking accept guard's inclusive date-range
- *    overlap (daterange '[]' &&) and mark only REAL overlapping personal
- *    commitments;
- *  - the agenda + week strip are plain date math (server component, plain
- *    searchParams filter links — no calendar library, no client state).
+ *    overlap and mark only REAL overlapping personal commitments.
  */
 
 export const dynamic = "force-dynamic";
@@ -45,13 +59,22 @@ const SOURCE_TONE: Record<PlanningSourceType, string> = {
   booking: "border-brand-blue/40 text-brand-blue",
   project: "border-brand-orange/40 text-brand-orange",
   task: "border-state-success/40 text-state-success",
+  journal: "border-brand-cyan/40 text-brand-cyan",
 };
 
-/** Filter-chip href — omits the default so the canonical URL stays clean. */
-function planningHref(source: PlanningSourceType | null): string {
-  return source
-    ? `/dashboard/planning?source=${source}`
-    : "/dashboard/planning";
+/** Canonical href — omits defaults so the clean URL stays canonical. */
+function planningHref(opts: {
+  view?: PlanningView;
+  date?: string | null;
+  source?: PlanningSourceType | null;
+  today: string;
+}): string {
+  const params = new URLSearchParams();
+  if (opts.view && opts.view !== "agenda") params.set("view", opts.view);
+  if (opts.date && opts.date !== opts.today) params.set("date", opts.date);
+  if (opts.source) params.set("source", opts.source);
+  const qs = params.toString();
+  return qs ? `/dashboard/planning?${qs}` : "/dashboard/planning";
 }
 
 export default async function PlanningPage({
@@ -59,20 +82,27 @@ export default async function PlanningPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ source?: string }>;
+  searchParams: Promise<{ source?: string; view?: string; date?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const { source: rawSource } = await searchParams;
+  const { source: rawSource, view: rawView, date: rawDate } = await searchParams;
   const sourceFilter = isPlanningSourceType(rawSource) ? rawSource : null;
+  const view: PlanningView = isPlanningView(rawView) ? rawView : "agenda";
+  const today = new Date().toISOString().slice(0, 10);
+  const anchor = parseIsoDay(rawDate) ?? today;
+  const range = visibleRange(view, anchor);
 
   const t = await getTranslations("planning");
   // Un-namespaced translator for the source-native status keys the items
-  // carry (bookings.status.*, tasks.status.*, planning.projectStatus.*).
+  // carry (bookings.status.*, tasks.status.*, planning.*Status.*).
   const tAll = await getTranslations();
 
-  const result = await getPlanning();
+  const result = await getPlanning({
+    rangeStart: range.start,
+    rangeEnd: range.end,
+  });
 
   const header = (
     <header className="flex flex-col gap-1">
@@ -100,7 +130,7 @@ export default async function PlanningPage({
   const visibleItems = sourceFilter
     ? result.items.filter((i) => i.sourceType === sourceFilter)
     : result.items;
-  const agenda = buildAgenda(visibleItems, new Date());
+  const conflictIds = conflictItemIds(detectConflicts(visibleItems));
 
   const dayFmt = new Intl.DateTimeFormat(locale, {
     weekday: "long",
@@ -111,13 +141,18 @@ export default async function PlanningPage({
     day: "numeric",
     month: "short",
   });
+  const monthFmt = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+  });
+  const monthOnlyFmt = new Intl.DateTimeFormat(locale, { month: "long" });
   const stripFmt = new Intl.DateTimeFormat(locale, { weekday: "narrow" });
-  const fmtDay = (dayIso: string) => dayFmt.format(new Date(`${dayIso}T00:00:00Z`));
-  const fmtShort = (dayIso: string) =>
-    shortFmt.format(new Date(`${dayIso}T00:00:00Z`));
+  const utc = (dayIso: string) => new Date(`${dayIso}T00:00:00Z`);
+  const fmtDay = (dayIso: string) => dayFmt.format(utc(dayIso));
+  const fmtShort = (dayIso: string) => shortFmt.format(utc(dayIso));
 
   function ItemRow({ item }: { item: PlanningItem }) {
-    const conflict = agenda.conflictIds.has(item.id);
+    const conflict = conflictIds.has(item.id);
     const contextKey =
       item.sourceType === "booking" ? `context.${item.roleContext}` : null;
     return (
@@ -183,28 +218,124 @@ export default async function PlanningPage({
     );
   }
 
-  const hasAnything =
-    agenda.days.length > 0 ||
-    agenda.later.length > 0 ||
-    agenda.undated.length > 0;
+  /* ---------------- view-specific projections ---------------- */
+
+  const agenda =
+    view === "agenda" ? buildAgenda(visibleItems, utc(anchor)) : null;
+  const monthGrid =
+    view === "month" ? buildMonthGrid(anchor, visibleItems, today) : null;
+  const weekDays =
+    view === "week" ? buildWeekView(anchor, visibleItems, today) : null;
+  const yearCells =
+    view === "year"
+      ? buildYearOverview(Number(anchor.slice(0, 4)), visibleItems, today)
+      : null;
+  const dayItems = view === "day" ? itemsForDay(visibleItems, anchor) : null;
+
+  const { prev, next } = navAnchors(view, anchor);
+
+  const periodLabel =
+    view === "year"
+      ? anchor.slice(0, 4)
+      : view === "month"
+        ? monthFmt.format(utc(firstOf(anchor)))
+        : view === "week"
+          ? `${fmtShort(weekDays?.[0]?.day ?? anchor)} – ${fmtShort(weekDays?.[6]?.day ?? anchor)}`
+          : fmtDay(anchor);
+
+  function firstOf(dayIso: string): string {
+    return `${dayIso.slice(0, 7)}-01`;
+  }
+
+  const hasAnything = agenda
+    ? agenda.days.length > 0 || agenda.later.length > 0 || agenda.undated.length > 0
+    : visibleItems.length > 0;
 
   return (
     <div className="flex flex-col gap-6" data-testid="planning-page">
       {header}
 
-      {/* Honest scope, stated up front: only real records, no external
-          calendar, nothing invented. */}
-      <p
-        className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs text-text-muted"
-        data-testid="planning-honest-note"
-      >
-        {t("honestNote")}
-      </p>
-
       <SourceNotes sources={result.sources} t={t} />
 
-      {/* Source filter — plain searchParams links (the activity-centre
-          pattern; keyboard accessible, no client state). */}
+      {/* View switcher — plain searchParams links, keyboard accessible. */}
+      <nav
+        className="flex flex-wrap items-center gap-2"
+        aria-label={t("views.label")}
+        data-testid="planning-views"
+      >
+        {PLANNING_VIEWS.map((v) => (
+          <Link
+            key={v}
+            href={planningHref({ view: v, date: anchor, source: sourceFilter, today }) as "/dashboard"}
+            aria-current={view === v ? "true" : undefined}
+            data-testid={`planning-view-${v}`}
+            className={`${CHIP_BASE} ${view === v ? CHIP_ACTIVE : CHIP_IDLE}`}
+          >
+            {t(`views.${v}`)}
+          </Link>
+        ))}
+      </nav>
+
+      {/* Date navigation: previous / today / next + a native date picker
+          (GET form — no client state; the URL is the whole state). */}
+      <div
+        className="flex flex-wrap items-center gap-2"
+        data-testid="planning-date-nav"
+      >
+        <Link
+          href={planningHref({ view, date: prev, source: sourceFilter, today }) as "/dashboard"}
+          aria-label={t("nav.prev")}
+          data-testid="planning-nav-prev"
+          className={`${CHIP_BASE} ${CHIP_IDLE}`}
+        >
+          ←
+        </Link>
+        <Link
+          href={planningHref({ view, source: sourceFilter, today }) as "/dashboard"}
+          data-testid="planning-nav-today"
+          className={`${CHIP_BASE} ${anchor === today ? CHIP_ACTIVE : CHIP_IDLE}`}
+        >
+          {t("nav.today")}
+        </Link>
+        <Link
+          href={planningHref({ view, date: next, source: sourceFilter, today }) as "/dashboard"}
+          aria-label={t("nav.next")}
+          data-testid="planning-nav-next"
+          className={`${CHIP_BASE} ${CHIP_IDLE}`}
+        >
+          →
+        </Link>
+        <span
+          className="min-w-0 break-words text-sm font-semibold text-text-primary"
+          data-testid="planning-period-label"
+        >
+          {periodLabel}
+        </span>
+        <form
+          action={`/${locale}/dashboard/planning`}
+          method="get"
+          className="ml-auto flex items-center gap-2"
+          data-testid="planning-date-picker"
+        >
+          {view !== "agenda" ? <input type="hidden" name="view" value={view} /> : null}
+          {sourceFilter ? <input type="hidden" name="source" value={sourceFilter} /> : null}
+          <label className="sr-only" htmlFor="planning-date-input">
+            {t("nav.dateLabel")}
+          </label>
+          <input
+            id="planning-date-input"
+            type="date"
+            name="date"
+            defaultValue={anchor}
+            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-xs text-text-primary"
+          />
+          <button type="submit" className={`${CHIP_BASE} ${CHIP_IDLE}`}>
+            {t("nav.go")}
+          </button>
+        </form>
+      </div>
+
+      {/* Source filter — plain searchParams links. */}
       <nav
         className="flex flex-wrap items-center gap-2"
         aria-label={t("filters.label")}
@@ -214,7 +345,7 @@ export default async function PlanningPage({
           {t("filters.label")}
         </span>
         <Link
-          href={planningHref(null) as "/dashboard"}
+          href={planningHref({ view, date: anchor, source: null, today }) as "/dashboard"}
           aria-current={sourceFilter === null ? "true" : undefined}
           data-testid="planning-filter-all"
           className={`${CHIP_BASE} ${sourceFilter === null ? CHIP_ACTIVE : CHIP_IDLE}`}
@@ -224,7 +355,7 @@ export default async function PlanningPage({
         {PLANNING_SOURCE_TYPES.map((s) => (
           <Link
             key={s}
-            href={planningHref(s) as "/dashboard"}
+            href={planningHref({ view, date: anchor, source: s, today }) as "/dashboard"}
             aria-current={sourceFilter === s ? "true" : undefined}
             data-testid={`planning-filter-${s}`}
             className={`${CHIP_BASE} ${sourceFilter === s ? CHIP_ACTIVE : CHIP_IDLE}`}
@@ -234,108 +365,267 @@ export default async function PlanningPage({
         ))}
       </nav>
 
-      {/* Week strip — seven cells of plain date math over the same real
-          items (informational; the agenda below is the primary view). */}
-      <section
-        className="flex flex-col gap-2"
-        aria-label={t("week.label")}
-        data-testid="planning-week-strip"
-      >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-          {t("week.label")}
-        </span>
-        <div className="grid grid-cols-7 gap-1">
-          {agenda.weekStrip.map((d) => (
-            <div
-              key={d.day}
-              data-testid={`planning-strip-${d.day}`}
-              className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md border px-1 py-2 ${
-                d.isToday
-                  ? "border-brand-blue/60 bg-brand-blue/5"
-                  : "border-ink-600 bg-ink-800/20"
-              }`}
-            >
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                {stripFmt.format(new Date(`${d.day}T00:00:00Z`))}
+      {/* ---------------- MONTH ---------------- */}
+      {monthGrid ? (
+        <section className="flex flex-col gap-2" data-testid="planning-month">
+          <div className="grid grid-cols-7 gap-1">
+            {monthGrid.weeks[0]?.map((cell) => (
+              <span
+                key={`hdr-${cell.day}`}
+                className="text-center font-mono text-[10px] uppercase tracking-label text-text-muted"
+              >
+                {stripFmt.format(utc(cell.day))}
               </span>
-              <span className="text-sm font-semibold tabular-nums text-text-primary">
-                {d.day.slice(8, 10)}
-              </span>
-              {d.count > 0 ? (
-                <span
-                  className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none tabular-nums ${
-                    d.hasConflict
-                      ? "bg-state-danger/15 text-state-danger"
-                      : "bg-brand-blue/15 text-brand-blue"
-                  }`}
-                >
-                  {d.count}
+            ))}
+            {monthGrid.weeks.flat().map((cell) => (
+              <Link
+                key={cell.day}
+                href={planningHref({ view: "day", date: cell.day, source: sourceFilter, today }) as "/dashboard"}
+                data-testid={`planning-month-cell-${cell.day}`}
+                className={`flex min-h-14 min-w-0 flex-col items-center gap-0.5 rounded-md border px-1 py-1.5 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                  cell.isToday
+                    ? "border-brand-blue/60 bg-brand-blue/5"
+                    : cell.inMonth
+                      ? "border-ink-600 bg-ink-800/20"
+                      : "border-ink-700/60 bg-transparent opacity-50"
+                }`}
+              >
+                <span className="text-sm font-semibold tabular-nums text-text-primary">
+                  {cell.day.slice(8, 10)}
                 </span>
-              ) : (
-                <span className="h-5 text-[10px] text-text-muted">·</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+                {cell.count > 0 ? (
+                  <span
+                    className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none tabular-nums ${
+                      cell.hasConflict
+                        ? "bg-state-danger/15 text-state-danger"
+                        : "bg-brand-blue/15 text-brand-blue"
+                    }`}
+                  >
+                    {cell.count}
+                  </span>
+                ) : (
+                  <span className="h-5 text-[10px] text-text-muted">·</span>
+                )}
+              </Link>
+            ))}
+          </div>
+          <p className="text-xs text-text-muted">{t("month.hint")}</p>
+        </section>
+      ) : null}
 
-      {!hasAnything ? (
-        /* Calm empty state — an empty plan is a state, not an error. */
-        <p
-          className="rounded-md border border-dashed border-ink-500 p-5 text-sm text-text-secondary"
-          data-testid="planning-empty"
-        >
-          {t("empty")}
-        </p>
-      ) : (
-        <section className="flex flex-col gap-4" data-testid="planning-agenda">
-          {agenda.days.map((group) => (
-            <div key={group.day} className="flex flex-col gap-2">
+      {/* ---------------- WEEK ---------------- */}
+      {weekDays ? (
+        <section className="flex flex-col gap-4" data-testid="planning-week-view">
+          {weekDays.map((d) => (
+            <div key={d.day} className="flex flex-col gap-2">
               <h2 className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-secondary">
-                {fmtDay(group.day)}
-                {group.isToday ? (
+                <Link
+                  href={planningHref({ view: "day", date: d.day, source: sourceFilter, today }) as "/dashboard"}
+                  className="hover:text-brand-blue"
+                >
+                  {fmtDay(d.day)}
+                </Link>
+                {d.isToday ? (
                   <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[10px] text-brand-blue">
                     {t("today")}
                   </span>
                 ) : null}
               </h2>
-              <ItemList
-                items={group.items}
-                testid={`planning-day-${group.day}`}
-              />
+              {d.items.length > 0 ? (
+                <ItemList items={d.items} testid={`planning-week-day-${d.day}`} />
+              ) : (
+                <p className="text-xs text-text-muted">—</p>
+              )}
             </div>
           ))}
-
-          {agenda.later.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
-                {t("later.title")}
-              </h2>
-              <ItemList items={agenda.later} testid="planning-later" />
-            </div>
-          ) : null}
-
-          {agenda.undated.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
-                {t("undated.title")}
-              </h2>
-              <p className="text-xs text-text-muted">{t("undated.hint")}</p>
-              <ItemList items={agenda.undated} testid="planning-undated" />
-            </div>
-          ) : null}
         </section>
-      )}
-
-      {agenda.pastCount > 0 ? (
-        /* Honest history note: finished items are not hidden silently. */
-        <p
-          className="text-xs text-text-muted"
-          data-testid="planning-past-note"
-        >
-          {t("pastHidden", { count: agenda.pastCount })}
-        </p>
       ) : null}
+
+      {/* ---------------- DAY ---------------- */}
+      {dayItems ? (
+        <section className="flex flex-col gap-2" data-testid="planning-day-view">
+          {dayItems.length > 0 ? (
+            <ItemList items={dayItems} testid={`planning-day-${anchor}`} />
+          ) : (
+            <p
+              className="rounded-md border border-dashed border-ink-500 p-5 text-sm text-text-secondary"
+              data-testid="planning-day-empty"
+            >
+              {t("day.empty")}
+            </p>
+          )}
+        </section>
+      ) : null}
+
+      {/* ---------------- YEAR ---------------- */}
+      {yearCells ? (
+        <section
+          className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
+          data-testid="planning-year-view"
+        >
+          {yearCells.map((m) => (
+            <Link
+              key={m.month}
+              href={planningHref({ view: "month", date: `${m.month}-01`, source: sourceFilter, today }) as "/dashboard"}
+              data-testid={`planning-year-${m.month}`}
+              className={`flex flex-col items-start gap-1 rounded-md border px-3 py-2.5 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                m.isCurrent
+                  ? "border-brand-blue/60 bg-brand-blue/5"
+                  : "border-ink-600 bg-ink-800/20"
+              }`}
+            >
+              <span className="text-sm font-semibold capitalize text-text-primary">
+                {monthOnlyFmt.format(utc(`${m.month}-01`))}
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                {t("year.count", { count: m.count })}
+              </span>
+            </Link>
+          ))}
+        </section>
+      ) : null}
+
+      {/* ---------------- AGENDA ---------------- */}
+      {agenda ? (
+        <>
+          {/* Week strip — seven cells of plain date math (informational). */}
+          <section
+            className="flex flex-col gap-2"
+            aria-label={t("week.label")}
+            data-testid="planning-week-strip"
+          >
+            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {t("week.label")}
+            </span>
+            <div className="grid grid-cols-7 gap-1">
+              {agenda.weekStrip.map((d) => (
+                <Link
+                  key={d.day}
+                  href={planningHref({ view: "day", date: d.day, source: sourceFilter, today }) as "/dashboard"}
+                  data-testid={`planning-strip-${d.day}`}
+                  className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md border px-1 py-2 transition-colors hover:border-brand-blue ${
+                    d.isToday
+                      ? "border-brand-blue/60 bg-brand-blue/5"
+                      : "border-ink-600 bg-ink-800/20"
+                  }`}
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    {stripFmt.format(utc(d.day))}
+                  </span>
+                  <span className="text-sm font-semibold tabular-nums text-text-primary">
+                    {d.day.slice(8, 10)}
+                  </span>
+                  {d.count > 0 ? (
+                    <span
+                      className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none tabular-nums ${
+                        d.hasConflict
+                          ? "bg-state-danger/15 text-state-danger"
+                          : "bg-brand-blue/15 text-brand-blue"
+                      }`}
+                    >
+                      {d.count}
+                    </span>
+                  ) : (
+                    <span className="h-5 text-[10px] text-text-muted">·</span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {!hasAnything ? (
+            <EmptyState t={t} sourceFilter={sourceFilter} />
+          ) : (
+            <section className="flex flex-col gap-4" data-testid="planning-agenda">
+              {agenda.days.map((group) => (
+                <div key={group.day} className="flex flex-col gap-2">
+                  <h2 className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                    {fmtDay(group.day)}
+                    {group.isToday ? (
+                      <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[10px] text-brand-blue">
+                        {t("today")}
+                      </span>
+                    ) : null}
+                  </h2>
+                  <ItemList
+                    items={group.items}
+                    testid={`planning-day-${group.day}`}
+                  />
+                </div>
+              ))}
+
+              {agenda.later.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                    {t("later.title")}
+                  </h2>
+                  <ItemList items={agenda.later} testid="planning-later" />
+                </div>
+              ) : null}
+
+              {agenda.undated.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                    {t("undated.title")}
+                  </h2>
+                  <p className="text-xs text-text-muted">{t("undated.hint")}</p>
+                  <ItemList items={agenda.undated} testid="planning-undated" />
+                </div>
+              ) : null}
+            </section>
+          )}
+
+          {agenda.pastCount > 0 ? (
+            /* Honest history note: finished items are not hidden silently. */
+            <p className="text-xs text-text-muted" data-testid="planning-past-note">
+              {t("pastHidden", { count: agenda.pastCount })}
+            </p>
+          ) : null}
+        </>
+      ) : null}
+
+      {/* Non-agenda empty state (month/week/day/year render their shells
+          above; agenda handles its own). */}
+      {!agenda && !hasAnything && view !== "day" ? (
+        <EmptyState t={t} sourceFilter={sourceFilter} />
+      ) : null}
+    </div>
+  );
+}
+
+/** Calm empty state with REAL next actions — every link is a live route. */
+function EmptyState({
+  t,
+  sourceFilter,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  sourceFilter: PlanningSourceType | null;
+}) {
+  const actions: { href: string; key: string; testid: string }[] = [
+    { href: "/dashboard/bookings", key: "emptyActions.bookings", testid: "planning-empty-cta-bookings" },
+    { href: "/dashboard/tasks", key: "emptyActions.tasks", testid: "planning-empty-cta-tasks" },
+    { href: "/dashboard/journal", key: "emptyActions.journal", testid: "planning-empty-cta-journal" },
+  ];
+  return (
+    <div
+      className="flex flex-col gap-3 rounded-md border border-dashed border-ink-500 p-5"
+      data-testid="planning-empty"
+    >
+      <p className="text-sm text-text-secondary">
+        {sourceFilter ? t("emptyFiltered") : t("empty")}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {actions.map((a) => (
+          <Link
+            key={a.key}
+            href={a.href as "/dashboard"}
+            data-testid={a.testid}
+            className="inline-flex min-h-9 items-center rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-medium text-brand-blue transition-colors hover:border-brand-blue"
+          >
+            {t(a.key)}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
@@ -380,6 +670,15 @@ function SourceNotes({
       testid: "planning-source-note-project-error",
     });
   }
+  if (sources.journal.status === "error") {
+    notes.push({
+      key: "sourceNotes.journalError",
+      testid: "planning-source-note-journal-error",
+    });
+  }
+  // journal "workers-only" is silent by design: a company owner without a
+  // worker profile simply has no journal facts — that is normal, not a
+  // condition to explain.
   if (notes.length === 0) return null;
   return (
     <div className="flex flex-col gap-2" data-testid="planning-source-notes">

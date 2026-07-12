@@ -8014,7 +8014,6 @@
     "eyebrow": "PLANNING",
     "title": "Planning",
     "intro": "Bookings, project dates and task deadlines in one agenda. Every row links to its real source.",
-    "honestNote": "Only records that really exist are shown: bookings, your managed projects' dates and open task due dates. No external calendar is connected and nothing is invented.",
     "notAuthed": "Sign in to see your plan.",
     "filters": {
       "label": "Source",
@@ -8023,14 +8022,16 @@
     "source": {
       "booking": "Booking",
       "project": "Project",
-      "task": "Task"
+      "task": "Task",
+      "journal": "Journal"
     },
     "sourceNotes": {
       "bookingUnavailable": "Bookings are not available yet — they join the plan once the booking layer is switched on.",
       "taskUnavailable": "Tasks are not available yet — task deadlines join the plan once the tasks layer is switched on.",
       "taskError": "Tasks could not be loaded right now. The rest of the plan is unaffected.",
       "projectManagersOnly": "Project date bands are shown to project managers. A worker-side project schedule joins once that view exists.",
-      "projectError": "Projects could not be loaded right now. The rest of the plan is unaffected."
+      "projectError": "Projects could not be loaded right now. The rest of the plan is unaffected.",
+      "journalError": "Journal entries could not be loaded right now. The rest of the plan renders as usual."
     },
     "week": {
       "label": "Next 7 days"
@@ -8058,12 +8059,46 @@
     "fallback": {
       "booking": "Booking",
       "project": "Project",
-      "task": "Task"
+      "task": "Task",
+      "journal": "Work entry"
     },
     "projectStatus": {
       "draft": "Draft",
       "live": "Live",
       "paused": "Paused"
+    },
+    "views": {
+      "label": "View",
+      "agenda": "Agenda",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "nav": {
+      "today": "Today",
+      "prev": "Previous period",
+      "next": "Next period",
+      "dateLabel": "Pick a date",
+      "go": "Go"
+    },
+    "journalStatus": {
+      "recorded": "Recorded"
+    },
+    "month": {
+      "hint": "Tap a day to see that day’s items."
+    },
+    "day": {
+      "empty": "Nothing on this day."
+    },
+    "year": {
+      "count": "{count, plural, =0 {no items} one {# item} other {# items}}"
+    },
+    "emptyFiltered": "No items for this source.",
+    "emptyActions": {
+      "bookings": "Propose a booking",
+      "tasks": "Create a task",
+      "journal": "Record completed work"
     }
   },
   "tasks": {
