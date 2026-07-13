@@ -142,17 +142,33 @@ function crewRequirement(
   const undetermined: string[] = [];
   const explanationParts: string[] = [];
 
-  // Headcount — from the owner's stated team size, never invented.
+  // Headcount — the user's entered value is an authoritative fact and is
+  // NEVER silently replaced by a derived number (owner principle:
+  // constitution §1.2). Only when nothing was stated does the system offer
+  // a placeholder, and that placeholder is carried as a labelled SYSTEM
+  // SUGGESTION requiring human confirm/edit.
   let headcount = 1;
   let headcountStated = false;
+  let userEnteredHeadcount: number | null = null;
+  let systemSuggestedHeadcount: number | null = null;
   if (entry.teamSize !== null) {
     headcount = entry.teamSize;
     headcountStated = true;
-    explanationParts.push(`headcount ${headcount} from the stated team size`);
+    if (entry.teamSizeSource === "user_entered") {
+      userEnteredHeadcount = entry.teamSize;
+      explanationParts.push(
+        `headcount ${headcount} — the number the owner entered (user-entered fact, kept authoritative)`,
+      );
+    } else {
+      explanationParts.push(
+        `headcount ${headcount} from the stated team size on the demand payload`,
+      );
+    }
   } else {
+    systemSuggestedHeadcount = 1;
     undetermined.push("headcount");
     explanationParts.push(
-      "headcount defaulted to 1 — no team size stated (confirm or edit)",
+      "headcount 1 is a SYSTEM SUGGESTION — no team size stated; confirm or edit before relying on it",
     );
   }
 
@@ -215,6 +231,8 @@ function crewRequirement(
     professionSlug,
     roleTitle: entry.title,
     headcount,
+    userEnteredHeadcount,
+    systemSuggestedHeadcount,
     hoursPerWeek: entry.hoursPerWeek,
     totalHours,
     skills,
@@ -248,6 +266,8 @@ function supervisorRequirement(
     professionSlug: supervisorProfession,
     roleTitle: null,
     headcount: 1,
+    userEnteredHeadcount: null,
+    systemSuggestedHeadcount: 1,
     hoursPerWeek: entry.hoursPerWeek,
     totalHours: null,
     skills: supervisorProfession
@@ -358,9 +378,20 @@ export function editRequirement(
 ): WorkforcePlanV1 {
   const { plan: next } = replaceRequirement(plan, requirementId, (r) => {
     if (r.status === "rejected") return r;
+    // An edited headcount is a HUMAN statement: it becomes the
+    // user-entered value and clears any competing system suggestion —
+    // the system's number never survives a human's explicit choice.
+    const headcountEdited =
+      typeof patch.headcount === "number" && patch.headcount !== r.headcount;
     return {
       ...r,
       ...patch,
+      ...(headcountEdited
+        ? {
+            userEnteredHeadcount: patch.headcount ?? null,
+            systemSuggestedHeadcount: null,
+          }
+        : {}),
       source: "human",
       explanation: `${r.explanation}; edited by human`,
       status: "edited",

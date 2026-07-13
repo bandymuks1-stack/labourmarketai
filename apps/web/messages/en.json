@@ -8145,7 +8145,10 @@
       "shortPeople": "{count, plural, one {short # person} other {short # people}}",
       "shortHours": "short {count} h",
       "coveredAll": "All assessed work is covered",
-      "capacityLabel": "Capacity coverage"
+      "capacityLabel": "Capacity coverage",
+      "userEntered": "You entered: {count}",
+      "systemSuggested": "System suggestion: {count} (confirm or edit)",
+      "confirmedRequired": "Confirmed: {count}"
     },
     "risk": {
       "none": "No capacity risk in the current view.",

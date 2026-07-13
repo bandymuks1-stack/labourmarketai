@@ -8145,7 +8145,10 @@
       "shortPeople": "trūksta {count} žm.",
       "shortHours": "trūksta {count} val.",
       "coveredAll": "Visi įvertinti darbai padengti",
-      "capacityLabel": "Pajėgumo padengimas"
+      "capacityLabel": "Pajėgumo padengimas",
+      "userEntered": "Jūsų įvesta: {count}",
+      "systemSuggested": "Sistemos pasiūlymas: {count} (patvirtinkite arba redaguokite)",
+      "confirmedRequired": "Patvirtinta: {count}"
     },
     "risk": {
       "none": "Dabartiniame vaizde pajėgumo rizikos nėra.",

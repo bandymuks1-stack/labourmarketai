@@ -57,6 +57,7 @@ function demandEntry(over: Partial<FutureWorkEntry> = {}): FutureWorkEntry {
     hoursPerWeek: 40,
     shifts: [],
     teamSize: 3,
+    teamSizeSource: "payload_stated",
     teamShape: "team",
     requiredSkills: ["electrical-install"],
     requiredCertificates: [],
@@ -81,6 +82,7 @@ function projectEntry(over: Partial<FutureWorkEntry> = {}): FutureWorkEntry {
     hoursPerWeek: null,
     shifts: [],
     teamSize: null,
+    teamSizeSource: null,
     teamShape: null,
     requiredSkills: [],
     requiredCertificates: [],
@@ -407,5 +409,28 @@ describe("stored plan overrides derivation", () => {
     );
     expect(stored).toHaveLength(1);
     expect(stored[0].source).toBe("human");
+  });
+});
+
+describe("derivationRouting — real task-router call site (P4)", () => {
+  it("derived requirements carry an audit record proving no LLM ran", () => {
+    const view = build({ entries: [demandEntry()] });
+    expect(view.derivationRouting).not.toBeNull();
+    expect(view.derivationRouting?.taskType).toBe("derive_workforce_requirements");
+    expect(view.derivationRouting?.providerAdapter).toBe("none");
+    expect(view.derivationRouting?.dataCategoriesSent).toEqual([]);
+    expect(view.derivationRouting?.actualCostUsd).toBeNull();
+    expect(view.derivationRouting?.blocked).toBeNull();
+  });
+
+  it("a stored human plan needs no derivation — no routing decision is recorded", async () => {
+    const { deriveWorkforceRequirements, planFromDerived } = await import(
+      "@/lib/workforce/work-breakdown"
+    );
+    const e = demandEntry();
+    const reqs = deriveWorkforceRequirements(e, CATALOG);
+    const plan = planFromDerived(reqs);
+    const view = build({ entries: [e], plans: { [e.id]: plan } });
+    expect(view.derivationRouting).toBeNull();
   });
 });

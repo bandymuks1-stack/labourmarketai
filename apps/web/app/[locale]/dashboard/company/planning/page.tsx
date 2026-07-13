@@ -353,6 +353,39 @@ export default async function CompanyWorkforcePlanningPage({
             </span>
           )}
         </div>
+        {/* Headcount provenance — the user's number is shown as the user's,
+            a system placeholder as a labelled suggestion, confirmed as
+            confirmed. Never merged into one anonymous figure. */}
+        {view.totals.userEnteredHeadcount !== null ||
+        view.totals.systemSuggestedHeadcount !== null ||
+        view.totals.confirmedRequiredHeadcount !== null ? (
+          <div
+            className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted"
+            data-testid="planning-zone-headcount-provenance"
+          >
+            {view.totals.userEnteredHeadcount !== null ? (
+              <span>
+                {t("summary.userEntered", {
+                  count: view.totals.userEnteredHeadcount,
+                })}
+              </span>
+            ) : null}
+            {view.totals.systemSuggestedHeadcount !== null ? (
+              <span>
+                {t("summary.systemSuggested", {
+                  count: view.totals.systemSuggestedHeadcount,
+                })}
+              </span>
+            ) : null}
+            {view.totals.confirmedRequiredHeadcount !== null ? (
+              <span>
+                {t("summary.confirmedRequired", {
+                  count: view.totals.confirmedRequiredHeadcount,
+                })}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
         <CapacityBar
           pct={view.totals.coveragePct}
           riskLevel={view.risk.level}

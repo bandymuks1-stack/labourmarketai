@@ -63,6 +63,31 @@ start or in which order they work. Binding principles:
   ABLE to derive workforce needs from real future work; it is not a
   mandatory first screen or a mandatory workflow for every company.
 
+### 1.2 User-entered facts stay authoritative (owner correction, 2026-07-13)
+
+**Canonical data does not mean prescribed user behavior. User-entered facts
+and choices remain authoritative until the user explicitly replaces or
+confirms an alternative.**
+
+Binding consequences (enforced by `lib/workforce/` and its guards):
+
+- a value the user typed (e.g. required headcount) is projected, derived,
+  and displayed AS the user's value — it is never silently replaced by a
+  derived default, a fallback, or an AI suggestion;
+- a system-derived number is always carried and displayed as a labelled
+  suggestion (`system_suggested_*`), separately explained, editable,
+  confirmable, and rejectable;
+- these values stay distinct end-to-end:
+  `user_entered_required_headcount`, `system_suggested_headcount`,
+  `confirmed_required_headcount`, `available_headcount`, `headcount_gap`;
+- a human edit is a user statement: it becomes the authoritative value and
+  clears any competing system suggestion;
+- the 2026-07-13 browser-proof defect (user entered 5, zone displayed 1 —
+  the `team_size` column was never selected, so a fallback silently
+  replaced the user's fact) is the canonical example of what this rule
+  forbids; its regression matrix lives in
+  `apps/web/lib/workforce/headcount-fidelity.test.ts`.
+
 ## 2. Canonical models (one truth per concept)
 
 | Concept | Canonical store | Contract |

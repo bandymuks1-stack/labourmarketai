@@ -112,3 +112,28 @@ describe("(d) daily run budget is enforced when a real count is supplied", () =>
     expect(out.status).toBe("suggestion");
   });
 });
+
+describe("(e) provider failure produces a VISIBLE fallback, never a silent one (P4)", () => {
+  it("re-route after a provider failure applies the fallback tier and says so", async () => {
+    const { resolveTaskRoute } = await import("./runtime/task-routing");
+    const decision = resolveTaskRoute("explain_match", {
+      attempt: 2,
+      previousProviderFailure: true,
+    });
+    expect(decision.fallbackApplied).toBe(true);
+    expect(decision.tier).toBe("low_cost");
+    expect(decision.modelAlias).toBe("haiku");
+    expect(decision.reason.toLowerCase()).toContain("fell back");
+
+    const out = await runAiAgentCore(matchingExplanationEntry, input, MOCK, {
+      locale: "en",
+      mock: validMock,
+      route: { attempt: 2, previousProviderFailure: true },
+    });
+    // The downgrade is carried on the audit record — visible, not silent.
+    expect(out.routing?.fallback).toBe(true);
+    expect(out.routing?.selectedTier).toBe("low_cost");
+    expect(out.routing?.modelAlias).toBe("haiku");
+    expect(out.routing?.reason.toLowerCase()).toContain("fell back");
+  });
+});

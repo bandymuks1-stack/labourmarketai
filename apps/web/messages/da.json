@@ -2344,7 +2344,10 @@
       "shortPeople": "{count, plural, one {mangler # person} other {mangler # personer}}",
       "shortHours": "mangler {count} t",
       "coveredAll": "Alt vurderet arbejde er dækket",
-      "capacityLabel": "Kapacitetsdækning"
+      "capacityLabel": "Kapacitetsdækning",
+      "userEntered": "Du indtastede: {count}",
+      "systemSuggested": "Systemforslag: {count} (bekræft eller rediger)",
+      "confirmedRequired": "Bekræftet: {count}"
     },
     "risk": {
       "none": "Ingen kapacitetsrisiko i denne visning.",

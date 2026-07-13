@@ -185,3 +185,43 @@ describe("Guard: create_position requires a human-confirmed gap", () => {
     expect(s).not.toMatch(/auto[_-]?hire|send[_-]?offer|contact[_-]?worker/i);
   });
 });
+
+describe("Guard: user-entered facts stay authoritative (constitution §1.2)", () => {
+  it("the workforce service selects the team_size column (the 5→1 root cause)", () => {
+    const s = src("workforce.ts");
+    expect(s).toMatch(/select\("id, title, status, payload, team_size"\)/);
+  });
+
+  it("the projection prefers the user-entered column over payload keys", () => {
+    const s = src("future-work-model.ts");
+    expect(s).toMatch(/columnTeamSize\s*\?\?\s*payloadTeamSize/);
+    expect(s).toContain('"user_entered"');
+  });
+
+  it("derivation never presents the fallback as a fact — it is a labelled system suggestion", () => {
+    const s = src("work-breakdown.ts");
+    expect(s).toContain("user-entered fact, kept authoritative");
+    expect(s).toContain("SYSTEM SUGGESTION");
+    expect(s).toMatch(/systemSuggestedHeadcount\s*=\s*1/);
+  });
+
+  it("a human edit clears the competing system suggestion", () => {
+    const s = src("work-breakdown.ts");
+    expect(s).toMatch(
+      /headcountEdited[\s\S]{0,300}userEnteredHeadcount:\s*patch\.headcount[\s\S]{0,100}systemSuggestedHeadcount:\s*null/,
+    );
+  });
+
+  it("the view separates the five named headcount values", () => {
+    const s = src("planning-zone-view.ts");
+    for (const field of [
+      "userEnteredHeadcount",
+      "systemSuggestedHeadcount",
+      "confirmedRequiredHeadcount",
+      "coveredHeadcount",
+      "shortfall",
+    ]) {
+      expect(s).toContain(field);
+    }
+  });
+});

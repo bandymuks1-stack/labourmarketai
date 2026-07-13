@@ -25,6 +25,11 @@
  *
  * Pure module: no server-only import, no DB client, no IO.
  */
+import {
+  buildRoutingAuditRecord,
+  resolveTaskRoute,
+  type AiRoutingAuditRecord,
+} from "@/lib/ai/runtime/task-routing";
 import type {
   FutureWorkEntry,
   FutureWorkSource,
@@ -82,6 +87,16 @@ export interface PlanningZoneEntry {
   readonly href: string | null;
   readonly requiredHeadcount: number;
   readonly coveredHeadcount: number;
+  /** Sum of user-entered headcounts on this entry's non-rejected lines —
+   *  null when the user entered none (owner principle: shown as the user's
+   *  own number, never replaced by a suggestion). */
+  readonly userEnteredHeadcount: number | null;
+  /** Sum of system-suggested headcounts (labelled suggestions awaiting
+   *  confirm/edit) — null when no line carries a suggestion. */
+  readonly systemSuggestedHeadcount: number | null;
+  /** Sum of headcounts on human-confirmed/edited lines — null when no line
+   *  is confirmed yet. */
+  readonly confirmedHeadcount: number | null;
 }
 
 export interface PlanningZoneMonth {
@@ -121,13 +136,27 @@ export type PlanningZoneNoteId =
 
 export interface PlanningZoneView {
   readonly isEmpty: boolean;
+  /** Routing audit for the derive_workforce_requirements call site — set
+   *  when at least one entry's requirements were DERIVED here (vs read from
+   *  a stored human plan). providerAdapter "none" + empty dataCategoriesSent
+   *  = the deterministic rules ran, no LLM was called, nothing was sent. */
+  readonly derivationRouting: AiRoutingAuditRecord | null;
   readonly months: readonly PlanningZoneMonth[];
   readonly undated: readonly PlanningZoneEntry[];
   readonly totals: {
+    /** Effective required headcount (user-entered values stay authoritative). */
     readonly requiredHeadcount: number;
+    /** available_headcount — capacity that can cover the requirements. */
     readonly coveredHeadcount: number;
+    /** headcount_gap — max(0, required - covered). */
     readonly shortfall: number;
     readonly coveragePct: number;
+    /** user_entered_required_headcount — null when the user entered none. */
+    readonly userEnteredHeadcount: number | null;
+    /** system_suggested_headcount — null when nothing is system-suggested. */
+    readonly systemSuggestedHeadcount: number | null;
+    /** confirmed_required_headcount — null when nothing is confirmed yet. */
+    readonly confirmedRequiredHeadcount: number | null;
     readonly requiredHours: number | null;
     readonly shortfallHours: number | null;
   };
@@ -274,6 +303,30 @@ export function buildPlanningZoneView(
   const requirements = input.entries.flatMap((e) =>
     requirementsForEntry(e, input.plans, input.catalog),
   );
+  // REAL task-router call site: requirement derivation. The deterministic
+  // rules in work-breakdown.ts are the PRIMARY flow (constitution §5); the
+  // router is consulted so the derivation carries an audit record proving
+  // what ran (nothing was sent to any provider). A stored human plan needs
+  // no derivation — then no routing decision is recorded.
+  const derivedAny = input.entries.some((e) => {
+    const plan = input.plans[e.id];
+    return !(plan && plan.requirements.some((r) => r.entryId === e.id));
+  });
+  const derivationRouting: AiRoutingAuditRecord | null = derivedAny
+    ? buildRoutingAuditRecord(
+        resolveTaskRoute("derive_workforce_requirements", { attempt: 1 }),
+        {
+          providerAdapter: "none",
+          schemaValidation: "skipped",
+          confidence: null,
+          actualCostUsd: null,
+          latencyMs: null,
+          usage: null,
+          humanReviewState: "not_required",
+          dataCategoriesSent: [],
+        },
+      )
+    : null;
   const assessment: CapacityAssessment = assessCapacity(
     requirements,
     {
@@ -297,8 +350,39 @@ export function buildPlanningZoneView(
     perEntry.set(r.entryId, agg);
   }
 
+  // Headcount provenance per entry (owner principle: the user's number is
+  // shown as the user's, a suggestion as a suggestion, confirmed as
+  // confirmed) — computed over the same non-rejected requirement lines the
+  // assessment used.
+  const provenance = new Map<
+    string,
+    { user: number | null; suggested: number | null; confirmed: number | null }
+  >();
+  for (const r of requirements) {
+    if (r.status === "rejected") continue;
+    const agg =
+      provenance.get(r.entryId) ??
+      ({ user: null, suggested: null, confirmed: null } as {
+        user: number | null;
+        suggested: number | null;
+        confirmed: number | null;
+      });
+    if (typeof r.userEnteredHeadcount === "number") {
+      agg.user = (agg.user ?? 0) + r.userEnteredHeadcount;
+    }
+    if (typeof r.systemSuggestedHeadcount === "number") {
+      agg.suggested = (agg.suggested ?? 0) + r.systemSuggestedHeadcount;
+    }
+    if (r.status === "confirmed" || r.status === "edited") {
+      agg.confirmed = (agg.confirmed ?? 0) + r.headcount;
+    }
+    provenance.set(r.entryId, agg);
+  }
+
   const toZoneEntry = (e: FutureWorkEntry): PlanningZoneEntry => {
     const agg = perEntry.get(e.id) ?? { required: 0, covered: 0 };
+    const prov =
+      provenance.get(e.id) ?? { user: null, suggested: null, confirmed: null };
     return {
       id: e.id,
       source: e.source,
@@ -308,6 +392,9 @@ export function buildPlanningZoneView(
       href: entryHref(e),
       requiredHeadcount: agg.required,
       coveredHeadcount: agg.covered,
+      userEnteredHeadcount: prov.user,
+      systemSuggestedHeadcount: prov.suggested,
+      confirmedHeadcount: prov.confirmed,
     };
   };
 
@@ -397,7 +484,19 @@ export function buildPlanningZoneView(
     if (secondaryActions.length >= 4) break;
   }
 
+  const sumProvenance = (
+    key: "user" | "suggested" | "confirmed",
+  ): number | null => {
+    let sum: number | null = null;
+    for (const agg of provenance.values()) {
+      const v = agg[key];
+      if (v !== null) sum = (sum ?? 0) + v;
+    }
+    return sum;
+  };
+
   return {
+    derivationRouting,
     isEmpty: input.entries.length === 0,
     months,
     undated,
@@ -406,6 +505,9 @@ export function buildPlanningZoneView(
       coveredHeadcount: totalCovered,
       shortfall: assessment.totalHeadcountShortfall,
       coveragePct: clampPct(totalCovered, totalRequired),
+      userEnteredHeadcount: sumProvenance("user"),
+      systemSuggestedHeadcount: sumProvenance("suggested"),
+      confirmedRequiredHeadcount: sumProvenance("confirmed"),
       requiredHours,
       shortfallHours,
     },

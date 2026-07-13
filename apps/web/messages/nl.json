@@ -8145,7 +8145,10 @@
       "shortPeople": "{count, plural, one {# persoon tekort} other {# mensen tekort}}",
       "shortHours": "{count} u tekort",
       "coveredAll": "Al het beoordeelde werk is gedekt",
-      "capacityLabel": "Capaciteitsdekking"
+      "capacityLabel": "Capaciteitsdekking",
+      "userEntered": "Door u ingevoerd: {count}",
+      "systemSuggested": "Systeemvoorstel: {count} (bevestigen of bewerken)",
+      "confirmedRequired": "Bevestigd: {count}"
     },
     "risk": {
       "none": "Geen capaciteitsrisico in dit beeld.",

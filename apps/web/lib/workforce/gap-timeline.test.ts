@@ -33,6 +33,7 @@ function entry(overrides?: Partial<FutureWorkEntry>): FutureWorkEntry {
     hoursPerWeek: 40,
     shifts: [],
     teamSize: 2,
+    teamSizeSource: "payload_stated",
     teamShape: "team",
     requiredSkills: ["concrete-pouring"],
     requiredCertificates: [],

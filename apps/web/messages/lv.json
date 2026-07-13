@@ -2344,7 +2344,10 @@
       "shortPeople": "[EN] {count, plural, one {short # person} other {short # people}}",
       "shortHours": "[EN] short {count} h",
       "coveredAll": "[EN] All assessed work is covered",
-      "capacityLabel": "[EN] Capacity coverage"
+      "capacityLabel": "[EN] Capacity coverage",
+      "userEntered": "[EN] You entered: {count}",
+      "systemSuggested": "[EN] System suggestion: {count} (confirm or edit)",
+      "confirmedRequired": "[EN] Confirmed: {count}"
     },
     "risk": {
       "none": "[EN] No capacity risk in the current view.",

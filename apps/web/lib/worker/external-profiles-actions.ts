@@ -8,9 +8,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
   classifyExternalProfilesError,
-  parseExternalProfilePlatform,
+  normalizeExternalProfileSubmission,
   parseExternalProfileVisibility,
-  validateExternalProfileUrl,
 } from "./external-profiles-model";
 
 /**
@@ -76,15 +75,18 @@ export async function addExternalProfileAction(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "unauthenticated" };
 
-  const platform = parseExternalProfilePlatform(
+  // Task-router call site (normalize_external_profile): the deterministic
+  // normalization below is the primary flow and runs with no provider; the
+  // routing audit record documents that no LLM ran and nothing was sent.
+  const submission = normalizeExternalProfileSubmission(
     String(formData.get("platform") ?? ""),
+    String(formData.get("url") ?? ""),
   );
-  const url = validateExternalProfileUrl(String(formData.get("url") ?? ""));
-  if (!platform || !url.ok) return { ok: false, code: "invalid" };
+  if (!submission.ok) return { ok: false, code: "invalid" };
 
   const { error } = await asAny(supabase).rpc("save_worker_external_profile_v1", {
-    p_platform: platform,
-    p_url: url.url,
+    p_platform: submission.platform,
+    p_url: submission.url,
     p_profile_id: null,
     p_snapshot: null,
   });

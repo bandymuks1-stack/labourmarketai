@@ -22,6 +22,12 @@
  * validation is unit-testable.
  */
 
+import {
+  buildRoutingAuditRecord,
+  resolveTaskRoute,
+  type AiRoutingAuditRecord,
+} from "@/lib/ai/runtime/task-routing";
+
 // Missing-schema classification is shared platform-wide — reuse the
 // canonical helpers instead of re-declaring the code sets.
 export {
@@ -147,4 +153,53 @@ export function classifyExternalProfilesError(
   if (code === "22023") return "invalid";
   if (code === "P0002") return "no_worker";
   return "error";
+}
+
+/* ------------------------------------------------------------------ */
+/* Task-router call site (P4) — deterministic normalization             */
+/* ------------------------------------------------------------------ */
+
+export type ExternalProfileSubmission =
+  | {
+      ok: true;
+      platform: ExternalProfilePlatform;
+      url: string;
+      routing: AiRoutingAuditRecord;
+    }
+  | { ok: false; routing: AiRoutingAuditRecord };
+
+/**
+ * REAL task-router call site for `normalize_external_profile`.
+ *
+ * The deterministic validation below IS the primary flow and works with no
+ * provider (constitution §5). The router is consulted so every submission
+ * carries an audit record of the routing decision; because no LLM ran,
+ * the outcome honestly reports adapter "none", nothing sent
+ * (dataCategoriesSent []), and no fabricated cost/latency/confidence.
+ * A future OPTIONAL AI suggestion layer (e.g. platform auto-detection from
+ * the URL text) would execute only under this same decision — and its
+ * output would be a labelled suggestion, never a silent rewrite of what
+ * the worker submitted (constitution §1.2).
+ */
+export function normalizeExternalProfileSubmission(
+  rawPlatform: string | null | undefined,
+  rawUrl: string | null | undefined,
+): ExternalProfileSubmission {
+  const decision = resolveTaskRoute("normalize_external_profile", { attempt: 1 });
+  const platform = parseExternalProfilePlatform(rawPlatform ?? "");
+  const validated = validateExternalProfileUrl(rawUrl);
+  const routing = buildRoutingAuditRecord(decision, {
+    providerAdapter: "none",
+    schemaValidation: "skipped",
+    confidence: null,
+    actualCostUsd: null,
+    latencyMs: null,
+    usage: null,
+    // No AI output was produced, so there is nothing for a human to review
+    // here; the policy's humanReview applies to LLM-produced normalizations.
+    humanReviewState: "not_required",
+    dataCategoriesSent: [],
+  });
+  if (!platform || !validated.ok) return { ok: false, routing };
+  return { ok: true, platform, url: validated.url, routing };
 }

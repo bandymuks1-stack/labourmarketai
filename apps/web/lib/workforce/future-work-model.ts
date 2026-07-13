@@ -83,9 +83,16 @@ export interface FutureWorkEntry {
   readonly hoursPerWeek: number | null;
   /** From structured_v2.time.shifts (closed set day/night/weekend). */
   readonly shifts: readonly string[];
-  /** Requested crew size when the payload states one (team_size /
-   *  number_of_workers); null = the owner never stated a headcount. */
+  /** Requested crew size. Precedence: the customer_requests.team_size
+   *  COLUMN (the number the user typed in the demand wizard) wins over any
+   *  historical payload key; null = the owner never stated a headcount.
+   *  OWNER PRINCIPLE: a user-entered value is an authoritative fact — it is
+   *  never silently replaced by a derived default downstream. */
   readonly teamSize: number | null;
+  /** Where teamSize came from: "user_entered" = the team_size column the
+   *  demand wizard writes; "payload_stated" = a historical payload key;
+   *  null = no headcount stated anywhere. */
+  readonly teamSizeSource: "user_entered" | "payload_stated" | null;
   /** Derived from structured_v2.target_supply (individual→solo,
    *  multiple_workers/team→team); null when not captured. `company` supply is
    *  a partner request, not an internal crew shape. */
@@ -115,6 +122,13 @@ export interface DemandWorkInput {
   readonly status: string;
   /** The raw payload jsonb — structured_v2 is parsed here, tolerantly. */
   readonly payload: unknown;
+  /** The customer_requests.team_size COLUMN — the headcount the user typed
+   *  in the demand wizard (demand-request.ts writes it there, NOT into the
+   *  payload). Undefined only for callers predating this field; the service
+   *  always selects it. This was the root cause of the 5→1 browser-proof
+   *  defect: the column was never selected, so the projection silently fell
+   *  back to a derived default of 1. */
+  readonly teamSize?: number | null;
 }
 
 /** A projects row (the delivery axis) as read under the projects RLS. */
@@ -196,6 +210,22 @@ function partnerExpected(v2: StructuredDemandV2 | null): boolean {
 
 export function demandToFutureWork(input: DemandWorkInput): FutureWorkEntry {
   const v2 = readStructuredDemandV2(input.payload);
+  // User-entered column wins; payload keys are a historical fallback only.
+  const columnTeamSize =
+    typeof input.teamSize === "number" &&
+    Number.isInteger(input.teamSize) &&
+    input.teamSize >= 1 &&
+    input.teamSize <= 100_000
+      ? input.teamSize
+      : null;
+  const payloadTeamSize = readTeamSize(input.payload);
+  const teamSize = columnTeamSize ?? payloadTeamSize;
+  const teamSizeSource =
+    columnTeamSize !== null
+      ? ("user_entered" as const)
+      : payloadTeamSize !== null
+        ? ("payload_stated" as const)
+        : null;
   return {
     id: `demand:${input.id}`,
     source: "demand",
@@ -207,7 +237,8 @@ export function demandToFutureWork(input: DemandWorkInput): FutureWorkEntry {
     location: { country: v2?.contract_country ?? null, city: null },
     hoursPerWeek: v2?.time?.hours_per_week ?? null,
     shifts: v2?.time?.shifts ?? [],
-    teamSize: readTeamSize(input.payload),
+    teamSize,
+    teamSizeSource,
     teamShape: teamShapeFromV2(v2),
     requiredSkills: readRequiredSkills(input.payload),
     requiredCertificates: v2?.requirements?.certificates ?? [],
@@ -240,6 +271,7 @@ export function projectToFutureWork(input: ProjectWorkInput): FutureWorkEntry {
     hoursPerWeek: null,
     shifts: [],
     teamSize: null,
+    teamSizeSource: null,
     teamShape: null,
     requiredSkills: [],
     requiredCertificates: [],
@@ -320,7 +352,20 @@ export interface WorkforceRequirement {
   /** Profession catalogue slug, or null = undetermined (human decides). */
   readonly professionSlug: string | null;
   readonly roleTitle: string | null;
+  /** The EFFECTIVE required headcount for this line. When the user entered
+   *  a number it IS that number; a system suggestion never silently
+   *  replaces it (owner principle: user-entered facts stay authoritative
+   *  until the user explicitly replaces or confirms an alternative). When
+   *  status is "confirmed"/"edited" this is the confirmed required value. */
   readonly headcount: number;
+  /** The headcount the USER entered (customer_requests.team_size via the
+   *  demand wizard) — null when the user never stated one. */
+  readonly userEnteredHeadcount?: number | null;
+  /** The headcount the SYSTEM suggested (e.g. the placeholder 1 when no
+   *  team size was stated, or a supervisor line's own count) — null when
+   *  the effective value came from the user. Always labelled a suggestion
+   *  in the UI; requires human confirm/edit. */
+  readonly systemSuggestedHeadcount?: number | null;
   readonly hoursPerWeek: number | null;
   /** headcount × hoursPerWeek × duration weeks — null when underivable. */
   readonly totalHours: number | null;
@@ -364,6 +409,8 @@ const requirementSchema = z
     professionSlug: z.string().min(1).max(120).nullable(),
     roleTitle: z.string().min(1).max(200).nullable(),
     headcount: z.number().int().min(0).max(100_000),
+    userEnteredHeadcount: z.number().int().min(1).max(100_000).nullable().optional(),
+    systemSuggestedHeadcount: z.number().int().min(0).max(100_000).nullable().optional(),
     hoursPerWeek: z.number().int().min(1).max(80).nullable(),
     totalHours: z.number().min(0).max(10_000_000).nullable(),
     skills: z.array(z.string().min(1).max(120)).max(60),

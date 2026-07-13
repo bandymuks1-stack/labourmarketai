@@ -8145,7 +8145,10 @@
       "shortPeople": "{count, plural, one {# Person fehlt} other {# Personen fehlen}}",
       "shortHours": "{count} Std. fehlen",
       "coveredAll": "Alle bewertete Arbeit ist abgedeckt",
-      "capacityLabel": "Kapazitätsabdeckung"
+      "capacityLabel": "Kapazitätsabdeckung",
+      "userEntered": "Ihre Eingabe: {count}",
+      "systemSuggested": "Systemvorschlag: {count} (bestätigen oder bearbeiten)",
+      "confirmedRequired": "Bestätigt: {count}"
     },
     "risk": {
       "none": "Kein Kapazitätsrisiko in dieser Ansicht.",

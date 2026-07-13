@@ -117,3 +117,39 @@ describe("error classification", () => {
     expect(classifyExternalProfilesError(undefined)).toBe("error");
   });
 });
+
+describe("normalizeExternalProfileSubmission — real task-router call site (P4)", () => {
+  it("valid submission normalizes deterministically and carries an honest audit record", async () => {
+    const { normalizeExternalProfileSubmission } = await import(
+      "./external-profiles-model"
+    );
+    const r = normalizeExternalProfileSubmission(
+      "github",
+      "https://github.com/example-worker",
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.platform).toBe("github");
+      expect(r.url).toBe("https://github.com/example-worker");
+    }
+    expect(r.routing.taskType).toBe("normalize_external_profile");
+    // No LLM ran: nothing was sent anywhere, no fabricated numbers.
+    expect(r.routing.providerAdapter).toBe("none");
+    expect(r.routing.dataCategoriesSent).toEqual([]);
+    expect(r.routing.actualCostUsd).toBeNull();
+    expect(r.routing.latencyMs).toBeNull();
+    expect(r.routing.schemaValidation).toBe("skipped");
+    // The audit never contains the worker's URL.
+    expect(JSON.stringify(r.routing)).not.toContain("example-worker");
+  });
+
+  it("invalid submission still fails closed with the same honest audit", async () => {
+    const { normalizeExternalProfileSubmission } = await import(
+      "./external-profiles-model"
+    );
+    const r = normalizeExternalProfileSubmission("github", "http://insecure.example");
+    expect(r.ok).toBe(false);
+    expect(r.routing.taskType).toBe("normalize_external_profile");
+    expect(r.routing.providerAdapter).toBe("none");
+  });
+});

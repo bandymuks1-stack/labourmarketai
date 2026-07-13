@@ -155,3 +155,27 @@ Rexora/Agentai OS AI Gateway — dependency-free):
 - **Second-model review / pre-run human confirmation:** declared in the
   policy shape; the `high_risk_verified` tier stays blocked until these
   flows are really built.
+
+## Real call sites (PR #749 fix round, 2026-07-13)
+
+Beyond the 4 agent runners (threaded inside `run-agent.ts`), the router is
+consulted at two real product call sites:
+
+1. **`derive_workforce_requirements`** —
+   `lib/workforce/planning-zone-view.ts`: when the planning zone derives
+   requirements (no stored human plan), the view carries
+   `derivationRouting` — an audit record with `providerAdapter: "none"` and
+   `dataCategoriesSent: []`, proving the deterministic rules ran and no LLM
+   was called and nothing was sent. A stored human plan records no decision.
+2. **`normalize_external_profile`** —
+   `lib/worker/external-profiles-model.ts`
+   `normalizeExternalProfileSubmission()` (used by the add-profile server
+   action): deterministic URL/platform normalization is the primary flow;
+   every submission carries the same honest audit record shape.
+
+In both, the deterministic/manual flow is PRIMARY and fully functional with
+no provider; a future AI layer would run only under the same decision and
+only as a labelled suggestion (constitution §1.2 — user-entered facts stay
+authoritative). Provider failure produces a VISIBLE fallback: the decision's
+`fallbackApplied: true` + reason text is carried on the outcome audit
+record (`run-agent-routing.test.ts` case (e)).

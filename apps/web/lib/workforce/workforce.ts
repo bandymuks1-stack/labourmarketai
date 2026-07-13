@@ -114,7 +114,7 @@ async function readDemandInputs(
 ): Promise<{ state: WorkforceSourceState; rows: DemandWorkInput[] }> {
   const res = await asAny(supabase)
     .from("customer_requests")
-    .select("id, title, status, payload")
+    .select("id, title, status, payload, team_size")
     .eq("profile_id", userId)
     .eq("kind", "company_request")
     .neq("status", "closed")
@@ -131,12 +131,16 @@ async function readDemandInputs(
     title: string | null;
     status: string;
     payload: unknown;
+    // The column the demand wizard writes the user's headcount to — the
+    // 5→1 root cause was this column never being selected here.
+    team_size: number | null;
   };
   const rows: DemandWorkInput[] = ((res.data ?? []) as Row[]).map((r) => ({
     id: r.id,
     title: r.title ?? null,
     status: r.status,
     payload: r.payload ?? null,
+    teamSize: r.team_size ?? null,
   }));
   return { state: { status: "ok", count: rows.length }, rows };
 }

@@ -8145,7 +8145,10 @@
       "shortPeople": "не хватает {count} чел.",
       "shortHours": "не хватает {count} ч",
       "coveredAll": "Вся оценённая работа покрыта",
-      "capacityLabel": "Покрытие мощности"
+      "capacityLabel": "Покрытие мощности",
+      "userEntered": "Вы ввели: {count}",
+      "systemSuggested": "Предложение системы: {count} (подтвердите или измените)",
+      "confirmedRequired": "Подтверждено: {count}"
     },
     "risk": {
       "none": "В текущем виде риска нехватки нет.",
