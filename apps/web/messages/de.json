@@ -8601,6 +8601,37 @@
     "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "invalid": "Wählen Sie eine Sprache und ein Niveau."
   },
+  "externalProfiles": {
+    "title": "Externe Profile",
+    "hint": "Verknüpfen Sie Profile, die Sie auf anderen Seiten haben — ein Portfolio, GitHub, LinkedIn oder ein Zertifikatsregister.",
+    "selfManaged": "Diese Links fügen Sie selbst hinzu und verwalten sie selbst. Die Plattform ruft niemals Inhalte von diesen Seiten ab und prüft sie nicht.",
+    "platform": "Seite",
+    "url": "Link (https://)",
+    "urlPlaceholder": "https://…",
+    "add": "Link hinzufügen",
+    "adding": "Wird hinzugefügt…",
+    "disconnect": "Trennen",
+    "confirmDisconnect": "Ja, trennen",
+    "cancel": "Abbrechen",
+    "visibility": "Sichtbarkeit",
+    "visibilityPrivate": "Privat",
+    "visibilityEmployers": "Arbeitgeber",
+    "visibilityNote": "Die Arbeitgeber-Ansicht ist noch nicht freigeschaltet — Ihre Auswahl wird gespeichert und gilt, sobald sie aktiv ist.",
+    "importNote": "Ein automatischer Import von diesen Seiten wird nicht angeboten. Um Ihre Daten zu übernehmen, laden Sie im Profil-Editor eine exportierte Lebenslauf-Datei hoch.",
+    "importLink": "Profil-Editor öffnen",
+    "empty": "Noch keine externen Profile verknüpft.",
+    "notEnabled": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "invalid": "Geben Sie einen vollständigen https://-Link ein und wählen Sie eine Seite.",
+    "platformNames": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "behance": "Behance",
+      "portfolio": "Portfolio",
+      "certificationRegistry": "Zertifikatsregister",
+      "other": "Andere"
+    }
+  },
   "network": {
     "module": {
       "label": "Mein Netzwerk",

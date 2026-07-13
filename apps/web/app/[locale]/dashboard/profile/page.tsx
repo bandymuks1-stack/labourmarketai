@@ -50,6 +50,14 @@ import {
   getOwnWorkerLanguages,
   type WorkerLanguagesRead,
 } from "@/lib/worker/worker-languages";
+import {
+  ExternalProfilesSection,
+  type ExternalProfilesLabels,
+} from "@/components/app/external-profiles-section";
+import {
+  getOwnExternalProfiles,
+  type ExternalProfilesRead,
+} from "@/lib/worker/external-profiles";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
 import { Building2 } from "lucide-react";
@@ -91,6 +99,7 @@ export default async function ProfilePage({
   const tHub = await getTranslations("marketplaceHub");
   const tPrefs = await getTranslations("workerPrefs");
   const tLangs = await getTranslations("workerLanguages");
+  const tExt = await getTranslations("externalProfiles");
 
   const supabase = await createClient();
   const {
@@ -184,10 +193,16 @@ export default async function ProfilePage({
   // 20260711250000 (PR #720). Until the owner applies it the read reports
   // needs-migration and the section renders its honest explanation state.
   let workerLanguages: WorkerLanguagesRead | null = null;
+  // External profile links (Labour Market OS P6) — worker_external_profiles
+  // from DRAFT migration 20260713210000. Until the owner applies it the read
+  // reports needs-migration and the section renders its honest explanation
+  // state. No automatic import exists — links are worker-added only.
+  let externalProfiles: ExternalProfilesRead | null = null;
   if (workerId) {
-    [availabilityPrefs, workerLanguages] = await Promise.all([
+    [availabilityPrefs, workerLanguages, externalProfiles] = await Promise.all([
       getOwnAvailabilityPrefs(),
       getOwnWorkerLanguages(),
+      getOwnExternalProfiles(),
     ]);
     const { data: wpAll } = await supabase
       .from("worker_professions")
@@ -683,6 +698,53 @@ export default async function ProfilePage({
               error: tLangs("error"),
               invalid: tLangs("invalid"),
             } satisfies WorkerLanguagesLabels
+          }
+        />
+      ) : null}
+
+      {/* External profile links (Labour Market OS P6) — worker_external_profiles
+          (draft migration 20260713210000), next to the languages card on the
+          same identity surface. Consent-first: private by default, no employer
+          read path in v1 (the card says so), soft disconnect only, NO
+          automatic import (honest note points at the CV-file upload flow). */}
+      {workerId && externalProfiles && externalProfiles.kind !== "no-worker" ? (
+        <ExternalProfilesSection
+          initial={
+            externalProfiles.kind === "ok" ? externalProfiles.profiles : []
+          }
+          needsMigration={externalProfiles.kind === "needs-migration"}
+          labels={
+            {
+              title: tExt("title"),
+              hint: tExt("hint"),
+              selfManaged: tExt("selfManaged"),
+              platform: tExt("platform"),
+              url: tExt("url"),
+              urlPlaceholder: tExt("urlPlaceholder"),
+              add: tExt("add"),
+              adding: tExt("adding"),
+              disconnect: tExt("disconnect"),
+              confirmDisconnect: tExt("confirmDisconnect"),
+              cancel: tExt("cancel"),
+              visibility: tExt("visibility"),
+              visibilityPrivate: tExt("visibilityPrivate"),
+              visibilityEmployers: tExt("visibilityEmployers"),
+              visibilityNote: tExt("visibilityNote"),
+              importNote: tExt("importNote"),
+              importLink: tExt("importLink"),
+              empty: tExt("empty"),
+              notEnabled: tExt("notEnabled"),
+              error: tExt("error"),
+              invalid: tExt("invalid"),
+              platformNames: {
+                linkedin: tExt("platformNames.linkedin"),
+                github: tExt("platformNames.github"),
+                behance: tExt("platformNames.behance"),
+                portfolio: tExt("platformNames.portfolio"),
+                certification_registry: tExt("platformNames.certificationRegistry"),
+                other: tExt("platformNames.other"),
+              },
+            } satisfies ExternalProfilesLabels
           }
         />
       ) : null}

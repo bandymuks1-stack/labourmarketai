@@ -8601,6 +8601,37 @@
     "error": "Opslaan is mislukt. Probeer het opnieuw.",
     "invalid": "Kies een taal en een niveau."
   },
+  "externalProfiles": {
+    "title": "Externe profielen",
+    "hint": "Koppel profielen die u op andere sites heeft — een portfolio, GitHub, LinkedIn of een certificeringsregister.",
+    "selfManaged": "U voegt deze links zelf toe en beheert ze zelf. Het platform haalt nooit inhoud van deze sites op en controleert die niet.",
+    "platform": "Site",
+    "url": "Link (https://)",
+    "urlPlaceholder": "https://…",
+    "add": "Link toevoegen",
+    "adding": "Toevoegen…",
+    "disconnect": "Ontkoppelen",
+    "confirmDisconnect": "Ja, ontkoppelen",
+    "cancel": "Annuleren",
+    "visibility": "Zichtbaarheid",
+    "visibilityPrivate": "Privé",
+    "visibilityEmployers": "Werkgevers",
+    "visibilityNote": "Weergave voor werkgevers is nog niet ingeschakeld — uw keuze wordt opgeslagen en gaat gelden zodra dit actief is.",
+    "importNote": "Automatisch importeren vanaf deze sites wordt niet aangeboden. Upload een geëxporteerd cv-bestand in de profieleditor om uw gegevens over te nemen.",
+    "importLink": "Profieleditor openen",
+    "empty": "Nog geen externe profielen gekoppeld.",
+    "notEnabled": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "error": "Opslaan is mislukt. Probeer het opnieuw.",
+    "invalid": "Voer een volledige https://-link in en kies een site.",
+    "platformNames": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "behance": "Behance",
+      "portfolio": "Portfolio",
+      "certificationRegistry": "Certificeringsregister",
+      "other": "Overig"
+    }
+  },
   "network": {
     "module": {
       "label": "Mijn netwerk",

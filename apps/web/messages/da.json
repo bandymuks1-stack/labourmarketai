@@ -2185,6 +2185,37 @@
     "error": "Kunne ikke gemme. Prøv igen.",
     "invalid": "Vælg et sprog og et niveau."
   },
+  "externalProfiles": {
+    "title": "Eksterne profiler",
+    "hint": "Tilknyt profiler, du har på andre sider — en portfolio, GitHub, LinkedIn eller et certificeringsregister.",
+    "selfManaged": "Du tilføjer og styrer selv disse links. Platformen henter aldrig indhold fra disse sider og kontrollerer det ikke.",
+    "platform": "Side",
+    "url": "Link (https://)",
+    "urlPlaceholder": "https://…",
+    "add": "Tilføj link",
+    "adding": "Tilføjer…",
+    "disconnect": "Fjern tilknytning",
+    "confirmDisconnect": "Ja, fjern",
+    "cancel": "Annuller",
+    "visibility": "Synlighed",
+    "visibilityPrivate": "Privat",
+    "visibilityEmployers": "Arbejdsgivere",
+    "visibilityNote": "Visning for arbejdsgivere er ikke slået til endnu — dit valg gemmes og træder i kraft, når den bliver det.",
+    "importNote": "Automatisk import fra disse sider tilbydes ikke. Upload en eksporteret CV-fil i profileditoren for at få dine data ind.",
+    "importLink": "Åbn profileditoren",
+    "empty": "Ingen eksterne profiler tilknyttet endnu.",
+    "notEnabled": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "error": "Kunne ikke gemme. Prøv igen.",
+    "invalid": "Indtast et fuldt https://-link og vælg en side.",
+    "platformNames": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "behance": "Behance",
+      "portfolio": "Portfolio",
+      "certificationRegistry": "Certificeringsregister",
+      "other": "Andet"
+    }
+  },
   "bookings": {
     "endsOn": "Indtil {date}",
     "noRole": "Arbejdsaftale",

@@ -243,6 +243,12 @@ describe("NO new DB migration in this PR", () => {
     // fail-closed owner-only RLS and RPC-only writes. DRAFT /
     // needs-human-gate, NOT applied; paired rollback + deferred
     // APPLIED_LEDGER entry in the PR.
-    expect(count).toBeLessThanOrEqual(131);
+    // Bumped 131 -> 132 for the multi-source talent draft
+    // (20260713210000_multi_source_talent_v1, Labour Market OS P5–P7):
+    // provenance ledger + worker external profiles + append-only
+    // identity-resolution audit; fail-closed RLS, RPC-only writes. DRAFT /
+    // needs-human-gate, NOT applied; paired rollback + deferred
+    // APPLIED_LEDGER entry in the PR.
+    expect(count).toBeLessThanOrEqual(132);
   });
 });

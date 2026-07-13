@@ -2185,6 +2185,37 @@
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Choose a language and a level."
   },
+  "externalProfiles": {
+    "title": "[EN] External profiles",
+    "hint": "[EN] Link profiles you hold on other sites — a portfolio, GitHub, LinkedIn or a certification registry.",
+    "selfManaged": "[EN] You add and control these links yourself. The platform never fetches or checks content from these sites.",
+    "platform": "[EN] Site",
+    "url": "[EN] Link (https://)",
+    "urlPlaceholder": "[EN] https://…",
+    "add": "[EN] Add link",
+    "adding": "[EN] Adding…",
+    "disconnect": "[EN] Disconnect",
+    "confirmDisconnect": "[EN] Yes, disconnect",
+    "cancel": "[EN] Cancel",
+    "visibility": "[EN] Visibility",
+    "visibilityPrivate": "[EN] Private",
+    "visibilityEmployers": "[EN] Employers",
+    "visibilityNote": "[EN] Employer viewing is not switched on yet — your visibility choice is saved and will apply once it is.",
+    "importNote": "[EN] Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
+    "importLink": "[EN] Open the profile editor",
+    "empty": "[EN] No external profiles linked yet.",
+    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "error": "[EN] Saving failed. Please try again.",
+    "invalid": "[EN] Enter a full https:// link and choose a site.",
+    "platformNames": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "behance": "Behance",
+      "portfolio": "Portfolio",
+      "certificationRegistry": "[EN] Certification registry",
+      "other": "[EN] Other"
+    }
+  },
   "bookings": {
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",

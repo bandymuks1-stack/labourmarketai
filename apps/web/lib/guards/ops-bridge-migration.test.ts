@@ -345,6 +345,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 130 -> 131 for the intake service-role grants draft
     // (20260713190000, canonical journey P3 defect fix) — DRAFT /
     // needs-human-gate, NOT applied; paired rollback in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 131/);
+    // Bumped 131 -> 132 for the multi-source talent draft
+    // (20260713210000_multi_source_talent_v1, Labour Market OS P5–P7) —
+    // DRAFT / needs-human-gate, NOT applied; paired rollback in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 132/);
   });
 });
