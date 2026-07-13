@@ -1,0 +1,577 @@
+/**
+ * Cost-aware AI task routing — PURE policy core (Labour Market OS, P8–P9).
+ *
+ * Every internal agent run is routed by TASK, not by hard-coded model id.
+ * A task policy declares what the task may see (data minimisation), what it
+ * must produce (strict schema), how much it may cost, and which model TIER it
+ * runs on. Tiers map to model ALIASES (lib/ai/types.ts AI_MODEL_CANDIDATES) —
+ * product code never carries a raw model id (guard: ai-task-routing).
+ *
+ * Binding routing rules (docs/product/cost-aware-ai-task-routing-contract-v1.md):
+ *   - Deterministic-first: capacity/skill gap detection is computed by the
+ *     pure workforce models, never an LLM (tier "deterministic", no model).
+ *   - Always start at the policy's preferredTier. The max model is NEVER a
+ *     default (no policy may prefer "advanced"/"high_risk_verified" unless it
+ *     is riskLevel "high" — and a high-risk policy must also require human
+ *     review; enforced by task-routing.test.ts).
+ *   - Escalate ONE tier only, and only on a condition the policy lists.
+ *   - Cost ceiling → blocked "cost_ceiling". A run over budget NEVER silently
+ *     proceeds.
+ *   - Provider-failure fallback may go DOWN a tier only with
+ *     fallbackApplied=true and an honest reason — no silent quality drop.
+ *   - The "high_risk_verified" tier requires a pre-run human confirmation
+ *     flow that does NOT exist yet → any route resolving there is blocked
+ *     "needs_human_confirmation" (honest inert seam, no fake approval).
+ *
+ * Audit-record persistence (an `ai_runs` table) is an owner-gated FUTURE
+ * migration — {@link buildRoutingAuditRecord} is the pure builder only; the
+ * record is exposed on the runner outcome for callers/tests today.
+ *
+ * Pure. No server-only, no env, no IO, no fetch.
+ */
+import { AI_MODEL_CANDIDATES } from "../types";
+import type { AiRuntimeConfig } from "./config-core";
+import type { AiAgentKey } from "../registry/types";
+
+// ── Task + tier vocabulary ──────────────────────────────────────────────────
+
+export const AI_TASK_TYPES = [
+  "structure_future_work",
+  "derive_workforce_requirements",
+  "normalize_work_scope",
+  "detect_capacity_gap",
+  "detect_skill_gap",
+  "normalize_external_profile",
+  "extract_cv",
+  "explain_match",
+  "translate_message",
+  "draft_follow_up",
+] as const;
+export type AiTaskType = (typeof AI_TASK_TYPES)[number];
+
+export const AI_MODEL_TIERS = [
+  "deterministic",
+  "low_cost",
+  "standard",
+  "advanced",
+  "high_risk_verified",
+] as const;
+export type AiModelTier = (typeof AI_MODEL_TIERS)[number];
+
+export type EscalationReason =
+  | "low_confidence"
+  | "schema_invalid"
+  | "contradicts_sources"
+  | "quality_below_threshold"
+  | "human_requested_depth";
+
+export type AiTaskRiskLevel = "low" | "medium" | "high";
+
+/** Model alias per tier — an ALIAS, never a raw model id in product code. */
+export type AiModelAlias = "haiku" | "sonnet" | "opus";
+
+export const TIER_MODEL_ALIAS: Record<AiModelTier, AiModelAlias | null> = {
+  deterministic: null, // pure workforce models — no LLM call at all
+  low_cost: "haiku",
+  standard: "sonnet",
+  advanced: "opus",
+  high_risk_verified: "opus", // opus + second-model review + human confirmation
+};
+
+/** Alias → concrete model id. The ONLY alias→id mapping outside config-core. */
+export function modelIdForAlias(alias: AiModelAlias): string {
+  return AI_MODEL_CANDIDATES.anthropic[alias];
+}
+
+// ── Task policies ───────────────────────────────────────────────────────────
+
+export interface AiTaskPolicy {
+  readonly taskType: AiTaskType;
+  readonly riskLevel: AiTaskRiskLevel;
+  /** Field NAMES the task may receive — data minimisation contract. */
+  readonly allowedFields: readonly string[];
+  /** Field NAMES the task must NEVER receive. */
+  readonly prohibitedFields: readonly string[];
+  /** Name of the strict zod schema the output must satisfy (audit label). */
+  readonly expectedSchema: string;
+  /** Confidence threshold 0..1 below which the output needs review. */
+  readonly minQuality: number;
+  /** Hard per-run cost ceiling (USD). Over ceiling → blocked, never run. */
+  readonly maxEstimatedCostUsd: number;
+  readonly maxLatencyMs: number;
+  readonly preferredTier: AiModelTier;
+  /** Tier used on provider failure (surfaced via fallbackApplied). */
+  readonly fallbackTier: AiModelTier;
+  /** The ONLY conditions that may escalate this task one tier. */
+  readonly escalationConditions: readonly EscalationReason[];
+  readonly secondModelReview: boolean;
+  /** Output requires explicit human review before it can be used/persisted. */
+  readonly humanReview: boolean;
+}
+
+/** Fields no task in this program ever needs — always prohibited. */
+const NEVER_NEEDED = [
+  "address",
+  "phone",
+  "email",
+  "exact_coordinates",
+  "documents",
+  "government_id",
+  "payment_details",
+] as const;
+
+export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
+  structure_future_work: {
+    taskType: "structure_future_work",
+    riskLevel: "medium",
+    allowedFields: [
+      "work_description",
+      "role_hints",
+      "timeframe",
+      "headcount_hint",
+      "region_hint",
+      "locale",
+    ],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "companyNeedOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.15,
+    maxLatencyMs: 30_000,
+    preferredTier: "standard",
+    fallbackTier: "low_cost",
+    escalationConditions: ["low_confidence", "schema_invalid", "human_requested_depth"],
+    secondModelReview: false,
+    humanReview: true,
+  },
+  derive_workforce_requirements: {
+    taskType: "derive_workforce_requirements",
+    riskLevel: "medium",
+    allowedFields: [
+      "structured_work_scope",
+      "role_requirements",
+      "country_code",
+      "timeframe",
+      "locale",
+    ],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "countryReadinessOutputSchema | documentAssistantOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.15,
+    maxLatencyMs: 30_000,
+    preferredTier: "standard",
+    fallbackTier: "low_cost",
+    escalationConditions: ["low_confidence", "schema_invalid", "contradicts_sources"],
+    secondModelReview: false,
+    humanReview: false,
+  },
+  normalize_work_scope: {
+    taskType: "normalize_work_scope",
+    riskLevel: "low",
+    allowedFields: ["scope_text", "journal_entry_text", "work_categories", "locale"],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "workJournalOutputSchema",
+    minQuality: 0.55,
+    maxEstimatedCostUsd: 0.05,
+    maxLatencyMs: 20_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: ["schema_invalid", "quality_below_threshold"],
+    secondModelReview: false,
+    humanReview: false,
+  },
+  detect_capacity_gap: {
+    taskType: "detect_capacity_gap",
+    riskLevel: "low",
+    allowedFields: [
+      "role_requirements",
+      "headcount_plan",
+      "capacity_records",
+      "assignment_records",
+    ],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "deterministic capacity-gap model output (pure workforce model)",
+    minQuality: 1,
+    maxEstimatedCostUsd: 0,
+    maxLatencyMs: 5_000,
+    preferredTier: "deterministic",
+    fallbackTier: "deterministic",
+    escalationConditions: [], // never escalates to an LLM — computed, not guessed
+    secondModelReview: false,
+    humanReview: false,
+  },
+  detect_skill_gap: {
+    taskType: "detect_skill_gap",
+    riskLevel: "low",
+    allowedFields: ["required_skills", "available_skills", "skill_matrix"],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "deterministic skill-gap model output (pure workforce model)",
+    minQuality: 1,
+    maxEstimatedCostUsd: 0,
+    maxLatencyMs: 5_000,
+    preferredTier: "deterministic",
+    fallbackTier: "deterministic",
+    escalationConditions: [], // never escalates to an LLM — computed, not guessed
+    secondModelReview: false,
+    humanReview: false,
+  },
+  normalize_external_profile: {
+    taskType: "normalize_external_profile",
+    riskLevel: "medium",
+    allowedFields: ["external_profile_text", "declared_skills", "locale"],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "workerProfileOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.12,
+    maxLatencyMs: 30_000,
+    preferredTier: "standard",
+    fallbackTier: "low_cost",
+    escalationConditions: ["low_confidence", "schema_invalid"],
+    secondModelReview: false,
+    humanReview: true,
+  },
+  extract_cv: {
+    taskType: "extract_cv",
+    riskLevel: "medium",
+    // The ONE task whose job is reading CV text — so cv_text/bio is allowed,
+    // but contact/location/document fields must still never be sent.
+    allowedFields: ["cv_text", "bio", "locale"],
+    prohibitedFields: [...NEVER_NEEDED],
+    expectedSchema: "workerProfileOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.2,
+    maxLatencyMs: 45_000,
+    preferredTier: "standard",
+    fallbackTier: "low_cost",
+    escalationConditions: ["low_confidence", "schema_invalid", "human_requested_depth"],
+    secondModelReview: false,
+    humanReview: true,
+  },
+  explain_match: {
+    taskType: "explain_match",
+    riskLevel: "medium",
+    allowedFields: [
+      "worker_skills",
+      "work_evidence_summaries",
+      "availability",
+      "country_readiness_summaries",
+      "documents_summary",
+      "company_need",
+      "booking_dates",
+      "accommodation",
+      "transport",
+      "language",
+      "locale",
+    ],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "matchingExplanationOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.15,
+    maxLatencyMs: 30_000,
+    preferredTier: "standard",
+    fallbackTier: "low_cost",
+    escalationConditions: ["low_confidence", "contradicts_sources", "human_requested_depth"],
+    secondModelReview: false,
+    humanReview: false,
+  },
+  translate_message: {
+    taskType: "translate_message",
+    riskLevel: "low",
+    allowedFields: ["source_text", "source_locale", "target_locale"],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "translationCopyOutputSchema",
+    minQuality: 0.55,
+    maxEstimatedCostUsd: 0.03,
+    maxLatencyMs: 15_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: ["quality_below_threshold"],
+    secondModelReview: false,
+    humanReview: false,
+  },
+  draft_follow_up: {
+    taskType: "draft_follow_up",
+    riskLevel: "medium",
+    allowedFields: ["conversation_summary", "recipient_role", "goal", "locale"],
+    prohibitedFields: ["full_cv", ...NEVER_NEEDED],
+    expectedSchema: "supportOnboardingOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.05,
+    maxLatencyMs: 20_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: ["quality_below_threshold", "human_requested_depth"],
+    secondModelReview: false,
+    // Outbound-shaped content: a draft is NEVER sent without a human
+    // (live sending itself stays an owner-only gate outside this layer).
+    humanReview: true,
+  },
+};
+
+// ── Agent → task mapping (all 11 registered agents) ────────────────────────
+
+/**
+ * Which program task each existing registry agent performs. Two deterministic
+ * tasks (detect_capacity_gap / detect_skill_gap) have NO agent on purpose —
+ * they are computed by the pure workforce models, not by an LLM.
+ *
+ * Rationale per row lives in
+ * docs/product/cost-aware-ai-task-routing-contract-v1.md.
+ */
+export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
+  worker_profile: "extract_cv", // free-text bio/CV → structured profile draft
+  work_journal: "normalize_work_scope", // journal free-text → structured work scope
+  skill_evidence: "normalize_external_profile", // evidence text → normalized capability claims
+  company_need: "structure_future_work", // company's future work → structured need
+  country_readiness: "derive_workforce_requirements", // what working there requires
+  document_assistant: "derive_workforce_requirements", // documents needed = requirement derivation
+  matching_explanation: "explain_match",
+  booking_risk: "explain_match", // risk narrative = explanation over canonical signals
+  admin_risk: "explain_match", // same explanation-class task, admin audience
+  support_onboarding: "draft_follow_up", // guidance / next-step message drafts
+  translation_copy: "translate_message",
+};
+
+export function taskTypeForAgent(agent: AiAgentKey): AiTaskType {
+  return AGENT_TASK_TYPES[agent];
+}
+
+// ── Route resolution ────────────────────────────────────────────────────────
+
+export interface AiTaskRouteContext {
+  /** 1-based attempt number (1 = first try). */
+  readonly attempt: number;
+  /** Quality-type failure from the PREVIOUS attempt (escalation trigger). */
+  readonly previousFailure?: EscalationReason;
+  /** The previous attempt failed at the PROVIDER (outage/timeout) — fallback. */
+  readonly previousProviderFailure?: boolean;
+  /** Pre-run cost estimate, when the caller can compute one. */
+  readonly estimatedCostUsd?: number;
+}
+
+export type RouteBlockReason = "cost_ceiling" | "needs_human_confirmation";
+
+export interface TaskRouteDecision {
+  readonly taskType: AiTaskType;
+  readonly tier: AiModelTier;
+  /** Model ALIAS for the tier (null for deterministic — no LLM call). */
+  readonly modelAlias: AiModelAlias | null;
+  /** Honest, human-readable reason for this exact route. */
+  readonly reason: string;
+  readonly escalated: boolean;
+  readonly fallbackApplied: boolean;
+  readonly secondModelReview: boolean;
+  /** Set → the run must NOT proceed (cost ceiling / missing human gate). */
+  readonly blocked?: RouteBlockReason;
+}
+
+/** LLM tier ladder for one-step escalation (deterministic is not on it). */
+const LLM_LADDER: readonly AiModelTier[] = [
+  "low_cost",
+  "standard",
+  "advanced",
+  "high_risk_verified",
+];
+
+function oneTierUp(tier: AiModelTier): AiModelTier {
+  const i = LLM_LADDER.indexOf(tier);
+  if (i < 0) return tier; // deterministic never climbs onto the LLM ladder
+  return LLM_LADDER[Math.min(i + 1, LLM_LADDER.length - 1)];
+}
+
+function tierRank(tier: AiModelTier): number {
+  return LLM_LADDER.indexOf(tier);
+}
+
+/**
+ * Resolve a route for an explicit policy. Exported so the (currently unused)
+ * high-risk block path is testable with a synthetic high-risk policy —
+ * no fake high-risk task is added to TASK_POLICIES just to exercise it.
+ */
+export function resolveRouteForPolicy(
+  policy: AiTaskPolicy,
+  ctx: AiTaskRouteContext,
+): TaskRouteDecision {
+  // Deterministic-first: computed by the pure workforce models, never an LLM.
+  if (policy.preferredTier === "deterministic") {
+    return {
+      taskType: policy.taskType,
+      tier: "deterministic",
+      modelAlias: null,
+      reason:
+        "deterministic-model task — computed by the pure workforce models, no LLM call",
+      escalated: false,
+      fallbackApplied: false,
+      secondModelReview: false,
+    };
+  }
+
+  // Cost ceiling: over budget NEVER silently proceeds.
+  if (
+    ctx.estimatedCostUsd !== undefined &&
+    ctx.estimatedCostUsd > policy.maxEstimatedCostUsd
+  ) {
+    return {
+      taskType: policy.taskType,
+      tier: policy.preferredTier,
+      modelAlias: TIER_MODEL_ALIAS[policy.preferredTier],
+      reason: `estimated cost ${ctx.estimatedCostUsd.toFixed(4)} USD exceeds the ${policy.maxEstimatedCostUsd.toFixed(4)} USD ceiling for ${policy.taskType} — run blocked`,
+      escalated: false,
+      fallbackApplied: false,
+      secondModelReview: policy.secondModelReview,
+      blocked: "cost_ceiling",
+    };
+  }
+
+  let tier: AiModelTier = policy.preferredTier;
+  let escalated = false;
+  let fallbackApplied = false;
+  let reason = `preferred tier "${tier}" for ${policy.taskType} (attempt ${ctx.attempt})`;
+
+  if (ctx.previousProviderFailure) {
+    // Provider failure → fallback tier. Never silent: fallbackApplied + reason.
+    const from = tier;
+    tier = policy.fallbackTier;
+    fallbackApplied = true;
+    reason =
+      tierRank(tier) < tierRank(from)
+        ? `provider failure — fell back from "${from}" to lower tier "${tier}" (quality downgrade surfaced, not silent)`
+        : `provider failure — retrying on fallback tier "${tier}"`;
+  } else if (
+    ctx.previousFailure !== undefined &&
+    policy.escalationConditions.includes(ctx.previousFailure)
+  ) {
+    // Escalate exactly ONE tier, only on a condition the policy lists.
+    const from = tier;
+    tier = oneTierUp(tier);
+    escalated = tier !== from;
+    reason = escalated
+      ? `escalated one tier "${from}" → "${tier}" after "${ctx.previousFailure}" (attempt ${ctx.attempt})`
+      : `already at the top LLM tier "${tier}" — cannot escalate further`;
+  } else if (ctx.previousFailure !== undefined) {
+    reason = `previous failure "${ctx.previousFailure}" is not an escalation condition for ${policy.taskType} — staying on "${tier}"`;
+  }
+
+  const secondModelReview =
+    policy.secondModelReview || tier === "high_risk_verified";
+
+  // The high_risk_verified tier needs a pre-run human confirmation flow that
+  // does not exist yet → honest block, never a fake approval.
+  if (tier === "high_risk_verified") {
+    return {
+      taskType: policy.taskType,
+      tier,
+      modelAlias: TIER_MODEL_ALIAS[tier],
+      reason: `${reason}; tier "high_risk_verified" requires a human confirmation flow that is not implemented — run blocked`,
+      escalated,
+      fallbackApplied,
+      secondModelReview,
+      blocked: "needs_human_confirmation",
+    };
+  }
+
+  return {
+    taskType: policy.taskType,
+    tier,
+    modelAlias: TIER_MODEL_ALIAS[tier],
+    reason,
+    escalated,
+    fallbackApplied,
+    secondModelReview,
+  };
+}
+
+export function resolveTaskRoute(
+  taskType: AiTaskType,
+  ctx: AiTaskRouteContext,
+): TaskRouteDecision {
+  return resolveRouteForPolicy(TASK_POLICIES[taskType], ctx);
+}
+
+// ── Daily run budget (previously declared but unenforced) ──────────────────
+
+export type RunBudgetAssessment = "ok" | "budget_exceeded";
+
+/**
+ * Pure daily-run-budget check against the clamped cfg.dailyRunBudget.
+ * HONEST GAP: there is no persisted run counter yet (owner-gated follow-up —
+ * see the routing contract doc). The runner enforces this only when the
+ * caller supplies a real `runsToday` count; nothing fakes a counter.
+ */
+export function assessRunBudget(
+  countToday: number,
+  cfg: AiRuntimeConfig,
+): RunBudgetAssessment {
+  return countToday >= cfg.dailyRunBudget ? "budget_exceeded" : "ok";
+}
+
+// ── Audit record (pure builder — persistence is an owner-gated follow-up) ──
+
+export type SchemaValidationState = "passed" | "failed" | "skipped";
+export type HumanReviewState = "not_required" | "pending" | "approved" | "rejected";
+
+export interface AiRoutingRunOutcome {
+  /** Which adapter actually served the run ("mock"/"anthropic"/"disabled"/"none"). */
+  readonly providerAdapter: string;
+  readonly schemaValidation: SchemaValidationState;
+  /** Envelope coarse confidence ("low"/"medium"/"high") or honest null. */
+  readonly confidence: string | null;
+  /** Honest null — no pricing table is wired; never a fabricated figure. */
+  readonly actualCostUsd: number | null;
+  readonly latencyMs: number | null;
+  readonly usage: {
+    readonly inputTokens: number | null;
+    readonly outputTokens: number | null;
+  } | null;
+  readonly humanReviewState: HumanReviewState;
+  /** Field NAMES / categories sent — NEVER field values (no PII in audit). */
+  readonly dataCategoriesSent: readonly string[];
+  readonly estimatedCostUsd?: number | null;
+}
+
+export interface AiRoutingAuditRecord {
+  readonly taskType: AiTaskType;
+  readonly selectedTier: AiModelTier;
+  readonly providerAdapter: string;
+  readonly modelAlias: AiModelAlias | null;
+  readonly reason: string;
+  readonly fallback: boolean;
+  readonly escalation: boolean;
+  readonly blocked: RouteBlockReason | null;
+  readonly secondModelReview: boolean;
+  readonly estimatedCostUsd: number | null;
+  readonly actualCostUsd: number | null;
+  readonly latencyMs: number | null;
+  readonly usage: {
+    readonly inputTokens: number | null;
+    readonly outputTokens: number | null;
+  } | null;
+  readonly schemaValidation: SchemaValidationState;
+  readonly confidence: string | null;
+  readonly humanReviewState: HumanReviewState;
+  readonly dataCategoriesSent: readonly string[];
+}
+
+export function buildRoutingAuditRecord(
+  decision: TaskRouteDecision,
+  outcome: AiRoutingRunOutcome,
+): AiRoutingAuditRecord {
+  return {
+    taskType: decision.taskType,
+    selectedTier: decision.tier,
+    providerAdapter: outcome.providerAdapter,
+    modelAlias: decision.modelAlias,
+    reason: decision.reason,
+    fallback: decision.fallbackApplied,
+    escalation: decision.escalated,
+    blocked: decision.blocked ?? null,
+    secondModelReview: decision.secondModelReview,
+    estimatedCostUsd: outcome.estimatedCostUsd ?? null,
+    actualCostUsd: outcome.actualCostUsd,
+    latencyMs: outcome.latencyMs,
+    usage: outcome.usage,
+    schemaValidation: outcome.schemaValidation,
+    confidence: outcome.confidence,
+    humanReviewState: outcome.humanReviewState,
+    dataCategoriesSent: [...outcome.dataCategoriesSent],
+  };
+}

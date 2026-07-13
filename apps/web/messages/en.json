@@ -1002,7 +1002,9 @@
       "map": "Map",
       "mapNote": "Where your team and work are",
       "evidence": "Evidence & reports",
-      "evidenceNote": "Completed work becomes record"
+      "evidenceNote": "Completed work becomes record",
+      "workforce": "Workforce planning",
+      "workforceNote": "Upcoming work vs. capacity — gaps, risk date and a suggested step."
     }
   },
   "demandReadback": {
@@ -8119,6 +8121,84 @@
       "journal": "Record completed work"
     }
   },
+  "workforcePlanning": {
+    "eyebrow": "Company workspace",
+    "title": "Workforce planning",
+    "intro": "Upcoming work, team capacity and gaps in one view — built from your work needs and projects.",
+    "module": {
+      "title": "Workforce planning",
+      "desc": "Upcoming work vs. capacity — gaps, risk date and a suggested step."
+    },
+    "notAuthed": "Sign in to see your workforce plan.",
+    "empty": "No upcoming work here yet. This view fills in from your work needs and projects — you can start from any point and add details later.",
+    "entries": {
+      "chooseTitle": "Start from whichever point suits you",
+      "title": "Other starting points",
+      "demand": "Create a work need or position",
+      "project": "Create a project",
+      "candidates": "Browse candidates",
+      "network": "Find people and companies"
+    },
+    "summary": {
+      "required": "people required",
+      "available": "can be covered",
+      "shortPeople": "{count, plural, one {short # person} other {short # people}}",
+      "shortHours": "short {count} h",
+      "coveredAll": "All assessed work is covered",
+      "capacityLabel": "Capacity coverage",
+      "userEntered": "You entered: {count}",
+      "systemSuggested": "System suggestion: {count} (confirm or edit)",
+      "confirmedRequired": "Confirmed: {count}"
+    },
+    "risk": {
+      "none": "No capacity risk in the current view.",
+      "onDate": "Capacity becomes insufficient on {date}.",
+      "level": {
+        "ok": "OK",
+        "tight": "Tight",
+        "critical": "Critical"
+      }
+    },
+    "skills": {
+      "title": "Missing skills"
+    },
+    "action": {
+      "title": "Recommended next step",
+      "optionalHint": "A suggestion based on your current data — any other starting point works too.",
+      "statusHint": "there is no separate page for this step yet, so plan it with your team.",
+      "none": "Nothing needs action right now.",
+      "secondaryTitle": "Also suggested",
+      "kind": {
+        "assign_existing_worker": "Assign available workers",
+        "transfer_from_project": "Review a transfer between projects",
+        "form_brigade": "Complete the brigade",
+        "train_existing_worker": "Train your workers in the missing skills",
+        "create_position": "Open a position for the confirmed need",
+        "engage_staffing_agency": "Engage a staffing agency",
+        "engage_partner": "Find an external partner"
+      }
+    },
+    "timeline": {
+      "title": "Upcoming work",
+      "undated": "No date yet",
+      "undatedHint": "These entries join the month view once a start date is set — you can add it later.",
+      "source": {
+        "demand": "Work need",
+        "project": "Project"
+      },
+      "untitled": "Untitled entry",
+      "requiredShort": "{count} needed",
+      "coveredShort": "{count} covered"
+    },
+    "notes": {
+      "assignmentsPending": "Assignment data is prepared and joins this view after owner activation.",
+      "languagesPending": "Language coverage is prepared and joins this view after owner activation.",
+      "brigadesPending": "Brigade coverage is prepared and joins this view after owner activation.",
+      "demandError": "Work needs could not be read right now.",
+      "projectError": "Projects could not be read right now.",
+      "capacityError": "Part of the capacity data could not be read right now."
+    }
+  },
   "tasks": {
     "eyebrow": "Work tasks",
     "title": "Tasks",
@@ -8600,6 +8680,37 @@
     "notEnabled": "This section is not enabled yet — nothing was saved.",
     "error": "Saving failed. Please try again.",
     "invalid": "Choose a language and a level."
+  },
+  "externalProfiles": {
+    "title": "External profiles",
+    "hint": "Link profiles you hold on other sites — a portfolio, GitHub, LinkedIn or a certification registry.",
+    "selfManaged": "You add and control these links yourself. The platform never fetches or checks content from these sites.",
+    "platform": "Site",
+    "url": "Link (https://)",
+    "urlPlaceholder": "https://…",
+    "add": "Add link",
+    "adding": "Adding…",
+    "disconnect": "Disconnect",
+    "confirmDisconnect": "Yes, disconnect",
+    "cancel": "Cancel",
+    "visibility": "Visibility",
+    "visibilityPrivate": "Private",
+    "visibilityEmployers": "Employers",
+    "visibilityNote": "Employer viewing is not switched on yet — your visibility choice is saved and will apply once it is.",
+    "importNote": "Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
+    "importLink": "Open the profile editor",
+    "empty": "No external profiles linked yet.",
+    "notEnabled": "This section is not enabled yet — nothing was saved.",
+    "error": "Saving failed. Please try again.",
+    "invalid": "Enter a full https:// link and choose a site.",
+    "platformNames": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "behance": "Behance",
+      "portfolio": "Portfolio",
+      "certificationRegistry": "Certification registry",
+      "other": "Other"
+    }
   },
   "network": {
     "module": {

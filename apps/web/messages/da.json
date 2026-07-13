@@ -2185,6 +2185,37 @@
     "error": "Kunne ikke gemme. Prøv igen.",
     "invalid": "Vælg et sprog og et niveau."
   },
+  "externalProfiles": {
+    "title": "Eksterne profiler",
+    "hint": "Tilknyt profiler, du har på andre sider — en portfolio, GitHub, LinkedIn eller et certificeringsregister.",
+    "selfManaged": "Du tilføjer og styrer selv disse links. Platformen henter aldrig indhold fra disse sider og kontrollerer det ikke.",
+    "platform": "Side",
+    "url": "Link (https://)",
+    "urlPlaceholder": "https://…",
+    "add": "Tilføj link",
+    "adding": "Tilføjer…",
+    "disconnect": "Fjern tilknytning",
+    "confirmDisconnect": "Ja, fjern",
+    "cancel": "Annuller",
+    "visibility": "Synlighed",
+    "visibilityPrivate": "Privat",
+    "visibilityEmployers": "Arbejdsgivere",
+    "visibilityNote": "Visning for arbejdsgivere er ikke slået til endnu — dit valg gemmes og træder i kraft, når den bliver det.",
+    "importNote": "Automatisk import fra disse sider tilbydes ikke. Upload en eksporteret CV-fil i profileditoren for at få dine data ind.",
+    "importLink": "Åbn profileditoren",
+    "empty": "Ingen eksterne profiler tilknyttet endnu.",
+    "notEnabled": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "error": "Kunne ikke gemme. Prøv igen.",
+    "invalid": "Indtast et fuldt https://-link og vælg en side.",
+    "platformNames": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "behance": "Behance",
+      "portfolio": "Portfolio",
+      "certificationRegistry": "Certificeringsregister",
+      "other": "Andet"
+    }
+  },
   "bookings": {
     "endsOn": "Indtil {date}",
     "noRole": "Arbejdsaftale",
@@ -2288,5 +2319,83 @@
     "mapEditHint": "Tryk på kortet — du ser det nye punkt og kan gemme eller annullere det.",
     "mapLockedHint": "Placering uændret. Tryk på “Skift placering” for at ændre den.",
     "mapEditButton": "Skift placering på kortet"
+  },
+  "workforcePlanning": {
+    "eyebrow": "Virksomhedsområde",
+    "title": "Bemandingsplanlægning",
+    "intro": "Kommende arbejde, teamkapacitet og mangler i ét overblik — opbygget ud fra jeres arbejdsbehov og projekter.",
+    "module": {
+      "title": "Bemandingsplanlægning",
+      "desc": "Kommende arbejde og kapacitet — mangler, risikodato og et foreslået skridt."
+    },
+    "notAuthed": "Log ind for at se jeres bemandingsplan.",
+    "empty": "Endnu intet kommende arbejde her. Visningen udfyldes fra jeres arbejdsbehov og projekter — I kan starte hvor som helst og tilføje detaljer senere.",
+    "entries": {
+      "chooseTitle": "Start der, hvor det passer jer",
+      "title": "Andre startpunkter",
+      "demand": "Opret arbejdsbehov eller stilling",
+      "project": "Opret projekt",
+      "candidates": "Se kandidater",
+      "network": "Find personer og virksomheder"
+    },
+    "summary": {
+      "required": "personer krævet",
+      "available": "kan dækkes",
+      "shortPeople": "{count, plural, one {mangler # person} other {mangler # personer}}",
+      "shortHours": "mangler {count} t",
+      "coveredAll": "Alt vurderet arbejde er dækket",
+      "capacityLabel": "Kapacitetsdækning",
+      "userEntered": "Du indtastede: {count}",
+      "systemSuggested": "Systemforslag: {count} (bekræft eller rediger)",
+      "confirmedRequired": "Bekræftet: {count}"
+    },
+    "risk": {
+      "none": "Ingen kapacitetsrisiko i denne visning.",
+      "onDate": "Kapaciteten bliver utilstrækkelig den {date}.",
+      "level": {
+        "ok": "OK",
+        "tight": "Stramt",
+        "critical": "Kritisk"
+      }
+    },
+    "skills": {
+      "title": "Manglende færdigheder"
+    },
+    "action": {
+      "title": "Anbefalet næste skridt",
+      "optionalHint": "Et forslag baseret på jeres data — ethvert andet startpunkt fungerer også.",
+      "statusHint": "der findes endnu ingen separat side til dette skridt, så planlæg det med jeres team.",
+      "none": "Ingen handling er nødvendig lige nu.",
+      "secondaryTitle": "Også foreslået",
+      "kind": {
+        "assign_existing_worker": "Tildel ledige arbejdere",
+        "transfer_from_project": "Overvej flytning mellem projekter",
+        "form_brigade": "Komplettér sjakket",
+        "train_existing_worker": "Oplær egne arbejdere i de manglende færdigheder",
+        "create_position": "Opret stilling til det bekræftede behov",
+        "engage_staffing_agency": "Inddrag vikarbureau",
+        "engage_partner": "Find ekstern partner"
+      }
+    },
+    "timeline": {
+      "title": "Kommende arbejde",
+      "undated": "Ingen dato endnu",
+      "undatedHint": "Disse poster vises i månedsvisningen, når en startdato er sat — den kan tilføjes senere.",
+      "source": {
+        "demand": "Arbejdsbehov",
+        "project": "Projekt"
+      },
+      "untitled": "Post uden titel",
+      "requiredShort": "{count} krævet",
+      "coveredShort": "{count} dækket"
+    },
+    "notes": {
+      "assignmentsPending": "Tildelingsdata er forberedt og vises i denne visning efter ejerens aktivering.",
+      "languagesPending": "Sprogdækning er forberedt og vises i denne visning efter ejerens aktivering.",
+      "brigadesPending": "Sjakdækning er forberedt og vises i denne visning efter ejerens aktivering.",
+      "demandError": "Arbejdsbehov kunne ikke læses lige nu.",
+      "projectError": "Projekter kunne ikke læses lige nu.",
+      "capacityError": "En del af kapacitetsdataene kunne ikke læses lige nu."
+    }
   }
 }

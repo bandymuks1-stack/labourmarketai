@@ -209,6 +209,41 @@ relax the gate — it *implements* it:
 If any later task spec contradicts this doctrine, the PR flags it under a
 `## Doctrine conflict` heading and asks DI before proceeding.
 
+## 9.1 Cost-aware task routing (Labour Market OS P8–P9 addendum)
+
+Runs are now routed by TASK, not by a hard-coded model. Call sites are
+unchanged (`runAiAgent(agentKey, input, { locale })` — still never a model
+or provider); the runner resolves `agentKey → taskType → tier → model
+alias` through the pure policy core `lib/ai/runtime/task-routing.ts`:
+
+- **Tiers:** `deterministic` (pure workforce models, no LLM — capacity/skill
+  gap detection), `low_cost` (haiku), `standard` (sonnet), `advanced` (opus,
+  escalation-only, never a default), `high_risk_verified` (opus +
+  second-model review — blocked until a real pre-run human-confirmation
+  flow exists).
+- **Rules:** start at the policy's preferred tier; escalate ONE tier only on
+  a listed condition; cost ceiling → `blocked: cost_ceiling` (never
+  silently proceeds); provider-failure fallback may go down a tier only
+  with `fallbackApplied: true` and an honest reason; the previously
+  unenforced `dailyRunBudget` now has a pure check (`assessRunBudget`),
+  applied when a caller supplies a real run count.
+- **Audit:** every outcome carries a routing audit record (tier, adapter,
+  alias, reason, escalation/fallback, cost estimate, honest-null actual
+  cost, latency, usage, schema validation, confidence, human-review state,
+  and `dataCategoriesSent` — field NAMES only, never input content).
+  Persisting it to an `ai_runs` table stays the owner-gated §7.1 migration.
+- **Adapters:** `lib/ai/runtime/providers/adapter-contract.ts` declares the
+  provider-neutral registry — `anthropic` active (still the one allowlisted
+  SDK importer); `openai`/`deepl`/`meta_llama`/`xai` declared-inactive
+  seams (run-core still maps them to the disabled provider); `sora`
+  unavailable.
+
+Contracts: `docs/product/cost-aware-ai-task-routing-contract-v1.md` +
+`docs/product/ai-data-minimization-contract-v1.md`. Guard:
+`lib/guards/ai-task-routing.test.ts` (no model literals outside
+`lib/ai/runtime`, policy completeness, single SDK importer, single active
+adapter, routing-module purity).
+
 ## 10. What this sprint will NOT do
 
 No committed keys; no live payment keys; no DNS; no Vercel env/secrets without

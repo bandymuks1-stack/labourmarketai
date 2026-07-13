@@ -8,6 +8,7 @@ import {
   Coins,
   Compass,
   FileText,
+  Gauge,
   Handshake,
   Home,
   IdCard,
@@ -67,6 +68,7 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   coins: Coins,
   sparkles: Sparkles,
   chart: BarChart3,
+  gauge: Gauge,
 };
 
 export async function DashboardModuleGrid({

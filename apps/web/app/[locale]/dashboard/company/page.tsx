@@ -877,7 +877,7 @@ export default async function CompanyDashboardPage({
           {tOps("connections.title")}
         </span>
         <p className="text-xs text-text-secondary">{tOps("connections.intro")}</p>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {[
             {
               key: "calendar",
@@ -896,6 +896,14 @@ export default async function CompanyDashboardPage({
               href: "/dashboard/reports/evidence",
               label: tOps("connections.evidence"),
               note: tOps("connections.evidenceNote"),
+            },
+            {
+              // Workforce planning zone (Labour Market OS P10) — the visual
+              // upcoming-work / capacity / gap view INSIDE this workspace.
+              key: "workforce",
+              href: "/dashboard/company/planning",
+              label: tOps("connections.workforce"),
+              note: tOps("connections.workforceNote"),
             },
           ].map((l) => (
             <Link

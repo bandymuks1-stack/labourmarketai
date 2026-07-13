@@ -1002,7 +1002,9 @@
       "map": "Žemėlapis",
       "mapNote": "Kur yra tavo komanda ir darbas",
       "evidence": "Įrodymai ir ataskaitos",
-      "evidenceNote": "Atliktas darbas tampa įrašu"
+      "evidenceNote": "Atliktas darbas tampa įrašu",
+      "workforce": "Darbo jėgos planavimas",
+      "workforceNote": "Būsimi darbai ir pajėgumas — trūkumai, rizikos data ir siūlomas žingsnis."
     }
   },
   "demandReadback": {
@@ -8119,6 +8121,84 @@
       "journal": "Įrašyti atliktą darbą"
     }
   },
+  "workforcePlanning": {
+    "eyebrow": "Įmonės erdvė",
+    "title": "Darbo jėgos planavimas",
+    "intro": "Būsimi darbai, komandos pajėgumas ir trūkumai vienoje vietoje — iš jūsų darbo poreikių ir projektų.",
+    "module": {
+      "title": "Darbo jėgos planavimas",
+      "desc": "Būsimi darbai ir pajėgumas — trūkumai, rizikos data ir siūlomas žingsnis."
+    },
+    "notAuthed": "Prisijunkite, kad matytumėte savo darbo jėgos planą.",
+    "empty": "Būsimų darbų čia dar nėra. Šis vaizdas pildosi iš jūsų darbo poreikių ir projektų — pradėti galite nuo bet kurio taško, o detales papildyti vėliau.",
+    "entries": {
+      "chooseTitle": "Pradėkite nuo jums patogaus taško",
+      "title": "Kiti pradžios taškai",
+      "demand": "Sukurti darbo poreikį ar poziciją",
+      "project": "Sukurti projektą",
+      "candidates": "Peržiūrėti kandidatus",
+      "network": "Rasti žmones ir įmones"
+    },
+    "summary": {
+      "required": "reikia žmonių",
+      "available": "galima padengti",
+      "shortPeople": "trūksta {count} žm.",
+      "shortHours": "trūksta {count} val.",
+      "coveredAll": "Visi įvertinti darbai padengti",
+      "capacityLabel": "Pajėgumo padengimas",
+      "userEntered": "Jūsų įvesta: {count}",
+      "systemSuggested": "Sistemos pasiūlymas: {count} (patvirtinkite arba redaguokite)",
+      "confirmedRequired": "Patvirtinta: {count}"
+    },
+    "risk": {
+      "none": "Dabartiniame vaizde pajėgumo rizikos nėra.",
+      "onDate": "Pajėgumo pritrūks {date}.",
+      "level": {
+        "ok": "Gerai",
+        "tight": "Įtempta",
+        "critical": "Kritinė"
+      }
+    },
+    "skills": {
+      "title": "Trūkstami įgūdžiai"
+    },
+    "action": {
+      "title": "Rekomenduojamas kitas žingsnis",
+      "optionalHint": "Pasiūlymas pagal jūsų dabartinius duomenis — tinka ir bet kuris kitas pradžios taškas.",
+      "statusHint": "šiam žingsniui atskiro puslapio dar nėra, todėl suplanuokite jį su komanda.",
+      "none": "Šiuo metu veiksmų nereikia.",
+      "secondaryTitle": "Taip pat siūloma",
+      "kind": {
+        "assign_existing_worker": "Priskirti laisvus darbuotojus",
+        "transfer_from_project": "Peržiūrėti perkėlimą tarp projektų",
+        "form_brigade": "Papildyti brigadą",
+        "train_existing_worker": "Apmokyti savo darbuotojus trūkstamų įgūdžių",
+        "create_position": "Atidaryti poziciją patvirtintam poreikiui",
+        "engage_staffing_agency": "Pasitelkti įdarbinimo agentūrą",
+        "engage_partner": "Rasti išorės partnerį"
+      }
+    },
+    "timeline": {
+      "title": "Būsimi darbai",
+      "undated": "Datos dar nėra",
+      "undatedHint": "Šie įrašai mėnesių vaizde atsiras nurodžius pradžios datą — ją galite papildyti vėliau.",
+      "source": {
+        "demand": "Darbo poreikis",
+        "project": "Projektas"
+      },
+      "untitled": "Įrašas be pavadinimo",
+      "requiredShort": "reikia {count}",
+      "coveredShort": "padengta {count}"
+    },
+    "notes": {
+      "assignmentsPending": "Priskyrimų duomenys paruošti ir šiame vaizde atsiras po savininko aktyvavimo.",
+      "languagesPending": "Kalbų aprėptis paruošta ir šiame vaizde atsiras po savininko aktyvavimo.",
+      "brigadesPending": "Brigadų aprėptis paruošta ir šiame vaizde atsiras po savininko aktyvavimo.",
+      "demandError": "Darbo poreikių šiuo metu nepavyko nuskaityti.",
+      "projectError": "Projektų šiuo metu nepavyko nuskaityti.",
+      "capacityError": "Dalies pajėgumo duomenų šiuo metu nepavyko nuskaityti."
+    }
+  },
   "tasks": {
     "eyebrow": "Darbo užduotys",
     "title": "Užduotys",
@@ -8600,6 +8680,37 @@
     "notEnabled": "Ši dalis dar neįjungta — niekas nebuvo išsaugota.",
     "error": "Išsaugoti nepavyko. Bandykite dar kartą.",
     "invalid": "Pasirinkite kalbą ir lygį."
+  },
+  "externalProfiles": {
+    "title": "Išoriniai profiliai",
+    "hint": "Susiekite profilius, kuriuos turite kitose svetainėse — portfolio, GitHub, LinkedIn ar sertifikatų registrą.",
+    "selfManaged": "Šias nuorodas pridedate ir valdote patys. Platforma niekada nesiunčia užklausų į šias svetaines ir netikrina jų turinio.",
+    "platform": "Svetainė",
+    "url": "Nuoroda (https://)",
+    "urlPlaceholder": "https://…",
+    "add": "Pridėti nuorodą",
+    "adding": "Pridedama…",
+    "disconnect": "Atjungti",
+    "confirmDisconnect": "Taip, atjungti",
+    "cancel": "Atšaukti",
+    "visibility": "Matomumas",
+    "visibilityPrivate": "Privatu",
+    "visibilityEmployers": "Darbdaviams",
+    "visibilityNote": "Darbdavių peržiūra dar neįjungta — jūsų matomumo pasirinkimas išsaugomas ir pradės veikti, kai ji bus įjungta.",
+    "importNote": "Automatinio importo iš šių svetainių nėra. Norėdami perkelti savo duomenis, profilio redaktoriuje įkelkite eksportuotą CV failą.",
+    "importLink": "Atidaryti profilio redaktorių",
+    "empty": "Išorinių profilių dar nepridėta.",
+    "notEnabled": "Ši dalis dar neįjungta — niekas nebuvo išsaugota.",
+    "error": "Išsaugoti nepavyko. Bandykite dar kartą.",
+    "invalid": "Įveskite pilną https:// nuorodą ir pasirinkite svetainę.",
+    "platformNames": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "behance": "Behance",
+      "portfolio": "Portfolio",
+      "certificationRegistry": "Sertifikatų registras",
+      "other": "Kita"
+    }
   },
   "network": {
     "module": {

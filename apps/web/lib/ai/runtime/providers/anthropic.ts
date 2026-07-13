@@ -75,6 +75,10 @@ export const anthropicCompletionProvider: AiCompletionProvider = {
       cfg.maxOutputTokens,
     );
 
+    // Task-routing model override (an id resolved from a tier alias) — falls
+    // back to the config default when the caller did not route the request.
+    const model = request.model ?? cfg.model;
+
     // The agent's strict schema is the contract; we instruct JSON-only output
     // and validate downstream (the agent layer rejects anything off-shape).
     const schemaHint = request.jsonSchema
@@ -83,7 +87,7 @@ export const anthropicCompletionProvider: AiCompletionProvider = {
 
     try {
       const res = await client.messages.create({
-        model: cfg.model,
+        model,
         max_tokens: maxTokens,
         thinking: { type: "adaptive" },
         system: request.system + schemaHint,
@@ -105,7 +109,7 @@ export const anthropicCompletionProvider: AiCompletionProvider = {
       return {
         status: "ok",
         provider: "anthropic",
-        model: cfg.model,
+        model,
         raw,
         usage: {
           inputTokens: res.usage?.input_tokens,

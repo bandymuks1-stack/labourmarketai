@@ -310,6 +310,27 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    id: "workforce_planning",
+    // Labour Market OS P10: the workforce-planning zone inside the company
+    // workspace (upcoming work vs. capacity, gaps, risk date).
+    route: getModuleRoute("workforce_planning"),
+    audience: "company",
+    labels: {
+      en: "Workforce planning",
+      lt: "Darbo jėgos planavimas",
+      ru: "Планирование персонала",
+      nl: "Personeelsplanning",
+      de: "Personalplanung",
+    },
+    synonyms: {
+      en: ["workforce", "capacity", "skill gap", "headcount", "planning zone"],
+      lt: ["darbo jėga", "pajėgumas", "trūkumai", "žmonių poreikis"],
+      ru: ["персонал", "мощность", "нехватка", "потребность в людях"],
+      nl: ["personeel", "capaciteit", "tekort", "personeelsbehoefte"],
+      de: ["personal", "kapazität", "engpass", "personalbedarf"],
+    },
+  },
+  {
     id: "objects_projects",
     route: getModuleRoute("projects"),
     audience: "company",
