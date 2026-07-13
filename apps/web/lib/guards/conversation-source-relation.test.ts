@@ -50,12 +50,14 @@ const MIGRATION =
 const ROLLBACK =
   "../../supabase/rollbacks/20260706210000_conversation_source_relation.down.sql";
 
-/** The four sanctioned context callers and the ONE type each may stamp
- *  (review pack §1.3 rows 2-5). */
+/** The sanctioned context callers and the ONE type each may stamp
+ *  (review pack §1.3 rows 2-5; canonical-journey P1 added the worker-side
+ *  demand-interest stamper — the SAME relationship type, opposite end). */
 const STAMPERS: ReadonlyArray<readonly [string, string]> = [
   ["lib/communication/request-worker-conversation.ts", "scouting"],
   ["lib/marketplace/service-request-conversation.ts", "accepted_service_request"],
   ["lib/communication/contact-interested-worker.ts", "demand_interest"],
+  ["lib/opportunities/contact-employer.ts", "demand_interest"],
   ["lib/booking/booking-conversation.ts", "accepted_booking"],
 ];
 

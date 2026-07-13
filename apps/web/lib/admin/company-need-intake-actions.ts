@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import {
   setCompanyNeedIntakeStatus,
-  COMPANY_NEED_INTAKE_STATUSES,
+  COMPANY_NEED_INTAKE_OPERATOR_STATUSES,
   type CompanyNeedIntakeStatus,
 } from "./company-need-intakes";
 
@@ -29,7 +29,11 @@ function readStatus(
   v: FormDataEntryValue | null,
 ): CompanyNeedIntakeStatus | null {
   const s = (v ?? "").toString();
-  return (COMPANY_NEED_INTAKE_STATUSES as readonly string[]).includes(s)
+  // Operator statuses only — `converted` is written exclusively by the
+  // company's own claim action, never through this form.
+  return (COMPANY_NEED_INTAKE_OPERATOR_STATUSES as readonly string[]).includes(
+    s,
+  )
     ? (s as CompanyNeedIntakeStatus)
     : null;
 }

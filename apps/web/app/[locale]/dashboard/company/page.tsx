@@ -13,6 +13,8 @@ import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { FeatureNote } from "@/components/app/feature-note";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
+import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
+import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
@@ -125,6 +127,10 @@ export default async function CompanyDashboardPage({
 
   const tWorkers = await getTranslations("roleDashboards.company.workers");
   const existingDraft = await getDemandDraft("company_request");
+  // Canonical-journey P3 — the caller's own claimable public intakes
+  // (authenticated-email match; [] on any missing state, never an error).
+  const tClaim = await getTranslations("companyClaimIntake");
+  const claimableIntakes = await listClaimablePublicIntakes();
 
   const ownCompany = await getOwnCompany();
   const workersResult = ownCompany
@@ -546,6 +552,30 @@ export default async function CompanyDashboardPage({
         {(await getTranslations("featureNotes"))("companySpace")}
       </FeatureNote>
 
+      {/* Honest data-driven status header (name, verification status, what to
+          fix) — consolidated next to the ONE action center below
+          (canonical-user-journey v1). */}
+      {companyRow ? <CompanyNextActions company={companyRow} /> : null}
+
+      {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
+          /company-need submissions (matched by their authenticated email)
+          continue here as a real draft demand instead of dead-ending in the
+          operator queue. Renders nothing when there is nothing to claim. */}
+      {claimableIntakes.length > 0 ? (
+        <ClaimPublicIntakeCard
+          locale={locale}
+          intakes={claimableIntakes}
+          labels={{
+            title: tClaim("title"),
+            body: tClaim("body"),
+            claimCta: tClaim("claimCta"),
+            claimed: tClaim("claimed"),
+            error: tClaim("error"),
+            workersLabel: tClaim("workersLabel"),
+          }}
+        />
+      ) : null}
+
       <CompanyActionNextActions
         room="company"
         primaryHref="/dashboard/company/projects/new"
@@ -633,7 +663,6 @@ export default async function CompanyDashboardPage({
         </section>
       ) : null}
 
-      {companyRow ? <CompanyNextActions company={companyRow} /> : null}
       {companyRow ? (
         <CompanyReadinessSummary
           company={{

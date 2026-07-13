@@ -493,32 +493,6 @@
       }
     }
   },
-  "searchRoom": {
-    "backToActions": "Veiksmų centras",
-    "title": "Darbuotojų paieška",
-    "subtitle": "Kaip pasiekti darbuotojus jūsų poreikiui — tikrais, struktūruotais keliais, be sugalvotų rezultatų.",
-    "reason": "Laisvos žodžių paieškos pagal žmones dar nėra: sukurti ją anksčiau, nei atsiranda sutikimą davusių ir patikrintų darbuotojų, reikštų rodyti netikrus rezultatus. Žemiau — tikras kelias, kuris veikia jau dabar.",
-    "paths": {
-      "scouting": {
-        "statusNote": {
-          "title": "Kaip veikia atitikimas šiandien",
-          "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.",
-          "stream": "Aktyvus kandidatų srautas dar priklauso nuo realiai užpildytų profilių ir poreikių.",
-          "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.",
-          "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo."
-        },
-        "title": "Ieškoti pagal poreikį",
-        "body": "Pasirinkite savo struktūruotą poreikį — atitikties variklis parodys tinkamus kandidatus su pagrindimu ir trūkumais. Be sugalvotų balų.",
-        "cta": "Atidaryti paiešką pagal poreikį"
-      },
-      "need": {
-        "title": "Pateikti poreikį",
-        "body": "Dar neturite struktūruoto poreikio? Aprašykite, ko reikia — jis bus struktūruotas ir paruoštas paieškai.",
-        "cta": "Pateikti poreikį"
-      }
-    },
-    "matchingNote": "Atitiktis grindžiama jūsų poreikio ir darbuotojų profilių laukais — be sugalvotų reitingų ir be netikro patvirtinimo. Kontaktai lieka paslėpti, kol abi pusės nesutaria."
-  },
   "marketMap": {
     "backToActions": "Veiksmų centras",
     "pageTitle": "Žemėlapis",
@@ -2130,7 +2104,8 @@
         "new": "Naujas",
         "contacted": "Susisiekta",
         "qualified": "Kvalifikuotas",
-        "rejected": "Atmestas"
+        "rejected": "Atmestas",
+        "converted": "Perkelta į įmonės paskyrą"
       },
       "actions": {
         "new": "Naujas",
@@ -7245,7 +7220,9 @@
       "contactedLink": "Įmonė atidarė pokalbį — peržiūrėkite žinutes",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
-      "contacted": "Įmonė pažymėjo: susisiekta"
+      "contacted": "Įmonė pažymėjo: susisiekta",
+      "contactEmployer": "Parašyti darbdaviui",
+      "contactError": "Nepavyko atidaryti pokalbio. Bandykite dar kartą."
     },
     "companyVerified": "Patikrinta įmonė",
     "structured": {
@@ -8555,7 +8532,8 @@
     "prefillButton": "Užpildyti pagal paskutinę užklausą",
     "prefillLoading": "Kraunama…",
     "prefillEmpty": "Ankstesnės užklausos nerasta",
-    "prefillDone": "Užpildyta pagal paskutinę užklausą — peržiūrėkite ir redaguokite"
+    "prefillDone": "Užpildyta pagal paskutinę užklausą — peržiūrėkite ir redaguokite",
+    "prefillFromDraft": "Užpildyta iš jūsų juodraščio — peržiūrėkite ir pateikite"
   },
   "workerPrefs": {
     "title": "Darbo pageidavimai",
@@ -8844,5 +8822,13 @@
     "previewsUnavailable": "Peržiūros laikinai nepasiekiamos.",
     "previewUnavailable": "Peržiūra nepasiekiama",
     "photoAlt": "Darbo nuotrauka"
+  },
+  "companyClaimIntake": {
+    "title": "Radome jūsų anksčiau pateiktą poreikį",
+    "body": "Šį poreikį aprašėte prieš susikurdami paskyrą. Tęskite jį čia — nieko nereikia vesti iš naujo.",
+    "claimCta": "Tęsti kaip juodraštį",
+    "claimed": "Perkelta į jūsų juodraščius",
+    "error": "Nepavyko perkelti. Bandykite dar kartą.",
+    "workersLabel": "Darbuotojų"
   }
 }

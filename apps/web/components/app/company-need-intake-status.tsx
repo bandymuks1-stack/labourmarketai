@@ -7,7 +7,8 @@ import {
   type CompanyNeedIntakeActionState,
 } from "@/lib/admin/company-need-intake-actions";
 import {
-  COMPANY_NEED_INTAKE_STATUSES,
+  COMPANY_NEED_INTAKE_OPERATOR_STATUSES,
+  type CompanyNeedIntakeOperatorStatus,
   type CompanyNeedIntakeStatus,
 } from "@/lib/admin/company-need-intake-shared";
 
@@ -20,7 +21,9 @@ import {
  * hidden input is the reliable channel (same fix as company-verification-review).
  */
 export interface CompanyNeedIntakeStatusLabels {
-  readonly actions: Record<CompanyNeedIntakeStatus, string>;
+  /** Operator-settable actions only — `converted` is display-only (written
+   *  by the company's own claim action, never by hand). */
+  readonly actions: Record<CompanyNeedIntakeOperatorStatus, string>;
   readonly statusSaved: string;
   readonly statusNotAdmin: string;
   readonly statusInvalid: string;
@@ -29,7 +32,7 @@ export interface CompanyNeedIntakeStatusLabels {
   readonly statusError: string;
 }
 
-const BUTTON_TONE: Record<CompanyNeedIntakeStatus, string> = {
+const BUTTON_TONE: Record<CompanyNeedIntakeOperatorStatus, string> = {
   new: "border-brand-blue/50 text-brand-blue hover:border-brand-blue",
   contacted: "border-brand-blue/50 text-brand-blue hover:border-brand-blue",
   qualified:
@@ -53,7 +56,7 @@ export function CompanyNeedIntakeStatusControl({
   >(setCompanyNeedIntakeStatusAction, null);
 
   const statusRef = useRef<HTMLInputElement>(null);
-  const setStatus = (v: CompanyNeedIntakeStatus) => {
+  const setStatus = (v: CompanyNeedIntakeOperatorStatus) => {
     if (statusRef.current) statusRef.current.value = v;
   };
 
@@ -84,7 +87,7 @@ export function CompanyNeedIntakeStatusControl({
       <input type="hidden" name="status" ref={statusRef} defaultValue="" />
 
       <div className="flex flex-wrap gap-2">
-        {COMPANY_NEED_INTAKE_STATUSES.map((s) => (
+        {COMPANY_NEED_INTAKE_OPERATOR_STATUSES.map((s) => (
           <button
             key={s}
             type="submit"

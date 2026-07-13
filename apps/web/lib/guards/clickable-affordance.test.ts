@@ -49,7 +49,6 @@ describe("info-only / future cards do not look tappable", () => {
     for (const rel of [
       "components/app/manager-evidence-card.tsx",
       "components/app/worker-readiness-summary.tsx",
-      "components/app/profile-cv-clarity-card.tsx",
     ]) {
       const src = read(rel);
       expect(src, rel).not.toMatch(/cursor-pointer|hover:border-brand|hover:bg-brand/);

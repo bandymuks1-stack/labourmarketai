@@ -51,9 +51,11 @@ describe("Guard: the company dashboard exposes the private request draft", () =>
     expect(page).not.toMatch(/!==\s*["']verified["']/);
   });
 
-  it("keeps the PR #254 next-action card pointing at the request section", () => {
+  it("keeps the PR #254 demand CTA pointing at the request section", () => {
+    // Consolidated (canonical-user-journey v1): the explainer card stack was
+    // removed; the tracked demand CTA still targets the real requests section.
     const next = read(NEXT);
-    expect(next).toContain('href: "#company-requests"');
+    expect(next).toContain('href={"#company-requests"');
   });
 });
 

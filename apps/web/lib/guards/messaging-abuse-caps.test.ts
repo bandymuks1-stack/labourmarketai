@@ -208,6 +208,10 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
         "lib/communication/open-conversation-action.ts",
         "lib/communication/request-worker-conversation.ts",
         "lib/marketplace/service-request-conversation.ts",
+        // Canonical-journey P1 — worker→employer open; subject derives from
+        // the REAL demand row it verified server-side (demand.title), same
+        // honesty rule as the company-side demand-interest action.
+        "lib/opportunities/contact-employer.ts",
       ].sort(),
     );
   });

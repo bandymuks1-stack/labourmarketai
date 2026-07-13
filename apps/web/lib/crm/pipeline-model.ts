@@ -103,6 +103,10 @@ export const PUBLIC_INTAKE_STAGE_MAP: Readonly<
   new: "new",
   contacted: "contacted",
   qualified: "qualifying",
+  // Claimed by the company's own account into a real draft demand
+  // (canonical-journey P3) — the demand now lives in customer_requests, so
+  // for the operator pipeline this intake is a successfully closed item.
+  converted: "closed",
   rejected: "closed",
 };
 

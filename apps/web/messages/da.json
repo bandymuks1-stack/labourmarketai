@@ -2121,7 +2121,8 @@
     "prefillButton": "Udfyld fra min seneste forespørgsel",
     "prefillLoading": "Indlæser…",
     "prefillEmpty": "Ingen tidligere forespørgsel fundet",
-    "prefillDone": "Udfyldt fra din seneste forespørgsel — gennemgå og redigér"
+    "prefillDone": "Udfyldt fra din seneste forespørgsel — gennemgå og redigér",
+    "prefillFromDraft": "Udfyldt fra din gemte kladde — gennemgå og indsend"
   },
   "workerPrefs": {
     "title": "Arbejdspræferencer",

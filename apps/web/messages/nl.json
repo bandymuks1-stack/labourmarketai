@@ -493,32 +493,6 @@
       }
     }
   },
-  "searchRoom": {
-    "backToActions": "Actiecentrum",
-    "title": "Werknemers zoeken",
-    "subtitle": "Hoe je werknemers bereikt voor je behoefte — via echte, gestructureerde paden, zonder verzonnen resultaten.",
-    "reason": "Er is nog geen vrije-tekstzoekfunctie voor mensen: zo’n functie bouwen voordat er een werknemersaanbod met toestemming en verificatie bestaat, zou betekenen dat we nepresultaten tonen. Hieronder staat het echte pad dat vandaag al werkt.",
-    "paths": {
-      "scouting": {
-        "statusNote": {
-          "title": "Hoe matching vandaag werkt",
-          "signals": "Op basis van de signalen uit het profiel en het werkjournaal die nu beschikbaar zijn, toont het systeem gereedheid en een mogelijke match.",
-          "stream": "Een actieve kandidatenstroom hangt nog steeds af van echte, ingevulde profielen en behoeften.",
-          "fill": "Vul een behoefte in zodat het systeem die kan vergelijken met de beschikbare signalen.",
-          "disclaimer": "Dit betekent geen dienstverband en geen bevestigde match."
-        },
-        "title": "Zoeken op behoefte",
-        "body": "Kies je gestructureerde behoefte — de matchengine toont geschikte kandidaten met de onderbouwing en de hiaten. Geen verzonnen scores.",
-        "cta": "Open zoeken op behoefte"
-      },
-      "need": {
-        "title": "Behoefte plaatsen",
-        "body": "Nog geen gestructureerde behoefte? Beschrijf wat je nodig hebt — het wordt gestructureerd en klaargemaakt voor het zoeken.",
-        "cta": "Behoefte plaatsen"
-      }
-    },
-    "matchingNote": "Matching is gebaseerd op de velden van je behoefte en werknemersprofielen — geen verzonnen ranglijsten en geen nepverificatie. Contactgegevens blijven verborgen totdat beide partijen akkoord gaan."
-  },
   "marketMap": {
     "backToActions": "Actiecentrum",
     "pageTitle": "Kaart",
@@ -2130,7 +2104,8 @@
         "new": "Nieuw",
         "contacted": "Benaderd",
         "qualified": "Gekwalificeerd",
-        "rejected": "Afgewezen"
+        "rejected": "Afgewezen",
+        "converted": "Overgenomen door bedrijfsaccount"
       },
       "actions": {
         "new": "Nieuw",
@@ -7245,7 +7220,9 @@
       "contactedLink": "Het bedrijf heeft een gesprek geopend — bekijk je berichten",
       "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
       "reviewed": "Het bedrijf heeft je interesse bekeken",
-      "contacted": "Bedrijf markeerde: contact opgenomen"
+      "contacted": "Bedrijf markeerde: contact opgenomen",
+      "contactEmployer": "Werkgever een bericht sturen",
+      "contactError": "Gesprek kon niet worden geopend. Probeer het opnieuw."
     },
     "companyVerified": "Geverifieerd bedrijf",
     "structured": {
@@ -8555,7 +8532,8 @@
     "prefillButton": "Invullen op basis van mijn laatste aanvraag",
     "prefillLoading": "Laden…",
     "prefillEmpty": "Geen eerdere aanvraag gevonden",
-    "prefillDone": "Ingevuld op basis van uw laatste aanvraag — controleer en bewerk"
+    "prefillDone": "Ingevuld op basis van uw laatste aanvraag — controleer en bewerk",
+    "prefillFromDraft": "Ingevuld vanuit uw opgeslagen concept — controleer en verstuur"
   },
   "workerPrefs": {
     "title": "Werkvoorkeuren",
@@ -8844,5 +8822,13 @@
     "previewsUnavailable": "Voorbeelden zijn tijdelijk niet beschikbaar.",
     "previewUnavailable": "Voorbeeld niet beschikbaar",
     "photoAlt": "Werkfoto"
+  },
+  "companyClaimIntake": {
+    "title": "We hebben uw eerdere aanvraag gevonden",
+    "body": "U beschreef deze behoefte vóór het aanmaken van uw account. Ga hier verder — niets hoeft opnieuw te worden ingevoerd.",
+    "claimCta": "Doorgaan als concept",
+    "claimed": "Verplaatst naar uw concepten",
+    "error": "Overnemen mislukt. Probeer het opnieuw.",
+    "workersLabel": "Werknemers"
   }
 }

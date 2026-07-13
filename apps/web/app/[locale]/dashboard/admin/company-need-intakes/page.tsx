@@ -31,6 +31,9 @@ const STATUS_TONE: Record<CompanyNeedIntakeStatus, string> = {
   new: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
   contacted: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
   qualified: "border-state-success/40 bg-state-success/5 text-state-success",
+  // Claimed by the company's own account (canonical-journey P3) — the
+  // strongest positive outcome the queue can show; display-only.
+  converted: "border-state-success/40 bg-state-success/5 text-state-success",
   rejected: "border-state-warning/40 bg-state-warning/5 text-state-warning",
 };
 

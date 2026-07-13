@@ -2121,7 +2121,8 @@
     "prefillButton": "[EN] Fill from my last request",
     "prefillLoading": "[EN] Loading…",
     "prefillEmpty": "[EN] No previous request found",
-    "prefillDone": "[EN] Filled from your last request — review and edit"
+    "prefillDone": "[EN] Filled from your last request — review and edit",
+    "prefillFromDraft": "Ifylld från ditt sparade utkast — granska och skicka"
   },
   "workerPrefs": {
     "title": "[EN] Work preferences",

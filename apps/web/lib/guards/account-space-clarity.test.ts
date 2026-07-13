@@ -8,8 +8,7 @@ import { join } from "node:path";
  * Public client-facing account/buyer surfaces must NOT expose internal
  * DB/RPC/schema language, must not present a private buyer as an organization
  * setup, must use specialist/team (not "darbuotojas") in generic buyer copy,
- * and must never use abstract "kas esu operacijoje" identity framing. The
- * mobile profile-explanation card must stack (not collapse into narrow columns).
+ * and must never use abstract "kas esu operacijoje" identity framing.
  */
 
 const root = join(__dirname, "..", "..");
@@ -66,21 +65,6 @@ describe("no abstract 'kas esu operacijoje' identity framing anywhere", () => {
       expect(JSON.stringify(json).toLowerCase()).not.toContain("kas esu operacijoje");
     });
   }
-});
-
-describe("mobile profile-explanation card stacks (no collapsing columns)", () => {
-  const card = read("components/app/profile-cv-clarity-card.tsx");
-  it("rows are flex-col on mobile, flex-row only at sm+", () => {
-    expect(card).toMatch(/flex flex-col[^"]*sm:flex-row/);
-  });
-  it("clarity bodies are short product copy (≤ ~140 chars), not long explanations", () => {
-    for (const json of [lt, en]) {
-      for (const k of Object.keys(json.profileCvClarity.step)) {
-        const body = json.profileCvClarity.step[k].body as string;
-        expect(body.length, `profileCvClarity.step.${k}.body too long`).toBeLessThanOrEqual(140);
-      }
-    }
-  });
 });
 
 describe("buyer setup replacement copy is human, saved-to-account language", () => {

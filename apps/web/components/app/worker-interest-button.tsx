@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import {
   expressInterestAction,
   withdrawInterestAction,
 } from "@/lib/opportunities/interest-actions";
+import { contactEmployerAction } from "@/lib/opportunities/contact-employer";
 import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
 
 /**
@@ -16,6 +18,13 @@ import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
  * contact reveal. Withdraw is always available on an active interest.
  * Rendered ONLY when the interest table exists (interestAvailable) — never a
  * dead button.
+ *
+ * Canonical-journey P1: an ACTIVE interest no longer dead-ends. The worker
+ * can open the real in-app thread with the demand owner ("Parašyti
+ * darbdaviui") — the server action re-verifies every fact (own signal, open
+ * demand, verified company) and opens the canonical 0021 conversation. No
+ * contact data is ever shown; the worker writes their own first message in
+ * the thread.
  */
 export function WorkerInterestButton({
   locale,
@@ -39,10 +48,15 @@ export function WorkerInterestButton({
     /** "contacted" is real (audit PR5): the company opened an in-app thread —
      *  this label links the worker to their messages, never a dead status. */
     contactedLink: string;
+    /** Canonical-journey P1 — the worker-initiated thread open. */
+    contactEmployer: string;
+    contactError: string;
   };
 }) {
+  const router = useRouter();
   const [status, setStatus] = useState<InterestStatus | null>(initialStatus);
   const [failed, setFailed] = useState(false);
+  const [contactFailed, setContactFailed] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const active = status === "interested" || status === "reviewed" || status === "contacted";
@@ -69,6 +83,20 @@ export function WorkerInterestButton({
       else setFailed(true);
     });
 
+  // Canonical-journey P1: open (or reopen) the real in-app thread with the
+  // demand owner. All facts re-verified server-side; on success the worker
+  // lands in the thread and writes their own words — nothing is auto-sent.
+  const onContactEmployer = () =>
+    startTransition(async () => {
+      setContactFailed(false);
+      const r = await contactEmployerAction({ locale, requestId });
+      if (r.ok) {
+        router.push(`/${locale}/dashboard/communication/${r.conversationId}`);
+      } else {
+        setContactFailed(true);
+      }
+    });
+
   return (
     <div className="flex flex-col gap-1.5" data-testid={`interest-${requestId}`}>
       <div className="flex flex-wrap items-center gap-2">
@@ -81,6 +109,15 @@ export function WorkerInterestButton({
             >
               ✓ {activeLabel}
             </span>
+            <button
+              type="button"
+              onClick={onContactEmployer}
+              disabled={pending}
+              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+              data-testid="interest-contact-employer"
+            >
+              {labels.contactEmployer}
+            </button>
             <button
               type="button"
               onClick={onWithdraw}
@@ -105,6 +142,11 @@ export function WorkerInterestButton({
         {failed ? (
           <span role="alert" className="text-[11px] text-state-warning">
             {labels.error}
+          </span>
+        ) : null}
+        {contactFailed ? (
+          <span role="alert" className="text-[11px] text-state-warning">
+            {labels.contactError}
           </span>
         ) : null}
       </div>

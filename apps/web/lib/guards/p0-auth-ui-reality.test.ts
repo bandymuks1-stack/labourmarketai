@@ -86,7 +86,7 @@ describe("P0 reality: no milestone codes in rendered placeholder values", () => 
 // Scoped to the namespaces a logged-in user reads in the product. Public
 // marketing (waitlist) and legal draft notices are intentionally out of scope:
 // a waitlist may say "coming soon", a legal page may say "draft".
-const PRODUCT_NAMESPACES = ["auth.dashboard", "marketMap", "searchRoom", "skills"] as const;
+const PRODUCT_NAMESPACES = ["auth.dashboard", "marketMap", "skills"] as const;
 const ROADMAP_WORD = /\bnumatoma\b|\bplanned\b|coming soon|\bTODO\b/i;
 
 describe("P0 reality: authenticated product copy carries no roadmap labels", () => {
@@ -104,47 +104,15 @@ describe("P0 reality: authenticated product copy carries no roadmap labels", () 
   }
 });
 
-// ── Rule C: /dashboard/search is a real, helpful room — not a dead placeholder ──
-describe("P0 reality: worker search route is not a dead placeholder", () => {
-  const page = read("app/[locale]/dashboard/search/page.tsx");
-
-  it("does not render the old DashboardSection 'empty.search' dead end", () => {
-    expect(page).not.toMatch(/DashboardSection/);
-    expect(page).not.toMatch(/empty\.search/);
-  });
-  it("uses the honest searchRoom namespace", () => {
-    expect(page).toMatch(/getTranslations\("searchRoom"\)/);
-  });
-  it("offers real next-action paths to existing routes", () => {
-    expect(page).toMatch(/\/dashboard\/company\/scouting/);
-    expect(page).toMatch(/\/dashboard\/company\b/);
-    expect(page).toMatch(/data-testid="search-real-paths"/);
-  });
-  it("has a back link to the action center (not a terminal screen)", () => {
-    expect(page).toMatch(/data-testid="back-to-action-center"/);
-  });
-
-  for (const locale of ACTIVE_LOCALES) {
-    it(`${locale}: searchRoom copy is present and complete`, () => {
-      const m = loadMessages(locale);
-      for (const key of [
-        "searchRoom.title",
-        "searchRoom.reason",
-        "searchRoom.paths.scouting.cta",
-        "searchRoom.paths.need.cta",
-        "searchRoom.matchingNote",
-      ]) {
-        const v = sub(m, key);
-        expect(typeof v === "string" && (v as string).trim().length > 0, `${locale} ${key}`).toBe(true);
-      }
-    });
-  }
-});
+// ── Rule C: RETIRED (canonical-user-journey v1). The unlinked
+// /dashboard/search router page was removed entirely — the ONE CommandFinder
+// is embedded on /dashboard, so there is no search route left to guard.
+// Rule D below still pins that nothing links to the removed route.
 
 // ── Rule D: the candidates room "search workers" CTA points at a real route ──
 describe("P0 reality: candidates room primary CTA is not the dead search page", () => {
   const candidates = read("app/[locale]/dashboard/candidates/page.tsx");
-  it("does not send users to the (now informational) bare /dashboard/search", () => {
+  it("does not send users to the removed /dashboard/search route", () => {
     expect(candidates).not.toMatch(/primaryHref="\/dashboard\/search"/);
   });
   it("points the primary action at the real scouting engine", () => {

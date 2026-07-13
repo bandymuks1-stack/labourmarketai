@@ -70,7 +70,9 @@ const SEARCH_MODEL_REL = "lib/search/dashboard-search-model.ts";
 const SEARCH_READS_REL = "lib/search/dashboard-search.ts";
 const SEARCH_ROUTE_REL = "app/api/dashboard-search/route.ts";
 const FINDER_REL = "components/app/command-finder.tsx";
-const SEARCH_PAGE_REL = "app/[locale]/dashboard/search/page.tsx";
+// NOTE (canonical-user-journey v1): the unlinked /dashboard/search router page
+// was removed — the ONE CommandFinder is embedded on /dashboard itself.
+const DASHBOARD_PAGE_REL = "app/[locale]/dashboard/page.tsx";
 const HUB_READS_REL = "lib/reports/reports-hub.ts";
 const HUB_PAGE_REL = "app/[locale]/dashboard/reports/page.tsx";
 
@@ -78,7 +80,7 @@ const SEARCH_MODEL = read(SEARCH_MODEL_REL);
 const SEARCH_READS = read(SEARCH_READS_REL);
 const SEARCH_ROUTE = read(SEARCH_ROUTE_REL);
 const FINDER = read(FINDER_REL);
-const SEARCH_PAGE = read(SEARCH_PAGE_REL);
+const DASHBOARD_PAGE = read(DASHBOARD_PAGE_REL);
 const HUB_READS = read(HUB_READS_REL);
 const HUB_PAGE = read(HUB_PAGE_REL);
 
@@ -350,13 +352,16 @@ describe("3. CommandFinder stays registry-first and accessible", () => {
     expect(FINDER).toMatch(/typeof v === "string"/);
   });
 
-  it("the search page embeds the SAME finder (one search truth) and keeps the scouting paths", () => {
-    expect(SEARCH_PAGE).toContain(
+  it("the dashboard embeds the ONE finder (one search truth; no separate search page)", () => {
+    expect(DASHBOARD_PAGE).toContain(
       'from "@/components/app/command-finder"',
     );
-    expect(SEARCH_PAGE).toMatch(/<CommandFinder \/>/);
-    // The deterministic people paths stay (p0-auth-ui-reality also pins them).
-    expect(SEARCH_PAGE).toMatch(/\/dashboard\/company\/scouting/);
+    expect(DASHBOARD_PAGE).toMatch(/<CommandFinder \/>/);
+    // The removed /dashboard/search router page must not come back.
+    expect(
+      existsSync(join(ROOT, "app", "[locale]", "dashboard", "search", "page.tsx")),
+      "the removed /dashboard/search page must not come back",
+    ).toBe(false);
   });
 });
 

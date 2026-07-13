@@ -94,7 +94,7 @@ export interface PlayerCardLabels {
 
 // Top-accent by readiness level. NOT gold: gold stays the reserved trust accent
 // (real work-card confirmation), so the readiness accent uses premium brand
-// tokens instead (DESIGN_SOUL §1; today-screen-honesty guard).
+// tokens instead (DESIGN_SOUL §1; player-card-honesty guard).
 const LEVEL_ACCENT: Record<ReadinessLevel, string> = {
   ready: "border-brand-cyan/40",
   building: "border-brand-blue/30",

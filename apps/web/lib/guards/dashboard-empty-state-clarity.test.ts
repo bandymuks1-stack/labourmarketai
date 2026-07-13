@@ -179,13 +179,6 @@ describe("Guard: rooms still render their empty-state branches", () => {
     expect(src).toMatch(/inbox\.emptyTitle/);
   });
 
-  it("worker evidence card renders an EmptyState when there's no evidence", () => {
-    const src = read("components/app/worker-evidence-card.tsx");
-    expect(src).toMatch(/!hasAny/);
-    expect(src).toMatch(/<EmptyState\b/);
-    expect(src).toMatch(/emptyTitle/);
-  });
-
   it("buyer requests section renders empty list + empty attachments", () => {
     const src = read("components/app/buyer-requests-section.tsx");
     expect(src).toMatch(/rows\.length === 0/);

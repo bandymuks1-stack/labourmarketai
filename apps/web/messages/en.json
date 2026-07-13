@@ -493,32 +493,6 @@
       }
     }
   },
-  "searchRoom": {
-    "backToActions": "Action center",
-    "title": "Worker search",
-    "subtitle": "How to reach workers for your need — through real, structured paths, with no invented results.",
-    "reason": "There is no free-text people search yet: building one before there is consented, verified worker supply would mean showing fake results. Below is the real path that works today.",
-    "paths": {
-      "scouting": {
-        "statusNote": {
-          "title": "How matching works today",
-          "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.",
-          "stream": "An active candidate stream still depends on real, filled-in profiles and needs.",
-          "fill": "Fill in a need so the system can compare it against the available signals.",
-          "disclaimer": "This does not mean employment or a confirmed match."
-        },
-        "title": "Search by need",
-        "body": "Pick your structured need — the match engine surfaces suitable candidates with the basis and the gaps. No invented scores.",
-        "cta": "Open search by need"
-      },
-      "need": {
-        "title": "Post a need",
-        "body": "No structured need yet? Describe what you need — it gets structured and made ready for search.",
-        "cta": "Post a need"
-      }
-    },
-    "matchingNote": "Matching is based on the fields of your need and worker profiles — no invented rankings and no fake verification. Contacts stay hidden until both sides agree."
-  },
   "marketMap": {
     "backToActions": "Action center",
     "pageTitle": "Map",
@@ -2130,7 +2104,8 @@
         "new": "New",
         "contacted": "Contacted",
         "qualified": "Qualified",
-        "rejected": "Rejected"
+        "rejected": "Rejected",
+        "converted": "Claimed by company account"
       },
       "actions": {
         "new": "New",
@@ -7245,7 +7220,9 @@
       "contactedLink": "The company opened a conversation — view your messages",
       "error": "Could not save. Try again.",
       "reviewed": "Company reviewed your interest",
-      "contacted": "Company marked: contacted"
+      "contacted": "Company marked: contacted",
+      "contactEmployer": "Message the employer",
+      "contactError": "Could not open the conversation. Please try again."
     },
     "companyVerified": "Verified company",
     "structured": {
@@ -8555,7 +8532,8 @@
     "prefillButton": "Fill from my last request",
     "prefillLoading": "Loading…",
     "prefillEmpty": "No previous request found",
-    "prefillDone": "Filled from your last request — review and edit"
+    "prefillDone": "Filled from your last request — review and edit",
+    "prefillFromDraft": "Filled from your saved draft — review and submit"
   },
   "workerPrefs": {
     "title": "Work preferences",
@@ -8844,5 +8822,13 @@
     "previewsUnavailable": "Previews are temporarily unavailable.",
     "previewUnavailable": "Preview unavailable",
     "photoAlt": "Work photo"
+  },
+  "companyClaimIntake": {
+    "title": "We found your earlier submission",
+    "body": "You described this need before creating your account. Continue it here — nothing needs to be re-typed.",
+    "claimCta": "Continue as my draft",
+    "claimed": "Moved to your drafts",
+    "error": "Could not claim it. Please try again.",
+    "workersLabel": "Workers"
   }
 }
