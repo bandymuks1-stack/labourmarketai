@@ -3,6 +3,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { isVisionPublic } from "@/lib/config/vision-publication";
 
 // `/vision` is gated by `lib/config/vision-publication.ts`. While the
@@ -74,6 +75,11 @@ export async function SiteNav() {
           <AuthCtaLink relPath={`/${locale}/auth/signup`}>
             <Button size="sm">{t("startNow")}</Button>
           </AuthCtaLink>
+          {/* F1: the public header must always offer the theme toggle —
+              visible on every viewport (mobile has no separate menu). */}
+          <ThemeToggleIcon
+            labels={{ toDark: t("themeToDark"), toLight: t("themeToLight") }}
+          />
           <LocaleSwitcher className="hidden sm:flex" />
         </div>
       </div>

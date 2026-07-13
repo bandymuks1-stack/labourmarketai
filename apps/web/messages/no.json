@@ -710,7 +710,9 @@
     "pricing": "[EN] Pricing",
     "about": "Om oss",
     "login": "[EN] Sign in",
-    "startNow": "[EN] Start now"
+    "startNow": "[EN] Start now",
+    "themeToDark": "Mørkt tema",
+    "themeToLight": "Lyst tema"
   },
   "pages": {
     "agencies": {
@@ -1607,7 +1609,12 @@
     },
     "draft": {
       "title": "[EN] Draft — projects and teams"
-    }
+    },
+    "myProjectsTitle": "Mine prosjekter",
+    "myProjectsEmpty": "Du er ennå ikke tildelt noe prosjekt. Når et selskap tildeler deg, vises prosjektet her.",
+    "assignmentActive": "Aktiv",
+    "assignmentEnded": "Avsluttet",
+    "untitledProject": "Prosjekt uten tittel"
   },
   "projectOps": {
     "stadium": {
@@ -1626,6 +1633,16 @@
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
+    },
+    "workerView": {
+      "eyebrow": "Mitt prosjekt",
+      "untitled": "Prosjekt uten tittel",
+      "assignmentActive": "Aktiv tildeling",
+      "assignmentEnded": "Tildeling avsluttet",
+      "projectRestricted": "Prosjektdetaljer er ikke tilgjengelige for deg nå. Tildelingen din forblir synlig.",
+      "journalCta": "Skriv journalinnlegg",
+      "chatCta": "Send melding",
+      "galleryTitle": "Mine bilder på dette prosjektet"
     }
   },
   "agencyPool": {
@@ -2247,5 +2264,28 @@
     "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
     "cancel": "[EN] Cancel",
     "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
+  },
+  "people": {
+    "eyebrow": "Personprofil",
+    "restrictedTitle": "Profil ikke tilgjengelig",
+    "restrictedBody": "Du kan ikke se denne personens profil: det finnes ingen aktiv arbeidsrelasjon, eller personen har ikke samtykket til å være synlig.",
+    "available": "Tilgjengelig",
+    "availableFrom": "Fra {date}",
+    "experienceYears": "{n} års erfaring",
+    "skillsTitle": "Ferdigheter",
+    "skillsEmpty": "Ingen ferdigheter du har lov til å se.",
+    "skillVerified": "Bekreftet",
+    "skillWorkBacked": "Underbygget av arbeid",
+    "skillDeclared": "Selvoppgitt",
+    "skillsLegend": "Bekreftet — godkjent av en leder. Underbygget av arbeid — synlig fra arbeidsjournalens innlegg. Selvoppgitt — lagt til av personen, ennå ikke kontrollert."
+  },
+  "marketMapBase": {
+    "previewTitle": "Nytt sted valgt — ikke lagret ennå",
+    "previewKeepNote": "Din forrige plassering beholdes til du trykker Lagre.",
+    "previewSave": "Lagre plassering",
+    "previewCancel": "Avbryt",
+    "mapEditHint": "Trykk på kartet — du ser det nye punktet og kan lagre eller avbryte det.",
+    "mapLockedHint": "Plassering uendret. Trykk “Endre plassering” for å endre den.",
+    "mapEditButton": "Endre plassering på kartet"
   }
 }

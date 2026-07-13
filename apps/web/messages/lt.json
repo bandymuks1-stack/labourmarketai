@@ -1417,7 +1417,8 @@
         "migrationBlockerBody": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
-        "columnInvitedAt": "Data"
+        "columnInvitedAt": "Data",
+        "openProfile": "Peržiūrėti profilį"
       },
       "scoutingBridge": {
         "title": "Raskite darbuotojų šiam poreikiui",
@@ -2547,7 +2548,8 @@
       "textSavedLabel": "Jūsų tekstas išsaugotas",
       "textSaveErrorLabel": "Nepavyko išsaugoti teksto. Bandykite dar kartą.",
       "applyErrorLabel": "Nepavyko išsaugoti pasirinktų gebėjimų. Bandykite dar kartą.",
-      "textClaimNotVerified": "Tai jūsų pačių teiginys — dar nepagrįsta darbo įrašais"
+      "textClaimNotVerified": "Tai jūsų pačių teiginys — dar nepagrįsta darbo įrašais",
+      "extractErrorLabel": "Nepavyko apdoroti teksto. Jūsų tekstas išsaugotas — bandykite dar kartą."
     }
   },
   "roles": {
@@ -4052,7 +4054,9 @@
     "about": "Apie",
     "vision": "Vizija",
     "login": "Prisijungti",
-    "startNow": "Pradėti dabar"
+    "startNow": "Pradėti dabar",
+    "themeToDark": "Tamsi tema",
+    "themeToLight": "Šviesi tema"
   },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",
@@ -4834,7 +4838,12 @@
     },
     "draft": {
       "title": "Ruošiama — projektai ir komandos"
-    }
+    },
+    "myProjectsTitle": "Mano projektai",
+    "myProjectsEmpty": "Kol kas nesate priskirtas jokiam projektui. Kai įmonė jus priskirs, projektą matysite čia.",
+    "assignmentActive": "Aktyvus",
+    "assignmentEnded": "Užbaigtas",
+    "untitledProject": "Projektas be pavadinimo"
   },
   "projectOps": {
     "centre": {
@@ -5058,6 +5067,16 @@
         "unknownWorker": "Darbuotojas",
         "sourceNote": "Nuotraukos yra darbuotojų žurnalo įrašų dalis — jos niekada nekeičiamos ir nevertinamos automatiškai."
       }
+    },
+    "workerView": {
+      "eyebrow": "Mano projektas",
+      "untitled": "Projektas be pavadinimo",
+      "assignmentActive": "Aktyvus priskyrimas",
+      "assignmentEnded": "Priskyrimas užbaigtas",
+      "projectRestricted": "Projekto informacija šiuo metu jums nepasiekiama. Jūsų priskyrimas išlieka matomas.",
+      "journalCta": "Pildyti darbo žurnalą",
+      "chatCta": "Susisiekti",
+      "galleryTitle": "Mano nuotraukos šiame projekte"
     }
   },
   "setupRoleChoice": {
@@ -7515,7 +7534,14 @@
     "editButton": "Keisti vietą",
     "resetButton": "Pašalinti vietą",
     "emptyBody": "Dar nepasirinkote vietos. Naudokite mygtuką aukščiau arba nurodykite rankiniu būdu.",
-    "radiusHelp": "Spindulys – paieškos zona aplink pasirinktą tašką: {km} km reiškia darbus ir paklausą iki {km} km nuo to taško."
+    "radiusHelp": "Spindulys – paieškos zona aplink pasirinktą tašką: {km} km reiškia darbus ir paklausą iki {km} km nuo to taško.",
+    "previewTitle": "Nauja vieta parinkta — dar neišsaugota",
+    "previewKeepNote": "Sena vieta lieka, kol paspausite „Išsaugoti“.",
+    "previewSave": "Išsaugoti vietą",
+    "previewCancel": "Atšaukti",
+    "mapEditHint": "Bakstelėkite žemėlapį — pamatysite naują tašką ir galėsite jį išsaugoti arba atšaukti.",
+    "mapLockedHint": "Vieta nepakeista. Norėdami ją keisti, paspauskite „Keisti vietą“.",
+    "mapEditButton": "Keisti vietą žemėlapyje"
   },
   "waze": {
     "open": "Atidaryti Waze"
@@ -8762,5 +8788,19 @@
         "error": "Nepavyko. Bandykite dar kartą."
       }
     }
+  },
+  "people": {
+    "eyebrow": "Asmens profilis",
+    "restrictedTitle": "Profilis nepasiekiamas",
+    "restrictedBody": "Šio žmogaus profilio negalite peržiūrėti: nėra aktyvaus darbo ryšio arba asmuo nesutiko būti matomas.",
+    "available": "Pasiekiamas",
+    "availableFrom": "Nuo {date}",
+    "experienceYears": "{n} m. patirtis",
+    "skillsTitle": "Įgūdžiai",
+    "skillsEmpty": "Įgūdžių, kuriuos galite matyti, nėra.",
+    "skillVerified": "Patvirtinta",
+    "skillWorkBacked": "Pagrįsta darbu",
+    "skillDeclared": "Nurodyta paties",
+    "skillsLegend": "Patvirtinta — patvirtino vadovas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta, dar nepatikrinta."
   }
 }

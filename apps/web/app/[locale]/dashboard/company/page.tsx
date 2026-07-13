@@ -182,6 +182,7 @@ export default async function CompanyDashboardPage({
     title: tWorkers("title"),
     subtitle: tWorkers("subtitle"),
     activeWorkersHeading: tWorkers("activeWorkersHeading"),
+    openProfile: tWorkers("openProfile"),
     noWorkersHeading: tWorkers("noWorkersHeading"),
     noWorkersBody: tWorkers("noWorkersBody"),
     inviteHeading: tWorkers("inviteHeading"),

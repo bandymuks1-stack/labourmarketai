@@ -710,7 +710,9 @@
     "pricing": "[EN] Pricing",
     "about": "Par mums",
     "login": "[EN] Sign in",
-    "startNow": "[EN] Start now"
+    "startNow": "[EN] Start now",
+    "themeToDark": "Tumšais motīvs",
+    "themeToLight": "Gaišais motīvs"
   },
   "pages": {
     "agencies": {
@@ -1607,7 +1609,12 @@
     },
     "draft": {
       "title": "[EN] Draft — projects and teams"
-    }
+    },
+    "myProjectsTitle": "Mani projekti",
+    "myProjectsEmpty": "Jūs vēl neesat piesaistīts nevienam projektam. Kad uzņēmums jūs piesaistīs, projekts parādīsies šeit.",
+    "assignmentActive": "Aktīvs",
+    "assignmentEnded": "Pabeigts",
+    "untitledProject": "Projekts bez nosaukuma"
   },
   "projectOps": {
     "stadium": {
@@ -1626,6 +1633,16 @@
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
+    },
+    "workerView": {
+      "eyebrow": "Mans projekts",
+      "untitled": "Projekts bez nosaukuma",
+      "assignmentActive": "Aktīva piesaiste",
+      "assignmentEnded": "Piesaiste pabeigta",
+      "projectRestricted": "Projekta informācija jums šobrīd nav pieejama. Jūsu piesaiste paliek redzama.",
+      "journalCta": "Rakstīt žurnāla ierakstu",
+      "chatCta": "Sūtīt ziņu",
+      "galleryTitle": "Mani foto šajā projektā"
     }
   },
   "agencyPool": {
@@ -2247,5 +2264,28 @@
     "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
     "cancel": "[EN] Cancel",
     "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
+  },
+  "people": {
+    "eyebrow": "Personas profils",
+    "restrictedTitle": "Profils nav pieejams",
+    "restrictedBody": "Jūs nevarat apskatīt šīs personas profilu: nav aktīvu darba attiecību, vai persona nav piekritusi būt atrodama.",
+    "available": "Pieejams",
+    "availableFrom": "No {date}",
+    "experienceYears": "{n} g. pieredze",
+    "skillsTitle": "Prasmes",
+    "skillsEmpty": "Nav prasmju, ko drīkstat redzēt.",
+    "skillVerified": "Apstiprināts",
+    "skillWorkBacked": "Pamatots ar darbu",
+    "skillDeclared": "Paša norādīts",
+    "skillsLegend": "Apstiprināts — apstiprinājis vadītājs. Pamatots ar darbu — redzams no darba žurnāla ierakstiem. Paša norādīts — pievienojusi pati persona, vēl nav pārbaudīts."
+  },
+  "marketMapBase": {
+    "previewTitle": "Izvēlēta jauna vieta — vēl nav saglabāta",
+    "previewKeepNote": "Iepriekšējā atrašanās vieta paliek, līdz nospiedīsiet Saglabāt.",
+    "previewSave": "Saglabāt vietu",
+    "previewCancel": "Atcelt",
+    "mapEditHint": "Pieskarieties kartei — redzēsiet jauno punktu un varēsiet to saglabāt vai atcelt.",
+    "mapLockedHint": "Vieta nav mainīta. Lai to mainītu, nospiediet “Mainīt vietu”.",
+    "mapEditButton": "Mainīt vietu kartē"
   }
 }

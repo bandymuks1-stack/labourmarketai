@@ -26,6 +26,7 @@ import {
 } from "@/components/app/project-operations-board";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
+import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { type Role } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +70,11 @@ export default async function ProjectOperationsPage({
   const role = (profile?.active_role as Role) ?? "worker";
 
   if (!MANAGER_ROLES.has(role)) {
+    // RC2 role-aware routing (F11): the operations board stays manager-only,
+    // but an ASSIGNED worker is routed to their permitted project view
+    // instead of a dead explanatory page.
+    const workerView = await getWorkerProjectView(id);
+    if (workerView) redirect(`/${locale}/dashboard/projects/${id}`);
     return (
       <div className="flex max-w-2xl flex-col gap-4">
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

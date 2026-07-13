@@ -127,6 +127,7 @@ export function MarketMapLive({
   ariaLabel,
   identity,
   suppressOwnMarker,
+  previewPoint,
 }: {
   selected: SelectedLocation | null;
   radiusKm: number;
@@ -140,10 +141,15 @@ export function MarketMapLive({
    *  no confirmed company location — so the personal location is never shown as
    *  the company marker (honest: the page shows a "location not added" note). */
   suppressOwnMarker?: boolean;
+  /** F12 safe editing: a NOT-yet-saved candidate point. Rendered as a
+   *  distinct dashed preview marker next to the (still untouched) saved
+   *  marker until the user explicitly confirms or cancels. */
+  previewPoint?: { lat: number; lng: number } | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletTypes.Map | null>(null);
   const layerRef = useRef<LeafletTypes.LayerGroup | null>(null);
+  const previewLayerRef = useRef<LeafletTypes.LayerGroup | null>(null);
   // Keep the latest onPick without re-initialising the map.
   const onPickRef = useRef(onPick);
   onPickRef.current = onPick;
@@ -170,6 +176,7 @@ export function MarketMapLive({
         });
         mapRef.current = created;
         layerRef.current = L.layerGroup().addTo(created);
+        previewLayerRef.current = L.layerGroup().addTo(created);
         // Tiles can mis-size when the container animates in.
         created.invalidateSize();
       } catch (err) {
@@ -183,8 +190,39 @@ export function MarketMapLive({
       created?.remove();
       mapRef.current = null;
       layerRef.current = null;
+      previewLayerRef.current = null;
     };
   }, []);
+
+  // F12 safe editing: draw / clear the dashed PREVIEW marker. The saved
+  // marker layer is untouched — the old location visibly stays until the
+  // user confirms.
+  useEffect(() => {
+    void (async () => {
+      const L = (await import("leaflet")).default;
+      const map = mapRef.current;
+      const layer = previewLayerRef.current;
+      if (!map || !layer) return;
+      layer.clearLayers();
+      if (!previewPoint) return;
+      const point: [number, number] = [previewPoint.lat, previewPoint.lng];
+      L.circle(point, {
+        radius: radiusKm * 1000,
+        color: "#F59E0B",
+        weight: 1.5,
+        dashArray: "6 6",
+        fillColor: "#F59E0B",
+        fillOpacity: 0.08,
+      }).addTo(layer);
+      L.circleMarker(point, {
+        radius: 8,
+        color: "#0B1014",
+        weight: 2,
+        fillColor: "#F59E0B",
+        fillOpacity: 1,
+      }).addTo(layer);
+    })();
+  }, [previewPoint, radiusKm]);
 
   // Draw / move the worker's own marker + radius when the selection changes.
   useEffect(() => {

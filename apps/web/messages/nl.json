@@ -1417,7 +1417,8 @@
         "migrationBlockerBody": "De actie kon niet worden voltooid. Probeer het opnieuw.",
         "columnEmail": "E-mail",
         "columnStatus": "Status",
-        "columnInvitedAt": "Datum"
+        "columnInvitedAt": "Datum",
+        "openProfile": "Profiel bekijken"
       },
       "scoutingBridge": {
         "title": "Vind werknemers voor deze personeelsbehoefte",
@@ -2547,7 +2548,8 @@
       "textSavedLabel": "Je tekst is opgeslagen",
       "textSaveErrorLabel": "Kon je tekst niet opslaan. Probeer het opnieuw.",
       "applyErrorLabel": "Kon de geselecteerde vaardigheden niet opslaan. Probeer het opnieuw.",
-      "textClaimNotVerified": "Dit is je eigen claim — nog niet onderbouwd door werkregistraties"
+      "textClaimNotVerified": "Dit is je eigen claim — nog niet onderbouwd door werkregistraties",
+      "extractErrorLabel": "De tekst kon niet worden verwerkt. Je tekst is opgeslagen — probeer het opnieuw."
     }
   },
   "roles": {
@@ -4052,7 +4054,9 @@
     "about": "Over ons",
     "vision": "Visie",
     "login": "Inloggen",
-    "startNow": "Begin nu"
+    "startNow": "Begin nu",
+    "themeToDark": "Donker thema",
+    "themeToLight": "Licht thema"
   },
   "hero": {
     "chip": "Algemeen arbeidsmarktplatform",
@@ -4834,7 +4838,12 @@
     },
     "draft": {
       "title": "In voorbereiding — projecten en ploegen"
-    }
+    },
+    "myProjectsTitle": "Mijn projecten",
+    "myProjectsEmpty": "Je bent nog aan geen enkel project toegewezen. Zodra een bedrijf je toewijst, verschijnt het project hier.",
+    "assignmentActive": "Actief",
+    "assignmentEnded": "Beëindigd",
+    "untitledProject": "Project zonder titel"
   },
   "projectOps": {
     "centre": {
@@ -5058,6 +5067,16 @@
         "unknownWorker": "Werknemer",
         "sourceNote": "Foto's zijn onderdeel van de journaalregistraties van werknemers — ze worden nooit aangepast of automatisch beoordeeld."
       }
+    },
+    "workerView": {
+      "eyebrow": "Mijn project",
+      "untitled": "Project zonder titel",
+      "assignmentActive": "Actieve toewijzing",
+      "assignmentEnded": "Toewijzing beëindigd",
+      "projectRestricted": "Projectdetails zijn momenteel niet voor je beschikbaar. Je toewijzing blijft zichtbaar.",
+      "journalCta": "Journaalinvoer schrijven",
+      "chatCta": "Bericht sturen",
+      "galleryTitle": "Mijn foto's op dit project"
     }
   },
   "setupRoleChoice": {
@@ -7515,7 +7534,14 @@
     "editButton": "Wijzig locatie",
     "resetButton": "Verwijder locatie",
     "emptyBody": "Je hebt nog geen locatie gekozen. Gebruik de knop hierboven of stel er handmatig een in.",
-    "radiusHelp": "De straal is het zoekgebied rond je gekozen punt: {km} km betekent werk en vraag tot {km} km vanaf dat punt."
+    "radiusHelp": "De straal is het zoekgebied rond je gekozen punt: {km} km betekent werk en vraag tot {km} km vanaf dat punt.",
+    "previewTitle": "Nieuwe plek gekozen — nog niet opgeslagen",
+    "previewKeepNote": "Je vorige locatie blijft staan tot je op Opslaan drukt.",
+    "previewSave": "Locatie opslaan",
+    "previewCancel": "Annuleren",
+    "mapEditHint": "Tik op de kaart — je ziet het nieuwe punt en kunt het opslaan of annuleren.",
+    "mapLockedHint": "Locatie ongewijzigd. Druk op “Locatie wijzigen” om te veranderen.",
+    "mapEditButton": "Locatie wijzigen op de kaart"
   },
   "waze": {
     "open": "Openen in Waze"
@@ -8762,5 +8788,19 @@
         "error": "Er ging iets mis. Probeer het opnieuw."
       }
     }
+  },
+  "people": {
+    "eyebrow": "Persoonsprofiel",
+    "restrictedTitle": "Profiel niet beschikbaar",
+    "restrictedBody": "Je kunt het profiel van deze persoon niet bekijken: er is geen actieve werkrelatie, of de persoon heeft geen toestemming gegeven om vindbaar te zijn.",
+    "available": "Beschikbaar",
+    "availableFrom": "Vanaf {date}",
+    "experienceYears": "{n} jr ervaring",
+    "skillsTitle": "Vaardigheden",
+    "skillsEmpty": "Geen vaardigheden die je mag zien.",
+    "skillVerified": "Bevestigd",
+    "skillWorkBacked": "Door werk gestaafd",
+    "skillDeclared": "Zelf opgegeven",
+    "skillsLegend": "Bevestigd — goedgekeurd door een manager. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd, nog niet gecontroleerd."
   }
 }

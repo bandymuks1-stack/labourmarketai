@@ -1417,7 +1417,8 @@
         "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
         "columnEmail": "Email",
         "columnStatus": "Status",
-        "columnInvitedAt": "Date"
+        "columnInvitedAt": "Date",
+        "openProfile": "View profile"
       },
       "scoutingBridge": {
         "title": "Find workers for this need",
@@ -2547,7 +2548,8 @@
       "textSavedLabel": "Your text is saved",
       "textSaveErrorLabel": "Could not save your text. Please try again.",
       "applyErrorLabel": "Could not save the selected skills. Please try again.",
-      "textClaimNotVerified": "This is your own claim — not yet backed by work records"
+      "textClaimNotVerified": "This is your own claim — not yet backed by work records",
+      "extractErrorLabel": "Could not process the text. Your text is saved — try again."
     }
   },
   "roles": {
@@ -4052,7 +4054,9 @@
     "about": "About",
     "vision": "Vision",
     "login": "Sign in",
-    "startNow": "Start now"
+    "startNow": "Start now",
+    "themeToDark": "Dark theme",
+    "themeToLight": "Light theme"
   },
   "hero": {
     "chip": "General labour-market platform",
@@ -4834,7 +4838,12 @@
     },
     "draft": {
       "title": "In preparation — projects and teams"
-    }
+    },
+    "myProjectsTitle": "My projects",
+    "myProjectsEmpty": "You are not assigned to any project yet. When a company assigns you, the project will appear here.",
+    "assignmentActive": "Active",
+    "assignmentEnded": "Ended",
+    "untitledProject": "Untitled project"
   },
   "projectOps": {
     "centre": {
@@ -5058,6 +5067,16 @@
         "unknownWorker": "Worker",
         "sourceNote": "Photos are part of workers' journal entries — they are never altered or automatically assessed."
       }
+    },
+    "workerView": {
+      "eyebrow": "My project",
+      "untitled": "Untitled project",
+      "assignmentActive": "Active assignment",
+      "assignmentEnded": "Assignment ended",
+      "projectRestricted": "Project details are not available to you right now. Your assignment stays visible.",
+      "journalCta": "Write a journal entry",
+      "chatCta": "Message",
+      "galleryTitle": "My photos on this project"
     }
   },
   "setupRoleChoice": {
@@ -7515,7 +7534,14 @@
     "editButton": "Change location",
     "resetButton": "Remove location",
     "emptyBody": "You haven''t chosen a location yet. Use the button above or set one manually.",
-    "radiusHelp": "The radius is the search area around your chosen point: {km} km means work and demand up to {km} km from that point."
+    "radiusHelp": "The radius is the search area around your chosen point: {km} km means work and demand up to {km} km from that point.",
+    "previewTitle": "New spot picked — not saved yet",
+    "previewKeepNote": "Your previous location stays until you press Save.",
+    "previewSave": "Save location",
+    "previewCancel": "Cancel",
+    "mapEditHint": "Tap the map — you'll see the new point and can save or cancel it.",
+    "mapLockedHint": "Location unchanged. To change it, press “Change location”.",
+    "mapEditButton": "Change location on the map"
   },
   "waze": {
     "open": "Open in Waze"
@@ -8762,5 +8788,19 @@
         "error": "Something went wrong. Please try again."
       }
     }
+  },
+  "people": {
+    "eyebrow": "Person profile",
+    "restrictedTitle": "Profile unavailable",
+    "restrictedBody": "You can't view this person's profile: there is no active work relationship, or the person hasn't agreed to be discoverable.",
+    "available": "Available",
+    "availableFrom": "From {date}",
+    "experienceYears": "{n} yrs experience",
+    "skillsTitle": "Skills",
+    "skillsEmpty": "No skills you are permitted to see.",
+    "skillVerified": "Confirmed",
+    "skillWorkBacked": "Work-backed",
+    "skillDeclared": "Self-declared",
+    "skillsLegend": "Confirmed — approved by a manager. Work-backed — supported by work journal entries. Self-declared — added by the person, not yet checked."
   }
 }

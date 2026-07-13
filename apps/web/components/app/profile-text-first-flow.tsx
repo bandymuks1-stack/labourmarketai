@@ -158,7 +158,6 @@ export function ProfileTextFirstFlow({
     setError(null);
     setApplied(false);
     setText(raw);
-    setHasExtracted(true);
 
     // Persist the user's own words. The text is the *claim* — saved into
     // the owner-only `profiles.profile_text` (migration 0014); reload
@@ -177,6 +176,22 @@ export function ProfileTextFirstFlow({
         });
     }
 
+    // RC6 error containment (F6 production finding: this action produced a
+    // client-side exception that replaced the whole app with the Next error
+    // shell). The extraction step is fully guarded: on ANY throw the user
+    // keeps their text (state + the save above), sees an inline retryable
+    // error, and the app never unmounts.
+    let extracted: ReturnType<typeof extractProfileSkillClaims>;
+    try {
+      extracted = extractProfileSkillClaims(raw);
+    } catch (e) {
+      console.error("[profile-text-first] extraction failed:", e);
+      setError(t("extractErrorLabel"));
+      return; // stay on the compose stage — nothing is lost
+    }
+
+    setHasExtracted(true);
+
     // Single extractor → single bucket. Chips the user has ALREADY
     // saved (server-side `profile_skill_claims`) are kept in the list
     // BUT marked with `already_saved` status so the user sees *why*
@@ -185,7 +200,7 @@ export function ProfileTextFirstFlow({
     // suggestions still carry `pending` status with the standard
     // select / discard actions.
     setSelfDeclared(
-      extractProfileSkillClaims(raw).map((c, i) => ({
+      extracted.map((c, i) => ({
         key: `claim-${i}-${c.normalizedLabel}`,
         status: savedClaimSet.has(c.normalizedLabel)
           ? "already_saved"
@@ -296,6 +311,15 @@ export function ProfileTextFirstFlow({
           initial={text}
         />
         <TextSaveIndicator state={textSaveState} t={t} />
+        {error && (
+          <p
+            className="text-xs text-state-danger"
+            role="alert"
+            data-testid="profile-text-flow-extract-error"
+          >
+            {error}
+          </p>
+        )}
         <CvInputPanel
           onPasteSubmit={(v) => {
             setPasted(v);

@@ -1417,7 +1417,8 @@
         "migrationBlockerBody": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
         "columnEmail": "E-Mail",
         "columnStatus": "Status",
-        "columnInvitedAt": "Datum"
+        "columnInvitedAt": "Datum",
+        "openProfile": "Profil ansehen"
       },
       "scoutingBridge": {
         "title": "Arbeitskräfte für diesen Bedarf finden",
@@ -2547,7 +2548,8 @@
       "textSavedLabel": "Ihr Text ist gespeichert",
       "textSaveErrorLabel": "Ihr Text konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "applyErrorLabel": "Die ausgewählten Fähigkeiten konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
-      "textClaimNotVerified": "Dies ist Ihre eigene Angabe — noch nicht durch Arbeitsnachweise belegt"
+      "textClaimNotVerified": "Dies ist Ihre eigene Angabe — noch nicht durch Arbeitsnachweise belegt",
+      "extractErrorLabel": "Der Text konnte nicht verarbeitet werden. Ihr Text ist gespeichert — versuchen Sie es erneut."
     }
   },
   "roles": {
@@ -4052,7 +4054,9 @@
     "about": "Über uns",
     "vision": "Vision",
     "login": "Anmelden",
-    "startNow": "Jetzt starten"
+    "startNow": "Jetzt starten",
+    "themeToDark": "Dunkles Design",
+    "themeToLight": "Helles Design"
   },
   "hero": {
     "chip": "Allgemeine Arbeitsmarktplattform",
@@ -4834,7 +4838,12 @@
     },
     "draft": {
       "title": "Draft — Projekte und Teams"
-    }
+    },
+    "myProjectsTitle": "Meine Projekte",
+    "myProjectsEmpty": "Sie sind noch keinem Projekt zugewiesen. Sobald ein Unternehmen Sie zuweist, erscheint das Projekt hier.",
+    "assignmentActive": "Aktiv",
+    "assignmentEnded": "Beendet",
+    "untitledProject": "Projekt ohne Titel"
   },
   "projectOps": {
     "centre": {
@@ -5058,6 +5067,16 @@
         "unknownWorker": "Arbeitskraft",
         "sourceNote": "Fotos sind Teil der Journaleinträge der Arbeitskräfte — sie werden niemals verändert oder automatisch bewertet."
       }
+    },
+    "workerView": {
+      "eyebrow": "Mein Projekt",
+      "untitled": "Projekt ohne Titel",
+      "assignmentActive": "Aktive Zuweisung",
+      "assignmentEnded": "Zuweisung beendet",
+      "projectRestricted": "Projektdetails sind für Sie derzeit nicht verfügbar. Ihre Zuweisung bleibt sichtbar.",
+      "journalCta": "Journaleintrag schreiben",
+      "chatCta": "Nachricht senden",
+      "galleryTitle": "Meine Fotos in diesem Projekt"
     }
   },
   "setupRoleChoice": {
@@ -7515,7 +7534,14 @@
     "editButton": "Standort ändern",
     "resetButton": "Standort entfernen",
     "emptyBody": "Sie haben noch keinen Standort gewählt. Verwenden Sie die Schaltfläche oben oder legen Sie einen manuell fest.",
-    "radiusHelp": "Der Radius ist das Suchgebiet um Ihren gewählten Punkt: {km} km bedeutet Arbeit und Nachfrage bis zu {km} km von diesem Punkt."
+    "radiusHelp": "Der Radius ist das Suchgebiet um Ihren gewählten Punkt: {km} km bedeutet Arbeit und Nachfrage bis zu {km} km von diesem Punkt.",
+    "previewTitle": "Neuer Punkt gewählt — noch nicht gespeichert",
+    "previewKeepNote": "Ihr bisheriger Standort bleibt, bis Sie auf Speichern drücken.",
+    "previewSave": "Standort speichern",
+    "previewCancel": "Abbrechen",
+    "mapEditHint": "Tippen Sie auf die Karte — Sie sehen den neuen Punkt und können ihn speichern oder verwerfen.",
+    "mapLockedHint": "Standort unverändert. Zum Ändern „Standort ändern“ drücken.",
+    "mapEditButton": "Standort auf der Karte ändern"
   },
   "waze": {
     "open": "In Waze öffnen"
@@ -8762,5 +8788,19 @@
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
       }
     }
+  },
+  "people": {
+    "eyebrow": "Personenprofil",
+    "restrictedTitle": "Profil nicht verfügbar",
+    "restrictedBody": "Sie können das Profil dieser Person nicht ansehen: Es besteht keine aktive Arbeitsbeziehung, oder die Person hat der Auffindbarkeit nicht zugestimmt.",
+    "available": "Verfügbar",
+    "availableFrom": "Ab {date}",
+    "experienceYears": "{n} J. Erfahrung",
+    "skillsTitle": "Fähigkeiten",
+    "skillsEmpty": "Keine Fähigkeiten, die Sie sehen dürfen.",
+    "skillVerified": "Bestätigt",
+    "skillWorkBacked": "Durch Arbeit belegt",
+    "skillDeclared": "Selbst angegeben",
+    "skillsLegend": "Bestätigt — von einer Führungskraft genehmigt. Durch Arbeit belegt — aus Arbeitsjournal-Einträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt, noch nicht geprüft."
   }
 }

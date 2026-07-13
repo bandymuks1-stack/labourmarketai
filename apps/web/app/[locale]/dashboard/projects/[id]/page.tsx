@@ -15,6 +15,8 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import { getProjectStadium } from "@/lib/projects/stadium";
+import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
+import { WorkerProjectPanel } from "@/components/app/worker-project-panel";
 import {
   deriveProjectLocation,
   formatProjectPlace,
@@ -62,21 +64,20 @@ export default async function ProjectStadiumPage({
     .eq("id", user.id)
     .single();
   const role = (profile?.active_role as Role) ?? "worker";
-  if (!MANAGER_ROLES.has(role)) {
-    return (
-      <div className="flex max-w-2xl flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
-        <p className="card-border p-4 text-sm text-text-secondary">
-          {tOps("managerOnly")}
-        </p>
-      </div>
-    );
-  }
 
-  const stadium = await getProjectStadium(id);
+  // RC2 role-aware routing (F11): one canonical project route that branches
+  // by real permission. Managers get the stadium; an ASSIGNED worker gets a
+  // scoped member view of their own project; only a user with genuinely no
+  // relation sees the honest no-access state. Nobody with a valid relation
+  // is ever dumped on a dead "this board is for managers" page.
+  const stadium = MANAGER_ROLES.has(role) ? await getProjectStadium(id) : null;
   if (!stadium) {
+    const workerView = await getWorkerProjectView(id);
+    if (workerView) {
+      return (
+        <WorkerProjectPanel locale={locale} projectId={id} view={workerView} />
+      );
+    }
     return (
       <div className="flex max-w-2xl flex-col gap-4">
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -256,7 +257,13 @@ export default async function ProjectStadiumPage({
                 className="card-border rise-in flex flex-col gap-3 p-4"
                 data-testid="stadium-player"
               >
-                <div className="flex items-center gap-3">
+                {/* F2/RC2: a fielded worker card opens the permitted person
+                    page (fail-closed by can_view_worker RLS there). */}
+                <Link
+                  href={`/${locale}/dashboard/people/${w.workerId}`}
+                  className="group flex items-center gap-3"
+                  data-testid={`stadium-player-open-${w.workerId}`}
+                >
                   <span
                     aria-hidden
                     className={cn(
@@ -269,14 +276,14 @@ export default async function ProjectStadiumPage({
                     {initialsOf(w.name)}
                   </span>
                   <div className="min-w-0">
-                    <p className="truncate font-display text-base font-semibold tracking-tightest text-text-primary">
+                    <p className="truncate font-display text-base font-semibold tracking-tightest text-text-primary group-hover:text-brand-blue">
                       {w.name}
                     </p>
                     <p className="truncate font-mono text-[10px] uppercase tracking-label text-text-muted">
                       {positionLabel(w.workerId)}
                     </p>
                   </div>
-                </div>
+                </Link>
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 font-mono text-[11px] text-text-secondary">
                     <NotebookPen className="h-3 w-3" aria-hidden />
