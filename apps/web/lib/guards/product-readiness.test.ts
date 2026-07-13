@@ -1740,7 +1740,7 @@ describe("no migration files added by this sprint", () => {
     // (20260713160000_agency_clients_v1) — canonical journey P5; DRAFT /
     // needs-human-gate, NOT applied; paired rollback + deferred
     // APPLIED_LEDGER entry in the PR.
-    const SPRINT_BASELINE = 130;
+    const SPRINT_BASELINE = 131;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

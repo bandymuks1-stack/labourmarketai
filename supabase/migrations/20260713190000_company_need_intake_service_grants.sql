@@ -1,0 +1,24 @@
+-- DRAFT — needs-human-gate — DO NOT APPLY automatically.
+-- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
+--
+-- 20260713190000 — service-role grants for company_need_public_intakes.
+--
+-- PRODUCTION DEFECT (found by the canonical-journey browser proof,
+-- 2026-07-13): the intake table (20260707120000, PR #678) carries RLS with
+-- NO policies by design ("read only via service role"), but the table was
+-- created WITHOUT any grant to service_role — information_schema shows only
+-- `postgres` holding privileges. Consequence in production TODAY:
+--   • the Public Intake Owner Queue (/dashboard/admin/company-need-intakes,
+--     PR #681) reads via the service-role client → "permission denied" →
+--     the queue renders its empty/error state and NO intake is reviewable;
+--   • the canonical-journey P3 claim bridge (email-matched claim into a
+--     draft demand) is blocked the same way.
+-- The intended security model is unchanged by this fix: anon/authenticated
+-- still have NO grants and NO policies (deny-all); the SECURITY DEFINER
+-- submit RPC stays the only write path from the public form.
+--
+-- Additive, reversible, no data change:
+grant select on public.company_need_public_intakes to service_role;
+-- Status is the ONLY column the app updates (operator queue transitions +
+-- the claim bridge's 'converted' stamp) — column-scoped on purpose.
+grant update (status) on public.company_need_public_intakes to service_role;

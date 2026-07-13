@@ -298,3 +298,28 @@ claim→catalogue promotion, journal→profile visible delta. P2: canonical pipe
 + missing stages + need conversion + worker contact path. P3: wire 3–4 dead registry
 agents into real flows behind existing gates. P4: reuse-first data entry (kill the
 triple need intake). P5: text-noise pass on changed screens.
+
+
+---
+
+## IMPLEMENTED — 2026-07-13 (canonical-user-journey v1 implementation PR)
+
+- §5.1/§5.2 CV/claims: claim→catalogue promotion at confirm time (one list, one
+  confirmation, both stores) + visible living-CV delta + /cv links — living-cv-contract-v1.
+- §5.4 pipeline: ONE derived 7-stage pipeline (no 7th enum, no migration) —
+  candidate-pipeline-contract-v1; scouting chips + one next action per stage.
+- §5.5–§5.7 hubs/next-action: orphan engines/components deleted (18 files); ONE
+  canonical next-action module; company page = one action centre; /dashboard/search removed.
+- §7 worker terminal break: worker→employer contact action (allowed_demand_interest,
+  worker side) + button — full E2E browser proof still needs a verified company (owner).
+- §7 company triple entry: draft→wizard auto-prefill + draft closed after submit
+  (browser-proven: ONE canonical row); public-intake claim bridge (email-gated) +
+  `converted` status — blocked in prod by a PRE-EXISTING grants defect (see below).
+- §1/§7 agency: client management inside the staffing_agency mode —
+  agency-client-management-contract-v1 (works-today panel + owner-gated agency_clients draft).
+- §4 AI: gated worker_profile enhancement inside the real review step; /work-abroad
+  fake-AI copy removed — human-reviewed-ai-assistance-contract-v1.
+- PRODUCTION DEFECT FOUND: `company_need_public_intakes` has no service_role grants →
+  the admin intake queue (PR #681) is silently broken in production; fix drafted as
+  owner-gated `20260713190000_company_need_intake_service_grants.sql`.
+- Browser proof: docs/launch/canonical-user-journey-browser-proof-v1.md.
