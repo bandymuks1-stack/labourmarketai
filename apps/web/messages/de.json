@@ -5999,7 +5999,7 @@
     "namePlaceholder": "Mein Profil",
     "candidateLabel": "Kandidaten-Fähigkeiten",
     "candidateHint": "Fähigkeiten, die Sie in eigenen Worten hinzugefügt haben (braucht Klärung, noch nicht geprüft).",
-    "thermoLabel": "Marktsignal",
+    "thermoLabel": "Marktaktivität",
     "thermoHint": "(Durchschnitt der angegebenen Gehaltserwartungen in Ihrem Projekt + vom Admin eingetragener Marktdurchschnitt) / 2 — wird nur angezeigt, wenn beide Komponenten vorhanden sind.",
     "thermoMissingPosition": "Unzureichende Projektdaten",
     "thermoMissingMarket": "Unzureichende Marktdaten",
@@ -6035,7 +6035,7 @@
       "levelReady": "Bereit",
       "levelBuilding": "Im Aufbau",
       "levelStart": "Am Anfang",
-      "signalsTemplate": "Signale erfüllt",
+      "signalsTemplate": "Schritte erledigt",
       "nextLabel": "Als Nächstes:",
       "pillars": {
         "profession": "Beruf",
@@ -6046,8 +6046,8 @@
         "workCard": "Arbeitskarte"
       }
     },
-    "verifiedTitle": "Bestätigte Fähigkeiten",
-    "verifiedEmpty": "Noch keine bestätigten Fähigkeiten. Sie erscheinen, wenn eine Führungskraft deine Journaleinträge bestätigt.",
+    "verifiedTitle": "Fähigkeiten mit Einträgen",
+    "verifiedEmpty": "Noch keine. Sie entstehen aus Ihren Arbeitseinträgen.",
     "journalSupportedLabel": "Durch Arbeit belegt",
     "journalSupportedHint": "Fähigkeiten, die deine Arbeitsjournal-Einträge belegen — stärker als selbst angegeben; warten auf Bestätigung durch die Führungskraft.",
     "latestEvidenceLabel": "Neuester Nachweis",
@@ -8808,10 +8808,10 @@
     "experienceYears": "{n} J. Erfahrung",
     "skillsTitle": "Fähigkeiten",
     "skillsEmpty": "Keine Fähigkeiten, die Sie sehen dürfen.",
-    "skillVerified": "Bestätigt",
+    "skillVerified": "Mit Führungskraft-Eintrag",
     "skillWorkBacked": "Durch Arbeit belegt",
     "skillDeclared": "Selbst angegeben",
-    "skillsLegend": "Bestätigt — von einer Führungskraft genehmigt. Durch Arbeit belegt — aus Arbeitsjournal-Einträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt, noch nicht geprüft."
+    "skillsLegend": "Mit Führungskraft-Eintrag — ein Eintrag der Führungskraft begleitet die Fähigkeit. Durch Arbeit belegt — aus Journaleinträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt."
   },
   "companyLocations": {
     "title": "Standorte",

@@ -43,7 +43,13 @@ export async function getCompanyLocations(): Promise<CompanyLocationsState> {
       .order("kind", { ascending: true })
       .order("created_at", { ascending: true });
     if (error) {
-      if (error.code === "42P01") return { kind: "needs-migration" };
+      // 42P01 = raw Postgres undefined_table; PGRST205 = PostgREST schema
+      // cache has never seen the table (the code the cloud API actually
+      // returns for a never-applied draft migration — verified in the
+      // production-build smoke).
+      if (error.code === "42P01" || error.code === "PGRST205") {
+        return { kind: "needs-migration" };
+      }
       console.error("[company-locations] read failed:", error.code);
       return { kind: "error" };
     }

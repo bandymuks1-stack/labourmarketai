@@ -5999,7 +5999,7 @@
     "namePlaceholder": "Mano profilis",
     "candidateLabel": "Kandidatiniai įgūdžiai",
     "candidateHint": "Įgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, neperžiūrėta).",
-    "thermoLabel": "Rinkos signalas",
+    "thermoLabel": "Rinkos aktyvumas",
     "thermoHint": "(deklaruotų atlygio lūkesčių vidurkis jūsų projekte + admin įvestas rinkos vidurkis) / 2 — rodoma tik kai yra abu dėmenys.",
     "thermoMissingPosition": "Nepakanka projekto duomenų",
     "thermoMissingMarket": "Nepakanka rinkos duomenų",
@@ -6035,7 +6035,7 @@
       "levelReady": "Pasiruošęs",
       "levelBuilding": "Renkasi",
       "levelStart": "Pradžia",
-      "signalsTemplate": "signalų surinkta",
+      "signalsTemplate": "žingsnių atlikta",
       "nextLabel": "Toliau:",
       "pillars": {
         "profession": "Profesija",
@@ -6046,8 +6046,8 @@
         "workCard": "Darbo kortelė"
       }
     },
-    "verifiedTitle": "Įgūdžių signalai",
-    "verifiedEmpty": "Įgūdžių signalų dar nėra. Jie atsiranda iš tavo darbo įrašų.",
+    "verifiedTitle": "Įgūdžiai su įrašais",
+    "verifiedEmpty": "Tokių įgūdžių dar nėra. Jie atsiranda iš jūsų darbo įrašų.",
     "journalSupportedLabel": "Pagrįsta darbu",
     "journalSupportedHint": "Įgūdžiai, kuriuos paremia tavo darbo žurnalo įrašai.",
     "latestEvidenceLabel": "Naujausias įrašas",
@@ -8808,10 +8808,10 @@
     "experienceYears": "{n} m. patirtis",
     "skillsTitle": "Įgūdžiai",
     "skillsEmpty": "Įgūdžių, kuriuos galite matyti, nėra.",
-    "skillVerified": "Patvirtinta",
+    "skillVerified": "Su vadovo įrašu",
     "skillWorkBacked": "Pagrįsta darbu",
     "skillDeclared": "Nurodyta paties",
-    "skillsLegend": "Patvirtinta — patvirtino vadovas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta, dar nepatikrinta."
+    "skillsLegend": "Su vadovo įrašu — įgūdį lydi vadovo įrašas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta."
   },
   "companyLocations": {
     "title": "Vietos",

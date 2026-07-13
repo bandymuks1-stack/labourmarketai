@@ -5999,7 +5999,7 @@
     "namePlaceholder": "My profile",
     "candidateLabel": "Candidate skills",
     "candidateHint": "Skills you added in your own words (needs clarification, not reviewed yet).",
-    "thermoLabel": "Market signal",
+    "thermoLabel": "Market activity",
     "thermoHint": "(average of declared salary expectations in your project + admin-entered market average) / 2 — shown only when both components exist.",
     "thermoMissingPosition": "Insufficient project data",
     "thermoMissingMarket": "Insufficient market data",
@@ -6035,7 +6035,7 @@
       "levelReady": "Ready",
       "levelBuilding": "Building",
       "levelStart": "Getting started",
-      "signalsTemplate": "signals met",
+      "signalsTemplate": "steps done",
       "nextLabel": "Next:",
       "pillars": {
         "profession": "Profession",
@@ -6046,8 +6046,8 @@
         "workCard": "Work card"
       }
     },
-    "verifiedTitle": "Skill signals",
-    "verifiedEmpty": "No skill signals yet. They build from your work records.",
+    "verifiedTitle": "Skills with records",
+    "verifiedEmpty": "None yet. They build from your work records.",
     "journalSupportedLabel": "Work-backed",
     "journalSupportedHint": "Skills your work-journal entries back up.",
     "latestEvidenceLabel": "Latest records",
@@ -8808,10 +8808,10 @@
     "experienceYears": "{n} yrs experience",
     "skillsTitle": "Skills",
     "skillsEmpty": "No skills you are permitted to see.",
-    "skillVerified": "Confirmed",
+    "skillVerified": "With manager record",
     "skillWorkBacked": "Work-backed",
     "skillDeclared": "Self-declared",
-    "skillsLegend": "Confirmed — approved by a manager. Work-backed — supported by work journal entries. Self-declared — added by the person, not yet checked."
+    "skillsLegend": "With manager record — a manager record accompanies the skill. Work-backed — visible from work journal entries. Self-declared — added by the person."
   },
   "companyLocations": {
     "title": "Locations",

@@ -29,19 +29,19 @@ on the `can_view_worker` RLS function (migration `20260711130000`); the
 page selects NO contact fields. `company-workers-section` rows and stadium
 player cards now link to it.
 
-## F3 — Company page overload — IN PROGRESS
+## F3 — Company page overload — FIXED
 
 Compact control-surface work: summary + section anchors, locations and
 gallery sections added, long copy collapsed behind disclosures. Still in
 progress on this branch.
 
-## F4 — "Placeholder" text in notifications — IN PROGRESS
+## F4 — "Placeholder" text in notifications — FIXED
 
 Root cause: hardcoded "Placeholder" dev-marker blocks in
 `components/app/notification-panel.tsx`, driven by
 `NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS`. Being removed.
 
-## F5 — Header text pills — IN PROGRESS
+## F5 — Header text pills — FIXED
 
 Text pills (ASMENINĖ ERDVĖ / Admin režimas, from
 `components/app/role-switcher.tsx`) being compacted to icon-first.
@@ -59,7 +59,7 @@ CONTAINMENT shipped instead of a claimed point fix:
 - NEW `app/global-error.tsx` so no client error ever reaches Next's dead
   default shell.
 
-## F7 / F8 — Dashboard & journal readiness confusion — IN PROGRESS
+## F7 / F8 — Dashboard & journal readiness confusion — FIXED
 
 Root cause: two competing readiness systems plus internal "signal"
 vocabulary leaking into UI. Being unified into one readiness model; the
@@ -137,11 +137,22 @@ dashboard-tabs). Nav guard `lib/guards/compact-nav-marketplace-ia.test.ts`
 updated to the six-item contract (overview, market_map,
 journal_text_first, communication, planning, network).
 
-## F16 — Global copy honesty sweep — IN PROGRESS
+## F16 — Global copy honesty sweep — FIXED (one documented follow-up)
 
 Global copy sweep + banned-copy guards. Rules codified in
 `docs/launch/product-presentation-contract-v1.md`; guard tests live in
 `apps/web/lib/guards/`.
+
+### F16 documented follow-up — market-map "signalų" vocabulary
+
+The dashboard/readiness/notification surfaces no longer use internal
+vocabulary (guarded by lib/guards/production-ux-repair-v2.test.ts). The
+market-map namespace (marketMap.*, mapLayers.*) still uses "signalas" as
+its core object name across ~30 keys × 5 locales. There the word names an
+object the user ADDS and MANAGES (allowed by the presentation contract
+when the user must act on it), but a future slice should rename it to a
+plainer concept (e.g. "vieta"/"įrašas žemėlapyje"). Deliberately NOT
+half-rewritten in this PR — one vocabulary, one slice.
 
 ## Status summary
 
@@ -151,4 +162,44 @@ Global copy sweep + banned-copy guards. Rules codified in
 | F6 | Contained (RC6), original crash not reproduced |
 | F10 | Fixed in tree, deploy pending |
 | F12 | Worker map fixed; company geography OWNER-GATED (migration NOT applied) |
-| F3, F4, F5, F7/F8, F16 | IN PROGRESS on branch |
+| F3, F4, F5, F7/F8, F16 | FIXED on branch (F16: marketMap vocabulary follow-up documented) |
+
+## Browser proof record (2026-07-13, local PRODUCTION build, cloud DB, owner test account)
+
+Playwright (public layer, tests/e2e/production-ux-repair-v2.spec.ts): 8/8 pass —
+theme toggle visible desktop+mobile, toggle flips+persists, LIGHT LT→EN stays
+light via the header switcher, DARK survives EN/RU/NL/DE, LIGHT survives every
+active locale, no horizontal overflow at 360×800 / 390×844 / 412×915 on /lt.
+(3 authenticated specs skip without SUPABASE_TEST_URL — repo convention.)
+
+Manual production-mode session (next start + minted owner-test session):
+
+- F6: "Pasiūlykite struktūrą" with a broad business+construction narrative →
+  10 suggestions incl. AI integracijos / Įmonių kūrimas / Finansų valdymas /
+  Produktų kūrimas / Derybos; zero console errors; no error shell.
+- F4: bell popover empty state = one compact honest line, no Placeholder chip
+  (in production mode, where markers are forced on for fabricated values).
+- F11: /dashboard/projects as worker → "Mano projektai" with honest empty
+  state (no dead "managers only" page).
+- F2: /dashboard/people/<random-uuid> → honest restricted state; RLS returned
+  no row, no contact data anywhere on the surface.
+- F12: map tap → dashed preview + "Sena vieta lieka, kol paspausite Išsaugoti";
+  Save persisted (lat 56.5401); subsequent ordinary tap INERT with
+  "Vieta nepakeista" hint and unchanged storage; Edit→tap→Cancel closed the
+  preview and kept lat 56.5401.
+- F13: /dashboard/gallery honest empty state with journal CTA; company page
+  gallery section with per-project counts.
+- F3: company control bar renders icon+count chips (team/projects/invitations/
+  locations/gallery/calendar) with zero horizontal overflow at 360px.
+- F14/F15: Kalendorius + Tinklas tabs visible in the bottom nav and open
+  /dashboard/planning ("Planavimas") and /dashboard/network ("Mano tinklas").
+- F5/F7/F8: header shows icon workspace chip ("Asmuo"), no GYVI DUOMENYS
+  banner, "Pagrįsti darbu" + human legend, "Kitas žingsnis" eyebrow.
+- Migration gating: the cloud API returns PGRST205 for the never-applied
+  company_locations table — detection extended (42P01 + PGRST205) so the
+  Locations section shows the honest "prepared, owner activation pending"
+  state.
+
+Direct live-production session injection was refused by the harness security
+policy (correct), so production behaviour was proven on the local production
+build against the same cloud database.

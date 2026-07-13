@@ -5999,7 +5999,7 @@
     "namePlaceholder": "Mijn profiel",
     "candidateLabel": "Kandidaat-vaardigheden",
     "candidateHint": "Vaardigheden die je in je eigen woorden hebt toegevoegd (verduidelijking nodig, nog niet beoordeeld).",
-    "thermoLabel": "Marktsignaal",
+    "thermoLabel": "Marktactiviteit",
     "thermoHint": "(gemiddelde van opgegeven salarisverwachtingen in je project + door de admin ingevoerd marktgemiddelde) / 2 — alleen getoond wanneer beide componenten bestaan.",
     "thermoMissingPosition": "Onvoldoende projectdata",
     "thermoMissingMarket": "Onvoldoende marktdata",
@@ -6035,7 +6035,7 @@
       "levelReady": "Klaar",
       "levelBuilding": "In opbouw",
       "levelStart": "Net gestart",
-      "signalsTemplate": "signalen behaald",
+      "signalsTemplate": "stappen voltooid",
       "nextLabel": "Volgende:",
       "pillars": {
         "profession": "Beroep",
@@ -6046,8 +6046,8 @@
         "workCard": "Werkkaart"
       }
     },
-    "verifiedTitle": "Vaardigheidssignalen",
-    "verifiedEmpty": "Nog geen vaardigheidssignalen. Ze worden opgebouwd uit je werkregistraties.",
+    "verifiedTitle": "Vaardigheden met registraties",
+    "verifiedEmpty": "Nog geen. Ze worden opgebouwd uit je werkregistraties.",
     "journalSupportedLabel": "Door werk gestaafd",
     "journalSupportedHint": "Vaardigheden die je werklogboek ondersteunt — sterker dan zelfverklaard; wachten op bevestiging door de manager.",
     "latestEvidenceLabel": "Laatste registraties",
@@ -8808,10 +8808,10 @@
     "experienceYears": "{n} jr ervaring",
     "skillsTitle": "Vaardigheden",
     "skillsEmpty": "Geen vaardigheden die je mag zien.",
-    "skillVerified": "Bevestigd",
+    "skillVerified": "Met managerregistratie",
     "skillWorkBacked": "Door werk gestaafd",
     "skillDeclared": "Zelf opgegeven",
-    "skillsLegend": "Bevestigd — goedgekeurd door een manager. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd, nog niet gecontroleerd."
+    "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd."
   },
   "companyLocations": {
     "title": "Locaties",
