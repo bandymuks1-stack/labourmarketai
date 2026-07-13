@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import { CvInputPanel } from "@/components/app/cv-input-panel";
 import { DetectedSuggestionCard, type SuggestionStatus } from "@/components/app/detected-suggestion-card";
 import { DetectedSuggestionList } from "@/components/app/detected-suggestion-list";
@@ -579,13 +580,13 @@ export function ProfileTextFirstFlow({
             {t("viewCapabilities")} →
           </a>
           {promotion && promotion.promoted > 0 && (
-            <a
-              href="/cv"
+            <Link
+              href={"/cv" as "/dashboard"}
               className="ml-3 mt-2 inline-flex text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
               data-testid="profile-text-flow-view-cv"
             >
               {t("viewUpdatedCv")} →
-            </a>
+            </Link>
           )}
         </div>
       )}
