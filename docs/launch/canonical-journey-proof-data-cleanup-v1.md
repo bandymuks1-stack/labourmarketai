@@ -31,6 +31,10 @@ production data artifacts.
 - `company_need_public_intakes` row **`b3e0352c-…`** (`status='new'`)
 - `customer_requests`: one closed draft + one submitted demand (later closed)
 - `demand_shortlist` / scouting pipeline rows for that demand
+- ADDED 2026-07-13 (labour-market-os browser proof): one submitted demand
+  "Plytelių klojėjų brigada biurų apdailai (E2E PROOF)" (+ its auto-saved
+  draft if persisted) — see
+  `docs/launch/labour-market-os-browser-proof-v1.md` §7
 
 ## Cleanup sequence (owner-run, in this order)
 
