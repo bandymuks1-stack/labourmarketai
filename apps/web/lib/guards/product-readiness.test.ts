@@ -1736,7 +1736,11 @@ describe("no migration files added by this sprint", () => {
     // (20260713120000_company_locations_v1) — production UX repair v2
     // F12.4/5; DRAFT / needs-human-gate, NOT applied; paired rollback +
     // deferred APPLIED_LEDGER entry in the PR.
-    const SPRINT_BASELINE = 129;
+    // Bumped 129 -> 130 for the staffing-agency client records draft
+    // (20260713160000_agency_clients_v1) — canonical journey P5; DRAFT /
+    // needs-human-gate, NOT applied; paired rollback + deferred
+    // APPLIED_LEDGER entry in the PR.
+    const SPRINT_BASELINE = 130;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

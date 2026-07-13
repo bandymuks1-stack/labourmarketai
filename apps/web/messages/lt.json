@@ -2526,10 +2526,10 @@
       "applyErrorLabel": "Nepavyko išsaugoti pasirinktų gebėjimų. Bandykite dar kartą.",
       "textClaimNotVerified": "Tai jūsų pačių teiginys — dar nepagrįsta darbo įrašais",
       "extractErrorLabel": "Nepavyko apdoroti teksto. Jūsų tekstas išsaugotas — bandykite dar kartą.",
-      "promotedToCatalog": "{n} patvirtinti įgūdžiai taip pat įrašyti į kataloginį įgūdžių sąrašą — jie dalyvauja atitikime ir jūsų CV.",
-      "promotedSkipped": "{n} lieka tik kaip paties nurodyti įrašai (ne pagal jūsų darbo kryptis).",
+      "promotedToCatalog": "{n} jūsų pasirinkti įgūdžiai taip pat įrašyti į kataloginį įgūdžių sąrašą — jie dalyvauja atitikime ir jūsų CV.",
+      "promotedSkipped": "{n} į kataloginį sąrašą nepateko (ne pagal jūsų darbo kryptis) — jie lieka jūsų profilyje kaip jūsų pačių įrašai.",
       "viewUpdatedCv": "Peržiūrėti atnaujintą CV",
-      "aiSuggestionHint": "AI pasiūlymas — patvirtinkite prieš įrašant"
+      "aiSuggestionHint": "AI pasiūlymas — peržiūrėkite prieš įrašant"
     }
   },
   "roles": {
@@ -6981,7 +6981,8 @@
     "ctaProfile": "Sukurti darbuotojo profilį",
     "ctaReadiness": "Patikrinti šalies pasiruošimą",
     "ctaTrades": "Žiūrėti amatus, su kuriais dirbame",
-    "disclaimer": "Mes nežadame darbo ar uždarbio, o pasiruošimo informacija nėra teisinė konsultacija."
+    "disclaimer": "Mes nežadame darbo ar uždarbio, o pasiruošimo informacija nėra teisinė konsultacija.",
+    "structuredNote": "Jūsų CV tekstas automatiškai struktūrizuojamas į profilį — kiekvieną pasiūlymą peržiūrite ir nusprendžiate jūs."
   },
   "needStructuring": {
     "pageTitle": "Poreikių struktūrinimas",
@@ -8834,5 +8835,58 @@
     "claimed": "Perkelta į jūsų juodraščius",
     "error": "Nepavyko perkelti. Bandykite dar kartą.",
     "workersLabel": "Darbuotojų"
+  },
+  "candidatePipeline": {
+    "stage": {
+      "new": "Naujas",
+      "reviewing": "Peržiūrimas",
+      "contacted": "Susisiekta",
+      "interview": "Pokalbis",
+      "offer": "Pasiūlymas",
+      "accepted": "Priimtas",
+      "rejected": "Atmestas"
+    },
+    "action": {
+      "review": "Peržiūrėti šį kandidatą",
+      "contact": "Pradėti pokalbį",
+      "message": "Atsidaryti žinutes",
+      "continueConversation": "Tęsti pokalbį",
+      "viewOffer": "Sekti pasiūlymo atsakymą",
+      "planWork": "Peržiūrėti priimtą pasiūlymą",
+      "reviewOthers": "Peržiūrėti kitus kandidatus"
+    }
+  },
+  "agencyClients": {
+    "title": "Klientai",
+    "subtitle": "Kam parūpinate darbuotojus — kliento poreikiai susiejami su jūsų užklausomis ir kandidatų paieška.",
+    "gatedHeading": "Paruošta — laukia savininko aktyvavimo",
+    "gatedBody": "Klientų įrašai paruošti, bet duomenų bazės pakeitimas dar nepritaikytas.",
+    "notLinkable": "Užklausų kol kas negalima susieti su klientais.",
+    "clientsEmpty": "Klientų dar nėra. Pridėkite pirmą klientą žemiau.",
+    "demandsHeading": "Jūsų užklausos",
+    "demandsEmpty": "Užklausų dar nėra.",
+    "demandsEmptyCta": "Sukurti užklausą",
+    "unassignedHeading": "Nesusieta su klientu",
+    "noLinkedDemands": "Susietų užklausų dar nėra — susiekite žemiau.",
+    "openScouting": "Kandidatai",
+    "addHeading": "Pridėti klientą",
+    "addButton": "Pridėti klientą",
+    "nameLabel": "Kliento pavadinimas",
+    "contactNameLabel": "Kontaktinis asmuo (nebūtina)",
+    "contactEmailLabel": "Kontaktinis el. paštas (nebūtina)",
+    "noteLabel": "Pastaba (nebūtina)",
+    "removeButton": "Pašalinti klientą",
+    "assignLabel": "Susieti su klientu",
+    "assignNone": "— be kliento —",
+    "assignButton": "Susieti",
+    "errorLabel": "Įvyko klaida. Bandykite dar kartą.",
+    "status": {
+      "draft": "Juodraštis",
+      "submitted": "Pateikta",
+      "in_review": "Peržiūrima",
+      "needs_followup": "Reikia patikslinti",
+      "approved": "Patvirtinta",
+      "closed": "Uždaryta"
+    }
   }
 }

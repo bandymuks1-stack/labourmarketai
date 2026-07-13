@@ -2526,10 +2526,10 @@
       "applyErrorLabel": "Could not save the selected skills. Please try again.",
       "textClaimNotVerified": "This is your own claim — not yet backed by work records",
       "extractErrorLabel": "Could not process the text. Your text is saved — try again.",
-      "promotedToCatalog": "{n} confirmed skills were also added to your catalogued skill list — they now count in matching and on your CV.",
-      "promotedSkipped": "{n} stay as self-declared entries only (outside your current work directions).",
+      "promotedToCatalog": "{n} of your selected skills were also added to your catalogued skill list — they now count in matching and on your CV.",
+      "promotedSkipped": "{n} were not added to the catalogued list (outside your current work directions) — they stay in your profile as your own notes.",
       "viewUpdatedCv": "View your updated CV",
-      "aiSuggestionHint": "AI suggestion — confirm before saving"
+      "aiSuggestionHint": "AI suggestion — review before saving"
     }
   },
   "roles": {
@@ -6981,7 +6981,8 @@
     "ctaProfile": "Create worker profile",
     "ctaReadiness": "Check country readiness",
     "ctaTrades": "See trades we work with",
-    "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice."
+    "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice.",
+    "structuredNote": "Your CV text is structured into a profile automatically — you review every suggestion and decide what is saved."
   },
   "needStructuring": {
     "pageTitle": "Need structuring",
@@ -8834,5 +8835,58 @@
     "claimed": "Moved to your drafts",
     "error": "Could not claim it. Please try again.",
     "workersLabel": "Workers"
+  },
+  "candidatePipeline": {
+    "stage": {
+      "new": "New",
+      "reviewing": "Reviewing",
+      "contacted": "Contacted",
+      "interview": "In conversation",
+      "offer": "Offer",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    },
+    "action": {
+      "review": "Review this candidate",
+      "contact": "Start a conversation",
+      "message": "Open your messages",
+      "continueConversation": "Continue the conversation",
+      "viewOffer": "Track the booking response",
+      "planWork": "Review the accepted booking",
+      "reviewOthers": "Review other candidates"
+    }
+  },
+  "agencyClients": {
+    "title": "Clients",
+    "subtitle": "Who you staff for — each client's needs link to your demands and candidate scouting.",
+    "gatedHeading": "Prepared — owner activation pending",
+    "gatedBody": "Client records are ready, but the database change is not applied yet.",
+    "notLinkable": "Demands cannot be linked to clients yet.",
+    "clientsEmpty": "No clients yet. Add your first client below.",
+    "demandsHeading": "Your demands",
+    "demandsEmpty": "No demands yet.",
+    "demandsEmptyCta": "Create a demand",
+    "unassignedHeading": "Not linked to a client",
+    "noLinkedDemands": "No linked demands yet — link one below.",
+    "openScouting": "Candidates",
+    "addHeading": "Add client",
+    "addButton": "Add client",
+    "nameLabel": "Client name",
+    "contactNameLabel": "Contact person (optional)",
+    "contactEmailLabel": "Contact email (optional)",
+    "noteLabel": "Note (optional)",
+    "removeButton": "Remove client",
+    "assignLabel": "Link to client",
+    "assignNone": "— no client —",
+    "assignButton": "Link",
+    "errorLabel": "Something went wrong. Try again.",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "in_review": "In review",
+      "needs_followup": "Needs follow-up",
+      "approved": "Approved",
+      "closed": "Closed"
+    }
   }
 }

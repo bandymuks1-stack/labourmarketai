@@ -2526,10 +2526,10 @@
       "applyErrorLabel": "Kon de geselecteerde vaardigheden niet opslaan. Probeer het opnieuw.",
       "textClaimNotVerified": "Dit is je eigen claim — nog niet onderbouwd door werkregistraties",
       "extractErrorLabel": "De tekst kon niet worden verwerkt. Je tekst is opgeslagen — probeer het opnieuw.",
-      "promotedToCatalog": "{n} bevestigde vaardigheden zijn ook toegevoegd aan uw cataloguslijst — ze tellen nu mee in matching en op uw cv.",
-      "promotedSkipped": "{n} blijven alleen zelfverklaarde vermeldingen (buiten uw werkrichtingen).",
+      "promotedToCatalog": "{n} van uw geselecteerde vaardigheden zijn ook toegevoegd aan uw cataloguslijst — ze tellen nu mee in matching en op uw cv.",
+      "promotedSkipped": "{n} zijn niet aan de cataloguslijst toegevoegd (buiten uw werkrichtingen) — ze blijven in uw profiel als uw eigen vermeldingen.",
       "viewUpdatedCv": "Bekijk uw bijgewerkte cv",
-      "aiSuggestionHint": "AI-suggestie — bevestig vóór het opslaan"
+      "aiSuggestionHint": "AI-suggestie — controleer vóór het opslaan"
     }
   },
   "roles": {
@@ -6981,7 +6981,8 @@
     "ctaProfile": "Werknemersprofiel aanmaken",
     "ctaReadiness": "Landgereedheid controleren",
     "ctaTrades": "Bekijk de vakgebieden waarmee we werken",
-    "disclaimer": "We beloven geen werk of inkomsten, en gereedheidsinformatie is geen juridisch advies."
+    "disclaimer": "We beloven geen werk of inkomsten, en gereedheidsinformatie is geen juridisch advies.",
+    "structuredNote": "Uw cv-tekst wordt automatisch gestructureerd tot een profiel — u beoordeelt elke suggestie en beslist wat wordt opgeslagen."
   },
   "needStructuring": {
     "pageTitle": "Behoeftestructurering",
@@ -8834,5 +8835,58 @@
     "claimed": "Verplaatst naar uw concepten",
     "error": "Overnemen mislukt. Probeer het opnieuw.",
     "workersLabel": "Werknemers"
+  },
+  "candidatePipeline": {
+    "stage": {
+      "new": "Nieuw",
+      "reviewing": "In beoordeling",
+      "contacted": "Gecontacteerd",
+      "interview": "In gesprek",
+      "offer": "Aanbod",
+      "accepted": "Geaccepteerd",
+      "rejected": "Afgewezen"
+    },
+    "action": {
+      "review": "Kandidaat beoordelen",
+      "contact": "Gesprek starten",
+      "message": "Berichten openen",
+      "continueConversation": "Gesprek voortzetten",
+      "viewOffer": "Reactie op het aanbod volgen",
+      "planWork": "Geaccepteerd aanbod bekijken",
+      "reviewOthers": "Andere kandidaten beoordelen"
+    }
+  },
+  "agencyClients": {
+    "title": "Klanten",
+    "subtitle": "Voor wie u personeel levert — klantbehoeften worden gekoppeld aan uw aanvragen en kandidaat-scouting.",
+    "gatedHeading": "Voorbereid — wacht op activering door de eigenaar",
+    "gatedBody": "Klantrecords zijn klaar, maar de databasewijziging is nog niet toegepast.",
+    "notLinkable": "Aanvragen kunnen nog niet aan klanten worden gekoppeld.",
+    "clientsEmpty": "Nog geen klanten. Voeg hieronder de eerste toe.",
+    "demandsHeading": "Uw aanvragen",
+    "demandsEmpty": "Nog geen aanvragen.",
+    "demandsEmptyCta": "Aanvraag aanmaken",
+    "unassignedHeading": "Niet aan een klant gekoppeld",
+    "noLinkedDemands": "Nog geen gekoppelde aanvragen — koppel er hieronder een.",
+    "openScouting": "Kandidaten",
+    "addHeading": "Klant toevoegen",
+    "addButton": "Klant toevoegen",
+    "nameLabel": "Klantnaam",
+    "contactNameLabel": "Contactpersoon (optioneel)",
+    "contactEmailLabel": "Contact-e-mail (optioneel)",
+    "noteLabel": "Notitie (optioneel)",
+    "removeButton": "Klant verwijderen",
+    "assignLabel": "Aan klant koppelen",
+    "assignNone": "— geen klant —",
+    "assignButton": "Koppelen",
+    "errorLabel": "Er ging iets mis. Probeer het opnieuw.",
+    "status": {
+      "draft": "Concept",
+      "submitted": "Ingediend",
+      "in_review": "In beoordeling",
+      "needs_followup": "Opvolging nodig",
+      "approved": "Goedgekeurd",
+      "closed": "Gesloten"
+    }
   }
 }

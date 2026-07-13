@@ -2526,10 +2526,10 @@
       "applyErrorLabel": "Die ausgewählten Fähigkeiten konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "textClaimNotVerified": "Dies ist Ihre eigene Angabe — noch nicht durch Arbeitsnachweise belegt",
       "extractErrorLabel": "Der Text konnte nicht verarbeitet werden. Ihr Text ist gespeichert — versuchen Sie es erneut.",
-      "promotedToCatalog": "{n} bestätigte Fähigkeiten wurden auch in Ihre Katalogliste übernommen — sie zählen jetzt im Matching und in Ihrem CV.",
-      "promotedSkipped": "{n} bleiben nur selbst angegebene Einträge (außerhalb Ihrer Arbeitsrichtungen).",
+      "promotedToCatalog": "{n} Ihrer ausgewählten Fähigkeiten wurden auch in Ihre Katalogliste übernommen — sie zählen jetzt im Matching und in Ihrem CV.",
+      "promotedSkipped": "{n} kamen nicht in die Katalogliste (außerhalb Ihrer Arbeitsrichtungen) — sie bleiben in Ihrem Profil als Ihre eigenen Einträge.",
       "viewUpdatedCv": "Aktualisiertes CV ansehen",
-      "aiSuggestionHint": "KI-Vorschlag — vor dem Speichern bestätigen"
+      "aiSuggestionHint": "KI-Vorschlag — vor dem Speichern prüfen"
     }
   },
   "roles": {
@@ -6981,7 +6981,8 @@
     "ctaProfile": "Arbeitskraft-Profil erstellen",
     "ctaReadiness": "Länderbereitschaft prüfen",
     "ctaTrades": "Gewerke ansehen, mit denen wir arbeiten",
-    "disclaimer": "Wir versprechen keine Arbeit und keinen Verdienst, und Informationen zur Bereitschaft sind keine Rechtsberatung."
+    "disclaimer": "Wir versprechen keine Arbeit und keinen Verdienst, und Informationen zur Bereitschaft sind keine Rechtsberatung.",
+    "structuredNote": "Ihr CV-Text wird automatisch in ein Profil strukturiert — Sie prüfen jeden Vorschlag und entscheiden, was gespeichert wird."
   },
   "needStructuring": {
     "pageTitle": "Bedarfsstrukturierung",
@@ -8834,5 +8835,58 @@
     "claimed": "In Ihre Entwürfe verschoben",
     "error": "Übernahme fehlgeschlagen. Bitte erneut versuchen.",
     "workersLabel": "Arbeitskräfte"
+  },
+  "candidatePipeline": {
+    "stage": {
+      "new": "Neu",
+      "reviewing": "In Prüfung",
+      "contacted": "Kontaktiert",
+      "interview": "Im Gespräch",
+      "offer": "Angebot",
+      "accepted": "Angenommen",
+      "rejected": "Abgelehnt"
+    },
+    "action": {
+      "review": "Kandidaten prüfen",
+      "contact": "Gespräch beginnen",
+      "message": "Nachrichten öffnen",
+      "continueConversation": "Gespräch fortsetzen",
+      "viewOffer": "Antwort auf das Angebot verfolgen",
+      "planWork": "Angenommenes Angebot ansehen",
+      "reviewOthers": "Weitere Kandidaten prüfen"
+    }
+  },
+  "agencyClients": {
+    "title": "Kunden",
+    "subtitle": "Für wen Sie Personal stellen — Kundenbedarfe werden mit Ihren Anfragen und dem Kandidaten-Scouting verknüpft.",
+    "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Inhaber",
+    "gatedBody": "Kundendatensätze sind bereit, aber die Datenbankänderung ist noch nicht angewendet.",
+    "notLinkable": "Anfragen können noch nicht mit Kunden verknüpft werden.",
+    "clientsEmpty": "Noch keine Kunden. Fügen Sie unten den ersten hinzu.",
+    "demandsHeading": "Ihre Anfragen",
+    "demandsEmpty": "Noch keine Anfragen.",
+    "demandsEmptyCta": "Anfrage erstellen",
+    "unassignedHeading": "Keinem Kunden zugeordnet",
+    "noLinkedDemands": "Noch keine verknüpften Anfragen — unten verknüpfen.",
+    "openScouting": "Kandidaten",
+    "addHeading": "Kunde hinzufügen",
+    "addButton": "Kunde hinzufügen",
+    "nameLabel": "Kundenname",
+    "contactNameLabel": "Ansprechpartner (optional)",
+    "contactEmailLabel": "Kontakt-E-Mail (optional)",
+    "noteLabel": "Notiz (optional)",
+    "removeButton": "Kunde entfernen",
+    "assignLabel": "Mit Kunde verknüpfen",
+    "assignNone": "— kein Kunde —",
+    "assignButton": "Verknüpfen",
+    "errorLabel": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "status": {
+      "draft": "Entwurf",
+      "submitted": "Eingereicht",
+      "in_review": "In Prüfung",
+      "needs_followup": "Rückfrage nötig",
+      "approved": "Genehmigt",
+      "closed": "Geschlossen"
+    }
   }
 }

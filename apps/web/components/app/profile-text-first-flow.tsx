@@ -283,21 +283,6 @@ export function ProfileTextFirstFlow({
       // never duplicates.
       await saveProfileSkillClaimsAction(confirmedClaims);
 
-      // Living CV (canonical-journey P2): the SAME user confirmation is
-      // also recorded as catalogued worker_skills rows where the label
-      // maps into the shared deterministic lexicon and the worker's own
-      // directions. One confirmation, both canonical stores — catalogued
-      // rows are what matching, journal evidence and the Verified CV
-      // read. Best-effort: a promotion failure never fails the save
-      // (claims are already persisted above).
-      let promo: PromoteClaimsResult | null = null;
-      try {
-        promo = await promoteConfirmedClaimsAction(confirmedClaims);
-      } catch (e) {
-        console.error("[profile-text-first] promotion failed:", e);
-      }
-      setPromotion(promo);
-
       // Pilot telemetry — fire-and-forget. We send a count of confirmed
       // skill claims (number, not labels) so the admin can see funnel
       // throughput without the labels themselves leaking into telemetry.
@@ -320,6 +305,22 @@ export function ProfileTextFirstFlow({
       );
       setApplied(true);
       router.refresh();
+
+      // Living CV (canonical-journey P2): the SAME user confirmation is
+      // also recorded as catalogued worker_skills rows where the label
+      // maps into the shared lexicon + the worker's own directions
+      // (matching, journal evidence and the Verified CV read catalogued
+      // rows). Best-effort AFTER the primary save+refresh: a promotion
+      // failure never fails the save; a success refreshes once more so
+      // the capability section shows the promoted rows.
+      try {
+        const promo = await promoteConfirmedClaimsAction(confirmedClaims);
+        setPromotion(promo);
+        if (promo.promoted > 0) router.refresh();
+      } catch (e) {
+        console.error("[profile-text-first] promotion failed:", e);
+        setPromotion(null);
+      }
       // Activation funnel (P0-A) — canonical profile-saved signal. Fired
       // after the save+refresh so the save→refresh path stays tight.
       trackFunnel(FUNNEL_EVENTS.profileSaved, {

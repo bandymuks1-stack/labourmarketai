@@ -233,6 +233,12 @@ describe("NO new DB migration in this PR", () => {
     // F12.4/5): HQ / operating locations / desired markets with fail-closed
     // owner-only RLS and RPC-only writes. DRAFT / needs-human-gate, NOT
     // applied; paired rollback + deferred APPLIED_LEDGER entry in the PR.
-    expect(count).toBeLessThanOrEqual(129);
+    // Bumped 129 -> 130 for the staffing-agency client records draft
+    // (20260713160000_agency_clients_v1, canonical journey P5): agency
+    // client CRM rows + ONE additive customer_requests.agency_client_id FK,
+    // fail-closed owner-only RLS and RPC-only writes. DRAFT /
+    // needs-human-gate, NOT applied; paired rollback + deferred
+    // APPLIED_LEDGER entry in the PR.
+    expect(count).toBeLessThanOrEqual(130);
   });
 });
