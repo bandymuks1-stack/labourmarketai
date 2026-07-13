@@ -37,6 +37,32 @@ future work
 Every new feature must locate itself on this chain. A feature that cannot is
 out of scope.
 
+### 1.1 Entry-point freedom (owner correction, 2026-07-13)
+
+The chain above describes what the system can DERIVE — it is **not** a
+mandated user sequence. LabourMarket.ai never dictates where a user must
+start or in which order they work. Binding principles:
+
+- **multiple valid entry points** — a company or agency may start from a
+  future work package, a position, a specific candidate, a skill gap, a
+  client need, a brigade, a CV/contact import, free text, or any other real
+  part of their job; a worker may start from a CV, profile, offer, job
+  search, journal, external profile, skills, availability, or desired
+  conditions;
+- **one canonical underlying system** — every entry path normalizes into the
+  same canonical objects (§2); no duplicate objects are created because of a
+  different entry path, and no path requires re-entering data another path
+  already captured;
+- **suggestions, not coercion** — recommendations (including "next action")
+  are clearly labeled recommendations; the user may always choose a
+  different action; no legitimate alternative path is blocked;
+- **progressive completion** — missing information is collected when it is
+  needed, can be skipped, and can be completed later; no mandatory long
+  onboarding when the user's current goal doesn't need it;
+- **user-controlled workflow** — "work first" means only that the system is
+  ABLE to derive workforce needs from real future work; it is not a
+  mandatory first screen or a mandatory workflow for every company.
+
 ## 2. Canonical models (one truth per concept)
 
 | Concept | Canonical store | Contract |
@@ -126,6 +152,9 @@ applied by an agent** — owner applies via Supabase MCP `apply_migration`.
   status indicators, one primary CTA. Forbidden: text walls, multiple
   next-action blocks, technical AI copy, horizontal scroll hiding the primary
   action, button-like elements without an action.
+- The primary CTA is a labeled recommendation, never a mandatory command
+  (§1.1); alternative legitimate entry actions stay visible and unblocked;
+  empty states offer a choice of starting points, not a single funnel.
 - Honest degradation everywhere: an unapplied migration or missing provider
   renders a truthful "prepared, owner activation pending" state — never a
   fake control.

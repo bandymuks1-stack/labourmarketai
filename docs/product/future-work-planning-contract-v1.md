@@ -26,6 +26,18 @@ and timeline-ordered (start date ascending, undated last). A demand and a
 project are never merged into one entry: no stored demand→project link
 exists, and inventing one would fake a relation.
 
+## Entry-point freedom (owner correction, 2026-07-13)
+
+Future-work planning is one of MANY valid entry points — not a mandated
+first step (constitution §1.1). A company may equally start from a position,
+a candidate, a client, an import, or free text; whichever path is taken,
+data normalizes into the SAME canonical rows above (`customer_requests`,
+`projects`) and their satellites — never into a duplicate object, and never
+requiring re-entry of data another path already captured. The planning zone
+presents derived needs and recommendations as labeled suggestions; it never
+blocks or sequences the user's legitimate alternative actions. "Work first"
+means only that the system CAN derive workforce needs from real future work.
+
 ## WorkforcePlanV1 — human-editable plan state on the canonical payload
 
 The human-reviewed workforce plan is ADDITIVE JSON on the canonical demand
