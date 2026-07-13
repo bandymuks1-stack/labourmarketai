@@ -22,7 +22,9 @@ export const mockCompletionProvider: AiCompletionProvider = {
     return {
       status: "ok",
       provider: "mock",
-      model: cfg.model,
+      // Honor the per-request routing override exactly like the live adapter,
+      // so routing decisions are provable in tests without a network.
+      model: request.model ?? cfg.model,
       raw: request.mock ?? null,
       usage: { inputTokens: 0, outputTokens: 0 },
     };

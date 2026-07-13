@@ -28,6 +28,12 @@ export interface AiCompletionRequest {
   /** Per-call output-token override (clamped by the runtime cost guard). */
   readonly maxOutputTokens?: number;
   /**
+   * Per-request model override, resolved by the task-routing layer from a
+   * tier ALIAS (task-routing.ts). Providers honor `request.model ?? cfg.model`.
+   * Absent → the config default model.
+   */
+  readonly model?: string;
+  /**
    * Deterministic output for the MOCK provider only (tests/dev). The live
    * provider ignores it entirely — it can never inject a fabricated live result.
    */
