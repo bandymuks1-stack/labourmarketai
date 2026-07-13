@@ -1,4 +1,12 @@
--- ════════════════════════════════════════════════════════════════════════
+-- ============================================================================
+-- DRAFT — needs-human-gate — DO NOT APPLY automatically.
+-- @human-gate-approved
+-- Prepared under the owner's Production UX Root-Cause Repair v2 goal command
+-- (2026-07-13, F12.4/5: "sukurk additive migraciją … migracijos nepritaikyk"):
+-- migration prepared FULLY but NOT applied — production apply happens ONLY
+-- after the owner reviews the PR #746 gate report. Never `db push`.
+-- ============================================================================
+--
 -- company_locations v1 — company operating geography (F12.4/5, production
 -- UX root-cause repair v2)
 --
