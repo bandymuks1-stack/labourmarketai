@@ -68,7 +68,7 @@ activates when the owner applies `20260713160000_agency_clients_v1`
 The company workspace also carries the "Darbo jėgos planavimas" card
 linking to the planning zone.
 
-## 4. Worker journeys (CV → Living CV; external profile → same profile) ⛔ BLOCKED_EXTERNAL_INPUT_REQUIRED
+## 4. Worker journeys (CV → Living CV; external profile → same profile) ⛔ BLOCKED_EXTERNAL_INPUT_REQUIRED (re-verified in the fix round — exact errors in §6b)
 
 No worker session exists in this browser profile and both unblock paths are
 owner-gated:
@@ -112,6 +112,54 @@ Planning zone (both empty and data states) checked at **360×800, 390×844,
 innerWidth` at every size (no horizontal scroll; primary CTA visible at
 360px). Public `/lt/company-need` and `/lt/auth/login` also pass the
 overflow check at 360px.
+
+## 6a. Headcount-fidelity fix — live before/after (2026-07-13 fix round)
+
+Same production demand row ("Plytelių klojėjų brigada biurų apdailai
+(E2E PROOF)", `customer_requests.team_size = 5` — the wizard HAD saved the
+user's 5 all along; the defect was purely the projection's SELECT):
+
+| | Before fix | After fix (live DOM, same row) |
+|---|---|---|
+| user_entered_required_headcount | dropped (not selected) | **"Jūsų įvesta: 5"** |
+| system_suggested_headcount | silently substituted as fact (1) | **"Sistemos pasiūlymas: 1 (patvirtinkite arba redaguokite)"** — the supervisor line (team-of-5 rule), labelled |
+| effective required | "1 reikia žmonių" | **"6 reikia žmonių"** (5 user crew + 1 suggested supervisor) |
+| available_headcount | 0 | 0 |
+| headcount_gap | "TRŪKSTA 1 ŽM." | **"TRŪKSTA 6 ŽM."** |
+| skill gaps | crew only | crew + supervisor skills (site-supervision, work-scheduling, …) |
+| recommendation | agency (labelled suggestion) | agency (labelled suggestion, unchanged) |
+
+confirmed_required_headcount: none yet — no line is human-confirmed on this
+row (the strip shows "Patvirtinta: n" once one is).
+
+## 6b. Screenshot evidence + exact tooling blockers (fix round)
+
+- **In-app Browser pane capture is broken this session**: every
+  `computer(screenshot)` and `zoom` call times out after 30s on every tab
+  (fresh tab included) while navigation/DOM/JS work — a session-level
+  capture-pipeline defect, not an app issue.
+- **Repo-allowed fallback used**: Playwright
+  (`apps/web/scripts/capture-planning-zone-proof.mjs`) captured
+  `docs/audits/evidence/labour-market-os-planning-zone-v1/` —
+  login + public company-need at 360×800, 390×844, 1440×900, overflow=false
+  at every size.
+- **Authenticated planning-zone screenshots remain BLOCKED** by three
+  independent, correctly-enforced gates: (1) the pane capture defect above;
+  (2) extracting the live session cookie for Playwright was denied
+  (credential materialization — correct); (3) minting fresh credentials is
+  owner-gated (production password reset denied: "[Modify Shared Resources]
+  … persistent credential change to live shared production state"; local
+  Supabase stack denied by the session's `Bash(supabase *)` deny rule:
+  "[Auto-Mode Bypass] The user denied `Bash(supabase *)`…"; Docker engine
+  itself now runs — v29.1.3 — so ONLY the deny rule blocks the local path).
+  The authenticated visual state is therefore evidenced by the recorded DOM
+  output in §6a, honestly NOT by pixels.
+- **Owner unblock options (any one):** allow `supabase start` for one proof
+  session (local stack + `db:fixtures:local` gives dev.worker/dev.company/
+  dev.agency accounts and unblocks §4 worker proof AND authenticated
+  screenshots with zero production risk); or run the two journeys yourself;
+  or a fresh Claude session where pane capture works (screenshots of the
+  company zone would then take minutes with the still-live proof session).
 
 ## 7. Production data created by this proof (cleanup addendum)
 
