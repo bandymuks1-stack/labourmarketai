@@ -1,5 +1,7 @@
 -- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY
+-- @human-gate-approved — owner approved MERGING this draft (PR #748 order,
+-- 2026-07-13); application to production stays a separate owner gate.
 -- Prepared under the canonical-user-journey P5 goal (2026-07-13, agency
 -- client management inside the company workspace). Migration prepared FULLY
 -- but NOT applied — production apply happens ONLY after explicit owner OK,

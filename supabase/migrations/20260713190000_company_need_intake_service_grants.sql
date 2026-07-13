@@ -1,4 +1,6 @@
 -- DRAFT — needs-human-gate — DO NOT APPLY automatically.
+-- @human-gate-approved — owner approved MERGING this draft (PR #748 order,
+-- 2026-07-13); application to production stays a separate owner gate.
 -- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
 --
 -- 20260713190000 — service-role grants for company_need_public_intakes.
@@ -22,3 +24,7 @@ grant select on public.company_need_public_intakes to service_role;
 -- Status is the ONLY column the app updates (operator queue transitions +
 -- the claim bridge's 'converted' stamp) — column-scoped on purpose.
 grant update (status) on public.company_need_public_intakes to service_role;
+
+-- ROLLBACK (paired file: supabase/rollbacks/20260713190000_company_need_intake_service_grants.down.sql):
+--   revoke update (status) on public.company_need_public_intakes from service_role;
+--   revoke select on public.company_need_public_intakes from service_role;
