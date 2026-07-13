@@ -1,4 +1,12 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import {
+  CalendarDays,
+  FolderKanban,
+  Images,
+  MailPlus,
+  MapPin,
+  UsersRound,
+} from "lucide-react";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Link } from "@/lib/i18n/navigation";
@@ -12,6 +20,12 @@ import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
+import { CompanyLocationsSection } from "@/components/app/company-locations-section";
+import { CompanyGallerySection } from "@/components/app/company-gallery-section";
+import { getCompanyLocations } from "@/lib/company/company-locations";
+import { listManagedProjects } from "@/lib/projects/projects";
+import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
+import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
@@ -122,8 +136,52 @@ export default async function CompanyDashboardPage({
   const orgMembers = ownCompany
     ? await getOrgMembersData("company", ownCompany.id)
     : null;
+
+  // F12.4/5 company geography (owner-gated migration → honest gated state)
+  // + F13 company gallery (real photo counts across managed projects).
+  const companyLocations = await getCompanyLocations();
+  const managedProjects = ownCompany ? await listManagedProjects() : [];
+  const companyGalleryProjects = await Promise.all(
+    managedProjects.slice(0, 12).map(async (p) => ({
+      projectId: p.id,
+      title: p.title,
+      photoCount: (await getProjectGallerySummary(p.id)).photoCount,
+    })),
+  );
+
   const tOrg = await getTranslations("orgMembers");
   const tOps = await getTranslations("companyOps");
+  const tLocs = await getTranslations("companyLocations");
+  const tCompanyGallery = await getTranslations("companyGallery");
+  const tTabs = await getTranslations("auth.dashboard.tabs");
+  const tCountries = await getTranslations("labourMarket");
+  const companyLocationsLabels = {
+    title: tLocs("title"),
+    subtitle: tLocs("subtitle"),
+    kindHeadquarters: tLocs("kindHeadquarters"),
+    kindOperating: tLocs("kindOperating"),
+    kindDesiredMarket: tLocs("kindDesiredMarket"),
+    countryLabel: tLocs("countryLabel"),
+    cityLabel: tLocs("cityLabel"),
+    regionLabel: tLocs("regionLabel"),
+    addButton: tLocs("addButton"),
+    removeButton: tLocs("removeButton"),
+    empty: tLocs("empty"),
+    gatedHeading: tLocs("gatedHeading"),
+    gatedBody: tLocs("gatedBody"),
+    errorLabel: tLocs("errorLabel"),
+    countries: Object.fromEntries(
+      MARKET_COUNTRIES.map((c) => [c, tCountries(`countryNames.${c}`)]),
+    ),
+    countryCodes: MARKET_COUNTRIES,
+  };
+  const companyGalleryLabels = {
+    title: tCompanyGallery("title"),
+    subtitle: tCompanyGallery("subtitle"),
+    photosLabel: tCompanyGallery("photosLabel"),
+    openLabel: tCompanyGallery("openLabel"),
+    empty: tCompanyGallery("empty"),
+  };
   // Slice 1 — operational status counts from existing data (read-back only).
   const acceptedCount = workersResult.kind === "ok" ? workersResult.rows.length : 0;
   // Slice 9 — per-worker work-readiness SIGNALS (not a rating), computed from
@@ -182,6 +240,7 @@ export default async function CompanyDashboardPage({
     title: tWorkers("title"),
     subtitle: tWorkers("subtitle"),
     activeWorkersHeading: tWorkers("activeWorkersHeading"),
+    openProfile: tWorkers("openProfile"),
     noWorkersHeading: tWorkers("noWorkersHeading"),
     noWorkersBody: tWorkers("noWorkersBody"),
     inviteHeading: tWorkers("inviteHeading"),
@@ -404,6 +463,84 @@ export default async function CompanyDashboardPage({
           </div>
         ) : null}
       </header>
+
+      {/* F3 (production UX repair v2): compact icon-led control bar — every
+          core company area is one glance + one tap away, with real counters.
+          Long explanations stay inside their sections, never up here. */}
+      <nav
+        aria-label={t("title")}
+        data-testid="company-control-bar"
+        className="flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]"
+      >
+        {[
+          {
+            key: "team",
+            href: "#company-team",
+            icon: <UsersRound className="h-4 w-4" aria-hidden />,
+            label: tWorkers("activeWorkersHeading"),
+            count: acceptedCount,
+          },
+          {
+            key: "projects",
+            href: `/${locale}/dashboard/projects`,
+            icon: <FolderKanban className="h-4 w-4" aria-hidden />,
+            label: tRooms("company.projectsLabel"),
+            count: managedProjects.length,
+          },
+          {
+            key: "invitations",
+            href: "#company-invitations",
+            icon: <MailPlus className="h-4 w-4" aria-hidden />,
+            label: tWorkers("invitationsHeading"),
+            count:
+              invitationsResult.kind === "ok"
+                ? invitationsResult.rows.length
+                : 0,
+          },
+          {
+            key: "locations",
+            href: "#company-locations",
+            icon: <MapPin className="h-4 w-4" aria-hidden />,
+            label: tLocs("title"),
+            count:
+              companyLocations.kind === "ok"
+                ? companyLocations.rows.length
+                : 0,
+          },
+          {
+            key: "gallery",
+            href: "#company-gallery",
+            icon: <Images className="h-4 w-4" aria-hidden />,
+            label: tCompanyGallery("title"),
+            count: companyGalleryProjects.reduce(
+              (n, p) => n + p.photoCount,
+              0,
+            ),
+          },
+          {
+            key: "calendar",
+            href: `/${locale}/dashboard/planning`,
+            icon: <CalendarDays className="h-4 w-4" aria-hidden />,
+            label: tTabs("planning"),
+            count: null,
+          },
+        ].map((item) => (
+          <a
+            key={item.key}
+            href={item.href}
+            data-testid={`company-control-${item.key}`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+          >
+            {item.icon}
+            {item.label}
+            {typeof item.count === "number" ? (
+              <span className="rounded-full bg-ink-700 px-1.5 py-0.5 font-mono text-[10px] text-text-primary tabular-nums">
+                {item.count}
+              </span>
+            ) : null}
+          </a>
+        ))}
+      </nav>
 
       <FeatureNote testId="feature-note-company">
         {(await getTranslations("featureNotes"))("companySpace")}
@@ -720,6 +857,25 @@ export default async function CompanyDashboardPage({
           labels={workersLabels}
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
+        />
+      </div>
+
+      {/* F12.4/5: company operating geography — HQ / operating locations /
+          desired markets. Owner-gated migration; honest gated state until
+          the owner applies it. */}
+      <div id="company-locations" className="scroll-mt-20">
+        <CompanyLocationsSection
+          state={companyLocations}
+          labels={companyLocationsLabels}
+        />
+      </div>
+
+      {/* F13: company gallery — photo evidence across the company's own
+          projects (existing journal-photo projection; same RLS, read-only). */}
+      <div id="company-gallery" className="scroll-mt-20">
+        <CompanyGallerySection
+          projects={companyGalleryProjects}
+          labels={companyGalleryLabels}
         />
       </div>
 

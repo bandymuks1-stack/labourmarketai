@@ -185,30 +185,28 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
   },
   {
     id: "planning",
-    // Unified planning agenda (control room PR E): bookings + managed
-    // project date bands + open task due dates in one compact agenda, each
-    // row linking back to its real source object. Declares NO
-    // attentionSignalIds — the booking/task signals already badge their own
-    // modules; a badge here would double-count the same numbers.
-    surfaceRoute: "/dashboard/planning",
-    labelKey: "auth.dashboard.myZone.actions.planning.title",
-    descriptionKey: "auth.dashboard.myZone.actions.planning.desc",
+    // Production UX repair v2 (F14): planning is now a catalogue FEATURE
+    // with a primary-nav tab — the module sources its route from the
+    // feature and joins the nav surface. Declares NO attentionSignalIds —
+    // the booking/task signals already badge their own modules.
+    featureKey: "planning",
+    labelKey: "features.planning.label",
+    descriptionKey: "features.planning.description",
     iconKey: "calendar",
     roles: ALL_ROLES,
-    surfaces: ["grid", "command"],
+    surfaces: ["grid", "nav", "command"],
   },
   {
     id: "network",
-    // "Mano tinklas" (core-network area B): my organizations, my active
-    // relationships, people & company search, and the canonical Pakviesti
-    // action with the real invitation lifecycle. A sub-surface of the
-    // person/company context - never a second dashboard.
-    surfaceRoute: "/dashboard/network",
-    labelKey: "network.module.label",
-    descriptionKey: "network.module.desc",
-    iconKey: "handshake",
+    // Production UX repair v2 (F15): the network is now a catalogue
+    // FEATURE with a primary-nav tab — never a second dashboard; this is
+    // the existing surface made findable.
+    featureKey: "network",
+    labelKey: "features.network.label",
+    descriptionKey: "features.network.description",
+    iconKey: "network",
     roles: ALL_ROLES,
-    surfaces: ["grid", "command"],
+    surfaces: ["grid", "nav", "command"],
   },
   {
     id: "market_map",

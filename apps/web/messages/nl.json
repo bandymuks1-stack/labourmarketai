@@ -55,7 +55,7 @@
     "basis": {
       "label": "Basis",
       "workerEvidence": "Geteld volgens de regels van het bewijsrapport uit je eigen gecatalogiseerde vaardigheden, werkjournaalregels en bevestigingen van leidinggevenden. Geen score, geen schatting.",
-      "workerActivity": "Directe tellingen van je eigen werkjournaalregels en je eigen geüploade journaalfoto's.",
+      "workerActivity": "Aantallen van je eigen journaalposten en geüploade foto's.",
       "orgDemand": "Tellingen over de vraagaanvragen die je zelf hebt aangemaakt. Open = concept, ingediend, in beoordeling of vervolg nodig.",
       "orgProjects": "Tellingen van de projectregels van je eigen bedrijf, gegroepeerd per vastgelegde status.",
       "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
@@ -441,7 +441,8 @@
         "step1": "Voer je behoefte in (beroep, locatie, hoeveel mensen).",
         "step2": "Het systeem structureert de behoefte en bereidt deze voor op matching.",
         "step3": "Bekijk wie er past en start een gesprek."
-      }
+      },
+      "projectsLabel": "Projecten"
     },
     "candidates": {
       "context": "Bedrijf · Werven",
@@ -1417,7 +1418,8 @@
         "migrationBlockerBody": "De actie kon niet worden voltooid. Probeer het opnieuw.",
         "columnEmail": "E-mail",
         "columnStatus": "Status",
-        "columnInvitedAt": "Datum"
+        "columnInvitedAt": "Datum",
+        "openProfile": "Profiel bekijken"
       },
       "scoutingBridge": {
         "title": "Vind werknemers voor deze personeelsbehoefte",
@@ -2547,7 +2549,8 @@
       "textSavedLabel": "Je tekst is opgeslagen",
       "textSaveErrorLabel": "Kon je tekst niet opslaan. Probeer het opnieuw.",
       "applyErrorLabel": "Kon de geselecteerde vaardigheden niet opslaan. Probeer het opnieuw.",
-      "textClaimNotVerified": "Dit is je eigen claim — nog niet onderbouwd door werkregistraties"
+      "textClaimNotVerified": "Dit is je eigen claim — nog niet onderbouwd door werkregistraties",
+      "extractErrorLabel": "De tekst kon niet worden verwerkt. Je tekst is opgeslagen — probeer het opnieuw."
     }
   },
   "roles": {
@@ -2744,6 +2747,14 @@
     "marketplace_hub": {
       "label": "Marktplaats",
       "description": "Een compacte hub die de kaart, kansen en je bedrijven verbindt."
+    },
+    "planning": {
+      "label": "Kalender",
+      "description": "Eén kalender: boekingen, projecten, taken en journaalinvoeren."
+    },
+    "network": {
+      "label": "Netwerk",
+      "description": "Mensen en bedrijven: zoeken, uitnodigingen en je relaties."
     }
   },
   "structuring": {
@@ -3097,8 +3108,8 @@
       "confirm": "Toevoegen",
       "adminMode": "Beheerdersmodus",
       "adminPanelLink": "Open het operationele controlepaneel",
-      "personSpace": "Persoonlijke ruimte",
-      "companySpace": "Bedrijfsruimte",
+      "personSpace": "Persoon",
+      "companySpace": "Bedrijf",
       "clarityNote": "Eén account, twee identiteiten — jij als persoon en je bedrijf. Wisselen verandert alleen welke acties je ziet (werk vinden, diensten aanbieden, personeel aannemen, een behoefte indienen); uitzendbureau en inkopen zijn acties, geen aparte systemen. Voor sommige bedrijfsacties kan later een organisatieprofiel nodig zijn."
     },
     "dashboard": {
@@ -3453,7 +3464,7 @@
         },
         "clearTitle": "Wat al duidelijk is",
         "missingTitle": "Wat nog ontbreekt",
-        "nextEyebrow": "Eén duidelijke volgende stap",
+        "nextEyebrow": "Volgende stap",
         "dim": {
           "work": {
             "label": "Wat ik kan",
@@ -3512,7 +3523,7 @@
           "title": "Werkkaartgegevens",
           "availabilityLabel": "Beschikbaarheid",
           "availabilityOption": {
-            "available": "Beschikbaar om te werken",
+            "available": "Beschikbaar voor werk",
             "busy": "Momenteel bezet",
             "unavailable": "Nu niet beschikbaar",
             "none": "Niet ingesteld"
@@ -3541,7 +3552,9 @@
         "discover": "Ontdekken",
         "search": "Zoeken",
         "account": "Instellingen",
-        "admin": "Admin"
+        "admin": "Admin",
+        "planning": "Kalender",
+        "network": "Netwerk"
       },
       "roleNotice": {
         "needs_worker_role": "Die link opent de werknemersruimte, die je account nog niet heeft. Voeg de werknemersrol toe in de ruimtehub.",
@@ -4052,7 +4065,9 @@
     "about": "Over ons",
     "vision": "Visie",
     "login": "Inloggen",
-    "startNow": "Begin nu"
+    "startNow": "Begin nu",
+    "themeToDark": "Donker thema",
+    "themeToLight": "Licht thema"
   },
   "hero": {
     "chip": "Algemeen arbeidsmarktplatform",
@@ -4834,7 +4849,12 @@
     },
     "draft": {
       "title": "In voorbereiding — projecten en ploegen"
-    }
+    },
+    "myProjectsTitle": "Mijn projecten",
+    "myProjectsEmpty": "Je bent nog aan geen enkel project toegewezen. Zodra een bedrijf je toewijst, verschijnt het project hier.",
+    "assignmentActive": "Actief",
+    "assignmentEnded": "Beëindigd",
+    "untitledProject": "Project zonder titel"
   },
   "projectOps": {
     "centre": {
@@ -5058,6 +5078,16 @@
         "unknownWorker": "Werknemer",
         "sourceNote": "Foto's zijn onderdeel van de journaalregistraties van werknemers — ze worden nooit aangepast of automatisch beoordeeld."
       }
+    },
+    "workerView": {
+      "eyebrow": "Mijn project",
+      "untitled": "Project zonder titel",
+      "assignmentActive": "Actieve toewijzing",
+      "assignmentEnded": "Toewijzing beëindigd",
+      "projectRestricted": "Projectdetails zijn momenteel niet voor je beschikbaar. Je toewijzing blijft zichtbaar.",
+      "journalCta": "Journaalinvoer schrijven",
+      "chatCta": "Bericht sturen",
+      "galleryTitle": "Mijn foto's op dit project"
     }
   },
   "setupRoleChoice": {
@@ -5969,7 +5999,7 @@
     "namePlaceholder": "Mijn profiel",
     "candidateLabel": "Kandidaat-vaardigheden",
     "candidateHint": "Vaardigheden die je in je eigen woorden hebt toegevoegd (verduidelijking nodig, nog niet beoordeeld).",
-    "thermoLabel": "Marktsignaal",
+    "thermoLabel": "Marktactiviteit",
     "thermoHint": "(gemiddelde van opgegeven salarisverwachtingen in je project + door de admin ingevoerd marktgemiddelde) / 2 — alleen getoond wanneer beide componenten bestaan.",
     "thermoMissingPosition": "Onvoldoende projectdata",
     "thermoMissingMarket": "Onvoldoende marktdata",
@@ -5978,7 +6008,7 @@
     "readinessPanel": {
       "title": "Zo verbeter je je gereedheid",
       "intro": "Dit kun je als volgende afronden om je kaart sterker te maken.",
-      "allReady": "Alle kernsignalen voor gereedheid zijn aanwezig.",
+      "allReady": "Alles klaar — je profiel is compleet.",
       "countryFit": "Werken in een ander land vereist de juiste documenten. Zonder die documenten word je niet getoond als klaar om in het buitenland te werken — je ziet alleen legale routes (bedrijf regelt het papierwerk, documentondersteuning). Het systeem belooft nooit het recht om te werken zonder documenten."
     },
     "readinessSteps": {
@@ -6001,11 +6031,11 @@
     },
     "readiness": {
       "label": "Gereedheid",
-      "hint": "Alle kernsignalen zijn aanwezig.",
+      "hint": "Alles klaar.",
       "levelReady": "Klaar",
       "levelBuilding": "In opbouw",
       "levelStart": "Net gestart",
-      "signalsTemplate": "signalen behaald",
+      "signalsTemplate": "stappen voltooid",
       "nextLabel": "Volgende:",
       "pillars": {
         "profession": "Beroep",
@@ -6016,9 +6046,9 @@
         "workCard": "Werkkaart"
       }
     },
-    "verifiedTitle": "Vaardigheidssignalen",
-    "verifiedEmpty": "Nog geen vaardigheidssignalen. Ze worden opgebouwd uit je werkregistraties.",
-    "journalSupportedLabel": "Onderbouwd door logboek",
+    "verifiedTitle": "Vaardigheden met registraties",
+    "verifiedEmpty": "Nog geen. Ze worden opgebouwd uit je werkregistraties.",
+    "journalSupportedLabel": "Door werk gestaafd",
     "journalSupportedHint": "Vaardigheden die je werklogboek ondersteunt — sterker dan zelfverklaard; wachten op bevestiging door de manager.",
     "latestEvidenceLabel": "Laatste registraties",
     "latestEvidenceEmpty": "Nog geen registraties — je eerste journaalitem wordt de eerste.",
@@ -6038,7 +6068,7 @@
     "form": {
       "labelLabel": "Hoe noem je het?",
       "labelPlaceholder": "bijv. monoliet betonstorten",
-      "relatedLabel": "Bij welk vak hoort het?",
+      "relatedLabel": "Bij welk beroep of vakgebied hoort het?",
       "relatedPlaceholder": "bijv. betonwerker",
       "toolsLabel": "Welk gereedschap / welke materialen?",
       "toolsPlaceholder": "bijv. trilnaald, bekisting",
@@ -7515,7 +7545,14 @@
     "editButton": "Wijzig locatie",
     "resetButton": "Verwijder locatie",
     "emptyBody": "Je hebt nog geen locatie gekozen. Gebruik de knop hierboven of stel er handmatig een in.",
-    "radiusHelp": "De straal is het zoekgebied rond je gekozen punt: {km} km betekent werk en vraag tot {km} km vanaf dat punt."
+    "radiusHelp": "De straal is het zoekgebied rond je gekozen punt: {km} km betekent werk en vraag tot {km} km vanaf dat punt.",
+    "previewTitle": "Nieuwe plek gekozen — nog niet opgeslagen",
+    "previewKeepNote": "Je vorige locatie blijft staan tot je op Opslaan drukt.",
+    "previewSave": "Locatie opslaan",
+    "previewCancel": "Annuleren",
+    "mapEditHint": "Tik op de kaart — je ziet het nieuwe punt en kunt het opslaan of annuleren.",
+    "mapLockedHint": "Locatie ongewijzigd. Druk op “Locatie wijzigen” om te veranderen.",
+    "mapEditButton": "Locatie wijzigen op de kaart"
   },
   "waze": {
     "open": "Openen in Waze"
@@ -7857,8 +7894,6 @@
   },
   "premiumHub": {
     "brand": "LabourMarket.ai",
-    "liveBadge": "Live gegevens",
-    "partialBadge": "Live gegevens · sommige blokken nog niet gevuld",
     "pageTitle": "Controlecentrum",
     "pageLead": "Eén plek om je professionele identiteit, team, markt en project te bekijken.",
     "unavailable": "Deze gegevens zijn momenteel niet beschikbaar.",
@@ -7876,8 +7911,9 @@
       },
       "stats": {
         "skills": "Vaardigheden",
-        "supported": "Onderbouwd door vermeldingen",
-        "entries": "Werkvermeldingen"
+        "supported": "Door werk gestaafd",
+        "entries": "Werkvermeldingen",
+        "legend": "Vaardigheden — alles wat je hebt opgegeven. Door werk gestaafd — die welke je werkjournaal ondersteunt."
       },
       "empty": {
         "title": "Profiel nog niet ingevuld",
@@ -8762,5 +8798,51 @@
         "error": "Er ging iets mis. Probeer het opnieuw."
       }
     }
+  },
+  "people": {
+    "eyebrow": "Persoonsprofiel",
+    "restrictedTitle": "Profiel niet beschikbaar",
+    "restrictedBody": "Je kunt het profiel van deze persoon niet bekijken: er is geen actieve werkrelatie, of de persoon heeft geen toestemming gegeven om vindbaar te zijn.",
+    "available": "Beschikbaar",
+    "availableFrom": "Vanaf {date}",
+    "experienceYears": "{n} jr ervaring",
+    "skillsTitle": "Vaardigheden",
+    "skillsEmpty": "Geen vaardigheden die je mag zien.",
+    "skillVerified": "Met managerregistratie",
+    "skillWorkBacked": "Door werk gestaafd",
+    "skillDeclared": "Zelf opgegeven",
+    "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd."
+  },
+  "companyLocations": {
+    "title": "Locaties",
+    "subtitle": "Hoofdkantoor, werklocaties en gewenste markten — in meerdere landen.",
+    "kindHeadquarters": "Hoofdkantoor",
+    "kindOperating": "Werklocatie",
+    "kindDesiredMarket": "Gewenste markt",
+    "countryLabel": "Land",
+    "cityLabel": "Stad",
+    "regionLabel": "Regio",
+    "addButton": "Locatie toevoegen",
+    "removeButton": "Locatie verwijderen",
+    "empty": "Nog geen locaties. Voeg je hoofdkantoor en werklocaties toe.",
+    "gatedHeading": "Voorbereid — wacht op activering door eigenaar",
+    "gatedBody": "Het locatiemodel is klaar, maar de databasewijziging is nog niet toegepast. Activering is een beslissing van de eigenaar.",
+    "errorLabel": "Opslaan mislukt. Probeer het opnieuw."
+  },
+  "companyGallery": {
+    "title": "Galerij",
+    "subtitle": "Foto's uit de werkjournalen van je projecten.",
+    "photosLabel": "foto's",
+    "openLabel": "Openen",
+    "empty": "Nog geen foto's. Ze verschijnen wanneer werknemers foto's aan journaalposten op een project toevoegen."
+  },
+  "personalGallery": {
+    "eyebrow": "Mijn ruimte",
+    "title": "Galerij",
+    "empty": "Nog geen foto's. Voeg een foto toe aan een werkjournaalpost — die verschijnt hier.",
+    "emptyCta": "Journaalpost schrijven",
+    "previewsUnavailable": "Voorbeelden zijn tijdelijk niet beschikbaar.",
+    "previewUnavailable": "Voorbeeld niet beschikbaar",
+    "photoAlt": "Werkfoto"
   }
 }

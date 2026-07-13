@@ -77,4 +77,16 @@ describe("pre-paint theme bootstrap", () => {
     // Belt: the post-hydration re-apply stays too.
     expect(src).toMatch(/ThemeReapply/);
   });
+
+  it("a locale switch cannot strip the theme (layout watcher restores it pre-paint)", () => {
+    // PR #744 production smoke finding: switching language re-renders
+    // <html lang> and React reconciliation removed data-theme — a light
+    // user flipped to dark. The layout renders ThemeReapply, whose
+    // MutationObserver restores the saved theme before the next paint.
+    expect(read("app/[locale]/layout.tsx")).toMatch(/<ThemeReapply \/>/);
+    const watcher = read("components/app/theme-reapply.tsx");
+    expect(watcher).toMatch(/MutationObserver/);
+    expect(watcher).toMatch(/attributeFilter: \["data-theme"\]/);
+    expect(watcher).toMatch(/hasAttribute\("data-theme"\)/);
+  });
 });

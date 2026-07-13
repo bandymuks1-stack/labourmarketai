@@ -55,7 +55,7 @@
     "basis": {
       "label": "Grundlage",
       "workerEvidence": "Gezählt nach den Regeln des Nachweisberichts aus Ihren eigenen katalogisierten Fähigkeiten, Arbeitsjournal-Einträgen und Bestätigungen von Verantwortlichen. Kein Score, keine Schätzung.",
-      "workerActivity": "Direkte Zählungen Ihrer eigenen Arbeitsjournal-Einträge und Ihrer eigenen hochgeladenen Journalfotos.",
+      "workerActivity": "Anzahl Ihrer eigenen Journaleinträge und hochgeladenen Fotos.",
       "orgDemand": "Zählungen über die von Ihnen selbst erstellten Bedarfsanfragen. Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig.",
       "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
       "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
@@ -441,7 +441,8 @@
         "step1": "Geben Sie Ihren Bedarf ein (Beruf, Standort, wie viele Personen).",
         "step2": "Das System strukturiert den Bedarf und bereitet ihn für das Matching vor.",
         "step3": "Prüfen Sie die Passenden und starten Sie eine Unterhaltung."
-      }
+      },
+      "projectsLabel": "Projekte"
     },
     "candidates": {
       "context": "Unternehmen · Einstellen",
@@ -1417,7 +1418,8 @@
         "migrationBlockerBody": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
         "columnEmail": "E-Mail",
         "columnStatus": "Status",
-        "columnInvitedAt": "Datum"
+        "columnInvitedAt": "Datum",
+        "openProfile": "Profil ansehen"
       },
       "scoutingBridge": {
         "title": "Arbeitskräfte für diesen Bedarf finden",
@@ -2547,7 +2549,8 @@
       "textSavedLabel": "Ihr Text ist gespeichert",
       "textSaveErrorLabel": "Ihr Text konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "applyErrorLabel": "Die ausgewählten Fähigkeiten konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
-      "textClaimNotVerified": "Dies ist Ihre eigene Angabe — noch nicht durch Arbeitsnachweise belegt"
+      "textClaimNotVerified": "Dies ist Ihre eigene Angabe — noch nicht durch Arbeitsnachweise belegt",
+      "extractErrorLabel": "Der Text konnte nicht verarbeitet werden. Ihr Text ist gespeichert — versuchen Sie es erneut."
     }
   },
   "roles": {
@@ -2744,6 +2747,14 @@
     "marketplace_hub": {
       "label": "Marktplatz",
       "description": "Ein kompakter Hub, der die Karte, Chancen und Ihre Unternehmen verbindet."
+    },
+    "planning": {
+      "label": "Kalender",
+      "description": "Ein Kalender: Buchungen, Projekte, Aufgaben und Journaleinträge."
+    },
+    "network": {
+      "label": "Netzwerk",
+      "description": "Personen und Unternehmen: Suche, Einladungen und Ihre Beziehungen."
     }
   },
   "structuring": {
@@ -3097,8 +3108,8 @@
       "confirm": "Hinzufügen",
       "adminMode": "Admin-Modus",
       "adminPanelLink": "Betriebs-Kontrollpanel öffnen",
-      "personSpace": "Persönlicher Bereich",
-      "companySpace": "Unternehmensbereich",
+      "personSpace": "Person",
+      "companySpace": "Unternehmen",
       "clarityNote": "Ein Konto, zwei Identitäten — Sie als Person und Ihr Unternehmen. Der Wechsel ändert nur, welche Aktionen Sie sehen (Arbeit finden, Dienstleistungen anbieten, einstellen, einen Bedarf einreichen); Agentur und Einkauf sind Aktionen, keine separaten Systeme. Einige Unternehmensaktionen benötigen später möglicherweise ein Organisationsprofil."
     },
     "dashboard": {
@@ -3453,7 +3464,7 @@
         },
         "clearTitle": "Was bereits klar ist",
         "missingTitle": "Was noch fehlt",
-        "nextEyebrow": "Ein klarer nächster Schritt",
+        "nextEyebrow": "Nächster Schritt",
         "dim": {
           "work": {
             "label": "Was ich kann",
@@ -3512,7 +3523,7 @@
           "title": "Details der Arbeitskarte",
           "availabilityLabel": "Verfügbarkeit",
           "availabilityOption": {
-            "available": "Verfügbar für Arbeit",
+            "available": "Für Arbeit verfügbar",
             "busy": "Derzeit beschäftigt",
             "unavailable": "Derzeit nicht verfügbar",
             "none": "Nicht festgelegt"
@@ -3541,7 +3552,9 @@
         "discover": "Entdecken",
         "search": "Suche",
         "account": "Einstellungen",
-        "admin": "Admin"
+        "admin": "Admin",
+        "planning": "Kalender",
+        "network": "Netzwerk"
       },
       "roleNotice": {
         "needs_worker_role": "Dieser Link öffnet den Arbeitskraft-Bereich, den Ihr Konto noch nicht hat. Fügen Sie die Arbeitskraft-Rolle im Bereichs-Hub hinzu.",
@@ -4052,7 +4065,9 @@
     "about": "Über uns",
     "vision": "Vision",
     "login": "Anmelden",
-    "startNow": "Jetzt starten"
+    "startNow": "Jetzt starten",
+    "themeToDark": "Dunkles Design",
+    "themeToLight": "Helles Design"
   },
   "hero": {
     "chip": "Allgemeine Arbeitsmarktplattform",
@@ -4834,7 +4849,12 @@
     },
     "draft": {
       "title": "Draft — Projekte und Teams"
-    }
+    },
+    "myProjectsTitle": "Meine Projekte",
+    "myProjectsEmpty": "Sie sind noch keinem Projekt zugewiesen. Sobald ein Unternehmen Sie zuweist, erscheint das Projekt hier.",
+    "assignmentActive": "Aktiv",
+    "assignmentEnded": "Beendet",
+    "untitledProject": "Projekt ohne Titel"
   },
   "projectOps": {
     "centre": {
@@ -5058,6 +5078,16 @@
         "unknownWorker": "Arbeitskraft",
         "sourceNote": "Fotos sind Teil der Journaleinträge der Arbeitskräfte — sie werden niemals verändert oder automatisch bewertet."
       }
+    },
+    "workerView": {
+      "eyebrow": "Mein Projekt",
+      "untitled": "Projekt ohne Titel",
+      "assignmentActive": "Aktive Zuweisung",
+      "assignmentEnded": "Zuweisung beendet",
+      "projectRestricted": "Projektdetails sind für Sie derzeit nicht verfügbar. Ihre Zuweisung bleibt sichtbar.",
+      "journalCta": "Journaleintrag schreiben",
+      "chatCta": "Nachricht senden",
+      "galleryTitle": "Meine Fotos in diesem Projekt"
     }
   },
   "setupRoleChoice": {
@@ -5969,7 +5999,7 @@
     "namePlaceholder": "Mein Profil",
     "candidateLabel": "Kandidaten-Fähigkeiten",
     "candidateHint": "Fähigkeiten, die Sie in eigenen Worten hinzugefügt haben (braucht Klärung, noch nicht geprüft).",
-    "thermoLabel": "Marktsignal",
+    "thermoLabel": "Marktaktivität",
     "thermoHint": "(Durchschnitt der angegebenen Gehaltserwartungen in Ihrem Projekt + vom Admin eingetragener Marktdurchschnitt) / 2 — wird nur angezeigt, wenn beide Komponenten vorhanden sind.",
     "thermoMissingPosition": "Unzureichende Projektdaten",
     "thermoMissingMarket": "Unzureichende Marktdaten",
@@ -5978,7 +6008,7 @@
     "readinessPanel": {
       "title": "So verbessern Sie Ihre Bereitschaft",
       "intro": "Das sollten Sie als Nächstes vervollständigen, um Ihre Karte zu stärken.",
-      "allReady": "Alle zentralen Bereitschaftssignale sind vorhanden.",
+      "allReady": "Alles bereit — Ihr Profil ist vollständig.",
       "countryFit": "Für die Arbeit in einem anderen Land sind die richtigen Dokumente nötig. Ohne sie werden Sie nicht als bereit für Arbeit im Ausland angezeigt — Sie sehen nur legale Wege (Unternehmen übernimmt den Papierkram, Dokumentenunterstützung). Das System verspricht niemals das Recht auf Arbeit ohne Dokumente."
     },
     "readinessSteps": {
@@ -6001,11 +6031,11 @@
     },
     "readiness": {
       "label": "Bereitschaft",
-      "hint": "Alle zentralen Signale sind vorhanden.",
+      "hint": "Alles bereit.",
       "levelReady": "Bereit",
       "levelBuilding": "Im Aufbau",
       "levelStart": "Am Anfang",
-      "signalsTemplate": "Signale erfüllt",
+      "signalsTemplate": "Schritte erledigt",
       "nextLabel": "Als Nächstes:",
       "pillars": {
         "profession": "Beruf",
@@ -6016,9 +6046,9 @@
         "workCard": "Arbeitskarte"
       }
     },
-    "verifiedTitle": "Bestätigte Fähigkeiten",
-    "verifiedEmpty": "Noch keine bestätigten Fähigkeiten. Sie erscheinen, wenn eine Führungskraft deine Journaleinträge bestätigt.",
-    "journalSupportedLabel": "Durch Journal belegt",
+    "verifiedTitle": "Fähigkeiten mit Einträgen",
+    "verifiedEmpty": "Noch keine. Sie entstehen aus Ihren Arbeitseinträgen.",
+    "journalSupportedLabel": "Durch Arbeit belegt",
     "journalSupportedHint": "Fähigkeiten, die deine Arbeitsjournal-Einträge belegen — stärker als selbst angegeben; warten auf Bestätigung durch die Führungskraft.",
     "latestEvidenceLabel": "Neuester Nachweis",
     "latestEvidenceEmpty": "Noch keine Nachweise — dein erster Journaleintrag wird der erste sein.",
@@ -6038,7 +6068,7 @@
     "form": {
       "labelLabel": "Wie nennen Sie es?",
       "labelPlaceholder": "z. B. Ortbetonarbeiten",
-      "relatedLabel": "Zu welchem Gewerk gehört es?",
+      "relatedLabel": "Zu welchem Beruf oder Bereich gehört es?",
       "relatedPlaceholder": "z. B. Betonbauer",
       "toolsLabel": "Welche Werkzeuge / Materialien?",
       "toolsPlaceholder": "z. B. Rüttler, Schalung",
@@ -7515,7 +7545,14 @@
     "editButton": "Standort ändern",
     "resetButton": "Standort entfernen",
     "emptyBody": "Sie haben noch keinen Standort gewählt. Verwenden Sie die Schaltfläche oben oder legen Sie einen manuell fest.",
-    "radiusHelp": "Der Radius ist das Suchgebiet um Ihren gewählten Punkt: {km} km bedeutet Arbeit und Nachfrage bis zu {km} km von diesem Punkt."
+    "radiusHelp": "Der Radius ist das Suchgebiet um Ihren gewählten Punkt: {km} km bedeutet Arbeit und Nachfrage bis zu {km} km von diesem Punkt.",
+    "previewTitle": "Neuer Punkt gewählt — noch nicht gespeichert",
+    "previewKeepNote": "Ihr bisheriger Standort bleibt, bis Sie auf Speichern drücken.",
+    "previewSave": "Standort speichern",
+    "previewCancel": "Abbrechen",
+    "mapEditHint": "Tippen Sie auf die Karte — Sie sehen den neuen Punkt und können ihn speichern oder verwerfen.",
+    "mapLockedHint": "Standort unverändert. Zum Ändern „Standort ändern“ drücken.",
+    "mapEditButton": "Standort auf der Karte ändern"
   },
   "waze": {
     "open": "In Waze öffnen"
@@ -7857,8 +7894,6 @@
   },
   "premiumHub": {
     "brand": "LabourMarket.ai",
-    "liveBadge": "Live-Daten",
-    "partialBadge": "Live-Daten · einige Blöcke noch nicht befüllt",
     "pageTitle": "Kontrollzentrum",
     "pageLead": "Ein Ort, um Ihre berufliche Identität, Ihr Team, Ihren Markt und Ihr Projekt zu überblicken.",
     "unavailable": "Diese Daten sind derzeit nicht verfügbar.",
@@ -7876,8 +7911,9 @@
       },
       "stats": {
         "skills": "Fähigkeiten",
-        "supported": "Durch Einträge gestützt",
-        "entries": "Arbeitseinträge"
+        "supported": "Durch Arbeit belegt",
+        "entries": "Arbeitseinträge",
+        "legend": "Fähigkeiten — alles, was Sie angegeben haben. Durch Arbeit belegt — die, die Ihre Journaleinträge stützen."
       },
       "empty": {
         "title": "Profil noch nicht ausgefüllt",
@@ -8762,5 +8798,51 @@
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
       }
     }
+  },
+  "people": {
+    "eyebrow": "Personenprofil",
+    "restrictedTitle": "Profil nicht verfügbar",
+    "restrictedBody": "Sie können das Profil dieser Person nicht ansehen: Es besteht keine aktive Arbeitsbeziehung, oder die Person hat der Auffindbarkeit nicht zugestimmt.",
+    "available": "Verfügbar",
+    "availableFrom": "Ab {date}",
+    "experienceYears": "{n} J. Erfahrung",
+    "skillsTitle": "Fähigkeiten",
+    "skillsEmpty": "Keine Fähigkeiten, die Sie sehen dürfen.",
+    "skillVerified": "Mit Führungskraft-Eintrag",
+    "skillWorkBacked": "Durch Arbeit belegt",
+    "skillDeclared": "Selbst angegeben",
+    "skillsLegend": "Mit Führungskraft-Eintrag — ein Eintrag der Führungskraft begleitet die Fähigkeit. Durch Arbeit belegt — aus Journaleinträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt."
+  },
+  "companyLocations": {
+    "title": "Standorte",
+    "subtitle": "Hauptsitz, Einsatzorte und Wunschmärkte — in mehreren Ländern.",
+    "kindHeadquarters": "Hauptsitz",
+    "kindOperating": "Einsatzort",
+    "kindDesiredMarket": "Wunschmarkt",
+    "countryLabel": "Land",
+    "cityLabel": "Stadt",
+    "regionLabel": "Region",
+    "addButton": "Standort hinzufügen",
+    "removeButton": "Standort entfernen",
+    "empty": "Noch keine Standorte. Fügen Sie Hauptsitz und Einsatzorte hinzu.",
+    "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Eigentümer",
+    "gatedBody": "Das Standortmodell ist bereit, aber die Datenbankänderung wurde noch nicht angewendet. Die Aktivierung ist eine Eigentümerentscheidung.",
+    "errorLabel": "Speichern fehlgeschlagen. Versuchen Sie es erneut."
+  },
+  "companyGallery": {
+    "title": "Galerie",
+    "subtitle": "Fotos aus den Arbeitsjournalen Ihrer Projekte.",
+    "photosLabel": "Fotos",
+    "openLabel": "Öffnen",
+    "empty": "Noch keine Fotos. Sie erscheinen, wenn Arbeiter Fotos an Journaleinträge eines Projekts anhängen."
+  },
+  "personalGallery": {
+    "eyebrow": "Mein Bereich",
+    "title": "Galerie",
+    "empty": "Noch keine Fotos. Hängen Sie ein Foto an einen Arbeitsjournal-Eintrag an — es erscheint hier.",
+    "emptyCta": "Journaleintrag schreiben",
+    "previewsUnavailable": "Vorschauen sind vorübergehend nicht verfügbar.",
+    "previewUnavailable": "Vorschau nicht verfügbar",
+    "photoAlt": "Arbeitsfoto"
   }
 }

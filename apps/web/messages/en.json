@@ -55,7 +55,7 @@
     "basis": {
       "label": "Basis",
       "workerEvidence": "Counted by the evidence-report rules from your own catalogued skills, work-journal entries and manager confirmations. No score, no estimate.",
-      "workerActivity": "Direct row counts over your own work-journal entries and your own uploaded journal photos.",
+      "workerActivity": "Counts of your own journal entries and uploaded photos.",
       "orgDemand": "Counts over the demand requests you created yourself. Open = draft, submitted, in review or needs follow-up.",
       "orgProjects": "Counts of your own company's project rows, grouped by each row's recorded status.",
       "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
@@ -441,7 +441,8 @@
         "step1": "Enter your need (profession, location, how many people).",
         "step2": "The system structures the need and prepares it for matching.",
         "step3": "Review the ones who fit and start a conversation."
-      }
+      },
+      "projectsLabel": "Projects"
     },
     "candidates": {
       "context": "Company · Hire",
@@ -1417,7 +1418,8 @@
         "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
         "columnEmail": "Email",
         "columnStatus": "Status",
-        "columnInvitedAt": "Date"
+        "columnInvitedAt": "Date",
+        "openProfile": "View profile"
       },
       "scoutingBridge": {
         "title": "Find workers for this need",
@@ -2547,7 +2549,8 @@
       "textSavedLabel": "Your text is saved",
       "textSaveErrorLabel": "Could not save your text. Please try again.",
       "applyErrorLabel": "Could not save the selected skills. Please try again.",
-      "textClaimNotVerified": "This is your own claim — not yet backed by work records"
+      "textClaimNotVerified": "This is your own claim — not yet backed by work records",
+      "extractErrorLabel": "Could not process the text. Your text is saved — try again."
     }
   },
   "roles": {
@@ -2744,6 +2747,14 @@
     "marketplace_hub": {
       "label": "Marketplace",
       "description": "A compact hub connecting the map, opportunities and your companies."
+    },
+    "planning": {
+      "label": "Calendar",
+      "description": "One calendar: bookings, projects, tasks and journal entries."
+    },
+    "network": {
+      "label": "Network",
+      "description": "People and companies: search, invitations and your relationships."
     }
   },
   "structuring": {
@@ -3097,8 +3108,8 @@
       "confirm": "Add",
       "adminMode": "Admin mode",
       "adminPanelLink": "Open operations control panel",
-      "personSpace": "Personal space",
-      "companySpace": "Company space",
+      "personSpace": "Person",
+      "companySpace": "Company",
       "clarityNote": "One account, two identities — you as a person and your company. Switching only changes which actions you see (find work, offer services, hire, submit a need); agency and buying are actions, not separate systems. Some company actions may need an organization profile later."
     },
     "dashboard": {
@@ -3453,7 +3464,7 @@
         },
         "clearTitle": "What's already clear",
         "missingTitle": "What's still missing",
-        "nextEyebrow": "One clear next step",
+        "nextEyebrow": "Next step",
         "dim": {
           "work": {
             "label": "What I can do",
@@ -3512,7 +3523,7 @@
           "title": "Work card details",
           "availabilityLabel": "Availability",
           "availabilityOption": {
-            "available": "Available to work",
+            "available": "Available for work",
             "busy": "Currently busy",
             "unavailable": "Not available right now",
             "none": "Not set"
@@ -3541,7 +3552,9 @@
         "discover": "Discover",
         "search": "Search",
         "account": "Settings",
-        "admin": "Admin"
+        "admin": "Admin",
+        "planning": "Calendar",
+        "network": "Network"
       },
       "roleNotice": {
         "needs_worker_role": "That link opens the worker space, which your account does not have yet. Add the worker role in the spaces hub.",
@@ -4052,7 +4065,9 @@
     "about": "About",
     "vision": "Vision",
     "login": "Sign in",
-    "startNow": "Start now"
+    "startNow": "Start now",
+    "themeToDark": "Dark theme",
+    "themeToLight": "Light theme"
   },
   "hero": {
     "chip": "General labour-market platform",
@@ -4834,7 +4849,12 @@
     },
     "draft": {
       "title": "In preparation — projects and teams"
-    }
+    },
+    "myProjectsTitle": "My projects",
+    "myProjectsEmpty": "You are not assigned to any project yet. When a company assigns you, the project will appear here.",
+    "assignmentActive": "Active",
+    "assignmentEnded": "Ended",
+    "untitledProject": "Untitled project"
   },
   "projectOps": {
     "centre": {
@@ -5058,6 +5078,16 @@
         "unknownWorker": "Worker",
         "sourceNote": "Photos are part of workers' journal entries — they are never altered or automatically assessed."
       }
+    },
+    "workerView": {
+      "eyebrow": "My project",
+      "untitled": "Untitled project",
+      "assignmentActive": "Active assignment",
+      "assignmentEnded": "Assignment ended",
+      "projectRestricted": "Project details are not available to you right now. Your assignment stays visible.",
+      "journalCta": "Write a journal entry",
+      "chatCta": "Message",
+      "galleryTitle": "My photos on this project"
     }
   },
   "setupRoleChoice": {
@@ -5969,7 +5999,7 @@
     "namePlaceholder": "My profile",
     "candidateLabel": "Candidate skills",
     "candidateHint": "Skills you added in your own words (needs clarification, not reviewed yet).",
-    "thermoLabel": "Market signal",
+    "thermoLabel": "Market activity",
     "thermoHint": "(average of declared salary expectations in your project + admin-entered market average) / 2 — shown only when both components exist.",
     "thermoMissingPosition": "Insufficient project data",
     "thermoMissingMarket": "Insufficient market data",
@@ -5978,7 +6008,7 @@
     "readinessPanel": {
       "title": "How to improve your readiness",
       "intro": "Here is what to complete next to make your card stronger.",
-      "allReady": "All core readiness signals are in place.",
+      "allReady": "All set — your profile is complete.",
       "countryFit": "Working in another country needs the right documents. Without them you are not shown as ready to work abroad — you only see legal routes (company handles paperwork, document support). The system never promises the right to work without documents."
     },
     "readinessSteps": {
@@ -6001,11 +6031,11 @@
     },
     "readiness": {
       "label": "Readiness",
-      "hint": "All core signals are in place.",
+      "hint": "All set.",
       "levelReady": "Ready",
       "levelBuilding": "Building",
       "levelStart": "Getting started",
-      "signalsTemplate": "signals met",
+      "signalsTemplate": "steps done",
       "nextLabel": "Next:",
       "pillars": {
         "profession": "Profession",
@@ -6016,9 +6046,9 @@
         "workCard": "Work card"
       }
     },
-    "verifiedTitle": "Skill signals",
-    "verifiedEmpty": "No skill signals yet. They build from your work records.",
-    "journalSupportedLabel": "Journal-supported",
+    "verifiedTitle": "Skills with records",
+    "verifiedEmpty": "None yet. They build from your work records.",
+    "journalSupportedLabel": "Work-backed",
     "journalSupportedHint": "Skills your work-journal entries back up.",
     "latestEvidenceLabel": "Latest records",
     "latestEvidenceEmpty": "No records entries yet — your first journal entry will be the first.",
@@ -6038,7 +6068,7 @@
     "form": {
       "labelLabel": "What do you call it?",
       "labelPlaceholder": "e.g. monolithic concreting",
-      "relatedLabel": "What trade is it part of?",
+      "relatedLabel": "What profession or field is it part of?",
       "relatedPlaceholder": "e.g. concreter",
       "toolsLabel": "What tools / materials?",
       "toolsPlaceholder": "e.g. vibrator, formwork",
@@ -7515,7 +7545,14 @@
     "editButton": "Change location",
     "resetButton": "Remove location",
     "emptyBody": "You haven''t chosen a location yet. Use the button above or set one manually.",
-    "radiusHelp": "The radius is the search area around your chosen point: {km} km means work and demand up to {km} km from that point."
+    "radiusHelp": "The radius is the search area around your chosen point: {km} km means work and demand up to {km} km from that point.",
+    "previewTitle": "New spot picked — not saved yet",
+    "previewKeepNote": "Your previous location stays until you press Save.",
+    "previewSave": "Save location",
+    "previewCancel": "Cancel",
+    "mapEditHint": "Tap the map — you'll see the new point and can save or cancel it.",
+    "mapLockedHint": "Location unchanged. To change it, press “Change location”.",
+    "mapEditButton": "Change location on the map"
   },
   "waze": {
     "open": "Open in Waze"
@@ -7857,8 +7894,6 @@
   },
   "premiumHub": {
     "brand": "LabourMarket.ai",
-    "liveBadge": "Live data",
-    "partialBadge": "Live data · some blocks not filled yet",
     "pageTitle": "Control hub",
     "pageLead": "One place to review your professional identity, team, market and project.",
     "unavailable": "This data is not available right now.",
@@ -7876,8 +7911,9 @@
       },
       "stats": {
         "skills": "Skills",
-        "supported": "Backed by entries",
-        "entries": "Work entries"
+        "supported": "Work-backed",
+        "entries": "Work entries",
+        "legend": "Skills — everything you have declared. Work-backed — the ones your work journal entries support."
       },
       "empty": {
         "title": "Profile not filled in yet",
@@ -8762,5 +8798,51 @@
         "error": "Something went wrong. Please try again."
       }
     }
+  },
+  "people": {
+    "eyebrow": "Person profile",
+    "restrictedTitle": "Profile unavailable",
+    "restrictedBody": "You can't view this person's profile: there is no active work relationship, or the person hasn't agreed to be discoverable.",
+    "available": "Available",
+    "availableFrom": "From {date}",
+    "experienceYears": "{n} yrs experience",
+    "skillsTitle": "Skills",
+    "skillsEmpty": "No skills you are permitted to see.",
+    "skillVerified": "With manager record",
+    "skillWorkBacked": "Work-backed",
+    "skillDeclared": "Self-declared",
+    "skillsLegend": "With manager record — a manager record accompanies the skill. Work-backed — visible from work journal entries. Self-declared — added by the person."
+  },
+  "companyLocations": {
+    "title": "Locations",
+    "subtitle": "Headquarters, operating locations and desired markets — across countries.",
+    "kindHeadquarters": "Headquarters",
+    "kindOperating": "Operating location",
+    "kindDesiredMarket": "Desired market",
+    "countryLabel": "Country",
+    "cityLabel": "City",
+    "regionLabel": "Region",
+    "addButton": "Add location",
+    "removeButton": "Remove location",
+    "empty": "No locations yet. Add your headquarters and operating locations.",
+    "gatedHeading": "Prepared — awaiting owner activation",
+    "gatedBody": "The locations model is ready, but the database change has not been applied yet. Activation is an owner decision.",
+    "errorLabel": "Could not save. Try again."
+  },
+  "companyGallery": {
+    "title": "Gallery",
+    "subtitle": "Photos from your projects' work journals.",
+    "photosLabel": "photos",
+    "openLabel": "Open",
+    "empty": "No photos yet. They appear when workers attach photos to journal entries on a project."
+  },
+  "personalGallery": {
+    "eyebrow": "My space",
+    "title": "Gallery",
+    "empty": "No photos yet. Attach a photo to a work journal entry — it will appear here.",
+    "emptyCta": "Write a journal entry",
+    "previewsUnavailable": "Previews are temporarily unavailable.",
+    "previewUnavailable": "Preview unavailable",
+    "photoAlt": "Work photo"
   }
 }

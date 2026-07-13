@@ -710,7 +710,9 @@
     "pricing": "[EN] Pricing",
     "about": "Om os",
     "login": "[EN] Sign in",
-    "startNow": "[EN] Start now"
+    "startNow": "[EN] Start now",
+    "themeToDark": "Mørkt tema",
+    "themeToLight": "Lyst tema"
   },
   "pages": {
     "agencies": {
@@ -1607,7 +1609,12 @@
     },
     "draft": {
       "title": "Draft — projekter og hold"
-    }
+    },
+    "myProjectsTitle": "Mine projekter",
+    "myProjectsEmpty": "Du er endnu ikke tildelt noget projekt. Når en virksomhed tildeler dig, vises projektet her.",
+    "assignmentActive": "Aktiv",
+    "assignmentEnded": "Afsluttet",
+    "untitledProject": "Projekt uden titel"
   },
   "projectOps": {
     "stadium": {
@@ -1626,6 +1633,16 @@
       "positionsTitle": "Manglende positioner",
       "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
       "openOps": "Åbn management-arenaen"
+    },
+    "workerView": {
+      "eyebrow": "Mit projekt",
+      "untitled": "Projekt uden titel",
+      "assignmentActive": "Aktiv tildeling",
+      "assignmentEnded": "Tildeling afsluttet",
+      "projectRestricted": "Projektdetaljer er ikke tilgængelige for dig lige nu. Din tildeling forbliver synlig.",
+      "journalCta": "Skriv journalindlæg",
+      "chatCta": "Send besked",
+      "galleryTitle": "Mine fotos på dette projekt"
     }
   },
   "agencyPool": {
@@ -2247,5 +2264,28 @@
     "requestAgainNote": "Dette sender en ny anmodning om den samme ydelse. Din tidligere besked er udfyldt på forhånd — ret den, hvis du vil. Udbyderen beslutter igen.",
     "cancel": "Annuller",
     "offeringInactive": "Denne ydelse er ikke længere aktiv, så der kan ikke sendes en ny anmodning."
+  },
+  "people": {
+    "eyebrow": "Personprofil",
+    "restrictedTitle": "Profil ikke tilgængelig",
+    "restrictedBody": "Du kan ikke se denne persons profil: der er ingen aktiv arbejdsrelation, eller personen har ikke givet samtykke til at være synlig.",
+    "available": "Tilgængelig",
+    "availableFrom": "Fra {date}",
+    "experienceYears": "{n} års erfaring",
+    "skillsTitle": "Kompetencer",
+    "skillsEmpty": "Ingen kompetencer, du må se.",
+    "skillVerified": "Bekræftet",
+    "skillWorkBacked": "Underbygget af arbejde",
+    "skillDeclared": "Selvangivet",
+    "skillsLegend": "Bekræftet — godkendt af en leder. Underbygget af arbejde — fremgår af arbejdsjournalens indlæg. Selvangivet — tilføjet af personen, endnu ikke kontrolleret."
+  },
+  "marketMapBase": {
+    "previewTitle": "Nyt sted valgt — endnu ikke gemt",
+    "previewKeepNote": "Din tidligere placering bevares, indtil du trykker Gem.",
+    "previewSave": "Gem placering",
+    "previewCancel": "Annuller",
+    "mapEditHint": "Tryk på kortet — du ser det nye punkt og kan gemme eller annullere det.",
+    "mapLockedHint": "Placering uændret. Tryk på “Skift placering” for at ændre den.",
+    "mapEditButton": "Skift placering på kortet"
   }
 }

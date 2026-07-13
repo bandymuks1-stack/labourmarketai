@@ -24,6 +24,15 @@ function isChunkError(error: (Error & { digest?: string }) | undefined): boolean
   return error.name === "ChunkLoadError" || CHUNK_ERROR.test(error.message ?? "");
 }
 
+/** Hardcoded last-resort labels — used ONLY if the intl context itself is
+ *  broken (a boundary that crashes hands the user Next's dead error shell,
+ *  which is exactly the F6 production failure mode). */
+const FALLBACK = {
+  reloading: "Atnaujinama… / Reloading…",
+  body: "Įvyko klaida. Jūsų duomenys išsaugoti — bandykite dar kartą. / Something went wrong. Your data is safe — try again.",
+  retry: "Bandyti dar kartą / Try again",
+} as const;
+
 export default function LocaleError({
   error,
   reset,
@@ -31,7 +40,17 @@ export default function LocaleError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const t = useTranslations("errorBoundary");
+  // RC6: the boundary must NEVER crash itself. The hook call stays
+  // unconditional (hook rules); only a broken intl context is caught, in
+  // which case bilingual hardcoded copy renders instead.
+  const translate = useTranslations("errorBoundary");
+  const t = (key: keyof typeof FALLBACK): string => {
+    try {
+      return translate(key);
+    } catch {
+      return FALLBACK[key];
+    }
+  };
   const chunk = isChunkError(error);
 
   useEffect(() => {

@@ -710,7 +710,9 @@
     "pricing": "[EN] Pricing",
     "about": "Meist",
     "login": "[EN] Sign in",
-    "startNow": "[EN] Start now"
+    "startNow": "[EN] Start now",
+    "themeToDark": "Tume teema",
+    "themeToLight": "Hele teema"
   },
   "pages": {
     "agencies": {
@@ -1607,7 +1609,12 @@
     },
     "draft": {
       "title": "[EN] Draft — projects and teams"
-    }
+    },
+    "myProjectsTitle": "Minu projektid",
+    "myProjectsEmpty": "Te pole veel ühelegi projektile määratud. Kui ettevõte teid määrab, ilmub projekt siia.",
+    "assignmentActive": "Aktiivne",
+    "assignmentEnded": "Lõppenud",
+    "untitledProject": "Pealkirjata projekt"
   },
   "projectOps": {
     "stadium": {
@@ -1626,6 +1633,16 @@
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
+    },
+    "workerView": {
+      "eyebrow": "Minu projekt",
+      "untitled": "Pealkirjata projekt",
+      "assignmentActive": "Aktiivne määramine",
+      "assignmentEnded": "Määramine lõppenud",
+      "projectRestricted": "Projekti üksikasjad pole teile praegu kättesaadavad. Teie määramine jääb nähtavaks.",
+      "journalCta": "Kirjuta päevikusse",
+      "chatCta": "Saada sõnum",
+      "galleryTitle": "Minu fotod sellel projektil"
     }
   },
   "agencyPool": {
@@ -2247,5 +2264,28 @@
     "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
     "cancel": "[EN] Cancel",
     "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
+  },
+  "people": {
+    "eyebrow": "Isiku profiil",
+    "restrictedTitle": "Profiil pole saadaval",
+    "restrictedBody": "Te ei saa selle isiku profiili vaadata: puudub aktiivne töösuhe või isik pole nõustunud olema leitav.",
+    "available": "Saadaval",
+    "availableFrom": "Alates {date}",
+    "experienceYears": "{n} a kogemust",
+    "skillsTitle": "Oskused",
+    "skillsEmpty": "Pole oskusi, mida teil on lubatud näha.",
+    "skillVerified": "Kinnitatud",
+    "skillWorkBacked": "Tööga tõendatud",
+    "skillDeclared": "Ise märgitud",
+    "skillsLegend": "Kinnitatud — juhi poolt heaks kiidetud. Tööga tõendatud — nähtav tööpäeviku sissekannetest. Ise märgitud — isiku lisatud, veel kontrollimata."
+  },
+  "marketMapBase": {
+    "previewTitle": "Uus koht valitud — pole veel salvestatud",
+    "previewKeepNote": "Teie eelmine asukoht jääb alles, kuni vajutate Salvesta.",
+    "previewSave": "Salvesta asukoht",
+    "previewCancel": "Tühista",
+    "mapEditHint": "Puudutage kaarti — näete uut punkti ja saate selle salvestada või tühistada.",
+    "mapLockedHint": "Asukoht muutmata. Muutmiseks vajutage „Muuda asukohta”.",
+    "mapEditButton": "Muuda asukohta kaardil"
   }
 }

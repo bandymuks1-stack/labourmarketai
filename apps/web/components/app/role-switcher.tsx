@@ -95,17 +95,17 @@ export function RoleSwitcher() {
           mixed in with worker/company/agency/customer chips, and so
           the workspace switcher's user-facing UX is untouched.
           Clicking the badge navigates to the pilot panel. */}
+      {/* F5 icon-first header: the admin entry is an icon badge with a
+          tooltip + accessible label — never a shouting text pill. */}
       {isAdmin && !adminUiHidden && (
         <Link
           href="/dashboard/admin"
           aria-label={tSwitcher("adminPanelLink")}
+          title={tSwitcher("adminMode")}
           data-testid="role-switcher-admin-badge"
-          className="inline-flex shrink-0 items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/10 px-2 py-1.5 text-sm font-semibold text-brand-orange hover:border-brand-orange sm:px-3"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-brand-orange/40 bg-brand-orange/10 text-brand-orange hover:border-brand-orange"
         >
           <Settings className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-          <span className="hidden font-mono text-[11px] uppercase tracking-label sm:inline">
-            {tSwitcher("adminMode")}
-          </span>
         </Link>
       )}
 
@@ -135,7 +135,9 @@ export function RoleSwitcher() {
             {activeOrgName}
           </span>
         ) : (
-          <span className="hidden font-mono text-[11px] uppercase tracking-label text-text-secondary sm:inline">
+          // F5 icon-first header: a short human word next to the identity
+          // icon — not an uppercase mono sentence-pill.
+          <span className="hidden text-[13px] font-medium text-text-secondary sm:inline">
             {activeIdentity ? tSwitcher(baseIdentityLabelKey(activeIdentity)) : tSwitcher("label")}
           </span>
         )}

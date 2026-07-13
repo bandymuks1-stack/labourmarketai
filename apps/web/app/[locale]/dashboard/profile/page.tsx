@@ -79,6 +79,7 @@ export default async function ProfilePage({
   setRequestLocale(locale);
   const t = await getTranslations("skills");
   const tSpaces = await getTranslations("spaces");
+  const tGallery = await getTranslations("personalGallery");
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
   const tRole = await getTranslations("auth.signup.role");
@@ -403,6 +404,16 @@ export default async function ProfilePage({
                 data-testid="profile-documents-link"
               >
                 {tDocs("title")}
+              </Link>
+            ) : null}
+            {/* F13: the personal gallery gets a clear person-context entry. */}
+            {workerId ? (
+              <Link
+                href={"/dashboard/gallery" as "/dashboard"}
+                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                data-testid="profile-gallery-link"
+              >
+                {tGallery("title")}
               </Link>
             ) : null}
             <Link

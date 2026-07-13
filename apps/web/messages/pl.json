@@ -710,7 +710,9 @@
     "pricing": "[EN] Pricing",
     "about": "O nas",
     "login": "[EN] Sign in",
-    "startNow": "[EN] Start now"
+    "startNow": "[EN] Start now",
+    "themeToDark": "Ciemny motyw",
+    "themeToLight": "Jasny motyw"
   },
   "pages": {
     "agencies": {
@@ -1607,7 +1609,12 @@
     },
     "draft": {
       "title": "[EN] Draft — projects and teams"
-    }
+    },
+    "myProjectsTitle": "Moje projekty",
+    "myProjectsEmpty": "Nie jesteś jeszcze przypisany do żadnego projektu. Gdy firma Cię przypisze, projekt pojawi się tutaj.",
+    "assignmentActive": "Aktywne",
+    "assignmentEnded": "Zakończone",
+    "untitledProject": "Projekt bez nazwy"
   },
   "projectOps": {
     "stadium": {
@@ -1626,6 +1633,16 @@
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
+    },
+    "workerView": {
+      "eyebrow": "Mój projekt",
+      "untitled": "Projekt bez nazwy",
+      "assignmentActive": "Aktywne przypisanie",
+      "assignmentEnded": "Przypisanie zakończone",
+      "projectRestricted": "Szczegóły projektu są obecnie niedostępne. Twoje przypisanie pozostaje widoczne.",
+      "journalCta": "Dodaj wpis do dziennika",
+      "chatCta": "Napisz wiadomość",
+      "galleryTitle": "Moje zdjęcia w tym projekcie"
     }
   },
   "agencyPool": {
@@ -2247,5 +2264,28 @@
     "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
     "cancel": "[EN] Cancel",
     "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
+  },
+  "people": {
+    "eyebrow": "Profil osoby",
+    "restrictedTitle": "Profil niedostępny",
+    "restrictedBody": "Nie możesz zobaczyć profilu tej osoby: brak aktywnej relacji zawodowej lub osoba nie wyraziła zgody na widoczność.",
+    "available": "Dostępny",
+    "availableFrom": "Od {date}",
+    "experienceYears": "{n} lat doświadczenia",
+    "skillsTitle": "Umiejętności",
+    "skillsEmpty": "Brak umiejętności, które możesz zobaczyć.",
+    "skillVerified": "Potwierdzone",
+    "skillWorkBacked": "Poparte pracą",
+    "skillDeclared": "Zadeklarowane",
+    "skillsLegend": "Potwierdzone — zatwierdzone przez menedżera. Poparte pracą — widoczne z wpisów dziennika pracy. Zadeklarowane — dodane przez osobę, jeszcze niezweryfikowane."
+  },
+  "marketMapBase": {
+    "previewTitle": "Wybrano nowe miejsce — jeszcze nie zapisane",
+    "previewKeepNote": "Poprzednia lokalizacja pozostaje, dopóki nie naciśniesz Zapisz.",
+    "previewSave": "Zapisz lokalizację",
+    "previewCancel": "Anuluj",
+    "mapEditHint": "Dotknij mapy — zobaczysz nowy punkt i będziesz mógł go zapisać lub anulować.",
+    "mapLockedHint": "Lokalizacja bez zmian. Aby ją zmienić, naciśnij „Zmień lokalizację”.",
+    "mapEditButton": "Zmień lokalizację na mapie"
   }
 }

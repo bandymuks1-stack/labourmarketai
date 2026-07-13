@@ -26,12 +26,14 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 describe("the global primary nav is the compact, non-duplicated set", () => {
-  it("primary nav = exactly overview / market_map / journal_text_first / communication (action-first)", () => {
+  it("primary nav = exactly overview / market_map / journal_text_first / communication / planning / network (production UX repair v2 F14/F15)", () => {
     expect(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id)).toEqual([
       "overview",
       "market_map",
       "journal_text_first",
       "communication",
+      "planning",
+      "network",
     ]);
   });
 

@@ -42,6 +42,10 @@ const CLASSIFICATION: Record<string, string> = {
   // the human-gated finance_records migration (I2); degrades honestly until
   // applied. Manual records only — no payment processing.
   "dashboard/finance": "REAL_LAUNCH_SURFACE",
+  // Personal gallery (production UX repair v2, F13) — read-only projection
+  // of the user's OWN journal_entry_photos (one photo system; uploads stay
+  // journal-only). Honest empty state points at the journal.
+  "dashboard/gallery": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/quick": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/report": "REAL_LAUNCH_SURFACE",
@@ -52,6 +56,11 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/journal/voice": "REAL_LAUNCH_SURFACE",
   "dashboard/market-map": "REAL_LAUNCH_SURFACE",
   "dashboard/opportunities": "REAL_LAUNCH_SURFACE",
+  // Person detail page (production UX repair v2, F2) — the single permitted
+  // destination for a member/person row; fail-closed on can_view_worker RLS
+  // (self/admin/consented discovery/active work relationship), no contact
+  // fields selected, honest restricted state otherwise.
+  "dashboard/people/[workerId]": "REAL_LAUNCH_SURFACE",
   // Unified planning agenda (control room PR E) — composes existing
   // RLS-scoped reads (bookings / managed projects / tasks); degrades
   // per-source, duplicates no record.

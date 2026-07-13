@@ -1,6 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { ChevronRight } from "lucide-react";
+
+import { Link } from "@/lib/i18n/navigation";
 
 import {
   inviteCompanyWorkerAction,
@@ -56,6 +59,7 @@ export interface CompanyWorkersSectionLabels {
   readonly migrationBlockerHeading: string;
   readonly migrationBlockerBody: string;
   readonly activeWorkersHeading: string;
+  readonly openProfile: string;
   readonly columnEmail: string;
   readonly columnStatus: string;
   readonly columnInvitedAt: string;
@@ -210,10 +214,30 @@ export function CompanyWorkersSection({
                     data-review-capability={ctx.reviewCapability}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <span className="break-all text-sm font-medium text-text-primary">{w.email ?? "—"}</span>
+                      {/* F2: every permitted member row opens the real person
+                          page (fail-closed by can_view_worker RLS there). */}
+                      <Link
+                        href={`/dashboard/people/${w.workerId}`}
+                        className="group inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-text-primary hover:text-brand-blue"
+                        data-testid={`company-worker-open-${w.workerId}`}
+                      >
+                        <span className="break-all">{w.email ?? "—"}</span>
+                        <ChevronRight
+                          className="h-3.5 w-3.5 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-brand-blue"
+                          aria-hidden
+                        />
+                      </Link>
                       <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
                     </div>
-                    <MessageButton profileId={w.profileId} labelKey="messageWorker" />
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/dashboard/people/${w.workerId}`}
+                        className="w-fit rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                      >
+                        {labels.openProfile}
+                      </Link>
+                      <MessageButton profileId={w.profileId} labelKey="messageWorker" />
+                    </div>
                     <div className="flex flex-col gap-1 text-xs text-text-secondary">
                       <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
                         <span>

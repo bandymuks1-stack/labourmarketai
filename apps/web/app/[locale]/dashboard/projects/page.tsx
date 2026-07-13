@@ -13,6 +13,8 @@ import {
 } from "@/components/app/project-assignment-manager";
 import { ProjectMap } from "@/components/app/arena/project-map";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
+import { listWorkerProjects } from "@/lib/projects/worker-project-access";
+import { MapPin } from "lucide-react";
 import { type Role } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -50,14 +52,56 @@ export default async function ProjectsPage({
     .single();
   const role = (profile?.active_role as Role) ?? "worker";
   if (!MANAGER_ROLES.has(role)) {
+    // RC2 role-aware routing (F11): a worker who lands here gets THEIR OWN
+    // projects (real assignments under RLS), never a dead "managers only"
+    // explanation. Honest empty state when they have no assignments yet.
+    const myProjects = await listWorkerProjects();
     return (
-      <div className="flex max-w-2xl flex-col gap-4">
+      <div
+        className="flex max-w-3xl flex-col gap-4"
+        data-testid="worker-projects-list"
+      >
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
+          {t("myProjectsTitle")}
         </h1>
-        <p className="card-border p-4 text-sm text-text-secondary">
-          {t("managerOnly")}
-        </p>
+        {myProjects.length === 0 ? (
+          <p className="card-border p-4 text-sm text-text-secondary">
+            {t("myProjectsEmpty")}
+          </p>
+        ) : (
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {myProjects.map((p) => (
+              <li key={p.projectId}>
+                <Link
+                  href={`/dashboard/projects/${p.projectId}`}
+                  data-testid="worker-project-card"
+                  className="card-border flex flex-col gap-2 p-4 transition-colors hover:border-brand-blue"
+                >
+                  <span className="font-display text-base font-semibold tracking-tightest text-text-primary">
+                    {p.title ?? t("untitledProject")}
+                  </span>
+                  {p.city || p.country ? (
+                    <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                      <MapPin className="h-3 w-3" aria-hidden />
+                      {[p.city, p.country].filter(Boolean).join(", ")}
+                    </span>
+                  ) : null}
+                  <span
+                    className={
+                      p.assignmentStatus === "active"
+                        ? "w-fit rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-success"
+                        : "w-fit rounded-full border border-ink-500 bg-ink-800 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                    }
+                  >
+                    {p.assignmentStatus === "active"
+                      ? t("assignmentActive")
+                      : t("assignmentEnded")}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   }

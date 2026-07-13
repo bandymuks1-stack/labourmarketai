@@ -98,6 +98,15 @@ export function MarketMapBase({
   const tc = useTranslations("labourMarket");
 
   const [selected, setSelected] = useState<SelectedLocation | null>(null);
+  // F12 safe editing: a map tap NEVER overwrites the saved location. When a
+  // location exists, taps are inert until the user enters explicit edit mode;
+  // a tap then only stages a PREVIEW point which needs Save (Cancel restores).
+  const [mapEditMode, setMapEditMode] = useState(false);
+  const [previewPoint, setPreviewPoint] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [pickLockedHint, setPickLockedHint] = useState(false);
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoHint, setGeoHint] = useState<GeoFailure | null>(null);
   const [manualOpen, setManualOpen] = useState(false);
@@ -189,27 +198,45 @@ export function MarketMapBase({
     setManualOpen(false);
   }, [country, region, address, radiusKm, persist, t]);
 
-  // ── Map tap: set a real coordinate by tapping the interactive map ──
-  // A third, fully provider-free way to choose location (works on mobile —
-  // a tap is a click). The picked point is a real coordinate from the inverse
-  // projection, saved as an "auto"-source location.
+  // ── Map tap (F12 safe editing) ──
+  // A tap NEVER writes directly. With a saved location and edit mode OFF the
+  // tap is inert (a hint explains how to change the location). Otherwise the
+  // tap stages a PREVIEW point — the saved location stays untouched until the
+  // user explicitly saves; Cancel discards the preview.
   const pickFromMap = useCallback(
     (lat: number, lng: number) => {
       setGeoHint(null);
       setManualError(null);
-      persist({
-        source: "auto",
-        lat,
-        lng,
-        country: null,
-        region: null,
-        address: null,
-        radiusKm,
-        savedAt: Date.now(),
-      });
+      if (selected && !mapEditMode) {
+        setPickLockedHint(true);
+        return;
+      }
+      setPickLockedHint(false);
+      setPreviewPoint({ lat, lng });
     },
-    [persist, radiusKm],
+    [selected, mapEditMode],
   );
+
+  const savePreview = useCallback(() => {
+    if (!previewPoint) return;
+    persist({
+      source: "auto",
+      lat: previewPoint.lat,
+      lng: previewPoint.lng,
+      country: null,
+      region: null,
+      address: null,
+      radiusKm,
+      savedAt: Date.now(),
+    });
+    setPreviewPoint(null);
+    setMapEditMode(false);
+  }, [previewPoint, persist, radiusKm]);
+
+  const cancelPreview = useCallback(() => {
+    setPreviewPoint(null);
+    setMapEditMode(false);
+  }, []);
 
   // Change the radius of the current selection in place.
   const changeRadius = useCallback(
@@ -405,10 +432,77 @@ export function MarketMapBase({
           ariaLabel={t("panelTitle")}
           identity={identity}
           suppressOwnMarker={suppressOwnMarker}
+          previewPoint={previewPoint}
         />
-        <p className="text-center text-[11px] text-text-muted" data-testid="location-map-tap-hint">
-          {t("mapTapHint")}
-        </p>
+        {/* F12 safe editing: state-aware map hint + explicit controls. */}
+        {previewPoint ? (
+          <div
+            className="flex flex-col items-center gap-2 rounded-lg border border-state-warning/40 bg-state-warning/5 p-3"
+            data-testid="map-preview-controls"
+          >
+            <p className="text-center text-xs font-medium text-text-primary">
+              {t("previewTitle")}
+            </p>
+            <p className="text-center text-[11px] text-text-secondary">
+              {previewPoint.lat.toFixed(4)}, {previewPoint.lng.toFixed(4)} ·{" "}
+              {t("previewKeepNote")}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              <button
+                type="button"
+                onClick={savePreview}
+                data-testid="map-preview-save"
+                className="inline-flex items-center gap-1.5 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue"
+              >
+                <Check className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                {t("previewSave")}
+              </button>
+              <button
+                type="button"
+                onClick={cancelPreview}
+                data-testid="map-preview-cancel"
+                className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger"
+              >
+                {t("previewCancel")}
+              </button>
+            </div>
+          </div>
+        ) : mapEditMode ? (
+          <p
+            className="text-center text-[11px] text-brand-cyan"
+            data-testid="location-map-edit-hint"
+          >
+            {t("mapEditHint")}
+          </p>
+        ) : selected ? (
+          <div className="flex flex-col items-center gap-1.5">
+            {pickLockedHint && (
+              <p
+                className="text-center text-[11px] text-state-warning"
+                data-testid="location-map-locked-hint"
+                role="status"
+              >
+                {t("mapLockedHint")}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setMapEditMode(true);
+                setPickLockedHint(false);
+              }}
+              data-testid="map-edit-mode-toggle"
+              className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+            >
+              <Pencil className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              {t("mapEditButton")}
+            </button>
+          </div>
+        ) : (
+          <p className="text-center text-[11px] text-text-muted" data-testid="location-map-tap-hint">
+            {t("mapTapHint")}
+          </p>
+        )}
         {selected ? (
           <div className="flex flex-col items-center gap-1">
             <p className="text-center text-sm font-medium text-text-primary" data-testid="location-panel-where">
