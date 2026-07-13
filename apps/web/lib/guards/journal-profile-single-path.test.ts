@@ -89,8 +89,9 @@ describe("Guard: profile is the canonical OUTPUT, not a journal manager", () => 
     const hub = readFileSync(join(APP_ROOT, "components/app/profile-hub-overview.tsx"), "utf8");
     expect(hub).toMatch(/deriveProfileNextAction/);
     expect(hub).toMatch(/profile-hub-primary-action/);
-    // The helper is pure (no AI/network/random).
-    const helper = readFileSync(join(APP_ROOT, "lib/profile/profile-next-action.ts"), "utf8");
+    // The helper is pure (no AI/network/random). It lives in the canonical
+    // next-action module (canonical-user-journey v1).
+    const helper = readFileSync(join(APP_ROOT, "lib/dashboard/next-action.ts"), "utf8");
     expect(helper).not.toMatch(/fetch\(|createClient|Math\.random|Date\.now/);
   });
 

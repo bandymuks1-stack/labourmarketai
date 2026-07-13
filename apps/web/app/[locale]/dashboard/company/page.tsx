@@ -13,9 +13,15 @@ import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { FeatureNote } from "@/components/app/feature-note";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
+import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
+import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
+import { AgencyClientsSection } from "@/components/app/agency-clients-section";
+// Client-management module ONLY (reuses customers-investigation outcome +
+// canonical customer_requests) — never the legacy lib/agency pool world.
+import { listAgencyClients, listAgencyDemands } from "@/lib/agency/clients";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
@@ -123,8 +129,20 @@ export default async function CompanyDashboardPage({
   const companyRow =
     companyProfile.kind === "ok" ? companyProfile.row : null;
 
+  // P5 agency client management — staffing-agency mode ONLY. Reads the
+  // caller's own agency_clients (owner-gated migration → honest gated state)
+  // + their OWN canonical customer_requests rows. Never fetched for other
+  // company types.
+  const isStaffingAgency = companyRow?.companyType === "staffing_agency";
+  const agencyClientsState = isStaffingAgency ? await listAgencyClients() : null;
+  const agencyDemandsState = isStaffingAgency ? await listAgencyDemands() : null;
+
   const tWorkers = await getTranslations("roleDashboards.company.workers");
   const existingDraft = await getDemandDraft("company_request");
+  // Canonical-journey P3 — the caller's own claimable public intakes
+  // (authenticated-email match; [] on any missing state, never an error).
+  const tClaim = await getTranslations("companyClaimIntake");
+  const claimableIntakes = await listClaimablePublicIntakes();
 
   const ownCompany = await getOwnCompany();
   const workersResult = ownCompany
@@ -182,6 +200,45 @@ export default async function CompanyDashboardPage({
     openLabel: tCompanyGallery("openLabel"),
     empty: tCompanyGallery("empty"),
   };
+  // P5: "Klientai" panel labels — resolved only in staffing-agency mode.
+  const tAgencyClients = isStaffingAgency
+    ? await getTranslations("agencyClients")
+    : null;
+  const agencyClientsLabels = tAgencyClients
+    ? {
+        title: tAgencyClients("title"),
+        subtitle: tAgencyClients("subtitle"),
+        gatedHeading: tAgencyClients("gatedHeading"),
+        gatedBody: tAgencyClients("gatedBody"),
+        notLinkable: tAgencyClients("notLinkable"),
+        clientsEmpty: tAgencyClients("clientsEmpty"),
+        demandsHeading: tAgencyClients("demandsHeading"),
+        demandsEmpty: tAgencyClients("demandsEmpty"),
+        demandsEmptyCta: tAgencyClients("demandsEmptyCta"),
+        unassignedHeading: tAgencyClients("unassignedHeading"),
+        noLinkedDemands: tAgencyClients("noLinkedDemands"),
+        openScouting: tAgencyClients("openScouting"),
+        addHeading: tAgencyClients("addHeading"),
+        nameLabel: tAgencyClients("nameLabel"),
+        contactNameLabel: tAgencyClients("contactNameLabel"),
+        contactEmailLabel: tAgencyClients("contactEmailLabel"),
+        noteLabel: tAgencyClients("noteLabel"),
+        addButton: tAgencyClients("addButton"),
+        removeButton: tAgencyClients("removeButton"),
+        assignLabel: tAgencyClients("assignLabel"),
+        assignNone: tAgencyClients("assignNone"),
+        assignButton: tAgencyClients("assignButton"),
+        errorLabel: tAgencyClients("errorLabel"),
+        statuses: {
+          draft: tAgencyClients("status.draft"),
+          submitted: tAgencyClients("status.submitted"),
+          in_review: tAgencyClients("status.in_review"),
+          needs_followup: tAgencyClients("status.needs_followup"),
+          approved: tAgencyClients("status.approved"),
+          closed: tAgencyClients("status.closed"),
+        },
+      }
+    : null;
   // Slice 1 — operational status counts from existing data (read-back only).
   const acceptedCount = workersResult.kind === "ok" ? workersResult.rows.length : 0;
   // Slice 9 — per-worker work-readiness SIGNALS (not a rating), computed from
@@ -546,6 +603,30 @@ export default async function CompanyDashboardPage({
         {(await getTranslations("featureNotes"))("companySpace")}
       </FeatureNote>
 
+      {/* Honest data-driven status header (name, verification status, what to
+          fix) — consolidated next to the ONE action center below
+          (canonical-user-journey v1). */}
+      {companyRow ? <CompanyNextActions company={companyRow} /> : null}
+
+      {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
+          /company-need submissions (matched by their authenticated email)
+          continue here as a real draft demand instead of dead-ending in the
+          operator queue. Renders nothing when there is nothing to claim. */}
+      {claimableIntakes.length > 0 ? (
+        <ClaimPublicIntakeCard
+          locale={locale}
+          intakes={claimableIntakes}
+          labels={{
+            title: tClaim("title"),
+            body: tClaim("body"),
+            claimCta: tClaim("claimCta"),
+            claimed: tClaim("claimed"),
+            error: tClaim("error"),
+            workersLabel: tClaim("workersLabel"),
+          }}
+        />
+      ) : null}
+
       <CompanyActionNextActions
         room="company"
         primaryHref="/dashboard/company/projects/new"
@@ -560,6 +641,7 @@ export default async function CompanyDashboardPage({
           kind='agency_offer' to customer_requests), and scouting. Renders
           strictly when companyRow.companyType === "staffing_agency". */}
       {companyRow && companyRow.companyType === "staffing_agency" ? (
+        <>
         <section
           className="card-border flex flex-col gap-3 p-5"
           data-testid="company-agency-mode"
@@ -631,9 +713,21 @@ export default async function CompanyDashboardPage({
             {t("agencyMode.legacyNote")}
           </p>
         </section>
+        {/* P5 "Klientai": client → need → candidates path for the agency,
+            INSIDE the same canonical workspace. Client records are gated on
+            the owner-approved migration (honest degraded state until then);
+            the demand list + scouting links are real today. */}
+        {agencyClientsState && agencyDemandsState && agencyClientsLabels ? (
+          <AgencyClientsSection
+            clients={agencyClientsState}
+            demands={agencyDemandsState}
+            locale={locale}
+            labels={agencyClientsLabels}
+          />
+        ) : null}
+        </>
       ) : null}
 
-      {companyRow ? <CompanyNextActions company={companyRow} /> : null}
       {companyRow ? (
         <CompanyReadinessSummary
           company={{

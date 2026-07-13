@@ -3,9 +3,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Guard: the company dashboard shows a usable, honest "next actions" surface
- * after automatic-first onboarding — never an empty/unclear dashboard, never
+ * Guard: the company dashboard shows a usable, honest STATUS surface after
+ * automatic-first onboarding — never an empty/unclear dashboard, never
  * "wait for admin approval", never faked verification/hiring/AI.
+ *
+ * Consolidated (canonical-user-journey v1): CompanyNextActions is now the
+ * data-driven status header (name, honest verification status, what to fix,
+ * tracked demand CTA); the four static explainer cards were removed because
+ * they duplicated the page's single CompanyActionNextActions action center.
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
@@ -61,12 +66,15 @@ describe("Guard: the next-actions component is honest + data-driven", () => {
     expect(src).toMatch(/verificationExplainer\.\$\{status\}/);
   });
 
-  it("renders the four next-action cards incl. optional verification", () => {
-    for (const c of ["completeDetails", "team", "requests", "verification"]) {
-      expect(src).toContain(`cards.${c}.title`);
+  it("keeps ONE action center: no duplicate explainer card stack", () => {
+    // The static completeDetails/team/verification cards live nowhere — the
+    // room's action center is CompanyActionNextActions on the page. Only the
+    // tracked demand CTA (real telemetry) remains here.
+    for (const c of ["completeDetails", "team", "verification"]) {
+      expect(src).not.toContain(`cards.${c}.title`);
     }
-    expect(src).toMatch(/optional:\s*true/); // verification card is optional
-    expect(src).toContain("optionalBadge");
+    expect(src).toContain("cards.requests.cta");
+    expect(src).toContain("companyDemandActionClicked");
   });
 
   it("surfaces needs_checks / missing items with a fix link", () => {
@@ -90,14 +98,9 @@ describe("Guard: next-actions i18n is honest + parity-clean (LT/EN)", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const na = ((loadJson(`messages/${loc}.json`).roleDashboards as any)?.company?.nextActions) as any;
 
-    it(`${loc}: ships cards + noCompany + headings`, () => {
+    it(`${loc}: ships the demand CTA + noCompany + fix headings`, () => {
       expect(na, `${loc} nextActions missing`).toBeTruthy();
-      expect(na.heading).toBeTruthy();
-      for (const c of ["completeDetails", "team", "requests", "verification"]) {
-        expect(na.cards?.[c]?.title, `${loc} ${c}.title`).toBeTruthy();
-        expect(na.cards?.[c]?.body, `${loc} ${c}.body`).toBeTruthy();
-        expect(na.cards?.[c]?.cta, `${loc} ${c}.cta`).toBeTruthy();
-      }
+      expect(na.cards?.requests?.cta, `${loc} requests.cta`).toBeTruthy();
       expect(na.noCompany?.title && na.noCompany?.body && na.noCompany?.cta).toBeTruthy();
       expect(na.fixHeading && na.missingHeading).toBeTruthy();
     });
@@ -106,11 +109,6 @@ describe("Guard: next-actions i18n is honest + parity-clean (LT/EN)", () => {
       const blob = JSON.stringify(na);
       expect(blob.toLowerCase()).not.toMatch(/wait for (an )?admin|laukti administratoriaus/);
       expect(blob).not.toMatch(FAKE);
-    });
-
-    it(`${loc}: the verification card is framed as optional`, () => {
-      const body = String(na.cards?.verification?.body ?? "").toLowerCase();
-      expect(body).toMatch(loc === "lt" ? /neprivalom/ : /optional/);
     });
   }
 });

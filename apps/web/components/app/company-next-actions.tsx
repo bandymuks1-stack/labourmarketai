@@ -7,13 +7,19 @@ import type { CompanyRow, CompanyVerificationStatus } from "@/lib/company/compan
 import { runCompanyChecks, type CompanyCheckKey } from "@/lib/company/company-checks";
 
 /**
- * Company dashboard "next actions" + honest status header (automatic-first).
+ * Company honest STATUS header (automatic-first).
  *
  * A company is usable immediately as `active_unverified`. This surface tells a
- * company user, at a glance: what their company is, its honest status, what (if
- * anything) needs fixing, and the concrete next things they can do now. It
- * NEVER says "wait for admin approval", never fakes verification/hiring/AI, and
- * surfaces stronger verification only as an optional trust step.
+ * company user, at a glance: what their company is, its honest status, and
+ * what (if anything) needs fixing — computed from the REAL saved row via
+ * runCompanyChecks. It NEVER says "wait for admin approval" and never fakes
+ * verification/hiring/AI.
+ *
+ * Consolidated (canonical-user-journey v1): the former four static explainer
+ * cards (complete details / team / requests / verification) duplicated the
+ * page's CompanyActionNextActions room card and were removed — ONE action
+ * center per page. Only the data-driven status/fix parts plus the tracked
+ * demand CTA (activation funnel P0-A) remain.
  *
  * Pure read + render: it receives the already-RLS-scoped company row (the
  * caller only ever passes the signed-in user's own company). No mutations, no
@@ -69,48 +75,6 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
         return key;
     }
   };
-
-  const cards: {
-    key: string;
-    title: string;
-    body: string;
-    cta: string;
-    href: string;
-    external?: boolean;
-    optional?: boolean;
-  }[] = [
-    {
-      key: "complete",
-      title: t("cards.completeDetails.title"),
-      body: t("cards.completeDetails.body"),
-      cta: t("cards.completeDetails.cta"),
-      href: "/dashboard/start/company",
-    },
-    {
-      key: "team",
-      title: t("cards.team.title"),
-      body: t("cards.team.body"),
-      cta: t("cards.team.cta"),
-      href: "#company-team",
-      external: true,
-    },
-    {
-      key: "requests",
-      title: t("cards.requests.title"),
-      body: t("cards.requests.body"),
-      cta: t("cards.requests.cta"),
-      href: "#company-requests",
-      external: true,
-    },
-    {
-      key: "verification",
-      title: t("cards.verification.title"),
-      body: t("cards.verification.body"),
-      cta: t("cards.verification.cta"),
-      href: "/dashboard/start/company",
-      optional: true,
-    },
-  ];
 
   return (
     <section
@@ -177,59 +141,18 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
         ) : null}
       </div>
 
-      {/* Next action cards */}
-      <div>
-        <p className="mb-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
-          {t("heading")}
-        </p>
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {cards.map((c) => (
-            <li
-              key={c.key}
-              className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-4"
-              data-testid={`company-next-action-${c.key}`}
-            >
-              <h3 className="flex items-center gap-2 font-display text-sm font-semibold text-text-primary">
-                {c.title}
-                {c.optional ? (
-                  <span className="rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted">
-                    {t("optionalBadge")}
-                  </span>
-                ) : null}
-              </h3>
-              <p className="text-xs leading-relaxed text-text-secondary">{c.body}</p>
-              {c.key === "requests" ? (
-                // Activation funnel (P0-A): clicking the demand/requests CTA.
-                // Must be checked before `c.external` — the requests card is
-                // external (hash href), and the plain <a> branch would
-                // otherwise swallow the click untracked.
-                <TrackedLink
-                  event={FUNNEL_EVENTS.companyDemandActionClicked}
-                  eventMetadata={{ surface: "company", entity_type: "company_request" }}
-                  href={c.href as "/dashboard"}
-                  className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
-                >
-                  {c.cta} →
-                </TrackedLink>
-              ) : c.external ? (
-                <a
-                  href={c.href}
-                  className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
-                >
-                  {c.cta} →
-                </a>
-              ) : (
-                <Link
-                  href={c.href as "/dashboard"}
-                  className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
-                >
-                  {c.cta} →
-                </Link>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Activation funnel (P0-A): the tracked demand/requests CTA — real
+          telemetry kept when the duplicate explainer cards were consolidated
+          out (canonical-user-journey v1). Hash href to the real requests
+          section below. */}
+      <TrackedLink
+        event={FUNNEL_EVENTS.companyDemandActionClicked}
+        eventMetadata={{ surface: "company", entity_type: "company_request" }}
+        href={"#company-requests" as "/dashboard"}
+        className="inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
+      >
+        {t("cards.requests.cta")} →
+      </TrackedLink>
     </section>
   );
 }

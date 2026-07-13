@@ -349,11 +349,24 @@ export async function submitDemandRequest(
  *  most recent request of the intent's kind, echoed back as form values. Own
  *  data only (customer_requests RLS: profile_id = auth.uid()); nothing here
  *  reads anyone else's demand. Absent/none → `found: false` (the form stays
- *  empty — no fabricated prefill). */
+ *  empty — no fabricated prefill).
+ *
+ *  Canonical-journey P3: the same read now understands the owner's DRAFT row
+ *  (save_demand_draft payload keys — capabilities/timing/title aliases), and
+ *  reports the source (`source: "draft"` + `sourceId`) so the wizard can
+ *  (a) auto-continue from the draft instead of asking the company to re-type
+ *  everything, and (b) close the draft after the real submit — one canonical
+ *  demand row, entered once. */
 export type DemandPrefill =
   | { found: false }
   | {
       found: true;
+      /** Where the values came from: the owner's private draft or their last
+       *  submitted/closed request (duplicate-and-edit). */
+      source: "draft" | "request";
+      /** The draft row id when source === "draft" — used to close the draft
+       *  after the real submit (draft→closed, DB transition-guard-allowed). */
+      sourceId: string;
       fields: {
         role: string;
         description: string;
@@ -382,18 +395,34 @@ export async function getOwnLastDemandPrefill(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
-  const { data, error } = await sb
+  const SELECT_COLS =
+    "id, status, title, need_summary, country, role_or_work_type, team_size, start_period, payload";
+  // A live draft always wins (the company is mid-flow); otherwise the most
+  // recent request of this kind (duplicate-and-edit). Own rows only (RLS).
+  const draftRes = await sb
     .from("customer_requests")
-    .select(
-      "title, need_summary, country, role_or_work_type, team_size, start_period, payload",
-    )
+    .select(SELECT_COLS)
     .eq("profile_id", user.id)
     .eq("kind", INTENT_KIND[intent])
+    .eq("status", "draft")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (error || !data) return { found: false };
+  let data = draftRes.data;
+  if (draftRes.error || !data) {
+    const lastRes = await sb
+      .from("customer_requests")
+      .select(SELECT_COLS)
+      .eq("profile_id", user.id)
+      .eq("kind", INTENT_KIND[intent])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (lastRes.error || !lastRes.data) return { found: false };
+    data = lastRes.data;
+  }
 
+  const isDraft = data.status === "draft";
   const payload =
     data.payload && typeof data.payload === "object"
       ? (data.payload as Record<string, unknown>)
@@ -410,16 +439,25 @@ export async function getOwnLastDemandPrefill(
         (s): s is string => typeof s === "string" && REQUIRED_TOOL_SLUGS.has(s),
       )
     : [];
+  // Draft-payload aliases (save_demand_draft stores the light form's keys):
+  // capabilities ≈ what is needed (→ description/skills), timing ≈ when
+  // (→ notes when notes are empty — echoed back, never invented).
+  const draftCapabilities = asText(payload.capabilities, MAX_TEXT);
+  const draftTiming = asText(payload.timing, MAX_TEXT);
 
   return {
     found: true,
+    source: isDraft ? "draft" : "request",
+    sourceId: String(data.id),
     fields: {
       role: asText(payload.role, MAX_TITLE) || asText(data.title, MAX_TITLE),
-      description: asText(data.need_summary, MAX_TEXT),
+      description: asText(data.need_summary, MAX_TEXT) || draftCapabilities,
       location: asText(payload.location, MAX_TITLE),
-      skills: asText(payload.skills, MAX_TEXT),
+      skills: asText(payload.skills, MAX_TEXT) || (isDraft ? draftCapabilities : ""),
       urgency,
-      notes: asText(payload.notes, MAX_TEXT),
+      notes:
+        asText(payload.notes, MAX_TEXT) ||
+        (isDraft && draftTiming ? draftTiming : ""),
       workType:
         typeof data.role_or_work_type === "string" && isWorkTypeSlug(data.role_or_work_type)
           ? data.role_or_work_type

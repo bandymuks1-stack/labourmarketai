@@ -127,7 +127,6 @@ describe("Guard: the worker composer/page no longer renders the disclaimer keys"
     "components/app/journal-entry-skill-links.tsx",
     "components/app/text-first-composer.tsx",
     "components/app/profile-text-first-flow.tsx",
-    "components/app/worker-evidence-card.tsx",
   ];
   const REMOVED_KEYS = [
     "ruleBasedNotice",

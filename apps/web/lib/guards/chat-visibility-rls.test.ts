@@ -208,8 +208,24 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    DESIGN (0005 — anon INSERT only, reads restricted to service
     //    role), the call is fenced behind an explicit isSuperadmin()
     //    re-check, SELECTs only `waitlist`, and writes nothing.
+    //  - lib/company/claim-public-intake.ts — canonical-journey P3 claim
+    //    bridge. Reads company_need_public_intakes rows ONLY where the
+    //    caller's AUTHENTICATED email equals contact_email (re-checked on
+    //    the claimed row), and updates ONLY that row's status to
+    //    'converted' after the owner-scoped save_demand_draft RPC (caller
+    //    session, RLS) created the draft. Touches no chat table, exposes no
+    //    third-party data, sends nothing outbound.
+    //  - lib/opportunities/contact-employer.ts — canonical-journey P1
+    //    worker→employer open. After the caller's OWN facts held under
+    //    their RLS session (worker row + own active interest signal), one
+    //    service-role read resolves the demand owner + verified-company
+    //    gate (customer_requests/companies are owner-scoped by design, so
+    //    a worker cannot read them directly). The owner's profile id never
+    //    reaches the browser; the conversation itself opens through the
+    //    gated 0021 backend (rate caps + §8.1 grant), never service-role.
     // None touch a chat table; they write only billing_* /
-    // payment_webhook_events (the intake read writes nothing at all).
+    // payment_webhook_events / one intake status column (the reads write
+    // nothing at all).
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
@@ -219,6 +235,8 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
       "lib/billing/subscription-store.ts",
+      "lib/company/claim-public-intake.ts",
+      "lib/opportunities/contact-employer.ts",
       "lib/sales/lead-intake.ts",
     ]);
   });

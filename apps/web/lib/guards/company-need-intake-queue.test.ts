@@ -126,9 +126,25 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
     const touching = readdirSync(migDir).filter((f) =>
       readFileSync(join(migDir, f), "utf8").includes(TABLE),
     );
-    // Exactly the original PR #678 migration references the table; this
-    // feature introduces no new migration that touches it.
-    expect(touching).toEqual(["20260707120000_company_need_public_intake.sql"]);
+    // The original PR #678 migration + the canonical-journey P3 defect fix
+    // (service-role-ONLY grants — the table was created with no grant at
+    // all, which silently broke this very queue in production). The fix
+    // must never widen access beyond service_role.
+    expect(touching).toEqual([
+      "20260707120000_company_need_public_intake.sql",
+      "20260713190000_company_need_intake_service_grants.sql",
+    ]);
+    const grants = readFileSync(
+      join(migDir, "20260713190000_company_need_intake_service_grants.sql"),
+      "utf8",
+    );
+    const code = grants.replace(/^\s*--.*$/gm, "");
+    // Every grant targets service_role and nothing else; no policy changes.
+    for (const m of code.matchAll(/grant[\s\S]*?;/gi)) {
+      expect(m[0]).toMatch(/to service_role/);
+    }
+    expect(code).not.toMatch(/to (anon|authenticated|public)\b/i);
+    expect(code).not.toMatch(/create policy|alter policy|disable row level/i);
   });
 });
 

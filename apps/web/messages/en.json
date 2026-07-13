@@ -493,32 +493,6 @@
       }
     }
   },
-  "searchRoom": {
-    "backToActions": "Action center",
-    "title": "Worker search",
-    "subtitle": "How to reach workers for your need — through real, structured paths, with no invented results.",
-    "reason": "There is no free-text people search yet: building one before there is consented, verified worker supply would mean showing fake results. Below is the real path that works today.",
-    "paths": {
-      "scouting": {
-        "statusNote": {
-          "title": "How matching works today",
-          "signals": "Based on the profile and Work Journal signals available now, the system shows readiness and a possible fit.",
-          "stream": "An active candidate stream still depends on real, filled-in profiles and needs.",
-          "fill": "Fill in a need so the system can compare it against the available signals.",
-          "disclaimer": "This does not mean employment or a confirmed match."
-        },
-        "title": "Search by need",
-        "body": "Pick your structured need — the match engine surfaces suitable candidates with the basis and the gaps. No invented scores.",
-        "cta": "Open search by need"
-      },
-      "need": {
-        "title": "Post a need",
-        "body": "No structured need yet? Describe what you need — it gets structured and made ready for search.",
-        "cta": "Post a need"
-      }
-    },
-    "matchingNote": "Matching is based on the fields of your need and worker profiles — no invented rankings and no fake verification. Contacts stay hidden until both sides agree."
-  },
   "marketMap": {
     "backToActions": "Action center",
     "pageTitle": "Map",
@@ -2130,7 +2104,8 @@
         "new": "New",
         "contacted": "Contacted",
         "qualified": "Qualified",
-        "rejected": "Rejected"
+        "rejected": "Rejected",
+        "converted": "Claimed by company account"
       },
       "actions": {
         "new": "New",
@@ -2550,7 +2525,11 @@
       "textSaveErrorLabel": "Could not save your text. Please try again.",
       "applyErrorLabel": "Could not save the selected skills. Please try again.",
       "textClaimNotVerified": "This is your own claim — not yet backed by work records",
-      "extractErrorLabel": "Could not process the text. Your text is saved — try again."
+      "extractErrorLabel": "Could not process the text. Your text is saved — try again.",
+      "promotedToCatalog": "{n} of your selected skills were also added to your catalogued skill list — they now count in matching and on your CV.",
+      "promotedSkipped": "{n} were not added to the catalogued list (outside your current work directions) — they stay in your profile as your own notes.",
+      "viewUpdatedCv": "View your updated CV",
+      "aiSuggestionHint": "AI suggestion — review before saving"
     }
   },
   "roles": {
@@ -7002,7 +6981,8 @@
     "ctaProfile": "Create worker profile",
     "ctaReadiness": "Check country readiness",
     "ctaTrades": "See trades we work with",
-    "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice."
+    "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice.",
+    "structuredNote": "Your CV text is structured into a profile automatically — you review every suggestion and decide what is saved."
   },
   "needStructuring": {
     "pageTitle": "Need structuring",
@@ -7245,7 +7225,9 @@
       "contactedLink": "The company opened a conversation — view your messages",
       "error": "Could not save. Try again.",
       "reviewed": "Company reviewed your interest",
-      "contacted": "Company marked: contacted"
+      "contacted": "Company marked: contacted",
+      "contactEmployer": "Message the employer",
+      "contactError": "Could not open the conversation. Please try again."
     },
     "companyVerified": "Verified company",
     "structured": {
@@ -8555,7 +8537,8 @@
     "prefillButton": "Fill from my last request",
     "prefillLoading": "Loading…",
     "prefillEmpty": "No previous request found",
-    "prefillDone": "Filled from your last request — review and edit"
+    "prefillDone": "Filled from your last request — review and edit",
+    "prefillFromDraft": "Filled from your saved draft — review and submit"
   },
   "workerPrefs": {
     "title": "Work preferences",
@@ -8844,5 +8827,66 @@
     "previewsUnavailable": "Previews are temporarily unavailable.",
     "previewUnavailable": "Preview unavailable",
     "photoAlt": "Work photo"
+  },
+  "companyClaimIntake": {
+    "title": "We found your earlier submission",
+    "body": "You described this need before creating your account. Continue it here — nothing needs to be re-typed.",
+    "claimCta": "Continue as my draft",
+    "claimed": "Moved to your drafts",
+    "error": "Could not claim it. Please try again.",
+    "workersLabel": "Workers"
+  },
+  "candidatePipeline": {
+    "stage": {
+      "new": "New",
+      "reviewing": "Reviewing",
+      "contacted": "Contacted",
+      "interview": "In conversation",
+      "offer": "Offer",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    },
+    "action": {
+      "review": "Review this candidate",
+      "contact": "Start a conversation",
+      "message": "Open your messages",
+      "continueConversation": "Continue the conversation",
+      "viewOffer": "Track the booking response",
+      "planWork": "Review the accepted booking",
+      "reviewOthers": "Review other candidates"
+    }
+  },
+  "agencyClients": {
+    "title": "Clients",
+    "subtitle": "Who you staff for — each client's needs link to your demands and candidate scouting.",
+    "gatedHeading": "Prepared — owner activation pending",
+    "gatedBody": "Client records are ready, but the database change is not applied yet.",
+    "notLinkable": "Demands cannot be linked to clients yet.",
+    "clientsEmpty": "No clients yet. Add your first client below.",
+    "demandsHeading": "Your demands",
+    "demandsEmpty": "No demands yet.",
+    "demandsEmptyCta": "Create a demand",
+    "unassignedHeading": "Not linked to a client",
+    "noLinkedDemands": "No linked demands yet — link one below.",
+    "openScouting": "Candidates",
+    "addHeading": "Add client",
+    "addButton": "Add client",
+    "nameLabel": "Client name",
+    "contactNameLabel": "Contact person (optional)",
+    "contactEmailLabel": "Contact email (optional)",
+    "noteLabel": "Note (optional)",
+    "removeButton": "Remove client",
+    "assignLabel": "Link to client",
+    "assignNone": "— no client —",
+    "assignButton": "Link",
+    "errorLabel": "Something went wrong. Try again.",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "in_review": "In review",
+      "needs_followup": "Needs follow-up",
+      "approved": "Approved",
+      "closed": "Closed"
+    }
   }
 }

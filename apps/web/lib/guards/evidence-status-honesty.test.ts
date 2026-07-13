@@ -119,13 +119,6 @@ describe("Guard: evidence-status copy never over-claims or fakes confirmation", 
 // ── 3. The "confirmed" chip is data-gated at every call site ───────────────
 
 describe("Guard: the confirmed state is only shown when real data supports it", () => {
-  it("profile evidence card adds 'confirmed' only when a confirmed skill exists", () => {
-    const card = read("components/app/worker-evidence-card.tsx");
-    expect(card).toMatch(
-      /if \(confirmedSkills\.length > 0\) evidenceActive\.push\("confirmed"\)/,
-    );
-  });
-
   it("journal page adds 'confirmed' only when an approved confirmation exists", () => {
     const page = read("app/[locale]/dashboard/journal/page.tsx");
     expect(page).toMatch(

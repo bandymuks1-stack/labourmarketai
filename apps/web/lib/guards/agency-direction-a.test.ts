@@ -77,8 +77,19 @@ describe("staffing-agency mode is a typed view on the company room", () => {
     expect(companyPage).toMatch(/\/dashboard\/company\/scouting/);
   });
 
-  it("the canonical company path imports nothing from lib/agency/*", () => {
-    expect(companyPage).not.toMatch(/@\/lib\/agency\//);
+  it("the canonical company path imports nothing from the LEGACY lib/agency world", () => {
+    // P5 (canonical journey) added lib/agency/clients* — the client-management
+    // module that reuses the canonical customer_requests demand model (see
+    // lib/guards/agency-client-management.test.ts). The legacy `agencies`-table
+    // modules (pool / pool-actions / actions / agency-workers) stay banned.
+    expect(companyPage).not.toMatch(
+      /@\/lib\/agency\/(pool|pool-actions|actions|agency-workers)/,
+    );
+    const agencyImports =
+      companyPage.match(/@\/lib\/agency\/[a-z-]+/g) ?? [];
+    for (const imp of agencyImports) {
+      expect(["@/lib/agency/clients", "@/lib/agency/clients-model", "@/lib/agency/clients-actions"]).toContain(imp);
+    }
     // The components the company room mounts stay clean too.
     for (const comp of [
       "components/app/company-workers-section.tsx",

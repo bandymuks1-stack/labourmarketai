@@ -921,6 +921,8 @@ export default async function OpportunitiesPage({
                                 internalNote: t("interest.internalNote"),
                                 error: t("interest.error"),
                                 contactedLink: t("interest.contactedLink"),
+                                contactEmployer: t("interest.contactEmployer"),
+                                contactError: t("interest.contactError"),
                               }}
                             />
                           ) : null}

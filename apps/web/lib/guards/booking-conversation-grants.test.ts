@@ -30,7 +30,7 @@ import {
 const APP = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf8");
 
-/** The four gated context callers: file → [exact grant, exact sourceHint type]. */
+/** The gated context callers: file → [exact grant, exact sourceHint type]. */
 const GATED_CALLERS: ReadonlyArray<
   readonly [string, ContactPermissionState, string]
 > = [
@@ -41,6 +41,14 @@ const GATED_CALLERS: ReadonlyArray<
   ],
   [
     "lib/communication/contact-interested-worker.ts",
+    "allowed_demand_interest",
+    "demand_interest",
+  ],
+  // Canonical-journey P1 — the WORKER side of the same demand-interest
+  // relationship (own active signal on an open verified-company demand,
+  // facts verified server-side in the action before the open).
+  [
+    "lib/opportunities/contact-employer.ts",
     "allowed_demand_interest",
     "demand_interest",
   ],
@@ -85,7 +93,7 @@ function walkLib(): string[] {
 // ── 1. Closed caller set: exact grant + typed sourceHint per gated caller ──
 
 describe("getOrCreateDirectConversation callers in lib/ are a closed, grant-typed set", () => {
-  it("the caller set is exactly the four gated callers + the one generic action", () => {
+  it("the caller set is exactly the five gated callers + the one generic action", () => {
     const callers = walkLib()
       .filter((rel) => rel !== DEFINITION)
       .filter((rel) => /getOrCreateDirectConversation\(/.test(read(rel)));

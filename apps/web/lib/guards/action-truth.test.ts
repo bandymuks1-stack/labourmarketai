@@ -73,7 +73,6 @@ describe("info-only cards do not look clickable", () => {
   for (const rel of [
     "components/app/manager-evidence-card.tsx",
     "components/app/worker-readiness-summary.tsx",
-    "components/app/profile-cv-clarity-card.tsx",
   ]) {
     it(`${rel} has no pointer cursor / hover-button on the card`, () => {
       const src = read(rel);

@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isSuperadmin } from "@/lib/auth/superadmin";
 import {
   COMPANY_NEED_INTAKE_STATUSES,
+  COMPANY_NEED_INTAKE_OPERATOR_STATUSES,
   type CompanyNeedIntakeStatus,
 } from "./company-need-intake-shared";
 
@@ -13,6 +14,7 @@ import {
 // (the server action, the page) keep a single import site.
 export {
   COMPANY_NEED_INTAKE_STATUSES,
+  COMPANY_NEED_INTAKE_OPERATOR_STATUSES,
   type CompanyNeedIntakeStatus,
 } from "./company-need-intake-shared";
 
@@ -102,7 +104,8 @@ const STATUS_ORDER: Record<CompanyNeedIntakeStatus, number> = {
   new: 0,
   contacted: 1,
   qualified: 2,
-  rejected: 3,
+  converted: 3,
+  rejected: 4,
 };
 
 function normaliseStatus(v: unknown): CompanyNeedIntakeStatus {
@@ -183,9 +186,14 @@ export async function setCompanyNeedIntakeStatus(
   status: CompanyNeedIntakeStatus,
 ): Promise<SetIntakeStatusResult> {
   if (!(await isSuperadmin())) return { kind: "not-admin" };
+  // OPERATOR statuses only — `converted` is written exclusively by the
+  // company's own claim action (lib/company/claim-public-intake.ts), so the
+  // queue can never assert a conversion that did not happen.
   if (
     !id ||
-    !(COMPANY_NEED_INTAKE_STATUSES as readonly string[]).includes(status)
+    !(COMPANY_NEED_INTAKE_OPERATOR_STATUSES as readonly string[]).includes(
+      status,
+    )
   ) {
     return { kind: "invalid" };
   }

@@ -11,11 +11,28 @@ import { FeatureNote } from "@/components/app/feature-note";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import type { CompanyCandidateLabel } from "@/lib/scouting/candidate-readiness";
+import {
+  deriveCandidatePipelineStage,
+  nextActionForStage,
+  type CandidatePipelineStage,
+} from "@/lib/pipeline/candidate-pipeline";
+import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
 
 const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
   can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
   limited_information: "border-state-amber/40 bg-state-amber/10 text-state-amber",
   not_enough_information: "border-ink-500 bg-ink-800/40 text-text-muted",
+};
+
+/** Visual tone per canonical pipeline stage (derived, never stored — P4). */
+const PIPELINE_TONE: Record<CandidatePipelineStage, string> = {
+  new: "border-ink-500 bg-ink-800 text-text-secondary",
+  reviewing: "border-brand-blue/40 bg-brand-blue/10 text-brand-blue",
+  contacted: "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan",
+  interview: "border-state-amber/40 bg-state-amber/10 text-state-amber",
+  offer: "border-state-warning/40 bg-state-warning/10 text-state-warning",
+  accepted: "border-state-success/40 bg-state-success/10 text-state-success",
+  rejected: "border-ink-500 bg-ink-800/40 text-text-muted",
 };
 
 /**
@@ -49,11 +66,25 @@ export default async function CompanyScoutingPage({
   // opportunities.discovery namespace (same tier explanation both sides see).
   const tCrit = await getTranslations("opportunities.discovery.criterion");
   const criterionLabel = (c: string) => (tCrit.has(c) ? tCrit(c as never) : c);
+  // Canonical pipeline labels (P4) — derived stage chips + one next action.
+  const tPipe = await getTranslations("candidatePipeline");
   const demands = await listCompanyDemands();
   // Human-structured demands first; since PR4 an unstructured demand can
   // still match via offline text recognition (honestly labeled below).
   const selected = request ?? demands.find((d) => d.structured)?.id ?? demands[0]?.id ?? null;
   const result = selected ? await runScouting(selected) : null;
+
+  // The two pipeline facts the scouting result does not already carry:
+  // booking status per pair + direct-conversation existence (both real,
+  // RLS-scoped reads; absent tables degrade to empty facts — see the
+  // candidate-pipeline-facts limitation note).
+  const pipelineFacts =
+    result?.kind === "ok" && result.candidates.length > 0
+      ? await loadDemandPipelineFacts(
+          result.demand.id,
+          result.candidates.map((c) => c.workerId),
+        )
+      : null;
 
   const statusLabels = {
     strong: t("status.strong"),
@@ -244,6 +275,20 @@ export default async function CompanyScoutingPage({
           {result.candidates.map((c) => {
             const p = c.preview;
             const fit = c.match.skillFit;
+            // ONE canonical pipeline stage (P4) — DERIVED at read time from
+            // the existing facts (shortlist + interest + booking +
+            // conversation), never stored. One next action per stage.
+            const stage = deriveCandidatePipelineStage({
+              shortlistStatus: c.shortlistStatus,
+              interestStatus: result.interestByWorker[c.workerId] ?? null,
+              bookingStatus: pipelineFacts?.bookingByWorker.get(c.workerId) ?? null,
+              conversationExists:
+                pipelineFacts?.conversationByWorker.has(c.workerId) ?? false,
+            });
+            const nextAction = nextActionForStage(stage, {
+              locale,
+              requestId: result.demand.id,
+            });
             return (
               <li
                 key={c.workerId}
@@ -284,6 +329,28 @@ export default async function CompanyScoutingPage({
                       {statusLabels[c.match.status]}
                     </span>
                   </div>
+                </div>
+
+                {/* Canonical pipeline (P4): the ONE derived stage of this
+                    (demand, worker) pair + its ONE next action. Derived at
+                    read time from real facts — never a stored 7th enum. */}
+                <div
+                  className="flex flex-wrap items-center justify-between gap-2"
+                  data-testid={`scout-pipeline-${c.workerId}`}
+                  data-stage={stage}
+                >
+                  <span
+                    className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${PIPELINE_TONE[stage]}`}
+                  >
+                    {tPipe(`stage.${stage}` as never)}
+                  </span>
+                  <Link
+                    href={nextAction.href}
+                    className="text-[11px] font-medium text-brand-blue hover:text-brand-cyan"
+                    data-testid={`scout-pipeline-next-${c.workerId}`}
+                  >
+                    {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
+                  </Link>
                 </div>
 
                 {/* Profile-safe facts (owner-approved fields only). */}

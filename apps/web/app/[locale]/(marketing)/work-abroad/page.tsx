@@ -15,10 +15,13 @@ export async function generateMetadata({
 
 /**
  * Foreign-worker funnel (Staffing Operating Model v1, PR3). An honest overview
- * of the agency operating model for a worker: the chain (intake → AI draft →
- * readiness → match → booking), what may be needed, and CTAs into the existing
- * profile / readiness / trades surfaces. No fake jobs, no wage promises, no legal
- * guarantee — copy lives in the `workAbroad` i18n namespace (en/lt/ru).
+ * of the agency operating model for a worker: the chain (intake → structured
+ * profile draft → readiness → match → interest loop), what may be needed, and
+ * CTAs into the existing profile / readiness / trades surfaces. No fake jobs,
+ * no wage promises, no legal guarantee — copy lives in the `workAbroad` i18n
+ * namespace (en/lt/ru). The old `workAbroad.aiNote` claimed help with no
+ * model behind it (audit §4) and is no longer rendered; `structuredNote`
+ * states the real deterministic capability instead.
  */
 export default async function WorkAbroadPage({
   params,
@@ -102,8 +105,11 @@ export default async function WorkAbroadPage({
         </div>
       </section>
 
+      {/* Honest capability statement: CV text is structured by the
+          deterministic extractor and every suggestion is human-confirmed.
+          No model runs behind this page, so no AI claim is made. */}
       <p className="mt-10 rounded-xl border border-border-subtle bg-surface-2 p-4 text-xs leading-relaxed text-text-secondary">
-        {t("aiNote")}
+        {t("structuredNote")}
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">

@@ -493,32 +493,6 @@
       }
     }
   },
-  "searchRoom": {
-    "backToActions": "Aktionszentrum",
-    "title": "Arbeitskräftesuche",
-    "subtitle": "Wie Sie Arbeitskräfte für Ihren Bedarf erreichen — über echte, strukturierte Wege, ohne erfundene Ergebnisse.",
-    "reason": "Es gibt noch keine Freitext-Personensuche: Sie zu bauen, bevor es ein verifiziertes Arbeitskräfteangebot mit Einwilligung gibt, würde bedeuten, gefälschte Ergebnisse anzuzeigen. Unten steht der echte Weg, der heute funktioniert.",
-    "paths": {
-      "scouting": {
-        "statusNote": {
-          "title": "Wie das Matching heute funktioniert",
-          "signals": "Basierend auf den jetzt verfügbaren Signalen aus Profil und Arbeitsjournal zeigt das System Bereitschaft und eine mögliche Passung.",
-          "stream": "Ein aktiver Kandidatenstrom hängt weiterhin von echten, ausgefüllten Profilen und Bedarfen ab.",
-          "fill": "Füllen Sie einen Bedarf aus, damit das System ihn mit den verfügbaren Signalen vergleichen kann.",
-          "disclaimer": "Das bedeutet keine Anstellung und keinen bestätigten Match."
-        },
-        "title": "Suche nach Bedarf",
-        "body": "Wählen Sie Ihren strukturierten Bedarf — die Match-Engine zeigt passende Kandidaten mit der Grundlage und den Lücken. Keine erfundenen Bewertungen.",
-        "cta": "Suche nach Bedarf öffnen"
-      },
-      "need": {
-        "title": "Bedarf veröffentlichen",
-        "body": "Noch kein strukturierter Bedarf? Beschreiben Sie, was Sie brauchen — er wird strukturiert und für die Suche vorbereitet.",
-        "cta": "Bedarf veröffentlichen"
-      }
-    },
-    "matchingNote": "Das Matching basiert auf den Feldern Ihres Bedarfs und der Arbeitskraft-Profile — keine erfundenen Rankings und keine gefälschte Verifizierung. Kontakte bleiben verborgen, bis beide Seiten zustimmen."
-  },
   "marketMap": {
     "backToActions": "Aktionszentrum",
     "pageTitle": "Karte",
@@ -2130,7 +2104,8 @@
         "new": "Neu",
         "contacted": "Kontaktiert",
         "qualified": "Qualifiziert",
-        "rejected": "Abgelehnt"
+        "rejected": "Abgelehnt",
+        "converted": "Vom Firmenkonto übernommen"
       },
       "actions": {
         "new": "Neu",
@@ -2550,7 +2525,11 @@
       "textSaveErrorLabel": "Ihr Text konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "applyErrorLabel": "Die ausgewählten Fähigkeiten konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "textClaimNotVerified": "Dies ist Ihre eigene Angabe — noch nicht durch Arbeitsnachweise belegt",
-      "extractErrorLabel": "Der Text konnte nicht verarbeitet werden. Ihr Text ist gespeichert — versuchen Sie es erneut."
+      "extractErrorLabel": "Der Text konnte nicht verarbeitet werden. Ihr Text ist gespeichert — versuchen Sie es erneut.",
+      "promotedToCatalog": "{n} Ihrer ausgewählten Fähigkeiten wurden auch in Ihre Katalogliste übernommen — sie zählen jetzt im Matching und in Ihrem CV.",
+      "promotedSkipped": "{n} kamen nicht in die Katalogliste (außerhalb Ihrer Arbeitsrichtungen) — sie bleiben in Ihrem Profil als Ihre eigenen Einträge.",
+      "viewUpdatedCv": "Aktualisiertes CV ansehen",
+      "aiSuggestionHint": "KI-Vorschlag — vor dem Speichern prüfen"
     }
   },
   "roles": {
@@ -7002,7 +6981,8 @@
     "ctaProfile": "Arbeitskraft-Profil erstellen",
     "ctaReadiness": "Länderbereitschaft prüfen",
     "ctaTrades": "Gewerke ansehen, mit denen wir arbeiten",
-    "disclaimer": "Wir versprechen keine Arbeit und keinen Verdienst, und Informationen zur Bereitschaft sind keine Rechtsberatung."
+    "disclaimer": "Wir versprechen keine Arbeit und keinen Verdienst, und Informationen zur Bereitschaft sind keine Rechtsberatung.",
+    "structuredNote": "Ihr CV-Text wird automatisch in ein Profil strukturiert — Sie prüfen jeden Vorschlag und entscheiden, was gespeichert wird."
   },
   "needStructuring": {
     "pageTitle": "Bedarfsstrukturierung",
@@ -7245,7 +7225,9 @@
       "contactedLink": "Das Unternehmen hat eine Konversation gestartet — Ihre Nachrichten ansehen",
       "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut.",
       "reviewed": "Das Unternehmen hat Ihr Interesse geprüft",
-      "contacted": "Vom Unternehmen markiert: kontaktiert"
+      "contacted": "Vom Unternehmen markiert: kontaktiert",
+      "contactEmployer": "Arbeitgeber anschreiben",
+      "contactError": "Gespräch konnte nicht geöffnet werden. Bitte erneut versuchen."
     },
     "companyVerified": "Verifiziertes Unternehmen",
     "structured": {
@@ -8555,7 +8537,8 @@
     "prefillButton": "Aus meiner letzten Anfrage übernehmen",
     "prefillLoading": "Wird geladen…",
     "prefillEmpty": "Keine frühere Anfrage gefunden",
-    "prefillDone": "Aus Ihrer letzten Anfrage übernommen — prüfen und bearbeiten"
+    "prefillDone": "Aus Ihrer letzten Anfrage übernommen — prüfen und bearbeiten",
+    "prefillFromDraft": "Aus Ihrem gespeicherten Entwurf ausgefüllt — prüfen und absenden"
   },
   "workerPrefs": {
     "title": "Arbeitspräferenzen",
@@ -8844,5 +8827,66 @@
     "previewsUnavailable": "Vorschauen sind vorübergehend nicht verfügbar.",
     "previewUnavailable": "Vorschau nicht verfügbar",
     "photoAlt": "Arbeitsfoto"
+  },
+  "companyClaimIntake": {
+    "title": "Wir haben Ihre frühere Anfrage gefunden",
+    "body": "Sie haben diesen Bedarf vor der Kontoerstellung beschrieben. Führen Sie ihn hier fort — nichts muss erneut eingegeben werden.",
+    "claimCta": "Als Entwurf fortführen",
+    "claimed": "In Ihre Entwürfe verschoben",
+    "error": "Übernahme fehlgeschlagen. Bitte erneut versuchen.",
+    "workersLabel": "Arbeitskräfte"
+  },
+  "candidatePipeline": {
+    "stage": {
+      "new": "Neu",
+      "reviewing": "In Prüfung",
+      "contacted": "Kontaktiert",
+      "interview": "Im Gespräch",
+      "offer": "Angebot",
+      "accepted": "Angenommen",
+      "rejected": "Abgelehnt"
+    },
+    "action": {
+      "review": "Kandidaten prüfen",
+      "contact": "Gespräch beginnen",
+      "message": "Nachrichten öffnen",
+      "continueConversation": "Gespräch fortsetzen",
+      "viewOffer": "Antwort auf das Angebot verfolgen",
+      "planWork": "Angenommenes Angebot ansehen",
+      "reviewOthers": "Weitere Kandidaten prüfen"
+    }
+  },
+  "agencyClients": {
+    "title": "Kunden",
+    "subtitle": "Für wen Sie Personal stellen — Kundenbedarfe werden mit Ihren Anfragen und dem Kandidaten-Scouting verknüpft.",
+    "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Inhaber",
+    "gatedBody": "Kundendatensätze sind bereit, aber die Datenbankänderung ist noch nicht angewendet.",
+    "notLinkable": "Anfragen können noch nicht mit Kunden verknüpft werden.",
+    "clientsEmpty": "Noch keine Kunden. Fügen Sie unten den ersten hinzu.",
+    "demandsHeading": "Ihre Anfragen",
+    "demandsEmpty": "Noch keine Anfragen.",
+    "demandsEmptyCta": "Anfrage erstellen",
+    "unassignedHeading": "Keinem Kunden zugeordnet",
+    "noLinkedDemands": "Noch keine verknüpften Anfragen — unten verknüpfen.",
+    "openScouting": "Kandidaten",
+    "addHeading": "Kunde hinzufügen",
+    "addButton": "Kunde hinzufügen",
+    "nameLabel": "Kundenname",
+    "contactNameLabel": "Ansprechpartner (optional)",
+    "contactEmailLabel": "Kontakt-E-Mail (optional)",
+    "noteLabel": "Notiz (optional)",
+    "removeButton": "Kunde entfernen",
+    "assignLabel": "Mit Kunde verknüpfen",
+    "assignNone": "— kein Kunde —",
+    "assignButton": "Verknüpfen",
+    "errorLabel": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "status": {
+      "draft": "Entwurf",
+      "submitted": "Eingereicht",
+      "in_review": "In Prüfung",
+      "needs_followup": "Rückfrage nötig",
+      "approved": "Genehmigt",
+      "closed": "Geschlossen"
+    }
   }
 }

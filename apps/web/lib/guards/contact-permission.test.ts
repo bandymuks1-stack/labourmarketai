@@ -163,6 +163,10 @@ describe("no contact without permission — the create path is gated", () => {
       // Audit PR4 — accepted-service-request grant, verified server-side in
       // the action before the conversation opens.
       "lib/marketplace/service-request-conversation.ts",
+      // Canonical-journey P1 — the WORKER side of the demand-interest grant
+      // (own active signal on an open verified-company demand), verified
+      // server-side before the conversation opens.
+      "lib/opportunities/contact-employer.ts",
     ]);
   });
 });

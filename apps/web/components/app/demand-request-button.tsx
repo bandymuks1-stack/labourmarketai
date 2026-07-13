@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
@@ -12,7 +12,8 @@ import {
   getOwnLastDemandPrefillAction,
   submitDemandRequestAction,
 } from "@/lib/demand/demand-request-actions";
-import type { DemandUrgency } from "@/lib/demand/demand-request";
+import { deleteDemandDraftAction } from "@/lib/demand/demand-drafts-actions";
+import type { DemandPrefill, DemandUrgency } from "@/lib/demand/demand-request";
 import { DemandAdvancedSections } from "@/components/app/demand-advanced-sections";
 import {
   buildStructuredV2Input,
@@ -169,9 +170,32 @@ export function DemandRequestButton({
     setAdv((prev) => ({ ...prev, ...patch }));
   // Duplicate-and-edit: prefill the whole wizard from the owner's OWN last
   // request (repeat action, Capability E/G). Own data only; nothing invented.
-  const [prefillState, setPrefillState] = useState<"idle" | "loading" | "empty" | "done">(
-    "idle",
-  );
+  const [prefillState, setPrefillState] = useState<
+    "idle" | "loading" | "empty" | "done" | "draft"
+  >("idle");
+  // The live draft row behind an auto-continue (canonical-journey P3): closed
+  // (draft→closed) after the real submit so exactly ONE canonical demand row
+  // remains — the company never re-enters the same need.
+  const [draftSource, setDraftSource] = useState(false);
+
+  function applyPrefill(res: Extract<DemandPrefill, { found: true }>) {
+    const f = res.fields;
+    setRole(f.role);
+    setDescription(f.description);
+    setLocation(f.location);
+    setSkills(f.skills);
+    if (f.urgency) setUrgency(f.urgency);
+    setNotes(f.notes);
+    setWorkType(f.workType ?? "");
+    setCountry(f.country ?? "");
+    setTeamSize(f.teamSize != null ? String(f.teamSize) : "");
+    setAccommodation(f.accommodation ?? "");
+    setTransport(f.transport ?? "");
+    setRequiredTools(f.requiredTools);
+    setAdv(storedV2ToFormState(res.structuredV2));
+    setShowDescError(false);
+  }
+
   async function prefillFromLast() {
     setPrefillState("loading");
     try {
@@ -180,26 +204,41 @@ export function DemandRequestButton({
         setPrefillState("empty");
         return;
       }
-      const f = res.fields;
-      setRole(f.role);
-      setDescription(f.description);
-      setLocation(f.location);
-      setSkills(f.skills);
-      if (f.urgency) setUrgency(f.urgency);
-      setNotes(f.notes);
-      setWorkType(f.workType ?? "");
-      setCountry(f.country ?? "");
-      setTeamSize(f.teamSize != null ? String(f.teamSize) : "");
-      setAccommodation(f.accommodation ?? "");
-      setTransport(f.transport ?? "");
-      setRequiredTools(f.requiredTools);
-      setAdv(storedV2ToFormState(res.structuredV2));
-      setShowDescError(false);
-      setPrefillState("done");
+      applyPrefill(res);
+      setDraftSource(res.source === "draft");
+      setPrefillState(res.source === "draft" ? "draft" : "done");
     } catch {
       setPrefillState("empty");
     }
   }
+
+  // Canonical-journey P3 — auto-continue from the company's OWN saved draft.
+  // Runs once on mount, applies ONLY when the form is still untouched, and
+  // only for a real draft row (a past submitted request never auto-fills —
+  // that stays the explicit duplicate-and-edit button above). The company
+  // saved this data themselves; asking them to re-type it was the bug.
+  const autoPrefillRan = useRef(false);
+  // Render-synced mirror of the description — the async auto-prefill checks it
+  // at APPLY time so it never overrides input the user typed meanwhile.
+  const descRef = useRef(description);
+  descRef.current = description;
+  useEffect(() => {
+    if (autoPrefillRan.current) return;
+    autoPrefillRan.current = true;
+    void (async () => {
+      try {
+        const res = await getOwnLastDemandPrefillAction(intent);
+        if (!res.found || res.source !== "draft") return;
+        if (descRef.current.trim()) return; // untouched check at apply time
+        applyPrefill(res);
+        setDraftSource(true);
+        setPrefillState("draft");
+      } catch {
+        // Prefill is a convenience — a failure leaves an empty form, never an error state.
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Review-step honesty derivations — computed from the SAME sanitizer the
   // server uses, so the preview never disagrees with what will be stored.
   const advWire = buildStructuredV2Input(adv);
@@ -275,6 +314,19 @@ export function DemandRequestButton({
             ? "needsMigration"
             : "error",
       );
+      // Canonical-journey P3: the submitted request supersedes the draft it
+      // was continued from — close the draft (draft→closed, guard-allowed)
+      // so exactly ONE canonical demand row remains. Best-effort: a failure
+      // leaves a stale draft behind (harmless), never blocks the submit.
+      if (res.ok && draftSource) {
+        try {
+          await deleteDemandDraftAction(
+            intent === "hire_workers" ? "company_request" : "agency_offer",
+          );
+        } catch {
+          /* stale draft is harmless; the submit already succeeded */
+        }
+      }
       // Refresh server components so the read-back list below shows the new
       // request immediately — it used to stay stale until a manual reload
       // (audit PR4: "demand submit success is a dead end").
@@ -466,6 +518,15 @@ export function DemandRequestButton({
                 data-testid="demand-prefill-done"
               >
                 {tsd("prefillDone")}
+              </span>
+            )}
+            {prefillState === "draft" && (
+              <span
+                className="text-xs text-state-success"
+                role="status"
+                data-testid="demand-prefill-draft"
+              >
+                {tsd("prefillFromDraft")}
               </span>
             )}
           </div>

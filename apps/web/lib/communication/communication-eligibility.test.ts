@@ -130,3 +130,48 @@ describe("isContactPermitted — only explicit allowed_* states pass", () => {
     expect(isContactPermitted(undefined)).toBe(false);
   });
 });
+
+// ── Canonical-journey P1: worker → demand owner (worker-side mirror) ──
+import {
+  evaluateWorkerContactRequest,
+  type WorkerContactFacts,
+} from "./communication-eligibility";
+
+describe("evaluateWorkerContactRequest — default-closed worker-side gate", () => {
+  const ALL_TRUE: WorkerContactFacts = {
+    hasOwnActiveSignal: true,
+    demandOpen: true,
+    companyVerified: true,
+  };
+
+  it("allows only when every fact holds", () => {
+    expect(evaluateWorkerContactRequest(ALL_TRUE)).toBe("allowed");
+  });
+
+  it("denies without the caller's own active interest signal (first)", () => {
+    expect(
+      evaluateWorkerContactRequest({ ...ALL_TRUE, hasOwnActiveSignal: false }),
+    ).toBe("no_interest");
+    // no_interest outranks the other denials — the worker's own action is
+    // the root permission fact.
+    expect(
+      evaluateWorkerContactRequest({
+        hasOwnActiveSignal: false,
+        demandOpen: false,
+        companyVerified: false,
+      }),
+    ).toBe("no_interest");
+  });
+
+  it("denies on a closed demand", () => {
+    expect(
+      evaluateWorkerContactRequest({ ...ALL_TRUE, demandOpen: false }),
+    ).toBe("demand_closed");
+  });
+
+  it("denies on an unverified owner", () => {
+    expect(
+      evaluateWorkerContactRequest({ ...ALL_TRUE, companyVerified: false }),
+    ).toBe("company_unverified");
+  });
+});

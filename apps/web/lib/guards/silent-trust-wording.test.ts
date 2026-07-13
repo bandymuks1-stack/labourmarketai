@@ -204,7 +204,6 @@ describe("Silent-trust: self-view surfaces carry no certification visual token",
   const card = read("components/app/worker-player-card.tsx");
   const map = read("components/app/market-map-live.tsx");
   const trust = read("components/app/trust-block.tsx");
-  const evidence = read("components/app/worker-evidence-card.tsx");
   const strip = read("components/app/evidence-status-strip.tsx");
   const cv = read("app/[locale]/cv/page.tsx");
 
@@ -229,8 +228,7 @@ describe("Silent-trust: self-view surfaces carry no certification visual token",
     expect(trust).not.toMatch(/state-success/);
   });
 
-  it("the worker-evidence + evidence-status strip use neutral tones", () => {
-    expect(evidence).not.toMatch(/emerald/);
+  it("the evidence-status strip uses neutral tones", () => {
     expect(strip).not.toMatch(/emerald/);
   });
 

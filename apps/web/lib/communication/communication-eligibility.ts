@@ -66,11 +66,17 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *     service_offering_request whose status is `accepted` (verified
  *     server-side by the marketplace action, passed as a grant — audit PR4:
  *     accepted rows must open the next step).
- *   - allowed_demand_interest — the worker themselves signalled interest on
- *     the caller's demand (demand_interest_signals row, not withdrawn; demand
- *     ownership verified server-side by the contact-interested-worker action
- *     — audit PR5: "contacted" must open a real thread, never claim contact
- *     that no surface mediated).
+ *   - allowed_demand_interest — an ACTIVE (not withdrawn) interest signal
+ *     links the two parties over a real demand. The grant is bidirectional
+ *     because the underlying relationship is the same fact seen from either
+ *     end: (a) company → worker: the worker signalled interest on the
+ *     caller's demand (ownership verified server-side by the
+ *     contact-interested-worker action — audit PR5: "contacted" must open a
+ *     real thread, never claim contact that no surface mediated);
+ *     (b) worker → demand owner: the caller's OWN interest signal on an open
+ *     demand of a verified company (facts verified server-side by the
+ *     contact-employer action — canonical-journey P1: the worker journey must
+ *     not dead-end in a waiting room after "interested").
  *   - allowed_accepted_booking — the booking loop's real mutual commitment:
  *     the caller is the proposing company or the booked worker of a
  *     booking_request whose status is `accepted` (verified server-side by
@@ -137,4 +143,44 @@ export function isContactPermitted(
   state: ContactPermissionState | null | undefined,
 ): boolean {
   return !!state && state !== "no_permission";
+}
+
+/**
+ * Worker → demand owner contact eligibility (canonical-journey P1) — PURE
+ * decision logic, the worker-side mirror of `evaluateCommunicationRequest`.
+ *
+ * Gates whether a worker may open the in-app conversation with the owner of
+ * a demand. Three facts, all verified server-side before this runs:
+ *   - hasOwnActiveSignal — the CALLER's own interest signal on this demand
+ *     exists and is not withdrawn (the worker's deliberate action; RLS-read
+ *     under the caller's own session).
+ *   - demandOpen        — the demand is still open to workers
+ *                         (customer_requests.status = 'submitted', the same
+ *                         gate list_open_demand_for_workers applies).
+ *   - companyVerified   — the demand owner is a verified company (same join
+ *                         the worker board RPC enforces; an unverified owner
+ *                         was never visible to the worker in the first place).
+ *
+ * Default-closed: any missing fact denies. No contact data is involved — this
+ * only decides whether an IN-APP conversation may be opened (no phone/email).
+ */
+export type WorkerContactDecision =
+  | "allowed"
+  | "no_interest"
+  | "demand_closed"
+  | "company_unverified";
+
+export interface WorkerContactFacts {
+  readonly hasOwnActiveSignal: boolean;
+  readonly demandOpen: boolean;
+  readonly companyVerified: boolean;
+}
+
+export function evaluateWorkerContactRequest(
+  facts: WorkerContactFacts,
+): WorkerContactDecision {
+  if (!facts.hasOwnActiveSignal) return "no_interest";
+  if (!facts.demandOpen) return "demand_closed";
+  if (!facts.companyVerified) return "company_unverified";
+  return "allowed";
 }

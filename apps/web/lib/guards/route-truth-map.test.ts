@@ -123,17 +123,15 @@ const CLASSIFICATION: Record<string, string> = {
   // route to classify. Fixture-free state enforced by hub-real-data-only.test.ts.
 
   // ── DUPLICATE_DRIFT (kept temporarily; consolidation in backlog) ──────
-  // Buyer rooms overlap the canonical company workspace (F-D4); search is
-  // an unlinked router page — since control room PR K it EMBEDS the one
-  // canonical CommandFinder (no second search system; classification kept
-  // until the owner decides whether the page gets an entry point);
+  // Buyer rooms overlap the canonical company workspace (F-D4);
   // market/recognize overlaps journal recognition. This list must SHRINK,
-  // never grow. The agency trio was consolidated 2026-07-05 (Direction A):
+  // never grow. The unlinked `dashboard/search` router page was REMOVED
+  // (canonical-user-journey v1) — the ONE CommandFinder is embedded on
+  // /dashboard. The agency trio was consolidated 2026-07-05 (Direction A):
   // agency = company_type 'staffing_agency' inside the canonical company
   // workspace, and the legacy routes became redirect stubs below.
   "dashboard/buyer": "DUPLICATE_DRIFT",
   "dashboard/start/buyer": "DUPLICATE_DRIFT",
-  "dashboard/search": "DUPLICATE_DRIFT",
   "dashboard/market/recognize": "DUPLICATE_DRIFT",
   "dashboard/marketplace": "REDIRECT_STUB",
   "dashboard/player-card": "REDIRECT_STUB",

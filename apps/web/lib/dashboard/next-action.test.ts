@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { deriveProfileNextAction } from "./profile-next-action";
+import { deriveProfileNextAction } from "./next-action";
 
+// Moved from lib/profile/profile-next-action.test.ts when the helper was
+// folded into the canonical next-action module (canonical-user-journey v1).
 describe("deriveProfileNextAction (deterministic one next action)", () => {
   it("no CV → complete profile", () => {
     expect(

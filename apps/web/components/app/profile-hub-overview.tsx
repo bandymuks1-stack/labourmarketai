@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { deriveProfileNextAction } from "@/lib/profile/profile-next-action";
+import { deriveProfileNextAction } from "@/lib/dashboard/next-action";
 import { skillEvidenceStatus } from "@/lib/profile/skill-evidence";
 import {
   buildPlayerCardMinimum,

@@ -322,5 +322,6 @@
       "undecodable": "Die Audiodatei konnte nicht gelesen werden — bitte erneut versuchen."
     },
     "permissionDenied": "Der Mikrofonzugriff wurde blockiert. Erlauben Sie den Zugriff in den Browsereinstellungen und versuchen Sie es erneut."
-  }
+  },
+  "savedOpenCv": "Ihr CV ansehen"
 }

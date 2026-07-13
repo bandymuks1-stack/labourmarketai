@@ -209,3 +209,25 @@ audit.
   read path. Every entry point re-checks `isSuperadmin()` first; the module
   touches no chat table, writes nothing, and sends nothing outbound. Pinned in
   the `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-07-13 — `lib/company/claim-public-intake.ts`** (canonical-journey P3
+  claim bridge). Reads `company_need_public_intakes` rows ONLY where the
+  caller's AUTHENTICATED email (`auth.users.email`) equals the intake's
+  `contact_email`, re-checked on the specific claimed row; updates ONLY that
+  row's `status` to `converted` AFTER the owner-scoped `save_demand_draft`
+  RPC (caller session, RLS) created the draft. The intake table has no
+  anon/authenticated policy by design, so service role is the only read
+  path; the caller sees only data they themselves typed into the public
+  form. No chat table, nothing outbound.
+
+- **2026-07-13 — `lib/opportunities/contact-employer.ts`** (canonical-journey
+  P1 worker→employer conversation open). After the caller's OWN facts held
+  under their RLS session (own worker row + own active `demand_interest_signals`
+  row), ONE service-role read resolves the demand owner and the
+  verified-company gate (`customer_requests` / `companies` are owner-scoped
+  by design, so a worker cannot read them directly — this is the app-side
+  equivalent of a SECURITY DEFINER RPC). The owner's profile id never
+  reaches the browser; the conversation opens through the gated 0021
+  backend (`getOrCreateDirectConversation`, rate caps + §8.1
+  `allowed_demand_interest` grant) under the CALLER's session, never
+  service-role. No chat table is touched with the admin client.
