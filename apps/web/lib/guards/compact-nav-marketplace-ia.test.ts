@@ -32,12 +32,14 @@ const MAP = "app/[locale]/dashboard/market-map/page.tsx";
 const MARKETPLACE = "app/[locale]/dashboard/marketplace/page.tsx";
 
 describe("the global nav is the compact, map-first set, in order", () => {
-  it("primary nav ids = overview, market_map, journal_text_first, communication (action-first)", () => {
+  it("primary nav ids = overview, market_map, journal_text_first, communication, planning, network (production UX repair v2 F14/F15: the calendar and the network are core modules and must be findable through normal navigation)", () => {
     expect(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id)).toEqual([
       "overview",
       "market_map",
       "journal_text_first",
       "communication",
+      "planning",
+      "network",
     ]);
   });
 

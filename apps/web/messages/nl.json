@@ -2746,6 +2746,14 @@
     "marketplace_hub": {
       "label": "Marktplaats",
       "description": "Een compacte hub die de kaart, kansen en je bedrijven verbindt."
+    },
+    "planning": {
+      "label": "Kalender",
+      "description": "Eén kalender: boekingen, projecten, taken en journaalinvoeren."
+    },
+    "network": {
+      "label": "Netwerk",
+      "description": "Mensen en bedrijven: zoeken, uitnodigingen en je relaties."
     }
   },
   "structuring": {
@@ -3543,7 +3551,9 @@
         "discover": "Ontdekken",
         "search": "Zoeken",
         "account": "Instellingen",
-        "admin": "Admin"
+        "admin": "Admin",
+        "planning": "Kalender",
+        "network": "Netwerk"
       },
       "roleNotice": {
         "needs_worker_role": "Die link opent de werknemersruimte, die je account nog niet heeft. Voeg de werknemersrol toe in de ruimtehub.",
@@ -8802,5 +8812,37 @@
     "skillWorkBacked": "Door werk gestaafd",
     "skillDeclared": "Zelf opgegeven",
     "skillsLegend": "Bevestigd — goedgekeurd door een manager. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd, nog niet gecontroleerd."
+  },
+  "companyLocations": {
+    "title": "Locaties",
+    "subtitle": "Hoofdkantoor, werklocaties en gewenste markten — in meerdere landen.",
+    "kindHeadquarters": "Hoofdkantoor",
+    "kindOperating": "Werklocatie",
+    "kindDesiredMarket": "Gewenste markt",
+    "countryLabel": "Land",
+    "cityLabel": "Stad",
+    "regionLabel": "Regio",
+    "addButton": "Locatie toevoegen",
+    "removeButton": "Locatie verwijderen",
+    "empty": "Nog geen locaties. Voeg je hoofdkantoor en werklocaties toe.",
+    "gatedHeading": "Voorbereid — wacht op activering door eigenaar",
+    "gatedBody": "Het locatiemodel is klaar, maar de databasewijziging is nog niet toegepast. Activering is een beslissing van de eigenaar.",
+    "errorLabel": "Opslaan mislukt. Probeer het opnieuw."
+  },
+  "companyGallery": {
+    "title": "Galerij",
+    "subtitle": "Foto's uit de werkjournalen van je projecten.",
+    "photosLabel": "foto's",
+    "openLabel": "Openen",
+    "empty": "Nog geen foto's. Ze verschijnen wanneer werknemers foto's aan journaalposten op een project toevoegen."
+  },
+  "personalGallery": {
+    "eyebrow": "Mijn ruimte",
+    "title": "Galerij",
+    "empty": "Nog geen foto's. Voeg een foto toe aan een werkjournaalpost — die verschijnt hier.",
+    "emptyCta": "Journaalpost schrijven",
+    "previewsUnavailable": "Voorbeelden zijn tijdelijk niet beschikbaar.",
+    "previewUnavailable": "Voorbeeld niet beschikbaar",
+    "photoAlt": "Werkfoto"
   }
 }

@@ -2746,6 +2746,14 @@
     "marketplace_hub": {
       "label": "Marktplatz",
       "description": "Ein kompakter Hub, der die Karte, Chancen und Ihre Unternehmen verbindet."
+    },
+    "planning": {
+      "label": "Kalender",
+      "description": "Ein Kalender: Buchungen, Projekte, Aufgaben und Journaleinträge."
+    },
+    "network": {
+      "label": "Netzwerk",
+      "description": "Personen und Unternehmen: Suche, Einladungen und Ihre Beziehungen."
     }
   },
   "structuring": {
@@ -3543,7 +3551,9 @@
         "discover": "Entdecken",
         "search": "Suche",
         "account": "Einstellungen",
-        "admin": "Admin"
+        "admin": "Admin",
+        "planning": "Kalender",
+        "network": "Netzwerk"
       },
       "roleNotice": {
         "needs_worker_role": "Dieser Link öffnet den Arbeitskraft-Bereich, den Ihr Konto noch nicht hat. Fügen Sie die Arbeitskraft-Rolle im Bereichs-Hub hinzu.",
@@ -8802,5 +8812,37 @@
     "skillWorkBacked": "Durch Arbeit belegt",
     "skillDeclared": "Selbst angegeben",
     "skillsLegend": "Bestätigt — von einer Führungskraft genehmigt. Durch Arbeit belegt — aus Arbeitsjournal-Einträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt, noch nicht geprüft."
+  },
+  "companyLocations": {
+    "title": "Standorte",
+    "subtitle": "Hauptsitz, Einsatzorte und Wunschmärkte — in mehreren Ländern.",
+    "kindHeadquarters": "Hauptsitz",
+    "kindOperating": "Einsatzort",
+    "kindDesiredMarket": "Wunschmarkt",
+    "countryLabel": "Land",
+    "cityLabel": "Stadt",
+    "regionLabel": "Region",
+    "addButton": "Standort hinzufügen",
+    "removeButton": "Standort entfernen",
+    "empty": "Noch keine Standorte. Fügen Sie Hauptsitz und Einsatzorte hinzu.",
+    "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Eigentümer",
+    "gatedBody": "Das Standortmodell ist bereit, aber die Datenbankänderung wurde noch nicht angewendet. Die Aktivierung ist eine Eigentümerentscheidung.",
+    "errorLabel": "Speichern fehlgeschlagen. Versuchen Sie es erneut."
+  },
+  "companyGallery": {
+    "title": "Galerie",
+    "subtitle": "Fotos aus den Arbeitsjournalen Ihrer Projekte.",
+    "photosLabel": "Fotos",
+    "openLabel": "Öffnen",
+    "empty": "Noch keine Fotos. Sie erscheinen, wenn Arbeiter Fotos an Journaleinträge eines Projekts anhängen."
+  },
+  "personalGallery": {
+    "eyebrow": "Mein Bereich",
+    "title": "Galerie",
+    "empty": "Noch keine Fotos. Hängen Sie ein Foto an einen Arbeitsjournal-Eintrag an — es erscheint hier.",
+    "emptyCta": "Journaleintrag schreiben",
+    "previewsUnavailable": "Vorschauen sind vorübergehend nicht verfügbar.",
+    "previewUnavailable": "Vorschau nicht verfügbar",
+    "photoAlt": "Arbeitsfoto"
   }
 }

@@ -30,6 +30,8 @@ export type NavIconKey =
   | "idCard"
   | "journal"
   | "messages"
+  | "calendar"
+  | "network"
   | "user"
   | "shield";
 
@@ -68,6 +70,17 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
   communication: {
     tabLabelKey: "auth.dashboard.tabs.communication",
     iconKey: "messages",
+  },
+  // Kalendorius (F14) — the ONE canonical calendar (/dashboard/planning)
+  // becomes findable through normal navigation.
+  planning: {
+    tabLabelKey: "auth.dashboard.tabs.planning",
+    iconKey: "calendar",
+  },
+  // Tinklas (F15) — people/company search, invitations, relationships.
+  network: {
+    tabLabelKey: "auth.dashboard.tabs.network",
+    iconKey: "network",
   },
   // Account / settings is intentionally NOT a primary tab — it lives in the
   // avatar / account menu (action-first IA v1: settings is a utility, not a

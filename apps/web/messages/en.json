@@ -2746,6 +2746,14 @@
     "marketplace_hub": {
       "label": "Marketplace",
       "description": "A compact hub connecting the map, opportunities and your companies."
+    },
+    "planning": {
+      "label": "Calendar",
+      "description": "One calendar: bookings, projects, tasks and journal entries."
+    },
+    "network": {
+      "label": "Network",
+      "description": "People and companies: search, invitations and your relationships."
     }
   },
   "structuring": {
@@ -3543,7 +3551,9 @@
         "discover": "Discover",
         "search": "Search",
         "account": "Settings",
-        "admin": "Admin"
+        "admin": "Admin",
+        "planning": "Calendar",
+        "network": "Network"
       },
       "roleNotice": {
         "needs_worker_role": "That link opens the worker space, which your account does not have yet. Add the worker role in the spaces hub.",
@@ -8802,5 +8812,37 @@
     "skillWorkBacked": "Work-backed",
     "skillDeclared": "Self-declared",
     "skillsLegend": "Confirmed — approved by a manager. Work-backed — supported by work journal entries. Self-declared — added by the person, not yet checked."
+  },
+  "companyLocations": {
+    "title": "Locations",
+    "subtitle": "Headquarters, operating locations and desired markets — across countries.",
+    "kindHeadquarters": "Headquarters",
+    "kindOperating": "Operating location",
+    "kindDesiredMarket": "Desired market",
+    "countryLabel": "Country",
+    "cityLabel": "City",
+    "regionLabel": "Region",
+    "addButton": "Add location",
+    "removeButton": "Remove location",
+    "empty": "No locations yet. Add your headquarters and operating locations.",
+    "gatedHeading": "Prepared — awaiting owner activation",
+    "gatedBody": "The locations model is ready, but the database change has not been applied yet. Activation is an owner decision.",
+    "errorLabel": "Could not save. Try again."
+  },
+  "companyGallery": {
+    "title": "Gallery",
+    "subtitle": "Photos from your projects' work journals.",
+    "photosLabel": "photos",
+    "openLabel": "Open",
+    "empty": "No photos yet. They appear when workers attach photos to journal entries on a project."
+  },
+  "personalGallery": {
+    "eyebrow": "My space",
+    "title": "Gallery",
+    "empty": "No photos yet. Attach a photo to a work journal entry — it will appear here.",
+    "emptyCta": "Write a journal entry",
+    "previewsUnavailable": "Previews are temporarily unavailable.",
+    "previewUnavailable": "Preview unavailable",
+    "photoAlt": "Work photo"
   }
 }

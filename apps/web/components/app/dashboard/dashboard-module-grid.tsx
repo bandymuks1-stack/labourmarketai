@@ -20,6 +20,7 @@ import {
   Sparkles,
   Store,
   User,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -53,6 +54,7 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   messages: MessageSquare,
   user: User,
   shield: Shield,
+  network: Users,
   compass: Compass,
   calendar: CalendarDays,
   documents: FileText,

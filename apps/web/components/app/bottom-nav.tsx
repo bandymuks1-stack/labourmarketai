@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CalendarDays,
   Home,
   IdCard,
   MapPin,
@@ -9,6 +10,7 @@ import {
   Shield,
   Store,
   User,
+  Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -37,6 +39,8 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   idCard: IdCard,
   journal: NotebookPen,
   messages: MessageSquare,
+  calendar: CalendarDays,
+  network: Users,
   user: User,
   shield: Shield,
 };

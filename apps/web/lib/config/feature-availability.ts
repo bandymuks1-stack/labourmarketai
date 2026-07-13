@@ -28,6 +28,8 @@ export type FeatureKey =
   | "profile_text_first"
   | "journal_text_first"
   | "communication"
+  | "planning"
+  | "network"
   | "account_roles"
   // Adjacent capabilities — visible but honestly preparing.
   | "role_expansion"
@@ -140,6 +142,32 @@ export const FEATURES: readonly FeatureConfig[] = [
     labelKey: "features.communication.label",
     descriptionKey: "features.communication.description",
     primaryRoute: "/dashboard/communication",
+    safeToShowInPrimaryNav: true,
+  },
+  {
+    // Kalendorius / planavimas (F14, production UX repair v2). The canonical
+    // calendar at /dashboard/planning existed but was reachable ONLY by
+    // typing the URL / command palette — a hidden core module. It is a
+    // primary product surface: one calendar over bookings / projects /
+    // tasks / journal, so it gets a real nav tab. No second calendar.
+    key: "planning",
+    availability: "active",
+    labelKey: "features.planning.label",
+    descriptionKey: "features.planning.description",
+    primaryRoute: "/dashboard/planning",
+    safeToShowInPrimaryNav: true,
+  },
+  {
+    // Tinklas / kontaktai (F15, production UX repair v2). The canonical
+    // network surface at /dashboard/network (people/company search, invite,
+    // pending invitations, relationships) was reachable only by URL. It is
+    // where relationships start, so it gets a real nav tab. No second
+    // dashboard — this is the existing surface, only made findable.
+    key: "network",
+    availability: "active",
+    labelKey: "features.network.label",
+    descriptionKey: "features.network.description",
+    primaryRoute: "/dashboard/network",
     safeToShowInPrimaryNav: true,
   },
   {

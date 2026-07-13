@@ -2746,6 +2746,14 @@
     "marketplace_hub": {
       "label": "Prekyvietė",
       "description": "Kompaktiškas centras, jungiantis žemėlapį, galimybes ir tavo įmones."
+    },
+    "planning": {
+      "label": "Kalendorius",
+      "description": "Vienas kalendorius: rezervacijos, projektai, užduotys ir žurnalo įrašai."
+    },
+    "network": {
+      "label": "Tinklas",
+      "description": "Žmonės ir įmonės: paieška, kvietimai ir jūsų ryšiai."
     }
   },
   "structuring": {
@@ -3543,7 +3551,9 @@
         "discover": "Naršyti",
         "search": "Ieškoti",
         "account": "Nustatymai",
-        "admin": "Administravimas"
+        "admin": "Administravimas",
+        "planning": "Kalendorius",
+        "network": "Tinklas"
       },
       "roleNotice": {
         "needs_worker_role": "Ta nuoroda veda į darbuotojo erdvę, kurios jūsų paskyra dar neturi. Pridėkite darbuotojo vaidmenį erdvių centre.",
@@ -8802,5 +8812,37 @@
     "skillWorkBacked": "Pagrįsta darbu",
     "skillDeclared": "Nurodyta paties",
     "skillsLegend": "Patvirtinta — patvirtino vadovas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta, dar nepatikrinta."
+  },
+  "companyLocations": {
+    "title": "Vietos",
+    "subtitle": "Būstinė, veiklos vietos ir norimos rinkos — keliose šalyse.",
+    "kindHeadquarters": "Būstinė",
+    "kindOperating": "Veiklos vieta",
+    "kindDesiredMarket": "Norima rinka",
+    "countryLabel": "Šalis",
+    "cityLabel": "Miestas",
+    "regionLabel": "Regionas",
+    "addButton": "Pridėti vietą",
+    "removeButton": "Pašalinti vietą",
+    "empty": "Vietų dar nepridėta. Pridėkite būstinę ir veiklos vietas.",
+    "gatedHeading": "Paruošta — laukia savininko aktyvavimo",
+    "gatedBody": "Vietų valdymo modelis paruoštas, bet duomenų bazės pakeitimas dar nepritaikytas. Aktyvavimas — savininko sprendimas.",
+    "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą."
+  },
+  "companyGallery": {
+    "title": "Galerija",
+    "subtitle": "Nuotraukos iš jūsų projektų darbo žurnalų.",
+    "photosLabel": "nuotraukos",
+    "openLabel": "Atidaryti",
+    "empty": "Nuotraukų dar nėra. Jos atsiranda, kai darbuotojai prideda nuotraukas prie žurnalo įrašų projekte."
+  },
+  "personalGallery": {
+    "eyebrow": "Mano erdvė",
+    "title": "Galerija",
+    "empty": "Nuotraukų dar nėra. Pridėkite nuotrauką prie darbo žurnalo įrašo — ji atsiras čia.",
+    "emptyCta": "Rašyti žurnalo įrašą",
+    "previewsUnavailable": "Peržiūros laikinai nepasiekiamos.",
+    "previewUnavailable": "Peržiūra nepasiekiama",
+    "photoAlt": "Darbo nuotrauka"
   }
 }
