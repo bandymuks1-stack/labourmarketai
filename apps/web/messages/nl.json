@@ -1002,7 +1002,9 @@
       "map": "Kaart",
       "mapNote": "Waar je team en werk zich bevinden",
       "evidence": "Bewijs & rapporten",
-      "evidenceNote": "Voltooid werk wordt vastgelegd"
+      "evidenceNote": "Voltooid werk wordt vastgelegd",
+      "workforce": "Personeelsplanning",
+      "workforceNote": "Aankomend werk en capaciteit — tekorten, risicodatum en een voorgestelde stap."
     }
   },
   "demandReadback": {
@@ -8117,6 +8119,81 @@
       "bookings": "Boeking voorstellen",
       "tasks": "Taak aanmaken",
       "journal": "Uitgevoerd werk vastleggen"
+    }
+  },
+  "workforcePlanning": {
+    "eyebrow": "Bedrijfsomgeving",
+    "title": "Personeelsplanning",
+    "intro": "Aankomend werk, teamcapaciteit en tekorten in één beeld — opgebouwd uit uw werkbehoeften en projecten.",
+    "module": {
+      "title": "Personeelsplanning",
+      "desc": "Aankomend werk en capaciteit — tekorten, risicodatum en een voorgestelde stap."
+    },
+    "notAuthed": "Meld u aan om uw personeelsplan te zien.",
+    "empty": "Nog geen aankomend werk. Dit beeld vult zich vanuit uw werkbehoeften en projecten — u kunt bij elk punt beginnen en details later aanvullen.",
+    "entries": {
+      "chooseTitle": "Begin waar het u uitkomt",
+      "title": "Andere startpunten",
+      "demand": "Werkbehoefte of positie aanmaken",
+      "project": "Project aanmaken",
+      "candidates": "Kandidaten bekijken",
+      "network": "Mensen en bedrijven vinden"
+    },
+    "summary": {
+      "required": "mensen nodig",
+      "available": "te dekken",
+      "shortPeople": "{count, plural, one {# persoon tekort} other {# mensen tekort}}",
+      "shortHours": "{count} u tekort",
+      "coveredAll": "Al het beoordeelde werk is gedekt",
+      "capacityLabel": "Capaciteitsdekking"
+    },
+    "risk": {
+      "none": "Geen capaciteitsrisico in dit beeld.",
+      "onDate": "De capaciteit schiet tekort op {date}.",
+      "level": {
+        "ok": "Oké",
+        "tight": "Krap",
+        "critical": "Kritiek"
+      }
+    },
+    "skills": {
+      "title": "Ontbrekende vaardigheden"
+    },
+    "action": {
+      "title": "Aanbevolen volgende stap",
+      "optionalHint": "Een suggestie op basis van uw gegevens — elk ander startpunt werkt ook.",
+      "statusHint": "voor deze stap bestaat nog geen aparte pagina, plan dit dus met uw team.",
+      "none": "Er is nu geen actie nodig.",
+      "secondaryTitle": "Ook voorgesteld",
+      "kind": {
+        "assign_existing_worker": "Beschikbare werkers toewijzen",
+        "transfer_from_project": "Overplaatsing tussen projecten bekijken",
+        "form_brigade": "Ploeg aanvullen",
+        "train_existing_worker": "Eigen werkers opleiden in de ontbrekende vaardigheden",
+        "create_position": "Positie openen voor de bevestigde behoefte",
+        "engage_staffing_agency": "Uitzendbureau inschakelen",
+        "engage_partner": "Externe partner vinden"
+      }
+    },
+    "timeline": {
+      "title": "Aankomend werk",
+      "undated": "Nog geen datum",
+      "undatedHint": "Deze items verschijnen in het maandoverzicht zodra een startdatum is ingesteld — later toevoegen kan.",
+      "source": {
+        "demand": "Werkbehoefte",
+        "project": "Project"
+      },
+      "untitled": "Item zonder titel",
+      "requiredShort": "{count} nodig",
+      "coveredShort": "{count} gedekt"
+    },
+    "notes": {
+      "assignmentsPending": "Toewijzingsgegevens zijn voorbereid en verschijnen in dit beeld na activering door de eigenaar.",
+      "languagesPending": "Taaldekking is voorbereid en verschijnt in dit beeld na activering door de eigenaar.",
+      "brigadesPending": "Ploegdekking is voorbereid en verschijnt in dit beeld na activering door de eigenaar.",
+      "demandError": "Werkbehoeften konden nu niet worden gelezen.",
+      "projectError": "Projecten konden nu niet worden gelezen.",
+      "capacityError": "Een deel van de capaciteitsgegevens kon nu niet worden gelezen."
     }
   },
   "tasks": {

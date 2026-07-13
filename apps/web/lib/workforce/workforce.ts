@@ -8,9 +8,11 @@ import { isMigrationMissingCode } from "@/lib/tasks/task-model";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import {
   composeFutureWork,
+  readWorkforcePlanV1,
   type DemandWorkInput,
   type FutureWorkEntry,
   type ProjectWorkInput,
+  type WorkforcePlanV1,
 } from "@/lib/workforce/future-work-model";
 import type {
   BrigadeInput,
@@ -79,6 +81,10 @@ export type WorkforceReadResult =
   | {
       readonly status: "ok";
       readonly entries: readonly FutureWorkEntry[];
+      /** entryId (`demand:<id>`) → the stored HUMAN plan at
+       *  payload.workforce_plan, where one validates. Read-only projection
+       *  of the same owner-scoped demand rows — no extra query. */
+      readonly plans: Readonly<Record<string, WorkforcePlanV1>>;
       readonly workers: readonly WorkerCapacityInput[];
       readonly assignments: readonly WorkerAssignmentInput[];
       readonly brigades: readonly BrigadeInput[];
@@ -609,9 +615,18 @@ export async function getWorkforce(): Promise<WorkforceReadResult> {
     projects: project.rows,
   });
 
+  // Stored human plans (payload.workforce_plan) — tolerant read of the same
+  // demand rows; an invalid/absent plan is an honest miss, never a default.
+  const plans: Record<string, WorkforcePlanV1> = {};
+  for (const row of demand.rows) {
+    const plan = readWorkforcePlanV1(row.payload);
+    if (plan) plans[`demand:${row.id}`] = plan;
+  }
+
   return {
     status: "ok",
     entries,
+    plans,
     workers,
     assignments: assignmentRead.assignments,
     brigades: brigadeRead.brigades,

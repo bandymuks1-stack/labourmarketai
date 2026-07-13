@@ -85,6 +85,12 @@ const NATIVE_NAV = new Set([
   // openDemandIntakeAsCompanyAction forms switch workspace then redirect to
   // /dashboard#demand-intake; feedback is the navigation itself.
   "app/[locale]/dashboard/company/page.tsx",
+  // Workforce planning zone (Labour Market OS P10) — the ONLY forms are the
+  // same openDemandIntakeAsCompanyAction pattern as the company page: the
+  // "create a work need" entry points switch workspace then redirect to
+  // /dashboard#demand-intake; feedback is the navigation itself. Pure
+  // server component — no client state, no mutation on this page.
+  "app/[locale]/dashboard/company/planning/page.tsx",
   // /dashboard/start/agency became a redirect stub (Direction A, 2026-07-05)
   // — no form remains there, so it left this allowlist.
   // company setup moved to the client <CompanySetupForm> (useActionState +

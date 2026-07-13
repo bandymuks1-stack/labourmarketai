@@ -1002,7 +1002,9 @@
       "map": "Karte",
       "mapNote": "Wo Ihr Team und Ihre Arbeit sind",
       "evidence": "Nachweise & Berichte",
-      "evidenceNote": "Abgeschlossene Arbeit wird zur Dokumentation"
+      "evidenceNote": "Abgeschlossene Arbeit wird zur Dokumentation",
+      "workforce": "Personalplanung",
+      "workforceNote": "Anstehende Arbeit und Kapazität — Lücken, Risikodatum und ein vorgeschlagener Schritt."
     }
   },
   "demandReadback": {
@@ -8117,6 +8119,81 @@
       "bookings": "Buchung vorschlagen",
       "tasks": "Aufgabe erstellen",
       "journal": "Erledigte Arbeit erfassen"
+    }
+  },
+  "workforcePlanning": {
+    "eyebrow": "Firmenbereich",
+    "title": "Personalplanung",
+    "intro": "Anstehende Arbeit, Teamkapazität und Lücken in einer Ansicht — aufgebaut aus Ihren Arbeitsbedarfen und Projekten.",
+    "module": {
+      "title": "Personalplanung",
+      "desc": "Anstehende Arbeit und Kapazität — Lücken, Risikodatum und ein vorgeschlagener Schritt."
+    },
+    "notAuthed": "Melden Sie sich an, um Ihren Personalplan zu sehen.",
+    "empty": "Noch keine anstehende Arbeit. Diese Ansicht füllt sich aus Ihren Arbeitsbedarfen und Projekten — Sie können an jedem Punkt beginnen und Details später ergänzen.",
+    "entries": {
+      "chooseTitle": "Beginnen Sie dort, wo es Ihnen passt",
+      "title": "Weitere Einstiegspunkte",
+      "demand": "Arbeitsbedarf oder Position anlegen",
+      "project": "Projekt anlegen",
+      "candidates": "Kandidaten ansehen",
+      "network": "Personen und Firmen finden"
+    },
+    "summary": {
+      "required": "Personen benötigt",
+      "available": "abdeckbar",
+      "shortPeople": "{count, plural, one {# Person fehlt} other {# Personen fehlen}}",
+      "shortHours": "{count} Std. fehlen",
+      "coveredAll": "Alle bewertete Arbeit ist abgedeckt",
+      "capacityLabel": "Kapazitätsabdeckung"
+    },
+    "risk": {
+      "none": "Kein Kapazitätsrisiko in dieser Ansicht.",
+      "onDate": "Die Kapazität reicht ab dem {date} nicht mehr aus.",
+      "level": {
+        "ok": "OK",
+        "tight": "Knapp",
+        "critical": "Kritisch"
+      }
+    },
+    "skills": {
+      "title": "Fehlende Fähigkeiten"
+    },
+    "action": {
+      "title": "Empfohlener nächster Schritt",
+      "optionalHint": "Ein Vorschlag auf Basis Ihrer Daten — jeder andere Einstiegspunkt funktioniert ebenso.",
+      "statusHint": "für diesen Schritt gibt es noch keine eigene Seite, planen Sie ihn daher mit Ihrem Team.",
+      "none": "Derzeit ist keine Aktion nötig.",
+      "secondaryTitle": "Ebenfalls vorgeschlagen",
+      "kind": {
+        "assign_existing_worker": "Verfügbare Arbeiter zuweisen",
+        "transfer_from_project": "Wechsel zwischen Projekten prüfen",
+        "form_brigade": "Kolonne vervollständigen",
+        "train_existing_worker": "Eigene Arbeiter in den fehlenden Fähigkeiten schulen",
+        "create_position": "Position für den bestätigten Bedarf eröffnen",
+        "engage_staffing_agency": "Personalagentur einschalten",
+        "engage_partner": "Externen Partner finden"
+      }
+    },
+    "timeline": {
+      "title": "Anstehende Arbeit",
+      "undated": "Noch kein Datum",
+      "undatedHint": "Diese Einträge erscheinen in der Monatsansicht, sobald ein Startdatum gesetzt ist — Nachtragen ist jederzeit möglich.",
+      "source": {
+        "demand": "Arbeitsbedarf",
+        "project": "Projekt"
+      },
+      "untitled": "Eintrag ohne Titel",
+      "requiredShort": "{count} benötigt",
+      "coveredShort": "{count} gedeckt"
+    },
+    "notes": {
+      "assignmentsPending": "Zuweisungsdaten sind vorbereitet und erscheinen in dieser Ansicht nach Freischaltung durch den Eigentümer.",
+      "languagesPending": "Die Sprachabdeckung ist vorbereitet und erscheint in dieser Ansicht nach Freischaltung durch den Eigentümer.",
+      "brigadesPending": "Die Kolonnenabdeckung ist vorbereitet und erscheint in dieser Ansicht nach Freischaltung durch den Eigentümer.",
+      "demandError": "Arbeitsbedarfe konnten gerade nicht gelesen werden.",
+      "projectError": "Projekte konnten gerade nicht gelesen werden.",
+      "capacityError": "Ein Teil der Kapazitätsdaten konnte gerade nicht gelesen werden."
     }
   },
   "tasks": {

@@ -35,6 +35,9 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/communication": "REAL_LAUNCH_SURFACE",
   "dashboard/communication/[conversationId]": "REAL_LAUNCH_SURFACE",
   "dashboard/company": "REAL_LAUNCH_SURFACE",
+  // Workforce planning zone (Labour Market OS P10) — the ONE visual planning
+  // zone INSIDE the company workspace; composes the P1–P4 workforce reads.
+  "dashboard/company/planning": "REAL_LAUNCH_SURFACE",
   "dashboard/company/projects/new": "REAL_LAUNCH_SURFACE",
   "dashboard/company/scouting": "REAL_LAUNCH_SURFACE",
   "dashboard/documents": "REAL_LAUNCH_SURFACE",

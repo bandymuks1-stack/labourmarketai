@@ -55,6 +55,7 @@ export type DashboardModuleId =
   | "projects"
   | "finance"
   | "company"
+  | "workforce_planning"
   | "activity"
   | "assist"
   | "reports"
@@ -78,7 +79,8 @@ export type ModuleIconKey =
   | "briefcase"
   | "coins"
   | "sparkles"
-  | "chart";
+  | "chart"
+  | "gauge";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -306,6 +308,21 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     labelKey: "auth.dashboard.myZone.actions.companyActions.title",
     descriptionKey: "auth.dashboard.myZone.actions.companyActions.desc",
     iconKey: "building",
+    roles: ORG_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  {
+    id: "workforce_planning",
+    // Workforce planning zone (Labour Market OS P10) — ONE visual planning
+    // zone INSIDE the company workspace (constitution §8: never a second
+    // dashboard). Composes the existing P1–P4 workforce reads; degrades
+    // honestly per source. NO attentionSignalIds — the zone reports, the
+    // spine notifies.
+    surfaceRoute: "/dashboard/company/planning",
+    labelKey: "workforcePlanning.module.title",
+    descriptionKey: "workforcePlanning.module.desc",
+    iconKey: "gauge",
     roles: ORG_ROLES,
     surfaces: ["grid", "command"],
   },

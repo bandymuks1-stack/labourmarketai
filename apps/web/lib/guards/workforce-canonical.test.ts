@@ -30,6 +30,9 @@ const PURE_MODULES = [
   "work-breakdown.ts",
   "capacity-model.ts",
   "gap-timeline.ts",
+  // P10: the planning-zone view model — pure shaping behind the ONE visual
+  // workforce-planning surface (page: dashboard/company/planning).
+  "planning-zone-view.ts",
 ] as const;
 
 const sourceFiles = readdirSync(WORKFORCE_DIR).filter(

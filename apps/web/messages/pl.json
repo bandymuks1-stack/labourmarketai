@@ -2319,5 +2319,80 @@
     "mapEditHint": "Dotknij mapy — zobaczysz nowy punkt i będziesz mógł go zapisać lub anulować.",
     "mapLockedHint": "Lokalizacja bez zmian. Aby ją zmienić, naciśnij „Zmień lokalizację”.",
     "mapEditButton": "Zmień lokalizację na mapie"
+  },
+  "workforcePlanning": {
+    "eyebrow": "[EN] Company workspace",
+    "title": "[EN] Workforce planning",
+    "intro": "[EN] Upcoming work, team capacity and gaps in one view — built from your work needs and projects.",
+    "module": {
+      "title": "[EN] Workforce planning",
+      "desc": "[EN] Upcoming work vs. capacity — gaps, risk date and a suggested step."
+    },
+    "notAuthed": "[EN] Sign in to see your workforce plan.",
+    "empty": "[EN] No upcoming work here yet. This view fills in from your work needs and projects — you can start from any point and add details later.",
+    "entries": {
+      "chooseTitle": "[EN] Start from whichever point suits you",
+      "title": "[EN] Other starting points",
+      "demand": "[EN] Create a work need or position",
+      "project": "[EN] Create a project",
+      "candidates": "[EN] Browse candidates",
+      "network": "[EN] Find people and companies"
+    },
+    "summary": {
+      "required": "[EN] people required",
+      "available": "[EN] can be covered",
+      "shortPeople": "[EN] {count, plural, one {short # person} other {short # people}}",
+      "shortHours": "[EN] short {count} h",
+      "coveredAll": "[EN] All assessed work is covered",
+      "capacityLabel": "[EN] Capacity coverage"
+    },
+    "risk": {
+      "none": "[EN] No capacity risk in the current view.",
+      "onDate": "[EN] Capacity becomes insufficient on {date}.",
+      "level": {
+        "ok": "[EN] OK",
+        "tight": "[EN] Tight",
+        "critical": "[EN] Critical"
+      }
+    },
+    "skills": {
+      "title": "[EN] Missing skills"
+    },
+    "action": {
+      "title": "[EN] Recommended next step",
+      "optionalHint": "[EN] A suggestion based on your current data — any other starting point works too.",
+      "statusHint": "[EN] there is no separate page for this step yet, so plan it with your team.",
+      "none": "[EN] Nothing needs action right now.",
+      "secondaryTitle": "[EN] Also suggested",
+      "kind": {
+        "assign_existing_worker": "[EN] Assign available workers",
+        "transfer_from_project": "[EN] Review a transfer between projects",
+        "form_brigade": "[EN] Complete the brigade",
+        "train_existing_worker": "[EN] Train your workers in the missing skills",
+        "create_position": "[EN] Open a position for the confirmed need",
+        "engage_staffing_agency": "[EN] Engage a staffing agency",
+        "engage_partner": "[EN] Find an external partner"
+      }
+    },
+    "timeline": {
+      "title": "[EN] Upcoming work",
+      "undated": "[EN] No date yet",
+      "undatedHint": "[EN] These entries join the month view once a start date is set — you can add it later.",
+      "source": {
+        "demand": "[EN] Work need",
+        "project": "[EN] Project"
+      },
+      "untitled": "[EN] Untitled entry",
+      "requiredShort": "[EN] {count} needed",
+      "coveredShort": "[EN] {count} covered"
+    },
+    "notes": {
+      "assignmentsPending": "[EN] Assignment data is prepared and joins this view after owner activation.",
+      "languagesPending": "[EN] Language coverage is prepared and joins this view after owner activation.",
+      "brigadesPending": "[EN] Brigade coverage is prepared and joins this view after owner activation.",
+      "demandError": "[EN] Work needs could not be read right now.",
+      "projectError": "[EN] Projects could not be read right now.",
+      "capacityError": "[EN] Part of the capacity data could not be read right now."
+    }
   }
 }
