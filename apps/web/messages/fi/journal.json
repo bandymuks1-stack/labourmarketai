@@ -312,5 +312,6 @@
       "undecodable": "Ääntä ei voitu lukea — yritä uudelleen."
     },
     "permissionDenied": "Mikrofonin käyttö estettiin. Salli mikrofoni selaimen asetuksista ja yritä uudelleen."
-  }
+  },
+  "savedOpenCv": "Näytä CV"
 }

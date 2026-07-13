@@ -838,6 +838,16 @@ export function JournalEntryComposer({
               >
                 {t("savedOpenProfile")} →
               </Link>
+              {/* Living CV (canonical-journey P2): a saved entry feeds the
+                  Verified CV's evidence tiers — make the destination where
+                  the change becomes visible one tap away. */}
+              <Link
+                href={"/cv" as "/dashboard"}
+                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                data-testid="journal-saved-open-cv"
+              >
+                {t("savedOpenCv")} →
+              </Link>
             </div>
           </div>
         )}

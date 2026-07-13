@@ -2525,7 +2525,11 @@
       "textSaveErrorLabel": "Ihr Text konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "applyErrorLabel": "Die ausgewählten Fähigkeiten konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "textClaimNotVerified": "Dies ist Ihre eigene Angabe — noch nicht durch Arbeitsnachweise belegt",
-      "extractErrorLabel": "Der Text konnte nicht verarbeitet werden. Ihr Text ist gespeichert — versuchen Sie es erneut."
+      "extractErrorLabel": "Der Text konnte nicht verarbeitet werden. Ihr Text ist gespeichert — versuchen Sie es erneut.",
+      "promotedToCatalog": "{n} bestätigte Fähigkeiten wurden auch in Ihre Katalogliste übernommen — sie zählen jetzt im Matching und in Ihrem CV.",
+      "promotedSkipped": "{n} bleiben nur selbst angegebene Einträge (außerhalb Ihrer Arbeitsrichtungen).",
+      "viewUpdatedCv": "Aktualisiertes CV ansehen",
+      "aiSuggestionHint": "KI-Vorschlag — vor dem Speichern bestätigen"
     }
   },
   "roles": {

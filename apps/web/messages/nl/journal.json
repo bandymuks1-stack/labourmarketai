@@ -322,5 +322,6 @@
       "undecodable": "De audio kon niet worden gelezen — probeer het opnieuw."
     },
     "permissionDenied": "Microfoontoegang is geblokkeerd. Sta microfoontoegang toe in je browserinstellingen en probeer het opnieuw."
-  }
+  },
+  "savedOpenCv": "Bekijk uw cv"
 }

@@ -2525,7 +2525,11 @@
       "textSaveErrorLabel": "Kon je tekst niet opslaan. Probeer het opnieuw.",
       "applyErrorLabel": "Kon de geselecteerde vaardigheden niet opslaan. Probeer het opnieuw.",
       "textClaimNotVerified": "Dit is je eigen claim — nog niet onderbouwd door werkregistraties",
-      "extractErrorLabel": "De tekst kon niet worden verwerkt. Je tekst is opgeslagen — probeer het opnieuw."
+      "extractErrorLabel": "De tekst kon niet worden verwerkt. Je tekst is opgeslagen — probeer het opnieuw.",
+      "promotedToCatalog": "{n} bevestigde vaardigheden zijn ook toegevoegd aan uw cataloguslijst — ze tellen nu mee in matching en op uw cv.",
+      "promotedSkipped": "{n} blijven alleen zelfverklaarde vermeldingen (buiten uw werkrichtingen).",
+      "viewUpdatedCv": "Bekijk uw bijgewerkte cv",
+      "aiSuggestionHint": "AI-suggestie — bevestig vóór het opslaan"
     }
   },
   "roles": {

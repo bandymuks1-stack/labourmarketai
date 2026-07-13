@@ -9,6 +9,12 @@ import { DetectedSuggestionList } from "@/components/app/detected-suggestion-lis
 import { TextFirstComposer } from "@/components/app/text-first-composer";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
+import {
+  promoteConfirmedClaimsAction,
+  type PromoteClaimsResult,
+} from "@/lib/profile/claim-catalog-promotion-actions";
+import { aiCvStructuringSuggestions } from "@/lib/profile/cv-ai-structuring-actions";
+import { useLocale } from "next-intl";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
 import { withTimeout } from "@/lib/async/with-timeout";
 import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
@@ -64,6 +70,10 @@ type Item = {
   value: string;
   /** Human form shown in the chip. */
   label: string;
+  /** Canonical-journey P6: true when the label came from the (owner-gated)
+   *  AI structuring enhancement — the chip carries an explicit AI hint and
+   *  goes through the SAME per-chip human confirm as every other chip. */
+  aiOrigin?: boolean;
 };
 
 /**
@@ -104,6 +114,7 @@ export function ProfileTextFirstFlow({
   const t = useTranslations("skills.textFirst");
   const tS = useTranslations("structuring");
   const tBucket = useTranslations("structuring.buckets");
+  const locale = useLocale();
   const router = useRouter();
 
   const [stage, setStage] = useState<"compose" | "review" | "manual">("compose");
@@ -128,6 +139,9 @@ export function ProfileTextFirstFlow({
   const [selfDeclared, setSelfDeclared] = useState<Item[]>([]);
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
+  // Canonical-journey P2 (living CV): the catalogued-promotion outcome of the
+  // last apply — drives the honest "what changed in your profile" delta line.
+  const [promotion, setPromotion] = useState<PromoteClaimsResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const savedClaimSet = useMemo(
@@ -157,6 +171,7 @@ export function ProfileTextFirstFlow({
   function analyse(raw: string) {
     setError(null);
     setApplied(false);
+    setPromotion(null);
     setText(raw);
 
     // Persist the user's own words. The text is the *claim* — saved into
@@ -210,6 +225,36 @@ export function ProfileTextFirstFlow({
       })),
     );
     setStage("review");
+
+    // Canonical-journey P6 — OPTIONAL, owner-gated AI enhancement of the
+    // SAME review list. Deterministic chips above are the always-on path;
+    // when the AI runtime is enabled, extra labelled suggestions append as
+    // ordinary pending chips (explicit AI hint, identical human confirm).
+    // Disabled/unavailable → `off` → nothing extra, no fake AI badge.
+    void aiCvStructuringSuggestions(raw, locale)
+      .then((res) => {
+        if (res.status !== "ok") return;
+        setSelfDeclared((prev) => {
+          const seen = new Set(prev.map((it) => it.value));
+          const extras: Item[] = [];
+          for (const [i, label] of res.skillLabels.entries()) {
+            const norm = label.trim().toLowerCase();
+            if (!norm || seen.has(norm) || savedClaimSet.has(norm)) continue;
+            seen.add(norm);
+            extras.push({
+              key: `ai-${i}-${norm}`,
+              status: "pending",
+              value: norm,
+              label: label.trim(),
+              aiOrigin: true,
+            });
+          }
+          return extras.length > 0 ? [...prev, ...extras] : prev;
+        });
+      })
+      .catch(() => {
+        // Best-effort enhancement — silence is the honest degraded state.
+      });
   }
 
   function toggle(key: string, next: SuggestionStatus) {
@@ -232,11 +277,26 @@ export function ProfileTextFirstFlow({
         return;
       }
 
-      // Self-declared profile_skill_claims — the ONLY persistence path
+      // Self-declared profile_skill_claims — the primary persistence path
       // from the text composer. Owner-only RLS; the server action
       // upserts on (profile_id, normalized_label) so re-clicking Save
       // never duplicates.
       await saveProfileSkillClaimsAction(confirmedClaims);
+
+      // Living CV (canonical-journey P2): the SAME user confirmation is
+      // also recorded as catalogued worker_skills rows where the label
+      // maps into the shared deterministic lexicon and the worker's own
+      // directions. One confirmation, both canonical stores — catalogued
+      // rows are what matching, journal evidence and the Verified CV
+      // read. Best-effort: a promotion failure never fails the save
+      // (claims are already persisted above).
+      let promo: PromoteClaimsResult | null = null;
+      try {
+        promo = await promoteConfirmedClaimsAction(confirmedClaims);
+      } catch (e) {
+        console.error("[profile-text-first] promotion failed:", e);
+      }
+      setPromotion(promo);
 
       // Pilot telemetry — fire-and-forget. We send a count of confirmed
       // skill claims (number, not labels) so the admin can see funnel
@@ -367,6 +427,7 @@ export function ProfileTextFirstFlow({
               // explicit and matches the owner's mental model
               // ("clicking Grįžti prie teksto is a fresh start").
               setApplied(false);
+              setPromotion(null);
               setError(null);
               setStage("compose");
             }}
@@ -440,6 +501,7 @@ export function ProfileTextFirstFlow({
               <DetectedSuggestionCard
                 key={it.key}
                 label={it.label}
+                hint={it.aiOrigin ? t("aiSuggestionHint") : undefined}
                 status={it.status}
                 onConfirm={() => toggle(it.key, "confirmed")}
                 onDiscard={() => toggle(it.key, "discarded")}
@@ -456,6 +518,7 @@ export function ProfileTextFirstFlow({
             <DetectedSuggestionCard
               key={it.key}
               label={it.label}
+              hint={it.aiOrigin ? t("aiSuggestionHint") : undefined}
               status={it.status}
               onConfirm={() => toggle(it.key, "confirmed")}
               onDiscard={() => toggle(it.key, "discarded")}
@@ -482,6 +545,28 @@ export function ProfileTextFirstFlow({
             </span>{" "}
             · {t("addedToProfile")} · {t("needsExternalConfirmation")}
           </p>
+          {/* Living CV delta (canonical-journey P2) — the honest "what
+              changed" line: how many confirmations also became catalogued
+              skills (the rows matching, journal evidence and the Verified
+              CV read), and how many stay claims-only. Rendered ONLY from
+              the real promotion result — no promotion, no line. */}
+          {promotion && promotion.applicable && (
+            <p
+              className="mt-1 text-text-secondary"
+              data-testid="profile-text-flow-promotion-delta"
+            >
+              {promotion.promoted > 0 && (
+                <span>{t("promotedToCatalog", { n: promotion.promoted })} </span>
+              )}
+              {promotion.skippedOutsideDirections > 0 && (
+                <span>
+                  {t("promotedSkipped", {
+                    n: promotion.skippedOutsideDirections,
+                  })}
+                </span>
+              )}
+            </p>
+          )}
           {/* Make the result reachable — link straight to the capabilities
               surface below where the saved chips now live, so the save is not
               a silent dead end. */}
@@ -492,6 +577,15 @@ export function ProfileTextFirstFlow({
           >
             {t("viewCapabilities")} →
           </a>
+          {promotion && promotion.promoted > 0 && (
+            <a
+              href="/cv"
+              className="ml-3 mt-2 inline-flex text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+              data-testid="profile-text-flow-view-cv"
+            >
+              {t("viewUpdatedCv")} →
+            </a>
+          )}
         </div>
       )}
 

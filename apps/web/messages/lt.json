@@ -2525,7 +2525,11 @@
       "textSaveErrorLabel": "Nepavyko išsaugoti teksto. Bandykite dar kartą.",
       "applyErrorLabel": "Nepavyko išsaugoti pasirinktų gebėjimų. Bandykite dar kartą.",
       "textClaimNotVerified": "Tai jūsų pačių teiginys — dar nepagrįsta darbo įrašais",
-      "extractErrorLabel": "Nepavyko apdoroti teksto. Jūsų tekstas išsaugotas — bandykite dar kartą."
+      "extractErrorLabel": "Nepavyko apdoroti teksto. Jūsų tekstas išsaugotas — bandykite dar kartą.",
+      "promotedToCatalog": "{n} patvirtinti įgūdžiai taip pat įrašyti į kataloginį įgūdžių sąrašą — jie dalyvauja atitikime ir jūsų CV.",
+      "promotedSkipped": "{n} lieka tik kaip paties nurodyti įrašai (ne pagal jūsų darbo kryptis).",
+      "viewUpdatedCv": "Peržiūrėti atnaujintą CV",
+      "aiSuggestionHint": "AI pasiūlymas — patvirtinkite prieš įrašant"
     }
   },
   "roles": {

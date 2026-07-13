@@ -2525,7 +2525,11 @@
       "textSaveErrorLabel": "Could not save your text. Please try again.",
       "applyErrorLabel": "Could not save the selected skills. Please try again.",
       "textClaimNotVerified": "This is your own claim — not yet backed by work records",
-      "extractErrorLabel": "Could not process the text. Your text is saved — try again."
+      "extractErrorLabel": "Could not process the text. Your text is saved — try again.",
+      "promotedToCatalog": "{n} confirmed skills were also added to your catalogued skill list — they now count in matching and on your CV.",
+      "promotedSkipped": "{n} stay as self-declared entries only (outside your current work directions).",
+      "viewUpdatedCv": "View your updated CV",
+      "aiSuggestionHint": "AI suggestion — confirm before saving"
     }
   },
   "roles": {
