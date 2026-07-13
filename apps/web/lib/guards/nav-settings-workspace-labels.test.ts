@@ -43,15 +43,19 @@ describe("Guard: account tab renamed to settings, not 'paskyra/account'", () => 
   }
 });
 
-describe("Guard: workspace switch labels are 'space', not 'account'", () => {
+describe("Guard: workspace switch labels are short identity words (production UX repair v2, F5)", () => {
+  // The owner production finding F5: the header pill "ASMENINĖ ERDVĖ" was a
+  // shouting sentence for a state the icon already carries. The workspace
+  // labels are now ONE short human identity word (Asmuo / Įmonė) — still a
+  // workspace, never an account switch — with the icon carrying the rest.
   const cases: Array<[string, string, string]> = [
     // locale, personSpace, companySpace
-    ["lt", "Asmeninė erdvė", "Įmonės erdvė"],
-    ["en", "Personal space", "Company space"],
-    ["ru", "Личное пространство", "Пространство компании"],
+    ["lt", "Asmuo", "Įmonė"],
+    ["en", "Person", "Company"],
+    ["ru", "Личный", "Компания"],
   ];
   for (const [loc, person, company] of cases) {
-    it(`${loc}: personSpace / companySpace are the workspace labels`, () => {
+    it(`${loc}: personSpace / companySpace are short identity labels`, () => {
       const s = switcher(load(loc));
       expect(s.personSpace, `${loc}.roleSwitcher.personSpace`).toBe(person);
       expect(s.companySpace, `${loc}.roleSwitcher.companySpace`).toBe(company);

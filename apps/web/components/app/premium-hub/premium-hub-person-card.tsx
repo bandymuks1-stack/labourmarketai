@@ -192,6 +192,14 @@ export async function PremiumHubPersonCard({
               testid="hub-person-stat-entries"
             />
           </div>
+          {/* RC3 skills truth: one plain-language line explaining what the
+              two skill numbers mean — never internal "signal" vocabulary. */}
+          <p
+            className="text-[11px] leading-relaxed text-text-muted"
+            data-testid="hub-person-stats-legend"
+          >
+            {t("person.stats.legend")}
+          </p>
         </>
       ) : null}
 

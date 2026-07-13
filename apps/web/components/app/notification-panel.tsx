@@ -2,7 +2,6 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { showPlaceholderMarkers } from "@/lib/env";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { Link } from "@/lib/i18n/navigation";
@@ -96,7 +95,6 @@ export function NotificationPanel() {
             activeRole={activeRole}
             switchRole={switchRole}
             markAllRead={markAllRead}
-            placeholderMarker={showPlaceholderMarkers}
           />
         </div>
       )}
@@ -112,7 +110,6 @@ export function NotificationPanel() {
           activeRole={activeRole}
           switchRole={switchRole}
           markAllRead={markAllRead}
-          placeholderMarker={showPlaceholderMarkers}
           chromeless
         />
       </MobileSheet>
@@ -143,7 +140,6 @@ function NotificationsBody({
   activeRole,
   switchRole,
   markAllRead,
-  placeholderMarker,
   chromeless = false,
 }: {
   label: string;
@@ -155,7 +151,6 @@ function NotificationsBody({
   activeRole: Role | null;
   switchRole: (r: Role) => void;
   markAllRead: () => void;
-  placeholderMarker: boolean;
   chromeless?: boolean;
 }) {
   // Localized notification-type labels (dead-UI repair: never the raw enum).
@@ -184,27 +179,14 @@ function NotificationsBody({
       )}
 
       {notifications.length === 0 ? (
-        <div className="p-5 text-sm">
+        // F4: a real empty inbox is REAL product state, not fabricated data —
+        // it renders one compact honest line, never a dev "Placeholder" chip
+        // (§18 markers are for fabricated VALUES, e.g. concept cards).
+        <div className="p-5 text-sm" data-testid="notification-empty-state">
           <p className="font-display font-semibold text-text-primary">
             {emptyTitle}
           </p>
-          <p
-            className={cn(
-              "relative mt-1.5 text-text-secondary",
-              placeholderMarker &&
-                "rounded-sm outline-dashed outline-1 outline-offset-2 outline-brand-blue/40 p-1.5",
-            )}
-          >
-            {placeholderMarker && (
-              <span
-                aria-hidden
-                className="pointer-events-none absolute -right-1 -top-3 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-[10px] uppercase tracking-label text-brand-blue"
-              >
-                Placeholder
-              </span>
-            )}
-            {emptyBody}
-          </p>
+          <p className="mt-1.5 text-text-secondary">{emptyBody}</p>
         </div>
       ) : (
         <ul className="flex flex-col">

@@ -55,7 +55,7 @@
     "basis": {
       "label": "Pagrindas",
       "workerEvidence": "Suskaičiuota pagal įrodymų ataskaitos taisykles iš jūsų pačių kataloguotų įgūdžių, darbo žurnalo įrašų ir vadovų patvirtinimų. Jokio balo, jokio spėjimo.",
-      "workerActivity": "Tiesioginiai jūsų pačių darbo žurnalo įrašų ir jūsų įkeltų žurnalo nuotraukų skaičiai.",
+      "workerActivity": "Jūsų darbo žurnalo įrašų ir įkeltų nuotraukų skaičiai.",
       "orgDemand": "Skaičiuojamos jūsų pačių sukurtos paklausos užklausos. Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio.",
       "orgProjects": "Jūsų įmonės projektų eilučių skaičiai, sugrupuoti pagal kiekvienos eilutės įrašytą būseną.",
       "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
@@ -441,7 +441,8 @@
         "step1": "Įrašykite poreikį (profesija, vieta, kiek žmonių).",
         "step2": "Sistema struktūruoja poreikį ir paruošia atrankai.",
         "step3": "Peržiūrėkite tinkamus ir pradėkite pokalbį."
-      }
+      },
+      "projectsLabel": "Projektai"
     },
     "candidates": {
       "context": "Įmonė · Samdyti",
@@ -3107,8 +3108,8 @@
       "confirm": "Pridėti",
       "adminMode": "Admin režimas",
       "adminPanelLink": "Atidaryti operacijų valdymo skydą",
-      "personSpace": "Asmeninė erdvė",
-      "companySpace": "Įmonės erdvė",
+      "personSpace": "Asmuo",
+      "companySpace": "Įmonė",
       "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
@@ -3463,7 +3464,7 @@
         },
         "clearTitle": "Kas jau aišku",
         "missingTitle": "Ko dar trūksta",
-        "nextEyebrow": "Vienas aiškus kitas žingsnis",
+        "nextEyebrow": "Kitas žingsnis",
         "dim": {
           "work": {
             "label": "Ką galiu dirbti",
@@ -3522,7 +3523,7 @@
           "title": "Darbo kortelės informacija",
           "availabilityLabel": "Prieinamumas",
           "availabilityOption": {
-            "available": "Galiu dirbti",
+            "available": "Laisvas darbui",
             "busy": "Šiuo metu užimtas",
             "unavailable": "Šiuo metu negaliu",
             "none": "Nenurodyta"
@@ -6007,7 +6008,7 @@
     "readinessPanel": {
       "title": "Kaip pagerinti pasiruošimą",
       "intro": "Štai ką dar verta sutvarkyti, kad jūsų kortelė būtų stipresnė.",
-      "allReady": "Visi pagrindiniai pasiruošimo signalai surinkti.",
+      "allReady": "Viskas paruošta — profilis pilnas.",
       "countryFit": "Darbui kitoje šalyje reikia atitinkamų dokumentų. Be jų nesate rodomi kaip pasiruošę dirbti užsienyje — matote tik teisėtus kelius (įmonė tvarko dokumentus, pagalba su dokumentais). Sistema nežada teisės dirbti be dokumentų."
     },
     "readinessSteps": {
@@ -6030,7 +6031,7 @@
     },
     "readiness": {
       "label": "Pasiruošimas",
-      "hint": "Visi pagrindiniai signalai surinkti.",
+      "hint": "Viskas paruošta.",
       "levelReady": "Pasiruošęs",
       "levelBuilding": "Renkasi",
       "levelStart": "Pradžia",
@@ -6047,7 +6048,7 @@
     },
     "verifiedTitle": "Įgūdžių signalai",
     "verifiedEmpty": "Įgūdžių signalų dar nėra. Jie atsiranda iš tavo darbo įrašų.",
-    "journalSupportedLabel": "Pagrįsta žurnalu",
+    "journalSupportedLabel": "Pagrįsta darbu",
     "journalSupportedHint": "Įgūdžiai, kuriuos paremia tavo darbo žurnalo įrašai.",
     "latestEvidenceLabel": "Naujausias įrašas",
     "latestEvidenceEmpty": "Įrašų dar nėra — pirmas žurnalo įrašas bus pirmasis.",
@@ -6067,7 +6068,7 @@
     "form": {
       "labelLabel": "Kaip tai vadini?",
       "labelPlaceholder": "Pvz.: monolitinis betonavimas",
-      "relatedLabel": "Su kuo susiję (profesija)?",
+      "relatedLabel": "Su kuo susiję (profesija ar sritis)?",
       "relatedPlaceholder": "Pvz.: betonuotojas",
       "toolsLabel": "Kokie įrankiai / medžiagos?",
       "toolsPlaceholder": "Pvz.: vibratorius, klojiniai",
@@ -7893,8 +7894,6 @@
   },
   "premiumHub": {
     "brand": "LabourMarket.ai",
-    "liveBadge": "Gyvi duomenys",
-    "partialBadge": "Gyvi duomenys · kai kurie blokai dar neužpildyti",
     "pageTitle": "Valdymo centras",
     "pageLead": "Viena vieta apžvelgti savo profesinę tapatybę, komandą, rinką ir projektą.",
     "unavailable": "Duomenys šiuo metu neprieinami.",
@@ -7912,8 +7911,9 @@
       },
       "stats": {
         "skills": "Įgūdžiai",
-        "supported": "Pagrįsti įrašais",
-        "entries": "Darbo įrašai"
+        "supported": "Pagrįsti darbu",
+        "entries": "Darbo įrašai",
+        "legend": "Įgūdžiai — visi jūsų nurodyti. Pagrįsti darbu — tie, kuriuos patvirtina jūsų darbo žurnalo įrašai."
       },
       "empty": {
         "title": "Profilis dar neužpildytas",

@@ -1,4 +1,12 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import {
+  CalendarDays,
+  FolderKanban,
+  Images,
+  MailPlus,
+  MapPin,
+  UsersRound,
+} from "lucide-react";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Link } from "@/lib/i18n/navigation";
@@ -145,6 +153,7 @@ export default async function CompanyDashboardPage({
   const tOps = await getTranslations("companyOps");
   const tLocs = await getTranslations("companyLocations");
   const tCompanyGallery = await getTranslations("companyGallery");
+  const tTabs = await getTranslations("auth.dashboard.tabs");
   const tCountries = await getTranslations("labourMarket");
   const companyLocationsLabels = {
     title: tLocs("title"),
@@ -454,6 +463,84 @@ export default async function CompanyDashboardPage({
           </div>
         ) : null}
       </header>
+
+      {/* F3 (production UX repair v2): compact icon-led control bar — every
+          core company area is one glance + one tap away, with real counters.
+          Long explanations stay inside their sections, never up here. */}
+      <nav
+        aria-label={t("title")}
+        data-testid="company-control-bar"
+        className="flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]"
+      >
+        {[
+          {
+            key: "team",
+            href: "#company-team",
+            icon: <UsersRound className="h-4 w-4" aria-hidden />,
+            label: tWorkers("activeWorkersHeading"),
+            count: acceptedCount,
+          },
+          {
+            key: "projects",
+            href: `/${locale}/dashboard/projects`,
+            icon: <FolderKanban className="h-4 w-4" aria-hidden />,
+            label: tRooms("company.projectsLabel"),
+            count: managedProjects.length,
+          },
+          {
+            key: "invitations",
+            href: "#company-invitations",
+            icon: <MailPlus className="h-4 w-4" aria-hidden />,
+            label: tWorkers("invitationsHeading"),
+            count:
+              invitationsResult.kind === "ok"
+                ? invitationsResult.rows.length
+                : 0,
+          },
+          {
+            key: "locations",
+            href: "#company-locations",
+            icon: <MapPin className="h-4 w-4" aria-hidden />,
+            label: tLocs("title"),
+            count:
+              companyLocations.kind === "ok"
+                ? companyLocations.rows.length
+                : 0,
+          },
+          {
+            key: "gallery",
+            href: "#company-gallery",
+            icon: <Images className="h-4 w-4" aria-hidden />,
+            label: tCompanyGallery("title"),
+            count: companyGalleryProjects.reduce(
+              (n, p) => n + p.photoCount,
+              0,
+            ),
+          },
+          {
+            key: "calendar",
+            href: `/${locale}/dashboard/planning`,
+            icon: <CalendarDays className="h-4 w-4" aria-hidden />,
+            label: tTabs("planning"),
+            count: null,
+          },
+        ].map((item) => (
+          <a
+            key={item.key}
+            href={item.href}
+            data-testid={`company-control-${item.key}`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+          >
+            {item.icon}
+            {item.label}
+            {typeof item.count === "number" ? (
+              <span className="rounded-full bg-ink-700 px-1.5 py-0.5 font-mono text-[10px] text-text-primary tabular-nums">
+                {item.count}
+              </span>
+            ) : null}
+          </a>
+        ))}
+      </nav>
 
       <FeatureNote testId="feature-note-company">
         {(await getTranslations("featureNotes"))("companySpace")}

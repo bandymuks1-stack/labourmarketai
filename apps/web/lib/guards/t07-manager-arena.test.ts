@@ -56,9 +56,9 @@ describe("ARENA confirm pulse is the real S3.5 gated queue", () => {
 });
 
 describe("DRAFT stays a gated human decision", () => {
-  it("the projects page keeps the manager gate + the draft manager mount", () => {
+  it("the projects page keeps the manager gate + the draft manager mount (workers get their own role-aware list, F11)", () => {
     expect(projectsPage).toMatch(/MANAGER_ROLES/);
-    expect(projectsPage).toMatch(/managerOnly/);
+    expect(projectsPage).toMatch(/listWorkerProjects/);
     expect(projectsPage).toMatch(/<ProjectAssignmentManager\b/);
   });
   it("the draft component advertises no ranking and no auto-pick", () => {

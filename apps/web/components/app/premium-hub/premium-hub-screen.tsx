@@ -37,19 +37,10 @@ export async function PremiumHubScreen({
 }) {
   const t = await getTranslations("premiumHub");
 
-  const badge = (
-    <span
-      data-testid="premium-hub-status-badge"
-      className={
-        vm.allReady
-          ? "inline-flex items-center gap-1.5 rounded-full border border-state-success/40 bg-state-success/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-success"
-          : "inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800/60 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted"
-      }
-    >
-      {vm.allReady ? <span className="live-dot" aria-hidden /> : null}
-      {vm.allReady ? t("liveBadge") : t("partialBadge")}
-    </span>
-  );
+  // F7/F16 (production UX repair v2): the "Gyvi duomenys · kai kurie blokai
+  // dar neužpildyti" badge was architecture reassurance the user cannot act
+  // on — internal data-source vocabulary is banned from the primary
+  // hierarchy, so the hub renders no data-provenance badge at all.
 
   const grid = (
     <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
@@ -68,7 +59,6 @@ export async function PremiumHubScreen({
         className="rounded-3xl border border-ink-600 bg-gradient-to-b from-ink-800/50 to-ink-900/30 p-4 shadow-card sm:p-6"
         data-testid="premium-hub-screen"
       >
-        <div className="mb-4 flex justify-end">{badge}</div>
         {grid}
       </div>
     );
@@ -77,12 +67,9 @@ export async function PremiumHubScreen({
   return (
     <div className="flex flex-col gap-5" data-testid="premium-hub-screen">
       <header className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-mono text-xs font-semibold uppercase tracking-label text-brand-cyan">
-            {t("brand")}
-          </span>
-          {badge}
-        </div>
+        <span className="font-mono text-xs font-semibold uppercase tracking-label text-brand-cyan">
+          {t("brand")}
+        </span>
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
           {t("pageTitle")}
         </h1>

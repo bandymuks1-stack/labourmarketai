@@ -71,16 +71,23 @@ describe("no consumer bypasses the lock", () => {
     }
   });
 
-  it("all four marker consumers read the shared constant", () => {
+  it("all marker consumers read the shared constant", () => {
+    // Production UX repair v2 (F4): the notification panel is NO LONGER a
+    // marker consumer — an empty inbox is REAL product state, not fabricated
+    // data, so it renders a plain empty state and must never carry the dev
+    // "Placeholder" chip. Markers stay for fabricated VALUES only.
     for (const f of [
       "components/ui/Placeholder.tsx",
       "components/app/dashboard-section.tsx",
-      "components/app/notification-panel.tsx",
       "components/app/player-card.tsx",
     ]) {
       expect(read(f), `${f} must import showPlaceholderMarkers`).toMatch(
         /showPlaceholderMarkers/,
       );
     }
+    expect(
+      read("components/app/notification-panel.tsx"),
+      "the notification panel must NOT mark its real empty state as a placeholder (F4)",
+    ).not.toMatch(/showPlaceholderMarkers|>Placeholder</);
   });
 });

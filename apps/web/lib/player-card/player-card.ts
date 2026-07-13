@@ -31,7 +31,13 @@ export interface VerifiedSkillBadge {
 
 export interface WorkerPlayerCard {
   displayName: string | null;
-  /** Self-declared skill claims (NOT verified). */
+  /** ALL declared skills — the deduped union of free-text
+   *  `profile_skill_claims` AND catalogued `worker_skills` rows (skills truth
+   *  contract, RC3). Production finding F9: the dashboard used to count ONLY
+   *  profile_skill_claims while the journal-supported number counted ONLY
+   *  worker_skills — two different populations presented as one, so "19
+   *  skills / 2 supported" was structurally incoherent. Every surface must
+   *  read THIS builder; journalSupportedSkills is a subset of this number. */
   skillsDeclared: number;
   /** Skills whose evidence tier is `work_journal` (worker_skills.source) —
    *  backed by journal entries, stronger than self-declared, NOT yet
@@ -115,6 +121,53 @@ async function verifiedSkillBadges(
   }
 }
 
+/**
+ * ONE declared-skills population (RC3): the deduped union of the worker's
+ * free-text claims (`profile_skill_claims.normalized_label`) and catalogued
+ * `worker_skills` (normalized catalogue name). Dedup key = lowercased,
+ * whitespace-collapsed label, so a claim that mirrors a catalogued skill is
+ * counted once. 0 on any read error — never inferred.
+ */
+async function declaredSkillsUnionCount(
+  supabase: SupabaseClient,
+  profileId: string,
+  workerId: string | null,
+): Promise<number> {
+  const norm = (s: string): string =>
+    s.toLowerCase().replace(/\s+/g, " ").trim();
+  const labels = new Set<string>();
+  try {
+    const { data: claims } = await asAny(supabase)
+      .from("profile_skill_claims")
+      .select("normalized_label")
+      .eq("profile_id", profileId);
+    for (const c of (claims ?? []) as { normalized_label: string | null }[]) {
+      if (c.normalized_label) labels.add(norm(c.normalized_label));
+    }
+  } catch {
+    /* keep whatever we have — honest degradation */
+  }
+  if (workerId) {
+    try {
+      const { data: rows } = await asAny(supabase)
+        .from("worker_skills")
+        .select("skill_id, skills(slug, name_lt, name_en)")
+        .eq("worker_id", workerId);
+      for (const r of (rows ?? []) as {
+        skill_id: string | null;
+        skills: { slug: string | null; name_lt: string | null; name_en: string | null } | null;
+      }[]) {
+        const label =
+          r.skills?.name_lt ?? r.skills?.name_en ?? r.skills?.slug ?? r.skill_id;
+        if (label) labels.add(norm(String(label)));
+      }
+    } catch {
+      /* honest degradation */
+    }
+  }
+  return labels.size;
+}
+
 /** Manager confirmations on the worker's own entries. 0 on any error. */
 async function ownConfirmationsCount(
   supabase: SupabaseClient,
@@ -169,12 +222,8 @@ export async function getWorkerPlayerCard(): Promise<WorkerPlayerCard | null> {
     professionRow,
     latestEntry,
   ] = await Promise.all([
-    safeCount(
-      asAny(supabase)
-        .from("profile_skill_claims")
-        .select("*", { count: "exact", head: true })
-        .eq("profile_id", user.id),
-    ),
+    // RC3 skills truth: ONE declared population (claims ∪ catalogued skills).
+    declaredSkillsUnionCount(supabase, user.id, workerId),
     // work_journal-tier skills (source column, migration 0010). 0 without a
     // worker row or on any read error — never inferred.
     workerId

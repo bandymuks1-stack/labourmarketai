@@ -224,13 +224,15 @@ describe("Guard: mixed multi-task text yields multiple relevant signals", () => 
     const text =
       "Šiandien rytą kroviau prekes sandėlyje 3h, tada vairavau mikroautobusą į objektą, mūrijau sieną, sutvarkiau React svetainės klaidą, vedžiau derybas su klientu ir pjausčiau gyvatvorę sode.";
     const labels = fragmentLabels(text);
-    // Warehouse, driving, masonry, programming, communication, gardening.
+    // Warehouse, driving, masonry, programming, negotiation, gardening.
+    // Production UX repair v2 (F9): "vedžiau derybas" now resolves to the
+    // precise "Derybos" skill instead of the broad "Komunikacija" bucket.
     for (const expected of [
       "Sandėlio / logistikos darbai",
       "Pavežėjimas / vairavimas",
       "Mūrijimas",
       "Programavimas",
-      "Komunikacija",
+      "Derybos",
       "Sodininkystė / aplinkos tvarkymas",
     ]) {
       expect(labels, `missing ${expected}`).toContain(expected);

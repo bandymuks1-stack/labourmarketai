@@ -18,10 +18,11 @@ const page = read("app/[locale]/dashboard/projects/page.tsx");
 const comp = read("components/app/project-assignment-manager.tsx");
 const actions = read("lib/projects/actions.ts");
 
-describe("the projects surface is manager-only + mounts the assignment manager", () => {
-  it("route is gated to company/agency managers", () => {
+describe("the projects surface is role-aware + mounts the assignment manager", () => {
+  it("managers keep the draft surface; a worker gets THEIR OWN projects, never a dead 'managers only' page (production UX repair v2, F11)", () => {
     expect(page).toMatch(/MANAGER_ROLES/);
-    expect(page).toMatch(/managerOnly/);
+    expect(page).toMatch(/listWorkerProjects/);
+    expect(page).toMatch(/worker-projects-list/);
     expect(page).toMatch(/<ProjectAssignmentManager\b/);
   });
 });

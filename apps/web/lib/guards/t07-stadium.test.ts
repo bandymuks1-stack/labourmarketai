@@ -42,9 +42,10 @@ describe("stadium read service is real-data-only", () => {
 });
 
 describe("the stadium page shows real states with honest emptiness", () => {
-  it("is manager-gated and surfaces not-authorized honestly", () => {
+  it("is role-aware: manager stadium, assigned-worker view, honest no-access (F11)", () => {
     expect(page).toMatch(/MANAGER_ROLES/);
-    expect(page).toMatch(/managerOnly/);
+    expect(page).toMatch(/getWorkerProjectView/);
+    expect(page).toMatch(/WorkerProjectPanel/);
     expect(page).toMatch(/stadium-not-authorized/);
   });
   it("today pulse renders the count ONLY when entries really exist", () => {

@@ -228,6 +228,11 @@ describe("NO new DB migration in this PR", () => {
     // hashed tokens whose acceptance creates the CANONICAL relationship
     // (engagement_contexts / project_worker_assignments). DRAFT /
     // needs-human-gate, NOT applied; paired rollback in the PR.
-    expect(count).toBeLessThanOrEqual(128);
+    // Bumped 128 -> 129 for the company operating geography draft
+    // (20260713120000_company_locations_v1, production UX repair v2
+    // F12.4/5): HQ / operating locations / desired markets with fail-closed
+    // owner-only RLS and RPC-only writes. DRAFT / needs-human-gate, NOT
+    // applied; paired rollback + deferred APPLIED_LEDGER entry in the PR.
+    expect(count).toBeLessThanOrEqual(129);
   });
 });

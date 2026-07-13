@@ -353,13 +353,17 @@ describe("5. real sources only — nothing that does not exist is simulated", ()
 });
 
 describe("6. registered everywhere a module must be", () => {
-  it("module registry: planning → /dashboard/planning, grid+command, ALL roles, calendar icon", () => {
+  it("module registry: planning → /dashboard/planning, grid+nav+command, ALL roles, calendar icon (production UX repair v2, F14)", () => {
     const m = getDashboardModule("planning");
     expect(getModuleRoute("planning")).toBe("/dashboard/planning");
     expect(m.surfaces).toContain("grid");
     expect(m.surfaces).toContain("command");
-    // Never a nav tab — the primary nav stays catalogue-derived.
-    expect(m.surfaces).not.toContain("nav");
+    // F14: planning is now a catalogue FEATURE with a primary-nav tab — the
+    // module joins the nav surface, still sourced from the catalogue (the
+    // registry mirrors it, never replaces it — see dashboard-module-registry
+    // guard 5).
+    expect(m.surfaces).toContain("nav");
+    expect(m.featureKey).toBe("planning");
     expect([...m.roles].sort()).toEqual(
       ["agency", "company", "customer", "worker"].sort(),
     );
@@ -369,10 +373,10 @@ describe("6. registered everywhere a module must be", () => {
     expect(m.attentionSignalIds).toBeUndefined();
   });
 
-  it("bookings hands the planning label to the planning module and speaks its own name", () => {
+  it("bookings speaks its own name, planning uses the catalogue feature label", () => {
     const bookings = getDashboardModule("bookings");
     const planning = getDashboardModule("planning");
-    expect(planning.labelKey).toBe("auth.dashboard.myZone.actions.planning.title");
+    expect(planning.labelKey).toBe("features.planning.label");
     expect(bookings.labelKey).toBe("auth.dashboard.myZone.actions.bookings.title");
     expect(bookings.labelKey).not.toBe(planning.labelKey);
     expect(bookings.iconKey).not.toBe(planning.iconKey);

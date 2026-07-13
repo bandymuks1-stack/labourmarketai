@@ -169,10 +169,19 @@ describe("photo report discoverability (owner smoke finding)", () => {
       "app/[locale]/dashboard/photo-report",
       "app/[locale]/dashboard/photo-reports",
       "app/[locale]/dashboard/foto-ataskaita",
-      "app/[locale]/dashboard/gallery",
     ]) {
       expect(existsSync(join(ROOT, forbidden)), forbidden).toBe(false);
     }
+    // Production UX repair v2 (F13): /dashboard/gallery IS allowed — but it
+    // must stay a READ-ONLY projection of the journal's own photo rows
+    // (getPersonalGallery), never a second upload system. Photos are added
+    // only through journal entries.
+    const galleryPage = readFileSync(
+      join(ROOT, "app/[locale]/dashboard/gallery/page.tsx"),
+      "utf8",
+    );
+    expect(galleryPage).toMatch(/getPersonalGallery/);
+    expect(galleryPage).not.toMatch(/<input[^>]*type="file"|upload.*action|FormData/i);
   });
   it("no fake verification claim in the new copy (photos never auto-verify work)", () => {
     const hint = (lt().modes.photoHint as string) + JSON.stringify(ltBase().projectOps.stadium.gallery);

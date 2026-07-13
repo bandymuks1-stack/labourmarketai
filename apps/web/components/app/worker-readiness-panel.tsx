@@ -25,6 +25,54 @@ export async function WorkerReadinessPanel({ card }: { card: WorkerPlayerCard })
   const readiness = deriveWorkerReadiness(card);
   const steps = readinessNextSteps(readiness);
   const stepKeys = new Set(steps.map((s) => s.pillar));
+  const complete = readiness.met === readiness.total;
+
+  // F8 (production UX repair v2): ONE readiness model. When everything is
+  // done the improvement checklist may not keep occupying a large section —
+  // it collapses to one compact completed line, with the checklist behind a
+  // disclosure for anyone who wants to re-inspect it.
+  if (complete) {
+    return (
+      <section
+        className="card-border flex flex-col gap-2 p-4"
+        data-testid="worker-readiness-panel"
+        data-readiness-complete="yes"
+      >
+        <p className="inline-flex items-center gap-2 text-sm font-medium text-text-primary">
+          <span
+            aria-hidden
+            className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-state-success/15 text-state-success"
+          >
+            <Check className="h-3 w-3" />
+          </span>
+          {t("readinessPanel.allReady")}
+        </p>
+        <details data-testid="readiness-complete-details">
+          <summary className="cursor-pointer text-xs text-text-secondary hover:text-text-primary">
+            {t("readinessPanel.title")}
+          </summary>
+          <ul className="mt-2 flex flex-col gap-2" data-testid="readiness-pillars">
+            {readiness.pillars.map((p) => (
+              <li
+                key={p.key}
+                className="flex items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-sm text-text-primary"
+                data-pillar={p.key}
+                data-met="yes"
+              >
+                <span
+                  aria-hidden
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-state-success/15 text-state-success"
+                >
+                  <Check className="h-3 w-3" />
+                </span>
+                {t(`readinessSteps.pillar.${p.key}`)}
+              </li>
+            ))}
+          </ul>
+        </details>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -36,9 +84,7 @@ export async function WorkerReadinessPanel({ card }: { card: WorkerPlayerCard })
           {t("readinessPanel.title")}
         </h2>
         <p className="text-xs leading-relaxed text-text-secondary">
-          {readiness.met === readiness.total
-            ? t("readinessPanel.allReady")
-            : t("readinessPanel.intro")}
+          {t("readinessPanel.intro")}
         </p>
       </header>
 

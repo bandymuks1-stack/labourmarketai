@@ -65,7 +65,10 @@ describe("MyZone carries status + what-improves-what; the grid carries the actio
       ["recordWork", "journal_text_first"],
       ["improveProfile", "profile_text_first"],
       ["findOpportunities", "/dashboard/opportunities"],
-      ["planning", "/dashboard/bookings"],
+      // Production UX repair v2 (F14): the planning module is now sourced
+      // from the `planning` catalogue feature (features.planning.label);
+      // the bookings module keeps its own name + route.
+      ["bookings", "/dashboard/bookings"],
       ["documents", "/dashboard/documents"],
       ["companyActions", "/dashboard/company"],
     ];

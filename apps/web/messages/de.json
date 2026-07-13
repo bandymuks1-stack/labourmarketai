@@ -55,7 +55,7 @@
     "basis": {
       "label": "Grundlage",
       "workerEvidence": "Gezählt nach den Regeln des Nachweisberichts aus Ihren eigenen katalogisierten Fähigkeiten, Arbeitsjournal-Einträgen und Bestätigungen von Verantwortlichen. Kein Score, keine Schätzung.",
-      "workerActivity": "Direkte Zählungen Ihrer eigenen Arbeitsjournal-Einträge und Ihrer eigenen hochgeladenen Journalfotos.",
+      "workerActivity": "Anzahl Ihrer eigenen Journaleinträge und hochgeladenen Fotos.",
       "orgDemand": "Zählungen über die von Ihnen selbst erstellten Bedarfsanfragen. Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig.",
       "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
       "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
@@ -441,7 +441,8 @@
         "step1": "Geben Sie Ihren Bedarf ein (Beruf, Standort, wie viele Personen).",
         "step2": "Das System strukturiert den Bedarf und bereitet ihn für das Matching vor.",
         "step3": "Prüfen Sie die Passenden und starten Sie eine Unterhaltung."
-      }
+      },
+      "projectsLabel": "Projekte"
     },
     "candidates": {
       "context": "Unternehmen · Einstellen",
@@ -3107,8 +3108,8 @@
       "confirm": "Hinzufügen",
       "adminMode": "Admin-Modus",
       "adminPanelLink": "Betriebs-Kontrollpanel öffnen",
-      "personSpace": "Persönlicher Bereich",
-      "companySpace": "Unternehmensbereich",
+      "personSpace": "Person",
+      "companySpace": "Unternehmen",
       "clarityNote": "Ein Konto, zwei Identitäten — Sie als Person und Ihr Unternehmen. Der Wechsel ändert nur, welche Aktionen Sie sehen (Arbeit finden, Dienstleistungen anbieten, einstellen, einen Bedarf einreichen); Agentur und Einkauf sind Aktionen, keine separaten Systeme. Einige Unternehmensaktionen benötigen später möglicherweise ein Organisationsprofil."
     },
     "dashboard": {
@@ -3463,7 +3464,7 @@
         },
         "clearTitle": "Was bereits klar ist",
         "missingTitle": "Was noch fehlt",
-        "nextEyebrow": "Ein klarer nächster Schritt",
+        "nextEyebrow": "Nächster Schritt",
         "dim": {
           "work": {
             "label": "Was ich kann",
@@ -3522,7 +3523,7 @@
           "title": "Details der Arbeitskarte",
           "availabilityLabel": "Verfügbarkeit",
           "availabilityOption": {
-            "available": "Verfügbar für Arbeit",
+            "available": "Für Arbeit verfügbar",
             "busy": "Derzeit beschäftigt",
             "unavailable": "Derzeit nicht verfügbar",
             "none": "Nicht festgelegt"
@@ -6007,7 +6008,7 @@
     "readinessPanel": {
       "title": "So verbessern Sie Ihre Bereitschaft",
       "intro": "Das sollten Sie als Nächstes vervollständigen, um Ihre Karte zu stärken.",
-      "allReady": "Alle zentralen Bereitschaftssignale sind vorhanden.",
+      "allReady": "Alles bereit — Ihr Profil ist vollständig.",
       "countryFit": "Für die Arbeit in einem anderen Land sind die richtigen Dokumente nötig. Ohne sie werden Sie nicht als bereit für Arbeit im Ausland angezeigt — Sie sehen nur legale Wege (Unternehmen übernimmt den Papierkram, Dokumentenunterstützung). Das System verspricht niemals das Recht auf Arbeit ohne Dokumente."
     },
     "readinessSteps": {
@@ -6030,7 +6031,7 @@
     },
     "readiness": {
       "label": "Bereitschaft",
-      "hint": "Alle zentralen Signale sind vorhanden.",
+      "hint": "Alles bereit.",
       "levelReady": "Bereit",
       "levelBuilding": "Im Aufbau",
       "levelStart": "Am Anfang",
@@ -6047,7 +6048,7 @@
     },
     "verifiedTitle": "Bestätigte Fähigkeiten",
     "verifiedEmpty": "Noch keine bestätigten Fähigkeiten. Sie erscheinen, wenn eine Führungskraft deine Journaleinträge bestätigt.",
-    "journalSupportedLabel": "Durch Journal belegt",
+    "journalSupportedLabel": "Durch Arbeit belegt",
     "journalSupportedHint": "Fähigkeiten, die deine Arbeitsjournal-Einträge belegen — stärker als selbst angegeben; warten auf Bestätigung durch die Führungskraft.",
     "latestEvidenceLabel": "Neuester Nachweis",
     "latestEvidenceEmpty": "Noch keine Nachweise — dein erster Journaleintrag wird der erste sein.",
@@ -6067,7 +6068,7 @@
     "form": {
       "labelLabel": "Wie nennen Sie es?",
       "labelPlaceholder": "z. B. Ortbetonarbeiten",
-      "relatedLabel": "Zu welchem Gewerk gehört es?",
+      "relatedLabel": "Zu welchem Beruf oder Bereich gehört es?",
       "relatedPlaceholder": "z. B. Betonbauer",
       "toolsLabel": "Welche Werkzeuge / Materialien?",
       "toolsPlaceholder": "z. B. Rüttler, Schalung",
@@ -7893,8 +7894,6 @@
   },
   "premiumHub": {
     "brand": "LabourMarket.ai",
-    "liveBadge": "Live-Daten",
-    "partialBadge": "Live-Daten · einige Blöcke noch nicht befüllt",
     "pageTitle": "Kontrollzentrum",
     "pageLead": "Ein Ort, um Ihre berufliche Identität, Ihr Team, Ihren Markt und Ihr Projekt zu überblicken.",
     "unavailable": "Diese Daten sind derzeit nicht verfügbar.",
@@ -7912,8 +7911,9 @@
       },
       "stats": {
         "skills": "Fähigkeiten",
-        "supported": "Durch Einträge gestützt",
-        "entries": "Arbeitseinträge"
+        "supported": "Durch Arbeit belegt",
+        "entries": "Arbeitseinträge",
+        "legend": "Fähigkeiten — alles, was Sie angegeben haben. Durch Arbeit belegt — die, die Ihre Journaleinträge stützen."
       },
       "empty": {
         "title": "Profil noch nicht ausgefüllt",

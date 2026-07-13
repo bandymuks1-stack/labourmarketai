@@ -444,6 +444,110 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "zapier",
     ],
   },
+  // Production UX repair v2 (F9): the owner's real narrative (AI
+  // integrations, founding companies, business/finance optimization,
+  // product building, negotiations, project management) produced almost
+  // no chips — these business/technology competencies were simply not in
+  // the vocabulary. Stems chosen against LT morphology, EN synonyms added.
+  {
+    // AI integrations — "diegiu AI integracijas", "dirbtinis intelektas".
+    label: "AI integracijos",
+    needles: [
+      "ai integracij",
+      "ai įrank",
+      "ai irank",
+      "dirbtinio intelekto",
+      "dirbtinis intelektas",
+      "ai integration",
+      "chatgpt",
+      "llm",
+      "ai agent",
+      "ai agentų",
+      "machine learning",
+    ],
+  },
+  {
+    // Founding / building companies — "kuriu įmones", "įkūriau įmonę".
+    label: "Įmonių kūrimas",
+    needles: [
+      "kuriu įmon",
+      "kuriu imon",
+      "įkūriau įmon",
+      "ikuriau imon",
+      "įmonės steigim",
+      "imones steigim",
+      "steigiu įmon",
+      "founded a company",
+      "company formation",
+      "startup",
+    ],
+  },
+  {
+    // Business optimization — "optimizuoju verslą / procesus".
+    label: "Verslo optimizavimas",
+    needles: [
+      "optimizuoju versl",
+      "verslo optimizav",
+      "procesų optimizav",
+      "procesu optimizav",
+      "business optimization",
+      "process optimization",
+    ],
+  },
+  {
+    // Finance optimization / management — "optimizuoju finansus".
+    label: "Finansų valdymas",
+    needles: [
+      "optimizuoju finans",
+      "finansų optimizav",
+      "finansu optimizav",
+      "finansų valdym",
+      "finansu valdym",
+      "biudžeto valdym",
+      "biudzeto valdym",
+      "finance optimization",
+      "financial management",
+      "budgeting",
+    ],
+  },
+  {
+    // Product building — "kuriu produktus".
+    label: "Produktų kūrimas",
+    needles: [
+      "kuriu produkt",
+      "produkto kūrim",
+      "produkto kurim",
+      "produktų kūrim",
+      "produktu kurim",
+      "product development",
+      "product building",
+      "building products",
+    ],
+  },
+  {
+    // Negotiation — "deruosi su partneriais", "vedžiau derybas". Owns the
+    // needles that previously lived under the broader "Komunikacija" row.
+    label: "Derybos",
+    needles: [
+      "deryb",
+      "derėj",
+      "derej",
+      "deruosi",
+      "negotiat",
+      "переговор",
+    ],
+  },
+  {
+    // Project management — "valdau projektus", "projektų valdymas".
+    label: "Projektų valdymas",
+    needles: [
+      "projektų valdym",
+      "projektu valdym",
+      "valdau projekt",
+      "project management",
+      "managing projects",
+    ],
+  },
   {
     // Motivation — motivating / coaching a team ("motyvuoju komandą").
     label: "Motyvavimas",
@@ -481,12 +585,8 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "public speaking",
       "презентац",
       "публичн", // публичные выступления
-      // negotiation
-      "deryb", // derybos / derybose
-      "derėj", // derėjausi
-      "derej",
-      "negotiat",
-      "переговор",
+      // negotiation moved to its own, more precise "Derybos" label
+      // (production UX repair v2, F9) — one fragment, one exact skill.
       // oratory
       "orator",
       "oratoryst",

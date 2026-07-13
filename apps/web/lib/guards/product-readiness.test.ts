@@ -496,6 +496,13 @@ describe("feature-availability + config-driven dashboard", () => {
         // request another user starts with them, so it is active + in primary
         // nav. The conversation table + RLS already exist and work.
         "communication",
+        // Production UX repair v2 (F14/F15): the ONE canonical calendar
+        // (/dashboard/planning) and the network surface (/dashboard/network)
+        // are real shipping pages that were reachable only by typed URL —
+        // now catalogue features with primary-nav tabs. No second calendar,
+        // no second dashboard: these are the existing surfaces made findable.
+        "planning",
+        "network",
         "account_roles",
       ]),
     );
@@ -1725,7 +1732,11 @@ describe("no migration files added by this sprint", () => {
     // Bumped 127 -> 128 for the canonical invitations draft
     // (20260712200000_canonical_invitations_v1) — core-network area B;
     // DRAFT / needs-human-gate, NOT applied; paired rollback in the PR.
-    const SPRINT_BASELINE = 128;
+    // Bumped 128 -> 129 for the company operating geography draft
+    // (20260713120000_company_locations_v1) — production UX repair v2
+    // F12.4/5; DRAFT / needs-human-gate, NOT applied; paired rollback +
+    // deferred APPLIED_LEDGER entry in the PR.
+    const SPRINT_BASELINE = 129;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

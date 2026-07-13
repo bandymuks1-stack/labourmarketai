@@ -45,7 +45,21 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
       const n = (catalog(loc) as { nav: Record<string, string> }).nav;
       const keys = Object.keys(n).sort();
       expect(keys).toEqual(
-        ["about", "agencies", "companies", "login", "pricing", "startNow", "vision", "workers"],
+        // themeToDark/themeToLight: the public header theme toggle labels
+        // (production UX repair v2, F1 — the public site previously had no
+        // theme control at all).
+        [
+          "about",
+          "agencies",
+          "companies",
+          "login",
+          "pricing",
+          "startNow",
+          "themeToDark",
+          "themeToLight",
+          "vision",
+          "workers",
+        ],
       );
       expect(Object.values(n)).not.toContain("Ištekliai");
       expect(Object.values(n)).not.toContain("Sprendimai");

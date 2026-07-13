@@ -104,6 +104,25 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
     en: "Event / inventory preparation",
     ru: "Подготовка мероприятий / инвентаря",
   },
+  // Production UX repair v2 (F9): business/technology competencies added to
+  // the extractor DICTIONARY — localized so the new canonical LT labels
+  // never leak into the EN/RU UI.
+  "AI integracijos": { en: "AI integrations", ru: "ИИ-интеграции" },
+  "Įmonių kūrimas": { en: "Company building", ru: "Создание компаний" },
+  "Verslo optimizavimas": {
+    en: "Business optimization",
+    ru: "Оптимизация бизнеса",
+  },
+  "Finansų valdymas": {
+    en: "Finance management",
+    ru: "Управление финансами",
+  },
+  "Produktų kūrimas": { en: "Product development", ru: "Создание продуктов" },
+  Derybos: { en: "Negotiation", ru: "Переговоры" },
+  "Projektų valdymas": {
+    en: "Project management",
+    ru: "Управление проектами",
+  },
 };
 
 /**

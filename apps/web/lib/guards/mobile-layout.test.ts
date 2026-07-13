@@ -58,27 +58,26 @@ describe("mobile layout invariants", () => {
   describe("role switcher (apps/web/components/app/role-switcher.tsx)", () => {
     const src = read("components/app/role-switcher.tsx");
 
-    it("admin badge label is mobile-hidden (icon-only on phones, full text on >=sm)", () => {
-      // "Admin režimas" / "Admin mode" copy doubles the badge width on
-      // mobile and pushes the role switcher off-screen. Hide the label
-      // text, keep the icon + aria-label.
-      expect(src).toMatch(/hidden font-mono[^"]*sm:inline/);
-      // aria-label remains so screen readers still announce the link.
+    it("admin badge is icon-only with tooltip + accessible label (production UX repair v2, F5)", () => {
+      // The old "ADMIN REŽIMAS" text pill shouted a state the icon already
+      // carries. The badge is now a fixed-size icon button at EVERY
+      // viewport; the words live in title (tooltip) + aria-label.
+      expect(src).toMatch(/h-9 w-9 shrink-0 items-center justify-center/);
       expect(src).toContain('aria-label={tSwitcher("adminPanelLink")}');
+      expect(src).toContain('title={tSwitcher("adminMode")}');
     });
 
     it("role trigger label is mobile-hidden (icon + chevron only on phones)", () => {
-      // Verified by counting occurrences of the mobile-hide class on a span
-      // inside the role button (admin badge above is the first hit; the
-      // role trigger label is the second).
-      const matches = src.match(/hidden font-mono[^"]*sm:inline/g) ?? [];
-      expect(matches.length).toBeGreaterThanOrEqual(2);
+      // F5: the workspace label is a short human word (never an uppercase
+      // mono pill) and still hides on phones — icon + chevron only.
+      expect(src).toMatch(/hidden text-\[13px\][^"]*sm:inline/);
+      expect(src).not.toMatch(/hidden font-mono[^"]*uppercase[^"]*sm:inline/);
     });
 
     it("admin badge + role trigger are shrink-0 (header truncates brand, not these)", () => {
       // Both badge + trigger must use `shrink-0` so the flex container
       // cannot compress them into illegibility on a tight header.
-      const shrinkHits = src.match(/inline-flex shrink-0/g) ?? [];
+      const shrinkHits = src.match(/shrink-0/g) ?? [];
       expect(shrinkHits.length).toBeGreaterThanOrEqual(2);
     });
 
