@@ -12,7 +12,8 @@
  *      — raw output is NEVER returned unvalidated (ai-output-schema-required);
  *   5. returns a typed outcome: suggestion | disabled | needs_review — each
  *      carrying the routing AUDIT record (field NAMES only, never input
- *      content; persistence of the record is an owner-gated follow-up).
+ *      content; the SERVER wrapper persists it best-effort into ai_runs via
+ *      runtime/audit-store.ts — persistence only ever happens server-side).
  *
  * `runAiAgentCore` is pure-ish (takes a resolved config) so the whole pipeline
  * is unit/eval-tested via the mock provider with no env, key, or network. The
@@ -20,15 +21,18 @@
  */
 import { dispatchAiCompletion } from "./runtime/run-core";
 import { providerKindFor, type AiRuntimeConfig, type AiDisabledReason } from "./runtime/config-core";
-import type { AiCompletionRequest, AiLocale, AiErrorCode } from "./runtime/types";
+import type { AiCompletionRequest, AiCompletionResult, AiLocale, AiErrorCode } from "./runtime/types";
 import type { PromptRegistryEntry, AiAgentKey } from "./registry/types";
+import { computeActualCostUsd } from "./runtime/model-pricing";
 import {
+  AI_RUN_OUTPUT_EXCERPT_MAX,
   TASK_POLICIES,
   assessRunBudget,
   buildRoutingAuditRecord,
   modelIdForAlias,
   resolveTaskRoute,
   taskTypeForAgent,
+  type AiModelProvider,
   type AiRoutingAuditRecord,
   type AiRoutingRunOutcome,
   type AiTaskRouteContext,
@@ -63,6 +67,12 @@ export type AiAgentOutcome<T = unknown> =
       readonly routing?: AiRoutingAuditRecord;
     };
 
+/** Injectable dispatcher seam (tests exercise timeout/fallback without a network). */
+export type AiDispatcher = (
+  request: AiCompletionRequest,
+  cfg: AiRuntimeConfig,
+) => Promise<AiCompletionResult>;
+
 export interface RunAgentOptions {
   readonly locale: AiLocale;
   readonly maxOutputTokens?: number;
@@ -71,11 +81,48 @@ export interface RunAgentOptions {
   /** Routing context (attempt / previous failure / cost estimate). Default: first attempt. */
   readonly route?: AiTaskRouteContext;
   /**
-   * Today's run count for the daily-run-budget guard. HONEST GAP: no run
-   * counter store exists yet (owner-gated follow-up) — the budget is enforced
-   * only when a caller supplies a real count; nothing fakes one.
+   * Today's run count for the daily-run-budget guard. The server wrapper
+   * (run-agent-server.ts) supplies it from the persisted ai_runs counter on
+   * live runs; when the count is unavailable the budget stays
+   * caller-supplied-only — nothing fakes a counter.
    */
   readonly runsToday?: number;
+  /** Language of the run — a routing dimension (activates languageRouting). */
+  readonly language?: string;
+  /** Input-source LABEL for the audit trail (e.g. "cv_upload") — never content. */
+  readonly inputSource?: string;
+  /** Profile the run relates to — used ONLY by the server wrapper for the
+   *  ai_runs audit row (the core never reads it). */
+  readonly profileId?: string;
+  /** Test seam: replaces the real run-core dispatcher. */
+  readonly dispatchOverride?: AiDispatcher;
+}
+
+/**
+ * Latency enforcement: race one dispatch against the policy's maxLatencyMs.
+ * On timeout the pending call is abandoned (the adapters additionally honor a
+ * clamped cfg.timeoutMs via their own AbortController/SDK timeout) and an
+ * honest timeout error result is returned so the fallback path can run.
+ */
+export async function withLatencyTimeout(
+  pending: Promise<AiCompletionResult>,
+  maxLatencyMs: number,
+): Promise<AiCompletionResult> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<AiCompletionResult>((resolve) => {
+    timer = setTimeout(() => {
+      resolve({
+        status: "error",
+        code: "timeout",
+        message: `policy latency ceiling ${maxLatencyMs}ms exceeded`,
+      });
+    }, maxLatencyMs);
+  });
+  try {
+    return await Promise.race([pending, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /** Field NAMES sent to the model — categories only, never values (audit). */
@@ -99,18 +146,31 @@ export async function runAiAgentCore<T = unknown>(
 
   // 2. Resolve the task route — call sites never pick a model/provider.
   const taskType = taskTypeForAgent(entry.agent);
-  const routeCtx: AiTaskRouteContext = opts.route ?? { attempt: 1 };
+  const routeCtx: AiTaskRouteContext = {
+    attempt: 1,
+    ...opts.route,
+    language: opts.route?.language ?? opts.language,
+  };
   const decision = resolveTaskRoute(taskType, routeCtx);
   const policy = TASK_POLICIES[taskType];
   const dataCategoriesSent = dataCategoriesOf(parsedInput.data);
   const auditBase: Omit<
     AiRoutingRunOutcome,
-    "providerAdapter" | "schemaValidation" | "confidence" | "latencyMs" | "usage"
+    | "providerAdapter"
+    | "schemaValidation"
+    | "confidence"
+    | "latencyMs"
+    | "usage"
+    | "actualCostUsd"
+    | "modelId"
+    | "outputExcerpt"
+    | "fallbackReason"
   > = {
-    actualCostUsd: null, // honest: no pricing table is wired
     humanReviewState: policy.humanReview ? "pending" : "not_required",
     dataCategoriesSent,
     estimatedCostUsd: routeCtx.estimatedCostUsd ?? null,
+    promptVersion: entry.version,
+    inputSource: opts.inputSource ?? null,
   };
   const skippedAudit = (decision2: TaskRouteDecision): AiRoutingAuditRecord =>
     buildRoutingAuditRecord(decision2, {
@@ -120,6 +180,10 @@ export async function runAiAgentCore<T = unknown>(
       confidence: null,
       latencyMs: null,
       usage: null,
+      actualCostUsd: null,
+      modelId: null,
+      outputExcerpt: null,
+      fallbackReason: null,
     });
 
   if (decision.blocked === "cost_ceiling") {
@@ -150,26 +214,69 @@ export async function runAiAgentCore<T = unknown>(
     };
   }
 
-  const request: AiCompletionRequest = {
+  // The routed alias resolves to the PRIMARY provider's candidate model id
+  // (anthropic for mock/disabled so tests stay deterministic).
+  const modelProvider: AiModelProvider =
+    cfg.state === "live" ? cfg.provider : "anthropic";
+  const requestForDecision = (d: TaskRouteDecision): AiCompletionRequest => ({
     agentKey: entry.agent,
     promptVersion: entry.version,
     system: entry.system,
     input: parsedInput.data,
     locale: opts.locale,
     maxOutputTokens: opts.maxOutputTokens,
-    model: decision.modelAlias ? modelIdForAlias(decision.modelAlias) : undefined,
+    model: d.modelAlias ? modelIdForAlias(d.modelAlias, modelProvider) : undefined,
+    modelAlias: d.modelAlias ?? undefined,
+    preferredProvider: d.preferredProvider ?? undefined,
     mock: opts.mock,
+  });
+  const request = requestForDecision(decision);
+
+  // Latency enforcement: the adapters honor a clamped timeout (their own
+  // AbortController / SDK timeout) AND the dispatch is raced against the
+  // policy ceiling, so a hung provider can never exceed policy.maxLatencyMs.
+  const dispatcher: AiDispatcher = opts.dispatchOverride ?? dispatchAiCompletion;
+  const guardedCfg: AiRuntimeConfig = {
+    ...cfg,
+    timeoutMs: Math.min(cfg.timeoutMs, policy.maxLatencyMs),
   };
 
+  let effectiveDecision = decision;
+  let fallbackReason: string | null = null;
   const startedAt = Date.now();
-  const result = await dispatchAiCompletion(request, cfg);
+  let result = await withLatencyTimeout(
+    dispatcher(request, guardedCfg),
+    policy.maxLatencyMs,
+  );
+
+  // Timeout → ONE fallback-tier retry with an honest, visible reason.
+  if (
+    result.status === "error" &&
+    result.code === "timeout" &&
+    !decision.fallbackApplied
+  ) {
+    const fbDecision = resolveTaskRoute(taskType, {
+      ...routeCtx,
+      attempt: routeCtx.attempt + 1,
+      previousProviderFailure: true,
+    });
+    if (!fbDecision.blocked && fbDecision.tier !== "deterministic") {
+      effectiveDecision = fbDecision;
+      fallbackReason = "latency_timeout";
+      result = await withLatencyTimeout(
+        dispatcher(requestForDecision(fbDecision), guardedCfg),
+        policy.maxLatencyMs,
+      );
+    }
+  }
   const latencyMs = Date.now() - startedAt;
 
   const audit = (
     schemaValidation: AiRoutingRunOutcome["schemaValidation"],
     confidence: string | null,
+    outputExcerpt: string | null = null,
   ): AiRoutingAuditRecord =>
-    buildRoutingAuditRecord(decision, {
+    buildRoutingAuditRecord(effectiveDecision, {
       ...auditBase,
       providerAdapter:
         result.status === "ok" ? result.provider : providerKindFor(cfg),
@@ -183,6 +290,19 @@ export async function runAiAgentCore<T = unknown>(
               outputTokens: result.usage.outputTokens ?? null,
             }
           : null,
+      // Real cost from real usage only — mock runs and unknown models stay
+      // null (see runtime/model-pricing.ts; never a fabricated figure).
+      actualCostUsd:
+        result.status === "ok" && result.provider !== "mock" && result.usage
+          ? computeActualCostUsd(
+              result.model,
+              result.usage.inputTokens ?? null,
+              result.usage.outputTokens ?? null,
+            )
+          : null,
+      modelId: result.status === "ok" ? result.model : (request.model ?? null),
+      outputExcerpt,
+      fallbackReason,
     });
 
   if (result.status === "disabled") {
@@ -215,12 +335,24 @@ export async function runAiAgentCore<T = unknown>(
       ? ((parsedOutput.data as { confidence: string }).confidence)
       : null;
 
+  // Bounded excerpt of the schema-VALIDATED output (the accepted subset) —
+  // doctrine §7.1: the response is logged; input content never is.
+  let outputExcerpt: string | null = null;
+  try {
+    outputExcerpt = JSON.stringify(parsedOutput.data).slice(
+      0,
+      AI_RUN_OUTPUT_EXCERPT_MAX,
+    );
+  } catch {
+    outputExcerpt = null;
+  }
+
   return {
     status: "suggestion",
     agent: entry.agent,
     provider: result.provider,
     model: result.model,
     value: parsedOutput.data as T,
-    routing: audit("passed", envelopeConfidence),
+    routing: audit("passed", envelopeConfidence, outputExcerpt),
   };
 }

@@ -1745,7 +1745,12 @@ describe("no migration files added by this sprint", () => {
     // (provenance ledger + worker external profiles + append-only
     // identity-resolution audit); DRAFT / needs-human-gate, NOT applied;
     // paired rollback + deferred APPLIED_LEDGER entry in the PR.
-    const SPRINT_BASELINE = 132;
+    // Bumped 132 -> 133 for the AI Router v1 run-audit draft
+    // (20260714150000_ai_runs_audit_v1) — APPEND-ONLY ai_runs log of live
+    // AI agent runs (admin-only SELECT, service-role-only writes); DRAFT /
+    // needs-human-gate, NOT applied; paired rollback + deferred
+    // APPLIED_LEDGER entry in the PR.
+    const SPRINT_BASELINE = 133;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

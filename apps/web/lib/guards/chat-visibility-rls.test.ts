@@ -223,9 +223,17 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    a worker cannot read them directly). The owner's profile id never
     //    reaches the browser; the conversation itself opens through the
     //    gated 0021 backend (rate caps + §8.1 grant), never service-role.
+    //  - lib/ai/runtime/audit-store.ts — AI Router v1 append-only run audit.
+    //    Best-effort INSERT of one ai_runs row per LIVE AI run + a head-only
+    //    COUNT for the daily-run budget. ai_runs by design carries NO
+    //    anon/authenticated write path (admin-only SELECT, append-only;
+    //    gated draft 20260714150000), so the service role is the only write
+    //    path — the billing-webhook pattern. The row carries field NAMES +
+    //    a bounded validated-output excerpt, never input content; touches
+    //    no chat table, sends nothing outbound.
     // None touch a chat table; they write only billing_* /
-    // payment_webhook_events / one intake status column (the reads write
-    // nothing at all).
+    // payment_webhook_events / one intake status column / the append-only
+    // ai_runs audit row (the reads write nothing at all).
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
@@ -234,6 +242,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
+      "lib/ai/runtime/audit-store.ts",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
       "lib/opportunities/contact-employer.ts",

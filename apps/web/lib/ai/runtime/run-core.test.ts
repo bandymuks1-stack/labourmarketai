@@ -24,12 +24,23 @@ const req = (mock?: unknown): AiCompletionRequest => ({
 });
 
 describe("selectCompletionProvider", () => {
-  it("maps kinds to providers; openai seam is inert", () => {
+  it("maps every kind to its provider (non-anthropic wires stay env-gated)", () => {
     expect(selectCompletionProvider("disabled").kind).toBe("disabled");
     expect(selectCompletionProvider("mock").kind).toBe("mock");
     expect(selectCompletionProvider("anthropic").kind).toBe("anthropic");
-    // openai is documented but NOT wired → inert (disabled), never half-built.
-    expect(selectCompletionProvider("openai").kind).toBe("disabled");
+    // AI Router v1: real fetch wires exist, DOUBLE env-gated inside each
+    // adapter (enable flag + key) — selection alone never reaches a network.
+    expect(selectCompletionProvider("openai").kind).toBe("openai");
+    expect(selectCompletionProvider("gemini").kind).toBe("gemini");
+    expect(selectCompletionProvider("xai").kind).toBe("xai");
+  });
+
+  it("an env-gated adapter selected without env returns the disabled sentinel", async () => {
+    const cfg = resolveAiRuntimeConfig({
+      ...base, mode: "live", provider: "openai", apiKey: "presence-only",
+    });
+    const r = await selectCompletionProvider("openai").complete(req(), cfg);
+    expect(r.status).toBe("disabled");
   });
 });
 

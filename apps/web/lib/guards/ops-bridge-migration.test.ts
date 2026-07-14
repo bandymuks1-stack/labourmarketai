@@ -348,6 +348,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 131 -> 132 for the multi-source talent draft
     // (20260713210000_multi_source_talent_v1, Labour Market OS P5–P7) —
     // DRAFT / needs-human-gate, NOT applied; paired rollback in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 132/);
+    // Bumped 132 -> 133 for the AI Router v1 run-audit draft
+    // (20260714150000_ai_runs_audit_v1, append-only ai_runs log) —
+    // DRAFT / needs-human-gate, NOT applied; paired rollback in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 133/);
   });
 });

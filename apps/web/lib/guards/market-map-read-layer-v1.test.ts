@@ -249,6 +249,11 @@ describe("NO new DB migration in this PR", () => {
     // identity-resolution audit; fail-closed RLS, RPC-only writes. DRAFT /
     // needs-human-gate, NOT applied; paired rollback + deferred
     // APPLIED_LEDGER entry in the PR.
-    expect(count).toBeLessThanOrEqual(132);
+    // Bumped 132 -> 133 for the AI Router v1 run-audit draft
+    // (20260714150000_ai_runs_audit_v1): APPEND-ONLY ai_runs log of live AI
+    // agent runs (admin-only SELECT, service-role-only writes, UPDATE/DELETE
+    // revoked for every role). DRAFT / needs-human-gate, NOT applied; paired
+    // rollback + deferred APPLIED_LEDGER entry in the PR.
+    expect(count).toBeLessThanOrEqual(133);
   });
 });

@@ -1,32 +1,42 @@
 /**
- * Provider adapter contract — declared, dependency-free registry (P9).
+ * Provider adapter contract — declared, dependency-free registry (P9 ·
+ * AI Router v1).
  *
  * A provider-neutral descriptor of every adapter this platform KNOWS about,
  * so a future shared AI Gateway (Rexora / Agentai OS) can consume the same
- * contract. This file declares seams — it wires NOTHING:
+ * contract. This file describes — it wires NOTHING itself:
  *
  *   - `anthropic` is the only ACTIVE adapter (providers/anthropic.ts, the one
  *     allowlisted SDK importer; still env-gated + inert without a key).
- *   - `openai`, `deepl`, `meta_llama`, `xai` are `declared_inactive`: named
- *     seams only. run-core.ts keeps mapping anything non-anthropic to the
- *     disabled provider — there is NO half-built wiring behind these ids.
+ *   - `openai`, `gemini`, `xai`, `deepl` are `wired_env_gated`: a REAL
+ *     fetch-based HTTP wire exists (providers/{openai,gemini,xai,deepl}.ts)
+ *     but each adapter is DOUBLE env-gated (per-provider enable flag + key)
+ *     and returns the typed disabled sentinel without both — honestly
+ *     declared, never faked, reachable only through run-core dispatch.
+ *   - `meta_llama` is `declared_inactive`: a named seam only — no wiring.
  *   - `sora` is `unavailable`: video generation has no task type here and is
  *     explicitly not usable.
  *
  * Guard ai-task-routing.test.ts pins that no adapter other than anthropic is
- * ever `active`. Pure. No SDK import, no env, no IO.
+ * ever `active`, and that ONLY runtime/providers/* reference the provider API
+ * hosts. Pure. No SDK import, no env, no IO.
  */
 import type { AiTaskType, TaskRouteDecision } from "../task-routing";
 
 export type AiProviderAdapterId =
   | "anthropic"
   | "openai"
+  | "gemini"
   | "deepl"
   | "meta_llama"
   | "xai"
   | "sora";
 
-export type AiAdapterStatus = "active" | "declared_inactive" | "unavailable";
+export type AiAdapterStatus =
+  | "active"
+  | "wired_env_gated"
+  | "declared_inactive"
+  | "unavailable";
 
 export interface AiProviderAdapterDescriptor {
   readonly id: AiProviderAdapterId;
@@ -62,17 +72,32 @@ export const PROVIDER_ADAPTER_REGISTRY: readonly AiProviderAdapterDescriptor[] =
   {
     id: "openai",
     displayName: "OpenAI",
-    status: "declared_inactive",
+    status: "wired_env_gated",
     capabilities: LLM_TASKS,
     notes:
-      "Declared seam only — run-core.ts maps 'openai' to the disabled provider. No wiring exists.",
+      "Real chat-completions wire in providers/openai.ts (no SDK). " +
+      "Inert unless AI_PROVIDER_MODE=live + AI_PROVIDER=openai + " +
+      "AI_OPENAI_ENABLED=true + OPENAI_API_KEY.",
+  },
+  {
+    id: "gemini",
+    displayName: "Google Gemini",
+    status: "wired_env_gated",
+    capabilities: LLM_TASKS,
+    notes:
+      "Real generateContent REST wire in providers/gemini.ts (no SDK). " +
+      "Inert unless AI_PROVIDER_MODE=live + AI_PROVIDER=gemini + " +
+      "AI_GEMINI_ENABLED=true + GEMINI_API_KEY.",
   },
   {
     id: "deepl",
     displayName: "DeepL",
-    status: "declared_inactive",
+    status: "wired_env_gated",
     capabilities: ["translate_message"],
-    notes: "Declared translation seam only. No client, no key handling, no wiring.",
+    notes:
+      "Real v2/translate wire in providers/deepl.ts, reached ONLY via the " +
+      "translate_message languageRouting preference. Inert unless " +
+      "AI_DEEPL_ENABLED=true + DEEPL_API_KEY; the LLM tier stays the fallback.",
   },
   {
     id: "meta_llama",
@@ -85,9 +110,12 @@ export const PROVIDER_ADAPTER_REGISTRY: readonly AiProviderAdapterDescriptor[] =
   {
     id: "xai",
     displayName: "xAI Grok",
-    status: "declared_inactive",
-    capabilities: ["explain_match", "draft_follow_up"],
-    notes: "Declared seam only. No wiring exists.",
+    status: "wired_env_gated",
+    capabilities: LLM_TASKS,
+    notes:
+      "Real OpenAI-compatible chat-completions wire in providers/xai.ts (no SDK). " +
+      "Inert unless AI_PROVIDER_MODE=live + AI_PROVIDER=xai + " +
+      "AI_XAI_ENABLED=true + XAI_API_KEY.",
   },
   {
     id: "sora",
