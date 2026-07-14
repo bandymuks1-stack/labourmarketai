@@ -2672,7 +2672,8 @@
       },
       "notKnown": {
         "grossNetBasis": "Nav zināms, vai summas ir bruto vai neto.",
-        "noObservationStore": "Novērojumu krātuve vēl nav iespējota, tāpēc atsauces uz atsevišķiem novērojumiem nav pieejamas."
+        "noObservationStore": "Novērojumu krātuve vēl nav iespējota, tāpēc atsauces uz atsevišķiem novērojumiem nav pieejamas.",
+        "demandMultiBucket": "Soli pa solim izvedums apraksta tikai pirmo pieprasījuma grupu — šī kartīte apvieno vairākas grupas, kuru ģeogrāfija un izlases lielumi atšķiras."
       }
     },
     "trustCard": {
@@ -2703,12 +2704,16 @@
         "demandNoOwnRows": "Šeit nav pieprasījuma skaitļa, jo jūsu organizācijai pēdējo 90 dienu laikā nav pieprasījuma ierakstu — šī kartīte skaita tikai jūsu pašu īstos ierakstus.",
         "supplyNotMeasured": "Šeit nav piedāvājuma skaitļa, jo darbinieku pieejamība vēl netiek apkopota: novērojumu krātuve ir sagatavota, bet izslēgta.",
         "skillGapNeedsBoth": "Šeit nav prasmju plaisas skaitļa, jo tam vajadzīgi gan pieprasījuma, gan piedāvājuma apkopojumi — neviens netiek publicēts, kamēr novērojumu krātuve ir izslēgta.",
-        "trendNeedsHistory": "Šeit nav tendences, jo tendencei vajadzīga datētu novērojumu vēsture, un novērojumu krātuve ir sagatavota, bet izslēgta. Tendence nekad netiek zīmēta no viena punkta."
+        "trendNeedsHistory": "Šeit nav tendences, jo tendencei vajadzīga datētu novērojumu vēsture, un novērojumu krātuve ir sagatavota, bet izslēgta. Tendence nekad netiek zīmēta no viena punkta.",
+        "salaryBasisNotComparable": "Šeit nav algas skaitļa, jo jūsu profesijai un valstij kurēts tirgus atskaites punkts ir ievadīts, taču to nevar godīgi salīdzināt: nav fiksēts, vai summas ir bruto vai neto. Neskaidrs salīdzinājums nekad netiek rādīts.",
+        "salaryInputsMissing": "Šeit nav algas skaitļa, jo kurēts tirgus atskaites punkts ir ievadīts, taču trūkst jūsu norādītās vēlamās algas, tāpēc nav ko salīdzināt."
       },
       "requirement": {
         "ownerEnableStore": "Platformas īpašniekam jāieslēdz novērojumu krātuve un jāapstiprina vismaz viens datu avots.",
         "salaryBenchmark": "Administratoram jāievada kurēts tirgus atskaites punkts jūsu profesijai un valstij, vai platformas īpašniekam jāapstiprina ārējais algu avots.",
-        "demandOwnRows": "Pievienojiet darba pieprasījumus — kartīte piepildīsies ar jūsu organizācijas datiem, tiklīdz būs ieraksti."
+        "demandOwnRows": "Pievienojiet darba pieprasījumus — kartīte piepildīsies ar jūsu organizācijas datiem, tiklīdz būs ieraksti.",
+        "salaryBasis": "Pirms godīga salīdzinājuma parādīšanas jābūt fiksētam, vai jūsu vēlamā alga un kurētais tirgus atskaites punkts ir norādīti bruto vai neto.",
+        "salaryInputs": "Ievadiet vēlamo algu savā darbinieka profilā — salīdzinājums parādīsies, tiklīdz tā būs ievadīta."
       },
       "after": {
         "activation": "Kad īpašnieks apstiprinās un aktivizēs datu avotu, šī kartīte piepildīsies ar pamatotiem, datētiem skaitļiem — katram būs uzticamība, svaigums, avots un soli pa solim izsekojama izcelsme."

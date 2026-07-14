@@ -2,10 +2,12 @@ import { getTranslations } from "next-intl/server";
 
 import type { ConfidenceLevel } from "@/lib/intelligence/confidence";
 import type { FreshnessLabel } from "@/lib/intelligence/freshness";
+import type { InsightOriginKind } from "@/lib/intelligence/explainability";
 import {
   INTEL_CHIP_CLASS,
   INTEL_CONFIDENCE_TONE,
   INTEL_ORIGIN_TONE,
+  INTEL_TRUST_STATUS_TONE,
 } from "./badge-styles";
 
 /**
@@ -58,7 +60,7 @@ export async function FreshnessNote({ label }: { label: FreshnessLabel }) {
 export async function OriginBadge({
   originKind,
 }: {
-  originKind: "internal" | "external" | "blended";
+  originKind: InsightOriginKind;
 }) {
   const t = await getTranslations("intelligence");
   return (
@@ -76,7 +78,7 @@ export async function ConflictBadge() {
   const t = await getTranslations("intelligence");
   return (
     <span
-      className={`${INTEL_CHIP_CLASS} border-state-danger/40 bg-state-danger/10 text-state-danger`}
+      className={`${INTEL_CHIP_CLASS} ${INTEL_TRUST_STATUS_TONE.conflict}`}
       data-testid="intelligence-conflict-badge"
     >
       {t("trustCard.conflict.title")}

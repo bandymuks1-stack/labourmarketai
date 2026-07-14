@@ -2672,7 +2672,8 @@
       },
       "notKnown": {
         "grossNetBasis": "Det vides ikke, om beløbene er brutto eller netto.",
-        "noObservationStore": "Observationslageret er endnu ikke aktiveret, så referencer til enkelte observationer er ikke tilgængelige."
+        "noObservationStore": "Observationslageret er endnu ikke aktiveret, så referencer til enkelte observationer er ikke tilgængelige.",
+        "demandMultiBucket": "Trin-for-trin-udledningen beskriver kun den første efterspørgselsgruppe — dette kort samler flere grupper med forskellig geografi og stikprøvestørrelse."
       }
     },
     "trustCard": {
@@ -2703,12 +2704,16 @@
         "demandNoOwnRows": "Der er intet efterspørgselstal her, fordi din organisation ikke har efterspørgselsposter de seneste 90 dage — kortet tæller kun jeres egne rigtige poster.",
         "supplyNotMeasured": "Der er intet udbudstal her, fordi arbejdskraftens tilgængelighed endnu ikke aggregeres: observationslageret er forberedt, men slukket.",
         "skillGapNeedsBoth": "Der er intet kompetencegab-tal her, fordi det kræver både et efterspørgsels- og et udbudsaggregat — ingen af dem offentliggøres, mens observationslageret er slukket.",
-        "trendNeedsHistory": "Der er ingen tendens her, fordi en tendens kræver en historik af daterede observationer, og observationslageret er forberedt, men slukket. En tendens tegnes aldrig ud fra ét punkt."
+        "trendNeedsHistory": "Der er ingen tendens her, fordi en tendens kræver en historik af daterede observationer, og observationslageret er forberedt, men slukket. En tendens tegnes aldrig ud fra ét punkt.",
+        "salaryBasisNotComparable": "Der er intet løntal her, fordi der findes en kurateret markedssats for dit erhverv og land, men den kan ikke sammenlignes ærligt: det er ikke registreret, om beløbene er brutto eller netto. En uklar sammenligning vises aldrig.",
+        "salaryInputsMissing": "Der er intet løntal her, fordi der findes en kurateret markedssats, men din egen forventede løn mangler, så der er intet at sammenligne med."
       },
       "requirement": {
         "ownerEnableStore": "Platformens ejer skal tænde for observationslageret og godkende mindst én datakilde.",
         "salaryBenchmark": "En administrator skal indtaste en kurateret markedssats for dit erhverv og land, eller platformens ejer skal godkende en ekstern lønkilde.",
-        "demandOwnRows": "Tilføj arbejdsforespørgsler — kortet fyldes med jeres egen organisations data, så snart der findes poster."
+        "demandOwnRows": "Tilføj arbejdsforespørgsler — kortet fyldes med jeres egen organisations data, så snart der findes poster.",
+        "salaryBasis": "Lønbasis (brutto eller netto) skal være registreret for både din forventede løn og den kuraterede markedssats, før en ærlig sammenligning kan vises.",
+        "salaryInputs": "Indtast din forventede løn i din arbejdstagerprofil — sammenligningen vises, så snart den findes."
       },
       "after": {
         "activation": "Når ejeren har godkendt og aktiveret en datakilde, fyldes dette kort med dokumenterede, daterede tal — hver med pålidelighed, friskhed, kilde og trin-for-trin-oprindelse."

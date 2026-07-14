@@ -2672,7 +2672,8 @@
       },
       "notKnown": {
         "grossNetBasis": "Nie wiadomo, czy kwoty są brutto, czy netto.",
-        "noObservationStore": "Magazyn obserwacji nie jest jeszcze włączony, więc odwołania do pojedynczych obserwacji są niedostępne."
+        "noObservationStore": "Magazyn obserwacji nie jest jeszcze włączony, więc odwołania do pojedynczych obserwacji są niedostępne.",
+        "demandMultiBucket": "Wyprowadzenie krok po kroku opisuje tylko pierwszą grupę popytu — ta karta łączy kilka grup o różnej geografii i wielkości próby."
       }
     },
     "trustCard": {
@@ -2703,12 +2704,16 @@
         "demandNoOwnRows": "Nie ma tu liczby popytu, ponieważ Twoja organizacja nie ma wpisów popytu z ostatnich 90 dni — ta karta liczy wyłącznie Wasze własne, prawdziwe wpisy.",
         "supplyNotMeasured": "Nie ma tu liczby podaży, ponieważ dostępność pracowników nie jest jeszcze agregowana: magazyn obserwacji jest przygotowany, ale wyłączony.",
         "skillGapNeedsBoth": "Nie ma tu liczby luki kompetencyjnej, ponieważ wymaga ona agregatów popytu i podaży — żaden nie jest publikowany, dopóki magazyn obserwacji jest wyłączony.",
-        "trendNeedsHistory": "Nie ma tu trendu, ponieważ trend wymaga historii datowanych obserwacji, a magazyn obserwacji jest przygotowany, ale wyłączony. Trend nigdy nie jest rysowany z jednego punktu."
+        "trendNeedsHistory": "Nie ma tu trendu, ponieważ trend wymaga historii datowanych obserwacji, a magazyn obserwacji jest przygotowany, ale wyłączony. Trend nigdy nie jest rysowany z jednego punktu.",
+        "salaryBasisNotComparable": "Nie ma tu kwoty wynagrodzenia, ponieważ dla Twojego zawodu i kraju istnieje kuratorowany punkt odniesienia, ale nie można go uczciwie porównać: nie zapisano, czy kwoty są brutto, czy netto. Niejasne porównanie nigdy nie jest pokazywane.",
+        "salaryInputsMissing": "Nie ma tu kwoty wynagrodzenia, ponieważ kuratorowany punkt odniesienia istnieje, ale brakuje Twojego oczekiwanego wynagrodzenia, więc nie ma czego porównać."
       },
       "requirement": {
         "ownerEnableStore": "Właściciel platformy musi włączyć magazyn obserwacji i zatwierdzić co najmniej jedno źródło danych.",
         "salaryBenchmark": "Administrator musi wprowadzić kuratorowany punkt odniesienia dla Twojego zawodu i kraju albo właściciel platformy musi zatwierdzić zewnętrzne źródło wynagrodzeń.",
-        "demandOwnRows": "Dodaj zapytania o pracę — ta karta wypełni się danymi Twojej organizacji, gdy tylko pojawią się wpisy."
+        "demandOwnRows": "Dodaj zapytania o pracę — ta karta wypełni się danymi Twojej organizacji, gdy tylko pojawią się wpisy.",
+        "salaryBasis": "Podstawa wynagrodzenia (brutto lub netto) musi być zapisana zarówno dla Twojego oczekiwanego wynagrodzenia, jak i dla kuratorowanego punktu odniesienia, zanim będzie można pokazać uczciwe porównanie.",
+        "salaryInputs": "Wpisz oczekiwane wynagrodzenie w swoim profilu pracownika — porównanie pojawi się, gdy tylko będzie dostępne."
       },
       "after": {
         "activation": "Gdy właściciel zatwierdzi i włączy źródło danych, ta karta wypełni się udokumentowanymi, datowanymi liczbami — każda z wiarygodnością, świeżością, źródłem i pochodzeniem krok po kroku."
