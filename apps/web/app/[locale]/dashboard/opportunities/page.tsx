@@ -298,10 +298,11 @@ export default async function OpportunitiesPage({
         className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
         data-testid="opportunities-next-step"
       >
+        {/* Density pass (worker-workspace UX audit v2): the intro sentence
+            restated what the two link cards below already say — removed. */}
         <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
           {t("nextStep.title")}
         </span>
-        <p className="text-xs text-text-secondary">{t("nextStep.intro")}</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {[
             {

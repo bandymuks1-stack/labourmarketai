@@ -822,7 +822,7 @@
     "notVerified": "Dies sind Angaben, die Sie selbst gemacht haben — noch nicht geprüft. Nachweise schaffen Vertrauen, Sie können sie aber auch später hinzufügen.",
     "primaryAction": "Fehlendes ergänzen",
     "primaryActionJournal": "Arbeitsnachweis hinzufügen",
-    "journalLink": "Arbeitsnachweise",
+    "journalLink": "Arbeitsjournal",
     "cvImportLink": "Lebenslauf hinzufügen — einfügen oder hochladen",
     "evidence": {
       "intro": "Fähigkeiten sind stärker, wenn sie durch echte Arbeits-, Lern- oder Aktivitätseinträge gestützt werden.",
@@ -2479,7 +2479,7 @@
       "body": "Einige Einträge sind noch nicht eindeutig klassifiziert. Prüfen Sie sie oder fügen Sie weitere Informationen hinzu, damit Ihr Profil genauer gematcht werden kann.",
       "cta": "Fähigkeiten prüfen"
     },
-    "pageTitle": "Meine Kompetenzen",
+    "pageTitle": "Mein Profil",
     "pageSubtitle": "Alles, was Ihre Arbeitskarte ausmacht, lebt hier: was Sie tun, was Sie können und was es belegt. Ihr gewählter Bereich ist Kontext, keine Grenze.",
     "professionLabel": "Ihr Beruf",
     "professionPlaceholder": "Beruf auswählen",
@@ -2517,14 +2517,14 @@
       "applyAll": "Ausgewählte Vorschläge hinzufügen",
       "applyAllDisabledHint": "Wählen Sie mindestens einen Vorschlag aus",
       "applying": "Wird gespeichert…",
-      "savedToCapabilities": "Fähigkeiten unter Meine Kompetenzen gespeichert",
+      "savedToCapabilities": "Fähigkeiten unter Meine Fähigkeiten gespeichert",
       "appliedToast": "Ausgewählte Vorschläge wurden Ihrem Profil hinzugefügt. Sie können sie weiterhin manuell bearbeiten oder erweitern.",
       "noSuggestionsFallback": "Noch keine eindeutigen Vorschläge. Sie können mehr Details angeben oder Informationen manuell hinzufügen.",
       "noNewSuggestions": "Keine neuen Vorschläge. Ihre bereits gespeicherten Fähigkeiten werden unten angezeigt.",
       "confirmedByYou": "Noch nicht geprüft",
       "addedToProfile": "Zu Ihrem Profil hinzugefügt",
       "needsExternalConfirmation": "Arbeitsnachweise später hinzufügen",
-      "viewCapabilities": "Ihre Kompetenzen ansehen",
+      "viewCapabilities": "Ihre Fähigkeiten ansehen",
       "textSavingLabel": "Wird gespeichert…",
       "textSavedLabel": "Ihr Text ist gespeichert",
       "textSaveErrorLabel": "Ihr Text konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
@@ -3203,7 +3203,7 @@
           "proof": {
             "title": "Arbeitsnachweise",
             "body": "Erfassen Sie erledigte Arbeit. Einträge werden später zu Nachweisen für Fähigkeiten.",
-            "cta": "Journal öffnen"
+            "cta": "Arbeitsjournal öffnen"
           },
           "notLimit": "Ihre erste Wahl ist keine Einschränkung — Sie können später weitere Richtungen hinzufügen."
         },
@@ -3256,7 +3256,7 @@
         "journal": {
           "title": "Arbeitsjournal",
           "body": "Erfassen Sie Arbeit zu einem Einsatz. Geprüfte Einträge sammeln mit der Zeit Fähigkeitsnachweise an.",
-          "cta": "Journal öffnen"
+          "cta": "Arbeitsjournal öffnen"
         },
         "addMore": {
           "title": "Fügen Sie eine weitere Art hinzu, labourmarket.ai zu nutzen",
@@ -3442,14 +3442,14 @@
         },
         "unverifiedNote": "Das ist, was Sie über sich selbst sagen — und das ist in Ordnung.",
         "activities": {
-          "title": "Meine Tätigkeiten und Fähigkeiten",
+          "title": "Meine Fähigkeiten",
           "body": "Sagen Sie uns, was Sie können und woran Sie arbeiten möchten. Alles an einem Ort.",
           "cta": "Öffnen"
         },
         "proofCard": {
           "title": "Meine Nachweise",
           "body": "Die Arbeit, die Sie erfassen, wird nach und nach zu Nachweisen Ihrer Fähigkeiten.",
-          "cta": "Journal öffnen"
+          "cta": "Arbeitsjournal öffnen"
         },
         "otherSpaces": "Meine anderen Bereiche"
       },
@@ -3545,7 +3545,7 @@
         "marketplace": "Marktplatz",
         "marketMap": "Karte",
         "profile": "Profil",
-        "journal": "Mein CV",
+        "journal": "Arbeitsjournal",
         "communication": "Nachrichten",
         "discover": "Entdecken",
         "search": "Suche",
@@ -6060,7 +6060,7 @@
   "skillClarify": {
     "title": "Meine Fähigkeiten",
     "intro": "Fügen Sie eine Fähigkeit hinzu, die noch nicht in der Liste steht — in Ihren eigenen Worten.",
-    "listTitle": "Meine Kandidaten-Fähigkeiten",
+    "listTitle": "Gespeicherte Fähigkeiten",
     "empty": "Sie haben noch nichts hinzugefügt.",
     "candidateBadge": "Selbst angegeben · braucht Klärung",
     "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
@@ -6242,7 +6242,7 @@
   },
   "cvExport": {
     "nameNotProvided": "Name noch nicht angegeben",
-    "pageTitle": "Bestätigter Lebenslauf",
+    "pageTitle": "Mein Lebenslauf",
     "builtFrom": {
       "lead": "Dieser Lebenslauf wird ausschließlich aus Ihren eigenen Kontodaten erstellt — nichts wird für Sie erfunden.",
       "profile": "Profil — Ihr Name, Beruf und Ihre Beschreibung.",
@@ -7181,7 +7181,6 @@
     "marketMapLink": "Marktkarte",
     "nextStep": {
       "title": "Von der Passung zum nächsten Schritt",
-      "intro": "Eine Chance geht über den Marktplatz und Ihren Plan weiter.",
       "marketplace": "Marktplatz",
       "marketplaceNote": "Dienstleistung anfragen oder anbieten",
       "bookings": "Plan & Buchungen",
@@ -8860,7 +8859,7 @@
       "title": "Meine Unternehmen"
     },
     "relationships": {
-      "title": "Meine Beziehungen",
+      "title": "Aktive Beziehungen",
       "empty": "Noch keine aktiven Beziehungen.",
       "noOrg": "Persönliche Beziehung — keinem Unternehmen zugeordnet",
       "slug": {

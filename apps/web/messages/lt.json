@@ -655,7 +655,7 @@
       }
     },
     "capabilities": {
-      "title": "Gebėjimų signalai",
+      "title": "Įgūdžių signalai",
       "note": "Tik jūsų pačių gebėjimai. Stipresni signalai atsiranda iš jūsų darbo įrašų.",
       "addAction": "Pridėti įgūdžių profilyje",
       "legend": "Savideklaruota — jūsų nurodyta; Iš darbų — pagrįsta jūsų žurnalo įrašais; Su įrašais — pagrįsta jūsų peržiūrėtais įrašais.",
@@ -798,7 +798,7 @@
     "systemEntries": "Darbo įrašai",
     "empty": "Pradėkite pildyti CV — sukurkite pirmą įrašą.",
     "emptyTitle": "Kol kas tuščia",
-    "emptyCta": "Atidaryti žurnalą"
+    "emptyCta": "Atidaryti darbo žurnalą"
   },
   "evidenceStatus": {
     "aria": "Įrašo būsena",
@@ -822,7 +822,7 @@
     "notVerified": "Tai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.",
     "primaryAction": "Pridėti, ko trūksta",
     "primaryActionJournal": "Pridėti darbo įrašą",
-    "journalLink": "Darbo įrašai",
+    "journalLink": "Darbo žurnalas",
     "cvImportLink": "Pridėk savo CV — įklijuok arba įkelk",
     "evidence": {
       "intro": "Įgūdžiai stipresni, kai juos paremia tikri darbo, mokymosi ar veiklos įrašai.",
@@ -907,7 +907,7 @@
     "saved": "Išsaugota",
     "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "none": "Pirma pridėkite įgūdžių savo profilyje.",
-    "profileLink": "Mano gebėjimai",
+    "profileLink": "Mano įgūdžiai",
     "source": {
       "recognized": "Atpažinta iš teksto",
       "confirmed": "Su įrašais",
@@ -1139,7 +1139,7 @@
         "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
         "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
-      "profileLink": "Mano gebėjimai (jei esate ir asmuo, ne tik įmonė)",
+      "profileLink": "Mano įgūdžiai (jei esate ir asmuo, ne tik įmonė)",
       "nextActions": {
         "heading": "Tolesni žingsniai",
         "missingHeading": "Pridėkite, kad sustiprintumėte profilį",
@@ -1460,7 +1460,7 @@
         "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
         "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
-      "profileLink": "Mano gebėjimai",
+      "profileLink": "Mano įgūdžiai",
       "noAgency": {
         "title": "Agentūros nustatymas dar nebaigtas",
         "body": "Agentūros nustatymas reikalingas tik agentūros darbo eigai. Jis neprivalomas, jei norite veikti kaip užsakovas, įmonė ar darbuotojas. Pasirinkite žemiau, kaip norite pradėti, arba užbaikite agentūros nustatymą.",
@@ -1628,7 +1628,7 @@
         "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
         "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
       },
-      "profileLink": "Mano gebėjimai",
+      "profileLink": "Mano įgūdžiai",
       "setup": {
         "formTitle": "Pirkėjo profilis",
         "formSubtitle": "Šie duomenys saugomi jūsų paskyroje. Juos galite keisti vėliau.",
@@ -2479,7 +2479,7 @@
       "body": "Kai kurie įrašai dar nėra aiškiai suklasifikuoti. Papildykite informaciją arba peržiūrėkite įgūdžius, kad profilis būtų tikslesnis.",
       "cta": "Peržiūrėti įgūdžius"
     },
-    "pageTitle": "Mano gebėjimai",
+    "pageTitle": "Mano profilis",
     "pageSubtitle": "Čia gyvena viskas, kas sudaro jūsų darbo kortelę: ką dirbate, ką mokate ir kuo galite tai įrodyti. Pasirinkta sritis — tik kontekstas, ne apribojimas.",
     "professionLabel": "Tavo profesija",
     "professionPlaceholder": "Pasirink profesiją",
@@ -2517,14 +2517,14 @@
       "applyAll": "Įtraukti pasirinktus pasiūlymus",
       "applyAllDisabledHint": "Pasirinkite bent vieną pasiūlymą",
       "applying": "Saugoma…",
-      "savedToCapabilities": "Įgūdžiai išsaugoti į Mano gebėjimai",
+      "savedToCapabilities": "Įgūdžiai išsaugoti į „Mano įgūdžiai“",
       "appliedToast": "Pasirinktus pasiūlymus įtraukėme į jūsų profilį. Galite juos koreguoti arba papildyti rankiniu būdu.",
       "noSuggestionsFallback": "Kol kas neradome aiškių pasiūlymų. Galite parašyti plačiau arba pridėti informaciją rankiniu būdu.",
       "noNewSuggestions": "Naujų pasiūlymų neradome. Jau išsaugoti gebėjimai rodomi žemiau.",
       "confirmedByYou": "Laukia peržiūros",
       "addedToProfile": "Pridėta į jūsų profilį",
       "needsExternalConfirmation": "Vėliau pridėkite darbo įrašų",
-      "viewCapabilities": "Žiūrėti savo gebėjimus",
+      "viewCapabilities": "Žiūrėti savo įgūdžius",
       "textSavingLabel": "Įrašoma…",
       "textSavedLabel": "Jūsų tekstas išsaugotas",
       "textSaveErrorLabel": "Nepavyko išsaugoti teksto. Bandykite dar kartą.",
@@ -2555,7 +2555,7 @@
       "customerPartial": "Pirkėjo erdvė dar ruošiama. Galite pridėti pirkėjo vaidmenį ir pildyti užklausą."
     },
     "worker": {
-      "description": "Veikla kaip asmuo: text-first profilis, įgūdžiai ir darbo dienoraštis. Aktyvu šiandien."
+      "description": "Veikla kaip asmuo: text-first profilis, įgūdžiai ir darbo žurnalas. Aktyvu šiandien."
     },
     "company": {
       "description": "Jūsų įmonė: komandų, projektų ir poreikių valdymas. Bus įjungta vėliau."
@@ -2608,7 +2608,7 @@
     "workflowSteps": {
       "s1": "Aprašykite, ką mokate, arba įkelkite CV tekstą",
       "s2": "Pasižymi savo įgūdžius",
-      "s3": "Užfiksuokite šiandienos darbą darbo dienoraštyje",
+      "s3": "Užfiksuokite šiandienos darbą darbo žurnale",
       "s4": "Įrašai virsta CV",
       "s5": "Įrašai lieka aiškiai sudėti CV",
       "s6": "Vystykite vaidmenis ir galimybes savo tempu"
@@ -3042,7 +3042,7 @@
         "heading": "Pradedate kaip asmuo ar įmonė?",
         "worker": {
           "title": "Asmuo",
-          "desc": "Ieškau darbo, siūlau savo darbą arba fiksuoju mokslus ir veiklą — profilis, įgūdžiai, CV ir darbo dienoraštis."
+          "desc": "Ieškau darbo, siūlau savo darbą arba fiksuoju mokslus ir veiklą — profilis, įgūdžiai, CV ir darbo žurnalas."
         },
         "company": {
           "title": "Įmonė",
@@ -3056,7 +3056,7 @@
           "title": "Pirkėjas",
           "desc": "Užsisakyti paslaugas, gauti ataskaitas."
         },
-        "infoBox": "Ką bepasirinktum — tai tik pradžios taškas; tavo darbo patirtis tyliai kaupiama Darbo Dienoraštyje. Vieną dieną tai gali būti vertingiausia tavo CV dalis.",
+        "infoBox": "Ką bepasirinktum — tai tik pradžios taškas; tavo darbo patirtis tyliai kaupiama Darbo žurnale. Vieną dieną tai gali būti vertingiausia tavo CV dalis.",
         "continue": "Tęsti",
         "multiNote": "Pasirinkite vieną ar abu — tai tik pradžios taškas. Asmuo ir įmonė yra tapatybės; samdymas, pirkimas, darbuotojų siūlymas ar projektų valdymas yra veiksmai, kuriuos pridėsite vėliau."
       },
@@ -3203,7 +3203,7 @@
           "proof": {
             "title": "Darbo įrašai",
             "body": "Žurnale fiksuokite atliktą darbą. Vėliau įrašai taps įgūdžių įrašais.",
-            "cta": "Atidaryti žurnalą"
+            "cta": "Atidaryti darbo žurnalą"
           },
           "notLimit": "Jūsų pirmas pasirinkimas nėra riba — vėliau galėsite pridėti daugiau krypčių."
         },
@@ -3244,7 +3244,7 @@
           },
           "journal": {
             "title": "Įrašykite pirmą darbo įrašą",
-            "body": "Užfiksuokite, ką nuveikėte. Darbo dienoraštis tampa jūsų įrašu.",
+            "body": "Užfiksuokite, ką nuveikėte. Darbo žurnalas tampa jūsų įrašu.",
             "bodyDone": "Įrašų: {n}"
           }
         },
@@ -3254,9 +3254,9 @@
           "cta": "Atidaryti profilį"
         },
         "journal": {
-          "title": "Darbo dienoraštis",
+          "title": "Darbo žurnalas",
           "body": "Fiksuokite darbą pagal veiklą. Peržiūrėti įrašai ilgainiui kaupia įgūdžių įrašus.",
-          "cta": "Atidaryti dienoraštį"
+          "cta": "Atidaryti darbo žurnalą"
         },
         "addMore": {
           "title": "Pridėkite dar vieną būdą naudotis labourmarket.ai",
@@ -3442,14 +3442,14 @@
         },
         "unverifiedNote": "Tai, ką pasakojate apie save. Dar neperžiūrėta žmogaus — ir tai normalu.",
         "activities": {
-          "title": "Mano veiklos ir įgūdžiai",
+          "title": "Mano įgūdžiai",
           "body": "Papasakokite, ką mokate ir ką norėtumėte veikti. Viskas vienoje vietoje.",
           "cta": "Atverti"
         },
         "proofCard": {
           "title": "Mano įrašai",
           "body": "Užfiksuotas darbas pamažu virsta jūsų įgūdžių įrašais.",
-          "cta": "Atverti dienoraštį"
+          "cta": "Atidaryti darbo žurnalą"
         },
         "otherSpaces": "Kitos mano erdvės"
       },
@@ -5766,7 +5766,7 @@
       "scope": "Sveikatos patikra",
       "item": {
         "login": "Prisijungimas su Google veikia",
-        "journal": "Darbo dienoraščio įrašai išsaugomi",
+        "journal": "Darbo žurnalo įrašai išsaugomi",
         "language": "Kalbos pranešimai gaunami",
         "telemetry": "Operacijų telemetrija fiksuojama (paskutinės 24 val.)",
         "drafts": "Įmonės / agentūros / pirkėjo juodraščiai išsaugomi",
@@ -6060,7 +6060,7 @@
   "skillClarify": {
     "title": "Mano įgūdžiai",
     "intro": "Pridėk įgūdį, kurio dar nėra sąraše — savais žodžiais.",
-    "listTitle": "Mano kandidatiniai įgūdžiai",
+    "listTitle": "Išsaugoti įgūdžiai",
     "empty": "Kol kas nieko nepridėjai.",
     "candidateBadge": "Savideklaruota · tikslinama",
     "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
@@ -7181,7 +7181,6 @@
     "marketMapLink": "Rinkos žemėlapis",
     "nextStep": {
       "title": "Paversk atitikimą veiksmu",
-      "intro": "Galimybė juda pirmyn per turgų ir tavo planą.",
       "marketplace": "Turgus",
       "marketplaceNote": "Paprašyk arba pasiūlyk paslaugą",
       "bookings": "Planas ir rezervacijos",
@@ -8788,7 +8787,7 @@
       "label": "Ryšiai",
       "desc": "Jūsų įmonės, žmonės, partneriai ir kvietimai vienoje vietoje."
     },
-    "eyebrow": "TINKLAS",
+    "eyebrow": "RYŠIAI",
     "title": "Ryšiai",
     "intro": "Jūsų įmonės, komandos, partneriai ir kvietimai. Pakvieskite žmogų ar įmonę tiesiai iš čia.",
     "notEnabled": "Kvietimai šioje aplinkoje dar neįjungti.",
@@ -8860,7 +8859,7 @@
       "title": "Mano įmonės"
     },
     "relationships": {
-      "title": "Mano ryšiai",
+      "title": "Aktyvūs ryšiai",
       "empty": "Aktyvių ryšių kol kas nėra.",
       "noOrg": "Asmeninis ryšys — nesusietas su įmone",
       "slug": {

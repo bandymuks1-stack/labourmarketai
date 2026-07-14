@@ -655,7 +655,7 @@
       }
     },
     "capabilities": {
-      "title": "Capability signals",
+      "title": "Skill signals",
       "note": "Only your own capabilities. Stronger signals build from your work records.",
       "addAction": "Add skills in your profile",
       "legend": "Self-declared — what you listed; From work — backed by your journal entries; With records — backed by your reviewed entries.",
@@ -822,7 +822,7 @@
     "notVerified": "This is information you provided yourself — not yet reviewed. Records build trust, but you can add it later.",
     "primaryAction": "Add what's missing",
     "primaryActionJournal": "Add a work record",
-    "journalLink": "Work records",
+    "journalLink": "Work journal",
     "cvImportLink": "Add your CV — paste or upload",
     "evidence": {
       "intro": "Skills are stronger when backed by real work, learning or activity entries.",
@@ -907,7 +907,7 @@
     "saved": "Saved",
     "error": "Could not save. Please try again.",
     "none": "Add skills in your profile first.",
-    "profileLink": "My capabilities",
+    "profileLink": "My skills",
     "source": {
       "recognized": "Recognized from text",
       "confirmed": "With records",
@@ -1139,7 +1139,7 @@
         "saveError": "Could not save. Please try again.",
         "deleteError": "Could not remove. Please try again."
       },
-      "profileLink": "My capabilities (if you're also a person, not only a company)",
+      "profileLink": "My skills (if you're also a person, not only a company)",
       "nextActions": {
         "heading": "Next steps",
         "missingHeading": "Add to strengthen your profile",
@@ -1460,7 +1460,7 @@
         "saveError": "Could not save. Please try again.",
         "deleteError": "Could not remove. Please try again."
       },
-      "profileLink": "My capabilities",
+      "profileLink": "My skills",
       "noAgency": {
         "title": "Agency setup is not finished yet",
         "body": "Agency setup is only needed for the agency workflow. It is not required if you want to act as a requester, a company, or a worker. Choose how you want to start below, or finish agency setup.",
@@ -1628,7 +1628,7 @@
         "saveError": "Could not save. Please try again.",
         "deleteError": "Could not remove. Please try again."
       },
-      "profileLink": "My capabilities",
+      "profileLink": "My skills",
       "setup": {
         "formTitle": "Buyer profile",
         "formSubtitle": "These details are saved to your account. You can update them later.",
@@ -2479,7 +2479,7 @@
       "body": "Some entries are not clearly classified yet. Review or add more information so your profile can be matched more accurately.",
       "cta": "Review skills"
     },
-    "pageTitle": "My capabilities",
+    "pageTitle": "My profile",
     "pageSubtitle": "Everything that makes up your work card lives here: what you do, what you can do, and what proves it. Your chosen field is context, not a limit.",
     "professionLabel": "Your profession",
     "professionPlaceholder": "Select a profession",
@@ -2517,14 +2517,14 @@
       "applyAll": "Add selected suggestions",
       "applyAllDisabledHint": "Select at least one suggestion",
       "applying": "Saving…",
-      "savedToCapabilities": "Skills saved to My capabilities",
+      "savedToCapabilities": "Skills saved to My skills",
       "appliedToast": "Selected suggestions added to your profile. You can still edit or extend them manually.",
       "noSuggestionsFallback": "No clear suggestions yet. You can add more detail or add information manually.",
       "noNewSuggestions": "No new suggestions. Your already-saved skills are shown below.",
       "confirmedByYou": "Not reviewed yet",
       "addedToProfile": "Added to your profile",
       "needsExternalConfirmation": "Add work records later",
-      "viewCapabilities": "View your capabilities",
+      "viewCapabilities": "View your skills",
       "textSavingLabel": "Saving…",
       "textSavedLabel": "Your text is saved",
       "textSaveErrorLabel": "Could not save your text. Please try again.",
@@ -3203,7 +3203,7 @@
           "proof": {
             "title": "Work records",
             "body": "Log completed work. Entries later become records for skills.",
-            "cta": "Open journal"
+            "cta": "Open work journal"
           },
           "notLimit": "Your first choice is not a limit — you can add more directions later."
         },
@@ -3256,7 +3256,7 @@
         "journal": {
           "title": "Work journal",
           "body": "Log work against an engagement. Reviewed entries accumulate skill records over time.",
-          "cta": "Open journal"
+          "cta": "Open work journal"
         },
         "addMore": {
           "title": "Add another way to use labourmarket.ai",
@@ -3442,14 +3442,14 @@
         },
         "unverifiedNote": "This is what you say about yourself — and that's fine.",
         "activities": {
-          "title": "My activities and skills",
+          "title": "My skills",
           "body": "Tell us what you can do and what you'd like to work on. All in one place.",
           "cta": "Open"
         },
         "proofCard": {
           "title": "My records",
           "body": "The work you log gradually becomes records of your skills.",
-          "cta": "Open journal"
+          "cta": "Open work journal"
         },
         "otherSpaces": "My other spaces"
       },
@@ -6060,7 +6060,7 @@
   "skillClarify": {
     "title": "My skills",
     "intro": "Add a skill that isn't in the list yet — in your own words.",
-    "listTitle": "My candidate skills",
+    "listTitle": "Saved skills",
     "empty": "You haven't added anything yet.",
     "candidateBadge": "Self-declared · needs clarification",
     "needsMigration": "Couldn’t complete the action. Please try again.",
@@ -7181,7 +7181,6 @@
     "marketMapLink": "Market map",
     "nextStep": {
       "title": "Turn a fit into action",
-      "intro": "An opportunity moves forward through the marketplace and your plan.",
       "marketplace": "Marketplace",
       "marketplaceNote": "Request or offer a service",
       "bookings": "Plan & bookings",
@@ -8860,7 +8859,7 @@
       "title": "My companies"
     },
     "relationships": {
-      "title": "My relationships",
+      "title": "Active relationships",
       "empty": "No active relationships yet.",
       "noOrg": "Personal relationship — not linked to a company",
       "slug": {

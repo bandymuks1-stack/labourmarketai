@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, LogOut, Shield, Sun, Moon, type LucideIcon } from "lucide-react";
+import { User, LogOut, Shield, Sun, Moon, FileText, type LucideIcon } from "lucide-react";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -22,6 +22,10 @@ import { User, LogOut, Shield, Sun, Moon, type LucideIcon } from "lucide-react";
  */
 export function AccountMenu() {
   const t = useTranslations("auth.dashboard");
+  // "Mano CV" findability (worker-workspace UX audit v2): the /cv sheet lives
+  // outside the dashboard shell, so the account menu carries a permanent link
+  // to it — a worker can always find their CV from any dashboard page.
+  const tCv = useTranslations("cvExport");
   const locale = useLocale();
   const { user, profile, isAdmin, adminUiHidden } = useAuth();
   const [open, setOpen] = useState(false);
@@ -138,6 +142,16 @@ export function AccountMenu() {
             )}
             {nextTheme === "dark" ? t("account.theme.toDark") : t("account.theme.toLight")}
           </button>
+          <Link
+            href="/cv"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            data-testid="account-menu-cv-link"
+            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+          >
+            <FileText className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+            {tCv("pageTitle")}
+          </Link>
           <Link
             href="/dashboard/account"
             role="menuitem"

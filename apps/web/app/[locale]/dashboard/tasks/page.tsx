@@ -448,14 +448,19 @@ export default async function TasksPage({
 
       {/* Create — a real RPC-backed form. Self-assign is the default; a
           project select appears only with the caller's own manageable
-          projects (RLS read — workers simply see none). No people-picker. */}
-      <section
-        className="flex flex-col gap-3 rounded-md border border-ink-500 bg-ink-800/30 p-4"
+          projects (RLS read — workers simply see none). No people-picker.
+          Density pass (worker-workspace UX audit v2): collapsed into a
+          disclosure so the OPEN TASKS lead the page — the ~10-field form no
+          longer pushes the task list below the fold. Same form, same action. */}
+      <details
+        className="group rounded-md border border-ink-500 bg-ink-800/30"
         data-testid="tasks-create"
       >
-        <h2 className="font-display text-lg font-semibold tracking-tight text-text-primary">
+        <summary className="flex cursor-pointer list-none items-center gap-2 p-4 font-display text-lg font-semibold tracking-tight text-text-primary [&::-webkit-details-marker]:hidden">
+          <span aria-hidden className="text-text-muted transition-transform group-open:rotate-90">›</span>
           {t("form.title")}
-        </h2>
+        </summary>
+        <div className="flex flex-col gap-3 px-4 pb-4">
         <form action={createWorkTaskAction} className="flex flex-col gap-3">
           {hiddenContext()}
           <label className="flex flex-col gap-1">
@@ -523,7 +528,8 @@ export default async function TasksPage({
             </Button>
           </div>
         </form>
-      </section>
+        </div>
+      </details>
 
       {/* Project-filtered section (linked from project operations). RLS
           scopes the read — a non-manager of the project simply sees less. */}

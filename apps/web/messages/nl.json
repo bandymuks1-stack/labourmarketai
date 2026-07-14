@@ -822,7 +822,7 @@
     "notVerified": "Dit is informatie die je zelf hebt opgegeven — nog niet beoordeeld. Registraties bouwen vertrouwen op, maar je kunt dat later toevoegen.",
     "primaryAction": "Vul aan wat ontbreekt",
     "primaryActionJournal": "Werkregistratie toevoegen",
-    "journalLink": "Werkregistraties",
+    "journalLink": "Werkjournaal",
     "cvImportLink": "Voeg je CV toe — plakken of uploaden",
     "evidence": {
       "intro": "Vaardigheden zijn sterker wanneer ze worden onderbouwd door echte werk-, leer- of activiteitenvermeldingen.",
@@ -1139,7 +1139,7 @@
         "saveError": "Opslaan is niet gelukt. Probeer het opnieuw.",
         "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw."
       },
-      "profileLink": "Mijn capaciteiten (als je ook een persoon bent, niet alleen een bedrijf)",
+      "profileLink": "Mijn vaardigheden (als je ook een persoon bent, niet alleen een bedrijf)",
       "nextActions": {
         "heading": "Volgende stappen",
         "missingHeading": "Voeg toe om je profiel te versterken",
@@ -1460,7 +1460,7 @@
         "saveError": "Opslaan is niet gelukt. Probeer het opnieuw.",
         "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw."
       },
-      "profileLink": "Mijn capaciteiten",
+      "profileLink": "Mijn vaardigheden",
       "noAgency": {
         "title": "De installatie van het uitzendbureau is nog niet afgerond",
         "body": "De installatie van het uitzendbureau is alleen nodig voor de bureauworkflow. Ze is niet vereist als je wilt optreden als aanvrager, bedrijf of werknemer. Kies hieronder hoe je wilt starten, of rond de installatie van het uitzendbureau af.",
@@ -1628,7 +1628,7 @@
         "saveError": "Opslaan is niet gelukt. Probeer het opnieuw.",
         "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw."
       },
-      "profileLink": "Mijn capaciteiten",
+      "profileLink": "Mijn vaardigheden",
       "setup": {
         "formTitle": "Kopersprofiel",
         "formSubtitle": "Deze gegevens worden opgeslagen bij je account. Je kunt ze later bijwerken.",
@@ -2479,7 +2479,7 @@
       "body": "Sommige vermeldingen zijn nog niet duidelijk geclassificeerd. Beoordeel ze of voeg meer informatie toe, zodat je profiel nauwkeuriger gematcht kan worden.",
       "cta": "Vaardigheden beoordelen"
     },
-    "pageTitle": "Mijn capaciteiten",
+    "pageTitle": "Mijn profiel",
     "pageSubtitle": "Alles wat je werkkaart vormt staat hier: wat je doet, wat je kunt en wat dat aantoont. Je gekozen vakgebied is context, geen beperking.",
     "professionLabel": "Je beroep",
     "professionPlaceholder": "Selecteer een beroep",
@@ -2517,14 +2517,14 @@
       "applyAll": "Geselecteerde suggesties toevoegen",
       "applyAllDisabledHint": "Selecteer minstens één suggestie",
       "applying": "Opslaan…",
-      "savedToCapabilities": "Vaardigheden opgeslagen in Mijn capaciteiten",
+      "savedToCapabilities": "Vaardigheden opgeslagen in Mijn vaardigheden",
       "appliedToast": "Geselecteerde suggesties toegevoegd aan je profiel. Je kunt ze nog steeds handmatig bewerken of uitbreiden.",
       "noSuggestionsFallback": "Nog geen duidelijke suggesties. Je kunt meer details geven of informatie handmatig toevoegen.",
       "noNewSuggestions": "Geen nieuwe suggesties. Je al opgeslagen vaardigheden staan hieronder.",
       "confirmedByYou": "Nog niet beoordeeld",
       "addedToProfile": "Toegevoegd aan je profiel",
       "needsExternalConfirmation": "Voeg later werkregistraties toe",
-      "viewCapabilities": "Bekijk je capaciteiten",
+      "viewCapabilities": "Bekijk je vaardigheden",
       "textSavingLabel": "Opslaan…",
       "textSavedLabel": "Je tekst is opgeslagen",
       "textSaveErrorLabel": "Kon je tekst niet opslaan. Probeer het opnieuw.",
@@ -3203,7 +3203,7 @@
           "proof": {
             "title": "Werkregistraties",
             "body": "Leg afgerond werk vast. Vermeldingen worden later registraties voor vaardigheden.",
-            "cta": "Journaal openen"
+            "cta": "Werkjournaal openen"
           },
           "notLimit": "Je eerste keuze is geen beperking — je kunt later meer richtingen toevoegen."
         },
@@ -3256,7 +3256,7 @@
         "journal": {
           "title": "Werkjournaal",
           "body": "Leg werk vast per opdracht. Beoordeelde vermeldingen bouwen in de loop van de tijd vaardigheidsregistraties op.",
-          "cta": "Journaal openen"
+          "cta": "Werkjournaal openen"
         },
         "addMore": {
           "title": "Voeg nog een manier toe om labourmarket.ai te gebruiken",
@@ -3442,14 +3442,14 @@
         },
         "unverifiedNote": "Dit is wat je over jezelf zegt — en dat is prima.",
         "activities": {
-          "title": "Mijn activiteiten en vaardigheden",
+          "title": "Mijn vaardigheden",
           "body": "Vertel ons wat je kunt en waaraan je zou willen werken. Alles op één plek.",
           "cta": "Openen"
         },
         "proofCard": {
           "title": "Mijn registraties",
           "body": "Het werk dat je vastlegt, wordt geleidelijk een registratie van je vaardigheden.",
-          "cta": "Journaal openen"
+          "cta": "Werkjournaal openen"
         },
         "otherSpaces": "Mijn andere ruimtes"
       },
@@ -3545,7 +3545,7 @@
         "marketplace": "Marktplaats",
         "marketMap": "Kaart",
         "profile": "Profiel",
-        "journal": "Mijn cv",
+        "journal": "Werkjournaal",
         "communication": "Berichten",
         "discover": "Ontdekken",
         "search": "Zoeken",
@@ -6060,7 +6060,7 @@
   "skillClarify": {
     "title": "Mijn vaardigheden",
     "intro": "Voeg een vaardigheid toe die nog niet in de lijst staat — in je eigen woorden.",
-    "listTitle": "Mijn kandidaat-vaardigheden",
+    "listTitle": "Opgeslagen vaardigheden",
     "empty": "Je hebt nog niets toegevoegd.",
     "candidateBadge": "Zelf opgegeven · verduidelijking nodig",
     "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw.",
@@ -6242,7 +6242,7 @@
   },
   "cvExport": {
     "nameNotProvided": "Naam nog niet toegevoegd",
-    "pageTitle": "Bevestigd CV",
+    "pageTitle": "Mijn cv",
     "builtFrom": {
       "lead": "Dit CV is uitsluitend opgebouwd uit je eigen accountgegevens — er wordt niets voor je aangemaakt.",
       "profile": "Profiel — je naam, beroep en beschrijving.",
@@ -7181,7 +7181,6 @@
     "marketMapLink": "Marktkaart",
     "nextStep": {
       "title": "Zet een match om in actie",
-      "intro": "Een kans komt verder via de marktplaats en je plan.",
       "marketplace": "Marktplaats",
       "marketplaceNote": "Vraag een dienst aan of bied er een aan",
       "bookings": "Plan & boekingen",
@@ -8860,7 +8859,7 @@
       "title": "Mijn bedrijven"
     },
     "relationships": {
-      "title": "Mijn relaties",
+      "title": "Actieve relaties",
       "empty": "Nog geen actieve relaties.",
       "noOrg": "Persoonlijke relatie — niet gekoppeld aan een bedrijf",
       "slug": {
