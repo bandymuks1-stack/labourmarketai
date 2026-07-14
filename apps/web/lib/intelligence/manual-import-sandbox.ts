@@ -313,21 +313,30 @@ export function runManualImportSandbox(
     const failures = result.ok ? [] : [...result.failures];
     allFailures.push(failures);
     const hash = String(candidate.observation.contentHash);
-    seenHashes.add(hash);
     firstSourceKey ??= asTrimmed(candidate.observation.sourceKey);
 
     const checkIds = new Set(failures.map((f) => f.checkId));
     if (failures.length === 0) {
       validRows++;
+      // Only ACCEPTED rows enter the duplicate set — a real import stores
+      // only accepted rows, so a rejected row followed by its corrected
+      // twin must not mark the correction as a duplicate.
+      seenHashes.add(hash);
     } else if (checkIds.has("duplicate")) {
       duplicated++;
     } else {
       rejectedOther++;
     }
-    // Rows blocked ONLY by the inactive source: valid after activation.
+    // Rows blocked ONLY by a registered-but-inactive source: these are the
+    // rows activation would let through. unknown_source / kind-mismatch
+    // rows can NOT become valid by flipping an existing source on.
     if (
       failures.length > 0 &&
-      failures.every((f) => f.checkId === "source_approved")
+      failures.every(
+        (f) =>
+          f.checkId === "source_approved" &&
+          f.reasonCode === "source_not_active",
+      )
     ) {
       validAfterActivation++;
     }

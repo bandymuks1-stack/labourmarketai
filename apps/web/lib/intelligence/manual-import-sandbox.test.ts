@@ -107,6 +107,20 @@ describe("validation preview (§3)", () => {
     expect(result.tallies.unsupportedSchema).toBeGreaterThanOrEqual(1); // "xx" geo
   });
 
+  it("a rejected row does NOT poison the duplicate set for its corrected twin", () => {
+    // Same observation identity: first with a rejected language, then the
+    // corrected row. A real import stores only accepted rows — the
+    // correction must validate, not fail as 'duplicate'.
+    const content = [
+      internalRow({ source_language: "de" }), // rejected: language
+      internalRow(), // corrected twin (same content hash) → must be VALID
+    ].join("\n");
+    const result = run(content);
+    expect(result.validRows).toBe(1);
+    expect(result.tallies.duplicateHashes).toBe(0);
+    expect(result.previews[1].valid).toBe(true);
+  });
+
   it("parse refusal reports the reason code and zero rows", () => {
     const result = run("{broken", { format: "json" });
     expect(result.parse).toEqual({
@@ -130,6 +144,15 @@ describe("readiness is NOT bypassed (fail-closed) — but honestly explained", (
     // A row with OTHER problems too is NOT counted as activation-ready.
     const mixed = run(externalRow({ unit: "usd_year" }));
     expect(mixed.validAfterActivation).toBe(0);
+  });
+
+  it("unknown sources are NOT counted as activation-ready — nothing exists to switch on", () => {
+    const result = run(
+      externalRow({ source_key: "cvbankas_salaray" /* typo → unknown */ }),
+    );
+    expect(result.validRows).toBe(0);
+    expect(result.validAfterActivation).toBe(0);
+    expect(result.tallies.sourceNotActive).toBe(1);
   });
 });
 
