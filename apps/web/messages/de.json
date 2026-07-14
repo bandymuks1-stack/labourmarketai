@@ -9600,6 +9600,91 @@
       "blocked": "Blockiert",
       "maintenance": "Wartung",
       "unknown": "Unbekannt"
+    },
+    "sandbox": {
+      "eyebrow": "Entwicklerwerkzeuge",
+      "title": "Manuelle Import-Sandbox",
+      "intro": "Isolierter Probelauf-Arbeitsbereich: Validieren Sie eine künftige Datenquelle aus einer lokalen Datei vor jeder Produktionsaktivierung. Jeder Lauf ist eine Simulation über die echte Validierungskette.",
+      "isolationNote": "Vollständig isoliert. Nichts hier kann Beobachtungen schreiben, eine Quelle aktivieren oder etwas herunterladen.",
+      "disabled": "Die manuelle Import-Sandbox ist ausgeschaltet. Setzen Sie INTELLIGENCE_SANDBOX_ENABLED=1 in der Serverumgebung, um diesen Entwickler-Arbeitsbereich zu aktivieren.",
+      "noDataImported": "ES WURDEN KEINE DATEN IMPORTIERT",
+      "form": {
+        "file": "Lokale Datei (CSV, JSON oder NDJSON)",
+        "format": "Format",
+        "mode": "Sitzungsmodus",
+        "modePreview": "Validieren + Beobachtungen ansehen",
+        "modeValidateOnly": "Nur validieren (Zählungen, keine Vorschau)",
+        "run": "Validierungssitzung starten",
+        "running": "Wird validiert…",
+        "note": "Nur vom Inhaber bereitgestellte lokale Dateien. Die Datei wird für diese Ansicht im Speicher verarbeitet und nirgends abgelegt."
+      },
+      "refused": {
+        "title": "Sitzung abgelehnt"
+      },
+      "parse": {
+        "failed": "Datei abgelehnt",
+        "row": "Zeile"
+      },
+      "counts": {
+        "detected": "Erkannte Zeilen",
+        "valid": "Gültige Zeilen",
+        "invalid": "Ungültige Zeilen",
+        "validAfterActivation": "Gültig nach Quellenaktivierung"
+      },
+      "tallies": {
+        "title": "Problemaufschlüsselung",
+        "missingFields": "Fehlende Felder",
+        "unsupportedSchema": "Nicht unterstützte Struktur",
+        "unknownCountries": "Unbekannte Länder",
+        "unknownLanguages": "Unbekannte Sprachen",
+        "salaryFormat": "Gehaltsformat-Probleme",
+        "duplicateHashes": "Doppelte Hashes",
+        "sourceNotActive": "Quelle nicht aktiv",
+        "dateIssues": "Datumsprobleme",
+        "hashMismatches": "Hash-Abweichungen"
+      },
+      "preview": {
+        "title": "Beobachtungsvorschau (wie sie nach der Validierung aussähen)",
+        "row": "Zeile",
+        "valid": "Würde bestehen",
+        "invalid": "Abgelehnt",
+        "hash": "Hash",
+        "source": "Quelle",
+        "timestamp": "Erfasst am",
+        "country": "Land",
+        "language": "Sprache",
+        "salaryBasis": "Gehaltsbasis",
+        "notSalaryMetric": "Keine Gehaltsmetrik",
+        "confidence": "Abgeleitete Verlässlichkeit",
+        "provenance": "Herkunft",
+        "reasonCodes": "Validierungs-Gründe"
+      },
+      "salaryBasis": {
+        "gross": "Brutto",
+        "net": "Netto",
+        "unknown": "Unbekannt"
+      },
+      "report": {
+        "title": "Importsitzungs-Vorschau (Simulation)",
+        "status": "Endstatus",
+        "duplicates": "Duplikate",
+        "errors": "Fehler",
+        "warnings": "Warnungen",
+        "privacy": "Datenschutzprobleme",
+        "rollbackRef": "Rücknahmereferenz",
+        "simulated": "simuliert",
+        "skipped": "Übersprungen je Grund",
+        "finalStatus": {
+          "success": "Erfolgreich",
+          "partial": "Teilweise",
+          "failed": "Fehlgeschlagen",
+          "blocked": "Blockiert"
+        }
+      },
+      "value": {
+        "unknown": "unbekannt",
+        "none": "keine"
+      }
     }
   }
 }

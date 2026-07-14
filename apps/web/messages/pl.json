@@ -2761,6 +2761,91 @@
       "blocked": "Zablokowane",
       "maintenance": "Konserwacja",
       "unknown": "Nieznane"
+    },
+    "sandbox": {
+      "eyebrow": "Narzędzia deweloperskie",
+      "title": "Piaskownica importu ręcznego",
+      "intro": "Izolowane środowisko próbne: sprawdź przyszłe źródło danych z lokalnego pliku przed jakąkolwiek aktywacją produkcyjną. Każde uruchomienie to symulacja przez prawdziwy potok walidacji.",
+      "isolationNote": "Całkowicie izolowane. Nic tutaj nie może zapisać obserwacji, aktywować źródła ani niczego pobrać.",
+      "disabled": "Piaskownica importu ręcznego jest wyłączona. Aby włączyć to środowisko dla deweloperów, ustaw INTELLIGENCE_SANDBOX_ENABLED=1 w środowisku serwera.",
+      "noDataImported": "ŻADNE DANE NIE ZOSTAŁY ZAIMPORTOWANE",
+      "form": {
+        "file": "Plik lokalny (CSV, JSON lub NDJSON)",
+        "format": "Format",
+        "mode": "Tryb sesji",
+        "modePreview": "Walidacja + podgląd obserwacji",
+        "modeValidateOnly": "Tylko walidacja (liczby, bez podglądów)",
+        "run": "Rozpocznij sesję walidacji",
+        "running": "Trwa walidacja…",
+        "note": "Wyłącznie lokalne pliki dostarczone przez właściciela. Plik jest przetwarzany w pamięci na potrzeby tego podglądu i nigdzie nie jest zapisywany."
+      },
+      "refused": {
+        "title": "Sesja odrzucona"
+      },
+      "parse": {
+        "failed": "Plik odrzucony",
+        "row": "wiersz"
+      },
+      "counts": {
+        "detected": "Wykryte wiersze",
+        "valid": "Prawidłowe wiersze",
+        "invalid": "Nieprawidłowe wiersze",
+        "validAfterActivation": "Prawidłowe po aktywacji źródła"
+      },
+      "tallies": {
+        "title": "Rozkład problemów",
+        "missingFields": "Brakujące pola",
+        "unsupportedSchema": "Nieobsługiwana struktura",
+        "unknownCountries": "Nieznane kraje",
+        "unknownLanguages": "Nieznane języki",
+        "salaryFormat": "Problemy formatu wynagrodzenia",
+        "duplicateHashes": "Powtórzone hasze",
+        "sourceNotActive": "Źródło nieaktywne",
+        "dateIssues": "Problemy z datami",
+        "hashMismatches": "Niezgodności haszy"
+      },
+      "preview": {
+        "title": "Podglądy obserwacji (jak wyglądałyby po walidacji)",
+        "row": "Wiersz",
+        "valid": "Przeszedłby walidację",
+        "invalid": "Odrzucony",
+        "hash": "Hasz",
+        "source": "Źródło",
+        "timestamp": "Zarejestrowano",
+        "country": "Kraj",
+        "language": "Język",
+        "salaryBasis": "Podstawa wynagrodzenia",
+        "notSalaryMetric": "To nie metryka wynagrodzenia",
+        "confidence": "Wyprowadzona wiarygodność",
+        "provenance": "Pochodzenie",
+        "reasonCodes": "Kody przyczyn walidacji"
+      },
+      "salaryBasis": {
+        "gross": "Brutto",
+        "net": "Netto",
+        "unknown": "Nieznane"
+      },
+      "report": {
+        "title": "Podgląd sesji importu (symulacja)",
+        "status": "Status końcowy",
+        "duplicates": "Duplikaty",
+        "errors": "Błędy",
+        "warnings": "Ostrzeżenia",
+        "privacy": "Problemy prywatności",
+        "rollbackRef": "Referencja wycofania",
+        "simulated": "symulowana",
+        "skipped": "Pominięte wg przyczyny",
+        "finalStatus": {
+          "success": "Sukces",
+          "partial": "Częściowo",
+          "failed": "Niepowodzenie",
+          "blocked": "Zablokowane"
+        }
+      },
+      "value": {
+        "unknown": "nieznane",
+        "none": "brak"
+      }
     }
   }
 }

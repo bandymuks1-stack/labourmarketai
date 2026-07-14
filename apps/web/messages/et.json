@@ -2761,6 +2761,91 @@
       "blocked": "Blokeeritud",
       "maintenance": "Hooldus",
       "unknown": "Teadmata"
+    },
+    "sandbox": {
+      "eyebrow": "Arendaja tööriistad",
+      "title": "Käsitsi impordi liivakast",
+      "intro": "Isoleeritud proovikäivituse tööala: kontrollige tulevast andmeallikat kohalikust failist enne mis tahes tootmisaktiveerimist. Iga käivitus on simulatsioon läbi päris valideerimisahela.",
+      "isolationNote": "Täielikult isoleeritud. Miski siin ei saa vaatlusi kirjutada, allikat aktiveerida ega midagi alla laadida.",
+      "disabled": "Käsitsi impordi liivakast on välja lülitatud. Selle arendajatööala lubamiseks määrake serverikeskkonnas INTELLIGENCE_SANDBOX_ENABLED=1.",
+      "noDataImported": "ANDMEID EI IMPORDITUD",
+      "form": {
+        "file": "Kohalik fail (CSV, JSON või NDJSON)",
+        "format": "Vorming",
+        "mode": "Seansi režiim",
+        "modePreview": "Valideeri + vaata vaatlusi",
+        "modeValidateOnly": "Ainult valideerimine (arvud, ilma eelvaadeteta)",
+        "run": "Alusta valideerimisseanssi",
+        "running": "Valideeritakse…",
+        "note": "Ainult omaniku esitatud kohalikud failid. Fail töödeldakse selle eelvaate jaoks mälus ja seda ei salvestata kuhugi."
+      },
+      "refused": {
+        "title": "Seanss tagasi lükatud"
+      },
+      "parse": {
+        "failed": "Fail tagasi lükatud",
+        "row": "rida"
+      },
+      "counts": {
+        "detected": "Tuvastatud read",
+        "valid": "Sobivad read",
+        "invalid": "Sobimatud read",
+        "validAfterActivation": "Sobivad pärast allika aktiveerimist"
+      },
+      "tallies": {
+        "title": "Probleemide jaotus",
+        "missingFields": "Puuduvad väljad",
+        "unsupportedSchema": "Toetamata struktuur",
+        "unknownCountries": "Tundmatud riigid",
+        "unknownLanguages": "Tundmatud keeled",
+        "salaryFormat": "Palgavormingu probleemid",
+        "duplicateHashes": "Korduvad räsid",
+        "sourceNotActive": "Allikas pole aktiivne",
+        "dateIssues": "Kuupäevaprobleemid",
+        "hashMismatches": "Räsi mittevastavused"
+      },
+      "preview": {
+        "title": "Vaatluste eelvaated (nagu need näeksid välja pärast valideerimist)",
+        "row": "Rida",
+        "valid": "Läbiks valideerimise",
+        "invalid": "Tagasi lükatud",
+        "hash": "Räsi",
+        "source": "Allikas",
+        "timestamp": "Salvestatud",
+        "country": "Riik",
+        "language": "Keel",
+        "salaryBasis": "Palga alus",
+        "notSalaryMetric": "Pole palgamõõdik",
+        "confidence": "Tuletatud usaldusväärsus",
+        "provenance": "Päritolu",
+        "reasonCodes": "Valideerimise põhjusekoodid"
+      },
+      "salaryBasis": {
+        "gross": "Bruto",
+        "net": "Neto",
+        "unknown": "Teadmata"
+      },
+      "report": {
+        "title": "Impordiseansi eelvaade (simulatsioon)",
+        "status": "Lõppolek",
+        "duplicates": "Duplikaadid",
+        "errors": "Vead",
+        "warnings": "Hoiatused",
+        "privacy": "Privaatsusprobleemid",
+        "rollbackRef": "Tagasipööramise viide",
+        "simulated": "simuleeritud",
+        "skipped": "Vahele jäetud põhjuste kaupa",
+        "finalStatus": {
+          "success": "Õnnestus",
+          "partial": "Osaliselt",
+          "failed": "Ebaõnnestus",
+          "blocked": "Blokeeritud"
+        }
+      },
+      "value": {
+        "unknown": "teadmata",
+        "none": "puudub"
+      }
     }
   }
 }

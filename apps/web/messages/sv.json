@@ -2761,6 +2761,91 @@
       "blocked": "Blockerad",
       "maintenance": "Underhåll",
       "unknown": "Okänd"
+    },
+    "sandbox": {
+      "eyebrow": "Utvecklarverktyg",
+      "title": "Manuell import-sandlåda",
+      "intro": "Isolerad provkörnings-arbetsyta: validera en framtida datakälla från en lokal fil före all produktionsaktivering. Varje körning är en simulering genom den riktiga valideringskedjan.",
+      "isolationNote": "Helt isolerad. Inget här kan skriva observationer, aktivera en källa eller ladda ner något.",
+      "disabled": "Den manuella import-sandlådan är avstängd. Sätt INTELLIGENCE_SANDBOX_ENABLED=1 i servermiljön för att aktivera denna utvecklararbetsyta.",
+      "noDataImported": "INGA DATA IMPORTERADES",
+      "form": {
+        "file": "Lokal fil (CSV, JSON eller NDJSON)",
+        "format": "Format",
+        "mode": "Sessionsläge",
+        "modePreview": "Validera + förhandsgranska observationer",
+        "modeValidateOnly": "Endast validering (antal, inga förhandsgranskningar)",
+        "run": "Starta valideringssession",
+        "running": "Validerar…",
+        "note": "Endast lokala filer som ägaren tillhandahåller. Filen bearbetas i minnet för denna vy och lagras ingenstans."
+      },
+      "refused": {
+        "title": "Session nekad"
+      },
+      "parse": {
+        "failed": "Fil nekad",
+        "row": "rad"
+      },
+      "counts": {
+        "detected": "Rader upptäckta",
+        "valid": "Giltiga rader",
+        "invalid": "Ogiltiga rader",
+        "validAfterActivation": "Giltiga efter källaktivering"
+      },
+      "tallies": {
+        "title": "Problemfördelning",
+        "missingFields": "Saknade fält",
+        "unsupportedSchema": "Struktur som inte stöds",
+        "unknownCountries": "Okända länder",
+        "unknownLanguages": "Okända språk",
+        "salaryFormat": "Löneformat-problem",
+        "duplicateHashes": "Duplicerade hashar",
+        "sourceNotActive": "Källa inte aktiv",
+        "dateIssues": "Datumproblem",
+        "hashMismatches": "Hash-avvikelser"
+      },
+      "preview": {
+        "title": "Observationsförhandsgranskningar (som de skulle se ut efter validering)",
+        "row": "Rad",
+        "valid": "Skulle godkännas",
+        "invalid": "Avvisad",
+        "hash": "Hash",
+        "source": "Källa",
+        "timestamp": "Registrerad",
+        "country": "Land",
+        "language": "Språk",
+        "salaryBasis": "Lönegrund",
+        "notSalaryMetric": "Inte ett lönemått",
+        "confidence": "Härledd tillförlitlighet",
+        "provenance": "Ursprung",
+        "reasonCodes": "Validerings-orsakskoder"
+      },
+      "salaryBasis": {
+        "gross": "Brutto",
+        "net": "Netto",
+        "unknown": "Okänd"
+      },
+      "report": {
+        "title": "Importsessions-förhandsgranskning (simulering)",
+        "status": "Slutstatus",
+        "duplicates": "Dubbletter",
+        "errors": "Fel",
+        "warnings": "Varningar",
+        "privacy": "Integritetsproblem",
+        "rollbackRef": "Återställningsreferens",
+        "simulated": "simulerad",
+        "skipped": "Överhoppade per orsak",
+        "finalStatus": {
+          "success": "Lyckades",
+          "partial": "Delvis",
+          "failed": "Misslyckades",
+          "blocked": "Blockerad"
+        }
+      },
+      "value": {
+        "unknown": "okänt",
+        "none": "inga"
+      }
     }
   }
 }
