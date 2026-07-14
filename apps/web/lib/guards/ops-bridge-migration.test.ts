@@ -357,6 +357,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 135 -> 136 for the Job Recommendation seen-marker draft
     // (20260714170000_worker_opportunity_seen_v1) — DRAFT /
     // needs-human-gate, NOT applied; paired rollback in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 136/);
+    // Bumped 136 -> 137 for the Journal Proof Engine template registry
+    // draft (20260714180000_journal_profession_templates_v1) — DRAFT /
+    // needs-human-gate, NOT applied; paired rollback in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 137/);
   });
 });

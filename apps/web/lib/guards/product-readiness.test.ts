@@ -1761,7 +1761,12 @@ describe("no migration files added by this sprint", () => {
     // gated mark RPC powering the honest "new matches" spine count; DRAFT /
     // needs-human-gate, NOT applied; paired rollback + deferred
     // APPLIED_LEDGER entry.
-    const SPRINT_BASELINE = 136;
+    // Bumped 136 -> 137 for the Journal Proof Engine template registry draft
+    // (20260714180000_journal_profession_templates_v1) — ONE §10 slug
+    // registry table (all seeds inactive; admin-only writes; authenticated
+    // read of active rows); DRAFT / needs-human-gate, NOT applied; paired
+    // rollback + deferred APPLIED_LEDGER entry.
+    const SPRINT_BASELINE = 137;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

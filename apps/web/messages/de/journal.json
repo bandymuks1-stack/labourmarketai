@@ -329,5 +329,64 @@
     "title": "Tagesnavigation",
     "all": "Alle Tage",
     "openInCalendar": "Im Kalender öffnen"
+  },
+  "spreadsheet": {
+    "title": "Tabellenmodus — mehrere Einträge auf einmal",
+    "hint": "Jede Zeile wird ein eigener Arbeitsjournal-Eintrag. Leere Zeilen werden übersprungen; fehlgeschlagene Zeilen bleiben mit genauem Grund bearbeitbar.",
+    "colDate": "Datum",
+    "colText": "Arbeit / Thema",
+    "colQuantity": "Menge",
+    "colUnit": "Einheit",
+    "colHours": "Std.",
+    "colEngagement": "Kontext / Projekt",
+    "colNote": "Notiz",
+    "textPlaceholder": "Was haben Sie gemacht?",
+    "addRow": "Zeile hinzufügen",
+    "removeRow": "Zeile entfernen",
+    "saveAll": "Zeilen speichern",
+    "saving": "Wird gespeichert…",
+    "savedSummary": "Gespeichert: {saved}. Fehlgeschlagen: {failed}.",
+    "rowUnexpectedError": "Unerwarteter Fehler — die Zeile wurde nicht gespeichert. Bitte erneut versuchen.",
+    "rowCount": "{count} / {max} Zeilen",
+    "errors": {
+      "text_required": "Beschreiben Sie, was Sie gemacht haben.",
+      "date_invalid": "Ungültiges Datum (JJJJ-MM-TT).",
+      "quantity_invalid": "Die Menge muss eine positive Zahl sein.",
+      "hours_invalid": "Stunden müssen zwischen 0 und 24 liegen.",
+      "engagement_required": "Wählen Sie einen Arbeitskontext."
+    }
+  },
+  "templates": {
+    "title": "Vorlagen nach Beruf",
+    "hint": "Eine Vorlage füllt nur die Textstruktur vor — alles bleibt frei änderbar.",
+    "construction_daily": "Tagesbericht Bau",
+    "transport_daily": "Tagesbericht Transport",
+    "cleaning_daily": "Tagesbericht Reinigung"
+  },
+  "aiSuggest": {
+    "title": "KI-Vorschläge aus diesem Eintrag",
+    "cta": "Aus Eintrag vorschlagen (KI)",
+    "loading": "Wird analysiert…",
+    "disclaimer": "Die KI schlägt nur vor — gespeichert wird erst, wenn Sie einen Vorschlag selbst übernehmen.",
+    "offNote": "KI-Vorschläge sind in dieser Umgebung nicht aktiviert, oder im Text wurde nichts Konkretes gefunden. Die automatische Erkennung oben funktioniert wie gewohnt.",
+    "skillsTitle": "Mögliche Fähigkeiten (KI)",
+    "achievementsTitle": "Mögliche Erfolge (KI)",
+    "experienceTitle": "Mögliche Berufserfahrung (KI)",
+    "projectTitle": "Mögliche Projektverknüpfung (KI)",
+    "addSkill": "Zum Profil hinzufügen",
+    "addAchievement": "Erfolg hinzufügen",
+    "addExperience": "Erfahrung hinzufügen",
+    "useProject": "Diesen Kontext verwenden",
+    "projectUsed": "Kontext ausgewählt",
+    "adding": "Wird gespeichert…",
+    "added": "Gespeichert",
+    "discard": "Verwerfen",
+    "needsMigration": "Dieser Speicher ist noch nicht aktiviert — der Vorschlag kann noch nicht gespeichert werden.",
+    "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "current": "aktuell"
+  },
+  "proofLoop": {
+    "strip": "Einträge → Fähigkeiten → CV → Angebote: {entries} Einträge diesen Monat · {evidenced} Fähigkeiten mit Einträgen · {confirmed} geprüft",
+    "cvLink": "CV"
   }
 }

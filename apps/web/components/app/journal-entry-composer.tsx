@@ -35,6 +35,11 @@ import { autoLinkRecognizedJournalSkills } from "@/lib/journal/journal-entry-ski
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
 import {
+  templateScaffoldText,
+  type JournalTemplateOption,
+} from "@/lib/journal/journal-templates-model";
+import { JournalAiSuggestions } from "@/components/app/journal-ai-suggestions";
+import {
   isValidJournalPhoto,
   uploadJournalEntryPhoto,
   type JournalPhotoUploadResult,
@@ -124,6 +129,7 @@ export function JournalEntryComposer({
   directions,
   workerSkills,
   editingEntry,
+  templates,
 }: {
   engagements: JournalEngagement[];
   directions: JournalDirection[];
@@ -134,6 +140,12 @@ export function JournalEntryComposer({
    *  `supersedeJournalEntry(editingEntry.id, …)` (RPC from migration 0018)
    *  instead of the create path. */
   editingEntry?: JournalEditingEntry | null;
+  /** ACTIVE profession templates from the §10 registry
+   *  (journal_profession_templates — owner-gated draft migration). Empty /
+   *  omitted → the picker renders NOTHING (honest absence). A template only
+   *  prefills the textarea scaffold + default quantity unit — same fields,
+   *  same single save path. */
+  templates?: JournalTemplateOption[];
 }) {
   const t = useTranslations("journal");
   const tS = useTranslations("structuring");
@@ -686,6 +698,28 @@ export function JournalEntryComposer({
     );
   }
 
+  // Journal Proof Engine v1 (§10): templates whose slug has a localized label
+  // — a slug without a label is skipped entirely, never rendered raw.
+  const visibleTemplates = (templates ?? [])
+    .map((tpl) => ({ tpl, label: tTemplateSafe(t, tpl.slug) }))
+    .filter((x): x is { tpl: JournalTemplateOption; label: string } => !!x.label);
+
+  /** Prefill from a picked template: scaffold lines into the textarea
+   *  (appended when the worker already typed — nothing is overwritten) and
+   *  the template's default quantity unit. Presentation-only; the single
+   *  createJournalEntry save path is untouched. */
+  function applyTemplate(tpl: JournalTemplateOption) {
+    const scaffold = templateScaffoldText(tpl);
+    setText((prev) => (prev.trim() ? `${prev}\n${scaffold}` : scaffold));
+    if (
+      tpl.defaultUnitSlug &&
+      (UNIT_OPTIONS as readonly string[]).includes(tpl.defaultUnitSlug)
+    ) {
+      setQtyUnit(tpl.defaultUnitSlug);
+    }
+    recordEvent("journal_template_applied", { template: tpl.slug });
+  }
+
   if (stage === "compose") {
     // ONE photo field, placed by the active mode preset: photo-first mode
     // leads with it, the other modes keep it after the text (same field,
@@ -971,6 +1005,40 @@ export function JournalEntryComposer({
               data-testid="journal-mode-hint"
             >
               {t(`modes.${mode}Hint`)}
+            </p>
+          </div>
+        )}
+
+        {!editingEntry && visibleTemplates.length > 0 && (
+          // Journal Proof Engine v1 (§10): ACTIVE profession templates from
+          // the journal_profession_templates registry. Picking one only
+          // prefills the textarea scaffold + default quantity unit — the
+          // worker edits freely and the ONE save path is unchanged. No
+          // active template for this worker → this block renders nothing.
+          <div
+            className="flex flex-col gap-2"
+            data-testid="journal-template-picker"
+          >
+            <Label>{t("templates.title")}</Label>
+            <div
+              className="flex flex-wrap gap-2"
+              role="group"
+              aria-label={t("templates.title")}
+            >
+              {visibleTemplates.map(({ tpl, label }) => (
+                <button
+                  key={tpl.slug}
+                  type="button"
+                  data-testid={`journal-template-${tpl.slug}`}
+                  onClick={() => applyTemplate(tpl)}
+                  className="rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] leading-relaxed text-text-muted">
+              {t("templates.hint")}
             </p>
           </div>
         )}
@@ -1521,6 +1589,18 @@ export function JournalEntryComposer({
         </div>
       )}
 
+      {/* Journal Proof Engine v1 (§3): OPTIONAL, user-initiated AI suggestions
+          over THIS entry draft. The deterministic cards above stay the
+          always-on layer; this block adds labelled candidates (skills /
+          achievements / experience / project link) only when the worker taps
+          the button AND the AI runtime is live — otherwise one honest line.
+          Every candidate is confirm/discard (§7.1). */}
+      <JournalAiSuggestions
+        text={text}
+        engagements={engagements.map((e) => ({ id: e.id, label: e.label }))}
+        onPickEngagement={setEngagementId}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <Label>{t("engagement")}</Label>
@@ -1625,6 +1705,21 @@ function tProfSafe(
     /* fall through */
   }
   return fallback ?? slug;
+}
+
+/** Resolve a template slug to its localized picker label. Missing label →
+ *  null → the template is SKIPPED (§10: a raw slug never reaches the UI). */
+function tTemplateSafe(
+  t: (key: string) => string,
+  slug: string,
+): string | null {
+  const key = `templates.${slug}`;
+  try {
+    const v = t(key);
+    return v && v !== key && v !== `journal.${key}` ? v : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Resolve a skill slug to its localized taxonomy name, falling back to the
