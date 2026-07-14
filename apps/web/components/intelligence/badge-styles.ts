@@ -10,6 +10,7 @@
  */
 import type { IntelligenceCardState } from "@/lib/intelligence/intelligence-view-model";
 import type { ConfidenceLevel } from "@/lib/intelligence/confidence";
+import type { InsightOriginKind } from "@/lib/intelligence/explainability";
 import type { SourceLifecycleState } from "@/lib/intelligence/source-lifecycle";
 import type { TrustCardStatus } from "@/lib/intelligence/trust-card-model";
 
@@ -34,10 +35,7 @@ export const INTEL_TRUST_STATUS_TONE: Record<TrustCardStatus, string> = {
 
 /** Origin kinds — external stays visually distinct from internal
  *  (doctrine: an external figure must never pass for a platform average). */
-export const INTEL_ORIGIN_TONE: Record<
-  "internal" | "external" | "blended",
-  string
-> = {
+export const INTEL_ORIGIN_TONE: Record<InsightOriginKind, string> = {
   internal: "border-ink-500 bg-ink-800/40 text-text-secondary",
   external: "border-brand-orange/50 bg-brand-orange/10 text-brand-orange",
   blended: "border-state-amber/50 bg-state-amber/10 text-state-amber",

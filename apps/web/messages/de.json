@@ -9511,7 +9511,8 @@
       },
       "notKnown": {
         "grossNetBasis": "Ob die Beträge brutto oder netto sind, ist nicht bekannt.",
-        "noObservationStore": "Der Beobachtungsspeicher ist noch nicht aktiviert, daher sind Verweise auf einzelne Beobachtungen nicht verfügbar."
+        "noObservationStore": "Der Beobachtungsspeicher ist noch nicht aktiviert, daher sind Verweise auf einzelne Beobachtungen nicht verfügbar.",
+        "demandMultiBucket": "Die Schritt-für-Schritt-Herleitung beschreibt nur die erste Nachfragegruppe — diese Karte fasst mehrere Gruppen mit unterschiedlicher Geografie und Stichprobengröße zusammen."
       }
     },
     "trustCard": {
@@ -9542,12 +9543,16 @@
         "demandNoOwnRows": "Hier steht keine Nachfragezahl, weil Ihre Organisation in den letzten 90 Tagen keine Nachfrageeinträge hat — diese Karte zählt nur Ihre eigenen echten Einträge.",
         "supplyNotMeasured": "Hier steht keine Angebotszahl, weil die Verfügbarkeit von Arbeitskräften noch nicht aggregiert wird: Der Beobachtungsspeicher ist vorbereitet, aber ausgeschaltet.",
         "skillGapNeedsBoth": "Hier steht keine Kompetenzlücken-Zahl, weil dafür sowohl ein Nachfrage- als auch ein Angebotsaggregat nötig ist — keines wird veröffentlicht, solange der Beobachtungsspeicher ausgeschaltet ist.",
-        "trendNeedsHistory": "Hier steht kein Trend, weil ein Trend eine Historie datierter Beobachtungen braucht und der Beobachtungsspeicher vorbereitet, aber ausgeschaltet ist. Ein Trend wird nie aus einem einzigen Punkt gezeichnet."
+        "trendNeedsHistory": "Hier steht kein Trend, weil ein Trend eine Historie datierter Beobachtungen braucht und der Beobachtungsspeicher vorbereitet, aber ausgeschaltet ist. Ein Trend wird nie aus einem einzigen Punkt gezeichnet.",
+        "salaryBasisNotComparable": "Hier steht keine Gehaltszahl, weil für Ihren Beruf und Ihr Land zwar ein kuratierter Marktrichtwert erfasst ist, er aber nicht ehrlich verglichen werden kann: Es ist nicht erfasst, ob die Beträge brutto oder netto sind. Ein unklarer Vergleich wird nie angezeigt.",
+        "salaryInputsMissing": "Hier steht keine Gehaltszahl, weil ein kuratierter Marktrichtwert erfasst ist, aber Ihr eigenes Wunschgehalt fehlt, sodass es nichts zu vergleichen gibt."
       },
       "requirement": {
         "ownerEnableStore": "Der Plattforminhaber muss den Beobachtungsspeicher einschalten und mindestens eine Datenquelle freigeben.",
         "salaryBenchmark": "Ein Administrator muss einen kuratierten Marktrichtwert für Ihren Beruf und Ihr Land erfassen, oder der Plattforminhaber muss eine externe Gehaltsquelle freigeben.",
-        "demandOwnRows": "Erfassen Sie Arbeitsanfragen — diese Karte füllt sich aus den Daten Ihrer eigenen Organisation, sobald Einträge existieren."
+        "demandOwnRows": "Erfassen Sie Arbeitsanfragen — diese Karte füllt sich aus den Daten Ihrer eigenen Organisation, sobald Einträge existieren.",
+        "salaryBasis": "Die Gehaltsbasis (brutto oder netto) muss sowohl für Ihr Wunschgehalt als auch für den kuratierten Marktrichtwert erfasst sein, bevor ein ehrlicher Vergleich angezeigt werden kann.",
+        "salaryInputs": "Tragen Sie Ihr Wunschgehalt in Ihrem Arbeitnehmerprofil ein — der Vergleich erscheint, sobald es vorliegt."
       },
       "after": {
         "activation": "Nachdem der Inhaber eine Datenquelle freigegeben und aktiviert hat, füllt sich diese Karte mit belegten, datierten Zahlen — jede mit Verlässlichkeit, Aktualität, Quelle und Schritt-für-Schritt-Herkunft."
