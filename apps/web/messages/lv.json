@@ -2454,7 +2454,12 @@
       "windowNone": "Bez fiksēta perioda",
       "geoNone": "Nav piesaistīts ģeogrāfijai",
       "sampleNone": "Bez izlases lieluma (kūrēts avots)",
-      "none": "Nav"
+      "none": "Nav",
+      "confidence": "Uzticamība",
+      "freshness": "Svaigums",
+      "whyVisible": "Kāpēc jūs to redzat",
+      "observations": "Novērojumi",
+      "notKnown": "Nav zināms"
     },
     "cards": {
       "kind": {
@@ -2553,19 +2558,25 @@
         "admin_market_rate_averages": "Administratora kūrētie tirgus likmju vidējie rādītāji",
         "stat_gov_lt": "Lietuvas statistika (osp.stat.gov.lt)",
         "eurostat": "Eurostat",
-        "cvbankas_salary": "CVbankas algu dati — ierosināta ārējā atsauce (nav aktīva)"
+        "cvbankas_salary": "CVbankas algu dati — ierosināta ārējā atsauce (nav aktīva)",
+        "eures": "EURES",
+        "uzt_lt": "Užimtumo tarnyba"
       },
       "terms": {
         "internal": "Iekšējs aprēķins no kanoniskajām platformas tabulām; kohortu politika aizsargā personas.",
         "adminCurated": "Īpašnieka ievadītie vidējie rādītāji ar avota piezīmi izlases lieluma vietā.",
         "statGovLt": "Oficiālā statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
         "eurostat": "Oficiālā ES statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
-        "cvbankas": "Tikai priekšlikums — lietošanas atļauja nav apstiprināta; nekad netiek jaukts ar iekšējiem skaitļiem."
+        "cvbankas": "Tikai priekšlikums — lietošanas atļauja nav apstiprināta; nekad netiek jaukts ar iekšējiem skaitļiem.",
+        "eures": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts.",
+        "uztLt": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts."
       },
       "status": {
         "active": "Aktīvs (iekšējs)",
         "proposedOff": "Ierosināts — izslēgts"
-      }
+      },
+      "eures": "EURES (ES darba mobilitātes portāls)",
+      "uztLt": "Lietuvas Nodarbinātības dienests (Užimtumo tarnyba)"
     },
     "methodology": {
       "title": "Metodika",
@@ -2578,6 +2589,83 @@
       "link": "Atvērt tirgus ieskatus",
       "salaryInsufficient": "Algas pozīcija pret atsauces vērtību vēl nav pieejama — profilā nepieciešamas algas gaidas, valsts un pamatprofesija.",
       "demandInsufficient": "Pēdējo 90 dienu logā pieprasījuma datu vēl nepietiek."
+    },
+    "confidence": {
+      "label": "Uzticamība",
+      "low": "Zema",
+      "medium": "Vidēja",
+      "high": "Augsta",
+      "unknown": "Nezināma"
+    },
+    "freshness": {
+      "updatedToday": "Atjaunināts šodien",
+      "updatedYesterday": "Atjaunināts vakar",
+      "updatedDaysAgo": "Atjaunināts pirms {days} dienām",
+      "outdated": "Novecojis — pēdējoreiz atjaunināts pirms {days} dienām",
+      "unknown": "Atjaunināšanas laiks nav zināms"
+    },
+    "timeline": {
+      "title": "Kā šī atziņa radās",
+      "actorLabel": "Izpildītājs",
+      "provenanceLabel": "Pēdas",
+      "stage": {
+        "source": "Avots",
+        "observation": "Novērojums",
+        "validation": "Validācija",
+        "aggregation": "Agregācija",
+        "insight": "Atziņa",
+        "visible": "Redzams jums"
+      },
+      "actor": {
+        "system": "Sistēma (deterministiski noteikumi)",
+        "owner": "Īpašnieks",
+        "source": "Datu avots"
+      }
+    },
+    "conflict": {
+      "agreement": "Avoti sakrīt",
+      "conflict": "Avoti ir pretrunā",
+      "notComparable": "Nav salīdzināmi",
+      "note": "Pretrunīgas vērtības tiek rādītas blakus — tās nekad netiek vidējotas."
+    },
+    "lifecycle": {
+      "proposed": "Ierosināts",
+      "approved": "Apstiprināts",
+      "active": "Aktīvs",
+      "paused": "Apturēts",
+      "deprecated": "Novecojis",
+      "blocked": "Bloķēts",
+      "notAvailable": "Nav pieejams"
+    },
+    "inspector": {
+      "eyebrow": "Izstrādātāja rīki",
+      "title": "Novērojumu inspektors",
+      "intro": "Tikai apskatei paredzēts logs uz neapstrādātiem tirgus novērojumiem: identitāte, jaucējkods, avots, laika zīmogi, atvasinātā uzticamība, privātuma klase un statuss.",
+      "readOnlyNote": "Tikai apskate. Šeit neko nevar rediģēt vai aktivizēt.",
+      "disabled": "Novērojumu inspektors ir izslēgts. Lai iespējotu šo izstrādātāju skatu, servera vidē iestatiet INTELLIGENCE_INSPECTOR_ENABLED=1.",
+      "needsMigration": "Novērojumu krātuve ir sagatavota un parādīsies šajā skatā pēc īpašnieka aktivizēšanas. Pagaidām nav ko pārbaudīt.",
+      "empty": "Novērojumu krātuve ir iespējota, bet rindu vēl nav.",
+      "readError": "Novērojumu krātuvi neizdevās nolasīt. Pārbaudiet servera žurnālus.",
+      "unknownValue": "nezināms",
+      "field": {
+        "id": "Novērojuma ID",
+        "hash": "Satura jaucējkods",
+        "source": "Avots",
+        "capturedAt": "Reģistrēts",
+        "confidenceRaw": "Saglabātais uzticamības rādītājs",
+        "sampleSize": "Izlases lielums",
+        "privacyClass": "Privātuma klase",
+        "status": "Svaiguma statuss"
+      }
+    },
+    "trust": {
+      "whyVisible": {
+        "roleMatched": "Tiek rādīts, jo tas atbilst jūsu lomai un jūsu pašu datiem."
+      },
+      "notKnown": {
+        "grossNetBasis": "Nav zināms, vai summas ir bruto vai neto.",
+        "noObservationStore": "Novērojumu krātuve vēl nav iespējota, tāpēc atsauces uz atsevišķiem novērojumiem nav pieejamas."
+      }
     }
   }
 }

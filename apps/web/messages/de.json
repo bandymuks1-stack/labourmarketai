@@ -9293,7 +9293,12 @@
       "windowNone": "Kein fester Zeitraum",
       "geoNone": "Keiner Geografie zugeordnet",
       "sampleNone": "Keine Stichprobengröße (kuratierte Quelle)",
-      "none": "Keine"
+      "none": "Keine",
+      "confidence": "Verlässlichkeit",
+      "freshness": "Aktualität",
+      "whyVisible": "Warum Sie das sehen",
+      "observations": "Beobachtungen",
+      "notKnown": "Nicht bekannt"
     },
     "cards": {
       "kind": {
@@ -9392,19 +9397,25 @@
         "admin_market_rate_averages": "Vom Administrator kuratierte Marktsatz-Durchschnitte",
         "stat_gov_lt": "Statistik Litauen (osp.stat.gov.lt)",
         "eurostat": "Eurostat",
-        "cvbankas_salary": "CVbankas-Gehaltsdaten — vorgeschlagener externer Referenzwert (nicht aktiv)"
+        "cvbankas_salary": "CVbankas-Gehaltsdaten — vorgeschlagener externer Referenzwert (nicht aktiv)",
+        "eures": "EURES",
+        "uzt_lt": "Užimtumo tarnyba"
       },
       "terms": {
         "internal": "Interne Ableitung aus kanonischen Plattformtabellen; die Kohortenregel schützt Einzelpersonen.",
         "adminCurated": "Vom Eigentümer eingegebene Durchschnitte mit Quellennotiz statt Stichprobengröße.",
         "statGovLt": "Amtliche Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
         "eurostat": "Amtliche EU-Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
-        "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt."
+        "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt.",
+        "eures": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen.",
+        "uztLt": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen."
       },
       "status": {
         "active": "Aktiv (intern)",
         "proposedOff": "Vorgeschlagen — aus"
-      }
+      },
+      "eures": "EURES (EU-Portal für berufliche Mobilität)",
+      "uztLt": "Litauischer Arbeitsdienst (Užimtumo tarnyba)"
     },
     "methodology": {
       "title": "Methodik",
@@ -9417,6 +9428,83 @@
       "link": "Marktintelligenz öffnen",
       "salaryInsufficient": "Die Gehaltsposition gegenüber dem Referenzwert ist noch nicht verfügbar — im Profil werden Gehaltsvorstellung, Land und Hauptberuf benötigt.",
       "demandInsufficient": "Noch nicht genug Nachfragedaten im Fenster der letzten 90 Tage."
+    },
+    "confidence": {
+      "label": "Verlässlichkeit",
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch",
+      "unknown": "Unbekannt"
+    },
+    "freshness": {
+      "updatedToday": "Heute aktualisiert",
+      "updatedYesterday": "Gestern aktualisiert",
+      "updatedDaysAgo": "Vor {days} Tagen aktualisiert",
+      "outdated": "Veraltet — letzte Aktualisierung vor {days} Tagen",
+      "unknown": "Aktualisierungszeitpunkt unbekannt"
+    },
+    "timeline": {
+      "title": "Wie diese Erkenntnis entstanden ist",
+      "actorLabel": "Akteur",
+      "provenanceLabel": "Nachweis",
+      "stage": {
+        "source": "Quelle",
+        "observation": "Beobachtung",
+        "validation": "Validierung",
+        "aggregation": "Aggregation",
+        "insight": "Erkenntnis",
+        "visible": "Für Sie sichtbar"
+      },
+      "actor": {
+        "system": "System (deterministische Regeln)",
+        "owner": "Inhaber",
+        "source": "Datenquelle"
+      }
+    },
+    "conflict": {
+      "agreement": "Quellen stimmen überein",
+      "conflict": "Quellen widersprechen sich",
+      "notComparable": "Nicht vergleichbar",
+      "note": "Widersprüchliche Werte werden nebeneinander gezeigt — niemals gemittelt."
+    },
+    "lifecycle": {
+      "proposed": "Vorgeschlagen",
+      "approved": "Genehmigt",
+      "active": "Aktiv",
+      "paused": "Pausiert",
+      "deprecated": "Veraltet",
+      "blocked": "Blockiert",
+      "notAvailable": "Nicht verfügbar"
+    },
+    "inspector": {
+      "eyebrow": "Entwicklerwerkzeuge",
+      "title": "Beobachtungs-Inspektor",
+      "intro": "Nur-Ansicht-Fenster für rohe Marktbeobachtungen: Identität, Hash, Quelle, Zeitstempel, abgeleitete Verlässlichkeit, Datenschutzklasse und Status.",
+      "readOnlyNote": "Nur Ansicht. Hier kann nichts bearbeitet oder aktiviert werden.",
+      "disabled": "Der Beobachtungs-Inspektor ist ausgeschaltet. Setzen Sie INTELLIGENCE_INSPECTOR_ENABLED=1 in der Serverumgebung, um diese Entwickleransicht zu aktivieren.",
+      "needsMigration": "Der Beobachtungsspeicher ist vorbereitet und erscheint in dieser Ansicht nach der Aktivierung durch den Inhaber. Es gibt noch nichts zu inspizieren.",
+      "empty": "Der Beobachtungsspeicher ist aktiviert, enthält aber noch keine Zeilen.",
+      "readError": "Der Beobachtungsspeicher konnte nicht gelesen werden. Prüfen Sie die Serverprotokolle.",
+      "unknownValue": "unbekannt",
+      "field": {
+        "id": "Beobachtungs-ID",
+        "hash": "Inhalts-Hash",
+        "source": "Quelle",
+        "capturedAt": "Erfasst am",
+        "confidenceRaw": "Gespeicherter Verlässlichkeitswert",
+        "sampleSize": "Stichprobengröße",
+        "privacyClass": "Datenschutzklasse",
+        "status": "Aktualitätsstatus"
+      }
+    },
+    "trust": {
+      "whyVisible": {
+        "roleMatched": "Angezeigt, weil es zu Ihrer Rolle und Ihren eigenen Daten passt."
+      },
+      "notKnown": {
+        "grossNetBasis": "Ob die Beträge brutto oder netto sind, ist nicht bekannt.",
+        "noObservationStore": "Der Beobachtungsspeicher ist noch nicht aktiviert, daher sind Verweise auf einzelne Beobachtungen nicht verfügbar."
+      }
     }
   }
 }

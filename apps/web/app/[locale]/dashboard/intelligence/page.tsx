@@ -18,6 +18,8 @@ import {
   allExternalSourcesOff,
   INTELLIGENCE_SOURCE_PROFILES,
 } from "@/lib/intelligence/source-governance";
+import { deriveSourceLifecycleState } from "@/lib/intelligence/source-lifecycle";
+import { SourceStatusBadge } from "@/components/intelligence/source-status-badge";
 
 /**
  * Market intelligence workspace (Labour Market Intelligence v1) — the ONE
@@ -217,17 +219,9 @@ export default async function IntelligencePage({
               <span>
                 {t(p.displayNameCode.replace(/^intelligence\./, "") as never) as string}
               </span>
-              <span
-                className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
-                  p.activation === "on"
-                    ? "border-ink-500 bg-ink-800/40 text-text-secondary"
-                    : "border-brand-orange/50 bg-brand-orange/10 text-brand-orange"
-                }`}
-              >
-                {p.activation === "on"
-                  ? t("sources.status.active")
-                  : t("sources.status.proposedOff")}
-              </span>
+              {/* Lifecycle badge (Trust Layer v1) — DERIVED deterministically
+                  from the governance profile; the page never decides a state. */}
+              <SourceStatusBadge state={deriveSourceLifecycleState(p)} />
               <span className="w-full text-[11px] text-text-muted">
                 {t(p.termsNoteCode.replace(/^intelligence\./, "") as never) as string}
               </span>

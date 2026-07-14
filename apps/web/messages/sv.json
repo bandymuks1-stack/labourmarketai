@@ -2454,7 +2454,12 @@
       "windowNone": "Ingen fast period",
       "geoNone": "Inte knuten till en geografi",
       "sampleNone": "Ingen urvalsstorlek (kurerad källa)",
-      "none": "Ingen"
+      "none": "Ingen",
+      "confidence": "Tillförlitlighet",
+      "freshness": "Färskhet",
+      "whyVisible": "Varför du ser detta",
+      "observations": "Observationer",
+      "notKnown": "Inte känt"
     },
     "cards": {
       "kind": {
@@ -2553,19 +2558,25 @@
         "admin_market_rate_averages": "Admin-kurerade marknadssatsgenomsnitt",
         "stat_gov_lt": "Litauens statistik (osp.stat.gov.lt)",
         "eurostat": "Eurostat",
-        "cvbankas_salary": "CVbankas lönedata — föreslagen extern referens (inte aktiv)"
+        "cvbankas_salary": "CVbankas lönedata — föreslagen extern referens (inte aktiv)",
+        "eures": "EURES",
+        "uzt_lt": "Užimtumo tarnyba"
       },
       "terms": {
         "internal": "Intern härledning från kanoniska plattformstabeller; kohortpolicyn skyddar enskilda.",
         "adminCurated": "Ägarangivna genomsnitt med en källnot i stället för en urvalsstorlek.",
         "statGovLt": "Officiell statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
         "eurostat": "Officiell EU-statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
-        "cvbankas": "Endast ett förslag — användningstillstånd obekräftat; blandas aldrig med interna siffror."
+        "cvbankas": "Endast ett förslag — användningstillstånd obekräftat; blandas aldrig med interna siffror.",
+        "eures": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag.",
+        "uztLt": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag."
       },
       "status": {
         "active": "Aktiv (intern)",
         "proposedOff": "Föreslagen — av"
-      }
+      },
+      "eures": "EURES (EU:s portal för arbetskraftsrörlighet)",
+      "uztLt": "Litauens arbetsförmedling (Užimtumo tarnyba)"
     },
     "methodology": {
       "title": "Metodik",
@@ -2578,6 +2589,83 @@
       "link": "Öppna marknadsinsikt",
       "salaryInsufficient": "Lönepositionen mot referensen är ännu inte tillgänglig — profilen behöver löneförväntan, land och huvudyrke.",
       "demandInsufficient": "Ännu inte tillräckligt med efterfrågedata i fönstret för de senaste 90 dagarna."
+    },
+    "confidence": {
+      "label": "Tillförlitlighet",
+      "low": "Låg",
+      "medium": "Medel",
+      "high": "Hög",
+      "unknown": "Okänd"
+    },
+    "freshness": {
+      "updatedToday": "Uppdaterad i dag",
+      "updatedYesterday": "Uppdaterad i går",
+      "updatedDaysAgo": "Uppdaterad för {days} dagar sedan",
+      "outdated": "Föråldrad — senast uppdaterad för {days} dagar sedan",
+      "unknown": "Uppdateringstid okänd"
+    },
+    "timeline": {
+      "title": "Så skapades denna insikt",
+      "actorLabel": "Aktör",
+      "provenanceLabel": "Spår",
+      "stage": {
+        "source": "Källa",
+        "observation": "Observation",
+        "validation": "Validering",
+        "aggregation": "Aggregering",
+        "insight": "Insikt",
+        "visible": "Synlig för dig"
+      },
+      "actor": {
+        "system": "System (deterministiska regler)",
+        "owner": "Ägare",
+        "source": "Datakälla"
+      }
+    },
+    "conflict": {
+      "agreement": "Källorna stämmer överens",
+      "conflict": "Källorna motsäger varandra",
+      "notComparable": "Inte jämförbara",
+      "note": "Motstridiga värden visas sida vid sida — de medelvärdesberäknas aldrig."
+    },
+    "lifecycle": {
+      "proposed": "Föreslagen",
+      "approved": "Godkänd",
+      "active": "Aktiv",
+      "paused": "Pausad",
+      "deprecated": "Utfasad",
+      "blocked": "Blockerad",
+      "notAvailable": "Inte tillgänglig"
+    },
+    "inspector": {
+      "eyebrow": "Utvecklarverktyg",
+      "title": "Observationsinspektör",
+      "intro": "Visningsfönster för råa marknadsobservationer: identitet, hash, källa, tidsstämplar, härledd tillförlitlighet, integritetsklass och status.",
+      "readOnlyNote": "Endast visning. Inget kan redigeras eller aktiveras här.",
+      "disabled": "Observationsinspektören är avstängd. Sätt INTELLIGENCE_INSPECTOR_ENABLED=1 i servermiljön för att aktivera denna utvecklarvy.",
+      "needsMigration": "Observationslagret är förberett och visas i denna vy efter ägarens aktivering. Det finns inget att inspektera ännu.",
+      "empty": "Observationslagret är aktiverat men innehåller inga rader ännu.",
+      "readError": "Observationslagret kunde inte läsas. Kontrollera serverloggarna.",
+      "unknownValue": "okänt",
+      "field": {
+        "id": "Observations-ID",
+        "hash": "Innehållshash",
+        "source": "Källa",
+        "capturedAt": "Registrerad",
+        "confidenceRaw": "Sparad tillförlitlighetspoäng",
+        "sampleSize": "Urvalsstorlek",
+        "privacyClass": "Integritetsklass",
+        "status": "Färskhetsstatus"
+      }
+    },
+    "trust": {
+      "whyVisible": {
+        "roleMatched": "Visas eftersom det matchar din roll och dina egna uppgifter."
+      },
+      "notKnown": {
+        "grossNetBasis": "Det är inte känt om beloppen är brutto eller netto.",
+        "noObservationStore": "Observationslagret är ännu inte aktiverat, så referenser till enskilda observationer är inte tillgängliga."
+      }
     }
   }
 }

@@ -2454,7 +2454,12 @@
       "windowNone": "Fikseeritud perioodita",
       "geoNone": "Geograafiaga sidumata",
       "sampleNone": "Valimi suuruseta (kureeritud allikas)",
-      "none": "Puudub"
+      "none": "Puudub",
+      "confidence": "Usaldusväärsus",
+      "freshness": "Värskus",
+      "whyVisible": "Miks te seda näete",
+      "observations": "Vaatlused",
+      "notKnown": "Teadmata"
     },
     "cards": {
       "kind": {
@@ -2553,19 +2558,25 @@
         "admin_market_rate_averages": "Administraatori kureeritud turumäärade keskmised",
         "stat_gov_lt": "Leedu statistika (osp.stat.gov.lt)",
         "eurostat": "Eurostat",
-        "cvbankas_salary": "CVbankase palgaandmed — kavandatav väline võrdlus (pole aktiivne)"
+        "cvbankas_salary": "CVbankase palgaandmed — kavandatav väline võrdlus (pole aktiivne)",
+        "eures": "EURES",
+        "uzt_lt": "Užimtumo tarnyba"
       },
       "terms": {
         "internal": "Sisemine tuletus kanoonilistest platvormitabelitest; kohordipoliitika kaitseb üksikisikuid.",
         "adminCurated": "Omaniku sisestatud keskmised koos allikamärkega valimi suuruse asemel.",
         "statGovLt": "Ametlik statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
         "eurostat": "Ametlik ELi statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
-        "cvbankas": "Ainult ettepanek — kasutusluba kinnitamata; ei segata kunagi sisemiste numbritega."
+        "cvbankas": "Ainult ettepanek — kasutusluba kinnitamata; ei segata kunagi sisemiste numbritega.",
+        "eures": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita.",
+        "uztLt": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita."
       },
       "status": {
         "active": "Aktiivne (sisemine)",
         "proposedOff": "Kavandatud — väljas"
-      }
+      },
+      "eures": "EURES (ELi töörände portaal)",
+      "uztLt": "Leedu tööturuamet (Užimtumo tarnyba)"
     },
     "methodology": {
       "title": "Metoodika",
@@ -2578,6 +2589,83 @@
       "link": "Ava turuülevaade",
       "salaryInsufficient": "Palgapositsioon võrdlusväärtuse suhtes pole veel saadaval — profiilis on vaja palgaootust, riiki ja põhiametit.",
       "demandInsufficient": "Viimase 90 päeva aknas pole nõudlusandmeid veel piisavalt."
+    },
+    "confidence": {
+      "label": "Usaldusväärsus",
+      "low": "Madal",
+      "medium": "Keskmine",
+      "high": "Kõrge",
+      "unknown": "Teadmata"
+    },
+    "freshness": {
+      "updatedToday": "Uuendatud täna",
+      "updatedYesterday": "Uuendatud eile",
+      "updatedDaysAgo": "Uuendatud {days} päeva tagasi",
+      "outdated": "Aegunud — viimati uuendatud {days} päeva tagasi",
+      "unknown": "Uuendamise aeg teadmata"
+    },
+    "timeline": {
+      "title": "Kuidas see teadmine tekkis",
+      "actorLabel": "Tegija",
+      "provenanceLabel": "Jälg",
+      "stage": {
+        "source": "Allikas",
+        "observation": "Vaatlus",
+        "validation": "Valideerimine",
+        "aggregation": "Agregeerimine",
+        "insight": "Teadmine",
+        "visible": "Teile nähtav"
+      },
+      "actor": {
+        "system": "Süsteem (deterministlikud reeglid)",
+        "owner": "Omanik",
+        "source": "Andmeallikas"
+      }
+    },
+    "conflict": {
+      "agreement": "Allikad on kooskõlas",
+      "conflict": "Allikad on vastuolus",
+      "notComparable": "Pole võrreldavad",
+      "note": "Vastuolulisi väärtusi näidatakse kõrvuti — neid ei keskmistata kunagi."
+    },
+    "lifecycle": {
+      "proposed": "Kavandatud",
+      "approved": "Heaks kiidetud",
+      "active": "Aktiivne",
+      "paused": "Peatatud",
+      "deprecated": "Aegunud",
+      "blocked": "Blokeeritud",
+      "notAvailable": "Pole saadaval"
+    },
+    "inspector": {
+      "eyebrow": "Arendaja tööriistad",
+      "title": "Vaatluste inspektor",
+      "intro": "Ainult vaatamiseks mõeldud aken toorestele turuvaatlustele: identiteet, räsi, allikas, ajatemplid, tuletatud usaldusväärsus, privaatsusklass ja olek.",
+      "readOnlyNote": "Ainult vaatamine. Siin ei saa midagi muuta ega aktiveerida.",
+      "disabled": "Vaatluste inspektor on välja lülitatud. Selle arendajavaate lubamiseks määrake serverikeskkonnas INTELLIGENCE_INSPECTOR_ENABLED=1.",
+      "needsMigration": "Vaatluste hoidla on ette valmistatud ja ilmub sellesse vaatesse pärast omaniku aktiveerimist. Praegu pole midagi vaadata.",
+      "empty": "Vaatluste hoidla on lubatud, kuid ridu veel pole.",
+      "readError": "Vaatluste hoidlat ei õnnestunud lugeda. Kontrollige serveri logisid.",
+      "unknownValue": "teadmata",
+      "field": {
+        "id": "Vaatluse ID",
+        "hash": "Sisu räsi",
+        "source": "Allikas",
+        "capturedAt": "Salvestatud",
+        "confidenceRaw": "Salvestatud usaldusskoor",
+        "sampleSize": "Valimi suurus",
+        "privacyClass": "Privaatsusklass",
+        "status": "Värskuse olek"
+      }
+    },
+    "trust": {
+      "whyVisible": {
+        "roleMatched": "Kuvatakse, sest see vastab teie rollile ja teie enda andmetele."
+      },
+      "notKnown": {
+        "grossNetBasis": "Pole teada, kas summad on bruto- või netosummad.",
+        "noObservationStore": "Vaatluste hoidla pole veel lubatud, seega üksikute vaatluste viited pole saadaval."
+      }
     }
   }
 }

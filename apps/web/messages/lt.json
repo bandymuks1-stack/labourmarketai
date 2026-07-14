@@ -9293,7 +9293,12 @@
       "windowNone": "Be fiksuoto laikotarpio",
       "geoNone": "Nesusieta su geografija",
       "sampleNone": "Be imties dydžio (kuruojamas šaltinis)",
-      "none": "Nėra"
+      "none": "Nėra",
+      "confidence": "Patikimumas",
+      "freshness": "Šviežumas",
+      "whyVisible": "Kodėl tai matote",
+      "observations": "Stebėjimai",
+      "notKnown": "Nežinoma"
     },
     "cards": {
       "kind": {
@@ -9392,19 +9397,25 @@
         "admin_market_rate_averages": "Administratoriaus kuruojami rinkos įkainių vidurkiai",
         "stat_gov_lt": "Lietuvos statistika (osp.stat.gov.lt)",
         "eurostat": "Eurostat",
-        "cvbankas_salary": "CVbankas atlyginimų duomenys — siūlomas išorinis atskaitos šaltinis (neaktyvus)"
+        "cvbankas_salary": "CVbankas atlyginimų duomenys — siūlomas išorinis atskaitos šaltinis (neaktyvus)",
+        "eures": "EURES",
+        "uzt_lt": "Užimtumo tarnyba"
       },
       "terms": {
         "internal": "Vidinis skaičiavimas iš kanoninių platformos lentelių; kohortų taisyklė saugo asmenis.",
         "adminCurated": "Savininko įvesti vidurkiai su šaltinio pastaba vietoj imties dydžio.",
         "statGovLt": "Oficiali statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
         "eurostat": "Oficiali ES statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
-        "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais."
+        "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais.",
+        "eures": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
+        "uztLt": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama."
       },
       "status": {
         "active": "Aktyvus (vidinis)",
         "proposedOff": "Siūlomas — išjungtas"
-      }
+      },
+      "eures": "EURES (ES darbo mobilumo portalas)",
+      "uztLt": "Užimtumo tarnyba"
     },
     "methodology": {
       "title": "Metodika",
@@ -9417,6 +9428,83 @@
       "link": "Atverti rinkos įžvalgas",
       "salaryInsufficient": "Atlyginimo padėtis pagal atskaitos rodiklį dar nepasiekiama — profilyje reikia atlyginimo lūkesčio, šalies ir pagrindinės profesijos.",
       "demandInsufficient": "Per pastarųjų 90 dienų langą paklausos duomenų dar nepakanka."
+    },
+    "confidence": {
+      "label": "Patikimumas",
+      "low": "Žemas",
+      "medium": "Vidutinis",
+      "high": "Aukštas",
+      "unknown": "Nežinomas"
+    },
+    "freshness": {
+      "updatedToday": "Atnaujinta šiandien",
+      "updatedYesterday": "Atnaujinta vakar",
+      "updatedDaysAgo": "Atnaujinta prieš {days} d.",
+      "outdated": "Pasenę duomenys — paskutinį kartą atnaujinta prieš {days} d.",
+      "unknown": "Atnaujinimo laikas nežinomas"
+    },
+    "timeline": {
+      "title": "Kaip atsirado ši įžvalga",
+      "actorLabel": "Vykdytojas",
+      "provenanceLabel": "Pėdsakas",
+      "stage": {
+        "source": "Šaltinis",
+        "observation": "Stebėjimas",
+        "validation": "Patikrinimas",
+        "aggregation": "Agregavimas",
+        "insight": "Įžvalga",
+        "visible": "Matoma jums"
+      },
+      "actor": {
+        "system": "Sistema (deterministinės taisyklės)",
+        "owner": "Savininkas",
+        "source": "Duomenų šaltinis"
+      }
+    },
+    "conflict": {
+      "agreement": "Šaltiniai sutampa",
+      "conflict": "Šaltiniai nesutampa",
+      "notComparable": "Nepalyginama",
+      "note": "Prieštaraujančios reikšmės rodomos greta — niekada nevidurkinamos."
+    },
+    "lifecycle": {
+      "proposed": "Siūlomas",
+      "approved": "Patvirtintas",
+      "active": "Aktyvus",
+      "paused": "Pristabdytas",
+      "deprecated": "Nebenaudojamas",
+      "blocked": "Užblokuotas",
+      "notAvailable": "Nepasiekiamas"
+    },
+    "inspector": {
+      "eyebrow": "Kūrėjo įrankiai",
+      "title": "Stebėjimų inspektorius",
+      "intro": "Tik peržiūrai skirtas neapdorotų rinkos stebėjimų langas: identifikatorius, maiša, šaltinis, laiko žymos, išvestas patikimumas, privatumo klasė ir būsena.",
+      "readOnlyNote": "Tik peržiūra. Čia nieko negalima redaguoti ar aktyvuoti.",
+      "disabled": "Stebėjimų inspektorius išjungtas. Norėdami įjungti šį kūrėjams skirtą vaizdą, serverio aplinkoje nustatykite INTELLIGENCE_INSPECTOR_ENABLED=1.",
+      "needsMigration": "Stebėjimų duomenų saugykla parengta ir bus įjungta po savininko aktyvavimo. Kol kas nėra ko tikrinti.",
+      "empty": "Stebėjimų saugykla įjungta, bet įrašų dar nėra.",
+      "readError": "Stebėjimų saugyklos nepavyko perskaityti. Patikrinkite serverio žurnalus.",
+      "unknownValue": "nežinoma",
+      "field": {
+        "id": "Stebėjimo ID",
+        "hash": "Turinio maiša",
+        "source": "Šaltinis",
+        "capturedAt": "Užfiksuota",
+        "confidenceRaw": "Saugomas patikimumo balas",
+        "sampleSize": "Imties dydis",
+        "privacyClass": "Privatumo klasė",
+        "status": "Šviežumo būsena"
+      }
+    },
+    "trust": {
+      "whyVisible": {
+        "roleMatched": "Rodoma, nes atitinka jūsų vaidmenį ir jūsų pačių duomenis."
+      },
+      "notKnown": {
+        "grossNetBasis": "Nežinoma, ar sumos nurodytos prieš mokesčius, ar po jų.",
+        "noObservationStore": "Stebėjimų saugykla dar neįjungta, todėl atskirų stebėjimų nuorodos nepasiekiamos."
+      }
     }
   }
 }

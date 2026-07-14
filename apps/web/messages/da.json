@@ -2454,7 +2454,12 @@
       "windowNone": "Ingen fast periode",
       "geoNone": "Ikke knyttet til en geografi",
       "sampleNone": "Ingen stikprøvestørrelse (kurateret kilde)",
-      "none": "Ingen"
+      "none": "Ingen",
+      "confidence": "Pålidelighed",
+      "freshness": "Friskhed",
+      "whyVisible": "Hvorfor du ser dette",
+      "observations": "Observationer",
+      "notKnown": "Ikke kendt"
     },
     "cards": {
       "kind": {
@@ -2553,19 +2558,25 @@
         "admin_market_rate_averages": "Admin-kuraterede markedssats-gennemsnit",
         "stat_gov_lt": "Litauens statistik (osp.stat.gov.lt)",
         "eurostat": "Eurostat",
-        "cvbankas_salary": "CVbankas-løndata — foreslået ekstern reference (ikke aktiv)"
+        "cvbankas_salary": "CVbankas-løndata — foreslået ekstern reference (ikke aktiv)",
+        "eures": "EURES",
+        "uzt_lt": "Užimtumo tarnyba"
       },
       "terms": {
         "internal": "Intern udledning fra kanoniske platformtabeller; kohortepolitikken beskytter enkeltpersoner.",
         "adminCurated": "Ejer-indtastede gennemsnit med en kildenote i stedet for en stikprøvestørrelse.",
         "statGovLt": "Officiel statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
         "eurostat": "Officiel EU-statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
-        "cvbankas": "Kun et forslag — brugstilladelse ubekræftet; blandes aldrig med interne tal."
+        "cvbankas": "Kun et forslag — brugstilladelse ubekræftet; blandes aldrig med interne tal.",
+        "eures": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag.",
+        "uztLt": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag."
       },
       "status": {
         "active": "Aktiv (intern)",
         "proposedOff": "Foreslået — slået fra"
-      }
+      },
+      "eures": "EURES (EU's jobmobilitetsportal)",
+      "uztLt": "Litauens arbejdsformidling (Užimtumo tarnyba)"
     },
     "methodology": {
       "title": "Metode",
@@ -2578,6 +2589,83 @@
       "link": "Åbn markedsindsigt",
       "salaryInsufficient": "Lønpositionen i forhold til referencen er endnu ikke tilgængelig — profilen skal have lønforventning, land og primært fag.",
       "demandInsufficient": "Endnu ikke nok efterspørgselsdata i vinduet for de seneste 90 dage."
+    },
+    "confidence": {
+      "label": "Pålidelighed",
+      "low": "Lav",
+      "medium": "Mellem",
+      "high": "Høj",
+      "unknown": "Ukendt"
+    },
+    "freshness": {
+      "updatedToday": "Opdateret i dag",
+      "updatedYesterday": "Opdateret i går",
+      "updatedDaysAgo": "Opdateret for {days} dage siden",
+      "outdated": "Forældet — sidst opdateret for {days} dage siden",
+      "unknown": "Opdateringstidspunkt ukendt"
+    },
+    "timeline": {
+      "title": "Sådan opstod denne indsigt",
+      "actorLabel": "Aktør",
+      "provenanceLabel": "Spor",
+      "stage": {
+        "source": "Kilde",
+        "observation": "Observation",
+        "validation": "Validering",
+        "aggregation": "Aggregering",
+        "insight": "Indsigt",
+        "visible": "Synlig for dig"
+      },
+      "actor": {
+        "system": "System (deterministiske regler)",
+        "owner": "Ejer",
+        "source": "Datakilde"
+      }
+    },
+    "conflict": {
+      "agreement": "Kilderne stemmer overens",
+      "conflict": "Kilderne modsiger hinanden",
+      "notComparable": "Ikke sammenlignelige",
+      "note": "Modstridende værdier vises side om side — de gennemsnitsberegnes aldrig."
+    },
+    "lifecycle": {
+      "proposed": "Foreslået",
+      "approved": "Godkendt",
+      "active": "Aktiv",
+      "paused": "På pause",
+      "deprecated": "Udfaset",
+      "blocked": "Blokeret",
+      "notAvailable": "Ikke tilgængelig"
+    },
+    "inspector": {
+      "eyebrow": "Udviklerværktøjer",
+      "title": "Observationsinspektør",
+      "intro": "Visningsvindue til rå markedsobservationer: identitet, hash, kilde, tidsstempler, afledt pålidelighed, privatlivsklasse og status.",
+      "readOnlyNote": "Kun visning. Intet kan redigeres eller aktiveres her.",
+      "disabled": "Observationsinspektøren er slået fra. Sæt INTELLIGENCE_INSPECTOR_ENABLED=1 i servermiljøet for at aktivere denne udviklervisning.",
+      "needsMigration": "Observationslageret er forberedt og vises i denne visning efter ejerens aktivering. Der er endnu intet at inspicere.",
+      "empty": "Observationslageret er aktiveret, men indeholder endnu ingen rækker.",
+      "readError": "Observationslageret kunne ikke læses. Tjek serverloggene.",
+      "unknownValue": "ukendt",
+      "field": {
+        "id": "Observations-ID",
+        "hash": "Indholdshash",
+        "source": "Kilde",
+        "capturedAt": "Registreret",
+        "confidenceRaw": "Gemt pålidelighedsscore",
+        "sampleSize": "Stikprøvestørrelse",
+        "privacyClass": "Privatlivsklasse",
+        "status": "Friskhedsstatus"
+      }
+    },
+    "trust": {
+      "whyVisible": {
+        "roleMatched": "Vises, fordi det matcher din rolle og dine egne data."
+      },
+      "notKnown": {
+        "grossNetBasis": "Det vides ikke, om beløbene er brutto eller netto.",
+        "noObservationStore": "Observationslageret er endnu ikke aktiveret, så referencer til enkelte observationer er ikke tilgængelige."
+      }
     }
   }
 }

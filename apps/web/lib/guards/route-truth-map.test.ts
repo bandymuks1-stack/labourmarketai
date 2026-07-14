@@ -104,6 +104,11 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/admin/candidate-pool": "INTERNAL_ADMIN",
   "dashboard/admin/company-need-intakes": "INTERNAL_ADMIN",
   "dashboard/admin/company-verification": "INTERNAL_ADMIN",
+  // Observation inspector (Intelligence Trust Layer v1) — developer-only,
+  // READ-ONLY view of raw intelligence observations; superadmin + explicit
+  // INTELLIGENCE_INSPECTOR_ENABLED flag, honest disabled/needs-migration
+  // states, no mutation, no source activation.
+  "dashboard/admin/intelligence-observations": "INTERNAL_ADMIN",
   "dashboard/admin/language-feedback": "INTERNAL_ADMIN",
   "dashboard/admin/launch-readiness": "INTERNAL_ADMIN",
   "dashboard/admin/league": "INTERNAL_ADMIN",
