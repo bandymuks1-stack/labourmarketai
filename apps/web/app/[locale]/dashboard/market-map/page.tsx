@@ -159,18 +159,23 @@ export default async function MarketMapPage({
       {/* Pre-search gate entry — answer the right questions BEFORE searching, so
           the market shows fewer but better options. Opens the recognizer (PR
           #561), which hands off to the existing real surfaces. */}
+      {/* Owner UX recovery v1: compact one-row entry (was a tall 3-line
+          card pushing the map down) — the map is the dominant surface. */}
       <Link
         href={"/dashboard/market/recognize" as "/dashboard"}
         data-testid="market-recognize-entry"
-        className="flex flex-col gap-1 card-border bg-ink-900/40 p-4 transition-colors hover:border-brand-blue"
+        className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 card-border bg-ink-900/40 px-3 py-2 transition-colors hover:border-brand-blue"
+        title={tRec("entry.body")}
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
-          {tRec("entry.title")}
+        <span className="flex min-w-0 flex-col">
+          <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+            {tRec("entry.title")}
+          </span>
+          <span className="truncate text-xs leading-relaxed text-text-secondary">
+            {tRec("entry.body")}
+          </span>
         </span>
-        <span className="text-sm leading-relaxed text-text-secondary">
-          {tRec("entry.body")}
-        </span>
-        <span className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-text-primary">
+        <span className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-text-primary">
           {tRec("entry.cta")}
           <span aria-hidden className="text-text-muted">
             →
@@ -213,13 +218,12 @@ export default async function MarketMapPage({
           markers, mobile-safe tap targets. The legend (future layers) stays the
           honest "not on map yet" signal; this strip is the actionable bridge. */}
       <section
-        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-3"
         data-testid="market-map-connections"
       >
         <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
           {tMap("connections.title")}
         </span>
-        <p className="text-xs text-text-secondary">{tMap("connections.intro")}</p>
         <div className="grid gap-2 sm:grid-cols-3">
           {[
             {

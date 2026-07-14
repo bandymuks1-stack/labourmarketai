@@ -61,13 +61,19 @@ export default async function JournalPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ editing?: string | string[] }>;
+  searchParams?: Promise<{ editing?: string | string[]; date?: string | string[] }>;
 }) {
   const { locale } = await params;
   const sp = (await searchParams) ?? {};
   const editingId =
     typeof sp.editing === "string" && sp.editing.trim().length > 0
       ? sp.editing.trim()
+      : null;
+  // Calendar-driven day navigation (owner UX recovery v1): ?date=YYYY-MM-DD
+  // filters the records to ONE day. Anything not a plain ISO day is ignored.
+  const selectedDate =
+    typeof sp.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(sp.date)
+      ? sp.date
       : null;
   setRequestLocale(locale);
   const t = await getTranslations("journal");
@@ -84,11 +90,15 @@ export default async function JournalPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: worker } = await supabase
-    .from("workers")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
+  // Worker row + the submitter's own display name (owner UX recovery v1:
+  // every journal entry names who submitted it) — independent reads, one batch.
+  const [{ data: worker }, { data: ownProfile }] = await Promise.all([
+    supabase.from("workers").select("id").eq("profile_id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
+  ]);
+  const submitterName =
+    ownProfile?.full_name ??
+    (ownProfile?.email ? ownProfile.email.split("@")[0] : null);
 
   // Active worker-side engagements — the journal is only meaningful with one.
   const { data: ecRows } = await supabase
@@ -420,9 +430,17 @@ export default async function JournalPage({
   const entryDayGroups: {
     key: string;
     label: string;
+    /** ISO day (YYYY-MM-DD) — the ?date= navigation key for this group. */
+    isoKey: string;
     totalMinutes: number;
     entries: JournalEntryRow[];
   }[] = [];
+  const isoDayOf = (createdAt: string): string => {
+    const d = new Date(createdAt);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate(),
+    ).padStart(2, "0")}`;
+  };
   for (const e of entries ?? []) {
     const label = new Date(e.created_at).toLocaleDateString(locale);
     // Day total = sum of each entry's time metric (hours/minutes only). "days"
@@ -447,11 +465,19 @@ export default async function JournalPage({
       entryDayGroups.push({
         key: label,
         label,
+        isoKey: isoDayOf(e.created_at),
         totalMinutes: mins,
         entries: [e],
       });
     }
   }
+  // Day filter (calendar-driven navigation): a selected ?date= narrows the
+  // diary to that one day; no match → the full diary with an honest note.
+  const filteredDayGroups = selectedDate
+    ? entryDayGroups.filter((g) => g.isoKey === selectedDate)
+    : entryDayGroups;
+  const dayFilterActive = selectedDate !== null && filteredDayGroups.length > 0;
+  const visibleDayGroups = dayFilterActive ? filteredDayGroups : entryDayGroups;
   const journalEvidenceActive: EvidenceStatus[] = ["self_declared"];
   if (
     evidenceStatuses.some((s) => s === "submitted" || s === "changes_requested")
@@ -528,35 +554,37 @@ export default async function JournalPage({
           a disclosure so the readiness signal is shown ONCE prominently (the
           player card), not twice stacked — the actionable detail stays one tap
           away without lengthening the page. */}
+      {/* Owner UX recovery v1: the journal leads with the WORK RECORDS, not
+          the CV identity. The player card (and its readiness detail) stays
+          one tap away in a single disclosure — the diary is no longer pushed
+          below a full identity block on every visit. */}
       {manoCard && manoCardLabels ? (
-        <section
+        <details
           id="mano-cv-identity"
-          className="flex flex-col gap-4 scroll-mt-20"
+          className="group order-3 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
-          <WorkerPlayerCard
-            card={manoCard}
-            labels={manoCardLabels}
-            thermometer={manoThermometer}
-            avatarUrl={manoAvatar.signedUrl}
-          />
-          <details className="group rounded-md border border-border-subtle bg-surface-1/50">
-            <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
-              <span className="inline-flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className="transition-transform group-open:rotate-90"
-                >
-                  ›
-                </span>
-                {tQuick("improve")}
+          <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
+            <span className="inline-flex items-center gap-2">
+              <span
+                aria-hidden
+                className="transition-transform group-open:rotate-90"
+              >
+                ›
               </span>
-            </summary>
-            <div className="px-4 pb-4">
-              <WorkerReadinessPanel card={manoCard} />
-            </div>
-          </details>
-        </section>
+              {tQuick("identity")}
+            </span>
+          </summary>
+          <div className="flex flex-col gap-4 px-4 pb-4">
+            <WorkerPlayerCard
+              card={manoCard}
+              labels={manoCardLabels}
+              thermometer={manoThermometer}
+              avatarUrl={manoAvatar.signedUrl}
+            />
+            <WorkerReadinessPanel card={manoCard} />
+          </div>
+        </details>
       ) : null}
 
       {/* P0 UX rescue: removed the read-only project-context note and the
@@ -655,6 +683,67 @@ export default async function JournalPage({
             </a>
           )}
         </div>
+        {/* Calendar-driven day navigation (owner UX recovery v1): the diary's
+            days as compact chips — tap a day to see exactly that day, tap the
+            calendar link to see the SAME day with bookings, projects and
+            tasks on the one canonical calendar. Real days only (only days
+            that actually have entries become chips). */}
+        {entryDayGroups.length > 1 && (
+          <nav
+            aria-label={t("dayNav.title")}
+            data-testid="journal-day-nav"
+            className="flex items-center gap-1.5 overflow-x-auto pb-1"
+          >
+            <Link
+              href={"/dashboard/journal#journal-entries" as "/dashboard"}
+              data-testid="journal-day-nav-all"
+              aria-current={!dayFilterActive ? "page" : undefined}
+              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                !dayFilterActive
+                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                  : "border-ink-500 text-text-secondary hover:border-brand-blue"
+              }`}
+            >
+              {t("dayNav.all")}
+            </Link>
+            {entryDayGroups.slice(0, 21).map((g) => (
+              <Link
+                key={g.isoKey}
+                href={
+                  `/dashboard/journal?date=${g.isoKey}#journal-entries` as "/dashboard"
+                }
+                data-testid={`journal-day-nav-${g.isoKey}`}
+                aria-current={
+                  dayFilterActive && selectedDate === g.isoKey ? "page" : undefined
+                }
+                className={`shrink-0 rounded-full border px-2.5 py-1 text-xs tabular-nums transition-colors ${
+                  dayFilterActive && selectedDate === g.isoKey
+                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
+                }`}
+              >
+                {new Date(g.isoKey).toLocaleDateString(locale, {
+                  month: "short",
+                  day: "numeric",
+                })}
+                <span className="ml-1 text-[10px] text-text-muted">
+                  {g.entries.length}
+                </span>
+              </Link>
+            ))}
+            {dayFilterActive && selectedDate && (
+              <Link
+                href={
+                  `/dashboard/planning?view=day&date=${selectedDate}` as "/dashboard"
+                }
+                data-testid="journal-day-open-calendar"
+                className="ml-auto shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
+              >
+                {t("dayNav.openInCalendar")} →
+              </Link>
+            )}
+          </nav>
+        )}
         {/* Honest "who can confirm" line above the entry list: the status chips
             below show "confirmed / awaiting", so name plainly who can actually
             move an entry to confirmed today — only manager / owner / external
@@ -707,7 +796,7 @@ export default async function JournalPage({
           />
         ) : (
           <div className="flex flex-col gap-4">
-            {entryDayGroups.map((group, idx) => {
+            {visibleDayGroups.map((group, idx) => {
               // Compact day card: date + entry count + summed hours (only when
               // the day has time entries). Newest day open, older days collapse
               // so the records surface stays a tidy diary, not an endless raw
@@ -861,6 +950,18 @@ export default async function JournalPage({
                             >
                               {t("entry.locationLabel")}:{" "}
                               {site?.value_text ?? t("entry.locationUnset")}
+                              {/* Who submitted (owner UX recovery v1) — this
+                                  surface is the worker's own diary, so the
+                                  submitter is the signed-in worker; named
+                                  explicitly so an entry is never anonymous. */}
+                              {submitterName ? (
+                                <span
+                                  data-testid={`journal-entry-submitter-${e.id}`}
+                                >
+                                  {" · "}
+                                  {t("entry.submittedBy")}: {submitterName}
+                                </span>
+                              ) : null}
                             </p>
                           </div>
                           {/* 2 · Sistema suprato — current signals from the current

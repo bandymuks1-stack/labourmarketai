@@ -108,7 +108,8 @@
     "textLabel": "Itemtekst",
     "locationLabel": "Locatie",
     "locationUnset": "Locatie niet opgegeven",
-    "understoodLabel": "Wat het systeem heeft begrepen"
+    "understoodLabel": "Wat het systeem heeft begrepen",
+    "submittedBy": "Ingediend door"
   },
   "editEntryTitle": "Item bewerken",
   "editEntryBanner": "Je bewerkt een opgeslagen item. Stel de structuur opnieuw voor, markeer wat je wijzigt, en dan vervangt \"Item bijwerken\" de oude versie. Om terug te gaan —",
@@ -323,5 +324,10 @@
     },
     "permissionDenied": "Microfoontoegang is geblokkeerd. Sta microfoontoegang toe in je browserinstellingen en probeer het opnieuw."
   },
-  "savedOpenCv": "Bekijk uw cv"
+  "savedOpenCv": "Bekijk uw cv",
+  "dayNav": {
+    "title": "Dagnavigatie",
+    "all": "Alle dagen",
+    "openInCalendar": "Openen in kalender"
+  }
 }

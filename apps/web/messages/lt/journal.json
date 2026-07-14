@@ -108,7 +108,8 @@
     "textLabel": "Įrašo tekstas",
     "locationLabel": "Vieta",
     "locationUnset": "Vieta nenurodyta",
-    "understoodLabel": "Sistema suprato"
+    "understoodLabel": "Sistema suprato",
+    "submittedBy": "Pateikė"
   },
   "editEntryTitle": "Redaguoti įrašą",
   "editEntryBanner": "Redaguojate jau išsaugotą įrašą. Pasiūlykite struktūrą iš naujo, pažymėkite ką taisote, ir paspaudus „Atnaujinti įrašą“ senas variantas bus pakeistas. Jei keisitės nuomonę —",
@@ -323,5 +324,10 @@
     },
     "permissionDenied": "Prieiga prie mikrofono užblokuota. Leiskite mikrofoną naršyklės nustatymuose ir bandykite dar kartą."
   },
-  "savedOpenCv": "Peržiūrėti savo CV"
+  "savedOpenCv": "Peržiūrėti savo CV",
+  "dayNav": {
+    "title": "Dienų navigacija",
+    "all": "Visos dienos",
+    "openInCalendar": "Atidaryti kalendoriuje"
+  }
 }

@@ -108,7 +108,8 @@
     "textLabel": "Eintragstext",
     "locationLabel": "Ort",
     "locationUnset": "Ort nicht angegeben",
-    "understoodLabel": "Was das System verstanden hat"
+    "understoodLabel": "Was das System verstanden hat",
+    "submittedBy": "Eingetragen von"
   },
   "editEntryTitle": "Eintrag bearbeiten",
   "editEntryBanner": "Sie bearbeiten einen gespeicherten Eintrag. Lassen Sie die Struktur erneut vorschlagen, markieren Sie, was Sie ändern, dann ersetzt \"Eintrag aktualisieren\" die alte Version. Zum Abbrechen —",
@@ -323,5 +324,10 @@
     },
     "permissionDenied": "Der Mikrofonzugriff wurde blockiert. Erlauben Sie den Zugriff in den Browsereinstellungen und versuchen Sie es erneut."
   },
-  "savedOpenCv": "Ihr CV ansehen"
+  "savedOpenCv": "Ihr CV ansehen",
+  "dayNav": {
+    "title": "Tagesnavigation",
+    "all": "Alle Tage",
+    "openInCalendar": "Im Kalender öffnen"
+  }
 }

@@ -76,11 +76,12 @@ export default async function CommunicationListPage({
   // Inbox contract: unread first, then latest activity. Both groups keep
   // the query's updated_at desc order (stable partition), so on mobile the
   // first unread thread is above the fold instead of buried by older-but-
-  // recently-bumped read threads.
-  const conversations = [
-    ...fetched.filter((c) => unreadIds.has(c.id)),
-    ...fetched.filter((c) => !unreadIds.has(c.id)),
-  ];
+  // recently-bumped read threads. Owner UX recovery v1: the two groups now
+  // render as LABELLED sections (unread / earlier) so prioritisation is
+  // visible structure, not just an invisible sort.
+  const unreadConversations = fetched.filter((c) => unreadIds.has(c.id));
+  const readConversations = fetched.filter((c) => !unreadIds.has(c.id));
+  const conversations = [...unreadConversations, ...readConversations];
 
   // Newest-message preview per thread (sender + first line) — WHAT is new,
   // visible without opening every thread.
@@ -111,6 +112,184 @@ export default async function CommunicationListPage({
   // incoming count (> 0); 0 on any missing-data state, so no fake badge.
   const tBookings = await getTranslations("bookings");
   const pendingBookings = await getPendingIncomingBookingCount();
+
+  // ONE card renderer for both sections (unread / earlier) — the card model,
+  // honesty rules and testids are identical wherever a thread renders.
+  const renderConversation = (c: ConversationRow) => {
+    const unread = unreadIds.has(c.id);
+    // Clarity v1: never render a card where the user cannot tell WHO /
+    // WHAT / WHICH CONTEXT. Derived honestly from the real `kind`; when
+    // identity/workspace are not in the data model we say so, not fake it.
+    const card = describeConversationCard({
+      kind: c.kind,
+      createdBy: c.created_by,
+      viewerId: user.id,
+      counterpartName: counterpartNames.get(c.id) ?? null,
+      // §8.2 demand context — the real subject column (for a direct
+      // thread it is the demand title written by the gated scouting
+      // action), so the scope line can honestly say which work
+      // request the thread is about.
+      subject: c.subject,
+      // Source relation v1 — RPC-resolved typed source (or null →
+      // the card renders exactly as before).
+      sourceContext: sourceContexts.get(c.id) ?? null,
+    });
+    // Real title fallback — never a technical "(be temos)": the
+    // permitted counterpart name, then the live source title (project /
+    // order / request), then the support-team label, then a neutral
+    // "Pokalbis". Only data that actually exists; nothing invented.
+    const title =
+      c.subject ??
+      (card.counterpartyRestricted ? null : (card.counterpartyName ?? null)) ??
+      card.sourceTitle ??
+      (c.kind === "support" ? t("counterparty.support") : t("conversationFallback"));
+    const preview = previews.get(c.id);
+    return (
+      <li
+        key={c.id}
+        className="card-border flex flex-col gap-0.5 px-3 py-2.5 transition-colors hover:border-brand-blue"
+      >
+        <Link
+          href={`/dashboard/communication/${c.id}`}
+          className="flex flex-col gap-0.5"
+          data-testid={`conversation-row-${c.id}`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <span className="flex min-w-0 items-center gap-2">
+              {unread && (
+                <span
+                  className="shrink-0 rounded-full bg-brand-blue/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-label text-brand-blue"
+                  data-testid={`conversation-unread-${c.id}`}
+                >
+                  {t("unread")}
+                </span>
+              )}
+              <span className="truncate text-sm font-semibold text-text-primary">
+                {title}
+              </span>
+            </span>
+            <span
+              className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted"
+              data-testid={`conversation-type-${c.id}`}
+            >
+              {t(card.typeKey)}
+            </span>
+          </div>
+          {/* Newest-message preview: who wrote it + the first line —
+              WHAT is new without opening the thread. Attachment-only
+              messages say so honestly. */}
+          {preview && (
+            <p
+              className="truncate text-xs text-text-secondary"
+              data-testid={`conversation-preview-${c.id}`}
+            >
+              <span className="text-text-muted">
+                {preview.byViewer
+                  ? t("byYou")
+                  : (card.counterpartyRestricted
+                      ? t("byOther")
+                      : (card.counterpartyName ?? t("byOther")))}
+                {": "}
+              </span>
+              {preview.text.length > 0
+                ? preview.text
+                : t("preview.attachmentOnly")}
+            </p>
+          )}
+          {/* Who + which context + when — ONE compact meta row (owner UX
+              recovery v1: the separate timestamp row folded in here). A
+              restricted counterparty renders as a locked, system-limited
+              chip (NOT a normal name and NOT a bland "unspecified
+              recipient") so the user knows the details are simply not
+              shown yet. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
+            {card.counterpartyRestricted ? (
+              <span
+                className="inline-flex items-center gap-1 rounded border border-ink-600/60 bg-ink-800/40 px-1.5 py-0.5 text-text-muted"
+                data-testid={`conversation-counterparty-${c.id}`}
+                data-restricted="true"
+              >
+                <Lock className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+                {t(card.counterpartyKey)}
+              </span>
+            ) : (
+              <span
+                className="text-text-secondary"
+                data-testid={`conversation-counterparty-${c.id}`}
+              >
+                {/* Permitted real name (safe reader) or the honest
+                    i18n label (e.g. support team) — never invented. */}
+                {card.counterpartyName ?? t(card.counterpartyKey)}
+              </span>
+            )}
+            <span aria-hidden className="text-text-muted">
+              ·
+            </span>
+            <span
+              className={
+                card.scopeKnown
+                  ? "text-text-secondary"
+                  : "italic text-text-muted"
+              }
+              data-testid={`conversation-scope-${c.id}`}
+              data-demand-context={card.demandContext ? "true" : undefined}
+            >
+              {t(card.scopeKey)}
+            </span>
+            {/* Honest origin: derived only from created_by vs the
+                viewer — "did I start this, or did someone reach out to
+                me?". Rendered only when created_by is known. */}
+            {card.originKey && (
+              <>
+                <span aria-hidden className="text-text-muted">
+                  ·
+                </span>
+                <span
+                  className="text-text-secondary"
+                  data-testid={`conversation-origin-${c.id}`}
+                >
+                  {t(card.originKey)}
+                </span>
+              </>
+            )}
+            <span aria-hidden className="text-text-muted">
+              ·
+            </span>
+            <span className="text-text-muted">
+              {new Date(c.updated_at).toLocaleString(locale)}
+            </span>
+          </div>
+        </Link>
+        {/* Source relation v1 — typed source line, rendered ONLY when
+            the participant-scoped RPC resolved a live source row
+            (never guessed from the subject). A SIBLING of the card
+            link (nested anchors are invalid HTML). With a route for
+            this viewer it is a real link-back; without one it is a
+            plain label — no dead ends, no fake state. */}
+        {card.sourceKey && (
+          <div className="flex flex-wrap items-center gap-x-1.5 text-[11px]">
+            {card.sourceHref ? (
+              <Link
+                href={card.sourceHref as "/dashboard"}
+                className="text-brand-blue hover:underline"
+                data-testid={`conversation-source-${c.id}`}
+                data-source-linked="true"
+              >
+                {t(card.sourceKey)}: {card.sourceTitle}
+              </Link>
+            ) : (
+              <span
+                className="text-text-secondary"
+                data-testid={`conversation-source-${c.id}`}
+              >
+                {t(card.sourceKey)}: {card.sourceTitle}
+              </span>
+            )}
+          </div>
+        )}
+      </li>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -178,179 +357,41 @@ export default async function CommunicationListPage({
           {t("empty")}
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {conversations.map((c) => {
-            const unread = unreadIds.has(c.id);
-            // Clarity v1: never render a card where the user cannot tell WHO /
-            // WHAT / WHICH CONTEXT. Derived honestly from the real `kind`; when
-            // identity/workspace are not in the data model we say so, not fake it.
-            const card = describeConversationCard({
-              kind: c.kind,
-              createdBy: c.created_by,
-              viewerId: user.id,
-              counterpartName: counterpartNames.get(c.id) ?? null,
-              // §8.2 demand context — the real subject column (for a direct
-              // thread it is the demand title written by the gated scouting
-              // action), so the scope line can honestly say which work
-              // request the thread is about.
-              subject: c.subject,
-              // Source relation v1 — RPC-resolved typed source (or null →
-              // the card renders exactly as before).
-              sourceContext: sourceContexts.get(c.id) ?? null,
-            });
-            // Real title fallback — never a technical "(be temos)": the
-            // permitted counterpart name, then the live source title (project /
-            // order / request), then the support-team label, then a neutral
-            // "Pokalbis". Only data that actually exists; nothing invented.
-            const title =
-              c.subject ??
-
-              (card.counterpartyRestricted ? null : (card.counterpartyName ?? null)) ??
-              card.sourceTitle ??
-              (c.kind === "support" ? t("counterparty.support") : t("conversationFallback"));
-            const preview = previews.get(c.id);
-            return (
-              <li
-                key={c.id}
-                className="card-border flex flex-col gap-1 p-4 transition-colors hover:border-brand-blue"
-              >
-                <Link
-                  href={`/dashboard/communication/${c.id}`}
-                  className="flex flex-col gap-1"
-                  data-testid={`conversation-row-${c.id}`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="flex min-w-0 items-center gap-2">
-                      {unread && (
-                        <span
-                          className="shrink-0 rounded-full bg-brand-blue/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-label text-brand-blue"
-                          data-testid={`conversation-unread-${c.id}`}
-                        >
-                          {t("unread")}
-                        </span>
-                      )}
-                      <span className="truncate text-sm font-semibold text-text-primary">
-                        {title}
-                      </span>
-                    </span>
-                    <span
-                      className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted"
-                      data-testid={`conversation-type-${c.id}`}
-                    >
-                      {t(card.typeKey)}
-                    </span>
-                  </div>
-                  {/* Newest-message preview: who wrote it + the first line —
-                      WHAT is new without opening the thread. Attachment-only
-                      messages say so honestly. */}
-                  {preview && (
-                    <p
-                      className="truncate text-xs text-text-secondary"
-                      data-testid={`conversation-preview-${c.id}`}
-                    >
-                      <span className="text-text-muted">
-                        {preview.byViewer
-                          ? t("byYou")
-                          : (card.counterpartyRestricted
-                              ? t("byOther")
-                              : (card.counterpartyName ?? t("byOther")))}
-                        {": "}
-                      </span>
-                      {preview.text.length > 0
-                        ? preview.text
-                        : t("preview.attachmentOnly")}
-                    </p>
-                  )}
-                  {/* Who + which context. A restricted counterparty renders as a
-                      locked, system-limited chip (NOT a normal name and NOT a
-                      bland "unspecified recipient") so the user knows the
-                      details are simply not shown yet. */}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
-                    {card.counterpartyRestricted ? (
-                      <span
-                        className="inline-flex items-center gap-1 rounded border border-ink-600/60 bg-ink-800/40 px-1.5 py-0.5 text-text-muted"
-                        data-testid={`conversation-counterparty-${c.id}`}
-                        data-restricted="true"
-                      >
-                        <Lock className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
-                        {t(card.counterpartyKey)}
-                      </span>
-                    ) : (
-                      <span
-                        className="text-text-secondary"
-                        data-testid={`conversation-counterparty-${c.id}`}
-                      >
-                        {/* Permitted real name (safe reader) or the honest
-                            i18n label (e.g. support team) — never invented. */}
-                        {card.counterpartyName ?? t(card.counterpartyKey)}
-                      </span>
-                    )}
-                    <span aria-hidden className="text-text-muted">
-                      ·
-                    </span>
-                    <span
-                      className={
-                        card.scopeKnown
-                          ? "text-text-secondary"
-                          : "italic text-text-muted"
-                      }
-                      data-testid={`conversation-scope-${c.id}`}
-                      data-demand-context={card.demandContext ? "true" : undefined}
-                    >
-                      {t(card.scopeKey)}
-                    </span>
-                    {/* Honest origin: derived only from created_by vs the
-                        viewer — "did I start this, or did someone reach out to
-                        me?". Rendered only when created_by is known. */}
-                    {card.originKey && (
-                      <>
-                        <span aria-hidden className="text-text-muted">
-                          ·
-                        </span>
-                        <span
-                          className="text-text-secondary"
-                          data-testid={`conversation-origin-${c.id}`}
-                        >
-                          {t(card.originKey)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-text-muted">
-                    <span>{new Date(c.updated_at).toLocaleString(locale)}</span>
-                  </div>
-                </Link>
-                {/* Source relation v1 — typed source line, rendered ONLY when
-                    the participant-scoped RPC resolved a live source row
-                    (never guessed from the subject). A SIBLING of the card
-                    link (nested anchors are invalid HTML). With a route for
-                    this viewer it is a real link-back; without one it is a
-                    plain label — no dead ends, no fake state. */}
-                {card.sourceKey && (
-                  <div className="flex flex-wrap items-center gap-x-1.5 text-[11px]">
-                    {card.sourceHref ? (
-                      <Link
-                        href={card.sourceHref as "/dashboard"}
-                        className="text-brand-blue hover:underline"
-                        data-testid={`conversation-source-${c.id}`}
-                        data-source-linked="true"
-                      >
-                        {t(card.sourceKey)}: {card.sourceTitle}
-                      </Link>
-                    ) : (
-                      <span
-                        className="text-text-secondary"
-                        data-testid={`conversation-source-${c.id}`}
-                      >
-                        {t(card.sourceKey)}: {card.sourceTitle}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+        <div className="flex flex-col gap-4">
+          {/* Unread first, as a labelled section — what needs attention is
+              visible structure, not just sort order. */}
+          {unreadConversations.length > 0 && (
+            <section
+              className="flex flex-col gap-2"
+              data-testid="communication-unread-section"
+            >
+              <h2 className="flex items-baseline gap-2 font-display text-sm font-semibold text-text-primary">
+                {t("sections.unread")}
+                <span className="font-mono text-xs font-normal text-text-muted tabular-nums">
+                  {unreadConversations.length}
+                </span>
+              </h2>
+              <ul className="flex flex-col gap-2">
+                {unreadConversations.map(renderConversation)}
+              </ul>
+            </section>
+          )}
+          {readConversations.length > 0 && (
+            <section
+              className="flex flex-col gap-2"
+              data-testid="communication-read-section"
+            >
+              {unreadConversations.length > 0 && (
+                <h2 className="font-display text-sm font-semibold text-text-secondary">
+                  {t("sections.earlier")}
+                </h2>
+              )}
+              <ul className="flex flex-col gap-2">
+                {readConversations.map(renderConversation)}
+              </ul>
+            </section>
+          )}
+        </div>
       )}
 
       {/* Support entry — secondary by design: real conversations own the top

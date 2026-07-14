@@ -41,7 +41,8 @@
       "conversations": "Your conversations",
       "bookings": "Your bookings",
       "documents": "Your document records"
-    }
+    },
+    "closeLabel": "Close search"
   },
   "reports": {
     "eyebrow": "Reports",
@@ -2031,7 +2032,8 @@
         "future_ocr_needed": "Image/OCR",
         "manual_review_only": "Other"
       },
-      "noFiles": "No files"
+      "noFiles": "No files",
+      "showAll": "Show all ({n})"
     },
     "user": {
       "onboarded": "Onboarded",
@@ -3102,8 +3104,16 @@
         "allClear": "Nothing is waiting for your attention right now.",
         "viewAll": "All activity"
       },
+      "moduleGrid": {
+        "manage": "Customize cards",
+        "done": "Done",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "hide": "Hide",
+        "hiddenTitle": "Hidden cards"
+      },
       "myZone": {
-        "actionsHeading": "What you can do now",
+        "actionsHeading": "Actions",
         "incompleteStatus": "Your information is not complete yet",
         "readyStatus": "Your profile is ready",
         "missing": {
@@ -3135,7 +3145,7 @@
             "desc": "Work that fits you"
           },
           "planning": {
-            "title": "Planning",
+            "title": "Calendar",
             "desc": "Bookings, projects and deadlines in one agenda"
           },
           "bookings": {
@@ -5396,6 +5406,10 @@
     "conversationFallback": "Conversation",
     "preview": {
       "attachmentOnly": "Attachment"
+    },
+    "sections": {
+      "unread": "Unread",
+      "earlier": "Earlier"
     }
   },
   "orgTier1Warning": {
@@ -6655,12 +6669,12 @@
       "withdraw": "Withdraw proposal",
       "findAnother": "Find another worker",
       "proposeAgain": "Propose again with new dates",
-      "planning": "View in planning"
+      "planning": "View in calendar"
     },
     "connections": {
-      "title": "Planning connects to",
+      "title": "Calendar connections",
       "intro": "A booking is part of your plan. These are the surfaces it links to.",
-      "planning": "Planning agenda",
+      "planning": "Calendar agenda",
       "planningNote": "This booking in date context with projects and tasks",
       "marketplace": "Marketplace requests",
       "marketplaceNote": "Service requests and their statuses",
@@ -8031,8 +8045,8 @@
     }
   },
   "planning": {
-    "eyebrow": "PLANNING",
-    "title": "Planning",
+    "eyebrow": "CALENDAR",
+    "title": "Calendar",
     "intro": "Bookings, project dates and task deadlines in one agenda. Every row links to its real source.",
     "notAuthed": "Sign in to see your plan.",
     "filters": {
@@ -8714,11 +8728,11 @@
   },
   "network": {
     "module": {
-      "label": "My network",
+      "label": "Network",
       "desc": "Your companies, people, partners and invitations in one place."
     },
     "eyebrow": "NETWORK",
-    "title": "My network",
+    "title": "Network",
     "intro": "Your companies, teams, partners and invitations. Invite a person or a company right from here.",
     "notEnabled": "Invitations are not enabled in this environment yet.",
     "incoming": {
@@ -8749,7 +8763,8 @@
         "agency": "Agency",
         "team": "Team",
         "other": "Organization"
-      }
+      },
+      "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown."
     },
     "sent": {
       "title": "My sent invitations",
@@ -8790,7 +8805,7 @@
     "relationships": {
       "title": "My relationships",
       "empty": "No active relationships yet.",
-      "noOrg": "No organization",
+      "noOrg": "Personal relationship — not linked to a company",
       "slug": {
         "employee": "Employee",
         "manager": "Manager",
@@ -8806,7 +8821,8 @@
         "student": "Student",
         "unemployed": "Looking for work",
         "volunteer": "Volunteer"
-      }
+      },
+      "why": "Only your active work relationships are shown — each row names the relationship."
     },
     "invite": {
       "title": "Invite",

@@ -41,7 +41,8 @@
       "conversations": "Je gesprekken",
       "bookings": "Je boekingen",
       "documents": "Je documentregistraties"
-    }
+    },
+    "closeLabel": "Zoeken sluiten"
   },
   "reports": {
     "eyebrow": "Rapporten",
@@ -2031,7 +2032,8 @@
         "future_ocr_needed": "Afbeelding/OCR",
         "manual_review_only": "Overig"
       },
-      "noFiles": "Geen bestanden"
+      "noFiles": "Geen bestanden",
+      "showAll": "Alles tonen ({n})"
     },
     "user": {
       "onboarded": "Onboarding voltooid",
@@ -3102,8 +3104,16 @@
         "allClear": "Er wacht op dit moment niets op uw aandacht.",
         "viewAll": "Alle activiteit"
       },
+      "moduleGrid": {
+        "manage": "Kaarten aanpassen",
+        "done": "Klaar",
+        "moveUp": "Omhoog verplaatsen",
+        "moveDown": "Omlaag verplaatsen",
+        "hide": "Verbergen",
+        "hiddenTitle": "Verborgen kaarten"
+      },
       "myZone": {
-        "actionsHeading": "Wat je nu kunt doen",
+        "actionsHeading": "Acties",
         "incompleteStatus": "Je gegevens zijn nog niet compleet",
         "readyStatus": "Je profiel is klaar",
         "missing": {
@@ -3135,7 +3145,7 @@
             "desc": "Werk dat bij je past"
           },
           "planning": {
-            "title": "Planning",
+            "title": "Kalender",
             "desc": "Boekingen, projecten en deadlines in één agenda"
           },
           "bookings": {
@@ -5396,6 +5406,10 @@
     "conversationFallback": "Gesprek",
     "preview": {
       "attachmentOnly": "Bijlage"
+    },
+    "sections": {
+      "unread": "Ongelezen",
+      "earlier": "Eerder"
     }
   },
   "orgTier1Warning": {
@@ -6655,12 +6669,12 @@
       "withdraw": "Voorstel intrekken",
       "findAnother": "Andere werknemer zoeken",
       "proposeAgain": "Opnieuw voorstellen met nieuwe datums",
-      "planning": "Bekijken in planning"
+      "planning": "Bekijk in kalender"
     },
     "connections": {
-      "title": "Planning is verbonden met",
+      "title": "Kalenderkoppelingen",
       "intro": "Een boeking is onderdeel van je plan. Dit zijn de onderdelen waaraan die gekoppeld is.",
-      "planning": "Planningsagenda",
+      "planning": "Kalenderagenda",
       "planningNote": "Deze boeking in datumcontext met projecten en taken",
       "marketplace": "Marktplaatsverzoeken",
       "marketplaceNote": "Serviceverzoeken en hun statussen",
@@ -8031,8 +8045,8 @@
     }
   },
   "planning": {
-    "eyebrow": "PLANNING",
-    "title": "Planning",
+    "eyebrow": "KALENDER",
+    "title": "Kalender",
     "intro": "Boekingen, projectdata en taakdeadlines in één agenda. Elke regel linkt naar de echte bron.",
     "notAuthed": "Log in om je planning te zien.",
     "filters": {
@@ -8714,11 +8728,11 @@
   },
   "network": {
     "module": {
-      "label": "Mijn netwerk",
+      "label": "Netwerk",
       "desc": "Uw bedrijven, mensen, partners en uitnodigingen op één plek."
     },
     "eyebrow": "NETWERK",
-    "title": "Mijn netwerk",
+    "title": "Netwerk",
     "intro": "Uw bedrijven, teams, partners en uitnodigingen. Nodig een persoon of bedrijf direct vanaf hier uit.",
     "notEnabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
     "incoming": {
@@ -8749,7 +8763,8 @@
         "agency": "Bureau",
         "team": "Team",
         "other": "Organisatie"
-      }
+      },
+      "visibilityReason": "Alleen mensen die vindbaar willen zijn of een echte werkrelatie met u hebben, worden getoond."
     },
     "sent": {
       "title": "Mijn verzonden uitnodigingen",
@@ -8790,7 +8805,7 @@
     "relationships": {
       "title": "Mijn relaties",
       "empty": "Nog geen actieve relaties.",
-      "noOrg": "Geen organisatie",
+      "noOrg": "Persoonlijke relatie — niet gekoppeld aan een bedrijf",
       "slug": {
         "employee": "Medewerker",
         "manager": "Manager",
@@ -8806,7 +8821,8 @@
         "student": "Student",
         "unemployed": "Werkzoekend",
         "volunteer": "Vrijwilliger"
-      }
+      },
+      "why": "Alleen uw actieve werkrelaties worden getoond — elke rij benoemt de relatie."
     },
     "invite": {
       "title": "Uitnodigen",
