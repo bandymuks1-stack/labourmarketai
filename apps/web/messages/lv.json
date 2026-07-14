@@ -2619,7 +2619,14 @@
       "actor": {
         "system": "Sistēma (deterministiski noteikumi)",
         "owner": "Īpašnieks",
-        "source": "Datu avots"
+        "source": "Datu avots",
+        "admin": "Administrators"
+      },
+      "explain": {
+        "curatedEntry": "Administrators ievadīja šo tirgus atskaites punktu ar avota piezīmi",
+        "deterministicComparison": "Sistēma aprēķināja šo rezultātu pēc fiksētiem, deterministiskiem noteikumiem",
+        "aggregatedOwnRows": "Sistēma apkopoja jūsu organizācijas pašas pieprasījuma ierakstus slīdošajā logā",
+        "renderedForYou": "Rezultāts jums tika parādīts ar pilnu skaidrojumu"
       }
     },
     "conflict": {
@@ -2660,12 +2667,56 @@
     },
     "trust": {
       "whyVisible": {
-        "roleMatched": "Tiek rādīts, jo tas atbilst jūsu lomai un jūsu pašu datiem."
+        "roleMatched": "Tiek rādīts, jo tas atbilst jūsu lomai un jūsu pašu datiem.",
+        "ownDemandRows": "Tiek rādīts, jo tas ir aprēķināts no jūsu organizācijas pašas pieprasījuma ierakstiem."
       },
       "notKnown": {
         "grossNetBasis": "Nav zināms, vai summas ir bruto vai neto.",
         "noObservationStore": "Novērojumu krātuve vēl nav iespējota, tāpēc atsauces uz atsevišķiem novērojumiem nav pieejamas."
       }
+    },
+    "trustCard": {
+      "rowTitle": "Tirgus konteksts",
+      "kind": {
+        "salaryBenchmark": "Algas atskaites punkts",
+        "demand": "Pieprasījums",
+        "supply": "Piedāvājums",
+        "skillGap": "Prasmju plaisa",
+        "marketTrend": "Tirgus tendence"
+      },
+      "status": {
+        "ready": "Gatavs",
+        "unavailable": "Datu vēl nav",
+        "conflict": "Konstatēta pretruna"
+      },
+      "conflict": {
+        "title": "Konstatēta pretruna",
+        "divergence": "atšķirība {pct}%"
+      },
+      "unavailable": {
+        "requirementTitle": "Kas ir vajadzīgs",
+        "sourcesTitle": "Avoti, kas gaida īpašnieka apstiprinājumu"
+      },
+      "reason": {
+        "salaryNoBenchmark": "Šeit nav algas skaitļa, jo jūsu profesijai un valstij vēl nav ievadīts kurēts tirgus atskaites punkts, un neviens ārējais algu avots nav apstiprināts lietošanai.",
+        "demandNotPublished": "Šeit nav pieprasījuma skaitļa, jo apkopots tirgus pieprasījums vēl netiek publicēts: novērojumu krātuve ir sagatavota, bet izslēgta, un neviens ārējais pieprasījuma avots nav apstiprināts.",
+        "demandNoOwnRows": "Šeit nav pieprasījuma skaitļa, jo jūsu organizācijai pēdējo 90 dienu laikā nav pieprasījuma ierakstu — šī kartīte skaita tikai jūsu pašu īstos ierakstus.",
+        "supplyNotMeasured": "Šeit nav piedāvājuma skaitļa, jo darbinieku pieejamība vēl netiek apkopota: novērojumu krātuve ir sagatavota, bet izslēgta.",
+        "skillGapNeedsBoth": "Šeit nav prasmju plaisas skaitļa, jo tam vajadzīgi gan pieprasījuma, gan piedāvājuma apkopojumi — neviens netiek publicēts, kamēr novērojumu krātuve ir izslēgta.",
+        "trendNeedsHistory": "Šeit nav tendences, jo tendencei vajadzīga datētu novērojumu vēsture, un novērojumu krātuve ir sagatavota, bet izslēgta. Tendence nekad netiek zīmēta no viena punkta."
+      },
+      "requirement": {
+        "ownerEnableStore": "Platformas īpašniekam jāieslēdz novērojumu krātuve un jāapstiprina vismaz viens datu avots.",
+        "salaryBenchmark": "Administratoram jāievada kurēts tirgus atskaites punkts jūsu profesijai un valstij, vai platformas īpašniekam jāapstiprina ārējais algu avots.",
+        "demandOwnRows": "Pievienojiet darba pieprasījumus — kartīte piepildīsies ar jūsu organizācijas datiem, tiklīdz būs ieraksti."
+      },
+      "after": {
+        "activation": "Kad īpašnieks apstiprinās un aktivizēs datu avotu, šī kartīte piepildīsies ar pamatotiem, datētiem skaitļiem — katram būs uzticamība, svaigums, avots un soli pa solim izsekojama izcelsme."
+      }
+    },
+    "drawer": {
+      "limitations": "Zināmie ierobežojumi",
+      "timelineUnavailable": "Soli pa solim izcelsmes josla šeit parādīsies, kad novērojumu krātuve tiks ieslēgta."
     }
   }
 }

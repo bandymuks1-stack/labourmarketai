@@ -1,10 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
-import { ContextualIntelligenceCard } from "@/components/intelligence/contextual-intelligence-card";
+import { TrustInsightCard } from "@/components/intelligence/trust-insight-card";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getCompanyDemandIntelligence } from "@/lib/intelligence/intelligence-read";
-import { buildCompanyIntelligenceCards } from "@/lib/intelligence/intelligence-view-model";
+import { buildCompanyDemandTrustCard } from "@/lib/intelligence/trust-card-model";
 import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
 import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
@@ -97,55 +97,24 @@ export default async function CompanyWorkforcePlanningPage({
     );
   }
 
-  // ── Contextual market-intelligence signal (Labour Market Intelligence
-  //    v1): the org's OWN 90-day demand aggregates from the intelligence
-  //    read layer, shaped by the view-model builder — real data or an honest
-  //    insufficient state, never a fabricated number. (A supply/demand-gap
-  //    composer does not exist in the read layer yet, so the demand-signal
-  //    card is the honest signal shown here.)
-  const tIntel = await getTranslations("intelligence");
+  // ── Market context (Contextual Intelligence UI v1): the org's OWN 90-day
+  //    demand aggregates as a trust card — full trust report (derived
+  //    confidence, freshness, limitations, timeline) when data exists, an
+  //    honest unavailable state (why / requirement / disabled sources /
+  //    after activation) otherwise. Never a fabricated number (§18).
   const demandIntel = await getCompanyDemandIntelligence();
-  const intelCards = buildCompanyIntelligenceCards({
-    salaryCompetitiveness: null,
-    supplyDemandGaps: [],
-    skillScarcity:
-      demandIntel.kind === "ok" ? demandIntel.demandAggregates : [],
-  });
-  const scarcityCard =
-    intelCards.find((c) => c.id === "company-skill-scarcity") ?? null;
+  const demandTrustCard = buildCompanyDemandTrustCard(
+    demandIntel.kind === "ok"
+      ? {
+          demandAggregates: demandIntel.demandAggregates,
+          windowStart: demandIntel.windowStart,
+          windowEnd: demandIntel.windowEnd,
+        }
+      : null,
+    Date.now(),
+  );
   const intelContextCard = (
-    <ContextualIntelligenceCard
-      locale={locale}
-      testId="planning-zone-intelligence"
-      eyebrow={tIntel("contextual.eyebrow")}
-      headline={
-        scarcityCard
-          ? (tIntel(
-              scarcityCard.headlineCode.replace(/^intelligence\./, "") as never,
-              { ...scarcityCard.headlineParams } as never,
-            ) as string)
-          : tIntel("contextual.demandInsufficient")
-      }
-      state={scarcityCard ? scarcityCard.state : "insufficient_data"}
-      stateLabel={
-        scarcityCard && scarcityCard.state === "ready"
-          ? tIntel("state.ready")
-          : tIntel("state.insufficientData")
-      }
-      badge={
-        scarcityCard
-          ? {
-              originKind: scarcityCard.sourceBadge.originKind,
-              originLabel: tIntel(`origin.${scarcityCard.sourceBadge.originKind}`),
-              sourceLabel: tIntel(
-                `sources.key.${scarcityCard.sourceBadge.sourceKey}` as never,
-              ) as string,
-              observedAtLabel: null,
-            }
-          : null
-      }
-      linkLabel={tIntel("contextual.link")}
-    />
+    <TrustInsightCard card={demandTrustCard} locale={locale} linkToWorkspace />
   );
 
   const view = buildPlanningZoneView({

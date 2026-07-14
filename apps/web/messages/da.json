@@ -2619,7 +2619,14 @@
       "actor": {
         "system": "System (deterministiske regler)",
         "owner": "Ejer",
-        "source": "Datakilde"
+        "source": "Datakilde",
+        "admin": "Administrator"
+      },
+      "explain": {
+        "curatedEntry": "En administrator indtastede denne markedssats med kildenote",
+        "deterministicComparison": "Systemet beregnede dette resultat med faste, deterministiske regler",
+        "aggregatedOwnRows": "Systemet aggregerede din organisations egne efterspørgselsposter over det løbende vindue",
+        "renderedForYou": "Resultatet blev vist for dig med den fulde forklaring"
       }
     },
     "conflict": {
@@ -2660,12 +2667,56 @@
     },
     "trust": {
       "whyVisible": {
-        "roleMatched": "Vises, fordi det matcher din rolle og dine egne data."
+        "roleMatched": "Vises, fordi det matcher din rolle og dine egne data.",
+        "ownDemandRows": "Vises, fordi det er beregnet ud fra din organisations egne efterspørgselsposter."
       },
       "notKnown": {
         "grossNetBasis": "Det vides ikke, om beløbene er brutto eller netto.",
         "noObservationStore": "Observationslageret er endnu ikke aktiveret, så referencer til enkelte observationer er ikke tilgængelige."
       }
+    },
+    "trustCard": {
+      "rowTitle": "Markedskontekst",
+      "kind": {
+        "salaryBenchmark": "Lønreference",
+        "demand": "Efterspørgsel",
+        "supply": "Udbud",
+        "skillGap": "Kompetencegab",
+        "marketTrend": "Markedstendens"
+      },
+      "status": {
+        "ready": "Klar",
+        "unavailable": "Ingen data endnu",
+        "conflict": "Konflikt fundet"
+      },
+      "conflict": {
+        "title": "Konflikt fundet",
+        "divergence": "forskel {pct}%"
+      },
+      "unavailable": {
+        "requirementTitle": "Hvad der kræves",
+        "sourcesTitle": "Kilder, der afventer ejerens godkendelse"
+      },
+      "reason": {
+        "salaryNoBenchmark": "Der er intet løntal her, fordi der endnu ikke findes en kurateret markedssats for dit erhverv og land, og ingen ekstern lønkilde er godkendt til brug.",
+        "demandNotPublished": "Der er intet efterspørgselstal her, fordi aggregeret markedsefterspørgsel endnu ikke offentliggøres: observationslageret er forberedt, men slukket, og ingen ekstern efterspørgselskilde er godkendt.",
+        "demandNoOwnRows": "Der er intet efterspørgselstal her, fordi din organisation ikke har efterspørgselsposter de seneste 90 dage — kortet tæller kun jeres egne rigtige poster.",
+        "supplyNotMeasured": "Der er intet udbudstal her, fordi arbejdskraftens tilgængelighed endnu ikke aggregeres: observationslageret er forberedt, men slukket.",
+        "skillGapNeedsBoth": "Der er intet kompetencegab-tal her, fordi det kræver både et efterspørgsels- og et udbudsaggregat — ingen af dem offentliggøres, mens observationslageret er slukket.",
+        "trendNeedsHistory": "Der er ingen tendens her, fordi en tendens kræver en historik af daterede observationer, og observationslageret er forberedt, men slukket. En tendens tegnes aldrig ud fra ét punkt."
+      },
+      "requirement": {
+        "ownerEnableStore": "Platformens ejer skal tænde for observationslageret og godkende mindst én datakilde.",
+        "salaryBenchmark": "En administrator skal indtaste en kurateret markedssats for dit erhverv og land, eller platformens ejer skal godkende en ekstern lønkilde.",
+        "demandOwnRows": "Tilføj arbejdsforespørgsler — kortet fyldes med jeres egen organisations data, så snart der findes poster."
+      },
+      "after": {
+        "activation": "Når ejeren har godkendt og aktiveret en datakilde, fyldes dette kort med dokumenterede, daterede tal — hver med pålidelighed, friskhed, kilde og trin-for-trin-oprindelse."
+      }
+    },
+    "drawer": {
+      "limitations": "Kendte begrænsninger",
+      "timelineUnavailable": "Trin-for-trin-oprindelseslinjen vises her, når observationslageret tændes."
     }
   }
 }

@@ -2619,7 +2619,14 @@
       "actor": {
         "system": "System (reguły deterministyczne)",
         "owner": "Właściciel",
-        "source": "Źródło danych"
+        "source": "Źródło danych",
+        "admin": "Administrator"
+      },
+      "explain": {
+        "curatedEntry": "Administrator wprowadził ten punkt odniesienia z notatką o źródle",
+        "deterministicComparison": "System obliczył ten wynik według stałych, deterministycznych reguł",
+        "aggregatedOwnRows": "System zagregował własne wpisy popytu Twojej organizacji w oknie kroczącym",
+        "renderedForYou": "Wynik został wyświetlony z pełnym objaśnieniem"
       }
     },
     "conflict": {
@@ -2660,12 +2667,56 @@
     },
     "trust": {
       "whyVisible": {
-        "roleMatched": "Wyświetlane, ponieważ pasuje do Twojej roli i Twoich własnych danych."
+        "roleMatched": "Wyświetlane, ponieważ pasuje do Twojej roli i Twoich własnych danych.",
+        "ownDemandRows": "Wyświetlane, ponieważ obliczono je z własnych wpisów popytu Twojej organizacji."
       },
       "notKnown": {
         "grossNetBasis": "Nie wiadomo, czy kwoty są brutto, czy netto.",
         "noObservationStore": "Magazyn obserwacji nie jest jeszcze włączony, więc odwołania do pojedynczych obserwacji są niedostępne."
       }
+    },
+    "trustCard": {
+      "rowTitle": "Kontekst rynku",
+      "kind": {
+        "salaryBenchmark": "Punkt odniesienia wynagrodzenia",
+        "demand": "Popyt",
+        "supply": "Podaż",
+        "skillGap": "Luka kompetencyjna",
+        "marketTrend": "Trend rynkowy"
+      },
+      "status": {
+        "ready": "Gotowe",
+        "unavailable": "Brak danych",
+        "conflict": "Wykryto sprzeczność"
+      },
+      "conflict": {
+        "title": "Wykryto sprzeczność",
+        "divergence": "różnica {pct}%"
+      },
+      "unavailable": {
+        "requirementTitle": "Co jest potrzebne",
+        "sourcesTitle": "Źródła oczekujące na zatwierdzenie właściciela"
+      },
+      "reason": {
+        "salaryNoBenchmark": "Nie ma tu kwoty wynagrodzenia, ponieważ dla Twojego zawodu i kraju nie wprowadzono jeszcze kuratorowanego punktu odniesienia, a żadne zewnętrzne źródło wynagrodzeń nie zostało zatwierdzone.",
+        "demandNotPublished": "Nie ma tu liczby popytu, ponieważ zagregowany popyt rynkowy nie jest jeszcze publikowany: magazyn obserwacji jest przygotowany, ale wyłączony, a żadne zewnętrzne źródło popytu nie zostało zatwierdzone.",
+        "demandNoOwnRows": "Nie ma tu liczby popytu, ponieważ Twoja organizacja nie ma wpisów popytu z ostatnich 90 dni — ta karta liczy wyłącznie Wasze własne, prawdziwe wpisy.",
+        "supplyNotMeasured": "Nie ma tu liczby podaży, ponieważ dostępność pracowników nie jest jeszcze agregowana: magazyn obserwacji jest przygotowany, ale wyłączony.",
+        "skillGapNeedsBoth": "Nie ma tu liczby luki kompetencyjnej, ponieważ wymaga ona agregatów popytu i podaży — żaden nie jest publikowany, dopóki magazyn obserwacji jest wyłączony.",
+        "trendNeedsHistory": "Nie ma tu trendu, ponieważ trend wymaga historii datowanych obserwacji, a magazyn obserwacji jest przygotowany, ale wyłączony. Trend nigdy nie jest rysowany z jednego punktu."
+      },
+      "requirement": {
+        "ownerEnableStore": "Właściciel platformy musi włączyć magazyn obserwacji i zatwierdzić co najmniej jedno źródło danych.",
+        "salaryBenchmark": "Administrator musi wprowadzić kuratorowany punkt odniesienia dla Twojego zawodu i kraju albo właściciel platformy musi zatwierdzić zewnętrzne źródło wynagrodzeń.",
+        "demandOwnRows": "Dodaj zapytania o pracę — ta karta wypełni się danymi Twojej organizacji, gdy tylko pojawią się wpisy."
+      },
+      "after": {
+        "activation": "Gdy właściciel zatwierdzi i włączy źródło danych, ta karta wypełni się udokumentowanymi, datowanymi liczbami — każda z wiarygodnością, świeżością, źródłem i pochodzeniem krok po kroku."
+      }
+    },
+    "drawer": {
+      "limitations": "Znane ograniczenia",
+      "timelineUnavailable": "Oś pochodzenia krok po kroku pojawi się tutaj, gdy magazyn obserwacji zostanie włączony."
     }
   }
 }

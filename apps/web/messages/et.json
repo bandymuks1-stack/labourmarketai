@@ -2619,7 +2619,14 @@
       "actor": {
         "system": "Süsteem (deterministlikud reeglid)",
         "owner": "Omanik",
-        "source": "Andmeallikas"
+        "source": "Andmeallikas",
+        "admin": "Administraator"
+      },
+      "explain": {
+        "curatedEntry": "Administraator sisestas selle turumäära koos allikamärkusega",
+        "deterministicComparison": "Süsteem arvutas selle tulemuse fikseeritud, deterministlike reeglitega",
+        "aggregatedOwnRows": "Süsteem koondas teie organisatsiooni enda nõudluskirjed jooksva akna ulatuses",
+        "renderedForYou": "Tulemus kuvati teile koos täieliku selgitusega"
       }
     },
     "conflict": {
@@ -2660,12 +2667,56 @@
     },
     "trust": {
       "whyVisible": {
-        "roleMatched": "Kuvatakse, sest see vastab teie rollile ja teie enda andmetele."
+        "roleMatched": "Kuvatakse, sest see vastab teie rollile ja teie enda andmetele.",
+        "ownDemandRows": "Kuvatakse, sest see on arvutatud teie organisatsiooni enda nõudluskirjetest."
       },
       "notKnown": {
         "grossNetBasis": "Pole teada, kas summad on bruto- või netosummad.",
         "noObservationStore": "Vaatluste hoidla pole veel lubatud, seega üksikute vaatluste viited pole saadaval."
       }
+    },
+    "trustCard": {
+      "rowTitle": "Turukontekst",
+      "kind": {
+        "salaryBenchmark": "Palga võrdlusalus",
+        "demand": "Nõudlus",
+        "supply": "Pakkumine",
+        "skillGap": "Oskuste lõhe",
+        "marketTrend": "Turutrend"
+      },
+      "status": {
+        "ready": "Valmis",
+        "unavailable": "Andmeid veel pole",
+        "conflict": "Tuvastati vastuolu"
+      },
+      "conflict": {
+        "title": "Tuvastati vastuolu",
+        "divergence": "erinevus {pct}%"
+      },
+      "unavailable": {
+        "requirementTitle": "Mida on vaja",
+        "sourcesTitle": "Omaniku kinnitust ootavad allikad"
+      },
+      "reason": {
+        "salaryNoBenchmark": "Siin pole palganumbrit, sest teie ametile ja riigile pole veel sisestatud kureeritud turumäära ning ühtki välist palgaallikat pole kasutamiseks heaks kiidetud.",
+        "demandNotPublished": "Siin pole nõudlusnumbrit, sest koondatud turunõudlust veel ei avaldata: vaatluste hoidla on ette valmistatud, kuid välja lülitatud, ja ühtki välist nõudlusallikat pole heaks kiidetud.",
+        "demandNoOwnRows": "Siin pole nõudlusnumbrit, sest teie organisatsioonil pole viimase 90 päeva jooksul nõudluskirjeid — kaart loeb ainult teie enda tegelikke kirjeid.",
+        "supplyNotMeasured": "Siin pole pakkumisnumbrit, sest töötajate saadavust veel ei koondata: vaatluste hoidla on ette valmistatud, kuid välja lülitatud.",
+        "skillGapNeedsBoth": "Siin pole oskuste lõhe numbrit, sest see vajab nii nõudluse kui ka pakkumise koondandmeid — kumbagi ei avaldata, kuni vaatluste hoidla on välja lülitatud.",
+        "trendNeedsHistory": "Siin pole trendi, sest trend vajab dateeritud vaatluste ajalugu ning vaatluste hoidla on ette valmistatud, kuid välja lülitatud. Trendi ei joonistata kunagi ühest punktist."
+      },
+      "requirement": {
+        "ownerEnableStore": "Platvormi omanik peab vaatluste hoidla sisse lülitama ja kinnitama vähemalt ühe andmeallika.",
+        "salaryBenchmark": "Administraator peab sisestama teie ametile ja riigile kureeritud turumäära või platvormi omanik peab kinnitama välise palgaallika.",
+        "demandOwnRows": "Lisage tööpäringuid — kaart täitub teie organisatsiooni enda andmetega niipea, kui kirjed on olemas."
+      },
+      "after": {
+        "activation": "Pärast seda, kui omanik on andmeallika kinnitanud ja aktiveerinud, täitub see kaart allikapõhiste, dateeritud numbritega — igaühel usaldusväärsus, värskus, allikas ja samm-sammuline päritolu."
+      }
+    },
+    "drawer": {
+      "limitations": "Teadaolevad piirangud",
+      "timelineUnavailable": "Samm-sammuline päritoluriba ilmub siia, kui vaatluste hoidla sisse lülitatakse."
     }
   }
 }

@@ -42,12 +42,60 @@ import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { type Role } from "@/lib/auth/actions";
 import { PremiumHubScreen } from "@/components/app/premium-hub/premium-hub-screen";
 import { getPremiumHubViewModel } from "@/components/app/premium-hub/premium-hub-data";
+import { TrustInsightCard } from "@/components/intelligence/trust-insight-card";
+import {
+  getCompanyDemandIntelligence,
+  getWorkerSalaryIntelligence,
+} from "@/lib/intelligence/intelligence-read";
+import {
+  buildCompanyDemandTrustCard,
+  buildWorkerSalaryTrustCard,
+} from "@/lib/intelligence/trust-card-model";
 
 // Authenticated cockpit — must never be served from a stale cache, or a logged-in
 // owner can see a pre-deploy render (e.g. missing the chain action CTAs).
 export const dynamic = "force-dynamic";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
+
+/**
+ * Hub market-context cards (Contextual Intelligence UI v1) — async server
+ * components so the RLS-scoped intelligence reads STREAM alongside the
+ * hub's main parallel batch (P0 latency doctrine: no new waterfall). Both
+ * render the ONE trust-card engine: a deterministic figure with its full
+ * trust report, or the honest unavailable state — never a fabricated
+ * number (§18).
+ */
+async function HubWorkerIntelligence({ locale }: { locale: string }) {
+  const salaryIntel = await getWorkerSalaryIntelligence();
+  if (salaryIntel.kind === "no_viewer") return null;
+  const card = buildWorkerSalaryTrustCard(
+    salaryIntel.kind === "ok"
+      ? {
+          benchmark: salaryIntel.benchmark,
+          comparison: salaryIntel.comparison,
+        }
+      : null,
+    Date.now(),
+  );
+  return <TrustInsightCard card={card} locale={locale} linkToWorkspace />;
+}
+
+async function HubCompanyIntelligence({ locale }: { locale: string }) {
+  const demandIntel = await getCompanyDemandIntelligence();
+  if (demandIntel.kind === "no_viewer") return null;
+  const card = buildCompanyDemandTrustCard(
+    demandIntel.kind === "ok"
+      ? {
+          demandAggregates: demandIntel.demandAggregates,
+          windowStart: demandIntel.windowStart,
+          windowEnd: demandIntel.windowEnd,
+        }
+      : null,
+    Date.now(),
+  );
+  return <TrustInsightCard card={card} locale={locale} linkToWorkspace />;
+}
 
 /** Overview tab — active-role overview (slice dashboard-active-role-overview-v1).
  *  Honest signals only (real profession/skills/journal counts); no fake
@@ -415,6 +463,12 @@ export default async function DashboardOverviewPage({
             counts as the bell, each chip linking its clearing surface. */}
         <DashboardStatusStrip entries={controlRoom.statusEntries} />
 
+        {/* Market context (Contextual Intelligence UI v1): the org's own
+            demand trust card — company/agency workspaces only. */}
+        {role === "company" || role === "agency" ? (
+          <HubCompanyIntelligence locale={locale} />
+        ) : null}
+
         {/* Real pending states — provider inbox, own outgoing requests,
             booking responses. Count-gated, never fake. */}
         {serviceRequestsNextAction}
@@ -696,6 +750,10 @@ export default async function DashboardOverviewPage({
           gated worker-visibility RPC is unapplied. The module grid above
           carries the matching new-job-matches badge from the spine. */}
       <JobRecommendationsCard locale={locale} />
+
+      {/* Market context (Contextual Intelligence UI v1): the worker's own
+          salary-vs-benchmark trust card, or its honest unavailable state. */}
+      <HubWorkerIntelligence locale={locale} />
 
       {/* Remaining real pending states — everything the top slot did NOT
           promote, same honest count-gated cards as before. */}
