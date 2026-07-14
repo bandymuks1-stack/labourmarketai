@@ -36,7 +36,8 @@ import {
   type MatchSignal,
   type MatchSignalState,
 } from "@/lib/opportunities/match-card-view";
-import { ContextualIntelligenceCard } from "@/components/intelligence/contextual-intelligence-card";
+import { TrustInsightCard } from "@/components/intelligence/trust-insight-card";
+import { buildOpportunityInsightRow } from "@/lib/intelligence/trust-card-model";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-read";
 import { loadWorkerOpportunities } from "@/lib/opportunities/load-worker-opportunities";
@@ -100,42 +101,23 @@ export default async function OpportunitiesPage({
   const result = await loadWorkerOpportunities();
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
-  // ── Contextual market-intelligence signal (Labour Market Intelligence
-  //    v1): the worker's OWN salary expectation vs. the curated benchmark
-  //    from the intelligence read layer — a real compared position or an
-  //    honest insufficient state, never a fabricated number.
+  // ── Market context (Contextual Intelligence UI v1): the worker's OWN
+  //    deterministic salary-vs-benchmark trust card plus the four honest
+  //    unavailable placeholders (demand / supply / skill gap / market
+  //    trend). Every card degrades honestly — the unavailable ones say WHY,
+  //    what is required, which sources are off and what activation changes.
+  //    Nothing here fabricates a number (§18).
   const tIntel = await getTranslations("intelligence");
   const salaryIntel = await getWorkerSalaryIntelligence();
-  const salaryCompared =
-    salaryIntel.kind === "ok" && salaryIntel.comparison.kind === "compared";
-  const salaryIntelHeadline =
-    salaryIntel.kind === "ok"
-      ? salaryIntel.comparison.kind === "compared"
-        ? (tIntel(
-            `cards.salary.band.${salaryIntel.comparison.band}` as never,
-            { positionPct: salaryIntel.comparison.positionPct } as never,
-          ) as string)
-        : salaryIntel.comparison.kind === "not_comparable"
-          ? (tIntel(
-              `cards.salary.${salaryIntel.comparison.reasonCode}` as never,
-            ) as string)
-          : tIntel("cards.salary.insufficientData")
-      : tIntel("contextual.salaryInsufficient");
-  const salaryIntelBadge =
+  const marketContextCards = buildOpportunityInsightRow(
     salaryIntel.kind === "ok"
       ? {
-          originKind: salaryIntel.benchmark.originKind,
-          originLabel: tIntel(`origin.${salaryIntel.benchmark.originKind}`),
-          sourceLabel: tIntel(
-            `sources.key.${salaryIntel.benchmark.sourceKey}` as never,
-          ) as string,
-          observedAtLabel: new Intl.DateTimeFormat(locale, {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }).format(new Date(salaryIntel.benchmark.observedAtIso)),
+          benchmark: salaryIntel.benchmark,
+          comparison: salaryIntel.comparison,
         }
-      : null;
+      : null,
+    Date.now(),
+  );
 
   const workLabels = buildWorkTypeLabelMap(locale);
   const profileHref = `/${locale}/dashboard/profile`;
@@ -426,24 +408,30 @@ export default async function OpportunitiesPage({
             </Link>
           </section>
 
-          {/* Salary position vs. the curated market benchmark — data from
-              the intelligence read layer; honest insufficient state when the
-              profile lacks salary/country/profession or no benchmark exists. */}
+          {/* Market context row (Contextual Intelligence UI v1): the ONE
+              trust-card engine renders the worker's salary-vs-benchmark
+              position plus four honest unavailable placeholders — no
+              duplicate UI, no fabricated figures, premium empty states. */}
           {salaryIntel.kind !== "no_viewer" ? (
-            <ContextualIntelligenceCard
-              locale={locale}
-              testId="opportunities-intelligence"
-              eyebrow={tIntel("contextual.eyebrow")}
-              headline={salaryIntelHeadline}
-              state={salaryCompared ? "ready" : "insufficient_data"}
-              stateLabel={
-                salaryCompared
-                  ? tIntel("state.ready")
-                  : tIntel("state.insufficientData")
-              }
-              badge={salaryIntelBadge}
-              linkLabel={tIntel("contextual.link")}
-            />
+            <section
+              className="flex flex-col gap-3"
+              data-testid="opportunities-market-context"
+              aria-label={tIntel("trustCard.rowTitle")}
+            >
+              <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                {tIntel("trustCard.rowTitle")}
+              </h2>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {marketContextCards.map((card, index) => (
+                  <TrustInsightCard
+                    key={card.id}
+                    card={card}
+                    locale={locale}
+                    linkToWorkspace={index === 0}
+                  />
+                ))}
+              </div>
+            </section>
           ) : null}
 
           {/* No-evidence improvement state (PR5): skill matching needs skill

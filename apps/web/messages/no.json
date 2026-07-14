@@ -2619,7 +2619,14 @@
       "actor": {
         "system": "System (deterministiske regler)",
         "owner": "Eier",
-        "source": "Datakilde"
+        "source": "Datakilde",
+        "admin": "Administrator"
+      },
+      "explain": {
+        "curatedEntry": "En administrator la inn denne markedssatsen med kildenotat",
+        "deterministicComparison": "Systemet beregnet dette resultatet med faste, deterministiske regler",
+        "aggregatedOwnRows": "Systemet aggregerte organisasjonens egne etterspørselsoppføringer over det løpende vinduet",
+        "renderedForYou": "Resultatet ble vist for deg med den fulle forklaringen"
       }
     },
     "conflict": {
@@ -2660,12 +2667,61 @@
     },
     "trust": {
       "whyVisible": {
-        "roleMatched": "Vises fordi det samsvarer med rollen din og dine egne data."
+        "roleMatched": "Vises fordi det samsvarer med rollen din og dine egne data.",
+        "ownDemandRows": "Vises fordi det er beregnet fra organisasjonens egne etterspørselsoppføringer."
       },
       "notKnown": {
         "grossNetBasis": "Det er ikke kjent om beløpene er brutto eller netto.",
-        "noObservationStore": "Observasjonslageret er ennå ikke aktivert, så referanser til enkeltobservasjoner er ikke tilgjengelige."
+        "noObservationStore": "Observasjonslageret er ennå ikke aktivert, så referanser til enkeltobservasjoner er ikke tilgjengelige.",
+        "demandMultiBucket": "Trinn-for-trinn-utledningen beskriver bare den første etterspørselsgruppen — dette kortet samler flere grupper med ulik geografi og utvalgsstørrelse."
       }
+    },
+    "trustCard": {
+      "rowTitle": "Markedskontekst",
+      "kind": {
+        "salaryBenchmark": "Lønnsreferanse",
+        "demand": "Etterspørsel",
+        "supply": "Tilbud",
+        "skillGap": "Kompetansegap",
+        "marketTrend": "Markedstrend"
+      },
+      "status": {
+        "ready": "Klar",
+        "unavailable": "Ingen data ennå",
+        "conflict": "Konflikt oppdaget"
+      },
+      "conflict": {
+        "title": "Konflikt oppdaget",
+        "divergence": "forskjell {pct}%"
+      },
+      "unavailable": {
+        "requirementTitle": "Hva som kreves",
+        "sourcesTitle": "Kilder som venter på eierens godkjenning"
+      },
+      "reason": {
+        "salaryNoBenchmark": "Det er ingen lønnstall her fordi det ennå ikke finnes en kuratert markedssats for ditt yrke og land, og ingen ekstern lønnskilde er godkjent for bruk.",
+        "demandNotPublished": "Det er ingen etterspørselstall her fordi aggregert markedsetterspørsel ennå ikke publiseres: observasjonslageret er forberedt, men avslått, og ingen ekstern etterspørselskilde er godkjent.",
+        "demandNoOwnRows": "Det er ingen etterspørselstall her fordi organisasjonen din ikke har etterspørselsoppføringer de siste 90 dagene — kortet teller bare deres egne ekte oppføringer.",
+        "supplyNotMeasured": "Det er ingen tilbudstall her fordi arbeidskraftens tilgjengelighet ennå ikke aggregeres: observasjonslageret er forberedt, men avslått.",
+        "skillGapNeedsBoth": "Det er ingen kompetansegap-tall her fordi det krever både et etterspørsels- og et tilbudsaggregat — ingen av dem publiseres mens observasjonslageret er avslått.",
+        "trendNeedsHistory": "Det er ingen trend her fordi en trend krever en historikk av daterte observasjoner, og observasjonslageret er forberedt, men avslått. En trend tegnes aldri fra ett punkt.",
+        "salaryBasisNotComparable": "Det er ingen lønnstall her fordi det finnes en kuratert markedssats for ditt yrke og land, men den kan ikke sammenlignes ærlig: det er ikke registrert om beløpene er brutto eller netto. En uklar sammenligning vises aldri.",
+        "salaryInputsMissing": "Det er ingen lønnstall her fordi det finnes en kuratert markedssats, men din egen forventede lønn mangler, så det er ingenting å sammenligne med."
+      },
+      "requirement": {
+        "ownerEnableStore": "Plattformeieren må slå på observasjonslageret og godkjenne minst én datakilde.",
+        "salaryBenchmark": "En administrator må legge inn en kuratert markedssats for ditt yrke og land, eller plattformeieren må godkjenne en ekstern lønnskilde.",
+        "demandOwnRows": "Legg til arbeidsforespørsler — kortet fylles med organisasjonens egne data så snart oppføringer finnes.",
+        "salaryBasis": "Lønnsbasis (brutto eller netto) må være registrert for både din forventede lønn og den kuraterte markedssatsen før en ærlig sammenligning kan vises.",
+        "salaryInputs": "Legg inn din forventede lønn i arbeidstakerprofilen din — sammenligningen vises så snart den finnes."
+      },
+      "after": {
+        "activation": "Etter at eieren har godkjent og aktivert en datakilde, fylles dette kortet med dokumenterte, daterte tall — hvert med pålitelighet, ferskhet, kilde og trinnvis opprinnelse."
+      }
+    },
+    "drawer": {
+      "limitations": "Kjente begrensninger",
+      "timelineUnavailable": "Den trinnvise opprinnelseslinjen vises her når observasjonslageret slås på."
     }
   }
 }

@@ -2,35 +2,37 @@ import { getTranslations } from "next-intl/server";
 
 import type { ConfidenceLevel } from "@/lib/intelligence/confidence";
 import type { FreshnessLabel } from "@/lib/intelligence/freshness";
+import type { InsightOriginKind } from "@/lib/intelligence/explainability";
+import {
+  INTEL_CHIP_CLASS,
+  INTEL_CONFIDENCE_TONE,
+  INTEL_ORIGIN_TONE,
+  INTEL_TRUST_STATUS_TONE,
+} from "./badge-styles";
 
 /**
- * Trust BADGES (Trust Layer v1) — the two small reusable renderers every
- * insight surface can attach:
+ * Trust BADGES (Trust Layer v1 / Contextual UI v1) — the reusable renderers
+ * every insight surface attaches. All tones come from the ONE badge design
+ * language (./badge-styles.ts):
  *
  *  - ConfidenceBadge: the DERIVED confidence level (low/medium/high/unknown)
  *    — the level arrives from lib/intelligence/confidence.ts, never guessed
  *    here; "unknown" renders as its own honest state, not hidden;
  *  - FreshnessNote: the deterministic age label ("updated today" …
- *    "outdated" … "unknown") from lib/intelligence/freshness.ts.
+ *    "outdated" … "unknown") from lib/intelligence/freshness.ts;
+ *  - OriginBadge: internal / external / blended origin — external always
+ *    visually distinct (doctrine);
+ *  - ConflictBadge: the loud "conflict detected" chip — rendered ONLY when
+ *    the trust layer reported a real conflict.
  *
  * Pure server renderers: no computation, no IO beyond translations.
  */
-
-const CHIP_CLASS =
-  "inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label";
-
-const CONFIDENCE_TONE: Record<ConfidenceLevel, string> = {
-  high: "border-state-success/40 bg-state-success/10 text-state-success",
-  medium: "border-brand-blue/40 bg-brand-blue/10 text-brand-blue",
-  low: "border-state-amber/40 bg-state-amber/10 text-state-amber",
-  unknown: "border-ink-500 bg-ink-800/40 text-text-muted",
-};
 
 export async function ConfidenceBadge({ level }: { level: ConfidenceLevel }) {
   const t = await getTranslations("intelligence");
   return (
     <span
-      className={`${CHIP_CLASS} ${CONFIDENCE_TONE[level]}`}
+      className={`${INTEL_CHIP_CLASS} ${INTEL_CONFIDENCE_TONE[level]}`}
       data-testid="intelligence-confidence-badge"
       data-confidence={level}
     >
@@ -51,6 +53,35 @@ export async function FreshnessNote({ label }: { label: FreshnessLabel }) {
         label.code.replace(/^intelligence\./, "") as never,
         label.params as never,
       ) as string}
+    </span>
+  );
+}
+
+export async function OriginBadge({
+  originKind,
+}: {
+  originKind: InsightOriginKind;
+}) {
+  const t = await getTranslations("intelligence");
+  return (
+    <span
+      className={`${INTEL_CHIP_CLASS} ${INTEL_ORIGIN_TONE[originKind]}`}
+      data-testid="intelligence-origin-badge"
+      data-origin={originKind}
+    >
+      {t(`origin.${originKind}`)}
+    </span>
+  );
+}
+
+export async function ConflictBadge() {
+  const t = await getTranslations("intelligence");
+  return (
+    <span
+      className={`${INTEL_CHIP_CLASS} ${INTEL_TRUST_STATUS_TONE.conflict}`}
+      data-testid="intelligence-conflict-badge"
+    >
+      {t("trustCard.conflict.title")}
     </span>
   );
 }

@@ -2619,7 +2619,14 @@
       "actor": {
         "system": "System (deterministiska regler)",
         "owner": "Ägare",
-        "source": "Datakälla"
+        "source": "Datakälla",
+        "admin": "Administratör"
+      },
+      "explain": {
+        "curatedEntry": "En administratör angav denna marknadsnivå med källnot",
+        "deterministicComparison": "Systemet beräknade detta resultat med fasta, deterministiska regler",
+        "aggregatedOwnRows": "Systemet aggregerade din organisations egna efterfrågeposter över det löpande fönstret",
+        "renderedForYou": "Resultatet visades för dig med den fullständiga förklaringen"
       }
     },
     "conflict": {
@@ -2660,12 +2667,61 @@
     },
     "trust": {
       "whyVisible": {
-        "roleMatched": "Visas eftersom det matchar din roll och dina egna uppgifter."
+        "roleMatched": "Visas eftersom det matchar din roll och dina egna uppgifter.",
+        "ownDemandRows": "Visas eftersom det är beräknat från din organisations egna efterfrågeposter."
       },
       "notKnown": {
         "grossNetBasis": "Det är inte känt om beloppen är brutto eller netto.",
-        "noObservationStore": "Observationslagret är ännu inte aktiverat, så referenser till enskilda observationer är inte tillgängliga."
+        "noObservationStore": "Observationslagret är ännu inte aktiverat, så referenser till enskilda observationer är inte tillgängliga.",
+        "demandMultiBucket": "Steg-för-steg-härledningen beskriver bara den första efterfrågegruppen — det här kortet kombinerar flera grupper vars geografi och urvalsstorlekar skiljer sig."
       }
+    },
+    "trustCard": {
+      "rowTitle": "Marknadskontext",
+      "kind": {
+        "salaryBenchmark": "Lönereferens",
+        "demand": "Efterfrågan",
+        "supply": "Utbud",
+        "skillGap": "Kompetensgap",
+        "marketTrend": "Marknadstrend"
+      },
+      "status": {
+        "ready": "Klar",
+        "unavailable": "Inga data ännu",
+        "conflict": "Konflikt upptäckt"
+      },
+      "conflict": {
+        "title": "Konflikt upptäckt",
+        "divergence": "skillnad {pct}%"
+      },
+      "unavailable": {
+        "requirementTitle": "Vad som krävs",
+        "sourcesTitle": "Källor som väntar på ägarens godkännande"
+      },
+      "reason": {
+        "salaryNoBenchmark": "Det finns ingen lönesiffra här eftersom det ännu inte finns någon kurerad marknadsnivå för ditt yrke och land, och ingen extern lönekälla är godkänd för användning.",
+        "demandNotPublished": "Det finns ingen efterfrågesiffra här eftersom aggregerad marknadsefterfrågan ännu inte publiceras: observationslagret är förberett men avstängt, och ingen extern efterfrågekälla är godkänd.",
+        "demandNoOwnRows": "Det finns ingen efterfrågesiffra här eftersom din organisation saknar efterfrågeposter de senaste 90 dagarna — kortet räknar bara era egna riktiga poster.",
+        "supplyNotMeasured": "Det finns ingen utbudssiffra här eftersom arbetskraftens tillgänglighet ännu inte aggregeras: observationslagret är förberett men avstängt.",
+        "skillGapNeedsBoth": "Det finns ingen kompetensgap-siffra här eftersom den kräver både ett efterfråge- och ett utbudsaggregat — inget publiceras medan observationslagret är avstängt.",
+        "trendNeedsHistory": "Det finns ingen trend här eftersom en trend kräver en historik av daterade observationer, och observationslagret är förberett men avstängt. En trend ritas aldrig från en enda punkt.",
+        "salaryBasisNotComparable": "Det finns ingen lönesiffra här eftersom det finns en kurerad marknadsnivå för ditt yrke och land, men den kan inte jämföras ärligt: det är inte registrerat om beloppen är brutto eller netto. En oklar jämförelse visas aldrig.",
+        "salaryInputsMissing": "Det finns ingen lönesiffra här eftersom det finns en kurerad marknadsnivå, men din egen förväntade lön saknas, så det finns inget att jämföra med."
+      },
+      "requirement": {
+        "ownerEnableStore": "Plattformens ägare måste slå på observationslagret och godkänna minst en datakälla.",
+        "salaryBenchmark": "En administratör måste ange en kurerad marknadsnivå för ditt yrke och land, eller så måste plattformens ägare godkänna en extern lönekälla.",
+        "demandOwnRows": "Lägg till arbetsförfrågningar — kortet fylls med er egen organisations data så snart poster finns.",
+        "salaryBasis": "Lönebasis (brutto eller netto) måste vara registrerad för både din förväntade lön och den kurerade marknadsnivån innan en ärlig jämförelse kan visas.",
+        "salaryInputs": "Ange din förväntade lön i din arbetstagarprofil — jämförelsen visas så snart den finns."
+      },
+      "after": {
+        "activation": "När ägaren har godkänt och aktiverat en datakälla fylls detta kort med underbyggda, daterade siffror — var och en med tillförlitlighet, färskhet, källa och steg-för-steg-ursprung."
+      }
+    },
+    "drawer": {
+      "limitations": "Kända begränsningar",
+      "timelineUnavailable": "Steg-för-steg-ursprungslinjen visas här när observationslagret slås på."
     }
   }
 }

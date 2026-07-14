@@ -9458,7 +9458,14 @@
       "actor": {
         "system": "Systeem (deterministische regels)",
         "owner": "Eigenaar",
-        "source": "Databron"
+        "source": "Databron",
+        "admin": "Beheerder"
+      },
+      "explain": {
+        "curatedEntry": "Een beheerder voerde dit markttarief in met de bronvermelding",
+        "deterministicComparison": "Het systeem berekende dit resultaat met vaste, deterministische regels",
+        "aggregatedOwnRows": "Het systeem aggregeerde de eigen vraagregistraties van uw organisatie over het lopende venster",
+        "renderedForYou": "Het resultaat werd voor u weergegeven met de volledige uitleg"
       }
     },
     "conflict": {
@@ -9499,12 +9506,61 @@
     },
     "trust": {
       "whyVisible": {
-        "roleMatched": "Getoond omdat het past bij uw rol en uw eigen gegevens."
+        "roleMatched": "Getoond omdat het past bij uw rol en uw eigen gegevens.",
+        "ownDemandRows": "Getoond omdat het is berekend uit de eigen vraagregistraties van uw organisatie."
       },
       "notKnown": {
         "grossNetBasis": "Het is niet bekend of de bedragen bruto of netto zijn.",
-        "noObservationStore": "De observatie-opslag is nog niet ingeschakeld, dus verwijzingen naar afzonderlijke observaties zijn niet beschikbaar."
+        "noObservationStore": "De observatie-opslag is nog niet ingeschakeld, dus verwijzingen naar afzonderlijke observaties zijn niet beschikbaar.",
+        "demandMultiBucket": "De stap-voor-stap-afleiding beschrijft alleen de eerste vraaggroep — deze kaart combineert meerdere groepen met verschillende geografie en steekproefomvang."
       }
+    },
+    "trustCard": {
+      "rowTitle": "Marktcontext",
+      "kind": {
+        "salaryBenchmark": "Salarisreferentie",
+        "demand": "Vraag",
+        "supply": "Aanbod",
+        "skillGap": "Vaardigheidskloof",
+        "marketTrend": "Markttrend"
+      },
+      "status": {
+        "ready": "Gereed",
+        "unavailable": "Nog geen gegevens",
+        "conflict": "Conflict gedetecteerd"
+      },
+      "conflict": {
+        "title": "Conflict gedetecteerd",
+        "divergence": "verschil {pct}%"
+      },
+      "unavailable": {
+        "requirementTitle": "Wat er nodig is",
+        "sourcesTitle": "Bronnen in afwachting van goedkeuring door de eigenaar"
+      },
+      "reason": {
+        "salaryNoBenchmark": "Hier staat geen salariscijfer omdat er nog geen gecureerde markttarief bestaat voor uw beroep en land, en geen externe salarisbron is goedgekeurd voor gebruik.",
+        "demandNotPublished": "Hier staat geen vraagcijfer omdat geaggregeerde marktvraag nog niet wordt gepubliceerd: de observatie-opslag is voorbereid maar uitgeschakeld, en geen externe vraagbron is goedgekeurd.",
+        "demandNoOwnRows": "Hier staat geen vraagcijfer omdat uw organisatie geen vraagregistraties heeft in de afgelopen 90 dagen — deze kaart telt alleen uw eigen echte registraties.",
+        "supplyNotMeasured": "Hier staat geen aanbodcijfer omdat de beschikbaarheid van werkers nog niet wordt geaggregeerd: de observatie-opslag is voorbereid maar uitgeschakeld.",
+        "skillGapNeedsBoth": "Hier staat geen vaardigheidskloof-cijfer omdat daarvoor zowel een vraag- als een aanbodaggregaat nodig is — geen van beide wordt gepubliceerd zolang de observatie-opslag uit staat.",
+        "trendNeedsHistory": "Hier staat geen trend omdat een trend een geschiedenis van gedateerde observaties nodig heeft, en de observatie-opslag is voorbereid maar uitgeschakeld. Een trend wordt nooit uit één punt getekend.",
+        "salaryBasisNotComparable": "Hier staat geen salariscijfer omdat er een gecureerd markttarief bestaat voor uw beroep en land, maar het niet eerlijk kan worden vergeleken: er is niet vastgelegd of de bedragen bruto of netto zijn. Een onduidelijke vergelijking wordt nooit getoond.",
+        "salaryInputsMissing": "Hier staat geen salariscijfer omdat er een gecureerd markttarief bestaat, maar uw eigen verwachte salaris ontbreekt, dus er valt niets te vergelijken."
+      },
+      "requirement": {
+        "ownerEnableStore": "De platformeigenaar moet de observatie-opslag inschakelen en ten minste één gegevensbron goedkeuren.",
+        "salaryBenchmark": "Een beheerder moet een gecureerd markttarief invoeren voor uw beroep en land, of de platformeigenaar moet een externe salarisbron goedkeuren.",
+        "demandOwnRows": "Voeg werkaanvragen toe — deze kaart vult zich met de gegevens van uw eigen organisatie zodra er registraties bestaan.",
+        "salaryBasis": "De salarisbasis (bruto of netto) moet zijn vastgelegd voor zowel uw verwachte salaris als het gecureerde markttarief voordat een eerlijke vergelijking kan worden getoond.",
+        "salaryInputs": "Voer uw verwachte salaris in uw werknemersprofiel in — de vergelijking verschijnt zodra het er is."
+      },
+      "after": {
+        "activation": "Nadat de eigenaar een gegevensbron heeft goedgekeurd en geactiveerd, vult deze kaart zich met onderbouwde, gedateerde cijfers — elk met betrouwbaarheid, versheid, bron en stapsgewijze herkomst."
+      }
+    },
+    "drawer": {
+      "limitations": "Bekende beperkingen",
+      "timelineUnavailable": "De stapsgewijze herkomsttijdlijn verschijnt hier zodra de observatie-opslag is ingeschakeld."
     }
   }
 }
