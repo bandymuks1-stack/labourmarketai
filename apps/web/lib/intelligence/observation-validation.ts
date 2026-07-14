@@ -26,7 +26,11 @@ import {
   type IntelligenceObservationV1,
 } from "./observation-contract";
 import { computeObservationContentHash } from "./observation-hash";
-import { evaluateMetricPermission, isKnownMetricKey } from "./metric-keys";
+import {
+  evaluateMetricPermission,
+  isKnownMetricKey,
+  SALARY_METRIC_EXPECTED_UNIT,
+} from "./metric-keys";
 import { getSourceProfile, isExternalSourceActive } from "./source-governance";
 
 export const OBSERVATION_VALIDATION_CHECKS = [
@@ -227,6 +231,18 @@ export function validateObservationCandidate(
       failures.push({
         checkId: "salary_structure",
         reasonCode: "salary_unit_unknown",
+      });
+    }
+    // A KNOWN salary metric must carry its exact 1:1 unit — a monthly-gross
+    // key on an hourly-net number is a contradictory row, never accepted.
+    // (Unknown salary keys already fail metric_key; no expectation exists.)
+    const expectedUnit = isKnownMetricKey(observation.metricKey)
+      ? SALARY_METRIC_EXPECTED_UNIT[observation.metricKey]
+      : undefined;
+    if (expectedUnit !== undefined && observation.unit !== expectedUnit) {
+      failures.push({
+        checkId: "salary_structure",
+        reasonCode: "salary_unit_mismatch",
       });
     }
     if (!(observation.valueNumeric > 0)) {

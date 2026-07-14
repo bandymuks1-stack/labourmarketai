@@ -48,6 +48,21 @@ export function isKnownMetricKey(v: string): v is IntelligenceMetricKey {
 }
 
 /**
+ * The 1:1 unit each salary metric key MUST carry — a metric key and a unit
+ * that contradict each other (e.g. a monthly-gross key on an hourly-net
+ * number) can never validate as one accepted row. Non-salary metrics have
+ * no entry (their units are not unit-vocabulary-bound today).
+ */
+export const SALARY_METRIC_EXPECTED_UNIT: Readonly<
+  Partial<Record<IntelligenceMetricKey, string>>
+> = {
+  "salary.month.gross": "eur_month_gross",
+  "salary.month.net": "eur_month_net",
+  "salary.hour.gross": "eur_hour_gross",
+  "salary.hour.net": "eur_hour_net",
+};
+
+/**
  * The RECORDED metric half of a source's import policy: the closed set of
  * metric keys this source may ever produce. Reused by the source registry
  * (source-governance.ts), the activation facts contract

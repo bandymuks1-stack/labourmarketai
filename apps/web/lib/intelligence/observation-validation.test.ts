@@ -234,6 +234,24 @@ describe("validateObservationCandidate — deterministic gate", () => {
     }
   });
 
+  it("a salary metric key contradicting its unit is rejected (1:1 expectation)", () => {
+    // Monthly-gross key riding an hourly-net number: both are valid units,
+    // but the row contradicts itself — never accepted.
+    const obs = validObservation({ unit: "eur_hour_net" });
+    const result = validateObservationCandidate(candidate(obs), CONTEXT);
+    expect(result.ok).toBe(false);
+    expect(failuresOf(result)).toContainEqual({
+      checkId: "salary_structure",
+      reasonCode: "salary_unit_mismatch",
+    });
+    // The matching unit passes the salary checks (fixture is the 1:1 pair).
+    const ok = validateObservationCandidate(
+      candidate(validObservation()),
+      CONTEXT,
+    );
+    expect(ok.ok).toBe(true);
+  });
+
   it("schema vs required_fields are classified separately", () => {
     const result = validateObservationCandidate(
       candidate({ subjectKind: "profession", valueNumeric: "NaN-ish" }),

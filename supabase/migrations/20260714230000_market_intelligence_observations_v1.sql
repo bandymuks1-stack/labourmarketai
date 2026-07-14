@@ -77,10 +77,18 @@ create table if not exists public.market_intelligence_sources (
   -- NULL is never permission, an empty list is never permission, and no
   -- wildcard form exists. The owner records this during activation.
   import_policy       jsonb,
+  -- Shape check is NULL-propagation-proof: `?` returns real booleans, so a
+  -- non-object, an object WITHOUT metric_keys (e.g. accidental camelCase
+  -- "metricKeys"), or a non-array metric_keys all REJECT — they can never
+  -- ride a NULL comparison through the CHECK.
   constraint market_intelligence_sources_import_policy_shape
     check (
       import_policy is null
-      or jsonb_typeof(import_policy->'metric_keys') = 'array'
+      or (
+        jsonb_typeof(import_policy) = 'object'
+        and import_policy ? 'metric_keys'
+        and jsonb_typeof(import_policy->'metric_keys') = 'array'
+      )
     ),
   owner_approved_at   timestamptz,
   owner_approval_note text,
@@ -296,6 +304,14 @@ values
    null, null, null, null),
   ('eurostat',
    'Eurostat',
+   'public_official', 'unconfirmed', 'off',
+   null, null, null, null),
+  ('eures',
+   'EURES — EU job mobility portal',
+   'public_official', 'unconfirmed', 'off',
+   null, null, null, null),
+  ('uzt_lt',
+   'Lithuanian Employment Service (uzt.lt)',
    'public_official', 'unconfirmed', 'off',
    null, null, null, null),
   ('cvbankas_salary',
