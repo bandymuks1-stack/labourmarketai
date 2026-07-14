@@ -37,6 +37,26 @@ export const AI_MODEL_CANDIDATES = {
     sonnet: "claude-sonnet-4-6",
     haiku: "claude-haiku-4-5-20251001",
   },
+  // Non-anthropic candidates for the env-gated fetch adapters
+  // (lib/ai/runtime/providers/{openai,gemini,xai}.ts). Keyed by the same tier
+  // ALIASES the routing layer uses (haiku = cheapest sufficient, sonnet =
+  // standard, opus = advanced). OWNER REVIEWS these ids before enabling any
+  // provider — they are config candidates only; nothing here activates AI.
+  openai: {
+    opus: "gpt-5",
+    sonnet: "gpt-5-mini",
+    haiku: "gpt-5-nano",
+  },
+  gemini: {
+    opus: "gemini-2.5-pro",
+    sonnet: "gemini-2.5-flash",
+    haiku: "gemini-2.5-flash-lite",
+  },
+  xai: {
+    opus: "grok-4",
+    sonnet: "grok-3",
+    haiku: "grok-3-mini",
+  },
 } as const;
 
 /** The use cases this boundary is shaped for (all inactive). */

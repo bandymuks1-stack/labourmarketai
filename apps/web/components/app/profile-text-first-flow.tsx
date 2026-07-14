@@ -15,6 +15,11 @@ import {
   type PromoteClaimsResult,
 } from "@/lib/profile/claim-catalog-promotion-actions";
 import { aiCvStructuringSuggestions } from "@/lib/profile/cv-ai-structuring-actions";
+import {
+  parseCvSections,
+  type CvSectionProposals,
+} from "@/lib/cv/structured-parse";
+import { CvImportSectionReview } from "@/components/app/cv-import-section-review";
 import { useLocale } from "next-intl";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
 import { withTimeout } from "@/lib/async/with-timeout";
@@ -144,6 +149,14 @@ export function ProfileTextFirstFlow({
   // last apply — drives the honest "what changed in your profile" delta line.
   const [promotion, setPromotion] = useState<PromoteClaimsResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Full CV System v1 (M2 wiring): STRUCTURED section proposals from the same
+  // text — deterministic parser always-on, AI sections only when the runtime
+  // is live (same single agent run as the skill suggestions). Everything in
+  // the review panel needs its own explicit per-item confirm.
+  const [sectionProposals, setSectionProposals] =
+    useState<CvSectionProposals | null>(null);
+  const [aiSectionProposals, setAiSectionProposals] =
+    useState<CvSectionProposals | null>(null);
 
   const savedClaimSet = useMemo(
     () => new Set(savedClaimNormalizedLabels),
@@ -208,6 +221,17 @@ export function ProfileTextFirstFlow({
 
     setHasExtracted(true);
 
+    // Structured SECTION proposals (Full CV System v1) — deterministic,
+    // guarded like the skill extraction: a parser throw degrades to the
+    // chips-only review, never an error shell.
+    try {
+      setSectionProposals(parseCvSections(raw));
+    } catch (e) {
+      console.error("[profile-text-first] section parse failed:", e);
+      setSectionProposals(null);
+    }
+    setAiSectionProposals(null);
+
     // Single extractor → single bucket. Chips the user has ALREADY
     // saved (server-side `profile_skill_claims`) are kept in the list
     // BUT marked with `already_saved` status so the user sees *why*
@@ -235,6 +259,9 @@ export function ProfileTextFirstFlow({
     void aiCvStructuringSuggestions(raw, locale)
       .then((res) => {
         if (res.status !== "ok") return;
+        // Same single agent run also carries structured section candidates
+        // (labelled AI, identical per-item confirm in the review panel).
+        setAiSectionProposals(res.sections);
         setSelfDeclared((prev) => {
           const seen = new Set(prev.map((it) => it.value));
           const extras: Item[] = [];
@@ -527,6 +554,17 @@ export function ProfileTextFirstFlow({
             />
           ))}
         </DetectedSuggestionList>
+      )}
+
+      {/* Structured section proposals (work history / education / languages /
+          certificates / salary / availability) — same doctrine as the chips:
+          the parser proposes, the user disposes, canonical tables persist.
+          Renders nothing when the text yielded no structured entries. */}
+      {sectionProposals && (
+        <CvImportSectionReview
+          proposals={sectionProposals}
+          aiProposals={aiSectionProposals}
+        />
       )}
 
       {error && (

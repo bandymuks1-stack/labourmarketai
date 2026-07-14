@@ -10,6 +10,7 @@ import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
 import { DashboardModuleGrid } from "@/components/app/dashboard/dashboard-module-grid";
 import { DashboardStatusStrip } from "@/components/app/dashboard/dashboard-status-strip";
+import { JobRecommendationsCard } from "@/components/app/dashboard/job-recommendations-card";
 import { MyZone } from "@/components/app/my-zone";
 import { PrivacyStatusCard } from "@/components/app/privacy-status-card";
 import { getOwnCompany } from "@/lib/company/company-setup";
@@ -31,6 +32,11 @@ import {
 } from "@/lib/dashboard/next-action";
 import { decideTopSlot } from "@/lib/dashboard/top-slot";
 import { buildControlRoomViewModel } from "@/lib/dashboard/control-room-view-model";
+import { getDashboardCardPreferences } from "@/lib/dashboard/preferences";
+import {
+  EMPTY_CARD_PREFS,
+  type DashboardPreferencesContext,
+} from "@/lib/dashboard/dashboard-preferences-shared";
 import { getSpineCounts } from "@/lib/notifications/spine";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { type Role } from "@/lib/auth/actions";
@@ -122,6 +128,16 @@ export default async function DashboardOverviewPage({
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : "worker";
+
+  // Server-side card layout (company architecture v1): the grid layout is a
+  // per-(profile, context) preference — the person and the company workspace
+  // keep separate layouts (§20). "unavailable" (owner-gated migration not
+  // applied) → null → the grid keeps the device-local behaviour honestly.
+  const prefsContext: DashboardPreferencesContext =
+    role === "worker" ? "person" : "company";
+  const cardPrefsRead = await getDashboardCardPreferences(prefsContext);
+  const serverCardPrefs =
+    cardPrefsRead.kind === "ok" ? (cardPrefsRead.prefs ?? EMPTY_CARD_PREFS) : null;
 
   // Role-gate landing banner (audit PR4) — explains the bounce + one connected
   // next action (the spaces hub), shown in BOTH branch layouts.
@@ -466,7 +482,11 @@ export default async function DashboardOverviewPage({
             access to the service loop, planning, map, messages, documents and
             the company workspace — real destinations only, badges from the
             spine. Reorder / hide / restore is device-local display state. */}
-        <DashboardModuleGrid modules={controlRoom.modules} />
+        <DashboardModuleGrid
+        modules={controlRoom.modules}
+        context={prefsContext}
+        serverPrefs={serverCardPrefs}
+      />
 
         {/* Universal command finder (WAGON 3) — type a normal term, get the
             right EXISTING page. Registry-only results, audience-filtered. */}
@@ -664,7 +684,18 @@ export default async function DashboardOverviewPage({
             : []),
         ]}
       />
-      <DashboardModuleGrid modules={controlRoom.modules} />
+      <DashboardModuleGrid
+        modules={controlRoom.modules}
+        context={prefsContext}
+        serverPrefs={serverCardPrefs}
+      />
+
+      {/* "Man tinkantys darbai" — top 3 recommendations from the ONE
+          request-cached read model (same PR4 engine as the board). §19 basis
+          form on every row; honest empty state; renders nothing while the
+          gated worker-visibility RPC is unapplied. The module grid above
+          carries the matching new-job-matches badge from the spine. */}
+      <JobRecommendationsCard locale={locale} />
 
       {/* Remaining real pending states — everything the top slot did NOT
           promote, same honest count-gated cards as before. */}

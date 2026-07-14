@@ -248,11 +248,58 @@ describe("routing audit record — every program field, honest nulls", () => {
       confidence: "medium",
       humanReviewState: "not_required",
       dataCategoriesSent: ["worker_skills", "company_need"],
+      // AI Router v1 fields — honest nulls when the caller supplies nothing.
+      modelId: null,
+      promptVersion: null,
+      inputSource: null,
+      outputExcerpt: null,
+      fallbackReason: null,
+      languageConsidered: null,
+      preferredProvider: null,
     });
     // Field-name-only audit: categories never carry values/PII by contract.
     for (const c of record.dataCategoriesSent) {
       expect(c).toMatch(/^[a-z_]+$/i);
     }
+  });
+});
+
+describe("language as a routing dimension (AI Router v1)", () => {
+  it("translate_message prefers deepl (policy) and records the language considered", () => {
+    const d = resolveTaskRoute("translate_message", { attempt: 1, language: "de" });
+    expect(d.preferredProvider).toBe("deepl");
+    expect(d.languageConsidered).toBe("de");
+    expect(d.tier).toBe("low_cost"); // LLM tier stays the fallback route
+    expect(d.reason).toMatch(/prefers provider "deepl" when configured/);
+  });
+
+  it("no language supplied → honest null, preference still declared by policy", () => {
+    const d = resolveTaskRoute("translate_message", { attempt: 1 });
+    expect(d.languageConsidered).toBeNull();
+    expect(d.preferredProvider).toBe("deepl");
+  });
+
+  it("tasks without languageRouting carry no provider preference", () => {
+    const d = resolveTaskRoute("explain_match", { attempt: 1, language: "lt" });
+    expect(d.preferredProvider).toBeNull();
+    expect(d.languageConsidered).toBe("lt");
+  });
+
+  it("a blocked route never carries a provider preference", () => {
+    const d = resolveTaskRoute("translate_message", {
+      attempt: 1,
+      estimatedCostUsd: 100,
+      language: "de",
+    });
+    expect(d.blocked).toBe("cost_ceiling");
+    expect(d.preferredProvider).toBeNull();
+  });
+
+  it("provider-aware alias mapping resolves each provider's own candidate", () => {
+    expect(modelIdForAlias("sonnet")).toBe(AI_MODEL_CANDIDATES.anthropic.sonnet);
+    expect(modelIdForAlias("sonnet", "openai")).toBe(AI_MODEL_CANDIDATES.openai.sonnet);
+    expect(modelIdForAlias("haiku", "gemini")).toBe(AI_MODEL_CANDIDATES.gemini.haiku);
+    expect(modelIdForAlias("opus", "xai")).toBe(AI_MODEL_CANDIDATES.xai.opus);
   });
 });
 

@@ -20,7 +20,8 @@
       "service_request_responses": "Verdwijnt wanneer je de pagina met dienstaanvragen opent.",
       "pending_bookings": "Verdwijnt wanneer je op het boekingsvoorstel reageert.",
       "booking_responses": "Verdwijnt wanneer je de boekingenpagina opent.",
-      "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina."
+      "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina.",
+      "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet)."
     }
   },
   "commandFinder": {
@@ -495,6 +496,42 @@
     }
   },
   "marketMap": {
+    "entities": {
+      "title": "Drie entiteiten op de kaart",
+      "intro": "De kaart onderscheidt drie verschillende ruimtelijke entiteiten: mensen, werkgebieden van bedrijven en projectlocaties. Elk heeft een eigen zichtbaarheidsregel en een eigen visuele vorm.",
+      "neverMixedNote": "De drie entiteiten worden nooit samengevoegd tot één markertype.",
+      "contactNote": "Contact verloopt altijd via de LabourMarket.ai-werkstroom — de kaart toont nooit telefoonnummers of e-mailadressen.",
+      "person": {
+        "name": "Mensen",
+        "legend": "Geaggregeerde aanwezigheid per gebied (gevuld vierkant)",
+        "countLabel": "{count}",
+        "smallSample": "<5",
+        "empty": "Nog geen geaggregeerde aanwezigheid van mensen om te tonen. Mensen verschijnen hier alleen als tellingen op gebiedsniveau zodra er in een gebied genoeg signalen met toestemming zijn (een exact aantal pas vanaf 5).",
+        "visibilityNote": "Mensen worden alleen getoond als geaggregeerde gebiedstellingen — nooit als een individueel punt, naam of contact. Gebieden met minder dan 5 zichtbare mensen tonen \"<5\"."
+      },
+      "company": {
+        "name": "Bedrijfsterritoria",
+        "legend": "Contour van werkgebied (gestippelde ring) — nooit een punt",
+        "kinds": {
+          "headquarters": "Hoofdkantoor",
+          "operating": "Werkgebied",
+          "desired_market": "Gewenste markt",
+          "demand_anchor": "Geverifieerde behoeftelocatie"
+        },
+        "storeInactive": "De opslag voor bedrijfsterritoria is in deze omgeving nog niet geactiveerd — activering is een beslissing van de eigenaar.",
+        "readError": "Bedrijfsterritoria konden nu niet worden geladen.",
+        "empty": "Nog geen bedrijfsterritoria. Voeg de werklocaties van uw bedrijf toe in de bedrijfswerkruimte.",
+        "visibilityNote": "Bedrijfsterritoria worden getekend als omlijnde gebieden op basis van door het bedrijf ingevoerde geografie — nooit als markers die op personen lijken."
+      },
+      "project": {
+        "name": "Projectlocaties",
+        "legend": "Projectmarker (ruit)",
+        "confirmedTag": "locatie bevestigd",
+        "unconfirmedTag": "gebiedsniveau",
+        "empty": "Nog geen projectlocaties. Projecten met een locatie verschijnen hier uit uw projectenlijst.",
+        "visibilityNote": "Een project toont pas een exact stadspunt nadat de locatie uitdrukkelijk is bevestigd; anders blijft het op gebiedsniveau."
+      }
+    },
     "backToActions": "Actiecentrum",
     "pageTitle": "Kaart",
     "pageLead": "Jij en de markt op één kaart.",
@@ -821,7 +858,7 @@
     "notVerified": "Dit is informatie die je zelf hebt opgegeven — nog niet beoordeeld. Registraties bouwen vertrouwen op, maar je kunt dat later toevoegen.",
     "primaryAction": "Vul aan wat ontbreekt",
     "primaryActionJournal": "Werkregistratie toevoegen",
-    "journalLink": "Werkregistraties",
+    "journalLink": "Werkjournaal",
     "cvImportLink": "Voeg je CV toe — plakken of uploaden",
     "evidence": {
       "intro": "Vaardigheden zijn sterker wanneer ze worden onderbouwd door echte werk-, leer- of activiteitenvermeldingen.",
@@ -1138,7 +1175,7 @@
         "saveError": "Opslaan is niet gelukt. Probeer het opnieuw.",
         "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw."
       },
-      "profileLink": "Mijn capaciteiten (als je ook een persoon bent, niet alleen een bedrijf)",
+      "profileLink": "Mijn vaardigheden (als je ook een persoon bent, niet alleen een bedrijf)",
       "nextActions": {
         "heading": "Volgende stappen",
         "missingHeading": "Voeg toe om je profiel te versterken",
@@ -1407,6 +1444,12 @@
           "estimate": "Elke schatting is voorlopig en niet-bindend — een planningshulp, geen offerte."
         },
         "cta": "Scouting openen"
+      },
+      "decisions": {
+        "title": "Wacht op je beslissing",
+        "review": "Journaalvermeldingen om te beoordelen",
+        "invitations": "Openstaande uitnodigingen voor werknemers",
+        "claims": "Openbare aanvragen die je kunt overnemen"
       }
     },
     "agency": {
@@ -1459,7 +1502,7 @@
         "saveError": "Opslaan is niet gelukt. Probeer het opnieuw.",
         "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw."
       },
-      "profileLink": "Mijn capaciteiten",
+      "profileLink": "Mijn vaardigheden",
       "noAgency": {
         "title": "De installatie van het uitzendbureau is nog niet afgerond",
         "body": "De installatie van het uitzendbureau is alleen nodig voor de bureauworkflow. Ze is niet vereist als je wilt optreden als aanvrager, bedrijf of werknemer. Kies hieronder hoe je wilt starten, of rond de installatie van het uitzendbureau af.",
@@ -1627,7 +1670,7 @@
         "saveError": "Opslaan is niet gelukt. Probeer het opnieuw.",
         "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw."
       },
-      "profileLink": "Mijn capaciteiten",
+      "profileLink": "Mijn vaardigheden",
       "setup": {
         "formTitle": "Kopersprofiel",
         "formSubtitle": "Deze gegevens worden opgeslagen bij je account. Je kunt ze later bijwerken.",
@@ -2478,7 +2521,7 @@
       "body": "Sommige vermeldingen zijn nog niet duidelijk geclassificeerd. Beoordeel ze of voeg meer informatie toe, zodat je profiel nauwkeuriger gematcht kan worden.",
       "cta": "Vaardigheden beoordelen"
     },
-    "pageTitle": "Mijn capaciteiten",
+    "pageTitle": "Mijn profiel",
     "pageSubtitle": "Alles wat je werkkaart vormt staat hier: wat je doet, wat je kunt en wat dat aantoont. Je gekozen vakgebied is context, geen beperking.",
     "professionLabel": "Je beroep",
     "professionPlaceholder": "Selecteer een beroep",
@@ -2516,14 +2559,14 @@
       "applyAll": "Geselecteerde suggesties toevoegen",
       "applyAllDisabledHint": "Selecteer minstens één suggestie",
       "applying": "Opslaan…",
-      "savedToCapabilities": "Vaardigheden opgeslagen in Mijn capaciteiten",
+      "savedToCapabilities": "Vaardigheden opgeslagen in Mijn vaardigheden",
       "appliedToast": "Geselecteerde suggesties toegevoegd aan je profiel. Je kunt ze nog steeds handmatig bewerken of uitbreiden.",
       "noSuggestionsFallback": "Nog geen duidelijke suggesties. Je kunt meer details geven of informatie handmatig toevoegen.",
       "noNewSuggestions": "Geen nieuwe suggesties. Je al opgeslagen vaardigheden staan hieronder.",
       "confirmedByYou": "Nog niet beoordeeld",
       "addedToProfile": "Toegevoegd aan je profiel",
       "needsExternalConfirmation": "Voeg later werkregistraties toe",
-      "viewCapabilities": "Bekijk je capaciteiten",
+      "viewCapabilities": "Bekijk je vaardigheden",
       "textSavingLabel": "Opslaan…",
       "textSavedLabel": "Je tekst is opgeslagen",
       "textSaveErrorLabel": "Kon je tekst niet opslaan. Probeer het opnieuw.",
@@ -3112,6 +3155,12 @@
         "hide": "Verbergen",
         "hiddenTitle": "Verborgen kaarten"
       },
+      "jobsCard": {
+        "title": "Banen die bij mij passen",
+        "viewAll": "Alle advertenties",
+        "empty": "Momenteel geen passende advertenties — vul je vaardigheden in je profiel aan.",
+        "emptyCta": "Profiel aanvullen"
+      },
       "myZone": {
         "actionsHeading": "Acties",
         "incompleteStatus": "Je gegevens zijn nog niet compleet",
@@ -3196,7 +3245,7 @@
           "proof": {
             "title": "Werkregistraties",
             "body": "Leg afgerond werk vast. Vermeldingen worden later registraties voor vaardigheden.",
-            "cta": "Journaal openen"
+            "cta": "Werkjournaal openen"
           },
           "notLimit": "Je eerste keuze is geen beperking — je kunt later meer richtingen toevoegen."
         },
@@ -3249,7 +3298,7 @@
         "journal": {
           "title": "Werkjournaal",
           "body": "Leg werk vast per opdracht. Beoordeelde vermeldingen bouwen in de loop van de tijd vaardigheidsregistraties op.",
-          "cta": "Journaal openen"
+          "cta": "Werkjournaal openen"
         },
         "addMore": {
           "title": "Voeg nog een manier toe om labourmarket.ai te gebruiken",
@@ -3435,14 +3484,14 @@
         },
         "unverifiedNote": "Dit is wat je over jezelf zegt — en dat is prima.",
         "activities": {
-          "title": "Mijn activiteiten en vaardigheden",
+          "title": "Mijn vaardigheden",
           "body": "Vertel ons wat je kunt en waaraan je zou willen werken. Alles op één plek.",
           "cta": "Openen"
         },
         "proofCard": {
           "title": "Mijn registraties",
           "body": "Het werk dat je vastlegt, wordt geleidelijk een registratie van je vaardigheden.",
-          "cta": "Journaal openen"
+          "cta": "Werkjournaal openen"
         },
         "otherSpaces": "Mijn andere ruimtes"
       },
@@ -3538,7 +3587,7 @@
         "marketplace": "Marktplaats",
         "marketMap": "Kaart",
         "profile": "Profiel",
-        "journal": "Mijn cv",
+        "journal": "Werkjournaal",
         "communication": "Berichten",
         "discover": "Ontdekken",
         "search": "Zoeken",
@@ -3719,7 +3768,8 @@
         "service_request_responses": "Antwoorden op je aanvragen",
         "pending_bookings": "Boekingsvoorstellen die op een reactie wachten",
         "booking_responses": "Antwoorden op je boekingsvoorstellen",
-        "open_task_attention": "Taken die aandacht vragen"
+        "open_task_attention": "Taken die aandacht vragen",
+        "new_job_matches": "Nieuwe vacatures die bij je passen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -6052,7 +6102,7 @@
   "skillClarify": {
     "title": "Mijn vaardigheden",
     "intro": "Voeg een vaardigheid toe die nog niet in de lijst staat — in je eigen woorden.",
-    "listTitle": "Mijn kandidaat-vaardigheden",
+    "listTitle": "Opgeslagen vaardigheden",
     "empty": "Je hebt nog niets toegevoegd.",
     "candidateBadge": "Zelf opgegeven · verduidelijking nodig",
     "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw.",
@@ -6234,7 +6284,7 @@
   },
   "cvExport": {
     "nameNotProvided": "Naam nog niet toegevoegd",
-    "pageTitle": "Bevestigd CV",
+    "pageTitle": "Mijn cv",
     "builtFrom": {
       "lead": "Dit CV is uitsluitend opgebouwd uit je eigen accountgegevens — er wordt niets voor je aangemaakt.",
       "profile": "Profiel — je naam, beroep en beschrijving.",
@@ -6267,7 +6317,47 @@
     "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden.",
     "summaryTitle": "Professionele samenvatting",
     "workHistoryTitle": "Werkervaring",
-    "present": "Heden"
+    "present": "Heden",
+    "languagesTitle": "Talen",
+    "languagesSelfStated": "Talen zoals opgegeven door de werker.",
+    "certificatesTitle": "Certificaten en licenties",
+    "declaredCertHint": "Zelf opgegeven",
+    "validUntil": "Geldig tot",
+    "drivingLicences": "Rijbewijscategorieën",
+    "educationTitle": "Opleiding",
+    "achievementsTitle": "Prestaties",
+    "projectsTitle": "Projecten",
+    "projectsHint": "Uit werkregistraties",
+    "confirmedByManager": "Met registraties",
+    "templates": {
+      "label": "Sjabloon",
+      "standard": "Standaard",
+      "compact": "Compact"
+    },
+    "privateDetails": {
+      "toggle": "Salarisverwachting en beschikbaarheid opnemen in de afdruk",
+      "title": "Salarisverwachting en beschikbaarheid",
+      "salary": "Salarisverwachting (EUR/maand)",
+      "availability": "Beschikbaarheid",
+      "availableFrom": "Beschikbaar vanaf",
+      "relocate": "Bereid te verhuizen",
+      "transport": "Eigen vervoer",
+      "yes": "Ja",
+      "no": "Nee",
+      "status": {
+        "available": "Beschikbaar",
+        "busy": "Bezet",
+        "unavailable": "Niet beschikbaar"
+      }
+    },
+    "tailored": {
+      "badge": "Cv op maat",
+      "forNeed": "Afgestemd op de aanvraag: {role}",
+      "basis": "Komt overeen met {matched} van {needTotal} gevraagde vaardigheden, {confirmed} met registraties",
+      "notVisible": "Deze aanvraag is niet zichtbaar voor jou — het standaard-cv wordt getoond.",
+      "noStructure": "Deze aanvraag heeft geen gestructureerde vaardigheidseisen — het standaard-cv wordt getoond.",
+      "matchedTag": "Sluit aan op de aanvraag"
+    }
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -7133,7 +7223,6 @@
     "marketMapLink": "Marktkaart",
     "nextStep": {
       "title": "Zet een match om in actie",
-      "intro": "Een kans komt verder via de marktplaats en je plan.",
       "marketplace": "Marktplaats",
       "marketplaceNote": "Vraag een dienst aan of bied er een aan",
       "bookings": "Plan & boekingen",
@@ -7226,6 +7315,15 @@
       "basis": "{matched} van {total} vereiste vaardigheden komen overeen ({confirmed} door manager bevestigd)",
       "recognizedNote": "eisen herkend uit de behoeftetekst — nog niet bevestigd",
       "missingPrefix": "ontbreekt:"
+    },
+    "recommendations": {
+      "basisCompact": "{matched} van {total} vaardigheden, {confirmed} bevestigd",
+      "newBadge": "Nieuw",
+      "salaryWithin": "Loon past",
+      "salaryNegotiable": "Loon bespreekbaar",
+      "moreSkills": "+{n}",
+      "journalTitle": "Gerelateerd aan je registraties",
+      "journalLine": "Een recente journaalregistratie ondersteunde de vaardigheid “{skill}” — deze baan vraagt die"
     },
     "workerNext": {
       "add_work_evidence": "Volgende stap: voeg werkbewijs toe in je werkjournaal",
@@ -8803,7 +8901,7 @@
       "title": "Mijn bedrijven"
     },
     "relationships": {
-      "title": "Mijn relaties",
+      "title": "Actieve relaties",
       "empty": "Nog geen actieve relaties.",
       "noOrg": "Persoonlijke relatie — niet gekoppeld aan een bedrijf",
       "slug": {
@@ -9015,5 +9113,129 @@
       "approved": "Goedgekeurd",
       "closed": "Gesloten"
     }
+  },
+  "cvSections": {
+    "grid": {
+      "title": "Volledigheid van je cv",
+      "hint": "Begin bij elk gewenst onderdeel — er is geen vaste volgorde.",
+      "filled": "Ingevuld",
+      "empty": "Leeg",
+      "open": "Openen"
+    },
+    "names": {
+      "summary": "Samenvatting",
+      "workHistory": "Werkervaring",
+      "education": "Opleiding",
+      "languages": "Talen",
+      "certificates": "Certificaten en licenties",
+      "skills": "Vaardigheden",
+      "projects": "Projecten",
+      "achievements": "Prestaties",
+      "salary": "Salarisverwachting",
+      "availability": "Beschikbaarheid"
+    },
+    "education": {
+      "title": "Opleiding",
+      "hint": "Voeg je opleiding toe — door jou opgegeven.",
+      "institution": "Instelling",
+      "program": "Opleiding / richting",
+      "type": "Type",
+      "startYear": "Startjaar",
+      "endYear": "Eindjaar",
+      "isCurrent": "Studeer momenteel",
+      "add": "Toevoegen",
+      "adding": "Opslaan…",
+      "save": "Opslaan",
+      "edit": "Bewerken",
+      "cancel": "Annuleren",
+      "remove": "Verwijderen",
+      "empty": "Nog geen opleidingsitems.",
+      "notEnabled": "Dit onderdeel is voorbereid maar nog niet ingeschakeld.",
+      "error": "Opslaan mislukt. Probeer opnieuw.",
+      "invalid": "Ongeldige waarde.",
+      "limit": "Limiet bereikt.",
+      "selfStated": "Door jou ingevuld."
+    },
+    "educationTypes": {
+      "primary": "Basisschool",
+      "secondary": "Middelbare school",
+      "vocational": "Vakopleiding (mbo)",
+      "college": "Hogeschool",
+      "university_bachelor": "Universiteit (bachelor)",
+      "university_master": "Universiteit (master)",
+      "doctorate": "Doctoraat",
+      "course_certificate": "Cursus / certificaat",
+      "other": "Overig"
+    },
+    "achievements": {
+      "title": "Prestaties en opgegeven certificaten",
+      "hint": "Prijzen, afgeronde cursussen en certificaten die je zelf opgeeft.",
+      "achTitle": "Titel",
+      "description": "Beschrijving",
+      "date": "Datum",
+      "type": "Type",
+      "add": "Toevoegen",
+      "adding": "Opslaan…",
+      "save": "Opslaan",
+      "edit": "Bewerken",
+      "cancel": "Annuleren",
+      "remove": "Verwijderen",
+      "empty": "Nog geen prestaties.",
+      "notEnabled": "Dit onderdeel is voorbereid maar nog niet ingeschakeld.",
+      "error": "Opslaan mislukt. Probeer opnieuw.",
+      "invalid": "Ongeldige waarde.",
+      "limit": "Limiet bereikt.",
+      "selfStated": "Door jou ingevuld.",
+      "declaredBadge": "Zelf opgegeven",
+      "confirmedBadge": "Met registraties"
+    },
+    "achievementTypes": {
+      "achievement": "Prestatie",
+      "award": "Prijs",
+      "course_completion": "Afgeronde cursus",
+      "declared_certificate": "Opgegeven certificaat",
+      "other": "Overig"
+    }
+  },
+  "cvImport": {
+    "reviewTitle": "Gedetecteerde cv-onderdelen",
+    "reviewHint": "Het systeem stelt alleen voor. Sla elk item op of verwijder het — jij beslist.",
+    "empty": "Geen gestructureerde items gevonden in de tekst.",
+    "groups": {
+      "workHistory": "Werkervaring",
+      "education": "Opleiding",
+      "languages": "Talen",
+      "certificates": "Certificaten",
+      "achievements": "Prestaties",
+      "salary": "Salarisverwachting",
+      "availability": "Beschikbaarheid"
+    },
+    "confirm": "Opslaan",
+    "saving": "Opslaan…",
+    "discard": "Verwijderen",
+    "confirmedLabel": "Opgeslagen",
+    "discardedLabel": "Verwijderd",
+    "replace": "Vervangen",
+    "conflict": "Er is al een andere waarde opgeslagen: {value}",
+    "needsMigration": "Dit onderdeel is voorbereid maar nog niet ingeschakeld — het item is niet opgeslagen.",
+    "error": "Opslaan mislukt. Probeer opnieuw.",
+    "invalid": "Ongeldige waarde.",
+    "aiHint": "AI-suggestie — controleer vóór het opslaan",
+    "chooseLevel": "Kies niveau",
+    "perMonth": "€/maand",
+    "availabilityKeys": {
+      "willingToRelocate": "Bereid te verhuizen",
+      "hasTransport": "Eigen vervoer",
+      "nightShiftsOk": "Kan nachtdiensten werken",
+      "weekendShiftsOk": "Kan in het weekend werken"
+    },
+    "imageOcr": {
+      "label": "Cv-foto / afbeelding (JPG, PNG)",
+      "note": "In voorbereiding — beeldherkenning werkt nog niet. Upload een PDF/DOCX of plak de tekst."
+    }
+  },
+  "companySwitcher": {
+    "heading": "Actief bedrijf",
+    "note": "Wisselen bepaalt namens welke organisatie je bedrijfsomgeving werkt."
   }
 }

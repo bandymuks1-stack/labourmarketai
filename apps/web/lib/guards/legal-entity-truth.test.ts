@@ -30,6 +30,7 @@ const catalogs = Object.fromEntries(
 
 const entityModule = read("lib/legal/entity-identity.ts");
 const footer = read("components/layouts/site-footer.tsx");
+const dashboardShell = read("app/[locale]/dashboard/layout.tsx");
 const legalNotice = read("app/[locale]/(marketing)/legal/legal-notice/page.tsx");
 const terms = read("app/[locale]/(marketing)/legal/terms/page.tsx");
 
@@ -65,6 +66,21 @@ describe("footer discloses operator + IP owner and owns the © correctly", () =>
     expect(f.operatedBy).toContain("Nonstop Group");
     expect(f.operatedBy).toContain("Labour Market AI Sp. z o.o.");
     expect(f.ipNotice).toContain("Nonstop Group");
+  });
+
+  // Created by Rexora — owner-approved attribution link (2026-07-14). The
+  // credit must be a real external link to the approved URL (never plain
+  // text, never a fabricated URL) in BOTH shells: public footer + dashboard.
+  it("footer renders the Rexora credit as a safe external link to the approved URL", () => {
+    expect(footer).toContain('href="https://aiprocessautomation.eu"');
+    expect(footer).toContain('rel="noopener noreferrer"');
+    expect(footer).toContain('{t("rexora")}');
+  });
+
+  it("dashboard shell renders the Rexora credit as a safe external link too", () => {
+    expect(dashboardShell).toContain('href="https://aiprocessautomation.eu"');
+    expect(dashboardShell).toContain('rel="noopener noreferrer"');
+    expect(dashboardShell).toContain('rexora');
   });
 });
 

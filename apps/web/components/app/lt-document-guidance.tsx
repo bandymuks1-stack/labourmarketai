@@ -114,12 +114,20 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
           ))}
       </div>
 
+      {/* Density pass (worker-workspace UX audit v2): the full registry made
+          the documents page end in a very long always-open list. Each country
+          group is now a collapsed disclosure (heading + item count visible);
+          every item stays reachable in one tap, nothing is removed. */}
       {[...grouped.entries()].map(([country, items]) => (
-        <div key={country} className="flex flex-col gap-2">
-          <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <details key={country} className="group flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/20">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-primary [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {country === "ALL" ? t("groupAll") : country}
-          </h3>
-          <ul className="flex flex-col gap-2">
+            <span className="rounded-full border border-ink-500 px-1.5 py-0.5 tabular-nums">
+              {items.length}
+            </span>
+          </summary>
+          <ul className="flex flex-col gap-2 px-3 pb-3">
             {items.map((item) => (
               <li
                 key={item.id}
@@ -165,7 +173,7 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       ))}
 
       {/* Information-only closing line — the real help-request flow is a

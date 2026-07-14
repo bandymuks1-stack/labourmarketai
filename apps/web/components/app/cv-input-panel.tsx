@@ -24,6 +24,7 @@ export function CvInputPanel({
   pasting?: boolean;
 }) {
   const t = useTranslations("structuring.cv");
+  const tImport = useTranslations("cvImport");
   const id = useId();
   const [pasted, setPasted] = useState("");
   const canSubmit = pasted.trim().length > 0 && !pasting;
@@ -57,6 +58,27 @@ export function CvInputPanel({
           <span className="text-[11px] leading-relaxed text-text-muted">
             {t("uploadHint")}
           </span>
+          {/* Image OCR — honest FUTURE seam (§18): the input exists, is
+              visibly disabled, and the label says plainly it is not available
+              yet. No fake button, no silent accept-and-fail. */}
+          <div
+            className="flex flex-col gap-1 rounded-md border border-dashed border-ink-600 p-2 opacity-70"
+            data-testid="cv-image-ocr-seam"
+          >
+            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {tImport("imageOcr.label")}
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png"
+              disabled
+              aria-disabled="true"
+              className="text-xs text-text-muted"
+            />
+            <span className="text-[11px] leading-relaxed text-text-muted">
+              {tImport("imageOcr.note")}
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/50 p-3">

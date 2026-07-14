@@ -1745,7 +1745,36 @@ describe("no migration files added by this sprint", () => {
     // (provenance ledger + worker external profiles + append-only
     // identity-resolution audit); DRAFT / needs-human-gate, NOT applied;
     // paired rollback + deferred APPLIED_LEDGER entry in the PR.
-    const SPRINT_BASELINE = 132;
+    // Bumped 132 -> 133 for the AI Router v1 run-audit draft
+    // (20260714150000_ai_runs_audit_v1) — APPEND-ONLY ai_runs log of live
+    // AI agent runs (admin-only SELECT, service-role-only writes); DRAFT /
+    // needs-human-gate, NOT applied; paired rollback + deferred
+    // APPLIED_LEDGER entry in the PR.
+    // Bumped 133 -> 135 for the Full CV System v1 drafts
+    // (20260714160000_worker_education_achievements_v1 +
+    // 20260714161000_self_declared_work_history_v1) — owner-only education/
+    // achievements stores + self-declared work-history RPCs; DRAFT /
+    // needs-human-gate, NOT applied; paired rollbacks + deferred
+    // APPLIED_LEDGER entries.
+    // Bumped 135 -> 136 for the Job Recommendation seen-marker draft
+    // (20260714170000_worker_opportunity_seen_v1) — ONE first-seen table +
+    // gated mark RPC powering the honest "new matches" spine count; DRAFT /
+    // needs-human-gate, NOT applied; paired rollback + deferred
+    // APPLIED_LEDGER entry.
+    // Bumped 136 -> 137 for the Journal Proof Engine template registry draft
+    // (20260714180000_journal_profession_templates_v1) — ONE §10 slug
+    // registry table (all seeds inactive; admin-only writes; authenticated
+    // read of active rows); DRAFT / needs-human-gate, NOT applied; paired
+    // rollback + deferred APPLIED_LEDGER entry.
+    // Bumped 137 -> 139 for the Company Architecture Completion v1 drafts
+    // (20260714210000_company_memberships_v1 — active-organization pointer
+    // on the EXISTING organizations/engagement_contexts membership model,
+    // membership-validation triggers, viewer slug seed;
+    // 20260714211000_dashboard_preferences_v1 — owner-only server-side
+    // dashboard card preferences per (profile, context), 8 KB bound). Both
+    // DRAFT / needs-human-gate, NOT applied; paired rollbacks + deferred
+    // APPLIED_LEDGER entries.
+    const SPRINT_BASELINE = 139;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

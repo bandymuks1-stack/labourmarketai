@@ -11,6 +11,10 @@ import { LabourMarketWorldMap } from "@/components/app/labour-market-world-map";
 import { MarketMapCapture } from "@/components/app/market-map-capture";
 import { MarketMapOwnerReadiness } from "@/components/app/market-map-owner-readiness";
 import { MapLayersLegend } from "@/components/app/map-layers-legend";
+import { MarketMapEntityLayers } from "@/components/app/market-map-entity-layers";
+import { getOwnSpatialCollections } from "@/lib/market-map/spatial-read";
+import { emptySpatialCollections } from "@/lib/market-map/spatial-entities";
+import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import {
   listOwnPreferredLocations,
   getOwnLoginConsent,
@@ -49,6 +53,7 @@ export default async function MarketMapPage({
   const tMap = await getTranslations("marketMap");
   const tLayers = await getTranslations("mapLayers");
   const tRec = await getTranslations("marketRecognition");
+  const tCountries = await getTranslations("labourMarket");
   // Owner-scoped current state for the capture forms (RLS — caller's own rows).
   const [preferred, login, demand, availability, capabilities, profileRes, avatar] =
     await Promise.all([
@@ -70,6 +75,15 @@ export default async function MarketMapPage({
   // company is an additional layer/panel on the SAME map (incomplete when it
   // has no confirmed location — never a fake company point, never the personal
   // marker relabelled as the company).
+  // Three-entity spatial read (Sprint v2 §6): typed collections — person
+  // presence (aggregate-only, §20), company territory, project locations —
+  // composed from the caller's own RLS-scoped rows only.
+  const spatial = await getOwnSpatialCollections();
+  const spatialCollections = spatial?.collections ?? emptySpatialCollections();
+  const companyTerritorySource = spatial?.companyTerritorySource ?? "error";
+  const countryNames = Object.fromEntries(
+    MARKET_COUNTRIES.map((code) => [code, tCountries(`countryNames.${code}`)]),
+  );
   const activeRole = profileRes.data?.active_role ?? null;
   const isCompanyContext = activeRole === "company" || activeRole === "agency";
   const companyRead = isCompanyContext ? await getOwnCompany() : null;
@@ -212,6 +226,15 @@ export default async function MarketMapPage({
             tLayers("items.trust"),
           ],
         }}
+      />
+      {/* THREE spatial entities (Sprint v2 §6) — person presence (aggregate
+          only, §20-safe), company operating territory, project locations — as
+          three toggleable layers with distinct visual languages, never mixed
+          into one pin type. Data: owner-scoped typed collections only. */}
+      <MarketMapEntityLayers
+        collections={spatialCollections}
+        companyTerritorySource={companyTerritorySource}
+        countryNames={countryNames}
       />
       {/* Operating-layer bridge (§8.9): the map shows WHERE things are; the
           real data is managed on these surfaces. Existing routes only, no fake

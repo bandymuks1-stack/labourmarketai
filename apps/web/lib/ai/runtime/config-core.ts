@@ -16,7 +16,10 @@
  */
 
 export type AiRuntimeState = "disabled" | "mock" | "live";
-export type AiProviderKind = "anthropic" | "openai";
+export type AiProviderKind = "anthropic" | "openai" | "gemini" | "xai";
+/** Secondary (task-specific) providers reachable only via routing preference —
+ *  never a primary AI_PROVIDER value. */
+export type AiSecondaryProviderKind = "deepl";
 
 export type AiDisabledReason =
   | "ok"
@@ -54,7 +57,12 @@ export interface AiRuntimeConfigInput {
 /** Default model for a future live provider — the latest Opus (see claude-api). */
 export const DEFAULT_AI_MODEL = "claude-opus-4-8";
 
-const KNOWN_PROVIDERS: readonly AiProviderKind[] = ["anthropic", "openai"];
+const KNOWN_PROVIDERS: readonly AiProviderKind[] = [
+  "anthropic",
+  "openai",
+  "gemini",
+  "xai",
+];
 
 /** A live API key shape we never want to see committed (sanity, not auth). */
 export const AI_KEY_SHAPE = /^(sk-ant-|sk-|sk-proj-)[A-Za-z0-9_-]{6,}/;

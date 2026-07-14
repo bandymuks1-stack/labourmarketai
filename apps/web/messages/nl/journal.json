@@ -224,7 +224,7 @@
   "listEmptyNext": "Maak hieronder je eerste item aan — het blijft privé totdat je het indient.",
   "listEmptyCta": "Maak je eerste item aan",
   "listTitle": "Werkitems",
-  "navTitle": "Werkregistraties",
+  "navTitle": "Werkjournaal",
   "navSubtitle": "Laat zien wat je hebt gedaan — het versterkt je werkkaart.",
   "composerBenefit": "Dit item versterkt je werkkaart.",
   "newEntry": "Nieuw item",
@@ -329,5 +329,64 @@
     "title": "Dagnavigatie",
     "all": "Alle dagen",
     "openInCalendar": "Openen in kalender"
+  },
+  "spreadsheet": {
+    "title": "Spreadsheetmodus — meerdere regels tegelijk",
+    "hint": "Elke rij wordt een eigen werkjournaalvermelding. Lege rijen worden overgeslagen; mislukte rijen blijven bewerkbaar met de exacte reden.",
+    "colDate": "Datum",
+    "colText": "Werk / onderwerp",
+    "colQuantity": "Hoeveelheid",
+    "colUnit": "Eenheid",
+    "colHours": "Uren",
+    "colEngagement": "Context / project",
+    "colNote": "Notitie",
+    "textPlaceholder": "Wat heb je gedaan?",
+    "addRow": "Rij toevoegen",
+    "removeRow": "Rij verwijderen",
+    "saveAll": "Rijen opslaan",
+    "saving": "Opslaan…",
+    "savedSummary": "Opgeslagen: {saved}. Mislukt: {failed}.",
+    "rowUnexpectedError": "Onverwachte fout — de rij is niet opgeslagen. Probeer opnieuw.",
+    "rowCount": "{count} / {max} rijen",
+    "errors": {
+      "text_required": "Beschrijf wat je hebt gedaan.",
+      "date_invalid": "Ongeldige datum (JJJJ-MM-DD).",
+      "quantity_invalid": "Hoeveelheid moet een positief getal zijn.",
+      "hours_invalid": "Uren moeten tussen 0 en 24 liggen.",
+      "engagement_required": "Kies een werkcontext."
+    }
+  },
+  "templates": {
+    "title": "Sjablonen per beroep",
+    "hint": "Een sjabloon vult alleen de tekststructuur in — alles is vrij aan te passen.",
+    "construction_daily": "Dagrapport bouw",
+    "transport_daily": "Dagrapport transport",
+    "cleaning_daily": "Dagrapport schoonmaak"
+  },
+  "aiSuggest": {
+    "title": "AI-suggesties uit deze vermelding",
+    "cta": "Voorstellen uit vermelding (AI)",
+    "loading": "Analyseren…",
+    "disclaimer": "AI stelt alleen voor — er wordt niets opgeslagen totdat je een voorstel zelf accepteert.",
+    "offNote": "AI-suggesties zijn in deze omgeving niet ingeschakeld, of er is niets concreets in de tekst gevonden. De automatische herkenning hierboven werkt zoals gebruikelijk.",
+    "skillsTitle": "Mogelijke vaardigheden (AI)",
+    "achievementsTitle": "Mogelijke prestaties (AI)",
+    "experienceTitle": "Mogelijke werkervaring (AI)",
+    "projectTitle": "Mogelijke projectkoppeling (AI)",
+    "addSkill": "Toevoegen aan profiel",
+    "addAchievement": "Prestatie toevoegen",
+    "addExperience": "Ervaring toevoegen",
+    "useProject": "Deze context gebruiken",
+    "projectUsed": "Context geselecteerd",
+    "adding": "Opslaan…",
+    "added": "Opgeslagen",
+    "discard": "Afwijzen",
+    "needsMigration": "Deze opslag is nog niet geactiveerd — het voorstel kan nog niet worden opgeslagen.",
+    "saveError": "Opslaan is niet gelukt. Probeer opnieuw.",
+    "current": "nu"
+  },
+  "proofLoop": {
+    "strip": "Vermeldingen → vaardigheden → CV → kansen: {entries} vermeldingen deze maand · {evidenced} vaardigheden met vermeldingen · {confirmed} beoordeeld",
+    "cvLink": "CV"
   }
 }

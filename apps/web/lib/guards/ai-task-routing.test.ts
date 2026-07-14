@@ -8,8 +8,12 @@
  *       table and the sole allowlisted definition site);
  *   (b) TASK_POLICIES exists and covers every AiTaskType;
  *   (c) providers/anthropic.ts stays the ONLY LLM SDK importer;
- *   (d) no provider adapter other than anthropic is ever "active";
- *   (e) the routing + adapter modules stay PURE (no server-only / env / fetch).
+ *   (d) no provider adapter other than anthropic is ever "active" (fetch-based
+ *       adapters are "wired_env_gated" — real wire, inert without env);
+ *   (e) the routing + adapter modules stay PURE (no server-only / env / fetch);
+ *   (f) the external provider API hosts (api.openai.com / api.deepl.com /
+ *       generativelanguage.googleapis.com / api.x.ai) appear ONLY under
+ *       lib/ai/runtime/providers/ — business logic never calls a vendor.
  *
  * Pure source assertions. Runs in CI via `pnpm -F web test`.
  */
@@ -109,14 +113,54 @@ describe("(c) providers/anthropic.ts remains the only SDK importer", () => {
 // ── (d) no adapter other than anthropic is active ──────────────────────────
 
 describe("(d) adapter registry — anthropic is the only active adapter", () => {
-  it("every non-anthropic adapter is declared_inactive or unavailable", () => {
+  it("every non-anthropic adapter is wired_env_gated, declared_inactive or unavailable", () => {
     for (const a of PROVIDER_ADAPTER_REGISTRY) {
       if (a.id === "anthropic") {
         expect(a.status).toBe("active");
       } else {
-        expect(["declared_inactive", "unavailable"], a.id).toContain(a.status);
+        expect(
+          ["wired_env_gated", "declared_inactive", "unavailable"],
+          a.id,
+        ).toContain(a.status);
       }
     }
+  });
+});
+
+// ── (f) provider API hosts are pinned to runtime/providers/* ───────────────
+
+// The fetch-based adapters are the ONLY files that may reference the external
+// provider API hosts — business logic can never call a vendor directly.
+const PROVIDER_HOSTS =
+  /api\.openai\.com|api\.deepl\.com|api-free\.deepl\.com|generativelanguage\.googleapis\.com|api\.x\.ai/;
+const PROVIDER_HOST_ALLOWLIST_PREFIX = "lib/ai/runtime/providers/";
+
+describe("(f) provider API hosts appear ONLY under lib/ai/runtime/providers", () => {
+  it("no file outside runtime/providers references a provider API host", () => {
+    const offenders: string[] = [];
+    for (const dir of ["lib", "app", "components"].map((d) => join(APP_ROOT, d))) {
+      for (const file of walk(dir)) {
+        if (/\.test\.tsx?$/.test(file)) continue; // guards may quote hosts
+        const r = rel(file);
+        if (r.startsWith(PROVIDER_HOST_ALLOWLIST_PREFIX)) continue;
+        if (PROVIDER_HOSTS.test(code(read(file)))) offenders.push(r);
+      }
+    }
+    expect(
+      offenders,
+      `provider API host referenced outside runtime/providers:\n${offenders.join("\n")}`,
+    ).toEqual([]);
+  });
+
+  it("the detector is real", () => {
+    expect(PROVIDER_HOSTS.test("https://api.openai.com/v1/chat/completions")).toBe(true);
+    expect(PROVIDER_HOSTS.test("https://api.deepl.com/v2/translate")).toBe(true);
+    expect(PROVIDER_HOSTS.test("https://api-free.deepl.com/v2/translate")).toBe(true);
+    expect(
+      PROVIDER_HOSTS.test("https://generativelanguage.googleapis.com/v1beta/models"),
+    ).toBe(true);
+    expect(PROVIDER_HOSTS.test("https://api.x.ai/v1/chat/completions")).toBe(true);
+    expect(PROVIDER_HOSTS.test("https://example.com/api")).toBe(false);
   });
 });
 

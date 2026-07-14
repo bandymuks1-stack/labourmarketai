@@ -9,9 +9,17 @@
  *
  * Pure types. No IO, no SDK import.
  */
-import type { AiProviderKind, AiDisabledReason } from "./config-core";
+import type {
+  AiProviderKind,
+  AiSecondaryProviderKind,
+  AiDisabledReason,
+} from "./config-core";
 
 export type AiLocale = "en" | "lt" | "ru";
+
+/** Tier alias vocabulary mirrored from task-routing (kept literal here so this
+ *  low-level module stays import-light). */
+export type AiRequestModelAlias = "haiku" | "sonnet" | "opus";
 
 export interface AiCompletionRequest {
   /** Agent identity — used for audit + deterministic mock routing. */
@@ -33,6 +41,19 @@ export interface AiCompletionRequest {
    * Absent → the config default model.
    */
   readonly model?: string;
+  /**
+   * Tier ALIAS the routing layer resolved (alongside the concrete `model` id).
+   * Env-gated non-anthropic adapters use it to pick their own candidate model
+   * when the concrete id belongs to another provider.
+   */
+  readonly modelAlias?: AiRequestModelAlias;
+  /**
+   * Language-routing preference from the task policy (e.g. "deepl" for
+   * translate_message). The dispatcher TRIES the preferred secondary provider
+   * first and falls through honestly to the primary LLM tier when it is not
+   * configured — never a silent fake.
+   */
+  readonly preferredProvider?: AiSecondaryProviderKind;
   /**
    * Deterministic output for the MOCK provider only (tests/dev). The live
    * provider ignores it entirely — it can never inject a fabricated live result.
@@ -56,7 +77,7 @@ export type AiErrorCode =
 export type AiCompletionResult =
   | {
       readonly status: "ok";
-      readonly provider: "mock" | AiProviderKind;
+      readonly provider: "mock" | AiProviderKind | AiSecondaryProviderKind;
       readonly model: string;
       /** RAW model output — UNVALIDATED. The agent layer validates via zod. */
       readonly raw: unknown;
@@ -73,7 +94,7 @@ export function isAiOk(
 
 /** A provider for a single completion. Implementations: disabled / mock / live. */
 export interface AiCompletionProvider {
-  readonly kind: "disabled" | "mock" | AiProviderKind;
+  readonly kind: "disabled" | "mock" | AiProviderKind | AiSecondaryProviderKind;
   complete(
     request: AiCompletionRequest,
     cfg: import("./config-core").AiRuntimeConfig,

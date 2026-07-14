@@ -224,7 +224,7 @@
   "listEmptyNext": "Create your first entry below — it stays private until you submit it.",
   "listEmptyCta": "Create your first entry",
   "listTitle": "Work entries",
-  "navTitle": "Work records",
+  "navTitle": "Work journal",
   "navSubtitle": "Show what you did — it strengthens your work card.",
   "composerBenefit": "This entry strengthens your work card.",
   "newEntry": "New entry",
@@ -329,5 +329,64 @@
     "title": "Day navigation",
     "all": "All days",
     "openInCalendar": "Open in calendar"
+  },
+  "spreadsheet": {
+    "title": "Spreadsheet mode — several entries at once",
+    "hint": "Each row becomes its own work journal entry. Empty rows are skipped; failed rows stay editable with the exact reason.",
+    "colDate": "Date",
+    "colText": "Work / topic",
+    "colQuantity": "Quantity",
+    "colUnit": "Unit",
+    "colHours": "Hrs",
+    "colEngagement": "Context / project",
+    "colNote": "Note",
+    "textPlaceholder": "What did you do?",
+    "addRow": "Add row",
+    "removeRow": "Remove row",
+    "saveAll": "Save rows",
+    "saving": "Saving…",
+    "savedSummary": "Saved: {saved}. Failed: {failed}.",
+    "rowUnexpectedError": "Unexpected error — the row was not saved. Try again.",
+    "rowCount": "{count} / {max} rows",
+    "errors": {
+      "text_required": "Describe what you did.",
+      "date_invalid": "Invalid date (YYYY-MM-DD).",
+      "quantity_invalid": "Quantity must be a positive number.",
+      "hours_invalid": "Hours must be between 0 and 24.",
+      "engagement_required": "Pick a work context."
+    }
+  },
+  "templates": {
+    "title": "Profession templates",
+    "hint": "A template only prefills the text structure — edit everything freely.",
+    "construction_daily": "Construction daily report",
+    "transport_daily": "Transport daily report",
+    "cleaning_daily": "Cleaning daily report"
+  },
+  "aiSuggest": {
+    "title": "AI suggestions from this entry",
+    "cta": "Suggest from entry (AI)",
+    "loading": "Analysing…",
+    "disclaimer": "AI only suggests — nothing is saved until you accept a suggestion yourself.",
+    "offNote": "AI suggestions are not enabled in this environment, or nothing concrete was found in the text. The automatic recognition above works as usual.",
+    "skillsTitle": "Possible skills (AI)",
+    "achievementsTitle": "Possible achievements (AI)",
+    "experienceTitle": "Possible work experience (AI)",
+    "projectTitle": "Possible project link (AI)",
+    "addSkill": "Add to profile",
+    "addAchievement": "Add achievement",
+    "addExperience": "Add experience",
+    "useProject": "Use this context",
+    "projectUsed": "Context selected",
+    "adding": "Saving…",
+    "added": "Saved",
+    "discard": "Discard",
+    "needsMigration": "This store is not activated yet — the suggestion cannot be saved for now.",
+    "saveError": "Could not save. Try again.",
+    "current": "now"
+  },
+  "proofLoop": {
+    "strip": "Entries → skills → CV → opportunities: {entries} entries this month · {evidenced} skills with records · {confirmed} reviewed",
+    "cvLink": "CV"
   }
 }

@@ -39,13 +39,30 @@ const schema = z.object({
   // `live` additionally requires AI_API_KEY (owner-set in Vercel env / .env.local,
   // NEVER committed, NEVER in the client). Safety logic: lib/ai/runtime/config-core.ts.
   AI_PROVIDER_MODE: z.enum(["disabled", "mock", "live"]).default("disabled"),
-  AI_PROVIDER: z.enum(["anthropic", "openai"]).default("anthropic"),
+  AI_PROVIDER: z
+    .enum(["anthropic", "openai", "gemini", "xai"])
+    .default("anthropic"),
   AI_API_KEY: z.string().optional(),
   AI_MODEL: z.string().optional(),
   AI_REQUEST_TIMEOUT_MS: z.string().optional(),
   AI_MAX_RETRIES: z.string().optional(),
   AI_MAX_OUTPUT_TOKENS: z.string().optional(),
   AI_DAILY_RUN_BUDGET: z.string().optional(),
+  // ── AI Router v1 — per-provider adapters (ALL OFF by default) ──────────────
+  // Each non-anthropic adapter is DOUBLE gated: its enable flag must be
+  // "true" AND its key must be present, else the adapter returns the typed
+  // disabled sentinel (lib/ai/runtime/providers/*). Keys are server env only
+  // (Vercel env / .env.local — NEVER committed, NEVER NEXT_PUBLIC).
+  AI_OPENAI_ENABLED: z.enum(["true", "false"]).default("false"),
+  OPENAI_API_KEY: z.string().optional(),
+  AI_GEMINI_ENABLED: z.enum(["true", "false"]).default("false"),
+  GEMINI_API_KEY: z.string().optional(),
+  AI_XAI_ENABLED: z.enum(["true", "false"]).default("false"),
+  XAI_API_KEY: z.string().optional(),
+  // DeepL is a SECONDARY provider (translate_message languageRouting only) —
+  // it is never a primary AI_PROVIDER value.
+  AI_DEEPL_ENABLED: z.enum(["true", "false"]).default("false"),
+  DEEPL_API_KEY: z.string().optional(),
 
   // ── Owner Telegram alerts (server-only; demand-signal notifications) ───────
   // Best-effort owner alert on a PERSISTED /company-need intake. OFF by default:
@@ -105,6 +122,14 @@ const parsed = schema.safeParse({
   AI_MAX_RETRIES: process.env.AI_MAX_RETRIES,
   AI_MAX_OUTPUT_TOKENS: process.env.AI_MAX_OUTPUT_TOKENS,
   AI_DAILY_RUN_BUDGET: process.env.AI_DAILY_RUN_BUDGET,
+  AI_OPENAI_ENABLED: process.env.AI_OPENAI_ENABLED,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  AI_GEMINI_ENABLED: process.env.AI_GEMINI_ENABLED,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  AI_XAI_ENABLED: process.env.AI_XAI_ENABLED,
+  XAI_API_KEY: process.env.XAI_API_KEY,
+  AI_DEEPL_ENABLED: process.env.AI_DEEPL_ENABLED,
+  DEEPL_API_KEY: process.env.DEEPL_API_KEY,
   OWNER_TELEGRAM_ALERTS_ENABLED: process.env.OWNER_TELEGRAM_ALERTS_ENABLED,
   OWNER_TELEGRAM_BOT_TOKEN: process.env.OWNER_TELEGRAM_BOT_TOKEN,
   OWNER_TELEGRAM_CHAT_ID: process.env.OWNER_TELEGRAM_CHAT_ID,

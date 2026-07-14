@@ -40,6 +40,14 @@ export interface SpineCounts {
    *  or rescheduling the task IS what clears it; 0 while the work_tasks
    *  migration is unapplied (control room PR D). */
   readonly openTaskAttention: number;
+  /** UNSEEN job recommendations for the signed-in worker — eligible /
+   *  near-miss matches from the ONE recommendation read model
+   *  (lib/opportunities/recommendations.ts) with no worker_opportunity_seen
+   *  marker yet. Rendering a recommendation (dashboard card, board, journal
+   *  block) marks it seen, so visiting IS the read event. 0 for non-worker
+   *  accounts and 0 while the owner-gated seen store is unapplied — a count
+   *  that could never clear would be permanent noise, not a signal. */
+  readonly newJobMatches: number;
 }
 
 export interface SpineSignalDef {
@@ -60,9 +68,11 @@ export interface SpineSignalDef {
 /**
  * Order = display order in the bell panel. Mirrors the top-slot priority
  * ladder (lib/dashboard/top-slot.ts): a person waiting on you outranks
- * passive news. Deferred (no honest backing yet, see PR notes):
- * opportunity/contacted conversation signals — no seen-model exists for
- * interest signals, so a count could never clear by visiting.
+ * passive news (new-job-matches therefore sits last). Deferred (no honest
+ * backing yet, see PR notes): contacted-conversation / interest-response
+ * signals — no seen-model exists for interest signals, so a count could
+ * never clear by visiting. (New matching JOBS gained their seen model in
+ * the worker_opportunity_seen migration and joined the catalogue.)
  */
 export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
   {
@@ -115,6 +125,19 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
     // tasks is a module card, not a primary-nav tab (badge stays card-level).
     href: "/dashboard/tasks",
     count: (c) => c.openTaskAttention,
+  },
+  {
+    id: "new-job-matches",
+    type: "new_job_matches",
+    // ONE aggregate row for ALL unseen matching jobs (never a row per job —
+    // anti-spam is part of the owner mandate). The opportunities board
+    // renders every open recommendation and marks it seen on render
+    // (worker_opportunity_seen), so visiting the board IS the read event.
+    // Passive news ranks below people waiting on you → last in the ladder.
+    // No featureKey: opportunities is a module card, not a primary-nav tab
+    // (the badge stays card-level via the module registry).
+    href: "/dashboard/opportunities",
+    count: (c) => c.newJobMatches,
   },
 ];
 

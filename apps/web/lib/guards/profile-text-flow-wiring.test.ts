@@ -448,7 +448,7 @@ describe("Guard: save-state lifecycle is honest and dedupe-safe", () => {
   //     surface with `already_saved` status so the user knows WHY they
   //     are not actionable;
   //   - the success message points at the unified surface
-  //     ("Įgūdžiai išsaugoti į Mano gebėjimai").
+  //     ("Įgūdžiai išsaugoti į „Mano įgūdžiai“").
   const flow = read("components/app/profile-text-first-flow.tsx");
 
   it("imports useRouter so it can refresh the unified surface after save", () => {
@@ -515,7 +515,9 @@ describe("Guard: save-state lifecycle is honest and dedupe-safe", () => {
     expect(codeOnly).toMatch(/t\(\s*["']applyAll["']\s*\)/);
   });
 
-  it("success message points at the unified Mano gebėjimai surface (savedToCapabilities key)", () => {
+  it("success message points at the unified Mano įgūdžiai surface (savedToCapabilities key)", () => {
+    // Canonical-term swap (worker-workspace UX audit v2): the unified skills
+    // surface is named "Mano įgūdžiai" everywhere (was "Mano gebėjimai").
     expect(flow).toMatch(/t\(\s*["']savedToCapabilities["']\s*\)/);
     const lt = JSON.parse(read("messages/lt.json")) as Record<
       string,
@@ -523,7 +525,7 @@ describe("Guard: save-state lifecycle is honest and dedupe-safe", () => {
     >;
     const skills = lt.skills as Record<string, unknown>;
     const tf = skills.textFirst as Record<string, string>;
-    expect(tf.savedToCapabilities).toContain("Mano gebėjimai");
+    expect(tf.savedToCapabilities).toContain("Mano įgūdžiai");
   });
 
   it("i18n carries the four save-state status labels (LT + EN)", () => {

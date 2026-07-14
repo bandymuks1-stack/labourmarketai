@@ -67,10 +67,13 @@ describe("Guard: the /cv page is the ONLY surface titled 'Mano CV'", () => {
   it("the renamed surfaces describe what they are (records language, not CV)", () => {
     const lt = base("lt");
     expect(lt.workerEvidence.title).toBe("Darbo įrašai ir įgūdžiai");
-    expect(lt.profileHub.journalLink).toBe("Darbo įrašai");
+    expect(lt.profileHub.journalLink).toBe("Darbo žurnalas");
     expect(lt.auth.dashboard.mySpace.proofCard.title).not.toBe("Mano CV");
     expect(lt.auth.dashboard.section.proofs.title).not.toBe("Mano CV");
-    expect(journalNs("lt").navTitle).toBe("Darbo įrašai");
+    // Canonical-term swap (worker-workspace UX audit v2): the journal H1 now
+    // carries the ONE canonical name "Darbo žurnalas" (matches the nav tab);
+    // it must still never read as a second "Mano CV".
+    expect(journalNs("lt").navTitle).toBe("Darbo žurnalas");
   });
 
   it("the journal page H1 renders the journal title, not the CV page title", () => {

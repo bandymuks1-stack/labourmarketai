@@ -224,7 +224,7 @@
   "listEmptyNext": "Sukurkite pirmą įrašą žemiau — jis lieka privatus, kol jį pateiksite.",
   "listEmptyCta": "Sukurti pirmą įrašą",
   "listTitle": "Darbo įrašai",
-  "navTitle": "Darbo įrašai",
+  "navTitle": "Darbo žurnalas",
   "navSubtitle": "Parodykite, ką dirbote — taip stiprėja jūsų darbo kortelė.",
   "composerBenefit": "Šis įrašas sustiprina jūsų darbo kortelę.",
   "newEntry": "Naujas įrašas",
@@ -329,5 +329,64 @@
     "title": "Dienų navigacija",
     "all": "Visos dienos",
     "openInCalendar": "Atidaryti kalendoriuje"
+  },
+  "spreadsheet": {
+    "title": "Lentelės režimas — keli įrašai iš karto",
+    "hint": "Kiekviena eilutė taps atskiru darbo žurnalo įrašu. Tuščios eilutės praleidžiamos; nepavykusios eilutės lieka redaguoti su tikslia priežastimi.",
+    "colDate": "Data",
+    "colText": "Darbas / tema",
+    "colQuantity": "Kiekis",
+    "colUnit": "Vienetas",
+    "colHours": "Val.",
+    "colEngagement": "Kontekstas / projektas",
+    "colNote": "Pastaba",
+    "textPlaceholder": "Ką dirbote?",
+    "addRow": "Pridėti eilutę",
+    "removeRow": "Pašalinti eilutę",
+    "saveAll": "Išsaugoti eilutes",
+    "saving": "Saugoma…",
+    "savedSummary": "Išsaugota: {saved}. Nepavyko: {failed}.",
+    "rowUnexpectedError": "Netikėta klaida — eilutė neišsaugota. Bandykite dar kartą.",
+    "rowCount": "{count} / {max} eilučių",
+    "errors": {
+      "text_required": "Įrašykite, ką dirbote.",
+      "date_invalid": "Neteisinga data (MMMM-MM-DD).",
+      "quantity_invalid": "Kiekis turi būti teigiamas skaičius.",
+      "hours_invalid": "Valandos turi būti tarp 0 ir 24.",
+      "engagement_required": "Pasirinkite darbo kontekstą."
+    }
+  },
+  "templates": {
+    "title": "Šablonai pagal profesiją",
+    "hint": "Šablonas tik užpildo teksto struktūrą — viską galite laisvai keisti.",
+    "construction_daily": "Statybų dienos ataskaita",
+    "transport_daily": "Transporto dienos ataskaita",
+    "cleaning_daily": "Valymo dienos ataskaita"
+  },
+  "aiSuggest": {
+    "title": "AI pasiūlymai iš įrašo",
+    "cta": "Pasiūlyti iš įrašo (AI)",
+    "loading": "Analizuojama…",
+    "disclaimer": "AI tik pasiūlo — niekas neišsaugoma, kol patys nepriimate pasiūlymo.",
+    "offNote": "AI pasiūlymai šioje aplinkoje neįjungti arba tekste nerasta nieko konkretaus. Automatinis atpažinimas viršuje veikia kaip įprasta.",
+    "skillsTitle": "Galimi įgūdžiai (AI)",
+    "achievementsTitle": "Galimi pasiekimai (AI)",
+    "experienceTitle": "Galima darbo patirtis (AI)",
+    "projectTitle": "Galima projekto sąsaja (AI)",
+    "addSkill": "Pridėti į profilį",
+    "addAchievement": "Pridėti pasiekimą",
+    "addExperience": "Pridėti patirtį",
+    "useProject": "Naudoti šį kontekstą",
+    "projectUsed": "Kontekstas parinktas",
+    "adding": "Saugoma…",
+    "added": "Išsaugota",
+    "discard": "Atmesti",
+    "needsMigration": "Ši saugykla dar neaktyvuota — pasiūlymo kol kas išsaugoti negalima.",
+    "saveError": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "current": "dabar"
+  },
+  "proofLoop": {
+    "strip": "Įrašai → įgūdžiai → CV → pasiūlymai: {entries} įrašai šį mėn. · {evidenced} įgūdžiai su įrašais · {confirmed} peržiūrėti",
+    "cvLink": "CV"
   }
 }

@@ -20,7 +20,8 @@
       "service_request_responses": "Verschwindet, wenn Sie die Seite mit den Serviceanfragen öffnen.",
       "pending_bookings": "Verschwindet, wenn Sie auf den Buchungsvorschlag reagieren.",
       "booking_responses": "Verschwindet, wenn Sie die Buchungsseite öffnen.",
-      "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde."
+      "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde.",
+      "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen)."
     }
   },
   "commandFinder": {
@@ -495,6 +496,42 @@
     }
   },
   "marketMap": {
+    "entities": {
+      "title": "Drei Entitäten auf der Karte",
+      "intro": "Die Karte unterscheidet drei verschiedene räumliche Entitäten: Personen, Tätigkeitsgebiete von Unternehmen und Projektstandorte. Jede hat ihre eigene Sichtbarkeitsregel und ihre eigene visuelle Form.",
+      "neverMixedNote": "Die drei Entitäten werden nie zu einem einzigen Markertyp zusammengeführt.",
+      "contactNote": "Kontakt läuft immer über den LabourMarket.ai-Workflow — die Karte zeigt nie Telefonnummern oder E-Mail-Adressen.",
+      "person": {
+        "name": "Personen",
+        "legend": "Aggregierte Präsenz je Gebiet (gefülltes Quadrat)",
+        "countLabel": "{count}",
+        "smallSample": "<5",
+        "empty": "Noch keine aggregierte Personenpräsenz anzuzeigen. Personen erscheinen hier nur als Zählungen auf Gebietsebene, sobald in einem Gebiet genügend Signale mit Einwilligung vorliegen (eine genaue Zahl erst ab 5).",
+        "visibilityNote": "Personen werden nur als aggregierte Gebietszählungen gezeigt — nie als einzelner Punkt, Name oder Kontakt. Gebiete mit weniger als 5 sichtbaren Personen zeigen \"<5\"."
+      },
+      "company": {
+        "name": "Unternehmensgebiete",
+        "legend": "Umriss des Tätigkeitsgebiets (gestrichelter Ring) — nie ein Punkt",
+        "kinds": {
+          "headquarters": "Hauptsitz",
+          "operating": "Tätigkeitsgebiet",
+          "desired_market": "Wunschmarkt",
+          "demand_anchor": "Verifizierter Bedarfsstandort"
+        },
+        "storeInactive": "Der Speicher für Unternehmensgebiete ist in dieser Umgebung noch nicht aktiviert — die Aktivierung ist eine Entscheidung des Eigentümers.",
+        "readError": "Unternehmensgebiete konnten gerade nicht geladen werden.",
+        "empty": "Noch keine Unternehmensgebiete. Fügen Sie die Tätigkeitsorte Ihres Unternehmens im Unternehmensbereich hinzu.",
+        "visibilityNote": "Unternehmensgebiete werden als umrandete Flächen aus der vom Unternehmen eingegebenen Geografie gezeichnet — nie als personenähnliche Marker."
+      },
+      "project": {
+        "name": "Projektstandorte",
+        "legend": "Projektmarker (Raute)",
+        "confirmedTag": "Standort bestätigt",
+        "unconfirmedTag": "Gebietsebene",
+        "empty": "Noch keine Projektstandorte. Projekte mit Standort erscheinen hier aus Ihrer Projektliste.",
+        "visibilityNote": "Ein Projekt zeigt erst nach ausdrücklicher Bestätigung seines Standorts einen genauen Stadtpunkt; sonst bleibt es auf Gebietsebene."
+      }
+    },
     "backToActions": "Aktionszentrum",
     "pageTitle": "Karte",
     "pageLead": "Sie und der Markt auf einer Karte.",
@@ -821,7 +858,7 @@
     "notVerified": "Dies sind Angaben, die Sie selbst gemacht haben — noch nicht geprüft. Nachweise schaffen Vertrauen, Sie können sie aber auch später hinzufügen.",
     "primaryAction": "Fehlendes ergänzen",
     "primaryActionJournal": "Arbeitsnachweis hinzufügen",
-    "journalLink": "Arbeitsnachweise",
+    "journalLink": "Arbeitsjournal",
     "cvImportLink": "Lebenslauf hinzufügen — einfügen oder hochladen",
     "evidence": {
       "intro": "Fähigkeiten sind stärker, wenn sie durch echte Arbeits-, Lern- oder Aktivitätseinträge gestützt werden.",
@@ -1407,6 +1444,12 @@
           "estimate": "Jede Schätzung ist vorläufig und unverbindlich — eine Planungshilfe, kein Angebot."
         },
         "cta": "Scouting öffnen"
+      },
+      "decisions": {
+        "title": "Wartet auf deine Entscheidung",
+        "review": "Journaleinträge zur Prüfung",
+        "invitations": "Ausstehende Einladungen an Arbeitskräfte",
+        "claims": "Öffentliche Anfragen, die du übernehmen kannst"
       }
     },
     "agency": {
@@ -2478,7 +2521,7 @@
       "body": "Einige Einträge sind noch nicht eindeutig klassifiziert. Prüfen Sie sie oder fügen Sie weitere Informationen hinzu, damit Ihr Profil genauer gematcht werden kann.",
       "cta": "Fähigkeiten prüfen"
     },
-    "pageTitle": "Meine Kompetenzen",
+    "pageTitle": "Mein Profil",
     "pageSubtitle": "Alles, was Ihre Arbeitskarte ausmacht, lebt hier: was Sie tun, was Sie können und was es belegt. Ihr gewählter Bereich ist Kontext, keine Grenze.",
     "professionLabel": "Ihr Beruf",
     "professionPlaceholder": "Beruf auswählen",
@@ -2516,14 +2559,14 @@
       "applyAll": "Ausgewählte Vorschläge hinzufügen",
       "applyAllDisabledHint": "Wählen Sie mindestens einen Vorschlag aus",
       "applying": "Wird gespeichert…",
-      "savedToCapabilities": "Fähigkeiten unter Meine Kompetenzen gespeichert",
+      "savedToCapabilities": "Fähigkeiten unter Meine Fähigkeiten gespeichert",
       "appliedToast": "Ausgewählte Vorschläge wurden Ihrem Profil hinzugefügt. Sie können sie weiterhin manuell bearbeiten oder erweitern.",
       "noSuggestionsFallback": "Noch keine eindeutigen Vorschläge. Sie können mehr Details angeben oder Informationen manuell hinzufügen.",
       "noNewSuggestions": "Keine neuen Vorschläge. Ihre bereits gespeicherten Fähigkeiten werden unten angezeigt.",
       "confirmedByYou": "Noch nicht geprüft",
       "addedToProfile": "Zu Ihrem Profil hinzugefügt",
       "needsExternalConfirmation": "Arbeitsnachweise später hinzufügen",
-      "viewCapabilities": "Ihre Kompetenzen ansehen",
+      "viewCapabilities": "Ihre Fähigkeiten ansehen",
       "textSavingLabel": "Wird gespeichert…",
       "textSavedLabel": "Ihr Text ist gespeichert",
       "textSaveErrorLabel": "Ihr Text konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
@@ -3112,6 +3155,12 @@
         "hide": "Ausblenden",
         "hiddenTitle": "Ausgeblendete Karten"
       },
+      "jobsCard": {
+        "title": "Passende Jobs für mich",
+        "viewAll": "Alle Anzeigen",
+        "empty": "Derzeit keine passenden Anzeigen — ergänzen Sie Ihre Fähigkeiten im Profil.",
+        "emptyCta": "Profil ergänzen"
+      },
       "myZone": {
         "actionsHeading": "Aktionen",
         "incompleteStatus": "Ihre Angaben sind noch nicht vollständig",
@@ -3196,7 +3245,7 @@
           "proof": {
             "title": "Arbeitsnachweise",
             "body": "Erfassen Sie erledigte Arbeit. Einträge werden später zu Nachweisen für Fähigkeiten.",
-            "cta": "Journal öffnen"
+            "cta": "Arbeitsjournal öffnen"
           },
           "notLimit": "Ihre erste Wahl ist keine Einschränkung — Sie können später weitere Richtungen hinzufügen."
         },
@@ -3249,7 +3298,7 @@
         "journal": {
           "title": "Arbeitsjournal",
           "body": "Erfassen Sie Arbeit zu einem Einsatz. Geprüfte Einträge sammeln mit der Zeit Fähigkeitsnachweise an.",
-          "cta": "Journal öffnen"
+          "cta": "Arbeitsjournal öffnen"
         },
         "addMore": {
           "title": "Fügen Sie eine weitere Art hinzu, labourmarket.ai zu nutzen",
@@ -3435,14 +3484,14 @@
         },
         "unverifiedNote": "Das ist, was Sie über sich selbst sagen — und das ist in Ordnung.",
         "activities": {
-          "title": "Meine Tätigkeiten und Fähigkeiten",
+          "title": "Meine Fähigkeiten",
           "body": "Sagen Sie uns, was Sie können und woran Sie arbeiten möchten. Alles an einem Ort.",
           "cta": "Öffnen"
         },
         "proofCard": {
           "title": "Meine Nachweise",
           "body": "Die Arbeit, die Sie erfassen, wird nach und nach zu Nachweisen Ihrer Fähigkeiten.",
-          "cta": "Journal öffnen"
+          "cta": "Arbeitsjournal öffnen"
         },
         "otherSpaces": "Meine anderen Bereiche"
       },
@@ -3538,7 +3587,7 @@
         "marketplace": "Marktplatz",
         "marketMap": "Karte",
         "profile": "Profil",
-        "journal": "Mein CV",
+        "journal": "Arbeitsjournal",
         "communication": "Nachrichten",
         "discover": "Entdecken",
         "search": "Suche",
@@ -3719,7 +3768,8 @@
         "service_request_responses": "Antworten auf Ihre Anfragen",
         "pending_bookings": "Buchungsvorschläge, die auf eine Antwort warten",
         "booking_responses": "Antworten auf Ihre Buchungsvorschläge",
-        "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen"
+        "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen",
+        "new_job_matches": "Neue Stellenanzeigen, die zu Ihnen passen"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -6052,7 +6102,7 @@
   "skillClarify": {
     "title": "Meine Fähigkeiten",
     "intro": "Fügen Sie eine Fähigkeit hinzu, die noch nicht in der Liste steht — in Ihren eigenen Worten.",
-    "listTitle": "Meine Kandidaten-Fähigkeiten",
+    "listTitle": "Gespeicherte Fähigkeiten",
     "empty": "Sie haben noch nichts hinzugefügt.",
     "candidateBadge": "Selbst angegeben · braucht Klärung",
     "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
@@ -6234,7 +6284,7 @@
   },
   "cvExport": {
     "nameNotProvided": "Name noch nicht angegeben",
-    "pageTitle": "Bestätigter Lebenslauf",
+    "pageTitle": "Mein Lebenslauf",
     "builtFrom": {
       "lead": "Dieser Lebenslauf wird ausschließlich aus Ihren eigenen Kontodaten erstellt — nichts wird für Sie erfunden.",
       "profile": "Profil — Ihr Name, Beruf und Ihre Beschreibung.",
@@ -6267,7 +6317,47 @@
     "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt.",
     "summaryTitle": "Berufliches Profil",
     "workHistoryTitle": "Beruflicher Werdegang",
-    "present": "Heute"
+    "present": "Heute",
+    "languagesTitle": "Sprachen",
+    "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
+    "certificatesTitle": "Zertifikate & Lizenzen",
+    "declaredCertHint": "Selbst angegeben",
+    "validUntil": "Gültig bis",
+    "drivingLicences": "Führerscheinklassen",
+    "educationTitle": "Ausbildung",
+    "achievementsTitle": "Erfolge",
+    "projectsTitle": "Projekte",
+    "projectsHint": "Aus Arbeitseinträgen",
+    "confirmedByManager": "Mit Einträgen",
+    "templates": {
+      "label": "Vorlage",
+      "standard": "Standard",
+      "compact": "Kompakt"
+    },
+    "privateDetails": {
+      "toggle": "Gehaltsvorstellung & Verfügbarkeit im Ausdruck aufnehmen",
+      "title": "Gehaltsvorstellung & Verfügbarkeit",
+      "salary": "Gehaltsvorstellung (EUR/Monat)",
+      "availability": "Verfügbarkeit",
+      "availableFrom": "Verfügbar ab",
+      "relocate": "Umzugsbereit",
+      "transport": "Eigenes Fahrzeug",
+      "yes": "Ja",
+      "no": "Nein",
+      "status": {
+        "available": "Verfügbar",
+        "busy": "Beschäftigt",
+        "unavailable": "Nicht verfügbar"
+      }
+    },
+    "tailored": {
+      "badge": "Zugeschnittener Lebenslauf",
+      "forNeed": "Zugeschnitten auf die Anfrage: {role}",
+      "basis": "Entspricht {matched} von {needTotal} geforderten Fähigkeiten, {confirmed} mit Einträgen",
+      "notVisible": "Diese Anfrage ist für Sie nicht sichtbar — der Standard-Lebenslauf wird angezeigt.",
+      "noStructure": "Diese Anfrage hat keine strukturierten Anforderungen — der Standard-Lebenslauf wird angezeigt.",
+      "matchedTag": "Passt zur Anfrage"
+    }
   },
   "todayScreen": {
     "eyebrow": "Heute",
@@ -7133,7 +7223,6 @@
     "marketMapLink": "Marktkarte",
     "nextStep": {
       "title": "Von der Passung zum nächsten Schritt",
-      "intro": "Eine Chance geht über den Marktplatz und Ihren Plan weiter.",
       "marketplace": "Marktplatz",
       "marketplaceNote": "Dienstleistung anfragen oder anbieten",
       "bookings": "Plan & Buchungen",
@@ -7226,6 +7315,15 @@
       "basis": "{matched} von {total} erforderlichen Fähigkeiten passen ({confirmed} vom Manager bestätigt)",
       "recognizedNote": "Anforderungen aus dem Bedarfstext erkannt — noch nicht bestätigt",
       "missingPrefix": "fehlend:"
+    },
+    "recommendations": {
+      "basisCompact": "{matched} von {total} Fähigkeiten, {confirmed} bestätigt",
+      "newBadge": "Neu",
+      "salaryWithin": "Lohn passt",
+      "salaryNegotiable": "Lohn verhandelbar",
+      "moreSkills": "+{n}",
+      "journalTitle": "Passend zu Ihren Einträgen",
+      "journalLine": "Ein aktueller Journaleintrag stützte die Fähigkeit „{skill}“ — diese Stelle erfordert sie"
     },
     "workerNext": {
       "add_work_evidence": "Nächster Schritt: Arbeitsnachweise im Arbeitsjournal hinzufügen",
@@ -8803,7 +8901,7 @@
       "title": "Meine Unternehmen"
     },
     "relationships": {
-      "title": "Meine Beziehungen",
+      "title": "Aktive Beziehungen",
       "empty": "Noch keine aktiven Beziehungen.",
       "noOrg": "Persönliche Beziehung — keinem Unternehmen zugeordnet",
       "slug": {
@@ -9015,5 +9113,129 @@
       "approved": "Genehmigt",
       "closed": "Geschlossen"
     }
+  },
+  "cvSections": {
+    "grid": {
+      "title": "Vollständigkeit des Lebenslaufs",
+      "hint": "Beginnen Sie mit einem beliebigen Abschnitt — es gibt keine feste Reihenfolge.",
+      "filled": "Ausgefüllt",
+      "empty": "Leer",
+      "open": "Öffnen"
+    },
+    "names": {
+      "summary": "Zusammenfassung",
+      "workHistory": "Berufserfahrung",
+      "education": "Ausbildung",
+      "languages": "Sprachen",
+      "certificates": "Zertifikate & Lizenzen",
+      "skills": "Fähigkeiten",
+      "projects": "Projekte",
+      "achievements": "Erfolge",
+      "salary": "Gehaltsvorstellung",
+      "availability": "Verfügbarkeit"
+    },
+    "education": {
+      "title": "Ausbildung",
+      "hint": "Fügen Sie Ihre Ausbildung hinzu — von Ihnen angegeben.",
+      "institution": "Einrichtung",
+      "program": "Studiengang / Fachrichtung",
+      "type": "Art",
+      "startYear": "Beginnjahr",
+      "endYear": "Abschlussjahr",
+      "isCurrent": "Derzeit in Ausbildung",
+      "add": "Hinzufügen",
+      "adding": "Wird gespeichert…",
+      "save": "Speichern",
+      "edit": "Bearbeiten",
+      "cancel": "Abbrechen",
+      "remove": "Entfernen",
+      "empty": "Noch keine Ausbildungseinträge.",
+      "notEnabled": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert.",
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "invalid": "Ungültiger Wert.",
+      "limit": "Limit erreicht.",
+      "selfStated": "Von Ihnen eingetragen."
+    },
+    "educationTypes": {
+      "primary": "Grundschule",
+      "secondary": "Sekundarschule",
+      "vocational": "Berufsausbildung",
+      "college": "Fachhochschule",
+      "university_bachelor": "Universität (Bachelor)",
+      "university_master": "Universität (Master)",
+      "doctorate": "Promotion",
+      "course_certificate": "Kurs / Zertifikat",
+      "other": "Sonstiges"
+    },
+    "achievements": {
+      "title": "Erfolge & angegebene Zertifikate",
+      "hint": "Auszeichnungen, abgeschlossene Kurse und selbst angegebene Zertifikate.",
+      "achTitle": "Titel",
+      "description": "Beschreibung",
+      "date": "Datum",
+      "type": "Art",
+      "add": "Hinzufügen",
+      "adding": "Wird gespeichert…",
+      "save": "Speichern",
+      "edit": "Bearbeiten",
+      "cancel": "Abbrechen",
+      "remove": "Entfernen",
+      "empty": "Noch keine Erfolge.",
+      "notEnabled": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert.",
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "invalid": "Ungültiger Wert.",
+      "limit": "Limit erreicht.",
+      "selfStated": "Von Ihnen eingetragen.",
+      "declaredBadge": "Selbst angegeben",
+      "confirmedBadge": "Mit Einträgen"
+    },
+    "achievementTypes": {
+      "achievement": "Erfolg",
+      "award": "Auszeichnung",
+      "course_completion": "Abgeschlossener Kurs",
+      "declared_certificate": "Angegebenes Zertifikat",
+      "other": "Sonstiges"
+    }
+  },
+  "cvImport": {
+    "reviewTitle": "Erkannte Lebenslauf-Abschnitte",
+    "reviewHint": "Das System schlägt nur vor. Speichern oder verwerfen Sie jeden Eintrag — Sie entscheiden.",
+    "empty": "Keine strukturierten Einträge im Text erkannt.",
+    "groups": {
+      "workHistory": "Berufserfahrung",
+      "education": "Ausbildung",
+      "languages": "Sprachen",
+      "certificates": "Zertifikate",
+      "achievements": "Erfolge",
+      "salary": "Gehaltsvorstellung",
+      "availability": "Verfügbarkeit"
+    },
+    "confirm": "Speichern",
+    "saving": "Wird gespeichert…",
+    "discard": "Verwerfen",
+    "confirmedLabel": "Gespeichert",
+    "discardedLabel": "Verworfen",
+    "replace": "Ersetzen",
+    "conflict": "Ein anderer Wert ist bereits gespeichert: {value}",
+    "needsMigration": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert — der Eintrag wurde nicht gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "invalid": "Ungültiger Wert.",
+    "aiHint": "KI-Vorschlag — vor dem Speichern prüfen",
+    "chooseLevel": "Niveau wählen",
+    "perMonth": "€/Monat",
+    "availabilityKeys": {
+      "willingToRelocate": "Umzugsbereit",
+      "hasTransport": "Eigenes Fahrzeug",
+      "nightShiftsOk": "Kann Nachtschichten arbeiten",
+      "weekendShiftsOk": "Kann am Wochenende arbeiten"
+    },
+    "imageOcr": {
+      "label": "Lebenslauf-Foto / Bild (JPG, PNG)",
+      "note": "In Vorbereitung — Bilderkennung ist noch nicht verfügbar. Laden Sie PDF/DOCX hoch oder fügen Sie den Text ein."
+    }
+  },
+  "companySwitcher": {
+    "heading": "Aktives Unternehmen",
+    "note": "Der Wechsel legt fest, für welche Organisation dein Unternehmensbereich arbeitet."
   }
 }

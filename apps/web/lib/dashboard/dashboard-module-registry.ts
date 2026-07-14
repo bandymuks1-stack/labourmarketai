@@ -155,6 +155,10 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     iconKey: "compass",
     roles: ["worker"],
     surfaces: ["grid", "command"],
+    // Job Recommendation Engine surfacing: the aggregate unseen-matches
+    // count badges the board's own card — the board renders every open
+    // recommendation and marks it seen, so the badge clears by visiting.
+    attentionSignalIds: ["new-job-matches"],
   },
 
   // ── Shared operational surfaces ──────────────────────────────────────

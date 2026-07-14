@@ -39,14 +39,17 @@ const WORKER_KEYS = [
 
 describe("journal is framed as the worker's work records connected to the work card", () => {
   it("LT title reads as work records (not 'įrodymai', not a second 'Mano CV')", () => {
-    expect(ltJ.navTitle).toMatch(/darbo įraš/i);
+    // Canonical-term unification (worker-workspace UX audit v2): the H1 is
+    // the ONE canonical "Darbo žurnalas" (same as the nav tab); the records
+    // framing stays on listTitle ("Darbo įrašai") directly below it.
+    expect(ltJ.navTitle).toMatch(/darbo (įraš|žurnal)/i);
     expect(ltJ.navTitle).not.toMatch(/cv/i);
     expect(ltJ.navTitle).not.toMatch(/įrodym/i);
     expect(ltJ.navSubtitle).toMatch(/darbo kortel/i);
     expect(ltJ.composerBenefit).toMatch(/darbo kortel/i);
   });
   it("EN title reads as work records (not 'evidence', not a second 'My CV')", () => {
-    expect(enJ.navTitle).toMatch(/work record/i);
+    expect(enJ.navTitle).toMatch(/work (record|journal)/i);
     expect(enJ.navTitle).not.toMatch(/cv/i);
     expect(enJ.navTitle).not.toMatch(/evidence/i);
     expect(enJ.navSubtitle).toMatch(/work card/i);

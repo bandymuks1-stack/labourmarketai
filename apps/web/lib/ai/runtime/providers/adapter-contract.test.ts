@@ -20,11 +20,17 @@ describe("PROVIDER_ADAPTER_REGISTRY", () => {
     expect(active.map((a) => a.id)).toEqual(["anthropic"]);
   });
 
-  it("openai/deepl/meta_llama/xai are declared_inactive seams", () => {
-    for (const id of ["openai", "deepl", "meta_llama", "xai"] as const) {
+  it("openai/gemini/xai/deepl are wired_env_gated (real fetch wire, inert without env)", () => {
+    for (const id of ["openai", "gemini", "xai", "deepl"] as const) {
       const a = PROVIDER_ADAPTER_REGISTRY.find((x) => x.id === id);
-      expect(a?.status, id).toBe("declared_inactive");
+      expect(a?.status, id).toBe("wired_env_gated");
+      expect(a?.notes, id).toMatch(/Inert unless/i);
     }
+  });
+
+  it("meta_llama stays a declared_inactive seam (no wiring exists)", () => {
+    const a = PROVIDER_ADAPTER_REGISTRY.find((x) => x.id === "meta_llama");
+    expect(a?.status).toBe("declared_inactive");
   });
 
   it("sora is unavailable with no capabilities (video — explicitly not usable)", () => {

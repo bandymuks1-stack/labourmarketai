@@ -599,6 +599,59 @@ export default async function CompanyDashboardPage({
         ))}
       </nav>
 
+      {/* Decision-first strip (company architecture v1): the overview LEADS
+          with what actually waits for the owner's decision — pending journal
+          reviews, pending worker invitations, claimable public intakes. All
+          counts REUSE reads this page already performs (no new queries);
+          count-gated exactly like the spine strip — zero pending = no strip,
+          never fake urgency. */}
+      {(() => {
+        const decisionEntries = [
+          {
+            key: "review",
+            count: reviewPendingCount,
+            href: `/${locale}/dashboard/inbox`,
+          },
+          {
+            key: "invitations",
+            count: pendingCount,
+            href: "#company-invitations",
+          },
+          {
+            key: "claims",
+            count: claimableIntakes.length,
+            href: "#company-claims",
+          },
+        ].filter((e) => e.count > 0);
+        if (decisionEntries.length === 0) return null;
+        return (
+          <section
+            aria-label={t("decisions.title")}
+            data-testid="company-decisions-strip"
+            className="flex flex-col gap-2"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+              {t("decisions.title")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {decisionEntries.map((e) => (
+                <a
+                  key={e.key}
+                  href={e.href}
+                  data-testid={`company-decision-${e.key}`}
+                  className="inline-flex items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/5 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand-orange"
+                >
+                  <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white tabular-nums">
+                    {e.count}
+                  </span>
+                  {t(`decisions.${e.key}`)}
+                </a>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
       <FeatureNote testId="feature-note-company">
         {(await getTranslations("featureNotes"))("companySpace")}
       </FeatureNote>
@@ -613,6 +666,7 @@ export default async function CompanyDashboardPage({
           continue here as a real draft demand instead of dead-ending in the
           operator queue. Renders nothing when there is nothing to claim. */}
       {claimableIntakes.length > 0 ? (
+        <div id="company-claims" className="scroll-mt-20">
         <ClaimPublicIntakeCard
           locale={locale}
           intakes={claimableIntakes}
@@ -625,6 +679,7 @@ export default async function CompanyDashboardPage({
             workersLabel: tClaim("workersLabel"),
           }}
         />
+        </div>
       ) : null}
 
       <CompanyActionNextActions

@@ -36,6 +36,12 @@ import { useTranslations } from "next-intl";
 import { ActionCard } from "@/components/app/action-card";
 import type { ControlRoomModule } from "@/lib/dashboard/control-room-view-model";
 import type { ModuleIconKey } from "@/lib/dashboard/dashboard-module-registry";
+import {
+  sanitizeCardPrefs,
+  type DashboardCardPrefs,
+  type DashboardPreferencesContext,
+} from "@/lib/dashboard/dashboard-preferences-shared";
+import { saveDashboardCardPreferences } from "@/lib/dashboard/preferences-actions";
 
 /**
  * Role-specific control-room grid (PR B → owner UX recovery v1). Renders the
@@ -45,11 +51,18 @@ import type { ModuleIconKey } from "@/lib/dashboard/dashboard-module-registry";
  *
  * Owner UX recovery v1: the grid is now the user's own configurable
  * workspace. Cards can be reordered, hidden and restored ("Tvarkyti") —
- * preferences are display-only, stored per device in localStorage (ids only,
- * never query text or PII), and NEVER change which destinations exist: the
- * registry + view model stay the single truth for routes, labels and badges.
- * A hidden card hides a shortcut, never a capability — the destination stays
- * reachable through nav and search.
+ * preferences are display-only (ids only, never query text or PII) and NEVER
+ * change which destinations exist: the registry + view model stay the single
+ * truth for routes, labels and badges. A hidden card hides a shortcut, never
+ * a capability — the destination stays reachable through nav and search.
+ *
+ * Company Architecture Completion (Sprint v2 §5): preferences are now
+ * SERVER-SIDE per (profile, context) — `serverPrefs` carries the stored
+ * row the page read via getDashboardCardPreferences and writes go through
+ * the saveDashboardCardPreferences server action. Honest fallback: while
+ * the owner-gated dashboard_preferences migration is unapplied the page
+ * passes `serverPrefs: null` and the grid keeps the previous device-local
+ * localStorage behaviour exactly (nothing pretends to persist).
  *
  * Every card is fully clickable (ActionCard = a real Link to the module's
  * real route) and carries a badge ONLY when its notification-spine count is
@@ -87,27 +100,21 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   gauge: Gauge,
 };
 
-/** Device-local card preferences — ids only. Version-keyed so a future shape
- *  change can never misread stale data. */
+/** Device-local card preferences (fallback mode only) — ids only.
+ *  Version-keyed so a future shape change can never misread stale data. */
 const CARD_PREFS_STORAGE_KEY = "lm.dashboard.moduleCards.v1";
 
-interface CardPrefs {
-  readonly order: readonly string[];
-  readonly hidden: readonly string[];
-}
+type CardPrefs = DashboardCardPrefs;
 
 const EMPTY_PREFS: CardPrefs = { order: [], hidden: [] };
 
-/** Defensive parse — anything that is not a string[] pair is discarded. */
+/** Defensive parse — delegates to the ONE shared bounded ids-only
+ *  sanitizer (dashboard-preferences-shared), so localStorage and the
+ *  server store accept exactly the same shape. */
 function parseCardPrefs(rawJson: string | null): CardPrefs {
   if (!rawJson) return EMPTY_PREFS;
   try {
-    const parsed: unknown = JSON.parse(rawJson);
-    if (typeof parsed !== "object" || parsed === null) return EMPTY_PREFS;
-    const p = parsed as { order?: unknown; hidden?: unknown };
-    const strings = (v: unknown): readonly string[] =>
-      Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
-    return { order: strings(p.order), hidden: strings(p.hidden) };
+    return sanitizeCardPrefs(JSON.parse(rawJson));
   } catch {
     return EMPTY_PREFS;
   }
@@ -135,26 +142,42 @@ function applyOrder(
 
 export function DashboardModuleGrid({
   modules,
+  context = "person",
+  serverPrefs = null,
 }: {
   modules: readonly ControlRoomModule[];
+  /** Which workspace layout this grid belongs to (§20 symmetry). */
+  context?: DashboardPreferencesContext;
+  /** Server-stored prefs (getDashboardCardPreferences). `null` = the server
+   *  store is unavailable (migration unapplied) → device-local fallback. */
+  serverPrefs?: CardPrefs | null;
 }) {
   const t = useTranslations();
   const tGrid = useTranslations("auth.dashboard.moduleGrid");
-  const [prefs, setPrefs] = useState<CardPrefs>(EMPTY_PREFS);
+  const serverMode = serverPrefs !== null;
+  // Server mode renders the stored layout on the SERVER already (no
+  // hydration flash); fallback mode starts from the registry default and
+  // loads localStorage after mount, exactly as before.
+  const [prefs, setPrefs] = useState<CardPrefs>(serverPrefs ?? EMPTY_PREFS);
   const [managing, setManaging] = useState(false);
 
-  // Prefs are device-local display state; load after mount (SSR renders the
-  // registry default so the grid is never empty / never hydration-broken).
   useEffect(() => {
+    if (serverMode) return; // server store is the truth — no local read
     try {
       setPrefs(parseCardPrefs(window.localStorage.getItem(CARD_PREFS_STORAGE_KEY)));
     } catch {
       // storage unavailable (private mode) — the grid works without prefs
     }
-  }, []);
+  }, [serverMode]);
 
   const persist = (next: CardPrefs) => {
     setPrefs(next);
+    if (serverMode) {
+      // Fire-and-forget server write (owner-only RLS row). A failed write
+      // only loses a display preference — never break the dashboard for it.
+      void saveDashboardCardPreferences(context, next).catch(() => {});
+      return;
+    }
     try {
       window.localStorage.setItem(CARD_PREFS_STORAGE_KEY, JSON.stringify(next));
     } catch {

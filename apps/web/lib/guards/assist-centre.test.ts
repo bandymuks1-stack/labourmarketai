@@ -79,6 +79,7 @@ const ZERO: SpineCounts = {
   bookingResponsesNew: 0,
   pendingInvitations: 0,
   openTaskAttention: 0,
+  newJobMatches: 0,
 };
 
 const resolveKey = (msgs: unknown, path: string): unknown =>
@@ -306,11 +307,12 @@ describe("3. attention is a deterministic composition of real counts", () => {
         bookingResponsesNew: 1,
         pendingInvitations: 1,
         openTaskAttention: 1,
+        newJobMatches: 1,
       },
       documents: { expiring: 1, missing: 1, reviewNeeded: 1 },
       finance: { overdueCount: 1 },
     });
-    // The complete answer: 7 spine signals + 3 document rows + 1 finance row.
+    // The complete answer: every spine signal + 3 document rows + 1 finance row.
     expect(items).toHaveLength(SPINE_SIGNALS.length + 4);
     for (const item of items) {
       expect(item.href.startsWith("/dashboard"), item.id).toBe(true);
@@ -330,6 +332,7 @@ describe("3. attention is a deterministic composition of real counts", () => {
           bookingResponsesNew: 1,
           pendingInvitations: 1,
           openTaskAttention: 1,
+          newJobMatches: 1,
         },
         documents: { expiring: 1, missing: 1, reviewNeeded: 1 },
         finance: { overdueCount: 1 },

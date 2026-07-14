@@ -62,6 +62,20 @@ import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
 import { Building2 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
+import {
+  CvCompletenessGrid,
+  type CvSectionCard,
+} from "@/components/app/cv-completeness-grid";
+import { WorkerEducationSection } from "@/components/app/worker-education-section";
+import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
+import {
+  getOwnWorkerEducation,
+  type WorkerEducationRead,
+} from "@/lib/worker/worker-education";
+import {
+  getOwnWorkerAchievements,
+  type WorkerAchievementsRead,
+} from "@/lib/worker/worker-achievements";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -126,7 +140,9 @@ export default async function ProfilePage({
         .eq("is_active", true),
       supabase
         .from("workers")
-        .select("id, availability_status, available_from, current_location_country")
+        .select(
+          "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur",
+        )
         .eq("profile_id", user.id)
         .maybeSingle(),
       supabase.from("professions").select("id, slug").eq("is_active", true),
@@ -198,12 +214,41 @@ export default async function ProfilePage({
   // reports needs-migration and the section renders its honest explanation
   // state. No automatic import exists — links are worker-added only.
   let externalProfiles: ExternalProfilesRead | null = null;
+  // Full CV System v1: education + achievements (DRAFT migration
+  // 20260714160000 — needs-migration until the owner applies it) and the
+  // count of project-linked journal entries powering the completeness grid.
+  let workerEducation: WorkerEducationRead | null = null;
+  let workerAchievements: WorkerAchievementsRead | null = null;
+  let projectLinkedEntryCount = 0;
+  let certificateDocCount = 0;
   if (workerId) {
-    [availabilityPrefs, workerLanguages, externalProfiles] = await Promise.all([
+    [
+      availabilityPrefs,
+      workerLanguages,
+      externalProfiles,
+      workerEducation,
+      workerAchievements,
+    ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       getOwnWorkerLanguages(),
       getOwnExternalProfiles(),
+      getOwnWorkerEducation(),
+      getOwnWorkerAchievements(),
     ]);
+    const { count: projCount } = await supabase
+      .from("journal_entries")
+      .select("*", { count: "exact", head: true })
+      .eq("worker_id", workerId)
+      .not("project_id", "is", null);
+    projectLinkedEntryCount = projCount ?? 0;
+    // Certificate/licence documents count (worker_documents is applied prod
+    // schema; cert-type slugs mirror lib/cv-export/cv-sections.ts).
+    const { count: certDocs } = await supabase
+      .from("worker_documents")
+      .select("*", { count: "exact", head: true })
+      .eq("worker_id", workerId)
+      .in("document_type_slug", ["professional_certificate", "a1_certificate"]);
+    certificateDocCount = certDocs ?? 0;
     const { data: wpAll } = await supabase
       .from("worker_professions")
       .select("profession_id, is_primary")
@@ -566,6 +611,77 @@ export default async function ProfilePage({
         }
       />
 
+      {/* CV completeness grid (Full CV System v1) — one dense card per CV
+          section with a REAL filled/empty state from the data loaded above;
+          each links to its editor. Order-free: the worker starts anywhere. */}
+      {workerId
+        ? (() => {
+            const eduCount =
+              workerEducation?.kind === "ok" ? workerEducation.entries.length : 0;
+            const achEntries =
+              workerAchievements?.kind === "ok" ? workerAchievements.entries : [];
+            const declaredCerts = achEntries.filter(
+              (a) => a.achievementTypeSlug === "declared_certificate",
+            ).length;
+            const cards: CvSectionCard[] = [
+              {
+                key: "summary",
+                filled: savedProfileText.trim().length > 0,
+                href: "#profile-edit",
+              },
+              {
+                key: "workHistory",
+                filled: engagementCards.length > 0,
+                href: "#capabilities",
+              },
+              { key: "education", filled: eduCount > 0, href: "#cv-education" },
+              {
+                key: "languages",
+                filled:
+                  workerLanguages?.kind === "ok" &&
+                  workerLanguages.languages.length > 0,
+                href: "#cv-languages",
+              },
+              {
+                key: "certificates",
+                filled: certificateDocCount > 0 || declaredCerts > 0,
+                href: DOCUMENTS_READINESS_ENABLED
+                  ? `/${locale}/dashboard/documents`
+                  : "#cv-achievements",
+              },
+              {
+                key: "skills",
+                filled: savedSkillClaims.length + savedSkills.length > 0,
+                href: "#profile-edit",
+              },
+              {
+                key: "projects",
+                filled: projectLinkedEntryCount > 0,
+                href: `/${locale}/dashboard/journal`,
+              },
+              {
+                key: "achievements",
+                filled: achEntries.length > 0,
+                href: "#cv-achievements",
+              },
+              {
+                key: "salary",
+                filled:
+                  worker?.salary_min_eur != null || worker?.salary_max_eur != null,
+                href: `/${locale}/dashboard`,
+              },
+              {
+                key: "availability",
+                filled:
+                  worker?.availability_status === "available" ||
+                  Boolean(worker?.available_from),
+                href: "#cv-availability",
+              },
+            ];
+            return <CvCompletenessGrid sections={cards} />;
+          })()
+        : null}
+
       {/* Honest "needs review" banner — only when real data shows declared
           skills not yet backed by work evidence (unsupported, incl. unmapped
           free-label claims). Never says "verified"; count is real. */}
@@ -608,6 +724,7 @@ export default async function ProfilePage({
           through the owner-scoped save_worker_availability_prefs RPC; every
           boolean pref is tri-state so "not stated" stays an honest null. */}
       {workerId && availabilityPrefs ? (
+        <div id="cv-availability" className="scroll-mt-20">
         <WorkerAvailabilityPrefsForm
           initial={
             availabilityPrefs.kind === "ok" ? availabilityPrefs.values : EMPTY_PREFS
@@ -672,6 +789,7 @@ export default async function ProfilePage({
             } satisfies WorkerAvailabilityPrefsLabels
           }
         />
+        </div>
       ) : null}
 
       {/* Self-stated languages (P2-PR3) — worker_languages (draft PR #720),
@@ -679,6 +797,7 @@ export default async function ProfilePage({
           Renders its honest not-enabled state until the owner applies the
           draft migration; writes only via the two owner-scoped RPCs. */}
       {workerId && workerLanguages && workerLanguages.kind !== "no-worker" ? (
+        <div id="cv-languages" className="scroll-mt-20">
         <WorkerLanguagesSection
           initial={workerLanguages.kind === "ok" ? workerLanguages.languages : []}
           needsMigration={workerLanguages.kind === "needs-migration"}
@@ -699,6 +818,26 @@ export default async function ProfilePage({
               invalid: tLangs("invalid"),
             } satisfies WorkerLanguagesLabels
           }
+        />
+        </div>
+      ) : null}
+
+      {/* Education + achievements editors (Full CV System v1) — the two NEW
+          canonical CV sections (worker_education / worker_achievements, DRAFT
+          migration 20260714160000). Honest not-enabled state until the owner
+          applies the draft; entries are self-declared, never verified. */}
+      {workerId && workerEducation ? (
+        <WorkerEducationSection
+          initial={workerEducation.kind === "ok" ? workerEducation.entries : []}
+          needsMigration={workerEducation.kind === "needs-migration"}
+        />
+      ) : null}
+      {workerId && workerAchievements ? (
+        <WorkerAchievementsSection
+          initial={
+            workerAchievements.kind === "ok" ? workerAchievements.entries : []
+          }
+          needsMigration={workerAchievements.kind === "needs-migration"}
         />
       ) : null}
 

@@ -231,3 +231,16 @@ audit.
   backend (`getOrCreateDirectConversation`, rate caps + §8.1
   `allowed_demand_interest` grant) under the CALLER's session, never
   service-role. No chat table is touched with the admin client.
+
+- **2026-07-14 — `lib/ai/runtime/audit-store.ts`** (AI Router v1 append-only
+  run audit). Best-effort INSERT of one `ai_runs` row per LIVE internal AI
+  run plus a head-only COUNT for the daily-run budget guard. `ai_runs` by
+  design carries NO anon/authenticated write path (admin-only SELECT,
+  append-only — UPDATE/DELETE revoked for every role; gated draft
+  `20260714150000_ai_runs_audit_v1.sql`), so the service role is the only
+  write path — the same pattern as the billing-webhook writes. The row
+  carries routing facts, field NAMES (`data_categories_sent`) and a bounded
+  excerpt of the schema-VALIDATED output — never input content, never a
+  chat table, nothing outbound. Failures are logged and swallowed; the run
+  outcome is unaffected. Pinned in the `chat-visibility-rls.test.ts` caller
+  inventory.

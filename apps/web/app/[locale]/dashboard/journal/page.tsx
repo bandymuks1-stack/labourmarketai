@@ -18,6 +18,8 @@ import {
 } from "@/lib/journal/journal-entry-skills";
 import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
 import { buildEntryDetectedSignals } from "@/lib/journal/entry-detected-signals";
+import { JournalSpreadsheetEntry } from "@/components/app/journal-spreadsheet-entry";
+import { listActiveJournalTemplates } from "@/lib/journal/journal-templates";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { buildEditingEntry } from "@/lib/journal/edit-entry";
 import {
@@ -26,6 +28,7 @@ import {
 } from "@/lib/journal/review-status";
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
 import { EmptyState } from "@/components/app/empty-state";
+import { JournalJobContext } from "@/components/app/journal-job-context";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { createClient } from "@/lib/supabase/server";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
@@ -257,6 +260,15 @@ export default async function JournalPage({
     .map((r) => (r.professions as { slug: string } | null)?.slug ?? null)
     .filter((s): s is string => s !== null)
     .map((slug) => ({ slug, name: tProf(slug) }));
+
+  // Journal Proof Engine v1 (§10): ACTIVE profession templates from the
+  // journal_profession_templates registry (owner-gated draft migration
+  // 20260714180000). Registry missing / no active rows → [] and the composer
+  // shows no picker (honest absence).
+  const journalTemplates = await listActiveJournalTemplates(
+    directions.map((d) => d.slug),
+    locale,
+  );
 
   // Worker's saved skills — used by the composer to surface
   // "this entry could strengthen X" suggestions for the rule-based parser.
@@ -495,6 +507,20 @@ export default async function JournalPage({
   ).length;
   const totalEntryCount = (entries ?? []).length;
 
+  // Proof-engine loop strip (Sprint v2 §3) — the journal is the PROOF ENGINE,
+  // not a diary: one dense line showing the real loop state from data already
+  // loaded on this page (no extra queries): entries this month, distinct
+  // declared skills with journal-entry evidence links, manager/client
+  // CONFIRMED skills. Counts are honest zeros until real activity exists.
+  const thisMonthPrefix = new Date().toISOString().slice(0, 7);
+  const entriesThisMonth = (entries ?? []).filter((e) =>
+    (e.created_at ?? "").startsWith(thisMonthPrefix),
+  ).length;
+  const evidencedSkillIds = new Set<string>();
+  for (const ids of linksByEntry.values()) {
+    for (const id of ids) evidencedSkillIds.add(id);
+  }
+
   // Mano CV identity lead — the player-card/avatar identity that opens the Mano
   // CV surface, above the work records. Worker-scoped real data only (null for
   // non-worker accounts, which never reach this branch). The same premium card
@@ -645,7 +671,34 @@ export default async function JournalPage({
             directions={directions}
             workerSkills={workerSkills}
             editingEntry={editingEntry}
+            templates={journalTemplates}
           />
+          {/* Spreadsheet mode (Journal Proof Engine v1 §1): fast MULTI-ROW
+              bulk entry. Each grid row saves through the SAME
+              createJournalEntry action — a bulk surface, not a second
+              journal system. Collapsed by default so the single-entry
+              composer stays the primary surface. */}
+          {!editingEntry && (
+            <details
+              className="group rounded-md border border-border-subtle bg-surface-1/50"
+              data-testid="journal-spreadsheet-section"
+            >
+              <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
+                <span className="inline-flex items-center gap-2">
+                  <span
+                    aria-hidden
+                    className="transition-transform group-open:rotate-90"
+                  >
+                    ›
+                  </span>
+                  {t("spreadsheet.title")}
+                </span>
+              </summary>
+              <div className="px-4 pb-4">
+                <JournalSpreadsheetEntry engagements={engagements} />
+              </div>
+            </details>
+          )}
         </div>
       </div>
 
@@ -784,6 +837,25 @@ export default async function JournalPage({
             data-testid="journal-cv-bridge-link"
           >
             {t("cvBridgeLink")} →
+          </Link>
+        </p>
+        {/* Proof-engine loop strip — ONE dense row, real counts only:
+            įrašai → įgūdžių įrodymai → CV → pasiūlymai. */}
+        <p
+          className="text-[11px] leading-relaxed text-text-muted"
+          data-testid="journal-proof-loop"
+        >
+          {t("proofLoop.strip", {
+            entries: entriesThisMonth,
+            evidenced: evidencedSkillIds.size,
+            confirmed: verifiedSkillIds.size,
+          })}{" "}
+          <Link
+            href="/cv"
+            className="font-medium text-brand-blue hover:underline"
+            data-testid="journal-proof-loop-cv-link"
+          >
+            {t("proofLoop.cvLink")} →
           </Link>
         </p>
         {(entries ?? []).length === 0 ? (
@@ -1014,6 +1086,13 @@ export default async function JournalPage({
           </div>
         )}
       </section>
+
+      {/* "Susiję su jūsų įrašais" — journal→jobs context (Job Recommendation
+          Engine surfacing). Self-contained component, ONE insertion point;
+          deterministic journal_entry_skills ∩ recommendation skill sets;
+          honest empty → renders nothing. order-6 keeps it after the diary
+          and composer in the visual order. */}
+      <JournalJobContext workerId={worker.id} locale={locale} />
     </div>
   );
 }

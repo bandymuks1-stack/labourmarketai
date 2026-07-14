@@ -23,9 +23,11 @@
  *     flow that does NOT exist yet → any route resolving there is blocked
  *     "needs_human_confirmation" (honest inert seam, no fake approval).
  *
- * Audit-record persistence (an `ai_runs` table) is an owner-gated FUTURE
- * migration — {@link buildRoutingAuditRecord} is the pure builder only; the
- * record is exposed on the runner outcome for callers/tests today.
+ * Audit-record persistence: {@link buildRoutingAuditRecord} stays the PURE
+ * builder; the server boundary (run-agent-server.ts → runtime/audit-store.ts)
+ * persists the record best-effort into the `ai_runs` table (gated draft
+ * migration 20260714150000_ai_runs_audit_v1.sql — applying it to prod is an
+ * owner gate; until then persistence fails soft and the run is unaffected).
  *
  * Pure. No server-only, no env, no IO, no fetch.
  */
@@ -78,9 +80,17 @@ export const TIER_MODEL_ALIAS: Record<AiModelTier, AiModelAlias | null> = {
   high_risk_verified: "opus", // opus + second-model review + human confirmation
 };
 
-/** Alias → concrete model id. The ONLY alias→id mapping outside config-core. */
-export function modelIdForAlias(alias: AiModelAlias): string {
-  return AI_MODEL_CANDIDATES.anthropic[alias];
+/** Providers with a per-alias candidate table (AI_MODEL_CANDIDATES keys). */
+export type AiModelProvider = "anthropic" | "openai" | "gemini" | "xai";
+
+/** Alias → concrete model id. The ONLY alias→id mapping outside config-core.
+ *  Defaults to anthropic; a live non-anthropic primary provider resolves its
+ *  own candidate for the SAME tier alias (cheapest-sufficient is preserved). */
+export function modelIdForAlias(
+  alias: AiModelAlias,
+  provider: AiModelProvider = "anthropic",
+): string {
+  return AI_MODEL_CANDIDATES[provider][alias];
 }
 
 // ── Task policies ───────────────────────────────────────────────────────────
@@ -107,6 +117,15 @@ export interface AiTaskPolicy {
   readonly secondModelReview: boolean;
   /** Output requires explicit human review before it can be used/persisted. */
   readonly humanReview: boolean;
+  /**
+   * LANGUAGE as a routing dimension: a task-specific preferred provider
+   * (e.g. DeepL for translation). The dispatcher tries it first WHEN
+   * CONFIGURED and falls back to the LLM tier honestly — the preference here
+   * is policy only; env gating lives in the provider adapter.
+   */
+  readonly languageRouting?: {
+    readonly preferredProvider: "deepl";
+  };
 }
 
 /** Fields no task in this program ever needs — always prohibited. */
@@ -287,6 +306,10 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     escalationConditions: ["quality_below_threshold"],
     secondModelReview: false,
     humanReview: false,
+    // Language routing: prefer the dedicated translation provider when the
+    // owner has configured it (DEEPL_API_KEY + AI_DEEPL_ENABLED) — otherwise
+    // the low_cost LLM tier serves the task exactly as before.
+    languageRouting: { preferredProvider: "deepl" },
   },
   draft_follow_up: {
     taskType: "draft_follow_up",
@@ -346,6 +369,9 @@ export interface AiTaskRouteContext {
   readonly previousProviderFailure?: boolean;
   /** Pre-run cost estimate, when the caller can compute one. */
   readonly estimatedCostUsd?: number;
+  /** Language of the run (routing dimension — recorded on the decision;
+   *  activates a policy's languageRouting preference when present). */
+  readonly language?: string;
 }
 
 export type RouteBlockReason = "cost_ceiling" | "needs_human_confirmation";
@@ -360,6 +386,11 @@ export interface TaskRouteDecision {
   readonly escalated: boolean;
   readonly fallbackApplied: boolean;
   readonly secondModelReview: boolean;
+  /** Language considered while routing (honest null when none supplied). */
+  readonly languageConsidered: string | null;
+  /** Task-policy preferred provider (e.g. "deepl") — tried first when
+   *  configured; the LLM tier stays the fallback. Null = no preference. */
+  readonly preferredProvider: "deepl" | null;
   /** Set → the run must NOT proceed (cost ceiling / missing human gate). */
   readonly blocked?: RouteBlockReason;
 }
@@ -391,6 +422,9 @@ export function resolveRouteForPolicy(
   policy: AiTaskPolicy,
   ctx: AiTaskRouteContext,
 ): TaskRouteDecision {
+  const languageConsidered = ctx.language ?? null;
+  const preferredProvider = policy.languageRouting?.preferredProvider ?? null;
+
   // Deterministic-first: computed by the pure workforce models, never an LLM.
   if (policy.preferredTier === "deterministic") {
     return {
@@ -402,6 +436,8 @@ export function resolveRouteForPolicy(
       escalated: false,
       fallbackApplied: false,
       secondModelReview: false,
+      languageConsidered,
+      preferredProvider: null, // no provider at all — computed, not served
     };
   }
 
@@ -418,6 +454,8 @@ export function resolveRouteForPolicy(
       escalated: false,
       fallbackApplied: false,
       secondModelReview: policy.secondModelReview,
+      languageConsidered,
+      preferredProvider: null, // blocked — no provider may run
       blocked: "cost_ceiling",
     };
   }
@@ -465,8 +503,14 @@ export function resolveRouteForPolicy(
       escalated,
       fallbackApplied,
       secondModelReview,
+      languageConsidered,
+      preferredProvider: null, // blocked — no provider may run
       blocked: "needs_human_confirmation",
     };
+  }
+
+  if (preferredProvider) {
+    reason += `; language ${languageConsidered ? `"${languageConsidered}" ` : ""}routing prefers provider "${preferredProvider}" when configured (LLM tier stays the fallback)`;
   }
 
   return {
@@ -477,6 +521,8 @@ export function resolveRouteForPolicy(
     escalated,
     fallbackApplied,
     secondModelReview,
+    languageConsidered,
+    preferredProvider,
   };
 }
 
@@ -493,9 +539,10 @@ export type RunBudgetAssessment = "ok" | "budget_exceeded";
 
 /**
  * Pure daily-run-budget check against the clamped cfg.dailyRunBudget.
- * HONEST GAP: there is no persisted run counter yet (owner-gated follow-up —
- * see the routing contract doc). The runner enforces this only when the
- * caller supplies a real `runsToday` count; nothing fakes a counter.
+ * The persisted counter comes from the ai_runs table (runtime/audit-store.ts
+ * countAiRunsTodayBestEffort — used by run-agent-server for live runs). When
+ * the count is unavailable (table not applied / query failed) the budget is
+ * enforced only for caller-supplied counts; nothing fakes a counter.
  */
 export function assessRunBudget(
   countToday: number,
@@ -526,6 +573,17 @@ export interface AiRoutingRunOutcome {
   /** Field NAMES / categories sent — NEVER field values (no PII in audit). */
   readonly dataCategoriesSent: readonly string[];
   readonly estimatedCostUsd?: number | null;
+  // ── AI Router v1 additions (all optional → honest nulls on the record) ────
+  /** Concrete model id the run was dispatched with (null when no LLM ran). */
+  readonly modelId?: string | null;
+  /** Prompt-registry version of the agent entry (audit). */
+  readonly promptVersion?: string | null;
+  /** Caller-supplied input-source LABEL (e.g. "cv_upload") — never content. */
+  readonly inputSource?: string | null;
+  /** Bounded excerpt of the schema-VALIDATED output (accepted subset). */
+  readonly outputExcerpt?: string | null;
+  /** Honest reason when a mid-run fallback was applied (e.g. latency_timeout). */
+  readonly fallbackReason?: string | null;
 }
 
 export interface AiRoutingAuditRecord {
@@ -549,7 +607,19 @@ export interface AiRoutingAuditRecord {
   readonly confidence: string | null;
   readonly humanReviewState: HumanReviewState;
   readonly dataCategoriesSent: readonly string[];
+  // ── AI Router v1 additions ─────────────────────────────────────────────────
+  readonly modelId: string | null;
+  readonly promptVersion: string | null;
+  readonly inputSource: string | null;
+  /** Bounded (≤ {@link AI_RUN_OUTPUT_EXCERPT_MAX} chars) validated-output excerpt. */
+  readonly outputExcerpt: string | null;
+  readonly fallbackReason: string | null;
+  readonly languageConsidered: string | null;
+  readonly preferredProvider: "deepl" | null;
 }
+
+/** Hard bound for the persisted output excerpt (mirrors the ai_runs CHECK). */
+export const AI_RUN_OUTPUT_EXCERPT_MAX = 4000;
 
 export function buildRoutingAuditRecord(
   decision: TaskRouteDecision,
@@ -573,5 +643,15 @@ export function buildRoutingAuditRecord(
     confidence: outcome.confidence,
     humanReviewState: outcome.humanReviewState,
     dataCategoriesSent: [...outcome.dataCategoriesSent],
+    modelId: outcome.modelId ?? null,
+    promptVersion: outcome.promptVersion ?? null,
+    inputSource: outcome.inputSource ?? null,
+    outputExcerpt:
+      typeof outcome.outputExcerpt === "string"
+        ? outcome.outputExcerpt.slice(0, AI_RUN_OUTPUT_EXCERPT_MAX)
+        : null,
+    fallbackReason: outcome.fallbackReason ?? null,
+    languageConsidered: decision.languageConsidered,
+    preferredProvider: decision.preferredProvider,
   };
 }
