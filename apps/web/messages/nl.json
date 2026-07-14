@@ -9595,6 +9595,91 @@
       "blocked": "Geblokkeerd",
       "maintenance": "Onderhoud",
       "unknown": "Onbekend"
+    },
+    "sandbox": {
+      "eyebrow": "Ontwikkelaarstools",
+      "title": "Handmatige import-sandbox",
+      "intro": "Geïsoleerde proefdraai-werkruimte: valideer één toekomstige gegevensbron vanuit een lokaal bestand vóór enige productie-activering. Elke run is een simulatie via de echte validatiepijplijn.",
+      "isolationNote": "Volledig geïsoleerd. Niets hier kan observaties wegschrijven, een bron activeren of iets downloaden.",
+      "disabled": "De handmatige import-sandbox staat uit. Stel INTELLIGENCE_SANDBOX_ENABLED=1 in de serveromgeving in om deze ontwikkelaarswerkruimte in te schakelen.",
+      "noDataImported": "ER ZIJN GEEN GEGEVENS GEÏMPORTEERD",
+      "form": {
+        "file": "Lokaal bestand (CSV, JSON of NDJSON)",
+        "format": "Formaat",
+        "mode": "Sessiemodus",
+        "modePreview": "Valideren + observaties bekijken",
+        "modeValidateOnly": "Alleen valideren (aantallen, geen voorbeelden)",
+        "run": "Validatiesessie starten",
+        "running": "Bezig met valideren…",
+        "note": "Alleen door de eigenaar aangeleverde lokale bestanden. Het bestand wordt in het geheugen verwerkt voor deze weergave en nergens opgeslagen."
+      },
+      "refused": {
+        "title": "Sessie geweigerd"
+      },
+      "parse": {
+        "failed": "Bestand geweigerd",
+        "row": "regel"
+      },
+      "counts": {
+        "detected": "Rijen gedetecteerd",
+        "valid": "Geldige rijen",
+        "invalid": "Ongeldige rijen",
+        "validAfterActivation": "Geldig na bronactivering"
+      },
+      "tallies": {
+        "title": "Probleemverdeling",
+        "missingFields": "Ontbrekende velden",
+        "unsupportedSchema": "Niet-ondersteunde structuur",
+        "unknownCountries": "Onbekende landen",
+        "unknownLanguages": "Onbekende talen",
+        "salaryFormat": "Salarisformaat-problemen",
+        "duplicateHashes": "Dubbele hashes",
+        "sourceNotActive": "Bron niet actief",
+        "dateIssues": "Datumproblemen",
+        "hashMismatches": "Hash-afwijkingen"
+      },
+      "preview": {
+        "title": "Observatievoorbeelden (zoals ze er na validatie zouden uitzien)",
+        "row": "Rij",
+        "valid": "Zou valideren",
+        "invalid": "Afgewezen",
+        "hash": "Hash",
+        "source": "Bron",
+        "timestamp": "Vastgelegd op",
+        "country": "Land",
+        "language": "Taal",
+        "salaryBasis": "Salarisbasis",
+        "notSalaryMetric": "Geen salarismetriek",
+        "confidence": "Afgeleide betrouwbaarheid",
+        "provenance": "Herkomst",
+        "reasonCodes": "Validatie-redencodes"
+      },
+      "salaryBasis": {
+        "gross": "Bruto",
+        "net": "Netto",
+        "unknown": "Onbekend"
+      },
+      "report": {
+        "title": "Importsessie-voorbeeld (simulatie)",
+        "status": "Eindstatus",
+        "duplicates": "Duplicaten",
+        "errors": "Fouten",
+        "warnings": "Waarschuwingen",
+        "privacy": "Privacykwesties",
+        "rollbackRef": "Terugdraaireferentie",
+        "simulated": "gesimuleerd",
+        "skipped": "Overgeslagen per reden",
+        "finalStatus": {
+          "success": "Geslaagd",
+          "partial": "Gedeeltelijk",
+          "failed": "Mislukt",
+          "blocked": "Geblokkeerd"
+        }
+      },
+      "value": {
+        "unknown": "onbekend",
+        "none": "geen"
+      }
     }
   }
 }

@@ -9595,6 +9595,91 @@
       "blocked": "Blocked",
       "maintenance": "Maintenance",
       "unknown": "Unknown"
+    },
+    "sandbox": {
+      "eyebrow": "Developer tools",
+      "title": "Manual import sandbox",
+      "intro": "Isolated dry-run workspace: validate one future data source from a local file before any production activation. Every run is a simulation over the real validation pipeline.",
+      "isolationNote": "Fully isolated. Nothing here can write observations, activate a source, or download anything.",
+      "disabled": "The manual import sandbox is switched off. Set INTELLIGENCE_SANDBOX_ENABLED=1 in the server environment to enable this developer-only workspace.",
+      "noDataImported": "NO DATA WAS IMPORTED",
+      "form": {
+        "file": "Local file (CSV, JSON or NDJSON)",
+        "format": "Format",
+        "mode": "Session mode",
+        "modePreview": "Validate + preview observations",
+        "modeValidateOnly": "Validate only (counts, no previews)",
+        "run": "Start validation session",
+        "running": "Validating…",
+        "note": "Owner-supplied local files only. The file is processed in memory for this preview and stored nowhere."
+      },
+      "refused": {
+        "title": "Session refused"
+      },
+      "parse": {
+        "failed": "File refused",
+        "row": "line"
+      },
+      "counts": {
+        "detected": "Rows detected",
+        "valid": "Valid rows",
+        "invalid": "Invalid rows",
+        "validAfterActivation": "Valid after source activation"
+      },
+      "tallies": {
+        "title": "Issue breakdown",
+        "missingFields": "Missing fields",
+        "unsupportedSchema": "Unsupported schema",
+        "unknownCountries": "Unknown countries",
+        "unknownLanguages": "Unknown languages",
+        "salaryFormat": "Salary format issues",
+        "duplicateHashes": "Duplicate hashes",
+        "sourceNotActive": "Source not active",
+        "dateIssues": "Date issues",
+        "hashMismatches": "Hash mismatches"
+      },
+      "preview": {
+        "title": "Observation previews (as they would appear after validation)",
+        "row": "Row",
+        "valid": "Would validate",
+        "invalid": "Rejected",
+        "hash": "Hash",
+        "source": "Source",
+        "timestamp": "Captured at",
+        "country": "Country",
+        "language": "Language",
+        "salaryBasis": "Salary basis",
+        "notSalaryMetric": "Not a salary metric",
+        "confidence": "Derived confidence",
+        "provenance": "Provenance",
+        "reasonCodes": "Validation reason codes"
+      },
+      "salaryBasis": {
+        "gross": "Gross",
+        "net": "Net",
+        "unknown": "Unknown"
+      },
+      "report": {
+        "title": "Import session preview (simulation)",
+        "status": "Final status",
+        "duplicates": "Duplicates",
+        "errors": "Errors",
+        "warnings": "Warnings",
+        "privacy": "Privacy issues",
+        "rollbackRef": "Rollback reference",
+        "simulated": "simulated",
+        "skipped": "Skipped per reason",
+        "finalStatus": {
+          "success": "Success",
+          "partial": "Partial",
+          "failed": "Failed",
+          "blocked": "Blocked"
+        }
+      },
+      "value": {
+        "unknown": "unknown",
+        "none": "none"
+      }
     }
   }
 }

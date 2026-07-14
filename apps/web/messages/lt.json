@@ -9595,6 +9595,91 @@
       "blocked": "Užblokuotas",
       "maintenance": "Priežiūra",
       "unknown": "Nežinoma"
+    },
+    "sandbox": {
+      "eyebrow": "Kūrėjo įrankiai",
+      "title": "Rankinio importo smėliadėžė",
+      "intro": "Izoliuota bandomoji darbo vieta: patikrinkite būsimą duomenų šaltinį iš vietinio failo prieš bet kokį gamybinį aktyvavimą. Kiekvienas paleidimas — simuliacija per tikrą patikros grandinę.",
+      "isolationNote": "Visiškai izoliuota. Čia niekas negali įrašyti stebėjimų, aktyvuoti šaltinio ar ką nors atsisiųsti.",
+      "disabled": "Rankinio importo smėliadėžė išjungta. Norėdami įjungti šią kūrėjams skirtą darbo vietą, serverio aplinkoje nustatykite INTELLIGENCE_SANDBOX_ENABLED=1.",
+      "noDataImported": "DUOMENYS NEBUVO IMPORTUOTI",
+      "form": {
+        "file": "Vietinis failas (CSV, JSON arba NDJSON)",
+        "format": "Formatas",
+        "mode": "Sesijos režimas",
+        "modePreview": "Patikrinti + peržiūrėti stebėjimus",
+        "modeValidateOnly": "Tik patikrinti (skaičiai, be peržiūrų)",
+        "run": "Pradėti patikros sesiją",
+        "running": "Tikrinama…",
+        "note": "Tik savininko pateikti vietiniai failai. Failas apdorojamas atmintyje šiai peržiūrai ir niekur nesaugomas."
+      },
+      "refused": {
+        "title": "Sesija atmesta"
+      },
+      "parse": {
+        "failed": "Failas atmestas",
+        "row": "eilutė"
+      },
+      "counts": {
+        "detected": "Aptikta eilučių",
+        "valid": "Tinkamos eilutės",
+        "invalid": "Netinkamos eilutės",
+        "validAfterActivation": "Tinkamos po šaltinio aktyvavimo"
+      },
+      "tallies": {
+        "title": "Problemų suvestinė",
+        "missingFields": "Trūkstami laukai",
+        "unsupportedSchema": "Nepalaikoma struktūra",
+        "unknownCountries": "Nežinomos šalys",
+        "unknownLanguages": "Nežinomos kalbos",
+        "salaryFormat": "Atlygio formato problemos",
+        "duplicateHashes": "Pasikartojančios maišos",
+        "sourceNotActive": "Šaltinis neaktyvus",
+        "dateIssues": "Datų problemos",
+        "hashMismatches": "Maišos neatitikimai"
+      },
+      "preview": {
+        "title": "Stebėjimų peržiūros (kaip jie atrodytų po patikros)",
+        "row": "Eilutė",
+        "valid": "Praeitų patikrą",
+        "invalid": "Atmesta",
+        "hash": "Maiša",
+        "source": "Šaltinis",
+        "timestamp": "Užfiksuota",
+        "country": "Šalis",
+        "language": "Kalba",
+        "salaryBasis": "Atlygio pagrindas",
+        "notSalaryMetric": "Ne atlygio rodiklis",
+        "confidence": "Išvestas patikimumas",
+        "provenance": "Kilmė",
+        "reasonCodes": "Patikros priežasčių kodai"
+      },
+      "salaryBasis": {
+        "gross": "Prieš mokesčius",
+        "net": "Po mokesčių",
+        "unknown": "Nežinoma"
+      },
+      "report": {
+        "title": "Importo sesijos peržiūra (simuliacija)",
+        "status": "Galutinė būsena",
+        "duplicates": "Dublikatai",
+        "errors": "Klaidos",
+        "warnings": "Įspėjimai",
+        "privacy": "Privatumo problemos",
+        "rollbackRef": "Atstatymo nuoroda",
+        "simulated": "simuliuota",
+        "skipped": "Praleista pagal priežastį",
+        "finalStatus": {
+          "success": "Pavyko",
+          "partial": "Iš dalies",
+          "failed": "Nepavyko",
+          "blocked": "Užblokuota"
+        }
+      },
+      "value": {
+        "unknown": "nežinoma",
+        "none": "nėra"
+      }
     }
   }
 }

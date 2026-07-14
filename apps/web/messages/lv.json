@@ -2756,6 +2756,91 @@
       "blocked": "Bloķēts",
       "maintenance": "Apkope",
       "unknown": "Nezināms"
+    },
+    "sandbox": {
+      "eyebrow": "Izstrādātāja rīki",
+      "title": "Manuālā importa smilškaste",
+      "intro": "Izolēta izmēģinājuma darbvieta: pārbaudiet nākotnes datu avotu no lokāla faila pirms jebkādas produkcijas aktivizēšanas. Katra palaišana ir simulācija caur īsto validācijas ķēdi.",
+      "isolationNote": "Pilnībā izolēta. Nekas šeit nevar ierakstīt novērojumus, aktivizēt avotu vai kaut ko lejupielādēt.",
+      "disabled": "Manuālā importa smilškaste ir izslēgta. Lai iespējotu šo izstrādātāju darbvietu, servera vidē iestatiet INTELLIGENCE_SANDBOX_ENABLED=1.",
+      "noDataImported": "DATI NETIKA IMPORTĒTI",
+      "form": {
+        "file": "Lokāls fails (CSV, JSON vai NDJSON)",
+        "format": "Formāts",
+        "mode": "Sesijas režīms",
+        "modePreview": "Validēt + priekšskatīt novērojumus",
+        "modeValidateOnly": "Tikai validēt (skaitļi, bez priekšskatījumiem)",
+        "run": "Sākt validācijas sesiju",
+        "running": "Notiek validācija…",
+        "note": "Tikai īpašnieka iesniegti lokāli faili. Fails šim priekšskatījumam tiek apstrādāts atmiņā un nekur netiek saglabāts."
+      },
+      "refused": {
+        "title": "Sesija noraidīta"
+      },
+      "parse": {
+        "failed": "Fails noraidīts",
+        "row": "rinda"
+      },
+      "counts": {
+        "detected": "Atrastās rindas",
+        "valid": "Derīgās rindas",
+        "invalid": "Nederīgās rindas",
+        "validAfterActivation": "Derīgas pēc avota aktivizēšanas"
+      },
+      "tallies": {
+        "title": "Problēmu sadalījums",
+        "missingFields": "Trūkstoši lauki",
+        "unsupportedSchema": "Neatbalstīta struktūra",
+        "unknownCountries": "Nezināmas valstis",
+        "unknownLanguages": "Nezināmas valodas",
+        "salaryFormat": "Algas formāta problēmas",
+        "duplicateHashes": "Dublēti jaucējkodi",
+        "sourceNotActive": "Avots nav aktīvs",
+        "dateIssues": "Datumu problēmas",
+        "hashMismatches": "Jaucējkodu neatbilstības"
+      },
+      "preview": {
+        "title": "Novērojumu priekšskatījumi (kā tie izskatītos pēc validācijas)",
+        "row": "Rinda",
+        "valid": "Izietu validāciju",
+        "invalid": "Noraidīts",
+        "hash": "Jaucējkods",
+        "source": "Avots",
+        "timestamp": "Reģistrēts",
+        "country": "Valsts",
+        "language": "Valoda",
+        "salaryBasis": "Algas pamats",
+        "notSalaryMetric": "Nav algas rādītājs",
+        "confidence": "Atvasinātā uzticamība",
+        "provenance": "Izcelsme",
+        "reasonCodes": "Validācijas iemeslu kodi"
+      },
+      "salaryBasis": {
+        "gross": "Bruto",
+        "net": "Neto",
+        "unknown": "Nezināms"
+      },
+      "report": {
+        "title": "Importa sesijas priekšskatījums (simulācija)",
+        "status": "Gala statuss",
+        "duplicates": "Dublikāti",
+        "errors": "Kļūdas",
+        "warnings": "Brīdinājumi",
+        "privacy": "Privātuma problēmas",
+        "rollbackRef": "Atcelšanas atsauce",
+        "simulated": "simulēta",
+        "skipped": "Izlaists pēc iemesla",
+        "finalStatus": {
+          "success": "Izdevās",
+          "partial": "Daļēji",
+          "failed": "Neizdevās",
+          "blocked": "Bloķēts"
+        }
+      },
+      "value": {
+        "unknown": "nezināms",
+        "none": "nav"
+      }
     }
   }
 }

@@ -109,6 +109,11 @@ const CLASSIFICATION: Record<string, string> = {
   // INTELLIGENCE_INSPECTOR_ENABLED flag, honest disabled/needs-migration
   // states, no mutation, no source activation.
   "dashboard/admin/intelligence-observations": "INTERNAL_ADMIN",
+  // Manual import sandbox (Manual Import Sandbox v1) — superadmin +
+  // INTELLIGENCE_SANDBOX_ENABLED flag; pure DRY-RUN over owner-supplied
+  // local files. No persistence path exists; every run banners
+  // "no data was imported". Nothing can activate a source here.
+  "dashboard/admin/import-sandbox": "INTERNAL_ADMIN",
   "dashboard/admin/language-feedback": "INTERNAL_ADMIN",
   "dashboard/admin/launch-readiness": "INTERNAL_ADMIN",
   "dashboard/admin/league": "INTERNAL_ADMIN",

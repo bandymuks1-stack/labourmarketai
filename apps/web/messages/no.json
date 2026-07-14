@@ -2756,6 +2756,91 @@
       "blocked": "Blokkert",
       "maintenance": "Vedlikehold",
       "unknown": "Ukjent"
+    },
+    "sandbox": {
+      "eyebrow": "Utviklerverktøy",
+      "title": "Manuell import-sandkasse",
+      "intro": "Isolert prøvekjørings-arbeidsområde: validér én fremtidig datakilde fra en lokal fil før enhver produksjonsaktivering. Hver kjøring er en simulering gjennom den ekte valideringskjeden.",
+      "isolationNote": "Fullstendig isolert. Ingenting her kan skrive observasjoner, aktivere en kilde eller laste ned noe.",
+      "disabled": "Den manuelle import-sandkassen er slått av. Sett INTELLIGENCE_SANDBOX_ENABLED=1 i servermiljøet for å aktivere dette utviklerarbeidsområdet.",
+      "noDataImported": "INGEN DATA BLE IMPORTERT",
+      "form": {
+        "file": "Lokal fil (CSV, JSON eller NDJSON)",
+        "format": "Format",
+        "mode": "Sesjonsmodus",
+        "modePreview": "Validér + forhåndsvis observasjoner",
+        "modeValidateOnly": "Kun validering (antall, ingen forhåndsvisninger)",
+        "run": "Start valideringssesjon",
+        "running": "Validerer…",
+        "note": "Kun lokale filer levert av eieren. Filen behandles i minnet for denne visningen og lagres ingen steder."
+      },
+      "refused": {
+        "title": "Sesjon avvist"
+      },
+      "parse": {
+        "failed": "Fil avvist",
+        "row": "linje"
+      },
+      "counts": {
+        "detected": "Rader oppdaget",
+        "valid": "Gyldige rader",
+        "invalid": "Ugyldige rader",
+        "validAfterActivation": "Gyldige etter kildeaktivering"
+      },
+      "tallies": {
+        "title": "Problemfordeling",
+        "missingFields": "Manglende felter",
+        "unsupportedSchema": "Ustøttet struktur",
+        "unknownCountries": "Ukjente land",
+        "unknownLanguages": "Ukjente språk",
+        "salaryFormat": "Lønnsformat-problemer",
+        "duplicateHashes": "Dupliserte hasher",
+        "sourceNotActive": "Kilde ikke aktiv",
+        "dateIssues": "Datoproblemer",
+        "hashMismatches": "Hash-avvik"
+      },
+      "preview": {
+        "title": "Observasjonsforhåndsvisninger (slik de ville sett ut etter validering)",
+        "row": "Rad",
+        "valid": "Ville bestått",
+        "invalid": "Avvist",
+        "hash": "Hash",
+        "source": "Kilde",
+        "timestamp": "Registrert",
+        "country": "Land",
+        "language": "Språk",
+        "salaryBasis": "Lønnsgrunnlag",
+        "notSalaryMetric": "Ikke en lønnsmetrikk",
+        "confidence": "Avledet pålitelighet",
+        "provenance": "Opprinnelse",
+        "reasonCodes": "Validerings-årsakskoder"
+      },
+      "salaryBasis": {
+        "gross": "Brutto",
+        "net": "Netto",
+        "unknown": "Ukjent"
+      },
+      "report": {
+        "title": "Importsesjons-forhåndsvisning (simulering)",
+        "status": "Sluttstatus",
+        "duplicates": "Duplikater",
+        "errors": "Feil",
+        "warnings": "Advarsler",
+        "privacy": "Personvernproblemer",
+        "rollbackRef": "Tilbakerullingsreferanse",
+        "simulated": "simulert",
+        "skipped": "Hoppet over per årsak",
+        "finalStatus": {
+          "success": "Vellykket",
+          "partial": "Delvis",
+          "failed": "Mislyktes",
+          "blocked": "Blokkert"
+        }
+      },
+      "value": {
+        "unknown": "ukjent",
+        "none": "ingen"
+      }
     }
   }
 }
