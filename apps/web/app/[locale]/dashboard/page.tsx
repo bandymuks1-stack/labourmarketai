@@ -10,7 +10,7 @@ import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
 import { DashboardModuleGrid } from "@/components/app/dashboard/dashboard-module-grid";
 import { DashboardStatusStrip } from "@/components/app/dashboard/dashboard-status-strip";
-import { MyZone, MyZoneImproves } from "@/components/app/my-zone";
+import { MyZone } from "@/components/app/my-zone";
 import { PrivacyStatusCard } from "@/components/app/privacy-status-card";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -443,13 +443,16 @@ export default async function DashboardOverviewPage({
                 intent={intent}
                 stepTitles={[tf("company.c1"), tf("company.c2"), tf("company.c3")]}
               />
+              {/* Static-stepper honesty note (guarded): the steps show
+                  progress, they are not live modules. Kept inside the
+                  section so it reads as the intake's own fine print. */}
+              <p
+                className="text-[11px] leading-relaxed text-text-muted"
+                data-testid="journey-progress-helper"
+              >
+                {tw("pilot.progressHelper")}
+              </p>
             </section>
-            <p
-              className="text-[11px] leading-relaxed text-text-muted"
-              data-testid="journey-progress-helper"
-            >
-              {tw("pilot.progressHelper")}
-            </p>
           </>
         )}
 
@@ -459,16 +462,17 @@ export default async function DashboardOverviewPage({
 
         <WorkerInvitationsCard preloaded={invitations} />
 
-        {/* The role's control-room grid (registry-driven): always-on access
-            to the service loop, planning, map, messages, documents and the
-            company workspace — real destinations only, badges from the spine. */}
+        {/* The role's configurable card workspace (registry-driven): always-on
+            access to the service loop, planning, map, messages, documents and
+            the company workspace — real destinations only, badges from the
+            spine. Reorder / hide / restore is device-local display state. */}
         <DashboardModuleGrid modules={controlRoom.modules} />
 
-        {/* Explainers last (audit PR6): help must never render above action. */}
-        <CurrentSpaceHeader role={role} />
         {/* Universal command finder (WAGON 3) — type a normal term, get the
             right EXISTING page. Registry-only results, audience-filtered. */}
         <CommandFinder />
+        {/* Compact space chip last — one line naming the active workspace. */}
+        <CurrentSpaceHeader role={role} />
       </div>
     );
   }
@@ -662,11 +666,6 @@ export default async function DashboardOverviewPage({
       />
       <DashboardModuleGrid modules={controlRoom.modules} />
 
-      {/* Privacy status — always visible, never blocking (consent v1):
-          shows whether employers can find this profile + the one link to
-          the canonical privacy screen. Default state = not visible. */}
-      <PrivacyStatusCard />
-
       {/* Remaining real pending states — everything the top slot did NOT
           promote, same honest count-gated cards as before. */}
       {topSlot !== "invitation" && <WorkerInvitationsCard preloaded={invitations} />}
@@ -675,14 +674,19 @@ export default async function DashboardOverviewPage({
       {topSlot !== "accepted_request" && outgoingRequestsNextAction}
       {topSlot !== "booking_response" && bookingResponsesNextAction}
 
-      {/* ── Explainers last (audit PR6): help must never render above action. ── */}
-      <MyZoneImproves />
-      <CurrentSpaceHeader role={role} />
+      {/* Privacy status — always visible, never blocking (consent v1):
+          shows whether employers can find this profile + the one link to
+          the canonical privacy screen. Default state = not visible. */}
+      <PrivacyStatusCard />
 
       {/* Universal command finder (WAGON 3) — type a normal term ("cv",
           "žurnalas", "kainos"), get the right EXISTING page. Registry-only
           results, audience-filtered from server-derived signals. */}
       <CommandFinder />
+      {/* Compact space chip last — one line naming the active workspace.
+          The "Kas ką gerina" explainer block is retired from the home
+          (owner UX recovery v1: explanation noise out, actions stay). */}
+      <CurrentSpaceHeader role={role} />
     </div>
   );
 }

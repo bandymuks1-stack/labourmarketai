@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { DashboardTabs } from "@/components/app/dashboard-tabs";
+import { HeaderSearch } from "@/components/app/header-search";
 import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { RoleSwitcher } from "@/components/app/role-switcher";
@@ -150,6 +151,9 @@ export default async function DashboardLayout({
             </Link>
             <DashboardTabs className="hidden md:flex" badges={navBadges} />
             <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+              {/* Universal OS search (owner UX recovery v1) — the ONE
+                  CommandFinder, reachable from every dashboard page. */}
+              <HeaderSearch />
               <LocaleSwitcher className="hidden md:flex" />
               <NotificationPanel />
               <RoleSwitcher />
@@ -160,7 +164,10 @@ export default async function DashboardLayout({
         {/* Mobile safe bottom — clears the fixed bottom nav (h-16) PLUS an
             extra rem for breathing room so form CTAs (Patvirtinti įrašą /
             Pridėti) never sit flush against the nav (Mobile UX §3-§4). */}
-        <main className="relative z-10 mx-auto max-w-container px-6 py-10 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-10">
+        {/* Owner UX recovery v1: tighter shell padding (py-10 → py-6,
+            px-6 → px-4) — less empty frame, more content per screen. The
+            mobile safe bottom (fixed nav clearance) is unchanged. */}
+        <main className="relative z-10 mx-auto max-w-container px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
           {children}
         </main>
         <BottomNav badges={navBadges} />

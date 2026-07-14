@@ -118,6 +118,17 @@ export default async function NetworkPage({
         </form>
         {search && (
           <div className="flex flex-col gap-3" data-testid="network-search-results">
+            {/* Why these people are visible (owner UX recovery v1): the
+                fail-closed visibility rule, stated once above the results —
+                every listed person has a reason to be here. */}
+            {search.people.length > 0 && (
+              <p
+                className="text-[11px] leading-relaxed text-text-muted"
+                data-testid="network-visibility-reason"
+              >
+                {t("search.visibilityReason")}
+              </p>
+            )}
             {search.people.length === 0 && search.companies.length === 0 ? (
               <p className="text-xs text-text-muted" data-testid="network-search-empty">
                 {t("search.empty")}
@@ -232,6 +243,17 @@ export default async function NetworkPage({
         <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
           {t("relationships.title")}
         </h2>
+        {/* Why each row is here: only ACTIVE work relationships appear, and
+            the chip on every row names the relationship (owner UX recovery
+            v1: no unexplained people). */}
+        {engagements.length > 0 && (
+          <p
+            className="text-[11px] leading-relaxed text-text-muted"
+            data-testid="network-relationships-why"
+          >
+            {t("relationships.why")}
+          </p>
+        )}
         {engagements.length === 0 ? (
           <p className="text-xs text-text-muted">{t("relationships.empty")}</p>
         ) : (

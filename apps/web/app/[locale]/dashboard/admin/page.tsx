@@ -353,6 +353,127 @@ export default async function AdminDashboardPage({
     },
   ];
 
+  // Decision-first landing (owner UX recovery v1): the queue previews the
+  // TOP rows; the rest stay one tap away in a disclosure — the control
+  // room summarises, it does not scroll.
+  const REVIEW_PREVIEW_COUNT = 5;
+  const renderReviewRow = (r: (typeof reviewRows)[number]) => {
+              const hasDescription = Boolean(r.needSummary?.trim());
+              const fileSummary =
+                r.attachmentCount === 0
+                  ? tReview("noFiles")
+                  : READINESS_KINDS.filter((k) => r.fileReadiness[k] > 0)
+                      .map(
+                        (k) =>
+                          `${tReview(`fileKinds.${k}`)}: ${r.fileReadiness[k]}`,
+                      )
+                      .join(" · ");
+              return (
+                <li
+                  key={r.id}
+                  className="card-border flex flex-col gap-2 p-3"
+                  data-testid={`admin-request-review-row-${r.id}`}
+                  data-priority={r.priority}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-sm font-semibold text-text-primary">
+                        {r.title}
+                      </span>
+                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        {tReview("created")}: {r.createdAt.slice(0, 10)} ·{" "}
+                        {tReview("filesLabel")}: {r.attachmentCount}
+                      </span>
+                    </div>
+                    <span className={REVIEW_PRIORITY_CHIP[r.priority]}>
+                      {tReview(`priority.${r.priority}`)}
+                    </span>
+                  </div>
+                  <p
+                    className={
+                      hasDescription
+                        ? "line-clamp-2 text-xs text-text-secondary"
+                        : "text-xs italic text-text-muted"
+                    }
+                  >
+                    {hasDescription ? r.needSummary : tReview("noDescription")}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+                    <span className="text-text-muted">
+                      {tReview("descriptionSignalHeading")}:
+                    </span>
+                    <span
+                      className={
+                        r.hasUsefulDescription
+                          ? "text-state-success"
+                          : "text-state-warning"
+                      }
+                    >
+                      {r.hasUsefulDescription
+                        ? tReview("descriptionSignal.present")
+                        : tReview("descriptionSignal.thin")}
+                    </span>
+                    <span className="text-text-muted">
+                      · {tReview("fileReadinessHeading")}:
+                    </span>
+                    <span className="text-text-secondary">{fileSummary}</span>
+                  </div>
+                  <p className="text-[11px] font-medium text-text-primary">
+                    {tReview(`action.${r.priority}`)}
+                  </p>
+                  {/* Dead-UI P0 fix: the action queue must give a click
+                      path — id-only pointer to the existing inspect page. */}
+                  {r.profileId ? (
+                    <Link
+                      href={`/dashboard/admin/users/${r.profileId}`}
+                      className="inline-flex min-h-11 w-fit items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10"
+                      data-testid={`admin-request-review-open-${r.id}`}
+                    >
+                      {tReview("openRequester")} →
+                    </Link>
+                  ) : null}
+                </li>
+              );
+  };
+
+  const renderRecentPerson = (p: NonNullable<typeof recent>[number]) => {
+            const hasText = (p.profile_text ?? "").length > 0;
+            const claimCount = claimsByProfile.get(p.id) ?? 0;
+            return (
+              <li key={p.id} className="card-border flex flex-col gap-1 p-3">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-sm font-semibold text-text-primary">
+                    {maskEmail(p.email)}
+                  </p>
+                  <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    {p.active_role ?? "—"}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-text-secondary">
+                  <span>
+                    {t("recent.profileText")}:{" "}
+                    <span
+                      className={
+                        hasText ? "text-state-success" : "text-text-muted"
+                      }
+                    >
+                      {hasText ? t("recent.yes") : t("recent.no")}
+                    </span>
+                  </span>
+                  <span>
+                    {t("recent.claims")}: {claimCount}
+                  </span>
+                  <Link
+                    href={`/dashboard/admin/users/${p.id}`}
+                    className="text-brand-blue hover:underline"
+                  >
+                    {t("recent.inspect")}
+                  </Link>
+                </div>
+              </li>
+            );
+  };
+
   return (
     <div className="flex flex-col gap-8" data-testid="admin-dashboard">
       <header className="flex flex-col gap-1">
@@ -454,89 +575,24 @@ export default async function AdminDashboardPage({
             {tReview("empty")}
           </p>
         ) : (
-          <ul
-            className="flex flex-col gap-2"
-            data-testid="admin-request-review-list"
-          >
-            {reviewRows.map((r) => {
-              const hasDescription = Boolean(r.needSummary?.trim());
-              const fileSummary =
-                r.attachmentCount === 0
-                  ? tReview("noFiles")
-                  : READINESS_KINDS.filter((k) => r.fileReadiness[k] > 0)
-                      .map(
-                        (k) =>
-                          `${tReview(`fileKinds.${k}`)}: ${r.fileReadiness[k]}`,
-                      )
-                      .join(" · ");
-              return (
-                <li
-                  key={r.id}
-                  className="card-border flex flex-col gap-2 p-3"
-                  data-testid={`admin-request-review-row-${r.id}`}
-                  data-priority={r.priority}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div className="flex min-w-0 flex-col gap-0.5">
-                      <span className="text-sm font-semibold text-text-primary">
-                        {r.title}
-                      </span>
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                        {tReview("created")}: {r.createdAt.slice(0, 10)} ·{" "}
-                        {tReview("filesLabel")}: {r.attachmentCount}
-                      </span>
-                    </div>
-                    <span className={REVIEW_PRIORITY_CHIP[r.priority]}>
-                      {tReview(`priority.${r.priority}`)}
-                    </span>
-                  </div>
-                  <p
-                    className={
-                      hasDescription
-                        ? "line-clamp-2 text-xs text-text-secondary"
-                        : "text-xs italic text-text-muted"
-                    }
-                  >
-                    {hasDescription ? r.needSummary : tReview("noDescription")}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
-                    <span className="text-text-muted">
-                      {tReview("descriptionSignalHeading")}:
-                    </span>
-                    <span
-                      className={
-                        r.hasUsefulDescription
-                          ? "text-state-success"
-                          : "text-state-warning"
-                      }
-                    >
-                      {r.hasUsefulDescription
-                        ? tReview("descriptionSignal.present")
-                        : tReview("descriptionSignal.thin")}
-                    </span>
-                    <span className="text-text-muted">
-                      · {tReview("fileReadinessHeading")}:
-                    </span>
-                    <span className="text-text-secondary">{fileSummary}</span>
-                  </div>
-                  <p className="text-[11px] font-medium text-text-primary">
-                    {tReview(`action.${r.priority}`)}
-                  </p>
-                  {/* Dead-UI P0 fix: the action queue must give a click
-                      path — id-only pointer to the existing inspect page. */}
-                  {r.profileId ? (
-                    <Link
-                      href={`/dashboard/admin/users/${r.profileId}`}
-                      className="inline-flex min-h-11 w-fit items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10"
-                      data-testid={`admin-request-review-open-${r.id}`}
-                    >
-                      {tReview("openRequester")} →
-                    </Link>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
+            <>
+            <ul
+              className="flex flex-col gap-2"
+              data-testid="admin-request-review-list"
+            >
+            {reviewRows.slice(0, REVIEW_PREVIEW_COUNT).map(renderReviewRow)}
+            </ul>
+            {reviewRows.length > REVIEW_PREVIEW_COUNT && (
+              <details data-testid="admin-request-review-more">
+                <summary className="cursor-pointer list-none py-1 text-xs font-medium text-brand-blue hover:underline">
+                  {tReview("showAll", { n: reviewRows.length })}
+                </summary>
+                <ul className="flex flex-col gap-2 pt-2">
+                  {reviewRows.slice(REVIEW_PREVIEW_COUNT).map(renderReviewRow)}
+                </ul>
+              </details>
+            )}
+            </>
         )}
       </section>
 
@@ -609,44 +665,18 @@ export default async function AdminDashboardPage({
           <p className="text-xs text-text-secondary">{t("recent.help")}</p>
         </div>
         <ul className="flex flex-col gap-2" data-testid="admin-recent-users">
-          {(recent ?? []).map((p) => {
-            const hasText = (p.profile_text ?? "").length > 0;
-            const claimCount = claimsByProfile.get(p.id) ?? 0;
-            return (
-              <li key={p.id} className="card-border flex flex-col gap-1 p-3">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-sm font-semibold text-text-primary">
-                    {maskEmail(p.email)}
-                  </p>
-                  <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                    {p.active_role ?? "—"}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-text-secondary">
-                  <span>
-                    {t("recent.profileText")}:{" "}
-                    <span
-                      className={
-                        hasText ? "text-state-success" : "text-text-muted"
-                      }
-                    >
-                      {hasText ? t("recent.yes") : t("recent.no")}
-                    </span>
-                  </span>
-                  <span>
-                    {t("recent.claims")}: {claimCount}
-                  </span>
-                  <Link
-                    href={`/dashboard/admin/users/${p.id}`}
-                    className="text-brand-blue hover:underline"
-                  >
-                    {t("recent.inspect")}
-                  </Link>
-                </div>
-              </li>
-            );
-          })}
+          {(recent ?? []).slice(0, REVIEW_PREVIEW_COUNT).map(renderRecentPerson)}
         </ul>
+        {(recent ?? []).length > REVIEW_PREVIEW_COUNT && (
+          <details data-testid="admin-recent-users-more">
+            <summary className="cursor-pointer list-none py-1 text-xs font-medium text-brand-blue hover:underline">
+              {tReview("showAll", { n: (recent ?? []).length })}
+            </summary>
+            <ul className="flex flex-col gap-2 pt-2">
+              {(recent ?? []).slice(REVIEW_PREVIEW_COUNT).map(renderRecentPerson)}
+            </ul>
+          </details>
+        )}
       </section>
 
       {/* BAND 3 — Control areas. Grouped navigation by real purpose. Replaces

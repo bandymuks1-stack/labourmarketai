@@ -42,33 +42,33 @@ export async function CurrentSpaceHeader({ role }: { role: Role }) {
   const t = await getTranslations("spaces");
   const key = ROLE_SPACE[role];
 
+  // Owner UX recovery v1: ONE compact line, not a card — the space name and
+  // the open-space link. The purpose sentence moved out of the layout flow
+  // into a native tooltip (title) so the chip explains itself on demand
+  // without spending a paragraph of screen on every visit.
   return (
     <section
-      className="card-border flex flex-col gap-2 p-4"
+      className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border-subtle bg-ink-800/20 px-3 py-2"
       data-testid="current-space-header"
       data-space={key}
+      title={t(`${key}.purpose`)}
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex flex-col gap-0.5">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-            {t("current")}
-          </span>
-          <h2 className="font-display text-lg font-semibold text-text-primary">
-            {t(`${key}.name`)}
-          </h2>
-        </div>
-        <Link
-          href={SPACE_ROUTE[key]}
-          className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
-          data-testid="open-space-link"
-          aria-label={`${t("openSpace")}: ${t(`${key}.name`)}`}
-        >
-          {t("openSpace")} →
-        </Link>
+      <div className="flex min-w-0 items-baseline gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          {t("current")}
+        </span>
+        <h2 className="truncate font-display text-sm font-semibold text-text-primary">
+          {t(`${key}.name`)}
+        </h2>
       </div>
-      <p className="text-xs leading-relaxed text-text-secondary">
-        {t(`${key}.purpose`)}
-      </p>
+      <Link
+        href={SPACE_ROUTE[key]}
+        className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
+        data-testid="open-space-link"
+        aria-label={`${t("openSpace")}: ${t(`${key}.name`)}`}
+      >
+        {t("openSpace")} →
+      </Link>
     </section>
   );
 }

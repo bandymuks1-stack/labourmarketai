@@ -108,7 +108,8 @@
     "textLabel": "Entry text",
     "locationLabel": "Location",
     "locationUnset": "Location not specified",
-    "understoodLabel": "What the system understood"
+    "understoodLabel": "What the system understood",
+    "submittedBy": "Submitted by"
   },
   "editEntryTitle": "Edit entry",
   "editEntryBanner": "You're editing a saved entry. Suggest the structure again, mark what you're changing, then \"Update entry\" replaces the old version. To back out —",
@@ -323,5 +324,10 @@
     },
     "permissionDenied": "Microphone access was blocked. Allow microphone access in your browser settings and try again."
   },
-  "savedOpenCv": "View your CV"
+  "savedOpenCv": "View your CV",
+  "dayNav": {
+    "title": "Day navigation",
+    "all": "All days",
+    "openInCalendar": "Open in calendar"
+  }
 }

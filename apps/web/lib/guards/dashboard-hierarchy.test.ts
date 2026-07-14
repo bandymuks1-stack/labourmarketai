@@ -64,7 +64,10 @@ describe("worker branch: state-driven top slot leads", () => {
     }
   });
 
-  it("premium hub → top slot → status strip → readiness → control-room grid → pending states → explainers", () => {
+  it("premium hub → top slot → status strip → readiness → card workspace → pending states → finder → space chip", () => {
+    // Owner UX recovery v1: the "Kas ką gerina" explainer block is retired
+    // from the home (explanation noise out); the finder and the compact
+    // space chip close the page below every actionable surface.
     expectOrder(
       WORKER,
       [
@@ -73,12 +76,12 @@ describe("worker branch: state-driven top slot leads", () => {
         "<DashboardStatusStrip",
         "<MyZone",
         "<DashboardModuleGrid",
-        "<MyZoneImproves",
-        "<CurrentSpaceHeader",
         "<CommandFinder",
+        "<CurrentSpaceHeader",
       ],
       "worker branch",
     );
+    expect(WORKER).not.toContain("<MyZoneImproves");
   });
 
   it("the hub person block carries the worker's folded next action + inline editor", () => {
@@ -91,8 +94,8 @@ describe("worker branch: state-driven top slot leads", () => {
     expect(WORKER).toContain("improves={false}");
   });
 
-  it("every real pending-state card renders above all help/explainer blocks", () => {
-    const help = WORKER.indexOf("<MyZoneImproves");
+  it("every real pending-state card renders above the finder + space chip", () => {
+    const help = WORKER.indexOf("<CommandFinder");
     expect(help).toBeGreaterThan(0);
     for (const card of [
       "<WorkerInvitationsCard",
@@ -111,7 +114,7 @@ describe("worker branch: state-driven top slot leads", () => {
 });
 
 describe("org branch: primary action first, demand intake promoted, explainers last", () => {
-  it("next action → status strip → pending states → chain actions → identity → intake → grid → explainers", () => {
+  it("next action → status strip → pending states → chain actions → identity → intake → grid → finder → space chip", () => {
     expectOrder(
       ORG,
       [
@@ -125,8 +128,8 @@ describe("org branch: primary action first, demand intake promoted, explainers l
         'data-testid="demand-intake-section"',
         "<WorkerInvitationsCard",
         "<DashboardModuleGrid",
-        "<CurrentSpaceHeader",
         "<CommandFinder",
+        "<CurrentSpaceHeader",
       ],
       "org branch",
     );

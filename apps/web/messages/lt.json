@@ -41,7 +41,8 @@
       "conversations": "Jūsų pokalbiai",
       "bookings": "Jūsų rezervacijos",
       "documents": "Jūsų dokumentų įrašai"
-    }
+    },
+    "closeLabel": "Užverti paiešką"
   },
   "reports": {
     "eyebrow": "Ataskaitos",
@@ -2031,7 +2032,8 @@
         "future_ocr_needed": "Vaizdas/OCR",
         "manual_review_only": "Kita"
       },
-      "noFiles": "Failų nėra"
+      "noFiles": "Failų nėra",
+      "showAll": "Rodyti visus ({n})"
     },
     "user": {
       "onboarded": "Užregistruotas",
@@ -2734,7 +2736,7 @@
       "description": "Vienas kalendorius: rezervacijos, projektai, užduotys ir žurnalo įrašai."
     },
     "network": {
-      "label": "Tinklas",
+      "label": "Ryšiai",
       "description": "Žmonės ir įmonės: paieška, kvietimai ir jūsų ryšiai."
     }
   },
@@ -3102,8 +3104,16 @@
         "allClear": "Šiuo metu niekas nelaukia jūsų dėmesio.",
         "viewAll": "Visa veikla"
       },
+      "moduleGrid": {
+        "manage": "Tvarkyti korteles",
+        "done": "Baigta",
+        "moveUp": "Perkelti aukščiau",
+        "moveDown": "Perkelti žemiau",
+        "hide": "Slėpti",
+        "hiddenTitle": "Paslėptos kortelės"
+      },
       "myZone": {
-        "actionsHeading": "Ką galite padaryti dabar",
+        "actionsHeading": "Veiksmai",
         "incompleteStatus": "Jūsų informacija dar nepilna",
         "readyStatus": "Jūsų profilis paruoštas",
         "missing": {
@@ -3135,7 +3145,7 @@
             "desc": "Jums tinkantis darbas"
           },
           "planning": {
-            "title": "Planavimas",
+            "title": "Kalendorius",
             "desc": "Rezervacijos, projektai ir terminai vienoje dienotvarkėje"
           },
           "bookings": {
@@ -3535,7 +3545,7 @@
         "account": "Nustatymai",
         "admin": "Administravimas",
         "planning": "Kalendorius",
-        "network": "Tinklas"
+        "network": "Ryšiai"
       },
       "roleNotice": {
         "needs_worker_role": "Ta nuoroda veda į darbuotojo erdvę, kurios jūsų paskyra dar neturi. Pridėkite darbuotojo vaidmenį erdvių centre.",
@@ -5396,6 +5406,10 @@
     "conversationFallback": "Pokalbis",
     "preview": {
       "attachmentOnly": "Priedas"
+    },
+    "sections": {
+      "unread": "Neperskaitytos",
+      "earlier": "Ankstesnės"
     }
   },
   "orgTier1Warning": {
@@ -6655,12 +6669,12 @@
       "withdraw": "Atšaukti pasiūlymą",
       "findAnother": "Ieškoti kito darbuotojo",
       "proposeAgain": "Siūlyti iš naujo su naujomis datomis",
-      "planning": "Peržiūrėti planavime"
+      "planning": "Peržiūrėti kalendoriuje"
     },
     "connections": {
-      "title": "Planavimas susijęs su",
+      "title": "Kalendorius susijęs su",
       "intro": "Rezervacija yra tavo plano dalis. Štai sritys, su kuriomis ji susijusi.",
-      "planning": "Planavimo dienotvarkė",
+      "planning": "Kalendoriaus dienotvarkė",
       "planningNote": "Ši rezervacija datų kontekste su projektais ir užduotimis",
       "marketplace": "Turgaus užklausos",
       "marketplaceNote": "Paslaugų užklausos ir jų būsenos",
@@ -8031,8 +8045,8 @@
     }
   },
   "planning": {
-    "eyebrow": "PLANAVIMAS",
-    "title": "Planavimas",
+    "eyebrow": "KALENDORIUS",
+    "title": "Kalendorius",
     "intro": "Rezervacijos, projektų datos ir užduočių terminai vienoje dienotvarkėje. Kiekviena eilutė veda į tikrąjį šaltinį.",
     "notAuthed": "Prisijunk, kad matytum savo planą.",
     "filters": {
@@ -8714,11 +8728,11 @@
   },
   "network": {
     "module": {
-      "label": "Mano tinklas",
+      "label": "Ryšiai",
       "desc": "Jūsų įmonės, žmonės, partneriai ir kvietimai vienoje vietoje."
     },
     "eyebrow": "TINKLAS",
-    "title": "Mano tinklas",
+    "title": "Ryšiai",
     "intro": "Jūsų įmonės, komandos, partneriai ir kvietimai. Pakvieskite žmogų ar įmonę tiesiai iš čia.",
     "notEnabled": "Kvietimai šioje aplinkoje dar neįjungti.",
     "incoming": {
@@ -8749,7 +8763,8 @@
         "agency": "Agentūra",
         "team": "Komanda",
         "other": "Organizacija"
-      }
+      },
+      "visibilityReason": "Rodomi tik žmonės, kurie sutiko būti randami arba turi realų darbo ryšį su jumis."
     },
     "sent": {
       "title": "Mano išsiųsti kvietimai",
@@ -8790,7 +8805,7 @@
     "relationships": {
       "title": "Mano ryšiai",
       "empty": "Aktyvių ryšių kol kas nėra.",
-      "noOrg": "Be organizacijos",
+      "noOrg": "Asmeninis ryšys — nesusietas su įmone",
       "slug": {
         "employee": "Darbuotojas",
         "manager": "Vadovas",
@@ -8806,7 +8821,8 @@
         "student": "Studentas",
         "unemployed": "Ieško darbo",
         "volunteer": "Savanoris"
-      }
+      },
+      "why": "Rodomi tik aktyvūs jūsų darbo ryšiai — kiekviena eilutė nurodo, koks tai ryšys."
     },
     "invite": {
       "title": "Pakviesti",

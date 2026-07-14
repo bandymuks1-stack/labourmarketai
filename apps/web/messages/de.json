@@ -41,7 +41,8 @@
       "conversations": "Ihre Unterhaltungen",
       "bookings": "Ihre Buchungen",
       "documents": "Ihre Dokumenteinträge"
-    }
+    },
+    "closeLabel": "Suche schließen"
   },
   "reports": {
     "eyebrow": "Berichte",
@@ -2031,7 +2032,8 @@
         "future_ocr_needed": "Bild/OCR",
         "manual_review_only": "Sonstige"
       },
-      "noFiles": "Keine Dateien"
+      "noFiles": "Keine Dateien",
+      "showAll": "Alle anzeigen ({n})"
     },
     "user": {
       "onboarded": "Onboarding abgeschlossen",
@@ -3102,8 +3104,16 @@
         "allClear": "Im Moment wartet nichts auf Ihre Aufmerksamkeit.",
         "viewAll": "Alle Aktivitäten"
       },
+      "moduleGrid": {
+        "manage": "Karten anpassen",
+        "done": "Fertig",
+        "moveUp": "Nach oben",
+        "moveDown": "Nach unten",
+        "hide": "Ausblenden",
+        "hiddenTitle": "Ausgeblendete Karten"
+      },
       "myZone": {
-        "actionsHeading": "Was Sie jetzt tun können",
+        "actionsHeading": "Aktionen",
         "incompleteStatus": "Ihre Angaben sind noch nicht vollständig",
         "readyStatus": "Ihr Profil ist bereit",
         "missing": {
@@ -3135,7 +3145,7 @@
             "desc": "Arbeit, die zu Ihnen passt"
           },
           "planning": {
-            "title": "Planung",
+            "title": "Kalender",
             "desc": "Buchungen, Projekte und Fristen in einer Agenda"
           },
           "bookings": {
@@ -5396,6 +5406,10 @@
     "conversationFallback": "Unterhaltung",
     "preview": {
       "attachmentOnly": "Anhang"
+    },
+    "sections": {
+      "unread": "Ungelesen",
+      "earlier": "Früher"
     }
   },
   "orgTier1Warning": {
@@ -6655,12 +6669,12 @@
       "withdraw": "Vorschlag zurückziehen",
       "findAnother": "Andere Arbeitskraft finden",
       "proposeAgain": "Erneut mit neuen Terminen vorschlagen",
-      "planning": "In der Planung ansehen"
+      "planning": "Im Kalender ansehen"
     },
     "connections": {
-      "title": "Die Planung ist verknüpft mit",
+      "title": "Kalender-Verknüpfungen",
       "intro": "Eine Buchung ist Teil Ihres Plans. Dies sind die Bereiche, mit denen sie verknüpft ist.",
-      "planning": "Planungs-Agenda",
+      "planning": "Kalender-Agenda",
       "planningNote": "Diese Buchung im Datumskontext mit Projekten und Aufgaben",
       "marketplace": "Marktplatz-Anfragen",
       "marketplaceNote": "Serviceanfragen und deren Status",
@@ -8031,8 +8045,8 @@
     }
   },
   "planning": {
-    "eyebrow": "PLANUNG",
-    "title": "Planung",
+    "eyebrow": "KALENDER",
+    "title": "Kalender",
     "intro": "Buchungen, Projekttermine und Aufgabenfristen in einer Agenda. Jede Zeile führt zur echten Quelle.",
     "notAuthed": "Melden Sie sich an, um Ihren Plan zu sehen.",
     "filters": {
@@ -8714,11 +8728,11 @@
   },
   "network": {
     "module": {
-      "label": "Mein Netzwerk",
+      "label": "Netzwerk",
       "desc": "Ihre Unternehmen, Personen, Partner und Einladungen an einem Ort."
     },
     "eyebrow": "NETZWERK",
-    "title": "Mein Netzwerk",
+    "title": "Netzwerk",
     "intro": "Ihre Unternehmen, Teams, Partner und Einladungen. Laden Sie eine Person oder ein Unternehmen direkt von hier ein.",
     "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
     "incoming": {
@@ -8749,7 +8763,8 @@
         "agency": "Agentur",
         "team": "Team",
         "other": "Organisation"
-      }
+      },
+      "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben."
     },
     "sent": {
       "title": "Meine gesendeten Einladungen",
@@ -8790,7 +8805,7 @@
     "relationships": {
       "title": "Meine Beziehungen",
       "empty": "Noch keine aktiven Beziehungen.",
-      "noOrg": "Ohne Organisation",
+      "noOrg": "Persönliche Beziehung — keinem Unternehmen zugeordnet",
       "slug": {
         "employee": "Mitarbeiter",
         "manager": "Manager",
@@ -8806,7 +8821,8 @@
         "student": "Student",
         "unemployed": "Arbeitssuchend",
         "volunteer": "Freiwilliger"
-      }
+      },
+      "why": "Angezeigt werden nur Ihre aktiven Arbeitsbeziehungen — jede Zeile benennt die Beziehung."
     },
     "invite": {
       "title": "Einladen",
