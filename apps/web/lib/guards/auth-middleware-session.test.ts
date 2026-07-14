@@ -10,7 +10,11 @@ import { NextRequest, NextResponse } from "next/server";
  *     public pages and bounce the user back to login;
  *   - anonymous public traffic never triggers a Supabase round-trip;
  *   - protected routes still gate unauthenticated users to /auth/login with a
- *     safe `next`, and not-yet-onboarded users to /onboarding.
+ *     safe `next`;
+ *   - middleware does NOT read the profiles row (P0 interaction-latency
+ *     audit): the not-yet-onboarded → /onboarding bounce is the dashboard
+ *     layout's job (it already reads the profile for the auth shell), so the
+ *     middleware never adds a second Supabase round-trip per navigation.
  */
 
 const getUserMock = vi.fn();
@@ -90,26 +94,27 @@ describe("logged-in session refresh", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("lets an onboarded user through to the dashboard", async () => {
+  it("lets an authed user through to the dashboard", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
-    fromSingleMock.mockResolvedValue({ data: { onboarded_at: "2026-01-01" } });
     const res = await middleware(req("/lt/dashboard", { authed: true }));
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("bounces a not-yet-onboarded user to /onboarding", async () => {
+  it("never reads the profiles row (onboarding gating is the layout's job)", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
-    fromSingleMock.mockResolvedValue({ data: { onboarded_at: null } });
-    const res = await middleware(req("/lt/dashboard", { authed: true }));
-    expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toContain("/lt/onboarding");
+    for (const p of ["/lt/dashboard", "/lt/dashboard/journal", "/lt/onboarding"]) {
+      await middleware(req(p, { authed: true }));
+    }
+    // One getUser (session refresh) per navigation, ZERO profile reads —
+    // the extra per-navigation Supabase round-trip is what the P0 latency
+    // audit removed. The dashboard layout owns the onboarded_at bounce.
+    expect(fromSingleMock).not.toHaveBeenCalled();
   });
 
   it("does not gate /onboarding itself", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     const res = await middleware(req("/lt/onboarding", { authed: true }));
     expect(res.headers.get("location")).toBeNull();
-    // onboarding must NOT trigger the onboarded_at lookup (avoids self-bounce).
     expect(fromSingleMock).not.toHaveBeenCalled();
   });
 });

@@ -70,7 +70,6 @@ export async function middleware(request: NextRequest) {
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
   const needsAuth = REQUIRES_AUTH.some((p) => rest === p || rest.startsWith(p + "/"));
-  const onboardingPage = rest === "/onboarding";
 
   // Without the anon key we cannot touch sessions; let the request through
   // (the page itself surfaces the misconfiguration).
@@ -121,19 +120,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Gate /dashboard behind onboarding; /onboarding itself is allowed.
-  if (!onboardingPage) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarded_at")
-      .eq("id", user.id)
-      .single();
-    if (!profile?.onboarded_at) {
-      const url = request.nextUrl.clone();
-      url.pathname = `/${locale}/onboarding`;
-      return NextResponse.redirect(url);
-    }
-  }
+  // Onboarding gating happens in the dashboard layout, which already reads
+  // the profile row for the auth shell and redirects to /onboarding when
+  // `onboarded_at` is null. Re-reading profiles here added one extra
+  // Supabase round-trip to EVERY authed dashboard navigation for a check
+  // the layout repeats anyway (P0 interaction-latency audit) — middleware
+  // keeps only the auth gate + session refresh above.
 
   return response;
 }

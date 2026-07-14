@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +26,10 @@ function asAny(supabase: SupabaseClient): any {
  * error returns the empty state — a badge must never crash the shell, and
  * "no badge" is the honest default.
  */
-export async function getUnreadConversationIds(): Promise<ReadonlySet<string>> {
+// Request-cached (P0 latency audit): the auth-shell spine and page surfaces
+// need this read in the same SSR pass — one query set per request, not two.
+export const getUnreadConversationIds = cache(
+  async (): Promise<ReadonlySet<string>> => {
   try {
     const supabase = await createClient();
     const {
@@ -71,7 +75,8 @@ export async function getUnreadConversationIds(): Promise<ReadonlySet<string>> {
   } catch {
     return new Set();
   }
-}
+  },
+);
 
 /**
  * Count of unread conversations — backs the Žinutės nav badge and the bell.

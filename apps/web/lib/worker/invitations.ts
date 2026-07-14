@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -41,10 +42,13 @@ export type AcceptInvitationResult =
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
 
-/** Pending invitations addressed to the current user's email (company + agency). */
-export async function listMyPendingWorkerInvitations(): Promise<
-  readonly PendingWorkerInvitation[]
-> {
+/** Pending invitations addressed to the current user's email (company + agency).
+ *  Request-cached (P0 latency audit): the spine count and the dashboard
+ *  invitation card read this in the same SSR pass — one read, not two. The
+ *  company and agency invitation reads are independent, so they run in
+ *  parallel. */
+export const listMyPendingWorkerInvitations = cache(
+  async (): Promise<readonly PendingWorkerInvitation[]> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -54,13 +58,22 @@ export async function listMyPendingWorkerInvitations(): Promise<
 
   const out: PendingWorkerInvitation[] = [];
 
-  const { data: co } = await asAny(supabase)
-    .from("company_worker_invitations")
-    .select("company_id, note, created_at, companies(display_name, legal_name)")
-    .ilike("invited_email", email)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const [{ data: co }, { data: ag }] = await Promise.all([
+    asAny(supabase)
+      .from("company_worker_invitations")
+      .select("company_id, note, created_at, companies(display_name, legal_name)")
+      .ilike("invited_email", email)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(50),
+    asAny(supabase)
+      .from("agency_worker_invitations")
+      .select("agency_id, note, created_at, agencies(legal_name)")
+      .ilike("invited_email", email)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
   for (const r of co ?? []) {
     const c = r.companies as { display_name: string | null; legal_name: string | null } | null;
     out.push({
@@ -71,14 +84,6 @@ export async function listMyPendingWorkerInvitations(): Promise<
       invitedAt: r.created_at as string,
     });
   }
-
-  const { data: ag } = await asAny(supabase)
-    .from("agency_worker_invitations")
-    .select("agency_id, note, created_at, agencies(legal_name)")
-    .ilike("invited_email", email)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(50);
   for (const r of ag ?? []) {
     const a = r.agencies as { legal_name: string | null } | null;
     out.push({
@@ -91,7 +96,8 @@ export async function listMyPendingWorkerInvitations(): Promise<
   }
 
   return out;
-}
+  },
+);
 
 async function acceptViaRpc(
   rpcName:

@@ -34,11 +34,18 @@ describe("getPendingIncomingRequestCount is an honest, open-only count", () => {
 describe("the dashboard surfaces the request loop as a count-gated next action", () => {
   const page = read("app/[locale]/dashboard/page.tsx");
 
-  it("computes the pending count via the marketplace helper", () => {
-    // imported from the marketplace module (alone or alongside the buyer helper)
-    expect(page).toMatch(/getPendingIncomingRequestCount/);
+  it("computes the pending count via the request-cached spine (same marketplace helper)", () => {
+    // P0 latency audit: the page takes the count from the request-cached
+    // spine instead of re-querying. The spine's pendingIncomingServiceRequests
+    // IS getPendingIncomingRequestCount() — asserted against spine.ts below,
+    // so the count still traces to the canonical marketplace helper.
     expect(page).toMatch(/from "@\/lib\/marketplace\/service-requests"/);
-    expect(page).toMatch(/const pendingServiceRequests = await getPendingIncomingRequestCount\(\);/);
+    expect(page).toMatch(
+      /const pendingServiceRequests = spineCounts\.pendingIncomingServiceRequests;/,
+    );
+    const spine = read("lib/notifications/spine.ts");
+    expect(spine).toMatch(/getPendingIncomingRequestCount\(\),/);
+    expect(spine).toMatch(/pendingIncomingServiceRequests,/);
   });
 
   it("renders the card ONLY when there is a real pending count (> 0)", () => {
