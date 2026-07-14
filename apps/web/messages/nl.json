@@ -496,6 +496,42 @@
     }
   },
   "marketMap": {
+    "entities": {
+      "title": "Drie entiteiten op de kaart",
+      "intro": "De kaart onderscheidt drie verschillende ruimtelijke entiteiten: mensen, werkgebieden van bedrijven en projectlocaties. Elk heeft een eigen zichtbaarheidsregel en een eigen visuele vorm.",
+      "neverMixedNote": "De drie entiteiten worden nooit samengevoegd tot één markertype.",
+      "contactNote": "Contact verloopt altijd via de LabourMarket.ai-werkstroom — de kaart toont nooit telefoonnummers of e-mailadressen.",
+      "person": {
+        "name": "Mensen",
+        "legend": "Geaggregeerde aanwezigheid per gebied (gevuld vierkant)",
+        "countLabel": "{count}",
+        "smallSample": "<5",
+        "empty": "Nog geen geaggregeerde aanwezigheid van mensen om te tonen. Mensen verschijnen hier alleen als tellingen op gebiedsniveau zodra er in een gebied genoeg signalen met toestemming zijn (een exact aantal pas vanaf 5).",
+        "visibilityNote": "Mensen worden alleen getoond als geaggregeerde gebiedstellingen — nooit als een individueel punt, naam of contact. Gebieden met minder dan 5 zichtbare mensen tonen \"<5\"."
+      },
+      "company": {
+        "name": "Bedrijfsterritoria",
+        "legend": "Contour van werkgebied (gestippelde ring) — nooit een punt",
+        "kinds": {
+          "headquarters": "Hoofdkantoor",
+          "operating": "Werkgebied",
+          "desired_market": "Gewenste markt",
+          "demand_anchor": "Geverifieerde behoeftelocatie"
+        },
+        "storeInactive": "De opslag voor bedrijfsterritoria is in deze omgeving nog niet geactiveerd — activering is een beslissing van de eigenaar.",
+        "readError": "Bedrijfsterritoria konden nu niet worden geladen.",
+        "empty": "Nog geen bedrijfsterritoria. Voeg de werklocaties van uw bedrijf toe in de bedrijfswerkruimte.",
+        "visibilityNote": "Bedrijfsterritoria worden getekend als omlijnde gebieden op basis van door het bedrijf ingevoerde geografie — nooit als markers die op personen lijken."
+      },
+      "project": {
+        "name": "Projectlocaties",
+        "legend": "Projectmarker (ruit)",
+        "confirmedTag": "locatie bevestigd",
+        "unconfirmedTag": "gebiedsniveau",
+        "empty": "Nog geen projectlocaties. Projecten met een locatie verschijnen hier uit uw projectenlijst.",
+        "visibilityNote": "Een project toont pas een exact stadspunt nadat de locatie uitdrukkelijk is bevestigd; anders blijft het op gebiedsniveau."
+      }
+    },
     "backToActions": "Actiecentrum",
     "pageTitle": "Kaart",
     "pageLead": "Jij en de markt op één kaart.",
@@ -1408,6 +1444,12 @@
           "estimate": "Elke schatting is voorlopig en niet-bindend — een planningshulp, geen offerte."
         },
         "cta": "Scouting openen"
+      },
+      "decisions": {
+        "title": "Wacht op je beslissing",
+        "review": "Journaalvermeldingen om te beoordelen",
+        "invitations": "Openstaande uitnodigingen voor werknemers",
+        "claims": "Openbare aanvragen die je kunt overnemen"
       }
     },
     "agency": {
@@ -9191,5 +9233,9 @@
       "label": "Cv-foto / afbeelding (JPG, PNG)",
       "note": "In voorbereiding — beeldherkenning werkt nog niet. Upload een PDF/DOCX of plak de tekst."
     }
+  },
+  "companySwitcher": {
+    "heading": "Actief bedrijf",
+    "note": "Wisselen bepaalt namens welke organisatie je bedrijfsomgeving werkt."
   }
 }

@@ -15,6 +15,8 @@ import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { baseIdentityForRole } from "@/lib/config/roles";
+import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -97,15 +99,38 @@ export default async function DashboardLayout({
     : (roles[0] ?? null);
 
   // Company identity → surface WHICH organization is active in the header so
-  // switching person ↔ company is unambiguous. Read-only, RLS-scoped, reuses
-  // the existing company read; resolved ONLY for the company identity (the
-  // person identity skips the query). Null — never a fabricated name — when no
-  // company row exists yet, so the header only claims an org when one is real.
+  // switching person ↔ company is unambiguous. Read-only, RLS-scoped;
+  // resolved ONLY for the company identity (the person identity skips the
+  // queries). Null — never a fabricated name — when no company row exists
+  // yet, so the header only claims an org when one is real.
+  //
+  // Company architecture v1: the ACTIVE organization now comes from the
+  // membership-validated server pointer (profiles.active_organization_id,
+  // owner-gated migration). A multi-company profile gets the org list for
+  // the header switcher; while the migration is unapplied (or the org read
+  // model is absent) we fall back to the legacy single-company read exactly
+  // as before — no switcher, honest single-company behaviour.
   let activeOrgName: string | null = null;
+  let organizations: SwitchableOrganization[] = [];
+  let activeOrganizationId: string | null = null;
   if (activeRole && baseIdentityForRole(activeRole) === "company") {
-    const company = await getOwnCompany();
-    if (company.kind === "ok" && company.row) {
-      activeOrgName = company.row.displayName ?? company.row.legalName ?? null;
+    const orgContext = await getActiveOrganizationContext();
+    if (orgContext.activeOrganization) {
+      activeOrgName = orgContext.activeOrganization.name;
+      activeOrganizationId = orgContext.activeOrganizationId;
+      // The switcher list is populated ONLY when switching can really
+      // persist (pointer column applied) AND there is more than one org.
+      if (orgContext.canSwitch) {
+        organizations = orgContext.organizations.map((o) => ({
+          id: o.id,
+          name: o.name,
+        }));
+      }
+    } else {
+      const company = await getOwnCompany();
+      if (company.kind === "ok" && company.row) {
+        activeOrgName = company.row.displayName ?? company.row.legalName ?? null;
+      }
     }
   }
 
@@ -132,6 +157,8 @@ export default async function DashboardLayout({
         isAdmin,
         adminUiHidden,
         activeOrgName,
+        organizations,
+        activeOrganizationId,
         notifications,
       }}
     >

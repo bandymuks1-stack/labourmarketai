@@ -270,6 +270,13 @@ describe("NO new DB migration in this PR", () => {
     // registry table (all seeds inactive; admin-only writes; authenticated
     // read of active rows). DRAFT / needs-human-gate, NOT applied; paired
     // rollback + deferred APPLIED_LEDGER entry.
-    expect(count).toBeLessThanOrEqual(137);
+    // Bumped 137 -> 139 for the Company Architecture Completion v1 drafts
+    // (20260714210000_company_memberships_v1 — active-organization pointer
+    // on the EXISTING membership model + validation triggers + viewer slug;
+    // 20260714211000_dashboard_preferences_v1 — owner-only server-side
+    // dashboard card preferences, 8 KB bound). Both DRAFT /
+    // needs-human-gate, NOT applied; paired rollbacks + deferred
+    // APPLIED_LEDGER entries.
+    expect(count).toBeLessThanOrEqual(139);
   });
 });

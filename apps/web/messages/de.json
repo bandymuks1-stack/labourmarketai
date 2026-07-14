@@ -496,6 +496,42 @@
     }
   },
   "marketMap": {
+    "entities": {
+      "title": "Drei Entitäten auf der Karte",
+      "intro": "Die Karte unterscheidet drei verschiedene räumliche Entitäten: Personen, Tätigkeitsgebiete von Unternehmen und Projektstandorte. Jede hat ihre eigene Sichtbarkeitsregel und ihre eigene visuelle Form.",
+      "neverMixedNote": "Die drei Entitäten werden nie zu einem einzigen Markertyp zusammengeführt.",
+      "contactNote": "Kontakt läuft immer über den LabourMarket.ai-Workflow — die Karte zeigt nie Telefonnummern oder E-Mail-Adressen.",
+      "person": {
+        "name": "Personen",
+        "legend": "Aggregierte Präsenz je Gebiet (gefülltes Quadrat)",
+        "countLabel": "{count}",
+        "smallSample": "<5",
+        "empty": "Noch keine aggregierte Personenpräsenz anzuzeigen. Personen erscheinen hier nur als Zählungen auf Gebietsebene, sobald in einem Gebiet genügend Signale mit Einwilligung vorliegen (eine genaue Zahl erst ab 5).",
+        "visibilityNote": "Personen werden nur als aggregierte Gebietszählungen gezeigt — nie als einzelner Punkt, Name oder Kontakt. Gebiete mit weniger als 5 sichtbaren Personen zeigen \"<5\"."
+      },
+      "company": {
+        "name": "Unternehmensgebiete",
+        "legend": "Umriss des Tätigkeitsgebiets (gestrichelter Ring) — nie ein Punkt",
+        "kinds": {
+          "headquarters": "Hauptsitz",
+          "operating": "Tätigkeitsgebiet",
+          "desired_market": "Wunschmarkt",
+          "demand_anchor": "Verifizierter Bedarfsstandort"
+        },
+        "storeInactive": "Der Speicher für Unternehmensgebiete ist in dieser Umgebung noch nicht aktiviert — die Aktivierung ist eine Entscheidung des Eigentümers.",
+        "readError": "Unternehmensgebiete konnten gerade nicht geladen werden.",
+        "empty": "Noch keine Unternehmensgebiete. Fügen Sie die Tätigkeitsorte Ihres Unternehmens im Unternehmensbereich hinzu.",
+        "visibilityNote": "Unternehmensgebiete werden als umrandete Flächen aus der vom Unternehmen eingegebenen Geografie gezeichnet — nie als personenähnliche Marker."
+      },
+      "project": {
+        "name": "Projektstandorte",
+        "legend": "Projektmarker (Raute)",
+        "confirmedTag": "Standort bestätigt",
+        "unconfirmedTag": "Gebietsebene",
+        "empty": "Noch keine Projektstandorte. Projekte mit Standort erscheinen hier aus Ihrer Projektliste.",
+        "visibilityNote": "Ein Projekt zeigt erst nach ausdrücklicher Bestätigung seines Standorts einen genauen Stadtpunkt; sonst bleibt es auf Gebietsebene."
+      }
+    },
     "backToActions": "Aktionszentrum",
     "pageTitle": "Karte",
     "pageLead": "Sie und der Markt auf einer Karte.",
@@ -1408,6 +1444,12 @@
           "estimate": "Jede Schätzung ist vorläufig und unverbindlich — eine Planungshilfe, kein Angebot."
         },
         "cta": "Scouting öffnen"
+      },
+      "decisions": {
+        "title": "Wartet auf deine Entscheidung",
+        "review": "Journaleinträge zur Prüfung",
+        "invitations": "Ausstehende Einladungen an Arbeitskräfte",
+        "claims": "Öffentliche Anfragen, die du übernehmen kannst"
       }
     },
     "agency": {
@@ -9191,5 +9233,9 @@
       "label": "Lebenslauf-Foto / Bild (JPG, PNG)",
       "note": "In Vorbereitung — Bilderkennung ist noch nicht verfügbar. Laden Sie PDF/DOCX hoch oder fügen Sie den Text ein."
     }
+  },
+  "companySwitcher": {
+    "heading": "Aktives Unternehmen",
+    "note": "Der Wechsel legt fest, für welche Organisation dein Unternehmensbereich arbeitet."
   }
 }

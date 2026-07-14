@@ -360,6 +360,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 136 -> 137 for the Journal Proof Engine template registry
     // draft (20260714180000_journal_profession_templates_v1) — DRAFT /
     // needs-human-gate, NOT applied; paired rollback in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 137/);
+    // Bumped 137 -> 139 for the Company Architecture Completion v1 drafts
+    // (20260714210000_company_memberships_v1 +
+    // 20260714211000_dashboard_preferences_v1) — DRAFT / needs-human-gate,
+    // NOT applied; paired rollbacks in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 139/);
   });
 });

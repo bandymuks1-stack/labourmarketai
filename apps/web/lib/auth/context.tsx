@@ -14,6 +14,8 @@ import {
   switchActiveRole as switchActiveRoleAction,
   type Role,
 } from "@/lib/auth/actions";
+import { switchActiveOrganization as switchActiveOrganizationAction } from "@/lib/company/organization-actions";
+import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 
 export type Notification = {
   id: string;
@@ -56,12 +58,24 @@ type AuthState = {
    * unambiguous. Never a fabricated name — null when no company row exists yet.
    */
   activeOrgName?: string | null;
+  /**
+   * Multi-company switching (company architecture v1): the organizations the
+   * profile can act as (server-resolved, RLS-scoped, membership-validated)
+   * and the server-stored active org id. Empty / single-entry list → no
+   * switcher is rendered (honest single-company case). Populated ONLY when
+   * the owner-gated active-organization migration is applied — otherwise the
+   * server passes an empty list and the header keeps today's behaviour.
+   */
+  organizations?: SwitchableOrganization[];
+  activeOrganizationId?: string | null;
   notifications: Notification[];
 };
 
 type AuthContextValue = AuthState & {
   switchRole: (role: Role) => Promise<void>;
   addRole: (role: Role) => Promise<void>;
+  /** Switch the ACTIVE organization (server-side pointer, then refresh). */
+  switchOrganization: (organizationId: string) => Promise<void>;
   markAsRead: (id: string) => void;
   markAllRead: () => void;
 };
@@ -96,6 +110,16 @@ export function AuthProvider({
     [router],
   );
 
+  const switchOrganization = useCallback(
+    async (organizationId: string) => {
+      // Membership is validated server-side (action + DB trigger); a failed
+      // switch simply leaves the current org active — nothing is faked.
+      const result = await switchActiveOrganizationAction(organizationId);
+      if (result.ok) router.refresh();
+    },
+    [router],
+  );
+
   const markAsRead = useCallback((id: string) => {
     setNotifications((cur) =>
       cur.map((n) =>
@@ -118,9 +142,12 @@ export function AuthProvider({
       isAdmin: initial.isAdmin,
       adminUiHidden: initial.adminUiHidden ?? false,
       activeOrgName: initial.activeOrgName ?? null,
+      organizations: initial.organizations ?? [],
+      activeOrganizationId: initial.activeOrganizationId ?? null,
       notifications,
       switchRole,
       addRole,
+      switchOrganization,
       markAsRead,
       markAllRead,
     }),
@@ -132,9 +159,12 @@ export function AuthProvider({
       initial.isAdmin,
       initial.adminUiHidden,
       initial.activeOrgName,
+      initial.organizations,
+      initial.activeOrganizationId,
       notifications,
       switchRole,
       addRole,
+      switchOrganization,
       markAsRead,
       markAllRead,
     ],

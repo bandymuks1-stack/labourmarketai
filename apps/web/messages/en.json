@@ -496,6 +496,42 @@
     }
   },
   "marketMap": {
+    "entities": {
+      "title": "Three entities on the map",
+      "intro": "The map distinguishes three different spatial entities: people, company operating territories and project locations. Each has its own visibility rule and its own visual shape.",
+      "neverMixedNote": "The three entities are never merged into one marker type.",
+      "contactNote": "Contact always happens through the LabourMarket.ai workflow — the map never shows phone numbers or email addresses.",
+      "person": {
+        "name": "People",
+        "legend": "Aggregated presence by area (filled square)",
+        "countLabel": "{count}",
+        "smallSample": "<5",
+        "empty": "No aggregated person presence to show yet. People appear here only as area-level counts once enough consented signals exist in an area (an exact count only from 5).",
+        "visibilityNote": "People are shown only as aggregated area counts — never as an individual point, name or contact. Areas with fewer than 5 visible people show \"<5\"."
+      },
+      "company": {
+        "name": "Company territories",
+        "legend": "Operating territory outline (dashed ring) — never a point",
+        "kinds": {
+          "headquarters": "Headquarters",
+          "operating": "Operating area",
+          "desired_market": "Desired market",
+          "demand_anchor": "Verified need location"
+        },
+        "storeInactive": "The company territory store is not yet activated in this environment — activation is an owner decision.",
+        "readError": "Could not load company territories right now.",
+        "empty": "No company territories yet. Add your company's operating locations in the company workspace.",
+        "visibilityNote": "Company territories are drawn as outlined areas from company-entered geography — never as person-like markers."
+      },
+      "project": {
+        "name": "Project locations",
+        "legend": "Project marker (diamond)",
+        "confirmedTag": "location confirmed",
+        "unconfirmedTag": "area level",
+        "empty": "No project locations yet. Projects with a location appear here from your project list.",
+        "visibilityNote": "A project shows an exact city point only after its location is explicitly confirmed; otherwise it stays at area level."
+      }
+    },
     "backToActions": "Action center",
     "pageTitle": "Map",
     "pageLead": "You and the market on one map.",
@@ -1408,6 +1444,12 @@
           "estimate": "Any estimate is preliminary and non-binding — a planning aid, not a quote."
         },
         "cta": "Open scouting"
+      },
+      "decisions": {
+        "title": "Waiting for your decision",
+        "review": "Journal entries to review",
+        "invitations": "Pending worker invitations",
+        "claims": "Public need submissions you can claim"
       }
     },
     "agency": {
@@ -9191,5 +9233,9 @@
       "label": "CV photo / image (JPG, PNG)",
       "note": "In preparation — image recognition is not available yet. Upload a PDF/DOCX or paste the text."
     }
+  },
+  "companySwitcher": {
+    "heading": "Active company",
+    "note": "Switching changes which organization your company workspaces act as."
   }
 }

@@ -496,6 +496,42 @@
     }
   },
   "marketMap": {
+    "entities": {
+      "title": "Trys esybės žemėlapyje",
+      "intro": "Žemėlapis skiria tris skirtingas erdvines esybes: žmones, įmonių veiklos teritorijas ir projektų vietas. Kiekviena turi savo matomumo taisyklę ir savo vizualinę formą.",
+      "neverMixedNote": "Šios trys esybės niekada nesujungiamos į vieną žymeklio tipą.",
+      "contactNote": "Susisiekimas visada vyksta tik per LabourMarket.ai platformą — žemėlapyje niekada nerodomi telefonai ar el. pašto adresai.",
+      "person": {
+        "name": "Žmonės",
+        "legend": "Apibendrintas buvimas pagal sritį (užpildytas kvadratas)",
+        "countLabel": "{count}",
+        "smallSample": "<5",
+        "empty": "Apibendrinto žmonių buvimo rodyti dar nėra. Žmonės čia matomi tik kaip srities lygio skaičiai, kai srityje susikaupia pakankamai sutikimu pagrįstų signalų (tikslus skaičius — tik nuo 5).",
+        "visibilityNote": "Žmonės rodomi tik kaip apibendrinti srities skaičiai — niekada kaip atskiras taškas, vardas ar kontaktas. Sritys, kuriose matomų žmonių mažiau nei 5, rodomos kaip „<5“."
+      },
+      "company": {
+        "name": "Įmonių teritorijos",
+        "legend": "Veiklos teritorijos kontūras (brūkšninis žiedas) — niekada taškas",
+        "kinds": {
+          "headquarters": "Būstinė",
+          "operating": "Veiklos sritis",
+          "desired_market": "Norima rinka",
+          "demand_anchor": "Patvirtinta poreikio vieta"
+        },
+        "storeInactive": "Įmonių teritorijų saugykla šioje aplinkoje dar neaktyvuota — aktyvavimas yra savininko sprendimas.",
+        "readError": "Šiuo metu įmonių teritorijų įkelti nepavyko.",
+        "empty": "Įmonių teritorijų dar nėra. Pridėkite įmonės veiklos vietas įmonės darbo erdvėje.",
+        "visibilityNote": "Įmonių teritorijos braižomos kaip kontūrinės sritys iš įmonės įvestos geografijos — niekada kaip į asmenį panašūs žymekliai."
+      },
+      "project": {
+        "name": "Projektų vietos",
+        "legend": "Projekto žymeklis (rombas)",
+        "confirmedTag": "vieta patvirtinta",
+        "unconfirmedTag": "srities lygis",
+        "empty": "Projektų vietų dar nėra. Projektai su vieta čia atsiranda iš jūsų projektų sąrašo.",
+        "visibilityNote": "Projektas rodo tikslų miesto tašką tik aiškiai patvirtinus jo vietą; kitaip jis lieka srities lygyje."
+      }
+    },
     "backToActions": "Veiksmų centras",
     "pageTitle": "Žemėlapis",
     "pageLead": "Tavo ir rinkos vaizdas viename žemėlapyje.",
@@ -1408,6 +1444,12 @@
           "estimate": "Bet kuri sąmata yra preliminari ir neįpareigojanti — planavimo pagalba, ne pasiūlymas."
         },
         "cta": "Atverti žvalgybą"
+      },
+      "decisions": {
+        "title": "Laukia jūsų sprendimo",
+        "review": "Žurnalo įrašai peržiūrai",
+        "invitations": "Laukiantys kvietimai darbuotojams",
+        "claims": "Viešos užklausos, kurias galite perimti"
       }
     },
     "agency": {
@@ -9191,5 +9233,9 @@
       "label": "CV nuotrauka / paveikslėlis (JPG, PNG)",
       "note": "RUOŠIAMA — nuotraukų atpažinimas dar neveikia. Įkelkite PDF/DOCX arba įklijuokite tekstą."
     }
+  },
+  "companySwitcher": {
+    "heading": "Aktyvi įmonė",
+    "note": "Perjungus įmonę, įmonės erdvės veikia pasirinktos organizacijos vardu."
   }
 }

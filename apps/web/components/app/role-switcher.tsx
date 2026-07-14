@@ -17,9 +17,10 @@ import {
   type LabourMarketRoleId,
 } from "@/lib/config/roles";
 import { usePopoverDismiss } from "@/lib/hooks/use-popover-dismiss";
+import { shouldOfferOrganizationSwitch } from "@/lib/company/organization-switch";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
-import { Settings } from "lucide-react";
+import { Building2, Settings } from "lucide-react";
 
 /** Authenticated-header role switcher. Always visible (even for users with
  *  one role) so adding a second role stays discoverable (PV §15).
@@ -29,17 +30,22 @@ import { Settings } from "lucide-react";
 export function RoleSwitcher() {
   const tSwitcher = useTranslations("auth.roleSwitcher");
   const tAccount = useTranslations("auth.dashboard.account");
+  const tCompanySwitcher = useTranslations("companySwitcher");
   const {
     roles,
     activeRole,
     adminUiHidden,
     activeOrgName,
+    organizations,
+    activeOrganizationId,
     switchRole,
     addRole,
+    switchOrganization,
     isAdmin,
   } = useAuth();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
+  const [pendingOrgId, setPendingOrgId] = useState<string | null>(null);
 
   // Same dismiss contract as the notification panel (owner smoke fix):
   // close on route change / outside click / Escape.
@@ -83,6 +89,28 @@ export function RoleSwitcher() {
       else await addRole(r);
     } finally {
       setPending(null);
+      setOpen(false);
+    }
+  }
+
+  // Company architecture v1: the org list arrives ONLY when the server
+  // resolved a real multi-company membership set AND the active-org pointer
+  // can persist (owner-gated migration applied). Single-company / unapplied
+  // states pass an empty list → no switcher chrome at all (honest absence).
+  const switchableOrganizations = organizations ?? [];
+  const offerOrganizationSwitch =
+    shouldOfferOrganizationSwitch(switchableOrganizations);
+
+  async function pickOrganization(orgId: string) {
+    if (orgId === activeOrganizationId) {
+      setOpen(false);
+      return;
+    }
+    setPendingOrgId(orgId);
+    try {
+      await switchOrganization(orgId);
+    } finally {
+      setPendingOrgId(null);
       setOpen(false);
     }
   }
@@ -235,6 +263,66 @@ export function RoleSwitcher() {
               );
             })}
           </ul>
+
+          {/* Multi-company switching (company architecture v1): rendered
+              ONLY for a real multi-company profile with a persistable
+              server-side pointer — a single-company user never sees this
+              block. Names are real organization rows (RLS-scoped), the
+              active one is marked, switching updates
+              profiles.active_organization_id then refreshes. */}
+          {offerOrganizationSwitch && (
+            <>
+              <hr className="my-2 border-ink-600" />
+              <p
+                className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted"
+                data-testid="org-switcher-heading"
+              >
+                {tCompanySwitcher("heading")}
+              </p>
+              <ul className="flex flex-col gap-0.5" data-testid="org-switcher-list">
+                {switchableOrganizations.map((org) => {
+                  const isActiveOrg = org.id === activeOrganizationId;
+                  return (
+                    <li key={org.id}>
+                      <button
+                        type="button"
+                        onClick={() => pickOrganization(org.id)}
+                        disabled={pendingOrgId !== null}
+                        data-testid={`org-switcher-option-${org.id}`}
+                        className={cn(
+                          "flex w-full items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-sm hover:bg-ink-700",
+                          isActiveOrg && "text-brand-blue",
+                        )}
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          <Building2
+                            className="h-4 w-4 shrink-0"
+                            strokeWidth={1.75}
+                            aria-hidden
+                          />
+                          <span className="truncate">{org.name}</span>
+                        </span>
+                        <span className="ml-auto flex shrink-0 items-center gap-2">
+                          {pendingOrgId === org.id ? (
+                            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                              {tSwitcher("switching")}
+                            </span>
+                          ) : isActiveOrg ? (
+                            <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
+                              {tSwitcher("active_label")}
+                            </span>
+                          ) : null}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="px-2 pb-1 pt-1 text-[11px] leading-snug text-text-muted">
+                {tCompanySwitcher("note")}
+              </p>
+            </>
+          )}
 
           {missingIdentities.length > 0 && (
             <>
