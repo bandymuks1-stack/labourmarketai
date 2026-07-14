@@ -20,7 +20,8 @@
       "service_request_responses": "Išnyksta, kai atidarote paslaugų užklausų puslapį.",
       "pending_bookings": "Išnyksta, kai atsakote į rezervacijos pasiūlymą.",
       "booking_responses": "Išnyksta, kai atidarote rezervacijų puslapį.",
-      "open_task_attention": "Išnyksta, kai užduotis užbaigiama, atblokuojama arba pakeičiamas jos terminas užduočių puslapyje."
+      "open_task_attention": "Išnyksta, kai užduotis užbaigiama, atblokuojama arba pakeičiamas jos terminas užduočių puslapyje.",
+      "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje)."
     }
   },
   "commandFinder": {
@@ -3112,6 +3113,12 @@
         "hide": "Slėpti",
         "hiddenTitle": "Paslėptos kortelės"
       },
+      "jobsCard": {
+        "title": "Man tinkantys darbai",
+        "viewAll": "Visi skelbimai",
+        "empty": "Šiuo metu atitinkančių skelbimų nėra — papildykite įgūdžius profilyje.",
+        "emptyCta": "Papildyti profilį"
+      },
       "myZone": {
         "actionsHeading": "Veiksmai",
         "incompleteStatus": "Jūsų informacija dar nepilna",
@@ -3719,7 +3726,8 @@
         "service_request_responses": "Atsakymai į jūsų užklausas",
         "pending_bookings": "Laukiantys rezervacijų pasiūlymai",
         "booking_responses": "Atsakymai į rezervacijų pasiūlymus",
-        "open_task_attention": "Užduotys, kurioms reikia dėmesio"
+        "open_task_attention": "Užduotys, kurioms reikia dėmesio",
+        "new_job_matches": "Nauji jums tinkantys darbo skelbimai"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -6267,7 +6275,47 @@
     "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
     "summaryTitle": "Profesinis aprašymas",
     "workHistoryTitle": "Darbo istorija",
-    "present": "Dabar"
+    "present": "Dabar",
+    "languagesTitle": "Kalbos",
+    "languagesSelfStated": "Kalbos, kaip jas nurodė darbuotojas.",
+    "certificatesTitle": "Sertifikatai ir pažymėjimai",
+    "declaredCertHint": "Nurodyta pačių",
+    "validUntil": "Galioja iki",
+    "drivingLicences": "Vairuotojo pažymėjimo kategorijos",
+    "educationTitle": "Išsilavinimas",
+    "achievementsTitle": "Pasiekimai",
+    "projectsTitle": "Projektai",
+    "projectsHint": "Iš darbo įrašų",
+    "confirmedByManager": "Su įrašais",
+    "templates": {
+      "label": "Šablonas",
+      "standard": "Standartinis",
+      "compact": "Kompaktiškas"
+    },
+    "privateDetails": {
+      "toggle": "Įtraukti atlyginimo lūkestį ir prieinamumą į spausdinamą CV",
+      "title": "Atlyginimo lūkestis ir prieinamumas",
+      "salary": "Atlyginimo lūkestis (EUR/mėn.)",
+      "availability": "Prieinamumas",
+      "availableFrom": "Gali pradėti nuo",
+      "relocate": "Gali persikelti",
+      "transport": "Turi nuosavą transportą",
+      "yes": "Taip",
+      "no": "Ne",
+      "status": {
+        "available": "Gali dirbti",
+        "busy": "Užimtas",
+        "unavailable": "Negali dirbti"
+      }
+    },
+    "tailored": {
+      "badge": "Pritaikytas CV",
+      "forNeed": "Pritaikyta pagal poreikį: {role}",
+      "basis": "Atitinka {matched} iš {needTotal} įgūdžių, {confirmed} su įrašais",
+      "notVisible": "Šis poreikis jums nematomas — rodomas standartinis CV.",
+      "noStructure": "Šis poreikis neturi struktūruotų įgūdžių reikalavimų — rodomas standartinis CV.",
+      "matchedTag": "Atitinka poreikį"
+    }
   },
   "todayScreen": {
     "eyebrow": "Šiandien",
@@ -7226,6 +7274,15 @@
       "basis": "Atitinka {matched} iš {total} reikalingų įgūdžių ({confirmed} patvirtinti vadovo)",
       "recognizedNote": "reikalavimai atpažinti iš poreikio teksto — dar nepatvirtinti",
       "missingPrefix": "trūksta:"
+    },
+    "recommendations": {
+      "basisCompact": "{matched} iš {total} įgūdžių, {confirmed} patvirtinti",
+      "newBadge": "Nauja",
+      "salaryWithin": "Atlygis tinka",
+      "salaryNegotiable": "Atlygis derinamas",
+      "moreSkills": "+{n}",
+      "journalTitle": "Susiję su jūsų įrašais",
+      "journalLine": "Neseniai jūsų žurnalo įrašas parėmė įgūdį „{skill}“ — jo reikia šiam darbui"
     },
     "workerNext": {
       "add_work_evidence": "Toliau: pridėkite darbo įrodymų žurnale",
@@ -9014,6 +9071,126 @@
       "needs_followup": "Reikia patikslinti",
       "approved": "Patvirtinta",
       "closed": "Uždaryta"
+    }
+  },
+  "cvSections": {
+    "grid": {
+      "title": "CV užpildymas",
+      "hint": "Pradėkite nuo bet kurios dalies — eiliškumas nesvarbus.",
+      "filled": "Užpildyta",
+      "empty": "Neužpildyta",
+      "open": "Atidaryti"
+    },
+    "names": {
+      "summary": "Aprašymas",
+      "workHistory": "Darbo patirtis",
+      "education": "Išsilavinimas",
+      "languages": "Kalbos",
+      "certificates": "Sertifikatai ir pažymėjimai",
+      "skills": "Įgūdžiai",
+      "projects": "Projektai",
+      "achievements": "Pasiekimai",
+      "salary": "Atlyginimo lūkestis",
+      "availability": "Prieinamumas"
+    },
+    "education": {
+      "title": "Išsilavinimas",
+      "hint": "Pridėkite savo išsilavinimą — nurodote patys.",
+      "institution": "Mokymo įstaiga",
+      "program": "Programa / kryptis",
+      "type": "Tipas",
+      "startYear": "Pradžios metai",
+      "endYear": "Pabaigos metai",
+      "isCurrent": "Šiuo metu mokausi",
+      "add": "Pridėti",
+      "adding": "Įrašoma…",
+      "save": "Išsaugoti",
+      "edit": "Redaguoti",
+      "cancel": "Atšaukti",
+      "remove": "Pašalinti",
+      "empty": "Išsilavinimo įrašų dar nėra.",
+      "notEnabled": "Ši dalis paruošta, bet dar neįjungta.",
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "invalid": "Netinkama reikšmė.",
+      "limit": "Pasiektas įrašų limitas.",
+      "selfStated": "Įrašyta jūsų pačių."
+    },
+    "educationTypes": {
+      "primary": "Pradinis",
+      "secondary": "Vidurinis",
+      "vocational": "Profesinis",
+      "college": "Kolegija",
+      "university_bachelor": "Universitetas (bakalauras)",
+      "university_master": "Universitetas (magistras)",
+      "doctorate": "Doktorantūra",
+      "course_certificate": "Kursai / pažymėjimas",
+      "other": "Kita"
+    },
+    "achievements": {
+      "title": "Pasiekimai ir nurodyti sertifikatai",
+      "hint": "Apdovanojimai, baigti kursai, jūsų pačių nurodyti sertifikatai.",
+      "achTitle": "Pavadinimas",
+      "description": "Aprašymas",
+      "date": "Data",
+      "type": "Tipas",
+      "add": "Pridėti",
+      "adding": "Įrašoma…",
+      "save": "Išsaugoti",
+      "edit": "Redaguoti",
+      "cancel": "Atšaukti",
+      "remove": "Pašalinti",
+      "empty": "Pasiekimų dar nėra.",
+      "notEnabled": "Ši dalis paruošta, bet dar neįjungta.",
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "invalid": "Netinkama reikšmė.",
+      "limit": "Pasiektas įrašų limitas.",
+      "selfStated": "Įrašyta jūsų pačių.",
+      "declaredBadge": "Nurodyta pačių",
+      "confirmedBadge": "Su įrašais"
+    },
+    "achievementTypes": {
+      "achievement": "Pasiekimas",
+      "award": "Apdovanojimas",
+      "course_completion": "Baigti kursai",
+      "declared_certificate": "Nurodytas sertifikatas",
+      "other": "Kita"
+    }
+  },
+  "cvImport": {
+    "reviewTitle": "Aptiktos CV dalys",
+    "reviewHint": "Sistema tik siūlo. Kiekvieną įrašą išsaugokite arba atmeskite — sprendžiate jūs.",
+    "empty": "Tekste struktūruotų įrašų neaptikta.",
+    "groups": {
+      "workHistory": "Darbo patirtis",
+      "education": "Išsilavinimas",
+      "languages": "Kalbos",
+      "certificates": "Sertifikatai",
+      "achievements": "Pasiekimai",
+      "salary": "Atlyginimo lūkestis",
+      "availability": "Prieinamumas"
+    },
+    "confirm": "Išsaugoti",
+    "saving": "Įrašoma…",
+    "discard": "Atmesti",
+    "confirmedLabel": "Išsaugota",
+    "discardedLabel": "Atmesta",
+    "replace": "Pakeisti",
+    "conflict": "Jau išsaugota kita reikšmė: {value}",
+    "needsMigration": "Ši dalis paruošta, bet dar neįjungta — įrašas neišsaugotas.",
+    "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "invalid": "Netinkama reikšmė.",
+    "aiHint": "DI pasiūlymas — peržiūrėkite prieš išsaugodami",
+    "chooseLevel": "Pasirinkite lygį",
+    "perMonth": "€/mėn.",
+    "availabilityKeys": {
+      "willingToRelocate": "Gali persikelti",
+      "hasTransport": "Turi nuosavą transportą",
+      "nightShiftsOk": "Gali dirbti naktinėmis pamainomis",
+      "weekendShiftsOk": "Gali dirbti savaitgaliais"
+    },
+    "imageOcr": {
+      "label": "CV nuotrauka / paveikslėlis (JPG, PNG)",
+      "note": "RUOŠIAMA — nuotraukų atpažinimas dar neveikia. Įkelkite PDF/DOCX arba įklijuokite tekstą."
     }
   }
 }

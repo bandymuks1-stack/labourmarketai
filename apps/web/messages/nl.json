@@ -20,7 +20,8 @@
       "service_request_responses": "Verdwijnt wanneer je de pagina met dienstaanvragen opent.",
       "pending_bookings": "Verdwijnt wanneer je op het boekingsvoorstel reageert.",
       "booking_responses": "Verdwijnt wanneer je de boekingenpagina opent.",
-      "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina."
+      "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina.",
+      "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet)."
     }
   },
   "commandFinder": {
@@ -3112,6 +3113,12 @@
         "hide": "Verbergen",
         "hiddenTitle": "Verborgen kaarten"
       },
+      "jobsCard": {
+        "title": "Banen die bij mij passen",
+        "viewAll": "Alle advertenties",
+        "empty": "Momenteel geen passende advertenties — vul je vaardigheden in je profiel aan.",
+        "emptyCta": "Profiel aanvullen"
+      },
       "myZone": {
         "actionsHeading": "Acties",
         "incompleteStatus": "Je gegevens zijn nog niet compleet",
@@ -3719,7 +3726,8 @@
         "service_request_responses": "Antwoorden op je aanvragen",
         "pending_bookings": "Boekingsvoorstellen die op een reactie wachten",
         "booking_responses": "Antwoorden op je boekingsvoorstellen",
-        "open_task_attention": "Taken die aandacht vragen"
+        "open_task_attention": "Taken die aandacht vragen",
+        "new_job_matches": "Nieuwe vacatures die bij je passen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -6267,7 +6275,47 @@
     "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden.",
     "summaryTitle": "Professionele samenvatting",
     "workHistoryTitle": "Werkervaring",
-    "present": "Heden"
+    "present": "Heden",
+    "languagesTitle": "Talen",
+    "languagesSelfStated": "Talen zoals opgegeven door de werker.",
+    "certificatesTitle": "Certificaten en licenties",
+    "declaredCertHint": "Zelf opgegeven",
+    "validUntil": "Geldig tot",
+    "drivingLicences": "Rijbewijscategorieën",
+    "educationTitle": "Opleiding",
+    "achievementsTitle": "Prestaties",
+    "projectsTitle": "Projecten",
+    "projectsHint": "Uit werkregistraties",
+    "confirmedByManager": "Met registraties",
+    "templates": {
+      "label": "Sjabloon",
+      "standard": "Standaard",
+      "compact": "Compact"
+    },
+    "privateDetails": {
+      "toggle": "Salarisverwachting en beschikbaarheid opnemen in de afdruk",
+      "title": "Salarisverwachting en beschikbaarheid",
+      "salary": "Salarisverwachting (EUR/maand)",
+      "availability": "Beschikbaarheid",
+      "availableFrom": "Beschikbaar vanaf",
+      "relocate": "Bereid te verhuizen",
+      "transport": "Eigen vervoer",
+      "yes": "Ja",
+      "no": "Nee",
+      "status": {
+        "available": "Beschikbaar",
+        "busy": "Bezet",
+        "unavailable": "Niet beschikbaar"
+      }
+    },
+    "tailored": {
+      "badge": "Cv op maat",
+      "forNeed": "Afgestemd op de aanvraag: {role}",
+      "basis": "Komt overeen met {matched} van {needTotal} gevraagde vaardigheden, {confirmed} met registraties",
+      "notVisible": "Deze aanvraag is niet zichtbaar voor jou — het standaard-cv wordt getoond.",
+      "noStructure": "Deze aanvraag heeft geen gestructureerde vaardigheidseisen — het standaard-cv wordt getoond.",
+      "matchedTag": "Sluit aan op de aanvraag"
+    }
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -7226,6 +7274,15 @@
       "basis": "{matched} van {total} vereiste vaardigheden komen overeen ({confirmed} door manager bevestigd)",
       "recognizedNote": "eisen herkend uit de behoeftetekst — nog niet bevestigd",
       "missingPrefix": "ontbreekt:"
+    },
+    "recommendations": {
+      "basisCompact": "{matched} van {total} vaardigheden, {confirmed} bevestigd",
+      "newBadge": "Nieuw",
+      "salaryWithin": "Loon past",
+      "salaryNegotiable": "Loon bespreekbaar",
+      "moreSkills": "+{n}",
+      "journalTitle": "Gerelateerd aan je registraties",
+      "journalLine": "Een recente journaalregistratie ondersteunde de vaardigheid “{skill}” — deze baan vraagt die"
     },
     "workerNext": {
       "add_work_evidence": "Volgende stap: voeg werkbewijs toe in je werkjournaal",
@@ -9014,6 +9071,126 @@
       "needs_followup": "Opvolging nodig",
       "approved": "Goedgekeurd",
       "closed": "Gesloten"
+    }
+  },
+  "cvSections": {
+    "grid": {
+      "title": "Volledigheid van je cv",
+      "hint": "Begin bij elk gewenst onderdeel — er is geen vaste volgorde.",
+      "filled": "Ingevuld",
+      "empty": "Leeg",
+      "open": "Openen"
+    },
+    "names": {
+      "summary": "Samenvatting",
+      "workHistory": "Werkervaring",
+      "education": "Opleiding",
+      "languages": "Talen",
+      "certificates": "Certificaten en licenties",
+      "skills": "Vaardigheden",
+      "projects": "Projecten",
+      "achievements": "Prestaties",
+      "salary": "Salarisverwachting",
+      "availability": "Beschikbaarheid"
+    },
+    "education": {
+      "title": "Opleiding",
+      "hint": "Voeg je opleiding toe — door jou opgegeven.",
+      "institution": "Instelling",
+      "program": "Opleiding / richting",
+      "type": "Type",
+      "startYear": "Startjaar",
+      "endYear": "Eindjaar",
+      "isCurrent": "Studeer momenteel",
+      "add": "Toevoegen",
+      "adding": "Opslaan…",
+      "save": "Opslaan",
+      "edit": "Bewerken",
+      "cancel": "Annuleren",
+      "remove": "Verwijderen",
+      "empty": "Nog geen opleidingsitems.",
+      "notEnabled": "Dit onderdeel is voorbereid maar nog niet ingeschakeld.",
+      "error": "Opslaan mislukt. Probeer opnieuw.",
+      "invalid": "Ongeldige waarde.",
+      "limit": "Limiet bereikt.",
+      "selfStated": "Door jou ingevuld."
+    },
+    "educationTypes": {
+      "primary": "Basisschool",
+      "secondary": "Middelbare school",
+      "vocational": "Vakopleiding (mbo)",
+      "college": "Hogeschool",
+      "university_bachelor": "Universiteit (bachelor)",
+      "university_master": "Universiteit (master)",
+      "doctorate": "Doctoraat",
+      "course_certificate": "Cursus / certificaat",
+      "other": "Overig"
+    },
+    "achievements": {
+      "title": "Prestaties en opgegeven certificaten",
+      "hint": "Prijzen, afgeronde cursussen en certificaten die je zelf opgeeft.",
+      "achTitle": "Titel",
+      "description": "Beschrijving",
+      "date": "Datum",
+      "type": "Type",
+      "add": "Toevoegen",
+      "adding": "Opslaan…",
+      "save": "Opslaan",
+      "edit": "Bewerken",
+      "cancel": "Annuleren",
+      "remove": "Verwijderen",
+      "empty": "Nog geen prestaties.",
+      "notEnabled": "Dit onderdeel is voorbereid maar nog niet ingeschakeld.",
+      "error": "Opslaan mislukt. Probeer opnieuw.",
+      "invalid": "Ongeldige waarde.",
+      "limit": "Limiet bereikt.",
+      "selfStated": "Door jou ingevuld.",
+      "declaredBadge": "Zelf opgegeven",
+      "confirmedBadge": "Met registraties"
+    },
+    "achievementTypes": {
+      "achievement": "Prestatie",
+      "award": "Prijs",
+      "course_completion": "Afgeronde cursus",
+      "declared_certificate": "Opgegeven certificaat",
+      "other": "Overig"
+    }
+  },
+  "cvImport": {
+    "reviewTitle": "Gedetecteerde cv-onderdelen",
+    "reviewHint": "Het systeem stelt alleen voor. Sla elk item op of verwijder het — jij beslist.",
+    "empty": "Geen gestructureerde items gevonden in de tekst.",
+    "groups": {
+      "workHistory": "Werkervaring",
+      "education": "Opleiding",
+      "languages": "Talen",
+      "certificates": "Certificaten",
+      "achievements": "Prestaties",
+      "salary": "Salarisverwachting",
+      "availability": "Beschikbaarheid"
+    },
+    "confirm": "Opslaan",
+    "saving": "Opslaan…",
+    "discard": "Verwijderen",
+    "confirmedLabel": "Opgeslagen",
+    "discardedLabel": "Verwijderd",
+    "replace": "Vervangen",
+    "conflict": "Er is al een andere waarde opgeslagen: {value}",
+    "needsMigration": "Dit onderdeel is voorbereid maar nog niet ingeschakeld — het item is niet opgeslagen.",
+    "error": "Opslaan mislukt. Probeer opnieuw.",
+    "invalid": "Ongeldige waarde.",
+    "aiHint": "AI-suggestie — controleer vóór het opslaan",
+    "chooseLevel": "Kies niveau",
+    "perMonth": "€/maand",
+    "availabilityKeys": {
+      "willingToRelocate": "Bereid te verhuizen",
+      "hasTransport": "Eigen vervoer",
+      "nightShiftsOk": "Kan nachtdiensten werken",
+      "weekendShiftsOk": "Kan in het weekend werken"
+    },
+    "imageOcr": {
+      "label": "Cv-foto / afbeelding (JPG, PNG)",
+      "note": "In voorbereiding — beeldherkenning werkt nog niet. Upload een PDF/DOCX of plak de tekst."
     }
   }
 }

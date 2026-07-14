@@ -20,7 +20,8 @@
       "service_request_responses": "Clears when you open the service requests page.",
       "pending_bookings": "Clears when you respond to the booking proposal.",
       "booking_responses": "Clears when you open the bookings page.",
-      "open_task_attention": "Clears when the task is completed, unblocked or rescheduled on the tasks page."
+      "open_task_attention": "Clears when the task is completed, unblocked or rescheduled on the tasks page.",
+      "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card)."
     }
   },
   "commandFinder": {
@@ -3112,6 +3113,12 @@
         "hide": "Hide",
         "hiddenTitle": "Hidden cards"
       },
+      "jobsCard": {
+        "title": "Jobs that fit me",
+        "viewAll": "All listings",
+        "empty": "No matching listings right now — add skills to your profile.",
+        "emptyCta": "Update profile"
+      },
       "myZone": {
         "actionsHeading": "Actions",
         "incompleteStatus": "Your information is not complete yet",
@@ -3719,7 +3726,8 @@
         "service_request_responses": "Answers to your requests",
         "pending_bookings": "Booking proposals awaiting response",
         "booking_responses": "Answers to your booking proposals",
-        "open_task_attention": "Tasks needing attention"
+        "open_task_attention": "Tasks needing attention",
+        "new_job_matches": "New job listings that fit you"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -6267,7 +6275,47 @@
     "notWorker": "CV export is available for worker profiles.",
     "summaryTitle": "Professional summary",
     "workHistoryTitle": "Work history",
-    "present": "Present"
+    "present": "Present",
+    "languagesTitle": "Languages",
+    "languagesSelfStated": "Languages as stated by the worker.",
+    "certificatesTitle": "Certificates & licences",
+    "declaredCertHint": "Listed by the worker",
+    "validUntil": "Valid until",
+    "drivingLicences": "Driving licence categories",
+    "educationTitle": "Education",
+    "achievementsTitle": "Achievements",
+    "projectsTitle": "Projects",
+    "projectsHint": "From work records",
+    "confirmedByManager": "With records",
+    "templates": {
+      "label": "Template",
+      "standard": "Standard",
+      "compact": "Compact"
+    },
+    "privateDetails": {
+      "toggle": "Include salary expectation & availability in the printout",
+      "title": "Salary expectation & availability",
+      "salary": "Salary expectation (EUR/month)",
+      "availability": "Availability",
+      "availableFrom": "Available from",
+      "relocate": "Willing to relocate",
+      "transport": "Has own transport",
+      "yes": "Yes",
+      "no": "No",
+      "status": {
+        "available": "Available",
+        "busy": "Busy",
+        "unavailable": "Unavailable"
+      }
+    },
+    "tailored": {
+      "badge": "Tailored CV",
+      "forNeed": "Tailored to the request: {role}",
+      "basis": "Matches {matched} of {needTotal} required skills, {confirmed} with records",
+      "notVisible": "This request is not visible to you — showing the standard CV.",
+      "noStructure": "This request has no structured skill requirements — showing the standard CV.",
+      "matchedTag": "Matches the request"
+    }
   },
   "todayScreen": {
     "eyebrow": "Today",
@@ -7226,6 +7274,15 @@
       "basis": "{matched} of {total} required skills match ({confirmed} manager-confirmed)",
       "recognizedNote": "requirements recognized from the demand text — not confirmed yet",
       "missingPrefix": "missing:"
+    },
+    "recommendations": {
+      "basisCompact": "{matched} of {total} skills, {confirmed} confirmed",
+      "newBadge": "New",
+      "salaryWithin": "Pay fits",
+      "salaryNegotiable": "Pay negotiable",
+      "moreSkills": "+{n}",
+      "journalTitle": "Related to your journal entries",
+      "journalLine": "A recent journal entry supported the skill “{skill}” — this job requires it"
     },
     "workerNext": {
       "add_work_evidence": "Next: add work evidence in your journal",
@@ -9014,6 +9071,126 @@
       "needs_followup": "Needs follow-up",
       "approved": "Approved",
       "closed": "Closed"
+    }
+  },
+  "cvSections": {
+    "grid": {
+      "title": "CV completeness",
+      "hint": "Start from any section — there is no required order.",
+      "filled": "Filled",
+      "empty": "Empty",
+      "open": "Open"
+    },
+    "names": {
+      "summary": "Summary",
+      "workHistory": "Work history",
+      "education": "Education",
+      "languages": "Languages",
+      "certificates": "Certificates & licences",
+      "skills": "Skills",
+      "projects": "Projects",
+      "achievements": "Achievements",
+      "salary": "Salary expectation",
+      "availability": "Availability"
+    },
+    "education": {
+      "title": "Education",
+      "hint": "Add your education — stated by you.",
+      "institution": "Institution",
+      "program": "Programme / field",
+      "type": "Type",
+      "startYear": "Start year",
+      "endYear": "End year",
+      "isCurrent": "Currently studying",
+      "add": "Add",
+      "adding": "Saving…",
+      "save": "Save",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "empty": "No education entries yet.",
+      "notEnabled": "This section is prepared but not enabled yet.",
+      "error": "Could not save. Try again.",
+      "invalid": "Invalid value.",
+      "limit": "Entry limit reached.",
+      "selfStated": "Entered by you."
+    },
+    "educationTypes": {
+      "primary": "Primary school",
+      "secondary": "Secondary school",
+      "vocational": "Vocational",
+      "college": "College",
+      "university_bachelor": "University (Bachelor)",
+      "university_master": "University (Master)",
+      "doctorate": "Doctorate",
+      "course_certificate": "Course / certificate",
+      "other": "Other"
+    },
+    "achievements": {
+      "title": "Achievements & declared certificates",
+      "hint": "Awards, completed courses, certificates you state yourself.",
+      "achTitle": "Title",
+      "description": "Description",
+      "date": "Date",
+      "type": "Type",
+      "add": "Add",
+      "adding": "Saving…",
+      "save": "Save",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "empty": "No achievements yet.",
+      "notEnabled": "This section is prepared but not enabled yet.",
+      "error": "Could not save. Try again.",
+      "invalid": "Invalid value.",
+      "limit": "Entry limit reached.",
+      "selfStated": "Entered by you.",
+      "declaredBadge": "Listed by you",
+      "confirmedBadge": "With records"
+    },
+    "achievementTypes": {
+      "achievement": "Achievement",
+      "award": "Award",
+      "course_completion": "Completed course",
+      "declared_certificate": "Declared certificate",
+      "other": "Other"
+    }
+  },
+  "cvImport": {
+    "reviewTitle": "Detected CV sections",
+    "reviewHint": "The system only suggests. Save or discard each entry — you decide.",
+    "empty": "No structured entries were detected in the text.",
+    "groups": {
+      "workHistory": "Work history",
+      "education": "Education",
+      "languages": "Languages",
+      "certificates": "Certificates",
+      "achievements": "Achievements",
+      "salary": "Salary expectation",
+      "availability": "Availability"
+    },
+    "confirm": "Save",
+    "saving": "Saving…",
+    "discard": "Discard",
+    "confirmedLabel": "Saved",
+    "discardedLabel": "Discarded",
+    "replace": "Replace",
+    "conflict": "A different value is already saved: {value}",
+    "needsMigration": "This section is prepared but not enabled yet — the entry was not saved.",
+    "error": "Could not save. Try again.",
+    "invalid": "Invalid value.",
+    "aiHint": "AI suggestion — review before saving",
+    "chooseLevel": "Choose level",
+    "perMonth": "€/month",
+    "availabilityKeys": {
+      "willingToRelocate": "Willing to relocate",
+      "hasTransport": "Has own transport",
+      "nightShiftsOk": "Can work night shifts",
+      "weekendShiftsOk": "Can work weekends"
+    },
+    "imageOcr": {
+      "label": "CV photo / image (JPG, PNG)",
+      "note": "In preparation — image recognition is not available yet. Upload a PDF/DOCX or paste the text."
     }
   }
 }

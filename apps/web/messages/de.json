@@ -20,7 +20,8 @@
       "service_request_responses": "Verschwindet, wenn Sie die Seite mit den Serviceanfragen öffnen.",
       "pending_bookings": "Verschwindet, wenn Sie auf den Buchungsvorschlag reagieren.",
       "booking_responses": "Verschwindet, wenn Sie die Buchungsseite öffnen.",
-      "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde."
+      "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde.",
+      "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen)."
     }
   },
   "commandFinder": {
@@ -3112,6 +3113,12 @@
         "hide": "Ausblenden",
         "hiddenTitle": "Ausgeblendete Karten"
       },
+      "jobsCard": {
+        "title": "Passende Jobs für mich",
+        "viewAll": "Alle Anzeigen",
+        "empty": "Derzeit keine passenden Anzeigen — ergänzen Sie Ihre Fähigkeiten im Profil.",
+        "emptyCta": "Profil ergänzen"
+      },
       "myZone": {
         "actionsHeading": "Aktionen",
         "incompleteStatus": "Ihre Angaben sind noch nicht vollständig",
@@ -3719,7 +3726,8 @@
         "service_request_responses": "Antworten auf Ihre Anfragen",
         "pending_bookings": "Buchungsvorschläge, die auf eine Antwort warten",
         "booking_responses": "Antworten auf Ihre Buchungsvorschläge",
-        "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen"
+        "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen",
+        "new_job_matches": "Neue Stellenanzeigen, die zu Ihnen passen"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -6267,7 +6275,47 @@
     "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt.",
     "summaryTitle": "Berufliches Profil",
     "workHistoryTitle": "Beruflicher Werdegang",
-    "present": "Heute"
+    "present": "Heute",
+    "languagesTitle": "Sprachen",
+    "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",
+    "certificatesTitle": "Zertifikate & Lizenzen",
+    "declaredCertHint": "Selbst angegeben",
+    "validUntil": "Gültig bis",
+    "drivingLicences": "Führerscheinklassen",
+    "educationTitle": "Ausbildung",
+    "achievementsTitle": "Erfolge",
+    "projectsTitle": "Projekte",
+    "projectsHint": "Aus Arbeitseinträgen",
+    "confirmedByManager": "Mit Einträgen",
+    "templates": {
+      "label": "Vorlage",
+      "standard": "Standard",
+      "compact": "Kompakt"
+    },
+    "privateDetails": {
+      "toggle": "Gehaltsvorstellung & Verfügbarkeit im Ausdruck aufnehmen",
+      "title": "Gehaltsvorstellung & Verfügbarkeit",
+      "salary": "Gehaltsvorstellung (EUR/Monat)",
+      "availability": "Verfügbarkeit",
+      "availableFrom": "Verfügbar ab",
+      "relocate": "Umzugsbereit",
+      "transport": "Eigenes Fahrzeug",
+      "yes": "Ja",
+      "no": "Nein",
+      "status": {
+        "available": "Verfügbar",
+        "busy": "Beschäftigt",
+        "unavailable": "Nicht verfügbar"
+      }
+    },
+    "tailored": {
+      "badge": "Zugeschnittener Lebenslauf",
+      "forNeed": "Zugeschnitten auf die Anfrage: {role}",
+      "basis": "Entspricht {matched} von {needTotal} geforderten Fähigkeiten, {confirmed} mit Einträgen",
+      "notVisible": "Diese Anfrage ist für Sie nicht sichtbar — der Standard-Lebenslauf wird angezeigt.",
+      "noStructure": "Diese Anfrage hat keine strukturierten Anforderungen — der Standard-Lebenslauf wird angezeigt.",
+      "matchedTag": "Passt zur Anfrage"
+    }
   },
   "todayScreen": {
     "eyebrow": "Heute",
@@ -7226,6 +7274,15 @@
       "basis": "{matched} von {total} erforderlichen Fähigkeiten passen ({confirmed} vom Manager bestätigt)",
       "recognizedNote": "Anforderungen aus dem Bedarfstext erkannt — noch nicht bestätigt",
       "missingPrefix": "fehlend:"
+    },
+    "recommendations": {
+      "basisCompact": "{matched} von {total} Fähigkeiten, {confirmed} bestätigt",
+      "newBadge": "Neu",
+      "salaryWithin": "Lohn passt",
+      "salaryNegotiable": "Lohn verhandelbar",
+      "moreSkills": "+{n}",
+      "journalTitle": "Passend zu Ihren Einträgen",
+      "journalLine": "Ein aktueller Journaleintrag stützte die Fähigkeit „{skill}“ — diese Stelle erfordert sie"
     },
     "workerNext": {
       "add_work_evidence": "Nächster Schritt: Arbeitsnachweise im Arbeitsjournal hinzufügen",
@@ -9014,6 +9071,126 @@
       "needs_followup": "Rückfrage nötig",
       "approved": "Genehmigt",
       "closed": "Geschlossen"
+    }
+  },
+  "cvSections": {
+    "grid": {
+      "title": "Vollständigkeit des Lebenslaufs",
+      "hint": "Beginnen Sie mit einem beliebigen Abschnitt — es gibt keine feste Reihenfolge.",
+      "filled": "Ausgefüllt",
+      "empty": "Leer",
+      "open": "Öffnen"
+    },
+    "names": {
+      "summary": "Zusammenfassung",
+      "workHistory": "Berufserfahrung",
+      "education": "Ausbildung",
+      "languages": "Sprachen",
+      "certificates": "Zertifikate & Lizenzen",
+      "skills": "Fähigkeiten",
+      "projects": "Projekte",
+      "achievements": "Erfolge",
+      "salary": "Gehaltsvorstellung",
+      "availability": "Verfügbarkeit"
+    },
+    "education": {
+      "title": "Ausbildung",
+      "hint": "Fügen Sie Ihre Ausbildung hinzu — von Ihnen angegeben.",
+      "institution": "Einrichtung",
+      "program": "Studiengang / Fachrichtung",
+      "type": "Art",
+      "startYear": "Beginnjahr",
+      "endYear": "Abschlussjahr",
+      "isCurrent": "Derzeit in Ausbildung",
+      "add": "Hinzufügen",
+      "adding": "Wird gespeichert…",
+      "save": "Speichern",
+      "edit": "Bearbeiten",
+      "cancel": "Abbrechen",
+      "remove": "Entfernen",
+      "empty": "Noch keine Ausbildungseinträge.",
+      "notEnabled": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert.",
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "invalid": "Ungültiger Wert.",
+      "limit": "Limit erreicht.",
+      "selfStated": "Von Ihnen eingetragen."
+    },
+    "educationTypes": {
+      "primary": "Grundschule",
+      "secondary": "Sekundarschule",
+      "vocational": "Berufsausbildung",
+      "college": "Fachhochschule",
+      "university_bachelor": "Universität (Bachelor)",
+      "university_master": "Universität (Master)",
+      "doctorate": "Promotion",
+      "course_certificate": "Kurs / Zertifikat",
+      "other": "Sonstiges"
+    },
+    "achievements": {
+      "title": "Erfolge & angegebene Zertifikate",
+      "hint": "Auszeichnungen, abgeschlossene Kurse und selbst angegebene Zertifikate.",
+      "achTitle": "Titel",
+      "description": "Beschreibung",
+      "date": "Datum",
+      "type": "Art",
+      "add": "Hinzufügen",
+      "adding": "Wird gespeichert…",
+      "save": "Speichern",
+      "edit": "Bearbeiten",
+      "cancel": "Abbrechen",
+      "remove": "Entfernen",
+      "empty": "Noch keine Erfolge.",
+      "notEnabled": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert.",
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "invalid": "Ungültiger Wert.",
+      "limit": "Limit erreicht.",
+      "selfStated": "Von Ihnen eingetragen.",
+      "declaredBadge": "Selbst angegeben",
+      "confirmedBadge": "Mit Einträgen"
+    },
+    "achievementTypes": {
+      "achievement": "Erfolg",
+      "award": "Auszeichnung",
+      "course_completion": "Abgeschlossener Kurs",
+      "declared_certificate": "Angegebenes Zertifikat",
+      "other": "Sonstiges"
+    }
+  },
+  "cvImport": {
+    "reviewTitle": "Erkannte Lebenslauf-Abschnitte",
+    "reviewHint": "Das System schlägt nur vor. Speichern oder verwerfen Sie jeden Eintrag — Sie entscheiden.",
+    "empty": "Keine strukturierten Einträge im Text erkannt.",
+    "groups": {
+      "workHistory": "Berufserfahrung",
+      "education": "Ausbildung",
+      "languages": "Sprachen",
+      "certificates": "Zertifikate",
+      "achievements": "Erfolge",
+      "salary": "Gehaltsvorstellung",
+      "availability": "Verfügbarkeit"
+    },
+    "confirm": "Speichern",
+    "saving": "Wird gespeichert…",
+    "discard": "Verwerfen",
+    "confirmedLabel": "Gespeichert",
+    "discardedLabel": "Verworfen",
+    "replace": "Ersetzen",
+    "conflict": "Ein anderer Wert ist bereits gespeichert: {value}",
+    "needsMigration": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert — der Eintrag wurde nicht gespeichert.",
+    "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "invalid": "Ungültiger Wert.",
+    "aiHint": "KI-Vorschlag — vor dem Speichern prüfen",
+    "chooseLevel": "Niveau wählen",
+    "perMonth": "€/Monat",
+    "availabilityKeys": {
+      "willingToRelocate": "Umzugsbereit",
+      "hasTransport": "Eigenes Fahrzeug",
+      "nightShiftsOk": "Kann Nachtschichten arbeiten",
+      "weekendShiftsOk": "Kann am Wochenende arbeiten"
+    },
+    "imageOcr": {
+      "label": "Lebenslauf-Foto / Bild (JPG, PNG)",
+      "note": "In Vorbereitung — Bilderkennung ist noch nicht verfügbar. Laden Sie PDF/DOCX hoch oder fügen Sie den Text ein."
     }
   }
 }
