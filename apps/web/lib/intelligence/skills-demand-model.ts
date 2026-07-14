@@ -17,6 +17,7 @@
  */
 import {
   applyCohortPolicy,
+  INTELLIGENCE_MIN_COHORT_N,
   type CohortBand,
 } from "./privacy";
 import {
@@ -212,7 +213,9 @@ export function computeSupplyDemandGap(
 
 // ── Emerging skills ──────────────────────────────────────────────────────────
 
-export const EMERGING_SKILLS_DEFAULT_MIN_SAMPLE = 5;
+// Derived from the single §20 cohort floor — never a drifting literal.
+export const EMERGING_SKILLS_DEFAULT_MIN_SAMPLE: number =
+  INTELLIGENCE_MIN_COHORT_N;
 
 export interface EmergingSkillItem {
   readonly skillSlug: string;
