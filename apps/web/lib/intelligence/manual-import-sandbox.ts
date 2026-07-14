@@ -74,6 +74,11 @@ export interface SandboxIssueTalliesV1 {
   readonly salaryFormat: number;
   readonly duplicateHashes: number;
   readonly sourceNotActive: number;
+  /** Rows whose metric key is unknown to the platform vocabulary. */
+  readonly unknownMetrics: number;
+  /** Rows whose metric the source's import policy does not permit
+   *  (missing / malformed / empty policy included — fail-closed). */
+  readonly metricPolicy: number;
   readonly dateIssues: number;
   readonly hashMismatches: number;
 }
@@ -223,6 +228,8 @@ function tally(failures: readonly ObservationValidationFailure[][]): SandboxIssu
     salaryFormat: 0,
     duplicateHashes: 0,
     sourceNotActive: 0,
+    unknownMetrics: 0,
+    metricPolicy: 0,
     dateIssues: 0,
     hashMismatches: 0,
   };
@@ -235,6 +242,8 @@ function tally(failures: readonly ObservationValidationFailure[][]): SandboxIssu
     if (checks.has("salary_structure")) counts.salaryFormat++;
     if (checks.has("duplicate")) counts.duplicateHashes++;
     if (checks.has("source_approved")) counts.sourceNotActive++;
+    if (checks.has("metric_key")) counts.unknownMetrics++;
+    if (checks.has("metric_policy")) counts.metricPolicy++;
     if (checks.has("date_validity")) counts.dateIssues++;
     if (checks.has("hash_integrity")) counts.hashMismatches++;
   }
@@ -329,7 +338,10 @@ export function runManualImportSandbox(
     }
     // Rows blocked ONLY by a registered-but-inactive source: these are the
     // rows activation would let through. unknown_source / kind-mismatch
-    // rows can NOT become valid by flipping an existing source on.
+    // rows can NOT become valid by flipping an existing source on — and
+    // neither can rows blocked by the metric import policy (missing /
+    // malformed / empty policy, unknown or unpermitted metric): activating
+    // a source without a recorded metric policy still imports NOTHING.
     if (
       failures.length > 0 &&
       failures.every(

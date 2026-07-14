@@ -48,12 +48,25 @@ flowchart LR
    integrity, in-file duplicate detection). All failures reported.
 4. Counts + issue breakdown: rows detected, valid, invalid, duplicates,
    missing fields, unknown countries/languages, salary format issues,
-   unsupported schema, date issues, hash mismatches.
+   unsupported schema, date issues, hash mismatches, unknown metrics,
+   metrics not allowed by the source's import policy.
 
 Readiness is NOT bypassed: rows from a non-active source fail
-`source_approved` in the sandbox too. The run additionally reports
-`validAfterActivation` — how many rows are blocked ONLY by the inactive
-source — which is a calculation about the future, not an override.
+`source_approved` in the sandbox too, and every row must ALSO pass the
+metric import-policy gate (metric-keys.ts): the metric key must exist in
+the canonical platform vocabulary AND be explicitly permitted by the
+source's RECORDED policy. A missing, malformed or empty policy rejects —
+absence is never permission, and no wildcard form exists. The run
+additionally reports `validAfterActivation` — how many rows are blocked
+ONLY by the inactive source — which is a calculation about the future,
+not an override. Rows also blocked by the metric policy (today: EVERY
+external row, because no external source has a recorded policy) are NOT
+counted: flipping activation alone would import nothing until the owner
+also records the permitted metric set.
+
+Deterministic metric rejection reasons: `metric_key:metric_key_unknown`,
+`metric_policy:import_policy_missing`, `metric_policy:import_policy_malformed`,
+`metric_policy:import_policy_empty`, `metric_policy:metric_not_permitted`.
 
 ## 3. Preview flow
 
@@ -79,8 +92,10 @@ country, language, salary basis (gross/net/unknown), DERIVED confidence
 ## 5. Future activation path
 
 1. Owner prepares a real export of the candidate source as a local file
-   and runs it through the sandbox until the issue breakdown is clean
-   (`validAfterActivation` = rows detected − true rejects).
+   and runs it through the sandbox until the issue breakdown is clean.
+   (`validAfterActivation` can only rise above 0 once the owner records
+   the source's permitted metric keys — until then every external row is
+   also policy-blocked, and the preview says so.)
 2. Owner completes the ten-item activation checklist
    (source-activation-playbook-v1 §3) — the sandbox result is evidence
    for the technical-approval item.

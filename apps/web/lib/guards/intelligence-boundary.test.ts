@@ -28,6 +28,10 @@ import {
   allExternalSourcesOff,
   isExternalSourceActive,
 } from "../intelligence/source-governance";
+import {
+  evaluateMetricPermission,
+  isKnownMetricKey,
+} from "../intelligence/metric-keys";
 
 const APP_ROOT = join(__dirname, "..", "..");
 const INTEL_DIR = join(APP_ROOT, "lib", "intelligence");
@@ -117,6 +121,30 @@ describe("(c) source governance keeps every external source inactive", () => {
       expect(isExternalSourceActive(p.key), `${p.key} active`).toBe(false);
     }
     expect(allExternalSourcesOff()).toBe(true);
+  });
+
+  it("metric import policy stays fail-closed: externals unrecorded, no wildcard anywhere, no allow-all escape", () => {
+    for (const p of INTELLIGENCE_SOURCE_PROFILES) {
+      if (p.sourceKind !== "internal_aggregated") {
+        // The owner has recorded NO metric policy for any external source —
+        // even activation would import nothing. Recording one is an owner
+        // action; this pin fails if code ever pre-fills it.
+        expect(p.importPolicy, `${p.key} importPolicy`).toBeNull();
+      } else {
+        // Internal policies are explicit, non-empty canonical subsets —
+        // never a wildcard, never "allow all".
+        expect(p.importPolicy, `${p.key} importPolicy`).not.toBeNull();
+        expect(p.importPolicy!.metricKeys.length).toBeGreaterThan(0);
+        for (const key of p.importPolicy!.metricKeys) {
+          expect(isKnownMetricKey(key), `${p.key}:${key}`).toBe(true);
+          expect(key).not.toContain("*");
+        }
+      }
+    }
+    // The evaluator itself refuses wildcard permission grammar.
+    expect(
+      evaluateMetricPermission({ metricKeys: ["*"] } as never, "salary.month.gross"),
+    ).toBe("import_policy_malformed");
   });
 });
 

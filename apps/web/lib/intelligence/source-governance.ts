@@ -17,6 +17,7 @@
  * never builds fetchable URLs. Pure module: no IO.
  */
 import type { ObservationSourceKind } from "./observation-contract";
+import type { SourceMetricImportPolicyV1 } from "./metric-keys";
 
 export type SourceLegalStatus = "confirmed" | "unconfirmed" | "refused";
 export type SourceActivation = "off" | "owner_review" | "on";
@@ -35,6 +36,16 @@ export interface IntelligenceSourceProfile {
   readonly homepage: string | null;
   /** True = the source is only ever a PROPOSAL until the owner confirms. */
   readonly proposedOnly: boolean;
+  /**
+   * The RECORDED metric import policy — the closed set of metric keys this
+   * source may ever produce. null = not recorded, and a source without a
+   * usable policy validates NOTHING (fail-closed), however active or
+   * approved it is. For external sources this stays null until the OWNER
+   * records the permitted metrics during the activation process — it is
+   * never inferred here. Internal policies below are code facts: they list
+   * exactly the metrics the platform's own derivations produce.
+   */
+  readonly importPolicy: SourceMetricImportPolicyV1 | null;
 }
 
 export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] =
@@ -51,6 +62,14 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       attributionRequired: false,
       homepage: null,
       proposedOnly: false,
+      // Code fact: skills-demand-model.ts derives exactly these two
+      // aggregates from canonical rows — nothing else is produced today.
+      importPolicy: {
+        metricKeys: [
+          "demand.role_request_count",
+          "demand.skill_request_count",
+        ],
+      },
     },
     {
       key: "admin_market_rate_averages",
@@ -64,6 +83,17 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       attributionRequired: false,
       homepage: null,
       proposedOnly: false,
+      // Code fact: curated market rates are salary benchmarks in the four
+      // unit shapes the salary-structure check accepts (month/hour ×
+      // gross/net) — see SALARY_METRIC_UNITS.
+      importPolicy: {
+        metricKeys: [
+          "salary.month.gross",
+          "salary.month.net",
+          "salary.hour.gross",
+          "salary.hour.net",
+        ],
+      },
     },
     {
       key: "stat_gov_lt",
@@ -76,6 +106,8 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       attributionRequired: true,
       homepage: "osp.stat.gov.lt",
       proposedOnly: true,
+      // Not recorded — an owner decision during activation. Fail-closed.
+      importPolicy: null,
     },
     {
       key: "eurostat",
@@ -87,6 +119,7 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       attributionRequired: true,
       homepage: "ec.europa.eu",
       proposedOnly: true,
+      importPolicy: null,
     },
     {
       // EURES — the EU job-mobility portal. PROPOSED only: multi-source
@@ -100,6 +133,7 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       attributionRequired: true,
       homepage: "eures.europa.eu",
       proposedOnly: true,
+      importPolicy: null,
     },
     {
       // Lithuanian Employment Service (Užimtumo tarnyba) — official labour
@@ -113,6 +147,7 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       attributionRequired: true,
       homepage: "uzt.lt",
       proposedOnly: true,
+      importPolicy: null,
     },
     {
       // CVbankas may only ever be a PROPOSED external benchmark until access
@@ -128,6 +163,7 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       attributionRequired: true,
       homepage: "cvbankas.lt",
       proposedOnly: true,
+      importPolicy: null,
     },
   ];
 

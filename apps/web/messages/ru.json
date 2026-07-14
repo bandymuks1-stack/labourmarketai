@@ -9640,6 +9640,8 @@
         "salaryFormat": "Проблемы формата зарплаты",
         "duplicateHashes": "Повторяющиеся хеши",
         "sourceNotActive": "Источник не активен",
+        "unknownMetrics": "Неизвестные метрики",
+        "metricPolicy": "Метрика не разрешена политикой источника",
         "dateIssues": "Проблемы дат",
         "hashMismatches": "Несовпадения хешей"
       },

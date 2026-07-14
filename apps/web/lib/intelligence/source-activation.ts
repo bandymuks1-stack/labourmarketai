@@ -19,6 +19,7 @@
  */
 import type { IntelligenceSourceProfile } from "./source-governance";
 import { deriveSourceLifecycleState } from "./source-lifecycle";
+import { isKnownMetricKey } from "./metric-keys";
 
 export const ACTIVATION_REQUIREMENT_IDS = [
   "owner_approval",
@@ -50,7 +51,10 @@ export interface SourceRateLimitPolicyV1 {
 }
 
 export interface SourceImportPolicyV1 {
-  /** Closed set of metric keys this source may ever produce. */
+  /** Closed set of metric keys this source may ever produce. Every key
+   *  must exist in the canonical vocabulary (metric-keys.ts) — readiness
+   *  rejects unknown keys, and validation enforces the same set via the
+   *  registry profile's importPolicy (fail-closed, no wildcards). */
   readonly metricKeys: readonly string[];
   /** Closed set of ISO-3166 alpha-2 countries this source may cover. */
   readonly countries: readonly string[];
@@ -181,6 +185,9 @@ export function evaluateActivationReadiness(
       "import_policy",
       facts.importPolicy !== null &&
         facts.importPolicy.metricKeys.length > 0 &&
+        // Every permitted metric must be a canonical platform metric —
+        // a policy naming unknown metrics can never green readiness.
+        facts.importPolicy.metricKeys.every(isKnownMetricKey) &&
         facts.importPolicy.countries.length > 0 &&
         facts.importPolicy.languages.length > 0 &&
         positiveInt(facts.importPolicy.maxSessionsPerDay),

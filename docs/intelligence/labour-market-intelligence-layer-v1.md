@@ -103,6 +103,7 @@ erDiagram
     text attribution_text
     text robots_status
     text rate_limit_note
+    jsonb import_policy "recorded permitted metric_keys; NULL = not recorded = imports nothing (fail-closed)"
     timestamptz owner_approved_at "required for activation=on"
     text owner_approval_note
   }

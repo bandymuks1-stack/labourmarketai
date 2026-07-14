@@ -7,9 +7,11 @@
  * handed to it and never reads or writes anything itself.
  *
  * Checks (ALL run — a rejection report lists every failure, not just the
- * first): schema · required fields · source approval · date validity ·
- * country allowlist · language allowlist · salary structure · content-hash
- * integrity · duplicate detection.
+ * first): schema · required fields · source approval · metric key
+ * (canonical vocabulary) · metric import policy (source must explicitly
+ * permit the metric) · date validity · country allowlist · language
+ * allowlist · salary structure · content-hash integrity · duplicate
+ * detection.
  *
  * Fail-closed by construction: with today's registry every external
  * source fails "source_approved", so NO external observation can validate
@@ -24,12 +26,15 @@ import {
   type IntelligenceObservationV1,
 } from "./observation-contract";
 import { computeObservationContentHash } from "./observation-hash";
+import { evaluateMetricPermission, isKnownMetricKey } from "./metric-keys";
 import { getSourceProfile, isExternalSourceActive } from "./source-governance";
 
 export const OBSERVATION_VALIDATION_CHECKS = [
   "schema",
   "required_fields",
   "source_approved",
+  "metric_key",
+  "metric_policy",
   "date_validity",
   "country",
   "language",
@@ -143,6 +148,27 @@ export function validateObservationCandidate(
       checkId: "source_approved",
       reasonCode: "source_not_active",
     });
+  }
+
+  // ── metric key + metric import policy (independent, fail-closed) ──────
+  // Two SEPARATE gates, both required, neither suppressing the other or
+  // the source checks above:
+  //   metric_key    — the candidate metric must exist in the canonical
+  //                   platform vocabulary (metric-keys.ts);
+  //   metric_policy — the source's RECORDED import policy must explicitly
+  //                   permit that metric. Missing / malformed / empty
+  //                   policy rejects — an approved or active source never
+  //                   authorizes every possible metric, and absence is
+  //                   never permission.
+  if (!isKnownMetricKey(observation.metricKey)) {
+    failures.push({ checkId: "metric_key", reasonCode: "metric_key_unknown" });
+  }
+  const metricPermission = evaluateMetricPermission(
+    profile?.importPolicy ?? null,
+    observation.metricKey,
+  );
+  if (metricPermission !== "permitted") {
+    failures.push({ checkId: "metric_policy", reasonCode: metricPermission });
   }
 
   // ── date validity ─────────────────────────────────────────────────────

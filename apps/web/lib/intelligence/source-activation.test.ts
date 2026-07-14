@@ -99,6 +99,21 @@ describe("evaluateActivationReadiness — ten requirements, all mandatory", () =
     }
   });
 
+  it("an import policy naming metrics unknown to the platform never greens readiness", () => {
+    const confirmed = { ...CVBANKAS, legalStatus: "confirmed" as const };
+    const readiness = evaluateActivationReadiness(confirmed, {
+      ...COMPLETE_FACTS,
+      importPolicy: {
+        ...COMPLETE_FACTS.importPolicy!,
+        metricKeys: ["salary.month.gross", "made.up.metric"],
+      },
+    });
+    expect(readiness.ready).toBe(false);
+    expect(
+      readiness.requirements.find((r) => r.id === "import_policy")!.satisfied,
+    ).toBe(false);
+  });
+
   it("robots 'not_applicable' greens ONLY official statistics APIs", () => {
     // A public-web source can never wave robots away as irrelevant…
     const confirmedWeb = { ...CVBANKAS, legalStatus: "confirmed" as const };

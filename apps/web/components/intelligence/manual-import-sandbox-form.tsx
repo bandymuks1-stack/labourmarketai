@@ -34,6 +34,8 @@ const TALLY_KEYS: readonly (keyof SandboxIssueTalliesV1)[] = [
   "salaryFormat",
   "duplicateHashes",
   "sourceNotActive",
+  "unknownMetrics",
+  "metricPolicy",
   "dateIssues",
   "hashMismatches",
 ];

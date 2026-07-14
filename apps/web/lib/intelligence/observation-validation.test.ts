@@ -23,7 +23,7 @@ function validObservation(overrides: Record<string, unknown> = {}) {
     unit: "eur_month_gross",
     statMethod: "median",
     sourceKind: "internal_aggregated",
-    sourceKey: "internal_platform_aggregates",
+    sourceKey: "admin_market_rate_averages",
     sourceUrl: null,
     derivationIds: ["agg-run-1"],
     capturedAt: "2026-07-10T08:00:00Z",
@@ -105,7 +105,7 @@ describe("validateObservationCandidate — deterministic gate", () => {
     // internal branch (and vice versa) — the registry is the truth.
     const mislabelled = validObservation({
       sourceKind: "approved_public_web",
-      sourceKey: "internal_platform_aggregates",
+      sourceKey: "admin_market_rate_averages",
       sourceUrl: "test://claimed-external",
       derivationIds: [],
     });
@@ -115,6 +115,123 @@ describe("validateObservationCandidate — deterministic gate", () => {
       checkId: "source_approved",
       reasonCode: "source_kind_mismatch",
     });
+  });
+
+  it("metric policy: a known metric the source does NOT permit is rejected", () => {
+    // internal_platform_aggregates records ONLY the demand aggregates —
+    // an internal salary row through it must fail the policy gate even
+    // though the source itself is approved and active.
+    const obs = validObservation({
+      sourceKey: "internal_platform_aggregates",
+    });
+    const result = validateObservationCandidate(candidate(obs), CONTEXT);
+    expect(result.ok).toBe(false);
+    expect(failuresOf(result)).toContainEqual({
+      checkId: "metric_policy",
+      reasonCode: "metric_not_permitted",
+    });
+    // …and the demand metric it DOES permit passes the policy gate.
+    const demandObs = validObservation({
+      sourceKey: "internal_platform_aggregates",
+      metricKey: "demand.role_request_count",
+      unit: "count",
+    });
+    const demandResult = validateObservationCandidate(
+      candidate(demandObs),
+      CONTEXT,
+    );
+    const demandChecks = new Set(
+      failuresOf(demandResult).map((f) => f.checkId),
+    );
+    expect(demandChecks.has("metric_policy")).toBe(false);
+    expect(demandChecks.has("metric_key")).toBe(false);
+  });
+
+  it("metric key unknown to the platform is rejected even with an approved source", () => {
+    const obs = validObservation({ metricKey: "salary.year.gross" });
+    const result = validateObservationCandidate(candidate(obs), CONTEXT);
+    expect(result.ok).toBe(false);
+    const failures = failuresOf(result);
+    expect(failures).toContainEqual({
+      checkId: "metric_key",
+      reasonCode: "metric_key_unknown",
+    });
+    // An unknown key is also outside the source's closed set — both
+    // independent gates report, neither suppresses the other.
+    expect(failures).toContainEqual({
+      checkId: "metric_policy",
+      reasonCode: "metric_not_permitted",
+    });
+  });
+
+  it("external sources fail policy (not recorded) AND inactivity together — activation alone never suffices", () => {
+    const obs = validObservation({
+      sourceKind: "approved_public_web",
+      sourceKey: "cvbankas_salary",
+      sourceUrl: "test://recorded-not-fetched",
+      derivationIds: [],
+    });
+    const result = validateObservationCandidate(candidate(obs), CONTEXT);
+    expect(result.ok).toBe(false);
+    const failures = failuresOf(result);
+    expect(failures).toContainEqual({
+      checkId: "source_approved",
+      reasonCode: "source_not_active",
+    });
+    expect(failures).toContainEqual({
+      checkId: "metric_policy",
+      reasonCode: "import_policy_missing",
+    });
+  });
+
+  it("a permitted metric never overrides a source-kind mismatch", () => {
+    // admin_market_rate_averages permits salary.month.gross — but the
+    // candidate lies about its kind, so it still fails source_approved.
+    const mislabelled = validObservation({
+      sourceKind: "approved_public_web",
+      sourceKey: "admin_market_rate_averages",
+      sourceUrl: "test://claimed-external",
+      derivationIds: [],
+    });
+    const result = validateObservationCandidate(candidate(mislabelled), CONTEXT);
+    expect(result.ok).toBe(false);
+    const failures = failuresOf(result);
+    expect(failures).toContainEqual({
+      checkId: "source_approved",
+      reasonCode: "source_kind_mismatch",
+    });
+    // The permitted metric did NOT suppress the mismatch…
+    const checks = new Set(failures.map((f) => f.checkId));
+    expect(checks.has("metric_policy")).toBe(false);
+  });
+
+  it("an unknown source reports missing policy alongside unknown_source", () => {
+    const obs = validObservation({ sourceKey: "no_such_source" });
+    const result = validateObservationCandidate(candidate(obs), CONTEXT);
+    expect(result.ok).toBe(false);
+    const failures = failuresOf(result);
+    expect(failures).toContainEqual({
+      checkId: "source_approved",
+      reasonCode: "unknown_source",
+    });
+    expect(failures).toContainEqual({
+      checkId: "metric_policy",
+      reasonCode: "import_policy_missing",
+    });
+  });
+
+  it("multiple genuine failures are reported together (metric gates included)", () => {
+    const obs = validObservation({
+      sourceKey: "internal_platform_aggregates", // salary not permitted
+      metricKey: "salary.year.gross", // unknown to the platform
+      geo: { country: "PL", region: null, city: null }, // country not allowed
+    });
+    const result = validateObservationCandidate(candidate(obs), CONTEXT);
+    expect(result.ok).toBe(false);
+    const checks = new Set(failuresOf(result).map((f) => f.checkId));
+    for (const expected of ["metric_key", "metric_policy", "country"]) {
+      expect(checks.has(expected as never), expected).toBe(true);
+    }
   });
 
   it("schema vs required_fields are classified separately", () => {

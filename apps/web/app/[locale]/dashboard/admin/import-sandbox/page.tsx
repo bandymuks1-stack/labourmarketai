@@ -53,6 +53,8 @@ const SANDBOX_LABEL_KEYS = [
   "tallies.salaryFormat",
   "tallies.duplicateHashes",
   "tallies.sourceNotActive",
+  "tallies.unknownMetrics",
+  "tallies.metricPolicy",
   "tallies.dateIssues",
   "tallies.hashMismatches",
   "preview.title",
