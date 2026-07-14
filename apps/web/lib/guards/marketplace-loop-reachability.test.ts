@@ -36,6 +36,7 @@ const ZERO: SpineCounts = {
   bookingResponsesNew: 0,
   pendingInvitations: 0,
   openTaskAttention: 0,
+  newJobMatches: 0,
 };
 
 describe("the control-room grid exposes always-on access to both loop halves", () => {

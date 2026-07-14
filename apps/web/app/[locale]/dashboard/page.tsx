@@ -10,6 +10,7 @@ import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
 import { DashboardModuleGrid } from "@/components/app/dashboard/dashboard-module-grid";
 import { DashboardStatusStrip } from "@/components/app/dashboard/dashboard-status-strip";
+import { JobRecommendationsCard } from "@/components/app/dashboard/job-recommendations-card";
 import { MyZone } from "@/components/app/my-zone";
 import { PrivacyStatusCard } from "@/components/app/privacy-status-card";
 import { getOwnCompany } from "@/lib/company/company-setup";
@@ -665,6 +666,13 @@ export default async function DashboardOverviewPage({
         ]}
       />
       <DashboardModuleGrid modules={controlRoom.modules} />
+
+      {/* "Man tinkantys darbai" — top 3 recommendations from the ONE
+          request-cached read model (same PR4 engine as the board). §19 basis
+          form on every row; honest empty state; renders nothing while the
+          gated worker-visibility RPC is unapplied. The module grid above
+          carries the matching new-job-matches badge from the spine. */}
+      <JobRecommendationsCard locale={locale} />
 
       {/* Remaining real pending states — everything the top slot did NOT
           promote, same honest count-gated cards as before. */}

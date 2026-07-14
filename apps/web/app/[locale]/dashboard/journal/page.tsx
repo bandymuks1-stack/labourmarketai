@@ -26,6 +26,7 @@ import {
 } from "@/lib/journal/review-status";
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
 import { EmptyState } from "@/components/app/empty-state";
+import { JournalJobContext } from "@/components/app/journal-job-context";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { createClient } from "@/lib/supabase/server";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
@@ -1014,6 +1015,13 @@ export default async function JournalPage({
           </div>
         )}
       </section>
+
+      {/* "Susiję su jūsų įrašais" — journal→jobs context (Job Recommendation
+          Engine surfacing). Self-contained component, ONE insertion point;
+          deterministic journal_entry_skills ∩ recommendation skill sets;
+          honest empty → renders nothing. order-6 keeps it after the diary
+          and composer in the visual order. */}
+      <JournalJobContext workerId={worker.id} locale={locale} />
     </div>
   );
 }

@@ -78,6 +78,7 @@ const ZERO: SpineCounts = {
   bookingResponsesNew: 0,
   pendingInvitations: 0,
   openTaskAttention: 0,
+  newJobMatches: 0,
 };
 
 /** Walk a source dir collecting ts/tsx files (skips tests). */

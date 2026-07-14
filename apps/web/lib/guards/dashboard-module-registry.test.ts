@@ -50,6 +50,7 @@ const ZERO: SpineCounts = {
   bookingResponsesNew: 0,
   pendingInvitations: 0,
   openTaskAttention: 0,
+  newJobMatches: 0,
 };
 
 /** Removed / preview / stub surfaces a module may never target (mirror of
@@ -227,6 +228,7 @@ describe("4. attention is spine-only (real counts, never a parallel number)", ()
       bookingResponsesNew: 6,
       pendingInvitations: 7,
       openTaskAttention: 8,
+      newJobMatches: 9,
     };
     const vm = buildControlRoomViewModel({
       role: "worker",
@@ -237,6 +239,9 @@ describe("4. attention is spine-only (real counts, never a parallel number)", ()
     expect(byId.get("communication")).toBe(2);
     expect(byId.get("service_requests")).toBe(3 + 4);
     expect(byId.get("bookings")).toBe(5 + 6);
+    // Job Recommendation surfacing: the board card carries the aggregate
+    // unseen-matches count (the SAME number the bell shows).
+    expect(byId.get("opportunities")).toBe(9);
     // Modules without a wired signal never fabricate a badge.
     expect(byId.get("journal")).toBe(0);
     expect(byId.get("services")).toBe(0);

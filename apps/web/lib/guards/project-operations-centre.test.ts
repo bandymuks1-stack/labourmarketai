@@ -471,6 +471,7 @@ describe("7. registered everywhere a module must be", () => {
     bookingResponsesNew: 0,
     pendingInvitations: 0,
     openTaskAttention: 0,
+    newJobMatches: 0,
   };
 
   it("module registry: projects → /dashboard/projects, grid+command, ORG roles, briefcase icon", () => {

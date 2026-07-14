@@ -12,6 +12,7 @@ import {
   OpportunityStructuredSections,
   payText,
 } from "@/components/app/opportunity-structured-detail";
+import { MarkOpportunitiesSeen } from "@/components/app/mark-opportunities-seen";
 import { RecentlyViewedStrip } from "@/components/app/recently-viewed-strip";
 import { WorkerSaveOpportunityButton } from "@/components/app/worker-save-opportunity-button";
 import {
@@ -261,6 +262,16 @@ export default async function OpportunitiesPage({
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
         metadata={{ surface: "opportunities", role_context: "worker" }}
       />
+      {/* Recommendation seen markers (anti-spam): the board renders every
+          authorized open demand, so visiting IS the read event — the
+          aggregate "new matching jobs" spine signal clears here. Best-effort
+          no-op while the owner-gated worker_opportunity_seen store is
+          unapplied. */}
+      {result.kind === "ready" && result.opportunities.length > 0 && (
+        <MarkOpportunitiesSeen
+          requestIds={result.opportunities.map((o) => o.need.id)}
+        />
+      )}
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("title")}

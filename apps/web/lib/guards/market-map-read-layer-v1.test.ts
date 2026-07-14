@@ -254,6 +254,17 @@ describe("NO new DB migration in this PR", () => {
     // agent runs (admin-only SELECT, service-role-only writes, UPDATE/DELETE
     // revoked for every role). DRAFT / needs-human-gate, NOT applied; paired
     // rollback + deferred APPLIED_LEDGER entry in the PR.
-    expect(count).toBeLessThanOrEqual(133);
+    // Bumped 133 -> 135 for the Full CV System v1 drafts
+    // (20260714160000_worker_education_achievements_v1 +
+    // 20260714161000_self_declared_work_history_v1): owner-only education/
+    // achievements stores + self-declared work-history RPCs. DRAFT /
+    // needs-human-gate, NOT applied; paired rollbacks + deferred
+    // APPLIED_LEDGER entries.
+    // Bumped 135 -> 136 for the Job Recommendation seen-marker draft
+    // (20260714170000_worker_opportunity_seen_v1): ONE first-seen table +
+    // gated mark RPC powering the honest "new matches" spine count. DRAFT /
+    // needs-human-gate, NOT applied; paired rollback + deferred
+    // APPLIED_LEDGER entry.
+    expect(count).toBeLessThanOrEqual(136);
   });
 });
