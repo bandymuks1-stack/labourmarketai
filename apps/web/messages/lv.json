@@ -2722,6 +2722,45 @@
     "drawer": {
       "limitations": "Zināmie ierobežojumi",
       "timelineUnavailable": "Soli pa solim izcelsmes josla šeit parādīsies, kad novērojumu krātuve tiks ieslēgta."
+    },
+    "activation": {
+      "title": "Avotu aktivizācijas gatavība",
+      "intro": "Katram ārējam avotam jāiztur visas desmit pārbaudes, pirms īpašnieks vispār var lemt par tā aktivizēšanu. Šajā lapā neko nevar apstiprināt vai aktivizēt — tā tikai godīgi parāda, kur katrs avots atrodas šodien.",
+      "status": {
+        "green": "Izpildīts",
+        "red": "Trūkst"
+      },
+      "item": {
+        "owner_approval": "Īpašnieka apstiprinājums reģistrēts",
+        "technical_approval": "Tehniskais apstiprinājums reģistrēts",
+        "legal_approval": "Juridiskā pārbaude apstiprināta",
+        "robots_check": "Robots politika pārskatīta un atļaujoša",
+        "terms_review": "Lietošanas noteikumi pārskatīti",
+        "rate_limits": "Pieprasījumu limiti definēti",
+        "import_policy": "Importa politika definēta (rādītāji, valstis, valodas)",
+        "retention_policy": "Glabāšanas politika definēta",
+        "rollback_plan": "Rakstisks atcelšanas plāns sagatavots",
+        "kill_switch": "Avārijas slēdzis ieviests un pārbaudīts"
+      },
+      "veto": {
+        "killSwitchEngaged": "Avārijas slēdzis ir ieslēgts — nekas nedrīkst darboties, kamēr īpašnieks to neatbrīvo.",
+        "robotsDisallow": "Robots politikas pārbaude bija negatīva — šo avotu nekad nevarēs aktivizēt, savācot citus apstiprinājumus.",
+        "legalRefused": "Juridiskā pārbaude šo avotu noraidīja.",
+        "lifecycleBlocked": "Šis avots ir bloķēts.",
+        "internalSource": "Iekšējie dati nekad neiziet ārējā avota aktivizāciju."
+      },
+      "allGreenNote": "Visi punkti ir zaļi. Pati aktivizācija joprojām ir atsevišķs īpašnieka lēmums, ko reģistrē avotu reģistrā.",
+      "notReadyNote": "Ne visi punkti ir zaļi — aktivizācija nav iespējama."
+    },
+    "health": {
+      "offline": "Bezsaistē",
+      "waitingApproval": "Gaida apstiprinājumu",
+      "paused": "Apturēts",
+      "healthy": "Vesels",
+      "error": "Kļūme",
+      "blocked": "Bloķēts",
+      "maintenance": "Apkope",
+      "unknown": "Nezināms"
     }
   }
 }

@@ -2722,6 +2722,45 @@
     "drawer": {
       "limitations": "Znane ograniczenia",
       "timelineUnavailable": "Oś pochodzenia krok po kroku pojawi się tutaj, gdy magazyn obserwacji zostanie włączony."
+    },
+    "activation": {
+      "title": "Gotowość źródeł do aktywacji",
+      "intro": "Każde zewnętrzne źródło musi przejść wszystkie dziesięć kontroli, zanim właściciel w ogóle będzie mógł decydować o aktywacji. Na tej stronie niczego nie można zatwierdzić ani aktywować — uczciwie pokazuje ona, gdzie każde źródło znajduje się dzisiaj.",
+      "status": {
+        "green": "Gotowe",
+        "red": "Brak"
+      },
+      "item": {
+        "owner_approval": "Zatwierdzenie właściciela odnotowane",
+        "technical_approval": "Zatwierdzenie techniczne odnotowane",
+        "legal_approval": "Przegląd prawny potwierdzony",
+        "robots_check": "Polityka robots sprawdzona i zezwalająca",
+        "terms_review": "Warunki użytkowania sprawdzone",
+        "rate_limits": "Limity zapytań zdefiniowane",
+        "import_policy": "Polityka importu zdefiniowana (metryki, kraje, języki)",
+        "retention_policy": "Polityka przechowywania zdefiniowana",
+        "rollback_plan": "Pisemny plan wycofania przygotowany",
+        "kill_switch": "Wyłącznik awaryjny wdrożony i przetestowany"
+      },
+      "veto": {
+        "killSwitchEngaged": "Wyłącznik awaryjny jest włączony — nic nie może działać, dopóki właściciel go nie zwolni.",
+        "robotsDisallow": "Przegląd polityki robots dał wynik negatywny — tego źródła nigdy nie da się aktywować, zbierając inne zatwierdzenia.",
+        "legalRefused": "Przegląd prawny odrzucił to źródło.",
+        "lifecycleBlocked": "To źródło jest zablokowane.",
+        "internalSource": "Dane wewnętrzne nigdy nie przechodzą przez aktywację źródła zewnętrznego."
+      },
+      "allGreenNote": "Wszystkie punkty są zielone. Sama aktywacja pozostaje osobną decyzją właściciela, odnotowywaną w rejestrze źródeł.",
+      "notReadyNote": "Nie wszystkie punkty są zielone — aktywacja jest niemożliwa."
+    },
+    "health": {
+      "offline": "Niedostępne",
+      "waitingApproval": "Oczekuje na zatwierdzenie",
+      "paused": "Wstrzymane",
+      "healthy": "Sprawne",
+      "error": "Awaria",
+      "blocked": "Zablokowane",
+      "maintenance": "Konserwacja",
+      "unknown": "Nieznane"
     }
   }
 }

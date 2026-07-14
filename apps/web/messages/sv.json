@@ -2722,6 +2722,45 @@
     "drawer": {
       "limitations": "Kända begränsningar",
       "timelineUnavailable": "Steg-för-steg-ursprungslinjen visas här när observationslagret slås på."
+    },
+    "activation": {
+      "title": "Källors aktiveringsberedskap",
+      "intro": "Varje extern källa måste klara alla tio kontroller innan ägaren över huvud taget kan besluta om aktivering. Inget på denna sida kan godkänna eller aktivera något — den visar bara ärligt var varje källa står i dag.",
+      "status": {
+        "green": "Klart",
+        "red": "Saknas"
+      },
+      "item": {
+        "owner_approval": "Ägarens godkännande registrerat",
+        "technical_approval": "Tekniskt godkännande registrerat",
+        "legal_approval": "Juridisk granskning bekräftad",
+        "robots_check": "Robots-policy granskad och tillåtande",
+        "terms_review": "Användarvillkor granskade",
+        "rate_limits": "Förfrågningsgränser definierade",
+        "import_policy": "Importpolicy definierad (mått, länder, språk)",
+        "retention_policy": "Lagringspolicy definierad",
+        "rollback_plan": "Skriftlig återställningsplan på plats",
+        "kill_switch": "Nödbrytare implementerad och testad"
+      },
+      "veto": {
+        "killSwitchEngaged": "Nödbrytaren är aktiverad — inget får köras förrän ägaren släpper den.",
+        "robotsDisallow": "Granskningen av robots-policyn var negativ — denna källa kan aldrig aktiveras genom att samla andra godkännanden.",
+        "legalRefused": "Den juridiska granskningen avvisade denna källa.",
+        "lifecycleBlocked": "Denna källa är blockerad.",
+        "internalSource": "Interna data går aldrig genom aktivering av en extern källa."
+      },
+      "allGreenNote": "Alla punkter är gröna. Själva aktiveringen är fortfarande ett separat ägarbeslut som registreras i källregistret.",
+      "notReadyNote": "Alla punkter är inte gröna — aktivering är inte möjlig."
+    },
+    "health": {
+      "offline": "Frånkopplad",
+      "waitingApproval": "Väntar på godkännande",
+      "paused": "Pausad",
+      "healthy": "Frisk",
+      "error": "Felar",
+      "blocked": "Blockerad",
+      "maintenance": "Underhåll",
+      "unknown": "Okänd"
     }
   }
 }

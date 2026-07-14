@@ -9561,6 +9561,45 @@
     "drawer": {
       "limitations": "Žinomi ribotumai",
       "timelineUnavailable": "Žingsnis po žingsnio kilmės juosta čia atsiras, kai bus įjungta stebėjimų duomenų saugykla."
+    },
+    "activation": {
+      "title": "Šaltinių aktyvavimo parengtis",
+      "intro": "Kiekvienas išorinis šaltinis turi praeiti visus dešimt patikrų, kad savininkas apskritai galėtų spręsti dėl jo aktyvavimo. Šiame puslapyje nieko negalima patvirtinti ar aktyvuoti — jis tik sąžiningai parodo, kur kiekvienas šaltinis yra šiandien.",
+      "status": {
+        "green": "Atlikta",
+        "red": "Trūksta"
+      },
+      "item": {
+        "owner_approval": "Užfiksuotas savininko patvirtinimas",
+        "technical_approval": "Užfiksuotas techninis patvirtinimas",
+        "legal_approval": "Patvirtinta teisinė peržiūra",
+        "robots_check": "Robots politika peržiūrėta ir leidžia",
+        "terms_review": "Peržiūrėtos naudojimo sąlygos",
+        "rate_limits": "Apibrėžti užklausų limitai",
+        "import_policy": "Apibrėžta importo politika (rodikliai, šalys, kalbos)",
+        "retention_policy": "Apibrėžta saugojimo politika",
+        "rollback_plan": "Parengtas rašytinis atstatymo planas",
+        "kill_switch": "Avarinis išjungiklis įdiegtas ir išbandytas"
+      },
+      "veto": {
+        "killSwitchEngaged": "Įjungtas avarinis išjungiklis — niekas negali veikti, kol savininkas jo neatleis.",
+        "robotsDisallow": "Robots politikos peržiūra buvo neigiama — šio šaltinio niekada nebus galima aktyvuoti surinkus kitus patvirtinimus.",
+        "legalRefused": "Teisinė peržiūra šį šaltinį atmetė.",
+        "lifecycleBlocked": "Šis šaltinis užblokuotas.",
+        "internalSource": "Vidiniai duomenys niekada neina per išorinio šaltinio aktyvavimą."
+      },
+      "allGreenNote": "Visi punktai žali. Pats aktyvavimas vis tiek yra atskiras savininko sprendimas, fiksuojamas šaltinių registre.",
+      "notReadyNote": "Ne visi punktai žali — aktyvavimas negalimas."
+    },
+    "health": {
+      "offline": "Nepasiekiamas",
+      "waitingApproval": "Laukia patvirtinimo",
+      "paused": "Pristabdytas",
+      "healthy": "Veikia",
+      "error": "Triktis",
+      "blocked": "Užblokuotas",
+      "maintenance": "Priežiūra",
+      "unknown": "Nežinoma"
     }
   }
 }
