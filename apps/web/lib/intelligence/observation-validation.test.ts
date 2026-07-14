@@ -100,6 +100,23 @@ describe("validateObservationCandidate — deterministic gate", () => {
     }
   });
 
+  it("a claimed sourceKind that contradicts the registry is a hard failure", () => {
+    // An external kind riding on an internal key must NOT be judged by the
+    // internal branch (and vice versa) — the registry is the truth.
+    const mislabelled = validObservation({
+      sourceKind: "approved_public_web",
+      sourceKey: "internal_platform_aggregates",
+      sourceUrl: "test://claimed-external",
+      derivationIds: [],
+    });
+    const result = validateObservationCandidate(candidate(mislabelled), CONTEXT);
+    expect(result.ok).toBe(false);
+    expect(failuresOf(result)).toContainEqual({
+      checkId: "source_approved",
+      reasonCode: "source_kind_mismatch",
+    });
+  });
+
   it("schema vs required_fields are classified separately", () => {
     const result = validateObservationCandidate(
       candidate({ subjectKind: "profession", valueNumeric: "NaN-ish" }),

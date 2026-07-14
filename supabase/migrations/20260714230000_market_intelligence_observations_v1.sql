@@ -124,10 +124,12 @@ create table if not exists public.market_intelligence_observations (
     check (source_kind = 'internal_aggregated' or source_url is not null),
   derivation_ids    text[] not null default '{}',
   -- internal observations must carry derivation ids pointing at the canonical
-  -- rows they were derived from (no unexplainable internal numbers)
+  -- rows they were derived from (no unexplainable internal numbers).
+  -- cardinality(), not array_length(): array_length('{}',1) is NULL, which a
+  -- CHECK treats as pass — the empty default would slip through.
   constraint market_intelligence_observations_internal_needs_derivation
     check (source_kind <> 'internal_aggregated'
-           or array_length(derivation_ids, 1) >= 1),
+           or cardinality(derivation_ids) >= 1),
   -- validity / versioning (append-preferred: supersede via valid_to)
   captured_at       timestamptz not null,
   valid_from        timestamptz not null,
@@ -219,7 +221,11 @@ drop policy if exists market_intelligence_insight_queries_insert
 create policy market_intelligence_insight_queries_insert
   on public.market_intelligence_insight_queries
   for insert to authenticated
-  with check (profile_id = auth.uid() or profile_id is null);
+  -- Strictly self-attributed: an authenticated session can never write an
+  -- unattributed (NULL profile_id) audit row — the log stays reliable.
+  -- (logInsightQuery always records the caller's own id; unattributed rows
+  -- would only ever come from the service-role path, which bypasses RLS.)
+  with check (profile_id = auth.uid());
 
 -- ── 5. Grants — explicit, fail-closed (mirrors ai_runs_audit_v1) ────────────
 revoke all on public.market_intelligence_sources from anon;

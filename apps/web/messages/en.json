@@ -9511,7 +9511,8 @@
       },
       "notKnown": {
         "grossNetBasis": "Whether the figures are gross or net is not known.",
-        "noObservationStore": "The observation store is not enabled yet, so individual observation references are not available."
+        "noObservationStore": "The observation store is not enabled yet, so individual observation references are not available.",
+        "demandMultiBucket": "The step-by-step derivation describes the first demand group only — this card combines several groups whose geography and sample sizes differ."
       }
     },
     "trustCard": {
@@ -9542,12 +9543,16 @@
         "demandNoOwnRows": "There is no demand figure here because your organisation has no demand entries in the trailing 90 days — this card counts only your own real entries.",
         "supplyNotMeasured": "There is no supply figure here because worker availability is not aggregated yet: the observations data store is prepared but switched off.",
         "skillGapNeedsBoth": "There is no skill-gap figure here because it needs both a demand and a supply aggregate — neither is published while the observations data store is switched off.",
-        "trendNeedsHistory": "There is no trend here because a trend needs a history of dated observations, and the observations data store is prepared but switched off. A trend is never drawn from a single point."
+        "trendNeedsHistory": "There is no trend here because a trend needs a history of dated observations, and the observations data store is prepared but switched off. A trend is never drawn from a single point.",
+        "salaryBasisNotComparable": "There is no salary figure here because a curated market rate exists for your profession and country, but it cannot be honestly compared: it is not recorded whether the amounts are gross or net. An unclear comparison is never shown.",
+        "salaryInputsMissing": "There is no salary figure here because a curated market rate exists, but your own expected salary is missing, so there is nothing to compare it against."
       },
       "requirement": {
         "ownerEnableStore": "The platform owner must switch on the observations data store and approve at least one data source.",
         "salaryBenchmark": "An administrator must enter a curated market rate for your profession and country, or the platform owner must approve an external salary source.",
-        "demandOwnRows": "Add work requests — this card fills from your organisation's own data as soon as entries exist."
+        "demandOwnRows": "Add work requests — this card fills from your organisation's own data as soon as entries exist.",
+        "salaryBasis": "The pay basis (gross or net) must be recorded for both your expected salary and the curated market rate before an honest comparison can be shown.",
+        "salaryInputs": "Enter your expected salary in your worker profile — the comparison appears as soon as it exists."
       },
       "after": {
         "activation": "After the owner approves and activates an input, this card fills with sourced, dated figures — each carrying its confidence, freshness, source and step-by-step derivation."

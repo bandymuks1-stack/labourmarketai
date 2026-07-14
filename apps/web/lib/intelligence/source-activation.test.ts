@@ -99,6 +99,32 @@ describe("evaluateActivationReadiness — ten requirements, all mandatory", () =
     }
   });
 
+  it("robots 'not_applicable' greens ONLY official statistics APIs", () => {
+    // A public-web source can never wave robots away as irrelevant…
+    const confirmedWeb = { ...CVBANKAS, legalStatus: "confirmed" as const };
+    const web = evaluateActivationReadiness(confirmedWeb, {
+      ...COMPLETE_FACTS,
+      robotsStatus: "not_applicable",
+    });
+    expect(web.ready).toBe(false);
+    expect(
+      web.requirements.find((r) => r.id === "robots_check")!.satisfied,
+    ).toBe(false);
+    // …while an official statistics API may record the documented exemption.
+    const official = {
+      ...getSourceProfile("stat_gov_lt")!,
+      legalStatus: "confirmed" as const,
+    };
+    const officialReadiness = evaluateActivationReadiness(official, {
+      ...COMPLETE_FACTS,
+      robotsStatus: "not_applicable",
+    });
+    expect(
+      officialReadiness.requirements.find((r) => r.id === "robots_check")!
+        .satisfied,
+    ).toBe(true);
+  });
+
   it("vetoes outrank a complete fact set", () => {
     const confirmed = { ...CVBANKAS, legalStatus: "confirmed" as const };
     // Engaged kill switch.

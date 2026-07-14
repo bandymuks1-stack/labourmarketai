@@ -205,10 +205,23 @@ describe("buildWorkerSalaryTrustCard", () => {
     expect(card.timeline!.firstTimestampIso).toBe(BENCHMARK.observedAtIso);
   });
 
-  it("missing benchmark / refused comparison → honest unavailable card", () => {
-    for (const input of [
-      null,
-      { benchmark: null, comparison: null },
+  it("missing benchmark → honest unavailable card asking for a curated rate", () => {
+    for (const input of [null, { benchmark: null, comparison: null }]) {
+      const card = buildWorkerSalaryTrustCard(input, NOW);
+      expect(card.status).toBe("unavailable");
+      expect(card.report).toBeNull();
+      expect(card.unavailable!.reasonCode).toBe(
+        "intelligence.trustCard.reason.salaryNoBenchmark",
+      );
+      expect(card.unavailable!.requirementCode).toBe(
+        "intelligence.trustCard.requirement.salaryBenchmark",
+      );
+    }
+  });
+
+  it("existing benchmark + refused comparison → the REAL reason, never 'no rate exists'", () => {
+    // basis unknown/mismatch: the rate exists — saying otherwise would lie.
+    const basisCard = buildWorkerSalaryTrustCard(
       {
         benchmark: BENCHMARK,
         comparison: {
@@ -216,14 +229,34 @@ describe("buildWorkerSalaryTrustCard", () => {
           reasonCode: "basis_unknown",
         } as SalaryComparisonResult,
       },
-    ]) {
-      const card = buildWorkerSalaryTrustCard(input, NOW);
-      expect(card.status).toBe("unavailable");
-      expect(card.report).toBeNull();
-      expect(card.unavailable!.requirementCode).toBe(
-        "intelligence.trustCard.requirement.salaryBenchmark",
-      );
-    }
+      NOW,
+    );
+    expect(basisCard.status).toBe("unavailable");
+    expect(basisCard.unavailable!.reasonCode).toBe(
+      "intelligence.trustCard.reason.salaryBasisNotComparable",
+    );
+    expect(basisCard.unavailable!.requirementCode).toBe(
+      "intelligence.trustCard.requirement.salaryBasis",
+    );
+
+    // missing own inputs next to an existing rate → the inputs reason.
+    const inputsCard = buildWorkerSalaryTrustCard(
+      {
+        benchmark: BENCHMARK,
+        comparison: {
+          kind: "insufficient_data",
+          missingCodes: ["intelligence.missing.subjectSalary"],
+        } as SalaryComparisonResult,
+      },
+      NOW,
+    );
+    expect(inputsCard.status).toBe("unavailable");
+    expect(inputsCard.unavailable!.reasonCode).toBe(
+      "intelligence.trustCard.reason.salaryInputsMissing",
+    );
+    expect(inputsCard.unavailable!.requirementCode).toBe(
+      "intelligence.trustCard.requirement.salaryInputs",
+    );
   });
 });
 
@@ -256,6 +289,10 @@ describe("buildCompanyDemandTrustCard", () => {
     // exact 7 ≥ cohort floor 5, fresh, confirmed internal, 1 derivation step
     expect(card.report!.confidence).toBe("medium");
     expect(card.report!.sourceKeys).toEqual(["internal_platform_aggregates"]);
+    // Several buckets → the first-bucket-only explanation is DISCLOSED.
+    expect(card.report!.notKnownCodes).toContain(
+      "intelligence.trust.notKnown.demandMultiBucket",
+    );
     expect(card.timeline!.stages.map((s) => s.stage)).toEqual([
       "aggregation",
       "insight",
@@ -274,6 +311,10 @@ describe("buildCompanyDemandTrustCard", () => {
     );
     expect(card.status).toBe("ready");
     expect(card.report!.confidence).toBe("unknown");
+    // One bucket → no multi-bucket limitation is claimed.
+    expect(card.report!.notKnownCodes).not.toContain(
+      "intelligence.trust.notKnown.demandMultiBucket",
+    );
   });
 
   it("no aggregates → unavailable with the own-rows reason", () => {

@@ -250,9 +250,27 @@ export function buildWorkerSalaryTrustCard(
     !input.comparison ||
     input.comparison.kind !== "compared"
   ) {
-    // No benchmark, or the comparison honestly refused (basis unknown /
-    // missing inputs) — this is a data gap, not a source gap alone, so the
-    // salary-specific reason + requirement codes are used.
+    // A benchmark EXISTS but the comparison honestly refused — say the real
+    // reason (basis unknown/mismatch, or missing own inputs). Claiming "no
+    // curated rate exists" here would be false (§18 honesty).
+    if (input?.benchmark && input.comparison) {
+      if (input.comparison.kind === "not_comparable") {
+        return buildUnavailableTrustCard("salary_benchmark", {
+          id: "salary-benchmark",
+          reasonCode:
+            "intelligence.trustCard.reason.salaryBasisNotComparable",
+          requirementCode: "intelligence.trustCard.requirement.salaryBasis",
+        });
+      }
+      if (input.comparison.kind === "insufficient_data") {
+        return buildUnavailableTrustCard("salary_benchmark", {
+          id: "salary-benchmark",
+          reasonCode: "intelligence.trustCard.reason.salaryInputsMissing",
+          requirementCode: "intelligence.trustCard.requirement.salaryInputs",
+        });
+      }
+    }
+    // Genuinely no benchmark — the salary-specific reason + requirement.
     return buildUnavailableTrustCard("salary_benchmark", {
       id: "salary-benchmark",
       requirementCode: "intelligence.trustCard.requirement.salaryBenchmark",
@@ -376,7 +394,14 @@ export function buildCompanyDemandTrustCard(
       provenanceStepCount: 1,
     }),
     sourceKeys: ["internal_platform_aggregates"],
-    notKnownCodes: ["intelligence.trust.notKnown.noObservationStore"],
+    notKnownCodes: [
+      "intelligence.trust.notKnown.noObservationStore",
+      // The drawer's step-by-step derivation describes the FIRST bucket;
+      // with several buckets that limitation is disclosed, not hidden.
+      ...(demandAggregates.length > 1
+        ? ["intelligence.trust.notKnown.demandMultiBucket"]
+        : []),
+    ],
     conflict: null,
   });
   const timeline = buildTimeline([

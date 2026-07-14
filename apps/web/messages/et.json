@@ -2672,7 +2672,8 @@
       },
       "notKnown": {
         "grossNetBasis": "Pole teada, kas summad on bruto- või netosummad.",
-        "noObservationStore": "Vaatluste hoidla pole veel lubatud, seega üksikute vaatluste viited pole saadaval."
+        "noObservationStore": "Vaatluste hoidla pole veel lubatud, seega üksikute vaatluste viited pole saadaval.",
+        "demandMultiBucket": "Samm-sammuline tuletus kirjeldab ainult esimest nõudlusrühma — see kaart ühendab mitu rühma, mille geograafia ja valimi suurused erinevad."
       }
     },
     "trustCard": {
@@ -2703,12 +2704,16 @@
         "demandNoOwnRows": "Siin pole nõudlusnumbrit, sest teie organisatsioonil pole viimase 90 päeva jooksul nõudluskirjeid — kaart loeb ainult teie enda tegelikke kirjeid.",
         "supplyNotMeasured": "Siin pole pakkumisnumbrit, sest töötajate saadavust veel ei koondata: vaatluste hoidla on ette valmistatud, kuid välja lülitatud.",
         "skillGapNeedsBoth": "Siin pole oskuste lõhe numbrit, sest see vajab nii nõudluse kui ka pakkumise koondandmeid — kumbagi ei avaldata, kuni vaatluste hoidla on välja lülitatud.",
-        "trendNeedsHistory": "Siin pole trendi, sest trend vajab dateeritud vaatluste ajalugu ning vaatluste hoidla on ette valmistatud, kuid välja lülitatud. Trendi ei joonistata kunagi ühest punktist."
+        "trendNeedsHistory": "Siin pole trendi, sest trend vajab dateeritud vaatluste ajalugu ning vaatluste hoidla on ette valmistatud, kuid välja lülitatud. Trendi ei joonistata kunagi ühest punktist.",
+        "salaryBasisNotComparable": "Siin pole palganumbrit, sest teie ametile ja riigile on kureeritud turumäär küll sisestatud, kuid seda ei saa ausalt võrrelda: pole fikseeritud, kas summad on bruto või neto. Ebaselget võrdlust ei näidata kunagi.",
+        "salaryInputsMissing": "Siin pole palganumbrit, sest kureeritud turumäär on sisestatud, kuid teie enda soovitud palk puudub, seega pole millegagi võrrelda."
       },
       "requirement": {
         "ownerEnableStore": "Platvormi omanik peab vaatluste hoidla sisse lülitama ja kinnitama vähemalt ühe andmeallika.",
         "salaryBenchmark": "Administraator peab sisestama teie ametile ja riigile kureeritud turumäära või platvormi omanik peab kinnitama välise palgaallika.",
-        "demandOwnRows": "Lisage tööpäringuid — kaart täitub teie organisatsiooni enda andmetega niipea, kui kirjed on olemas."
+        "demandOwnRows": "Lisage tööpäringuid — kaart täitub teie organisatsiooni enda andmetega niipea, kui kirjed on olemas.",
+        "salaryBasis": "Enne ausa võrdluse näitamist peab olema fikseeritud, kas teie soovitud palk ja kureeritud turumäär on bruto või neto.",
+        "salaryInputs": "Sisestage oma soovitud palk töötajaprofiili — võrdlus ilmub kohe, kui see on olemas."
       },
       "after": {
         "activation": "Pärast seda, kui omanik on andmeallika kinnitanud ja aktiveerinud, täitub see kaart allikapõhiste, dateeritud numbritega — igaühel usaldusväärsus, värskus, allikas ja samm-sammuline päritolu."
