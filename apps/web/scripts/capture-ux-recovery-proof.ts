@@ -12,7 +12,7 @@
  */
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 
 const BASE = process.env.PROOF_BASE_URL ?? "http://127.0.0.1:3000";
 const STATE = join(process.cwd(), "tests", "e2e", ".storage-state.json");
