@@ -18,6 +18,7 @@
 import {
   buildExplanation,
   type InsightExplanationV1,
+  type InsightOriginKind,
 } from "./explainability";
 import type {
   SalaryBenchmarkV1,
@@ -47,7 +48,7 @@ export interface IntelligenceCardItemV1 {
 }
 
 export interface IntelligenceSourceBadge {
-  readonly originKind: "external" | "internal" | "blended";
+  readonly originKind: InsightOriginKind;
   readonly sourceKey: string;
   readonly observedAtIso: string | null;
 }

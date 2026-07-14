@@ -19,6 +19,7 @@ import type {
   ObservationSubjectKind,
   ObservationWindow,
 } from "./observation-contract";
+import type { InsightOriginKind } from "./explainability";
 
 /** Divergence (percent of the larger magnitude) tolerated as agreement. */
 export const DEFAULT_CONFLICT_TOLERANCE_PCT = 10;
@@ -33,7 +34,7 @@ export interface ComparableSignalV1 {
   readonly window: ObservationWindow;
   readonly valueNumeric: number;
   readonly sourceKey: string;
-  readonly originKind: "external" | "internal" | "blended";
+  readonly originKind: InsightOriginKind;
 }
 
 export type NotComparableReasonCode =
