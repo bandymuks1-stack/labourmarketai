@@ -116,6 +116,39 @@ export function parseInvoiceObject(
   };
 }
 
+export interface InvoiceRenewal {
+  readonly providerSubscriptionId: string | null;
+  readonly periodStart: string | null;
+  readonly periodEnd: string | null;
+}
+
+/**
+ * Renewal bookkeeping (Sprint v2 pricing slice): a PAID invoice carries the
+ * subscription period it covers — the store extends
+ * current_period_start/end from it so a renewal is recorded even when the
+ * matching customer.subscription.updated event is delayed or dropped.
+ * Reads the first invoice line's period (Stripe's canonical location) and
+ * falls back to the invoice-level period fields. Unknown → nulls (honest;
+ * nothing is guessed).
+ */
+export function parseInvoiceRenewal(
+  obj: Record<string, unknown> | null | undefined,
+): InvoiceRenewal {
+  const sub = asString(obj?.subscription);
+  const lines = obj?.lines as
+    | { data?: Array<Record<string, unknown>> }
+    | undefined;
+  const firstLine = Array.isArray(lines?.data) ? lines.data[0] : undefined;
+  const linePeriod = firstLine?.period as
+    | Record<string, unknown>
+    | undefined;
+  const periodStart =
+    isoFromUnix(linePeriod?.start) ?? isoFromUnix(obj?.period_start);
+  const periodEnd =
+    isoFromUnix(linePeriod?.end) ?? isoFromUnix(obj?.period_end);
+  return { providerSubscriptionId: sub, periodStart, periodEnd };
+}
+
 /** A test event MUST be test-mode — a live event is rejected. */
 export function assertTestEvent(event: { testMode: boolean }): boolean {
   return event.testMode === true;

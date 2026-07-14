@@ -5,6 +5,7 @@ import {
   parseSubscriptionObject,
   parseCheckoutSessionObject,
   parseInvoiceObject,
+  parseInvoiceRenewal,
   assertTestEvent,
 } from "./webhook-core";
 
@@ -73,5 +74,34 @@ describe("webhook-core — event mapping", () => {
   it("a live event is rejected (test-only chain)", () => {
     expect(assertTestEvent({ testMode: true })).toBe(true);
     expect(assertTestEvent({ testMode: false })).toBe(false);
+  });
+});
+
+describe("webhook-core — invoice renewal bookkeeping (Sprint v2 pricing slice)", () => {
+  it("reads the covered period from the first invoice line", () => {
+    const r = parseInvoiceRenewal({
+      subscription: "sub_7",
+      lines: { data: [{ period: { start: 1767225600, end: 1769904000 } }] },
+    });
+    expect(r.providerSubscriptionId).toBe("sub_7");
+    expect(r.periodStart).toBe(new Date(1767225600 * 1000).toISOString());
+    expect(r.periodEnd).toBe(new Date(1769904000 * 1000).toISOString());
+  });
+
+  it("falls back to invoice-level period fields", () => {
+    const r = parseInvoiceRenewal({
+      subscription: "sub_7",
+      period_start: 1767225600,
+      period_end: 1769904000,
+    });
+    expect(r.periodStart).toBe(new Date(1767225600 * 1000).toISOString());
+    expect(r.periodEnd).toBe(new Date(1769904000 * 1000).toISOString());
+  });
+
+  it("unknown period stays null — nothing is guessed", () => {
+    const r = parseInvoiceRenewal({ subscription: "sub_7" });
+    expect(r.periodStart).toBeNull();
+    expect(r.periodEnd).toBeNull();
+    expect(parseInvoiceRenewal(null).providerSubscriptionId).toBeNull();
   });
 });

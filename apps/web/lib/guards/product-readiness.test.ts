@@ -1774,7 +1774,16 @@ describe("no migration files added by this sprint", () => {
     // dashboard card preferences per (profile, context), 8 KB bound). Both
     // DRAFT / needs-human-gate, NOT applied; paired rollbacks + deferred
     // APPLIED_LEDGER entries.
-    const SPRINT_BASELINE = 139;
+    // Bumped 139 -> 142 for the Pricing & Payments v1 drafts
+    // (20260714190000_billing_plans_offers_v1 +
+    // 20260714191000_ad_products_registry_v1 +
+    // 20260714200000_usage_cost_tracking_v1) — Launch Offer windows +
+    // automatic 15% first-annual eligibility memory, job-ad product slug
+    // registry (all inactive, NULL prices), usage/credits/cost tracking
+    // (append-only). ALL DRAFT / needs-human-gate, NOT applied; payments
+    // stay OFF (kill-switch + live hard-block untouched); paired rollbacks
+    // + deferred APPLIED_LEDGER entries.
+    const SPRINT_BASELINE = 142;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -364,6 +364,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260714210000_company_memberships_v1 +
     // 20260714211000_dashboard_preferences_v1) — DRAFT / needs-human-gate,
     // NOT applied; paired rollbacks in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 139/);
+    // Bumped 139 -> 142 for the Pricing & Payments v1 drafts
+    // (20260714190000 + 20260714191000 + 20260714200000) — ALL DRAFT /
+    // needs-human-gate, NOT applied; paired rollbacks in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 142/);
   });
 });

@@ -1,7 +1,17 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { SubscriptionUpsert, PaymentStatus } from "@/lib/billing/webhook-core";
+import type {
+  SubscriptionUpsert,
+  PaymentStatus,
+  InvoiceRenewal,
+} from "@/lib/billing/webhook-core";
+import { resolvePlanV2Slug } from "@/lib/billing/plans";
+import {
+  LAUNCH_OFFER_PLAN_SLUG,
+  buildLaunchOfferEligibilityRow,
+} from "@/lib/billing/offers";
+import { recordLaunchOfferEligibility } from "@/lib/billing/offer-store";
 
 /**
  * Subscription store (Stripe sprint PR4) — the SERVER-only write path for the
@@ -86,15 +96,61 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
   const { error } = await sb
     .from("billing_subscriptions")
     .upsert(row, { onConflict: "provider,provider_subscription_id" });
-  if (!error) return "ok";
+  if (!error) {
+    await maybeRecordLaunchOfferEligibility({
+      ownerId,
+      planKey,
+      status: u.status,
+      activationAtIso: u.currentPeriodStart,
+      testMode: u.testMode,
+    });
+    return "ok";
+  }
   if (error.code === RELATION_ABSENT) return "needs-migration";
   return "error";
 }
 
-/** Update the last payment status for a subscription (invoice events). */
+/**
+ * Launch Offer hook (Sprint v2 §9): when a subscription for the Launch Offer
+ * plan becomes active/trialing inside the offer window, the system
+ * automatically remembers the 15% first-annual discount eligibility
+ * (billing_offer_eligibility). Best-effort and idempotent — a duplicate or a
+ * not-yet-applied migration never affects the subscription write.
+ */
+async function maybeRecordLaunchOfferEligibility(input: {
+  ownerId: string | null;
+  planKey: string | null;
+  status: SubscriptionUpsert["status"];
+  activationAtIso: string | null;
+  testMode: boolean;
+}): Promise<void> {
+  try {
+    if (!input.ownerId || !input.planKey) return;
+    if (input.status !== "active" && input.status !== "trialing") return;
+    const v2 = resolvePlanV2Slug(input.planKey);
+    if (v2 !== LAUNCH_OFFER_PLAN_SLUG) return;
+    const row = buildLaunchOfferEligibilityRow({
+      profileId: input.ownerId,
+      planV2Slug: v2,
+      activationAtIso: input.activationAtIso ?? new Date().toISOString(),
+      testMode: input.testMode,
+    });
+    if (!row) return; // outside the offer window — nothing earned
+    await recordLaunchOfferEligibility(row);
+  } catch {
+    // best-effort: eligibility bookkeeping never breaks the webhook chain
+  }
+}
+
+/**
+ * Update the last payment status for a subscription (invoice events). A PAID
+ * invoice may carry the renewal period (Sprint v2 renewal bookkeeping) — the
+ * covered period is then recorded so current_period_end extends on renewal.
+ */
 export async function applyInvoicePayment(
   providerSubscriptionId: string | null,
   status: PaymentStatus,
+  renewal?: Pick<InvoiceRenewal, "periodStart" | "periodEnd">,
 ): Promise<StoreResult> {
   if (!providerSubscriptionId) return "ok";
   const patch: Record<string, unknown> = {
@@ -103,6 +159,11 @@ export async function applyInvoicePayment(
   };
   // A failed payment moves an active subscription to past_due (honest signal).
   if (status === "failed") patch.status = "past_due";
+  // Renewal bookkeeping: only a SUCCEEDED payment extends the recorded period.
+  if (status === "succeeded" && renewal) {
+    if (renewal.periodStart) patch.current_period_start = renewal.periodStart;
+    if (renewal.periodEnd) patch.current_period_end = renewal.periodEnd;
+  }
   const { error } = await admin()
     .from("billing_subscriptions")
     .update(patch)

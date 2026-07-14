@@ -244,3 +244,18 @@ audit.
   chat table, nothing outbound. Failures are logged and swallowed; the run
   outcome is unaffected. Pinned in the `chat-visibility-rls.test.ts` caller
   inventory.
+
+- **2026-07-14 — `lib/billing/offer-store.ts`, `lib/billing/usage.ts`,
+  `lib/billing/cost-engine.ts`** (Pricing & Payments v1, Sprint v2 §9–§11).
+  Three server-only billing modules on the SAME pattern as
+  `subscription-store.ts`: the billing/usage tables carry NO
+  anon/authenticated write path by design (gated drafts `20260714190000` +
+  `20260714200000`), so the service role is the only write/read-aggregate
+  path. `offer-store.ts` writes ONE idempotent `billing_offer_eligibility`
+  row from the webhook chain (the automatic Launch Offer 15% memory) and
+  serves the superadmin billing page read; `usage.ts` appends bounded
+  `usage_events` rows (append-only — UPDATE/DELETE revoked for every role);
+  `cost-engine.ts` performs READ-ONLY per-customer rollups over `ai_runs` +
+  `usage_events`. None touches a chat table, none sends anything outbound;
+  all degrade honestly (needs-migration) until the owner applies the gated
+  drafts. Pinned in the `chat-visibility-rls.test.ts` caller inventory.

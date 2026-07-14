@@ -6,6 +6,7 @@ import {
   parseSubscriptionObject,
   parseCheckoutSessionObject,
   parseInvoiceObject,
+  parseInvoiceRenewal,
   assertTestEvent,
 } from "@/lib/billing/webhook-core";
 import {
@@ -90,8 +91,12 @@ export async function POST(req: Request) {
         }
       }
     } else if (event.type === "invoice.payment_succeeded" || event.type === "invoice.payment_failed") {
-      const inv = parseInvoiceObject(event.object, event.type === "invoice.payment_succeeded");
-      result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus);
+      const succeeded = event.type === "invoice.payment_succeeded";
+      const inv = parseInvoiceObject(event.object, succeeded);
+      // Renewal bookkeeping (test mode): a paid invoice extends the recorded
+      // subscription period even when subscription.updated is delayed.
+      const renewal = succeeded ? parseInvoiceRenewal(event.object) : undefined;
+      result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus, renewal);
     }
     await markWebhookProcessed(event.id, result === "ok" ? undefined : result);
   } catch (e) {

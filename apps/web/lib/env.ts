@@ -34,6 +34,14 @@ const schema = z.object({
   STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
   STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
   STRIPE_PRICE_AGENCY_PILOT: z.string().optional(),
+  // Catalogue V2 (Sprint v2 §9) TEST price ids — see
+  // scripts/billing/stripe-test-products.md for the exact products to create.
+  STRIPE_PRICE_AI_PLUS: z.string().optional(),
+  STRIPE_PRICE_VIP_MEDIA: z.string().optional(),
+  STRIPE_PRICE_LAUNCH_OFFER: z.string().optional(),
+  STRIPE_PRICE_AGENCY_START: z.string().optional(),
+  STRIPE_PRICE_AGENCY_GROWTH: z.string().optional(),
+  STRIPE_PRICE_AGENCY_SCALE: z.string().optional(),
   // ── Internal LLM Agents (disabled by default; mock for tests/dev) ──────────
   // The runtime is `disabled` unless AI_PROVIDER_MODE is `mock` or `live`.
   // `live` additionally requires AI_API_KEY (owner-set in Vercel env / .env.local,
@@ -114,6 +122,12 @@ const parsed = schema.safeParse({
   STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
   STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
   STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,
+  STRIPE_PRICE_AI_PLUS: process.env.STRIPE_PRICE_AI_PLUS,
+  STRIPE_PRICE_VIP_MEDIA: process.env.STRIPE_PRICE_VIP_MEDIA,
+  STRIPE_PRICE_LAUNCH_OFFER: process.env.STRIPE_PRICE_LAUNCH_OFFER,
+  STRIPE_PRICE_AGENCY_START: process.env.STRIPE_PRICE_AGENCY_START,
+  STRIPE_PRICE_AGENCY_GROWTH: process.env.STRIPE_PRICE_AGENCY_GROWTH,
+  STRIPE_PRICE_AGENCY_SCALE: process.env.STRIPE_PRICE_AGENCY_SCALE,
   AI_PROVIDER_MODE: process.env.AI_PROVIDER_MODE,
   AI_PROVIDER: process.env.AI_PROVIDER,
   AI_API_KEY: process.env.AI_API_KEY,

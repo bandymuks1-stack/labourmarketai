@@ -11,7 +11,7 @@ export async function generateMetadata({
   const { locale } = await params;
   return buildPageMetadataFor("pricing", locale, "/pricing");
 }
-import { PricingTable } from "@/components/marketing/pricing-table";
+import { PricingCatalogueV2 } from "@/components/marketing/pricing-catalogue-v2";
 import { ServiceOffers } from "@/components/marketing/service-offers";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
 import {
@@ -19,8 +19,6 @@ import {
   ConciergeOfferSection,
 } from "@/components/marketing/concierge-offer";
 
-// getPlans() reads the live `plans` table; keep this page request-time so
-// the build never needs Supabase. It degrades gracefully if unreachable.
 export const dynamic = "force-dynamic";
 
 export default async function PricingPage({
@@ -49,7 +47,10 @@ export default async function PricingPage({
           /dashboard/admin/billing (launch repair Scope C). */}
       <ConciergeAccessBanner />
       <ConciergeOfferSection />
-      <PricingTable />
+      {/* Sprint v2 §9 — owner-confirmed catalogue (persons / companies /
+          agencies) with the honest "payment activation in preparation" state.
+          Replaces the legacy placeholder PricingTable on the public page. */}
+      <PricingCatalogueV2 />
       <PrePaymentPlanBoundary />
       <ServiceOffers />
 
