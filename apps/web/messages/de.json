@@ -9556,6 +9556,45 @@
     "drawer": {
       "limitations": "Bekannte Einschränkungen",
       "timelineUnavailable": "Die Schritt-für-Schritt-Herkunftsleiste erscheint hier, sobald der Beobachtungsspeicher eingeschaltet ist."
+    },
+    "activation": {
+      "title": "Aktivierungsbereitschaft der Quellen",
+      "intro": "Jede externe Quelle muss alle zehn Prüfungen bestehen, bevor der Inhaber überhaupt über eine Aktivierung entscheiden kann. Auf dieser Seite kann nichts genehmigt oder aktiviert werden — sie zeigt nur ehrlich, wo jede Quelle heute steht.",
+      "status": {
+        "green": "Erledigt",
+        "red": "Fehlt"
+      },
+      "item": {
+        "owner_approval": "Inhaberfreigabe erfasst",
+        "technical_approval": "Technische Freigabe erfasst",
+        "legal_approval": "Rechtliche Prüfung bestätigt",
+        "robots_check": "Robots-Richtlinie geprüft und erlaubend",
+        "terms_review": "Nutzungsbedingungen geprüft",
+        "rate_limits": "Anfragelimits definiert",
+        "import_policy": "Importrichtlinie definiert (Metriken, Länder, Sprachen)",
+        "retention_policy": "Aufbewahrungsrichtlinie definiert",
+        "rollback_plan": "Schriftlicher Rücknahmeplan vorhanden",
+        "kill_switch": "Notausschalter implementiert und getestet"
+      },
+      "veto": {
+        "killSwitchEngaged": "Der Notausschalter ist aktiviert — nichts darf laufen, bis der Inhaber ihn löst.",
+        "robotsDisallow": "Die Prüfung der Robots-Richtlinie fiel negativ aus — diese Quelle kann nie durch das Sammeln anderer Freigaben aktiviert werden.",
+        "legalRefused": "Die rechtliche Prüfung hat diese Quelle abgelehnt.",
+        "lifecycleBlocked": "Diese Quelle ist blockiert.",
+        "internalSource": "Interne Daten durchlaufen nie die Aktivierung einer externen Quelle."
+      },
+      "allGreenNote": "Alle Punkte sind grün. Die Aktivierung selbst bleibt eine separate Entscheidung des Inhabers, festgehalten im Quellenregister.",
+      "notReadyNote": "Nicht alle Punkte sind grün — eine Aktivierung ist nicht möglich."
+    },
+    "health": {
+      "offline": "Offline",
+      "waitingApproval": "Wartet auf Freigabe",
+      "paused": "Pausiert",
+      "healthy": "Gesund",
+      "error": "Fehlerzustand",
+      "blocked": "Blockiert",
+      "maintenance": "Wartung",
+      "unknown": "Unbekannt"
     }
   }
 }

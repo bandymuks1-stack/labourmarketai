@@ -9556,6 +9556,45 @@
     "drawer": {
       "limitations": "Known limitations",
       "timelineUnavailable": "The step-by-step derivation timeline appears here once the observations data store is switched on."
+    },
+    "activation": {
+      "title": "Source activation readiness",
+      "intro": "Every external source must pass all ten checks before the owner can even decide to activate it. Nothing on this page can approve or activate anything — it only shows honestly where each source stands today.",
+      "status": {
+        "green": "Done",
+        "red": "Missing"
+      },
+      "item": {
+        "owner_approval": "Owner approval recorded",
+        "technical_approval": "Technical approval recorded",
+        "legal_approval": "Legal review confirmed",
+        "robots_check": "Robots policy reviewed and permitting",
+        "terms_review": "Usage terms reviewed",
+        "rate_limits": "Rate limits defined",
+        "import_policy": "Import policy defined (metrics, countries, languages)",
+        "retention_policy": "Retention policy defined",
+        "rollback_plan": "Written rollback plan in place",
+        "kill_switch": "Kill switch implemented and tested"
+      },
+      "veto": {
+        "killSwitchEngaged": "The kill switch is engaged — nothing may run until the owner releases it.",
+        "robotsDisallow": "The robots policy review came back negative — this source can never be activated by collecting other approvals.",
+        "legalRefused": "Legal review refused this source.",
+        "lifecycleBlocked": "This source is blocked.",
+        "internalSource": "Internal data never goes through external source activation."
+      },
+      "allGreenNote": "Every item is green. Activation itself is still a separate owner decision recorded in the source registry.",
+      "notReadyNote": "Not every item is green — activation is not possible."
+    },
+    "health": {
+      "offline": "Offline",
+      "waitingApproval": "Waiting for approval",
+      "paused": "Paused",
+      "healthy": "Healthy",
+      "error": "Failing",
+      "blocked": "Blocked",
+      "maintenance": "Maintenance",
+      "unknown": "Unknown"
     }
   }
 }

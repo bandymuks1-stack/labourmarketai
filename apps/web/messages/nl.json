@@ -9556,6 +9556,45 @@
     "drawer": {
       "limitations": "Bekende beperkingen",
       "timelineUnavailable": "De stapsgewijze herkomsttijdlijn verschijnt hier zodra de observatie-opslag is ingeschakeld."
+    },
+    "activation": {
+      "title": "Activeringsgereedheid van bronnen",
+      "intro": "Elke externe bron moet alle tien controles doorstaan voordat de eigenaar überhaupt over activering kan beslissen. Op deze pagina kan niets worden goedgekeurd of geactiveerd — ze toont alleen eerlijk waar elke bron vandaag staat.",
+      "status": {
+        "green": "Gereed",
+        "red": "Ontbreekt"
+      },
+      "item": {
+        "owner_approval": "Goedkeuring van de eigenaar vastgelegd",
+        "technical_approval": "Technische goedkeuring vastgelegd",
+        "legal_approval": "Juridische beoordeling bevestigd",
+        "robots_check": "Robots-beleid beoordeeld en toegestaan",
+        "terms_review": "Gebruiksvoorwaarden beoordeeld",
+        "rate_limits": "Verzoeklimieten gedefinieerd",
+        "import_policy": "Importbeleid gedefinieerd (metrieken, landen, talen)",
+        "retention_policy": "Bewaarbeleid gedefinieerd",
+        "rollback_plan": "Schriftelijk terugdraaiplan aanwezig",
+        "kill_switch": "Noodschakelaar geïmplementeerd en getest"
+      },
+      "veto": {
+        "killSwitchEngaged": "De noodschakelaar is ingeschakeld — niets mag draaien totdat de eigenaar deze vrijgeeft.",
+        "robotsDisallow": "De beoordeling van het robots-beleid was negatief — deze bron kan nooit worden geactiveerd door andere goedkeuringen te verzamelen.",
+        "legalRefused": "De juridische beoordeling heeft deze bron afgewezen.",
+        "lifecycleBlocked": "Deze bron is geblokkeerd.",
+        "internalSource": "Interne gegevens doorlopen nooit de activering van een externe bron."
+      },
+      "allGreenNote": "Elk item is groen. De activering zelf blijft een aparte beslissing van de eigenaar, vastgelegd in het bronnenregister.",
+      "notReadyNote": "Niet elk item is groen — activering is niet mogelijk."
+    },
+    "health": {
+      "offline": "Offline",
+      "waitingApproval": "Wacht op goedkeuring",
+      "paused": "Gepauzeerd",
+      "healthy": "Gezond",
+      "error": "Storing",
+      "blocked": "Geblokkeerd",
+      "maintenance": "Onderhoud",
+      "unknown": "Onbekend"
     }
   }
 }

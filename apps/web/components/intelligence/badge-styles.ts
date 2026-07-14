@@ -11,6 +11,7 @@
 import type { IntelligenceCardState } from "@/lib/intelligence/intelligence-view-model";
 import type { ConfidenceLevel } from "@/lib/intelligence/confidence";
 import type { SourceLifecycleState } from "@/lib/intelligence/source-lifecycle";
+import type { SourceHealthState } from "@/lib/intelligence/source-health";
 import type { TrustCardStatus } from "@/lib/intelligence/trust-card-model";
 
 /** Base chip class shared by EVERY intelligence badge. */
@@ -60,4 +61,23 @@ export const INTEL_LIFECYCLE_TONE: Record<SourceLifecycleState, string> = {
   deprecated: "border-ink-500 bg-ink-800/40 text-text-muted",
   blocked: "border-state-danger/40 bg-state-danger/10 text-state-danger",
   not_available: "border-ink-500 bg-ink-800/40 text-text-muted",
+};
+
+/** Source health states (source-health.ts) — recorded facts only. */
+export const INTEL_HEALTH_TONE: Record<SourceHealthState, string> = {
+  healthy: "border-state-success/40 bg-state-success/10 text-state-success",
+  waiting_approval:
+    "border-brand-orange/50 bg-brand-orange/10 text-brand-orange",
+  maintenance: "border-brand-blue/40 bg-brand-blue/10 text-brand-blue",
+  paused: "border-state-amber/40 bg-state-amber/10 text-state-amber",
+  error: "border-state-danger/40 bg-state-danger/10 text-state-danger",
+  blocked: "border-state-danger/40 bg-state-danger/10 text-state-danger",
+  offline: "border-ink-500 bg-ink-800/40 text-text-muted",
+  unknown: "border-ink-500 bg-ink-800/40 text-text-muted",
+};
+
+/** Activation checklist item states — green only when a fact exists. */
+export const INTEL_CHECK_TONE: Record<"green" | "red", string> = {
+  green: "border-state-success/40 bg-state-success/10 text-state-success",
+  red: "border-state-danger/40 bg-state-danger/10 text-state-danger",
 };

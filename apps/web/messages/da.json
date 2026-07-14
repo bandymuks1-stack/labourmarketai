@@ -2717,6 +2717,45 @@
     "drawer": {
       "limitations": "Kendte begrænsninger",
       "timelineUnavailable": "Trin-for-trin-oprindelseslinjen vises her, når observationslageret tændes."
+    },
+    "activation": {
+      "title": "Kilders aktiveringsparathed",
+      "intro": "Hver ekstern kilde skal bestå alle ti kontroller, før ejeren overhovedet kan beslutte at aktivere den. Intet på denne side kan godkende eller aktivere noget — den viser kun ærligt, hvor hver kilde står i dag.",
+      "status": {
+        "green": "Udført",
+        "red": "Mangler"
+      },
+      "item": {
+        "owner_approval": "Ejerens godkendelse registreret",
+        "technical_approval": "Teknisk godkendelse registreret",
+        "legal_approval": "Juridisk gennemgang bekræftet",
+        "robots_check": "Robots-politik gennemgået og tilladende",
+        "terms_review": "Brugsvilkår gennemgået",
+        "rate_limits": "Forespørgselsgrænser defineret",
+        "import_policy": "Importpolitik defineret (metrikker, lande, sprog)",
+        "retention_policy": "Opbevaringspolitik defineret",
+        "rollback_plan": "Skriftlig tilbagerulningsplan på plads",
+        "kill_switch": "Nødafbryder implementeret og testet"
+      },
+      "veto": {
+        "killSwitchEngaged": "Nødafbryderen er aktiveret — intet må køre, før ejeren frigiver den.",
+        "robotsDisallow": "Gennemgangen af robots-politikken var negativ — denne kilde kan aldrig aktiveres ved at indsamle andre godkendelser.",
+        "legalRefused": "Den juridiske gennemgang afviste denne kilde.",
+        "lifecycleBlocked": "Denne kilde er blokeret.",
+        "internalSource": "Interne data gennemgår aldrig aktivering af en ekstern kilde."
+      },
+      "allGreenNote": "Alle punkter er grønne. Selve aktiveringen er stadig en separat ejerbeslutning, der registreres i kilderegistret.",
+      "notReadyNote": "Ikke alle punkter er grønne — aktivering er ikke mulig."
+    },
+    "health": {
+      "offline": "Offline",
+      "waitingApproval": "Afventer godkendelse",
+      "paused": "På pause",
+      "healthy": "Sund",
+      "error": "Fejler",
+      "blocked": "Blokeret",
+      "maintenance": "Vedligeholdelse",
+      "unknown": "Ukendt"
     }
   }
 }

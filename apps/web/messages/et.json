@@ -2717,6 +2717,45 @@
     "drawer": {
       "limitations": "Teadaolevad piirangud",
       "timelineUnavailable": "Samm-sammuline päritoluriba ilmub siia, kui vaatluste hoidla sisse lülitatakse."
+    },
+    "activation": {
+      "title": "Allikate aktiveerimisvalmidus",
+      "intro": "Iga väline allikas peab läbima kõik kümme kontrolli, enne kui omanik saab üldse aktiveerimise üle otsustada. Sellel lehel ei saa midagi heaks kiita ega aktiveerida — see näitab ausalt, kus iga allikas täna seisab.",
+      "status": {
+        "green": "Tehtud",
+        "red": "Puudub"
+      },
+      "item": {
+        "owner_approval": "Omaniku kinnitus salvestatud",
+        "technical_approval": "Tehniline kinnitus salvestatud",
+        "legal_approval": "Õiguslik ülevaatus kinnitatud",
+        "robots_check": "Robots-poliitika üle vaadatud ja lubav",
+        "terms_review": "Kasutustingimused üle vaadatud",
+        "rate_limits": "Päringulimiidid määratletud",
+        "import_policy": "Impordipoliitika määratletud (mõõdikud, riigid, keeled)",
+        "retention_policy": "Säilituspoliitika määratletud",
+        "rollback_plan": "Kirjalik tagasipööramisplaan olemas",
+        "kill_switch": "Hädalüliti juurutatud ja testitud"
+      },
+      "veto": {
+        "killSwitchEngaged": "Hädalüliti on rakendatud — miski ei tohi töötada, kuni omanik selle vabastab.",
+        "robotsDisallow": "Robots-poliitika ülevaatus oli negatiivne — seda allikat ei saa kunagi aktiveerida teisi kinnitusi kogudes.",
+        "legalRefused": "Õiguslik ülevaatus lükkas selle allika tagasi.",
+        "lifecycleBlocked": "See allikas on blokeeritud.",
+        "internalSource": "Sisemised andmed ei läbi kunagi välise allika aktiveerimist."
+      },
+      "allGreenNote": "Kõik punktid on rohelised. Aktiveerimine ise on endiselt omaniku eraldi otsus, mis salvestatakse allikate registris.",
+      "notReadyNote": "Kõik punktid pole rohelised — aktiveerimine pole võimalik."
+    },
+    "health": {
+      "offline": "Võrguühenduseta",
+      "waitingApproval": "Ootab kinnitust",
+      "paused": "Peatatud",
+      "healthy": "Töökorras",
+      "error": "Tõrge",
+      "blocked": "Blokeeritud",
+      "maintenance": "Hooldus",
+      "unknown": "Teadmata"
     }
   }
 }
