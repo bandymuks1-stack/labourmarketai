@@ -154,7 +154,10 @@ describe("dashboard renders count-gated 'new' markers (no fake unread)", () => {
   const page = read("app/[locale]/dashboard/page.tsx");
 
   it("computes both new counts via the marketplace helper", () => {
-    expect(page).toMatch(/const \{ providerNew, buyerNew \} = await getServiceRequestsNewCounts\(\);/);
+    // Called inside the page's parallel batch (P0 latency audit); both counts
+    // land via the Promise.all destructure.
+    expect(page).toMatch(/getServiceRequestsNewCounts\(\),/);
+    expect(page).toMatch(/\{ providerNew, buyerNew \},/);
   });
 
   it("provider marker shows ONLY when providerNew > 0", () => {

@@ -36,8 +36,10 @@ describe("the dashboard renders the buyer status card honestly", () => {
   const page = read("app/[locale]/dashboard/page.tsx");
 
   it("computes the summary via the marketplace helper", () => {
-    expect(page).toMatch(/getOutgoingRequestSummary/);
-    expect(page).toMatch(/const outgoingSummary = await getOutgoingRequestSummary\(\);/);
+    // Called inside the page's parallel batch (P0 latency audit); the result
+    // lands in `outgoingSummary` via the Promise.all destructure.
+    expect(page).toMatch(/getOutgoingRequestSummary\(\),/);
+    expect(page).toMatch(/outgoingSummary,/);
   });
 
   it("is status-gated: no card when there are no outgoing requests (no fake urgency)", () => {

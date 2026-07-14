@@ -18,11 +18,6 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { getWorkerCard } from "@/lib/worker/work-card";
 import { deriveWorkCardState } from "@/lib/worker/work-card-state";
 import {
-  getBookingResponsesNewCount,
-  getPendingIncomingBookingCount,
-} from "@/lib/booking/booking-actions";
-import {
-  getPendingIncomingRequestCount,
   getOutgoingRequestSummary,
   getServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests";
@@ -91,11 +86,32 @@ export default async function DashboardOverviewPage({
   // serial latency; it is awaited once, just before the role branch.
   const hubVmPromise = getPremiumHubViewModel();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role, full_name, email")
-    .eq("id", user.id)
-    .single();
+  // ONE parallel read batch (P0 latency audit). These reads are mutually
+  // independent; the prior sequential awaits stacked ~8 network round-trips
+  // into the overview's TTFB. getSpineCounts() is request-cached and shared
+  // with the auth-shell layout, and it already carries the pending-service-
+  // request / booking counts, so those helpers are not re-queried here.
+  const [
+    { data: profile },
+    companyRead,
+    invitations,
+    { providerNew, buyerNew },
+    outgoingSummary,
+    spineCounts,
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("active_role, full_name, email")
+      .eq("id", user.id)
+      .single(),
+    getOwnCompany(),
+    listMyPendingWorkerInvitations(),
+    getServiceRequestsNewCounts(),
+    getOutgoingRequestSummary(),
+    getSpineCounts(),
+  ]);
+  const pendingServiceRequests = spineCounts.pendingIncomingServiceRequests;
+  const bookingResponsesNew = spineCounts.bookingResponsesNew;
 
   const t = await getTranslations("auth.dashboard");
   const tw = await getTranslations("auth.dashboard.wow");
@@ -123,10 +139,9 @@ export default async function DashboardOverviewPage({
       </Link>
     </div>
   ) : null;
-  // Real company existence (RLS-scoped) → drives the focused identity entry:
-  // company actions vs an honest "create a company" CTA. Read failure / missing
-  // migration falls back to "no company" (CTA shown).
-  const companyRead = await getOwnCompany();
+  // Real company existence (RLS-scoped, read in the parallel batch above) →
+  // drives the focused identity entry: company actions vs an honest "create a
+  // company" CTA. Read failure / missing migration falls back to "no company".
   const hasCompany = companyRead.kind === "ok" && companyRead.row !== null;
   // Owner smoke 2026-07-05: the home card must name the ACTIVE company.
   const companyName =
@@ -140,14 +155,10 @@ export default async function DashboardOverviewPage({
   // into the real request loop. 0 on any missing-data / needs-migration state →
   // no card, no fake badge (honest degradation).
   const tMarket = await getTranslations("marketplace");
-  // Fetched ONCE here: the state-driven top slot needs the count and the
-  // invitations card needs the rows (passed down as `preloaded`).
-  const invitations = await listMyPendingWorkerInvitations();
-  const pendingServiceRequests = await getPendingIncomingRequestCount();
-  // "New since last seen" markers — a real OTHER-party update after this user last
-  // opened /dashboard/service-requests. 0 when never opened (seen_at null) or the
+  // Invitations rows + counts all come from the parallel batch above. The
+  // "new since last seen" markers are a real OTHER-party update after this
+  // user last opened /dashboard/service-requests — 0 when never opened or the
   // seen RPC is not applied yet (rollout-safe). Never my own action, never faked.
-  const { providerNew, buyerNew } = await getServiceRequestsNewCounts();
   const serviceRequestsNextAction =
     pendingServiceRequests > 0 ? (
       <Link
@@ -181,7 +192,6 @@ export default async function DashboardOverviewPage({
   // ('sent') request; otherwise an answered ('declined') one shown calmly, no
   // panic copy. No outgoing requests → no card (no fake urgency). All counts are
   // 0 on any needs-migration / not-authed state (honest degradation).
-  const outgoingSummary = await getOutgoingRequestSummary();
   const outgoingState: "accepted" | "waiting" | "declined" | null =
     outgoingSummary.accepted > 0
       ? "accepted"
@@ -244,7 +254,6 @@ export default async function DashboardOverviewPage({
   // seen migration is unapplied — never a fake badge). Opens the exact
   // surface that shows the response.
   const tBookingsShared = await getTranslations("bookings");
-  const bookingResponsesNew = await getBookingResponsesNewCount();
   const bookingResponsesNextAction =
     bookingResponsesNew > 0 ? (
       <Link
@@ -271,7 +280,6 @@ export default async function DashboardOverviewPage({
   // source of truth. getSpineCounts() is request-cached, so this REUSES the
   // layout's bell/badge read instead of issuing a second set of count
   // queries; every badge and strip count traces to those spine counts.
-  const spineCounts = await getSpineCounts();
   const controlRoom = buildControlRoomViewModel({
     role,
     counts: spineCounts,
@@ -302,30 +310,30 @@ export default async function DashboardOverviewPage({
     // pending-review set the inbox uses (RPC), so the priority is data-driven:
     // entries waiting → review; nothing waiting → invite/open team (real route).
     // Degrades to 0 (honest "nothing waiting") if the RPC isn't applied (42883).
+    // The reviewable-entries RPC and the demand read-back are independent
+    // reads — run them in parallel (P0 latency audit) instead of stacking
+    // two more round-trips onto the org overview.
+    const isManagerRole = role === "company" || role === "agency";
+    const [reviewableRes, demandReadback] = await Promise.all([
+      isManagerRole
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (supabase as any).rpc("reviewable_journal_entry_ids")
+        : Promise.resolve(null),
+      // Demand read-back for the org's own submitted requests (company/agency
+      // only; the customer/buyer role has its own detailed requests surface on
+      // /dashboard/buyer). Honest status only — no matching.
+      isManagerRole ? listOwnCustomerRequests() : Promise.resolve(null),
+    ]);
     let pendingReview = 0;
-    if (role === "company" || role === "agency") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: idRows } = await (supabase as any).rpc(
-        "reviewable_journal_entry_ids",
-      );
-      if (Array.isArray(idRows)) pendingReview = idRows.length;
-    }
-    const nextAction: NextAction =
-      role === "company" || role === "agency"
-        ? managerNextAction(role, pendingReview)
-        : customerNextAction();
+    if (Array.isArray(reviewableRes?.data)) pendingReview = reviewableRes.data.length;
+    const nextAction: NextAction = isManagerRole
+      ? managerNextAction(role, pendingReview)
+      : customerNextAction();
 
     const intent = role === "agency" ? "partner" : "hire_workers";
     // Intent-specific copy: a company hiring sees hiring language, an agency sees
     // candidate-supply language — never a generic buyer "need".
     const pilotKey = intent === "hire_workers" ? "hire" : "partner";
-    // Demand read-back for the org's own submitted requests (company/agency
-    // only; the customer/buyer role has its own detailed requests surface on
-    // /dashboard/buyer). Honest status only — no matching.
-    const showDemandReadback = role === "company" || role === "agency";
-    const demandReadback = showDemandReadback
-      ? await listOwnCustomerRequests()
-      : null;
     const tReadback = await getTranslations("demandReadback");
     const tReqStatus = await getTranslations(
       "roleDashboards.buyer.requests.understanding.requestStatus",
@@ -533,7 +541,10 @@ export default async function DashboardOverviewPage({
   // Bookings are not a primary nav item; their home is Žinutės (this card just
   // links there / to the bookings detail).
   const tBookings = await getTranslations("bookings");
-  const pendingBookings = await getPendingIncomingBookingCount();
+  // From the request-cached spine (P0 latency audit) — the spine's
+  // pendingIncomingBookings IS getPendingIncomingBookingCount(), so this is
+  // the same real count without a second round-trip.
+  const pendingBookings = spineCounts.pendingIncomingBookings;
 
   // Real booking next-action — only when there are pending incoming
   // proposals (> 0). Not a generic nav tile; a true action-needed card

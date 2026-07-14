@@ -278,9 +278,10 @@ describe("5. the registry is the single source (no duplicate hard-coded islands)
   it("both role branches render the registry-driven grid + status strip", () => {
     expect((page.match(/<DashboardModuleGrid\b/g) ?? []).length).toBe(2);
     expect((page.match(/<DashboardStatusStrip\b/g) ?? []).length).toBe(2);
-    // Fed by the pure view model over the request-cached spine read.
+    // Fed by the pure view model over the request-cached spine read (awaited
+    // inside the page's parallel batch since the P0 latency audit).
     expect(page).toMatch(/buildControlRoomViewModel\(\{/);
-    expect(page).toMatch(/await getSpineCounts\(\)/);
+    expect(page).toMatch(/getSpineCounts\(\),/);
   });
 
   it("the grid component renders modules only through the shared ActionCard (no invented links)", () => {

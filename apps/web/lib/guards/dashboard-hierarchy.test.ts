@@ -154,7 +154,11 @@ describe("top-slot copy exists in every served locale", () => {
 
 describe("invitations load exactly once (count + card share one read)", () => {
   it("the page fetches listMyPendingWorkerInvitations and passes it down", () => {
-    expect(PAGE).toMatch(/const invitations = await listMyPendingWorkerInvitations\(\)/);
+    // Read once inside the page's parallel batch (P0 latency audit); the rows
+    // land in `invitations` via the Promise.all destructure. The helper itself
+    // is request-cached, so the spine count shares the same single read.
+    expect(PAGE).toMatch(/listMyPendingWorkerInvitations\(\),/);
+    expect(PAGE).toMatch(/invitations,/);
     // Both card mounts reuse the preloaded rows — no duplicate DB read.
     const mounts = PAGE.match(/<WorkerInvitationsCard preloaded=\{invitations\}/g) ?? [];
     expect(mounts.length).toBeGreaterThanOrEqual(2);
