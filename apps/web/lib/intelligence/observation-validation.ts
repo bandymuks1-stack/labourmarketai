@@ -127,6 +127,14 @@ export function validateObservationCandidate(
       checkId: "source_approved",
       reasonCode: "unknown_source",
     });
+  } else if (observation.sourceKind !== profile.sourceKind) {
+    // The candidate's claimed kind must MATCH the registry — otherwise a
+    // mislabelled row (e.g. an external kind riding on an internal key)
+    // would be judged by the wrong branch. Mismatch is a hard failure.
+    failures.push({
+      checkId: "source_approved",
+      reasonCode: "source_kind_mismatch",
+    });
   } else if (
     profile.sourceKind !== "internal_aggregated" &&
     !isExternalSourceActive(observation.sourceKey)

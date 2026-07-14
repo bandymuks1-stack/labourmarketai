@@ -163,7 +163,11 @@ export function evaluateActivationReadiness(
     requirement(
       "robots_check",
       facts.robotsStatus === "allows" ||
-        facts.robotsStatus === "not_applicable",
+        // "not_applicable" is valid ONLY for official statistics APIs
+        // (the documented exemption) — a public-web source can never
+        // green its robots requirement by declaring robots irrelevant.
+        (facts.robotsStatus === "not_applicable" &&
+          profile.sourceKind === "public_official"),
     ),
     requirement("terms_review", isNonEmpty(facts.termsReviewedAtIso)),
     requirement(
