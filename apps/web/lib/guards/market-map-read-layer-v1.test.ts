@@ -265,6 +265,14 @@ describe("NO new DB migration in this PR", () => {
     // gated mark RPC powering the honest "new matches" spine count. DRAFT /
     // needs-human-gate, NOT applied; paired rollback + deferred
     // APPLIED_LEDGER entry.
-    expect(count).toBeLessThanOrEqual(136);
+    // Bumped 136 -> 139 for the Pricing & Payments v1 drafts
+    // (20260714190000_billing_plans_offers_v1 +
+    // 20260714191000_ad_products_registry_v1 +
+    // 20260714200000_usage_cost_tracking_v1): offer windows + automatic
+    // 15% first-annual eligibility memory, inactive/NULL-price ad product
+    // registry, append-only usage/credits/cost tracking. ALL DRAFT /
+    // needs-human-gate, NOT applied; paired rollbacks + deferred
+    // APPLIED_LEDGER entries.
+    expect(count).toBeLessThanOrEqual(139);
   });
 });

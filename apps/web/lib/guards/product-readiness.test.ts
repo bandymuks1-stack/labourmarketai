@@ -1761,7 +1761,16 @@ describe("no migration files added by this sprint", () => {
     // gated mark RPC powering the honest "new matches" spine count; DRAFT /
     // needs-human-gate, NOT applied; paired rollback + deferred
     // APPLIED_LEDGER entry.
-    const SPRINT_BASELINE = 136;
+    // Bumped 136 -> 139 for the Pricing & Payments v1 drafts
+    // (20260714190000_billing_plans_offers_v1 +
+    // 20260714191000_ad_products_registry_v1 +
+    // 20260714200000_usage_cost_tracking_v1) — Launch Offer windows +
+    // automatic 15% first-annual eligibility memory, job-ad product slug
+    // registry (all inactive, NULL prices), usage/credits/cost tracking
+    // (append-only). ALL DRAFT / needs-human-gate, NOT applied; payments
+    // stay OFF (kill-switch + live hard-block untouched); paired rollbacks
+    // + deferred APPLIED_LEDGER entries.
+    const SPRINT_BASELINE = 139;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

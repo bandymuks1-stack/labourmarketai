@@ -6916,6 +6916,27 @@
         "blocked_by_design": "Blocked by design"
       },
       "proofLabel": "proof"
+    },
+    "catalogueV2": {
+      "title": "Catalogue v2 (owner-confirmed prices)",
+      "intro": "Prices are read from the typed catalogue (lib/billing/plans.ts). The payments kill-switch stays off — no paid plan is purchasable until the owner activates billing.",
+      "audience": {
+        "person": "Persons",
+        "company": "Companies",
+        "agency": "Agencies"
+      },
+      "free": "Free",
+      "perMonth": "/mo",
+      "stateFree": "free",
+      "stateNotEnabled": "payment not enabled",
+      "aliasNote": "Legacy plan keys map onto the new catalogue:"
+    },
+    "offerEligibility": {
+      "title": "Launch Offer discount eligibilities",
+      "unavailable": "Table not applied yet (migration 20260714190000 awaits owner approval) — there are no rows and nothing is shown artificially.",
+      "empty": "No earned eligibilities yet.",
+      "earned": "earned",
+      "consumed": "consumed"
     }
   },
   "conciergeOffer": {
@@ -9191,6 +9212,121 @@
     "imageOcr": {
       "label": "CV photo / image (JPG, PNG)",
       "note": "In preparation — image recognition is not available yet. Upload a PDF/DOCX or paste the text."
+    }
+  },
+  "pricingV2": {
+    "paymentsState": {
+      "badge": "Payment activation in preparation",
+      "body": "Prices are confirmed, but payments are not activated yet — nothing is charged on this page and no card details are collected. Leave a request and we will arrange activation with you directly."
+    },
+    "audiences": {
+      "person": "For persons",
+      "company": "For companies",
+      "agency": "For agencies"
+    },
+    "free": "Free",
+    "perMonth": "/mo",
+    "cta": "Join the waitlist",
+    "ctaNote": "Payments are not activated yet — a request commits you to nothing and nothing is charged.",
+    "ctaFree": "Use it free — no payment needed.",
+    "launchOffer": {
+      "badge": "Project Launch Offer",
+      "validUntil": "Offer valid until {date}.",
+      "discountNote": "Companies activating by {activateBy} automatically earn a {percent}% discount on their first annual subscription if it is activated before {annualBy}. The system remembers this eligibility automatically."
+    },
+    "plans": {
+      "free_person": {
+        "name": "FREE",
+        "tagline": "A start for every person.",
+        "features": [
+          "Profile and work journal",
+          "AI assistant — 10 requests/mo",
+          "Up to 10 media items in the gallery"
+        ]
+      },
+      "ai_plus": {
+        "name": "AI PLUS",
+        "tagline": "More AI help for everyday work.",
+        "features": [
+          "AI assistant — 200 requests/mo",
+          "Up to 50 media items in the gallery",
+          "Everything in FREE"
+        ]
+      },
+      "vip_media": {
+        "name": "VIP MEDIA",
+        "tagline": "Maximum media and visibility.",
+        "features": [
+          "AI assistant — 500 requests/mo",
+          "Up to 500 media items in the gallery",
+          "Internal LabourMarket.ai visibility boost (in preparation)",
+          "Everything in AI PLUS"
+        ]
+      },
+      "free_company": {
+        "name": "FREE",
+        "tagline": "A company's start on the market.",
+        "features": [
+          "1 active job advertisement",
+          "AI assistant — 10 requests/mo",
+          "Up to 20 media items in the gallery"
+        ]
+      },
+      "launch_offer_99": {
+        "name": "PROJECT LAUNCH OFFER",
+        "tagline": "Unlimited ads and internal promotion during the project launch period.",
+        "features": [
+          "Unlimited company job advertisements",
+          "LabourMarket.ai internal promotion",
+          "AI assistant — 300 requests/mo",
+          "Up to 200 media items in the gallery"
+        ]
+      },
+      "agency_start": {
+        "name": "START",
+        "tagline": "For an agency's first clients.",
+        "features": [
+          "Up to 10 active job ads",
+          "Up to 3 managed companies",
+          "AI assistant — 300 requests/mo"
+        ]
+      },
+      "agency_growth": {
+        "name": "GROWTH",
+        "tagline": "For a growing agency.",
+        "features": [
+          "Up to 50 active job ads",
+          "Up to 10 managed companies",
+          "AI assistant — 1000 requests/mo",
+          "LabourMarket.ai internal promotion"
+        ]
+      },
+      "agency_scale": {
+        "name": "SCALE",
+        "tagline": "For large teams and volume.",
+        "features": [
+          "Unlimited active job ads",
+          "Unlimited managed companies",
+          "AI assistant — 3000 requests/mo",
+          "LabourMarket.ai internal promotion"
+        ]
+      }
+    },
+    "adProducts": {
+      "badge": "In preparation",
+      "title": "Job advertisement pricing",
+      "note": "The ad-product architecture is prepared, but prices are not confirmed yet and these cannot be ordered. Regular company subscriptions do not include unlimited ads — the only exception is the PROJECT LAUNCH OFFER plan.",
+      "preparing": "In preparation",
+      "items": {
+        "single_ad": "Single job ad",
+        "ai_promoted_ad": "AI-promoted job ad",
+        "premium_promoted_ad": "Premium-promoted job ad",
+        "international_ad": "International job ad",
+        "package_5": "5-ad package",
+        "package_20": "20-ad package",
+        "agency_package": "Agency package",
+        "extra_promotion": "Extra promotion"
+      }
     }
   }
 }

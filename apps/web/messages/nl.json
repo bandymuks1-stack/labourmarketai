@@ -6916,6 +6916,27 @@
         "blocked_by_design": "Bewust geblokkeerd"
       },
       "proofLabel": "bewijs"
+    },
+    "catalogueV2": {
+      "title": "Catalogus v2 (door de eigenaar bevestigde prijzen)",
+      "intro": "Prijzen worden gelezen uit de getypeerde catalogus (lib/billing/plans.ts). De kill-switch voor betalingen blijft uit — geen enkel betaald plan is te koop totdat de eigenaar de facturering activeert.",
+      "audience": {
+        "person": "Personen",
+        "company": "Bedrijven",
+        "agency": "Bureaus"
+      },
+      "free": "Gratis",
+      "perMonth": "/mnd",
+      "stateFree": "gratis",
+      "stateNotEnabled": "betaling niet geactiveerd",
+      "aliasNote": "Oude plansleutels verwijzen naar de nieuwe catalogus:"
+    },
+    "offerEligibility": {
+      "title": "Kortingsrechten van het lanceringsaanbod",
+      "unavailable": "Tabel nog niet toegepast (migratie 20260714190000 wacht op goedkeuring van de eigenaar) — er zijn geen rijen en er wordt niets kunstmatig getoond.",
+      "empty": "Nog geen verworven rechten.",
+      "earned": "verworven",
+      "consumed": "gebruikt"
     }
   },
   "conciergeOffer": {
@@ -9191,6 +9212,121 @@
     "imageOcr": {
       "label": "Cv-foto / afbeelding (JPG, PNG)",
       "note": "In voorbereiding — beeldherkenning werkt nog niet. Upload een PDF/DOCX of plak de tekst."
+    }
+  },
+  "pricingV2": {
+    "paymentsState": {
+      "badge": "Betalingsactivering in voorbereiding",
+      "body": "De prijzen zijn bevestigd, maar betalingen zijn nog niet geactiveerd — op deze pagina wordt niets in rekening gebracht en er worden geen kaartgegevens verzameld. Laat een aanvraag achter en we stemmen de activering rechtstreeks met u af."
+    },
+    "audiences": {
+      "person": "Voor personen",
+      "company": "Voor bedrijven",
+      "agency": "Voor bureaus"
+    },
+    "free": "Gratis",
+    "perMonth": "/mnd",
+    "cta": "Aanmelden voor de wachtlijst",
+    "ctaNote": "Betalingen zijn nog niet geactiveerd — een aanvraag verplicht u tot niets en er wordt niets in rekening gebracht.",
+    "ctaFree": "Gratis te gebruiken — geen betaling nodig.",
+    "launchOffer": {
+      "badge": "Project Launch Offer",
+      "validUntil": "Aanbod geldig tot {date}.",
+      "discountNote": "Bedrijven die vóór {activateBy} activeren, krijgen automatisch recht op {percent}% korting op hun eerste jaarabonnement als dat vóór {annualBy} wordt geactiveerd. Het systeem onthoudt dit recht automatisch."
+    },
+    "plans": {
+      "free_person": {
+        "name": "FREE",
+        "tagline": "Een start voor iedereen.",
+        "features": [
+          "Profiel en werkjournaal",
+          "AI-assistent — 10 verzoeken/mnd",
+          "Tot 10 media-items in de galerij"
+        ]
+      },
+      "ai_plus": {
+        "name": "AI PLUS",
+        "tagline": "Meer AI-hulp bij het dagelijkse werk.",
+        "features": [
+          "AI-assistent — 200 verzoeken/mnd",
+          "Tot 50 media-items in de galerij",
+          "Alles uit FREE"
+        ]
+      },
+      "vip_media": {
+        "name": "VIP MEDIA",
+        "tagline": "Maximale media en zichtbaarheid.",
+        "features": [
+          "AI-assistent — 500 verzoeken/mnd",
+          "Tot 500 media-items in de galerij",
+          "Interne LabourMarket.ai-zichtbaarheidsboost (in voorbereiding)",
+          "Alles uit AI PLUS"
+        ]
+      },
+      "free_company": {
+        "name": "FREE",
+        "tagline": "De start van een bedrijf op de markt.",
+        "features": [
+          "1 actieve vacature",
+          "AI-assistent — 10 verzoeken/mnd",
+          "Tot 20 media-items in de galerij"
+        ]
+      },
+      "launch_offer_99": {
+        "name": "PROJECT LAUNCH OFFER",
+        "tagline": "Onbeperkte vacatures en interne promotie tijdens de lanceringsperiode.",
+        "features": [
+          "Onbeperkte bedrijfsvacatures",
+          "Interne LabourMarket.ai-promotie",
+          "AI-assistent — 300 verzoeken/mnd",
+          "Tot 200 media-items in de galerij"
+        ]
+      },
+      "agency_start": {
+        "name": "START",
+        "tagline": "Voor de eerste klanten van een bureau.",
+        "features": [
+          "Tot 10 actieve vacatures",
+          "Tot 3 beheerde bedrijven",
+          "AI-assistent — 300 verzoeken/mnd"
+        ]
+      },
+      "agency_growth": {
+        "name": "GROWTH",
+        "tagline": "Voor een groeiend bureau.",
+        "features": [
+          "Tot 50 actieve vacatures",
+          "Tot 10 beheerde bedrijven",
+          "AI-assistent — 1000 verzoeken/mnd",
+          "Interne LabourMarket.ai-promotie"
+        ]
+      },
+      "agency_scale": {
+        "name": "SCALE",
+        "tagline": "Voor grote teams en volumes.",
+        "features": [
+          "Onbeperkte actieve vacatures",
+          "Onbeperkt aantal beheerde bedrijven",
+          "AI-assistent — 3000 verzoeken/mnd",
+          "Interne LabourMarket.ai-promotie"
+        ]
+      }
+    },
+    "adProducts": {
+      "badge": "In voorbereiding",
+      "title": "Tarieven voor vacatures",
+      "note": "De architectuur voor advertentieproducten is voorbereid, maar de prijzen zijn nog niet bevestigd en bestellen is nog niet mogelijk. Reguliere bedrijfsabonnementen bevatten geen onbeperkte vacatures — de enige uitzondering is het PROJECT LAUNCH OFFER-plan.",
+      "preparing": "In voorbereiding",
+      "items": {
+        "single_ad": "Losse vacature",
+        "ai_promoted_ad": "AI-gepromote vacature",
+        "premium_promoted_ad": "Premium-gepromote vacature",
+        "international_ad": "Internationale vacature",
+        "package_5": "Pakket van 5 vacatures",
+        "package_20": "Pakket van 20 vacatures",
+        "agency_package": "Bureaupakket",
+        "extra_promotion": "Extra promotie"
+      }
     }
   }
 }

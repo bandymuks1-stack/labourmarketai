@@ -6916,6 +6916,27 @@
         "blocked_by_design": "Konzeptbedingt blockiert"
       },
       "proofLabel": "Nachweis"
+    },
+    "catalogueV2": {
+      "title": "Katalog v2 (vom Eigentümer bestätigte Preise)",
+      "intro": "Die Preise werden aus dem typisierten Katalog gelesen (lib/billing/plans.ts). Der Kill-Switch für Zahlungen bleibt aus — kein bezahlter Plan ist kaufbar, bis der Eigentümer die Abrechnung aktiviert.",
+      "audience": {
+        "person": "Personen",
+        "company": "Unternehmen",
+        "agency": "Agenturen"
+      },
+      "free": "Kostenlos",
+      "perMonth": "/Monat",
+      "stateFree": "kostenlos",
+      "stateNotEnabled": "Zahlung nicht aktiviert",
+      "aliasNote": "Alte Planschlüssel verweisen auf den neuen Katalog:"
+    },
+    "offerEligibility": {
+      "title": "Rabattansprüche des Startangebots",
+      "unavailable": "Tabelle noch nicht angewendet (Migration 20260714190000 wartet auf die Freigabe des Eigentümers) — es gibt keine Zeilen, und nichts wird künstlich angezeigt.",
+      "empty": "Noch keine erworbenen Ansprüche.",
+      "earned": "erworben",
+      "consumed": "verbraucht"
     }
   },
   "conciergeOffer": {
@@ -9191,6 +9212,121 @@
     "imageOcr": {
       "label": "Lebenslauf-Foto / Bild (JPG, PNG)",
       "note": "In Vorbereitung — Bilderkennung ist noch nicht verfügbar. Laden Sie PDF/DOCX hoch oder fügen Sie den Text ein."
+    }
+  },
+  "pricingV2": {
+    "paymentsState": {
+      "badge": "Zahlungsaktivierung in Vorbereitung",
+      "body": "Die Preise sind bestätigt, aber Zahlungen sind noch nicht aktiviert — auf dieser Seite wird nichts abgebucht und es werden keine Kartendaten erhoben. Hinterlassen Sie eine Anfrage, und wir stimmen die Aktivierung direkt mit Ihnen ab."
+    },
+    "audiences": {
+      "person": "Für Personen",
+      "company": "Für Unternehmen",
+      "agency": "Für Agenturen"
+    },
+    "free": "Kostenlos",
+    "perMonth": "/Monat",
+    "cta": "Auf die Warteliste setzen",
+    "ctaNote": "Zahlungen sind noch nicht aktiviert — eine Anfrage verpflichtet zu nichts, und es wird nichts abgebucht.",
+    "ctaFree": "Kostenlos nutzbar — keine Zahlung erforderlich.",
+    "launchOffer": {
+      "badge": "Project Launch Offer",
+      "validUntil": "Angebot gültig bis {date}.",
+      "discountNote": "Unternehmen, die bis {activateBy} aktivieren, erhalten automatisch Anspruch auf {percent}% Rabatt auf ihr erstes Jahresabonnement, wenn dieses vor {annualBy} aktiviert wird. Das System merkt sich diesen Anspruch automatisch."
+    },
+    "plans": {
+      "free_person": {
+        "name": "FREE",
+        "tagline": "Ein Start für jede Person.",
+        "features": [
+          "Profil und Arbeitsjournal",
+          "KI-Assistent — 10 Anfragen/Monat",
+          "Bis zu 10 Medienelemente in der Galerie"
+        ]
+      },
+      "ai_plus": {
+        "name": "AI PLUS",
+        "tagline": "Mehr KI-Hilfe für die tägliche Arbeit.",
+        "features": [
+          "KI-Assistent — 200 Anfragen/Monat",
+          "Bis zu 50 Medienelemente in der Galerie",
+          "Alles aus FREE"
+        ]
+      },
+      "vip_media": {
+        "name": "VIP MEDIA",
+        "tagline": "Maximale Medien und Sichtbarkeit.",
+        "features": [
+          "KI-Assistent — 500 Anfragen/Monat",
+          "Bis zu 500 Medienelemente in der Galerie",
+          "Interner LabourMarket.ai-Sichtbarkeits-Boost (in Vorbereitung)",
+          "Alles aus AI PLUS"
+        ]
+      },
+      "free_company": {
+        "name": "FREE",
+        "tagline": "Der Start eines Unternehmens auf dem Markt.",
+        "features": [
+          "1 aktive Stellenanzeige",
+          "KI-Assistent — 10 Anfragen/Monat",
+          "Bis zu 20 Medienelemente in der Galerie"
+        ]
+      },
+      "launch_offer_99": {
+        "name": "PROJECT LAUNCH OFFER",
+        "tagline": "Unbegrenzte Anzeigen und interne Bewerbung während der Startphase des Projekts.",
+        "features": [
+          "Unbegrenzte Stellenanzeigen des Unternehmens",
+          "Interne LabourMarket.ai-Bewerbung",
+          "KI-Assistent — 300 Anfragen/Monat",
+          "Bis zu 200 Medienelemente in der Galerie"
+        ]
+      },
+      "agency_start": {
+        "name": "START",
+        "tagline": "Für die ersten Kunden einer Agentur.",
+        "features": [
+          "Bis zu 10 aktive Anzeigen",
+          "Bis zu 3 verwaltete Unternehmen",
+          "KI-Assistent — 300 Anfragen/Monat"
+        ]
+      },
+      "agency_growth": {
+        "name": "GROWTH",
+        "tagline": "Für eine wachsende Agentur.",
+        "features": [
+          "Bis zu 50 aktive Anzeigen",
+          "Bis zu 10 verwaltete Unternehmen",
+          "KI-Assistent — 1000 Anfragen/Monat",
+          "Interne LabourMarket.ai-Bewerbung"
+        ]
+      },
+      "agency_scale": {
+        "name": "SCALE",
+        "tagline": "Für große Teams und Volumen.",
+        "features": [
+          "Unbegrenzte aktive Anzeigen",
+          "Unbegrenzte Anzahl verwalteter Unternehmen",
+          "KI-Assistent — 3000 Anfragen/Monat",
+          "Interne LabourMarket.ai-Bewerbung"
+        ]
+      }
+    },
+    "adProducts": {
+      "badge": "In Vorbereitung",
+      "title": "Preise für Stellenanzeigen",
+      "note": "Die Architektur der Anzeigenprodukte ist vorbereitet, aber die Preise sind noch nicht bestätigt und eine Bestellung ist noch nicht möglich. Reguläre Unternehmensabonnements enthalten keine unbegrenzten Anzeigen — die einzige Ausnahme ist der Plan PROJECT LAUNCH OFFER.",
+      "preparing": "In Vorbereitung",
+      "items": {
+        "single_ad": "Einzelne Stellenanzeige",
+        "ai_promoted_ad": "KI-beworbene Stellenanzeige",
+        "premium_promoted_ad": "Premium-beworbene Stellenanzeige",
+        "international_ad": "Internationale Stellenanzeige",
+        "package_5": "Paket mit 5 Anzeigen",
+        "package_20": "Paket mit 20 Anzeigen",
+        "agency_package": "Agentur-Paket",
+        "extra_promotion": "Zusätzliche Bewerbung"
+      }
     }
   }
 }

@@ -231,9 +231,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    path — the billing-webhook pattern. The row carries field NAMES +
     //    a bounded validated-output excerpt, never input content; touches
     //    no chat table, sends nothing outbound.
+    //  - lib/billing/offer-store.ts / lib/billing/usage.ts /
+    //    lib/billing/cost-engine.ts — Pricing & Payments v1 (Sprint v2
+    //    §9–§11), the subscription-store pattern: the billing/usage tables
+    //    carry NO anon/authenticated write path by design (gated drafts
+    //    20260714190000 + 20260714200000), so the service role is the only
+    //    path. offer-store writes ONE idempotent billing_offer_eligibility
+    //    row from the webhook chain (automatic Launch Offer 15% memory) +
+    //    a superadmin-page read; usage.ts appends bounded append-only
+    //    usage_events rows; cost-engine.ts is READ-ONLY rollups over
+    //    ai_runs + usage_events. See CHAT_VISIBILITY_AUDIT.md §7.
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
-    // ai_runs audit row (the reads write nothing at all).
+    // ai_runs / usage_events audit rows (the reads write nothing at all).
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
@@ -243,7 +253,10 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
       "lib/ai/runtime/audit-store.ts",
+      "lib/billing/cost-engine.ts",
+      "lib/billing/offer-store.ts",
       "lib/billing/subscription-store.ts",
+      "lib/billing/usage.ts",
       "lib/company/claim-public-intake.ts",
       "lib/opportunities/contact-employer.ts",
       "lib/sales/lead-intake.ts",

@@ -2,7 +2,13 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { getAdminBillingOverview } from "@/lib/admin/billing-overview";
-import { PRE_PAYMENT_PLANS } from "@/lib/billing/plans";
+import {
+  PRE_PAYMENT_PLANS,
+  PLAN_CATALOGUE_V2,
+  LEGACY_PLAN_ALIASES,
+  formatEurMonthlyCents,
+} from "@/lib/billing/plans";
+import { listOfferEligibilityBestEffort } from "@/lib/billing/offer-store";
 import {
   BILLING_READINESS_ITEMS,
   PRICING_READINESS_STATE,
@@ -30,6 +36,7 @@ export default async function AdminBillingPage({
 
   const t = await getTranslations("adminBilling");
   const o = await getAdminBillingOverview();
+  const offerEligibility = await listOfferEligibilityBestEffort();
   const coverage = summarizeEntitlementCoverage();
   const paidPlanKeys = PRE_PAYMENT_PLANS.filter(
     (p) => p.accessState === "payment_not_enabled",
@@ -145,6 +152,98 @@ export default async function AdminBillingPage({
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* Catalogue V2 (Sprint v2 §9) — owner-confirmed prices; payments stay
+          off (kill-switch) so every paid tier is honestly not-purchasable. */}
+      <section className="flex flex-col gap-3" data-testid="billing-catalogue-v2">
+        <header className="flex flex-col gap-0.5">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("catalogueV2.title")}
+          </h2>
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {t("catalogueV2.intro")}
+          </p>
+        </header>
+        <ul className="flex flex-col gap-1.5">
+          {PLAN_CATALOGUE_V2.map((p) => (
+            <li
+              key={p.slug}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2"
+              data-plan-v2={p.slug}
+            >
+              <span className="text-sm text-text-primary">
+                <span className="font-mono text-xs text-text-muted">{p.slug}</span>
+                {" · "}
+                {t(`catalogueV2.audience.${p.audience}` as never)}
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="font-display text-sm font-bold text-text-primary">
+                  {p.priceMonthlyCents === 0
+                    ? t("catalogueV2.free")
+                    : `${formatEurMonthlyCents(p.priceMonthlyCents)}${t("catalogueV2.perMonth")}`}
+                </span>
+                <span className="rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted">
+                  {p.accessState === "free"
+                    ? t("catalogueV2.stateFree")
+                    : t("catalogueV2.stateNotEnabled")}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-[11px] text-text-muted">
+          {t("catalogueV2.aliasNote")}{" "}
+          <span className="font-mono text-[10px]">
+            {Object.entries(LEGACY_PLAN_ALIASES)
+              .map(([from, to]) => `${from}→${to}`)
+              .join(" · ")}
+          </span>
+        </p>
+      </section>
+
+      {/* Launch Offer eligibility memory (Sprint v2 §9) — honest not-applied
+          state until 20260714190000_billing_plans_offers_v1.sql is applied. */}
+      <section className="flex flex-col gap-2" data-testid="billing-offer-eligibility">
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {t("offerEligibility.title")}
+        </h2>
+        {!offerEligibility.available ? (
+          <p className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary">
+            {t("offerEligibility.unavailable")}
+          </p>
+        ) : offerEligibility.rows.length === 0 ? (
+          <p className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted">
+            {t("offerEligibility.empty")}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-1.5">
+            {offerEligibility.rows.map((r, i) => (
+              <li
+                key={`${r.profileId}-${r.offerSlug}-${i}`}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2"
+              >
+                <span className="text-sm text-text-primary">
+                  <span className="font-mono text-xs text-text-muted">
+                    {r.profileId.slice(0, 8)}
+                  </span>
+                  {" · "}
+                  {r.offerSlug} · {r.discountPercent}%
+                  {r.testMode ? (
+                    <span className="ml-2 font-mono text-[10px] uppercase tracking-label text-state-amber">
+                      test
+                    </span>
+                  ) : null}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                  {r.consumedAt
+                    ? t("offerEligibility.consumed")
+                    : t("offerEligibility.earned")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* Subscriptions */}

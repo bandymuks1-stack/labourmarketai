@@ -6916,6 +6916,27 @@
         "blocked_by_design": "Užblokuota pagal dizainą"
       },
       "proofLabel": "įrodymas"
+    },
+    "catalogueV2": {
+      "title": "Kainynas v2 (savininko patvirtintos kainos)",
+      "intro": "Kainos skaitomos iš tipizuoto katalogo (lib/billing/plans.ts). Mokėjimų jungiklis lieka išjungtas — nė vienas mokamas planas nėra įsigyjamas, kol savininkas mokėjimų neįjungs.",
+      "audience": {
+        "person": "Asmenys",
+        "company": "Įmonės",
+        "agency": "Agentūros"
+      },
+      "free": "Nemokamas",
+      "perMonth": "/mėn.",
+      "stateFree": "nemokamas",
+      "stateNotEnabled": "mokėjimas neaktyvuotas",
+      "aliasNote": "Seni planų raktai atitinka naują katalogą:"
+    },
+    "offerEligibility": {
+      "title": "Starto pasiūlymo nuolaidų teisės",
+      "unavailable": "Lentelė dar nepritaikyta (migracija 20260714190000 laukia savininko patvirtinimo) — įrašų nėra, nieko nerodoma dirbtinai.",
+      "empty": "Įgytų teisių dar nėra.",
+      "earned": "įgyta",
+      "consumed": "panaudota"
     }
   },
   "conciergeOffer": {
@@ -9191,6 +9212,121 @@
     "imageOcr": {
       "label": "CV nuotrauka / paveikslėlis (JPG, PNG)",
       "note": "RUOŠIAMA — nuotraukų atpažinimas dar neveikia. Įkelkite PDF/DOCX arba įklijuokite tekstą."
+    }
+  },
+  "pricingV2": {
+    "paymentsState": {
+      "badge": "Mokėjimų aktyvavimas ruošiamas",
+      "body": "Kainos patvirtintos, bet mokėjimai dar neaktyvuoti — šiame puslapyje niekas neapmokestinama ir kortelės duomenys nerenkami. Palikite užklausą, ir aktyvavimą suderinsime tiesiogiai."
+    },
+    "audiences": {
+      "person": "Asmenims",
+      "company": "Įmonėms",
+      "agency": "Agentūroms"
+    },
+    "free": "Nemokamai",
+    "perMonth": "/mėn.",
+    "cta": "Prisijungti prie laukiančiųjų sąrašo",
+    "ctaNote": "Mokėjimai dar neaktyvuoti — užklausa nieko neįpareigoja ir niekas neapmokestinama.",
+    "ctaFree": "Naudokitės nemokamai — mokėjimo nereikia.",
+    "launchOffer": {
+      "badge": "Projekto starto pasiūlymas",
+      "validUntil": "Pasiūlymas galioja iki {date}.",
+      "discountNote": "Aktyvavus iki {activateBy}, įmonė automatiškai įgyja teisę į {percent}% nuolaidą pirmajai metinei prenumeratai, jei ji aktyvuojama iki {annualBy}. Sistema šią teisę įsimena automatiškai."
+    },
+    "plans": {
+      "free_person": {
+        "name": "FREE",
+        "tagline": "Startas kiekvienam žmogui.",
+        "features": [
+          "Profilis ir darbo žurnalas",
+          "AI asistentas — 10 užklausų/mėn.",
+          "Iki 10 medijos įrašų galerijoje"
+        ]
+      },
+      "ai_plus": {
+        "name": "AI PLUS",
+        "tagline": "Daugiau AI pagalbos kasdieniam darbui.",
+        "features": [
+          "AI asistentas — 200 užklausų/mėn.",
+          "Iki 50 medijos įrašų galerijoje",
+          "Viskas iš FREE plano"
+        ]
+      },
+      "vip_media": {
+        "name": "VIP MEDIA",
+        "tagline": "Maksimali medija ir matomumas.",
+        "features": [
+          "AI asistentas — 500 užklausų/mėn.",
+          "Iki 500 medijos įrašų galerijoje",
+          "Vidinis LabourMarket.ai matomumo didinimas (ruošiama)",
+          "Viskas iš AI PLUS plano"
+        ]
+      },
+      "free_company": {
+        "name": "FREE",
+        "tagline": "Įmonės startas rinkoje.",
+        "features": [
+          "1 aktyvus darbo skelbimas",
+          "AI asistentas — 10 užklausų/mėn.",
+          "Iki 20 medijos įrašų galerijoje"
+        ]
+      },
+      "launch_offer_99": {
+        "name": "PROJECT LAUNCH OFFER",
+        "tagline": "Neriboti skelbimai ir vidinė reklama projekto starto laikotarpiu.",
+        "features": [
+          "Neriboti įmonės darbo skelbimai",
+          "LabourMarket.ai vidinė reklama",
+          "AI asistentas — 300 užklausų/mėn.",
+          "Iki 200 medijos įrašų galerijoje"
+        ]
+      },
+      "agency_start": {
+        "name": "START",
+        "tagline": "Pirmiesiems agentūros klientams.",
+        "features": [
+          "Iki 10 aktyvių skelbimų",
+          "Iki 3 valdomų įmonių",
+          "AI asistentas — 300 užklausų/mėn."
+        ]
+      },
+      "agency_growth": {
+        "name": "GROWTH",
+        "tagline": "Augančiai agentūrai.",
+        "features": [
+          "Iki 50 aktyvių skelbimų",
+          "Iki 10 valdomų įmonių",
+          "AI asistentas — 1000 užklausų/mėn.",
+          "LabourMarket.ai vidinė reklama"
+        ]
+      },
+      "agency_scale": {
+        "name": "SCALE",
+        "tagline": "Didelėms komandoms ir apimtims.",
+        "features": [
+          "Neriboti aktyvūs skelbimai",
+          "Neribotas valdomų įmonių skaičius",
+          "AI asistentas — 3000 užklausų/mėn.",
+          "LabourMarket.ai vidinė reklama"
+        ]
+      }
+    },
+    "adProducts": {
+      "badge": "Ruošiama",
+      "title": "Darbo skelbimų įkainiai",
+      "note": "Skelbimų produktų architektūra paruošta, bet kainos dar nepatvirtintos ir užsakyti jų dar negalima. Įprastos įmonių prenumeratos neapima neribotų skelbimų — vienintelė išimtis yra PROJECT LAUNCH OFFER planas.",
+      "preparing": "Ruošiama",
+      "items": {
+        "single_ad": "Pavienis skelbimas",
+        "ai_promoted_ad": "AI reklamuojamas skelbimas",
+        "premium_promoted_ad": "Premium reklamuojamas skelbimas",
+        "international_ad": "Tarptautinis skelbimas",
+        "package_5": "5 skelbimų paketas",
+        "package_20": "20 skelbimų paketas",
+        "agency_package": "Agentūrų paketas",
+        "extra_promotion": "Papildoma reklama"
+      }
     }
   }
 }
