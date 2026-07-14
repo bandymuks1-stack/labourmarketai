@@ -1,7 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { ContextualIntelligenceCard } from "@/components/intelligence/contextual-intelligence-card";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { getCompanyDemandIntelligence } from "@/lib/intelligence/intelligence-read";
+import { buildCompanyIntelligenceCards } from "@/lib/intelligence/intelligence-view-model";
 import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
 import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
@@ -93,6 +96,57 @@ export default async function CompanyWorkforcePlanningPage({
       </div>
     );
   }
+
+  // ── Contextual market-intelligence signal (Labour Market Intelligence
+  //    v1): the org's OWN 90-day demand aggregates from the intelligence
+  //    read layer, shaped by the view-model builder — real data or an honest
+  //    insufficient state, never a fabricated number. (A supply/demand-gap
+  //    composer does not exist in the read layer yet, so the demand-signal
+  //    card is the honest signal shown here.)
+  const tIntel = await getTranslations("intelligence");
+  const demandIntel = await getCompanyDemandIntelligence();
+  const intelCards = buildCompanyIntelligenceCards({
+    salaryCompetitiveness: null,
+    supplyDemandGaps: [],
+    skillScarcity:
+      demandIntel.kind === "ok" ? demandIntel.demandAggregates : [],
+  });
+  const scarcityCard =
+    intelCards.find((c) => c.id === "company-skill-scarcity") ?? null;
+  const intelContextCard = (
+    <ContextualIntelligenceCard
+      locale={locale}
+      testId="planning-zone-intelligence"
+      eyebrow={tIntel("contextual.eyebrow")}
+      headline={
+        scarcityCard
+          ? (tIntel(
+              scarcityCard.headlineCode.replace(/^intelligence\./, "") as never,
+              { ...scarcityCard.headlineParams } as never,
+            ) as string)
+          : tIntel("contextual.demandInsufficient")
+      }
+      state={scarcityCard ? scarcityCard.state : "insufficient_data"}
+      stateLabel={
+        scarcityCard && scarcityCard.state === "ready"
+          ? tIntel("state.ready")
+          : tIntel("state.insufficientData")
+      }
+      badge={
+        scarcityCard
+          ? {
+              originKind: scarcityCard.sourceBadge.originKind,
+              originLabel: tIntel(`origin.${scarcityCard.sourceBadge.originKind}`),
+              sourceLabel: tIntel(
+                `sources.key.${scarcityCard.sourceBadge.sourceKey}` as never,
+              ) as string,
+              observedAtLabel: null,
+            }
+          : null
+      }
+      linkLabel={tIntel("contextual.link")}
+    />
+  );
 
   const view = buildPlanningZoneView({
     entries: result.entries,
@@ -404,6 +458,8 @@ export default async function CompanyWorkforcePlanningPage({
           </span>
         </p>
       </section>
+
+      {intelContextCard}
 
       {/* Skill gaps — chips, capped short. */}
       {view.missingSkills.length > 0 ? (

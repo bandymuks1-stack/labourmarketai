@@ -142,6 +142,11 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // other module surfaces. Role-specific real-data index; the evidence
   // report below stays its own inventoried surface (linked, unchanged).
   { id: "reports", urlPattern: "/dashboard/reports", sourceFile: "app/[locale]/dashboard/reports/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // Labour Market Intelligence v1: the intelligence workspace is a dashboard
+  // module (registry-driven grid card), so it joins the smoke inventory like
+  // the other module surfaces. Deterministic sourced signals only — honest
+  // insufficient_data / needs_migration states, never a fabricated number.
+  { id: "intelligence", urlPattern: "/dashboard/intelligence", sourceFile: "app/[locale]/dashboard/intelligence/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "reports-evidence", urlPattern: "/dashboard/reports/evidence", sourceFile: "app/[locale]/dashboard/reports/evidence/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "player-card", urlPattern: "/dashboard/player-card", sourceFile: "app/[locale]/dashboard/player-card/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "market-map", urlPattern: "/dashboard/market-map", sourceFile: "app/[locale]/dashboard/market-map/page.tsx", requiresAuth: true, kind: "role-flow" },

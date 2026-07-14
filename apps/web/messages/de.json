@@ -9237,5 +9237,186 @@
   "companySwitcher": {
     "heading": "Aktives Unternehmen",
     "note": "Der Wechsel legt fest, für welche Organisation dein Unternehmensbereich arbeitet."
+  },
+  "intelligence": {
+    "module": {
+      "title": "Marktintelligenz",
+      "desc": "Gehalts- und Nachfragesignale aus deterministischen Daten mit Quellenangabe — mit einer Erklärung hinter jeder Zahl."
+    },
+    "page": {
+      "eyebrow": "Einblicke",
+      "title": "Marktintelligenz",
+      "intro": "Kernsignale aus Ihren eigenen Daten und kuratierten Referenzwerten. Jede Zahl trägt Quelle, Datum und eine Erklärung.",
+      "notAvailableForRole": "Marktintelligenz ist für diese Rolle noch nicht verfügbar.",
+      "missingTitle": "Was für Ihr Gehaltssignal fehlt",
+      "signalsTitle": "Kernsignale",
+      "sourcesTitle": "Datenquellen"
+    },
+    "state": {
+      "ready": "Bereit",
+      "insufficientData": "Unzureichende Daten",
+      "needsMigration": "Wartet auf Aktivierung",
+      "stale": "Veraltet"
+    },
+    "stateNote": {
+      "insufficientData": "Für dieses Signal gibt es noch nicht genug echte Daten — statt einer erfundenen Zahl wird eine ehrliche Lücke gezeigt.",
+      "needsMigration": "Der Datenspeicher hinter diesem Signal ist vorbereitet und wird nach Freigabe durch den Eigentümer angebunden. Bis dahin wird nichts geschätzt.",
+      "stale": "Die Belege hinter diesem Signal sind älter als das Aktualitätsfenster — betrachten Sie sie als veraltet."
+    },
+    "valueClass": {
+      "userEntered": "Von einer Person eingegeben",
+      "systemSuggestion": "Systemvorschlag",
+      "confirmed": "Bestätigt",
+      "availableCapacity": "Gezählte Kapazität",
+      "calculatedGap": "Berechnete Lücke"
+    },
+    "origin": {
+      "internal": "Intern",
+      "external": "Extern",
+      "blended": "Gemischt"
+    },
+    "badge": {
+      "source": "Quelle",
+      "observedAt": "Erfasst",
+      "notObserved": "kein Datum"
+    },
+    "explain": {
+      "toggle": "Wie wird das berechnet?",
+      "meaning": "Was es bedeutet",
+      "dataBasis": "Auf welchen Daten es beruht",
+      "window": "Zeitraum",
+      "geo": "Geografie",
+      "sample": "Stichprobengröße",
+      "origin": "Extern oder intern",
+      "nextAction": "Vorgeschlagener nächster Schritt",
+      "uncertainty": "Unsicherheit",
+      "windowNone": "Kein fester Zeitraum",
+      "geoNone": "Keiner Geografie zugeordnet",
+      "sampleNone": "Keine Stichprobengröße (kuratierte Quelle)",
+      "none": "Keine"
+    },
+    "cards": {
+      "kind": {
+        "salary": "Gehalt vs. Referenzwert",
+        "salaryCompetitiveness": "Wettbewerbsfähigkeit des Angebots",
+        "missingSkills": "Fehlende Fähigkeiten",
+        "skillFreshness": "Aktualität der Fähigkeitsnachweise",
+        "supplyDemandGap": "Angebots-/Nachfragelücke",
+        "skillScarcity": "Nachfragesignale",
+        "timeToFill": "Erwartete Besetzungsdauer",
+        "agencyAggregate": "Kundenübergreifendes Aggregat"
+      },
+      "state": {
+        "needsMigration": "Dieses Signal ist vorbereitet und wartet auf die Freigabe durch den Eigentümer."
+      },
+      "salary": {
+        "noBenchmark": "Für Ihren Beruf und Ihr Land ist noch kein Gehaltsreferenzwert verfügbar.",
+        "insufficientData": "Nicht genug Daten, um ein Gehalt mit dem Referenzwert zu vergleichen.",
+        "basis_unknown": "Es ist nicht angegeben, ob die Beträge brutto oder netto sind, daher ist ein ehrlicher Vergleich nicht möglich.",
+        "basis_mismatch": "Die Grundlagen unterscheiden sich (brutto vs. netto), daher ist ein ehrlicher Vergleich nicht möglich.",
+        "band": {
+          "below": "Unter dem Marktreferenzwert ({positionPct} %)",
+          "within": "Innerhalb des Marktreferenzbandes ({positionPct} %)",
+          "above": "Über dem Marktreferenzwert ({positionPct} %)"
+        }
+      },
+      "missingSkills": {
+        "headline": "Fähigkeiten, die Ihre Passung stärken würden: {count}",
+        "item": "Fehlende Fähigkeit: {skillSlug}"
+      },
+      "skillFreshness": {
+        "headline": "Fähigkeiten mit veralteten Journalnachweisen: {count}",
+        "item": "Veralteter Nachweis: {skillSlug}"
+      },
+      "supplyDemandGap": {
+        "headline": "Die Nachfrage übersteigt das sichtbare Angebot um {gap}",
+        "item": "Nachfrage {demand} · Angebot {supply} · Lücke {gap}"
+      },
+      "skillScarcity": {
+        "headline": "Nachfragesignale im Zeitraum: {count}",
+        "itemExact": "{subjectId}: {count} Anfragen",
+        "itemSmallSample": "{subjectId}: kleine Stichprobe"
+      },
+      "timeToFill": {
+        "notMeasuredYet": "Die Besetzungsdauer wird noch nicht gemessen — es gibt keine echten Daten, daher wird keine Schätzung angezeigt."
+      }
+    },
+    "basis": {
+      "gatedMigration": "Vom Eigentümer freizugebender Datenspeicher (noch nicht aktiviert)",
+      "marketRateAverages": "Vom Administrator kuratierte Marktsatz-Durchschnitte",
+      "journalEvidence": "Ihre eigenen Arbeitsjournal-Nachweise",
+      "fillTimeMeasurementsMissing": "Besetzungsdauer-Messungen (noch nicht erhoben)",
+      "customerRequests": "Ihre eigenen Nachfrageanfragen",
+      "workerRows": "Gezählte Arbeitskräfte-Datensätze",
+      "demandWindowCounts": "Nachfragezahlen je Zeitraum",
+      "matchFitBasis": "Die Basis der kanonischen Match-Engine"
+    },
+    "missing": {
+      "workerProfile": "Arbeitskräfteprofil",
+      "salaryExpectation": "Gehaltsvorstellung im Profil",
+      "country": "Land im Profil",
+      "primaryProfession": "Hauptberuf im Profil",
+      "benchmark": "Ein kuratierter Referenzwert für Ihren Beruf und Ihr Land",
+      "subjectSalary": "Ein gültiger Gehaltsbetrag"
+    },
+    "uncertainty": {
+      "curatedNoSampleSize": "Kuratierte Quelle ohne Stichprobengröße (stattdessen eine Herkunftsnotiz)",
+      "smallSample": "Kleine Stichprobe — mit Vorsicht interpretieren",
+      "noRoleProfessionJoin": "Nachfragerollen sind Freitext — es existiert keine strikte Verknüpfung mit Berufen",
+      "trendIsSuggestion": "Der Trend ist ein Systemvorschlag, keine Tatsache"
+    },
+    "salary": {
+      "comparedToBenchmark": "Ihr Betrag im Vergleich zu einem Marktreferenzwert mit Quellenangabe"
+    },
+    "demand": {
+      "requestCount": "Wie viele Nachfrageanfragen im Zeitraum diese Rolle oder Fähigkeit nennen"
+    },
+    "gap": {
+      "supplyDemandRowCount": "Nachfragedatensätze minus gezählte Angebotsdatensätze im selben Rahmen"
+    },
+    "skills": {
+      "emergingDemandGrowth": "Wachstum der Nachfrage nach dieser Fähigkeit von Zeitraum zu Zeitraum",
+      "missingForRecommendation": "Fähigkeiten, die der Match-Engine für eine Empfehlung fehlten"
+    },
+    "nextAction": {
+      "logJournalEvidence": "Erfassen Sie Nachweise für diese Fähigkeiten im Arbeitsjournal"
+    },
+    "sources": {
+      "internalPlatformAggregates": "Interne Aggregate von LabourMarket.ai",
+      "adminMarketRateAverages": "Vom Administrator kuratierte Marktsatz-Durchschnitte",
+      "statGovLt": "Statistik Litauen (osp.stat.gov.lt)",
+      "eurostat": "Eurostat",
+      "cvbankasSalary": "CVbankas-Gehaltsdaten — vorgeschlagener externer Referenzwert (nicht aktiv)",
+      "key": {
+        "internal_platform_aggregates": "Interne Aggregate von LabourMarket.ai",
+        "admin_market_rate_averages": "Vom Administrator kuratierte Marktsatz-Durchschnitte",
+        "stat_gov_lt": "Statistik Litauen (osp.stat.gov.lt)",
+        "eurostat": "Eurostat",
+        "cvbankas_salary": "CVbankas-Gehaltsdaten — vorgeschlagener externer Referenzwert (nicht aktiv)"
+      },
+      "terms": {
+        "internal": "Interne Ableitung aus kanonischen Plattformtabellen; die Kohortenregel schützt Einzelpersonen.",
+        "adminCurated": "Vom Eigentümer eingegebene Durchschnitte mit Quellennotiz statt Stichprobengröße.",
+        "statGovLt": "Amtliche Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
+        "eurostat": "Amtliche EU-Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
+        "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt."
+      },
+      "status": {
+        "active": "Aktiv (intern)",
+        "proposedOff": "Vorgeschlagen — aus"
+      }
+    },
+    "methodology": {
+      "title": "Methodik",
+      "deterministic": "Alle Werte sind deterministisch und aus Datensätzen mit Quellen berechnet — nichts wird von KI geschätzt, und keine Zahl wird jemals erfunden.",
+      "externalOff": "Externe Quellen sind aus: Jeder externe Referenzwert ist ein Vorschlag, der auf die rechtliche Bestätigung des Eigentümers wartet. Interne und externe Zahlen werden nie vermischt.",
+      "cohort": "Kleine Kohorten werden gebündelt oder unterdrückt, um Einzelpersonen zu schützen."
+    },
+    "contextual": {
+      "eyebrow": "Marktintelligenz",
+      "link": "Marktintelligenz öffnen",
+      "salaryInsufficient": "Die Gehaltsposition gegenüber dem Referenzwert ist noch nicht verfügbar — im Profil werden Gehaltsvorstellung, Land und Hauptberuf benötigt.",
+      "demandInsufficient": "Noch nicht genug Nachfragedaten im Fenster der letzten 90 Tage."
+    }
   }
 }

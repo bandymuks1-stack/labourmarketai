@@ -9237,5 +9237,186 @@
   "companySwitcher": {
     "heading": "Aktyvi įmonė",
     "note": "Perjungus įmonę, įmonės erdvės veikia pasirinktos organizacijos vardu."
+  },
+  "intelligence": {
+    "module": {
+      "title": "Rinkos įžvalgos",
+      "desc": "Atlyginimų ir paklausos signalai iš duomenų su šaltiniais — su paaiškinimu prie kiekvieno skaičiaus."
+    },
+    "page": {
+      "eyebrow": "Įžvalgos",
+      "title": "Rinkos įžvalgos",
+      "intro": "Svarbiausi signalai iš jūsų pačių duomenų ir kuruojamų atskaitos rodiklių. Kiekvienas skaičius turi šaltinį, datą ir paaiškinimą.",
+      "notAvailableForRole": "Rinkos įžvalgos šiam vaidmeniui kol kas neteikiamos.",
+      "missingTitle": "Ko trūksta jūsų atlyginimo signalui",
+      "signalsTitle": "Pagrindiniai signalai",
+      "sourcesTitle": "Duomenų šaltiniai"
+    },
+    "state": {
+      "ready": "Parengta",
+      "insufficientData": "Nepakanka duomenų",
+      "needsMigration": "Laukia aktyvavimo",
+      "stale": "Pasenę duomenys"
+    },
+    "stateNote": {
+      "insufficientData": "Šiam signalui dar nepakanka tikrų duomenų — rodome sąžiningą spragą, o ne išgalvotą skaičių.",
+      "needsMigration": "Šio signalo duomenų saugykla parengta ir bus įjungta po savininko aktyvavimo. Iki tol niekas nespėjama.",
+      "stale": "Šio signalo įrodymai senesni nei šviežumo langas — vertinkite juos kaip pasenusius."
+    },
+    "valueClass": {
+      "userEntered": "Įvedė žmogus",
+      "systemSuggestion": "Sistemos pasiūlymas",
+      "confirmed": "Patvirtinta",
+      "availableCapacity": "Suskaičiuoti pajėgumai",
+      "calculatedGap": "Apskaičiuotas atotrūkis"
+    },
+    "origin": {
+      "internal": "Vidinis",
+      "external": "Išorinis",
+      "blended": "Mišrus"
+    },
+    "badge": {
+      "source": "Šaltinis",
+      "observedAt": "Užfiksuota",
+      "notObserved": "be datos"
+    },
+    "explain": {
+      "toggle": "Kaip tai apskaičiuota?",
+      "meaning": "Ką tai reiškia",
+      "dataBasis": "Kokiais duomenimis remiamasi",
+      "window": "Laikotarpis",
+      "geo": "Geografija",
+      "sample": "Imties dydis",
+      "origin": "Išorinis ar vidinis",
+      "nextAction": "Siūlomas kitas žingsnis",
+      "uncertainty": "Neapibrėžtumas",
+      "windowNone": "Be fiksuoto laikotarpio",
+      "geoNone": "Nesusieta su geografija",
+      "sampleNone": "Be imties dydžio (kuruojamas šaltinis)",
+      "none": "Nėra"
+    },
+    "cards": {
+      "kind": {
+        "salary": "Atlyginimas ir atskaitos rodiklis",
+        "salaryCompetitiveness": "Pasiūlymo konkurencingumas",
+        "missingSkills": "Trūkstami įgūdžiai",
+        "skillFreshness": "Įgūdžių įrodymų šviežumas",
+        "supplyDemandGap": "Pasiūlos ir paklausos atotrūkis",
+        "skillScarcity": "Paklausos signalai",
+        "timeToFill": "Numatoma užpildymo trukmė",
+        "agencyAggregate": "Suvestinė tarp klientų"
+      },
+      "state": {
+        "needsMigration": "Šis signalas parengtas ir laukia savininko aktyvavimo."
+      },
+      "salary": {
+        "noBenchmark": "Jūsų profesijai ir šaliai atskaitos rodiklio dar nėra.",
+        "insufficientData": "Nepakanka duomenų atlyginimui palyginti su atskaitos rodikliu.",
+        "basis_unknown": "Nenurodyta, ar sumos yra bruto, ar neto, todėl sąžiningas palyginimas negalimas.",
+        "basis_mismatch": "Sumų pagrindai skiriasi (bruto ir neto), todėl sąžiningas palyginimas negalimas.",
+        "band": {
+          "below": "Žemiau rinkos atskaitos rodiklio ({positionPct} %)",
+          "within": "Rinkos atskaitos rodiklio ribose ({positionPct} %)",
+          "above": "Aukščiau rinkos atskaitos rodiklio ({positionPct} %)"
+        }
+      },
+      "missingSkills": {
+        "headline": "Atitikimą sustiprintų įgūdžių: {count}",
+        "item": "Trūkstamas įgūdis: {skillSlug}"
+      },
+      "skillFreshness": {
+        "headline": "Įgūdžių su pasenusiais žurnalo įrodymais: {count}",
+        "item": "Pasenę įrodymai: {skillSlug}"
+      },
+      "supplyDemandGap": {
+        "headline": "Paklausa viršija matomą pasiūlą: {gap}",
+        "item": "Paklausa {demand} · pasiūla {supply} · atotrūkis {gap}"
+      },
+      "skillScarcity": {
+        "headline": "Paklausos signalų per laikotarpį: {count}",
+        "itemExact": "{subjectId}: užklausų — {count}",
+        "itemSmallSample": "{subjectId}: maža imtis"
+      },
+      "timeToFill": {
+        "notMeasuredYet": "Užpildymo trukmė dar nematuojama — tikrų duomenų nėra, todėl joks įvertis nerodomas."
+      }
+    },
+    "basis": {
+      "gatedMigration": "Savininko aktyvuojama duomenų saugykla (dar neįjungta)",
+      "marketRateAverages": "Administratoriaus kuruojami rinkos įkainių vidurkiai",
+      "journalEvidence": "Jūsų darbo žurnalo įrodymai",
+      "fillTimeMeasurementsMissing": "Užpildymo trukmės matavimai (dar nerenkami)",
+      "customerRequests": "Jūsų pačių darbo poreikių užklausos",
+      "workerRows": "Suskaičiuoti darbuotojų įrašai",
+      "demandWindowCounts": "Paklausos skaičiai pagal laikotarpius",
+      "matchFitBasis": "Kanoninio atitikimo variklio pagrindas"
+    },
+    "missing": {
+      "workerProfile": "Darbuotojo profilis",
+      "salaryExpectation": "Atlyginimo lūkestis profilyje",
+      "country": "Šalis profilyje",
+      "primaryProfession": "Pagrindinė profesija profilyje",
+      "benchmark": "Kuruojamas atskaitos rodiklis jūsų profesijai ir šaliai",
+      "subjectSalary": "Tinkama atlyginimo suma"
+    },
+    "uncertainty": {
+      "curatedNoSampleSize": "Kuruojamas šaltinis be imties dydžio (vietoj jo — kilmės pastaba)",
+      "smallSample": "Maža imtis — vertinkite atsargiai",
+      "noRoleProfessionJoin": "Paklausos rolės — laisvas tekstas, griežtos sąsajos su profesijomis nėra",
+      "trendIsSuggestion": "Tendencija — sistemos pasiūlymas, ne faktas"
+    },
+    "salary": {
+      "comparedToBenchmark": "Jūsų suma palyginta su rinkos atskaitos rodikliu iš nurodyto šaltinio"
+    },
+    "demand": {
+      "requestCount": "Kiek paklausos užklausų per laikotarpį nurodo šią rolę ar įgūdį"
+    },
+    "gap": {
+      "supplyDemandRowCount": "Paklausos įrašai minus suskaičiuoti pasiūlos įrašai toje pačioje aprėptyje"
+    },
+    "skills": {
+      "emergingDemandGrowth": "Šio įgūdžio paklausos augimas lyginant laikotarpius",
+      "missingForRecommendation": "Įgūdžiai, kurių atitikimo variklis pasigedo rekomendacijai"
+    },
+    "nextAction": {
+      "logJournalEvidence": "Užfiksuokite šių įgūdžių įrodymus darbo žurnale"
+    },
+    "sources": {
+      "internalPlatformAggregates": "LabourMarket.ai vidinės suvestinės",
+      "adminMarketRateAverages": "Administratoriaus kuruojami rinkos įkainių vidurkiai",
+      "statGovLt": "Lietuvos statistika (osp.stat.gov.lt)",
+      "eurostat": "Eurostat",
+      "cvbankasSalary": "CVbankas atlyginimų duomenys — siūlomas išorinis atskaitos šaltinis (neaktyvus)",
+      "key": {
+        "internal_platform_aggregates": "LabourMarket.ai vidinės suvestinės",
+        "admin_market_rate_averages": "Administratoriaus kuruojami rinkos įkainių vidurkiai",
+        "stat_gov_lt": "Lietuvos statistika (osp.stat.gov.lt)",
+        "eurostat": "Eurostat",
+        "cvbankas_salary": "CVbankas atlyginimų duomenys — siūlomas išorinis atskaitos šaltinis (neaktyvus)"
+      },
+      "terms": {
+        "internal": "Vidinis skaičiavimas iš kanoninių platformos lentelių; kohortų taisyklė saugo asmenis.",
+        "adminCurated": "Savininko įvesti vidurkiai su šaltinio pastaba vietoj imties dydžio.",
+        "statGovLt": "Oficiali statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
+        "eurostat": "Oficiali ES statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
+        "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais."
+      },
+      "status": {
+        "active": "Aktyvus (vidinis)",
+        "proposedOff": "Siūlomas — išjungtas"
+      }
+    },
+    "methodology": {
+      "title": "Metodika",
+      "deterministic": "Visos reikšmės deterministinės ir apskaičiuotos iš įrašų su šaltiniais — nieko nesprendžia DI ir joks skaičius niekada neišgalvojamas.",
+      "externalOff": "Išoriniai šaltiniai išjungti: kiekvienas išorinis atskaitos šaltinis — tik pasiūlymas, laukiantis savininko teisinio patvirtinimo. Vidiniai ir išoriniai skaičiai niekada nemaišomi.",
+      "cohort": "Mažos kohortos apibendrinamos arba slepiamos, kad apsaugotume asmenis."
+    },
+    "contextual": {
+      "eyebrow": "Rinkos įžvalgos",
+      "link": "Atverti rinkos įžvalgas",
+      "salaryInsufficient": "Atlyginimo padėtis pagal atskaitos rodiklį dar nepasiekiama — profilyje reikia atlyginimo lūkesčio, šalies ir pagrindinės profesijos.",
+      "demandInsufficient": "Per pastarųjų 90 dienų langą paklausos duomenų dar nepakanka."
+    }
   }
 }

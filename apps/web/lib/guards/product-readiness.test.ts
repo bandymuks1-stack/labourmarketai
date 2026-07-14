@@ -1774,7 +1774,12 @@ describe("no migration files added by this sprint", () => {
     // dashboard card preferences per (profile, context), 8 KB bound). Both
     // DRAFT / needs-human-gate, NOT applied; paired rollbacks + deferred
     // APPLIED_LEDGER entries.
-    const SPRINT_BASELINE = 139;
+    // Bumped 139 -> 140 for the Labour Market Intelligence layer v1 draft
+    // (20260714230000_market_intelligence_observations_v1 — source registry
+    // with all external sources OFF, versioned observation contract table,
+    // append-only insight query log). DRAFT / needs-human-gate, NOT applied;
+    // paired rollback + activation runbook in docs/intelligence/.
+    const SPRINT_BASELINE = 140;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

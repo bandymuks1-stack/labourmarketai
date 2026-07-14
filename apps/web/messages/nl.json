@@ -9237,5 +9237,186 @@
   "companySwitcher": {
     "heading": "Actief bedrijf",
     "note": "Wisselen bepaalt namens welke organisatie je bedrijfsomgeving werkt."
+  },
+  "intelligence": {
+    "module": {
+      "title": "Marktinzichten",
+      "desc": "Salaris- en vraagsignalen uit deterministische data met bronvermelding — met een uitleg achter elk cijfer."
+    },
+    "page": {
+      "eyebrow": "Inzichten",
+      "title": "Marktinzichten",
+      "intro": "Kernsignalen op basis van uw eigen gegevens en gecureerde referentiewaarden. Elk cijfer heeft een bron, datum en uitleg.",
+      "notAvailableForRole": "Marktinzichten zijn voor deze rol nog niet beschikbaar.",
+      "missingTitle": "Wat ontbreekt voor uw salarissignaal",
+      "signalsTitle": "Kernsignalen",
+      "sourcesTitle": "Databronnen"
+    },
+    "state": {
+      "ready": "Gereed",
+      "insufficientData": "Onvoldoende gegevens",
+      "needsMigration": "Wacht op activering",
+      "stale": "Verouderd"
+    },
+    "stateNote": {
+      "insufficientData": "Er zijn nog niet genoeg echte gegevens voor dit signaal — een eerlijke leemte wordt getoond in plaats van een verzonnen getal.",
+      "needsMigration": "De gegevensopslag achter dit signaal is voorbereid en sluit aan na activering door de eigenaar. Tot die tijd wordt niets geschat.",
+      "stale": "Het bewijs achter dit signaal is ouder dan het actualiteitsvenster — beschouw het als verouderd."
+    },
+    "valueClass": {
+      "userEntered": "Door een persoon ingevoerd",
+      "systemSuggestion": "Systeemsuggestie",
+      "confirmed": "Bevestigd",
+      "availableCapacity": "Getelde capaciteit",
+      "calculatedGap": "Berekend tekort"
+    },
+    "origin": {
+      "internal": "Intern",
+      "external": "Extern",
+      "blended": "Gemengd"
+    },
+    "badge": {
+      "source": "Bron",
+      "observedAt": "Vastgelegd",
+      "notObserved": "geen datum"
+    },
+    "explain": {
+      "toggle": "Hoe is dit berekend?",
+      "meaning": "Wat het betekent",
+      "dataBasis": "Op welke gegevens het rust",
+      "window": "Periode",
+      "geo": "Geografie",
+      "sample": "Steekproefomvang",
+      "origin": "Extern of intern",
+      "nextAction": "Voorgestelde volgende stap",
+      "uncertainty": "Onzekerheid",
+      "windowNone": "Geen vaste periode",
+      "geoNone": "Niet aan een geografie gekoppeld",
+      "sampleNone": "Geen steekproefomvang (gecureerde bron)",
+      "none": "Geen"
+    },
+    "cards": {
+      "kind": {
+        "salary": "Salaris vs. referentiewaarde",
+        "salaryCompetitiveness": "Concurrentiekracht van het aanbod",
+        "missingSkills": "Ontbrekende vaardigheden",
+        "skillFreshness": "Actualiteit van vaardigheidsbewijs",
+        "supplyDemandGap": "Vraag-aanbodkloof",
+        "skillScarcity": "Vraagsignalen",
+        "timeToFill": "Verwachte invultijd",
+        "agencyAggregate": "Aggregaat over klanten"
+      },
+      "state": {
+        "needsMigration": "Dit signaal is voorbereid en wacht op activering door de eigenaar."
+      },
+      "salary": {
+        "noBenchmark": "Voor uw beroep en land is nog geen salarisreferentie beschikbaar.",
+        "insufficientData": "Onvoldoende gegevens om een salaris met de referentie te vergelijken.",
+        "basis_unknown": "Er is niet vermeld of de bedragen bruto of netto zijn, dus een eerlijke vergelijking is niet mogelijk.",
+        "basis_mismatch": "De grondslagen verschillen (bruto vs. netto), dus een eerlijke vergelijking is niet mogelijk.",
+        "band": {
+          "below": "Onder de marktreferentie ({positionPct} %)",
+          "within": "Binnen de marktreferentieband ({positionPct} %)",
+          "above": "Boven de marktreferentie ({positionPct} %)"
+        }
+      },
+      "missingSkills": {
+        "headline": "Vaardigheden die uw match zouden versterken: {count}",
+        "item": "Ontbrekende vaardigheid: {skillSlug}"
+      },
+      "skillFreshness": {
+        "headline": "Vaardigheden met verouderd dagboekbewijs: {count}",
+        "item": "Verouderd bewijs: {skillSlug}"
+      },
+      "supplyDemandGap": {
+        "headline": "De vraag overtreft het zichtbare aanbod met {gap}",
+        "item": "Vraag {demand} · aanbod {supply} · kloof {gap}"
+      },
+      "skillScarcity": {
+        "headline": "Vraagsignalen in de periode: {count}",
+        "itemExact": "{subjectId}: {count} aanvragen",
+        "itemSmallSample": "{subjectId}: kleine steekproef"
+      },
+      "timeToFill": {
+        "notMeasuredYet": "De invultijd wordt nog niet gemeten — er bestaan geen echte gegevens, dus er wordt geen schatting getoond."
+      }
+    },
+    "basis": {
+      "gatedMigration": "Door de eigenaar geactiveerde gegevensopslag (nog niet ingeschakeld)",
+      "marketRateAverages": "Door de beheerder gecureerde markttariefgemiddelden",
+      "journalEvidence": "Uw eigen werkdagboekbewijs",
+      "fillTimeMeasurementsMissing": "Invultijdmetingen (nog niet verzameld)",
+      "customerRequests": "Uw eigen vraagaanvragen",
+      "workerRows": "Getelde werknemersrecords",
+      "demandWindowCounts": "Vraagaantallen per periode",
+      "matchFitBasis": "De basis van de canonieke matchengine"
+    },
+    "missing": {
+      "workerProfile": "Werknemersprofiel",
+      "salaryExpectation": "Salarisverwachting in uw profiel",
+      "country": "Land in uw profiel",
+      "primaryProfession": "Hoofdberoep in uw profiel",
+      "benchmark": "Een gecureerde referentie voor uw beroep en land",
+      "subjectSalary": "Een geldig salarisbedrag"
+    },
+    "uncertainty": {
+      "curatedNoSampleSize": "Gecureerde bron zonder steekproefomvang (met een herkomstnotitie in plaats daarvan)",
+      "smallSample": "Kleine steekproef — met voorzichtigheid interpreteren",
+      "noRoleProfessionJoin": "Vraagrollen zijn vrije tekst — er bestaat geen strikte koppeling met beroepen",
+      "trendIsSuggestion": "De trend is een systeemsuggestie, geen feit"
+    },
+    "salary": {
+      "comparedToBenchmark": "Uw bedrag vergeleken met een marktreferentie met bronvermelding"
+    },
+    "demand": {
+      "requestCount": "Hoeveel vraagaanvragen in de periode deze rol of vaardigheid noemen"
+    },
+    "gap": {
+      "supplyDemandRowCount": "Vraagrecords minus getelde aanbodrecords binnen dezelfde afbakening"
+    },
+    "skills": {
+      "emergingDemandGrowth": "Groei van de vraag naar deze vaardigheid van periode tot periode",
+      "missingForRecommendation": "Vaardigheden die de matchengine miste voor een aanbeveling"
+    },
+    "nextAction": {
+      "logJournalEvidence": "Leg bewijs voor deze vaardigheden vast in het werkdagboek"
+    },
+    "sources": {
+      "internalPlatformAggregates": "Interne aggregaten van LabourMarket.ai",
+      "adminMarketRateAverages": "Door de beheerder gecureerde markttariefgemiddelden",
+      "statGovLt": "Statistiek Litouwen (osp.stat.gov.lt)",
+      "eurostat": "Eurostat",
+      "cvbankasSalary": "CVbankas-salarisgegevens — voorgestelde externe referentie (niet actief)",
+      "key": {
+        "internal_platform_aggregates": "Interne aggregaten van LabourMarket.ai",
+        "admin_market_rate_averages": "Door de beheerder gecureerde markttariefgemiddelden",
+        "stat_gov_lt": "Statistiek Litouwen (osp.stat.gov.lt)",
+        "eurostat": "Eurostat",
+        "cvbankas_salary": "CVbankas-salarisgegevens — voorgestelde externe referentie (niet actief)"
+      },
+      "terms": {
+        "internal": "Interne afleiding uit canonieke platformtabellen; het cohortbeleid beschermt individuen.",
+        "adminCurated": "Door de eigenaar ingevoerde gemiddelden met een bronnotitie in plaats van een steekproefomvang.",
+        "statGovLt": "Officiële statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
+        "eurostat": "Officiële EU-statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
+        "cvbankas": "Alleen een voorstel — gebruikstoestemming onbevestigd; wordt nooit met interne cijfers gemengd."
+      },
+      "status": {
+        "active": "Actief (intern)",
+        "proposedOff": "Voorgesteld — uit"
+      }
+    },
+    "methodology": {
+      "title": "Methodiek",
+      "deterministic": "Alle waarden zijn deterministisch en berekend uit records met bronnen — niets wordt door AI geschat en geen enkel getal wordt ooit verzonnen.",
+      "externalOff": "Externe bronnen staan uit: elke externe referentie is een voorstel dat wacht op de juridische bevestiging van de eigenaar. Interne en externe cijfers worden nooit gemengd.",
+      "cohort": "Kleine cohorten worden gebundeld of onderdrukt om individuen te beschermen."
+    },
+    "contextual": {
+      "eyebrow": "Marktinzichten",
+      "link": "Marktinzichten openen",
+      "salaryInsufficient": "De salarispositie t.o.v. de referentie is nog niet beschikbaar — het profiel heeft een salarisverwachting, land en hoofdberoep nodig.",
+      "demandInsufficient": "Nog onvoldoende vraaggegevens in het venster van de afgelopen 90 dagen."
+    }
   }
 }

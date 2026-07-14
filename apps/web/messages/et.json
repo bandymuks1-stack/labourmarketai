@@ -2398,5 +2398,186 @@
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
     }
+  },
+  "intelligence": {
+    "module": {
+      "title": "Turuülevaade",
+      "desc": "Palga- ja nõudlussignaalid deterministlikest allikaviidetega andmetest — iga numbri taga on selgitus."
+    },
+    "page": {
+      "eyebrow": "Ülevaated",
+      "title": "Turuülevaade",
+      "intro": "Põhisignaalid, mis on ehitatud teie enda andmetele ja kureeritud võrdlusväärtustele. Igal numbril on allikas, kuupäev ja selgitus.",
+      "notAvailableForRole": "Turuülevaade pole selle rolli jaoks veel saadaval.",
+      "missingTitle": "Mis on teie palgasignaali jaoks puudu",
+      "signalsTitle": "Põhisignaalid",
+      "sourcesTitle": "Andmeallikad"
+    },
+    "state": {
+      "ready": "Valmis",
+      "insufficientData": "Andmeid pole piisavalt",
+      "needsMigration": "Ootab aktiveerimist",
+      "stale": "Aegunud"
+    },
+    "stateNote": {
+      "insufficientData": "Selle signaali jaoks pole veel piisavalt päris andmeid — väljamõeldud numbri asemel näidatakse ausat lünka.",
+      "needsMigration": "Selle signaali andmehoidla on ette valmistatud ja liitub pärast omaniku aktiveerimist. Seni midagi ei hinnata.",
+      "stale": "Selle signaali tõendid on värskusaknast vanemad — käsitlege neid aegununa."
+    },
+    "valueClass": {
+      "userEntered": "Inimese sisestatud",
+      "systemSuggestion": "Süsteemi soovitus",
+      "confirmed": "Kinnitatud",
+      "availableCapacity": "Loendatud võimekus",
+      "calculatedGap": "Arvutatud lõhe"
+    },
+    "origin": {
+      "internal": "Sisemine",
+      "external": "Väline",
+      "blended": "Segatud"
+    },
+    "badge": {
+      "source": "Allikas",
+      "observedAt": "Fikseeritud",
+      "notObserved": "kuupäev puudub"
+    },
+    "explain": {
+      "toggle": "Kuidas see on arvutatud?",
+      "meaning": "Mida see tähendab",
+      "dataBasis": "Millistele andmetele see tugineb",
+      "window": "Periood",
+      "geo": "Geograafia",
+      "sample": "Valimi suurus",
+      "origin": "Väline või sisemine",
+      "nextAction": "Soovitatud järgmine samm",
+      "uncertainty": "Ebakindlus",
+      "windowNone": "Fikseeritud perioodita",
+      "geoNone": "Geograafiaga sidumata",
+      "sampleNone": "Valimi suuruseta (kureeritud allikas)",
+      "none": "Puudub"
+    },
+    "cards": {
+      "kind": {
+        "salary": "Palk vs. võrdlusväärtus",
+        "salaryCompetitiveness": "Pakkumise konkurentsivõime",
+        "missingSkills": "Puuduvad oskused",
+        "skillFreshness": "Oskuste tõendite värskus",
+        "supplyDemandGap": "Pakkumise ja nõudluse lõhe",
+        "skillScarcity": "Nõudlussignaalid",
+        "timeToFill": "Eeldatav täitmisaeg",
+        "agencyAggregate": "Klientideülene koond"
+      },
+      "state": {
+        "needsMigration": "See signaal on ette valmistatud ja ootab omaniku aktiveerimist."
+      },
+      "salary": {
+        "noBenchmark": "Teie ameti ja riigi jaoks pole võrdlusväärtust veel saadaval.",
+        "insufficientData": "Palga võrdlemiseks võrdlusväärtusega pole piisavalt andmeid.",
+        "basis_unknown": "Pole märgitud, kas summad on bruto või neto, seega aus võrdlus pole võimalik.",
+        "basis_mismatch": "Summade alused erinevad (bruto vs. neto), seega aus võrdlus pole võimalik.",
+        "band": {
+          "below": "Alla turu võrdlusväärtuse ({positionPct} %)",
+          "within": "Turu võrdlusväärtuse vahemikus ({positionPct} %)",
+          "above": "Üle turu võrdlusväärtuse ({positionPct} %)"
+        }
+      },
+      "missingSkills": {
+        "headline": "Oskused, mis tugevdaksid teie sobivust: {count}",
+        "item": "Puuduv oskus: {skillSlug}"
+      },
+      "skillFreshness": {
+        "headline": "Aegunud päevikutõenditega oskused: {count}",
+        "item": "Aegunud tõend: {skillSlug}"
+      },
+      "supplyDemandGap": {
+        "headline": "Nõudlus ületab nähtavat pakkumist {gap} võrra",
+        "item": "Nõudlus {demand} · pakkumine {supply} · lõhe {gap}"
+      },
+      "skillScarcity": {
+        "headline": "Nõudlussignaale perioodis: {count}",
+        "itemExact": "{subjectId}: {count} päringut",
+        "itemSmallSample": "{subjectId}: väike valim"
+      },
+      "timeToFill": {
+        "notMeasuredYet": "Täitmisaega veel ei mõõdeta — päris andmeid pole, seega hinnangut ei näidata."
+      }
+    },
+    "basis": {
+      "gatedMigration": "Omaniku aktiveeritav andmehoidla (pole veel sisse lülitatud)",
+      "marketRateAverages": "Administraatori kureeritud turumäärade keskmised",
+      "journalEvidence": "Teie enda tööpäeviku tõendid",
+      "fillTimeMeasurementsMissing": "Täitmisaja mõõtmised (veel kogumata)",
+      "customerRequests": "Teie enda nõudluspäringud",
+      "workerRows": "Loendatud töötajate kirjed",
+      "demandWindowCounts": "Nõudlusnäitajad perioodide kaupa",
+      "matchFitBasis": "Kanoonilise sobitusmootori alus"
+    },
+    "missing": {
+      "workerProfile": "Töötaja profiil",
+      "salaryExpectation": "Palgaootus profiilis",
+      "country": "Riik profiilis",
+      "primaryProfession": "Põhiamet profiilis",
+      "benchmark": "Kureeritud võrdlusväärtus teie ameti ja riigi jaoks",
+      "subjectSalary": "Kehtiv palgasumma"
+    },
+    "uncertainty": {
+      "curatedNoSampleSize": "Kureeritud allikas ilma valimi suuruseta (selle asemel päritolumärge)",
+      "smallSample": "Väike valim — tõlgendage ettevaatlikult",
+      "noRoleProfessionJoin": "Nõudluse rollid on vaba tekst — ranget seost ametitega pole",
+      "trendIsSuggestion": "Trend on süsteemi soovitus, mitte fakt"
+    },
+    "salary": {
+      "comparedToBenchmark": "Teie summa võrrelduna allikaviitega turu võrdlusväärtusega"
+    },
+    "demand": {
+      "requestCount": "Mitu nõudluspäringut perioodis nimetavad seda rolli või oskust"
+    },
+    "gap": {
+      "supplyDemandRowCount": "Nõudluse kirjed miinus loendatud pakkumise kirjed samas ulatuses"
+    },
+    "skills": {
+      "emergingDemandGrowth": "Selle oskuse nõudluse kasv perioodist perioodi",
+      "missingForRecommendation": "Oskused, millest sobitusmootoril soovituse jaoks puudu jäi"
+    },
+    "nextAction": {
+      "logJournalEvidence": "Fikseerige nende oskuste tõendid tööpäevikus"
+    },
+    "sources": {
+      "internalPlatformAggregates": "LabourMarket.ai sisemised koondandmed",
+      "adminMarketRateAverages": "Administraatori kureeritud turumäärade keskmised",
+      "statGovLt": "Leedu statistika (osp.stat.gov.lt)",
+      "eurostat": "Eurostat",
+      "cvbankasSalary": "CVbankase palgaandmed — kavandatav väline võrdlus (pole aktiivne)",
+      "key": {
+        "internal_platform_aggregates": "LabourMarket.ai sisemised koondandmed",
+        "admin_market_rate_averages": "Administraatori kureeritud turumäärade keskmised",
+        "stat_gov_lt": "Leedu statistika (osp.stat.gov.lt)",
+        "eurostat": "Eurostat",
+        "cvbankas_salary": "CVbankase palgaandmed — kavandatav väline võrdlus (pole aktiivne)"
+      },
+      "terms": {
+        "internal": "Sisemine tuletus kanoonilistest platvormitabelitest; kohordipoliitika kaitseb üksikisikuid.",
+        "adminCurated": "Omaniku sisestatud keskmised koos allikamärkega valimi suuruse asemel.",
+        "statGovLt": "Ametlik statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
+        "eurostat": "Ametlik ELi statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
+        "cvbankas": "Ainult ettepanek — kasutusluba kinnitamata; ei segata kunagi sisemiste numbritega."
+      },
+      "status": {
+        "active": "Aktiivne (sisemine)",
+        "proposedOff": "Kavandatud — väljas"
+      }
+    },
+    "methodology": {
+      "title": "Metoodika",
+      "deterministic": "Kõik väärtused on deterministlikud ja arvutatud allikatega kirjetest — midagi ei hinda tehisintellekt ja ühtegi numbrit ei mõelda kunagi välja.",
+      "externalOff": "Välised allikad on väljas: iga väline võrdlus on ettepanek, mis ootab omaniku õiguslikku kinnitust. Sisemisi ja väliseid numbreid ei segata kunagi.",
+      "cohort": "Väikesed kohordid rühmitatakse või peidetakse üksikisikute kaitseks."
+    },
+    "contextual": {
+      "eyebrow": "Turuülevaade",
+      "link": "Ava turuülevaade",
+      "salaryInsufficient": "Palgapositsioon võrdlusväärtuse suhtes pole veel saadaval — profiilis on vaja palgaootust, riiki ja põhiametit.",
+      "demandInsufficient": "Viimase 90 päeva aknas pole nõudlusandmeid veel piisavalt."
+    }
   }
 }

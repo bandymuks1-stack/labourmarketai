@@ -9237,5 +9237,186 @@
   "companySwitcher": {
     "heading": "Active company",
     "note": "Switching changes which organization your company workspaces act as."
+  },
+  "intelligence": {
+    "module": {
+      "title": "Market intelligence",
+      "desc": "Salary and demand signals from sourced, deterministic data — with an explanation behind every figure."
+    },
+    "page": {
+      "eyebrow": "Intelligence",
+      "title": "Market intelligence",
+      "intro": "Key signals built from your own data and curated benchmarks. Every figure carries its source, date and an explanation.",
+      "notAvailableForRole": "Market intelligence is not available for this role yet.",
+      "missingTitle": "What is missing for your salary signal",
+      "signalsTitle": "Key signals",
+      "sourcesTitle": "Data sources"
+    },
+    "state": {
+      "ready": "Ready",
+      "insufficientData": "Insufficient data",
+      "needsMigration": "Awaiting activation",
+      "stale": "Stale"
+    },
+    "stateNote": {
+      "insufficientData": "There is not enough real data for this signal yet — an honest gap is shown instead of an invented number.",
+      "needsMigration": "The data store behind this signal is prepared and joins the view after owner activation. Nothing is estimated in the meantime.",
+      "stale": "The evidence behind this signal is older than the freshness window — treat it as out of date."
+    },
+    "valueClass": {
+      "userEntered": "Entered by a person",
+      "systemSuggestion": "System suggestion",
+      "confirmed": "Confirmed",
+      "availableCapacity": "Counted capacity",
+      "calculatedGap": "Calculated gap"
+    },
+    "origin": {
+      "internal": "Internal",
+      "external": "External",
+      "blended": "Blended"
+    },
+    "badge": {
+      "source": "Source",
+      "observedAt": "Observed",
+      "notObserved": "no date"
+    },
+    "explain": {
+      "toggle": "How is this computed?",
+      "meaning": "What it means",
+      "dataBasis": "Which data it rests on",
+      "window": "Time window",
+      "geo": "Geography",
+      "sample": "Sample size",
+      "origin": "External or internal",
+      "nextAction": "Suggested next step",
+      "uncertainty": "Uncertainty",
+      "windowNone": "No fixed window",
+      "geoNone": "Not scoped to a geography",
+      "sampleNone": "No sample size (curated source)",
+      "none": "None"
+    },
+    "cards": {
+      "kind": {
+        "salary": "Salary vs. benchmark",
+        "salaryCompetitiveness": "Offer competitiveness",
+        "missingSkills": "Missing skills",
+        "skillFreshness": "Skill evidence freshness",
+        "supplyDemandGap": "Supply / demand gap",
+        "skillScarcity": "Demand signals",
+        "timeToFill": "Expected time to fill",
+        "agencyAggregate": "Cross-client aggregate"
+      },
+      "state": {
+        "needsMigration": "This signal is prepared and awaits owner activation."
+      },
+      "salary": {
+        "noBenchmark": "No salary benchmark is available for your profession and country yet.",
+        "insufficientData": "Not enough data to compare a salary against the benchmark.",
+        "basis_unknown": "It is not stated whether the figures are gross or net, so an honest comparison is not possible.",
+        "basis_mismatch": "The salary bases differ (gross vs. net), so an honest comparison is not possible.",
+        "band": {
+          "below": "Below the market benchmark ({positionPct} %)",
+          "within": "Within the market benchmark band ({positionPct} %)",
+          "above": "Above the market benchmark ({positionPct} %)"
+        }
+      },
+      "missingSkills": {
+        "headline": "Skills that would strengthen your match: {count}",
+        "item": "Missing skill: {skillSlug}"
+      },
+      "skillFreshness": {
+        "headline": "Skills with stale journal evidence: {count}",
+        "item": "Stale evidence: {skillSlug}"
+      },
+      "supplyDemandGap": {
+        "headline": "Demand exceeds visible supply by {gap}",
+        "item": "Demand {demand} · supply {supply} · gap {gap}"
+      },
+      "skillScarcity": {
+        "headline": "Demand signals in the window: {count}",
+        "itemExact": "{subjectId}: {count} requests",
+        "itemSmallSample": "{subjectId}: small sample"
+      },
+      "timeToFill": {
+        "notMeasuredYet": "Time-to-fill is not measured yet — no real fill-time data exists, so no estimate is shown."
+      }
+    },
+    "basis": {
+      "gatedMigration": "Owner-gated data store (not yet activated)",
+      "marketRateAverages": "Admin-curated market rate averages",
+      "journalEvidence": "Your own work-journal evidence",
+      "fillTimeMeasurementsMissing": "Fill-time measurements (not collected yet)",
+      "customerRequests": "Your own demand requests",
+      "workerRows": "Counted worker rows",
+      "demandWindowCounts": "Demand counts per time window",
+      "matchFitBasis": "The canonical match engine's fit basis"
+    },
+    "missing": {
+      "workerProfile": "Worker profile",
+      "salaryExpectation": "Salary expectation in your profile",
+      "country": "Country in your profile",
+      "primaryProfession": "Primary profession in your profile",
+      "benchmark": "A curated benchmark for your profession and country",
+      "subjectSalary": "A valid salary figure"
+    },
+    "uncertainty": {
+      "curatedNoSampleSize": "Curated source without a sample size (a provenance note instead)",
+      "smallSample": "Small sample — treat with caution",
+      "noRoleProfessionJoin": "Demand roles are free text — no strict join to professions exists",
+      "trendIsSuggestion": "The trend is a system suggestion, not a fact"
+    },
+    "salary": {
+      "comparedToBenchmark": "Your figure compared against a sourced market benchmark"
+    },
+    "demand": {
+      "requestCount": "How many demand requests name this role or skill in the window"
+    },
+    "gap": {
+      "supplyDemandRowCount": "Demand rows minus counted supply rows in the same scope"
+    },
+    "skills": {
+      "emergingDemandGrowth": "Window-over-window growth in demand for this skill",
+      "missingForRecommendation": "Skills the match engine found missing for a recommendation"
+    },
+    "nextAction": {
+      "logJournalEvidence": "Log work-journal evidence for these skills"
+    },
+    "sources": {
+      "internalPlatformAggregates": "LabourMarket.ai internal aggregates",
+      "adminMarketRateAverages": "Admin-curated market rate averages",
+      "statGovLt": "Statistics Lithuania (osp.stat.gov.lt)",
+      "eurostat": "Eurostat",
+      "cvbankasSalary": "CVbankas salary data — proposed external benchmark (not active)",
+      "key": {
+        "internal_platform_aggregates": "LabourMarket.ai internal aggregates",
+        "admin_market_rate_averages": "Admin-curated market rate averages",
+        "stat_gov_lt": "Statistics Lithuania (osp.stat.gov.lt)",
+        "eurostat": "Eurostat",
+        "cvbankas_salary": "CVbankas salary data — proposed external benchmark (not active)"
+      },
+      "terms": {
+        "internal": "Internal derivation from canonical platform tables; the cohort policy protects individuals.",
+        "adminCurated": "Owner-entered averages with a source note instead of a sample size.",
+        "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
+        "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
+        "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures."
+      },
+      "status": {
+        "active": "Active (internal)",
+        "proposedOff": "Proposed — off"
+      }
+    },
+    "methodology": {
+      "title": "Methodology",
+      "deterministic": "All values are deterministic and computed from sourced records — nothing is estimated by AI and no number is ever invented.",
+      "externalOff": "External sources are off: every external benchmark is a proposal awaiting the owner's legal confirmation. Internal and external figures are never blended.",
+      "cohort": "Small cohorts are banded or suppressed to protect individuals."
+    },
+    "contextual": {
+      "eyebrow": "Market intelligence",
+      "link": "Open market intelligence",
+      "salaryInsufficient": "Salary position vs. the benchmark is not available yet — a salary expectation, country and primary profession are needed in the profile.",
+      "demandInsufficient": "Not enough demand data in the trailing 90-day window yet."
+    }
   }
 }

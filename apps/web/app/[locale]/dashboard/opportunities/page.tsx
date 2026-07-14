@@ -36,7 +36,9 @@ import {
   type MatchSignal,
   type MatchSignalState,
 } from "@/lib/opportunities/match-card-view";
+import { ContextualIntelligenceCard } from "@/components/intelligence/contextual-intelligence-card";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-read";
 import { loadWorkerOpportunities } from "@/lib/opportunities/load-worker-opportunities";
 import {
   activeFilterEntries,
@@ -97,6 +99,43 @@ export default async function OpportunitiesPage({
   const tsd = await getTranslations("structuredDemand");
   const result = await loadWorkerOpportunities();
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
+
+  // ── Contextual market-intelligence signal (Labour Market Intelligence
+  //    v1): the worker's OWN salary expectation vs. the curated benchmark
+  //    from the intelligence read layer — a real compared position or an
+  //    honest insufficient state, never a fabricated number.
+  const tIntel = await getTranslations("intelligence");
+  const salaryIntel = await getWorkerSalaryIntelligence();
+  const salaryCompared =
+    salaryIntel.kind === "ok" && salaryIntel.comparison.kind === "compared";
+  const salaryIntelHeadline =
+    salaryIntel.kind === "ok"
+      ? salaryIntel.comparison.kind === "compared"
+        ? (tIntel(
+            `cards.salary.band.${salaryIntel.comparison.band}` as never,
+            { positionPct: salaryIntel.comparison.positionPct } as never,
+          ) as string)
+        : salaryIntel.comparison.kind === "not_comparable"
+          ? (tIntel(
+              `cards.salary.${salaryIntel.comparison.reasonCode}` as never,
+            ) as string)
+          : tIntel("cards.salary.insufficientData")
+      : tIntel("contextual.salaryInsufficient");
+  const salaryIntelBadge =
+    salaryIntel.kind === "ok"
+      ? {
+          originKind: salaryIntel.benchmark.originKind,
+          originLabel: tIntel(`origin.${salaryIntel.benchmark.originKind}`),
+          sourceLabel: tIntel(
+            `sources.key.${salaryIntel.benchmark.sourceKey}` as never,
+          ) as string,
+          observedAtLabel: new Intl.DateTimeFormat(locale, {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }).format(new Date(salaryIntel.benchmark.observedAtIso)),
+        }
+      : null;
 
   const workLabels = buildWorkTypeLabelMap(locale);
   const profileHref = `/${locale}/dashboard/profile`;
@@ -386,6 +425,26 @@ export default async function OpportunitiesPage({
               {t("ctaProfile")} →
             </Link>
           </section>
+
+          {/* Salary position vs. the curated market benchmark — data from
+              the intelligence read layer; honest insufficient state when the
+              profile lacks salary/country/profession or no benchmark exists. */}
+          {salaryIntel.kind !== "no_viewer" ? (
+            <ContextualIntelligenceCard
+              locale={locale}
+              testId="opportunities-intelligence"
+              eyebrow={tIntel("contextual.eyebrow")}
+              headline={salaryIntelHeadline}
+              state={salaryCompared ? "ready" : "insufficient_data"}
+              stateLabel={
+                salaryCompared
+                  ? tIntel("state.ready")
+                  : tIntel("state.insufficientData")
+              }
+              badge={salaryIntelBadge}
+              linkLabel={tIntel("contextual.link")}
+            />
+          ) : null}
 
           {/* No-evidence improvement state (PR5): skill matching needs skill
               evidence. Honest guidance to the Work Journal — never a fake fit. */}
