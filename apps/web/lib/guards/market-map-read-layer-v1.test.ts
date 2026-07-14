@@ -277,6 +277,10 @@ describe("NO new DB migration in this PR", () => {
     // dashboard card preferences, 8 KB bound). Both DRAFT /
     // needs-human-gate, NOT applied; paired rollbacks + deferred
     // APPLIED_LEDGER entries.
-    expect(count).toBeLessThanOrEqual(139);
+    // Bumped 139 -> 140 for the Labour Market Intelligence layer v1 draft
+    // (20260714230000_market_intelligence_observations_v1 — source registry,
+    // observation contract, insight query log; all external sources OFF).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    expect(count).toBeLessThanOrEqual(140);
   });
 });

@@ -59,6 +59,7 @@ export type DashboardModuleId =
   | "activity"
   | "assist"
   | "reports"
+  | "market_intelligence"
   | "overview";
 
 /** Icon ids for module cards. A superset of the nav's NavIconKey so the nav
@@ -376,6 +377,23 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "reports.intro",
     iconKey: "chart",
     roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  // ── Market intelligence workspace (Labour Market Intelligence v1) ────
+  {
+    id: "market_intelligence",
+    // Sourced, deterministic salary/demand signals over the viewer's OWN
+    // RLS-scoped reads + curated benchmarks (lib/intelligence). Every card
+    // carries state, value class, source badge and a full explanation —
+    // honest insufficient_data / needs_migration states, never a fabricated
+    // number. Declares NO attentionSignalIds — the workspace reports, it
+    // does not notify (same reasoning as reports/assist).
+    surfaceRoute: "/dashboard/intelligence",
+    labelKey: "intelligence.module.title",
+    descriptionKey: "intelligence.module.desc",
+    iconKey: "gauge",
+    roles: ["worker", "company", "agency"],
     surfaces: ["grid", "command"],
   },
 

@@ -2398,5 +2398,186 @@
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
     }
+  },
+  "intelligence": {
+    "module": {
+      "title": "Tirgus ieskati",
+      "desc": "Algu un pieprasījuma signāli no deterministiskiem datiem ar avotu norādi — ar skaidrojumu aiz katra skaitļa."
+    },
+    "page": {
+      "eyebrow": "Ieskati",
+      "title": "Tirgus ieskati",
+      "intro": "Galvenie signāli, kas balstīti jūsu pašu datos un kūrētās atsauces vērtībās. Katram skaitlim ir avots, datums un skaidrojums.",
+      "notAvailableForRole": "Tirgus ieskati šai lomai vēl nav pieejami.",
+      "missingTitle": "Kā trūkst jūsu algas signālam",
+      "signalsTitle": "Galvenie signāli",
+      "sourcesTitle": "Datu avoti"
+    },
+    "state": {
+      "ready": "Gatavs",
+      "insufficientData": "Nepietiek datu",
+      "needsMigration": "Gaida aktivizēšanu",
+      "stale": "Novecojis"
+    },
+    "stateNote": {
+      "insufficientData": "Šim signālam vēl nepietiek īstu datu — godīga sprauga tiek rādīta izdomāta skaitļa vietā.",
+      "needsMigration": "Šī signāla datu krātuve ir sagatavota un tiks pieslēgta pēc īpašnieka aktivizēšanas. Līdz tam nekas netiek lēsts.",
+      "stale": "Šī signāla pierādījumi ir vecāki par svaiguma logu — uzskatiet tos par novecojušiem."
+    },
+    "valueClass": {
+      "userEntered": "Ievadījis cilvēks",
+      "systemSuggestion": "Sistēmas ieteikums",
+      "confirmed": "Apstiprināts",
+      "availableCapacity": "Saskaitītā kapacitāte",
+      "calculatedGap": "Aprēķinātā starpība"
+    },
+    "origin": {
+      "internal": "Iekšējs",
+      "external": "Ārējs",
+      "blended": "Jaukts"
+    },
+    "badge": {
+      "source": "Avots",
+      "observedAt": "Fiksēts",
+      "notObserved": "bez datuma"
+    },
+    "explain": {
+      "toggle": "Kā tas ir aprēķināts?",
+      "meaning": "Ko tas nozīmē",
+      "dataBasis": "Uz kādiem datiem tas balstās",
+      "window": "Periods",
+      "geo": "Ģeogrāfija",
+      "sample": "Izlases lielums",
+      "origin": "Ārējs vai iekšējs",
+      "nextAction": "Ieteiktais nākamais solis",
+      "uncertainty": "Nenoteiktība",
+      "windowNone": "Bez fiksēta perioda",
+      "geoNone": "Nav piesaistīts ģeogrāfijai",
+      "sampleNone": "Bez izlases lieluma (kūrēts avots)",
+      "none": "Nav"
+    },
+    "cards": {
+      "kind": {
+        "salary": "Alga pret atsauces vērtību",
+        "salaryCompetitiveness": "Piedāvājuma konkurētspēja",
+        "missingSkills": "Trūkstošās prasmes",
+        "skillFreshness": "Prasmju pierādījumu svaigums",
+        "supplyDemandGap": "Piedāvājuma un pieprasījuma starpība",
+        "skillScarcity": "Pieprasījuma signāli",
+        "timeToFill": "Paredzamais aizpildīšanas laiks",
+        "agencyAggregate": "Kopsavilkums starp klientiem"
+      },
+      "state": {
+        "needsMigration": "Šis signāls ir sagatavots un gaida īpašnieka aktivizēšanu."
+      },
+      "salary": {
+        "noBenchmark": "Jūsu profesijai un valstij atsauces vērtība vēl nav pieejama.",
+        "insufficientData": "Nepietiek datu, lai salīdzinātu algu ar atsauces vērtību.",
+        "basis_unknown": "Nav norādīts, vai summas ir bruto vai neto, tāpēc godīgs salīdzinājums nav iespējams.",
+        "basis_mismatch": "Summu pamati atšķiras (bruto un neto), tāpēc godīgs salīdzinājums nav iespējams.",
+        "band": {
+          "below": "Zem tirgus atsauces vērtības ({positionPct} %)",
+          "within": "Tirgus atsauces vērtības joslā ({positionPct} %)",
+          "above": "Virs tirgus atsauces vērtības ({positionPct} %)"
+        }
+      },
+      "missingSkills": {
+        "headline": "Prasmes, kas stiprinātu jūsu atbilstību: {count}",
+        "item": "Trūkstošā prasme: {skillSlug}"
+      },
+      "skillFreshness": {
+        "headline": "Prasmes ar novecojušiem žurnāla pierādījumiem: {count}",
+        "item": "Novecojis pierādījums: {skillSlug}"
+      },
+      "supplyDemandGap": {
+        "headline": "Pieprasījums pārsniedz redzamo piedāvājumu par {gap}",
+        "item": "Pieprasījums {demand} · piedāvājums {supply} · starpība {gap}"
+      },
+      "skillScarcity": {
+        "headline": "Pieprasījuma signāli periodā: {count}",
+        "itemExact": "{subjectId}: pieprasījumu — {count}",
+        "itemSmallSample": "{subjectId}: maza izlase"
+      },
+      "timeToFill": {
+        "notMeasuredYet": "Aizpildīšanas laiks vēl netiek mērīts — īstu datu nav, tāpēc netiek rādīts neviens aprēķins."
+      }
+    },
+    "basis": {
+      "gatedMigration": "Īpašnieka aktivizējama datu krātuve (vēl nav ieslēgta)",
+      "marketRateAverages": "Administratora kūrētie tirgus likmju vidējie rādītāji",
+      "journalEvidence": "Jūsu paša darba žurnāla pierādījumi",
+      "fillTimeMeasurementsMissing": "Aizpildīšanas laika mērījumi (vēl netiek vākti)",
+      "customerRequests": "Jūsu paša pieprasījuma pieteikumi",
+      "workerRows": "Saskaitītie darbinieku ieraksti",
+      "demandWindowCounts": "Pieprasījuma skaitļi pa periodiem",
+      "matchFitBasis": "Kanoniskā atbilstības dzinēja pamats"
+    },
+    "missing": {
+      "workerProfile": "Darbinieka profils",
+      "salaryExpectation": "Algas gaidas profilā",
+      "country": "Valsts profilā",
+      "primaryProfession": "Pamatprofesija profilā",
+      "benchmark": "Kūrēta atsauces vērtība jūsu profesijai un valstij",
+      "subjectSalary": "Derīga algas summa"
+    },
+    "uncertainty": {
+      "curatedNoSampleSize": "Kūrēts avots bez izlases lieluma (tā vietā — izcelsmes piezīme)",
+      "smallSample": "Maza izlase — vērtējiet piesardzīgi",
+      "noRoleProfessionJoin": "Pieprasījuma lomas ir brīvs teksts — stingras saites ar profesijām nav",
+      "trendIsSuggestion": "Tendence ir sistēmas ieteikums, nevis fakts"
+    },
+    "salary": {
+      "comparedToBenchmark": "Jūsu summa salīdzināta ar tirgus atsauces vērtību no norādīta avota"
+    },
+    "demand": {
+      "requestCount": "Cik pieprasījuma pieteikumu periodā min šo lomu vai prasmi"
+    },
+    "gap": {
+      "supplyDemandRowCount": "Pieprasījuma ieraksti mīnus saskaitītie piedāvājuma ieraksti tajā pašā tvērumā"
+    },
+    "skills": {
+      "emergingDemandGrowth": "Šīs prasmes pieprasījuma pieaugums no perioda uz periodu",
+      "missingForRecommendation": "Prasmes, kuru atbilstības dzinējam pietrūka ieteikumam"
+    },
+    "nextAction": {
+      "logJournalEvidence": "Fiksējiet šo prasmju pierādījumus darba žurnālā"
+    },
+    "sources": {
+      "internalPlatformAggregates": "LabourMarket.ai iekšējie kopsavilkumi",
+      "adminMarketRateAverages": "Administratora kūrētie tirgus likmju vidējie rādītāji",
+      "statGovLt": "Lietuvas statistika (osp.stat.gov.lt)",
+      "eurostat": "Eurostat",
+      "cvbankasSalary": "CVbankas algu dati — ierosināta ārējā atsauce (nav aktīva)",
+      "key": {
+        "internal_platform_aggregates": "LabourMarket.ai iekšējie kopsavilkumi",
+        "admin_market_rate_averages": "Administratora kūrētie tirgus likmju vidējie rādītāji",
+        "stat_gov_lt": "Lietuvas statistika (osp.stat.gov.lt)",
+        "eurostat": "Eurostat",
+        "cvbankas_salary": "CVbankas algu dati — ierosināta ārējā atsauce (nav aktīva)"
+      },
+      "terms": {
+        "internal": "Iekšējs aprēķins no kanoniskajām platformas tabulām; kohortu politika aizsargā personas.",
+        "adminCurated": "Īpašnieka ievadītie vidējie rādītāji ar avota piezīmi izlases lieluma vietā.",
+        "statGovLt": "Oficiālā statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
+        "eurostat": "Oficiālā ES statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
+        "cvbankas": "Tikai priekšlikums — lietošanas atļauja nav apstiprināta; nekad netiek jaukts ar iekšējiem skaitļiem."
+      },
+      "status": {
+        "active": "Aktīvs (iekšējs)",
+        "proposedOff": "Ierosināts — izslēgts"
+      }
+    },
+    "methodology": {
+      "title": "Metodika",
+      "deterministic": "Visas vērtības ir deterministiskas un aprēķinātas no ierakstiem ar avotiem — neko nelēš MI, un neviens skaitlis nekad netiek izdomāts.",
+      "externalOff": "Ārējie avoti ir izslēgti: katra ārējā atsauce ir priekšlikums, kas gaida īpašnieka juridisko apstiprinājumu. Iekšējie un ārējie skaitļi nekad netiek jaukti.",
+      "cohort": "Mazas kohortas tiek grupētas vai slēptas, lai aizsargātu personas."
+    },
+    "contextual": {
+      "eyebrow": "Tirgus ieskati",
+      "link": "Atvērt tirgus ieskatus",
+      "salaryInsufficient": "Algas pozīcija pret atsauces vērtību vēl nav pieejama — profilā nepieciešamas algas gaidas, valsts un pamatprofesija.",
+      "demandInsufficient": "Pēdējo 90 dienu logā pieprasījuma datu vēl nepietiek."
+    }
   }
 }

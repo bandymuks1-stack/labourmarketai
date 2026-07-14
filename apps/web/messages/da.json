@@ -2398,5 +2398,186 @@
       "projectError": "Projekter kunne ikke læses lige nu.",
       "capacityError": "En del af kapacitetsdataene kunne ikke læses lige nu."
     }
+  },
+  "intelligence": {
+    "module": {
+      "title": "Markedsindsigt",
+      "desc": "Løn- og efterspørgselssignaler fra deterministiske data med kildeangivelse — med en forklaring bag hvert tal."
+    },
+    "page": {
+      "eyebrow": "Indsigt",
+      "title": "Markedsindsigt",
+      "intro": "Nøglesignaler bygget på dine egne data og kuraterede referenceværdier. Hvert tal har kilde, dato og en forklaring.",
+      "notAvailableForRole": "Markedsindsigt er endnu ikke tilgængelig for denne rolle.",
+      "missingTitle": "Hvad der mangler for dit lønsignal",
+      "signalsTitle": "Nøglesignaler",
+      "sourcesTitle": "Datakilder"
+    },
+    "state": {
+      "ready": "Klar",
+      "insufficientData": "Utilstrækkelige data",
+      "needsMigration": "Afventer aktivering",
+      "stale": "Forældet"
+    },
+    "stateNote": {
+      "insufficientData": "Der er endnu ikke nok rigtige data til dette signal — der vises et ærligt hul i stedet for et opdigtet tal.",
+      "needsMigration": "Datalageret bag dette signal er forberedt og kobles på efter ejerens aktivering. Indtil da estimeres intet.",
+      "stale": "Beviserne bag dette signal er ældre end friskhedsvinduet — betragt dem som forældede."
+    },
+    "valueClass": {
+      "userEntered": "Indtastet af en person",
+      "systemSuggestion": "Systemforslag",
+      "confirmed": "Bekræftet",
+      "availableCapacity": "Optalt kapacitet",
+      "calculatedGap": "Beregnet gab"
+    },
+    "origin": {
+      "internal": "Intern",
+      "external": "Ekstern",
+      "blended": "Blandet"
+    },
+    "badge": {
+      "source": "Kilde",
+      "observedAt": "Registreret",
+      "notObserved": "ingen dato"
+    },
+    "explain": {
+      "toggle": "Hvordan er dette beregnet?",
+      "meaning": "Hvad det betyder",
+      "dataBasis": "Hvilke data det hviler på",
+      "window": "Periode",
+      "geo": "Geografi",
+      "sample": "Stikprøvestørrelse",
+      "origin": "Ekstern eller intern",
+      "nextAction": "Foreslået næste skridt",
+      "uncertainty": "Usikkerhed",
+      "windowNone": "Ingen fast periode",
+      "geoNone": "Ikke knyttet til en geografi",
+      "sampleNone": "Ingen stikprøvestørrelse (kurateret kilde)",
+      "none": "Ingen"
+    },
+    "cards": {
+      "kind": {
+        "salary": "Løn vs. referenceværdi",
+        "salaryCompetitiveness": "Tilbuddets konkurrenceevne",
+        "missingSkills": "Manglende kompetencer",
+        "skillFreshness": "Kompetencebevisernes friskhed",
+        "supplyDemandGap": "Udbuds-/efterspørgselsgab",
+        "skillScarcity": "Efterspørgselssignaler",
+        "timeToFill": "Forventet besættelsestid",
+        "agencyAggregate": "Aggregat på tværs af kunder"
+      },
+      "state": {
+        "needsMigration": "Dette signal er forberedt og afventer ejerens aktivering."
+      },
+      "salary": {
+        "noBenchmark": "Der findes endnu ingen lønreference for dit fag og land.",
+        "insufficientData": "Ikke nok data til at sammenligne en løn med referencen.",
+        "basis_unknown": "Det er ikke angivet, om beløbene er brutto eller netto, så en ærlig sammenligning er ikke mulig.",
+        "basis_mismatch": "Grundlagene er forskellige (brutto vs. netto), så en ærlig sammenligning er ikke mulig.",
+        "band": {
+          "below": "Under markedsreferencen ({positionPct} %)",
+          "within": "Inden for markedsreferencebåndet ({positionPct} %)",
+          "above": "Over markedsreferencen ({positionPct} %)"
+        }
+      },
+      "missingSkills": {
+        "headline": "Kompetencer, der ville styrke dit match: {count}",
+        "item": "Manglende kompetence: {skillSlug}"
+      },
+      "skillFreshness": {
+        "headline": "Kompetencer med forældede journalbeviser: {count}",
+        "item": "Forældet bevis: {skillSlug}"
+      },
+      "supplyDemandGap": {
+        "headline": "Efterspørgslen overstiger det synlige udbud med {gap}",
+        "item": "Efterspørgsel {demand} · udbud {supply} · gab {gap}"
+      },
+      "skillScarcity": {
+        "headline": "Efterspørgselssignaler i perioden: {count}",
+        "itemExact": "{subjectId}: {count} forespørgsler",
+        "itemSmallSample": "{subjectId}: lille stikprøve"
+      },
+      "timeToFill": {
+        "notMeasuredYet": "Besættelsestiden måles endnu ikke — der findes ingen rigtige data, så der vises intet estimat."
+      }
+    },
+    "basis": {
+      "gatedMigration": "Ejer-aktiveret datalager (endnu ikke slået til)",
+      "marketRateAverages": "Admin-kuraterede markedssats-gennemsnit",
+      "journalEvidence": "Dine egne arbejdsjournal-beviser",
+      "fillTimeMeasurementsMissing": "Besættelsestidsmålinger (endnu ikke indsamlet)",
+      "customerRequests": "Dine egne efterspørgselsforespørgsler",
+      "workerRows": "Optalte medarbejderrækker",
+      "demandWindowCounts": "Efterspørgselstal pr. periode",
+      "matchFitBasis": "Den kanoniske matchmotors grundlag"
+    },
+    "missing": {
+      "workerProfile": "Medarbejderprofil",
+      "salaryExpectation": "Lønforventning i din profil",
+      "country": "Land i din profil",
+      "primaryProfession": "Primært fag i din profil",
+      "benchmark": "En kurateret reference for dit fag og land",
+      "subjectSalary": "Et gyldigt lønbeløb"
+    },
+    "uncertainty": {
+      "curatedNoSampleSize": "Kurateret kilde uden stikprøvestørrelse (med en kildenote i stedet)",
+      "smallSample": "Lille stikprøve — fortolk med forsigtighed",
+      "noRoleProfessionJoin": "Efterspørgselsroller er fritekst — der findes ingen streng kobling til fag",
+      "trendIsSuggestion": "Tendensen er et systemforslag, ikke et faktum"
+    },
+    "salary": {
+      "comparedToBenchmark": "Dit beløb sammenlignet med en markedsreference med kildeangivelse"
+    },
+    "demand": {
+      "requestCount": "Hvor mange efterspørgselsforespørgsler i perioden nævner denne rolle eller kompetence"
+    },
+    "gap": {
+      "supplyDemandRowCount": "Efterspørgselsrækker minus optalte udbudsrækker inden for samme afgrænsning"
+    },
+    "skills": {
+      "emergingDemandGrowth": "Vækst i efterspørgslen på denne kompetence fra periode til periode",
+      "missingForRecommendation": "Kompetencer, som matchmotoren manglede til en anbefaling"
+    },
+    "nextAction": {
+      "logJournalEvidence": "Registrér beviser for disse kompetencer i arbejdsjournalen"
+    },
+    "sources": {
+      "internalPlatformAggregates": "LabourMarket.ai interne aggregater",
+      "adminMarketRateAverages": "Admin-kuraterede markedssats-gennemsnit",
+      "statGovLt": "Litauens statistik (osp.stat.gov.lt)",
+      "eurostat": "Eurostat",
+      "cvbankasSalary": "CVbankas-løndata — foreslået ekstern reference (ikke aktiv)",
+      "key": {
+        "internal_platform_aggregates": "LabourMarket.ai interne aggregater",
+        "admin_market_rate_averages": "Admin-kuraterede markedssats-gennemsnit",
+        "stat_gov_lt": "Litauens statistik (osp.stat.gov.lt)",
+        "eurostat": "Eurostat",
+        "cvbankas_salary": "CVbankas-løndata — foreslået ekstern reference (ikke aktiv)"
+      },
+      "terms": {
+        "internal": "Intern udledning fra kanoniske platformtabeller; kohortepolitikken beskytter enkeltpersoner.",
+        "adminCurated": "Ejer-indtastede gennemsnit med en kildenote i stedet for en stikprøvestørrelse.",
+        "statGovLt": "Officiel statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
+        "eurostat": "Officiel EU-statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
+        "cvbankas": "Kun et forslag — brugstilladelse ubekræftet; blandes aldrig med interne tal."
+      },
+      "status": {
+        "active": "Aktiv (intern)",
+        "proposedOff": "Foreslået — slået fra"
+      }
+    },
+    "methodology": {
+      "title": "Metode",
+      "deterministic": "Alle værdier er deterministiske og beregnet ud fra registreringer med kilder — intet estimeres af AI, og intet tal opdigtes nogensinde.",
+      "externalOff": "Eksterne kilder er slået fra: enhver ekstern reference er et forslag, der afventer ejerens juridiske bekræftelse. Interne og eksterne tal blandes aldrig.",
+      "cohort": "Små kohorter samles i bånd eller skjules for at beskytte enkeltpersoner."
+    },
+    "contextual": {
+      "eyebrow": "Markedsindsigt",
+      "link": "Åbn markedsindsigt",
+      "salaryInsufficient": "Lønpositionen i forhold til referencen er endnu ikke tilgængelig — profilen skal have lønforventning, land og primært fag.",
+      "demandInsufficient": "Endnu ikke nok efterspørgselsdata i vinduet for de seneste 90 dage."
+    }
   }
 }

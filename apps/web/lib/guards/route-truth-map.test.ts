@@ -50,6 +50,10 @@ const CLASSIFICATION: Record<string, string> = {
   // journal-only). Honest empty state points at the journal.
   "dashboard/gallery": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox": "REAL_LAUNCH_SURFACE",
+  // Market intelligence workspace (Labour Market Intelligence v1) — sourced,
+  // deterministic salary/demand signals with per-card explanations; degrades
+  // honestly (insufficient_data / needs_migration), external sources OFF.
+  "dashboard/intelligence": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/quick": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/report": "REAL_LAUNCH_SURFACE",
   "dashboard/journal": "REAL_LAUNCH_SURFACE",

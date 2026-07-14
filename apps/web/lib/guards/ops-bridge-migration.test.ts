@@ -364,6 +364,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260714210000_company_memberships_v1 +
     // 20260714211000_dashboard_preferences_v1) — DRAFT / needs-human-gate,
     // NOT applied; paired rollbacks in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 139/);
+    // Bumped 139 -> 140 for the Labour Market Intelligence layer v1 draft
+    // (20260714230000_market_intelligence_observations_v1) — DRAFT /
+    // needs-human-gate, NOT applied; this cross-pin follows the
+    // product-readiness baseline bump made with that layer.
+    expect(guard).toMatch(/SPRINT_BASELINE = 140/);
   });
 });

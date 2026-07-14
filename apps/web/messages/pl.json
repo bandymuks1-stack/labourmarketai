@@ -2398,5 +2398,186 @@
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
     }
+  },
+  "intelligence": {
+    "module": {
+      "title": "Analiza rynku",
+      "desc": "Sygnały o wynagrodzeniach i popycie z deterministycznych danych ze wskazaniem źródeł — z wyjaśnieniem za każdą liczbą."
+    },
+    "page": {
+      "eyebrow": "Analizy",
+      "title": "Analiza rynku",
+      "intro": "Kluczowe sygnały zbudowane na Twoich własnych danych i kuratorowanych wartościach odniesienia. Każda liczba ma źródło, datę i wyjaśnienie.",
+      "notAvailableForRole": "Analiza rynku nie jest jeszcze dostępna dla tej roli.",
+      "missingTitle": "Czego brakuje do Twojego sygnału wynagrodzenia",
+      "signalsTitle": "Kluczowe sygnały",
+      "sourcesTitle": "Źródła danych"
+    },
+    "state": {
+      "ready": "Gotowe",
+      "insufficientData": "Za mało danych",
+      "needsMigration": "Oczekuje na aktywację",
+      "stale": "Nieaktualne"
+    },
+    "stateNote": {
+      "insufficientData": "Dla tego sygnału nie ma jeszcze wystarczających prawdziwych danych — zamiast wymyślonej liczby pokazujemy uczciwą lukę.",
+      "needsMigration": "Magazyn danych tego sygnału jest przygotowany i zostanie podłączony po aktywacji przez właściciela. Do tego czasu niczego nie szacujemy.",
+      "stale": "Dowody stojące za tym sygnałem są starsze niż okno świeżości — traktuj je jako nieaktualne."
+    },
+    "valueClass": {
+      "userEntered": "Wprowadzone przez człowieka",
+      "systemSuggestion": "Sugestia systemu",
+      "confirmed": "Potwierdzone",
+      "availableCapacity": "Policzone zasoby",
+      "calculatedGap": "Wyliczona luka"
+    },
+    "origin": {
+      "internal": "Wewnętrzne",
+      "external": "Zewnętrzne",
+      "blended": "Mieszane"
+    },
+    "badge": {
+      "source": "Źródło",
+      "observedAt": "Zarejestrowano",
+      "notObserved": "brak daty"
+    },
+    "explain": {
+      "toggle": "Jak to obliczono?",
+      "meaning": "Co to oznacza",
+      "dataBasis": "Na jakich danych się opiera",
+      "window": "Okres",
+      "geo": "Geografia",
+      "sample": "Wielkość próby",
+      "origin": "Zewnętrzne czy wewnętrzne",
+      "nextAction": "Sugerowany następny krok",
+      "uncertainty": "Niepewność",
+      "windowNone": "Bez ustalonego okresu",
+      "geoNone": "Nie powiązano z geografią",
+      "sampleNone": "Brak wielkości próby (źródło kuratorowane)",
+      "none": "Brak"
+    },
+    "cards": {
+      "kind": {
+        "salary": "Wynagrodzenie a wartość odniesienia",
+        "salaryCompetitiveness": "Konkurencyjność oferty",
+        "missingSkills": "Brakujące umiejętności",
+        "skillFreshness": "Świeżość dowodów umiejętności",
+        "supplyDemandGap": "Luka podaży i popytu",
+        "skillScarcity": "Sygnały popytu",
+        "timeToFill": "Oczekiwany czas obsadzenia",
+        "agencyAggregate": "Agregat między klientami"
+      },
+      "state": {
+        "needsMigration": "Ten sygnał jest przygotowany i czeka na aktywację przez właściciela."
+      },
+      "salary": {
+        "noBenchmark": "Dla Twojego zawodu i kraju nie ma jeszcze wartości odniesienia.",
+        "insufficientData": "Za mało danych, aby porównać wynagrodzenie z wartością odniesienia.",
+        "basis_unknown": "Nie wskazano, czy kwoty są brutto, czy netto, więc uczciwe porównanie nie jest możliwe.",
+        "basis_mismatch": "Podstawy kwot się różnią (brutto i netto), więc uczciwe porównanie nie jest możliwe.",
+        "band": {
+          "below": "Poniżej rynkowej wartości odniesienia ({positionPct} %)",
+          "within": "W przedziale rynkowej wartości odniesienia ({positionPct} %)",
+          "above": "Powyżej rynkowej wartości odniesienia ({positionPct} %)"
+        }
+      },
+      "missingSkills": {
+        "headline": "Umiejętności, które wzmocniłyby Twoje dopasowanie: {count}",
+        "item": "Brakująca umiejętność: {skillSlug}"
+      },
+      "skillFreshness": {
+        "headline": "Umiejętności z nieaktualnymi dowodami z dziennika: {count}",
+        "item": "Nieaktualny dowód: {skillSlug}"
+      },
+      "supplyDemandGap": {
+        "headline": "Popyt przewyższa widoczną podaż o {gap}",
+        "item": "Popyt {demand} · podaż {supply} · luka {gap}"
+      },
+      "skillScarcity": {
+        "headline": "Sygnały popytu w okresie: {count}",
+        "itemExact": "{subjectId}: zapytań — {count}",
+        "itemSmallSample": "{subjectId}: mała próba"
+      },
+      "timeToFill": {
+        "notMeasuredYet": "Czas obsadzenia nie jest jeszcze mierzony — nie ma prawdziwych danych, więc nie pokazujemy żadnego szacunku."
+      }
+    },
+    "basis": {
+      "gatedMigration": "Magazyn danych aktywowany przez właściciela (jeszcze niewłączony)",
+      "marketRateAverages": "Kuratorowane przez administratora średnie stawki rynkowe",
+      "journalEvidence": "Twoje własne dowody z dziennika pracy",
+      "fillTimeMeasurementsMissing": "Pomiary czasu obsadzenia (jeszcze niezbierane)",
+      "customerRequests": "Twoje własne zapytania popytowe",
+      "workerRows": "Policzone rekordy pracowników",
+      "demandWindowCounts": "Liczby popytu według okresów",
+      "matchFitBasis": "Podstawa kanonicznego silnika dopasowania"
+    },
+    "missing": {
+      "workerProfile": "Profil pracownika",
+      "salaryExpectation": "Oczekiwanie płacowe w profilu",
+      "country": "Kraj w profilu",
+      "primaryProfession": "Główny zawód w profilu",
+      "benchmark": "Kuratorowana wartość odniesienia dla Twojego zawodu i kraju",
+      "subjectSalary": "Prawidłowa kwota wynagrodzenia"
+    },
+    "uncertainty": {
+      "curatedNoSampleSize": "Źródło kuratorowane bez wielkości próby (zamiast niej — nota o pochodzeniu)",
+      "smallSample": "Mała próba — interpretuj ostrożnie",
+      "noRoleProfessionJoin": "Role popytu to wolny tekst — nie istnieje ścisłe powiązanie z zawodami",
+      "trendIsSuggestion": "Trend to sugestia systemu, nie fakt"
+    },
+    "salary": {
+      "comparedToBenchmark": "Twoja kwota porównana z rynkową wartością odniesienia ze wskazanym źródłem"
+    },
+    "demand": {
+      "requestCount": "Ile zapytań popytowych w okresie wskazuje tę rolę lub umiejętność"
+    },
+    "gap": {
+      "supplyDemandRowCount": "Rekordy popytu minus policzone rekordy podaży w tym samym zakresie"
+    },
+    "skills": {
+      "emergingDemandGrowth": "Wzrost popytu na tę umiejętność między okresami",
+      "missingForRecommendation": "Umiejętności, których silnikowi dopasowania zabrakło do rekomendacji"
+    },
+    "nextAction": {
+      "logJournalEvidence": "Zapisz dowody tych umiejętności w dzienniku pracy"
+    },
+    "sources": {
+      "internalPlatformAggregates": "Wewnętrzne agregaty LabourMarket.ai",
+      "adminMarketRateAverages": "Kuratorowane przez administratora średnie stawki rynkowe",
+      "statGovLt": "Statystyka Litwy (osp.stat.gov.lt)",
+      "eurostat": "Eurostat",
+      "cvbankasSalary": "Dane płacowe CVbankas — proponowane zewnętrzne odniesienie (nieaktywne)",
+      "key": {
+        "internal_platform_aggregates": "Wewnętrzne agregaty LabourMarket.ai",
+        "admin_market_rate_averages": "Kuratorowane przez administratora średnie stawki rynkowe",
+        "stat_gov_lt": "Statystyka Litwy (osp.stat.gov.lt)",
+        "eurostat": "Eurostat",
+        "cvbankas_salary": "Dane płacowe CVbankas — proponowane zewnętrzne odniesienie (nieaktywne)"
+      },
+      "terms": {
+        "internal": "Wewnętrzne wyliczenie z kanonicznych tabel platformy; polityka kohort chroni osoby.",
+        "adminCurated": "Średnie wprowadzone przez właściciela z notą o źródle zamiast wielkości próby.",
+        "statGovLt": "Statystyka urzędowa; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
+        "eurostat": "Urzędowa statystyka UE; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
+        "cvbankas": "Tylko propozycja — zgoda na użycie niepotwierdzona; nigdy nie mieszane z liczbami wewnętrznymi."
+      },
+      "status": {
+        "active": "Aktywne (wewnętrzne)",
+        "proposedOff": "Proponowane — wyłączone"
+      }
+    },
+    "methodology": {
+      "title": "Metodyka",
+      "deterministic": "Wszystkie wartości są deterministyczne i obliczone z rekordów ze źródłami — niczego nie szacuje AI i żadna liczba nigdy nie jest wymyślana.",
+      "externalOff": "Źródła zewnętrzne są wyłączone: każde zewnętrzne odniesienie to propozycja czekająca na prawne potwierdzenie właściciela. Liczby wewnętrzne i zewnętrzne nigdy nie są mieszane.",
+      "cohort": "Małe kohorty są grupowane lub ukrywane, aby chronić osoby."
+    },
+    "contextual": {
+      "eyebrow": "Analiza rynku",
+      "link": "Otwórz analizę rynku",
+      "salaryInsufficient": "Pozycja wynagrodzenia względem odniesienia nie jest jeszcze dostępna — w profilu potrzebne są oczekiwanie płacowe, kraj i główny zawód.",
+      "demandInsufficient": "Za mało danych o popycie w oknie ostatnich 90 dni."
+    }
   }
 }
