@@ -143,10 +143,18 @@ export async function SiteFooter() {
             <span data-testid="footer-copyright">
               {copyrightLine(new Date().getFullYear())}. {t("ipNotice")}
             </span>
-            {/* Created by Rexora — text only; no approved Rexora URL was found in
-                the repo / brand config, so no link is fabricated (owner to confirm
-                the URL, then it can become a link). */}
-            <span>{t("rexora")}</span>
+            {/* Created by Rexora — owner-approved URL (2026-07-14):
+                https://aiprocessautomation.eu. External link, so a plain <a>
+                (not the locale-aware Link) with noopener/noreferrer. Pinned by
+                legal-entity-truth.test.ts. */}
+            <a
+              href="https://aiprocessautomation.eu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-text-secondary"
+            >
+              {t("rexora")}
+            </a>
           </div>
         </div>
       </div>

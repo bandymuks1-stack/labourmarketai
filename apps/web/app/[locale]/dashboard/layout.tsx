@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { DashboardTabs } from "@/components/app/dashboard-tabs";
@@ -35,6 +35,7 @@ export default async function DashboardLayout({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const footerT = await getTranslations("footer");
 
   const supabase = await createClient();
   const {
@@ -169,6 +170,23 @@ export default async function DashboardLayout({
             mobile safe bottom (fixed nav clearance) is unchanged. */}
         <main className="relative z-10 mx-auto max-w-container px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
           {children}
+          {/* Created by Rexora — quiet product credit (owner directive,
+              2026-07-14, URL approved: https://aiprocessautomation.eu).
+              Lives INSIDE <main> so it scrolls with content and inherits the
+              mobile bottom-nav clearance padding above — it can never sit
+              under or collide with the fixed BottomNav. Deliberately the
+              subtlest text tier (text-xs, muted). Pinned by
+              legal-entity-truth.test.ts. */}
+          <div className="mt-10 text-center">
+            <a
+              href="https://aiprocessautomation.eu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-text-muted transition-colors hover:text-text-secondary"
+            >
+              {footerT("rexora")}
+            </a>
+          </div>
         </main>
         <BottomNav badges={navBadges} />
         {/* v1 tester language-feedback widget. Mounted INSIDE the auth
