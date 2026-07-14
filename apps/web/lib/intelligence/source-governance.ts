@@ -89,6 +89,32 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       proposedOnly: true,
     },
     {
+      // EURES — the EU job-mobility portal. PROPOSED only: multi-source
+      // contract placeholder, never fetched, activation is an owner decision.
+      key: "eures",
+      displayNameCode: "intelligence.sources.eures",
+      sourceKind: "public_official",
+      legalStatus: "unconfirmed",
+      activation: "off",
+      termsNoteCode: "intelligence.sources.terms.eures",
+      attributionRequired: true,
+      homepage: "eures.europa.eu",
+      proposedOnly: true,
+    },
+    {
+      // Lithuanian Employment Service (Užimtumo tarnyba) — official labour
+      // market statistics. PROPOSED only, same owner gate as every external.
+      key: "uzt_lt",
+      displayNameCode: "intelligence.sources.uztLt",
+      sourceKind: "public_official",
+      legalStatus: "unconfirmed",
+      activation: "off",
+      termsNoteCode: "intelligence.sources.terms.uztLt",
+      attributionRequired: true,
+      homepage: "uzt.lt",
+      proposedOnly: true,
+    },
+    {
       // CVbankas may only ever be a PROPOSED external benchmark until access
       // and usage permission are confirmed by the owner. Even then, an
       // external figure must NEVER be labelled a LabourMarket.ai average —

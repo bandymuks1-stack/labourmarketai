@@ -9293,7 +9293,12 @@
       "windowNone": "Geen vaste periode",
       "geoNone": "Niet aan een geografie gekoppeld",
       "sampleNone": "Geen steekproefomvang (gecureerde bron)",
-      "none": "Geen"
+      "none": "Geen",
+      "confidence": "Betrouwbaarheid",
+      "freshness": "Versheid",
+      "whyVisible": "Waarom u dit ziet",
+      "observations": "Observaties",
+      "notKnown": "Niet bekend"
     },
     "cards": {
       "kind": {
@@ -9392,19 +9397,25 @@
         "admin_market_rate_averages": "Door de beheerder gecureerde markttariefgemiddelden",
         "stat_gov_lt": "Statistiek Litouwen (osp.stat.gov.lt)",
         "eurostat": "Eurostat",
-        "cvbankas_salary": "CVbankas-salarisgegevens — voorgestelde externe referentie (niet actief)"
+        "cvbankas_salary": "CVbankas-salarisgegevens — voorgestelde externe referentie (niet actief)",
+        "eures": "EURES",
+        "uzt_lt": "Užimtumo tarnyba"
       },
       "terms": {
         "internal": "Interne afleiding uit canonieke platformtabellen; het cohortbeleid beschermt individuen.",
         "adminCurated": "Door de eigenaar ingevoerde gemiddelden met een bronnotitie in plaats van een steekproefomvang.",
         "statGovLt": "Officiële statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
         "eurostat": "Officiële EU-statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
-        "cvbankas": "Alleen een voorstel — gebruikstoestemming onbevestigd; wordt nooit met interne cijfers gemengd."
+        "cvbankas": "Alleen een voorstel — gebruikstoestemming onbevestigd; wordt nooit met interne cijfers gemengd.",
+        "eures": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald.",
+        "uztLt": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald."
       },
       "status": {
         "active": "Actief (intern)",
         "proposedOff": "Voorgesteld — uit"
-      }
+      },
+      "eures": "EURES (EU-portaal voor arbeidsmobiliteit)",
+      "uztLt": "Litouwse arbeidsdienst (Užimtumo tarnyba)"
     },
     "methodology": {
       "title": "Methodiek",
@@ -9417,6 +9428,83 @@
       "link": "Marktinzichten openen",
       "salaryInsufficient": "De salarispositie t.o.v. de referentie is nog niet beschikbaar — het profiel heeft een salarisverwachting, land en hoofdberoep nodig.",
       "demandInsufficient": "Nog onvoldoende vraaggegevens in het venster van de afgelopen 90 dagen."
+    },
+    "confidence": {
+      "label": "Betrouwbaarheid",
+      "low": "Laag",
+      "medium": "Gemiddeld",
+      "high": "Hoog",
+      "unknown": "Onbekend"
+    },
+    "freshness": {
+      "updatedToday": "Vandaag bijgewerkt",
+      "updatedYesterday": "Gisteren bijgewerkt",
+      "updatedDaysAgo": "{days} dagen geleden bijgewerkt",
+      "outdated": "Verouderd — laatst bijgewerkt {days} dagen geleden",
+      "unknown": "Bijwerkmoment onbekend"
+    },
+    "timeline": {
+      "title": "Hoe dit inzicht is ontstaan",
+      "actorLabel": "Actor",
+      "provenanceLabel": "Spoor",
+      "stage": {
+        "source": "Bron",
+        "observation": "Observatie",
+        "validation": "Validatie",
+        "aggregation": "Aggregatie",
+        "insight": "Inzicht",
+        "visible": "Zichtbaar voor u"
+      },
+      "actor": {
+        "system": "Systeem (deterministische regels)",
+        "owner": "Eigenaar",
+        "source": "Databron"
+      }
+    },
+    "conflict": {
+      "agreement": "Bronnen komen overeen",
+      "conflict": "Bronnen spreken elkaar tegen",
+      "notComparable": "Niet vergelijkbaar",
+      "note": "Tegenstrijdige waarden worden naast elkaar getoond — nooit gemiddeld."
+    },
+    "lifecycle": {
+      "proposed": "Voorgesteld",
+      "approved": "Goedgekeurd",
+      "active": "Actief",
+      "paused": "Gepauzeerd",
+      "deprecated": "Uitgefaseerd",
+      "blocked": "Geblokkeerd",
+      "notAvailable": "Niet beschikbaar"
+    },
+    "inspector": {
+      "eyebrow": "Ontwikkelaarstools",
+      "title": "Observatie-inspector",
+      "intro": "Alleen-bekijken venster op ruwe marktobservaties: identiteit, hash, bron, tijdstempels, afgeleide betrouwbaarheid, privacyklasse en status.",
+      "readOnlyNote": "Alleen bekijken. Hier kan niets worden bewerkt of geactiveerd.",
+      "disabled": "De observatie-inspector staat uit. Stel INTELLIGENCE_INSPECTOR_ENABLED=1 in de serveromgeving in om deze ontwikkelaarsweergave in te schakelen.",
+      "needsMigration": "De observatie-opslag is voorbereid en verschijnt in deze weergave na activering door de eigenaar. Er valt nog niets te inspecteren.",
+      "empty": "De observatie-opslag is ingeschakeld, maar bevat nog geen rijen.",
+      "readError": "De observatie-opslag kon niet worden gelezen. Controleer de serverlogs.",
+      "unknownValue": "onbekend",
+      "field": {
+        "id": "Observatie-ID",
+        "hash": "Inhoudshash",
+        "source": "Bron",
+        "capturedAt": "Vastgelegd op",
+        "confidenceRaw": "Opgeslagen betrouwbaarheidsscore",
+        "sampleSize": "Steekproefomvang",
+        "privacyClass": "Privacyklasse",
+        "status": "Versheidsstatus"
+      }
+    },
+    "trust": {
+      "whyVisible": {
+        "roleMatched": "Getoond omdat het past bij uw rol en uw eigen gegevens."
+      },
+      "notKnown": {
+        "grossNetBasis": "Het is niet bekend of de bedragen bruto of netto zijn.",
+        "noObservationStore": "De observatie-opslag is nog niet ingeschakeld, dus verwijzingen naar afzonderlijke observaties zijn niet beschikbaar."
+      }
     }
   }
 }

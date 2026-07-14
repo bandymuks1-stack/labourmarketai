@@ -9293,7 +9293,12 @@
       "windowNone": "No fixed window",
       "geoNone": "Not scoped to a geography",
       "sampleNone": "No sample size (curated source)",
-      "none": "None"
+      "none": "None",
+      "confidence": "Confidence",
+      "freshness": "Freshness",
+      "whyVisible": "Why you see this",
+      "observations": "Observations",
+      "notKnown": "Not known"
     },
     "cards": {
       "kind": {
@@ -9392,19 +9397,25 @@
         "admin_market_rate_averages": "Admin-curated market rate averages",
         "stat_gov_lt": "Statistics Lithuania (osp.stat.gov.lt)",
         "eurostat": "Eurostat",
-        "cvbankas_salary": "CVbankas salary data — proposed external benchmark (not active)"
+        "cvbankas_salary": "CVbankas salary data — proposed external benchmark (not active)",
+        "eures": "EURES",
+        "uzt_lt": "Užimtumo tarnyba"
       },
       "terms": {
         "internal": "Internal derivation from canonical platform tables; the cohort policy protects individuals.",
         "adminCurated": "Owner-entered averages with a source note instead of a sample size.",
         "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
         "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
-        "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures."
+        "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
+        "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
+        "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."
       },
       "status": {
         "active": "Active (internal)",
         "proposedOff": "Proposed — off"
-      }
+      },
+      "eures": "EURES (EU job mobility portal)",
+      "uztLt": "Lithuanian Employment Service (Užimtumo tarnyba)"
     },
     "methodology": {
       "title": "Methodology",
@@ -9417,6 +9428,83 @@
       "link": "Open market intelligence",
       "salaryInsufficient": "Salary position vs. the benchmark is not available yet — a salary expectation, country and primary profession are needed in the profile.",
       "demandInsufficient": "Not enough demand data in the trailing 90-day window yet."
+    },
+    "confidence": {
+      "label": "Confidence",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "unknown": "Unknown"
+    },
+    "freshness": {
+      "updatedToday": "Updated today",
+      "updatedYesterday": "Updated yesterday",
+      "updatedDaysAgo": "Updated {days} days ago",
+      "outdated": "Outdated — last update {days} days ago",
+      "unknown": "Update time unknown"
+    },
+    "timeline": {
+      "title": "How this insight was made",
+      "actorLabel": "Actor",
+      "provenanceLabel": "Trace",
+      "stage": {
+        "source": "Source",
+        "observation": "Observation",
+        "validation": "Validation",
+        "aggregation": "Aggregation",
+        "insight": "Insight",
+        "visible": "Visible to you"
+      },
+      "actor": {
+        "system": "System (deterministic rules)",
+        "owner": "Owner",
+        "source": "Data source"
+      }
+    },
+    "conflict": {
+      "agreement": "Sources agree",
+      "conflict": "Sources disagree",
+      "notComparable": "Not comparable",
+      "note": "Conflicting values are shown side by side — never averaged."
+    },
+    "lifecycle": {
+      "proposed": "Proposed",
+      "approved": "Approved",
+      "active": "Active",
+      "paused": "Paused",
+      "deprecated": "Deprecated",
+      "blocked": "Blocked",
+      "notAvailable": "Not available"
+    },
+    "inspector": {
+      "eyebrow": "Developer tools",
+      "title": "Observation inspector",
+      "intro": "View-only window into raw market intelligence observations: identity, hash, source, timestamps, derived confidence, privacy class and status.",
+      "readOnlyNote": "Viewing only. Nothing can be edited or activated here.",
+      "disabled": "The observation inspector is switched off. Set INTELLIGENCE_INSPECTOR_ENABLED=1 in the server environment to enable this developer-only view.",
+      "needsMigration": "The observations data store is prepared and joins this view after owner activation. There is nothing to inspect yet.",
+      "empty": "The observations store is enabled but contains no rows yet.",
+      "readError": "The observations store could not be read. Check the server logs.",
+      "unknownValue": "unknown",
+      "field": {
+        "id": "Observation ID",
+        "hash": "Content hash",
+        "source": "Source",
+        "capturedAt": "Captured at",
+        "confidenceRaw": "Stored confidence score",
+        "sampleSize": "Sample size",
+        "privacyClass": "Privacy class",
+        "status": "Freshness status"
+      }
+    },
+    "trust": {
+      "whyVisible": {
+        "roleMatched": "Shown because it matches your role and your own data."
+      },
+      "notKnown": {
+        "grossNetBasis": "Whether the figures are gross or net is not known.",
+        "noObservationStore": "The observation store is not enabled yet, so individual observation references are not available."
+      }
     }
   }
 }
