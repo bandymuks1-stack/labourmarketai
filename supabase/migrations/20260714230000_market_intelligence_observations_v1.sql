@@ -69,6 +69,27 @@ create table if not exists public.market_intelligence_sources (
   attribution_text    text,
   robots_status       text,
   rate_limit_note     text,
+  -- The RECORDED metric import policy: {"metric_keys": ["salary.month.gross",
+  -- …]} — the closed set of metric keys this source may ever produce
+  -- (code half: importPolicy on the registry profile + the metric_policy
+  -- validation check). NULL = not recorded, and validation treats a source
+  -- without a usable policy as unable to import ANY metric (fail-closed) —
+  -- NULL is never permission, an empty list is never permission, and no
+  -- wildcard form exists. The owner records this during activation.
+  import_policy       jsonb,
+  -- Shape check is NULL-propagation-proof: `?` returns real booleans, so a
+  -- non-object, an object WITHOUT metric_keys (e.g. accidental camelCase
+  -- "metricKeys"), or a non-array metric_keys all REJECT — they can never
+  -- ride a NULL comparison through the CHECK.
+  constraint market_intelligence_sources_import_policy_shape
+    check (
+      import_policy is null
+      or (
+        jsonb_typeof(import_policy) = 'object'
+        and import_policy ? 'metric_keys'
+        and jsonb_typeof(import_policy->'metric_keys') = 'array'
+      )
+    ),
   owner_approved_at   timestamptz,
   owner_approval_note text,
   created_at          timestamptz not null default now(),
@@ -258,31 +279,47 @@ revoke update, delete on public.market_intelligence_insight_queries from service
 -- Internal derivations are confirmed + on (they never leave the platform);
 -- every EXTERNAL source ships unconfirmed + off and requires the owner
 -- activation runbook (docs/intelligence/activation-runbook-v1.md).
+-- import_policy mirrors the code registry: internal sources record the
+-- exact metrics their derivations produce; EVERY external source ships
+-- with import_policy NULL (not recorded) — the owner records the permitted
+-- metric set during activation, and until then the source can import
+-- nothing even if it were somehow switched on (fail-closed dual gate).
 insert into public.market_intelligence_sources
   (source_key, display_name, source_kind, legal_status, activation,
-   owner_approved_at, owner_approval_note, attribution_text)
+   owner_approved_at, owner_approval_note, attribution_text, import_policy)
 values
   ('internal_platform_aggregates',
    'Internal platform aggregates',
    'internal_aggregated', 'confirmed', 'on',
-   now(), 'internal derivation — no external access', null),
+   now(), 'internal derivation — no external access', null,
+   '{"metric_keys": ["demand.role_request_count", "demand.skill_request_count"]}'::jsonb),
   ('admin_market_rate_averages',
    'Admin-entered market rate averages',
    'internal_aggregated', 'confirmed', 'on',
-   now(), 'internal derivation — no external access', null),
+   now(), 'internal derivation — no external access', null,
+   '{"metric_keys": ["salary.month.gross", "salary.month.net", "salary.hour.gross", "salary.hour.net"]}'::jsonb),
   ('stat_gov_lt',
    'Official Statistics Portal of Lithuania (stat.gov.lt)',
    'public_official', 'unconfirmed', 'off',
-   null, null, null),
+   null, null, null, null),
   ('eurostat',
    'Eurostat',
    'public_official', 'unconfirmed', 'off',
-   null, null, null),
+   null, null, null, null),
+  ('eures',
+   'EURES — EU job mobility portal',
+   'public_official', 'unconfirmed', 'off',
+   null, null, null, null),
+  ('uzt_lt',
+   'Lithuanian Employment Service (uzt.lt)',
+   'public_official', 'unconfirmed', 'off',
+   null, null, null, null),
   ('cvbankas_salary',
    'CVbankas salary listings (external benchmark)',
    'approved_public_web', 'unconfirmed', 'off',
    null, null,
-   'PROPOSED ONLY — external benchmark; never label as LabourMarket.ai average; access/usage permission unconfirmed')
+   'PROPOSED ONLY — external benchmark; never label as LabourMarket.ai average; access/usage permission unconfirmed',
+   null)
 on conflict (source_key) do nothing;
 
 commit;

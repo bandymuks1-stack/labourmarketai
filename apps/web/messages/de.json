@@ -9640,6 +9640,8 @@
         "salaryFormat": "Gehaltsformat-Probleme",
         "duplicateHashes": "Doppelte Hashes",
         "sourceNotActive": "Quelle nicht aktiv",
+        "unknownMetrics": "Unbekannte Metriken",
+        "metricPolicy": "Metrik laut Quellen-Richtlinie nicht erlaubt",
         "dateIssues": "Datumsprobleme",
         "hashMismatches": "Hash-Abweichungen"
       },

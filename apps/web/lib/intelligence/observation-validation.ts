@@ -7,9 +7,11 @@
  * handed to it and never reads or writes anything itself.
  *
  * Checks (ALL run — a rejection report lists every failure, not just the
- * first): schema · required fields · source approval · date validity ·
- * country allowlist · language allowlist · salary structure · content-hash
- * integrity · duplicate detection.
+ * first): schema · required fields · source approval · metric key
+ * (canonical vocabulary) · metric import policy (source must explicitly
+ * permit the metric) · date validity · country allowlist · language
+ * allowlist · salary structure · content-hash integrity · duplicate
+ * detection.
  *
  * Fail-closed by construction: with today's registry every external
  * source fails "source_approved", so NO external observation can validate
@@ -24,12 +26,19 @@ import {
   type IntelligenceObservationV1,
 } from "./observation-contract";
 import { computeObservationContentHash } from "./observation-hash";
+import {
+  evaluateMetricPermission,
+  isKnownMetricKey,
+  SALARY_METRIC_EXPECTED_UNIT,
+} from "./metric-keys";
 import { getSourceProfile, isExternalSourceActive } from "./source-governance";
 
 export const OBSERVATION_VALIDATION_CHECKS = [
   "schema",
   "required_fields",
   "source_approved",
+  "metric_key",
+  "metric_policy",
   "date_validity",
   "country",
   "language",
@@ -145,6 +154,27 @@ export function validateObservationCandidate(
     });
   }
 
+  // ── metric key + metric import policy (independent, fail-closed) ──────
+  // Two SEPARATE gates, both required, neither suppressing the other or
+  // the source checks above:
+  //   metric_key    — the candidate metric must exist in the canonical
+  //                   platform vocabulary (metric-keys.ts);
+  //   metric_policy — the source's RECORDED import policy must explicitly
+  //                   permit that metric. Missing / malformed / empty
+  //                   policy rejects — an approved or active source never
+  //                   authorizes every possible metric, and absence is
+  //                   never permission.
+  if (!isKnownMetricKey(observation.metricKey)) {
+    failures.push({ checkId: "metric_key", reasonCode: "metric_key_unknown" });
+  }
+  const metricPermission = evaluateMetricPermission(
+    profile?.importPolicy ?? null,
+    observation.metricKey,
+  );
+  if (metricPermission !== "permitted") {
+    failures.push({ checkId: "metric_policy", reasonCode: metricPermission });
+  }
+
   // ── date validity ─────────────────────────────────────────────────────
   const capturedMs = Date.parse(observation.capturedAt);
   if (capturedMs > context.nowMs) {
@@ -201,6 +231,18 @@ export function validateObservationCandidate(
       failures.push({
         checkId: "salary_structure",
         reasonCode: "salary_unit_unknown",
+      });
+    }
+    // A KNOWN salary metric must carry its exact 1:1 unit — a monthly-gross
+    // key on an hourly-net number is a contradictory row, never accepted.
+    // (Unknown salary keys already fail metric_key; no expectation exists.)
+    const expectedUnit = isKnownMetricKey(observation.metricKey)
+      ? SALARY_METRIC_EXPECTED_UNIT[observation.metricKey]
+      : undefined;
+    if (expectedUnit !== undefined && observation.unit !== expectedUnit) {
+      failures.push({
+        checkId: "salary_structure",
+        reasonCode: "salary_unit_mismatch",
       });
     }
     if (!(observation.valueNumeric > 0)) {

@@ -2801,6 +2801,8 @@
         "salaryFormat": "Lønformat-problemer",
         "duplicateHashes": "Duplikerede hashes",
         "sourceNotActive": "Kilde ikke aktiv",
+        "unknownMetrics": "Ukendte målinger",
+        "metricPolicy": "Måling ikke tilladt af kildens politik",
         "dateIssues": "Datoproblemer",
         "hashMismatches": "Hash-uoverensstemmelser"
       },

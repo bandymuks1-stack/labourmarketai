@@ -2801,6 +2801,8 @@
         "salaryFormat": "Problemy formatu wynagrodzenia",
         "duplicateHashes": "Powtórzone hasze",
         "sourceNotActive": "Źródło nieaktywne",
+        "unknownMetrics": "Nieznane metryki",
+        "metricPolicy": "Metryka niedozwolona przez politykę źródła",
         "dateIssues": "Problemy z datami",
         "hashMismatches": "Niezgodności haszy"
       },

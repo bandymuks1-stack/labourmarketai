@@ -2801,6 +2801,8 @@
         "salaryFormat": "Algas formāta problēmas",
         "duplicateHashes": "Dublēti jaucējkodi",
         "sourceNotActive": "Avots nav aktīvs",
+        "unknownMetrics": "Nezināmas metrikas",
+        "metricPolicy": "Metrika nav atļauta avota politikā",
         "dateIssues": "Datumu problēmas",
         "hashMismatches": "Jaucējkodu neatbilstības"
       },

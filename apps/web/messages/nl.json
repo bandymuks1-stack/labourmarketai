@@ -9640,6 +9640,8 @@
         "salaryFormat": "Salarisformaat-problemen",
         "duplicateHashes": "Dubbele hashes",
         "sourceNotActive": "Bron niet actief",
+        "unknownMetrics": "Onbekende metrieken",
+        "metricPolicy": "Metriek niet toegestaan door bronbeleid",
         "dateIssues": "Datumproblemen",
         "hashMismatches": "Hash-afwijkingen"
       },

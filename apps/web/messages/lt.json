@@ -9640,6 +9640,8 @@
         "salaryFormat": "Atlygio formato problemos",
         "duplicateHashes": "Pasikartojančios maišos",
         "sourceNotActive": "Šaltinis neaktyvus",
+        "unknownMetrics": "Nežinomos metrikos",
+        "metricPolicy": "Metrika neleidžiama pagal šaltinio politiką",
         "dateIssues": "Datų problemos",
         "hashMismatches": "Maišos neatitikimai"
       },

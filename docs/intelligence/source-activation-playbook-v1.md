@@ -83,7 +83,18 @@ green, and even then activation is a separate owner action:
 5. **Terms review** — usage terms read and recorded.
 6. **Rate limits** — max requests/hour, bytes/fetch, items/session.
 7. **Import policy** — closed metric-key, country and language lists +
-   max sessions/day.
+   max sessions/day. The metric keys must come from the canonical
+   platform vocabulary (`metric-keys.ts`) — a policy naming an unknown
+   metric never greens this item, and validation independently enforces
+   the same recorded set per source (registry `importPolicy`, DB
+   `import_policy` jsonb in the gated migration): source approval and
+   metric approval are SEPARATE gates, so an active source with no
+   usable metric policy still imports nothing. No wildcard exists —
+   "allow all" is unrepresentable and a `*` entry is malformed. Example
+   record for a future owner-approved source:
+   `{"metric_keys": ["salary.month.gross"]}` — exactly the metrics the
+   owner permits, nothing else. Today every external source has NO
+   recorded metric policy (fail-closed).
 8. **Retention policy** — TTL days + expired handling (mark, never
    silent rewrite).
 9. **Rollback plan** — written pointer (see §5).

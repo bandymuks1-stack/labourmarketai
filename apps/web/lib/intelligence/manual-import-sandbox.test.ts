@@ -22,7 +22,7 @@ function internalRow(overrides: Record<string, unknown> = {}): string {
     unit: "eur_month_gross",
     stat_method: "median",
     source_kind: "internal_aggregated",
-    source_key: "internal_platform_aggregates",
+    source_key: "admin_market_rate_averages",
     derivation_ids: "agg-run-1",
     captured_at: "2026-07-10T08:00:00Z",
     sample_size: 42,
@@ -135,15 +135,68 @@ describe("validation preview (§3)", () => {
 });
 
 describe("readiness is NOT bypassed (fail-closed) — but honestly explained", () => {
-  it("external rows fail source_approved today; validAfterActivation counts them", () => {
+  it("external rows fail source_approved AND metric policy today; validAfterActivation stays 0", () => {
     const result = run([externalRow(), externalRow({ subject_id: "plumber" })].join("\n"));
     expect(result.validRows).toBe(0);
     expect(result.tallies.sourceNotActive).toBe(2);
-    // Both rows are otherwise perfect → they'd validate after activation.
-    expect(result.validAfterActivation).toBe(2);
+    // No external source has a RECORDED metric import policy yet, so the
+    // rows are blocked by the missing policy too — flipping activation
+    // alone would import NOTHING. The preview must say so honestly.
+    expect(result.tallies.metricPolicy).toBe(2);
+    expect(result.validAfterActivation).toBe(0);
+    expect(result.previews[0].failureCodes).toContain(
+      "metric_policy:import_policy_missing",
+    );
     // A row with OTHER problems too is NOT counted as activation-ready.
     const mixed = run(externalRow({ unit: "usd_year" }));
     expect(mixed.validAfterActivation).toBe(0);
+  });
+
+  it("a metric outside the source's recorded policy is rejected and tallied", () => {
+    // admin_market_rate_averages permits salary metrics only — a demand
+    // metric through it fails metric_policy (still internal + active).
+    const result = run(
+      internalRow({
+        metric_key: "demand.role_request_count",
+        unit: "count",
+      }),
+    );
+    expect(result.validRows).toBe(0);
+    expect(result.tallies.metricPolicy).toBe(1);
+    expect(result.tallies.unknownMetrics).toBe(0);
+    expect(result.validAfterActivation).toBe(0);
+    expect(result.previews[0].failureCodes).toContain(
+      "metric_policy:metric_not_permitted",
+    );
+  });
+
+  it("a metric unknown to the platform is rejected and tallied", () => {
+    const result = run(internalRow({ metric_key: "salary.year.gross" }));
+    expect(result.validRows).toBe(0);
+    expect(result.tallies.unknownMetrics).toBe(1);
+    expect(result.previews[0].failureCodes).toContain(
+      "metric_key:metric_key_unknown",
+    );
+  });
+
+  it("import-session accounting stays exact with metric-policy rejections", () => {
+    const result = run(
+      [
+        internalRow(), // valid
+        internalRow(), // duplicate
+        internalRow({ metric_key: "demand.role_request_count", unit: "count" }), // policy-rejected
+        externalRow({ subject_id: "plumber" }), // source+policy rejected
+      ].join("\n"),
+    );
+    expect(result.sessionPreview).not.toBeNull();
+    const session = result.sessionPreview!;
+    expect(session.itemsScanned).toBe(4);
+    expect(
+      session.itemsAccepted + session.itemsRejected + session.itemsDuplicated,
+    ).toBe(session.itemsScanned);
+    expect(session.itemsAccepted).toBe(1);
+    expect(session.itemsDuplicated).toBe(1);
+    expect(session.itemsRejected).toBe(2);
   });
 
   it("unknown sources are NOT counted as activation-ready — nothing exists to switch on", () => {
@@ -162,7 +215,7 @@ describe("observation preview (§4)", () => {
     expect(result.previews).toHaveLength(1);
     const p = result.previews[0];
     expect(p.contentHash).toMatch(/^[0-9a-f]{64}$/);
-    expect(p.sourceKey).toBe("internal_platform_aggregates");
+    expect(p.sourceKey).toBe("admin_market_rate_averages");
     expect(p.capturedAtIso).toBe("2026-07-10T08:00:00Z");
     expect(p.country).toBe("LT");
     expect(p.language).toBe("lt");
@@ -178,7 +231,10 @@ describe("observation preview (§4)", () => {
     const result = run(externalRow());
     const p = result.previews[0];
     expect(p.valid).toBe(false);
-    expect(p.failureCodes).toEqual(["source_approved:source_not_active"]);
+    expect(p.failureCodes).toEqual([
+      "source_approved:source_not_active",
+      "metric_policy:import_policy_missing",
+    ]);
     for (const code of p.failureCodes) {
       expect(code).toMatch(/^[a-z_]+:[a-z0-9_.:]+$/i);
       expect(code).not.toMatch(/\bat\s.+\d+:\d+/); // no stack frames

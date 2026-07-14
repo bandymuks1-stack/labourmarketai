@@ -2801,6 +2801,8 @@
         "salaryFormat": "Palgavormingu probleemid",
         "duplicateHashes": "Korduvad räsid",
         "sourceNotActive": "Allikas pole aktiivne",
+        "unknownMetrics": "Tundmatud mõõdikud",
+        "metricPolicy": "Mõõdik pole allika poliitika järgi lubatud",
         "dateIssues": "Kuupäevaprobleemid",
         "hashMismatches": "Räsi mittevastavused"
       },
